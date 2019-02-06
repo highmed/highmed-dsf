@@ -1,7 +1,8 @@
 package org.highmed.fhir.spring.config;
 
-import org.highmed.fhir.adapter.PatientJsonAdapter;
-import org.highmed.fhir.adapter.PatientXmlAdapter;
+import org.highmed.fhir.adapter.JsonFhirAdapter;
+import org.highmed.fhir.adapter.XmlFhirAdapter;
+import org.hl7.fhir.r4.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,14 +16,14 @@ public class AdapterConfig
 	private FhirContext fhirContext;
 
 	@Bean
-	public PatientJsonAdapter patientJsonAdapter()
+	public JsonFhirAdapter<Patient> patientJsonAdapter()
 	{
-		return new PatientJsonAdapter(fhirContext);
+		return JsonFhirAdapter.create(fhirContext, Patient.class);
 	}
 
 	@Bean
-	public PatientXmlAdapter patientXmlAdapter()
+	public XmlFhirAdapter<Patient> patientXmlAdapter()
 	{
-		return new PatientXmlAdapter(fhirContext);
+		return XmlFhirAdapter.create(fhirContext, Patient.class);
 	}
 }

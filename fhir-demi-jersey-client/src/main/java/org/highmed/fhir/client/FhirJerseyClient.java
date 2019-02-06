@@ -9,9 +9,10 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.highmed.fhir.adapter.PatientJsonAdapter;
-import org.highmed.fhir.adapter.PatientXmlAdapter;
+import org.highmed.fhir.adapter.JsonFhirAdapter;
+import org.highmed.fhir.adapter.XmlFhirAdapter;
 import org.hl7.fhir.r4.model.BaseResource;
+import org.hl7.fhir.r4.model.Patient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +34,8 @@ public class FhirJerseyClient extends AbstractJerseyClient
 
 	public static List<Object> components(FhirContext fhirContext)
 	{
-		return Arrays.asList(new PatientJsonAdapter(fhirContext), new PatientXmlAdapter(fhirContext));
+		return Arrays.asList(JsonFhirAdapter.create(fhirContext, Patient.class),
+				XmlFhirAdapter.create(fhirContext, Patient.class));
 	}
 
 	public URI create(BaseResource resource)

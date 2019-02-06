@@ -18,7 +18,7 @@ import org.hl7.fhir.r4.model.BaseResource;
 
 import ca.uhn.fhir.parser.IParser;
 
-public class AbstractFhirAdapter<T extends BaseResource> implements MessageBodyReader<T>, MessageBodyWriter<T>
+public abstract class AbstractFhirAdapter<T extends BaseResource> implements MessageBodyReader<T>, MessageBodyWriter<T>
 {
 	private final Class<T> resourceType;
 	private final IParser parser;
