@@ -1,6 +1,7 @@
 package org.highmed.fhir.spring.config;
 
 import org.highmed.fhir.werbservice.ConformanceProvider;
+import org.highmed.fhir.werbservice.PatientService;
 import org.highmed.fhir.werbservice.TaskProvider;
 import org.highmed.fhir.werbservice.TestService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,5 +34,11 @@ public class WebserviceConfig
 	public TaskProvider taskProvider()
 	{
 		return new TaskProvider(fhirConfig.fhirContext(), serverBase);
+	}
+	
+	@Bean
+	public PatientService patientService()
+	{
+		return new PatientService();
 	}
 }
