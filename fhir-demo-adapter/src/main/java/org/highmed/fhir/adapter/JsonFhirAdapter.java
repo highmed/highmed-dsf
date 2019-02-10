@@ -10,19 +10,15 @@ import javax.ws.rs.ext.Provider;
 import org.hl7.fhir.r4.model.BaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.Constants;
 
 @Provider
-@Consumes(MediaType.APPLICATION_JSON)
-@Produces(MediaType.APPLICATION_JSON)
+@Consumes({ Constants.CT_FHIR_JSON_NEW, Constants.CT_FHIR_JSON, MediaType.APPLICATION_JSON })
+@Produces({ Constants.CT_FHIR_JSON_NEW, Constants.CT_FHIR_JSON, MediaType.APPLICATION_JSON })
 public class JsonFhirAdapter<T extends BaseResource> extends AbstractFhirAdapter<T>
 		implements MessageBodyReader<T>, MessageBodyWriter<T>
 {
-	public static <T extends BaseResource> JsonFhirAdapter<T> create(FhirContext fhirContext, Class<T> resourceType)
-	{
-		return new JsonFhirAdapter<T>(fhirContext, resourceType);
-	}
-
-	private JsonFhirAdapter(FhirContext fhirContext, Class<T> resourceType)
+	protected JsonFhirAdapter(FhirContext fhirContext, Class<T> resourceType)
 	{
 		super(resourceType, fhirContext.newJsonParser());
 	}

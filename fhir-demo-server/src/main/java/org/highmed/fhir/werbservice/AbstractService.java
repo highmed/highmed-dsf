@@ -6,12 +6,13 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.hl7.fhir.r4.model.DomainResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.rest.api.Constants;
 
 public class AbstractService<D extends DomainResource>
 {
@@ -26,7 +27,7 @@ public class AbstractService<D extends DomainResource>
 
 	@GET
 	@Path("/{id}")
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Produces({ Constants.CT_FHIR_JSON_NEW, Constants.CT_FHIR_XML_NEW })
 	public Response find(@PathParam("id") String id)
 	{
 		logger.trace("GET '{}/{}'", path, id);
@@ -35,10 +36,13 @@ public class AbstractService<D extends DomainResource>
 	}
 
 	@POST
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Consumes({ Constants.CT_FHIR_JSON_NEW, Constants.CT_FHIR_XML_NEW })
 	public Response create(D resource)
 	{
 		logger.trace("POST '{}'", path);
+
+		logger.debug("IdElement: {}, Id: {}, IdBase: {}", resource.getIdElement(), resource.getId(),
+				resource.getIdBase());
 
 		return Response.ok().build();
 	}

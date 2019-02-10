@@ -23,7 +23,7 @@ public abstract class AbstractFhirAdapter<T extends BaseResource> implements Mes
 	private final Class<T> resourceType;
 	private final IParser parser;
 
-	public AbstractFhirAdapter(Class<T> resourceType, IParser parser)
+	protected AbstractFhirAdapter(Class<T> resourceType, IParser parser)
 	{
 		this.resourceType = resourceType;
 		this.parser = parser;

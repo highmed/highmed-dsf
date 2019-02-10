@@ -6,19 +6,20 @@ import java.util.Arrays;
 import java.util.List;
 
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.highmed.fhir.adapter.JsonFhirAdapter;
-import org.highmed.fhir.adapter.XmlFhirAdapter;
+import org.highmed.fhir.adapter.CapabilityStatementJsonFhirAdapter;
+import org.highmed.fhir.adapter.CapabilityStatementXmlFhirAdapter;
+import org.highmed.fhir.adapter.PatientJsonFhirAdapter;
+import org.highmed.fhir.adapter.PatientXmlFhirAdapter;
 import org.hl7.fhir.r4.model.BaseResource;
-import org.hl7.fhir.r4.model.Patient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.Constants;
 
 public class FhirJerseyClient extends AbstractJerseyClient
 {
@@ -34,19 +35,30 @@ public class FhirJerseyClient extends AbstractJerseyClient
 
 	public static List<Object> components(FhirContext fhirContext)
 	{
-		return Arrays.asList(JsonFhirAdapter.create(fhirContext, Patient.class),
-				XmlFhirAdapter.create(fhirContext, Patient.class));
+		return Arrays.asList(new PatientJsonFhirAdapter(fhirContext), new PatientXmlFhirAdapter(fhirContext),
+				new CapabilityStatementJsonFhirAdapter(fhirContext),
+				new CapabilityStatementXmlFhirAdapter(fhirContext));
 	}
 
 	public URI create(BaseResource resource)
 	{
 		try (Response response = getResource().path(resource.getClass().getSimpleName()).request()
-				.accept(MediaType.APPLICATION_JSON_TYPE).post(Entity.entity(resource, MediaType.APPLICATION_JSON_TYPE)))
+				.accept(Constants.CT_FHIR_JSON_NEW).post(Entity.entity(resource, Constants.CT_FHIR_JSON_NEW)))
 		{
 			logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
 					response.getStatusInfo().getReasonPhrase());
 
 			return null;
+		}
+	}
+
+	public void getConformance()
+	{
+		try (Response response = getResource().path("metadata").request()
+				.accept(Constants.CT_FHIR_JSON_NEW + "; fhirVersion=4.0").get())
+		{
+			logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+					response.getStatusInfo().getReasonPhrase());
 		}
 	}
 }

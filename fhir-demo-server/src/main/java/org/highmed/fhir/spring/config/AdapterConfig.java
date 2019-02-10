@@ -1,8 +1,9 @@
 package org.highmed.fhir.spring.config;
 
-import org.highmed.fhir.adapter.JsonFhirAdapter;
-import org.highmed.fhir.adapter.XmlFhirAdapter;
-import org.hl7.fhir.r4.model.Patient;
+import org.highmed.fhir.adapter.CapabilityStatementJsonFhirAdapter;
+import org.highmed.fhir.adapter.CapabilityStatementXmlFhirAdapter;
+import org.highmed.fhir.adapter.PatientJsonFhirAdapter;
+import org.highmed.fhir.adapter.PatientXmlFhirAdapter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,14 +17,26 @@ public class AdapterConfig
 	private FhirContext fhirContext;
 
 	@Bean
-	public JsonFhirAdapter<Patient> patientJsonAdapter()
+	public PatientJsonFhirAdapter patientJsonAdapter()
 	{
-		return JsonFhirAdapter.create(fhirContext, Patient.class);
+		return new PatientJsonFhirAdapter(fhirContext);
 	}
 
 	@Bean
-	public XmlFhirAdapter<Patient> patientXmlAdapter()
+	public PatientXmlFhirAdapter patientXmlAdapter()
 	{
-		return XmlFhirAdapter.create(fhirContext, Patient.class);
+		return new PatientXmlFhirAdapter(fhirContext);
+	}
+
+	@Bean
+	public CapabilityStatementJsonFhirAdapter capabilityStatementJsonAdapter()
+	{
+		return new CapabilityStatementJsonFhirAdapter(fhirContext);
+	}
+
+	@Bean
+	public CapabilityStatementXmlFhirAdapter capabilityStatementXmlAdapter()
+	{
+		return new CapabilityStatementXmlFhirAdapter(fhirContext);
 	}
 }

@@ -6,7 +6,9 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.UUID;
 
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -27,7 +29,10 @@ public class TestFhirJerseyClient
 				keyStorePassword, null, null, null, 0, 0, null, FhirContext.forR4());
 
 		Patient patient = new Patient();
+		patient.setIdElement(new IdType("Patient", UUID.randomUUID().toString(), "2"));
 
 		fhirJerseyClient.create(patient);
+
+		fhirJerseyClient.getConformance();
 	}
 }
