@@ -11,7 +11,6 @@ public class FhirConfig
 	@Bean
 	public FhirContext fhirContext()
 	{
-		FhirContext fhirContext = FhirContext.forR4();
-		return fhirContext;
+		return FhirContext.forR4();
 	}
 }
