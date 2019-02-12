@@ -36,6 +36,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
+import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -74,7 +75,7 @@ public abstract class AbstractService<D extends BasicCrudDao<R>, R extends Domai
 		return dao;
 	}
 
-	private void handleSql(RunnableWithSqlException f)
+	protected void handleSql(RunnableWithSqlException f)
 	{
 		try
 		{
@@ -87,7 +88,7 @@ public abstract class AbstractService<D extends BasicCrudDao<R>, R extends Domai
 		}
 	}
 
-	private <RS> RS handleSql(SupplierWithSqlException<RS> s)
+	protected <RS> RS handleSql(SupplierWithSqlException<RS> s)
 	{
 		try
 		{
@@ -100,7 +101,7 @@ public abstract class AbstractService<D extends BasicCrudDao<R>, R extends Domai
 		}
 	}
 
-	private <RS> RS handleSqlAndDeleted(SupplierWithSqlAndResourceDeletedException<RS> s)
+	protected <RS> RS handleSqlAndDeleted(SupplierWithSqlAndResourceDeletedException<RS> s)
 	{
 		try
 		{
@@ -118,7 +119,7 @@ public abstract class AbstractService<D extends BasicCrudDao<R>, R extends Domai
 		}
 	}
 
-	private <RS> RS handleSqlAndNotFound(SupplierWithSqlAndResourceNotFoundException<RS> s)
+	protected <RS> RS handleSqlAndNotFound(SupplierWithSqlAndResourceNotFoundException<RS> s)
 	{
 		try
 		{
@@ -135,6 +136,17 @@ public abstract class AbstractService<D extends BasicCrudDao<R>, R extends Domai
 			logger.error("Error while accessing db", e);
 			throw new WebApplicationException();
 		}
+	}
+
+	protected IdType toFullId(IdType id)
+	{
+		id.setIdBase(serverBase);
+		return id;
+	}
+
+	protected String toFullId(String id)
+	{
+		return toFullId(new IdType(id)).asStringValue();
 	}
 
 	private OperationOutcome createOutcome(IssueSeverity severity, IssueType type, String diagnostics)
@@ -177,7 +189,7 @@ public abstract class AbstractService<D extends BasicCrudDao<R>, R extends Domai
 		return read.map(d -> response(Status.OK, d, mimeType)).orElse(Response.status(Status.NOT_FOUND)).build();
 	}
 
-	private String toSpecialMimeType(String format)
+	protected String toSpecialMimeType(String format)
 	{
 		if (format == null || format.isBlank())
 			return null;
@@ -189,7 +201,7 @@ public abstract class AbstractService<D extends BasicCrudDao<R>, R extends Domai
 			throw new WebApplicationException(Status.UNSUPPORTED_MEDIA_TYPE);
 	}
 
-	private ResponseBuilder response(Status status, R resource, String mimeType)
+	protected ResponseBuilder response(Status status, Resource resource, String mimeType)
 	{
 		Objects.requireNonNull(status, "status");
 		Objects.requireNonNull(resource, "resource");

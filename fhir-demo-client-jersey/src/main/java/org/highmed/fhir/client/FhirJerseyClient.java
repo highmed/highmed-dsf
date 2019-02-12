@@ -9,6 +9,8 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
 import org.highmed.fhir.adapter.AbstractFhirAdapter;
+import org.highmed.fhir.adapter.BundleJsonFhirAdapter;
+import org.highmed.fhir.adapter.BundleXmlFhirAdapter;
 import org.highmed.fhir.adapter.CapabilityStatementJsonFhirAdapter;
 import org.highmed.fhir.adapter.CapabilityStatementXmlFhirAdapter;
 import org.highmed.fhir.adapter.HealthcareServiceJsonFhirAdapter;
@@ -57,19 +59,19 @@ public class FhirJerseyClient extends AbstractJerseyClient
 
 	public static List<AbstractFhirAdapter<?>> components(FhirContext fhirContext)
 	{
-		return Arrays.asList(new CapabilityStatementJsonFhirAdapter(fhirContext),
-				new CapabilityStatementXmlFhirAdapter(fhirContext), new HealthcareServiceJsonFhirAdapter(fhirContext),
-				new HealthcareServiceXmlFhirAdapter(fhirContext), new LocationJsonFhirAdapter(fhirContext),
-				new LocationXmlFhirAdapter(fhirContext), new OrganizationJsonFhirAdapter(fhirContext),
-				new OrganizationXmlFhirAdapter(fhirContext), new PatientJsonFhirAdapter(fhirContext),
-				new PatientXmlFhirAdapter(fhirContext), new PractitionerJsonFhirAdapter(fhirContext),
-				new PractitionerXmlFhirAdapter(fhirContext), new PractitionerRoleJsonFhirAdapter(fhirContext),
-				new PractitionerRoleXmlFhirAdapter(fhirContext), new ProvenanceJsonFhirAdapter(fhirContext),
-				new ProvenanceXmlFhirAdapter(fhirContext), new ResearchStudyJsonFhirAdapter(fhirContext),
-				new ResearchStudyXmlFhirAdapter(fhirContext), new StructureDefinitionJsonFhirAdapter(fhirContext),
-				new StructureDefinitionXmlFhirAdapter(fhirContext), new SubscriptionJsonFhirAdapter(fhirContext),
-				new SubscriptionXmlFhirAdapter(fhirContext), new TaskJsonFhirAdapter(fhirContext),
-				new TaskXmlFhirAdapter(fhirContext));
+		return Arrays.asList(new BundleJsonFhirAdapter(fhirContext), new BundleXmlFhirAdapter(fhirContext),
+				new CapabilityStatementJsonFhirAdapter(fhirContext), new CapabilityStatementXmlFhirAdapter(fhirContext),
+				new HealthcareServiceJsonFhirAdapter(fhirContext), new HealthcareServiceXmlFhirAdapter(fhirContext),
+				new LocationJsonFhirAdapter(fhirContext), new LocationXmlFhirAdapter(fhirContext),
+				new OrganizationJsonFhirAdapter(fhirContext), new OrganizationXmlFhirAdapter(fhirContext),
+				new PatientJsonFhirAdapter(fhirContext), new PatientXmlFhirAdapter(fhirContext),
+				new PractitionerJsonFhirAdapter(fhirContext), new PractitionerXmlFhirAdapter(fhirContext),
+				new PractitionerRoleJsonFhirAdapter(fhirContext), new PractitionerRoleXmlFhirAdapter(fhirContext),
+				new ProvenanceJsonFhirAdapter(fhirContext), new ProvenanceXmlFhirAdapter(fhirContext),
+				new ResearchStudyJsonFhirAdapter(fhirContext), new ResearchStudyXmlFhirAdapter(fhirContext),
+				new StructureDefinitionJsonFhirAdapter(fhirContext), new StructureDefinitionXmlFhirAdapter(fhirContext),
+				new SubscriptionJsonFhirAdapter(fhirContext), new SubscriptionXmlFhirAdapter(fhirContext),
+				new TaskJsonFhirAdapter(fhirContext), new TaskXmlFhirAdapter(fhirContext));
 	}
 
 	public DomainResource create(DomainResource resource)

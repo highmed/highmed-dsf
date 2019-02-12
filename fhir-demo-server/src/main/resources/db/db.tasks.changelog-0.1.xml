@@ -30,7 +30,7 @@
 			GRANT ALL ON TABLE tasks TO ${liquibase_user};
 			GRANT SELECT, INSERT, UPDATE ON TABLE tasks TO ${server_users_group};
 			CREATE INDEX tasks_task_id_index ON tasks USING btree (task_id);
-			CREATE INDEX tasks_task_index ON patients USING gin (patient);
+			CREATE INDEX tasks_task_index ON tasks USING gin (task);
 			CREATE INDEX tasks_task_id_version_index ON tasks USING btree (task_id, version);
 		</sql>
 	</changeSet>

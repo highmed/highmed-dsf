@@ -3,7 +3,9 @@ package org.highmed.fhir.webservice;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -17,6 +19,7 @@ import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementImplementati
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementKind;
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestComponent;
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
+import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent;
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementSoftwareComponent;
 import org.hl7.fhir.r4.model.CapabilityStatement.RestfulCapabilityMode;
 import org.hl7.fhir.r4.model.CapabilityStatement.TypeRestfulInteraction;
@@ -25,6 +28,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HealthcareService;
 import org.hl7.fhir.r4.model.Location;
@@ -94,6 +98,12 @@ public class ConformanceService
 				Organization.class, Patient.class, PractitionerRole.class, Practitioner.class, Provenance.class,
 				ResearchStudy.class, StructureDefinition.class, Subscription.class, Task.class);
 
+		Map<Class<? extends DomainResource>, List<CapabilityStatementRestResourceSearchParamComponent>> searchParameters = new HashMap<>();
+		searchParameters.put(Task.class,
+				Arrays.asList(new CapabilityStatementRestResourceSearchParamComponent().setName("requester")
+						.setDefinition("http://hl7.org/fhir/SearchParameter/Task-requester")
+						.setType(SearchParamType.REFERENCE).setDocumentation("Search by task requester")));
+
 		for (Class<? extends DomainResource> resource : resources)
 		{
 			CapabilityStatementRestResourceComponent r = rest.addResource();
@@ -104,6 +114,8 @@ public class ConformanceService
 			r.addInteraction().setCode(TypeRestfulInteraction.VREAD);
 			r.addInteraction().setCode(TypeRestfulInteraction.UPDATE);
 			r.addInteraction().setCode(TypeRestfulInteraction.DELETE);
+
+			searchParameters.getOrDefault(resource, Collections.emptyList()).forEach(r::addSearchParam);
 		}
 
 		return Response.ok(statement).build();

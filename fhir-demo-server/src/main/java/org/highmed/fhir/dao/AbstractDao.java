@@ -145,6 +145,12 @@ public abstract class AbstractDao<D extends DomainResource> implements BasicCrud
 		}
 	}
 
+	protected D getResource(ResultSet result, int index) throws SQLException
+	{
+		String json = result.getString(index);
+		return jsonParser.parseResource(resourceType, json);
+	}
+
 	@Override
 	public Optional<D> read(IdType id) throws SQLException, ResourceDeletedException
 	{
@@ -161,13 +167,14 @@ public abstract class AbstractDao<D extends DomainResource> implements BasicCrud
 				{
 					if (result.getBoolean(2))
 					{
-						logger.info("{} with IdPart {} found, but marked as deleted.", resourceTypeName, id.getIdPart());
+						logger.info("{} with IdPart {} found, but marked as deleted.", resourceTypeName,
+								id.getIdPart());
 						throw new ResourceDeletedException(id);
 					}
 					else
 					{
 						logger.info("{} with IdPart {} found.", resourceTypeName, id.getIdPart());
-						return Optional.of(jsonParser.parseResource(resourceType, result.getString(1)));
+						return Optional.of(getResource(result, 1));
 					}
 				}
 				else
@@ -193,7 +200,7 @@ public abstract class AbstractDao<D extends DomainResource> implements BasicCrud
 				{
 					logger.info("{} with IdPart {} and Version {} found.", resourceTypeName, id.getIdPart(),
 							id.getVersionIdPartAsLong());
-					return Optional.of(jsonParser.parseResource(resourceType, result.getString(1)));
+					return Optional.of(getResource(result, 1));
 				}
 				else
 				{
