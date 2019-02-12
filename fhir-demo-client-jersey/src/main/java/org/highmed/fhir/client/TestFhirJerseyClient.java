@@ -6,10 +6,11 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
-import java.util.UUID;
 
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Task;
 
 import ca.uhn.fhir.context.FhirContext;
 import de.rwh.utils.crypto.CertificateHelper;
@@ -28,11 +29,16 @@ public class TestFhirJerseyClient
 		FhirJerseyClient fhirJerseyClient = new FhirJerseyClient("https://localhost:8001/fhir", trustStore, keyStore,
 				keyStorePassword, null, null, null, 0, 0, null, FhirContext.forR4());
 
-		Patient patient = new Patient();
-		patient.setIdElement(new IdType("Patient", UUID.randomUUID().toString(), "2"));
+		// Patient patient = new Patient();
+		// patient.setIdElement(new IdType("Patient", UUID.randomUUID().toString(), "2"));
+		// fhirJerseyClient.create(patient);
 
-		fhirJerseyClient.create(patient);
+		DomainResource organization = fhirJerseyClient.create(new Organization().setName("Test Organization"));
+		fhirJerseyClient.create(new Task().setRequester(new Reference(organization.getIdElement().toVersionless()))
+				.setDescription("Organization reference without version"));
+		fhirJerseyClient.create(new Task().setRequester(new Reference(organization.getIdElement()))
+				.setDescription("Organization reference with version"));
 
-		fhirJerseyClient.getConformance();
+		// fhirJerseyClient.getConformance();
 	}
 }

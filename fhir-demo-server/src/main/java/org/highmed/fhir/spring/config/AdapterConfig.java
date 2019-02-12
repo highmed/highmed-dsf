@@ -1,70 +1,33 @@
 package org.highmed.fhir.spring.config;
 
-import org.highmed.fhir.adapter.CapabilityStatementJsonFhirAdapter;
-import org.highmed.fhir.adapter.CapabilityStatementXmlFhirAdapter;
-import org.highmed.fhir.adapter.PatientJsonFhirAdapter;
-import org.highmed.fhir.adapter.PatientXmlFhirAdapter;
-import org.highmed.fhir.adapter.SubscriptionJsonFhirAdapter;
-import org.highmed.fhir.adapter.SubscriptionXmlFhirAdapter;
-import org.highmed.fhir.adapter.TaskJsonFhirAdapter;
-import org.highmed.fhir.adapter.TaskXmlFhirAdapter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import java.util.Set;
 
-import ca.uhn.fhir.context.FhirContext;
+import javax.ws.rs.ext.Provider;
+
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.type.filter.AnnotationTypeFilter;
 
 @Configuration
-public class AdapterConfig
+public class AdapterConfig implements BeanDefinitionRegistryPostProcessor
 {
-	@Autowired
-	private FhirContext fhirContext;
-
-	@Bean
-	public PatientJsonFhirAdapter patientJsonAdapter()
+	@Override
+	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException
 	{
-		return new PatientJsonFhirAdapter(fhirContext);
+		// nothing to do
 	}
 
-	@Bean
-	public PatientXmlFhirAdapter patientXmlAdapter()
+	@Override
+	public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException
 	{
-		return new PatientXmlFhirAdapter(fhirContext);
-	}
-
-	@Bean
-	public TaskJsonFhirAdapter taskJsonAdapter()
-	{
-		return new TaskJsonFhirAdapter(fhirContext);
-	}
-
-	@Bean
-	public TaskXmlFhirAdapter taskXmlAdapter()
-	{
-		return new TaskXmlFhirAdapter(fhirContext);
-	}
-	
-	@Bean
-	public SubscriptionJsonFhirAdapter subscriptionJsonAdapter()
-	{
-		return new SubscriptionJsonFhirAdapter(fhirContext);
-	}
-	
-	@Bean
-	public SubscriptionXmlFhirAdapter subscriptionXmlAdapter()
-	{
-		return new SubscriptionXmlFhirAdapter(fhirContext);
-	}
-
-	@Bean
-	public CapabilityStatementJsonFhirAdapter capabilityStatementJsonAdapter()
-	{
-		return new CapabilityStatementJsonFhirAdapter(fhirContext);
-	}
-
-	@Bean
-	public CapabilityStatementXmlFhirAdapter capabilityStatementXmlAdapter()
-	{
-		return new CapabilityStatementXmlFhirAdapter(fhirContext);
+		ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(false);
+		scanner.addIncludeFilter(new AnnotationTypeFilter(Provider.class));
+		Set<BeanDefinition> adapters = scanner.findCandidateComponents("org.highmed.fhir.adapter");
+		adapters.forEach(def -> registry.registerBeanDefinition(def.getBeanClassName(), def));
 	}
 }

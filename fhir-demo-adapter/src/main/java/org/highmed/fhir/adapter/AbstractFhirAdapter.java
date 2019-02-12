@@ -27,6 +27,8 @@ public abstract class AbstractFhirAdapter<T extends BaseResource> implements Mes
 	{
 		this.resourceType = resourceType;
 		this.parser = parser;
+		
+		parser.setStripVersionsFromReferences(false);
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package org.highmed.fhir.spring.config;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.highmed.fhir.dao.OrganizationDao;
 import org.highmed.fhir.dao.PatientDao;
 import org.highmed.fhir.dao.SubscriptionDao;
 import org.highmed.fhir.dao.TaskDao;
@@ -58,5 +59,11 @@ public class DaoConfig
 	public TaskDao taskDao()
 	{
 		return new TaskDao(dataSource(), fhirContext);
+	}
+
+	@Bean
+	public OrganizationDao organizationDao()
+	{
+		return new OrganizationDao(dataSource(), fhirContext);
 	}
 }

@@ -50,6 +50,7 @@ public abstract class AbstractDao<D extends DomainResource> implements BasicCrud
 
 		resourceTypeName = Objects.requireNonNull(resourceType, "resourceType").getAnnotation(ResourceDef.class).name();
 		jsonParser = Objects.requireNonNull(fhirContext, "fhirContext").newJsonParser();
+		jsonParser.setStripVersionsFromReferences(false);
 	}
 
 	@Override

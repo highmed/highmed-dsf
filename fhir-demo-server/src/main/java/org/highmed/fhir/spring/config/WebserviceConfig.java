@@ -1,6 +1,7 @@
 package org.highmed.fhir.spring.config;
 
 import org.highmed.fhir.webservice.ConformanceService;
+import org.highmed.fhir.webservice.OrganizationService;
 import org.highmed.fhir.webservice.PatientService;
 import org.highmed.fhir.webservice.SubscriptionService;
 import org.highmed.fhir.webservice.TaskService;
@@ -40,5 +41,11 @@ public class WebserviceConfig
 	public TaskService taskService()
 	{
 		return new TaskService(serverBase, daoConfig.taskDao());
+	}
+
+	@Bean
+	public OrganizationService organizationService()
+	{
+		return new OrganizationService(serverBase, daoConfig.organizationDao());
 	}
 }

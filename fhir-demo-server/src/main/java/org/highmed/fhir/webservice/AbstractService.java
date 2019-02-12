@@ -42,7 +42,7 @@ import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.rest.api.Constants;
 
-public abstract class AbstractService<D extends DomainResource> implements InitializingBean
+public abstract class AbstractService<D extends BasicCrudDao<R>, R extends DomainResource> implements InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractService.class);
 
@@ -53,20 +53,25 @@ public abstract class AbstractService<D extends DomainResource> implements Initi
 
 	private final String serverBase;
 	private final String resourceTypeName;
-	private final BasicCrudDao<D> crudDao;
+	private final D dao;
 
-	public AbstractService(String serverBase, String resourceTypeName, BasicCrudDao<D> crudDao)
+	public AbstractService(String serverBase, String resourceTypeName, D dao)
 	{
 		this.serverBase = serverBase;
 		this.resourceTypeName = resourceTypeName;
-		this.crudDao = crudDao;
+		this.dao = dao;
 	}
 
 	public void afterPropertiesSet() throws Exception
 	{
 		Objects.requireNonNull(serverBase, "serverBase");
 		Objects.requireNonNull(resourceTypeName, "resourceTypeName");
-		Objects.requireNonNull(crudDao, "crudDao");
+		Objects.requireNonNull(dao, "dao");
+	}
+
+	protected D getDao()
+	{
+		return dao;
 	}
 
 	private void handleSql(RunnableWithSqlException f)
@@ -82,7 +87,7 @@ public abstract class AbstractService<D extends DomainResource> implements Initi
 		}
 	}
 
-	private <R> R handleSql(SupplierWithSqlException<R> s)
+	private <RS> RS handleSql(SupplierWithSqlException<RS> s)
 	{
 		try
 		{
@@ -95,7 +100,7 @@ public abstract class AbstractService<D extends DomainResource> implements Initi
 		}
 	}
 
-	private <R> R handleSqlAndDeleted(SupplierWithSqlAndResourceDeletedException<R> s)
+	private <RS> RS handleSqlAndDeleted(SupplierWithSqlAndResourceDeletedException<RS> s)
 	{
 		try
 		{
@@ -113,7 +118,7 @@ public abstract class AbstractService<D extends DomainResource> implements Initi
 		}
 	}
 
-	private <R> R handleSqlAndNotFound(SupplierWithSqlAndResourceNotFoundException<R> s)
+	private <RS> RS handleSqlAndNotFound(SupplierWithSqlAndResourceNotFoundException<RS> s)
 	{
 		try
 		{
@@ -151,7 +156,7 @@ public abstract class AbstractService<D extends DomainResource> implements Initi
 
 		String mimeType = toSpecialMimeType(format);
 
-		Optional<D> read = handleSqlAndDeleted(() -> crudDao.read(new IdType(id)));
+		Optional<R> read = handleSqlAndDeleted(() -> dao.read(new IdType(id)));
 
 		return read.map(d -> response(Status.OK, d, mimeType)).orElse(Response.status(Status.NOT_FOUND)).build();
 	}
@@ -167,7 +172,7 @@ public abstract class AbstractService<D extends DomainResource> implements Initi
 
 		String mimeType = toSpecialMimeType(format);
 
-		Optional<D> read = handleSql(() -> crudDao.readVersion(new IdType(resourceTypeName, id, version)));
+		Optional<R> read = handleSql(() -> dao.readVersion(new IdType(resourceTypeName, id, version)));
 
 		return read.map(d -> response(Status.OK, d, mimeType)).orElse(Response.status(Status.NOT_FOUND)).build();
 	}
@@ -184,7 +189,7 @@ public abstract class AbstractService<D extends DomainResource> implements Initi
 			throw new WebApplicationException(Status.UNSUPPORTED_MEDIA_TYPE);
 	}
 
-	private ResponseBuilder response(Status status, D resource, String mimeType)
+	private ResponseBuilder response(Status status, R resource, String mimeType)
 	{
 		Objects.requireNonNull(status, "status");
 		Objects.requireNonNull(resource, "resource");
@@ -207,7 +212,7 @@ public abstract class AbstractService<D extends DomainResource> implements Initi
 	@Path("/{id}")
 	@Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
 			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
-	public Response update(@PathParam("id") String id, D resource)
+	public Response update(@PathParam("id") String id, R resource)
 	{
 		logger.trace("PUT '{}/{}'", resourceTypeName, id);
 
@@ -223,7 +228,7 @@ public abstract class AbstractService<D extends DomainResource> implements Initi
 									+ resource.getIdElement().getBaseUrl() + " unexpected."))
 					.build();
 
-		D updated = handleSqlAndNotFound(() -> crudDao.update(resource));
+		R updated = handleSqlAndNotFound(() -> dao.update(resource));
 
 		return response(Status.OK, updated, null).build();
 	}
@@ -236,7 +241,7 @@ public abstract class AbstractService<D extends DomainResource> implements Initi
 	{
 		logger.trace("DELETE '{}/{}'", resourceTypeName, id);
 
-		handleSql(() -> crudDao.delete(new IdType(id)));
+		handleSql(() -> dao.delete(new IdType(id)));
 
 		return response(Status.OK, null, null).build();
 	}
@@ -244,11 +249,11 @@ public abstract class AbstractService<D extends DomainResource> implements Initi
 	@POST
 	@Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
 			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
-	public Response create(D resource, @Context UriInfo uriInfo)
+	public Response create(R resource, @Context UriInfo uriInfo)
 	{
 		logger.trace("POST '{}'", resourceTypeName);
 
-		D createdResource = handleSql(() -> crudDao.create(resource));
+		R createdResource = handleSql(() -> dao.create(resource));
 
 		URI location = uriInfo.getAbsolutePathBuilder().path("/{id}/_history/{vid}")
 				.build(createdResource.getIdElement().getIdPart(), createdResource.getIdElement().getVersionIdPart());

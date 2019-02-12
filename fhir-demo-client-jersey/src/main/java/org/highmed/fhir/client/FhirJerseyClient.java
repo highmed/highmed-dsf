@@ -10,6 +10,8 @@ import javax.ws.rs.core.Response;
 
 import org.highmed.fhir.adapter.CapabilityStatementJsonFhirAdapter;
 import org.highmed.fhir.adapter.CapabilityStatementXmlFhirAdapter;
+import org.highmed.fhir.adapter.OrganizationJsonFhirAdapter;
+import org.highmed.fhir.adapter.OrganizationXmlFhirAdapter;
 import org.highmed.fhir.adapter.PatientJsonFhirAdapter;
 import org.highmed.fhir.adapter.PatientXmlFhirAdapter;
 import org.highmed.fhir.adapter.SubscriptionJsonFhirAdapter;
@@ -43,6 +45,7 @@ public class FhirJerseyClient extends AbstractJerseyClient
 		return Arrays.asList(new PatientJsonFhirAdapter(fhirContext), new PatientXmlFhirAdapter(fhirContext),
 				new TaskJsonFhirAdapter(fhirContext), new TaskXmlFhirAdapter(fhirContext),
 				new SubscriptionJsonFhirAdapter(fhirContext), new SubscriptionXmlFhirAdapter(fhirContext),
+				new OrganizationJsonFhirAdapter(fhirContext), new OrganizationXmlFhirAdapter(fhirContext),
 				new CapabilityStatementJsonFhirAdapter(fhirContext),
 				new CapabilityStatementXmlFhirAdapter(fhirContext));
 	}
