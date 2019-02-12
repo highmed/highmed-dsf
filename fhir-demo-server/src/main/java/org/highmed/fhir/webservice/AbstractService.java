@@ -25,8 +25,8 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import org.highmed.fhir.dao.BasicCrudDao;
-import org.highmed.fhir.dao.ResourceDeletedException;
-import org.highmed.fhir.dao.ResourceNotFoundException;
+import org.highmed.fhir.dao.exception.ResourceDeletedException;
+import org.highmed.fhir.dao.exception.ResourceNotFoundException;
 import org.highmed.fhir.function.RunnableWithSqlException;
 import org.highmed.fhir.function.SupplierWithSqlAndResourceDeletedException;
 import org.highmed.fhir.function.SupplierWithSqlAndResourceNotFoundException;

@@ -3,6 +3,7 @@ package org.highmed.fhir.webservice;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -22,9 +23,18 @@ import org.hl7.fhir.r4.model.CapabilityStatement.TypeRestfulInteraction;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.HealthcareService;
+import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.PractitionerRole;
+import org.hl7.fhir.r4.model.Provenance;
+import org.hl7.fhir.r4.model.ResearchStudy;
+import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.UrlType;
@@ -79,30 +89,22 @@ public class ConformanceService
 		Extension websocketExtension = rest.addExtension();
 		websocketExtension.setUrl("http://hl7.org/fhir/StructureDefinition/capabilitystatement-websocket");
 		websocketExtension.setValue(new UrlType(serverBase.replace("http", "ws") + "/ws"));
-		CapabilityStatementRestResourceComponent patientResource = rest.addResource();
-		patientResource.setType(Patient.class.getAnnotation(ResourceDef.class).name());
-		patientResource.setProfile(Patient.class.getAnnotation(ResourceDef.class).profile());
-		patientResource.addInteraction().setCode(TypeRestfulInteraction.CREATE);
-		patientResource.addInteraction().setCode(TypeRestfulInteraction.READ);
-		patientResource.addInteraction().setCode(TypeRestfulInteraction.VREAD);
-		patientResource.addInteraction().setCode(TypeRestfulInteraction.UPDATE);
-		patientResource.addInteraction().setCode(TypeRestfulInteraction.DELETE);
-		CapabilityStatementRestResourceComponent taskResource = rest.addResource();
-		taskResource.setType(Task.class.getAnnotation(ResourceDef.class).name());
-		taskResource.setProfile(Task.class.getAnnotation(ResourceDef.class).profile());
-		taskResource.addInteraction().setCode(TypeRestfulInteraction.CREATE);
-		taskResource.addInteraction().setCode(TypeRestfulInteraction.READ);
-		taskResource.addInteraction().setCode(TypeRestfulInteraction.VREAD);
-		taskResource.addInteraction().setCode(TypeRestfulInteraction.UPDATE);
-		taskResource.addInteraction().setCode(TypeRestfulInteraction.DELETE);
-		CapabilityStatementRestResourceComponent subscriptionResource = rest.addResource();
-		subscriptionResource.setType(Subscription.class.getAnnotation(ResourceDef.class).name());
-		subscriptionResource.setProfile(Task.class.getAnnotation(ResourceDef.class).profile());
-		subscriptionResource.addInteraction().setCode(TypeRestfulInteraction.CREATE);
-		subscriptionResource.addInteraction().setCode(TypeRestfulInteraction.READ);
-		subscriptionResource.addInteraction().setCode(TypeRestfulInteraction.VREAD);
-		subscriptionResource.addInteraction().setCode(TypeRestfulInteraction.UPDATE);
-		subscriptionResource.addInteraction().setCode(TypeRestfulInteraction.DELETE);
+
+		List<Class<? extends DomainResource>> resources = Arrays.asList(HealthcareService.class, Location.class,
+				Organization.class, Patient.class, PractitionerRole.class, Practitioner.class, Provenance.class,
+				ResearchStudy.class, StructureDefinition.class, Subscription.class, Task.class);
+
+		for (Class<? extends DomainResource> resource : resources)
+		{
+			CapabilityStatementRestResourceComponent r = rest.addResource();
+			r.setType(resource.getAnnotation(ResourceDef.class).name());
+			r.setProfile(resource.getAnnotation(ResourceDef.class).profile());
+			r.addInteraction().setCode(TypeRestfulInteraction.CREATE);
+			r.addInteraction().setCode(TypeRestfulInteraction.READ);
+			r.addInteraction().setCode(TypeRestfulInteraction.VREAD);
+			r.addInteraction().setCode(TypeRestfulInteraction.UPDATE);
+			r.addInteraction().setCode(TypeRestfulInteraction.DELETE);
+		}
 
 		return Response.ok(statement).build();
 	}

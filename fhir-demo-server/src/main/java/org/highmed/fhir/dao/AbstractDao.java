@@ -10,6 +10,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.highmed.fhir.dao.exception.ResourceDeletedException;
+import org.highmed.fhir.dao.exception.ResourceNotFoundException;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.postgresql.util.PGobject;
@@ -159,12 +161,12 @@ public abstract class AbstractDao<D extends DomainResource> implements BasicCrud
 				{
 					if (result.getBoolean(2))
 					{
-						logger.info("{} with IdPart {} found, but marked as deleted.", resourceType, id.getIdPart());
+						logger.info("{} with IdPart {} found, but marked as deleted.", resourceTypeName, id.getIdPart());
 						throw new ResourceDeletedException(id);
 					}
 					else
 					{
-						logger.info("{} with IdPart {} found.", resourceType, id.getIdPart());
+						logger.info("{} with IdPart {} found.", resourceTypeName, id.getIdPart());
 						return Optional.of(jsonParser.parseResource(resourceType, result.getString(1)));
 					}
 				}

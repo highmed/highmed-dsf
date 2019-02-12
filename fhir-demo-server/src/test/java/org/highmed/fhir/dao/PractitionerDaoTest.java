@@ -7,49 +7,49 @@ import java.util.GregorianCalendar;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
-import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class PatientDaoTest extends AbstractDaoTest<Patient, PatientDao>
+public class PractitionerDaoTest extends AbstractDaoTest<Practitioner, PractitionerDao>
 {
 	private final Date birthday = new GregorianCalendar(1980, 0, 2).getTime();
 	private final AdministrativeGender gender = AdministrativeGender.FEMALE;
 
-	public PatientDaoTest()
+	public PractitionerDaoTest()
 	{
-		super(Patient.class);
+		super(Practitioner.class);
 	}
 
 	@Override
-	protected PatientDao createDao(BasicDataSource dataSource, FhirContext fhirContext)
+	protected PractitionerDao createDao(BasicDataSource dataSource, FhirContext fhirContext)
 	{
-		return new PatientDao(dataSource, fhirContext);
+		return new PractitionerDao(dataSource, fhirContext);
 	}
 
 	@Override
-	protected Patient createResource()
+	protected Practitioner createResource()
 	{
-		Patient patient = new Patient();
-		patient.setBirthDate(birthday);
-		return patient;
+		Practitioner practitioner = new Practitioner();
+		practitioner.setBirthDate(birthday);
+		return practitioner;
 	}
 
 	@Override
-	protected void checkCreated(Patient resource)
+	protected void checkCreated(Practitioner resource)
 	{
 		assertEquals(birthday, resource.getBirthDate());
 	}
 
 	@Override
-	protected Patient updateResource(Patient resource)
+	protected Practitioner updateResource(Practitioner resource)
 	{
 		resource.setGender(gender);
 		return resource;
 	}
 
 	@Override
-	protected void checkUpdates(Patient resource)
+	protected void checkUpdates(Practitioner resource)
 	{
 		assertEquals(gender, resource.getGender());
 	}

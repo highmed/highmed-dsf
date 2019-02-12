@@ -1,8 +1,15 @@
 package org.highmed.fhir.spring.config;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.highmed.fhir.dao.HealthcareServiceDao;
+import org.highmed.fhir.dao.LocationDao;
 import org.highmed.fhir.dao.OrganizationDao;
 import org.highmed.fhir.dao.PatientDao;
+import org.highmed.fhir.dao.PractitionerDao;
+import org.highmed.fhir.dao.PractitionerRoleDao;
+import org.highmed.fhir.dao.ProvenanceDao;
+import org.highmed.fhir.dao.ResearchStudyDao;
+import org.highmed.fhir.dao.StructureDefinitionDao;
 import org.highmed.fhir.dao.SubscriptionDao;
 import org.highmed.fhir.dao.TaskDao;
 import org.postgresql.Driver;
@@ -44,9 +51,57 @@ public class DaoConfig
 	}
 
 	@Bean
+	public HealthcareServiceDao healthcareServiceDao()
+	{
+		return new HealthcareServiceDao(dataSource(), fhirContext);
+	}
+
+	@Bean
+	public LocationDao locationDao()
+	{
+		return new LocationDao(dataSource(), fhirContext);
+	}
+
+	@Bean
+	public OrganizationDao organizationDao()
+	{
+		return new OrganizationDao(dataSource(), fhirContext);
+	}
+
+	@Bean
 	public PatientDao patientDao()
 	{
 		return new PatientDao(dataSource(), fhirContext);
+	}
+
+	@Bean
+	public PractitionerDao practitionerDao()
+	{
+		return new PractitionerDao(dataSource(), fhirContext);
+	}
+
+	@Bean
+	public PractitionerRoleDao practitionerRoleDao()
+	{
+		return new PractitionerRoleDao(dataSource(), fhirContext);
+	}
+
+	@Bean
+	public ProvenanceDao provenanceDao()
+	{
+		return new ProvenanceDao(dataSource(), fhirContext);
+	}
+
+	@Bean
+	public ResearchStudyDao researchStudyDao()
+	{
+		return new ResearchStudyDao(dataSource(), fhirContext);
+	}
+
+	@Bean
+	public StructureDefinitionDao structureDefinitionDao()
+	{
+		return new StructureDefinitionDao(dataSource(), fhirContext);
 	}
 
 	@Bean
@@ -59,11 +114,5 @@ public class DaoConfig
 	public TaskDao taskDao()
 	{
 		return new TaskDao(dataSource(), fhirContext);
-	}
-
-	@Bean
-	public OrganizationDao organizationDao()
-	{
-		return new OrganizationDao(dataSource(), fhirContext);
 	}
 }

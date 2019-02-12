@@ -1,4 +1,4 @@
-package org.highmed.fhir.dao;
+package org.highmed.fhir.dao.exception;
 
 import org.hl7.fhir.r4.model.IdType;
 

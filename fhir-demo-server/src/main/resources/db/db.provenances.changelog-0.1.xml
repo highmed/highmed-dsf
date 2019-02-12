@@ -7,9 +7,9 @@
 	<property name="json" value="JSONB" dbms="postgresql" />
 	<property name="json" value="varchar(5000)" dbms="h2" />
 
-	<changeSet author="hhund" id="db.organizations.changelog-0.1">
-		<createTable tableName="organizations">
-			<column name="organization_id" type="UUID">
+	<changeSet author="hhund" id="db.provenances.changelog-0.1">
+		<createTable tableName="provenances">
+			<column name="provenance_id" type="UUID">
 				<constraints nullable="false" />
 			</column>
 			<column name="version" type="BIGINT">
@@ -18,20 +18,20 @@
 			<column name="deleted" type="BOOLEAN">
 				<constraints nullable="true" />
 			</column>
-			<column name="organization" type="${json}">
+			<column name="provenance" type="${json}">
 				<constraints nullable="false" />
 			</column>
 		</createTable>
 
-		<addPrimaryKey tableName="organizations" columnNames="organization_id, version" />
+		<addPrimaryKey tableName="provenances" columnNames="provenance_id, version" />
 
 		<sql dbms="postgresql">
-			ALTER TABLE organizations OWNER TO ${liquibase_user};
-			GRANT ALL ON TABLE organizations TO ${liquibase_user};
-			GRANT SELECT, INSERT, UPDATE ON TABLE organizations TO ${server_users_group};
-			CREATE INDEX organizations_organization_id_index ON organizations USING btree (organization_id);
-			CREATE INDEX organizations_organization_index ON organizations USING gin (organization);
-			CREATE INDEX organizations_organization_id_version_index ON organizations USING btree (organization_id, version);
+			ALTER TABLE provenances OWNER TO ${liquibase_user};
+			GRANT ALL ON TABLE provenances TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE ON TABLE provenances TO ${server_users_group};
+			CREATE INDEX provenances_provenance_id_index ON provenances USING btree (provenance_id);
+			CREATE INDEX provenances_provenance_index ON provenances USING gin (provenance);
+			CREATE INDEX provenances_provenance_id_version_index ON provenances USING btree (provenance_id, version);
 		</sql>
 	</changeSet>
 </databaseChangeLog>

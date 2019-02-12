@@ -23,14 +23,14 @@ public class AbstractJerseyClient
 	private final String domain;
 
 	public AbstractJerseyClient(String schemaHostPort, KeyStore trustStore, KeyStore keyStore,
-			String keyStorePassword, ObjectMapper objectMapper, List<Object> componentsToRegister)
+			String keyStorePassword, ObjectMapper objectMapper, List<?> componentsToRegister)
 	{
 		this(schemaHostPort, trustStore, keyStore, keyStorePassword, null, null, null, 0, 0, objectMapper, componentsToRegister);
 	}
 
 	public AbstractJerseyClient(String schemaHostPort, KeyStore trustStore, KeyStore keyStore,
 			String keyStorePassword, String proxySchemeHostPort, String proxyUserName, String proxyPassword,
-			int connectTimeout, int readTimeout, ObjectMapper objectMapper, List<Object> componentsToRegister)
+			int connectTimeout, int readTimeout, ObjectMapper objectMapper, List<?> componentsToRegister)
 	{
 		SSLContext sslContext = null;
 		if (trustStore != null && keyStore == null && keyStorePassword == null)
