@@ -24,7 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import de.rwh.utils.test.Database;
 
-public abstract class AbstractDomainResourceDaoTest<D extends DomainResource, C extends BasicCrudDao<D>>
+public abstract class AbstractDomainResourceDaoTest<D extends DomainResource, C extends AbstractDomainResourceDao<D>>
 {
 	@ClassRule
 	public static final FhirEmbeddedPostgresWithLiquibase template = new FhirEmbeddedPostgresWithLiquibase(

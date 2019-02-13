@@ -29,7 +29,7 @@ import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 
-public abstract class AbstractDomainResourceDao<R extends DomainResource> implements BasicCrudDao<R>, InitializingBean
+public abstract class AbstractDomainResourceDao<R extends DomainResource> implements InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractDomainResourceDao.class);
 
@@ -43,8 +43,8 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 	private final String resourceTypeName;
 	private final IParser jsonParser;
 
-	public AbstractDomainResourceDao(BasicDataSource dataSource, FhirContext fhirContext, Class<R> resourceType, String resourceTable,
-			String resourceColumn, String resourceIdColumn)
+	public AbstractDomainResourceDao(BasicDataSource dataSource, FhirContext fhirContext, Class<R> resourceType,
+			String resourceTable, String resourceColumn, String resourceIdColumn)
 	{
 		this.dataSource = dataSource;
 		this.resourceType = resourceType;
@@ -88,8 +88,7 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 		return resourceColumn;
 	}
 
-	@Override
-	public R create(R resource) throws SQLException
+	public final R create(R resource) throws SQLException
 	{
 		try (Connection connection = dataSource.getConnection())
 		{
@@ -167,8 +166,7 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 		return jsonParser.parseResource(resourceType, json);
 	}
 
-	@Override
-	public Optional<R> read(IdType id) throws SQLException, ResourceDeletedException
+	public final Optional<R> read(IdType id) throws SQLException, ResourceDeletedException
 	{
 		try (Connection connection = dataSource.getConnection();
 				PreparedStatement statement = connection.prepareStatement("SELECT " + resourceColumn + ", deleted FROM "
@@ -199,8 +197,7 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 		}
 	}
 
-	@Override
-	public Optional<R> readVersion(IdType id) throws SQLException
+	public final Optional<R> readVersion(IdType id) throws SQLException
 	{
 		try (Connection connection = dataSource.getConnection();
 				PreparedStatement statement = connection.prepareStatement("SELECT " + resourceColumn + " FROM "
@@ -228,8 +225,7 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 		}
 	}
 
-	@Override
-	public R update(R resource) throws SQLException, ResourceNotFoundException
+	public final R update(R resource) throws SQLException, ResourceNotFoundException
 	{
 		Objects.requireNonNull(resource, "resource");
 
@@ -308,8 +304,7 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 		}
 	}
 
-	@Override
-	public void delete(IdType id) throws SQLException
+	public final void delete(IdType id) throws SQLException
 	{
 		try (Connection connection = dataSource.getConnection())
 		{

@@ -28,7 +28,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
-import org.highmed.fhir.dao.BasicCrudDao;
+import org.highmed.fhir.dao.AbstractDomainResourceDao;
 import org.highmed.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.fhir.dao.exception.ResourceNotFoundException;
 import org.highmed.fhir.dao.search.PartialResult;
@@ -52,7 +52,7 @@ import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.rest.api.Constants;
 
-public abstract class AbstractService<D extends BasicCrudDao<R>, R extends DomainResource> implements InitializingBean
+public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R extends DomainResource> implements InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractService.class);
 
