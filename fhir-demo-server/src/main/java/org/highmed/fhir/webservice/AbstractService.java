@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -198,31 +199,44 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 	@Path("/{id}")
 	@Produces({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
 			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
-	public Response read(@PathParam("id") String id, @QueryParam("_format") String format)
+	public Response read(@PathParam("id") String id, @QueryParam("_format") String format, @Context UriInfo uri)
 	{
-		logger.trace("GET '{}/{}'", resourceTypeName, id);
+		logger.trace("GET '{}'", uri.getRequestUri().toString());
 
-		String mimeType = toSpecialMimeType(format);
+		Optional<R> read = withUuid(id, uuid -> handleSqlAndDeleted(() -> dao.read(uuid)));
 
-		Optional<R> read = handleSqlAndDeleted(() -> dao.read(new IdType(id)));
+		return read.map(d -> response(Status.OK, d, toSpecialMimeType(format)))
+				.orElse(Response.status(Status.NOT_FOUND)).build();
+	}
 
-		return read.map(d -> response(Status.OK, d, mimeType)).orElse(Response.status(Status.NOT_FOUND)).build();
+	private Optional<R> withUuid(String id, Function<UUID, Optional<R>> withUuid)
+	{
+		UUID uuid;
+		try
+		{
+			uuid = UUID.fromString(id);
+		}
+		catch (IllegalArgumentException e)
+		{
+			return Optional.empty();
+		}
+
+		return withUuid.apply(uuid);
 	}
 
 	@GET
 	@Path("/{id}/_history/{vid}")
 	@Produces({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
 			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
-	public Response vread(@PathParam("id") String id, @PathParam("vid") String version,
-			@QueryParam("_format") String format)
+	public Response vread(@PathParam("id") String id, @PathParam("vid") long version,
+			@QueryParam("_format") String format, @Context UriInfo uri)
 	{
-		logger.trace("GET '{}/{}/_history/{}'", resourceTypeName, id, version);
+		logger.trace("GET '{}'", uri.getRequestUri().toString());
 
-		String mimeType = toSpecialMimeType(format);
+		Optional<R> read = withUuid(id, uuid -> handleSql(() -> dao.readVersion(uuid, version)));
 
-		Optional<R> read = handleSql(() -> dao.readVersion(new IdType(resourceTypeName, id, version)));
-
-		return read.map(d -> response(Status.OK, d, mimeType)).orElse(Response.status(Status.NOT_FOUND)).build();
+		return read.map(d -> response(Status.OK, d, toSpecialMimeType(format)))
+				.orElse(Response.status(Status.NOT_FOUND)).build();
 	}
 
 	protected String toSpecialMimeType(String format)
@@ -262,9 +276,9 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 	@Path("/{id}")
 	@Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
 			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
-	public Response update(@PathParam("id") String id, R resource)
+	public Response update(@PathParam("id") String id, R resource, @Context UriInfo uri)
 	{
-		logger.trace("PUT '{}/{}'", resourceTypeName, id);
+		logger.trace("PUT '{}'", uri.getRequestUri().toString());
 
 		if (!Objects.equals(id, resource.getIdElement().getIdPart()))
 			return Response.status(Status.BAD_REQUEST)
@@ -287,9 +301,9 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 	@Path("/{id}")
 	@Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
 			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
-	public Response delete(@PathParam("id") String id)
+	public Response delete(@PathParam("id") String id, @Context UriInfo uri)
 	{
-		logger.trace("DELETE '{}/{}'", resourceTypeName, id);
+		logger.trace("DELETE '{}'", uri.getRequestUri().toString());
 
 		handleSql(() -> dao.delete(new IdType(id)));
 
@@ -299,13 +313,13 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 	@POST
 	@Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
 			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
-	public Response create(R resource, @Context UriInfo uriInfo)
+	public Response create(R resource, @Context UriInfo uri)
 	{
-		logger.trace("POST '{}'", resourceTypeName);
+		logger.trace("POST '{}'", uri.getRequestUri().toString());
 
 		R createdResource = handleSql(() -> dao.create(resource));
 
-		URI location = uriInfo.getAbsolutePathBuilder().path("/{id}/_history/{vid}")
+		URI location = uri.getAbsolutePathBuilder().path("/{id}/_history/{vid}")
 				.build(createdResource.getIdElement().getIdPart(), createdResource.getIdElement().getVersionIdPart());
 
 		return response(Status.CREATED, createdResource, null).location(location).build();
@@ -316,6 +330,8 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
 	public Response search(@Context UriInfo uri)
 	{
+		logger.trace("GET {}", uri.getRequestUri().toString());
+
 		MultivaluedMap<String, String> queryParameters = uri.getQueryParameters();
 
 		Integer count = getFirstInt(queryParameters, "_count");

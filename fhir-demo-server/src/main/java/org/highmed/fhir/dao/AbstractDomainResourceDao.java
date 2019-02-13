@@ -95,17 +95,17 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 		{
 			connection.setReadOnly(false);
 
-			R inserted = create(connection, resource, UUID.randomUUID().toString());
+			R inserted = create(connection, resource, UUID.randomUUID());
 
 			logger.debug("{} with ID {} created", resourceTypeName, inserted.getId());
 			return inserted;
 		}
 	}
 
-	private R create(Connection connection, R resource, String idPart) throws SQLException
+	private R create(Connection connection, R resource, UUID uuid) throws SQLException
 	{
 		resource = copy(resource);
-		resource.setIdElement(new IdType(resourceTypeName, idPart, "1"));
+		resource.setIdElement(new IdType(resourceTypeName, uuid.toString(), "1"));
 		resource.getMeta().setVersionId("1");
 		resource.getMeta().setLastUpdated(new Date());
 
@@ -113,7 +113,7 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 		try (PreparedStatement statement = connection.prepareStatement(
 				"INSERT INTO " + resourceTable + " (" + resourceIdColumn + ", " + resourceColumn + ") VALUES (?, ?)"))
 		{
-			statement.setObject(1, uuidToPgObject(resource.getIdElement()));
+			statement.setObject(1, uuidToPgObject(uuid));
 			statement.setObject(2, resourceToPgObject(resource));
 
 			logger.trace("Executing query '{}'", statement);
@@ -143,16 +143,16 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 		}
 	}
 
-	private Object uuidToPgObject(IdType id)
+	private Object uuidToPgObject(UUID uuid)
 	{
-		if (id == null)
+		if (uuid == null)
 			return null;
 
 		try
 		{
 			PGobject o = new PGobject();
 			o.setType("UUID");
-			o.setValue(id.getIdPart());
+			o.setValue(uuid.toString());
 			return o;
 		}
 		catch (DataFormatException | SQLException e)
@@ -167,13 +167,16 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 		return jsonParser.parseResource(resourceType, json);
 	}
 
-	public final Optional<R> read(IdType id) throws SQLException, ResourceDeletedException
+	public final Optional<R> read(UUID uuid) throws SQLException, ResourceDeletedException
 	{
+		if (uuid == null)
+			return Optional.empty();
+
 		try (Connection connection = dataSource.getConnection();
 				PreparedStatement statement = connection.prepareStatement("SELECT " + resourceColumn + ", deleted FROM "
 						+ resourceTable + " WHERE " + resourceIdColumn + " = ? ORDER BY version LIMIT 1"))
 		{
-			statement.setObject(1, uuidToPgObject(id));
+			statement.setObject(1, uuidToPgObject(uuid));
 
 			logger.trace("Executing query '{}'", statement);
 			try (ResultSet result = statement.executeQuery())
@@ -182,13 +185,12 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 				{
 					if (result.getBoolean(2))
 					{
-						logger.info("{} with IdPart {} found, but marked as deleted.", resourceTypeName,
-								id.getIdPart());
-						throw new ResourceDeletedException(id);
+						logger.debug("{} with IdPart {} found, but marked as deleted.", resourceTypeName, uuid);
+						throw new ResourceDeletedException(new IdType(resourceTypeName, uuid.toString()));
 					}
 					else
 					{
-						logger.info("{} with IdPart {} found.", resourceTypeName, id.getIdPart());
+						logger.debug("{} with IdPart {} found.", resourceTypeName, uuid);
 						return Optional.of(getResource(result, 1));
 					}
 				}
@@ -198,28 +200,45 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 		}
 	}
 
-	public final Optional<R> readVersion(IdType id) throws SQLException
+	private UUID toUuid(String idPart)
 	{
+		if (idPart == null)
+			return null;
+
+		// TODO control flow by exception
+		try
+		{
+			return UUID.fromString(idPart);
+		}
+		catch (IllegalArgumentException e)
+		{
+			return null;
+		}
+	}
+
+	public final Optional<R> readVersion(UUID uuid, long version) throws SQLException
+	{
+		if (uuid == null)
+			return Optional.empty();
+
 		try (Connection connection = dataSource.getConnection();
 				PreparedStatement statement = connection.prepareStatement("SELECT " + resourceColumn + " FROM "
 						+ resourceTable + " WHERE " + resourceIdColumn + " = ? AND version = ?"))
 		{
-			statement.setObject(1, uuidToPgObject(id));
-			statement.setLong(2, id.getVersionIdPartAsLong());
+			statement.setObject(1, uuidToPgObject(uuid));
+			statement.setLong(2, version);
 
 			logger.trace("Executing query '{}'", statement);
 			try (ResultSet result = statement.executeQuery())
 			{
 				if (result.next())
 				{
-					logger.info("{} with IdPart {} and Version {} found.", resourceTypeName, id.getIdPart(),
-							id.getVersionIdPartAsLong());
+					logger.debug("{} with IdPart {} and Version {} found.", resourceTypeName, uuid, version);
 					return Optional.of(getResource(result, 1));
 				}
 				else
 				{
-					logger.info("{} with IdPart {} and Version {} not found.", resourceTypeName, id.getIdPart(),
-							id.getVersionIdPartAsLong());
+					logger.debug("{} with IdPart {} and Version {} not found.", resourceTypeName, uuid, version);
 					return Optional.empty();
 				}
 			}
@@ -238,7 +257,7 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 
 			try
 			{
-				long version = getLastVersion(resource, connection) + 1;
+				long version = getLatestVersion(resource, connection) + 1;
 				R inserted = update(connection, copy(resource), resource.getIdElement().getIdPart(), version);
 
 				connection.commit();
@@ -257,6 +276,9 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 
 	private R update(Connection connection, R resource, String idPart, long version) throws SQLException
 	{
+		UUID uuid = toUuid(resource.getIdElement().getIdPart());
+		if (uuid == null)
+			throw new IllegalArgumentException("resource.id is not a UUID");
 		String versionAsString = String.valueOf(version);
 
 		resource = copy(resource);
@@ -267,7 +289,7 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 		try (PreparedStatement statement = connection.prepareStatement("INSERT INTO " + resourceTable + " ("
 				+ resourceIdColumn + ", version, " + resourceColumn + ") VALUES (?, ?, ?)"))
 		{
-			statement.setObject(1, uuidToPgObject(resource.getIdElement()));
+			statement.setObject(1, uuidToPgObject(uuid));
 			statement.setLong(2, version);
 			statement.setObject(3, resourceToPgObject(resource));
 
@@ -278,12 +300,16 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 		return resource;
 	}
 
-	private long getLastVersion(R resource, Connection connection) throws SQLException, ResourceNotFoundException
+	private long getLatestVersion(R resource, Connection connection) throws SQLException, ResourceNotFoundException
 	{
+		UUID uuid = toUuid(resource.getIdElement().getIdPart());
+		if (uuid == null)
+			throw new ResourceNotFoundException(resource.getId());
+
 		try (PreparedStatement statement = connection.prepareStatement("SELECT version FROM " + resourceTable
 				+ " WHERE " + resourceIdColumn + " = ? ORDER BY version LIMIT 1"))
 		{
-			statement.setObject(1, uuidToPgObject(resource.getIdElement()));
+			statement.setObject(1, uuidToPgObject(uuid));
 
 			logger.trace("Executing query '{}'", statement);
 			try (ResultSet result = statement.executeQuery())
@@ -307,6 +333,10 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 
 	public final void delete(IdType id) throws SQLException
 	{
+		UUID uuid = toUuid(id.getIdPart());
+		if (uuid == null)
+			throw new IllegalArgumentException("idPart not a uuid");
+
 		try (Connection connection = dataSource.getConnection())
 		{
 			connection.setReadOnly(false);
@@ -314,7 +344,7 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 			try (PreparedStatement statement = connection.prepareStatement(
 					"UPDATE " + resourceTable + " SET deleted = TRUE WHERE " + resourceIdColumn + " = ?"))
 			{
-				statement.setObject(1, uuidToPgObject(id));
+				statement.setObject(1, uuidToPgObject(uuid));
 
 				logger.trace("Executing query '{}'", statement);
 				statement.execute();

@@ -14,14 +14,12 @@ import org.highmed.fhir.dao.exception.ResourceNotFoundException;
 import org.highmed.fhir.test.FhirEmbeddedPostgresWithLiquibase;
 import org.highmed.fhir.test.TestSuiteDbTests;
 import org.hl7.fhir.r4.model.DomainResource;
-import org.hl7.fhir.r4.model.IdType;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import de.rwh.utils.test.Database;
 
 public abstract class AbstractDomainResourceDaoTest<D extends DomainResource, C extends AbstractDomainResourceDao<D>>
@@ -43,16 +41,6 @@ public abstract class AbstractDomainResourceDaoTest<D extends DomainResource, C 
 		this.resouceClass = resouceClass;
 	}
 
-	private IdType createIdWithoutVersion()
-	{
-		return new IdType(resouceClass.getAnnotation(ResourceDef.class).name(), UUID.randomUUID().toString(), null);
-	}
-
-	private IdType createIdWithVersion()
-	{
-		return new IdType(resouceClass.getAnnotation(ResourceDef.class).name(), UUID.randomUUID().toString(), "1");
-	}
-
 	@Before
 	public void before() throws Exception
 	{
@@ -65,14 +53,14 @@ public abstract class AbstractDomainResourceDaoTest<D extends DomainResource, C 
 	@Test
 	public void testEmpty() throws Exception
 	{
-		Optional<D> read = dao.read(createIdWithoutVersion());
+		Optional<D> read = dao.read(UUID.randomUUID());
 		assertTrue(read.isEmpty());
 	}
 
 	@Test
 	public void testEmptyWithVersion() throws Exception
 	{
-		Optional<D> read = dao.readVersion(createIdWithVersion());
+		Optional<D> read = dao.readVersion(UUID.randomUUID(), 1L);
 		assertTrue(read.isEmpty());
 	}
 
@@ -97,7 +85,7 @@ public abstract class AbstractDomainResourceDaoTest<D extends DomainResource, C 
 
 		assertTrue(newResource.equalsDeep(createdResource));
 
-		Optional<D> read = dao.read(createdResource.getIdElement());
+		Optional<D> read = dao.read(UUID.fromString(createdResource.getIdElement().getIdPart()));
 		assertTrue(read.isPresent());
 		assertNotNull(read.get().getId());
 		assertNotNull(read.get().getMeta().getVersionId());
@@ -160,12 +148,12 @@ public abstract class AbstractDomainResourceDaoTest<D extends DomainResource, C 
 
 		assertTrue(newResource.equalsDeep(createdResource));
 
-		Optional<D> read = dao.read(createdResource.getIdElement());
+		Optional<D> read = dao.read(UUID.fromString(createdResource.getIdElement().getIdPart()));
 		assertTrue(read.isPresent());
 
 		dao.delete(createdResource.getIdElement());
 
-		dao.read(createdResource.getIdElement());
+		dao.read(UUID.fromString(createdResource.getIdElement().getIdPart()));
 	}
 
 	@Test
@@ -185,7 +173,8 @@ public abstract class AbstractDomainResourceDaoTest<D extends DomainResource, C 
 
 		assertTrue(newResource.equalsDeep(createdResource));
 
-		Optional<D> read = dao.readVersion(createdResource.getIdElement());
+		Optional<D> read = dao.readVersion(UUID.fromString(createdResource.getIdElement().getIdPart()),
+				createdResource.getIdElement().getVersionIdPartAsLong());
 		assertTrue(read.isPresent());
 
 		assertTrue(newResource.equalsDeep(read.get()));
@@ -208,7 +197,7 @@ public abstract class AbstractDomainResourceDaoTest<D extends DomainResource, C 
 
 		assertTrue(newResource.equalsDeep(createdResource));
 
-		Optional<D> read = dao.read(createdResource.getIdElement());
+		Optional<D> read = dao.read(UUID.fromString(createdResource.getIdElement().getIdPart()));
 		assertTrue(read.isPresent());
 
 		assertTrue(newResource.equalsDeep(read.get()));
