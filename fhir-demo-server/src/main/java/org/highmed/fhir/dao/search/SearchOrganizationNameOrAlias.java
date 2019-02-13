@@ -3,51 +3,17 @@ package org.highmed.fhir.dao.search;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.UriBuilder;
-
 import org.highmed.fhir.dao.search.SearchParameter.SearchParameterDefinition;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 
 @SearchParameterDefinition(name = SearchOrganizationNameOrAlias.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Organization-name", type = SearchParamType.STRING, documentation = "A portion of the organization's name or alias")
-public class SearchOrganizationNameOrAlias implements SearchParameter
+public class SearchOrganizationNameOrAlias extends AbstractStringSearch implements SearchParameter
 {
 	public static final String PARAMETER_NAME = "name";
 
-	private enum StringSearchType
+	public SearchOrganizationNameOrAlias()
 	{
-		STARTS_WITH, EXACT, CONTAINS
-	}
-
-	private String value;
-	private StringSearchType type;
-
-	public void configure(MultivaluedMap<String, String> queryParameters)
-	{
-		String startsWith = queryParameters.getFirst(PARAMETER_NAME);
-		if (startsWith != null && !startsWith.isBlank())
-		{
-			this.value = startsWith;
-			this.type = StringSearchType.STARTS_WITH;
-		}
-		String exact = queryParameters.getFirst(PARAMETER_NAME + ":exact");
-		if (exact != null && !exact.isBlank())
-		{
-			this.value = exact;
-			this.type = StringSearchType.EXACT;
-		}
-		String contains = queryParameters.getFirst(PARAMETER_NAME + ":contains");
-		if (contains != null && !contains.isBlank())
-		{
-			this.value = contains;
-			this.type = StringSearchType.CONTAINS;
-		}
-	}
-
-	@Override
-	public boolean isDefined()
-	{
-		return value != null && type != null;
+		super(PARAMETER_NAME);
 	}
 
 	@Override
@@ -88,23 +54,5 @@ public class SearchOrganizationNameOrAlias implements SearchParameter
 				statement.setString(parameterIndex, value);
 				return;
 		}
-	}
-
-	@Override
-	public void modifyBundleUri(UriBuilder bundleUri)
-	{
-		if (value != null && type != null)
-			switch (type)
-			{
-				case STARTS_WITH:
-					bundleUri = bundleUri.replaceQueryParam(PARAMETER_NAME, value);
-					return;
-				case CONTAINS:
-					bundleUri = bundleUri.replaceQueryParam(PARAMETER_NAME + ":contains", value);
-					return;
-				case EXACT:
-					bundleUri = bundleUri.replaceQueryParam(PARAMETER_NAME + ":exact", value);
-					return;
-			}
 	}
 }
