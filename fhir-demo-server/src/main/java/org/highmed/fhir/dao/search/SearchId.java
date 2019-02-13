@@ -58,6 +58,6 @@ public class SearchId implements SearchParameter
 	public void modifyBundleUri(UriBuilder bundleUri)
 	{
 		if (id != null)
-			bundleUri.replaceQueryParam("_id", id);
+			bundleUri.replaceQueryParam(PARAMETER_NAME, id);
 	}
 }

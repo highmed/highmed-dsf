@@ -68,6 +68,6 @@ public class SearchTaskStatus implements SearchParameter
 	public void modifyBundleUri(UriBuilder bundleUri)
 	{
 		if (status != null)
-			bundleUri = bundleUri.replaceQueryParam("status", status.toCode());
+			bundleUri = bundleUri.replaceQueryParam(PARAMETER_NAME, status.toCode());
 	}
 }
