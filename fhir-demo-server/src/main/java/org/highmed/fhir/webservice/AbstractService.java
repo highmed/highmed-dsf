@@ -72,6 +72,10 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 	private final D dao;
 	private final Supplier<SearchParameter[]> searchParameterFactory;
 
+	/*
+	 * Using a supplier for SearchParameters, because implementations are not thread safe and need to be created on a
+	 * request basis
+	 */
 	public AbstractService(String serverBase, int defaultPageCount, String resourceTypeName, D dao,
 			Supplier<SearchParameter[]> searchParameterFactory)
 	{
@@ -321,7 +325,7 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 		int effectivePage = page == null ? 1 : page;
 		int effectiveCount = (count == null || count < 0) ? getDefaultPageCount() : count;
 
-		/* SearchParameter implementations are not thread safe and need to be created on a request bases */
+		/* SearchParameter implementations are not thread safe and need to be created on a request basis */
 		SearchQueryFactory queryFactory = getDao().createSearchQueryFactory(effectivePage, effectiveCount)
 				.with(getDao().createSearchId()).with(searchParameterFactory.get()).build();
 
