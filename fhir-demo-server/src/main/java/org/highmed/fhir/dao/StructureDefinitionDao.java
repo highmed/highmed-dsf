@@ -8,7 +8,7 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class StructureDefinitionDao extends AbstractDao<StructureDefinition>
+public class StructureDefinitionDao extends AbstractDomainResourceDao<StructureDefinition>
 {
 	public StructureDefinitionDao(BasicDataSource dataSource, FhirContext fhirContext)
 	{

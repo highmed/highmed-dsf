@@ -7,7 +7,7 @@ import org.hl7.fhir.r4.model.Organization;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class OrganizationDaoTest extends AbstractDaoTest<Organization, OrganizationDao>
+public class OrganizationDaoTest extends AbstractDomainResourceDaoTest<Organization, OrganizationDao>
 {
 	private static final String name = "Demo Organization";
 	private static final boolean active = true;

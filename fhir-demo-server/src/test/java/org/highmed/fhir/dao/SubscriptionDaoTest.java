@@ -8,7 +8,7 @@ import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class SubscriptionDaoTest extends AbstractDaoTest<Subscription, SubscriptionDao>
+public class SubscriptionDaoTest extends AbstractDomainResourceDaoTest<Subscription, SubscriptionDao>
 {
 	private static final String reason = "Demo Subscription Reason";
 	private static final SubscriptionStatus status = SubscriptionStatus.ACTIVE;

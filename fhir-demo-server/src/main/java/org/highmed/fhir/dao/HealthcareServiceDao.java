@@ -8,7 +8,7 @@ import org.hl7.fhir.r4.model.HealthcareService;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class HealthcareServiceDao extends AbstractDao<HealthcareService>
+public class HealthcareServiceDao extends AbstractDomainResourceDao<HealthcareService>
 {
 	public HealthcareServiceDao(BasicDataSource dataSource, FhirContext fhirContext)
 	{

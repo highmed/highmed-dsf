@@ -8,7 +8,7 @@ import org.hl7.fhir.r4.model.ResearchStudy;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class ResearchStudyDao extends AbstractDao<ResearchStudy>
+public class ResearchStudyDao extends AbstractDomainResourceDao<ResearchStudy>
 {
 	public ResearchStudyDao(BasicDataSource dataSource, FhirContext fhirContext)
 	{

@@ -11,7 +11,7 @@ import org.hl7.fhir.r4.model.Patient;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class PatientDaoTest extends AbstractDaoTest<Patient, PatientDao>
+public class PatientDaoTest extends AbstractDomainResourceDaoTest<Patient, PatientDao>
 {
 	private final Date birthday = new GregorianCalendar(1980, 0, 2).getTime();
 	private final AdministrativeGender gender = AdministrativeGender.FEMALE;

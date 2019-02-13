@@ -8,7 +8,7 @@ import org.hl7.fhir.r4.model.PractitionerRole;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class PractitionerRoleDao extends AbstractDao<PractitionerRole>
+public class PractitionerRoleDao extends AbstractDomainResourceDao<PractitionerRole>
 {
 	public PractitionerRoleDao(BasicDataSource dataSource, FhirContext fhirContext)
 	{

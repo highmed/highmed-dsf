@@ -10,7 +10,7 @@ import org.hl7.fhir.r4.model.Task;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class TaskDao extends AbstractDao<Task>
+public class TaskDao extends AbstractDomainResourceDao<Task>
 {
 	public TaskDao(BasicDataSource dataSource, FhirContext fhirContext)
 	{

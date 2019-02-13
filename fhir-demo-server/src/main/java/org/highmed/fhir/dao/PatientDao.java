@@ -8,7 +8,7 @@ import org.hl7.fhir.r4.model.Patient;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class PatientDao extends AbstractDao<Patient>
+public class PatientDao extends AbstractDomainResourceDao<Patient>
 {
 	public PatientDao(BasicDataSource dataSource, FhirContext fhirContext)
 	{

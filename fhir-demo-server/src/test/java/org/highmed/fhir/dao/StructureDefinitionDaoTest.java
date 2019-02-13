@@ -7,7 +7,7 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class StructureDefinitionDaoTest extends AbstractDaoTest<StructureDefinition, StructureDefinitionDao>
+public class StructureDefinitionDaoTest extends AbstractDomainResourceDaoTest<StructureDefinition, StructureDefinitionDao>
 {
 	private static final String name = "StructureDefinition";
 	private static final String title = "Demo Structure Definition";

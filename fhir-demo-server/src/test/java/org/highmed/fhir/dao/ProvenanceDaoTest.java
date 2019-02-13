@@ -14,7 +14,7 @@ import org.hl7.fhir.r4.model.Signature;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class ProvenanceDaoTest extends AbstractDaoTest<Provenance, ProvenanceDao>
+public class ProvenanceDaoTest extends AbstractDomainResourceDaoTest<Provenance, ProvenanceDao>
 {
 	private final Date recorded = new GregorianCalendar(2019, 0, 1, 10, 20, 30).getTime();
 	private final byte[] signatureData = "foo bar baz".getBytes();

@@ -8,7 +8,7 @@ import org.hl7.fhir.r4.model.Provenance;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class ProvenanceDao extends AbstractDao<Provenance>
+public class ProvenanceDao extends AbstractDomainResourceDao<Provenance>
 {
 	public ProvenanceDao(BasicDataSource dataSource, FhirContext fhirContext)
 	{

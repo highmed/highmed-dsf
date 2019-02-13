@@ -8,7 +8,7 @@ import org.hl7.fhir.r4.model.Organization;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class OrganizationDao extends AbstractDao<Organization>
+public class OrganizationDao extends AbstractDomainResourceDao<Organization>
 {
 	public OrganizationDao(BasicDataSource dataSource, FhirContext fhirContext)
 	{

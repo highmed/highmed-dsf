@@ -29,9 +29,9 @@ import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 
-public abstract class AbstractDao<R extends DomainResource> implements BasicCrudDao<R>, InitializingBean
+public abstract class AbstractDomainResourceDao<R extends DomainResource> implements BasicCrudDao<R>, InitializingBean
 {
-	private static final Logger logger = LoggerFactory.getLogger(AbstractDao.class);
+	private static final Logger logger = LoggerFactory.getLogger(AbstractDomainResourceDao.class);
 
 	private final BasicDataSource dataSource;
 	private final Class<R> resourceType;
@@ -43,7 +43,7 @@ public abstract class AbstractDao<R extends DomainResource> implements BasicCrud
 	private final String resourceTypeName;
 	private final IParser jsonParser;
 
-	public AbstractDao(BasicDataSource dataSource, FhirContext fhirContext, Class<R> resourceType, String resourceTable,
+	public AbstractDomainResourceDao(BasicDataSource dataSource, FhirContext fhirContext, Class<R> resourceType, String resourceTable,
 			String resourceColumn, String resourceIdColumn)
 	{
 		this.dataSource = dataSource;

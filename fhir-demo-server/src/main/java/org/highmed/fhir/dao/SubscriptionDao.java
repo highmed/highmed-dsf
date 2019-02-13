@@ -8,7 +8,7 @@ import org.hl7.fhir.r4.model.Subscription;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class SubscriptionDao extends AbstractDao<Subscription>
+public class SubscriptionDao extends AbstractDomainResourceDao<Subscription>
 {
 	public SubscriptionDao(BasicDataSource dataSource, FhirContext fhirContext)
 	{

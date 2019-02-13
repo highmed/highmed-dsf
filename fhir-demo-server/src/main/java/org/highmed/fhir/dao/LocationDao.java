@@ -8,7 +8,7 @@ import org.hl7.fhir.r4.model.Location;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class LocationDao extends AbstractDao<Location>
+public class LocationDao extends AbstractDomainResourceDao<Location>
 {
 	public LocationDao(BasicDataSource dataSource, FhirContext fhirContext)
 	{
