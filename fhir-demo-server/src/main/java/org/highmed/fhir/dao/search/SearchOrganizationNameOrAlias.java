@@ -14,25 +14,55 @@ public class SearchOrganizationNameOrAlias implements SearchParameter
 {
 	public static final String PARAMETER_NAME = "name";
 
-	private String name;
+	private enum StringSearchType
+	{
+		STARTS_WITH, EXACT, CONTAINS
+	}
+
+	private String value;
+	private StringSearchType type;
 
 	public void configure(MultivaluedMap<String, String> queryParameters)
 	{
-		String name = queryParameters.getFirst(PARAMETER_NAME);
-
-		this.name = name == null || name.isBlank() ? null : name;
+		String startsWith = queryParameters.getFirst(PARAMETER_NAME);
+		if (startsWith != null && !startsWith.isBlank())
+		{
+			this.value = startsWith;
+			this.type = StringSearchType.STARTS_WITH;
+		}
+		String exact = queryParameters.getFirst(PARAMETER_NAME + ":exact");
+		if (exact != null && !exact.isBlank())
+		{
+			this.value = exact;
+			this.type = StringSearchType.EXACT;
+		}
+		String contains = queryParameters.getFirst(PARAMETER_NAME + ":contains");
+		if (contains != null && !contains.isBlank())
+		{
+			this.value = contains;
+			this.type = StringSearchType.CONTAINS;
+		}
 	}
 
 	@Override
 	public boolean isDefined()
 	{
-		return name != null;
+		return value != null && type != null;
 	}
 
 	@Override
 	public String getSubquery()
 	{
-		return "(lower(organization->>'name') LIKE ? OR lower(organization->>'alias') LIKE ?)";
+		switch (type)
+		{
+			case STARTS_WITH:
+			case CONTAINS:
+				return "(lower(organization->>'name') LIKE ? OR lower(organization->>'alias') LIKE ?)";
+			case EXACT:
+				return "(organization->>'name' = ? OR organization->>'alias' = ?)";
+			default:
+				return "";
+		}
 	}
 
 	@Override
@@ -46,13 +76,35 @@ public class SearchOrganizationNameOrAlias implements SearchParameter
 			throws SQLException
 	{
 		// will be called twice, once with subqueryParameterIndex = 1 and once with subqueryParameterIndex = 2
-		statement.setString(parameterIndex, "%" + name.toLowerCase() + "%");
+		switch (type)
+		{
+			case STARTS_WITH:
+				statement.setString(parameterIndex, value.toLowerCase() + "%");
+				return;
+			case CONTAINS:
+				statement.setString(parameterIndex, "%" + value.toLowerCase() + "%");
+				return;
+			case EXACT:
+				statement.setString(parameterIndex, value);
+				return;
+		}
 	}
 
 	@Override
 	public void modifyBundleUri(UriBuilder bundleUri)
 	{
-		if (name != null)
-			bundleUri = bundleUri.replaceQueryParam("name", name);
+		if (value != null && type != null)
+			switch (type)
+			{
+				case STARTS_WITH:
+					bundleUri = bundleUri.replaceQueryParam(PARAMETER_NAME, value);
+					return;
+				case CONTAINS:
+					bundleUri = bundleUri.replaceQueryParam(PARAMETER_NAME + ":contains", value);
+					return;
+				case EXACT:
+					bundleUri = bundleUri.replaceQueryParam(PARAMETER_NAME + ":exact", value);
+					return;
+			}
 	}
 }
