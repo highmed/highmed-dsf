@@ -3,16 +3,24 @@ package org.highmed.fhir.dao.search;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.UriBuilder;
+
+import org.highmed.fhir.dao.search.SearchParameter.SearchParameterDefinition;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
+import org.hl7.fhir.r4.model.IdType;
 
-public class SearchTaskRequester implements SearchQuery
+@SearchParameterDefinition(name = SearchTaskRequester.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Task-requester", type = SearchParamType.REFERENCE, documentation = "Search by task requester")
+public class SearchTaskRequester implements SearchParameter
 {
-	private final IdType requester;
+	public static final String PARAMETER_NAME = "requester";
 
-	public SearchTaskRequester(String requester)
+	private IdType requester;
+
+	public void configure(MultivaluedMap<String, String> queryParameters)
 	{
+		String requester = queryParameters.getFirst(PARAMETER_NAME);
+
 		this.requester = requester == null || requester.isBlank() ? null : new IdType(requester);
 	}
 
@@ -41,10 +49,9 @@ public class SearchTaskRequester implements SearchQuery
 	}
 
 	@Override
-	public CapabilityStatementRestResourceSearchParamComponent createCapabilityStatementPart()
+	public void modifyBundleUri(UriBuilder bundleUri)
 	{
-		return new CapabilityStatementRestResourceSearchParamComponent().setName("requester")
-				.setDefinition("http://hl7.org/fhir/SearchParameter/Task-requester").setType(SearchParamType.REFERENCE)
-				.setDocumentation("Search by task requester");
+		if (requester != null)
+			bundleUri = bundleUri.replaceQueryParam("requester", requester);
 	}
 }

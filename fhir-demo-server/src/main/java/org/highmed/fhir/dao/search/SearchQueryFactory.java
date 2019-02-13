@@ -7,6 +7,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.UriBuilder;
+
 public class SearchQueryFactory
 {
 	public static class SearchQueryFactoryBuilder
@@ -17,7 +20,7 @@ public class SearchQueryFactory
 		private final int page;
 		private final int count;
 
-		private final List<SearchQuery> searchQueries = new ArrayList<SearchQuery>();
+		private final List<SearchParameter> searchQueries = new ArrayList<SearchParameter>();
 
 		public SearchQueryFactoryBuilder(String resourceTable, String resourceIdColumn, String resourceColumn, int page,
 				int count)
@@ -35,15 +38,15 @@ public class SearchQueryFactory
 			return new SearchQueryFactoryBuilder(resourceTable, resourceIdColumn, resourceColumn, page, count);
 		}
 
-		public SearchQueryFactoryBuilder with(SearchQuery e)
+		public SearchQueryFactoryBuilder with(SearchParameter searchQuery)
 		{
-			searchQueries.add(e);
+			this.searchQueries.add(searchQuery);
 			return this;
 		}
 
-		public SearchQueryFactoryBuilder with(SearchQuery... e)
+		public SearchQueryFactoryBuilder with(SearchParameter... searchQueries)
 		{
-			searchQueries.addAll(Arrays.asList(e));
+			this.searchQueries.addAll(Arrays.asList(searchQueries));
 			return this;
 		}
 
@@ -55,11 +58,11 @@ public class SearchQueryFactory
 
 	private final String searchQueryMain;
 	private final String countQueryMain;
-	private final List<SearchQuery> searchQueries = new ArrayList<SearchQuery>();
+	private final List<SearchParameter> searchParameters = new ArrayList<SearchParameter>();
 	private final PageAndCount pageAndCount;
 
 	SearchQueryFactory(String resourceTable, String resourceIdColumn, String resourceColumn, int page, int count,
-			List<? extends SearchQuery> searchQueries)
+			List<? extends SearchParameter> searchParameters)
 	{
 		this.searchQueryMain = "SELECT " + resourceColumn + " FROM (SELECT DISTINCT ON (" + resourceIdColumn + ") "
 				+ resourceColumn + " FROM " + resourceTable + " WHERE NOT deleted ORDER BY " + resourceIdColumn
@@ -69,13 +72,13 @@ public class SearchQueryFactory
 				+ " FROM " + resourceTable + " WHERE NOT deleted ORDER BY " + resourceIdColumn
 				+ ", version DESC) AS current_" + resourceTable;
 
-		this.searchQueries.addAll(searchQueries);
+		this.searchParameters.addAll(searchParameters);
 		this.pageAndCount = new PageAndCount(page, count);
 	}
 
 	public String createCountSql()
 	{
-		String filter = searchQueries.stream().filter(SearchQuery::isDefined).map(SearchQuery::getSubquery)
+		String filter = searchParameters.stream().filter(SearchParameter::isDefined).map(SearchParameter::getSubquery)
 				.collect(Collectors.joining(" AND "));
 
 		return countQueryMain + (!filter.isEmpty() ? (" WHERE " + filter) : "");
@@ -83,7 +86,7 @@ public class SearchQueryFactory
 
 	public String createSearchSql()
 	{
-		String filter = searchQueries.stream().filter(SearchQuery::isDefined).map(SearchQuery::getSubquery)
+		String filter = searchParameters.stream().filter(SearchParameter::isDefined).map(SearchParameter::getSubquery)
 				.collect(Collectors.joining(" AND "));
 
 		return searchQueryMain + (!filter.isEmpty() ? (" WHERE " + filter) : "") + pageAndCount.sql();
@@ -91,10 +94,11 @@ public class SearchQueryFactory
 
 	public void modifyStatement(PreparedStatement statement) throws SQLException
 	{
-		List<SearchQuery> filtered = searchQueries.stream().filter(SearchQuery::isDefined).collect(Collectors.toList());
+		List<SearchParameter> filtered = searchParameters.stream().filter(SearchParameter::isDefined)
+				.collect(Collectors.toList());
 
 		int index = 0;
-		for (SearchQuery q : filtered)
+		for (SearchParameter q : filtered)
 			for (int i = 0; i < q.getSqlParameterCount(); i++)
 				q.modifyStatement(++index, statement);
 	}
@@ -107,5 +111,15 @@ public class SearchQueryFactory
 	public boolean isCountOnly(int overallCount)
 	{
 		return pageAndCount.getPage() < 1 || pageAndCount.getCount() < 1 || pageAndCount.getPageStart() > overallCount;
+	}
+
+	public void configureParameters(MultivaluedMap<String, String> queryParameters)
+	{
+		searchParameters.forEach(p -> p.configure(queryParameters));
+	}
+
+	public void configureBundleUri(UriBuilder bundleUri)
+	{
+		searchParameters.forEach(p -> p.modifyBundleUri(bundleUri));
 	}
 }

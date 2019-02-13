@@ -3,17 +3,25 @@ package org.highmed.fhir.dao.search;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.UriBuilder;
+
+import org.highmed.fhir.dao.search.SearchParameter.SearchParameterDefinition;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Task.TaskStatus;
 
-public class SearchTaskStatus implements SearchQuery
+@SearchParameterDefinition(name = SearchTaskStatus.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Task-status", type = SearchParamType.TOKEN, documentation = "Search by task status")
+public class SearchTaskStatus implements SearchParameter
 {
-	private final TaskStatus status;
+	public static final String PARAMETER_NAME = "status";
 
-	public SearchTaskStatus(String status)
+	private TaskStatus status;
+
+	public void configure(MultivaluedMap<String, String> queryParameters)
 	{
+		String status = queryParameters.getFirst(PARAMETER_NAME);
+
 		this.status = status == null || status.isBlank() || !statusValid(status) ? null : TaskStatus.fromCode(status);
 	}
 
@@ -56,10 +64,9 @@ public class SearchTaskStatus implements SearchQuery
 	}
 
 	@Override
-	public CapabilityStatementRestResourceSearchParamComponent createCapabilityStatementPart()
+	public void modifyBundleUri(UriBuilder bundleUri)
 	{
-		return new CapabilityStatementRestResourceSearchParamComponent().setName("status")
-				.setDefinition("http://hl7.org/fhir/SearchParameter/Task-status").setType(SearchParamType.TOKEN)
-				.setDocumentation("Search by task status");
+		if (status != null)
+			bundleUri = bundleUri.replaceQueryParam("status", status.toCode());
 	}
 }

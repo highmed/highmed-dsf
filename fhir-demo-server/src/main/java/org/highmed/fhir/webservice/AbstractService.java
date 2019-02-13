@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.Consumes;
@@ -22,6 +23,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
@@ -32,6 +34,8 @@ import org.highmed.fhir.dao.AbstractDomainResourceDao;
 import org.highmed.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.fhir.dao.exception.ResourceNotFoundException;
 import org.highmed.fhir.dao.search.PartialResult;
+import org.highmed.fhir.dao.search.SearchParameter;
+import org.highmed.fhir.dao.search.SearchQueryFactory;
 import org.highmed.fhir.function.RunnableWithSqlException;
 import org.highmed.fhir.function.SupplierWithSqlAndResourceDeletedException;
 import org.highmed.fhir.function.SupplierWithSqlAndResourceNotFoundException;
@@ -52,7 +56,8 @@ import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.rest.api.Constants;
 
-public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R extends DomainResource> implements InitializingBean
+public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R extends DomainResource>
+		implements InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractService.class);
 
@@ -65,13 +70,24 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 	private final int defaultPageCount;
 	private final String resourceTypeName;
 	private final D dao;
+	private final Supplier<SearchParameter[]> searchParameterFactory;
 
-	public AbstractService(String serverBase, int defaultPageCount, String resourceTypeName, D dao)
+	public AbstractService(String serverBase, int defaultPageCount, String resourceTypeName, D dao,
+			Supplier<SearchParameter[]> searchParameterFactory)
 	{
 		this.serverBase = serverBase;
 		this.defaultPageCount = defaultPageCount;
 		this.resourceTypeName = resourceTypeName;
 		this.dao = dao;
+		this.searchParameterFactory = searchParameterFactory;
+	}
+
+	protected static Supplier<SearchParameter[]> withSearchParameters(SearchParameter... searchParameters)
+	{
+		return () ->
+		{
+			return searchParameters;
+		};
 	}
 
 	public void afterPropertiesSet() throws Exception
@@ -291,6 +307,34 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 		return response(Status.CREATED, createdResource, null).location(location).build();
 	}
 
+	@GET
+	@Produces({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
+			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	public Response search(@Context UriInfo uri)
+	{
+		MultivaluedMap<String, String> queryParameters = uri.getQueryParameters();
+
+		Integer count = getFirstInt(queryParameters, "_count");
+		Integer page = getFirstInt(queryParameters, "page");
+		String format = queryParameters.getFirst("format");
+
+		int effectivePage = page == null ? 1 : page;
+		int effectiveCount = (count == null || count < 0) ? getDefaultPageCount() : count;
+
+		/* SearchParameter implementations are not thread safe and need to be created on a request bases */
+		SearchQueryFactory queryFactory = getDao().createSearchQueryFactory(effectivePage, effectiveCount)
+				.with(getDao().createSearchId()).with(searchParameterFactory.get()).build();
+
+		queryFactory.configureParameters(queryParameters);
+
+		PartialResult<R> results = handleSql(() -> getDao().search(queryFactory));
+
+		UriBuilder bundleUri = uri.getAbsolutePathBuilder();
+		queryFactory.configureBundleUri(bundleUri);
+
+		return response(Status.OK, createSearchSet(results, bundleUri, format), toSpecialMimeType(format)).build();
+	}
+
 	protected Bundle createSearchSet(PartialResult<R> tasks, UriBuilder bundleUri, String format)
 	{
 		Bundle bundle = new Bundle();
@@ -305,10 +349,11 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 		if (format != null)
 			bundleUri = bundleUri.replaceQueryParam("_format", format);
 
-		if (tasks.getPageAndCount().getCount() > 0 && !tasks.getPartialResult().isEmpty())
+		if (tasks.getPageAndCount().getCount() > 0)
 		{
 			bundleUri = bundleUri.replaceQueryParam("_count", tasks.getPageAndCount().getCount());
-			bundleUri = bundleUri.replaceQueryParam("page", tasks.getPageAndCount().getPage());
+			bundleUri = bundleUri.replaceQueryParam("page",
+					tasks.getPartialResult().isEmpty() ? 1 : tasks.getPageAndCount().getPage());
 		}
 		else
 			bundleUri = bundleUri.replaceQueryParam("_count", "0");
@@ -339,5 +384,18 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 		}
 
 		return bundle;
+	}
+
+	private Integer getFirstInt(MultivaluedMap<String, String> queryParameters, String key)
+	{
+		String first = queryParameters.getFirst(key);
+		try
+		{
+			return Integer.valueOf(first);
+		}
+		catch (NumberFormatException e)
+		{
+			return null;
+		}
 	}
 }

@@ -13,6 +13,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.highmed.fhir.dao.search.SearchId;
+import org.highmed.fhir.dao.search.SearchParameter;
+import org.highmed.fhir.dao.search.SearchParameter.SearchParameterDefinition;
 import org.highmed.fhir.dao.search.SearchTaskRequester;
 import org.highmed.fhir.dao.search.SearchTaskStatus;
 import org.hl7.fhir.r4.model.CapabilityStatement;
@@ -98,8 +101,8 @@ public class ConformanceService
 				PractitionerRole.class, Practitioner.class, Provenance.class, ResearchStudy.class,
 				StructureDefinition.class, Subscription.class, Task.class);
 
-		var taskRequester = new SearchTaskRequester(null).createCapabilityStatementPart();
-		var taskStatus = new SearchTaskStatus(null).createCapabilityStatementPart();
+		var taskRequester = createCapabilityStatementPart(SearchTaskRequester.class);
+		var taskStatus = createCapabilityStatementPart(SearchTaskStatus.class);
 
 		var searchParameters = new HashMap<Class<? extends DomainResource>, List<CapabilityStatementRestResourceSearchParamComponent>>();
 		searchParameters.put(Task.class, Arrays.asList(taskRequester, taskStatus));
@@ -116,9 +119,19 @@ public class ConformanceService
 			r.addInteraction().setCode(TypeRestfulInteraction.DELETE);
 			r.addInteraction().setCode(TypeRestfulInteraction.SEARCHTYPE);
 
+			r.addSearchParam(createCapabilityStatementPart(SearchId.class));
 			searchParameters.getOrDefault(resource, Collections.emptyList()).forEach(r::addSearchParam);
 		}
 
 		return Response.ok(statement).build();
+	}
+
+	private CapabilityStatementRestResourceSearchParamComponent createCapabilityStatementPart(
+			Class<? extends SearchParameter> parameter)
+	{
+		SearchParameterDefinition d = parameter.getAnnotation(SearchParameterDefinition.class);
+
+		return new CapabilityStatementRestResourceSearchParamComponent().setName(d.name()).setDefinition(d.definition())
+				.setType(d.type()).setDocumentation(d.documentation());
 	}
 }
