@@ -291,7 +291,7 @@ public abstract class AbstractService<D extends BasicCrudDao<R>, R extends Domai
 		return response(Status.CREATED, createdResource, null).location(location).build();
 	}
 
-	protected Bundle createSearchSet(PartialResult<R> tasks, UriBuilder bundleUri)
+	protected Bundle createSearchSet(PartialResult<R> tasks, UriBuilder bundleUri, String format)
 	{
 		Bundle bundle = new Bundle();
 		bundle.setId(UUID.randomUUID().toString());
@@ -301,6 +301,9 @@ public abstract class AbstractService<D extends BasicCrudDao<R>, R extends Domai
 				.map(r -> new BundleEntryComponent().setResource(r).setFullUrl(toFullId(r.getId())))
 				.collect(Collectors.toList()));
 		bundle.setTotal(tasks.getOverallCount());
+
+		if (format != null)
+			bundleUri = bundleUri.replaceQueryParam("_format", format);
 
 		if (tasks.getPageAndCount().getCount() > 0 && !tasks.getPartialResult().isEmpty())
 		{

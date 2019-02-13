@@ -4,6 +4,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent;
+import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 
 public class SearchTaskRequester implements SearchQuery
 {
@@ -36,5 +38,13 @@ public class SearchTaskRequester implements SearchQuery
 	public void modifyStatement(int parameterIndex, PreparedStatement statement) throws SQLException
 	{
 		statement.setString(parameterIndex, requester.getValue() + (requester.hasVersionIdPart() ? "" : "%"));
+	}
+
+	@Override
+	public CapabilityStatementRestResourceSearchParamComponent createCapabilityStatementPart()
+	{
+		return new CapabilityStatementRestResourceSearchParamComponent().setName("requester")
+				.setDefinition("http://hl7.org/fhir/SearchParameter/Task-requester").setType(SearchParamType.REFERENCE)
+				.setDocumentation("Search by task requester");
 	}
 }

@@ -2,19 +2,64 @@ package org.highmed.fhir.dao.search;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class SearchQueryFactory
 {
+	public static class SearchQueryFactoryBuilder
+	{
+		private final String resourceTable;
+		private final String resourceIdColumn;
+		private final String resourceColumn;
+		private final int page;
+		private final int count;
+
+		private final List<SearchQuery> searchQueries = new ArrayList<SearchQuery>();
+
+		public SearchQueryFactoryBuilder(String resourceTable, String resourceIdColumn, String resourceColumn, int page,
+				int count)
+		{
+			this.resourceTable = resourceTable;
+			this.resourceIdColumn = resourceIdColumn;
+			this.resourceColumn = resourceColumn;
+			this.page = page;
+			this.count = count;
+		}
+
+		public static SearchQueryFactoryBuilder create(String resourceTable, String resourceIdColumn,
+				String resourceColumn, int page, int count)
+		{
+			return new SearchQueryFactoryBuilder(resourceTable, resourceIdColumn, resourceColumn, page, count);
+		}
+
+		public SearchQueryFactoryBuilder with(SearchQuery e)
+		{
+			searchQueries.add(e);
+			return this;
+		}
+
+		public SearchQueryFactoryBuilder with(SearchQuery... e)
+		{
+			searchQueries.addAll(Arrays.asList(e));
+			return this;
+		}
+
+		public SearchQueryFactory build()
+		{
+			return new SearchQueryFactory(resourceTable, resourceIdColumn, resourceColumn, page, count, searchQueries);
+		}
+	}
+
 	private final String searchQueryMain;
 	private final String countQueryMain;
-	private final List<SearchQuery> searchQueries;
+	private final List<SearchQuery> searchQueries = new ArrayList<SearchQuery>();
 	private final PageAndCount pageAndCount;
 
-	public SearchQueryFactory(String resourceTable, String resourceIdColumn, String resourceColumn, int page, int count,
-			SearchQuery... searchQueries)
+	SearchQueryFactory(String resourceTable, String resourceIdColumn, String resourceColumn, int page, int count,
+			List<? extends SearchQuery> searchQueries)
 	{
 		this.searchQueryMain = "SELECT " + resourceColumn + " FROM (SELECT DISTINCT ON (" + resourceIdColumn + ") "
 				+ resourceColumn + " FROM " + resourceTable + " WHERE NOT deleted ORDER BY " + resourceIdColumn
@@ -24,7 +69,7 @@ public class SearchQueryFactory
 				+ " FROM " + resourceTable + " WHERE NOT deleted ORDER BY " + resourceIdColumn
 				+ ", version DESC) AS current_" + resourceTable;
 
-		this.searchQueries = Arrays.asList(searchQueries);
+		this.searchQueries.addAll(searchQueries);
 		this.pageAndCount = new PageAndCount(page, count);
 	}
 

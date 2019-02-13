@@ -4,6 +4,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent;
+import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Task.TaskStatus;
 
 public class SearchTaskStatus implements SearchQuery
@@ -51,5 +53,13 @@ public class SearchTaskStatus implements SearchQuery
 	public void modifyStatement(int parameterIndex, PreparedStatement statement) throws SQLException
 	{
 		statement.setString(parameterIndex, status.toCode());
+	}
+
+	@Override
+	public CapabilityStatementRestResourceSearchParamComponent createCapabilityStatementPart()
+	{
+		return new CapabilityStatementRestResourceSearchParamComponent().setName("status")
+				.setDefinition("http://hl7.org/fhir/SearchParameter/Task-status").setType(SearchParamType.TOKEN)
+				.setDocumentation("Search by task status");
 	}
 }

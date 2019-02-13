@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -14,6 +13,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.highmed.fhir.dao.search.SearchTaskRequester;
+import org.highmed.fhir.dao.search.SearchTaskStatus;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementImplementationComponent;
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementKind;
@@ -28,7 +29,6 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
-import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HealthcareService;
 import org.hl7.fhir.r4.model.Location;
@@ -94,18 +94,14 @@ public class ConformanceService
 		websocketExtension.setUrl("http://hl7.org/fhir/StructureDefinition/capabilitystatement-websocket");
 		websocketExtension.setValue(new UrlType(serverBase.replace("http", "ws") + "/ws"));
 
-		List<Class<? extends DomainResource>> resources = Arrays.asList(HealthcareService.class, Location.class,
-				Organization.class, Patient.class, PractitionerRole.class, Practitioner.class, Provenance.class,
-				ResearchStudy.class, StructureDefinition.class, Subscription.class, Task.class);
+		var resources = Arrays.asList(HealthcareService.class, Location.class, Organization.class, Patient.class,
+				PractitionerRole.class, Practitioner.class, Provenance.class, ResearchStudy.class,
+				StructureDefinition.class, Subscription.class, Task.class);
 
-		CapabilityStatementRestResourceSearchParamComponent taskRequester = new CapabilityStatementRestResourceSearchParamComponent()
-				.setName("requester").setDefinition("http://hl7.org/fhir/SearchParameter/Task-requester")
-				.setType(SearchParamType.REFERENCE).setDocumentation("Search by task requester");
-		CapabilityStatementRestResourceSearchParamComponent taskStatus = new CapabilityStatementRestResourceSearchParamComponent()
-				.setName("status").setDefinition("http://hl7.org/fhir/SearchParameter/Task-status")
-				.setType(SearchParamType.TOKEN).setDocumentation("Search by task status");
+		var taskRequester = new SearchTaskRequester(null).createCapabilityStatementPart();
+		var taskStatus = new SearchTaskStatus(null).createCapabilityStatementPart();
 
-		Map<Class<? extends DomainResource>, List<CapabilityStatementRestResourceSearchParamComponent>> searchParameters = new HashMap<>();
+		var searchParameters = new HashMap<Class<? extends DomainResource>, List<CapabilityStatementRestResourceSearchParamComponent>>();
 		searchParameters.put(Task.class, Arrays.asList(taskRequester, taskStatus));
 
 		for (Class<? extends DomainResource> resource : resources)
@@ -118,9 +114,7 @@ public class ConformanceService
 			r.addInteraction().setCode(TypeRestfulInteraction.VREAD);
 			r.addInteraction().setCode(TypeRestfulInteraction.UPDATE);
 			r.addInteraction().setCode(TypeRestfulInteraction.DELETE);
-
-			if (searchParameters.containsKey(resource))
-				r.addInteraction().setCode(TypeRestfulInteraction.SEARCHTYPE);
+			r.addInteraction().setCode(TypeRestfulInteraction.SEARCHTYPE);
 
 			searchParameters.getOrDefault(resource, Collections.emptyList()).forEach(r::addSearchParam);
 		}

@@ -16,6 +16,7 @@ import org.highmed.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.fhir.dao.exception.ResourceNotFoundException;
 import org.highmed.fhir.dao.search.PartialResult;
 import org.highmed.fhir.dao.search.SearchQueryFactory;
+import org.highmed.fhir.dao.search.SearchQueryFactory.SearchQueryFactoryBuilder;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.postgresql.util.PGobject;
@@ -325,6 +326,12 @@ public abstract class AbstractDao<R extends DomainResource> implements BasicCrud
 				logger.debug("{} with ID {} marked as deleted.", resourceTypeName, id);
 			}
 		}
+	}
+
+	protected SearchQueryFactoryBuilder createSearchQueryFactory(int page, int count)
+	{
+		return SearchQueryFactoryBuilder.create(getResourceTable(), getResourceIdColumn(), getResourceColumn(), page,
+				count);
 	}
 
 	protected PartialResult<R> search(SearchQueryFactory queryFactory) throws SQLException

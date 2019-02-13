@@ -47,10 +47,8 @@ public class TaskService extends AbstractService<TaskDao, Task>
 			bundleUri = bundleUri.replaceQueryParam("requester", requester);
 		if (status != null && !status.isBlank() && statusValid(status))
 			bundleUri = bundleUri.replaceQueryParam("status", status);
-		if (format != null)
-			bundleUri = bundleUri.replaceQueryParam("_format", format);
 
-		return response(Status.OK, createSearchSet(tasks, bundleUri), toSpecialMimeType(format)).build();
+		return response(Status.OK, createSearchSet(tasks, bundleUri, format), toSpecialMimeType(format)).build();
 	}
 
 	private boolean statusValid(String status)

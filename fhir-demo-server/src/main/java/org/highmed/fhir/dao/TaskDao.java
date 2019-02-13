@@ -4,7 +4,6 @@ import java.sql.SQLException;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.fhir.dao.search.PartialResult;
-import org.highmed.fhir.dao.search.SearchQueryFactory;
 import org.highmed.fhir.dao.search.SearchTaskRequester;
 import org.highmed.fhir.dao.search.SearchTaskStatus;
 import org.hl7.fhir.r4.model.Task;
@@ -26,9 +25,7 @@ public class TaskDao extends AbstractDao<Task>
 
 	public PartialResult<Task> search(String requester, String status, int page, int count) throws SQLException
 	{
-		SearchQueryFactory queryFactory = new SearchQueryFactory(getResourceTable(), getResourceIdColumn(),
-				getResourceColumn(), page, count, new SearchTaskRequester(requester), new SearchTaskStatus(status));
-
-		return search(queryFactory);
+		return search(createSearchQueryFactory(page, count)
+				.with(new SearchTaskRequester(requester), new SearchTaskStatus(status)).build());
 	}
 }
