@@ -1,11 +1,5 @@
 package org.highmed.fhir.webservice;
 
-import java.net.URI;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -18,13 +12,10 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.highmed.fhir.dao.TaskDao;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.Bundle.BundleType;
-import org.hl7.fhir.r4.model.DomainResource;
-import org.hl7.fhir.r4.model.IdType;
+import org.highmed.fhir.dao.search.PartialResult;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Task;
-import org.hl7.fhir.r4.model.UriType;
+import org.hl7.fhir.r4.model.Task.TaskStatus;
 
 import ca.uhn.fhir.rest.api.Constants;
 
@@ -33,44 +24,46 @@ public class TaskService extends AbstractService<TaskDao, Task>
 {
 	public static final String RESOURCE_TYPE_NAME = "Task";
 
-	public TaskService(String serverBase, TaskDao taskDao)
+	public TaskService(String serverBase, int defaultPageCount, TaskDao taskDao)
 	{
-		super(serverBase, RESOURCE_TYPE_NAME, taskDao);
+		super(serverBase, defaultPageCount, RESOURCE_TYPE_NAME, taskDao);
 	}
 
 	@GET
 	@Produces({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
 			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
-	public Response search(@QueryParam("requester") String requester, @QueryParam("_format") String format,
+	public Response search(@QueryParam("requester") String requester, @QueryParam("status") String status,
+			@QueryParam("page") Integer page, @QueryParam("_count") Integer count, @QueryParam("_format") String format,
 			@Context UriInfo uri)
 	{
-		List<Task> tasks = handleSql(() -> getDao().getTaskBy(new IdType(requester)));
+		int effectivePage = page == null ? 1 : page;
+		int effectiveCount = (count == null || count < 0) ? getDefaultPageCount() : count;
+
+		PartialResult<Task> tasks = handleSql(() -> getDao().search(requester, status, effectivePage, effectiveCount));
 
 		UriBuilder bundleUri = uri.getAbsolutePathBuilder();
-		if (requester != null)
+
+		if (requester != null && !requester.isBlank())
 			bundleUri = bundleUri.replaceQueryParam("requester", requester);
+		if (status != null && !status.isBlank() && statusValid(status))
+			bundleUri = bundleUri.replaceQueryParam("status", status);
 		if (format != null)
 			bundleUri = bundleUri.replaceQueryParam("_format", format);
 
-		return response(Status.OK, createSearchSet(tasks, bundleUri.build()), toSpecialMimeType(format)).build();
+		return response(Status.OK, createSearchSet(tasks, bundleUri), toSpecialMimeType(format)).build();
 	}
 
-	private Bundle createSearchSet(List<? extends DomainResource> resources, URI uri)
+	private boolean statusValid(String status)
 	{
-		Bundle bundle = new Bundle();
-		bundle.setId(UUID.randomUUID().toString());
-		bundle.getMeta().setLastUpdated(getLatest(resources));
-		bundle.setType(BundleType.SEARCHSET);
-		bundle.setEntry(
-				resources.stream().map(r -> new BundleEntryComponent().setResource(r).setFullUrl(toFullId(r.getId())))
-						.collect(Collectors.toList()));
-		bundle.setTotal(resources.size());
-		bundle.addLink().setRelation("self").setUrlElement(new UriType(uri));
-		return bundle;
-	}
-
-	private Date getLatest(List<? extends DomainResource> resources)
-	{
-		return resources.stream().map(r -> r.getMeta().getLastUpdated()).sorted().findFirst().orElse(new Date());
+		// FIXME control flow by exception
+		try
+		{
+			TaskStatus.fromCode(status);
+			return true;
+		}
+		catch (FHIRException e)
+		{
+			return false;
+		}
 	}
 }

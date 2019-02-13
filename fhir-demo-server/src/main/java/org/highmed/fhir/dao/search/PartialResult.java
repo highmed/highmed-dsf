@@ -1,0 +1,52 @@
+package org.highmed.fhir.dao.search;
+
+import java.util.Collections;
+import java.util.List;
+
+import org.hl7.fhir.r4.model.DomainResource;
+
+public class PartialResult<R extends DomainResource>
+{
+	private final int overallCount;
+	private final PageAndCount pageAndCount;
+	private final List<R> partialResult;
+	private final boolean countOnly;
+
+	public PartialResult(int overallCount, PageAndCount pageAndCount, List<R> partialResult, boolean countOnly)
+	{
+		this.overallCount = overallCount;
+		this.pageAndCount = pageAndCount;
+		this.partialResult = partialResult;
+		this.countOnly = countOnly;
+	}
+
+	public int getOverallCount()
+	{
+		return overallCount;
+	}
+
+	public PageAndCount getPageAndCount()
+	{
+		return pageAndCount;
+	}
+
+	public List<R> getPartialResult()
+	{
+		return Collections.unmodifiableList(partialResult);
+	}
+
+	public boolean isLastPage()
+	{
+		return pageAndCount.getPage() >= getLastPage();
+	}
+
+	public int getLastPage()
+	{
+		return (int) Math.ceil((double) overallCount / pageAndCount.getCount());
+	}
+
+	public boolean isCountOnly()
+	{
+		return countOnly;
+	}
+}

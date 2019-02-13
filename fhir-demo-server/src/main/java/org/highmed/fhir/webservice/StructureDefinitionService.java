@@ -10,8 +10,9 @@ public class StructureDefinitionService extends AbstractService<StructureDefinit
 {
 	public static final String RESOURCE_TYPE_NAME = "StructureDefinition";
 
-	public StructureDefinitionService(String serverBase, StructureDefinitionDao structureDefinitionDao)
+	public StructureDefinitionService(String serverBase, int defaultPageCount,
+			StructureDefinitionDao structureDefinitionDao)
 	{
-		super(serverBase, RESOURCE_TYPE_NAME, structureDefinitionDao);
+		super(serverBase, defaultPageCount, RESOURCE_TYPE_NAME, structureDefinitionDao);
 	}
 }

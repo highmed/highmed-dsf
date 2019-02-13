@@ -10,8 +10,8 @@ public class OrganizationService extends AbstractService<OrganizationDao, Organi
 {
 	public static final String RESOURCE_TYPE_NAME = "Organization";
 
-	public OrganizationService(String serverBase, OrganizationDao organizationDao)
+	public OrganizationService(String serverBase, int defaultPageCount, OrganizationDao organizationDao)
 	{
-		super(serverBase, RESOURCE_TYPE_NAME, organizationDao);
+		super(serverBase, defaultPageCount, RESOURCE_TYPE_NAME, organizationDao);
 	}
 }

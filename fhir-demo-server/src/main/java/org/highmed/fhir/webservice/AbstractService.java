@@ -3,9 +3,12 @@ package org.highmed.fhir.webservice;
 import java.net.URI;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -22,21 +25,27 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.highmed.fhir.dao.BasicCrudDao;
 import org.highmed.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.fhir.dao.exception.ResourceNotFoundException;
+import org.highmed.fhir.dao.search.PartialResult;
 import org.highmed.fhir.function.RunnableWithSqlException;
 import org.highmed.fhir.function.SupplierWithSqlAndResourceDeletedException;
 import org.highmed.fhir.function.SupplierWithSqlAndResourceNotFoundException;
 import org.highmed.fhir.function.SupplierWithSqlException;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.UriType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -48,17 +57,19 @@ public abstract class AbstractService<D extends BasicCrudDao<R>, R extends Domai
 	private static final Logger logger = LoggerFactory.getLogger(AbstractService.class);
 
 	private static final List<String> JSON_FORMATS = Arrays.asList(Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW,
-			MediaType.APPLICATION_JSON, "json");
+			MediaType.APPLICATION_JSON);
 	private static final List<String> XML_FORMATS = Arrays.asList(Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW,
-			MediaType.APPLICATION_XML, MediaType.TEXT_XML, "xml");
+			MediaType.APPLICATION_XML, MediaType.TEXT_XML);
 
 	private final String serverBase;
+	private final int defaultPageCount;
 	private final String resourceTypeName;
 	private final D dao;
 
-	public AbstractService(String serverBase, String resourceTypeName, D dao)
+	public AbstractService(String serverBase, int defaultPageCount, String resourceTypeName, D dao)
 	{
 		this.serverBase = serverBase;
+		this.defaultPageCount = defaultPageCount;
 		this.resourceTypeName = resourceTypeName;
 		this.dao = dao;
 	}
@@ -73,6 +84,11 @@ public abstract class AbstractService<D extends BasicCrudDao<R>, R extends Domai
 	protected D getDao()
 	{
 		return dao;
+	}
+
+	protected int getDefaultPageCount()
+	{
+		return defaultPageCount;
 	}
 
 	protected void handleSql(RunnableWithSqlException f)
@@ -193,9 +209,11 @@ public abstract class AbstractService<D extends BasicCrudDao<R>, R extends Domai
 	{
 		if (format == null || format.isBlank())
 			return null;
-		if (XML_FORMATS.contains(format))
+		if (XML_FORMATS.contains(format) || JSON_FORMATS.contains(format))
+			return format;
+		else if ("xml".equals(format))
 			return Constants.CT_FHIR_XML_NEW;
-		else if (JSON_FORMATS.contains(format))
+		else if ("json".equals(format))
 			return Constants.CT_FHIR_JSON_NEW;
 		else
 			throw new WebApplicationException(Status.UNSUPPORTED_MEDIA_TYPE);
@@ -271,5 +289,52 @@ public abstract class AbstractService<D extends BasicCrudDao<R>, R extends Domai
 				.build(createdResource.getIdElement().getIdPart(), createdResource.getIdElement().getVersionIdPart());
 
 		return response(Status.CREATED, createdResource, null).location(location).build();
+	}
+
+	protected Bundle createSearchSet(PartialResult<R> tasks, UriBuilder bundleUri)
+	{
+		Bundle bundle = new Bundle();
+		bundle.setId(UUID.randomUUID().toString());
+		bundle.getMeta().setLastUpdated(new Date());
+		bundle.setType(BundleType.SEARCHSET);
+		bundle.setEntry(tasks.getPartialResult().stream()
+				.map(r -> new BundleEntryComponent().setResource(r).setFullUrl(toFullId(r.getId())))
+				.collect(Collectors.toList()));
+		bundle.setTotal(tasks.getOverallCount());
+
+		if (tasks.getPageAndCount().getCount() > 0 && !tasks.getPartialResult().isEmpty())
+		{
+			bundleUri = bundleUri.replaceQueryParam("_count", tasks.getPageAndCount().getCount());
+			bundleUri = bundleUri.replaceQueryParam("page", tasks.getPageAndCount().getPage());
+		}
+		else
+			bundleUri = bundleUri.replaceQueryParam("_count", "0");
+		bundle.addLink().setRelation("self").setUrlElement(new UriType(bundleUri.build()));
+
+		if (tasks.getPageAndCount().getCount() > 0 && !tasks.getPartialResult().isEmpty())
+		{
+			bundleUri = bundleUri.replaceQueryParam("page", 1);
+			bundleUri = bundleUri.replaceQueryParam("_count", tasks.getPageAndCount().getCount());
+			bundle.addLink().setRelation("first").setUrlElement(new UriType(bundleUri.build()));
+
+			if (tasks.getPageAndCount().getPage() > 1)
+			{
+				bundleUri = bundleUri.replaceQueryParam("page", tasks.getPageAndCount().getPage() - 1);
+				bundleUri = bundleUri.replaceQueryParam("_count", tasks.getPageAndCount().getCount());
+				bundle.addLink().setRelation("previous").setUrlElement(new UriType(bundleUri.build()));
+			}
+			if (!tasks.isLastPage())
+			{
+				bundleUri = bundleUri.replaceQueryParam("page", tasks.getPageAndCount().getPage() + 1);
+				bundleUri = bundleUri.replaceQueryParam("_count", tasks.getPageAndCount().getCount());
+				bundle.addLink().setRelation("next").setUrlElement(new UriType(bundleUri.build()));
+			}
+
+			bundleUri = bundleUri.replaceQueryParam("page", tasks.getLastPage());
+			bundleUri = bundleUri.replaceQueryParam("_count", tasks.getPageAndCount().getCount());
+			bundle.addLink().setRelation("last").setUrlElement(new UriType(bundleUri.build()));
+		}
+
+		return bundle;
 	}
 }

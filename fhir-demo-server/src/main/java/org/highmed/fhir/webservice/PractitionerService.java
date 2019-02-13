@@ -10,8 +10,8 @@ public class PractitionerService extends AbstractService<PractitionerDao, Practi
 {
 	public static final String RESOURCE_TYPE_NAME = "Practitioner";
 
-	public PractitionerService(String serverBase, PractitionerDao practitionerDao)
+	public PractitionerService(String serverBase, int defaultPageCount, PractitionerDao practitionerDao)
 	{
-		super(serverBase, RESOURCE_TYPE_NAME, practitionerDao);
+		super(serverBase, defaultPageCount, RESOURCE_TYPE_NAME, practitionerDao);
 	}
 }

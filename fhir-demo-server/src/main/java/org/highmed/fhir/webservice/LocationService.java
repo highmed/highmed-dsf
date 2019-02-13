@@ -10,8 +10,8 @@ public class LocationService extends AbstractService<LocationDao, Location>
 {
 	public static final String RESOURCE_TYPE_NAME = "Location";
 
-	public LocationService(String serverBase, LocationDao locationDao)
+	public LocationService(String serverBase, int defaultPageCount, LocationDao locationDao)
 	{
-		super(serverBase, RESOURCE_TYPE_NAME, locationDao);
+		super(serverBase, defaultPageCount, RESOURCE_TYPE_NAME, locationDao);
 	}
 }

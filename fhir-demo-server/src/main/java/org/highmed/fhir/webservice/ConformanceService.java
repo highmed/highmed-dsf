@@ -98,11 +98,15 @@ public class ConformanceService
 				Organization.class, Patient.class, PractitionerRole.class, Practitioner.class, Provenance.class,
 				ResearchStudy.class, StructureDefinition.class, Subscription.class, Task.class);
 
+		CapabilityStatementRestResourceSearchParamComponent taskRequester = new CapabilityStatementRestResourceSearchParamComponent()
+				.setName("requester").setDefinition("http://hl7.org/fhir/SearchParameter/Task-requester")
+				.setType(SearchParamType.REFERENCE).setDocumentation("Search by task requester");
+		CapabilityStatementRestResourceSearchParamComponent taskStatus = new CapabilityStatementRestResourceSearchParamComponent()
+				.setName("status").setDefinition("http://hl7.org/fhir/SearchParameter/Task-status")
+				.setType(SearchParamType.TOKEN).setDocumentation("Search by task status");
+
 		Map<Class<? extends DomainResource>, List<CapabilityStatementRestResourceSearchParamComponent>> searchParameters = new HashMap<>();
-		searchParameters.put(Task.class,
-				Arrays.asList(new CapabilityStatementRestResourceSearchParamComponent().setName("requester")
-						.setDefinition("http://hl7.org/fhir/SearchParameter/Task-requester")
-						.setType(SearchParamType.REFERENCE).setDocumentation("Search by task requester")));
+		searchParameters.put(Task.class, Arrays.asList(taskRequester, taskStatus));
 
 		for (Class<? extends DomainResource> resource : resources)
 		{
@@ -114,6 +118,9 @@ public class ConformanceService
 			r.addInteraction().setCode(TypeRestfulInteraction.VREAD);
 			r.addInteraction().setCode(TypeRestfulInteraction.UPDATE);
 			r.addInteraction().setCode(TypeRestfulInteraction.DELETE);
+
+			if (searchParameters.containsKey(resource))
+				r.addInteraction().setCode(TypeRestfulInteraction.SEARCHTYPE);
 
 			searchParameters.getOrDefault(resource, Collections.emptyList()).forEach(r::addSearchParam);
 		}

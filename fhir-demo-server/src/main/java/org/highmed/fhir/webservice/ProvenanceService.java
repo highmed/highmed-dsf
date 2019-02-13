@@ -10,8 +10,8 @@ public class ProvenanceService extends AbstractService<ProvenanceDao, Provenance
 {
 	public static final String RESOURCE_TYPE_NAME = "Provenance";
 
-	public ProvenanceService(String serverBase, ProvenanceDao provenanceDao)
+	public ProvenanceService(String serverBase, int defaultPageCount, ProvenanceDao provenanceDao)
 	{
-		super(serverBase, RESOURCE_TYPE_NAME, provenanceDao);
+		super(serverBase, defaultPageCount, RESOURCE_TYPE_NAME, provenanceDao);
 	}
 }

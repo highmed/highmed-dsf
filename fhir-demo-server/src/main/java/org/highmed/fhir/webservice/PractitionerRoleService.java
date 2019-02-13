@@ -10,8 +10,8 @@ public class PractitionerRoleService extends AbstractService<PractitionerRoleDao
 {
 	public static final String RESOURCE_TYPE_NAME = "PractitionerRole";
 
-	public PractitionerRoleService(String serverBase, PractitionerRoleDao practitionerRoleDao)
+	public PractitionerRoleService(String serverBase, int defaultPageCount, PractitionerRoleDao practitionerRoleDao)
 	{
-		super(serverBase, RESOURCE_TYPE_NAME, practitionerRoleDao);
+		super(serverBase, defaultPageCount, RESOURCE_TYPE_NAME, practitionerRoleDao);
 	}
 }

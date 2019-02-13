@@ -10,8 +10,8 @@ public class SubscriptionService extends AbstractService<SubscriptionDao, Subscr
 {
 	public static final String RESOURCE_TYPE = "Subscription";
 
-	public SubscriptionService(String serverBase, SubscriptionDao subscriptionDao)
+	public SubscriptionService(String serverBase, int defaultPageCount, SubscriptionDao subscriptionDao)
 	{
-		super(serverBase, RESOURCE_TYPE, subscriptionDao);
+		super(serverBase, defaultPageCount, RESOURCE_TYPE, subscriptionDao);
 	}
 }

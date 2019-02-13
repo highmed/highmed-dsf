@@ -1,5 +1,6 @@
 package org.highmed.fhir.dao;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -11,6 +12,7 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.fhir.dao.exception.ResourceNotFoundException;
 import org.highmed.fhir.test.FhirEmbeddedPostgresWithLiquibase;
+import org.highmed.fhir.test.TestSuiteDbTests;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.Before;
@@ -25,7 +27,8 @@ import de.rwh.utils.test.Database;
 public abstract class AbstractDaoTest<D extends DomainResource, C extends BasicCrudDao<D>>
 {
 	@ClassRule
-	public static final FhirEmbeddedPostgresWithLiquibase template = new FhirEmbeddedPostgresWithLiquibase();
+	public static final FhirEmbeddedPostgresWithLiquibase template = new FhirEmbeddedPostgresWithLiquibase(
+			TestSuiteDbTests.template);
 
 	@Rule
 	public final Database database = new Database(template);
@@ -86,13 +89,21 @@ public abstract class AbstractDaoTest<D extends DomainResource, C extends BasicC
 		assertNotNull(createdResource);
 		assertNotNull(createdResource.getId());
 		assertNotNull(createdResource.getMeta().getVersionId());
+		assertEquals("1", createdResource.getIdElement().getVersionIdPart());
+		assertEquals("1", createdResource.getMeta().getVersionId());
 
 		newResource.setIdElement(createdResource.getIdElement().copy());
 		newResource.setMeta(createdResource.getMeta().copy());
 
 		assertTrue(newResource.equalsDeep(createdResource));
 
-		dao.read(createdResource.getIdElement());
+		Optional<D> read = dao.read(createdResource.getIdElement());
+		assertTrue(read.isPresent());
+		assertNotNull(read.get().getId());
+		assertNotNull(read.get().getMeta().getVersionId());
+		assertEquals("1", read.get().getIdElement().getVersionIdPart());
+		assertEquals("1", read.get().getMeta().getVersionId());
+
 	}
 
 	protected abstract void checkCreated(D resource);

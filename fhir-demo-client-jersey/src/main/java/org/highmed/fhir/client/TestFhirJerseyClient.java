@@ -6,11 +6,13 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.Date;
 
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.r4.model.Task.TaskStatus;
 
 import ca.uhn.fhir.context.FhirContext;
 import de.rwh.utils.crypto.CertificateHelper;
@@ -35,7 +37,8 @@ public class TestFhirJerseyClient
 
 		DomainResource organization = fhirJerseyClient.create(new Organization().setName("Test Organization"));
 		fhirJerseyClient.create(new Task().setRequester(new Reference(organization.getIdElement().toVersionless()))
-				.setDescription("Organization reference without version"));
+				.setDescription("Organization reference without version").setAuthoredOn(new Date())
+				.setStatus(TaskStatus.REQUESTED));
 		fhirJerseyClient.create(new Task().setRequester(new Reference(organization.getIdElement()))
 				.setDescription("Organization reference with version"));
 

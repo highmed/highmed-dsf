@@ -10,8 +10,8 @@ public class HealthcareServiceService extends AbstractService<HealthcareServiceD
 {
 	public static final String RESOURCE_TYPE_NAME = "HealthcareService";
 
-	public HealthcareServiceService(String serverBase, HealthcareServiceDao healthcareServiceDao)
+	public HealthcareServiceService(String serverBase, int defaultPageCount, HealthcareServiceDao healthcareServiceDao)
 	{
-		super(serverBase, RESOURCE_TYPE_NAME, healthcareServiceDao);
+		super(serverBase, defaultPageCount, RESOURCE_TYPE_NAME, healthcareServiceDao);
 	}
 }

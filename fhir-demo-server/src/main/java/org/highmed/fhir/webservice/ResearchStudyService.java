@@ -10,8 +10,8 @@ public class ResearchStudyService extends AbstractService<ResearchStudyDao, Rese
 {
 	public static final String RESOURCE_TYPE_NAME = "ResearchStudy";
 
-	public ResearchStudyService(String serverBase, ResearchStudyDao researchStudyDao)
+	public ResearchStudyService(String serverBase, int defaultPageCount, ResearchStudyDao researchStudyDao)
 	{
-		super(serverBase, RESOURCE_TYPE_NAME, researchStudyDao);
+		super(serverBase, defaultPageCount, RESOURCE_TYPE_NAME, researchStudyDao);
 	}
 }

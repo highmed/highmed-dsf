@@ -23,6 +23,9 @@ public class WebserviceConfig
 	@Value("${org.highmed.fhir.serverBase}")
 	private String serverBase;
 
+	@Value("${org.highmed.fhir.defaultPageCount}")
+	private int defaultPageCount;
+
 	@Autowired
 	private DaoConfig daoConfig;
 
@@ -35,66 +38,66 @@ public class WebserviceConfig
 	@Bean
 	public HealthcareServiceService healthcareServiceService()
 	{
-		return new HealthcareServiceService(serverBase, daoConfig.healthcareServiceDao());
+		return new HealthcareServiceService(serverBase, defaultPageCount, daoConfig.healthcareServiceDao());
 	}
 
 	@Bean
 	public LocationService locationService()
 	{
-		return new LocationService(serverBase, daoConfig.locationDao());
+		return new LocationService(serverBase, defaultPageCount, daoConfig.locationDao());
 	}
 
 	@Bean
 	public OrganizationService organizationService()
 	{
-		return new OrganizationService(serverBase, daoConfig.organizationDao());
+		return new OrganizationService(serverBase, defaultPageCount, daoConfig.organizationDao());
 	}
 
 	@Bean
 	public PatientService patientService()
 	{
-		return new PatientService(serverBase, daoConfig.patientDao());
+		return new PatientService(serverBase, defaultPageCount, daoConfig.patientDao());
 	}
 
 	@Bean
 	public PractitionerRoleService practitionerRoleService()
 	{
-		return new PractitionerRoleService(serverBase, daoConfig.practitionerRoleDao());
+		return new PractitionerRoleService(serverBase, defaultPageCount, daoConfig.practitionerRoleDao());
 	}
 
 	@Bean
 	public PractitionerService practitionerService()
 	{
-		return new PractitionerService(serverBase, daoConfig.practitionerDao());
+		return new PractitionerService(serverBase, defaultPageCount, daoConfig.practitionerDao());
 	}
 
 	@Bean
 	public ProvenanceService provenanceService()
 	{
-		return new ProvenanceService(serverBase, daoConfig.provenanceDao());
+		return new ProvenanceService(serverBase, defaultPageCount, daoConfig.provenanceDao());
 	}
 
 	@Bean
 	public ResearchStudyService researchStudyService()
 	{
-		return new ResearchStudyService(serverBase, daoConfig.researchStudyDao());
+		return new ResearchStudyService(serverBase, defaultPageCount, daoConfig.researchStudyDao());
 	}
 
 	@Bean
 	public StructureDefinitionService structureDefinitionService()
 	{
-		return new StructureDefinitionService(serverBase, daoConfig.structureDefinitionDao());
+		return new StructureDefinitionService(serverBase, defaultPageCount, daoConfig.structureDefinitionDao());
 	}
 
 	@Bean
 	public SubscriptionService subscriptionService()
 	{
-		return new SubscriptionService(serverBase, daoConfig.subscriptionDao());
+		return new SubscriptionService(serverBase, defaultPageCount, daoConfig.subscriptionDao());
 	}
 
 	@Bean
 	public TaskService taskService()
 	{
-		return new TaskService(serverBase, daoConfig.taskDao());
+		return new TaskService(serverBase, defaultPageCount, daoConfig.taskDao());
 	}
 }
