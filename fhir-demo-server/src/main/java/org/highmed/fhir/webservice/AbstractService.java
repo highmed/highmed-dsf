@@ -339,7 +339,20 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 		return response(Status.OK, createSearchSet(results, bundleUri, format), toSpecialMimeType(format)).build();
 	}
 
-	protected Bundle createSearchSet(PartialResult<R> tasks, UriBuilder bundleUri, String format)
+	private Integer getFirstInt(MultivaluedMap<String, String> queryParameters, String key)
+	{
+		String first = queryParameters.getFirst(key);
+		try
+		{
+			return Integer.valueOf(first);
+		}
+		catch (NumberFormatException e)
+		{
+			return null;
+		}
+	}
+
+	private Bundle createSearchSet(PartialResult<R> tasks, UriBuilder bundleUri, String format)
 	{
 		Bundle bundle = new Bundle();
 		bundle.setId(UUID.randomUUID().toString());
@@ -361,6 +374,7 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 		}
 		else
 			bundleUri = bundleUri.replaceQueryParam("_count", "0");
+
 		bundle.addLink().setRelation("self").setUrlElement(new UriType(bundleUri.build()));
 
 		if (tasks.getPageAndCount().getCount() > 0 && !tasks.getPartialResult().isEmpty())
@@ -388,18 +402,5 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 		}
 
 		return bundle;
-	}
-
-	private Integer getFirstInt(MultivaluedMap<String, String> queryParameters, String key)
-	{
-		String first = queryParameters.getFirst(key);
-		try
-		{
-			return Integer.valueOf(first);
-		}
-		catch (NumberFormatException e)
-		{
-			return null;
-		}
 	}
 }

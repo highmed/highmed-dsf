@@ -37,7 +37,8 @@ public interface SearchParameter
 
 	int getSqlParameterCount();
 
-	void modifyStatement(int parameterIndex, PreparedStatement statement) throws SQLException;
+	void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement)
+			throws SQLException;
 
 	void modifyBundleUri(UriBuilder bundleUri);
 }

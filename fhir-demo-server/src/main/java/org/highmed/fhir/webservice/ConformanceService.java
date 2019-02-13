@@ -14,6 +14,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.highmed.fhir.dao.search.SearchId;
+import org.highmed.fhir.dao.search.SearchOrganizationNameOrAlias;
 import org.highmed.fhir.dao.search.SearchParameter;
 import org.highmed.fhir.dao.search.SearchParameter.SearchParameterDefinition;
 import org.highmed.fhir.dao.search.SearchTaskRequester;
@@ -101,11 +102,14 @@ public class ConformanceService
 				PractitionerRole.class, Practitioner.class, Provenance.class, ResearchStudy.class,
 				StructureDefinition.class, Subscription.class, Task.class);
 
+		var searchParameters = new HashMap<Class<? extends DomainResource>, List<CapabilityStatementRestResourceSearchParamComponent>>();
+
 		var taskRequester = createCapabilityStatementPart(SearchTaskRequester.class);
 		var taskStatus = createCapabilityStatementPart(SearchTaskStatus.class);
-
-		var searchParameters = new HashMap<Class<? extends DomainResource>, List<CapabilityStatementRestResourceSearchParamComponent>>();
 		searchParameters.put(Task.class, Arrays.asList(taskRequester, taskStatus));
+
+		var organizationNameOrAlias = createCapabilityStatementPart(SearchOrganizationNameOrAlias.class);
+		searchParameters.put(Organization.class, Arrays.asList(taskRequester, organizationNameOrAlias));
 
 		for (Class<? extends DomainResource> resource : resources)
 		{

@@ -100,7 +100,7 @@ public class SearchQueryFactory
 		int index = 0;
 		for (SearchParameter q : filtered)
 			for (int i = 0; i < q.getSqlParameterCount(); i++)
-				q.modifyStatement(++index, statement);
+				q.modifyStatement(++index, i, statement);
 	}
 
 	public PageAndCount getPageAndCount()

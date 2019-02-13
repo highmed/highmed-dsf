@@ -43,7 +43,8 @@ public class SearchTaskRequester implements SearchParameter
 	}
 
 	@Override
-	public void modifyStatement(int parameterIndex, PreparedStatement statement) throws SQLException
+	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement)
+			throws SQLException
 	{
 		statement.setString(parameterIndex, requester.getValue() + (requester.hasVersionIdPart() ? "" : "%"));
 	}
