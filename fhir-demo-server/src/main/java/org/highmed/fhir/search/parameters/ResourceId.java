@@ -1,4 +1,4 @@
-package org.highmed.fhir.dao.search;
+package org.highmed.fhir.search.parameters;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -6,18 +6,19 @@ import java.sql.SQLException;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 
-import org.highmed.fhir.dao.search.SearchParameter.SearchParameterDefinition;
+import org.highmed.fhir.search.SearchParameter;
+import org.highmed.fhir.webservice.search.WsSearchParameter.SearchParameterDefinition;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 
-@SearchParameterDefinition(name = SearchId.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Resource-id", type = SearchParamType.TOKEN, documentation = "Logical id of this artifact")
-public class SearchId implements SearchParameter
+@SearchParameterDefinition(name = ResourceId.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Resource-id", type = SearchParamType.TOKEN, documentation = "Logical id of this artifact")
+public class ResourceId implements SearchParameter
 {
 	public static final String PARAMETER_NAME = "_id";
 
 	private final String resourceIdColumn;
 	private String id;
 
-	public SearchId(String resourceIdColumn)
+	public ResourceId(String resourceIdColumn)
 	{
 		this.resourceIdColumn = resourceIdColumn;
 	}
@@ -25,8 +26,12 @@ public class SearchId implements SearchParameter
 	@Override
 	public void configure(MultivaluedMap<String, String> queryParameters)
 	{
-		String id = queryParameters.getFirst(PARAMETER_NAME);
-		this.id = id == null || id.isBlank() ? null : id;
+		id = toId(queryParameters.getFirst(PARAMETER_NAME));
+	}
+
+	private String toId(String id)
+	{
+		return id == null || id.isBlank() ? null : id;
 	}
 
 	@Override
@@ -36,7 +41,7 @@ public class SearchId implements SearchParameter
 	}
 
 	@Override
-	public String getSubquery()
+	public String getFilterQuery()
 	{
 		return resourceIdColumn + " = ?";
 	}
@@ -59,11 +64,5 @@ public class SearchId implements SearchParameter
 	{
 		if (id != null)
 			bundleUri.replaceQueryParam(PARAMETER_NAME, id);
-	}
-
-	@Override
-	public void reset()
-	{
-		// nothing to do
 	}
 }

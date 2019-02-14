@@ -34,13 +34,13 @@ import javax.ws.rs.core.UriInfo;
 import org.highmed.fhir.dao.AbstractDomainResourceDao;
 import org.highmed.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.fhir.dao.exception.ResourceNotFoundException;
-import org.highmed.fhir.dao.search.PartialResult;
-import org.highmed.fhir.dao.search.SearchParameter;
-import org.highmed.fhir.dao.search.SearchQueryFactory;
 import org.highmed.fhir.function.RunnableWithSqlException;
 import org.highmed.fhir.function.SupplierWithSqlAndResourceDeletedException;
 import org.highmed.fhir.function.SupplierWithSqlAndResourceNotFoundException;
 import org.highmed.fhir.function.SupplierWithSqlException;
+import org.highmed.fhir.search.PartialResult;
+import org.highmed.fhir.search.SearchParameter;
+import org.highmed.fhir.search.SearchQuery;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
@@ -342,16 +342,15 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 		int effectiveCount = (count == null || count < 0) ? getDefaultPageCount() : count;
 
 		/* SearchParameter implementations are not thread safe and need to be created on a request basis */
-		SearchQueryFactory queryFactory = getDao().createSearchQueryFactory(effectivePage, effectiveCount)
-				.with(getDao().createSearchId(), getDao().createSearchLastUpdated()).with(searchParameterFactory.get())
-				.build();
+		SearchQuery query = getDao().createSearchQueryBuilder().with(effectivePage, effectiveCount)
+				.with(getDao().createResourceSearchParameters()).with(searchParameterFactory.get()).build();
 
-		queryFactory.configureParameters(queryParameters);
+		query.configureParameters(queryParameters);
 
-		PartialResult<R> results = handleSql(() -> getDao().search(queryFactory));
+		PartialResult<R> results = handleSql(() -> getDao().search(query));
 
 		UriBuilder bundleUri = uri.getAbsolutePathBuilder();
-		queryFactory.configureBundleUri(bundleUri);
+		query.configureBundleUri(bundleUri);
 
 		return response(Status.OK, createSearchSet(results, bundleUri, format), toSpecialMimeType(format)).build();
 	}

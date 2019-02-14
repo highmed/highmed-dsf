@@ -1,4 +1,4 @@
-package org.highmed.fhir.dao.search;
+package org.highmed.fhir.search;
 
 public class PageAndCount
 {

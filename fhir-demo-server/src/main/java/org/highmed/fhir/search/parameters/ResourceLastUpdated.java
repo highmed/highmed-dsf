@@ -1,20 +1,23 @@
-package org.highmed.fhir.dao.search;
+package org.highmed.fhir.search.parameters;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.highmed.fhir.dao.search.SearchParameter.SearchParameterDefinition;
+import org.highmed.fhir.search.SearchParameter;
+import org.highmed.fhir.webservice.search.AbstractDateTimeSearch;
+import org.highmed.fhir.webservice.search.WsSearchParameter.SearchParameterDefinition;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 
-@SearchParameterDefinition(name = SearchLastUpdated.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Resource-lastUpdated", type = SearchParamType.TOKEN, documentation = "When the resource version last changed")
-public class SearchLastUpdated extends AbstractDateTimeSearch implements SearchParameter
+@SearchParameterDefinition(name = ResourceLastUpdated.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Resource-lastUpdated", type = SearchParamType.TOKEN, documentation = "When the resource version last changed")
+public class ResourceLastUpdated extends AbstractDateTimeSearch implements SearchParameter
 {
 	public static final String PARAMETER_NAME = "_lastUpdated";
 
@@ -22,7 +25,7 @@ public class SearchLastUpdated extends AbstractDateTimeSearch implements SearchP
 
 	private List<Object> values = new ArrayList<>();
 
-	public SearchLastUpdated(String resourceColumn)
+	public ResourceLastUpdated(String resourceColumn)
 	{
 		super(PARAMETER_NAME);
 
@@ -30,19 +33,19 @@ public class SearchLastUpdated extends AbstractDateTimeSearch implements SearchP
 	}
 
 	@Override
-	public String getSubquery()
+	public String getFilterQuery()
 	{
-		return valuesAndTypes.stream().map(this::getSubquery).collect(Collectors.joining(" AND "));
+		return getValuesAndTypes().stream().map(this::getSubquery).collect(Collectors.joining(" AND "));
 	}
 
 	private String getSubquery(DateTimeValueAndTypeAndSearchType value)
 	{
 		switch (value.type)
 		{
-			case DATE:
+			case ZONED_DATE_TIME:
+				return getSubquery((ZonedDateTime) value.value, value.searchType);
+			case LOCAL_DATE:
 				return getSubquery((LocalDate) value.value, value.searchType);
-			case DATE_TIME:
-				return getSubquery((LocalDateTime) value.value, value.searchType);
 			case YEAR_MONTH_PERIOD:
 			case YEAR_PERIOD:
 				return getSubquery((LocalDatePair) value.value);
@@ -51,7 +54,7 @@ public class SearchLastUpdated extends AbstractDateTimeSearch implements SearchP
 		}
 	}
 
-	private String getSubquery(LocalDateTime value, DateTimeSearchType searchType)
+	private String getSubquery(ZonedDateTime value, DateTimeSearchType searchType)
 	{
 		values.add(value);
 
@@ -82,15 +85,11 @@ public class SearchLastUpdated extends AbstractDateTimeSearch implements SearchP
 			throws SQLException
 	{
 		Object value = values.get(subqueryParameterIndex);
-		if (value instanceof LocalDateTime)
-			statement.setTimestamp(parameterIndex, Timestamp.valueOf((LocalDateTime) value));
+
+		if (value instanceof ZonedDateTime)
+			statement.setTimestamp(parameterIndex, Timestamp
+					.valueOf(((ZonedDateTime) value).withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime()));
 		else if (value instanceof LocalDate)
 			statement.setDate(parameterIndex, Date.valueOf((LocalDate) value));
-	}
-
-	@Override
-	public void reset()
-	{
-		values.clear();
 	}
 }

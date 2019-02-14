@@ -1,4 +1,4 @@
-package org.highmed.fhir.dao.search;
+package org.highmed.fhir.search.parameters;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -6,36 +6,35 @@ import java.sql.SQLException;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 
-import org.highmed.fhir.dao.search.SearchParameter.SearchParameterDefinition;
+import org.highmed.fhir.search.SearchParameter;
+import org.highmed.fhir.webservice.search.WsSearchParameter.SearchParameterDefinition;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
-import org.hl7.fhir.r4.model.Task.TaskStatus;
 
-@SearchParameterDefinition(name = SearchTaskStatus.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Task-status", type = SearchParamType.TOKEN, documentation = "Search by task status")
-public class SearchTaskStatus implements SearchParameter
+@SearchParameterDefinition(name = TaskStatus.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Task-status", type = SearchParamType.TOKEN, documentation = "Search by task status")
+public class TaskStatus implements SearchParameter
 {
 	public static final String PARAMETER_NAME = "status";
 
-	private TaskStatus status;
+	private org.hl7.fhir.r4.model.Task.TaskStatus status;
 
 	public void configure(MultivaluedMap<String, String> queryParameters)
 	{
-		String status = queryParameters.getFirst(PARAMETER_NAME);
-
-		this.status = status == null || status.isBlank() || !statusValid(status) ? null : TaskStatus.fromCode(status);
+		status = toStatus(queryParameters.getFirst(PARAMETER_NAME));
 	}
 
-	private boolean statusValid(String status)
+	private org.hl7.fhir.r4.model.Task.TaskStatus toStatus(String status)
 	{
-		// TODO fix control flow by exception
+		if (status == null || status.isBlank())
+			return null;
+
 		try
 		{
-			TaskStatus.fromCode(status);
-			return true;
+			return org.hl7.fhir.r4.model.Task.TaskStatus.fromCode(status);
 		}
 		catch (FHIRException e)
 		{
-			return false;
+			return null;
 		}
 	}
 
@@ -46,7 +45,7 @@ public class SearchTaskStatus implements SearchParameter
 	}
 
 	@Override
-	public String getSubquery()
+	public String getFilterQuery()
 	{
 		return "task->>'status' = ?";
 	}
@@ -69,11 +68,5 @@ public class SearchTaskStatus implements SearchParameter
 	{
 		if (status != null)
 			bundleUri = bundleUri.replaceQueryParam(PARAMETER_NAME, status.toCode());
-	}
-
-	@Override
-	public void reset()
-	{
-		// nothing to do
 	}
 }

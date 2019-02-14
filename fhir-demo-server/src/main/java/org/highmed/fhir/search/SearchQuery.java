@@ -1,4 +1,4 @@
-package org.highmed.fhir.dao.search;
+package org.highmed.fhir.search;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -10,9 +10,35 @@ import java.util.stream.Collectors;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 
-public class SearchQueryFactory
+import org.highmed.fhir.dao.search.DbSearchQuery;
+
+public class SearchQuery implements DbSearchQuery
 {
-	public static class SearchQueryFactoryBuilder
+	public static class SearchQueryBuilder
+	{
+		private final String resourceTable;
+		private final String resourceIdColumn;
+		private final String resourceColumn;
+
+		public SearchQueryBuilder(String resourceTable, String resourceIdColumn, String resourceColumn)
+		{
+			this.resourceTable = resourceTable;
+			this.resourceIdColumn = resourceIdColumn;
+			this.resourceColumn = resourceColumn;
+		}
+
+		public static SearchQueryBuilder create(String resourceTable, String resourceIdColumn, String resourceColumn)
+		{
+			return new SearchQueryBuilder(resourceTable, resourceIdColumn, resourceColumn);
+		}
+
+		public SearchQueryBuilderForDb with(int page, int count)
+		{
+			return new SearchQueryBuilderForDb(resourceTable, resourceIdColumn, resourceColumn, page, count);
+		}
+	}
+
+	public static class SearchQueryBuilderForDb
 	{
 		private final String resourceTable;
 		private final String resourceIdColumn;
@@ -22,7 +48,7 @@ public class SearchQueryFactory
 
 		private final List<SearchParameter> searchQueries = new ArrayList<SearchParameter>();
 
-		public SearchQueryFactoryBuilder(String resourceTable, String resourceIdColumn, String resourceColumn, int page,
+		public SearchQueryBuilderForDb(String resourceTable, String resourceIdColumn, String resourceColumn, int page,
 				int count)
 		{
 			this.resourceTable = resourceTable;
@@ -32,27 +58,21 @@ public class SearchQueryFactory
 			this.count = count;
 		}
 
-		public static SearchQueryFactoryBuilder create(String resourceTable, String resourceIdColumn,
-				String resourceColumn, int page, int count)
-		{
-			return new SearchQueryFactoryBuilder(resourceTable, resourceIdColumn, resourceColumn, page, count);
-		}
-
-		public SearchQueryFactoryBuilder with(SearchParameter searchQuery)
+		public SearchQueryBuilderForDb with(SearchParameter searchQuery)
 		{
 			this.searchQueries.add(searchQuery);
 			return this;
 		}
 
-		public SearchQueryFactoryBuilder with(SearchParameter... searchQueries)
+		public SearchQueryBuilderForDb with(SearchParameter... searchQueries)
 		{
 			this.searchQueries.addAll(Arrays.asList(searchQueries));
 			return this;
 		}
 
-		public SearchQueryFactory build()
+		public SearchQuery build()
 		{
-			return new SearchQueryFactory(resourceTable, resourceIdColumn, resourceColumn, page, count, searchQueries);
+			return new SearchQuery(resourceTable, resourceIdColumn, resourceColumn, page, count, searchQueries);
 		}
 	}
 
@@ -61,7 +81,9 @@ public class SearchQueryFactory
 	private final List<SearchParameter> searchParameters = new ArrayList<SearchParameter>();
 	private final PageAndCount pageAndCount;
 
-	SearchQueryFactory(String resourceTable, String resourceIdColumn, String resourceColumn, int page, int count,
+	private String filterQuery = "";
+
+	SearchQuery(String resourceTable, String resourceIdColumn, String resourceColumn, int page, int count,
 			List<? extends SearchParameter> searchParameters)
 	{
 		this.searchQueryMain = "SELECT " + resourceColumn + " FROM (SELECT DISTINCT ON (" + resourceIdColumn + ") "
@@ -76,22 +98,27 @@ public class SearchQueryFactory
 		this.pageAndCount = new PageAndCount(page, count);
 	}
 
-	public String createCountSql()
+	public void configureParameters(MultivaluedMap<String, String> queryParameters)
 	{
-		String filter = searchParameters.stream().filter(SearchParameter::isDefined).map(SearchParameter::getSubquery)
-				.collect(Collectors.joining(" AND "));
+		searchParameters.forEach(p -> p.configure(queryParameters));
 
-		return countQueryMain + (!filter.isEmpty() ? (" WHERE " + filter) : "");
+		filterQuery = searchParameters.stream().filter(SearchParameter::isDefined).map(SearchParameter::getFilterQuery)
+				.collect(Collectors.joining(" AND "));
 	}
 
-	public String createSearchSql()
+	@Override
+	public String getCountSql()
 	{
-		String filter = searchParameters.stream().filter(SearchParameter::isDefined).map(SearchParameter::getSubquery)
-				.collect(Collectors.joining(" AND "));
-
-		return searchQueryMain + (!filter.isEmpty() ? (" WHERE " + filter) : "") + pageAndCount.sql();
+		return countQueryMain + (!filterQuery.isEmpty() ? (" WHERE " + filterQuery) : "");
 	}
 
+	@Override
+	public String getSearchSql()
+	{
+		return searchQueryMain + (!filterQuery.isEmpty() ? (" WHERE " + filterQuery) : "") + pageAndCount.sql();
+	}
+
+	@Override
 	public void modifyStatement(PreparedStatement statement) throws SQLException
 	{
 		List<SearchParameter> filtered = searchParameters.stream().filter(SearchParameter::isDefined)
@@ -103,28 +130,20 @@ public class SearchQueryFactory
 				q.modifyStatement(++index, i, statement);
 	}
 
+	@Override
 	public PageAndCount getPageAndCount()
 	{
 		return pageAndCount;
 	}
 
+	@Override
 	public boolean isCountOnly(int overallCount)
 	{
 		return pageAndCount.getPage() < 1 || pageAndCount.getCount() < 1 || pageAndCount.getPageStart() > overallCount;
 	}
 
-	public void configureParameters(MultivaluedMap<String, String> queryParameters)
-	{
-		searchParameters.forEach(p -> p.configure(queryParameters));
-	}
-
 	public void configureBundleUri(UriBuilder bundleUri)
 	{
 		searchParameters.forEach(p -> p.modifyBundleUri(bundleUri));
-	}
-
-	public void reset()
-	{
-		searchParameters.forEach(SearchParameter::reset);
 	}
 }

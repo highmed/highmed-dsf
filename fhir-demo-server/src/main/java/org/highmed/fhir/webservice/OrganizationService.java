@@ -3,7 +3,7 @@ package org.highmed.fhir.webservice;
 import javax.ws.rs.Path;
 
 import org.highmed.fhir.dao.OrganizationDao;
-import org.highmed.fhir.dao.search.SearchOrganizationNameOrAlias;
+import org.highmed.fhir.search.parameters.OrganizationName;
 import org.hl7.fhir.r4.model.Organization;
 
 @Path(OrganizationService.RESOURCE_TYPE_NAME)
@@ -14,6 +14,6 @@ public class OrganizationService extends AbstractService<OrganizationDao, Organi
 	public OrganizationService(String serverBase, int defaultPageCount, OrganizationDao organizationDao)
 	{
 		super(serverBase, defaultPageCount, RESOURCE_TYPE_NAME, organizationDao,
-				withSearchParameters(new SearchOrganizationNameOrAlias()));
+				withSearchParameters(new OrganizationName()));
 	}
 }

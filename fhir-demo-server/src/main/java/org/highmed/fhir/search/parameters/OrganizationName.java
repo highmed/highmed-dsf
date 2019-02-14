@@ -1,23 +1,25 @@
-package org.highmed.fhir.dao.search;
+package org.highmed.fhir.search.parameters;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import org.highmed.fhir.dao.search.SearchParameter.SearchParameterDefinition;
+import org.highmed.fhir.search.SearchParameter;
+import org.highmed.fhir.webservice.search.AbstractStringSearch;
+import org.highmed.fhir.webservice.search.WsSearchParameter.SearchParameterDefinition;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 
-@SearchParameterDefinition(name = SearchOrganizationNameOrAlias.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Organization-name", type = SearchParamType.STRING, documentation = "A portion of the organization's name or alias")
-public class SearchOrganizationNameOrAlias extends AbstractStringSearch implements SearchParameter
+@SearchParameterDefinition(name = OrganizationName.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Organization-name", type = SearchParamType.STRING, documentation = "A portion of the organization's name or alias")
+public class OrganizationName extends AbstractStringSearch implements SearchParameter
 {
 	public static final String PARAMETER_NAME = "name";
 
-	public SearchOrganizationNameOrAlias()
+	public OrganizationName()
 	{
 		super(PARAMETER_NAME);
 	}
 
 	@Override
-	public String getSubquery()
+	public String getFilterQuery()
 	{
 		switch (valueAndType.type)
 		{
@@ -54,11 +56,5 @@ public class SearchOrganizationNameOrAlias extends AbstractStringSearch implemen
 				statement.setString(parameterIndex, valueAndType.value);
 				return;
 		}
-	}
-
-	@Override
-	public void reset()
-	{
-		// nothing to do
 	}
 }

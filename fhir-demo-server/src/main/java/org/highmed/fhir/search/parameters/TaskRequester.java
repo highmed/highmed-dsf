@@ -1,4 +1,4 @@
-package org.highmed.fhir.dao.search;
+package org.highmed.fhir.search.parameters;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -6,12 +6,13 @@ import java.sql.SQLException;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 
-import org.highmed.fhir.dao.search.SearchParameter.SearchParameterDefinition;
+import org.highmed.fhir.search.SearchParameter;
+import org.highmed.fhir.webservice.search.WsSearchParameter.SearchParameterDefinition;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.IdType;
 
-@SearchParameterDefinition(name = SearchTaskRequester.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Task-requester", type = SearchParamType.REFERENCE, documentation = "Search by task requester")
-public class SearchTaskRequester implements SearchParameter
+@SearchParameterDefinition(name = TaskRequester.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Task-requester", type = SearchParamType.REFERENCE, documentation = "Search by task requester")
+public class TaskRequester implements SearchParameter
 {
 	public static final String PARAMETER_NAME = "requester";
 
@@ -19,9 +20,12 @@ public class SearchTaskRequester implements SearchParameter
 
 	public void configure(MultivaluedMap<String, String> queryParameters)
 	{
-		String requester = queryParameters.getFirst(PARAMETER_NAME);
+		requester = toIdType(queryParameters.getFirst(PARAMETER_NAME));
+	}
 
-		this.requester = requester == null || requester.isBlank() ? null : new IdType(requester);
+	private IdType toIdType(String requester)
+	{
+		return requester == null || requester.isBlank() ? null : new IdType(requester);
 	}
 
 	@Override
@@ -31,7 +35,7 @@ public class SearchTaskRequester implements SearchParameter
 	}
 
 	@Override
-	public String getSubquery()
+	public String getFilterQuery()
 	{
 		return "task->'requester'->>'reference' " + (requester.hasVersionIdPart() ? "=" : "LIKE") + " ?";
 	}
@@ -54,11 +58,5 @@ public class SearchTaskRequester implements SearchParameter
 	{
 		if (requester != null)
 			bundleUri = bundleUri.replaceQueryParam(PARAMETER_NAME, requester);
-	}
-
-	@Override
-	public void reset()
-	{
-		// nothing to do
 	}
 }

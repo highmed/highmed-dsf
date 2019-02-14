@@ -14,11 +14,12 @@ import java.util.UUID;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.fhir.dao.exception.ResourceNotFoundException;
-import org.highmed.fhir.dao.search.PartialResult;
-import org.highmed.fhir.dao.search.SearchId;
-import org.highmed.fhir.dao.search.SearchLastUpdated;
-import org.highmed.fhir.dao.search.SearchQueryFactory;
-import org.highmed.fhir.dao.search.SearchQueryFactory.SearchQueryFactoryBuilder;
+import org.highmed.fhir.dao.search.DbSearchQuery;
+import org.highmed.fhir.search.PartialResult;
+import org.highmed.fhir.search.SearchParameter;
+import org.highmed.fhir.search.SearchQuery.SearchQueryBuilder;
+import org.highmed.fhir.search.parameters.ResourceId;
+import org.highmed.fhir.search.parameters.ResourceLastUpdated;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.postgresql.util.PGobject;
@@ -355,30 +356,25 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 		}
 	}
 
-	public final SearchQueryFactoryBuilder createSearchQueryFactory(int page, int count)
+	public final SearchQueryBuilder createSearchQueryBuilder()
 	{
-		return SearchQueryFactoryBuilder.create(getResourceTable(), getResourceIdColumn(), getResourceColumn(), page,
-				count);
+		return SearchQueryBuilder.create(getResourceTable(), getResourceIdColumn(), getResourceColumn());
 	}
 
-	public final SearchId createSearchId()
+	public final SearchParameter[] createResourceSearchParameters()
 	{
-		return new SearchId(getResourceIdColumn());
+		return new SearchParameter[] { new ResourceId(getResourceIdColumn()),
+				new ResourceLastUpdated(getResourceColumn()) };
 	}
 
-	public final SearchLastUpdated createSearchLastUpdated()
-	{
-		return new SearchLastUpdated(getResourceColumn());
-	}
-
-	public final PartialResult<R> search(SearchQueryFactory queryFactory) throws SQLException
+	public final PartialResult<R> search(DbSearchQuery query) throws SQLException
 	{
 		try (Connection connection = getDataSource().getConnection())
 		{
 			int overallCount = 0;
-			try (PreparedStatement statement = connection.prepareStatement(queryFactory.createCountSql()))
+			try (PreparedStatement statement = connection.prepareStatement(query.getCountSql()))
 			{
-				queryFactory.modifyStatement(statement);
+				query.modifyStatement(statement);
 
 				logger.trace("Executing query '{}'", statement);
 				try (ResultSet result = statement.executeQuery())
@@ -390,13 +386,11 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 
 			List<R> partialResult = new ArrayList<>();
 
-			if (!queryFactory.isCountOnly(overallCount))
+			if (!query.isCountOnly(overallCount))
 			{
-				queryFactory.reset();
-				
-				try (PreparedStatement statement = connection.prepareStatement(queryFactory.createSearchSql()))
+				try (PreparedStatement statement = connection.prepareStatement(query.getSearchSql()))
 				{
-					queryFactory.modifyStatement(statement);
+					query.modifyStatement(statement);
 
 					logger.trace("Executing query '{}'", statement);
 					try (ResultSet result = statement.executeQuery())
@@ -408,8 +402,8 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 				}
 			}
 
-			return new PartialResult<>(overallCount, queryFactory.getPageAndCount(), partialResult,
-					queryFactory.isCountOnly(overallCount));
+			return new PartialResult<>(overallCount, query.getPageAndCount(), partialResult,
+					query.isCountOnly(overallCount));
 		}
 	}
 }

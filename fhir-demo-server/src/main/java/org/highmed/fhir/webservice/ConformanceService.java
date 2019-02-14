@@ -13,13 +13,13 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.highmed.fhir.dao.search.SearchId;
-import org.highmed.fhir.dao.search.SearchLastUpdated;
-import org.highmed.fhir.dao.search.SearchOrganizationNameOrAlias;
-import org.highmed.fhir.dao.search.SearchParameter;
-import org.highmed.fhir.dao.search.SearchParameter.SearchParameterDefinition;
-import org.highmed.fhir.dao.search.SearchTaskRequester;
-import org.highmed.fhir.dao.search.SearchTaskStatus;
+import org.highmed.fhir.dao.search.DbSearchParameter;
+import org.highmed.fhir.search.parameters.ResourceId;
+import org.highmed.fhir.search.parameters.ResourceLastUpdated;
+import org.highmed.fhir.search.parameters.OrganizationName;
+import org.highmed.fhir.search.parameters.TaskRequester;
+import org.highmed.fhir.search.parameters.TaskStatus;
+import org.highmed.fhir.webservice.search.WsSearchParameter.SearchParameterDefinition;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementImplementationComponent;
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementKind;
@@ -105,11 +105,11 @@ public class ConformanceService
 
 		var searchParameters = new HashMap<Class<? extends DomainResource>, List<CapabilityStatementRestResourceSearchParamComponent>>();
 
-		var taskRequester = createCapabilityStatementPart(SearchTaskRequester.class);
-		var taskStatus = createCapabilityStatementPart(SearchTaskStatus.class);
+		var taskRequester = createCapabilityStatementPart(TaskRequester.class);
+		var taskStatus = createCapabilityStatementPart(TaskStatus.class);
 		searchParameters.put(Task.class, Arrays.asList(taskRequester, taskStatus));
 
-		var organizationNameOrAlias = createCapabilityStatementPart(SearchOrganizationNameOrAlias.class);
+		var organizationNameOrAlias = createCapabilityStatementPart(OrganizationName.class);
 		searchParameters.put(Organization.class, Arrays.asList(taskRequester, organizationNameOrAlias));
 
 		for (Class<? extends DomainResource> resource : resources)
@@ -124,8 +124,8 @@ public class ConformanceService
 			r.addInteraction().setCode(TypeRestfulInteraction.DELETE);
 			r.addInteraction().setCode(TypeRestfulInteraction.SEARCHTYPE);
 
-			r.addSearchParam(createCapabilityStatementPart(SearchId.class));
-			r.addSearchParam(createCapabilityStatementPart(SearchLastUpdated.class));
+			r.addSearchParam(createCapabilityStatementPart(ResourceId.class));
+			r.addSearchParam(createCapabilityStatementPart(ResourceLastUpdated.class));
 			searchParameters.getOrDefault(resource, Collections.emptyList()).forEach(r::addSearchParam);
 		}
 
@@ -133,7 +133,7 @@ public class ConformanceService
 	}
 
 	private CapabilityStatementRestResourceSearchParamComponent createCapabilityStatementPart(
-			Class<? extends SearchParameter> parameter)
+			Class<? extends DbSearchParameter> parameter)
 	{
 		SearchParameterDefinition d = parameter.getAnnotation(SearchParameterDefinition.class);
 

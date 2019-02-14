@@ -1,17 +1,17 @@
-package org.highmed.fhir.dao.search;
+package org.highmed.fhir.webservice.search;
 
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 
-public abstract class AbstractStringSearch implements SearchParameter
+public abstract class AbstractStringSearch implements WsSearchParameter
 {
 	protected static enum StringSearchType
 	{
 		STARTS_WITH(""), EXACT(":exact"), CONTAINS(":contains");
 
-		final String sufix;
+		public final String sufix;
 
-		StringSearchType(String sufix)
+		private StringSearchType(String sufix)
 		{
 			this.sufix = sufix;
 		}
@@ -19,10 +19,10 @@ public abstract class AbstractStringSearch implements SearchParameter
 
 	protected static class StringValueAndSearchType
 	{
-		final String value;
-		final StringSearchType type;
+		public final String value;
+		public final StringSearchType type;
 
-		StringValueAndSearchType(String value, StringSearchType type)
+		private StringValueAndSearchType(String value, StringSearchType type)
 		{
 			this.value = value;
 			this.type = type;

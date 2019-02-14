@@ -1,7 +1,8 @@
-package org.highmed.fhir.dao.search;
+package org.highmed.fhir.webservice.search;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -15,16 +16,16 @@ import java.util.stream.Collectors;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 
-public abstract class AbstractDateTimeSearch implements SearchParameter
+public abstract class AbstractDateTimeSearch implements WsSearchParameter
 {
 	protected static enum DateTimeSearchType
 	{
 		EQ("eq", "="), NE("ne", "<>"), GT("gt", ">"), LT("lt", "<"), GE("ge", ">="), LE("le", "<=");
 
-		final String prefix;
-		final String operator;
+		public final String prefix;
+		public final String operator;
 
-		DateTimeSearchType(String prefix, String operator)
+		private DateTimeSearchType(String prefix, String operator)
 		{
 			this.prefix = prefix;
 			this.operator = operator;
@@ -33,16 +34,16 @@ public abstract class AbstractDateTimeSearch implements SearchParameter
 
 	protected static enum DateTimeType
 	{
-		DATE_TIME, DATE, YEAR_PERIOD, YEAR_MONTH_PERIOD;
+		ZONED_DATE_TIME, LOCAL_DATE, YEAR_PERIOD, YEAR_MONTH_PERIOD;
 	}
 
 	protected static class DateTimeValueAndTypeAndSearchType
 	{
-		final Object value;
-		final DateTimeType type;
-		final DateTimeSearchType searchType;
+		public final Object value;
+		public final DateTimeType type;
+		public final DateTimeSearchType searchType;
 
-		DateTimeValueAndTypeAndSearchType(Object value, DateTimeType type, DateTimeSearchType searchType)
+		private DateTimeValueAndTypeAndSearchType(Object value, DateTimeType type, DateTimeSearchType searchType)
 		{
 			this.value = value;
 			this.type = type;
@@ -52,10 +53,10 @@ public abstract class AbstractDateTimeSearch implements SearchParameter
 
 	protected static class LocalDatePair
 	{
-		final LocalDate startInclusive;
-		final LocalDate endExclusive;
+		public final LocalDate startInclusive;
+		public final LocalDate endExclusive;
 
-		LocalDatePair(LocalDate startInclusive, LocalDate endExclusive)
+		private LocalDatePair(LocalDate startInclusive, LocalDate endExclusive)
 		{
 			this.startInclusive = startInclusive;
 			this.endExclusive = endExclusive;
@@ -71,13 +72,14 @@ public abstract class AbstractDateTimeSearch implements SearchParameter
 	private static final Pattern YEAR_PATTERN = Pattern.compile("[0-9]{4}");
 	private static final Pattern YEAR_MONTH_PATTERN = Pattern.compile("([0-9]{4})-([0-9]{2})");
 	private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ISO_DATE_TIME;
+	private static final DateTimeFormatter DATE_TIME_FORMAT_OUT = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 	private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ISO_LOCAL_DATE;
 	private static final DateTimeFormatter YEAR_FORMAT = DateTimeFormatter.ofPattern("yyyy");
 	private static final DateTimeFormatter YEAR_MONTH_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM");
 
 	private final String parameterName;
 
-	protected List<DateTimeValueAndTypeAndSearchType> valuesAndTypes = new ArrayList<>();
+	private List<DateTimeValueAndTypeAndSearchType> valuesAndTypes = new ArrayList<>();
 
 	public AbstractDateTimeSearch(String parameterName)
 	{
@@ -93,15 +95,25 @@ public abstract class AbstractDateTimeSearch implements SearchParameter
 
 	private DateTimeValueAndTypeAndSearchType parse(String parameter)
 	{
+		final String fixedParameter = parameter.replace(' ', '+');
+
 		if (Arrays.stream(DateTimeSearchType.values()).map(t -> t.prefix)
-				.anyMatch(prefix -> parameter.toLowerCase().startsWith(prefix)))
+				.anyMatch(prefix -> fixedParameter.toLowerCase().startsWith(prefix)))
 		{
-			String prefix = parameter.substring(0, 2);
-			String value = parameter.substring(2, parameter.length()).toUpperCase();
+			String prefix = fixedParameter.substring(0, 2);
+			String value = fixedParameter.substring(2, fixedParameter.length()).toUpperCase();
 			return parseValue(value, DateTimeSearchType.valueOf(prefix.toUpperCase()));
 		}
 		else
-			return parseValue(parameter, DateTimeSearchType.EQ);
+			return parseValue(fixedParameter, DateTimeSearchType.EQ);
+	}
+
+	/**
+	 * @return list contains max 2 values
+	 */
+	public List<DateTimeValueAndTypeAndSearchType> getValuesAndTypes()
+	{
+		return valuesAndTypes;
 	}
 
 	@Override
@@ -121,9 +133,9 @@ public abstract class AbstractDateTimeSearch implements SearchParameter
 	{
 		switch (value.type)
 		{
-			case DATE_TIME:
-				return ((LocalDateTime) value.value).format(DATE_TIME_FORMAT);
-			case DATE:
+			case ZONED_DATE_TIME:
+				return ((ZonedDateTime) value.value).format(DATE_TIME_FORMAT_OUT);
+			case LOCAL_DATE:
 				return ((LocalDate) value.value).format(DATE_FORMAT);
 			case YEAR_PERIOD:
 				return ((LocalDatePair) value.value).startInclusive.format(YEAR_FORMAT);
@@ -140,8 +152,8 @@ public abstract class AbstractDateTimeSearch implements SearchParameter
 		try
 		{
 			// TODO fix control flow by exception
-			return new DateTimeValueAndTypeAndSearchType(LocalDateTime.parse(value, DATE_TIME_FORMAT),
-					DateTimeType.DATE_TIME, searchType);
+			return new DateTimeValueAndTypeAndSearchType(ZonedDateTime.parse(value, DATE_TIME_FORMAT),
+					DateTimeType.ZONED_DATE_TIME, searchType);
 		}
 		catch (DateTimeParseException e)
 		{
@@ -151,7 +163,19 @@ public abstract class AbstractDateTimeSearch implements SearchParameter
 		try
 		{
 			// TODO fix control flow by exception
-			return new DateTimeValueAndTypeAndSearchType(LocalDate.parse(value, DATE_FORMAT), DateTimeType.DATE,
+			return new DateTimeValueAndTypeAndSearchType(
+					ZonedDateTime.parse(value, DATE_TIME_FORMAT.withZone(ZoneId.systemDefault())),
+					DateTimeType.ZONED_DATE_TIME, searchType);
+		}
+		catch (DateTimeParseException e)
+		{
+			// not a date-time, ignore
+		}
+
+		try
+		{
+			// TODO fix control flow by exception
+			return new DateTimeValueAndTypeAndSearchType(LocalDate.parse(value, DATE_FORMAT), DateTimeType.LOCAL_DATE,
 					searchType);
 		}
 		catch (DateTimeParseException e)
