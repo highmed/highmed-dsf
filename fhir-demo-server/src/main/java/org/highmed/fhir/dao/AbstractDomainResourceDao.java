@@ -37,6 +37,7 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 	private static final Logger logger = LoggerFactory.getLogger(AbstractDomainResourceDao.class);
 
 	private final BasicDataSource dataSource;
+	private final FhirContext fhirContext;
 	private final Class<R> resourceType;
 
 	private final String resourceTable;
@@ -44,12 +45,12 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 	private final String resourceIdColumn;
 
 	private final String resourceTypeName;
-	private final IParser jsonParser;
 
 	public AbstractDomainResourceDao(BasicDataSource dataSource, FhirContext fhirContext, Class<R> resourceType,
 			String resourceTable, String resourceColumn, String resourceIdColumn)
 	{
 		this.dataSource = dataSource;
+		this.fhirContext = fhirContext;
 		this.resourceType = resourceType;
 
 		this.resourceTable = resourceTable;
@@ -57,8 +58,13 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 		this.resourceIdColumn = resourceIdColumn;
 
 		resourceTypeName = Objects.requireNonNull(resourceType, "resourceType").getAnnotation(ResourceDef.class).name();
-		jsonParser = Objects.requireNonNull(fhirContext, "fhirContext").newJsonParser();
-		jsonParser.setStripVersionsFromReferences(false);
+	}
+
+	protected IParser getJsonParser()
+	{
+		IParser p = Objects.requireNonNull(fhirContext, "fhirContext").newJsonParser();
+		p.setStripVersionsFromReferences(false);
+		return p;
 	}
 
 	@Override
@@ -136,7 +142,7 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 		{
 			PGobject o = new PGobject();
 			o.setType("JSONB");
-			o.setValue(jsonParser.encodeResourceToString(resource));
+			o.setValue(getJsonParser().encodeResourceToString(resource));
 			return o;
 		}
 		catch (DataFormatException | SQLException e)
@@ -166,7 +172,7 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 	protected R getResource(ResultSet result, int index) throws SQLException
 	{
 		String json = result.getString(index);
-		return jsonParser.parseResource(resourceType, json);
+		return getJsonParser().parseResource(resourceType, json);
 	}
 
 	public final Optional<R> read(UUID uuid) throws SQLException, ResourceDeletedException

@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.function.Supplier;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -21,14 +22,20 @@ import ca.uhn.fhir.parser.IParser;
 public abstract class AbstractFhirAdapter<T extends BaseResource> implements MessageBodyReader<T>, MessageBodyWriter<T>
 {
 	private final Class<T> resourceType;
-	private final IParser parser;
+	private final Supplier<IParser> parser;
 
-	protected AbstractFhirAdapter(Class<T> resourceType, IParser parser)
+	protected AbstractFhirAdapter(Class<T> resourceType, Supplier<IParser> parser)
 	{
 		this.resourceType = resourceType;
 		this.parser = parser;
-		
-		parser.setStripVersionsFromReferences(false);
+	}
+
+	private IParser getParser()
+	{
+		/* Parsers are not guaranteed to be thread safe */
+		IParser p = parser.get();
+		p.setStripVersionsFromReferences(false);
+		return p;
 	}
 
 	@Override
@@ -42,7 +49,7 @@ public abstract class AbstractFhirAdapter<T extends BaseResource> implements Mes
 			MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream)
 			throws IOException, WebApplicationException
 	{
-		parser.encodeResourceToWriter(t, new OutputStreamWriter(entityStream));
+		getParser().encodeResourceToWriter(t, new OutputStreamWriter(entityStream));
 	}
 
 	@Override
@@ -56,6 +63,6 @@ public abstract class AbstractFhirAdapter<T extends BaseResource> implements Mes
 			MultivaluedMap<String, String> httpHeaders, InputStream entityStream)
 			throws IOException, WebApplicationException
 	{
-		return parser.parseResource(type, new InputStreamReader(entityStream));
+		return getParser().parseResource(type, new InputStreamReader(entityStream));
 	}
 }

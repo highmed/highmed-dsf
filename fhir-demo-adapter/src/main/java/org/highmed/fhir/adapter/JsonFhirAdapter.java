@@ -18,6 +18,7 @@ public class JsonFhirAdapter<T extends BaseResource> extends AbstractFhirAdapter
 {
 	protected JsonFhirAdapter(FhirContext fhirContext, Class<T> resourceType)
 	{
-		super(resourceType, fhirContext.newJsonParser());
+		/* Parsers are not guaranteed to be thread safe */
+		super(resourceType, fhirContext::newJsonParser);
 	}
 }

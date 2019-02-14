@@ -18,6 +18,7 @@ public class XmlFhirAdapter<T extends BaseResource> extends AbstractFhirAdapter<
 {
 	protected XmlFhirAdapter(FhirContext fhirContext, Class<T> resourceType)
 	{
-		super(resourceType, fhirContext.newXmlParser());
+		/* Parsers are not guaranteed to be thread safe */
+		super(resourceType, fhirContext::newXmlParser);
 	}
 }
