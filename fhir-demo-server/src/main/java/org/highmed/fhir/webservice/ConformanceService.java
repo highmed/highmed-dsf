@@ -14,9 +14,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.highmed.fhir.dao.search.DbSearchParameter;
+import org.highmed.fhir.search.parameters.OrganizationName;
 import org.highmed.fhir.search.parameters.ResourceId;
 import org.highmed.fhir.search.parameters.ResourceLastUpdated;
-import org.highmed.fhir.search.parameters.OrganizationName;
 import org.highmed.fhir.search.parameters.TaskRequester;
 import org.highmed.fhir.search.parameters.TaskStatus;
 import org.highmed.fhir.webservice.search.WsSearchParameter.SearchParameterDefinition;
@@ -33,6 +33,7 @@ import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Enumerations.FHIRVersion;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HealthcareService;
@@ -86,7 +87,7 @@ public class ConformanceService
 		statement.setImplementation(new CapabilityStatementImplementationComponent());
 		statement.getImplementation().setDescription("Implementation Description");
 		statement.getImplementation().setUrl(serverBase);
-		statement.setFhirVersion("4.0.0");
+		statement.setFhirVersion(FHIRVersion._4_0_0);
 		statement.setFormat(
 				Arrays.asList(new CodeType(Constants.CT_FHIR_JSON_NEW), new CodeType(Constants.CT_FHIR_XML_NEW)));
 		CapabilityStatementRestComponent rest = statement.addRest();
