@@ -60,4 +60,10 @@ public class SearchId implements SearchParameter
 		if (id != null)
 			bundleUri.replaceQueryParam(PARAMETER_NAME, id);
 	}
+
+	@Override
+	public void reset()
+	{
+		// nothing to do
+	}
 }

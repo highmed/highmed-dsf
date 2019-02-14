@@ -122,4 +122,9 @@ public class SearchQueryFactory
 	{
 		searchParameters.forEach(p -> p.modifyBundleUri(bundleUri));
 	}
+
+	public void reset()
+	{
+		searchParameters.forEach(SearchParameter::reset);
+	}
 }

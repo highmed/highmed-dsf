@@ -41,4 +41,6 @@ public interface SearchParameter
 			throws SQLException;
 
 	void modifyBundleUri(UriBuilder bundleUri);
+
+	void reset();
 }

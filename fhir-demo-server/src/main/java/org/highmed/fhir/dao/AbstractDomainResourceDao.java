@@ -16,6 +16,7 @@ import org.highmed.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.fhir.dao.exception.ResourceNotFoundException;
 import org.highmed.fhir.dao.search.PartialResult;
 import org.highmed.fhir.dao.search.SearchId;
+import org.highmed.fhir.dao.search.SearchLastUpdated;
 import org.highmed.fhir.dao.search.SearchQueryFactory;
 import org.highmed.fhir.dao.search.SearchQueryFactory.SearchQueryFactoryBuilder;
 import org.hl7.fhir.r4.model.DomainResource;
@@ -365,6 +366,11 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 		return new SearchId(getResourceIdColumn());
 	}
 
+	public final SearchLastUpdated createSearchLastUpdated()
+	{
+		return new SearchLastUpdated(getResourceColumn());
+	}
+
 	public final PartialResult<R> search(SearchQueryFactory queryFactory) throws SQLException
 	{
 		try (Connection connection = getDataSource().getConnection())
@@ -386,6 +392,8 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 
 			if (!queryFactory.isCountOnly(overallCount))
 			{
+				queryFactory.reset();
+				
 				try (PreparedStatement statement = connection.prepareStatement(queryFactory.createSearchSql()))
 				{
 					queryFactory.modifyStatement(statement);

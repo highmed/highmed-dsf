@@ -19,7 +19,7 @@ public class SearchOrganizationNameOrAlias extends AbstractStringSearch implemen
 	@Override
 	public String getSubquery()
 	{
-		switch (type)
+		switch (valueAndType.type)
 		{
 			case STARTS_WITH:
 			case CONTAINS:
@@ -42,17 +42,23 @@ public class SearchOrganizationNameOrAlias extends AbstractStringSearch implemen
 			throws SQLException
 	{
 		// will be called twice, once with subqueryParameterIndex = 1 and once with subqueryParameterIndex = 2
-		switch (type)
+		switch (valueAndType.type)
 		{
 			case STARTS_WITH:
-				statement.setString(parameterIndex, value.toLowerCase() + "%");
+				statement.setString(parameterIndex, valueAndType.value.toLowerCase() + "%");
 				return;
 			case CONTAINS:
-				statement.setString(parameterIndex, "%" + value.toLowerCase() + "%");
+				statement.setString(parameterIndex, "%" + valueAndType.value.toLowerCase() + "%");
 				return;
 			case EXACT:
-				statement.setString(parameterIndex, value);
+				statement.setString(parameterIndex, valueAndType.value);
 				return;
 		}
+	}
+
+	@Override
+	public void reset()
+	{
+		// nothing to do
 	}
 }

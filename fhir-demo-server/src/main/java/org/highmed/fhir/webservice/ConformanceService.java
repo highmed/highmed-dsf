@@ -14,6 +14,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.highmed.fhir.dao.search.SearchId;
+import org.highmed.fhir.dao.search.SearchLastUpdated;
 import org.highmed.fhir.dao.search.SearchOrganizationNameOrAlias;
 import org.highmed.fhir.dao.search.SearchParameter;
 import org.highmed.fhir.dao.search.SearchParameter.SearchParameterDefinition;
@@ -124,6 +125,7 @@ public class ConformanceService
 			r.addInteraction().setCode(TypeRestfulInteraction.SEARCHTYPE);
 
 			r.addSearchParam(createCapabilityStatementPart(SearchId.class));
+			r.addSearchParam(createCapabilityStatementPart(SearchLastUpdated.class));
 			searchParameters.getOrDefault(resource, Collections.emptyList()).forEach(r::addSearchParam);
 		}
 

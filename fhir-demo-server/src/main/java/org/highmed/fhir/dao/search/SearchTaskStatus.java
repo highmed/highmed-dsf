@@ -27,7 +27,7 @@ public class SearchTaskStatus implements SearchParameter
 
 	private boolean statusValid(String status)
 	{
-		// FIXME control flow by exception
+		// TODO fix control flow by exception
 		try
 		{
 			TaskStatus.fromCode(status);
@@ -69,5 +69,11 @@ public class SearchTaskStatus implements SearchParameter
 	{
 		if (status != null)
 			bundleUri = bundleUri.replaceQueryParam(PARAMETER_NAME, status.toCode());
+	}
+
+	@Override
+	public void reset()
+	{
+		// nothing to do
 	}
 }

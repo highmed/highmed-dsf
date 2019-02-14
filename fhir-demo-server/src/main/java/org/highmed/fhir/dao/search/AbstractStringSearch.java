@@ -5,15 +5,33 @@ import javax.ws.rs.core.UriBuilder;
 
 public abstract class AbstractStringSearch implements SearchParameter
 {
-	protected enum StringSearchType
+	protected static enum StringSearchType
 	{
-		STARTS_WITH, EXACT, CONTAINS
+		STARTS_WITH(""), EXACT(":exact"), CONTAINS(":contains");
+
+		final String sufix;
+
+		StringSearchType(String sufix)
+		{
+			this.sufix = sufix;
+		}
+	}
+
+	protected static class StringValueAndSearchType
+	{
+		final String value;
+		final StringSearchType type;
+
+		StringValueAndSearchType(String value, StringSearchType type)
+		{
+			this.value = value;
+			this.type = type;
+		}
 	}
 
 	private final String parameterName;
 
-	protected String value;
-	protected StringSearchType type;
+	protected StringValueAndSearchType valueAndType;
 
 	public AbstractStringSearch(String parameterName)
 	{
@@ -25,44 +43,35 @@ public abstract class AbstractStringSearch implements SearchParameter
 		String startsWith = queryParameters.getFirst(parameterName);
 		if (startsWith != null && !startsWith.isBlank())
 		{
-			this.value = startsWith;
-			this.type = StringSearchType.STARTS_WITH;
+			valueAndType = new StringValueAndSearchType(startsWith, StringSearchType.STARTS_WITH);
+			return;
 		}
-		String exact = queryParameters.getFirst(parameterName + ":exact");
+
+		String exact = queryParameters.getFirst(parameterName + StringSearchType.EXACT.sufix);
 		if (exact != null && !exact.isBlank())
 		{
-			this.value = exact;
-			this.type = StringSearchType.EXACT;
+			valueAndType = new StringValueAndSearchType(exact, StringSearchType.EXACT);
+			return;
 		}
-		String contains = queryParameters.getFirst(parameterName + ":contains");
+
+		String contains = queryParameters.getFirst(parameterName + StringSearchType.CONTAINS.sufix);
 		if (contains != null && !contains.isBlank())
 		{
-			this.value = contains;
-			this.type = StringSearchType.CONTAINS;
+			valueAndType = new StringValueAndSearchType(contains, StringSearchType.CONTAINS);
+			return;
 		}
 	}
 
 	@Override
 	public boolean isDefined()
 	{
-		return value != null && type != null;
+		return valueAndType != null;
 	}
 
 	@Override
 	public void modifyBundleUri(UriBuilder bundleUri)
 	{
-		if (value != null && type != null)
-			switch (type)
-			{
-				case STARTS_WITH:
-					bundleUri = bundleUri.replaceQueryParam(parameterName, value);
-					return;
-				case CONTAINS:
-					bundleUri = bundleUri.replaceQueryParam(parameterName + ":contains", value);
-					return;
-				case EXACT:
-					bundleUri = bundleUri.replaceQueryParam(parameterName + ":exact", value);
-					return;
-			}
+		if (valueAndType != null)
+			bundleUri = bundleUri.replaceQueryParam(parameterName + valueAndType.type.sufix, valueAndType.value);
 	}
 }

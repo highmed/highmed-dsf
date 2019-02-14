@@ -55,4 +55,10 @@ public class SearchTaskRequester implements SearchParameter
 		if (requester != null)
 			bundleUri = bundleUri.replaceQueryParam(PARAMETER_NAME, requester);
 	}
+
+	@Override
+	public void reset()
+	{
+		// nothing to do
+	}
 }

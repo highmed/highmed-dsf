@@ -343,7 +343,8 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 
 		/* SearchParameter implementations are not thread safe and need to be created on a request basis */
 		SearchQueryFactory queryFactory = getDao().createSearchQueryFactory(effectivePage, effectiveCount)
-				.with(getDao().createSearchId()).with(searchParameterFactory.get()).build();
+				.with(getDao().createSearchId(), getDao().createSearchLastUpdated()).with(searchParameterFactory.get())
+				.build();
 
 		queryFactory.configureParameters(queryParameters);
 
