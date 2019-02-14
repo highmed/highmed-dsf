@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StructureDefinition xmlns="http://hl7.org/fhir">
+	<id value="504" />
+	<meta>
+		<versionId value="1" />
+		<lastUpdated value="2019-02-13T11:58:44.527-05:00" />
+	</meta>
+	<url
+		value="http://highmed.org/fhir/StructureDefinition/DataSharingTask" />
+	<name value="highmed-data-sharing-task" />
+	<status value="draft" />
+	<kind value="resource" />
+	<abstract value="false" />
+	<type value="Task" />
+	<baseDefinition
+		value="http://hl7.org/fhir/StructureDefinition/Task" />
+	<derivation value="constraint" />
+	<differential>
+		<element id="Task">
+			<path value="Task" />
+		</element>
+		<element id="Task.extension">
+			<path value="Task.extension" />
+			<slicing>
+				<discriminator>
+					<type value="value" />
+					<path value="url" />
+				</discriminator>
+				<rules value="open" />
+			</slicing>
+			<min value="1" />
+		</element>
+		<element id="Task.extension:researchStudy">
+			<path value="Task.extension" />
+			<sliceName value="researchStudy" />
+			<min value="1" />
+			<max value="1" />
+			<fixedUri
+				value="http://hl7.org/fhir/StructureDefinition/workflow-researchStudy" />
+		</element>
+	</differential>
+</StructureDefinition>
