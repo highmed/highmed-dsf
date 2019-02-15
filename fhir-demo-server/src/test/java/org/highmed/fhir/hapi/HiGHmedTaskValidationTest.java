@@ -41,11 +41,8 @@ public class HiGHmedTaskValidationTest
 		assertTrue(highmedTask.getMessages().isEmpty());
 
 		StructureDefinition snapshot = highmedTask.getSnapshot();
-		snapshot.setUrl(highmedTaskDiff.getUrl());
-		
-		logger.debug("Snapshot: " + context.newXmlParser().setPrettyPrint(true).encodeResourceToString(snapshot));
-
 		logger.info("Snapshot URL: {}", snapshot.getUrl());
+		logger.debug("Snapshot:\n" + context.newXmlParser().setPrettyPrint(true).encodeResourceToString(snapshot));
 
 		Task task = new Task();
 		task.getMeta().addProfile(snapshot.getUrl());
@@ -57,7 +54,7 @@ public class HiGHmedTaskValidationTest
 		researchStudyReference.setReference("ResearchStudy/" + UUID.randomUUID().toString());
 		ext.setValue(researchStudyReference);
 
-		logger.debug("Task: " + context.newXmlParser().setPrettyPrint(true).encodeResourceToString(task));
+		logger.debug("Task:\n" + context.newXmlParser().setPrettyPrint(true).encodeResourceToString(task));
 
 		ResourceValidator validator = new ResourceValidator(context, snapshot);
 		ValidationResult validationResult = validator.validate(task);
