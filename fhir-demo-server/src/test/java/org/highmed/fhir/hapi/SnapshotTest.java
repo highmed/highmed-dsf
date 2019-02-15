@@ -1,6 +1,7 @@
 package org.highmed.fhir.hapi;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import org.highmed.fhir.service.StructureDefinitionReader;
 import org.hl7.fhir.r4.conformance.ProfileUtilities;
 import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
+import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
@@ -49,7 +51,7 @@ public class SnapshotTest
 
 		profileUtis.generateSnapshot(base, derived, url, profileName);
 
-		logger.info("Snapshot: " + context.newXmlParser().encodeResourceToString(base));
+		logger.info("Snapshot: " + context.newXmlParser().encodeResourceToString(derived));
 
 		messages.forEach(m -> logger.error("Issue while generating snapshot: {} - {} - {}", m.getDisplay(), m.getLine(),
 				m.getMessage()));
@@ -72,5 +74,11 @@ public class SnapshotTest
 		assertNotNull(snapshot.getSnapshot());
 		assertNotNull(snapshot.getMessages());
 		assertTrue(snapshot.getMessages().isEmpty());
+
+		assertTrue(snapshot.getSnapshot().getSnapshot().getElement().stream().map(ElementDefinition::getId)
+				.anyMatch(id -> "Task.extension:researchStudy".equals(id)));
+
+		snapshot.getSnapshot().getSnapshot().getElement()
+				.forEach(e -> logger.debug("snapshot.element.path#id: {}", e.getId()));
 	}
 }

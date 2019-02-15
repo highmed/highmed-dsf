@@ -57,7 +57,7 @@ public class SnapshotGenerator
 	public SnapshotWithValidationMessages generateSnapshot(String baseTypeName, String baseAbsoluteUrlPrefix,
 			StructureDefinition differential)
 	{
-		StructureDefinition base = worker.fetchTypeDefinition(baseTypeName).copy();
+		StructureDefinition base = worker.fetchTypeDefinition(baseTypeName);
 
 		/* ProfileUtilities is not thread safe */
 		List<ValidationMessage> messages = new ArrayList<>();
@@ -65,6 +65,6 @@ public class SnapshotGenerator
 
 		profileUtils.generateSnapshot(base, differential, baseAbsoluteUrlPrefix, null);
 
-		return new SnapshotWithValidationMessages(base, messages);
+		return new SnapshotWithValidationMessages(differential, messages);
 	}
 }
