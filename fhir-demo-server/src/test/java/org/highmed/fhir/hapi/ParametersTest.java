@@ -1,11 +1,15 @@
 package org.highmed.fhir.hapi;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.codesystems.ResourceValidationMode;
 import org.junit.Test;
@@ -19,7 +23,7 @@ public class ParametersTest
 	private static final Logger logger = LoggerFactory.getLogger(ParametersTest.class);
 
 	@Test
-	public void testParameters() throws Exception
+	public void testParametersWithoutResource() throws Exception
 	{
 		final CodeType mode = new CodeType(ResourceValidationMode.CREATE.toCode());
 		final UriType uri = new UriType("StructureDefinition/" + UUID.randomUUID().toString());
@@ -33,5 +37,30 @@ public class ParametersTest
 
 		assertEquals(mode, parameters.getParameter("mode"));
 		assertEquals(uri, parameters.getParameter("uri"));
+	}
+
+	@Test
+	public void testParametersWithResource() throws Exception
+	{
+		final CodeType mode = new CodeType(ResourceValidationMode.CREATE.toCode());
+		final UriType uri = new UriType("StructureDefinition/" + UUID.randomUUID().toString());
+		final Patient patient = new Patient();
+		patient.setId(UUID.randomUUID().toString());
+
+		Parameters parameters = new Parameters();
+		parameters.addParameter("mode", mode);
+		parameters.addParameter("uri", uri);
+		parameters.addParameter().setName("resource").setResource(patient);
+
+		FhirContext context = FhirContext.forR4();
+		logger.info("Parameters: {}", context.newXmlParser().encodeResourceToString(parameters));
+
+		assertEquals(mode, parameters.getParameter("mode"));
+		assertEquals(uri, parameters.getParameter("uri"));
+
+		Optional<ParametersParameterComponent> resource = parameters.getParameter().stream()
+				.filter(p -> "resource".equals(p.getName())).findFirst();
+		assertTrue(resource.isPresent());
+		assertEquals(patient, resource.get().getResource());
 	}
 }
