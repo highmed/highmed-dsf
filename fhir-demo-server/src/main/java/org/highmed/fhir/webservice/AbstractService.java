@@ -51,15 +51,19 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
+import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.UriType;
+import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.validation.ValidationResult;
 
 @Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
 		Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
@@ -79,7 +83,7 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 	private final int defaultPageCount;
 	private final String resourceTypeName;
 	private final D dao;
-	private final List<Supplier<SearchParameter>> searchParameterFactories;
+	private final List<Supplier<SearchParameter<R>>> searchParameterFactories;
 
 	private ResourceValidator validator;
 
@@ -89,7 +93,7 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 	 */
 	@SafeVarargs
 	public AbstractService(String serverBase, int defaultPageCount, String resourceTypeName, D dao,
-			ResourceValidator validator, Supplier<SearchParameter>... searchParameterFactories)
+			ResourceValidator validator, Supplier<SearchParameter<R>>... searchParameterFactories)
 	{
 		this.serverBase = serverBase;
 		this.defaultPageCount = defaultPageCount;
@@ -317,7 +321,8 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 		return bundle;
 	}
 
-	private SearchParameter[] createSearchParameters()
+	@SuppressWarnings("unchecked")
+	private SearchParameter<R>[] createSearchParameters()
 	{
 		return searchParameterFactories.stream().map(Supplier::get).toArray(SearchParameter[]::new);
 	}
@@ -329,10 +334,16 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 
 		R createdResource = handleSql(() -> dao.create(resource));
 
+		postCreate(createdResource);
+
 		URI location = uri.getAbsolutePathBuilder().path("/{id}/_history/{vid}")
 				.build(createdResource.getIdElement().getIdPart(), createdResource.getIdElement().getVersionIdPart());
 
 		return response(Status.CREATED, createdResource, null).location(location).build();
+	}
+
+	protected void postCreate(R createdResource)
+	{
 	}
 
 	@GET
@@ -366,21 +377,37 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 	{
 		logger.trace("PUT '{}'", uri.getRequestUri().toString());
 
-		if (!Objects.equals(id, resource.getIdElement().getIdPart()))
-			return Response.status(Status.BAD_REQUEST)
-					.entity(createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING, "Path id not equal to "
-							+ resourceTypeName + " id (" + id + "vs." + resource.getIdElement().getIdPart() + ")."))
-					.build();
-		if (resource.getIdElement().getBaseUrl() != null && !serverBase.equals(resource.getIdElement().getBaseUrl()))
-			return Response.status(Status.BAD_REQUEST)
-					.entity(createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
-							resourceTypeName + " id.baseUrl must be null or equal to " + serverBase + ", value "
-									+ resource.getIdElement().getBaseUrl() + " unexpected."))
-					.build();
+		IdType resourceId = resource.getIdElement();
 
-		R updated = handleSqlAndNotFound(() -> dao.update(resource));
+		if (!Objects.equals(id, resourceId.getIdPart()))
+			return createPathVsElementIdResponse(id, resourceId);
+		if (resourceId.getBaseUrl() != null && !serverBase.equals(resourceId.getBaseUrl()))
+			return createInvalidBaseUrlResponse(resourceId);
 
-		return response(Status.OK, updated, null).build();
+		R updatedResource = handleSqlAndNotFound(() -> dao.update(resource));
+
+		postUpdate(updatedResource);
+
+		return response(Status.OK, updatedResource, null).build();
+	}
+
+	private Response createPathVsElementIdResponse(String id, IdType resourceId)
+	{
+		OperationOutcome out = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+				"Path id not equal to " + resourceTypeName + " id (" + id + "vs." + resourceId.getIdPart() + ").");
+		return Response.status(Status.BAD_REQUEST).entity(out).build();
+	}
+
+	private Response createInvalidBaseUrlResponse(IdType resourceId)
+	{
+		OperationOutcome out = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+				resourceTypeName + " id.baseUrl must be null or equal to " + serverBase + ", value "
+						+ resourceId.getBaseUrl() + " unexpected.");
+		return Response.status(Status.BAD_REQUEST).entity(out).build();
+	}
+
+	protected void postUpdate(R updatedResource)
+	{
 	}
 
 	@DELETE
@@ -428,9 +455,31 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 	{
 		logger.trace("POST {}", uri.getRequestUri().toString());
 
-		// ValidationResult validationResult = validator.validate(resource);
+		Optional<Resource> resource = getResource(parameters, "resource");
+		if (resource.isEmpty())
+			return Response.status(Status.BAD_REQUEST).build(); // TODO return OperationOutcome, hint post with id url?
+
+		Type mode = parameters.getParameter("mode");
+		if (!(mode instanceof CodeType))
+			return Response.status(Status.BAD_REQUEST).build(); // TODO return OperationOutcome
+
+		Type profile = parameters.getParameter("profile");
+		if (!(profile instanceof UriType))
+			return Response.status(Status.BAD_REQUEST).build(); // TODO return OperationOutcome
+
+		// TODO handle mode and profile parameters
+
+		ValidationResult validationResult = validator.validate(resource.get());
+
+		// TODO create return values
 
 		return Response.ok().build();
+	}
+
+	private Optional<Resource> getResource(Parameters parameters, String parameterName)
+	{
+		return parameters.getParameter().stream().filter(p -> parameterName.equals(p.getName())).findFirst()
+				.map(ParametersParameterComponent::getResource);
 	}
 
 	@POST
@@ -440,8 +489,8 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 	{
 		logger.trace("POST {}", uri.getRequestUri().toString());
 
-		if (parameters.hasParameter("resource"))
-			return Response.status(Status.BAD_REQUEST).build(); // TODO return OperationOutcome
+		if (getResource(parameters, "resource").isPresent())
+			return Response.status(Status.BAD_REQUEST).build(); // TODO return OperationOutcome, hint post with id url?
 
 		Type mode = parameters.getParameter("mode");
 		if (!(mode instanceof CodeType))
@@ -452,5 +501,15 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 			return Response.status(Status.BAD_REQUEST).build(); // TODO return OperationOutcome
 
 		return Response.ok().build();
+	}
+
+	protected OperationOutcome createValidationOutcome(List<ValidationMessage> messages)
+	{
+		OperationOutcome outcome = new OperationOutcome();
+		List<OperationOutcomeIssueComponent> issues = messages.stream().map(vm -> new OperationOutcomeIssueComponent()
+				.setSeverity(IssueSeverity.ERROR).setCode(IssueType.STRUCTURE).setDiagnostics(vm.getMessage()))
+				.collect(Collectors.toList());
+		outcome.setIssue(issues);
+		return outcome;
 	}
 }
