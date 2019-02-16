@@ -7,9 +7,13 @@ import org.highmed.fhir.search.SearchParameter;
 import org.highmed.fhir.webservice.search.AbstractCanonicalUrlParameter;
 import org.highmed.fhir.webservice.search.WsSearchParameter.SearchParameterDefinition;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
+import org.hl7.fhir.r4.model.StructureDefinition;
+
+import com.google.common.base.Objects;
 
 @SearchParameterDefinition(name = StructureDefinitionUrl.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/conformance-url", type = SearchParamType.URI, documentation = "The uri that identifies the structure definition")
-public class StructureDefinitionUrl extends AbstractCanonicalUrlParameter implements SearchParameter
+public class StructureDefinitionUrl extends AbstractCanonicalUrlParameter
+		implements SearchParameter<StructureDefinition>
 {
 	public static final String PARAMETER_NAME = "url";
 
@@ -59,5 +63,21 @@ public class StructureDefinitionUrl extends AbstractCanonicalUrlParameter implem
 			}
 		else if (subqueryParameterIndex == 2)
 			statement.setString(parameterIndex, valueAndType.version);
+	}
+
+	@Override
+	public boolean matches(StructureDefinition resource)
+	{
+		switch (valueAndType.type)
+		{
+			case PRECISE:
+				return Objects.equal(resource.getUrl(), valueAndType.url)
+						&& (valueAndType.version == null || Objects.equal(resource.getVersion(), valueAndType.version));
+			case BELOW:
+				return resource.getUrl() != null && resource.getUrl().startsWith(valueAndType.url)
+						&& (valueAndType.version == null || Objects.equal(resource.getVersion(), valueAndType.version));
+			default:
+				return false;
+		}
 	}
 }

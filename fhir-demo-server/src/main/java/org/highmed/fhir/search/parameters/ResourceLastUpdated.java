@@ -14,10 +14,11 @@ import java.util.stream.Collectors;
 import org.highmed.fhir.search.SearchParameter;
 import org.highmed.fhir.webservice.search.AbstractDateTimeParameter;
 import org.highmed.fhir.webservice.search.WsSearchParameter.SearchParameterDefinition;
+import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 
 @SearchParameterDefinition(name = ResourceLastUpdated.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Resource-lastUpdated", type = SearchParamType.DATE, documentation = "When the resource version last changed")
-public class ResourceLastUpdated extends AbstractDateTimeParameter implements SearchParameter
+public class ResourceLastUpdated extends AbstractDateTimeParameter implements SearchParameter<DomainResource>
 {
 	public static final String PARAMETER_NAME = "_lastUpdated";
 
@@ -91,5 +92,84 @@ public class ResourceLastUpdated extends AbstractDateTimeParameter implements Se
 					.valueOf(((ZonedDateTime) value).withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime()));
 		else if (value instanceof LocalDate)
 			statement.setDate(parameterIndex, Date.valueOf((LocalDate) value));
+	}
+
+	@Override
+	public boolean matches(DomainResource resource)
+	{
+		ZonedDateTime lastUpdated = toZonedDateTime(resource.getMeta().getLastUpdated());
+		return lastUpdated != null && getValuesAndTypes().stream().allMatch(value -> matches(lastUpdated, value));
+	}
+
+	private ZonedDateTime toZonedDateTime(java.util.Date date)
+	{
+		if (date == null)
+			return null;
+
+		return ZonedDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+	}
+
+	private boolean matches(ZonedDateTime lastUpdated, DateTimeValueAndTypeAndSearchType value)
+	{
+		switch (value.type)
+		{
+			case ZONED_DATE_TIME:
+				return matches(lastUpdated, (ZonedDateTime) value.value, value.searchType);
+			case LOCAL_DATE:
+				return matches(lastUpdated.toLocalDate(), (LocalDate) value.value, value.searchType);
+			case YEAR_MONTH_PERIOD:
+			case YEAR_PERIOD:
+				return matches(lastUpdated.toLocalDate(), (LocalDatePair) value.value);
+			default:
+				return false;
+		}
+	}
+
+	private boolean matches(ZonedDateTime lastUpdated, ZonedDateTime value, DateTimeSearchType type)
+	{
+		switch (type)
+		{
+			case EQ:
+				return lastUpdated.equals(value);
+			case GT:
+				return lastUpdated.isAfter(value);
+			case GE:
+				return lastUpdated.isAfter(value) || lastUpdated.equals(value);
+			case LT:
+				return lastUpdated.isBefore(value);
+			case LE:
+				return lastUpdated.isBefore(value) || lastUpdated.equals(value);
+			case NE:
+				return !lastUpdated.isEqual(value);
+			default:
+				return false;
+		}
+	}
+
+	private boolean matches(LocalDate lastUpdated, LocalDate value, DateTimeSearchType type)
+	{
+		switch (type)
+		{
+			case EQ:
+				return lastUpdated.equals(value);
+			case GT:
+				return lastUpdated.isAfter(value);
+			case GE:
+				return lastUpdated.isAfter(value) || lastUpdated.equals(value);
+			case LT:
+				return lastUpdated.isBefore(value);
+			case LE:
+				return lastUpdated.isBefore(value) || lastUpdated.equals(value);
+			case NE:
+				return !lastUpdated.isEqual(value);
+			default:
+				return false;
+		}
+	}
+
+	private boolean matches(LocalDate lastUpdated, LocalDatePair value)
+	{
+		return (lastUpdated.isAfter(value.startInclusive) || lastUpdated.isEqual(value.startInclusive))
+				&& lastUpdated.isBefore(value.endExclusive);
 	}
 }

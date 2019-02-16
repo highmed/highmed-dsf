@@ -8,10 +8,13 @@ import javax.ws.rs.core.UriBuilder;
 
 import org.highmed.fhir.search.SearchParameter;
 import org.highmed.fhir.webservice.search.WsSearchParameter.SearchParameterDefinition;
+import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 
+import com.google.common.base.Objects;
+
 @SearchParameterDefinition(name = ResourceId.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Resource-id", type = SearchParamType.TOKEN, documentation = "Logical id of this artifact")
-public class ResourceId implements SearchParameter
+public class ResourceId implements SearchParameter<DomainResource>
 {
 	public static final String PARAMETER_NAME = "_id";
 
@@ -63,5 +66,11 @@ public class ResourceId implements SearchParameter
 	public void modifyBundleUri(UriBuilder bundleUri)
 	{
 		bundleUri.replaceQueryParam(PARAMETER_NAME, id);
+	}
+
+	@Override
+	public boolean matches(DomainResource resource)
+	{
+		return Objects.equal(resource.getId(), id);
 	}
 }

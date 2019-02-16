@@ -10,9 +10,12 @@ import org.highmed.fhir.search.SearchParameter;
 import org.highmed.fhir.webservice.search.WsSearchParameter.SearchParameterDefinition;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
+import org.hl7.fhir.r4.model.Task;
+
+import com.google.common.base.Objects;
 
 @SearchParameterDefinition(name = TaskStatus.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Task-status", type = SearchParamType.TOKEN, documentation = "Search by task status")
-public class TaskStatus implements SearchParameter
+public class TaskStatus implements SearchParameter<Task>
 {
 	public static final String PARAMETER_NAME = "status";
 
@@ -67,5 +70,11 @@ public class TaskStatus implements SearchParameter
 	public void modifyBundleUri(UriBuilder bundleUri)
 	{
 		bundleUri.replaceQueryParam(PARAMETER_NAME, status.toCode());
+	}
+
+	@Override
+	public boolean matches(Task resource)
+	{
+		return Objects.equal(resource.getStatus(), status);
 	}
 }

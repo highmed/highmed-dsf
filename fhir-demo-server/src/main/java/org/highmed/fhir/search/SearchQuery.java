@@ -46,7 +46,7 @@ public class SearchQuery implements DbSearchQuery
 		private final int page;
 		private final int count;
 
-		private final List<SearchParameter> searchQueries = new ArrayList<SearchParameter>();
+		private final List<SearchParameter<?>> searchQueries = new ArrayList<SearchParameter<?>>();
 
 		public SearchQueryBuilderForDb(String resourceTable, String resourceIdColumn, String resourceColumn, int page,
 				int count)
@@ -58,13 +58,13 @@ public class SearchQuery implements DbSearchQuery
 			this.count = count;
 		}
 
-		public SearchQueryBuilderForDb with(SearchParameter searchQuery)
+		public SearchQueryBuilderForDb with(SearchParameter<?> searchQuery)
 		{
 			this.searchQueries.add(searchQuery);
 			return this;
 		}
 
-		public SearchQueryBuilderForDb with(SearchParameter... searchQueries)
+		public SearchQueryBuilderForDb with(SearchParameter<?>... searchQueries)
 		{
 			this.searchQueries.addAll(Arrays.asList(searchQueries));
 			return this;
@@ -78,13 +78,13 @@ public class SearchQuery implements DbSearchQuery
 
 	private final String searchQueryMain;
 	private final String countQueryMain;
-	private final List<SearchParameter> searchParameters = new ArrayList<SearchParameter>();
+	private final List<SearchParameter<?>> searchParameters = new ArrayList<SearchParameter<?>>();
 	private final PageAndCount pageAndCount;
 
 	private String filterQuery = "";
 
 	SearchQuery(String resourceTable, String resourceIdColumn, String resourceColumn, int page, int count,
-			List<? extends SearchParameter> searchParameters)
+			List<? extends SearchParameter<?>> searchParameters)
 	{
 		this.searchQueryMain = "SELECT " + resourceColumn + " FROM (SELECT DISTINCT ON (" + resourceIdColumn + ") "
 				+ resourceColumn + " FROM " + resourceTable + " WHERE NOT deleted ORDER BY " + resourceIdColumn
@@ -121,11 +121,11 @@ public class SearchQuery implements DbSearchQuery
 	@Override
 	public void modifyStatement(PreparedStatement statement) throws SQLException
 	{
-		List<SearchParameter> filtered = searchParameters.stream().filter(SearchParameter::isDefined)
+		List<SearchParameter<?>> filtered = searchParameters.stream().filter(SearchParameter::isDefined)
 				.collect(Collectors.toList());
 
 		int index = 0;
-		for (SearchParameter q : filtered)
+		for (SearchParameter<?> q : filtered)
 			for (int i = 0; i < q.getSqlParameterCount(); i++)
 				q.modifyStatement(++index, i + 1, statement);
 	}
