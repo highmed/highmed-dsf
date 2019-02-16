@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <StructureDefinition xmlns="http://hl7.org/fhir">
-	<id value="504" />
 	<meta>
-		<versionId value="1" />
 		<lastUpdated value="2019-02-13T11:58:44.527-05:00" />
 	</meta>
+	<version value="0.0.1" />
 	<url
 		value="http://highmed.org/fhir/StructureDefinition/DataSharingTask" />
 	<name value="highmed-data-sharing-task" />

@@ -4,6 +4,7 @@ import javax.ws.rs.Path;
 
 import org.highmed.fhir.dao.OrganizationDao;
 import org.highmed.fhir.search.parameters.OrganizationName;
+import org.highmed.fhir.service.ResourceValidator;
 import org.hl7.fhir.r4.model.Organization;
 
 @Path(OrganizationService.RESOURCE_TYPE_NAME)
@@ -11,9 +12,9 @@ public class OrganizationService extends AbstractService<OrganizationDao, Organi
 {
 	public static final String RESOURCE_TYPE_NAME = "Organization";
 
-	public OrganizationService(String serverBase, int defaultPageCount, OrganizationDao organizationDao)
+	public OrganizationService(String serverBase, int defaultPageCount, OrganizationDao organizationDao,
+			ResourceValidator validator)
 	{
-		super(serverBase, defaultPageCount, RESOURCE_TYPE_NAME, organizationDao,
-				withSearchParameters(new OrganizationName()));
+		super(serverBase, defaultPageCount, RESOURCE_TYPE_NAME, organizationDao, validator, OrganizationName::new);
 	}
 }

@@ -29,6 +29,12 @@ public class WebserviceConfig
 	@Autowired
 	private DaoConfig daoConfig;
 
+	@Autowired
+	private ValidationConfig validationConfig;
+
+	@Autowired
+	private SnapshotConfig snapshotConfig;
+
 	@Bean
 	public ConformanceService conformanceService()
 	{
@@ -38,66 +44,76 @@ public class WebserviceConfig
 	@Bean
 	public HealthcareServiceService healthcareServiceService()
 	{
-		return new HealthcareServiceService(serverBase, defaultPageCount, daoConfig.healthcareServiceDao());
+		return new HealthcareServiceService(serverBase, defaultPageCount, daoConfig.healthcareServiceDao(),
+				validationConfig.resourceValidator());
 	}
 
 	@Bean
 	public LocationService locationService()
 	{
-		return new LocationService(serverBase, defaultPageCount, daoConfig.locationDao());
+		return new LocationService(serverBase, defaultPageCount, daoConfig.locationDao(),
+				validationConfig.resourceValidator());
 	}
 
 	@Bean
 	public OrganizationService organizationService()
 	{
-		return new OrganizationService(serverBase, defaultPageCount, daoConfig.organizationDao());
+		return new OrganizationService(serverBase, defaultPageCount, daoConfig.organizationDao(),
+				validationConfig.resourceValidator());
 	}
 
 	@Bean
 	public PatientService patientService()
 	{
-		return new PatientService(serverBase, defaultPageCount, daoConfig.patientDao());
+		return new PatientService(serverBase, defaultPageCount, daoConfig.patientDao(),
+				validationConfig.resourceValidator());
 	}
 
 	@Bean
 	public PractitionerRoleService practitionerRoleService()
 	{
-		return new PractitionerRoleService(serverBase, defaultPageCount, daoConfig.practitionerRoleDao());
+		return new PractitionerRoleService(serverBase, defaultPageCount, daoConfig.practitionerRoleDao(),
+				validationConfig.resourceValidator());
 	}
 
 	@Bean
 	public PractitionerService practitionerService()
 	{
-		return new PractitionerService(serverBase, defaultPageCount, daoConfig.practitionerDao());
+		return new PractitionerService(serverBase, defaultPageCount, daoConfig.practitionerDao(),
+				validationConfig.resourceValidator());
 	}
 
 	@Bean
 	public ProvenanceService provenanceService()
 	{
-		return new ProvenanceService(serverBase, defaultPageCount, daoConfig.provenanceDao());
+		return new ProvenanceService(serverBase, defaultPageCount, daoConfig.provenanceDao(),
+				validationConfig.resourceValidator());
 	}
 
 	@Bean
 	public ResearchStudyService researchStudyService()
 	{
-		return new ResearchStudyService(serverBase, defaultPageCount, daoConfig.researchStudyDao());
+		return new ResearchStudyService(serverBase, defaultPageCount, daoConfig.researchStudyDao(),
+				validationConfig.resourceValidator());
 	}
 
 	@Bean
 	public StructureDefinitionService structureDefinitionService()
 	{
-		return new StructureDefinitionService(serverBase, defaultPageCount, daoConfig.structureDefinitionDao());
+		return new StructureDefinitionService(serverBase, defaultPageCount, daoConfig.structureDefinitionDao(),
+				validationConfig.resourceValidator(), snapshotConfig.snapshotGenerator());
 	}
 
 	@Bean
 	public SubscriptionService subscriptionService()
 	{
-		return new SubscriptionService(serverBase, defaultPageCount, daoConfig.subscriptionDao());
+		return new SubscriptionService(serverBase, defaultPageCount, daoConfig.subscriptionDao(),
+				validationConfig.resourceValidator());
 	}
 
 	@Bean
 	public TaskService taskService()
 	{
-		return new TaskService(serverBase, defaultPageCount, daoConfig.taskDao());
+		return new TaskService(serverBase, defaultPageCount, daoConfig.taskDao(), validationConfig.resourceValidator());
 	}
 }

@@ -3,6 +3,7 @@ package org.highmed.fhir.webservice;
 import javax.ws.rs.Path;
 
 import org.highmed.fhir.dao.HealthcareServiceDao;
+import org.highmed.fhir.service.ResourceValidator;
 import org.hl7.fhir.r4.model.HealthcareService;
 
 @Path(HealthcareServiceService.RESOURCE_TYPE_NAME)
@@ -10,8 +11,9 @@ public class HealthcareServiceService extends AbstractService<HealthcareServiceD
 {
 	public static final String RESOURCE_TYPE_NAME = "HealthcareService";
 
-	public HealthcareServiceService(String serverBase, int defaultPageCount, HealthcareServiceDao healthcareServiceDao)
+	public HealthcareServiceService(String serverBase, int defaultPageCount, HealthcareServiceDao healthcareServiceDao,
+			ResourceValidator validator)
 	{
-		super(serverBase, defaultPageCount, RESOURCE_TYPE_NAME, healthcareServiceDao, withSearchParameters());
+		super(serverBase, defaultPageCount, RESOURCE_TYPE_NAME, healthcareServiceDao, validator);
 	}
 }

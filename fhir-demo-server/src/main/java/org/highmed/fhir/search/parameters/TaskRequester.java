@@ -56,7 +56,6 @@ public class TaskRequester implements SearchParameter
 	@Override
 	public void modifyBundleUri(UriBuilder bundleUri)
 	{
-		if (requester != null)
-			bundleUri = bundleUri.replaceQueryParam(PARAMETER_NAME, requester);
+		bundleUri.replaceQueryParam(PARAMETER_NAME, requester);
 	}
 }

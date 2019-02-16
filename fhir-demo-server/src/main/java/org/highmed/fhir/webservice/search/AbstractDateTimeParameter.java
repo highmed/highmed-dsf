@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 
-public abstract class AbstractDateTimeSearch implements WsSearchParameter
+public abstract class AbstractDateTimeParameter implements WsSearchParameter
 {
 	protected static enum DateTimeSearchType
 	{
@@ -81,7 +81,7 @@ public abstract class AbstractDateTimeSearch implements WsSearchParameter
 
 	private List<DateTimeValueAndTypeAndSearchType> valuesAndTypes = new ArrayList<>();
 
-	public AbstractDateTimeSearch(String parameterName)
+	public AbstractDateTimeParameter(String parameterName)
 	{
 		this.parameterName = parameterName;
 	}

@@ -17,6 +17,7 @@ import org.highmed.fhir.dao.search.DbSearchParameter;
 import org.highmed.fhir.search.parameters.OrganizationName;
 import org.highmed.fhir.search.parameters.ResourceId;
 import org.highmed.fhir.search.parameters.ResourceLastUpdated;
+import org.highmed.fhir.search.parameters.StructureDefinitionUrl;
 import org.highmed.fhir.search.parameters.TaskRequester;
 import org.highmed.fhir.search.parameters.TaskStatus;
 import org.highmed.fhir.webservice.search.WsSearchParameter.SearchParameterDefinition;
@@ -111,7 +112,10 @@ public class ConformanceService
 		searchParameters.put(Task.class, Arrays.asList(taskRequester, taskStatus));
 
 		var organizationNameOrAlias = createCapabilityStatementPart(OrganizationName.class);
-		searchParameters.put(Organization.class, Arrays.asList(taskRequester, organizationNameOrAlias));
+		searchParameters.put(Organization.class, Arrays.asList(organizationNameOrAlias));
+
+		var structureDefinitionUrl = createCapabilityStatementPart(StructureDefinitionUrl.class);
+		searchParameters.put(StructureDefinition.class, Arrays.asList(structureDefinitionUrl));
 
 		for (Class<? extends DomainResource> resource : resources)
 		{

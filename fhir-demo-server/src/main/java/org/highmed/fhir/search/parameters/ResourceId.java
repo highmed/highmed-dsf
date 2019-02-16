@@ -62,7 +62,6 @@ public class ResourceId implements SearchParameter
 	@Override
 	public void modifyBundleUri(UriBuilder bundleUri)
 	{
-		if (id != null)
-			bundleUri.replaceQueryParam(PARAMETER_NAME, id);
+		bundleUri.replaceQueryParam(PARAMETER_NAME, id);
 	}
 }

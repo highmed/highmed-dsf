@@ -41,15 +41,19 @@ import org.highmed.fhir.function.SupplierWithSqlException;
 import org.highmed.fhir.search.PartialResult;
 import org.highmed.fhir.search.SearchParameter;
 import org.highmed.fhir.search.SearchQuery;
+import org.highmed.fhir.service.ResourceValidator;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.UriType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +61,10 @@ import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.rest.api.Constants;
 
+@Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
+		Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+@Produces({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
+		Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
 public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R extends DomainResource>
 		implements InitializingBean
 {
@@ -71,28 +79,24 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 	private final int defaultPageCount;
 	private final String resourceTypeName;
 	private final D dao;
-	private final Supplier<SearchParameter[]> searchParameterFactory;
+	private final List<Supplier<SearchParameter>> searchParameterFactories;
+
+	private ResourceValidator validator;
 
 	/*
 	 * Using a supplier for SearchParameters, because implementations are not thread safe and need to be created on a
 	 * request basis
 	 */
+	@SafeVarargs
 	public AbstractService(String serverBase, int defaultPageCount, String resourceTypeName, D dao,
-			Supplier<SearchParameter[]> searchParameterFactory)
+			ResourceValidator validator, Supplier<SearchParameter>... searchParameterFactories)
 	{
 		this.serverBase = serverBase;
 		this.defaultPageCount = defaultPageCount;
 		this.resourceTypeName = resourceTypeName;
 		this.dao = dao;
-		this.searchParameterFactory = searchParameterFactory;
-	}
-
-	protected static Supplier<SearchParameter[]> withSearchParameters(SearchParameter... searchParameters)
-	{
-		return () ->
-		{
-			return searchParameters;
-		};
+		this.validator = validator;
+		this.searchParameterFactories = Arrays.asList(searchParameterFactories);
 	}
 
 	public void afterPropertiesSet() throws Exception
@@ -100,6 +104,8 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 		Objects.requireNonNull(serverBase, "serverBase");
 		Objects.requireNonNull(resourceTypeName, "resourceTypeName");
 		Objects.requireNonNull(dao, "dao");
+		Objects.requireNonNull(validator, "validator");
+		Objects.requireNonNull(searchParameterFactories, "searchParameterFactory");
 	}
 
 	protected D getDao()
@@ -120,8 +126,7 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 		}
 		catch (SQLException e)
 		{
-			logger.error("Error while accessing db", e);
-			throw new WebApplicationException();
+			throw logSqlExceptionAndCreateWebApplicationException(e);
 		}
 	}
 
@@ -133,8 +138,7 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 		}
 		catch (SQLException e)
 		{
-			logger.error("Error while accessing db", e);
-			throw new WebApplicationException();
+			throw logSqlExceptionAndCreateWebApplicationException(e);
 		}
 	}
 
@@ -151,9 +155,15 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 		}
 		catch (SQLException e)
 		{
-			logger.error("Error while accessing db", e);
-			throw new WebApplicationException();
+			throw logSqlExceptionAndCreateWebApplicationException(e);
 		}
+	}
+
+	private WebApplicationException logSqlExceptionAndCreateWebApplicationException(SQLException e)
+	{
+		logger.error("Error while accessing DB", e);
+		return new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR)
+				.entity(createOutcome(IssueSeverity.ERROR, IssueType.EXCEPTION, "Error while accessing DB")).build());
 	}
 
 	protected <RS> RS handleSqlAndNotFound(SupplierWithSqlAndResourceNotFoundException<RS> s)
@@ -170,8 +180,7 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 		}
 		catch (SQLException e)
 		{
-			logger.error("Error while accessing db", e);
-			throw new WebApplicationException();
+			throw logSqlExceptionAndCreateWebApplicationException(e);
 		}
 	}
 
@@ -186,7 +195,7 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 		return toFullId(new IdType(id)).asStringValue();
 	}
 
-	private OperationOutcome createOutcome(IssueSeverity severity, IssueType type, String diagnostics)
+	protected OperationOutcome createOutcome(IssueSeverity severity, IssueType type, String diagnostics)
 	{
 		OperationOutcome outcome = new OperationOutcome();
 		outcome.getIssueFirstRep().setSeverity(severity);
@@ -195,21 +204,7 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 		return outcome;
 	}
 
-	@GET
-	@Path("/{id}")
-	@Produces({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
-			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
-	public Response read(@PathParam("id") String id, @QueryParam("_format") String format, @Context UriInfo uri)
-	{
-		logger.trace("GET '{}'", uri.getRequestUri().toString());
-
-		Optional<R> read = withUuid(id, uuid -> handleSqlAndDeleted(() -> dao.read(uuid)));
-
-		return read.map(d -> response(Status.OK, d, toSpecialMimeType(format)))
-				.orElse(Response.status(Status.NOT_FOUND)).build();
-	}
-
-	private Optional<R> withUuid(String id, Function<UUID, Optional<R>> withUuid)
+	protected final Optional<R> withUuid(String id, Function<UUID, Optional<R>> withUuid)
 	{
 		UUID uuid;
 		try
@@ -222,21 +217,6 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 		}
 
 		return withUuid.apply(uuid);
-	}
-
-	@GET
-	@Path("/{id}/_history/{vid}")
-	@Produces({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
-			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
-	public Response vread(@PathParam("id") String id, @PathParam("vid") long version,
-			@QueryParam("_format") String format, @Context UriInfo uri)
-	{
-		logger.trace("GET '{}'", uri.getRequestUri().toString());
-
-		Optional<R> read = withUuid(id, uuid -> handleSql(() -> dao.readVersion(uuid, version)));
-
-		return read.map(d -> response(Status.OK, d, toSpecialMimeType(format)))
-				.orElse(Response.status(Status.NOT_FOUND)).build();
 	}
 
 	protected String toSpecialMimeType(String format)
@@ -270,89 +250,6 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 		}
 
 		return b;
-	}
-
-	@PUT
-	@Path("/{id}")
-	@Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
-			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
-	public Response update(@PathParam("id") String id, R resource, @Context UriInfo uri)
-	{
-		logger.trace("PUT '{}'", uri.getRequestUri().toString());
-
-		if (!Objects.equals(id, resource.getIdElement().getIdPart()))
-			return Response.status(Status.BAD_REQUEST)
-					.entity(createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING, "Path id not equal to "
-							+ resourceTypeName + " id (" + id + "vs." + resource.getIdElement().getIdPart() + ")."))
-					.build();
-		if (resource.getIdElement().getBaseUrl() != null && !serverBase.equals(resource.getIdElement().getBaseUrl()))
-			return Response.status(Status.BAD_REQUEST)
-					.entity(createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
-							resourceTypeName + " id.baseUrl must be null or equal to " + serverBase + ", value "
-									+ resource.getIdElement().getBaseUrl() + " unexpected."))
-					.build();
-
-		R updated = handleSqlAndNotFound(() -> dao.update(resource));
-
-		return response(Status.OK, updated, null).build();
-	}
-
-	@DELETE
-	@Path("/{id}")
-	@Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
-			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
-	public Response delete(@PathParam("id") String id, @Context UriInfo uri)
-	{
-		logger.trace("DELETE '{}'", uri.getRequestUri().toString());
-
-		handleSql(() -> dao.delete(new IdType(id)));
-
-		return response(Status.OK, null, null).build();
-	}
-
-	@POST
-	@Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
-			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
-	public Response create(R resource, @Context UriInfo uri)
-	{
-		logger.trace("POST '{}'", uri.getRequestUri().toString());
-
-		R createdResource = handleSql(() -> dao.create(resource));
-
-		URI location = uri.getAbsolutePathBuilder().path("/{id}/_history/{vid}")
-				.build(createdResource.getIdElement().getIdPart(), createdResource.getIdElement().getVersionIdPart());
-
-		return response(Status.CREATED, createdResource, null).location(location).build();
-	}
-
-	@GET
-	@Produces({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
-			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
-	public Response search(@Context UriInfo uri)
-	{
-		logger.trace("GET {}", uri.getRequestUri().toString());
-
-		MultivaluedMap<String, String> queryParameters = uri.getQueryParameters();
-
-		Integer count = getFirstInt(queryParameters, "_count");
-		Integer page = getFirstInt(queryParameters, "page");
-		String format = queryParameters.getFirst("format");
-
-		int effectivePage = page == null ? 1 : page;
-		int effectiveCount = (count == null || count < 0) ? getDefaultPageCount() : count;
-
-		/* SearchParameter implementations are not thread safe and need to be created on a request basis */
-		SearchQuery query = getDao().createSearchQueryBuilder().with(effectivePage, effectiveCount)
-				.with(getDao().createResourceSearchParameters()).with(searchParameterFactory.get()).build();
-
-		query.configureParameters(queryParameters);
-
-		PartialResult<R> results = handleSql(() -> getDao().search(query));
-
-		UriBuilder bundleUri = uri.getAbsolutePathBuilder();
-		query.configureBundleUri(bundleUri);
-
-		return response(Status.OK, createSearchSet(results, bundleUri, format), toSpecialMimeType(format)).build();
 	}
 
 	private Integer getFirstInt(MultivaluedMap<String, String> queryParameters, String key)
@@ -418,5 +315,142 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 		}
 
 		return bundle;
+	}
+
+	private SearchParameter[] createSearchParameters()
+	{
+		return searchParameterFactories.stream().map(Supplier::get).toArray(SearchParameter[]::new);
+	}
+
+	@POST
+	public Response create(R resource, @Context UriInfo uri)
+	{
+		logger.trace("POST '{}'", uri.getRequestUri().toString());
+
+		R createdResource = handleSql(() -> dao.create(resource));
+
+		URI location = uri.getAbsolutePathBuilder().path("/{id}/_history/{vid}")
+				.build(createdResource.getIdElement().getIdPart(), createdResource.getIdElement().getVersionIdPart());
+
+		return response(Status.CREATED, createdResource, null).location(location).build();
+	}
+
+	@GET
+	@Path("/{id}")
+	public Response read(@PathParam("id") String id, @QueryParam("_format") String format, @Context UriInfo uri)
+	{
+		logger.trace("GET '{}'", uri.getRequestUri().toString());
+
+		Optional<R> read = withUuid(id, uuid -> handleSqlAndDeleted(() -> dao.read(uuid)));
+
+		return read.map(d -> response(Status.OK, d, toSpecialMimeType(format)))
+				.orElse(Response.status(Status.NOT_FOUND)).build();
+	}
+
+	@GET
+	@Path("/{id}/_history/{vid}")
+	public Response vread(@PathParam("id") String id, @PathParam("vid") long version,
+			@QueryParam("_format") String format, @Context UriInfo uri)
+	{
+		logger.trace("GET '{}'", uri.getRequestUri().toString());
+
+		Optional<R> read = withUuid(id, uuid -> handleSql(() -> dao.readVersion(uuid, version)));
+
+		return read.map(d -> response(Status.OK, d, toSpecialMimeType(format)))
+				.orElse(Response.status(Status.NOT_FOUND)).build();
+	}
+
+	@PUT
+	@Path("/{id}")
+	public Response update(@PathParam("id") String id, R resource, @Context UriInfo uri)
+	{
+		logger.trace("PUT '{}'", uri.getRequestUri().toString());
+
+		if (!Objects.equals(id, resource.getIdElement().getIdPart()))
+			return Response.status(Status.BAD_REQUEST)
+					.entity(createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING, "Path id not equal to "
+							+ resourceTypeName + " id (" + id + "vs." + resource.getIdElement().getIdPart() + ")."))
+					.build();
+		if (resource.getIdElement().getBaseUrl() != null && !serverBase.equals(resource.getIdElement().getBaseUrl()))
+			return Response.status(Status.BAD_REQUEST)
+					.entity(createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+							resourceTypeName + " id.baseUrl must be null or equal to " + serverBase + ", value "
+									+ resource.getIdElement().getBaseUrl() + " unexpected."))
+					.build();
+
+		R updated = handleSqlAndNotFound(() -> dao.update(resource));
+
+		return response(Status.OK, updated, null).build();
+	}
+
+	@DELETE
+	@Path("/{id}")
+	public Response delete(@PathParam("id") String id, @Context UriInfo uri)
+	{
+		logger.trace("DELETE '{}'", uri.getRequestUri().toString());
+
+		handleSql(() -> dao.delete(new IdType(id)));
+
+		return response(Status.OK, null, null).build();
+	}
+
+	@GET
+	public Response search(@Context UriInfo uri)
+	{
+		logger.trace("GET {}", uri.getRequestUri().toString());
+
+		MultivaluedMap<String, String> queryParameters = uri.getQueryParameters();
+
+		Integer count = getFirstInt(queryParameters, "_count");
+		Integer page = getFirstInt(queryParameters, "page");
+		String format = queryParameters.getFirst("format");
+
+		int effectivePage = page == null ? 1 : page;
+		int effectiveCount = (count == null || count < 0) ? getDefaultPageCount() : count;
+
+		/* SearchParameter implementations are not thread safe and need to be created on a request basis */
+		SearchQuery query = getDao().createSearchQueryBuilder().with(effectivePage, effectiveCount)
+				.with(getDao().createResourceSearchParameters()).with(createSearchParameters()).build();
+
+		query.configureParameters(queryParameters);
+
+		PartialResult<R> results = handleSql(() -> getDao().search(query));
+
+		UriBuilder bundleUri = uri.getAbsolutePathBuilder();
+		query.configureBundleUri(bundleUri);
+
+		return response(Status.OK, createSearchSet(results, bundleUri, format), toSpecialMimeType(format)).build();
+	}
+
+	@POST
+	@Path("/{validate : [$]validate(/)?}")
+	public Response validateNew(@PathParam("validate") String validate, Parameters parameters, @Context UriInfo uri)
+	{
+		logger.trace("POST {}", uri.getRequestUri().toString());
+
+		// ValidationResult validationResult = validator.validate(resource);
+
+		return Response.ok().build();
+	}
+
+	@POST
+	@Path("/{id}/{validate : [$]validate(/)?}")
+	public Response validateExisting(@PathParam("validate") String validate, Parameters parameters,
+			@Context UriInfo uri)
+	{
+		logger.trace("POST {}", uri.getRequestUri().toString());
+
+		if (parameters.hasParameter("resource"))
+			return Response.status(Status.BAD_REQUEST).build(); // TODO return OperationOutcome
+
+		Type mode = parameters.getParameter("mode");
+		if (!(mode instanceof CodeType))
+			return Response.status(Status.BAD_REQUEST).build(); // TODO return OperationOutcome
+
+		Type profile = parameters.getParameter("profile");
+		if (!(profile instanceof UriType))
+			return Response.status(Status.BAD_REQUEST).build(); // TODO return OperationOutcome
+
+		return Response.ok().build();
 	}
 }

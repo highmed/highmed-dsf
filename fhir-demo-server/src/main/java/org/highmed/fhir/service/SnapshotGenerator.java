@@ -38,9 +38,9 @@ public class SnapshotGenerator
 
 	private final IWorkerContext worker;
 
-	public SnapshotGenerator(FhirContext context, StructureDefinition... structureDefinitions)
+	public SnapshotGenerator(FhirContext fhirContext, StructureDefinition... structureDefinitions)
 	{
-		worker = createWorker(context, createValidationSupport(context, structureDefinitions));
+		worker = createWorker(fhirContext, createValidationSupport(fhirContext, structureDefinitions));
 	}
 
 	protected HapiWorkerContext createWorker(FhirContext context, IValidationSupport validationSupport)
@@ -54,10 +54,15 @@ public class SnapshotGenerator
 		return new DefaultProfileValidationSupportWithCustomStructureDefinitions(context, structureDefinitions);
 	}
 
-	public SnapshotWithValidationMessages generateSnapshot(String baseTypeName, String baseAbsoluteUrlPrefix,
+	public SnapshotWithValidationMessages generateSnapshot(StructureDefinition differential)
+	{
+		return generateSnapshot("", differential);
+	}
+
+	public SnapshotWithValidationMessages generateSnapshot(String baseAbsoluteUrlPrefix,
 			StructureDefinition differential)
 	{
-		StructureDefinition base = worker.fetchTypeDefinition(baseTypeName);
+		StructureDefinition base = worker.fetchTypeDefinition(differential.getType());
 
 		/* ProfileUtilities is not thread safe */
 		List<ValidationMessage> messages = new ArrayList<>();

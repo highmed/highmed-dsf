@@ -19,6 +19,8 @@ import org.highmed.fhir.adapter.LocationJsonFhirAdapter;
 import org.highmed.fhir.adapter.LocationXmlFhirAdapter;
 import org.highmed.fhir.adapter.OrganizationJsonFhirAdapter;
 import org.highmed.fhir.adapter.OrganizationXmlFhirAdapter;
+import org.highmed.fhir.adapter.ParametersJsonFhirAdapter;
+import org.highmed.fhir.adapter.ParametersXmlFhirAdapter;
 import org.highmed.fhir.adapter.PatientJsonFhirAdapter;
 import org.highmed.fhir.adapter.PatientXmlFhirAdapter;
 import org.highmed.fhir.adapter.PractitionerJsonFhirAdapter;
@@ -64,6 +66,7 @@ public class FhirJerseyClient extends AbstractJerseyClient
 				new HealthcareServiceJsonFhirAdapter(fhirContext), new HealthcareServiceXmlFhirAdapter(fhirContext),
 				new LocationJsonFhirAdapter(fhirContext), new LocationXmlFhirAdapter(fhirContext),
 				new OrganizationJsonFhirAdapter(fhirContext), new OrganizationXmlFhirAdapter(fhirContext),
+				new ParametersJsonFhirAdapter(fhirContext), new ParametersXmlFhirAdapter(fhirContext),
 				new PatientJsonFhirAdapter(fhirContext), new PatientXmlFhirAdapter(fhirContext),
 				new PractitionerJsonFhirAdapter(fhirContext), new PractitionerXmlFhirAdapter(fhirContext),
 				new PractitionerRoleJsonFhirAdapter(fhirContext), new PractitionerRoleXmlFhirAdapter(fhirContext),

@@ -127,7 +127,7 @@ public class SearchQuery implements DbSearchQuery
 		int index = 0;
 		for (SearchParameter q : filtered)
 			for (int i = 0; i < q.getSqlParameterCount(); i++)
-				q.modifyStatement(++index, i, statement);
+				q.modifyStatement(++index, i + 1, statement);
 	}
 
 	@Override
@@ -144,6 +144,6 @@ public class SearchQuery implements DbSearchQuery
 
 	public void configureBundleUri(UriBuilder bundleUri)
 	{
-		searchParameters.forEach(p -> p.modifyBundleUri(bundleUri));
+		searchParameters.stream().filter(SearchParameter::isDefined).forEach(p -> p.modifyBundleUri(bundleUri));
 	}
 }

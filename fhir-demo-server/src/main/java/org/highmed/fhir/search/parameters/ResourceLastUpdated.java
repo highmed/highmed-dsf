@@ -12,12 +12,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.highmed.fhir.search.SearchParameter;
-import org.highmed.fhir.webservice.search.AbstractDateTimeSearch;
+import org.highmed.fhir.webservice.search.AbstractDateTimeParameter;
 import org.highmed.fhir.webservice.search.WsSearchParameter.SearchParameterDefinition;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 
 @SearchParameterDefinition(name = ResourceLastUpdated.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Resource-lastUpdated", type = SearchParamType.DATE, documentation = "When the resource version last changed")
-public class ResourceLastUpdated extends AbstractDateTimeSearch implements SearchParameter
+public class ResourceLastUpdated extends AbstractDateTimeParameter implements SearchParameter
 {
 	public static final String PARAMETER_NAME = "_lastUpdated";
 

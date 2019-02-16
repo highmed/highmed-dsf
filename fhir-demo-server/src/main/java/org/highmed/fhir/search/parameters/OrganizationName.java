@@ -4,12 +4,12 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import org.highmed.fhir.search.SearchParameter;
-import org.highmed.fhir.webservice.search.AbstractStringSearch;
+import org.highmed.fhir.webservice.search.AbstractStringParameter;
 import org.highmed.fhir.webservice.search.WsSearchParameter.SearchParameterDefinition;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 
 @SearchParameterDefinition(name = OrganizationName.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Organization-name", type = SearchParamType.STRING, documentation = "A portion of the organization's name or alias")
-public class OrganizationName extends AbstractStringSearch implements SearchParameter
+public class OrganizationName extends AbstractStringParameter implements SearchParameter
 {
 	public static final String PARAMETER_NAME = "name";
 

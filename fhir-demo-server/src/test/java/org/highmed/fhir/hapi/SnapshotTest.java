@@ -66,9 +66,8 @@ public class SnapshotTest
 		SnapshotGenerator generator = new SnapshotGenerator(context,
 				reader.readXml(Paths.get("src/test/resources/extension-workflow-researchstudy.xml")));
 
-		SnapshotWithValidationMessages snapshot = generator.generateSnapshot(
-				Task.class.getAnnotation(ResourceDef.class).name(), "",
-				reader.readXml(Paths.get("src/test/resources/task-highmed-0.0.1.xml")));
+		SnapshotWithValidationMessages snapshot = generator
+				.generateSnapshot(reader.readXml(Paths.get("src/test/resources/task-highmed-0.0.1.xml")));
 
 		assertNotNull(snapshot);
 		assertNotNull(snapshot.getSnapshot());

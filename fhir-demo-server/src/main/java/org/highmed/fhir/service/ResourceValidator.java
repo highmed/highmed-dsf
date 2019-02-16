@@ -13,9 +13,10 @@ public class ResourceValidator
 {
 	private final FhirValidator validator;
 
-	public ResourceValidator(FhirContext context, StructureDefinition... structureDefinitions)
+	public ResourceValidator(FhirContext fhirContext, StructureDefinition... structureDefinitions)
 	{
-		validator = configureValidator(context.newValidator(), createValidationSupport(context, structureDefinitions));
+		validator = configureValidator(fhirContext.newValidator(),
+				createValidationSupport(fhirContext, structureDefinitions));
 	}
 
 	public ValidationResult validate(IBaseResource resource)

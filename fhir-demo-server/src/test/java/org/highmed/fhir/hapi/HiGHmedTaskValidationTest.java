@@ -34,7 +34,7 @@ public class HiGHmedTaskValidationTest
 				.readXml(Paths.get("src/test/resources/task-highmed-0.0.1.xml"));
 
 		SnapshotGenerator generator = new SnapshotGenerator(context, highmedTaskDiff);
-		SnapshotWithValidationMessages highmedTask = generator.generateSnapshot("Task", "", highmedTaskDiff);
+		SnapshotWithValidationMessages highmedTask = generator.generateSnapshot(highmedTaskDiff);
 
 		assertNotNull(highmedTask);
 		assertNotNull(highmedTask.getMessages());

@@ -3,7 +3,7 @@ package org.highmed.fhir.webservice.search;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 
-public abstract class AbstractStringSearch implements WsSearchParameter
+public abstract class AbstractStringParameter implements WsSearchParameter
 {
 	protected static enum StringSearchType
 	{
@@ -33,7 +33,7 @@ public abstract class AbstractStringSearch implements WsSearchParameter
 
 	protected StringValueAndSearchType valueAndType;
 
-	public AbstractStringSearch(String parameterName)
+	public AbstractStringParameter(String parameterName)
 	{
 		this.parameterName = parameterName;
 	}
@@ -71,7 +71,6 @@ public abstract class AbstractStringSearch implements WsSearchParameter
 	@Override
 	public void modifyBundleUri(UriBuilder bundleUri)
 	{
-		if (valueAndType != null)
-			bundleUri = bundleUri.replaceQueryParam(parameterName + valueAndType.type.sufix, valueAndType.value);
+		bundleUri.replaceQueryParam(parameterName + valueAndType.type.sufix, valueAndType.value);
 	}
 }
