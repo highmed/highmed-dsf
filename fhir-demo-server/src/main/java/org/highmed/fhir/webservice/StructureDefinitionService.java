@@ -88,6 +88,8 @@ public class StructureDefinitionService extends AbstractService<StructureDefinit
 	{
 		logger.trace("GET {}", uri.getRequestUri().toString());
 
+		//TODO 1. try get snapshot from db, 2. try generating
+		
 		Optional<StructureDefinition> differential = withUuid(id,
 				uuid -> handleSqlAndDeleted(() -> getDao().read(uuid)));
 
