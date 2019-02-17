@@ -58,8 +58,7 @@ public class StructureDefinitionService extends AbstractService<StructureDefinit
 			StructureDefinitionSnapshotDao structureDefinitionSnapshotDao, ResourceValidator validator,
 			EventManager eventManager, SnapshotGenerator snapshotGenerator)
 	{
-		super(serverBase, defaultPageCount, StructureDefinition.class, structureDefinitionDao, validator, eventManager,
-				StructureDefinitionUrl::new);
+		super(serverBase, defaultPageCount, StructureDefinition.class, structureDefinitionDao, validator, eventManager);
 
 		this.snapshotDao = structureDefinitionSnapshotDao;
 		this.snapshotGenerator = snapshotGenerator;
@@ -191,8 +190,7 @@ public class StructureDefinitionService extends AbstractService<StructureDefinit
 
 			logger.trace("Parameters with url {}", url.getValue());
 
-			SearchQuery query = createSearchQuery(1, 1, snapshotDao, 
-					createSearchParameters(new StructureDefinitionUrl("structure_definition_snapshot")));
+			SearchQuery query = snapshotDao.createSearchQuery(1, 1);
 			MultivaluedHashMap<String, String> searchParameters = new MultivaluedHashMap<>();
 			searchParameters.putSingle(StructureDefinitionUrl.PARAMETER_NAME, url.getValue());
 			searchParameters.putSingle(AbstractSearchParameter.SORT_PARAMETER,

@@ -44,7 +44,6 @@ import org.highmed.fhir.function.SupplierWithSqlAndResourceNotFoundException;
 import org.highmed.fhir.function.SupplierWithSqlException;
 import org.highmed.fhir.search.PartialResult;
 import org.highmed.fhir.search.SearchQuery;
-import org.highmed.fhir.search.parameters.basic.SearchParameter;
 import org.highmed.fhir.service.ResourceValidator;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -76,7 +75,6 @@ import ca.uhn.fhir.rest.api.Constants;
 public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R extends DomainResource>
 		implements InitializingBean
 {
-
 	private static final Logger logger = LoggerFactory.getLogger(AbstractService.class);
 
 	public static final String JSON_FORMAT = "json";
@@ -93,16 +91,9 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 	private final D dao;
 	private final ResourceValidator validator;
 	private final EventManager eventManager;
-	private final List<Supplier<SearchParameter<R>>> searchParameterFactories;
 
-	/*
-	 * Using a suppliers for SearchParameters, because implementations are not thread safe and need to be created on a
-	 * request basis
-	 */
-	@SafeVarargs
 	public AbstractService(String serverBase, int defaultPageCount, Class<R> resourceType, D dao,
-			ResourceValidator validator, EventManager eventManager,
-			Supplier<SearchParameter<R>>... searchParameterFactories)
+			ResourceValidator validator, EventManager eventManager)
 	{
 		this.serverBase = serverBase;
 		this.defaultPageCount = defaultPageCount;
@@ -111,7 +102,6 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 		this.dao = dao;
 		this.validator = validator;
 		this.eventManager = eventManager;
-		this.searchParameterFactories = Arrays.asList(searchParameterFactories);
 	}
 
 	public void afterPropertiesSet() throws Exception
@@ -119,7 +109,6 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 		Objects.requireNonNull(serverBase, "serverBase");
 		Objects.requireNonNull(dao, "dao");
 		Objects.requireNonNull(validator, "validator");
-		Objects.requireNonNull(searchParameterFactories, "searchParameterFactory");
 	}
 
 	protected final D getDao()
@@ -265,37 +254,6 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 
 		return bundle;
 	}
-
-	/* TODO move search query builder code below to dao */
-
-	@SuppressWarnings("unchecked")
-	private SearchParameter<R>[] createSearchParameters()
-	{
-		return searchParameterFactories.stream().map(Supplier::get).toArray(SearchParameter[]::new);
-	}
-
-	@SuppressWarnings("unchecked")
-	@SafeVarargs
-	protected final <RT extends DomainResource> SearchParameter<RT>[] createSearchParameters(
-			SearchParameter<RT>... searchParameters)
-	{
-		return Arrays.stream(searchParameters).toArray(SearchParameter[]::new);
-	}
-
-	protected final SearchQuery createSearchQuery(int effectivePage, int effectiveCount)
-	{
-		return getDao().createSearchQueryBuilderWithBasicSearchParameters().with(effectivePage, effectiveCount)
-				.with(createSearchParameters()).build();
-	}
-
-	protected final <RT extends DomainResource, DT extends AbstractDomainResourceDao<RT>> SearchQuery createSearchQuery(
-			int effectivePage, int effectiveCount, DT dao, SearchParameter<RT>[] searchParameters)
-	{
-		return dao.createSearchQueryBuilderWithBasicSearchParameters().with(effectivePage, effectiveCount)
-				.with(searchParameters).build();
-	}
-
-	/* end to do move */
 
 	@POST
 	public Response create(R resource, @Context UriInfo uri)
@@ -633,7 +591,7 @@ public abstract class AbstractService<D extends AbstractDomainResourceDao<R>, R 
 		int effectiveCount = (count == null || count < 0) ? getDefaultPageCount() : count;
 
 		/* SearchParameter implementations are not thread safe and need to be created on a request basis */
-		SearchQuery query = createSearchQuery(effectivePage, effectiveCount);
+		SearchQuery query = getDao().createSearchQuery(effectivePage, effectiveCount);
 
 		query.configureParameters(queryParameters);
 

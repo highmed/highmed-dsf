@@ -11,12 +11,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.fhir.dao.exception.ResourceNotFoundException;
 import org.highmed.fhir.search.DbSearchQuery;
 import org.highmed.fhir.search.PartialResult;
+import org.highmed.fhir.search.SearchQuery;
 import org.highmed.fhir.search.SearchQuery.SearchQueryBuilder;
 import org.highmed.fhir.search.parameters.ResourceId;
 import org.highmed.fhir.search.parameters.ResourceLastUpdated;
@@ -45,10 +47,18 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 	private final String resourceColumn;
 	private final String resourceIdColumn;
 
+	private final List<Supplier<SearchParameter<R>>> searchParameterFactories;
+
 	private final String resourceTypeName;
 
+	/*
+	 * Using a suppliers for SearchParameters, because implementations are not thread safe and need to be created on a
+	 * request basis
+	 */
+	@SafeVarargs
 	public AbstractDomainResourceDao(BasicDataSource dataSource, FhirContext fhirContext, Class<R> resourceType,
-			String resourceTable, String resourceColumn, String resourceIdColumn)
+			String resourceTable, String resourceColumn, String resourceIdColumn,
+			Supplier<SearchParameter<R>>... searchParameterFactories)
 	{
 		this.dataSource = dataSource;
 		this.fhirContext = fhirContext;
@@ -57,6 +67,7 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 		this.resourceTable = resourceTable;
 		this.resourceColumn = resourceColumn;
 		this.resourceIdColumn = resourceIdColumn;
+		this.searchParameterFactories = Arrays.asList(searchParameterFactories);
 
 		resourceTypeName = Objects.requireNonNull(resourceType, "resourceType").getAnnotation(ResourceDef.class).name();
 	}
@@ -408,17 +419,6 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 		}
 	}
 
-	public final SearchQueryBuilder createSearchQueryBuilderWithBasicSearchParameters()
-	{
-		return SearchQueryBuilder.create(getResourceTable(), getResourceIdColumn(), getResourceColumn(),
-				createResourceSearchParameters());
-	}
-
-	private final List<SearchParameter<?>> createResourceSearchParameters()
-	{
-		return Arrays.asList(new ResourceId(getResourceIdColumn()), new ResourceLastUpdated(getResourceColumn()));
-	}
-
 	public final PartialResult<R> search(DbSearchQuery query) throws SQLException
 	{
 		try (Connection connection = getDataSource().getConnection())
@@ -457,5 +457,13 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 			return new PartialResult<>(overallCount, query.getPageAndCount(), partialResult,
 					query.isCountOnly(overallCount));
 		}
+	}
+
+	public final SearchQuery createSearchQuery(int effectivePage, int effectiveCount)
+	{
+		return SearchQueryBuilder
+				.create(getResourceTable(), getResourceIdColumn(), getResourceColumn(), effectivePage, effectiveCount)
+				.with(new ResourceId(getResourceIdColumn()), new ResourceLastUpdated(getResourceColumn()))
+				.with(searchParameterFactories.stream().map(Supplier::get).toArray(SearchParameter[]::new)).build();
 	}
 }

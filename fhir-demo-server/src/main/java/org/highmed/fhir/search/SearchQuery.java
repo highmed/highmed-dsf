@@ -18,35 +18,12 @@ public class SearchQuery implements DbSearchQuery
 {
 	public static class SearchQueryBuilder
 	{
-		private final String resourceTable;
-		private final String resourceIdColumn;
-		private final String resourceColumn;
-		private final List<SearchParameter<?>> searchParameters;
-
-		public SearchQueryBuilder(String resourceTable, String resourceIdColumn, String resourceColumn,
-				List<SearchParameter<?>> searchParameters)
-		{
-			this.resourceTable = resourceTable;
-			this.resourceIdColumn = resourceIdColumn;
-			this.resourceColumn = resourceColumn;
-			this.searchParameters = searchParameters;
-		}
-
 		public static SearchQueryBuilder create(String resourceTable, String resourceIdColumn, String resourceColumn,
-				List<SearchParameter<?>> searchParameters)
+				int page, int count)
 		{
-			return new SearchQueryBuilder(resourceTable, resourceIdColumn, resourceColumn, searchParameters);
+			return new SearchQueryBuilder(resourceTable, resourceIdColumn, resourceColumn, page, count);
 		}
 
-		public SearchQueryBuilderForDb with(int page, int count)
-		{
-			return new SearchQueryBuilderForDb(resourceTable, resourceIdColumn, resourceColumn, searchParameters, page,
-					count);
-		}
-	}
-
-	public static class SearchQueryBuilderForDb
-	{
 		private final String resourceTable;
 		private final String resourceIdColumn;
 		private final String resourceColumn;
@@ -55,30 +32,28 @@ public class SearchQuery implements DbSearchQuery
 
 		private final List<SearchParameter<?>> searchParameters = new ArrayList<SearchParameter<?>>();
 
-		public SearchQueryBuilderForDb(String resourceTable, String resourceIdColumn, String resourceColumn,
-				List<SearchParameter<?>> searchParameters, int page, int count)
+		public SearchQueryBuilder(String resourceTable, String resourceIdColumn, String resourceColumn, int page,
+				int count)
 		{
 			this.resourceTable = resourceTable;
 			this.resourceIdColumn = resourceIdColumn;
 			this.resourceColumn = resourceColumn;
-			if (searchParameters != null)
-				this.searchParameters.addAll(searchParameters);
 			this.page = page;
 			this.count = count;
 		}
 
-		public SearchQueryBuilderForDb with(SearchParameter<?> searchParameters)
+		public SearchQueryBuilder with(SearchParameter<?> searchParameters)
 		{
 			this.searchParameters.add(searchParameters);
 			return this;
 		}
 
-		public SearchQueryBuilderForDb with(SearchParameter<?>... searchParameters)
+		public SearchQueryBuilder with(SearchParameter<?>... searchParameters)
 		{
 			return with(Arrays.asList(searchParameters));
 		}
 
-		public SearchQueryBuilderForDb with(List<SearchParameter<?>> searchParameters)
+		public SearchQueryBuilder with(List<SearchParameter<?>> searchParameters)
 		{
 			this.searchParameters.addAll(searchParameters);
 			return this;
