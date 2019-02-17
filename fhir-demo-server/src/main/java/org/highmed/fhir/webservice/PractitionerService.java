@@ -3,6 +3,7 @@ package org.highmed.fhir.webservice;
 import javax.ws.rs.Path;
 
 import org.highmed.fhir.dao.PractitionerDao;
+import org.highmed.fhir.event.EventManager;
 import org.highmed.fhir.service.ResourceValidator;
 import org.hl7.fhir.r4.model.Practitioner;
 
@@ -12,8 +13,8 @@ public class PractitionerService extends AbstractService<PractitionerDao, Practi
 	public static final String RESOURCE_TYPE_NAME = "Practitioner";
 
 	public PractitionerService(String serverBase, int defaultPageCount, PractitionerDao practitionerDao,
-			ResourceValidator validator)
+			ResourceValidator validator, EventManager eventManager)
 	{
-		super(serverBase, defaultPageCount, RESOURCE_TYPE_NAME, practitionerDao, validator);
+		super(serverBase, defaultPageCount, Practitioner.class, practitionerDao, validator, eventManager);
 	}
 }

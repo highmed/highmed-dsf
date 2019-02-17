@@ -10,6 +10,7 @@ import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.codesystems.ResourceValidationMode;
 import org.junit.Test;
@@ -62,5 +63,38 @@ public class ParametersTest
 				.filter(p -> "resource".equals(p.getName())).findFirst();
 		assertTrue(resource.isPresent());
 		assertEquals(patient, resource.get().getResource());
+	}
+
+	@Test
+	public void testParametersSnapshotOperationInWithResource() throws Exception
+	{
+		final StructureDefinition sd = new StructureDefinition();
+		sd.setUrlElement(new UriType("http://test.com/fhir/StructureDefinition/" + UUID.randomUUID().toString()));
+
+		Parameters parameters = new Parameters();
+		parameters.addParameter().setName("resource").setResource(sd);
+
+		FhirContext context = FhirContext.forR4();
+		logger.info("Parameters: {}", context.newXmlParser().encodeResourceToString(parameters));
+
+		Optional<ParametersParameterComponent> resource = parameters.getParameter().stream()
+				.filter(p -> "resource".equals(p.getName())).findFirst();
+		assertTrue(resource.isPresent());
+		assertEquals(sd, resource.get().getResource());
+	}
+
+	@Test
+	public void testParametersSnapshotOperationInWithUrl() throws Exception
+	{
+		final UriType uri = new UriType(
+				"http://test.com/fhir/StructureDefinition/" + UUID.randomUUID().toString() + "|0.0.1");
+
+		Parameters parameters = new Parameters();
+		parameters.addParameter().setName("url").setValue(uri);
+
+		FhirContext context = FhirContext.forR4();
+		logger.info("Parameters: {}", context.newXmlParser().encodeResourceToString(parameters));
+
+		assertEquals(uri, parameters.getParameter("url"));
 	}
 }

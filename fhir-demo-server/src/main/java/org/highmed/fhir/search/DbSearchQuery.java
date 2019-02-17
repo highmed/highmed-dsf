@@ -1,9 +1,7 @@
-package org.highmed.fhir.dao.search;
+package org.highmed.fhir.search;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-
-import org.highmed.fhir.search.PageAndCount;
 
 public interface DbSearchQuery
 {

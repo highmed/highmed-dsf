@@ -1,9 +1,11 @@
-package org.highmed.fhir.webservice.search;
+package org.highmed.fhir.search.parameters.basic;
 
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 
-public abstract class AbstractCanonicalUrlParameter implements WsSearchParameter
+import org.hl7.fhir.r4.model.DomainResource;
+
+public abstract class AbstractCanonicalUrlParameter<R extends DomainResource> extends AbstractSearchParameter<R>
 {
 	protected static enum UriSearchType
 	{
@@ -31,16 +33,15 @@ public abstract class AbstractCanonicalUrlParameter implements WsSearchParameter
 		}
 	}
 
-	private final String parameterName;
-
 	protected CanonicalUrlAndSearchType valueAndType;
 
 	public AbstractCanonicalUrlParameter(String parameterName)
 	{
-		this.parameterName = parameterName;
+		super(parameterName);
 	}
 
-	public void configure(MultivaluedMap<String, String> queryParameters)
+	@Override
+	protected final void configureSearchParameter(MultivaluedMap<String, String> queryParameters)
 	{
 		String precise = queryParameters.getFirst(parameterName);
 		if (precise != null && !precise.isBlank())

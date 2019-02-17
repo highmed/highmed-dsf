@@ -3,16 +3,16 @@ package org.highmed.fhir.search.parameters;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import org.highmed.fhir.search.SearchParameter;
-import org.highmed.fhir.webservice.search.AbstractStringParameter;
-import org.highmed.fhir.webservice.search.WsSearchParameter.SearchParameterDefinition;
+import org.highmed.fhir.search.parameters.basic.AbstractStringParameter;
+import org.highmed.fhir.search.parameters.basic.SearchParameter;
+import org.highmed.fhir.search.parameters.basic.SearchParameter.SearchParameterDefinition;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Organization;
 
 import com.google.common.base.Objects;
 
 @SearchParameterDefinition(name = OrganizationName.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Organization-name", type = SearchParamType.STRING, documentation = "A portion of the organization's name or alias")
-public class OrganizationName extends AbstractStringParameter implements SearchParameter<Organization>
+public class OrganizationName extends AbstractStringParameter<Organization>
 {
 	public static final String PARAMETER_NAME = "name";
 
@@ -64,6 +64,9 @@ public class OrganizationName extends AbstractStringParameter implements SearchP
 	@Override
 	public boolean matches(Organization resource)
 	{
+		if (!isDefined())
+			throw SearchParameter.notDefined();
+
 		switch (valueAndType.type)
 		{
 			case STARTS_WITH:
@@ -75,7 +78,24 @@ public class OrganizationName extends AbstractStringParameter implements SearchP
 			case EXACT:
 				return Objects.equal(resource.getName(), valueAndType.value);
 			default:
-				return false;
+				throw SearchParameter.notDefined();
+		}
+	}
+
+	@Override
+	protected String getSortSql(String sortDirectionWithSpacePrefix)
+	{
+		switch (valueAndType.type)
+		{
+			case STARTS_WITH:
+			case CONTAINS:
+				return "lower(organization->>'name')" + sortDirectionWithSpacePrefix + ", lower(organization->>'alias')"
+						+ sortDirectionWithSpacePrefix;
+			case EXACT:
+				return "organization->>'name'" + sortDirectionWithSpacePrefix + ", organization->>'alias'"
+						+ sortDirectionWithSpacePrefix;
+			default:
+				return "";
 		}
 	}
 }

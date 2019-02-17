@@ -4,9 +4,11 @@ import java.security.KeyStore;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.highmed.fhir.adapter.AbstractFhirAdapter;
 import org.highmed.fhir.adapter.BundleJsonFhirAdapter;
@@ -38,6 +40,9 @@ import org.highmed.fhir.adapter.SubscriptionXmlFhirAdapter;
 import org.highmed.fhir.adapter.TaskJsonFhirAdapter;
 import org.highmed.fhir.adapter.TaskXmlFhirAdapter;
 import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.UriType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,6 +104,42 @@ public class FhirJerseyClient extends AbstractJerseyClient
 		{
 			logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
 					response.getStatusInfo().getReasonPhrase());
+		}
+	}
+
+	public StructureDefinition generateSnapshot(String url)
+	{
+		Parameters parameters = new Parameters();
+		parameters.addParameter().setName("url").setValue(new UriType(url));
+
+		try (Response response = getResource().path(StructureDefinition.class.getAnnotation(ResourceDef.class).name())
+				.path("$snapshot").request().accept(Constants.CT_FHIR_JSON_NEW)
+				.post(Entity.entity(parameters, Constants.CT_FHIR_JSON_NEW)))
+		{
+			logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+					response.getStatusInfo().getReasonPhrase());
+			if (Status.OK.getStatusCode() == response.getStatus())
+				return response.readEntity(StructureDefinition.class);
+			else
+				throw new WebApplicationException(response);
+		}
+	}
+
+	public StructureDefinition generateSnapshot(StructureDefinition differential)
+	{
+		Parameters parameters = new Parameters();
+		parameters.addParameter().setName("resource").setResource(differential);
+
+		try (Response response = getResource().path(StructureDefinition.class.getAnnotation(ResourceDef.class).name())
+				.path("$snapshot").request().accept(Constants.CT_FHIR_JSON_NEW)
+				.post(Entity.entity(parameters, Constants.CT_FHIR_JSON_NEW)))
+		{
+			logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+					response.getStatusInfo().getReasonPhrase());
+			if (Status.OK.getStatusCode() == response.getStatus())
+				return response.readEntity(StructureDefinition.class);
+			else
+				throw new WebApplicationException(response);
 		}
 	}
 }

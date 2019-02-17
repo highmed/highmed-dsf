@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -14,12 +15,12 @@ import java.util.UUID;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.fhir.dao.exception.ResourceNotFoundException;
-import org.highmed.fhir.dao.search.DbSearchQuery;
+import org.highmed.fhir.search.DbSearchQuery;
 import org.highmed.fhir.search.PartialResult;
-import org.highmed.fhir.search.SearchParameter;
 import org.highmed.fhir.search.SearchQuery.SearchQueryBuilder;
 import org.highmed.fhir.search.parameters.ResourceId;
 import org.highmed.fhir.search.parameters.ResourceLastUpdated;
+import org.highmed.fhir.search.parameters.basic.SearchParameter;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.postgresql.util.PGobject;
@@ -175,6 +176,25 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 		return getJsonParser().parseResource(resourceType, json);
 	}
 
+	public final boolean hasNonDeletedResource(UUID uuid) throws SQLException
+	{
+		if (uuid == null)
+			return false;
+
+		try (Connection connection = dataSource.getConnection();
+				PreparedStatement statement = connection.prepareStatement("SELECT count(*) FROM " + resourceTable
+						+ " WHERE " + resourceIdColumn + " = ? AND NOT deleted"))
+		{
+			statement.setObject(1, uuidToPgObject(uuid));
+
+			logger.trace("Executing query '{}'", statement);
+			try (ResultSet result = statement.executeQuery())
+			{
+				return result.next() && result.getInt(1) > 0;
+			}
+		}
+	}
+
 	public final Optional<R> read(UUID uuid) throws SQLException, ResourceDeletedException
 	{
 		if (uuid == null)
@@ -205,22 +225,6 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 				else
 					return Optional.empty();
 			}
-		}
-	}
-
-	private UUID toUuid(String idPart)
-	{
-		if (idPart == null)
-			return null;
-
-		// TODO control flow by exception
-		try
-		{
-			return UUID.fromString(idPart);
-		}
-		catch (IllegalArgumentException e)
-		{
-			return null;
 		}
 	}
 
@@ -265,14 +269,18 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 
 			try
 			{
-				long version = getLatestVersion(resource, connection) + 1;
-				R inserted = update(connection, copy(resource), resource.getIdElement().getIdPart(), version);
+				LatestVersion latestVersion = getLatestVersion(resource, connection);
+				long newVersion = latestVersion.version + 1;
+
+				R updated = update(connection, resource, newVersion);
+				if (latestVersion.deleted)
+					markDeleted(connection, toUuid(updated.getIdElement().getIdPart()), false);
 
 				connection.commit();
 
 				logger.debug("{} with IdPart {} updated, new version {}.", resourceTypeName,
-						inserted.getIdElement().getIdPart(), version);
-				return inserted;
+						updated.getIdElement().getIdPart(), newVersion);
+				return updated;
 			}
 			catch (Exception e)
 			{
@@ -282,23 +290,41 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 		}
 	}
 
-	private R update(Connection connection, R resource, String idPart, long version) throws SQLException
+	private UUID toUuid(String idPart)
+	{
+		if (idPart == null)
+			return null;
+
+		// TODO control flow by exception
+		try
+		{
+			return UUID.fromString(idPart);
+		}
+		catch (IllegalArgumentException e)
+		{
+			return null;
+		}
+	}
+
+	private R update(Connection connection, R resource, long newVersion) throws SQLException
 	{
 		UUID uuid = toUuid(resource.getIdElement().getIdPart());
 		if (uuid == null)
 			throw new IllegalArgumentException("resource.id is not a UUID");
-		String versionAsString = String.valueOf(version);
+
+		String newVersionAsString = String.valueOf(newVersion);
+		IdType newId = new IdType(resourceTypeName, resource.getIdElement().getIdPart(), newVersionAsString);
 
 		resource = copy(resource);
-		resource.setIdElement(new IdType(resourceTypeName, idPart, versionAsString));
-		resource.getMeta().setVersionId(versionAsString);
+		resource.setIdElement(newId);
+		resource.getMeta().setVersionId(newVersionAsString);
 		resource.getMeta().setLastUpdated(new Date());
 
 		try (PreparedStatement statement = connection.prepareStatement("INSERT INTO " + resourceTable + " ("
 				+ resourceIdColumn + ", version, " + resourceColumn + ") VALUES (?, ?, ?)"))
 		{
 			statement.setObject(1, uuidToPgObject(uuid));
-			statement.setLong(2, version);
+			statement.setLong(2, newVersion);
 			statement.setObject(3, resourceToPgObject(resource));
 
 			logger.trace("Executing query '{}'", statement);
@@ -308,13 +334,26 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 		return resource;
 	}
 
-	private long getLatestVersion(R resource, Connection connection) throws SQLException, ResourceNotFoundException
+	private static class LatestVersion
+	{
+		final long version;
+		final boolean deleted;
+
+		LatestVersion(long version, boolean deleted)
+		{
+			this.version = version;
+			this.deleted = deleted;
+		}
+	}
+
+	private LatestVersion getLatestVersion(R resource, Connection connection)
+			throws SQLException, ResourceNotFoundException
 	{
 		UUID uuid = toUuid(resource.getIdElement().getIdPart());
 		if (uuid == null)
 			throw new ResourceNotFoundException(resource.getId());
 
-		try (PreparedStatement statement = connection.prepareStatement("SELECT version FROM " + resourceTable
+		try (PreparedStatement statement = connection.prepareStatement("SELECT version, deleted FROM " + resourceTable
 				+ " WHERE " + resourceIdColumn + " = ? ORDER BY version LIMIT 1"))
 		{
 			statement.setObject(1, uuidToPgObject(uuid));
@@ -325,10 +364,13 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 				if (result.next())
 				{
 					long version = result.getLong(1);
+					boolean deleted = result.getBoolean(2);
 
-					logger.debug("Latest version for {} with IdPart {} equals {}.", resourceTypeName,
-							resource.getIdElement().getIdPart(), version);
-					return version;
+					logger.debug(
+							"Latest version for {} with IdPart {} is {}"
+									+ (deleted ? ", resource marked as deleted." : "."),
+							resourceTypeName, resource.getIdElement().getIdPart(), version);
+					return new LatestVersion(version, deleted);
 				}
 				else
 				{
@@ -339,38 +381,42 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 		}
 	}
 
-	public final void delete(IdType id) throws SQLException
+	public final void delete(UUID uuid) throws SQLException
 	{
-		UUID uuid = toUuid(id.getIdPart());
-		if (uuid == null)
-			throw new IllegalArgumentException("idPart not a uuid");
-
 		try (Connection connection = dataSource.getConnection())
 		{
 			connection.setReadOnly(false);
-
-			try (PreparedStatement statement = connection.prepareStatement(
-					"UPDATE " + resourceTable + " SET deleted = TRUE WHERE " + resourceIdColumn + " = ?"))
-			{
-				statement.setObject(1, uuidToPgObject(uuid));
-
-				logger.trace("Executing query '{}'", statement);
-				statement.execute();
-
-				logger.debug("{} with ID {} marked as deleted.", resourceTypeName, id);
-			}
+			markDeleted(connection, uuid, true);
 		}
 	}
 
-	public final SearchQueryBuilder createSearchQueryBuilder()
+	private void markDeleted(Connection connection, UUID uuid, boolean deleted) throws SQLException
 	{
-		return SearchQueryBuilder.create(getResourceTable(), getResourceIdColumn(), getResourceColumn());
+		if (uuid == null)
+			return;
+
+		try (PreparedStatement statement = connection
+				.prepareStatement("UPDATE " + resourceTable + " SET deleted = ? WHERE " + resourceIdColumn + " = ?"))
+		{
+			statement.setBoolean(1, deleted);
+			statement.setObject(2, uuidToPgObject(uuid));
+
+			logger.trace("Executing query '{}'", statement);
+			statement.execute();
+
+			logger.debug("{} with ID {} marked as deleted.", resourceTypeName, uuid);
+		}
 	}
 
-	public final SearchParameter[] createResourceSearchParameters()
+	public final SearchQueryBuilder createSearchQueryBuilderWithBasicSearchParameters()
 	{
-		return new SearchParameter[] { new ResourceId(getResourceIdColumn()),
-				new ResourceLastUpdated(getResourceColumn()) };
+		return SearchQueryBuilder.create(getResourceTable(), getResourceIdColumn(), getResourceColumn(),
+				createResourceSearchParameters());
+	}
+
+	private final List<SearchParameter<?>> createResourceSearchParameters()
+	{
+		return Arrays.asList(new ResourceId(getResourceIdColumn()), new ResourceLastUpdated(getResourceColumn()));
 	}
 
 	public final PartialResult<R> search(DbSearchQuery query) throws SQLException

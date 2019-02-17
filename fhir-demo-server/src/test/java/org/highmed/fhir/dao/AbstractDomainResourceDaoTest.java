@@ -33,7 +33,7 @@ public abstract class AbstractDomainResourceDaoTest<D extends DomainResource, C 
 
 	protected final Class<D> resouceClass;
 
-	protected FhirContext fhirContext;
+	protected final FhirContext fhirContext = FhirContext.forR4();
 	protected C dao;
 
 	protected AbstractDomainResourceDaoTest(Class<D> resouceClass)
@@ -44,7 +44,6 @@ public abstract class AbstractDomainResourceDaoTest<D extends DomainResource, C 
 	@Before
 	public void before() throws Exception
 	{
-		fhirContext = FhirContext.forR4();
 		dao = createDao(database.getDataSource(), fhirContext);
 	}
 
@@ -151,7 +150,7 @@ public abstract class AbstractDomainResourceDaoTest<D extends DomainResource, C 
 		Optional<D> read = dao.read(UUID.fromString(createdResource.getIdElement().getIdPart()));
 		assertTrue(read.isPresent());
 
-		dao.delete(createdResource.getIdElement());
+		dao.delete(UUID.fromString(createdResource.getIdElement().getIdPart()));
 
 		dao.read(UUID.fromString(createdResource.getIdElement().getIdPart()));
 	}

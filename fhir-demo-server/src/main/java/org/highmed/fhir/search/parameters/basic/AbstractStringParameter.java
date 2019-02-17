@@ -1,9 +1,11 @@
-package org.highmed.fhir.webservice.search;
+package org.highmed.fhir.search.parameters.basic;
 
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 
-public abstract class AbstractStringParameter implements WsSearchParameter
+import org.hl7.fhir.r4.model.DomainResource;
+
+public abstract class AbstractStringParameter<R extends DomainResource> extends AbstractSearchParameter<R>
 {
 	protected static enum StringSearchType
 	{
@@ -29,16 +31,15 @@ public abstract class AbstractStringParameter implements WsSearchParameter
 		}
 	}
 
-	private final String parameterName;
-
 	protected StringValueAndSearchType valueAndType;
 
 	public AbstractStringParameter(String parameterName)
 	{
-		this.parameterName = parameterName;
+		super(parameterName);
 	}
-
-	public void configure(MultivaluedMap<String, String> queryParameters)
+	
+	@Override
+	protected final void configureSearchParameter(MultivaluedMap<String, String> queryParameters)
 	{
 		String startsWith = queryParameters.getFirst(parameterName);
 		if (startsWith != null && !startsWith.isBlank())

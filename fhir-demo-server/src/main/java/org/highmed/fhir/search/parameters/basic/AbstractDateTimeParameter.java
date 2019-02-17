@@ -1,4 +1,4 @@
-package org.highmed.fhir.webservice.search;
+package org.highmed.fhir.search.parameters.basic;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -16,7 +16,10 @@ import java.util.stream.Collectors;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 
-public abstract class AbstractDateTimeParameter implements WsSearchParameter
+import org.hl7.fhir.r4.model.DomainResource;
+
+public abstract class AbstractDateTimeParameter<R extends DomainResource> extends AbstractSearchParameter<R>
+		implements SearchParameter<R>
 {
 	protected static enum DateTimeSearchType
 	{
@@ -77,18 +80,18 @@ public abstract class AbstractDateTimeParameter implements WsSearchParameter
 	private static final DateTimeFormatter YEAR_FORMAT = DateTimeFormatter.ofPattern("yyyy");
 	private static final DateTimeFormatter YEAR_MONTH_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM");
 
-	private final String parameterName;
-
 	private List<DateTimeValueAndTypeAndSearchType> valuesAndTypes = new ArrayList<>();
 
 	public AbstractDateTimeParameter(String parameterName)
 	{
-		this.parameterName = parameterName;
+		super(parameterName);
 	}
 
-	public void configure(MultivaluedMap<String, String> queryParameters)
+	@Override
+	protected final void configureSearchParameter(MultivaluedMap<String, String> queryParameters)
 	{
-		List<String> parameters = queryParameters.getOrDefault(parameterName, Collections.emptyList());
+		List<String> parameters = queryParameters.getOrDefault(queryParameters, Collections.emptyList());
+
 		parameters.stream().limit(2).map(this::parse).filter(v -> v != null)
 				.collect(Collectors.toCollection(() -> valuesAndTypes));
 	}

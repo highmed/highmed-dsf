@@ -1,5 +1,6 @@
 package org.highmed.fhir.test;
 
+import org.highmed.fhir.hapi.HiGHmedTaskValidationTest;
 import org.highmed.fhir.hapi.IdTypeTest;
 import org.highmed.fhir.hapi.ParametersTest;
 import org.highmed.fhir.hapi.SerializationTest;
@@ -10,7 +11,8 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({ SerializationTest.class, SnapshotTest.class, ValidationTest.class, ParametersTest.class, IdTypeTest.class })
+@SuiteClasses({ SerializationTest.class, SnapshotTest.class, ValidationTest.class, HiGHmedTaskValidationTest.class,
+		ParametersTest.class, IdTypeTest.class })
 public class TestSuiteUnitTests
 {
 }

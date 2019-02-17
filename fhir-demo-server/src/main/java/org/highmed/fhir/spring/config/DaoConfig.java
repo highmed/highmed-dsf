@@ -10,6 +10,7 @@ import org.highmed.fhir.dao.PractitionerRoleDao;
 import org.highmed.fhir.dao.ProvenanceDao;
 import org.highmed.fhir.dao.ResearchStudyDao;
 import org.highmed.fhir.dao.StructureDefinitionDao;
+import org.highmed.fhir.dao.StructureDefinitionSnapshotDao;
 import org.highmed.fhir.dao.SubscriptionDao;
 import org.highmed.fhir.dao.TaskDao;
 import org.postgresql.Driver;
@@ -102,6 +103,12 @@ public class DaoConfig
 	public StructureDefinitionDao structureDefinitionDao()
 	{
 		return new StructureDefinitionDao(dataSource(), fhirContext);
+	}
+
+	@Bean
+	public StructureDefinitionSnapshotDao structureDefinitionSnapshotDao()
+	{
+		return new StructureDefinitionSnapshotDao(dataSource(), fhirContext);
 	}
 
 	@Bean

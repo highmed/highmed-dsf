@@ -6,15 +6,16 @@ import java.sql.SQLException;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 
-import org.highmed.fhir.search.SearchParameter;
-import org.highmed.fhir.webservice.search.WsSearchParameter.SearchParameterDefinition;
+import org.highmed.fhir.search.parameters.basic.AbstractSearchParameter;
+import org.highmed.fhir.search.parameters.basic.SearchParameter;
+import org.highmed.fhir.search.parameters.basic.SearchParameter.SearchParameterDefinition;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 
 import com.google.common.base.Objects;
 
 @SearchParameterDefinition(name = ResourceId.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Resource-id", type = SearchParamType.TOKEN, documentation = "Logical id of this artifact")
-public class ResourceId implements SearchParameter<DomainResource>
+public class ResourceId extends AbstractSearchParameter<DomainResource>
 {
 	public static final String PARAMETER_NAME = "_id";
 
@@ -23,11 +24,13 @@ public class ResourceId implements SearchParameter<DomainResource>
 
 	public ResourceId(String resourceIdColumn)
 	{
+		super(PARAMETER_NAME);
+
 		this.resourceIdColumn = resourceIdColumn;
 	}
 
 	@Override
-	public void configure(MultivaluedMap<String, String> queryParameters)
+	protected void configureSearchParameter(MultivaluedMap<String, String> queryParameters)
 	{
 		id = toId(queryParameters.getFirst(PARAMETER_NAME));
 	}
@@ -71,6 +74,15 @@ public class ResourceId implements SearchParameter<DomainResource>
 	@Override
 	public boolean matches(DomainResource resource)
 	{
-		return Objects.equal(resource.getId(), id);
+		if (isDefined())
+			return Objects.equal(resource.getId(), id);
+		else
+			throw SearchParameter.notDefined();
+	}
+
+	@Override
+	protected String getSortSql(String sortDirectionWithSpacePrefix)
+	{
+		return resourceIdColumn + sortDirectionWithSpacePrefix;
 	}
 }

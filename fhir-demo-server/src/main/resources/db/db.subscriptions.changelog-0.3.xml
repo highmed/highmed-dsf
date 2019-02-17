@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<property name="json" value="JSONB" dbms="postgresql" />
+	<property name="json" value="varchar(5000)" dbms="h2" />
+
+	<changeSet author="hhund" id="db.subscriptions.changelog-0.3">
+		<sql dbms="postgresql">
+			DROP INDEX subscriptions_subscription_id_index;
+			DROP INDEX subscriptions_subscription_index;
+			DROP INDEX subscriptions_subscription_id_version_index;
+			CREATE INDEX subscription_id_index ON subscriptions USING btree (subscription_id);
+			CREATE INDEX subscription_index ON patients USING gin (patient);
+			CREATE INDEX subscription_id_version_index ON subscriptions USING btree (subscription_id, version);
+		</sql>
+	</changeSet>
+</databaseChangeLog>

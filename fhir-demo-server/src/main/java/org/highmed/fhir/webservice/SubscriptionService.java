@@ -3,6 +3,7 @@ package org.highmed.fhir.webservice;
 import javax.ws.rs.Path;
 
 import org.highmed.fhir.dao.SubscriptionDao;
+import org.highmed.fhir.event.EventManager;
 import org.highmed.fhir.service.ResourceValidator;
 import org.hl7.fhir.r4.model.Subscription;
 
@@ -12,8 +13,8 @@ public class SubscriptionService extends AbstractService<SubscriptionDao, Subscr
 	public static final String RESOURCE_TYPE = "Subscription";
 
 	public SubscriptionService(String serverBase, int defaultPageCount, SubscriptionDao subscriptionDao,
-			ResourceValidator validator)
+			ResourceValidator validator, EventManager eventManager)
 	{
-		super(serverBase, defaultPageCount, RESOURCE_TYPE, subscriptionDao, validator);
+		super(serverBase, defaultPageCount, Subscription.class, subscriptionDao, validator, eventManager);
 	}
 }

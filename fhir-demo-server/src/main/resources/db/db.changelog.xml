@@ -15,6 +15,7 @@
 	<include file="db/db.provenances.changelog.xml" />
 	<include file="db/db.research_studies.changelog.xml" />
 	<include file="db/db.structure_definitions.changelog.xml" />
+	<include file="db/db.structure_definition_snapshots.changelog.xml" />
 	<include file="db/db.subscriptions.changelog.xml" />
 	<include file="db/db.tasks.changelog.xml" />
 

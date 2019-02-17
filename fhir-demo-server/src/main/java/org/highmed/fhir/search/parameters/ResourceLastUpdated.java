@@ -11,14 +11,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.highmed.fhir.search.SearchParameter;
-import org.highmed.fhir.webservice.search.AbstractDateTimeParameter;
-import org.highmed.fhir.webservice.search.WsSearchParameter.SearchParameterDefinition;
+import org.highmed.fhir.search.parameters.basic.AbstractDateTimeParameter;
+import org.highmed.fhir.search.parameters.basic.SearchParameter;
+import org.highmed.fhir.search.parameters.basic.SearchParameter.SearchParameterDefinition;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 
 @SearchParameterDefinition(name = ResourceLastUpdated.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Resource-lastUpdated", type = SearchParamType.DATE, documentation = "When the resource version last changed")
-public class ResourceLastUpdated extends AbstractDateTimeParameter implements SearchParameter<DomainResource>
+public class ResourceLastUpdated extends AbstractDateTimeParameter<DomainResource>
 {
 	public static final String PARAMETER_NAME = "_lastUpdated";
 
@@ -97,6 +97,9 @@ public class ResourceLastUpdated extends AbstractDateTimeParameter implements Se
 	@Override
 	public boolean matches(DomainResource resource)
 	{
+		if (!isDefined())
+			throw SearchParameter.notDefined();
+
 		ZonedDateTime lastUpdated = toZonedDateTime(resource.getMeta().getLastUpdated());
 		return lastUpdated != null && getValuesAndTypes().stream().allMatch(value -> matches(lastUpdated, value));
 	}
@@ -121,7 +124,7 @@ public class ResourceLastUpdated extends AbstractDateTimeParameter implements Se
 			case YEAR_PERIOD:
 				return matches(lastUpdated.toLocalDate(), (LocalDatePair) value.value);
 			default:
-				return false;
+				throw SearchParameter.notDefined();
 		}
 	}
 
@@ -142,7 +145,7 @@ public class ResourceLastUpdated extends AbstractDateTimeParameter implements Se
 			case NE:
 				return !lastUpdated.isEqual(value);
 			default:
-				return false;
+				throw SearchParameter.notDefined();
 		}
 	}
 
@@ -163,7 +166,7 @@ public class ResourceLastUpdated extends AbstractDateTimeParameter implements Se
 			case NE:
 				return !lastUpdated.isEqual(value);
 			default:
-				return false;
+				throw SearchParameter.notDefined();
 		}
 	}
 
@@ -171,5 +174,11 @@ public class ResourceLastUpdated extends AbstractDateTimeParameter implements Se
 	{
 		return (lastUpdated.isAfter(value.startInclusive) || lastUpdated.isEqual(value.startInclusive))
 				&& lastUpdated.isBefore(value.endExclusive);
+	}
+
+	@Override
+	protected String getSortSql(String sortDirectionWithSpacePrefix)
+	{
+		return jsonProperty + "::timestamp" + sortDirectionWithSpacePrefix;
 	}
 }

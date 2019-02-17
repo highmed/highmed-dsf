@@ -3,36 +3,44 @@ package org.highmed.fhir.search.parameters;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import org.highmed.fhir.search.SearchParameter;
-import org.highmed.fhir.webservice.search.AbstractCanonicalUrlParameter;
-import org.highmed.fhir.webservice.search.WsSearchParameter.SearchParameterDefinition;
+import org.highmed.fhir.search.parameters.basic.AbstractCanonicalUrlParameter;
+import org.highmed.fhir.search.parameters.basic.SearchParameter;
+import org.highmed.fhir.search.parameters.basic.SearchParameter.SearchParameterDefinition;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 
 import com.google.common.base.Objects;
 
 @SearchParameterDefinition(name = StructureDefinitionUrl.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/conformance-url", type = SearchParamType.URI, documentation = "The uri that identifies the structure definition")
-public class StructureDefinitionUrl extends AbstractCanonicalUrlParameter
-		implements SearchParameter<StructureDefinition>
+public class StructureDefinitionUrl extends AbstractCanonicalUrlParameter<StructureDefinition>
 {
 	public static final String PARAMETER_NAME = "url";
 
+	private final String resourceColumn;
+
 	public StructureDefinitionUrl()
 	{
+		this("structure_definition");
+	}
+
+	public StructureDefinitionUrl(String resourceColumn)
+	{
 		super(PARAMETER_NAME);
+
+		this.resourceColumn = resourceColumn;
 	}
 
 	@Override
 	public String getFilterQuery()
 	{
-		String versionSubQuery = hasVersion() ? " AND structure_definition->>'version' = ?" : "";
+		String versionSubQuery = hasVersion() ? " AND " + resourceColumn + "->>'version' = ?" : "";
 
 		switch (valueAndType.type)
 		{
 			case PRECISE:
-				return "structure_definition->>'url' = ?" + versionSubQuery;
+				return resourceColumn + "->>'url' = ?" + versionSubQuery;
 			case BELOW:
-				return "structure_definition->>'url' LIKE ?" + versionSubQuery;
+				return resourceColumn + "->>'url' LIKE ?" + versionSubQuery;
 			default:
 				return "";
 		}
@@ -68,6 +76,9 @@ public class StructureDefinitionUrl extends AbstractCanonicalUrlParameter
 	@Override
 	public boolean matches(StructureDefinition resource)
 	{
+		if (!isDefined())
+			throw SearchParameter.notDefined();
+
 		switch (valueAndType.type)
 		{
 			case PRECISE:
@@ -77,7 +88,13 @@ public class StructureDefinitionUrl extends AbstractCanonicalUrlParameter
 				return resource.getUrl() != null && resource.getUrl().startsWith(valueAndType.url)
 						&& (valueAndType.version == null || Objects.equal(resource.getVersion(), valueAndType.version));
 			default:
-				return false;
+				throw SearchParameter.notDefined();
 		}
+	}
+
+	@Override
+	protected String getSortSql(String sortDirectionWithSpacePrefix)
+	{
+		return resourceColumn + "->>'url'" + sortDirectionWithSpacePrefix;
 	}
 }
