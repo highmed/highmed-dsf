@@ -49,7 +49,7 @@ public class HiGHmedTaskValidationTest
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		Extension ext = task.addExtension();
-		ext.setUrl(highmedTaskDiff.getUrl());
+		ext.setUrl("http://hl7.org/fhir/StructureDefinition/workflow-researchStudy");
 		Reference researchStudyReference = new Reference();
 		researchStudyReference.setReference("ResearchStudy/" + UUID.randomUUID().toString());
 		ext.setValue(researchStudyReference);

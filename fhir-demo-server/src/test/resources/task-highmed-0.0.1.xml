@@ -1,41 +1,41 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <StructureDefinition xmlns="http://hl7.org/fhir">
 	<meta>
-		<lastUpdated value="2019-02-13T11:58:44.527-05:00" />
+		<versionId value="8"/>
+		<lastUpdated value="2019-02-18T09:05:59.361-05:00"/>
 	</meta>
-	<version value="0.0.1" />
-	<url
-		value="http://highmed.org/fhir/StructureDefinition/DataSharingTask" />
-	<name value="highmed-data-sharing-task" />
-	<status value="draft" />
-	<kind value="resource" />
-	<abstract value="false" />
-	<type value="Task" />
-	<baseDefinition
-		value="http://hl7.org/fhir/StructureDefinition/Task" />
-	<derivation value="constraint" />
+	<url value="http://highmed.org/fhir/StructureDefinition/DataSharingTask"/>
+	<name value="highmed-data-sharing-task"/>
+	<status value="draft"/>
+	<experimental value="true"/>
+	<kind value="resource"/>
+	<abstract value="false"/>
+	<type value="Task"/>
+	<baseDefinition value="http://hl7.org/fhir/StructureDefinition/Task"/>
+	<derivation value="constraint"/>
 	<differential>
 		<element id="Task">
-			<path value="Task" />
+			<path value="Task"/>
 		</element>
 		<element id="Task.extension">
-			<path value="Task.extension" />
+			<path value="Task.extension"/>
 			<slicing>
 				<discriminator>
-					<type value="value" />
-					<path value="url" />
+					<type value="value"/>
+					<path value="url"/>
 				</discriminator>
-				<rules value="open" />
+				<rules value="open"/>
 			</slicing>
-			<min value="1" />
+			<min value="1"/>
 		</element>
 		<element id="Task.extension:researchStudy">
-			<path value="Task.extension" />
-			<sliceName value="researchStudy" />
-			<min value="1" />
-			<max value="1" />
-			<fixedUri
-				value="http://hl7.org/fhir/StructureDefinition/workflow-researchStudy" />
+			<path value="Task.extension"/>
+			<sliceName value="researchStudy"/>
+			<min value="1"/>
+			<max value="1"/>
+			<type>
+				<code value="Extension"/>
+				<profile value="http://hl7.org/fhir/StructureDefinition/workflow-researchStudy"/>
+			</type>
 		</element>
 	</differential>
 </StructureDefinition>
