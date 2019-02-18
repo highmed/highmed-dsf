@@ -55,7 +55,7 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 
 	private void handleEventAsync(Event<?> event)
 	{
-		logger.info("handling async event {} for resource of type {} with id {}", event.getClass().getName(),
+		logger.debug("handling event {} for resource of type {} with id {}", event.getClass().getName(),
 				event.getType().getAnnotation(ResourceDef.class).name(), event.getId());
 
 		// TODO get subscriptions from db
