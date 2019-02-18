@@ -1,19 +1,18 @@
-package org.highmed.fhir.webservice;
+package org.highmed.fhir.webservice.impl;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 import org.highmed.fhir.search.parameters.OrganizationName;
 import org.highmed.fhir.search.parameters.ResourceId;
@@ -23,6 +22,7 @@ import org.highmed.fhir.search.parameters.TaskRequester;
 import org.highmed.fhir.search.parameters.TaskStatus;
 import org.highmed.fhir.search.parameters.basic.SearchParameter;
 import org.highmed.fhir.search.parameters.basic.SearchParameter.SearchParameterDefinition;
+import org.highmed.fhir.webservice.specification.ConformanceService;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementImplementationComponent;
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementKind;
@@ -54,37 +54,33 @@ import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.UrlType;
 import org.hl7.fhir.r4.model.codesystems.RestfulSecurityService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 
 import com.google.common.collect.Streams;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.rest.api.Constants;
 
-@Path(ConformanceService.PATH)
-public class ConformanceService
+public class ConformanceServiceImpl implements ConformanceService, InitializingBean
 {
-	public static final String PATH = "metadata";
-
-	private static final Logger logger = LoggerFactory.getLogger(ConformanceService.class);
-
 	private final String serverBase;
 	private final int defaultPageCount;
 
-	public ConformanceService(String serverBase, int defaultPageCount)
+	public ConformanceServiceImpl(String serverBase, int defaultPageCount)
 	{
 		this.serverBase = serverBase;
 		this.defaultPageCount = defaultPageCount;
 	}
 
-	@GET
-	@Produces({ Constants.CT_FHIR_JSON_NEW, Constants.CT_FHIR_XML_NEW, Constants.CT_FHIR_JSON, Constants.CT_FHIR_XML,
-			MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response getMetadata(@QueryParam("mode") String mode)
+	@Override
+	public void afterPropertiesSet() throws Exception
 	{
-		logger.trace("GET {}/?mode={}", PATH, mode);
+		Objects.requireNonNull(serverBase, "serverBase");
+	}
 
+	@Override
+	public Response getMetadata(@QueryParam("mode") String mode, @Context UriInfo uri)
+	{
 		CapabilityStatement statement = new CapabilityStatement();
 		statement.setStatus(PublicationStatus.ACTIVE);
 		statement.setDate(new Date());
@@ -149,7 +145,7 @@ public class ConformanceService
 			r.addInteraction().setCode(TypeRestfulInteraction.SEARCHTYPE);
 
 			standardSortableSearchParameters.stream().forEach(r::addSearchParam);
-			
+
 			var resourceSearchParameters = searchParameters.getOrDefault(resource, Collections.emptyList());
 			resourceSearchParameters.forEach(r::addSearchParam);
 
@@ -196,8 +192,8 @@ public class ConformanceService
 	private CapabilityStatementRestResourceSearchParamComponent createFormatParameter()
 	{
 		String formatValues = Streams
-				.concat(Stream.of(AbstractService.JSON_FORMAT), AbstractService.JSON_FORMATS.stream(),
-						Stream.of(AbstractService.XML_FORMAT), AbstractService.XML_FORMATS.stream())
+				.concat(Stream.of(AbstractServiceImpl.JSON_FORMAT), AbstractServiceImpl.JSON_FORMATS.stream(),
+						Stream.of(AbstractServiceImpl.XML_FORMAT), AbstractServiceImpl.XML_FORMATS.stream())
 				.collect(Collectors.joining(", ", "[", "]"));
 		CapabilityStatementRestResourceSearchParamComponent createFormatParameter = createSearchParameter("_format", "",
 				SearchParamType.STRING,
