@@ -46,20 +46,20 @@ public class TestFhirJerseyClient
 
 		// fhirJerseyClient.getConformance();
 
-		// StructureDefinition sD = fhirContext.newXmlParser().parseResource(StructureDefinition.class,
-		// Files.newInputStream(Paths.get("../fhir-demo-server/src/test/resources/task-highmed-0.0.1.xml")));
-		//
-		// fhirJerseyClient.create(sD);
+		StructureDefinition sD = fhirContext.newXmlParser().parseResource(StructureDefinition.class,
+				Files.newInputStream(Paths.get("../fhir-demo-server/src/test/resources/task-highmed-0.0.2.xml")));
+
+		fhirJerseyClient.create(sD);
 
 		// StructureDefinition sd = fhirJerseyClient
 		// .generateSnapshot("http://highmed.org/fhir/StructureDefinition/DataSharingTask");
 		// String xml = fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(sd);
 		// System.out.println(xml);
 
-		StructureDefinition diff = fhirContext.newXmlParser().parseResource(StructureDefinition.class,
-				Files.newInputStream(Paths.get("../fhir-demo-server/src/test/resources/task-highmed-0.0.1.xml")));
-		StructureDefinition sd = fhirJerseyClient.generateSnapshot(diff);
-		String xml = fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(sd);
-		System.out.println(xml);
+		// StructureDefinition diff = fhirContext.newXmlParser().parseResource(StructureDefinition.class,
+		// Files.newInputStream(Paths.get("../fhir-demo-server/src/test/resources/task-highmed-0.0.1.xml")));
+		// StructureDefinition sd = fhirJerseyClient.generateSnapshot(diff);
+		// String xml = fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(sd);
+		// System.out.println(xml);
 	}
 }
