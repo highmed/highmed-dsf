@@ -1,13 +1,10 @@
-package org.highmed.fhir.webservice;
+package org.highmed.fhir.webservice.impl;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
@@ -29,6 +26,7 @@ import org.highmed.fhir.search.parameters.basic.AbstractSearchParameter;
 import org.highmed.fhir.service.ResourceValidator;
 import org.highmed.fhir.service.SnapshotGenerator;
 import org.highmed.fhir.service.SnapshotGenerator.SnapshotWithValidationMessages;
+import org.highmed.fhir.webservice.specification.StructureDefinitionService;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
@@ -43,22 +41,20 @@ import org.hl7.fhir.r4.model.UriType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Path(StructureDefinitionService.RESOURCE_TYPE_NAME)
-public class StructureDefinitionService extends AbstractService<StructureDefinitionDao, StructureDefinition>
+public class StructureDefinitionServiceImpl extends AbstractServiceImpl<StructureDefinitionDao, StructureDefinition>
+		implements StructureDefinitionService
 {
-	public static final String RESOURCE_TYPE_NAME = "StructureDefinition";
-
-	private static final Logger logger = LoggerFactory.getLogger(StructureDefinitionService.class);
+	private static final Logger logger = LoggerFactory.getLogger(StructureDefinitionServiceImpl.class);
 
 	private final StructureDefinitionSnapshotDao snapshotDao;
 	private final SnapshotGenerator snapshotGenerator;
 
-	public StructureDefinitionService(String serverBase, int defaultPageCount,
-			StructureDefinitionDao structureDefinitionDao,
-			StructureDefinitionSnapshotDao structureDefinitionSnapshotDao, ResourceValidator validator,
-			EventManager eventManager, SnapshotGenerator snapshotGenerator)
+	public StructureDefinitionServiceImpl(String serverBase, int defaultPageCount,
+			StructureDefinitionDao structureDefinitionDao, ResourceValidator validator, EventManager eventManager,
+			ServiceHelperImpl<StructureDefinition> serviceHelper,
+			StructureDefinitionSnapshotDao structureDefinitionSnapshotDao, SnapshotGenerator snapshotGenerator)
 	{
-		super(serverBase, defaultPageCount, StructureDefinition.class, structureDefinitionDao, validator, eventManager);
+		super(serverBase, defaultPageCount, structureDefinitionDao, validator, eventManager, serviceHelper);
 
 		this.snapshotDao = structureDefinitionSnapshotDao;
 		this.snapshotGenerator = snapshotGenerator;
@@ -91,7 +87,7 @@ public class StructureDefinitionService extends AbstractService<StructureDefinit
 	{
 		if (resource.hasSnapshot())
 		{
-			catchAndLogSqlAndResourceNotFoundException(() -> dbOp.apply(resource));
+			serviceHelper.catchAndLogSqlAndResourceNotFoundException(() -> dbOp.apply(resource));
 
 			resource.setSnapshot(null);
 		}
@@ -120,14 +116,15 @@ public class StructureDefinitionService extends AbstractService<StructureDefinit
 	@Override
 	protected void postDelete(String id)
 	{
-		catchAndLogSqlException(() -> snapshotDao.delete(withUuid(id)));
+		serviceHelper.catchAndLogSqlException(() -> snapshotDao.delete(serviceHelper.withUuid(id)));
 	}
 
 	private void post(StructureDefinition createdResource,
 			FunctionWithSqlAndResourceNotFoundException<StructureDefinition, StructureDefinition> dbOp)
 	{
-		boolean snapshotExists = catchAndLogSqlExceptionAndIfReturn(
-				() -> snapshotDao.hasNonDeletedResource(withUuid(createdResource.getIdElement().getIdPart())),
+		boolean snapshotExists = serviceHelper.catchAndLogSqlExceptionAndIfReturn(
+				() -> snapshotDao
+						.hasNonDeletedResource(serviceHelper.withUuid(createdResource.getIdElement().getIdPart())),
 				() -> false);
 
 		if (!snapshotExists)
@@ -135,47 +132,40 @@ public class StructureDefinitionService extends AbstractService<StructureDefinit
 			SnapshotWithValidationMessages s = snapshotGenerator.generateSnapshot(createdResource);
 
 			if (s.getMessages().isEmpty())
-				catchAndLogSqlAndResourceNotFoundException(() -> dbOp.apply(createdResource));
+				serviceHelper.catchAndLogSqlAndResourceNotFoundException(() -> dbOp.apply(createdResource));
 		}
 	}
 
-	@GET
-	@Path("/{id}/{snapshot : [$]snapshot(/)?}")
+	@Override
 	public Response getSnapshotExisting(@PathParam("snapshot") String snapshotPath, @PathParam("id") String id,
 			@QueryParam("_format") String format, @Context UriInfo uri)
 	{
-		logger.trace("GET {}", uri.getRequestUri().toString());
-
-		Optional<StructureDefinition> snapshot = catchAndLogSqlAndResourceDeletedExceptionAndIfReturn(
-				() -> snapshotDao.read(withUuid(id)), Optional::empty, Optional::empty);
+		Optional<StructureDefinition> snapshot = serviceHelper.catchAndLogSqlAndResourceDeletedExceptionAndIfReturn(
+				() -> snapshotDao.read(serviceHelper.withUuid(id)), Optional::empty, Optional::empty);
 
 		if (snapshot.isPresent())
-			return snapshot.map(d -> response(Status.OK, d, toSpecialMimeType(format))).get().build();
+			return snapshot.map(d -> serviceHelper.response(Status.OK, d, serviceHelper.toSpecialMimeType(format)))
+					.get().build();
 
-		Optional<StructureDefinition> differential = handleSqlAndResourceDeletedException(
-				() -> getDao().read(withUuid(id)));
+		Optional<StructureDefinition> differential = serviceHelper
+				.handleSqlAndResourceDeletedException(() -> dao.read(serviceHelper.withUuid(id)));
 
-		return differential.map(this::generateSnapshot).map(d -> response(Status.OK, d, toSpecialMimeType(format)))
+		return differential.map(this::generateSnapshot)
+				.map(d -> serviceHelper.response(Status.OK, d, serviceHelper.toSpecialMimeType(format)))
 				.orElse(Response.status(Status.NOT_FOUND)).build();
 	}
 
-	@POST
-	@Path("/{id}/{snapshot : [$]snapshot(/)?}")
-	public Response snapshotExisting(@PathParam("snapshot") String snapshotPath, @PathParam("id") String id,
+	@Override
+	public Response postSnapshotExisting(@PathParam("snapshot") String snapshotPath, @PathParam("id") String id,
 			@QueryParam("_format") String format, @Context UriInfo uri)
 	{
-		logger.trace("POST {}", uri.getRequestUri().toString());
-		// redirecting to GET with 303 See Other
-		return Response.status(Status.SEE_OTHER).location(uri.getRequestUri()).build();
+		return getSnapshotExisting(snapshotPath, id, format, uri);
 	}
 
-	@POST
-	@Path("/{snapshot : [$]snapshot(/)?}")
+	@Override
 	public Response snapshotNew(@PathParam("snapshot") String snapshotPath, @QueryParam("_format") String format,
 			Parameters parameters, @Context UriInfo uri)
 	{
-		logger.trace("POST {}", uri.getRequestUri().toString());
-
 		Type urlType = parameters.getParameter("url");
 		Optional<ParametersParameterComponent> resource = parameters.getParameter().stream()
 				.filter(p -> "resource".equals(p.getName())).findFirst();
@@ -197,12 +187,13 @@ public class StructureDefinitionService extends AbstractService<StructureDefinit
 					"-" + ResourceLastUpdated.PARAMETER_NAME);
 			query.configureParameters(searchParameters);
 
-			PartialResult<StructureDefinition> result = handleSqlException(() -> snapshotDao.search(query));
+			PartialResult<StructureDefinition> result = serviceHelper
+					.handleSqlException(() -> snapshotDao.search(query));
 
 			Optional<StructureDefinition> snapshot = Optional
 					.ofNullable(result.getPartialResult().isEmpty() ? null : result.getPartialResult().get(0));
 
-			return snapshot.map(d -> response(Status.OK, d, toSpecialMimeType(format)))
+			return snapshot.map(d -> serviceHelper.response(Status.OK, d, serviceHelper.toSpecialMimeType(format)))
 					.orElse(Response.status(Status.NOT_FOUND)).build();
 		}
 		else if (urlType == null && resource.isPresent() && resource.get().getResource() != null)
@@ -218,9 +209,10 @@ public class StructureDefinitionService extends AbstractService<StructureDefinit
 				return Response.status(Status.BAD_REQUEST).build(); // TODO OperationOutcome
 
 			if (sd.hasSnapshot())
-				return response(Status.OK, sd, toSpecialMimeType(format)).build();
+				return serviceHelper.response(Status.OK, sd, serviceHelper.toSpecialMimeType(format)).build();
 			else
-				return response(Status.OK, generateSnapshot(sd), toSpecialMimeType(format)).build();
+				return serviceHelper.response(Status.OK, generateSnapshot(sd), serviceHelper.toSpecialMimeType(format))
+						.build();
 		}
 		else
 		{
