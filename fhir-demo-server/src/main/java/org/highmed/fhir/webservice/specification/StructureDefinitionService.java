@@ -8,9 +8,11 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 
 public interface StructureDefinitionService extends BasicService<StructureDefinition>
 {
-	Response getSnapshotExisting(String snapshotPath, String id, String format, UriInfo uri);
+	Response postSnapshotNew(String snapshotPath, String format, Parameters parameters, UriInfo uri);
+
+	Response getSnapshotNew(String snapshotPath, String url, String format, UriInfo uri);
 
 	Response postSnapshotExisting(String snapshotPath, String id, String format, UriInfo uri);
 
-	Response snapshotNew(String snapshotPath, String format, Parameters parameters, UriInfo uri);
+	Response getSnapshotExisting(String snapshotPath, String id, String format, UriInfo uri);
 }

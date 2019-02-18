@@ -14,19 +14,25 @@ public class StructureDefinitionServiceSecure extends
 	{
 		super(delegate);
 	}
-
-	public Response getSnapshotExisting(String snapshotPath, String id, String format, UriInfo uri)
+	
+	public Response postSnapshotNew(String snapshotPath, String format, Parameters parameters, UriInfo uri)
 	{
-		return delegate.getSnapshotExisting(snapshotPath, id, format, uri);
+		return delegate.postSnapshotNew(snapshotPath, format, parameters, uri);
 	}
 
+	@Override
+	public Response getSnapshotNew(String snapshotPath, String url, String format, UriInfo uri)
+	{
+		return delegate.getSnapshotNew(snapshotPath, url, format, uri);
+	}
+	
 	public Response postSnapshotExisting(String snapshotPath, String id, String format, UriInfo uri)
 	{
 		return delegate.postSnapshotExisting(snapshotPath, id, format, uri);
 	}
-
-	public Response snapshotNew(String snapshotPath, String format, Parameters parameters, UriInfo uri)
+	
+	public Response getSnapshotExisting(String snapshotPath, String id, String format, UriInfo uri)
 	{
-		return delegate.snapshotNew(snapshotPath, format, parameters, uri);
+		return delegate.getSnapshotExisting(snapshotPath, id, format, uri);
 	}
 }

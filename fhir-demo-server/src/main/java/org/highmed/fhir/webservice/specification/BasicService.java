@@ -20,7 +20,11 @@ public interface BasicService<R extends DomainResource>
 
 	Response search(UriInfo uri);
 
-	Response validateNew(String validate, Parameters parameters, UriInfo uri);
+	Response postValidateNew(String validate, Parameters parameters, UriInfo uri);
 
-	Response validateExisting(String validate, Parameters parameters, UriInfo uri);
+	Response getValidateNew(String validate, String mode, String profile, String format, UriInfo uri);
+
+	Response postValidateExisting(String validate, Parameters parameters, UriInfo uri);
+
+	Response getValidateExisting(String validate, String mode, String profile, String format, UriInfo uri);
 }

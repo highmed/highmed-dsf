@@ -84,7 +84,7 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 
 		R createdResource = serviceHelper.handleSqlException(() -> dao.create(resource));
 
-		eventManager.handleEvent(serviceHelper.newResourceCreatedEvent(resource));
+		eventManager.handleEvent(serviceHelper.newResourceCreatedEvent(createdResource));
 
 		postCreate(createdResource);
 
@@ -271,7 +271,7 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 	}
 
 	@Override
-	public Response validateNew(@PathParam("validate") String validate, Parameters parameters, @Context UriInfo uri)
+	public Response postValidateNew(@PathParam("validate") String validate, Parameters parameters, @Context UriInfo uri)
 	{
 		Optional<Resource> resource = getResource(parameters, "resource");
 		if (resource.isEmpty())
@@ -295,7 +295,14 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 	}
 
 	@Override
-	public Response validateExisting(@PathParam("validate") String validate, Parameters parameters,
+	public Response getValidateNew(String validate, String mode, String profile, String format, UriInfo uri)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Response postValidateExisting(@PathParam("validate") String validate, Parameters parameters,
 			@Context UriInfo uri)
 	{
 		if (getResource(parameters, "resource").isPresent())
@@ -311,5 +318,12 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 			return Response.status(Status.BAD_REQUEST).build(); // TODO return OperationOutcome
 
 		return Response.ok().build();
+	}
+
+	@Override
+	public Response getValidateExisting(String validate, String mode, String profile, String format, UriInfo uri)
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

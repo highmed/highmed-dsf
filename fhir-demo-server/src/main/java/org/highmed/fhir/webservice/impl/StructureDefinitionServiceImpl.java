@@ -137,33 +137,7 @@ public class StructureDefinitionServiceImpl extends AbstractServiceImpl<Structur
 	}
 
 	@Override
-	public Response getSnapshotExisting(@PathParam("snapshot") String snapshotPath, @PathParam("id") String id,
-			@QueryParam("_format") String format, @Context UriInfo uri)
-	{
-		Optional<StructureDefinition> snapshot = serviceHelper.catchAndLogSqlAndResourceDeletedExceptionAndIfReturn(
-				() -> snapshotDao.read(serviceHelper.withUuid(id)), Optional::empty, Optional::empty);
-
-		if (snapshot.isPresent())
-			return snapshot.map(d -> serviceHelper.response(Status.OK, d, serviceHelper.toSpecialMimeType(format)))
-					.get().build();
-
-		Optional<StructureDefinition> differential = serviceHelper
-				.handleSqlAndResourceDeletedException(() -> dao.read(serviceHelper.withUuid(id)));
-
-		return differential.map(this::generateSnapshot)
-				.map(d -> serviceHelper.response(Status.OK, d, serviceHelper.toSpecialMimeType(format)))
-				.orElse(Response.status(Status.NOT_FOUND)).build();
-	}
-
-	@Override
-	public Response postSnapshotExisting(@PathParam("snapshot") String snapshotPath, @PathParam("id") String id,
-			@QueryParam("_format") String format, @Context UriInfo uri)
-	{
-		return getSnapshotExisting(snapshotPath, id, format, uri);
-	}
-
-	@Override
-	public Response snapshotNew(@PathParam("snapshot") String snapshotPath, @QueryParam("_format") String format,
+	public Response postSnapshotNew(@PathParam("snapshot") String snapshotPath, @QueryParam("_format") String format,
 			Parameters parameters, @Context UriInfo uri)
 	{
 		Type urlType = parameters.getParameter("url");
@@ -219,6 +193,39 @@ public class StructureDefinitionServiceImpl extends AbstractServiceImpl<Structur
 			// TODO OperationOutcome resource vs. url
 			return Response.status(Status.BAD_REQUEST).build();
 		}
+	}
+
+	@Override
+	public Response getSnapshotNew(String snapshotPath, String url, String format, UriInfo uri)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Response postSnapshotExisting(@PathParam("snapshot") String snapshotPath, @PathParam("id") String id,
+			@QueryParam("_format") String format, @Context UriInfo uri)
+	{
+		return getSnapshotExisting(snapshotPath, id, format, uri);
+	}
+
+	@Override
+	public Response getSnapshotExisting(@PathParam("snapshot") String snapshotPath, @PathParam("id") String id,
+			@QueryParam("_format") String format, @Context UriInfo uri)
+	{
+		Optional<StructureDefinition> snapshot = serviceHelper.catchAndLogSqlAndResourceDeletedExceptionAndIfReturn(
+				() -> snapshotDao.read(serviceHelper.withUuid(id)), Optional::empty, Optional::empty);
+
+		if (snapshot.isPresent())
+			return snapshot.map(d -> serviceHelper.response(Status.OK, d, serviceHelper.toSpecialMimeType(format)))
+					.get().build();
+
+		Optional<StructureDefinition> differential = serviceHelper
+				.handleSqlAndResourceDeletedException(() -> dao.read(serviceHelper.withUuid(id)));
+
+		return differential.map(this::generateSnapshot)
+				.map(d -> serviceHelper.response(Status.OK, d, serviceHelper.toSpecialMimeType(format)))
+				.orElse(Response.status(Status.NOT_FOUND)).build();
 	}
 
 	private StructureDefinition generateSnapshot(StructureDefinition differential)

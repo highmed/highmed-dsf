@@ -438,7 +438,7 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 
 			List<R> partialResult = new ArrayList<>();
 
-			if (!query.isCountOnly(overallCount))
+			if (!query.isCountOnly(overallCount)) //TODO ask db if count 0
 			{
 				try (PreparedStatement statement = connection.prepareStatement(query.getSearchSql()))
 				{

@@ -46,13 +46,25 @@ public class AbstractServiceSecure<R extends DomainResource, S extends BasicServ
 		return delegate.search(uri);
 	}
 
-	public Response validateNew(String validate, Parameters parameters, UriInfo uri)
+	public Response postValidateNew(String validate, Parameters parameters, UriInfo uri)
 	{
-		return delegate.validateNew(validate, parameters, uri);
+		return delegate.postValidateNew(validate, parameters, uri);
+	}
+	
+	@Override
+	public Response getValidateNew(String validate, String mode, String profile, String format, UriInfo uri)
+	{
+		return delegate.getValidateNew(validate, mode, profile, format, uri);
 	}
 
-	public Response validateExisting(String validate, Parameters parameters, UriInfo uri)
+	public Response postValidateExisting(String validate, Parameters parameters, UriInfo uri)
 	{
-		return delegate.validateExisting(validate, parameters, uri);
+		return delegate.postValidateExisting(validate, parameters, uri);
+	}
+	
+	@Override
+	public Response getValidateExisting(String validate, String mode, String profile, String format, UriInfo uri)
+	{
+		return delegate.getValidateExisting(validate, mode, profile, format, uri);
 	}
 }

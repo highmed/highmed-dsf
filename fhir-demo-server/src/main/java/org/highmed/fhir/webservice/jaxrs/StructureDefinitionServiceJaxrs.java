@@ -28,18 +28,31 @@ public class StructureDefinitionServiceJaxrs extends
 		super(delegate);
 	}
 
+	@POST
+	@Path("/{snapshot : [$]snapshot(/)?}")
+	@Override
+	public Response postSnapshotNew(@PathParam("snapshot") String snapshotPath, @QueryParam("_format") String format,
+			Parameters parameters, @Context UriInfo uri)
+	{
+		logger.trace("POST {}", uri.getRequestUri().toString());
+
+		return delegate.postSnapshotNew(snapshotPath, format, parameters, uri);
+	}
+
 	@GET
-	@Path("/{id}/{snapshot : [$]snapshot(/)?}")
-	public Response getSnapshotExisting(@PathParam("snapshot") String snapshotPath, @PathParam("id") String id,
-			@QueryParam("_format") String format, @Context UriInfo uri)
+	@Path("/{snapshot : [$]snapshot(/)?}")
+	@Override
+	public Response getSnapshotNew(@PathParam("snapshot") String snapshotPath, @PathParam("url") String url,
+			@PathParam("_format") String format, @Context UriInfo uri)
 	{
 		logger.trace("GET {}", uri.getRequestUri().toString());
 
-		return delegate.getSnapshotExisting(snapshotPath, id, format, uri);
+		return delegate.getSnapshotNew(snapshotPath, url, format, uri);
 	}
 
 	@POST
 	@Path("/{id}/{snapshot : [$]snapshot(/)?}")
+	@Override
 	public Response postSnapshotExisting(@PathParam("snapshot") String snapshotPath, String id,
 			@QueryParam("_format") String format, @Context UriInfo uri)
 	{
@@ -48,13 +61,14 @@ public class StructureDefinitionServiceJaxrs extends
 		return delegate.postSnapshotExisting(snapshotPath, id, format, uri);
 	}
 
-	@POST
-	@Path("/{snapshot : [$]snapshot(/)?}")
-	public Response snapshotNew(@PathParam("snapshot") String snapshotPath, @QueryParam("_format") String format,
-			Parameters parameters, @Context UriInfo uri)
+	@GET
+	@Path("/{id}/{snapshot : [$]snapshot(/)?}")
+	@Override
+	public Response getSnapshotExisting(@PathParam("snapshot") String snapshotPath, @PathParam("id") String id,
+			@QueryParam("_format") String format, @Context UriInfo uri)
 	{
-		logger.trace("POST {}", uri.getRequestUri().toString());
+		logger.trace("GET {}", uri.getRequestUri().toString());
 
-		return delegate.snapshotNew(snapshotPath, format, parameters, uri);
+		return delegate.getSnapshotExisting(snapshotPath, id, format, uri);
 	}
 }

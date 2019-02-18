@@ -99,22 +99,43 @@ public class AbstractServiceJaxrs<R extends DomainResource, S extends BasicServi
 	@POST
 	@Path("/{validate : [$]validate(/)?}")
 	@Override
-	public Response validateNew(@PathParam("validate") String validate, Parameters parameters, @Context UriInfo uri)
+	public Response postValidateNew(@PathParam("validate") String validate, Parameters parameters, @Context UriInfo uri)
 	{
 		logger.trace("POST {}", uri.getRequestUri().toString());
 
-		return delegate.validateNew(validate, parameters, uri);
+		return delegate.postValidateNew(validate, parameters, uri);
+	}
+
+	@GET
+	@Path("/{validate : [$]validate(/)?}")
+	@Override
+	public Response getValidateNew(@PathParam("validate") String validate, @QueryParam("mode") String mode,
+			@QueryParam("profile") String profile, @QueryParam("_format") String format, @Context UriInfo uri)
+	{
+		logger.trace("GET {}", uri.getRequestUri().toString());
+
+		return delegate.getValidateNew(validate, mode, profile, format, uri);
 	}
 
 	@POST
 	@Path("/{id}/{validate : [$]validate(/)?}")
 	@Override
-	public Response validateExisting(@PathParam("validate") String validate, Parameters parameters,
+	public Response postValidateExisting(@PathParam("validate") String validate, Parameters parameters,
 			@Context UriInfo uri)
 	{
 		logger.trace("POST {}", uri.getRequestUri().toString());
-	
-		return delegate.validateExisting(validate, parameters, uri);
 
+		return delegate.postValidateExisting(validate, parameters, uri);
+	}
+
+	@GET
+	@Path("/{id}/{validate : [$]validate(/)?}")
+	@Override
+	public Response getValidateExisting(@PathParam("validate") String validate, @QueryParam("mode") String mode,
+			@QueryParam("profile") String profile, @QueryParam("_format") String format, @Context UriInfo uri)
+	{
+		logger.trace("GET {}", uri.getRequestUri().toString());
+
+		return delegate.getValidateExisting(validate, mode, profile, format, uri);
 	}
 }
