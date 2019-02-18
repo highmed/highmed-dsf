@@ -4,7 +4,7 @@ public class SortParameter
 {
 	public enum SortDirection
 	{
-		ASC("", ""), DESC(" DESC", "+");
+		ASC("", ""), DESC(" DESC", "-");
 
 		private final String sqlModifier;
 		private final String urlModifier;
