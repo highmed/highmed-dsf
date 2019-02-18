@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+
 public class EventManagerImpl implements EventManager, InitializingBean, DisposableBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(EventManagerImpl.class);
@@ -53,9 +55,10 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 
 	private void handleEventAsync(Event<?> event)
 	{
-		// TODO Auto-generated method stub
-		
-		event.getClass();
-		event.getResource();
+		logger.info("handling async event {} for resource of type {} with id {}", event.getClass().getName(),
+				event.getType().getAnnotation(ResourceDef.class).name(), event.getId());
+
+		// TODO get subscriptions from db
+		// TODO figure out what connected event handlers to call, and call them
 	}
 }

@@ -32,6 +32,11 @@ public class TestFhirJerseyClient
 		// patient.setIdElement(new IdType("Patient", UUID.randomUUID().toString(), "2"));
 		// fhirJerseyClient.create(patient);
 
+		// Patient patient = new Patient();
+		// patient.setIdElement(new IdType("d7b7e47d-9dc9-436c-abc6-b945bad80d19"));
+		// patient.setGender(AdministrativeGender.FEMALE);
+		// fhirJerseyClient.update(patient);
+
 		// DomainResource organization = fhirJerseyClient.create(new Organization().setName("Test Organization"));
 		// fhirJerseyClient.create(new Task().setRequester(new Reference(organization.getIdElement().toVersionless()))
 		// .setDescription("Organization reference without version").setAuthoredOn(new Date())

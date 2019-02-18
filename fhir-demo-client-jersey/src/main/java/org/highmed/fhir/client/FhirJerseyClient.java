@@ -97,6 +97,21 @@ public class FhirJerseyClient extends AbstractJerseyClient
 		}
 	}
 
+	public DomainResource update(DomainResource resource)
+	{
+		try (Response response = getResource().path(resource.getClass().getAnnotation(ResourceDef.class).name())
+				.path(resource.getIdElement().getIdPart()).request().accept(Constants.CT_FHIR_JSON_NEW)
+				.put(Entity.entity(resource, Constants.CT_FHIR_JSON_NEW)))
+		{
+			logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+					response.getStatusInfo().getReasonPhrase());
+			logger.debug("HTTP header ETag: {}", response.getHeaderString(HttpHeaders.ETAG));
+			logger.debug("HTTP header Last-Modified: {}", response.getHeaderString(HttpHeaders.LAST_MODIFIED));
+
+			return response.readEntity(resource.getClass());
+		}
+	}
+
 	public void getConformance()
 	{
 		try (Response response = getResource().path("metadata").request()
