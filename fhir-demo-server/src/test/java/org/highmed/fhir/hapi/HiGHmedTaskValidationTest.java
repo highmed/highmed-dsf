@@ -31,7 +31,7 @@ public class HiGHmedTaskValidationTest
 	{
 		FhirContext context = FhirContext.forR4();
 		StructureDefinition highmedTaskDiff = new StructureDefinitionReader(context)
-				.readXml(Paths.get("src/test/resources/task-highmed-0.0.1.xml"));
+				.readXml(Paths.get("src/test/resources/task-highmed-0.0.2.xml"));
 
 		SnapshotGenerator generator = new SnapshotGenerator(context, highmedTaskDiff);
 		SnapshotWithValidationMessages highmedTask = generator.generateSnapshot(highmedTaskDiff);
