@@ -46,6 +46,12 @@ public interface SearchParameter<R extends DomainResource>
 	void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement)
 			throws SQLException;
 
+	/**
+	 * Will not be called if {@link #isDefined()} returns <code>false</code>
+	 * 
+	 * @param bundleUri
+	 *            never <code>null</code>
+	 */
 	void modifyBundleUri(UriBuilder bundleUri);
 
 	boolean matches(R resource);

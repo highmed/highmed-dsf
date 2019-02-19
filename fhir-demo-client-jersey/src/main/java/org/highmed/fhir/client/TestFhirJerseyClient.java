@@ -33,7 +33,6 @@ public class TestFhirJerseyClient
 
 		try
 		{
-
 			// Patient patient = new Patient();
 			// patient.setIdElement(new IdType("Patient", UUID.randomUUID().toString(), "2"));
 			// fhirJerseyClient.create(patient);
@@ -53,14 +52,13 @@ public class TestFhirJerseyClient
 
 			// fhirJerseyClient.getConformance();
 
-			
-			StructureDefinition sD = fhirContext.newXmlParser().parseResource(StructureDefinition.class,
-					Files.newInputStream(Paths.get("../fhir-demo-server/src/test/resources/profiles/extension-workflow-researchstudy.xml")));
-			fhirJerseyClient.create(sD);
-			
-//			StructureDefinition sD = fhirContext.newXmlParser().parseResource(StructureDefinition.class,
-//					Files.newInputStream(Paths.get("../fhir-demo-server/src/test/resources/profiles/task-highmed-0.0.2.xml")));
-//			fhirJerseyClient.create(sD);
+			// StructureDefinition sD = fhirContext.newXmlParser().parseResource(StructureDefinition.class,
+			// Files.newInputStream(Paths.get("../fhir-demo-server/src/test/resources/profiles/extension-workflow-researchstudy.xml")));
+			// fhirJerseyClient.create(sD);
+
+			// StructureDefinition sD = fhirContext.newXmlParser().parseResource(StructureDefinition.class,
+			// Files.newInputStream(Paths.get("../fhir-demo-server/src/test/resources/profiles/task-highmed-0.0.2.xml")));
+			// fhirJerseyClient.create(sD);
 
 			// StructureDefinition sd = fhirJerseyClient
 			// .generateSnapshot("http://highmed.org/fhir/StructureDefinition/DataSharingTask");
@@ -73,11 +71,11 @@ public class TestFhirJerseyClient
 			// String xml = fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(sd);
 			// System.out.println(xml);
 
-//			StructureDefinition diff = fhirContext.newXmlParser().parseResource(StructureDefinition.class,
-//					Files.newInputStream(Paths.get("../fhir-demo-server/src/test/resources/address-de-basis-0.2.xml")));
-//			StructureDefinition sd = fhirJerseyClient.generateSnapshot(diff.setSnapshot(null));
-//			String xml = fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(sd);
-//			System.out.println(xml);
+			// StructureDefinition diff = fhirContext.newXmlParser().parseResource(StructureDefinition.class,
+			// Files.newInputStream(Paths.get("../fhir-demo-server/src/test/resources/address-de-basis-0.2.xml")));
+			// StructureDefinition sd = fhirJerseyClient.generateSnapshot(diff.setSnapshot(null));
+			// String xml = fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(sd);
+			// System.out.println(xml);
 
 		}
 		catch (WebApplicationException e)

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.core.MultivaluedMap;
@@ -163,10 +164,14 @@ public class SearchQuery implements DbSearchQuery
 		return pageAndCount.getPage() < 1 || pageAndCount.getCount() < 1 || pageAndCount.getPageStart() > overallCount;
 	}
 
-	public void configureBundleUri(UriBuilder bundleUri)
+	public UriBuilder configureBundleUri(UriBuilder bundleUri)
 	{
+		Objects.requireNonNull(bundleUri, "bundleUri");
+
 		searchParameters.stream().filter(SearchParameter::isDefined).forEach(p -> p.modifyBundleUri(bundleUri));
 		bundleUri.replaceQueryParam(AbstractSearchParameter.SORT_PARAMETER, sortParameter());
+
+		return bundleUri;
 	}
 
 	private String sortParameter()

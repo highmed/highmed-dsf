@@ -11,11 +11,15 @@ import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionMappingComponent;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 
 public class SnapshotGenerator
 {
+	private static final Logger logger = LoggerFactory.getLogger(SnapshotGenerator.class);
+
 	public static class SnapshotWithValidationMessages
 	{
 		private final StructureDefinition snapshot;
@@ -58,6 +62,9 @@ public class SnapshotGenerator
 	public SnapshotWithValidationMessages generateSnapshot(String baseAbsoluteUrlPrefix,
 			StructureDefinition differential)
 	{
+		logger.debug("Generating snapshot for StructureDefinition with id {}, url {}, version {}",
+				differential.getIdElement().getIdPart(), differential.getUrl(), differential.getVersion());
+
 		StructureDefinition base = worker.fetchTypeDefinition(differential.getType());
 
 		/* ProfileUtilities is not thread safe */
@@ -101,6 +108,17 @@ public class SnapshotGenerator
 		};
 
 		profileUtils.generateSnapshot(base, differential, baseAbsoluteUrlPrefix, null);
+
+		if (messages.isEmpty())
+			logger.debug("Snapshot generated for StructureDefinition with id {}, url {}, version {}",
+					differential.getIdElement().getIdPart(), differential.getUrl(), differential.getVersion());
+		else
+		{
+			logger.warn("Snapshot not generated for StructureDefinition with id {}, url {}, version {}",
+					differential.getIdElement().getIdPart(), differential.getUrl(), differential.getVersion());
+			messages.forEach(m -> logger.warn("Issue while generating snapshot: {} - {} - {}", m.getDisplay(),
+					m.getLine(), m.getMessage()));
+		}
 
 		return new SnapshotWithValidationMessages(differential, messages);
 	}

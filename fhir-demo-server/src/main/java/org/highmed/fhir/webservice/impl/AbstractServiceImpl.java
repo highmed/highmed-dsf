@@ -220,15 +220,13 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 		int effectivePage = page == null ? 1 : page;
 		int effectiveCount = (count == null || count < 0) ? defaultPageCount : count;
 
-		/* SearchParameter implementations are not thread safe and need to be created on a request basis */
 		SearchQuery query = dao.createSearchQuery(effectivePage, effectiveCount);
 
 		query.configureParameters(queryParameters);
 
 		PartialResult<R> result = serviceHelper.handleSqlException(() -> dao.search(query));
 
-		UriBuilder bundleUri = uri.getAbsolutePathBuilder();
-		query.configureBundleUri(bundleUri);
+		UriBuilder bundleUri = query.configureBundleUri(uri.getAbsolutePathBuilder());
 
 		return serviceHelper.response(Status.OK, serviceHelper.createSearchSet(result, bundleUri, format),
 				serviceHelper.toSpecialMimeType(format)).build();

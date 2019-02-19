@@ -82,22 +82,57 @@ public class StructureDefinitionServiceImpl extends AbstractServiceImpl<Structur
 
 		resource.setSnapshot(null);
 
-		return postCreateOrUpdate(forPost);
+		return postCreate(forPost);
 	}
 
 	@Override
 	protected Consumer<StructureDefinition> preUpdate(StructureDefinition resource)
 	{
-		return postCreateOrUpdate(resource);
+		StructureDefinition forPost = resource.hasSnapshot() ? resource.copy() : null;
+
+		resource.setSnapshot(null);
+
+		return postUpdate(forPost);
 	}
 
-	private Consumer<StructureDefinition> postCreateOrUpdate(StructureDefinition preResource)
+	private Consumer<StructureDefinition> postCreate(StructureDefinition preResource)
 	{
 		return postResource ->
 		{
 			if (preResource != null && preResource.hasSnapshot())
+			{
 				handleSnapshot(preResource, info -> snapshotDao
 						.create(serviceHelper.withUuid(postResource.getIdElement().getIdPart()), preResource, info));
+			}
+			else if (postResource != null)
+			{
+				try
+				{
+					SnapshotWithValidationMessages s = snapshotGenerator.generateSnapshot(postResource);
+
+					if (s != null && s.getSnapshot() != null && s.getMessages().isEmpty())
+						handleSnapshot(s.getSnapshot(),
+								info -> snapshotDao.create(
+										serviceHelper.withUuid(postResource.getIdElement().getIdPart()), postResource,
+										info));
+				}
+				catch (Exception e)
+				{
+					logger.warn("Error while generating snapshot for StructureDefinition with id "
+							+ postResource.getIdElement().getIdPart(), e);
+				}
+			}
+		};
+	}
+
+	private Consumer<StructureDefinition> postUpdate(StructureDefinition preResource)
+	{
+		return postResource ->
+		{
+			if (preResource != null && preResource.hasSnapshot())
+			{
+				handleSnapshot(preResource, info -> snapshotDao.update(preResource, info));
+			}
 			else if (postResource != null)
 			{
 				try
