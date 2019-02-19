@@ -8,6 +8,9 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 
+import javax.ws.rs.WebApplicationException;
+
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.StructureDefinition;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -28,38 +31,61 @@ public class TestFhirJerseyClient
 		FhirJerseyClient fhirJerseyClient = new FhirJerseyClient("https://localhost:8001/fhir", trustStore, keyStore,
 				keyStorePassword, null, null, null, 0, 0, null, fhirContext);
 
-		// Patient patient = new Patient();
-		// patient.setIdElement(new IdType("Patient", UUID.randomUUID().toString(), "2"));
-		// fhirJerseyClient.create(patient);
+		try
+		{
 
-		// Patient patient = new Patient();
-		// patient.setIdElement(new IdType("d7b7e47d-9dc9-436c-abc6-b945bad80d19"));
-		// patient.setGender(AdministrativeGender.FEMALE);
-		// fhirJerseyClient.update(patient);
+			// Patient patient = new Patient();
+			// patient.setIdElement(new IdType("Patient", UUID.randomUUID().toString(), "2"));
+			// fhirJerseyClient.create(patient);
 
-		// DomainResource organization = fhirJerseyClient.create(new Organization().setName("Test Organization"));
-		// fhirJerseyClient.create(new Task().setRequester(new Reference(organization.getIdElement().toVersionless()))
-		// .setDescription("Organization reference without version").setAuthoredOn(new Date())
-		// .setStatus(TaskStatus.REQUESTED));
-		// fhirJerseyClient.create(new Task().setRequester(new Reference(organization.getIdElement()))
-		// .setDescription("Organization reference with version"));
+			// Patient patient = new Patient();
+			// patient.setIdElement(new IdType("d7b7e47d-9dc9-436c-abc6-b945bad80d19"));
+			// patient.setGender(AdministrativeGender.FEMALE);
+			// fhirJerseyClient.update(patient);
 
-		// fhirJerseyClient.getConformance();
+			// DomainResource organization = fhirJerseyClient.create(new Organization().setName("Test Organization"));
+			// fhirJerseyClient.create(new Task().setRequester(new
+			// Reference(organization.getIdElement().toVersionless()))
+			// .setDescription("Organization reference without version").setAuthoredOn(new Date())
+			// .setStatus(TaskStatus.REQUESTED));
+			// fhirJerseyClient.create(new Task().setRequester(new Reference(organization.getIdElement()))
+			// .setDescription("Organization reference with version"));
 
-		StructureDefinition sD = fhirContext.newXmlParser().parseResource(StructureDefinition.class,
-				Files.newInputStream(Paths.get("../fhir-demo-server/src/test/resources/task-highmed-0.0.2.xml")));
+			// fhirJerseyClient.getConformance();
 
-		fhirJerseyClient.create(sD);
+			// StructureDefinition sD = fhirContext.newXmlParser().parseResource(StructureDefinition.class,
+			// Files.newInputStream(Paths.get("../fhir-demo-server/src/test/resources/task-highmed-0.0.2.xml")));
+			//
+			// fhirJerseyClient.create(sD);
 
-		// StructureDefinition sd = fhirJerseyClient
-		// .generateSnapshot("http://highmed.org/fhir/StructureDefinition/DataSharingTask");
-		// String xml = fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(sd);
-		// System.out.println(xml);
+			// StructureDefinition sd = fhirJerseyClient
+			// .generateSnapshot("http://highmed.org/fhir/StructureDefinition/DataSharingTask");
+			// String xml = fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(sd);
+			// System.out.println(xml);
 
-		// StructureDefinition diff = fhirContext.newXmlParser().parseResource(StructureDefinition.class,
-		// Files.newInputStream(Paths.get("../fhir-demo-server/src/test/resources/task-highmed-0.0.1.xml")));
-		// StructureDefinition sd = fhirJerseyClient.generateSnapshot(diff);
-		// String xml = fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(sd);
-		// System.out.println(xml);
+			// StructureDefinition diff = fhirContext.newXmlParser().parseResource(StructureDefinition.class,
+			// Files.newInputStream(Paths.get("../fhir-demo-server/src/test/resources/task-highmed-0.0.1.xml")));
+			// StructureDefinition sd = fhirJerseyClient.generateSnapshot(diff);
+			// String xml = fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(sd);
+			// System.out.println(xml);
+
+			StructureDefinition diff = fhirContext.newXmlParser().parseResource(StructureDefinition.class,
+					Files.newInputStream(Paths.get("../fhir-demo-server/src/test/resources/address-de-basis-0.2.xml")));
+			StructureDefinition sd = fhirJerseyClient.generateSnapshot(diff.setSnapshot(null));
+			String xml = fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(sd);
+			System.out.println(xml);
+
+		}
+		catch (WebApplicationException e)
+		{
+			if (e.getResponse() != null && e.getResponse().hasEntity())
+			{
+				OperationOutcome outcome = e.getResponse().readEntity(OperationOutcome.class);
+				String xml = fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(outcome);
+				System.out.println(xml);
+			}
+			else
+				e.printStackTrace();
+		}
 	}
 }

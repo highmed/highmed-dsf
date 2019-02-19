@@ -3,11 +3,13 @@ package org.highmed.fhir.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hl7.fhir.exceptions.DefinitionException;
 import org.hl7.fhir.r4.conformance.ProfileUtilities;
 import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionMappingComponent;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -66,7 +68,32 @@ public class SnapshotGenerator
 
 		/* ProfileUtilities is not thread safe */
 		List<ValidationMessage> messages = new ArrayList<>();
-		ProfileUtilities profileUtils = new ProfileUtilities(worker, messages, null);
+		ProfileUtilities profileUtils = new ProfileUtilities(worker, messages, null)
+		{
+			public void updateMaps(StructureDefinition base, StructureDefinition derived) throws DefinitionException
+			{
+				if (base == null)
+					throw new DefinitionException("no base profile provided");
+				if (derived == null)
+					throw new DefinitionException("no derived structure provided");
+
+				for (StructureDefinitionMappingComponent baseMap : base.getMapping())
+				{
+					boolean found = false;
+					for (StructureDefinitionMappingComponent derivedMap : derived.getMapping())
+					{
+						if ((derivedMap.getUri() != null && derivedMap.getUri().equals(baseMap.getUri()))
+								|| (derivedMap.getName() != null && derivedMap.getName().equals(baseMap.getName())))
+						{
+							found = true;
+							break;
+						}
+					}
+					if (!found)
+						derived.getMapping().add(baseMap);
+				}
+			}
+		};
 
 		profileUtils.generateSnapshot(base, differential, baseAbsoluteUrlPrefix, null);
 

@@ -19,6 +19,8 @@ import org.highmed.fhir.adapter.HealthcareServiceJsonFhirAdapter;
 import org.highmed.fhir.adapter.HealthcareServiceXmlFhirAdapter;
 import org.highmed.fhir.adapter.LocationJsonFhirAdapter;
 import org.highmed.fhir.adapter.LocationXmlFhirAdapter;
+import org.highmed.fhir.adapter.OperationOutcomeJsonFhirAdapter;
+import org.highmed.fhir.adapter.OperationOutcomeXmlFhirAdapter;
 import org.highmed.fhir.adapter.OrganizationJsonFhirAdapter;
 import org.highmed.fhir.adapter.OrganizationXmlFhirAdapter;
 import org.highmed.fhir.adapter.ParametersJsonFhirAdapter;
@@ -39,6 +41,7 @@ import org.highmed.fhir.adapter.SubscriptionJsonFhirAdapter;
 import org.highmed.fhir.adapter.SubscriptionXmlFhirAdapter;
 import org.highmed.fhir.adapter.TaskJsonFhirAdapter;
 import org.highmed.fhir.adapter.TaskXmlFhirAdapter;
+import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StructureDefinition;
@@ -70,6 +73,7 @@ public class FhirJerseyClient extends AbstractJerseyClient
 				new CapabilityStatementJsonFhirAdapter(fhirContext), new CapabilityStatementXmlFhirAdapter(fhirContext),
 				new HealthcareServiceJsonFhirAdapter(fhirContext), new HealthcareServiceXmlFhirAdapter(fhirContext),
 				new LocationJsonFhirAdapter(fhirContext), new LocationXmlFhirAdapter(fhirContext),
+				new OperationOutcomeJsonFhirAdapter(fhirContext), new OperationOutcomeXmlFhirAdapter(fhirContext),
 				new OrganizationJsonFhirAdapter(fhirContext), new OrganizationXmlFhirAdapter(fhirContext),
 				new ParametersJsonFhirAdapter(fhirContext), new ParametersXmlFhirAdapter(fhirContext),
 				new PatientJsonFhirAdapter(fhirContext), new PatientXmlFhirAdapter(fhirContext),
@@ -84,42 +88,50 @@ public class FhirJerseyClient extends AbstractJerseyClient
 
 	public DomainResource create(DomainResource resource)
 	{
-		try (Response response = getResource().path(resource.getClass().getAnnotation(ResourceDef.class).name())
-				.request().accept(Constants.CT_FHIR_JSON_NEW).post(Entity.entity(resource, Constants.CT_FHIR_JSON_NEW)))
-		{
-			logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
-					response.getStatusInfo().getReasonPhrase());
-			logger.debug("HTTP header Location: {}", response.getLocation());
-			logger.debug("HTTP header ETag: {}", response.getHeaderString(HttpHeaders.ETAG));
-			logger.debug("HTTP header Last-Modified: {}", response.getHeaderString(HttpHeaders.LAST_MODIFIED));
+		Response response = getResource().path(resource.getClass().getAnnotation(ResourceDef.class).name()).request()
+				.accept(Constants.CT_FHIR_JSON_NEW).post(Entity.entity(resource, Constants.CT_FHIR_JSON_NEW));
 
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		logger.debug("HTTP header Location: {}", response.getLocation());
+		logger.debug("HTTP header ETag: {}", response.getHeaderString(HttpHeaders.ETAG));
+		logger.debug("HTTP header Last-Modified: {}", response.getHeaderString(HttpHeaders.LAST_MODIFIED));
+
+		if (Status.CREATED.getStatusCode() == response.getStatus())
 			return response.readEntity(resource.getClass());
-		}
+		else
+			throw new WebApplicationException(response);
 	}
 
 	public DomainResource update(DomainResource resource)
 	{
-		try (Response response = getResource().path(resource.getClass().getAnnotation(ResourceDef.class).name())
+		Response response = getResource().path(resource.getClass().getAnnotation(ResourceDef.class).name())
 				.path(resource.getIdElement().getIdPart()).request().accept(Constants.CT_FHIR_JSON_NEW)
-				.put(Entity.entity(resource, Constants.CT_FHIR_JSON_NEW)))
-		{
-			logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
-					response.getStatusInfo().getReasonPhrase());
-			logger.debug("HTTP header ETag: {}", response.getHeaderString(HttpHeaders.ETAG));
-			logger.debug("HTTP header Last-Modified: {}", response.getHeaderString(HttpHeaders.LAST_MODIFIED));
+				.put(Entity.entity(resource, Constants.CT_FHIR_JSON_NEW));
 
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		logger.debug("HTTP header ETag: {}", response.getHeaderString(HttpHeaders.ETAG));
+		logger.debug("HTTP header Last-Modified: {}", response.getHeaderString(HttpHeaders.LAST_MODIFIED));
+
+		if (Status.OK.getStatusCode() == response.getStatus())
 			return response.readEntity(resource.getClass());
-		}
+		else
+			throw new WebApplicationException(response);
 	}
 
-	public void getConformance()
+	public CapabilityStatement getConformance()
 	{
-		try (Response response = getResource().path("metadata").request()
-				.accept(Constants.CT_FHIR_JSON_NEW + "; fhirVersion=4.0").get())
-		{
-			logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
-					response.getStatusInfo().getReasonPhrase());
-		}
+		Response response = getResource().path("metadata").request()
+				.accept(Constants.CT_FHIR_JSON_NEW + "; fhirVersion=4.0").get();
+
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+
+		if (Status.OK.getStatusCode() == response.getStatus())
+			return response.readEntity(CapabilityStatement.class);
+		else
+			throw new WebApplicationException(response);
 	}
 
 	public StructureDefinition generateSnapshot(String url)
@@ -127,17 +139,16 @@ public class FhirJerseyClient extends AbstractJerseyClient
 		Parameters parameters = new Parameters();
 		parameters.addParameter().setName("url").setValue(new UriType(url));
 
-		try (Response response = getResource().path(StructureDefinition.class.getAnnotation(ResourceDef.class).name())
+		Response response = getResource().path(StructureDefinition.class.getAnnotation(ResourceDef.class).name())
 				.path("$snapshot").request().accept(Constants.CT_FHIR_JSON_NEW)
-				.post(Entity.entity(parameters, Constants.CT_FHIR_JSON_NEW)))
-		{
-			logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
-					response.getStatusInfo().getReasonPhrase());
-			if (Status.OK.getStatusCode() == response.getStatus())
-				return response.readEntity(StructureDefinition.class);
-			else
-				throw new WebApplicationException(response);
-		}
+				.post(Entity.entity(parameters, Constants.CT_FHIR_JSON_NEW));
+
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		if (Status.OK.getStatusCode() == response.getStatus())
+			return response.readEntity(StructureDefinition.class);
+		else
+			throw new WebApplicationException(response);
 	}
 
 	public StructureDefinition generateSnapshot(StructureDefinition differential)
@@ -145,16 +156,15 @@ public class FhirJerseyClient extends AbstractJerseyClient
 		Parameters parameters = new Parameters();
 		parameters.addParameter().setName("resource").setResource(differential);
 
-		try (Response response = getResource().path(StructureDefinition.class.getAnnotation(ResourceDef.class).name())
+		Response response = getResource().path(StructureDefinition.class.getAnnotation(ResourceDef.class).name())
 				.path("$snapshot").request().accept(Constants.CT_FHIR_JSON_NEW)
-				.post(Entity.entity(parameters, Constants.CT_FHIR_JSON_NEW)))
-		{
-			logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
-					response.getStatusInfo().getReasonPhrase());
-			if (Status.OK.getStatusCode() == response.getStatus())
-				return response.readEntity(StructureDefinition.class);
-			else
-				throw new WebApplicationException(response);
-		}
+				.post(Entity.entity(parameters, Constants.CT_FHIR_JSON_NEW));
+
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		if (Status.OK.getStatusCode() == response.getStatus())
+			return response.readEntity(StructureDefinition.class);
+		else
+			throw new WebApplicationException(response);
 	}
 }
