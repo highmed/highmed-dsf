@@ -352,11 +352,11 @@ public class ServiceHelperImpl<R extends DomainResource> implements Initializing
 		}
 	}
 
-	public void catchAndLogSqlAndResourceNotFoundException(RunnableWithSqlAndResourceNotFoundException s)
+	public void catchAndLogSqlAndResourceNotFoundException(RunnableWithSqlAndResourceNotFoundException r)
 	{
 		try
 		{
-			s.run();
+			r.run();
 		}
 		catch (ResourceNotFoundException e)
 		{
@@ -365,6 +365,25 @@ public class ServiceHelperImpl<R extends DomainResource> implements Initializing
 		catch (SQLException e)
 		{
 			logger.error("Error while accessing DB", e);
+		}
+	}
+
+	public R catchAndLogSqlAndResourceNotFoundException(SupplierWithSqlAndResourceNotFoundException<R> s,
+			Supplier<R> onResourceNotFoundException, Supplier<R> onSqlException)
+	{
+		try
+		{
+			return s.get();
+		}
+		catch (ResourceNotFoundException e)
+		{
+			logger.error(resourceTypeName + " with id " + e.getId() + " not found", e);
+			return onResourceNotFoundException.get();
+		}
+		catch (SQLException e)
+		{
+			logger.error("Error while accessing DB", e);
+			return onSqlException.get();
 		}
 	}
 

@@ -3,7 +3,6 @@ package org.highmed.fhir.service;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.r4.model.StructureDefinition;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.validation.FhirValidator;
@@ -13,10 +12,9 @@ public class ResourceValidator
 {
 	private final FhirValidator validator;
 
-	public ResourceValidator(FhirContext fhirContext, StructureDefinition... structureDefinitions)
+	public ResourceValidator(FhirContext fhirContext, IValidationSupport validationSupport)
 	{
-		validator = configureValidator(fhirContext.newValidator(),
-				createValidationSupport(fhirContext, structureDefinitions));
+		validator = configureValidator(fhirContext.newValidator(), validationSupport);
 	}
 
 	public ValidationResult validate(IBaseResource resource)
@@ -24,18 +22,12 @@ public class ResourceValidator
 		return validator.validateWithResult(resource);
 	}
 
-	protected FhirValidator configureValidator(FhirValidator validator, IValidationSupport support)
+	protected FhirValidator configureValidator(FhirValidator validator, IValidationSupport validationSupport)
 	{
 		FhirInstanceValidator instanceValidator = new FhirInstanceValidator();
-		instanceValidator.setValidationSupport(support);
+		instanceValidator.setValidationSupport(validationSupport);
 
 		validator.registerValidatorModule(instanceValidator);
 		return validator;
-	}
-
-	protected IValidationSupport createValidationSupport(FhirContext context,
-			StructureDefinition... structureDefinitions)
-	{
-		return new DefaultProfileValidationSupportWithCustomStructureDefinitions(context, structureDefinitions);
 	}
 }

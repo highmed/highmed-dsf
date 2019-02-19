@@ -5,17 +5,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import ca.uhn.fhir.context.FhirContext;
-
 @Configuration
 public class ValidationConfig
 {
 	@Autowired
-	private FhirContext fhirContext;
+	private FhirConfig fhirConfig;
 
 	@Bean
 	public ResourceValidator resourceValidator()
 	{
-		return new ResourceValidator(fhirContext/* TODO structureDefinitions */);
+		return new ResourceValidator(fhirConfig.fhirContext(), fhirConfig.validationSupport());
 	}
 }

@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.highmed.fhir</groupId>
 	<artifactId>fhir-demo-parent</artifactId>
-	<version>0.1.0-SNAPSHOT</version>
+	<version>0.4.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<parent>
@@ -20,6 +20,7 @@
 		<module>fhir-demo-server-jetty</module>
 		<module>fhir-demo-client</module>
 		<module>fhir-demo-client-jersey</module>
+		<module>fhir-demo-cert-generator</module>
 	</modules>
 
 	<properties>

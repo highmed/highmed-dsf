@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.PathParam;
@@ -80,13 +81,14 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 	@Override
 	public Response create(R resource, @Context UriInfo uri)
 	{
-		preCreate(resource);
+		Consumer<R> postCreate = preCreate(resource);
 
 		R createdResource = serviceHelper.handleSqlException(() -> dao.create(resource));
 
 		eventManager.handleEvent(serviceHelper.newResourceCreatedEvent(createdResource));
 
-		postCreate(createdResource);
+		if (postCreate != null)
+			postCreate.accept(createdResource);
 
 		URI location = uri.getAbsolutePathBuilder().path("/{id}/_history/{vid}")
 				.build(createdResource.getIdElement().getIdPart(), createdResource.getIdElement().getVersionIdPart());
@@ -100,24 +102,15 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 	 * 
 	 * @param resource
 	 *            not <code>null</code>
+	 * @return if not null, the returned {@link Consumer} will be called after the create operation and before returning
+	 *         to the client, the {@link Consumer} can throw a {@link WebApplicationException} to interrupt the normal
+	 *         flow, the {@link Consumer} will be called with the created resource
 	 * @throws WebApplicationException
 	 *             if the normal flow should be interrupted
 	 */
-	protected void preCreate(R resource) throws WebApplicationException
+	protected Consumer<R> preCreate(R resource) throws WebApplicationException
 	{
-	}
-
-	/**
-	 * Override to modify the created resource before returning to the client, throw {@link WebApplicationException} to
-	 * interrupt the normal flow
-	 * 
-	 * @param createdResource
-	 *            not <code>null</code>
-	 * @throws WebApplicationException
-	 *             if the normal flow should be interrupted
-	 */
-	protected void postCreate(R createdResource) throws WebApplicationException
-	{
+		return null;
 	}
 
 	@Override
@@ -155,13 +148,14 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 		if (resourceId.getBaseUrl() != null && !serverBase.equals(resourceId.getBaseUrl()))
 			return serviceHelper.createInvalidBaseUrlResponse(resourceId);
 
-		preUpdate(resource);
+		Consumer<R> postUpdate = preUpdate(resource);
 
 		R updatedResource = serviceHelper.handleSqlAndResourceNotFoundException(() -> dao.update(resource));
 
 		eventManager.handleEvent(serviceHelper.newResourceUpdatedEvent(updatedResource));
 
-		postUpdate(updatedResource);
+		if (postUpdate != null)
+			postUpdate.accept(updatedResource);
 
 		return serviceHelper.response(Status.OK, updatedResource, null).build();
 	}
@@ -172,36 +166,27 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 	 * 
 	 * @param resource
 	 *            not <code>null</code>
+	 * @return if not null, the returned {@link Consumer} will be called after the update operation and before returning
+	 *         to the client, the {@link Consumer} can throw a {@link WebApplicationException} to interrupt the normal
+	 *         flow, the {@link Consumer} will be called with the updated resource
 	 * @throws WebApplicationException
 	 *             if the normal flow should be interrupted
 	 */
-	protected void preUpdate(R resource)
+	protected Consumer<R> preUpdate(R resource)
 	{
-	}
-
-	/**
-	 * Override to modify the updated resource before returning to the client, throw {@link WebApplicationException} to
-	 * interrupt the normal flow
-	 * 
-	 * @param updatedResource
-	 *            not <code>null</code>
-	 * @throws WebApplicationException
-	 *             if the normal flow should be interrupted
-	 */
-	protected void postUpdate(R updatedResource)
-	{
+		return null;
 	}
 
 	@Override
 	public Response delete(@PathParam("id") String id, @Context UriInfo uri)
 	{
-		preDelete(id);
+		Consumer<String> afterDelete = beforeDelete(id);
 
 		serviceHelper.handleSqlException(() -> dao.delete(serviceHelper.withUuid(id)));
 
 		eventManager.handleEvent(serviceHelper.newResourceDeletedEvent(id));
 
-		postDelete(id);
+		afterDelete.accept(id);
 
 		return serviceHelper.response(Status.OK, null, null).build();
 	}
@@ -211,21 +196,16 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 	 * 
 	 * @param id
 	 *            of the resource to be deleted
+	 * @return if not null, the returned {@link Consumer} will be called after the create operation and before returning
+	 *         to the client, the {@link Consumer} can throw a {@link WebApplicationException} to interrupt the normal
+	 *         flow, the {@link Consumer} will be called with the id ({@link IdType#getIdPart()}) of the deleted
+	 *         resource
 	 * @throws WebApplicationException
 	 *             if the normal flow should be interrupted
 	 */
-	protected void preDelete(String id)
+	protected Consumer<String> beforeDelete(String id)
 	{
-	}
-
-	/**
-	 * Override to perform actions post delete, this method should not throw {@link WebApplicationException}
-	 * 
-	 * @param id
-	 *            of the deleted resource
-	 */
-	protected void postDelete(String id)
-	{
+		return null;
 	}
 
 	@Override

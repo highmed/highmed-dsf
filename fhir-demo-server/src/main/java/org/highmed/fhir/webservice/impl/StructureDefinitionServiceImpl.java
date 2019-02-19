@@ -3,6 +3,7 @@ package org.highmed.fhir.webservice.impl;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.PathParam;
@@ -17,15 +18,18 @@ import javax.ws.rs.core.UriInfo;
 import org.highmed.fhir.dao.StructureDefinitionDao;
 import org.highmed.fhir.dao.StructureDefinitionSnapshotDao;
 import org.highmed.fhir.event.EventManager;
-import org.highmed.fhir.function.FunctionWithSqlAndResourceNotFoundException;
+import org.highmed.fhir.function.ConsumerWithSqlAndResourceNotFoundException;
 import org.highmed.fhir.search.PartialResult;
 import org.highmed.fhir.search.SearchQuery;
 import org.highmed.fhir.search.parameters.ResourceLastUpdated;
 import org.highmed.fhir.search.parameters.StructureDefinitionUrl;
 import org.highmed.fhir.search.parameters.basic.AbstractSearchParameter;
 import org.highmed.fhir.service.ResourceValidator;
+import org.highmed.fhir.service.SnapshotDependencies;
+import org.highmed.fhir.service.SnapshotDependencyAnalyzer;
 import org.highmed.fhir.service.SnapshotGenerator;
 import org.highmed.fhir.service.SnapshotGenerator.SnapshotWithValidationMessages;
+import org.highmed.fhir.service.SnapshotInfo;
 import org.highmed.fhir.webservice.specification.StructureDefinitionService;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
@@ -48,16 +52,19 @@ public class StructureDefinitionServiceImpl extends AbstractServiceImpl<Structur
 
 	private final StructureDefinitionSnapshotDao snapshotDao;
 	private final SnapshotGenerator snapshotGenerator;
+	private final SnapshotDependencyAnalyzer snapshotDependencyAnalyzer;
 
 	public StructureDefinitionServiceImpl(String serverBase, int defaultPageCount,
 			StructureDefinitionDao structureDefinitionDao, ResourceValidator validator, EventManager eventManager,
 			ServiceHelperImpl<StructureDefinition> serviceHelper,
-			StructureDefinitionSnapshotDao structureDefinitionSnapshotDao, SnapshotGenerator snapshotGenerator)
+			StructureDefinitionSnapshotDao structureDefinitionSnapshotDao, SnapshotGenerator anapshotGenerator,
+			SnapshotDependencyAnalyzer snapshotDependencyAnalyzer)
 	{
 		super(serverBase, defaultPageCount, structureDefinitionDao, validator, eventManager, serviceHelper);
 
 		this.snapshotDao = structureDefinitionSnapshotDao;
-		this.snapshotGenerator = snapshotGenerator;
+		this.snapshotGenerator = anapshotGenerator;
+		this.snapshotDependencyAnalyzer = snapshotDependencyAnalyzer;
 	}
 
 	@Override
@@ -69,71 +76,65 @@ public class StructureDefinitionServiceImpl extends AbstractServiceImpl<Structur
 	}
 
 	@Override
-	protected void preCreate(StructureDefinition resource) throws WebApplicationException
+	protected Consumer<StructureDefinition> preCreate(StructureDefinition resource) throws WebApplicationException
 	{
-		// TODO logging
-		pre(resource, snapshotDao::create);
+		StructureDefinition forPost = resource.hasSnapshot() ? resource.copy() : null;
+
+		resource.setSnapshot(null);
+
+		return postCreateOrUpdate(forPost);
 	}
 
 	@Override
-	protected void preUpdate(StructureDefinition resource)
+	protected Consumer<StructureDefinition> preUpdate(StructureDefinition resource)
 	{
-		// TODO logging
-		pre(resource, snapshotDao::update);
+		return postCreateOrUpdate(resource);
 	}
 
-	private void pre(StructureDefinition resource,
-			FunctionWithSqlAndResourceNotFoundException<StructureDefinition, StructureDefinition> dbOp)
+	private Consumer<StructureDefinition> postCreateOrUpdate(StructureDefinition preResource)
 	{
-		if (resource.hasSnapshot())
+		return postResource ->
 		{
-			serviceHelper.catchAndLogSqlAndResourceNotFoundException(() -> dbOp.apply(resource));
+			if (preResource != null && preResource.hasSnapshot())
+				handleSnapshot(preResource, info -> snapshotDao
+						.create(serviceHelper.withUuid(postResource.getIdElement().getIdPart()), preResource, info));
+			else if (postResource != null)
+			{
+				try
+				{
+					SnapshotWithValidationMessages s = snapshotGenerator.generateSnapshot(postResource);
 
-			resource.setSnapshot(null);
-		}
+					if (s != null && s.getSnapshot() != null && s.getMessages().isEmpty())
+						handleSnapshot(s.getSnapshot(), info -> snapshotDao.update(s.getSnapshot(), info));
+				}
+				catch (Exception e)
+				{
+					logger.warn("Error while generating snapshot for StructureDefinition with id "
+							+ postResource.getIdElement().getIdPart(), e);
+				}
+			}
+		};
 	}
 
-	@Override
-	protected void postCreate(StructureDefinition createdResource) throws WebApplicationException
+	private void handleSnapshot(StructureDefinition snapshot,
+			ConsumerWithSqlAndResourceNotFoundException<SnapshotInfo> dbOp)
 	{
-		// TODO logging
-		post(createdResource, snapshotDao::create);
+		SnapshotDependencies dependencies = snapshotDependencyAnalyzer.analyzeSnapshotDependencies(snapshot);
+
+		serviceHelper.catchAndLogSqlException(() -> snapshotDao.deleteAllByDependency(snapshot.getUrl()));
+
+		serviceHelper.catchAndLogSqlAndResourceNotFoundException(() -> dbOp.accept(new SnapshotInfo(dependencies)));
 	}
 
 	@Override
-	protected void postUpdate(StructureDefinition updatedResource)
+	protected Consumer<String> beforeDelete(String id)
 	{
-		// TODO logging
-		post(updatedResource, snapshotDao::create);
+		return this::afterDelete;
 	}
 
-	@Override
-	protected void preDelete(String id)
-	{
-		// nothing to do
-	}
-
-	@Override
-	protected void postDelete(String id)
+	private void afterDelete(String id)
 	{
 		serviceHelper.catchAndLogSqlException(() -> snapshotDao.delete(serviceHelper.withUuid(id)));
-	}
-
-	private void post(StructureDefinition createdResource,
-			FunctionWithSqlAndResourceNotFoundException<StructureDefinition, StructureDefinition> dbOp)
-	{
-		boolean snapshotExists = serviceHelper.catchAndLogSqlExceptionAndIfReturn(
-				() -> snapshotDao
-						.hasNonDeletedResource(serviceHelper.withUuid(createdResource.getIdElement().getIdPart())),
-				() -> false);
-
-		if (!snapshotExists)
-		{
-			SnapshotWithValidationMessages s = snapshotGenerator.generateSnapshot(createdResource);
-
-			if (s.getMessages().isEmpty())
-				serviceHelper.catchAndLogSqlAndResourceNotFoundException(() -> dbOp.apply(createdResource));
-		}
 	}
 
 	@Override

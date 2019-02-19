@@ -109,6 +109,11 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 		return resourceColumn;
 	}
 
+	protected String getResourceTypeName()
+	{
+		return resourceTypeName;
+	}
+
 	public final R create(R resource) throws SQLException
 	{
 		try (Connection connection = dataSource.getConnection())
@@ -124,7 +129,7 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 
 	private R create(Connection connection, R resource, UUID uuid) throws SQLException
 	{
-		resource = copy(resource);
+		resource = copy(resource); // XXX defensive copy, might want to remove this call
 		resource.setIdElement(new IdType(resourceTypeName, uuid.toString(), "1"));
 		resource.getMeta().setVersionId("1");
 		resource.getMeta().setLastUpdated(new Date());
@@ -145,7 +150,7 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 
 	protected abstract R copy(R resource);
 
-	private Object resourceToPgObject(R resource)
+	protected final Object resourceToPgObject(R resource)
 	{
 		if (resource == null)
 			return null;
@@ -163,7 +168,7 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 		}
 	}
 
-	private Object uuidToPgObject(UUID uuid)
+	protected final PGobject uuidToPgObject(UUID uuid)
 	{
 		if (uuid == null)
 			return null;
@@ -270,6 +275,8 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 
 	public final R update(R resource) throws SQLException, ResourceNotFoundException
 	{
+		resource = copy(resource); // XXX defensive copy, might want to remove this call
+
 		Objects.requireNonNull(resource, "resource");
 
 		try (Connection connection = dataSource.getConnection())
@@ -301,7 +308,7 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 		}
 	}
 
-	private UUID toUuid(String idPart)
+	protected final UUID toUuid(String idPart)
 	{
 		if (idPart == null)
 			return null;
@@ -345,7 +352,7 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 		return resource;
 	}
 
-	private static class LatestVersion
+	protected static class LatestVersion
 	{
 		final long version;
 		final boolean deleted;
@@ -357,7 +364,7 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 		}
 	}
 
-	private LatestVersion getLatestVersion(R resource, Connection connection)
+	protected final LatestVersion getLatestVersion(R resource, Connection connection)
 			throws SQLException, ResourceNotFoundException
 	{
 		UUID uuid = toUuid(resource.getIdElement().getIdPart());
@@ -401,7 +408,7 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 		}
 	}
 
-	private void markDeleted(Connection connection, UUID uuid, boolean deleted) throws SQLException
+	protected final void markDeleted(Connection connection, UUID uuid, boolean deleted) throws SQLException
 	{
 		if (uuid == null)
 			return;
@@ -438,7 +445,7 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 
 			List<R> partialResult = new ArrayList<>();
 
-			if (!query.isCountOnly(overallCount)) //TODO ask db if count 0
+			if (!query.isCountOnly(overallCount)) // TODO ask db if count 0
 			{
 				try (PreparedStatement statement = connection.prepareStatement(query.getSearchSql()))
 				{

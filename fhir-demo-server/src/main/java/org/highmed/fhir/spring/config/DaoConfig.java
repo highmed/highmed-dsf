@@ -13,13 +13,12 @@ import org.highmed.fhir.dao.StructureDefinitionDao;
 import org.highmed.fhir.dao.StructureDefinitionSnapshotDao;
 import org.highmed.fhir.dao.SubscriptionDao;
 import org.highmed.fhir.dao.TaskDao;
+import org.highmed.fhir.dao.converter.SnapshotInfoConverter;
 import org.postgresql.Driver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import ca.uhn.fhir.context.FhirContext;
 
 @Configuration
 public class DaoConfig
@@ -34,7 +33,10 @@ public class DaoConfig
 	private String dbPassword;
 
 	@Autowired
-	private FhirContext fhirContext;
+	private FhirConfig fhirConfig;
+
+	@Autowired
+	private JsonConfig jsonConfig;
 
 	@Bean
 	public BasicDataSource dataSource()
@@ -54,72 +56,78 @@ public class DaoConfig
 	@Bean
 	public HealthcareServiceDao healthcareServiceDao()
 	{
-		return new HealthcareServiceDao(dataSource(), fhirContext);
+		return new HealthcareServiceDao(dataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public LocationDao locationDao()
 	{
-		return new LocationDao(dataSource(), fhirContext);
+		return new LocationDao(dataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public OrganizationDao organizationDao()
 	{
-		return new OrganizationDao(dataSource(), fhirContext);
+		return new OrganizationDao(dataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public PatientDao patientDao()
 	{
-		return new PatientDao(dataSource(), fhirContext);
+		return new PatientDao(dataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public PractitionerDao practitionerDao()
 	{
-		return new PractitionerDao(dataSource(), fhirContext);
+		return new PractitionerDao(dataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public PractitionerRoleDao practitionerRoleDao()
 	{
-		return new PractitionerRoleDao(dataSource(), fhirContext);
+		return new PractitionerRoleDao(dataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public ProvenanceDao provenanceDao()
 	{
-		return new ProvenanceDao(dataSource(), fhirContext);
+		return new ProvenanceDao(dataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public ResearchStudyDao researchStudyDao()
 	{
-		return new ResearchStudyDao(dataSource(), fhirContext);
+		return new ResearchStudyDao(dataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public StructureDefinitionDao structureDefinitionDao()
 	{
-		return new StructureDefinitionDao(dataSource(), fhirContext);
+		return new StructureDefinitionDao(dataSource(), fhirConfig.fhirContext());
+	}
+
+	@Bean
+	public SnapshotInfoConverter snapshotInfoConverter()
+	{
+		return new SnapshotInfoConverter(jsonConfig.objectMapper());
 	}
 
 	@Bean
 	public StructureDefinitionSnapshotDao structureDefinitionSnapshotDao()
 	{
-		return new StructureDefinitionSnapshotDao(dataSource(), fhirContext);
+		return new StructureDefinitionSnapshotDao(dataSource(), fhirConfig.fhirContext(), snapshotInfoConverter());
 	}
 
 	@Bean
 	public SubscriptionDao subscriptionDao()
 	{
-		return new SubscriptionDao(dataSource(), fhirContext);
+		return new SubscriptionDao(dataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public TaskDao taskDao()
 	{
-		return new TaskDao(dataSource(), fhirContext);
+		return new TaskDao(dataSource(), fhirConfig.fhirContext());
 	}
 }

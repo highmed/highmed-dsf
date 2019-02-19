@@ -36,7 +36,7 @@ public class SnapshotTest
 
 		StructureDefinitionReader reader = new StructureDefinitionReader(context);
 		var validationSupport = new DefaultProfileValidationSupportWithCustomStructureDefinitions(context,
-				reader.readXml(Paths.get("src/test/resources/extension-workflow-researchstudy.xml")));
+				reader.readXml(Paths.get("src/test/resources/profiles/extension-workflow-researchstudy.xml")));
 
 		IWorkerContext worker = new HapiWorkerContext(context, validationSupport);
 		List<ValidationMessage> messages = new ArrayList<>();
@@ -47,7 +47,7 @@ public class SnapshotTest
 		String profileName = "highmed-data-sharing-task";
 		StructureDefinition base = worker.fetchTypeDefinition(Task.class.getAnnotation(ResourceDef.class).name())
 				.copy();
-		StructureDefinition derived = reader.readXml(Paths.get("src/test/resources/task-highmed-0.0.1.xml"));
+		StructureDefinition derived = reader.readXml(Paths.get("src/test/resources/profiles/task-highmed-0.0.2.xml"));
 
 		profileUtis.generateSnapshot(base, derived, url, profileName);
 
@@ -63,11 +63,13 @@ public class SnapshotTest
 		FhirContext context = FhirContext.forR4();
 		StructureDefinitionReader reader = new StructureDefinitionReader(context);
 
+		StructureDefinition structureDefinition = reader
+				.readXml(Paths.get("src/test/resources/profiles/extension-workflow-researchstudy.xml"));
 		SnapshotGenerator generator = new SnapshotGenerator(context,
-				reader.readXml(Paths.get("src/test/resources/extension-workflow-researchstudy.xml")));
+				new DefaultProfileValidationSupportWithCustomStructureDefinitions(context, structureDefinition));
 
 		SnapshotWithValidationMessages snapshot = generator
-				.generateSnapshot(reader.readXml(Paths.get("src/test/resources/task-highmed-0.0.1.xml")));
+				.generateSnapshot(reader.readXml(Paths.get("src/test/resources/profiles/task-highmed-0.0.2.xml")));
 
 		assertNotNull(snapshot);
 		assertNotNull(snapshot.getSnapshot());

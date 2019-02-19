@@ -40,20 +40,14 @@ public class SnapshotGenerator
 
 	private final IWorkerContext worker;
 
-	public SnapshotGenerator(FhirContext fhirContext, StructureDefinition... structureDefinitions)
+	public SnapshotGenerator(FhirContext fhirContext, IValidationSupport validationSupport)
 	{
-		worker = createWorker(fhirContext, createValidationSupport(fhirContext, structureDefinitions));
+		worker = createWorker(fhirContext, validationSupport);
 	}
 
 	protected HapiWorkerContext createWorker(FhirContext context, IValidationSupport validationSupport)
 	{
 		return new HapiWorkerContext(context, validationSupport);
-	}
-
-	protected IValidationSupport createValidationSupport(FhirContext context,
-			StructureDefinition... structureDefinitions)
-	{
-		return new DefaultProfileValidationSupportWithCustomStructureDefinitions(context, structureDefinitions);
 	}
 
 	public SnapshotWithValidationMessages generateSnapshot(StructureDefinition differential)
@@ -70,6 +64,7 @@ public class SnapshotGenerator
 		List<ValidationMessage> messages = new ArrayList<>();
 		ProfileUtilities profileUtils = new ProfileUtilities(worker, messages, null)
 		{
+			@Override
 			public void updateMaps(StructureDefinition base, StructureDefinition derived) throws DefinitionException
 			{
 				if (base == null)
@@ -82,6 +77,16 @@ public class SnapshotGenerator
 					boolean found = false;
 					for (StructureDefinitionMappingComponent derivedMap : derived.getMapping())
 					{
+						/*
+						 * XXX NullPointerException if mapping.uri is null, see original if statement:
+						 * 
+						 * if (derivedMap.getUri().equals(baseMap.getUri()))
+						 * 
+						 * NPE fix by checking getUri != null
+						 * 
+						 * also fixes missing name based matching, via specification rule: StructureDefinition.mapping
+						 * "Must have at least a name or a uri (or both)"
+						 */
 						if ((derivedMap.getUri() != null && derivedMap.getUri().equals(baseMap.getUri()))
 								|| (derivedMap.getName() != null && derivedMap.getName().equals(baseMap.getName())))
 						{

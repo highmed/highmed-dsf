@@ -1,5 +1,8 @@
 package org.highmed.fhir.spring.config;
 
+import org.highmed.fhir.service.DefaultProfileValidationSupportWithCustomStructureDefinitionsFromDb;
+import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -8,9 +11,19 @@ import ca.uhn.fhir.context.FhirContext;
 @Configuration
 public class FhirConfig
 {
+	@Autowired
+	private DaoConfig daoConfig;
+
 	@Bean
 	public FhirContext fhirContext()
 	{
 		return FhirContext.forR4();
+	}
+
+	@Bean
+	public IValidationSupport validationSupport()
+	{
+		return new DefaultProfileValidationSupportWithCustomStructureDefinitionsFromDb(fhirContext(),
+				daoConfig.structureDefinitionDao(), daoConfig.structureDefinitionSnapshotDao());
 	}
 }

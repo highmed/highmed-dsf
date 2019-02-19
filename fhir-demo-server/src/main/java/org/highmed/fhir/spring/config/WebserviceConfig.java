@@ -170,11 +170,11 @@ public class WebserviceConfig
 	@Bean
 	public StructureDefinitionService structureDefinitionService()
 	{
-		return new StructureDefinitionServiceJaxrs(
-				new StructureDefinitionServiceSecure(new StructureDefinitionServiceImpl(serverBase, defaultPageCount,
-						daoConfig.structureDefinitionDao(), validationConfig.resourceValidator(),
-						eventConfig.eventManager(), serviceHelper(StructureDefinition.class),
-						daoConfig.structureDefinitionSnapshotDao(), snapshotConfig.snapshotGenerator())));
+		return new StructureDefinitionServiceJaxrs(new StructureDefinitionServiceSecure(
+				new StructureDefinitionServiceImpl(serverBase, defaultPageCount, daoConfig.structureDefinitionDao(),
+						validationConfig.resourceValidator(), eventConfig.eventManager(),
+						serviceHelper(StructureDefinition.class), daoConfig.structureDefinitionSnapshotDao(),
+						snapshotConfig.snapshotGenerator(), snapshotConfig.snapshotDependencyAnalyzer())));
 	}
 
 	@Bean

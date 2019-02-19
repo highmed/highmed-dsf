@@ -1,21 +1,26 @@
 package org.highmed.fhir.spring.config;
 
+import org.highmed.fhir.service.SnapshotDependencyAnalyzer;
 import org.highmed.fhir.service.SnapshotGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import ca.uhn.fhir.context.FhirContext;
-
 @Configuration
 public class SnapshotConfig
 {
 	@Autowired
-	private FhirContext fhirContext;
+	private FhirConfig fhirConfig;
 
 	@Bean
 	public SnapshotGenerator snapshotGenerator()
 	{
-		return new SnapshotGenerator(fhirContext/* TODO structureDefinitions */);
+		return new SnapshotGenerator(fhirConfig.fhirContext(), fhirConfig.validationSupport());
+	}
+
+	@Bean
+	public SnapshotDependencyAnalyzer snapshotDependencyAnalyzer()
+	{
+		return new SnapshotDependencyAnalyzer();
 	}
 }

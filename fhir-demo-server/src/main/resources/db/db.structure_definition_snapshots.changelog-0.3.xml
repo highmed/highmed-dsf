@@ -7,7 +7,7 @@
 	<property name="json" value="JSONB" dbms="postgresql" />
 	<property name="json" value="varchar(5000)" dbms="h2" />
 
-	<changeSet author="hhund" id="db.structure_definition_snapshots.changelog-0.2">
+	<changeSet author="hhund" id="db.structure_definition_snapshots.changelog-0.3">
 		<createTable tableName="structure_definition_snapshots">
 			<column name="structure_definition_snapshot_id" type="UUID">
 				<constraints nullable="false" />

@@ -1,6 +1,9 @@
 package org.highmed.fhir.hapi;
 
+import static org.junit.Assert.assertNotNull;
+
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -10,6 +13,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.highmed.fhir.service.DefaultProfileValidationSupportWithCustomStructureDefinitions;
 import org.highmed.fhir.service.SnapshotGenerator;
 import org.highmed.fhir.service.SnapshotGenerator.SnapshotWithValidationMessages;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -29,13 +33,9 @@ public class StructureDefinitionTreeTest
 		FhirContext context = FhirContext.forR4();
 
 		Map<String, StructureDefinition> structureDefinitionsByUrl = Files
-				.list(Paths.get("src/test/resources/structure_definitions"))
+				.list(Paths.get("src/test/resources/profiles"))
 				.map(p -> readStructureDefinition(context, p).setSnapshot(null))
-				// .filter(sd -> sd.getUrl().startsWith("http://fhir.de/"))
 				.collect(Collectors.toMap(StructureDefinition::getUrl, Function.identity()));
-
-		// structureDefinitionsByUrl.forEach((k, v) -> System.out.println(k + ": " + context.newXmlParser()
-		// .encodeResourceToString(v.setSnapshot(null)).replace('\n', ' ').replace('\r', ' ')));
 
 		structureDefinitionsByUrl.values().forEach(v -> printTree(v, structureDefinitionsByUrl));
 	}
@@ -103,9 +103,9 @@ public class StructureDefinitionTreeTest
 
 	private StructureDefinition readStructureDefinition(FhirContext context, Path p)
 	{
-		try
+		try (InputStream in = Files.newInputStream(p))
 		{
-			return context.newXmlParser().parseResource(StructureDefinition.class, Files.newInputStream(p));
+			return context.newXmlParser().parseResource(StructureDefinition.class, in);
 		}
 		catch (DataFormatException | IOException e)
 		{
@@ -119,7 +119,7 @@ public class StructureDefinitionTreeTest
 		FhirContext context = FhirContext.forR4();
 
 		Map<String, StructureDefinition> structureDefinitionsByUrl = Files
-				.list(Paths.get("src/test/resources/structure_definitions"))
+				.list(Paths.get("src/test/resources/profiles"))
 				.map(p -> readStructureDefinition(context, p).setSnapshot(null))
 				.filter(sd -> sd.getUrl().startsWith("http://fhir.de/"))
 				.collect(Collectors.toMap(StructureDefinition::getUrl, Function.identity()));
@@ -127,12 +127,15 @@ public class StructureDefinitionTreeTest
 		StructureDefinition patientDeBasis = structureDefinitionsByUrl
 				.get("http://fhir.de/StructureDefinition/patient-de-basis/0.2.1");
 
-		SnapshotGenerator generator = new SnapshotGenerator(context);
-		// , structureDefinitionsByUrl.values().toArray(StructureDefinition[]::new));
+		SnapshotGenerator generator = new SnapshotGenerator(context,
+				new DefaultProfileValidationSupportWithCustomStructureDefinitions(context,
+						structureDefinitionsByUrl.values().toArray(StructureDefinition[]::new)));
 
 		SnapshotWithValidationMessages snapshot = generator.generateSnapshot(patientDeBasis);
 
 		System.out.println(context.newXmlParser().encodeResourceToString(snapshot.getSnapshot()));
 		snapshot.getMessages().forEach(vm -> System.out.println(vm.getMessage()));
+
+		assertNotNull(snapshot.getSnapshot());
 	}
 }

@@ -34,7 +34,7 @@ public class ValidationTest
 		instanceValidator.setValidationSupport(new DefaultProfileValidationSupportWithCustomStructureDefinitions(
 				context, readStructureDefinitions(context)));
 
-		Patient patient = createPatient();
+		Patient patient = createNonValidPatient();
 
 		ValidationResult result = validator.validateWithResult(patient);
 
@@ -48,11 +48,11 @@ public class ValidationTest
 	{
 		StructureDefinitionReader reader = new StructureDefinitionReader(context);
 
-		return reader.readXml(Paths.get("src/test/resources/patient-de-basis-0.2.xml"),
-				Paths.get("src/test/resources/address-de-basis-0.2.xml"));
+		return reader.readXml(Paths.get("src/test/resources/profiles/patient-de-basis-0.2.xml"),
+				Paths.get("src/test/resources/profiles/address-de-basis-0.2.xml"));
 	}
 
-	private Patient createPatient()
+	private Patient createNonValidPatient()
 	{
 		Patient patient = new Patient();
 		patient.getMeta().addProfile("http://fhir.de/StructureDefinition/patient-de-basis/0.2");
@@ -61,12 +61,14 @@ public class ValidationTest
 	}
 
 	@Test
-	public void testValidator()
+	public void testNonValidPatient()
 	{
 		FhirContext context = FhirContext.forR4();
-		ResourceValidator validator = new ResourceValidator(context, readStructureDefinitions(context));
+		StructureDefinition[] readStructureDefinitions = readStructureDefinitions(context);
+		ResourceValidator validator = new ResourceValidator(context,
+				new DefaultProfileValidationSupportWithCustomStructureDefinitions(context, readStructureDefinitions));
 
-		ValidationResult result = validator.validate(createPatient());
+		ValidationResult result = validator.validate(createNonValidPatient());
 		assertFalse(result.isSuccessful());
 	}
 }
