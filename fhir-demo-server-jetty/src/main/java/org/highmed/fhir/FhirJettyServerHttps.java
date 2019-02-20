@@ -25,6 +25,7 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
 import org.glassfish.jersey.servlet.init.JerseyServletContainerInitializer;
+import org.highmed.fhir.authentication.AuthenticationFilter;
 import org.springframework.web.SpringServletContainerInitializer;
 
 import de.rwh.utils.jetty.JettyServer;
@@ -54,7 +55,7 @@ public class FhirJettyServerHttps
 		ErrorHandler errorHandler = statusCodeOnlyErrorHandler();
 
 		JettyServer server = new JettyServer(connector, errorHandler, "/fhir", initializers, initParameter,
-				webInfClassesDirs, webInfJars /* , AuthenticationFilter.class */);
+				webInfClassesDirs, webInfJars, AuthenticationFilter.class);
 
 		initializeWebSocketServerContainer(server);
 

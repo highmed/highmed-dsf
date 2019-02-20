@@ -1,7 +1,6 @@
 package org.highmed.fhir.client;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -10,8 +9,8 @@ import java.security.cert.CertificateException;
 
 import javax.ws.rs.WebApplicationException;
 
+import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.StructureDefinition;
 
 import ca.uhn.fhir.context.FhirContext;
 import de.rwh.utils.crypto.CertificateHelper;
@@ -23,8 +22,8 @@ public class TestFhirJerseyClient
 			throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException
 	{
 		String keyStorePassword = "password";
-		KeyStore keyStore = CertificateReader
-				.fromPkcs12(Paths.get("C:/Users/hhund/hhn/test-ca/test-client_certificate.p12"), keyStorePassword);
+		KeyStore keyStore = CertificateReader.fromPkcs12(
+				Paths.get("../fhir-demo-cert-generator/cert/test-client_certificate.p12"), keyStorePassword);
 		KeyStore trustStore = CertificateHelper.extractTrust(keyStore);
 
 		FhirContext fhirContext = FhirContext.forR4();
@@ -50,7 +49,8 @@ public class TestFhirJerseyClient
 			// fhirJerseyClient.create(new Task().setRequester(new Reference(organization.getIdElement()))
 			// .setDescription("Organization reference with version"));
 
-			// fhirJerseyClient.getConformance();
+			CapabilityStatement conformance = fhirJerseyClient.getConformance();
+			System.out.println(fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
 
 			// StructureDefinition sD = fhirContext.newXmlParser().parseResource(StructureDefinition.class,
 			// Files.newInputStream(Paths.get("../fhir-demo-server/src/test/resources/profiles/extension-workflow-researchstudy.xml")));

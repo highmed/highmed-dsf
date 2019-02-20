@@ -3,10 +3,11 @@ package org.highmed.fhir.webservice.specification;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.highmed.fhir.authentication.NeedsAuthentication;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Parameters;
 
-public interface BasicService<R extends DomainResource>
+public interface BasicService<R extends DomainResource> extends NeedsAuthentication
 {
 	Response create(R resource, UriInfo uri);
 

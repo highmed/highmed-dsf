@@ -1,8 +1,5 @@
 package org.highmed.fhir;
 
-import java.util.Arrays;
-import java.util.Optional;
-
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.ws.rs.ApplicationPath;
@@ -25,15 +22,14 @@ public final class FhirJerseyApplication extends ResourceConfig
 	{
 		WebApplicationContext context = WebApplicationContextUtils.getWebApplicationContext(servletContext);
 
-		context.getBeansWithAnnotation(Path.class).forEach((n, b) ->
+		context.getBeansWithAnnotation(Path.class).forEach((n, bean) ->
 		{
-			Optional<Path> path = Arrays.stream(b.getClass().getInterfaces()).map(i -> i.getAnnotation(Path.class))
-					.filter(p -> p != null).findFirst();
+			Path path = bean.getClass().getAnnotation(Path.class);
 
 			logger.debug("Registering bean '{}' as singleton resource with path '{}'", n,
-					servletContext.getContextPath() + "/" + path.map(Path::value).orElse("?unknown?"));
+					servletContext.getContextPath() + "/" + path.value());
 
-			register(b);
+			register(bean);
 		});
 
 		context.getBeansWithAnnotation(Provider.class).forEach((n, b) ->

@@ -1,23 +1,11 @@
 package org.highmed.fhir.dao;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.Arrays;
-import java.util.UUID;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.fhir.dao.converter.SnapshotInfoConverter;
-import org.highmed.fhir.service.SnapshotDependencies;
-import org.highmed.fhir.service.SnapshotInfo;
 import org.highmed.fhir.spring.config.JsonConfig;
 import org.hl7.fhir.r4.model.StructureDefinition;
-import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
