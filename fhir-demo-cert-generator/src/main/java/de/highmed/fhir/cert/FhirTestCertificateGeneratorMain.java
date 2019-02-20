@@ -8,11 +8,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.KeyPair;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Properties;
 
+import org.apache.commons.codec.binary.Hex;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequest;
 
@@ -140,10 +144,12 @@ public class FhirTestCertificateGeneratorMain
 
 		System.out.println("\nAll files except for " + caCertPem.toString() + ", " + serverCertP12.toString() + " and "
 				+ clientCertP12.toString() + " can be moved to a different folder.");
-		System.out.println("Password for " + serverCertP12.toString() + " and " + clientCertP12.toString() + " is "
-				+ CERT_PASSWORD);
+		System.out.println("Password for " + serverCertP12.toString() + " and " + clientCertP12.toString() + " is '"
+				+ CERT_PASSWORD + "' (without ticks).");
 		System.out.println("Add " + clientCertP12.toString()
-				+ " to your browsers certificate store. The p12 file includes the Test-CA certificate wich typically gets installed during the p12 import");
+				+ " to your browsers certificate store to access the server via https. The p12 file includes the Test-CA certificate wich typically gets installed during the p12 import.");
+		System.out.println("Add client certificate SHA-512 thumbprint '" + getThumbprintHex(clientCertificate)
+				+ "' to the jetty config.properties file.");
 	}
 
 	private static boolean exists(String fileType, Path p)
@@ -155,5 +161,17 @@ public class FhirTestCertificateGeneratorMain
 		}
 		else
 			return false;
+	}
+
+	private static String getThumbprintHex(X509Certificate certificate)
+	{
+		try
+		{
+			return Hex.encodeHexString(MessageDigest.getInstance("SHA-512").digest(certificate.getEncoded()));
+		}
+		catch (CertificateEncodingException | NoSuchAlgorithmException e)
+		{
+			throw new RuntimeException(e);
+		}
 	}
 }

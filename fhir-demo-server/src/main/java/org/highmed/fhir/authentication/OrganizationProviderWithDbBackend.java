@@ -27,8 +27,9 @@ public class OrganizationProviderWithDbBackend implements OrganizationProvider, 
 	public OrganizationProviderWithDbBackend(OrganizationDao dao, List<String> localUserThumbprints)
 	{
 		this.dao = dao;
+
 		if (localUserThumbprints != null)
-			this.localUserThumbprints.addAll(localUserThumbprints);
+			localUserThumbprints.stream().map(t -> t.toLowerCase()).forEach(this.localUserThumbprints::add);
 	}
 
 	@Override
@@ -52,7 +53,7 @@ public class OrganizationProviderWithDbBackend implements OrganizationProvider, 
 		String loginThumbprintHex = Hex.encodeHexString(getThumbprint(certificate));
 		logger.debug("Generated SHA-512 certificate thumbprint: {}", loginThumbprintHex);
 
-		if (localUserThumbprints.contains(loginThumbprintHex))
+		if (localUserThumbprints.contains(loginThumbprintHex.toLowerCase()))
 			return Optional.of(new Organization().setName("Local User"));
 		else
 			return dao.readByIdentifier("", loginThumbprintHex);
