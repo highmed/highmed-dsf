@@ -24,7 +24,7 @@ public class AuthenticationFilter implements Filter
 {
 	private static final Logger logger = LoggerFactory.getLogger(AuthenticationFilter.class);
 
-	public static final String USER_PROPERTY = AuthenticationFilter.class.getName() + ".organization";
+	public static final String ORGANIZATION_PROPERTY = AuthenticationFilter.class.getName() + ".organization";
 
 	private OrganizationProvider organizationProvider;
 	private AuthenticationFilterConfig authenticationFilterConfig;
@@ -94,7 +94,7 @@ public class AuthenticationFilter implements Filter
 
 	private void setOrganizationAttribute(HttpServletRequest request, Organization organization)
 	{
-		request.getSession().setAttribute(USER_PROPERTY, organization);
+		request.getSession().setAttribute(ORGANIZATION_PROPERTY, organization);
 	}
 
 	private void unauthoized(HttpServletResponse response) throws IOException

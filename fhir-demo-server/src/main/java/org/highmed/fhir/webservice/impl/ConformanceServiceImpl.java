@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -23,6 +22,7 @@ import org.highmed.fhir.search.parameters.TaskStatus;
 import org.highmed.fhir.search.parameters.basic.SearchParameter;
 import org.highmed.fhir.search.parameters.basic.SearchParameter.SearchParameterDefinition;
 import org.highmed.fhir.webservice.specification.ConformanceService;
+import org.highmed.fhir.websocket.EventEndpoint;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementImplementationComponent;
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementKind;
@@ -54,32 +54,28 @@ import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.UrlType;
 import org.hl7.fhir.r4.model.codesystems.RestfulSecurityService;
-import org.springframework.beans.factory.InitializingBean;
 
 import com.google.common.collect.Streams;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.rest.api.Constants;
 
-public class ConformanceServiceImpl implements ConformanceService, InitializingBean
+public class ConformanceServiceImpl implements ConformanceService
 {
-	private final String serverBase;
-	private final int defaultPageCount;
+	private final CapabilityStatement capabilityStatement;
 
 	public ConformanceServiceImpl(String serverBase, int defaultPageCount)
 	{
-		this.serverBase = serverBase;
-		this.defaultPageCount = defaultPageCount;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(serverBase, "serverBase");
+		capabilityStatement = createCapabilityStatement(serverBase, defaultPageCount);
 	}
 
 	@Override
 	public Response getMetadata(@QueryParam("mode") String mode, @Context UriInfo uri)
+	{
+		return Response.ok(capabilityStatement).build();
+	}
+
+	private CapabilityStatement createCapabilityStatement(String serverBase, int defaultPageCount)
 	{
 		CapabilityStatement statement = new CapabilityStatement();
 		statement.setStatus(PublicationStatus.ACTIVE);
@@ -103,7 +99,7 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 						RestfulSecurityService.CERTIFICATES.getDisplay()))));
 		Extension websocketExtension = rest.addExtension();
 		websocketExtension.setUrl("http://hl7.org/fhir/StructureDefinition/capabilitystatement-websocket");
-		websocketExtension.setValue(new UrlType(serverBase.replace("http", "ws") + "/ws"));
+		websocketExtension.setValue(new UrlType(serverBase.replace("http", "ws") + EventEndpoint.PATH));
 
 		var resources = Arrays.asList(HealthcareService.class, Location.class, Organization.class, Patient.class,
 				PractitionerRole.class, Practitioner.class, Provenance.class, ResearchStudy.class,
@@ -150,15 +146,14 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 			resourceSearchParameters.forEach(r::addSearchParam);
 
 			r.addSearchParam(createFormatParameter());
-			r.addSearchParam(createCountParameter());
+			r.addSearchParam(createCountParameter(defaultPageCount));
 			r.addSearchParam(createPageParameter());
 			r.addSearchParam(createSortParameter(standardSortableSearchParameters, resourceSearchParameters));
 
 			operations.getOrDefault(resource, Collections.emptyList()).forEach(r::addOperation);
 			standardOperations.forEach(r::addOperation);
 		}
-
-		return Response.ok(statement).build();
+		return statement;
 	}
 
 	private CapabilityStatementRestResourceOperationComponent createValidateOperation()
@@ -183,7 +178,7 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 		return createSearchParameter("page", "", SearchParamType.NUMBER, "Specify the page number, 1 if not specified");
 	}
 
-	private CapabilityStatementRestResourceSearchParamComponent createCountParameter()
+	private CapabilityStatementRestResourceSearchParamComponent createCountParameter(int defaultPageCount)
 	{
 		return createSearchParameter("_count", "", SearchParamType.NUMBER,
 				"Specify the numer of returned resources per page, " + defaultPageCount + " if not specified");
