@@ -11,18 +11,18 @@ import org.highmed.fhir.search.parameters.basic.SearchParameter;
 import org.highmed.fhir.search.parameters.basic.SearchParameter.SearchParameterDefinition;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
-import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.r4.model.Subscription;
 
 import com.google.common.base.Objects;
 
-@SearchParameterDefinition(name = TaskStatus.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Task-status", type = SearchParamType.TOKEN, documentation = "Search by task status")
-public class TaskStatus extends AbstractTokenParameter<Task>
+@SearchParameterDefinition(name = SubscriptionChannelType.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Subscription.channel.type", type = SearchParamType.TOKEN, documentation = "The type of channel for the sent notifications")
+public class SubscriptionChannelType extends AbstractTokenParameter<Subscription>
 {
-	public static final String PARAMETER_NAME = "status";
+	public static final String PARAMETER_NAME = "type";
 
-	private org.hl7.fhir.r4.model.Task.TaskStatus status;
+	private org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType channelType;
 
-	public TaskStatus()
+	public SubscriptionChannelType()
 	{
 		super(PARAMETER_NAME);
 	}
@@ -33,17 +33,17 @@ public class TaskStatus extends AbstractTokenParameter<Task>
 		super.configureSearchParameter(queryParameters);
 
 		if (valueAndType != null && valueAndType.type == TokenSearchType.CODE)
-			status = toStatus(valueAndType.codeValue);
+			channelType = toChannelType(valueAndType.codeValue);
 	}
 
-	private org.hl7.fhir.r4.model.Task.TaskStatus toStatus(String status)
+	private org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType toChannelType(String status)
 	{
 		if (status == null || status.isBlank())
 			return null;
 
 		try
 		{
-			return org.hl7.fhir.r4.model.Task.TaskStatus.fromCode(status);
+			return org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType.fromCode(status);
 		}
 		catch (FHIRException e)
 		{
@@ -54,13 +54,13 @@ public class TaskStatus extends AbstractTokenParameter<Task>
 	@Override
 	public boolean isDefined()
 	{
-		return super.isDefined() && status != null;
+		return super.isDefined() && channelType != null;
 	}
 
 	@Override
 	public String getFilterQuery()
 	{
-		return "task->>'status' = ?";
+		return "subscription->'channel'->>'type' = ?";
 	}
 
 	@Override
@@ -73,27 +73,27 @@ public class TaskStatus extends AbstractTokenParameter<Task>
 	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement)
 			throws SQLException
 	{
-		statement.setString(parameterIndex, status.toCode());
+		statement.setString(parameterIndex, channelType.toCode());
 	}
 
 	@Override
 	public void modifyBundleUri(UriBuilder bundleUri)
 	{
-		bundleUri.replaceQueryParam(PARAMETER_NAME, status.toCode());
+		bundleUri.replaceQueryParam(PARAMETER_NAME, channelType.toCode());
 	}
 
 	@Override
-	public boolean matches(Task resource)
+	public boolean matches(Subscription resource)
 	{
 		if (!isDefined())
 			throw SearchParameter.notDefined();
 
-		return Objects.equal(resource.getStatus(), status);
+		return Objects.equal(resource.getChannel().getType(), channelType);
 	}
 
 	@Override
 	protected String getSortSql(String sortDirectionWithSpacePrefix)
 	{
-		return "task->>'status'" + sortDirectionWithSpacePrefix;
+		return "subscription->'channel'->>'type'" + sortDirectionWithSpacePrefix;
 	}
 }

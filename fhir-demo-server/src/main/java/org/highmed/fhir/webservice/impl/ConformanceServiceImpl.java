@@ -17,6 +17,8 @@ import org.highmed.fhir.search.parameters.OrganizationName;
 import org.highmed.fhir.search.parameters.ResourceId;
 import org.highmed.fhir.search.parameters.ResourceLastUpdated;
 import org.highmed.fhir.search.parameters.StructureDefinitionUrl;
+import org.highmed.fhir.search.parameters.SubscriptionStatus;
+import org.highmed.fhir.search.parameters.SubscriptionChannelType;
 import org.highmed.fhir.search.parameters.TaskRequester;
 import org.highmed.fhir.search.parameters.TaskStatus;
 import org.highmed.fhir.search.parameters.basic.SearchParameter;
@@ -107,15 +109,19 @@ public class ConformanceServiceImpl implements ConformanceService
 
 		var searchParameters = new HashMap<Class<? extends DomainResource>, List<CapabilityStatementRestResourceSearchParamComponent>>();
 
-		var taskRequester = createSearchParameter(TaskRequester.class);
-		var taskStatus = createSearchParameter(TaskStatus.class);
-		searchParameters.put(Task.class, Arrays.asList(taskRequester, taskStatus));
-
 		var organizationNameOrAlias = createSearchParameter(OrganizationName.class);
 		searchParameters.put(Organization.class, Arrays.asList(organizationNameOrAlias));
 
 		var structureDefinitionUrl = createSearchParameter(StructureDefinitionUrl.class);
 		searchParameters.put(StructureDefinition.class, Arrays.asList(structureDefinitionUrl));
+
+		var subscriptionStatus = createSearchParameter(SubscriptionStatus.class);
+		var subscriptionChannelType = createSearchParameter(SubscriptionChannelType.class);
+		searchParameters.put(Subscription.class, Arrays.asList(subscriptionStatus, subscriptionChannelType));
+
+		var taskRequester = createSearchParameter(TaskRequester.class);
+		var taskStatus = createSearchParameter(TaskStatus.class);
+		searchParameters.put(Task.class, Arrays.asList(taskRequester, taskStatus));
 
 		var operations = new HashMap<Class<? extends DomainResource>, List<CapabilityStatementRestResourceOperationComponent>>();
 
@@ -170,7 +176,7 @@ public class ConformanceServiceImpl implements ConformanceService
 				"Specify the returned order, allowed values: "
 						+ Streams.concat(standardSearchParameters.stream(), resourceSearchParameters.stream())
 								.map(s -> s.getName()).collect(Collectors.joining(", ", "[", "]"))
-						+ " (one or multiple as comma separated string)");
+						+ " (one or multiple as comma separated string), prefix with '-' for reversed order");
 	}
 
 	private CapabilityStatementRestResourceSearchParamComponent createPageParameter()

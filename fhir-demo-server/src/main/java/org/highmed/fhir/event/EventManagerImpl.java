@@ -1,13 +1,17 @@
 package org.highmed.fhir.event;
 
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import org.highmed.fhir.dao.SubscriptionDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 
@@ -17,14 +21,23 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 
 	private final ExecutorService executor = Executors.newCachedThreadPool();
 
-	public EventManagerImpl()
+	private final SubscriptionDao subscriptionDao;
+
+	public EventManagerImpl(SubscriptionDao subscriptionDao)
 	{
+		this.subscriptionDao = subscriptionDao;
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
-		// TODO Auto-generated method stub
+		Objects.requireNonNull(subscriptionDao, "subscriptionDao");
+	}
+
+	@EventListener({ ContextRefreshedEvent.class })
+	public void onContextRefreshedEvent(ContextRefreshedEvent event)
+	{
+		logger.info("onContextRefreshedEvent");
 	}
 
 	@Override

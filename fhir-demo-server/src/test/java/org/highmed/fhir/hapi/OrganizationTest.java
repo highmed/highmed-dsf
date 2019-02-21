@@ -4,8 +4,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import org.apache.commons.codec.binary.Hex;
-import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,12 +22,16 @@ public class OrganizationTest
 	public void testOrganizationJson() throws Exception
 	{
 		Organization organization = new Organization();
-		Identifier identifier = organization.addIdentifier();
-		identifier.setSystem("http://highmed.org/fhir/NamingSystem/certificate-thumbprint-hex");
-		identifier.setValue(Hex.encodeHexString("foo bar baz".getBytes()));
+		Extension thumbprint = organization.addExtension();
+		thumbprint.setUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
+		thumbprint.setValue(new StringType(Hex.encodeHexString("foo bar baz".getBytes())));
+		Extension role = organization.addExtension();
+		role.setUrl("http://highmed.org/fhir/StructureDefinition/server-role");
+		role.setValue(new CodeType("local"));
 
-		FhirContext context = FhirContext.forR4();
 		
+		FhirContext context = FhirContext.forR4();
+
 		String string = context.newJsonParser().encodeResourceToString(organization);
 		logger.info(string);
 

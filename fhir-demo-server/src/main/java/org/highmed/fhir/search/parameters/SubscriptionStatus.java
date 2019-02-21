@@ -11,18 +11,18 @@ import org.highmed.fhir.search.parameters.basic.SearchParameter;
 import org.highmed.fhir.search.parameters.basic.SearchParameter.SearchParameterDefinition;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
-import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.r4.model.Subscription;
 
 import com.google.common.base.Objects;
 
-@SearchParameterDefinition(name = TaskStatus.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Task-status", type = SearchParamType.TOKEN, documentation = "Search by task status")
-public class TaskStatus extends AbstractTokenParameter<Task>
+@SearchParameterDefinition(name = SubscriptionStatus.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Subscription.status", type = SearchParamType.TOKEN, documentation = "Search by subscription status")
+public class SubscriptionStatus extends AbstractTokenParameter<Subscription>
 {
 	public static final String PARAMETER_NAME = "status";
 
-	private org.hl7.fhir.r4.model.Task.TaskStatus status;
+	private org.hl7.fhir.r4.model.Subscription.SubscriptionStatus status;
 
-	public TaskStatus()
+	public SubscriptionStatus()
 	{
 		super(PARAMETER_NAME);
 	}
@@ -36,14 +36,14 @@ public class TaskStatus extends AbstractTokenParameter<Task>
 			status = toStatus(valueAndType.codeValue);
 	}
 
-	private org.hl7.fhir.r4.model.Task.TaskStatus toStatus(String status)
+	private org.hl7.fhir.r4.model.Subscription.SubscriptionStatus toStatus(String status)
 	{
 		if (status == null || status.isBlank())
 			return null;
 
 		try
 		{
-			return org.hl7.fhir.r4.model.Task.TaskStatus.fromCode(status);
+			return org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.fromCode(status);
 		}
 		catch (FHIRException e)
 		{
@@ -60,7 +60,7 @@ public class TaskStatus extends AbstractTokenParameter<Task>
 	@Override
 	public String getFilterQuery()
 	{
-		return "task->>'status' = ?";
+		return "subscription->>'status' = ?";
 	}
 
 	@Override
@@ -83,7 +83,7 @@ public class TaskStatus extends AbstractTokenParameter<Task>
 	}
 
 	@Override
-	public boolean matches(Task resource)
+	public boolean matches(Subscription resource)
 	{
 		if (!isDefined())
 			throw SearchParameter.notDefined();
@@ -94,6 +94,6 @@ public class TaskStatus extends AbstractTokenParameter<Task>
 	@Override
 	protected String getSortSql(String sortDirectionWithSpacePrefix)
 	{
-		return "task->>'status'" + sortDirectionWithSpacePrefix;
+		return "subscription->>'status'" + sortDirectionWithSpacePrefix;
 	}
 }
