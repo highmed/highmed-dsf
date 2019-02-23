@@ -23,7 +23,14 @@ public class TaskRequester extends AbstractSearchParameter<Task>
 
 	public TaskRequester()
 	{
+		this(null);
+	}
+
+	public TaskRequester(IdType requester)
+	{
 		super(PARAMETER_NAME);
+
+		this.requester = requester;
 	}
 
 	@Override

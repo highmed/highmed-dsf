@@ -24,9 +24,15 @@ public class ResourceId extends AbstractSearchParameter<DomainResource>
 
 	public ResourceId(String resourceIdColumn)
 	{
+		this(resourceIdColumn, null);
+	}
+
+	public ResourceId(String resourceIdColumn, String id)
+	{
 		super(PARAMETER_NAME);
 
 		this.resourceIdColumn = resourceIdColumn;
+		this.id = id;
 	}
 
 	@Override

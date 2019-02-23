@@ -21,7 +21,7 @@ import org.hl7.fhir.r4.model.DomainResource;
 public abstract class AbstractDateTimeParameter<R extends DomainResource> extends AbstractSearchParameter<R>
 		implements SearchParameter<R>
 {
-	protected static enum DateTimeSearchType
+	public static enum DateTimeSearchType
 	{
 		EQ("eq", "="), NE("ne", "<>"), GT("gt", ">"), LT("lt", "<"), GE("ge", ">="), LE("le", "<=");
 
@@ -85,6 +85,56 @@ public abstract class AbstractDateTimeParameter<R extends DomainResource> extend
 	public AbstractDateTimeParameter(String parameterName)
 	{
 		super(parameterName);
+	}
+
+	public AbstractDateTimeParameter(String parameterName, ZonedDateTime dateTime, DateTimeSearchType type)
+	{
+		super(parameterName);
+
+		valuesAndTypes.add(new DateTimeValueAndTypeAndSearchType(dateTime, DateTimeType.ZONED_DATE_TIME, type));
+	}
+
+	public AbstractDateTimeParameter(String parameterName, ZonedDateTime dateTime1, DateTimeSearchType type1,
+			ZonedDateTime dateTime2, DateTimeSearchType type2)
+	{
+		super(parameterName);
+
+		valuesAndTypes.add(new DateTimeValueAndTypeAndSearchType(dateTime1, DateTimeType.ZONED_DATE_TIME, type1));
+		valuesAndTypes.add(new DateTimeValueAndTypeAndSearchType(dateTime2, DateTimeType.ZONED_DATE_TIME, type2));
+	}
+
+	public AbstractDateTimeParameter(String parameterName, LocalDate date, DateTimeSearchType type)
+	{
+		super(parameterName);
+
+		valuesAndTypes.add(new DateTimeValueAndTypeAndSearchType(date, DateTimeType.LOCAL_DATE, type));
+	}
+
+	public AbstractDateTimeParameter(String parameterName, LocalDate date1, DateTimeSearchType type1, LocalDate date2,
+			DateTimeSearchType type2)
+	{
+		super(parameterName);
+
+		valuesAndTypes.add(new DateTimeValueAndTypeAndSearchType(date1, DateTimeType.LOCAL_DATE, type1));
+		valuesAndTypes.add(new DateTimeValueAndTypeAndSearchType(date2, DateTimeType.LOCAL_DATE, type2));
+	}
+
+	public AbstractDateTimeParameter(String parameterName, int year)
+	{
+		super(parameterName);
+
+		valuesAndTypes.add(new DateTimeValueAndTypeAndSearchType(
+				new LocalDatePair(LocalDate.of(year, 1, 1), LocalDate.of(year, 1, 1).plusYears(1)),
+				DateTimeType.YEAR_PERIOD, DateTimeSearchType.EQ));
+	}
+
+	public AbstractDateTimeParameter(String parameterName, int year, int month)
+	{
+		super(parameterName);
+
+		valuesAndTypes.add(new DateTimeValueAndTypeAndSearchType(
+				new LocalDatePair(LocalDate.of(year, month, 1), LocalDate.of(year, month, 1).plusMonths(1)),
+				DateTimeType.YEAR_PERIOD, DateTimeSearchType.EQ));
 	}
 
 	@Override

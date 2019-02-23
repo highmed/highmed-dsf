@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Hex;
 import org.highmed.fhir.dao.OrganizationDao;
+import org.highmed.fhir.help.ExceptionHandler;
 import org.hl7.fhir.r4.model.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,11 +23,14 @@ public class OrganizationProviderWithDbBackend implements OrganizationProvider, 
 	private static final Logger logger = LoggerFactory.getLogger(OrganizationProviderWithDbBackend.class);
 
 	private final OrganizationDao dao;
+	private final ExceptionHandler exceptionHandler;
 	private final List<String> localUserThumbprints = new ArrayList<String>();
 
-	public OrganizationProviderWithDbBackend(OrganizationDao dao, List<String> localUserThumbprints)
+	public OrganizationProviderWithDbBackend(OrganizationDao dao, ExceptionHandler exceptionHandler,
+			List<String> localUserThumbprints)
 	{
 		this.dao = dao;
+		this.exceptionHandler = exceptionHandler;
 
 		if (localUserThumbprints != null)
 			localUserThumbprints.stream().map(t -> t.toLowerCase()).forEach(this.localUserThumbprints::add);
@@ -36,6 +40,8 @@ public class OrganizationProviderWithDbBackend implements OrganizationProvider, 
 	public void afterPropertiesSet() throws Exception
 	{
 		Objects.requireNonNull(dao, "dao");
+		Objects.requireNonNull(exceptionHandler, "exceptionHandler");
+
 		if (localUserThumbprints.isEmpty())
 			logger.warn("No local users configured");
 		else
@@ -56,7 +62,8 @@ public class OrganizationProviderWithDbBackend implements OrganizationProvider, 
 		if (localUserThumbprints.contains(loginThumbprintHex.toLowerCase()))
 			return Optional.of(new Organization().setName("Local User"));
 		else
-			return dao.readByIdentifier("", loginThumbprintHex);
+			return exceptionHandler.catchAndLogSqlAndResourceDeletedExceptionAndIfReturn(
+					() -> dao.readByThumbprint(loginThumbprintHex), Optional::empty, Optional::empty);
 	}
 
 	private byte[] getThumbprint(X509Certificate certificate)

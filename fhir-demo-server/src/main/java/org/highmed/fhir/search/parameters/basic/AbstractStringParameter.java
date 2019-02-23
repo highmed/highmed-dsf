@@ -7,7 +7,7 @@ import org.hl7.fhir.r4.model.DomainResource;
 
 public abstract class AbstractStringParameter<R extends DomainResource> extends AbstractSearchParameter<R>
 {
-	protected static enum StringSearchType
+	public static enum StringSearchType
 	{
 		STARTS_WITH(""), EXACT(":exact"), CONTAINS(":contains");
 
@@ -37,7 +37,14 @@ public abstract class AbstractStringParameter<R extends DomainResource> extends 
 	{
 		super(parameterName);
 	}
-	
+
+	public AbstractStringParameter(String parameterName, String value, StringSearchType type)
+	{
+		super(parameterName);
+
+		valueAndType = new StringValueAndSearchType(value, type);
+	}
+
 	@Override
 	protected final void configureSearchParameter(MultivaluedMap<String, String> queryParameters)
 	{

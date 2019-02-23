@@ -24,7 +24,14 @@ public class TaskStatus extends AbstractTokenParameter<Task>
 
 	public TaskStatus()
 	{
+		this(null);
+	}
+
+	public TaskStatus(org.hl7.fhir.r4.model.Task.TaskStatus status)
+	{
 		super(PARAMETER_NAME);
+
+		this.status = status;
 	}
 
 	@Override

@@ -7,7 +7,7 @@ import org.hl7.fhir.r4.model.DomainResource;
 
 public abstract class AbstractCanonicalUrlParameter<R extends DomainResource> extends AbstractSearchParameter<R>
 {
-	protected static enum UriSearchType
+	public static enum UriSearchType
 	{
 		PRECISE(""), BELOW(":below"); // TODO, ABOVE(":above");
 
@@ -38,6 +38,13 @@ public abstract class AbstractCanonicalUrlParameter<R extends DomainResource> ex
 	public AbstractCanonicalUrlParameter(String parameterName)
 	{
 		super(parameterName);
+	}
+
+	public AbstractCanonicalUrlParameter(String parameterName, String url, String version, UriSearchType type)
+	{
+		super(parameterName);
+
+		valueAndType = new CanonicalUrlAndSearchType(url, version, type);
 	}
 
 	@Override

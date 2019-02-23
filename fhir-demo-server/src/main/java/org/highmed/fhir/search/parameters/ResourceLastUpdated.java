@@ -22,15 +22,63 @@ public class ResourceLastUpdated extends AbstractDateTimeParameter<DomainResourc
 {
 	public static final String PARAMETER_NAME = "_lastUpdated";
 
-	private final String jsonProperty;
+	private static String toJsonProperty(String resourceColumn)
+	{
+		return "(" + resourceColumn + "->'meta'->>'lastUpdated')";
+	}
 
+	private final String jsonProperty;
 	private List<Object> values = new ArrayList<>();
 
 	public ResourceLastUpdated(String resourceColumn)
 	{
 		super(PARAMETER_NAME);
 
-		jsonProperty = "(" + resourceColumn + "->'meta'->>'lastUpdated')";
+		jsonProperty = toJsonProperty(resourceColumn);
+	}
+
+	public ResourceLastUpdated(String resourceColumn, ZonedDateTime dateTime, DateTimeSearchType type)
+	{
+		super(PARAMETER_NAME, dateTime, type);
+
+		jsonProperty = toJsonProperty(resourceColumn);
+	}
+
+	public ResourceLastUpdated(String resourceColumn, ZonedDateTime dateTime1, DateTimeSearchType type1,
+			ZonedDateTime dateTime2, DateTimeSearchType type2)
+	{
+		super(PARAMETER_NAME, dateTime1, type1, dateTime2, type2);
+
+		jsonProperty = toJsonProperty(resourceColumn);
+	}
+
+	public ResourceLastUpdated(String resourceColumn, LocalDate date, DateTimeSearchType type)
+	{
+		super(PARAMETER_NAME, date, type);
+
+		jsonProperty = toJsonProperty(resourceColumn);
+	}
+
+	public ResourceLastUpdated(String resourceColumn, LocalDate date1, DateTimeSearchType type1, LocalDate date2,
+			DateTimeSearchType type2)
+	{
+		super(PARAMETER_NAME, date1, type1, date2, type2);
+
+		jsonProperty = toJsonProperty(resourceColumn);
+	}
+
+	public ResourceLastUpdated(String resourceColumn, int year)
+	{
+		super(PARAMETER_NAME, year);
+
+		jsonProperty = toJsonProperty(resourceColumn);
+	}
+
+	public ResourceLastUpdated(String resourceColumn, int year, int month)
+	{
+		super(PARAMETER_NAME, year, month);
+
+		jsonProperty = toJsonProperty(resourceColumn);
 	}
 
 	@Override

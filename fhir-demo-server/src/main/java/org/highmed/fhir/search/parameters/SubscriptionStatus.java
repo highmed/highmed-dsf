@@ -24,7 +24,14 @@ public class SubscriptionStatus extends AbstractTokenParameter<Subscription>
 
 	public SubscriptionStatus()
 	{
+		this(null);
+	}
+
+	public SubscriptionStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus status)
+	{
 		super(PARAMETER_NAME);
+
+		this.status = status;
 	}
 
 	@Override

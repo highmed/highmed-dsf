@@ -21,6 +21,9 @@ public class AuthenticationConfig
 	@Autowired
 	private DaoConfig daoConfig;
 
+	@Autowired
+	private HelperConfig helperConfig;
+
 	@Value("#{'${org.highmed.fhir.local-user.thumbprints}'.split(',')}")
 	private List<String> localUserThumbprints;
 
@@ -33,6 +36,7 @@ public class AuthenticationConfig
 	@Bean
 	public OrganizationProvider organizationProvider()
 	{
-		return new OrganizationProviderWithDbBackend(daoConfig.organizationDao(), localUserThumbprints);
+		return new OrganizationProviderWithDbBackend(daoConfig.organizationDao(), helperConfig.exceptionHandler(),
+				localUserThumbprints);
 	}
 }

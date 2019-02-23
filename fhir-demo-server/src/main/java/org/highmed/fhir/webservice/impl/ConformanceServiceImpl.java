@@ -13,12 +13,13 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.highmed.fhir.help.ParameterConverter;
 import org.highmed.fhir.search.parameters.OrganizationName;
 import org.highmed.fhir.search.parameters.ResourceId;
 import org.highmed.fhir.search.parameters.ResourceLastUpdated;
 import org.highmed.fhir.search.parameters.StructureDefinitionUrl;
-import org.highmed.fhir.search.parameters.SubscriptionStatus;
 import org.highmed.fhir.search.parameters.SubscriptionChannelType;
+import org.highmed.fhir.search.parameters.SubscriptionStatus;
 import org.highmed.fhir.search.parameters.TaskRequester;
 import org.highmed.fhir.search.parameters.TaskStatus;
 import org.highmed.fhir.search.parameters.basic.SearchParameter;
@@ -193,8 +194,8 @@ public class ConformanceServiceImpl implements ConformanceService
 	private CapabilityStatementRestResourceSearchParamComponent createFormatParameter()
 	{
 		String formatValues = Streams
-				.concat(Stream.of(AbstractServiceImpl.JSON_FORMAT), AbstractServiceImpl.JSON_FORMATS.stream(),
-						Stream.of(AbstractServiceImpl.XML_FORMAT), AbstractServiceImpl.XML_FORMATS.stream())
+				.concat(Stream.of(ParameterConverter.JSON_FORMAT), ParameterConverter.JSON_FORMATS.stream(),
+						Stream.of(ParameterConverter.XML_FORMAT), ParameterConverter.XML_FORMATS.stream())
 				.collect(Collectors.joining(", ", "[", "]"));
 		CapabilityStatementRestResourceSearchParamComponent createFormatParameter = createSearchParameter("_format", "",
 				SearchParamType.STRING,

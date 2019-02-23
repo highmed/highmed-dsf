@@ -18,7 +18,12 @@ public class OrganizationName extends AbstractStringParameter<Organization>
 
 	public OrganizationName()
 	{
-		super(PARAMETER_NAME);
+		this(null, null);
+	}
+
+	public OrganizationName(String value, StringSearchType type)
+	{
+		super(PARAMETER_NAME, value, type);
 	}
 
 	@Override

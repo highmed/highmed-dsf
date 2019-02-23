@@ -7,7 +7,7 @@ import org.hl7.fhir.r4.model.DomainResource;
 
 public abstract class AbstractTokenParameter<R extends DomainResource> extends AbstractSearchParameter<R>
 {
-	protected static enum TokenSearchType
+	public static enum TokenSearchType
 	{
 		CODE, CODE_AND_SYSTEM, CODE_AND_NO_SYSTEM_PROPERTY, SYSTEM
 	}
@@ -29,6 +29,11 @@ public abstract class AbstractTokenParameter<R extends DomainResource> extends A
 	protected TokenValueAndSearchType valueAndType;
 
 	public AbstractTokenParameter(String parameterName)
+	{
+		super(parameterName);
+	}
+
+	public AbstractTokenParameter(String parameterName, String codeValue, String systemValue, TokenSearchType type)
 	{
 		super(parameterName);
 	}

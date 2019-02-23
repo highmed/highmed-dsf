@@ -22,18 +22,20 @@ public class OrganizationTest
 	public void testOrganizationJson() throws Exception
 	{
 		Organization organization = new Organization();
-		Extension thumbprint = organization.addExtension();
-		thumbprint.setUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
-		thumbprint.setValue(new StringType(Hex.encodeHexString("foo bar baz".getBytes())));
+		Extension thumbprint1 = organization.addExtension();
+		thumbprint1.setUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
+		thumbprint1.setValue(new StringType(Hex.encodeHexString("foo bar baz".getBytes())));
+		Extension thumbprint2 = organization.addExtension();
+		thumbprint2.setUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
+		thumbprint2.setValue(new StringType(Hex.encodeHexString("Blub Blub Blub".getBytes())));
 		Extension role = organization.addExtension();
 		role.setUrl("http://highmed.org/fhir/StructureDefinition/server-role");
 		role.setValue(new CodeType("local"));
 
-		
 		FhirContext context = FhirContext.forR4();
 
-		String string = context.newJsonParser().encodeResourceToString(organization);
-		logger.info(string);
+		String string = context.newJsonParser().setPrettyPrint(true).encodeResourceToString(organization);
+		logger.info("Organization:\n{}", string);
 
 		Organization parseOrganization = context.newJsonParser().parseResource(Organization.class, string);
 

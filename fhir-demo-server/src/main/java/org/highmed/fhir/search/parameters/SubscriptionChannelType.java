@@ -24,7 +24,14 @@ public class SubscriptionChannelType extends AbstractTokenParameter<Subscription
 
 	public SubscriptionChannelType()
 	{
+		this(null);
+	}
+
+	public SubscriptionChannelType(org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType channelType)
+	{
 		super(PARAMETER_NAME);
+
+		this.channelType = channelType;
 	}
 
 	@Override

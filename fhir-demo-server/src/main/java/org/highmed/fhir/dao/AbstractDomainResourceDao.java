@@ -473,4 +473,12 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 				.with(new ResourceId(getResourceIdColumn()), new ResourceLastUpdated(getResourceColumn()))
 				.with(searchParameterFactories.stream().map(Supplier::get).toArray(SearchParameter[]::new)).build();
 	}
+
+	public final SearchQuery createSearchQuery(int effectivePage, int effectiveCount, String sortParameters,
+			SearchParameter<?>... parameters)
+	{
+		return SearchQueryBuilder
+				.create(getResourceTable(), getResourceIdColumn(), getResourceColumn(), effectivePage, effectiveCount)
+				.with(parameters).sort(sortParameters).build();
+	}
 }

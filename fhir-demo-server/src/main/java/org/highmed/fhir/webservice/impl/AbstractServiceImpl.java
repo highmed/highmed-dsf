@@ -1,7 +1,6 @@
 package org.highmed.fhir.webservice.impl;
 
 import java.net.URI;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -12,7 +11,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -20,8 +18,12 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.highmed.fhir.dao.AbstractDomainResourceDao;
+import org.highmed.fhir.event.EventGenerator;
 import org.highmed.fhir.event.EventManager;
 import org.highmed.fhir.function.SupplierWithSqlException;
+import org.highmed.fhir.help.ExceptionHandler;
+import org.highmed.fhir.help.ParameterConverter;
+import org.highmed.fhir.help.ResponseGenerator;
 import org.highmed.fhir.search.PartialResult;
 import org.highmed.fhir.search.SearchQuery;
 import org.highmed.fhir.service.ResourceValidator;
@@ -41,34 +43,35 @@ import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.springframework.beans.factory.InitializingBean;
 
-import ca.uhn.fhir.rest.api.Constants;
-
 public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>, R extends DomainResource>
 		implements BasicService<R>, InitializingBean
 {
-	public static final String JSON_FORMAT = "json";
-	public static final List<String> JSON_FORMATS = Arrays.asList(Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW,
-			MediaType.APPLICATION_JSON);
-	public static final String XML_FORMAT = "xml";
-	public static final List<String> XML_FORMATS = Arrays.asList(Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW,
-			MediaType.APPLICATION_XML, MediaType.TEXT_XML);
-
+	protected final String resourceTypeName;
 	protected final String serverBase;
 	protected final int defaultPageCount;
 	protected final D dao;
 	protected final ResourceValidator validator;
 	protected final EventManager eventManager;
-	protected final ServiceHelperImpl<R> serviceHelper;
+	protected final ExceptionHandler exceptionHandler;
+	protected final EventGenerator<R> eventGenerator;
+	protected final ResponseGenerator responseGenerator;
+	protected final ParameterConverter parameterConverter;
 
-	public AbstractServiceImpl(String serverBase, int defaultPageCount, D dao, ResourceValidator validator,
-			EventManager eventManager, ServiceHelperImpl<R> serviceHelper)
+	public AbstractServiceImpl(String resourceTypeName, String serverBase, int defaultPageCount, D dao,
+			ResourceValidator validator, EventManager eventManager, ExceptionHandler exceptionHandler,
+			EventGenerator<R> eventGenerator, ResponseGenerator responseGenerator,
+			ParameterConverter parameterConverter)
 	{
+		this.resourceTypeName = resourceTypeName;
 		this.serverBase = serverBase;
 		this.defaultPageCount = defaultPageCount;
 		this.dao = dao;
 		this.validator = validator;
 		this.eventManager = eventManager;
-		this.serviceHelper = serviceHelper;
+		this.exceptionHandler = exceptionHandler;
+		this.eventGenerator = eventGenerator;
+		this.responseGenerator = responseGenerator;
+		this.parameterConverter = parameterConverter;
 	}
 
 	public void afterPropertiesSet() throws Exception
@@ -83,9 +86,9 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 	{
 		Consumer<R> postCreate = preCreate(resource);
 
-		R createdResource = serviceHelper.handleSqlException(() -> dao.create(resource));
+		R createdResource = exceptionHandler.handleSqlException(() -> dao.create(resource));
 
-		eventManager.handleEvent(serviceHelper.newResourceCreatedEvent(createdResource));
+		eventManager.handleEvent(eventGenerator.newResourceCreatedEvent(createdResource));
 
 		if (postCreate != null)
 			postCreate.accept(createdResource);
@@ -93,7 +96,7 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 		URI location = uri.getAbsolutePathBuilder().path("/{id}/_history/{vid}")
 				.build(createdResource.getIdElement().getIdPart(), createdResource.getIdElement().getVersionIdPart());
 
-		return serviceHelper.response(Status.CREATED, createdResource, null).location(location).build();
+		return responseGenerator.response(Status.CREATED, createdResource, null).location(location).build();
 	}
 
 	/**
@@ -116,10 +119,10 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 	@Override
 	public Response read(@PathParam("id") String id, @QueryParam("_format") String format, @Context UriInfo uri)
 	{
-		Optional<R> read = serviceHelper
-				.handleSqlAndResourceDeletedException(() -> dao.read(serviceHelper.withUuid(id)));
+		Optional<R> read = exceptionHandler.handleSqlAndResourceDeletedException(resourceTypeName,
+				() -> dao.read(parameterConverter.toUuid(resourceTypeName, id)));
 
-		return read.map(d -> serviceHelper.response(Status.OK, d, serviceHelper.toSpecialMimeType(format)))
+		return read.map(d -> responseGenerator.response(Status.OK, d, parameterConverter.toSpecialMimeType(format)))
 				.orElse(Response.status(Status.NOT_FOUND)).build();
 	}
 
@@ -127,15 +130,15 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 	public Response vread(@PathParam("id") String id, @PathParam("vid") long version,
 			@QueryParam("_format") String format, @Context UriInfo uri)
 	{
-		Optional<R> read = serviceHelper.handleSqlException(vRead(id, version));
+		Optional<R> read = exceptionHandler.handleSqlException(vRead(id, version));
 
-		return read.map(d -> serviceHelper.response(Status.OK, d, serviceHelper.toSpecialMimeType(format)))
+		return read.map(d -> responseGenerator.response(Status.OK, d, parameterConverter.toSpecialMimeType(format)))
 				.orElse(Response.status(Status.NOT_FOUND)).build();
 	}
 
 	private SupplierWithSqlException<Optional<R>> vRead(String id, long version)
 	{
-		return () -> dao.readVersion(serviceHelper.withUuid(id), version);
+		return () -> dao.readVersion(parameterConverter.toUuid(resourceTypeName, id), version);
 	}
 
 	@Override
@@ -144,20 +147,21 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 		IdType resourceId = resource.getIdElement();
 
 		if (!Objects.equals(id, resourceId.getIdPart()))
-			return serviceHelper.createPathVsElementIdResponse(id, resourceId);
+			return responseGenerator.createPathVsElementIdResponse(resourceTypeName, id, resourceId);
 		if (resourceId.getBaseUrl() != null && !serverBase.equals(resourceId.getBaseUrl()))
-			return serviceHelper.createInvalidBaseUrlResponse(resourceId);
+			return responseGenerator.createInvalidBaseUrlResponse(resourceTypeName, resourceId);
 
 		Consumer<R> postUpdate = preUpdate(resource);
 
-		R updatedResource = serviceHelper.handleSqlAndResourceNotFoundException(() -> dao.update(resource));
+		R updatedResource = exceptionHandler.handleSqlAndResourceNotFoundException(resourceTypeName,
+				() -> dao.update(resource));
 
-		eventManager.handleEvent(serviceHelper.newResourceUpdatedEvent(updatedResource));
+		eventManager.handleEvent(eventGenerator.newResourceUpdatedEvent(updatedResource));
 
 		if (postUpdate != null)
 			postUpdate.accept(updatedResource);
 
-		return serviceHelper.response(Status.OK, updatedResource, null).build();
+		return responseGenerator.response(Status.OK, updatedResource, null).build();
 	}
 
 	/**
@@ -182,13 +186,13 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 	{
 		Consumer<String> afterDelete = beforeDelete(id);
 
-		serviceHelper.handleSqlException(() -> dao.delete(serviceHelper.withUuid(id)));
+		exceptionHandler.handleSqlException(() -> dao.delete(parameterConverter.toUuid(resourceTypeName, id)));
 
-		eventManager.handleEvent(serviceHelper.newResourceDeletedEvent(id));
+		eventManager.handleEvent(eventGenerator.newResourceDeletedEvent(id));
 
 		afterDelete.accept(id);
 
-		return serviceHelper.response(Status.OK, null, null).build();
+		return responseGenerator.response(Status.OK, null, null).build();
 	}
 
 	/**
@@ -213,8 +217,8 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 	{
 		MultivaluedMap<String, String> queryParameters = uri.getQueryParameters();
 
-		Integer count = serviceHelper.getFirstInt(queryParameters, "_count");
-		Integer page = serviceHelper.getFirstInt(queryParameters, "page");
+		Integer count = parameterConverter.getFirstInt(queryParameters, "_count");
+		Integer page = parameterConverter.getFirstInt(queryParameters, "page");
 		String format = queryParameters.getFirst("format");
 
 		int effectivePage = page == null ? 1 : page;
@@ -224,12 +228,12 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 
 		query.configureParameters(queryParameters);
 
-		PartialResult<R> result = serviceHelper.handleSqlException(() -> dao.search(query));
+		PartialResult<R> result = exceptionHandler.handleSqlException(() -> dao.search(query));
 
 		UriBuilder bundleUri = query.configureBundleUri(uri.getAbsolutePathBuilder());
 
-		return serviceHelper.response(Status.OK, serviceHelper.createSearchSet(result, bundleUri, format),
-				serviceHelper.toSpecialMimeType(format)).build();
+		return responseGenerator.response(Status.OK, responseGenerator.createSearchSet(result, bundleUri, format),
+				parameterConverter.toSpecialMimeType(format)).build();
 	}
 
 	private Optional<Resource> getResource(Parameters parameters, String parameterName)

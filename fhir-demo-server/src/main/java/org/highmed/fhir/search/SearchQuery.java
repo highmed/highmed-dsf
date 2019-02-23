@@ -32,6 +32,7 @@ public class SearchQuery implements DbSearchQuery
 		private final int count;
 
 		private final List<SearchParameter<?>> searchParameters = new ArrayList<SearchParameter<?>>();
+		private String sortParameters;
 
 		public SearchQueryBuilder(String resourceTable, String resourceIdColumn, String resourceColumn, int page,
 				int count)
@@ -60,9 +61,16 @@ public class SearchQuery implements DbSearchQuery
 			return this;
 		}
 
+		public SearchQueryBuilder sort(String sortParameters)
+		{
+			this.sortParameters = sortParameters;
+			return this;
+		}
+
 		public SearchQuery build()
 		{
-			return new SearchQuery(resourceTable, resourceIdColumn, resourceColumn, page, count, searchParameters);
+			return new SearchQuery(resourceTable, resourceIdColumn, resourceColumn, page, count, sortParameters,
+					searchParameters);
 		}
 	}
 
@@ -78,6 +86,12 @@ public class SearchQuery implements DbSearchQuery
 	SearchQuery(String resourceTable, String resourceIdColumn, String resourceColumn, int page, int count,
 			List<? extends SearchParameter<?>> searchParameters)
 	{
+		this(resourceTable, resourceIdColumn, resourceColumn, page, count, null, searchParameters);
+	}
+
+	SearchQuery(String resourceTable, String resourceIdColumn, String resourceColumn, int page, int count,
+			String sortParameters, List<? extends SearchParameter<?>> searchParameters)
+	{
 		this.searchQueryMain = "SELECT " + resourceColumn + " FROM (SELECT DISTINCT ON (" + resourceIdColumn + ") "
 				+ resourceColumn + " FROM " + resourceTable + " WHERE NOT deleted ORDER BY " + resourceIdColumn
 				+ ", version DESC) AS current_" + resourceTable;
@@ -88,6 +102,9 @@ public class SearchQuery implements DbSearchQuery
 
 		this.searchParameters.addAll(searchParameters);
 		this.pageAndCount = new PageAndCount(page, count);
+
+		if (sortParameters != null)
+			createSortSql(sortParameters);
 	}
 
 	public void configureParameters(MultivaluedMap<String, String> queryParameters)

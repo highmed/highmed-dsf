@@ -154,29 +154,6 @@ public class StructureDefinitionSnapshotDao extends AbstractStructureDefinitionD
 		return resource;
 	}
 
-	//
-	// public void updateSnapshotInfo(UUID snapshotId, SnapshotInfo info) throws SQLException
-	// {
-	// Objects.requireNonNull(info, "info");
-	//
-	// try (Connection connection = getDataSource().getConnection())
-	// {
-	// connection.setReadOnly(false);
-	//
-	// try (PreparedStatement statement = connection.prepareStatement("UPDATE " + getResourceTable()
-	// + " SET structure_definition_snapshot_info = ? WHERE " + getResourceIdColumn() + " = ?"))
-	// {
-	// statement.setObject(1, converter.toDb(info));
-	// statement.setObject(2, uuidToPgObject(snapshotId));
-	//
-	// logger.trace("Executing query '{}'", statement);
-	// statement.execute();
-	//
-	// logger.debug("SnapshotInfo updated for {} with id {}", getResourceTypeName(), snapshotId);
-	// }
-	// }
-	// }
-
 	public void deleteAllByDependency(String url) throws SQLException
 	{
 		Objects.requireNonNull(url, "url");

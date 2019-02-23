@@ -6,10 +6,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -17,8 +14,12 @@ import javax.ws.rs.core.UriInfo;
 
 import org.highmed.fhir.dao.StructureDefinitionDao;
 import org.highmed.fhir.dao.StructureDefinitionSnapshotDao;
+import org.highmed.fhir.event.EventGenerator;
 import org.highmed.fhir.event.EventManager;
 import org.highmed.fhir.function.ConsumerWithSqlAndResourceNotFoundException;
+import org.highmed.fhir.help.ExceptionHandler;
+import org.highmed.fhir.help.ParameterConverter;
+import org.highmed.fhir.help.ResponseGenerator;
 import org.highmed.fhir.search.PartialResult;
 import org.highmed.fhir.search.SearchQuery;
 import org.highmed.fhir.search.parameters.ResourceLastUpdated;
@@ -54,16 +55,18 @@ public class StructureDefinitionServiceImpl extends AbstractServiceImpl<Structur
 	private final SnapshotGenerator snapshotGenerator;
 	private final SnapshotDependencyAnalyzer snapshotDependencyAnalyzer;
 
-	public StructureDefinitionServiceImpl(String serverBase, int defaultPageCount,
-			StructureDefinitionDao structureDefinitionDao, ResourceValidator validator, EventManager eventManager,
-			ServiceHelperImpl<StructureDefinition> serviceHelper,
-			StructureDefinitionSnapshotDao structureDefinitionSnapshotDao, SnapshotGenerator anapshotGenerator,
+	public StructureDefinitionServiceImpl(String resourceTypeName, String serverBase, int defaultPageCount,
+			StructureDefinitionDao dao, ResourceValidator validator, EventManager eventManager,
+			ExceptionHandler exceptionHandler, EventGenerator<StructureDefinition> eventGenerator,
+			ResponseGenerator responseGenerator, ParameterConverter parameterConverter,
+			StructureDefinitionSnapshotDao structureDefinitionSnapshotDao, SnapshotGenerator sanapshotGenerator,
 			SnapshotDependencyAnalyzer snapshotDependencyAnalyzer)
 	{
-		super(serverBase, defaultPageCount, structureDefinitionDao, validator, eventManager, serviceHelper);
+		super(resourceTypeName, serverBase, defaultPageCount, dao, validator, eventManager, exceptionHandler,
+				eventGenerator, responseGenerator, parameterConverter);
 
 		this.snapshotDao = structureDefinitionSnapshotDao;
-		this.snapshotGenerator = anapshotGenerator;
+		this.snapshotGenerator = sanapshotGenerator;
 		this.snapshotDependencyAnalyzer = snapshotDependencyAnalyzer;
 	}
 
@@ -101,8 +104,11 @@ public class StructureDefinitionServiceImpl extends AbstractServiceImpl<Structur
 		{
 			if (preResource != null && preResource.hasSnapshot())
 			{
-				handleSnapshot(preResource, info -> snapshotDao
-						.create(serviceHelper.withUuid(postResource.getIdElement().getIdPart()), preResource, info));
+
+				handleSnapshot(preResource,
+						info -> snapshotDao.create(
+								parameterConverter.toUuid(resourceTypeName, postResource.getIdElement().getIdPart()),
+								preResource, info));
 			}
 			else if (postResource != null)
 			{
@@ -111,10 +117,9 @@ public class StructureDefinitionServiceImpl extends AbstractServiceImpl<Structur
 					SnapshotWithValidationMessages s = snapshotGenerator.generateSnapshot(postResource);
 
 					if (s != null && s.getSnapshot() != null && s.getMessages().isEmpty())
-						handleSnapshot(s.getSnapshot(),
-								info -> snapshotDao.create(
-										serviceHelper.withUuid(postResource.getIdElement().getIdPart()), postResource,
-										info));
+						handleSnapshot(s.getSnapshot(), info -> snapshotDao.create(
+								parameterConverter.toUuid(resourceTypeName, postResource.getIdElement().getIdPart()),
+								postResource, info));
 				}
 				catch (Exception e)
 				{
@@ -156,9 +161,10 @@ public class StructureDefinitionServiceImpl extends AbstractServiceImpl<Structur
 	{
 		SnapshotDependencies dependencies = snapshotDependencyAnalyzer.analyzeSnapshotDependencies(snapshot);
 
-		serviceHelper.catchAndLogSqlException(() -> snapshotDao.deleteAllByDependency(snapshot.getUrl()));
+		exceptionHandler.catchAndLogSqlException(() -> snapshotDao.deleteAllByDependency(snapshot.getUrl()));
 
-		serviceHelper.catchAndLogSqlAndResourceNotFoundException(() -> dbOp.accept(new SnapshotInfo(dependencies)));
+		exceptionHandler.catchAndLogSqlAndResourceNotFoundException(resourceTypeName,
+				() -> dbOp.accept(new SnapshotInfo(dependencies)));
 	}
 
 	@Override
@@ -169,12 +175,12 @@ public class StructureDefinitionServiceImpl extends AbstractServiceImpl<Structur
 
 	private void afterDelete(String id)
 	{
-		serviceHelper.catchAndLogSqlException(() -> snapshotDao.delete(serviceHelper.withUuid(id)));
+		exceptionHandler
+				.catchAndLogSqlException(() -> snapshotDao.delete(parameterConverter.toUuid(resourceTypeName, id)));
 	}
 
 	@Override
-	public Response postSnapshotNew(@PathParam("snapshot") String snapshotPath, @QueryParam("_format") String format,
-			Parameters parameters, @Context UriInfo uri)
+	public Response postSnapshotNew(String snapshotPath, String format, Parameters parameters, UriInfo uri)
 	{
 		Type urlType = parameters.getParameter("url");
 		Optional<ParametersParameterComponent> resource = parameters.getParameter().stream()
@@ -190,21 +196,7 @@ public class StructureDefinitionServiceImpl extends AbstractServiceImpl<Structur
 
 			logger.trace("Parameters with url {}", url.getValue());
 
-			SearchQuery query = snapshotDao.createSearchQuery(1, 1);
-			MultivaluedHashMap<String, String> searchParameters = new MultivaluedHashMap<>();
-			searchParameters.putSingle(StructureDefinitionUrl.PARAMETER_NAME, url.getValue());
-			searchParameters.putSingle(AbstractSearchParameter.SORT_PARAMETER,
-					"-" + ResourceLastUpdated.PARAMETER_NAME);
-			query.configureParameters(searchParameters);
-
-			PartialResult<StructureDefinition> result = serviceHelper
-					.handleSqlException(() -> snapshotDao.search(query));
-
-			Optional<StructureDefinition> snapshot = Optional
-					.ofNullable(result.getPartialResult().isEmpty() ? null : result.getPartialResult().get(0));
-
-			return snapshot.map(d -> serviceHelper.response(Status.OK, d, serviceHelper.toSpecialMimeType(format)))
-					.orElse(Response.status(Status.NOT_FOUND)).build();
+			return getSnapshot(format, url.getValue());
 		}
 		else if (urlType == null && resource.isPresent() && resource.get().getResource() != null)
 		{
@@ -219,9 +211,10 @@ public class StructureDefinitionServiceImpl extends AbstractServiceImpl<Structur
 				return Response.status(Status.BAD_REQUEST).build(); // TODO OperationOutcome
 
 			if (sd.hasSnapshot())
-				return serviceHelper.response(Status.OK, sd, serviceHelper.toSpecialMimeType(format)).build();
+				return responseGenerator.response(Status.OK, sd, parameterConverter.toSpecialMimeType(format)).build();
 			else
-				return serviceHelper.response(Status.OK, generateSnapshot(sd), serviceHelper.toSpecialMimeType(format))
+				return responseGenerator
+						.response(Status.OK, generateSnapshot(sd), parameterConverter.toSpecialMimeType(format))
 						.build();
 		}
 		else
@@ -231,36 +224,53 @@ public class StructureDefinitionServiceImpl extends AbstractServiceImpl<Structur
 		}
 	}
 
-	@Override
-	public Response getSnapshotNew(String snapshotPath, String url, String format, UriInfo uri)
+	private Response getSnapshot(String format, String url)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		SearchQuery query = snapshotDao.createSearchQuery(1, 1);
+		MultivaluedHashMap<String, String> searchParameters = new MultivaluedHashMap<>();
+		searchParameters.putSingle(StructureDefinitionUrl.PARAMETER_NAME, url);
+		searchParameters.putSingle(AbstractSearchParameter.SORT_PARAMETER, "-" + ResourceLastUpdated.PARAMETER_NAME);
+		query.configureParameters(searchParameters);
+
+		PartialResult<StructureDefinition> result = exceptionHandler
+				.handleSqlException(() -> snapshotDao.search(query));
+
+		Optional<StructureDefinition> snapshot = Optional
+				.ofNullable(result.getPartialResult().isEmpty() ? null : result.getPartialResult().get(0));
+
+		return snapshot.map(d -> responseGenerator.response(Status.OK, d, parameterConverter.toSpecialMimeType(format)))
+				.orElse(Response.status(Status.NOT_FOUND)).build();
 	}
 
 	@Override
-	public Response postSnapshotExisting(@PathParam("snapshot") String snapshotPath, @PathParam("id") String id,
-			@QueryParam("_format") String format, @Context UriInfo uri)
+	public Response getSnapshotNew(String snapshotPath, String url, String format, UriInfo uri)
+	{
+		return getSnapshot(format, url);
+	}
+
+	@Override
+	public Response postSnapshotExisting(String snapshotPath, String id, String format, UriInfo uri)
 	{
 		return getSnapshotExisting(snapshotPath, id, format, uri);
 	}
 
 	@Override
-	public Response getSnapshotExisting(@PathParam("snapshot") String snapshotPath, @PathParam("id") String id,
-			@QueryParam("_format") String format, @Context UriInfo uri)
+	public Response getSnapshotExisting(String snapshotPath, String id, String format, UriInfo uri)
 	{
-		Optional<StructureDefinition> snapshot = serviceHelper.catchAndLogSqlAndResourceDeletedExceptionAndIfReturn(
-				() -> snapshotDao.read(serviceHelper.withUuid(id)), Optional::empty, Optional::empty);
+		Optional<StructureDefinition> snapshot = exceptionHandler.catchAndLogSqlAndResourceDeletedExceptionAndIfReturn(
+				() -> snapshotDao.read(parameterConverter.toUuid(resourceTypeName, id)), Optional::empty,
+				Optional::empty);
 
 		if (snapshot.isPresent())
-			return snapshot.map(d -> serviceHelper.response(Status.OK, d, serviceHelper.toSpecialMimeType(format)))
+			return snapshot
+					.map(d -> responseGenerator.response(Status.OK, d, parameterConverter.toSpecialMimeType(format)))
 					.get().build();
 
-		Optional<StructureDefinition> differential = serviceHelper
-				.handleSqlAndResourceDeletedException(() -> dao.read(serviceHelper.withUuid(id)));
+		Optional<StructureDefinition> differential = exceptionHandler.handleSqlAndResourceDeletedException(
+				resourceTypeName, () -> dao.read(parameterConverter.toUuid(resourceTypeName, id)));
 
 		return differential.map(this::generateSnapshot)
-				.map(d -> serviceHelper.response(Status.OK, d, serviceHelper.toSpecialMimeType(format)))
+				.map(d -> responseGenerator.response(Status.OK, d, parameterConverter.toSpecialMimeType(format)))
 				.orElse(Response.status(Status.NOT_FOUND)).build();
 	}
 

@@ -1,7 +1,11 @@
 package org.highmed.fhir.webservice.impl;
 
 import org.highmed.fhir.dao.PractitionerDao;
+import org.highmed.fhir.event.EventGenerator;
 import org.highmed.fhir.event.EventManager;
+import org.highmed.fhir.help.ExceptionHandler;
+import org.highmed.fhir.help.ParameterConverter;
+import org.highmed.fhir.help.ResponseGenerator;
 import org.highmed.fhir.service.ResourceValidator;
 import org.highmed.fhir.webservice.specification.PractitionerService;
 import org.hl7.fhir.r4.model.Practitioner;
@@ -9,9 +13,12 @@ import org.hl7.fhir.r4.model.Practitioner;
 public class PractitionerServiceImpl extends AbstractServiceImpl<PractitionerDao, Practitioner>
 		implements PractitionerService
 {
-	public PractitionerServiceImpl(String serverBase, int defaultPageCount, PractitionerDao practitionerDao,
-			ResourceValidator validator, EventManager eventManager, ServiceHelperImpl<Practitioner> serviceHelper)
+	public PractitionerServiceImpl(String resourceTypeName, String serverBase, int defaultPageCount,
+			PractitionerDao dao, ResourceValidator validator, EventManager eventManager,
+			ExceptionHandler exceptionHandler, EventGenerator<Practitioner> eventGenerator,
+			ResponseGenerator responseGenerator, ParameterConverter parameterConverter)
 	{
-		super(serverBase, defaultPageCount, practitionerDao, validator, eventManager, serviceHelper);
+		super(resourceTypeName, serverBase, defaultPageCount, dao, validator, eventManager, exceptionHandler,
+				eventGenerator, responseGenerator, parameterConverter);
 	}
 }

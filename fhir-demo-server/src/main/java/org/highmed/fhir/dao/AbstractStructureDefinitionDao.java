@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.fhir.search.parameters.StructureDefinitionUrl;
+import org.highmed.fhir.search.parameters.basic.AbstractCanonicalUrlParameter.UriSearchType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,11 @@ public abstract class AbstractStructureDefinitionDao extends AbstractDomainResou
 	{
 		super(dataSource, fhirContext, StructureDefinition.class, resourceTable, resourceColumn, resourceIdColumn,
 				() -> new StructureDefinitionUrl(resourceColumn));
+	}
+	
+	public StructureDefinitionUrl createStructureDefinitionUrl(String url, String version, UriSearchType type)
+	{
+		return new StructureDefinitionUrl(getResourceColumn(), url, version, type);
 	}
 
 	public List<StructureDefinition> readAll() throws SQLException
