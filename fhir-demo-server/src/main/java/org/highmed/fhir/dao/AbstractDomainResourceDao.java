@@ -114,6 +114,11 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 		return resourceTypeName;
 	}
 
+	public Class<R> getResourceType()
+	{
+		return resourceType;
+	}
+
 	public final R create(R resource) throws SQLException
 	{
 		try (Connection connection = dataSource.getConnection())
@@ -466,19 +471,21 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 		}
 	}
 
-	public final SearchQuery createSearchQuery(int effectivePage, int effectiveCount)
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public final SearchQuery<R> createSearchQuery(int effectivePage, int effectiveCount)
 	{
 		return SearchQueryBuilder
-				.create(getResourceTable(), getResourceIdColumn(), getResourceColumn(), effectivePage, effectiveCount)
-				.with(new ResourceId(getResourceIdColumn()), new ResourceLastUpdated(getResourceColumn()))
+				.create(getResourceType(), getResourceTable(), getResourceIdColumn(), getResourceColumn(),
+						effectivePage, effectiveCount)
+				.with(new ResourceId(resourceType, getResourceIdColumn()),
+						new ResourceLastUpdated(resourceType, getResourceColumn()))
 				.with(searchParameterFactories.stream().map(Supplier::get).toArray(SearchParameter[]::new)).build();
 	}
 
-	public final SearchQuery createSearchQuery(int effectivePage, int effectiveCount, String sortParameters,
-			SearchParameter<?>... parameters)
+	public final SearchQuery<R> createSearchQuery(int effectivePage, int effectiveCount, String sortParameters,
+			@SuppressWarnings("unchecked") SearchParameter<R>... parameters)
 	{
-		return SearchQueryBuilder
-				.create(getResourceTable(), getResourceIdColumn(), getResourceColumn(), effectivePage, effectiveCount)
-				.with(parameters).sort(sortParameters).build();
+		return SearchQueryBuilder.create(getResourceType(), getResourceTable(), getResourceIdColumn(),
+				getResourceColumn(), effectivePage, effectiveCount).with(parameters).sort(sortParameters).build();
 	}
 }

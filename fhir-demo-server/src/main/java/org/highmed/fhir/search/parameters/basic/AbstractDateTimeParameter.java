@@ -9,11 +9,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 
 import org.hl7.fhir.r4.model.DomainResource;
@@ -82,65 +82,15 @@ public abstract class AbstractDateTimeParameter<R extends DomainResource> extend
 
 	private List<DateTimeValueAndTypeAndSearchType> valuesAndTypes = new ArrayList<>();
 
-	public AbstractDateTimeParameter(String parameterName)
+	public AbstractDateTimeParameter(Class<R> resourceType, String parameterName)
 	{
-		super(parameterName);
-	}
-
-	public AbstractDateTimeParameter(String parameterName, ZonedDateTime dateTime, DateTimeSearchType type)
-	{
-		super(parameterName);
-
-		valuesAndTypes.add(new DateTimeValueAndTypeAndSearchType(dateTime, DateTimeType.ZONED_DATE_TIME, type));
-	}
-
-	public AbstractDateTimeParameter(String parameterName, ZonedDateTime dateTime1, DateTimeSearchType type1,
-			ZonedDateTime dateTime2, DateTimeSearchType type2)
-	{
-		super(parameterName);
-
-		valuesAndTypes.add(new DateTimeValueAndTypeAndSearchType(dateTime1, DateTimeType.ZONED_DATE_TIME, type1));
-		valuesAndTypes.add(new DateTimeValueAndTypeAndSearchType(dateTime2, DateTimeType.ZONED_DATE_TIME, type2));
-	}
-
-	public AbstractDateTimeParameter(String parameterName, LocalDate date, DateTimeSearchType type)
-	{
-		super(parameterName);
-
-		valuesAndTypes.add(new DateTimeValueAndTypeAndSearchType(date, DateTimeType.LOCAL_DATE, type));
-	}
-
-	public AbstractDateTimeParameter(String parameterName, LocalDate date1, DateTimeSearchType type1, LocalDate date2,
-			DateTimeSearchType type2)
-	{
-		super(parameterName);
-
-		valuesAndTypes.add(new DateTimeValueAndTypeAndSearchType(date1, DateTimeType.LOCAL_DATE, type1));
-		valuesAndTypes.add(new DateTimeValueAndTypeAndSearchType(date2, DateTimeType.LOCAL_DATE, type2));
-	}
-
-	public AbstractDateTimeParameter(String parameterName, int year)
-	{
-		super(parameterName);
-
-		valuesAndTypes.add(new DateTimeValueAndTypeAndSearchType(
-				new LocalDatePair(LocalDate.of(year, 1, 1), LocalDate.of(year, 1, 1).plusYears(1)),
-				DateTimeType.YEAR_PERIOD, DateTimeSearchType.EQ));
-	}
-
-	public AbstractDateTimeParameter(String parameterName, int year, int month)
-	{
-		super(parameterName);
-
-		valuesAndTypes.add(new DateTimeValueAndTypeAndSearchType(
-				new LocalDatePair(LocalDate.of(year, month, 1), LocalDate.of(year, month, 1).plusMonths(1)),
-				DateTimeType.YEAR_PERIOD, DateTimeSearchType.EQ));
+		super(resourceType, parameterName);
 	}
 
 	@Override
-	protected final void configureSearchParameter(MultivaluedMap<String, String> queryParameters)
+	protected final void configureSearchParameter(Map<String, List<String>> queryParameters)
 	{
-		List<String> parameters = queryParameters.getOrDefault(queryParameters, Collections.emptyList());
+		List<String> parameters = queryParameters.getOrDefault(parameterName, Collections.emptyList());
 
 		parameters.stream().limit(2).map(this::parse).filter(v -> v != null)
 				.collect(Collectors.toCollection(() -> valuesAndTypes));

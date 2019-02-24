@@ -6,37 +6,41 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 
 import org.highmed.fhir.search.parameters.basic.AbstractSearchParameter;
 import org.highmed.fhir.search.parameters.basic.SearchParameter;
+import org.hl7.fhir.r4.model.DomainResource;
 
-public class SearchQuery implements DbSearchQuery
+public class SearchQuery<R extends DomainResource> implements DbSearchQuery
 {
-	public static class SearchQueryBuilder
+	public static class SearchQueryBuilder<R extends DomainResource>
 	{
-		public static SearchQueryBuilder create(String resourceTable, String resourceIdColumn, String resourceColumn,
-				int page, int count)
+		public static <R extends DomainResource> SearchQueryBuilder<R> create(Class<R> resourceType,
+				String resourceTable, String resourceIdColumn, String resourceColumn, int page, int count)
 		{
-			return new SearchQueryBuilder(resourceTable, resourceIdColumn, resourceColumn, page, count);
+			return new SearchQueryBuilder<R>(resourceType, resourceTable, resourceIdColumn, resourceColumn, page,
+					count);
 		}
 
+		private final Class<R> resourceType;
 		private final String resourceTable;
 		private final String resourceIdColumn;
 		private final String resourceColumn;
 		private final int page;
 		private final int count;
 
-		private final List<SearchParameter<?>> searchParameters = new ArrayList<SearchParameter<?>>();
+		private final List<SearchParameter<R>> searchParameters = new ArrayList<SearchParameter<R>>();
 		private String sortParameters;
 
-		public SearchQueryBuilder(String resourceTable, String resourceIdColumn, String resourceColumn, int page,
-				int count)
+		private SearchQueryBuilder(Class<R> resourceType, String resourceTable, String resourceIdColumn,
+				String resourceColumn, int page, int count)
 		{
+			this.resourceType = resourceType;
 			this.resourceTable = resourceTable;
 			this.resourceIdColumn = resourceIdColumn;
 			this.resourceColumn = resourceColumn;
@@ -44,54 +48,56 @@ public class SearchQuery implements DbSearchQuery
 			this.count = count;
 		}
 
-		public SearchQueryBuilder with(SearchParameter<?> searchParameters)
+		public SearchQueryBuilder<R> with(SearchParameter<R> searchParameters)
 		{
 			this.searchParameters.add(searchParameters);
 			return this;
 		}
 
-		public SearchQueryBuilder with(SearchParameter<?>... searchParameters)
+		public SearchQueryBuilder<R> with(@SuppressWarnings("unchecked") SearchParameter<R>... searchParameters)
 		{
 			return with(Arrays.asList(searchParameters));
 		}
 
-		public SearchQueryBuilder with(List<SearchParameter<?>> searchParameters)
+		public SearchQueryBuilder<R> with(List<SearchParameter<R>> searchParameters)
 		{
 			this.searchParameters.addAll(searchParameters);
 			return this;
 		}
 
-		public SearchQueryBuilder sort(String sortParameters)
+		public SearchQueryBuilder<R> sort(String sortParameters)
 		{
 			this.sortParameters = sortParameters;
 			return this;
 		}
 
-		public SearchQuery build()
+		public SearchQuery<R> build()
 		{
-			return new SearchQuery(resourceTable, resourceIdColumn, resourceColumn, page, count, sortParameters,
-					searchParameters);
+			return new SearchQuery<R>(resourceType, resourceTable, resourceIdColumn, resourceColumn, page, count,
+					sortParameters, searchParameters);
 		}
 	}
 
+	private final Class<R> resourceType;
 	private final String searchQueryMain;
 	private final String countQueryMain;
-	private final List<SearchParameter<?>> searchParameters = new ArrayList<SearchParameter<?>>();
+	private final List<SearchParameter<R>> searchParameters = new ArrayList<>();
 	private final PageAndCount pageAndCount;
 
 	private String filterQuery = "";
 	private String sortSql = "";
-	private List<SearchParameter<?>> sortParameters = Collections.emptyList();
+	private List<SearchParameter<R>> sortParameters = Collections.emptyList();
 
-	SearchQuery(String resourceTable, String resourceIdColumn, String resourceColumn, int page, int count,
-			List<? extends SearchParameter<?>> searchParameters)
+	SearchQuery(Class<R> resourceType, String resourceTable, String resourceIdColumn, String resourceColumn, int page,
+			int count, List<? extends SearchParameter<R>> searchParameters)
 	{
-		this(resourceTable, resourceIdColumn, resourceColumn, page, count, null, searchParameters);
+		this(resourceType, resourceTable, resourceIdColumn, resourceColumn, page, count, null, searchParameters);
 	}
 
-	SearchQuery(String resourceTable, String resourceIdColumn, String resourceColumn, int page, int count,
-			String sortParameters, List<? extends SearchParameter<?>> searchParameters)
+	SearchQuery(Class<R> resourceType, String resourceTable, String resourceIdColumn, String resourceColumn, int page,
+			int count, String sortParameters, List<? extends SearchParameter<R>> searchParameters)
 	{
+		this.resourceType = resourceType;
 		this.searchQueryMain = "SELECT " + resourceColumn + " FROM (SELECT DISTINCT ON (" + resourceIdColumn + ") "
 				+ resourceColumn + " FROM " + resourceTable + " WHERE NOT deleted ORDER BY " + resourceIdColumn
 				+ ", version DESC) AS current_" + resourceTable;
@@ -107,14 +113,22 @@ public class SearchQuery implements DbSearchQuery
 			createSortSql(sortParameters);
 	}
 
-	public void configureParameters(MultivaluedMap<String, String> queryParameters)
+	public void configureParameters(Map<String, List<String>> queryParameters)
 	{
 		searchParameters.forEach(p -> p.configure(queryParameters));
 
 		filterQuery = searchParameters.stream().filter(SearchParameter::isDefined).map(SearchParameter::getFilterQuery)
 				.collect(Collectors.joining(" AND "));
 
-		createSortSql(queryParameters.getFirst(AbstractSearchParameter.SORT_PARAMETER));
+		createSortSql(getFirst(queryParameters, AbstractSearchParameter.SORT_PARAMETER));
+	}
+
+	private String getFirst(Map<String, List<String>> queryParameters, String key)
+	{
+		if (queryParameters.containsKey(key) && !queryParameters.get(key).isEmpty())
+			return queryParameters.get(key).get(0);
+		else
+			return null;
 	}
 
 	private void createSortSql(String sortParameterValue)
@@ -132,9 +146,9 @@ public class SearchQuery implements DbSearchQuery
 				.collect(Collectors.joining(", ", " ORDER BY ", ""));
 	}
 
-	private SearchParameter<?> getSearchParameter(String sort)
+	private SearchParameter<R> getSearchParameter(String sort)
 	{
-		for (SearchParameter<?> p : searchParameters)
+		for (SearchParameter<R> p : searchParameters)
 		{
 			if (p.getParameterName().equals(sort) || ("+" + p.getParameterName()).equals(sort)
 					|| ("-" + p.getParameterName()).equals(sort))
@@ -198,5 +212,19 @@ public class SearchQuery implements DbSearchQuery
 		return sortParameters.stream()
 				.map(p -> p.getSortParameter().getDirection().getUrlModifier() + p.getParameterName())
 				.collect(Collectors.joining(","));
+	}
+
+	public Class<R> getResourceType()
+	{
+		return resourceType;
+	}
+
+	public boolean matches(DomainResource resource)
+	{
+		if (!getResourceType().isInstance(resource))
+			return false;
+
+		return searchParameters.stream().filter(SearchParameter::isDefined)
+				.map(p -> p.matches(getResourceType().cast(resource))).allMatch(b -> b);
 	}
 }

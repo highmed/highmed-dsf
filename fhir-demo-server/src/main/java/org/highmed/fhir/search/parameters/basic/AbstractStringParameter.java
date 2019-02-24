@@ -1,6 +1,8 @@
 package org.highmed.fhir.search.parameters.basic;
 
-import javax.ws.rs.core.MultivaluedMap;
+import java.util.List;
+import java.util.Map;
+
 import javax.ws.rs.core.UriBuilder;
 
 import org.hl7.fhir.r4.model.DomainResource;
@@ -33,36 +35,29 @@ public abstract class AbstractStringParameter<R extends DomainResource> extends 
 
 	protected StringValueAndSearchType valueAndType;
 
-	public AbstractStringParameter(String parameterName)
+	public AbstractStringParameter(Class<R> resourceType, String parameterName)
 	{
-		super(parameterName);
-	}
-
-	public AbstractStringParameter(String parameterName, String value, StringSearchType type)
-	{
-		super(parameterName);
-
-		valueAndType = new StringValueAndSearchType(value, type);
+		super(resourceType, parameterName);
 	}
 
 	@Override
-	protected final void configureSearchParameter(MultivaluedMap<String, String> queryParameters)
+	protected final void configureSearchParameter(Map<String, List<String>> queryParameters)
 	{
-		String startsWith = queryParameters.getFirst(parameterName);
+		String startsWith = getFirst(queryParameters, parameterName);
 		if (startsWith != null && !startsWith.isBlank())
 		{
 			valueAndType = new StringValueAndSearchType(startsWith, StringSearchType.STARTS_WITH);
 			return;
 		}
 
-		String exact = queryParameters.getFirst(parameterName + StringSearchType.EXACT.sufix);
+		String exact = getFirst(queryParameters, parameterName + StringSearchType.EXACT.sufix);
 		if (exact != null && !exact.isBlank())
 		{
 			valueAndType = new StringValueAndSearchType(exact, StringSearchType.EXACT);
 			return;
 		}
 
-		String contains = queryParameters.getFirst(parameterName + StringSearchType.CONTAINS.sufix);
+		String contains = getFirst(queryParameters, parameterName + StringSearchType.CONTAINS.sufix);
 		if (contains != null && !contains.isBlank())
 		{
 			valueAndType = new StringValueAndSearchType(contains, StringSearchType.CONTAINS);

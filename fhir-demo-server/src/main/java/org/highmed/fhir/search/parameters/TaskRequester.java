@@ -2,9 +2,10 @@ package org.highmed.fhir.search.parameters;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 
 import org.highmed.fhir.search.parameters.basic.AbstractSearchParameter;
@@ -23,20 +24,13 @@ public class TaskRequester extends AbstractSearchParameter<Task>
 
 	public TaskRequester()
 	{
-		this(null);
-	}
-
-	public TaskRequester(IdType requester)
-	{
-		super(PARAMETER_NAME);
-
-		this.requester = requester;
+		super(Task.class, PARAMETER_NAME);
 	}
 
 	@Override
-	protected void configureSearchParameter(MultivaluedMap<String, String> queryParameters)
+	protected void configureSearchParameter(Map<String, List<String>> queryParameters)
 	{
-		requester = toIdType(queryParameters.getFirst(PARAMETER_NAME));
+		requester = toIdType(getFirst(queryParameters, PARAMETER_NAME));
 	}
 
 	private IdType toIdType(String requester)

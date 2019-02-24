@@ -1,9 +1,10 @@
 package org.highmed.fhir.search.parameters.basic;
 
-import javax.ws.rs.core.MultivaluedMap;
+import java.util.List;
+import java.util.Map;
+
 import javax.ws.rs.core.UriBuilder;
 
-import org.highmed.fhir.search.parameters.basic.SortParameter.SortDirection;
 import org.hl7.fhir.r4.model.DomainResource;
 
 public abstract class AbstractCanonicalUrlParameter<R extends DomainResource> extends AbstractSearchParameter<R>
@@ -36,28 +37,20 @@ public abstract class AbstractCanonicalUrlParameter<R extends DomainResource> ex
 
 	protected CanonicalUrlAndSearchType valueAndType;
 
-	public AbstractCanonicalUrlParameter(String parameterName)
+	public AbstractCanonicalUrlParameter(Class<R> resourceType, String parameterName)
 	{
-		super(parameterName);
-	}
-
-	public AbstractCanonicalUrlParameter(String parameterName, SortDirection sortDirection, String url, String version,
-			UriSearchType type)
-	{
-		super(parameterName, sortDirection);
-
-		if (url != null && type != null)
-			valueAndType = new CanonicalUrlAndSearchType(url, version, type);
+		super(resourceType, parameterName);
 	}
 
 	@Override
-	protected final void configureSearchParameter(MultivaluedMap<String, String> queryParameters)
+	protected final void configureSearchParameter(Map<String, List<String>> queryParameters)
 	{
-		String precise = queryParameters.getFirst(parameterName);
+
+		String precise = getFirst(queryParameters, parameterName);
 		if (precise != null && !precise.isBlank())
 			valueAndType = toValueAndType(precise, UriSearchType.PRECISE);
 
-		String below = queryParameters.getFirst(parameterName + UriSearchType.BELOW.sufix);
+		String below = getFirst(queryParameters, parameterName + UriSearchType.BELOW.sufix);
 		if (below != null && !below.isBlank())
 			valueAndType = toValueAndType(below, UriSearchType.BELOW);
 

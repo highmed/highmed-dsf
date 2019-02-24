@@ -22,7 +22,7 @@ public class AbstractEvent<R extends DomainResource> implements Event<R>
 	}
 
 	@Override
-	public Class<R> getType()
+	public Class<R> getResourceType()
 	{
 		return type;
 	}

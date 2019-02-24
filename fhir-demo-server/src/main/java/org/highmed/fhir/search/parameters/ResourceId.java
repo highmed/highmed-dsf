@@ -2,8 +2,9 @@ package org.highmed.fhir.search.parameters;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
 
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 
 import org.highmed.fhir.search.parameters.basic.AbstractSearchParameter;
@@ -15,30 +16,24 @@ import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import com.google.common.base.Objects;
 
 @SearchParameterDefinition(name = ResourceId.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Resource-id", type = SearchParamType.TOKEN, documentation = "Logical id of this artifact")
-public class ResourceId extends AbstractSearchParameter<DomainResource>
+public class ResourceId<R extends DomainResource> extends AbstractSearchParameter<R>
 {
 	public static final String PARAMETER_NAME = "_id";
 
 	private final String resourceIdColumn;
 	private String id;
 
-	public ResourceId(String resourceIdColumn)
+	public ResourceId(Class<R> resourceType, String resourceIdColumn)
 	{
-		this(resourceIdColumn, null);
-	}
-
-	public ResourceId(String resourceIdColumn, String id)
-	{
-		super(PARAMETER_NAME);
+		super(resourceType, PARAMETER_NAME);
 
 		this.resourceIdColumn = resourceIdColumn;
-		this.id = id;
 	}
 
 	@Override
-	protected void configureSearchParameter(MultivaluedMap<String, String> queryParameters)
+	protected void configureSearchParameter(Map<String, List<String>> queryParameters)
 	{
-		id = toId(queryParameters.getFirst(PARAMETER_NAME));
+		id = toId(getFirst(queryParameters, PARAMETER_NAME));
 	}
 
 	private String toId(String id)

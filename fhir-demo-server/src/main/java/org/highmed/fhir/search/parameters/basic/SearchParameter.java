@@ -7,8 +7,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
 
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 
 import org.hl7.fhir.r4.model.DomainResource;
@@ -35,7 +36,7 @@ public interface SearchParameter<R extends DomainResource>
 		return new IllegalStateException("not defined");
 	}
 
-	void configure(MultivaluedMap<String, String> queryParameters);
+	void configure(Map<String, List<String>> queryParameters);
 
 	boolean isDefined();
 
@@ -53,6 +54,8 @@ public interface SearchParameter<R extends DomainResource>
 	 *            never <code>null</code>
 	 */
 	void modifyBundleUri(UriBuilder bundleUri);
+
+	Class<R> getResourceType();
 
 	boolean matches(R resource);
 

@@ -1,13 +1,17 @@
 package org.highmed.fhir.websocket;
 
+import java.io.IOException;
 import java.util.Objects;
 
 import javax.websocket.CloseReason;
+import javax.websocket.CloseReason.CloseCodes;
 import javax.websocket.Endpoint;
 import javax.websocket.EndpointConfig;
+import javax.websocket.MessageHandler;
 import javax.websocket.Session;
 
 import org.highmed.fhir.event.EventManager;
+import org.hl7.fhir.r4.model.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -18,6 +22,8 @@ public class EventEndpoint extends Endpoint implements InitializingBean
 	public static final String ORGANIZATION_PROPERTY = EventEndpoint.class.getName() + ".organization";
 
 	private static final Logger logger = LoggerFactory.getLogger(EventEndpoint.class);
+
+	private static final String BIND_MESSAGE_START = "bind ";
 
 	private final EventManager eventManager;
 
@@ -37,91 +43,62 @@ public class EventEndpoint extends Endpoint implements InitializingBean
 	{
 		logger.trace("onOpen");
 
-		session.getUserProperties().get(ORGANIZATION_PROPERTY);
-		// if (user == null || !UserRole.userHasOneOfRoles(user, UserRole.WEBSOCKET, UserRole.WEBSOCKET_AND_WEBSERVICE))
-		// {
-		// logger.warn("No user in session or user has not one of roles {{}, {}}, closing websocket",
-		// UserRole.WEBSOCKET.getValue(), UserRole.WEBSOCKET_AND_WEBSERVICE.getValue());
-		// try
-		// {
-		// session.close(new CloseReason(CloseCodes.VIOLATED_POLICY, user == null ? "No User" : "Forbidden"));
-		// }
-		// catch (IOException e)
-		// {
-		// logger.warn("Error while closing websocket", e);
-		// }
-		//
-		// return;
-		// }
+		Organization organization = getOrganization(session);
+		// TODO check role || !UserRole.userHasOneOfRoles(user, UserRole.WEBSOCKET, UserRole.WEBSOCKET_AND_WEBSERVICE)
+		if (organization == null)
+		{
+			logger.warn("No organization in session");
+			// TODO
+			// or organization has not one of roles {{}, {}}, closing websocket",
+			// UserRole.WEBSOCKET.getValue(), UserRole.WEBSOCKET_AND_WEBSERVICE.getValue());
+			try
+			{
+				session.close(new CloseReason(CloseCodes.VIOLATED_POLICY,
+						organization == null ? "No organization" : "Forbidden"));
+			}
+			catch (IOException e)
+			{
+				logger.warn("Error while closing websocket", e);
+			}
 
-		// EventHandler<E> handler = new EventHandler<E>()
-		// {
-		// @Override
-		// public void handleEvent(E event)
-		// {
-		// if (!eventFilter.test(session.getRequestParameterMap(), event))
-		// {
-		// logger.debug("{} event filtered", event.getClass().getSimpleName());
-		// return;
-		// }
-		//
-		// try
-		// {
-		// if (session.isOpen())
-		// {
-		// logger.debug("Sending {} to user {}", event.getClass().getSimpleName(),
-		// (user != null ? user.getSubjectDn() : "?"));
-		// session.getAsyncRemote().sendText(objectMapper.writeValueAsString(event));
-		// }
-		// else
-		// logger.warn("Session closed, can't send message");
-		// }
-		// catch (JsonProcessingException e)
-		// {
-		// logger.error("Error while converting object of type " + event.getClass().getName() + " to json", e);
-		// }
-		// }
-		// };
+			return;
+		}
 
-		// logger.info("Websocket connection for user {} opend, adding event handler",
-		// (user != null ? user.getSubjectDn() : "?"));
-		//
-		// eventHandlers.put(session, handler);
-		// eventManager.addEventHandler(user, handler);
+		// don't use lambda
+		session.addMessageHandler(new MessageHandler.Whole<String>()
+		{
+			@Override
+			public void onMessage(String message)
+			{
+				if (message != null && !message.isBlank() && message.startsWith(BIND_MESSAGE_START))
+					eventManager.bind(message.substring(BIND_MESSAGE_START.length()), session.getAsyncRemote());
+			}
+		});
+	}
+
+	private Organization getOrganization(Session session)
+	{
+		Object object = session.getUserProperties().get(ORGANIZATION_PROPERTY);
+		if (object != null && object instanceof Organization)
+			return (Organization) object;
+		else
+		{
+			logger.warn("User property {} not a {}", ORGANIZATION_PROPERTY, Organization.class.getName());
+			return null;
+		}
 	}
 
 	@Override
 	public void onClose(Session session, CloseReason closeReason)
 	{
 		logger.trace("onClose");
-
-		// User user = (User) session.getUserProperties().get(USER_PROPERTY);
-		// logger.warn("Websocket connection for user {} closed", (user != null ? user.getSubjectDn() : "?"));
-
-		// if (user != null)
-		// {
-		// EventHandler<E> handler = eventHandlers.remove(session);
-		// eventManager.removeEventHandler(user, handler);
-		// }
+		eventManager.close(session.getAsyncRemote());
 	}
 
 	@Override
 	public void onError(Session session, Throwable thr)
 	{
 		logger.trace("onError");
-
-		// User user = (User) session.getUserProperties().get(USER_PROPERTY);
-		//
-		// if (thr != null && thr instanceof SocketTimeoutException)
-		// logger.warn("Error in websocket connection for user " + (user != null ? user.getSubjectDn() : "?") + ": "
-		// + thr.getMessage());
-		// else
-		// logger.warn("Error in websocket connection for user " + (user != null ? user.getSubjectDn() : "?"), thr);
-		//
-		// if (user != null)
-		// {
-		// EventHandler<E> handler = eventHandlers.remove(session);
-		// eventManager.removeEventHandler(user, handler);
-		// }
+		eventManager.close(session.getAsyncRemote());
 	}
 }

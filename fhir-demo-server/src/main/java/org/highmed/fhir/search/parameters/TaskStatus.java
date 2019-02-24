@@ -2,8 +2,9 @@ package org.highmed.fhir.search.parameters;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
 
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 
 import org.highmed.fhir.search.parameters.basic.AbstractTokenParameter;
@@ -24,18 +25,11 @@ public class TaskStatus extends AbstractTokenParameter<Task>
 
 	public TaskStatus()
 	{
-		this(null);
-	}
-
-	public TaskStatus(org.hl7.fhir.r4.model.Task.TaskStatus status)
-	{
-		super(PARAMETER_NAME);
-
-		this.status = status;
+		super(Task.class, PARAMETER_NAME);
 	}
 
 	@Override
-	protected void configureSearchParameter(MultivaluedMap<String, String> queryParameters)
+	protected void configureSearchParameter(Map<String, List<String>> queryParameters)
 	{
 		super.configureSearchParameter(queryParameters);
 

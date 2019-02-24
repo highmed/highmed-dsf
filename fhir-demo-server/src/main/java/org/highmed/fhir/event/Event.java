@@ -7,7 +7,7 @@ public interface Event<R extends DomainResource>
 	/**
 	 * @return never <code>null</code>
 	 */
-	Class<R> getType();
+	Class<R> getResourceType();
 
 	/**
 	 * @return never <code>null</code>

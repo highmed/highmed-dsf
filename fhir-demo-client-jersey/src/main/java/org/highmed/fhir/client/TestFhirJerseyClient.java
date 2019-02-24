@@ -6,17 +6,11 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
-import java.util.Date;
 
 import javax.ws.rs.WebApplicationException;
 
-import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.Task;
-import org.hl7.fhir.r4.model.Task.TaskIntent;
 import org.hl7.fhir.r4.model.Task.TaskStatus;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -41,36 +35,36 @@ public class TestFhirJerseyClient
 		{
 			// Patient patient = new Patient();
 			// patient.setIdElement(new IdType("Patient", UUID.randomUUID().toString(), "2"));
-			// fhirJerseyClient.create(patient);
+			// Patient createdPatient = fhirJerseyClient.create(Patient.class, patient);
+			//
+			// createdPatient.setGender(AdministrativeGender.FEMALE);
+			// fhirJerseyClient.update(Patient.class, createdPatient);
 
-			// Patient patient = new Patient();
-			// patient.setIdElement(new IdType("d7b7e47d-9dc9-436c-abc6-b945bad80d19"));
-			// patient.setGender(AdministrativeGender.FEMALE);
-			// fhirJerseyClient.update(patient);
-
-			Organization organization = fhirJerseyClient.create(Organization.class,
-					new Organization().setName("Test Organization"));
-
-			ResearchStudy researchStudy = fhirJerseyClient.create(ResearchStudy.class,
-					new ResearchStudy().setDescription("Test Research Study").setSponsor(new Reference(organization)));
-
-			Task task = new Task();
-			task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/DataSharingTask");
-			task.setRequester(new Reference(organization.getIdElement()));
-			task.setDescription("Organization reference with version");
-			task.setAuthoredOn(new Date());
-			task.setStatus(TaskStatus.REQUESTED);
-			task.setIntent(TaskIntent.ORDER);
-			Extension ext = task.addExtension();
-			ext.setUrl("http://hl7.org/fhir/StructureDefinition/workflow-researchStudy");
-			Reference researchStudyReference = new Reference(researchStudy);
-			ext.setValue(researchStudyReference);
-
-			fhirJerseyClient.create(Task.class, task);
-
-			fhirJerseyClient.create(Task.class,
-					new Task().setRequester(new Reference(organization.getIdElement().toVersionless()))
-							.setDescription("Organization reference without version"));
+			//
+			// Organization organization = fhirJerseyClient.create(Organization.class,
+			// new Organization().setName("Test Organization"));
+			//
+			// ResearchStudy researchStudy = fhirJerseyClient.create(ResearchStudy.class,
+			// new ResearchStudy().setDescription("Test Research Study").setSponsor(new Reference(organization)));
+			//
+			// Task task = new Task();
+			// task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/DataSharingTask");
+			// task.setRequester(new Reference(organization.getIdElement()));
+			// task.setDescription("Organization reference with version");
+			// task.setAuthoredOn(new Date());
+			// task.setStatus(TaskStatus.REQUESTED);
+			// task.setIntent(TaskIntent.ORDER);
+			// Extension ext = task.addExtension();
+			// ext.setUrl("http://hl7.org/fhir/StructureDefinition/workflow-researchStudy");
+			// Reference researchStudyReference = new Reference(researchStudy);
+			// ext.setValue(researchStudyReference);
+			//
+			// fhirJerseyClient.create(Task.class, task);
+			//
+			// fhirJerseyClient.create(Task.class,
+			// new Task().setRequester(new Reference(organization.getIdElement().toVersionless()))
+			// .setDescription("Organization reference without version"));
+			//
 
 			// CapabilityStatement conformance = fhirJerseyClient.getConformance();
 			// System.out.println(fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
@@ -99,6 +93,21 @@ public class TestFhirJerseyClient
 			// StructureDefinition sd = fhirJerseyClient.generateSnapshot(diff.setSnapshot(null));
 			// String xml = fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(sd);
 			// System.out.println(xml);
+
+			// Subscription subscription = new Subscription();
+			// subscription.setStatus(SubscriptionStatus.ACTIVE);
+			// subscription.setReason("Businness Process Engine");
+			// subscription.setCriteria("Task?status=requested");
+			// SubscriptionChannelComponent channel = subscription.getChannel();
+			// channel.setType(SubscriptionChannelType.WEBSOCKET);
+			// channel.setPayload(Constants.CT_FHIR_JSON_NEW);
+			//
+			// fhirJerseyClient.create(Subscription.class, subscription);
+
+			Task createdTask = fhirJerseyClient.create(Task.class, new Task().setDescription("Status draft").setStatus(TaskStatus.DRAFT));
+
+			createdTask.setStatus(TaskStatus.REQUESTED);
+			fhirJerseyClient.update(Task.class, createdTask);
 
 		}
 		catch (WebApplicationException e)

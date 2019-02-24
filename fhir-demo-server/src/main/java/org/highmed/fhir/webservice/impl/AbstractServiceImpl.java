@@ -236,7 +236,7 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 		Integer count = parameterConverter.getFirstInt(queryParameters, "_count");
 		int effectiveCount = (count == null || count < 0) ? defaultPageCount : count;
 
-		SearchQuery query = dao.createSearchQuery(effectivePage, effectiveCount);
+		SearchQuery<R> query = dao.createSearchQuery(effectivePage, effectiveCount);
 		query.configureParameters(queryParameters);
 
 		PartialResult<R> result = exceptionHandler.handleSqlException(() -> dao.search(query));
@@ -329,10 +329,10 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 	@Override
 	public Response getValidateNew(String validate, UriInfo uri, HttpHeaders headers)
 	{
-		MultivaluedMap<String, String> queryParameters = uri.getQueryParameters();
-
-		String mode = queryParameters.getFirst("mode");
-		String profile = queryParameters.getFirst("profile");
+		// MultivaluedMap<String, String> queryParameters = uri.getQueryParameters();
+		//
+		// String mode = queryParameters.getFirst("mode");
+		// String profile = queryParameters.getFirst("profile");
 
 		// mode = create
 

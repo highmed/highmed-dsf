@@ -1,6 +1,9 @@
 package org.highmed.fhir.webservice.impl;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -8,7 +11,6 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
@@ -227,10 +229,11 @@ public class StructureDefinitionServiceImpl extends AbstractServiceImpl<Structur
 
 	private Response getSnapshot(String url, UriInfo uri, HttpHeaders headers)
 	{
-		SearchQuery query = snapshotDao.createSearchQuery(1, 1);
-		MultivaluedHashMap<String, String> searchParameters = new MultivaluedHashMap<>();
-		searchParameters.putSingle(StructureDefinitionUrl.PARAMETER_NAME, url);
-		searchParameters.putSingle(AbstractSearchParameter.SORT_PARAMETER, "-" + ResourceLastUpdated.PARAMETER_NAME);
+		SearchQuery<StructureDefinition> query = snapshotDao.createSearchQuery(1, 1);
+		Map<String, List<String>> searchParameters = new HashMap<>();
+		searchParameters.put(StructureDefinitionUrl.PARAMETER_NAME, Collections.singletonList(url));
+		searchParameters.put(AbstractSearchParameter.SORT_PARAMETER,
+				Collections.singletonList("-" + ResourceLastUpdated.PARAMETER_NAME));
 		query.configureParameters(searchParameters);
 
 		PartialResult<StructureDefinition> result = exceptionHandler

@@ -18,7 +18,7 @@ import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 
 @SearchParameterDefinition(name = ResourceLastUpdated.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Resource-lastUpdated", type = SearchParamType.DATE, documentation = "When the resource version last changed")
-public class ResourceLastUpdated extends AbstractDateTimeParameter<DomainResource>
+public class ResourceLastUpdated<R extends DomainResource> extends AbstractDateTimeParameter<R>
 {
 	public static final String PARAMETER_NAME = "_lastUpdated";
 
@@ -30,53 +30,9 @@ public class ResourceLastUpdated extends AbstractDateTimeParameter<DomainResourc
 	private final String jsonProperty;
 	private List<Object> values = new ArrayList<>();
 
-	public ResourceLastUpdated(String resourceColumn)
+	public ResourceLastUpdated(Class<R> resourceType, String resourceColumn)
 	{
-		super(PARAMETER_NAME);
-
-		jsonProperty = toJsonProperty(resourceColumn);
-	}
-
-	public ResourceLastUpdated(String resourceColumn, ZonedDateTime dateTime, DateTimeSearchType type)
-	{
-		super(PARAMETER_NAME, dateTime, type);
-
-		jsonProperty = toJsonProperty(resourceColumn);
-	}
-
-	public ResourceLastUpdated(String resourceColumn, ZonedDateTime dateTime1, DateTimeSearchType type1,
-			ZonedDateTime dateTime2, DateTimeSearchType type2)
-	{
-		super(PARAMETER_NAME, dateTime1, type1, dateTime2, type2);
-
-		jsonProperty = toJsonProperty(resourceColumn);
-	}
-
-	public ResourceLastUpdated(String resourceColumn, LocalDate date, DateTimeSearchType type)
-	{
-		super(PARAMETER_NAME, date, type);
-
-		jsonProperty = toJsonProperty(resourceColumn);
-	}
-
-	public ResourceLastUpdated(String resourceColumn, LocalDate date1, DateTimeSearchType type1, LocalDate date2,
-			DateTimeSearchType type2)
-	{
-		super(PARAMETER_NAME, date1, type1, date2, type2);
-
-		jsonProperty = toJsonProperty(resourceColumn);
-	}
-
-	public ResourceLastUpdated(String resourceColumn, int year)
-	{
-		super(PARAMETER_NAME, year);
-
-		jsonProperty = toJsonProperty(resourceColumn);
-	}
-
-	public ResourceLastUpdated(String resourceColumn, int year, int month)
-	{
-		super(PARAMETER_NAME, year, month);
+		super(resourceType, PARAMETER_NAME);
 
 		jsonProperty = toJsonProperty(resourceColumn);
 	}
@@ -133,7 +89,7 @@ public class ResourceLastUpdated extends AbstractDateTimeParameter<DomainResourc
 	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement)
 			throws SQLException
 	{
-		Object value = values.get(subqueryParameterIndex);
+		Object value = values.get(subqueryParameterIndex - 1);
 
 		if (value instanceof ZonedDateTime)
 			statement.setTimestamp(parameterIndex, Timestamp

@@ -1,6 +1,8 @@
 package org.highmed.fhir.search.parameters.basic;
 
-import javax.ws.rs.core.MultivaluedMap;
+import java.util.List;
+import java.util.Map;
+
 import javax.ws.rs.core.UriBuilder;
 
 import org.hl7.fhir.r4.model.DomainResource;
@@ -28,20 +30,15 @@ public abstract class AbstractTokenParameter<R extends DomainResource> extends A
 
 	protected TokenValueAndSearchType valueAndType;
 
-	public AbstractTokenParameter(String parameterName)
+	public AbstractTokenParameter(Class<R> resourceType, String parameterName)
 	{
-		super(parameterName);
-	}
-
-	public AbstractTokenParameter(String parameterName, String codeValue, String systemValue, TokenSearchType type)
-	{
-		super(parameterName);
+		super(resourceType, parameterName);
 	}
 
 	@Override
-	protected void configureSearchParameter(MultivaluedMap<String, String> queryParameters)
+	protected void configureSearchParameter(Map<String, List<String>> queryParameters)
 	{
-		String param = queryParameters.getFirst(parameterName);
+		String param = getFirst(queryParameters, parameterName);
 		if (param != null && !param.isEmpty())
 		{
 			if (param.indexOf('|') == -1)

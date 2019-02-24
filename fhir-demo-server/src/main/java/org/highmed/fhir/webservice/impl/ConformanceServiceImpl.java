@@ -74,7 +74,7 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 		capabilityStatement = createCapabilityStatement(serverBase, defaultPageCount);
 		this.parameterConverter = parameterConverter;
 	}
-	
+
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
@@ -140,8 +140,11 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 				"Generates a StructureDefinition instance with a snapshot, based on a differential in a specified StructureDefinition");
 		operations.put(StructureDefinition.class, Arrays.asList(snapshotOperation));
 
-		var standardSortableSearchParameters = Arrays.asList(createSearchParameter(ResourceId.class),
-				createSearchParameter(ResourceLastUpdated.class));
+		@SuppressWarnings("unchecked")
+		var standardSortableSearchParameters = Arrays.asList(
+				createSearchParameter((Class<? extends SearchParameter<? extends DomainResource>>) ResourceId.class),
+				createSearchParameter(
+						(Class<? extends SearchParameter<? extends DomainResource>>) ResourceLastUpdated.class));
 		var standardOperations = Arrays.asList(createValidateOperation());
 
 		for (Class<? extends DomainResource> resource : resources)
@@ -220,7 +223,7 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 	}
 
 	private CapabilityStatementRestResourceSearchParamComponent createSearchParameter(
-			Class<? extends SearchParameter<?>> parameter)
+			Class<? extends SearchParameter<? extends DomainResource>> parameter)
 	{
 		SearchParameterDefinition d = parameter.getAnnotation(SearchParameterDefinition.class);
 		return createSearchParameter(d.name(), d.definition(), d.type(), d.documentation());
