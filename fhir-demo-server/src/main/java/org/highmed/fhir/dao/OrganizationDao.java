@@ -40,11 +40,11 @@ public class OrganizationDao extends AbstractDomainResourceDao<Organization>
 		try (Connection connection = getDataSource().getConnection();
 				PreparedStatement statement = connection
 						.prepareStatement("SELECT " + getResourceColumn() + ", deleted FROM " + getResourceTable()
-								+ " WHERE organization->'extension' @> ? ORDER BY version LIMIT 1"))
+								+ " WHERE organization->'extension' @> ?::jsonb ORDER BY version LIMIT 1"))
 		{
 
-			String search = "'[{\"url\": \"http://highmed.org/fhir/StructureDefinition/certificate-thumbprint\", \"valueString\": \""
-					+ thumbprintHex + "\"}]'";
+			String search = "[{\"url\": \"http://highmed.org/fhir/StructureDefinition/certificate-thumbprint\", \"valueString\": \""
+					+ thumbprintHex + "\"}]";
 			statement.setString(1, search);
 
 			logger.trace("Executing query '{}'", statement);

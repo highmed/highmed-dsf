@@ -6,11 +6,18 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.Date;
 
 import javax.ws.rs.WebApplicationException;
 
-import org.hl7.fhir.r4.model.CapabilityStatement;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.ResearchStudy;
+import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.r4.model.Task.TaskIntent;
+import org.hl7.fhir.r4.model.Task.TaskStatus;
 
 import ca.uhn.fhir.context.FhirContext;
 import de.rwh.utils.crypto.CertificateHelper;
@@ -41,16 +48,32 @@ public class TestFhirJerseyClient
 			// patient.setGender(AdministrativeGender.FEMALE);
 			// fhirJerseyClient.update(patient);
 
-			// DomainResource organization = fhirJerseyClient.create(new Organization().setName("Test Organization"));
-			// fhirJerseyClient.create(new Task().setRequester(new
-			// Reference(organization.getIdElement().toVersionless()))
-			// .setDescription("Organization reference without version").setAuthoredOn(new Date())
-			// .setStatus(TaskStatus.REQUESTED));
-			// fhirJerseyClient.create(new Task().setRequester(new Reference(organization.getIdElement()))
-			// .setDescription("Organization reference with version"));
+			Organization organization = fhirJerseyClient.create(Organization.class,
+					new Organization().setName("Test Organization"));
 
-			CapabilityStatement conformance = fhirJerseyClient.getConformance();
-			System.out.println(fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
+			ResearchStudy researchStudy = fhirJerseyClient.create(ResearchStudy.class,
+					new ResearchStudy().setDescription("Test Research Study").setSponsor(new Reference(organization)));
+
+			Task task = new Task();
+			task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/DataSharingTask");
+			task.setRequester(new Reference(organization.getIdElement()));
+			task.setDescription("Organization reference with version");
+			task.setAuthoredOn(new Date());
+			task.setStatus(TaskStatus.REQUESTED);
+			task.setIntent(TaskIntent.ORDER);
+			Extension ext = task.addExtension();
+			ext.setUrl("http://hl7.org/fhir/StructureDefinition/workflow-researchStudy");
+			Reference researchStudyReference = new Reference(researchStudy);
+			ext.setValue(researchStudyReference);
+
+			fhirJerseyClient.create(Task.class, task);
+
+			fhirJerseyClient.create(Task.class,
+					new Task().setRequester(new Reference(organization.getIdElement().toVersionless()))
+							.setDescription("Organization reference without version"));
+
+			// CapabilityStatement conformance = fhirJerseyClient.getConformance();
+			// System.out.println(fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
 
 			// StructureDefinition sD = fhirContext.newXmlParser().parseResource(StructureDefinition.class,
 			// Files.newInputStream(Paths.get("../fhir-demo-server/src/test/resources/profiles/extension-workflow-researchstudy.xml")));

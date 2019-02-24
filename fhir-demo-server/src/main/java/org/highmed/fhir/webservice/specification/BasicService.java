@@ -22,11 +22,12 @@ public interface BasicService<R extends DomainResource> extends NeedsAuthenticat
 
 	Response search(UriInfo uri, HttpHeaders headers);
 
-	Response postValidateNew(String validate, Parameters parameters, UriInfo uri, HttpHeaders headers);
+	Response postValidateNew(String validatePath, Parameters parameters, UriInfo uri, HttpHeaders headers);
 
-	Response getValidateNew(String validate, UriInfo uri, HttpHeaders headers);
+	Response getValidateNew(String validatePath, UriInfo uri, HttpHeaders headers);
 
-	Response postValidateExisting(String validate, Parameters parameters, UriInfo uri, HttpHeaders headers);
+	Response postValidateExisting(String validatePath, String id, Parameters parameters, UriInfo uri,
+			HttpHeaders headers);
 
-	Response getValidateExisting(String validate, UriInfo uri, HttpHeaders headers);
+	Response getValidateExisting(String validatePath, String id, UriInfo uri, HttpHeaders headers);
 }

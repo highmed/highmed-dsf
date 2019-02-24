@@ -3,6 +3,7 @@ package org.highmed.fhir.search.parameters.basic;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 
+import org.highmed.fhir.search.parameters.basic.SortParameter.SortDirection;
 import org.hl7.fhir.r4.model.DomainResource;
 
 public abstract class AbstractCanonicalUrlParameter<R extends DomainResource> extends AbstractSearchParameter<R>
@@ -40,11 +41,13 @@ public abstract class AbstractCanonicalUrlParameter<R extends DomainResource> ex
 		super(parameterName);
 	}
 
-	public AbstractCanonicalUrlParameter(String parameterName, String url, String version, UriSearchType type)
+	public AbstractCanonicalUrlParameter(String parameterName, SortDirection sortDirection, String url, String version,
+			UriSearchType type)
 	{
-		super(parameterName);
+		super(parameterName, sortDirection);
 
-		valueAndType = new CanonicalUrlAndSearchType(url, version, type);
+		if (url != null && type != null)
+			valueAndType = new CanonicalUrlAndSearchType(url, version, type);
 	}
 
 	@Override
@@ -52,25 +55,11 @@ public abstract class AbstractCanonicalUrlParameter<R extends DomainResource> ex
 	{
 		String precise = queryParameters.getFirst(parameterName);
 		if (precise != null && !precise.isBlank())
-		{
-			String[] preciseSplit = splitAtPipe(precise);
-			if (preciseSplit.length == 1)
-				valueAndType = new CanonicalUrlAndSearchType(preciseSplit[0], null, UriSearchType.PRECISE);
-			else if (preciseSplit.length == 2)
-				valueAndType = new CanonicalUrlAndSearchType(preciseSplit[0], preciseSplit[1], UriSearchType.PRECISE);
-			return;
-		}
+			valueAndType = toValueAndType(precise, UriSearchType.PRECISE);
 
 		String below = queryParameters.getFirst(parameterName + UriSearchType.BELOW.sufix);
 		if (below != null && !below.isBlank())
-		{
-			String[] belowSplit = splitAtPipe(below);
-			if (belowSplit.length == 1)
-				valueAndType = new CanonicalUrlAndSearchType(belowSplit[0], null, UriSearchType.BELOW);
-			else if (belowSplit.length == 2)
-				valueAndType = new CanonicalUrlAndSearchType(belowSplit[0], belowSplit[1], UriSearchType.BELOW);
-			return;
-		}
+			valueAndType = toValueAndType(below, UriSearchType.BELOW);
 
 		// TODO
 		// String above = queryParameters.getFirst(parameterName + UriSearchType.ABOVE.sufix);
@@ -81,9 +70,18 @@ public abstract class AbstractCanonicalUrlParameter<R extends DomainResource> ex
 		// }
 	}
 
-	private String[] splitAtPipe(String value)
+	protected static CanonicalUrlAndSearchType toValueAndType(String parameter, UriSearchType type)
 	{
-		return value.split("[|]");
+		if (parameter != null && !parameter.isBlank())
+		{
+			String[] split = parameter.split("[|]");
+			if (split.length == 1)
+				return new CanonicalUrlAndSearchType(split[0], null, type);
+			else if (split.length == 2)
+				return new CanonicalUrlAndSearchType(split[0], split[1], type);
+		}
+
+		return null;
 	}
 
 	@Override

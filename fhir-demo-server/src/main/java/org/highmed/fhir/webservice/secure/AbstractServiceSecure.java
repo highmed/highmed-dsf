@@ -58,14 +58,15 @@ public class AbstractServiceSecure<R extends DomainResource, S extends BasicServ
 		return delegate.getValidateNew(validate, uri, headers);
 	}
 
-	public Response postValidateExisting(String validate, Parameters parameters, UriInfo uri, HttpHeaders headers)
+	public Response postValidateExisting(String validate, String id, Parameters parameters, UriInfo uri,
+			HttpHeaders headers)
 	{
-		return delegate.postValidateExisting(validate, parameters, uri, headers);
+		return delegate.postValidateExisting(validate, id, parameters, uri, headers);
 	}
 
 	@Override
-	public Response getValidateExisting(String validate, UriInfo uri, HttpHeaders headers)
+	public Response getValidateExisting(String validate, String id, UriInfo uri, HttpHeaders headers)
 	{
-		return delegate.getValidateExisting(validate, uri, headers);
+		return delegate.getValidateExisting(validate, id, uri, headers);
 	}
 }

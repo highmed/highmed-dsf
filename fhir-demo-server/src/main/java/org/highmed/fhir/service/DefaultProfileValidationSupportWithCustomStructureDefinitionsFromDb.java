@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.highmed.fhir.dao.StructureDefinitionDao;
 import org.highmed.fhir.dao.StructureDefinitionSnapshotDao;
@@ -55,14 +56,14 @@ public class DefaultProfileValidationSupportWithCustomStructureDefinitionsFromDb
 	@Override
 	public StructureDefinition fetchStructureDefinition(FhirContext theContext, String theUrl)
 	{
-		StructureDefinition structureDefinition = null;
-		structureDefinition = throwRuntimeException(() -> structureDefinitionDao.readByUrl(theUrl));
-		if (structureDefinition != null)
-			return structureDefinition;
-
+		Optional<StructureDefinition> structureDefinition = null;
 		structureDefinition = throwRuntimeException(() -> structureDefinitionSnapshotDao.readByUrl(theUrl));
-		if (structureDefinition != null)
-			return structureDefinition;
+		if (structureDefinition.isPresent())
+			return structureDefinition.get();
+
+		structureDefinition = throwRuntimeException(() -> structureDefinitionDao.readByUrl(theUrl));
+		if (structureDefinition.isPresent())
+			return structureDefinition.get();
 
 		return super.fetchStructureDefinition(theContext, theUrl);
 	}

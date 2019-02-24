@@ -86,7 +86,7 @@ public class FhirJerseyClient extends AbstractJerseyClient
 				new TaskJsonFhirAdapter(fhirContext), new TaskXmlFhirAdapter(fhirContext));
 	}
 
-	public DomainResource create(DomainResource resource)
+	public <R extends DomainResource> R create(Class<R> resourceClass, R resource)
 	{
 		Response response = getResource().path(resource.getClass().getAnnotation(ResourceDef.class).name()).request()
 				.accept(Constants.CT_FHIR_JSON_NEW).post(Entity.entity(resource, Constants.CT_FHIR_JSON_NEW));
@@ -98,12 +98,12 @@ public class FhirJerseyClient extends AbstractJerseyClient
 		logger.debug("HTTP header Last-Modified: {}", response.getHeaderString(HttpHeaders.LAST_MODIFIED));
 
 		if (Status.CREATED.getStatusCode() == response.getStatus())
-			return response.readEntity(resource.getClass());
+			return response.readEntity(resourceClass);
 		else
 			throw new WebApplicationException(response);
 	}
 
-	public DomainResource update(DomainResource resource)
+	public <R extends DomainResource> R update(Class<R> resourceClass, R resource)
 	{
 		Response response = getResource().path(resource.getClass().getAnnotation(ResourceDef.class).name())
 				.path(resource.getIdElement().getIdPart()).request().accept(Constants.CT_FHIR_JSON_NEW)
@@ -115,7 +115,7 @@ public class FhirJerseyClient extends AbstractJerseyClient
 		logger.debug("HTTP header Last-Modified: {}", response.getHeaderString(HttpHeaders.LAST_MODIFIED));
 
 		if (Status.OK.getStatusCode() == response.getStatus())
-			return response.readEntity(resource.getClass());
+			return response.readEntity(resourceClass);
 		else
 			throw new WebApplicationException(response);
 	}

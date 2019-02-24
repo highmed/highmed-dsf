@@ -229,12 +229,12 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 				{
 					if (result.getBoolean(2))
 					{
-						logger.debug("{} with IdPart {} found, but marked as deleted.", resourceTypeName, uuid);
+						logger.debug("{} with IdPart {} found, but marked as deleted", resourceTypeName, uuid);
 						throw new ResourceDeletedException(new IdType(resourceTypeName, uuid.toString()));
 					}
 					else
 					{
-						logger.debug("{} with IdPart {} found.", resourceTypeName, uuid);
+						logger.debug("{} with IdPart {} found", resourceTypeName, uuid);
 						return Optional.of(getResource(result, 1));
 					}
 				}
@@ -261,12 +261,12 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 			{
 				if (result.next())
 				{
-					logger.debug("{} with IdPart {} and Version {} found.", resourceTypeName, uuid, version);
+					logger.debug("{} with IdPart {} and Version {} found", resourceTypeName, uuid, version);
 					return Optional.of(getResource(result, 1));
 				}
 				else
 				{
-					logger.debug("{} with IdPart {} and Version {} not found.", resourceTypeName, uuid, version);
+					logger.debug("{} with IdPart {} and Version {} not found", resourceTypeName, uuid, version);
 					return Optional.empty();
 				}
 			}
@@ -296,7 +296,7 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 
 				connection.commit();
 
-				logger.debug("{} with IdPart {} updated, new version {}.", resourceTypeName,
+				logger.debug("{} with IdPart {} updated, new version {}", resourceTypeName,
 						updated.getIdElement().getIdPart(), newVersion);
 				return updated;
 			}
@@ -386,13 +386,13 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 
 					logger.debug(
 							"Latest version for {} with IdPart {} is {}"
-									+ (deleted ? ", resource marked as deleted." : "."),
+									+ (deleted ? ", resource marked as deleted" : ""),
 							resourceTypeName, resource.getIdElement().getIdPart(), version);
 					return new LatestVersion(version, deleted);
 				}
 				else
 				{
-					logger.debug("{} with IdPart {} not found.", resourceTypeName, resource.getIdElement().getIdPart());
+					logger.debug("{} with IdPart {} not found", resourceTypeName, resource.getIdElement().getIdPart());
 					throw new ResourceNotFoundException(resource.getId());
 				}
 			}
@@ -422,7 +422,7 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 			logger.trace("Executing query '{}'", statement);
 			statement.execute();
 
-			logger.debug("{} with ID {} marked as deleted.", resourceTypeName, uuid);
+			logger.debug("{} with ID {} marked as deleted", resourceTypeName, uuid);
 		}
 	}
 

@@ -53,8 +53,8 @@ public class StructureDefinitionServiceJaxrs extends
 	@POST
 	@Path("/{id}/{snapshot : [$]snapshot(/)?}")
 	@Override
-	public Response postSnapshotExisting(@PathParam("snapshot") String snapshotPath, String id, @Context UriInfo uri,
-			@Context HttpHeaders headers)
+	public Response postSnapshotExisting(@PathParam("snapshot") String snapshotPath, @PathParam("id") String id,
+			@Context UriInfo uri, @Context HttpHeaders headers)
 	{
 		logger.trace("POST {}", uri.getRequestUri().toString());
 

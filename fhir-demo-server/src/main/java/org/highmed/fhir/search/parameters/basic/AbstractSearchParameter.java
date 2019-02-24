@@ -16,6 +16,12 @@ public abstract class AbstractSearchParameter<R extends DomainResource> implemen
 
 	private SortDirection sortDirection;
 
+	public AbstractSearchParameter(String parameterName, SortDirection sortDirection)
+	{
+		this.parameterName = parameterName;
+		this.sortDirection = sortDirection;
+	}
+
 	public AbstractSearchParameter(String parameterName)
 	{
 		this.parameterName = parameterName;

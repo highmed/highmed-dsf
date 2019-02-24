@@ -121,22 +121,22 @@ public class AbstractServiceJaxrs<R extends DomainResource, S extends BasicServi
 	@POST
 	@Path("/{id}/{validate : [$]validate(/)?}")
 	@Override
-	public Response postValidateExisting(@PathParam("validate") String validate, Parameters parameters,
-			@Context UriInfo uri, @Context HttpHeaders headers)
+	public Response postValidateExisting(@PathParam("validate") String validatePath, @PathParam("id") String id,
+			Parameters parameters, @Context UriInfo uri, @Context HttpHeaders headers)
 	{
 		logger.trace("POST {}", uri.getRequestUri().toString());
 
-		return delegate.postValidateExisting(validate, parameters, uri, headers);
+		return delegate.postValidateExisting(validatePath, id, parameters, uri, headers);
 	}
 
 	@GET
 	@Path("/{id}/{validate : [$]validate(/)?}")
 	@Override
-	public Response getValidateExisting(@PathParam("validate") String validate, @Context UriInfo uri,
-			@Context HttpHeaders headers)
+	public Response getValidateExisting(@PathParam("validate") String validatePath, @PathParam("id") String id,
+			@Context UriInfo uri, @Context HttpHeaders headers)
 	{
 		logger.trace("GET {}", uri.getRequestUri().toString());
 
-		return delegate.getValidateExisting(validate, uri, headers);
+		return delegate.getValidateExisting(validatePath, id, uri, headers);
 	}
 }
