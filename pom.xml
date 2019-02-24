@@ -19,7 +19,8 @@
 		<module>fhir-demo-server</module>
 		<module>fhir-demo-server-jetty</module>
 		<module>fhir-demo-client</module>
-		<module>fhir-demo-client-jersey</module>
+		<module>fhir-demo-webservice-client</module>
+		<module>fhir-demo-websocket-client</module>
 		<module>fhir-demo-cert-generator</module>
 	</modules>
 
