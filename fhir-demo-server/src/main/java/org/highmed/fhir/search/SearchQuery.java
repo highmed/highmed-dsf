@@ -186,7 +186,9 @@ public class SearchQuery implements DbSearchQuery
 		Objects.requireNonNull(bundleUri, "bundleUri");
 
 		searchParameters.stream().filter(SearchParameter::isDefined).forEach(p -> p.modifyBundleUri(bundleUri));
-		bundleUri.replaceQueryParam(AbstractSearchParameter.SORT_PARAMETER, sortParameter());
+
+		if (!sortParameters.isEmpty())
+			bundleUri.replaceQueryParam(AbstractSearchParameter.SORT_PARAMETER, sortParameter());
 
 		return bundleUri;
 	}

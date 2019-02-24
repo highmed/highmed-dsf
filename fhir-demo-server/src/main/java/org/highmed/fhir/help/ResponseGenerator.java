@@ -75,7 +75,8 @@ public class ResponseGenerator
 		return new BundleEntryComponent().setResource(resource).setFullUrl(toFullId(resource.getId()));
 	}
 
-	public Bundle createSearchSet(PartialResult<? extends DomainResource> result, UriBuilder bundleUri, String format)
+	public Bundle createSearchSet(PartialResult<? extends DomainResource> result, UriBuilder bundleUri, String format,
+			String pretty)
 	{
 		Bundle bundle = new Bundle();
 		bundle.setId(UUID.randomUUID().toString());
@@ -87,6 +88,8 @@ public class ResponseGenerator
 
 		if (format != null)
 			bundleUri = bundleUri.replaceQueryParam("_format", format);
+		if (pretty != null)
+			bundleUri = bundleUri.replaceQueryParam("_pretty", pretty);
 
 		if (result.getPageAndCount().getCount() > 0)
 		{

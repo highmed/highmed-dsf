@@ -18,7 +18,6 @@ import javax.ws.rs.core.UriInfo;
 import org.highmed.fhir.dao.AbstractDomainResourceDao;
 import org.highmed.fhir.event.EventGenerator;
 import org.highmed.fhir.event.EventManager;
-import org.highmed.fhir.function.SupplierWithSqlException;
 import org.highmed.fhir.help.ExceptionHandler;
 import org.highmed.fhir.help.ParameterConverter;
 import org.highmed.fhir.help.ResponseGenerator;
@@ -26,6 +25,7 @@ import org.highmed.fhir.search.PartialResult;
 import org.highmed.fhir.search.SearchQuery;
 import org.highmed.fhir.service.ResourceValidator;
 import org.highmed.fhir.webservice.specification.BasicService;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
@@ -94,7 +94,9 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 		URI location = uri.getAbsolutePathBuilder().path("/{id}/_history/{vid}")
 				.build(createdResource.getIdElement().getIdPart(), createdResource.getIdElement().getVersionIdPart());
 
-		return responseGenerator.response(Status.CREATED, createdResource, null).location(location).build();
+		return responseGenerator
+				.response(Status.CREATED, createdResource, parameterConverter.getMediaType(uri, headers))
+				.location(location).build();
 	}
 
 	/**
@@ -120,22 +122,28 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 		Optional<R> read = exceptionHandler.handleSqlAndResourceDeletedException(resourceTypeName,
 				() -> dao.read(parameterConverter.toUuid(resourceTypeName, id)));
 
-		return read.map(d -> responseGenerator.response(Status.OK, d, parameterConverter.getMediaType(uri, headers)))
-				.orElse(Response.status(Status.NOT_FOUND)).build();
+		if (read.isPresent())
+		{
+			return responseGenerator.response(Status.OK, read.get(), parameterConverter.getMediaType(uri, headers))
+					.build();
+		}
+		else
+			return Response.status(Status.NOT_FOUND).build(); // TODO return OperationOutcome
 	}
 
 	@Override
 	public Response vread(String id, long version, UriInfo uri, HttpHeaders headers)
 	{
-		Optional<R> read = exceptionHandler.handleSqlException(vRead(id, version));
+		Optional<R> read = exceptionHandler
+				.handleSqlException(() -> dao.readVersion(parameterConverter.toUuid(resourceTypeName, id), version));
 
-		return read.map(d -> responseGenerator.response(Status.OK, d, parameterConverter.getMediaType(uri, headers)))
-				.orElse(Response.status(Status.NOT_FOUND)).build();
-	}
-
-	private SupplierWithSqlException<Optional<R>> vRead(String id, long version)
-	{
-		return () -> dao.readVersion(parameterConverter.toUuid(resourceTypeName, id), version);
+		if (read.isPresent())
+		{
+			return responseGenerator.response(Status.OK, read.get(), parameterConverter.getMediaType(uri, headers))
+					.build();
+		}
+		else
+			return Response.status(Status.NOT_FOUND).build(); // TODO return OperationOutcome
 	}
 
 	@Override
@@ -158,7 +166,8 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 		if (postUpdate != null)
 			postUpdate.accept(updatedResource);
 
-		return responseGenerator.response(Status.OK, updatedResource, null).build();
+		return responseGenerator.response(Status.OK, updatedResource, parameterConverter.getMediaType(uri, headers))
+				.build();
 	}
 
 	/**
@@ -189,7 +198,7 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 
 		afterDelete.accept(id);
 
-		return responseGenerator.response(Status.OK, null, null).build();
+		return Response.ok().build(); // TODO return OperationOutcome
 	}
 
 	/**
@@ -216,7 +225,8 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 
 		Integer count = parameterConverter.getFirstInt(queryParameters, "_count");
 		Integer page = parameterConverter.getFirstInt(queryParameters, "page");
-		String format = queryParameters.getFirst("format");
+		String format = queryParameters.getFirst("_format");
+		String pretty = queryParameters.getFirst("_pretty");
 
 		int effectivePage = page == null ? 1 : page;
 		int effectiveCount = (count == null || count < 0) ? defaultPageCount : count;
@@ -229,8 +239,9 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 
 		UriBuilder bundleUri = query.configureBundleUri(uri.getAbsolutePathBuilder());
 
-		return responseGenerator.response(Status.OK, responseGenerator.createSearchSet(result, bundleUri, format),
-				parameterConverter.getMediaType(uri, headers)).build();
+		Bundle searchSet = responseGenerator.createSearchSet(result, bundleUri, format, pretty);
+
+		return responseGenerator.response(Status.OK, searchSet, parameterConverter.getMediaType(uri, headers)).build();
 	}
 
 	private Optional<Resource> getResource(Parameters parameters, String parameterName)
