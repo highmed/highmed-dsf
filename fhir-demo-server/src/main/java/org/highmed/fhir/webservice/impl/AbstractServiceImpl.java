@@ -7,10 +7,8 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -82,7 +80,7 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 	}
 
 	@Override
-	public Response create(R resource, @Context UriInfo uri)
+	public Response create(R resource, UriInfo uri, HttpHeaders headers)
 	{
 		Consumer<R> postCreate = preCreate(resource);
 
@@ -117,22 +115,21 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 	}
 
 	@Override
-	public Response read(@PathParam("id") String id, @QueryParam("_format") String format, @Context UriInfo uri)
+	public Response read(String id, UriInfo uri, HttpHeaders headers)
 	{
 		Optional<R> read = exceptionHandler.handleSqlAndResourceDeletedException(resourceTypeName,
 				() -> dao.read(parameterConverter.toUuid(resourceTypeName, id)));
 
-		return read.map(d -> responseGenerator.response(Status.OK, d, parameterConverter.toSpecialMimeType(format)))
+		return read.map(d -> responseGenerator.response(Status.OK, d, parameterConverter.getMediaType(uri, headers)))
 				.orElse(Response.status(Status.NOT_FOUND)).build();
 	}
 
 	@Override
-	public Response vread(@PathParam("id") String id, @PathParam("vid") long version,
-			@QueryParam("_format") String format, @Context UriInfo uri)
+	public Response vread(String id, long version, UriInfo uri, HttpHeaders headers)
 	{
 		Optional<R> read = exceptionHandler.handleSqlException(vRead(id, version));
 
-		return read.map(d -> responseGenerator.response(Status.OK, d, parameterConverter.toSpecialMimeType(format)))
+		return read.map(d -> responseGenerator.response(Status.OK, d, parameterConverter.getMediaType(uri, headers)))
 				.orElse(Response.status(Status.NOT_FOUND)).build();
 	}
 
@@ -142,7 +139,7 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 	}
 
 	@Override
-	public Response update(@PathParam("id") String id, R resource, @Context UriInfo uri)
+	public Response update(String id, R resource, UriInfo uri, HttpHeaders headers)
 	{
 		IdType resourceId = resource.getIdElement();
 
@@ -182,7 +179,7 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 	}
 
 	@Override
-	public Response delete(@PathParam("id") String id, @Context UriInfo uri)
+	public Response delete(String id, UriInfo uri, HttpHeaders headers)
 	{
 		Consumer<String> afterDelete = beforeDelete(id);
 
@@ -213,7 +210,7 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 	}
 
 	@Override
-	public Response search(@Context UriInfo uri)
+	public Response search(UriInfo uri, HttpHeaders headers)
 	{
 		MultivaluedMap<String, String> queryParameters = uri.getQueryParameters();
 
@@ -233,7 +230,7 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 		UriBuilder bundleUri = query.configureBundleUri(uri.getAbsolutePathBuilder());
 
 		return responseGenerator.response(Status.OK, responseGenerator.createSearchSet(result, bundleUri, format),
-				parameterConverter.toSpecialMimeType(format)).build();
+				parameterConverter.getMediaType(uri, headers)).build();
 	}
 
 	private Optional<Resource> getResource(Parameters parameters, String parameterName)
@@ -253,7 +250,7 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 	}
 
 	@Override
-	public Response postValidateNew(@PathParam("validate") String validate, Parameters parameters, @Context UriInfo uri)
+	public Response postValidateNew(String validate, Parameters parameters, UriInfo uri, HttpHeaders headers)
 	{
 		Optional<Resource> resource = getResource(parameters, "resource");
 		if (resource.isEmpty())
@@ -277,15 +274,15 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 	}
 
 	@Override
-	public Response getValidateNew(String validate, String mode, String profile, String format, UriInfo uri)
+	public Response getValidateNew(String validate, UriInfo uri, HttpHeaders headers)
 	{
+		// String mode, String profile from uri
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Response postValidateExisting(@PathParam("validate") String validate, Parameters parameters,
-			@Context UriInfo uri)
+	public Response postValidateExisting(String validate, Parameters parameters, UriInfo uri, HttpHeaders headers)
 	{
 		if (getResource(parameters, "resource").isPresent())
 			return Response.status(Status.BAD_REQUEST)
@@ -303,8 +300,9 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 	}
 
 	@Override
-	public Response getValidateExisting(String validate, String mode, String profile, String format, UriInfo uri)
+	public Response getValidateExisting(String validate, UriInfo uri, HttpHeaders headers)
 	{
+		// String mode, String profile from uri
 		// TODO Auto-generated method stub
 		return null;
 	}

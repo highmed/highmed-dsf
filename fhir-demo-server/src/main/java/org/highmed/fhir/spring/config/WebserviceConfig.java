@@ -94,8 +94,8 @@ public class WebserviceConfig
 	@Bean
 	public ConformanceService conformanceService()
 	{
-		return new ConformanceServiceJaxrs(
-				new ConformanceServiceSecure(new ConformanceServiceImpl(serverBase, defaultPageCount)));
+		return new ConformanceServiceJaxrs(new ConformanceServiceSecure(
+				new ConformanceServiceImpl(serverBase, defaultPageCount, helperConfig.parameterConverter())));
 	}
 
 	private String resourceTypeName(Class<? extends DomainResource> r)

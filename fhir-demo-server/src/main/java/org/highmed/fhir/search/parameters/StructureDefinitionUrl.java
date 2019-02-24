@@ -20,17 +20,19 @@ public class StructureDefinitionUrl extends AbstractCanonicalUrlParameter<Struct
 
 	public StructureDefinitionUrl()
 	{
-		this(null, null, null);
+		this("structure_definition");
+	}
+
+	public StructureDefinitionUrl(String resourceColumn)
+	{
+		super(PARAMETER_NAME);
+
+		this.resourceColumn = resourceColumn;
 	}
 
 	public StructureDefinitionUrl(String url, String version, UriSearchType type)
 	{
 		this("structure_definition", url, version, type);
-	}
-
-	public StructureDefinitionUrl(String resourceColumn)
-	{
-		this(resourceColumn, null, null, null);
 	}
 
 	public StructureDefinitionUrl(String resourceColumn, String url, String version, UriSearchType type)

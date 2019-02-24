@@ -4,8 +4,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
@@ -31,44 +31,44 @@ public class StructureDefinitionServiceJaxrs extends
 	@POST
 	@Path("/{snapshot : [$]snapshot(/)?}")
 	@Override
-	public Response postSnapshotNew(@PathParam("snapshot") String snapshotPath, @QueryParam("_format") String format,
-			Parameters parameters, @Context UriInfo uri)
+	public Response postSnapshotNew(@PathParam("snapshot") String snapshotPath, Parameters parameters,
+			@Context UriInfo uri, @Context HttpHeaders headers)
 	{
 		logger.trace("POST {}", uri.getRequestUri().toString());
 
-		return delegate.postSnapshotNew(snapshotPath, format, parameters, uri);
+		return delegate.postSnapshotNew(snapshotPath, parameters, uri, headers);
 	}
 
 	@GET
 	@Path("/{snapshot : [$]snapshot(/)?}")
 	@Override
-	public Response getSnapshotNew(@PathParam("snapshot") String snapshotPath, @PathParam("url") String url,
-			@PathParam("_format") String format, @Context UriInfo uri)
+	public Response getSnapshotNew(@PathParam("snapshot") String snapshotPath, @Context UriInfo uri,
+			@Context HttpHeaders headers)
 	{
 		logger.trace("GET {}", uri.getRequestUri().toString());
 
-		return delegate.getSnapshotNew(snapshotPath, url, format, uri);
+		return delegate.getSnapshotNew(snapshotPath, uri, headers);
 	}
 
 	@POST
 	@Path("/{id}/{snapshot : [$]snapshot(/)?}")
 	@Override
-	public Response postSnapshotExisting(@PathParam("snapshot") String snapshotPath, String id,
-			@QueryParam("_format") String format, @Context UriInfo uri)
+	public Response postSnapshotExisting(@PathParam("snapshot") String snapshotPath, String id, @Context UriInfo uri,
+			@Context HttpHeaders headers)
 	{
 		logger.trace("POST {}", uri.getRequestUri().toString());
 
-		return delegate.postSnapshotExisting(snapshotPath, id, format, uri);
+		return delegate.postSnapshotExisting(snapshotPath, id, uri, headers);
 	}
 
 	@GET
 	@Path("/{id}/{snapshot : [$]snapshot(/)?}")
 	@Override
 	public Response getSnapshotExisting(@PathParam("snapshot") String snapshotPath, @PathParam("id") String id,
-			@QueryParam("_format") String format, @Context UriInfo uri)
+			@Context UriInfo uri, @Context HttpHeaders headers)
 	{
 		logger.trace("GET {}", uri.getRequestUri().toString());
 
-		return delegate.getSnapshotExisting(snapshotPath, id, format, uri);
+		return delegate.getSnapshotExisting(snapshotPath, id, uri, headers);
 	}
 }

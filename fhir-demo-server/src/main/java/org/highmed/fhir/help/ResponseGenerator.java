@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
@@ -39,15 +40,15 @@ public class ResponseGenerator
 		return outcome;
 	}
 
-	public ResponseBuilder response(Status status, Resource resource, String mimeType)
+	public ResponseBuilder response(Status status, Resource resource, MediaType mediaType)
 	{
 		Objects.requireNonNull(status, "status");
 		Objects.requireNonNull(resource, "resource");
 
 		ResponseBuilder b = Response.status(status).entity(resource);
 
-		if (mimeType != null)
-			b = b.type(mimeType);
+		if (mediaType != null)
+			b = b.type(mediaType);
 
 		if (resource.getMeta() != null)
 		{

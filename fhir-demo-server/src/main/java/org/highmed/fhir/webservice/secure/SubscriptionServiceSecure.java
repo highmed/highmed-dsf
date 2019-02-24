@@ -1,5 +1,6 @@
 package org.highmed.fhir.webservice.secure;
 
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
@@ -13,25 +14,25 @@ public class SubscriptionServiceSecure extends AbstractServiceSecure<Subscriptio
 	{
 		super(delegate);
 	}
-	
+
 	@Override
-	public Response create(Subscription resource, UriInfo uri)
+	public Response create(Subscription resource, UriInfo uri, HttpHeaders headers)
 	{
-		//check subscription.channel.payload null or one of the supported mimetypes
-		//check subscription.channel.type = websocket
-		//check subscription.criteria is implemented as search query
-		//check if subscription.channel.type = websocket, Task unique on subscription.criteria
-		
+		// check subscription.channel.payload null or one of the supported mimetypes
+		// check subscription.channel.type = websocket
+		// check subscription.criteria is implemented as search query
+		// check if subscription.channel.type = websocket, Task unique on subscription.criteria
+
 		// TODO Auto-generated method stub
-		return super.create(resource, uri);
+		return super.create(resource, uri, headers);
 	}
-	
+
 	@Override
-	public Response update(String id, Subscription resource, UriInfo uri)
+	public Response update(String id, Subscription resource, UriInfo uri, HttpHeaders headers)
 	{
-		//see create
-		
+		// see create
+
 		// TODO Auto-generated method stub
-		return super.update(id, resource, uri);
+		return super.update(id, resource, uri, headers);
 	}
 }

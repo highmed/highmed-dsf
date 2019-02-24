@@ -1,5 +1,6 @@
 package org.highmed.fhir.webservice.specification;
 
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
@@ -9,23 +10,23 @@ import org.hl7.fhir.r4.model.Parameters;
 
 public interface BasicService<R extends DomainResource> extends NeedsAuthentication
 {
-	Response create(R resource, UriInfo uri);
+	Response create(R resource, UriInfo uri, HttpHeaders headers);
 
-	Response read(String id, String format, UriInfo uri);
+	Response read(String id, UriInfo uri, HttpHeaders headers);
 
-	Response vread(String id, long version, String format, UriInfo uri);
+	Response vread(String id, long version, UriInfo uri, HttpHeaders headers);
 
-	Response update(String id, R resource, UriInfo uri);
+	Response update(String id, R resource, UriInfo uri, HttpHeaders headers);
 
-	Response delete(String id, UriInfo uri);
+	Response delete(String id, UriInfo uri, HttpHeaders headers);
 
-	Response search(UriInfo uri);
+	Response search(UriInfo uri, HttpHeaders headers);
 
-	Response postValidateNew(String validate, Parameters parameters, UriInfo uri);
+	Response postValidateNew(String validate, Parameters parameters, UriInfo uri, HttpHeaders headers);
 
-	Response getValidateNew(String validate, String mode, String profile, String format, UriInfo uri);
+	Response getValidateNew(String validate, UriInfo uri, HttpHeaders headers);
 
-	Response postValidateExisting(String validate, Parameters parameters, UriInfo uri);
+	Response postValidateExisting(String validate, Parameters parameters, UriInfo uri, HttpHeaders headers);
 
-	Response getValidateExisting(String validate, String mode, String profile, String format, UriInfo uri);
+	Response getValidateExisting(String validate, UriInfo uri, HttpHeaders headers);
 }

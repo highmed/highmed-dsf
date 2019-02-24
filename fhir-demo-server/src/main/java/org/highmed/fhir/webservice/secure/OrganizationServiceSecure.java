@@ -1,5 +1,6 @@
 package org.highmed.fhir.webservice.secure;
 
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
@@ -15,7 +16,7 @@ public class OrganizationServiceSecure extends AbstractServiceSecure<Organizatio
 	}
 
 	@Override
-	public Response create(Organization resource, UriInfo uri)
+	public Response create(Organization resource, UriInfo uri, HttpHeaders headers)
 	{
 		// check organization not existing if contains identifier with identifier.system
 		// http://highmed.org/fhir/NamingSystem/certificate-thumbprint-hexwith
@@ -23,15 +24,15 @@ public class OrganizationServiceSecure extends AbstractServiceSecure<Organizatio
 		// no two organizations can have the same certificate thumb-print
 
 		// TODO Auto-generated method stub
-		return super.create(resource, uri);
+		return super.create(resource, uri, headers);
 	}
 
 	@Override
-	public Response update(String id, Organization resource, UriInfo uri)
+	public Response update(String id, Organization resource, UriInfo uri, HttpHeaders headers)
 	{
 		// see create, no two organizations can have the same certificate thumb-print
 
 		// TODO Auto-generated method stub
-		return super.update(id, resource, uri);
+		return super.update(id, resource, uri, headers);
 	}
 }

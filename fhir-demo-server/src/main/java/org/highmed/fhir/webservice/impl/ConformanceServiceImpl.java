@@ -5,11 +5,11 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
@@ -57,25 +57,34 @@ import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.UrlType;
 import org.hl7.fhir.r4.model.codesystems.RestfulSecurityService;
+import org.springframework.beans.factory.InitializingBean;
 
 import com.google.common.collect.Streams;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.rest.api.Constants;
 
-public class ConformanceServiceImpl implements ConformanceService
+public class ConformanceServiceImpl implements ConformanceService, InitializingBean
 {
 	private final CapabilityStatement capabilityStatement;
+	private final ParameterConverter parameterConverter;
 
-	public ConformanceServiceImpl(String serverBase, int defaultPageCount)
+	public ConformanceServiceImpl(String serverBase, int defaultPageCount, ParameterConverter parameterConverter)
 	{
 		capabilityStatement = createCapabilityStatement(serverBase, defaultPageCount);
+		this.parameterConverter = parameterConverter;
+	}
+	
+	@Override
+	public void afterPropertiesSet() throws Exception
+	{
+		Objects.requireNonNull(parameterConverter, "parameterConverter");
 	}
 
 	@Override
-	public Response getMetadata(@QueryParam("mode") String mode, @Context UriInfo uri)
+	public Response getMetadata(String mode, UriInfo uri, HttpHeaders headers)
 	{
-		return Response.ok(capabilityStatement).build();
+		return Response.ok(capabilityStatement, parameterConverter.getMediaType(uri, headers)).build();
 	}
 
 	private CapabilityStatement createCapabilityStatement(String serverBase, int defaultPageCount)

@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -180,7 +181,7 @@ public class StructureDefinitionServiceImpl extends AbstractServiceImpl<Structur
 	}
 
 	@Override
-	public Response postSnapshotNew(String snapshotPath, String format, Parameters parameters, UriInfo uri)
+	public Response postSnapshotNew(String snapshotPath, Parameters parameters, UriInfo uri, HttpHeaders headers)
 	{
 		Type urlType = parameters.getParameter("url");
 		Optional<ParametersParameterComponent> resource = parameters.getParameter().stream()
@@ -196,7 +197,7 @@ public class StructureDefinitionServiceImpl extends AbstractServiceImpl<Structur
 
 			logger.trace("Parameters with url {}", url.getValue());
 
-			return getSnapshot(format, url.getValue());
+			return getSnapshot(url.getValue(), uri, headers);
 		}
 		else if (urlType == null && resource.isPresent() && resource.get().getResource() != null)
 		{
@@ -211,10 +212,10 @@ public class StructureDefinitionServiceImpl extends AbstractServiceImpl<Structur
 				return Response.status(Status.BAD_REQUEST).build(); // TODO OperationOutcome
 
 			if (sd.hasSnapshot())
-				return responseGenerator.response(Status.OK, sd, parameterConverter.toSpecialMimeType(format)).build();
+				return responseGenerator.response(Status.OK, sd, parameterConverter.getMediaType(uri, headers)).build();
 			else
 				return responseGenerator
-						.response(Status.OK, generateSnapshot(sd), parameterConverter.toSpecialMimeType(format))
+						.response(Status.OK, generateSnapshot(sd), parameterConverter.getMediaType(uri, headers))
 						.build();
 		}
 		else
@@ -224,7 +225,7 @@ public class StructureDefinitionServiceImpl extends AbstractServiceImpl<Structur
 		}
 	}
 
-	private Response getSnapshot(String format, String url)
+	private Response getSnapshot(String url, UriInfo uri, HttpHeaders headers)
 	{
 		SearchQuery query = snapshotDao.createSearchQuery(1, 1);
 		MultivaluedHashMap<String, String> searchParameters = new MultivaluedHashMap<>();
@@ -238,24 +239,25 @@ public class StructureDefinitionServiceImpl extends AbstractServiceImpl<Structur
 		Optional<StructureDefinition> snapshot = Optional
 				.ofNullable(result.getPartialResult().isEmpty() ? null : result.getPartialResult().get(0));
 
-		return snapshot.map(d -> responseGenerator.response(Status.OK, d, parameterConverter.toSpecialMimeType(format)))
+		return snapshot
+				.map(d -> responseGenerator.response(Status.OK, d, parameterConverter.getMediaType(uri, headers)))
 				.orElse(Response.status(Status.NOT_FOUND)).build();
 	}
 
 	@Override
-	public Response getSnapshotNew(String snapshotPath, String url, String format, UriInfo uri)
+	public Response getSnapshotNew(String snapshotPath, UriInfo uri, HttpHeaders headers)
 	{
-		return getSnapshot(format, url);
+		return getSnapshot(uri.getQueryParameters().getFirst("url"), uri, headers);
 	}
 
 	@Override
-	public Response postSnapshotExisting(String snapshotPath, String id, String format, UriInfo uri)
+	public Response postSnapshotExisting(String snapshotPath, String id, UriInfo uri, HttpHeaders headers)
 	{
-		return getSnapshotExisting(snapshotPath, id, format, uri);
+		return getSnapshotExisting(snapshotPath, id, uri, headers);
 	}
 
 	@Override
-	public Response getSnapshotExisting(String snapshotPath, String id, String format, UriInfo uri)
+	public Response getSnapshotExisting(String snapshotPath, String id, UriInfo uri, HttpHeaders headers)
 	{
 		Optional<StructureDefinition> snapshot = exceptionHandler.catchAndLogSqlAndResourceDeletedExceptionAndIfReturn(
 				() -> snapshotDao.read(parameterConverter.toUuid(resourceTypeName, id)), Optional::empty,
@@ -263,14 +265,14 @@ public class StructureDefinitionServiceImpl extends AbstractServiceImpl<Structur
 
 		if (snapshot.isPresent())
 			return snapshot
-					.map(d -> responseGenerator.response(Status.OK, d, parameterConverter.toSpecialMimeType(format)))
+					.map(d -> responseGenerator.response(Status.OK, d, parameterConverter.getMediaType(uri, headers)))
 					.get().build();
 
 		Optional<StructureDefinition> differential = exceptionHandler.handleSqlAndResourceDeletedException(
 				resourceTypeName, () -> dao.read(parameterConverter.toUuid(resourceTypeName, id)));
 
 		return differential.map(this::generateSnapshot)
-				.map(d -> responseGenerator.response(Status.OK, d, parameterConverter.toSpecialMimeType(format)))
+				.map(d -> responseGenerator.response(Status.OK, d, parameterConverter.getMediaType(uri, headers)))
 				.orElse(Response.status(Status.NOT_FOUND)).build();
 	}
 

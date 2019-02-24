@@ -21,6 +21,8 @@ import ca.uhn.fhir.parser.IParser;
 
 public abstract class AbstractFhirAdapter<T extends BaseResource> implements MessageBodyReader<T>, MessageBodyWriter<T>
 {
+	public static final String PRETTY = "pretty";
+
 	private final Class<T> resourceType;
 	private final Supplier<IParser> parser;
 
@@ -30,11 +32,15 @@ public abstract class AbstractFhirAdapter<T extends BaseResource> implements Mes
 		this.parser = parser;
 	}
 
-	private IParser getParser()
+	private IParser getParser(MediaType mediaType)
 	{
 		/* Parsers are not guaranteed to be thread safe */
 		IParser p = parser.get();
 		p.setStripVersionsFromReferences(false);
+
+		if (mediaType != null && "true".equals(mediaType.getParameters().getOrDefault(PRETTY, "false")))
+			p.setPrettyPrint(true);
+
 		return p;
 	}
 
@@ -49,7 +55,7 @@ public abstract class AbstractFhirAdapter<T extends BaseResource> implements Mes
 			MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream)
 			throws IOException, WebApplicationException
 	{
-		getParser().encodeResourceToWriter(t, new OutputStreamWriter(entityStream));
+		getParser(mediaType).encodeResourceToWriter(t, new OutputStreamWriter(entityStream));
 	}
 
 	@Override
@@ -63,6 +69,6 @@ public abstract class AbstractFhirAdapter<T extends BaseResource> implements Mes
 			MultivaluedMap<String, String> httpHeaders, InputStream entityStream)
 			throws IOException, WebApplicationException
 	{
-		return getParser().parseResource(type, new InputStreamReader(entityStream));
+		return getParser(null).parseResource(type, new InputStreamReader(entityStream));
 	}
 }

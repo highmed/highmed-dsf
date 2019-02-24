@@ -1,5 +1,6 @@
 package org.highmed.fhir.webservice.secure;
 
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
@@ -16,55 +17,55 @@ public class AbstractServiceSecure<R extends DomainResource, S extends BasicServ
 		this.delegate = delegate;
 	}
 
-	public Response create(R resource, UriInfo uri)
+	public Response create(R resource, UriInfo uri, HttpHeaders headers)
 	{
-		return delegate.create(resource, uri);
+		return delegate.create(resource, uri, headers);
 	}
 
-	public Response read(String id, String format, UriInfo uri)
+	public Response read(String id, UriInfo uri, HttpHeaders headers)
 	{
-		return delegate.read(id, format, uri);
+		return delegate.read(id, uri, headers);
 	}
 
-	public Response vread(String id, long version, String format, UriInfo uri)
+	public Response vread(String id, long version, UriInfo uri, HttpHeaders headers)
 	{
-		return delegate.vread(id, version, format, uri);
+		return delegate.vread(id, version, uri, headers);
 	}
 
-	public Response update(String id, R resource, UriInfo uri)
+	public Response update(String id, R resource, UriInfo uri, HttpHeaders headers)
 	{
-		return delegate.update(id, resource, uri);
+		return delegate.update(id, resource, uri, headers);
 	}
 
-	public Response delete(String id, UriInfo uri)
+	public Response delete(String id, UriInfo uri, HttpHeaders headers)
 	{
-		return delegate.delete(id, uri);
+		return delegate.delete(id, uri, headers);
 	}
 
-	public Response search(UriInfo uri)
+	public Response search(UriInfo uri, HttpHeaders headers)
 	{
-		return delegate.search(uri);
+		return delegate.search(uri, headers);
 	}
 
-	public Response postValidateNew(String validate, Parameters parameters, UriInfo uri)
+	public Response postValidateNew(String validate, Parameters parameters, UriInfo uri, HttpHeaders headers)
 	{
-		return delegate.postValidateNew(validate, parameters, uri);
+		return delegate.postValidateNew(validate, parameters, uri, headers);
 	}
-	
+
 	@Override
-	public Response getValidateNew(String validate, String mode, String profile, String format, UriInfo uri)
+	public Response getValidateNew(String validate, UriInfo uri, HttpHeaders headers)
 	{
-		return delegate.getValidateNew(validate, mode, profile, format, uri);
+		return delegate.getValidateNew(validate, uri, headers);
 	}
 
-	public Response postValidateExisting(String validate, Parameters parameters, UriInfo uri)
+	public Response postValidateExisting(String validate, Parameters parameters, UriInfo uri, HttpHeaders headers)
 	{
-		return delegate.postValidateExisting(validate, parameters, uri);
+		return delegate.postValidateExisting(validate, parameters, uri, headers);
 	}
-	
+
 	@Override
-	public Response getValidateExisting(String validate, String mode, String profile, String format, UriInfo uri)
+	public Response getValidateExisting(String validate, UriInfo uri, HttpHeaders headers)
 	{
-		return delegate.getValidateExisting(validate, mode, profile, format, uri);
+		return delegate.getValidateExisting(validate, uri, headers);
 	}
 }

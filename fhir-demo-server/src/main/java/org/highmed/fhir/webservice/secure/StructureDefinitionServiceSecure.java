@@ -1,5 +1,6 @@
 package org.highmed.fhir.webservice.secure;
 
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
@@ -16,57 +17,58 @@ public class StructureDefinitionServiceSecure extends
 	}
 
 	@Override
-	public Response create(StructureDefinition resource, UriInfo uri)
+	public Response create(StructureDefinition resource, UriInfo uri, HttpHeaders headers)
 	{
 		// check logged in, check "local" user (local user only could be default)
 		// check against existing profiles, no create if profile with same URL, version and status exists
 
 		// TODO Auto-generated method stub
-		return super.create(resource, uri);
+		return super.create(resource, uri, headers);
 	}
 
 	@Override
-	public Response update(String id, StructureDefinition resource, UriInfo uri)
+	public Response update(String id, StructureDefinition resource, UriInfo uri, HttpHeaders headers)
 	{
 		// check logged in, check "local" user (local user only could be default)
 		// check resource exists for given path id
-		// check against existing profile (by path id), no update if profile has different URL, version or status, status change via create
+		// check against existing profile (by path id), no update if profile has different URL, version or status,
+		// status change via create
 		// check against existing profile (by path id), no update if status ACTIVE or RETIRED
-		
+
 		// TODO Auto-generated method stub
-		return super.update(id, resource, uri);
+		return super.update(id, resource, uri, headers);
 	}
-	
+
 	@Override
-	public Response delete(String id, UriInfo uri)
+	public Response delete(String id, UriInfo uri, HttpHeaders headers)
 	{
-		//check logger in, check "local" user (local user only could be default)
-		
+		// check logger in, check "local" user (local user only could be default)
+
 		// TODO Auto-generated method stub
-		return super.delete(id, uri);
+		return super.delete(id, uri, headers);
 	}
 
 	@Override
-	public Response postSnapshotNew(String snapshotPath, String format, Parameters parameters, UriInfo uri)
+	public Response postSnapshotNew(String snapshotPath, Parameters parameters, UriInfo uri, HttpHeaders headers)
 	{
-		return delegate.postSnapshotNew(snapshotPath, format, parameters, uri);
+		return delegate.postSnapshotNew(snapshotPath, parameters, uri, headers);
 	}
 
 	@Override
-	public Response getSnapshotNew(String snapshotPath, String url, String format, UriInfo uri)
+	public Response getSnapshotNew(String snapshotPath, UriInfo uri, HttpHeaders headers)
 	{
-		return delegate.getSnapshotNew(snapshotPath, url, format, uri);
+		return delegate.getSnapshotNew(snapshotPath, uri, headers);
 	}
 
 	@Override
-	public Response postSnapshotExisting(String snapshotPath, String id, String format, UriInfo uri)
+	public Response postSnapshotExisting(String snapshotPath, String id, UriInfo uri, HttpHeaders headers)
 	{
-		return delegate.postSnapshotExisting(snapshotPath, id, format, uri);
+		return delegate.postSnapshotExisting(snapshotPath, id, uri, headers);
 	}
 
 	@Override
-	public Response getSnapshotExisting(String snapshotPath, String id, String format, UriInfo uri)
+	public Response getSnapshotExisting(String snapshotPath, String id, UriInfo uri, HttpHeaders headers)
 	{
-		return delegate.getSnapshotExisting(snapshotPath, id, format, uri);
+		return delegate.getSnapshotExisting(snapshotPath, id, uri, headers);
 	}
 }
