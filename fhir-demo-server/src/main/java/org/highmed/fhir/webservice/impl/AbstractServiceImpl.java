@@ -413,7 +413,9 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 				return responseGenerator.response(Status.OK, createValidationOutcomeError(result.getMessages()),
 						parameterConverter.getMediaType(uri, headers)).build();
 		}
-		else
+		else if ("delete".equals(mode))
 			return Response.status(Status.METHOD_NOT_ALLOWED).build(); // TODO mode = delete
+		else
+			return Response.status(Status.METHOD_NOT_ALLOWED).build(); // TODO return OperationOutcome
 	}
 }

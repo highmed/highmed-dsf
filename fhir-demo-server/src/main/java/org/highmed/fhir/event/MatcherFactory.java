@@ -22,7 +22,7 @@ public class MatcherFactory
 			this.daosByResourceName.putAll(daosByResourceName);
 	}
 
-	public Optional<Matcher> createQuery(String uri)
+	public Optional<Matcher> createMatcher(String uri)
 	{
 		UriComponents componentes = UriComponentsBuilder.fromUriString(uri).build();
 		String path = componentes.getPath();

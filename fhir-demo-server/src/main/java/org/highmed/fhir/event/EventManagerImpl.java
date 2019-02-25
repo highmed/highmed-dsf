@@ -103,7 +103,7 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 	private final FhirContext fhirContext;
 
 	private final ReadWriteMap<String, Subscription> subscriptionsByIdPart = new ReadWriteMap<>();
-	private final ReadWriteMap<Class<? extends DomainResource>, List<SubscriptionAndMatcher>> searchQueriesByResource = new ReadWriteMap<>();
+	private final ReadWriteMap<Class<? extends DomainResource>, List<SubscriptionAndMatcher>> matchersByResource = new ReadWriteMap<>();
 	private final ReadWriteMap<String, List<SessionIdAndRemoteAsync>> asyncRemotesBySubscriptionIdPart = new ReadWriteMap<>();
 
 	public EventManagerImpl(SubscriptionDao subscriptionDao, ExceptionHandler exceptionHandler,
@@ -127,35 +127,35 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 	@EventListener({ ContextRefreshedEvent.class })
 	public void onContextRefreshedEvent(ContextRefreshedEvent event)
 	{
-		refreshQueries();
+		refreshMatchers();
 	}
 
-	private void refreshQueries()
+	private void refreshMatchers()
 	{
 		logger.info("Refreshing subscriptions");
 
 		try
 		{
 			List<Subscription> subscriptions = subscriptionDao.readByStatus(SubscriptionStatus.ACTIVE);
-			Map<Class<? extends DomainResource>, List<SubscriptionAndMatcher>> queries = new HashMap<>();
+			Map<Class<? extends DomainResource>, List<SubscriptionAndMatcher>> matchers = new HashMap<>();
 			for (Subscription subscription : subscriptions)
 			{
-				Optional<Matcher> query = matcherFactory.createQuery(subscription.getCriteria());
-				if (query.isPresent())
+				Optional<Matcher> matcher = matcherFactory.createMatcher(subscription.getCriteria());
+				if (matcher.isPresent())
 				{
-					if (queries.containsKey(query.get().getResourceType()))
+					if (matchers.containsKey(matcher.get().getResourceType()))
 					{
-						queries.get(query.get().getResourceType())
-								.add(new SubscriptionAndMatcher(subscription, query.get()));
+						matchers.get(matcher.get().getResourceType())
+								.add(new SubscriptionAndMatcher(subscription, matcher.get()));
 					}
 					else
 					{
-						queries.put(query.get().getResourceType(), new ArrayList<>(
-								Collections.singletonList(new SubscriptionAndMatcher(subscription, query.get()))));
+						matchers.put(matcher.get().getResourceType(), new ArrayList<>(
+								Collections.singletonList(new SubscriptionAndMatcher(subscription, matcher.get()))));
 					}
 				}
 			}
-			searchQueriesByResource.replaceAll(queries);
+			matchersByResource.replaceAll(matchers);
 			subscriptionsByIdPart.replaceAll(subscriptions.stream()
 					.collect(Collectors.toMap(s -> s.getIdElement().getIdPart(), Function.identity())));
 		}
@@ -197,9 +197,9 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 				event.getResourceType().getAnnotation(ResourceDef.class).name(), event.getId());
 
 		if (Subscription.class.equals(event.getResourceType()))
-			refreshQueries();
+			refreshMatchers();
 
-		Optional<List<SubscriptionAndMatcher>> optMatchers = searchQueriesByResource.get(event.getResourceType());
+		Optional<List<SubscriptionAndMatcher>> optMatchers = matchersByResource.get(event.getResourceType());
 		if (optMatchers.isEmpty())
 		{
 			logger.debug("No subscriptions for event {} for resource of type {} with id {}", event.getClass().getName(),

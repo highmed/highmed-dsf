@@ -49,6 +49,7 @@ public class WebsocketEndpoint extends Endpoint
 				{
 					logger.debug("Bound received");
 					boundReceived = true;
+					return;
 				}
 
 				if (boundReceived)

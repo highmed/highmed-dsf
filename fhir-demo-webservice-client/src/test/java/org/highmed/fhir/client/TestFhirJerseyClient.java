@@ -28,8 +28,8 @@ public class TestFhirJerseyClient
 		KeyStore trustStore = CertificateHelper.extractTrust(keyStore);
 
 		FhirContext fhirContext = FhirContext.forR4();
-		WebserviceClient client = new WebserviceClientJersey("https://localhost:8001/fhir", trustStore,
-				keyStore, keyStorePassword, null, null, null, 0, 0, null, fhirContext);
+		WebserviceClient client = new WebserviceClientJersey("https://localhost:8001/fhir", trustStore, keyStore,
+				keyStorePassword, null, null, null, 0, 0, null, fhirContext);
 
 		try
 		{
@@ -104,10 +104,9 @@ public class TestFhirJerseyClient
 			//
 			// client.create(subscription);
 
-			Task createdTask = client
-					.create(new Task().setDescription("Status draft").setStatus(TaskStatus.DRAFT));
+			Task createdTask = client.create(new Task().setDescription("Status draft").setStatus(TaskStatus.DRAFT));
 
-			createdTask.setStatus(TaskStatus.REQUESTED);
+			createdTask.setStatus(TaskStatus.REQUESTED).setDescription("Status requested");
 			client.update(createdTask);
 		}
 		catch (WebApplicationException e)
