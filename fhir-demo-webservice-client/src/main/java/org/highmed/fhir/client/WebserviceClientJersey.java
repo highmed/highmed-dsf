@@ -15,6 +15,8 @@ import org.highmed.fhir.adapter.BundleJsonFhirAdapter;
 import org.highmed.fhir.adapter.BundleXmlFhirAdapter;
 import org.highmed.fhir.adapter.CapabilityStatementJsonFhirAdapter;
 import org.highmed.fhir.adapter.CapabilityStatementXmlFhirAdapter;
+import org.highmed.fhir.adapter.CodeSystemJsonFhirAdapter;
+import org.highmed.fhir.adapter.CodeSystemXmlFhirAdapter;
 import org.highmed.fhir.adapter.HealthcareServiceJsonFhirAdapter;
 import org.highmed.fhir.adapter.HealthcareServiceXmlFhirAdapter;
 import org.highmed.fhir.adapter.LocationJsonFhirAdapter;
@@ -41,6 +43,8 @@ import org.highmed.fhir.adapter.SubscriptionJsonFhirAdapter;
 import org.highmed.fhir.adapter.SubscriptionXmlFhirAdapter;
 import org.highmed.fhir.adapter.TaskJsonFhirAdapter;
 import org.highmed.fhir.adapter.TaskXmlFhirAdapter;
+import org.highmed.fhir.adapter.ValueSetJsonFhirAdapter;
+import org.highmed.fhir.adapter.ValueSetXmlFhirAdapter;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Parameters;
@@ -71,6 +75,7 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 	{
 		return Arrays.asList(new BundleJsonFhirAdapter(fhirContext), new BundleXmlFhirAdapter(fhirContext),
 				new CapabilityStatementJsonFhirAdapter(fhirContext), new CapabilityStatementXmlFhirAdapter(fhirContext),
+				new CodeSystemJsonFhirAdapter(fhirContext), new CodeSystemXmlFhirAdapter(fhirContext),
 				new HealthcareServiceJsonFhirAdapter(fhirContext), new HealthcareServiceXmlFhirAdapter(fhirContext),
 				new LocationJsonFhirAdapter(fhirContext), new LocationXmlFhirAdapter(fhirContext),
 				new OperationOutcomeJsonFhirAdapter(fhirContext), new OperationOutcomeXmlFhirAdapter(fhirContext),
@@ -83,7 +88,8 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 				new ResearchStudyJsonFhirAdapter(fhirContext), new ResearchStudyXmlFhirAdapter(fhirContext),
 				new StructureDefinitionJsonFhirAdapter(fhirContext), new StructureDefinitionXmlFhirAdapter(fhirContext),
 				new SubscriptionJsonFhirAdapter(fhirContext), new SubscriptionXmlFhirAdapter(fhirContext),
-				new TaskJsonFhirAdapter(fhirContext), new TaskXmlFhirAdapter(fhirContext));
+				new TaskJsonFhirAdapter(fhirContext), new TaskXmlFhirAdapter(fhirContext),
+				new ValueSetJsonFhirAdapter(fhirContext), new ValueSetXmlFhirAdapter(fhirContext));
 	}
 
 	@Override

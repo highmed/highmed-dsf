@@ -1,5 +1,6 @@
 package org.highmed.fhir.spring.config;
 
+import org.highmed.fhir.webservice.impl.CodeSystemServiceImpl;
 import org.highmed.fhir.webservice.impl.ConformanceServiceImpl;
 import org.highmed.fhir.webservice.impl.HealthcareServiceServiceImpl;
 import org.highmed.fhir.webservice.impl.LocationServiceImpl;
@@ -12,6 +13,8 @@ import org.highmed.fhir.webservice.impl.ResearchStudyServiceImpl;
 import org.highmed.fhir.webservice.impl.StructureDefinitionServiceImpl;
 import org.highmed.fhir.webservice.impl.SubscriptionServiceImpl;
 import org.highmed.fhir.webservice.impl.TaskServiceImpl;
+import org.highmed.fhir.webservice.impl.ValueSetServiceImpl;
+import org.highmed.fhir.webservice.jaxrs.CodeSystemServiceJaxrs;
 import org.highmed.fhir.webservice.jaxrs.ConformanceServiceJaxrs;
 import org.highmed.fhir.webservice.jaxrs.HealthcareServiceServiceJaxrs;
 import org.highmed.fhir.webservice.jaxrs.LocationServiceJaxrs;
@@ -24,6 +27,8 @@ import org.highmed.fhir.webservice.jaxrs.ResearchStudyServiceJaxrs;
 import org.highmed.fhir.webservice.jaxrs.StructureDefinitionServiceJaxrs;
 import org.highmed.fhir.webservice.jaxrs.SubscriptionServiceJaxrs;
 import org.highmed.fhir.webservice.jaxrs.TaskServiceJaxrs;
+import org.highmed.fhir.webservice.jaxrs.ValueSetServiceJaxrs;
+import org.highmed.fhir.webservice.secure.CodeSystemServiceSecure;
 import org.highmed.fhir.webservice.secure.ConformanceServiceSecure;
 import org.highmed.fhir.webservice.secure.HealthcareServiceServiceSecure;
 import org.highmed.fhir.webservice.secure.LocationServiceSecure;
@@ -36,6 +41,8 @@ import org.highmed.fhir.webservice.secure.ResearchStudyServiceSecure;
 import org.highmed.fhir.webservice.secure.StructureDefinitionServiceSecure;
 import org.highmed.fhir.webservice.secure.SubscriptionServiceSecure;
 import org.highmed.fhir.webservice.secure.TaskServiceSecure;
+import org.highmed.fhir.webservice.secure.ValueSetServiceSecure;
+import org.highmed.fhir.webservice.specification.CodeSystemService;
 import org.highmed.fhir.webservice.specification.ConformanceService;
 import org.highmed.fhir.webservice.specification.HealthcareServiceService;
 import org.highmed.fhir.webservice.specification.LocationService;
@@ -48,6 +55,8 @@ import org.highmed.fhir.webservice.specification.ResearchStudyService;
 import org.highmed.fhir.webservice.specification.StructureDefinitionService;
 import org.highmed.fhir.webservice.specification.SubscriptionService;
 import org.highmed.fhir.webservice.specification.TaskService;
+import org.highmed.fhir.webservice.specification.ValueSetService;
+import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.HealthcareService;
 import org.hl7.fhir.r4.model.Location;
@@ -60,6 +69,7 @@ import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -101,6 +111,20 @@ public class WebserviceConfig
 	private String resourceTypeName(Class<? extends DomainResource> r)
 	{
 		return r.getAnnotation(ResourceDef.class).name();
+	}
+
+	@Bean
+	public CodeSystemService codeSystemService()
+	{
+		return new CodeSystemServiceJaxrs(new CodeSystemServiceSecure(codeSystemServiceImpl()));
+	}
+
+	private CodeSystemServiceImpl codeSystemServiceImpl()
+	{
+		return new CodeSystemServiceImpl(resourceTypeName(CodeSystem.class), serverBase, defaultPageCount,
+				daoConfig.codeSystemDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
+				helperConfig.exceptionHandler(), eventConfig.eventGenerator(CodeSystem.class),
+				helperConfig.responseGenerator(), helperConfig.parameterConverter());
 	}
 
 	@Bean
@@ -258,5 +282,19 @@ public class WebserviceConfig
 				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
 				eventConfig.eventGenerator(Task.class), helperConfig.responseGenerator(),
 				helperConfig.parameterConverter());
+	}
+
+	@Bean
+	public ValueSetService valueSetService()
+	{
+		return new ValueSetServiceJaxrs(new ValueSetServiceSecure(valueSetServiceImpl()));
+	}
+
+	private ValueSetServiceImpl valueSetServiceImpl()
+	{
+		return new ValueSetServiceImpl(resourceTypeName(ValueSet.class), serverBase, defaultPageCount,
+				daoConfig.valueSetDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
+				helperConfig.exceptionHandler(), eventConfig.eventGenerator(ValueSet.class),
+				helperConfig.responseGenerator(), helperConfig.parameterConverter());
 	}
 }

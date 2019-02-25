@@ -34,6 +34,7 @@ public class EventConfig
 	{
 		Map<String, AbstractDomainResourceDao<? extends DomainResource>> daosByResourceName = new HashMap<>();
 
+		put(daosByResourceName, daoConfig.codeSystemDao());
 		put(daosByResourceName, daoConfig.healthcareServiceDao());
 		put(daosByResourceName, daoConfig.locationDao());
 		put(daosByResourceName, daoConfig.organizationDao());
@@ -45,6 +46,7 @@ public class EventConfig
 		put(daosByResourceName, daoConfig.structureDefinitionDao());
 		put(daosByResourceName, daoConfig.subscriptionDao());
 		put(daosByResourceName, daoConfig.taskDao());
+		put(daosByResourceName, daoConfig.valueSetDao());
 
 		return new MatcherFactory(daosByResourceName);
 	}

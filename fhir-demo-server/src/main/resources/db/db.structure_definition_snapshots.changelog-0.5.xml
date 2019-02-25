@@ -4,8 +4,12 @@
 	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
 
-	<include file="db/db.structure_definition_snapshots.changelog-0.3.xml" />
-	<include file="db/db.structure_definition_snapshots.changelog-0.4.xml" />
-	<include file="db/db.structure_definition_snapshots.changelog-0.5.xml" />
-	
+	<property name="json" value="JSONB" dbms="postgresql" />
+	<property name="json" value="varchar(5000)" dbms="h2" />
+
+	<changeSet author="hhund" id="db.structure_definition_snapshots.changelog-0.5">
+		<sql dbms="postgresql">
+			REVOKE DELETE ON TABLE structure_definition_snapshots FROM ${server_users_group};
+		</sql>
+	</changeSet>
 </databaseChangeLog>

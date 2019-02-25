@@ -203,7 +203,7 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 	@Override
 	public Response delete(String id, UriInfo uri, HttpHeaders headers)
 	{
-		Consumer<String> afterDelete = beforeDelete(id);
+		Consumer<String> afterDelete = preDelete(id);
 
 		exceptionHandler.handleSqlException(() -> dao.delete(parameterConverter.toUuid(resourceTypeName, id)));
 
@@ -226,7 +226,7 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 	 * @throws WebApplicationException
 	 *             if the normal flow should be interrupted
 	 */
-	protected Consumer<String> beforeDelete(String id)
+	protected Consumer<String> preDelete(String id)
 	{
 		return null;
 	}

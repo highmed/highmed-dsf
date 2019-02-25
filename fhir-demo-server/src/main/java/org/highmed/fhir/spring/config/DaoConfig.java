@@ -1,6 +1,7 @@
 package org.highmed.fhir.spring.config;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.highmed.fhir.dao.CodeSystemDao;
 import org.highmed.fhir.dao.HealthcareServiceDao;
 import org.highmed.fhir.dao.LocationDao;
 import org.highmed.fhir.dao.OrganizationDao;
@@ -13,6 +14,7 @@ import org.highmed.fhir.dao.StructureDefinitionDao;
 import org.highmed.fhir.dao.StructureDefinitionSnapshotDao;
 import org.highmed.fhir.dao.SubscriptionDao;
 import org.highmed.fhir.dao.TaskDao;
+import org.highmed.fhir.dao.ValueSetDao;
 import org.highmed.fhir.dao.converter.SnapshotInfoConverter;
 import org.postgresql.Driver;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +53,12 @@ public class DaoConfig
 		dataSource.setTestOnBorrow(true);
 		dataSource.setValidationQuery("SELECT 1");
 		return dataSource;
+	}
+
+	@Bean
+	public CodeSystemDao codeSystemDao()
+	{
+		return new CodeSystemDao(dataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
@@ -129,5 +137,11 @@ public class DaoConfig
 	public TaskDao taskDao()
 	{
 		return new TaskDao(dataSource(), fhirConfig.fhirContext());
+	}
+
+	@Bean
+	public ValueSetDao valueSetDao()
+	{
+		return new ValueSetDao(dataSource(), fhirConfig.fhirContext());
 	}
 }

@@ -14,7 +14,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.highmed.fhir.help.ParameterConverter;
-import org.highmed.fhir.search.SearchQueryParameter;
 import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.fhir.search.parameters.OrganizationName;
 import org.highmed.fhir.search.parameters.ResourceId;
@@ -36,6 +35,7 @@ import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResource
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementSoftwareComponent;
 import org.hl7.fhir.r4.model.CapabilityStatement.RestfulCapabilityMode;
 import org.hl7.fhir.r4.model.CapabilityStatement.TypeRestfulInteraction;
+import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -56,6 +56,7 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.UrlType;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.codesystems.RestfulSecurityService;
 import org.springframework.beans.factory.InitializingBean;
 
@@ -119,9 +120,9 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 		websocketExtension.setUrl("http://hl7.org/fhir/StructureDefinition/capabilitystatement-websocket");
 		websocketExtension.setValue(new UrlType(serverBase.replace("http", "ws") + EventEndpoint.PATH));
 
-		var resources = Arrays.asList(HealthcareService.class, Location.class, Organization.class, Patient.class,
-				PractitionerRole.class, Practitioner.class, Provenance.class, ResearchStudy.class,
-				StructureDefinition.class, Subscription.class, Task.class);
+		var resources = Arrays.asList(CodeSystem.class, HealthcareService.class, Location.class, Organization.class,
+				Patient.class, PractitionerRole.class, Practitioner.class, Provenance.class, ResearchStudy.class,
+				StructureDefinition.class, Subscription.class, Task.class, ValueSet.class);
 
 		var searchParameters = new HashMap<Class<? extends DomainResource>, List<CapabilityStatementRestResourceSearchParamComponent>>();
 
@@ -146,11 +147,8 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 				"Generates a StructureDefinition instance with a snapshot, based on a differential in a specified StructureDefinition");
 		operations.put(StructureDefinition.class, Arrays.asList(snapshotOperation));
 
-		@SuppressWarnings("unchecked")
-		var standardSortableSearchParameters = Arrays.asList(
-				createSearchParameter((Class<? extends SearchQueryParameter<? extends DomainResource>>) ResourceId.class),
-				createSearchParameter(
-						(Class<? extends SearchQueryParameter<? extends DomainResource>>) ResourceLastUpdated.class));
+		var standardSortableSearchParameters = Arrays.asList(createSearchParameter(ResourceId.class),
+				createSearchParameter(ResourceLastUpdated.class));
 		var standardOperations = Arrays.asList(createValidateOperation());
 
 		for (Class<? extends DomainResource> resource : resources)
@@ -171,6 +169,7 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 			resourceSearchParameters.forEach(r::addSearchParam);
 
 			r.addSearchParam(createFormatParameter());
+			r.addSearchParam(createPrettyParameter());
 			r.addSearchParam(createCountParameter(defaultPageCount));
 			r.addSearchParam(createPageParameter());
 			r.addSearchParam(createSortParameter(standardSortableSearchParameters, resourceSearchParameters));
@@ -221,6 +220,14 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 		return createFormatParameter;
 	}
 
+	private CapabilityStatementRestResourceSearchParamComponent createPrettyParameter()
+	{
+		CapabilityStatementRestResourceSearchParamComponent createFormatParameter = createSearchParameter("_pretty", "",
+				SearchParamType.SPECIAL,
+				"Ask for a pretty printed response for human convenience, allowed values: [true, false]");
+		return createFormatParameter;
+	}
+
 	private CapabilityStatementRestResourceOperationComponent createOperation(String name, String definition,
 			String documentation)
 	{
@@ -228,8 +235,7 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 				.setDocumentation(documentation);
 	}
 
-	private CapabilityStatementRestResourceSearchParamComponent createSearchParameter(
-			Class<? extends SearchQueryParameter<? extends DomainResource>> parameter)
+	private CapabilityStatementRestResourceSearchParamComponent createSearchParameter(Class<?> parameter)
 	{
 		SearchParameterDefinition d = parameter.getAnnotation(SearchParameterDefinition.class);
 		return createSearchParameter(d.name(), d.definition(), d.type(), d.documentation());

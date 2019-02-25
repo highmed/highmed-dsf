@@ -171,7 +171,7 @@ public class StructureDefinitionServiceImpl extends AbstractServiceImpl<Structur
 	}
 
 	@Override
-	protected Consumer<String> beforeDelete(String id)
+	protected Consumer<String> preDelete(String id)
 	{
 		return this::afterDelete;
 	}

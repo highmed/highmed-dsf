@@ -6,6 +6,7 @@
 
 	<include file="db/db.create-db-users.changelog.xml" />
 	
+	<include file="db/db.code_systems.changelog.xml" />
 	<include file="db/db.healthcare_services.changelog.xml" />
 	<include file="db/db.locations.changelog.xml" />
 	<include file="db/db.organizations.changelog.xml" />
@@ -18,5 +19,6 @@
 	<include file="db/db.structure_definition_snapshots.changelog.xml" />
 	<include file="db/db.subscriptions.changelog.xml" />
 	<include file="db/db.tasks.changelog.xml" />
+	<include file="db/db.value_sets.changelog.xml" />
 
 </databaseChangeLog>

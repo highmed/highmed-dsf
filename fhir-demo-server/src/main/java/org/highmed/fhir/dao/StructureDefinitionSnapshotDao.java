@@ -162,16 +162,16 @@ public class StructureDefinitionSnapshotDao extends AbstractStructureDefinitionD
 		{
 			connection.setReadOnly(false);
 
-			try (PreparedStatement statement = connection.prepareStatement("DELETE FROM " + getResourceTable()
-					+ " WHERE structure_definition_snapshot_info->'dependencies'->'profiles' ?? ?"))
+			try (PreparedStatement statement = connection.prepareStatement("UPDATE " + getResourceTable()
+					+ " SET deleted = TRUE WHERE structure_definition_snapshot_info->'dependencies'->'profiles' ?? ?"))
 			{
 				statement.setString(1, url);
 
 				logger.trace("Executing query '{}'", statement);
 				int count = statement.executeUpdate();
-				logger.debug("{} {} snapshot{} with dependency url {} deleted", count, getResourceTypeName(),
-						count != 1 ? "s" : "", url);
 
+				logger.debug("{} {} snapshot{} with dependency url {} marked as deleted", count, getResourceTypeName(),
+						count != 1 ? "s" : "", url);
 			}
 		}
 	}
