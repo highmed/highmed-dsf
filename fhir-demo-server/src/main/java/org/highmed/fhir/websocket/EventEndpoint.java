@@ -10,13 +10,14 @@ import javax.websocket.EndpointConfig;
 import javax.websocket.MessageHandler;
 import javax.websocket.Session;
 
+import org.highmed.fhir.authentication.NeedsAuthentication;
 import org.highmed.fhir.event.EventManager;
 import org.hl7.fhir.r4.model.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-public class EventEndpoint extends Endpoint implements InitializingBean
+public class EventEndpoint extends Endpoint implements InitializingBean, NeedsAuthentication
 {
 	public static final String PATH = "/ws";
 	public static final String ORGANIZATION_PROPERTY = EventEndpoint.class.getName() + ".organization";
@@ -39,9 +40,15 @@ public class EventEndpoint extends Endpoint implements InitializingBean
 	}
 
 	@Override
+	public String getPath()
+	{
+		return PATH;
+	}
+
+	@Override
 	public void onOpen(Session session, EndpointConfig config)
 	{
-		logger.trace("onOpen");
+		logger.trace("onOpen " + session.getId());
 
 		Organization organization = getOrganization(session);
 		// TODO check role || !UserRole.userHasOneOfRoles(user, UserRole.WEBSOCKET, UserRole.WEBSOCKET_AND_WEBSERVICE)
@@ -70,8 +77,14 @@ public class EventEndpoint extends Endpoint implements InitializingBean
 			@Override
 			public void onMessage(String message)
 			{
+				logger.debug("onMessage {}", message);
+
 				if (message != null && !message.isBlank() && message.startsWith(BIND_MESSAGE_START))
-					eventManager.bind(message.substring(BIND_MESSAGE_START.length()), session.getAsyncRemote());
+				{
+					logger.debug("Websocket bind message received: {}", message);
+					eventManager.bind(session.getId(), session.getAsyncRemote(),
+							message.substring(BIND_MESSAGE_START.length()));
+				}
 			}
 		});
 	}
@@ -91,14 +104,14 @@ public class EventEndpoint extends Endpoint implements InitializingBean
 	@Override
 	public void onClose(Session session, CloseReason closeReason)
 	{
-		logger.trace("onClose");
-		eventManager.close(session.getAsyncRemote());
+		logger.trace("onClose " + session.getId());
+		eventManager.close(session.getId());
 	}
 
 	@Override
 	public void onError(Session session, Throwable thr)
 	{
-		logger.trace("onError");
-		eventManager.close(session.getAsyncRemote());
+		logger.trace("onError " + session.getId());
+		eventManager.close(session.getId());
 	}
 }

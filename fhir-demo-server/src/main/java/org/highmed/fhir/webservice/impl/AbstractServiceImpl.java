@@ -87,6 +87,12 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 	}
 
 	@Override
+	public String getPath()
+	{
+		throw new UnsupportedOperationException("implemented by jaxrs service layer");
+	}
+
+	@Override
 	public Response create(R resource, UriInfo uri, HttpHeaders headers)
 	{
 		Consumer<R> postCreate = preCreate(resource);

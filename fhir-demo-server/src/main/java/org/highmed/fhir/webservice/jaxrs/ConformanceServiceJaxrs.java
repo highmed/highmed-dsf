@@ -32,6 +32,12 @@ public class ConformanceServiceJaxrs implements ConformanceService
 		this.delegate = delegate;
 	}
 
+	@Override
+	public String getPath()
+	{
+		return PATH;
+	}
+
 	@GET
 	@Override
 	public Response getMetadata(@QueryParam("mode") String mode, @Context UriInfo uri, @Context HttpHeaders headers)

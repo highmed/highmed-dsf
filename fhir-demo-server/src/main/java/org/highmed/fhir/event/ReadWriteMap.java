@@ -77,4 +77,17 @@ public class ReadWriteMap<K, V>
 			w.unlock();
 		}
 	}
+
+	public boolean containsKey(Object key)
+	{
+		r.lock();
+		try
+		{
+			return map.containsKey(key);
+		}
+		finally
+		{
+			r.unlock();
+		}
+	}
 }

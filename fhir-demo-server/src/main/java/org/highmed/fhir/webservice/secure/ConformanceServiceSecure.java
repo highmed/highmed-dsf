@@ -15,6 +15,12 @@ public class ConformanceServiceSecure implements ConformanceService
 		this.delegate = delegate;
 	}
 
+	@Override
+	public String getPath()
+	{
+		throw new UnsupportedOperationException("implemented by jaxrs service layer");
+	}
+
 	public Response getMetadata(String mode, UriInfo uri, HttpHeaders headers)
 	{
 		return delegate.getMetadata(mode, uri, headers);

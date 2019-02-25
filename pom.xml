@@ -25,6 +25,7 @@
 	</modules>
 
 	<properties>
+		<tyrus.version>1.15</tyrus.version>
 	</properties>
 
 	<repositories>
@@ -157,6 +158,23 @@
 				<groupId>org.glassfish.jaxb</groupId>
 				<artifactId>jaxb-runtime</artifactId>
 				<version>${jersey.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.glassfish.jersey.core</groupId>
+				<artifactId>jersey-common</artifactId>
+				<version>${jersey.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.glassfish.tyrus</groupId>
+				<artifactId>tyrus-client</artifactId>
+				<version>${tyrus.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish.tyrus</groupId>
+				<artifactId>tyrus-container-grizzly-client</artifactId>
+				<version>${tyrus.version}</version>
 			</dependency>
 
 			<dependency>

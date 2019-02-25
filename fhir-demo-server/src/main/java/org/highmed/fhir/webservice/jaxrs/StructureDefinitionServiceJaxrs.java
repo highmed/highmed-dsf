@@ -28,6 +28,12 @@ public class StructureDefinitionServiceJaxrs extends
 		super(delegate);
 	}
 
+	@Override
+	public String getPath()
+	{
+		return PATH;
+	}
+
 	@POST
 	@Path("/{snapshot : [$]snapshot(/)?}")
 	@Override

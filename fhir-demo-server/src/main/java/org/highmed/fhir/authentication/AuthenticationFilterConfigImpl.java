@@ -6,7 +6,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Path;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,14 +25,8 @@ public class AuthenticationFilterConfigImpl implements AuthenticationFilterConfi
 
 		List<String> pathFromServices = services.stream().map(s ->
 		{
-			Path pathAnnotation = s.getClass().getAnnotation(Path.class);
-
-			if (pathAnnotation == null)
-				throw new IllegalArgumentException(
-						s.getClass().getName() + " is missing " + Path.class.getName() + " annotation");
-
-			return servletPath
-					+ (pathAnnotation.value().startsWith("/") ? pathAnnotation.value() : "/" + pathAnnotation.value());
+			String path = s.getPath();
+			return servletPath + (path.startsWith("/") ? path : "/" + path);
 
 		}).collect(Collectors.toList());
 

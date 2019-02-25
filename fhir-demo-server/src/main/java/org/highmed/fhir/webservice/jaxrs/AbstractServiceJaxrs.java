@@ -26,7 +26,8 @@ import ca.uhn.fhir.rest.api.Constants;
 		Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
 @Produces({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
 		Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
-public class AbstractServiceJaxrs<R extends DomainResource, S extends BasicService<R>> implements BasicService<R>
+public abstract class AbstractServiceJaxrs<R extends DomainResource, S extends BasicService<R>>
+		implements BasicService<R>
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractServiceJaxrs.class);
 

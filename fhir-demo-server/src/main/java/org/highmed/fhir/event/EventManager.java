@@ -6,7 +6,7 @@ public interface EventManager
 {
 	void handleEvent(Event<?> event);
 
-	void bind(String subscriptionIdPart, Async asyncRemote);
+	void bind(String sessionId, Async asyncRemote, String subscriptionIdPart);
 
-	void close(Async asyncRemote);
+	void close(String sessionId);
 }

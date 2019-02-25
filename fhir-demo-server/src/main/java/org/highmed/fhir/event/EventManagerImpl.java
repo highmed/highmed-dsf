@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.websocket.RemoteEndpoint.Async;
@@ -53,6 +54,47 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 		}
 	}
 
+	private static class SessionIdAndRemoteAsync
+	{
+		final String sessionId;
+		final Async removeAsync;
+
+		SessionIdAndRemoteAsync(String sessionId, Async removeAsync)
+		{
+			this.sessionId = sessionId;
+			this.removeAsync = removeAsync;
+		}
+
+		@Override
+		public int hashCode()
+		{
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((sessionId == null) ? 0 : sessionId.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			SessionIdAndRemoteAsync other = (SessionIdAndRemoteAsync) obj;
+			if (sessionId == null)
+			{
+				if (other.sessionId != null)
+					return false;
+			}
+			else if (!sessionId.equals(other.sessionId))
+				return false;
+			return true;
+		}
+	}
+
 	private final ExecutorService executor = Executors.newCachedThreadPool();
 
 	private final SubscriptionDao subscriptionDao;
@@ -60,8 +102,9 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 	private final MatcherFactory matcherFactory;
 	private final FhirContext fhirContext;
 
+	private final ReadWriteMap<String, Subscription> subscriptionsByIdPart = new ReadWriteMap<>();
 	private final ReadWriteMap<Class<? extends DomainResource>, List<SubscriptionAndMatcher>> searchQueriesByResource = new ReadWriteMap<>();
-	private final ReadWriteMap<String, List<Async>> asyncRemotesBySubscriptionIdPart = new ReadWriteMap<>();
+	private final ReadWriteMap<String, List<SessionIdAndRemoteAsync>> asyncRemotesBySubscriptionIdPart = new ReadWriteMap<>();
 
 	public EventManagerImpl(SubscriptionDao subscriptionDao, ExceptionHandler exceptionHandler,
 			MatcherFactory matcherFactory, FhirContext fhirContext)
@@ -115,6 +158,8 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 				}
 			}
 			searchQueriesByResource.replaceAll(queries);
+			subscriptionsByIdPart.replaceAll(subscriptions.stream()
+					.collect(Collectors.toMap(s -> s.getIdElement().getIdPart(), Function.identity())));
 		}
 		catch (SQLException e)
 		{
@@ -184,7 +229,8 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 				event.getClass().getName(), event.getResourceType().getAnnotation(ResourceDef.class).name(),
 				event.getId(), s.getIdElement().getIdPart());
 
-		Optional<List<Async>> optRemotes = asyncRemotesBySubscriptionIdPart.get(s.getIdElement().getIdPart());
+		Optional<List<SessionIdAndRemoteAsync>> optRemotes = asyncRemotesBySubscriptionIdPart
+				.get(s.getIdElement().getIdPart());
 		if (optRemotes.isEmpty())
 		{
 			logger.debug("No remotes connected for event {} for resource of type {} with id {}",
@@ -205,32 +251,40 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 				optRemotes.get().size(), optRemotes.get().size() != 1 ? "s" : "", event.getClass().getName(),
 				event.getResourceType().getAnnotation(ResourceDef.class).name(), event.getId());
 
-		optRemotes.get().forEach(r -> r.sendText(text));
+		optRemotes.get().forEach(r -> r.removeAsync.sendText(text));
 	}
 
 	@Override
-	public void bind(String subscriptionIdPart, Async asyncRemote)
+	public void bind(String sessionId, Async asyncRemote, String subscriptionIdPart)
 	{
-		asyncRemotesBySubscriptionIdPart.putWithOldValue(subscriptionIdPart, list ->
+		if (subscriptionsByIdPart.containsKey(subscriptionIdPart))
 		{
-			if (list == null)
+			logger.debug("Binding websocket session {} to subscription {}", sessionId, subscriptionIdPart);
+			asyncRemotesBySubscriptionIdPart.putWithOldValue(subscriptionIdPart, list ->
 			{
-				List<Async> newList = new ArrayList<>();
-				newList.add(asyncRemote);
-				return newList;
-			}
-			else
-			{
-				list.add(asyncRemote);
-				return list;
-			}
-		});
+				if (list == null)
+				{
+					List<SessionIdAndRemoteAsync> newList = new ArrayList<>();
+					newList.add(new SessionIdAndRemoteAsync(sessionId, asyncRemote));
+					return newList;
+				}
+				else
+				{
+					list.add(new SessionIdAndRemoteAsync(sessionId, asyncRemote));
+					return list;
+				}
+			});
+			asyncRemote.sendText("bound " + subscriptionIdPart);
+		}
+		else
+			asyncRemote.sendText("Not Found");
 	}
 
 	@Override
-	public void close(Async asyncRemote)
+	public void close(String sessionId)
 	{
+		logger.debug("Removing websocket session {}", sessionId);
 		asyncRemotesBySubscriptionIdPart.removeWhereValueMatches(list -> list.isEmpty(),
-				list -> list.remove(asyncRemote));
+				list -> list.remove(new SessionIdAndRemoteAsync(sessionId, null)));
 	}
 }

@@ -17,6 +17,12 @@ public class AbstractServiceSecure<R extends DomainResource, S extends BasicServ
 		this.delegate = delegate;
 	}
 
+	@Override
+	public String getPath()
+	{
+		throw new UnsupportedOperationException("implemented by jaxrs service layer");
+	}
+
 	public Response create(R resource, UriInfo uri, HttpHeaders headers)
 	{
 		return delegate.create(resource, uri, headers);

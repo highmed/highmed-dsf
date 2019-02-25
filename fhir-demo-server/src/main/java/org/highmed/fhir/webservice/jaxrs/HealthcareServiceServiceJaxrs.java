@@ -15,4 +15,10 @@ public class HealthcareServiceServiceJaxrs extends AbstractServiceJaxrs<Healthca
 	{
 		super(delegate);
 	}
+
+	@Override
+	public String getPath()
+	{
+		return PATH;
+	}
 }

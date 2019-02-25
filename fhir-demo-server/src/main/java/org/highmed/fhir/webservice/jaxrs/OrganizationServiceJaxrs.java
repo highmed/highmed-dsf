@@ -15,4 +15,10 @@ public class OrganizationServiceJaxrs extends AbstractServiceJaxrs<Organization,
 	{
 		super(delegate);
 	}
+
+	@Override
+	public String getPath()
+	{
+		return PATH;
+	}
 }

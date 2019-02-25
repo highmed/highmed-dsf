@@ -15,4 +15,10 @@ public class SubscriptionServiceJaxrs extends AbstractServiceJaxrs<Subscription,
 	{
 		super(delegate);
 	}
+
+	@Override
+	public String getPath()
+	{
+		return PATH;
+	}
 }

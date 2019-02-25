@@ -1,9 +1,41 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>org.highmed.fhir</groupId>
-    <artifactId>fhir-demo-parent</artifactId>
-    <version>0.4.0-SNAPSHOT</version>
-  </parent>
-  <artifactId>fhir-demo-websocket-client</artifactId>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>fhir-demo-websocket-client</artifactId>
+
+	<parent>
+		<groupId>org.highmed.fhir</groupId>
+		<artifactId>fhir-demo-parent</artifactId>
+		<version>0.4.0-SNAPSHOT</version>
+	</parent>
+
+	<dependencies>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-r4</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.glassfish.jersey.core</groupId>
+			<artifactId>jersey-common</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.tyrus</groupId>
+			<artifactId>tyrus-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.tyrus</groupId>
+			<artifactId>tyrus-container-grizzly-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>de.rwh.utils</groupId>
+			<artifactId>crypto-utils</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>de.rwh.utils</groupId>
+			<artifactId>log4j2-utils</artifactId>
+		</dependency>
+	</dependencies>
 </project>

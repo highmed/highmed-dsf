@@ -14,4 +14,10 @@ public class TaskServiceJaxrs extends AbstractServiceJaxrs<Task, TaskService> im
 	{
 		super(delegate);
 	}
+
+	@Override
+	public String getPath()
+	{
+		return PATH;
+	}
 }

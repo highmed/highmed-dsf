@@ -15,4 +15,10 @@ public class ResearchStudyServiceJaxrs extends AbstractServiceJaxrs<ResearchStud
 	{
 		super(delegate);
 	}
+
+	@Override
+	public String getPath()
+	{
+		return PATH;
+	}
 }

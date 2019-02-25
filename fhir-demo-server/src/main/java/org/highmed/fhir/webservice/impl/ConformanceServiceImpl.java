@@ -76,6 +76,12 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 	}
 
 	@Override
+	public String getPath()
+	{
+		throw new UnsupportedOperationException("implemented by jaxrs service layer");
+	}
+
+	@Override
 	public void afterPropertiesSet() throws Exception
 	{
 		Objects.requireNonNull(parameterConverter, "parameterConverter");
