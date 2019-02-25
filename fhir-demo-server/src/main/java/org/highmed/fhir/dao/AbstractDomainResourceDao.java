@@ -18,11 +18,11 @@ import org.highmed.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.fhir.dao.exception.ResourceNotFoundException;
 import org.highmed.fhir.search.DbSearchQuery;
 import org.highmed.fhir.search.PartialResult;
+import org.highmed.fhir.search.SearchQueryParameter;
 import org.highmed.fhir.search.SearchQuery;
 import org.highmed.fhir.search.SearchQuery.SearchQueryBuilder;
 import org.highmed.fhir.search.parameters.ResourceId;
 import org.highmed.fhir.search.parameters.ResourceLastUpdated;
-import org.highmed.fhir.search.parameters.basic.SearchParameter;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.postgresql.util.PGobject;
@@ -47,7 +47,7 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 	private final String resourceColumn;
 	private final String resourceIdColumn;
 
-	private final List<Supplier<SearchParameter<R>>> searchParameterFactories;
+	private final List<Supplier<SearchQueryParameter<R>>> searchParameterFactories;
 
 	private final String resourceTypeName;
 
@@ -58,7 +58,7 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 	@SafeVarargs
 	public AbstractDomainResourceDao(BasicDataSource dataSource, FhirContext fhirContext, Class<R> resourceType,
 			String resourceTable, String resourceColumn, String resourceIdColumn,
-			Supplier<SearchParameter<R>>... searchParameterFactories)
+			Supplier<SearchQueryParameter<R>>... searchParameterFactories)
 	{
 		this.dataSource = dataSource;
 		this.fhirContext = fhirContext;
@@ -477,13 +477,12 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 		return SearchQueryBuilder
 				.create(getResourceType(), getResourceTable(), getResourceIdColumn(), getResourceColumn(),
 						effectivePage, effectiveCount)
-				.with(new ResourceId(resourceType, getResourceIdColumn()),
-						new ResourceLastUpdated(resourceType, getResourceColumn()))
-				.with(searchParameterFactories.stream().map(Supplier::get).toArray(SearchParameter[]::new)).build();
+				.with(new ResourceId(getResourceIdColumn()), new ResourceLastUpdated(getResourceColumn()))
+				.with(searchParameterFactories.stream().map(Supplier::get).toArray(SearchQueryParameter[]::new)).build();
 	}
 
 	public final SearchQuery<R> createSearchQuery(int effectivePage, int effectiveCount, String sortParameters,
-			@SuppressWarnings("unchecked") SearchParameter<R>... parameters)
+			@SuppressWarnings("unchecked") SearchQueryParameter<R>... parameters)
 	{
 		return SearchQueryBuilder.create(getResourceType(), getResourceTable(), getResourceIdColumn(),
 				getResourceColumn(), effectivePage, effectiveCount).with(parameters).sort(sortParameters).build();

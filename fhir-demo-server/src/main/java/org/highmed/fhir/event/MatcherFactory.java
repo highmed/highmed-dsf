@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.highmed.fhir.dao.AbstractDomainResourceDao;
+import org.highmed.fhir.search.Matcher;
 import org.highmed.fhir.search.SearchQuery;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.springframework.util.MultiValueMap;
@@ -21,7 +22,7 @@ public class MatcherFactory
 			this.daosByResourceName.putAll(daosByResourceName);
 	}
 
-	public Optional<SearchQuery<? extends DomainResource>> createQuery(String uri)
+	public Optional<Matcher> createQuery(String uri)
 	{
 		UriComponents componentes = UriComponentsBuilder.fromUriString(uri).build();
 		String path = componentes.getPath();
@@ -37,12 +38,5 @@ public class MatcherFactory
 		}
 		else
 			return Optional.empty();
-	}
-
-	public static void main(String[] args)
-	{
-		UriComponents components = UriComponentsBuilder.fromUriString("Task?status=requested").build();
-		System.out.println(components.getPath());
-		System.out.println(components.getQueryParams());
 	}
 }

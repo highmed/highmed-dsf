@@ -18,7 +18,7 @@ import javax.websocket.RemoteEndpoint.Async;
 
 import org.highmed.fhir.dao.SubscriptionDao;
 import org.highmed.fhir.help.ExceptionHandler;
-import org.highmed.fhir.search.SearchQuery;
+import org.highmed.fhir.search.Matcher;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
@@ -40,17 +40,17 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 	private static class SubscriptionAndMatcher
 	{
 		final Subscription subscription;
-		final SearchQuery<?> query;
+		final Matcher matcher;
 
-		SubscriptionAndMatcher(Subscription subscription, SearchQuery<?> query)
+		SubscriptionAndMatcher(Subscription subscription, Matcher matcher)
 		{
 			this.subscription = subscription;
-			this.query = query;
+			this.matcher = matcher;
 		}
 
 		boolean matches(DomainResource resource)
 		{
-			return query.matches(resource);
+			return matcher.matches(resource);
 		}
 	}
 
@@ -140,13 +140,11 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 			Map<Class<? extends DomainResource>, List<SubscriptionAndMatcher>> queries = new HashMap<>();
 			for (Subscription subscription : subscriptions)
 			{
-				Optional<SearchQuery<? extends DomainResource>> query = matcherFactory
-						.createQuery(subscription.getCriteria());
+				Optional<Matcher> query = matcherFactory.createQuery(subscription.getCriteria());
 				if (query.isPresent())
 				{
 					if (queries.containsKey(query.get().getResourceType()))
 					{
-
 						queries.get(query.get().getResourceType())
 								.add(new SubscriptionAndMatcher(subscription, query.get()));
 					}
@@ -247,7 +245,7 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 		else
 			text = "ping " + s.getIdElement().getIdPart();
 
-		logger.debug("Calling {} remote{} connected for event {} for resource of type {} with id {}",
+		logger.debug("Calling {} connected remote{} for event {} for resource of type {} with id {}",
 				optRemotes.get().size(), optRemotes.get().size() != 1 ? "s" : "", event.getClass().getName(),
 				event.getResourceType().getAnnotation(ResourceDef.class).name(), event.getId());
 
@@ -260,7 +258,7 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 		if (subscriptionsByIdPart.containsKey(subscriptionIdPart))
 		{
 			logger.debug("Binding websocket session {} to subscription {}", sessionId, subscriptionIdPart);
-			asyncRemotesBySubscriptionIdPart.putWithOldValue(subscriptionIdPart, list ->
+			asyncRemotesBySubscriptionIdPart.replace(subscriptionIdPart, list ->
 			{
 				if (list == null)
 				{
@@ -277,7 +275,7 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 			asyncRemote.sendText("bound " + subscriptionIdPart);
 		}
 		else
-			asyncRemote.sendText("Not Found");
+			asyncRemote.sendText("not-found " + subscriptionIdPart); // TODO not part of FHIR specification
 	}
 
 	@Override

@@ -53,7 +53,7 @@ public class WebsocketEndpoint extends Endpoint
 
 				if (boundReceived)
 				{
-					if (pingHandler != null)
+					if (pingHandler != null && ("ping " + subscriptionIdPart).equals(message))
 						pingHandler.accept(message);
 					else if (domainResourceHandler != null && parserFactory != null)
 						domainResourceHandler.accept((DomainResource) parserFactory.get().parseResource(message));

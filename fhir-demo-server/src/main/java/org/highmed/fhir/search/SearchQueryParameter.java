@@ -1,4 +1,4 @@
-package org.highmed.fhir.search.parameters.basic;
+package org.highmed.fhir.search;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -15,7 +15,7 @@ import javax.ws.rs.core.UriBuilder;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 
-public interface SearchParameter<R extends DomainResource>
+public interface SearchQueryParameter<R extends DomainResource> extends MatcherParameter
 {
 	@Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)
@@ -29,11 +29,6 @@ public interface SearchParameter<R extends DomainResource>
 		SearchParamType type();
 
 		String documentation();
-	}
-
-	static IllegalStateException notDefined()
-	{
-		return new IllegalStateException("not defined");
 	}
 
 	void configure(Map<String, List<String>> queryParameters);
@@ -55,11 +50,7 @@ public interface SearchParameter<R extends DomainResource>
 	 */
 	void modifyBundleUri(UriBuilder bundleUri);
 
-	Class<R> getResourceType();
-
-	boolean matches(R resource);
-
-	SortParameter getSortParameter();
+	SearchQuerySortParameter getSortParameter();
 
 	String getParameterName();
 }

@@ -8,9 +8,9 @@ import java.util.Objects;
 
 import javax.ws.rs.core.UriBuilder;
 
+import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.fhir.search.parameters.basic.AbstractSearchParameter;
-import org.highmed.fhir.search.parameters.basic.SearchParameter;
-import org.highmed.fhir.search.parameters.basic.SearchParameter.SearchParameterDefinition;
+import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Task;
@@ -24,7 +24,7 @@ public class TaskRequester extends AbstractSearchParameter<Task>
 
 	public TaskRequester()
 	{
-		super(Task.class, PARAMETER_NAME);
+		super(PARAMETER_NAME);
 	}
 
 	@Override
@@ -70,16 +70,20 @@ public class TaskRequester extends AbstractSearchParameter<Task>
 	}
 
 	@Override
-	public boolean matches(Task resource)
+	public boolean matches(DomainResource resource)
 	{
 		if (!isDefined())
-			throw SearchParameter.notDefined();
+			throw notDefined();
+
+		if (!(resource instanceof Task))
+			return false;
+
+		Task t = (Task) resource;
 
 		if (requester.hasVersionIdPart())
-			return Objects.equals(resource.getRequester().getIdElement().getValue(),
-					requester.getIdElement().getValue());
-		else if (resource.getRequester().getIdElement().getValue() != null)
-			return resource.getRequester().getIdElement().getValue().startsWith(requester.getIdElement().getValue());
+			return Objects.equals(t.getRequester().getIdElement().getValue(), requester.getIdElement().getValue());
+		else if (t.getRequester().getIdElement().getValue() != null)
+			return t.getRequester().getIdElement().getValue().startsWith(requester.getIdElement().getValue());
 		else
 			return false;
 	}

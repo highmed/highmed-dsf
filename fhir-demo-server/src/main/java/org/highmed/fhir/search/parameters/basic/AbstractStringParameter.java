@@ -35,9 +35,9 @@ public abstract class AbstractStringParameter<R extends DomainResource> extends 
 
 	protected StringValueAndSearchType valueAndType;
 
-	public AbstractStringParameter(Class<R> resourceType, String parameterName)
+	public AbstractStringParameter(String parameterName)
 	{
-		super(resourceType, parameterName);
+		super(parameterName);
 	}
 
 	@Override

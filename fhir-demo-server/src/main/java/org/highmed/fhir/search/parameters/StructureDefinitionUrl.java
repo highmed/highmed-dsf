@@ -3,9 +3,9 @@ package org.highmed.fhir.search.parameters;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.fhir.search.parameters.basic.AbstractCanonicalUrlParameter;
-import org.highmed.fhir.search.parameters.basic.SearchParameter;
-import org.highmed.fhir.search.parameters.basic.SearchParameter.SearchParameterDefinition;
+import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 
@@ -26,7 +26,7 @@ public class StructureDefinitionUrl extends AbstractCanonicalUrlParameter<Struct
 
 	public StructureDefinitionUrl(String resourceColumn)
 	{
-		super(StructureDefinition.class, PARAMETER_NAME);
+		super(PARAMETER_NAME);
 
 		this.resourceColumn = resourceColumn;
 	}
@@ -75,21 +75,26 @@ public class StructureDefinitionUrl extends AbstractCanonicalUrlParameter<Struct
 	}
 
 	@Override
-	public boolean matches(StructureDefinition resource)
+	public boolean matches(DomainResource resource)
 	{
 		if (!isDefined())
-			throw SearchParameter.notDefined();
+			throw notDefined();
+
+		if (!(resource instanceof StructureDefinition))
+			return false;
+
+		StructureDefinition s = (StructureDefinition) resource;
 
 		switch (valueAndType.type)
 		{
 			case PRECISE:
-				return Objects.equal(resource.getUrl(), valueAndType.url)
-						&& (valueAndType.version == null || Objects.equal(resource.getVersion(), valueAndType.version));
+				return Objects.equal(s.getUrl(), valueAndType.url)
+						&& (valueAndType.version == null || Objects.equal(s.getVersion(), valueAndType.version));
 			case BELOW:
-				return resource.getUrl() != null && resource.getUrl().startsWith(valueAndType.url)
-						&& (valueAndType.version == null || Objects.equal(resource.getVersion(), valueAndType.version));
+				return s.getUrl() != null && s.getUrl().startsWith(valueAndType.url)
+						&& (valueAndType.version == null || Objects.equal(s.getVersion(), valueAndType.version));
 			default:
-				throw SearchParameter.notDefined();
+				throw notDefined();
 		}
 	}
 

@@ -7,9 +7,8 @@ import java.util.Map;
 
 import javax.ws.rs.core.UriBuilder;
 
+import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.fhir.search.parameters.basic.AbstractSearchParameter;
-import org.highmed.fhir.search.parameters.basic.SearchParameter;
-import org.highmed.fhir.search.parameters.basic.SearchParameter.SearchParameterDefinition;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 
@@ -23,9 +22,9 @@ public class ResourceId<R extends DomainResource> extends AbstractSearchParamete
 	private final String resourceIdColumn;
 	private String id;
 
-	public ResourceId(Class<R> resourceType, String resourceIdColumn)
+	public ResourceId(String resourceIdColumn)
 	{
-		super(resourceType, PARAMETER_NAME);
+		super(PARAMETER_NAME);
 
 		this.resourceIdColumn = resourceIdColumn;
 	}
@@ -78,7 +77,7 @@ public class ResourceId<R extends DomainResource> extends AbstractSearchParamete
 		if (isDefined())
 			return Objects.equal(resource.getId(), id);
 		else
-			throw SearchParameter.notDefined();
+			throw notDefined();
 	}
 
 	@Override

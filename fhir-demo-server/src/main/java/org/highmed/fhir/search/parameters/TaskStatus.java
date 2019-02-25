@@ -7,10 +7,10 @@ import java.util.Map;
 
 import javax.ws.rs.core.UriBuilder;
 
+import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.fhir.search.parameters.basic.AbstractTokenParameter;
-import org.highmed.fhir.search.parameters.basic.SearchParameter;
-import org.highmed.fhir.search.parameters.basic.SearchParameter.SearchParameterDefinition;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Task;
 
@@ -25,7 +25,7 @@ public class TaskStatus extends AbstractTokenParameter<Task>
 
 	public TaskStatus()
 	{
-		super(Task.class, PARAMETER_NAME);
+		super(PARAMETER_NAME);
 	}
 
 	@Override
@@ -84,12 +84,15 @@ public class TaskStatus extends AbstractTokenParameter<Task>
 	}
 
 	@Override
-	public boolean matches(Task resource)
+	public boolean matches(DomainResource resource)
 	{
 		if (!isDefined())
-			throw SearchParameter.notDefined();
+			throw notDefined();
 
-		return Objects.equal(resource.getStatus(), status);
+		if (!(resource instanceof Task))
+			return false;
+
+		return Objects.equal(((Task) resource).getStatus(), status);
 	}
 
 	@Override

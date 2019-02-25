@@ -1,6 +1,6 @@
-package org.highmed.fhir.search.parameters.basic;
+package org.highmed.fhir.search;
 
-public class SortParameter
+public class SearchQuerySortParameter
 {
 	public enum SortDirection
 	{
@@ -37,7 +37,7 @@ public class SortParameter
 	private final String sql;
 	private final SortDirection direction;
 
-	public SortParameter(String sql, SortDirection direction)
+	public SearchQuerySortParameter(String sql, SortDirection direction)
 	{
 		this.sql = sql;
 		this.direction = direction;

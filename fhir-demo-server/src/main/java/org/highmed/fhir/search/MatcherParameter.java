@@ -1,0 +1,8 @@
+package org.highmed.fhir.search;
+
+import org.hl7.fhir.r4.model.DomainResource;
+
+public interface MatcherParameter
+{
+	boolean matches(DomainResource resource);
+}

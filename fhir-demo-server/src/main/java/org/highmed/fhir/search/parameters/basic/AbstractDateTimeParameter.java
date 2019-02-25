@@ -16,10 +16,11 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.core.UriBuilder;
 
+import org.highmed.fhir.search.SearchQueryParameter;
 import org.hl7.fhir.r4.model.DomainResource;
 
 public abstract class AbstractDateTimeParameter<R extends DomainResource> extends AbstractSearchParameter<R>
-		implements SearchParameter<R>
+		implements SearchQueryParameter<R>
 {
 	public static enum DateTimeSearchType
 	{
@@ -82,9 +83,9 @@ public abstract class AbstractDateTimeParameter<R extends DomainResource> extend
 
 	private List<DateTimeValueAndTypeAndSearchType> valuesAndTypes = new ArrayList<>();
 
-	public AbstractDateTimeParameter(Class<R> resourceType, String parameterName)
+	public AbstractDateTimeParameter(String parameterName)
 	{
-		super(resourceType, parameterName);
+		super(parameterName);
 	}
 
 	@Override

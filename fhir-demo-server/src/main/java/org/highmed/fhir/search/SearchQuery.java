@@ -13,10 +13,9 @@ import java.util.stream.Collectors;
 import javax.ws.rs.core.UriBuilder;
 
 import org.highmed.fhir.search.parameters.basic.AbstractSearchParameter;
-import org.highmed.fhir.search.parameters.basic.SearchParameter;
 import org.hl7.fhir.r4.model.DomainResource;
 
-public class SearchQuery<R extends DomainResource> implements DbSearchQuery
+public class SearchQuery<R extends DomainResource> implements DbSearchQuery, Matcher
 {
 	public static class SearchQueryBuilder<R extends DomainResource>
 	{
@@ -34,7 +33,7 @@ public class SearchQuery<R extends DomainResource> implements DbSearchQuery
 		private final int page;
 		private final int count;
 
-		private final List<SearchParameter<R>> searchParameters = new ArrayList<SearchParameter<R>>();
+		private final List<SearchQueryParameter<R>> searchParameters = new ArrayList<SearchQueryParameter<R>>();
 		private String sortParameters;
 
 		private SearchQueryBuilder(Class<R> resourceType, String resourceTable, String resourceIdColumn,
@@ -48,18 +47,18 @@ public class SearchQuery<R extends DomainResource> implements DbSearchQuery
 			this.count = count;
 		}
 
-		public SearchQueryBuilder<R> with(SearchParameter<R> searchParameters)
+		public SearchQueryBuilder<R> with(SearchQueryParameter<R> searchParameters)
 		{
 			this.searchParameters.add(searchParameters);
 			return this;
 		}
 
-		public SearchQueryBuilder<R> with(@SuppressWarnings("unchecked") SearchParameter<R>... searchParameters)
+		public SearchQueryBuilder<R> with(@SuppressWarnings("unchecked") SearchQueryParameter<R>... searchParameters)
 		{
 			return with(Arrays.asList(searchParameters));
 		}
 
-		public SearchQueryBuilder<R> with(List<SearchParameter<R>> searchParameters)
+		public SearchQueryBuilder<R> with(List<SearchQueryParameter<R>> searchParameters)
 		{
 			this.searchParameters.addAll(searchParameters);
 			return this;
@@ -81,21 +80,21 @@ public class SearchQuery<R extends DomainResource> implements DbSearchQuery
 	private final Class<R> resourceType;
 	private final String searchQueryMain;
 	private final String countQueryMain;
-	private final List<SearchParameter<R>> searchParameters = new ArrayList<>();
+	private final List<SearchQueryParameter<R>> searchParameters = new ArrayList<>();
 	private final PageAndCount pageAndCount;
 
 	private String filterQuery = "";
 	private String sortSql = "";
-	private List<SearchParameter<R>> sortParameters = Collections.emptyList();
+	private List<SearchQueryParameter<R>> sortParameters = Collections.emptyList();
 
 	SearchQuery(Class<R> resourceType, String resourceTable, String resourceIdColumn, String resourceColumn, int page,
-			int count, List<? extends SearchParameter<R>> searchParameters)
+			int count, List<? extends SearchQueryParameter<R>> searchParameters)
 	{
 		this(resourceType, resourceTable, resourceIdColumn, resourceColumn, page, count, null, searchParameters);
 	}
 
 	SearchQuery(Class<R> resourceType, String resourceTable, String resourceIdColumn, String resourceColumn, int page,
-			int count, String sortParameters, List<? extends SearchParameter<R>> searchParameters)
+			int count, String sortParameters, List<? extends SearchQueryParameter<R>> searchParameters)
 	{
 		this.resourceType = resourceType;
 		this.searchQueryMain = "SELECT " + resourceColumn + " FROM (SELECT DISTINCT ON (" + resourceIdColumn + ") "
@@ -117,7 +116,7 @@ public class SearchQuery<R extends DomainResource> implements DbSearchQuery
 	{
 		searchParameters.forEach(p -> p.configure(queryParameters));
 
-		filterQuery = searchParameters.stream().filter(SearchParameter::isDefined).map(SearchParameter::getFilterQuery)
+		filterQuery = searchParameters.stream().filter(SearchQueryParameter::isDefined).map(SearchQueryParameter::getFilterQuery)
 				.collect(Collectors.joining(" AND "));
 
 		createSortSql(getFirst(queryParameters, AbstractSearchParameter.SORT_PARAMETER));
@@ -146,9 +145,9 @@ public class SearchQuery<R extends DomainResource> implements DbSearchQuery
 				.collect(Collectors.joining(", ", " ORDER BY ", ""));
 	}
 
-	private SearchParameter<R> getSearchParameter(String sort)
+	private SearchQueryParameter<R> getSearchParameter(String sort)
 	{
-		for (SearchParameter<R> p : searchParameters)
+		for (SearchQueryParameter<R> p : searchParameters)
 		{
 			if (p.getParameterName().equals(sort) || ("+" + p.getParameterName()).equals(sort)
 					|| ("-" + p.getParameterName()).equals(sort))
@@ -174,11 +173,11 @@ public class SearchQuery<R extends DomainResource> implements DbSearchQuery
 	@Override
 	public void modifyStatement(PreparedStatement statement) throws SQLException
 	{
-		List<SearchParameter<?>> filtered = searchParameters.stream().filter(SearchParameter::isDefined)
+		List<SearchQueryParameter<?>> filtered = searchParameters.stream().filter(SearchQueryParameter::isDefined)
 				.collect(Collectors.toList());
 
 		int index = 0;
-		for (SearchParameter<?> q : filtered)
+		for (SearchQueryParameter<?> q : filtered)
 			for (int i = 0; i < q.getSqlParameterCount(); i++)
 				q.modifyStatement(++index, i + 1, statement);
 	}
@@ -199,7 +198,7 @@ public class SearchQuery<R extends DomainResource> implements DbSearchQuery
 	{
 		Objects.requireNonNull(bundleUri, "bundleUri");
 
-		searchParameters.stream().filter(SearchParameter::isDefined).forEach(p -> p.modifyBundleUri(bundleUri));
+		searchParameters.stream().filter(SearchQueryParameter::isDefined).forEach(p -> p.modifyBundleUri(bundleUri));
 
 		if (!sortParameters.isEmpty())
 			bundleUri.replaceQueryParam(AbstractSearchParameter.SORT_PARAMETER, sortParameter());
@@ -219,12 +218,13 @@ public class SearchQuery<R extends DomainResource> implements DbSearchQuery
 		return resourceType;
 	}
 
+	@Override
 	public boolean matches(DomainResource resource)
 	{
 		if (!getResourceType().isInstance(resource))
 			return false;
 
-		return searchParameters.stream().filter(SearchParameter::isDefined)
-				.map(p -> p.matches(getResourceType().cast(resource))).allMatch(b -> b);
+		return searchParameters.stream().filter(SearchQueryParameter::isDefined).map(p -> p.matches(resource))
+				.allMatch(b -> b);
 	}
 }

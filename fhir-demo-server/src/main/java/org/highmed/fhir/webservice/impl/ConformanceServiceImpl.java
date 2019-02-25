@@ -14,6 +14,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.highmed.fhir.help.ParameterConverter;
+import org.highmed.fhir.search.SearchQueryParameter;
+import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.fhir.search.parameters.OrganizationName;
 import org.highmed.fhir.search.parameters.ResourceId;
 import org.highmed.fhir.search.parameters.ResourceLastUpdated;
@@ -22,8 +24,6 @@ import org.highmed.fhir.search.parameters.SubscriptionChannelType;
 import org.highmed.fhir.search.parameters.SubscriptionStatus;
 import org.highmed.fhir.search.parameters.TaskRequester;
 import org.highmed.fhir.search.parameters.TaskStatus;
-import org.highmed.fhir.search.parameters.basic.SearchParameter;
-import org.highmed.fhir.search.parameters.basic.SearchParameter.SearchParameterDefinition;
 import org.highmed.fhir.webservice.specification.ConformanceService;
 import org.highmed.fhir.websocket.EventEndpoint;
 import org.hl7.fhir.r4.model.CapabilityStatement;
@@ -148,9 +148,9 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 
 		@SuppressWarnings("unchecked")
 		var standardSortableSearchParameters = Arrays.asList(
-				createSearchParameter((Class<? extends SearchParameter<? extends DomainResource>>) ResourceId.class),
+				createSearchParameter((Class<? extends SearchQueryParameter<? extends DomainResource>>) ResourceId.class),
 				createSearchParameter(
-						(Class<? extends SearchParameter<? extends DomainResource>>) ResourceLastUpdated.class));
+						(Class<? extends SearchQueryParameter<? extends DomainResource>>) ResourceLastUpdated.class));
 		var standardOperations = Arrays.asList(createValidateOperation());
 
 		for (Class<? extends DomainResource> resource : resources)
@@ -229,7 +229,7 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 	}
 
 	private CapabilityStatementRestResourceSearchParamComponent createSearchParameter(
-			Class<? extends SearchParameter<? extends DomainResource>> parameter)
+			Class<? extends SearchQueryParameter<? extends DomainResource>> parameter)
 	{
 		SearchParameterDefinition d = parameter.getAnnotation(SearchParameterDefinition.class);
 		return createSearchParameter(d.name(), d.definition(), d.type(), d.documentation());

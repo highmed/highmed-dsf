@@ -30,9 +30,9 @@ public abstract class AbstractTokenParameter<R extends DomainResource> extends A
 
 	protected TokenValueAndSearchType valueAndType;
 
-	public AbstractTokenParameter(Class<R> resourceType, String parameterName)
+	public AbstractTokenParameter(String parameterName)
 	{
-		super(resourceType, parameterName);
+		super(parameterName);
 	}
 
 	@Override
@@ -85,10 +85,5 @@ public abstract class AbstractTokenParameter<R extends DomainResource> extends A
 				bundleUri.replaceQueryParam(parameterName, valueAndType + "|");
 				break;
 		}
-	}
-
-	public static void main(String[] args)
-	{
-
 	}
 }

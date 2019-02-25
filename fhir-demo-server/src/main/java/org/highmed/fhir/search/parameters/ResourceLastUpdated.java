@@ -11,9 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.fhir.search.parameters.basic.AbstractDateTimeParameter;
-import org.highmed.fhir.search.parameters.basic.SearchParameter;
-import org.highmed.fhir.search.parameters.basic.SearchParameter.SearchParameterDefinition;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 
@@ -30,9 +29,9 @@ public class ResourceLastUpdated<R extends DomainResource> extends AbstractDateT
 	private final String jsonProperty;
 	private List<Object> values = new ArrayList<>();
 
-	public ResourceLastUpdated(Class<R> resourceType, String resourceColumn)
+	public ResourceLastUpdated(String resourceColumn)
 	{
-		super(resourceType, PARAMETER_NAME);
+		super(PARAMETER_NAME);
 
 		jsonProperty = toJsonProperty(resourceColumn);
 	}
@@ -102,7 +101,7 @@ public class ResourceLastUpdated<R extends DomainResource> extends AbstractDateT
 	public boolean matches(DomainResource resource)
 	{
 		if (!isDefined())
-			throw SearchParameter.notDefined();
+			throw notDefined();
 
 		ZonedDateTime lastUpdated = toZonedDateTime(resource.getMeta().getLastUpdated());
 		return lastUpdated != null && getValuesAndTypes().stream().allMatch(value -> matches(lastUpdated, value));
@@ -128,7 +127,7 @@ public class ResourceLastUpdated<R extends DomainResource> extends AbstractDateT
 			case YEAR_PERIOD:
 				return matches(lastUpdated.toLocalDate(), (LocalDatePair) value.value);
 			default:
-				throw SearchParameter.notDefined();
+				throw notDefined();
 		}
 	}
 
@@ -149,7 +148,7 @@ public class ResourceLastUpdated<R extends DomainResource> extends AbstractDateT
 			case NE:
 				return !lastUpdated.isEqual(value);
 			default:
-				throw SearchParameter.notDefined();
+				throw notDefined();
 		}
 	}
 
@@ -170,7 +169,7 @@ public class ResourceLastUpdated<R extends DomainResource> extends AbstractDateT
 			case NE:
 				return !lastUpdated.isEqual(value);
 			default:
-				throw SearchParameter.notDefined();
+				throw notDefined();
 		}
 	}
 

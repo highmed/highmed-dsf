@@ -5,27 +5,32 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.highmed.fhir.search.parameters.basic.SortParameter.SortDirection;
+import org.highmed.fhir.search.SearchQueryParameter;
+import org.highmed.fhir.search.SearchQuerySortParameter;
+import org.highmed.fhir.search.SearchQuerySortParameter.SortDirection;
 import org.hl7.fhir.r4.model.DomainResource;
 
-public abstract class AbstractSearchParameter<R extends DomainResource> implements SearchParameter<R>
+public abstract class AbstractSearchParameter<R extends DomainResource> implements SearchQueryParameter<R>
 {
 	public static final String SORT_PARAMETER = "_sort";
 
-	protected final Class<R> resourceType;
 	protected final String parameterName;
 
 	private SortDirection sortDirection;
 
-	public AbstractSearchParameter(Class<R> resourceType, String parameterName)
+	public AbstractSearchParameter(String parameterName)
 	{
-		this.resourceType = resourceType;
 		this.parameterName = parameterName;
 	}
 
 	public final String getParameterName()
 	{
 		return parameterName;
+	}
+
+	protected IllegalStateException notDefined()
+	{
+		return new IllegalStateException("not defined");
 	}
 
 	@Override
@@ -59,16 +64,10 @@ public abstract class AbstractSearchParameter<R extends DomainResource> implemen
 	protected abstract void configureSearchParameter(Map<String, List<String>> queryParameters);
 
 	@Override
-	public SortParameter getSortParameter()
+	public SearchQuerySortParameter getSortParameter()
 	{
-		return new SortParameter(getSortSql(sortDirection.getSqlModifierWithSpacePrefix()), sortDirection);
+		return new SearchQuerySortParameter(getSortSql(sortDirection.getSqlModifierWithSpacePrefix()), sortDirection);
 	}
 
 	protected abstract String getSortSql(String sortDirectionWithSpacePrefix);
-
-	@Override
-	public Class<R> getResourceType()
-	{
-		return resourceType;
-	}
 }

@@ -3,9 +3,9 @@ package org.highmed.fhir.search.parameters;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.fhir.search.parameters.basic.AbstractStringParameter;
-import org.highmed.fhir.search.parameters.basic.SearchParameter;
-import org.highmed.fhir.search.parameters.basic.SearchParameter.SearchParameterDefinition;
+import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Organization;
 
@@ -18,7 +18,7 @@ public class OrganizationName extends AbstractStringParameter<Organization>
 
 	public OrganizationName()
 	{
-		super(Organization.class, PARAMETER_NAME);
+		super(PARAMETER_NAME);
 	}
 
 	@Override
@@ -62,23 +62,26 @@ public class OrganizationName extends AbstractStringParameter<Organization>
 	}
 
 	@Override
-	public boolean matches(Organization resource)
+	public boolean matches(DomainResource resource)
 	{
 		if (!isDefined())
-			throw SearchParameter.notDefined();
+			throw notDefined();
+
+		if (!(resource instanceof Organization))
+			return false;
+
+		Organization o = (Organization) resource;
 
 		switch (valueAndType.type)
 		{
 			case STARTS_WITH:
-				return resource.getName() != null
-						&& resource.getName().toLowerCase().startsWith(valueAndType.value.toLowerCase());
+				return o.getName() != null && o.getName().toLowerCase().startsWith(valueAndType.value.toLowerCase());
 			case CONTAINS:
-				return resource.getName() != null
-						&& resource.getName().toLowerCase().contains(valueAndType.value.toLowerCase());
+				return o.getName() != null && o.getName().toLowerCase().contains(valueAndType.value.toLowerCase());
 			case EXACT:
-				return Objects.equal(resource.getName(), valueAndType.value);
+				return Objects.equal(o.getName(), valueAndType.value);
 			default:
-				throw SearchParameter.notDefined();
+				throw notDefined();
 		}
 	}
 

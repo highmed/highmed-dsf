@@ -37,9 +37,9 @@ public abstract class AbstractCanonicalUrlParameter<R extends DomainResource> ex
 
 	protected CanonicalUrlAndSearchType valueAndType;
 
-	public AbstractCanonicalUrlParameter(Class<R> resourceType, String parameterName)
+	public AbstractCanonicalUrlParameter(String parameterName)
 	{
-		super(resourceType, parameterName);
+		super(parameterName);
 	}
 
 	@Override

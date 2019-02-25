@@ -46,7 +46,7 @@ public class ReadWriteMap<K, V>
 		}
 	}
 
-	public void putWithOldValue(K key, Function<V, V> put)
+	public void replace(K key, Function<V, V> put)
 	{
 		w.lock();
 		try
