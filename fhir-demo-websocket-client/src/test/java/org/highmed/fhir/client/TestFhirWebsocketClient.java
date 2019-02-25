@@ -32,6 +32,9 @@ public class TestFhirWebsocketClient
 
 		WebsocketClientTyrus client = new WebsocketClientTyrus(fhirContext, URI.create("wss://localhost:8001/fhir/ws"),
 				trustStore, keyStore, keyStorePassword, "8c52c90d-a99c-40ce-9e49-8ba604224401");
+		// WebsocketClientTyrus client = new WebsocketClientTyrus(fhirContext,
+		// URI.create("wss://localhost:8001/fhir/ws"),
+		// trustStore, keyStore, keyStorePassword, "4e19853d-82cb-4509-b2cf-b5b86f70ae91");
 
 		client.connect();
 		client.setDomainResourceHandler(r -> onResource(fhirContext, r), fhirContext::newJsonParser);

@@ -96,8 +96,8 @@ public class TestFhirJerseyClient
 
 			// Subscription subscription = new Subscription();
 			// subscription.setStatus(SubscriptionStatus.ACTIVE);
-			// subscription.setReason("Businness Process Engine");
-			// subscription.setCriteria("Task?status=requested");
+			// subscription.setReason("Test");
+			// subscription.setCriteria("Task");
 			// SubscriptionChannelComponent channel = subscription.getChannel();
 			// channel.setType(SubscriptionChannelType.WEBSOCKET);
 			// channel.setPayload(Constants.CT_FHIR_JSON_NEW);
