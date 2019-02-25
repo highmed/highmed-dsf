@@ -1,6 +1,5 @@
 package org.highmed.fhir.client;
 
-
 import java.security.KeyStore;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -22,15 +21,16 @@ public class AbstractJerseyClient
 	private final Client client;
 	private final String domain;
 
-	public AbstractJerseyClient(String schemaHostPort, KeyStore trustStore, KeyStore keyStore,
-			String keyStorePassword, ObjectMapper objectMapper, List<?> componentsToRegister)
+	public AbstractJerseyClient(String schemaHostPort, KeyStore trustStore, KeyStore keyStore, String keyStorePassword,
+			ObjectMapper objectMapper, List<?> componentsToRegister)
 	{
-		this(schemaHostPort, trustStore, keyStore, keyStorePassword, null, null, null, 0, 0, objectMapper, componentsToRegister);
+		this(schemaHostPort, trustStore, keyStore, keyStorePassword, null, null, null, 0, 0, objectMapper,
+				componentsToRegister);
 	}
 
-	public AbstractJerseyClient(String schemaHostPort, KeyStore trustStore, KeyStore keyStore,
-			String keyStorePassword, String proxySchemeHostPort, String proxyUserName, String proxyPassword,
-			int connectTimeout, int readTimeout, ObjectMapper objectMapper, List<?> componentsToRegister)
+	public AbstractJerseyClient(String schemaHostPort, KeyStore trustStore, KeyStore keyStore, String keyStorePassword,
+			String proxySchemeHostPort, String proxyUserName, String proxyPassword, int connectTimeout, int readTimeout,
+			ObjectMapper objectMapper, List<?> componentsToRegister)
 	{
 		SSLContext sslContext = null;
 		if (trustStore != null && keyStore == null && keyStorePassword == null)
@@ -57,7 +57,7 @@ public class AbstractJerseyClient
 			p.setMapper(objectMapper);
 			builder.register(p);
 		}
-		
+
 		componentsToRegister.forEach(builder::register);
 
 		client = builder.build();

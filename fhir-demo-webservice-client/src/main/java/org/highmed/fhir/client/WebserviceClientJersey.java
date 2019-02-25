@@ -55,13 +55,13 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.rest.api.Constants;
 
-public class FhirJerseyClient extends AbstractJerseyClient
+public class WebserviceClientJersey extends AbstractJerseyClient implements WebserviceClient
 {
-	private static final Logger logger = LoggerFactory.getLogger(FhirJerseyClient.class);
+	private static final Logger logger = LoggerFactory.getLogger(WebserviceClientJersey.class);
 
-	public FhirJerseyClient(String schemaHostPort, KeyStore trustStore, KeyStore keyStore, String keyStorePassword,
-			String proxySchemeHostPort, String proxyUserName, String proxyPassword, int connectTimeout, int readTimeout,
-			ObjectMapper objectMapper, FhirContext fhirContext)
+	public WebserviceClientJersey(String schemaHostPort, KeyStore trustStore, KeyStore keyStore,
+			String keyStorePassword, String proxySchemeHostPort, String proxyUserName, String proxyPassword,
+			int connectTimeout, int readTimeout, ObjectMapper objectMapper, FhirContext fhirContext)
 	{
 		super(schemaHostPort, trustStore, keyStore, keyStorePassword, proxySchemeHostPort, proxyUserName, proxyPassword,
 				connectTimeout, readTimeout, objectMapper, components(fhirContext));
@@ -86,7 +86,9 @@ public class FhirJerseyClient extends AbstractJerseyClient
 				new TaskJsonFhirAdapter(fhirContext), new TaskXmlFhirAdapter(fhirContext));
 	}
 
-	public <R extends DomainResource> R create(Class<R> resourceClass, R resource)
+	@Override
+	@SuppressWarnings("unchecked")
+	public <R extends DomainResource> R create(R resource)
 	{
 		Response response = getResource().path(resource.getClass().getAnnotation(ResourceDef.class).name()).request()
 				.accept(Constants.CT_FHIR_JSON_NEW).post(Entity.entity(resource, Constants.CT_FHIR_JSON_NEW));
@@ -98,12 +100,14 @@ public class FhirJerseyClient extends AbstractJerseyClient
 		logger.debug("HTTP header Last-Modified: {}", response.getHeaderString(HttpHeaders.LAST_MODIFIED));
 
 		if (Status.CREATED.getStatusCode() == response.getStatus())
-			return response.readEntity(resourceClass);
+			return (R) response.readEntity(resource.getClass());
 		else
 			throw new WebApplicationException(response);
 	}
 
-	public <R extends DomainResource> R update(Class<R> resourceClass, R resource)
+	@Override
+	@SuppressWarnings("unchecked")
+	public <R extends DomainResource> R update(R resource)
 	{
 		Response response = getResource().path(resource.getClass().getAnnotation(ResourceDef.class).name())
 				.path(resource.getIdElement().getIdPart()).request().accept(Constants.CT_FHIR_JSON_NEW)
@@ -115,11 +119,12 @@ public class FhirJerseyClient extends AbstractJerseyClient
 		logger.debug("HTTP header Last-Modified: {}", response.getHeaderString(HttpHeaders.LAST_MODIFIED));
 
 		if (Status.OK.getStatusCode() == response.getStatus())
-			return response.readEntity(resourceClass);
+			return (R) response.readEntity(resource.getClass());
 		else
 			throw new WebApplicationException(response);
 	}
 
+	@Override
 	public CapabilityStatement getConformance()
 	{
 		Response response = getResource().path("metadata").request()
@@ -134,6 +139,7 @@ public class FhirJerseyClient extends AbstractJerseyClient
 			throw new WebApplicationException(response);
 	}
 
+	@Override
 	public StructureDefinition generateSnapshot(String url)
 	{
 		Parameters parameters = new Parameters();
@@ -151,6 +157,7 @@ public class FhirJerseyClient extends AbstractJerseyClient
 			throw new WebApplicationException(response);
 	}
 
+	@Override
 	public StructureDefinition generateSnapshot(StructureDefinition differential)
 	{
 		Parameters parameters = new Parameters();

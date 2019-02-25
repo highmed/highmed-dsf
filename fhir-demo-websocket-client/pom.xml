@@ -34,8 +34,14 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>de.rwh.utils</groupId>
 			<artifactId>log4j2-utils</artifactId>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>
