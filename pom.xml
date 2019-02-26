@@ -16,9 +16,14 @@
 	<modules>
 		<module>bpe-demo-server</module>
 		<module>bpe-demo-server-jetty</module>
+		<module>bpe-demo-db-migration</module>
 	</modules>
 
 	<properties>
+		<!-- if upgrading, added last (and in between) versions to db-migration 
+			project, db-migration needs dependency to all version since and including 
+			7.10.0 for camunda-sql-scripts -->
+		<camunda.version>7.10.0</camunda.version>
 	</properties>
 
 	<repositories>
@@ -37,6 +42,16 @@
 			<id>repo-it-release</id>
 			<name>libs-release-mi</name>
 			<url>https://repository.it.hs-heilbronn.de/artifactory/libs-release-mi-local</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+		</repository>
+		<repository>
+			<id>camunda-bpm</id>
+			<url>https://app.camunda.com/nexus/content/repositories/camunda-bpm/</url>
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
@@ -162,6 +177,25 @@
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
 				<version>42.2.5</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.camunda.bpm</groupId>
+				<artifactId>camunda-bom</artifactId>
+				<version>${camunda.version}</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
+			<dependency>
+				<groupId>org.camunda.bpm.distro</groupId>
+				<artifactId>camunda-sql-scripts</artifactId>
+				<version>${camunda.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.mybatis</groupId>
+				<artifactId>mybatis</artifactId>
+				<version>3.5.0</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

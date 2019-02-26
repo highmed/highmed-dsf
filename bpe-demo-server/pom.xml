@@ -73,6 +73,15 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.camunda.bpm</groupId>
+			<artifactId>camunda-engine</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.camunda.bpm</groupId>
+			<artifactId>camunda-engine-spring</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>de.rwh.utils</groupId>
 			<artifactId>db-test-utils</artifactId>
 			<scope>test</scope>
