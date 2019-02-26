@@ -75,10 +75,10 @@ public class WebsocketEndpoint extends Endpoint
 		logger.warn("Websocket onError", throwable);
 	}
 
-	public void setDomainResourceHandler(Consumer<DomainResource> handler, Supplier<IParser> parserFactory)
+	public void setDomainResourceHandler(Consumer<DomainResource> handler, Supplier<IParser> parser)
 	{
 		domainResourceHandler = handler;
-		this.parserFactory = parserFactory;
+		parserFactory = parser;
 		pingHandler = null;
 	}
 

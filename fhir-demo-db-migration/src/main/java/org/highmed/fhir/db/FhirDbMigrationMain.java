@@ -27,20 +27,6 @@ public class FhirDbMigrationMain
 
 	public static void main(String[] args) throws Exception
 	{
-		// if (args.length != 1 || !("-dev".equals(args[0]) ||
-		// "-prod".equals(args[0])))
-		// {
-		// logger.error("Argument -dev or -prod expected");
-		// System.exit(1);
-		// }
-		//
-		// String context = args[0];
-		// context = context.substring(1, context.length());
-		//
-		// logger.info("Executing with context {}", context);
-		//
-		// Contexts contexts = new Contexts(context);
-
 		Contexts contexts = new Contexts();
 
 		Path propertiesPath = Paths.get("db.properties");

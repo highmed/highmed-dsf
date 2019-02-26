@@ -56,12 +56,12 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 	private static class SessionIdAndRemoteAsync
 	{
 		final String sessionId;
-		final Async removeAsync;
+		final Async remoteAsync;
 
-		SessionIdAndRemoteAsync(String sessionId, Async removeAsync)
+		SessionIdAndRemoteAsync(String sessionId, Async remoteAsync)
 		{
 			this.sessionId = sessionId;
-			this.removeAsync = removeAsync;
+			this.remoteAsync = remoteAsync;
 		}
 
 		@Override
@@ -226,6 +226,7 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 	{
 		Optional<List<SessionIdAndRemoteAsync>> optRemotes = asyncRemotesBySubscriptionIdPart
 				.get(s.getIdElement().getIdPart());
+
 		if (optRemotes.isEmpty())
 		{
 			logger.debug("No remotes connected to subscription with id {}", s.getIdElement().getIdPart());
@@ -243,7 +244,21 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 		logger.debug("Calling {} remote{} connected to subscription with id {}", optRemotes.get().size(),
 				optRemotes.get().size() != 1 ? "s" : "", s.getIdElement().getIdPart());
 
-		optRemotes.get().forEach(r -> r.removeAsync.sendText(text));
+		// defensive copy since since list could be changed by other threads while we are reading
+		List<SessionIdAndRemoteAsync> remotes = new ArrayList<>(optRemotes.get());
+		remotes.forEach(r -> send(r, text));
+	}
+
+	private void send(SessionIdAndRemoteAsync sessionAndRemote, String text)
+	{
+		try
+		{
+			sessionAndRemote.remoteAsync.sendText(text);
+		}
+		catch (Exception e)
+		{
+			logger.warn("Error while sending event to remote with session id {}", sessionAndRemote.sessionId);
+		}
 	}
 
 	@Override

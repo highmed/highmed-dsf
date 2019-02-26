@@ -72,12 +72,12 @@
 		<dependencies>
 			<dependency>
 				<groupId>org.highmed.fhir</groupId>
-				<artifactId>fhir-demo-jersey-client</artifactId>
+				<artifactId>fhir-demo-adapter</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.highmed.fhir</groupId>
-				<artifactId>fhir-demo-adapter</artifactId>
+				<artifactId>fhir-demo-db-migration</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -87,7 +87,27 @@
 			</dependency>
 			<dependency>
 				<groupId>org.highmed.fhir</groupId>
-				<artifactId>fhir-demo-jetty</artifactId>
+				<artifactId>fhir-demo-server-jetty</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.fhir</groupId>
+				<artifactId>fhir-demo-client</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.fhir</groupId>
+				<artifactId>fhir-demo-webservice-client</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.fhir</groupId>
+				<artifactId>fhir-demo-websocket-client</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.fhir</groupId>
+				<artifactId>fhir-demo-cert-generator</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
