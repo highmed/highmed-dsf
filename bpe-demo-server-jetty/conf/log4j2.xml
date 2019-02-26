@@ -41,8 +41,8 @@
 	</Appenders>
 
 	<Loggers>
-		<Logger name="org.highmed" level="DEBUG" />
-		<Logger name="de.khd" level="TRACE" />
+		<Logger name="org.highmed" level="TRACE" />
+		<Logger name="de.rwh" level="DEBUG" />
 		<Logger name="org.apache" level="WARN" />
 		<Logger name="org.springframework" level="WARN" />
 		<Logger name="jndi" level="WARN" />

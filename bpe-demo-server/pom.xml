@@ -12,6 +12,15 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>org.highmed.fhir</groupId>
+			<artifactId>fhir-demo-websocket-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>de.rwh.utils</groupId>
+			<artifactId>crypto-utils</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>org.glassfish.jaxb</groupId>
 			<artifactId>jaxb-runtime</artifactId>
 		</dependency>
