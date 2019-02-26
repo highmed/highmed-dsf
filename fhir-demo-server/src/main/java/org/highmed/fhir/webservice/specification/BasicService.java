@@ -5,11 +5,14 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.highmed.fhir.authentication.NeedsAuthentication;
+import org.highmed.fhir.authentication.UserProvider;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Parameters;
 
 public interface BasicService<R extends DomainResource> extends NeedsAuthentication
 {
+	void setUserProvider(UserProvider provider);
+
 	Response create(R resource, UriInfo uri, HttpHeaders headers);
 
 	Response read(String id, UriInfo uri, HttpHeaders headers);

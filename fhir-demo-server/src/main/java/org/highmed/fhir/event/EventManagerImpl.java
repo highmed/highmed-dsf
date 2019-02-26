@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -26,8 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.EventListener;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
@@ -102,6 +101,7 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 	private final MatcherFactory matcherFactory;
 	private final FhirContext fhirContext;
 
+	private final AtomicBoolean firstCall = new AtomicBoolean(true);
 	private final ReadWriteMap<String, Subscription> subscriptionsByIdPart = new ReadWriteMap<>();
 	private final ReadWriteMap<Class<? extends DomainResource>, List<SubscriptionAndMatcher>> matchersByResource = new ReadWriteMap<>();
 	private final ReadWriteMap<String, List<SessionIdAndRemoteAsync>> asyncRemotesBySubscriptionIdPart = new ReadWriteMap<>();
@@ -124,15 +124,16 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 		Objects.requireNonNull(fhirContext, "fhirContext");
 	}
 
-	@EventListener({ ContextRefreshedEvent.class })
-	public void onContextRefreshedEvent(ContextRefreshedEvent event)
-	{
-		refreshMatchers();
-	}
+	// @EventListener({ ContextRefreshedEvent.class })
+	// public void onContextRefreshedEvent(ContextRefreshedEvent event)
+	// {
+	// refreshMatchers();
+	// }
 
 	private void refreshMatchers()
 	{
 		logger.info("Refreshing subscriptions");
+		firstCall.set(false);
 
 		try
 		{
@@ -196,7 +197,7 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 		logger.debug("handling event {} for resource of type {} with id {}", event.getClass().getName(),
 				event.getResourceType().getAnnotation(ResourceDef.class).name(), event.getId());
 
-		if (Subscription.class.equals(event.getResourceType()))
+		if (Subscription.class.equals(event.getResourceType()) || firstCall.get())
 			refreshMatchers();
 
 		Optional<List<SubscriptionAndMatcher>> optMatchers = matchersByResource.get(event.getResourceType());
@@ -223,17 +224,11 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 
 	private void handleEvent(Subscription s, Event<?> event)
 	{
-		logger.debug("handling event {} for resource of type {} with id {} based on active subscription with id {}",
-				event.getClass().getName(), event.getResourceType().getAnnotation(ResourceDef.class).name(),
-				event.getId(), s.getIdElement().getIdPart());
-
 		Optional<List<SessionIdAndRemoteAsync>> optRemotes = asyncRemotesBySubscriptionIdPart
 				.get(s.getIdElement().getIdPart());
 		if (optRemotes.isEmpty())
 		{
-			logger.debug("No remotes connected for event {} for resource of type {} with id {}",
-					event.getClass().getName(), event.getResourceType().getAnnotation(ResourceDef.class).name(),
-					event.getId());
+			logger.debug("No remotes connected to subscription with id {}", s.getIdElement().getIdPart());
 			return;
 		}
 
@@ -245,9 +240,8 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 		else
 			text = "ping " + s.getIdElement().getIdPart();
 
-		logger.debug("Calling {} connected remote{} for event {} for resource of type {} with id {}",
-				optRemotes.get().size(), optRemotes.get().size() != 1 ? "s" : "", event.getClass().getName(),
-				event.getResourceType().getAnnotation(ResourceDef.class).name(), event.getId());
+		logger.debug("Calling {} remote{} connected to subscription with id {}", optRemotes.get().size(),
+				optRemotes.get().size() != 1 ? "s" : "", s.getIdElement().getIdPart());
 
 		optRemotes.get().forEach(r -> r.removeAsync.sendText(text));
 	}
@@ -255,6 +249,9 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 	@Override
 	public void bind(String sessionId, Async asyncRemote, String subscriptionIdPart)
 	{
+		if (firstCall.get())
+			refreshMatchers();
+
 		if (subscriptionsByIdPart.containsKey(subscriptionIdPart))
 		{
 			logger.debug("Binding websocket session {} to subscription {}", sessionId, subscriptionIdPart);

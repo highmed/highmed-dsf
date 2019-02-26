@@ -16,6 +16,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
+import org.highmed.fhir.authentication.UserProvider;
 import org.highmed.fhir.dao.AbstractDomainResourceDao;
 import org.highmed.fhir.event.EventGenerator;
 import org.highmed.fhir.event.EventManager;
@@ -81,9 +82,21 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 
 	public void afterPropertiesSet() throws Exception
 	{
+		Objects.requireNonNull(resourceTypeName, "resourceTypeName");
 		Objects.requireNonNull(serverBase, "serverBase");
+		Objects.requireNonNull(defaultPageCount, "defaultPageCount");
 		Objects.requireNonNull(dao, "dao");
 		Objects.requireNonNull(validator, "validator");
+		Objects.requireNonNull(eventManager, "eventManager");
+		Objects.requireNonNull(exceptionHandler, "exceptionHandler");
+		Objects.requireNonNull(eventGenerator, "eventGenerator");
+		Objects.requireNonNull(responseGenerator, "responseGenerator");
+		Objects.requireNonNull(parameterConverter, "parameterConverter");
+	}
+
+	@Override
+	public void setUserProvider(UserProvider provider)
+	{
 	}
 
 	@Override
