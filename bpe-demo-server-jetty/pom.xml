@@ -2,7 +2,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>bpe-demo-jetty</artifactId>
+	<artifactId>bpe-demo-server-jetty</artifactId>
 
 	<parent>
 		<groupId>org.highmed.bpe</groupId>
@@ -17,23 +17,14 @@
 		</dependency>
 
 		<dependency>
-			<groupId>de.rwh.utils</groupId>
-			<artifactId>jetty-utils</artifactId>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<scope>compile</scope>
 		</dependency>
 
 		<dependency>
-			<groupId>org.glassfish.jersey.containers</groupId>
-			<artifactId>jersey-container-servlet</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-web</artifactId>
-			<exclusions>
-				<exclusion>
-					<artifactId>commons-logging</artifactId>
-					<groupId>commons-logging</groupId>
-				</exclusion>
-			</exclusions>
+			<groupId>de.rwh.utils</groupId>
+			<artifactId>jetty-utils</artifactId>
 		</dependency>
 
 		<dependency>

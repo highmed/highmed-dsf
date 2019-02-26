@@ -10,12 +10,12 @@
 	<parent>
 		<groupId>de.rwh.pom</groupId>
 		<artifactId>rwh-pom</artifactId>
-		<version>0.3.0</version>
+		<version>0.4.0</version>
 	</parent>
 
 	<modules>
-		<module>bpe-demo-jetty</module>
 		<module>bpe-demo-server</module>
+		<module>bpe-demo-server-jetty</module>
 	</modules>
 
 	<properties>
@@ -77,6 +77,21 @@
 			<dependency>
 				<groupId>de.rwh.utils</groupId>
 				<artifactId>jetty-utils</artifactId>
+				<version>0.3.0-SNAPSHOT</version>
+			</dependency>
+			<dependency>
+				<groupId>de.rwh.utils</groupId>
+				<artifactId>crypto-utils</artifactId>
+				<version>2.1.0-SNAPSHOT</version>
+			</dependency>
+			<dependency>
+				<groupId>de.rwh.utils</groupId>
+				<artifactId>log4j2-utils</artifactId>
+				<version>0.2.0-SNAPSHOT</version>
+			</dependency>
+			<dependency>
+				<groupId>de.rwh.utils</groupId>
+				<artifactId>db-test-utils</artifactId>
 				<version>0.2.0-SNAPSHOT</version>
 			</dependency>
 
@@ -95,7 +110,17 @@
 				<artifactId>jersey-hk2</artifactId>
 				<version>${jersey.version}</version>
 			</dependency>
-			
+			<dependency>
+				<groupId>org.glassfish.jersey.media</groupId>
+				<artifactId>jersey-media-jaxb</artifactId>
+				<version>${jersey.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish.jersey.media</groupId>
+				<artifactId>jersey-media-json-jackson</artifactId>
+				<version>${jersey.version}</version>
+			</dependency>
+
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-context</artifactId>
@@ -108,9 +133,35 @@
 			</dependency>
 
 			<dependency>
+				<groupId>javax.ws.rs</groupId>
+				<artifactId>javax.ws.rs-api</artifactId>
+				<version>2.1</version>
+			</dependency>
+			<dependency>
 				<groupId>javax.servlet</groupId>
 				<artifactId>javax.servlet-api</artifactId>
 				<version>3.1.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish.jaxb</groupId>
+				<artifactId>jaxb-runtime</artifactId>
+				<version>2.3.2</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-dbcp2</artifactId>
+				<version>2.6.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.liquibase</groupId>
+				<artifactId>liquibase-core</artifactId>
+				<version>3.6.3</version>
+			</dependency>
+			<dependency>
+				<groupId>org.postgresql</groupId>
+				<artifactId>postgresql</artifactId>
+				<version>42.2.5</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
