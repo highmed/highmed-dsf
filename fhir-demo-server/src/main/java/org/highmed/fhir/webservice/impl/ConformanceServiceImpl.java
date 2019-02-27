@@ -24,7 +24,7 @@ import org.highmed.fhir.search.parameters.SubscriptionStatus;
 import org.highmed.fhir.search.parameters.TaskRequester;
 import org.highmed.fhir.search.parameters.TaskStatus;
 import org.highmed.fhir.webservice.specification.ConformanceService;
-import org.highmed.fhir.websocket.EventEndpoint;
+import org.highmed.fhir.websocket.ServerEndpoint;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementImplementationComponent;
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementKind;
@@ -118,7 +118,7 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 						RestfulSecurityService.CERTIFICATES.getDisplay()))));
 		Extension websocketExtension = rest.addExtension();
 		websocketExtension.setUrl("http://hl7.org/fhir/StructureDefinition/capabilitystatement-websocket");
-		websocketExtension.setValue(new UrlType(serverBase.replace("http", "ws") + EventEndpoint.PATH));
+		websocketExtension.setValue(new UrlType(serverBase.replace("http", "ws") + ServerEndpoint.PATH));
 
 		var resources = Arrays.asList(CodeSystem.class, HealthcareService.class, Location.class, Organization.class,
 				Patient.class, PractitionerRole.class, Practitioner.class, Provenance.class, ResearchStudy.class,

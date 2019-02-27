@@ -24,6 +24,6 @@ public class ServerEndpointRegistrationForAuthentication extends ServerEndpointR
 		Organization organization = (Organization) httpSession.getAttribute(AuthenticationFilter.ORGANIZATION_PROPERTY);
 
 		// don't use ServerEndpointRegistration#getUserProperties()
-		sec.getUserProperties().put(EventEndpoint.ORGANIZATION_PROPERTY, organization);
+		sec.getUserProperties().put(ServerEndpoint.ORGANIZATION_PROPERTY, organization);
 	}
 }

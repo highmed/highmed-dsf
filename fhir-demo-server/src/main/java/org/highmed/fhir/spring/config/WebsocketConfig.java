@@ -1,6 +1,6 @@
 package org.highmed.fhir.spring.config;
 
-import org.highmed.fhir.websocket.EventEndpoint;
+import org.highmed.fhir.websocket.ServerEndpoint;
 import org.highmed.fhir.websocket.ServerEndpointRegistrationForAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -15,15 +15,15 @@ public class WebsocketConfig
 	private EventConfig eventConfig;
 
 	@Bean
-	public EventEndpoint eventEndpoint()
+	public ServerEndpoint eventEndpoint()
 	{
-		return new EventEndpoint(eventConfig.eventManager());
+		return new ServerEndpoint(eventConfig.eventManager());
 	}
 
 	@Bean
 	public ServerEndpointRegistration eventEndpointRegistration()
 	{
-		return new ServerEndpointRegistrationForAuthentication(EventEndpoint.PATH, eventEndpoint());
+		return new ServerEndpointRegistrationForAuthentication(ServerEndpoint.PATH, eventEndpoint());
 	}
 
 	@Bean

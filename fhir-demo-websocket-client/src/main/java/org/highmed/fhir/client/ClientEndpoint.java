@@ -15,13 +15,13 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.parser.IParser;
 
-public class WebsocketEndpoint extends Endpoint
+public class ClientEndpoint extends Endpoint
 {
-	private static final Logger logger = LoggerFactory.getLogger(WebsocketEndpoint.class);
+	private static final Logger logger = LoggerFactory.getLogger(ClientEndpoint.class);
 
 	private final String subscriptionIdPart;
 
-	public WebsocketEndpoint(String subscriptionIdPart)
+	public ClientEndpoint(String subscriptionIdPart)
 	{
 		this.subscriptionIdPart = subscriptionIdPart;
 	}
@@ -35,8 +35,7 @@ public class WebsocketEndpoint extends Endpoint
 	{
 		logger.debug("Websocket onOpen");
 
-		// don't use lambda expression for handler
-		session.addMessageHandler(new Whole<String>()
+		session.addMessageHandler(new Whole<String>() // don't use lambda
 		{
 			private boolean boundReceived;
 

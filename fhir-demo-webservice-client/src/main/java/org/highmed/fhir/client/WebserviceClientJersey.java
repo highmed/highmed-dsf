@@ -3,9 +3,14 @@ package org.highmed.fhir.client;
 import java.security.KeyStore;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -45,6 +50,7 @@ import org.highmed.fhir.adapter.TaskJsonFhirAdapter;
 import org.highmed.fhir.adapter.TaskXmlFhirAdapter;
 import org.highmed.fhir.adapter.ValueSetJsonFhirAdapter;
 import org.highmed.fhir.adapter.ValueSetXmlFhirAdapter;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Parameters;
@@ -93,7 +99,6 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public <R extends DomainResource> R create(R resource)
 	{
 		Response response = getResource().path(resource.getClass().getAnnotation(ResourceDef.class).name()).request()
@@ -106,15 +111,20 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 		logger.debug("HTTP header Last-Modified: {}", response.getHeaderString(HttpHeaders.LAST_MODIFIED));
 
 		if (Status.CREATED.getStatusCode() == response.getStatus())
-			return (R) response.readEntity(resource.getClass());
+		{
+			@SuppressWarnings("unchecked")
+			R read = (R) response.readEntity(resource.getClass());
+			return read;
+		}
 		else
 			throw new WebApplicationException(response);
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public <R extends DomainResource> R update(R resource)
 	{
+		Objects.requireNonNull(resource, "resource");
+
 		Response response = getResource().path(resource.getClass().getAnnotation(ResourceDef.class).name())
 				.path(resource.getIdElement().getIdPart()).request().accept(Constants.CT_FHIR_JSON_NEW)
 				.put(Entity.entity(resource, Constants.CT_FHIR_JSON_NEW));
@@ -125,7 +135,11 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 		logger.debug("HTTP header Last-Modified: {}", response.getHeaderString(HttpHeaders.LAST_MODIFIED));
 
 		if (Status.OK.getStatusCode() == response.getStatus())
-			return (R) response.readEntity(resource.getClass());
+		{
+			@SuppressWarnings("unchecked")
+			R read = (R) response.readEntity(resource.getClass());
+			return read;
+		}
 		else
 			throw new WebApplicationException(response);
 	}
@@ -148,6 +162,8 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 	@Override
 	public StructureDefinition generateSnapshot(String url)
 	{
+		Objects.requireNonNull(url, "url");
+
 		Parameters parameters = new Parameters();
 		parameters.addParameter().setName("url").setValue(new UriType(url));
 
@@ -166,6 +182,8 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 	@Override
 	public StructureDefinition generateSnapshot(StructureDefinition differential)
 	{
+		Objects.requireNonNull(differential, "differential");
+
 		Parameters parameters = new Parameters();
 		parameters.addParameter().setName("resource").setResource(differential);
 
@@ -179,5 +197,68 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 			return response.readEntity(StructureDefinition.class);
 		else
 			throw new WebApplicationException(response);
+	}
+
+	@Override
+	public <R extends DomainResource> R read(Class<R> resourceType, String id)
+	{
+		Objects.requireNonNull(resourceType, "resourceType");
+		Objects.requireNonNull(id, "id");
+
+		Response response = getResource().path(StructureDefinition.class.getAnnotation(ResourceDef.class).name())
+				.path(id).request().accept(Constants.CT_FHIR_JSON_NEW).get();
+
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		if (Status.OK.getStatusCode() == response.getStatus())
+			return response.readEntity(resourceType);
+		else
+			throw new WebApplicationException(response);
+	}
+
+	@Override
+	public <R extends DomainResource> R read(Class<R> resourceType, String id, String version)
+	{
+		Objects.requireNonNull(resourceType, "resourceType");
+		Objects.requireNonNull(id, "id");
+		Objects.requireNonNull(version, "version");
+
+		Response response = getResource().path(StructureDefinition.class.getAnnotation(ResourceDef.class).name())
+				.path(id).path("_history").path(version).request().accept(Constants.CT_FHIR_JSON_NEW).get();
+
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		if (Status.OK.getStatusCode() == response.getStatus())
+			return response.readEntity(resourceType);
+		else
+			throw new WebApplicationException(response);
+	}
+
+	@Override
+	public <R extends DomainResource> List<R> search(Class<R> resourceType, Map<String, List<String>> parameters)
+	{
+		Objects.requireNonNull(resourceType, "resourceType");
+
+		WebTarget target = getResource().path(StructureDefinition.class.getAnnotation(ResourceDef.class).name());
+		if (parameters != null)
+		{
+			for (Entry<String, List<String>> entry : parameters.entrySet())
+				target = target.queryParam(entry.getKey(), entry.getValue().toArray());
+		}
+
+		Response response = target.request().accept(Constants.CT_FHIR_JSON_NEW).get();
+
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		if (Status.OK.getStatusCode() == response.getStatus())
+			return bundleToList(resourceType, response.readEntity(Bundle.class));
+		else
+			throw new WebApplicationException(response);
+	}
+
+	private <R extends DomainResource> List<R> bundleToList(Class<R> resourceType, Bundle bundle)
+	{
+		return bundle.getEntry().stream().filter(c -> resourceType.isInstance(c.getResource()))
+				.map(c -> resourceType.cast(c.getResource())).collect(Collectors.toList());
 	}
 }

@@ -47,7 +47,7 @@ public class WebsocketClientTyrus implements WebsocketClient
 
 	private final URI wsUri;
 	private final SSLContext sslContext;
-	private final WebsocketEndpoint endpoint;
+	private final ClientEndpoint endpoint;
 	private final String subscriptionIdPart;
 
 	private ClientManager manager;
@@ -68,7 +68,7 @@ public class WebsocketClientTyrus implements WebsocketClient
 		else
 			sslContext = SslConfigurator.getDefaultContext();
 
-		this.endpoint = new WebsocketEndpoint(subscriptionIdPart);
+		this.endpoint = new ClientEndpoint(subscriptionIdPart);
 		this.subscriptionIdPart = subscriptionIdPart;
 	}
 
