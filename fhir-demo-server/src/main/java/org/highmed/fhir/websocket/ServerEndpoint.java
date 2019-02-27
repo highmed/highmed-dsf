@@ -100,7 +100,7 @@ public class ServerEndpoint extends Endpoint implements InitializingBean, NeedsA
 			}
 		});
 
-		ScheduledFuture<?> pinger = scheduler.scheduleWithFixedDelay(() -> ping(session), 10, 10, TimeUnit.SECONDS);
+		ScheduledFuture<?> pinger = scheduler.scheduleWithFixedDelay(() -> ping(session), 2, 2, TimeUnit.MINUTES);
 		session.getUserProperties().put(PINGER_PROPERTY, pinger);
 	}
 
