@@ -8,6 +8,7 @@ import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.TaskService;
 import org.camunda.bpm.engine.spring.ProcessEngineFactoryBean;
 import org.camunda.bpm.engine.spring.SpringProcessEngineConfiguration;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,6 +27,9 @@ public class CamundaConfig
 
 	@Value("${org.highmed.bpe.db.password.camunda}")
 	private String dbPasswordCamunda;
+	
+	@Autowired
+	private ProcessEngine processEngine;
 
 	@Bean
 	public DataSourceTransactionManager transactionManager()
@@ -58,7 +62,7 @@ public class CamundaConfig
 	}
 
 	@Bean
-	public ProcessEngineFactoryBean processEngine()
+	public ProcessEngineFactoryBean processEngineFactory()
 	{
 		var f = new ProcessEngineFactoryBean();
 		f.setProcessEngineConfiguration(processEngineConfiguration());
@@ -66,31 +70,31 @@ public class CamundaConfig
 	}
 
 	@Bean
-	public RepositoryService repositoryService(ProcessEngine processEngine) throws Exception
+	public RepositoryService repositoryService() throws Exception
 	{
 		return processEngine.getRepositoryService();
 	}
 
 	@Bean
-	public RuntimeService runtimeService(ProcessEngine processEngine) throws Exception
+	public RuntimeService runtimeService() throws Exception
 	{
 		return processEngine.getRuntimeService();
 	}
 
 	@Bean
-	public TaskService taskService(ProcessEngine processEngine) throws Exception
+	public TaskService taskService() throws Exception
 	{
 		return processEngine.getTaskService();
 	}
 
 	@Bean
-	public HistoryService historyService(ProcessEngine processEngine) throws Exception
+	public HistoryService historyService() throws Exception
 	{
 		return processEngine.getHistoryService();
 	}
 
 	@Bean
-	public ManagementService managementService(ProcessEngine processEngine) throws Exception
+	public ManagementService managementService() throws Exception
 	{
 		return processEngine.getManagementService();
 	}

@@ -16,6 +16,10 @@
 			<artifactId>fhir-demo-websocket-client</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.highmed.fhir</groupId>
+			<artifactId>fhir-demo-webservice-client</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>de.rwh.utils</groupId>
 			<artifactId>crypto-utils</artifactId>
 		</dependency>
@@ -59,6 +63,11 @@
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.ws.rs</groupId>
+			<artifactId>javax.ws.rs-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 

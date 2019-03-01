@@ -24,6 +24,7 @@
 			project, db-migration needs dependency to all version since and including 
 			7.10.0 for camunda-sql-scripts -->
 		<camunda.version>7.10.0</camunda.version>
+		<fhir.demo.version>0.5.0-SNAPSHOT</fhir.demo.version>
 	</properties>
 
 	<repositories>
@@ -97,7 +98,12 @@
 			<dependency>
 				<groupId>org.highmed.fhir</groupId>
 				<artifactId>fhir-demo-websocket-client</artifactId>
-				<version>0.5.0-SNAPSHOT</version>
+				<version>${fhir.demo.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.fhir</groupId>
+				<artifactId>fhir-demo-webservice-client</artifactId>
+				<version>${fhir.demo.version}</version>
 			</dependency>
 
 			<dependency>
