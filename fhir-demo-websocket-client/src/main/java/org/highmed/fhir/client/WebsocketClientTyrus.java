@@ -69,6 +69,7 @@ public class WebsocketClientTyrus implements WebsocketClient
 			sslContext = SslConfigurator.getDefaultContext();
 
 		this.endpoint = new ClientEndpoint(subscriptionIdPart);
+		
 		this.subscriptionIdPart = subscriptionIdPart;
 	}
 
@@ -98,11 +99,6 @@ public class WebsocketClientTyrus implements WebsocketClient
 			throw new RuntimeException(e);
 		}
 
-		bind();
-	}
-
-	private void bind()
-	{
 		if (session == null || !session.isOpen())
 			throw new IllegalStateException("not connected");
 

@@ -23,7 +23,7 @@ public class FhirConfig
 	@Bean
 	public IValidationSupport validationSupport()
 	{
-		return new DefaultProfileValidationSupportWithFetchFromDb(fhirContext(),
-				daoConfig.structureDefinitionDao(), daoConfig.structureDefinitionSnapshotDao());
+		return new DefaultProfileValidationSupportWithFetchFromDb(fhirContext(), daoConfig.structureDefinitionDao(),
+				daoConfig.structureDefinitionSnapshotDao(), daoConfig.codeSystemDao(), daoConfig.valueSetDao());
 	}
 }

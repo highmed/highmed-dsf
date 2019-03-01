@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.highmed.fhir.dao.CodeSystemDao;
 import org.highmed.fhir.dao.StructureDefinitionDao;
 import org.highmed.fhir.dao.StructureDefinitionSnapshotDao;
+import org.highmed.fhir.dao.ValueSetDao;
 import org.highmed.fhir.function.SupplierWithSqlException;
 import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -25,13 +27,18 @@ public class DefaultProfileValidationSupportWithFetchFromDb extends DefaultProfi
 
 	private final StructureDefinitionDao structureDefinitionDao;
 	private final StructureDefinitionSnapshotDao structureDefinitionSnapshotDao;
+	private final CodeSystemDao codeSystemDao;
+	private final ValueSetDao valueSetDao;
 
 	public DefaultProfileValidationSupportWithFetchFromDb(FhirContext context,
 			StructureDefinitionDao structureDefinitionDao,
-			StructureDefinitionSnapshotDao structureDefinitionSnapshotDao)
+			StructureDefinitionSnapshotDao structureDefinitionSnapshotDao, CodeSystemDao codeSystemDao,
+			ValueSetDao valueSetDao)
 	{
 		this.structureDefinitionDao = structureDefinitionDao;
 		this.structureDefinitionSnapshotDao = structureDefinitionSnapshotDao;
+		this.codeSystemDao = codeSystemDao;
+		this.valueSetDao = valueSetDao;
 	}
 
 	@Override
@@ -39,6 +46,8 @@ public class DefaultProfileValidationSupportWithFetchFromDb extends DefaultProfi
 	{
 		Objects.requireNonNull(structureDefinitionDao, "structureDefinitionDao");
 		Objects.requireNonNull(structureDefinitionSnapshotDao, "structureDefinitionSnapshotDao");
+		Objects.requireNonNull(codeSystemDao, "codeSystemDao");
+		Objects.requireNonNull(valueSetDao, "valueSetDao");
 	}
 
 	@Override
@@ -84,7 +93,10 @@ public class DefaultProfileValidationSupportWithFetchFromDb extends DefaultProfi
 	@Override
 	public CodeSystem fetchCodeSystem(FhirContext context, String system)
 	{
-		// TODO Auto-generated method stub
+		Optional<CodeSystem> codeSystem = throwRuntimeException(() -> codeSystemDao.readByUrl(system));
+		if (codeSystem.isPresent())
+			return codeSystem.get();
+
 		return super.fetchCodeSystem(context, system);
 	}
 
@@ -92,7 +104,10 @@ public class DefaultProfileValidationSupportWithFetchFromDb extends DefaultProfi
 	// @Override
 	// public ValueSet fetchValueSet(FhirContext context, String system)
 	// {
-	// TODO Auto-generated method stub
-	// return super.fetchValueSet(context, theSystem);
+	// Optional<ValueSet> valueSet = throwRuntimeException(() -> valueSetDao.readByUrl(system));
+	// if (valueSet.isPresent())
+	// return valueSet.get();
+	//
+	// return super.fetchValueSet(context, system);
 	// }
 }

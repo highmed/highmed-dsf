@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Entity;
@@ -235,7 +234,7 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 	}
 
 	@Override
-	public <R extends DomainResource> List<R> search(Class<R> resourceType, Map<String, List<String>> parameters)
+	public <R extends DomainResource> Bundle search(Class<R> resourceType, Map<String, List<String>> parameters)
 	{
 		Objects.requireNonNull(resourceType, "resourceType");
 
@@ -251,14 +250,14 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
 				response.getStatusInfo().getReasonPhrase());
 		if (Status.OK.getStatusCode() == response.getStatus())
-			return bundleToList(resourceType, response.readEntity(Bundle.class));
+			return response.readEntity(Bundle.class);
 		else
 			throw new WebApplicationException(response);
 	}
 
-	private <R extends DomainResource> List<R> bundleToList(Class<R> resourceType, Bundle bundle)
-	{
-		return bundle.getEntry().stream().filter(c -> resourceType.isInstance(c.getResource()))
-				.map(c -> resourceType.cast(c.getResource())).collect(Collectors.toList());
-	}
+	// private <R extends DomainResource> List<R> bundleToList(Class<R> resourceType, Bundle bundle)
+	// {
+	// return bundle.getEntry().stream().filter(c -> resourceType.isInstance(c.getResource()))
+	// .map(c -> resourceType.cast(c.getResource())).collect(Collectors.toList());
+	// }
 }

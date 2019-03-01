@@ -20,11 +20,16 @@ public abstract class AbstractStructureDefinitionDao extends AbstractDomainResou
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractStructureDefinitionDao.class);
 
+	private final ReadByUrl<StructureDefinition> readByUrl;
+
 	public AbstractStructureDefinitionDao(BasicDataSource dataSource, FhirContext fhirContext, String resourceTable,
 			String resourceColumn, String resourceIdColumn)
 	{
 		super(dataSource, fhirContext, StructureDefinition.class, resourceTable, resourceColumn, resourceIdColumn,
 				() -> new StructureDefinitionUrl(resourceColumn));
+
+		readByUrl = new ReadByUrl<StructureDefinition>(this::getDataSource, this::getResource, resourceTable,
+				resourceColumn, resourceIdColumn);
 	}
 
 	public List<StructureDefinition> readAll() throws SQLException
@@ -49,33 +54,6 @@ public abstract class AbstractStructureDefinitionDao extends AbstractDomainResou
 
 	public Optional<StructureDefinition> readByUrl(String urlAndVersion) throws SQLException
 	{
-		if (urlAndVersion == null || urlAndVersion.isBlank())
-			return Optional.empty();
-
-		String[] split = urlAndVersion.split("[|]");
-		if (split.length < 1 || split.length > 2)
-			return Optional.empty();
-
-		String versionSql = split.length == 2 ? (getResourceColumn() + "->>'version' = ?") : "";
-		String sql = "SELECT DISTINCT ON(" + getResourceIdColumn() + ") " + getResourceColumn() + " FROM "
-				+ getResourceTable() + " WHERE NOT deleted AND " + getResourceColumn() + "->>'url' = ? " + versionSql
-				+ "ORDER BY " + getResourceIdColumn() + ", version LIMIT 1";
-
-		try (Connection connection = getDataSource().getConnection();
-				PreparedStatement statement = connection.prepareStatement(sql))
-		{
-			statement.setString(1, split[0]);
-			if (split.length == 2)
-				statement.setString(2, split[1]);
-
-			logger.trace("Executing query '{}'", statement);
-			try (ResultSet result = statement.executeQuery())
-			{
-				if (result.next())
-					return Optional.of(getResource(result, 1));
-				else
-					return Optional.empty();
-			}
-		}
+		return readByUrl.readByUrl(urlAndVersion);
 	}
 }

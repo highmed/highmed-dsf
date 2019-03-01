@@ -19,16 +19,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class AbstractJerseyClient
 {
 	private final Client client;
-	private final String domain;
+	private final String baseUrl;
 
-	public AbstractJerseyClient(String schemaHostPort, KeyStore trustStore, KeyStore keyStore, String keyStorePassword,
+	public AbstractJerseyClient(String baseUrl, KeyStore trustStore, KeyStore keyStore, String keyStorePassword,
 			ObjectMapper objectMapper, List<?> componentsToRegister)
 	{
-		this(schemaHostPort, trustStore, keyStore, keyStorePassword, null, null, null, 0, 0, objectMapper,
+		this(baseUrl, trustStore, keyStore, keyStorePassword, null, null, null, 0, 0, objectMapper,
 				componentsToRegister);
 	}
 
-	public AbstractJerseyClient(String schemaHostPort, KeyStore trustStore, KeyStore keyStore, String keyStorePassword,
+	public AbstractJerseyClient(String baseUrl, KeyStore trustStore, KeyStore keyStore, String keyStorePassword,
 			String proxySchemeHostPort, String proxyUserName, String proxyPassword, int connectTimeout, int readTimeout,
 			ObjectMapper objectMapper, List<?> componentsToRegister)
 	{
@@ -62,11 +62,11 @@ public class AbstractJerseyClient
 
 		client = builder.build();
 
-		this.domain = schemaHostPort;
+		this.baseUrl = baseUrl;
 	}
 
 	protected WebTarget getResource()
 	{
-		return client.target(domain);
+		return client.target(baseUrl);
 	}
 }
