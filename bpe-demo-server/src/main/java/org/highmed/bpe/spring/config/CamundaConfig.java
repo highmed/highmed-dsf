@@ -27,7 +27,7 @@ public class CamundaConfig
 
 	@Value("${org.highmed.bpe.db.password.camunda}")
 	private String dbPasswordCamunda;
-	
+
 	@Autowired
 	private ProcessEngine processEngine;
 
@@ -70,31 +70,31 @@ public class CamundaConfig
 	}
 
 	@Bean
-	public RepositoryService repositoryService() throws Exception
+	public RepositoryService repositoryService()
 	{
 		return processEngine.getRepositoryService();
 	}
 
 	@Bean
-	public RuntimeService runtimeService() throws Exception
+	public RuntimeService runtimeService()
 	{
 		return processEngine.getRuntimeService();
 	}
 
 	@Bean
-	public TaskService taskService() throws Exception
+	public TaskService taskService()
 	{
 		return processEngine.getTaskService();
 	}
 
 	@Bean
-	public HistoryService historyService() throws Exception
+	public HistoryService historyService()
 	{
 		return processEngine.getHistoryService();
 	}
 
 	@Bean
-	public ManagementService managementService() throws Exception
+	public ManagementService managementService()
 	{
 		return processEngine.getManagementService();
 	}

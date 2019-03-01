@@ -3,6 +3,7 @@ package org.highmed.bpe.event;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.ProcessEngineException;
@@ -12,12 +13,14 @@ import org.camunda.bpm.engine.repository.ProcessDefinition;
 import org.camunda.bpm.engine.runtime.EventSubscription;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
 import org.highmed.fhir.client.WebserviceClient;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.ParameterComponent;
 import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.web.util.UriComponentsBuilder;
 
 public class TaskHandler implements InitializingBean
 {
@@ -48,19 +51,23 @@ public class TaskHandler implements InitializingBean
 		task.setStatus(TaskStatus.INPROGRESS);
 		webserviceClient.update(task);
 
-		String processDefinitionKey = getProcessDefinitionKey(task.getInstantiatesUri());
-		String versionTag = getVersionTag(task.getInstantiatesUri());
-		String messageName = getString(task.getInput(), "http://highmed.org/fhir/CodeSystem/task-input",
-				"message-name");
-		String businessKey = getString(task.getInput(), "http://highmed.org/fhir/CodeSystem/task-input",
-				"business-key");
+		// http://highmed.org/bpe/Process/processDefinitionKey
+		// http://highmed.org/bpe/Process/processDefinitionKey/_history/versionTag
+		List<String> pathSegments = getPathSegments(task.getInstantiatesUri());
+		String processDefinitionKey = pathSegments.get(2);
+		String versionTag = pathSegments.size() == 5 ? pathSegments.get(4) : null;
+		String messageName = getString(task.getInput(), "http://highmed.org/fhir/CodeSystem/task-input", "message-name")
+				.orElse(null);
+		String businessKey = getString(task.getInput(), "http://highmed.org/fhir/CodeSystem/task-input", "business-key")
+				.orElse(null);
 
 		Map<String, Object> processVariables = task.getInput().stream()
 				.collect(Collectors.toMap(this::toKey, ParameterComponent::getValue));
 
 		try
 		{
-			onMessageReceived(processDefinitionKey, versionTag, messageName, businessKey, processVariables);
+			onMessageReceivedContinueOrStartProcessInstance(processDefinitionKey, versionTag, messageName, businessKey,
+					processVariables);
 			task.setStatus(TaskStatus.COMPLETED);
 		}
 		catch (ProcessEngineException e)
@@ -74,24 +81,17 @@ public class TaskHandler implements InitializingBean
 		}
 	}
 
-	private String getProcessDefinitionKey(String instantiatesUri)
+	private List<String> getPathSegments(String istantiatesUri)
 	{
-		// http://highmed.org/bpmn/Process/processDefinitionKey/_history/versionTag
-		// TODO Auto-generated method stub
-		return null;
+		return UriComponentsBuilder.fromUriString(istantiatesUri).build().getPathSegments();
 	}
 
-	private String getVersionTag(String instantiatesUri)
+	private Optional<String> getString(List<ParameterComponent> list, String system, String code)
 	{
-		// http://highmed.org/bpmn/Process/processDefinitionKey/_history/versionTag
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	private String getString(List<ParameterComponent> list, String system, String code)
-	{
-		// TODO Auto-generated method stub
-		return null;
+		return list.stream().filter(c -> c.getValue() instanceof StringType)
+				.filter(c -> c.getType().getCoding().stream()
+						.anyMatch(co -> system.equals(co.getSystem()) && code.equals(co.getCode())))
+				.map(c -> ((StringType) c.getValue()).asStringValue()).findFirst();
 	}
 
 	private String toKey(ParameterComponent parameterComponent)
@@ -102,10 +102,17 @@ public class TaskHandler implements InitializingBean
 						: parameterComponent.getType().getCodingFirstRep().getCode());
 	}
 
-	private void onMessageReceived(String processDefinitionKey, String versionTag, String messageName,
-			String businessKey, Map<String, Object> processVariables) throws ProcessEngineException
+	private ProcessInstance onMessageReceivedContinueOrStartProcessInstance(String processDefinitionKey,
+			String versionTag, String messageName, String businessKey, Map<String, Object> processVariables)
+			throws ProcessEngineException
 	{
-		ProcessDefinition processDefinition = getProcessDefinition(repositoryService, processDefinitionKey, versionTag);
+		ProcessDefinition processDefinition = getProcessDefinition(processDefinitionKey, versionTag);
+
+		if (processDefinition == null)
+			throw new ProcessEngineException("ProcessDefinition with key " + processDefinitionKey
+					+ (versionTag != null && !versionTag.isBlank() ? (" and versionTag " + versionTag) : "")
+					+ " not found");
+
 		ProcessInstance instance = runtimeService.createProcessInstanceQuery()
 				.processDefinitionId(processDefinition.getId()).processInstanceBusinessKey(businessKey).singleResult();
 
@@ -119,15 +126,16 @@ public class TaskHandler implements InitializingBean
 				runtimeService.messageEventReceived(subscription.getEventName(), subscription.getExecutionId(),
 						processVariables);
 			}
+
+			return instance;
 		}
 		else
 		{
-			runtimeService.startProcessInstanceById(processDefinition.getId(), businessKey, processVariables);
+			return runtimeService.startProcessInstanceById(processDefinition.getId(), businessKey, processVariables);
 		}
 	}
 
-	private ProcessDefinition getProcessDefinition(RepositoryService repositoryService, String processDefinitionKey,
-			String versionTag)
+	private ProcessDefinition getProcessDefinition(String processDefinitionKey, String versionTag)
 	{
 		if (versionTag != null && !versionTag.isBlank())
 			return repositoryService.createProcessDefinitionQuery().processDefinitionKey(processDefinitionKey)

@@ -112,7 +112,7 @@ public class EventConfig
 	}
 
 	@Bean
-	public EventHandler eventHandler() throws Exception
+	public EventHandler eventHandler()
 	{
 		EventType eventType = EventType.fromString(subscriptionPayloadType);
 
@@ -137,7 +137,7 @@ public class EventConfig
 	}
 
 	@Bean
-	public TaskHandler taskHandler() throws Exception
+	public TaskHandler taskHandler()
 	{
 		return new TaskHandler(camundaConfig.runtimeService(), camundaConfig.repositoryService(),
 				fhirWebserviceClient());
