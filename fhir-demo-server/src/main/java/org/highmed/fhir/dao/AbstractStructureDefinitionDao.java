@@ -10,6 +10,7 @@ import java.util.Optional;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.fhir.search.parameters.StructureDefinitionUrl;
+import org.highmed.fhir.search.parameters.StructureDefinitionVersion;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +27,7 @@ public abstract class AbstractStructureDefinitionDao extends AbstractDomainResou
 			String resourceColumn, String resourceIdColumn)
 	{
 		super(dataSource, fhirContext, StructureDefinition.class, resourceTable, resourceColumn, resourceIdColumn,
-				() -> new StructureDefinitionUrl(resourceColumn));
+				() -> new StructureDefinitionUrl(resourceColumn), () -> new StructureDefinitionVersion(resourceColumn));
 
 		readByUrl = new ReadByUrl<StructureDefinition>(this::getDataSource, this::getResource, resourceTable,
 				resourceColumn, resourceIdColumn);

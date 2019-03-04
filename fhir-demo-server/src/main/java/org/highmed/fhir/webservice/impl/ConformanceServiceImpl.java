@@ -15,14 +15,19 @@ import javax.ws.rs.core.UriInfo;
 
 import org.highmed.fhir.help.ParameterConverter;
 import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
+import org.highmed.fhir.search.parameters.CodeSystemUrl;
+import org.highmed.fhir.search.parameters.CodeSystemVersion;
 import org.highmed.fhir.search.parameters.OrganizationName;
 import org.highmed.fhir.search.parameters.ResourceId;
 import org.highmed.fhir.search.parameters.ResourceLastUpdated;
 import org.highmed.fhir.search.parameters.StructureDefinitionUrl;
+import org.highmed.fhir.search.parameters.StructureDefinitionVersion;
 import org.highmed.fhir.search.parameters.SubscriptionChannelType;
 import org.highmed.fhir.search.parameters.SubscriptionStatus;
 import org.highmed.fhir.search.parameters.TaskRequester;
 import org.highmed.fhir.search.parameters.TaskStatus;
+import org.highmed.fhir.search.parameters.ValueSetUrl;
+import org.highmed.fhir.search.parameters.ValueSetVersion;
 import org.highmed.fhir.webservice.specification.ConformanceService;
 import org.highmed.fhir.websocket.ServerEndpoint;
 import org.hl7.fhir.r4.model.CapabilityStatement;
@@ -127,11 +132,17 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 
 		var searchParameters = new HashMap<Class<? extends DomainResource>, List<CapabilityStatementRestResourceSearchParamComponent>>();
 
+		var codeSystemUrl = createSearchParameter(CodeSystemUrl.class);
+		var codeSystemVersion = createSearchParameter(CodeSystemVersion.class);
+		searchParameters.put(CodeSystem.class, Arrays.asList(codeSystemUrl, codeSystemVersion));
+
 		var organizationNameOrAlias = createSearchParameter(OrganizationName.class);
 		searchParameters.put(Organization.class, Arrays.asList(organizationNameOrAlias));
 
 		var structureDefinitionUrl = createSearchParameter(StructureDefinitionUrl.class);
-		searchParameters.put(StructureDefinition.class, Arrays.asList(structureDefinitionUrl));
+		var structureDefinitionVersion = createSearchParameter(StructureDefinitionVersion.class);
+		searchParameters.put(StructureDefinition.class,
+				Arrays.asList(structureDefinitionUrl, structureDefinitionVersion));
 
 		var subscriptionStatus = createSearchParameter(SubscriptionStatus.class);
 		var subscriptionChannelType = createSearchParameter(SubscriptionChannelType.class);
@@ -140,6 +151,10 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 		var taskRequester = createSearchParameter(TaskRequester.class);
 		var taskStatus = createSearchParameter(TaskStatus.class);
 		searchParameters.put(Task.class, Arrays.asList(taskRequester, taskStatus));
+
+		var valueSetUrl = createSearchParameter(ValueSetUrl.class);
+		var valueSetVersion = createSearchParameter(ValueSetVersion.class);
+		searchParameters.put(ValueSet.class, Arrays.asList(valueSetUrl, valueSetVersion));
 
 		var operations = new HashMap<Class<? extends DomainResource>, List<CapabilityStatementRestResourceOperationComponent>>();
 

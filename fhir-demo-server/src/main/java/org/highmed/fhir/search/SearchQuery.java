@@ -116,8 +116,8 @@ public class SearchQuery<R extends DomainResource> implements DbSearchQuery, Mat
 	{
 		searchParameters.forEach(p -> p.configure(queryParameters));
 
-		filterQuery = searchParameters.stream().filter(SearchQueryParameter::isDefined).map(SearchQueryParameter::getFilterQuery)
-				.collect(Collectors.joining(" AND "));
+		filterQuery = searchParameters.stream().filter(SearchQueryParameter::isDefined)
+				.map(SearchQueryParameter::getFilterQuery).collect(Collectors.joining(" AND "));
 
 		createSortSql(getFirst(queryParameters, AbstractSearchParameter.SORT_PARAMETER));
 	}
@@ -221,6 +221,9 @@ public class SearchQuery<R extends DomainResource> implements DbSearchQuery, Mat
 	@Override
 	public boolean matches(DomainResource resource)
 	{
+		if (resource == null)
+			return false;
+
 		if (!getResourceType().isInstance(resource))
 			return false;
 

@@ -1,22 +1,22 @@
 package org.highmed.fhir.search.parameters;
 
 import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
-import org.highmed.fhir.search.parameters.basic.AbstractUrlAndVersionParameter;
+import org.highmed.fhir.search.parameters.basic.AbstractVersionParameter;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 
-@SearchParameterDefinition(name = StructureDefinitionUrl.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/StructureDefinition.url", type = SearchParamType.URI, documentation = "The uri that identifies the structure definition")
-public class StructureDefinitionUrl extends AbstractUrlAndVersionParameter<StructureDefinition>
+@SearchParameterDefinition(name = StructureDefinitionVersion.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/StructureDefinition.version", type = SearchParamType.TOKEN, documentation = "The business version of the structure definition")
+public class StructureDefinitionVersion extends AbstractVersionParameter<StructureDefinition>
 {
 	public static final String RESOURCE_COLUMN = "structure_definition";
 
-	public StructureDefinitionUrl()
+	public StructureDefinitionVersion()
 	{
 		this(RESOURCE_COLUMN);
 	}
 
-	public StructureDefinitionUrl(String resourceColumn)
+	public StructureDefinitionVersion(String resourceColumn)
 	{
 		super(resourceColumn);
 	}

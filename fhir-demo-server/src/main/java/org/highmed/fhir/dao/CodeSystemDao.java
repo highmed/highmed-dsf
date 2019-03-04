@@ -4,6 +4,8 @@ import java.sql.SQLException;
 import java.util.Optional;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.highmed.fhir.search.parameters.CodeSystemUrl;
+import org.highmed.fhir.search.parameters.CodeSystemVersion;
 import org.hl7.fhir.r4.model.CodeSystem;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -14,7 +16,8 @@ public class CodeSystemDao extends AbstractDomainResourceDao<CodeSystem>
 
 	public CodeSystemDao(BasicDataSource dataSource, FhirContext fhirContext)
 	{
-		super(dataSource, fhirContext, CodeSystem.class, "code_systems", "code_system", "code_system_id");
+		super(dataSource, fhirContext, CodeSystem.class, "code_systems", "code_system", "code_system_id",
+				() -> new CodeSystemUrl(), () -> new CodeSystemVersion());
 
 		readByUrl = new ReadByUrl<CodeSystem>(this::getDataSource, this::getResource, getResourceTable(),
 				getResourceColumn(), getResourceIdColumn());
