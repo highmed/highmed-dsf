@@ -2,6 +2,7 @@ package org.highmed.fhir.spring.config;
 
 import org.highmed.fhir.webservice.impl.CodeSystemServiceImpl;
 import org.highmed.fhir.webservice.impl.ConformanceServiceImpl;
+import org.highmed.fhir.webservice.impl.EndpointServiceImpl;
 import org.highmed.fhir.webservice.impl.HealthcareServiceServiceImpl;
 import org.highmed.fhir.webservice.impl.LocationServiceImpl;
 import org.highmed.fhir.webservice.impl.OrganizationServiceImpl;
@@ -16,6 +17,7 @@ import org.highmed.fhir.webservice.impl.TaskServiceImpl;
 import org.highmed.fhir.webservice.impl.ValueSetServiceImpl;
 import org.highmed.fhir.webservice.jaxrs.CodeSystemServiceJaxrs;
 import org.highmed.fhir.webservice.jaxrs.ConformanceServiceJaxrs;
+import org.highmed.fhir.webservice.jaxrs.EndpointServiceJaxrs;
 import org.highmed.fhir.webservice.jaxrs.HealthcareServiceServiceJaxrs;
 import org.highmed.fhir.webservice.jaxrs.LocationServiceJaxrs;
 import org.highmed.fhir.webservice.jaxrs.OrganizationServiceJaxrs;
@@ -30,6 +32,7 @@ import org.highmed.fhir.webservice.jaxrs.TaskServiceJaxrs;
 import org.highmed.fhir.webservice.jaxrs.ValueSetServiceJaxrs;
 import org.highmed.fhir.webservice.secure.CodeSystemServiceSecure;
 import org.highmed.fhir.webservice.secure.ConformanceServiceSecure;
+import org.highmed.fhir.webservice.secure.EndpointServiceSecure;
 import org.highmed.fhir.webservice.secure.HealthcareServiceServiceSecure;
 import org.highmed.fhir.webservice.secure.LocationServiceSecure;
 import org.highmed.fhir.webservice.secure.OrganizationServiceSecure;
@@ -44,6 +47,7 @@ import org.highmed.fhir.webservice.secure.TaskServiceSecure;
 import org.highmed.fhir.webservice.secure.ValueSetServiceSecure;
 import org.highmed.fhir.webservice.specification.CodeSystemService;
 import org.highmed.fhir.webservice.specification.ConformanceService;
+import org.highmed.fhir.webservice.specification.EndpointService;
 import org.highmed.fhir.webservice.specification.HealthcareServiceService;
 import org.highmed.fhir.webservice.specification.LocationService;
 import org.highmed.fhir.webservice.specification.OrganizationService;
@@ -58,6 +62,7 @@ import org.highmed.fhir.webservice.specification.TaskService;
 import org.highmed.fhir.webservice.specification.ValueSetService;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.HealthcareService;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Organization;
@@ -124,6 +129,20 @@ public class WebserviceConfig
 		return new CodeSystemServiceImpl(resourceTypeName(CodeSystem.class), serverBase, defaultPageCount,
 				daoConfig.codeSystemDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
 				helperConfig.exceptionHandler(), eventConfig.eventGenerator(CodeSystem.class),
+				helperConfig.responseGenerator(), helperConfig.parameterConverter());
+	}
+
+	@Bean
+	public EndpointService endpointService()
+	{
+		return new EndpointServiceJaxrs(new EndpointServiceSecure(endpointServiceImpl()));
+	}
+
+	private EndpointServiceImpl endpointServiceImpl()
+	{
+		return new EndpointServiceImpl(resourceTypeName(Endpoint.class), serverBase, defaultPageCount,
+				daoConfig.endpointDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
+				helperConfig.exceptionHandler(), eventConfig.eventGenerator(Endpoint.class),
 				helperConfig.responseGenerator(), helperConfig.parameterConverter());
 	}
 

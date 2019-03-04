@@ -2,6 +2,7 @@ package org.highmed.fhir.spring.config;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.fhir.dao.CodeSystemDao;
+import org.highmed.fhir.dao.EndpointDao;
 import org.highmed.fhir.dao.HealthcareServiceDao;
 import org.highmed.fhir.dao.LocationDao;
 import org.highmed.fhir.dao.OrganizationDao;
@@ -59,6 +60,12 @@ public class DaoConfig
 	public CodeSystemDao codeSystemDao()
 	{
 		return new CodeSystemDao(dataSource(), fhirConfig.fhirContext());
+	}
+
+	@Bean
+	public EndpointDao endpointDao()
+	{
+		return new EndpointDao(dataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean

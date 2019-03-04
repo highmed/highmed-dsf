@@ -1,0 +1,7 @@
+package org.highmed.fhir.webservice.specification;
+
+import org.hl7.fhir.r4.model.Endpoint;
+
+public interface EndpointService extends BasicService<Endpoint>
+{
+}
