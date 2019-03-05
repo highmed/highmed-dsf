@@ -3,10 +3,14 @@ package org.highmed.fhir.hapi;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.util.UUID;
+
 import org.apache.commons.codec.binary.Hex;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -31,6 +35,7 @@ public class OrganizationTest
 		Extension role = organization.addExtension();
 		role.setUrl("http://highmed.org/fhir/StructureDefinition/server-role");
 		role.setValue(new CodeType("local"));
+		organization.addEndpoint(new Reference(new IdType("Endpoint", UUID.randomUUID().toString())));
 
 		FhirContext context = FhirContext.forR4();
 

@@ -17,6 +17,8 @@ import org.highmed.fhir.help.ParameterConverter;
 import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.fhir.search.parameters.CodeSystemUrl;
 import org.highmed.fhir.search.parameters.CodeSystemVersion;
+import org.highmed.fhir.search.parameters.EndpointOrganization;
+import org.highmed.fhir.search.parameters.OrganizationEndpoint;
 import org.highmed.fhir.search.parameters.OrganizationName;
 import org.highmed.fhir.search.parameters.ResourceId;
 import org.highmed.fhir.search.parameters.ResourceLastUpdated;
@@ -136,8 +138,12 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 		var codeSystemVersion = createSearchParameter(CodeSystemVersion.class);
 		searchParameters.put(CodeSystem.class, Arrays.asList(codeSystemUrl, codeSystemVersion));
 
+		var endpointOrganization = createSearchParameter(EndpointOrganization.class);
+		searchParameters.put(Endpoint.class, Arrays.asList(endpointOrganization));
+
 		var organizationNameOrAlias = createSearchParameter(OrganizationName.class);
-		searchParameters.put(Organization.class, Arrays.asList(organizationNameOrAlias));
+		var organizationEndpoint = createSearchParameter(OrganizationEndpoint.class);
+		searchParameters.put(Organization.class, Arrays.asList(organizationNameOrAlias, organizationEndpoint));
 
 		var structureDefinitionUrl = createSearchParameter(StructureDefinitionUrl.class);
 		var structureDefinitionVersion = createSearchParameter(StructureDefinitionVersion.class);

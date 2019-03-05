@@ -10,8 +10,6 @@ import java.security.cert.CertificateException;
 import javax.ws.rs.WebApplicationException;
 
 import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.Task;
-import org.hl7.fhir.r4.model.Task.TaskStatus;
 
 import ca.uhn.fhir.context.FhirContext;
 import de.rwh.utils.crypto.CertificateHelper;
@@ -104,10 +102,31 @@ public class TestFhirJerseyClient
 			//
 			// client.create(subscription);
 
-			Task createdTask = client.create(new Task().setDescription("Status draft").setStatus(TaskStatus.DRAFT));
+			// Task createdTask = client.create(new Task().setDescription("Status draft").setStatus(TaskStatus.DRAFT));
+			//
+			// createdTask.setStatus(TaskStatus.REQUESTED).setDescription("Status requested");
+			// client.update(createdTask);
 
-			createdTask.setStatus(TaskStatus.REQUESTED).setDescription("Status requested");
-			client.update(createdTask);
+			// Organization org = client.read(Organization.class, "e8aa9c06-9789-4c2b-8292-1c2a9601c2cc");
+
+			// Endpoint endpoint = new Endpoint();
+			// endpoint.setStatus(EndpointStatus.ACTIVE);
+			// endpoint.setConnectionType(new Coding("http://terminology.hl7.org/CodeSystem/endpoint-connection-type",
+			// "hl7-fhir-rest", "HL7 FHIR"));
+			// endpoint.setManagingOrganization(
+			// new Reference(new IdType(org.getIdElement().getResourceType(), org.getIdElement().getIdPart())));
+			// endpoint.setAddress("https://localhost:8001/fhir");
+			//
+			// Endpoint createdEndpoint = client.create(endpoint);
+			//
+			// org.getEndpoint().clear();
+			// org.addEndpoint(new Reference(new IdType(createdEndpoint.getIdElement().getResourceType(),
+			// createdEndpoint.getIdElement().getIdPart())));
+			// client.update(org);
+
+			// Organization org = client.read(Organization.class, "e8aa9c06-9789-4c2b-8292-1c2a9601c2cc");
+			// org.setActive(true);
+			// client.update(org);
 		}
 		catch (WebApplicationException e)
 		{

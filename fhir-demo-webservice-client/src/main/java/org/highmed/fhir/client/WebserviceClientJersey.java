@@ -21,6 +21,8 @@ import org.highmed.fhir.adapter.CapabilityStatementJsonFhirAdapter;
 import org.highmed.fhir.adapter.CapabilityStatementXmlFhirAdapter;
 import org.highmed.fhir.adapter.CodeSystemJsonFhirAdapter;
 import org.highmed.fhir.adapter.CodeSystemXmlFhirAdapter;
+import org.highmed.fhir.adapter.EndpointJsonFhirAdapter;
+import org.highmed.fhir.adapter.EndpointXmlFhirAdapter;
 import org.highmed.fhir.adapter.HealthcareServiceJsonFhirAdapter;
 import org.highmed.fhir.adapter.HealthcareServiceXmlFhirAdapter;
 import org.highmed.fhir.adapter.LocationJsonFhirAdapter;
@@ -81,6 +83,7 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 		return Arrays.asList(new BundleJsonFhirAdapter(fhirContext), new BundleXmlFhirAdapter(fhirContext),
 				new CapabilityStatementJsonFhirAdapter(fhirContext), new CapabilityStatementXmlFhirAdapter(fhirContext),
 				new CodeSystemJsonFhirAdapter(fhirContext), new CodeSystemXmlFhirAdapter(fhirContext),
+				new EndpointJsonFhirAdapter(fhirContext), new EndpointXmlFhirAdapter(fhirContext),
 				new HealthcareServiceJsonFhirAdapter(fhirContext), new HealthcareServiceXmlFhirAdapter(fhirContext),
 				new LocationJsonFhirAdapter(fhirContext), new LocationXmlFhirAdapter(fhirContext),
 				new OperationOutcomeJsonFhirAdapter(fhirContext), new OperationOutcomeXmlFhirAdapter(fhirContext),
@@ -204,8 +207,8 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 		Objects.requireNonNull(resourceType, "resourceType");
 		Objects.requireNonNull(id, "id");
 
-		Response response = getResource().path(StructureDefinition.class.getAnnotation(ResourceDef.class).name())
-				.path(id).request().accept(Constants.CT_FHIR_JSON_NEW).get();
+		Response response = getResource().path(resourceType.getAnnotation(ResourceDef.class).name()).path(id).request()
+				.accept(Constants.CT_FHIR_JSON_NEW).get();
 
 		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
 				response.getStatusInfo().getReasonPhrase());
@@ -222,8 +225,8 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 		Objects.requireNonNull(id, "id");
 		Objects.requireNonNull(version, "version");
 
-		Response response = getResource().path(StructureDefinition.class.getAnnotation(ResourceDef.class).name())
-				.path(id).path("_history").path(version).request().accept(Constants.CT_FHIR_JSON_NEW).get();
+		Response response = getResource().path(resourceType.getAnnotation(ResourceDef.class).name()).path(id)
+				.path("_history").path(version).request().accept(Constants.CT_FHIR_JSON_NEW).get();
 
 		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
 				response.getStatusInfo().getReasonPhrase());
@@ -238,7 +241,7 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 	{
 		Objects.requireNonNull(resourceType, "resourceType");
 
-		WebTarget target = getResource().path(StructureDefinition.class.getAnnotation(ResourceDef.class).name());
+		WebTarget target = getResource().path(resourceType.getAnnotation(ResourceDef.class).name());
 		if (parameters != null)
 		{
 			for (Entry<String, List<String>> entry : parameters.entrySet())
