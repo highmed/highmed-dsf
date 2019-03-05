@@ -223,7 +223,7 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 
 		try (Connection connection = dataSource.getConnection();
 				PreparedStatement statement = connection.prepareStatement("SELECT " + resourceColumn + ", deleted FROM "
-						+ resourceTable + " WHERE " + resourceIdColumn + " = ? ORDER BY version LIMIT 1"))
+						+ resourceTable + " WHERE " + resourceIdColumn + " = ? ORDER BY version DESC LIMIT 1"))
 		{
 			statement.setObject(1, uuidToPgObject(uuid));
 
@@ -377,7 +377,7 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 			throw new ResourceNotFoundException(resource.getId());
 
 		try (PreparedStatement statement = connection.prepareStatement("SELECT version, deleted FROM " + resourceTable
-				+ " WHERE " + resourceIdColumn + " = ? ORDER BY version LIMIT 1"))
+				+ " WHERE " + resourceIdColumn + " = ? ORDER BY version DESC LIMIT 1"))
 		{
 			statement.setObject(1, uuidToPgObject(uuid));
 

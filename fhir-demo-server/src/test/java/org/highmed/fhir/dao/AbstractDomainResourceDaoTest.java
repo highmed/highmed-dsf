@@ -201,4 +201,43 @@ public abstract class AbstractDomainResourceDaoTest<D extends DomainResource, C 
 
 		assertTrue(newResource.equalsDeep(read.get()));
 	}
+
+	@Test
+	public void testReadLatest() throws Exception
+	{
+		D newResource = createResource();
+		assertNull(newResource.getId());
+		assertNull(newResource.getMeta().getVersionId());
+
+		D createdResource = dao.create(newResource);
+		assertNotNull(createdResource);
+		assertNotNull(createdResource.getId());
+		assertNotNull(createdResource.getMeta().getVersionId());
+		assertEquals("1", createdResource.getIdElement().getVersionIdPart());
+
+		D updatedResource = dao.update(createdResource);
+		assertNotNull(updatedResource);
+		assertNotNull(updatedResource.getId());
+		assertNotNull(updatedResource.getMeta().getVersionId());
+		assertEquals("2", updatedResource.getIdElement().getVersionIdPart());
+
+		D updatedResource2 = dao.update(updatedResource);
+		assertNotNull(updatedResource2);
+		assertNotNull(updatedResource2.getId());
+		assertNotNull(updatedResource2.getMeta().getVersionId());
+		assertEquals("3", updatedResource2.getIdElement().getVersionIdPart());
+
+		newResource.setIdElement(updatedResource2.getIdElement().copy());
+		newResource.setMeta(updatedResource2.getMeta().copy());
+
+		assertTrue(newResource.equalsDeep(updatedResource2));
+
+		Optional<D> read = dao.read(UUID.fromString(updatedResource2.getIdElement().getIdPart()));
+		assertTrue(read.isPresent());
+
+		String s1 = fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(updatedResource2);
+		String s2 = fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(read.get());
+		assertTrue(s1 + "\nvs\n" + s2, updatedResource2.equalsDeep(read.get()));
+		assertEquals("3", read.get().getIdElement().getVersionIdPart());
+	}
 }
