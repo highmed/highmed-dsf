@@ -1,11 +1,16 @@
 package org.highmed.fhir.search.parameters.basic;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.core.UriBuilder;
 
+import org.highmed.fhir.search.SearchQueryIncludeParameter;
+import org.highmed.fhir.search.SearchQueryIncludeParameter.IncludeParts;
 import org.hl7.fhir.r4.model.DomainResource;
 
 public abstract class AbstractReferenceParameter<R extends DomainResource> extends AbstractSearchParameter<R>
@@ -32,14 +37,18 @@ public abstract class AbstractReferenceParameter<R extends DomainResource> exten
 		}
 	}
 
-	private final String[] resourceNames;
+	private final String resourceTypeName;
+	private final List<String> targetResourceTypeNames;
+
+	private SearchQueryIncludeParameter includeParameter;
 
 	protected ReferenceValueAndSearchType valueAndType;
 
-	public AbstractReferenceParameter(String parameterName, String... resourceNames)
+	public AbstractReferenceParameter(String resourceTypeName, String parameterName, String... targetResourceTypeNames)
 	{
 		super(parameterName);
-		this.resourceNames = resourceNames;
+		this.resourceTypeName = resourceTypeName;
+		this.targetResourceTypeNames = Arrays.asList(targetResourceTypeNames);
 	}
 
 	@Override
@@ -48,20 +57,45 @@ public abstract class AbstractReferenceParameter<R extends DomainResource> exten
 		String param = getFirst(queryParameters, parameterName);
 		if (param != null && !param.isEmpty())
 		{
-			if (param.indexOf('/') == -1 && resourceNames.length == 1)
+			if (param.indexOf('/') == -1 && targetResourceTypeNames.size() == 1)
 				valueAndType = new ReferenceValueAndSearchType(null, param, null, ReferenceSearchType.ID);
 			else if (param.indexOf('/') >= 0)
 			{
 				String[] splitAtSlash = param.split("/");
 				if (splitAtSlash.length == 2
-						&& Arrays.stream(resourceNames).map(n -> n.equals(splitAtSlash[0])).anyMatch(b -> b))
+						&& targetResourceTypeNames.stream().map(n -> n.equals(splitAtSlash[0])).anyMatch(b -> b))
 					valueAndType = new ReferenceValueAndSearchType(splitAtSlash[0], splitAtSlash[1], null,
 							ReferenceSearchType.RESOURCE_NAME_AND_ID);
 			}
 			else if (param.startsWith("http")
-					&& Arrays.stream(resourceNames).map(n -> param.contains("/" + n + "/")).anyMatch(b -> b))
+					&& targetResourceTypeNames.stream().map(n -> param.contains("/" + n + "/")).anyMatch(b -> b))
 				valueAndType = new ReferenceValueAndSearchType(null, null, param, ReferenceSearchType.URL);
 		}
+	}
+
+	@Override
+	protected void configureIncludeParameter(Map<String, List<String>> queryParameters)
+	{
+		List<IncludeParts> includeParts = getIncludeParts(queryParameters);
+
+		if (!includeParts.isEmpty())
+		{
+			List<String> includeSqls = includeParts.stream().map(this::getIncludeSql).filter(s -> s != null)
+					.collect(Collectors.toList());
+			includeParameter = new SearchQueryIncludeParameter(includeSqls, includeParts);
+		}
+	}
+
+	private List<IncludeParts> getIncludeParts(Map<String, List<String>> queryParameters)
+	{
+		List<String> includeParameterValues = queryParameters.getOrDefault(INCLUDE_PARAMETER, Collections.emptyList());
+
+		return includeParameterValues.stream().map(IncludeParts::fromString)
+				.filter(p -> resourceTypeName.equals(p.getSourceResourceTypeName())
+						&& parameterName.equals(p.getSearchParameterName())
+						&& (p.getTargetResourceTypeName() == null
+								|| targetResourceTypeNames.contains(p.getTargetResourceTypeName())))
+				.collect(Collectors.toList());
 	}
 
 	@Override
@@ -86,11 +120,11 @@ public abstract class AbstractReferenceParameter<R extends DomainResource> exten
 		}
 	}
 
-	public static void main(String[] args)
+	@Override
+	public Optional<SearchQueryIncludeParameter> getIncludeParameter()
 	{
-		String param = "http://foo.bar/baz/Patient/1234";
-		String[] resourceNames = { "Patient" };
-		System.out.println(Arrays.stream(resourceNames).map(n -> param.contains(n)).anyMatch(b -> b));
-
+		return Optional.ofNullable(includeParameter);
 	}
+
+	protected abstract String getIncludeSql(IncludeParts includeParts);
 }

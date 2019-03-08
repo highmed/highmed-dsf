@@ -10,13 +10,16 @@ public class PartialResult<R extends DomainResource>
 	private final int overallCount;
 	private final PageAndCount pageAndCount;
 	private final List<R> partialResult;
+	private final List<DomainResource> includes;
 	private final boolean countOnly;
 
-	public PartialResult(int overallCount, PageAndCount pageAndCount, List<R> partialResult, boolean countOnly)
+	public PartialResult(int overallCount, PageAndCount pageAndCount, List<R> partialResult,
+			List<DomainResource> includes, boolean countOnly)
 	{
 		this.overallCount = overallCount;
 		this.pageAndCount = pageAndCount;
 		this.partialResult = partialResult;
+		this.includes = includes;
 		this.countOnly = countOnly;
 	}
 
@@ -33,6 +36,11 @@ public class PartialResult<R extends DomainResource>
 	public List<R> getPartialResult()
 	{
 		return Collections.unmodifiableList(partialResult);
+	}
+
+	public List<DomainResource> getIncludes()
+	{
+		return Collections.unmodifiableList(includes);
 	}
 
 	public boolean isLastPage()

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.highmed.fhir.search.SearchQueryIncludeParameter;
 import org.highmed.fhir.search.SearchQueryParameter;
 import org.highmed.fhir.search.SearchQuerySortParameter;
 import org.highmed.fhir.search.SearchQuerySortParameter.SortDirection;
@@ -13,10 +14,11 @@ import org.hl7.fhir.r4.model.DomainResource;
 public abstract class AbstractSearchParameter<R extends DomainResource> implements SearchQueryParameter<R>
 {
 	public static final String SORT_PARAMETER = "_sort";
+	public static final String INCLUDE_PARAMETER = "_include";
 
 	protected final String parameterName;
 
-	private SortDirection sortDirection;
+	private SearchQuerySortParameter sortParameter;
 
 	public AbstractSearchParameter(String parameterName)
 	{
@@ -36,7 +38,12 @@ public abstract class AbstractSearchParameter<R extends DomainResource> implemen
 	@Override
 	public final void configure(Map<String, List<String>> queryParameters)
 	{
-		sortDirection = getSortDirection(getFirst(queryParameters, SORT_PARAMETER));
+		SortDirection sortDirection = getSortDirection(getFirst(queryParameters, SORT_PARAMETER));
+		if (sortDirection != null)
+			sortParameter = new SearchQuerySortParameter(getSortSql(sortDirection.getSqlModifierWithSpacePrefix()),
+					parameterName, sortDirection);
+
+		configureIncludeParameter(queryParameters);
 
 		configureSearchParameter(queryParameters);
 	}
@@ -61,13 +68,24 @@ public abstract class AbstractSearchParameter<R extends DomainResource> implemen
 		return sortParameter.map(SortDirection::fromString).orElse(null);
 	}
 
+	protected void configureIncludeParameter(Map<String, List<String>> queryParameters)
+	{
+		// default impl does nothing
+	}
+
 	protected abstract void configureSearchParameter(Map<String, List<String>> queryParameters);
 
 	@Override
-	public SearchQuerySortParameter getSortParameter()
+	public Optional<SearchQuerySortParameter> getSortParameter()
 	{
-		return new SearchQuerySortParameter(getSortSql(sortDirection.getSqlModifierWithSpacePrefix()), sortDirection);
+		return Optional.ofNullable(sortParameter);
 	}
 
 	protected abstract String getSortSql(String sortDirectionWithSpacePrefix);
+
+	@Override
+	public Optional<SearchQueryIncludeParameter> getIncludeParameter()
+	{
+		return Optional.empty();
+	}
 }

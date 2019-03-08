@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<property name="json" value="JSONB" dbms="postgresql" />
+	<property name="json" value="varchar(5000)" dbms="h2" />
+
+	<changeSet author="hhund" id="db.healthcare_services.changelog-0.6">
+		<createView viewName="current_healthcare_services" replaceIfExists="true">
+			SELECT DISTINCT ON (healthcare_service_id) healthcare_service_id, version, healthcare_service
+			FROM healthcare_services WHERE NOT deleted ORDER BY healthcare_service_id, version DESC
+		</createView>
+		
+		<sql>
+			ALTER TABLE current_healthcare_services OWNER TO ${liquibase_user};
+			GRANT ALL ON TABLE current_healthcare_services TO ${liquibase_user};
+			GRANT SELECT ON TABLE current_healthcare_services TO ${server_users_group};
+		</sql>
+	</changeSet>
+</databaseChangeLog>

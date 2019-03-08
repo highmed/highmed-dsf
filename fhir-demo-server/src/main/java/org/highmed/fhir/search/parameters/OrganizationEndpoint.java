@@ -3,6 +3,7 @@ package org.highmed.fhir.search.parameters;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import org.highmed.fhir.search.SearchQueryIncludeParameter.IncludeParts;
 import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.fhir.search.parameters.basic.AbstractReferenceParameter;
 import org.hl7.fhir.r4.model.DomainResource;
@@ -12,12 +13,13 @@ import org.hl7.fhir.r4.model.Organization;
 @SearchParameterDefinition(name = OrganizationEndpoint.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Organization.endpoint", type = SearchParamType.REFERENCE, documentation = "Technical endpoints providing access to services operated for the organization")
 public class OrganizationEndpoint extends AbstractReferenceParameter<Organization>
 {
+	private static final String RESOURCE_TYPE_NAME = "Organization";
 	public static final String PARAMETER_NAME = "endpoint";
-	private static final String RESOURCE_NAME = "Endpoint";
+	private static final String TARGET_RESOURCE_TYPE_NAME = "Endpoint";
 
 	public OrganizationEndpoint()
 	{
-		super(PARAMETER_NAME, RESOURCE_NAME);
+		super(RESOURCE_TYPE_NAME, PARAMETER_NAME, TARGET_RESOURCE_TYPE_NAME);
 	}
 
 	@Override
@@ -39,7 +41,7 @@ public class OrganizationEndpoint extends AbstractReferenceParameter<Organizatio
 		switch (valueAndType.type)
 		{
 			case ID:
-				statement.setString(parameterIndex, RESOURCE_NAME + "/" + valueAndType.id);
+				statement.setString(parameterIndex, TARGET_RESOURCE_TYPE_NAME + "/" + valueAndType.id);
 				break;
 			case RESOURCE_NAME_AND_ID:
 				statement.setString(parameterIndex, valueAndType.resourceName + "/" + valueAndType.id);
@@ -66,7 +68,7 @@ public class OrganizationEndpoint extends AbstractReferenceParameter<Organizatio
 			switch (valueAndType.type)
 			{
 				case ID:
-					return ref.equals(RESOURCE_NAME + "/" + valueAndType.id);
+					return ref.equals(TARGET_RESOURCE_TYPE_NAME + "/" + valueAndType.id);
 				case RESOURCE_NAME_AND_ID:
 					return ref.equals(valueAndType.resourceName + "/" + valueAndType.id);
 				case URL:
@@ -81,5 +83,16 @@ public class OrganizationEndpoint extends AbstractReferenceParameter<Organizatio
 	protected String getSortSql(String sortDirectionWithSpacePrefix)
 	{
 		return "(SELECT string_agg(reference->>'reference', ' ') FROM jsonb_array_elements(organization->'endpoint') AS reference)";
+	}
+
+	@Override
+	protected String getIncludeSql(IncludeParts includeParts)
+	{
+		if (includeParts.matches(RESOURCE_TYPE_NAME, PARAMETER_NAME, TARGET_RESOURCE_TYPE_NAME))
+			return "(SELECT jsonb_agg(endpoint) FROM current_endpoints"
+					+ " WHERE concat('Endpoint/', endpoint->>'id') IN (SELECT reference->>'reference' FROM jsonb_array_elements(organization->'endpoint') AS reference)"
+					+ ") AS endpoints";
+		else
+			return null;
 	}
 }

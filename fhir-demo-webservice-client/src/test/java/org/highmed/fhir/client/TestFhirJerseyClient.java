@@ -9,9 +9,17 @@ import java.security.cert.CertificateException;
 
 import javax.ws.rs.WebApplicationException;
 
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.Endpoint.EndpointStatus;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Reference;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.Constants;
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.CertificateReader;
 
@@ -108,7 +116,7 @@ public class TestFhirJerseyClient
 			// client.update(createdTask);
 
 			// Organization org = client.read(Organization.class, "e8aa9c06-9789-4c2b-8292-1c2a9601c2cc");
-
+			//
 			// Endpoint endpoint = new Endpoint();
 			// endpoint.setStatus(EndpointStatus.ACTIVE);
 			// endpoint.setConnectionType(new Coding("http://terminology.hl7.org/CodeSystem/endpoint-connection-type",
@@ -116,6 +124,10 @@ public class TestFhirJerseyClient
 			// endpoint.setManagingOrganization(
 			// new Reference(new IdType(org.getIdElement().getResourceType(), org.getIdElement().getIdPart())));
 			// endpoint.setAddress("https://localhost:8001/fhir");
+			// endpoint.addPayloadType(new CodeableConcept(new Coding("http://hl7.org/fhir/resource-types", "Task",
+			// "Task")));
+			// endpoint.addPayloadMimeType(Constants.CT_FHIR_JSON_NEW);
+			// endpoint.addPayloadMimeType(Constants.CT_FHIR_XML_NEW);
 			//
 			// Endpoint createdEndpoint = client.create(endpoint);
 			//

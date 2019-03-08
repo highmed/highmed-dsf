@@ -2,7 +2,7 @@ package org.highmed.fhir.search;
 
 public class SearchQuerySortParameter
 {
-	public enum SortDirection
+	public static enum SortDirection
 	{
 		ASC("", ""), DESC(" DESC", "-");
 
@@ -19,7 +19,7 @@ public class SearchQuerySortParameter
 		{
 			return sqlModifier;
 		}
-		
+
 		public String getUrlModifier()
 		{
 			return urlModifier;
@@ -35,11 +35,13 @@ public class SearchQuerySortParameter
 	}
 
 	private final String sql;
+	private final String parameterName;
 	private final SortDirection direction;
 
-	public SearchQuerySortParameter(String sql, SortDirection direction)
+	public SearchQuerySortParameter(String sql, String parameterName, SortDirection direction)
 	{
 		this.sql = sql;
+		this.parameterName = parameterName;
 		this.direction = direction;
 	}
 
@@ -51,5 +53,15 @@ public class SearchQuerySortParameter
 	public SortDirection getDirection()
 	{
 		return direction;
+	}
+
+	public String getParameterName()
+	{
+		return parameterName;
+	}
+
+	public String getBundleUriQueryParameterValuePart()
+	{
+		return getDirection().getUrlModifier() + getParameterName();
 	}
 }

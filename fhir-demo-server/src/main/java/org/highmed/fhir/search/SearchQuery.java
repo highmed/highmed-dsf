@@ -20,28 +20,24 @@ public class SearchQuery<R extends DomainResource> implements DbSearchQuery, Mat
 	public static class SearchQueryBuilder<R extends DomainResource>
 	{
 		public static <R extends DomainResource> SearchQueryBuilder<R> create(Class<R> resourceType,
-				String resourceTable, String resourceIdColumn, String resourceColumn, int page, int count)
+				String resourceTable, String resourceColumn, int page, int count)
 		{
-			return new SearchQueryBuilder<R>(resourceType, resourceTable, resourceIdColumn, resourceColumn, page,
-					count);
+			return new SearchQueryBuilder<R>(resourceType, resourceTable, resourceColumn, page, count);
 		}
 
 		private final Class<R> resourceType;
 		private final String resourceTable;
-		private final String resourceIdColumn;
 		private final String resourceColumn;
 		private final int page;
 		private final int count;
 
 		private final List<SearchQueryParameter<R>> searchParameters = new ArrayList<SearchQueryParameter<R>>();
-		private String sortParameters;
 
-		private SearchQueryBuilder(Class<R> resourceType, String resourceTable, String resourceIdColumn,
-				String resourceColumn, int page, int count)
+		private SearchQueryBuilder(Class<R> resourceType, String resourceTable, String resourceColumn, int page,
+				int count)
 		{
 			this.resourceType = resourceType;
 			this.resourceTable = resourceTable;
-			this.resourceIdColumn = resourceIdColumn;
 			this.resourceColumn = resourceColumn;
 			this.page = page;
 			this.count = count;
@@ -64,52 +60,33 @@ public class SearchQuery<R extends DomainResource> implements DbSearchQuery, Mat
 			return this;
 		}
 
-		public SearchQueryBuilder<R> sort(String sortParameters)
-		{
-			this.sortParameters = sortParameters;
-			return this;
-		}
-
 		public SearchQuery<R> build()
 		{
-			return new SearchQuery<R>(resourceType, resourceTable, resourceIdColumn, resourceColumn, page, count,
-					sortParameters, searchParameters);
+			return new SearchQuery<R>(resourceType, resourceTable, resourceColumn, page, count, searchParameters);
 		}
 	}
 
 	private final Class<R> resourceType;
-	private final String searchQueryMain;
-	private final String countQueryMain;
+	private final String resourceColumn;
+	private final String resourceTable;
 	private final List<SearchQueryParameter<R>> searchParameters = new ArrayList<>();
 	private final PageAndCount pageAndCount;
 
 	private String filterQuery = "";
 	private String sortSql = "";
+	private String includeSql = "";
 	private List<SearchQueryParameter<R>> sortParameters = Collections.emptyList();
+	private List<SearchQueryParameter<R>> includeParameters = Collections.emptyList();
 
-	SearchQuery(Class<R> resourceType, String resourceTable, String resourceIdColumn, String resourceColumn, int page,
-			int count, List<? extends SearchQueryParameter<R>> searchParameters)
-	{
-		this(resourceType, resourceTable, resourceIdColumn, resourceColumn, page, count, null, searchParameters);
-	}
-
-	SearchQuery(Class<R> resourceType, String resourceTable, String resourceIdColumn, String resourceColumn, int page,
-			int count, String sortParameters, List<? extends SearchQueryParameter<R>> searchParameters)
+	SearchQuery(Class<R> resourceType, String resourceTable, String resourceColumn, int page, int count,
+			List<? extends SearchQueryParameter<R>> searchParameters)
 	{
 		this.resourceType = resourceType;
-		this.searchQueryMain = "SELECT " + resourceColumn + " FROM (SELECT DISTINCT ON (" + resourceIdColumn + ") "
-				+ resourceColumn + " FROM " + resourceTable + " WHERE NOT deleted ORDER BY " + resourceIdColumn
-				+ ", version DESC) AS current_" + resourceTable;
-
-		this.countQueryMain = "SELECT count(*) FROM (SELECT DISTINCT ON (" + resourceIdColumn + ") " + resourceColumn
-				+ " FROM " + resourceTable + " WHERE NOT deleted ORDER BY " + resourceIdColumn
-				+ ", version DESC) AS current_" + resourceTable;
+		this.resourceTable = resourceTable;
+		this.resourceColumn = resourceColumn;
 
 		this.searchParameters.addAll(searchParameters);
 		this.pageAndCount = new PageAndCount(page, count);
-
-		if (sortParameters != null)
-			createSortSql(sortParameters);
 	}
 
 	public void configureParameters(Map<String, List<String>> queryParameters)
@@ -120,6 +97,7 @@ public class SearchQuery<R extends DomainResource> implements DbSearchQuery, Mat
 				.map(SearchQueryParameter::getFilterQuery).collect(Collectors.joining(" AND "));
 
 		createSortSql(getFirst(queryParameters, AbstractSearchParameter.SORT_PARAMETER));
+		createIncludeSql(queryParameters.get(AbstractSearchParameter.INCLUDE_PARAMETER));
 	}
 
 	private String getFirst(Map<String, List<String>> queryParameters, String key)
@@ -135,37 +113,44 @@ public class SearchQuery<R extends DomainResource> implements DbSearchQuery, Mat
 		if (sortParameterValue == null)
 			return;
 
-		sortParameters = Arrays.stream(sortParameterValue.split("[,]+")).map(this::getSearchParameter)
-				.filter(sp -> sp != null).collect(Collectors.toList());
+		sortParameters = searchParameters.stream().filter(sp -> sp.getSortParameter().isPresent())
+				.collect(Collectors.toList());
 
 		if (sortParameters.isEmpty())
 			return;
 
-		sortSql = sortParameters.stream().map(sp -> sp.getSortParameter().getSql())
+		sortSql = sortParameters.stream().map(sp -> sp.getSortParameter().get().getSql())
 				.collect(Collectors.joining(", ", " ORDER BY ", ""));
 	}
 
-	private SearchQueryParameter<R> getSearchParameter(String sort)
+	private void createIncludeSql(List<String> includeParameterValues)
 	{
-		for (SearchQueryParameter<R> p : searchParameters)
-		{
-			if (p.getParameterName().equals(sort) || ("+" + p.getParameterName()).equals(sort)
-					|| ("-" + p.getParameterName()).equals(sort))
-				return p;
-		}
+		if (includeParameterValues == null || includeParameterValues.isEmpty())
+			return;
 
-		return null;
+		includeParameters = searchParameters.stream().filter(sp -> sp.getIncludeParameter().isPresent())
+				.collect(Collectors.toList());
+
+		if (includeParameters.isEmpty())
+			return;
+
+		includeSql = includeParameters.stream().map(sp -> sp.getIncludeParameter().get().getSql())
+				.collect(Collectors.joining(", ", ", ", ""));
 	}
 
 	@Override
 	public String getCountSql()
 	{
+		String countQueryMain = "SELECT count(*) FROM current_" + resourceTable;
+
 		return countQueryMain + (!filterQuery.isEmpty() ? (" WHERE " + filterQuery) : "");
 	}
 
 	@Override
 	public String getSearchSql()
 	{
+		String searchQueryMain = "SELECT " + resourceColumn + includeSql + " FROM current_" + resourceTable;
+
 		return searchQueryMain + (!filterQuery.isEmpty() ? (" WHERE " + filterQuery) : "") + sortSql
 				+ pageAndCount.sql();
 	}
@@ -202,15 +187,22 @@ public class SearchQuery<R extends DomainResource> implements DbSearchQuery, Mat
 
 		if (!sortParameters.isEmpty())
 			bundleUri.replaceQueryParam(AbstractSearchParameter.SORT_PARAMETER, sortParameter());
+		if (!includeParameters.isEmpty())
+			bundleUri.replaceQueryParam(AbstractSearchParameter.INCLUDE_PARAMETER, includeParameters());
 
 		return bundleUri;
 	}
 
 	private String sortParameter()
 	{
-		return sortParameters.stream()
-				.map(p -> p.getSortParameter().getDirection().getUrlModifier() + p.getParameterName())
+		return sortParameters.stream().map(p -> p.getSortParameter().get().getBundleUriQueryParameterValuePart())
 				.collect(Collectors.joining(","));
+	}
+
+	private Object[] includeParameters()
+	{
+		return includeParameters.stream().flatMap(p -> p.getIncludeParameter().get().getBundleUriQueryParameterValues())
+				.toArray();
 	}
 
 	public Class<R> getResourceType()
@@ -229,5 +221,12 @@ public class SearchQuery<R extends DomainResource> implements DbSearchQuery, Mat
 
 		return searchParameters.stream().filter(SearchQueryParameter::isDefined).map(p -> p.matches(resource))
 				.allMatch(b -> b);
+	}
+
+	@Override
+	public Class<? extends DomainResource> getIncludeResourceTypForColumName(String columnName)
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

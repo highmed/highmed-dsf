@@ -3,10 +3,12 @@ package org.highmed.fhir.dao;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -18,17 +20,22 @@ import org.highmed.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.fhir.dao.exception.ResourceNotFoundException;
 import org.highmed.fhir.search.DbSearchQuery;
 import org.highmed.fhir.search.PartialResult;
-import org.highmed.fhir.search.SearchQueryParameter;
 import org.highmed.fhir.search.SearchQuery;
 import org.highmed.fhir.search.SearchQuery.SearchQueryBuilder;
+import org.highmed.fhir.search.SearchQueryParameter;
 import org.highmed.fhir.search.parameters.ResourceId;
 import org.highmed.fhir.search.parameters.ResourceLastUpdated;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.postgresql.util.PGobject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
@@ -195,6 +202,26 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 	{
 		String json = result.getString(index);
 		return getJsonParser().parseResource(resourceType, json);
+	}
+
+	protected List<DomainResource> getResources(ResultSet result, int index) throws SQLException
+	{
+		String json = result.getString(index);
+		JsonArray array = (JsonArray) new JsonParser().parse(json);
+
+		List<DomainResource> includes = new ArrayList<>();
+		Iterator<JsonElement> it = array.iterator();
+		while (it.hasNext())
+		{
+			JsonElement jsonElement = it.next();
+			IBaseResource resource = getJsonParser().parseResource(jsonElement.toString());
+			if (resource instanceof DomainResource)
+				includes.add((DomainResource) resource);
+			else
+				logger.warn("parsed resouce of type {} not instance of {}", resource.getClass().getName(),
+						DomainResource.class.getName());
+		}
+		return includes;
 	}
 
 	public final boolean hasNonDeletedResource(UUID uuid) throws SQLException
@@ -449,6 +476,7 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 			}
 
 			List<R> partialResult = new ArrayList<>();
+			List<DomainResource> includes = new ArrayList<>();
 
 			if (!query.isCountOnly(overallCount)) // TODO ask db if count 0
 			{
@@ -459,14 +487,19 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 					logger.trace("Executing query '{}'", statement);
 					try (ResultSet result = statement.executeQuery())
 					{
+						ResultSetMetaData metaData = result.getMetaData();
 						while (result.next())
+						{
 							partialResult.add(getResource(result, 1));
 
+							for (int c = 2; c <= metaData.getColumnCount(); c++)
+								includes.addAll(getResources(result, c));
+						}
 					}
 				}
 			}
 
-			return new PartialResult<>(overallCount, query.getPageAndCount(), partialResult,
+			return new PartialResult<>(overallCount, query.getPageAndCount(), partialResult, includes,
 					query.isCountOnly(overallCount));
 		}
 	}
@@ -475,16 +508,9 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 	public final SearchQuery<R> createSearchQuery(int effectivePage, int effectiveCount)
 	{
 		return SearchQueryBuilder
-				.create(getResourceType(), getResourceTable(), getResourceIdColumn(), getResourceColumn(),
-						effectivePage, effectiveCount)
+				.create(getResourceType(), getResourceTable(), getResourceColumn(), effectivePage, effectiveCount)
 				.with(new ResourceId(getResourceIdColumn()), new ResourceLastUpdated(getResourceColumn()))
-				.with(searchParameterFactories.stream().map(Supplier::get).toArray(SearchQueryParameter[]::new)).build();
-	}
-
-	public final SearchQuery<R> createSearchQuery(int effectivePage, int effectiveCount, String sortParameters,
-			@SuppressWarnings("unchecked") SearchQueryParameter<R>... parameters)
-	{
-		return SearchQueryBuilder.create(getResourceType(), getResourceTable(), getResourceIdColumn(),
-				getResourceColumn(), effectivePage, effectiveCount).with(parameters).sort(sortParameters).build();
+				.with(searchParameterFactories.stream().map(Supplier::get).toArray(SearchQueryParameter[]::new))
+				.build();
 	}
 }

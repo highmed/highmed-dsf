@@ -83,6 +83,7 @@ public class ResponseGenerator
 		bundle.getMeta().setLastUpdated(new Date());
 		bundle.setType(BundleType.SEARCHSET);
 		result.getPartialResult().stream().map(this::toBundleEntryComponent).forEach(bundle::addEntry);
+		result.getIncludes().stream().map(this::toBundleEntryComponent).forEach(bundle::addEntry);
 
 		bundle.setTotal(result.getOverallCount());
 

@@ -9,6 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.ws.rs.core.UriBuilder;
 
@@ -50,7 +51,9 @@ public interface SearchQueryParameter<R extends DomainResource> extends MatcherP
 	 */
 	void modifyBundleUri(UriBuilder bundleUri);
 
-	SearchQuerySortParameter getSortParameter();
+	Optional<SearchQuerySortParameter> getSortParameter();
+
+	Optional<SearchQueryIncludeParameter> getIncludeParameter();
 
 	String getParameterName();
 }
