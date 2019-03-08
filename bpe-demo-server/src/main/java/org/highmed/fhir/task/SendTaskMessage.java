@@ -1,4 +1,4 @@
-package org.highmed.bpe.message;
+package org.highmed.fhir.task;
 
 import java.util.Date;
 import java.util.Objects;
