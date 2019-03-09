@@ -57,7 +57,7 @@ public class CamundaConfig
 		c.setDataSource(transactionAwareDataSource());
 		c.setTransactionManager(transactionManager());
 		c.setDatabaseSchemaUpdate("false");
-		c.setJobExecutorActivate(false);
+		c.setJobExecutorActivate(true);
 		return c;
 	}
 
