@@ -13,6 +13,7 @@ import org.highmed.fhir.service.SnapshotGenerator;
 import org.highmed.fhir.service.SnapshotGenerator.SnapshotWithValidationMessages;
 import org.highmed.fhir.service.StructureDefinitionReader;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Task;
@@ -57,6 +58,9 @@ public class HiGHmedTaskValidationTest
 		Reference researchStudyReference = new Reference();
 		researchStudyReference.setReference("ResearchStudy/" + UUID.randomUUID().toString());
 		ext.setValue(researchStudyReference);
+
+		Reference requesterReference = new Reference(new IdType("Organization", UUID.randomUUID().toString()));
+		task.setRequester(requesterReference);
 
 		logger.debug("Task:\n" + context.newXmlParser().setPrettyPrint(true).encodeResourceToString(task));
 
