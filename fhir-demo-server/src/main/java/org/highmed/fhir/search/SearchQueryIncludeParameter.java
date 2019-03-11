@@ -41,7 +41,7 @@ public class SearchQueryIncludeParameter
 
 		public String toBundleUriQueryParameterValue()
 		{
-			return targetResourceTypeName + ":" + getSearchParameterName()
+			return getSourceResourceTypeName() + ":" + getSearchParameterName()
 					+ (getTargetResourceTypeName() != null ? (":" + getTargetResourceTypeName()) : "");
 		}
 

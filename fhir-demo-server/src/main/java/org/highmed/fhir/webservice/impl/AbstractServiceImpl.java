@@ -249,7 +249,7 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 	{
 		MultivaluedMap<String, String> queryParameters = uri.getQueryParameters();
 
-		Integer page = parameterConverter.getFirstInt(queryParameters, "page");
+		Integer page = parameterConverter.getFirstInt(queryParameters, "_page");
 		int effectivePage = page == null ? 1 : page;
 
 		Integer count = parameterConverter.getFirstInt(queryParameters, "_count");

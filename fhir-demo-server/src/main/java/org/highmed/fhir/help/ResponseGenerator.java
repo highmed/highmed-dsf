@@ -95,7 +95,7 @@ public class ResponseGenerator
 		if (result.getPageAndCount().getCount() > 0)
 		{
 			bundleUri = bundleUri.replaceQueryParam("_count", result.getPageAndCount().getCount());
-			bundleUri = bundleUri.replaceQueryParam("page",
+			bundleUri = bundleUri.replaceQueryParam("_page",
 					result.getPartialResult().isEmpty() ? 1 : result.getPageAndCount().getPage());
 		}
 		else
@@ -105,24 +105,24 @@ public class ResponseGenerator
 
 		if (result.getPageAndCount().getCount() > 0 && !result.getPartialResult().isEmpty())
 		{
-			bundleUri = bundleUri.replaceQueryParam("page", 1);
+			bundleUri = bundleUri.replaceQueryParam("_page", 1);
 			bundleUri = bundleUri.replaceQueryParam("_count", result.getPageAndCount().getCount());
 			bundle.addLink().setRelation("first").setUrlElement(new UriType(bundleUri.build()));
 
 			if (result.getPageAndCount().getPage() > 1)
 			{
-				bundleUri = bundleUri.replaceQueryParam("page", result.getPageAndCount().getPage() - 1);
+				bundleUri = bundleUri.replaceQueryParam("_page", result.getPageAndCount().getPage() - 1);
 				bundleUri = bundleUri.replaceQueryParam("_count", result.getPageAndCount().getCount());
 				bundle.addLink().setRelation("previous").setUrlElement(new UriType(bundleUri.build()));
 			}
 			if (!result.isLastPage())
 			{
-				bundleUri = bundleUri.replaceQueryParam("page", result.getPageAndCount().getPage() + 1);
+				bundleUri = bundleUri.replaceQueryParam("_page", result.getPageAndCount().getPage() + 1);
 				bundleUri = bundleUri.replaceQueryParam("_count", result.getPageAndCount().getCount());
 				bundle.addLink().setRelation("next").setUrlElement(new UriType(bundleUri.build()));
 			}
 
-			bundleUri = bundleUri.replaceQueryParam("page", result.getLastPage());
+			bundleUri = bundleUri.replaceQueryParam("_page", result.getLastPage());
 			bundleUri = bundleUri.replaceQueryParam("_count", result.getPageAndCount().getCount());
 			bundle.addLink().setRelation("last").setUrlElement(new UriType(bundleUri.build()));
 		}

@@ -190,6 +190,7 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 			var resourceSearchParameters = searchParameters.getOrDefault(resource, Collections.emptyList());
 			resourceSearchParameters.forEach(r::addSearchParam);
 
+			r.addSearchParam(createIncludeParameter(resource, resourceSearchParameters));
 			r.addSearchParam(createFormatParameter());
 			r.addSearchParam(createPrettyParameter());
 			r.addSearchParam(createCountParameter(defaultPageCount));
@@ -200,6 +201,18 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 			standardOperations.forEach(r::addOperation);
 		}
 		return statement;
+	}
+
+	private CapabilityStatementRestResourceSearchParamComponent createIncludeParameter(
+			Class<? extends DomainResource> resource,
+			List<CapabilityStatementRestResourceSearchParamComponent> resourceSearchParameters)
+	{
+		return createSearchParameter("_include", "", SearchParamType.SPECIAL,
+				"Additional resources to return, allowed values: "
+						+ resourceSearchParameters.stream().filter(s -> SearchParamType.REFERENCE.equals(s.getType()))
+								.map(s -> resource.getAnnotation(ResourceDef.class).name() + ":" + s.getName())
+								.collect(Collectors.joining(", ", "[", "]"))
+						+ " (use one _include parameter for every resource to include)");
 	}
 
 	private CapabilityStatementRestResourceOperationComponent createValidateOperation()
@@ -221,7 +234,7 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 
 	private CapabilityStatementRestResourceSearchParamComponent createPageParameter()
 	{
-		return createSearchParameter("page", "", SearchParamType.NUMBER, "Specify the page number, 1 if not specified");
+		return createSearchParameter("_page", "", SearchParamType.NUMBER, "Specify the page number, 1 if not specified");
 	}
 
 	private CapabilityStatementRestResourceSearchParamComponent createCountParameter(int defaultPageCount)
