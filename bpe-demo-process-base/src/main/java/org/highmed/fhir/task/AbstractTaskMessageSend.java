@@ -43,6 +43,7 @@ public class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
+		Objects.requireNonNull(organizationProvider, "organizationProvider");
 		Objects.requireNonNull(clientProvider, "clientProvider");
 	}
 

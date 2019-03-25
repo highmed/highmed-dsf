@@ -18,7 +18,7 @@
       <bpmn:messageEventDefinition messageRef="Message_1h0kvyq" camunda:class="org.highmed.bpe.message.SendPong" />
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="SequenceFlow_09i9zb8" sourceRef="Task_0ltampw" targetRef="EndEvent_1ivxrjg" />
-    <bpmn:serviceTask id="Task_0ltampw">
+    <bpmn:serviceTask id="Task_0ltampw" name="logPing" camunda:class="org.highmed.bpe.service.LogPing">
       <bpmn:incoming>SequenceFlow_07w11cw</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_09i9zb8</bpmn:outgoing>
     </bpmn:serviceTask>

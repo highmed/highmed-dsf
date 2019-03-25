@@ -14,6 +14,8 @@ import org.highmed.fhir.client.ClientProvider;
 import org.highmed.fhir.client.ClientProviderImpl;
 import org.highmed.fhir.client.WebsocketClient;
 import org.highmed.fhir.client.WebsocketClientTyrus;
+import org.highmed.fhir.organization.OrganizationProvider;
+import org.highmed.fhir.organization.OrganizationProviderImpl;
 import org.highmed.fhir.task.TaskHandler;
 import org.highmed.fhir.variables.DomainResourceSerializer;
 import org.highmed.fhir.variables.FhirPlugin;
@@ -36,13 +38,15 @@ import de.rwh.utils.crypto.io.CertificateReader;
 @Configuration
 public class FhirConfig
 {
+	@Value("${org.highmed.bpe.fhir.local.organization.id}")
+	private String localOrganizationIdPart;
 
 	@Value("${org.highmed.bpe.fhir.webservice.keystore.p12file}")
 	private String webserviceKeyStoreFile;
 
 	@Value("${org.highmed.bpe.fhir.webservice.keystore.password}")
 	private String webserviceKeyStorePassword;
-	
+
 	@Value("${org.highmed.bpe.fhir.remote.webservice.readTimeout}")
 	private int remoteReadTimeout;
 
@@ -199,5 +203,11 @@ public class FhirConfig
 		{
 			throw new RuntimeException(e);
 		}
+	}
+
+	@Bean
+	public OrganizationProvider organizationProvider()
+	{
+		return new OrganizationProviderImpl(clientProvider(), localOrganizationIdPart);
 	}
 }

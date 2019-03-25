@@ -1,6 +1,7 @@
 package org.highmed.bpe.service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -12,8 +13,9 @@ import org.highmed.fhir.variables.MultiInstanceTargets;
 import org.highmed.fhir.variables.MultiInstanceTargetsValues;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 
-public class SelectTargets implements JavaDelegate
+public class SelectTargets implements JavaDelegate, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(SelectTargets.class);
 
@@ -22,6 +24,12 @@ public class SelectTargets implements JavaDelegate
 	public SelectTargets(OrganizationProvider organizationProvider)
 	{
 		this.organizationProvider = organizationProvider;
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception
+	{
+		Objects.requireNonNull(organizationProvider, "organizationProvider");
 	}
 
 	@Override
