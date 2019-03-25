@@ -7,9 +7,11 @@ import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.highmed.fhir.client.ClientProvider;
 import org.highmed.fhir.client.WebserviceClient;
+import org.highmed.fhir.organization.OrganizationProvider;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.ParameterComponent;
@@ -19,18 +21,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-public class SendTaskMessage implements JavaDelegate, InitializingBean
+public class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
 {
 	public static final String VARIABLE_MESSAGE_NAME = "messageName";
 	public static final String VARIABLE_PROCESS_DEFINITION_KEY = "processDefinitionKey";
 	public static final String VARIABLE_VERSION_TAG = "versionTag";
+	public static final String VARIABLE_TARGET_ORGANIZATION = "targetOrganization";
+	public static final String VARIABLE_CORRELATION_KEY = "correlationKey";
 
-	private static final Logger logger = LoggerFactory.getLogger(SendTaskMessage.class);
+	private static final Logger logger = LoggerFactory.getLogger(AbstractTaskMessageSend.class);
 
 	private final ClientProvider clientProvider;
+	private final OrganizationProvider organizationProvider;
 
-	public SendTaskMessage(ClientProvider clientProvider)
+	public AbstractTaskMessageSend(OrganizationProvider organizationProvider, ClientProvider clientProvider)
 	{
+		this.organizationProvider = organizationProvider;
 		this.clientProvider = clientProvider;
 	}
 
@@ -43,12 +49,12 @@ public class SendTaskMessage implements JavaDelegate, InitializingBean
 	@Override
 	public void execute(DelegateExecution execution) throws Exception
 	{
-		Organization target = (Organization) execution.getVariable("target");
-		String processDefinitionKey = (String) execution.getVariable("processDefinitionKey");
-		String versionTag = (String) execution.getVariable("versionTag");
-		String messageName = (String) execution.getVariable("messageName");
+		Organization target = (Organization) execution.getVariable(VARIABLE_TARGET_ORGANIZATION);
+		String processDefinitionKey = (String) execution.getVariable(VARIABLE_PROCESS_DEFINITION_KEY);
+		String versionTag = (String) execution.getVariable(VARIABLE_VERSION_TAG);
+		String messageName = (String) execution.getVariable(VARIABLE_MESSAGE_NAME);
 		String businessKey = execution.getBusinessKey();
-		String correlationKey = (String) execution.getVariable("correlationKey");
+		String correlationKey = (String) execution.getVariable(VARIABLE_CORRELATION_KEY);
 
 		sendTask(target, processDefinitionKey, versionTag, messageName, businessKey, correlationKey);
 	}
@@ -63,6 +69,8 @@ public class SendTaskMessage implements JavaDelegate, InitializingBean
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
+		task.setRequester(new Reference(organizationProvider.getLocalOrganization().getIdElement()));
+		task.getRestriction().addRecipient(new Reference(target.getIdElement()));
 
 		// http://highmed.org/bpe/Process/processDefinitionKey
 		// http://highmed.org/bpe/Process/processDefinitionKey/versionTag
@@ -94,8 +102,8 @@ public class SendTaskMessage implements JavaDelegate, InitializingBean
 		for (ParameterComponent param : additionalInputParameters)
 			task.getInput().add(param);
 
-		WebserviceClient client = clientProvider.getRemote(target.getIdElement());
-		
+		WebserviceClient client = clientProvider.getRemoteClient(target.getIdElement());
+
 		logger.info("Sending task {} to organization {} ({})", task.getInstantiatesUri(), target.getName(),
 				target.getIdElement().getIdPart());
 		client.create(task);

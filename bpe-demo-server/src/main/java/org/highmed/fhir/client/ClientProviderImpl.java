@@ -13,7 +13,7 @@ import org.hl7.fhir.r4.model.Organization;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class ClientProvider
+public class ClientProviderImpl implements ClientProvider
 {
 	private final Map<String, WebserviceClient> clientsByUrl = new HashMap<>();
 
@@ -25,7 +25,7 @@ public class ClientProvider
 
 	private final int remoteReadTimeout;
 	private final int remoteConnectTimeout;
-	private final String remoteProxyPasswor;
+	private final String remoteProxyPassword;
 	private final String remoteProxyUsername;
 	private final String remoteProxySchemeHostPort;
 
@@ -33,9 +33,9 @@ public class ClientProvider
 	private final int localConnectTimeout;
 	private final String localBaseUrl;
 
-	public ClientProvider(FhirContext fhirContext, KeyStore keyStore, String keyStorePassword, KeyStore trustStore,
-			int remoteReadTimeout, int remoteConnectTimeout, String remoteProxyPasswor, String remoteProxyUsername,
-			String remoteProxySchemeHostPort, int localReadTimeout, int localConnectTimeout, String localBaseUrl)
+	public ClientProviderImpl(FhirContext fhirContext, KeyStore keyStore, String keyStorePassword, KeyStore trustStore,
+			int remoteReadTimeout, int remoteConnectTimeout, String remoteProxyPassword, String remoteProxyUsername,
+			String remoteProxySchemeHostPort, int localReadTimeout, int localConnectTimeout, String localWebserviceUrl)
 	{
 		this.fhirContext = fhirContext;
 		this.keyStore = keyStore;
@@ -43,61 +43,64 @@ public class ClientProvider
 		this.trustStore = trustStore;
 		this.remoteReadTimeout = remoteReadTimeout;
 		this.remoteConnectTimeout = remoteConnectTimeout;
-		this.remoteProxyPasswor = remoteProxyPasswor;
+		this.remoteProxyPassword = remoteProxyPassword;
 		this.remoteProxyUsername = remoteProxyUsername;
 		this.remoteProxySchemeHostPort = remoteProxySchemeHostPort;
 		this.localReadTimeout = localReadTimeout;
 		this.localConnectTimeout = localConnectTimeout;
-		this.localBaseUrl = localBaseUrl;
+		this.localBaseUrl = localWebserviceUrl;
 	}
 
-	private WebserviceClient getClient(String baseUrl)
+	private WebserviceClient getClient(String webserviceUrl)
 	{
 		synchronized (clientsByUrl)
 		{
-			if (clientsByUrl.containsKey(baseUrl))
-				return clientsByUrl.get(baseUrl);
+			if (clientsByUrl.containsKey(webserviceUrl))
+				return clientsByUrl.get(webserviceUrl);
 			else
 			{
 				WebserviceClient client;
-				if (localBaseUrl.equals(baseUrl))
-					client = new WebserviceClientJersey(baseUrl, trustStore, keyStore, keyStorePassword, null, null,
+				if (localBaseUrl.equals(webserviceUrl))
+					client = new WebserviceClientJersey(webserviceUrl, trustStore, keyStore, keyStorePassword, null, null,
 							null, localConnectTimeout, localReadTimeout, null, fhirContext);
 				else
-					client = new WebserviceClientJersey(baseUrl, trustStore, keyStore, keyStorePassword,
-							remoteProxySchemeHostPort, remoteProxyUsername, remoteProxyPasswor, remoteConnectTimeout,
+					client = new WebserviceClientJersey(webserviceUrl, trustStore, keyStore, keyStorePassword,
+							remoteProxySchemeHostPort, remoteProxyUsername, remoteProxyPassword, remoteConnectTimeout,
 							remoteReadTimeout, null, fhirContext);
 
-				clientsByUrl.put(baseUrl, client);
+				clientsByUrl.put(webserviceUrl, client);
 				return client;
 			}
 		}
 	}
 
-	public WebserviceClient getLocal()
+	@Override
+	public WebserviceClient getLocalClient()
 	{
-		return getRemote(localBaseUrl);
+		return getRemoteClient(localBaseUrl);
 	}
 
-	public WebserviceClient getRemote(String baseUrl)
+	@Override
+	public WebserviceClient getRemoteClient(String webserviceUrl)
 	{
-		WebserviceClient cachedClient = clientsByUrl.get(baseUrl);
+		WebserviceClient cachedClient = clientsByUrl.get(webserviceUrl);
 		if (cachedClient != null)
 			return cachedClient;
 		else
 		{
-			WebserviceClient newClient = getClient(baseUrl);
-			clientsByUrl.put(baseUrl, newClient);
+			WebserviceClient newClient = getClient(webserviceUrl);
+			clientsByUrl.put(webserviceUrl, newClient);
 			return newClient;
 		}
 	}
 
-	public WebserviceClient getRemote(IdType organizationReference)
+	@Override
+	public WebserviceClient getRemoteClient(IdType organizationReference)
 	{
 		if (organizationReference.hasBaseUrl())
 			throw new IllegalArgumentException("Reference to locally stored organization expected");
 
-		Bundle resultSet = getLocal().search(Organization.class,
+		Bundle resultSet = getLocalClient().search(Organization.class,
 				Map.of("_id", Collections.singletonList(organizationReference.getIdPart()), "_include",
 						Collections.singletonList("Organization:endpoint")));
 
@@ -120,6 +123,6 @@ public class ClientProvider
 									.map(e -> e.getResource().getClass().getName()).collect(Collectors.joining(", "))
 							+ ")");
 
-		return getRemote(endpoint.getAddress());
+		return getRemoteClient(endpoint.getAddress());
 	}
 }

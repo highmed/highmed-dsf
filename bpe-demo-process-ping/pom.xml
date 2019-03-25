@@ -2,7 +2,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>bpe-demo-process-base</artifactId>
+	<artifactId>bpe-demo-process-ping</artifactId>
 
 	<parent>
 		<groupId>org.highmed.bpe</groupId>
@@ -12,17 +12,8 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.highmed.fhir</groupId>
-			<artifactId>fhir-demo-webservice-client</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-context</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.camunda.bpm</groupId>
-			<artifactId>camunda-engine</artifactId>
+			<groupId>org.highmed.bpe</groupId>
+			<artifactId>bpe-demo-process-base</artifactId>
 		</dependency>
 	</dependencies>
 </project>

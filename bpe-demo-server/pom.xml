@@ -17,7 +17,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.highmed.bpe</groupId>
-			<artifactId>bpe-demo-process-hello</artifactId>
+			<artifactId>bpe-demo-process-ping</artifactId>
 		</dependency>
 
 		<dependency>
