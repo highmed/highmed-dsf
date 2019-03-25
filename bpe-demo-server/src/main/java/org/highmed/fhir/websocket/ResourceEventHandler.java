@@ -1,8 +1,9 @@
-package org.highmed.bpe.event;
+package org.highmed.fhir.websocket;
 
 import java.util.Objects;
 
 import org.highmed.fhir.client.WebsocketClient;
+import org.highmed.fhir.task.TaskHandler;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;

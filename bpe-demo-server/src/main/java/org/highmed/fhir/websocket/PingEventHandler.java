@@ -1,4 +1,4 @@
-package org.highmed.bpe.event;
+package org.highmed.fhir.websocket;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -11,6 +11,7 @@ import java.util.Optional;
 
 import org.highmed.fhir.client.WebserviceClient;
 import org.highmed.fhir.client.WebsocketClient;
+import org.highmed.fhir.task.TaskHandler;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Task;
@@ -30,7 +31,7 @@ public class PingEventHandler implements EventHandler, InitializingBean
 
 	private static final String PARAM_LAST_UPDATE = "_lastUpdated";
 	private static final String PARAM_COUNT = "_count";
-	private static final String PARAM_PAGE = "page";
+	private static final String PARAM_PAGE = "_page";
 	private static final String PARAM_SORT = "_sort";
 	private static final int RESULT_PAGE_COUNT = 20;
 

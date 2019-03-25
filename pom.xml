@@ -17,6 +17,8 @@
 		<module>bpe-demo-server</module>
 		<module>bpe-demo-server-jetty</module>
 		<module>bpe-demo-db-migration</module>
+		<module>bpe-demo-process-base</module>
+		<module>bpe-demo-process-hello</module>
 	</modules>
 
 	<properties>
@@ -92,6 +94,16 @@
 			<dependency>
 				<groupId>org.highmed.bpe</groupId>
 				<artifactId>bpe-demo-db-migration</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.bpe</groupId>
+				<artifactId>bpe-demo-process-base</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.bpe</groupId>
+				<artifactId>bpe-demo-process-hello</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 

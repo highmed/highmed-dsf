@@ -1,4 +1,4 @@
-package org.highmed.bpe.event;
+package org.highmed.fhir.websocket;
 
 import java.io.IOException;
 import java.nio.file.Files;

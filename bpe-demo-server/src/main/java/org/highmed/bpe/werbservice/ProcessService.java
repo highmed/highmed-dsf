@@ -4,18 +4,24 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.camunda.bpm.engine.ProcessEngineException;
 import org.camunda.bpm.engine.RepositoryService;
 import org.camunda.bpm.engine.RuntimeService;
+import org.camunda.bpm.engine.repository.Deployment;
+import org.camunda.bpm.engine.repository.DeploymentBuilder;
 import org.camunda.bpm.engine.repository.ProcessDefinition;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
+import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -88,5 +94,49 @@ public class ProcessService implements InitializingBean
 		else
 			return repositoryService.createProcessDefinitionQuery().processDefinitionKey(processDefinitionKey)
 					.latestVersion().singleResult();
+	}
+
+	@POST
+	public Response create(BpmnModelInstance resource, @Context UriInfo uri, @Context HttpHeaders headers)
+	{
+		logger.trace("POST {}", uri.getRequestUri().toString());
+
+		DeploymentBuilder deploymentBuilder = repositoryService.createDeployment();
+		deploymentBuilder.addModelInstance("hello_world.bpmn", resource);
+		Deployment deployment = deploymentBuilder.deploy();
+		logger.info("Hello World process deployed with ID {}", deployment.getId(), deployment);
+
+		return Response.ok().build();
+	}
+
+	@GET
+	@Path("/{id}")
+	public Response read(@PathParam("id") String id, @Context UriInfo uri, @Context HttpHeaders headers)
+	{
+		logger.trace("GET {}", uri.getRequestUri().toString());
+
+		repositoryService.createDeploymentQuery();
+		
+		return Response.ok().build();
+	}
+
+	@GET
+	@Path("/{id}/_history/{version}")
+	public Response vread(@PathParam("id") String id, @PathParam("version") String version, @Context UriInfo uri,
+			@Context HttpHeaders headers)
+	{
+		logger.trace("GET {}", uri.getRequestUri().toString());
+
+		return Response.ok().build();
+	}
+
+	@PUT
+	@Path("/{id}")
+	public Response update(@PathParam("id") String id, BpmnModelInstance resource, @Context UriInfo uri,
+			@Context HttpHeaders headers)
+	{
+		logger.trace("PUT {}", uri.getRequestUri().toString());
+
+		return Response.ok().build();
 	}
 }

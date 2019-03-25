@@ -12,6 +12,15 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>org.highmed.bpe</groupId>
+			<artifactId>bpe-demo-process-base</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.highmed.bpe</groupId>
+			<artifactId>bpe-demo-process-hello</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>org.highmed.fhir</groupId>
 			<artifactId>fhir-demo-websocket-client</artifactId>
 		</dependency>
