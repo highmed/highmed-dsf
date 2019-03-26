@@ -40,7 +40,9 @@ public class SelectTargets implements JavaDelegate, InitializingBean
 				execution.getVariables(), execution.getVariablesLocal());
 
 		List<MultiInstanceTarget> targets = organizationProvider.getRemoteOrganizations().stream()
-				.map(o -> new MultiInstanceTarget(o, UUID.randomUUID().toString())).collect(Collectors.toList());
+				.map(o -> o.getIdElement())
+				.map(oId -> new MultiInstanceTarget(oId.getValue(), UUID.randomUUID().toString()))
+				.collect(Collectors.toList());
 
 		execution.setVariable("multiInstanceTargets",
 				MultiInstanceTargetsValues.create(new MultiInstanceTargets(targets)));

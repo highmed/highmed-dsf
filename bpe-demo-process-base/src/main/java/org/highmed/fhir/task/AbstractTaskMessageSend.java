@@ -9,9 +9,10 @@ import org.highmed.bpe.Constants;
 import org.highmed.fhir.client.ClientProvider;
 import org.highmed.fhir.client.WebserviceClient;
 import org.highmed.fhir.organization.OrganizationProvider;
+import org.highmed.fhir.variables.MultiInstanceTarget;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
@@ -45,18 +46,25 @@ public class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
 	@Override
 	public void execute(DelegateExecution execution) throws Exception
 	{
-		Organization target = (Organization) execution.getVariable(Constants.VARIABLE_TARGET_ORGANIZATION);
 		String processDefinitionKey = (String) execution.getVariable(Constants.VARIABLE_PROCESS_DEFINITION_KEY);
 		String versionTag = (String) execution.getVariable(Constants.VARIABLE_VERSION_TAG);
 		String messageName = (String) execution.getVariable(Constants.VARIABLE_MESSAGE_NAME);
 		String businessKey = execution.getBusinessKey();
-		String correlationKey = (String) execution.getVariable(Constants.VARIABLE_CORRELATION_KEY);
 
-		sendTask(target, processDefinitionKey, versionTag, messageName, businessKey, correlationKey);
+		// TODO see Bug https://app.camunda.com/jira/browse/CAM-9444
+		// String targetOrganizationId = (String) execution.getVariable(Constants.VARIABLE_TARGET_ORGANIZATION_ID);
+		// String correlationKey = (String) execution.getVariable(Constants.VARIABLE_CORRELATION_KEY);
+
+		MultiInstanceTarget target = (MultiInstanceTarget) execution
+				.getVariable(Constants.VARIABLE_MULTIINSTANCE_TARGET);
+
+		sendTask(target.getTargetOrganizationId(), processDefinitionKey, versionTag, messageName, businessKey,
+				target.getCorrelationKey());
 	}
 
-	protected void sendTask(Organization target, String processDefinitionKey, String versionTag, String messageName,
-			String businessKey, String correlationKey, ParameterComponent... additionalInputParameters)
+	protected void sendTask(String targetOrganizationId, String processDefinitionKey, String versionTag,
+			String messageName, String businessKey, String correlationKey,
+			ParameterComponent... additionalInputParameters)
 	{
 		if (messageName.isEmpty() || processDefinitionKey.isEmpty())
 			throw new IllegalStateException("Next process-id or message-name not definied");
@@ -66,7 +74,7 @@ public class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
 		task.setRequester(new Reference(organizationProvider.getLocalOrganization().getIdElement()));
-		task.getRestriction().addRecipient(new Reference(target.getIdElement()));
+		task.getRestriction().addRecipient(new Reference(targetOrganizationId));
 
 		// http://highmed.org/bpe/Process/processDefinitionKey
 		// http://highmed.org/bpe/Process/processDefinitionKey/versionTag
@@ -98,10 +106,10 @@ public class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
 		for (ParameterComponent param : additionalInputParameters)
 			task.getInput().add(param);
 
-		WebserviceClient client = clientProvider.getRemoteClient(target.getIdElement());
+		WebserviceClient client = clientProvider.getRemoteClient(new IdType(targetOrganizationId));
 
-		logger.info("Sending task {} to organization {} ({})", task.getInstantiatesUri(), target.getName(),
-				target.getIdElement().getIdPart());
+		logger.info("Sending task for process {} to organization {} (endpoint: {})", task.getInstantiatesUri(),
+				targetOrganizationId, client.getBaseUrl());
 		client.create(task);
 	}
 

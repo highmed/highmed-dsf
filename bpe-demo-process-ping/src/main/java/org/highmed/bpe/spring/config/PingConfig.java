@@ -5,6 +5,7 @@ import org.highmed.bpe.message.SendPong;
 import org.highmed.bpe.plugin.PingPlugin;
 import org.highmed.bpe.service.LogPing;
 import org.highmed.bpe.service.LogPong;
+import org.highmed.bpe.service.SelectTarget;
 import org.highmed.bpe.service.SelectTargets;
 import org.highmed.fhir.client.ClientProvider;
 import org.highmed.fhir.organization.OrganizationProvider;
@@ -55,5 +56,11 @@ public class PingConfig
 	public SelectTargets selectTargets()
 	{
 		return new SelectTargets(organizationProvider);
+	}
+
+	@Bean
+	public SelectTarget selectTarget()
+	{
+		return new SelectTarget(organizationProvider);
 	}
 }

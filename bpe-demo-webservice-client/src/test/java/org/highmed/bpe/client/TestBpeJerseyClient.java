@@ -27,6 +27,7 @@ public class TestBpeJerseyClient
 
 		try
 		{
+			client.startProcessWithVersion("ping", "1.0.0");
 		}
 		catch (WebApplicationException e)
 		{

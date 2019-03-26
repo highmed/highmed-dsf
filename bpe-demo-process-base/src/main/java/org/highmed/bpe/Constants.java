@@ -5,8 +5,11 @@ public interface Constants
 	String VARIABLE_MESSAGE_NAME = "messageName";
 	String VARIABLE_PROCESS_DEFINITION_KEY = "processDefinitionKey";
 	String VARIABLE_VERSION_TAG = "versionTag";
-	String VARIABLE_TARGET_ORGANIZATION = "targetOrganization";
-	String VARIABLE_CORRELATION_KEY = "correlationKey";
+
+	// String VARIABLE_TARGET_ORGANIZATION_ID = "targetOrganizationId";
+	// String VARIABLE_CORRELATION_KEY = "correlationKey";
+	String VARIABLE_MULTIINSTANCE_TARGET = "multiInstanceTarget";
+
 	String VARIABLE_TASK = "task";
 
 	String CODESYSTEM_HIGHMED_BPMN = "http://highmed.org/fhir/CodeSystem/bpmn-message";
