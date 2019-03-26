@@ -5,6 +5,7 @@ import java.util.Objects;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
+import org.highmed.bpe.Constants;
 import org.highmed.fhir.client.ClientProvider;
 import org.highmed.fhir.client.WebserviceClient;
 import org.highmed.fhir.organization.OrganizationProvider;
@@ -23,12 +24,6 @@ import org.springframework.beans.factory.InitializingBean;
 
 public class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
 {
-	public static final String VARIABLE_MESSAGE_NAME = "messageName";
-	public static final String VARIABLE_PROCESS_DEFINITION_KEY = "processDefinitionKey";
-	public static final String VARIABLE_VERSION_TAG = "versionTag";
-	public static final String VARIABLE_TARGET_ORGANIZATION = "targetOrganization";
-	public static final String VARIABLE_CORRELATION_KEY = "correlationKey";
-
 	private static final Logger logger = LoggerFactory.getLogger(AbstractTaskMessageSend.class);
 
 	private final ClientProvider clientProvider;
@@ -50,12 +45,12 @@ public class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
 	@Override
 	public void execute(DelegateExecution execution) throws Exception
 	{
-		Organization target = (Organization) execution.getVariable(VARIABLE_TARGET_ORGANIZATION);
-		String processDefinitionKey = (String) execution.getVariable(VARIABLE_PROCESS_DEFINITION_KEY);
-		String versionTag = (String) execution.getVariable(VARIABLE_VERSION_TAG);
-		String messageName = (String) execution.getVariable(VARIABLE_MESSAGE_NAME);
+		Organization target = (Organization) execution.getVariable(Constants.VARIABLE_TARGET_ORGANIZATION);
+		String processDefinitionKey = (String) execution.getVariable(Constants.VARIABLE_PROCESS_DEFINITION_KEY);
+		String versionTag = (String) execution.getVariable(Constants.VARIABLE_VERSION_TAG);
+		String messageName = (String) execution.getVariable(Constants.VARIABLE_MESSAGE_NAME);
 		String businessKey = execution.getBusinessKey();
-		String correlationKey = (String) execution.getVariable(VARIABLE_CORRELATION_KEY);
+		String correlationKey = (String) execution.getVariable(Constants.VARIABLE_CORRELATION_KEY);
 
 		sendTask(target, processDefinitionKey, versionTag, messageName, businessKey, correlationKey);
 	}
@@ -75,27 +70,27 @@ public class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
 
 		// http://highmed.org/bpe/Process/processDefinitionKey
 		// http://highmed.org/bpe/Process/processDefinitionKey/versionTag
-		String instantiatesUri = "http://highmed.org/bpe/Process/" + processDefinitionKey
+		String instantiatesUri = Constants.PROCESS_URI_BASE + processDefinitionKey
 				+ (versionTag != null && !versionTag.isEmpty() ? ("/" + versionTag) : "");
 		task.setInstantiatesUri(instantiatesUri);
 
 		ParameterComponent messageNameInput = new ParameterComponent(
-				new CodeableConcept(
-						new Coding("http://highmed.org/fhir/CodeSystem/bpmn-message", "message-name", null)),
+				new CodeableConcept(new Coding(Constants.CODESYSTEM_HIGHMED_BPMN,
+						Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME, null)),
 				new StringType(messageName));
 		task.getInput().add(messageNameInput);
 
 		ParameterComponent businessKeyInput = new ParameterComponent(
-				new CodeableConcept(
-						new Coding("http://highmed.org/fhir/CodeSystem/bpmn-message", "business-key", null)),
+				new CodeableConcept(new Coding(Constants.CODESYSTEM_HIGHMED_BPMN,
+						Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY, null)),
 				new StringType(businessKey));
 		task.getInput().add(businessKeyInput);
 
 		if (correlationKey != null)
 		{
 			ParameterComponent correlationKeyInput = new ParameterComponent(
-					new CodeableConcept(
-							new Coding("http://highmed.org/fhir/CodeSystem/bpmn-message", "correlation-key", null)),
+					new CodeableConcept(new Coding(Constants.CODESYSTEM_HIGHMED_BPMN,
+							Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY, null)),
 					new StringType(correlationKey));
 			task.getInput().add(correlationKeyInput);
 		}

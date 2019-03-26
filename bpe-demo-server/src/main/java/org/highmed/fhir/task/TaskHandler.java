@@ -14,6 +14,7 @@ import org.camunda.bpm.engine.repository.ProcessDefinition;
 import org.camunda.bpm.engine.runtime.MessageCorrelationBuilder;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
 import org.camunda.bpm.engine.variable.Variables;
+import org.highmed.bpe.Constants;
 import org.highmed.fhir.client.WebserviceClient;
 import org.highmed.fhir.variables.DomainResourceValues;
 import org.hl7.fhir.r4.model.StringType;
@@ -59,15 +60,15 @@ public class TaskHandler implements InitializingBean
 		List<String> pathSegments = getPathSegments(task.getInstantiatesUri());
 		String processDefinitionKey = pathSegments.get(2);
 		String versionTag = pathSegments.size() == 4 ? pathSegments.get(3) : null;
-		
-		String messageName = getString(task.getInput(), "http://highmed.org/fhir/CodeSystem/bpmn-message",
-				"message-name").orElse(null);
-		String businessKey = getString(task.getInput(), "http://highmed.org/fhir/CodeSystem/bpmn-message",
-				"business-key").orElse(null);
-		String correlationKey = getString(task.getInput(), "http://highmed.org/fhir/CodeSystem/bpmn-message",
-				"correlation-key").orElse(null);
 
-		Map<String, Object> variables = Map.of("task", DomainResourceValues.create(task));
+		String messageName = getString(task.getInput(), Constants.CODESYSTEM_HIGHMED_BPMN,
+				Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME).orElse(null);
+		String businessKey = getString(task.getInput(), Constants.CODESYSTEM_HIGHMED_BPMN,
+				Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY).orElse(null);
+		String correlationKey = getString(task.getInput(), Constants.CODESYSTEM_HIGHMED_BPMN,
+				Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY).orElse(null);
+
+		Map<String, Object> variables = Map.of(Constants.VARIABLE_TASK, DomainResourceValues.create(task));
 
 		try
 		{
