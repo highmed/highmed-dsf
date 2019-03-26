@@ -19,6 +19,7 @@
 		<module>bpe-demo-db-migration</module>
 		<module>bpe-demo-process-base</module>
 		<module>bpe-demo-process-ping</module>
+		<module>bpe-demo-webservice-client</module>
 	</modules>
 
 	<properties>
@@ -104,6 +105,11 @@
 			<dependency>
 				<groupId>org.highmed.bpe</groupId>
 				<artifactId>bpe-demo-process-ping</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.bpe</groupId>
+				<artifactId>bpe-demo-webservice-client</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
