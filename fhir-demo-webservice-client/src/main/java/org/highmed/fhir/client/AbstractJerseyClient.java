@@ -69,4 +69,9 @@ public class AbstractJerseyClient
 	{
 		return client.target(baseUrl);
 	}
+	
+	public String getBaseUrl()
+	{
+		return baseUrl;
+	}
 }

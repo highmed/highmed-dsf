@@ -70,11 +70,11 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 {
 	private static final Logger logger = LoggerFactory.getLogger(WebserviceClientJersey.class);
 
-	public WebserviceClientJersey(String schemaHostPort, KeyStore trustStore, KeyStore keyStore,
-			String keyStorePassword, String proxySchemeHostPort, String proxyUserName, String proxyPassword,
-			int connectTimeout, int readTimeout, ObjectMapper objectMapper, FhirContext fhirContext)
+	public WebserviceClientJersey(String baseUrl, KeyStore trustStore, KeyStore keyStore, String keyStorePassword,
+			String proxySchemeHostPort, String proxyUserName, String proxyPassword, int connectTimeout, int readTimeout,
+			ObjectMapper objectMapper, FhirContext fhirContext)
 	{
-		super(schemaHostPort, trustStore, keyStore, keyStorePassword, proxySchemeHostPort, proxyUserName, proxyPassword,
+		super(baseUrl, trustStore, keyStore, keyStorePassword, proxySchemeHostPort, proxyUserName, proxyPassword,
 				connectTimeout, readTimeout, objectMapper, components(fhirContext));
 	}
 

@@ -10,6 +10,8 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 
 public interface WebserviceClient
 {
+	String getBaseUrl();
+	
 	<R extends DomainResource> R create(R resource);
 
 	<R extends DomainResource> R update(R resource);
