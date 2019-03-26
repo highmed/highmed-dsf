@@ -17,7 +17,7 @@ public abstract class AbstractProcessEnginePlugin implements ProcessEnginePlugin
 	{
 		RepositoryService repositoryService = processEngine.getRepositoryService();
 
-		Deployment deployment = repositoryService.createDeployment().name(modelFilename)
+		Deployment deployment = repositoryService.createDeployment().name(modelFilename).source(modelFilename)
 				.addModelInstance(modelFilename, model).enableDuplicateFiltering(true).deploy();
 
 		logger.info("Process {} deployed with id {}", modelFilename, deployment.getId());
