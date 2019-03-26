@@ -20,6 +20,7 @@
 		<module>bpe-demo-process-base</module>
 		<module>bpe-demo-process-ping</module>
 		<module>bpe-demo-webservice-client</module>
+		<module>bpe-demo-cert-generator</module>
 	</modules>
 
 	<properties>
