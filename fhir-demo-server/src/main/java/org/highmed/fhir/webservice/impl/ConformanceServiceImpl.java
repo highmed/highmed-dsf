@@ -2,6 +2,7 @@ package org.highmed.fhir.webservice.impl;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -15,19 +16,31 @@ import javax.ws.rs.core.UriInfo;
 
 import org.highmed.fhir.help.ParameterConverter;
 import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
+import org.highmed.fhir.search.parameters.CodeSystemIdentifier;
 import org.highmed.fhir.search.parameters.CodeSystemUrl;
 import org.highmed.fhir.search.parameters.CodeSystemVersion;
+import org.highmed.fhir.search.parameters.EndpointIdentifier;
 import org.highmed.fhir.search.parameters.EndpointOrganization;
+import org.highmed.fhir.search.parameters.HealthcareServiceIdentifier;
+import org.highmed.fhir.search.parameters.LocationIdentifier;
 import org.highmed.fhir.search.parameters.OrganizationEndpoint;
+import org.highmed.fhir.search.parameters.OrganizationIdentifier;
 import org.highmed.fhir.search.parameters.OrganizationName;
+import org.highmed.fhir.search.parameters.PatientIdentifier;
+import org.highmed.fhir.search.parameters.PractitionerIdentifier;
+import org.highmed.fhir.search.parameters.PractitionerRoleIdentifier;
+import org.highmed.fhir.search.parameters.ResearchStudyIdentifier;
 import org.highmed.fhir.search.parameters.ResourceId;
 import org.highmed.fhir.search.parameters.ResourceLastUpdated;
+import org.highmed.fhir.search.parameters.StructureDefinitionIdentifier;
 import org.highmed.fhir.search.parameters.StructureDefinitionUrl;
 import org.highmed.fhir.search.parameters.StructureDefinitionVersion;
 import org.highmed.fhir.search.parameters.SubscriptionChannelType;
 import org.highmed.fhir.search.parameters.SubscriptionStatus;
+import org.highmed.fhir.search.parameters.TaskIdentifier;
 import org.highmed.fhir.search.parameters.TaskRequester;
 import org.highmed.fhir.search.parameters.TaskStatus;
+import org.highmed.fhir.search.parameters.ValueSetIdentifier;
 import org.highmed.fhir.search.parameters.ValueSetUrl;
 import org.highmed.fhir.search.parameters.ValueSetVersion;
 import org.highmed.fhir.webservice.specification.ConformanceService;
@@ -134,33 +147,58 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 
 		var searchParameters = new HashMap<Class<? extends DomainResource>, List<CapabilityStatementRestResourceSearchParamComponent>>();
 
+		var codeSystemIdentifier = createSearchParameter(CodeSystemIdentifier.class);
 		var codeSystemUrl = createSearchParameter(CodeSystemUrl.class);
 		var codeSystemVersion = createSearchParameter(CodeSystemVersion.class);
-		searchParameters.put(CodeSystem.class, Arrays.asList(codeSystemUrl, codeSystemVersion));
+		searchParameters.put(CodeSystem.class, Arrays.asList(codeSystemIdentifier, codeSystemUrl, codeSystemVersion));
 
+		var endpointIdentifier = createSearchParameter(EndpointIdentifier.class);
 		var endpointOrganization = createSearchParameter(EndpointOrganization.class);
-		searchParameters.put(Endpoint.class, Arrays.asList(endpointOrganization));
+		searchParameters.put(Endpoint.class, Arrays.asList(endpointIdentifier, endpointOrganization));
 
-		var organizationNameOrAlias = createSearchParameter(OrganizationName.class);
+		var healthcareServiceIdentifier = createSearchParameter(HealthcareServiceIdentifier.class);
+		searchParameters.put(HealthcareService.class, Arrays.asList(healthcareServiceIdentifier));
+
+		var locationIdentifier = createSearchParameter(LocationIdentifier.class);
+		searchParameters.put(Location.class, Arrays.asList(locationIdentifier));
+
 		var organizationEndpoint = createSearchParameter(OrganizationEndpoint.class);
-		searchParameters.put(Organization.class, Arrays.asList(organizationNameOrAlias, organizationEndpoint));
+		var organizationIdentifier = createSearchParameter(OrganizationIdentifier.class);
+		var organizationNameOrAlias = createSearchParameter(OrganizationName.class);
+		searchParameters.put(Organization.class,
+				Arrays.asList(organizationEndpoint, organizationIdentifier, organizationNameOrAlias));
 
+		var patientIdentifier = createSearchParameter(PatientIdentifier.class);
+		searchParameters.put(Patient.class, Arrays.asList(patientIdentifier));
+
+		var practitionerIdentifier = createSearchParameter(PractitionerIdentifier.class);
+		searchParameters.put(Practitioner.class, Arrays.asList(practitionerIdentifier));
+
+		var practitionerRoleIdentifier = createSearchParameter(PractitionerRoleIdentifier.class);
+		searchParameters.put(PractitionerRole.class, Arrays.asList(practitionerRoleIdentifier));
+
+		var researchStudyIdentifier = createSearchParameter(ResearchStudyIdentifier.class);
+		searchParameters.put(ResearchStudy.class, Arrays.asList(researchStudyIdentifier));
+
+		var structureDefinitionIdentifier = createSearchParameter(StructureDefinitionIdentifier.class);
 		var structureDefinitionUrl = createSearchParameter(StructureDefinitionUrl.class);
 		var structureDefinitionVersion = createSearchParameter(StructureDefinitionVersion.class);
 		searchParameters.put(StructureDefinition.class,
-				Arrays.asList(structureDefinitionUrl, structureDefinitionVersion));
+				Arrays.asList(structureDefinitionIdentifier, structureDefinitionUrl, structureDefinitionVersion));
 
 		var subscriptionStatus = createSearchParameter(SubscriptionStatus.class);
 		var subscriptionChannelType = createSearchParameter(SubscriptionChannelType.class);
 		searchParameters.put(Subscription.class, Arrays.asList(subscriptionStatus, subscriptionChannelType));
 
+		var taskIdentifier = createSearchParameter(TaskIdentifier.class);
 		var taskRequester = createSearchParameter(TaskRequester.class);
 		var taskStatus = createSearchParameter(TaskStatus.class);
-		searchParameters.put(Task.class, Arrays.asList(taskRequester, taskStatus));
+		searchParameters.put(Task.class, Arrays.asList(taskIdentifier, taskRequester, taskStatus));
 
+		var valueSetIdentifier = createSearchParameter(ValueSetIdentifier.class);
 		var valueSetUrl = createSearchParameter(ValueSetUrl.class);
 		var valueSetVersion = createSearchParameter(ValueSetVersion.class);
-		searchParameters.put(ValueSet.class, Arrays.asList(valueSetUrl, valueSetVersion));
+		searchParameters.put(ValueSet.class, Arrays.asList(valueSetIdentifier, valueSetUrl, valueSetVersion));
 
 		var operations = new HashMap<Class<? extends DomainResource>, List<CapabilityStatementRestResourceOperationComponent>>();
 
@@ -188,7 +226,9 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 			standardSortableSearchParameters.stream().forEach(r::addSearchParam);
 
 			var resourceSearchParameters = searchParameters.getOrDefault(resource, Collections.emptyList());
-			resourceSearchParameters.forEach(r::addSearchParam);
+			resourceSearchParameters.stream()
+					.sorted(Comparator.comparing(CapabilityStatementRestResourceSearchParamComponent::getName))
+					.forEach(r::addSearchParam);
 
 			r.addSearchParam(createIncludeParameter(resource, resourceSearchParameters));
 			r.addSearchParam(createFormatParameter());
@@ -234,7 +274,8 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 
 	private CapabilityStatementRestResourceSearchParamComponent createPageParameter()
 	{
-		return createSearchParameter("_page", "", SearchParamType.NUMBER, "Specify the page number, 1 if not specified");
+		return createSearchParameter("_page", "", SearchParamType.NUMBER,
+				"Specify the page number, 1 if not specified");
 	}
 
 	private CapabilityStatementRestResourceSearchParamComponent createCountParameter(int defaultPageCount)

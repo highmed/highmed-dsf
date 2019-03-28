@@ -9,6 +9,7 @@ import java.util.Optional;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.fhir.search.parameters.OrganizationEndpoint;
+import org.highmed.fhir.search.parameters.OrganizationIdentifier;
 import org.highmed.fhir.search.parameters.OrganizationName;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Organization;
@@ -24,7 +25,7 @@ public class OrganizationDao extends AbstractDomainResourceDao<Organization>
 	public OrganizationDao(BasicDataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, Organization.class, "organizations", "organization", "organization_id",
-				OrganizationName::new, OrganizationEndpoint::new);
+				OrganizationName::new, OrganizationEndpoint::new, OrganizationIdentifier::new);
 	}
 
 	@Override

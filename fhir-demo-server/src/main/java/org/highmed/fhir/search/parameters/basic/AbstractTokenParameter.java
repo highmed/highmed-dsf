@@ -16,14 +16,14 @@ public abstract class AbstractTokenParameter<R extends DomainResource> extends A
 
 	protected static class TokenValueAndSearchType
 	{
-		public final String codeValue;
 		public final String systemValue;
+		public final String codeValue;
 		public final TokenSearchType type;
 
-		TokenValueAndSearchType(String codeValue, String systemValue, TokenSearchType type)
+		TokenValueAndSearchType(String systemValue, String codeValue, TokenSearchType type)
 		{
-			this.codeValue = codeValue;
 			this.systemValue = systemValue;
+			this.codeValue = codeValue;
 			this.type = type;
 		}
 	}
@@ -42,13 +42,13 @@ public abstract class AbstractTokenParameter<R extends DomainResource> extends A
 		if (param != null && !param.isEmpty())
 		{
 			if (param.indexOf('|') == -1)
-				valueAndType = new TokenValueAndSearchType(param, null, TokenSearchType.CODE);
+				valueAndType = new TokenValueAndSearchType(null, param, TokenSearchType.CODE);
 			else if (param.charAt(0) == '|')
 				valueAndType = new TokenValueAndSearchType(param.substring(1), null,
 						TokenSearchType.CODE_AND_NO_SYSTEM_PROPERTY);
 			else if (param.charAt(param.length() - 1) == '|')
 				valueAndType = new TokenValueAndSearchType(param.substring(0, param.length() - 1), null,
-						TokenSearchType.CODE_AND_NO_SYSTEM_PROPERTY);
+						TokenSearchType.SYSTEM);
 			else
 			{
 				String[] splitAtPipe = param.split("[|]");

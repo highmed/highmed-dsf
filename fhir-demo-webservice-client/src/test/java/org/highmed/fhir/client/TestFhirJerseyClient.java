@@ -9,17 +9,9 @@ import java.security.cert.CertificateException;
 
 import javax.ws.rs.WebApplicationException;
 
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Endpoint;
-import org.hl7.fhir.r4.model.Endpoint.EndpointStatus;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.Reference;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.Constants;
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.CertificateReader;
 
@@ -135,9 +127,11 @@ public class TestFhirJerseyClient
 			// org.addEndpoint(new Reference(new IdType(createdEndpoint.getIdElement().getResourceType(),
 			// createdEndpoint.getIdElement().getIdPart())));
 			// client.update(org);
-
+			//
 			// Organization org = client.read(Organization.class, "e8aa9c06-9789-4c2b-8292-1c2a9601c2cc");
-			// org.setActive(true);
+			// org.addIdentifier().setSystem("http://highmed.org/fhir/CodeSystem/organizations").setValue("Hochschule
+			// Heilbronn");
+			//
 			// client.update(org);
 		}
 		catch (WebApplicationException e)

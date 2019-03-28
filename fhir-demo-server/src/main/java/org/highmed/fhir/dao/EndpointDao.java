@@ -1,6 +1,7 @@
 package org.highmed.fhir.dao;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.highmed.fhir.search.parameters.EndpointIdentifier;
 import org.highmed.fhir.search.parameters.EndpointOrganization;
 import org.hl7.fhir.r4.model.Endpoint;
 
@@ -11,7 +12,7 @@ public class EndpointDao extends AbstractDomainResourceDao<Endpoint>
 	public EndpointDao(BasicDataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, Endpoint.class, "endpoints", "endpoint", "endpoint_id",
-				EndpointOrganization::new);
+				EndpointOrganization::new, EndpointIdentifier::new);
 	}
 
 	@Override

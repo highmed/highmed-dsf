@@ -14,6 +14,8 @@ import javax.ws.rs.core.UriBuilder;
 
 import org.highmed.fhir.search.parameters.basic.AbstractSearchParameter;
 import org.hl7.fhir.r4.model.DomainResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SearchQuery<R extends DomainResource> implements DbSearchQuery, Matcher
 {
@@ -65,6 +67,8 @@ public class SearchQuery<R extends DomainResource> implements DbSearchQuery, Mat
 			return new SearchQuery<R>(resourceType, resourceTable, resourceColumn, page, count, searchParameters);
 		}
 	}
+
+	private static final Logger logger = LoggerFactory.getLogger(SearchQuery.class);
 
 	private final Class<R> resourceType;
 	private final String resourceColumn;
@@ -158,13 +162,21 @@ public class SearchQuery<R extends DomainResource> implements DbSearchQuery, Mat
 	@Override
 	public void modifyStatement(PreparedStatement statement) throws SQLException
 	{
-		List<SearchQueryParameter<?>> filtered = searchParameters.stream().filter(SearchQueryParameter::isDefined)
-				.collect(Collectors.toList());
+		try
+		{
+			List<SearchQueryParameter<?>> filtered = searchParameters.stream().filter(SearchQueryParameter::isDefined)
+					.collect(Collectors.toList());
 
-		int index = 0;
-		for (SearchQueryParameter<?> q : filtered)
-			for (int i = 0; i < q.getSqlParameterCount(); i++)
-				q.modifyStatement(++index, i + 1, statement);
+			int index = 0;
+			for (SearchQueryParameter<?> q : filtered)
+				for (int i = 0; i < q.getSqlParameterCount(); i++)
+					q.modifyStatement(++index, i + 1, statement);
+		}
+		catch (SQLException e)
+		{
+			logger.warn("Error while modifying prepared statement '{}': {}", statement.toString(), e.getMessage());
+			throw e;
+		}
 	}
 
 	@Override

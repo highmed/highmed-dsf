@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.Optional;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.highmed.fhir.search.parameters.ValueSetIdentifier;
 import org.highmed.fhir.search.parameters.ValueSetUrl;
 import org.highmed.fhir.search.parameters.ValueSetVersion;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -17,10 +18,10 @@ public class ValueSetDao extends AbstractDomainResourceDao<ValueSet>
 	public ValueSetDao(BasicDataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, ValueSet.class, "value_sets", "value_set", "value_set_id",
-				() -> new ValueSetUrl(), () -> new ValueSetVersion());
+				ValueSetIdentifier::new, ValueSetUrl::new, ValueSetVersion::new);
 
-		readByUrl = new ReadByUrl<ValueSet>(this::getDataSource, this::getResource, getResourceTable(),
-				getResourceColumn(), getResourceIdColumn());
+		readByUrl = new ReadByUrl<>(this::getDataSource, this::getResource, getResourceTable(), getResourceColumn(),
+				getResourceIdColumn());
 	}
 
 	@Override
