@@ -26,6 +26,7 @@ import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
 import org.glassfish.jersey.servlet.init.JerseyServletContainerInitializer;
 import org.highmed.fhir.authentication.AuthenticationFilter;
+import org.highmed.fhir.db.DbMigrator;
 import org.springframework.web.SpringServletContainerInitializer;
 
 import de.rwh.utils.jetty.JettyServer;
@@ -36,6 +37,10 @@ public class FhirJettyServer
 {
 	public static void main(String[] args)
 	{
+		Properties dbProperties = PropertiesReader.read(Paths.get("conf/db.properties"), StandardCharsets.UTF_8);
+		DbMigrator migrator = new DbMigrator();
+		migrator.migrate(dbProperties);
+
 		Properties properties = PropertiesReader.read(Paths.get("conf/jetty.properties"), StandardCharsets.UTF_8);
 
 		Log4jInitializer.initializeLog4j(properties);
