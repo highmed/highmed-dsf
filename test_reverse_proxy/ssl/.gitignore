@@ -1,3 +1,3 @@
-/server-ca.crt
-/server.crt
-/server.key
+/localhost_certificate.pem
+/localhost_private-key.pem
+/testca_certificate.pem

@@ -1,11 +1,53 @@
-version: '3'
+version: '3.2'
 services:
-  web:
-    build: ./test_reverse_proxy
-    ports:
+   fhir_proxy:
+      build: ./test_reverse_proxy
+      restart: always
+      ports:
       - 8080:80
       - 8443:443
-    volumes:
-      - ./test_reverse_proxy/ssl:/usr/local/apache2/ssl:ro
-    environment:
-      - SERVER_NAME=localhost
+      volumes:
+      -  type: bind
+         source: ./test_reverse_proxy/ssl
+         target: /usr/local/apache2/ssl
+      environment:
+         SERVER_NAME: localhost
+      networks:
+      - fhir_frontend
+      depends_on:
+      - fhir_app
+   fhir_app:
+      image: highmed/fhir
+      restart: always
+      volumes:
+      -  type: bind
+         source: ./fhir/conf
+         target: /opt/fhir/conf
+      networks:
+      - fhir_frontend
+      - fhir_backend
+      depends_on:
+      - fhir_db
+   fhir_db:
+      image: postgres
+      restart: always
+      environment:
+         POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+         POSTGRES_USER_FILE: /run/secrets/postgres_user
+         POSTGRES_DB_FILE: /run/secrets/postgres_db
+      networks:
+      - fhir_backend
+      secrets:
+      - postgres_password
+      - postgres_user
+      - postgres_db
+secrets:
+   postgres_password:
+      file: ./fhir_db/conf/postgres_password
+   postgres_user:
+      file: ./fhir_db/conf/postgres_user
+   postgres_db:
+      file: ./fhir_db/conf/postgres_db
+networks:
+   fhir_frontend: null
+   fhir_backend: null
