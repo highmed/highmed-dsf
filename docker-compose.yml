@@ -1,0 +1,11 @@
+version: '3'
+services:
+  web:
+    build: ./test_reverse_proxy
+    ports:
+      - 8080:80
+      - 8443:443
+    volumes:
+      - ./test_reverse_proxy/ssl:/usr/local/apache2/ssl:ro
+    environment:
+      - SERVER_NAME=localhost
