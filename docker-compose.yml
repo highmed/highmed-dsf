@@ -1,14 +1,14 @@
 version: '3.2'
 services:
    fhir_proxy:
-      build: ./test_reverse_proxy
+      build: ./fhir_proxy
       restart: always
       ports:
       - 8080:80
       - 8443:443
       volumes:
       -  type: bind
-         source: ./test_reverse_proxy/ssl
+         source: ./fhir_proxy/ssl
          target: /usr/local/apache2/ssl
       environment:
          SERVER_NAME: localhost
@@ -21,7 +21,7 @@ services:
       restart: always
       volumes:
       -  type: bind
-         source: ./fhir/conf
+         source: ./fhir_app/conf
          target: /opt/fhir/conf
       networks:
       - fhir_frontend
