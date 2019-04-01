@@ -1,34 +1,34 @@
 version: '3.2'
 services:
-   fhir_proxy:
-      build: ./fhir_proxy
+   proxy:
+      build: ./proxy
       restart: always
       ports:
       - 8080:80
       - 8443:443
       volumes:
       -  type: bind
-         source: ./fhir_proxy/ssl
+         source: ./proxy/ssl
          target: /usr/local/apache2/ssl
       environment:
          SERVER_NAME: localhost
       networks:
       - fhir_frontend
       depends_on:
-      - fhir_app
-   fhir_app:
+      - app
+   app:
       image: highmed/fhir
       restart: always
       volumes:
       -  type: bind
-         source: ./fhir_app/conf
+         source: ./app/conf
          target: /opt/fhir/conf
       networks:
       - fhir_frontend
       - fhir_backend
       depends_on:
-      - fhir_db
-   fhir_db:
+      - db
+   db:
       image: postgres
       restart: always
       environment:
@@ -43,11 +43,11 @@ services:
       - postgres_db
 secrets:
    postgres_password:
-      file: ./fhir_db/conf/postgres_password
+      file: ./db/conf/postgres_password
    postgres_user:
-      file: ./fhir_db/conf/postgres_user
+      file: ./db/conf/postgres_user
    postgres_db:
-      file: ./fhir_db/conf/postgres_db
+      file: ./db/conf/postgres_db
 networks:
    fhir_frontend: null
    fhir_backend: null
