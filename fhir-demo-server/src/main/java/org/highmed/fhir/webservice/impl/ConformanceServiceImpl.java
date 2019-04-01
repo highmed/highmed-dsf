@@ -21,13 +21,18 @@ import org.highmed.fhir.search.parameters.CodeSystemUrl;
 import org.highmed.fhir.search.parameters.CodeSystemVersion;
 import org.highmed.fhir.search.parameters.EndpointIdentifier;
 import org.highmed.fhir.search.parameters.EndpointOrganization;
+import org.highmed.fhir.search.parameters.HealthcareServiceActive;
 import org.highmed.fhir.search.parameters.HealthcareServiceIdentifier;
 import org.highmed.fhir.search.parameters.LocationIdentifier;
+import org.highmed.fhir.search.parameters.OrganizationActive;
 import org.highmed.fhir.search.parameters.OrganizationEndpoint;
 import org.highmed.fhir.search.parameters.OrganizationIdentifier;
 import org.highmed.fhir.search.parameters.OrganizationName;
+import org.highmed.fhir.search.parameters.PatientActive;
 import org.highmed.fhir.search.parameters.PatientIdentifier;
+import org.highmed.fhir.search.parameters.PractitionerActive;
 import org.highmed.fhir.search.parameters.PractitionerIdentifier;
+import org.highmed.fhir.search.parameters.PractitionerRoleActive;
 import org.highmed.fhir.search.parameters.PractitionerRoleIdentifier;
 import org.highmed.fhir.search.parameters.ResearchStudyIdentifier;
 import org.highmed.fhir.search.parameters.ResourceId;
@@ -156,26 +161,32 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 		var endpointOrganization = createSearchParameter(EndpointOrganization.class);
 		searchParameters.put(Endpoint.class, Arrays.asList(endpointIdentifier, endpointOrganization));
 
+		var healthcareServiceActive = createSearchParameter(HealthcareServiceActive.class);
 		var healthcareServiceIdentifier = createSearchParameter(HealthcareServiceIdentifier.class);
-		searchParameters.put(HealthcareService.class, Arrays.asList(healthcareServiceIdentifier));
+		searchParameters.put(HealthcareService.class,
+				Arrays.asList(healthcareServiceActive, healthcareServiceIdentifier));
 
 		var locationIdentifier = createSearchParameter(LocationIdentifier.class);
 		searchParameters.put(Location.class, Arrays.asList(locationIdentifier));
 
+		var organizationActive = createSearchParameter(OrganizationActive.class);
 		var organizationEndpoint = createSearchParameter(OrganizationEndpoint.class);
 		var organizationIdentifier = createSearchParameter(OrganizationIdentifier.class);
 		var organizationNameOrAlias = createSearchParameter(OrganizationName.class);
-		searchParameters.put(Organization.class,
-				Arrays.asList(organizationEndpoint, organizationIdentifier, organizationNameOrAlias));
+		searchParameters.put(Organization.class, Arrays.asList(organizationActive, organizationEndpoint,
+				organizationIdentifier, organizationNameOrAlias));
 
+		var patientActive = createSearchParameter(PatientActive.class);
 		var patientIdentifier = createSearchParameter(PatientIdentifier.class);
-		searchParameters.put(Patient.class, Arrays.asList(patientIdentifier));
+		searchParameters.put(Patient.class, Arrays.asList(patientActive, patientIdentifier));
 
+		var practitionerActive = createSearchParameter(PractitionerActive.class);
 		var practitionerIdentifier = createSearchParameter(PractitionerIdentifier.class);
-		searchParameters.put(Practitioner.class, Arrays.asList(practitionerIdentifier));
+		searchParameters.put(Practitioner.class, Arrays.asList(practitionerActive, practitionerIdentifier));
 
+		var practitionerRoleActive = createSearchParameter(PractitionerRoleActive.class);
 		var practitionerRoleIdentifier = createSearchParameter(PractitionerRoleIdentifier.class);
-		searchParameters.put(PractitionerRole.class, Arrays.asList(practitionerRoleIdentifier));
+		searchParameters.put(PractitionerRole.class, Arrays.asList(practitionerRoleActive, practitionerRoleIdentifier));
 
 		var researchStudyIdentifier = createSearchParameter(ResearchStudyIdentifier.class);
 		searchParameters.put(ResearchStudy.class, Arrays.asList(researchStudyIdentifier));

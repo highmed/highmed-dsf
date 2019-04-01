@@ -1,6 +1,7 @@
 package org.highmed.fhir.dao;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.highmed.fhir.search.parameters.PractitionerRoleActive;
 import org.highmed.fhir.search.parameters.PractitionerRoleIdentifier;
 import org.hl7.fhir.r4.model.PractitionerRole;
 
@@ -11,7 +12,7 @@ public class PractitionerRoleDao extends AbstractDomainResourceDao<PractitionerR
 	public PractitionerRoleDao(BasicDataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, PractitionerRole.class, "practitioner_roles", "practitioner_role",
-				"practitioner_role_id", PractitionerRoleIdentifier::new);
+				"practitioner_role_id", PractitionerRoleIdentifier::new, PractitionerRoleActive::new);
 	}
 
 	@Override

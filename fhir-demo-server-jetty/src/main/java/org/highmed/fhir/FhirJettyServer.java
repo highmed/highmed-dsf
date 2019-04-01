@@ -37,13 +37,13 @@ public class FhirJettyServer
 {
 	public static void main(String[] args)
 	{
-		Properties dbProperties = PropertiesReader.read(Paths.get("conf/db.properties"), StandardCharsets.UTF_8);
-		DbMigrator migrator = new DbMigrator();
-		migrator.migrate(dbProperties);
-
 		Properties properties = PropertiesReader.read(Paths.get("conf/jetty.properties"), StandardCharsets.UTF_8);
 
 		Log4jInitializer.initializeLog4j(properties);
+
+		Properties dbProperties = PropertiesReader.read(Paths.get("conf/db.properties"), StandardCharsets.UTF_8);
+		DbMigrator migrator = new DbMigrator();
+		migrator.migrate(dbProperties);
 
 		HttpConfiguration httpConfiguration = httpConfiguration(forwardedSecureRequestCustomizer());
 		Function<Server, ServerConnector> connector = httpConnector(httpConfiguration, properties);
