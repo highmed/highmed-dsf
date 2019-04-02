@@ -41,6 +41,7 @@ import org.highmed.fhir.search.parameters.StructureDefinitionIdentifier;
 import org.highmed.fhir.search.parameters.StructureDefinitionUrl;
 import org.highmed.fhir.search.parameters.StructureDefinitionVersion;
 import org.highmed.fhir.search.parameters.SubscriptionChannelType;
+import org.highmed.fhir.search.parameters.SubscriptionCriteria;
 import org.highmed.fhir.search.parameters.SubscriptionStatus;
 import org.highmed.fhir.search.parameters.TaskIdentifier;
 import org.highmed.fhir.search.parameters.TaskRequester;
@@ -197,9 +198,11 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 		searchParameters.put(StructureDefinition.class,
 				Arrays.asList(structureDefinitionIdentifier, structureDefinitionUrl, structureDefinitionVersion));
 
+		var subscriptionCriteria = createSearchParameter(SubscriptionCriteria.class);
 		var subscriptionStatus = createSearchParameter(SubscriptionStatus.class);
 		var subscriptionChannelType = createSearchParameter(SubscriptionChannelType.class);
-		searchParameters.put(Subscription.class, Arrays.asList(subscriptionStatus, subscriptionChannelType));
+		searchParameters.put(Subscription.class,
+				Arrays.asList(subscriptionCriteria, subscriptionStatus, subscriptionChannelType));
 
 		var taskIdentifier = createSearchParameter(TaskIdentifier.class);
 		var taskRequester = createSearchParameter(TaskRequester.class);
@@ -241,7 +244,9 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 					.sorted(Comparator.comparing(CapabilityStatementRestResourceSearchParamComponent::getName))
 					.forEach(r::addSearchParam);
 
-			r.addSearchParam(createIncludeParameter(resource, resourceSearchParameters));
+			if (resourceSearchParameters.stream().anyMatch(s -> SearchParamType.REFERENCE.equals(s.getType())))
+				r.addSearchParam(createIncludeParameter(resource, resourceSearchParameters));
+
 			r.addSearchParam(createFormatParameter());
 			r.addSearchParam(createPrettyParameter());
 			r.addSearchParam(createCountParameter(defaultPageCount));

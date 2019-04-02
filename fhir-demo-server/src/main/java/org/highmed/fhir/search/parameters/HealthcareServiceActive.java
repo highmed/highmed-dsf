@@ -55,6 +55,6 @@ public class HealthcareServiceActive extends AbstractBooleanParameter<Healthcare
 	@Override
 	protected String getSortSql(String sortDirectionWithSpacePrefix)
 	{
-		return "(healthcare_service->>'active')::BOOLEAN " + sortDirectionWithSpacePrefix;
+		return "(healthcare_service->>'active')::BOOLEAN" + sortDirectionWithSpacePrefix;
 	}
 }

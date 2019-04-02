@@ -55,6 +55,6 @@ public class PractitionerActive extends AbstractBooleanParameter<Practitioner>
 	@Override
 	protected String getSortSql(String sortDirectionWithSpacePrefix)
 	{
-		return "(practitioner->>'active')::BOOLEAN " + sortDirectionWithSpacePrefix;
+		return "(practitioner->>'active')::BOOLEAN" + sortDirectionWithSpacePrefix;
 	}
 }

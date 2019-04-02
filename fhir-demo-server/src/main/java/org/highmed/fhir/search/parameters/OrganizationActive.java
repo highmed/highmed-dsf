@@ -55,6 +55,6 @@ public class OrganizationActive extends AbstractBooleanParameter<Organization>
 	@Override
 	protected String getSortSql(String sortDirectionWithSpacePrefix)
 	{
-		return "(organization->>'active')::BOOLEAN " + sortDirectionWithSpacePrefix;
+		return "(organization->>'active')::BOOLEAN" + sortDirectionWithSpacePrefix;
 	}
 }

@@ -55,6 +55,6 @@ public class PatientActive extends AbstractBooleanParameter<Patient>
 	@Override
 	protected String getSortSql(String sortDirectionWithSpacePrefix)
 	{
-		return "(patient->>'active')::BOOLEAN " + sortDirectionWithSpacePrefix;
+		return "(patient->>'active')::BOOLEAN" + sortDirectionWithSpacePrefix;
 	}
 }
