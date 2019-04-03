@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import javax.websocket.RemoteEndpoint.Async;
 
+import org.highmed.fhir.dao.DaoProvider;
 import org.highmed.fhir.dao.SubscriptionDao;
 import org.highmed.fhir.help.ExceptionHandler;
 import org.highmed.fhir.search.Matcher;
@@ -47,8 +48,17 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 			this.matcher = matcher;
 		}
 
-		boolean matches(DomainResource resource)
+		boolean matches(DomainResource resource, DaoProvider daoProvider)
 		{
+			try
+			{
+				matcher.resloveReferencesForMatching(resource, daoProvider);
+			}
+			catch (SQLException e)
+			{
+				throw new RuntimeException(e);
+			}
+
 			return matcher.matches(resource);
 		}
 	}
@@ -96,6 +106,7 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 
 	private final ExecutorService executor = Executors.newCachedThreadPool();
 
+	private final DaoProvider daoProvider;
 	private final SubscriptionDao subscriptionDao;
 	private final ExceptionHandler exceptionHandler;
 	private final MatcherFactory matcherFactory;
@@ -106,10 +117,11 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 	private final ReadWriteMap<Class<? extends DomainResource>, List<SubscriptionAndMatcher>> matchersByResource = new ReadWriteMap<>();
 	private final ReadWriteMap<String, List<SessionIdAndRemoteAsync>> asyncRemotesBySubscriptionIdPart = new ReadWriteMap<>();
 
-	public EventManagerImpl(SubscriptionDao subscriptionDao, ExceptionHandler exceptionHandler,
-			MatcherFactory matcherFactory, FhirContext fhirContext)
+	public EventManagerImpl(DaoProvider daoProvider, ExceptionHandler exceptionHandler, MatcherFactory matcherFactory,
+			FhirContext fhirContext)
 	{
-		this.subscriptionDao = subscriptionDao;
+		this.daoProvider = daoProvider;
+		this.subscriptionDao = daoProvider.getSubscriptionDao();
 		this.exceptionHandler = exceptionHandler;
 		this.matcherFactory = matcherFactory;
 		this.fhirContext = fhirContext;
@@ -122,13 +134,8 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 		Objects.requireNonNull(exceptionHandler, "exceptionHandler");
 		Objects.requireNonNull(matcherFactory, "matcherFactory");
 		Objects.requireNonNull(fhirContext, "fhirContext");
+		Objects.requireNonNull(daoProvider, "daoProvider");
 	}
-
-	// @EventListener({ ContextRefreshedEvent.class })
-	// public void onContextRefreshedEvent(ContextRefreshedEvent event)
-	// {
-	// refreshMatchers();
-	// }
 
 	private void refreshMatchers()
 	{
@@ -209,7 +216,7 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 		}
 
 		List<SubscriptionAndMatcher> matchingSubscriptions = optMatchers.get().stream()
-				.filter(sAndM -> sAndM.matches(event.getResource())).collect(Collectors.toList());
+				.filter(sAndM -> sAndM.matches(event.getResource(), daoProvider)).collect(Collectors.toList());
 
 		if (matchingSubscriptions.isEmpty())
 		{

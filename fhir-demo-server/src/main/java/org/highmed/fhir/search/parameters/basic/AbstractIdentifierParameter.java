@@ -27,14 +27,12 @@ public abstract class AbstractIdentifierParameter<R extends DomainResource> exte
 		switch (valueAndType.type)
 		{
 			case CODE:
-				return resourceColumn + "->'identifier' @> ?::jsonb";
 			case CODE_AND_SYSTEM:
+			case SYSTEM:
 				return resourceColumn + "->'identifier' @> ?::jsonb";
 			case CODE_AND_NO_SYSTEM_PROPERTY:
 				return "(SELECT count(*) FROM jsonb_array_elements(" + resourceColumn
 						+ "->'identifier') identifier WHERE identifier->>'value' = ? AND NOT (identifier ?? 'system')) > 0";
-			case SYSTEM:
-				return resourceColumn + "->'identifier' @> ?::jsonb";
 			default:
 				return "";
 		}
@@ -70,18 +68,23 @@ public abstract class AbstractIdentifierParameter<R extends DomainResource> exte
 
 	protected boolean identifierMatches(List<Identifier> identifiers)
 	{
+		return identifiers.stream().anyMatch(i -> identifierMatches(valueAndType, i));
+	}
+
+	public static boolean identifierMatches(TokenValueAndSearchType valueAndType, Identifier identifier)
+	{
 		switch (valueAndType.type)
 		{
 			case CODE:
-				return identifiers.stream().anyMatch(i -> Objects.equals(valueAndType.codeValue, i.getValue()));
+				return Objects.equals(valueAndType.codeValue, identifier.getValue());
 			case CODE_AND_SYSTEM:
-				return identifiers.stream().anyMatch(i -> Objects.equals(valueAndType.codeValue, i.getValue())
-						&& Objects.equals(valueAndType.systemValue, i.getSystem()));
+				return Objects.equals(valueAndType.codeValue, identifier.getValue())
+						&& Objects.equals(valueAndType.systemValue, identifier.getSystem());
 			case CODE_AND_NO_SYSTEM_PROPERTY:
-				return identifiers.stream().anyMatch(i -> Objects.equals(valueAndType.codeValue, i.getValue())
-						&& (i.getSystem() == null || i.getSystem().isBlank()));
+				return Objects.equals(valueAndType.codeValue, identifier.getValue())
+						&& (identifier.getSystem() == null || identifier.getSystem().isBlank());
 			case SYSTEM:
-				return identifiers.stream().anyMatch(i -> Objects.equals(valueAndType.systemValue, i.getSystem()));
+				return Objects.equals(valueAndType.systemValue, identifier.getSystem());
 			default:
 				return false;
 		}

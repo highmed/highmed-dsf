@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.core.UriBuilder;
 
+import org.highmed.fhir.dao.DaoProvider;
 import org.highmed.fhir.search.parameters.basic.AbstractSearchParameter;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.slf4j.Logger;
@@ -223,6 +224,36 @@ public class SearchQuery<R extends DomainResource> implements DbSearchQuery, Mat
 	}
 
 	@Override
+	public void resloveReferencesForMatching(DomainResource resource, DaoProvider daoProvider) throws SQLException
+	{
+		if (resource == null)
+			return;
+
+		if (!getResourceType().isInstance(resource))
+			return;
+
+		List<SQLException> exceptions = searchParameters.stream().filter(SearchQueryParameter::isDefined).map(p ->
+		{
+			try
+			{
+				p.resloveReferencesForMatching(resource, daoProvider);
+				return null;
+			}
+			catch (SQLException e)
+			{
+				return e;
+			}
+		}).collect(Collectors.toList());
+
+		if (!exceptions.isEmpty())
+		{
+			SQLException sqlException = new SQLException("Error while resoling references");
+			exceptions.forEach(sqlException::addSuppressed);
+			throw sqlException;
+		}
+	}
+
+	@Override
 	public boolean matches(DomainResource resource)
 	{
 		if (resource == null)
@@ -233,12 +264,5 @@ public class SearchQuery<R extends DomainResource> implements DbSearchQuery, Mat
 
 		return searchParameters.stream().filter(SearchQueryParameter::isDefined).map(p -> p.matches(resource))
 				.allMatch(b -> b);
-	}
-
-	@Override
-	public Class<? extends DomainResource> getIncludeResourceTypForColumName(String columnName)
-	{
-		// TODO Auto-generated method stub
-		return null;
 	}
 }

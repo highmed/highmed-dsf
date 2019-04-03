@@ -2,6 +2,8 @@ package org.highmed.fhir.spring.config;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.fhir.dao.CodeSystemDao;
+import org.highmed.fhir.dao.DaoProvider;
+import org.highmed.fhir.dao.DaoProviderImpl;
 import org.highmed.fhir.dao.EndpointDao;
 import org.highmed.fhir.dao.HealthcareServiceDao;
 import org.highmed.fhir.dao.LocationDao;
@@ -150,5 +152,14 @@ public class DaoConfig
 	public ValueSetDao valueSetDao()
 	{
 		return new ValueSetDao(dataSource(), fhirConfig.fhirContext());
+	}
+
+	@Bean
+	public DaoProvider daoProvider()
+	{
+		return new DaoProviderImpl(codeSystemDao(), endpointDao(), healthcareServiceDao(), locationDao(),
+				organizationDao(), patientDao(), practitionerDao(), provenanceDao(), researchStudyDao(),
+				structureDefinitionDao(), structureDefinitionSnapshotDao(), subscriptionDao(), taskDao(),
+				valueSetDao());
 	}
 }

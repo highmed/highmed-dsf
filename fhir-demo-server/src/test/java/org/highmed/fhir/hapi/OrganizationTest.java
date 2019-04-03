@@ -1,12 +1,12 @@
 package org.highmed.fhir.hapi;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 import java.util.UUID;
 
 import org.apache.commons.codec.binary.Hex;
 import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Organization;
@@ -49,5 +49,22 @@ public class OrganizationTest
 		assertEquals(organization.getIdentifierFirstRep().getValue(), organization.getIdentifierFirstRep().getValue());
 		assertEquals(organization.getIdentifierFirstRep().getSystem(),
 				organization.getIdentifierFirstRep().getSystem());
+	}
+
+	@Test
+	public void testEndpointReference() throws Exception
+	{
+		String eId = UUID.randomUUID().toString();
+		Endpoint e = new Endpoint();
+		e.setIdElement(new IdType("Endpoint", eId, "version"));
+
+		Organization o = new Organization();
+		o.addEndpoint().setReferenceElement(new IdType(e.getIdElement().getResourceType(), e.getIdElement().getIdPart(),
+				e.getIdElement().getVersionIdPart()));
+
+		FhirContext context = FhirContext.forR4();
+		String string = context.newJsonParser().setPrettyPrint(true).encodeResourceToString(o);
+
+		logger.info(string);
 	}
 }

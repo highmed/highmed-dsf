@@ -9,25 +9,6 @@ import org.hl7.fhir.r4.model.DomainResource;
 
 public abstract class AbstractTokenParameter<R extends DomainResource> extends AbstractSearchParameter<R>
 {
-	protected static enum TokenSearchType
-	{
-		CODE, CODE_AND_SYSTEM, CODE_AND_NO_SYSTEM_PROPERTY, SYSTEM
-	}
-
-	protected static class TokenValueAndSearchType
-	{
-		public final String systemValue;
-		public final String codeValue;
-		public final TokenSearchType type;
-
-		TokenValueAndSearchType(String systemValue, String codeValue, TokenSearchType type)
-		{
-			this.systemValue = systemValue;
-			this.codeValue = codeValue;
-			this.type = type;
-		}
-	}
-
 	protected TokenValueAndSearchType valueAndType;
 
 	public AbstractTokenParameter(String parameterName)
@@ -39,23 +20,7 @@ public abstract class AbstractTokenParameter<R extends DomainResource> extends A
 	protected void configureSearchParameter(Map<String, List<String>> queryParameters)
 	{
 		String param = getFirst(queryParameters, parameterName);
-		if (param != null && !param.isEmpty())
-		{
-			if (param.indexOf('|') == -1)
-				valueAndType = new TokenValueAndSearchType(null, param, TokenSearchType.CODE);
-			else if (param.charAt(0) == '|')
-				valueAndType = new TokenValueAndSearchType(param.substring(1), null,
-						TokenSearchType.CODE_AND_NO_SYSTEM_PROPERTY);
-			else if (param.charAt(param.length() - 1) == '|')
-				valueAndType = new TokenValueAndSearchType(param.substring(0, param.length() - 1), null,
-						TokenSearchType.SYSTEM);
-			else
-			{
-				String[] splitAtPipe = param.split("[|]");
-				valueAndType = new TokenValueAndSearchType(splitAtPipe[0], splitAtPipe[1],
-						TokenSearchType.CODE_AND_SYSTEM);
-			}
-		}
+		valueAndType = TokenValueAndSearchType.fromParamValue(param).orElse(null);
 	}
 
 	@Override
@@ -82,7 +47,7 @@ public abstract class AbstractTokenParameter<R extends DomainResource> extends A
 				break;
 
 			case SYSTEM:
-				bundleUri.replaceQueryParam(parameterName, valueAndType + "|");
+				bundleUri.replaceQueryParam(parameterName, valueAndType.systemValue + "|");
 				break;
 		}
 	}

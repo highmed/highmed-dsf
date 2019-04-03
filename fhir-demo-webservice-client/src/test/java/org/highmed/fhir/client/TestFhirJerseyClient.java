@@ -133,6 +133,48 @@ public class TestFhirJerseyClient
 			// Heilbronn");
 			//
 			// client.update(org);
+
+			// Organization org = new Organization();
+			// org.addIdentifier().setSystem("http://highmed.org/fhir/CodeSystem/organization")
+			// .setValue("Test Organization");
+			// org.setActive(true);
+			// org.setName("Test Organization");
+			// org = client.create(org);
+			//
+			// Endpoint endpoint1 = new Endpoint();
+			// endpoint1.addIdentifier().setSystem("http://highmed.org/fhir/CodeSystem/endpoint").setValue("Endpoint1");
+			// endpoint1.setStatus(EndpointStatus.ACTIVE);
+			// endpoint1.setConnectionType(new Coding("http://terminology.hl7.org/CodeSystem/endpoint-connection-type",
+			// "hl7-fhir-rest", "HL7 FHIR"));
+			// endpoint1.setManagingOrganization(
+			// new Reference(new IdType(org.getIdElement().getResourceType(), org.getIdElement().getIdPart())));
+			// endpoint1.setAddress("https://localhost:8001/fhir");
+			// endpoint1.addPayloadType(
+			// new CodeableConcept(new Coding("http://hl7.org/fhir/resource-types", "Task", "Task")));
+			// endpoint1.addPayloadMimeType(Constants.CT_FHIR_JSON_NEW);
+			// endpoint1.addPayloadMimeType(Constants.CT_FHIR_XML_NEW);
+			// endpoint1 = client.create(endpoint1);
+			//
+			// Endpoint endpoint2 = new Endpoint();
+			// endpoint2.addIdentifier().setSystem("http://highmed.org/fhir/CodeSystem/endpoint").setValue("Endpoint2");
+			// endpoint2.setStatus(EndpointStatus.ACTIVE);
+			// endpoint2.setConnectionType(new Coding("http://terminology.hl7.org/CodeSystem/endpoint-connection-type",
+			// "hl7-fhir-rest", "HL7 FHIR"));
+			// endpoint2.setManagingOrganization(
+			// new Reference(new IdType(org.getIdElement().getResourceType(), org.getIdElement().getIdPart())));
+			// endpoint2.setAddress("https://localhost:8001/fhir");
+			// endpoint2.addPayloadType(
+			// new CodeableConcept(new Coding("http://hl7.org/fhir/resource-types", "Task", "Task")));
+			// endpoint2.addPayloadMimeType(Constants.CT_FHIR_JSON_NEW);
+			// endpoint2.addPayloadMimeType(Constants.CT_FHIR_XML_NEW);
+			// endpoint2 = client.create(endpoint2);
+			//
+			// org.addEndpoint(new Reference(
+			// new IdType(endpoint1.getIdElement().getResourceType(), endpoint1.getIdElement().getIdPart())));
+			// org.addEndpoint(new Reference(
+			// new IdType(endpoint2.getIdElement().getResourceType(), endpoint2.getIdElement().getIdPart())));
+			//
+			// client.update(org);
 		}
 		catch (WebApplicationException e)
 		{

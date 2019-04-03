@@ -14,6 +14,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.fhir.dao.exception.ResourceDeletedException;
@@ -45,6 +46,52 @@ import ca.uhn.fhir.parser.IParser;
 public abstract class AbstractDomainResourceDao<R extends DomainResource> implements InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractDomainResourceDao.class);
+
+	private static final class DomainResourceDistinctById
+	{
+		private final IdType id;
+		private final DomainResource resource;
+
+		public DomainResourceDistinctById(IdType id, DomainResource resource)
+		{
+			this.id = id;
+			this.resource = resource;
+		}
+
+		@Override
+		public int hashCode()
+		{
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((id == null) ? 0 : id.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			DomainResourceDistinctById other = (DomainResourceDistinctById) obj;
+			if (id == null)
+			{
+				if (other.id != null)
+					return false;
+			}
+			else if (!id.equals(other.id))
+				return false;
+			return true;
+		}
+
+		public DomainResource getResource()
+		{
+			return resource;
+		}
+	}
 
 	private final BasicDataSource dataSource;
 	private final FhirContext fhirContext;
@@ -498,6 +545,9 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 					}
 				}
 			}
+
+			includes = includes.stream().map(r -> new DomainResourceDistinctById(r.getIdElement(), r)).distinct()
+					.map(DomainResourceDistinctById::getResource).collect(Collectors.toList());
 
 			return new PartialResult<>(overallCount, query.getPageAndCount(), partialResult, includes,
 					query.isCountOnly(overallCount));

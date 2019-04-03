@@ -2,13 +2,21 @@ package org.highmed.fhir.search.parameters;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.UUID;
 
+import org.highmed.fhir.dao.DaoProvider;
+import org.highmed.fhir.dao.EndpointDao;
+import org.highmed.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.fhir.search.SearchQueryIncludeParameter.IncludeParts;
 import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
+import org.highmed.fhir.search.parameters.basic.AbstractIdentifierParameter;
 import org.highmed.fhir.search.parameters.basic.AbstractReferenceParameter;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Reference;
 
 @SearchParameterDefinition(name = OrganizationEndpoint.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Organization.endpoint", type = SearchParamType.REFERENCE, documentation = "Technical endpoints providing access to services operated for the organization")
 public class OrganizationEndpoint extends AbstractReferenceParameter<Organization>
@@ -19,13 +27,37 @@ public class OrganizationEndpoint extends AbstractReferenceParameter<Organizatio
 
 	public OrganizationEndpoint()
 	{
-		super(RESOURCE_TYPE_NAME, PARAMETER_NAME, TARGET_RESOURCE_TYPE_NAME);
+		super(Organization.class, RESOURCE_TYPE_NAME, PARAMETER_NAME, TARGET_RESOURCE_TYPE_NAME);
 	}
 
 	@Override
 	public String getFilterQuery()
 	{
-		return "? IN (SELECT reference->>'reference' FROM jsonb_array_elements(organization->'endpoint') AS reference)";
+		switch (valueAndType.type)
+		{
+			case ID:
+			case RESOURCE_NAME_AND_ID:
+			case URL:
+				return "? IN (SELECT reference->>'reference' FROM jsonb_array_elements(organization->'endpoint') AS reference)";
+
+			case IDENTIFIER:
+			{
+				switch (valueAndType.identifier.type)
+				{
+					case CODE:
+					case CODE_AND_SYSTEM:
+					case SYSTEM:
+						return "(SELECT jsonb_agg(identifier) FROM (SELECT identifier FROM current_endpoints, jsonb_array_elements(endpoint->'identifier') identifier"
+								+ " WHERE concat('Endpoint/', endpoint->>'id') IN (SELECT reference->>'reference' FROM jsonb_array_elements(organization->'endpoint') reference)"
+								+ " ) AS identifiers) @> ?::jsonb";
+					case CODE_AND_NO_SYSTEM_PROPERTY:
+						return "(SELECT count(*) FROM (SELECT identifier FROM current_endpoints, jsonb_array_elements(endpoint->'identifier') identifier"
+								+ " WHERE concat('Endpoint/', endpoint->>'id') IN (SELECT reference->>'reference' FROM jsonb_array_elements(organization->'endpoint') reference)"
+								+ " ) AS identifiers WHERE identifier->>'value' = ? AND NOT (identifier ?? 'system')) > 0";
+				}
+			}
+		}
+		return "";
 	}
 
 	@Override
@@ -49,6 +81,54 @@ public class OrganizationEndpoint extends AbstractReferenceParameter<Organizatio
 			case URL:
 				statement.setString(parameterIndex, valueAndType.url);
 				break;
+			case IDENTIFIER:
+			{
+				switch (valueAndType.identifier.type)
+				{
+					case CODE:
+						statement.setString(parameterIndex,
+								"[{\"value\": \"" + valueAndType.identifier.codeValue + "\"}]");
+						break;
+					case CODE_AND_SYSTEM:
+						statement.setString(parameterIndex, "[{\"value\": \"" + valueAndType.identifier.codeValue
+								+ "\", \"system\": \"" + valueAndType.identifier.systemValue + "\"}]");
+						break;
+					case CODE_AND_NO_SYSTEM_PROPERTY:
+						statement.setString(parameterIndex, valueAndType.identifier.codeValue);
+						break;
+					case SYSTEM:
+						statement.setString(parameterIndex,
+								"[{\"system\": \"" + valueAndType.identifier.systemValue + "\"}]");
+						break;
+				}
+			}
+		}
+	}
+
+	@Override
+	protected void doResloveReferencesForMatching(Organization resource, DaoProvider daoProvider) throws SQLException
+	{
+		EndpointDao dao = daoProvider.getEndpointDao();
+		for (Reference reference : resource.getEndpoint())
+		{
+			IIdType idType = reference.getReferenceElement();
+
+			if (idType.hasVersionIdPart())
+			{
+				dao.readVersion(UUID.fromString(idType.getIdPart()), idType.getVersionIdPartAsLong())
+						.ifPresent(reference::setResource);
+			}
+			else
+			{
+				try
+				{
+					dao.read(UUID.fromString(idType.getIdPart())).ifPresent(reference::setResource);
+				}
+				catch (ResourceDeletedException e)
+				{
+					// ignore while matching, will result in a non match if this would have been the matching resource
+				}
+			}
 		}
 	}
 
@@ -63,20 +143,29 @@ public class OrganizationEndpoint extends AbstractReferenceParameter<Organizatio
 
 		Organization o = (Organization) resource;
 
-		return o.getEndpoint().stream().map(e -> e.getReference()).anyMatch(ref ->
+		if (ReferenceSearchType.IDENTIFIER.equals(valueAndType.type))
 		{
-			switch (valueAndType.type)
+			return o.getEndpoint().stream().map(e -> e.getResource()).filter(r -> r instanceof Endpoint)
+					.flatMap(r -> ((Endpoint) r).getIdentifier().stream())
+					.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
+		}
+		else
+		{
+			return o.getEndpoint().stream().map(e -> e.getReference()).anyMatch(ref ->
 			{
-				case ID:
-					return ref.equals(TARGET_RESOURCE_TYPE_NAME + "/" + valueAndType.id);
-				case RESOURCE_NAME_AND_ID:
-					return ref.equals(valueAndType.resourceName + "/" + valueAndType.id);
-				case URL:
-					return ref.equals(valueAndType.url);
-				default:
-					return false;
-			}
-		});
+				switch (valueAndType.type)
+				{
+					case ID:
+						return ref.equals(TARGET_RESOURCE_TYPE_NAME + "/" + valueAndType.id);
+					case RESOURCE_NAME_AND_ID:
+						return ref.equals(valueAndType.resourceName + "/" + valueAndType.id);
+					case URL:
+						return ref.equals(valueAndType.url);
+					default:
+						return false;
+				}
+			});
+		}
 	}
 
 	@Override

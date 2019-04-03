@@ -61,7 +61,7 @@ public class EventConfig
 	@Bean
 	public EventManager eventManager()
 	{
-		return new EventManagerImpl(daoConfig.subscriptionDao(), helperConfig.exceptionHandler(), matcherFactory(),
+		return new EventManagerImpl(daoConfig.daoProvider(), helperConfig.exceptionHandler(), matcherFactory(),
 				fhirConfig.fhirContext());
 	}
 
