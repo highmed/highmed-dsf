@@ -185,11 +185,11 @@ public abstract class AbstractReferenceParameter<R extends DomainResource> exten
 	protected abstract String getIncludeSql(IncludeParts includeParts);
 
 	@Override
-	public void resloveReferencesForMatching(DomainResource resource, DaoProvider daoProvider) throws SQLException
+	public void resolveReferencesForMatching(DomainResource resource, DaoProvider daoProvider) throws SQLException
 	{
 		if (resourceType.isInstance(resource))
-			doResloveReferencesForMatching(resourceType.cast(resource), daoProvider);
+			doResolveReferencesForMatching(resourceType.cast(resource), daoProvider);
 	}
 
-	protected abstract void doResloveReferencesForMatching(R resource, DaoProvider daoProvider) throws SQLException;
+	protected abstract void doResolveReferencesForMatching(R resource, DaoProvider daoProvider) throws SQLException;
 }

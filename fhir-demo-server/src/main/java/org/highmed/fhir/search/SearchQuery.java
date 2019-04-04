@@ -236,7 +236,7 @@ public class SearchQuery<R extends DomainResource> implements DbSearchQuery, Mat
 		{
 			try
 			{
-				p.resloveReferencesForMatching(resource, daoProvider);
+				p.resolveReferencesForMatching(resource, daoProvider);
 				return null;
 			}
 			catch (SQLException e)

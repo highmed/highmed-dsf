@@ -106,7 +106,7 @@ public class OrganizationEndpoint extends AbstractReferenceParameter<Organizatio
 	}
 
 	@Override
-	protected void doResloveReferencesForMatching(Organization resource, DaoProvider daoProvider) throws SQLException
+	protected void doResolveReferencesForMatching(Organization resource, DaoProvider daoProvider) throws SQLException
 	{
 		EndpointDao dao = daoProvider.getEndpointDao();
 		for (Reference reference : resource.getEndpoint())

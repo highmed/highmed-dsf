@@ -7,7 +7,9 @@ import org.hl7.fhir.r4.model.DomainResource;
 
 public interface MatcherParameter
 {
-	void resloveReferencesForMatching(DomainResource resource, DaoProvider daoProvider) throws SQLException;
+	default void resolveReferencesForMatching(DomainResource resource, DaoProvider daoProvider) throws SQLException
+	{
+	}
 
 	boolean matches(DomainResource resource);
 }

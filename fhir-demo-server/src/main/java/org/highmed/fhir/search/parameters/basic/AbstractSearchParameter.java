@@ -1,12 +1,10 @@
 package org.highmed.fhir.search.parameters.basic;
 
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.highmed.fhir.dao.DaoProvider;
 import org.highmed.fhir.search.SearchQueryIncludeParameter;
 import org.highmed.fhir.search.SearchQueryParameter;
 import org.highmed.fhir.search.SearchQuerySortParameter;
@@ -89,10 +87,5 @@ public abstract class AbstractSearchParameter<R extends DomainResource> implemen
 	public Optional<SearchQueryIncludeParameter> getIncludeParameter()
 	{
 		return Optional.empty();
-	}
-
-	@Override
-	public void resloveReferencesForMatching(DomainResource resource, DaoProvider daoProvider) throws SQLException
-	{
 	}
 }
