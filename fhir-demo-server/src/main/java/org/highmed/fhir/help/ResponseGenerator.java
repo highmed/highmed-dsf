@@ -1,8 +1,10 @@
 package org.highmed.fhir.help;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -11,9 +13,11 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
 import org.highmed.fhir.search.PartialResult;
+import org.highmed.fhir.search.SearchQueryParameterError;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
+import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -67,23 +71,34 @@ public class ResponseGenerator
 
 	public String toFullId(String id)
 	{
+		if (id == null)
+			return null;
+
 		return toFullId(new IdType(id)).asStringValue();
 	}
 
-	public BundleEntryComponent toBundleEntryComponent(DomainResource resource)
+	public BundleEntryComponent toBundleEntryComponent(DomainResource resource, SearchEntryMode mode)
 	{
-		return new BundleEntryComponent().setResource(resource).setFullUrl(toFullId(resource.getId()));
+		BundleEntryComponent entry = new BundleEntryComponent();
+		entry.getSearch().setMode(mode);
+		entry.setResource(resource);
+		entry.setFullUrl(toFullId(resource.getId()));
+		return entry;
 	}
 
-	public Bundle createSearchSet(PartialResult<? extends DomainResource> result, UriBuilder bundleUri, String format,
-			String pretty)
+	public Bundle createSearchSet(PartialResult<? extends DomainResource> result,
+			List<SearchQueryParameterError> errors, UriBuilder bundleUri, String format, String pretty)
 	{
 		Bundle bundle = new Bundle();
 		bundle.setId(UUID.randomUUID().toString());
 		bundle.getMeta().setLastUpdated(new Date());
 		bundle.setType(BundleType.SEARCHSET);
-		result.getPartialResult().stream().map(this::toBundleEntryComponent).forEach(bundle::addEntry);
-		result.getIncludes().stream().map(this::toBundleEntryComponent).forEach(bundle::addEntry);
+		result.getPartialResult().stream().map(r -> toBundleEntryComponent(r, SearchEntryMode.MATCH))
+				.forEach(bundle::addEntry);
+		result.getIncludes().stream().map(r -> toBundleEntryComponent(r, SearchEntryMode.INCLUDE))
+				.forEach(bundle::addEntry);
+		if (!errors.isEmpty())
+			bundle.addEntry(toBundleEntryComponent(toOperationOutcome(errors), SearchEntryMode.OUTCOME));
 
 		bundle.setTotal(result.getOverallCount());
 
@@ -128,6 +143,12 @@ public class ResponseGenerator
 		}
 
 		return bundle;
+	}
+
+	public OperationOutcome toOperationOutcome(List<SearchQueryParameterError> errors)
+	{
+		String diagnostics = errors.stream().map(SearchQueryParameterError::toString).collect(Collectors.joining("; "));
+		return createOutcome(IssueSeverity.WARNING, IssueType.PROCESSING, diagnostics);
 	}
 
 	public Response createPathVsElementIdResponse(String resourceTypeName, String id, IdType resourceId)

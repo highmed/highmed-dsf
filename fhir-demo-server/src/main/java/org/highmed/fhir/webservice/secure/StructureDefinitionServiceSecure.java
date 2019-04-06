@@ -44,6 +44,15 @@ public class StructureDefinitionServiceSecure extends
 	}
 
 	@Override
+	public Response update(StructureDefinition resource, UriInfo uri, HttpHeaders headers)
+	{
+		// see update above
+
+		// TODO Auto-generated method stub
+		return super.update(resource, uri, headers);
+	}
+
+	@Override
 	public Response delete(String id, UriInfo uri, HttpHeaders headers)
 	{
 		// check logger in, check "local" user (local user only could be default)

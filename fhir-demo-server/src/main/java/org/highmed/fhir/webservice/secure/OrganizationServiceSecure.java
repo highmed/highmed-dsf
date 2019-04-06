@@ -18,9 +18,8 @@ public class OrganizationServiceSecure extends AbstractServiceSecure<Organizatio
 	@Override
 	public Response create(Organization resource, UriInfo uri, HttpHeaders headers)
 	{
-		// check organization not existing if contains identifier with identifier.system
-		// http://highmed.org/fhir/NamingSystem/certificate-thumbprint-hexwith
-		// and same identifier.value
+		// check organization not existing if contains identifier with identifier.system (or extension)
+		// http://highmed.org/fhir/NamingSystem/certificate-thumbprint-hex with same identifier.value
 		// no two organizations can have the same certificate thumb-print
 
 		// TODO Auto-generated method stub
@@ -34,5 +33,14 @@ public class OrganizationServiceSecure extends AbstractServiceSecure<Organizatio
 
 		// TODO Auto-generated method stub
 		return super.update(id, resource, uri, headers);
+	}
+
+	@Override
+	public Response update(Organization resource, UriInfo uri, HttpHeaders headers)
+	{
+		// see create, no two organizations can have the same certificate thumb-print
+
+		// TODO Auto-generated method stub
+		return super.update(resource, uri, headers);
 	}
 }

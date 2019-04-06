@@ -35,4 +35,13 @@ public class TaskServiceSecure extends AbstractServiceSecure<Task, TaskService> 
 		// TODO Auto-generated method stub
 		return super.update(id, resource, uri, headers);
 	}
+
+	@Override
+	public Response update(Task resource, UriInfo uri, HttpHeaders headers)
+	{
+		// see update above
+
+		// TODO Auto-generated method stub
+		return super.update(resource, uri, headers);
+	}
 }

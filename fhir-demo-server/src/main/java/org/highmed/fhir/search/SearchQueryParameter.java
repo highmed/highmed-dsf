@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import javax.ws.rs.core.UriBuilder;
 
@@ -34,6 +35,8 @@ public interface SearchQueryParameter<R extends DomainResource> extends MatcherP
 
 	void configure(Map<String, List<String>> queryParameters);
 
+	List<SearchQueryParameterError> getErrors();
+
 	boolean isDefined();
 
 	String getFilterQuery();
@@ -56,4 +59,6 @@ public interface SearchQueryParameter<R extends DomainResource> extends MatcherP
 	Optional<SearchQueryIncludeParameter> getIncludeParameter();
 
 	String getParameterName();
+	
+	Stream<String> getBaseAndModifiedParameterNames();
 }

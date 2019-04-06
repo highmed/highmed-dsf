@@ -8,6 +8,8 @@ import java.util.Map;
 import javax.ws.rs.core.UriBuilder;
 
 import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
+import org.highmed.fhir.search.SearchQueryParameterError;
+import org.highmed.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 import org.highmed.fhir.search.parameters.basic.AbstractTokenParameter;
 import org.highmed.fhir.search.parameters.basic.TokenSearchType;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -35,10 +37,10 @@ public class TaskStatus extends AbstractTokenParameter<Task>
 		super.configureSearchParameter(queryParameters);
 
 		if (valueAndType != null && valueAndType.type == TokenSearchType.CODE)
-			status = toStatus(valueAndType.codeValue);
+			status = toStatus(valueAndType.codeValue, queryParameters.get(parameterName));
 	}
 
-	private org.hl7.fhir.r4.model.Task.TaskStatus toStatus(String status)
+	private org.hl7.fhir.r4.model.Task.TaskStatus toStatus(String status, List<String> parameterValues)
 	{
 		if (status == null || status.isBlank())
 			return null;
@@ -49,6 +51,8 @@ public class TaskStatus extends AbstractTokenParameter<Task>
 		}
 		catch (FHIRException e)
 		{
+			addError(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE, parameterName,
+					parameterValues, e));
 			return null;
 		}
 	}

@@ -6,13 +6,18 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.ws.rs.core.UriBuilder;
 
 import org.highmed.fhir.dao.DaoProvider;
+import org.highmed.fhir.search.SearchQuery;
 import org.highmed.fhir.search.SearchQueryIncludeParameter;
 import org.highmed.fhir.search.SearchQueryIncludeParameter.IncludeParts;
+import org.highmed.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
+import org.highmed.fhir.search.SearchQueryParameterError;
 import org.hl7.fhir.r4.model.DomainResource;
 
 public abstract class AbstractReferenceParameter<R extends DomainResource> extends AbstractSearchParameter<R>
@@ -44,8 +49,13 @@ public abstract class AbstractReferenceParameter<R extends DomainResource> exten
 		}
 
 		public static Optional<ReferenceValueAndSearchType> fromParamValue(List<String> targetResourceTypeNames,
-				String param, String identifierParam)
+				String parameterName, Map<String, List<String>> queryParameters,
+				Consumer<SearchQueryParameterError> errors)
 		{
+			final String param = getFirst(queryParameters, parameterName);
+			final String identifierParam = getFirst(queryParameters,
+					parameterName + PARAMETER_NAME_IDENTIFIER_MODIFIER);
+
 			if (param != null && !param.isBlank())
 			{
 				if (param.indexOf('/') == -1 && targetResourceTypeNames.size() == 1)
@@ -58,18 +68,41 @@ public abstract class AbstractReferenceParameter<R extends DomainResource> exten
 							.map(name -> name.equals(splitAtSlash[0])).anyMatch(b -> b))
 						return Optional.of(new ReferenceValueAndSearchType(splitAtSlash[0], splitAtSlash[1], null, null,
 								ReferenceSearchType.RESOURCE_NAME_AND_ID));
+					else
+						errors.accept(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE,
+								parameterName, queryParameters.get(parameterName),
+								"Unsupported target resource type name " + splitAtSlash[0] + ", not one of "
+										+ targetResourceTypeNames));
 				}
 				else if (param.startsWith("http") && targetResourceTypeNames.stream()
 						.map(name -> param.contains("/" + name + "/")).anyMatch(b -> b))
 					return Optional
 							.of(new ReferenceValueAndSearchType(null, null, param, null, ReferenceSearchType.URL));
+				else
+					errors.accept(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE,
+							parameterName, queryParameters.get(parameterName)));
+			}
+			else if (param != null && param.isBlank())
+			{
+				errors.accept(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE,
+						parameterName, queryParameters.get(parameterName), "Value empty"));
 			}
 			else if (identifierParam != null && !identifierParam.isBlank())
 			{
-				return TokenValueAndSearchType.fromParamValue(identifierParam)
+				return TokenValueAndSearchType
+						.fromParamValue(parameterName + PARAMETER_NAME_IDENTIFIER_MODIFIER, queryParameters, errors)
 						.map(identifier -> new ReferenceValueAndSearchType(null, null, null, identifier,
 								ReferenceSearchType.IDENTIFIER));
 			}
+			else if (identifierParam != null && identifierParam.isBlank())
+			{
+				errors.accept(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE,
+						parameterName, queryParameters.get(parameterName), "Value empty"));
+			}
+
+			if (queryParameters.get(parameterName) != null && queryParameters.get(parameterName).size() > 1)
+				errors.accept(new SearchQueryParameterError(SearchQueryParameterErrorType.UNSUPPORTED_NUMBER_OF_VALUES,
+						parameterName, queryParameters.get(parameterName)));
 
 			return Optional.empty();
 		}
@@ -94,13 +127,16 @@ public abstract class AbstractReferenceParameter<R extends DomainResource> exten
 	}
 
 	@Override
+	protected Stream<String> getModifiedParameterNames()
+	{
+		return Stream.of(getParameterName() + PARAMETER_NAME_IDENTIFIER_MODIFIER);
+	}
+
+	@Override
 	protected void configureSearchParameter(Map<String, List<String>> queryParameters)
 	{
-		String param = getFirst(queryParameters, parameterName);
-		String identifierParam = getFirst(queryParameters, parameterName + PARAMETER_NAME_IDENTIFIER_MODIFIER);
-
-		valueAndType = ReferenceValueAndSearchType.fromParamValue(targetResourceTypeNames, param, identifierParam)
-				.orElse(null);
+		valueAndType = ReferenceValueAndSearchType
+				.fromParamValue(targetResourceTypeNames, parameterName, queryParameters, this::addError).orElse(null);
 	}
 
 	@Override
@@ -118,7 +154,8 @@ public abstract class AbstractReferenceParameter<R extends DomainResource> exten
 
 	private List<IncludeParts> getIncludeParts(Map<String, List<String>> queryParameters)
 	{
-		List<String> includeParameterValues = queryParameters.getOrDefault(INCLUDE_PARAMETER, Collections.emptyList());
+		List<String> includeParameterValues = queryParameters.getOrDefault(SearchQuery.PARAMETER_INCLUDE,
+				Collections.emptyList());
 
 		return includeParameterValues.stream().map(IncludeParts::fromString)
 				.filter(p -> resourceTypeName.equals(p.getSourceResourceTypeName())

@@ -8,6 +8,7 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -17,6 +18,8 @@ import java.util.stream.Collectors;
 import javax.ws.rs.core.UriBuilder;
 
 import org.highmed.fhir.search.SearchQueryParameter;
+import org.highmed.fhir.search.SearchQueryParameterError;
+import org.highmed.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 import org.hl7.fhir.r4.model.DomainResource;
 
 public abstract class AbstractDateTimeParameter<R extends DomainResource> extends AbstractSearchParameter<R>
@@ -93,23 +96,117 @@ public abstract class AbstractDateTimeParameter<R extends DomainResource> extend
 	{
 		List<String> parameters = queryParameters.getOrDefault(parameterName, Collections.emptyList());
 
-		parameters.stream().limit(2).map(this::parse).filter(v -> v != null)
+		parameters.stream().limit(2).map(value -> parse(value, parameters)).filter(v -> v != null)
 				.collect(Collectors.toCollection(() -> valuesAndTypes));
+
+		DateTimeValueAndTypeAndSearchType first = valuesAndTypes.size() < 1 ? null : valuesAndTypes.get(0);
+		DateTimeValueAndTypeAndSearchType second = valuesAndTypes.size() < 2 ? null : valuesAndTypes.get(1);
+
+		if (parameters.size() > 2)
+			addError(new SearchQueryParameterError(SearchQueryParameterErrorType.UNSUPPORTED_NUMBER_OF_VALUES,
+					parameterName, parameters, "More than two " + parameterName + " values"));
+		else if (valuesAndTypes.size() == 2)
+		{
+			// if two search operators, only for example lt and gt are allowed in combination
+			if (!((EnumSet.of(DateTimeSearchType.GE, DateTimeSearchType.GT).contains(first.searchType)
+					&& EnumSet.of(DateTimeSearchType.LE, DateTimeSearchType.LT).contains(second.searchType))
+					|| (EnumSet.of(DateTimeSearchType.GE, DateTimeSearchType.GT).contains(first.searchType)
+							&& EnumSet.of(DateTimeSearchType.LE, DateTimeSearchType.LT).contains(second.searchType))))
+				addError(new SearchQueryParameterError(SearchQueryParameterErrorType.UNSUPPORTED_NUMBER_OF_VALUES,
+						parameterName, parameters,
+						"Seach operators " + first.searchType + " and " + second.searchType + " can't be combined"));
+		}
+
+		if (valuesAndTypes.size() > 1 && (!((EnumSet.of(DateTimeSearchType.GE, DateTimeSearchType.GT)
+				.contains(first.searchType)
+				&& EnumSet.of(DateTimeSearchType.LE, DateTimeSearchType.LT).contains(second.searchType))
+				|| (EnumSet.of(DateTimeSearchType.GE, DateTimeSearchType.GT).contains(first.searchType)
+						&& EnumSet.of(DateTimeSearchType.LE, DateTimeSearchType.LT).contains(second.searchType)))))
+		{
+			valuesAndTypes.clear();
+			valuesAndTypes.add(first);
+		}
 	}
 
-	private DateTimeValueAndTypeAndSearchType parse(String parameter)
+	private DateTimeValueAndTypeAndSearchType parse(String parameterValue, List<String> parameterValues)
 	{
-		final String fixedParameter = parameter.replace(' ', '+');
+		final String fixedParameterValue = parameterValue.replace(' ', '+');
 
 		if (Arrays.stream(DateTimeSearchType.values()).map(t -> t.prefix)
-				.anyMatch(prefix -> fixedParameter.toLowerCase().startsWith(prefix)))
+				.anyMatch(prefix -> fixedParameterValue.toLowerCase().startsWith(prefix)))
 		{
-			String prefix = fixedParameter.substring(0, 2);
-			String value = fixedParameter.substring(2, fixedParameter.length()).toUpperCase();
-			return parseValue(value, DateTimeSearchType.valueOf(prefix.toUpperCase()));
+			String prefix = fixedParameterValue.substring(0, 2);
+			String value = fixedParameterValue.substring(2, fixedParameterValue.length()).toUpperCase();
+			return parseValue(value, DateTimeSearchType.valueOf(prefix.toUpperCase()), fixedParameterValue,
+					parameterValues);
 		}
 		else
-			return parseValue(fixedParameter, DateTimeSearchType.EQ);
+			return parseValue(fixedParameterValue, DateTimeSearchType.EQ, fixedParameterValue, parameterValues);
+	}
+
+	// yyyy-mm-ddThh:mm:ss[Z|(+|-)hh:mm]
+	private DateTimeValueAndTypeAndSearchType parseValue(String value, DateTimeSearchType searchType,
+			String parameterValue, List<String> parameterValues)
+	{
+		try
+		{
+			// TODO fix control flow by exception
+			return new DateTimeValueAndTypeAndSearchType(ZonedDateTime.parse(value, DATE_TIME_FORMAT),
+					DateTimeType.ZONED_DATE_TIME, searchType);
+		}
+		catch (DateTimeParseException e)
+		{
+			// not a date-time, ignore
+		}
+
+		try
+		{
+			// TODO fix control flow by exception
+			return new DateTimeValueAndTypeAndSearchType(
+					ZonedDateTime.parse(value, DATE_TIME_FORMAT.withZone(ZoneId.systemDefault())),
+					DateTimeType.ZONED_DATE_TIME, searchType);
+		}
+		catch (DateTimeParseException e)
+		{
+			// not a date-time, ignore
+		}
+
+		try
+		{
+			// TODO fix control flow by exception
+			return new DateTimeValueAndTypeAndSearchType(LocalDate.parse(value, DATE_FORMAT), DateTimeType.LOCAL_DATE,
+					searchType);
+		}
+		catch (DateTimeParseException e)
+		{
+			// not a date, ignore
+		}
+
+		if (DateTimeSearchType.EQ.equals(searchType))
+		{
+			Matcher yearMonthMatcher = YEAR_MONTH_PATTERN.matcher(value);
+			if (yearMonthMatcher.matches())
+			{
+				int year = Integer.parseInt(yearMonthMatcher.group(1));
+				int month = Integer.parseInt(yearMonthMatcher.group(2));
+				return new DateTimeValueAndTypeAndSearchType(
+						new LocalDatePair(LocalDate.of(year, month, 1), LocalDate.of(year, month, 1).plusMonths(1)),
+						DateTimeType.YEAR_MONTH_PERIOD, DateTimeSearchType.EQ);
+			}
+
+			Matcher yearMatcher = YEAR_PATTERN.matcher(value);
+			if (yearMatcher.matches())
+			{
+				int year = Integer.parseInt(yearMatcher.group());
+				return new DateTimeValueAndTypeAndSearchType(
+						new LocalDatePair(LocalDate.of(year, 1, 1), LocalDate.of(year, 1, 1).plusYears(1)),
+						DateTimeType.YEAR_PERIOD, DateTimeSearchType.EQ);
+			}
+		}
+
+		addError(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE, parameterName,
+				parameterValues, parameterValue + " not parsable"));
+		return null;
 	}
 
 	/**
@@ -148,64 +245,5 @@ public abstract class AbstractDateTimeParameter<R extends DomainResource> extend
 			default:
 				return "";
 		}
-	}
-
-	// yyyy-mm-ddThh:mm:ss[Z|(+|-)hh:mm]
-	private DateTimeValueAndTypeAndSearchType parseValue(String value, DateTimeSearchType searchType)
-	{
-		try
-		{
-			// TODO fix control flow by exception
-			return new DateTimeValueAndTypeAndSearchType(ZonedDateTime.parse(value, DATE_TIME_FORMAT),
-					DateTimeType.ZONED_DATE_TIME, searchType);
-		}
-		catch (DateTimeParseException e)
-		{
-			// not a date-time, ignore
-		}
-
-		try
-		{
-			// TODO fix control flow by exception
-			return new DateTimeValueAndTypeAndSearchType(
-					ZonedDateTime.parse(value, DATE_TIME_FORMAT.withZone(ZoneId.systemDefault())),
-					DateTimeType.ZONED_DATE_TIME, searchType);
-		}
-		catch (DateTimeParseException e)
-		{
-			// not a date-time, ignore
-		}
-
-		try
-		{
-			// TODO fix control flow by exception
-			return new DateTimeValueAndTypeAndSearchType(LocalDate.parse(value, DATE_FORMAT), DateTimeType.LOCAL_DATE,
-					searchType);
-		}
-		catch (DateTimeParseException e)
-		{
-			// not a date, ignore
-		}
-
-		Matcher yearMonthMatcher = YEAR_MONTH_PATTERN.matcher(value);
-		if (yearMonthMatcher.matches())
-		{
-			int year = Integer.parseInt(yearMonthMatcher.group(1));
-			int month = Integer.parseInt(yearMonthMatcher.group(2));
-			return new DateTimeValueAndTypeAndSearchType(
-					new LocalDatePair(LocalDate.of(year, month, 1), LocalDate.of(year, month, 1).plusMonths(1)),
-					DateTimeType.YEAR_MONTH_PERIOD, DateTimeSearchType.EQ);
-		}
-
-		Matcher yearMatcher = YEAR_PATTERN.matcher(value);
-		if (yearMatcher.matches())
-		{
-			int year = Integer.parseInt(yearMatcher.group());
-			return new DateTimeValueAndTypeAndSearchType(
-					new LocalDatePair(LocalDate.of(year, 1, 1), LocalDate.of(year, 1, 1).plusYears(1)),
-					DateTimeType.YEAR_PERIOD, DateTimeSearchType.EQ);
-		}
-
-		return null;
 	}
 }

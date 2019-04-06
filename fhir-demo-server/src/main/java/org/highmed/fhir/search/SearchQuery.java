@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -13,13 +14,23 @@ import java.util.stream.Collectors;
 import javax.ws.rs.core.UriBuilder;
 
 import org.highmed.fhir.dao.DaoProvider;
-import org.highmed.fhir.search.parameters.basic.AbstractSearchParameter;
+import org.highmed.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SearchQuery<R extends DomainResource> implements DbSearchQuery, Matcher
 {
+	public static final String PARAMETER_SORT = "_sort";
+	public static final String PARAMETER_INCLUDE = "_include";
+	public static final String PARAMETER_PAGE = "_page";
+	public static final String PARAMETER_COUNT = "_count";
+	public static final String PARAMETER_FORMAT = "_format";
+	public static final String PARAMETER_PRETTY = "_pretty";
+
+	public static final String[] STANDARD_PARAMETERS = { PARAMETER_SORT, PARAMETER_INCLUDE, PARAMETER_PAGE,
+			PARAMETER_COUNT, PARAMETER_FORMAT, PARAMETER_PRETTY };
+
 	public static class SearchQueryBuilder<R extends DomainResource>
 	{
 		public static <R extends DomainResource> SearchQueryBuilder<R> create(Class<R> resourceType,
@@ -101,8 +112,39 @@ public class SearchQuery<R extends DomainResource> implements DbSearchQuery, Mat
 		filterQuery = searchParameters.stream().filter(SearchQueryParameter::isDefined)
 				.map(SearchQueryParameter::getFilterQuery).collect(Collectors.joining(" AND "));
 
-		createSortSql(getFirst(queryParameters, AbstractSearchParameter.SORT_PARAMETER));
-		createIncludeSql(queryParameters.get(AbstractSearchParameter.INCLUDE_PARAMETER));
+		createSortSql(getFirst(queryParameters, PARAMETER_SORT));
+		createIncludeSql(queryParameters.get(PARAMETER_INCLUDE));
+	}
+
+	public List<SearchQueryParameterError> getUnsupportedQueryParameters(Map<String, List<String>> queryParameters)
+	{
+		Map<String, List<String>> parameters = new HashMap<String, List<String>>(queryParameters);
+		searchParameters.stream().flatMap(p -> p.getBaseAndModifiedParameterNames()).forEach(parameters::remove);
+		Arrays.asList(STANDARD_PARAMETERS).forEach(parameters::remove);
+
+		List<SearchQueryParameterError> errors = new ArrayList<>(getDuplicateStandardParameters(queryParameters));
+
+		parameters.keySet().stream().map(
+				name -> new SearchQueryParameterError(SearchQueryParameterErrorType.UNSUPPORTED_PARAMETER, name, null))
+				.forEach(errors::add);
+
+		searchParameters.stream().flatMap(p -> p.getErrors().stream()).forEach(errors::add);
+
+		logger.warn("Query parameters with error: {}", errors);
+		return errors;
+	}
+
+	private List<SearchQueryParameterError> getDuplicateStandardParameters(Map<String, List<String>> queryParameters)
+	{
+		List<SearchQueryParameterError> errors = new ArrayList<>();
+		for (String parameter : STANDARD_PARAMETERS)
+		{
+			List<String> values = queryParameters.get(parameter);
+			if (values != null && values.size() > 1)
+				errors.add(new SearchQueryParameterError(SearchQueryParameterErrorType.UNSUPPORTED_NUMBER_OF_VALUES,
+						parameter, values));
+		}
+		return errors;
 	}
 
 	private String getFirst(Map<String, List<String>> queryParameters, String key)
@@ -199,9 +241,9 @@ public class SearchQuery<R extends DomainResource> implements DbSearchQuery, Mat
 		searchParameters.stream().filter(SearchQueryParameter::isDefined).forEach(p -> p.modifyBundleUri(bundleUri));
 
 		if (!sortParameters.isEmpty())
-			bundleUri.replaceQueryParam(AbstractSearchParameter.SORT_PARAMETER, sortParameter());
+			bundleUri.replaceQueryParam(PARAMETER_SORT, sortParameter());
 		if (!includeParameters.isEmpty())
-			bundleUri.replaceQueryParam(AbstractSearchParameter.INCLUDE_PARAMETER, includeParameters());
+			bundleUri.replaceQueryParam(PARAMETER_INCLUDE, includeParameters());
 
 		return bundleUri;
 	}

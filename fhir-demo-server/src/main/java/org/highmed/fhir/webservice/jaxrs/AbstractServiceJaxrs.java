@@ -96,6 +96,15 @@ public abstract class AbstractServiceJaxrs<R extends DomainResource, S extends B
 		return delegate.update(id, resource, uri, headers);
 	}
 
+	@PUT
+	@Override
+	public Response update(R resource, @Context UriInfo uri, @Context HttpHeaders headers)
+	{
+		logger.trace("PUT {}", uri.getRequestUri().toString());
+
+		return delegate.update(resource, uri, headers);
+	}
+
 	@DELETE
 	@Path("/{id}")
 	@Override
@@ -104,6 +113,15 @@ public abstract class AbstractServiceJaxrs<R extends DomainResource, S extends B
 		logger.trace("DELETE {}", uri.getRequestUri().toString());
 
 		return delegate.delete(id, uri, headers);
+	}
+
+	@DELETE
+	@Override
+	public Response delete(@Context UriInfo uri, @Context HttpHeaders headers)
+	{
+		logger.trace("DELETE {}", uri.getRequestUri().toString());
+
+		return delegate.delete(uri, headers);
 	}
 
 	@GET

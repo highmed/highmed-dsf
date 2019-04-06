@@ -9,6 +9,8 @@ import java.util.UUID;
 import javax.ws.rs.core.UriBuilder;
 
 import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
+import org.highmed.fhir.search.SearchQueryParameterError;
+import org.highmed.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 import org.highmed.fhir.search.parameters.basic.AbstractSearchParameter;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
@@ -36,17 +38,35 @@ public class ResourceId<R extends DomainResource> extends AbstractSearchParamete
 	@Override
 	protected void configureSearchParameter(Map<String, List<String>> queryParameters)
 	{
-		id = toId(getFirst(queryParameters, PARAMETER_NAME));
+		String firstValue = getFirst(queryParameters, PARAMETER_NAME);
+
+		if (firstValue == null)
+			return; // parameter not defined
+
+		id = toId(firstValue, queryParameters.get(PARAMETER_NAME));
 	}
 
-	private UUID toId(String id)
+	private UUID toId(String firstValue, List<String> values)
 	{
+		if (values != null && values.size() > 1)
+			addError(new SearchQueryParameterError(SearchQueryParameterErrorType.UNSUPPORTED_NUMBER_OF_VALUES,
+					PARAMETER_NAME, values));
+
+		if (firstValue.isBlank())
+		{
+			addError(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE, PARAMETER_NAME,
+					values));
+			return null;
+		}
+
 		try
 		{
-			return id == null || id.isBlank() ? null : UUID.fromString(id);
+			return UUID.fromString(firstValue);
 		}
 		catch (IllegalArgumentException e)
 		{
+			addError(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE, PARAMETER_NAME,
+					values, e));
 			return null;
 		}
 	}

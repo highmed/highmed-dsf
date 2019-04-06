@@ -1,6 +1,11 @@
 package org.highmed.fhir.search.parameters.basic;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
+
+import org.highmed.fhir.search.SearchQueryParameterError;
 
 public class TokenValueAndSearchType
 {
@@ -15,8 +20,13 @@ public class TokenValueAndSearchType
 		this.type = type;
 	}
 
-	public static Optional<TokenValueAndSearchType> fromParamValue(String param)
+	public static Optional<TokenValueAndSearchType> fromParamValue(String parameterName,
+			Map<String, List<String>> queryParameters, Consumer<SearchQueryParameterError> errors)
 	{
+		String param = null;
+		if (queryParameters.containsKey(parameterName) && !queryParameters.get(parameterName).isEmpty())
+			param = queryParameters.get(parameterName).get(0);
+
 		if (param != null && !param.isBlank())
 		{
 			if (param.indexOf('|') == -1)

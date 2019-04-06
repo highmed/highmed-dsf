@@ -1,33 +1,47 @@
 package org.highmed.fhir.search.parameters.basic;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
+import org.highmed.fhir.search.SearchQuery;
 import org.highmed.fhir.search.SearchQueryIncludeParameter;
 import org.highmed.fhir.search.SearchQueryParameter;
+import org.highmed.fhir.search.SearchQueryParameterError;
 import org.highmed.fhir.search.SearchQuerySortParameter;
 import org.highmed.fhir.search.SearchQuerySortParameter.SortDirection;
 import org.hl7.fhir.r4.model.DomainResource;
 
 public abstract class AbstractSearchParameter<R extends DomainResource> implements SearchQueryParameter<R>
 {
-	public static final String SORT_PARAMETER = "_sort";
-	public static final String INCLUDE_PARAMETER = "_include";
-
 	protected final String parameterName;
 
 	private SearchQuerySortParameter sortParameter;
+	private final List<SearchQueryParameterError> errors = new ArrayList<SearchQueryParameterError>();
 
 	public AbstractSearchParameter(String parameterName)
 	{
 		this.parameterName = parameterName;
 	}
 
+	@Override
 	public final String getParameterName()
 	{
 		return parameterName;
+	}
+
+	@Override
+	public Stream<String> getBaseAndModifiedParameterNames()
+	{
+		return Stream.concat(Stream.of(getParameterName()), getModifiedParameterNames());
+	}
+
+	protected Stream<String> getModifiedParameterNames()
+	{
+		return Stream.empty();
 	}
 
 	protected IllegalStateException notDefined()
@@ -38,7 +52,7 @@ public abstract class AbstractSearchParameter<R extends DomainResource> implemen
 	@Override
 	public final void configure(Map<String, List<String>> queryParameters)
 	{
-		SortDirection sortDirection = getSortDirection(getFirst(queryParameters, SORT_PARAMETER));
+		SortDirection sortDirection = getSortDirection(getFirst(queryParameters, SearchQuery.PARAMETER_SORT));
 		if (sortDirection != null)
 			sortParameter = new SearchQuerySortParameter(getSortSql(sortDirection.getSqlModifierWithSpacePrefix()),
 					parameterName, sortDirection);
@@ -48,7 +62,18 @@ public abstract class AbstractSearchParameter<R extends DomainResource> implemen
 		configureSearchParameter(queryParameters);
 	}
 
-	protected String getFirst(Map<String, List<String>> queryParameters, String key)
+	@Override
+	public List<SearchQueryParameterError> getErrors()
+	{
+		return errors;
+	}
+
+	protected final void addError(SearchQueryParameterError error)
+	{
+		errors.add(error);
+	}
+
+	protected static String getFirst(Map<String, List<String>> queryParameters, String key)
 	{
 		if (queryParameters.containsKey(key) && !queryParameters.get(key).isEmpty())
 			return queryParameters.get(key).get(0);

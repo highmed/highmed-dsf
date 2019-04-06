@@ -27,7 +27,6 @@ import org.highmed.fhir.search.PartialResult;
 import org.highmed.fhir.search.SearchQuery;
 import org.highmed.fhir.search.parameters.ResourceLastUpdated;
 import org.highmed.fhir.search.parameters.StructureDefinitionUrl;
-import org.highmed.fhir.search.parameters.basic.AbstractSearchParameter;
 import org.highmed.fhir.service.ResourceValidator;
 import org.highmed.fhir.service.SnapshotDependencies;
 import org.highmed.fhir.service.SnapshotDependencyAnalyzer;
@@ -232,7 +231,7 @@ public class StructureDefinitionServiceImpl extends AbstractServiceImpl<Structur
 		SearchQuery<StructureDefinition> query = snapshotDao.createSearchQuery(1, 1);
 		Map<String, List<String>> searchParameters = new HashMap<>();
 		searchParameters.put(StructureDefinitionUrl.PARAMETER_NAME, Collections.singletonList(url));
-		searchParameters.put(AbstractSearchParameter.SORT_PARAMETER,
+		searchParameters.put(SearchQuery.PARAMETER_SORT,
 				Collections.singletonList("-" + ResourceLastUpdated.PARAMETER_NAME));
 		query.configureParameters(searchParameters);
 

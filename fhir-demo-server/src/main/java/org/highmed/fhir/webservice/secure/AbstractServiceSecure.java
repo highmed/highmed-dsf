@@ -38,6 +38,7 @@ public class AbstractServiceSecure<R extends DomainResource, S extends BasicServ
 		throw new UnsupportedOperationException("implemented by jaxrs service layer");
 	}
 
+	@Override
 	public Response create(R resource, UriInfo uri, HttpHeaders headers)
 	{
 		logger.debug("Current user '{}'", provider.getCurrentUser().getName());
@@ -45,6 +46,7 @@ public class AbstractServiceSecure<R extends DomainResource, S extends BasicServ
 		return delegate.create(resource, uri, headers);
 	}
 
+	@Override
 	public Response read(String id, UriInfo uri, HttpHeaders headers)
 	{
 		logger.debug("Current user '{}'", provider.getCurrentUser().getName());
@@ -52,6 +54,7 @@ public class AbstractServiceSecure<R extends DomainResource, S extends BasicServ
 		return delegate.read(id, uri, headers);
 	}
 
+	@Override
 	public Response vread(String id, long version, UriInfo uri, HttpHeaders headers)
 	{
 		logger.debug("Current user '{}'", provider.getCurrentUser().getName());
@@ -59,6 +62,7 @@ public class AbstractServiceSecure<R extends DomainResource, S extends BasicServ
 		return delegate.vread(id, version, uri, headers);
 	}
 
+	@Override
 	public Response update(String id, R resource, UriInfo uri, HttpHeaders headers)
 	{
 		logger.debug("Current user '{}'", provider.getCurrentUser().getName());
@@ -66,6 +70,15 @@ public class AbstractServiceSecure<R extends DomainResource, S extends BasicServ
 		return delegate.update(id, resource, uri, headers);
 	}
 
+	@Override
+	public Response update(R resource, UriInfo uri, HttpHeaders headers)
+	{
+		logger.debug("Current user '{}'", provider.getCurrentUser().getName());
+
+		return delegate.update(resource, uri, headers);
+	}
+
+	@Override
 	public Response delete(String id, UriInfo uri, HttpHeaders headers)
 	{
 		logger.debug("Current user '{}'", provider.getCurrentUser().getName());
@@ -73,6 +86,15 @@ public class AbstractServiceSecure<R extends DomainResource, S extends BasicServ
 		return delegate.delete(id, uri, headers);
 	}
 
+	@Override
+	public Response delete(UriInfo uri, HttpHeaders headers)
+	{
+		logger.debug("Current user '{}'", provider.getCurrentUser().getName());
+
+		return delegate.delete(uri, headers);
+	}
+
+	@Override
 	public Response search(UriInfo uri, HttpHeaders headers)
 	{
 		logger.debug("Current user '{}'", provider.getCurrentUser().getName());
@@ -80,6 +102,7 @@ public class AbstractServiceSecure<R extends DomainResource, S extends BasicServ
 		return delegate.search(uri, headers);
 	}
 
+	@Override
 	public Response postValidateNew(String validate, Parameters parameters, UriInfo uri, HttpHeaders headers)
 	{
 		logger.debug("Current user '{}'", provider.getCurrentUser().getName());
@@ -95,6 +118,7 @@ public class AbstractServiceSecure<R extends DomainResource, S extends BasicServ
 		return delegate.getValidateNew(validate, uri, headers);
 	}
 
+	@Override
 	public Response postValidateExisting(String validate, String id, Parameters parameters, UriInfo uri,
 			HttpHeaders headers)
 	{

@@ -13,6 +13,14 @@ public interface BasicService<R extends DomainResource> extends NeedsAuthenticat
 {
 	void setUserProvider(UserProvider provider);
 
+	/**
+	 * regular and conditional create
+	 * 
+	 * @param resource
+	 * @param uri
+	 * @param headers
+	 * @return
+	 */
 	Response create(R resource, UriInfo uri, HttpHeaders headers);
 
 	Response read(String id, UriInfo uri, HttpHeaders headers);
@@ -21,7 +29,26 @@ public interface BasicService<R extends DomainResource> extends NeedsAuthenticat
 
 	Response update(String id, R resource, UriInfo uri, HttpHeaders headers);
 
+	/**
+	 * conditional update
+	 * 
+	 * @param resource
+	 * @param uri
+	 * @param headers
+	 * @return
+	 */
+	Response update(R resource, UriInfo uri, HttpHeaders headers);
+
 	Response delete(String id, UriInfo uri, HttpHeaders headers);
+
+	/**
+	 * conditional delete
+	 * 
+	 * @param uri
+	 * @param headers
+	 * @return
+	 */
+	Response delete(UriInfo uri, HttpHeaders headers);
 
 	Response search(UriInfo uri, HttpHeaders headers);
 

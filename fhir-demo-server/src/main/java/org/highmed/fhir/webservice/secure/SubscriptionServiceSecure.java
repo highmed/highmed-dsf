@@ -35,4 +35,13 @@ public class SubscriptionServiceSecure extends AbstractServiceSecure<Subscriptio
 		// TODO Auto-generated method stub
 		return super.update(id, resource, uri, headers);
 	}
+
+	@Override
+	public Response update(Subscription resource, UriInfo uri, HttpHeaders headers)
+	{
+		// see create
+
+		// TODO Auto-generated method stub
+		return super.update(resource, uri, headers);
+	}
 }

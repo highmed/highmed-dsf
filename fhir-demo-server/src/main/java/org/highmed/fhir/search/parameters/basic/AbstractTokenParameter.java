@@ -5,6 +5,8 @@ import java.util.Map;
 
 import javax.ws.rs.core.UriBuilder;
 
+import org.highmed.fhir.search.SearchQueryParameterError;
+import org.highmed.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 import org.hl7.fhir.r4.model.DomainResource;
 
 public abstract class AbstractTokenParameter<R extends DomainResource> extends AbstractSearchParameter<R>
@@ -19,8 +21,12 @@ public abstract class AbstractTokenParameter<R extends DomainResource> extends A
 	@Override
 	protected void configureSearchParameter(Map<String, List<String>> queryParameters)
 	{
-		String param = getFirst(queryParameters, parameterName);
-		valueAndType = TokenValueAndSearchType.fromParamValue(param).orElse(null);
+		valueAndType = TokenValueAndSearchType.fromParamValue(parameterName, queryParameters, this::addError)
+				.orElse(null);
+
+		if (queryParameters.get(parameterName) != null && queryParameters.get(parameterName).size() > 1)
+			addError(new SearchQueryParameterError(SearchQueryParameterErrorType.UNSUPPORTED_NUMBER_OF_VALUES,
+					parameterName, queryParameters.get(parameterName)));
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package org.highmed.fhir.webservice.impl;
 
 import java.net.URI;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -25,6 +26,7 @@ import org.highmed.fhir.help.ParameterConverter;
 import org.highmed.fhir.help.ResponseGenerator;
 import org.highmed.fhir.search.PartialResult;
 import org.highmed.fhir.search.SearchQuery;
+import org.highmed.fhir.search.SearchQueryParameterError;
 import org.highmed.fhir.service.ResourceValidator;
 import org.highmed.fhir.webservice.specification.BasicService;
 import org.hl7.fhir.r4.model.Bundle;
@@ -44,7 +46,11 @@ import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.UrlType;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
@@ -108,6 +114,11 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 	@Override
 	public Response create(R resource, UriInfo uri, HttpHeaders headers)
 	{
+		if (alreadyExists(headers)) // might throw errors
+		{
+			// TODO throw error
+		}
+
 		Consumer<R> postCreate = preCreate(resource);
 
 		R createdResource = exceptionHandler.handleSqlException(() -> dao.create(resource));
@@ -123,6 +134,38 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 		return responseGenerator
 				.response(Status.CREATED, createdResource, parameterConverter.getMediaType(uri, headers))
 				.location(location).build();
+	}
+
+	private boolean alreadyExists(HttpHeaders headers)
+	{
+		Optional<String> noneExistsHeaderValue = getHeaderString(headers, Constants.HEADER_IF_NONE_EXIST,
+				Constants.HEADER_IF_NONE_EXIST_LC);
+
+		if (noneExistsHeaderValue.isEmpty())
+			return false;
+
+		UriComponents componentes = UriComponentsBuilder.fromUriString(noneExistsHeaderValue.get()).build();
+		String path = componentes.getPath();
+		if (path != null && !path.isBlank())
+			; // TODO path not allowed here, throw error
+
+		MultiValueMap<String, String> queryParameters = componentes.getQueryParams();
+
+		SearchQuery<R> query = dao.createSearchQuery(0, 0);
+		query.configureParameters(queryParameters);
+
+		List<SearchQueryParameterError> unsupportedQueryParameters = query
+				.getUnsupportedQueryParameters(queryParameters);
+		if (!unsupportedQueryParameters.isEmpty())
+			; // TODO throw error
+
+		PartialResult<R> result = exceptionHandler.handleSqlException(() -> dao.search(query));
+		return result.getOverallCount() > 0;
+	}
+
+	private Optional<String> getHeaderString(HttpHeaders headers, String... headerNames)
+	{
+		return Arrays.stream(headerNames).map(name -> headers.getHeaderString(name)).filter(h -> h != null).findFirst();
 	}
 
 	/**
@@ -214,6 +257,34 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 	}
 
 	@Override
+	public Response update(R resource, UriInfo uri, HttpHeaders headers)
+	{
+		// MultivaluedMap<String, String> queryParameters = uri.getQueryParameters();
+		//
+		// Integer page = parameterConverter.getFirstInt(queryParameters, "_page");
+		// int effectivePage = page == null ? 1 : page;
+		//
+		// Integer count = parameterConverter.getFirstInt(queryParameters, "_count");
+		// int effectiveCount = (count == null || count < 0) ? defaultPageCount : count;
+		//
+		// SearchQuery<R> query = dao.createSearchQuery(effectivePage, effectiveCount);
+		// query.configureParameters(queryParameters);
+		//
+		// PartialResult<R> result = exceptionHandler.handleSqlException(() -> dao.search(query));
+		//
+		// UriBuilder bundleUri = query.configureBundleUri(uri.getAbsolutePathBuilder());
+		//
+		// String format = queryParameters.getFirst("_format");
+		// String pretty = queryParameters.getFirst("_pretty");
+		// Bundle searchSet = responseGenerator.createSearchSet(result, bundleUri, format, pretty);
+		//
+		// return responseGenerator.response(Status.OK, searchSet, parameterConverter.getMediaType(uri,
+		// headers)).build();
+
+		return null; // TODO conditional update
+	}
+
+	@Override
 	public Response delete(String id, UriInfo uri, HttpHeaders headers)
 	{
 		Consumer<String> afterDelete = preDelete(id);
@@ -245,26 +316,56 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 	}
 
 	@Override
+	public Response delete(UriInfo uri, HttpHeaders headers)
+	{
+		// MultivaluedMap<String, String> queryParameters = uri.getQueryParameters();
+		//
+		// Integer page = parameterConverter.getFirstInt(queryParameters, "_page");
+		// int effectivePage = page == null ? 1 : page;
+		//
+		// Integer count = parameterConverter.getFirstInt(queryParameters, "_count");
+		// int effectiveCount = (count == null || count < 0) ? defaultPageCount : count;
+		//
+		// SearchQuery<R> query = dao.createSearchQuery(effectivePage, effectiveCount);
+		// query.configureParameters(queryParameters);
+		//
+		// PartialResult<R> result = exceptionHandler.handleSqlException(() -> dao.search(query));
+		//
+		// UriBuilder bundleUri = query.configureBundleUri(uri.getAbsolutePathBuilder());
+		//
+		// String format = queryParameters.getFirst("_format");
+		// String pretty = queryParameters.getFirst("_pretty");
+		// Bundle searchSet = responseGenerator.createSearchSet(result, bundleUri, format, pretty);
+		//
+		// return responseGenerator.response(Status.OK, searchSet, parameterConverter.getMediaType(uri,
+		// headers)).build();
+
+		return null; // TODO conditional delete
+	}
+
+	@Override
 	public Response search(UriInfo uri, HttpHeaders headers)
 	{
 		MultivaluedMap<String, String> queryParameters = uri.getQueryParameters();
 
-		Integer page = parameterConverter.getFirstInt(queryParameters, "_page");
+		Integer page = parameterConverter.getFirstInt(queryParameters, SearchQuery.PARAMETER_PAGE);
 		int effectivePage = page == null ? 1 : page;
 
-		Integer count = parameterConverter.getFirstInt(queryParameters, "_count");
+		Integer count = parameterConverter.getFirstInt(queryParameters, SearchQuery.PARAMETER_COUNT);
 		int effectiveCount = (count == null || count < 0) ? defaultPageCount : count;
 
 		SearchQuery<R> query = dao.createSearchQuery(effectivePage, effectiveCount);
 		query.configureParameters(queryParameters);
+		List<SearchQueryParameterError> errors = query.getUnsupportedQueryParameters(queryParameters);
+		// TODO throw error if strict param handling is configured, include warning else
 
 		PartialResult<R> result = exceptionHandler.handleSqlException(() -> dao.search(query));
 
 		UriBuilder bundleUri = query.configureBundleUri(uri.getAbsolutePathBuilder());
 
-		String format = queryParameters.getFirst("_format");
-		String pretty = queryParameters.getFirst("_pretty");
-		Bundle searchSet = responseGenerator.createSearchSet(result, bundleUri, format, pretty);
+		String format = queryParameters.getFirst(SearchQuery.PARAMETER_FORMAT);
+		String pretty = queryParameters.getFirst(SearchQuery.PARAMETER_PRETTY);
+		Bundle searchSet = responseGenerator.createSearchSet(result, errors, bundleUri, format, pretty);
 
 		return responseGenerator.response(Status.OK, searchSet, parameterConverter.getMediaType(uri, headers)).build();
 	}
