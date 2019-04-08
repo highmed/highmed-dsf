@@ -14,6 +14,8 @@ public interface WebserviceClient
 	
 	<R extends DomainResource> R create(R resource);
 
+	<R extends DomainResource> R create(R resource, String ifNoneExistCriteria);
+
 	<R extends DomainResource> R update(R resource);
 
 	<R extends DomainResource> R read(Class<R> resourceType, String id);

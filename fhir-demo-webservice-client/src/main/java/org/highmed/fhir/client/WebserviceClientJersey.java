@@ -103,8 +103,36 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 	@Override
 	public <R extends DomainResource> R create(R resource)
 	{
+		Objects.requireNonNull(resource, "resource");
+
 		Response response = getResource().path(resource.getClass().getAnnotation(ResourceDef.class).name()).request()
 				.accept(Constants.CT_FHIR_JSON_NEW).post(Entity.entity(resource, Constants.CT_FHIR_JSON_NEW));
+
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		logger.debug("HTTP header Location: {}", response.getLocation());
+		logger.debug("HTTP header ETag: {}", response.getHeaderString(HttpHeaders.ETAG));
+		logger.debug("HTTP header Last-Modified: {}", response.getHeaderString(HttpHeaders.LAST_MODIFIED));
+
+		if (Status.CREATED.getStatusCode() == response.getStatus())
+		{
+			@SuppressWarnings("unchecked")
+			R read = (R) response.readEntity(resource.getClass());
+			return read;
+		}
+		else
+			throw new WebApplicationException(response);
+	}
+
+	@Override
+	public <R extends DomainResource> R create(R resource, String ifNoneExistCriteria)
+	{
+		Objects.requireNonNull(resource, "resource");
+		Objects.requireNonNull(ifNoneExistCriteria, "ifNoneExistCriteria");
+
+		Response response = getResource().path(resource.getClass().getAnnotation(ResourceDef.class).name()).request()
+				.header(Constants.HEADER_IF_NONE_EXIST, ifNoneExistCriteria).accept(Constants.CT_FHIR_JSON_NEW)
+				.post(Entity.entity(resource, Constants.CT_FHIR_JSON_NEW));
 
 		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
 				response.getStatusInfo().getReasonPhrase());

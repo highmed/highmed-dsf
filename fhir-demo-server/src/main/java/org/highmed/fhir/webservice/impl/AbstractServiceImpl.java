@@ -114,10 +114,7 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 	@Override
 	public Response create(R resource, UriInfo uri, HttpHeaders headers)
 	{
-		if (alreadyExists(headers)) // might throw errors
-		{
-			// TODO throw error
-		}
+		checkAlreadyExists(uri, headers); // might throw errors
 
 		Consumer<R> postCreate = preCreate(resource);
 
@@ -136,18 +133,25 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 				.location(location).build();
 	}
 
-	private boolean alreadyExists(HttpHeaders headers)
+	private void checkAlreadyExists(UriInfo uri, HttpHeaders headers) throws WebApplicationException
 	{
-		Optional<String> noneExistsHeaderValue = getHeaderString(headers, Constants.HEADER_IF_NONE_EXIST,
+		Optional<String> ifNoneExistsHeader = getHeaderString(headers, Constants.HEADER_IF_NONE_EXIST,
 				Constants.HEADER_IF_NONE_EXIST_LC);
 
-		if (noneExistsHeaderValue.isEmpty())
-			return false;
+		if (ifNoneExistsHeader.isEmpty())
+			return; // header not found, nothing to check against
 
-		UriComponents componentes = UriComponentsBuilder.fromUriString(noneExistsHeaderValue.get()).build();
+		if (ifNoneExistsHeader.get().isBlank())
+			throw exceptionHandler.badIfNoneExistHeaderValue(ifNoneExistsHeader.get());
+
+		String ifNoneExistsHeaderValue = ifNoneExistsHeader.get();
+		if (!ifNoneExistsHeaderValue.contains("?"))
+			ifNoneExistsHeaderValue = '?' + ifNoneExistsHeaderValue;
+
+		UriComponents componentes = UriComponentsBuilder.fromUriString(ifNoneExistsHeaderValue).build();
 		String path = componentes.getPath();
 		if (path != null && !path.isBlank())
-			; // TODO path not allowed here, throw error
+			throw exceptionHandler.badIfNoneExistHeaderValue(ifNoneExistsHeader.get());
 
 		MultiValueMap<String, String> queryParameters = componentes.getQueryParams();
 
@@ -157,10 +161,13 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 		List<SearchQueryParameterError> unsupportedQueryParameters = query
 				.getUnsupportedQueryParameters(queryParameters);
 		if (!unsupportedQueryParameters.isEmpty())
-			; // TODO throw error
+			throw exceptionHandler.badIfNoneExistHeaderValue(ifNoneExistsHeader.get());
 
 		PartialResult<R> result = exceptionHandler.handleSqlException(() -> dao.search(query));
-		return result.getOverallCount() > 0;
+		if (result.getOverallCount() == 1)
+			throw exceptionHandler.oneAlreadyExists(resourceTypeName, ifNoneExistsHeader.get(), uri);
+		else if (result.getOverallCount() > 1)
+			throw exceptionHandler.multipleAlreadyExists(resourceTypeName, ifNoneExistsHeader.get());
 	}
 
 	private Optional<String> getHeaderString(HttpHeaders headers, String... headerNames)
