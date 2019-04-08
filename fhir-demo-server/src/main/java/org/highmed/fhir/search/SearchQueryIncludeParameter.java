@@ -66,6 +66,17 @@ public class SearchQueryIncludeParameter
 					&& parameterName.equals(getSearchParameterName()) && (getTargetResourceTypeName() == null
 							|| targetResourceTypeName.equals(getTargetResourceTypeName()));
 		}
+
+		@Override
+		public String toString()
+		{
+			if (searchParameterName == null && targetResourceTypeName == null)
+				return sourceResourceTypeName;
+			else if (targetResourceTypeName == null)
+				return sourceResourceTypeName + ":" + searchParameterName;
+			else
+				return sourceResourceTypeName + ":" + searchParameterName + ":" + targetResourceTypeName;
+		}
 	}
 
 	private final List<String> sql;
@@ -84,6 +95,6 @@ public class SearchQueryIncludeParameter
 
 	public String getSql()
 	{
-		return sql.stream().collect(Collectors.joining());
+		return sql.stream().collect(Collectors.joining(", "));
 	}
 }

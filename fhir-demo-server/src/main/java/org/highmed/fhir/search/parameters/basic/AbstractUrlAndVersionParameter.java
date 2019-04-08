@@ -1,8 +1,10 @@
 package org.highmed.fhir.search.parameters.basic;
 
+import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import org.highmed.fhir.function.BiFunctionWithSqlException;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.MetadataResource;
 
@@ -45,8 +47,8 @@ public abstract class AbstractUrlAndVersionParameter<R extends MetadataResource>
 	}
 
 	@Override
-	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement)
-			throws SQLException
+	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement,
+			BiFunctionWithSqlException<String, Object[], Array> arrayCreator) throws SQLException
 	{
 		if (subqueryParameterIndex == 1)
 			switch (valueAndType.type)

@@ -1,5 +1,6 @@
 package org.highmed.fhir.search.parameters;
 
+import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
@@ -7,6 +8,7 @@ import java.util.Map;
 
 import javax.ws.rs.core.UriBuilder;
 
+import org.highmed.fhir.function.BiFunctionWithSqlException;
 import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.fhir.search.parameters.basic.AbstractTokenParameter;
 import org.highmed.fhir.search.parameters.basic.TokenSearchType;
@@ -72,8 +74,8 @@ public class SubscriptionStatus extends AbstractTokenParameter<Subscription>
 	}
 
 	@Override
-	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement)
-			throws SQLException
+	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement,
+			BiFunctionWithSqlException<String, Object[], Array> arrayCreator) throws SQLException
 	{
 		statement.setString(parameterIndex, status.toCode());
 	}

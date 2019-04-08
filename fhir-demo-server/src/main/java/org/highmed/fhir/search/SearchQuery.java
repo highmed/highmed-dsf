@@ -1,11 +1,13 @@
 package org.highmed.fhir.search;
 
+import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -14,6 +16,7 @@ import java.util.stream.Collectors;
 import javax.ws.rs.core.UriBuilder;
 
 import org.highmed.fhir.dao.DaoProvider;
+import org.highmed.fhir.function.BiFunctionWithSqlException;
 import org.highmed.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.slf4j.Logger;
@@ -141,10 +144,18 @@ public class SearchQuery<R extends DomainResource> implements DbSearchQuery, Mat
 		{
 			List<String> values = queryParameters.get(parameter);
 			if (values != null && values.size() > 1)
-				errors.add(new SearchQueryParameterError(SearchQueryParameterErrorType.UNSUPPORTED_NUMBER_OF_VALUES,
-						parameter, values));
+			{
+				if (!PARAMETER_INCLUDE.equals(parameter) || hasDuplicates(values))
+					errors.add(new SearchQueryParameterError(SearchQueryParameterErrorType.UNSUPPORTED_NUMBER_OF_VALUES,
+							parameter, values));
+			}
 		}
 		return errors;
+	}
+
+	private boolean hasDuplicates(List<String> values)
+	{
+		return values.size() != new HashSet<>(values).size();
 	}
 
 	private String getFirst(Map<String, List<String>> queryParameters, String key)
@@ -203,7 +214,8 @@ public class SearchQuery<R extends DomainResource> implements DbSearchQuery, Mat
 	}
 
 	@Override
-	public void modifyStatement(PreparedStatement statement) throws SQLException
+	public void modifyStatement(PreparedStatement statement,
+			BiFunctionWithSqlException<String, Object[], Array> arrayCreator) throws SQLException
 	{
 		try
 		{
@@ -213,7 +225,7 @@ public class SearchQuery<R extends DomainResource> implements DbSearchQuery, Mat
 			int index = 0;
 			for (SearchQueryParameter<?> q : filtered)
 				for (int i = 0; i < q.getSqlParameterCount(); i++)
-					q.modifyStatement(++index, i + 1, statement);
+					q.modifyStatement(++index, i + 1, statement, arrayCreator);
 		}
 		catch (SQLException e)
 		{

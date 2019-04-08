@@ -7,6 +7,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -254,6 +255,10 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 	protected List<DomainResource> getResources(ResultSet result, int index) throws SQLException
 	{
 		String json = result.getString(index);
+
+		if (json == null)
+			return Collections.emptyList();
+
 		JsonArray array = (JsonArray) new JsonParser().parse(json);
 
 		List<DomainResource> includes = new ArrayList<>();
@@ -512,7 +517,7 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 			int overallCount = 0;
 			try (PreparedStatement statement = connection.prepareStatement(query.getCountSql()))
 			{
-				query.modifyStatement(statement);
+				query.modifyStatement(statement, connection::createArrayOf);
 
 				logger.trace("Executing query '{}'", statement);
 				try (ResultSet result = statement.executeQuery())
@@ -529,7 +534,7 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 			{
 				try (PreparedStatement statement = connection.prepareStatement(query.getSearchSql()))
 				{
-					query.modifyStatement(statement);
+					query.modifyStatement(statement, connection::createArrayOf);
 
 					logger.trace("Executing query '{}'", statement);
 					try (ResultSet result = statement.executeQuery())

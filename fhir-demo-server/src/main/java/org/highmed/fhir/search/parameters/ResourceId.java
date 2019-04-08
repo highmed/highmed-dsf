@@ -1,5 +1,6 @@
 package org.highmed.fhir.search.parameters;
 
+import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.UUID;
 import javax.ws.rs.core.UriBuilder;
 
 import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
+import org.highmed.fhir.function.BiFunctionWithSqlException;
 import org.highmed.fhir.search.SearchQueryParameterError;
 import org.highmed.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 import org.highmed.fhir.search.parameters.basic.AbstractSearchParameter;
@@ -90,8 +92,8 @@ public class ResourceId<R extends DomainResource> extends AbstractSearchParamete
 	}
 
 	@Override
-	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement)
-			throws SQLException
+	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement,
+			BiFunctionWithSqlException<String, Object[], Array> arrayCreator) throws SQLException
 	{
 		statement.setObject(parameterIndex, asUuidPgObject(id));
 	}

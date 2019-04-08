@@ -1,5 +1,7 @@
 package org.highmed.fhir.search.parameters.basic;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -53,7 +55,18 @@ public abstract class AbstractStringParameter<R extends DomainResource> extends 
 	@Override
 	protected final void configureSearchParameter(Map<String, List<String>> queryParameters)
 	{
-		String startsWith = getFirst(queryParameters, parameterName);
+		List<String> allValues = new ArrayList<>();
+		allValues.addAll(queryParameters.getOrDefault(parameterName + StringSearchType.STARTS_WITH.modifier,
+				Collections.emptyList()));
+		allValues.addAll(
+				queryParameters.getOrDefault(parameterName + StringSearchType.EXACT.modifier, Collections.emptyList()));
+		allValues.addAll(queryParameters.getOrDefault(parameterName + StringSearchType.CONTAINS.modifier,
+				Collections.emptyList()));
+		if (allValues.size() > 1)
+			addError(new SearchQueryParameterError(SearchQueryParameterErrorType.UNSUPPORTED_NUMBER_OF_VALUES,
+					parameterName, allValues));
+
+		String startsWith = getFirst(queryParameters, parameterName + StringSearchType.STARTS_WITH.modifier);
 		if (startsWith != null)
 		{
 			valueAndType = new StringValueAndSearchType(startsWith, StringSearchType.STARTS_WITH);
@@ -73,10 +86,6 @@ public abstract class AbstractStringParameter<R extends DomainResource> extends 
 			valueAndType = new StringValueAndSearchType(contains, StringSearchType.CONTAINS);
 			return;
 		}
-
-		if (queryParameters.get(parameterName) != null && queryParameters.get(parameterName).size() > 1)
-			addError(new SearchQueryParameterError(SearchQueryParameterErrorType.UNSUPPORTED_NUMBER_OF_VALUES,
-					parameterName, queryParameters.get(parameterName)));
 	}
 
 	@Override

@@ -16,6 +16,8 @@ public interface DaoProvider
 
 	PractitionerDao getPractitionerDao();
 
+	PractitionerRoleDao getPractitionerRoleDao();
+
 	ProvenanceDao getProvenanceDao();
 
 	ResearchStudyDao getResearchStudyDao();

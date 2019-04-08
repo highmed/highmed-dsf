@@ -1,10 +1,14 @@
 package org.highmed.fhir.search.parameters.basic;
 
+import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
+import org.highmed.fhir.function.BiFunctionWithSqlException;
+import org.highmed.fhir.search.SearchQueryParameterError;
+import org.highmed.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.MetadataResource;
 
@@ -32,6 +36,9 @@ public abstract class AbstractVersionParameter<R extends MetadataResource> exten
 
 		if (valueAndType != null && valueAndType.type == TokenSearchType.CODE)
 			version = valueAndType.codeValue;
+		else if (valueAndType != null)
+			addError(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE, PARAMETER_NAME,
+					queryParameters.get(PARAMETER_NAME)));
 	}
 
 	@Override
@@ -53,8 +60,8 @@ public abstract class AbstractVersionParameter<R extends MetadataResource> exten
 	}
 
 	@Override
-	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement)
-			throws SQLException
+	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement,
+			BiFunctionWithSqlException<String, Object[], Array> arrayCreator) throws SQLException
 	{
 		statement.setString(parameterIndex, version);
 	}

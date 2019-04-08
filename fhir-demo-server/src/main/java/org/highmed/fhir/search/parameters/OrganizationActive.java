@@ -1,8 +1,10 @@
 package org.highmed.fhir.search.parameters;
 
+import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import org.highmed.fhir.function.BiFunctionWithSqlException;
 import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.fhir.search.parameters.basic.AbstractBooleanParameter;
 import org.hl7.fhir.r4.model.DomainResource;
@@ -32,8 +34,8 @@ public class OrganizationActive extends AbstractBooleanParameter<Organization>
 	}
 
 	@Override
-	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement)
-			throws SQLException
+	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement,
+			BiFunctionWithSqlException<String, Object[], Array> arrayCreator) throws SQLException
 	{
 		statement.setBoolean(parameterIndex, value);
 	}

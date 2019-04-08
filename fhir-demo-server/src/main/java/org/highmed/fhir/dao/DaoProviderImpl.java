@@ -13,6 +13,7 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	private final OrganizationDao organizationDao;
 	private final PatientDao patientDao;
 	private final PractitionerDao practitionerDao;
+	private final PractitionerRoleDao practitionerRoleDao;
 	private final ProvenanceDao provenanceDao;
 	private final ResearchStudyDao researchStudyDao;
 	private final StructureDefinitionDao structureDefinitionDao;
@@ -23,8 +24,9 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 
 	public DaoProviderImpl(CodeSystemDao codeSystemDao, EndpointDao endpointDao,
 			HealthcareServiceDao healthcareServiceDao, LocationDao locationDao, OrganizationDao organizationDao,
-			PatientDao patientDao, PractitionerDao practitionerDao, ProvenanceDao provenanceDao,
-			ResearchStudyDao researchStudyDao, StructureDefinitionDao structureDefinitionDao,
+			PatientDao patientDao, PractitionerDao practitionerDao, PractitionerRoleDao practitionerRoleDao,
+			ProvenanceDao provenanceDao, ResearchStudyDao researchStudyDao,
+			StructureDefinitionDao structureDefinitionDao,
 			StructureDefinitionSnapshotDao structureDefinitionSnapshotDao, SubscriptionDao subscriptionDao,
 			TaskDao taskDao, ValueSetDao valueSetDao)
 	{
@@ -35,6 +37,7 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 		this.organizationDao = organizationDao;
 		this.patientDao = patientDao;
 		this.practitionerDao = practitionerDao;
+		this.practitionerRoleDao = practitionerRoleDao;
 		this.provenanceDao = provenanceDao;
 		this.researchStudyDao = researchStudyDao;
 		this.structureDefinitionDao = structureDefinitionDao;
@@ -103,6 +106,12 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	public PractitionerDao getPractitionerDao()
 	{
 		return practitionerDao;
+	}
+
+	@Override
+	public PractitionerRoleDao getPractitionerRoleDao()
+	{
+		return practitionerRoleDao;
 	}
 
 	@Override

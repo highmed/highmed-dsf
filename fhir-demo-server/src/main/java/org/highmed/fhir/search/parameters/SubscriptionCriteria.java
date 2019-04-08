@@ -1,9 +1,11 @@
 package org.highmed.fhir.search.parameters;
 
+import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Objects;
 
+import org.highmed.fhir.function.BiFunctionWithSqlException;
 import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.fhir.search.parameters.basic.AbstractStringParameter;
 import org.hl7.fhir.r4.model.DomainResource;
@@ -33,8 +35,8 @@ public class SubscriptionCriteria extends AbstractStringParameter<Subscription>
 	}
 
 	@Override
-	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement)
-			throws SQLException
+	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement,
+			BiFunctionWithSqlException<String, Object[], Array> arrayCreator) throws SQLException
 	{
 		statement.setString(1, valueAndType.value);
 	}

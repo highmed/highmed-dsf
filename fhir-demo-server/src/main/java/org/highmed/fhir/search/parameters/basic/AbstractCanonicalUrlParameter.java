@@ -1,10 +1,15 @@
 package org.highmed.fhir.search.parameters.basic;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import javax.ws.rs.core.UriBuilder;
 
+import org.highmed.fhir.search.SearchQueryParameterError;
+import org.highmed.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 import org.hl7.fhir.r4.model.DomainResource;
 
 public abstract class AbstractCanonicalUrlParameter<R extends DomainResource> extends AbstractSearchParameter<R>
@@ -13,11 +18,11 @@ public abstract class AbstractCanonicalUrlParameter<R extends DomainResource> ex
 	{
 		PRECISE(""), BELOW(":below"); // TODO, ABOVE(":above");
 
-		public final String sufix;
+		public final String modifier;
 
-		private UriSearchType(String sufix)
+		private UriSearchType(String modifier)
 		{
-			this.sufix = sufix;
+			this.modifier = modifier;
 		}
 	}
 
@@ -43,19 +48,39 @@ public abstract class AbstractCanonicalUrlParameter<R extends DomainResource> ex
 	}
 
 	@Override
+	protected Stream<String> getModifiedParameterNames()
+	{
+		return Stream.of(getParameterName() + UriSearchType.BELOW.modifier);
+	}
+
+	@Override
 	protected final void configureSearchParameter(Map<String, List<String>> queryParameters)
 	{
+		List<String> allValues = new ArrayList<>();
+		allValues.addAll(
+				queryParameters.getOrDefault(parameterName + UriSearchType.PRECISE.modifier, Collections.emptyList()));
+		allValues.addAll(
+				queryParameters.getOrDefault(parameterName + UriSearchType.BELOW.modifier, Collections.emptyList()));
+		if (allValues.size() > 1)
+			addError(new SearchQueryParameterError(SearchQueryParameterErrorType.UNSUPPORTED_NUMBER_OF_VALUES,
+					parameterName, allValues));
 
-		String precise = getFirst(queryParameters, parameterName);
-		if (precise != null && !precise.isBlank())
+		String precise = getFirst(queryParameters, parameterName + UriSearchType.PRECISE.modifier);
+		if (precise != null)
+		{
 			valueAndType = toValueAndType(precise, UriSearchType.PRECISE);
+			return;
+		}
 
-		String below = getFirst(queryParameters, parameterName + UriSearchType.BELOW.sufix);
-		if (below != null && !below.isBlank())
+		String below = getFirst(queryParameters, parameterName + UriSearchType.BELOW.modifier);
+		if (below != null)
+		{
 			valueAndType = toValueAndType(below, UriSearchType.BELOW);
+			return;
+		}
 
 		// TODO
-		// String above = queryParameters.getFirst(parameterName + UriSearchType.ABOVE.sufix);
+		// String above = queryParameters.getFirst(parameterName + UriSearchType.ABOVE.modifier);
 		// if (above != null && !above.isBlank())
 		// {
 		// valueAndType = new UriValueAndSearchType(above, UriSearchType.ABOVE);
@@ -91,7 +116,7 @@ public abstract class AbstractCanonicalUrlParameter<R extends DomainResource> ex
 	@Override
 	public void modifyBundleUri(UriBuilder bundleUri)
 	{
-		bundleUri.replaceQueryParam(parameterName + valueAndType.type.sufix,
+		bundleUri.replaceQueryParam(parameterName + valueAndType.type.modifier,
 				valueAndType.url + (hasVersion() ? ("|" + valueAndType.version) : ""));
 	}
 }

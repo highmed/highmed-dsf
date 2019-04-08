@@ -5,6 +5,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.stream.Stream;
 
 import javax.ws.rs.core.UriBuilder;
 
+import org.highmed.fhir.function.BiFunctionWithSqlException;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 
@@ -43,8 +45,8 @@ public interface SearchQueryParameter<R extends DomainResource> extends MatcherP
 
 	int getSqlParameterCount();
 
-	void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement)
-			throws SQLException;
+	void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement,
+			BiFunctionWithSqlException<String, Object[], Array> arrayCreator) throws SQLException;
 
 	/**
 	 * Will not be called if {@link #isDefined()} returns <code>false</code>
@@ -59,6 +61,6 @@ public interface SearchQueryParameter<R extends DomainResource> extends MatcherP
 	Optional<SearchQueryIncludeParameter> getIncludeParameter();
 
 	String getParameterName();
-	
+
 	Stream<String> getBaseAndModifiedParameterNames();
 }

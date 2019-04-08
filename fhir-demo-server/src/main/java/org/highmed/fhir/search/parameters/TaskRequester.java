@@ -1,53 +1,80 @@
 package org.highmed.fhir.search.parameters;
 
+import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.Arrays;
+import java.util.UUID;
 
-import javax.ws.rs.core.UriBuilder;
-
+import org.highmed.fhir.dao.AbstractDomainResourceDao;
+import org.highmed.fhir.dao.DaoProvider;
+import org.highmed.fhir.dao.exception.ResourceDeletedException;
+import org.highmed.fhir.function.BiFunctionWithSqlException;
+import org.highmed.fhir.search.SearchQueryIncludeParameter.IncludeParts;
 import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
-import org.highmed.fhir.search.parameters.basic.AbstractSearchParameter;
+import org.highmed.fhir.search.parameters.basic.AbstractIdentifierParameter;
+import org.highmed.fhir.search.parameters.basic.AbstractReferenceParameter;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
-import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.PractitionerRole;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
 
 @SearchParameterDefinition(name = TaskRequester.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Task-requester", type = SearchParamType.REFERENCE, documentation = "Search by task requester")
-public class TaskRequester extends AbstractSearchParameter<Task>
+public class TaskRequester extends AbstractReferenceParameter<Task>
 {
 	public static final String PARAMETER_NAME = "requester";
 
-	private IdType requester;
+	private static final String RESOURCE_TYPE_NAME = "Task";
+	private static final String[] TARGET_RESOURCE_TYPE_NAMES = { "Practitioner", "Organization", "Patient",
+			"PractitionerRole" };
+	// TODO add Device, RelatedPerson if supported, see also doResolveReferencesForMatching, matches, getIncludeSql
+
+	private static final String ORGANIZATION_IDENTIFIERS_SUBQUERY = "(SELECT practitioner->'identifier' FROM current_practitioners"
+			+ " WHERE concat('Practitioner/', practitioner->>'id') = task->'requester'->>'reference' "
+			+ " UNION SELECT organization->'identifier' FROM current_organizations"
+			+ " WHERE concat('Organization/', organization->>'id') = task->'requester'->>'reference' "
+			+ " UNION SELECT patient->'identifier' FROM current_patients"
+			+ " WHERE concat('Patient/', patient->>'id') = task->'requester'->>'reference' "
+			+ " UNION SELECT practitioner_role->'identifier' FROM current_practitioner_roles"
+			+ " WHERE concat('PractitionerRole/', practitioner_role->>'id') = task->'requester'->>'reference')";
 
 	public TaskRequester()
 	{
-		super(PARAMETER_NAME);
-	}
-
-	@Override
-	protected void configureSearchParameter(Map<String, List<String>> queryParameters)
-	{
-		requester = toIdType(getFirst(queryParameters, PARAMETER_NAME));
-	}
-
-	private IdType toIdType(String requester)
-	{
-		return requester == null || requester.isBlank() ? null : new IdType(requester);
-	}
-
-	@Override
-	public boolean isDefined()
-	{
-		return requester != null;
+		super(Task.class, RESOURCE_TYPE_NAME, PARAMETER_NAME, TARGET_RESOURCE_TYPE_NAMES);
 	}
 
 	@Override
 	public String getFilterQuery()
 	{
-		return "task->'requester'->>'reference' " + (requester.hasVersionIdPart() ? "=" : "LIKE") + " ?";
+		switch (valueAndType.type)
+		{
+			case ID:
+				return "task->'requester'->>'reference' IN ?";
+			case RESOURCE_NAME_AND_ID:
+			case URL:
+				return "task->'requester'->>'reference' = ?";
+			case IDENTIFIER:
+			{
+				switch (valueAndType.identifier.type)
+				{
+					case CODE:
+					case CODE_AND_SYSTEM:
+					case SYSTEM:
+						return ORGANIZATION_IDENTIFIERS_SUBQUERY + " @> ?::jsonb";
+					case CODE_AND_NO_SYSTEM_PROPERTY:
+						return "(SELECT count(*) FROM jsonb_array_elements(" + ORGANIZATION_IDENTIFIERS_SUBQUERY
+								+ ") identifier WHERE identifier->>'value' = ? AND NOT (identifier ?? 'system')) > 0";
+				}
+			}
+		}
+
+		return "";
 	}
 
 	@Override
@@ -57,16 +84,83 @@ public class TaskRequester extends AbstractSearchParameter<Task>
 	}
 
 	@Override
-	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement)
-			throws SQLException
+	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement,
+			BiFunctionWithSqlException<String, Object[], Array> arrayCreator) throws SQLException
 	{
-		statement.setString(parameterIndex, requester.getValue() + (requester.hasVersionIdPart() ? "" : "%"));
+		switch (valueAndType.type)
+		{
+			case ID:
+				Array array = arrayCreator.apply("TEXT",
+						Arrays.stream(TARGET_RESOURCE_TYPE_NAMES).map(n -> n + "/" + valueAndType.id).toArray());
+				statement.setArray(parameterIndex, array);
+				break;
+			case RESOURCE_NAME_AND_ID:
+				statement.setString(parameterIndex, valueAndType.resourceName + "/" + valueAndType.id);
+				break;
+			case URL:
+				statement.setString(parameterIndex, valueAndType.url);
+				break;
+			case IDENTIFIER:
+			{
+				switch (valueAndType.identifier.type)
+				{
+					case CODE:
+						statement.setString(parameterIndex,
+								"[{\"value\": \"" + valueAndType.identifier.codeValue + "\"}]");
+						break;
+					case CODE_AND_SYSTEM:
+						statement.setString(parameterIndex, "[{\"value\": \"" + valueAndType.identifier.codeValue
+								+ "\", \"system\": \"" + valueAndType.identifier.systemValue + "\"}]");
+						break;
+					case CODE_AND_NO_SYSTEM_PROPERTY:
+						statement.setString(parameterIndex, valueAndType.identifier.codeValue);
+						break;
+					case SYSTEM:
+						statement.setString(parameterIndex,
+								"[{\"system\": \"" + valueAndType.identifier.systemValue + "\"}]");
+						break;
+				}
+			}
+		}
 	}
 
 	@Override
-	public void modifyBundleUri(UriBuilder bundleUri)
+	protected void doResolveReferencesForMatching(Task resource, DaoProvider daoProvider) throws SQLException
 	{
-		bundleUri.replaceQueryParam(PARAMETER_NAME, requester);
+		Reference reference = resource.getRequester();
+		IIdType idType = reference.getReferenceElement();
+
+		if (idType.hasResourceType())
+		{
+			if ("Practitioner".equals(idType.getResourceType()))
+				setResource(reference, idType, daoProvider.getPractitionerDao());
+			else if ("Organization".equals(idType.getResourceType()))
+				setResource(reference, idType, daoProvider.getOrganizationDao());
+			else if ("Patient".equals(idType.getResourceType()))
+				setResource(reference, idType, daoProvider.getPatientDao());
+			else if ("PractitionerRole".equals(idType.getResourceType()))
+				setResource(reference, idType, daoProvider.getPractitionerRoleDao());
+		}
+	}
+
+	private void setResource(Reference reference, IIdType idType, AbstractDomainResourceDao<?> dao) throws SQLException
+	{
+		if (idType.hasVersionIdPart())
+		{
+			dao.readVersion(UUID.fromString(idType.getIdPart()), idType.getVersionIdPartAsLong())
+					.ifPresent(reference::setResource);
+		}
+		else
+		{
+			try
+			{
+				dao.read(UUID.fromString(idType.getIdPart())).ifPresent(reference::setResource);
+			}
+			catch (ResourceDeletedException e)
+			{
+				// ignore while matching, will result in a non match if this would have been the matching resource
+			}
+		}
 	}
 
 	@Override
@@ -75,22 +169,91 @@ public class TaskRequester extends AbstractSearchParameter<Task>
 		if (!isDefined())
 			throw notDefined();
 
-		if (!(resource instanceof Task))
+		if (!(resource instanceof Endpoint))
 			return false;
 
 		Task t = (Task) resource;
 
-		if (requester.hasVersionIdPart())
-			return Objects.equals(t.getRequester().getIdElement().getValue(), requester.getIdElement().getValue());
-		else if (t.getRequester().getIdElement().getValue() != null)
-			return t.getRequester().getIdElement().getValue().startsWith(requester.getIdElement().getValue());
+		if (ReferenceSearchType.IDENTIFIER.equals(valueAndType.type))
+		{
+			if (t.getRequester().getResource() instanceof Practitioner)
+			{
+				Practitioner p = (Practitioner) t.getRequester().getResource();
+				return p.getIdentifier().stream()
+						.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
+			}
+			else if (t.getRequester().getResource() instanceof Organization)
+			{
+				Organization o = (Organization) t.getRequester().getResource();
+				return o.getIdentifier().stream()
+						.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
+			}
+			else if (t.getRequester().getResource() instanceof Patient)
+			{
+				Patient p = (Patient) t.getRequester().getResource();
+				return p.getIdentifier().stream()
+						.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
+			}
+			else if (t.getRequester().getResource() instanceof PractitionerRole)
+			{
+				PractitionerRole p = (PractitionerRole) t.getRequester().getResource();
+				return p.getIdentifier().stream()
+						.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
+			}
+			else
+				return false;
+		}
 		else
-			return false;
+		{
+			String ref = t.getRequester().getReference();
+			switch (valueAndType.type)
+			{
+				case ID:
+					return ref.equals("Practitioner" + "/" + valueAndType.id)
+							|| ref.equals("Organization" + "/" + valueAndType.id)
+							|| ref.equals("Patient" + "/" + valueAndType.id)
+							|| ref.equals("PractitionerRole" + "/" + valueAndType.id);
+				case RESOURCE_NAME_AND_ID:
+					return ref.equals(valueAndType.resourceName + "/" + valueAndType.id);
+				case URL:
+					return ref.equals(valueAndType.url);
+				default:
+					return false;
+			}
+		}
 	}
 
 	@Override
 	protected String getSortSql(String sortDirectionWithSpacePrefix)
 	{
-		return "task->'requester'->>'reference'" + sortDirectionWithSpacePrefix;
+		return "task->'requester'->>'reference'";
+	}
+
+	@Override
+	protected String getIncludeSql(IncludeParts includeParts)
+	{
+		if (RESOURCE_TYPE_NAME.equals(includeParts.getSourceResourceTypeName())
+				&& PARAMETER_NAME.equals(includeParts.getSearchParameterName())
+				&& Arrays.stream(TARGET_RESOURCE_TYPE_NAMES)
+						.anyMatch(n -> n.equals(includeParts.getTargetResourceTypeName())))
+			switch (includeParts.getTargetResourceTypeName())
+			{
+				case "Practitioner":
+					return "(SELECT jsonb_build_array(practitioner) FROM current_practitioners"
+							+ " WHERE concat('Practitioner/', practitioner->>'id') = task->'requester'->>'reference') AS practitioners";
+				case "Organization":
+					return "(SELECT jsonb_build_array(organization) FROM current_organizations"
+							+ " WHERE concat('Organization/', organization->>'id') = task->'requester'->>'reference') AS organizations";
+				case "Patient":
+					return "(SELECT jsonb_build_array(patient) FROM current_patients"
+							+ " WHERE concat('Patient/', patient->>'id') = task->'requester'->>'reference') AS patients";
+				case "PractitionerRole":
+					return "(SELECT jsonb_build_array(practitioner_role) FROM current_practitioner_roles"
+							+ " WHERE concat('PractitionerRole/', practitioner_role->>'id') = task->'requester'->>'reference') AS practitioner_roles";
+				default:
+					return null;
+			}
+		else
+			return null;
 	}
 }

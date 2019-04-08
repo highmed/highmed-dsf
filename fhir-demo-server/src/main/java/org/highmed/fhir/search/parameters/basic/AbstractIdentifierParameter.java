@@ -1,10 +1,12 @@
 package org.highmed.fhir.search.parameters.basic;
 
+import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
 
+import org.highmed.fhir.function.BiFunctionWithSqlException;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Identifier;
 
@@ -45,8 +47,8 @@ public abstract class AbstractIdentifierParameter<R extends DomainResource> exte
 	}
 
 	@Override
-	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement)
-			throws SQLException
+	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement,
+			BiFunctionWithSqlException<String, Object[], Array> arrayCreator) throws SQLException
 	{
 		switch (valueAndType.type)
 		{

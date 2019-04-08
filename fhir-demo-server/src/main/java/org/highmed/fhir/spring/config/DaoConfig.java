@@ -158,8 +158,8 @@ public class DaoConfig
 	public DaoProvider daoProvider()
 	{
 		return new DaoProviderImpl(codeSystemDao(), endpointDao(), healthcareServiceDao(), locationDao(),
-				organizationDao(), patientDao(), practitionerDao(), provenanceDao(), researchStudyDao(),
-				structureDefinitionDao(), structureDefinitionSnapshotDao(), subscriptionDao(), taskDao(),
-				valueSetDao());
+				organizationDao(), patientDao(), practitionerDao(), practitionerRoleDao(), provenanceDao(),
+				researchStudyDao(), structureDefinitionDao(), structureDefinitionSnapshotDao(), subscriptionDao(),
+				taskDao(), valueSetDao());
 	}
 }

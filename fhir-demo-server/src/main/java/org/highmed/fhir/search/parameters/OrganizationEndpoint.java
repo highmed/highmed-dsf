@@ -1,5 +1,6 @@
 package org.highmed.fhir.search.parameters;
 
+import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.UUID;
@@ -7,6 +8,7 @@ import java.util.UUID;
 import org.highmed.fhir.dao.DaoProvider;
 import org.highmed.fhir.dao.EndpointDao;
 import org.highmed.fhir.dao.exception.ResourceDeletedException;
+import org.highmed.fhir.function.BiFunctionWithSqlException;
 import org.highmed.fhir.search.SearchQueryIncludeParameter.IncludeParts;
 import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.fhir.search.parameters.basic.AbstractIdentifierParameter;
@@ -67,8 +69,8 @@ public class OrganizationEndpoint extends AbstractReferenceParameter<Organizatio
 	}
 
 	@Override
-	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement)
-			throws SQLException
+	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement,
+			BiFunctionWithSqlException<String, Object[], Array> arrayCreator) throws SQLException
 	{
 		switch (valueAndType.type)
 		{

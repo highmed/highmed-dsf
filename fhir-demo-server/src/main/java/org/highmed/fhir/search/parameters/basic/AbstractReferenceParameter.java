@@ -1,6 +1,7 @@
 package org.highmed.fhir.search.parameters.basic;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -16,8 +17,8 @@ import org.highmed.fhir.dao.DaoProvider;
 import org.highmed.fhir.search.SearchQuery;
 import org.highmed.fhir.search.SearchQueryIncludeParameter;
 import org.highmed.fhir.search.SearchQueryIncludeParameter.IncludeParts;
-import org.highmed.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 import org.highmed.fhir.search.SearchQueryParameterError;
+import org.highmed.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 import org.hl7.fhir.r4.model.DomainResource;
 
 public abstract class AbstractReferenceParameter<R extends DomainResource> extends AbstractSearchParameter<R>
@@ -52,6 +53,14 @@ public abstract class AbstractReferenceParameter<R extends DomainResource> exten
 				String parameterName, Map<String, List<String>> queryParameters,
 				Consumer<SearchQueryParameterError> errors)
 		{
+			List<String> allValues = new ArrayList<>();
+			allValues.addAll(queryParameters.getOrDefault(parameterName, Collections.emptyList()));
+			allValues.addAll(queryParameters.getOrDefault(parameterName + PARAMETER_NAME_IDENTIFIER_MODIFIER,
+					Collections.emptyList()));
+			if (allValues.size() > 1)
+				errors.accept(new SearchQueryParameterError(SearchQueryParameterErrorType.UNSUPPORTED_NUMBER_OF_VALUES,
+						parameterName, allValues));
+
 			final String param = getFirst(queryParameters, parameterName);
 			final String identifierParam = getFirst(queryParameters,
 					parameterName + PARAMETER_NAME_IDENTIFIER_MODIFIER);
@@ -157,10 +166,22 @@ public abstract class AbstractReferenceParameter<R extends DomainResource> exten
 		List<String> includeParameterValues = queryParameters.getOrDefault(SearchQuery.PARAMETER_INCLUDE,
 				Collections.emptyList());
 
+		List<String> nonMatchingIncludeParameters = includeParameterValues.stream().map(IncludeParts::fromString)
+				.filter(p -> !resourceTypeName.equals(p.getSourceResourceTypeName())
+						|| !parameterName.equals(p.getSearchParameterName())
+						|| !((targetResourceTypeNames.size() == 1 && p.getTargetResourceTypeName() == null)
+								|| targetResourceTypeNames.contains(p.getTargetResourceTypeName())))
+				.map(IncludeParts::toString).collect(Collectors.toList());
+
+		if (!nonMatchingIncludeParameters.isEmpty())
+			addError(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE,
+					SearchQuery.PARAMETER_INCLUDE, includeParameterValues, "Non matching include parameter"
+							+ (nonMatchingIncludeParameters.size() != 1 ? "s " : " ") + nonMatchingIncludeParameters));
+
 		return includeParameterValues.stream().map(IncludeParts::fromString)
 				.filter(p -> resourceTypeName.equals(p.getSourceResourceTypeName())
 						&& parameterName.equals(p.getSearchParameterName())
-						&& (p.getTargetResourceTypeName() == null
+						&& ((targetResourceTypeNames.size() == 1 && p.getTargetResourceTypeName() == null)
 								|| targetResourceTypeNames.contains(p.getTargetResourceTypeName())))
 				.collect(Collectors.toList());
 	}

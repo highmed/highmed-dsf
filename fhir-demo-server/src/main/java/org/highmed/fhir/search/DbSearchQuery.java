@@ -1,7 +1,10 @@
 package org.highmed.fhir.search;
 
+import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+
+import org.highmed.fhir.function.BiFunctionWithSqlException;
 
 public interface DbSearchQuery
 {
@@ -11,7 +14,8 @@ public interface DbSearchQuery
 
 	String getSearchSql();
 
-	void modifyStatement(PreparedStatement statement) throws SQLException;
+	void modifyStatement(PreparedStatement statement, BiFunctionWithSqlException<String, Object[], Array> arrayCreator)
+			throws SQLException;
 
 	PageAndCount getPageAndCount();
 }

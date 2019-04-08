@@ -1,5 +1,6 @@
 package org.highmed.fhir.search.parameters;
 
+import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.UUID;
@@ -7,6 +8,7 @@ import java.util.UUID;
 import org.highmed.fhir.dao.DaoProvider;
 import org.highmed.fhir.dao.OrganizationDao;
 import org.highmed.fhir.dao.exception.ResourceDeletedException;
+import org.highmed.fhir.function.BiFunctionWithSqlException;
 import org.highmed.fhir.search.SearchQueryIncludeParameter.IncludeParts;
 import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.fhir.search.parameters.basic.AbstractIdentifierParameter;
@@ -21,8 +23,9 @@ import org.hl7.fhir.r4.model.Reference;
 @SearchParameterDefinition(name = EndpointOrganization.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Endpoint.managingOrganization", type = SearchParamType.REFERENCE, documentation = "The organization that is managing the endpoint, search by identifier is supported")
 public class EndpointOrganization extends AbstractReferenceParameter<Endpoint>
 {
-	private static final String RESOURCE_TYPE_NAME = "Endpoint";
 	public static final String PARAMETER_NAME = "organization";
+
+	private static final String RESOURCE_TYPE_NAME = "Endpoint";
 	private static final String TARGET_RESOURCE_TYPE_NAME = "Organization";
 
 	private static final String ORGANIZATION_IDENTIFIERS_SUBQUERY = "(SELECT organization->'identifier' FROM current_organizations"
@@ -67,8 +70,8 @@ public class EndpointOrganization extends AbstractReferenceParameter<Endpoint>
 	}
 
 	@Override
-	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement)
-			throws SQLException
+	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement,
+			BiFunctionWithSqlException<String, Object[], Array> arrayCreator) throws SQLException
 	{
 		switch (valueAndType.type)
 		{
