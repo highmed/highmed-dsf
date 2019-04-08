@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -57,7 +58,7 @@ public class ResponseGenerator
 		if (resource.getMeta() != null)
 		{
 			b = b.lastModified(resource.getMeta().getLastUpdated());
-			b = b.tag(resource.getMeta().getVersionId());
+			b = b.tag(new EntityTag(resource.getMeta().getVersionId(), true));
 		}
 
 		return b;
