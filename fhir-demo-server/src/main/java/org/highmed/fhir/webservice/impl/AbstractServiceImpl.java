@@ -161,7 +161,7 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 		List<SearchQueryParameterError> unsupportedQueryParameters = query
 				.getUnsupportedQueryParameters(queryParameters);
 		if (!unsupportedQueryParameters.isEmpty())
-			throw exceptionHandler.badIfNoneExistHeaderValue(ifNoneExistsHeader.get());
+			throw exceptionHandler.badIfNoneExistHeaderValue(ifNoneExistsHeader.get(), unsupportedQueryParameters);
 
 		PartialResult<R> result = exceptionHandler.handleSqlException(() -> dao.search(query));
 		if (result.getOverallCount() == 1)

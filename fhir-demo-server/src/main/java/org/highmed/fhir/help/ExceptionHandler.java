@@ -1,7 +1,9 @@
 package org.highmed.fhir.help;
 
 import java.sql.SQLException;
+import java.util.List;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
@@ -15,6 +17,7 @@ import org.highmed.fhir.function.RunnableWithSqlException;
 import org.highmed.fhir.function.SupplierWithSqlAndResourceDeletedException;
 import org.highmed.fhir.function.SupplierWithSqlAndResourceNotFoundException;
 import org.highmed.fhir.function.SupplierWithSqlException;
+import org.highmed.fhir.search.SearchQueryParameterError;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
@@ -153,6 +156,20 @@ public class ExceptionHandler
 
 		OperationOutcome outcome = responseGenerator.createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Bad If-None-Exist header value '" + ifNoneExistsHeaderValue + "'");
+		return new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(outcome).build());
+	}
+
+	public WebApplicationException badIfNoneExistHeaderValue(String ifNoneExistsHeaderValue,
+			List<SearchQueryParameterError> unsupportedQueryParameters)
+	{
+		String unsupportedQueryParametersString = unsupportedQueryParameters.stream()
+				.map(SearchQueryParameterError::toString).collect(Collectors.joining("; "));
+		logger.error("Bad If-None-Exist header value '{}', unsupported query parameter{} {}", ifNoneExistsHeaderValue,
+				unsupportedQueryParameters.size() != 1 ? "s" : "", unsupportedQueryParametersString);
+
+		OperationOutcome outcome = responseGenerator.createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+				"Bad If-None-Exist header value '" + ifNoneExistsHeaderValue + "', unsupported query parameter"
+						+ (unsupportedQueryParameters.size() != 1 ? "s" : "") + " " + unsupportedQueryParametersString);
 		return new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(outcome).build());
 	}
 
