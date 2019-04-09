@@ -62,14 +62,15 @@ public class AbstractJerseyClient
 
 		client = builder.build();
 
-		this.baseUrl = baseUrl;
+		this.baseUrl = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
+		// making sure the root url works, this might be a workaround for a jersey client bug
 	}
 
 	protected WebTarget getResource()
 	{
 		return client.target(baseUrl);
 	}
-	
+
 	public String getBaseUrl()
 	{
 		return baseUrl;

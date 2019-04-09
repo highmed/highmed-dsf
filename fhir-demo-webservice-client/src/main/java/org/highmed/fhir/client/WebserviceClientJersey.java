@@ -291,4 +291,24 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 	// return bundle.getEntry().stream().filter(c -> resourceType.isInstance(c.getResource()))
 	// .map(c -> resourceType.cast(c.getResource())).collect(Collectors.toList());
 	// }
+
+	@Override
+	public Bundle postBundle(Bundle bundle)
+	{
+		Objects.requireNonNull(bundle, "bundle");
+
+		Response response = getResource().request().accept(Constants.CT_FHIR_JSON_NEW)
+				.post(Entity.entity(bundle, Constants.CT_FHIR_JSON_NEW));
+
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		logger.debug("HTTP header Location: {}", response.getLocation());
+		logger.debug("HTTP header ETag: {}", response.getHeaderString(HttpHeaders.ETAG));
+		logger.debug("HTTP header Last-Modified: {}", response.getHeaderString(HttpHeaders.LAST_MODIFIED));
+
+		if (Status.OK.getStatusCode() == response.getStatus())
+			return response.readEntity(Bundle.class);
+		else
+			throw new WebApplicationException(response);
+	}
 }

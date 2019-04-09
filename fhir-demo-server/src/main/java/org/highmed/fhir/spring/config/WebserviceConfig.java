@@ -11,6 +11,7 @@ import org.highmed.fhir.webservice.impl.PractitionerRoleServiceImpl;
 import org.highmed.fhir.webservice.impl.PractitionerServiceImpl;
 import org.highmed.fhir.webservice.impl.ProvenanceServiceImpl;
 import org.highmed.fhir.webservice.impl.ResearchStudyServiceImpl;
+import org.highmed.fhir.webservice.impl.RootServiceImpl;
 import org.highmed.fhir.webservice.impl.StructureDefinitionServiceImpl;
 import org.highmed.fhir.webservice.impl.SubscriptionServiceImpl;
 import org.highmed.fhir.webservice.impl.TaskServiceImpl;
@@ -26,6 +27,7 @@ import org.highmed.fhir.webservice.jaxrs.PractitionerRoleServiceJaxrs;
 import org.highmed.fhir.webservice.jaxrs.PractitionerServiceJaxrs;
 import org.highmed.fhir.webservice.jaxrs.ProvenanceServiceJaxrs;
 import org.highmed.fhir.webservice.jaxrs.ResearchStudyServiceJaxrs;
+import org.highmed.fhir.webservice.jaxrs.RootServiceJaxrs;
 import org.highmed.fhir.webservice.jaxrs.StructureDefinitionServiceJaxrs;
 import org.highmed.fhir.webservice.jaxrs.SubscriptionServiceJaxrs;
 import org.highmed.fhir.webservice.jaxrs.TaskServiceJaxrs;
@@ -41,6 +43,7 @@ import org.highmed.fhir.webservice.secure.PractitionerRoleServiceSecure;
 import org.highmed.fhir.webservice.secure.PractitionerServiceSecure;
 import org.highmed.fhir.webservice.secure.ProvenanceServiceSecure;
 import org.highmed.fhir.webservice.secure.ResearchStudyServiceSecure;
+import org.highmed.fhir.webservice.secure.RootServiceSecure;
 import org.highmed.fhir.webservice.secure.StructureDefinitionServiceSecure;
 import org.highmed.fhir.webservice.secure.SubscriptionServiceSecure;
 import org.highmed.fhir.webservice.secure.TaskServiceSecure;
@@ -56,6 +59,7 @@ import org.highmed.fhir.webservice.specification.PractitionerRoleService;
 import org.highmed.fhir.webservice.specification.PractitionerService;
 import org.highmed.fhir.webservice.specification.ProvenanceService;
 import org.highmed.fhir.webservice.specification.ResearchStudyService;
+import org.highmed.fhir.webservice.specification.RootService;
 import org.highmed.fhir.webservice.specification.StructureDefinitionService;
 import org.highmed.fhir.webservice.specification.SubscriptionService;
 import org.highmed.fhir.webservice.specification.TaskService;
@@ -315,5 +319,16 @@ public class WebserviceConfig
 				daoConfig.valueSetDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
 				helperConfig.exceptionHandler(), eventConfig.eventGenerator(ValueSet.class),
 				helperConfig.responseGenerator(), helperConfig.parameterConverter());
+	}
+
+	@Bean
+	public RootService rootService()
+	{
+		return new RootServiceJaxrs(new RootServiceSecure(rootServiceImpl()));
+	}
+
+	private RootServiceImpl rootServiceImpl()
+	{
+		return new RootServiceImpl();
 	}
 }

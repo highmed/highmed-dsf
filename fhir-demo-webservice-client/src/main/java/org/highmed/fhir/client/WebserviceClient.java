@@ -29,4 +29,6 @@ public interface WebserviceClient
 	StructureDefinition generateSnapshot(String url);
 
 	StructureDefinition generateSnapshot(StructureDefinition differential);
+	
+	Bundle postBundle(Bundle bundle);
 }
