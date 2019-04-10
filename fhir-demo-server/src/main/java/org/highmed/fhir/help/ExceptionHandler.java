@@ -18,6 +18,7 @@ import org.highmed.fhir.function.SupplierWithSqlAndResourceDeletedException;
 import org.highmed.fhir.function.SupplierWithSqlAndResourceNotFoundException;
 import org.highmed.fhir.function.SupplierWithSqlException;
 import org.highmed.fhir.search.SearchQueryParameterError;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
@@ -87,10 +88,15 @@ public class ExceptionHandler
 
 	public WebApplicationException methodNotAllowed(String resourceTypeName, ResourceNotFoundException e)
 	{
-		logger.error("{} with id {} not found", resourceTypeName, e.getId());
+		return methodNotAllowed(resourceTypeName, e.getId());
+	}
+
+	public WebApplicationException methodNotAllowed(String resourceTypeName, String id)
+	{
+		logger.error("{} with id {} not found", resourceTypeName, id);
 
 		OperationOutcome outcome = responseGenerator.createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
-				"Resource with id " + e.getId() + " not found.");
+				"Resource with id " + id + " not found.");
 		return new WebApplicationException(Response.status(Status.METHOD_NOT_ALLOWED).entity(outcome).build());
 	}
 
@@ -129,24 +135,22 @@ public class ExceptionHandler
 		return new WebApplicationException(Response.status(Status.GONE).entity(outcome).build());
 	}
 
-	public WebApplicationException oneAlreadyExists(String resourceTypeName, String ifNoneExistsHeaderValue,
-			UriInfo uri)
+	public WebApplicationException oneExists(String resourceTypeName, String ifNoneExistsHeaderValue, UriInfo uri)
 	{
-		logger.info("{} with criteria {} already exists", resourceTypeName, ifNoneExistsHeaderValue);
+		logger.info("{} with criteria {} exists", resourceTypeName, ifNoneExistsHeaderValue);
 
 		OperationOutcome outcome = responseGenerator.createOutcome(IssueSeverity.INFORMATION, IssueType.DUPLICATE,
-				"Resource with criteria '" + ifNoneExistsHeaderValue + "' already exists");
+				"Resource with criteria '" + ifNoneExistsHeaderValue + "' exists");
 
 		return new WebApplicationException(Response.status(Status.OK).entity(outcome).build());
 	}
 
-	public WebApplicationException multipleAlreadyExists(String resourceTypeName, String ifNoneExistsHeaderValue)
+	public WebApplicationException multipleExists(String resourceTypeName, String ifNoneExistsHeaderValue)
 	{
-		logger.error("Multiple {} resources with criteria {} already exist", resourceTypeName, ifNoneExistsHeaderValue);
+		logger.error("Multiple {} resources with criteria {} exist", resourceTypeName, ifNoneExistsHeaderValue);
 
 		OperationOutcome outcome = responseGenerator.createOutcome(IssueSeverity.ERROR, IssueType.MULTIPLEMATCHES,
-				"Multiple " + resourceTypeName + " resources with criteria '" + ifNoneExistsHeaderValue
-						+ "' already exist");
+				"Multiple " + resourceTypeName + " resources with criteria '" + ifNoneExistsHeaderValue + "' exist");
 		return new WebApplicationException(Response.status(Status.PRECONDITION_FAILED).entity(outcome).build());
 	}
 
@@ -170,6 +174,29 @@ public class ExceptionHandler
 		OperationOutcome outcome = responseGenerator.createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Bad If-None-Exist header value '" + ifNoneExistsHeaderValue + "', unsupported query parameter"
 						+ (unsupportedQueryParameters.size() != 1 ? "s" : "") + " " + unsupportedQueryParametersString);
+		return new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(outcome).build());
+	}
+
+	public WebApplicationException badRequest(String queryParameters,
+			List<SearchQueryParameterError> unsupportedQueryParameters)
+	{
+		String unsupportedQueryParametersString = unsupportedQueryParameters.stream()
+				.map(SearchQueryParameterError::toString).collect(Collectors.joining("; "));
+		logger.error("Bad request '{}', unsupported query parameter{} {}", queryParameters,
+				unsupportedQueryParameters.size() != 1 ? "s" : "", unsupportedQueryParametersString);
+
+		OperationOutcome outcome = responseGenerator.createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+				"Bad request '" + queryParameters + "', unsupported query parameter"
+						+ (unsupportedQueryParameters.size() != 1 ? "s" : "") + " " + unsupportedQueryParametersString);
+		return new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(outcome).build());
+	}
+
+	public WebApplicationException badRequestIdsNotMatching(IdType dbResourceId, IdType resourceId)
+	{
+		logger.error("Bad request Id {} does not match db Id {}", resourceId.getValue(), dbResourceId.getValue());
+
+		OperationOutcome outcome = responseGenerator.createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+				"Bad request Id " + resourceId.getValue() + " does not match db Id " + dbResourceId.getValue());
 		return new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(outcome).build());
 	}
 

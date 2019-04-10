@@ -55,7 +55,8 @@ public class ResponseGenerator
 		if (mediaType != null)
 			b = b.type(mediaType);
 
-		if (resource.getMeta() != null)
+		if (resource.getMeta() != null && resource.getMeta().getLastUpdated() != null
+				&& resource.getMeta().getVersionId() != null)
 		{
 			b = b.lastModified(resource.getMeta().getLastUpdated());
 			b = b.tag(new EntityTag(resource.getMeta().getVersionId(), true));

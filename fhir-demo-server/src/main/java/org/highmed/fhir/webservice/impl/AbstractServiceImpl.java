@@ -4,6 +4,8 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -45,8 +47,10 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.UrlType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.util.MultiValueMap;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -58,6 +62,8 @@ import ca.uhn.fhir.validation.ValidationResult;
 public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>, R extends DomainResource>
 		implements BasicService<R>, InitializingBean
 {
+	private static final Logger logger = LoggerFactory.getLogger(AbstractServiceImpl.class);
+
 	protected final String resourceTypeName;
 	protected final String serverBase;
 	protected final int defaultPageCount;
@@ -153,7 +159,18 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 		if (path != null && !path.isBlank())
 			throw exceptionHandler.badIfNoneExistHeaderValue(ifNoneExistsHeader.get());
 
-		MultiValueMap<String, String> queryParameters = componentes.getQueryParams();
+		Map<String, List<String>> queryParameters = componentes.getQueryParams();
+		if (Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(queryParameters::containsKey))
+		{
+			logger.warn(
+					"{} Header contains query parameter not applicable in this conditional create context: '{}', parameters {} will be ignored",
+					Constants.HEADER_IF_NONE_EXIST, ifNoneExistsHeader.get(),
+					Arrays.toString(SearchQuery.STANDARD_PARAMETERS));
+
+			queryParameters = queryParameters.entrySet().stream()
+					.filter(e -> !Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(p -> p.equals(e.getKey())))
+					.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+		}
 
 		SearchQuery<R> query = dao.createSearchQuery(0, 0);
 		query.configureParameters(queryParameters);
@@ -165,9 +182,9 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 
 		PartialResult<R> result = exceptionHandler.handleSqlException(() -> dao.search(query));
 		if (result.getOverallCount() == 1)
-			throw exceptionHandler.oneAlreadyExists(resourceTypeName, ifNoneExistsHeader.get(), uri);
+			throw exceptionHandler.oneExists(resourceTypeName, ifNoneExistsHeader.get(), uri);
 		else if (result.getOverallCount() > 1)
-			throw exceptionHandler.multipleAlreadyExists(resourceTypeName, ifNoneExistsHeader.get());
+			throw exceptionHandler.multipleExists(resourceTypeName, ifNoneExistsHeader.get());
 	}
 
 	private Optional<String> getHeaderString(HttpHeaders headers, String... headerNames)
@@ -263,32 +280,89 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 		return null;
 	}
 
+	/*
+	 * No matches, no id provided: The server creates the resource.
+	 * 
+	 * No matches, id provided: The server treats the interaction as an Update as Create interaction (or rejects it, if
+	 * it does not support Update as Create) -> reject
+	 * 
+	 * One Match, no resource id provided OR (resource id provided and it matches the found resource): The server
+	 * performs the update against the matching resource
+	 * 
+	 * One Match, resource id provided but does not match resource found: The server returns a 400 Bad Request error
+	 * indicating the client id specification was a problem preferably with an OperationOutcome
+	 * 
+	 * Multiple matches: The server returns a 412 Precondition Failed error indicating the client's criteria were not
+	 * selective enough preferably with an OperationOutcome
+	 */
 	@Override
 	public Response update(R resource, UriInfo uri, HttpHeaders headers)
 	{
-		// MultivaluedMap<String, String> queryParameters = uri.getQueryParameters();
-		//
-		// Integer page = parameterConverter.getFirstInt(queryParameters, "_page");
-		// int effectivePage = page == null ? 1 : page;
-		//
-		// Integer count = parameterConverter.getFirstInt(queryParameters, "_count");
-		// int effectiveCount = (count == null || count < 0) ? defaultPageCount : count;
-		//
-		// SearchQuery<R> query = dao.createSearchQuery(effectivePage, effectiveCount);
-		// query.configureParameters(queryParameters);
-		//
-		// PartialResult<R> result = exceptionHandler.handleSqlException(() -> dao.search(query));
-		//
-		// UriBuilder bundleUri = query.configureBundleUri(uri.getAbsolutePathBuilder());
-		//
-		// String format = queryParameters.getFirst("_format");
-		// String pretty = queryParameters.getFirst("_pretty");
-		// Bundle searchSet = responseGenerator.createSearchSet(result, bundleUri, format, pretty);
-		//
-		// return responseGenerator.response(Status.OK, searchSet, parameterConverter.getMediaType(uri,
-		// headers)).build();
+		Map<String, List<String>> queryParameters = uri.getQueryParameters();
+		if (Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(queryParameters::containsKey))
+		{
+			logger.warn(
+					"Query contains parameter not applicable in this conditional update context: '{}', parameters {} will be ignored",
+					UriComponentsBuilder.newInstance()
+							.replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString(),
+					Arrays.toString(SearchQuery.STANDARD_PARAMETERS));
 
-		return null; // TODO conditional update
+			queryParameters = queryParameters.entrySet().stream()
+					.filter(e -> !Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(p -> p.equals(e.getKey())))
+					.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+		}
+
+		SearchQuery<R> query = dao.createSearchQuery(1, 1);
+		query.configureParameters(queryParameters);
+
+		List<SearchQueryParameterError> unsupportedQueryParameters = query
+				.getUnsupportedQueryParameters(queryParameters);
+		if (!unsupportedQueryParameters.isEmpty())
+			throw exceptionHandler.badRequest(
+					UriComponentsBuilder.newInstance()
+							.replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString(),
+					unsupportedQueryParameters);
+
+		PartialResult<R> result = exceptionHandler.handleSqlException(() -> dao.search(query));
+
+		// No matches, no id provided: The server creates the resource.
+		if (result.getOverallCount() <= 0 && !resource.hasId())
+			return create(resource, uri, headers);
+
+		// No matches, id provided: The server treats the interaction as an Update as Create interaction (or rejects it,
+		// if it does not support Update as Create) -> reject
+		else if (result.getOverallCount() <= 0 && resource.hasId())
+			throw exceptionHandler.methodNotAllowed(resourceTypeName, resource.getId());
+
+		// One Match, no resource id provided OR (resource id provided and it matches the found resource):
+		// The server performs the update against the matching resource
+		else if (result.getOverallCount() == 1)
+		{
+			R dbResource = result.getPartialResult().get(0);
+			IdType dbResourceId = dbResource.getIdElement();
+			IdType resourceId = resource.getIdElement();
+
+			// BaseUrl - The server base URL (e.g. "http://example.com/fhir")
+			// ResourceType - The resource type (e.g. "Patient")
+			// IdPart - The ID (e.g. "123")
+			// Version - The version ID ("e.g. "456")
+			if (!resource.hasId())
+				return update(dbResource.getId(), resource, uri, headers);
+			else if (resource.hasId() && (!resourceId.hasBaseUrl() || serverBase.equals(resourceId.getBaseUrl()))
+					&& (!resourceId.hasResourceType() || resourceTypeName.equals(resourceId.getResourceType()))
+					&& (dbResourceId.getIdPart().equals(resourceId.getIdPart())))
+				return update(dbResource.getId(), resource, uri, headers);
+			else
+				throw exceptionHandler.badRequestIdsNotMatching(
+						dbResourceId.withServerBase(serverBase, resourceTypeName),
+						resourceId.hasBaseUrl() && resourceId.hasResourceType() ? resourceId
+								: resourceId.withServerBase(serverBase, resourceTypeName));
+		}
+		// Multiple matches: The server returns a 412 Precondition Failed error indicating the client's criteria were
+		// not selective enough preferably with an OperationOutcome
+		else // if (result.getOverallCount() > 1)
+			throw exceptionHandler.multipleExists(resourceTypeName, UriComponentsBuilder.newInstance()
+					.replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString());
 	}
 
 	@Override
