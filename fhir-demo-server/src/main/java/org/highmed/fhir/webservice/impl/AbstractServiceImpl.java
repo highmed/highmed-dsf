@@ -154,7 +154,7 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 			return; // header not found, nothing to check against
 
 		if (ifNoneExistsHeader.get().isBlank())
-			throw exceptionHandler.badIfNoneExistHeaderValue(ifNoneExistsHeader.get());
+			throw new WebApplicationException(responseGenerator.badIfNoneExistHeaderValue(ifNoneExistsHeader.get()));
 
 		String ifNoneExistsHeaderValue = ifNoneExistsHeader.get();
 		if (!ifNoneExistsHeaderValue.contains("?"))
@@ -163,7 +163,7 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 		UriComponents componentes = UriComponentsBuilder.fromUriString(ifNoneExistsHeaderValue).build();
 		String path = componentes.getPath();
 		if (path != null && !path.isBlank())
-			throw exceptionHandler.badIfNoneExistHeaderValue(ifNoneExistsHeader.get());
+			throw new WebApplicationException(responseGenerator.badIfNoneExistHeaderValue(ifNoneExistsHeader.get()));
 
 		Map<String, List<String>> queryParameters = componentes.getQueryParams();
 		if (Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(queryParameters::containsKey))
@@ -184,13 +184,16 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 		List<SearchQueryParameterError> unsupportedQueryParameters = query
 				.getUnsupportedQueryParameters(queryParameters);
 		if (!unsupportedQueryParameters.isEmpty())
-			throw exceptionHandler.badIfNoneExistHeaderValue(ifNoneExistsHeader.get(), unsupportedQueryParameters);
+			throw new WebApplicationException(
+					responseGenerator.badIfNoneExistHeaderValue(ifNoneExistsHeader.get(), unsupportedQueryParameters));
 
 		PartialResult<R> result = exceptionHandler.handleSqlException(() -> dao.search(query));
 		if (result.getOverallCount() == 1)
-			throw exceptionHandler.oneExists(resourceTypeName, ifNoneExistsHeader.get(), uri);
+			throw new WebApplicationException(
+					responseGenerator.oneExists(resourceTypeName, ifNoneExistsHeader.get(), uri));
 		else if (result.getOverallCount() > 1)
-			throw exceptionHandler.multipleExists(resourceTypeName, ifNoneExistsHeader.get());
+			throw new WebApplicationException(
+					responseGenerator.multipleExists(resourceTypeName, ifNoneExistsHeader.get()));
 	}
 
 	private Optional<String> getHeaderString(HttpHeaders headers, String... headerNames)
@@ -222,9 +225,9 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 				() -> dao.read(parameterConverter.toUuid(resourceTypeName, id)));
 
 		Optional<Date> ifModifiedSince = getHeaderString(headers, Constants.HEADER_IF_MODIFIED_SINCE,
-				Constants.HEADER_IF_MODIFIED_SINCE_LC).flatMap(this::toIfModifiedSinceDate);
+				Constants.HEADER_IF_MODIFIED_SINCE_LC).flatMap(this::toDate);
 		Optional<EntityTag> ifNoneMatch = getHeaderString(headers, Constants.HEADER_IF_NONE_MATCH,
-				Constants.HEADER_IF_NONE_MATCH_LC).flatMap(this::toIfNoneMatchTag);
+				Constants.HEADER_IF_NONE_MATCH_LC).flatMap(this::toEntityTag);
 
 		return read.map(resource ->
 		{
@@ -239,34 +242,55 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 		}).orElseGet(() -> Response.status(Status.NOT_FOUND).build()); // TODO return OperationOutcome
 	}
 
-	private Optional<EntityTag> toIfNoneMatchTag(String ifNoneMatchValue)
+	/**
+	 * @param eTagValue
+	 *            ETag string value
+	 * @return {@link Optional} of {@link EntityTag} for the given value or {@link Optional#empty()} if the given value
+	 *         could not be parsed or was null/blank
+	 */
+	private Optional<EntityTag> toEntityTag(String eTagValue)
 	{
-		if (ifNoneMatchValue == null || ifNoneMatchValue.isBlank())
+		if (eTagValue == null || eTagValue.isBlank())
 			return Optional.empty();
 
 		try
 		{
-			return Optional.of(EntityTag.valueOf(ifNoneMatchValue));
+			EntityTag eTag = EntityTag.valueOf(eTagValue);
+			if (eTag.isWeak())
+				return Optional.of(eTag);
+			else
+			{
+				logger.warn("{} not a weak ETag", eTag.getValue());
+				return Optional.empty();
+			}
 		}
 		catch (IllegalArgumentException e)
 		{
+			logger.warn("Unable to parse ETag value", e);
 			return Optional.empty();
 		}
 	}
 
-	private Optional<Date> toIfModifiedSinceDate(String ifModifiedSinceValue)
+	/**
+	 * @param rfc1123DateValue
+	 *            RFC 1123 date string
+	 * @return {@link Optional} of {@link Date} in system default timezone or {@link Optional#empty()} if the given
+	 *         value could not be parsed or was null/blank
+	 */
+	private Optional<Date> toDate(String rfc1123DateValue)
 	{
-		if (ifModifiedSinceValue == null || ifModifiedSinceValue.isBlank())
+		if (rfc1123DateValue == null || rfc1123DateValue.isBlank())
 			return Optional.empty();
 
 		try
 		{
-			ZonedDateTime parsed = ZonedDateTime.parse(ifModifiedSinceValue,
+			ZonedDateTime parsed = ZonedDateTime.parse(rfc1123DateValue,
 					DateTimeFormatter.RFC_1123_DATE_TIME.withZone(ZoneId.systemDefault()));
 			return Optional.of(Date.from(parsed.toInstant()));
 		}
 		catch (DateTimeParseException e)
 		{
+			logger.warn("Not a RFC-1123 date", e);
 			return Optional.empty();
 		}
 	}
@@ -278,9 +302,9 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 				.handleSqlException(() -> dao.readVersion(parameterConverter.toUuid(resourceTypeName, id), version));
 
 		Optional<Date> ifModifiedSince = getHeaderString(headers, Constants.HEADER_IF_MODIFIED_SINCE,
-				Constants.HEADER_IF_MODIFIED_SINCE_LC).flatMap(this::toIfModifiedSinceDate);
+				Constants.HEADER_IF_MODIFIED_SINCE_LC).flatMap(this::toDate);
 		Optional<EntityTag> ifNoneMatch = getHeaderString(headers, Constants.HEADER_IF_NONE_MATCH,
-				Constants.HEADER_IF_NONE_MATCH_LC).flatMap(this::toIfNoneMatchTag);
+				Constants.HEADER_IF_NONE_MATCH_LC).flatMap(this::toEntityTag);
 
 		return read.map(resource ->
 		{
@@ -307,8 +331,12 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 
 		Consumer<R> afterUpdate = preUpdate(resource);
 
-		R updatedResource = exceptionHandler.handleSqlAndResourceNotFoundExceptionForUpdateAsCreate(resourceTypeName,
-				() -> dao.update(resource));
+		Optional<Long> ifMatch = getHeaderString(headers, Constants.HEADER_IF_MATCH, Constants.HEADER_IF_MATCH_LC)
+				.flatMap(this::toEntityTag).flatMap(this::toVersion);
+
+		R updatedResource = exceptionHandler
+				.handleSqlExAndResourceNotFoundExForUpdateAsCreateAndResouceVersionNonMatchEx(resourceTypeName,
+						() -> dao.update(resource, ifMatch.orElse(null)));
 
 		eventManager.handleEvent(eventGenerator.newResourceUpdatedEvent(updatedResource));
 
@@ -317,6 +345,19 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 
 		return responseGenerator.response(Status.OK, updatedResource, parameterConverter.getMediaType(uri, headers))
 				.build();
+	}
+
+	private Optional<Long> toVersion(EntityTag tag)
+	{
+		try
+		{
+			return Optional.of(Long.parseLong(tag.getValue()));
+		}
+		catch (NumberFormatException e)
+		{
+			logger.warn("ETag value not a Long value", e);
+			return Optional.empty();
+		}
 	}
 
 	/**
@@ -359,7 +400,7 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 		List<SearchQueryParameterError> unsupportedQueryParameters = query
 				.getUnsupportedQueryParameters(queryParameters);
 		if (!unsupportedQueryParameters.isEmpty())
-			throw exceptionHandler.badRequest(
+			return responseGenerator.badRequest(
 					UriComponentsBuilder.newInstance()
 							.replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString(),
 					unsupportedQueryParameters);
@@ -373,7 +414,7 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 		// No matches, id provided: The server treats the interaction as an Update as Create interaction (or rejects it,
 		// if it does not support Update as Create) -> reject
 		else if (result.getOverallCount() <= 0 && resource.hasId())
-			throw exceptionHandler.updateAsCreateNotAllowed(resourceTypeName, resource.getId());
+			return responseGenerator.updateAsCreateNotAllowed(resourceTypeName, resource.getId());
 
 		// One Match, no resource id provided OR (resource id provided and it matches the found resource):
 		// The server performs the update against the matching resource
@@ -399,7 +440,7 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 					&& (dbResourceId.getIdPart().equals(resource.getIdElement().getIdPart())))
 				return update(resource.getIdElement().getIdPart(), resource, uri, headers);
 			else
-				throw exceptionHandler.badRequestIdsNotMatching(
+				return responseGenerator.badRequestIdsNotMatching(
 						dbResourceId.withServerBase(serverBase, resourceTypeName),
 						resource.getIdElement().hasBaseUrl() && resource.getIdElement().hasResourceType()
 								? resource.getIdElement()
@@ -408,8 +449,8 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 		// Multiple matches: The server returns a 412 Precondition Failed error indicating the client's criteria were
 		// not selective enough preferably with an OperationOutcome
 		else // if (result.getOverallCount() > 1)
-			throw exceptionHandler.multipleExists(resourceTypeName, UriComponentsBuilder.newInstance()
-					.replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString());
+			throw new WebApplicationException(responseGenerator.multipleExists(resourceTypeName, UriComponentsBuilder
+					.newInstance().replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString()));
 	}
 
 	@Override
@@ -424,7 +465,7 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 		if (afterDelete != null)
 			afterDelete.accept(id);
 
-		return Response.ok().build(); // TODO return OperationOutcome
+		return Response.noContent().build(); // TODO return OperationOutcome
 	}
 
 	/**
@@ -447,29 +488,44 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 	@Override
 	public Response delete(UriInfo uri, HttpHeaders headers)
 	{
-		// MultivaluedMap<String, String> queryParameters = uri.getQueryParameters();
-		//
-		// Integer page = parameterConverter.getFirstInt(queryParameters, "_page");
-		// int effectivePage = page == null ? 1 : page;
-		//
-		// Integer count = parameterConverter.getFirstInt(queryParameters, "_count");
-		// int effectiveCount = (count == null || count < 0) ? defaultPageCount : count;
-		//
-		// SearchQuery<R> query = dao.createSearchQuery(effectivePage, effectiveCount);
-		// query.configureParameters(queryParameters);
-		//
-		// PartialResult<R> result = exceptionHandler.handleSqlException(() -> dao.search(query));
-		//
-		// UriBuilder bundleUri = query.configureBundleUri(uri.getAbsolutePathBuilder());
-		//
-		// String format = queryParameters.getFirst("_format");
-		// String pretty = queryParameters.getFirst("_pretty");
-		// Bundle searchSet = responseGenerator.createSearchSet(result, bundleUri, format, pretty);
-		//
-		// return responseGenerator.response(Status.OK, searchSet, parameterConverter.getMediaType(uri,
-		// headers)).build();
+		Map<String, List<String>> queryParameters = uri.getQueryParameters();
+		if (Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(queryParameters::containsKey))
+		{
+			logger.warn(
+					"Query contains parameter not applicable in this conditional delete context: '{}', parameters {} will be ignored",
+					UriComponentsBuilder.newInstance()
+							.replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString(),
+					Arrays.toString(SearchQuery.STANDARD_PARAMETERS));
 
-		return null; // TODO conditional delete
+			queryParameters = queryParameters.entrySet().stream()
+					.filter(e -> !Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(p -> p.equals(e.getKey())))
+					.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+		}
+
+		SearchQuery<R> query = dao.createSearchQuery(1, 1);
+		query.configureParameters(queryParameters);
+
+		List<SearchQueryParameterError> unsupportedQueryParameters = query
+				.getUnsupportedQueryParameters(queryParameters);
+		if (!unsupportedQueryParameters.isEmpty())
+			return responseGenerator.badRequest(
+					UriComponentsBuilder.newInstance()
+							.replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString(),
+					unsupportedQueryParameters);
+
+		PartialResult<R> result = exceptionHandler.handleSqlException(() -> dao.search(query));
+
+		// No matches or One Match: The server performs an ordinary delete on the matching resource
+		if (result.getOverallCount() <= 1)
+		{
+			R resource = result.getPartialResult().get(0);
+			return delete(resource.getIdElement().getIdPart(), uri, headers);
+		}
+		// Multiple matches: A server may choose to delete all the matching resources, or it may choose to return a 412
+		// Precondition Failed error indicating the client's criteria were not selective enough.
+		else
+			throw new WebApplicationException(responseGenerator.multipleExists(resourceTypeName, UriComponentsBuilder
+					.newInstance().replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString()));
 	}
 
 	@Override

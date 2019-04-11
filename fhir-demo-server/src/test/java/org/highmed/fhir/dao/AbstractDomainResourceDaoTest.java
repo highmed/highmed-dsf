@@ -11,6 +11,7 @@ import java.util.UUID;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.fhir.dao.exception.ResourceNotFoundException;
+import org.highmed.fhir.dao.exception.ResourceVersionNoMatchException;
 import org.highmed.fhir.test.FhirEmbeddedPostgresWithLiquibase;
 import org.highmed.fhir.test.TestSuiteDbTests;
 import org.hl7.fhir.r4.model.DomainResource;
@@ -114,7 +115,7 @@ public abstract class AbstractDomainResourceDaoTest<D extends DomainResource, C 
 
 		assertTrue(newResource.equalsDeep(createdResource));
 
-		D updatedResource = dao.update(updateResource(createdResource));
+		D updatedResource = dao.update(updateResource(createdResource), null);
 		assertNotNull(updatedResource);
 	}
 
@@ -125,7 +126,47 @@ public abstract class AbstractDomainResourceDaoTest<D extends DomainResource, C 
 		assertNull(newResource.getId());
 		assertNull(newResource.getMeta().getVersionId());
 
-		dao.update(newResource);
+		dao.update(newResource, null);
+	}
+
+	@Test(expected = ResourceVersionNoMatchException.class)
+	public void testUpdateNotLatest() throws Exception
+	{
+		D newResource = createResource();
+		assertNull(newResource.getId());
+		assertNull(newResource.getMeta().getVersionId());
+
+		D createdResource = dao.create(newResource);
+		assertNotNull(createdResource);
+		assertNotNull(createdResource.getId());
+		assertNotNull(createdResource.getMeta().getVersionId());
+
+		newResource.setIdElement(createdResource.getIdElement().copy());
+		newResource.setMeta(createdResource.getMeta().copy());
+
+		assertTrue(newResource.equalsDeep(createdResource));
+
+		dao.update(updateResource(createdResource), 0L);
+	}
+
+	public void testUpdateLatest() throws Exception
+	{
+		D newResource = createResource();
+		assertNull(newResource.getId());
+		assertNull(newResource.getMeta().getVersionId());
+
+		D createdResource = dao.create(newResource);
+		assertNotNull(createdResource);
+		assertNotNull(createdResource.getId());
+		assertNotNull(createdResource.getMeta().getVersionId());
+
+		newResource.setIdElement(createdResource.getIdElement().copy());
+		newResource.setMeta(createdResource.getMeta().copy());
+
+		assertTrue(newResource.equalsDeep(createdResource));
+
+		D updatedResource = dao.update(updateResource(createdResource), 1L);
+		assertNotNull(updatedResource);
 	}
 
 	protected abstract void checkUpdates(D resource);
@@ -215,13 +256,13 @@ public abstract class AbstractDomainResourceDaoTest<D extends DomainResource, C 
 		assertNotNull(createdResource.getMeta().getVersionId());
 		assertEquals("1", createdResource.getIdElement().getVersionIdPart());
 
-		D updatedResource = dao.update(createdResource);
+		D updatedResource = dao.update(createdResource, null);
 		assertNotNull(updatedResource);
 		assertNotNull(updatedResource.getId());
 		assertNotNull(updatedResource.getMeta().getVersionId());
 		assertEquals("2", updatedResource.getIdElement().getVersionIdPart());
 
-		D updatedResource2 = dao.update(updatedResource);
+		D updatedResource2 = dao.update(updatedResource, null);
 		assertNotNull(updatedResource2);
 		assertNotNull(updatedResource2.getId());
 		assertNotNull(updatedResource2.getMeta().getVersionId());

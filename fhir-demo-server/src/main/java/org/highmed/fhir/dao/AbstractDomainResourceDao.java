@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.fhir.dao.exception.ResourceNotFoundException;
+import org.highmed.fhir.dao.exception.ResourceVersionNoMatchException;
 import org.highmed.fhir.search.DbSearchQuery;
 import org.highmed.fhir.search.PartialResult;
 import org.highmed.fhir.search.SearchQuery;
@@ -357,8 +358,12 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 		}
 	}
 
-	public final R update(R resource) throws SQLException, ResourceNotFoundException
+	public final R update(R resource, Long expectedVersion)
+			throws SQLException, ResourceNotFoundException, ResourceVersionNoMatchException
 	{
+		Objects.requireNonNull(resource, "resource");
+		// expectedVersion may be null
+
 		resource = copy(resource); // XXX defensive copy, might want to remove this call
 
 		Objects.requireNonNull(resource, "resource");
@@ -372,10 +377,19 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 			try
 			{
 				LatestVersion latestVersion = getLatestVersion(resource, connection);
+
+				if (expectedVersion != null && expectedVersion != latestVersion.version)
+				{
+					logger.info("Expected version {} does not match latest version {}", expectedVersion,
+							latestVersion.version);
+					throw new ResourceVersionNoMatchException(resource.getIdElement().getIdPart(), expectedVersion,
+							latestVersion.version);
+				}
+
 				long newVersion = latestVersion.version + 1;
 
 				R updated = update(connection, resource, newVersion);
-				if (latestVersion.deleted)
+				if (latestVersion.deleted) // TODO check if resurrection need undelete for old versions
 					markDeleted(connection, toUuid(updated.getIdElement().getIdPart()), false);
 
 				connection.commit();

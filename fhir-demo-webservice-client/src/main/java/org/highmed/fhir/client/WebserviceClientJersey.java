@@ -9,7 +9,9 @@ import java.util.Objects;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -155,9 +157,13 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 	{
 		Objects.requireNonNull(resource, "resource");
 
-		Response response = getResource().path(resource.getClass().getAnnotation(ResourceDef.class).name())
-				.path(resource.getIdElement().getIdPart()).request().accept(Constants.CT_FHIR_JSON_NEW)
-				.put(Entity.entity(resource, Constants.CT_FHIR_JSON_NEW));
+		Builder builder = getResource().path(resource.getClass().getAnnotation(ResourceDef.class).name())
+				.path(resource.getIdElement().getIdPart()).request().accept(Constants.CT_FHIR_JSON_NEW);
+
+		if (resource.getMeta().hasVersionId())
+			builder.header(Constants.HEADER_IF_MATCH, new EntityTag(resource.getMeta().getVersionId(), true));
+
+		Response response = builder.put(Entity.entity(resource, Constants.CT_FHIR_JSON_NEW));
 
 		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
 				response.getStatusInfo().getReasonPhrase());
@@ -187,8 +193,12 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 		for (Entry<String, List<String>> entry : parameters.entrySet())
 			target = target.queryParam(entry.getKey(), entry.getValue().toArray());
 
-		Response response = target.request().accept(Constants.CT_FHIR_JSON_NEW)
-				.put(Entity.entity(resource, Constants.CT_FHIR_JSON_NEW));
+		Builder builder = target.request().accept(Constants.CT_FHIR_JSON_NEW);
+
+		if (resource.getMeta().hasVersionId())
+			builder.header(Constants.HEADER_IF_MATCH, new EntityTag(resource.getMeta().getVersionId(), true));
+
+		Response response = builder.put(Entity.entity(resource, Constants.CT_FHIR_JSON_NEW));
 
 		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
 				response.getStatusInfo().getReasonPhrase());
@@ -218,7 +228,8 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 		logger.debug("HTTP header ETag: {}", response.getHeaderString(HttpHeaders.ETAG));
 		logger.debug("HTTP header Last-Modified: {}", response.getHeaderString(HttpHeaders.LAST_MODIFIED));
 
-		if (Status.OK.getStatusCode() != response.getStatus())
+		if (Status.OK.getStatusCode() != response.getStatus()
+				&& Status.NO_CONTENT.getStatusCode() != response.getStatus())
 			throw new WebApplicationException(response);
 	}
 
