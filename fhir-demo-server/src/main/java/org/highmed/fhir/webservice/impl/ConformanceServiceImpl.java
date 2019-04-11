@@ -59,6 +59,7 @@ import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResource
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceOperationComponent;
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent;
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementSoftwareComponent;
+import org.hl7.fhir.r4.model.CapabilityStatement.ResourceVersionPolicy;
 import org.hl7.fhir.r4.model.CapabilityStatement.RestfulCapabilityMode;
 import org.hl7.fhir.r4.model.CapabilityStatement.TypeRestfulInteraction;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -228,6 +229,8 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 		for (Class<? extends DomainResource> resource : resources)
 		{
 			CapabilityStatementRestResourceComponent r = rest.addResource();
+			r.setUpdateCreate(false);
+			r.setVersioning(ResourceVersionPolicy.VERSIONED);
 			r.setType(resource.getAnnotation(ResourceDef.class).name());
 			r.setProfile(resource.getAnnotation(ResourceDef.class).profile());
 			r.addInteraction().setCode(TypeRestfulInteraction.CREATE);

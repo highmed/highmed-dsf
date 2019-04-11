@@ -1,8 +1,13 @@
 package org.highmed.fhir.webservice.impl;
 
 import java.net.URI;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -12,6 +17,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -215,13 +221,54 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 		Optional<R> read = exceptionHandler.handleSqlAndResourceDeletedException(resourceTypeName,
 				() -> dao.read(parameterConverter.toUuid(resourceTypeName, id)));
 
-		if (read.isPresent())
+		Optional<Date> ifModifiedSince = getHeaderString(headers, Constants.HEADER_IF_MODIFIED_SINCE,
+				Constants.HEADER_IF_MODIFIED_SINCE_LC).flatMap(this::toIfModifiedSinceDate);
+		Optional<EntityTag> ifNoneMatch = getHeaderString(headers, Constants.HEADER_IF_NONE_MATCH,
+				Constants.HEADER_IF_NONE_MATCH_LC).flatMap(this::toIfNoneMatchTag);
+
+		return read.map(resource ->
 		{
-			return responseGenerator.response(Status.OK, read.get(), parameterConverter.getMediaType(uri, headers))
-					.build();
+			EntityTag resourceTag = new EntityTag(resource.getMeta().getVersionId(), true);
+			if (ifNoneMatch.map(t -> t.equals(resourceTag)).orElse(false))
+				return Response.notModified(resourceTag).lastModified(resource.getMeta().getLastUpdated()).build();
+			else if (ifModifiedSince.map(d -> resource.getMeta().getLastUpdated().after(d)).orElse(false))
+				return Response.notModified(resourceTag).lastModified(resource.getMeta().getLastUpdated()).build();
+			else
+				return responseGenerator.response(Status.OK, resource, parameterConverter.getMediaType(uri, headers))
+						.build();
+		}).orElseGet(() -> Response.status(Status.NOT_FOUND).build()); // TODO return OperationOutcome
+	}
+
+	private Optional<EntityTag> toIfNoneMatchTag(String ifNoneMatchValue)
+	{
+		if (ifNoneMatchValue == null || ifNoneMatchValue.isBlank())
+			return Optional.empty();
+
+		try
+		{
+			return Optional.of(EntityTag.valueOf(ifNoneMatchValue));
 		}
-		else
-			return Response.status(Status.NOT_FOUND).build(); // TODO return OperationOutcome
+		catch (IllegalArgumentException e)
+		{
+			return Optional.empty();
+		}
+	}
+
+	private Optional<Date> toIfModifiedSinceDate(String ifModifiedSinceValue)
+	{
+		if (ifModifiedSinceValue == null || ifModifiedSinceValue.isBlank())
+			return Optional.empty();
+
+		try
+		{
+			ZonedDateTime parsed = ZonedDateTime.parse(ifModifiedSinceValue,
+					DateTimeFormatter.RFC_1123_DATE_TIME.withZone(ZoneId.systemDefault()));
+			return Optional.of(Date.from(parsed.toInstant()));
+		}
+		catch (DateTimeParseException e)
+		{
+			return Optional.empty();
+		}
 	}
 
 	@Override
@@ -230,13 +277,22 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 		Optional<R> read = exceptionHandler
 				.handleSqlException(() -> dao.readVersion(parameterConverter.toUuid(resourceTypeName, id), version));
 
-		if (read.isPresent())
+		Optional<Date> ifModifiedSince = getHeaderString(headers, Constants.HEADER_IF_MODIFIED_SINCE,
+				Constants.HEADER_IF_MODIFIED_SINCE_LC).flatMap(this::toIfModifiedSinceDate);
+		Optional<EntityTag> ifNoneMatch = getHeaderString(headers, Constants.HEADER_IF_NONE_MATCH,
+				Constants.HEADER_IF_NONE_MATCH_LC).flatMap(this::toIfNoneMatchTag);
+
+		return read.map(resource ->
 		{
-			return responseGenerator.response(Status.OK, read.get(), parameterConverter.getMediaType(uri, headers))
-					.build();
-		}
-		else
-			return Response.status(Status.NOT_FOUND).build(); // TODO return OperationOutcome
+			EntityTag resourceTag = new EntityTag(resource.getMeta().getVersionId(), true);
+			if (ifNoneMatch.map(t -> t.equals(resourceTag)).orElse(false))
+				return Response.notModified(resourceTag).lastModified(resource.getMeta().getLastUpdated()).build();
+			else if (ifModifiedSince.map(d -> resource.getMeta().getLastUpdated().after(d)).orElse(false))
+				return Response.notModified(resourceTag).lastModified(resource.getMeta().getLastUpdated()).build();
+			else
+				return responseGenerator.response(Status.OK, resource, parameterConverter.getMediaType(uri, headers))
+						.build();
+		}).orElseGet(() -> Response.status(Status.NOT_FOUND).build()); // TODO return OperationOutcome
 	}
 
 	@Override
