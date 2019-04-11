@@ -69,7 +69,7 @@ public class ExceptionHandler
 		return new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR).entity(outcome).build());
 	}
 
-	public <T> T handleSqlAndResourceNotFoundException(String resourceTypeName,
+	public <T> T handleSqlAndResourceNotFoundExceptionForUpdateAsCreate(String resourceTypeName,
 			SupplierWithSqlAndResourceNotFoundException<T> s)
 	{
 		try
@@ -78,7 +78,7 @@ public class ExceptionHandler
 		}
 		catch (ResourceNotFoundException e)
 		{
-			throw methodNotAllowed(resourceTypeName, e);
+			throw updateAsCreateNotAllowed(resourceTypeName, e);
 		}
 		catch (SQLException e)
 		{
@@ -86,17 +86,17 @@ public class ExceptionHandler
 		}
 	}
 
-	public WebApplicationException methodNotAllowed(String resourceTypeName, ResourceNotFoundException e)
+	public WebApplicationException updateAsCreateNotAllowed(String resourceTypeName, ResourceNotFoundException e)
 	{
-		return methodNotAllowed(resourceTypeName, e.getId());
+		return updateAsCreateNotAllowed(resourceTypeName, e.getId());
 	}
 
-	public WebApplicationException methodNotAllowed(String resourceTypeName, String id)
+	public WebApplicationException updateAsCreateNotAllowed(String resourceTypeName, String id)
 	{
 		logger.error("{} with id {} not found", resourceTypeName, id);
 
 		OperationOutcome outcome = responseGenerator.createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
-				"Resource with id " + id + " not found.");
+				"Resource with id " + id + " not found");
 		return new WebApplicationException(Response.status(Status.METHOD_NOT_ALLOWED).entity(outcome).build());
 	}
 
@@ -105,7 +105,7 @@ public class ExceptionHandler
 		logger.error("{} with id (not a UUID) not found", resourceTypeName);
 
 		OperationOutcome outcome = responseGenerator.createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
-				"Resource with id (not a UUID) not found.");
+				"Resource with id (not a UUID) not found");
 		return new WebApplicationException(Response.status(Status.NOT_FOUND).entity(outcome).build());
 	}
 

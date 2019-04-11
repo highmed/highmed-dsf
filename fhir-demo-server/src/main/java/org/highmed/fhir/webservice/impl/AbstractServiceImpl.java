@@ -122,14 +122,14 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 	{
 		checkAlreadyExists(uri, headers); // might throw errors
 
-		Consumer<R> postCreate = preCreate(resource);
+		Consumer<R> afterCreate = preCreate(resource);
 
 		R createdResource = exceptionHandler.handleSqlException(() -> dao.create(resource));
 
 		eventManager.handleEvent(eventGenerator.newResourceCreatedEvent(createdResource));
 
-		if (postCreate != null)
-			postCreate.accept(createdResource);
+		if (afterCreate != null)
+			afterCreate.accept(createdResource);
 
 		URI location = uri.getAbsolutePathBuilder().path("/{id}/_history/{vid}")
 				.build(createdResource.getIdElement().getIdPart(), createdResource.getIdElement().getVersionIdPart());
@@ -249,15 +249,15 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 		if (resourceId.getBaseUrl() != null && !serverBase.equals(resourceId.getBaseUrl()))
 			return responseGenerator.createInvalidBaseUrlResponse(resourceTypeName, resourceId);
 
-		Consumer<R> postUpdate = preUpdate(resource);
+		Consumer<R> afterUpdate = preUpdate(resource);
 
-		R updatedResource = exceptionHandler.handleSqlAndResourceNotFoundException(resourceTypeName,
+		R updatedResource = exceptionHandler.handleSqlAndResourceNotFoundExceptionForUpdateAsCreate(resourceTypeName,
 				() -> dao.update(resource));
 
 		eventManager.handleEvent(eventGenerator.newResourceUpdatedEvent(updatedResource));
 
-		if (postUpdate != null)
-			postUpdate.accept(updatedResource);
+		if (afterUpdate != null)
+			afterUpdate.accept(updatedResource);
 
 		return responseGenerator.response(Status.OK, updatedResource, parameterConverter.getMediaType(uri, headers))
 				.build();
@@ -280,21 +280,6 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 		return null;
 	}
 
-	/*
-	 * No matches, no id provided: The server creates the resource.
-	 * 
-	 * No matches, id provided: The server treats the interaction as an Update as Create interaction (or rejects it, if
-	 * it does not support Update as Create) -> reject
-	 * 
-	 * One Match, no resource id provided OR (resource id provided and it matches the found resource): The server
-	 * performs the update against the matching resource
-	 * 
-	 * One Match, resource id provided but does not match resource found: The server returns a 400 Bad Request error
-	 * indicating the client id specification was a problem preferably with an OperationOutcome
-	 * 
-	 * Multiple matches: The server returns a 412 Precondition Failed error indicating the client's criteria were not
-	 * selective enough preferably with an OperationOutcome
-	 */
 	@Override
 	public Response update(R resource, UriInfo uri, HttpHeaders headers)
 	{
@@ -332,7 +317,7 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 		// No matches, id provided: The server treats the interaction as an Update as Create interaction (or rejects it,
 		// if it does not support Update as Create) -> reject
 		else if (result.getOverallCount() <= 0 && resource.hasId())
-			throw exceptionHandler.methodNotAllowed(resourceTypeName, resource.getId());
+			throw exceptionHandler.updateAsCreateNotAllowed(resourceTypeName, resource.getId());
 
 		// One Match, no resource id provided OR (resource id provided and it matches the found resource):
 		// The server performs the update against the matching resource
@@ -340,23 +325,29 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 		{
 			R dbResource = result.getPartialResult().get(0);
 			IdType dbResourceId = dbResource.getIdElement();
-			IdType resourceId = resource.getIdElement();
 
 			// BaseUrl - The server base URL (e.g. "http://example.com/fhir")
 			// ResourceType - The resource type (e.g. "Patient")
 			// IdPart - The ID (e.g. "123")
 			// Version - The version ID ("e.g. "456")
 			if (!resource.hasId())
-				return update(dbResource.getId(), resource, uri, headers);
-			else if (resource.hasId() && (!resourceId.hasBaseUrl() || serverBase.equals(resourceId.getBaseUrl()))
-					&& (!resourceId.hasResourceType() || resourceTypeName.equals(resourceId.getResourceType()))
-					&& (dbResourceId.getIdPart().equals(resourceId.getIdPart())))
-				return update(dbResource.getId(), resource, uri, headers);
+			{
+				resource.setIdElement(dbResourceId);
+				return update(resource.getIdElement().getIdPart(), resource, uri, headers);
+			}
+			else if (resource.hasId()
+					&& (!resource.getIdElement().hasBaseUrl()
+							|| serverBase.equals(resource.getIdElement().getBaseUrl()))
+					&& (!resource.getIdElement().hasResourceType()
+							|| resourceTypeName.equals(resource.getIdElement().getResourceType()))
+					&& (dbResourceId.getIdPart().equals(resource.getIdElement().getIdPart())))
+				return update(resource.getIdElement().getIdPart(), resource, uri, headers);
 			else
 				throw exceptionHandler.badRequestIdsNotMatching(
 						dbResourceId.withServerBase(serverBase, resourceTypeName),
-						resourceId.hasBaseUrl() && resourceId.hasResourceType() ? resourceId
-								: resourceId.withServerBase(serverBase, resourceTypeName));
+						resource.getIdElement().hasBaseUrl() && resource.getIdElement().hasResourceType()
+								? resource.getIdElement()
+								: resource.getIdElement().withServerBase(serverBase, resourceTypeName));
 		}
 		// Multiple matches: The server returns a 412 Precondition Failed error indicating the client's criteria were
 		// not selective enough preferably with an OperationOutcome
@@ -374,7 +365,8 @@ public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>
 
 		eventManager.handleEvent(eventGenerator.newResourceDeletedEvent(id));
 
-		afterDelete.accept(id);
+		if (afterDelete != null)
+			afterDelete.accept(id);
 
 		return Response.ok().build(); // TODO return OperationOutcome
 	}

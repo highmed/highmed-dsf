@@ -156,7 +156,7 @@ public class ResponseGenerator
 	public Response createPathVsElementIdResponse(String resourceTypeName, String id, IdType resourceId)
 	{
 		OperationOutcome out = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
-				"Path id not equal to " + resourceTypeName + " id (" + id + "vs." + resourceId.getIdPart() + ").");
+				"Path id not equal to " + resourceTypeName + " id (" + id + " vs. " + resourceId.getIdPart() + ").");
 		return Response.status(Status.BAD_REQUEST).entity(out).build();
 	}
 
