@@ -11,12 +11,16 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 public interface WebserviceClient
 {
 	String getBaseUrl();
-	
+
 	<R extends DomainResource> R create(R resource);
 
 	<R extends DomainResource> R create(R resource, String ifNoneExistCriteria);
 
 	<R extends DomainResource> R update(R resource);
+
+	<R extends DomainResource> R update(R resource, Map<String, List<String>> parameters);
+
+	void delete(Class<? extends DomainResource> resourceClass, String id);
 
 	<R extends DomainResource> R read(Class<R> resourceType, String id);
 
@@ -29,6 +33,6 @@ public interface WebserviceClient
 	StructureDefinition generateSnapshot(String url);
 
 	StructureDefinition generateSnapshot(StructureDefinition differential);
-	
+
 	Bundle postBundle(Bundle bundle);
 }

@@ -175,6 +175,54 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 	}
 
 	@Override
+	public <R extends DomainResource> R update(R resource, Map<String, List<String>> parameters)
+	{
+		Objects.requireNonNull(resource, "resource");
+		Objects.requireNonNull(parameters, "parameters");
+		if (parameters.isEmpty())
+			throw new IllegalArgumentException("parameters map empty");
+
+		WebTarget target = getResource().path(resource.getClass().getAnnotation(ResourceDef.class).name());
+
+		for (Entry<String, List<String>> entry : parameters.entrySet())
+			target = target.queryParam(entry.getKey(), entry.getValue().toArray());
+
+		Response response = target.request().accept(Constants.CT_FHIR_JSON_NEW)
+				.put(Entity.entity(resource, Constants.CT_FHIR_JSON_NEW));
+
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		logger.debug("HTTP header ETag: {}", response.getHeaderString(HttpHeaders.ETAG));
+		logger.debug("HTTP header Last-Modified: {}", response.getHeaderString(HttpHeaders.LAST_MODIFIED));
+
+		if (Status.CREATED.getStatusCode() == response.getStatus() || Status.OK.getStatusCode() == response.getStatus())
+		{
+			@SuppressWarnings("unchecked")
+			R read = (R) response.readEntity(resource.getClass());
+			return read;
+		}
+		else
+			throw new WebApplicationException(response);
+	}
+
+	@Override
+	public void delete(Class<? extends DomainResource> resourceClass, String id)
+	{
+		Objects.requireNonNull(id, "id");
+
+		Response response = getResource().path(resourceClass.getAnnotation(ResourceDef.class).name()).path(id).request()
+				.accept(Constants.CT_FHIR_JSON_NEW).delete();
+
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		logger.debug("HTTP header ETag: {}", response.getHeaderString(HttpHeaders.ETAG));
+		logger.debug("HTTP header Last-Modified: {}", response.getHeaderString(HttpHeaders.LAST_MODIFIED));
+
+		if (Status.OK.getStatusCode() != response.getStatus())
+			throw new WebApplicationException(response);
+	}
+
+	@Override
 	public CapabilityStatement getConformance()
 	{
 		Response response = getResource().path("metadata").request()
