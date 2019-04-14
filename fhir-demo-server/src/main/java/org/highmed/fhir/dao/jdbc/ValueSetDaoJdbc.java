@@ -14,14 +14,14 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class ValueSetDaoJdbc extends AbstractDomainResourceDaoJdbc<ValueSet> implements ValueSetDao
 {
-	private final ReadByUrlJdbc<ValueSet> readByUrl;
+	private final ReadByUrlDaoJdbc<ValueSet> readByUrl;
 
 	public ValueSetDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, ValueSet.class, "value_sets", "value_set", "value_set_id",
 				ValueSetIdentifier::new, ValueSetUrl::new, ValueSetVersion::new);
 
-		readByUrl = new ReadByUrlJdbc<>(this::getDataSource, this::getResource, getResourceTable(), getResourceColumn(),
+		readByUrl = new ReadByUrlDaoJdbc<>(this::getDataSource, this::getResource, getResourceTable(), getResourceColumn(),
 				getResourceIdColumn());
 	}
 

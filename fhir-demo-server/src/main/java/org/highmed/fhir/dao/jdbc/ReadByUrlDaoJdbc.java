@@ -14,9 +14,9 @@ import org.hl7.fhir.r4.model.DomainResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class ReadByUrlJdbc<R extends DomainResource>
+class ReadByUrlDaoJdbc<R extends DomainResource>
 {
-	private static final Logger logger = LoggerFactory.getLogger(ReadByUrlJdbc.class);
+	private static final Logger logger = LoggerFactory.getLogger(ReadByUrlDaoJdbc.class);
 
 	private final Supplier<DataSource> dataSourceSupplier;
 	private final BiFunctionWithSqlException<ResultSet, Integer, R> resourceExtractor;
@@ -25,7 +25,7 @@ class ReadByUrlJdbc<R extends DomainResource>
 	private final String resourceColumn;
 	private final String resourceIdColumn;
 
-	ReadByUrlJdbc(Supplier<DataSource> dataSourceSupplier,
+	ReadByUrlDaoJdbc(Supplier<DataSource> dataSourceSupplier,
 			BiFunctionWithSqlException<ResultSet, Integer, R> resourceExtractor, String resourceTable,
 			String resourceColumn, String resourceIdColumn)
 	{

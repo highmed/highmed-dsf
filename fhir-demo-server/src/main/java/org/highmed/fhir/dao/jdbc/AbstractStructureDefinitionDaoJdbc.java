@@ -22,7 +22,7 @@ abstract class AbstractStructureDefinitionDaoJdbc extends AbstractDomainResource
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractStructureDefinitionDaoJdbc.class);
 
-	private final ReadByUrlJdbc<StructureDefinition> readByUrl;
+	private final ReadByUrlDaoJdbc<StructureDefinition> readByUrl;
 
 	public AbstractStructureDefinitionDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext, String resourceTable,
 			String resourceColumn, String resourceIdColumn)
@@ -31,7 +31,7 @@ abstract class AbstractStructureDefinitionDaoJdbc extends AbstractDomainResource
 				() -> new StructureDefinitionIdentifier(resourceColumn),
 				() -> new StructureDefinitionUrl(resourceColumn), () -> new StructureDefinitionVersion(resourceColumn));
 
-		readByUrl = new ReadByUrlJdbc<StructureDefinition>(this::getDataSource, this::getResource, resourceTable,
+		readByUrl = new ReadByUrlDaoJdbc<StructureDefinition>(this::getDataSource, this::getResource, resourceTable,
 				resourceColumn, resourceIdColumn);
 	}
 

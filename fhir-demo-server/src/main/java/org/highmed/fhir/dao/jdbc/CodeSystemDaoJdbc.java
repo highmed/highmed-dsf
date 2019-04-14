@@ -14,14 +14,14 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class CodeSystemDaoJdbc extends AbstractDomainResourceDaoJdbc<CodeSystem> implements CodeSystemDao
 {
-	private final ReadByUrlJdbc<CodeSystem> readByUrl;
+	private final ReadByUrlDaoJdbc<CodeSystem> readByUrl;
 
 	public CodeSystemDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, CodeSystem.class, "code_systems", "code_system", "code_system_id",
 				CodeSystemUrl::new, CodeSystemVersion::new, CodeSystemIdentifier::new);
 
-		readByUrl = new ReadByUrlJdbc<>(this::getDataSource, this::getResource, getResourceTable(), getResourceColumn(),
+		readByUrl = new ReadByUrlDaoJdbc<>(this::getDataSource, this::getResource, getResourceTable(), getResourceColumn(),
 				getResourceIdColumn());
 	}
 
