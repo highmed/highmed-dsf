@@ -82,6 +82,7 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.ResearchStudy;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Task;
@@ -238,6 +239,7 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 			r.setConditionalRead(ConditionalReadStatus.FULLSUPPORT);
 			r.setConditionalUpdate(true);
 			r.setConditionalDelete(ConditionalDeleteStatus.SINGLE);
+
 			r.setType(resource.getAnnotation(ResourceDef.class).name());
 			r.setProfile(resource.getAnnotation(ResourceDef.class).profile());
 			r.addInteraction().setCode(TypeRestfulInteraction.CREATE);
@@ -256,6 +258,11 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 
 			if (resourceSearchParameters.stream().anyMatch(s -> SearchParamType.REFERENCE.equals(s.getType())))
 				r.addSearchParam(createIncludeParameter(resource, resourceSearchParameters));
+
+			r.setSearchInclude(resourceSearchParameters.stream()
+					.filter(s -> SearchParamType.REFERENCE.equals(s.getType()))
+					.map(s -> new StringType(resource.getAnnotation(ResourceDef.class).name() + ":" + s.getName()))
+					.collect(Collectors.toList()));
 
 			r.addSearchParam(createFormatParameter());
 			r.addSearchParam(createPrettyParameter());
