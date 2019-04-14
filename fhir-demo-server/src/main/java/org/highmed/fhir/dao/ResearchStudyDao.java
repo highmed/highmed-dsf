@@ -1,22 +1,7 @@
 package org.highmed.fhir.dao;
 
-import org.apache.commons.dbcp2.BasicDataSource;
-import org.highmed.fhir.search.parameters.ResearchStudyIdentifier;
 import org.hl7.fhir.r4.model.ResearchStudy;
 
-import ca.uhn.fhir.context.FhirContext;
-
-public class ResearchStudyDao extends AbstractDomainResourceDao<ResearchStudy>
+public interface ResearchStudyDao extends DomainResourceDao<ResearchStudy>
 {
-	public ResearchStudyDao(BasicDataSource dataSource, FhirContext fhirContext)
-	{
-		super(dataSource, fhirContext, ResearchStudy.class, "research_studies", "research_study", "research_study_id",
-				ResearchStudyIdentifier::new);
-	}
-
-	@Override
-	protected ResearchStudy copy(ResearchStudy resource)
-	{
-		return resource.copy();
-	}
 }

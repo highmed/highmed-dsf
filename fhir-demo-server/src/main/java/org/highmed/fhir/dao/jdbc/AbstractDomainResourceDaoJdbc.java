@@ -1,4 +1,4 @@
-package org.highmed.fhir.dao;
+package org.highmed.fhir.dao.jdbc;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -45,9 +45,9 @@ import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 
-public abstract class AbstractDomainResourceDao<R extends DomainResource> implements InitializingBean
+abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implements InitializingBean
 {
-	private static final Logger logger = LoggerFactory.getLogger(AbstractDomainResourceDao.class);
+	private static final Logger logger = LoggerFactory.getLogger(AbstractDomainResourceDaoJdbc.class);
 
 	private static final class DomainResourceDistinctById
 	{
@@ -112,7 +112,7 @@ public abstract class AbstractDomainResourceDao<R extends DomainResource> implem
 	 * request basis
 	 */
 	@SafeVarargs
-	public AbstractDomainResourceDao(BasicDataSource dataSource, FhirContext fhirContext, Class<R> resourceType,
+	public AbstractDomainResourceDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext, Class<R> resourceType,
 			String resourceTable, String resourceColumn, String resourceIdColumn,
 			Supplier<SearchQueryParameter<R>>... searchParameterFactories)
 	{

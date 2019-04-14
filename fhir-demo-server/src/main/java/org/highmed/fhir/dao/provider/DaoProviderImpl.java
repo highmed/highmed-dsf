@@ -1,7 +1,22 @@
-package org.highmed.fhir.dao;
+package org.highmed.fhir.dao.provider;
 
 import java.util.Objects;
 
+import org.highmed.fhir.dao.CodeSystemDao;
+import org.highmed.fhir.dao.EndpointDao;
+import org.highmed.fhir.dao.HealthcareServiceDao;
+import org.highmed.fhir.dao.LocationDao;
+import org.highmed.fhir.dao.OrganizationDao;
+import org.highmed.fhir.dao.PatientDao;
+import org.highmed.fhir.dao.PractitionerDao;
+import org.highmed.fhir.dao.PractitionerRoleDao;
+import org.highmed.fhir.dao.ProvenanceDao;
+import org.highmed.fhir.dao.ResearchStudyDao;
+import org.highmed.fhir.dao.StructureDefinitionDao;
+import org.highmed.fhir.dao.StructureDefinitionSnapshotDao;
+import org.highmed.fhir.dao.SubscriptionDao;
+import org.highmed.fhir.dao.TaskDao;
+import org.highmed.fhir.dao.ValueSetDao;
 import org.springframework.beans.factory.InitializingBean;
 
 public class DaoProviderImpl implements DaoProvider, InitializingBean

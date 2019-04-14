@@ -1,4 +1,4 @@
-package org.highmed.fhir.dao;
+package org.highmed.fhir.dao.jdbc;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -18,20 +18,20 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public abstract class AbstractStructureDefinitionDao extends AbstractDomainResourceDao<StructureDefinition>
+abstract class AbstractStructureDefinitionDaoJdbc extends AbstractDomainResourceDaoJdbc<StructureDefinition>
 {
-	private static final Logger logger = LoggerFactory.getLogger(AbstractStructureDefinitionDao.class);
+	private static final Logger logger = LoggerFactory.getLogger(AbstractStructureDefinitionDaoJdbc.class);
 
-	private final ReadByUrl<StructureDefinition> readByUrl;
+	private final ReadByUrlJdbc<StructureDefinition> readByUrl;
 
-	public AbstractStructureDefinitionDao(BasicDataSource dataSource, FhirContext fhirContext, String resourceTable,
+	public AbstractStructureDefinitionDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext, String resourceTable,
 			String resourceColumn, String resourceIdColumn)
 	{
 		super(dataSource, fhirContext, StructureDefinition.class, resourceTable, resourceColumn, resourceIdColumn,
 				() -> new StructureDefinitionIdentifier(resourceColumn),
 				() -> new StructureDefinitionUrl(resourceColumn), () -> new StructureDefinitionVersion(resourceColumn));
 
-		readByUrl = new ReadByUrl<StructureDefinition>(this::getDataSource, this::getResource, resourceTable,
+		readByUrl = new ReadByUrlJdbc<StructureDefinition>(this::getDataSource, this::getResource, resourceTable,
 				resourceColumn, resourceIdColumn);
 	}
 

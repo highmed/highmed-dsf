@@ -6,9 +6,9 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.UUID;
 
-import org.highmed.fhir.dao.AbstractDomainResourceDao;
-import org.highmed.fhir.dao.DaoProvider;
+import org.highmed.fhir.dao.DomainResourceDao;
 import org.highmed.fhir.dao.exception.ResourceDeletedException;
+import org.highmed.fhir.dao.provider.DaoProvider;
 import org.highmed.fhir.function.BiFunctionWithSqlException;
 import org.highmed.fhir.search.SearchQueryIncludeParameter.IncludeParts;
 import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
@@ -143,7 +143,7 @@ public class TaskRequester extends AbstractReferenceParameter<Task>
 		}
 	}
 
-	private void setResource(Reference reference, IIdType idType, AbstractDomainResourceDao<?> dao) throws SQLException
+	private void setResource(Reference reference, IIdType idType, DomainResourceDao<?> dao) throws SQLException
 	{
 		if (idType.hasVersionIdPart())
 		{

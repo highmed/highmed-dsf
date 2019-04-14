@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.highmed.fhir.dao.jdbc.ResearchStudyDaoJdbc;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.ResearchStudy;
 
@@ -25,7 +26,7 @@ public class ResearchStudyDaoTest extends AbstractDomainResourceDaoTest<Research
 	@Override
 	protected ResearchStudyDao createDao(BasicDataSource dataSource, FhirContext fhirContext)
 	{
-		return new ResearchStudyDao(dataSource, fhirContext);
+		return new ResearchStudyDaoJdbc(dataSource, fhirContext);
 	}
 
 	@Override

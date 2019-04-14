@@ -3,6 +3,7 @@ package org.highmed.fhir.dao;
 import static org.junit.Assert.assertEquals;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.highmed.fhir.dao.jdbc.OrganizationDaoJdbc;
 import org.hl7.fhir.r4.model.Organization;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -20,7 +21,7 @@ public class OrganizationDaoTest extends AbstractDomainResourceDaoTest<Organizat
 	@Override
 	protected OrganizationDao createDao(BasicDataSource dataSource, FhirContext fhirContext)
 	{
-		return new OrganizationDao(dataSource, fhirContext);
+		return new OrganizationDaoJdbc(dataSource, fhirContext);
 	}
 
 	@Override

@@ -3,6 +3,7 @@ package org.highmed.fhir.dao;
 import static org.junit.Assert.assertEquals;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.highmed.fhir.dao.jdbc.EndpointDaoJdbc;
 import org.hl7.fhir.r4.model.Endpoint;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -20,7 +21,7 @@ public class EndpointDaoTest extends AbstractDomainResourceDaoTest<Endpoint, End
 	@Override
 	protected EndpointDao createDao(BasicDataSource dataSource, FhirContext fhirContext)
 	{
-		return new EndpointDao(dataSource, fhirContext);
+		return new EndpointDaoJdbc(dataSource, fhirContext);
 	}
 
 	@Override

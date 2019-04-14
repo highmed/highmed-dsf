@@ -2,8 +2,6 @@ package org.highmed.fhir.spring.config;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.fhir.dao.CodeSystemDao;
-import org.highmed.fhir.dao.DaoProvider;
-import org.highmed.fhir.dao.DaoProviderImpl;
 import org.highmed.fhir.dao.EndpointDao;
 import org.highmed.fhir.dao.HealthcareServiceDao;
 import org.highmed.fhir.dao.LocationDao;
@@ -19,6 +17,23 @@ import org.highmed.fhir.dao.SubscriptionDao;
 import org.highmed.fhir.dao.TaskDao;
 import org.highmed.fhir.dao.ValueSetDao;
 import org.highmed.fhir.dao.converter.SnapshotInfoConverter;
+import org.highmed.fhir.dao.jdbc.CodeSystemDaoJdbc;
+import org.highmed.fhir.dao.jdbc.EndpointDaoJdbc;
+import org.highmed.fhir.dao.jdbc.HealthcareServiceDaoJdbc;
+import org.highmed.fhir.dao.jdbc.LocationDaoJdbc;
+import org.highmed.fhir.dao.jdbc.OrganizationDaoJdbc;
+import org.highmed.fhir.dao.jdbc.PatientDaoJdbc;
+import org.highmed.fhir.dao.jdbc.PractitionerDaoJdbc;
+import org.highmed.fhir.dao.jdbc.PractitionerRoleDaoJdbc;
+import org.highmed.fhir.dao.jdbc.ProvenanceDaoJdbc;
+import org.highmed.fhir.dao.jdbc.ResearchStudyDaoJdbc;
+import org.highmed.fhir.dao.jdbc.StructureDefinitionDaoJdbc;
+import org.highmed.fhir.dao.jdbc.StructureDefinitionSnapshotDaoJdbc;
+import org.highmed.fhir.dao.jdbc.SubscriptionDaoJdbc;
+import org.highmed.fhir.dao.jdbc.TaskDaoJdbc;
+import org.highmed.fhir.dao.jdbc.ValueSetDaoJdbc;
+import org.highmed.fhir.dao.provider.DaoProvider;
+import org.highmed.fhir.dao.provider.DaoProviderImpl;
 import org.postgresql.Driver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -61,67 +76,67 @@ public class DaoConfig
 	@Bean
 	public CodeSystemDao codeSystemDao()
 	{
-		return new CodeSystemDao(dataSource(), fhirConfig.fhirContext());
+		return new CodeSystemDaoJdbc(dataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public EndpointDao endpointDao()
 	{
-		return new EndpointDao(dataSource(), fhirConfig.fhirContext());
+		return new EndpointDaoJdbc(dataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public HealthcareServiceDao healthcareServiceDao()
 	{
-		return new HealthcareServiceDao(dataSource(), fhirConfig.fhirContext());
+		return new HealthcareServiceDaoJdbc(dataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public LocationDao locationDao()
 	{
-		return new LocationDao(dataSource(), fhirConfig.fhirContext());
+		return new LocationDaoJdbc(dataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public OrganizationDao organizationDao()
 	{
-		return new OrganizationDao(dataSource(), fhirConfig.fhirContext());
+		return new OrganizationDaoJdbc(dataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public PatientDao patientDao()
 	{
-		return new PatientDao(dataSource(), fhirConfig.fhirContext());
+		return new PatientDaoJdbc(dataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public PractitionerDao practitionerDao()
 	{
-		return new PractitionerDao(dataSource(), fhirConfig.fhirContext());
+		return new PractitionerDaoJdbc(dataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public PractitionerRoleDao practitionerRoleDao()
 	{
-		return new PractitionerRoleDao(dataSource(), fhirConfig.fhirContext());
+		return new PractitionerRoleDaoJdbc(dataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public ProvenanceDao provenanceDao()
 	{
-		return new ProvenanceDao(dataSource(), fhirConfig.fhirContext());
+		return new ProvenanceDaoJdbc(dataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public ResearchStudyDao researchStudyDao()
 	{
-		return new ResearchStudyDao(dataSource(), fhirConfig.fhirContext());
+		return new ResearchStudyDaoJdbc(dataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public StructureDefinitionDao structureDefinitionDao()
 	{
-		return new StructureDefinitionDao(dataSource(), fhirConfig.fhirContext());
+		return new StructureDefinitionDaoJdbc(dataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
@@ -133,25 +148,25 @@ public class DaoConfig
 	@Bean
 	public StructureDefinitionSnapshotDao structureDefinitionSnapshotDao()
 	{
-		return new StructureDefinitionSnapshotDao(dataSource(), fhirConfig.fhirContext(), snapshotInfoConverter());
+		return new StructureDefinitionSnapshotDaoJdbc(dataSource(), fhirConfig.fhirContext(), snapshotInfoConverter());
 	}
 
 	@Bean
 	public SubscriptionDao subscriptionDao()
 	{
-		return new SubscriptionDao(dataSource(), fhirConfig.fhirContext());
+		return new SubscriptionDaoJdbc(dataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public TaskDao taskDao()
 	{
-		return new TaskDao(dataSource(), fhirConfig.fhirContext());
+		return new TaskDaoJdbc(dataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public ValueSetDao valueSetDao()
 	{
-		return new ValueSetDao(dataSource(), fhirConfig.fhirContext());
+		return new ValueSetDaoJdbc(dataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean

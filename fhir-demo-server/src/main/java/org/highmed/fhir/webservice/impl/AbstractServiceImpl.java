@@ -26,7 +26,7 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.highmed.fhir.authentication.UserProvider;
-import org.highmed.fhir.dao.AbstractDomainResourceDao;
+import org.highmed.fhir.dao.DomainResourceDao;
 import org.highmed.fhir.event.EventGenerator;
 import org.highmed.fhir.event.EventManager;
 import org.highmed.fhir.help.ExceptionHandler;
@@ -65,7 +65,7 @@ import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 
-public abstract class AbstractServiceImpl<D extends AbstractDomainResourceDao<R>, R extends DomainResource>
+public abstract class AbstractServiceImpl<D extends DomainResourceDao<R>, R extends DomainResource>
 		implements BasicService<R>, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractServiceImpl.class);

@@ -23,7 +23,7 @@ import org.junit.Test;
 import ca.uhn.fhir.context.FhirContext;
 import de.rwh.utils.test.Database;
 
-public abstract class AbstractDomainResourceDaoTest<D extends DomainResource, C extends AbstractDomainResourceDao<D>>
+public abstract class AbstractDomainResourceDaoTest<D extends DomainResource, C extends DomainResourceDao<D>>
 {
 	@ClassRule
 	public static final FhirEmbeddedPostgresWithLiquibase template = new FhirEmbeddedPostgresWithLiquibase(

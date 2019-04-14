@@ -3,11 +3,13 @@ package org.highmed.fhir.dao;
 import static org.junit.Assert.assertEquals;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.highmed.fhir.dao.jdbc.StructureDefinitionDaoJdbc;
 import org.hl7.fhir.r4.model.StructureDefinition;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class StructureDefinitionDaoTest extends AbstractDomainResourceDaoTest<StructureDefinition, StructureDefinitionDao>
+public class StructureDefinitionDaoTest
+		extends AbstractDomainResourceDaoTest<StructureDefinition, StructureDefinitionDao>
 {
 	private static final String name = "StructureDefinition";
 	private static final String title = "Demo Structure Definition";
@@ -20,7 +22,7 @@ public class StructureDefinitionDaoTest extends AbstractDomainResourceDaoTest<St
 	@Override
 	protected StructureDefinitionDao createDao(BasicDataSource dataSource, FhirContext fhirContext)
 	{
-		return new StructureDefinitionDao(dataSource, fhirContext);
+		return new StructureDefinitionDaoJdbc(dataSource, fhirContext);
 	}
 
 	@Override

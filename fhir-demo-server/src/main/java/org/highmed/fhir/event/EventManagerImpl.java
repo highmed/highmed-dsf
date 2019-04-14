@@ -17,8 +17,8 @@ import java.util.stream.Collectors;
 
 import javax.websocket.RemoteEndpoint.Async;
 
-import org.highmed.fhir.dao.DaoProvider;
 import org.highmed.fhir.dao.SubscriptionDao;
+import org.highmed.fhir.dao.provider.DaoProvider;
 import org.highmed.fhir.help.ExceptionHandler;
 import org.highmed.fhir.search.Matcher;
 import org.hl7.fhir.r4.model.DomainResource;

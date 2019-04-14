@@ -5,9 +5,9 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.UUID;
 
-import org.highmed.fhir.dao.DaoProvider;
 import org.highmed.fhir.dao.EndpointDao;
 import org.highmed.fhir.dao.exception.ResourceDeletedException;
+import org.highmed.fhir.dao.provider.DaoProvider;
 import org.highmed.fhir.function.BiFunctionWithSqlException;
 import org.highmed.fhir.search.SearchQueryIncludeParameter.IncludeParts;
 import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;

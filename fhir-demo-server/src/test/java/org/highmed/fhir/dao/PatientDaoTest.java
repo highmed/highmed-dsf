@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.highmed.fhir.dao.jdbc.PatientDaoJdbc;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.Patient;
 
@@ -24,7 +25,7 @@ public class PatientDaoTest extends AbstractDomainResourceDaoTest<Patient, Patie
 	@Override
 	protected PatientDao createDao(BasicDataSource dataSource, FhirContext fhirContext)
 	{
-		return new PatientDao(dataSource, fhirContext);
+		return new PatientDaoJdbc(dataSource, fhirContext);
 	}
 
 	@Override

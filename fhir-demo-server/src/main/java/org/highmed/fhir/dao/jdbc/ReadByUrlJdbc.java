@@ -1,4 +1,4 @@
-package org.highmed.fhir.dao;
+package org.highmed.fhir.dao.jdbc;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -14,9 +14,9 @@ import org.hl7.fhir.r4.model.DomainResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class ReadByUrl<R extends DomainResource>
+class ReadByUrlJdbc<R extends DomainResource>
 {
-	private static final Logger logger = LoggerFactory.getLogger(ReadByUrl.class);
+	private static final Logger logger = LoggerFactory.getLogger(ReadByUrlJdbc.class);
 
 	private final Supplier<DataSource> dataSourceSupplier;
 	private final BiFunctionWithSqlException<ResultSet, Integer, R> resourceExtractor;
@@ -25,7 +25,7 @@ class ReadByUrl<R extends DomainResource>
 	private final String resourceColumn;
 	private final String resourceIdColumn;
 
-	ReadByUrl(Supplier<DataSource> dataSourceSupplier,
+	ReadByUrlJdbc(Supplier<DataSource> dataSourceSupplier,
 			BiFunctionWithSqlException<ResultSet, Integer, R> resourceExtractor, String resourceTable,
 			String resourceColumn, String resourceIdColumn)
 	{

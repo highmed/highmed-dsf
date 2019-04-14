@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.highmed.fhir.dao.jdbc.ProvenanceDaoJdbc;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Signature;
 
@@ -27,7 +28,7 @@ public class ProvenanceDaoTest extends AbstractDomainResourceDaoTest<Provenance,
 	@Override
 	protected ProvenanceDao createDao(BasicDataSource dataSource, FhirContext fhirContext)
 	{
-		return new ProvenanceDao(dataSource, fhirContext);
+		return new ProvenanceDaoJdbc(dataSource, fhirContext);
 	}
 
 	@Override

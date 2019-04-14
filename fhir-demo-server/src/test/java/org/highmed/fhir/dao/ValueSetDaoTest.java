@@ -3,6 +3,7 @@ package org.highmed.fhir.dao;
 import static org.junit.Assert.assertEquals;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.highmed.fhir.dao.jdbc.ValueSetDaoJdbc;
 import org.hl7.fhir.r4.model.ValueSet;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -20,7 +21,7 @@ public class ValueSetDaoTest extends AbstractDomainResourceDaoTest<ValueSet, Val
 	@Override
 	protected ValueSetDao createDao(BasicDataSource dataSource, FhirContext fhirContext)
 	{
-		return new ValueSetDao(dataSource, fhirContext);
+		return new ValueSetDaoJdbc(dataSource, fhirContext);
 	}
 
 	@Override

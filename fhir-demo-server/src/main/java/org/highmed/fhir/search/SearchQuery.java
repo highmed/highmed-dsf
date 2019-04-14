@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.core.UriBuilder;
 
-import org.highmed.fhir.dao.DaoProvider;
+import org.highmed.fhir.dao.provider.DaoProvider;
 import org.highmed.fhir.function.BiFunctionWithSqlException;
 import org.highmed.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 import org.hl7.fhir.r4.model.DomainResource;

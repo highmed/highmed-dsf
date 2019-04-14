@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 
 import javax.ws.rs.core.UriBuilder;
 
-import org.highmed.fhir.dao.DaoProvider;
+import org.highmed.fhir.dao.provider.DaoProvider;
 import org.highmed.fhir.search.SearchQuery;
 import org.highmed.fhir.search.SearchQueryIncludeParameter;
 import org.highmed.fhir.search.SearchQueryIncludeParameter.IncludeParts;

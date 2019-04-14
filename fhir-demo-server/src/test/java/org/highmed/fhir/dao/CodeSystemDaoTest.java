@@ -3,6 +3,7 @@ package org.highmed.fhir.dao;
 import static org.junit.Assert.assertEquals;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.highmed.fhir.dao.jdbc.CodeSystemDaoJdbc;
 import org.hl7.fhir.r4.model.CodeSystem;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -20,7 +21,7 @@ public class CodeSystemDaoTest extends AbstractDomainResourceDaoTest<CodeSystem,
 	@Override
 	protected CodeSystemDao createDao(BasicDataSource dataSource, FhirContext fhirContext)
 	{
-		return new CodeSystemDao(dataSource, fhirContext);
+		return new CodeSystemDaoJdbc(dataSource, fhirContext);
 	}
 
 	@Override
