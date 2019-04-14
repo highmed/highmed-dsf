@@ -18,6 +18,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.highmed.fhir.dao.DomainResourceDao;
 import org.highmed.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.fhir.dao.exception.ResourceNotFoundException;
 import org.highmed.fhir.dao.exception.ResourceVersionNoMatchException;
@@ -45,7 +46,7 @@ import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 
-abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implements InitializingBean
+abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implements DomainResourceDao<R>, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractDomainResourceDaoJdbc.class);
 
@@ -98,14 +99,13 @@ abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implement
 	private final BasicDataSource dataSource;
 	private final FhirContext fhirContext;
 	private final Class<R> resourceType;
+	private final String resourceTypeName;
 
 	private final String resourceTable;
 	private final String resourceColumn;
 	private final String resourceIdColumn;
 
 	private final List<Supplier<SearchQueryParameter<R>>> searchParameterFactories;
-
-	private final String resourceTypeName;
 
 	/*
 	 * Using a suppliers for SearchParameters, because implementations are not thread safe and need to be created on a
@@ -119,13 +119,12 @@ abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implement
 		this.dataSource = dataSource;
 		this.fhirContext = fhirContext;
 		this.resourceType = resourceType;
+		resourceTypeName = Objects.requireNonNull(resourceType, "resourceType").getAnnotation(ResourceDef.class).name();
 
 		this.resourceTable = resourceTable;
 		this.resourceColumn = resourceColumn;
 		this.resourceIdColumn = resourceIdColumn;
 		this.searchParameterFactories = Arrays.asList(searchParameterFactories);
-
-		resourceTypeName = Objects.requireNonNull(resourceType, "resourceType").getAnnotation(ResourceDef.class).name();
 	}
 
 	protected IParser getJsonParser()
@@ -165,14 +164,10 @@ abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implement
 		return resourceColumn;
 	}
 
-	protected String getResourceTypeName()
+	@Override
+	public String getResourceTypeName()
 	{
 		return resourceTypeName;
-	}
-
-	public Class<R> getResourceType()
-	{
-		return resourceType;
 	}
 
 	public final R create(R resource) throws SQLException
@@ -577,7 +572,7 @@ abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implement
 	public final SearchQuery<R> createSearchQuery(int effectivePage, int effectiveCount)
 	{
 		return SearchQueryBuilder
-				.create(getResourceType(), getResourceTable(), getResourceColumn(), effectivePage, effectiveCount)
+				.create(resourceType, getResourceTable(), getResourceColumn(), effectivePage, effectiveCount)
 				.with(new ResourceId(getResourceIdColumn()), new ResourceLastUpdated(getResourceColumn()))
 				.with(searchParameterFactories.stream().map(Supplier::get).toArray(SearchQueryParameter[]::new))
 				.build();

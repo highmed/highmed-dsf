@@ -15,8 +15,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-
 @Configuration
 public class EventConfig
 {
@@ -54,8 +52,7 @@ public class EventConfig
 	private void put(Map<String, ? super DomainResourceDao<? extends DomainResource>> daosByResourceName,
 			DomainResourceDao<? extends DomainResource> dao)
 	{
-		String resourceName = dao.getResourceType().getAnnotation(ResourceDef.class).name();
-		daosByResourceName.put(resourceName, dao);
+		daosByResourceName.put(dao.getResourceTypeName(), dao);
 	}
 
 	@Bean

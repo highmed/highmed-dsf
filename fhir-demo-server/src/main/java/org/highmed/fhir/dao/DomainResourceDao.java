@@ -14,7 +14,7 @@ import org.hl7.fhir.r4.model.DomainResource;
 
 public interface DomainResourceDao<R extends DomainResource>
 {
-	Class<R> getResourceType();
+	String getResourceTypeName();
 
 	R create(R resource) throws SQLException;
 
