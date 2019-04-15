@@ -3,7 +3,6 @@ package org.highmed.fhir.help;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.core.EntityTag;
@@ -70,26 +69,13 @@ public class ResponseGenerator
 		return b;
 	}
 
-	public IdType toFullId(IdType id)
-	{
-		id.setIdBase(serverBase);
-		return id;
-	}
-
-	public String toFullId(String id)
-	{
-		if (id == null)
-			return null;
-
-		return toFullId(new IdType(id)).asStringValue();
-	}
-
 	public BundleEntryComponent toBundleEntryComponent(DomainResource resource, SearchEntryMode mode)
 	{
 		BundleEntryComponent entry = new BundleEntryComponent();
 		entry.getSearch().setMode(mode);
 		entry.setResource(resource);
-		entry.setFullUrl(toFullId(resource.getId()));
+		entry.setFullUrlElement(new IdType(serverBase, resource.getIdElement().getResourceType(),
+				resource.getIdElement().getIdPart(), null));
 		return entry;
 	}
 
@@ -97,8 +83,7 @@ public class ResponseGenerator
 			List<SearchQueryParameterError> errors, UriBuilder bundleUri, String format, String pretty)
 	{
 		Bundle bundle = new Bundle();
-		bundle.setId(UUID.randomUUID().toString());
-		bundle.getMeta().setLastUpdated(new Date());
+		bundle.setTimestamp(new Date());
 		bundle.setType(BundleType.SEARCHSET);
 		result.getPartialResult().stream().map(r -> toBundleEntryComponent(r, SearchEntryMode.MATCH))
 				.forEach(bundle::addEntry);
