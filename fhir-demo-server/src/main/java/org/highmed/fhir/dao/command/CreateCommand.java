@@ -90,7 +90,7 @@ public class CreateCommand<R extends DomainResource, D extends DomainResourceDao
 		{
 			bundle.getEntry().stream().map(BundleEntryComponent::getResource).filter(r -> r instanceof DomainResource)
 					.map(r -> (DomainResource) r).forEach(r -> replacer.setReference(r, resource.getClass(), fullUrl,
-							new IdType(resource.getResourceType().toString(), id.toString(), "1").getValue()));
+							new IdType(resource.getResourceType().toString(), id.toString()).getValue()));
 		}
 	}
 
@@ -99,7 +99,7 @@ public class CreateCommand<R extends DomainResource, D extends DomainResourceDao
 	{
 		checkAlreadyExists(entry.getRequest().getIfNoneExist(), resource.getResourceType());
 
-		createdResource = dao.createWithTransactionAndId(connection, createdResource, id);
+		createdResource = dao.createWithTransactionAndId(connection, resource, id);
 	}
 
 	private void checkAlreadyExists(String ifNoneExist, ResourceType resourceType) throws WebApplicationException
@@ -158,8 +158,8 @@ public class CreateCommand<R extends DomainResource, D extends DomainResourceDao
 		response.setStatus(Status.CREATED.getStatusCode() + " " + Status.CREATED.getReasonPhrase());
 		response.setLocation(createdResource.getIdElement()
 				.withServerBase(serverBase, createdResource.getResourceType().name()).getValue());
-		response.setEtag(new EntityTag(resource.getMeta().getVersionId(), true).getValue());
-		response.setLastModified(resource.getMeta().getLastUpdated());
+		response.setEtag(new EntityTag(createdResource.getMeta().getVersionId(), true).toString());
+		response.setLastModified(createdResource.getMeta().getLastUpdated());
 
 		return resultEntry;
 	}

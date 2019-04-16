@@ -6,10 +6,16 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.UUID;
 
 import javax.ws.rs.WebApplicationException;
 
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleType;
+import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
+import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Organization;
 
 import ca.uhn.fhir.context.FhirContext;
 import de.rwh.utils.crypto.CertificateHelper;
@@ -26,11 +32,42 @@ public class TestFhirJerseyClient
 		KeyStore trustStore = CertificateHelper.extractTrust(keyStore);
 
 		FhirContext fhirContext = FhirContext.forR4();
-		WebserviceClient client = new WebserviceClientJersey("https://localhost:8001/fhir", trustStore, keyStore,
+		WebserviceClient client = new WebserviceClientJersey("https://localhost:8001/fhir/", trustStore, keyStore,
 				keyStorePassword, null, null, null, 0, 0, null, fhirContext);
 
 		try
 		{
+			// Bundle bundle = new Bundle();
+			// bundle.setType(BundleType.TRANSACTION);
+			//
+			// Organization organization = new Organization();
+			// organization.setId(UUID.randomUUID().toString());
+			// organization.setName("Test Organization");
+			//
+			// Endpoint endpoint = new Endpoint();
+			// endpoint.setId(UUID.randomUUID().toString());
+			// endpoint.setName("Test Endpoint");
+			// endpoint.setManagingOrganization(new Reference("urn:uuid:" + organization.getIdElement().getIdPart()));
+			//
+			// organization.addEndpoint(new Reference("urn:uuid:" + endpoint.getIdElement().getIdPart()));
+			//
+			// BundleEntryComponent entry1 = bundle.addEntry();
+			// entry1.setResource(organization);
+			// entry1.setFullUrl("urn:uuid:" + organization.getIdElement().getIdPart());
+			// entry1.getRequest().setMethod(HTTPVerb.POST);
+			// entry1.getRequest().setUrl("Organization");
+			//
+			// BundleEntryComponent entry2 = bundle.addEntry();
+			// entry2.setResource(endpoint);
+			// entry2.setFullUrl("urn:uuid:" + endpoint.getIdElement().getIdPart());
+			// entry2.getRequest().setMethod(HTTPVerb.POST);
+			// entry2.getRequest().setUrl("Endpoint");
+			//
+			// System.out.println(fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
+			//
+
+			// client.postBundle(bundle);
+
 			// Patient patient = new Patient();
 			// patient.setIdElement(new IdType("Patient", UUID.randomUUID().toString(), "2"));
 			// Patient createdPatient = client.create(patient);
@@ -175,6 +212,43 @@ public class TestFhirJerseyClient
 			// new IdType(endpoint2.getIdElement().getResourceType(), endpoint2.getIdElement().getIdPart())));
 			//
 			// client.update(org);
+
+			// Organization org = new Organization();
+			// client.create(org, "identifier=http://highmed.org/fhir/CodeSystem/organization|Test
+			// Organization&_format=json");
+
+			// Organization org = new Organization();
+			// org.setName("conditional update");
+			// client.create(org);
+			
+//			client.delete(Organization.class, "1246cb25-f96f-4761-a1dd-696fd9d5dc51");
+//			client.delete(Endpoint.class, "cf566fd2-3fb4-4736-9497-42a4a2c3fab4");
+
+			var bundle = new Bundle();
+			bundle.setType(BundleType.TRANSACTION);
+
+			var org = new Organization();
+			org.setName("Transaction Test Organization");
+
+			var ept = new Endpoint();
+			ept.setName("Transaction Test Endpoint");
+
+			var orgEntry = bundle.addEntry();
+			orgEntry.setFullUrl("urn:uuid:" + UUID.randomUUID().toString());
+			orgEntry.setResource(org);
+			orgEntry.getRequest().setMethod(HTTPVerb.POST);
+			orgEntry.getRequest().setUrl(org.getResourceType().name());
+
+			var eptEntry = bundle.addEntry();
+			eptEntry.setFullUrl("urn:uuid:" + UUID.randomUUID().toString());
+			eptEntry.setResource(ept);
+			eptEntry.getRequest().setMethod(HTTPVerb.POST);
+			eptEntry.getRequest().setUrl(ept.getResourceType().name());
+
+			org.addEndpoint().setReference(eptEntry.getFullUrl());
+			ept.getManagingOrganization().setReference(orgEntry.getFullUrl());
+
+			client.postBundle(bundle);
 		}
 		catch (WebApplicationException e)
 		{
