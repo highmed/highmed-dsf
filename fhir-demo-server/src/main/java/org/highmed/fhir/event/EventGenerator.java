@@ -2,27 +2,20 @@ package org.highmed.fhir.event;
 
 import org.hl7.fhir.r4.model.DomainResource;
 
-public class EventGenerator<R extends DomainResource>
+public class EventGenerator
 {
-	private final Class<R> resourceType;
-
-	public EventGenerator(Class<R> resourceType)
+	public ResourceCreatedEvent newResourceCreatedEvent(DomainResource createdResource)
 	{
-		this.resourceType = resourceType;
+		return new ResourceCreatedEvent(createdResource.getClass(), createdResource);
 	}
 
-	public ResourceCreatedEvent<R> newResourceCreatedEvent(R createdResource)
+	public ResourceUpdatedEvent newResourceUpdatedEvent(DomainResource updatedResource)
 	{
-		return new ResourceCreatedEvent<R>(resourceType, createdResource);
+		return new ResourceUpdatedEvent(updatedResource.getClass(), updatedResource);
 	}
 
-	public ResourceUpdatedEvent<R> newResourceUpdatedEvent(R updatedResource)
+	public ResourceDeletedEvent newResourceDeletedEvent(Class<? extends DomainResource> resourceType, String id)
 	{
-		return new ResourceUpdatedEvent<R>(resourceType, updatedResource);
-	}
-
-	public ResourceDeletedEvent<R> newResourceDeletedEvent(String id)
-	{
-		return new ResourceDeletedEvent<R>(resourceType, id);
+		return new ResourceDeletedEvent(resourceType, id);
 	}
 }

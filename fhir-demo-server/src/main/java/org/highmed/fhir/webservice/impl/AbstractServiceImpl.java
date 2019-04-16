@@ -70,6 +70,7 @@ public abstract class AbstractServiceImpl<D extends DomainResourceDao<R>, R exte
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractServiceImpl.class);
 
+	protected final Class<? extends DomainResource> resourceType;
 	protected final String resourceTypeName;
 	protected final String serverBase;
 	protected final int defaultPageCount;
@@ -77,15 +78,16 @@ public abstract class AbstractServiceImpl<D extends DomainResourceDao<R>, R exte
 	protected final ResourceValidator validator;
 	protected final EventManager eventManager;
 	protected final ExceptionHandler exceptionHandler;
-	protected final EventGenerator<R> eventGenerator;
+	protected final EventGenerator eventGenerator;
 	protected final ResponseGenerator responseGenerator;
 	protected final ParameterConverter parameterConverter;
 
-	public AbstractServiceImpl(String resourceTypeName, String serverBase, int defaultPageCount, D dao,
-			ResourceValidator validator, EventManager eventManager, ExceptionHandler exceptionHandler,
-			EventGenerator<R> eventGenerator, ResponseGenerator responseGenerator,
+	public AbstractServiceImpl(Class<? extends DomainResource> resourceType, String resourceTypeName, String serverBase,
+			int defaultPageCount, D dao, ResourceValidator validator, EventManager eventManager,
+			ExceptionHandler exceptionHandler, EventGenerator eventGenerator, ResponseGenerator responseGenerator,
 			ParameterConverter parameterConverter)
 	{
+		this.resourceType = resourceType;
 		this.resourceTypeName = resourceTypeName;
 		this.serverBase = serverBase;
 		this.defaultPageCount = defaultPageCount;
@@ -126,7 +128,7 @@ public abstract class AbstractServiceImpl<D extends DomainResourceDao<R>, R exte
 	@Override
 	public Response create(R resource, UriInfo uri, HttpHeaders headers)
 	{
-		checkAlreadyExists(uri, headers); // might throw errors
+		checkAlreadyExists(headers); // might throw errors
 
 		Consumer<R> afterCreate = preCreate(resource);
 
@@ -145,32 +147,32 @@ public abstract class AbstractServiceImpl<D extends DomainResourceDao<R>, R exte
 				.location(location).build();
 	}
 
-	private void checkAlreadyExists(UriInfo uri, HttpHeaders headers) throws WebApplicationException
+	private void checkAlreadyExists(HttpHeaders headers) throws WebApplicationException
 	{
-		Optional<String> ifNoneExistsHeader = getHeaderString(headers, Constants.HEADER_IF_NONE_EXIST,
+		Optional<String> ifNoneExistHeader = getHeaderString(headers, Constants.HEADER_IF_NONE_EXIST,
 				Constants.HEADER_IF_NONE_EXIST_LC);
 
-		if (ifNoneExistsHeader.isEmpty())
+		if (ifNoneExistHeader.isEmpty())
 			return; // header not found, nothing to check against
 
-		if (ifNoneExistsHeader.get().isBlank())
-			throw new WebApplicationException(responseGenerator.badIfNoneExistHeaderValue(ifNoneExistsHeader.get()));
+		if (ifNoneExistHeader.get().isBlank())
+			throw new WebApplicationException(responseGenerator.badIfNoneExistHeaderValue(ifNoneExistHeader.get()));
 
-		String ifNoneExistsHeaderValue = ifNoneExistsHeader.get();
-		if (!ifNoneExistsHeaderValue.contains("?"))
-			ifNoneExistsHeaderValue = '?' + ifNoneExistsHeaderValue;
+		String ifNoneExistHeaderValue = ifNoneExistHeader.get();
+		if (!ifNoneExistHeaderValue.contains("?"))
+			ifNoneExistHeaderValue = '?' + ifNoneExistHeaderValue;
 
-		UriComponents componentes = UriComponentsBuilder.fromUriString(ifNoneExistsHeaderValue).build();
+		UriComponents componentes = UriComponentsBuilder.fromUriString(ifNoneExistHeaderValue).build();
 		String path = componentes.getPath();
 		if (path != null && !path.isBlank())
-			throw new WebApplicationException(responseGenerator.badIfNoneExistHeaderValue(ifNoneExistsHeader.get()));
+			throw new WebApplicationException(responseGenerator.badIfNoneExistHeaderValue(ifNoneExistHeader.get()));
 
 		Map<String, List<String>> queryParameters = componentes.getQueryParams();
 		if (Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(queryParameters::containsKey))
 		{
 			logger.warn(
 					"{} Header contains query parameter not applicable in this conditional create context: '{}', parameters {} will be ignored",
-					Constants.HEADER_IF_NONE_EXIST, ifNoneExistsHeader.get(),
+					Constants.HEADER_IF_NONE_EXIST, ifNoneExistHeader.get(),
 					Arrays.toString(SearchQuery.STANDARD_PARAMETERS));
 
 			queryParameters = queryParameters.entrySet().stream()
@@ -185,15 +187,14 @@ public abstract class AbstractServiceImpl<D extends DomainResourceDao<R>, R exte
 				.getUnsupportedQueryParameters(queryParameters);
 		if (!unsupportedQueryParameters.isEmpty())
 			throw new WebApplicationException(
-					responseGenerator.badIfNoneExistHeaderValue(ifNoneExistsHeader.get(), unsupportedQueryParameters));
+					responseGenerator.badIfNoneExistHeaderValue(ifNoneExistHeader.get(), unsupportedQueryParameters));
 
 		PartialResult<R> result = exceptionHandler.handleSqlException(() -> dao.search(query));
 		if (result.getOverallCount() == 1)
-			throw new WebApplicationException(
-					responseGenerator.oneExists(resourceTypeName, ifNoneExistsHeader.get(), uri));
+			throw new WebApplicationException(responseGenerator.oneExists(resourceTypeName, ifNoneExistHeader.get()));
 		else if (result.getOverallCount() > 1)
 			throw new WebApplicationException(
-					responseGenerator.multipleExists(resourceTypeName, ifNoneExistsHeader.get()));
+					responseGenerator.multipleExists(resourceTypeName, ifNoneExistHeader.get()));
 	}
 
 	private Optional<String> getHeaderString(HttpHeaders headers, String... headerNames)
@@ -460,7 +461,7 @@ public abstract class AbstractServiceImpl<D extends DomainResourceDao<R>, R exte
 
 		exceptionHandler.handleSqlException(() -> dao.delete(parameterConverter.toUuid(resourceTypeName, id)));
 
-		eventManager.handleEvent(eventGenerator.newResourceDeletedEvent(id));
+		eventManager.handleEvent(eventGenerator.newResourceDeletedEvent(resourceType, id));
 
 		if (afterDelete != null)
 			afterDelete.accept(id);

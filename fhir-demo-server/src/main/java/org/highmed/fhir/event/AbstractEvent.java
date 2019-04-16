@@ -4,9 +4,9 @@ import java.util.Objects;
 
 import org.hl7.fhir.r4.model.DomainResource;
 
-public class AbstractEvent<R extends DomainResource> implements Event<R>
+public class AbstractEvent implements Event
 {
-	private final Class<R> type;
+	private final Class<? extends DomainResource> type;
 	private final String id;
 
 	/**
@@ -15,14 +15,14 @@ public class AbstractEvent<R extends DomainResource> implements Event<R>
 	 * @param id
 	 *            not <code>null</code>
 	 */
-	public AbstractEvent(Class<R> type, String id)
+	public AbstractEvent(Class<? extends DomainResource> type, String id)
 	{
 		this.type = Objects.requireNonNull(type, "type");
 		this.id = Objects.requireNonNull(id, "id");
 	}
 
 	@Override
-	public Class<R> getResourceType()
+	public Class<? extends DomainResource> getResourceType()
 	{
 		return type;
 	}
@@ -37,7 +37,7 @@ public class AbstractEvent<R extends DomainResource> implements Event<R>
 	 * @return always <code>null</code>
 	 */
 	@Override
-	public R getResource()
+	public DomainResource getResource()
 	{
 		return null;
 	}

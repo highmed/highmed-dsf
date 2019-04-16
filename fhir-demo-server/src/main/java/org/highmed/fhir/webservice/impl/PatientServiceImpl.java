@@ -14,10 +14,9 @@ public class PatientServiceImpl extends AbstractServiceImpl<PatientDao, Patient>
 {
 	public PatientServiceImpl(String resourceTypeName, String serverBase, int defaultPageCount, PatientDao dao,
 			ResourceValidator validator, EventManager eventManager, ExceptionHandler exceptionHandler,
-			EventGenerator<Patient> eventGenerator, ResponseGenerator responseGenerator,
-			ParameterConverter parameterConverter)
+			EventGenerator eventGenerator, ResponseGenerator responseGenerator, ParameterConverter parameterConverter)
 	{
-		super(resourceTypeName, serverBase, defaultPageCount, dao, validator, eventManager, exceptionHandler,
-				eventGenerator, responseGenerator, parameterConverter);
+		super(Patient.class, resourceTypeName, serverBase, defaultPageCount, dao, validator, eventManager,
+				exceptionHandler, eventGenerator, responseGenerator, parameterConverter);
 	}
 }

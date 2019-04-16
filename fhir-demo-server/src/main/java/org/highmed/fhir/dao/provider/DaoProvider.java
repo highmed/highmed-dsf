@@ -1,6 +1,9 @@
 package org.highmed.fhir.dao.provider;
 
+import java.util.Optional;
+
 import org.highmed.fhir.dao.CodeSystemDao;
+import org.highmed.fhir.dao.DomainResourceDao;
 import org.highmed.fhir.dao.EndpointDao;
 import org.highmed.fhir.dao.HealthcareServiceDao;
 import org.highmed.fhir.dao.LocationDao;
@@ -15,6 +18,7 @@ import org.highmed.fhir.dao.StructureDefinitionSnapshotDao;
 import org.highmed.fhir.dao.SubscriptionDao;
 import org.highmed.fhir.dao.TaskDao;
 import org.highmed.fhir.dao.ValueSetDao;
+import org.hl7.fhir.r4.model.DomainResource;
 
 public interface DaoProvider
 {
@@ -47,4 +51,6 @@ public interface DaoProvider
 	TaskDao getTaskDao();
 
 	ValueSetDao getValueSetDao();
+
+	<R extends DomainResource> Optional<? extends DomainResourceDao<R>> getDao(Class<R> resourceClass);
 }

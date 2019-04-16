@@ -59,13 +59,12 @@ public class StructureDefinitionServiceImpl extends AbstractServiceImpl<Structur
 
 	public StructureDefinitionServiceImpl(String resourceTypeName, String serverBase, int defaultPageCount,
 			StructureDefinitionDao dao, ResourceValidator validator, EventManager eventManager,
-			ExceptionHandler exceptionHandler, EventGenerator<StructureDefinition> eventGenerator,
-			ResponseGenerator responseGenerator, ParameterConverter parameterConverter,
-			StructureDefinitionSnapshotDao structureDefinitionSnapshotDao, SnapshotGenerator sanapshotGenerator,
-			SnapshotDependencyAnalyzer snapshotDependencyAnalyzer)
+			ExceptionHandler exceptionHandler, EventGenerator eventGenerator, ResponseGenerator responseGenerator,
+			ParameterConverter parameterConverter, StructureDefinitionSnapshotDao structureDefinitionSnapshotDao,
+			SnapshotGenerator sanapshotGenerator, SnapshotDependencyAnalyzer snapshotDependencyAnalyzer)
 	{
-		super(resourceTypeName, serverBase, defaultPageCount, dao, validator, eventManager, exceptionHandler,
-				eventGenerator, responseGenerator, parameterConverter);
+		super(StructureDefinition.class, resourceTypeName, serverBase, defaultPageCount, dao, validator, eventManager,
+				exceptionHandler, eventGenerator, responseGenerator, parameterConverter);
 
 		this.snapshotDao = structureDefinitionSnapshotDao;
 		this.snapshotGenerator = sanapshotGenerator;
@@ -106,7 +105,6 @@ public class StructureDefinitionServiceImpl extends AbstractServiceImpl<Structur
 		{
 			if (preResource != null && preResource.hasSnapshot())
 			{
-
 				handleSnapshot(preResource,
 						info -> snapshotDao.create(
 								parameterConverter.toUuid(resourceTypeName, postResource.getIdElement().getIdPart()),

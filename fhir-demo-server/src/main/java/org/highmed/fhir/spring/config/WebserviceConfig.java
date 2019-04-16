@@ -110,6 +110,9 @@ public class WebserviceConfig
 	@Autowired
 	private HelperConfig helperConfig;
 
+	@Autowired
+	private CommandConfig commandConfig;
+
 	@Bean
 	public ConformanceService conformanceService()
 	{
@@ -132,8 +135,8 @@ public class WebserviceConfig
 	{
 		return new CodeSystemServiceImpl(resourceTypeName(CodeSystem.class), serverBase, defaultPageCount,
 				daoConfig.codeSystemDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
-				helperConfig.exceptionHandler(), eventConfig.eventGenerator(CodeSystem.class),
-				helperConfig.responseGenerator(), helperConfig.parameterConverter());
+				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
+				helperConfig.parameterConverter());
 	}
 
 	@Bean
@@ -146,8 +149,8 @@ public class WebserviceConfig
 	{
 		return new EndpointServiceImpl(resourceTypeName(Endpoint.class), serverBase, defaultPageCount,
 				daoConfig.endpointDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
-				helperConfig.exceptionHandler(), eventConfig.eventGenerator(Endpoint.class),
-				helperConfig.responseGenerator(), helperConfig.parameterConverter());
+				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
+				helperConfig.parameterConverter());
 	}
 
 	@Bean
@@ -160,8 +163,8 @@ public class WebserviceConfig
 	{
 		return new HealthcareServiceServiceImpl(resourceTypeName(HealthcareService.class), serverBase, defaultPageCount,
 				daoConfig.healthcareServiceDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
-				helperConfig.exceptionHandler(), eventConfig.eventGenerator(HealthcareService.class),
-				helperConfig.responseGenerator(), helperConfig.parameterConverter());
+				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
+				helperConfig.parameterConverter());
 	}
 
 	@Bean
@@ -174,8 +177,8 @@ public class WebserviceConfig
 	{
 		return new LocationServiceImpl(resourceTypeName(Location.class), serverBase, defaultPageCount,
 				daoConfig.locationDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
-				helperConfig.exceptionHandler(), eventConfig.eventGenerator(Location.class),
-				helperConfig.responseGenerator(), helperConfig.parameterConverter());
+				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
+				helperConfig.parameterConverter());
 	}
 
 	@Bean
@@ -188,8 +191,8 @@ public class WebserviceConfig
 	{
 		return new OrganizationServiceImpl(resourceTypeName(Organization.class), serverBase, defaultPageCount,
 				daoConfig.organizationDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
-				helperConfig.exceptionHandler(), eventConfig.eventGenerator(Organization.class),
-				helperConfig.responseGenerator(), helperConfig.parameterConverter());
+				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
+				helperConfig.parameterConverter());
 	}
 
 	@Bean
@@ -202,8 +205,8 @@ public class WebserviceConfig
 	{
 		return new PatientServiceImpl(resourceTypeName(Patient.class), serverBase, defaultPageCount,
 				daoConfig.patientDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
-				helperConfig.exceptionHandler(), eventConfig.eventGenerator(Patient.class),
-				helperConfig.responseGenerator(), helperConfig.parameterConverter());
+				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
+				helperConfig.parameterConverter());
 	}
 
 	@Bean
@@ -216,8 +219,8 @@ public class WebserviceConfig
 	{
 		return new PractitionerRoleServiceImpl(resourceTypeName(PractitionerRole.class), serverBase, defaultPageCount,
 				daoConfig.practitionerRoleDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
-				helperConfig.exceptionHandler(), eventConfig.eventGenerator(PractitionerRole.class),
-				helperConfig.responseGenerator(), helperConfig.parameterConverter());
+				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
+				helperConfig.parameterConverter());
 	}
 
 	@Bean
@@ -230,8 +233,8 @@ public class WebserviceConfig
 	{
 		return new PractitionerServiceImpl(resourceTypeName(Practitioner.class), serverBase, defaultPageCount,
 				daoConfig.practitionerDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
-				helperConfig.exceptionHandler(), eventConfig.eventGenerator(Practitioner.class),
-				helperConfig.responseGenerator(), helperConfig.parameterConverter());
+				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
+				helperConfig.parameterConverter());
 	}
 
 	@Bean
@@ -244,8 +247,8 @@ public class WebserviceConfig
 	{
 		return new ProvenanceServiceImpl(resourceTypeName(Provenance.class), serverBase, defaultPageCount,
 				daoConfig.provenanceDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
-				helperConfig.exceptionHandler(), eventConfig.eventGenerator(Provenance.class),
-				helperConfig.responseGenerator(), helperConfig.parameterConverter());
+				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
+				helperConfig.parameterConverter());
 	}
 
 	@Bean
@@ -258,8 +261,8 @@ public class WebserviceConfig
 	{
 		return new ResearchStudyServiceImpl(resourceTypeName(ResearchStudy.class), serverBase, defaultPageCount,
 				daoConfig.researchStudyDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
-				helperConfig.exceptionHandler(), eventConfig.eventGenerator(ResearchStudy.class),
-				helperConfig.responseGenerator(), helperConfig.parameterConverter());
+				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
+				helperConfig.parameterConverter());
 	}
 
 	@Bean
@@ -273,10 +276,10 @@ public class WebserviceConfig
 	{
 		return new StructureDefinitionServiceImpl(resourceTypeName(StructureDefinition.class), serverBase,
 				defaultPageCount, daoConfig.structureDefinitionDao(), validationConfig.resourceValidator(),
-				eventConfig.eventManager(), helperConfig.exceptionHandler(),
-				eventConfig.eventGenerator(StructureDefinition.class), helperConfig.responseGenerator(),
-				helperConfig.parameterConverter(), daoConfig.structureDefinitionSnapshotDao(),
-				snapshotConfig.snapshotGenerator(), snapshotConfig.snapshotDependencyAnalyzer());
+				eventConfig.eventManager(), helperConfig.exceptionHandler(), eventConfig.eventGenerator(),
+				helperConfig.responseGenerator(), helperConfig.parameterConverter(),
+				daoConfig.structureDefinitionSnapshotDao(), snapshotConfig.snapshotGenerator(),
+				snapshotConfig.snapshotDependencyAnalyzer());
 	}
 
 	@Bean
@@ -289,8 +292,8 @@ public class WebserviceConfig
 	{
 		return new SubscriptionServiceImpl(resourceTypeName(Subscription.class), serverBase, defaultPageCount,
 				daoConfig.subscriptionDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
-				helperConfig.exceptionHandler(), eventConfig.eventGenerator(Subscription.class),
-				helperConfig.responseGenerator(), helperConfig.parameterConverter());
+				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
+				helperConfig.parameterConverter());
 	}
 
 	@Bean
@@ -303,8 +306,7 @@ public class WebserviceConfig
 	{
 		return new TaskServiceImpl(resourceTypeName(Task.class), serverBase, defaultPageCount, daoConfig.taskDao(),
 				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
-				eventConfig.eventGenerator(Task.class), helperConfig.responseGenerator(),
-				helperConfig.parameterConverter());
+				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter());
 	}
 
 	@Bean
@@ -317,8 +319,8 @@ public class WebserviceConfig
 	{
 		return new ValueSetServiceImpl(resourceTypeName(ValueSet.class), serverBase, defaultPageCount,
 				daoConfig.valueSetDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
-				helperConfig.exceptionHandler(), eventConfig.eventGenerator(ValueSet.class),
-				helperConfig.responseGenerator(), helperConfig.parameterConverter());
+				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
+				helperConfig.parameterConverter());
 	}
 
 	@Bean
@@ -329,6 +331,7 @@ public class WebserviceConfig
 
 	private RootServiceImpl rootServiceImpl()
 	{
-		return new RootServiceImpl();
+		return new RootServiceImpl(commandConfig.commandFactory(), helperConfig.responseGenerator(),
+				helperConfig.parameterConverter());
 	}
 }

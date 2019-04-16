@@ -11,7 +11,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.UriInfo;
 
 import org.highmed.fhir.search.PartialResult;
 import org.highmed.fhir.search.SearchQueryParameterError;
@@ -221,7 +220,7 @@ public class ResponseGenerator
 		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
-	public Response oneExists(String resourceTypeName, String ifNoneExistsHeaderValue, UriInfo uri)
+	public Response oneExists(String resourceTypeName, String ifNoneExistsHeaderValue)
 	{
 		logger.info("{} with criteria {} exists", resourceTypeName, ifNoneExistsHeaderValue);
 

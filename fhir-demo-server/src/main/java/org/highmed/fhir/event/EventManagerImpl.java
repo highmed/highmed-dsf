@@ -194,12 +194,12 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 	}
 
 	@Override
-	public void handleEvent(Event<?> event)
+	public void handleEvent(Event event)
 	{
 		executor.execute(() -> handleEventAsync(event));
 	}
 
-	private void handleEventAsync(Event<?> event)
+	private void handleEventAsync(Event event)
 	{
 		logger.debug("handling event {} for resource of type {} with id {}", event.getClass().getName(),
 				event.getResourceType().getAnnotation(ResourceDef.class).name(), event.getId());
@@ -229,7 +229,7 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 		matchingSubscriptions.forEach(sAndM -> this.handleEvent(sAndM.subscription, event));
 	}
 
-	private void handleEvent(Subscription s, Event<?> event)
+	private void handleEvent(Subscription s, Event event)
 	{
 		Optional<List<SessionIdAndRemoteAsync>> optRemotes = asyncRemotesBySubscriptionIdPart
 				.get(s.getIdElement().getIdPart());

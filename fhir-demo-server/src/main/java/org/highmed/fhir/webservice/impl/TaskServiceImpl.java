@@ -14,10 +14,9 @@ public class TaskServiceImpl extends AbstractServiceImpl<TaskDao, Task> implemen
 {
 	public TaskServiceImpl(String resourceTypeName, String serverBase, int defaultPageCount, TaskDao dao,
 			ResourceValidator validator, EventManager eventManager, ExceptionHandler exceptionHandler,
-			EventGenerator<Task> eventGenerator, ResponseGenerator responseGenerator,
-			ParameterConverter parameterConverter)
+			EventGenerator eventGenerator, ResponseGenerator responseGenerator, ParameterConverter parameterConverter)
 	{
-		super(resourceTypeName, serverBase, defaultPageCount, dao, validator, eventManager, exceptionHandler,
-				eventGenerator, responseGenerator, parameterConverter);
+		super(Task.class, resourceTypeName, serverBase, defaultPageCount, dao, validator, eventManager,
+				exceptionHandler, eventGenerator, responseGenerator, parameterConverter);
 	}
 }

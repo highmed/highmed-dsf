@@ -15,10 +15,10 @@ public class HealthcareServiceServiceImpl extends AbstractServiceImpl<Healthcare
 {
 	public HealthcareServiceServiceImpl(String resourceTypeName, String serverBase, int defaultPageCount,
 			HealthcareServiceDao dao, ResourceValidator validator, EventManager eventManager,
-			ExceptionHandler exceptionHandler, EventGenerator<HealthcareService> eventGenerator,
-			ResponseGenerator responseGenerator, ParameterConverter parameterConverter)
+			ExceptionHandler exceptionHandler, EventGenerator eventGenerator, ResponseGenerator responseGenerator,
+			ParameterConverter parameterConverter)
 	{
-		super(resourceTypeName, serverBase, defaultPageCount, dao, validator, eventManager, exceptionHandler,
-				eventGenerator, responseGenerator, parameterConverter);
+		super(HealthcareService.class, resourceTypeName, serverBase, defaultPageCount, dao, validator, eventManager,
+				exceptionHandler, eventGenerator, responseGenerator, parameterConverter);
 	}
 }

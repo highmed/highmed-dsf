@@ -10,10 +10,8 @@ import org.highmed.fhir.event.EventManagerImpl;
 import org.highmed.fhir.event.MatcherFactory;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
 
 @Configuration
 public class EventConfig
@@ -63,9 +61,8 @@ public class EventConfig
 	}
 
 	@Bean
-	@Scope(BeanDefinition.SCOPE_PROTOTYPE)
-	public <R extends DomainResource> EventGenerator<R> eventGenerator(Class<R> resourceType)
+	public EventGenerator eventGenerator()
 	{
-		return new EventGenerator<R>(resourceType);
+		return new EventGenerator();
 	}
 }

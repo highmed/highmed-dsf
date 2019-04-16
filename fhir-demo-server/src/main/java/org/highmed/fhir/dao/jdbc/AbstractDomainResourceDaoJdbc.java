@@ -17,7 +17,8 @@ import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import org.apache.commons.dbcp2.BasicDataSource;
+import javax.sql.DataSource;
+
 import org.highmed.fhir.dao.DomainResourceDao;
 import org.highmed.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.fhir.dao.exception.ResourceNotFoundException;
@@ -96,7 +97,7 @@ abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implement
 		}
 	}
 
-	private final BasicDataSource dataSource;
+	private final DataSource dataSource;
 	private final FhirContext fhirContext;
 	private final Class<R> resourceType;
 	private final String resourceTypeName;
@@ -112,7 +113,7 @@ abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implement
 	 * request basis
 	 */
 	@SafeVarargs
-	public AbstractDomainResourceDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext, Class<R> resourceType,
+	public AbstractDomainResourceDaoJdbc(DataSource dataSource, FhirContext fhirContext, Class<R> resourceType,
 			String resourceTable, String resourceColumn, String resourceIdColumn,
 			Supplier<SearchQueryParameter<R>>... searchParameterFactories)
 	{
@@ -144,7 +145,7 @@ abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implement
 		Objects.requireNonNull(resourceIdColumn, "resourceIdColumn");
 	}
 
-	protected BasicDataSource getDataSource()
+	protected DataSource getDataSource()
 	{
 		return dataSource;
 	}
@@ -170,17 +171,40 @@ abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implement
 		return resourceTypeName;
 	}
 
+	@Override
 	public final R create(R resource) throws SQLException
 	{
+		Objects.requireNonNull(resource, "resource");
+
+		return createWithId(resource, UUID.randomUUID());
+	}
+
+	@Override
+	public R createWithId(R resource, UUID uuid) throws SQLException
+	{
+		Objects.requireNonNull(resource, "resource");
+		Objects.requireNonNull(uuid, "uuid");
+
 		try (Connection connection = dataSource.getConnection())
 		{
 			connection.setReadOnly(false);
-
-			R inserted = create(connection, resource, UUID.randomUUID());
-
-			logger.debug("{} with ID {} created", resourceTypeName, inserted.getId());
-			return inserted;
+			return createWithTransactionAndId(connection, resource, uuid);
 		}
+	}
+
+	@Override
+	public R createWithTransactionAndId(Connection connection, R resource, UUID uuid) throws SQLException
+	{
+		Objects.requireNonNull(connection, "connection");
+		Objects.requireNonNull(resource, "resource");
+		Objects.requireNonNull(uuid, "uuid");
+		if (connection.isReadOnly())
+			throw new IllegalStateException("Connection is read-only");
+
+		R inserted = create(connection, resource, uuid);
+
+		logger.debug("{} with ID {} created", resourceTypeName, inserted.getId());
+		return inserted;
 	}
 
 	private R create(Connection connection, R resource, UUID uuid) throws SQLException
@@ -291,14 +315,28 @@ abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implement
 		}
 	}
 
+	@Override
 	public final Optional<R> read(UUID uuid) throws SQLException, ResourceDeletedException
 	{
 		if (uuid == null)
 			return Optional.empty();
 
-		try (Connection connection = dataSource.getConnection();
-				PreparedStatement statement = connection.prepareStatement("SELECT " + resourceColumn + ", deleted FROM "
-						+ resourceTable + " WHERE " + resourceIdColumn + " = ? ORDER BY version DESC LIMIT 1"))
+		try (Connection connection = dataSource.getConnection())
+		{
+			return readWithTransaction(connection, uuid);
+		}
+	}
+
+	@Override
+	public Optional<R> readWithTransaction(Connection connection, UUID uuid)
+			throws SQLException, ResourceDeletedException
+	{
+		Objects.requireNonNull(connection, "connection");
+		if (uuid == null)
+			return Optional.empty();
+
+		try (PreparedStatement statement = connection.prepareStatement("SELECT " + resourceColumn + ", deleted FROM "
+				+ resourceTable + " WHERE " + resourceIdColumn + " = ? ORDER BY version DESC LIMIT 1"))
 		{
 			statement.setObject(1, uuidToPgObject(uuid));
 
@@ -324,14 +362,27 @@ abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implement
 		}
 	}
 
+	@Override
 	public final Optional<R> readVersion(UUID uuid, long version) throws SQLException
 	{
 		if (uuid == null)
 			return Optional.empty();
 
-		try (Connection connection = dataSource.getConnection();
-				PreparedStatement statement = connection.prepareStatement("SELECT " + resourceColumn + " FROM "
-						+ resourceTable + " WHERE " + resourceIdColumn + " = ? AND version = ?"))
+		try (Connection connection = dataSource.getConnection())
+		{
+			return readVersionWithTransaction(connection, uuid, version);
+		}
+	}
+
+	@Override
+	public Optional<R> readVersionWithTransaction(Connection connection, UUID uuid, long version) throws SQLException
+	{
+		Objects.requireNonNull(connection, "connection");
+		if (uuid == null)
+			return Optional.empty();
+
+		try (PreparedStatement statement = connection.prepareStatement("SELECT " + resourceColumn + " FROM "
+				+ resourceTable + " WHERE " + resourceIdColumn + " = ? AND version = ?"))
 		{
 			statement.setObject(1, uuidToPgObject(uuid));
 			statement.setLong(2, version);
@@ -353,15 +404,56 @@ abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implement
 		}
 	}
 
+	@Override
 	public final R update(R resource, Long expectedVersion)
 			throws SQLException, ResourceNotFoundException, ResourceVersionNoMatchException
 	{
+		// Objects.requireNonNull(resource, "resource");
+		// // expectedVersion may be null
+		//
+		// resource = copy(resource); // XXX defensive copy, might want to remove this call
+		//
+		// Objects.requireNonNull(resource, "resource");
+		//
+		// try (Connection connection = dataSource.getConnection())
+		// {
+		// connection.setReadOnly(false);
+		// connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
+		// connection.setAutoCommit(false);
+		//
+		// try
+		// {
+		// LatestVersion latestVersion = getLatestVersion(resource, connection);
+		//
+		// if (expectedVersion != null && expectedVersion != latestVersion.version)
+		// {
+		// logger.info("Expected version {} does not match latest version {}", expectedVersion,
+		// latestVersion.version);
+		// throw new ResourceVersionNoMatchException(resource.getIdElement().getIdPart(), expectedVersion,
+		// latestVersion.version);
+		// }
+		//
+		// long newVersion = latestVersion.version + 1;
+		//
+		// R updated = update(connection, resource, newVersion);
+		// if (latestVersion.deleted) // TODO check if resurrection need undelete for old versions
+		// markDeleted(connection, toUuid(updated.getIdElement().getIdPart()), false);
+		//
+		// connection.commit();
+		//
+		// logger.debug("{} with IdPart {} updated, new version {}", resourceTypeName,
+		// updated.getIdElement().getIdPart(), newVersion);
+		// return updated;
+		// }
+		// catch (Exception e)
+		// {
+		// connection.rollback();
+		// throw e;
+		// }
+		// }
+
 		Objects.requireNonNull(resource, "resource");
 		// expectedVersion may be null
-
-		resource = copy(resource); // XXX defensive copy, might want to remove this call
-
-		Objects.requireNonNull(resource, "resource");
 
 		try (Connection connection = dataSource.getConnection())
 		{
@@ -371,27 +463,11 @@ abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implement
 
 			try
 			{
-				LatestVersion latestVersion = getLatestVersion(resource, connection);
-
-				if (expectedVersion != null && expectedVersion != latestVersion.version)
-				{
-					logger.info("Expected version {} does not match latest version {}", expectedVersion,
-							latestVersion.version);
-					throw new ResourceVersionNoMatchException(resource.getIdElement().getIdPart(), expectedVersion,
-							latestVersion.version);
-				}
-
-				long newVersion = latestVersion.version + 1;
-
-				R updated = update(connection, resource, newVersion);
-				if (latestVersion.deleted) // TODO check if resurrection need undelete for old versions
-					markDeleted(connection, toUuid(updated.getIdElement().getIdPart()), false);
+				R updatedResource = updateWithTransaction(connection, resource, expectedVersion);
 
 				connection.commit();
 
-				logger.debug("{} with IdPart {} updated, new version {}", resourceTypeName,
-						updated.getIdElement().getIdPart(), newVersion);
-				return updated;
+				return updatedResource;
 			}
 			catch (Exception e)
 			{
@@ -399,6 +475,43 @@ abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implement
 				throw e;
 			}
 		}
+	}
+
+	@Override
+	public R updateWithTransaction(Connection connection, R resource, Long expectedVersion)
+			throws SQLException, ResourceNotFoundException, ResourceVersionNoMatchException
+	{
+		Objects.requireNonNull(connection, "connection");
+		Objects.requireNonNull(resource, "resource");
+		// expectedVersion may be null
+		if (connection.isReadOnly())
+			throw new IllegalStateException("Connection is read-only");
+		if (connection.getTransactionIsolation() != Connection.TRANSACTION_REPEATABLE_READ
+				&& connection.getTransactionIsolation() != Connection.TRANSACTION_SERIALIZABLE)
+			throw new IllegalStateException("Connection transaction isolation not REPEATABLE_READ or SERIALIZABLE");
+		if (connection.getAutoCommit())
+			throw new IllegalStateException("Connection transaction is in auto commit mode");
+
+		resource = copy(resource); // XXX defensive copy, might want to remove this call
+
+		LatestVersion latestVersion = getLatestVersion(resource, connection);
+
+		if (expectedVersion != null && expectedVersion != latestVersion.version)
+		{
+			logger.info("Expected version {} does not match latest version {}", expectedVersion, latestVersion.version);
+			throw new ResourceVersionNoMatchException(resource.getIdElement().getIdPart(), expectedVersion,
+					latestVersion.version);
+		}
+
+		long newVersion = latestVersion.version + 1;
+
+		R updated = update(connection, resource, newVersion);
+		if (latestVersion.deleted) // TODO check if resurrection needs undelete for old versions
+			markDeleted(connection, toUuid(updated.getIdElement().getIdPart()), false);
+
+		logger.debug("{} with IdPart {} updated, new version {}", resourceTypeName, updated.getIdElement().getIdPart(),
+				newVersion);
+		return updated;
 	}
 
 	protected final UUID toUuid(String idPart)
@@ -492,13 +605,30 @@ abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implement
 		}
 	}
 
+	@Override
 	public final void delete(UUID uuid) throws SQLException
 	{
+		if (uuid == null)
+			return;
+
 		try (Connection connection = dataSource.getConnection())
 		{
 			connection.setReadOnly(false);
-			markDeleted(connection, uuid, true);
+
+			deleteWithTransaction(connection, uuid);
 		}
+	}
+
+	@Override
+	public void deleteWithTransaction(Connection connection, UUID uuid) throws SQLException
+	{
+		if (uuid == null)
+			return;
+		Objects.requireNonNull(connection, "connection");
+		if (connection.isReadOnly())
+			throw new IllegalStateException("Connection is read-only");
+
+		markDeleted(connection, uuid, true);
 	}
 
 	protected final void markDeleted(Connection connection, UUID uuid, boolean deleted) throws SQLException
@@ -519,55 +649,68 @@ abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implement
 		}
 	}
 
+	@Override
 	public final PartialResult<R> search(DbSearchQuery query) throws SQLException
 	{
+		Objects.requireNonNull(query, "query");
+
 		try (Connection connection = getDataSource().getConnection())
 		{
-			int overallCount = 0;
-			try (PreparedStatement statement = connection.prepareStatement(query.getCountSql()))
+			return searchWithTransaction(connection, query);
+		}
+	}
+
+	@Override
+	public PartialResult<R> searchWithTransaction(Connection connection, DbSearchQuery query) throws SQLException
+	{
+		Objects.requireNonNull(connection, "connection");
+		Objects.requireNonNull(query, "query");
+
+		int overallCount = 0;
+		try (PreparedStatement statement = connection.prepareStatement(query.getCountSql()))
+		{
+			query.modifyStatement(statement, connection::createArrayOf);
+
+			logger.trace("Executing query '{}'", statement);
+			try (ResultSet result = statement.executeQuery())
+			{
+				if (result.next())
+					overallCount = result.getInt(1);
+			}
+		}
+
+		List<R> partialResult = new ArrayList<>();
+		List<DomainResource> includes = new ArrayList<>();
+
+		if (!query.isCountOnly(overallCount)) // TODO ask db if count 0
+		{
+			try (PreparedStatement statement = connection.prepareStatement(query.getSearchSql()))
 			{
 				query.modifyStatement(statement, connection::createArrayOf);
 
 				logger.trace("Executing query '{}'", statement);
 				try (ResultSet result = statement.executeQuery())
 				{
-					if (result.next())
-						overallCount = result.getInt(1);
-				}
-			}
-
-			List<R> partialResult = new ArrayList<>();
-			List<DomainResource> includes = new ArrayList<>();
-
-			if (!query.isCountOnly(overallCount)) // TODO ask db if count 0
-			{
-				try (PreparedStatement statement = connection.prepareStatement(query.getSearchSql()))
-				{
-					query.modifyStatement(statement, connection::createArrayOf);
-
-					logger.trace("Executing query '{}'", statement);
-					try (ResultSet result = statement.executeQuery())
+					ResultSetMetaData metaData = result.getMetaData();
+					while (result.next())
 					{
-						ResultSetMetaData metaData = result.getMetaData();
-						while (result.next())
-						{
-							partialResult.add(getResource(result, 1));
+						partialResult.add(getResource(result, 1));
 
-							for (int c = 2; c <= metaData.getColumnCount(); c++)
-								includes.addAll(getResources(result, c));
-						}
+						for (int c = 2; c <= metaData.getColumnCount(); c++)
+							includes.addAll(getResources(result, c));
 					}
 				}
 			}
-
-			includes = includes.stream().map(r -> new DomainResourceDistinctById(r.getIdElement(), r)).distinct()
-					.map(DomainResourceDistinctById::getResource).collect(Collectors.toList());
-
-			return new PartialResult<>(overallCount, query.getPageAndCount(), partialResult, includes,
-					query.isCountOnly(overallCount));
 		}
+
+		includes = includes.stream().map(r -> new DomainResourceDistinctById(r.getIdElement(), r)).distinct()
+				.map(DomainResourceDistinctById::getResource).collect(Collectors.toList());
+
+		return new PartialResult<>(overallCount, query.getPageAndCount(), partialResult, includes,
+				query.isCountOnly(overallCount));
 	}
 
+	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public final SearchQuery<R> createSearchQuery(int effectivePage, int effectiveCount)
 	{

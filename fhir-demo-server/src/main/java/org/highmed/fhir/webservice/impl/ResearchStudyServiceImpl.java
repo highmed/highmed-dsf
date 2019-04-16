@@ -15,10 +15,10 @@ public class ResearchStudyServiceImpl extends AbstractServiceImpl<ResearchStudyD
 {
 	public ResearchStudyServiceImpl(String resourceTypeName, String serverBase, int defaultPageCount,
 			ResearchStudyDao dao, ResourceValidator validator, EventManager eventManager,
-			ExceptionHandler exceptionHandler, EventGenerator<ResearchStudy> eventGenerator,
-			ResponseGenerator responseGenerator, ParameterConverter parameterConverter)
+			ExceptionHandler exceptionHandler, EventGenerator eventGenerator, ResponseGenerator responseGenerator,
+			ParameterConverter parameterConverter)
 	{
-		super(resourceTypeName, serverBase, defaultPageCount, dao, validator, eventManager, exceptionHandler,
-				eventGenerator, responseGenerator, parameterConverter);
+		super(ResearchStudy.class, resourceTypeName, serverBase, defaultPageCount, dao, validator, eventManager,
+				exceptionHandler, eventGenerator, responseGenerator, parameterConverter);
 	}
 }

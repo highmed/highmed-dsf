@@ -14,10 +14,9 @@ public class ProvenanceServiceImpl extends AbstractServiceImpl<ProvenanceDao, Pr
 {
 	public ProvenanceServiceImpl(String resourceTypeName, String serverBase, int defaultPageCount, ProvenanceDao dao,
 			ResourceValidator validator, EventManager eventManager, ExceptionHandler exceptionHandler,
-			EventGenerator<Provenance> eventGenerator, ResponseGenerator responseGenerator,
-			ParameterConverter parameterConverter)
+			EventGenerator eventGenerator, ResponseGenerator responseGenerator, ParameterConverter parameterConverter)
 	{
-		super(resourceTypeName, serverBase, defaultPageCount, dao, validator, eventManager, exceptionHandler,
-				eventGenerator, responseGenerator, parameterConverter);
+		super(Provenance.class, resourceTypeName, serverBase, defaultPageCount, dao, validator, eventManager,
+				exceptionHandler, eventGenerator, responseGenerator, parameterConverter);
 	}
 }

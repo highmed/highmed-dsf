@@ -2,9 +2,9 @@ package org.highmed.fhir.event;
 
 import org.hl7.fhir.r4.model.DomainResource;
 
-public class ResourceDeletedEvent<R extends DomainResource> extends AbstractEvent<R> implements Event<R>
+public class ResourceDeletedEvent extends AbstractEvent implements Event
 {
-	public ResourceDeletedEvent(Class<R> type, String id)
+	public ResourceDeletedEvent(Class<? extends DomainResource> type, String id)
 	{
 		super(type, id);
 	}

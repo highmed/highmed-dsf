@@ -14,10 +14,9 @@ public class LocationServiceImpl extends AbstractServiceImpl<LocationDao, Locati
 {
 	public LocationServiceImpl(String resourceTypeName, String serverBase, int defaultPageCount, LocationDao dao,
 			ResourceValidator validator, EventManager eventManager, ExceptionHandler exceptionHandler,
-			EventGenerator<Location> eventGenerator, ResponseGenerator responseGenerator,
-			ParameterConverter parameterConverter)
+			EventGenerator eventGenerator, ResponseGenerator responseGenerator, ParameterConverter parameterConverter)
 	{
-		super(resourceTypeName, serverBase, defaultPageCount, dao, validator, eventManager, exceptionHandler,
-				eventGenerator, responseGenerator, parameterConverter);
+		super(Location.class, resourceTypeName, serverBase, defaultPageCount, dao, validator, eventManager,
+				exceptionHandler, eventGenerator, responseGenerator, parameterConverter);
 	}
 }

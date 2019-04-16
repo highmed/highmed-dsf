@@ -14,10 +14,9 @@ public class ValueSetServiceImpl extends AbstractServiceImpl<ValueSetDao, ValueS
 {
 	public ValueSetServiceImpl(String resourceTypeName, String serverBase, int defaultPageCount, ValueSetDao dao,
 			ResourceValidator validator, EventManager eventManager, ExceptionHandler exceptionHandler,
-			EventGenerator<ValueSet> eventGenerator, ResponseGenerator responseGenerator,
-			ParameterConverter parameterConverter)
+			EventGenerator eventGenerator, ResponseGenerator responseGenerator, ParameterConverter parameterConverter)
 	{
-		super(resourceTypeName, serverBase, defaultPageCount, dao, validator, eventManager, exceptionHandler,
-				eventGenerator, responseGenerator, parameterConverter);
+		super(ValueSet.class, resourceTypeName, serverBase, defaultPageCount, dao, validator, eventManager,
+				exceptionHandler, eventGenerator, responseGenerator, parameterConverter);
 	}
 }

@@ -66,6 +66,24 @@ public class ExceptionHandler
 		return new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR).entity(outcome).build());
 	}
 
+	public WebApplicationException internalServerErrorBundleTransaction(Exception e)
+	{
+		logger.error("Error while executing transaction", e);
+
+		OperationOutcome outcome = responseGenerator.createOutcome(IssueSeverity.ERROR, IssueType.EXCEPTION,
+				"Error while executing transaction");
+		return new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR).entity(outcome).build());
+	}
+
+	public WebApplicationException internalServerErrorBundleBatch(Exception e)
+	{
+		logger.error("Error while executing batch element", e);
+
+		OperationOutcome outcome = responseGenerator.createOutcome(IssueSeverity.ERROR, IssueType.EXCEPTION,
+				"Error while executing batch element");
+		return new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR).entity(outcome).build());
+	}
+
 	public <T> T handleSqlExAndResourceNotFoundExForUpdateAsCreateAndResouceVersionNonMatchEx(String resourceTypeName,
 			SupplierWithSqlAndResourceNotFoundAndResouceVersionNoMatchException<T> s)
 	{

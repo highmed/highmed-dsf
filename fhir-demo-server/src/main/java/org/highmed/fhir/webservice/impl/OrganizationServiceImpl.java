@@ -15,10 +15,10 @@ public class OrganizationServiceImpl extends AbstractServiceImpl<OrganizationDao
 {
 	public OrganizationServiceImpl(String resourceTypeName, String serverBase, int defaultPageCount,
 			OrganizationDao dao, ResourceValidator validator, EventManager eventManager,
-			ExceptionHandler exceptionHandler, EventGenerator<Organization> eventGenerator,
-			ResponseGenerator responseGenerator, ParameterConverter parameterConverter)
+			ExceptionHandler exceptionHandler, EventGenerator eventGenerator, ResponseGenerator responseGenerator,
+			ParameterConverter parameterConverter)
 	{
-		super(resourceTypeName, serverBase, defaultPageCount, dao, validator, eventManager, exceptionHandler,
-				eventGenerator, responseGenerator, parameterConverter);
+		super(Organization.class, resourceTypeName, serverBase, defaultPageCount, dao, validator, eventManager,
+				exceptionHandler, eventGenerator, responseGenerator, parameterConverter);
 	}
 }

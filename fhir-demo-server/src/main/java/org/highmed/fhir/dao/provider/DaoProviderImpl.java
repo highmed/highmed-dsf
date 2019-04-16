@@ -1,8 +1,12 @@
 package org.highmed.fhir.dao.provider;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.highmed.fhir.dao.CodeSystemDao;
+import org.highmed.fhir.dao.DomainResourceDao;
 import org.highmed.fhir.dao.EndpointDao;
 import org.highmed.fhir.dao.HealthcareServiceDao;
 import org.highmed.fhir.dao.LocationDao;
@@ -17,6 +21,21 @@ import org.highmed.fhir.dao.StructureDefinitionSnapshotDao;
 import org.highmed.fhir.dao.SubscriptionDao;
 import org.highmed.fhir.dao.TaskDao;
 import org.highmed.fhir.dao.ValueSetDao;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.HealthcareService;
+import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.PractitionerRole;
+import org.hl7.fhir.r4.model.Provenance;
+import org.hl7.fhir.r4.model.ResearchStudy;
+import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.Subscription;
+import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.springframework.beans.factory.InitializingBean;
 
 public class DaoProviderImpl implements DaoProvider, InitializingBean
@@ -36,6 +55,8 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	private final SubscriptionDao subscriptionDao;
 	private final TaskDao taskDao;
 	private final ValueSetDao valueSetDao;
+
+	private final Map<Class<? extends DomainResource>, DomainResourceDao<?>> daos = new HashMap<>();
 
 	public DaoProviderImpl(CodeSystemDao codeSystemDao, EndpointDao endpointDao,
 			HealthcareServiceDao healthcareServiceDao, LocationDao locationDao, OrganizationDao organizationDao,
@@ -60,6 +81,21 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 		this.subscriptionDao = subscriptionDao;
 		this.taskDao = taskDao;
 		this.valueSetDao = valueSetDao;
+
+		daos.put(CodeSystem.class, codeSystemDao);
+		daos.put(Endpoint.class, endpointDao);
+		daos.put(HealthcareService.class, healthcareServiceDao);
+		daos.put(Location.class, locationDao);
+		daos.put(Organization.class, organizationDao);
+		daos.put(Patient.class, patientDao);
+		daos.put(Practitioner.class, practitionerDao);
+		daos.put(PractitionerRole.class, practitionerRoleDao);
+		daos.put(Provenance.class, provenanceDao);
+		daos.put(ResearchStudy.class, researchStudyDao);
+		daos.put(StructureDefinition.class, structureDefinitionDao);
+		daos.put(Subscription.class, subscriptionDao);
+		daos.put(Task.class, taskDao);
+		daos.put(ValueSet.class, valueSetDao);
 	}
 
 	@Override
@@ -169,5 +205,13 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	public ValueSetDao getValueSetDao()
 	{
 		return valueSetDao;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <R extends DomainResource> Optional<? extends DomainResourceDao<R>> getDao(Class<R> resourceClass)
+	{
+		DomainResourceDao<?> value = daos.get(resourceClass);
+		return (Optional<? extends DomainResourceDao<R>>) Optional.ofNullable(value);
 	}
 }

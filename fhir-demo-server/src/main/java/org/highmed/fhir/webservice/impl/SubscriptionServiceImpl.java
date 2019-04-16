@@ -15,10 +15,10 @@ public class SubscriptionServiceImpl extends AbstractServiceImpl<SubscriptionDao
 {
 	public SubscriptionServiceImpl(String resourceTypeName, String serverBase, int defaultPageCount,
 			SubscriptionDao dao, ResourceValidator validator, EventManager eventManager,
-			ExceptionHandler exceptionHandler, EventGenerator<Subscription> eventGenerator,
-			ResponseGenerator responseGenerator, ParameterConverter parameterConverter)
+			ExceptionHandler exceptionHandler, EventGenerator eventGenerator, ResponseGenerator responseGenerator,
+			ParameterConverter parameterConverter)
 	{
-		super(resourceTypeName, serverBase, defaultPageCount, dao, validator, eventManager, exceptionHandler,
-				eventGenerator, responseGenerator, parameterConverter);
+		super(Subscription.class, resourceTypeName, serverBase, defaultPageCount, dao, validator, eventManager,
+				exceptionHandler, eventGenerator, responseGenerator, parameterConverter);
 	}
 }

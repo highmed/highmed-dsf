@@ -61,6 +61,7 @@ import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResource
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementSoftwareComponent;
 import org.hl7.fhir.r4.model.CapabilityStatement.ConditionalDeleteStatus;
 import org.hl7.fhir.r4.model.CapabilityStatement.ConditionalReadStatus;
+import org.hl7.fhir.r4.model.CapabilityStatement.ReferenceHandlingPolicy;
 import org.hl7.fhir.r4.model.CapabilityStatement.ResourceVersionPolicy;
 import org.hl7.fhir.r4.model.CapabilityStatement.RestfulCapabilityMode;
 import org.hl7.fhir.r4.model.CapabilityStatement.TypeRestfulInteraction;
@@ -239,6 +240,7 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 			r.setConditionalRead(ConditionalReadStatus.FULLSUPPORT);
 			r.setConditionalUpdate(true);
 			r.setConditionalDelete(ConditionalDeleteStatus.SINGLE);
+			r.addReferencePolicy(ReferenceHandlingPolicy.LITERAL); // TODO ReferenceHandlingPolicy.ENFORCED
 
 			r.setType(resource.getAnnotation(ResourceDef.class).name());
 			r.setProfile(resource.getAnnotation(ResourceDef.class).profile());

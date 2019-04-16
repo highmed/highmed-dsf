@@ -2,12 +2,12 @@ package org.highmed.fhir.event;
 
 import org.hl7.fhir.r4.model.DomainResource;
 
-public interface Event<R extends DomainResource>
+public interface Event
 {
 	/**
 	 * @return never <code>null</code>
 	 */
-	Class<R> getResourceType();
+	Class<? extends DomainResource> getResourceType();
 
 	/**
 	 * @return never <code>null</code>
@@ -17,5 +17,5 @@ public interface Event<R extends DomainResource>
 	/**
 	 * @return might be <code>null</code>
 	 */
-	R getResource();
+	DomainResource getResource();
 }
