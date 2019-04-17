@@ -127,7 +127,7 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 	}
 
 	@Override
-	public <R extends DomainResource> R create(R resource, String ifNoneExistCriteria)
+	public <R extends DomainResource> R createConditionaly(R resource, String ifNoneExistCriteria)
 	{
 		Objects.requireNonNull(resource, "resource");
 		Objects.requireNonNull(ifNoneExistCriteria, "ifNoneExistCriteria");
@@ -181,16 +181,16 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 	}
 
 	@Override
-	public <R extends DomainResource> R update(R resource, Map<String, List<String>> parameters)
+	public <R extends DomainResource> R updateConditionaly(R resource, Map<String, List<String>> criteria)
 	{
 		Objects.requireNonNull(resource, "resource");
-		Objects.requireNonNull(parameters, "parameters");
-		if (parameters.isEmpty())
-			throw new IllegalArgumentException("parameters map empty");
+		Objects.requireNonNull(criteria, "criteria");
+		if (criteria.isEmpty())
+			throw new IllegalArgumentException("criteria map empty");
 
 		WebTarget target = getResource().path(resource.getClass().getAnnotation(ResourceDef.class).name());
 
-		for (Entry<String, List<String>> entry : parameters.entrySet())
+		for (Entry<String, List<String>> entry : criteria.entrySet())
 			target = target.queryParam(entry.getKey(), entry.getValue().toArray());
 
 		Builder builder = target.request().accept(Constants.CT_FHIR_JSON_NEW);
@@ -218,10 +218,36 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 	@Override
 	public void delete(Class<? extends DomainResource> resourceClass, String id)
 	{
+		Objects.requireNonNull(resourceClass, "resourceClass");
 		Objects.requireNonNull(id, "id");
 
 		Response response = getResource().path(resourceClass.getAnnotation(ResourceDef.class).name()).path(id).request()
 				.accept(Constants.CT_FHIR_JSON_NEW).delete();
+
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		logger.debug("HTTP header ETag: {}", response.getHeaderString(HttpHeaders.ETAG));
+		logger.debug("HTTP header Last-Modified: {}", response.getHeaderString(HttpHeaders.LAST_MODIFIED));
+
+		if (Status.OK.getStatusCode() != response.getStatus()
+				&& Status.NO_CONTENT.getStatusCode() != response.getStatus())
+			throw new WebApplicationException(response);
+	}
+
+	@Override
+	public void deleteConditionaly(Class<? extends DomainResource> resourceClass, Map<String, List<String>> criteria)
+	{
+		Objects.requireNonNull(resourceClass, "resourceClass");
+		Objects.requireNonNull(criteria, "criteria");
+		if (criteria.isEmpty())
+			throw new IllegalArgumentException("criteria map empty");
+
+		WebTarget target = getResource().path(resourceClass.getAnnotation(ResourceDef.class).name());
+
+		for (Entry<String, List<String>> entry : criteria.entrySet())
+			target = target.queryParam(entry.getKey(), entry.getValue().toArray());
+
+		Response response = target.request().accept(Constants.CT_FHIR_JSON_NEW).delete();
 
 		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
 				response.getStatusInfo().getReasonPhrase());

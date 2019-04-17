@@ -65,12 +65,9 @@ public class BatchCommandList implements CommandList
 			Bundle result = new Bundle();
 			result.setType(BundleType.BATCHRESPONSE);
 
-			// TODO Map with runnable not needed toEntry changes to type compatible with results
-			Map<Integer, Runnable> allResults = new HashMap<>((int) ((commands.size() / 0.75) + 1));
-			caughtExceptions.forEach((k, v) -> allResults.put(k, () -> result.addEntry(toEntry(v))));
-			results.forEach((k, v) -> allResults.put(k, () -> result.addEntry(v)));
-			allResults.entrySet().stream().sorted(Comparator.comparing(Entry::getKey)).map(Entry::getValue)
-					.forEach(Runnable::run);
+			caughtExceptions.forEach((k, v) -> results.put(k, toEntry(v)));
+			results.entrySet().stream().sorted(Comparator.comparing(Entry::getKey)).map(Entry::getValue)
+					.forEach(result::addEntry);
 
 			return result;
 		}

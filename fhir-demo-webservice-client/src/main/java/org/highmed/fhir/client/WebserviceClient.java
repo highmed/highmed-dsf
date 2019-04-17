@@ -14,13 +14,15 @@ public interface WebserviceClient
 
 	<R extends DomainResource> R create(R resource);
 
-	<R extends DomainResource> R create(R resource, String ifNoneExistCriteria);
+	<R extends DomainResource> R createConditionaly(R resource, String ifNoneExistCriteria);
 
 	<R extends DomainResource> R update(R resource);
 
-	<R extends DomainResource> R update(R resource, Map<String, List<String>> parameters);
+	<R extends DomainResource> R updateConditionaly(R resource, Map<String, List<String>> criteria);
 
 	void delete(Class<? extends DomainResource> resourceClass, String id);
+
+	void deleteConditionaly(Class<? extends DomainResource> resourceClass, Map<String, List<String>> criteria);
 
 	<R extends DomainResource> R read(Class<R> resourceType, String id);
 

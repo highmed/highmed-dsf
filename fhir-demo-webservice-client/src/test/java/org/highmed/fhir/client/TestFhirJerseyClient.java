@@ -6,6 +6,8 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.Collections;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.ws.rs.WebApplicationException;
@@ -220,9 +222,11 @@ public class TestFhirJerseyClient
 			// Organization org = new Organization();
 			// org.setName("conditional update");
 			// client.create(org);
-			
-//			client.delete(Organization.class, "1246cb25-f96f-4761-a1dd-696fd9d5dc51");
-//			client.delete(Endpoint.class, "cf566fd2-3fb4-4736-9497-42a4a2c3fab4");
+
+			client.deleteConditionaly(Organization.class,
+					Map.of("name:exact", Collections.singletonList("Transaction Test Organization")));
+			client.deleteConditionaly(Endpoint.class,
+					Map.of("name:exact", Collections.singletonList("Transaction Test Endpoint")));
 
 			var bundle = new Bundle();
 			bundle.setType(BundleType.TRANSACTION);
@@ -248,7 +252,8 @@ public class TestFhirJerseyClient
 			org.addEndpoint().setReference(eptEntry.getFullUrl());
 			ept.getManagingOrganization().setReference(orgEntry.getFullUrl());
 
-			client.postBundle(bundle);
+			Bundle result = client.postBundle(bundle);
+			System.out.println(fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(result));
 		}
 		catch (WebApplicationException e)
 		{

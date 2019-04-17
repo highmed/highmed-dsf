@@ -8,22 +8,21 @@ import org.highmed.fhir.function.BiFunctionWithSqlException;
 import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.fhir.search.parameters.basic.AbstractStringParameter;
 import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
-import org.hl7.fhir.r4.model.Organization;
 
 import com.google.common.base.Objects;
 
-@SearchParameterDefinition(name = OrganizationName.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Organization-name", type = SearchParamType.STRING, documentation = "A portion of the organization's name or alias")
-public class OrganizationName extends AbstractStringParameter<Organization>
+@SearchParameterDefinition(name = EndpointName.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Endpoint-name", type = SearchParamType.STRING, documentation = "A name that this endpoint can be identified by")
+public class EndpointName extends AbstractStringParameter<Endpoint>
 {
 	public static final String PARAMETER_NAME = "name";
 
-	public OrganizationName()
+	public EndpointName()
 	{
 		super(PARAMETER_NAME);
 	}
 
-	// FIXME property alias is a list
 	@Override
 	public String getFilterQuery()
 	{
@@ -31,9 +30,9 @@ public class OrganizationName extends AbstractStringParameter<Organization>
 		{
 			case STARTS_WITH:
 			case CONTAINS:
-				return "(lower(organization->>'name') LIKE ? OR lower(organization->>'alias') LIKE ?)";
+				return "lower(endpoint->>'name') LIKE ?";
 			case EXACT:
-				return "(organization->>'name' = ? OR organization->>'alias' = ?)";
+				return "endpoint->>'name' = ?";
 			default:
 				return "";
 		}
@@ -42,15 +41,13 @@ public class OrganizationName extends AbstractStringParameter<Organization>
 	@Override
 	public int getSqlParameterCount()
 	{
-		return 2;
+		return 1;
 	}
 
-	// FIXME property alias is a list
 	@Override
 	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement,
 			BiFunctionWithSqlException<String, Object[], Array> arrayCreator) throws SQLException
 	{
-		// will be called twice, once with subqueryParameterIndex = 1 and once with subqueryParameterIndex = 2
 		switch (valueAndType.type)
 		{
 			case STARTS_WITH:
@@ -65,32 +62,30 @@ public class OrganizationName extends AbstractStringParameter<Organization>
 		}
 	}
 
-	// FIXME match against aliases
 	@Override
 	public boolean matches(DomainResource resource)
 	{
 		if (!isDefined())
 			throw notDefined();
 
-		if (!(resource instanceof Organization))
+		if (!(resource instanceof Endpoint))
 			return false;
 
-		Organization o = (Organization) resource;
+		Endpoint e = (Endpoint) resource;
 
 		switch (valueAndType.type)
 		{
 			case STARTS_WITH:
-				return o.getName() != null && o.getName().toLowerCase().startsWith(valueAndType.value.toLowerCase());
+				return e.getName() != null && e.getName().toLowerCase().startsWith(valueAndType.value.toLowerCase());
 			case CONTAINS:
-				return o.getName() != null && o.getName().toLowerCase().contains(valueAndType.value.toLowerCase());
+				return e.getName() != null && e.getName().toLowerCase().contains(valueAndType.value.toLowerCase());
 			case EXACT:
-				return Objects.equal(o.getName(), valueAndType.value);
+				return Objects.equal(e.getName(), valueAndType.value);
 			default:
 				throw notDefined();
 		}
 	}
 
-	// FIXME property alias is a list
 	@Override
 	protected String getSortSql(String sortDirectionWithSpacePrefix)
 	{
@@ -98,11 +93,9 @@ public class OrganizationName extends AbstractStringParameter<Organization>
 		{
 			case STARTS_WITH:
 			case CONTAINS:
-				return "lower(organization->>'name')" + sortDirectionWithSpacePrefix + ", lower(organization->>'alias')"
-						+ sortDirectionWithSpacePrefix;
+				return "lower(endpoint->>'name')" + sortDirectionWithSpacePrefix;
 			case EXACT:
-				return "organization->>'name'" + sortDirectionWithSpacePrefix + ", organization->>'alias'"
-						+ sortDirectionWithSpacePrefix;
+				return "endpoint->>'name'" + sortDirectionWithSpacePrefix;
 			default:
 				return "";
 		}
