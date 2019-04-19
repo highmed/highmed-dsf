@@ -9,7 +9,11 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 
 public interface Command
 {
+	String URL_UUID_PREFIX = "urn:uuid:";
+	
 	int getIndex();
+	
+	int getTransactionPriority();
 
 	void preExecute(Connection connection) throws SQLException, WebApplicationException;
 

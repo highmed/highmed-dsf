@@ -53,12 +53,12 @@ public class BatchCommandList implements CommandList
 
 			commands.forEach(c -> preExecute(connection, caughtExceptions, c));
 
-			IntStream.range(0, commands.size()).filter(index -> caughtExceptions.containsKey(index))
+			IntStream.range(0, commands.size()).filter(index -> !caughtExceptions.containsKey(index))
 					.mapToObj(index -> commands.get(index)).forEach(c -> execute(connection, caughtExceptions, c));
 
 			Map<Integer, BundleEntryComponent> results = new HashMap<>((int) ((commands.size() / 0.75) + 1));
 
-			IntStream.range(0, commands.size()).filter(index -> caughtExceptions.containsKey(index))
+			IntStream.range(0, commands.size()).filter(index -> !caughtExceptions.containsKey(index))
 					.mapToObj(index -> commands.get(index))
 					.forEach(c -> postExecute(connection, caughtExceptions, c, results));
 
@@ -100,11 +100,12 @@ public class BatchCommandList implements CommandList
 	{
 		try
 		{
+			logger.debug("Running pre-execute of command {}", command.getClass().getName());
 			command.preExecute(connection);
 		}
 		catch (Exception e)
 		{
-			logger.warn("Error while running pre-execute of command " + command.getClass().getSimpleName(), e);
+			logger.warn("Error while running pre-execute of command " + command.getClass().getName(), e);
 			caughtExceptions.put(command.getIndex(), e);
 		}
 	}
@@ -113,11 +114,12 @@ public class BatchCommandList implements CommandList
 	{
 		try
 		{
+			logger.debug("Running execute of command {}", command.getClass().getName());
 			command.execute(connection);
 		}
 		catch (Exception e)
 		{
-			logger.warn("Error while executing command " + command.getClass().getSimpleName(), e);
+			logger.warn("Error while executing command " + command.getClass().getName(), e);
 			caughtExceptions.put(command.getIndex(), e);
 		}
 	}
@@ -127,11 +129,12 @@ public class BatchCommandList implements CommandList
 	{
 		try
 		{
+			logger.debug("Running post-execute of command {}", command.getClass().getName());
 			results.put(command.getIndex(), command.postExecute(connection));
 		}
 		catch (Exception e)
 		{
-			logger.warn("Error while running post-execute of command " + command.getClass().getSimpleName(), e);
+			logger.warn("Error while running post-execute of command " + command.getClass().getName(), e);
 			caughtExceptions.put(command.getIndex(), e);
 		}
 	}

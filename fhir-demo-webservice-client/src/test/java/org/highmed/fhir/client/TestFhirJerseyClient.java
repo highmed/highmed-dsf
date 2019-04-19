@@ -242,12 +242,14 @@ public class TestFhirJerseyClient
 			orgEntry.setResource(org);
 			orgEntry.getRequest().setMethod(HTTPVerb.POST);
 			orgEntry.getRequest().setUrl(org.getResourceType().name());
+			orgEntry.getRequest().setIfNoneExist("name:exact=Transaction Test Organization");
 
 			var eptEntry = bundle.addEntry();
 			eptEntry.setFullUrl("urn:uuid:" + UUID.randomUUID().toString());
 			eptEntry.setResource(ept);
 			eptEntry.getRequest().setMethod(HTTPVerb.POST);
 			eptEntry.getRequest().setUrl(ept.getResourceType().name());
+			eptEntry.getRequest().setIfNoneExist("name:exact=Transaction Test Endpoint");
 
 			org.addEndpoint().setReference(eptEntry.getFullUrl());
 			ept.getManagingOrganization().setReference(orgEntry.getFullUrl());

@@ -1,8 +1,8 @@
 package org.highmed.fhir.dao.command;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +11,8 @@ import java.util.Map.Entry;
 
 import javax.sql.DataSource;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.highmed.fhir.help.ExceptionHandler;
 import org.hl7.fhir.r4.model.Bundle;
@@ -35,6 +37,9 @@ public class TransactionCommandList implements CommandList
 
 		if (commands != null)
 			this.commands.addAll(commands);
+
+		Collections.sort(this.commands,
+				Comparator.comparing(Command::getTransactionPriority).thenComparing(Command::getIndex));
 	}
 
 	@Override
@@ -53,12 +58,14 @@ public class TransactionCommandList implements CommandList
 			{
 				try
 				{
+					logger.debug("Running pre-execute of command {}, for entry at index {}", c.getClass().getName(),
+							c.getIndex());
 					c.preExecute(connection);
 				}
-				catch (SQLException e)
+				catch (Exception e)
 				{
 					logger.warn("Error while running pre-execute of command " + c.getClass().getSimpleName()
-							+ ", rolling back transaction", e);
+							+ ", for entry at index " + c.getIndex() + ", rolling back transaction", e);
 
 					connection.rollback();
 					throw e;
@@ -69,12 +76,14 @@ public class TransactionCommandList implements CommandList
 			{
 				try
 				{
+					logger.debug("Running execute of command {}, for entry at index {}", c.getClass().getName(),
+							c.getIndex());
 					c.execute(connection);
 				}
-				catch (SQLException e)
+				catch (Exception e)
 				{
 					logger.warn("Error while executing command " + c.getClass().getSimpleName()
-							+ ", rolling back transaction", e);
+							+ ", for entry at index " + c.getIndex() + ", rolling back transaction", e);
 
 					connection.rollback();
 					throw e;
@@ -86,12 +95,14 @@ public class TransactionCommandList implements CommandList
 			{
 				try
 				{
+					logger.debug("Running post-execute of command {}, for entry at index {}", c.getClass().getName(),
+							c.getIndex());
 					results.put(c.getIndex(), c.postExecute(connection));
 				}
-				catch (SQLException e)
+				catch (Exception e)
 				{
 					logger.warn("Error while running post-execute of command " + c.getClass().getSimpleName()
-							+ ", rolling back transaction", e);
+							+ ", for entry at index " + c.getIndex() + ", rolling back transaction", e);
 
 					connection.rollback();
 					throw e;
@@ -109,7 +120,8 @@ public class TransactionCommandList implements CommandList
 		}
 		catch (WebApplicationException e)
 		{
-			throw e;
+			throw new WebApplicationException(
+					Response.status(Status.BAD_REQUEST).entity(e.getResponse().getEntity()).build());
 		}
 		catch (Exception e)
 		{

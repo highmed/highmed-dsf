@@ -5,8 +5,10 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import javax.sql.DataSource;
 import javax.ws.rs.WebApplicationException;
@@ -75,15 +77,22 @@ public class CommandFactory implements InitializingBean
 		Objects.requireNonNull(parameterConverter, "parameterConverter");
 	}
 
-	private <R extends DomainResource> Command get(Bundle bundle, int index, BundleEntryComponent entry, R resource)
+	private <R extends DomainResource> Stream<Command> get(Bundle bundle, int index, BundleEntryComponent entry,
+			R resource)
 	{
 		// TODO
-		return new Command()
+		return Stream.of(new Command()
 		{
 			@Override
 			public int getIndex()
 			{
 				return index;
+			}
+
+			@Override
+			public int getTransactionPriority()
+			{
+				return 4;
 			}
 
 			@Override
@@ -101,28 +110,28 @@ public class CommandFactory implements InitializingBean
 			{
 				return new BundleEntryComponent();
 			}
-		};
+		});
 	}
 
-	@SuppressWarnings("unchecked")
 	private <R extends DomainResource> Command post(Bundle bundle, int index, BundleEntryComponent entry, R resource)
 	{
 		if (resource.getResourceType().name().equals(entry.getRequest().getUrl()))
 		{
+			@SuppressWarnings("unchecked")
 			Optional<? extends DomainResourceDao<R>> dao = (Optional<? extends DomainResourceDao<R>>) daoProvider
 					.getDao(resource.getClass());
 
 			if (resource instanceof StructureDefinition)
-				return new CreateStructureDefinitionCommand(index, serverBase, (StructureDefinitionDao) dao.get(),
-						replacer, responseGenerator, exceptionHandler, eventManager, eventGenerator, bundle, entry,
-						(StructureDefinition) resource, daoProvider.getStructureDefinitionSnapshotDao(),
+				return new CreateStructureDefinitionCommand(index, bundle, entry, (StructureDefinition) resource,
+						serverBase, (StructureDefinitionDao) dao.get(), replacer, responseGenerator, exceptionHandler,
+						eventManager, eventGenerator, daoProvider.getStructureDefinitionSnapshotDao(),
 						snapshotGenerator, snapshotDependencyAnalyzer, parameterConverter);
-
-			return dao
-					.map(d -> new CreateCommand<R, DomainResourceDao<R>>(index, serverBase, d, replacer,
-							responseGenerator, exceptionHandler, eventManager, eventGenerator, bundle, entry, resource))
-					.orElseThrow(() -> new IllegalStateException(
-							"Resource of type " + resource.getClass().getName() + " not supported"));
+			else
+				return dao
+						.map(d -> new CreateCommand<R, DomainResourceDao<R>>(index, bundle, entry, resource, serverBase,
+								d, replacer, responseGenerator, exceptionHandler, eventManager, eventGenerator))
+						.orElseThrow(() -> new IllegalStateException(
+								"Resource of type " + resource.getClass().getName() + " not supported"));
 		}
 		else
 			throw new IllegalStateException(
@@ -131,42 +140,45 @@ public class CommandFactory implements InitializingBean
 
 	private <R extends DomainResource> Command put(Bundle bundle, int index, BundleEntryComponent entry, R resource)
 	{
-		// TODO
-		return new Command()
+		if (resource.getResourceType().name().equals(entry.getRequest().getUrl()))
 		{
-			@Override
-			public int getIndex()
-			{
-				return index;
-			}
+			@SuppressWarnings("unchecked")
+			Optional<? extends DomainResourceDao<R>> dao = (Optional<? extends DomainResourceDao<R>>) daoProvider
+					.getDao(resource.getClass());
 
-			@Override
-			public void preExecute(Connection connection) throws SQLException
-			{
-			}
-
-			@Override
-			public void execute(Connection connection) throws SQLException
-			{
-			}
-
-			@Override
-			public BundleEntryComponent postExecute(Connection connection) throws SQLException, WebApplicationException
-			{
-				return new BundleEntryComponent();
-			}
-		};
+			if (resource instanceof StructureDefinition)
+				return new UpdateStructureDefinitionCommand(index, bundle, entry, (StructureDefinition) resource,
+						serverBase, (StructureDefinitionDao) dao.get(), replacer, responseGenerator, exceptionHandler,
+						eventManager, eventGenerator, daoProvider.getStructureDefinitionSnapshotDao(),
+						snapshotGenerator, snapshotDependencyAnalyzer, parameterConverter);
+			else
+				return dao
+						.map(d -> new UpdateCommand<R, DomainResourceDao<R>>(index, bundle, entry, resource, serverBase,
+								d, replacer, responseGenerator, exceptionHandler, eventManager, eventGenerator))
+						.orElseThrow(() -> new IllegalStateException(
+								"Resource of type " + resource.getClass().getName() + " not supported"));
+		}
+		else
+			throw new IllegalStateException(
+					"Request url " + entry.getRequest().getUrl() + " for method POST not supported");
 	}
 
-	private <R extends DomainResource> Command delete(Bundle bundle, int index, BundleEntryComponent entry, R resource)
+	private <R extends DomainResource> Stream<Command> delete(Bundle bundle, int index, BundleEntryComponent entry,
+			R resource)
 	{
 		// TODO
-		return new Command()
+		return Stream.of(new Command()
 		{
 			@Override
 			public int getIndex()
 			{
 				return index;
+			}
+
+			@Override
+			public int getTransactionPriority()
+			{
+				return 1;
 			}
 
 			@Override
@@ -184,7 +196,7 @@ public class CommandFactory implements InitializingBean
 			{
 				return new BundleEntryComponent();
 			}
-		};
+		});
 	}
 
 	public CommandList createCommands(Bundle bundle)
@@ -196,7 +208,7 @@ public class CommandFactory implements InitializingBean
 		{
 			List<Command> commands = IntStream.range(0, bundle.getEntry().size())
 					.mapToObj(index -> createCommand(bundle, index, bundle.getEntry().get(index)))
-					.collect(Collectors.toList());
+					.flatMap(Function.identity()).collect(Collectors.toList());
 
 			switch (bundle.getType())
 			{
@@ -212,7 +224,7 @@ public class CommandFactory implements InitializingBean
 		throw new IllegalStateException("Unsupported bundle type " + bundle.getType());
 	}
 
-	public Command createCommand(Bundle bundle, int index, BundleEntryComponent entry)
+	public Stream<Command> createCommand(Bundle bundle, int index, BundleEntryComponent entry)
 	{
 		if (entry.hasRequest() && entry.getRequest().hasMethod() && entry.hasResource()
 				&& entry.getResource() instanceof DomainResource)
@@ -222,9 +234,11 @@ public class CommandFactory implements InitializingBean
 				case GET:
 					return get(bundle, index, entry, (DomainResource) entry.getResource());
 				case POST:
-					return post(bundle, index, entry, (DomainResource) entry.getResource());
+					Command post = post(bundle, index, entry, (DomainResource) entry.getResource());
+					return resolveReferences(post, index, entry, (DomainResource) entry.getResource());
 				case PUT:
-					return put(bundle, index, entry, (DomainResource) entry.getResource());
+					Command put = put(bundle, index, entry, (DomainResource) entry.getResource());
+					return resolveReferences(put, index, entry, (DomainResource) entry.getResource());
 				case DELETE:
 					return delete(bundle, index, entry, (DomainResource) entry.getResource());
 				default:
@@ -236,6 +250,13 @@ public class CommandFactory implements InitializingBean
 			throw new IllegalStateException(
 					"BundleEntry has no request or request has no method or request has no resource of type "
 							+ DomainResource.class.getName());
+	}
+
+	private Stream<Command> resolveReferences(Command cmd, int index, BundleEntryComponent entry,
+			DomainResource resource)
+	{
+		// TODO Auto-generated method stub
+		return Stream.of(cmd);
 	}
 
 	// public static void main(String[] args)

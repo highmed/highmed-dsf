@@ -57,7 +57,7 @@ public class RootServiceImpl implements RootService, InitializingBean
 				&& (BundleType.BATCH.equals(bundle.getType()) || BundleType.TRANSACTION.equals(bundle.getType())))
 		{
 			CommandList commands = commandFactory.createCommands(bundle);
-			Bundle result = commands.execute();
+			Bundle result = commands.execute(); // throws WebApplicationException
 
 			return responseGenerator.response(Status.OK, result, parameterConverter.getMediaType(uri, headers)).build();
 		}

@@ -34,50 +34,31 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import ca.uhn.fhir.rest.api.Constants;
 
-public class CreateCommand<R extends DomainResource, D extends DomainResourceDao<R>> implements Command
+public class CreateCommand<R extends DomainResource, D extends DomainResourceDao<R>> extends AbstractCommand<R, D>
+		implements Command
 {
 	private static final Logger logger = LoggerFactory.getLogger(CreateCommand.class);
 
-	private static final String UUID_PREFIX = "urn:uuid:";
-
-	private final int index;
-
-	protected final String serverBase;
-	protected final D dao;
 	protected final ReferenceReplacer replacer;
 	protected final ResponseGenerator responseGenerator;
 	protected final ExceptionHandler exceptionHandler;
 	protected final EventManager eventManager;
 	protected final EventGenerator eventGenerator;
 
-	protected final Bundle bundle;
-	protected final BundleEntryComponent entry;
-	protected final R resource;
-
 	protected UUID id;
 	protected R createdResource;
 
-	public CreateCommand(int index, String serverBase, D dao, ReferenceReplacer replacer,
-			ResponseGenerator responseGenerator, ExceptionHandler exceptionHandler, EventManager eventManager,
-			EventGenerator eventGenerator, Bundle bundle, BundleEntryComponent entry, R resource)
+	public CreateCommand(int index, Bundle bundle, BundleEntryComponent entry, R resource, String serverBase, D dao,
+			ReferenceReplacer replacer, ResponseGenerator responseGenerator, ExceptionHandler exceptionHandler,
+			EventManager eventManager, EventGenerator eventGenerator)
 	{
-		this.index = index;
-		this.serverBase = serverBase;
-		this.dao = dao;
+		super(2, index, bundle, entry, resource, serverBase, dao);
+
 		this.replacer = replacer;
 		this.responseGenerator = responseGenerator;
 		this.exceptionHandler = exceptionHandler;
 		this.eventManager = eventManager;
 		this.eventGenerator = eventGenerator;
-		this.bundle = bundle;
-		this.entry = entry;
-		this.resource = resource;
-	}
-
-	@Override
-	public int getIndex()
-	{
-		return index;
 	}
 
 	@Override
@@ -86,7 +67,7 @@ public class CreateCommand<R extends DomainResource, D extends DomainResourceDao
 		id = UUID.randomUUID();
 
 		String fullUrl = entry.getFullUrl();
-		if (fullUrl.startsWith(UUID_PREFIX))
+		if (fullUrl.startsWith(URL_UUID_PREFIX))
 		{
 			bundle.getEntry().stream().map(BundleEntryComponent::getResource).filter(r -> r instanceof DomainResource)
 					.map(r -> (DomainResource) r).forEach(r -> replacer.setReference(r, resource.getClass(), fullUrl,
