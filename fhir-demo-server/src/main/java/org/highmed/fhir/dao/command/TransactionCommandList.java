@@ -97,7 +97,7 @@ public class TransactionCommandList implements CommandList
 				{
 					logger.debug("Running post-execute of command {}, for entry at index {}", c.getClass().getName(),
 							c.getIndex());
-					results.put(c.getIndex(), c.postExecute(connection));
+					results.putIfAbsent(c.getIndex(), c.postExecute(connection));
 				}
 				catch (Exception e)
 				{
