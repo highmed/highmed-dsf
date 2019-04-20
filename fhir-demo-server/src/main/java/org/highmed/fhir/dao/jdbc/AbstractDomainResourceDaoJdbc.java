@@ -408,50 +408,6 @@ abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implement
 	public final R update(R resource, Long expectedVersion)
 			throws SQLException, ResourceNotFoundException, ResourceVersionNoMatchException
 	{
-		// Objects.requireNonNull(resource, "resource");
-		// // expectedVersion may be null
-		//
-		// resource = copy(resource); // XXX defensive copy, might want to remove this call
-		//
-		// Objects.requireNonNull(resource, "resource");
-		//
-		// try (Connection connection = dataSource.getConnection())
-		// {
-		// connection.setReadOnly(false);
-		// connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
-		// connection.setAutoCommit(false);
-		//
-		// try
-		// {
-		// LatestVersion latestVersion = getLatestVersion(resource, connection);
-		//
-		// if (expectedVersion != null && expectedVersion != latestVersion.version)
-		// {
-		// logger.info("Expected version {} does not match latest version {}", expectedVersion,
-		// latestVersion.version);
-		// throw new ResourceVersionNoMatchException(resource.getIdElement().getIdPart(), expectedVersion,
-		// latestVersion.version);
-		// }
-		//
-		// long newVersion = latestVersion.version + 1;
-		//
-		// R updated = update(connection, resource, newVersion);
-		// if (latestVersion.deleted) // TODO check if resurrection need undelete for old versions
-		// markDeleted(connection, toUuid(updated.getIdElement().getIdPart()), false);
-		//
-		// connection.commit();
-		//
-		// logger.debug("{} with IdPart {} updated, new version {}", resourceTypeName,
-		// updated.getIdElement().getIdPart(), newVersion);
-		// return updated;
-		// }
-		// catch (Exception e)
-		// {
-		// connection.rollback();
-		// throw e;
-		// }
-		// }
-
 		Objects.requireNonNull(resource, "resource");
 		// expectedVersion may be null
 
