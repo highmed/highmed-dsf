@@ -199,7 +199,7 @@ abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implement
 		Objects.requireNonNull(resource, "resource");
 		Objects.requireNonNull(uuid, "uuid");
 		if (connection.isReadOnly())
-			throw new IllegalStateException("Connection is read-only");
+			throw new IllegalArgumentException("Connection is read-only");
 
 		R inserted = create(connection, resource, uuid);
 
@@ -210,8 +210,8 @@ abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implement
 	private R create(Connection connection, R resource, UUID uuid) throws SQLException
 	{
 		resource = copy(resource); // XXX defensive copy, might want to remove this call
-		resource.setIdElement(new IdType(resourceTypeName, uuid.toString(), "1"));
-		resource.getMeta().setVersionId("1");
+		resource.setIdElement(new IdType(resourceTypeName, uuid.toString(), FIRST_VERSION_STRING));
+		resource.getMeta().setVersionId(FIRST_VERSION_STRING);
 		resource.getMeta().setLastUpdated(new Date());
 
 		// db version set by default value
@@ -365,7 +365,7 @@ abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implement
 	@Override
 	public final Optional<R> readVersion(UUID uuid, long version) throws SQLException
 	{
-		if (uuid == null)
+		if (uuid == null || version < FIRST_VERSION)
 			return Optional.empty();
 
 		try (Connection connection = dataSource.getConnection())
@@ -378,7 +378,7 @@ abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implement
 	public Optional<R> readVersionWithTransaction(Connection connection, UUID uuid, long version) throws SQLException
 	{
 		Objects.requireNonNull(connection, "connection");
-		if (uuid == null)
+		if (uuid == null || version < FIRST_VERSION)
 			return Optional.empty();
 
 		try (PreparedStatement statement = connection.prepareStatement("SELECT " + resourceColumn + " FROM "
@@ -441,12 +441,12 @@ abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implement
 		Objects.requireNonNull(resource, "resource");
 		// expectedVersion may be null
 		if (connection.isReadOnly())
-			throw new IllegalStateException("Connection is read-only");
+			throw new IllegalArgumentException("Connection is read-only");
 		if (connection.getTransactionIsolation() != Connection.TRANSACTION_REPEATABLE_READ
 				&& connection.getTransactionIsolation() != Connection.TRANSACTION_SERIALIZABLE)
-			throw new IllegalStateException("Connection transaction isolation not REPEATABLE_READ or SERIALIZABLE");
+			throw new IllegalArgumentException("Connection transaction isolation not REPEATABLE_READ or SERIALIZABLE");
 		if (connection.getAutoCommit())
-			throw new IllegalStateException("Connection transaction is in auto commit mode");
+			throw new IllegalArgumentException("Connection transaction is in auto commit mode");
 
 		resource = copy(resource); // XXX defensive copy, might want to remove this call
 
@@ -470,6 +470,33 @@ abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implement
 		return updated;
 	}
 
+	@Override
+	public R updateWithTransactionKeepVersion(Connection connection, R resource)
+			throws SQLException, ResourceNotFoundException
+	{
+		Objects.requireNonNull(connection, "connection");
+		Objects.requireNonNull(resource, "resource");
+		if (connection.isReadOnly())
+			throw new IllegalArgumentException("Connection is read-only");
+		if (connection.getTransactionIsolation() != Connection.TRANSACTION_REPEATABLE_READ
+				&& connection.getTransactionIsolation() != Connection.TRANSACTION_SERIALIZABLE)
+			throw new IllegalArgumentException("Connection transaction isolation not REPEATABLE_READ or SERIALIZABLE");
+		if (connection.getAutoCommit())
+			throw new IllegalArgumentException("Connection transaction is in auto commit mode");
+
+		resource = copy(resource); // XXX defensive copy, might want to remove this call
+
+		LatestVersion latestVersion = getLatestVersion(resource, connection);
+
+		R updated = update(connection, resource, latestVersion.version);
+		if (latestVersion.deleted) // TODO check if resurrection needs undelete for old versions
+			markDeleted(connection, toUuid(updated.getIdElement().getIdPart()), false);
+
+		logger.debug("{} with IdPart {} updated, version {} unchanged", resourceTypeName,
+				updated.getIdElement().getIdPart(), latestVersion);
+		return updated;
+	}
+
 	protected final UUID toUuid(String idPart)
 	{
 		if (idPart == null)
@@ -486,25 +513,23 @@ abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implement
 		}
 	}
 
-	private R update(Connection connection, R resource, long newVersion) throws SQLException
+	private R update(Connection connection, R resource, long version) throws SQLException
 	{
 		UUID uuid = toUuid(resource.getIdElement().getIdPart());
 		if (uuid == null)
 			throw new IllegalArgumentException("resource.id is not a UUID");
 
-		String newVersionAsString = String.valueOf(newVersion);
-		IdType newId = new IdType(resourceTypeName, resource.getIdElement().getIdPart(), newVersionAsString);
-
 		resource = copy(resource);
-		resource.setIdElement(newId);
-		resource.getMeta().setVersionId(newVersionAsString);
+		String versionAsString = String.valueOf(version);
+		resource.setIdElement(new IdType(resourceTypeName, resource.getIdElement().getIdPart(), versionAsString));
+		resource.getMeta().setVersionId(versionAsString);
 		resource.getMeta().setLastUpdated(new Date());
 
 		try (PreparedStatement statement = connection.prepareStatement("INSERT INTO " + resourceTable + " ("
 				+ resourceIdColumn + ", version, " + resourceColumn + ") VALUES (?, ?, ?)"))
 		{
 			statement.setObject(1, uuidToPgObject(uuid));
-			statement.setLong(2, newVersion);
+			statement.setLong(2, version);
 			statement.setObject(3, resourceToPgObject(resource));
 
 			logger.trace("Executing query '{}'", statement);
@@ -668,10 +693,9 @@ abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implement
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public final SearchQuery<R> createSearchQuery(int effectivePage, int effectiveCount)
+	public final SearchQuery<R> createSearchQuery(int page, int count)
 	{
-		return SearchQueryBuilder
-				.create(resourceType, getResourceTable(), getResourceColumn(), effectivePage, effectiveCount)
+		return SearchQueryBuilder.create(resourceType, getResourceTable(), getResourceColumn(), page, count)
 				.with(new ResourceId(getResourceIdColumn()), new ResourceLastUpdated(getResourceColumn()))
 				.with(searchParameterFactories.stream().map(Supplier::get).toArray(SearchQueryParameter[]::new))
 				.build();

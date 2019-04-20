@@ -15,35 +15,205 @@ import org.hl7.fhir.r4.model.DomainResource;
 
 public interface DomainResourceDao<R extends DomainResource>
 {
+	int FIRST_VERSION = 1;
+	String FIRST_VERSION_STRING = String.valueOf(FIRST_VERSION);
+
 	String getResourceTypeName();
 
+	/**
+	 * @param resource
+	 *            not <code>null</code>
+	 * @return the stored resource, not the same object as the given resource (defensive copy)
+	 * @throws SQLException
+	 */
 	R create(R resource) throws SQLException;
 
+	/**
+	 * @param resource
+	 *            not <code>null</code>
+	 * @param uuid
+	 *            not <code>null</code>
+	 * @return the stored resource, not the same object as the given resource (defensive copy)
+	 * @throws SQLException
+	 */
 	R createWithId(R resource, UUID uuid) throws SQLException;
 
+	/**
+	 * @param connection
+	 *            not <code>null</code>, not {@link Connection#isReadOnly()}
+	 * @param resource
+	 *            not <code>null</code>
+	 * @param uuid
+	 *            not <code>null</code>
+	 * @return the stored resource, not the same object as the given resource
+	 * @throws SQLException
+	 * @throws IllegalArgumentException
+	 *             if the given connection is {@link Connection#isReadOnly()}
+	 */
 	R createWithTransactionAndId(Connection connection, R resource, UUID uuid) throws SQLException;
 
-	Optional<R> readWithTransaction(Connection connection, UUID uuid) throws SQLException, ResourceDeletedException;
-
+	/**
+	 * @param uuid
+	 *            may be <code>null</code>
+	 * @return {@link Optional#empty()} if the given uuid is <code>null</code> or no resource could be found for the
+	 *         given uuid
+	 * @throws SQLException
+	 * @throws ResourceDeletedException
+	 *             if a resource with the given uuid could be found, but is marked as delete
+	 */
 	Optional<R> read(UUID uuid) throws SQLException, ResourceDeletedException;
 
+	/**
+	 * @param connection
+	 *            not <code>null</code>
+	 * @param uuid
+	 *            may be <code>null</code>
+	 * @return {@link Optional#empty()} if the given uuid is <code>null</code> or no resource could be found for the
+	 *         given uuid
+	 * @throws SQLException
+	 * @throws ResourceDeletedException
+	 *             if a resource with the given uuid could be found, but is marked as delete
+	 */
+	Optional<R> readWithTransaction(Connection connection, UUID uuid) throws SQLException, ResourceDeletedException;
+
+	/**
+	 * @param uuid
+	 *            may be <code>null</code>
+	 * @param version
+	 *            may be less then {@value #FIRST_VERSION}
+	 * @return {@link Optional#empty()} if the given uuid is <code>null</code>, the given version is less then
+	 *         {@value #FIRST_VERSION} or no resource could be found for the given uuid and version
+	 * @throws SQLException
+	 */
 	Optional<R> readVersion(UUID uuid, long version) throws SQLException;
 
+	/**
+	 * @param connection
+	 *            not <code>null</code>
+	 * @param uuid
+	 *            may be <code>null</code>
+	 * @param version
+	 *            may be less then {@value #FIRST_VERSION}
+	 * @return {@link Optional#empty()} if the given uuid is <code>null</code>, the given version is less then
+	 *         {@value #FIRST_VERSION} or no resource could be found for the given uuid and version
+	 * @throws SQLException
+	 */
 	Optional<R> readVersionWithTransaction(Connection connection, UUID uuid, long version) throws SQLException;
 
+	/**
+	 * Sets the version of the stored resource to latest version from DB plus 1.
+	 * 
+	 * If the given expectedVersion is not <code>null</code>, checks if the given expectedVersion is the latest version
+	 * in DB before storing the update.
+	 * 
+	 * Resurrects all old versions (removes deleted flag) if the latest version in DB is marked as deleted.
+	 * 
+	 * @param resource
+	 *            not <code>null</code>
+	 * @param expectedVersion
+	 *            may be <code>null</code>
+	 * @return the stored resource, not the same object as the given resource (defensive copy)
+	 * @throws SQLException
+	 * @throws ResourceNotFoundException
+	 *             if the given resource could not be found
+	 * @throws ResourceVersionNoMatchException
+	 *             if the given expectedVersion is not <code>null</code> and the latest version
+	 */
 	R update(R resource, Long expectedVersion)
 			throws SQLException, ResourceNotFoundException, ResourceVersionNoMatchException;
 
+	/**
+	 * Sets the version of the stored resource to latest version from DB plus 1.
+	 * 
+	 * If the given expectedVersion is not <code>null</code>, checks if the given expectedVersion is the latest version
+	 * in DB before storing the update.
+	 * 
+	 * Resurrects all old versions (removes deleted flag) if the latest version in DB is marked as deleted.
+	 *
+	 * @param connection
+	 *            not <code>null</code>, not {@link Connection#isReadOnly()} and not {@link Connection#getAutoCommit()}
+	 *            and {@link Connection#getTransactionIsolation()} one of {@link Connection#TRANSACTION_REPEATABLE_READ}
+	 *            or {@link Connection#TRANSACTION_SERIALIZABLE}
+	 * @param resource
+	 *            not <code>null</code>
+	 * @param expectedVersion
+	 *            may be <code>null</code>
+	 * @return the stored resource, not the same object as the given resource (defensive copy)
+	 * @throws SQLException
+	 * @throws ResourceNotFoundException
+	 *             if the given resource could not be found
+	 * @throws ResourceVersionNoMatchException
+	 *             if the given expectedVersion is not <code>null</code> and is not the latest version
+	 * @throws IllegalArgumentException
+	 *             if the given connection is {@link Connection#isReadOnly()} or is {@link Connection#getAutoCommit()}
+	 *             or {@link Connection#getTransactionIsolation()} is not one of
+	 *             {@link Connection#TRANSACTION_REPEATABLE_READ} or {@link Connection#TRANSACTION_SERIALIZABLE}
+	 */
 	R updateWithTransaction(Connection connection, R resource, Long expectedVersion)
 			throws SQLException, ResourceNotFoundException, ResourceVersionNoMatchException;
 
+	/**
+	 * Does <b>not</b> not increment the resource version. Set the version of the stored resource to latest version from
+	 * DB. See {@link #updateWithTransaction(Connection, DomainResource, Long)} to increment the version before storing
+	 * the resource.
+	 * 
+	 * Resurrects all old versions (removes deleted flag) if the latest version in DB is marked as deleted.
+	 *
+	 * @param connection
+	 *            not <code>null</code>, not {@link Connection#isReadOnly()} and not {@link Connection#getAutoCommit()}
+	 *            and {@link Connection#getTransactionIsolation()} one of {@link Connection#TRANSACTION_REPEATABLE_READ}
+	 *            or {@link Connection#TRANSACTION_SERIALIZABLE}
+	 * @param resource
+	 *            not <code>null</code>
+	 * @return the stored resource, not the same object as the given resource (defensive copy)
+	 * @throws SQLException
+	 * @throws ResourceNotFoundException
+	 *             if the given resource could not be found
+	 * @throws IllegalArgumentException
+	 *             if the given connection is {@link Connection#isReadOnly()} or is {@link Connection#getAutoCommit()}
+	 *             or {@link Connection#getTransactionIsolation()} is not one of
+	 *             {@link Connection#TRANSACTION_REPEATABLE_READ} or {@link Connection#TRANSACTION_SERIALIZABLE}
+	 */
+	R updateWithTransactionKeepVersion(Connection connection, R resource)
+			throws SQLException, ResourceNotFoundException;
+
+	/**
+	 * Does nothing if the given uuid is <code>null</code>
+	 * 
+	 * @param uuid
+	 *            may be <code>null</code>
+	 * @throws SQLException
+	 */
 	void delete(UUID uuid) throws SQLException;
 
+	/**
+	 * Does nothing if the given uuid is <code>null</code>
+	 * 
+	 * @param connection
+	 *            not <code>null</code>, not {@link Connection#isReadOnly()}
+	 * @param uuid
+	 *            may be <code>null</code>
+	 * @throws SQLException
+	 */
 	void deleteWithTransaction(Connection connection, UUID uuid) throws SQLException;
 
+	/**
+	 * @param query
+	 *            not <code>null</code>
+	 * @return
+	 * @throws SQLException
+	 */
 	PartialResult<R> search(DbSearchQuery query) throws SQLException;
 
+	/**
+	 * @param connection
+	 *            not <code>null</code>
+	 * @param query
+	 *            not <code>null</code>
+	 * @return
+	 * @throws SQLException
+	 */
 	PartialResult<R> searchWithTransaction(Connection connection, DbSearchQuery query) throws SQLException;
 
-	SearchQuery<R> createSearchQuery(int effectivePage, int effectiveCount);
+	SearchQuery<R> createSearchQuery(int page, int count);
 }
