@@ -1,6 +1,7 @@
 package org.highmed.fhir.spring.config;
 
 import org.highmed.fhir.dao.command.CommandFactory;
+import org.highmed.fhir.dao.command.ReferenceExtractor;
 import org.highmed.fhir.dao.command.ReferenceReplacer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,11 +33,17 @@ public class CommandConfig
 	}
 
 	@Bean
+	public ReferenceExtractor referenceExtractor()
+	{
+		return new ReferenceExtractor();
+	}
+
+	@Bean
 	public CommandFactory commandFactory()
 	{
 		return new CommandFactory(serverBase, daoConfig.dataSource(), daoConfig.daoProvider(), referenceReplacer(),
-				helperConfig.responseGenerator(), helperConfig.exceptionHandler(), eventConfig.eventManager(),
-				eventConfig.eventGenerator(), snapshotConfig.snapshotGenerator(),
+				referenceExtractor(), helperConfig.responseGenerator(), helperConfig.exceptionHandler(),
+				eventConfig.eventManager(), eventConfig.eventGenerator(), snapshotConfig.snapshotGenerator(),
 				snapshotConfig.snapshotDependencyAnalyzer(), helperConfig.parameterConverter());
 	}
 }
