@@ -17,6 +17,7 @@ import org.highmed.fhir.dao.DomainResourceDao;
 import org.highmed.fhir.event.EventGenerator;
 import org.highmed.fhir.event.EventManager;
 import org.highmed.fhir.help.ExceptionHandler;
+import org.highmed.fhir.help.ParameterConverter;
 import org.highmed.fhir.help.ResponseGenerator;
 import org.highmed.fhir.search.PartialResult;
 import org.highmed.fhir.search.SearchQuery;
@@ -44,13 +45,14 @@ public class CreateCommand<R extends DomainResource, D extends DomainResourceDao
 	protected final ExceptionHandler exceptionHandler;
 	protected final EventManager eventManager;
 	protected final EventGenerator eventGenerator;
+	protected final ParameterConverter parameterConverter;
 
 	protected UUID id;
 	protected R createdResource;
 
 	public CreateCommand(int index, Bundle bundle, BundleEntryComponent entry, String serverBase, R resource, D dao,
 			ReferenceReplacer replacer, ResponseGenerator responseGenerator, ExceptionHandler exceptionHandler,
-			EventManager eventManager, EventGenerator eventGenerator)
+			EventManager eventManager, EventGenerator eventGenerator, ParameterConverter parameterConverter)
 	{
 		super(2, index, bundle, entry, serverBase, resource, dao);
 
@@ -59,6 +61,7 @@ public class CreateCommand<R extends DomainResource, D extends DomainResourceDao
 		this.exceptionHandler = exceptionHandler;
 		this.eventManager = eventManager;
 		this.eventGenerator = eventGenerator;
+		this.parameterConverter = parameterConverter;
 	}
 
 	@Override
@@ -94,7 +97,8 @@ public class CreateCommand<R extends DomainResource, D extends DomainResourceDao
 		if (path != null && !path.isBlank())
 			throw new WebApplicationException(responseGenerator.badIfNoneExistHeaderValue(ifNoneExist));
 
-		Map<String, List<String>> queryParameters = componentes.getQueryParams();
+		Map<String, List<String>> queryParameters = parameterConverter
+				.cleanQueryParameters(componentes.getQueryParams());
 		if (Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(queryParameters::containsKey))
 		{
 			logger.warn(

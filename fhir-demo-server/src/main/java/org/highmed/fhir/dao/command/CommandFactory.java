@@ -130,14 +130,13 @@ public class CommandFactory implements InitializingBean
 			if (resource instanceof StructureDefinition)
 				return new CreateStructureDefinitionCommand(index, bundle, entry, serverBase,
 						(StructureDefinition) resource, (StructureDefinitionDao) dao.get(), referenceReplacer,
-						responseGenerator, exceptionHandler, eventManager, eventGenerator,
-						daoProvider.getStructureDefinitionSnapshotDao(), snapshotGenerator, snapshotDependencyAnalyzer,
-						parameterConverter);
+						responseGenerator, exceptionHandler, eventManager, eventGenerator, parameterConverter,
+						daoProvider.getStructureDefinitionSnapshotDao(), snapshotGenerator, snapshotDependencyAnalyzer);
 			else
 				return dao
 						.map(d -> new CreateCommand<R, DomainResourceDao<R>>(index, bundle, entry, serverBase, resource,
-								d, referenceReplacer, responseGenerator, exceptionHandler, eventManager,
-								eventGenerator))
+								d, referenceReplacer, responseGenerator, exceptionHandler, eventManager, eventGenerator,
+								parameterConverter))
 						.orElseThrow(() -> new IllegalStateException(
 								"Resource of type " + resource.getClass().getName() + " not supported"));
 		}

@@ -77,7 +77,8 @@ public class DeleteCommand extends AbstractCommand implements Command
 		if (componentes.getPathSegments().size() == 2 && componentes.getQueryParams().isEmpty())
 			deleteById(connection, componentes.getPathSegments().get(0), componentes.getPathSegments().get(1));
 		else if (componentes.getPathSegments().size() == 1 && !componentes.getQueryParams().isEmpty())
-			deleteByCondition(connection, componentes.getPathSegments().get(0), componentes.getQueryParams());
+			deleteByCondition(connection, componentes.getPathSegments().get(0),
+					parameterConverter.cleanQueryParameters(componentes.getQueryParams()));
 		else
 			throw new WebApplicationException(
 					responseGenerator.badDeleteRequestUrl(index, entry.getRequest().getUrl()));

@@ -252,11 +252,11 @@ public class TestFhirJerseyClient
 
 			var delOrg = bundle.addEntry();
 			delOrg.getRequest().setMethod(HTTPVerb.DELETE);
-			delOrg.getRequest().setUrl("Organization?identifier=" + orgIdentifierSystem + "|" + orgIdentifierValue);
+			delOrg.getRequest().setUrl("Organization?identifier=" + orgIdentifierSystem.replace(' ', '+') + "|" + orgIdentifierValue.replace(' ', '+'));
 
 			var delEpt = bundle.addEntry();
 			delEpt.getRequest().setMethod(HTTPVerb.DELETE);
-			delEpt.getRequest().setUrl("Endpoint?identifier=" + eptIdentifierSystem + "|" + eptIdentifierValue);
+			delEpt.getRequest().setUrl("Endpoint?identifier=" + eptIdentifierSystem.replace(' ', '+') + "|" + eptIdentifierValue.replace(' ', '+'));
 
 			var org = new Organization();
 			org.setName("Transaction Test Organization");
@@ -281,14 +281,14 @@ public class TestFhirJerseyClient
 			orgEntry.setResource(org);
 			orgEntry.getRequest().setMethod(HTTPVerb.POST);
 			orgEntry.getRequest().setUrl(org.getResourceType().name());
-			orgEntry.getRequest().setIfNoneExist("identifier=" + orgIdentifierSystem + "|" + orgIdentifierValue);
+			orgEntry.getRequest().setIfNoneExist("identifier=" + orgIdentifierSystem.replace(' ', '+') + "|" + orgIdentifierValue.replace(' ', '+'));
 
 			var eptEntry = bundle.addEntry();
 			eptEntry.setFullUrl("urn:uuid:" + UUID.randomUUID().toString());
 			eptEntry.setResource(ept);
 			eptEntry.getRequest().setMethod(HTTPVerb.POST);
 			eptEntry.getRequest().setUrl(ept.getResourceType().name());
-			eptEntry.getRequest().setIfNoneExist("identifier=" + eptIdentifierSystem + "|" + eptIdentifierValue);
+			eptEntry.getRequest().setIfNoneExist("identifier=" + eptIdentifierSystem.replace(' ', '+') + "|" + eptIdentifierValue.replace(' ', '+'));
 
 			// org.addEndpoint().setReference(eptEntry.getFullUrl());
 			// ept.getManagingOrganization().setReference(orgEntry.getFullUrl());

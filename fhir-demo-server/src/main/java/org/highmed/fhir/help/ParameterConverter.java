@@ -1,9 +1,12 @@
 package org.highmed.fhir.help;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.HttpHeaders;
@@ -110,5 +113,24 @@ public class ParameterConverter
 		{
 			return null;
 		}
+	}
+
+	/**
+	 * replaces all occurrences of '+' with ' ' (a space) for all query parameter values
+	 * 
+	 * @param queryParameters
+	 * @return
+	 */
+	public Map<String, List<String>> cleanQueryParameters(Map<String, List<String>> queryParameters)
+	{
+		Map<String, List<String>> cleaned = new HashMap<>((int) (queryParameters.size() / 0.75) + 1);
+		for (Entry<String, List<String>> entry : queryParameters.entrySet())
+			cleaned.put(entry.getKey(), cleanQueryParameterValues(entry.getValue()));
+		return cleaned;
+	}
+
+	private List<String> cleanQueryParameterValues(List<String> queryParameterValues)
+	{
+		return queryParameterValues.stream().map(v -> v.replace('+', ' ')).collect(Collectors.toList());
 	}
 }
