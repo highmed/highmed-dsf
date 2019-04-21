@@ -234,7 +234,7 @@ public class ReferenceExtractor
 	public Stream<ResourceReference> getReferences(Organization resource)
 	{
 		var partOf = getReference(resource, Organization::hasPartOf, Organization::getPartOf, "Organization::partOf",
-				Location.class);
+				Organization.class);
 		var endpoints = getReferences(resource, Organization::hasEndpoint, Organization::getEndpoint,
 				"Organization.endpoint", Endpoint.class);
 
