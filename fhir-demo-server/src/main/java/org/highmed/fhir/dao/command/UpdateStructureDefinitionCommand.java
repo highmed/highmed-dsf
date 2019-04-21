@@ -19,14 +19,14 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 public class UpdateStructureDefinitionCommand extends UpdateCommand<StructureDefinition, StructureDefinitionDao>
 		implements Command
 {
-	public UpdateStructureDefinitionCommand(int index, Bundle bundle, BundleEntryComponent entry,
-			StructureDefinition resource, String serverBase, StructureDefinitionDao structureDefinitionDao,
-			ReferenceReplacer replacer, ResponseGenerator responseGenerator, ExceptionHandler exceptionHandler,
-			EventManager eventManager, EventGenerator eventGenerator,
-			StructureDefinitionSnapshotDao structureDefinitionSnapshotDao, SnapshotGenerator snapshotGenerator,
-			SnapshotDependencyAnalyzer snapshotDependencyAnalyzer, ParameterConverter parameterConverter)
+	public UpdateStructureDefinitionCommand(int index, Bundle bundle, BundleEntryComponent entry, String serverBase,
+			StructureDefinition resource, StructureDefinitionDao dao, ReferenceReplacer replacer,
+			ResponseGenerator responseGenerator, ExceptionHandler exceptionHandler, EventManager eventManager,
+			EventGenerator eventGenerator, StructureDefinitionSnapshotDao snapshotDao,
+			SnapshotGenerator snapshotGenerator, SnapshotDependencyAnalyzer snapshotDependencyAnalyzer,
+			ParameterConverter parameterConverter)
 	{
-		super(index, bundle, entry, resource, serverBase, structureDefinitionDao, replacer, responseGenerator,
+		super(index, bundle, entry, serverBase, resource, dao, replacer, responseGenerator,
 				exceptionHandler, eventManager, eventGenerator);
 
 		// TODO Auto-generated constructor stub

@@ -35,7 +35,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 
 public class ResolveReferencesCommand<R extends DomainResource, D extends DomainResourceDao<R>>
-		extends AbstractCommand<R, D> implements Command
+		extends AbstractCommandWithResource<R, D> implements Command
 {
 	private static final Logger logger = LoggerFactory.getLogger(ResolveReferencesCommand.class);
 
@@ -44,11 +44,11 @@ public class ResolveReferencesCommand<R extends DomainResource, D extends Domain
 	private final DaoProvider daoProvider;
 	private final ExceptionHandler exceptionHandler;
 
-	public ResolveReferencesCommand(int index, Bundle bundle, BundleEntryComponent entry, R resource, String serverBase,
+	public ResolveReferencesCommand(int index, Bundle bundle, BundleEntryComponent entry, String serverBase, R resource,
 			D dao, ReferenceExtractor referenceExtractor, ResponseGenerator responseGenerator, DaoProvider daoProvider,
 			ExceptionHandler exceptionHandler)
 	{
-		super(5, index, bundle, entry, resource, serverBase, dao);
+		super(5, index, bundle, entry, serverBase, resource, dao);
 
 		this.referenceExtractor = referenceExtractor;
 		this.responseGenerator = responseGenerator;
@@ -251,7 +251,7 @@ public class ResolveReferencesCommand<R extends DomainResource, D extends Domain
 		if (Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(queryParameters::containsKey))
 		{
 			logger.warn(
-					"Query contains parameter not applicable in this conditional update context: '{}', parameters {} will be ignored",
+					"Query contains parameter not applicable in this resolve reference context: '{}', parameters {} will be ignored",
 					UriComponentsBuilder.newInstance()
 							.replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString(),
 					Arrays.toString(SearchQuery.STANDARD_PARAMETERS));

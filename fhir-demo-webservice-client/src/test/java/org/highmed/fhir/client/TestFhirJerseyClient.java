@@ -6,8 +6,6 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
-import java.util.Collections;
-import java.util.Map;
 import java.util.UUID;
 
 import javax.ws.rs.WebApplicationException;
@@ -224,32 +222,58 @@ public class TestFhirJerseyClient
 			// org.setName("conditional update");
 			// client.create(org);
 
-			client.deleteConditionaly(Organization.class,
-					Map.of("name:exact", Collections.singletonList("Transaction Test Organization")));
-			client.deleteConditionaly(Endpoint.class,
-					Map.of("name:exact", Collections.singletonList("Transaction Test Endpoint")));
+			//
+			// Patient created = client.create(new Patient().setActive(true).setBirthDate(new Date()));
+			//
+			// var bundle = new Bundle();
+			// bundle.setType(BundleType.TRANSACTION);
+			//
+			// var del1 = bundle.addEntry();
+			// del1.getRequest().setMethod(HTTPVerb.DELETE);
+			// del1.getRequest().setUrl("Patient?_id=bbdc562a-3c15-4641-bf8b-e72e7380548c");
+			//
+			// var del2 = bundle.addEntry();
+			// del2.getRequest().setMethod(HTTPVerb.DELETE);
+			// del2.getRequest().setUrl("Patient/bbdc562a-3c15-4641-bf8b-e72e7380548c");
+			//
+
+			// client.deleteConditionaly(Organization.class,
+			// Map.of("name:exact", Collections.singletonList("Transaction Test Organization")));
+			// client.deleteConditionaly(Endpoint.class,
+			// Map.of("name:exact", Collections.singletonList("Transaction Test Endpoint")));
+
+			final String orgIdentifierSystem = "http://highmed.org/fhir/CodeSystem/organization";
+			final String orgIdentifierValue = "Transaction Test Organization";
+			final String eptIdentifierSystem = "http://highmed.org/fhir/CodeSystem/endpoint";
+			final String eptIdentifierValue = "Transaction Test Endpoint";
 
 			var bundle = new Bundle();
 			bundle.setType(BundleType.TRANSACTION);
 
+			var delOrg = bundle.addEntry();
+			delOrg.getRequest().setMethod(HTTPVerb.DELETE);
+			delOrg.getRequest().setUrl("Organization?identifier=" + orgIdentifierSystem + "|" + orgIdentifierValue);
+
+			var delEpt = bundle.addEntry();
+			delEpt.getRequest().setMethod(HTTPVerb.DELETE);
+			delEpt.getRequest().setUrl("Endpoint?identifier=" + eptIdentifierSystem + "|" + eptIdentifierValue);
+
 			var org = new Organization();
 			org.setName("Transaction Test Organization");
-			org.addIdentifier().setSystem("http://highmed.org/fhir/CodeSystem/organization")
-					.setValue("Transaction Test Organization");
+			org.addIdentifier().setSystem(orgIdentifierSystem).setValue(orgIdentifierValue);
 			Reference eptReference = new Reference();
 			eptReference.setType("Endpoint");
-			eptReference.getIdentifier().setSystem("http://highmed.org/fhir/CodeSystem/endpoint");
-			eptReference.getIdentifier().setValue("Transaction Test Endpoint");
+			eptReference.getIdentifier().setSystem(eptIdentifierSystem);
+			eptReference.getIdentifier().setValue(eptIdentifierValue);
 			org.addEndpoint(eptReference);
 
 			var ept = new Endpoint();
 			ept.setName("Transaction Test Endpoint");
-			ept.addIdentifier().setSystem("http://highmed.org/fhir/CodeSystem/endpoint")
-					.setValue("Transaction Test Endpoint");
+			ept.addIdentifier().setSystem(eptIdentifierSystem).setValue(eptIdentifierValue);
 			Reference orgReference = new Reference();
 			orgReference.setType("Organization");
-			orgReference.getIdentifier().setSystem("http://highmed.org/fhir/CodeSystem/organization");
-			orgReference.getIdentifier().setValue("Transaction Test Organization");
+			orgReference.getIdentifier().setSystem(orgIdentifierSystem);
+			orgReference.getIdentifier().setValue(orgIdentifierValue);
 			ept.setManagingOrganization(orgReference);
 
 			var orgEntry = bundle.addEntry();
@@ -257,14 +281,14 @@ public class TestFhirJerseyClient
 			orgEntry.setResource(org);
 			orgEntry.getRequest().setMethod(HTTPVerb.POST);
 			orgEntry.getRequest().setUrl(org.getResourceType().name());
-			orgEntry.getRequest().setIfNoneExist("name:exact=Transaction Test Organization");
+			orgEntry.getRequest().setIfNoneExist("identifier=" + orgIdentifierSystem + "|" + orgIdentifierValue);
 
 			var eptEntry = bundle.addEntry();
 			eptEntry.setFullUrl("urn:uuid:" + UUID.randomUUID().toString());
 			eptEntry.setResource(ept);
 			eptEntry.getRequest().setMethod(HTTPVerb.POST);
 			eptEntry.getRequest().setUrl(ept.getResourceType().name());
-			eptEntry.getRequest().setIfNoneExist("name:exact=Transaction Test Endpoint");
+			eptEntry.getRequest().setIfNoneExist("identifier=" + eptIdentifierSystem + "|" + eptIdentifierValue);
 
 			// org.addEndpoint().setReference(eptEntry.getFullUrl());
 			// ept.getManagingOrganization().setReference(orgEntry.getFullUrl());

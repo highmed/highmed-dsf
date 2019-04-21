@@ -10,11 +10,11 @@ import javax.ws.rs.core.UriInfo;
 import org.highmed.fhir.authentication.UserProvider;
 import org.highmed.fhir.dao.command.CommandFactory;
 import org.highmed.fhir.dao.command.CommandList;
+import org.highmed.fhir.help.ExceptionHandler;
 import org.highmed.fhir.help.ParameterConverter;
 import org.highmed.fhir.help.ResponseGenerator;
 import org.highmed.fhir.webservice.specification.RootService;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.springframework.beans.factory.InitializingBean;
 
 public class RootServiceImpl implements RootService, InitializingBean
@@ -22,13 +22,15 @@ public class RootServiceImpl implements RootService, InitializingBean
 	private final CommandFactory commandFactory;
 	private final ResponseGenerator responseGenerator;
 	private final ParameterConverter parameterConverter;
+	private final ExceptionHandler exceptionHandler;
 
 	public RootServiceImpl(CommandFactory commandFactory, ResponseGenerator responseGenerator,
-			ParameterConverter parameterConverter)
+			ParameterConverter parameterConverter, ExceptionHandler exceptionHandler)
 	{
 		this.commandFactory = commandFactory;
 		this.responseGenerator = responseGenerator;
 		this.parameterConverter = parameterConverter;
+		this.exceptionHandler = exceptionHandler;
 	}
 
 	@Override
@@ -37,6 +39,7 @@ public class RootServiceImpl implements RootService, InitializingBean
 		Objects.requireNonNull(commandFactory, "commandFactory");
 		Objects.requireNonNull(responseGenerator, "responseGenerator");
 		Objects.requireNonNull(parameterConverter, "parameterConverter");
+		Objects.requireNonNull(exceptionHandler, "exceptionHandler");
 	}
 
 	@Override
@@ -53,15 +56,10 @@ public class RootServiceImpl implements RootService, InitializingBean
 	@Override
 	public Response handleBundle(Bundle bundle, UriInfo uri, HttpHeaders headers)
 	{
-		if (bundle.getType() != null
-				&& (BundleType.BATCH.equals(bundle.getType()) || BundleType.TRANSACTION.equals(bundle.getType())))
-		{
-			CommandList commands = commandFactory.createCommands(bundle);
-			Bundle result = commands.execute(); // throws WebApplicationException
+		CommandList commands = exceptionHandler.handleBadBundleException(() -> commandFactory.createCommands(bundle));
 
-			return responseGenerator.response(Status.OK, result, parameterConverter.getMediaType(uri, headers)).build();
-		}
+		Bundle result = commands.execute(); // throws WebApplicationException
 
-		return Response.status(Status.BAD_REQUEST).build(); // TODO
+		return responseGenerator.response(Status.OK, result, parameterConverter.getMediaType(uri, headers)).build();
 	}
 }

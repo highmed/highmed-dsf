@@ -7,6 +7,8 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.highmed.fhir.dao.command.CommandList;
+import org.highmed.fhir.dao.exception.BadBundleException;
 import org.highmed.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.fhir.dao.exception.ResourceNotFoundException;
 import org.highmed.fhir.dao.exception.ResourceVersionNoMatchException;
@@ -273,6 +275,19 @@ public class ExceptionHandler
 		{
 			logger.warn("Error while accessing DB", e);
 			return onSqlException.get();
+		}
+	}
+
+	public CommandList handleBadBundleException(Supplier<CommandList> commandListCreator)
+	{
+		try
+		{
+			return commandListCreator.get();
+		}
+		catch (BadBundleException e)
+		{
+			logger.warn("Error while creating command list for bundle: {}", e.getMessage());
+			throw new WebApplicationException(responseGenerator.badBundleRequest(e.getMessage()));
 		}
 	}
 }

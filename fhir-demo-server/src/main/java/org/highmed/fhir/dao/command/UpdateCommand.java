@@ -3,7 +3,6 @@ package org.highmed.fhir.dao.command;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.ws.rs.WebApplicationException;
 
@@ -19,8 +18,8 @@ import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class UpdateCommand<R extends DomainResource, D extends DomainResourceDao<R>> extends AbstractCommand<R, D>
-		implements Command
+public class UpdateCommand<R extends DomainResource, D extends DomainResourceDao<R>>
+		extends AbstractCommandWithResource<R, D> implements Command
 {
 	private static final Logger logger = LoggerFactory.getLogger(UpdateCommand.class);
 
@@ -30,14 +29,13 @@ public class UpdateCommand<R extends DomainResource, D extends DomainResourceDao
 	protected final EventManager eventManager;
 	protected final EventGenerator eventGenerator;
 
-	protected UUID id;
 	protected R updatedResource;
 
-	public UpdateCommand(int index, Bundle bundle, BundleEntryComponent entry, R resource, String serverBase, D dao,
+	public UpdateCommand(int index, Bundle bundle, BundleEntryComponent entry, String serverBase, R resource, D dao,
 			ReferenceReplacer replacer, ResponseGenerator responseGenerator, ExceptionHandler exceptionHandler,
 			EventManager eventManager, EventGenerator eventGenerator)
 	{
-		super(3, index, bundle, entry, resource, serverBase, dao);
+		super(3, index, bundle, entry, serverBase, resource, dao);
 
 		this.replacer = replacer;
 		this.responseGenerator = responseGenerator;

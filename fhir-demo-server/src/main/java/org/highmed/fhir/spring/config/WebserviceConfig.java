@@ -332,6 +332,6 @@ public class WebserviceConfig
 	private RootServiceImpl rootServiceImpl()
 	{
 		return new RootServiceImpl(commandConfig.commandFactory(), helperConfig.responseGenerator(),
-				helperConfig.parameterConverter());
+				helperConfig.parameterConverter(), helperConfig.exceptionHandler());
 	}
 }

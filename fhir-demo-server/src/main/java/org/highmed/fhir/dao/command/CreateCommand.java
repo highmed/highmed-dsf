@@ -34,8 +34,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import ca.uhn.fhir.rest.api.Constants;
 
-public class CreateCommand<R extends DomainResource, D extends DomainResourceDao<R>> extends AbstractCommand<R, D>
-		implements Command
+public class CreateCommand<R extends DomainResource, D extends DomainResourceDao<R>>
+		extends AbstractCommandWithResource<R, D> implements Command
 {
 	private static final Logger logger = LoggerFactory.getLogger(CreateCommand.class);
 
@@ -48,11 +48,11 @@ public class CreateCommand<R extends DomainResource, D extends DomainResourceDao
 	protected UUID id;
 	protected R createdResource;
 
-	public CreateCommand(int index, Bundle bundle, BundleEntryComponent entry, R resource, String serverBase, D dao,
+	public CreateCommand(int index, Bundle bundle, BundleEntryComponent entry, String serverBase, R resource, D dao,
 			ReferenceReplacer replacer, ResponseGenerator responseGenerator, ExceptionHandler exceptionHandler,
 			EventManager eventManager, EventGenerator eventGenerator)
 	{
-		super(2, index, bundle, entry, resource, serverBase, dao);
+		super(2, index, bundle, entry, serverBase, resource, dao);
 
 		this.replacer = replacer;
 		this.responseGenerator = responseGenerator;
@@ -72,12 +72,13 @@ public class CreateCommand<R extends DomainResource, D extends DomainResourceDao
 	public void execute(Map<String, IdType> idTranslationTable, Connection connection)
 			throws SQLException, WebApplicationException
 	{
-		checkAlreadyExists(entry.getRequest().getIfNoneExist(), resource.getResourceType());
+		checkAlreadyExists(connection, entry.getRequest().getIfNoneExist(), resource.getResourceType());
 
 		createdResource = dao.createWithTransactionAndId(connection, resource, id);
 	}
 
-	private void checkAlreadyExists(String ifNoneExist, ResourceType resourceType) throws WebApplicationException
+	private void checkAlreadyExists(Connection connection, String ifNoneExist, ResourceType resourceType)
+			throws WebApplicationException
 	{
 		if (ifNoneExist == null)
 			return; // header not found, nothing to check against
@@ -114,7 +115,8 @@ public class CreateCommand<R extends DomainResource, D extends DomainResourceDao
 			throw new WebApplicationException(
 					responseGenerator.badIfNoneExistHeaderValue(ifNoneExist, unsupportedQueryParameters));
 
-		PartialResult<R> result = exceptionHandler.handleSqlException(() -> dao.search(query));
+		PartialResult<R> result = exceptionHandler
+				.handleSqlException(() -> dao.searchWithTransaction(connection, query));
 		if (result.getOverallCount() == 1)
 			throw new WebApplicationException(responseGenerator.oneExists(resourceType.name(), ifNoneExist));
 		else if (result.getOverallCount() > 1)

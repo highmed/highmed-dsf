@@ -33,14 +33,14 @@ public class CreateStructureDefinitionCommand extends CreateCommand<StructureDef
 
 	private StructureDefinition resourceWithSnapshot;
 
-	public CreateStructureDefinitionCommand(int index, Bundle bundle, BundleEntryComponent entry,
-			StructureDefinition resource, String serverBase, StructureDefinitionDao dao, ReferenceReplacer replacer,
+	public CreateStructureDefinitionCommand(int index, Bundle bundle, BundleEntryComponent entry, String serverBase,
+			StructureDefinition resource, StructureDefinitionDao dao, ReferenceReplacer replacer,
 			ResponseGenerator responseGenerator, ExceptionHandler exceptionHandler, EventManager eventManager,
 			EventGenerator eventGenerator, StructureDefinitionSnapshotDao snapshotDao,
 			SnapshotGenerator snapshotGenerator, SnapshotDependencyAnalyzer snapshotDependencyAnalyzer,
 			ParameterConverter parameterConverter)
 	{
-		super(index, bundle, entry, resource, serverBase, dao, replacer, responseGenerator, exceptionHandler,
+		super(index, bundle, entry, serverBase, resource, dao, replacer, responseGenerator, exceptionHandler,
 				eventManager, eventGenerator);
 
 		this.snapshotDao = snapshotDao;

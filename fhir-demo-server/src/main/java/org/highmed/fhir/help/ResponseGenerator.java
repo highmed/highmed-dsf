@@ -49,6 +49,12 @@ public class ResponseGenerator
 		return outcome;
 	}
 
+	public OperationOutcome resourceDeleted(String resourceTypeName, String id)
+	{
+		return createOutcome(IssueSeverity.INFORMATION, IssueType.INFORMATIONAL,
+				resourceTypeName + " with id " + id + " marked as deleted");
+	}
+
 	public ResponseBuilder response(Status status, Resource resource, MediaType mediaType)
 	{
 		Objects.requireNonNull(status, "status");
@@ -396,6 +402,62 @@ public class ResponseGenerator
 						+ "' of reference at " + resourceReference.getReferenceLocation() + " in resource of type "
 						+ resource.getResourceType().name() + " with id " + resource.getId() + " at bundle index "
 						+ bundleIndex + " not found");
+		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
+	}
+
+	public Response badDeleteRequestUrl(int bundleIndex, String url)
+	{
+		logger.error("Bad delete request url {} at bundle index {}", url, bundleIndex);
+
+		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING, "Bad delete request url "
+				+ url + " at bundle index " + bundleIndex + " not supported by this implementation");
+		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
+	}
+
+	public Response resourceTypeNotSupportedByImplementation(int bundleIndex, String resourceTypeName)
+	{
+		logger.error("Resource type {} at bundle index {} not supported by this implementation", resourceTypeName,
+				bundleIndex);
+
+		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING, "Resource type "
+				+ resourceTypeName + " at bundle index " + bundleIndex + " not supported by this implementation");
+		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
+	}
+
+	public Response badConditionalDeleteRequest(int bundleIndex, String queryParameters,
+			List<SearchQueryParameterError> unsupportedQueryParameters)
+	{
+		String unsupportedQueryParametersString = unsupportedQueryParameters.stream()
+				.map(SearchQueryParameterError::toString).collect(Collectors.joining("; "));
+		logger.error("Bad conditional delete request '{}', unsupported query parameter{} {} at bundle index {}",
+				queryParameters, unsupportedQueryParameters.size() != 1 ? "s" : "", unsupportedQueryParametersString,
+				bundleIndex);
+
+		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+				"Bad conditional delete request '" + queryParameters + "', unsupported query parameter"
+						+ (unsupportedQueryParameters.size() != 1 ? "s" : "") + " " + unsupportedQueryParametersString
+						+ " at bundle index " + bundleIndex);
+		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
+	}
+
+	public Response badConditionalDeleteRequestMultipleMatches(int bundleIndex, String resourceTypeName,
+			String queryParameters)
+	{
+		logger.error("Multiple {} resources with criteria '{}' exist for delete request at bundle index {}",
+				resourceTypeName, queryParameters, bundleIndex);
+
+		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.MULTIPLEMATCHES,
+				"Multiple " + resourceTypeName + " resources with criteria '" + queryParameters
+						+ "' exist for delete request at bundle index " + bundleIndex);
+		return Response.status(Status.PRECONDITION_FAILED).entity(outcome).build();
+	}
+
+	public Response badBundleRequest(String message)
+	{
+		logger.error("Bad bundle request - {}", message);
+
+		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+				"Bad bundle request - " + message);
 		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 }

@@ -468,7 +468,8 @@ public abstract class AbstractServiceImpl<D extends DomainResourceDao<R>, R exte
 		if (afterDelete != null)
 			afterDelete.accept(id);
 
-		return Response.noContent().build(); // TODO return OperationOutcome
+		return responseGenerator.response(Status.OK, responseGenerator.resourceDeleted(resourceTypeName, id),
+				parameterConverter.getMediaType(uri, headers)).build();
 	}
 
 	/**
