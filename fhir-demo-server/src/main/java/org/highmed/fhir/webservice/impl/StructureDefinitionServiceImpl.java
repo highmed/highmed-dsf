@@ -175,8 +175,8 @@ public class StructureDefinitionServiceImpl extends AbstractServiceImpl<Structur
 
 	private void afterDelete(String id)
 	{
-		exceptionHandler
-				.catchAndLogSqlException(() -> snapshotDao.delete(parameterConverter.toUuid(resourceTypeName, id)));
+		exceptionHandler.catchAndLogSqlAndResourceNotFoundException(resourceTypeName,
+				() -> snapshotDao.delete(parameterConverter.toUuid(resourceTypeName, id)));
 	}
 
 	@Override

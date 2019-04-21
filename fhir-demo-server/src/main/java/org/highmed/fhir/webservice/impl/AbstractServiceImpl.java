@@ -459,9 +459,11 @@ public abstract class AbstractServiceImpl<D extends DomainResourceDao<R>, R exte
 	{
 		Consumer<String> afterDelete = preDelete(id);
 
-		exceptionHandler.handleSqlException(() -> dao.delete(parameterConverter.toUuid(resourceTypeName, id)));
+		boolean deleted = exceptionHandler.handleSqlAndResourceNotFoundException(resourceTypeName,
+				() -> dao.delete(parameterConverter.toUuid(resourceTypeName, id)));
 
-		eventManager.handleEvent(eventGenerator.newResourceDeletedEvent(resourceType, id));
+		if (deleted)
+			eventManager.handleEvent(eventGenerator.newResourceDeletedEvent(resourceType, id));
 
 		if (afterDelete != null)
 			afterDelete.accept(id);
@@ -516,8 +518,13 @@ public abstract class AbstractServiceImpl<D extends DomainResourceDao<R>, R exte
 
 		PartialResult<R> result = exceptionHandler.handleSqlException(() -> dao.search(query));
 
-		// No matches or One Match: The server performs an ordinary delete on the matching resource
-		if (result.getOverallCount() <= 1)
+		// No matches
+		if (result.getOverallCount() <= 0)
+		{
+			return Response.noContent().build(); // TODO return OperationOutcome
+		}
+		// One Match: The server performs an ordinary delete on the matching resource
+		else if (result.getOverallCount() == 1)
 		{
 			R resource = result.getPartialResult().get(0);
 			return delete(resource.getIdElement().getIdPart(), uri, headers);

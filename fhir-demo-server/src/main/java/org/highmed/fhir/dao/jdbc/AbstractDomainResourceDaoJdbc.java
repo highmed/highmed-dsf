@@ -453,6 +453,48 @@ abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implement
 	}
 
 	@Override
+	public Optional<IdType> existsWithTransaction(Connection connection, String idString, String versionString)
+			throws SQLException
+	{
+		Objects.requireNonNull(connection, "connection");
+
+		UUID uuid = toUuid(idString);
+
+		if (uuid == null)
+			return Optional.empty();
+
+		if (versionString == null || versionString.isBlank())
+		{
+			if (hasNonDeletedResource(uuid))
+				return Optional.of(new IdType(resourceTypeName, idString));
+			else
+				return Optional.empty();
+		}
+		else
+		{
+			Long version = toLong(versionString);
+			if (version == null || version < FIRST_VERSION)
+				return Optional.empty();
+
+			try (PreparedStatement statement = connection.prepareStatement(
+					"SELECT COUNT(*) FROM " + resourceTable + " WHERE " + resourceIdColumn + " = ? AND version = ?"))
+			{
+				statement.setObject(1, uuidToPgObject(uuid));
+				statement.setLong(2, version);
+
+				logger.trace("Executing query '{}'", statement);
+				try (ResultSet result = statement.executeQuery())
+				{
+					if (result.next() && result.getInt(1) > 0)
+						return Optional.of(new IdType(resourceTypeName, idString, versionString));
+					else
+						return Optional.empty();
+				}
+			}
+		}
+	}
+
+	@Override
 	public final R update(R resource, Long expectedVersion)
 			throws SQLException, ResourceNotFoundException, ResourceVersionNoMatchException
 	{
@@ -651,7 +693,16 @@ abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implement
 	{
 		UUID uuid = toUuid(resource.getIdElement().getIdPart());
 		if (uuid == null)
-			throw new ResourceNotFoundException(resource.getId());
+			throw new ResourceNotFoundException(resource.getId() != null ? resource.getId() : "'null'");
+
+		return getLatestVersion(uuid, connection);
+	}
+
+	protected final LatestVersion getLatestVersion(UUID uuid, Connection connection)
+			throws SQLException, ResourceNotFoundException
+	{
+		if (uuid == null)
+			throw new ResourceNotFoundException("'null'");
 
 		try (PreparedStatement statement = connection.prepareStatement("SELECT version, deleted FROM " + resourceTable
 				+ " WHERE " + resourceIdColumn + " = ? ORDER BY version DESC LIMIT 1"))
@@ -669,49 +720,56 @@ abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implement
 					logger.debug(
 							"Latest version for {} with IdPart {} is {}"
 									+ (deleted ? ", resource marked as deleted" : ""),
-							resourceTypeName, resource.getIdElement().getIdPart(), version);
+							resourceTypeName, uuid.toString(), version);
 					return new LatestVersion(version, deleted);
 				}
 				else
 				{
-					logger.debug("{} with IdPart {} not found", resourceTypeName, resource.getIdElement().getIdPart());
-					throw new ResourceNotFoundException(resource.getId());
+					logger.debug("{} with IdPart {} not found", resourceTypeName, uuid.toString());
+					throw new ResourceNotFoundException(uuid.toString());
 				}
 			}
 		}
 	}
 
 	@Override
-	public final void delete(UUID uuid) throws SQLException
+	public final boolean delete(UUID uuid) throws SQLException, ResourceNotFoundException
 	{
 		if (uuid == null)
-			return;
+			throw new ResourceNotFoundException("'null'");
 
 		try (Connection connection = dataSource.getConnection())
 		{
 			connection.setReadOnly(false);
 
-			deleteWithTransaction(connection, uuid);
+			return deleteWithTransaction(connection, uuid);
 		}
 	}
 
 	@Override
-	public void deleteWithTransaction(Connection connection, UUID uuid) throws SQLException
+	public boolean deleteWithTransaction(Connection connection, UUID uuid)
+			throws SQLException, ResourceNotFoundException
 	{
 		if (uuid == null)
-			return;
+			throw new ResourceNotFoundException("'null'");
 		Objects.requireNonNull(connection, "connection");
 		if (connection.isReadOnly())
 			throw new IllegalStateException("Connection is read-only");
 
-		markDeleted(connection, uuid, true);
+		return markDeleted(connection, uuid, true);
 	}
 
 	// caution: implementation of method hasNonDeletedResource only works because we set all versions as deleted here
-	protected final void markDeleted(Connection connection, UUID uuid, boolean deleted) throws SQLException
+	protected final boolean markDeleted(Connection connection, UUID uuid, boolean deleted)
+			throws SQLException, ResourceNotFoundException
 	{
 		if (uuid == null)
-			return;
+			throw new ResourceNotFoundException("'null'");
+
+		LatestVersion latestVersion = getLatestVersion(uuid, connection);
+
+		if (latestVersion.deleted)
+			return false;
 
 		try (PreparedStatement statement = connection
 				.prepareStatement("UPDATE " + resourceTable + " SET deleted = ? WHERE " + resourceIdColumn + " = ?"))
@@ -723,6 +781,7 @@ abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implement
 			statement.execute();
 
 			logger.debug("{} with ID {} marked as deleted", resourceTypeName, uuid);
+			return true;
 		}
 	}
 

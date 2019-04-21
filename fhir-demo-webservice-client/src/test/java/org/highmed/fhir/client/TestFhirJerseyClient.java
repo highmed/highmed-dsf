@@ -18,6 +18,7 @@ import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Reference;
 
 import ca.uhn.fhir.context.FhirContext;
 import de.rwh.utils.crypto.CertificateHelper;
@@ -233,9 +234,23 @@ public class TestFhirJerseyClient
 
 			var org = new Organization();
 			org.setName("Transaction Test Organization");
+			org.addIdentifier().setSystem("http://highmed.org/fhir/CodeSystem/organization")
+					.setValue("Transaction Test Organization");
+			Reference eptReference = new Reference();
+			eptReference.setType("Endpoint");
+			eptReference.getIdentifier().setSystem("http://highmed.org/fhir/CodeSystem/endpoint");
+			eptReference.getIdentifier().setValue("Transaction Test Endpoint");
+			org.addEndpoint(eptReference);
 
 			var ept = new Endpoint();
 			ept.setName("Transaction Test Endpoint");
+			ept.addIdentifier().setSystem("http://highmed.org/fhir/CodeSystem/endpoint")
+					.setValue("Transaction Test Endpoint");
+			Reference orgReference = new Reference();
+			orgReference.setType("Organization");
+			orgReference.getIdentifier().setSystem("http://highmed.org/fhir/CodeSystem/organization");
+			orgReference.getIdentifier().setValue("Transaction Test Organization");
+			ept.setManagingOrganization(orgReference);
 
 			var orgEntry = bundle.addEntry();
 			orgEntry.setFullUrl("urn:uuid:" + UUID.randomUUID().toString());
@@ -251,9 +266,10 @@ public class TestFhirJerseyClient
 			eptEntry.getRequest().setUrl(ept.getResourceType().name());
 			eptEntry.getRequest().setIfNoneExist("name:exact=Transaction Test Endpoint");
 
-			org.addEndpoint().setReference(eptEntry.getFullUrl());
-			ept.getManagingOrganization().setReference(orgEntry.getFullUrl());
+			// org.addEndpoint().setReference(eptEntry.getFullUrl());
+			// ept.getManagingOrganization().setReference(orgEntry.getFullUrl());
 
+			System.out.println(fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
 			Bundle result = client.postBundle(bundle);
 			System.out.println(fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(result));
 		}

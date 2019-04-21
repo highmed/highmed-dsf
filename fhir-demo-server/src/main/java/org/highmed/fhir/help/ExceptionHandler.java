@@ -139,7 +139,16 @@ public class ExceptionHandler
 		logger.error("{} with id (not a UUID) not found", resourceTypeName);
 
 		OperationOutcome outcome = responseGenerator.createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
-				"Resource with id (not a UUID) not found");
+				resourceTypeName + " with id (not a UUID) not found");
+		return new WebApplicationException(Response.status(Status.NOT_FOUND).entity(outcome).build());
+	}
+
+	public WebApplicationException notFound(String resourceTypeName, ResourceNotFoundException e)
+	{
+		logger.error("{} with id {} not found", resourceTypeName, e.getId());
+
+		OperationOutcome outcome = responseGenerator.createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+				resourceTypeName + " with id " + e.getId() + " not found");
 		return new WebApplicationException(Response.status(Status.NOT_FOUND).entity(outcome).build());
 	}
 
@@ -153,6 +162,23 @@ public class ExceptionHandler
 		catch (ResourceDeletedException e)
 		{
 			throw gone(resourceTypeName, e);
+		}
+		catch (SQLException e)
+		{
+			throw internalServerError(e);
+		}
+	}
+
+	public <T> T handleSqlAndResourceNotFoundException(String resourceTypeName,
+			SupplierWithSqlAndResourceNotFoundException<T> s)
+	{
+		try
+		{
+			return s.get();
+		}
+		catch (ResourceNotFoundException e)
+		{
+			throw notFound(resourceTypeName, e);
 		}
 		catch (SQLException e)
 		{

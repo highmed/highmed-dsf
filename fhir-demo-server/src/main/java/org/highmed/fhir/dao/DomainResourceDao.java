@@ -115,6 +115,19 @@ public interface DomainResourceDao<R extends DomainResource>
 	Optional<IdType> exists(String id, String version) throws SQLException;
 
 	/**
+	 * @param connection
+	 *            not <code>null</code>
+	 * @param id
+	 *            not <code>null</code>
+	 * @param version
+	 *            may be <code>null</code>
+	 * @return <code>true</code> if a resource with the given id and version exists, if the given version is null and a
+	 *         resource with the given id is marked as deleted returns <code>false</code>
+	 * @throws SQLException
+	 */
+	Optional<IdType> existsWithTransaction(Connection connection, String id, String version) throws SQLException;
+
+	/**
 	 * Sets the version of the stored resource to latest version from DB plus 1.
 	 * 
 	 * If the given expectedVersion is not <code>null</code>, checks if the given expectedVersion is the latest version
@@ -192,24 +205,32 @@ public interface DomainResourceDao<R extends DomainResource>
 	R updateSameRowWithTransaction(Connection connection, R resource) throws SQLException, ResourceNotFoundException;
 
 	/**
-	 * Does nothing if the given uuid is <code>null</code>
+	 * Returns <code>false</code> if a matching resource was already marked as deleted
 	 * 
 	 * @param uuid
 	 *            may be <code>null</code>
+	 * @return <code>true</code> if a resource with the given uuid could be found and marked as deleted,
+	 *         <code>false</code> if a resource with the given uuid was already marked as deleted
 	 * @throws SQLException
+	 * @throws ResourceNotFoundException
+	 *             if the given uuid is <code>null</code> or no resource could be found with the given uuid
 	 */
-	void delete(UUID uuid) throws SQLException;
+	boolean delete(UUID uuid) throws SQLException, ResourceNotFoundException;
 
 	/**
-	 * Does nothing if the given uuid is <code>null</code>
+	 * Returns <code>false</code> if a matching resource was already marked as deleted
 	 * 
 	 * @param connection
 	 *            not <code>null</code>, not {@link Connection#isReadOnly()}
 	 * @param uuid
 	 *            may be <code>null</code>
+	 * @return <code>true</code> if a resource with the given uuid could be found and marked as deleted,
+	 *         <code>false</code> if a resource with the given uuid was already marked as deleted
 	 * @throws SQLException
+	 * @throws ResourceNotFoundException
+	 *             if the given uuid is <code>null</code> or no resource could be found with the given uuid
 	 */
-	void deleteWithTransaction(Connection connection, UUID uuid) throws SQLException;
+	boolean deleteWithTransaction(Connection connection, UUID uuid) throws SQLException, ResourceNotFoundException;
 
 	/**
 	 * @param query
