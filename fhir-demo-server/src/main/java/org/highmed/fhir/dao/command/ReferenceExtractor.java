@@ -220,10 +220,10 @@ public class ReferenceExtractor
 	public Stream<ResourceReference> getReferences(Location resource)
 	{
 		var managingOrganization = getReference(resource, Location::hasManagingOrganization,
-				Location::getManagingOrganization, "Location::managingOrganization", Organization.class);
-		var partOf = getReference(resource, Location::hasPartOf, Location::getPartOf, "Location::partOf",
+				Location::getManagingOrganization, "Location.managingOrganization", Organization.class);
+		var partOf = getReference(resource, Location::hasPartOf, Location::getPartOf, "Location.partOf",
 				Location.class);
-		var endpoints = getReferences(resource, Location::hasEndpoint, Location::getEndpoint, "Location::endpoint",
+		var endpoints = getReferences(resource, Location::hasEndpoint, Location::getEndpoint, "Location.endpoint",
 				Endpoint.class);
 
 		var extensionReferences = getExtensionReferences(resource);
@@ -233,7 +233,7 @@ public class ReferenceExtractor
 
 	public Stream<ResourceReference> getReferences(Organization resource)
 	{
-		var partOf = getReference(resource, Organization::hasPartOf, Organization::getPartOf, "Organization::partOf",
+		var partOf = getReference(resource, Organization::hasPartOf, Organization::getPartOf, "Organization.partOf",
 				Organization.class);
 		var endpoints = getReferences(resource, Organization::hasEndpoint, Organization::getEndpoint,
 				"Organization.endpoint", Endpoint.class);
