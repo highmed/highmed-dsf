@@ -41,6 +41,7 @@ import org.springframework.beans.factory.InitializingBean;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import com.sun.xml.txw2.IllegalAnnotationException;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
@@ -109,8 +110,8 @@ abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implement
 	private final List<Supplier<SearchQueryParameter<R>>> searchParameterFactories;
 
 	/*
-	 * Using a suppliers for SearchParameters, because implementations are not thread safe and need to be created on a
-	 * request basis
+	 * Using a suppliers for SearchParameters, implementations are not thread safe and because of that need to be
+	 * created on a request basis
 	 */
 	@SafeVarargs
 	public AbstractDomainResourceDaoJdbc(DataSource dataSource, FhirContext fhirContext, Class<R> resourceType,
@@ -169,6 +170,12 @@ abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implement
 	public String getResourceTypeName()
 	{
 		return resourceTypeName;
+	}
+
+	@Override
+	public Class<R> getResourceType()
+	{
+		return resourceType;
 	}
 
 	@Override
@@ -296,6 +303,7 @@ abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implement
 		return includes;
 	}
 
+	// caution: only works because we set all versions as deleted in method markDeleted
 	public final boolean hasNonDeletedResource(UUID uuid) throws SQLException
 	{
 		if (uuid == null)
@@ -405,6 +413,46 @@ abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implement
 	}
 
 	@Override
+	public Optional<IdType> exists(String idString, String versionString) throws SQLException
+	{
+		UUID uuid = toUuid(idString);
+
+		if (uuid == null)
+			return Optional.empty();
+
+		if (versionString == null || versionString.isBlank())
+		{
+			if (hasNonDeletedResource(uuid))
+				return Optional.of(new IdType(resourceTypeName, idString));
+			else
+				return Optional.empty();
+		}
+		else
+		{
+			Long version = toLong(versionString);
+			if (version == null || version < FIRST_VERSION)
+				return Optional.empty();
+
+			try (Connection connection = dataSource.getConnection();
+					PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) FROM " + resourceTable
+							+ " WHERE " + resourceIdColumn + " = ? AND version = ?"))
+			{
+				statement.setObject(1, uuidToPgObject(uuid));
+				statement.setLong(2, version);
+
+				logger.trace("Executing query '{}'", statement);
+				try (ResultSet result = statement.executeQuery())
+				{
+					if (result.next() && result.getInt(1) > 0)
+						return Optional.of(new IdType(resourceTypeName, idString, versionString));
+					else
+						return Optional.empty();
+				}
+			}
+		}
+	}
+
+	@Override
 	public final R update(R resource, Long expectedVersion)
 			throws SQLException, ResourceNotFoundException, ResourceVersionNoMatchException
 	{
@@ -471,11 +519,17 @@ abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implement
 	}
 
 	@Override
-	public R updateWithTransactionKeepVersion(Connection connection, R resource)
+	public R updateSameRowWithTransaction(Connection connection, R resource)
 			throws SQLException, ResourceNotFoundException
 	{
 		Objects.requireNonNull(connection, "connection");
 		Objects.requireNonNull(resource, "resource");
+		if (!resource.hasIdElement())
+			throw new IllegalAnnotationException(resourceTypeName + " has no id element");
+		if (resource.hasIdElement() && !resource.getIdElement().hasIdPart())
+			throw new IllegalAnnotationException(resourceTypeName + ".id has not id part");
+		if (resource.hasIdElement() && !resource.getIdElement().hasVersionIdPart())
+			throw new IllegalAnnotationException(resourceTypeName + ".id has not version part");
 		if (connection.isReadOnly())
 			throw new IllegalArgumentException("Connection is read-only");
 		if (connection.getTransactionIsolation() != Connection.TRANSACTION_REPEATABLE_READ
@@ -486,28 +540,40 @@ abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implement
 
 		resource = copy(resource); // XXX defensive copy, might want to remove this call
 
-		LatestVersion latestVersion = getLatestVersion(resource, connection);
-
-		R updated = update(connection, resource, latestVersion.version);
-		if (latestVersion.deleted) // TODO check if resurrection needs undelete for old versions
-			markDeleted(connection, toUuid(updated.getIdElement().getIdPart()), false);
+		R updated = updateSameRow(connection, resource);
 
 		logger.debug("{} with IdPart {} updated, version {} unchanged", resourceTypeName,
-				updated.getIdElement().getIdPart(), latestVersion);
+				updated.getIdElement().getIdPart(), resource.getIdElement().getVersionIdPart());
 		return updated;
 	}
 
-	protected final UUID toUuid(String idPart)
+	protected final UUID toUuid(String id)
 	{
-		if (idPart == null)
+		if (id == null)
 			return null;
 
 		// TODO control flow by exception
 		try
 		{
-			return UUID.fromString(idPart);
+			return UUID.fromString(id);
 		}
 		catch (IllegalArgumentException e)
+		{
+			return null;
+		}
+	}
+
+	protected final Long toLong(String version)
+	{
+		if (version == null)
+			return null;
+
+		// TODO control flow by exception
+		try
+		{
+			return Long.parseLong(version);
+		}
+		catch (NumberFormatException e)
 		{
 			return null;
 		}
@@ -531,6 +597,35 @@ abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implement
 			statement.setObject(1, uuidToPgObject(uuid));
 			statement.setLong(2, version);
 			statement.setObject(3, resourceToPgObject(resource));
+
+			logger.trace("Executing query '{}'", statement);
+			statement.execute();
+		}
+
+		return resource;
+	}
+
+	private R updateSameRow(Connection connection, R resource) throws SQLException
+	{
+		UUID uuid = toUuid(resource.getIdElement().getIdPart());
+		if (uuid == null)
+			throw new IllegalArgumentException("resource.id.idPart is not a UUID");
+		Long version = toLong(resource.getIdElement().getVersionIdPart());
+		if (version == null)
+			throw new IllegalArgumentException("resource.id.versionPart is not a number >= " + FIRST_VERSION_STRING);
+
+		resource = copy(resource);
+		String versionAsString = String.valueOf(version);
+		resource.setIdElement(new IdType(resourceTypeName, resource.getIdElement().getIdPart(), versionAsString));
+		resource.getMeta().setVersionId(versionAsString);
+		resource.getMeta().setLastUpdated(new Date());
+
+		try (PreparedStatement statement = connection.prepareStatement("UPDATE " + resourceTable + " SET "
+				+ resourceColumn + " = ? WHERE " + resourceIdColumn + " = ? AND version = ?"))
+		{
+			statement.setObject(1, resourceToPgObject(resource));
+			statement.setObject(2, uuidToPgObject(uuid));
+			statement.setLong(3, version);
 
 			logger.trace("Executing query '{}'", statement);
 			statement.execute();
@@ -612,6 +707,7 @@ abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implement
 		markDeleted(connection, uuid, true);
 	}
 
+	// caution: implementation of method hasNonDeletedResource only works because we set all versions as deleted here
 	protected final void markDeleted(Connection connection, UUID uuid, boolean deleted) throws SQLException
 	{
 		if (uuid == null)

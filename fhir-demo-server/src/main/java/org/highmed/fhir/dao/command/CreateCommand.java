@@ -62,21 +62,15 @@ public class CreateCommand<R extends DomainResource, D extends DomainResourceDao
 	}
 
 	@Override
-	public void preExecute(Connection connection) throws SQLException, WebApplicationException
+	public void preExecute(Map<String, IdType> idTranslationTable)
 	{
 		id = UUID.randomUUID();
-
-		String fullUrl = entry.getFullUrl();
-		if (fullUrl.startsWith(URL_UUID_PREFIX))
-		{
-			bundle.getEntry().stream().map(BundleEntryComponent::getResource).filter(r -> r instanceof DomainResource)
-					.map(r -> (DomainResource) r).forEach(r -> replacer.setReference(r, resource.getClass(), fullUrl,
-							new IdType(resource.getResourceType().toString(), id.toString()).getValue()));
-		}
+		idTranslationTable.put(entry.getFullUrl(), new IdType(resource.getResourceType().toString(), id.toString()));
 	}
 
 	@Override
-	public void execute(Connection connection) throws SQLException, WebApplicationException
+	public void execute(Map<String, IdType> idTranslationTable, Connection connection)
+			throws SQLException, WebApplicationException
 	{
 		checkAlreadyExists(entry.getRequest().getIfNoneExist(), resource.getResourceType());
 
@@ -128,9 +122,16 @@ public class CreateCommand<R extends DomainResource, D extends DomainResourceDao
 	}
 
 	@Override
-	public BundleEntryComponent postExecute(Connection connection) throws SQLException, WebApplicationException
+	public BundleEntryComponent postExecute()
 	{
-		eventManager.handleEvent(eventGenerator.newResourceCreatedEvent(createdResource));
+		try
+		{
+			eventManager.handleEvent(eventGenerator.newResourceCreatedEvent(createdResource));
+		}
+		catch (Exception e)
+		{
+			logger.warn("Error while handling resource created event", e);
+		}
 
 		BundleEntryComponent resultEntry = new BundleEntryComponent();
 		resultEntry.setFullUrl(new IdType(serverBase, createdResource.getResourceType().name(),

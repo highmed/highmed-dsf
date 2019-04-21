@@ -1,6 +1,7 @@
 package org.highmed.fhir.test;
 
 import org.highmed.fhir.dao.CodeSystemDaoTest;
+import org.highmed.fhir.dao.EndpointDaoTest;
 import org.highmed.fhir.dao.HealthcareServiceDaoTest;
 import org.highmed.fhir.dao.LocationDaoTest;
 import org.highmed.fhir.dao.OrganizationDaoTest;
@@ -20,7 +21,7 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({ CodeSystemDaoTest.class, HealthcareServiceDaoTest.class, LocationDaoTest.class,
+@SuiteClasses({ CodeSystemDaoTest.class, EndpointDaoTest.class, HealthcareServiceDaoTest.class, LocationDaoTest.class,
 		OrganizationDaoTest.class, PatientDaoTest.class, PractitionerDaoTest.class, PractitionerRoleDaoTest.class,
 		ProvenanceDaoTest.class, ResearchStudyDaoTest.class, StructureDefinitionDaoTest.class,
 		StructureDefinitionSnapshotDaoTest.class, SubscriptionDaoTest.class, TaskDaoTest.class, ValueSetDaoTest.class })

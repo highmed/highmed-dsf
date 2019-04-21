@@ -38,6 +38,8 @@ import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.springframework.beans.factory.InitializingBean;
 
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+
 public class DaoProviderImpl implements DaoProvider, InitializingBean
 {
 	private final CodeSystemDao codeSystemDao;
@@ -56,7 +58,8 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	private final TaskDao taskDao;
 	private final ValueSetDao valueSetDao;
 
-	private final Map<Class<? extends DomainResource>, DomainResourceDao<?>> daos = new HashMap<>();
+	private final Map<Class<? extends DomainResource>, DomainResourceDao<?>> daosByResourecClass = new HashMap<>();
+	private final Map<String, DomainResourceDao<?>> daosByResourceTypeName = new HashMap<>();
 
 	public DaoProviderImpl(CodeSystemDao codeSystemDao, EndpointDao endpointDao,
 			HealthcareServiceDao healthcareServiceDao, LocationDao locationDao, OrganizationDao organizationDao,
@@ -82,20 +85,22 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 		this.taskDao = taskDao;
 		this.valueSetDao = valueSetDao;
 
-		daos.put(CodeSystem.class, codeSystemDao);
-		daos.put(Endpoint.class, endpointDao);
-		daos.put(HealthcareService.class, healthcareServiceDao);
-		daos.put(Location.class, locationDao);
-		daos.put(Organization.class, organizationDao);
-		daos.put(Patient.class, patientDao);
-		daos.put(Practitioner.class, practitionerDao);
-		daos.put(PractitionerRole.class, practitionerRoleDao);
-		daos.put(Provenance.class, provenanceDao);
-		daos.put(ResearchStudy.class, researchStudyDao);
-		daos.put(StructureDefinition.class, structureDefinitionDao);
-		daos.put(Subscription.class, subscriptionDao);
-		daos.put(Task.class, taskDao);
-		daos.put(ValueSet.class, valueSetDao);
+		daosByResourecClass.put(CodeSystem.class, codeSystemDao);
+		daosByResourecClass.put(Endpoint.class, endpointDao);
+		daosByResourecClass.put(HealthcareService.class, healthcareServiceDao);
+		daosByResourecClass.put(Location.class, locationDao);
+		daosByResourecClass.put(Organization.class, organizationDao);
+		daosByResourecClass.put(Patient.class, patientDao);
+		daosByResourecClass.put(Practitioner.class, practitionerDao);
+		daosByResourecClass.put(PractitionerRole.class, practitionerRoleDao);
+		daosByResourecClass.put(Provenance.class, provenanceDao);
+		daosByResourecClass.put(ResearchStudy.class, researchStudyDao);
+		daosByResourecClass.put(StructureDefinition.class, structureDefinitionDao);
+		daosByResourecClass.put(Subscription.class, subscriptionDao);
+		daosByResourecClass.put(Task.class, taskDao);
+		daosByResourecClass.put(ValueSet.class, valueSetDao);
+
+		daosByResourecClass.forEach((k, v) -> daosByResourceTypeName.put(k.getAnnotation(ResourceDef.class).name(), v));
 	}
 
 	@Override
@@ -211,7 +216,14 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	@SuppressWarnings("unchecked")
 	public <R extends DomainResource> Optional<? extends DomainResourceDao<R>> getDao(Class<R> resourceClass)
 	{
-		DomainResourceDao<?> value = daos.get(resourceClass);
+		DomainResourceDao<?> value = daosByResourecClass.get(resourceClass);
 		return (Optional<? extends DomainResourceDao<R>>) Optional.ofNullable(value);
+	}
+
+	@Override
+	public Optional<DomainResourceDao<?>> getDao(String resourceTypeName)
+	{
+		DomainResourceDao<?> value = daosByResourceTypeName.get(resourceTypeName);
+		return Optional.ofNullable(value);
 	}
 }

@@ -41,40 +41,42 @@ public class ReferenceExtractor
 	private static final Logger logger = LoggerFactory.getLogger(ReferenceExtractor.class);
 
 	@SafeVarargs
-	private Function<Reference, ResourceReference> toResourceReference(
+	private Function<Reference, ResourceReference> toResourceReference(String referenceLocation,
 			Class<? extends DomainResource>... referenceTypes)
 	{
-		return ref -> new ResourceReference(ref, Arrays.asList(referenceTypes));
+		return ref -> new ResourceReference(referenceLocation, ref, Arrays.asList(referenceTypes));
 	}
 
 	@SafeVarargs
 	private <R extends DomainResource> Stream<ResourceReference> getReference(R resource, Predicate<R> hasReference,
-			Function<R, Reference> getReference, Class<? extends DomainResource>... referenceTypes)
+			Function<R, Reference> getReference, String referenceLocation,
+			Class<? extends DomainResource>... referenceTypes)
 	{
 		return hasReference.test(resource)
-				? Stream.of(getReference.apply(resource)).map(toResourceReference(referenceTypes))
+				? Stream.of(getReference.apply(resource)).map(toResourceReference(referenceLocation, referenceTypes))
 				: Stream.empty();
 	}
 
 	@SafeVarargs
 	private <R extends DomainResource> Stream<ResourceReference> getReferences(R resource, Predicate<R> hasReference,
-			Function<R, List<Reference>> getReference, Class<? extends DomainResource>... referenceTypes)
+			Function<R, List<Reference>> getReference, String referenceLocation,
+			Class<? extends DomainResource>... referenceTypes)
 	{
-		return hasReference.test(resource)
-				? Stream.of(getReference.apply(resource)).flatMap(List::stream).map(toResourceReference(referenceTypes))
-				: Stream.empty();
+		return hasReference.test(resource) ? Stream.of(getReference.apply(resource)).flatMap(List::stream)
+				.map(toResourceReference(referenceLocation, referenceTypes)) : Stream.empty();
 	}
 
 	@SafeVarargs
 	private <R extends DomainResource, E extends BackboneElement> Stream<ResourceReference> getBackboneElementsReference(
 			R resource, Predicate<R> hasBackboneElements, Function<R, List<E>> getBackboneElements,
-			Predicate<E> hasReference, Function<E, Reference> getReference,
+			Predicate<E> hasReference, Function<E, Reference> getReference, String referenceLocation,
 			Class<? extends DomainResource>... referenceTypes)
 	{
 		if (hasBackboneElements.test(resource))
 		{
 			List<E> backboneElements = getBackboneElements.apply(resource);
-			return backboneElements.stream().map(e -> getReference(e, hasReference, getReference, referenceTypes))
+			return backboneElements.stream()
+					.map(e -> getReference(e, hasReference, getReference, referenceLocation, referenceTypes))
 					.flatMap(Function.identity());
 		}
 		else
@@ -83,23 +85,23 @@ public class ReferenceExtractor
 
 	@SafeVarargs
 	private <E extends BackboneElement> Stream<ResourceReference> getReference(E backboneElement,
-			Predicate<E> hasReference, Function<E, Reference> getReference,
+			Predicate<E> hasReference, Function<E, Reference> getReference, String referenceLocation,
 			Class<? extends DomainResource>... referenceTypes)
 	{
-		return hasReference.test(backboneElement)
-				? Stream.of(getReference.apply(backboneElement)).map(toResourceReference(referenceTypes))
-				: Stream.empty();
+		return hasReference.test(backboneElement) ? Stream.of(getReference.apply(backboneElement))
+				.map(toResourceReference(referenceLocation, referenceTypes)) : Stream.empty();
 	}
 
 	@SafeVarargs
 	private <R extends DomainResource, E extends BackboneElement> Stream<ResourceReference> getBackboneElementReferences(
 			R resource, Predicate<R> hasBackboneElement, Function<R, E> getBackboneElement, Predicate<E> hasReference,
-			Function<E, List<Reference>> getReference, Class<? extends DomainResource>... referenceTypes)
+			Function<E, List<Reference>> getReference, String referenceLocation,
+			Class<? extends DomainResource>... referenceTypes)
 	{
 		if (hasBackboneElement.test(resource))
 		{
 			E backboneElement = getBackboneElement.apply(resource);
-			return getReferences(backboneElement, hasReference, getReference, referenceTypes);
+			return getReferences(backboneElement, hasReference, getReference, referenceLocation, referenceTypes);
 		}
 		else
 			return Stream.empty();
@@ -110,13 +112,14 @@ public class ReferenceExtractor
 	// private <R extends DomainResource, E extends BackboneElement> Stream<ResourceReference>
 	// getBackboneElementsReferences(
 	// R resource, Predicate<R> hasBackboneElements, Function<R, List<E>> getBackboneElements,
-	// Predicate<E> hasReference, Function<E, List<Reference>> getReference,
+	// Predicate<E> hasReference, Function<E, List<Reference>> getReference, String referenceLocation,
 	// Class<? extends DomainResource>... referenceTypes)
 	// {
 	// if (hasBackboneElements.test(resource))
 	// {
 	// List<E> backboneElements = getBackboneElements.apply(resource);
-	// return backboneElements.stream().map(e -> getReferences(e, hasReference, getReference, referenceTypes))
+	// return backboneElements.stream()
+	// .map(e -> getReferences(e, hasReference, getReference, referenceLocation, referenceTypes))
 	// .flatMap(Function.identity());
 	// }
 	// else
@@ -125,17 +128,18 @@ public class ReferenceExtractor
 
 	@SafeVarargs
 	private <E extends BackboneElement> Stream<ResourceReference> getReferences(E backboneElement,
-			Predicate<E> hasReference, Function<E, List<Reference>> getReference,
+			Predicate<E> hasReference, Function<E, List<Reference>> getReference, String referenceLocation,
 			Class<? extends DomainResource>... referenceTypes)
 	{
 		return hasReference.test(backboneElement) ? Stream.of(getReference.apply(backboneElement)).flatMap(List::stream)
-				.map(toResourceReference(referenceTypes)) : Stream.empty();
+				.map(toResourceReference(referenceLocation, referenceTypes)) : Stream.empty();
 	}
 
 	private Stream<ResourceReference> getExtensionReferences(DomainResource resource)
 	{
 		return resource.getExtension().stream().filter(e -> e.getValue() instanceof Reference)
-				.map(e -> (Reference) e.getValue()).map(toResourceReference());
+				.map(e -> (Reference) e.getValue())
+				.map(toResourceReference(resource.getResourceType().name() + ".extension"));
 	}
 
 	@SafeVarargs
@@ -187,7 +191,7 @@ public class ReferenceExtractor
 			return Stream.empty();
 
 		var managingOrganization = getReference(resource, Endpoint::hasManagingOrganization,
-				Endpoint::getManagingOrganization, Organization.class);
+				Endpoint::getManagingOrganization, "Endpoint.managingOrganization", Organization.class);
 
 		var extensionReferences = getExtensionReferences(resource);
 
@@ -200,13 +204,13 @@ public class ReferenceExtractor
 			return Stream.empty();
 
 		var providedBy = getReference(resource, HealthcareService::hasProvidedBy, HealthcareService::getProvidedBy,
-				Organization.class);
+				"HealthcareService.providedBy", Organization.class);
 		var locations = getReferences(resource, HealthcareService::hasLocation, HealthcareService::getLocation,
-				Location.class);
+				"HealthcareService.location", Location.class);
 		var coverageAreas = getReferences(resource, HealthcareService::hasCoverageArea,
-				HealthcareService::getCoverageArea, Location.class);
+				HealthcareService::getCoverageArea, "HealthcareService.coverageArea", Location.class);
 		var endpoints = getReferences(resource, HealthcareService::hasEndpoint, HealthcareService::getEndpoint,
-				Endpoint.class);
+				"HealthcareService.endpoint", Endpoint.class);
 
 		var extensionReferences = getExtensionReferences(resource);
 
@@ -216,9 +220,11 @@ public class ReferenceExtractor
 	public Stream<ResourceReference> getReferences(Location resource)
 	{
 		var managingOrganization = getReference(resource, Location::hasManagingOrganization,
-				Location::getManagingOrganization, Organization.class);
-		var partOf = getReference(resource, Location::hasPartOf, Location::getPartOf, Location.class);
-		var endpoints = getReferences(resource, Location::hasEndpoint, Location::getEndpoint, Endpoint.class);
+				Location::getManagingOrganization, "Location::managingOrganization", Organization.class);
+		var partOf = getReference(resource, Location::hasPartOf, Location::getPartOf, "Location::partOf",
+				Location.class);
+		var endpoints = getReferences(resource, Location::hasEndpoint, Location::getEndpoint, "Location::endpoint",
+				Endpoint.class);
 
 		var extensionReferences = getExtensionReferences(resource);
 
@@ -227,8 +233,10 @@ public class ReferenceExtractor
 
 	public Stream<ResourceReference> getReferences(Organization resource)
 	{
-		var partOf = getReference(resource, Organization::hasPartOf, Organization::getPartOf, Location.class);
-		var endpoints = getReferences(resource, Organization::hasEndpoint, Organization::getEndpoint, Endpoint.class);
+		var partOf = getReference(resource, Organization::hasPartOf, Organization::getPartOf, "Organization::partOf",
+				Location.class);
+		var endpoints = getReferences(resource, Organization::hasEndpoint, Organization::getEndpoint,
+				"Organization.endpoint", Endpoint.class);
 
 		var extensionReferences = getExtensionReferences(resource);
 
@@ -238,13 +246,16 @@ public class ReferenceExtractor
 	public Stream<ResourceReference> getReferences(Patient resource)
 	{
 		var contacts_organization = getBackboneElementsReference(resource, Patient::hasContact, Patient::getContact,
-				ContactComponent::hasOrganization, ContactComponent::getOrganization, Organization.class);
+				ContactComponent::hasOrganization, ContactComponent::getOrganization, "Patient.contact.organization",
+				Organization.class);
 		var generalPractitioners = getReferences(resource, Patient::hasGeneralPractitioner,
-				Patient::getGeneralPractitioner, Organization.class, Practitioner.class, PractitionerRole.class);
+				Patient::getGeneralPractitioner, "Patient.generalPractitioner", Organization.class, Practitioner.class,
+				PractitionerRole.class);
 		var managingOrganization = getReference(resource, Patient::hasManagingOrganization,
-				Patient::getManagingOrganization, Organization.class);
+				Patient::getManagingOrganization, "Patient.managingOrganization", Organization.class);
 		var links_other = getBackboneElementsReference(resource, Patient::hasLink, Patient::getLink,
-				PatientLinkComponent::hasOther, PatientLinkComponent::getOther, Patient.class, RelatedPerson.class);
+				PatientLinkComponent::hasOther, PatientLinkComponent::getOther, "Patient.link.other", Patient.class,
+				RelatedPerson.class);
 
 		var extensionReferences = getExtensionReferences(resource);
 
@@ -256,7 +267,7 @@ public class ReferenceExtractor
 	{
 		var qualifications_issuer = getBackboneElementsReference(resource, Practitioner::hasQualification,
 				Practitioner::getQualification, PractitionerQualificationComponent::hasIssuer,
-				PractitionerQualificationComponent::getIssuer, Organization.class);
+				PractitionerQualificationComponent::getIssuer, "Practitioner.qualification.issuer", Organization.class);
 
 		var extensionReferences = getExtensionReferences(resource);
 
@@ -266,15 +277,15 @@ public class ReferenceExtractor
 	public Stream<ResourceReference> getReferences(PractitionerRole resource)
 	{
 		var practitioner = getReference(resource, PractitionerRole::hasPractitioner, PractitionerRole::getPractitioner,
-				Practitioner.class);
+				"PractitionerRole.practitioner", Practitioner.class);
 		var organization = getReference(resource, PractitionerRole::hasOrganization, PractitionerRole::getOrganization,
-				Organization.class);
+				"PractitionerRole.organization", Organization.class);
 		var locations = getReferences(resource, PractitionerRole::hasLocation, PractitionerRole::getLocation,
-				Location.class);
+				"PractitionerRole.location", Location.class);
 		var healthcareServices = getReferences(resource, PractitionerRole::hasHealthcareService,
-				PractitionerRole::getHealthcareService, HealthcareService.class);
+				PractitionerRole::getHealthcareService, "PractitionerRole.healthcareService", HealthcareService.class);
 		var endpoints = getReferences(resource, PractitionerRole::hasEndpoint, PractitionerRole::getEndpoint,
-				Endpoint.class);
+				"PractitionerRole.endpoint", Endpoint.class);
 
 		var extensionReferences = getExtensionReferences(resource);
 
@@ -283,16 +294,19 @@ public class ReferenceExtractor
 
 	public Stream<ResourceReference> getReferences(Provenance resource)
 	{
-		var targets = getReferences(resource, Provenance::hasTarget, Provenance::getTarget);
-		var location = getReference(resource, Provenance::hasLocation, Provenance::getLocation, Location.class);
+		var targets = getReferences(resource, Provenance::hasTarget, Provenance::getTarget, "Provenance.target");
+		var location = getReference(resource, Provenance::hasLocation, Provenance::getLocation, "Provenance.location",
+				Location.class);
 		var agents_who = getBackboneElementsReference(resource, Provenance::hasAgent, Provenance::getAgent,
-				ProvenanceAgentComponent::hasWho, ProvenanceAgentComponent::getWho, Practitioner.class,
-				PractitionerRole.class, RelatedPerson.class, Patient.class, Device.class, Organization.class);
+				ProvenanceAgentComponent::hasWho, ProvenanceAgentComponent::getWho, "Provenance.agent.who",
+				Practitioner.class, PractitionerRole.class, RelatedPerson.class, Patient.class, Device.class,
+				Organization.class);
 		var agents_onBehalfOf = getBackboneElementsReference(resource, Provenance::hasAgent, Provenance::getAgent,
-				ProvenanceAgentComponent::hasOnBehalfOf, ProvenanceAgentComponent::getOnBehalfOf, Practitioner.class,
-				PractitionerRole.class, RelatedPerson.class, Patient.class, Device.class, Organization.class);
+				ProvenanceAgentComponent::hasOnBehalfOf, ProvenanceAgentComponent::getOnBehalfOf,
+				"Provenance.agent.onBehalfOf", Practitioner.class, PractitionerRole.class, RelatedPerson.class,
+				Patient.class, Device.class, Organization.class);
 		var entities_what = getBackboneElementsReference(resource, Provenance::hasEntity, Provenance::getEntity,
-				ProvenanceEntityComponent::hasWhat, ProvenanceEntityComponent::getWhat);
+				ProvenanceEntityComponent::hasWhat, ProvenanceEntityComponent::getWhat, "Provenance.entity.what");
 
 		var extensionReferences = getExtensionReferences(resource);
 
@@ -302,14 +316,18 @@ public class ReferenceExtractor
 	public Stream<ResourceReference> getReferences(ResearchStudy resource)
 	{
 		var protocols = getReferences(resource, ResearchStudy::hasProtocol, ResearchStudy::getProtocol,
-				PlanDefinition.class);
-		var partOfs = getReferences(resource, ResearchStudy::hasPartOf, ResearchStudy::getPartOf, ResearchStudy.class);
+				"ResearchStudy.protocol", PlanDefinition.class);
+		var partOfs = getReferences(resource, ResearchStudy::hasPartOf, ResearchStudy::getPartOf,
+				"ResearchStudy.partOf", ResearchStudy.class);
 		var enrollments = getReferences(resource, ResearchStudy::hasEnrollment, ResearchStudy::getEnrollment,
-				Group.class);
-		var sponsor = getReference(resource, ResearchStudy::hasSponsor, ResearchStudy::getSponsor, Organization.class);
+				"ResearchStudy.enrollment", Group.class);
+		var sponsor = getReference(resource, ResearchStudy::hasSponsor, ResearchStudy::getSponsor,
+				"ResearchStudy.sponsor", Organization.class);
 		var principalInvestigator = getReference(resource, ResearchStudy::hasPrincipalInvestigator,
-				ResearchStudy::getPrincipalInvestigator, Practitioner.class, PractitionerRole.class);
-		var sites = getReferences(resource, ResearchStudy::hasSite, ResearchStudy::getSite, Location.class);
+				ResearchStudy::getPrincipalInvestigator, "ResearchStudy.principalInvestigator", Practitioner.class,
+				PractitionerRole.class);
+		var sites = getReferences(resource, ResearchStudy::hasSite, ResearchStudy::getSite, "ResearchStudy.site",
+				Location.class);
 
 		var extensionReferences = getExtensionReferences(resource);
 
@@ -318,25 +336,28 @@ public class ReferenceExtractor
 
 	public Stream<ResourceReference> getReferences(Task resource)
 	{
-		var basedOns = getReferences(resource, Task::hasBasedOn, Task::getBasedOn);
-		var partOfs = getReferences(resource, Task::hasPartOf, Task::getPartOf, Task.class);
-		var focus = getReference(resource, Task::hasFocus, Task::getFocus);
-		var for_ = getReference(resource, Task::hasFor, Task::getFor);
-		var encounter = getReference(resource, Task::hasEncounter, Task::getEncounter, Encounter.class);
-		var requester = getReference(resource, Task::hasRequester, Task::getRequester, Device.class, Organization.class,
-				Patient.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class);
-		var owner = getReference(resource, Task::hasOwner, Task::getOwner, Practitioner.class, PractitionerRole.class,
-				Organization.class, CareTeam.class, HealthcareService.class, Patient.class, Device.class,
-				RelatedPerson.class);
-		var location = getReference(resource, Task::hasLocation, Task::getLocation, Location.class);
-		var reasonReference = getReference(resource, Task::hasReasonReference, Task::getReasonReference);
-		var insurance = getReferences(resource, Task::hasInsurance, Task::getInsurance, Coverage.class,
-				ClaimResponse.class);
+		var basedOns = getReferences(resource, Task::hasBasedOn, Task::getBasedOn, "Task.basedOn");
+		var partOfs = getReferences(resource, Task::hasPartOf, Task::getPartOf, "Task.partOf", Task.class);
+		var focus = getReference(resource, Task::hasFocus, Task::getFocus, "Task.focus");
+		var for_ = getReference(resource, Task::hasFor, Task::getFor, "Task.for");
+		var encounter = getReference(resource, Task::hasEncounter, Task::getEncounter, "Task.encounter",
+				Encounter.class);
+		var requester = getReference(resource, Task::hasRequester, Task::getRequester, "Task.requester", Device.class,
+				Organization.class, Patient.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class);
+		var owner = getReference(resource, Task::hasOwner, Task::getOwner, "Task.owner", Practitioner.class,
+				PractitionerRole.class, Organization.class, CareTeam.class, HealthcareService.class, Patient.class,
+				Device.class, RelatedPerson.class);
+		var location = getReference(resource, Task::hasLocation, Task::getLocation, "Task.location", Location.class);
+		var reasonReference = getReference(resource, Task::hasReasonReference, Task::getReasonReference,
+				"Task.reasonReference");
+		var insurance = getReferences(resource, Task::hasInsurance, Task::getInsurance, "Task.insurance",
+				Coverage.class, ClaimResponse.class);
 		var relevanteHistories = getReferences(resource, Task::hasRelevantHistory, Task::getRelevantHistory,
-				Provenance.class);
+				"Task.relevantHistory", Provenance.class);
 		var restriction_recipiets = getBackboneElementReferences(resource, Task::hasRestriction, Task::getRestriction,
-				TaskRestrictionComponent::hasRecipient, TaskRestrictionComponent::getRecipient, Patient.class,
-				Practitioner.class, PractitionerRole.class, RelatedPerson.class, Group.class, Organization.class);
+				TaskRestrictionComponent::hasRecipient, TaskRestrictionComponent::getRecipient,
+				"Task.restriction.recipient", Patient.class, Practitioner.class, PractitionerRole.class,
+				RelatedPerson.class, Group.class, Organization.class);
 
 		var extensionReferences = getExtensionReferences(resource);
 

@@ -53,4 +53,6 @@ public interface DaoProvider
 	ValueSetDao getValueSetDao();
 
 	<R extends DomainResource> Optional<? extends DomainResourceDao<R>> getDao(Class<R> resourceClass);
+
+	Optional<DomainResourceDao<?>> getDao(String resourceTypeName);
 }

@@ -3,6 +3,7 @@ package org.highmed.fhir.dao.command;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
@@ -11,7 +12,6 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import javax.sql.DataSource;
-import javax.ws.rs.WebApplicationException;
 
 import org.highmed.fhir.dao.DomainResourceDao;
 import org.highmed.fhir.dao.StructureDefinitionDao;
@@ -27,6 +27,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.springframework.beans.factory.InitializingBean;
 
@@ -100,17 +101,17 @@ public class CommandFactory implements InitializingBean
 			}
 
 			@Override
-			public void preExecute(Connection connection) throws SQLException
+			public void preExecute(Map<String, IdType> idTranslationTable)
 			{
 			}
 
 			@Override
-			public void execute(Connection connection) throws SQLException
+			public void execute(Map<String, IdType> idTranslationTable, Connection connection) throws SQLException
 			{
 			}
 
 			@Override
-			public BundleEntryComponent postExecute(Connection connection) throws SQLException, WebApplicationException
+			public BundleEntryComponent postExecute()
 			{
 				return new BundleEntryComponent();
 			}
@@ -188,17 +189,17 @@ public class CommandFactory implements InitializingBean
 			}
 
 			@Override
-			public void preExecute(Connection connection) throws SQLException
+			public void preExecute(Map<String, IdType> idTranslationTable)
 			{
 			}
 
 			@Override
-			public void execute(Connection connection) throws SQLException
+			public void execute(Map<String, IdType> idTranslationTable, Connection connection) throws SQLException
 			{
 			}
 
 			@Override
-			public BundleEntryComponent postExecute(Connection connection) throws SQLException, WebApplicationException
+			public BundleEntryComponent postExecute()
 			{
 				return new BundleEntryComponent();
 			}
@@ -267,34 +268,13 @@ public class CommandFactory implements InitializingBean
 
 		if (referenceExtractor.getReferences(resource).anyMatch(r -> true))
 		{
-			return dao
-					.map(d -> Stream.of(cmd,
-							new ResolveReferencesCommand<R, DomainResourceDao<R>>(index, bundle, entry, resource,
-									serverBase, d)))
+			return dao.map(d -> Stream.of(cmd,
+					new ResolveReferencesCommand<R, DomainResourceDao<R>>(index, bundle, entry, resource, serverBase, d,
+							referenceExtractor, responseGenerator, daoProvider, exceptionHandler)))
 					.orElseThrow(() -> new IllegalStateException(
 							"Resource of type " + resource.getClass().getName() + " not supported"));
 		}
 		else
 			return Stream.of(cmd);
 	}
-
-	// public static void main(String[] args)
-	// {
-	// var b = new Bundle();
-	// var e1 = b.addEntry();
-	// e1.setFullUrl("urn:uid:" + UUID.randomUUID().toString());
-	// var r1 = e1.getRequest();
-	// r1.setUrl("Patient");
-	// r1.setMethod(HTTPVerb.POST);
-	// e1.setResource(new Patient().setActive(true));
-	//
-	// PatientDao patienDao = new PatientDaoJdbc(null, null);
-	// DaoProvider daoProvider = new DaoProviderImpl(null, null, null, null, null, patienDao, null, null, null, null,
-	// null,
-	// null, null, null, null);
-	// var f = new CommandFactory(null, daoProvider, null, null, null, null, null);
-	// List<JdbcCommand> c = f.createCommands(b);
-	//
-	// System.out.println(c.size());
-	// }
 }

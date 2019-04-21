@@ -12,6 +12,7 @@ import org.highmed.fhir.search.DbSearchQuery;
 import org.highmed.fhir.search.PartialResult;
 import org.highmed.fhir.search.SearchQuery;
 import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.IdType;
 
 public interface DomainResourceDao<R extends DomainResource>
 {
@@ -19,6 +20,8 @@ public interface DomainResourceDao<R extends DomainResource>
 	String FIRST_VERSION_STRING = String.valueOf(FIRST_VERSION);
 
 	String getResourceTypeName();
+
+	Class<R> getResourceType();
 
 	/**
 	 * @param resource
@@ -101,6 +104,17 @@ public interface DomainResourceDao<R extends DomainResource>
 	Optional<R> readVersionWithTransaction(Connection connection, UUID uuid, long version) throws SQLException;
 
 	/**
+	 * @param id
+	 *            not <code>null</code>
+	 * @param version
+	 *            may be <code>null</code>
+	 * @return <code>true</code> if a resource with the given id and version exists, if the given version is null and a
+	 *         resource with the given id is marked as deleted returns <code>false</code>
+	 * @throws SQLException
+	 */
+	Optional<IdType> exists(String id, String version) throws SQLException;
+
+	/**
 	 * Sets the version of the stored resource to latest version from DB plus 1.
 	 * 
 	 * If the given expectedVersion is not <code>null</code>, checks if the given expectedVersion is the latest version
@@ -172,10 +186,10 @@ public interface DomainResourceDao<R extends DomainResource>
 	 * @throws IllegalArgumentException
 	 *             if the given connection is {@link Connection#isReadOnly()} or is {@link Connection#getAutoCommit()}
 	 *             or {@link Connection#getTransactionIsolation()} is not one of
-	 *             {@link Connection#TRANSACTION_REPEATABLE_READ} or {@link Connection#TRANSACTION_SERIALIZABLE}
+	 *             {@link Connection#TRANSACTION_REPEATABLE_READ} or {@link Connection#TRANSACTION_SERIALIZABLE}, if the
+	 *             given resource has not id-element, not id-element with id part or no id-element with version part
 	 */
-	R updateWithTransactionKeepVersion(Connection connection, R resource)
-			throws SQLException, ResourceNotFoundException;
+	R updateSameRowWithTransaction(Connection connection, R resource) throws SQLException, ResourceNotFoundException;
 
 	/**
 	 * Does nothing if the given uuid is <code>null</code>

@@ -8,7 +8,8 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 public abstract class AbstractCommand<R extends DomainResource, D extends DomainResourceDao<R>> implements Command
 {
 	private final int transactionPriority;
-	private final int index;
+
+	protected final int index;
 
 	protected final Bundle bundle;
 	protected final BundleEntryComponent entry;

@@ -66,6 +66,24 @@ public class ExceptionHandler
 		return new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR).entity(outcome).build());
 	}
 
+	public WebApplicationException internalServerError(ResourceDeletedException e)
+	{
+		logger.error("Error while accessing DB", e);
+
+		OperationOutcome outcome = responseGenerator.createOutcome(IssueSeverity.ERROR, IssueType.EXCEPTION,
+				"Error while accessing DB");
+		return new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR).entity(outcome).build());
+	}
+
+	public WebApplicationException internalServerError(ResourceNotFoundException e)
+	{
+		logger.error("Error while accessing DB", e);
+
+		OperationOutcome outcome = responseGenerator.createOutcome(IssueSeverity.ERROR, IssueType.EXCEPTION,
+				"Error while accessing DB");
+		return new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR).entity(outcome).build());
+	}
+
 	public WebApplicationException internalServerErrorBundleTransaction(Exception e)
 	{
 		logger.error("Error while executing transaction", e);

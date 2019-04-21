@@ -2,11 +2,13 @@ package org.highmed.fhir.dao.command;
 
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
 import javax.sql.DataSource;
@@ -17,6 +19,7 @@ import org.highmed.fhir.help.ExceptionHandler;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,17 +53,18 @@ public class BatchCommandList implements CommandList
 
 			Map<Integer, Exception> caughtExceptions = new HashMap<Integer, Exception>(
 					(int) (commands.size() / 0.75) + 1);
+			Map<String, IdType> idTranslationTable = new HashMap<>();
 
-			commands.forEach(c -> preExecute(connection, caughtExceptions, c));
+			commands.forEach(preExecute(idTranslationTable, caughtExceptions));
 
 			IntStream.range(0, commands.size()).filter(index -> !caughtExceptions.containsKey(index))
-					.mapToObj(index -> commands.get(index)).forEach(c -> execute(connection, caughtExceptions, c));
+					.mapToObj(index -> commands.get(index))
+					.forEach(execute(idTranslationTable, connection, caughtExceptions));
 
 			Map<Integer, BundleEntryComponent> results = new HashMap<>((int) ((commands.size() / 0.75) + 1));
 
 			IntStream.range(0, commands.size()).filter(index -> !caughtExceptions.containsKey(index))
-					.mapToObj(index -> commands.get(index))
-					.forEach(c -> postExecute(connection, caughtExceptions, c, results));
+					.mapToObj(index -> commands.get(index)).forEach(postExecute(caughtExceptions, results));
 
 			Bundle result = new Bundle();
 			result.setType(BundleType.BATCHRESPONSE);
@@ -96,46 +100,58 @@ public class BatchCommandList implements CommandList
 		return entry;
 	}
 
-	private void preExecute(Connection connection, Map<Integer, Exception> caughtExceptions, Command command)
+	private Consumer<Command> preExecute(Map<String, IdType> idTranslationTable,
+			Map<Integer, Exception> caughtExceptions)
 	{
-		try
+		return command ->
 		{
-			logger.debug("Running pre-execute of command {}", command.getClass().getName());
-			command.preExecute(connection);
-		}
-		catch (Exception e)
-		{
-			logger.warn("Error while running pre-execute of command " + command.getClass().getName(), e);
-			caughtExceptions.put(command.getIndex(), e);
-		}
+			try
+			{
+				logger.debug("Running pre-execute of command {}", command.getClass().getName());
+				command.preExecute(idTranslationTable);
+			}
+			catch (Exception e)
+			{
+				logger.warn("Error while running pre-execute of command " + command.getClass().getName(), e);
+				caughtExceptions.put(command.getIndex(), e);
+			}
+		};
 	}
 
-	private void execute(Connection connection, Map<Integer, Exception> caughtExceptions, Command command)
+	private Consumer<Command> execute(Map<String, IdType> idTranslationTable, Connection connection,
+			Map<Integer, Exception> caughtExceptions)
 	{
-		try
+		return command ->
 		{
-			logger.debug("Running execute of command {}", command.getClass().getName());
-			command.execute(connection);
-		}
-		catch (Exception e)
-		{
-			logger.warn("Error while executing command " + command.getClass().getName(), e);
-			caughtExceptions.put(command.getIndex(), e);
-		}
+			try
+			{
+				logger.debug("Running execute of command {}", command.getClass().getName());
+				command.execute(Collections.unmodifiableMap(idTranslationTable), connection);
+			}
+			catch (Exception e)
+			{
+				logger.warn("Error while executing command " + command.getClass().getName(), e);
+				caughtExceptions.put(command.getIndex(), e);
+			}
+		};
+
 	}
 
-	private void postExecute(Connection connection, Map<Integer, Exception> caughtExceptions, Command command,
+	private Consumer<Command> postExecute(Map<Integer, Exception> caughtExceptions,
 			Map<Integer, BundleEntryComponent> results)
 	{
-		try
+		return command ->
 		{
-			logger.debug("Running post-execute of command {}", command.getClass().getName());
-			results.put(command.getIndex(), command.postExecute(connection));
-		}
-		catch (Exception e)
-		{
-			logger.warn("Error while running post-execute of command " + command.getClass().getName(), e);
-			caughtExceptions.put(command.getIndex(), e);
-		}
+			try
+			{
+				logger.debug("Running post-execute of command {}", command.getClass().getName());
+				results.put(command.getIndex(), command.postExecute());
+			}
+			catch (Exception e)
+			{
+				logger.warn("Error while running post-execute of command " + command.getClass().getName(), e);
+				caughtExceptions.put(command.getIndex(), e);
+			}
+		};
 	}
 }

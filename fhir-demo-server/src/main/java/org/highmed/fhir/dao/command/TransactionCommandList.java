@@ -18,6 +18,7 @@ import org.highmed.fhir.help.ExceptionHandler;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
+import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +30,7 @@ public class TransactionCommandList implements CommandList
 	private final ExceptionHandler exceptionHandler;
 
 	private final List<Command> commands = new ArrayList<>();
+	private final boolean hasModifyingCommand;
 
 	public TransactionCommandList(DataSource dataSource, ExceptionHandler exceptionHandler, List<Command> commands)
 	{
@@ -40,54 +42,64 @@ public class TransactionCommandList implements CommandList
 
 		Collections.sort(this.commands,
 				Comparator.comparing(Command::getTransactionPriority).thenComparing(Command::getIndex));
+
+		hasModifyingCommand = commands.stream()
+				.anyMatch(c -> c instanceof CreateCommand || c instanceof UpdateCommand || c instanceof DeleteCommand);
 	}
 
 	@Override
 	public Bundle execute() throws WebApplicationException
 	{
-		try (Connection connection = dataSource.getConnection())
+		try
 		{
-			if (commands.stream().anyMatch(
-					c -> c instanceof CreateCommand || c instanceof UpdateCommand || c instanceof DeleteCommand))
-				connection.setReadOnly(false);
-
-			connection.setAutoCommit(false);
-			connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
-
+			Map<String, IdType> idTranslationTable = new HashMap<>();
 			for (Command c : commands)
 			{
 				try
 				{
-					logger.debug("Running pre-execute of command {}, for entry at index {}", c.getClass().getName(),
+					logger.debug("Running pre-execute of command {} for entry at index {}", c.getClass().getName(),
 							c.getIndex());
-					c.preExecute(connection);
+					c.preExecute(idTranslationTable);
 				}
 				catch (Exception e)
 				{
 					logger.warn("Error while running pre-execute of command " + c.getClass().getSimpleName()
-							+ ", for entry at index " + c.getIndex() + ", rolling back transaction", e);
+							+ " for entry at index " + c.getIndex() + ", abborting transaction", e);
 
-					connection.rollback();
 					throw e;
 				}
 			}
 
-			for (Command c : commands)
+			try (Connection connection = dataSource.getConnection())
 			{
-				try
+				if (hasModifyingCommand)
 				{
-					logger.debug("Running execute of command {}, for entry at index {}", c.getClass().getName(),
-							c.getIndex());
-					c.execute(connection);
+					connection.setReadOnly(false);
+					connection.setAutoCommit(false);
+					connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
 				}
-				catch (Exception e)
-				{
-					logger.warn("Error while executing command " + c.getClass().getSimpleName()
-							+ ", for entry at index " + c.getIndex() + ", rolling back transaction", e);
 
-					connection.rollback();
-					throw e;
+				for (Command c : commands)
+				{
+					try
+					{
+						logger.debug("Running execute of command {} for entry at index {}", c.getClass().getName(),
+								c.getIndex());
+						c.execute(Collections.unmodifiableMap(idTranslationTable), connection);
+					}
+					catch (Exception e)
+					{
+						logger.warn("Error while executing command " + c.getClass().getSimpleName()
+								+ " for entry at index " + c.getIndex() + ", rolling back transaction", e);
+
+						if (hasModifyingCommand)
+							connection.rollback();
+
+						throw e;
+					}
 				}
+
+				connection.commit();
 			}
 
 			Map<Integer, BundleEntryComponent> results = new HashMap<>((int) ((commands.size() / 0.75) + 1));
@@ -95,16 +107,15 @@ public class TransactionCommandList implements CommandList
 			{
 				try
 				{
-					logger.debug("Running post-execute of command {}, for entry at index {}", c.getClass().getName(),
+					logger.debug("Running post-execute of command {} for entry at index {}", c.getClass().getName(),
 							c.getIndex());
-					results.putIfAbsent(c.getIndex(), c.postExecute(connection));
+					results.putIfAbsent(c.getIndex(), c.postExecute());
 				}
 				catch (Exception e)
 				{
 					logger.warn("Error while running post-execute of command " + c.getClass().getSimpleName()
-							+ ", for entry at index " + c.getIndex() + ", rolling back transaction", e);
+							+ " for entry at index " + c.getIndex() + ", rolling back transaction", e);
 
-					connection.rollback();
 					throw e;
 				}
 			}
@@ -113,8 +124,6 @@ public class TransactionCommandList implements CommandList
 			result.setType(BundleType.TRANSACTIONRESPONSE);
 			results.entrySet().stream().sorted(Comparator.comparing(Entry::getKey)).map(Entry::getValue)
 					.forEach(result::addEntry);
-
-			connection.commit();
 
 			return result;
 		}

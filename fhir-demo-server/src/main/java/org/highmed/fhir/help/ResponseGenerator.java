@@ -12,6 +12,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
+import org.highmed.fhir.dao.command.ResourceReference;
 import org.highmed.fhir.search.PartialResult;
 import org.highmed.fhir.search.SearchQueryParameterError;
 import org.hl7.fhir.r4.model.Bundle;
@@ -228,5 +229,64 @@ public class ResponseGenerator
 				"Resource with criteria '" + ifNoneExistsHeaderValue + "' exists");
 
 		return Response.status(Status.OK).entity(outcome).build();
+	}
+
+	public Response unknownReference(int bundleIndex, DomainResource resource, ResourceReference resourceReference)
+	{
+		logger.error("Unknown reference at {} in resource of type {} with id {} at bundle index {}",
+				resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId(),
+				bundleIndex);
+
+		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+				"Unknown reference at " + resourceReference.getReferenceLocation() + " in resource of type "
+						+ resource.getResourceType().name() + " with id " + resource.getId() + " at bundle index "
+						+ bundleIndex);
+		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
+	}
+
+	public Response referenceTargetTypeNotSupportedByImplementation(int bundleIndex, DomainResource resource,
+			ResourceReference resourceReference)
+	{
+		logger.error(
+				"Reference target type of reference at {} in resource of type {} with id {} at bundle index {} not supported by this implementation",
+				resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId(),
+				bundleIndex);
+
+		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+				"Reference target type of reference at " + resourceReference.getReferenceLocation()
+						+ " in resource of type " + resource.getResourceType().name() + " with id " + resource.getId()
+						+ " at bundle index " + bundleIndex + " not supported by this implementation");
+		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
+	}
+
+	public Response referenceTargetTypeNotSupportedByResource(int bundleIndex, DomainResource resource,
+			ResourceReference resourceReference)
+	{
+		logger.error(
+				"Reference target type of reference at {} in resource of type {} with id {} at bundle index {} not supported",
+				resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId(),
+				bundleIndex);
+
+		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+				"Reference target type of reference at " + resourceReference.getReferenceLocation()
+						+ " in resource of type " + resource.getResourceType().name() + " with id " + resource.getId()
+						+ " at bundle index " + bundleIndex + " not supported");
+		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
+	}
+
+	public Response referenceTargetNotFoundLocally(int bundleIndex, DomainResource resource,
+			ResourceReference resourceReference)
+	{
+		logger.error(
+				"Reference target {} of reference at {} in resource of type {} with id {} at bundle index {} not found",
+				resourceReference.getReference().getReference(), resourceReference.getReferenceLocation(),
+				resource.getResourceType().name(), resource.getId(), bundleIndex);
+
+		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+				"Reference target " + resourceReference.getReference().getReference() + " of reference at "
+						+ resourceReference.getReferenceLocation() + " in resource of type "
+						+ resource.getResourceType().name() + " with id " + resource.getId() + " at bundle index "
+						+ bundleIndex + " not found");
+		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 }
