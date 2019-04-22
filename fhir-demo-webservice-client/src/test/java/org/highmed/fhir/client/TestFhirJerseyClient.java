@@ -12,6 +12,7 @@ import java.util.UUID;
 import javax.ws.rs.WebApplicationException;
 
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.Endpoint;
@@ -245,7 +246,7 @@ public class TestFhirJerseyClient
 			// client.deleteConditionaly(Endpoint.class,
 			// Map.of("name:exact", Collections.singletonList("Transaction Test Endpoint")));
 
-			createUpdateBundleTest(context, client);
+			deleteCreateUpdateReadTaskBundleTest(context, client);
 
 		}
 		catch (WebApplicationException e)
@@ -261,7 +262,7 @@ public class TestFhirJerseyClient
 		}
 	}
 
-	private static void createUpdateBundleTest(FhirContext context, WebserviceClient client)
+	private static void deleteCreateUpdateReadTaskBundleTest(FhirContext context, WebserviceClient client)
 	{
 		final String taskIdentifierSystem = "http://highmed.org/fhir/CodeSystem/task";
 		final String taskIdentifierValue = "Transaction Update Test Task";
@@ -283,6 +284,7 @@ public class TestFhirJerseyClient
 		createTaskEntry.setResource(task);
 		createTaskEntry.getRequest().setMethod(HTTPVerb.POST);
 		createTaskEntry.getRequest().setUrl("Task");
+		createTaskEntry.getRequest().setIfNoneExist("identifier=" + taskIdentifierSystem + "|" + taskIdentifierValue);
 
 		var updateTask = task.copy();
 		updateTask.setStatus(TaskStatus.DRAFT);
@@ -294,18 +296,17 @@ public class TestFhirJerseyClient
 		updateTaskEntry.getRequest().setUrl("Task/?identifier=" + taskIdentifierSystem + "|" + taskIdentifierValue);
 		updateTaskEntry.getRequest().setIfMatch("W/\"1\"");
 
-		// try
-		// {
+		var readTaskEntry = bundle.addEntry();
+		readTaskEntry.getRequest().setMethod(HTTPVerb.GET);
+//		readTaskEntry.getRequest()
+//				.setUrl("Task/?identifier=" + taskIdentifierSystem + "|" + taskIdentifierValue + "&foo=bar");
+		readTaskEntry.getRequest().setUrl(createTaskEntry.getFullUrl());
+
 		System.out.println(
 				"request bundle:\n" + context.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		Bundle result = client.postBundle(bundle);
 		System.out.println(
 				"result bundle:\n" + context.newXmlParser().setPrettyPrint(true).encodeResourceToString(result));
-		// }
-		// finally
-		// {
-		// client.delete(Task.class, createdTask.getIdElement().getIdPart());
-		// }
 	}
 
 	private static void deleteCreateBundleTest(FhirContext context, WebserviceClient client)

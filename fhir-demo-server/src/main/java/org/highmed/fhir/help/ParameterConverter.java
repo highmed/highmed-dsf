@@ -1,11 +1,12 @@
 package org.highmed.fhir.help;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -13,7 +14,6 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
@@ -104,16 +104,22 @@ public class ParameterConverter
 				!pretty ? null : Map.of(AbstractFhirAdapter.PRETTY, String.valueOf(pretty)));
 	}
 
-	public Integer getFirstInt(MultivaluedMap<String, String> queryParameters, String key)
+	public Integer getFirstInt(Map<String, List<String>> queryParameters, String key)
 	{
-		String first = queryParameters.getFirst(key);
-		try
-		{
-			return Integer.valueOf(first);
-		}
-		catch (NumberFormatException e)
-		{
+		List<String> listForKey = queryParameters.getOrDefault(key, Collections.emptyList());
+		if (listForKey.isEmpty())
 			return null;
+		else
+		{
+			// TODO control flow by exception
+			try
+			{
+				return Integer.valueOf(listForKey.get(0));
+			}
+			catch (NumberFormatException e)
+			{
+				return null;
+			}
 		}
 	}
 
@@ -167,21 +173,34 @@ public class ParameterConverter
 
 	/**
 	 * @param tag
-	 * @return {@link Optional} of long version for the given tag or {@link Optional#empty()} if the given tags value
-	 *         could not be parsed as long or was null/blank
+	 * @return {@link Optional} long version for the given tag or {@link Optional#empty()} if the given tags value could
+	 *         not be parsed as long or was null/blank
 	 */
 	public Optional<Long> toVersion(EntityTag tag)
 	{
 		if (tag == null || tag.getValue() == null || tag.getValue().isBlank())
 			return Optional.empty();
 
+		return toVersion(tag.getValue());
+	}
+
+	/**
+	 * @param version
+	 * @return {@link Optional} long version for the given {@link String} value or {@link Optional#empty()} if the given
+	 *         {@link String} value could not be parsed as long or was null/blank
+	 */
+	public Optional<Long> toVersion(String version)
+	{
+		if (version == null || version.isBlank())
+			return Optional.empty();
+
 		try
 		{
-			return Optional.of(Long.parseLong(tag.getValue()));
+			return Optional.of(Long.parseLong(version));
 		}
 		catch (NumberFormatException e)
 		{
-			logger.warn("ETag value not a Long value", e);
+			logger.warn("Version not a Long value", e);
 			return Optional.empty();
 		}
 	}

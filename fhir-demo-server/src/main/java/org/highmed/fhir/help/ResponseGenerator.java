@@ -85,6 +85,19 @@ public class ResponseGenerator
 		return entry;
 	}
 
+	/**
+	 * @param result
+	 *            not <code>null</code>
+	 * @param errors
+	 *            not <code>null</code>
+	 * @param bundleUri
+	 *            not <code>null</code>
+	 * @param format
+	 *            may be <code>null</code>
+	 * @param pretty
+	 *            may be <code>null</code>
+	 * @return
+	 */
 	public Bundle createSearchSet(PartialResult<? extends DomainResource> result,
 			List<SearchQueryParameterError> errors, UriBuilder bundleUri, String format, String pretty)
 	{

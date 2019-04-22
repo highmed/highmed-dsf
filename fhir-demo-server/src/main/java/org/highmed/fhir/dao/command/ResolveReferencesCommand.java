@@ -47,7 +47,7 @@ public class ResolveReferencesCommand<R extends DomainResource, D extends Domain
 			D dao, ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
 			ReferenceExtractor referenceExtractor, ResponseGenerator responseGenerator, DaoProvider daoProvider)
 	{
-		super(5, index, bundle, entry, serverBase, resource, dao, exceptionHandler, parameterConverter);
+		super(4, index, bundle, entry, serverBase, resource, dao, exceptionHandler, parameterConverter);
 
 		this.referenceExtractor = referenceExtractor;
 		this.responseGenerator = responseGenerator;

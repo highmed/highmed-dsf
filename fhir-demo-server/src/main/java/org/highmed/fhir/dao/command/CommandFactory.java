@@ -1,9 +1,6 @@
 package org.highmed.fhir.dao.command;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
@@ -27,13 +24,13 @@ import org.highmed.fhir.service.SnapshotGenerator;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.DomainResource;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.springframework.beans.factory.InitializingBean;
 
 public class CommandFactory implements InitializingBean
 {
 	private final String serverBase;
+	private final int defaultPageCount;
 	private final DataSource dataSource;
 	private final DaoProvider daoProvider;
 	private final ReferenceReplacer referenceReplacer;
@@ -46,13 +43,14 @@ public class CommandFactory implements InitializingBean
 	private final SnapshotDependencyAnalyzer snapshotDependencyAnalyzer;
 	private final ParameterConverter parameterConverter;
 
-	public CommandFactory(String serverBase, DataSource dataSource, DaoProvider daoProvider,
+	public CommandFactory(String serverBase, int defaultPageCount, DataSource dataSource, DaoProvider daoProvider,
 			ReferenceReplacer referenceReplacer, ReferenceExtractor referenceExtractor,
 			ResponseGenerator responseGenerator, ExceptionHandler exceptionHandler, EventManager eventManager,
 			EventGenerator eventGenerator, SnapshotGenerator snapshotGenerator,
 			SnapshotDependencyAnalyzer snapshotDependencyAnalyzer, ParameterConverter parameterConverter)
 	{
 		this.serverBase = serverBase;
+		this.defaultPageCount = defaultPageCount;
 		this.dataSource = dataSource;
 		this.daoProvider = daoProvider;
 		this.referenceReplacer = referenceReplacer;
@@ -85,37 +83,8 @@ public class CommandFactory implements InitializingBean
 	// read, vread
 	private Command get(Bundle bundle, int index, BundleEntryComponent entry)
 	{
-		// TODO
-		return new Command()
-		{
-			@Override
-			public int getIndex()
-			{
-				return index;
-			}
-
-			@Override
-			public int getTransactionPriority()
-			{
-				return 4;
-			}
-
-			@Override
-			public void preExecute(Map<String, IdType> idTranslationTable)
-			{
-			}
-
-			@Override
-			public void execute(Map<String, IdType> idTranslationTable, Connection connection) throws SQLException
-			{
-			}
-
-			@Override
-			public BundleEntryComponent postExecute()
-			{
-				return new BundleEntryComponent();
-			}
-		};
+		return new ReadCommand(index, bundle, entry, serverBase, defaultPageCount, daoProvider, parameterConverter,
+				responseGenerator, exceptionHandler);
 	}
 
 	// create, conditional create
