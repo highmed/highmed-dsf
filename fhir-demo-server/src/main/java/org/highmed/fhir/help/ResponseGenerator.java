@@ -149,18 +149,23 @@ public class ResponseGenerator
 		return createOutcome(IssueSeverity.WARNING, IssueType.PROCESSING, diagnostics);
 	}
 
-	public Response createPathVsElementIdResponse(String resourceTypeName, String id, IdType resourceId)
+	public Response pathVsElementId(String resourceTypeName, String id, IdType resourceId)
 	{
+		logger.error("Path id not equal to {} id ({} vs. {})", resourceTypeName, id, resourceId.getIdPart());
+
 		OperationOutcome out = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
-				"Path id not equal to " + resourceTypeName + " id (" + id + " vs. " + resourceId.getIdPart() + ").");
+				"Path id not equal to " + resourceTypeName + " id (" + id + " vs. " + resourceId.getIdPart() + ")");
 		return Response.status(Status.BAD_REQUEST).entity(out).build();
 	}
 
-	public Response createInvalidBaseUrlResponse(String resourceTypeName, IdType resourceId)
+	public Response invalidBaseUrl(String resourceTypeName, IdType resourceId)
 	{
+		logger.error("{} id.baseUrl must be null or equal to {}, value {} unexpected", resourceTypeName, serverBase,
+				resourceId.getBaseUrl());
+
 		OperationOutcome out = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				resourceTypeName + " id.baseUrl must be null or equal to " + serverBase + ", value "
-						+ resourceId.getBaseUrl() + " unexpected.");
+						+ resourceId.getBaseUrl() + " unexpected");
 		return Response.status(Status.BAD_REQUEST).entity(out).build();
 	}
 
@@ -459,5 +464,37 @@ public class ResponseGenerator
 		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Bad bundle request - " + message);
 		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
+	}
+
+	public Response pathVsElementIdInBundle(int bundleIndex, String resourceTypeName, String id, IdType resourceId)
+	{
+		logger.error("Path id not equal to {} id ({} vs. {}) at bundle index {}", resourceTypeName, id,
+				resourceId.getIdPart(), bundleIndex);
+
+		OperationOutcome out = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+				"Path id not equal to " + resourceTypeName + " id (" + id + " vs. " + resourceId.getIdPart()
+						+ ") at bundle index " + bundleIndex);
+		return Response.status(Status.BAD_REQUEST).entity(out).build();
+	}
+
+	public Response invalidBaseUrlInBundle(int bundleIndex, String resourceTypeName, IdType resourceId)
+	{
+		logger.error("{} id.baseUrl must be null or equal to {}, value {} unexpected at bundle index {}",
+				resourceTypeName, serverBase, resourceId.getBaseUrl(), bundleIndex);
+
+		OperationOutcome out = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+				resourceTypeName + " id.baseUrl must be null or equal to " + serverBase + ", value "
+						+ resourceId.getBaseUrl() + " unexpected at bundle index " + bundleIndex);
+		return Response.status(Status.BAD_REQUEST).entity(out).build();
+	}
+
+	public Response nonMatchingResourceTypeAndRequestUrlInBundle(int bundleIndex, String resourceTypeName, String url)
+	{
+		logger.error("Non matching resource type {} and request url {} at bundle index {}", resourceTypeName, url,
+				bundleIndex);
+
+		OperationOutcome out = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING, "Non matching resource type "
+				+ resourceTypeName + " and request url " + url + " at bundle index " + bundleIndex);
+		return Response.status(Status.BAD_REQUEST).entity(out).build();
 	}
 }

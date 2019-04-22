@@ -40,33 +40,30 @@ public class CreateCommand<R extends DomainResource, D extends DomainResourceDao
 {
 	private static final Logger logger = LoggerFactory.getLogger(CreateCommand.class);
 
-	protected final ReferenceReplacer replacer;
 	protected final ResponseGenerator responseGenerator;
-	protected final ExceptionHandler exceptionHandler;
 	protected final EventManager eventManager;
 	protected final EventGenerator eventGenerator;
-	protected final ParameterConverter parameterConverter;
 
 	protected UUID id;
 	protected R createdResource;
 
 	public CreateCommand(int index, Bundle bundle, BundleEntryComponent entry, String serverBase, R resource, D dao,
-			ReferenceReplacer replacer, ResponseGenerator responseGenerator, ExceptionHandler exceptionHandler,
-			EventManager eventManager, EventGenerator eventGenerator, ParameterConverter parameterConverter)
+			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
+			ResponseGenerator responseGenerator, EventManager eventManager, EventGenerator eventGenerator)
 	{
-		super(2, index, bundle, entry, serverBase, resource, dao);
+		super(2, index, bundle, entry, serverBase, resource, dao, exceptionHandler, parameterConverter);
 
-		this.replacer = replacer;
 		this.responseGenerator = responseGenerator;
-		this.exceptionHandler = exceptionHandler;
 		this.eventManager = eventManager;
 		this.eventGenerator = eventGenerator;
-		this.parameterConverter = parameterConverter;
 	}
 
 	@Override
 	public void preExecute(Map<String, IdType> idTranslationTable)
 	{
+		// TODO validate entry.getFullUrl() vs resource.getIdElement()
+		// TODO validate entry.getFullUrl() is urn:uuid:...
+
 		id = UUID.randomUUID();
 		idTranslationTable.put(entry.getFullUrl(), new IdType(resource.getResourceType().toString(), id.toString()));
 	}

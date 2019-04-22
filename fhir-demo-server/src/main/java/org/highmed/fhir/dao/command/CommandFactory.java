@@ -129,14 +129,14 @@ public class CommandFactory implements InitializingBean
 
 			if (resource instanceof StructureDefinition)
 				return new CreateStructureDefinitionCommand(index, bundle, entry, serverBase,
-						(StructureDefinition) resource, (StructureDefinitionDao) dao.get(), referenceReplacer,
-						responseGenerator, exceptionHandler, eventManager, eventGenerator, parameterConverter,
+						(StructureDefinition) resource, (StructureDefinitionDao) dao.get(), exceptionHandler,
+						parameterConverter, responseGenerator, eventManager, eventGenerator,
 						daoProvider.getStructureDefinitionSnapshotDao(), snapshotGenerator, snapshotDependencyAnalyzer);
 			else
 				return dao
 						.map(d -> new CreateCommand<R, DomainResourceDao<R>>(index, bundle, entry, serverBase, resource,
-								d, referenceReplacer, responseGenerator, exceptionHandler, eventManager, eventGenerator,
-								parameterConverter))
+								d, exceptionHandler, parameterConverter, responseGenerator, eventManager,
+								eventGenerator))
 						.orElseThrow(() -> new IllegalStateException(
 								"Resource of type " + resource.getClass().getName() + " not supported"));
 		}
@@ -157,14 +157,13 @@ public class CommandFactory implements InitializingBean
 
 			if (resource instanceof StructureDefinition)
 				return new UpdateStructureDefinitionCommand(index, bundle, entry, serverBase,
-						(StructureDefinition) resource, (StructureDefinitionDao) dao.get(), referenceReplacer,
-						responseGenerator, exceptionHandler, eventManager, eventGenerator,
-						daoProvider.getStructureDefinitionSnapshotDao(), snapshotGenerator, snapshotDependencyAnalyzer,
-						parameterConverter);
+						(StructureDefinition) resource, (StructureDefinitionDao) dao.get(), exceptionHandler,
+						parameterConverter, responseGenerator, eventManager, eventGenerator,
+						daoProvider.getStructureDefinitionSnapshotDao(), snapshotGenerator, snapshotDependencyAnalyzer);
 			else
 				return dao
 						.map(d -> new UpdateCommand<R, DomainResourceDao<R>>(index, bundle, entry, serverBase, resource,
-								d, referenceReplacer, responseGenerator, exceptionHandler, eventManager,
+								d, exceptionHandler, parameterConverter, responseGenerator, eventManager,
 								eventGenerator))
 						.orElseThrow(() -> new IllegalStateException(
 								"Resource of type " + resource.getClass().getName() + " not supported"));
@@ -260,10 +259,9 @@ public class CommandFactory implements InitializingBean
 
 		if (referenceExtractor.getReferences(resource).anyMatch(r -> true))
 		{
-			return dao
-					.map(d -> Stream.of(cmd,
-							new ResolveReferencesCommand<R, DomainResourceDao<R>>(index, bundle, entry, serverBase,
-									resource, d, referenceExtractor, responseGenerator, daoProvider, exceptionHandler)))
+			return dao.map(d -> Stream.of(cmd,
+					new ResolveReferencesCommand<R, DomainResourceDao<R>>(index, bundle, entry, serverBase, resource, d,
+							exceptionHandler, parameterConverter, referenceExtractor, responseGenerator, daoProvider)))
 					.orElseThrow(() -> new IllegalStateException(
 							"Resource of type " + resource.getClass().getName() + " not supported"));
 		}

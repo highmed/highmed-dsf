@@ -144,7 +144,8 @@ public interface DomainResourceDao<R extends DomainResource>
 	 * @throws ResourceNotFoundException
 	 *             if the given resource could not be found
 	 * @throws ResourceVersionNoMatchException
-	 *             if the given expectedVersion is not <code>null</code> and the latest version
+	 *             if the given expectedVersion is not <code>null</code> and the latest version does not match the given
+	 *             expectedVersion
 	 */
 	R update(R resource, Long expectedVersion)
 			throws SQLException, ResourceNotFoundException, ResourceVersionNoMatchException;

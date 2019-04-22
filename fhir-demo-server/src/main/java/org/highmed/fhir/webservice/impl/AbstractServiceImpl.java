@@ -228,7 +228,7 @@ public abstract class AbstractServiceImpl<D extends DomainResourceDao<R>, R exte
 		Optional<Date> ifModifiedSince = getHeaderString(headers, Constants.HEADER_IF_MODIFIED_SINCE,
 				Constants.HEADER_IF_MODIFIED_SINCE_LC).flatMap(this::toDate);
 		Optional<EntityTag> ifNoneMatch = getHeaderString(headers, Constants.HEADER_IF_NONE_MATCH,
-				Constants.HEADER_IF_NONE_MATCH_LC).flatMap(this::toEntityTag);
+				Constants.HEADER_IF_NONE_MATCH_LC).flatMap(parameterConverter::toEntityTag);
 
 		return read.map(resource ->
 		{
@@ -241,35 +241,6 @@ public abstract class AbstractServiceImpl<D extends DomainResourceDao<R>, R exte
 				return responseGenerator.response(Status.OK, resource, parameterConverter.getMediaType(uri, headers))
 						.build();
 		}).orElseGet(() -> Response.status(Status.NOT_FOUND).build()); // TODO return OperationOutcome
-	}
-
-	/**
-	 * @param eTagValue
-	 *            ETag string value
-	 * @return {@link Optional} of {@link EntityTag} for the given value or {@link Optional#empty()} if the given value
-	 *         could not be parsed or was null/blank
-	 */
-	private Optional<EntityTag> toEntityTag(String eTagValue)
-	{
-		if (eTagValue == null || eTagValue.isBlank())
-			return Optional.empty();
-
-		try
-		{
-			EntityTag eTag = EntityTag.valueOf(eTagValue);
-			if (eTag.isWeak())
-				return Optional.of(eTag);
-			else
-			{
-				logger.warn("{} not a weak ETag", eTag.getValue());
-				return Optional.empty();
-			}
-		}
-		catch (IllegalArgumentException e)
-		{
-			logger.warn("Unable to parse ETag value", e);
-			return Optional.empty();
-		}
 	}
 
 	/**
@@ -305,7 +276,7 @@ public abstract class AbstractServiceImpl<D extends DomainResourceDao<R>, R exte
 		Optional<Date> ifModifiedSince = getHeaderString(headers, Constants.HEADER_IF_MODIFIED_SINCE,
 				Constants.HEADER_IF_MODIFIED_SINCE_LC).flatMap(this::toDate);
 		Optional<EntityTag> ifNoneMatch = getHeaderString(headers, Constants.HEADER_IF_NONE_MATCH,
-				Constants.HEADER_IF_NONE_MATCH_LC).flatMap(this::toEntityTag);
+				Constants.HEADER_IF_NONE_MATCH_LC).flatMap(parameterConverter::toEntityTag);
 
 		return read.map(resource ->
 		{
@@ -326,14 +297,14 @@ public abstract class AbstractServiceImpl<D extends DomainResourceDao<R>, R exte
 		IdType resourceId = resource.getIdElement();
 
 		if (!Objects.equals(id, resourceId.getIdPart()))
-			return responseGenerator.createPathVsElementIdResponse(resourceTypeName, id, resourceId);
+			return responseGenerator.pathVsElementId(resourceTypeName, id, resourceId);
 		if (resourceId.getBaseUrl() != null && !serverBase.equals(resourceId.getBaseUrl()))
-			return responseGenerator.createInvalidBaseUrlResponse(resourceTypeName, resourceId);
+			return responseGenerator.invalidBaseUrl(resourceTypeName, resourceId);
 
 		Consumer<R> afterUpdate = preUpdate(resource);
 
 		Optional<Long> ifMatch = getHeaderString(headers, Constants.HEADER_IF_MATCH, Constants.HEADER_IF_MATCH_LC)
-				.flatMap(this::toEntityTag).flatMap(this::toVersion);
+				.flatMap(parameterConverter::toEntityTag).flatMap(parameterConverter::toVersion);
 
 		R updatedResource = exceptionHandler
 				.handleSqlExAndResourceNotFoundExForUpdateAsCreateAndResouceVersionNonMatchEx(resourceTypeName,
@@ -346,19 +317,6 @@ public abstract class AbstractServiceImpl<D extends DomainResourceDao<R>, R exte
 
 		return responseGenerator.response(Status.OK, updatedResource, parameterConverter.getMediaType(uri, headers))
 				.build();
-	}
-
-	private Optional<Long> toVersion(EntityTag tag)
-	{
-		try
-		{
-			return Optional.of(Long.parseLong(tag.getValue()));
-		}
-		catch (NumberFormatException e)
-		{
-			logger.warn("ETag value not a Long value", e);
-			return Optional.empty();
-		}
 	}
 
 	/**

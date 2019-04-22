@@ -4,11 +4,13 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
@@ -132,5 +134,55 @@ public class ParameterConverter
 	private List<String> cleanQueryParameterValues(List<String> queryParameterValues)
 	{
 		return queryParameterValues.stream().map(v -> v.replace('+', ' ')).collect(Collectors.toList());
+	}
+
+	/**
+	 * @param eTagValue
+	 *            ETag string value
+	 * @return {@link Optional} of {@link EntityTag} for the given value or {@link Optional#empty()} if the given value
+	 *         could not be parsed or was null/blank
+	 */
+	public Optional<EntityTag> toEntityTag(String eTagValue)
+	{
+		if (eTagValue == null || eTagValue.isBlank())
+			return Optional.empty();
+
+		try
+		{
+			EntityTag eTag = EntityTag.valueOf(eTagValue);
+			if (eTag.isWeak())
+				return Optional.of(eTag);
+			else
+			{
+				logger.warn("{} not a weak ETag", eTag.getValue());
+				return Optional.empty();
+			}
+		}
+		catch (IllegalArgumentException e)
+		{
+			logger.warn("Unable to parse ETag value", e);
+			return Optional.empty();
+		}
+	}
+
+	/**
+	 * @param tag
+	 * @return {@link Optional} of long version for the given tag or {@link Optional#empty()} if the given tags value
+	 *         could not be parsed as long or was null/blank
+	 */
+	public Optional<Long> toVersion(EntityTag tag)
+	{
+		if (tag == null || tag.getValue() == null || tag.getValue().isBlank())
+			return Optional.empty();
+
+		try
+		{
+			return Optional.of(Long.parseLong(tag.getValue()));
+		}
+		catch (NumberFormatException e)
+		{
+			logger.warn("ETag value not a Long value", e);
+			return Optional.empty();
+		}
 	}
 }

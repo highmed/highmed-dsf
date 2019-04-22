@@ -6,33 +6,32 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
 
 import org.highmed.fhir.dao.DomainResourceDao;
-import org.highmed.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.fhir.dao.exception.ResourceNotFoundException;
 import org.highmed.fhir.dao.provider.DaoProvider;
 import org.highmed.fhir.help.ExceptionHandler;
+import org.highmed.fhir.help.ParameterConverter;
 import org.highmed.fhir.help.ResponseGenerator;
 import org.highmed.fhir.search.PartialResult;
 import org.highmed.fhir.search.SearchQuery;
 import org.highmed.fhir.search.SearchQueryParameterError;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.hl7.fhir.r4.model.DomainResource;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Identifier;
 
 public class ResolveReferencesCommand<R extends DomainResource, D extends DomainResourceDao<R>>
 		extends AbstractCommandWithResource<R, D> implements Command
@@ -42,18 +41,16 @@ public class ResolveReferencesCommand<R extends DomainResource, D extends Domain
 	private final ReferenceExtractor referenceExtractor;
 	private final ResponseGenerator responseGenerator;
 	private final DaoProvider daoProvider;
-	private final ExceptionHandler exceptionHandler;
 
 	public ResolveReferencesCommand(int index, Bundle bundle, BundleEntryComponent entry, String serverBase, R resource,
-			D dao, ReferenceExtractor referenceExtractor, ResponseGenerator responseGenerator, DaoProvider daoProvider,
-			ExceptionHandler exceptionHandler)
+			D dao, ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
+			ReferenceExtractor referenceExtractor, ResponseGenerator responseGenerator, DaoProvider daoProvider)
 	{
-		super(5, index, bundle, entry, serverBase, resource, dao);
+		super(5, index, bundle, entry, serverBase, resource, dao, exceptionHandler, parameterConverter);
 
 		this.referenceExtractor = referenceExtractor;
 		this.responseGenerator = responseGenerator;
 		this.daoProvider = daoProvider;
-		this.exceptionHandler = exceptionHandler;
 	}
 
 	@Override
@@ -79,36 +76,6 @@ public class ResolveReferencesCommand<R extends DomainResource, D extends Domain
 			{
 				throw exceptionHandler.internalServerError(e);
 			}
-		}
-	}
-
-	private R latest(Map<String, IdType> idTranslationTable, Connection connection) throws SQLException
-	{
-		try
-		{
-			String id = idTranslationTable.get(entry.getFullUrl()).getIdPart();
-			return dao.readWithTransaction(connection, toUuid(resource.getResourceType().name(), id))
-					.orElseThrow(() -> exceptionHandler.internalServerError(new ResourceNotFoundException(id)));
-		}
-		catch (ResourceDeletedException e)
-		{
-			throw exceptionHandler.internalServerError(e);
-		}
-	}
-
-	public UUID toUuid(String resourceTypeName, String id)
-	{
-		if (id == null)
-			return null;
-
-		// TODO control flow by exception
-		try
-		{
-			return UUID.fromString(id);
-		}
-		catch (IllegalArgumentException e)
-		{
-			throw exceptionHandler.notFound(resourceTypeName, e);
 		}
 	}
 
