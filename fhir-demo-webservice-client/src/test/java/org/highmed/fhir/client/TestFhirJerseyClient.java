@@ -246,7 +246,8 @@ public class TestFhirJerseyClient
 			// client.deleteConditionaly(Endpoint.class,
 			// Map.of("name:exact", Collections.singletonList("Transaction Test Endpoint")));
 
-			deleteCreateUpdateReadTaskBundleTest(context, client);
+			// deleteCreateUpdateReadTaskBundleTest(context, client);
+			updateBundleTest(context, client);
 
 		}
 		catch (WebApplicationException e)
@@ -298,8 +299,8 @@ public class TestFhirJerseyClient
 
 		var readTaskEntry = bundle.addEntry();
 		readTaskEntry.getRequest().setMethod(HTTPVerb.GET);
-//		readTaskEntry.getRequest()
-//				.setUrl("Task/?identifier=" + taskIdentifierSystem + "|" + taskIdentifierValue + "&foo=bar");
+		// readTaskEntry.getRequest()
+		// .setUrl("Task/?identifier=" + taskIdentifierSystem + "|" + taskIdentifierValue + "&foo=bar");
 		readTaskEntry.getRequest().setUrl(createTaskEntry.getFullUrl());
 
 		System.out.println(
@@ -358,6 +359,51 @@ public class TestFhirJerseyClient
 		eptEntry.getRequest().setMethod(HTTPVerb.POST);
 		eptEntry.getRequest().setUrl(ept.getResourceType().name());
 		eptEntry.getRequest().setIfNoneExist("identifier=" + eptIdentifierSystem + "|" + eptIdentifierValue);
+
+		System.out.println(context.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		Bundle result = client.postBundle(bundle);
+		System.out.println(context.newXmlParser().setPrettyPrint(true).encodeResourceToString(result));
+	}
+
+	private static void updateBundleTest(FhirContext context, WebserviceClient client)
+	{
+		final String orgIdentifierSystem = "http://highmed.org/fhir/CodeSystem/organization";
+		final String orgIdentifierValue = "Transaction Test Organization";
+		final String eptIdentifierSystem = "http://highmed.org/fhir/CodeSystem/endpoint";
+		final String eptIdentifierValue = "Transaction Test Endpoint";
+
+		var bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+
+		var org = new Organization();
+		org.setName("Transaction Test Organization");
+		org.addIdentifier().setSystem(orgIdentifierSystem).setValue(orgIdentifierValue);
+		Reference eptReference = new Reference();
+		eptReference.setType("Endpoint");
+		eptReference.getIdentifier().setSystem(eptIdentifierSystem);
+		eptReference.getIdentifier().setValue(eptIdentifierValue);
+		org.addEndpoint(eptReference);
+
+		var ept = new Endpoint();
+		ept.setName("Transaction Test Endpoint");
+		ept.addIdentifier().setSystem(eptIdentifierSystem).setValue(eptIdentifierValue);
+		Reference orgReference = new Reference();
+		orgReference.setType("Organization");
+		orgReference.getIdentifier().setSystem(orgIdentifierSystem);
+		orgReference.getIdentifier().setValue(orgIdentifierValue);
+		ept.setManagingOrganization(orgReference);
+
+		var orgEntry = bundle.addEntry();
+		orgEntry.setFullUrl("urn:uuid:" + UUID.randomUUID().toString());
+		orgEntry.setResource(org);
+		orgEntry.getRequest().setMethod(HTTPVerb.PUT);
+		orgEntry.getRequest().setUrl("Organization?identifier=" + orgIdentifierSystem + "|" + orgIdentifierValue);
+
+		var eptEntry = bundle.addEntry();
+		eptEntry.setFullUrl("urn:uuid:" + UUID.randomUUID().toString());
+		eptEntry.setResource(ept);
+		eptEntry.getRequest().setMethod(HTTPVerb.PUT);
+		eptEntry.getRequest().setUrl("Endpoint?identifier=" + eptIdentifierSystem + "|" + eptIdentifierValue);
 
 		System.out.println(context.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		Bundle result = client.postBundle(bundle);

@@ -16,7 +16,6 @@ import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.Response.Status;
 
 import org.highmed.fhir.dao.DomainResourceDao;
-import org.highmed.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.fhir.event.EventGenerator;
 import org.highmed.fhir.event.EventManager;
 import org.highmed.fhir.help.ExceptionHandler;
@@ -135,11 +134,7 @@ public class UpdateCommand<R extends DomainResource, D extends DomainResourceDao
 			throw new WebApplicationException(
 					responseGenerator.invalidBaseUrlInBundle(index, resourceTypeName, resourceId));
 
-		// in case we are updating a resource with temp-id created within this transaction
-		// error if we are updating a resource deleted within this transaction
-		R latest = latestErrorIfDeleted(idTranslationTable, connection).orElse(resource);
-
-		if (!Objects.equals(resourceTypeName, latest.getResourceType().name()))
+		if (!Objects.equals(resourceTypeName, resource.getResourceType().name()))
 			throw new WebApplicationException(responseGenerator.nonMatchingResourceTypeAndRequestUrlInBundle(index,
 					resourceTypeName, entry.getRequest().getUrl()));
 
@@ -147,22 +142,7 @@ public class UpdateCommand<R extends DomainResource, D extends DomainResourceDao
 				.flatMap(parameterConverter::toEntityTag).flatMap(parameterConverter::toVersion);
 
 		updatedResource = exceptionHandler.handleSqlExAndResourceNotFoundExForUpdateAsCreateAndResouceVersionNonMatchEx(
-				resourceTypeName, () -> dao.updateWithTransaction(connection, latest, ifMatch.orElse(null)));
-	}
-
-	protected Optional<R> latestErrorIfDeleted(Map<String, IdType> idTranslationTable, Connection connection)
-			throws SQLException
-	{
-		try
-		{
-			String id = idTranslationTable.getOrDefault(entry.getFullUrl(), resource.getIdElement()).getIdPart();
-			return dao.readWithTransaction(connection,
-					parameterConverter.toUuid(resource.getResourceType().name(), id));
-		}
-		catch (ResourceDeletedException e)
-		{
-			throw exceptionHandler.internalServerError(e);
-		}
+				resourceTypeName, () -> dao.updateWithTransaction(connection, resource, ifMatch.orElse(null)));
 	}
 
 	private void updateByCondition(Map<String, IdType> idTranslationTable, Connection connection,
