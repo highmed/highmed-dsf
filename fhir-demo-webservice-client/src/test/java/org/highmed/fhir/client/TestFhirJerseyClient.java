@@ -6,6 +6,7 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.Date;
 import java.util.UUID;
 
 import javax.ws.rs.WebApplicationException;
@@ -17,6 +18,8 @@ import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.r4.model.Task.TaskStatus;
 
 import ca.uhn.fhir.context.FhirContext;
 import de.rwh.utils.crypto.CertificateHelper;
@@ -32,9 +35,9 @@ public class TestFhirJerseyClient
 				Paths.get("../fhir-demo-cert-generator/cert/test-client_certificate.p12"), keyStorePassword);
 		KeyStore trustStore = CertificateHelper.extractTrust(keyStore);
 
-		FhirContext fhirContext = FhirContext.forR4();
+		FhirContext context = FhirContext.forR4();
 		WebserviceClient client = new WebserviceClientJersey("https://localhost:8001/fhir/", trustStore, keyStore,
-				keyStorePassword, null, null, null, 0, 0, null, fhirContext);
+				keyStorePassword, null, null, null, 0, 0, null, context);
 
 		try
 		{
@@ -64,7 +67,7 @@ public class TestFhirJerseyClient
 			// entry2.getRequest().setMethod(HTTPVerb.POST);
 			// entry2.getRequest().setUrl("Endpoint");
 			//
-			// System.out.println(fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
+			// System.out.println(context.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
 			//
 
 			// client.postBundle(bundle);
@@ -103,31 +106,31 @@ public class TestFhirJerseyClient
 			//
 
 			// CapabilityStatement conformance = client.getConformance();
-			// System.out.println(fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
+			// System.out.println(context.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
 
-			// StructureDefinition sD = fhirContext.newXmlParser().parseResource(StructureDefinition.class,
+			// StructureDefinition sD = context.newXmlParser().parseResource(StructureDefinition.class,
 			// Files.newInputStream(Paths.get("../fhir-demo-server/src/test/resources/profiles/extension-workflow-researchstudy.xml")));
 			// client.create(sD);
 
-			// StructureDefinition sD = fhirContext.newXmlParser().parseResource(StructureDefinition.class,
+			// StructureDefinition sD = context.newXmlParser().parseResource(StructureDefinition.class,
 			// Files.newInputStream(Paths.get("../fhir-demo-server/src/test/resources/profiles/task-highmed-0.0.2.xml")));
 			// client.create(sD);
 
 			// StructureDefinition sd = client
 			// .generateSnapshot("http://highmed.org/fhir/StructureDefinition/DataSharingTask");
-			// String xml = fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(sd);
+			// String xml = context.newXmlParser().setPrettyPrint(true).encodeResourceToString(sd);
 			// System.out.println(xml);
 
-			// StructureDefinition diff = fhirContext.newXmlParser().parseResource(StructureDefinition.class,
+			// StructureDefinition diff = context.newXmlParser().parseResource(StructureDefinition.class,
 			// Files.newInputStream(Paths.get("../fhir-demo-server/src/test/resources/task-highmed-0.0.1.xml")));
 			// StructureDefinition sd = client.generateSnapshot(diff);
-			// String xml = fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(sd);
+			// String xml = context.newXmlParser().setPrettyPrint(true).encodeResourceToString(sd);
 			// System.out.println(xml);
 
-			// StructureDefinition diff = fhirContext.newXmlParser().parseResource(StructureDefinition.class,
+			// StructureDefinition diff = context.newXmlParser().parseResource(StructureDefinition.class,
 			// Files.newInputStream(Paths.get("../fhir-demo-server/src/test/resources/address-de-basis-0.2.xml")));
 			// StructureDefinition sd = client.generateSnapshot(diff.setSnapshot(null));
-			// String xml = fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(sd);
+			// String xml = context.newXmlParser().setPrettyPrint(true).encodeResourceToString(sd);
 			// System.out.println(xml);
 
 			// Subscription subscription = new Subscription();
@@ -242,71 +245,121 @@ public class TestFhirJerseyClient
 			// client.deleteConditionaly(Endpoint.class,
 			// Map.of("name:exact", Collections.singletonList("Transaction Test Endpoint")));
 
-			final String orgIdentifierSystem = "http://highmed.org/fhir/CodeSystem/organization";
-			final String orgIdentifierValue = "Transaction Test Organization";
-			final String eptIdentifierSystem = "http://highmed.org/fhir/CodeSystem/endpoint";
-			final String eptIdentifierValue = "Transaction Test Endpoint";
+			createUpdateBundleTest(context, client);
 
-			var bundle = new Bundle();
-			bundle.setType(BundleType.TRANSACTION);
-
-			var delOrg = bundle.addEntry();
-			delOrg.getRequest().setMethod(HTTPVerb.DELETE);
-			delOrg.getRequest().setUrl("Organization?identifier=" + orgIdentifierSystem + "|" + orgIdentifierValue);
-
-			var delEpt = bundle.addEntry();
-			delEpt.getRequest().setMethod(HTTPVerb.DELETE);
-			delEpt.getRequest().setUrl("Endpoint?identifier=" + eptIdentifierSystem + "|" + eptIdentifierValue);
-
-			var org = new Organization();
-			org.setName("Transaction Test Organization");
-			org.addIdentifier().setSystem(orgIdentifierSystem).setValue(orgIdentifierValue);
-			Reference eptReference = new Reference();
-			eptReference.setType("Endpoint");
-			eptReference.getIdentifier().setSystem(eptIdentifierSystem);
-			eptReference.getIdentifier().setValue(eptIdentifierValue);
-			org.addEndpoint(eptReference);
-
-			var ept = new Endpoint();
-			ept.setName("Transaction Test Endpoint");
-			ept.addIdentifier().setSystem(eptIdentifierSystem).setValue(eptIdentifierValue);
-			Reference orgReference = new Reference();
-			orgReference.setType("Organization");
-			orgReference.getIdentifier().setSystem(orgIdentifierSystem);
-			orgReference.getIdentifier().setValue(orgIdentifierValue);
-			ept.setManagingOrganization(orgReference);
-
-			var orgEntry = bundle.addEntry();
-			orgEntry.setFullUrl("urn:uuid:" + UUID.randomUUID().toString());
-			orgEntry.setResource(org);
-			orgEntry.getRequest().setMethod(HTTPVerb.POST);
-			orgEntry.getRequest().setUrl(org.getResourceType().name());
-			orgEntry.getRequest().setIfNoneExist("identifier=" + orgIdentifierSystem + "|" + orgIdentifierValue);
-
-			var eptEntry = bundle.addEntry();
-			eptEntry.setFullUrl("urn:uuid:" + UUID.randomUUID().toString());
-			eptEntry.setResource(ept);
-			eptEntry.getRequest().setMethod(HTTPVerb.POST);
-			eptEntry.getRequest().setUrl(ept.getResourceType().name());
-			eptEntry.getRequest().setIfNoneExist("identifier=" + eptIdentifierSystem + "|" + eptIdentifierValue);
-
-			// org.addEndpoint().setReference(eptEntry.getFullUrl());
-			// ept.getManagingOrganization().setReference(orgEntry.getFullUrl());
-
-			System.out.println(fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
-			Bundle result = client.postBundle(bundle);
-			System.out.println(fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(result));
 		}
 		catch (WebApplicationException e)
 		{
 			if (e.getResponse() != null && e.getResponse().hasEntity())
 			{
 				OperationOutcome outcome = e.getResponse().readEntity(OperationOutcome.class);
-				String xml = fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(outcome);
+				String xml = context.newXmlParser().setPrettyPrint(true).encodeResourceToString(outcome);
 				System.out.println(xml);
 			}
 			else
 				e.printStackTrace();
 		}
+	}
+
+	private static void createUpdateBundleTest(FhirContext context, WebserviceClient client)
+	{
+		final String taskIdentifierSystem = "http://highmed.org/fhir/CodeSystem/task";
+		final String taskIdentifierValue = "Transaction Update Test Task";
+
+		var bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+
+		var deleleteTaskentry = bundle.addEntry();
+		deleleteTaskentry.getRequest().setMethod(HTTPVerb.DELETE);
+		deleleteTaskentry.getRequest().setUrl("Task?identifier=" + taskIdentifierSystem + "|" + taskIdentifierValue);
+
+		var task = new Task();
+		task.setAuthoredOn(new Date());
+		task.setDescription("Transaction Update Test Task");
+		task.addIdentifier().setSystem(taskIdentifierSystem).setValue(taskIdentifierValue);
+
+		var createTaskEntry = bundle.addEntry();
+		createTaskEntry.setFullUrl("urn:uuid:" + UUID.randomUUID().toString());
+		createTaskEntry.setResource(task);
+		createTaskEntry.getRequest().setMethod(HTTPVerb.POST);
+		createTaskEntry.getRequest().setUrl("Task");
+
+		var updateTask = task.copy();
+		updateTask.setStatus(TaskStatus.DRAFT);
+
+		var updateTaskEntry = bundle.addEntry();
+		updateTaskEntry.setFullUrl("urn:uuid:" + UUID.randomUUID().toString());
+		updateTaskEntry.setResource(updateTask);
+		updateTaskEntry.getRequest().setMethod(HTTPVerb.PUT);
+		updateTaskEntry.getRequest().setUrl("Task/?identifier=" + taskIdentifierSystem + "|" + taskIdentifierValue);
+		updateTaskEntry.getRequest().setIfMatch("W/\"1\"");
+
+		// try
+		// {
+		System.out.println(
+				"request bundle:\n" + context.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		Bundle result = client.postBundle(bundle);
+		System.out.println(
+				"result bundle:\n" + context.newXmlParser().setPrettyPrint(true).encodeResourceToString(result));
+		// }
+		// finally
+		// {
+		// client.delete(Task.class, createdTask.getIdElement().getIdPart());
+		// }
+	}
+
+	private static void deleteCreateBundleTest(FhirContext context, WebserviceClient client)
+	{
+		final String orgIdentifierSystem = "http://highmed.org/fhir/CodeSystem/organization";
+		final String orgIdentifierValue = "Transaction Test Organization";
+		final String eptIdentifierSystem = "http://highmed.org/fhir/CodeSystem/endpoint";
+		final String eptIdentifierValue = "Transaction Test Endpoint";
+
+		var bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+
+		var delOrg = bundle.addEntry();
+		delOrg.getRequest().setMethod(HTTPVerb.DELETE);
+		delOrg.getRequest().setUrl("Organization?identifier=" + orgIdentifierSystem + "|" + orgIdentifierValue);
+
+		var delEpt = bundle.addEntry();
+		delEpt.getRequest().setMethod(HTTPVerb.DELETE);
+		delEpt.getRequest().setUrl("Endpoint?identifier=" + eptIdentifierSystem + "|" + eptIdentifierValue);
+
+		var org = new Organization();
+		org.setName("Transaction Test Organization");
+		org.addIdentifier().setSystem(orgIdentifierSystem).setValue(orgIdentifierValue);
+		Reference eptReference = new Reference();
+		eptReference.setType("Endpoint");
+		eptReference.getIdentifier().setSystem(eptIdentifierSystem);
+		eptReference.getIdentifier().setValue(eptIdentifierValue);
+		org.addEndpoint(eptReference);
+
+		var ept = new Endpoint();
+		ept.setName("Transaction Test Endpoint");
+		ept.addIdentifier().setSystem(eptIdentifierSystem).setValue(eptIdentifierValue);
+		Reference orgReference = new Reference();
+		orgReference.setType("Organization");
+		orgReference.getIdentifier().setSystem(orgIdentifierSystem);
+		orgReference.getIdentifier().setValue(orgIdentifierValue);
+		ept.setManagingOrganization(orgReference);
+
+		var orgEntry = bundle.addEntry();
+		orgEntry.setFullUrl("urn:uuid:" + UUID.randomUUID().toString());
+		orgEntry.setResource(org);
+		orgEntry.getRequest().setMethod(HTTPVerb.POST);
+		orgEntry.getRequest().setUrl(org.getResourceType().name());
+		orgEntry.getRequest().setIfNoneExist("identifier=" + orgIdentifierSystem + "|" + orgIdentifierValue);
+
+		var eptEntry = bundle.addEntry();
+		eptEntry.setFullUrl("urn:uuid:" + UUID.randomUUID().toString());
+		eptEntry.setResource(ept);
+		eptEntry.getRequest().setMethod(HTTPVerb.POST);
+		eptEntry.getRequest().setUrl(ept.getResourceType().name());
+		eptEntry.getRequest().setIfNoneExist("identifier=" + eptIdentifierSystem + "|" + eptIdentifierValue);
+
+		System.out.println(context.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		Bundle result = client.postBundle(bundle);
+		System.out.println(context.newXmlParser().setPrettyPrint(true).encodeResourceToString(result));
 	}
 }

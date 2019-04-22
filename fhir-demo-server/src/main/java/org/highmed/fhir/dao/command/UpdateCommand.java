@@ -2,21 +2,29 @@ package org.highmed.fhir.dao.command;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.Response.Status;
 
 import org.highmed.fhir.dao.DomainResourceDao;
+import org.highmed.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.fhir.event.EventGenerator;
 import org.highmed.fhir.event.EventManager;
 import org.highmed.fhir.help.ExceptionHandler;
 import org.highmed.fhir.help.ParameterConverter;
 import org.highmed.fhir.help.ResponseGenerator;
+import org.highmed.fhir.search.PartialResult;
+import org.highmed.fhir.search.SearchQuery;
+import org.highmed.fhir.search.SearchQueryParameterError;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent;
@@ -24,6 +32,7 @@ import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -35,6 +44,9 @@ public class UpdateCommand<R extends DomainResource, D extends DomainResourceDao
 	protected final ResponseGenerator responseGenerator;
 	protected final EventManager eventManager;
 	protected final EventGenerator eventGenerator;
+
+	protected UUID id;
+	protected R createdResource;
 
 	protected R updatedResource;
 
@@ -52,9 +64,46 @@ public class UpdateCommand<R extends DomainResource, D extends DomainResourceDao
 	@Override
 	public void preExecute(Map<String, IdType> idTranslationTable)
 	{
-		// TODO validate entry.getFullUrl() vs resource.getIdElement()
-		// TODO validate entry.getFullUrl() is urn:uuid:... if conditional update
-		// TODO validate entry.getFullUrl() is id with server base matching if direct update with id
+		UriComponents componentes = UriComponentsBuilder.fromUriString(entry.getRequest().getUrl()).build();
+		if (componentes.getPathSegments().size() == 2 && componentes.getQueryParams().isEmpty())
+		{
+			if (entry.getFullUrl().startsWith(URL_UUID_PREFIX))
+				throw new WebApplicationException(
+						responseGenerator.badUpdateRequestUrl(index, entry.getRequest().getUrl()));
+			else if (!resource.hasIdElement() || !resource.getIdElement().hasIdPart())
+				throw new WebApplicationException(
+						responseGenerator.bundleEntryResouceMissingId(index, resource.getResourceType().name()));
+			else if (resource.getIdElement().getIdPart().startsWith(URL_UUID_PREFIX))
+				throw new WebApplicationException(
+						responseGenerator.badUpdateRequestUrl(index, entry.getRequest().getUrl()));
+
+			String expectedBaseUrl = serverBase;
+			String expectedResourceTypeName = resource.getResourceType().name();
+			String expectedId = resource.getIdElement().getIdPart();
+			String expectedfullUrl = new IdType(expectedBaseUrl, expectedResourceTypeName, expectedId, null).getValue();
+
+			if (!expectedfullUrl.equals(entry.getFullUrl()))
+				throw new WebApplicationException(responseGenerator.badBundleEntryFullUrl(index, entry.getFullUrl()));
+			else if (!expectedResourceTypeName.equals(componentes.getPathSegments().get(0))
+					|| !expectedId.equals(componentes.getPathSegments().get(1)))
+				throw new WebApplicationException(
+						responseGenerator.badUpdateRequestUrl(index, entry.getRequest().getUrl()));
+		}
+		else if (componentes.getPathSegments().size() == 1 && !componentes.getQueryParams().isEmpty())
+		{
+			if (!entry.getFullUrl().startsWith(URL_UUID_PREFIX))
+				throw new WebApplicationException(
+						responseGenerator.badUpdateRequestUrl(index, entry.getRequest().getUrl()));
+			else if (!resource.getIdElement().getValue().startsWith(URL_UUID_PREFIX))
+				throw new WebApplicationException(responseGenerator.bundleEntryBadResourceId(index,
+						resource.getResourceType().name(), URL_UUID_PREFIX));
+			else if (!entry.getFullUrl().equals(resource.getIdElement().getValue()))
+				throw new WebApplicationException(responseGenerator.badBundleEntryFullUrlVsResourceId(index,
+						entry.getFullUrl(), resource.getIdElement().getValue()));
+		}
+		else
+			throw new WebApplicationException(
+					responseGenerator.badUpdateRequestUrl(index, entry.getRequest().getUrl()));
 	}
 
 	@Override
@@ -71,7 +120,7 @@ public class UpdateCommand<R extends DomainResource, D extends DomainResourceDao
 					parameterConverter.cleanQueryParameters(componentes.getQueryParams()));
 		else
 			throw new WebApplicationException(
-					responseGenerator.badDeleteRequestUrl(index, entry.getRequest().getUrl()));
+					responseGenerator.badUpdateRequestUrl(index, entry.getRequest().getUrl()));
 	}
 
 	private void updateById(Map<String, IdType> idTranslationTable, Connection connection, String resourceTypeName,
@@ -86,7 +135,9 @@ public class UpdateCommand<R extends DomainResource, D extends DomainResourceDao
 			throw new WebApplicationException(
 					responseGenerator.invalidBaseUrlInBundle(index, resourceTypeName, resourceId));
 
-		R latest = latest(idTranslationTable, connection);
+		// in case we are updating a resource with temp-id created within this transaction
+		// error if we are updating a resource deleted within this transaction
+		R latest = latestErrorIfDeleted(idTranslationTable, connection).orElse(resource);
 
 		if (!Objects.equals(resourceTypeName, latest.getResourceType().name()))
 			throw new WebApplicationException(responseGenerator.nonMatchingResourceTypeAndRequestUrlInBundle(index,
@@ -99,11 +150,102 @@ public class UpdateCommand<R extends DomainResource, D extends DomainResourceDao
 				resourceTypeName, () -> dao.updateWithTransaction(connection, latest, ifMatch.orElse(null)));
 	}
 
-	private void updateByCondition(Map<String, IdType> idTranslationTable, Connection connection,
-			String resourceTypeName, Map<String, List<String>> queryParameters)
+	protected Optional<R> latestErrorIfDeleted(Map<String, IdType> idTranslationTable, Connection connection)
+			throws SQLException
 	{
-		// TODO
-		// add actual id of matching resource to idTranslationTable
+		try
+		{
+			String id = idTranslationTable.getOrDefault(entry.getFullUrl(), resource.getIdElement()).getIdPart();
+			return dao.readWithTransaction(connection,
+					parameterConverter.toUuid(resource.getResourceType().name(), id));
+		}
+		catch (ResourceDeletedException e)
+		{
+			throw exceptionHandler.internalServerError(e);
+		}
+	}
+
+	private void updateByCondition(Map<String, IdType> idTranslationTable, Connection connection,
+			String resourceTypeName, Map<String, List<String>> queryParameters) throws SQLException
+	{
+		if (Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(queryParameters::containsKey))
+		{
+			logger.warn(
+					"Query contains parameter not applicable in this conditional update context: '{}', parameters {} will be ignored",
+					UriComponentsBuilder.newInstance()
+							.replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString(),
+					Arrays.toString(SearchQuery.STANDARD_PARAMETERS));
+
+			queryParameters = queryParameters.entrySet().stream()
+					.filter(e -> !Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(p -> p.equals(e.getKey())))
+					.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+		}
+
+		SearchQuery<R> query = dao.createSearchQuery(1, 1);
+		query.configureParameters(queryParameters);
+
+		List<SearchQueryParameterError> unsupportedParams = query.getUnsupportedQueryParameters(queryParameters);
+		if (!unsupportedParams.isEmpty())
+			throw new WebApplicationException(responseGenerator.unsupportedConditionalUpdateQuery(index,
+					entry.getRequest().getUrl(), unsupportedParams));
+
+		PartialResult<R> result = exceptionHandler
+				.handleSqlException(() -> dao.searchWithTransaction(connection, query));
+
+		// No matches, no id provided: The server creates the resource.
+		if (result.getOverallCount() <= 0 && !resource.hasId())
+		{
+			id = UUID.randomUUID();
+			idTranslationTable.put(entry.getFullUrl(),
+					new IdType(resource.getResourceType().toString(), id.toString()));
+			createdResource = dao.createWithTransactionAndId(connection, resource, id);
+		}
+
+		// No matches, id provided: The server treats the interaction as an Update as Create interaction (or rejects it,
+		// if it does not support Update as Create) -> reject
+		else if (result.getOverallCount() <= 0 && resource.hasId())
+			// TODO bundle specific error
+			throw new WebApplicationException(
+					responseGenerator.updateAsCreateNotAllowed(resourceTypeName, resource.getId()));
+
+		// One Match, no resource id provided OR (resource id provided and it matches the found resource):
+		// The server performs the update against the matching resource
+		else if (result.getOverallCount() == 1)
+		{
+			R dbResource = result.getPartialResult().get(0);
+			IdType dbResourceId = dbResource.getIdElement();
+
+			// BaseUrl - The server base URL (e.g. "http://example.com/fhir")
+			// ResourceType - The resource type (e.g. "Patient")
+			// IdPart - The ID (e.g. "123")
+			// Version - The version ID ("e.g. "456")
+			if (!resource.hasId() || resource.getIdElement().getValue().startsWith(URL_UUID_PREFIX))
+			{
+				resource.setIdElement(dbResourceId);
+				idTranslationTable.put(entry.getFullUrl(),
+						new IdType(resource.getResourceType().toString(), dbResource.getIdElement().getIdPart()));
+				updateById(idTranslationTable, connection, resourceTypeName, resource.getIdElement().getIdPart());
+			}
+			else if (resource.hasId()
+					&& (!resource.getIdElement().hasBaseUrl()
+							|| serverBase.equals(resource.getIdElement().getBaseUrl()))
+					&& (!resource.getIdElement().hasResourceType()
+							|| resourceTypeName.equals(resource.getIdElement().getResourceType()))
+					&& (dbResourceId.getIdPart().equals(resource.getIdElement().getIdPart())))
+				updateById(idTranslationTable, connection, resourceTypeName, resource.getIdElement().getIdPart());
+			else
+				// TODO bundle specific error
+				throw new WebApplicationException(responseGenerator.badRequestIdsNotMatching(
+						dbResourceId.withServerBase(serverBase, resourceTypeName),
+						resource.getIdElement().hasBaseUrl() && resource.getIdElement().hasResourceType()
+								? resource.getIdElement()
+								: resource.getIdElement().withServerBase(serverBase, resourceTypeName)));
+		}
+		// Multiple matches: The server returns a 412 Precondition Failed error indicating the client's criteria were
+		// not selective enough preferably with an OperationOutcome
+		else // if (result.getOverallCount() > 1)
+			throw new WebApplicationException(responseGenerator.multipleExists(resourceTypeName, UriComponentsBuilder
+					.newInstance().replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString()));
 	}
 
 	@Override

@@ -414,8 +414,17 @@ public class ResponseGenerator
 	{
 		logger.error("Bad delete request url {} at bundle index {}", url, bundleIndex);
 
-		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING, "Bad delete request url "
-				+ url + " at bundle index " + bundleIndex + " not supported by this implementation");
+		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+				"Bad delete request url " + url + " at bundle index " + bundleIndex);
+		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
+	}
+
+	public Response badUpdateRequestUrl(int bundleIndex, String url)
+	{
+		logger.error("Bad update request url {} at bundle index {}", url, bundleIndex);
+
+		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+				"Bad update request url " + url + " at bundle index " + bundleIndex);
 		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
@@ -495,6 +504,63 @@ public class ResponseGenerator
 
 		OperationOutcome out = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING, "Non matching resource type "
 				+ resourceTypeName + " and request url " + url + " at bundle index " + bundleIndex);
+		return Response.status(Status.BAD_REQUEST).entity(out).build();
+	}
+
+	public Response unsupportedConditionalUpdateQuery(int bundleIndex, String query,
+			List<SearchQueryParameterError> unsupportedQueryParameters)
+	{
+		String unsupportedQueryParametersString = unsupportedQueryParameters.stream()
+				.map(SearchQueryParameterError::toString).collect(Collectors.joining("; "));
+
+		logger.error("Bad conditional update request '{}', unsupported query parameter{} {} at bundle index {}", query,
+				unsupportedQueryParameters.size() != 1 ? "s" : "", unsupportedQueryParametersString, bundleIndex);
+
+		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+				"Bad conditional update request '" + query + "', unsupported query parameter"
+						+ (unsupportedQueryParameters.size() != 1 ? "s" : "") + " " + unsupportedQueryParametersString
+						+ " at bundle index " + bundleIndex);
+		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
+
+	}
+
+	public Response bundleEntryResouceMissingId(int bundleIndex, String resourceTypeName)
+	{
+		logger.error("Bundle entry of type {} at bundle index {} is missing id value", resourceTypeName, bundleIndex);
+
+		OperationOutcome out = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING, "Bundle entry of type "
+				+ resourceTypeName + " at bundle index " + bundleIndex + " is missing id value");
+		return Response.status(Status.BAD_REQUEST).entity(out).build();
+	}
+
+	public Response badBundleEntryFullUrl(int bundleIndex, String fullUrl)
+	{
+		logger.error("Bad entry fullUrl '{}' at bundle index {}", fullUrl, bundleIndex);
+
+		OperationOutcome out = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+				"Bad entry fullUrl '" + fullUrl + "' at bundle index " + bundleIndex);
+		return Response.status(Status.BAD_REQUEST).entity(out).build();
+	}
+
+	public Response bundleEntryBadResourceId(int bundleIndex, String resourceTypeName, String urlUuidPrefix)
+	{
+		logger.error("Bundle entry of type {} at bundle index {} id value not starting with {}", resourceTypeName,
+				bundleIndex, urlUuidPrefix);
+
+		OperationOutcome out = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+				"Bundle entry of type " + resourceTypeName + " at bundle index " + bundleIndex
+						+ " id value not starting with " + urlUuidPrefix);
+		return Response.status(Status.BAD_REQUEST).entity(out).build();
+	}
+
+	public Response badBundleEntryFullUrlVsResourceId(int bundleIndex, String fullUrl, String idValue)
+	{
+		logger.error("Resource id not equal to entry fullUrl ({} vs. {}) at bundle index {}", idValue, fullUrl,
+				bundleIndex);
+
+		OperationOutcome out = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+				"Resource id not equal to entry fullUrl (" + idValue + " vs. " + fullUrl + ") at bundle index "
+						+ bundleIndex);
 		return Response.status(Status.BAD_REQUEST).entity(out).build();
 	}
 }

@@ -6,22 +6,32 @@ import org.highmed.fhir.dao.StructureDefinitionDao;
 import org.highmed.fhir.dao.StructureDefinitionSnapshotDao;
 import org.highmed.fhir.event.EventGenerator;
 import org.highmed.fhir.event.EventManager;
+import org.highmed.fhir.function.ConsumerWithSqlAndResourceNotFoundException;
 import org.highmed.fhir.help.ExceptionHandler;
 import org.highmed.fhir.help.ParameterConverter;
 import org.highmed.fhir.help.ResponseGenerator;
+import org.highmed.fhir.service.SnapshotDependencies;
 import org.highmed.fhir.service.SnapshotDependencyAnalyzer;
 import org.highmed.fhir.service.SnapshotGenerator;
+import org.highmed.fhir.service.SnapshotGenerator.SnapshotWithValidationMessages;
+import org.highmed.fhir.service.SnapshotInfo;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.StructureDefinition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class UpdateStructureDefinitionCommand extends UpdateCommand<StructureDefinition, StructureDefinitionDao>
 		implements Command
 {
+	private static final Logger logger = LoggerFactory.getLogger(UpdateStructureDefinitionCommand.class);
+
 	private final StructureDefinitionSnapshotDao snapshotDao;
 	private final SnapshotGenerator snapshotGenerator;
 	private final SnapshotDependencyAnalyzer snapshotDependencyAnalyzer;
+
+	private StructureDefinition resourceWithSnapshot;
 
 	public UpdateStructureDefinitionCommand(int index, Bundle bundle, BundleEntryComponent entry, String serverBase,
 			StructureDefinition resource, StructureDefinitionDao dao, ExceptionHandler exceptionHandler,
@@ -35,14 +45,13 @@ public class UpdateStructureDefinitionCommand extends UpdateCommand<StructureDef
 		this.snapshotDao = snapshotDao;
 		this.snapshotGenerator = snapshotGenerator;
 		this.snapshotDependencyAnalyzer = snapshotDependencyAnalyzer;
-
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	public void preExecute(Map<String, IdType> idTranslationTable)
 	{
-		// TODO Auto-generated method stub
+		resourceWithSnapshot = resource.hasSnapshot() ? resource.copy() : null;
+		resource.setSnapshot(null);
 
 		super.preExecute(idTranslationTable);
 	}
@@ -50,8 +59,37 @@ public class UpdateStructureDefinitionCommand extends UpdateCommand<StructureDef
 	@Override
 	public BundleEntryComponent postExecute()
 	{
-		// TODO Auto-generated method stub
+		if (resourceWithSnapshot != null)
+		{
+			handleSnapshot(resourceWithSnapshot, info -> snapshotDao.update(resourceWithSnapshot, info));
+		}
+		else if (updatedResource != null)
+		{
+			try
+			{
+				SnapshotWithValidationMessages s = snapshotGenerator.generateSnapshot(updatedResource);
+
+				if (s != null && s.getSnapshot() != null && s.getMessages().isEmpty())
+					handleSnapshot(s.getSnapshot(), info -> snapshotDao.update(s.getSnapshot(), info));
+			}
+			catch (Exception e)
+			{
+				logger.warn("Error while generating snapshot for StructureDefinition with id "
+						+ updatedResource.getIdElement().getIdPart(), e);
+			}
+		}
 
 		return super.postExecute();
+	}
+
+	private void handleSnapshot(StructureDefinition snapshot,
+			ConsumerWithSqlAndResourceNotFoundException<SnapshotInfo> dbOp)
+	{
+		SnapshotDependencies dependencies = snapshotDependencyAnalyzer.analyzeSnapshotDependencies(snapshot);
+
+		exceptionHandler.catchAndLogSqlException(() -> snapshotDao.deleteAllByDependency(snapshot.getUrl()));
+
+		exceptionHandler.catchAndLogSqlAndResourceNotFoundException(resource.getResourceType().name(),
+				() -> dbOp.accept(new SnapshotInfo(dependencies)));
 	}
 }

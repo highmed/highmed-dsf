@@ -85,7 +85,7 @@ public class TransactionCommandList implements CommandList
 					{
 						logger.debug("Running execute of command {} for entry at index {}", c.getClass().getName(),
 								c.getIndex());
-						c.execute(Collections.unmodifiableMap(idTranslationTable), connection);
+						c.execute(idTranslationTable, connection);
 					}
 					catch (Exception e)
 					{

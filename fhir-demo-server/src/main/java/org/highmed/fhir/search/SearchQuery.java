@@ -297,7 +297,7 @@ public class SearchQuery<R extends DomainResource> implements DbSearchQuery, Mat
 			{
 				return e;
 			}
-		}).collect(Collectors.toList());
+		}).filter(e -> e != null).collect(Collectors.toList());
 
 		if (!exceptions.isEmpty())
 		{

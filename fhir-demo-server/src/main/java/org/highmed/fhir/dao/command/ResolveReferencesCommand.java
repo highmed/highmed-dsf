@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.ws.rs.WebApplicationException;
 
 import org.highmed.fhir.dao.DomainResourceDao;
+import org.highmed.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.fhir.dao.exception.ResourceNotFoundException;
 import org.highmed.fhir.dao.provider.DaoProvider;
 import org.highmed.fhir.help.ExceptionHandler;
@@ -62,7 +63,7 @@ public class ResolveReferencesCommand<R extends DomainResource, D extends Domain
 	public void execute(Map<String, IdType> idTranslationTable, Connection connection)
 			throws SQLException, WebApplicationException
 	{
-		R latest = latest(idTranslationTable, connection);
+		R latest = latestOrErrorIfDeletedOrNotFound(idTranslationTable, connection);
 
 		boolean resourceNeedsUpdated = referenceExtractor.getReferences(latest)
 				.map(resolveReference(idTranslationTable, connection)).anyMatch(b -> b);
@@ -76,6 +77,21 @@ public class ResolveReferencesCommand<R extends DomainResource, D extends Domain
 			{
 				throw exceptionHandler.internalServerError(e);
 			}
+		}
+	}
+
+	private R latestOrErrorIfDeletedOrNotFound(Map<String, IdType> idTranslationTable, Connection connection)
+			throws SQLException
+	{
+		try
+		{
+			String id = idTranslationTable.getOrDefault(entry.getFullUrl(), resource.getIdElement()).getIdPart();
+			return dao.readWithTransaction(connection, parameterConverter.toUuid(resource.getResourceType().name(), id))
+					.orElseThrow(() -> exceptionHandler.internalServerError(new ResourceNotFoundException(id)));
+		}
+		catch (ResourceDeletedException e)
+		{
+			throw exceptionHandler.internalServerError(e);
 		}
 	}
 

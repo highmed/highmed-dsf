@@ -231,10 +231,10 @@ public class CommandFactory implements InitializingBean
 			{
 				switch (entry.getRequest().getMethod())
 				{
-					case POST:
+					case POST: // create
 						Command post = post(bundle, index, entry, (DomainResource) entry.getResource());
 						return resolveReferences(post, bundle, index, entry, (DomainResource) entry.getResource());
-					case PUT:
+					case PUT: // update
 						Command put = put(bundle, index, entry, (DomainResource) entry.getResource());
 						return resolveReferences(put, bundle, index, entry, (DomainResource) entry.getResource());
 					default:
@@ -257,7 +257,7 @@ public class CommandFactory implements InitializingBean
 		Optional<? extends DomainResourceDao<R>> dao = (Optional<? extends DomainResourceDao<R>>) daoProvider
 				.getDao(resource.getClass());
 
-		if (referenceExtractor.getReferences(resource).anyMatch(r -> true))
+		if (referenceExtractor.getReferences(resource).anyMatch(r -> true)) // at least one entry
 		{
 			return dao.map(d -> Stream.of(cmd,
 					new ResolveReferencesCommand<R, DomainResourceDao<R>>(index, bundle, entry, serverBase, resource, d,
