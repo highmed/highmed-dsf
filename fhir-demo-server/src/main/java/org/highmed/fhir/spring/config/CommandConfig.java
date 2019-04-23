@@ -1,6 +1,7 @@
 package org.highmed.fhir.spring.config;
 
 import org.highmed.fhir.dao.command.CommandFactory;
+import org.highmed.fhir.dao.command.CommandFactoryImpl;
 import org.highmed.fhir.dao.command.ReferenceExtractor;
 import org.highmed.fhir.dao.command.ReferenceReplacer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +45,7 @@ public class CommandConfig
 	@Bean
 	public CommandFactory commandFactory()
 	{
-		return new CommandFactory(serverBase, defaultPageCount, daoConfig.dataSource(), daoConfig.daoProvider(),
+		return new CommandFactoryImpl(serverBase, defaultPageCount, daoConfig.dataSource(), daoConfig.daoProvider(),
 				referenceReplacer(), referenceExtractor(), helperConfig.responseGenerator(),
 				helperConfig.exceptionHandler(), eventConfig.eventManager(), eventConfig.eventGenerator(),
 				snapshotConfig.snapshotGenerator(), snapshotConfig.snapshotDependencyAnalyzer(),

@@ -107,12 +107,24 @@ public class BatchCommandList implements CommandList
 		{
 			try
 			{
-				logger.debug("Running pre-execute of command {}", command.getClass().getName());
-				command.preExecute(idTranslationTable);
+				if (!caughtExceptions.containsKey(command.getIndex()))
+				{
+					logger.debug("Running pre-execute of command {} for entry at index {}",
+							command.getClass().getName(), command.getIndex());
+					command.preExecute(idTranslationTable);
+				}
+				else
+				{
+					logger.info("Skipping pre-execute of command {} for entry at index {}, caught exception {}",
+							command.getClass().getName(), command.getIndex(),
+							caughtExceptions.get(command.getIndex()).getClass().getName() + ": "
+									+ caughtExceptions.get(command.getIndex()).getMessage());
+				}
 			}
 			catch (Exception e)
 			{
-				logger.warn("Error while running pre-execute of command " + command.getClass().getName(), e);
+				logger.warn("Error while running pre-execute of command " + command.getClass().getName()
+						+ " for entry at index " + command.getIndex(), e);
 				caughtExceptions.put(command.getIndex(), e);
 			}
 		};
@@ -125,12 +137,24 @@ public class BatchCommandList implements CommandList
 		{
 			try
 			{
-				logger.debug("Running execute of command {}", command.getClass().getName());
-				command.execute(Collections.unmodifiableMap(idTranslationTable), connection);
+				if (!caughtExceptions.containsKey(command.getIndex()))
+				{
+					logger.debug("Running execute of command {} for entry at index {}", command.getClass().getName(),
+							command.getIndex());
+					command.execute(Collections.unmodifiableMap(idTranslationTable), connection);
+				}
+				else
+				{
+					logger.info("Skipping execute of command {} for entry at index {}, caught exception {}",
+							command.getClass().getName(), command.getIndex(),
+							caughtExceptions.get(command.getIndex()).getClass().getName() + ": "
+									+ caughtExceptions.get(command.getIndex()).getMessage());
+				}
 			}
 			catch (Exception e)
 			{
-				logger.warn("Error while executing command " + command.getClass().getName(), e);
+				logger.warn("Error while executing command " + command.getClass().getName() + " for entry at index "
+						+ command.getIndex(), e);
 				caughtExceptions.put(command.getIndex(), e);
 			}
 		};
@@ -144,12 +168,24 @@ public class BatchCommandList implements CommandList
 		{
 			try
 			{
-				logger.debug("Running post-execute of command {}", command.getClass().getName());
-				results.put(command.getIndex(), command.postExecute());
+				if (!caughtExceptions.containsKey(command.getIndex()))
+				{
+					logger.debug("Running post-execute of command {} for entry at index {}",
+							command.getClass().getName(), command.getIndex());
+					results.put(command.getIndex(), command.postExecute());
+				}
+				else
+				{
+					logger.info("Skipping post-execute of command {} for entry at index {}, caught exception {}",
+							command.getClass().getName(), command.getIndex(),
+							caughtExceptions.get(command.getIndex()).getClass().getName() + ": "
+									+ caughtExceptions.get(command.getIndex()).getMessage());
+				}
 			}
 			catch (Exception e)
 			{
-				logger.warn("Error while running post-execute of command " + command.getClass().getName(), e);
+				logger.warn("Error while running post-execute of command " + command.getClass().getName()
+						+ " for entry at index " + command.getIndex(), e);
 				caughtExceptions.put(command.getIndex(), e);
 			}
 		};

@@ -5,12 +5,14 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.EntityTag;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.highmed.fhir.dao.DomainResourceDao;
@@ -44,8 +46,8 @@ public class CreateCommand<R extends DomainResource, D extends DomainResourceDao
 	protected final EventManager eventManager;
 	protected final EventGenerator eventGenerator;
 
-	protected UUID id;
 	protected R createdResource;
+	protected Response responseResult;
 
 	public CreateCommand(int index, Bundle bundle, BundleEntryComponent entry, String serverBase, R resource, D dao,
 			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
@@ -63,25 +65,36 @@ public class CreateCommand<R extends DomainResource, D extends DomainResourceDao
 	{
 		// TODO validate entry.getFullUrl() vs resource.getIdElement()
 		// TODO validate entry.getFullUrl() is urn:uuid:...
-
-		id = UUID.randomUUID();
-		idTranslationTable.put(entry.getFullUrl(), new IdType(resource.getResourceType().toString(), id.toString()));
 	}
 
 	@Override
 	public void execute(Map<String, IdType> idTranslationTable, Connection connection)
 			throws SQLException, WebApplicationException
 	{
-		checkAlreadyExists(connection, entry.getRequest().getIfNoneExist(), resource.getResourceType());
+		Optional<DomainResource> exists = checkAlreadyExists(connection, entry.getRequest().getIfNoneExist(),
+				resource.getResourceType());
 
-		createdResource = dao.createWithTransactionAndId(connection, resource, id);
+		if (exists.isEmpty())
+		{
+			UUID id = UUID.randomUUID();
+			idTranslationTable.put(entry.getFullUrl(),
+					new IdType(resource.getResourceType().toString(), id.toString()));
+			createdResource = dao.createWithTransactionAndId(connection, resource, id);
+		}
+		else
+		{
+			DomainResource existingResource = exists.get();
+			idTranslationTable.put(entry.getFullUrl(), new IdType(existingResource.getResourceType().toString(),
+					existingResource.getIdElement().getIdPart()));
+			responseResult = responseGenerator.oneExists(existingResource, entry.getRequest().getIfNoneExist());
+		}
 	}
 
-	private void checkAlreadyExists(Connection connection, String ifNoneExist, ResourceType resourceType)
-			throws WebApplicationException
+	private Optional<DomainResource> checkAlreadyExists(Connection connection, String ifNoneExist,
+			ResourceType resourceType) throws WebApplicationException
 	{
 		if (ifNoneExist == null)
-			return; // header not found, nothing to check against
+			return Optional.empty();
 
 		if (ifNoneExist.isBlank())
 			throw new WebApplicationException(responseGenerator.badIfNoneExistHeaderValue(ifNoneExist));
@@ -107,7 +120,7 @@ public class CreateCommand<R extends DomainResource, D extends DomainResourceDao
 					.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 		}
 
-		SearchQuery<R> query = dao.createSearchQuery(0, 0);
+		SearchQuery<R> query = dao.createSearchQuery(1, 1);
 		query.configureParameters(queryParameters);
 
 		List<SearchQueryParameterError> unsupportedQueryParameters = query
@@ -119,33 +132,54 @@ public class CreateCommand<R extends DomainResource, D extends DomainResourceDao
 		PartialResult<R> result = exceptionHandler
 				.handleSqlException(() -> dao.searchWithTransaction(connection, query));
 		if (result.getOverallCount() == 1)
-			throw new WebApplicationException(responseGenerator.oneExists(resourceType.name(), ifNoneExist));
+			return Optional.of(result.getPartialResult().get(0));
 		else if (result.getOverallCount() > 1)
 			throw new WebApplicationException(responseGenerator.multipleExists(resourceType.name(), ifNoneExist));
+
+		return Optional.empty();
 	}
 
 	@Override
 	public BundleEntryComponent postExecute()
 	{
-		try
+		if (responseResult == null)
 		{
-			eventManager.handleEvent(eventGenerator.newResourceCreatedEvent(createdResource));
+			try
+			{
+				eventManager.handleEvent(eventGenerator.newResourceCreatedEvent(createdResource));
+			}
+			catch (Exception e)
+			{
+				logger.warn("Error while handling resource created event", e);
+			}
+
+			BundleEntryComponent resultEntry = new BundleEntryComponent();
+			resultEntry.setFullUrl(new IdType(serverBase, createdResource.getResourceType().name(),
+					createdResource.getIdElement().getIdPart(), null).getValue());
+			BundleEntryResponseComponent response = resultEntry.getResponse();
+			response.setStatus(Status.CREATED.getStatusCode() + " " + Status.CREATED.getReasonPhrase());
+			response.setLocation(createdResource.getIdElement()
+					.withServerBase(serverBase, createdResource.getResourceType().name()).getValue());
+			response.setEtag(new EntityTag(createdResource.getMeta().getVersionId(), true).toString());
+			response.setLastModified(createdResource.getMeta().getLastUpdated());
+
+			return resultEntry;
 		}
-		catch (Exception e)
+		else
 		{
-			logger.warn("Error while handling resource created event", e);
+			BundleEntryComponent resultEntry = new BundleEntryComponent();
+			BundleEntryResponseComponent response = resultEntry.getResponse();
+			response.setStatus(responseResult.getStatusInfo().getStatusCode() + " "
+					+ responseResult.getStatusInfo().getReasonPhrase());
+
+			if (responseResult.getLocation() != null)
+				response.setLocation(responseResult.getLocation().toString());
+			if (responseResult.getEntityTag() != null)
+				response.setEtag(responseResult.getEntityTag().getValue());
+			if (responseResult.getLastModified() != null)
+				response.setLastModified(responseResult.getLastModified());
+
+			return resultEntry;
 		}
-
-		BundleEntryComponent resultEntry = new BundleEntryComponent();
-		resultEntry.setFullUrl(new IdType(serverBase, createdResource.getResourceType().name(),
-				createdResource.getIdElement().getIdPart(), null).getValue());
-		BundleEntryResponseComponent response = resultEntry.getResponse();
-		response.setStatus(Status.CREATED.getStatusCode() + " " + Status.CREATED.getReasonPhrase());
-		response.setLocation(createdResource.getIdElement()
-				.withServerBase(serverBase, createdResource.getResourceType().name()).getValue());
-		response.setEtag(new EntityTag(createdResource.getMeta().getVersionId(), true).toString());
-		response.setLastModified(createdResource.getMeta().getLastUpdated());
-
-		return resultEntry;
 	}
 }

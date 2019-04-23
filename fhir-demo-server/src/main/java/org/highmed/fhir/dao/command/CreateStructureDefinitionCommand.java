@@ -58,6 +58,9 @@ public class CreateStructureDefinitionCommand extends CreateCommand<StructureDef
 	@Override
 	public BundleEntryComponent postExecute()
 	{
+		if (responseResult != null)
+			return super.postExecute();
+
 		if (resourceWithSnapshot != null)
 		{
 			handleSnapshot(resourceWithSnapshot,

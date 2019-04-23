@@ -1,5 +1,6 @@
 package org.highmed.fhir.help;
 
+import java.net.URI;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -28,6 +29,8 @@ import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.UriType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.rest.api.Constants;
 
 public class ResponseGenerator
 {
@@ -245,14 +248,20 @@ public class ResponseGenerator
 		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
-	public Response oneExists(String resourceTypeName, String ifNoneExistsHeaderValue)
+	public Response oneExists(DomainResource resource, String ifNoneExistsHeaderValue)
 	{
-		logger.info("{} with criteria {} exists", resourceTypeName, ifNoneExistsHeaderValue);
+		logger.info("{} with criteria {} exists", resource, ifNoneExistsHeaderValue);
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.INFORMATION, IssueType.DUPLICATE,
 				"Resource with criteria '" + ifNoneExistsHeaderValue + "' exists");
 
-		return Response.status(Status.OK).entity(outcome).build();
+		UriBuilder uri = UriBuilder.fromPath(serverBase);
+		URI location = uri.path("/{id}/" + Constants.PARAM_HISTORY + "/{vid}")
+				.build(resource.getIdElement().getIdPart(), resource.getIdElement().getVersionIdPart());
+
+		return Response.status(Status.OK).entity(outcome).location(location)
+				.lastModified(resource.getMeta().getLastUpdated())
+				.tag(new EntityTag(resource.getMeta().getVersionId(), true)).build();
 	}
 
 	public Response unknownReference(int bundleIndex, DomainResource resource, ResourceReference resourceReference)

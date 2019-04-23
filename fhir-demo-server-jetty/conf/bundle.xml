@@ -1,0 +1,55 @@
+<Bundle xmlns="http://hl7.org/fhir">
+	<type value="transaction"></type>
+	<entry>
+		<fullUrl value="urn:uuid:bb73165c-c7b9-4342-8e28-531f07fa7735"></fullUrl>
+		<resource>
+			<Organization xmlns="http://hl7.org/fhir">
+				<identifier>
+					<system
+						value="http://highmed.org/fhir/CodeSystem/organization"></system>
+					<value value="Transaction Test Organization"></value>
+				</identifier>
+				<name value="Transaction Test Organization"></name>
+				<endpoint>
+					<type value="Endpoint"></type>
+					<identifier>
+						<system value="http://highmed.org/fhir/CodeSystem/endpoint"></system>
+						<value value="Transaction Test Endpoint"></value>
+					</identifier>
+				</endpoint>
+			</Organization>
+		</resource>
+		<request>
+			<method value="POST"></method>
+			<url value="Organization"></url>
+			<ifNoneExist
+				value="identifier=http://highmed.org/fhir/CodeSystem/organization|Transaction Test Organization"></ifNoneExist>
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:b879e904-d666-45de-a995-accdd4429b79"></fullUrl>
+		<resource>
+			<Endpoint xmlns="http://hl7.org/fhir">
+				<identifier>
+					<system value="http://highmed.org/fhir/CodeSystem/endpoint"></system>
+					<value value="Transaction Test Endpoint"></value>
+				</identifier>
+				<name value="Transaction Test Endpoint"></name>
+				<managingOrganization>
+					<type value="Organization"></type>
+					<identifier>
+						<system
+							value="http://highmed.org/fhir/CodeSystem/organization"></system>
+						<value value="Transaction Test Organization"></value>
+					</identifier>
+				</managingOrganization>
+			</Endpoint>
+		</resource>
+		<request>
+			<method value="POST"></method>
+			<url value="Endpoint"></url>
+			<ifNoneExist
+				value="identifier=http://highmed.org/fhir/CodeSystem/endpoint|Transaction Test Endpoint"></ifNoneExist>
+		</request>
+	</entry>
+</Bundle>

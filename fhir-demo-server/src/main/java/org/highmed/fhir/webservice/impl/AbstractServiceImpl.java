@@ -139,12 +139,13 @@ public abstract class AbstractServiceImpl<D extends DomainResourceDao<R>, R exte
 		if (afterCreate != null)
 			afterCreate.accept(createdResource);
 
-		URI location = uri.getAbsolutePathBuilder().path("/{id}/_history/{vid}")
+		URI location = uri.getAbsolutePathBuilder().path("/{id}/" + Constants.PARAM_HISTORY + "/{vid}")
 				.build(createdResource.getIdElement().getIdPart(), createdResource.getIdElement().getVersionIdPart());
 
 		return responseGenerator
 				.response(Status.CREATED, createdResource, parameterConverter.getMediaType(uri, headers))
-				.location(location).build();
+				.location(location).lastModified(resource.getMeta().getLastUpdated())
+				.tag(new EntityTag(resource.getMeta().getVersionId(), true)).build();
 	}
 
 	private void checkAlreadyExists(HttpHeaders headers) throws WebApplicationException
@@ -180,7 +181,7 @@ public abstract class AbstractServiceImpl<D extends DomainResourceDao<R>, R exte
 					.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 		}
 
-		SearchQuery<R> query = dao.createSearchQuery(0, 0);
+		SearchQuery<R> query = dao.createSearchQuery(1, 1);
 		query.configureParameters(queryParameters);
 
 		List<SearchQueryParameterError> unsupportedQueryParameters = query
@@ -191,7 +192,8 @@ public abstract class AbstractServiceImpl<D extends DomainResourceDao<R>, R exte
 
 		PartialResult<R> result = exceptionHandler.handleSqlException(() -> dao.search(query));
 		if (result.getOverallCount() == 1)
-			throw new WebApplicationException(responseGenerator.oneExists(resourceTypeName, ifNoneExistHeader.get()));
+			throw new WebApplicationException(
+					responseGenerator.oneExists(result.getPartialResult().get(0), ifNoneExistHeader.get()));
 		else if (result.getOverallCount() > 1)
 			throw new WebApplicationException(
 					responseGenerator.multipleExists(resourceTypeName, ifNoneExistHeader.get()));

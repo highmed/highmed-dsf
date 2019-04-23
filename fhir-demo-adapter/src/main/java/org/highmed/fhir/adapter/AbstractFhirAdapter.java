@@ -37,6 +37,7 @@ public abstract class AbstractFhirAdapter<T extends BaseResource> implements Mes
 		/* Parsers are not guaranteed to be thread safe */
 		IParser p = parser.get();
 		p.setStripVersionsFromReferences(false);
+		p.setOverrideResourceIdWithBundleEntryFullUrl(false);
 
 		if (mediaType != null && "true".equals(mediaType.getParameters().getOrDefault(PRETTY, "false")))
 			p.setPrettyPrint(true);

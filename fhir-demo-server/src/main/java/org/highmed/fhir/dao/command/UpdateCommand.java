@@ -93,10 +93,10 @@ public class UpdateCommand<R extends DomainResource, D extends DomainResourceDao
 			if (!entry.getFullUrl().startsWith(URL_UUID_PREFIX))
 				throw new WebApplicationException(
 						responseGenerator.badUpdateRequestUrl(index, entry.getRequest().getUrl()));
-			else if (!resource.getIdElement().getValue().startsWith(URL_UUID_PREFIX))
+			else if (resource.hasIdElement() && !resource.getIdElement().getValue().startsWith(URL_UUID_PREFIX))
 				throw new WebApplicationException(responseGenerator.bundleEntryBadResourceId(index,
 						resource.getResourceType().name(), URL_UUID_PREFIX));
-			else if (!entry.getFullUrl().equals(resource.getIdElement().getValue()))
+			else if (resource.hasIdElement() && !entry.getFullUrl().equals(resource.getIdElement().getValue()))
 				throw new WebApplicationException(responseGenerator.badBundleEntryFullUrlVsResourceId(index,
 						entry.getFullUrl(), resource.getIdElement().getValue()));
 		}
