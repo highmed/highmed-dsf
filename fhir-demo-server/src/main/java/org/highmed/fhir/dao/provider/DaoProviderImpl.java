@@ -216,8 +216,8 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	@SuppressWarnings("unchecked")
 	public <R extends DomainResource> Optional<? extends DomainResourceDao<R>> getDao(Class<R> resourceClass)
 	{
-		DomainResourceDao<?> value = daosByResourecClass.get(resourceClass);
-		return (Optional<? extends DomainResourceDao<R>>) Optional.ofNullable(value);
+		DomainResourceDao<R> value = (DomainResourceDao<R>) daosByResourecClass.get(resourceClass);
+		return Optional.ofNullable(value);
 	}
 
 	@Override
