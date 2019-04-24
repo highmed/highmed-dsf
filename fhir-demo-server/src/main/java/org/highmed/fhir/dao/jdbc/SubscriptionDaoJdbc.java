@@ -10,7 +10,9 @@ import java.util.List;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.fhir.dao.SubscriptionDao;
+import org.highmed.fhir.search.parameters.SubscriptionChannelPayload;
 import org.highmed.fhir.search.parameters.SubscriptionChannelType;
+import org.highmed.fhir.search.parameters.SubscriptionCriteria;
 import org.highmed.fhir.search.parameters.SubscriptionStatus;
 import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
@@ -25,7 +27,8 @@ public class SubscriptionDaoJdbc extends AbstractDomainResourceDaoJdbc<Subscript
 	public SubscriptionDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, Subscription.class, "subscriptions", "subscription", "subscription_id",
-				SubscriptionStatus::new, SubscriptionChannelType::new);
+				SubscriptionCriteria::new, SubscriptionStatus::new, SubscriptionChannelType::new,
+				SubscriptionChannelPayload::new);
 	}
 
 	@Override

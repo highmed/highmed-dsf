@@ -41,6 +41,7 @@ import org.highmed.fhir.search.parameters.ResourceLastUpdated;
 import org.highmed.fhir.search.parameters.StructureDefinitionIdentifier;
 import org.highmed.fhir.search.parameters.StructureDefinitionUrl;
 import org.highmed.fhir.search.parameters.StructureDefinitionVersion;
+import org.highmed.fhir.search.parameters.SubscriptionChannelPayload;
 import org.highmed.fhir.search.parameters.SubscriptionChannelType;
 import org.highmed.fhir.search.parameters.SubscriptionCriteria;
 import org.highmed.fhir.search.parameters.SubscriptionStatus;
@@ -207,9 +208,10 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 
 		var subscriptionCriteria = createSearchParameter(SubscriptionCriteria.class);
 		var subscriptionStatus = createSearchParameter(SubscriptionStatus.class);
+		var subscriptionChannelPayload = createSearchParameter(SubscriptionChannelPayload.class);
 		var subscriptionChannelType = createSearchParameter(SubscriptionChannelType.class);
-		searchParameters.put(Subscription.class,
-				Arrays.asList(subscriptionCriteria, subscriptionStatus, subscriptionChannelType));
+		searchParameters.put(Subscription.class, Arrays.asList(subscriptionCriteria, subscriptionStatus,
+				subscriptionChannelPayload, subscriptionChannelType));
 
 		var taskIdentifier = createSearchParameter(TaskIdentifier.class);
 		var taskRequester = createSearchParameter(TaskRequester.class);

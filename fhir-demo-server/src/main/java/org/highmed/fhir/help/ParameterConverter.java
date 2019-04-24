@@ -1,5 +1,7 @@
 package org.highmed.fhir.help;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -139,7 +141,8 @@ public class ParameterConverter
 
 	private List<String> cleanQueryParameterValues(List<String> queryParameterValues)
 	{
-		return queryParameterValues.stream().map(v -> v.replace('+', ' ')).collect(Collectors.toList());
+		return queryParameterValues.stream().map(v -> URLDecoder.decode(v, StandardCharsets.UTF_8))
+				.collect(Collectors.toList());
 	}
 
 	/**
