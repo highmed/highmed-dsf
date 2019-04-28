@@ -1,25 +1,17 @@
 package org.highmed.bpe.db;
 
-import java.io.InputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.Connection;
-import java.util.PropertyResourceBundle;
+import java.util.Properties;
 
-import org.apache.commons.dbcp2.BasicDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import liquibase.Contexts;
-import liquibase.Liquibase;
-import liquibase.changelog.ChangeLogParameters;
-import liquibase.database.Database;
-import liquibase.database.DatabaseFactory;
-import liquibase.database.jvm.JdbcConnection;
-import liquibase.resource.ClassLoaderResourceAccessor;
 
 public class BpeDbMigrationMain
 {
@@ -27,56 +19,32 @@ public class BpeDbMigrationMain
 
 	public static void main(String[] args) throws Exception
 	{
-		Contexts contexts = new Contexts();
-
 		Path propertiesPath = Paths.get("db.properties");
 		if (!Files.isReadable(propertiesPath))
 		{
-			System.err.println("Properties file not readable: " + propertiesPath.toAbsolutePath().toString());
+			logger.error("Properties file not readable: {}", propertiesPath.toAbsolutePath().toString());
 			System.exit(1);
 		}
 
-		InputStream in = Files.newInputStream(propertiesPath);
+		Properties dbProperties = read(propertiesPath, StandardCharsets.UTF_8);
 
-		PropertyResourceBundle dbProperties = new PropertyResourceBundle(
-				new InputStreamReader(in, Charset.forName("UTF-8")));
+		DbMigrator migrator = new DbMigrator();
+		migrator.migrate(dbProperties);
+	}
 
-		Class.forName(dbProperties.getString("db.driver"));
+	private static Properties read(Path propertiesFile, Charset encoding)
+	{
+		Properties properties = new Properties();
 
-		BasicDataSource dataSource = null;
-		try
+		try (Reader reader = new InputStreamReader(Files.newInputStream(propertiesFile), encoding))
 		{
-			dataSource = new BasicDataSource();
-
-			dataSource.setDriverClassName(dbProperties.getString("db.driver"));
-			dataSource.setUrl(dbProperties.getString("db.url"));
-			dataSource.setUsername(dbProperties.getString("db.migration-username"));
-			dataSource.setPassword(dbProperties.getString("db.migration-password"));
-
-			try (Connection connection = dataSource.getConnection())
-			{
-				Database database = DatabaseFactory.getInstance()
-						.findCorrectDatabaseImplementation(new JdbcConnection(connection));
-				Liquibase liquibase = new Liquibase("db/db.changelog.xml", new ClassLoaderResourceAccessor(), database);
-
-				ChangeLogParameters changeLogParameters = liquibase.getChangeLogParameters();
-				changeLogParameters.set("liquibase_user", dbProperties.getString("db.migration-username"));
-				changeLogParameters.set("server_users_group", dbProperties.getString("db.server_users_group"));
-				changeLogParameters.set("server_user", dbProperties.getString("db.server_user"));
-				changeLogParameters.set("server_user_password", dbProperties.getString("db.server_user_password"));
-				changeLogParameters.set("camunda_users_group", dbProperties.getString("db.camunda_users_group"));
-				changeLogParameters.set("camunda_user", dbProperties.getString("db.camunda_user"));
-				changeLogParameters.set("camunda_user_password", dbProperties.getString("db.camunda_user_password"));
-
-				logger.info("Executing DB migration ...");
-				liquibase.update(contexts);
-				logger.info("Executing DB migration [Done]");
-			}
+			properties.load(reader);
 		}
-		finally
+		catch (IOException e)
 		{
-			if (dataSource != null)
-				dataSource.close();
+			throw new RuntimeException(e);
 		}
+
+		return properties;
 	}
 }

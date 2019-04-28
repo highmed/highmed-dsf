@@ -6,7 +6,7 @@ import java.util.Objects;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.highmed.bpe.Constants;
-import org.highmed.fhir.client.ClientProvider;
+import org.highmed.fhir.client.WebserviceClientProvider;
 import org.highmed.fhir.client.WebserviceClient;
 import org.highmed.fhir.organization.OrganizationProvider;
 import org.highmed.fhir.variables.MultiInstanceTarget;
@@ -27,10 +27,10 @@ public class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractTaskMessageSend.class);
 
-	private final ClientProvider clientProvider;
+	private final WebserviceClientProvider clientProvider;
 	private final OrganizationProvider organizationProvider;
 
-	public AbstractTaskMessageSend(OrganizationProvider organizationProvider, ClientProvider clientProvider)
+	public AbstractTaskMessageSend(OrganizationProvider organizationProvider, WebserviceClientProvider clientProvider)
 	{
 		this.organizationProvider = organizationProvider;
 		this.clientProvider = clientProvider;
@@ -106,7 +106,7 @@ public class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
 		for (ParameterComponent param : additionalInputParameters)
 			task.getInput().add(param);
 
-		WebserviceClient client = clientProvider.getRemoteClient(new IdType(targetOrganizationId));
+		WebserviceClient client = clientProvider.getRemoteWebserviceClient(new IdType(targetOrganizationId));
 
 		logger.info("Sending task for process {} to organization {} (endpoint: {})", task.getInstantiatesUri(),
 				targetOrganizationId, client.getBaseUrl());

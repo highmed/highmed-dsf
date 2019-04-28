@@ -10,7 +10,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.highmed.fhir.client.WebserviceClient;
-import org.highmed.fhir.client.WebsocketClient;
 import org.highmed.fhir.task.TaskHandler;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -18,14 +17,8 @@ import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.event.ContextClosedEvent;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.EventListener;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.util.UriComponents;
-import org.springframework.web.util.UriComponentsBuilder;
 
-public class PingEventHandler implements EventHandler, InitializingBean
+public class PingEventHandler implements InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(PingEventHandler.class);
 
@@ -35,87 +28,73 @@ public class PingEventHandler implements EventHandler, InitializingBean
 	private static final String PARAM_SORT = "_sort";
 	private static final int RESULT_PAGE_COUNT = 20;
 
-	private final WebsocketClient fhirWebsocketClient;
 	private final LastEventTimeIo lastEventTimeIo;
-	private final TaskHandler fhirTaskHandler;
-	private final WebserviceClient fhirWebserviceClient;
-	private final String subscriptionIdPart;
-	private final String searchCriteria;
-	private final String searchCriteriaPath;
-	private final MultiValueMap<String, String> searchCriteriaQueryParameters;
+	private final TaskHandler taskHandler;
+	private final WebserviceClient webserviceClient;
+	// private final String subscriptionIdPart;
+	// private final String subscriptionCriteria;
+	// private final String searchCriteriaPath;
+	// private final MultiValueMap<String, String> searchCriteriaQueryParameters;
 
-	public PingEventHandler(WebsocketClient fhirWebsocketClient, LastEventTimeIo lastEventTimeIo,
-			TaskHandler fhirTaskHandler, WebserviceClient fhirWebserviceClient, String subscriptionIdPart,
-			String searchCriteria)
+	public PingEventHandler(LastEventTimeIo lastEventTimeIo, TaskHandler taskHandler, WebserviceClient webserviceClient)
 	{
-		this.fhirWebsocketClient = fhirWebsocketClient;
 		this.lastEventTimeIo = lastEventTimeIo;
-		this.fhirTaskHandler = fhirTaskHandler;
-		this.fhirWebserviceClient = fhirWebserviceClient;
-		this.subscriptionIdPart = subscriptionIdPart;
-		this.searchCriteria = searchCriteria;
-
-		if (searchCriteria != null)
-		{
-			UriComponents componentes = UriComponentsBuilder.fromUriString(searchCriteria).build();
-			searchCriteriaPath = componentes.getPath();
-			searchCriteriaQueryParameters = componentes.getQueryParams();
-		}
-		else
-		{
-			searchCriteriaPath = null;
-			searchCriteriaQueryParameters = null;
-		}
-
-		fhirWebsocketClient.setPingHandler(this::onPing);
+		this.taskHandler = taskHandler;
+		this.webserviceClient = webserviceClient;
+		// this.subscriptionIdPart = subscriptionIdPart;
+		// this.subscriptionCriteria = subscriptionCriteria;
+		//
+		// if (subscriptionCriteria != null)
+		// {
+		// UriComponents componentes = UriComponentsBuilder.fromUriString(subscriptionCriteria).build();
+		// searchCriteriaPath = componentes.getPath();
+		// searchCriteriaQueryParameters = componentes.getQueryParams();
+		// }
+		// else
+		// {
+		// searchCriteriaPath = null;
+		// searchCriteriaQueryParameters = null;
+		// }
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
-		Objects.requireNonNull(fhirWebsocketClient, "fhirWebsocketClient");
 		Objects.requireNonNull(lastEventTimeIo, "lastEventTimeIo");
-		Objects.requireNonNull(fhirTaskHandler, "fhirTaskHandler");
-		Objects.requireNonNull(fhirWebserviceClient, "fhirWebserviceClient");
-		Objects.requireNonNull(searchCriteria, "searchCriteria");
-
-		if (!("Task".equals(searchCriteriaPath) || searchCriteriaPath.isEmpty()))
-			logger.warn("Search criteria path for ping event handler not equal to 'Task'. '{}' will be ignored",
-					searchCriteriaPath);
-		if (searchCriteriaQueryParameters.containsKey(PARAM_LAST_UPDATE))
-			logger.warn(
-					"Search criteria query parameters for ping event handler contains parameter {}, parameter will be overridden",
-					PARAM_LAST_UPDATE);
-		if (searchCriteriaQueryParameters.containsKey(PARAM_COUNT))
-			logger.warn(
-					"Search criteria query parameters for ping event handler contains parameter {}, parameter will be overridden",
-					PARAM_COUNT);
-		if (searchCriteriaQueryParameters.containsKey(PARAM_PAGE))
-			logger.warn(
-					"Search criteria query parameters for ping event handler contains parameter {}, parameter will be overridden",
-					PARAM_PAGE);
-		if (searchCriteriaQueryParameters.containsKey(PARAM_SORT))
-			logger.warn(
-					"Search criteria query parameters for ping event handler contains parameter {}, parameter will be overridden",
-					PARAM_SORT);
-
-		logger.info("Ping event handler configured with subscription-id {} and search-criteria {}", subscriptionIdPart,
-				searchCriteria);
+		Objects.requireNonNull(taskHandler, "taskHandler");
+		Objects.requireNonNull(webserviceClient, "webserviceClient");
+		// Objects.requireNonNull(subscriptionCriteria, "subscriptionCriteria");
+		//
+		// if (!("Task".equals(searchCriteriaPath) || searchCriteriaPath.isEmpty()))
+		// logger.warn("Search criteria path for ping event handler not equal to 'Task'. '{}' will be ignored",
+		// searchCriteriaPath);
+		// if (searchCriteriaQueryParameters.containsKey(PARAM_LAST_UPDATE))
+		// logger.warn(
+		// "Search criteria query parameters for ping event handler contains parameter {}, parameter will be
+		// overridden",
+		// PARAM_LAST_UPDATE);
+		// if (searchCriteriaQueryParameters.containsKey(PARAM_COUNT))
+		// logger.warn(
+		// "Search criteria query parameters for ping event handler contains parameter {}, parameter will be
+		// overridden",
+		// PARAM_COUNT);
+		// if (searchCriteriaQueryParameters.containsKey(PARAM_PAGE))
+		// logger.warn(
+		// "Search criteria query parameters for ping event handler contains parameter {}, parameter will be
+		// overridden",
+		// PARAM_PAGE);
+		// if (searchCriteriaQueryParameters.containsKey(PARAM_SORT))
+		// logger.warn(
+		// "Search criteria query parameters for ping event handler contains parameter {}, parameter will be
+		// overridden",
+		// PARAM_SORT);
+		//
+		// logger.info("Ping event handler configured with subscription-id {} and search-criteria {}",
+		// subscriptionIdPart,
+		// subscriptionCriteria);
 	}
 
-	@EventListener({ ContextRefreshedEvent.class })
-	public void onContextRefreshedEvent(ContextRefreshedEvent event)
-	{
-		fhirWebsocketClient.connect();
-	}
-
-	@EventListener({ ContextClosedEvent.class })
-	public void onContextClosedEvent(ContextClosedEvent event)
-	{
-		fhirWebsocketClient.disconnect();
-	}
-
-	private void onPing(String ping)
+	public void onPing(String ping, String subscriptionIdPart, Map<String, List<String>> searchCriteriaQueryParameters)
 	{
 		logger.trace("Ping for subscription {} received", ping);
 		if (!subscriptionIdPart.equals(ping))
@@ -141,7 +120,7 @@ public class PingEventHandler implements EventHandler, InitializingBean
 		queryParams.put(PARAM_PAGE, Arrays.asList("1"));
 		queryParams.put(PARAM_SORT, Arrays.asList(PARAM_LAST_UPDATE));
 
-		Bundle bundle = fhirWebserviceClient.search(Task.class, queryParams);
+		Bundle bundle = webserviceClient.search(Task.class, queryParams);
 		lastEventTimeIo.writeLastEventTime(LocalDateTime.now());
 
 		if (bundle.getTotal() <= 0)
@@ -153,7 +132,7 @@ public class PingEventHandler implements EventHandler, InitializingBean
 		for (BundleEntryComponent entry : bundle.getEntry())
 		{
 			if (entry.getResource() instanceof Task)
-				fhirTaskHandler.onTask((Task) entry.getResource());
+				taskHandler.onTask((Task) entry.getResource());
 			else
 				logger.warn("Ignoring resource of type {}");
 		}
@@ -161,7 +140,7 @@ public class PingEventHandler implements EventHandler, InitializingBean
 		if (bundle.getTotal() > RESULT_PAGE_COUNT)
 		{
 			logger.warn("Result bundle.total > {}, calling onPing again", RESULT_PAGE_COUNT);
-			onPing(ping);
+			onPing(ping, subscriptionIdPart, searchCriteriaQueryParameters);
 		}
 	}
 }

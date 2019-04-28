@@ -22,6 +22,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.glassfish.jersey.servlet.init.JerseyServletContainerInitializer;
+import org.highmed.bpe.db.DbMigrator;
 import org.springframework.web.SpringServletContainerInitializer;
 
 import de.rwh.utils.jetty.JettyServer;
@@ -33,9 +34,13 @@ public class BpeJettyServer
 	public static void main(String[] args)
 	{
 		Properties properties = PropertiesReader.read(Paths.get("conf/jetty.properties"), StandardCharsets.UTF_8);
-
+		
 		Log4jInitializer.initializeLog4j(properties);
-
+		
+		Properties dbProperties = PropertiesReader.read(Paths.get("conf/db.properties"), StandardCharsets.UTF_8);
+		DbMigrator migrator = new DbMigrator();
+		migrator.migrate(dbProperties);
+		
 		HttpConfiguration httpConfiguration = httpConfiguration(forwardedSecureRequestCustomizer());
 		Function<Server, ServerConnector> connector = httpConnector(httpConfiguration, properties);
 

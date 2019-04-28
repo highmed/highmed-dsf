@@ -11,6 +11,13 @@
 	</parent>
 
 	<dependencies>
+		<!-- TODO remove -->
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.5.8</version>
+		</dependency>
+		<!-- TODO end remove -->
 		<dependency>
 			<groupId>org.highmed.bpe</groupId>
 			<artifactId>bpe-demo-process-base</artifactId>

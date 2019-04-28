@@ -1,7 +1,6 @@
 package org.highmed.bpe.spring.config;
 
 import java.io.IOException;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -10,10 +9,8 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 
-import org.highmed.fhir.client.ClientProvider;
 import org.highmed.fhir.client.ClientProviderImpl;
-import org.highmed.fhir.client.WebsocketClient;
-import org.highmed.fhir.client.WebsocketClientTyrus;
+import org.highmed.fhir.client.WebsocketClientProvider;
 import org.highmed.fhir.organization.OrganizationProvider;
 import org.highmed.fhir.organization.OrganizationProviderImpl;
 import org.highmed.fhir.task.TaskHandler;
@@ -21,11 +18,8 @@ import org.highmed.fhir.variables.DomainResourceSerializer;
 import org.highmed.fhir.variables.FhirPlugin;
 import org.highmed.fhir.variables.MultiInstanceTargetSerializer;
 import org.highmed.fhir.variables.MultiInstanceTargetsSerializer;
-import org.highmed.fhir.websocket.EventHandler;
-import org.highmed.fhir.websocket.EventType;
+import org.highmed.fhir.websocket.FhirConnector;
 import org.highmed.fhir.websocket.LastEventTimeIo;
-import org.highmed.fhir.websocket.PingEventHandler;
-import org.highmed.fhir.websocket.ResourceEventHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -38,13 +32,16 @@ import de.rwh.utils.crypto.io.CertificateReader;
 @Configuration
 public class FhirConfig
 {
-	@Value("${org.highmed.bpe.fhir.local.organization.id}")
-	private String localOrganizationIdPart;
+	@Value("${org.highmed.bpe.fhir.local.organization.identifier.codeSystem}")
+	private String localOrganizationIdentifierCodeSystem;
 
-	@Value("${org.highmed.bpe.fhir.webservice.keystore.p12file}")
+	@Value("${org.highmed.bpe.fhir.local.organization.identifier.value}")
+	private String localOrganizationIdentifierValue;
+
+	@Value("${org.highmed.bpe.fhir.local.webservice.keystore.p12file}")
 	private String webserviceKeyStoreFile;
 
-	@Value("${org.highmed.bpe.fhir.webservice.keystore.password}")
+	@Value("${org.highmed.bpe.fhir.local.webservice.keystore.password}")
 	private String webserviceKeyStorePassword;
 
 	@Value("${org.highmed.bpe.fhir.remote.webservice.readTimeout}")
@@ -62,8 +59,8 @@ public class FhirConfig
 	@Value("${org.highmed.bpe.fhir.remote.webservice.proxy.schemeHostPort:#{null}}")
 	private String remoteProxySchemeHostPort;
 
-	@Value("${org.highmed.bpe.fhir.local.webservice.url}")
-	private String localWebserviceUrl;
+	@Value("${org.highmed.bpe.fhir.local.webservice.baseUrl}")
+	private String localWebserviceBaseUrl;
 
 	@Value("${org.highmed.bpe.fhir.local.webservice.readTimeout}")
 	private int localReadTimeout;
@@ -71,26 +68,20 @@ public class FhirConfig
 	@Value("${org.highmed.bpe.fhir.local.webservice.connectTimeout}")
 	private int localConnectTimeout;
 
-	@Value("${org.highmed.bpe.fhir.websocket.url}")
-	private String websocketUrl;
+	@Value("${org.highmed.bpe.fhir.local.websocket.url}")
+	private String localWebsocketUrl;
 
-	@Value("${org.highmed.bpe.fhir.websocket.keystore.p12file}")
-	private String websocketKeyStoreFile;
+	@Value("${org.highmed.bpe.fhir.local.websocket.keystore.p12file}")
+	private String localWebsocketKeyStoreFile;
 
-	@Value("${org.highmed.bpe.fhir.websocket.keystore.password}")
-	private String websocketKeyStorePassword;
+	@Value("${org.highmed.bpe.fhir.local.websocket.keystore.password}")
+	private String localWebsocketKeyStorePassword;
 
-	@Value("${org.highmed.bpe.fhir.task.subscription.id}")
-	private String subscriptionIdPart;
+	@Value("${org.highmed.bpe.fhir.task.subscription.searchParameter}")
+	private String subscriptionSearchParameter;
 
-	@Value("${org.highmed.bpe.fhir.task.subscription.payload}")
-	private String subscriptionPayloadType;
-
-	@Value("${org.highmed.bpe.fhir.task.subscription.last_event_time_file}")
+	@Value("${org.highmed.bpe.fhir.task.subscription.lastEventTimeFile}")
 	private String lastEventTimeFile;
-
-	@Value("${org.highmed.bpe.fhir.task.subscription.criteria:#{null}}")
-	private String searchCriteria;
 
 	@Autowired
 	private CamundaConfig camundaConfig;
@@ -130,46 +121,6 @@ public class FhirConfig
 	}
 
 	@Bean
-	public WebsocketClient fhirWebsocketClient()
-	{
-		try
-		{
-			Path ksFile = Paths.get(websocketKeyStoreFile);
-
-			if (!Files.isReadable(ksFile))
-				throw new IOException("Websocket keystore file '" + ksFile.toString() + "' not readable");
-
-			KeyStore keyStore = CertificateReader.fromPkcs12(ksFile, websocketKeyStorePassword);
-			KeyStore trustStore = CertificateHelper.extractTrust(keyStore);
-
-			return new WebsocketClientTyrus(fhirContext(), URI.create(websocketUrl), trustStore, keyStore,
-					websocketKeyStorePassword, subscriptionIdPart);
-		}
-		catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e)
-		{
-			throw new RuntimeException(e);
-		}
-	}
-
-	@Bean
-	public EventHandler eventHandler()
-	{
-		EventType eventType = EventType.fromString(subscriptionPayloadType);
-
-		switch (eventType)
-		{
-			case JSON:
-			case XML:
-				return new ResourceEventHandler(fhirWebsocketClient(), taskHandler(), eventType, fhirContext());
-			case PING:
-				return new PingEventHandler(fhirWebsocketClient(), lastEventTimeIo(), taskHandler(),
-						clientProvider().getLocalClient(), subscriptionIdPart, searchCriteria);
-			default:
-				throw new IllegalArgumentException("Unknonw event type: " + eventType);
-		}
-	}
-
-	@Bean
 	public LastEventTimeIo lastEventTimeIo()
 	{
 		return new LastEventTimeIo(Paths.get(lastEventTimeFile));
@@ -179,25 +130,38 @@ public class FhirConfig
 	public TaskHandler taskHandler()
 	{
 		return new TaskHandler(camundaConfig.runtimeService(), camundaConfig.repositoryService(),
-				clientProvider().getLocalClient());
+				clientProvider().getLocalWebserviceClient());
 	}
 
 	@Bean
-	public ClientProvider clientProvider()
+	public WebsocketClientProvider clientProvider()
 	{
 		try
 		{
-			Path ksFile = Paths.get(webserviceKeyStoreFile);
+			Path localWebserviceKsFile = Paths.get(webserviceKeyStoreFile);
 
-			if (!Files.isReadable(ksFile))
-				throw new IOException("Webservice keystore file '" + ksFile.toString() + "' not readable");
+			if (!Files.isReadable(localWebserviceKsFile))
+				throw new IOException(
+						"Webservice keystore file '" + localWebserviceKsFile.toString() + "' not readable");
 
-			KeyStore keyStore = CertificateReader.fromPkcs12(ksFile, webserviceKeyStorePassword);
-			KeyStore trustStore = CertificateHelper.extractTrust(keyStore);
+			KeyStore localWebserviceKeyStore = CertificateReader.fromPkcs12(localWebserviceKsFile,
+					webserviceKeyStorePassword);
+			KeyStore localWebserviceTrustStore = CertificateHelper.extractTrust(localWebserviceKeyStore);
 
-			return new ClientProviderImpl(fhirContext(), keyStore, websocketKeyStorePassword, trustStore,
-					remoteReadTimeout, remoteConnectTimeout, remoteProxyPassword, remoteProxyUsername,
-					remoteProxySchemeHostPort, localReadTimeout, localConnectTimeout, localWebserviceUrl);
+			Path localWebsocketKsFile = Paths.get(localWebsocketKeyStoreFile);
+
+			if (!Files.isReadable(localWebsocketKsFile))
+				throw new IOException("Websocket keystore file '" + localWebsocketKsFile.toString() + "' not readable");
+
+			KeyStore localWebsocketKeyStore = CertificateReader.fromPkcs12(localWebsocketKsFile,
+					localWebsocketKeyStorePassword);
+			KeyStore localWebsocketTrustStore = CertificateHelper.extractTrust(localWebsocketKeyStore);
+
+			return new ClientProviderImpl(fhirContext(), localWebserviceBaseUrl, localReadTimeout, localConnectTimeout,
+					localWebserviceTrustStore, localWebserviceKeyStore, webserviceKeyStorePassword, remoteReadTimeout,
+					remoteConnectTimeout, remoteProxyPassword, remoteProxyUsername, remoteProxySchemeHostPort,
+					localWebsocketUrl, localWebsocketTrustStore, localWebsocketKeyStore,
+					localWebsocketKeyStorePassword);
 		}
 		catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e)
 		{
@@ -208,6 +172,13 @@ public class FhirConfig
 	@Bean
 	public OrganizationProvider organizationProvider()
 	{
-		return new OrganizationProviderImpl(clientProvider(), localOrganizationIdPart);
+		return new OrganizationProviderImpl(clientProvider(), localOrganizationIdentifierCodeSystem,
+				localOrganizationIdentifierValue);
+	}
+	
+	@Bean
+	public FhirConnector fhirConnector()
+	{
+		return new FhirConnector(clientProvider(), taskHandler(), lastEventTimeIo(), fhirContext(), subscriptionSearchParameter);
 	}
 }
