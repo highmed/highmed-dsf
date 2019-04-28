@@ -69,7 +69,6 @@ public class WebsocketClientTyrus implements WebsocketClient
 			sslContext = SslConfigurator.getDefaultContext();
 
 		this.endpoint = new ClientEndpoint(subscriptionIdPart);
-		
 		this.subscriptionIdPart = subscriptionIdPart;
 	}
 

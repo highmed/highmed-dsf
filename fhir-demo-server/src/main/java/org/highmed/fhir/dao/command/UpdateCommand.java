@@ -116,7 +116,7 @@ public class UpdateCommand<R extends DomainResource, D extends DomainResourceDao
 					componentes.getPathSegments().get(1));
 		else if (componentes.getPathSegments().size() == 1 && !componentes.getQueryParams().isEmpty())
 			updateByCondition(idTranslationTable, connection, componentes.getPathSegments().get(0),
-					parameterConverter.cleanQueryParameters(componentes.getQueryParams()));
+					parameterConverter.urlDecodeQueryParameters(componentes.getQueryParams()));
 		else
 			throw new WebApplicationException(
 					responseGenerator.badUpdateRequestUrl(index, entry.getRequest().getUrl()));

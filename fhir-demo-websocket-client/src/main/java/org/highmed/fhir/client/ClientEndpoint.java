@@ -26,8 +26,8 @@ public class ClientEndpoint extends Endpoint
 		this.subscriptionIdPart = subscriptionIdPart;
 	}
 
-	private Consumer<DomainResource> domainResourceHandler;
 	private Supplier<IParser> parserFactory;
+	private Consumer<DomainResource> domainResourceHandler;
 	private Consumer<String> pingHandler;
 
 	@Override

@@ -168,7 +168,7 @@ public abstract class AbstractServiceImpl<D extends DomainResourceDao<R>, R exte
 		if (path != null && !path.isBlank())
 			throw new WebApplicationException(responseGenerator.badIfNoneExistHeaderValue(ifNoneExistHeader.get()));
 
-		Map<String, List<String>> queryParameters = componentes.getQueryParams();
+		Map<String, List<String>> queryParameters = parameterConverter.urlDecodeQueryParameters(componentes.getQueryParams());
 		if (Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(queryParameters::containsKey))
 		{
 			logger.warn(

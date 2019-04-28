@@ -4,7 +4,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -124,22 +124,22 @@ public class ParameterConverter
 			}
 		}
 	}
-
+	
 	/**
-	 * replaces all occurrences of '+' with ' ' (a space) for all query parameter values
+	 * URL-decodes all query-parameter values
 	 * 
 	 * @param queryParameters
 	 * @return
 	 */
-	public Map<String, List<String>> cleanQueryParameters(Map<String, List<String>> queryParameters)
+	public Map<String, List<String>> urlDecodeQueryParameters(Map<String, List<String>> queryParameters)
 	{
-		Map<String, List<String>> cleaned = new HashMap<>((int) (queryParameters.size() / 0.75) + 1);
+		Map<String, List<String>> cleaned = new LinkedHashMap<>((int) (queryParameters.size() / 0.75) + 1);
 		for (Entry<String, List<String>> entry : queryParameters.entrySet())
-			cleaned.put(entry.getKey(), cleanQueryParameterValues(entry.getValue()));
+			cleaned.put(entry.getKey(), urlDecodeQueryParameter(entry.getValue()));
 		return cleaned;
 	}
 
-	private List<String> cleanQueryParameterValues(List<String> queryParameterValues)
+	private List<String> urlDecodeQueryParameter(List<String> queryParameterValues)
 	{
 		return queryParameterValues.stream().map(v -> URLDecoder.decode(v, StandardCharsets.UTF_8))
 				.collect(Collectors.toList());

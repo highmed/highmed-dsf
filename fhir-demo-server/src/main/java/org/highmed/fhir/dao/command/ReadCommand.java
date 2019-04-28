@@ -86,7 +86,7 @@ public class ReadCommand extends AbstractCommand implements Command
 					componentes.getPathSegments().get(3));
 		else if (componentes.getPathSegments().size() == 1 && !componentes.getQueryParams().isEmpty())
 			readByCondition(connection, componentes.getPathSegments().get(0),
-					parameterConverter.cleanQueryParameters(componentes.getQueryParams()));
+					parameterConverter.urlDecodeQueryParameters(componentes.getQueryParams()));
 		else
 			throw new WebApplicationException(responseGenerator.badUpdateRequestUrl(index, requestUrl));
 	}

@@ -108,7 +108,7 @@ public class CreateCommand<R extends DomainResource, D extends DomainResourceDao
 			throw new WebApplicationException(responseGenerator.badIfNoneExistHeaderValue(ifNoneExist));
 
 		Map<String, List<String>> queryParameters = parameterConverter
-				.cleanQueryParameters(componentes.getQueryParams());
+				.urlDecodeQueryParameters(componentes.getQueryParams());
 		if (Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(queryParameters::containsKey))
 		{
 			logger.warn(
