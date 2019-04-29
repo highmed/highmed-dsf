@@ -15,8 +15,7 @@ COPY target/fhir_demo.jar ./fhir_demo.jar
 RUN mkdir ./log
 
 RUN adduser --system --no-create-home --group java
-RUN chown root:java ./ ./lib
-RUN chown root:java ./fhir_demo.jar ./lib/*.jar ./log
+RUN chown root:java ./ ./lib ./log ./fhir_demo.jar ./lib/*.jar
 RUN chmod 750 ./ ./lib
 RUN chmod 640 ./fhir_demo.jar ./lib/*.jar
 RUN chmod 2660 ./log	

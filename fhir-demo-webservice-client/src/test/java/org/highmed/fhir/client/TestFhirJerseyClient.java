@@ -6,6 +6,7 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.Collections;
 import java.util.Date;
 import java.util.UUID;
 
@@ -246,7 +247,8 @@ public class TestFhirJerseyClient
 			// Map.of("name:exact", Collections.singletonList("Transaction Test Endpoint")));
 
 			// deleteCreateUpdateReadTaskBundleTest(context, client);
-			updateBundleTest(context, client);
+			// updateBundleTest(context, client);
+			deleteOrganizationsAndEndpoints(context, client);
 
 		}
 		catch (WebApplicationException e)
@@ -260,6 +262,19 @@ public class TestFhirJerseyClient
 			else
 				e.printStackTrace();
 		}
+	}
+
+	private static void deleteOrganizationsAndEndpoints(FhirContext context, WebserviceClient client)
+	{
+		Bundle orgs = client.search(Organization.class, Collections.emptyMap());
+		orgs.getEntry().stream().filter(e -> e.getResource() instanceof Organization)
+				.map(e -> (Organization) e.getResource()).map(o -> o.getIdElement().getIdPart())
+				.forEach(id -> client.delete(Organization.class, id));
+
+		Bundle epts = client.search(Endpoint.class, Collections.emptyMap());
+		epts.getEntry().stream().filter(e -> e.getResource() instanceof Endpoint).map(e -> (Endpoint) e.getResource())
+				.map(o -> o.getIdElement().getIdPart()).forEach(id -> client.delete(Endpoint.class, id));
+
 	}
 
 	private static void deleteCreateUpdateReadTaskBundleTest(FhirContext context, WebserviceClient client)
