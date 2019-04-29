@@ -28,8 +28,12 @@ public class LastEventTimeIo implements InitializingBean
 	public void afterPropertiesSet() throws Exception
 	{
 		Objects.requireNonNull(lastEventTimeFile, "lastEventTimeFile");
-		if (!Files.isWritable(lastEventTimeFile.getParent()) || Files.isWritable(lastEventTimeFile))
-			throw new IOException("last event time file at " + lastEventTimeFile.toString() + " not writable");
+
+		if (Files.exists(lastEventTimeFile) && !Files.isWritable(lastEventTimeFile))
+			throw new IOException("Last event time file at " + lastEventTimeFile.toString() + " not writable");
+		else if (!Files.isWritable(lastEventTimeFile.getParent()))
+			throw new IOException(
+					"Last event time file at " + lastEventTimeFile.toString() + " not existing and parent not writable");
 	}
 
 	public Optional<LocalDateTime> readLastEventTime()
@@ -41,7 +45,7 @@ public class LastEventTimeIo implements InitializingBean
 		}
 		catch (IOException e)
 		{
-			logger.warn("error while reading last event time file: {}", e.getMessage());
+			logger.warn("Error while reading last event time file: {}", e.getMessage());
 			return Optional.empty();
 		}
 	}
@@ -56,7 +60,7 @@ public class LastEventTimeIo implements InitializingBean
 		}
 		catch (IOException e)
 		{
-			logger.warn("error while writing last event time file: {}", e.getMessage());
+			logger.warn("Error while writing last event time file: {}", e.getMessage());
 		}
 
 		return time;

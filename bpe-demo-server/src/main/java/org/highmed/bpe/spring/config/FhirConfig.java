@@ -32,11 +32,11 @@ import de.rwh.utils.crypto.io.CertificateReader;
 @Configuration
 public class FhirConfig
 {
-	@Value("${org.highmed.bpe.fhir.local.organization.identifier.codeSystem}")
-	private String localOrganizationIdentifierCodeSystem;
+	@Value("${org.highmed.bpe.fhir.organization.identifier.codeSystem}")
+	private String organizationIdentifierCodeSystem;
 
-	@Value("${org.highmed.bpe.fhir.local.organization.identifier.value}")
-	private String localOrganizationIdentifierValue;
+	@Value("${org.highmed.bpe.fhir.organization.identifier.localValue}")
+	private String organizationIdentifierLocalValue;
 
 	@Value("${org.highmed.bpe.fhir.local.webservice.keystore.p12file}")
 	private String webserviceKeyStoreFile;
@@ -172,13 +172,14 @@ public class FhirConfig
 	@Bean
 	public OrganizationProvider organizationProvider()
 	{
-		return new OrganizationProviderImpl(clientProvider(), localOrganizationIdentifierCodeSystem,
-				localOrganizationIdentifierValue);
+		return new OrganizationProviderImpl(clientProvider(), organizationIdentifierCodeSystem,
+				organizationIdentifierLocalValue);
 	}
-	
+
 	@Bean
 	public FhirConnector fhirConnector()
 	{
-		return new FhirConnector(clientProvider(), taskHandler(), lastEventTimeIo(), fhirContext(), subscriptionSearchParameter);
+		return new FhirConnector(clientProvider(), taskHandler(), lastEventTimeIo(), fhirContext(),
+				subscriptionSearchParameter);
 	}
 }
