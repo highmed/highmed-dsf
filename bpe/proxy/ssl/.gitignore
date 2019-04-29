@@ -1,3 +1,5 @@
 /localhost_certificate.pem
 /localhost_private-key.pem
 /testca_certificate.pem
+/bpe_certificate.pem
+/bpe_private-key.pem

@@ -1,1 +1,1 @@
-copy cert files here: localhost_certificate.pem, localhost_private-key.pem, testca_certificate.pem
+copy cert files here: bpe_certificate.pem, bpe_private-key.pem, testca_certificate.pem
