@@ -1,7 +1,7 @@
 version: '3.2'
 services:
    proxy:
-      build: ./proxy
+      image: highmed/fhir_proxy
       restart: always
       ports:
       - 8080:80
@@ -11,15 +11,15 @@ services:
          source: ./proxy/ssl
          target: /usr/local/apache2/ssl
       environment:
-         SERVER_NAME: localhost
+         HTTPS_SERVER_NAME_PORT: localhost:8443
+         APP_SERVER_IP: 172.28.1.3
       networks:
          frontend:
             ipv4_address: 172.28.1.2
          bpe:
             ipv4_address: 172.28.2.2
             aliases:
-             - fhir
-         
+            - fhir
       depends_on:
       - app
    app:
@@ -63,16 +63,16 @@ networks:
       ipam:
          driver: default
          config:
-         - subnet: 172.28.1.0/25
+         -  subnet: 172.28.1.0/25
    backend:
       driver: bridge
       ipam:
          driver: default
          config:
-         - subnet: 172.28.1.128/25
+         -  subnet: 172.28.1.128/25
    bpe:
       driver: bridge
       ipam:
          driver: default
          config:
-         - subnet: 172.28.2.0/24
+         -  subnet: 172.28.2.0/24

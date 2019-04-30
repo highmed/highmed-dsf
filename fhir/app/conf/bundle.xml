@@ -6,19 +6,25 @@
 			<Organization xmlns="http://hl7.org/fhir">
 				<identifier>
 					<system value="http://highmed.org/fhir/CodeSystem/organization" />
-					<value value="Test_Organization" />
+					<value value="Test_TTP" />
 				</identifier>
-				<name value="Test Organization" />
+				<name value="Test TTP" />
 				<endpoint>
 					<reference value="urn:uuid:b879e904-d666-45de-a995-accdd4429b79" />
 					<type value="Endpoint" />
 				</endpoint>
+				<type>
+					<coding>
+						<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
+						<code value="TTP" />
+					</coding>
+				</type>
 			</Organization>
 		</resource>
 		<request>
 			<method value="POST" />
 			<url value="Organization" />
-			<ifNoneExist value="identifier=http://highmed.org/fhir/CodeSystem/organization|Test_Organization" />
+			<ifNoneExist value="identifier=http://highmed.org/fhir/CodeSystem/organization|Test_TTP" />
 		</request>
 	</entry>
 	<entry>
@@ -44,7 +50,7 @@
 					<type value="Organization" />
 					<identifier>
 						<system value="http://highmed.org/fhir/CodeSystem/organization" />
-						<value value="Test_Organization" />
+						<value value="Test_TTP" />
 					</identifier>
 				</managingOrganization>
 			</Endpoint>
@@ -52,7 +58,7 @@
 		<request>
 			<method value="POST" />
 			<url value="Endpoint" />
-			<ifNoneExist value="organization:identifier=http://highmed.org/fhir/CodeSystem/organization|Test_Organization" />
+			<ifNoneExist value="organization:identifier=http://highmed.org/fhir/CodeSystem/organization|Test_TTP" />
 		</request>
 	</entry>
 	<entry>
