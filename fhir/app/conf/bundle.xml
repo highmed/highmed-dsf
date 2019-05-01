@@ -1,5 +1,38 @@
-<Bundle xmlns="http://hl7.org/fhir">
+<Bundle xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://hl7.org/fhir http://www.hl7.org/fhir/fhir-base.xsd">
 	<type value="transaction" />
+	<entry>
+		<fullUrl value="urn:uuid:8fb5660b-250c-4506-8d66-a550ce129f13" />
+		<resource>
+			<CodeSystem xmlns="http://hl7.org/fhir">
+				<url value="http://highmed.org/fhir/CodeSystem/organization-type" />
+				<version value="0.1.0" />
+				<name value="HiGHmed_Organization_Type" />
+				<title value="HiGHmed Organization Type" />
+				<status value="active" />
+				<experimental value="false" />
+				<date value="2019-05-01T16:44:01+02:00" />
+				<publisher value="HiGHmed" />
+				<caseSensitive value="true" />
+				<hierarchyMeaning value="grouped-by" />
+				<versionNeeded value="false" />
+				<content value="complete" />
+				<concept>
+					<code value="TTP" />
+					<definition value="Trusted Third Party" />
+				</concept>
+				<concept>
+					<code value="MeDIC" />
+					<definition value="Medical Data Integration Center" />
+				</concept>
+			</CodeSystem>
+		</resource>
+		<request>
+			<method value="POST" />
+			<url value="CodeSystem" />
+			<ifNoneExist value="url=http://highmed.org/fhir/CodeSystem/organization-type" />
+		</request>
+	</entry>
 	<entry>
 		<fullUrl value="urn:uuid:bb73165c-c7b9-4342-8e28-531f07fa7735" />
 		<resource>
@@ -8,17 +41,18 @@
 					<system value="http://highmed.org/fhir/CodeSystem/organization" />
 					<value value="Test_TTP" />
 				</identifier>
-				<name value="Test TTP" />
-				<endpoint>
-					<reference value="urn:uuid:b879e904-d666-45de-a995-accdd4429b79" />
-					<type value="Endpoint" />
-				</endpoint>
+				<active value="true" />
 				<type>
 					<coding>
 						<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
 						<code value="TTP" />
 					</coding>
 				</type>
+				<name value="Test TTP" />
+				<endpoint>
+					<reference value="urn:uuid:b879e904-d666-45de-a995-accdd4429b79" />
+					<type value="Endpoint" />
+				</endpoint>
 			</Organization>
 		</resource>
 		<request>
@@ -36,6 +70,14 @@
 					<system value="http://terminology.hl7.org/CodeSystem/endpoint-connection-type" />
 					<code value="hl7-fhir-rest" />
 				</connectionType>
+				<name value="Test Endpoint" />
+				<managingOrganization>
+					<type value="Organization" />
+					<identifier>
+						<system value="http://highmed.org/fhir/CodeSystem/organization" />
+						<value value="Test_TTP" />
+					</identifier>
+				</managingOrganization>
 				<payloadType>
 					<coding>
 						<system value="http://hl7.org/fhir/resource-types" />
@@ -45,14 +87,6 @@
 				<payloadMimeType value="application/fhir+json" />
 				<payloadMimeType value="application/fhir+xml" />
 				<address value="https://localhost:8001/fhir" />
-				<name value="Test Endpoint" />
-				<managingOrganization>
-					<type value="Organization" />
-					<identifier>
-						<system value="http://highmed.org/fhir/CodeSystem/organization" />
-						<value value="Test_TTP" />
-					</identifier>
-				</managingOrganization>
 			</Endpoint>
 		</resource>
 		<request>
