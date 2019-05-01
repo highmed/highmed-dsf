@@ -57,14 +57,14 @@ public class StructureDefinitionServiceImpl extends AbstractServiceImpl<Structur
 	private final SnapshotGenerator snapshotGenerator;
 	private final SnapshotDependencyAnalyzer snapshotDependencyAnalyzer;
 
-	public StructureDefinitionServiceImpl(String resourceTypeName, String serverBase, int defaultPageCount,
+	public StructureDefinitionServiceImpl(String resourceTypeName, String serverBase, String path, int defaultPageCount,
 			StructureDefinitionDao dao, ResourceValidator validator, EventManager eventManager,
 			ExceptionHandler exceptionHandler, EventGenerator eventGenerator, ResponseGenerator responseGenerator,
 			ParameterConverter parameterConverter, StructureDefinitionSnapshotDao structureDefinitionSnapshotDao,
 			SnapshotGenerator sanapshotGenerator, SnapshotDependencyAnalyzer snapshotDependencyAnalyzer)
 	{
-		super(StructureDefinition.class, resourceTypeName, serverBase, defaultPageCount, dao, validator, eventManager,
-				exceptionHandler, eventGenerator, responseGenerator, parameterConverter);
+		super(StructureDefinition.class, resourceTypeName, serverBase, path, defaultPageCount, dao, validator,
+				eventManager, exceptionHandler, eventGenerator, responseGenerator, parameterConverter);
 
 		this.snapshotDao = structureDefinitionSnapshotDao;
 		this.snapshotGenerator = sanapshotGenerator;

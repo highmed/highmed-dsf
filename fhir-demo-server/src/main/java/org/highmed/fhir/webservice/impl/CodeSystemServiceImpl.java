@@ -12,11 +12,12 @@ import org.hl7.fhir.r4.model.CodeSystem;
 
 public class CodeSystemServiceImpl extends AbstractServiceImpl<CodeSystemDao, CodeSystem> implements CodeSystemService
 {
-	public CodeSystemServiceImpl(String resourceTypeName, String serverBase, int defaultPageCount, CodeSystemDao dao,
-			ResourceValidator validator, EventManager eventManager, ExceptionHandler exceptionHandler,
-			EventGenerator eventGenerator, ResponseGenerator responseGenerator, ParameterConverter parameterConverter)
+	public CodeSystemServiceImpl(String resourceTypeName, String serverBase, String path, int defaultPageCount,
+			CodeSystemDao dao, ResourceValidator validator, EventManager eventManager,
+			ExceptionHandler exceptionHandler, EventGenerator eventGenerator, ResponseGenerator responseGenerator,
+			ParameterConverter parameterConverter)
 	{
-		super(CodeSystem.class, resourceTypeName, serverBase, defaultPageCount, dao, validator, eventManager,
+		super(CodeSystem.class, resourceTypeName, serverBase, path, defaultPageCount, dao, validator, eventManager,
 				exceptionHandler, eventGenerator, responseGenerator, parameterConverter);
 	}
 }

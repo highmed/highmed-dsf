@@ -14,10 +14,4 @@ public class LocationServiceJaxrs extends AbstractServiceJaxrs<Location, Locatio
 	{
 		super(delegate);
 	}
-
-	@Override
-	public String getPath()
-	{
-		return PATH;
-	}
 }

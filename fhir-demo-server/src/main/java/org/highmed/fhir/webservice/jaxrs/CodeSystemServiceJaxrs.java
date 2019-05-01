@@ -15,10 +15,4 @@ public class CodeSystemServiceJaxrs extends AbstractServiceJaxrs<CodeSystem, Cod
 	{
 		super(delegate);
 	}
-
-	@Override
-	public String getPath()
-	{
-		return PATH;
-	}
 }

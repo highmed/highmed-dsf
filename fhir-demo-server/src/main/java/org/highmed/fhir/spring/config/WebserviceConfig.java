@@ -133,10 +133,10 @@ public class WebserviceConfig
 
 	private CodeSystemServiceImpl codeSystemServiceImpl()
 	{
-		return new CodeSystemServiceImpl(resourceTypeName(CodeSystem.class), serverBase, defaultPageCount,
-				daoConfig.codeSystemDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
-				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
-				helperConfig.parameterConverter());
+		return new CodeSystemServiceImpl(resourceTypeName(CodeSystem.class), serverBase, CodeSystemServiceJaxrs.PATH,
+				defaultPageCount, daoConfig.codeSystemDao(), validationConfig.resourceValidator(),
+				eventConfig.eventManager(), helperConfig.exceptionHandler(), eventConfig.eventGenerator(),
+				helperConfig.responseGenerator(), helperConfig.parameterConverter());
 	}
 
 	@Bean
@@ -147,10 +147,10 @@ public class WebserviceConfig
 
 	private EndpointServiceImpl endpointServiceImpl()
 	{
-		return new EndpointServiceImpl(resourceTypeName(Endpoint.class), serverBase, defaultPageCount,
-				daoConfig.endpointDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
-				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
-				helperConfig.parameterConverter());
+		return new EndpointServiceImpl(resourceTypeName(Endpoint.class), serverBase, EndpointServiceJaxrs.PATH,
+				defaultPageCount, daoConfig.endpointDao(), validationConfig.resourceValidator(),
+				eventConfig.eventManager(), helperConfig.exceptionHandler(), eventConfig.eventGenerator(),
+				helperConfig.responseGenerator(), helperConfig.parameterConverter());
 	}
 
 	@Bean
@@ -161,10 +161,10 @@ public class WebserviceConfig
 
 	private HealthcareServiceServiceImpl healthcareServiceServiceImpl()
 	{
-		return new HealthcareServiceServiceImpl(resourceTypeName(HealthcareService.class), serverBase, defaultPageCount,
-				daoConfig.healthcareServiceDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
-				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
-				helperConfig.parameterConverter());
+		return new HealthcareServiceServiceImpl(resourceTypeName(HealthcareService.class), serverBase,
+				HealthcareServiceServiceJaxrs.PATH, defaultPageCount, daoConfig.healthcareServiceDao(),
+				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
+				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter());
 	}
 
 	@Bean
@@ -175,10 +175,10 @@ public class WebserviceConfig
 
 	private LocationServiceImpl locationServiceImpl()
 	{
-		return new LocationServiceImpl(resourceTypeName(Location.class), serverBase, defaultPageCount,
-				daoConfig.locationDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
-				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
-				helperConfig.parameterConverter());
+		return new LocationServiceImpl(resourceTypeName(Location.class), serverBase, LocationServiceJaxrs.PATH,
+				defaultPageCount, daoConfig.locationDao(), validationConfig.resourceValidator(),
+				eventConfig.eventManager(), helperConfig.exceptionHandler(), eventConfig.eventGenerator(),
+				helperConfig.responseGenerator(), helperConfig.parameterConverter());
 	}
 
 	@Bean
@@ -189,10 +189,10 @@ public class WebserviceConfig
 
 	private OrganizationServiceImpl organizationServiceImpl()
 	{
-		return new OrganizationServiceImpl(resourceTypeName(Organization.class), serverBase, defaultPageCount,
-				daoConfig.organizationDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
-				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
-				helperConfig.parameterConverter());
+		return new OrganizationServiceImpl(resourceTypeName(Organization.class), serverBase,
+				OrganizationServiceJaxrs.PATH, defaultPageCount, daoConfig.organizationDao(),
+				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
+				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter());
 	}
 
 	@Bean
@@ -203,10 +203,10 @@ public class WebserviceConfig
 
 	private PatientServiceImpl patientServiceImpl()
 	{
-		return new PatientServiceImpl(resourceTypeName(Patient.class), serverBase, defaultPageCount,
-				daoConfig.patientDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
-				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
-				helperConfig.parameterConverter());
+		return new PatientServiceImpl(resourceTypeName(Patient.class), serverBase, PatientServiceJaxrs.PATH,
+				defaultPageCount, daoConfig.patientDao(), validationConfig.resourceValidator(),
+				eventConfig.eventManager(), helperConfig.exceptionHandler(), eventConfig.eventGenerator(),
+				helperConfig.responseGenerator(), helperConfig.parameterConverter());
 	}
 
 	@Bean
@@ -217,10 +217,10 @@ public class WebserviceConfig
 
 	private PractitionerRoleServiceImpl practitionerRoleServiceImpl()
 	{
-		return new PractitionerRoleServiceImpl(resourceTypeName(PractitionerRole.class), serverBase, defaultPageCount,
-				daoConfig.practitionerRoleDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
-				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
-				helperConfig.parameterConverter());
+		return new PractitionerRoleServiceImpl(resourceTypeName(PractitionerRole.class), serverBase,
+				PractitionerRoleServiceJaxrs.PATH, defaultPageCount, daoConfig.practitionerRoleDao(),
+				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
+				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter());
 	}
 
 	@Bean
@@ -231,10 +231,10 @@ public class WebserviceConfig
 
 	private PractitionerServiceImpl practitionerServiceImpl()
 	{
-		return new PractitionerServiceImpl(resourceTypeName(Practitioner.class), serverBase, defaultPageCount,
-				daoConfig.practitionerDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
-				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
-				helperConfig.parameterConverter());
+		return new PractitionerServiceImpl(resourceTypeName(Practitioner.class), serverBase,
+				PractitionerServiceJaxrs.PATH, defaultPageCount, daoConfig.practitionerDao(),
+				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
+				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter());
 	}
 
 	@Bean
@@ -245,10 +245,10 @@ public class WebserviceConfig
 
 	private ProvenanceServiceImpl provenanceServiceImpl()
 	{
-		return new ProvenanceServiceImpl(resourceTypeName(Provenance.class), serverBase, defaultPageCount,
-				daoConfig.provenanceDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
-				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
-				helperConfig.parameterConverter());
+		return new ProvenanceServiceImpl(resourceTypeName(Provenance.class), serverBase, ProvenanceServiceJaxrs.PATH,
+				defaultPageCount, daoConfig.provenanceDao(), validationConfig.resourceValidator(),
+				eventConfig.eventManager(), helperConfig.exceptionHandler(), eventConfig.eventGenerator(),
+				helperConfig.responseGenerator(), helperConfig.parameterConverter());
 	}
 
 	@Bean
@@ -259,10 +259,10 @@ public class WebserviceConfig
 
 	private ResearchStudyServiceImpl researchStudyServiceImpl()
 	{
-		return new ResearchStudyServiceImpl(resourceTypeName(ResearchStudy.class), serverBase, defaultPageCount,
-				daoConfig.researchStudyDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
-				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
-				helperConfig.parameterConverter());
+		return new ResearchStudyServiceImpl(resourceTypeName(ResearchStudy.class), serverBase,
+				ResearchStudyServiceJaxrs.PATH, defaultPageCount, daoConfig.researchStudyDao(),
+				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
+				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter());
 	}
 
 	@Bean
@@ -275,9 +275,9 @@ public class WebserviceConfig
 	private StructureDefinitionServiceImpl structureDefinitionServiceImpl()
 	{
 		return new StructureDefinitionServiceImpl(resourceTypeName(StructureDefinition.class), serverBase,
-				defaultPageCount, daoConfig.structureDefinitionDao(), validationConfig.resourceValidator(),
-				eventConfig.eventManager(), helperConfig.exceptionHandler(), eventConfig.eventGenerator(),
-				helperConfig.responseGenerator(), helperConfig.parameterConverter(),
+				StructureDefinitionServiceJaxrs.PATH, defaultPageCount, daoConfig.structureDefinitionDao(),
+				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
+				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter(),
 				daoConfig.structureDefinitionSnapshotDao(), snapshotConfig.snapshotGenerator(),
 				snapshotConfig.snapshotDependencyAnalyzer());
 	}
@@ -290,10 +290,10 @@ public class WebserviceConfig
 
 	private SubscriptionServiceImpl subscriptionServiceImpl()
 	{
-		return new SubscriptionServiceImpl(resourceTypeName(Subscription.class), serverBase, defaultPageCount,
-				daoConfig.subscriptionDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
-				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
-				helperConfig.parameterConverter());
+		return new SubscriptionServiceImpl(resourceTypeName(Subscription.class), serverBase,
+				SubscriptionServiceJaxrs.PATH, defaultPageCount, daoConfig.subscriptionDao(),
+				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
+				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter());
 	}
 
 	@Bean
@@ -304,9 +304,10 @@ public class WebserviceConfig
 
 	private TaskServiceImpl taskServiceImpl()
 	{
-		return new TaskServiceImpl(resourceTypeName(Task.class), serverBase, defaultPageCount, daoConfig.taskDao(),
-				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
-				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter());
+		return new TaskServiceImpl(resourceTypeName(Task.class), serverBase, TaskServiceJaxrs.PATH, defaultPageCount,
+				daoConfig.taskDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
+				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
+				helperConfig.parameterConverter());
 	}
 
 	@Bean
@@ -317,10 +318,10 @@ public class WebserviceConfig
 
 	private ValueSetServiceImpl valueSetServiceImpl()
 	{
-		return new ValueSetServiceImpl(resourceTypeName(ValueSet.class), serverBase, defaultPageCount,
-				daoConfig.valueSetDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
-				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
-				helperConfig.parameterConverter());
+		return new ValueSetServiceImpl(resourceTypeName(ValueSet.class), serverBase, ValueSetServiceJaxrs.PATH,
+				defaultPageCount, daoConfig.valueSetDao(), validationConfig.resourceValidator(),
+				eventConfig.eventManager(), helperConfig.exceptionHandler(), eventConfig.eventGenerator(),
+				helperConfig.responseGenerator(), helperConfig.parameterConverter());
 	}
 
 	@Bean

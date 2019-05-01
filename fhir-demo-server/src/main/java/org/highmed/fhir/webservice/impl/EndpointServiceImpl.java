@@ -12,11 +12,11 @@ import org.hl7.fhir.r4.model.Endpoint;
 
 public class EndpointServiceImpl extends AbstractServiceImpl<EndpointDao, Endpoint> implements EndpointService
 {
-	public EndpointServiceImpl(String resourceTypeName, String serverBase, int defaultPageCount, EndpointDao dao,
-			ResourceValidator validator, EventManager eventManager, ExceptionHandler exceptionHandler,
+	public EndpointServiceImpl(String resourceTypeName, String serverBase, String path, int defaultPageCount,
+			EndpointDao dao, ResourceValidator validator, EventManager eventManager, ExceptionHandler exceptionHandler,
 			EventGenerator eventGenerator, ResponseGenerator responseGenerator, ParameterConverter parameterConverter)
 	{
-		super(Endpoint.class, resourceTypeName, serverBase, defaultPageCount, dao, validator, eventManager,
+		super(Endpoint.class, resourceTypeName, serverBase, path, defaultPageCount, dao, validator, eventManager,
 				exceptionHandler, eventGenerator, responseGenerator, parameterConverter);
 	}
 }

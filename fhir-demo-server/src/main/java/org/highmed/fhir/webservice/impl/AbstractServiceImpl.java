@@ -73,6 +73,7 @@ public abstract class AbstractServiceImpl<D extends DomainResourceDao<R>, R exte
 	protected final Class<? extends DomainResource> resourceType;
 	protected final String resourceTypeName;
 	protected final String serverBase;
+	protected final String path;
 	protected final int defaultPageCount;
 	protected final D dao;
 	protected final ResourceValidator validator;
@@ -83,13 +84,14 @@ public abstract class AbstractServiceImpl<D extends DomainResourceDao<R>, R exte
 	protected final ParameterConverter parameterConverter;
 
 	public AbstractServiceImpl(Class<? extends DomainResource> resourceType, String resourceTypeName, String serverBase,
-			int defaultPageCount, D dao, ResourceValidator validator, EventManager eventManager,
+			String path, int defaultPageCount, D dao, ResourceValidator validator, EventManager eventManager,
 			ExceptionHandler exceptionHandler, EventGenerator eventGenerator, ResponseGenerator responseGenerator,
 			ParameterConverter parameterConverter)
 	{
 		this.resourceType = resourceType;
 		this.resourceTypeName = resourceTypeName;
 		this.serverBase = serverBase;
+		this.path = path;
 		this.defaultPageCount = defaultPageCount;
 		this.dao = dao;
 		this.validator = validator;
@@ -122,7 +124,7 @@ public abstract class AbstractServiceImpl<D extends DomainResourceDao<R>, R exte
 	@Override
 	public String getPath()
 	{
-		throw new UnsupportedOperationException("implemented by jaxrs service layer");
+		return path;
 	}
 
 	@Override
@@ -168,7 +170,8 @@ public abstract class AbstractServiceImpl<D extends DomainResourceDao<R>, R exte
 		if (path != null && !path.isBlank())
 			throw new WebApplicationException(responseGenerator.badIfNoneExistHeaderValue(ifNoneExistHeader.get()));
 
-		Map<String, List<String>> queryParameters = parameterConverter.urlDecodeQueryParameters(componentes.getQueryParams());
+		Map<String, List<String>> queryParameters = parameterConverter
+				.urlDecodeQueryParameters(componentes.getQueryParams());
 		if (Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(queryParameters::containsKey))
 		{
 			logger.warn(
@@ -515,7 +518,7 @@ public abstract class AbstractServiceImpl<D extends DomainResourceDao<R>, R exte
 
 		PartialResult<R> result = exceptionHandler.handleSqlException(() -> dao.search(query));
 
-		UriBuilder bundleUri = query.configureBundleUri(uri.getAbsolutePathBuilder());
+		UriBuilder bundleUri = query.configureBundleUri(UriBuilder.fromPath(serverBase).path(path));
 
 		String format = queryParameters.getFirst(SearchQuery.PARAMETER_FORMAT);
 		String pretty = queryParameters.getFirst(SearchQuery.PARAMETER_PRETTY);

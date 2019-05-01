@@ -12,11 +12,11 @@ import org.hl7.fhir.r4.model.Task;
 
 public class TaskServiceImpl extends AbstractServiceImpl<TaskDao, Task> implements TaskService
 {
-	public TaskServiceImpl(String resourceTypeName, String serverBase, int defaultPageCount, TaskDao dao,
+	public TaskServiceImpl(String resourceTypeName, String serverBase, String path, int defaultPageCount, TaskDao dao,
 			ResourceValidator validator, EventManager eventManager, ExceptionHandler exceptionHandler,
 			EventGenerator eventGenerator, ResponseGenerator responseGenerator, ParameterConverter parameterConverter)
 	{
-		super(Task.class, resourceTypeName, serverBase, defaultPageCount, dao, validator, eventManager,
+		super(Task.class, resourceTypeName, serverBase, path, defaultPageCount, dao, validator, eventManager,
 				exceptionHandler, eventGenerator, responseGenerator, parameterConverter);
 	}
 }

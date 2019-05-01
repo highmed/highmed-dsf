@@ -51,6 +51,12 @@ public abstract class AbstractServiceJaxrs<R extends DomainResource, S extends B
 	}
 
 	@Override
+	public String getPath()
+	{
+		return delegate.getPath();
+	}
+
+	@Override
 	public void setUserProvider(UserProvider provider)
 	{
 		delegate.setUserProvider(provider);

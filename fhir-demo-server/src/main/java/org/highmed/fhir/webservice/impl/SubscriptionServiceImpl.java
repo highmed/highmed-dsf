@@ -13,12 +13,12 @@ import org.hl7.fhir.r4.model.Subscription;
 public class SubscriptionServiceImpl extends AbstractServiceImpl<SubscriptionDao, Subscription>
 		implements SubscriptionService
 {
-	public SubscriptionServiceImpl(String resourceTypeName, String serverBase, int defaultPageCount,
+	public SubscriptionServiceImpl(String resourceTypeName, String serverBase, String path, int defaultPageCount,
 			SubscriptionDao dao, ResourceValidator validator, EventManager eventManager,
 			ExceptionHandler exceptionHandler, EventGenerator eventGenerator, ResponseGenerator responseGenerator,
 			ParameterConverter parameterConverter)
 	{
-		super(Subscription.class, resourceTypeName, serverBase, defaultPageCount, dao, validator, eventManager,
+		super(Subscription.class, resourceTypeName, serverBase, path, defaultPageCount, dao, validator, eventManager,
 				exceptionHandler, eventGenerator, responseGenerator, parameterConverter);
 	}
 }

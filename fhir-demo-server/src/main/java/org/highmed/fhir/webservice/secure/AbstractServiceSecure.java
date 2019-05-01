@@ -35,7 +35,7 @@ public class AbstractServiceSecure<R extends DomainResource, S extends BasicServ
 	@Override
 	public String getPath()
 	{
-		throw new UnsupportedOperationException("implemented by jaxrs service layer");
+		return delegate.getPath();
 	}
 
 	@Override

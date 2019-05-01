@@ -14,10 +14,4 @@ public class ValueSetServiceJaxrs extends AbstractServiceJaxrs<ValueSet, ValueSe
 	{
 		super(delegate);
 	}
-
-	@Override
-	public String getPath()
-	{
-		return PATH;
-	}
 }

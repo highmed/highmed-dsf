@@ -12,11 +12,12 @@ import org.hl7.fhir.r4.model.Provenance;
 
 public class ProvenanceServiceImpl extends AbstractServiceImpl<ProvenanceDao, Provenance> implements ProvenanceService
 {
-	public ProvenanceServiceImpl(String resourceTypeName, String serverBase, int defaultPageCount, ProvenanceDao dao,
-			ResourceValidator validator, EventManager eventManager, ExceptionHandler exceptionHandler,
-			EventGenerator eventGenerator, ResponseGenerator responseGenerator, ParameterConverter parameterConverter)
+	public ProvenanceServiceImpl(String resourceTypeName, String serverBase, String path, int defaultPageCount,
+			ProvenanceDao dao, ResourceValidator validator, EventManager eventManager,
+			ExceptionHandler exceptionHandler, EventGenerator eventGenerator, ResponseGenerator responseGenerator,
+			ParameterConverter parameterConverter)
 	{
-		super(Provenance.class, resourceTypeName, serverBase, defaultPageCount, dao, validator, eventManager,
+		super(Provenance.class, resourceTypeName, serverBase, path, defaultPageCount, dao, validator, eventManager,
 				exceptionHandler, eventGenerator, responseGenerator, parameterConverter);
 	}
 }

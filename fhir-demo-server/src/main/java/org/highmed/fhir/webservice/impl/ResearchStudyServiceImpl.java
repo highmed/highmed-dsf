@@ -13,12 +13,12 @@ import org.hl7.fhir.r4.model.ResearchStudy;
 public class ResearchStudyServiceImpl extends AbstractServiceImpl<ResearchStudyDao, ResearchStudy>
 		implements ResearchStudyService
 {
-	public ResearchStudyServiceImpl(String resourceTypeName, String serverBase, int defaultPageCount,
+	public ResearchStudyServiceImpl(String resourceTypeName, String serverBase, String path, int defaultPageCount,
 			ResearchStudyDao dao, ResourceValidator validator, EventManager eventManager,
 			ExceptionHandler exceptionHandler, EventGenerator eventGenerator, ResponseGenerator responseGenerator,
 			ParameterConverter parameterConverter)
 	{
-		super(ResearchStudy.class, resourceTypeName, serverBase, defaultPageCount, dao, validator, eventManager,
+		super(ResearchStudy.class, resourceTypeName, serverBase, path, defaultPageCount, dao, validator, eventManager,
 				exceptionHandler, eventGenerator, responseGenerator, parameterConverter);
 	}
 }

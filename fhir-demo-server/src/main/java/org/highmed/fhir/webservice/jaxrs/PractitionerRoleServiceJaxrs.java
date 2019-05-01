@@ -15,10 +15,4 @@ public class PractitionerRoleServiceJaxrs extends AbstractServiceJaxrs<Practitio
 	{
 		super(delegate);
 	}
-
-	@Override
-	public String getPath()
-	{
-		return PATH;
-	}
 }

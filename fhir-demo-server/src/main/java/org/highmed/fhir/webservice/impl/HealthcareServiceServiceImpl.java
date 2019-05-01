@@ -13,12 +13,12 @@ import org.hl7.fhir.r4.model.HealthcareService;
 public class HealthcareServiceServiceImpl extends AbstractServiceImpl<HealthcareServiceDao, HealthcareService>
 		implements HealthcareServiceService
 {
-	public HealthcareServiceServiceImpl(String resourceTypeName, String serverBase, int defaultPageCount,
+	public HealthcareServiceServiceImpl(String resourceTypeName, String serverBase, String path, int defaultPageCount,
 			HealthcareServiceDao dao, ResourceValidator validator, EventManager eventManager,
 			ExceptionHandler exceptionHandler, EventGenerator eventGenerator, ResponseGenerator responseGenerator,
 			ParameterConverter parameterConverter)
 	{
-		super(HealthcareService.class, resourceTypeName, serverBase, defaultPageCount, dao, validator, eventManager,
-				exceptionHandler, eventGenerator, responseGenerator, parameterConverter);
+		super(HealthcareService.class, resourceTypeName, serverBase, path, defaultPageCount, dao, validator,
+				eventManager, exceptionHandler, eventGenerator, responseGenerator, parameterConverter);
 	}
 }

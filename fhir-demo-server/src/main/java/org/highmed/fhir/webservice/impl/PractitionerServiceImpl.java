@@ -13,12 +13,12 @@ import org.hl7.fhir.r4.model.Practitioner;
 public class PractitionerServiceImpl extends AbstractServiceImpl<PractitionerDao, Practitioner>
 		implements PractitionerService
 {
-	public PractitionerServiceImpl(String resourceTypeName, String serverBase, int defaultPageCount,
+	public PractitionerServiceImpl(String resourceTypeName, String serverBase, String path, int defaultPageCount,
 			PractitionerDao dao, ResourceValidator validator, EventManager eventManager,
 			ExceptionHandler exceptionHandler, EventGenerator eventGenerator, ResponseGenerator responseGenerator,
 			ParameterConverter parameterConverter)
 	{
-		super(Practitioner.class, resourceTypeName, serverBase, defaultPageCount, dao, validator, eventManager,
+		super(Practitioner.class, resourceTypeName, serverBase, path, defaultPageCount, dao, validator, eventManager,
 				exceptionHandler, eventGenerator, responseGenerator, parameterConverter);
 	}
 }

@@ -15,10 +15,4 @@ public class ProvenanceServiceJaxrs extends AbstractServiceJaxrs<Provenance, Pro
 	{
 		super(delegate);
 	}
-
-	@Override
-	public String getPath()
-	{
-		return PATH;
-	}
 }

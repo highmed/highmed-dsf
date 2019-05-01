@@ -13,12 +13,12 @@ import org.hl7.fhir.r4.model.PractitionerRole;
 public class PractitionerRoleServiceImpl extends AbstractServiceImpl<PractitionerRoleDao, PractitionerRole>
 		implements PractitionerRoleService
 {
-	public PractitionerRoleServiceImpl(String resourceTypeName, String serverBase, int defaultPageCount,
+	public PractitionerRoleServiceImpl(String resourceTypeName, String serverBase, String path, int defaultPageCount,
 			PractitionerRoleDao dao, ResourceValidator validator, EventManager eventManager,
 			ExceptionHandler exceptionHandler, EventGenerator eventGenerator, ResponseGenerator responseGenerator,
 			ParameterConverter parameterConverter)
 	{
-		super(PractitionerRole.class, resourceTypeName, serverBase, defaultPageCount, dao, validator, eventManager,
-				exceptionHandler, eventGenerator, responseGenerator, parameterConverter);
+		super(PractitionerRole.class, resourceTypeName, serverBase, path, defaultPageCount, dao, validator,
+				eventManager, exceptionHandler, eventGenerator, responseGenerator, parameterConverter);
 	}
 }

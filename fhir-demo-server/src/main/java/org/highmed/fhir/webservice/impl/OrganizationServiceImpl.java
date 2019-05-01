@@ -13,12 +13,12 @@ import org.hl7.fhir.r4.model.Organization;
 public class OrganizationServiceImpl extends AbstractServiceImpl<OrganizationDao, Organization>
 		implements OrganizationService
 {
-	public OrganizationServiceImpl(String resourceTypeName, String serverBase, int defaultPageCount,
+	public OrganizationServiceImpl(String resourceTypeName, String serverBase, String path, int defaultPageCount,
 			OrganizationDao dao, ResourceValidator validator, EventManager eventManager,
 			ExceptionHandler exceptionHandler, EventGenerator eventGenerator, ResponseGenerator responseGenerator,
 			ParameterConverter parameterConverter)
 	{
-		super(Organization.class, resourceTypeName, serverBase, defaultPageCount, dao, validator, eventManager,
+		super(Organization.class, resourceTypeName, serverBase, path, defaultPageCount, dao, validator, eventManager,
 				exceptionHandler, eventGenerator, responseGenerator, parameterConverter);
 	}
 }

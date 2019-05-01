@@ -12,11 +12,11 @@ import org.hl7.fhir.r4.model.Location;
 
 public class LocationServiceImpl extends AbstractServiceImpl<LocationDao, Location> implements LocationService
 {
-	public LocationServiceImpl(String resourceTypeName, String serverBase, int defaultPageCount, LocationDao dao,
-			ResourceValidator validator, EventManager eventManager, ExceptionHandler exceptionHandler,
+	public LocationServiceImpl(String resourceTypeName, String serverBase, String path, int defaultPageCount,
+			LocationDao dao, ResourceValidator validator, EventManager eventManager, ExceptionHandler exceptionHandler,
 			EventGenerator eventGenerator, ResponseGenerator responseGenerator, ParameterConverter parameterConverter)
 	{
-		super(Location.class, resourceTypeName, serverBase, defaultPageCount, dao, validator, eventManager,
+		super(Location.class, resourceTypeName, serverBase, path, defaultPageCount, dao, validator, eventManager,
 				exceptionHandler, eventGenerator, responseGenerator, parameterConverter);
 	}
 }
