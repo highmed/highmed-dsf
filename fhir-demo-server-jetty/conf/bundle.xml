@@ -55,23 +55,4 @@
 			<ifNoneExist value="organization:identifier=http://highmed.org/fhir/CodeSystem/organization|Test_Organization" />
 		</request>
 	</entry>
-	<entry>
-		<fullUrl value="urn:uuid:e8585375-bb1e-43b2-83a5-d18e4e1e99ca" />
-		<resource>
-			<Subscription xmlns="http://hl7.org/fhir">
-				<status value="active" />
-				<reason value="Businness Process Engine" />
-				<criteria value="Task?status=requested" />
-				<channel>
-					<type value="websocket" />
-					<payload value="application/fhir+json" />
-				</channel>
-			</Subscription>
-		</resource>
-		<request>
-			<method value="POST" />
-			<url value="Subscription" />
-			<ifNoneExist value="criteria=Task%3Fstatus%3Drequested&amp;status=active&amp;type=websocket&amp;payload=application/fhir%2Bjson" />
-		</request>
-	</entry>
 </Bundle>

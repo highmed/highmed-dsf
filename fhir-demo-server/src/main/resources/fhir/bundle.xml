@@ -1,0 +1,56 @@
+<Bundle xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://hl7.org/fhir http://www.hl7.org/fhir/fhir-base.xsd">
+	<!-- TODO add StructureDefinitions, CodeSystems etc. managed via software release cycle -->
+	<type value="transaction" />
+	<entry>
+		<fullUrl value="urn:uuid:8fb5660b-250c-4506-8d66-a550ce129f13" />
+		<resource>
+			<CodeSystem xmlns="http://hl7.org/fhir">
+				<url value="http://highmed.org/fhir/CodeSystem/organization-type" />
+				<version value="0.1.0" />
+				<name value="HiGHmed_Organization_Type" />
+				<title value="HiGHmed Organization Type" />
+				<status value="active" />
+				<experimental value="false" />
+				<date value="2019-05-01T16:44:01+02:00" />
+				<publisher value="HiGHmed" />
+				<caseSensitive value="true" />
+				<hierarchyMeaning value="grouped-by" />
+				<versionNeeded value="false" />
+				<content value="complete" />
+				<concept>
+					<code value="TTP" />
+					<definition value="Trusted Third Party" />
+				</concept>
+				<concept>
+					<code value="MeDIC" />
+					<definition value="Medical Data Integration Center" />
+				</concept>
+			</CodeSystem>
+		</resource>
+		<request>
+			<method value="POST" />
+			<url value="CodeSystem" />
+			<ifNoneExist value="url=http://highmed.org/fhir/CodeSystem/organization-type" />
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:e8585375-bb1e-43b2-83a5-d18e4e1e99ca" />
+		<resource>
+			<Subscription xmlns="http://hl7.org/fhir">
+				<status value="active" />
+				<reason value="Businness Process Engine" />
+				<criteria value="Task?status=requested" />
+				<channel>
+					<type value="websocket" />
+					<payload value="application/fhir+json" />
+				</channel>
+			</Subscription>
+		</resource>
+		<request>
+			<method value="POST" />
+			<url value="Subscription" />
+			<ifNoneExist value="criteria=Task%3Fstatus%3Drequested&amp;status=active&amp;type=websocket&amp;payload=application/fhir%2Bjson" />
+		</request>
+	</entry>
+</Bundle>
