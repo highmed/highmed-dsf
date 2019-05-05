@@ -65,7 +65,7 @@ public class AuthenticationFilter implements Filter
 			Optional<User> user = getUser(httpServletRequest);
 			if (user.isPresent())
 			{
-				logger.debug("User '{}' authenticated", user.get().getName());
+				logger.debug("User '{}' with role '{}' authenticated", user.get().getName(), user.get().getRole());
 				setUserAttribute(httpServletRequest, user.get());
 
 				chain.doFilter(httpServletRequest, httpServletResponse);
