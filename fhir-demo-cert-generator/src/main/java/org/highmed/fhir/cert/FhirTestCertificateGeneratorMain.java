@@ -139,7 +139,7 @@ public class FhirTestCertificateGeneratorMain
 		PemIo.writeX509CertificateToPem(clientCertificate, clientCertPem);
 		System.out.println("Saving client private-key to " + clientPrivateKey.toAbsolutePath().toString());
 		PemIo.writePrivateKeyToPem((RSAPrivateCrtKey) clientRsaKeyPair.getPrivate(), clientPrivateKey);
-		System.out.println("Saving cliet public-key to " + clientPublicKey.toAbsolutePath().toString());
+		System.out.println("Saving client public-key to " + clientPublicKey.toAbsolutePath().toString());
 		PemIo.writePublicKeyToPem((RSAPublicKey) clientRsaKeyPair.getPublic(), clientPublicKey);
 
 		System.out.println("\nAll files except for " + caCertPem.toString() + ", " + serverCertP12.toString() + " and "
