@@ -71,4 +71,25 @@ WSL - Ubuntu
 
 Windows Host (Docker)
 	docker run -d -p 5000:5000 --restart always --name registry registry:latest
+	add registry to %windir%\system32\drivers\etc\hosts with IP 127.0.0.1
 
+
+FHIR Docker
+	docker build -t highmed/fhir .
+	docker tag highmed/fhir:latest registry:5000/highmed/fhir:latest
+	docker push registry:5000/highmed/fhir
+	
+FHIR Proxy Docker
+	docker build -t highmed/fhir_proxy .
+	docker tag highmed/fhir_proxy:latest registry:5000/highmed/fhir_proxy:latest
+	docker push registry:5000/highmed/fhir_proxy
+	
+BPE Docker
+	docker build -t highmed/bpe .
+	docker tag highmed/bpe:latest registry:5000/highmed/bpe:latest
+	docker push registry:5000/highmed/bpe
+
+BPE Proxy Docker
+	docker build -t highmed/bpe_proxy .
+	docker tag highmed/bpe_proxy:latest registry:5000/highmed/bpe_proxy:latest
+	docker push registry:5000/highmed/bpe_proxy

@@ -21,12 +21,112 @@
 					<reference value="urn:uuid:b879e904-d666-45de-a995-accdd4429b79" />
 					<type value="Endpoint" />
 				</endpoint>
+				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
+					<valueString
+						value="8f5ae8d68b1d4d0b8b66a71e4053884f00b546e806ec75ca0b6048e3551c26a3e5a0f31e4b1d3241c88de66eaf45e722e54f370daa8db181708b2f98f11d5b31" />
+				</extension>
 			</Organization>
 		</resource>
 		<request>
 			<method value="POST" />
 			<url value="Organization" />
 			<ifNoneExist value="identifier=http://highmed.org/fhir/CodeSystem/organization|Test_TTP" />
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:cf62edc2-cc5d-43ed-ac0e-caf09f7326c3" />
+		<resource>
+			<Organization xmlns="http://hl7.org/fhir">
+				<identifier>
+					<system value="http://highmed.org/fhir/CodeSystem/organization" />
+					<value value="Test_MeDIC_1" />
+				</identifier>
+				<active value="true" />
+				<type>
+					<coding>
+						<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
+						<code value="MeDIC" />
+					</coding>
+				</type>
+				<name value="Test MeDIC 1" />
+				<endpoint>
+					<reference value="urn:uuid:6b405f8a-a201-475d-8dd7-4d73314855e1" />
+					<type value="Endpoint" />
+				</endpoint>
+				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
+					<valueString
+						value="5476e8362667f3167e0617d9099e674fc0e9fc08e18c9b41b9f57770e5c6b26daf6329b2f3e5a897a8bfd1feb25a2bb1c6e86279407471d0fc363ff3986e32cb" />
+				</extension>
+			</Organization>
+		</resource>
+		<request>
+			<method value="POST" />
+			<url value="Organization" />
+			<ifNoneExist value="identifier=http://highmed.org/fhir/CodeSystem/organization|Test_MeDIC_1" />
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:55901940-02db-40bf-9a6e-bdfdd0ddb7bf" />
+		<resource>
+			<Organization xmlns="http://hl7.org/fhir">
+				<identifier>
+					<system value="http://highmed.org/fhir/CodeSystem/organization" />
+					<value value="Test_MeDIC_2" />
+				</identifier>
+				<active value="true" />
+				<type>
+					<coding>
+						<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
+						<code value="MeDIC" />
+					</coding>
+				</type>
+				<name value="Test MeDIC 2" />
+				<endpoint>
+					<reference value="urn:uuid:1712b523-1783-40fa-a317-375415686457" />
+					<type value="Endpoint" />
+				</endpoint>
+				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
+					<valueString
+						value="c00bf50c40c04f2fc3f353acce81127e4732f261f5003b6b761bc0a0b5a7f84dc063ec8086402309ad560d52349ed4ee578e79bbb0481a94649c41ca522df8ba" />
+				</extension>
+			</Organization>
+		</resource>
+		<request>
+			<method value="POST" />
+			<url value="Organization" />
+			<ifNoneExist value="identifier=http://highmed.org/fhir/CodeSystem/organization|Test_MeDIC_2" />
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:a49a45d2-88cc-4830-a028-413d68d9a439" />
+		<resource>
+			<Organization xmlns="http://hl7.org/fhir">
+				<identifier>
+					<system value="http://highmed.org/fhir/CodeSystem/organization" />
+					<value value="Test_MeDIC_3" />
+				</identifier>
+				<active value="true" />
+				<type>
+					<coding>
+						<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
+						<code value="MeDIC" />
+					</coding>
+				</type>
+				<name value="Test MeDIC 3" />
+				<endpoint>
+					<reference value="urn:uuid:1c3d45f9-5aa8-4979-892e-bf2d29b398e0" />
+					<type value="Endpoint" />
+				</endpoint>
+				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
+					<valueString
+						value="55084b67a2e39cce0bc9e4912584bbe3888fecc606fde5304eb48184e26a4a1ce21b1df557d5955925602aa688022e9c57e1b360c3473b742ee4f50c885b10ea" />
+				</extension>
+			</Organization>
+		</resource>
+		<request>
+			<method value="POST" />
+			<url value="Organization" />
+			<ifNoneExist value="identifier=http://highmed.org/fhir/CodeSystem/organization|Test_MeDIC_3" />
 		</request>
 	</entry>
 	<entry>
@@ -54,13 +154,115 @@
 				</payloadType>
 				<payloadMimeType value="application/fhir+json" />
 				<payloadMimeType value="application/fhir+xml" />
-				<address value="https://localhost:8001/fhir" />
+				<address value="https://ttp/fhir" />
 			</Endpoint>
 		</resource>
 		<request>
 			<method value="POST" />
 			<url value="Endpoint" />
 			<ifNoneExist value="organization:identifier=http://highmed.org/fhir/CodeSystem/organization|Test_TTP" />
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:6b405f8a-a201-475d-8dd7-4d73314855e1" />
+		<resource>
+			<Endpoint xmlns="http://hl7.org/fhir">
+				<status value="active" />
+				<connectionType>
+					<system value="http://terminology.hl7.org/CodeSystem/endpoint-connection-type" />
+					<code value="hl7-fhir-rest" />
+				</connectionType>
+				<name value="Test MeDIC 1 Endpoint" />
+				<managingOrganization>
+					<type value="Organization" />
+					<identifier>
+						<system value="http://highmed.org/fhir/CodeSystem/organization" />
+						<value value="Test_MeDIC_1" />
+					</identifier>
+				</managingOrganization>
+				<payloadType>
+					<coding>
+						<system value="http://hl7.org/fhir/resource-types" />
+						<code value="Task" />
+					</coding>
+				</payloadType>
+				<payloadMimeType value="application/fhir+json" />
+				<payloadMimeType value="application/fhir+xml" />
+				<address value="https://medic1/fhir" />
+			</Endpoint>
+		</resource>
+		<request>
+			<method value="POST" />
+			<url value="Endpoint" />
+			<ifNoneExist value="organization:identifier=http://highmed.org/fhir/CodeSystem/organization|Test_MeDIC_1" />
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:1712b523-1783-40fa-a317-375415686457" />
+		<resource>
+			<Endpoint xmlns="http://hl7.org/fhir">
+				<status value="active" />
+				<connectionType>
+					<system value="http://terminology.hl7.org/CodeSystem/endpoint-connection-type" />
+					<code value="hl7-fhir-rest" />
+				</connectionType>
+				<name value="Test MeDIC 2 Endpoint" />
+				<managingOrganization>
+					<type value="Organization" />
+					<identifier>
+						<system value="http://highmed.org/fhir/CodeSystem/organization" />
+						<value value="Test_MeDIC_2" />
+					</identifier>
+				</managingOrganization>
+				<payloadType>
+					<coding>
+						<system value="http://hl7.org/fhir/resource-types" />
+						<code value="Task" />
+					</coding>
+				</payloadType>
+				<payloadMimeType value="application/fhir+json" />
+				<payloadMimeType value="application/fhir+xml" />
+				<address value="https://medic2/fhir" />
+			</Endpoint>
+		</resource>
+		<request>
+			<method value="POST" />
+			<url value="Endpoint" />
+			<ifNoneExist value="organization:identifier=http://highmed.org/fhir/CodeSystem/organization|Test_MeDIC_2" />
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:1c3d45f9-5aa8-4979-892e-bf2d29b398e0" />
+		<resource>
+			<Endpoint xmlns="http://hl7.org/fhir">
+				<status value="active" />
+				<connectionType>
+					<system value="http://terminology.hl7.org/CodeSystem/endpoint-connection-type" />
+					<code value="hl7-fhir-rest" />
+				</connectionType>
+				<name value="Test MeDIC 3 Endpoint" />
+				<managingOrganization>
+					<type value="Organization" />
+					<identifier>
+						<system value="http://highmed.org/fhir/CodeSystem/organization" />
+						<value value="Test_MeDIC_3" />
+					</identifier>
+				</managingOrganization>
+				<payloadType>
+					<coding>
+						<system value="http://hl7.org/fhir/resource-types" />
+						<code value="Task" />
+					</coding>
+				</payloadType>
+				<payloadMimeType value="application/fhir+json" />
+				<payloadMimeType value="application/fhir+xml" />
+				<address value="https://medic3/fhir" />
+			</Endpoint>
+		</resource>
+		<request>
+			<method value="POST" />
+			<url value="Endpoint" />
+			<ifNoneExist value="organization:identifier=http://highmed.org/fhir/CodeSystem/organization|Test_MeDIC_3" />
 		</request>
 	</entry>
 </Bundle>

@@ -6,7 +6,7 @@
 		<Console name="CONSOLE" target="SYSTEM_OUT">
 			<PatternLayout pattern="%p\t%t - %C{1}.%M(%L) | %m%n" />
 		</Console>
-		<!-- <RollingFile name="FILE" fileName="log/fhir.log"
+		<RollingFile name="FILE" fileName="log/fhir.log"
 			filePattern="log/bpe_%d{MM-dd-yyyy}_%i.log.gz"
 			ignoreExceptions="false">
 			<PatternLayout>
@@ -16,7 +16,7 @@
 				<OnStartupTriggeringPolicy />
 				<TimeBasedTriggeringPolicy />
 			</Policies>
-		</RollingFile> -->
+		</RollingFile>
 
 		<!-- <SMTP name="MAIL" subject="BPE Error"
 			to="foo@bar.de, baz@bar.de"
@@ -50,7 +50,7 @@
 
 		<Root level="WARN">
 			<AppenderRef ref="CONSOLE" />
-			<!-- <AppenderRef ref="FILE" /> -->
+			<AppenderRef ref="FILE" />
 			<!-- <AppenderRef ref="MAIL" /> -->
 		</Root>
 	</Loggers>
