@@ -13,5 +13,5 @@ public interface OrganizationProvider
 	 * @return {@link Optional#empty()} if no {@link Organization} is found, or the given {@link X509Certificate} is
 	 *         <code>null</code>
 	 */
-	Optional<Organization> getOrganization(X509Certificate certificate);
+	Optional<User> getOrganization(X509Certificate certificate);
 }

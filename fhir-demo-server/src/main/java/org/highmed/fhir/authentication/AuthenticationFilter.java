@@ -15,7 +15,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Response.Status;
 
-import org.hl7.fhir.r4.model.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -24,7 +23,7 @@ public class AuthenticationFilter implements Filter
 {
 	private static final Logger logger = LoggerFactory.getLogger(AuthenticationFilter.class);
 
-	public static final String ORGANIZATION_PROPERTY = AuthenticationFilter.class.getName() + ".organization";
+	public static final String USER_PROPERTY = AuthenticationFilter.class.getName() + ".user";
 
 	private OrganizationProvider organizationProvider;
 	private AuthenticationFilterConfig authenticationFilterConfig;
@@ -63,13 +62,11 @@ public class AuthenticationFilter implements Filter
 		}
 		else
 		{
-			Optional<Organization> organization = getOrganization(httpServletRequest);
-
-			if (organization.isPresent())
+			Optional<User> user = getUser(httpServletRequest);
+			if (user.isPresent())
 			{
-				logger.debug("Organization '{}' authenticated", organization.get().getName());
-
-				setOrganizationAttribute(httpServletRequest, organization.get());
+				logger.debug("User '{}' authenticated", user.get().getName());
+				setUserAttribute(httpServletRequest, user.get());
 
 				chain.doFilter(httpServletRequest, httpServletResponse);
 			}
@@ -78,7 +75,7 @@ public class AuthenticationFilter implements Filter
 		}
 	}
 
-	private Optional<Organization> getOrganization(HttpServletRequest httpServletRequest)
+	private Optional<User> getUser(HttpServletRequest httpServletRequest)
 	{
 		X509Certificate[] certificates = (X509Certificate[]) httpServletRequest
 				.getAttribute("javax.servlet.request.X509Certificate");
@@ -92,14 +89,14 @@ public class AuthenticationFilter implements Filter
 			return organizationProvider.getOrganization(certificates[0]);
 	}
 
-	private void setOrganizationAttribute(HttpServletRequest request, Organization organization)
+	private void setUserAttribute(HttpServletRequest request, User user)
 	{
-		request.getSession().setAttribute(ORGANIZATION_PROPERTY, organization);
+		request.getSession().setAttribute(USER_PROPERTY, user);
 	}
 
 	private void unauthoized(HttpServletResponse response) throws IOException
 	{
-		logger.warn("Organization not found, sending unauthorized");
+		logger.warn("User not found, sending unauthorized");
 		response.sendError(Status.UNAUTHORIZED.getStatusCode());
 	}
 

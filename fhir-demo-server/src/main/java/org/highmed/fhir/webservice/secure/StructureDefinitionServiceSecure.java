@@ -64,7 +64,8 @@ public class StructureDefinitionServiceSecure extends
 	@Override
 	public Response postSnapshotNew(String snapshotPath, Parameters parameters, UriInfo uri, HttpHeaders headers)
 	{
-		logger.debug("Current user '{}'", provider.getCurrentUser().getName());
+		logger.debug("Current user '{}', role '{}'", provider.getCurrentUser().getName(),
+				provider.getCurrentUser().getRole());
 
 		return delegate.postSnapshotNew(snapshotPath, parameters, uri, headers);
 	}
@@ -72,7 +73,8 @@ public class StructureDefinitionServiceSecure extends
 	@Override
 	public Response getSnapshotNew(String snapshotPath, UriInfo uri, HttpHeaders headers)
 	{
-		logger.debug("Current user '{}'", provider.getCurrentUser().getName());
+		logger.debug("Current user '{}', role '{}'", provider.getCurrentUser().getName(),
+				provider.getCurrentUser().getRole());
 
 		return delegate.getSnapshotNew(snapshotPath, uri, headers);
 	}
@@ -80,7 +82,8 @@ public class StructureDefinitionServiceSecure extends
 	@Override
 	public Response postSnapshotExisting(String snapshotPath, String id, UriInfo uri, HttpHeaders headers)
 	{
-		logger.debug("Current user '{}'", provider.getCurrentUser().getName());
+		logger.debug("Current user '{}', role '{}'", provider.getCurrentUser().getName(),
+				provider.getCurrentUser().getRole());
 
 		return delegate.postSnapshotExisting(snapshotPath, id, uri, headers);
 	}
@@ -88,7 +91,8 @@ public class StructureDefinitionServiceSecure extends
 	@Override
 	public Response getSnapshotExisting(String snapshotPath, String id, UriInfo uri, HttpHeaders headers)
 	{
-		logger.debug("Current user '{}'", provider.getCurrentUser().getName());
+		logger.debug("Current user '{}', role '{}'", provider.getCurrentUser().getName(),
+				provider.getCurrentUser().getRole());
 
 		return delegate.getSnapshotExisting(snapshotPath, id, uri, headers);
 	}

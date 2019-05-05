@@ -5,19 +5,26 @@ import org.hl7.fhir.r4.model.Organization;
 public class User
 {
 	private final Organization organization;
+	private final UserRole userRole;
 
-	public User(Organization organization)
+	public User(Organization organization, UserRole userRole)
 	{
 		this.organization = organization;
+		this.userRole = userRole;
 	}
 
 	public UserRole getRole()
 	{
-		return UserRole.UNKNOWN; // TODO
+		return userRole;
+	}
+
+	public Organization getOrganization()
+	{
+		return organization;
 	}
 
 	public String getName()
 	{
-		return organization.getName();
+		return organization == null ? "null" : organization.getName();
 	}
 }

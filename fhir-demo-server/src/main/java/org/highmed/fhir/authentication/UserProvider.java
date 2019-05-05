@@ -8,7 +8,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
-import org.hl7.fhir.r4.model.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,8 +24,7 @@ public class UserProvider
 
 	public User getCurrentUser()
 	{
-		Object organization = httpRequest.get().getSession().getAttribute(AuthenticationFilter.ORGANIZATION_PROPERTY);
-		return new User((Organization) organization);
+		return (User) httpRequest.get().getSession().getAttribute(AuthenticationFilter.USER_PROPERTY);
 	}
 
 	public void checkCurrentUserHasOneOfRoles(UserRole... roles)

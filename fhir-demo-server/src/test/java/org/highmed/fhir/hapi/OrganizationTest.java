@@ -1,11 +1,11 @@
 package org.highmed.fhir.hapi;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.UUID;
 
 import org.apache.commons.codec.binary.Hex;
-import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
@@ -32,17 +32,14 @@ public class OrganizationTest
 		Extension thumbprint2 = organization.addExtension();
 		thumbprint2.setUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
 		thumbprint2.setValue(new StringType(Hex.encodeHexString("Blub Blub Blub".getBytes())));
-		Extension role = organization.addExtension();
-		role.setUrl("http://highmed.org/fhir/StructureDefinition/server-role");
-		role.setValue(new CodeType("local"));
 		organization.addEndpoint(new Reference(new IdType("Endpoint", UUID.randomUUID().toString())));
 
 		FhirContext context = FhirContext.forR4();
 
-		String string = context.newJsonParser().setPrettyPrint(true).encodeResourceToString(organization);
+		String string = context.newXmlParser().setPrettyPrint(true).encodeResourceToString(organization);
 		logger.info("Organization:\n{}", string);
 
-		Organization parseOrganization = context.newJsonParser().parseResource(Organization.class, string);
+		Organization parseOrganization = context.newXmlParser().parseResource(Organization.class, string);
 
 		assertNotNull(parseOrganization);
 		assertNotNull(parseOrganization.getIdentifierFirstRep());
@@ -63,7 +60,7 @@ public class OrganizationTest
 				e.getIdElement().getVersionIdPart()));
 
 		FhirContext context = FhirContext.forR4();
-		String string = context.newJsonParser().setPrettyPrint(true).encodeResourceToString(o);
+		String string = context.newXmlParser().setPrettyPrint(true).encodeResourceToString(o);
 
 		logger.info(string);
 	}

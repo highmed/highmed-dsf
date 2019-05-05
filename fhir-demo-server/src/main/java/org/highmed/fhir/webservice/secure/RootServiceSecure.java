@@ -40,7 +40,8 @@ public class RootServiceSecure implements RootService
 	@Override
 	public Response handleBundle(Bundle bundle, UriInfo uri, HttpHeaders headers)
 	{
-		logger.debug("Current user '{}'", provider.getCurrentUser().getName());
+		logger.debug("Current user '{}', role '{}'", provider.getCurrentUser().getName(),
+				provider.getCurrentUser().getRole());
 
 		return delegate.handleBundle(bundle, uri, headers);
 	}

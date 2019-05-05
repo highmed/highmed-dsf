@@ -21,7 +21,7 @@ public class ServerEndpointRegistrationForAuthentication extends ServerEndpointR
 	public void modifyHandshake(ServerEndpointConfig sec, HandshakeRequest request, HandshakeResponse response)
 	{
 		HttpSession httpSession = (HttpSession) request.getHttpSession();
-		Organization organization = (Organization) httpSession.getAttribute(AuthenticationFilter.ORGANIZATION_PROPERTY);
+		Organization organization = (Organization) httpSession.getAttribute(AuthenticationFilter.USER_PROPERTY);
 
 		// don't use ServerEndpointRegistration#getUserProperties()
 		sec.getUserProperties().put(ServerEndpoint.ORGANIZATION_PROPERTY, organization);

@@ -41,7 +41,8 @@ public class AbstractServiceSecure<R extends DomainResource, S extends BasicServ
 	@Override
 	public Response create(R resource, UriInfo uri, HttpHeaders headers)
 	{
-		logger.debug("Current user '{}'", provider.getCurrentUser().getName());
+		logger.debug("Current user '{}', role '{}'", provider.getCurrentUser().getName(),
+				provider.getCurrentUser().getRole());
 
 		return delegate.create(resource, uri, headers);
 	}
@@ -49,7 +50,8 @@ public class AbstractServiceSecure<R extends DomainResource, S extends BasicServ
 	@Override
 	public Response read(String id, UriInfo uri, HttpHeaders headers)
 	{
-		logger.debug("Current user '{}'", provider.getCurrentUser().getName());
+		logger.debug("Current user '{}', role '{}'", provider.getCurrentUser().getName(),
+				provider.getCurrentUser().getRole());
 
 		return delegate.read(id, uri, headers);
 	}
@@ -57,7 +59,8 @@ public class AbstractServiceSecure<R extends DomainResource, S extends BasicServ
 	@Override
 	public Response vread(String id, long version, UriInfo uri, HttpHeaders headers)
 	{
-		logger.debug("Current user '{}'", provider.getCurrentUser().getName());
+		logger.debug("Current user '{}', role '{}'", provider.getCurrentUser().getName(),
+				provider.getCurrentUser().getRole());
 
 		return delegate.vread(id, version, uri, headers);
 	}
@@ -65,7 +68,8 @@ public class AbstractServiceSecure<R extends DomainResource, S extends BasicServ
 	@Override
 	public Response update(String id, R resource, UriInfo uri, HttpHeaders headers)
 	{
-		logger.debug("Current user '{}'", provider.getCurrentUser().getName());
+		logger.debug("Current user '{}', role '{}'", provider.getCurrentUser().getName(),
+				provider.getCurrentUser().getRole());
 
 		return delegate.update(id, resource, uri, headers);
 	}
@@ -73,7 +77,8 @@ public class AbstractServiceSecure<R extends DomainResource, S extends BasicServ
 	@Override
 	public Response update(R resource, UriInfo uri, HttpHeaders headers)
 	{
-		logger.debug("Current user '{}'", provider.getCurrentUser().getName());
+		logger.debug("Current user '{}', role '{}'", provider.getCurrentUser().getName(),
+				provider.getCurrentUser().getRole());
 
 		return delegate.update(resource, uri, headers);
 	}
@@ -81,7 +86,8 @@ public class AbstractServiceSecure<R extends DomainResource, S extends BasicServ
 	@Override
 	public Response delete(String id, UriInfo uri, HttpHeaders headers)
 	{
-		logger.debug("Current user '{}'", provider.getCurrentUser().getName());
+		logger.debug("Current user '{}', role '{}'", provider.getCurrentUser().getName(),
+				provider.getCurrentUser().getRole());
 
 		return delegate.delete(id, uri, headers);
 	}
@@ -89,7 +95,8 @@ public class AbstractServiceSecure<R extends DomainResource, S extends BasicServ
 	@Override
 	public Response delete(UriInfo uri, HttpHeaders headers)
 	{
-		logger.debug("Current user '{}'", provider.getCurrentUser().getName());
+		logger.debug("Current user '{}', role '{}'", provider.getCurrentUser().getName(),
+				provider.getCurrentUser().getRole());
 
 		return delegate.delete(uri, headers);
 	}
@@ -97,7 +104,8 @@ public class AbstractServiceSecure<R extends DomainResource, S extends BasicServ
 	@Override
 	public Response search(UriInfo uri, HttpHeaders headers)
 	{
-		logger.debug("Current user '{}'", provider.getCurrentUser().getName());
+		logger.debug("Current user '{}', role '{}'", provider.getCurrentUser().getName(),
+				provider.getCurrentUser().getRole());
 
 		return delegate.search(uri, headers);
 	}
@@ -105,7 +113,8 @@ public class AbstractServiceSecure<R extends DomainResource, S extends BasicServ
 	@Override
 	public Response postValidateNew(String validate, Parameters parameters, UriInfo uri, HttpHeaders headers)
 	{
-		logger.debug("Current user '{}'", provider.getCurrentUser().getName());
+		logger.debug("Current user '{}', role '{}'", provider.getCurrentUser().getName(),
+				provider.getCurrentUser().getRole());
 
 		return delegate.postValidateNew(validate, parameters, uri, headers);
 	}
@@ -113,7 +122,8 @@ public class AbstractServiceSecure<R extends DomainResource, S extends BasicServ
 	@Override
 	public Response getValidateNew(String validate, UriInfo uri, HttpHeaders headers)
 	{
-		logger.debug("Current user '{}'", provider.getCurrentUser().getName());
+		logger.debug("Current user '{}', role '{}'", provider.getCurrentUser().getName(),
+				provider.getCurrentUser().getRole());
 
 		return delegate.getValidateNew(validate, uri, headers);
 	}
@@ -122,7 +132,8 @@ public class AbstractServiceSecure<R extends DomainResource, S extends BasicServ
 	public Response postValidateExisting(String validate, String id, Parameters parameters, UriInfo uri,
 			HttpHeaders headers)
 	{
-		logger.debug("Current user '{}'", provider.getCurrentUser().getName());
+		logger.debug("Current user '{}', role '{}'", provider.getCurrentUser().getName(),
+				provider.getCurrentUser().getRole());
 
 		return delegate.postValidateExisting(validate, id, parameters, uri, headers);
 	}
@@ -130,7 +141,8 @@ public class AbstractServiceSecure<R extends DomainResource, S extends BasicServ
 	@Override
 	public Response getValidateExisting(String validate, String id, UriInfo uri, HttpHeaders headers)
 	{
-		logger.debug("Current user '{}'", provider.getCurrentUser().getName());
+		logger.debug("Current user '{}', role '{}'", provider.getCurrentUser().getName(),
+				provider.getCurrentUser().getRole());
 
 		return delegate.getValidateExisting(validate, id, uri, headers);
 	}

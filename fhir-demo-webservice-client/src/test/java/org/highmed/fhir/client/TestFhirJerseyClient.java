@@ -250,6 +250,11 @@ public class TestFhirJerseyClient
 			// updateBundleTest(context, client);
 			deleteOrganizationsAndEndpoints(context, client);
 
+			// client.deleteConditionaly(Organization.class, Map.of("identifier",
+			// Collections.singletonList("http://highmed.org/fhir/CodeSystem/organization|Test_Organization")));
+			// client.deleteConditionaly(Endpoint.class, Map.of("organization:identifier",
+			// Collections.singletonList("http://highmed.org/fhir/CodeSystem/organization|Test_Organization")));
+
 		}
 		catch (WebApplicationException e)
 		{

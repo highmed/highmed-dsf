@@ -51,7 +51,7 @@ public class OrganizationProviderWithDbBackend implements OrganizationProvider, 
 	}
 
 	@Override
-	public Optional<Organization> getOrganization(X509Certificate certificate)
+	public Optional<User> getOrganization(X509Certificate certificate)
 	{
 		if (certificate == null)
 			return Optional.empty();
@@ -59,11 +59,13 @@ public class OrganizationProviderWithDbBackend implements OrganizationProvider, 
 		String loginThumbprintHex = Hex.encodeHexString(getThumbprint(certificate));
 		logger.debug("Generated SHA-512 certificate thumbprint: {}", loginThumbprintHex);
 
-		if (localUserThumbprints.contains(loginThumbprintHex.toLowerCase()))
-			return Optional.of(new Organization().setName("Local User"));
-		else
-			return exceptionHandler.catchAndLogSqlAndResourceDeletedExceptionAndIfReturn(
-					() -> dao.readByThumbprint(loginThumbprintHex), Optional::empty, Optional::empty);
+		UserRole userRole = localUserThumbprints.contains(loginThumbprintHex.toLowerCase()) ? UserRole.LOCAL
+				: UserRole.REMOTE;
+
+		Optional<Organization> optOrg = exceptionHandler.catchAndLogSqlAndResourceDeletedExceptionAndIfReturn(
+				() -> dao.readByThumbprint(loginThumbprintHex), Optional::empty, Optional::empty);
+
+		return optOrg.map(org -> new User(org, userRole));
 	}
 
 	private byte[] getThumbprint(X509Certificate certificate)
