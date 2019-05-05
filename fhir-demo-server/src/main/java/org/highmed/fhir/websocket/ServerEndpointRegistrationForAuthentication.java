@@ -7,7 +7,7 @@ import javax.websocket.server.HandshakeRequest;
 import javax.websocket.server.ServerEndpointConfig;
 
 import org.highmed.fhir.authentication.AuthenticationFilter;
-import org.hl7.fhir.r4.model.Organization;
+import org.highmed.fhir.authentication.User;
 import org.springframework.web.socket.server.standard.ServerEndpointRegistration;
 
 public class ServerEndpointRegistrationForAuthentication extends ServerEndpointRegistration
@@ -21,9 +21,9 @@ public class ServerEndpointRegistrationForAuthentication extends ServerEndpointR
 	public void modifyHandshake(ServerEndpointConfig sec, HandshakeRequest request, HandshakeResponse response)
 	{
 		HttpSession httpSession = (HttpSession) request.getHttpSession();
-		Organization organization = (Organization) httpSession.getAttribute(AuthenticationFilter.USER_PROPERTY);
+		User user = (User) httpSession.getAttribute(AuthenticationFilter.USER_PROPERTY);
 
 		// don't use ServerEndpointRegistration#getUserProperties()
-		sec.getUserProperties().put(ServerEndpoint.ORGANIZATION_PROPERTY, organization);
+		sec.getUserProperties().put(ServerEndpoint.USER_PROPERTY, user);
 	}
 }

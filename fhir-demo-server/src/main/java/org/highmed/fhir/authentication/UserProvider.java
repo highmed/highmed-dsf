@@ -27,7 +27,7 @@ public class UserProvider
 		return (User) httpRequest.get().getSession().getAttribute(AuthenticationFilter.USER_PROPERTY);
 	}
 
-	public void checkCurrentUserHasOneOfRoles(UserRole... roles)
+	public void checkCurrentUserHasOneOfRoles(UserRole... expectedRoles)
 	{
 		User user = getCurrentUser();
 
@@ -36,22 +36,13 @@ public class UserProvider
 			logger.warn("Current user is null, sending {}", Status.UNAUTHORIZED);
 			throw new WebApplicationException(Status.UNAUTHORIZED);
 		}
-		else if (!userHasOneOfRoles(user, roles))
+		else if (!UserRole.userHasOneOfRoles(user, expectedRoles))
 		{
 			logger.warn("Current user {} has non of roles {}, sending {}", user.getName(),
-					Arrays.stream(roles).map(r -> r.name()).collect(Collectors.joining(", ", "{", "}")),
+					Arrays.stream(expectedRoles).map(r -> r.name()).collect(Collectors.joining(", ", "{", "}")),
 					Status.FORBIDDEN);
 
 			throw new WebApplicationException(Status.FORBIDDEN);
 		}
-	}
-
-	private static boolean userHasOneOfRoles(User u, UserRole... roles)
-	{
-		for (UserRole role : roles)
-			if (role.equals(u.getRole()))
-				return true;
-
-		return false;
 	}
 }

@@ -20,8 +20,9 @@ import javax.websocket.Session;
 
 import org.apache.commons.codec.binary.Hex;
 import org.highmed.fhir.authentication.NeedsAuthentication;
+import org.highmed.fhir.authentication.User;
+import org.highmed.fhir.authentication.UserRole;
 import org.highmed.fhir.event.EventManager;
-import org.hl7.fhir.r4.model.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -32,7 +33,7 @@ public class ServerEndpoint extends Endpoint implements InitializingBean, NeedsA
 	private static final Logger logger = LoggerFactory.getLogger(ServerEndpoint.class);
 
 	public static final String PATH = "/ws";
-	public static final String ORGANIZATION_PROPERTY = ServerEndpoint.class.getName() + ".organization";
+	public static final String USER_PROPERTY = ServerEndpoint.class.getName() + ".user";
 
 	private static final String PINGER_PROPERTY = "pinger";
 	private static final String BIND_MESSAGE_START = "bind ";
@@ -63,18 +64,14 @@ public class ServerEndpoint extends Endpoint implements InitializingBean, NeedsA
 	{
 		logger.debug("onOpen session: {}", session.getId());
 
-		Organization organization = getOrganization(session);
-		// TODO check role || !UserRole.userHasOneOfRoles(user, UserRole.WEBSOCKET, UserRole.WEBSOCKET_AND_WEBSERVICE)
-		if (organization == null)
+		User user = getUser(session);
+		if (user == null || !UserRole.userHasOneOfRoles(user, UserRole.LOCAL))
 		{
-			logger.warn("No organization in session: {}", session.getId());
-			// TODO
-			// or organization has not one of roles {{}, {}}, closing websocket",
-			// UserRole.WEBSOCKET.getValue(), UserRole.WEBSOCKET_AND_WEBSERVICE.getValue());
+			logger.warn("No user in session or user is missing role {}, closing websocket: {}", UserRole.LOCAL,
+					session.getId());
 			try
 			{
-				session.close(new CloseReason(CloseCodes.VIOLATED_POLICY,
-						organization == null ? "No organization" : "Forbidden"));
+				session.close(new CloseReason(CloseCodes.VIOLATED_POLICY, user == null ? "No user" : "Forbidden"));
 			}
 			catch (IOException e)
 			{
@@ -137,14 +134,14 @@ public class ServerEndpoint extends Endpoint implements InitializingBean, NeedsA
 		}
 	}
 
-	private Organization getOrganization(Session session)
+	private User getUser(Session session)
 	{
-		Object object = session.getUserProperties().get(ORGANIZATION_PROPERTY);
-		if (object != null && object instanceof Organization)
-			return (Organization) object;
+		Object object = session.getUserProperties().get(USER_PROPERTY);
+		if (object != null && object instanceof User)
+			return (User) object;
 		else
 		{
-			logger.warn("User property {} not a {}", ORGANIZATION_PROPERTY, Organization.class.getName());
+			logger.warn("User property {} not a {}", USER_PROPERTY, User.class.getName());
 			return null;
 		}
 	}
