@@ -62,8 +62,11 @@ public class OrganizationProviderWithDbBackend implements OrganizationProvider, 
 		UserRole userRole = localUserThumbprints.contains(loginThumbprintHex.toLowerCase()) ? UserRole.LOCAL
 				: UserRole.REMOTE;
 
-		Optional<Organization> optOrg = exceptionHandler.catchAndLogSqlAndResourceDeletedExceptionAndIfReturn(
-				() -> dao.readByThumbprint(loginThumbprintHex), Optional::empty, Optional::empty);
+		Optional<Organization> optOrg = exceptionHandler
+				.catchAndLogSqlExceptionAndIfReturn(() -> dao.readByThumbprint(loginThumbprintHex), Optional::empty);
+
+		if (optOrg.isEmpty() && UserRole.LOCAL.equals(userRole))
+			return Optional.of(new User(new Organization().setName("Local Admin User"), userRole));
 
 		return optOrg.map(org -> new User(org, userRole));
 	}
