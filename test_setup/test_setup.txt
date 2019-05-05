@@ -1,0 +1,74 @@
+Windows 10
+Hyper-V (PS as Admin)
+	New-VMSwitch -name HiGHmed -SwitchType Internal
+	New-NetIPAddress -InterfaceAlias 'vEthernet (HiGHmed)' -IPAddress 10.42.0.1 -PrefixLength 24
+	New-NetNat -Name HiGHmedNAT -InternalIPInterfaceAddressPrefix 10.42.0.0/24
+	New-VM -Name "HiGHmed_TTP" -MemoryStartupBytes 2GB -NewVHDPath 'C:\Users\Public\Documents\Hyper-V\Virtual Hard Disks\HiGHmed_TTP.vhdx' -NewVHDSizeBytes 24GB -SwitchName HiGHmed -Generation 2
+	New-VM -Name "HiGHmed_MeDIC_1" -MemoryStartupBytes 2GB -NewVHDPath 'C:\Users\Public\Documents\Hyper-V\Virtual Hard Disks\HiGHmed_MeDIC_1.vhdx' -NewVHDSizeBytes 24GB -SwitchName HiGHmed -Generation 2
+	New-VM -Name "HiGHmed_MeDIC_2" -MemoryStartupBytes 2GB -NewVHDPath 'C:\Users\Public\Documents\Hyper-V\Virtual Hard Disks\HiGHmed_MeDIC_2.vhdx' -NewVHDSizeBytes 24GB -SwitchName HiGHmed -Generation 2
+	New-VM -Name "HiGHmed_MeDIC_3" -MemoryStartupBytes 2GB -NewVHDPath 'C:\Users\Public\Documents\Hyper-V\Virtual Hard Disks\HiGHmed_MeDIC_3.vhdx' -NewVHDSizeBytes 24GB -SwitchName HiGHmed -Generation 2
+	Set-VMProcessor -VMName "HiGHmed_TTP" -Count 2
+	Set-VMProcessor -VMName "HiGHmed_MeDIC_1" -Count 2
+	Set-VMProcessor -VMName "HiGHmed_MeDIC_2" -Count 2
+	Set-VMProcessor -VMName "HiGHmed_MeDIC_3" -Count 2
+	Add-VMDvdDrive -VMName 'HiGHmed_TTP' -Path C:\Users\hhund\Downloads\ubuntu-18.04.2-live-server-amd64.iso
+	Add-VMDvdDrive -VMName 'HiGHmed_MeDIC_1' -Path C:\Users\hhund\Downloads\ubuntu-18.04.2-live-server-amd64.iso
+	Add-VMDvdDrive -VMName 'HiGHmed_MeDIC_2' -Path C:\Users\hhund\Downloads\ubuntu-18.04.2-live-server-amd64.iso
+	Add-VMDvdDrive -VMName 'HiGHmed_MeDIC_3' -Path C:\Users\hhund\Downloads\ubuntu-18.04.2-live-server-amd64.iso
+	Set-VMFirmware -VMName "HiGHmed_TTP" -BootOrder $(Get-VMDvdDrive -VMName "HiGHmed_TTP"),$(Get-VMHardDiskDrive -VMName "HiGHmed_TTP"),$(Get-VMNetworkAdapter -VMName "HiGHmed_TTP") -SecureBootTemplate MicrosoftUEFICertificateAuthority
+	Set-VMFirmware -VMName "HiGHmed_MeDIC_1" -BootOrder $(Get-VMDvdDrive -VMName "HiGHmed_MeDIC_1"),$(Get-VMHardDiskDrive -VMName "HiGHmed_MeDIC_1"),$(Get-VMNetworkAdapter -VMName "HiGHmed_MeDIC_1") -SecureBootTemplate MicrosoftUEFICertificateAuthority
+	Set-VMFirmware -VMName "HiGHmed_MeDIC_2" -BootOrder $(Get-VMDvdDrive -VMName "HiGHmed_MeDIC_2"),$(Get-VMHardDiskDrive -VMName "HiGHmed_MeDIC_2"),$(Get-VMNetworkAdapter -VMName "HiGHmed_MeDIC_2") -SecureBootTemplate MicrosoftUEFICertificateAuthority
+	Set-VMFirmware -VMName "HiGHmed_MeDIC_3" -BootOrder $(Get-VMDvdDrive -VMName "HiGHmed_MeDIC_3"),$(Get-VMHardDiskDrive -VMName "HiGHmed_MeDIC_3"),$(Get-VMNetworkAdapter -VMName "HiGHmed_MeDIC_3") -SecureBootTemplate MicrosoftUEFICertificateAuthority
+
+VMs (Setup Ubuntu Server)
+	Ubuntu 18.04.2 Setup, Network 10.42.0.{10,11,12,13}, hostname {ttp, medic1, medic2, medic3}, username same as WSL username
+	Network:
+		Subnet: 10.42.0.0/24
+		Address: 10.42.0.{10,11,12,13}
+		Gateway: 10.42.0.1
+		DNS: 8.8.8.8
+	Hostname: {ttp, medic1, medic2, medic3}
+	Username same as WSL username
+	Install OpenSSH Server
+	
+	Start-VM -VMName "HiGHmed_TTP"
+	vmconnect localhost "HiGHmed_TTP"
+	
+	Start-VM -VMName "HiGHmed_MeDIC_1"
+	vmconnect localhost "HiGHmed_MeDIC_1"
+	
+	Start-VM -VMName "HiGHmed_MeDIC_2"
+	vmconnect localhost "HiGHmed_MeDIC_2"
+	
+	Start-VM -VMName "HiGHmed_MeDIC_3"
+	vmconnect localhost "HiGHmed_MeDIC_3"
+	
+	login to console and set sudo without password
+	sudo visudo
+	change
+	%sudo	ALL=(ALL:ALL) ALL
+	to
+	%sudo	ALL=(ALL:ALL) NOPASSWD:ALL
+	
+
+Windows Host
+	add {ttp, medic1, medic2, medic3} to %windir%\system32\drivers\etc\hosts IPs: 10.24.0. {10,11,12,13}
+	Restart WSL with administrative PowerShell prompt: Restart-Service LxssManager
+
+WSL - Ubuntu
+	ssh-keygen -o -a 100 -t ed25519 -f ~/.ssh/id_ed25519 -C "hhund" [create ssh key]
+	ssh-copy-id {host} [add ssh key to {ttp, medic1, medic2, medic3}]
+	sudo apt-add-repository ppa:ansible/ansible
+	sudo apt install ansible
+	sudo nano /etc/ansible/hosts
+		[HiGHmed]
+		ttp
+		medic1
+		medic2
+		medic3
+	ansible-playbook highmed.yml
+
+
+Windows Host (Docker)
+	docker run -d -p 5000:5000 --restart always --name registry registry:latest
+
