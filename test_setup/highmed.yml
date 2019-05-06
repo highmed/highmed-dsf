@@ -1,6 +1,8 @@
 -  hosts: HiGHmed
-   become: true
    gather_facts: false
+   vars:
+      user: '{{ lookup(''env'',''USER'') }}'
+   become: true
    pre_tasks:
    -  name: Install python2 for Ansible
       raw: bash -c "test -e /usr/bin/python || (apt -qqy update && apt install -qqy python-minimal)"
@@ -52,6 +54,14 @@
          - containerd.io
          state: present
          update_cache: true
+   -  name: Setup Docker insecure registry 'registry:5000'
+      copy:
+         dest: /etc/docker/daemon.json
+         content: |
+            {
+              "insecure-registries" : ["registry:5000"]
+            }
+      notify: Restart Docker
    -  name: update /etc/hosts file
       blockinfile:
          path: /etc/hosts
@@ -60,7 +70,7 @@
          marker: '# {mark} ANSIBLE MANAGED BLOCK {{ item.name }}'
       with_items:
       -  name: registry
-         ip: 10.42.0.1
+         ip: 10.42.0.9
       -  name: ttp
          ip: 10.42.0.10
       -  name: medic1
@@ -69,6 +79,15 @@
          ip: 10.42.0.12
       -  name: medic3
          ip: 10.42.0.13
+   -  name: Add user '{{ user }}' to group docker
+      user:
+         name: '{{ user }}'
+         groups: docker
+         append: true
    handlers:
    -  name: Reboot
       reboot: null
+   -  name: Restart Docker
+      service:
+         name: docker
+         state: restarted

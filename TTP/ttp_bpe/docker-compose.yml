@@ -1,7 +1,7 @@
 version: '3.2'
 services:
    proxy:
-      image: registry/highmed/bpe_proxy
+      image: registry:5000/highmed/bpe_proxy
       restart: always
       ports:
       - 8080:80
@@ -19,7 +19,7 @@ services:
       depends_on:
       - app
    app:
-      image: registry/highmed/bpe
+      image: registry:5000/highmed/bpe
       restart: always
       volumes:
       -  type: bind

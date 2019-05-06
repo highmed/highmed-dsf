@@ -1,7 +1,7 @@
 version: '3.2'
 services:
    proxy:
-      image: highmed/fhir_proxy
+      image: registry:5000/highmed/fhir_proxy
       restart: always
       ports:
       - 80:80
@@ -23,7 +23,7 @@ services:
       depends_on:
       - app
    app:
-      image: highmed/fhir
+      image: registry:5000/highmed/fhir
       restart: always
       volumes:
       -  type: bind
