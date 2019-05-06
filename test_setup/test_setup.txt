@@ -25,6 +25,11 @@ Windows Host
 		Set-VMFirmware -VMName "HiGHmed_MeDIC_1" -BootOrder $(Get-VMDvdDrive -VMName "HiGHmed_MeDIC_1"),$(Get-VMHardDiskDrive -VMName "HiGHmed_MeDIC_1"),$(Get-VMNetworkAdapter -VMName "HiGHmed_MeDIC_1") -SecureBootTemplate MicrosoftUEFICertificateAuthority
 		Set-VMFirmware -VMName "HiGHmed_MeDIC_2" -BootOrder $(Get-VMDvdDrive -VMName "HiGHmed_MeDIC_2"),$(Get-VMHardDiskDrive -VMName "HiGHmed_MeDIC_2"),$(Get-VMNetworkAdapter -VMName "HiGHmed_MeDIC_2") -SecureBootTemplate MicrosoftUEFICertificateAuthority
 		Set-VMFirmware -VMName "HiGHmed_MeDIC_3" -BootOrder $(Get-VMDvdDrive -VMName "HiGHmed_MeDIC_3"),$(Get-VMHardDiskDrive -VMName "HiGHmed_MeDIC_3"),$(Get-VMNetworkAdapter -VMName "HiGHmed_MeDIC_3") -SecureBootTemplate MicrosoftUEFICertificateAuthority
+		Set-VMMemory -VMName "HiGHmed_DockerRegistry" -MaximumBytes 2GB
+		Set-VMMemory -VMName "HiGHmed_TTP" -MaximumBytes 4GB
+		Set-VMMemory -VMName "HiGHmed_MeDIC_1" -MaximumBytes 4GB
+		Set-VMMemory -VMName "HiGHmed_MeDIC_2" -MaximumBytes 4GB
+		Set-VMMemory -VMName "HiGHmed_MeDIC_3" -MaximumBytes 4GB
 
 VMs (Setup Ubuntu Server)
 	Start-VM -VMName "HiGHmed_DockerRegistry"
