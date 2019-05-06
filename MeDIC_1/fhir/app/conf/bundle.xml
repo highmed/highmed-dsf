@@ -17,10 +17,6 @@
 					</coding>
 				</type>
 				<name value="Test TTP" />
-				<endpoint>
-					<reference value="urn:uuid:b879e904-d666-45de-a995-accdd4429b79" />
-					<type value="Endpoint" />
-				</endpoint>
 				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
 					<valueString
 						value="532a7736fd2187c4895765fa211cd076e70d0e9405c466b650ca3c2e89b9cd796a063f1840f26b6422b08aafdaff677fb53bec14916185355ae1b6ee1b0afc5f" />
