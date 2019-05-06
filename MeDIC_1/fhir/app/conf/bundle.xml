@@ -23,7 +23,7 @@
 				</endpoint>
 				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
 					<valueString
-						value="8f5ae8d68b1d4d0b8b66a71e4053884f00b546e806ec75ca0b6048e3551c26a3e5a0f31e4b1d3241c88de66eaf45e722e54f370daa8db181708b2f98f11d5b31" />
+						value="532a7736fd2187c4895765fa211cd076e70d0e9405c466b650ca3c2e89b9cd796a063f1840f26b6422b08aafdaff677fb53bec14916185355ae1b6ee1b0afc5f" />
 				</extension>
 			</Organization>
 		</resource>

@@ -23,7 +23,7 @@
 				</endpoint>
 				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
 					<valueString
-						value="8f5ae8d68b1d4d0b8b66a71e4053884f00b546e806ec75ca0b6048e3551c26a3e5a0f31e4b1d3241c88de66eaf45e722e54f370daa8db181708b2f98f11d5b31" />
+						value="532a7736fd2187c4895765fa211cd076e70d0e9405c466b650ca3c2e89b9cd796a063f1840f26b6422b08aafdaff677fb53bec14916185355ae1b6ee1b0afc5f" />
 				</extension>
 			</Organization>
 		</resource>
@@ -55,7 +55,7 @@
 				</endpoint>
 				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
 					<valueString
-						value="5476e8362667f3167e0617d9099e674fc0e9fc08e18c9b41b9f57770e5c6b26daf6329b2f3e5a897a8bfd1feb25a2bb1c6e86279407471d0fc363ff3986e32cb" />
+						value="f143826e22f1a95830ab32dde7b388c154039ed0633c9b0d1526078a9ee7f403540e3cd3459331a3c2caf72e006daff2f71ab7cd2136272e5e022ef392c32246" />
 				</extension>
 			</Organization>
 		</resource>
@@ -87,7 +87,7 @@
 				</endpoint>
 				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
 					<valueString
-						value="c00bf50c40c04f2fc3f353acce81127e4732f261f5003b6b761bc0a0b5a7f84dc063ec8086402309ad560d52349ed4ee578e79bbb0481a94649c41ca522df8ba" />
+						value="e4af921e6cbc35032ddb21b8a36f366ff7605bdb20bddddcbca6bcc437239b58e9189dfea3a66c584a9bb0a6006c243031c6c5504a43d059afa629d24f8b55bb" />
 				</extension>
 			</Organization>
 		</resource>
@@ -119,7 +119,7 @@
 				</endpoint>
 				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
 					<valueString
-						value="55084b67a2e39cce0bc9e4912584bbe3888fecc606fde5304eb48184e26a4a1ce21b1df557d5955925602aa688022e9c57e1b360c3473b742ee4f50c885b10ea" />
+						value="821be11d134e7070e3bcc402032fdab9d8ee865ef2b98ac70605864572fcd4e13cd55cb9d3841785a497234f1fb8447434cd07ca47e524db36fcfcccdea0d56f" />
 				</extension>
 			</Organization>
 		</resource>

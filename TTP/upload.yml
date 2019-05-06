@@ -13,7 +13,9 @@
       synchronize:
          src: bpe
          dest: /opt/highmed
+         perms: no
    -  name: Synchronize fhir folder
       synchronize:
          src: fhir
-         dest: /opt/highmed 
+         dest: /opt/highmed
+         perms: no 
