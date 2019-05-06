@@ -10,6 +10,8 @@ import org.highmed.bpe.Constants;
 import org.highmed.fhir.organization.OrganizationProvider;
 import org.highmed.fhir.variables.MultiInstanceTarget;
 import org.highmed.fhir.variables.MultiInstanceTargetValues;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.ParameterComponent;
@@ -17,13 +19,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-public class SelectTarget implements JavaDelegate, InitializingBean
+public class SelectPongTarget implements JavaDelegate, InitializingBean
 {
-	private static final Logger logger = LoggerFactory.getLogger(SelectTargets.class);
+	private static final Logger logger = LoggerFactory.getLogger(SelectPingTargets.class);
 
 	private final OrganizationProvider organizationProvider;
 
-	public SelectTarget(OrganizationProvider organizationProvider)
+	public SelectPongTarget(OrganizationProvider organizationProvider)
 	{
 		this.organizationProvider = organizationProvider;
 	}
@@ -45,10 +47,14 @@ public class SelectTarget implements JavaDelegate, InitializingBean
 
 		String correlationKey = getString(task.getInput(), Constants.CODESYSTEM_HIGHMED_BPMN,
 				Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY).get();
-		String targetOrganizationId = task.getRequester().getReference();
 
-		execution.setVariable(Constants.VARIABLE_MULTIINSTANCE_TARGET,
-				MultiInstanceTargetValues.create(new MultiInstanceTarget(targetOrganizationId, correlationKey)));
+		Identifier targetOrganizationIdentifier = organizationProvider
+				.getIdentifier(new IdType(task.getRequester().getReference()))
+				.orElseThrow(() -> new IllegalStateException(
+						"Organization with id " + task.getRequester().getReference() + " not found"));
+
+		execution.setVariable(Constants.VARIABLE_MULTI_INSTANCE_TARGET, MultiInstanceTargetValues
+				.create(new MultiInstanceTarget(targetOrganizationIdentifier.getValue(), correlationKey)));
 	}
 
 	private Optional<String> getString(List<ParameterComponent> list, String system, String code)

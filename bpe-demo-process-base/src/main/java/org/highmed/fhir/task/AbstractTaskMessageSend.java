@@ -56,9 +56,9 @@ public class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
 		// String correlationKey = (String) execution.getVariable(Constants.VARIABLE_CORRELATION_KEY);
 
 		MultiInstanceTarget target = (MultiInstanceTarget) execution
-				.getVariable(Constants.VARIABLE_MULTIINSTANCE_TARGET);
+				.getVariable(Constants.VARIABLE_MULTI_INSTANCE_TARGET);
 
-		sendTask(target.getTargetOrganizationId(), processDefinitionKey, versionTag, messageName, businessKey,
+		sendTask(target.getTargetOrganizationIdentifierValue(), processDefinitionKey, versionTag, messageName, businessKey,
 				target.getCorrelationKey());
 	}
 

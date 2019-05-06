@@ -1,5 +1,7 @@
 package org.highmed.bpe.werbservice;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -19,6 +21,7 @@ import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.repository.Deployment;
 import org.camunda.bpm.engine.repository.ProcessDefinition;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
+import org.highmed.bpe.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -53,7 +56,7 @@ public class ProcessService implements InitializingBean
 	{
 		logger.trace("POST {}", uri.getRequestUri().toString());
 
-		return start(processDefinitionKey, null, null);
+		return start(processDefinitionKey, null, uri.getQueryParameters());
 	}
 
 	@POST
@@ -63,10 +66,10 @@ public class ProcessService implements InitializingBean
 	{
 		logger.trace("POST {}", uri.getRequestUri().toString());
 
-		return start(processDefinitionKey, versionTag, null);
+		return start(processDefinitionKey, versionTag, uri.getQueryParameters());
 	}
 
-	private Response start(String processDefinitionKey, String versionTag, Map<String, Object> processVariables)
+	private Response start(String processDefinitionKey, String versionTag, Map<String, List<String>> queryParameters)
 	{
 		ProcessDefinition processDefinition = getProcessDefinition(processDefinitionKey, versionTag);
 
@@ -79,7 +82,7 @@ public class ProcessService implements InitializingBean
 		}
 
 		runtimeService.startProcessInstanceById(processDefinition.getId(), UUID.randomUUID().toString(),
-				processVariables);
+				Map.of(Constants.VARIABLE_QUERY_PARAMETERS, new HashMap<>(queryParameters)));
 
 		return Response.status(Status.CREATED).build();
 	}
@@ -94,18 +97,18 @@ public class ProcessService implements InitializingBean
 					.latestVersion().singleResult();
 	}
 
-//	@POST
-//	public Response create(BpmnModelInstance resource, @Context UriInfo uri, @Context HttpHeaders headers)
-//	{
-//		logger.trace("POST {}", uri.getRequestUri().toString());
-//
-//		DeploymentBuilder deploymentBuilder = repositoryService.createDeployment();
-//		deploymentBuilder.addModelInstance("hello_world.bpmn", resource);
-//		Deployment deployment = deploymentBuilder.deploy();
-//		logger.info("Hello World process deployed with ID {}", deployment.getId(), deployment);
-//
-//		return Response.ok().build();
-//	}
+	// @POST
+	// public Response create(BpmnModelInstance resource, @Context UriInfo uri, @Context HttpHeaders headers)
+	// {
+	// logger.trace("POST {}", uri.getRequestUri().toString());
+	//
+	// DeploymentBuilder deploymentBuilder = repositoryService.createDeployment();
+	// deploymentBuilder.addModelInstance("hello_world.bpmn", resource);
+	// Deployment deployment = deploymentBuilder.deploy();
+	// logger.info("Hello World process deployed with ID {}", deployment.getId(), deployment);
+	//
+	// return Response.ok().build();
+	// }
 
 	@GET
 	@Path("/{id}")

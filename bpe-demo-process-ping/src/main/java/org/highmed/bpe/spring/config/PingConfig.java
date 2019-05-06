@@ -5,8 +5,8 @@ import org.highmed.bpe.message.SendPong;
 import org.highmed.bpe.plugin.PingPlugin;
 import org.highmed.bpe.service.LogPing;
 import org.highmed.bpe.service.LogPong;
-import org.highmed.bpe.service.SelectTarget;
-import org.highmed.bpe.service.SelectTargets;
+import org.highmed.bpe.service.SelectPongTarget;
+import org.highmed.bpe.service.SelectPingTargets;
 import org.highmed.fhir.client.WebserviceClientProvider;
 import org.highmed.fhir.organization.OrganizationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,14 +53,14 @@ public class PingConfig
 	}
 
 	@Bean
-	public SelectTargets selectTargets()
+	public SelectPingTargets selectPingTargets()
 	{
-		return new SelectTargets(organizationProvider);
+		return new SelectPingTargets(organizationProvider);
 	}
 
 	@Bean
-	public SelectTarget selectTarget()
+	public SelectPongTarget selectPongTarget()
 	{
-		return new SelectTarget(organizationProvider);
+		return new SelectPongTarget(organizationProvider);
 	}
 }

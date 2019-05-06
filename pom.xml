@@ -21,6 +21,7 @@
 		<module>bpe-demo-process-ping</module>
 		<module>bpe-demo-webservice-client</module>
 		<module>bpe-demo-cert-generator</module>
+		<module>bpe-demo-prcoess-update-resources</module>
 	</modules>
 
 	<properties>
@@ -106,6 +107,11 @@
 			<dependency>
 				<groupId>org.highmed.bpe</groupId>
 				<artifactId>bpe-demo-process-ping</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.bpe</groupId>
+				<artifactId>bpe-demo-process-update-resources</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

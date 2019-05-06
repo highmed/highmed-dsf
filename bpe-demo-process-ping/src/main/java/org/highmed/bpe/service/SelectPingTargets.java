@@ -15,13 +15,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-public class SelectTargets implements JavaDelegate, InitializingBean
+public class SelectPingTargets implements JavaDelegate, InitializingBean
 {
-	private static final Logger logger = LoggerFactory.getLogger(SelectTargets.class);
+	private static final Logger logger = LoggerFactory.getLogger(SelectPingTargets.class);
 
 	private final OrganizationProvider organizationProvider;
 
-	public SelectTargets(OrganizationProvider organizationProvider)
+	public SelectPingTargets(OrganizationProvider organizationProvider)
 	{
 		this.organizationProvider = organizationProvider;
 	}
@@ -39,9 +39,8 @@ public class SelectTargets implements JavaDelegate, InitializingBean
 				getClass().getName(), execution.getProcessInstanceId(), execution.getBusinessKey(),
 				execution.getVariables(), execution.getVariablesLocal());
 
-		List<MultiInstanceTarget> targets = organizationProvider.getRemoteOrganizations().stream()
-				.map(o -> o.getIdElement())
-				.map(oId -> new MultiInstanceTarget(oId.getValue(), UUID.randomUUID().toString()))
+		List<MultiInstanceTarget> targets = organizationProvider.getRemoteIdentifiers().stream()
+				.map(identifier -> new MultiInstanceTarget(identifier.getValue(), UUID.randomUUID().toString()))
 				.collect(Collectors.toList());
 
 		execution.setVariable("multiInstanceTargets",

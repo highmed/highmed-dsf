@@ -99,6 +99,11 @@ public class ClientProviderImpl implements WebserviceClientProvider, WebsocketCl
 		Objects.requireNonNull(localWebsocketKeyStorePassword, "localWebsocketKeyStorePassword");
 	}
 
+	public String getLocalBaseUrl()
+	{
+		return localBaseUrl;
+	}
+	
 	private WebserviceClient getClient(String webserviceUrl)
 	{
 		synchronized (webserviceClientsByUrl)

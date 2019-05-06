@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
 
 public interface OrganizationProvider
@@ -29,4 +31,17 @@ public interface OrganizationProvider
 	 *         {@link #getLocalIdentifier()}
 	 */
 	List<Organization> getRemoteOrganizations();
+
+	/**
+	 * @return {@link Organization}s {@link Identifier} with {@link #getDefaultSystem()} and identifier other than
+	 *         {@link #getLocalIdentifier()}
+	 */
+	List<Identifier> getRemoteIdentifiers();
+
+	/**
+	 * @param organizationId
+	 * @return {@link Organization}s {@link Identifier} with idPart equal to the given organizationId, or
+	 *         {@link Optional#empty()} if not found
+	 */
+	Optional<Identifier> getIdentifier(IdType organizationId);
 }

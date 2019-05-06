@@ -10,11 +10,17 @@ import java.util.stream.Stream;
 
 import org.highmed.fhir.client.WebserviceClientProvider;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 public class OrganizationProviderImpl implements OrganizationProvider, InitializingBean
 {
+	private static final Logger logger = LoggerFactory.getLogger(OrganizationProviderImpl.class);
+
 	private final WebserviceClientProvider clientProvider;
 	private final String organizationIdentifierCodeSystem;
 	private final String organizationIdentifierLocalValue;
@@ -85,5 +91,31 @@ public class OrganizationProviderImpl implements OrganizationProvider, Initializ
 				o -> !o.getIdentifier().stream().anyMatch(i -> organizationIdentifierCodeSystem.equals(i.getSystem())
 						&& organizationIdentifierLocalValue.equals(i.getValue())))
 				.collect(Collectors.toList());
+	}
+
+	@Override
+	public List<Identifier> getRemoteIdentifiers()
+	{
+		return getRemoteOrganizations()
+				.stream().map(o -> o.getIdentifier().stream()
+						.filter(i -> organizationIdentifierCodeSystem.equals(i.getSystem())).findFirst().orElse(null))
+				.filter(i -> i != null).collect(Collectors.toList());
+	}
+
+	@Override
+	public Optional<Identifier> getIdentifier(IdType organizationId)
+	{
+		if (!organizationId.hasBaseUrl() || clientProvider.getLocalBaseUrl().equals(organizationId.getBaseUrl()))
+		{
+			List<Identifier> identifiers = clientProvider.getLocalWebserviceClient()
+					.read(Organization.class, organizationId.getIdPart()).getIdentifier();
+			return identifiers.stream().filter(i -> organizationIdentifierCodeSystem.equals(i.getSystem())).findFirst();
+		}
+		else
+		{
+			logger.warn("OrganizationId starts with baseUrl not equal to {}, but {}", clientProvider.getLocalBaseUrl(),
+					organizationId.getBaseUrl());
+			return Optional.empty();
+		}
 	}
 }

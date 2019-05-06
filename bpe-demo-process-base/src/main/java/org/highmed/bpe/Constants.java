@@ -8,9 +8,9 @@ public interface Constants
 
 	// String VARIABLE_TARGET_ORGANIZATION_ID = "targetOrganizationId";
 	// String VARIABLE_CORRELATION_KEY = "correlationKey";
-	String VARIABLE_MULTIINSTANCE_TARGET = "multiInstanceTarget";
-
+	String VARIABLE_MULTI_INSTANCE_TARGET = "multiInstanceTarget";
 	String VARIABLE_TASK = "task";
+	String VARIABLE_QUERY_PARAMETERS = "queryParameters";
 
 	String CODESYSTEM_HIGHMED_BPMN = "http://highmed.org/fhir/CodeSystem/bpmn-message";
 	String CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME = "message-name";

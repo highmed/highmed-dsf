@@ -5,20 +5,21 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class MultiInstanceTarget
 {
-	private final String targetOrganizationId;
+	private final String targetOrganizationIdentifierValue;
 	private final String correlationKey;
 
 	@JsonCreator
-	public MultiInstanceTarget(@JsonProperty("targetOrganizationId") String targetOrganizationId,
+	public MultiInstanceTarget(
+			@JsonProperty("targetOrganizationIdentifierValue") String targetOrganizationIdentifierValue,
 			@JsonProperty("correlationKey") String correlationKey)
 	{
-		this.targetOrganizationId = targetOrganizationId;
+		this.targetOrganizationIdentifierValue = targetOrganizationIdentifierValue;
 		this.correlationKey = correlationKey;
 	}
 
-	public String getTargetOrganizationId()
+	public String getTargetOrganizationIdentifierValue()
 	{
-		return targetOrganizationId;
+		return targetOrganizationIdentifierValue;
 	}
 
 	public String getCorrelationKey()
