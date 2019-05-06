@@ -1,6 +1,7 @@
 package org.highmed.fhir.variables;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import org.hl7.fhir.r4.model.Organization;
 
@@ -17,7 +18,7 @@ public class OrganizationDeserializer extends JsonDeserializer<Organization>
 
 	public OrganizationDeserializer(FhirContext fhirContext)
 	{
-		this.fhirContext = fhirContext;
+		this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext");
 	}
 
 	@Override

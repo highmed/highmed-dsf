@@ -18,12 +18,21 @@ import org.highmed.fhir.variables.DomainResourceSerializer;
 import org.highmed.fhir.variables.FhirPlugin;
 import org.highmed.fhir.variables.MultiInstanceTargetSerializer;
 import org.highmed.fhir.variables.MultiInstanceTargetsSerializer;
+import org.highmed.fhir.variables.OrganizationDeserializer;
+import org.highmed.fhir.variables.OrganizationSerializer;
 import org.highmed.fhir.websocket.FhirConnector;
 import org.highmed.fhir.websocket.LastEventTimeIo;
+import org.hl7.fhir.r4.model.Organization;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import ca.uhn.fhir.context.FhirContext;
 import de.rwh.utils.crypto.CertificateHelper;
@@ -86,8 +95,38 @@ public class FhirConfig
 	@Autowired
 	private CamundaConfig camundaConfig;
 
-	@Autowired
-	private JsonConfig jsonConfig;
+	@Bean
+	public ObjectMapper objectMapper()
+	{
+		ObjectMapper mapper = new ObjectMapper();
+
+		mapper.getFactory().disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
+		mapper.disable(MapperFeature.DEFAULT_VIEW_INCLUSION);
+		mapper.setSerializationInclusion(Include.NON_NULL);
+		mapper.setSerializationInclusion(Include.NON_EMPTY);
+
+		// mapper.enable(SerializationFeature.INDENT_OUTPUT);
+
+		SimpleModule module = new SimpleModule();
+		module.addSerializer(Organization.class, organizationSerializer());
+		module.addDeserializer(Organization.class, organizationDeserializer());
+
+		mapper.registerModule(module);
+
+		return mapper;
+	}
+
+	@Bean
+	public OrganizationSerializer organizationSerializer()
+	{
+		return new OrganizationSerializer(fhirContext());
+	}
+
+	@Bean
+	public OrganizationDeserializer organizationDeserializer()
+	{
+		return new OrganizationDeserializer(fhirContext());
+	}
 
 	@Bean
 	public FhirContext fhirContext()
@@ -111,13 +150,13 @@ public class FhirConfig
 	@Bean
 	public MultiInstanceTargetSerializer multiInstanceTargetSerializer()
 	{
-		return new MultiInstanceTargetSerializer(jsonConfig.objectMapper());
+		return new MultiInstanceTargetSerializer(objectMapper());
 	}
 
 	@Bean
 	public MultiInstanceTargetsSerializer multiInstanceTargetsSerializer()
 	{
-		return new MultiInstanceTargetsSerializer(jsonConfig.objectMapper());
+		return new MultiInstanceTargetsSerializer(objectMapper());
 	}
 
 	@Bean

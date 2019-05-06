@@ -19,7 +19,7 @@ RUN adduser --system --no-create-home --group java
 RUN chown root:java ./ ./lib ./log ./last_event ./bpe_demo.jar ./lib/*.jar
 RUN chmod 750 ./ ./lib
 RUN chmod 640 ./bpe_demo.jar ./lib/*.jar
-RUN chmod 2660 ./log ./last_event	
+RUN chmod 1775 ./log ./last_event	
 
 USER java
 ENTRYPOINT ["/usr/bin/java", "-cp", "lib/*:bpe_demo.jar", "org.highmed.bpe.BpeJettyServer"]
