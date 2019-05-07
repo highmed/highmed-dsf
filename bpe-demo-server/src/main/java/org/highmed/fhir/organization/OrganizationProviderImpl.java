@@ -24,6 +24,7 @@ public class OrganizationProviderImpl implements OrganizationProvider, Initializ
 	private final WebserviceClientProvider clientProvider;
 	private final String organizationIdentifierCodeSystem;
 	private final String organizationIdentifierLocalValue;
+	private final Identifier localIdentifier;
 
 	public OrganizationProviderImpl(WebserviceClientProvider clientProvider, String organizationIdentifierCodeSystem,
 			String organizationIdentifierLocalValue)
@@ -31,6 +32,9 @@ public class OrganizationProviderImpl implements OrganizationProvider, Initializ
 		this.clientProvider = clientProvider;
 		this.organizationIdentifierCodeSystem = organizationIdentifierCodeSystem;
 		this.organizationIdentifierLocalValue = organizationIdentifierLocalValue;
+
+		localIdentifier = new Identifier().setSystem(organizationIdentifierCodeSystem)
+				.setValue(organizationIdentifierLocalValue);
 	}
 
 	@Override
@@ -48,9 +52,15 @@ public class OrganizationProviderImpl implements OrganizationProvider, Initializ
 	}
 
 	@Override
-	public String getLocalIdentifier()
+	public String getLocalIdentifierValue()
 	{
 		return organizationIdentifierLocalValue;
+	}
+
+	@Override
+	public Identifier getLocalIdentifier()
+	{
+		return localIdentifier;
 	}
 
 	private Stream<Organization> searchForOrganizations(String system, String identifier)

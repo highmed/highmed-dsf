@@ -12,7 +12,7 @@ public interface OrganizationProvider
 {
 	String getDefaultSystem();
 
-	String getLocalIdentifier();
+	String getLocalIdentifierValue();
 
 	Optional<Organization> getOrganization(String identifier);
 
@@ -21,20 +21,22 @@ public interface OrganizationProvider
 	/**
 	 * @return the local organization
 	 * @throws NoSuchElementException
-	 *             if no {@link Organization} with {@link #getDefaultSystem()} and {@link #getLocalIdentifier()} could
+	 *             if no {@link Organization} with {@link #getDefaultSystem()} and {@link #getLocalIdentifierValue()} could
 	 *             be found
 	 */
 	Organization getLocalOrganization();
 
 	/**
 	 * @return {@link Organization}s with {@link #getDefaultSystem()} and identifier other than
-	 *         {@link #getLocalIdentifier()}
+	 *         {@link #getLocalIdentifierValue()}
 	 */
 	List<Organization> getRemoteOrganizations();
 
+	Identifier getLocalIdentifier();
+	
 	/**
 	 * @return {@link Organization}s {@link Identifier} with {@link #getDefaultSystem()} and identifier other than
-	 *         {@link #getLocalIdentifier()}
+	 *         {@link #getLocalIdentifierValue()}
 	 */
 	List<Identifier> getRemoteIdentifiers();
 

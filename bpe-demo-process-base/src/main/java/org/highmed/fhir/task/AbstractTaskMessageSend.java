@@ -58,11 +58,11 @@ public class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
 		MultiInstanceTarget target = (MultiInstanceTarget) execution
 				.getVariable(Constants.VARIABLE_MULTI_INSTANCE_TARGET);
 
-		sendTask(target.getTargetOrganizationIdentifierValue(), processDefinitionKey, versionTag, messageName, businessKey,
-				target.getCorrelationKey());
+		sendTask(target.getTargetOrganizationIdentifierValue(), processDefinitionKey, versionTag, messageName,
+				businessKey, target.getCorrelationKey());
 	}
 
-	protected void sendTask(String targetOrganizationId, String processDefinitionKey, String versionTag,
+	protected void sendTask(String targetOrganizationIdentifierValue, String processDefinitionKey, String versionTag,
 			String messageName, String businessKey, String correlationKey,
 			ParameterComponent... additionalInputParameters)
 	{
@@ -73,8 +73,13 @@ public class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
-		task.setRequester(new Reference(organizationProvider.getLocalOrganization().getIdElement()));
-		task.getRestriction().addRecipient(new Reference(targetOrganizationId));
+		task.setRequester(
+				new Reference().setType("Organization").setIdentifier(organizationProvider.getLocalIdentifier()));
+		Reference targetReference = new Reference();
+		targetReference.setType("Organization");
+		targetReference.getIdentifier().setSystem(organizationProvider.getDefaultSystem())
+				.setValue(targetOrganizationIdentifierValue);
+		task.getRestriction().addRecipient(targetReference);
 
 		// http://highmed.org/bpe/Process/processDefinitionKey
 		// http://highmed.org/bpe/Process/processDefinitionKey/versionTag
@@ -106,10 +111,11 @@ public class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
 		for (ParameterComponent param : additionalInputParameters)
 			task.getInput().add(param);
 
-		WebserviceClient client = clientProvider.getRemoteWebserviceClient(new IdType(targetOrganizationId));
+		WebserviceClient client = clientProvider
+				.getRemoteWebserviceClient(new IdType(targetOrganizationIdentifierValue));
 
 		logger.info("Sending task for process {} to organization {} (endpoint: {})", task.getInstantiatesUri(),
-				targetOrganizationId, client.getBaseUrl());
+				targetOrganizationIdentifierValue, client.getBaseUrl());
 		client.create(task);
 	}
 
