@@ -1,4 +1,4 @@
-package org.highmed.fhir.dao.command;
+package org.highmed.fhir.service;
 
 import java.util.Arrays;
 import java.util.List;
@@ -6,6 +6,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import org.highmed.fhir.dao.command.ResourceReference;
 import org.hl7.fhir.r4.model.BackboneElement;
 import org.hl7.fhir.r4.model.CareTeam;
 import org.hl7.fhir.r4.model.ClaimResponse;
@@ -36,9 +37,9 @@ import org.hl7.fhir.r4.model.Task.TaskRestrictionComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ReferenceExtractor
+public class ReferenceExtractorImpl implements ReferenceExtractor
 {
-	private static final Logger logger = LoggerFactory.getLogger(ReferenceExtractor.class);
+	private static final Logger logger = LoggerFactory.getLogger(ReferenceExtractorImpl.class);
 
 	@SafeVarargs
 	private Function<Reference, ResourceReference> toResourceReference(String referenceLocation,
@@ -155,8 +156,12 @@ public class ReferenceExtractor
 			return Arrays.stream(streams).flatMap(Function.identity());
 	}
 
+	@Override
 	public Stream<ResourceReference> getReferences(DomainResource resource)
 	{
+		if (resource == null)
+			return Stream.empty();
+
 		if (resource instanceof Endpoint)
 			return getReferences((Endpoint) resource);
 		else if (resource instanceof HealthcareService)
@@ -180,11 +185,12 @@ public class ReferenceExtractor
 		else
 		{
 			logger.debug("Resource of type {} not supported by {}, returning extension references only",
-					resource.getClass().getName(), ReferenceExtractor.class.getName());
+					resource.getClass().getName(), ReferenceExtractorImpl.class.getName());
 			return getExtensionReferences(resource);
 		}
 	}
 
+	@Override
 	public Stream<ResourceReference> getReferences(Endpoint resource)
 	{
 		if (resource == null)
@@ -198,6 +204,7 @@ public class ReferenceExtractor
 		return concat(managingOrganization, extensionReferences);
 	}
 
+	@Override
 	public Stream<ResourceReference> getReferences(HealthcareService resource)
 	{
 		if (resource == null)
@@ -217,6 +224,7 @@ public class ReferenceExtractor
 		return concat(providedBy, locations, coverageAreas, endpoints, extensionReferences);
 	}
 
+	@Override
 	public Stream<ResourceReference> getReferences(Location resource)
 	{
 		var managingOrganization = getReference(resource, Location::hasManagingOrganization,
@@ -231,6 +239,7 @@ public class ReferenceExtractor
 		return concat(managingOrganization, partOf, endpoints, extensionReferences);
 	}
 
+	@Override
 	public Stream<ResourceReference> getReferences(Organization resource)
 	{
 		var partOf = getReference(resource, Organization::hasPartOf, Organization::getPartOf, "Organization.partOf",
@@ -243,6 +252,7 @@ public class ReferenceExtractor
 		return concat(partOf, endpoints, extensionReferences);
 	}
 
+	@Override
 	public Stream<ResourceReference> getReferences(Patient resource)
 	{
 		var contacts_organization = getBackboneElementsReference(resource, Patient::hasContact, Patient::getContact,
@@ -263,6 +273,7 @@ public class ReferenceExtractor
 				extensionReferences);
 	}
 
+	@Override
 	public Stream<ResourceReference> getReferences(Practitioner resource)
 	{
 		var qualifications_issuer = getBackboneElementsReference(resource, Practitioner::hasQualification,
@@ -274,6 +285,7 @@ public class ReferenceExtractor
 		return concat(qualifications_issuer, extensionReferences);
 	}
 
+	@Override
 	public Stream<ResourceReference> getReferences(PractitionerRole resource)
 	{
 		var practitioner = getReference(resource, PractitionerRole::hasPractitioner, PractitionerRole::getPractitioner,
@@ -292,6 +304,7 @@ public class ReferenceExtractor
 		return concat(practitioner, organization, locations, healthcareServices, endpoints, extensionReferences);
 	}
 
+	@Override
 	public Stream<ResourceReference> getReferences(Provenance resource)
 	{
 		var targets = getReferences(resource, Provenance::hasTarget, Provenance::getTarget, "Provenance.target");
@@ -313,6 +326,7 @@ public class ReferenceExtractor
 		return concat(targets, location, agents_who, agents_onBehalfOf, entities_what, extensionReferences);
 	}
 
+	@Override
 	public Stream<ResourceReference> getReferences(ResearchStudy resource)
 	{
 		var protocols = getReferences(resource, ResearchStudy::hasProtocol, ResearchStudy::getProtocol,
@@ -334,6 +348,7 @@ public class ReferenceExtractor
 		return concat(protocols, partOfs, enrollments, sponsor, principalInvestigator, sites, extensionReferences);
 	}
 
+	@Override
 	public Stream<ResourceReference> getReferences(Task resource)
 	{
 		var basedOns = getReferences(resource, Task::hasBasedOn, Task::getBasedOn, "Task.basedOn");

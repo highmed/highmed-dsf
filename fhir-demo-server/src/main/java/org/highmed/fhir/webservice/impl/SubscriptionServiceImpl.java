@@ -6,6 +6,8 @@ import org.highmed.fhir.event.EventManager;
 import org.highmed.fhir.help.ExceptionHandler;
 import org.highmed.fhir.help.ParameterConverter;
 import org.highmed.fhir.help.ResponseGenerator;
+import org.highmed.fhir.service.ReferenceExtractor;
+import org.highmed.fhir.service.ReferenceResolver;
 import org.highmed.fhir.service.ResourceValidator;
 import org.highmed.fhir.webservice.specification.SubscriptionService;
 import org.hl7.fhir.r4.model.Subscription;
@@ -16,9 +18,11 @@ public class SubscriptionServiceImpl extends AbstractServiceImpl<SubscriptionDao
 	public SubscriptionServiceImpl(String resourceTypeName, String serverBase, String path, int defaultPageCount,
 			SubscriptionDao dao, ResourceValidator validator, EventManager eventManager,
 			ExceptionHandler exceptionHandler, EventGenerator eventGenerator, ResponseGenerator responseGenerator,
-			ParameterConverter parameterConverter)
+			ParameterConverter parameterConverter, ReferenceExtractor referenceExtractor,
+			ReferenceResolver referenceResolver)
 	{
 		super(Subscription.class, resourceTypeName, serverBase, path, defaultPageCount, dao, validator, eventManager,
-				exceptionHandler, eventGenerator, responseGenerator, parameterConverter);
+				exceptionHandler, eventGenerator, responseGenerator, parameterConverter, referenceExtractor,
+				referenceResolver);
 	}
 }

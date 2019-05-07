@@ -6,6 +6,8 @@ import org.highmed.fhir.event.EventManager;
 import org.highmed.fhir.help.ExceptionHandler;
 import org.highmed.fhir.help.ParameterConverter;
 import org.highmed.fhir.help.ResponseGenerator;
+import org.highmed.fhir.service.ReferenceExtractor;
+import org.highmed.fhir.service.ReferenceResolver;
 import org.highmed.fhir.service.ResourceValidator;
 import org.highmed.fhir.webservice.specification.LocationService;
 import org.hl7.fhir.r4.model.Location;
@@ -14,9 +16,11 @@ public class LocationServiceImpl extends AbstractServiceImpl<LocationDao, Locati
 {
 	public LocationServiceImpl(String resourceTypeName, String serverBase, String path, int defaultPageCount,
 			LocationDao dao, ResourceValidator validator, EventManager eventManager, ExceptionHandler exceptionHandler,
-			EventGenerator eventGenerator, ResponseGenerator responseGenerator, ParameterConverter parameterConverter)
+			EventGenerator eventGenerator, ResponseGenerator responseGenerator, ParameterConverter parameterConverter,
+			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver)
 	{
 		super(Location.class, resourceTypeName, serverBase, path, defaultPageCount, dao, validator, eventManager,
-				exceptionHandler, eventGenerator, responseGenerator, parameterConverter);
+				exceptionHandler, eventGenerator, responseGenerator, parameterConverter, referenceExtractor,
+				referenceResolver);
 	}
 }

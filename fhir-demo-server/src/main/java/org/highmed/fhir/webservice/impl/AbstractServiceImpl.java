@@ -1,6 +1,8 @@
 package org.highmed.fhir.webservice.impl;
 
 import java.net.URI;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -13,7 +15,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
@@ -27,6 +31,8 @@ import javax.ws.rs.core.UriInfo;
 
 import org.highmed.fhir.authentication.UserProvider;
 import org.highmed.fhir.dao.DomainResourceDao;
+import org.highmed.fhir.dao.command.ResourceReference;
+import org.highmed.fhir.dao.exception.ResourceNotFoundException;
 import org.highmed.fhir.event.EventGenerator;
 import org.highmed.fhir.event.EventManager;
 import org.highmed.fhir.help.ExceptionHandler;
@@ -35,6 +41,8 @@ import org.highmed.fhir.help.ResponseGenerator;
 import org.highmed.fhir.search.PartialResult;
 import org.highmed.fhir.search.SearchQuery;
 import org.highmed.fhir.search.SearchQueryParameterError;
+import org.highmed.fhir.service.ReferenceExtractor;
+import org.highmed.fhir.service.ReferenceResolver;
 import org.highmed.fhir.service.ResourceValidator;
 import org.highmed.fhir.webservice.specification.BasicService;
 import org.hl7.fhir.r4.model.Bundle;
@@ -82,11 +90,14 @@ public abstract class AbstractServiceImpl<D extends DomainResourceDao<R>, R exte
 	protected final EventGenerator eventGenerator;
 	protected final ResponseGenerator responseGenerator;
 	protected final ParameterConverter parameterConverter;
+	protected final ReferenceExtractor referenceExtractor;
+	protected final ReferenceResolver referenceResolver;
 
 	public AbstractServiceImpl(Class<? extends DomainResource> resourceType, String resourceTypeName, String serverBase,
 			String path, int defaultPageCount, D dao, ResourceValidator validator, EventManager eventManager,
 			ExceptionHandler exceptionHandler, EventGenerator eventGenerator, ResponseGenerator responseGenerator,
-			ParameterConverter parameterConverter)
+			ParameterConverter parameterConverter, ReferenceExtractor referenceExtractor,
+			ReferenceResolver referenceResolver)
 	{
 		this.resourceType = resourceType;
 		this.resourceTypeName = resourceTypeName;
@@ -100,6 +111,8 @@ public abstract class AbstractServiceImpl<D extends DomainResourceDao<R>, R exte
 		this.eventGenerator = eventGenerator;
 		this.responseGenerator = responseGenerator;
 		this.parameterConverter = parameterConverter;
+		this.referenceExtractor = referenceExtractor;
+		this.referenceResolver = referenceResolver;
 	}
 
 	public void afterPropertiesSet() throws Exception
@@ -114,6 +127,8 @@ public abstract class AbstractServiceImpl<D extends DomainResourceDao<R>, R exte
 		Objects.requireNonNull(eventGenerator, "eventGenerator");
 		Objects.requireNonNull(responseGenerator, "responseGenerator");
 		Objects.requireNonNull(parameterConverter, "parameterConverter");
+		Objects.requireNonNull(referenceExtractor, "referenceExtractor");
+		Objects.requireNonNull(referenceResolver, "referenceResolver");
 	}
 
 	@Override
@@ -134,7 +149,27 @@ public abstract class AbstractServiceImpl<D extends DomainResourceDao<R>, R exte
 
 		Consumer<R> afterCreate = preCreate(resource);
 
-		R createdResource = exceptionHandler.handleSqlException(() -> dao.create(resource));
+		R createdResource = exceptionHandler.handleSqlException(() ->
+		{
+			try (Connection connection = dao.getNewTransaction())
+			{
+				try
+				{
+					R created = dao.createWithTransactionAndId(connection, resource, UUID.randomUUID());
+
+					created = resolveReferences(connection, created);
+
+					connection.commit();
+
+					return created;
+				}
+				catch (SQLException | WebApplicationException e)
+				{
+					connection.rollback();
+					throw e;
+				}
+			}
+		});
 
 		eventManager.handleEvent(eventGenerator.newResourceCreatedEvent(createdResource));
 
@@ -146,8 +181,45 @@ public abstract class AbstractServiceImpl<D extends DomainResourceDao<R>, R exte
 
 		return responseGenerator
 				.response(Status.CREATED, createdResource, parameterConverter.getMediaType(uri, headers))
-				.location(location).lastModified(resource.getMeta().getLastUpdated())
-				.tag(new EntityTag(resource.getMeta().getVersionId(), true)).build();
+				.location(location).lastModified(createdResource.getMeta().getLastUpdated())
+				.tag(new EntityTag(createdResource.getMeta().getVersionId(), true)).build();
+	}
+
+	private R resolveReferences(Connection connection, R created) throws SQLException
+	{
+		boolean resourceNeedsUpdated = referenceExtractor.getReferences(created)
+				.map(resolveReference(created, connection)).anyMatch(b -> b);
+		if (resourceNeedsUpdated)
+		{
+			try
+			{
+				created = dao.updateSameRowWithTransaction(connection, created);
+			}
+			catch (ResourceNotFoundException e)
+			{
+				throw exceptionHandler.internalServerError(e);
+			}
+		}
+		return created;
+	}
+
+	private Function<ResourceReference, Boolean> resolveReference(DomainResource resource, Connection connection)
+			throws WebApplicationException
+	{
+		return resourceReference ->
+		{
+			switch (resourceReference.getType(serverBase))
+			{
+				case LITERAL_INTERNAL:
+					return referenceResolver.resolveLiteralInternalReference(resource, resourceReference, connection);
+				case LITERAL_EXTERNAL:
+					return referenceResolver.resolveLiteralExternalReference(resource, resourceReference);
+				case LOGICAL:
+					return referenceResolver.resolveLogicalReference(resource, resourceReference, connection);
+				default:
+					throw new WebApplicationException(responseGenerator.unknownReference(resource, resourceReference));
+			}
+		};
 	}
 
 	private void checkAlreadyExists(HttpHeaders headers) throws WebApplicationException
@@ -312,8 +384,27 @@ public abstract class AbstractServiceImpl<D extends DomainResourceDao<R>, R exte
 				.flatMap(parameterConverter::toEntityTag).flatMap(parameterConverter::toVersion);
 
 		R updatedResource = exceptionHandler
-				.handleSqlExAndResourceNotFoundExForUpdateAsCreateAndResouceVersionNonMatchEx(resourceTypeName,
-						() -> dao.update(resource, ifMatch.orElse(null)));
+				.handleSqlExAndResourceNotFoundExForUpdateAsCreateAndResouceVersionNonMatchEx(resourceTypeName, () ->
+				{
+					try (Connection connection = dao.getNewTransaction())
+					{
+						try
+						{
+							R updated = dao.update(resource, ifMatch.orElse(null));
+
+							updated = resolveReferences(connection, updated);
+
+							connection.commit();
+
+							return updated;
+						}
+						catch (SQLException | WebApplicationException e)
+						{
+							connection.rollback();
+							throw e;
+						}
+					}
+				});
 
 		eventManager.handleEvent(eventGenerator.newResourceUpdatedEvent(updatedResource));
 

@@ -4,6 +4,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.highmed.fhir.help.ResponseGenerator;
 import org.highmed.fhir.webservice.specification.StructureDefinitionService;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StructureDefinition;
@@ -15,9 +16,9 @@ public class StructureDefinitionServiceSecure extends
 {
 	private static final Logger logger = LoggerFactory.getLogger(StructureDefinitionServiceSecure.class);
 
-	public StructureDefinitionServiceSecure(StructureDefinitionService delegate)
+	public StructureDefinitionServiceSecure(StructureDefinitionService delegate, ResponseGenerator responseGenerator)
 	{
-		super(delegate);
+		super(delegate, responseGenerator);
 	}
 
 	@Override

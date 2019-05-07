@@ -2,8 +2,9 @@ package org.highmed.fhir.spring.config;
 
 import org.highmed.fhir.dao.command.CommandFactory;
 import org.highmed.fhir.dao.command.CommandFactoryImpl;
-import org.highmed.fhir.dao.command.ReferenceExtractor;
-import org.highmed.fhir.dao.command.ReferenceReplacer;
+import org.highmed.fhir.service.ReferenceExtractorImpl;
+import org.highmed.fhir.service.ReferenceResolver;
+import org.highmed.fhir.service.ReferenceResolverImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -31,22 +32,23 @@ public class CommandConfig
 	private EventConfig eventConfig;
 
 	@Bean
-	public ReferenceReplacer referenceReplacer()
+	public ReferenceExtractorImpl referenceExtractor()
 	{
-		return new ReferenceReplacer();
+		return new ReferenceExtractorImpl();
 	}
 
 	@Bean
-	public ReferenceExtractor referenceExtractor()
+	public ReferenceResolver referenceResolver()
 	{
-		return new ReferenceExtractor();
+		return new ReferenceResolverImpl(serverBase, daoConfig.daoProvider(), helperConfig.responseGenerator(),
+				helperConfig.exceptionHandler());
 	}
 
 	@Bean
 	public CommandFactory commandFactory()
 	{
 		return new CommandFactoryImpl(serverBase, defaultPageCount, daoConfig.dataSource(), daoConfig.daoProvider(),
-				referenceReplacer(), referenceExtractor(), helperConfig.responseGenerator(),
+				referenceExtractor(), referenceResolver(), helperConfig.responseGenerator(),
 				helperConfig.exceptionHandler(), eventConfig.eventManager(), eventConfig.eventGenerator(),
 				snapshotConfig.snapshotGenerator(), snapshotConfig.snapshotDependencyAnalyzer(),
 				helperConfig.parameterConverter());

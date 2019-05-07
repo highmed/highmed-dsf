@@ -13,6 +13,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
+import org.highmed.fhir.authentication.User;
 import org.highmed.fhir.dao.command.ResourceReference;
 import org.highmed.fhir.search.PartialResult;
 import org.highmed.fhir.search.SearchQueryParameterError;
@@ -167,7 +168,7 @@ public class ResponseGenerator
 
 	public Response pathVsElementId(String resourceTypeName, String id, IdType resourceId)
 	{
-		logger.error("Path id not equal to {} id ({} vs. {})", resourceTypeName, id, resourceId.getIdPart());
+		logger.warn("Path id not equal to {} id ({} vs. {})", resourceTypeName, id, resourceId.getIdPart());
 
 		OperationOutcome out = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Path id not equal to " + resourceTypeName + " id (" + id + " vs. " + resourceId.getIdPart() + ")");
@@ -176,7 +177,7 @@ public class ResponseGenerator
 
 	public Response invalidBaseUrl(String resourceTypeName, IdType resourceId)
 	{
-		logger.error("{} id.baseUrl must be null or equal to {}, value {} unexpected", resourceTypeName, serverBase,
+		logger.warn("{} id.baseUrl must be null or equal to {}, value {} unexpected", resourceTypeName, serverBase,
 				resourceId.getBaseUrl());
 
 		OperationOutcome out = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
@@ -189,7 +190,7 @@ public class ResponseGenerator
 	{
 		String unsupportedQueryParametersString = unsupportedQueryParameters.stream()
 				.map(SearchQueryParameterError::toString).collect(Collectors.joining("; "));
-		logger.error("Bad request '{}', unsupported query parameter{} {}", queryParameters,
+		logger.warn("Bad request '{}', unsupported query parameter{} {}", queryParameters,
 				unsupportedQueryParameters.size() != 1 ? "s" : "", unsupportedQueryParametersString);
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
@@ -200,7 +201,7 @@ public class ResponseGenerator
 
 	public Response badRequestIdsNotMatching(IdType dbResourceId, IdType resourceId)
 	{
-		logger.error("Bad request Id {} does not match db Id {}", resourceId.getValue(), dbResourceId.getValue());
+		logger.warn("Bad request Id {} does not match db Id {}", resourceId.getValue(), dbResourceId.getValue());
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Bad request Id " + resourceId.getValue() + " does not match db Id " + dbResourceId.getValue());
@@ -209,7 +210,7 @@ public class ResponseGenerator
 
 	public Response updateAsCreateNotAllowed(String resourceTypeName, String id)
 	{
-		logger.error("{} with id {} not found", resourceTypeName, id);
+		logger.warn("{} with id {} not found", resourceTypeName, id);
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Resource with id " + id + " not found");
@@ -218,7 +219,7 @@ public class ResponseGenerator
 
 	public Response multipleExists(String resourceTypeName, String ifNoneExistsHeaderValue)
 	{
-		logger.error("Multiple {} resources with criteria {} exist", resourceTypeName, ifNoneExistsHeaderValue);
+		logger.warn("Multiple {} resources with criteria {} exist", resourceTypeName, ifNoneExistsHeaderValue);
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.MULTIPLEMATCHES,
 				"Multiple " + resourceTypeName + " resources with criteria '" + ifNoneExistsHeaderValue + "' exist");
@@ -227,7 +228,7 @@ public class ResponseGenerator
 
 	public Response badIfNoneExistHeaderValue(String ifNoneExistsHeaderValue)
 	{
-		logger.error("Bad If-None-Exist header value '{}'", ifNoneExistsHeaderValue);
+		logger.warn("Bad If-None-Exist header value '{}'", ifNoneExistsHeaderValue);
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Bad If-None-Exist header value '" + ifNoneExistsHeaderValue + "'");
@@ -239,7 +240,7 @@ public class ResponseGenerator
 	{
 		String unsupportedQueryParametersString = unsupportedQueryParameters.stream()
 				.map(SearchQueryParameterError::toString).collect(Collectors.joining("; "));
-		logger.error("Bad If-None-Exist header value '{}', unsupported query parameter{} {}", ifNoneExistsHeaderValue,
+		logger.warn("Bad If-None-Exist header value '{}', unsupported query parameter{} {}", ifNoneExistsHeaderValue,
 				unsupportedQueryParameters.size() != 1 ? "s" : "", unsupportedQueryParametersString);
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
@@ -264,177 +265,244 @@ public class ResponseGenerator
 				.tag(new EntityTag(resource.getMeta().getVersionId(), true)).build();
 	}
 
-	public Response unknownReference(int bundleIndex, DomainResource resource, ResourceReference resourceReference)
+	public Response unknownReference(DomainResource resource, ResourceReference resourceReference)
 	{
-		logger.error("Unknown reference at {} in resource of type {} with id {} at bundle index {}",
-				resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId(),
-				bundleIndex);
+		return unknownReference(null, resource, resourceReference);
+	}
+
+	public Response unknownReference(Integer bundleIndex, DomainResource resource, ResourceReference resourceReference)
+	{
+		if (bundleIndex == null)
+			logger.warn("Unknown reference at {} in resource of type {} with id {}",
+					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId());
+		else
+			logger.warn("Unknown reference at {} in resource of type {} with id {} at bundle index {}",
+					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId(),
+					bundleIndex);
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Unknown reference at " + resourceReference.getReferenceLocation() + " in resource of type "
-						+ resource.getResourceType().name() + " with id " + resource.getId() + " at bundle index "
-						+ bundleIndex);
+						+ resource.getResourceType().name() + " with id " + resource.getId()
+						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex));
 		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
-	public Response referenceTargetTypeNotSupportedByImplementation(int bundleIndex, DomainResource resource,
+	public Response referenceTargetTypeNotSupportedByImplementation(Integer bundleIndex, DomainResource resource,
 			ResourceReference resourceReference)
 	{
-		logger.error(
-				"Reference target type of reference at {} in resource of type {} with id {} at bundle index {} not supported by this implementation",
-				resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId(),
-				bundleIndex);
+		if (bundleIndex == null)
+			logger.warn(
+					"Reference target type of reference at {} in resource of type {} with id {} not supported by this implementation",
+					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId());
+		else
+			logger.warn(
+					"Reference target type of reference at {} in resource of type {} with id {} at bundle index {} not supported by this implementation",
+					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId(),
+					bundleIndex);
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Reference target type of reference at " + resourceReference.getReferenceLocation()
 						+ " in resource of type " + resource.getResourceType().name() + " with id " + resource.getId()
-						+ " at bundle index " + bundleIndex + " not supported by this implementation");
+						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex)
+						+ " not supported by this implementation");
 		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
-	public Response referenceTargetTypeNotSupportedByResource(int bundleIndex, DomainResource resource,
+	public Response referenceTargetTypeNotSupportedByResource(Integer bundleIndex, DomainResource resource,
 			ResourceReference resourceReference)
 	{
-		logger.error(
-				"Reference target type of reference at {} in resource of type {} with id {} at bundle index {} not supported",
-				resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId(),
-				bundleIndex);
+		if (bundleIndex == null)
+			logger.warn("Reference target type of reference at {} in resource of type {} with id {} not supported",
+					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId());
+		else
+			logger.warn(
+					"Reference target type of reference at {} in resource of type {} with id {} at bundle index {} not supported",
+					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId(),
+					bundleIndex);
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Reference target type of reference at " + resourceReference.getReferenceLocation()
 						+ " in resource of type " + resource.getResourceType().name() + " with id " + resource.getId()
-						+ " at bundle index " + bundleIndex + " not supported");
+						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex) + " not supported");
 		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
-	public Response referenceTargetNotFoundLocally(int bundleIndex, DomainResource resource,
+	public Response referenceTargetNotFoundLocally(Integer bundleIndex, DomainResource resource,
 			ResourceReference resourceReference)
 	{
-		logger.error(
-				"Reference target {} of reference at {} in resource of type {} with id {} at bundle index {} not found",
-				resourceReference.getReference().getReference(), resourceReference.getReferenceLocation(),
-				resource.getResourceType().name(), resource.getId(), bundleIndex);
+		if (bundleIndex == null)
+			logger.warn("Reference target {} of reference at {} in resource of type {} with id {} not found",
+					resourceReference.getReference().getReference(), resourceReference.getReferenceLocation(),
+					resource.getResourceType().name(), resource.getId());
+		else
+			logger.warn(
+					"Reference target {} of reference at {} in resource of type {} with id {} at bundle index {} not found",
+					resourceReference.getReference().getReference(), resourceReference.getReferenceLocation(),
+					resource.getResourceType().name(), resource.getId(), bundleIndex);
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Reference target " + resourceReference.getReference().getReference() + " of reference at "
 						+ resourceReference.getReferenceLocation() + " in resource of type "
-						+ resource.getResourceType().name() + " with id " + resource.getId() + " at bundle index "
-						+ bundleIndex + " not found");
+						+ resource.getResourceType().name() + " with id " + resource.getId()
+						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex) + " not found");
 		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
-	public Response badReference(boolean logicalNoConditional, int bundleIndex, DomainResource resource,
+	public Response badReference(boolean logicalNoConditional, Integer bundleIndex, DomainResource resource,
 			ResourceReference resourceReference, String queryParameters,
 			List<SearchQueryParameterError> unsupportedQueryParameters)
 	{
 		String unsupportedQueryParametersString = unsupportedQueryParameters.stream()
 				.map(SearchQueryParameterError::toString).collect(Collectors.joining("; "));
 
-		logger.error(
-				"{} reference {} at {} in resource of type {} with id {} at bundle index {} contains unsupported queryparameter{} {}",
-				logicalNoConditional ? "Logical" : "Conditional", queryParameters,
-				resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId(),
-				bundleIndex, unsupportedQueryParameters.size() != 1 ? "s" : "", unsupportedQueryParametersString);
+		if (bundleIndex == null)
+			logger.warn(
+					"{} reference {} at {} in resource of type {} with id {} contains unsupported queryparameter{} {}",
+					logicalNoConditional ? "Logical" : "Conditional", queryParameters,
+					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId(),
+					unsupportedQueryParameters.size() != 1 ? "s" : "", unsupportedQueryParametersString);
+		else
+			logger.warn(
+					"{} reference {} at {} in resource of type {} with id {} at bundle index {} contains unsupported queryparameter{} {}",
+					logicalNoConditional ? "Logical" : "Conditional", queryParameters,
+					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId(),
+					bundleIndex, unsupportedQueryParameters.size() != 1 ? "s" : "", unsupportedQueryParametersString);
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				(logicalNoConditional ? "Logical" : "Conditional") + " reference " + queryParameters + " at "
 						+ resourceReference.getReferenceLocation() + " in resource of type "
-						+ resource.getResourceType().name() + " with id " + resource.getId() + " at bundle index "
-						+ bundleIndex + " contains unsupported queryparameter"
-						+ (unsupportedQueryParameters.size() != 1 ? "s" : "") + " " + unsupportedQueryParametersString);
+						+ resource.getResourceType().name() + " with id " + resource.getId()
+						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex)
+						+ " contains unsupported queryparameter" + (unsupportedQueryParameters.size() != 1 ? "s" : "")
+						+ " " + unsupportedQueryParametersString);
 		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
-	public Response referenceTargetNotFoundLocallyByIdentifier(int bundleIndex, DomainResource resource,
+	public Response referenceTargetNotFoundLocallyByIdentifier(Integer bundleIndex, DomainResource resource,
 			ResourceReference resourceReference)
 	{
-		logger.error(
-				"Reference target by identifier '{}|{}' of reference at {} in resource of type {} with id {} at bundle index {} not found",
-				resourceReference.getReference().getIdentifier().getSystem(),
-				resourceReference.getReference().getIdentifier().getValue(), resourceReference.getReferenceLocation(),
-				resource.getResourceType().name(), resource.getId(), bundleIndex);
+		if (bundleIndex == null)
+			logger.warn(
+					"Reference target by identifier '{}|{}' of reference at {} in resource of type {} with id {} not found",
+					resourceReference.getReference().getIdentifier().getSystem(),
+					resourceReference.getReference().getIdentifier().getValue(),
+					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId());
+		else
+			logger.warn(
+					"Reference target by identifier '{}|{}' of reference at {} in resource of type {} with id {} at bundle index {} not found",
+					resourceReference.getReference().getIdentifier().getSystem(),
+					resourceReference.getReference().getIdentifier().getValue(),
+					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId(),
+					bundleIndex);
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Reference target by identifier '" + resourceReference.getReference().getIdentifier().getSystem() + "|"
 						+ resourceReference.getReference().getIdentifier().getValue() + "' of reference at "
 						+ resourceReference.getReferenceLocation() + " in resource of type "
-						+ resource.getResourceType().name() + " with id " + resource.getId() + " at bundle index "
-						+ bundleIndex + " not found");
+						+ resource.getResourceType().name() + " with id " + resource.getId()
+						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex) + " not found");
 		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
-	public Response referenceTargetMultipleMatchesLocallyByIdentifier(int bundleIndex, DomainResource resource,
+	public Response referenceTargetMultipleMatchesLocallyByIdentifier(Integer bundleIndex, DomainResource resource,
 			ResourceReference resourceReference, int overallCount)
 	{
-		logger.error(
-				"Found {} matches for reference target by identifier '{}|{}' of reference at {} in resource of type {} with id {} at bundle index {}",
-				overallCount, resourceReference.getReference().getIdentifier().getSystem(),
-				resourceReference.getReference().getIdentifier().getValue(), resourceReference.getReferenceLocation(),
-				resource.getResourceType().name(), resource.getId(), bundleIndex);
+		if (bundleIndex == null)
+			logger.warn(
+					"Found {} matches for reference target by identifier '{}|{}' of reference at {} in resource of type {} with id {}",
+					overallCount, resourceReference.getReference().getIdentifier().getSystem(),
+					resourceReference.getReference().getIdentifier().getValue(),
+					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId());
+		else
+			logger.warn(
+					"Found {} matches for reference target by identifier '{}|{}' of reference at {} in resource of type {} with id {} at bundle index {}",
+					overallCount, resourceReference.getReference().getIdentifier().getSystem(),
+					resourceReference.getReference().getIdentifier().getValue(),
+					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId(),
+					bundleIndex);
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Found " + overallCount + " matches for reference target by identifier '"
 						+ resourceReference.getReference().getIdentifier().getSystem() + "|"
 						+ resourceReference.getReference().getIdentifier().getValue() + "' of reference at "
 						+ resourceReference.getReferenceLocation() + " in resource of type "
-						+ resource.getResourceType().name() + " with id " + resource.getId() + " at bundle index "
-						+ bundleIndex + " not found");
+						+ resource.getResourceType().name() + " with id " + resource.getId()
+						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex) + " not found");
 		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
-	public Response referenceTargetNotFoundLocallyByCondition(int bundleIndex, DomainResource resource,
+	public Response referenceTargetNotFoundLocallyByCondition(Integer bundleIndex, DomainResource resource,
 			ResourceReference resourceReference, String queryParameters)
 	{
-		logger.error(
-				"Reference target by identifier '{}|{}' of reference at {} in resource of type {} with id {} at bundle index {} not found",
-				resourceReference.getReference().getIdentifier().getSystem(),
-				resourceReference.getReference().getIdentifier().getValue(), resourceReference.getReferenceLocation(),
-				resource.getResourceType().name(), resource.getId(), bundleIndex);
+		if (bundleIndex == null)
+			logger.warn(
+					"Reference target by identifier '{}|{}' of reference at {} in resource of type {} with id {} not found",
+					resourceReference.getReference().getIdentifier().getSystem(),
+					resourceReference.getReference().getIdentifier().getValue(),
+					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId());
+		else
+			logger.warn(
+					"Reference target by identifier '{}|{}' of reference at {} in resource of type {} with id {} at bundle index {} not found",
+					resourceReference.getReference().getIdentifier().getSystem(),
+					resourceReference.getReference().getIdentifier().getValue(),
+					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId(),
+					bundleIndex);
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Reference target by identifier '" + resourceReference.getReference().getIdentifier().getSystem() + "|"
 						+ resourceReference.getReference().getIdentifier().getValue() + "' of reference at "
 						+ resourceReference.getReferenceLocation() + " in resource of type "
-						+ resource.getResourceType().name() + " with id " + resource.getId() + " at bundle index "
-						+ bundleIndex + " not found");
+						+ resource.getResourceType().name() + " with id " + resource.getId()
+						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex) + " not found");
 		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
-	public Response referenceTargetMultipleMatchesLocallyByCondition(int bundleIndex, DomainResource resource,
+	public Response referenceTargetMultipleMatchesLocallyByCondition(Integer bundleIndex, DomainResource resource,
 			ResourceReference resourceReference, int overallCount, String queryParameters)
 	{
-		logger.error(
-				"Found {} matches for reference target by condition '{}' of reference at {} in resource of type {} with id {} at bundle index {}",
-				overallCount, queryParameters, resourceReference.getReferenceLocation(),
-				resource.getResourceType().name(), resource.getId(), bundleIndex);
+		if (bundleIndex == null)
+			logger.warn(
+					"Found {} matches for reference target by condition '{}' of reference at {} in resource of type {} with id {}",
+					overallCount, queryParameters, resourceReference.getReferenceLocation(),
+					resource.getResourceType().name(), resource.getId());
+		else
+			logger.warn(
+					"Found {} matches for reference target by condition '{}' of reference at {} in resource of type {} with id {} at bundle index {}",
+					overallCount, queryParameters, resourceReference.getReferenceLocation(),
+					resource.getResourceType().name(), resource.getId(), bundleIndex);
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Found " + overallCount + " matches for reference target by condition '" + queryParameters
 						+ "' of reference at " + resourceReference.getReferenceLocation() + " in resource of type "
-						+ resource.getResourceType().name() + " with id " + resource.getId() + " at bundle index "
-						+ bundleIndex + " not found");
+						+ resource.getResourceType().name() + " with id " + resource.getId()
+						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex) + " not found");
 		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
-	public Response referenceTargetBadCondition(int bundleIndex, DomainResource resource,
+	public Response referenceTargetBadCondition(Integer bundleIndex, DomainResource resource,
 			ResourceReference resourceReference)
 	{
-		logger.error(
-				"Bad conditional reference target '{}' of reference at {} in resource of type {} with id {} at bundle index {}",
-				resourceReference.getReference().getReference(), resourceReference.getReferenceLocation(),
-				resource.getResourceType().name(), resource.getId(), bundleIndex);
+		if (bundleIndex == null)
+			logger.warn("Bad conditional reference target '{}' of reference at {} in resource of type {} with id {}",
+					resourceReference.getReference().getReference(), resourceReference.getReferenceLocation(),
+					resource.getResourceType().name(), resource.getId());
+		else
+			logger.warn(
+					"Bad conditional reference target '{}' of reference at {} in resource of type {} with id {} at bundle index {}",
+					resourceReference.getReference().getReference(), resourceReference.getReferenceLocation(),
+					resource.getResourceType().name(), resource.getId(), bundleIndex);
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Bad conditional reference target '" + resourceReference.getReference().getReference()
 						+ "' of reference at " + resourceReference.getReferenceLocation() + " in resource of type "
-						+ resource.getResourceType().name() + " with id " + resource.getId() + " at bundle index "
-						+ bundleIndex + " not found");
+						+ resource.getResourceType().name() + " with id " + resource.getId()
+						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex) + " not found");
 		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
 	public Response badDeleteRequestUrl(int bundleIndex, String url)
 	{
-		logger.error("Bad delete request url {} at bundle index {}", url, bundleIndex);
+		logger.warn("Bad delete request url {} at bundle index {}", url, bundleIndex);
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Bad delete request url " + url + " at bundle index " + bundleIndex);
@@ -443,7 +511,7 @@ public class ResponseGenerator
 
 	public Response badUpdateRequestUrl(int bundleIndex, String url)
 	{
-		logger.error("Bad update request url {} at bundle index {}", url, bundleIndex);
+		logger.warn("Bad update request url {} at bundle index {}", url, bundleIndex);
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Bad update request url " + url + " at bundle index " + bundleIndex);
@@ -452,7 +520,7 @@ public class ResponseGenerator
 
 	public Response resourceTypeNotSupportedByImplementation(int bundleIndex, String resourceTypeName)
 	{
-		logger.error("Resource type {} at bundle index {} not supported by this implementation", resourceTypeName,
+		logger.warn("Resource type {} at bundle index {} not supported by this implementation", resourceTypeName,
 				bundleIndex);
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING, "Resource type "
@@ -465,7 +533,7 @@ public class ResponseGenerator
 	{
 		String unsupportedQueryParametersString = unsupportedQueryParameters.stream()
 				.map(SearchQueryParameterError::toString).collect(Collectors.joining("; "));
-		logger.error("Bad conditional delete request '{}', unsupported query parameter{} {} at bundle index {}",
+		logger.warn("Bad conditional delete request '{}', unsupported query parameter{} {} at bundle index {}",
 				queryParameters, unsupportedQueryParameters.size() != 1 ? "s" : "", unsupportedQueryParametersString,
 				bundleIndex);
 
@@ -479,7 +547,7 @@ public class ResponseGenerator
 	public Response badConditionalDeleteRequestMultipleMatches(int bundleIndex, String resourceTypeName,
 			String queryParameters)
 	{
-		logger.error("Multiple {} resources with criteria '{}' exist for delete request at bundle index {}",
+		logger.warn("Multiple {} resources with criteria '{}' exist for delete request at bundle index {}",
 				resourceTypeName, queryParameters, bundleIndex);
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.MULTIPLEMATCHES,
@@ -490,7 +558,7 @@ public class ResponseGenerator
 
 	public Response badBundleRequest(String message)
 	{
-		logger.error("Bad bundle request - {}", message);
+		logger.warn("Bad bundle request - {}", message);
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Bad bundle request - " + message);
@@ -499,7 +567,7 @@ public class ResponseGenerator
 
 	public Response pathVsElementIdInBundle(int bundleIndex, String resourceTypeName, String id, IdType resourceId)
 	{
-		logger.error("Path id not equal to {} id ({} vs. {}) at bundle index {}", resourceTypeName, id,
+		logger.warn("Path id not equal to {} id ({} vs. {}) at bundle index {}", resourceTypeName, id,
 				resourceId.getIdPart(), bundleIndex);
 
 		OperationOutcome out = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
@@ -510,7 +578,7 @@ public class ResponseGenerator
 
 	public Response invalidBaseUrlInBundle(int bundleIndex, String resourceTypeName, IdType resourceId)
 	{
-		logger.error("{} id.baseUrl must be null or equal to {}, value {} unexpected at bundle index {}",
+		logger.warn("{} id.baseUrl must be null or equal to {}, value {} unexpected at bundle index {}",
 				resourceTypeName, serverBase, resourceId.getBaseUrl(), bundleIndex);
 
 		OperationOutcome out = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
@@ -521,7 +589,7 @@ public class ResponseGenerator
 
 	public Response nonMatchingResourceTypeAndRequestUrlInBundle(int bundleIndex, String resourceTypeName, String url)
 	{
-		logger.error("Non matching resource type {} and request url {} at bundle index {}", resourceTypeName, url,
+		logger.warn("Non matching resource type {} and request url {} at bundle index {}", resourceTypeName, url,
 				bundleIndex);
 
 		OperationOutcome out = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING, "Non matching resource type "
@@ -535,7 +603,7 @@ public class ResponseGenerator
 		String unsupportedQueryParametersString = unsupportedQueryParameters.stream()
 				.map(SearchQueryParameterError::toString).collect(Collectors.joining("; "));
 
-		logger.error("Bad conditional update request '{}', unsupported query parameter{} {} at bundle index {}", query,
+		logger.warn("Bad conditional update request '{}', unsupported query parameter{} {} at bundle index {}", query,
 				unsupportedQueryParameters.size() != 1 ? "s" : "", unsupportedQueryParametersString, bundleIndex);
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
@@ -548,7 +616,7 @@ public class ResponseGenerator
 
 	public Response bundleEntryResouceMissingId(int bundleIndex, String resourceTypeName)
 	{
-		logger.error("Bundle entry of type {} at bundle index {} is missing id value", resourceTypeName, bundleIndex);
+		logger.warn("Bundle entry of type {} at bundle index {} is missing id value", resourceTypeName, bundleIndex);
 
 		OperationOutcome out = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING, "Bundle entry of type "
 				+ resourceTypeName + " at bundle index " + bundleIndex + " is missing id value");
@@ -557,7 +625,7 @@ public class ResponseGenerator
 
 	public Response badBundleEntryFullUrl(int bundleIndex, String fullUrl)
 	{
-		logger.error("Bad entry fullUrl '{}' at bundle index {}", fullUrl, bundleIndex);
+		logger.warn("Bad entry fullUrl '{}' at bundle index {}", fullUrl, bundleIndex);
 
 		OperationOutcome out = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Bad entry fullUrl '" + fullUrl + "' at bundle index " + bundleIndex);
@@ -566,7 +634,7 @@ public class ResponseGenerator
 
 	public Response bundleEntryBadResourceId(int bundleIndex, String resourceTypeName, String urlUuidPrefix)
 	{
-		logger.error("Bundle entry of type {} at bundle index {} id value not starting with {}", resourceTypeName,
+		logger.warn("Bundle entry of type {} at bundle index {} id value not starting with {}", resourceTypeName,
 				bundleIndex, urlUuidPrefix);
 
 		OperationOutcome out = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
@@ -577,12 +645,22 @@ public class ResponseGenerator
 
 	public Response badBundleEntryFullUrlVsResourceId(int bundleIndex, String fullUrl, String idValue)
 	{
-		logger.error("Resource id not equal to entry fullUrl ({} vs. {}) at bundle index {}", idValue, fullUrl,
+		logger.warn("Resource id not equal to entry fullUrl ({} vs. {}) at bundle index {}", idValue, fullUrl,
 				bundleIndex);
 
 		OperationOutcome out = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Resource id not equal to entry fullUrl (" + idValue + " vs. " + fullUrl + ") at bundle index "
 						+ bundleIndex);
 		return Response.status(Status.BAD_REQUEST).entity(out).build();
+	}
+
+	public Response forbiddenNotAllowed(String operation, User user, String reason)
+	{
+		logger.warn("Operation {} forbidden for user '{}'{}", operation, user.getName(),
+				reason != null ? " " + reason : "");
+
+		OperationOutcome out = createOutcome(IssueSeverity.ERROR, IssueType.FORBIDDEN,
+				"Operation " + operation + " forbidden");
+		return Response.status(Status.FORBIDDEN).entity(out).build();
 	}
 }

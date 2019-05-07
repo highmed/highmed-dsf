@@ -179,6 +179,17 @@ abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implement
 	}
 
 	@Override
+	public Connection getNewTransaction() throws SQLException
+	{
+		Connection connection = dataSource.getConnection();
+		connection.setReadOnly(false);
+		connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
+		connection.setAutoCommit(false);
+
+		return connection;
+	}
+
+	@Override
 	public final R create(R resource) throws SQLException
 	{
 		Objects.requireNonNull(resource, "resource");
@@ -580,8 +591,6 @@ abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implement
 		if (connection.getAutoCommit())
 			throw new IllegalArgumentException("Connection transaction is in auto commit mode");
 
-		resource = copy(resource); // XXX defensive copy, might want to remove this call
-
 		R updated = updateSameRow(connection, resource);
 
 		logger.debug("{} with IdPart {} updated, version {} unchanged", resourceTypeName,
@@ -657,10 +666,10 @@ abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implement
 			throw new IllegalArgumentException("resource.id.versionPart is not a number >= " + FIRST_VERSION_STRING);
 
 		resource = copy(resource);
-		String versionAsString = String.valueOf(version);
-		resource.setIdElement(new IdType(resourceTypeName, resource.getIdElement().getIdPart(), versionAsString));
-		resource.getMeta().setVersionId(versionAsString);
-		resource.getMeta().setLastUpdated(new Date());
+		// String versionAsString = String.valueOf(version);
+		// resource.setIdElement(new IdType(resourceTypeName, resource.getIdElement().getIdPart(), versionAsString));
+		// resource.getMeta().setVersionId(versionAsString);
+		// resource.getMeta().setLastUpdated(new Date());
 
 		try (PreparedStatement statement = connection.prepareStatement("UPDATE " + resourceTable + " SET "
 				+ resourceColumn + " = ? WHERE " + resourceIdColumn + " = ? AND version = ?"))

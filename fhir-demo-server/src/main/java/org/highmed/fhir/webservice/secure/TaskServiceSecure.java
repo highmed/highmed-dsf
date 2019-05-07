@@ -1,47 +1,45 @@
 package org.highmed.fhir.webservice.secure;
 
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
+import java.util.Optional;
+
 import javax.ws.rs.core.UriInfo;
 
+import org.highmed.fhir.help.ResponseGenerator;
 import org.highmed.fhir.webservice.specification.TaskService;
 import org.hl7.fhir.r4.model.Task;
 
 public class TaskServiceSecure extends AbstractServiceSecure<Task, TaskService> implements TaskService
 {
-	public TaskServiceSecure(TaskService delegate)
+	public TaskServiceSecure(TaskService delegate, ResponseGenerator responseGenerator)
 	{
-		super(delegate);
+		super(delegate, responseGenerator);
 	}
 
 	@Override
-	public Response create(Task resource, UriInfo uri, HttpHeaders headers)
+	protected Optional<String> reasonCreateNotAllowed(Task resource)
 	{
+		// TODO authorization rules
 		// allowed status draft | requested for all users
 		// task.requester must be organization of current user
-
-		// TODO Auto-generated method stub
-		return super.create(resource, uri, headers);
+		return Optional.empty();
 	}
 
 	@Override
-	public Response update(String id, Task resource, UriInfo uri, HttpHeaders headers)
+	protected Optional<String> reasonUpdateNotAllowed(String id, Task resource)
 	{
+		// TODO authorization rules
 		// allowed status change from draft to requested for remote users
 		// update only allowed at status draft for remote users
 		// task.requester must be organization of current user or local user
 		// only update of tasks with requester = current user allowed for remote users
 
-		// TODO Auto-generated method stub
-		return super.update(id, resource, uri, headers);
+		return Optional.empty();
 	}
 
 	@Override
-	public Response update(Task resource, UriInfo uri, HttpHeaders headers)
+	protected Optional<String> reasonUpdateNotAllowed(Task resource, UriInfo uri)
 	{
-		// see update above
-
-		// TODO Auto-generated method stub
-		return super.update(resource, uri, headers);
+		// TODO authorization rules, see above
+		return Optional.empty();
 	}
 }

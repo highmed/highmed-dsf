@@ -1,10 +1,15 @@
 package org.highmed.fhir.webservice.secure;
 
+import java.util.Optional;
+import java.util.function.Function;
+
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.highmed.fhir.authentication.UserProvider;
+import org.highmed.fhir.authentication.UserRole;
+import org.highmed.fhir.help.ResponseGenerator;
 import org.highmed.fhir.webservice.specification.BasicService;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Parameters;
@@ -16,12 +21,14 @@ public class AbstractServiceSecure<R extends DomainResource, S extends BasicServ
 	private static final Logger logger = LoggerFactory.getLogger(AbstractServiceSecure.class);
 
 	protected final S delegate;
+	protected final ResponseGenerator responseGenerator;
 
 	protected UserProvider provider;
 
-	public AbstractServiceSecure(S delegate)
+	public AbstractServiceSecure(S delegate, ResponseGenerator responseGenerator)
 	{
 		this.delegate = delegate;
+		this.responseGenerator = responseGenerator;
 	}
 
 	@Override
@@ -38,13 +45,31 @@ public class AbstractServiceSecure<R extends DomainResource, S extends BasicServ
 		return delegate.getPath();
 	}
 
+	private Function<String, Response> forbidden(String operation)
+	{
+		return reason -> responseGenerator.forbiddenNotAllowed(operation, provider.getCurrentUser(), reason);
+	}
+
 	@Override
 	public Response create(R resource, UriInfo uri, HttpHeaders headers)
 	{
 		logger.debug("Current user '{}', role '{}'", provider.getCurrentUser().getName(),
 				provider.getCurrentUser().getRole());
 
-		return delegate.create(resource, uri, headers);
+		return reasonCreateNotAllowed(resource).map(forbidden("create"))
+				.orElse(delegate.create(resource, uri, headers));
+	}
+
+	/**
+	 * @param resource
+	 * @return {@link Optional#empty()} if create(resource) allowed
+	 */
+	protected Optional<String> reasonCreateNotAllowed(R resource)
+	{
+		if (!UserRole.LOCAL.equals(provider.getCurrentUser().getRole()))
+			return Optional.of("Missing role 'LOCAL'");
+		else
+			return Optional.empty();
 	}
 
 	@Override
@@ -53,7 +78,16 @@ public class AbstractServiceSecure<R extends DomainResource, S extends BasicServ
 		logger.debug("Current user '{}', role '{}'", provider.getCurrentUser().getName(),
 				provider.getCurrentUser().getRole());
 
-		return delegate.read(id, uri, headers);
+		return reasonReadNotAllowed(id).map(forbidden("read")).orElse(delegate.read(id, uri, headers));
+	}
+
+	/**
+	 * @param id
+	 * @return {@link Optional#empty()} if read(id) allowed
+	 */
+	protected Optional<String> reasonReadNotAllowed(String id)
+	{
+		return Optional.empty();
 	}
 
 	@Override
@@ -62,7 +96,18 @@ public class AbstractServiceSecure<R extends DomainResource, S extends BasicServ
 		logger.debug("Current user '{}', role '{}'", provider.getCurrentUser().getName(),
 				provider.getCurrentUser().getRole());
 
-		return delegate.vread(id, version, uri, headers);
+		return reasonReadNotAllowed(id, version).map(forbidden("read"))
+				.orElse(delegate.vread(id, version, uri, headers));
+	}
+
+	/**
+	 * @param id
+	 * @param version
+	 * @return {@link Optional#empty()} if read(id, version) allowed
+	 */
+	protected Optional<String> reasonReadNotAllowed(String id, long version)
+	{
+		return Optional.empty();
 	}
 
 	@Override
@@ -71,7 +116,21 @@ public class AbstractServiceSecure<R extends DomainResource, S extends BasicServ
 		logger.debug("Current user '{}', role '{}'", provider.getCurrentUser().getName(),
 				provider.getCurrentUser().getRole());
 
-		return delegate.update(id, resource, uri, headers);
+		return reasonUpdateNotAllowed(id, resource).map(forbidden("update"))
+				.orElse(delegate.update(id, resource, uri, headers));
+	}
+
+	/**
+	 * @param id
+	 * @param resource
+	 * @return {@link Optional#empty()} if update(id, resource) allowed
+	 */
+	protected Optional<String> reasonUpdateNotAllowed(String id, R resource)
+	{
+		if (!UserRole.LOCAL.equals(provider.getCurrentUser().getRole()))
+			return Optional.of("Missing role 'LOCAL'");
+		else
+			return Optional.empty();
 	}
 
 	@Override
@@ -80,7 +139,21 @@ public class AbstractServiceSecure<R extends DomainResource, S extends BasicServ
 		logger.debug("Current user '{}', role '{}'", provider.getCurrentUser().getName(),
 				provider.getCurrentUser().getRole());
 
-		return delegate.update(resource, uri, headers);
+		return reasonUpdateNotAllowed(resource, uri).map(forbidden("update"))
+				.orElse(delegate.update(resource, uri, headers));
+	}
+
+	/**
+	 * @param resource
+	 * @param uri
+	 * @return {@link Optional#empty()} if update(resource, uri) allowed
+	 */
+	protected Optional<String> reasonUpdateNotAllowed(R resource, UriInfo uri)
+	{
+		if (!UserRole.LOCAL.equals(provider.getCurrentUser().getRole()))
+			return Optional.of("Missing role 'LOCAL'");
+		else
+			return Optional.empty();
 	}
 
 	@Override
@@ -89,7 +162,19 @@ public class AbstractServiceSecure<R extends DomainResource, S extends BasicServ
 		logger.debug("Current user '{}', role '{}'", provider.getCurrentUser().getName(),
 				provider.getCurrentUser().getRole());
 
-		return delegate.delete(id, uri, headers);
+		return reasonDeleteNotAllowed(id).map(forbidden("delete")).orElse(delegate.delete(id, uri, headers));
+	}
+
+	/**
+	 * @param id
+	 * @return {@link Optional#empty()} if delete(id) allowed
+	 */
+	protected Optional<String> reasonDeleteNotAllowed(String id)
+	{
+		if (!UserRole.LOCAL.equals(provider.getCurrentUser().getRole()))
+			return Optional.of("Missing role 'LOCAL'");
+		else
+			return Optional.empty();
 	}
 
 	@Override
@@ -98,7 +183,19 @@ public class AbstractServiceSecure<R extends DomainResource, S extends BasicServ
 		logger.debug("Current user '{}', role '{}'", provider.getCurrentUser().getName(),
 				provider.getCurrentUser().getRole());
 
-		return delegate.delete(uri, headers);
+		return reasonDeleteNotAllowed(uri).map(forbidden("delete")).orElse(delegate.delete(uri, headers));
+	}
+
+	/**
+	 * @param uri
+	 * @return {@link Optional#empty()} if delete(uri) allowed
+	 */
+	protected Optional<String> reasonDeleteNotAllowed(UriInfo uri)
+	{
+		if (!UserRole.LOCAL.equals(provider.getCurrentUser().getRole()))
+			return Optional.of("Missing role 'LOCAL'");
+		else
+			return Optional.empty();
 	}
 
 	@Override

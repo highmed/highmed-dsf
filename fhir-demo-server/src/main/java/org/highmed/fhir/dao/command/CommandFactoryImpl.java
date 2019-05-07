@@ -19,6 +19,8 @@ import org.highmed.fhir.event.EventManager;
 import org.highmed.fhir.help.ExceptionHandler;
 import org.highmed.fhir.help.ParameterConverter;
 import org.highmed.fhir.help.ResponseGenerator;
+import org.highmed.fhir.service.ReferenceExtractor;
+import org.highmed.fhir.service.ReferenceResolver;
 import org.highmed.fhir.service.SnapshotDependencyAnalyzer;
 import org.highmed.fhir.service.SnapshotGenerator;
 import org.hl7.fhir.r4.model.Bundle;
@@ -33,8 +35,8 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 	private final int defaultPageCount;
 	private final DataSource dataSource;
 	private final DaoProvider daoProvider;
-	private final ReferenceReplacer referenceReplacer;
 	private final ReferenceExtractor referenceExtractor;
+	private final ReferenceResolver referenceResolver;
 	private final ResponseGenerator responseGenerator;
 	private final ExceptionHandler exceptionHandler;
 	private final EventManager eventManager;
@@ -44,7 +46,7 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 	private final ParameterConverter parameterConverter;
 
 	public CommandFactoryImpl(String serverBase, int defaultPageCount, DataSource dataSource, DaoProvider daoProvider,
-			ReferenceReplacer referenceReplacer, ReferenceExtractor referenceExtractor,
+			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver,
 			ResponseGenerator responseGenerator, ExceptionHandler exceptionHandler, EventManager eventManager,
 			EventGenerator eventGenerator, SnapshotGenerator snapshotGenerator,
 			SnapshotDependencyAnalyzer snapshotDependencyAnalyzer, ParameterConverter parameterConverter)
@@ -53,8 +55,8 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 		this.defaultPageCount = defaultPageCount;
 		this.dataSource = dataSource;
 		this.daoProvider = daoProvider;
-		this.referenceReplacer = referenceReplacer;
 		this.referenceExtractor = referenceExtractor;
+		this.referenceResolver = referenceResolver;
 		this.responseGenerator = responseGenerator;
 		this.exceptionHandler = exceptionHandler;
 		this.eventManager = eventManager;
@@ -69,8 +71,8 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 	{
 		Objects.requireNonNull(serverBase, "serverBase");
 		Objects.requireNonNull(daoProvider, "daoProvider");
-		Objects.requireNonNull(referenceReplacer, "referenceReplacer");
 		Objects.requireNonNull(referenceExtractor, "referenceExtractor");
+		Objects.requireNonNull(referenceResolver, "referenceResolver");
 		Objects.requireNonNull(responseGenerator, "responseGenerator");
 		Objects.requireNonNull(exceptionHandler, "exceptionHandler");
 		Objects.requireNonNull(eventManager, "eventManager");
@@ -155,7 +157,9 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 					"Request url " + entry.getRequest().getUrl() + " for method DELETE not supported");
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.highmed.fhir.dao.command.CommandFactory#createCommands(org.hl7.fhir.r4.model.Bundle)
 	 */
 	@Override
@@ -232,9 +236,11 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 
 		if (referenceExtractor.getReferences(resource).anyMatch(r -> true)) // at least one entry
 		{
-			return dao.map(d -> Stream.of(cmd,
-					new ResolveReferencesCommand<R, DomainResourceDao<R>>(index, bundle, entry, serverBase, resource, d,
-							exceptionHandler, parameterConverter, referenceExtractor, responseGenerator, daoProvider)))
+			return dao
+					.map(d -> Stream.of(cmd,
+							new ResolveReferencesCommand<R, DomainResourceDao<R>>(index, bundle, entry, serverBase,
+									resource, d, exceptionHandler, parameterConverter, referenceExtractor,
+									responseGenerator, referenceResolver)))
 					.orElseThrow(() -> new IllegalStateException(
 							"Resource of type " + resource.getClass().getName() + " not supported"));
 		}

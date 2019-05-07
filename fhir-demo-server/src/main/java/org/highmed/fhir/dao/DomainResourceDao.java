@@ -24,6 +24,13 @@ public interface DomainResourceDao<R extends DomainResource>
 	Class<R> getResourceType();
 
 	/**
+	 * @return new connection (read-only <code>false</code>, auto-commit <code>false</code>, isolation-level
+	 *         {@link Connection#TRANSACTION_REPEATABLE_READ})
+	 * @throws SQLException
+	 */
+	Connection getNewTransaction() throws SQLException;
+
+	/**
 	 * @param resource
 	 *            not <code>null</code>
 	 * @return the stored resource, not the same object as the given resource (defensive copy)

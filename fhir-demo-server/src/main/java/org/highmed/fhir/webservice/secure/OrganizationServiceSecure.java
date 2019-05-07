@@ -4,15 +4,16 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.highmed.fhir.help.ResponseGenerator;
 import org.highmed.fhir.webservice.specification.OrganizationService;
 import org.hl7.fhir.r4.model.Organization;
 
 public class OrganizationServiceSecure extends AbstractServiceSecure<Organization, OrganizationService>
 		implements OrganizationService
 {
-	public OrganizationServiceSecure(OrganizationService delegate)
+	public OrganizationServiceSecure(OrganizationService delegate, ResponseGenerator responseGenerator)
 	{
-		super(delegate);
+		super(delegate, responseGenerator);
 	}
 
 	@Override
