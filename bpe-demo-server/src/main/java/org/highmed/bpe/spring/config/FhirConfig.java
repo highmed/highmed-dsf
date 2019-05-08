@@ -14,6 +14,8 @@ import org.highmed.fhir.client.WebsocketClientProvider;
 import org.highmed.fhir.organization.OrganizationProvider;
 import org.highmed.fhir.organization.OrganizationProviderImpl;
 import org.highmed.fhir.task.TaskHandler;
+import org.highmed.fhir.task.TaskHelper;
+import org.highmed.fhir.task.TaskHelperImpl;
 import org.highmed.fhir.variables.DomainResourceSerializer;
 import org.highmed.fhir.variables.FhirPlugin;
 import org.highmed.fhir.variables.MultiInstanceTargetSerializer;
@@ -220,5 +222,11 @@ public class FhirConfig
 	{
 		return new FhirConnector(clientProvider(), taskHandler(), lastEventTimeIo(), fhirContext(),
 				subscriptionSearchParameter);
+	}
+
+	@Bean
+	public TaskHelper taskHelper()
+	{
+		return new TaskHelperImpl();
 	}
 }

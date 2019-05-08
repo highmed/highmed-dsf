@@ -1,5 +1,6 @@
 package org.highmed.bpe.werbservice;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
@@ -56,7 +58,7 @@ public class ProcessService implements InitializingBean
 	{
 		logger.trace("POST {}", uri.getRequestUri().toString());
 
-		return start(processDefinitionKey, null, uri.getQueryParameters());
+		return start(processDefinitionKey, null, copy(uri.getQueryParameters()));
 	}
 
 	@POST
@@ -66,7 +68,7 @@ public class ProcessService implements InitializingBean
 	{
 		logger.trace("POST {}", uri.getRequestUri().toString());
 
-		return start(processDefinitionKey, versionTag, uri.getQueryParameters());
+		return start(processDefinitionKey, versionTag, copy(uri.getQueryParameters()));
 	}
 
 	private Response start(String processDefinitionKey, String versionTag, Map<String, List<String>> queryParameters)
@@ -82,9 +84,17 @@ public class ProcessService implements InitializingBean
 		}
 
 		runtimeService.startProcessInstanceById(processDefinition.getId(), UUID.randomUUID().toString(),
-				Map.of(Constants.VARIABLE_QUERY_PARAMETERS, new HashMap<>(queryParameters)));
+				Map.of(Constants.VARIABLE_QUERY_PARAMETERS, queryParameters));
 
 		return Response.status(Status.CREATED).build();
+	}
+
+	private Map<String, List<String>> copy(MultivaluedMap<String, String> queryParameters)
+	{
+		Map<String, List<String>> map = new HashMap<>();
+		queryParameters.entrySet().stream()
+				.forEach(entry -> map.put(entry.getKey(), new ArrayList<String>(entry.getValue())));
+		return map;
 	}
 
 	private ProcessDefinition getProcessDefinition(String processDefinitionKey, String versionTag)

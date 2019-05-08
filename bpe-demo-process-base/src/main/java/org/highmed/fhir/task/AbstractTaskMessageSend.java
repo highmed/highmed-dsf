@@ -2,17 +2,17 @@ package org.highmed.fhir.task;
 
 import java.util.Date;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.highmed.bpe.Constants;
-import org.highmed.fhir.client.WebserviceClientProvider;
 import org.highmed.fhir.client.WebserviceClient;
+import org.highmed.fhir.client.WebserviceClientProvider;
 import org.highmed.fhir.organization.OrganizationProvider;
 import org.highmed.fhir.variables.MultiInstanceTarget;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
@@ -59,12 +59,22 @@ public class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
 				.getVariable(Constants.VARIABLE_MULTI_INSTANCE_TARGET);
 
 		sendTask(target.getTargetOrganizationIdentifierValue(), processDefinitionKey, versionTag, messageName,
-				businessKey, target.getCorrelationKey());
+				businessKey, target.getCorrelationKey(), getAdditionalInputParameters(execution));
+	}
+
+	/**
+	 * Override this method to add additional input parameters to the task resource being send
+	 * 
+	 * @return {@link Stream} of {@link ParameterComponent}s to be added as input parameters
+	 */
+	protected Stream<ParameterComponent> getAdditionalInputParameters(DelegateExecution execution)
+	{
+		return Stream.empty();
 	}
 
 	protected void sendTask(String targetOrganizationIdentifierValue, String processDefinitionKey, String versionTag,
 			String messageName, String businessKey, String correlationKey,
-			ParameterComponent... additionalInputParameters)
+			Stream<ParameterComponent> additionalInputParameters)
 	{
 		if (messageName.isEmpty() || processDefinitionKey.isEmpty())
 			throw new IllegalStateException("Next process-id or message-name not definied");
@@ -108,11 +118,10 @@ public class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
 			task.getInput().add(correlationKeyInput);
 		}
 
-		for (ParameterComponent param : additionalInputParameters)
-			task.getInput().add(param);
+		additionalInputParameters.forEach(task.getInput()::add);
 
-		WebserviceClient client = clientProvider
-				.getRemoteWebserviceClient(new IdType(targetOrganizationIdentifierValue));
+		WebserviceClient client = clientProvider.getRemoteWebserviceClient(organizationProvider.getDefaultSystem(),
+				targetOrganizationIdentifierValue);
 
 		logger.info("Sending task for process {} to organization {} (endpoint: {})", task.getInstantiatesUri(),
 				targetOrganizationIdentifierValue, client.getBaseUrl());

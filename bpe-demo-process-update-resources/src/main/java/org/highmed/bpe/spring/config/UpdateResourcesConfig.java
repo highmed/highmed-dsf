@@ -6,6 +6,7 @@ import org.highmed.bpe.service.SelectUpdateResourcesTargets;
 import org.highmed.bpe.service.UpdateResources;
 import org.highmed.fhir.client.WebserviceClientProvider;
 import org.highmed.fhir.organization.OrganizationProvider;
+import org.highmed.fhir.task.TaskHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,6 +19,9 @@ public class UpdateResourcesConfig
 
 	@Autowired
 	private OrganizationProvider organizationProvider;
+
+	@Autowired
+	private TaskHelper taskHelper;
 
 	@Bean
 	public UpdateResourcesPlugin updateResourcesPlugin()
@@ -40,6 +44,6 @@ public class UpdateResourcesConfig
 	@Bean
 	public UpdateResources updateResources()
 	{
-		return new UpdateResources(clientProvider);
+		return new UpdateResources(clientProvider, taskHelper);
 	}
 }

@@ -3,9 +3,12 @@ package org.highmed.bpe.client;
 import java.security.KeyStore;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -31,29 +34,57 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 		return Collections.emptyList();
 	}
 
-	public void startProcessLatestVersion(String processDefinitionKey)
+	@Override
+	public void startProcessLatestVersion(String processDefinitionKey) throws WebApplicationException
 	{
 		Objects.requireNonNull(processDefinitionKey, "processDefinitionKey");
 
-		Response response = getResource().path("Process").path(processDefinitionKey).path("$start").request()
-				.post(null);
-
-		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
-				response.getStatusInfo().getReasonPhrase());
-
-		if (Status.CREATED.getStatusCode() != response.getStatus())
-			throw new WebApplicationException(response);
-		else
-			response.close();
+		start(processDefinitionKey, null, Collections.emptyMap());
 	}
 
-	public void startProcessWithVersion(String processDefinitionKey, String versionTag)
+	@Override
+	public void startProcessLatestVersion(String processDefinitionKey, Map<String, List<String>> parameters)
+			throws WebApplicationException
+	{
+		Objects.requireNonNull(processDefinitionKey, "processDefinitionKey");
+
+		start(processDefinitionKey, null, parameters == null ? Collections.emptyMap() : parameters);
+	}
+
+	@Override
+	public void startProcessWithVersion(String processDefinitionKey, String versionTag) throws WebApplicationException
 	{
 		Objects.requireNonNull(processDefinitionKey, "processDefinitionKey");
 		Objects.requireNonNull(versionTag, "versionTag");
 
-		Response response = getResource().path("Process").path(processDefinitionKey).path("$start").request()
-				.post(null);
+		start(processDefinitionKey, versionTag, Collections.emptyMap());
+	}
+
+	@Override
+	public void startProcessWithVersion(String processDefinitionKey, String versionTag,
+			Map<String, List<String>> parameters) throws WebApplicationException
+	{
+		Objects.requireNonNull(processDefinitionKey, "processDefinitionKey");
+		Objects.requireNonNull(versionTag, "versionTag");
+
+		start(processDefinitionKey, versionTag, parameters == null ? Collections.emptyMap() : parameters);
+	}
+
+	private void start(String processDefinitionKey, String versionTag, Map<String, List<String>> parameters)
+	{
+		Objects.requireNonNull(parameters, "parameters");
+
+		WebTarget path = getResource().path("Process").path(processDefinitionKey);
+
+		if (versionTag != null)
+			path = path.path(versionTag);
+
+		path = path.path("$start");
+
+		for (Entry<String, List<String>> entry : parameters.entrySet())
+			path = path.queryParam(entry.getKey(), entry.getValue().toArray());
+
+		Response response = path.request().post(null);
 
 		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
 				response.getStatusInfo().getReasonPhrase());

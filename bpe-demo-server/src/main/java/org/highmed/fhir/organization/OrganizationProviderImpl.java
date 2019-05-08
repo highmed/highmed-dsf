@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -65,25 +66,28 @@ public class OrganizationProviderImpl implements OrganizationProvider, Initializ
 
 	private Stream<Organization> searchForOrganizations(String system, String identifier)
 	{
-		Bundle resultSet = clientProvider.getLocalWebserviceClient().search(Organization.class, Map.of("active",
-				Collections.singletonList("true"), "identifier", Collections.singletonList(system + "|" + identifier)));
+		return searchForOrganizations(system + "|" + identifier);
+	}
 
-		return resultSet.getEntry().stream().map(c -> c.getResource()).filter(c -> c instanceof Organization)
-				.map(c -> (Organization) c);
+	private Stream<Organization> searchForOrganizations(String identifierValue)
+	{
+		Bundle resultSet = clientProvider.getLocalWebserviceClient().search(Organization.class, Map.of("active",
+				Collections.singletonList("true"), "identifier", Collections.singletonList(identifierValue)));
+
+		return resultSet.getEntry().stream().map(bundleEntry -> bundleEntry.getResource())
+				.filter(resource -> resource instanceof Organization).map(organization -> (Organization) organization);
+	}
+
+	@Override
+	public Optional<Organization> getOrganization(String identifier)
+	{
+		return getOrganization(organizationIdentifierCodeSystem, identifier);
 	}
 
 	@Override
 	public Optional<Organization> getOrganization(String system, String identifier)
 	{
 		return searchForOrganizations(system, identifier).findFirst();
-	}
-
-	@Override
-	public Optional<Organization> getOrganization(String identifier)
-	{
-		Stream<Organization> organizations = searchForOrganizations(organizationIdentifierCodeSystem, identifier);
-
-		return organizations.findFirst();
 	}
 
 	@Override
@@ -95,21 +99,18 @@ public class OrganizationProviderImpl implements OrganizationProvider, Initializ
 	@Override
 	public List<Organization> getRemoteOrganizations()
 	{
-		Stream<Organization> organizations = searchForOrganizations(organizationIdentifierCodeSystem, "");
-
-		return organizations.filter(
-				o -> !o.getIdentifier().stream().anyMatch(i -> organizationIdentifierCodeSystem.equals(i.getSystem())
-						&& organizationIdentifierLocalValue.equals(i.getValue())))
+		return searchForOrganizations(organizationIdentifierCodeSystem, "")
+				.filter(noIdentifierMatches(organizationIdentifierCodeSystem, organizationIdentifierLocalValue))
 				.collect(Collectors.toList());
 	}
 
 	@Override
 	public List<Identifier> getRemoteIdentifiers()
 	{
-		return getRemoteOrganizations()
-				.stream().map(o -> o.getIdentifier().stream()
-						.filter(i -> organizationIdentifierCodeSystem.equals(i.getSystem())).findFirst().orElse(null))
-				.filter(i -> i != null).collect(Collectors.toList());
+		return getRemoteOrganizations().stream()
+				.map(organization -> organization.getIdentifier().stream()
+						.filter(identifierWithSystem(organizationIdentifierCodeSystem)).findFirst().orElse(null))
+				.filter(identifier -> identifier != null).collect(Collectors.toList());
 	}
 
 	@Override
@@ -119,7 +120,7 @@ public class OrganizationProviderImpl implements OrganizationProvider, Initializ
 		{
 			List<Identifier> identifiers = clientProvider.getLocalWebserviceClient()
 					.read(Organization.class, organizationId.getIdPart()).getIdentifier();
-			return identifiers.stream().filter(i -> organizationIdentifierCodeSystem.equals(i.getSystem())).findFirst();
+			return identifiers.stream().filter(identifierWithSystem(organizationIdentifierCodeSystem)).findFirst();
 		}
 		else
 		{
@@ -127,5 +128,32 @@ public class OrganizationProviderImpl implements OrganizationProvider, Initializ
 					organizationId.getBaseUrl());
 			return Optional.empty();
 		}
+	}
+
+	@Override
+	public Stream<Organization> searchRemoteOrganizations(String searchParameterIdentifierValue)
+	{
+		return searchForOrganizations(searchParameterIdentifierValue)
+				.filter(noIdentifierMatches(organizationIdentifierCodeSystem, organizationIdentifierLocalValue));
+	}
+
+	@Override
+	public Stream<Identifier> searchRemoteOrganizationsIdentifiers(String searchParameterIdentifierValue)
+	{
+		return searchRemoteOrganizations(searchParameterIdentifierValue)
+				.map(organization -> organization.getIdentifier().stream()
+						.filter(identifierWithSystem(organizationIdentifierCodeSystem)).findFirst().orElse(null))
+				.filter(identifier -> identifier != null);
+	}
+
+	private static Predicate<? super Identifier> identifierWithSystem(String system)
+	{
+		return identifier -> system.equals(identifier.getSystem());
+	}
+
+	private static Predicate<? super Organization> noIdentifierMatches(String system, String value)
+	{
+		return organization -> !organization.getIdentifier().stream()
+				.anyMatch(i -> system.equals(i.getSystem()) && value.equals(i.getValue()));
 	}
 }

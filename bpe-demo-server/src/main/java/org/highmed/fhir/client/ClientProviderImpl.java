@@ -103,7 +103,7 @@ public class ClientProviderImpl implements WebserviceClientProvider, WebsocketCl
 	{
 		return localBaseUrl;
 	}
-	
+
 	private WebserviceClient getClient(String webserviceUrl)
 	{
 		synchronized (webserviceClientsByUrl)
@@ -131,11 +131,10 @@ public class ClientProviderImpl implements WebserviceClientProvider, WebsocketCl
 	@Override
 	public WebserviceClient getLocalWebserviceClient()
 	{
-		return getRemoteWebserviceClient(localBaseUrl);
+		return getRemoteWebserviceClientByUrl(localBaseUrl);
 	}
 
-	@Override
-	public WebserviceClient getRemoteWebserviceClient(String webserviceUrl)
+	private WebserviceClient getRemoteWebserviceClientByUrl(String webserviceUrl)
 	{
 		WebserviceClient cachedClient = webserviceClientsByUrl.get(webserviceUrl);
 		if (cachedClient != null)
@@ -151,11 +150,18 @@ public class ClientProviderImpl implements WebserviceClientProvider, WebsocketCl
 	@Override
 	public WebserviceClient getRemoteWebserviceClient(IdType organizationReference)
 	{
+		Objects.requireNonNull(organizationReference, "organizationReference");
 		if (organizationReference.hasBaseUrl())
 			throw new IllegalArgumentException("Reference to locally stored organization expected");
 
+		Endpoint endpoint = searchForEndpoint("_id", organizationReference.getIdPart());
+		return getRemoteWebserviceClientByUrl(endpoint.getAddress());
+	}
+
+	private Endpoint searchForEndpoint(String searchParameter, String searchParameterValue)
+	{
 		Bundle resultSet = getLocalWebserviceClient().search(Organization.class,
-				Map.of("_id", Collections.singletonList(organizationReference.getIdPart()), "_include",
+				Map.of(searchParameter, Collections.singletonList(searchParameterValue), "_include",
 						Collections.singletonList("Organization:endpoint")));
 
 		if (resultSet.getTotal() != 1 || resultSet.getEntry().size() != 2)
@@ -176,8 +182,19 @@ public class ClientProviderImpl implements WebserviceClientProvider, WebsocketCl
 							+ Endpoint.class.getName() + ", found (" + resultSet.getEntry().stream()
 									.map(e -> e.getResource().getClass().getName()).collect(Collectors.joining(", "))
 							+ ")");
+		return endpoint;
+	}
 
-		return getRemoteWebserviceClient(endpoint.getAddress());
+	@Override
+	public WebserviceClient getRemoteWebserviceClient(String organizationIdentifierSystem,
+			String organizationIdentifierValue)
+	{
+		Objects.requireNonNull(organizationIdentifierSystem, "organizationIdentifierSystem");
+		Objects.requireNonNull(organizationIdentifierValue, "organizationIdentifierValue");
+
+		Endpoint endpoint = searchForEndpoint("identifier",
+				organizationIdentifierSystem + "|" + organizationIdentifierValue);
+		return getRemoteWebserviceClientByUrl(endpoint.getAddress());
 	}
 
 	@Override

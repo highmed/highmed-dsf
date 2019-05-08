@@ -53,7 +53,7 @@ public class TaskHandler implements InitializingBean
 	public void onTask(Task task)
 	{
 		task.setStatus(TaskStatus.INPROGRESS);
-		webserviceClient.update(task);
+		task = webserviceClient.update(task);
 
 		// http://highmed.org/bpe/Process/processDefinitionKey
 		// http://highmed.org/bpe/Process/processDefinitionKey/versionTag

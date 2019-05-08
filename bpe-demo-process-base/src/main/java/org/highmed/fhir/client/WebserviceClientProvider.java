@@ -8,7 +8,7 @@ public interface WebserviceClientProvider
 
 	WebserviceClient getLocalWebserviceClient();
 
-	WebserviceClient getRemoteWebserviceClient(String baseUrl);
-
 	WebserviceClient getRemoteWebserviceClient(IdType organizationReference);
+
+	WebserviceClient getRemoteWebserviceClient(String organizationIdentifierSystem, String organizationIdentifierValue);
 }
