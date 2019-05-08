@@ -99,7 +99,8 @@ public class TransactionCommandList implements CommandList
 					}
 				}
 
-				connection.commit();
+				if (hasModifyingCommand)
+					connection.commit();
 			}
 
 			Map<Integer, BundleEntryComponent> results = new HashMap<>((int) ((commands.size() / 0.75) + 1));
