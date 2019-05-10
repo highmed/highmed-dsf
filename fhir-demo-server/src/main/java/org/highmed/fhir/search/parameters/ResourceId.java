@@ -9,13 +9,13 @@ import java.util.UUID;
 
 import javax.ws.rs.core.UriBuilder;
 
-import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.fhir.function.BiFunctionWithSqlException;
+import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.fhir.search.SearchQueryParameterError;
 import org.highmed.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 import org.highmed.fhir.search.parameters.basic.AbstractSearchParameter;
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
+import org.hl7.fhir.r4.model.Resource;
 import org.postgresql.util.PGobject;
 
 import com.google.common.base.Objects;
@@ -23,7 +23,7 @@ import com.google.common.base.Objects;
 import ca.uhn.fhir.parser.DataFormatException;
 
 @SearchParameterDefinition(name = ResourceId.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Resource-id", type = SearchParamType.TOKEN, documentation = "Logical id of this artifact")
-public class ResourceId<R extends DomainResource> extends AbstractSearchParameter<R>
+public class ResourceId<R extends Resource> extends AbstractSearchParameter<R>
 {
 	public static final String PARAMETER_NAME = "_id";
 
@@ -123,7 +123,7 @@ public class ResourceId<R extends DomainResource> extends AbstractSearchParamete
 	}
 
 	@Override
-	public boolean matches(DomainResource resource)
+	public boolean matches(Resource resource)
 	{
 		if (isDefined())
 			return Objects.equal(resource.getId(), id.toString());

@@ -6,7 +6,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.highmed.fhir.dao.CodeSystemDao;
-import org.highmed.fhir.dao.DomainResourceDao;
+import org.highmed.fhir.dao.ResourceDao;
 import org.highmed.fhir.dao.EndpointDao;
 import org.highmed.fhir.dao.HealthcareServiceDao;
 import org.highmed.fhir.dao.LocationDao;
@@ -58,8 +58,8 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	private final TaskDao taskDao;
 	private final ValueSetDao valueSetDao;
 
-	private final Map<Class<? extends DomainResource>, DomainResourceDao<?>> daosByResourecClass = new HashMap<>();
-	private final Map<String, DomainResourceDao<?>> daosByResourceTypeName = new HashMap<>();
+	private final Map<Class<? extends DomainResource>, ResourceDao<?>> daosByResourecClass = new HashMap<>();
+	private final Map<String, ResourceDao<?>> daosByResourceTypeName = new HashMap<>();
 
 	public DaoProviderImpl(CodeSystemDao codeSystemDao, EndpointDao endpointDao,
 			HealthcareServiceDao healthcareServiceDao, LocationDao locationDao, OrganizationDao organizationDao,
@@ -214,16 +214,16 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <R extends DomainResource> Optional<? extends DomainResourceDao<R>> getDao(Class<R> resourceClass)
+	public <R extends DomainResource> Optional<? extends ResourceDao<R>> getDao(Class<R> resourceClass)
 	{
-		DomainResourceDao<R> value = (DomainResourceDao<R>) daosByResourecClass.get(resourceClass);
+		ResourceDao<R> value = (ResourceDao<R>) daosByResourecClass.get(resourceClass);
 		return Optional.ofNullable(value);
 	}
 
 	@Override
-	public Optional<DomainResourceDao<?>> getDao(String resourceTypeName)
+	public Optional<ResourceDao<?>> getDao(String resourceTypeName)
 	{
-		DomainResourceDao<?> value = daosByResourceTypeName.get(resourceTypeName);
+		ResourceDao<?> value = daosByResourceTypeName.get(resourceTypeName);
 		return Optional.ofNullable(value);
 	}
 }

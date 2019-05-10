@@ -14,7 +14,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
-import org.highmed.fhir.dao.DomainResourceDao;
+import org.highmed.fhir.dao.ResourceDao;
 import org.highmed.fhir.dao.provider.DaoProvider;
 import org.highmed.fhir.help.ExceptionHandler;
 import org.highmed.fhir.help.ParameterConverter;
@@ -29,6 +29,7 @@ import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Resource;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -93,14 +94,14 @@ public class ReadCommand extends AbstractCommand implements Command
 
 	private void readById(Connection connection, String resourceTypeName, String id)
 	{
-		Optional<DomainResourceDao<? extends DomainResource>> optDao = daoProvider.getDao(resourceTypeName);
+		Optional<ResourceDao<? extends Resource>> optDao = daoProvider.getDao(resourceTypeName);
 		if (optDao.isEmpty())
 		{
 			responseResult = Response.status(Status.NOT_FOUND).build();
 			return;
 		}
 
-		DomainResourceDao<? extends DomainResource> dao = optDao.get();
+		ResourceDao<? extends Resource> dao = optDao.get();
 		Optional<?> read = exceptionHandler.handleSqlAndResourceDeletedException(resourceTypeName,
 				() -> dao.readWithTransaction(connection, parameterConverter.toUuid(resourceTypeName, id)));
 		if (read.isEmpty())
@@ -125,7 +126,7 @@ public class ReadCommand extends AbstractCommand implements Command
 
 	private void readByIdAndVersion(Connection connection, String resourceTypeName, String id, String version)
 	{
-		Optional<DomainResourceDao<? extends DomainResource>> optDao = daoProvider.getDao(resourceTypeName);
+		Optional<ResourceDao<? extends Resource>> optDao = daoProvider.getDao(resourceTypeName);
 		Optional<Long> longVersion = parameterConverter.toVersion(version);
 		if (optDao.isEmpty() || longVersion.isEmpty())
 		{
@@ -133,7 +134,7 @@ public class ReadCommand extends AbstractCommand implements Command
 			return;
 		}
 
-		DomainResourceDao<? extends DomainResource> dao = optDao.get();
+		ResourceDao<? extends Resource> dao = optDao.get();
 		Optional<?> read = exceptionHandler.handleSqlAndResourceDeletedException(resourceTypeName,
 				() -> dao.readVersionWithTransaction(connection, parameterConverter.toUuid(resourceTypeName, id),
 						longVersion.get()));
@@ -160,7 +161,7 @@ public class ReadCommand extends AbstractCommand implements Command
 	private void readByCondition(Connection connection, String resourceTypeName,
 			Map<String, List<String>> cleanQueryParameters)
 	{
-		Optional<DomainResourceDao<? extends DomainResource>> optDao = daoProvider.getDao(resourceTypeName);
+		Optional<ResourceDao<? extends Resource>> optDao = daoProvider.getDao(resourceTypeName);
 		if (optDao.isEmpty())
 		{
 			responseResult = Response.status(Status.NOT_FOUND).build();
@@ -173,12 +174,12 @@ public class ReadCommand extends AbstractCommand implements Command
 		Integer count = parameterConverter.getFirstInt(cleanQueryParameters, SearchQuery.PARAMETER_COUNT);
 		int effectiveCount = (count == null || count < 0) ? defaultPageCount : count;
 
-		SearchQuery<? extends DomainResource> query = optDao.get().createSearchQuery(effectivePage, effectiveCount);
+		SearchQuery<? extends Resource> query = optDao.get().createSearchQuery(effectivePage, effectiveCount);
 		query.configureParameters(cleanQueryParameters);
 		List<SearchQueryParameterError> errors = query.getUnsupportedQueryParameters(cleanQueryParameters);
 		// TODO throw error if strict param handling is configured, include warning else
 
-		PartialResult<? extends DomainResource> result = exceptionHandler
+		PartialResult<? extends Resource> result = exceptionHandler
 				.handleSqlException(() -> optDao.get().searchWithTransaction(connection, query));
 
 		UriBuilder bundleUri = query.configureBundleUri(UriBuilder.fromPath(serverBase + "/" + resourceTypeName));

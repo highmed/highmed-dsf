@@ -7,9 +7,9 @@ import java.sql.SQLException;
 import org.highmed.fhir.function.BiFunctionWithSqlException;
 import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.fhir.search.parameters.basic.AbstractBooleanParameter;
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.PractitionerRole;
+import org.hl7.fhir.r4.model.Resource;
 
 @SearchParameterDefinition(name = PractitionerActive.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/PractitionerRole-active", type = SearchParamType.TOKEN, documentation = "Whether this practitioner role record is in active use [true|false]")
 public class PractitionerRoleActive extends AbstractBooleanParameter<PractitionerRole>
@@ -41,7 +41,7 @@ public class PractitionerRoleActive extends AbstractBooleanParameter<Practitione
 	}
 
 	@Override
-	public boolean matches(DomainResource resource)
+	public boolean matches(Resource resource)
 	{
 		if (!isDefined())
 			throw notDefined();

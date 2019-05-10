@@ -2,8 +2,8 @@ package org.highmed.fhir.search.parameters;
 
 import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.fhir.search.parameters.basic.AbstractUrlAndVersionParameter;
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StructureDefinition;
 
 @SearchParameterDefinition(name = StructureDefinitionUrl.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/StructureDefinition.url", type = SearchParamType.URI, documentation = "The uri that identifies the structure definition")
@@ -22,7 +22,7 @@ public class StructureDefinitionUrl extends AbstractUrlAndVersionParameter<Struc
 	}
 
 	@Override
-	protected boolean instanceOf(DomainResource resource)
+	protected boolean instanceOf(Resource resource)
 	{
 		return resource instanceof StructureDefinition;
 	}

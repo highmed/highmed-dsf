@@ -3,8 +3,8 @@ package org.highmed.fhir.search.parameters;
 import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.fhir.search.parameters.basic.AbstractVersionParameter;
 import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
+import org.hl7.fhir.r4.model.Resource;
 
 @SearchParameterDefinition(name = CodeSystemVersion.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/CodeSystem.version", type = SearchParamType.TOKEN, documentation = "The business version of the code system")
 public class CodeSystemVersion extends AbstractVersionParameter<CodeSystem>
@@ -22,7 +22,7 @@ public class CodeSystemVersion extends AbstractVersionParameter<CodeSystem>
 	}
 
 	@Override
-	protected boolean instanceOf(DomainResource resource)
+	protected boolean instanceOf(Resource resource)
 	{
 		return resource instanceof CodeSystem;
 	}

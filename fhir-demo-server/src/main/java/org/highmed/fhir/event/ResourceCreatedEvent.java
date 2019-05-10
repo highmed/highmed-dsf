@@ -1,10 +1,10 @@
 package org.highmed.fhir.event;
 
-import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Resource;
 
 public class ResourceCreatedEvent extends AbstractEventWithResource implements Event
 {
-	public ResourceCreatedEvent(Class<? extends DomainResource> type, DomainResource resource)
+	public ResourceCreatedEvent(Class<? extends Resource> type, Resource resource)
 	{
 		super(type, resource);
 	}

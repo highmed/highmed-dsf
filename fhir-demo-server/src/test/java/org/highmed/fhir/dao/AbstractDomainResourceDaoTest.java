@@ -14,7 +14,7 @@ import org.highmed.fhir.dao.exception.ResourceNotFoundException;
 import org.highmed.fhir.dao.exception.ResourceVersionNoMatchException;
 import org.highmed.fhir.test.FhirEmbeddedPostgresWithLiquibase;
 import org.highmed.fhir.test.TestSuiteDbTests;
-import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Resource;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -23,7 +23,7 @@ import org.junit.Test;
 import ca.uhn.fhir.context.FhirContext;
 import de.rwh.utils.test.Database;
 
-public abstract class AbstractDomainResourceDaoTest<D extends DomainResource, C extends DomainResourceDao<D>>
+public abstract class AbstractDomainResourceDaoTest<D extends Resource, C extends ResourceDao<D>>
 {
 	@ClassRule
 	public static final FhirEmbeddedPostgresWithLiquibase template = new FhirEmbeddedPostgresWithLiquibase(
@@ -240,7 +240,9 @@ public abstract class AbstractDomainResourceDaoTest<D extends DomainResource, C 
 		Optional<D> read = dao.read(UUID.fromString(createdResource.getIdElement().getIdPart()));
 		assertTrue(read.isPresent());
 
-		assertTrue(newResource.equalsDeep(read.get()));
+		String s1 = fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(newResource);
+		String s2 = fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(read.get());
+		assertTrue(s1 + "\nvs\n" + s2, newResource.equalsDeep(read.get()));
 	}
 
 	@Test

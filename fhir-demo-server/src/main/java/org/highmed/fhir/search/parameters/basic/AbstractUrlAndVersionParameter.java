@@ -5,8 +5,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import org.highmed.fhir.function.BiFunctionWithSqlException;
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.MetadataResource;
+import org.hl7.fhir.r4.model.Resource;
 
 import com.google.common.base.Objects;
 
@@ -67,10 +67,10 @@ public abstract class AbstractUrlAndVersionParameter<R extends MetadataResource>
 			statement.setString(parameterIndex, valueAndType.version);
 	}
 
-	protected abstract boolean instanceOf(DomainResource resource);
+	protected abstract boolean instanceOf(Resource resource);
 
 	@Override
-	public boolean matches(DomainResource resource)
+	public boolean matches(Resource resource)
 	{
 		if (!isDefined())
 			throw notDefined();

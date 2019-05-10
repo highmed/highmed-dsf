@@ -15,7 +15,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.Response.Status;
 
-import org.highmed.fhir.dao.DomainResourceDao;
+import org.highmed.fhir.dao.ResourceDao;
 import org.highmed.fhir.event.EventGenerator;
 import org.highmed.fhir.event.EventManager;
 import org.highmed.fhir.help.ExceptionHandler;
@@ -35,7 +35,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-public class UpdateCommand<R extends DomainResource, D extends DomainResourceDao<R>>
+public class UpdateCommand<R extends DomainResource, D extends ResourceDao<R>>
 		extends AbstractCommandWithResource<R, D> implements Command
 {
 	private static final Logger logger = LoggerFactory.getLogger(UpdateCommand.class);

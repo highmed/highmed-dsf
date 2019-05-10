@@ -6,7 +6,7 @@ import java.util.List;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
 
-public interface SubscriptionDao extends DomainResourceDao<Subscription>
+public interface SubscriptionDao extends ResourceDao<Subscription>
 {
 	List<Subscription> readByStatus(SubscriptionStatus status) throws SQLException;
 }

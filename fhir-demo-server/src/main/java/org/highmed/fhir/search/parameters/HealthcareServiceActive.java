@@ -7,9 +7,9 @@ import java.sql.SQLException;
 import org.highmed.fhir.function.BiFunctionWithSqlException;
 import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.fhir.search.parameters.basic.AbstractBooleanParameter;
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.HealthcareService;
+import org.hl7.fhir.r4.model.Resource;
 
 @SearchParameterDefinition(name = HealthcareServiceActive.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/HealthcareService-active", type = SearchParamType.TOKEN, documentation = "The Healthcare Service is currently marked as active [true|false]")
 public class HealthcareServiceActive extends AbstractBooleanParameter<HealthcareService>
@@ -41,7 +41,7 @@ public class HealthcareServiceActive extends AbstractBooleanParameter<Healthcare
 	}
 
 	@Override
-	public boolean matches(DomainResource resource)
+	public boolean matches(Resource resource)
 	{
 		if (!isDefined())
 			throw notDefined();

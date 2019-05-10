@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
-import org.highmed.fhir.dao.DomainResourceDao;
+import org.highmed.fhir.dao.ResourceDao;
 import org.highmed.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.fhir.dao.exception.ResourceNotFoundException;
 import org.highmed.fhir.dao.exception.ResourceVersionNoMatchException;
@@ -33,6 +33,7 @@ import org.highmed.fhir.search.parameters.ResourceLastUpdated;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Resource;
 import org.postgresql.util.PGobject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +49,7 @@ import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 
-abstract class AbstractDomainResourceDaoJdbc<R extends DomainResource> implements DomainResourceDao<R>, InitializingBean
+abstract class AbstractDomainResourceDaoJdbc<R extends Resource> implements ResourceDao<R>, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractDomainResourceDaoJdbc.class);
 

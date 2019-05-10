@@ -17,6 +17,7 @@ import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.fhir.search.parameters.basic.AbstractDateTimeParameter;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
+import org.hl7.fhir.r4.model.Resource;
 
 @SearchParameterDefinition(name = ResourceLastUpdated.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Resource-lastUpdated", type = SearchParamType.DATE, documentation = "When the resource version last changed")
 public class ResourceLastUpdated<R extends DomainResource> extends AbstractDateTimeParameter<R>
@@ -100,7 +101,7 @@ public class ResourceLastUpdated<R extends DomainResource> extends AbstractDateT
 	}
 
 	@Override
-	public boolean matches(DomainResource resource)
+	public boolean matches(Resource resource)
 	{
 		if (!isDefined())
 			throw notDefined();

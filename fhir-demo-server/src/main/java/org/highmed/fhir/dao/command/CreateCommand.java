@@ -15,7 +15,7 @@ import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.highmed.fhir.dao.DomainResourceDao;
+import org.highmed.fhir.dao.ResourceDao;
 import org.highmed.fhir.event.EventGenerator;
 import org.highmed.fhir.event.EventManager;
 import org.highmed.fhir.help.ExceptionHandler;
@@ -37,7 +37,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import ca.uhn.fhir.rest.api.Constants;
 
-public class CreateCommand<R extends DomainResource, D extends DomainResourceDao<R>>
+public class CreateCommand<R extends DomainResource, D extends ResourceDao<R>>
 		extends AbstractCommandWithResource<R, D> implements Command
 {
 	private static final Logger logger = LoggerFactory.getLogger(CreateCommand.class);

@@ -2,11 +2,11 @@ package org.highmed.fhir.event;
 
 import java.util.Objects;
 
-import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Resource;
 
 public class AbstractEvent implements Event
 {
-	private final Class<? extends DomainResource> type;
+	private final Class<? extends Resource> type;
 	private final String id;
 
 	/**
@@ -15,14 +15,14 @@ public class AbstractEvent implements Event
 	 * @param id
 	 *            not <code>null</code>
 	 */
-	public AbstractEvent(Class<? extends DomainResource> type, String id)
+	public AbstractEvent(Class<? extends Resource> type, String id)
 	{
 		this.type = Objects.requireNonNull(type, "type");
 		this.id = Objects.requireNonNull(id, "id");
 	}
 
 	@Override
-	public Class<? extends DomainResource> getResourceType()
+	public Class<? extends Resource> getResourceType()
 	{
 		return type;
 	}
@@ -37,7 +37,7 @@ public class AbstractEvent implements Event
 	 * @return always <code>null</code>
 	 */
 	@Override
-	public DomainResource getResource()
+	public Resource getResource()
 	{
 		return null;
 	}

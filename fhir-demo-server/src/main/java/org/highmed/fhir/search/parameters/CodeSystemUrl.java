@@ -3,8 +3,8 @@ package org.highmed.fhir.search.parameters;
 import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.fhir.search.parameters.basic.AbstractUrlAndVersionParameter;
 import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
+import org.hl7.fhir.r4.model.Resource;
 
 @SearchParameterDefinition(name = CodeSystemUrl.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/CodeSystem.url", type = SearchParamType.URI, documentation = "The uri that identifies the code system")
 public class CodeSystemUrl extends AbstractUrlAndVersionParameter<CodeSystem>
@@ -17,7 +17,7 @@ public class CodeSystemUrl extends AbstractUrlAndVersionParameter<CodeSystem>
 	}
 
 	@Override
-	protected boolean instanceOf(DomainResource resource)
+	protected boolean instanceOf(Resource resource)
 	{
 		return resource instanceof CodeSystem;
 	}

@@ -3,7 +3,7 @@ package org.highmed.fhir.spring.config;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.highmed.fhir.dao.DomainResourceDao;
+import org.highmed.fhir.dao.ResourceDao;
 import org.highmed.fhir.event.EventGenerator;
 import org.highmed.fhir.event.EventManager;
 import org.highmed.fhir.event.EventManagerImpl;
@@ -28,7 +28,7 @@ public class EventConfig
 	@Bean
 	public MatcherFactory matcherFactory()
 	{
-		Map<String, DomainResourceDao<? extends DomainResource>> daosByResourceName = new HashMap<>();
+		Map<String, ResourceDao<? extends DomainResource>> daosByResourceName = new HashMap<>();
 
 		put(daosByResourceName, daoConfig.codeSystemDao());
 		put(daosByResourceName, daoConfig.healthcareServiceDao());
@@ -47,8 +47,8 @@ public class EventConfig
 		return new MatcherFactory(daosByResourceName);
 	}
 
-	private void put(Map<String, ? super DomainResourceDao<? extends DomainResource>> daosByResourceName,
-			DomainResourceDao<? extends DomainResource> dao)
+	private void put(Map<String, ? super ResourceDao<? extends DomainResource>> daosByResourceName,
+			ResourceDao<? extends DomainResource> dao)
 	{
 		daosByResourceName.put(dao.getResourceTypeName(), dao);
 	}

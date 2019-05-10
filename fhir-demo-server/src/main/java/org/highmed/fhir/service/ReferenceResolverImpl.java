@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
 
-import org.highmed.fhir.dao.DomainResourceDao;
+import org.highmed.fhir.dao.ResourceDao;
 import org.highmed.fhir.dao.command.ResourceReference;
 import org.highmed.fhir.dao.command.ResourceReference.ReferenceType;
 import org.highmed.fhir.dao.provider.DaoProvider;
@@ -24,6 +24,7 @@ import org.highmed.fhir.search.SearchQueryParameterError;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -107,14 +108,14 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 			throw new IllegalArgumentException("Not a literal internal reference");
 
 		IdType id = new IdType(resourceReference.getReference().getReference());
-		Optional<DomainResourceDao<?>> referenceDao = daoProvider.getDao(id.getResourceType());
+		Optional<ResourceDao<?>> referenceDao = daoProvider.getDao(id.getResourceType());
 
 		if (referenceDao.isEmpty())
 			throw new WebApplicationException(responseGenerator
 					.referenceTargetTypeNotSupportedByImplementation(bundleIndex, resource, resourceReference));
 		else
 		{
-			DomainResourceDao<?> d = referenceDao.get();
+			ResourceDao<?> d = referenceDao.get();
 			if (!resourceReference.supportsType(d.getResourceType()))
 				throw new WebApplicationException(responseGenerator
 						.referenceTargetTypeNotSupportedByResource(bundleIndex, resource, resourceReference));
@@ -180,19 +181,19 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 			throw new WebApplicationException(
 					responseGenerator.referenceTargetBadCondition(bundleIndex, resource, resourceReference));
 
-		Optional<DomainResourceDao<?>> referenceDao = daoProvider.getDao(path);
+		Optional<ResourceDao<?>> referenceDao = daoProvider.getDao(path);
 
 		if (referenceDao.isEmpty())
 			throw new WebApplicationException(responseGenerator
 					.referenceTargetTypeNotSupportedByImplementation(bundleIndex, resource, resourceReference));
 		else
 		{
-			DomainResourceDao<?> d = referenceDao.get();
+			ResourceDao<?> d = referenceDao.get();
 			if (!resourceReference.supportsType(d.getResourceType()))
 				throw new WebApplicationException(responseGenerator
 						.referenceTargetTypeNotSupportedByResource(bundleIndex, resource, resourceReference));
 
-			DomainResource target = search(resource, bundleIndex, connection, d, resourceReference,
+			Resource target = search(resource, bundleIndex, connection, d, resourceReference,
 					condition.getQueryParams(), true);
 
 			resourceReference.getReference().setIdentifier(null).setReferenceElement(
@@ -222,20 +223,20 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 
 		String targetType = resourceReference.getReference().getType();
 
-		Optional<DomainResourceDao<?>> referenceDao = daoProvider.getDao(targetType);
+		Optional<ResourceDao<?>> referenceDao = daoProvider.getDao(targetType);
 
 		if (referenceDao.isEmpty())
 			throw new WebApplicationException(responseGenerator
 					.referenceTargetTypeNotSupportedByImplementation(bundleIndex, resource, resourceReference));
 		else
 		{
-			DomainResourceDao<?> d = referenceDao.get();
+			ResourceDao<?> d = referenceDao.get();
 			if (!resourceReference.supportsType(d.getResourceType()))
 				throw new WebApplicationException(responseGenerator
 						.referenceTargetTypeNotSupportedByResource(bundleIndex, resource, resourceReference));
 
 			Identifier targetIdentifier = resourceReference.getReference().getIdentifier();
-			DomainResource target = search(resource, bundleIndex, connection, d, resourceReference, Map.of("identifier",
+			Resource target = search(resource, bundleIndex, connection, d, resourceReference, Map.of("identifier",
 					Collections.singletonList(targetIdentifier.getSystem() + "|" + targetIdentifier.getValue())), true);
 
 			resourceReference.getReference().setIdentifier(null).setReferenceElement(
@@ -245,8 +246,8 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 		return true; // throws exception if reference could not be resolved
 	}
 
-	private DomainResource search(DomainResource resource, Integer bundleIndex, Connection connection,
-			DomainResourceDao<?> referenceTargetDao, ResourceReference resourceReference,
+	private Resource search(DomainResource resource, Integer bundleIndex, Connection connection,
+			ResourceDao<?> referenceTargetDao, ResourceReference resourceReference,
 			Map<String, List<String>> queryParameters, boolean logicalNoConditional)
 	{
 		if (Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(queryParameters::containsKey))

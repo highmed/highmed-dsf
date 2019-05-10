@@ -79,7 +79,7 @@ public class ResponseGenerator
 		return b;
 	}
 
-	public BundleEntryComponent toBundleEntryComponent(DomainResource resource, SearchEntryMode mode)
+	public BundleEntryComponent toBundleEntryComponent(Resource resource, SearchEntryMode mode)
 	{
 		BundleEntryComponent entry = new BundleEntryComponent();
 		entry.getSearch().setMode(mode);
@@ -102,7 +102,7 @@ public class ResponseGenerator
 	 *            may be <code>null</code>
 	 * @return
 	 */
-	public Bundle createSearchSet(PartialResult<? extends DomainResource> result,
+	public Bundle createSearchSet(PartialResult<? extends Resource> result,
 			List<SearchQueryParameterError> errors, UriBuilder bundleUri, String format, String pretty)
 	{
 		Bundle bundle = new Bundle();

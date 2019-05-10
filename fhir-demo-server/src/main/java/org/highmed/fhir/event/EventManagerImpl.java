@@ -21,7 +21,7 @@ import org.highmed.fhir.dao.SubscriptionDao;
 import org.highmed.fhir.dao.provider.DaoProvider;
 import org.highmed.fhir.help.ExceptionHandler;
 import org.highmed.fhir.search.Matcher;
-import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
 import org.slf4j.Logger;
@@ -48,7 +48,7 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 			this.matcher = matcher;
 		}
 
-		boolean matches(DomainResource resource, DaoProvider daoProvider)
+		boolean matches(Resource resource, DaoProvider daoProvider)
 		{
 			try
 			{
@@ -114,7 +114,7 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 
 	private final AtomicBoolean firstCall = new AtomicBoolean(true);
 	private final ReadWriteMap<String, Subscription> subscriptionsByIdPart = new ReadWriteMap<>();
-	private final ReadWriteMap<Class<? extends DomainResource>, List<SubscriptionAndMatcher>> matchersByResource = new ReadWriteMap<>();
+	private final ReadWriteMap<Class<? extends Resource>, List<SubscriptionAndMatcher>> matchersByResource = new ReadWriteMap<>();
 	private final ReadWriteMap<String, List<SessionIdAndRemoteAsync>> asyncRemotesBySubscriptionIdPart = new ReadWriteMap<>();
 
 	public EventManagerImpl(DaoProvider daoProvider, ExceptionHandler exceptionHandler, MatcherFactory matcherFactory,
@@ -145,7 +145,7 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 		try
 		{
 			List<Subscription> subscriptions = subscriptionDao.readByStatus(SubscriptionStatus.ACTIVE);
-			Map<Class<? extends DomainResource>, List<SubscriptionAndMatcher>> matchers = new HashMap<>();
+			Map<Class<? extends Resource>, List<SubscriptionAndMatcher>> matchers = new HashMap<>();
 			for (Subscription subscription : subscriptions)
 			{
 				Optional<Matcher> matcher = matcherFactory.createMatcher(subscription.getCriteria());

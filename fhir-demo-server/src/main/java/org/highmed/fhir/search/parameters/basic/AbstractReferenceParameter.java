@@ -20,6 +20,7 @@ import org.highmed.fhir.search.SearchQueryIncludeParameter.IncludeParts;
 import org.highmed.fhir.search.SearchQueryParameterError;
 import org.highmed.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Resource;
 
 public abstract class AbstractReferenceParameter<R extends DomainResource> extends AbstractSearchParameter<R>
 {
@@ -243,7 +244,7 @@ public abstract class AbstractReferenceParameter<R extends DomainResource> exten
 	protected abstract String getIncludeSql(IncludeParts includeParts);
 
 	@Override
-	public void resolveReferencesForMatching(DomainResource resource, DaoProvider daoProvider) throws SQLException
+	public void resolveReferencesForMatching(Resource resource, DaoProvider daoProvider) throws SQLException
 	{
 		if (resourceType.isInstance(resource))
 			doResolveReferencesForMatching(resourceType.cast(resource), daoProvider);

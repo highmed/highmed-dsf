@@ -1,6 +1,7 @@
 package org.highmed.fhir.spring.config;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.highmed.fhir.dao.BundleDao;
 import org.highmed.fhir.dao.CodeSystemDao;
 import org.highmed.fhir.dao.EndpointDao;
 import org.highmed.fhir.dao.HealthcareServiceDao;
@@ -17,6 +18,7 @@ import org.highmed.fhir.dao.SubscriptionDao;
 import org.highmed.fhir.dao.TaskDao;
 import org.highmed.fhir.dao.ValueSetDao;
 import org.highmed.fhir.dao.converter.SnapshotInfoConverter;
+import org.highmed.fhir.dao.jdbc.BundleDaoJdbc;
 import org.highmed.fhir.dao.jdbc.CodeSystemDaoJdbc;
 import org.highmed.fhir.dao.jdbc.EndpointDaoJdbc;
 import org.highmed.fhir.dao.jdbc.HealthcareServiceDaoJdbc;
@@ -71,6 +73,12 @@ public class DaoConfig
 		dataSource.setTestOnBorrow(true);
 		dataSource.setValidationQuery("SELECT 1");
 		return dataSource;
+	}
+
+	@Bean
+	public BundleDao bundleDao()
+	{
+		return new BundleDaoJdbc(dataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean

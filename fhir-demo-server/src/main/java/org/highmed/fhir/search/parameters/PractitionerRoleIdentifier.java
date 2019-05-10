@@ -2,9 +2,9 @@ package org.highmed.fhir.search.parameters;
 
 import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.fhir.search.parameters.basic.AbstractIdentifierParameter;
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.PractitionerRole;
+import org.hl7.fhir.r4.model.Resource;
 
 @SearchParameterDefinition(name = AbstractIdentifierParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/PractitionerRole.​identifier", type = SearchParamType.TOKEN, documentation = "A practitioner's Identifier")
 public class PractitionerRoleIdentifier extends AbstractIdentifierParameter<PractitionerRole>
@@ -17,7 +17,7 @@ public class PractitionerRoleIdentifier extends AbstractIdentifierParameter<Prac
 	}
 
 	@Override
-	public boolean matches(DomainResource resource)
+	public boolean matches(Resource resource)
 	{
 		if (!isDefined())
 			throw notDefined();

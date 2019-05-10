@@ -2,9 +2,9 @@ package org.highmed.fhir.search.parameters;
 
 import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.fhir.search.parameters.basic.AbstractIdentifierParameter;
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Resource;
 
 @SearchParameterDefinition(name = AbstractIdentifierParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Organization.​identifier", type = SearchParamType.TOKEN, documentation = "Any identifier for the organization (not the accreditation issuer's identifier)")
 public class OrganizationIdentifier extends AbstractIdentifierParameter<Organization>
@@ -17,7 +17,7 @@ public class OrganizationIdentifier extends AbstractIdentifierParameter<Organiza
 	}
 
 	@Override
-	public boolean matches(DomainResource resource)
+	public boolean matches(Resource resource)
 	{
 		if (!isDefined())
 			throw notDefined();

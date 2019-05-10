@@ -6,7 +6,7 @@ import java.util.List;
 import org.hl7.fhir.r4.model.StructureDefinition;
 
 public interface StructureDefinitionDaoBase
-		extends DomainResourceDao<StructureDefinition>, ReadByUrlDao<StructureDefinition>
+		extends ResourceDao<StructureDefinition>, ReadByUrlDao<StructureDefinition>
 {
 	List<StructureDefinition> readAll() throws SQLException;
 }

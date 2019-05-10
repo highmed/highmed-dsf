@@ -3,13 +3,13 @@ package org.highmed.fhir.search;
 import java.sql.SQLException;
 
 import org.highmed.fhir.dao.provider.DaoProvider;
-import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Resource;
 
 public interface Matcher
 {
-	void resloveReferencesForMatching(DomainResource resource, DaoProvider daoProvider) throws SQLException;
+	void resloveReferencesForMatching(Resource resource, DaoProvider daoProvider) throws SQLException;
 
-	boolean matches(DomainResource resource);
+	boolean matches(Resource resource);
 
-	Class<? extends DomainResource> getResourceType();
+	Class<? extends Resource> getResourceType();
 }

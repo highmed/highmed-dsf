@@ -3,7 +3,7 @@ package org.highmed.fhir.dao.provider;
 import java.util.Optional;
 
 import org.highmed.fhir.dao.CodeSystemDao;
-import org.highmed.fhir.dao.DomainResourceDao;
+import org.highmed.fhir.dao.ResourceDao;
 import org.highmed.fhir.dao.EndpointDao;
 import org.highmed.fhir.dao.HealthcareServiceDao;
 import org.highmed.fhir.dao.LocationDao;
@@ -52,7 +52,7 @@ public interface DaoProvider
 
 	ValueSetDao getValueSetDao();
 
-	<R extends DomainResource> Optional<? extends DomainResourceDao<R>> getDao(Class<R> resourceClass);
+	<R extends DomainResource> Optional<? extends ResourceDao<R>> getDao(Class<R> resourceClass);
 
-	Optional<DomainResourceDao<?>> getDao(String resourceTypeName);
+	Optional<ResourceDao<?>> getDao(String resourceTypeName);
 }

@@ -16,10 +16,10 @@ import java.util.stream.Stream;
 import javax.ws.rs.core.UriBuilder;
 
 import org.highmed.fhir.function.BiFunctionWithSqlException;
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
+import org.hl7.fhir.r4.model.Resource;
 
-public interface SearchQueryParameter<R extends DomainResource> extends MatcherParameter
+public interface SearchQueryParameter<R extends Resource> extends MatcherParameter
 {
 	@Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)

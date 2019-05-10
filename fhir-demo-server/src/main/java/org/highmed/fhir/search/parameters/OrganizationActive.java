@@ -7,9 +7,9 @@ import java.sql.SQLException;
 import org.highmed.fhir.function.BiFunctionWithSqlException;
 import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.fhir.search.parameters.basic.AbstractBooleanParameter;
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Resource;
 
 @SearchParameterDefinition(name = OrganizationActive.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Organization-active", type = SearchParamType.TOKEN, documentation = "Is the Organization record active [true|false]")
 public class OrganizationActive extends AbstractBooleanParameter<Organization>
@@ -41,7 +41,7 @@ public class OrganizationActive extends AbstractBooleanParameter<Organization>
 	}
 
 	@Override
-	public boolean matches(DomainResource resource)
+	public boolean matches(Resource resource)
 	{
 		if (!isDefined())
 			throw notDefined();

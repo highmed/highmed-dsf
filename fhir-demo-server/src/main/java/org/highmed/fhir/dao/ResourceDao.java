@@ -13,8 +13,9 @@ import org.highmed.fhir.search.PartialResult;
 import org.highmed.fhir.search.SearchQuery;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Resource;
 
-public interface DomainResourceDao<R extends DomainResource>
+public interface ResourceDao<R extends Resource>
 {
 	int FIRST_VERSION = 1;
 	String FIRST_VERSION_STRING = String.valueOf(FIRST_VERSION);

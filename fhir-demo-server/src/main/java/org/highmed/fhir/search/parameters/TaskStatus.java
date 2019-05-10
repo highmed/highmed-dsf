@@ -8,15 +8,15 @@ import java.util.Map;
 
 import javax.ws.rs.core.UriBuilder;
 
-import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.fhir.function.BiFunctionWithSqlException;
+import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.fhir.search.SearchQueryParameterError;
 import org.highmed.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 import org.highmed.fhir.search.parameters.basic.AbstractTokenParameter;
 import org.highmed.fhir.search.parameters.basic.TokenSearchType;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
 
 import com.google.common.base.Objects;
@@ -91,7 +91,7 @@ public class TaskStatus extends AbstractTokenParameter<Task>
 	}
 
 	@Override
-	public boolean matches(DomainResource resource)
+	public boolean matches(Resource resource)
 	{
 		if (!isDefined())
 			throw notDefined();

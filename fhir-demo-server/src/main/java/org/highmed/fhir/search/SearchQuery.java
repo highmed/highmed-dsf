@@ -18,11 +18,11 @@ import javax.ws.rs.core.UriBuilder;
 import org.highmed.fhir.dao.provider.DaoProvider;
 import org.highmed.fhir.function.BiFunctionWithSqlException;
 import org.highmed.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
-import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SearchQuery<R extends DomainResource> implements DbSearchQuery, Matcher
+public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 {
 	public static final String PARAMETER_SORT = "_sort";
 	public static final String PARAMETER_INCLUDE = "_include";
@@ -34,10 +34,10 @@ public class SearchQuery<R extends DomainResource> implements DbSearchQuery, Mat
 	public static final String[] STANDARD_PARAMETERS = { PARAMETER_SORT, PARAMETER_INCLUDE, PARAMETER_PAGE,
 			PARAMETER_COUNT, PARAMETER_FORMAT, PARAMETER_PRETTY };
 
-	public static class SearchQueryBuilder<R extends DomainResource>
+	public static class SearchQueryBuilder<R extends Resource>
 	{
-		public static <R extends DomainResource> SearchQueryBuilder<R> create(Class<R> resourceType,
-				String resourceTable, String resourceColumn, int page, int count)
+		public static <R extends Resource> SearchQueryBuilder<R> create(Class<R> resourceType, String resourceTable,
+				String resourceColumn, int page, int count)
 		{
 			return new SearchQueryBuilder<R>(resourceType, resourceTable, resourceColumn, page, count);
 		}
@@ -278,7 +278,7 @@ public class SearchQuery<R extends DomainResource> implements DbSearchQuery, Mat
 	}
 
 	@Override
-	public void resloveReferencesForMatching(DomainResource resource, DaoProvider daoProvider) throws SQLException
+	public void resloveReferencesForMatching(Resource resource, DaoProvider daoProvider) throws SQLException
 	{
 		if (resource == null)
 			return;
@@ -308,7 +308,7 @@ public class SearchQuery<R extends DomainResource> implements DbSearchQuery, Mat
 	}
 
 	@Override
-	public boolean matches(DomainResource resource)
+	public boolean matches(Resource resource)
 	{
 		if (resource == null)
 			return false;

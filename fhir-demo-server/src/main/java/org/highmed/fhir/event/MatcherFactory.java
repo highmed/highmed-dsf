@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.highmed.fhir.dao.DomainResourceDao;
+import org.highmed.fhir.dao.ResourceDao;
 import org.highmed.fhir.search.Matcher;
 import org.highmed.fhir.search.SearchQuery;
 import org.hl7.fhir.r4.model.DomainResource;
@@ -14,9 +14,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 public class MatcherFactory
 {
-	private final Map<String, DomainResourceDao<? extends DomainResource>> daosByResourceName = new HashMap<>();
+	private final Map<String, ResourceDao<? extends DomainResource>> daosByResourceName = new HashMap<>();
 
-	public MatcherFactory(Map<String, DomainResourceDao<? extends DomainResource>> daosByResourceName)
+	public MatcherFactory(Map<String, ResourceDao<? extends DomainResource>> daosByResourceName)
 	{
 		if (daosByResourceName != null)
 			this.daosByResourceName.putAll(daosByResourceName);
@@ -31,7 +31,7 @@ public class MatcherFactory
 
 		if (daosByResourceName.containsKey(path))
 		{
-			DomainResourceDao<? extends DomainResource> dao = daosByResourceName.get(path);
+			ResourceDao<? extends DomainResource> dao = daosByResourceName.get(path);
 			SearchQuery<? extends DomainResource> query = dao.createSearchQuery(1, 1);
 			query.configureParameters(queryParameters);
 			return Optional.of(query);

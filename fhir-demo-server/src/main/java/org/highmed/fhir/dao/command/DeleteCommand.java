@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
-import org.highmed.fhir.dao.DomainResourceDao;
+import org.highmed.fhir.dao.ResourceDao;
 import org.highmed.fhir.dao.provider.DaoProvider;
 import org.highmed.fhir.event.EventGenerator;
 import org.highmed.fhir.event.EventManager;
@@ -25,8 +25,8 @@ import org.highmed.fhir.search.SearchQueryParameterError;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent;
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
@@ -46,7 +46,7 @@ public class DeleteCommand extends AbstractCommand implements Command
 
 	private boolean deleted;
 	private String resourceTypeName;
-	private Class<? extends DomainResource> resourceType;
+	private Class<? extends Resource> resourceType;
 	private String id;
 
 	public DeleteCommand(int index, Bundle bundle, BundleEntryComponent entry, String serverBase,
@@ -88,7 +88,7 @@ public class DeleteCommand extends AbstractCommand implements Command
 
 	private void deleteById(Connection connection, String resourceTypeName, String id)
 	{
-		Optional<DomainResourceDao<?>> dao = daoProvider.getDao(resourceTypeName);
+		Optional<ResourceDao<?>> dao = daoProvider.getDao(resourceTypeName);
 
 		if (dao.isEmpty())
 			throw new WebApplicationException(
@@ -106,14 +106,14 @@ public class DeleteCommand extends AbstractCommand implements Command
 	private void deleteByCondition(Connection connection, String resourceTypeName,
 			Map<String, List<String>> queryParameters)
 	{
-		Optional<DomainResourceDao<?>> dao = daoProvider.getDao(resourceTypeName);
+		Optional<ResourceDao<?>> dao = daoProvider.getDao(resourceTypeName);
 
 		if (dao.isEmpty())
 			throw new WebApplicationException(
 					responseGenerator.resourceTypeNotSupportedByImplementation(index, resourceTypeName));
 		else
 		{
-			Optional<DomainResource> resourceToDelete = search(connection, dao.get(), queryParameters);
+			Optional<Resource> resourceToDelete = search(connection, dao.get(), queryParameters);
 			if (resourceToDelete.isPresent())
 			{
 				deleted = exceptionHandler.handleSqlAndResourceNotFoundException(resourceTypeName,
@@ -126,7 +126,7 @@ public class DeleteCommand extends AbstractCommand implements Command
 		}
 	}
 
-	private Optional<DomainResource> search(Connection connection, DomainResourceDao<?> dao,
+	private Optional<Resource> search(Connection connection, ResourceDao<?> dao,
 			Map<String, List<String>> queryParameters)
 	{
 		if (Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(queryParameters::containsKey))

@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 
 import javax.sql.DataSource;
 
-import org.highmed.fhir.dao.DomainResourceDao;
+import org.highmed.fhir.dao.ResourceDao;
 import org.highmed.fhir.dao.StructureDefinitionDao;
 import org.highmed.fhir.dao.exception.BadBundleException;
 import org.highmed.fhir.dao.provider.DaoProvider;
@@ -95,7 +95,7 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 		if (resource.getResourceType().name().equals(entry.getRequest().getUrl()))
 		{
 			@SuppressWarnings("unchecked")
-			Optional<? extends DomainResourceDao<R>> dao = (Optional<? extends DomainResourceDao<R>>) daoProvider
+			Optional<? extends ResourceDao<R>> dao = (Optional<? extends ResourceDao<R>>) daoProvider
 					.getDao(resource.getClass());
 
 			if (resource instanceof StructureDefinition)
@@ -105,7 +105,7 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 						daoProvider.getStructureDefinitionSnapshotDao(), snapshotGenerator, snapshotDependencyAnalyzer);
 			else
 				return dao
-						.map(d -> new CreateCommand<R, DomainResourceDao<R>>(index, bundle, entry, serverBase, resource,
+						.map(d -> new CreateCommand<R, ResourceDao<R>>(index, bundle, entry, serverBase, resource,
 								d, exceptionHandler, parameterConverter, responseGenerator, eventManager,
 								eventGenerator))
 						.orElseThrow(() -> new IllegalStateException(
@@ -123,7 +123,7 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 				&& entry.getRequest().getUrl().startsWith(resource.getResourceType().name()))
 		{
 			@SuppressWarnings("unchecked")
-			Optional<? extends DomainResourceDao<R>> dao = (Optional<? extends DomainResourceDao<R>>) daoProvider
+			Optional<? extends ResourceDao<R>> dao = (Optional<? extends ResourceDao<R>>) daoProvider
 					.getDao(resource.getClass());
 
 			if (resource instanceof StructureDefinition)
@@ -133,7 +133,7 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 						daoProvider.getStructureDefinitionSnapshotDao(), snapshotGenerator, snapshotDependencyAnalyzer);
 			else
 				return dao
-						.map(d -> new UpdateCommand<R, DomainResourceDao<R>>(index, bundle, entry, serverBase, resource,
+						.map(d -> new UpdateCommand<R, ResourceDao<R>>(index, bundle, entry, serverBase, resource,
 								d, exceptionHandler, parameterConverter, responseGenerator, eventManager,
 								eventGenerator))
 						.orElseThrow(() -> new IllegalStateException(
@@ -231,14 +231,14 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 			BundleEntryComponent entry, R resource)
 	{
 		@SuppressWarnings("unchecked")
-		Optional<? extends DomainResourceDao<R>> dao = (Optional<? extends DomainResourceDao<R>>) daoProvider
+		Optional<? extends ResourceDao<R>> dao = (Optional<? extends ResourceDao<R>>) daoProvider
 				.getDao(resource.getClass());
 
 		if (referenceExtractor.getReferences(resource).anyMatch(r -> true)) // at least one entry
 		{
 			return dao
 					.map(d -> Stream.of(cmd,
-							new ResolveReferencesCommand<R, DomainResourceDao<R>>(index, bundle, entry, serverBase,
+							new ResolveReferencesCommand<R, ResourceDao<R>>(index, bundle, entry, serverBase,
 									resource, d, exceptionHandler, parameterConverter, referenceExtractor,
 									responseGenerator, referenceResolver)))
 					.orElseThrow(() -> new IllegalStateException(

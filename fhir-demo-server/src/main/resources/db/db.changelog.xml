@@ -6,6 +6,8 @@
 
 	<include file="db/db.create-db-users.changelog.xml" />
 	
+	<include file="db/db.bundles.changelog.xml" />
+	<include file="db/db.code_systems.changelog.xml" />
 	<include file="db/db.code_systems.changelog.xml" />
 	<include file="db/db.endpoints.changelog.xml" />
 	<include file="db/db.healthcare_services.changelog.xml" />

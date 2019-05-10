@@ -9,8 +9,8 @@ import java.util.Map;
 import org.highmed.fhir.function.BiFunctionWithSqlException;
 import org.highmed.fhir.search.SearchQueryParameterError;
 import org.highmed.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.MetadataResource;
+import org.hl7.fhir.r4.model.Resource;
 
 import com.google.common.base.Objects;
 
@@ -66,10 +66,10 @@ public abstract class AbstractVersionParameter<R extends MetadataResource> exten
 		statement.setString(parameterIndex, version);
 	}
 
-	protected abstract boolean instanceOf(DomainResource resource);
+	protected abstract boolean instanceOf(Resource resource);
 
 	@Override
-	public boolean matches(DomainResource resource)
+	public boolean matches(Resource resource)
 	{
 		if (!isDefined())
 			throw notDefined();

@@ -13,9 +13,9 @@ import org.highmed.fhir.search.SearchQueryParameter;
 import org.highmed.fhir.search.SearchQueryParameterError;
 import org.highmed.fhir.search.SearchQuerySortParameter;
 import org.highmed.fhir.search.SearchQuerySortParameter.SortDirection;
-import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Resource;
 
-public abstract class AbstractSearchParameter<R extends DomainResource> implements SearchQueryParameter<R>
+public abstract class AbstractSearchParameter<R extends Resource> implements SearchQueryParameter<R>
 {
 	protected final String parameterName;
 

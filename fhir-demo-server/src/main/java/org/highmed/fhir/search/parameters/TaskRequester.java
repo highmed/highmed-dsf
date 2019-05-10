@@ -6,7 +6,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.UUID;
 
-import org.highmed.fhir.dao.DomainResourceDao;
+import org.highmed.fhir.dao.ResourceDao;
 import org.highmed.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.fhir.dao.provider.DaoProvider;
 import org.highmed.fhir.function.BiFunctionWithSqlException;
@@ -15,7 +15,6 @@ import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.fhir.search.parameters.basic.AbstractIdentifierParameter;
 import org.highmed.fhir.search.parameters.basic.AbstractReferenceParameter;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Organization;
@@ -23,6 +22,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
 
 @SearchParameterDefinition(name = TaskRequester.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Task-requester", type = SearchParamType.REFERENCE, documentation = "Search by task requester")
@@ -143,7 +143,7 @@ public class TaskRequester extends AbstractReferenceParameter<Task>
 		}
 	}
 
-	private void setResource(Reference reference, IIdType idType, DomainResourceDao<?> dao) throws SQLException
+	private void setResource(Reference reference, IIdType idType, ResourceDao<?> dao) throws SQLException
 	{
 		if (idType.hasVersionIdPart())
 		{
@@ -164,7 +164,7 @@ public class TaskRequester extends AbstractReferenceParameter<Task>
 	}
 
 	@Override
-	public boolean matches(DomainResource resource)
+	public boolean matches(Resource resource)
 	{
 		if (!isDefined())
 			throw notDefined();

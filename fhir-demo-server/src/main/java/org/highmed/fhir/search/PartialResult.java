@@ -4,8 +4,9 @@ import java.util.Collections;
 import java.util.List;
 
 import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Resource;
 
-public class PartialResult<R extends DomainResource>
+public class PartialResult<R extends Resource>
 {
 	private final int overallCount;
 	private final PageAndCount pageAndCount;

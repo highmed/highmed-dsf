@@ -1,13 +1,13 @@
 package org.highmed.fhir.dao.command;
 
-import org.highmed.fhir.dao.DomainResourceDao;
+import org.highmed.fhir.dao.ResourceDao;
 import org.highmed.fhir.help.ExceptionHandler;
 import org.highmed.fhir.help.ParameterConverter;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.DomainResource;
 
-public abstract class AbstractCommandWithResource<R extends DomainResource, D extends DomainResourceDao<R>>
+public abstract class AbstractCommandWithResource<R extends DomainResource, D extends ResourceDao<R>>
 		extends AbstractCommand implements Command
 {
 	protected final R resource;

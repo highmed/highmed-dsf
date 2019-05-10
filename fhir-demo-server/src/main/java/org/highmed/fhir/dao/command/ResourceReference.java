@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 
 public class ResourceReference
 {
@@ -121,7 +122,7 @@ public class ResourceReference
 		return Collections.unmodifiableList(referenceTypes);
 	}
 
-	public boolean supportsType(Class<? extends DomainResource> type)
+	public boolean supportsType(Class<? extends Resource> type)
 	{
 		return referenceTypes.isEmpty() || referenceTypes.contains(type);
 	}

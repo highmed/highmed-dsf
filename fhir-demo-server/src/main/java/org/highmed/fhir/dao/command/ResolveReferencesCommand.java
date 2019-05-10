@@ -7,7 +7,7 @@ import java.util.function.Function;
 
 import javax.ws.rs.WebApplicationException;
 
-import org.highmed.fhir.dao.DomainResourceDao;
+import org.highmed.fhir.dao.ResourceDao;
 import org.highmed.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.fhir.dao.exception.ResourceNotFoundException;
 import org.highmed.fhir.help.ExceptionHandler;
@@ -20,7 +20,7 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
 
-public class ResolveReferencesCommand<R extends DomainResource, D extends DomainResourceDao<R>>
+public class ResolveReferencesCommand<R extends DomainResource, D extends ResourceDao<R>>
 		extends AbstractCommandWithResource<R, D> implements Command
 {
 	private final ReferenceExtractor referenceExtractor;
