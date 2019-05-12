@@ -55,8 +55,8 @@ import org.highmed.fhir.adapter.ValueSetJsonFhirAdapter;
 import org.highmed.fhir.adapter.ValueSetXmlFhirAdapter;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.UriType;
 import org.slf4j.Logger;
@@ -103,7 +103,7 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 	}
 
 	@Override
-	public <R extends DomainResource> R create(R resource)
+	public <R extends Resource> R create(R resource)
 	{
 		Objects.requireNonNull(resource, "resource");
 
@@ -127,7 +127,7 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 	}
 
 	@Override
-	public <R extends DomainResource> R createConditionaly(R resource, String ifNoneExistCriteria)
+	public <R extends Resource> R createConditionaly(R resource, String ifNoneExistCriteria)
 	{
 		Objects.requireNonNull(resource, "resource");
 		Objects.requireNonNull(ifNoneExistCriteria, "ifNoneExistCriteria");
@@ -153,7 +153,7 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 	}
 
 	@Override
-	public <R extends DomainResource> R update(R resource)
+	public <R extends Resource> R update(R resource)
 	{
 		Objects.requireNonNull(resource, "resource");
 
@@ -181,7 +181,7 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 	}
 
 	@Override
-	public <R extends DomainResource> R updateConditionaly(R resource, Map<String, List<String>> criteria)
+	public <R extends Resource> R updateConditionaly(R resource, Map<String, List<String>> criteria)
 	{
 		Objects.requireNonNull(resource, "resource");
 		Objects.requireNonNull(criteria, "criteria");
@@ -216,7 +216,7 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 	}
 
 	@Override
-	public void delete(Class<? extends DomainResource> resourceClass, String id)
+	public void delete(Class<? extends Resource> resourceClass, String id)
 	{
 		Objects.requireNonNull(resourceClass, "resourceClass");
 		Objects.requireNonNull(id, "id");
@@ -235,7 +235,7 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 	}
 
 	@Override
-	public void deleteConditionaly(Class<? extends DomainResource> resourceClass, Map<String, List<String>> criteria)
+	public void deleteConditionaly(Class<? extends Resource> resourceClass, Map<String, List<String>> criteria)
 	{
 		Objects.requireNonNull(resourceClass, "resourceClass");
 		Objects.requireNonNull(criteria, "criteria");
@@ -315,7 +315,7 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 	}
 
 	@Override
-	public <R extends DomainResource> R read(Class<R> resourceType, String id)
+	public <R extends Resource> R read(Class<R> resourceType, String id)
 	{
 		Objects.requireNonNull(resourceType, "resourceType");
 		Objects.requireNonNull(id, "id");
@@ -332,7 +332,7 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 	}
 
 	@Override
-	public <R extends DomainResource> R read(Class<R> resourceType, String id, String version)
+	public <R extends Resource> R read(Class<R> resourceType, String id, String version)
 	{
 		Objects.requireNonNull(resourceType, "resourceType");
 		Objects.requireNonNull(id, "id");
@@ -350,7 +350,7 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 	}
 
 	@Override
-	public <R extends DomainResource> Bundle search(Class<R> resourceType, Map<String, List<String>> parameters)
+	public <R extends Resource> Bundle search(Class<R> resourceType, Map<String, List<String>> parameters)
 	{
 		Objects.requireNonNull(resourceType, "resourceType");
 

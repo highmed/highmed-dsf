@@ -5,30 +5,30 @@ import java.util.Map;
 
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
-import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StructureDefinition;
 
 public interface WebserviceClient
 {
 	String getBaseUrl();
 
-	<R extends DomainResource> R create(R resource);
+	<R extends Resource> R create(R resource);
 
-	<R extends DomainResource> R createConditionaly(R resource, String ifNoneExistCriteria);
+	<R extends Resource> R createConditionaly(R resource, String ifNoneExistCriteria);
 
-	<R extends DomainResource> R update(R resource);
+	<R extends Resource> R update(R resource);
 
-	<R extends DomainResource> R updateConditionaly(R resource, Map<String, List<String>> criteria);
+	<R extends Resource> R updateConditionaly(R resource, Map<String, List<String>> criteria);
 
-	void delete(Class<? extends DomainResource> resourceClass, String id);
+	void delete(Class<? extends Resource> resourceClass, String id);
 
-	void deleteConditionaly(Class<? extends DomainResource> resourceClass, Map<String, List<String>> criteria);
+	void deleteConditionaly(Class<? extends Resource> resourceClass, Map<String, List<String>> criteria);
 
-	<R extends DomainResource> R read(Class<R> resourceType, String id);
+	<R extends Resource> R read(Class<R> resourceType, String id);
 
-	<R extends DomainResource> R read(Class<R> resourceType, String id, String version);
+	<R extends Resource> R read(Class<R> resourceType, String id, String version);
 
-	<R extends DomainResource> Bundle search(Class<R> resourceType, Map<String, List<String>> parameters);
+	<R extends Resource> Bundle search(Class<R> resourceType, Map<String, List<String>> parameters);
 
 	CapabilityStatement getConformance();
 

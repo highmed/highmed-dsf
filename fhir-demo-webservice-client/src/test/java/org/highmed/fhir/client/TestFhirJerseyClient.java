@@ -13,11 +13,14 @@ import java.util.UUID;
 import javax.ws.rs.WebApplicationException;
 
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.TaskStatus;
@@ -248,7 +251,9 @@ public class TestFhirJerseyClient
 
 			// deleteCreateUpdateReadTaskBundleTest(context, client);
 			// updateBundleTest(context, client);
-			deleteOrganizationsAndEndpoints(context, client);
+			// deleteOrganizationsAndEndpoints(context, client);
+
+			client.create(patientUpdateOrCreateBundle());
 		}
 		catch (WebApplicationException e)
 		{
@@ -325,6 +330,15 @@ public class TestFhirJerseyClient
 
 	private static void deleteCreateBundleTest(FhirContext context, WebserviceClient client)
 	{
+		var bundle = deleteCreateBundle();
+
+		System.out.println(context.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		Bundle result = client.postBundle(bundle);
+		System.out.println(context.newXmlParser().setPrettyPrint(true).encodeResourceToString(result));
+	}
+
+	private static Bundle deleteCreateBundle()
+	{
 		final String orgIdentifierSystem = "http://highmed.org/fhir/CodeSystem/organization";
 		final String orgIdentifierValue = "Transaction Test Organization";
 		final String eptIdentifierSystem = "http://highmed.org/fhir/CodeSystem/endpoint";
@@ -372,10 +386,7 @@ public class TestFhirJerseyClient
 		eptEntry.getRequest().setMethod(HTTPVerb.POST);
 		eptEntry.getRequest().setUrl(ept.getResourceType().name());
 		eptEntry.getRequest().setIfNoneExist("identifier=" + eptIdentifierSystem + "|" + eptIdentifierValue);
-
-		System.out.println(context.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
-		Bundle result = client.postBundle(bundle);
-		System.out.println(context.newXmlParser().setPrettyPrint(true).encodeResourceToString(result));
+		return bundle;
 	}
 
 	private static void updateBundleTest(FhirContext context, WebserviceClient client)
@@ -421,5 +432,28 @@ public class TestFhirJerseyClient
 		System.out.println(context.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		Bundle result = client.postBundle(bundle);
 		System.out.println(context.newXmlParser().setPrettyPrint(true).encodeResourceToString(result));
+	}
+
+	private static Bundle patientUpdateOrCreateBundle()
+	{
+		final String patIdSystem = "http://foo.bar/baz";
+		final String patIdValue = "123467890";
+
+		var b = new Bundle();
+		b.setType(BundleType.TRANSACTION);
+
+		var p = new Patient();
+		p.setActive(true);
+		var i = p.addIdentifier();
+		i.setSystem(patIdSystem);
+		i.setValue(patIdValue);
+
+		var e = b.addEntry();
+		e.setFullUrl("urn:uuid:" + UUID.randomUUID().toString());
+		e.setResource(p);
+		e.getRequest().setMethod(HTTPVerb.PUT);
+		e.getRequest().setUrl("Patient?identifier=" + patIdSystem + "|" + patIdValue);
+
+		return b;
 	}
 }
