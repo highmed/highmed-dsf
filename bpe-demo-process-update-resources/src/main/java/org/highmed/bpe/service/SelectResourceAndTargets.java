@@ -54,18 +54,25 @@ public class SelectResourceAndTargets implements JavaDelegate, InitializingBean
 		List<String> bundleIds = queryParameters.get(PARAMETER_BUNDLE_ID);
 		logger.debug(PARAMETER_BUNDLE_ID + ": {}", bundleIds);
 
-		if (bundleIds.stream().anyMatch(id -> !BUNDLE_ID_PATTERN.matcher(id).matches()))
+		if (bundleIds.size() != 1)
 		{
-			logger.error("Process parameter {} contains unexpected ids not matching {}", BUNDLE_ID_PATTERN,
+			logger.error("Process parameter {} contains unexpected number of Bundle IDs, expected 1, got {}",
+					PARAMETER_BUNDLE_ID, bundleIds.size());
+			throw new RuntimeException("Process parameter " + PARAMETER_BUNDLE_ID
+					+ " contains unexpected number of Bundle IDs, expected 1, got " + bundleIds.size());
+		}
+		else if (bundleIds.stream().anyMatch(id -> !BUNDLE_ID_PATTERN.matcher(id).matches()))
+		{
+			logger.error("Process parameter {} contains unexpected ids not matching {}", PARAMETER_BUNDLE_ID,
 					BUNDLE_ID_PATTERN_STRING);
-			throw new IllegalArgumentException("Process parameter " + BUNDLE_ID_PATTERN
+			throw new RuntimeException("Process parameter " + PARAMETER_BUNDLE_ID
 					+ " contains unexpected ids not matching " + BUNDLE_ID_PATTERN_STRING);
 		}
 
 		List<String> targetIdentifierSearchParameters = queryParameters.get(PARAMETER_TARGET_IDENTIFIER);
 		logger.debug(PARAMETER_TARGET_IDENTIFIER + ": {}", targetIdentifierSearchParameters);
 
-		execution.setVariable(Constants.VARIABLE_BUNDLE_IDS, bundleIds);
+		execution.setVariable(Constants.VARIABLE_BUNDLE_ID, bundleIds.get(0));
 
 		List<MultiInstanceTarget> targets = targetIdentifierSearchParameters.stream()
 				.flatMap(organizationProvider::searchRemoteOrganizationsIdentifiers)

@@ -1,6 +1,5 @@
 package org.highmed.bpe.message;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
@@ -23,9 +22,8 @@ public class SendRequest extends AbstractTaskMessageSend
 	@Override
 	protected Stream<ParameterComponent> getAdditionalInputParameters(DelegateExecution execution)
 	{
-		@SuppressWarnings("unchecked")
-		List<String> bundleIds = (List<String>) execution.getVariable(Constants.VARIABLE_BUNDLE_IDS);
-		return bundleIds.stream().map(this::toInputParameter);
+		String bundleId = (String) execution.getVariable(Constants.VARIABLE_BUNDLE_ID);
+		return Stream.of(bundleId).map(this::toInputParameter);
 	}
 
 	private ParameterComponent toInputParameter(String bundleId)
