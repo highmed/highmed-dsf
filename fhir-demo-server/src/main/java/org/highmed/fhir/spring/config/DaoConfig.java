@@ -180,7 +180,7 @@ public class DaoConfig
 	@Bean
 	public DaoProvider daoProvider()
 	{
-		return new DaoProviderImpl(codeSystemDao(), endpointDao(), healthcareServiceDao(), locationDao(),
+		return new DaoProviderImpl(bundleDao(), codeSystemDao(), endpointDao(), healthcareServiceDao(), locationDao(),
 				organizationDao(), patientDao(), practitionerDao(), practitionerRoleDao(), provenanceDao(),
 				researchStudyDao(), structureDefinitionDao(), structureDefinitionSnapshotDao(), subscriptionDao(),
 				taskDao(), valueSetDao());

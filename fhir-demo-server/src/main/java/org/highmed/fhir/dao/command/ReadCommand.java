@@ -26,10 +26,11 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent;
 import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -37,6 +38,8 @@ import ca.uhn.fhir.rest.api.Constants;
 
 public class ReadCommand extends AbstractCommand implements Command
 {
+	private static final Logger logger = LoggerFactory.getLogger(ReadCommand.class);
+
 	private final int defaultPageCount;
 
 	private final DaoProvider daoProvider;
@@ -45,7 +48,7 @@ public class ReadCommand extends AbstractCommand implements Command
 	private final ExceptionHandler exceptionHandler;
 
 	private Bundle multipleResult;
-	private DomainResource singleResult;
+	private Resource singleResult;
 	private Response responseResult;
 
 	public ReadCommand(int index, Bundle bundle, BundleEntryComponent entry, String serverBase, int defaultPageCount,
@@ -72,6 +75,8 @@ public class ReadCommand extends AbstractCommand implements Command
 			throws SQLException, WebApplicationException
 	{
 		String requestUrl = entry.getRequest().getUrl();
+
+		logger.debug("Executing request for url {}", requestUrl);
 
 		if (requestUrl.startsWith(URL_UUID_PREFIX))
 			requestUrl = idTranslationTable.getOrDefault(requestUrl, new IdType(requestUrl)).getValue();
@@ -110,7 +115,7 @@ public class ReadCommand extends AbstractCommand implements Command
 			return;
 		}
 
-		DomainResource r = (DomainResource) read.get();
+		Resource r = (Resource) read.get();
 
 		Optional<Date> ifModifiedSince = Optional.ofNullable(entry.getRequest().getIfModifiedSince());
 		Optional<EntityTag> ifNoneMatch = Optional.ofNullable(entry.getRequest().getIfNoneMatch())
@@ -144,7 +149,7 @@ public class ReadCommand extends AbstractCommand implements Command
 			return;
 		}
 
-		DomainResource r = (DomainResource) read.get();
+		Resource r = (Resource) read.get();
 
 		Optional<Date> ifModifiedSince = Optional.ofNullable(entry.getRequest().getIfModifiedSince());
 		Optional<EntityTag> ifNoneMatch = Optional.ofNullable(entry.getRequest().getIfNoneMatch())
@@ -193,11 +198,11 @@ public class ReadCommand extends AbstractCommand implements Command
 		OperationOutcome searchWarning = null;
 
 		if (multipleResult != null && multipleResult.getEntry().size() == 1)
-			singleResult = (DomainResource) multipleResult.getEntry().get(0).getResource();
+			singleResult = (Resource) multipleResult.getEntry().get(0).getResource();
 		else if (multipleResult != null && multipleResult.getEntry().size() == 2 && multipleResult.getEntry().stream()
 				.filter(e -> SearchEntryMode.MATCH.equals(e.getSearch().getMode())).count() == 1)
 		{
-			singleResult = (DomainResource) multipleResult.getEntry().stream()
+			singleResult = (Resource) multipleResult.getEntry().stream()
 					.filter(e -> SearchEntryMode.MATCH.equals(e.getSearch().getMode())).findFirst()
 					.map(BundleEntryComponent::getResource).get();
 

@@ -2,6 +2,7 @@ package org.highmed.fhir.dao.provider;
 
 import java.util.Optional;
 
+import org.highmed.fhir.dao.BundleDao;
 import org.highmed.fhir.dao.CodeSystemDao;
 import org.highmed.fhir.dao.ResourceDao;
 import org.highmed.fhir.dao.EndpointDao;
@@ -22,6 +23,8 @@ import org.hl7.fhir.r4.model.DomainResource;
 
 public interface DaoProvider
 {
+	BundleDao getBundleDao();
+
 	CodeSystemDao getCodeSystemDao();
 
 	EndpointDao getEndpointDao();

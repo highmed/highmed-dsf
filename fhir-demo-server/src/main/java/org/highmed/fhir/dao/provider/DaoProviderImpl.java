@@ -5,8 +5,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.highmed.fhir.dao.BundleDao;
 import org.highmed.fhir.dao.CodeSystemDao;
-import org.highmed.fhir.dao.ResourceDao;
 import org.highmed.fhir.dao.EndpointDao;
 import org.highmed.fhir.dao.HealthcareServiceDao;
 import org.highmed.fhir.dao.LocationDao;
@@ -16,11 +16,13 @@ import org.highmed.fhir.dao.PractitionerDao;
 import org.highmed.fhir.dao.PractitionerRoleDao;
 import org.highmed.fhir.dao.ProvenanceDao;
 import org.highmed.fhir.dao.ResearchStudyDao;
+import org.highmed.fhir.dao.ResourceDao;
 import org.highmed.fhir.dao.StructureDefinitionDao;
 import org.highmed.fhir.dao.StructureDefinitionSnapshotDao;
 import org.highmed.fhir.dao.SubscriptionDao;
 import org.highmed.fhir.dao.TaskDao;
 import org.highmed.fhir.dao.ValueSetDao;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Endpoint;
@@ -32,6 +34,7 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.ResearchStudy;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Task;
@@ -42,6 +45,7 @@ import ca.uhn.fhir.model.api.annotation.ResourceDef;
 
 public class DaoProviderImpl implements DaoProvider, InitializingBean
 {
+	private final BundleDao bundleDao;
 	private final CodeSystemDao codeSystemDao;
 	private final EndpointDao endpointDao;
 	private final HealthcareServiceDao healthcareServiceDao;
@@ -58,10 +62,10 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	private final TaskDao taskDao;
 	private final ValueSetDao valueSetDao;
 
-	private final Map<Class<? extends DomainResource>, ResourceDao<?>> daosByResourecClass = new HashMap<>();
+	private final Map<Class<? extends Resource>, ResourceDao<?>> daosByResourecClass = new HashMap<>();
 	private final Map<String, ResourceDao<?>> daosByResourceTypeName = new HashMap<>();
 
-	public DaoProviderImpl(CodeSystemDao codeSystemDao, EndpointDao endpointDao,
+	public DaoProviderImpl(BundleDao bundleDao, CodeSystemDao codeSystemDao, EndpointDao endpointDao,
 			HealthcareServiceDao healthcareServiceDao, LocationDao locationDao, OrganizationDao organizationDao,
 			PatientDao patientDao, PractitionerDao practitionerDao, PractitionerRoleDao practitionerRoleDao,
 			ProvenanceDao provenanceDao, ResearchStudyDao researchStudyDao,
@@ -69,6 +73,7 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 			StructureDefinitionSnapshotDao structureDefinitionSnapshotDao, SubscriptionDao subscriptionDao,
 			TaskDao taskDao, ValueSetDao valueSetDao)
 	{
+		this.bundleDao = bundleDao;
 		this.codeSystemDao = codeSystemDao;
 		this.endpointDao = endpointDao;
 		this.healthcareServiceDao = healthcareServiceDao;
@@ -85,6 +90,7 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 		this.taskDao = taskDao;
 		this.valueSetDao = valueSetDao;
 
+		daosByResourecClass.put(Bundle.class, bundleDao);
 		daosByResourecClass.put(CodeSystem.class, codeSystemDao);
 		daosByResourecClass.put(Endpoint.class, endpointDao);
 		daosByResourecClass.put(HealthcareService.class, healthcareServiceDao);
@@ -120,6 +126,12 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 		Objects.requireNonNull(subscriptionDao, "subscriptionDao");
 		Objects.requireNonNull(taskDao, "taskDao");
 		Objects.requireNonNull(valueSetDao, "valueSetDao");
+	}
+
+	@Override
+	public BundleDao getBundleDao()
+	{
+		return bundleDao;
 	}
 
 	@Override
