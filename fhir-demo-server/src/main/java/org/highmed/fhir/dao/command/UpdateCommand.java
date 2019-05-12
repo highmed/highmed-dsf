@@ -35,8 +35,8 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-public class UpdateCommand<R extends DomainResource, D extends ResourceDao<R>>
-		extends AbstractCommandWithResource<R, D> implements Command
+public class UpdateCommand<R extends DomainResource, D extends ResourceDao<R>> extends AbstractCommandWithResource<R, D>
+		implements Command
 {
 	private static final Logger logger = LoggerFactory.getLogger(UpdateCommand.class);
 
@@ -45,8 +45,6 @@ public class UpdateCommand<R extends DomainResource, D extends ResourceDao<R>>
 	protected final EventGenerator eventGenerator;
 
 	protected UUID id;
-	protected R createdResource;
-
 	protected R updatedResource;
 
 	public UpdateCommand(int index, Bundle bundle, BundleEntryComponent entry, String serverBase, R resource, D dao,
@@ -178,7 +176,7 @@ public class UpdateCommand<R extends DomainResource, D extends ResourceDao<R>>
 			id = UUID.randomUUID();
 			idTranslationTable.put(entry.getFullUrl(),
 					new IdType(resource.getResourceType().toString(), id.toString()));
-			createdResource = dao.createWithTransactionAndId(connection, resource, id);
+			updatedResource = dao.createWithTransactionAndId(connection, resource, id);
 		}
 
 		// No matches, id provided: The server treats the interaction as an Update as Create interaction (or rejects it,
