@@ -22,7 +22,7 @@
       <bpmn:outgoing>SequenceFlow_1xwki6k</bpmn:outgoing>
       <bpmn:multiInstanceLoopCharacteristics camunda:collection="${multiInstanceTargets.targets}" camunda:elementVariable="multiInstanceTarget" />
     </bpmn:sendTask>
-    <bpmn:serviceTask id="Task_1ws5v3q" name="selectTargets" camunda:class="org.highmed.bpe.service.SelectUpdateResourcesTargets">
+    <bpmn:serviceTask id="Task_1ws5v3q" name="selectResourceAndTargets" camunda:class="org.highmed.bpe.service.SelectResourceAndTargets">
       <bpmn:incoming>SequenceFlow_1ryplwc</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1u4zxix</bpmn:outgoing>
     </bpmn:serviceTask>

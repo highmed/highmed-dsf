@@ -11,12 +11,13 @@ public interface Constants
 	String VARIABLE_MULTI_INSTANCE_TARGET = "multiInstanceTarget";
 	String VARIABLE_TASK = "task";
 	String VARIABLE_QUERY_PARAMETERS = "queryParameters";
+	String VARIABLE_BUNDLE_IDS = "bundleIds";
 
 	String CODESYSTEM_HIGHMED_BPMN = "http://highmed.org/fhir/CodeSystem/bpmn-message";
 	String CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME = "message-name";
 	String CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY = "business-key";
 	String CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY = "correlation-key";
-	String CODESYSTEM_HIGHMED_BPMN_VALUE_RESOURCE_SEARCH_CRITERIA = "resource-search-criteria";
+	String CODESYSTEM_HIGHMED_BPMN_VALUE_BUNDLE_REFERENCE = "bundle-reference";
 
 	String PROCESS_URI_BASE = "http://highmed.org/bpe/Process/";
 }

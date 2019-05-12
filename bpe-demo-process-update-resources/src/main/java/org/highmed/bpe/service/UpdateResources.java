@@ -17,6 +17,7 @@ import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,15 +54,15 @@ public class UpdateResources implements JavaDelegate, InitializingBean
 
 		Task task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
 
-		Stream<String> updateSearchCriteria = taskHelper.getInputParameterStringValues(task,
-				Constants.CODESYSTEM_HIGHMED_BPMN, Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_RESOURCE_SEARCH_CRITERIA);
+		Stream<Reference> bundleReferences = (Stream<Reference>) taskHelper.getInputParameterReferenceValues(task,
+				Constants.CODESYSTEM_HIGHMED_BPMN, Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_BUNDLE_REFERENCE);
 
 		Bundle searchTransaction = new Bundle();
 		searchTransaction.setType(BundleType.TRANSACTION);
-		updateSearchCriteria.map(this::toEntry).forEach(searchTransaction::addEntry);
+		bundleReferences.map(this::toSearchEntry).forEach(searchTransaction::addEntry);
 
 		FhirContext context = FhirContext.forR4();
-
+		// TODO remove logging of parsed value
 		logger.debug("Search Transaction: {}",
 				context.newXmlParser().setPrettyPrint(true).encodeResourceToString(searchTransaction));
 
@@ -71,6 +72,7 @@ public class UpdateResources implements JavaDelegate, InitializingBean
 		try
 		{
 			Bundle searchResult = requesterClient.postBundle(searchTransaction);
+			// TODO remove logging of parsed value
 			logger.debug("Search Result: {}",
 					context.newXmlParser().setPrettyPrint(true).encodeResourceToString(searchResult));
 		}
@@ -84,10 +86,10 @@ public class UpdateResources implements JavaDelegate, InitializingBean
 		}
 	}
 
-	private BundleEntryComponent toEntry(String criteria)
+	private BundleEntryComponent toSearchEntry(Reference bundleReference)
 	{
 		BundleEntryComponent entry = new BundleEntryComponent();
-		entry.getRequest().setMethod(HTTPVerb.GET).setUrl(criteria);
+		entry.getRequest().setMethod(HTTPVerb.GET).setUrl(bundleReference.getReference());
 		return entry;
 	}
 }

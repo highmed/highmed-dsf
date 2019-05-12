@@ -14,6 +14,10 @@
       <bpmn:incoming>SequenceFlow_0eygcor</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="SequenceFlow_0eygcor" sourceRef="Task_1hj13pf" targetRef="EndEvent_1i1w8yx" />
+    <bpmn:textAnnotation id="TextAnnotation_0rr4guv">
+      <bpmn:text>TODO: add step to check requesting organization is of type TTP</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_1sc5e0d" sourceRef="Task_1hj13pf" targetRef="TextAnnotation_0rr4guv" />
   </bpmn:process>
   <bpmn:message id="Message_1r6vnvn" name="updateResources" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
@@ -34,6 +38,13 @@
       <bpmndi:BPMNEdge id="SequenceFlow_0eygcor_di" bpmnElement="SequenceFlow_0eygcor">
         <di:waypoint x="365" y="121" />
         <di:waypoint x="415" y="121" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="TextAnnotation_0rr4guv_di" bpmnElement="TextAnnotation_0rr4guv">
+        <dc:Bounds x="270" y="188" width="227.98828125" height="42.99609375" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Association_1sc5e0d_di" bpmnElement="Association_1sc5e0d">
+        <di:waypoint x="347" y="161" />
+        <di:waypoint x="368" y="188" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

@@ -2,7 +2,7 @@ package org.highmed.bpe.spring.config;
 
 import org.highmed.bpe.message.SendRequest;
 import org.highmed.bpe.plugin.UpdateResourcesPlugin;
-import org.highmed.bpe.service.SelectUpdateResourcesTargets;
+import org.highmed.bpe.service.SelectResourceAndTargets;
 import org.highmed.bpe.service.UpdateResources;
 import org.highmed.fhir.client.WebserviceClientProvider;
 import org.highmed.fhir.organization.OrganizationProvider;
@@ -36,9 +36,9 @@ public class UpdateResourcesConfig
 	}
 
 	@Bean
-	public SelectUpdateResourcesTargets selectUpdateResourcesTargets()
+	public SelectResourceAndTargets selectUpdateResourcesTargets()
 	{
-		return new SelectUpdateResourcesTargets(organizationProvider);
+		return new SelectResourceAndTargets(organizationProvider);
 	}
 
 	@Bean

@@ -36,11 +36,7 @@ public class TestBpeJerseyClient
 		// }
 
 		client.startProcessWithVersion("requestUpdateResources", "1.0.0", Map.of("target-identifier",
-				Collections.singletonList("http://highmed.org/fhir/CodeSystem/organization|"), "resource-criteria",
-				Arrays.asList(
-						"Organization?identifier=http://highmed.org/fhir/CodeSystem/organization|Test_Organization",
-						"Endpoint?organization:identifier=http://highmed.org/fhir/CodeSystem/organization|Test_Organization",
-						"Organization?identifier=http://highmed.org/fhir/CodeSystem/organization|Foo_Organization",
-						"Endpoint?organization:identifier=http://highmed.org/fhir/CodeSystem/organization|Foo_Organization")));
+				Collections.singletonList("http://highmed.org/fhir/CodeSystem/organization|"), "bundle-id",
+				Arrays.asList("Bundle/6c18e27e-2dbd-4855-8e9c-0800a2ad087b")));
 	}
 }

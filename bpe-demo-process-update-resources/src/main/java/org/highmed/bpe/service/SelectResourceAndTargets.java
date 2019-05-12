@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
@@ -17,15 +18,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-public class SelectUpdateResourcesTargets implements JavaDelegate, InitializingBean
+public class SelectResourceAndTargets implements JavaDelegate, InitializingBean
 {
-	private static final Logger logger = LoggerFactory.getLogger(SelectUpdateResourcesTargets.class);
+	private static final Logger logger = LoggerFactory.getLogger(SelectResourceAndTargets.class);
 
 	private static final String PARAMETER_TARGET_IDENTIFIER = "target-identifier";
+	private static final String PARAMETER_BUNDLE_ID = "bundle-id";
+	private static final String BUNDLE_ID_PATTERN_STRING = "Bundle/.+";
+	private static final Pattern BUNDLE_ID_PATTERN = Pattern.compile(BUNDLE_ID_PATTERN_STRING);
 
 	private final OrganizationProvider organizationProvider;
 
-	public SelectUpdateResourcesTargets(OrganizationProvider organizationProvider)
+	public SelectResourceAndTargets(OrganizationProvider organizationProvider)
 	{
 		this.organizationProvider = organizationProvider;
 	}
@@ -47,14 +51,26 @@ public class SelectUpdateResourcesTargets implements JavaDelegate, InitializingB
 		Map<String, List<String>> queryParameters = (Map<String, List<String>>) execution
 				.getVariable(Constants.VARIABLE_QUERY_PARAMETERS);
 
-		logger.debug(PARAMETER_TARGET_IDENTIFIER + ": {}", queryParameters.get(PARAMETER_TARGET_IDENTIFIER));
+		List<String> bundleIds = queryParameters.get(PARAMETER_BUNDLE_ID);
+		logger.debug(PARAMETER_BUNDLE_ID + ": {}", bundleIds);
+
+		if (bundleIds.stream().anyMatch(id -> !BUNDLE_ID_PATTERN.matcher(id).matches()))
+		{
+			logger.error("Process parameter {} contains unexpected ids not matching {}", BUNDLE_ID_PATTERN,
+					BUNDLE_ID_PATTERN_STRING);
+			throw new IllegalArgumentException("Process parameter " + BUNDLE_ID_PATTERN
+					+ " contains unexpected ids not matching " + BUNDLE_ID_PATTERN_STRING);
+		}
 
 		List<String> targetIdentifierSearchParameters = queryParameters.get(PARAMETER_TARGET_IDENTIFIER);
+		logger.debug(PARAMETER_TARGET_IDENTIFIER + ": {}", targetIdentifierSearchParameters);
+
+		execution.setVariable(Constants.VARIABLE_BUNDLE_IDS, bundleIds);
+
 		List<MultiInstanceTarget> targets = targetIdentifierSearchParameters.stream()
 				.flatMap(organizationProvider::searchRemoteOrganizationsIdentifiers)
 				.map(identifier -> new MultiInstanceTarget(identifier.getValue(), UUID.randomUUID().toString()))
 				.collect(Collectors.toList());
-
 		execution.setVariable("multiInstanceTargets",
 				MultiInstanceTargetsValues.create(new MultiInstanceTargets(targets)));
 	}
