@@ -5,7 +5,7 @@ import java.sql.Connection;
 import javax.ws.rs.WebApplicationException;
 
 import org.highmed.fhir.dao.command.ResourceReference;
-import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Resource;
 
 public interface ReferenceResolver
 {
@@ -27,7 +27,7 @@ public interface ReferenceResolver
 	 *             {@link ResourceReference.ReferenceType#LOGICAL}
 	 * @see ResourceReference#getType(String)
 	 */
-	boolean resolveReference(DomainResource resource, ResourceReference resourceReference, Connection connection);
+	boolean resolveReference(Resource resource, ResourceReference resourceReference, Connection connection);
 
 	/**
 	 * @param resource
@@ -49,7 +49,7 @@ public interface ReferenceResolver
 	 *             {@link ResourceReference.ReferenceType#LOGICAL}
 	 * @see ResourceReference#getType(String)
 	 */
-	boolean resolveReference(DomainResource resource, Integer bundleIndex, ResourceReference resourceReference,
+	boolean resolveReference(Resource resource, Integer bundleIndex, ResourceReference resourceReference,
 			Connection connection) throws WebApplicationException, IllegalArgumentException;
 
 	/**
@@ -67,7 +67,7 @@ public interface ReferenceResolver
 	 *             if the reference is not of type {@link ResourceReference.ReferenceType#LITERAL_INTERNAL}
 	 * @see ResourceReference#getType(String)
 	 */
-	boolean resolveLiteralInternalReference(DomainResource resource, ResourceReference resourceReference,
+	boolean resolveLiteralInternalReference(Resource resource, ResourceReference resourceReference,
 			Connection connection) throws WebApplicationException, IllegalArgumentException;
 
 	/**
@@ -87,8 +87,8 @@ public interface ReferenceResolver
 	 *             if the reference is not of type {@link ResourceReference.ReferenceType#LITERAL_INTERNAL}
 	 * @see ResourceReference#getType(String)
 	 */
-	boolean resolveLiteralInternalReference(DomainResource resource, Integer bundleIndex,
-			ResourceReference resourceReference, Connection connection) throws WebApplicationException;
+	boolean resolveLiteralInternalReference(Resource resource, Integer bundleIndex, ResourceReference resourceReference,
+			Connection connection) throws WebApplicationException;
 
 	/**
 	 * @param resource
@@ -105,7 +105,7 @@ public interface ReferenceResolver
 	 *             if the reference is not of type {@link ResourceReference.ReferenceType#LITERAL_EXTERNAL}
 	 * @see ResourceReference#getType(String)
 	 */
-	boolean resolveLiteralExternalReference(DomainResource resource, ResourceReference resourceReference);
+	boolean resolveLiteralExternalReference(Resource resource, ResourceReference resourceReference);
 
 	/**
 	 * @param resource
@@ -124,8 +124,8 @@ public interface ReferenceResolver
 	 *             if the reference is not of type {@link ResourceReference.ReferenceType#LITERAL_EXTERNAL}
 	 * @see ResourceReference#getType(String)
 	 */
-	boolean resolveLiteralExternalReference(DomainResource resource, Integer bundleIndex,
-			ResourceReference resourceReference) throws WebApplicationException, IllegalArgumentException;
+	boolean resolveLiteralExternalReference(Resource resource, Integer bundleIndex, ResourceReference resourceReference)
+			throws WebApplicationException, IllegalArgumentException;
 
 	/**
 	 * @param resource
@@ -142,7 +142,7 @@ public interface ReferenceResolver
 	 *             if the reference is not of type {@link ResourceReference.ReferenceType#CONDITIONAL}
 	 * @see ResourceReference#getType(String)
 	 */
-	boolean resolveConditionalReference(DomainResource resource, ResourceReference resourceReference,
+	boolean resolveConditionalReference(Resource resource, ResourceReference resourceReference,
 			Connection connection) throws WebApplicationException, IllegalArgumentException;
 
 	/**
@@ -162,9 +162,8 @@ public interface ReferenceResolver
 	 *             if the reference is not of type {@link ResourceReference.ReferenceType#CONDITIONAL}
 	 * @see ResourceReference#getType(String)
 	 */
-	boolean resolveConditionalReference(DomainResource resource, Integer bundleIndex,
-			ResourceReference resourceReference, Connection connection)
-			throws WebApplicationException, IllegalArgumentException;
+	boolean resolveConditionalReference(Resource resource, Integer bundleIndex, ResourceReference resourceReference,
+			Connection connection) throws WebApplicationException, IllegalArgumentException;
 
 	/**
 	 * @param resource
@@ -181,7 +180,7 @@ public interface ReferenceResolver
 	 *             if the reference is not of type {@link ResourceReference.ReferenceType#LOGICAL}
 	 * @see ResourceReference#getType(String)
 	 */
-	boolean resolveLogicalReference(DomainResource resource, ResourceReference resourceReference, Connection connection)
+	boolean resolveLogicalReference(Resource resource, ResourceReference resourceReference, Connection connection)
 			throws WebApplicationException, IllegalArgumentException;
 
 	/**
@@ -201,6 +200,6 @@ public interface ReferenceResolver
 	 *             if the reference is not of type {@link ResourceReference.ReferenceType#LOGICAL}
 	 * @see ResourceReference#getType(String)
 	 */
-	boolean resolveLogicalReference(DomainResource resource, Integer bundleIndex, ResourceReference resourceReference,
+	boolean resolveLogicalReference(Resource resource, Integer bundleIndex, ResourceReference resourceReference,
 			Connection connection) throws WebApplicationException, IllegalArgumentException;
 }

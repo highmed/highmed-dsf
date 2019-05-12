@@ -17,8 +17,8 @@ import javax.ws.rs.core.UriInfo;
 
 import org.highmed.fhir.authentication.UserProvider;
 import org.highmed.fhir.webservice.specification.BasicService;
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -29,7 +29,7 @@ import ca.uhn.fhir.rest.api.Constants;
 		Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
 @Produces({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
 		Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
-public abstract class AbstractServiceJaxrs<R extends DomainResource, S extends BasicService<R>>
+public abstract class AbstractServiceJaxrs<R extends Resource, S extends BasicService<R>>
 		implements BasicService<R>, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractServiceJaxrs.class);

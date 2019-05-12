@@ -7,7 +7,6 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
@@ -100,10 +99,10 @@ public class ResourceReference
 
 	private final String referenceLocation;
 	private final Reference reference;
-	private final List<Class<? extends DomainResource>> referenceTypes = new ArrayList<>();
+	private final List<Class<? extends Resource>> referenceTypes = new ArrayList<>();
 
 	public ResourceReference(String referenceLocation, Reference reference,
-			List<Class<? extends DomainResource>> referenceTypes)
+			List<Class<? extends Resource>> referenceTypes)
 	{
 		this.referenceLocation = referenceLocation;
 		this.reference = reference;
@@ -117,7 +116,7 @@ public class ResourceReference
 		return reference;
 	}
 
-	public List<Class<? extends DomainResource>> getReferenceTypes()
+	public List<Class<? extends Resource>> getReferenceTypes()
 	{
 		return Collections.unmodifiableList(referenceTypes);
 	}

@@ -11,12 +11,12 @@ import org.highmed.fhir.authentication.UserProvider;
 import org.highmed.fhir.authentication.UserRole;
 import org.highmed.fhir.help.ResponseGenerator;
 import org.highmed.fhir.webservice.specification.BasicService;
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AbstractServiceSecure<R extends DomainResource, S extends BasicService<R>> implements BasicService<R>
+public class AbstractServiceSecure<R extends Resource, S extends BasicService<R>> implements BasicService<R>
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractServiceSecure.class);
 

@@ -3,7 +3,6 @@ package org.highmed.fhir.service;
 import java.util.stream.Stream;
 
 import org.highmed.fhir.dao.command.ResourceReference;
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.HealthcareService;
 import org.hl7.fhir.r4.model.Location;
@@ -13,11 +12,12 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.ResearchStudy;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
 
 public interface ReferenceExtractor
 {
-	Stream<ResourceReference> getReferences(DomainResource resource);
+	Stream<ResourceReference> getReferences(Resource resource);
 
 	Stream<ResourceReference> getReferences(Endpoint resource);
 

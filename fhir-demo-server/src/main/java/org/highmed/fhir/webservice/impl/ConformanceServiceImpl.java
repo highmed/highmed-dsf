@@ -53,6 +53,7 @@ import org.highmed.fhir.search.parameters.ValueSetUrl;
 import org.highmed.fhir.search.parameters.ValueSetVersion;
 import org.highmed.fhir.webservice.specification.ConformanceService;
 import org.highmed.fhir.websocket.ServerEndpoint;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementImplementationComponent;
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementKind;
@@ -85,6 +86,7 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.ResearchStudy;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Subscription;
@@ -154,9 +156,10 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 		websocketExtension.setUrl("http://hl7.org/fhir/StructureDefinition/capabilitystatement-websocket");
 		websocketExtension.setValue(new UrlType(serverBase.replace("http", "ws") + ServerEndpoint.PATH));
 
-		var resources = Arrays.asList(CodeSystem.class, Endpoint.class, HealthcareService.class, Location.class,
-				Organization.class, Patient.class, PractitionerRole.class, Practitioner.class, Provenance.class,
-				ResearchStudy.class, StructureDefinition.class, Subscription.class, Task.class, ValueSet.class);
+		var resources = Arrays.asList(Bundle.class, CodeSystem.class, Endpoint.class, HealthcareService.class,
+				Location.class, Organization.class, Patient.class, PractitionerRole.class, Practitioner.class,
+				Provenance.class, ResearchStudy.class, StructureDefinition.class, Subscription.class, Task.class,
+				ValueSet.class);
 
 		var searchParameters = new HashMap<Class<? extends DomainResource>, List<CapabilityStatementRestResourceSearchParamComponent>>();
 
@@ -234,7 +237,7 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 				createSearchParameter(ResourceLastUpdated.class));
 		var standardOperations = Arrays.asList(createValidateOperation());
 
-		for (Class<? extends DomainResource> resource : resources)
+		for (Class<? extends Resource> resource : resources)
 		{
 			CapabilityStatementRestResourceComponent r = rest.addResource();
 			r.setVersioning(ResourceVersionPolicy.VERSIONED);
@@ -283,7 +286,7 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 	}
 
 	private CapabilityStatementRestResourceSearchParamComponent createIncludeParameter(
-			Class<? extends DomainResource> resource,
+			Class<? extends Resource> resource,
 			List<CapabilityStatementRestResourceSearchParamComponent> resourceSearchParameters)
 	{
 		return createSearchParameter("_include", "", SearchParamType.SPECIAL,

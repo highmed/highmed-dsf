@@ -21,7 +21,6 @@ import org.highmed.fhir.help.ResponseGenerator;
 import org.highmed.fhir.search.PartialResult;
 import org.highmed.fhir.search.SearchQuery;
 import org.highmed.fhir.search.SearchQueryParameterError;
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Resource;
@@ -60,13 +59,13 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 	}
 
 	@Override
-	public boolean resolveReference(DomainResource resource, ResourceReference resourceReference, Connection connection)
+	public boolean resolveReference(Resource resource, ResourceReference resourceReference, Connection connection)
 	{
 		return resolveReference(resource, null, resourceReference, connection);
 	}
 
 	@Override
-	public boolean resolveReference(DomainResource resource, Integer bundleIndex, ResourceReference resourceReference,
+	public boolean resolveReference(Resource resource, Integer bundleIndex, ResourceReference resourceReference,
 			Connection connection)
 	{
 		Objects.requireNonNull(resource, "resource");
@@ -90,14 +89,14 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 	}
 
 	@Override
-	public boolean resolveLiteralInternalReference(DomainResource resource, ResourceReference resourceReference,
+	public boolean resolveLiteralInternalReference(Resource resource, ResourceReference resourceReference,
 			Connection connection) throws WebApplicationException, IllegalArgumentException
 	{
 		return resolveLiteralInternalReference(resource, null, resourceReference, connection);
 	}
 
 	@Override
-	public boolean resolveLiteralInternalReference(DomainResource resource, Integer bundleIndex,
+	public boolean resolveLiteralInternalReference(Resource resource, Integer bundleIndex,
 			ResourceReference resourceReference, Connection connection)
 			throws WebApplicationException, IllegalArgumentException
 	{
@@ -131,14 +130,14 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 	}
 
 	@Override
-	public boolean resolveLiteralExternalReference(DomainResource resource, ResourceReference resourceReference)
+	public boolean resolveLiteralExternalReference(Resource resource, ResourceReference resourceReference)
 			throws WebApplicationException, IllegalArgumentException
 	{
 		return resolveLiteralExternalReference(resource, null, resourceReference);
 	}
 
 	@Override
-	public boolean resolveLiteralExternalReference(DomainResource resource, Integer bundleIndex,
+	public boolean resolveLiteralExternalReference(Resource resource, Integer bundleIndex,
 			ResourceReference resourceReference) throws WebApplicationException, IllegalArgumentException
 	{
 		Objects.requireNonNull(resource, "resource");
@@ -157,14 +156,14 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 	}
 
 	@Override
-	public boolean resolveConditionalReference(DomainResource resource, ResourceReference resourceReference,
+	public boolean resolveConditionalReference(Resource resource, ResourceReference resourceReference,
 			Connection connection) throws WebApplicationException, IllegalArgumentException
 	{
 		return resolveConditionalReference(resource, null, resourceReference, connection);
 	}
 
 	@Override
-	public boolean resolveConditionalReference(DomainResource resource, Integer bundleIndex,
+	public boolean resolveConditionalReference(Resource resource, Integer bundleIndex,
 			ResourceReference resourceReference, Connection connection)
 			throws WebApplicationException, IllegalArgumentException
 	{
@@ -204,16 +203,15 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 	}
 
 	@Override
-	public boolean resolveLogicalReference(DomainResource resource, ResourceReference resourceReference,
+	public boolean resolveLogicalReference(Resource resource, ResourceReference resourceReference,
 			Connection connection) throws WebApplicationException, IllegalArgumentException
 	{
 		return resolveLogicalReference(resource, null, resourceReference, connection);
 	}
 
 	@Override
-	public boolean resolveLogicalReference(DomainResource resource, Integer bundleIndex,
-			ResourceReference resourceReference, Connection connection)
-			throws WebApplicationException, IllegalArgumentException
+	public boolean resolveLogicalReference(Resource resource, Integer bundleIndex, ResourceReference resourceReference,
+			Connection connection) throws WebApplicationException, IllegalArgumentException
 	{
 		Objects.requireNonNull(resource, "resource");
 		Objects.requireNonNull(resourceReference, "resourceReference");
@@ -246,7 +244,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 		return true; // throws exception if reference could not be resolved
 	}
 
-	private Resource search(DomainResource resource, Integer bundleIndex, Connection connection,
+	private Resource search(Resource resource, Integer bundleIndex, Connection connection,
 			ResourceDao<?> referenceTargetDao, ResourceReference resourceReference,
 			Map<String, List<String>> queryParameters, boolean logicalNoConditional)
 	{

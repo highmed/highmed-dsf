@@ -21,7 +21,6 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
@@ -102,8 +101,8 @@ public class ResponseGenerator
 	 *            may be <code>null</code>
 	 * @return
 	 */
-	public Bundle createSearchSet(PartialResult<? extends Resource> result,
-			List<SearchQueryParameterError> errors, UriBuilder bundleUri, String format, String pretty)
+	public Bundle createSearchSet(PartialResult<? extends Resource> result, List<SearchQueryParameterError> errors,
+			UriBuilder bundleUri, String format, String pretty)
 	{
 		Bundle bundle = new Bundle();
 		bundle.setTimestamp(new Date());
@@ -249,7 +248,7 @@ public class ResponseGenerator
 		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
-	public Response oneExists(DomainResource resource, String ifNoneExistsHeaderValue)
+	public Response oneExists(Resource resource, String ifNoneExistsHeaderValue)
 	{
 		logger.info("{} with criteria {} exists", resource, ifNoneExistsHeaderValue);
 
@@ -265,12 +264,12 @@ public class ResponseGenerator
 				.tag(new EntityTag(resource.getMeta().getVersionId(), true)).build();
 	}
 
-	public Response unknownReference(DomainResource resource, ResourceReference resourceReference)
+	public Response unknownReference(Resource resource, ResourceReference resourceReference)
 	{
 		return unknownReference(null, resource, resourceReference);
 	}
 
-	public Response unknownReference(Integer bundleIndex, DomainResource resource, ResourceReference resourceReference)
+	public Response unknownReference(Integer bundleIndex, Resource resource, ResourceReference resourceReference)
 	{
 		if (bundleIndex == null)
 			logger.warn("Unknown reference at {} in resource of type {} with id {}",
@@ -287,7 +286,7 @@ public class ResponseGenerator
 		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
-	public Response referenceTargetTypeNotSupportedByImplementation(Integer bundleIndex, DomainResource resource,
+	public Response referenceTargetTypeNotSupportedByImplementation(Integer bundleIndex, Resource resource,
 			ResourceReference resourceReference)
 	{
 		if (bundleIndex == null)
@@ -308,7 +307,7 @@ public class ResponseGenerator
 		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
-	public Response referenceTargetTypeNotSupportedByResource(Integer bundleIndex, DomainResource resource,
+	public Response referenceTargetTypeNotSupportedByResource(Integer bundleIndex, Resource resource,
 			ResourceReference resourceReference)
 	{
 		if (bundleIndex == null)
@@ -327,7 +326,7 @@ public class ResponseGenerator
 		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
-	public Response referenceTargetNotFoundLocally(Integer bundleIndex, DomainResource resource,
+	public Response referenceTargetNotFoundLocally(Integer bundleIndex, Resource resource,
 			ResourceReference resourceReference)
 	{
 		if (bundleIndex == null)
@@ -348,7 +347,7 @@ public class ResponseGenerator
 		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
-	public Response badReference(boolean logicalNoConditional, Integer bundleIndex, DomainResource resource,
+	public Response badReference(boolean logicalNoConditional, Integer bundleIndex, Resource resource,
 			ResourceReference resourceReference, String queryParameters,
 			List<SearchQueryParameterError> unsupportedQueryParameters)
 	{
@@ -378,7 +377,7 @@ public class ResponseGenerator
 		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
-	public Response referenceTargetNotFoundLocallyByIdentifier(Integer bundleIndex, DomainResource resource,
+	public Response referenceTargetNotFoundLocallyByIdentifier(Integer bundleIndex, Resource resource,
 			ResourceReference resourceReference)
 	{
 		if (bundleIndex == null)
@@ -404,7 +403,7 @@ public class ResponseGenerator
 		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
-	public Response referenceTargetMultipleMatchesLocallyByIdentifier(Integer bundleIndex, DomainResource resource,
+	public Response referenceTargetMultipleMatchesLocallyByIdentifier(Integer bundleIndex, Resource resource,
 			ResourceReference resourceReference, int overallCount)
 	{
 		if (bundleIndex == null)
@@ -431,7 +430,7 @@ public class ResponseGenerator
 		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
-	public Response referenceTargetNotFoundLocallyByCondition(Integer bundleIndex, DomainResource resource,
+	public Response referenceTargetNotFoundLocallyByCondition(Integer bundleIndex, Resource resource,
 			ResourceReference resourceReference, String queryParameters)
 	{
 		if (bundleIndex == null)
@@ -457,7 +456,7 @@ public class ResponseGenerator
 		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
-	public Response referenceTargetMultipleMatchesLocallyByCondition(Integer bundleIndex, DomainResource resource,
+	public Response referenceTargetMultipleMatchesLocallyByCondition(Integer bundleIndex, Resource resource,
 			ResourceReference resourceReference, int overallCount, String queryParameters)
 	{
 		if (bundleIndex == null)
@@ -479,7 +478,7 @@ public class ResponseGenerator
 		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
-	public Response referenceTargetBadCondition(Integer bundleIndex, DomainResource resource,
+	public Response referenceTargetBadCondition(Integer bundleIndex, Resource resource,
 			ResourceReference resourceReference)
 	{
 		if (bundleIndex == null)

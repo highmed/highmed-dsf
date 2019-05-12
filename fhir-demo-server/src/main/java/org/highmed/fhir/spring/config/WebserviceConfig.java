@@ -1,5 +1,6 @@
 package org.highmed.fhir.spring.config;
 
+import org.highmed.fhir.webservice.impl.BundleServiceImpl;
 import org.highmed.fhir.webservice.impl.CodeSystemServiceImpl;
 import org.highmed.fhir.webservice.impl.ConformanceServiceImpl;
 import org.highmed.fhir.webservice.impl.EndpointServiceImpl;
@@ -16,6 +17,7 @@ import org.highmed.fhir.webservice.impl.StructureDefinitionServiceImpl;
 import org.highmed.fhir.webservice.impl.SubscriptionServiceImpl;
 import org.highmed.fhir.webservice.impl.TaskServiceImpl;
 import org.highmed.fhir.webservice.impl.ValueSetServiceImpl;
+import org.highmed.fhir.webservice.jaxrs.BundleServiceJaxrs;
 import org.highmed.fhir.webservice.jaxrs.CodeSystemServiceJaxrs;
 import org.highmed.fhir.webservice.jaxrs.ConformanceServiceJaxrs;
 import org.highmed.fhir.webservice.jaxrs.EndpointServiceJaxrs;
@@ -32,6 +34,7 @@ import org.highmed.fhir.webservice.jaxrs.StructureDefinitionServiceJaxrs;
 import org.highmed.fhir.webservice.jaxrs.SubscriptionServiceJaxrs;
 import org.highmed.fhir.webservice.jaxrs.TaskServiceJaxrs;
 import org.highmed.fhir.webservice.jaxrs.ValueSetServiceJaxrs;
+import org.highmed.fhir.webservice.secure.BundleServiceSecure;
 import org.highmed.fhir.webservice.secure.CodeSystemServiceSecure;
 import org.highmed.fhir.webservice.secure.ConformanceServiceSecure;
 import org.highmed.fhir.webservice.secure.EndpointServiceSecure;
@@ -48,6 +51,7 @@ import org.highmed.fhir.webservice.secure.StructureDefinitionServiceSecure;
 import org.highmed.fhir.webservice.secure.SubscriptionServiceSecure;
 import org.highmed.fhir.webservice.secure.TaskServiceSecure;
 import org.highmed.fhir.webservice.secure.ValueSetServiceSecure;
+import org.highmed.fhir.webservice.specification.BundleService;
 import org.highmed.fhir.webservice.specification.CodeSystemService;
 import org.highmed.fhir.webservice.specification.ConformanceService;
 import org.highmed.fhir.webservice.specification.EndpointService;
@@ -64,8 +68,8 @@ import org.highmed.fhir.webservice.specification.StructureDefinitionService;
 import org.highmed.fhir.webservice.specification.SubscriptionService;
 import org.highmed.fhir.webservice.specification.TaskService;
 import org.highmed.fhir.webservice.specification.ValueSetService;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.HealthcareService;
 import org.hl7.fhir.r4.model.Location;
@@ -75,6 +79,7 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.ResearchStudy;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Task;
@@ -120,7 +125,7 @@ public class WebserviceConfig
 				new ConformanceServiceImpl(serverBase, defaultPageCount, helperConfig.parameterConverter())));
 	}
 
-	private String resourceTypeName(Class<? extends DomainResource> r)
+	private String resourceTypeName(Class<? extends Resource> r)
 	{
 		return r.getAnnotation(ResourceDef.class).name();
 	}
@@ -136,6 +141,21 @@ public class WebserviceConfig
 	{
 		return new CodeSystemServiceImpl(resourceTypeName(CodeSystem.class), serverBase, CodeSystemServiceJaxrs.PATH,
 				defaultPageCount, daoConfig.codeSystemDao(), validationConfig.resourceValidator(),
+				eventConfig.eventManager(), helperConfig.exceptionHandler(), eventConfig.eventGenerator(),
+				helperConfig.responseGenerator(), helperConfig.parameterConverter(), commandConfig.referenceExtractor(),
+				commandConfig.referenceResolver());
+	}
+
+	@Bean
+	public BundleService bundleService()
+	{
+		return new BundleServiceJaxrs(new BundleServiceSecure(bundleServiceImpl(), helperConfig.responseGenerator()));
+	}
+
+	private BundleService bundleServiceImpl()
+	{
+		return new BundleServiceImpl(resourceTypeName(Bundle.class), serverBase, BundleServiceJaxrs.PATH,
+				defaultPageCount, daoConfig.bundleDao(), validationConfig.resourceValidator(),
 				eventConfig.eventManager(), helperConfig.exceptionHandler(), eventConfig.eventGenerator(),
 				helperConfig.responseGenerator(), helperConfig.parameterConverter(), commandConfig.referenceExtractor(),
 				commandConfig.referenceResolver());

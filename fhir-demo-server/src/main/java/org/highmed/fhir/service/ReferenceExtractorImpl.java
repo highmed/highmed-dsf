@@ -32,6 +32,7 @@ import org.hl7.fhir.r4.model.Provenance.ProvenanceEntityComponent;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedPerson;
 import org.hl7.fhir.r4.model.ResearchStudy;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.TaskRestrictionComponent;
 import org.slf4j.Logger;
@@ -43,13 +44,13 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 
 	@SafeVarargs
 	private Function<Reference, ResourceReference> toResourceReference(String referenceLocation,
-			Class<? extends DomainResource>... referenceTypes)
+			Class<? extends Resource>... referenceTypes)
 	{
 		return ref -> new ResourceReference(referenceLocation, ref, Arrays.asList(referenceTypes));
 	}
 
 	@SafeVarargs
-	private <R extends DomainResource> Stream<ResourceReference> getReference(R resource, Predicate<R> hasReference,
+	private <R extends Resource> Stream<ResourceReference> getReference(R resource, Predicate<R> hasReference,
 			Function<R, Reference> getReference, String referenceLocation,
 			Class<? extends DomainResource>... referenceTypes)
 	{
@@ -59,19 +60,19 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 	}
 
 	@SafeVarargs
-	private <R extends DomainResource> Stream<ResourceReference> getReferences(R resource, Predicate<R> hasReference,
+	private <R extends Resource> Stream<ResourceReference> getReferences(R resource, Predicate<R> hasReference,
 			Function<R, List<Reference>> getReference, String referenceLocation,
-			Class<? extends DomainResource>... referenceTypes)
+			Class<? extends Resource>... referenceTypes)
 	{
 		return hasReference.test(resource) ? Stream.of(getReference.apply(resource)).flatMap(List::stream)
 				.map(toResourceReference(referenceLocation, referenceTypes)) : Stream.empty();
 	}
 
 	@SafeVarargs
-	private <R extends DomainResource, E extends BackboneElement> Stream<ResourceReference> getBackboneElementsReference(
+	private <R extends Resource, E extends BackboneElement> Stream<ResourceReference> getBackboneElementsReference(
 			R resource, Predicate<R> hasBackboneElements, Function<R, List<E>> getBackboneElements,
 			Predicate<E> hasReference, Function<E, Reference> getReference, String referenceLocation,
-			Class<? extends DomainResource>... referenceTypes)
+			Class<? extends Resource>... referenceTypes)
 	{
 		if (hasBackboneElements.test(resource))
 		{
@@ -87,7 +88,7 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 	@SafeVarargs
 	private <E extends BackboneElement> Stream<ResourceReference> getReference(E backboneElement,
 			Predicate<E> hasReference, Function<E, Reference> getReference, String referenceLocation,
-			Class<? extends DomainResource>... referenceTypes)
+			Class<? extends Resource>... referenceTypes)
 	{
 		return hasReference.test(backboneElement) ? Stream.of(getReference.apply(backboneElement))
 				.map(toResourceReference(referenceLocation, referenceTypes)) : Stream.empty();
@@ -157,7 +158,7 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 	}
 
 	@Override
-	public Stream<ResourceReference> getReferences(DomainResource resource)
+	public Stream<ResourceReference> getReferences(Resource resource)
 	{
 		if (resource == null)
 			return Stream.empty();
@@ -182,11 +183,17 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 			return getReferences((ResearchStudy) resource);
 		else if (resource instanceof Task)
 			return getReferences((Task) resource);
+		else if (resource instanceof DomainResource)
+		{
+			logger.debug("DomainResource of type {} not supported, returning extension references only",
+					resource.getClass().getName());
+			return getExtensionReferences((DomainResource) resource);
+		}
 		else
 		{
-			logger.debug("Resource of type {} not supported by {}, returning extension references only",
-					resource.getClass().getName(), ReferenceExtractorImpl.class.getName());
-			return getExtensionReferences(resource);
+			logger.debug("Resource of type {} not supported, returning no references", resource.getClass().getName());
+			return Stream.empty();
+
 		}
 	}
 

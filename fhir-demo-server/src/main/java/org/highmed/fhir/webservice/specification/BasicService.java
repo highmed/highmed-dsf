@@ -6,10 +6,10 @@ import javax.ws.rs.core.UriInfo;
 
 import org.highmed.fhir.authentication.NeedsAuthentication;
 import org.highmed.fhir.authentication.UserProvider;
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Resource;
 
-public interface BasicService<R extends DomainResource> extends NeedsAuthentication
+public interface BasicService<R extends Resource> extends NeedsAuthentication
 {
 	void setUserProvider(UserProvider provider);
 

@@ -48,7 +48,6 @@ import org.highmed.fhir.webservice.specification.BasicService;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeType;
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
@@ -73,12 +72,12 @@ import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 
-public abstract class AbstractServiceImpl<D extends ResourceDao<R>, R extends DomainResource>
+public abstract class AbstractServiceImpl<D extends ResourceDao<R>, R extends Resource>
 		implements BasicService<R>, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractServiceImpl.class);
 
-	protected final Class<? extends DomainResource> resourceType;
+	protected final Class<? extends Resource> resourceType;
 	protected final String resourceTypeName;
 	protected final String serverBase;
 	protected final String path;
@@ -93,7 +92,7 @@ public abstract class AbstractServiceImpl<D extends ResourceDao<R>, R extends Do
 	protected final ReferenceExtractor referenceExtractor;
 	protected final ReferenceResolver referenceResolver;
 
-	public AbstractServiceImpl(Class<? extends DomainResource> resourceType, String resourceTypeName, String serverBase,
+	public AbstractServiceImpl(Class<? extends Resource> resourceType, String resourceTypeName, String serverBase,
 			String path, int defaultPageCount, D dao, ResourceValidator validator, EventManager eventManager,
 			ExceptionHandler exceptionHandler, EventGenerator eventGenerator, ResponseGenerator responseGenerator,
 			ParameterConverter parameterConverter, ReferenceExtractor referenceExtractor,
@@ -203,7 +202,7 @@ public abstract class AbstractServiceImpl<D extends ResourceDao<R>, R extends Do
 		return created;
 	}
 
-	private Function<ResourceReference, Boolean> resolveReference(DomainResource resource, Connection connection)
+	private Function<ResourceReference, Boolean> resolveReference(Resource resource, Connection connection)
 			throws WebApplicationException
 	{
 		return resourceReference ->
