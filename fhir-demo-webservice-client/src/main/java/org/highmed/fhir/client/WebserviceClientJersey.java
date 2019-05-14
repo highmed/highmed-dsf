@@ -328,6 +328,7 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
 				response.getStatusInfo().getReasonPhrase());
 		if (Status.OK.getStatusCode() == response.getStatus())
+			// TODO remove workaround if HAPI bug fixed
 			return fixBundle(resourceType, response.readEntity(resourceType));
 		else
 			throw new WebApplicationException(response);
@@ -372,7 +373,8 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
 				response.getStatusInfo().getReasonPhrase());
 		if (Status.OK.getStatusCode() == response.getStatus())
-			return response.readEntity(resourceType);
+			// TODO remove workaround if HAPI bug fixed
+			return fixBundle(resourceType, response.readEntity(resourceType));
 		else
 			throw new WebApplicationException(response);
 	}
