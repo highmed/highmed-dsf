@@ -7,7 +7,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.camunda.bpm.engine.ProcessEngineException;
 import org.camunda.bpm.engine.RepositoryService;
 import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.repository.ProcessDefinition;
@@ -75,7 +74,7 @@ public class TaskHandler implements InitializingBean
 			onMessage(businessKey, correlationKey, processDefinitionKey, versionTag, messageName, variables);
 			task.setStatus(TaskStatus.COMPLETED);
 		}
-		catch (ProcessEngineException e)
+		catch (Exception e)
 		{
 			logger.error("Error while handling task", e);
 			task.setStatus(TaskStatus.FAILED);
