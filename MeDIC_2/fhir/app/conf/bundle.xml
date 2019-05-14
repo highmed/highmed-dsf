@@ -29,4 +29,32 @@
 			<ifNoneExist value="identifier=http://highmed.org/fhir/CodeSystem/organization|Test_TTP" />
 		</request>
 	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:55901940-02db-40bf-9a6e-bdfdd0ddb7bf" />
+		<resource>
+			<Organization xmlns="http://hl7.org/fhir">
+				<identifier>
+					<system value="http://highmed.org/fhir/CodeSystem/organization" />
+					<value value="Test_MeDIC_2" />
+				</identifier>
+				<active value="true" />
+				<type>
+					<coding>
+						<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
+						<code value="MeDIC" />
+					</coding>
+				</type>
+				<name value="Test MeDIC 2" />
+				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
+					<valueString
+						value="e4af921e6cbc35032ddb21b8a36f366ff7605bdb20bddddcbca6bcc437239b58e9189dfea3a66c584a9bb0a6006c243031c6c5504a43d059afa629d24f8b55bb" />
+				</extension>
+			</Organization>
+		</resource>
+		<request>
+			<method value="POST" />
+			<url value="Organization" />
+			<ifNoneExist value="identifier=http://highmed.org/fhir/CodeSystem/organization|Test_MeDIC_2" />
+		</request>
+	</entry>
 </Bundle>

@@ -133,6 +133,10 @@
 		<fullUrl value="urn:uuid:b879e904-d666-45de-a995-accdd4429b79" />
 		<resource>
 			<Endpoint xmlns="http://hl7.org/fhir">
+				<identifier>
+					<system value="http://highmed.org/fhir/CodeSystem/endpoint" />
+					<value value="Test_TTP_Endpoint" />
+				</identifier>
 				<status value="active" />
 				<connectionType>
 					<system value="http://terminology.hl7.org/CodeSystem/endpoint-connection-type" />
@@ -160,13 +164,17 @@
 		<request>
 			<method value="POST" />
 			<url value="Endpoint" />
-			<ifNoneExist value="organization:identifier=http://highmed.org/fhir/CodeSystem/organization|Test_TTP" />
+			<ifNoneExist value="identifier=http://highmed.org/fhir/CodeSystem/endpoint|Test_TTP_Endpoint" />
 		</request>
 	</entry>
 	<entry>
 		<fullUrl value="urn:uuid:6b405f8a-a201-475d-8dd7-4d73314855e1" />
 		<resource>
 			<Endpoint xmlns="http://hl7.org/fhir">
+				<identifier>
+					<system value="http://highmed.org/fhir/CodeSystem/endpoint" />
+					<value value="Test_MeDIC_1_Endpoint" />
+				</identifier>
 				<status value="active" />
 				<connectionType>
 					<system value="http://terminology.hl7.org/CodeSystem/endpoint-connection-type" />
@@ -194,13 +202,17 @@
 		<request>
 			<method value="POST" />
 			<url value="Endpoint" />
-			<ifNoneExist value="organization:identifier=http://highmed.org/fhir/CodeSystem/organization|Test_MeDIC_1" />
+			<ifNoneExist value="identifier=http://highmed.org/fhir/CodeSystem/endpoint|Test_MeDIC_1_Endpoint" />
 		</request>
 	</entry>
 	<entry>
 		<fullUrl value="urn:uuid:1712b523-1783-40fa-a317-375415686457" />
 		<resource>
 			<Endpoint xmlns="http://hl7.org/fhir">
+				<identifier>
+					<system value="http://highmed.org/fhir/CodeSystem/endpoint" />
+					<value value="Test_MeDIC_2_Endpoint" />
+				</identifier>
 				<status value="active" />
 				<connectionType>
 					<system value="http://terminology.hl7.org/CodeSystem/endpoint-connection-type" />
@@ -228,13 +240,17 @@
 		<request>
 			<method value="POST" />
 			<url value="Endpoint" />
-			<ifNoneExist value="organization:identifier=http://highmed.org/fhir/CodeSystem/organization|Test_MeDIC_2" />
+			<ifNoneExist value="identifier=http://highmed.org/fhir/CodeSystem/endpoint|Test_MeDIC_2_Endpoint" />
 		</request>
 	</entry>
 	<entry>
 		<fullUrl value="urn:uuid:1c3d45f9-5aa8-4979-892e-bf2d29b398e0" />
 		<resource>
 			<Endpoint xmlns="http://hl7.org/fhir">
+				<identifier>
+					<system value="http://highmed.org/fhir/CodeSystem/endpoint" />
+					<value value="Test_MeDIC_3_Endpoint" />
+				</identifier>
 				<status value="active" />
 				<connectionType>
 					<system value="http://terminology.hl7.org/CodeSystem/endpoint-connection-type" />
@@ -262,7 +278,7 @@
 		<request>
 			<method value="POST" />
 			<url value="Endpoint" />
-			<ifNoneExist value="organization:identifier=http://highmed.org/fhir/CodeSystem/organization|Test_MeDIC_3" />
+			<ifNoneExist value="identifier=http://highmed.org/fhir/CodeSystem/endpoint|Test_MeDIC_3_Endpoint" />
 		</request>
 	</entry>
 </Bundle>

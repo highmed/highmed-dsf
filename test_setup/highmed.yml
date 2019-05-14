@@ -69,7 +69,8 @@
          append: true
    -  name: Download docker-compose
       get_url:
-         url: https://github.com/docker/compose/releases/download/1.24.0/docker-compose-{{ ansible_system }}-{{ ansible_userspace_architecture }}
+         url: https://github.com/docker/compose/releases/download/1.24.0/docker-compose-{{ ansible_system }}-{{ ansible_userspace_architecture
+            }}
          dest: /usr/local/bin/docker-compose
          checksum: sha256:bee6460f96339d5d978bb63d17943f773e1a140242dfa6c941d5e020a302c91b
          mode: '777'
@@ -90,6 +91,9 @@
          ip: 10.42.0.12
       -  name: medic3
          ip: 10.42.0.13
+   -  name: Set timezone to Europe/Berlin
+      timezone:
+         name: Europe/Berlin
    handlers:
    -  name: Reboot
       reboot: null
