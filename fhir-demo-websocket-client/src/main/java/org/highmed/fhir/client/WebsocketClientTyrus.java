@@ -9,7 +9,6 @@ import java.util.function.Supplier;
 import javax.net.ssl.SSLContext;
 import javax.websocket.CloseReason;
 import javax.websocket.DeploymentException;
-import javax.websocket.Session;
 
 import org.glassfish.jersey.SslConfigurator;
 import org.glassfish.tyrus.client.ClientManager;
@@ -48,12 +47,9 @@ public class WebsocketClientTyrus implements WebsocketClient
 	private final URI wsUri;
 	private final SSLContext sslContext;
 	private final ClientEndpoint endpoint;
-	private final String subscriptionIdPart;
 
 	private ClientManager manager;
 	private volatile boolean close;
-
-	private Session session;
 
 	public WebsocketClientTyrus(FhirContext fhirContext, URI wsUri, KeyStore trustStore, KeyStore keyStore,
 			String keyStorePassword, String subscriptionIdPart)
@@ -69,7 +65,6 @@ public class WebsocketClientTyrus implements WebsocketClient
 			sslContext = SslConfigurator.getDefaultContext();
 
 		this.endpoint = new ClientEndpoint(subscriptionIdPart);
-		this.subscriptionIdPart = subscriptionIdPart;
 	}
 
 	@Override
@@ -85,7 +80,7 @@ public class WebsocketClientTyrus implements WebsocketClient
 		try
 		{
 			logger.debug("Connecting to websocket {} and waiting for connection", wsUri);
-			session = manager.connectToServer(endpoint, wsUri);
+			manager.connectToServer(endpoint, wsUri);
 		}
 		catch (DeploymentException e)
 		{
@@ -97,11 +92,6 @@ public class WebsocketClientTyrus implements WebsocketClient
 			logger.warn("Error while connecting to server", e);
 			throw new RuntimeException(e);
 		}
-
-		if (session == null || !session.isOpen())
-			throw new IllegalStateException("not connected");
-
-		session.getAsyncRemote().sendText("bind " + subscriptionIdPart);
 	}
 
 	@Override

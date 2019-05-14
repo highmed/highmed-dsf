@@ -68,6 +68,8 @@ public class ClientEndpoint extends Endpoint
 				}
 			}
 		});
+		
+		session.getAsyncRemote().sendText("bind " + subscriptionIdPart);
 	}
 
 	@Override
