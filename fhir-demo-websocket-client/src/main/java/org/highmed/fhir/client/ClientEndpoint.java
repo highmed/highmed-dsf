@@ -53,10 +53,18 @@ public class ClientEndpoint extends Endpoint
 
 				if (boundReceived)
 				{
-					if (pingHandler != null && ("ping " + subscriptionIdPart).equals(message))
-						pingHandler.accept(message);
-					else if (domainResourceHandler != null && parserFactory != null)
-						domainResourceHandler.accept((DomainResource) parserFactory.get().parseResource(message));
+					try
+					{
+						if (pingHandler != null && ("ping " + subscriptionIdPart).equals(message))
+							pingHandler.accept(message);
+						else if (domainResourceHandler != null && parserFactory != null)
+							domainResourceHandler.accept((DomainResource) parserFactory.get().parseResource(message));
+					}
+					catch (Throwable e)
+					{
+						logger.error("Error while handling message, caught {}: {}", e.getClass().getName(),
+								e.getMessage());
+					}
 				}
 			}
 		});
