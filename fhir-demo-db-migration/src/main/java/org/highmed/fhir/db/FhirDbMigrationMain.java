@@ -28,8 +28,7 @@ public class FhirDbMigrationMain
 
 		Properties dbProperties = read(propertiesPath, StandardCharsets.UTF_8);
 
-		DbMigrator migrator = new DbMigrator();
-		migrator.migrate(dbProperties);
+		DbMigrator.migrate(dbProperties);
 	}
 
 	private static Properties read(Path propertiesFile, Charset encoding)

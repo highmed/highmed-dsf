@@ -42,7 +42,7 @@ public class FhirJettyServerHttps
 		Log4jInitializer.initializeLog4j(properties);
 
 		Properties dbProperties = PropertiesReader.read(Paths.get("conf/db.properties"), StandardCharsets.UTF_8);
-		new DbMigrator().migrate(dbProperties);
+		DbMigrator.retryOnConnectException(3, () -> DbMigrator.migrate(dbProperties));
 
 		HttpConfiguration httpConfiguration = httpConfiguration(secureRequestCustomizer());
 		Function<Server, ServerConnector> connector = httpsConnector(httpConfiguration, properties);
