@@ -1,5 +1,6 @@
 package org.highmed.bpe.spring.config;
 
+import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
 import org.highmed.bpe.message.SendRequest;
 import org.highmed.bpe.plugin.UpdateResourcesPlugin;
 import org.highmed.bpe.service.SelectResourceAndTargets;
@@ -10,6 +11,8 @@ import org.highmed.fhir.task.TaskHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import ca.uhn.fhir.context.FhirContext;
 
 @Configuration
 public class UpdateResourcesConfig
@@ -23,8 +26,11 @@ public class UpdateResourcesConfig
 	@Autowired
 	private TaskHelper taskHelper;
 
+	@Autowired
+	private FhirContext fhirContext;
+
 	@Bean
-	public UpdateResourcesPlugin updateResourcesPlugin()
+	public ProcessEnginePlugin updateResourcesPlugin()
 	{
 		return new UpdateResourcesPlugin();
 	}
@@ -44,6 +50,6 @@ public class UpdateResourcesConfig
 	@Bean
 	public UpdateResources updateResources()
 	{
-		return new UpdateResources(clientProvider, taskHelper);
+		return new UpdateResources(clientProvider, taskHelper, fhirContext);
 	}
 }

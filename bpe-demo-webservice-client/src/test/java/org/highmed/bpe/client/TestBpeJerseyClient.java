@@ -23,22 +23,21 @@ public class TestBpeJerseyClient
 				.fromPkcs12(Paths.get("../bpe-demo-cert-generator/cert/test-client_certificate.p12"), keyStorePassword);
 		KeyStore trustStore = CertificateHelper.extractTrust(keyStore);
 
-		WebserviceClient client = new WebserviceClientJersey("https://localhost:8002/bpe", trustStore, keyStore,
+//		WebserviceClient client = new WebserviceClientJersey("https://localhost:8002/bpe", trustStore, keyStore,
+//				keyStorePassword, null, null, null, 0, 0, null);
+		WebserviceClient client = new WebserviceClientJersey("https://ttp:8443/bpe", trustStore, keyStore,
 				keyStorePassword, null, null, null, 0, 0, null);
 
-		// try
-		// {
-		// client.startProcessWithVersion("ping", "1.0.0");
-		// }
-		// catch (WebApplicationException e)
-		// {
-		// e.printStackTrace();
-		// }
+		client.startProcessWithVersion("ping", "1.0.0");
+
+//		client.startProcessWithVersion("updateWhiteList", "1.0.0");
 
 //		client.startProcessWithVersion("requestUpdateResources", "1.0.0", Map.of("target-identifier",
 //				Collections.singletonList("http://highmed.org/fhir/CodeSystem/organization|"), "bundle-id",
-//				Arrays.asList("Bundle/6c18e27e-2dbd-4855-8e9c-0800a2ad087b")));
-		
-		client.startProcessWithVersion("updateWhiteList", "1.0.0");
+//				Arrays.asList("Bundle/30a10cba-64e3-4340-8930-35fa5e0fd69d")));
+
+//		client.startProcessWithVersion("requestUpdateResources", "1.0.0", Map.of("target-identifier",
+//				Collections.singletonList("http://highmed.org/fhir/CodeSystem/organization|"), "bundle-id",
+//				Arrays.asList("Bundle/30a376fa-f3ba-4f68-8e04-c5b9c0c4f5c9")));
 	}
 }

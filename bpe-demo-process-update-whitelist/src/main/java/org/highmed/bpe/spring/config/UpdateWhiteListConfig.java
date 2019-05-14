@@ -1,5 +1,6 @@
 package org.highmed.bpe.spring.config;
 
+import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
 import org.highmed.bpe.plugin.UpdateWhiteListPlugin;
 import org.highmed.bpe.service.UpdateWhiteList;
 import org.highmed.fhir.client.WebserviceClientProvider;
@@ -18,7 +19,7 @@ public class UpdateWhiteListConfig
 	private OrganizationProvider organizationProvider;
 
 	@Bean
-	public UpdateWhiteListPlugin updateWhiteListPlugin()
+	public ProcessEnginePlugin updateWhiteListPlugin()
 	{
 		return new UpdateWhiteListPlugin();
 	}

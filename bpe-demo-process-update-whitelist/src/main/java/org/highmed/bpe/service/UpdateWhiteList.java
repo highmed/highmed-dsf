@@ -107,7 +107,7 @@ public class UpdateWhiteList implements JavaDelegate, InitializingBean
 			endpoint.setManagingOrganization(new Reference().setReference(organizationId).setType("Organization"));
 			endpointEntry.setResource(endpoint);
 
-			return new Reference().setReference(endpointId);
+			return new Reference().setReference(endpointId).setType("Endpoint");
 		});
 	}
 

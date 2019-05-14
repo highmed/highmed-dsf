@@ -9,6 +9,8 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 
+import org.camunda.bpm.engine.ProcessEngine;
+import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
 import org.highmed.fhir.client.ClientProviderImpl;
 import org.highmed.fhir.client.WebsocketClientProvider;
 import org.highmed.fhir.organization.OrganizationProvider;
@@ -29,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -92,7 +95,8 @@ public class FhirConfig
 	private String lastEventTimeFile;
 
 	@Autowired
-	private CamundaConfig camundaConfig;
+	@Lazy
+	private ProcessEngine processEngine;
 
 	@Bean
 	public ObjectMapper objectMapper()
@@ -134,7 +138,7 @@ public class FhirConfig
 	}
 
 	@Bean
-	public FhirPlugin fhirPlugin()
+	public ProcessEnginePlugin fhirPlugin()
 	{
 		return new FhirPlugin(domainResourceSerializer(), multiInstanceTargetSerializer(),
 				multiInstanceTargetsSerializer());
@@ -167,7 +171,7 @@ public class FhirConfig
 	@Bean
 	public TaskHandler taskHandler()
 	{
-		return new TaskHandler(camundaConfig.runtimeService(), camundaConfig.repositoryService(),
+		return new TaskHandler(processEngine.getRuntimeService(), processEngine.getRepositoryService(),
 				clientProvider().getLocalWebserviceClient());
 	}
 

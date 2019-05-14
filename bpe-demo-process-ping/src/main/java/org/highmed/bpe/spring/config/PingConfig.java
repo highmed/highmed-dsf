@@ -1,5 +1,6 @@
 package org.highmed.bpe.spring.config;
 
+import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
 import org.highmed.bpe.message.SendPing;
 import org.highmed.bpe.message.SendPong;
 import org.highmed.bpe.plugin.PingPlugin;
@@ -27,7 +28,7 @@ public class PingConfig
 	private TaskHelper taskHelper;
 
 	@Bean
-	public PingPlugin pingPlugin()
+	public ProcessEnginePlugin pingPlugin()
 	{
 		return new PingPlugin();
 	}

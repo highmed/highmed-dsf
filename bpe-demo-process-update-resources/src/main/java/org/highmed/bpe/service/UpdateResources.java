@@ -23,6 +23,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
+import ca.uhn.fhir.context.FhirContext;
+
 public class UpdateResources implements JavaDelegate, InitializingBean
 {
 	private static final String BUNDLE_ID_PREFIX = "Bundle/";
@@ -31,11 +33,13 @@ public class UpdateResources implements JavaDelegate, InitializingBean
 
 	private final WebserviceClientProvider clientProvider;
 	private final TaskHelper taskHelper;
+	private final FhirContext context;
 
-	public UpdateResources(WebserviceClientProvider clientProvider, TaskHelper taskHelper)
+	public UpdateResources(WebserviceClientProvider clientProvider, TaskHelper taskHelper, FhirContext context)
 	{
 		this.clientProvider = clientProvider;
 		this.taskHelper = taskHelper;
+		this.context = context;
 	}
 
 	@Override
@@ -70,7 +74,7 @@ public class UpdateResources implements JavaDelegate, InitializingBean
 			logger.error("Error while reading Bundle with id {} from organization {}", bundleReference.getReference(),
 					task.getRequester().getReference());
 			throw new RuntimeException("Error while reading Bundle with id " + bundleReference.getReference()
-					+ " from organization " + task.getRequester().getReference());
+					+ " from organization " + task.getRequester().getReference(), e);
 		}
 
 		if (!EnumSet.of(BundleType.TRANSACTION, BundleType.BATCH).contains(bundle.getType()))
@@ -81,6 +85,7 @@ public class UpdateResources implements JavaDelegate, InitializingBean
 
 		try
 		{
+			logger.debug("Posting bundle to local endpoint: {}", context.newXmlParser().encodeResourceToString(bundle));
 			clientProvider.getLocalWebserviceClient().postBundle(bundle);
 		}
 		catch (Exception e)
@@ -88,7 +93,7 @@ public class UpdateResources implements JavaDelegate, InitializingBean
 			logger.error("Error while executing read Bundle with id {} from organization {} locally",
 					bundleReference.getReference(), task.getRequester().getReference());
 			throw new RuntimeException("Error while executing read Bundle with id " + bundleReference.getReference()
-					+ " from organization " + task.getRequester().getReference() + " locally");
+					+ " from organization " + task.getRequester().getReference() + " locally", e);
 		}
 	}
 
