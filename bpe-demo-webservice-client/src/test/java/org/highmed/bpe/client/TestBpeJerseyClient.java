@@ -35,8 +35,10 @@ public class TestBpeJerseyClient
 		// e.printStackTrace();
 		// }
 
-		client.startProcessWithVersion("requestUpdateResources", "1.0.0", Map.of("target-identifier",
-				Collections.singletonList("http://highmed.org/fhir/CodeSystem/organization|"), "bundle-id",
-				Arrays.asList("Bundle/6c18e27e-2dbd-4855-8e9c-0800a2ad087b")));
+//		client.startProcessWithVersion("requestUpdateResources", "1.0.0", Map.of("target-identifier",
+//				Collections.singletonList("http://highmed.org/fhir/CodeSystem/organization|"), "bundle-id",
+//				Arrays.asList("Bundle/6c18e27e-2dbd-4855-8e9c-0800a2ad087b")));
+		
+		client.startProcessWithVersion("updateWhiteList", "1.0.0");
 	}
 }

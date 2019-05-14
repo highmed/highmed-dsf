@@ -27,8 +27,8 @@ public class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractTaskMessageSend.class);
 
-	private final WebserviceClientProvider clientProvider;
-	private final OrganizationProvider organizationProvider;
+	protected final WebserviceClientProvider clientProvider;
+	protected final OrganizationProvider organizationProvider;
 
 	public AbstractTaskMessageSend(OrganizationProvider organizationProvider, WebserviceClientProvider clientProvider)
 	{

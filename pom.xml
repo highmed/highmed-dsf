@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.highmed.bpe</groupId>
@@ -22,12 +21,11 @@
 		<module>bpe-demo-process-update-resources</module>
 		<module>bpe-demo-webservice-client</module>
 		<module>bpe-demo-cert-generator</module>
+		<module>bpe-demo-process-update-whitelist</module>
 	</modules>
 
 	<properties>
-		<!-- if upgrading, added last (and in between) versions to db-migration 
-			project, db-migration needs dependency to all version since and including 
-			7.10.0 for camunda-sql-scripts -->
+		<!-- if upgrading, added last (and in between) versions to db-migration project, db-migration needs dependency to all version since and including 7.10.0 for camunda-sql-scripts -->
 		<camunda.version>7.10.0</camunda.version>
 		<fhir.demo.version>0.5.0-SNAPSHOT</fhir.demo.version>
 	</properties>
@@ -116,6 +114,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.highmed.bpe</groupId>
+				<artifactId>bpe-demo-process-update-whitelist</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.bpe</groupId>
 				<artifactId>bpe-demo-webservice-client</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -167,7 +170,7 @@
 				<artifactId>jersey-hk2</artifactId>
 				<version>${jersey.version}</version>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>org.glassfish.jersey.core</groupId>
 				<artifactId>jersey-client</artifactId>

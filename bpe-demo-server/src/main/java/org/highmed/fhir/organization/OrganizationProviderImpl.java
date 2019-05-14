@@ -9,6 +9,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.highmed.bpe.Constants;
 import org.highmed.fhir.client.WebserviceClientProvider;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
@@ -23,33 +24,28 @@ public class OrganizationProviderImpl implements OrganizationProvider, Initializ
 	private static final Logger logger = LoggerFactory.getLogger(OrganizationProviderImpl.class);
 
 	private final WebserviceClientProvider clientProvider;
-	private final String organizationIdentifierCodeSystem;
 	private final String organizationIdentifierLocalValue;
 	private final Identifier localIdentifier;
 
-	public OrganizationProviderImpl(WebserviceClientProvider clientProvider, String organizationIdentifierCodeSystem,
-			String organizationIdentifierLocalValue)
+	public OrganizationProviderImpl(WebserviceClientProvider clientProvider, String organizationIdentifierLocalValue)
 	{
 		this.clientProvider = clientProvider;
-		this.organizationIdentifierCodeSystem = organizationIdentifierCodeSystem;
 		this.organizationIdentifierLocalValue = organizationIdentifierLocalValue;
 
-		localIdentifier = new Identifier().setSystem(organizationIdentifierCodeSystem)
-				.setValue(organizationIdentifierLocalValue);
+		localIdentifier = new Identifier().setSystem(getDefaultSystem()).setValue(organizationIdentifierLocalValue);
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
 		Objects.requireNonNull(clientProvider, "clientProvider");
-		Objects.requireNonNull(organizationIdentifierCodeSystem, "organizationIdentifierCodeSystem");
 		Objects.requireNonNull(organizationIdentifierLocalValue, "organizationIdentifierLocalValue");
 	}
 
 	@Override
 	public String getDefaultSystem()
 	{
-		return organizationIdentifierCodeSystem;
+		return Constants.ORGANIZATION_IDENTIFIER_SYSTEM;
 	}
 
 	@Override
@@ -81,7 +77,7 @@ public class OrganizationProviderImpl implements OrganizationProvider, Initializ
 	@Override
 	public Optional<Organization> getOrganization(String identifier)
 	{
-		return getOrganization(organizationIdentifierCodeSystem, identifier);
+		return getOrganization(getDefaultSystem(), identifier);
 	}
 
 	@Override
@@ -99,8 +95,8 @@ public class OrganizationProviderImpl implements OrganizationProvider, Initializ
 	@Override
 	public List<Organization> getRemoteOrganizations()
 	{
-		return searchForOrganizations(organizationIdentifierCodeSystem, "")
-				.filter(noIdentifierMatches(organizationIdentifierCodeSystem, organizationIdentifierLocalValue))
+		return searchForOrganizations(getDefaultSystem(), "")
+				.filter(noIdentifierMatches(getDefaultSystem(), organizationIdentifierLocalValue))
 				.collect(Collectors.toList());
 	}
 
@@ -109,7 +105,7 @@ public class OrganizationProviderImpl implements OrganizationProvider, Initializ
 	{
 		return getRemoteOrganizations().stream()
 				.map(organization -> organization.getIdentifier().stream()
-						.filter(identifierWithSystem(organizationIdentifierCodeSystem)).findFirst().orElse(null))
+						.filter(identifierWithSystem(getDefaultSystem())).findFirst().orElse(null))
 				.filter(identifier -> identifier != null).collect(Collectors.toList());
 	}
 
@@ -120,7 +116,7 @@ public class OrganizationProviderImpl implements OrganizationProvider, Initializ
 		{
 			List<Identifier> identifiers = clientProvider.getLocalWebserviceClient()
 					.read(Organization.class, organizationId.getIdPart()).getIdentifier();
-			return identifiers.stream().filter(identifierWithSystem(organizationIdentifierCodeSystem)).findFirst();
+			return identifiers.stream().filter(identifierWithSystem(getDefaultSystem())).findFirst();
 		}
 		else
 		{
@@ -134,7 +130,7 @@ public class OrganizationProviderImpl implements OrganizationProvider, Initializ
 	public Stream<Organization> searchRemoteOrganizations(String searchParameterIdentifierValue)
 	{
 		return searchForOrganizations(searchParameterIdentifierValue)
-				.filter(noIdentifierMatches(organizationIdentifierCodeSystem, organizationIdentifierLocalValue));
+				.filter(noIdentifierMatches(getDefaultSystem(), organizationIdentifierLocalValue));
 	}
 
 	@Override
@@ -142,7 +138,7 @@ public class OrganizationProviderImpl implements OrganizationProvider, Initializ
 	{
 		return searchRemoteOrganizations(searchParameterIdentifierValue)
 				.map(organization -> organization.getIdentifier().stream()
-						.filter(identifierWithSystem(organizationIdentifierCodeSystem)).findFirst().orElse(null))
+						.filter(identifierWithSystem(getDefaultSystem())).findFirst().orElse(null))
 				.filter(identifier -> identifier != null);
 	}
 

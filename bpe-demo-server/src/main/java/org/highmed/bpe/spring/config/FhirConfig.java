@@ -43,9 +43,6 @@ import de.rwh.utils.crypto.io.CertificateReader;
 @Configuration
 public class FhirConfig
 {
-	@Value("${org.highmed.bpe.fhir.organization.identifier.codeSystem}")
-	private String organizationIdentifierCodeSystem;
-
 	@Value("${org.highmed.bpe.fhir.organization.identifier.localValue}")
 	private String organizationIdentifierLocalValue;
 
@@ -213,8 +210,7 @@ public class FhirConfig
 	@Bean
 	public OrganizationProvider organizationProvider()
 	{
-		return new OrganizationProviderImpl(clientProvider(), organizationIdentifierCodeSystem,
-				organizationIdentifierLocalValue);
+		return new OrganizationProviderImpl(clientProvider(), organizationIdentifierLocalValue);
 	}
 
 	@Bean

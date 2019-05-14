@@ -29,6 +29,10 @@
 			<groupId>org.highmed.bpe</groupId>
 			<artifactId>bpe-demo-process-update-resources</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.highmed.bpe</groupId>
+			<artifactId>bpe-demo-process-update-whitelist</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>org.highmed.fhir</groupId>

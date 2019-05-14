@@ -3,6 +3,7 @@ package org.highmed.bpe.service;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
@@ -15,9 +16,9 @@ import org.highmed.fhir.client.WebserviceClientProvider;
 import org.highmed.fhir.task.TaskHelper;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.r4.model.UrlType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -53,6 +54,46 @@ public class UpdateResources implements JavaDelegate, InitializingBean
 
 		Task task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
 
+		Reference bundleReference = getBundleReference(task);
+		UrlType endpointAddress = getEndpointAddress(task);
+
+		WebserviceClient requesterClient = clientProvider.getRemoteWebserviceClient(endpointAddress.asStringValue());
+
+		Bundle bundle;
+		try
+		{
+			bundle = requesterClient.read(Bundle.class,
+					bundleReference.getReference().substring(BUNDLE_ID_PREFIX.length()));
+		}
+		catch (WebApplicationException e)
+		{
+			logger.error("Error while reading Bundle with id {} from organization {}", bundleReference.getReference(),
+					task.getRequester().getReference());
+			throw new RuntimeException("Error while reading Bundle with id " + bundleReference.getReference()
+					+ " from organization " + task.getRequester().getReference());
+		}
+
+		if (!EnumSet.of(BundleType.TRANSACTION, BundleType.BATCH).contains(bundle.getType()))
+		{
+			logger.error("Bundle type TRANSACTION or BATCH expected, but got {}", bundle.getType());
+			throw new RuntimeException("Bundle type TRANSACTION or BATCH expected, but got " + bundle.getType());
+		}
+
+		try
+		{
+			clientProvider.getLocalWebserviceClient().postBundle(bundle);
+		}
+		catch (Exception e)
+		{
+			logger.error("Error while executing read Bundle with id {} from organization {} locally",
+					bundleReference.getReference(), task.getRequester().getReference());
+			throw new RuntimeException("Error while executing read Bundle with id " + bundleReference.getReference()
+					+ " from organization " + task.getRequester().getReference() + " locally");
+		}
+	}
+
+	private Reference getBundleReference(Task task)
+	{
 		List<Reference> bundleReferences = taskHelper.getInputParameterReferenceValues(task,
 				Constants.CODESYSTEM_HIGHMED_BPMN, Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_BUNDLE_REFERENCE)
 				.collect(Collectors.toList());
@@ -74,40 +115,22 @@ public class UpdateResources implements JavaDelegate, InitializingBean
 					+ Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_BUNDLE_REFERENCE + " has no Bundle reference");
 		}
 
-		WebserviceClient requesterClient = clientProvider
-				.getRemoteWebserviceClient(new IdType(task.getRequester().getReference()));
+		return bundleReferences.get(0);
+	}
 
-		Bundle bundle;
-		try
-		{
-			bundle = requesterClient.read(Bundle.class,
-					bundleReferences.get(0).getReference().substring(BUNDLE_ID_PREFIX.length()));
-		}
-		catch (WebApplicationException e)
-		{
-			logger.error("Error while reading Bundle with id {} from organization {}",
-					bundleReferences.get(0).getReference(), task.getRequester().getReference());
-			throw new RuntimeException("Error while reading Bundle with id " + bundleReferences.get(0).getReference()
-					+ " from organization " + task.getRequester().getReference());
-		}
+	private UrlType getEndpointAddress(Task task)
+	{
+		Optional<UrlType> endpointAddress = taskHelper.getFirstInputParameterUrlValue(task,
+				Constants.CODESYSTEM_HIGHMED_BPMN, Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ENDPOINT_ADDRESS);
 
-		if (!EnumSet.of(BundleType.TRANSACTION, BundleType.BATCH).contains(bundle.getType()))
+		if (endpointAddress.isEmpty())
 		{
-			logger.error("Bundle type TRANSACTION or BATCH expected, but got {}", bundle.getType());
-			throw new RuntimeException("Bundle type TRANSACTION or BATCH expected, but got " + bundle.getType());
-		}
-
-		try
-		{
-			clientProvider.getLocalWebserviceClient().postBundle(bundle);
-		}
-		catch (Exception e)
-		{
-			logger.error("Error while executing read Bundle with id {} from organization {} locally",
-					bundleReferences.get(0).getReference(), task.getRequester().getReference());
+			logger.error("Task is missing input parameter {}",
+					Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ENDPOINT_ADDRESS);
 			throw new RuntimeException(
-					"Error while executing read Bundle with id " + bundleReferences.get(0).getReference()
-							+ " from organization " + task.getRequester().getReference() + " locally");
+					"Task is missing input parameter " + Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_BUNDLE_REFERENCE);
 		}
+
+		return endpointAddress.get();
 	}
 }

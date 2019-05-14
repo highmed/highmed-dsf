@@ -131,11 +131,14 @@ public class ClientProviderImpl implements WebserviceClientProvider, WebsocketCl
 	@Override
 	public WebserviceClient getLocalWebserviceClient()
 	{
-		return getRemoteWebserviceClientByUrl(localBaseUrl);
+		return getRemoteWebserviceClient(localBaseUrl);
 	}
 
-	private WebserviceClient getRemoteWebserviceClientByUrl(String webserviceUrl)
+	@Override
+	public WebserviceClient getRemoteWebserviceClient(String webserviceUrl)
 	{
+		Objects.requireNonNull(webserviceUrl, "webserviceUrl");
+
 		WebserviceClient cachedClient = webserviceClientsByUrl.get(webserviceUrl);
 		if (cachedClient != null)
 			return cachedClient;
@@ -155,7 +158,7 @@ public class ClientProviderImpl implements WebserviceClientProvider, WebsocketCl
 			throw new IllegalArgumentException("Reference to locally stored organization expected");
 
 		Endpoint endpoint = searchForEndpoint("_id", organizationReference.getIdPart());
-		return getRemoteWebserviceClientByUrl(endpoint.getAddress());
+		return getRemoteWebserviceClient(endpoint.getAddress());
 	}
 
 	private Endpoint searchForEndpoint(String searchParameter, String searchParameterValue)
@@ -194,7 +197,7 @@ public class ClientProviderImpl implements WebserviceClientProvider, WebsocketCl
 
 		Endpoint endpoint = searchForEndpoint("identifier",
 				organizationIdentifierSystem + "|" + organizationIdentifierValue);
-		return getRemoteWebserviceClientByUrl(endpoint.getAddress());
+		return getRemoteWebserviceClient(endpoint.getAddress());
 	}
 
 	@Override

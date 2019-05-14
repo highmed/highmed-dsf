@@ -18,6 +18,13 @@ public interface Constants
 	String CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY = "business-key";
 	String CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY = "correlation-key";
 	String CODESYSTEM_HIGHMED_BPMN_VALUE_BUNDLE_REFERENCE = "bundle-reference";
+	String CODESYSTEM_HIGHMED_BPMN_VALUE_ENDPOINT_ADDRESS = "endpoint-address";
 
 	String PROCESS_URI_BASE = "http://highmed.org/bpe/Process/";
+
+	String ORGANIZATION_IDENTIFIER_SYSTEM = "http://highmed.org/fhir/CodeSystem/organization";
+	String ENDPOINT_IDENTIFIER_SYSTEM = "http://highmed.org/fhir/CodeSystem/endpoint";
+	
+	String BUNDLE_IDENTIFIER_SYSTEM = "http://highmed.org/fhir/CodeSystem/bundle";
+	String WHITE_LIST_BUNDLE_IDENTIFIER_VALUE = "HiGHmed_white_list";
 }
