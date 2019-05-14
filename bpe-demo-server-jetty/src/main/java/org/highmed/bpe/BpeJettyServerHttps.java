@@ -34,13 +34,12 @@ public class BpeJettyServerHttps
 	public static void main(String[] args)
 	{
 		Properties properties = PropertiesReader.read(Paths.get("conf/jetty.properties"), StandardCharsets.UTF_8);
-		
+
 		Log4jInitializer.initializeLog4j(properties);
-		
+
 		Properties dbProperties = PropertiesReader.read(Paths.get("conf/db.properties"), StandardCharsets.UTF_8);
-		DbMigrator migrator = new DbMigrator();
-		migrator.migrate(dbProperties);
-		
+		DbMigrator.retryOnConnectException(3, () -> DbMigrator.migrate(dbProperties));
+
 		HttpConfiguration httpConfiguration = httpConfiguration(secureRequestCustomizer());
 		Function<Server, ServerConnector> connector = httpsConnector(httpConfiguration, properties);
 

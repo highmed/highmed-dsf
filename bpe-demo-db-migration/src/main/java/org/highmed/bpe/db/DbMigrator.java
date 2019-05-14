@@ -1,5 +1,6 @@
 package org.highmed.bpe.db;
 
+import java.net.ConnectException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
@@ -17,11 +18,15 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
 
-public class DbMigrator
+public final class DbMigrator
 {
 	private static final Logger logger = LoggerFactory.getLogger(DbMigrator.class);
 
-	public void migrate(Properties dbProperties)
+	private DbMigrator()
+	{
+	}
+
+	public static void migrate(Properties dbProperties)
 	{
 		try
 		{
@@ -69,6 +74,38 @@ public class DbMigrator
 		{
 			logger.error("Error while running liquibase", e);
 			throw new RuntimeException(e);
+		}
+	}
+
+	public static void retryOnConnectException(int times, Runnable run)
+	{
+		if (times <= 0)
+			return;
+
+		try
+		{
+			run.run();
+		}
+		catch (RuntimeException e)
+		{
+			Throwable cause = e;
+			while (!(cause instanceof ConnectException) && cause.getCause() != null)
+				cause = cause.getCause();
+
+			if (cause instanceof ConnectException && times > 1)
+			{
+				logger.warn("ConnectException: trying again in 1s");
+				try
+				{
+					Thread.sleep(1000);
+				}
+				catch (InterruptedException e1)
+				{
+				}
+				retryOnConnectException(--times, run);
+			}
+			else
+				throw e;
 		}
 	}
 }
