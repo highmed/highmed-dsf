@@ -69,6 +69,9 @@ public class ParserTest
 		configureParser(fhirContext.newXmlParser()).encodeResourceToString(read);
 	}
 
+	// TODO HAPI bug -> StackOverflowError
+	// TODO remove workaround in WebserviceClientJersey#read(Class, String)
+	// and WebserviceClientJersey#read(Class, String, String)
 	@Test(expected = StackOverflowError.class)
 	public void testParseBundleWithEntriesWithCircularReferencesFile() throws Exception
 	{
