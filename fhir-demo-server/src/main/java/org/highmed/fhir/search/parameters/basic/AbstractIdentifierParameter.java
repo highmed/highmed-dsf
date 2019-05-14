@@ -7,10 +7,10 @@ import java.util.List;
 import java.util.Objects;
 
 import org.highmed.fhir.function.BiFunctionWithSqlException;
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Resource;
 
-public abstract class AbstractIdentifierParameter<R extends DomainResource> extends AbstractTokenParameter<R>
+public abstract class AbstractIdentifierParameter<R extends Resource> extends AbstractTokenParameter<R>
 {
 	public static final String PARAMETER_NAME = "identifier";
 

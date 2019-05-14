@@ -7,9 +7,9 @@ import javax.ws.rs.core.UriBuilder;
 
 import org.highmed.fhir.search.SearchQueryParameterError;
 import org.highmed.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
-import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Resource;
 
-public abstract class AbstractTokenParameter<R extends DomainResource> extends AbstractSearchParameter<R>
+public abstract class AbstractTokenParameter<R extends Resource> extends AbstractSearchParameter<R>
 {
 	protected TokenValueAndSearchType valueAndType;
 

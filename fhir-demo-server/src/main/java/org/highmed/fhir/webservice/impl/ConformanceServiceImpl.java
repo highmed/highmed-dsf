@@ -16,6 +16,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.highmed.fhir.help.ParameterConverter;
 import org.highmed.fhir.search.SearchQueryParameter.SearchParameterDefinition;
+import org.highmed.fhir.search.parameters.BundleIdentifier;
 import org.highmed.fhir.search.parameters.CodeSystemIdentifier;
 import org.highmed.fhir.search.parameters.CodeSystemUrl;
 import org.highmed.fhir.search.parameters.CodeSystemVersion;
@@ -161,7 +162,10 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 				Provenance.class, ResearchStudy.class, StructureDefinition.class, Subscription.class, Task.class,
 				ValueSet.class);
 
-		var searchParameters = new HashMap<Class<? extends DomainResource>, List<CapabilityStatementRestResourceSearchParamComponent>>();
+		var searchParameters = new HashMap<Class<? extends Resource>, List<CapabilityStatementRestResourceSearchParamComponent>>();
+
+		var bundleIdentifier = createSearchParameter(BundleIdentifier.class);
+		searchParameters.put(Bundle.class, Arrays.asList(bundleIdentifier));
 
 		var codeSystemIdentifier = createSearchParameter(CodeSystemIdentifier.class);
 		var codeSystemUrl = createSearchParameter(CodeSystemUrl.class);

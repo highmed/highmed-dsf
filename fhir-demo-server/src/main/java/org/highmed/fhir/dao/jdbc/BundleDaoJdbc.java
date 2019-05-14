@@ -5,6 +5,7 @@ import java.sql.SQLException;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.fhir.dao.BundleDao;
+import org.highmed.fhir.search.parameters.BundleIdentifier;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 
@@ -14,7 +15,7 @@ public class BundleDaoJdbc extends AbstractDomainResourceDaoJdbc<Bundle> impleme
 {
 	public BundleDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
 	{
-		super(dataSource, fhirContext, Bundle.class, "bundles", "bundle", "bundle_id");
+		super(dataSource, fhirContext, Bundle.class, "bundles", "bundle", "bundle_id", BundleIdentifier::new);
 	}
 
 	@Override
