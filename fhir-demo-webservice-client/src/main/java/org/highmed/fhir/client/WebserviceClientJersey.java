@@ -55,6 +55,8 @@ import org.highmed.fhir.adapter.ValueSetJsonFhirAdapter;
 import org.highmed.fhir.adapter.ValueSetXmlFhirAdapter;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
+import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StructureDefinition;
@@ -326,9 +328,35 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
 				response.getStatusInfo().getReasonPhrase());
 		if (Status.OK.getStatusCode() == response.getStatus())
-			return response.readEntity(resourceType);
+			return fixBundle(resourceType, response.readEntity(resourceType));
 		else
 			throw new WebApplicationException(response);
+	}
+
+	// FIXME bug in HAPI framework
+	// TODO workaround using ReferenceExtractorImpl to remove all reference->resources
+	private <R extends Resource> R fixBundle(Class<R> resourceType, R readEntity)
+	{
+		if (Bundle.class.equals(resourceType))
+		{
+			Bundle b = (Bundle) readEntity;
+			b.getEntry().stream().filter(e -> e.hasResource() && e.getResource() instanceof Organization)
+					.map(e -> (Organization) e.getResource()).forEach(this::fixOrganization);
+			b.getEntry().stream().filter(e -> e.hasResource() && e.getResource() instanceof Endpoint)
+					.map(e -> (Endpoint) e.getResource()).forEach(this::fixEndpoint);
+		}
+
+		return readEntity;
+	}
+
+	private void fixOrganization(Organization organization)
+	{
+		organization.getEndpoint().forEach(ref -> ref.setResource(null));
+	}
+
+	private void fixEndpoint(Endpoint endpoint)
+	{
+		endpoint.getManagingOrganization().setResource(null);
 	}
 
 	@Override
