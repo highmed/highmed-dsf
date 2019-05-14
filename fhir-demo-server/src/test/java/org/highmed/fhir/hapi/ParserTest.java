@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -23,12 +24,13 @@ public class ParserTest
 	}
 
 	@Test
+	@Ignore ("HAPI bug: bundle.getIdElement().getVersionIdPart() returns null")
 	public void testParseBundleWithVersion() throws Exception
 	{
 		String bundleJson = "{\"id\": \"c30abdbe-c605-4c55-be31-2aa7992e754a\", \"meta\": {\"versionId\": \"1\", \"lastUpdated\": \"2019-05-10T12:16:29.532+02:00\"}, \"type\": \"searchset\", \"resourceType\": \"Bundle\"}";
 		Bundle bundle = fhirContext.newJsonParser().parseResource(Bundle.class, bundleJson);
 		assertNotNull(bundle);
 		assertEquals("1", bundle.getMeta().getVersionId());
-		assertEquals("Bundle.id.version", "1", bundle.getIdElement().getVersionIdPart());
+		assertEquals("Bundle.id.version", "1", bundle.getIdElement().getVersionIdPart()); // HAPI bug -> null
 	}
 }
