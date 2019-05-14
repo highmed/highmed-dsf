@@ -17,7 +17,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
@@ -184,15 +183,23 @@ public abstract class AbstractServiceImpl<D extends ResourceDao<R>, R extends Re
 				.tag(new EntityTag(createdResource.getMeta().getVersionId(), true)).build();
 	}
 
-	private R resolveReferences(Connection connection, R created) throws SQLException
+	private R resolveReferences(Connection connection, final R created) throws SQLException
 	{
-		boolean resourceNeedsUpdated = referenceExtractor.getReferences(created)
-				.map(resolveReference(created, connection)).anyMatch(b -> b);
+		boolean resourceNeedsUpdated = false;
+		List<ResourceReference> references = referenceExtractor.getReferences(created).collect(Collectors.toList());
+		// Don't use stream.map(...).anyMatch(b -> b), anyMatch is a shortcut operation stopping after first match
+		for (ResourceReference ref : references)
+		{
+			boolean needsUpdate = resolveReference(created, connection, ref);
+			if (needsUpdate)
+				resourceNeedsUpdated = true;
+		}
+
 		if (resourceNeedsUpdated)
 		{
 			try
 			{
-				created = dao.updateSameRowWithTransaction(connection, created);
+				return dao.updateSameRowWithTransaction(connection, created);
 			}
 			catch (ResourceNotFoundException e)
 			{
@@ -202,23 +209,20 @@ public abstract class AbstractServiceImpl<D extends ResourceDao<R>, R extends Re
 		return created;
 	}
 
-	private Function<ResourceReference, Boolean> resolveReference(Resource resource, Connection connection)
+	private boolean resolveReference(Resource resource, Connection connection, ResourceReference resourceReference)
 			throws WebApplicationException
 	{
-		return resourceReference ->
+		switch (resourceReference.getType(serverBase))
 		{
-			switch (resourceReference.getType(serverBase))
-			{
-				case LITERAL_INTERNAL:
-					return referenceResolver.resolveLiteralInternalReference(resource, resourceReference, connection);
-				case LITERAL_EXTERNAL:
-					return referenceResolver.resolveLiteralExternalReference(resource, resourceReference);
-				case LOGICAL:
-					return referenceResolver.resolveLogicalReference(resource, resourceReference, connection);
-				default:
-					throw new WebApplicationException(responseGenerator.unknownReference(resource, resourceReference));
-			}
-		};
+			case LITERAL_INTERNAL:
+				return referenceResolver.resolveLiteralInternalReference(resource, resourceReference, connection);
+			case LITERAL_EXTERNAL:
+				return referenceResolver.resolveLiteralExternalReference(resource, resourceReference);
+			case LOGICAL:
+				return referenceResolver.resolveLogicalReference(resource, resourceReference, connection);
+			default:
+				throw new WebApplicationException(responseGenerator.unknownReference(resource, resourceReference));
+		}
 	}
 
 	private void checkAlreadyExists(HttpHeaders headers) throws WebApplicationException

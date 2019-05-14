@@ -2,8 +2,9 @@ package org.highmed.fhir.dao.command;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
 
@@ -50,8 +51,16 @@ public class ResolveReferencesCommand<R extends DomainResource, D extends Resour
 	{
 		R latest = latestOrErrorIfDeletedOrNotFound(idTranslationTable, connection);
 
-		boolean resourceNeedsUpdated = referenceExtractor.getReferences(latest)
-				.map(resolveReference(idTranslationTable, connection)).anyMatch(b -> b);
+		boolean resourceNeedsUpdated = false;
+		List<ResourceReference> references = referenceExtractor.getReferences(latest).collect(Collectors.toList());
+		// Don't use stream.map(...).anyMatch(b -> b), anyMatch is a shortcut operation stopping after first match
+		for (ResourceReference ref : references)
+		{
+			boolean needsUpdate = resolveReference(idTranslationTable, connection, ref);
+			if (needsUpdate)
+				resourceNeedsUpdated = true;
+		}
+
 		if (resourceNeedsUpdated)
 		{
 			try
@@ -80,31 +89,27 @@ public class ResolveReferencesCommand<R extends DomainResource, D extends Resour
 		}
 	}
 
-	private Function<ResourceReference, Boolean> resolveReference(Map<String, IdType> idTranslationTable,
-			Connection connection) throws WebApplicationException
+	private boolean resolveReference(Map<String, IdType> idTranslationTable, Connection connection,
+			ResourceReference resourceReference) throws WebApplicationException
 	{
-		return resourceReference ->
+		switch (resourceReference.getType(serverBase))
 		{
-			switch (resourceReference.getType(serverBase))
-			{
-				case TEMPORARY:
-					return resolveTemporaryReference(resourceReference, idTranslationTable);
-				case LITERAL_INTERNAL:
-					return referenceResolver.resolveLiteralInternalReference(resource, index, resourceReference,
-							connection);
-				case LITERAL_EXTERNAL:
-					return referenceResolver.resolveLiteralExternalReference(resource, index, resourceReference);
-				case CONDITIONAL:
-					return referenceResolver.resolveConditionalReference(resource, index, resourceReference,
-							connection);
-				case LOGICAL:
-					return referenceResolver.resolveLogicalReference(resource, index, resourceReference, connection);
-				case UNKNOWN:
-				default:
-					throw new WebApplicationException(
-							responseGenerator.unknownReference(index, resource, resourceReference));
-			}
-		};
+			case TEMPORARY:
+				return resolveTemporaryReference(resourceReference, idTranslationTable);
+			case LITERAL_INTERNAL:
+				return referenceResolver.resolveLiteralInternalReference(resource, index, resourceReference,
+						connection);
+			case LITERAL_EXTERNAL:
+				return referenceResolver.resolveLiteralExternalReference(resource, index, resourceReference);
+			case CONDITIONAL:
+				return referenceResolver.resolveConditionalReference(resource, index, resourceReference, connection);
+			case LOGICAL:
+				return referenceResolver.resolveLogicalReference(resource, index, resourceReference, connection);
+			case UNKNOWN:
+			default:
+				throw new WebApplicationException(
+						responseGenerator.unknownReference(index, resource, resourceReference));
+		}
 	}
 
 	private boolean resolveTemporaryReference(ResourceReference resourceReference,
