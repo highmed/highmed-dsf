@@ -11,6 +11,7 @@ services:
          source: ./proxy/ssl
          target: /usr/local/apache2/ssl
       environment:
+         TZ: Europe/Berlin
          HTTPS_SERVER_NAME_PORT: medic2:8443
          APP_SERVER_IP: 172.28.3.3
       networks:
@@ -25,6 +26,8 @@ services:
       -  type: bind
          source: ./app/conf
          target: /opt/bpe/conf
+      environment:
+         TZ: Europe/Berlin
       networks:
          frontend:
             ipv4_address: 172.28.3.3
@@ -43,6 +46,7 @@ services:
       image: postgres
       restart: always
       environment:
+         TZ: Europe/Berlin
          POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
          POSTGRES_USER_FILE: /run/secrets/postgres_user
          POSTGRES_DB_FILE: /run/secrets/postgres_db

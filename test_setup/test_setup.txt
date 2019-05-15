@@ -99,6 +99,9 @@ Windows Host
 	Docker -> Preferences -> Daemon
 	add insecure registry:
 		registry:5000
+		
+Upload Config Files
+	ansible-playbook MeDIC_1/upload.yml MeDIC_2/upload.yml MeDIC_3/upload.yml TTP/upload.yml
 
 FHIR Docker
 	docker build -t highmed/fhir .
