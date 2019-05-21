@@ -7,15 +7,17 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.highmed.fhir.service.DefaultProfileValidationSupportWithCustomStructureDefinitions;
+import org.highmed.fhir.service.DefaultProfileValidationSupportWithCustomResources;
 import org.highmed.fhir.service.SnapshotGenerator;
 import org.highmed.fhir.service.SnapshotGenerator.SnapshotWithValidationMessages;
+import org.highmed.fhir.service.SnapshotGeneratorImpl;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.ElementDefinition.TypeRefComponent;
@@ -127,9 +129,9 @@ public class StructureDefinitionTreeTest
 		StructureDefinition patientDeBasis = structureDefinitionsByUrl
 				.get("http://fhir.de/StructureDefinition/patient-de-basis/0.2.1");
 
-		SnapshotGenerator generator = new SnapshotGenerator(context,
-				new DefaultProfileValidationSupportWithCustomStructureDefinitions(context,
-						structureDefinitionsByUrl.values().toArray(StructureDefinition[]::new)));
+		SnapshotGenerator generator = new SnapshotGeneratorImpl(context,
+				new DefaultProfileValidationSupportWithCustomResources(structureDefinitionsByUrl.values(),
+						Collections.emptyList(), Collections.emptyList()));
 
 		SnapshotWithValidationMessages snapshot = generator.generateSnapshot(patientDeBasis);
 

@@ -16,8 +16,8 @@ public class EndpointServiceImpl extends AbstractServiceImpl<EndpointDao, Endpoi
 {
 	public EndpointServiceImpl(String resourceTypeName, String serverBase, String path, int defaultPageCount,
 			EndpointDao dao, ResourceValidator validator, EventManager eventManager, ExceptionHandler exceptionHandler,
-			EventGenerator eventGenerator, ResponseGenerator responseGenerator, ParameterConverter parameterConverter, ReferenceExtractor referenceExtractor,
-			ReferenceResolver referenceResolver)
+			EventGenerator eventGenerator, ResponseGenerator responseGenerator, ParameterConverter parameterConverter,
+			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver)
 	{
 		super(Endpoint.class, resourceTypeName, serverBase, path, defaultPageCount, dao, validator, eventManager,
 				exceptionHandler, eventGenerator, responseGenerator, parameterConverter, referenceExtractor,

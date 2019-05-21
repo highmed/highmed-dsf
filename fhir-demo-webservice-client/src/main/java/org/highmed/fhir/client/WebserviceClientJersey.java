@@ -334,6 +334,25 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 			throw new WebApplicationException(response);
 	}
 
+	@Override
+	public <R extends Resource> boolean exists(Class<R> resourceType, String id)
+	{
+		Objects.requireNonNull(resourceType, "resourceType");
+		Objects.requireNonNull(id, "id");
+
+		Response response = getResource().path(resourceType.getAnnotation(ResourceDef.class).name()).path(id).request()
+				.accept(Constants.CT_FHIR_JSON_NEW).head();
+
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		if (Status.OK.getStatusCode() == response.getStatus())
+			return true;
+		else if (Status.NOT_FOUND.getStatusCode() == response.getStatus())
+			return false;
+		else
+			throw new WebApplicationException(response);
+	}
+
 	// FIXME bug in HAPI framework
 	// TODO workaround using ReferenceExtractorImpl to remove all reference->resources
 	private <R extends Resource> R fixBundle(Class<R> resourceType, R readEntity)
@@ -375,6 +394,26 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 		if (Status.OK.getStatusCode() == response.getStatus())
 			// TODO remove workaround if HAPI bug fixed
 			return fixBundle(resourceType, response.readEntity(resourceType));
+		else
+			throw new WebApplicationException(response);
+	}
+
+	@Override
+	public <R extends Resource> boolean exists(Class<R> resourceType, String id, String version)
+	{
+		Objects.requireNonNull(resourceType, "resourceType");
+		Objects.requireNonNull(id, "id");
+		Objects.requireNonNull(version, "version");
+
+		Response response = getResource().path(resourceType.getAnnotation(ResourceDef.class).name()).path(id)
+				.path("_history").path(version).request().accept(Constants.CT_FHIR_JSON_NEW).head();
+
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		if (Status.OK.getStatusCode() == response.getStatus())
+			return true;
+		else if (Status.NOT_FOUND.getStatusCode() == response.getStatus())
+			return false;
 		else
 			throw new WebApplicationException(response);
 	}

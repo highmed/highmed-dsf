@@ -3,9 +3,12 @@ package org.highmed.fhir.hapi;
 import static org.junit.Assert.assertFalse;
 
 import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.List;
 
-import org.highmed.fhir.service.DefaultProfileValidationSupportWithCustomStructureDefinitions;
+import org.highmed.fhir.service.DefaultProfileValidationSupportWithCustomResources;
 import org.highmed.fhir.service.ResourceValidator;
+import org.highmed.fhir.service.ResourceValidatorImpl;
 import org.highmed.fhir.service.StructureDefinitionReader;
 import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.Patient;
@@ -31,8 +34,8 @@ public class ValidationTest
 		FhirInstanceValidator instanceValidator = new FhirInstanceValidator();
 		validator.registerValidatorModule(instanceValidator);
 
-		instanceValidator.setValidationSupport(new DefaultProfileValidationSupportWithCustomStructureDefinitions(
-				context, readStructureDefinitions(context)));
+		instanceValidator.setValidationSupport(new DefaultProfileValidationSupportWithCustomResources(
+				readStructureDefinitions(context), Collections.emptyList(), Collections.emptyList()));
 
 		Patient patient = createNonValidPatient();
 
@@ -44,7 +47,7 @@ public class ValidationTest
 				r.getLocationString(), r.getMessage()));
 	}
 
-	private StructureDefinition[] readStructureDefinitions(FhirContext context)
+	private List<StructureDefinition> readStructureDefinitions(FhirContext context)
 	{
 		StructureDefinitionReader reader = new StructureDefinitionReader(context);
 
@@ -64,9 +67,10 @@ public class ValidationTest
 	public void testNonValidPatient()
 	{
 		FhirContext context = FhirContext.forR4();
-		StructureDefinition[] readStructureDefinitions = readStructureDefinitions(context);
-		ResourceValidator validator = new ResourceValidator(context,
-				new DefaultProfileValidationSupportWithCustomStructureDefinitions(context, readStructureDefinitions));
+		List<StructureDefinition> readStructureDefinitions = readStructureDefinitions(context);
+		ResourceValidator validator = new ResourceValidatorImpl(context,
+				new DefaultProfileValidationSupportWithCustomResources(readStructureDefinitions,
+						Collections.emptyList(), Collections.emptyList()));
 
 		ValidationResult result = validator.validate(createNonValidPatient());
 		assertFalse(result.isSuccessful());

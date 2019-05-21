@@ -26,7 +26,7 @@
 
 	<properties>
 		<tyrus.version>1.15</tyrus.version>
-		<fhir.version>3.7.0</fhir.version>
+		<fhir.version>3.8.0-SNAPSHOT</fhir.version>
 	</properties>
 
 	<repositories>
@@ -50,6 +50,17 @@
 			</snapshots>
 			<releases>
 				<enabled>true</enabled>
+			</releases>
+		</repository>
+		<repository>
+			<id>sonatype-snapshot</id>
+			<name>oss.sonatype.org snapshots</name>
+			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<releases>
+				<enabled>false</enabled>
 			</releases>
 		</repository>
 	</repositories>

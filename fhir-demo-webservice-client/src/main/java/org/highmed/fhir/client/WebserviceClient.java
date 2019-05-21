@@ -25,8 +25,12 @@ public interface WebserviceClient
 	void deleteConditionaly(Class<? extends Resource> resourceClass, Map<String, List<String>> criteria);
 
 	<R extends Resource> R read(Class<R> resourceType, String id);
+	
+	<R extends Resource> boolean exists(Class<R> resourceType, String id);
 
 	<R extends Resource> R read(Class<R> resourceType, String id, String version);
+
+	<R extends Resource> boolean exists(Class<R> resourceType, String id, String version);
 
 	<R extends Resource> Bundle search(Class<R> resourceType, Map<String, List<String>> parameters);
 

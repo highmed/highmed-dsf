@@ -14,6 +14,7 @@ import org.highmed.fhir.function.SupplierWithSqlException;
 import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -91,23 +92,22 @@ public class DefaultProfileValidationSupportWithFetchFromDb extends DefaultProfi
 	}
 
 	@Override
-	public CodeSystem fetchCodeSystem(FhirContext context, String system)
+	public CodeSystem fetchCodeSystem(FhirContext context, String url)
 	{
-		Optional<CodeSystem> codeSystem = throwRuntimeException(() -> codeSystemDao.readByUrl(system));
+		Optional<CodeSystem> codeSystem = throwRuntimeException(() -> codeSystemDao.readByUrl(url));
 		if (codeSystem.isPresent())
 			return codeSystem.get();
 
-		return super.fetchCodeSystem(context, system);
+		return super.fetchCodeSystem(context, url);
 	}
 
-	// TODO add fetchValueSystem as soon as its available in IValidationSupport
-	// @Override
-	// public ValueSet fetchValueSet(FhirContext context, String system)
-	// {
-	// Optional<ValueSet> valueSet = throwRuntimeException(() -> valueSetDao.readByUrl(system));
-	// if (valueSet.isPresent())
-	// return valueSet.get();
-	//
-	// return super.fetchValueSet(context, system);
-	// }
+	@Override
+	public ValueSet fetchValueSet(FhirContext context, String url)
+	{
+		Optional<ValueSet> valueSet = throwRuntimeException(() -> valueSetDao.readByUrl(url));
+		if (valueSet.isPresent())
+			return valueSet.get();
+
+		return super.fetchValueSet(context, url);
+	}
 }

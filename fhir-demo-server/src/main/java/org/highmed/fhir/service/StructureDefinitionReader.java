@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.hl7.fhir.r4.model.StructureDefinition;
 
@@ -20,9 +22,9 @@ public class StructureDefinitionReader
 		this.context = context;
 	}
 
-	public StructureDefinition[] readXml(Path... xmlPaths)
+	public List<StructureDefinition> readXml(Path... xmlPaths)
 	{
-		return Arrays.stream(xmlPaths).map(this::readXml).toArray(StructureDefinition[]::new);
+		return Arrays.stream(xmlPaths).map(this::readXml).collect(Collectors.toList());
 	}
 
 	public StructureDefinition readXml(Path xmlPath)

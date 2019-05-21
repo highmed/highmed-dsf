@@ -5,11 +5,13 @@ import static org.junit.Assert.assertTrue;
 
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-import org.highmed.fhir.service.DefaultProfileValidationSupportWithCustomStructureDefinitions;
+import org.highmed.fhir.service.DefaultProfileValidationSupportWithCustomResources;
 import org.highmed.fhir.service.SnapshotGenerator;
 import org.highmed.fhir.service.SnapshotGenerator.SnapshotWithValidationMessages;
+import org.highmed.fhir.service.SnapshotGeneratorImpl;
 import org.highmed.fhir.service.StructureDefinitionReader;
 import org.hl7.fhir.r4.conformance.ProfileUtilities;
 import org.hl7.fhir.r4.context.IWorkerContext;
@@ -35,8 +37,10 @@ public class SnapshotTest
 		FhirContext context = FhirContext.forR4();
 
 		StructureDefinitionReader reader = new StructureDefinitionReader(context);
-		var validationSupport = new DefaultProfileValidationSupportWithCustomStructureDefinitions(context,
-				reader.readXml(Paths.get("src/test/resources/profiles/extension-workflow-researchstudy.xml")));
+		var validationSupport = new DefaultProfileValidationSupportWithCustomResources(
+				Collections.singletonList(
+						reader.readXml(Paths.get("src/test/resources/profiles/extension-workflow-researchstudy.xml"))),
+				Collections.emptyList(), Collections.emptyList());
 
 		IWorkerContext worker = new HapiWorkerContext(context, validationSupport);
 		List<ValidationMessage> messages = new ArrayList<>();
@@ -65,8 +69,9 @@ public class SnapshotTest
 
 		StructureDefinition structureDefinition = reader
 				.readXml(Paths.get("src/test/resources/profiles/extension-workflow-researchstudy.xml"));
-		SnapshotGenerator generator = new SnapshotGenerator(context,
-				new DefaultProfileValidationSupportWithCustomStructureDefinitions(context, structureDefinition));
+		SnapshotGenerator generator = new SnapshotGeneratorImpl(context,
+				new DefaultProfileValidationSupportWithCustomResources(Collections.singletonList(structureDefinition),
+						Collections.emptyList(), Collections.emptyList()));
 
 		SnapshotWithValidationMessages snapshot = generator
 				.generateSnapshot(reader.readXml(Paths.get("src/test/resources/profiles/task-highmed-0.0.2.xml")));

@@ -105,9 +105,8 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 						daoProvider.getStructureDefinitionSnapshotDao(), snapshotGenerator, snapshotDependencyAnalyzer);
 			else
 				return dao
-						.map(d -> new CreateCommand<R, ResourceDao<R>>(index, bundle, entry, serverBase, resource,
-								d, exceptionHandler, parameterConverter, responseGenerator, eventManager,
-								eventGenerator))
+						.map(d -> new CreateCommand<R, ResourceDao<R>>(index, bundle, entry, serverBase, resource, d,
+								exceptionHandler, parameterConverter, responseGenerator, eventManager, eventGenerator))
 						.orElseThrow(() -> new IllegalStateException(
 								"Resource of type " + resource.getClass().getName() + " not supported"));
 		}
@@ -133,9 +132,8 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 						daoProvider.getStructureDefinitionSnapshotDao(), snapshotGenerator, snapshotDependencyAnalyzer);
 			else
 				return dao
-						.map(d -> new UpdateCommand<R, ResourceDao<R>>(index, bundle, entry, serverBase, resource,
-								d, exceptionHandler, parameterConverter, responseGenerator, eventManager,
-								eventGenerator))
+						.map(d -> new UpdateCommand<R, ResourceDao<R>>(index, bundle, entry, serverBase, resource, d,
+								exceptionHandler, parameterConverter, responseGenerator, eventManager, eventGenerator))
 						.orElseThrow(() -> new IllegalStateException(
 								"Resource of type " + resource.getClass().getName() + " not supported"));
 		}
@@ -238,9 +236,9 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 		{
 			return dao
 					.map(d -> Stream.of(cmd,
-							new ResolveReferencesCommand<R, ResourceDao<R>>(index, bundle, entry, serverBase,
-									resource, d, exceptionHandler, parameterConverter, referenceExtractor,
-									responseGenerator, referenceResolver)))
+							new ResolveReferencesCommand<R, ResourceDao<R>>(index, bundle, entry, serverBase, resource,
+									d, exceptionHandler, parameterConverter, referenceExtractor, responseGenerator,
+									referenceResolver)))
 					.orElseThrow(() -> new IllegalStateException(
 							"Resource of type " + resource.getClass().getName() + " not supported"));
 		}

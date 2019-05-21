@@ -5,12 +5,15 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.UUID;
 
-import org.highmed.fhir.service.DefaultProfileValidationSupportWithCustomStructureDefinitions;
+import org.highmed.fhir.service.DefaultProfileValidationSupportWithCustomResources;
 import org.highmed.fhir.service.ResourceValidator;
+import org.highmed.fhir.service.ResourceValidatorImpl;
 import org.highmed.fhir.service.SnapshotGenerator;
 import org.highmed.fhir.service.SnapshotGenerator.SnapshotWithValidationMessages;
+import org.highmed.fhir.service.SnapshotGeneratorImpl;
 import org.highmed.fhir.service.StructureDefinitionReader;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
@@ -37,8 +40,9 @@ public class HiGHmedTaskValidationTest
 		StructureDefinition highmedTaskDiff = new StructureDefinitionReader(context)
 				.readXml(Paths.get("src/test/resources/profiles/task-highmed-0.0.2.xml"));
 
-		SnapshotGenerator generator = new SnapshotGenerator(context,
-				new DefaultProfileValidationSupportWithCustomStructureDefinitions(context, highmedTaskDiff));
+		SnapshotGenerator generator = new SnapshotGeneratorImpl(context,
+				new DefaultProfileValidationSupportWithCustomResources(Collections.singletonList(highmedTaskDiff),
+						Collections.emptyList(), Collections.emptyList()));
 		SnapshotWithValidationMessages highmedTask = generator.generateSnapshot(highmedTaskDiff);
 
 		assertNotNull(highmedTask);
@@ -64,8 +68,9 @@ public class HiGHmedTaskValidationTest
 
 		logger.debug("Task:\n" + context.newXmlParser().setPrettyPrint(true).encodeResourceToString(task));
 
-		ResourceValidator validator = new ResourceValidator(context,
-				new DefaultProfileValidationSupportWithCustomStructureDefinitions(context, snapshot));
+		ResourceValidator validator = new ResourceValidatorImpl(context,
+				new DefaultProfileValidationSupportWithCustomResources(Collections.singletonList(snapshot),
+						Collections.emptyList(), Collections.emptyList()));
 		ValidationResult validationResult = validator.validate(task);
 
 		validationResult.getMessages().forEach(m -> logger.info("Validation Issue: {} - {} - {}", m.getSeverity(),
@@ -93,8 +98,9 @@ public class HiGHmedTaskValidationTest
 
 		logger.debug("Task:\n" + context.newXmlParser().setPrettyPrint(true).encodeResourceToString(task));
 
-		ResourceValidator validator = new ResourceValidator(context,
-				new DefaultProfileValidationSupportWithCustomStructureDefinitions(context, highmedTaskDiff));
+		ResourceValidator validator = new ResourceValidatorImpl(context,
+				new DefaultProfileValidationSupportWithCustomResources(Collections.singletonList(highmedTaskDiff),
+						Collections.emptyList(), Collections.emptyList()));
 		ValidationResult validationResult = validator.validate(task);
 
 		validationResult.getMessages().forEach(m -> logger.info("Validation Issue: {} - {} - {}", m.getSeverity(),
