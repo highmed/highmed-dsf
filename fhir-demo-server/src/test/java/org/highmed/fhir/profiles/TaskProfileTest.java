@@ -19,6 +19,7 @@ import org.highmed.fhir.service.ValueSetExpanderImpl;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Task;
@@ -121,10 +122,8 @@ public class TaskProfileTest
 		correlationKey.getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
 				.setCode("correlation-key");
 		correlationKey.setValue(new StringType(UUID.randomUUID().toString()));
-		var testInput = task.addInput();
-		testInput.getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
-				.setCode("test");
-		testInput.setValue(new StringType("test"));
+		task.addExtension().setUrl("http://hl7.org/fhir/StructureDefinition/workflow-researchStudy")
+				.setValue(new Reference("https://medic1/fhir/ResearchStudy/" + UUID.randomUUID().toString()));
 
 		logger.debug("Task: {}", context.newXmlParser().setPrettyPrint(true).encodeResourceToString(task));
 
