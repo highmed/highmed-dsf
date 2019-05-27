@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StructureDefinition;
 
@@ -25,12 +26,14 @@ public interface WebserviceClient
 	void deleteConditionaly(Class<? extends Resource> resourceClass, Map<String, List<String>> criteria);
 
 	<R extends Resource> R read(Class<R> resourceType, String id);
-	
+
 	<R extends Resource> boolean exists(Class<R> resourceType, String id);
 
 	<R extends Resource> R read(Class<R> resourceType, String id, String version);
 
 	<R extends Resource> boolean exists(Class<R> resourceType, String id, String version);
+
+	boolean exists(IdType resourceTypeIdVersion);
 
 	<R extends Resource> Bundle search(Class<R> resourceType, Map<String, List<String>> parameters);
 
@@ -41,4 +44,5 @@ public interface WebserviceClient
 	StructureDefinition generateSnapshot(StructureDefinition differential);
 
 	Bundle postBundle(Bundle bundle);
+
 }

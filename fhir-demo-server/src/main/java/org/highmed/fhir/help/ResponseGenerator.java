@@ -347,6 +347,51 @@ public class ResponseGenerator
 		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
+	public Response referenceTargetNotFoundRemote(Integer bundleIndex, Resource resource,
+			ResourceReference resourceReference, String serverBase)
+	{
+		if (bundleIndex == null)
+			logger.warn(
+					"Reference target {} of reference at {} in resource of type {} with id {} not found on server {}",
+					resourceReference.getReference().getReference(), resourceReference.getReferenceLocation(),
+					resource.getResourceType().name(), resource.getId(), serverBase);
+		else
+			logger.warn(
+					"Reference target {} of reference at {} in resource of type {} with id {} at bundle index {} not found on server {}",
+					resourceReference.getReference().getReference(), resourceReference.getReferenceLocation(),
+					resource.getResourceType().name(), resource.getId(), bundleIndex, serverBase);
+
+		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+				"Reference target " + resourceReference.getReference().getReference() + " of reference at "
+						+ resourceReference.getReferenceLocation() + " in resource of type "
+						+ resource.getResourceType().name() + " with id " + resource.getId()
+						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex) + " not found on server "
+						+ serverBase);
+		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
+	}
+
+	public Response noEndpointFoundForLiteralExternalReference(Integer bundleIndex, Resource resource,
+			ResourceReference resourceReference)
+	{
+		if (bundleIndex == null)
+			logger.warn(
+					"No Endpoint found for reference target {} of reference at {} in resource of type {} with id {}",
+					resourceReference.getReference().getReference(), resourceReference.getReferenceLocation(),
+					resource.getResourceType().name(), resource.getId());
+		else
+			logger.warn(
+					"No Endpoint found for reference target {} of reference at {} in resource of type {} with id {} at bundle index {} not found",
+					resourceReference.getReference().getReference(), resourceReference.getReferenceLocation(),
+					resource.getResourceType().name(), resource.getId(), bundleIndex);
+
+		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+				"No Endpoint found for reference target " + resourceReference.getReference().getReference()
+						+ " of reference at " + resourceReference.getReferenceLocation() + " in resource of type "
+						+ resource.getResourceType().name() + " with id " + resource.getId()
+						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex) + " not found");
+		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
+	}
+
 	public Response badReference(boolean logicalNoConditional, Integer bundleIndex, Resource resource,
 			ResourceReference resourceReference, String queryParameters,
 			List<SearchQueryParameterError> unsupportedQueryParameters)

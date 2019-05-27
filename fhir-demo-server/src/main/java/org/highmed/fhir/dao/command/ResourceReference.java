@@ -126,9 +126,14 @@ public class ResourceReference
 		return referenceTypes.isEmpty() || referenceTypes.contains(type);
 	}
 
-	public ReferenceType getType(String serverBase)
+	/**
+	 * @param localServerBase
+	 *            not <code>null</code>
+	 * @return
+	 */
+	public ReferenceType getType(String localServerBase)
 	{
-		Objects.requireNonNull(serverBase, "serverBase");
+		Objects.requireNonNull(localServerBase, "localServerBase");
 
 		if (reference.hasReference())
 		{
@@ -140,7 +145,7 @@ public class ResourceReference
 			if (idRefMatcher.matches())
 			{
 				IdType id = new IdType(reference.getReference());
-				if (!id.isAbsolute() || serverBase.equals(id.getBaseUrl()))
+				if (!id.isAbsolute() || localServerBase.equals(id.getBaseUrl()))
 					return ReferenceType.LITERAL_INTERNAL;
 				else
 					return ReferenceType.LITERAL_EXTERNAL;
@@ -162,5 +167,20 @@ public class ResourceReference
 	public String getReferenceLocation()
 	{
 		return referenceLocation;
+	}
+
+	/**
+	 * @return empty String if the type of this {@link ResourceReference} is not {@link ReferenceType#LITERAL_EXTERNAL}
+	 * @param localServerBase
+	 *            not <code>null</code>
+	 */
+	public String getServerBase(String localServerBase)
+	{
+		Objects.requireNonNull(localServerBase, "localServerBase");
+
+		if (ReferenceType.LITERAL_EXTERNAL.equals(getType(localServerBase)))
+			return new IdType(reference.getReference()).getBaseUrl();
+		else
+			return "";
 	}
 }

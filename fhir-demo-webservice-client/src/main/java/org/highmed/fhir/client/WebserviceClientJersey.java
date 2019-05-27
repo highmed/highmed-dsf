@@ -56,6 +56,7 @@ import org.highmed.fhir.adapter.ValueSetXmlFhirAdapter;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
@@ -342,6 +343,32 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 
 		Response response = getResource().path(resourceType.getAnnotation(ResourceDef.class).name()).path(id).request()
 				.accept(Constants.CT_FHIR_JSON_NEW).head();
+
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		if (Status.OK.getStatusCode() == response.getStatus())
+			return true;
+		else if (Status.NOT_FOUND.getStatusCode() == response.getStatus())
+			return false;
+		else
+			throw new WebApplicationException(response);
+	}
+
+	@Override
+	public boolean exists(IdType resourceTypeIdVersion)
+	{
+		Objects.requireNonNull(resourceTypeIdVersion, "resourceTypeIdVersion");
+		Objects.requireNonNull(resourceTypeIdVersion.getResourceType(), "resourceTypeIdVersion.resourceType");
+		Objects.requireNonNull(resourceTypeIdVersion.getIdPart(), "resourceTypeIdVersion.idPart");
+		// version may be null
+
+		WebTarget path = getResource().path(resourceTypeIdVersion.getResourceType())
+				.path(resourceTypeIdVersion.getIdPart());
+
+		if (resourceTypeIdVersion.hasVersionIdPart())
+			path = path.path("_history").path(resourceTypeIdVersion.getVersionIdPart());
+
+		Response response = path.request().accept(Constants.CT_FHIR_JSON_NEW).head();
 
 		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
 				response.getStatusInfo().getReasonPhrase());

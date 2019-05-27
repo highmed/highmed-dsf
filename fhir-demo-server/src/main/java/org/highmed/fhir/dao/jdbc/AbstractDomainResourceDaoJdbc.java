@@ -315,7 +315,7 @@ abstract class AbstractDomainResourceDaoJdbc<R extends Resource> implements Reso
 		return includes;
 	}
 
-	// caution: only works because we set all versions as deleted in method markDeleted
+	/* caution: only works because we set all versions as deleted or not deleted in method markDeleted */
 	public final boolean hasNonDeletedResource(UUID uuid) throws SQLException
 	{
 		if (uuid == null)
@@ -425,47 +425,13 @@ abstract class AbstractDomainResourceDaoJdbc<R extends Resource> implements Reso
 	}
 
 	@Override
-	public Optional<IdType> exists(String idString, String versionString) throws SQLException
+	public boolean existsNotDeleted(String idString, String versionString) throws SQLException
 	{
-		UUID uuid = toUuid(idString);
-
-		if (uuid == null)
-			return Optional.empty();
-
-		if (versionString == null || versionString.isBlank())
-		{
-			if (hasNonDeletedResource(uuid))
-				return Optional.of(new IdType(resourceTypeName, idString));
-			else
-				return Optional.empty();
-		}
-		else
-		{
-			Long version = toLong(versionString);
-			if (version == null || version < FIRST_VERSION)
-				return Optional.empty();
-
-			try (Connection connection = dataSource.getConnection();
-					PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) FROM " + resourceTable
-							+ " WHERE " + resourceIdColumn + " = ? AND version = ?"))
-			{
-				statement.setObject(1, uuidToPgObject(uuid));
-				statement.setLong(2, version);
-
-				logger.trace("Executing query '{}'", statement);
-				try (ResultSet result = statement.executeQuery())
-				{
-					if (result.next() && result.getInt(1) > 0)
-						return Optional.of(new IdType(resourceTypeName, idString, versionString));
-					else
-						return Optional.empty();
-				}
-			}
-		}
+		return existsNotDeletedWithTransaction(dataSource.getConnection(), idString, versionString);
 	}
 
 	@Override
-	public Optional<IdType> existsWithTransaction(Connection connection, String idString, String versionString)
+	public boolean existsNotDeletedWithTransaction(Connection connection, String idString, String versionString)
 			throws SQLException
 	{
 		Objects.requireNonNull(connection, "connection");
@@ -473,23 +439,18 @@ abstract class AbstractDomainResourceDaoJdbc<R extends Resource> implements Reso
 		UUID uuid = toUuid(idString);
 
 		if (uuid == null)
-			return Optional.empty();
+			return false;
 
 		if (versionString == null || versionString.isBlank())
-		{
-			if (hasNonDeletedResource(uuid))
-				return Optional.of(new IdType(resourceTypeName, idString));
-			else
-				return Optional.empty();
-		}
+			return hasNonDeletedResource(uuid);
 		else
 		{
 			Long version = toLong(versionString);
 			if (version == null || version < FIRST_VERSION)
-				return Optional.empty();
+				return false;
 
-			try (PreparedStatement statement = connection.prepareStatement(
-					"SELECT COUNT(*) FROM " + resourceTable + " WHERE " + resourceIdColumn + " = ? AND version = ?"))
+			try (PreparedStatement statement = connection.prepareStatement("SELECT count(*) FROM " + resourceTable
+					+ " WHERE " + resourceIdColumn + " = ? AND version = ? AND NOT deleted"))
 			{
 				statement.setObject(1, uuidToPgObject(uuid));
 				statement.setLong(2, version);
@@ -497,10 +458,7 @@ abstract class AbstractDomainResourceDaoJdbc<R extends Resource> implements Reso
 				logger.trace("Executing query '{}'", statement);
 				try (ResultSet result = statement.executeQuery())
 				{
-					if (result.next() && result.getInt(1) > 0)
-						return Optional.of(new IdType(resourceTypeName, idString, versionString));
-					else
-						return Optional.empty();
+					return result.next() && result.getInt(1) > 0;
 				}
 			}
 		}
@@ -769,7 +727,10 @@ abstract class AbstractDomainResourceDaoJdbc<R extends Resource> implements Reso
 		return markDeleted(connection, uuid, true);
 	}
 
-	// caution: implementation of method hasNonDeletedResource only works because we set all versions as deleted here
+	/*
+	 * caution: implementation of method hasNonDeletedResource only works because we set all versions as deleted or not
+	 * deleted here
+	 */
 	protected final boolean markDeleted(Connection connection, UUID uuid, boolean deleted)
 			throws SQLException, ResourceNotFoundException
 	{

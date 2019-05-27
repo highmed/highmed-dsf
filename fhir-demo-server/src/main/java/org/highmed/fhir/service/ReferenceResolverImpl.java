@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
 
+import org.highmed.fhir.client.ClientProvider;
+import org.highmed.fhir.client.WebserviceClient;
 import org.highmed.fhir.dao.ResourceDao;
 import org.highmed.fhir.dao.command.ResourceReference;
 import org.highmed.fhir.dao.command.ResourceReference.ReferenceType;
@@ -39,14 +41,16 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 	private final DaoProvider daoProvider;
 	private final ResponseGenerator responseGenerator;
 	private final ExceptionHandler exceptionHandler;
+	private final ClientProvider clientProvider;
 
 	public ReferenceResolverImpl(String serverBase, DaoProvider daoProvider, ResponseGenerator responseGenerator,
-			ExceptionHandler exceptionHandler)
+			ExceptionHandler exceptionHandler, ClientProvider clientProvider)
 	{
 		this.serverBase = serverBase;
 		this.daoProvider = daoProvider;
 		this.responseGenerator = responseGenerator;
 		this.exceptionHandler = exceptionHandler;
+		this.clientProvider = clientProvider;
 	}
 
 	@Override
@@ -56,6 +60,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 		Objects.requireNonNull(daoProvider, "daoProvider");
 		Objects.requireNonNull(responseGenerator, "responseGenerator");
 		Objects.requireNonNull(exceptionHandler, "exceptionHandler");
+		Objects.requireNonNull(clientProvider, "clientProvider");
 	}
 
 	@Override
@@ -119,9 +124,9 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 				throw new WebApplicationException(responseGenerator
 						.referenceTargetTypeNotSupportedByResource(bundleIndex, resource, resourceReference));
 
-			Optional<IdType> localId = exceptionHandler.handleSqlException(
-					() -> d.existsWithTransaction(connection, id.getIdPart(), id.getVersionIdPart()));
-			if (localId.isEmpty())
+			boolean exists = exceptionHandler.handleSqlException(
+					() -> d.existsNotDeletedWithTransaction(connection, id.getIdPart(), id.getVersionIdPart()));
+			if (!exists)
 				throw new WebApplicationException(
 						responseGenerator.referenceTargetNotFoundLocally(bundleIndex, resource, resourceReference));
 		}
@@ -145,14 +150,21 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 		if (!ReferenceType.LITERAL_EXTERNAL.equals(resourceReference.getType(serverBase)))
 			throw new IllegalArgumentException("Not a literal external reference");
 
-		// TODO implement me
+		String remoteServerBase = resourceReference.getServerBase(serverBase);
+		Optional<WebserviceClient> client = clientProvider.getClient(remoteServerBase);
 
-		logger.warn(
-				"Not resolving literal external reference {} of reference at {} in resource of type {} with id {} at bundle index {}, testing of literal external references not implemented yet",
-				resourceReference.getReference().getReference(), resourceReference.getReferenceLocation(),
-				resource.getResourceType().name(), resource.getId(), bundleIndex);
+		if (client.isEmpty())
+			throw new WebApplicationException(responseGenerator.noEndpointFoundForLiteralExternalReference(bundleIndex,
+					resource, resourceReference));
+		else
+		{
+			IdType referenceId = new IdType(resourceReference.getReference().getReference());
+			if (!client.get().exists(referenceId))
+				throw new WebApplicationException(responseGenerator.referenceTargetNotFoundRemote(bundleIndex, resource,
+						resourceReference, remoteServerBase));
+		}
 
-		return false; // throws exception if reference could not be resolved
+		return true; // throws exception if reference could not be resolved
 	}
 
 	@Override

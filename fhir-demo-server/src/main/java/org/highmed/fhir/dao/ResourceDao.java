@@ -12,7 +12,6 @@ import org.highmed.fhir.search.DbSearchQuery;
 import org.highmed.fhir.search.PartialResult;
 import org.highmed.fhir.search.SearchQuery;
 import org.hl7.fhir.r4.model.DomainResource;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
 
 public interface ResourceDao<R extends Resource>
@@ -120,7 +119,7 @@ public interface ResourceDao<R extends Resource>
 	 *         resource with the given id is marked as deleted returns <code>false</code>
 	 * @throws SQLException
 	 */
-	Optional<IdType> exists(String id, String version) throws SQLException;
+	boolean existsNotDeleted(String id, String version) throws SQLException;
 
 	/**
 	 * @param connection
@@ -133,7 +132,7 @@ public interface ResourceDao<R extends Resource>
 	 *         resource with the given id is marked as deleted returns <code>false</code>
 	 * @throws SQLException
 	 */
-	Optional<IdType> existsWithTransaction(Connection connection, String id, String version) throws SQLException;
+	boolean existsNotDeletedWithTransaction(Connection connection, String id, String version) throws SQLException;
 
 	/**
 	 * Sets the version of the stored resource to latest version from DB plus 1.

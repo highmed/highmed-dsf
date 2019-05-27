@@ -13,15 +13,16 @@ import org.highmed.fhir.hapi.SnapshotTest;
 import org.highmed.fhir.hapi.StructureDefinitionTreeTest;
 import org.highmed.fhir.hapi.SubscriptionTest;
 import org.highmed.fhir.hapi.ValidationTest;
+import org.highmed.fhir.profiles.ProfileTests;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({ ResourceReferenceTest.class, CodeSystemTest.class, EndpointTest.class, HiGHmedTaskValidationTest.class, IdTypeTest.class,
-		OrganizationTest.class, ParametersTest.class, SerializationTest.class, ReferenceTypTest.class,
+@SuiteClasses({ ResourceReferenceTest.class, CodeSystemTest.class, EndpointTest.class, HiGHmedTaskValidationTest.class,
+		IdTypeTest.class, OrganizationTest.class, ParametersTest.class, SerializationTest.class, ReferenceTypTest.class,
 		SerializationTest.class, SnapshotTest.class, StructureDefinitionTreeTest.class, SubscriptionTest.class,
-		ValidationTest.class })
+		ValidationTest.class, ProfileTests.class })
 public class TestSuiteUnitTests
 {
 }

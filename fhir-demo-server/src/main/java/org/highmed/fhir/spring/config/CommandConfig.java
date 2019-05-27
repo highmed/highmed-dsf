@@ -31,6 +31,9 @@ public class CommandConfig
 	@Autowired
 	private EventConfig eventConfig;
 
+	@Autowired
+	private ClientConfig clientConfig;
+
 	@Bean
 	public ReferenceExtractorImpl referenceExtractor()
 	{
@@ -41,7 +44,7 @@ public class CommandConfig
 	public ReferenceResolver referenceResolver()
 	{
 		return new ReferenceResolverImpl(serverBase, daoConfig.daoProvider(), helperConfig.responseGenerator(),
-				helperConfig.exceptionHandler());
+				helperConfig.exceptionHandler(), clientConfig.clientProvider());
 	}
 
 	@Bean
