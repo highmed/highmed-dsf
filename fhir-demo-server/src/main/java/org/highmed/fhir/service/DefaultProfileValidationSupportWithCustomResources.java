@@ -40,7 +40,7 @@ public class DefaultProfileValidationSupportWithCustomResources extends DefaultP
 	@Override
 	public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext context)
 	{
-		logger.debug("Fetching all structure-definitions");
+		logger.trace("Fetching all StructureDefinitions");
 
 		var sD = new ArrayList<>(structureDefinitionsByUrl.values());
 		sD.addAll(super.fetchAllStructureDefinitions(context));
@@ -50,7 +50,7 @@ public class DefaultProfileValidationSupportWithCustomResources extends DefaultP
 	@Override
 	public StructureDefinition fetchStructureDefinition(FhirContext context, String url)
 	{
-		logger.debug("Fetching structure-definition by url: {}", url);
+		logger.trace("Fetching StructureDefinition by url: {}", url);
 
 		var sD = structureDefinitionsByUrl.getOrDefault(url, null);
 
@@ -68,7 +68,7 @@ public class DefaultProfileValidationSupportWithCustomResources extends DefaultP
 	@Override
 	public CodeSystem fetchCodeSystem(FhirContext context, String url)
 	{
-		logger.debug("Fetching code-system by url: {}", url);
+		logger.trace("Fetching CodeSystem by url: {}", url);
 
 		var cS = codeSystemsByUrl.getOrDefault(url, null);
 
@@ -86,7 +86,7 @@ public class DefaultProfileValidationSupportWithCustomResources extends DefaultP
 	@Override
 	public ValueSet fetchValueSet(FhirContext context, String url)
 	{
-		logger.debug("Fetching value-set by url: {}", url);
+		logger.trace("Fetching ValueSet by url: {}", url);
 
 		var vS = valueSetsByUrl.getOrDefault(url, null);
 
