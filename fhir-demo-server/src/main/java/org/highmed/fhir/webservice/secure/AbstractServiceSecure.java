@@ -61,6 +61,8 @@ public class AbstractServiceSecure<R extends Resource, S extends BasicService<R>
 	}
 
 	/**
+	 * Override this method for non default behavior. Default: Not allowed if user role not {@link UserRole#LOCAL}.
+	 * 
 	 * @param resource
 	 * @return {@link Optional#empty()} if create(resource) allowed
 	 */
@@ -82,6 +84,8 @@ public class AbstractServiceSecure<R extends Resource, S extends BasicService<R>
 	}
 
 	/**
+	 * Override this method for non default behavior. Default: Always allowed.
+	 * 
 	 * @param id
 	 * @return {@link Optional#empty()} if read(id) allowed
 	 */
@@ -101,6 +105,8 @@ public class AbstractServiceSecure<R extends Resource, S extends BasicService<R>
 	}
 
 	/**
+	 * Override this method for non default behavior. Default: Always allowed.
+	 * 
 	 * @param id
 	 * @param version
 	 * @return {@link Optional#empty()} if read(id, version) allowed
@@ -121,6 +127,8 @@ public class AbstractServiceSecure<R extends Resource, S extends BasicService<R>
 	}
 
 	/**
+	 * Override this method for non default behavior. Default: Not allowed if user role not {@link UserRole#LOCAL}.
+	 * 
 	 * @param id
 	 * @param resource
 	 * @return {@link Optional#empty()} if update(id, resource) allowed
@@ -144,6 +152,8 @@ public class AbstractServiceSecure<R extends Resource, S extends BasicService<R>
 	}
 
 	/**
+	 * Override this method for non default behavior. Default: Not allowed if user role not {@link UserRole#LOCAL}.
+	 * 
 	 * @param resource
 	 * @param uri
 	 * @return {@link Optional#empty()} if update(resource, uri) allowed
@@ -166,6 +176,8 @@ public class AbstractServiceSecure<R extends Resource, S extends BasicService<R>
 	}
 
 	/**
+	 * Override this method for non default behavior. Default: Not allowed if user role not {@link UserRole#LOCAL}.
+	 * 
 	 * @param id
 	 * @return {@link Optional#empty()} if delete(id) allowed
 	 */
@@ -187,6 +199,8 @@ public class AbstractServiceSecure<R extends Resource, S extends BasicService<R>
 	}
 
 	/**
+	 * Override this method for non default behavior. Default: Not allowed if user role not {@link UserRole#LOCAL}.
+	 * 
 	 * @param uri
 	 * @return {@link Optional#empty()} if delete(uri) allowed
 	 */

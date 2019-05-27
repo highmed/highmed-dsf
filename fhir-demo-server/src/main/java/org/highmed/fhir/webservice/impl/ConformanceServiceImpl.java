@@ -23,6 +23,7 @@ import org.highmed.fhir.search.parameters.CodeSystemVersion;
 import org.highmed.fhir.search.parameters.EndpointIdentifier;
 import org.highmed.fhir.search.parameters.EndpointName;
 import org.highmed.fhir.search.parameters.EndpointOrganization;
+import org.highmed.fhir.search.parameters.EndpointStatus;
 import org.highmed.fhir.search.parameters.HealthcareServiceActive;
 import org.highmed.fhir.search.parameters.HealthcareServiceIdentifier;
 import org.highmed.fhir.search.parameters.LocationIdentifier;
@@ -136,13 +137,13 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 		CapabilityStatement statement = new CapabilityStatement();
 		statement.setStatus(PublicationStatus.ACTIVE);
 		statement.setDate(new Date());
-		statement.setPublisher("Demo Publisher");
+		statement.setPublisher("Publisher - TODO"); // TODO
 		statement.setKind(CapabilityStatementKind.INSTANCE);
 		statement.setSoftware(new CapabilityStatementSoftwareComponent());
-		statement.getSoftware().setName("Software Name");
-		statement.getSoftware().setVersion("Software Version");
+		statement.getSoftware().setName("Software Name -  TODO"); // TODO
+		statement.getSoftware().setVersion("Software Version - TODO"); // TODO
 		statement.setImplementation(new CapabilityStatementImplementationComponent());
-		statement.getImplementation().setDescription("Implementation Description");
+		statement.getImplementation().setDescription("Implementation Description - TODO"); // TODO
 		statement.getImplementation().setUrl(serverBase);
 		statement.setFhirVersion(FHIRVersion._4_0_0);
 		statement.setFormat(
@@ -175,7 +176,9 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 		var endpointIdentifier = createSearchParameter(EndpointIdentifier.class);
 		var endpointName = createSearchParameter(EndpointName.class);
 		var endpointOrganization = createSearchParameter(EndpointOrganization.class);
-		searchParameters.put(Endpoint.class, Arrays.asList(endpointIdentifier, endpointName, endpointOrganization));
+		var endpointStatus = createSearchParameter(EndpointStatus.class);
+		searchParameters.put(Endpoint.class,
+				Arrays.asList(endpointIdentifier, endpointName, endpointOrganization, endpointStatus));
 
 		var healthcareServiceActive = createSearchParameter(HealthcareServiceActive.class);
 		var healthcareServiceIdentifier = createSearchParameter(HealthcareServiceIdentifier.class);
