@@ -11,7 +11,7 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.highmed.bpe</groupId>
+			<groupId>org.highmed.dsf</groupId>
 			<artifactId>bpe-process-base</artifactId>
 		</dependency>
 	</dependencies>
