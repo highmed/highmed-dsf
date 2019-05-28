@@ -35,15 +35,15 @@ public class OrganizationDaoJdbc extends AbstractDomainResourceDaoJdbc<Organizat
 	}
 
 	@Override
-	public Optional<Organization> readByThumbprint(String thumbprintHex) throws SQLException
+	public Optional<Organization> readActiveNotDeletedByThumbprint(String thumbprintHex) throws SQLException
 	{
-		if (thumbprintHex == null)
+		if (thumbprintHex == null || thumbprintHex.isBlank())
 			return Optional.empty();
 
 		try (Connection connection = getDataSource().getConnection();
 				PreparedStatement statement = connection.prepareStatement("SELECT " + getResourceColumn() + " FROM "
-						+ getResourceTable()
-						+ " WHERE organization->'extension' @> ?::jsonb AND NOT deleted ORDER BY version LIMIT 1"))
+						+ getResourceTable() + " WHERE " + getResourceColumn() + "->'extension' @> ?::jsonb AND "
+						+ getResourceColumn() + "->>'active' = 'true' AND NOT deleted ORDER BY version LIMIT 1"))
 		{
 
 			String search = "[{\"url\": \"http://highmed.org/fhir/StructureDefinition/certificate-thumbprint\", \"valueString\": \""

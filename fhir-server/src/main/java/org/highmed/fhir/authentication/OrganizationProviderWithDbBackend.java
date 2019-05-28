@@ -63,7 +63,7 @@ public class OrganizationProviderWithDbBackend implements OrganizationProvider, 
 				: UserRole.REMOTE;
 
 		Optional<Organization> optOrg = exceptionHandler
-				.catchAndLogSqlExceptionAndIfReturn(() -> dao.readByThumbprint(loginThumbprintHex), Optional::empty);
+				.catchAndLogSqlExceptionAndIfReturn(() -> dao.readActiveNotDeletedByThumbprint(loginThumbprintHex), Optional::empty);
 
 		if (optOrg.isEmpty() && UserRole.LOCAL.equals(userRole))
 			return Optional.of(new User(new Organization().setName("Local Admin User"), userRole));
