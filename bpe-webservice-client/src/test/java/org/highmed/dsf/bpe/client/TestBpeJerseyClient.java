@@ -1,4 +1,4 @@
-package org.highmed.bpe.client;
+package org.highmed.dsf.bpe.client;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -9,6 +9,9 @@ import java.security.cert.CertificateException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
+
+import org.highmed.dsf.bpe.client.WebserviceClient;
+import org.highmed.dsf.bpe.client.WebserviceClientJersey;
 
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.CertificateReader;

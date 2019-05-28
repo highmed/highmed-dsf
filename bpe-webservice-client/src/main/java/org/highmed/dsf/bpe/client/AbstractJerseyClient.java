@@ -1,4 +1,4 @@
-package org.highmed.bpe.client;
+package org.highmed.dsf.bpe.client;
 
 
 import java.security.KeyStore;
