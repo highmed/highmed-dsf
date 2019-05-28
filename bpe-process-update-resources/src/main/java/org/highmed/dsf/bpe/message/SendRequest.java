@@ -1,4 +1,4 @@
-package org.highmed.bpe.message;
+package org.highmed.dsf.bpe.message;
 
 import java.util.stream.Stream;
 

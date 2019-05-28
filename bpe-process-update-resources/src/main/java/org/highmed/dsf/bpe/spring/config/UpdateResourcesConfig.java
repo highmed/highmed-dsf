@@ -1,10 +1,10 @@
-package org.highmed.bpe.spring.config;
+package org.highmed.dsf.bpe.spring.config;
 
 import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
-import org.highmed.bpe.message.SendRequest;
-import org.highmed.bpe.plugin.UpdateResourcesPlugin;
-import org.highmed.bpe.service.SelectResourceAndTargets;
-import org.highmed.bpe.service.UpdateResources;
+import org.highmed.dsf.bpe.message.SendRequest;
+import org.highmed.dsf.bpe.plugin.UpdateResourcesPlugin;
+import org.highmed.dsf.bpe.service.SelectResourceAndTargets;
+import org.highmed.dsf.bpe.service.UpdateResources;
 import org.highmed.dsf.fhir.client.WebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
