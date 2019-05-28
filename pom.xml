@@ -27,6 +27,14 @@
 		<hapi.version>3.8.0-SNAPSHOT</hapi.version>
 	</properties>
 
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>manual</distribution>
+		</license>
+	</licenses>
+
 	<repositories>
 		<repository>
 			<id>repo-it-snapshot</id>
