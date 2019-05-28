@@ -12,9 +12,11 @@ import static org.mockito.Mockito.when;
 import java.security.KeyStore;
 import java.util.Optional;
 
-import org.highmed.fhir.dao.EndpointDao;
-import org.highmed.fhir.function.SupplierWithSqlException;
-import org.highmed.fhir.help.ExceptionHandler;
+import org.highmed.dsf.fhir.client.ClientProvider;
+import org.highmed.dsf.fhir.client.ClientProviderImpl;
+import org.highmed.dsf.fhir.dao.EndpointDao;
+import org.highmed.dsf.fhir.function.SupplierWithSqlException;
+import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.junit.Before;
 import org.junit.Test;
 

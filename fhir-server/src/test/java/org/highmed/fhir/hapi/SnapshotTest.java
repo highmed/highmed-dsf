@@ -8,11 +8,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.highmed.fhir.service.DefaultProfileValidationSupportWithCustomResources;
-import org.highmed.fhir.service.SnapshotGenerator;
-import org.highmed.fhir.service.SnapshotGenerator.SnapshotWithValidationMessages;
-import org.highmed.fhir.service.SnapshotGeneratorImpl;
-import org.highmed.fhir.service.StructureDefinitionReader;
+import org.highmed.dsf.fhir.service.DefaultProfileValidationSupportWithCustomResources;
+import org.highmed.dsf.fhir.service.SnapshotGenerator;
+import org.highmed.dsf.fhir.service.SnapshotGeneratorImpl;
+import org.highmed.dsf.fhir.service.StructureDefinitionReader;
+import org.highmed.dsf.fhir.service.SnapshotGenerator.SnapshotWithValidationMessages;
 import org.hl7.fhir.r4.conformance.ProfileUtilities;
 import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;

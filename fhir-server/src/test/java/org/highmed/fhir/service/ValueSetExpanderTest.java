@@ -2,6 +2,9 @@ package org.highmed.fhir.service;
 
 import static org.junit.Assert.*;
 
+import org.highmed.dsf.fhir.service.DefaultProfileValidationSupportWithCustomResources;
+import org.highmed.dsf.fhir.service.ValueSetExpander;
+import org.highmed.dsf.fhir.service.ValueSetExpanderImpl;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.terminologies.ValueSetExpander.ValueSetExpansionOutcome;

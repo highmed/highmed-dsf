@@ -3,7 +3,8 @@ package org.highmed.fhir.dao;
 import static org.junit.Assert.assertEquals;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.highmed.fhir.dao.jdbc.StructureDefinitionDaoJdbc;
+import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
+import org.highmed.dsf.fhir.dao.jdbc.StructureDefinitionDaoJdbc;
 import org.hl7.fhir.r4.model.StructureDefinition;
 
 import ca.uhn.fhir.context.FhirContext;

@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import org.highmed.dsf.fhir.service.SnapshotDependencies;
+import org.highmed.dsf.fhir.service.SnapshotDependencyAnalyzer;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.junit.Test;
 

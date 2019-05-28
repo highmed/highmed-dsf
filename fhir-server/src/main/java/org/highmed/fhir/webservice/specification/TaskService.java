@@ -1,7 +1,0 @@
-package org.highmed.fhir.webservice.specification;
-
-import org.hl7.fhir.r4.model.Task;
-
-public interface TaskService extends BasicService<Task>
-{
-}

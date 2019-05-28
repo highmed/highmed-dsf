@@ -4,7 +4,9 @@ import static org.junit.Assert.*;
 
 import java.util.Arrays;
 
-import org.highmed.fhir.spring.config.JsonConfig;
+import org.highmed.dsf.fhir.service.SnapshotDependencies;
+import org.highmed.dsf.fhir.service.SnapshotInfo;
+import org.highmed.dsf.fhir.spring.config.JsonConfig;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -6,10 +6,10 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 
-import org.highmed.fhir.service.DefaultProfileValidationSupportWithCustomResources;
-import org.highmed.fhir.service.ResourceValidator;
-import org.highmed.fhir.service.ResourceValidatorImpl;
-import org.highmed.fhir.service.StructureDefinitionReader;
+import org.highmed.dsf.fhir.service.DefaultProfileValidationSupportWithCustomResources;
+import org.highmed.dsf.fhir.service.ResourceValidator;
+import org.highmed.dsf.fhir.service.ResourceValidatorImpl;
+import org.highmed.dsf.fhir.service.StructureDefinitionReader;
 import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StructureDefinition;

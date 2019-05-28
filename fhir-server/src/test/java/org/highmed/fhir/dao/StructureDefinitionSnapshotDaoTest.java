@@ -3,9 +3,10 @@ package org.highmed.fhir.dao;
 import static org.junit.Assert.assertEquals;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.highmed.fhir.dao.converter.SnapshotInfoConverter;
-import org.highmed.fhir.dao.jdbc.StructureDefinitionSnapshotDaoJdbc;
-import org.highmed.fhir.spring.config.JsonConfig;
+import org.highmed.dsf.fhir.dao.StructureDefinitionSnapshotDao;
+import org.highmed.dsf.fhir.dao.converter.SnapshotInfoConverter;
+import org.highmed.dsf.fhir.dao.jdbc.StructureDefinitionSnapshotDaoJdbc;
+import org.highmed.dsf.fhir.spring.config.JsonConfig;
 import org.hl7.fhir.r4.model.StructureDefinition;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
