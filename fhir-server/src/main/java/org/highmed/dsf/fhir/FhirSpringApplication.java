@@ -21,7 +21,7 @@ public class FhirSpringApplication implements WebApplicationInitializer
 	private AnnotationConfigWebApplicationContext getContext()
 	{
 		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
-		context.setConfigLocation("org.highmed.fhir.spring.config");
+		context.setConfigLocation("org.highmed.dsf.fhir.spring.config");
 
 		return context;
 	}
