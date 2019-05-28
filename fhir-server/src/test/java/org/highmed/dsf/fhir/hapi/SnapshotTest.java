@@ -51,7 +51,7 @@ public class SnapshotTest
 		String profileName = "highmed-data-sharing-task";
 		StructureDefinition base = worker.fetchTypeDefinition(Task.class.getAnnotation(ResourceDef.class).name())
 				.copy();
-		StructureDefinition derived = reader.readXml(Paths.get("src/test/resources/profiles/task-highmed-0.0.2.xml"));
+		StructureDefinition derived = reader.readXml(Paths.get("src/test/resources/profiles/highmed-task-0.5.0.xml"));
 
 		profileUtis.generateSnapshot(base, derived, url, profileName);
 
@@ -74,7 +74,7 @@ public class SnapshotTest
 						Collections.emptyList(), Collections.emptyList()));
 
 		SnapshotWithValidationMessages snapshot = generator
-				.generateSnapshot(reader.readXml(Paths.get("src/test/resources/profiles/task-highmed-0.0.2.xml")));
+				.generateSnapshot(reader.readXml(Paths.get("src/test/resources/profiles/highmed-task-0.5.0.xml")));
 
 		assertNotNull(snapshot);
 		assertNotNull(snapshot.getSnapshot());

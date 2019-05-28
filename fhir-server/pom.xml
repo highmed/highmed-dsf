@@ -135,7 +135,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<includes>
-						<include>org.highmed.dsf.test.TestSuiteAll</include>
+						<include>org.highmed.dsf.fhir.test.TestSuiteAll</include>
 					</includes>
 				</configuration>
 			</plugin>
