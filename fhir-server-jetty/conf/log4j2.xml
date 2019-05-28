@@ -6,8 +6,8 @@
 		<Console name="CONSOLE" target="SYSTEM_OUT">
 			<PatternLayout pattern="%p\t%t - %C{1}.%M(%L) | %m%n" />
 		</Console>
-		<!-- <RollingFile name="FILE" fileName="log/adt_db.log"
-			filePattern="log/adt_db_%d{MM-dd-yyyy}_%i.log.gz"
+		<!-- <RollingFile name="FILE" fileName="log/fhir.log"
+			filePattern="log/fhir_%d{MM-dd-yyyy}_%i.log.gz"
 			ignoreExceptions="false">
 			<PatternLayout>
 				<Pattern>%d [%t] %-5p %c - %m%n</Pattern>
@@ -18,12 +18,12 @@
 			</Policies>
 		</RollingFile> -->
 
-		<!-- <SMTP name="MAIL" subject="Error"
+		<!-- <SMTP name="MAIL" subject="FHIR Error"
 			to="foo@test.com, bar@test.com"	from="baz@test.com"
 			replyTo="foo@test.com" smtpHost="localhost"
 			smtpPort="25" bufferSize="50">
 		</SMTP>
-		<SMTP name="MAIL_CERTIFICATE" subject="Certificate Warning"
+		<SMTP name="MAIL_CERTIFICATE" subject="FHIR Certificate Warning"
 			to="foo@test.com, bar@test.com"	from="baz@test.com"
 			replyTo="foo@test.com" smtpHost="localhost"	smtpPort="25" bufferSize="1">
 			<ThresholdFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY"/>
