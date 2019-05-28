@@ -19,7 +19,7 @@ public class BpeSpringApplication implements WebApplicationInitializer
 	private AnnotationConfigWebApplicationContext getContext()
 	{
 		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
-		context.setConfigLocation("org.highmed.bpe.spring.config");
+		context.setConfigLocation("org.highmed.dsf.bpe.spring.config");
 
 		return context;
 	}

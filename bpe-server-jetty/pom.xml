@@ -39,7 +39,7 @@
 	</dependencies>
 
 	<build>
-		<finalName>bpe_demo</finalName>
+		<finalName>highmed_bpe</finalName>
 
 		<plugins>
 			<plugin>
@@ -50,7 +50,7 @@
 						<manifest>
 							<addClasspath>true</addClasspath>
 							<classpathPrefix>lib/</classpathPrefix>
-							<mainClass>org.highmed.bpe.BpeJettyServer</mainClass>
+							<mainClass>org.highmed.dsf.bpe.BpeJettyServer</mainClass>
 						</manifest>
 					</archive>
 				</configuration>

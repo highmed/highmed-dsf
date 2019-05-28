@@ -11,15 +11,15 @@ VOLUME /opt/bpe/conf/
 WORKDIR /opt/bpe
 
 COPY target/lib ./lib
-COPY target/bpe_demo.jar ./bpe_demo.jar
+COPY target/highmed_bpe.jar ./highmed_bpe.jar
 RUN mkdir ./log
 RUN mkdir ./last_event
 
 RUN adduser --system --no-create-home --group java
-RUN chown root:java ./ ./lib ./log ./last_event ./bpe_demo.jar ./lib/*.jar
+RUN chown root:java ./ ./lib ./log ./last_event ./highmed_bpe.jar ./lib/*.jar
 RUN chmod 750 ./ ./lib
-RUN chmod 640 ./bpe_demo.jar ./lib/*.jar
+RUN chmod 640 ./highmed_bpe.jar ./lib/*.jar
 RUN chmod 1775 ./log ./last_event	
 
 USER java
-ENTRYPOINT ["/usr/bin/java", "-cp", "lib/*:bpe_demo.jar", "org.highmed.bpe.BpeJettyServer"]
+ENTRYPOINT ["/usr/bin/java", "-cp", "lib/*:highmed_bpe.jar", "org.highmed.dsf.bpe.BpeJettyServer"]
