@@ -3,7 +3,6 @@ package org.highmed.dsf.fhir.test;
 import org.highmed.dsf.fhir.dao.command.ResourceReferenceTest;
 import org.highmed.dsf.fhir.hapi.CodeSystemTest;
 import org.highmed.dsf.fhir.hapi.EndpointTest;
-import org.highmed.dsf.fhir.hapi.HiGHmedTaskValidationTest;
 import org.highmed.dsf.fhir.hapi.IdTypeTest;
 import org.highmed.dsf.fhir.hapi.OrganizationTest;
 import org.highmed.dsf.fhir.hapi.ParametersTest;
@@ -19,8 +18,8 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({ ResourceReferenceTest.class, CodeSystemTest.class, EndpointTest.class, HiGHmedTaskValidationTest.class,
-		IdTypeTest.class, OrganizationTest.class, ParametersTest.class, SerializationTest.class, ReferenceTypTest.class,
+@SuiteClasses({ ResourceReferenceTest.class, CodeSystemTest.class, EndpointTest.class, IdTypeTest.class,
+		OrganizationTest.class, ParametersTest.class, SerializationTest.class, ReferenceTypTest.class,
 		SerializationTest.class, SnapshotTest.class, StructureDefinitionTreeTest.class, SubscriptionTest.class,
 		ValidationTest.class, ProfileTests.class })
 public class TestSuiteUnitTests
