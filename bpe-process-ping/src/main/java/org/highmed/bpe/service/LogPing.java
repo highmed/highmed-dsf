@@ -2,7 +2,7 @@ package org.highmed.bpe.service;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
-import org.highmed.bpe.Constants;
+import org.highmed.dsf.bpe.Constants;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

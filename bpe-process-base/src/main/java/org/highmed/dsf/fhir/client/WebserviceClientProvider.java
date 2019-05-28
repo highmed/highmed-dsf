@@ -1,5 +1,6 @@
-package org.highmed.fhir.client;
+package org.highmed.dsf.fhir.client;
 
+import org.highmed.fhir.client.WebserviceClient;
 import org.hl7.fhir.r4.model.IdType;
 
 public interface WebserviceClientProvider

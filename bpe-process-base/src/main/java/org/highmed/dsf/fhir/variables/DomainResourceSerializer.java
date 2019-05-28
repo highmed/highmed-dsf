@@ -1,4 +1,4 @@
-package org.highmed.fhir.variables;
+package org.highmed.dsf.fhir.variables;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -10,7 +10,7 @@ import java.util.Objects;
 import org.camunda.bpm.engine.impl.variable.serializer.PrimitiveValueSerializer;
 import org.camunda.bpm.engine.impl.variable.serializer.ValueFields;
 import org.camunda.bpm.engine.variable.impl.value.UntypedValueImpl;
-import org.highmed.fhir.variables.DomainResourceValues.DomainResourceValue;
+import org.highmed.dsf.fhir.variables.DomainResourceValues.DomainResourceValue;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.springframework.beans.factory.InitializingBean;
 

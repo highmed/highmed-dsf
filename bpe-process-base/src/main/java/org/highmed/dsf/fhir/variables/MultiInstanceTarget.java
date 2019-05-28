@@ -1,4 +1,4 @@
-package org.highmed.fhir.variables;
+package org.highmed.dsf.fhir.variables;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

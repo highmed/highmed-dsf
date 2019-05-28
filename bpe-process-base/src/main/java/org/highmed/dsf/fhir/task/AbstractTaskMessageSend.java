@@ -1,4 +1,4 @@
-package org.highmed.fhir.task;
+package org.highmed.dsf.fhir.task;
 
 import java.util.Date;
 import java.util.Objects;
@@ -6,11 +6,11 @@ import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
-import org.highmed.bpe.Constants;
+import org.highmed.dsf.bpe.Constants;
+import org.highmed.dsf.fhir.client.WebserviceClientProvider;
+import org.highmed.dsf.fhir.organization.OrganizationProvider;
+import org.highmed.dsf.fhir.variables.MultiInstanceTarget;
 import org.highmed.fhir.client.WebserviceClient;
-import org.highmed.fhir.client.WebserviceClientProvider;
-import org.highmed.fhir.organization.OrganizationProvider;
-import org.highmed.fhir.variables.MultiInstanceTarget;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Reference;

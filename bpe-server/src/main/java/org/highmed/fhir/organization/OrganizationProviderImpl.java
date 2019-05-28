@@ -9,8 +9,9 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.highmed.bpe.Constants;
-import org.highmed.fhir.client.WebserviceClientProvider;
+import org.highmed.dsf.bpe.Constants;
+import org.highmed.dsf.fhir.client.WebserviceClientProvider;
+import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;

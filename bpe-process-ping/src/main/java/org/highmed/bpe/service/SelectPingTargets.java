@@ -7,10 +7,10 @@ import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
-import org.highmed.fhir.organization.OrganizationProvider;
-import org.highmed.fhir.variables.MultiInstanceTarget;
-import org.highmed.fhir.variables.MultiInstanceTargets;
-import org.highmed.fhir.variables.MultiInstanceTargetsValues;
+import org.highmed.dsf.fhir.organization.OrganizationProvider;
+import org.highmed.dsf.fhir.variables.MultiInstanceTarget;
+import org.highmed.dsf.fhir.variables.MultiInstanceTargets;
+import org.highmed.dsf.fhir.variables.MultiInstanceTargetsValues;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;

@@ -4,11 +4,11 @@ import java.util.Objects;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
-import org.highmed.bpe.Constants;
-import org.highmed.fhir.organization.OrganizationProvider;
-import org.highmed.fhir.task.TaskHelper;
-import org.highmed.fhir.variables.MultiInstanceTarget;
-import org.highmed.fhir.variables.MultiInstanceTargetValues;
+import org.highmed.dsf.bpe.Constants;
+import org.highmed.dsf.fhir.organization.OrganizationProvider;
+import org.highmed.dsf.fhir.task.TaskHelper;
+import org.highmed.dsf.fhir.variables.MultiInstanceTarget;
+import org.highmed.dsf.fhir.variables.MultiInstanceTargetValues;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Task;

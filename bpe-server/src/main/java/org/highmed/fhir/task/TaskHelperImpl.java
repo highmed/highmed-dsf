@@ -3,6 +3,7 @@ package org.highmed.fhir.task;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.highmed.dsf.fhir.task.TaskHelper;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;

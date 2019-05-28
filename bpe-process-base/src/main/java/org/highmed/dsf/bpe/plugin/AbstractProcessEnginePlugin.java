@@ -1,4 +1,4 @@
-package org.highmed.bpe.plugin;
+package org.highmed.dsf.bpe.plugin;
 
 import org.camunda.bpm.engine.ProcessEngine;
 import org.camunda.bpm.engine.RepositoryService;

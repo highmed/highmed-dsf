@@ -1,4 +1,4 @@
-package org.highmed.fhir.variables;
+package org.highmed.dsf.fhir.variables;
 
 import java.util.Map;
 

@@ -3,10 +3,10 @@ package org.highmed.bpe.message;
 import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.bpe.Constants;
-import org.highmed.fhir.client.WebserviceClientProvider;
-import org.highmed.fhir.organization.OrganizationProvider;
-import org.highmed.fhir.task.AbstractTaskMessageSend;
+import org.highmed.dsf.bpe.Constants;
+import org.highmed.dsf.fhir.client.WebserviceClientProvider;
+import org.highmed.dsf.fhir.organization.OrganizationProvider;
+import org.highmed.dsf.fhir.task.AbstractTaskMessageSend;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Reference;

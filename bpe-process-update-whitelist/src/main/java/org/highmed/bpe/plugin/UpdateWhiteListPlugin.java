@@ -3,6 +3,7 @@ package org.highmed.bpe.plugin;
 import org.camunda.bpm.engine.ProcessEngine;
 import org.camunda.bpm.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
+import org.highmed.dsf.bpe.plugin.AbstractProcessEnginePlugin;
 
 public class UpdateWhiteListPlugin extends AbstractProcessEnginePlugin
 {
