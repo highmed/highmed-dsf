@@ -4,7 +4,7 @@
 	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
 
-	<changeSet author="hhund" id="create_server_user" dbms="postgresql">
+	<changeSet author="hhund" id="db.create-db-users.changelog-0.1.0" dbms="postgresql">
 		<preConditions onFail="MARK_RAN">
 			<and>
 				<sqlCheck expectedResult="0">SELECT COUNT(*) FROM pg_roles WHERE rolname='${server_user}'</sqlCheck>

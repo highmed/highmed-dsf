@@ -4,9 +4,9 @@
 	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
 
-	<include file="db/db.create-db-users.changelog.xml" />
+	<include file="db/db.create-db-users.changelog-0.1.0.xml" />
 	
-	<include file="db/db.camunda_engine.changelog.xml" />
-	<include file="db/db.camunda_identity.changelog.xml" />
+	<include file="db/db.camunda_engine.changelog-0.1.0.xml" />
+	<include file="db/db.camunda_identity.changelog-0.1.0.xml" />
 
 </databaseChangeLog>
