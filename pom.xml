@@ -1,8 +1,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.highmed.bpe</groupId>
-	<artifactId>bpe-demo-parent</artifactId>
+	<groupId>org.highmed.dsf</groupId>
+	<artifactId>bpe-parent</artifactId>
 	<version>0.1.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
@@ -13,21 +13,21 @@
 	</parent>
 
 	<modules>
-		<module>bpe-demo-server</module>
-		<module>bpe-demo-server-jetty</module>
-		<module>bpe-demo-db-migration</module>
-		<module>bpe-demo-process-base</module>
-		<module>bpe-demo-process-ping</module>
-		<module>bpe-demo-process-update-resources</module>
-		<module>bpe-demo-webservice-client</module>
-		<module>bpe-demo-cert-generator</module>
-		<module>bpe-demo-process-update-whitelist</module>
+		<module>bpe-cert-generator</module>
+		<module>bpe-db-migration</module>
+		<module>bpe-process-base</module>
+		<module>bpe-process-ping</module>
+		<module>bpe-process-update-resources</module>
+		<module>bpe-process-update-whitelist</module>
+		<module>bpe-server</module>
+		<module>bpe-server-jetty</module>
+		<module>bpe-webservice-client</module>
 	</modules>
 
 	<properties>
 		<!-- if upgrading, added last (and in between) versions to db-migration project, db-migration needs dependency to all version since and including 7.10.0 for camunda-sql-scripts -->
 		<camunda.version>7.10.0</camunda.version>
-		<fhir.demo.version>0.5.0-SNAPSHOT</fhir.demo.version>
+		<dsf.fhir.version>0.1.0-SNAPSHOT</dsf.fhir.version>
 	</properties>
 
 	<repositories>
@@ -83,55 +83,55 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>org.highmed.bpe</groupId>
-				<artifactId>bpe-demo-server</artifactId>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>bpe-server</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.highmed.bpe</groupId>
-				<artifactId>bpe-demo-jetty</artifactId>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>bpe-jetty</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.highmed.bpe</groupId>
-				<artifactId>bpe-demo-db-migration</artifactId>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>bpe-db-migration</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.highmed.bpe</groupId>
-				<artifactId>bpe-demo-process-base</artifactId>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>bpe-process-base</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.highmed.bpe</groupId>
-				<artifactId>bpe-demo-process-ping</artifactId>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>bpe-process-ping</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.highmed.bpe</groupId>
-				<artifactId>bpe-demo-process-update-resources</artifactId>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>bpe-process-update-resources</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.highmed.bpe</groupId>
-				<artifactId>bpe-demo-process-update-whitelist</artifactId>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>bpe-process-update-whitelist</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.highmed.bpe</groupId>
-				<artifactId>bpe-demo-webservice-client</artifactId>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>bpe-webservice-client</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
 			<dependency>
-				<groupId>org.highmed.fhir</groupId>
-				<artifactId>fhir-demo-websocket-client</artifactId>
-				<version>${fhir.demo.version}</version>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>fhir-websocket-client</artifactId>
+				<version>${dsf.fhir.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.highmed.fhir</groupId>
-				<artifactId>fhir-demo-webservice-client</artifactId>
-				<version>${fhir.demo.version}</version>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>fhir-webservice-client</artifactId>
+				<version>${dsf.fhir.version}</version>
 			</dependency>
 
 			<dependency>
