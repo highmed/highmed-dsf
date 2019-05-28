@@ -1,8 +1,8 @@
-package org.highmed.bpe.spring.config;
+package org.highmed.dsf.bpe.spring.config;
 
 import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
-import org.highmed.bpe.plugin.UpdateWhiteListPlugin;
-import org.highmed.bpe.service.UpdateWhiteList;
+import org.highmed.dsf.bpe.plugin.UpdateWhiteListPlugin;
+import org.highmed.dsf.bpe.service.UpdateWhiteList;
 import org.highmed.dsf.fhir.client.WebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
