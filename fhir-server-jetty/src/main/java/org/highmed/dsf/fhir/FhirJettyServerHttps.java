@@ -1,8 +1,8 @@
-package org.highmed.fhir;
+package org.highmed.dsf.fhir;
 
-import static de.rwh.utils.jetty.JettyServer.forwardedSecureRequestCustomizer;
 import static de.rwh.utils.jetty.JettyServer.httpConfiguration;
-import static de.rwh.utils.jetty.JettyServer.httpConnector;
+import static de.rwh.utils.jetty.JettyServer.httpsConnector;
+import static de.rwh.utils.jetty.JettyServer.secureRequestCustomizer;
 import static de.rwh.utils.jetty.JettyServer.start;
 import static de.rwh.utils.jetty.JettyServer.statusCodeOnlyErrorHandler;
 import static de.rwh.utils.jetty.JettyServer.webInfClassesDirs;
@@ -33,7 +33,7 @@ import de.rwh.utils.jetty.JettyServer;
 import de.rwh.utils.jetty.Log4jInitializer;
 import de.rwh.utils.jetty.PropertiesReader;
 
-public class FhirJettyServer
+public class FhirJettyServerHttps
 {
 	public static void main(String[] args)
 	{
@@ -44,8 +44,8 @@ public class FhirJettyServer
 		Properties dbProperties = PropertiesReader.read(Paths.get("conf/db.properties"), StandardCharsets.UTF_8);
 		DbMigrator.retryOnConnectException(3, () -> DbMigrator.migrate(dbProperties));
 
-		HttpConfiguration httpConfiguration = httpConfiguration(forwardedSecureRequestCustomizer());
-		Function<Server, ServerConnector> connector = httpConnector(httpConfiguration, properties);
+		HttpConfiguration httpConfiguration = httpConfiguration(secureRequestCustomizer());
+		Function<Server, ServerConnector> connector = httpsConnector(httpConfiguration, properties);
 
 		Properties initParameter = PropertiesReader.read(Paths.get("conf/config.properties"), StandardCharsets.UTF_8);
 

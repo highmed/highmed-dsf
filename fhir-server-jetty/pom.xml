@@ -54,7 +54,7 @@
 						<manifest>
 							<addClasspath>true</addClasspath>
 							<classpathPrefix>lib/</classpathPrefix>
-							<mainClass>org.highmed.dsf.FhirJettyServer</mainClass>
+							<mainClass>org.highmed.dsf.fhir.FhirJettyServer</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
