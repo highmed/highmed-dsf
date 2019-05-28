@@ -1,4 +1,4 @@
-package org.highmed.bpe.db;
+package org.highmed.dsf.bpe.db;
 
 import java.io.IOException;
 import java.io.InputStreamReader;

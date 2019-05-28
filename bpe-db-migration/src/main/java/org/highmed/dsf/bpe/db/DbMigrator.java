@@ -1,4 +1,4 @@
-package org.highmed.bpe.db;
+package org.highmed.dsf.bpe.db;
 
 import java.net.ConnectException;
 import java.sql.Connection;
