@@ -22,7 +22,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.glassfish.jersey.servlet.init.JerseyServletContainerInitializer;
-import org.highmed.bpe.db.DbMigrator;
+import org.highmed.dsf.bpe.db.DbMigrator;
 import org.springframework.web.SpringServletContainerInitializer;
 
 import de.rwh.utils.jetty.JettyServer;
