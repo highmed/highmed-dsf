@@ -1,4 +1,4 @@
-package org.highmed.bpe.cert;
+package org.highmed.dsf.bpe.cert;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
