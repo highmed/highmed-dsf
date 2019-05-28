@@ -45,7 +45,7 @@ public class BpeJettyServer
 
 		Properties initParameter = PropertiesReader.read(Paths.get("conf/config.properties"), StandardCharsets.UTF_8);
 
-		Predicate<String> filter = s -> s.contains("bpe-demo-server");
+		Predicate<String> filter = s -> s.contains("bpe-server");
 		Stream<String> webInfClassesDirs = webInfClassesDirs(filter);
 		Stream<String> webInfJars = webInfJars(filter);
 
