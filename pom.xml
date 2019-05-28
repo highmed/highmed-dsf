@@ -25,10 +25,18 @@
 	</modules>
 
 	<properties>
-		<!-- if upgrading, added last (and in between) versions to db-migration project, db-migration needs dependency to all version since and including 7.10.0 for camunda-sql-scripts -->
+		<!-- if upgrading, add latest (and in between) versions to db-migration project, db-migration needs dependency to all versions since and including 7.10.0 for camunda-sql-scripts -->
 		<camunda.version>7.10.0</camunda.version>
 		<dsf.fhir.version>0.1.0-SNAPSHOT</dsf.fhir.version>
 	</properties>
+
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>manual</distribution>
+		</license>
+	</licenses>
 
 	<repositories>
 		<repository>
