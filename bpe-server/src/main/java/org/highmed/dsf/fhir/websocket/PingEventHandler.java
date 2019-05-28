@@ -1,4 +1,4 @@
-package org.highmed.fhir.websocket;
+package org.highmed.dsf.fhir.websocket;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -9,8 +9,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.highmed.dsf.fhir.task.TaskHandler;
 import org.highmed.fhir.client.WebserviceClient;
-import org.highmed.fhir.task.TaskHandler;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Task;

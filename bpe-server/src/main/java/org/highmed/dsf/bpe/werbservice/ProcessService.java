@@ -1,4 +1,4 @@
-package org.highmed.bpe.werbservice;
+package org.highmed.dsf.bpe.werbservice;
 
 import java.util.ArrayList;
 import java.util.HashMap;

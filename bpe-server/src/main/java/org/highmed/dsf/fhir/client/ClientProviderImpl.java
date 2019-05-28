@@ -1,4 +1,4 @@
-package org.highmed.fhir.client;
+package org.highmed.dsf.fhir.client;
 
 import java.net.URI;
 import java.security.KeyStore;
@@ -9,6 +9,10 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.highmed.dsf.fhir.client.WebserviceClientProvider;
+import org.highmed.fhir.client.WebserviceClient;
+import org.highmed.fhir.client.WebserviceClientJersey;
+import org.highmed.fhir.client.WebsocketClient;
+import org.highmed.fhir.client.WebsocketClientTyrus;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;

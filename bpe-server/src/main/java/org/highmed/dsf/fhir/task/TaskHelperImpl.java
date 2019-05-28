@@ -1,4 +1,4 @@
-package org.highmed.fhir.task;
+package org.highmed.dsf.fhir.task;
 
 import java.util.Optional;
 import java.util.stream.Stream;

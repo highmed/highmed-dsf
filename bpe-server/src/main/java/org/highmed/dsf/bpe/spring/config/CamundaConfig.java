@@ -1,4 +1,4 @@
-package org.highmed.bpe.spring.config;
+package org.highmed.dsf.bpe.spring.config;
 
 import java.util.List;
 

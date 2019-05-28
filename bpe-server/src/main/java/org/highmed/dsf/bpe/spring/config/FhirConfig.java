@@ -1,4 +1,4 @@
-package org.highmed.bpe.spring.config;
+package org.highmed.dsf.bpe.spring.config;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -11,21 +11,21 @@ import java.security.cert.CertificateException;
 
 import org.camunda.bpm.engine.ProcessEngine;
 import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
+import org.highmed.dsf.fhir.client.ClientProviderImpl;
+import org.highmed.dsf.fhir.client.WebsocketClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
+import org.highmed.dsf.fhir.organization.OrganizationProviderImpl;
+import org.highmed.dsf.fhir.task.TaskHandler;
 import org.highmed.dsf.fhir.task.TaskHelper;
+import org.highmed.dsf.fhir.task.TaskHelperImpl;
 import org.highmed.dsf.fhir.variables.DomainResourceSerializer;
 import org.highmed.dsf.fhir.variables.FhirPlugin;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargetSerializer;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargetsSerializer;
 import org.highmed.dsf.fhir.variables.OrganizationDeserializer;
 import org.highmed.dsf.fhir.variables.OrganizationSerializer;
-import org.highmed.fhir.client.ClientProviderImpl;
-import org.highmed.fhir.client.WebsocketClientProvider;
-import org.highmed.fhir.organization.OrganizationProviderImpl;
-import org.highmed.fhir.task.TaskHandler;
-import org.highmed.fhir.task.TaskHelperImpl;
-import org.highmed.fhir.websocket.FhirConnector;
-import org.highmed.fhir.websocket.LastEventTimeIo;
+import org.highmed.dsf.fhir.websocket.FhirConnector;
+import org.highmed.dsf.fhir.websocket.LastEventTimeIo;
 import org.hl7.fhir.r4.model.Organization;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

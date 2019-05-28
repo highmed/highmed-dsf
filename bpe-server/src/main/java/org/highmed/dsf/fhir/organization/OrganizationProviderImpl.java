@@ -1,4 +1,4 @@
-package org.highmed.fhir.organization;
+package org.highmed.dsf.fhir.organization;
 
 import java.util.Collections;
 import java.util.List;

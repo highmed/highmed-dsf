@@ -1,8 +1,8 @@
-package org.highmed.fhir.websocket;
+package org.highmed.dsf.fhir.websocket;
 
 import java.util.Objects;
 
-import org.highmed.fhir.task.TaskHandler;
+import org.highmed.dsf.fhir.task.TaskHandler;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;

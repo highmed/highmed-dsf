@@ -1,4 +1,4 @@
-package org.highmed.fhir.websocket;
+package org.highmed.dsf.fhir.websocket;
 
 public enum EventType
 {

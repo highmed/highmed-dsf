@@ -1,4 +1,4 @@
-package org.highmed.bpe.service;
+package org.highmed.dsf.bpe.service;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
@@ -6,11 +6,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-public class BarService implements JavaDelegate, InitializingBean
+public class BazService implements JavaDelegate, InitializingBean
 {
-	private static final Logger logger = LoggerFactory.getLogger(BarService.class);
+	private static final Logger logger = LoggerFactory.getLogger(BazService.class);
 
-	public BarService()
+	public BazService()
 	{
 		logger.info("TestService() " + System.identityHashCode(this));
 	}
@@ -27,6 +27,6 @@ public class BarService implements JavaDelegate, InitializingBean
 		logger.info("Process instance ID {}, business key {}", execution.getProcessInstanceId(),
 				execution.getBusinessKey());
 		logger.info("Variables: {}", execution.getVariables());
-		logger.info("Bar Service ... " + System.identityHashCode(this));
+		logger.info("Baz Service ... " + System.identityHashCode(this));
 	}
 }
