@@ -1,9 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.highmed.fhir</groupId>
-	<artifactId>fhir-demo-parent</artifactId>
-	<version>0.5.0-SNAPSHOT</version>
+	<groupId>org.highmed.dsf</groupId>
+	<artifactId>fhir-parent</artifactId>
+	<version>0.1.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<parent>
@@ -13,14 +13,13 @@
 	</parent>
 
 	<modules>
-		<module>fhir-demo-adapter</module>
-		<module>fhir-demo-db-migration</module>
-		<module>fhir-demo-server</module>
-		<module>fhir-demo-server-jetty</module>
-		<module>fhir-demo-client</module>
-		<module>fhir-demo-webservice-client</module>
-		<module>fhir-demo-websocket-client</module>
-		<module>fhir-demo-cert-generator</module>
+		<module>fhir-adapter</module>
+		<module>fhir-cert-generator</module>
+		<module>fhir-db-migration</module>
+		<module>fhir-server</module>
+		<module>fhir-server-jetty</module>
+		<module>fhir-webservice-client</module>
+		<module>fhir-websocket-client</module>
 	</modules>
 
 	<properties>
@@ -82,43 +81,43 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>org.highmed.fhir</groupId>
-				<artifactId>fhir-demo-adapter</artifactId>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>fhir-adapter</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.highmed.fhir</groupId>
-				<artifactId>fhir-demo-db-migration</artifactId>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>fhir-db-migration</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.highmed.fhir</groupId>
-				<artifactId>fhir-demo-server</artifactId>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>fhir-server</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.highmed.fhir</groupId>
-				<artifactId>fhir-demo-server-jetty</artifactId>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>fhir-server-jetty</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.highmed.fhir</groupId>
-				<artifactId>fhir-demo-client</artifactId>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>fhir-client</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.highmed.fhir</groupId>
-				<artifactId>fhir-demo-webservice-client</artifactId>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>fhir-webservice-client</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.highmed.fhir</groupId>
-				<artifactId>fhir-demo-websocket-client</artifactId>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>fhir-websocket-client</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.highmed.fhir</groupId>
-				<artifactId>fhir-demo-cert-generator</artifactId>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>fhir-cert-generator</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 

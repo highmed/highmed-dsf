@@ -2,22 +2,22 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>fhir-demo-server-jetty</artifactId>
+	<artifactId>fhir-server-jetty</artifactId>
 
 	<parent>
-		<groupId>org.highmed.fhir</groupId>
-		<artifactId>fhir-demo-parent</artifactId>
-		<version>0.5.0-SNAPSHOT</version>
+		<groupId>org.highmed.dsf</groupId>
+		<artifactId>fhir-parent</artifactId>
+		<version>0.1.0-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
 		<dependency>
-			<groupId>org.highmed.fhir</groupId>
-			<artifactId>fhir-demo-server</artifactId>
+			<groupId>org.highmed.dsf</groupId>
+			<artifactId>fhir-server</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.highmed.fhir</groupId>
-			<artifactId>fhir-demo-db-migration</artifactId>
+			<groupId>org.highmed.dsf</groupId>
+			<artifactId>fhir-db-migration</artifactId>
 		</dependency>
 
 		<dependency>
@@ -54,7 +54,7 @@
 						<manifest>
 							<addClasspath>true</addClasspath>
 							<classpathPrefix>lib/</classpathPrefix>
-							<mainClass>org.highmed.fhir.FhirJettyServer</mainClass>
+							<mainClass>org.highmed.dsf.FhirJettyServer</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
