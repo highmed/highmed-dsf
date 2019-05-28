@@ -18,24 +18,14 @@
 			</Policies>
 		</RollingFile> -->
 
-		<!-- <SMTP name="MAIL" subject="Production RWH LAB Gateway Error"
-			to="hauke.hund@med.uni-heidelberg.de, thomas.hilbel@med.uni-heidelberg.de"
-			from="med3-kvm15@med.uni-heidelberg.de"
-			replyTo="hauke.hund@med.uni-heidelberg.de" smtpHost="localhost"
+		<!-- <SMTP name="MAIL" subject="Error"
+			to="foo@test.com, bar@test.com"	from="baz@test.com"
+			replyTo="foo@test.com" smtpHost="localhost"
 			smtpPort="25" bufferSize="50">
 		</SMTP>
-		<SMTP name="MAIL_CERTIFICATE" subject="Production RWH LAB Gateway Certificate Warning"
-			to="hauke.hund@med.uni-heidelberg.de, thomas.hilbel@med.uni-heidelberg.de"
-			from="med3-kvm15@med.uni-heidelberg.de"
-			replyTo="hauke.hund@med.uni-heidelberg.de" smtpHost="localhost"
-			smtpPort="25" bufferSize="1">
-			<ThresholdFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY"/>
-		</SMTP>
-		<SMTP name="MAIL_HL7" subject="Production RWH ADT Gateway HL7 Warning"
-			to="hauke.hund@med.uni-heidelberg.de, thomas.hilbel@med.uni-heidelberg.de"
-			from="med3-kvm15@med.uni-heidelberg.de"
-			replyTo="hauke.hund@med.uni-heidelberg.de" smtpHost="localhost"
-			smtpPort="25" bufferSize="1">
+		<SMTP name="MAIL_CERTIFICATE" subject="Certificate Warning"
+			to="foo@test.com, bar@test.com"	from="baz@test.com"
+			replyTo="foo@test.com" smtpHost="localhost"	smtpPort="25" bufferSize="1">
 			<ThresholdFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY"/>
 		</SMTP> -->
 	</Appenders>
@@ -53,9 +43,6 @@
 		
 		<!-- <Logger name="certificate-warning-logger" level="INFO">
 			<AppenderRef ref="MAIL_CERTIFICATE" />
-		</Logger>
-		<Logger name="async-message-handler-warning-logger" level="INFO">
-			<AppenderRef ref="MAIL_HL7" />
 		</Logger> -->
 
 		<Root level="WARN">
