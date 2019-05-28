@@ -49,7 +49,7 @@ public class FhirJettyServer
 
 		Properties initParameter = PropertiesReader.read(Paths.get("conf/config.properties"), StandardCharsets.UTF_8);
 
-		Predicate<String> filter = s -> s.contains("fhir-demo-server");
+		Predicate<String> filter = s -> s.contains("fhir-server");
 		Stream<String> webInfClassesDirs = webInfClassesDirs(filter);
 		Stream<String> webInfJars = webInfJars(filter);
 
