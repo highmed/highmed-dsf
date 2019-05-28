@@ -1,4 +1,4 @@
-package org.highmed.fhir.cert;
+package org.highmed.dsf.fhir.cert;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
