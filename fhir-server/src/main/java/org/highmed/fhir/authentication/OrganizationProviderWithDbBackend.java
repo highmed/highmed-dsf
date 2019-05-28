@@ -10,6 +10,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.security.auth.x500.X500Principal;
+
 import org.apache.commons.codec.binary.Hex;
 import org.highmed.fhir.dao.OrganizationDao;
 import org.highmed.fhir.help.ExceptionHandler;
@@ -57,13 +59,14 @@ public class OrganizationProviderWithDbBackend implements OrganizationProvider, 
 			return Optional.empty();
 
 		String loginThumbprintHex = Hex.encodeHexString(getThumbprint(certificate));
-		logger.debug("Generated SHA-512 certificate thumbprint: {}", loginThumbprintHex);
+		logger.debug("Reading user-role of '{}', thumbprint '{}' (SHA-512)",
+				certificate.getSubjectX500Principal().getName(X500Principal.RFC1779), loginThumbprintHex);
 
 		UserRole userRole = localUserThumbprints.contains(loginThumbprintHex.toLowerCase()) ? UserRole.LOCAL
 				: UserRole.REMOTE;
 
-		Optional<Organization> optOrg = exceptionHandler
-				.catchAndLogSqlExceptionAndIfReturn(() -> dao.readActiveNotDeletedByThumbprint(loginThumbprintHex), Optional::empty);
+		Optional<Organization> optOrg = exceptionHandler.catchAndLogSqlExceptionAndIfReturn(
+				() -> dao.readActiveNotDeletedByThumbprint(loginThumbprintHex), Optional::empty);
 
 		if (optOrg.isEmpty() && UserRole.LOCAL.equals(userRole))
 			return Optional.of(new User(new Organization().setName("Local Admin User"), userRole));
