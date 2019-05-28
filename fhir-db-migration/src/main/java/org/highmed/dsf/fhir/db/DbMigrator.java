@@ -1,4 +1,4 @@
-package org.highmed.fhir.db;
+package org.highmed.dsf.fhir.db;
 
 import java.net.ConnectException;
 import java.sql.Connection;
