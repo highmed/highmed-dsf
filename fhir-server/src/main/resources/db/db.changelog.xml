@@ -1,27 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
 
-	<include file="db/db.create-db-users.changelog.xml" />
-	
-	<include file="db/db.bundles.changelog.xml" />
-	<include file="db/db.code_systems.changelog.xml" />
-	<include file="db/db.code_systems.changelog.xml" />
-	<include file="db/db.endpoints.changelog.xml" />
-	<include file="db/db.healthcare_services.changelog.xml" />
-	<include file="db/db.locations.changelog.xml" />
-	<include file="db/db.organizations.changelog.xml" />
-	<include file="db/db.patients.changelog.xml" />
-	<include file="db/db.practitioner_roles.changelog.xml" />
-	<include file="db/db.practitioners.changelog.xml" />
-	<include file="db/db.provenances.changelog.xml" />
-	<include file="db/db.research_studies.changelog.xml" />
-	<include file="db/db.structure_definitions.changelog.xml" />
-	<include file="db/db.structure_definition_snapshots.changelog.xml" />
-	<include file="db/db.subscriptions.changelog.xml" />
-	<include file="db/db.tasks.changelog.xml" />
-	<include file="db/db.value_sets.changelog.xml" />
+	<include file="db/db.create-db-users.changelog-0.1.0.xml" />
+
+	<include file="db/db.bundles.changelog-0.1.0.xml" />
+	<include file="db/db.code_systems.changelog-0.1.0.xml" />
+	<include file="db/db.code_systems.changelog-0.1.0.xml" />
+	<include file="db/db.endpoints.changelog-0.1.0.xml" />
+	<include file="db/db.healthcare_services.changelog-0.1.0.xml" />
+	<include file="db/db.locations.changelog-0.1.0.xml" />
+	<include file="db/db.organizations.changelog-0.1.0.xml" />
+	<include file="db/db.patients.changelog-0.1.0.xml" />
+	<include file="db/db.practitioner_roles.changelog-0.1.0.xml" />
+	<include file="db/db.practitioners.changelog-0.1.0.xml" />
+	<include file="db/db.provenances.changelog-0.1.0.xml" />
+	<include file="db/db.research_studies.changelog-0.1.0.xml" />
+	<include file="db/db.structure_definitions.changelog-0.1.0.xml" />
+	<include file="db/db.structure_definition_snapshots.changelog-0.1.0.xml" />
+	<include file="db/db.subscriptions.changelog-0.1.0.xml" />
+	<include file="db/db.tasks.changelog-0.1.0.xml" />
+	<include file="db/db.value_sets.changelog-0.1.0.xml" />
 
 </databaseChangeLog>

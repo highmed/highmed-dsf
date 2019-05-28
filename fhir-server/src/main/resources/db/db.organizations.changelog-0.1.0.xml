@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<property name="json" value="JSONB" dbms="postgresql" />
+	<property name="json" value="varchar(5000)" dbms="h2" />
+
+	<changeSet author="hhund" id="db.organizations.changelog-0.1.0">
+		<createTable tableName="organizations">
+			<column name="organization_id" type="UUID">
+				<constraints nullable="false" />
+			</column>
+			<column name="version" type="BIGINT" defaultValueNumeric="1">
+				<constraints nullable="false" />
+			</column>
+			<column name="deleted" type="BOOLEAN" defaultValue="false">
+				<constraints nullable="false" />
+			</column>
+			<column name="organization" type="${json}">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addPrimaryKey tableName="organizations" columnNames="organization_id, version" />
+
+		<sql dbms="postgresql">
+			ALTER TABLE organizations OWNER TO ${liquibase_user};
+			GRANT ALL ON TABLE organizations TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE ON TABLE organizations TO ${server_users_group};
+			CREATE INDEX organization_id_index ON organizations USING btree (organization_id);
+			CREATE INDEX organization_index ON organizations USING gin (organization);
+			CREATE INDEX organization_id_version_index ON organizations USING btree (organization_id, version)
+		</sql>
+
+		<createView viewName="current_organizations" replaceIfExists="true">
+			SELECT DISTINCT ON (organization_id) organization_id, version, organization
+			FROM organizations WHERE NOT deleted ORDER BY organization_id, version DESC
+		</createView>
+
+		<sql dbms="postgresql">
+			ALTER TABLE current_organizations OWNER TO ${liquibase_user};
+			GRANT ALL ON TABLE current_organizations TO ${liquibase_user};
+			GRANT SELECT ON TABLE current_organizations TO ${server_users_group};
+		</sql>
+	</changeSet>
+</databaseChangeLog>
