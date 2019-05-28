@@ -27,7 +27,7 @@ public class AdapterConfig implements BeanDefinitionRegistryPostProcessor
 	{
 		ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(false);
 		scanner.addIncludeFilter(new AnnotationTypeFilter(Provider.class));
-		Set<BeanDefinition> adapters = scanner.findCandidateComponents("org.highmed.fhir.adapter");
+		Set<BeanDefinition> adapters = scanner.findCandidateComponents("org.highmed.dsf.fhir.adapter");
 		adapters.forEach(def -> registry.registerBeanDefinition(def.getBeanClassName(), def));
 	}
 }
