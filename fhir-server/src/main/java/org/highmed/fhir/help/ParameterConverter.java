@@ -19,7 +19,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import org.highmed.fhir.adapter.AbstractFhirAdapter;
+import org.highmed.dsf.fhir.adapter.AbstractFhirAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
