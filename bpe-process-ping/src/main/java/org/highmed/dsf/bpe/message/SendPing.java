@@ -1,4 +1,4 @@
-package org.highmed.bpe.message;
+package org.highmed.dsf.bpe.message;
 
 import org.highmed.dsf.fhir.client.WebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;

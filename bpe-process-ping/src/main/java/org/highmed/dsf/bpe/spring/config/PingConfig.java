@@ -1,13 +1,13 @@
-package org.highmed.bpe.spring.config;
+package org.highmed.dsf.bpe.spring.config;
 
 import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
-import org.highmed.bpe.message.SendPing;
-import org.highmed.bpe.message.SendPong;
-import org.highmed.bpe.plugin.PingPlugin;
-import org.highmed.bpe.service.LogPing;
-import org.highmed.bpe.service.LogPong;
-import org.highmed.bpe.service.SelectPingTargets;
-import org.highmed.bpe.service.SelectPongTarget;
+import org.highmed.dsf.bpe.message.SendPing;
+import org.highmed.dsf.bpe.message.SendPong;
+import org.highmed.dsf.bpe.plugin.PingPlugin;
+import org.highmed.dsf.bpe.service.LogPing;
+import org.highmed.dsf.bpe.service.LogPong;
+import org.highmed.dsf.bpe.service.SelectPingTargets;
+import org.highmed.dsf.bpe.service.SelectPongTarget;
 import org.highmed.dsf.fhir.client.WebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;

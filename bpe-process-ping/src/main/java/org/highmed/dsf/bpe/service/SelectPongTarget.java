@@ -1,4 +1,4 @@
-package org.highmed.bpe.service;
+package org.highmed.dsf.bpe.service;
 
 import java.util.Objects;
 
