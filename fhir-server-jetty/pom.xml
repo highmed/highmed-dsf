@@ -43,7 +43,7 @@
 	</dependencies>
 
 	<build>
-		<finalName>fhir_demo</finalName>
+		<finalName>highmed_fhir</finalName>
 
 		<plugins>
 			<plugin>

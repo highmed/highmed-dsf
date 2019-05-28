@@ -11,14 +11,14 @@ VOLUME /opt/fhir/conf/
 WORKDIR /opt/fhir
 
 COPY target/lib ./lib
-COPY target/fhir_demo.jar ./fhir_demo.jar
+COPY target/highmed_fhir.jar ./highmed_fhir.jar
 RUN mkdir ./log
 
 RUN adduser --system --no-create-home --group java
-RUN chown root:java ./ ./lib ./log ./fhir_demo.jar ./lib/*.jar
+RUN chown root:java ./ ./lib ./log ./highmed_fhir.jar ./lib/*.jar
 RUN chmod 750 ./ ./lib
-RUN chmod 640 ./fhir_demo.jar ./lib/*.jar
+RUN chmod 640 ./highmed_fhir.jar ./lib/*.jar
 RUN chmod 1775 ./log	
 
 USER java
-ENTRYPOINT ["/usr/bin/java", "-cp", "lib/*:fhir_demo.jar", "org.highmed.fhir.FhirJettyServer"]
+ENTRYPOINT ["/usr/bin/java", "-cp", "lib/*:highmed_fhir.jar", "org.highmed.dsf.fhir.FhirJettyServer"]
