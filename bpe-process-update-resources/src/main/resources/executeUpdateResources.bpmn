@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_0k0v4i2" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.1.0">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_0k0v4i2" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="2.2.4">
   <bpmn:process id="executeUpdateResources" isExecutable="true" camunda:versionTag="1.0.0">
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>SequenceFlow_0djh0eg</bpmn:outgoing>
       <bpmn:messageEventDefinition messageRef="Message_1r6vnvn" />
     </bpmn:startEvent>
     <bpmn:sequenceFlow id="SequenceFlow_0djh0eg" sourceRef="StartEvent_1" targetRef="Task_1hj13pf" />
-    <bpmn:serviceTask id="Task_1hj13pf" name="updateResources" camunda:class="org.highmed.bpe.service.UpdateResources">
+    <bpmn:serviceTask id="Task_1hj13pf" name="updateResources" camunda:class="org.highmed.dsf.bpe.service.UpdateResources">
       <bpmn:incoming>SequenceFlow_0djh0eg</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0eygcor</bpmn:outgoing>
     </bpmn:serviceTask>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_15v05m6" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.1.0">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_15v05m6" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="2.2.4">
   <bpmn:process id="pong" isExecutable="true" camunda:versionTag="1.0.0">
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>SequenceFlow_07w11cw</bpmn:outgoing>
@@ -15,14 +15,14 @@
         </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_1ism9wt</bpmn:incoming>
-      <bpmn:messageEventDefinition messageRef="Message_1h0kvyq" camunda:class="org.highmed.bpe.message.SendPong" />
+      <bpmn:messageEventDefinition messageRef="Message_1h0kvyq" camunda:class="org.highmed.dsf.bpe.message.SendPong" />
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="SequenceFlow_09i9zb8" sourceRef="Task_0ltampw" targetRef="ServiceTask_0ko681m" />
-    <bpmn:serviceTask id="Task_0ltampw" name="logPing" camunda:class="org.highmed.bpe.service.LogPing">
+    <bpmn:serviceTask id="Task_0ltampw" name="logPing" camunda:class="org.highmed.dsf.bpe.service.LogPing">
       <bpmn:incoming>SequenceFlow_07w11cw</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_09i9zb8</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="ServiceTask_0ko681m" name="selectTarget" camunda:class="org.highmed.bpe.service.SelectPongTarget">
+    <bpmn:serviceTask id="ServiceTask_0ko681m" name="selectTarget" camunda:class="org.highmed.dsf.bpe.service.SelectPongTarget">
       <bpmn:incoming>SequenceFlow_09i9zb8</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1ism9wt</bpmn:outgoing>
     </bpmn:serviceTask>

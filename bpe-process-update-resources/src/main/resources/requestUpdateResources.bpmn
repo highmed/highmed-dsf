@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_0os0n0z" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.1.0">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_0os0n0z" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="2.2.4">
   <bpmn:process id="requestUpdateResources" isExecutable="true" camunda:versionTag="1.0.0">
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>SequenceFlow_1ryplwc</bpmn:outgoing>
@@ -10,7 +10,7 @@
       <bpmn:incoming>SequenceFlow_1xwki6k</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="SequenceFlow_1xwki6k" sourceRef="Task_126uqse" targetRef="EndEvent_1f9cjs7" />
-    <bpmn:sendTask id="Task_126uqse" name="sendRequest" camunda:class="org.highmed.bpe.message.SendRequest">
+    <bpmn:sendTask id="Task_126uqse" name="sendRequest" camunda:class="org.highmed.dsf.bpe.message.SendRequest">
       <bpmn:extensionElements>
         <camunda:inputOutput>
           <camunda:inputParameter name="processDefinitionKey">executeUpdateResources</camunda:inputParameter>
@@ -22,7 +22,7 @@
       <bpmn:outgoing>SequenceFlow_1xwki6k</bpmn:outgoing>
       <bpmn:multiInstanceLoopCharacteristics camunda:collection="${multiInstanceTargets.targets}" camunda:elementVariable="multiInstanceTarget" />
     </bpmn:sendTask>
-    <bpmn:serviceTask id="Task_1ws5v3q" name="selectResourceAndTargets" camunda:class="org.highmed.bpe.service.SelectResourceAndTargets">
+    <bpmn:serviceTask id="Task_1ws5v3q" name="selectResourceAndTargets" camunda:class="org.highmed.dsf.bpe.service.SelectResourceAndTargets">
       <bpmn:incoming>SequenceFlow_1ryplwc</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1u4zxix</bpmn:outgoing>
     </bpmn:serviceTask>

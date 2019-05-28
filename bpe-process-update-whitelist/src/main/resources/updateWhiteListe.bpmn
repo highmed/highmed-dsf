@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1yb5vw3" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.1.0">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1yb5vw3" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="2.2.4">
   <bpmn:process id="updateWhiteList" isExecutable="true" camunda:versionTag="1.0.0">
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>SequenceFlow_0bbhq2r</bpmn:outgoing>
@@ -9,7 +9,7 @@
       <bpmn:incoming>SequenceFlow_0oyvmcd</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="SequenceFlow_0oyvmcd" sourceRef="Task_0im0htk" targetRef="EndEvent_0xd0x8k" />
-    <bpmn:serviceTask id="Task_0im0htk" name="updateWhiteList" camunda:class="org.highmed.bpe.service.UpdateWhiteList">
+    <bpmn:serviceTask id="Task_0im0htk" name="updateWhiteList" camunda:class="org.highmed.dsf.bpe.service.UpdateWhiteList">
       <bpmn:incoming>SequenceFlow_0bbhq2r</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0oyvmcd</bpmn:outgoing>
     </bpmn:serviceTask>

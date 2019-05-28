@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_0azvmx1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.1.0">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_0azvmx1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="2.2.4">
   <bpmn:process id="ping" isExecutable="true" camunda:versionTag="1.0.0">
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>SequenceFlow_0k1j79c</bpmn:outgoing>
     </bpmn:startEvent>
     <bpmn:sequenceFlow id="SequenceFlow_0k1j79c" sourceRef="StartEvent_1" targetRef="Task_0vq4jpt" />
     <bpmn:sequenceFlow id="SequenceFlow_05ia6lz" sourceRef="Task_0vq4jpt" targetRef="Task_0duocqf" />
-    <bpmn:serviceTask id="Task_0vq4jpt" name="selectTargets" camunda:class="org.highmed.bpe.service.SelectPingTargets">
+    <bpmn:serviceTask id="Task_0vq4jpt" name="selectTargets" camunda:class="org.highmed.dsf.bpe.service.SelectPingTargets">
       <bpmn:incoming>SequenceFlow_0k1j79c</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_05ia6lz</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sendTask id="Task_0duocqf" name="sendPing" camunda:class="org.highmed.bpe.message.SendPing">
+    <bpmn:sendTask id="Task_0duocqf" name="sendPing" camunda:class="org.highmed.dsf.bpe.message.SendPing">
       <bpmn:extensionElements>
         <camunda:inputOutput>
           <camunda:inputParameter name="processDefinitionKey">pong</camunda:inputParameter>
@@ -34,7 +34,7 @@
         <bpmn:incoming>SequenceFlow_0vxiwg9</bpmn:incoming>
       </bpmn:endEvent>
       <bpmn:sequenceFlow id="SequenceFlow_0vxiwg9" sourceRef="Task_071cmsp" targetRef="EndEvent_1yf8pjt" />
-      <bpmn:serviceTask id="Task_071cmsp" name="logPong" camunda:class="org.highmed.bpe.service.LogPong">
+      <bpmn:serviceTask id="Task_071cmsp" name="logPong" camunda:class="org.highmed.dsf.bpe.service.LogPong">
         <bpmn:incoming>SequenceFlow_0r89tc0</bpmn:incoming>
         <bpmn:outgoing>SequenceFlow_0vxiwg9</bpmn:outgoing>
       </bpmn:serviceTask>
