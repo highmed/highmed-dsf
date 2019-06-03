@@ -13,7 +13,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
-			<artifactId>fhir-adapter</artifactId>
+			<artifactId>dsf-fhir-adapter</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>

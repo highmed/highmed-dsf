@@ -13,11 +13,11 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
-			<artifactId>fhir-server</artifactId>
+			<artifactId>dsf-fhir-server</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
-			<artifactId>fhir-db-migration</artifactId>
+			<artifactId>dsf-fhir-db-migration</artifactId>
 		</dependency>
 
 		<dependency>

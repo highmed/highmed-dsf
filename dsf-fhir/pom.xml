@@ -66,42 +66,42 @@
 		<dependencies>
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
-				<artifactId>fhir-adapter</artifactId>
+				<artifactId>dsf-fhir-adapter</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
-				<artifactId>fhir-db-migration</artifactId>
+				<artifactId>dsf-fhir-db-migration</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
-				<artifactId>fhir-server</artifactId>
+				<artifactId>dsf-fhir-server</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
-				<artifactId>fhir-server-jetty</artifactId>
+				<artifactId>dsf-fhir-server-jetty</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
-				<artifactId>fhir-client</artifactId>
+				<artifactId>dsf-fhir-client</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
-				<artifactId>fhir-webservice-client</artifactId>
+				<artifactId>dsf-fhir-webservice-client</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
-				<artifactId>fhir-websocket-client</artifactId>
+				<artifactId>dsf-fhir-websocket-client</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
-				<artifactId>fhir-cert-generator</artifactId>
+				<artifactId>dsf-fhir-cert-generator</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
