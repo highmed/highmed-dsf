@@ -9,6 +9,7 @@
 	<modules>
 		<module>bpe</module>
 		<module>fhir</module>
+		<module>tools</module>
 	</modules>
 
 	<properties>
