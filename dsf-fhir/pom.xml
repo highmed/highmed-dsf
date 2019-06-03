@@ -11,9 +11,9 @@
 	</parent>
 
 	<modules>
-		<module>dsf-fhir-adapter</module>
 		<module>dsf-fhir-cert-generator</module>
 		<module>dsf-fhir-db-migration</module>
+		<module>dsf-fhir-rest-adapter</module>
 		<module>dsf-fhir-server</module>
 		<module>dsf-fhir-server-jetty</module>
 		<module>dsf-fhir-webservice-client</module>
@@ -66,7 +66,7 @@
 		<dependencies>
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
-				<artifactId>dsf-fhir-adapter</artifactId>
+				<artifactId>dsf-fhir-rest-adapter</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
