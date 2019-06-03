@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<changeSet author="hhund" id="db.create-db-users.changelog-0.1.0" dbms="postgresql">
+		<preConditions onFail="MARK_RAN">
+			<and>
+				<sqlCheck expectedResult="0">SELECT COUNT(*) FROM pg_roles WHERE rolname='${server_user}'</sqlCheck>
+				<sqlCheck expectedResult="0">SELECT COUNT(*) FROM pg_roles WHERE rolname='${server_users_group}'</sqlCheck>
+				<sqlCheck expectedResult="0">SELECT COUNT(*) FROM pg_roles WHERE rolname='${camunda_users_group}'</sqlCheck>
+			</and>
+		</preConditions>
+		<sql>
+			CREATE ROLE ${server_users_group} NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION;
+			CREATE ROLE ${camunda_users_group} NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION;
+			CREATE ROLE ${server_user} LOGIN PASSWORD '${server_user_password}' NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION;
+			GRANT ${server_users_group} TO ${server_user};
+			CREATE ROLE ${camunda_user} LOGIN PASSWORD '${camunda_user_password}' NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION;
+			GRANT ${camunda_users_group} TO ${camunda_user};
+		</sql>
+	</changeSet>
+</databaseChangeLog>

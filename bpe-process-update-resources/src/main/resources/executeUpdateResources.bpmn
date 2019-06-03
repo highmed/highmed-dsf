@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_0k0v4i2" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="2.2.4">
+  <bpmn:process id="executeUpdateResources" isExecutable="true" camunda:versionTag="1.0.0">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>SequenceFlow_0djh0eg</bpmn:outgoing>
+      <bpmn:messageEventDefinition messageRef="Message_1r6vnvn" />
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_0djh0eg" sourceRef="StartEvent_1" targetRef="Task_1hj13pf" />
+    <bpmn:serviceTask id="Task_1hj13pf" name="updateResources" camunda:class="org.highmed.dsf.bpe.service.UpdateResources">
+      <bpmn:incoming>SequenceFlow_0djh0eg</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0eygcor</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent_1i1w8yx">
+      <bpmn:incoming>SequenceFlow_0eygcor</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_0eygcor" sourceRef="Task_1hj13pf" targetRef="EndEvent_1i1w8yx" />
+    <bpmn:textAnnotation id="TextAnnotation_0rr4guv">
+      <bpmn:text>TODO: add step to check requesting organization is of type TTP</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_1sc5e0d" sourceRef="Task_1hj13pf" targetRef="TextAnnotation_0rr4guv" />
+  </bpmn:process>
+  <bpmn:message id="Message_1r6vnvn" name="updateResources" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="executeUpdateResources">
+      <bpmndi:BPMNShape id="StartEvent_1orek60_di" bpmnElement="StartEvent_1">
+        <dc:Bounds x="179" y="103" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0djh0eg_di" bpmnElement="SequenceFlow_0djh0eg">
+        <di:waypoint x="215" y="121" />
+        <di:waypoint x="265" y="121" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_1t3955f_di" bpmnElement="Task_1hj13pf">
+        <dc:Bounds x="265" y="81" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_1i1w8yx_di" bpmnElement="EndEvent_1i1w8yx">
+        <dc:Bounds x="415" y="103" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0eygcor_di" bpmnElement="SequenceFlow_0eygcor">
+        <di:waypoint x="365" y="121" />
+        <di:waypoint x="415" y="121" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="TextAnnotation_0rr4guv_di" bpmnElement="TextAnnotation_0rr4guv">
+        <dc:Bounds x="270" y="188" width="227.98828125" height="42.99609375" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Association_1sc5e0d_di" bpmnElement="Association_1sc5e0d">
+        <di:waypoint x="347" y="161" />
+        <di:waypoint x="368" y="188" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
