@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<changeSet author="camunda.org" id="db.camunda_engine.changelog-0.1.0">
+		<sqlFile dbms="postgresql" encoding="utf8" path="sql/create/postgres_engine_7.10.0.sql" />
+			
+		<sql dbms="postgresql">
+			GRANT ALL ON TABLE ACT_GE_PROPERTY TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_GE_PROPERTY TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_GE_BYTEARRAY TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_GE_BYTEARRAY TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_RE_DEPLOYMENT TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RE_DEPLOYMENT TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_RU_EXECUTION TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RU_EXECUTION TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_RU_JOB TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RU_JOB TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_RU_JOBDEF TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RU_JOBDEF TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_RE_PROCDEF TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RE_PROCDEF TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_RU_TASK TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RU_TASK TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_RU_IDENTITYLINK TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RU_IDENTITYLINK TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_RU_VARIABLE TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RU_VARIABLE TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_RU_EVENT_SUBSCR TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RU_EVENT_SUBSCR TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_RU_INCIDENT TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RU_INCIDENT TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_RU_AUTHORIZATION TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RU_AUTHORIZATION TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_RU_FILTER TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RU_FILTER TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_RU_METER_LOG TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RU_METER_LOG TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_RU_EXT_TASK TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RU_EXT_TASK TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_RU_BATCH TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RU_BATCH TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_RE_CASE_DEF TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RE_CASE_DEF TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_RU_CASE_EXECUTION TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RU_CASE_EXECUTION TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_RU_CASE_SENTRY_PART TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RU_CASE_SENTRY_PART TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_RE_DECISION_DEF TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RE_DECISION_DEF TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_RE_DECISION_REQ_DEF TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_RE_DECISION_REQ_DEF TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_HI_PROCINST TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_HI_PROCINST TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_HI_ACTINST TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_HI_ACTINST TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_HI_TASKINST TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_HI_TASKINST TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_HI_VARINST TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_HI_VARINST TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_HI_DETAIL TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_HI_DETAIL TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_HI_IDENTITYLINK TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_HI_IDENTITYLINK TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_HI_COMMENT TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_HI_COMMENT TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_HI_ATTACHMENT TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_HI_ATTACHMENT TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_HI_OP_LOG TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_HI_OP_LOG TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_HI_INCIDENT TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_HI_INCIDENT TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_HI_JOB_LOG TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_HI_JOB_LOG TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_HI_BATCH TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_HI_BATCH TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_HI_EXT_TASK_LOG TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_HI_EXT_TASK_LOG TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_HI_CASEINST TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_HI_CASEINST TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_HI_CASEACTINST TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_HI_CASEACTINST TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_HI_DECINST TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_HI_DECINST TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_HI_DEC_IN TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_HI_DEC_IN TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_HI_DEC_OUT TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_HI_DEC_OUT TO ${camunda_users_group};
+		</sql>
+	</changeSet>
+
+</databaseChangeLog>
