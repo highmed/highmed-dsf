@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<property name="json" value="JSONB" dbms="postgresql" />
+	<property name="json" value="varchar(5000)" dbms="h2" />
+
+	<changeSet author="hhund" id="db.locations.changelog-0.1.0">
+		<createTable tableName="locations">
+			<column name="location_id" type="UUID">
+				<constraints nullable="false" />
+			</column>
+			<column name="version" type="BIGINT" defaultValueNumeric="1">
+				<constraints nullable="false" />
+			</column>
+			<column name="deleted" type="BOOLEAN" defaultValue="false">
+				<constraints nullable="false" />
+			</column>
+			<column name="location" type="${json}">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addPrimaryKey tableName="locations" columnNames="location_id, version" />
+
+		<sql dbms="postgresql">
+			ALTER TABLE locations OWNER TO ${liquibase_user};
+			GRANT ALL ON TABLE locations TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE ON TABLE locations TO ${server_users_group};
+			CREATE INDEX location_id_index ON locations USING btree (location_id);
+			CREATE INDEX location_index ON locations USING gin (location);
+			CREATE INDEX location_id_version_index ON locations USING btree (location_id, version);
+		</sql>
+
+		<createView viewName="current_locations" replaceIfExists="true">
+			SELECT DISTINCT ON (location_id) location_id, version, location
+			FROM locations WHERE NOT deleted ORDER BY location_id, version DESC
+		</createView>
+
+		<sql dbms="postgresql">
+			ALTER TABLE current_locations OWNER TO ${liquibase_user};
+			GRANT ALL ON TABLE current_locations TO ${liquibase_user};
+			GRANT SELECT ON TABLE current_locations TO ${server_users_group};
+		</sql>
+	</changeSet>
+</databaseChangeLog>
