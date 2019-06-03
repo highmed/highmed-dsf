@@ -11,13 +11,13 @@
 	</parent>
 
 	<modules>
-		<module>fhir-adapter</module>
-		<module>fhir-cert-generator</module>
-		<module>fhir-db-migration</module>
-		<module>fhir-server</module>
-		<module>fhir-server-jetty</module>
-		<module>fhir-webservice-client</module>
-		<module>fhir-websocket-client</module>
+		<module>dsf-fhir-adapter</module>
+		<module>dsf-fhir-cert-generator</module>
+		<module>dsf-fhir-db-migration</module>
+		<module>dsf-fhir-server</module>
+		<module>dsf-fhir-server-jetty</module>
+		<module>dsf-fhir-webservice-client</module>
+		<module>dsf-fhir-websocket-client</module>
 	</modules>
 
 	<properties>

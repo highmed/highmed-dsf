@@ -11,15 +11,15 @@
 	</parent>
 
 	<modules>
-		<module>bpe-cert-generator</module>
-		<module>bpe-db-migration</module>
-		<module>bpe-process-base</module>
-		<module>bpe-process-ping</module>
-		<module>bpe-process-update-resources</module>
-		<module>bpe-process-update-whitelist</module>
-		<module>bpe-server</module>
-		<module>bpe-server-jetty</module>
-		<module>bpe-webservice-client</module>
+		<module>dsf-bpe-cert-generator</module>
+		<module>dsf-bpe-db-migration</module>
+		<module>dsf-bpe-process-base</module>
+		<module>dsf-bpe-process-ping</module>
+		<module>dsf-bpe-process-update-resources</module>
+		<module>dsf-bpe-process-update-whitelist</module>
+		<module>dsf-bpe-server</module>
+		<module>dsf-bpe-server-jetty</module>
+		<module>dsf-bpe-webservice-client</module>
 	</modules>
 
 	<properties>
