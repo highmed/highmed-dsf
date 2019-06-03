@@ -7,9 +7,9 @@
 	<packaging>pom</packaging>
 
 	<modules>
-		<module>bpe</module>
-		<module>fhir</module>
-		<module>tools</module>
+		<module>dsf-bpe</module>
+		<module>dsf-fhir</module>
+		<module>dsf-tools</module>
 	</modules>
 
 	<properties>
