@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<property name="json" value="JSONB" dbms="postgresql" />
+	<property name="json" value="varchar(5000)" dbms="h2" />
+
+	<changeSet author="hhund" id="db.research_studies.changelog-0.1.0">
+		<createTable tableName="research_studies">
+			<column name="research_study_id" type="UUID">
+				<constraints nullable="false" />
+			</column>
+			<column name="version" type="BIGINT" defaultValueNumeric="1">
+				<constraints nullable="false" />
+			</column>
+			<column name="deleted" type="BOOLEAN" defaultValue="false">
+				<constraints nullable="false" />
+			</column>
+			<column name="research_study" type="${json}">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addPrimaryKey tableName="research_studies" columnNames="research_study_id, version" />
+
+		<sql dbms="postgresql">
+			ALTER TABLE research_studies OWNER TO ${liquibase_user};
+			GRANT ALL ON TABLE research_studies TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE ON TABLE research_studies TO ${server_users_group};
+			CREATE INDEX research_study_id_index ON research_studies USING btree (research_study_id);
+			CREATE INDEX research_study_index ON research_studies USING gin (research_study);
+			CREATE INDEX research_study_id_version_index ON research_studies USING btree (research_study_id, version);
+		</sql>
+
+		<createView viewName="current_research_studies" replaceIfExists="true">
+			SELECT DISTINCT ON (research_study_id) research_study_id, version, research_study
+			FROM research_studies WHERE NOT deleted ORDER BY research_study_id, version DESC
+		</createView>
+
+		<sql dbms="postgresql">
+			ALTER TABLE current_research_studies OWNER TO ${liquibase_user};
+			GRANT ALL ON TABLE current_research_studies TO ${liquibase_user};
+			GRANT SELECT ON TABLE current_research_studies TO ${server_users_group};
+		</sql>
+	</changeSet>
+</databaseChangeLog>

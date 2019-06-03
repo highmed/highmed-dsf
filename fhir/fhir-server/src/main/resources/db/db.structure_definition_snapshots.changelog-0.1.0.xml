@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<property name="json" value="JSONB" dbms="postgresql" />
+	<property name="json" value="varchar(5000)" dbms="h2" />
+
+	<changeSet author="hhund" id="db.structure_definition_snapshots.changelog-0.1.0">
+		<createTable tableName="structure_definition_snapshots">
+			<column name="structure_definition_snapshot_id" type="UUID">
+				<constraints nullable="false" />
+			</column>
+			<column name="version" type="BIGINT" defaultValueNumeric="1">
+				<constraints nullable="false" />
+			</column>
+			<column name="deleted" type="BOOLEAN" defaultValue="false">
+				<constraints nullable="false" />
+			</column>
+			<column name="structure_definition_snapshot" type="${json}">
+				<constraints nullable="false" />
+			</column>
+			<column name="structure_definition_snapshot_info" type="${json}">
+				<constraints nullable="true" />
+			</column>
+		</createTable>
+
+		<addPrimaryKey tableName="structure_definition_snapshots" columnNames="structure_definition_snapshot_id, version" />
+
+		<sql dbms="postgresql">
+			ALTER TABLE structure_definition_snapshots OWNER TO ${liquibase_user};
+			GRANT ALL ON TABLE structure_definition_snapshots TO ${liquibase_user};
+			GRANT SELECT, INSERT, UPDATE ON TABLE structure_definition_snapshots TO ${server_users_group};
+			CREATE INDEX structure_definition_snapshot_id_index ON structure_definition_snapshots USING btree (structure_definition_snapshot_id);
+			CREATE INDEX structure_definition_snapshot_index ON structure_definition_snapshots USING gin (structure_definition_snapshot);
+			CREATE INDEX structure_definition_snapshot_id_version_index ON structure_definition_snapshots USING btree (structure_definition_snapshot_id, version);
+			CREATE INDEX structure_definition_snapshot_info_index ON structure_definition_snapshots USING gin (structure_definition_snapshot_info);
+		</sql>
+
+		<createView viewName="current_structure_definition_snapshots" replaceIfExists="true">
+			SELECT DISTINCT ON (structure_definition_snapshot_id) structure_definition_snapshot_id, version, structure_definition_snapshot
+			FROM structure_definition_snapshots WHERE NOT deleted ORDER BY structure_definition_snapshot_id, version DESC
+		</createView>
+
+		<sql dbms="postgresql">
+			ALTER TABLE current_structure_definition_snapshots OWNER TO ${liquibase_user};
+			GRANT ALL ON TABLE current_structure_definition_snapshots TO ${liquibase_user};
+			GRANT SELECT ON TABLE current_structure_definition_snapshots TO ${server_users_group};
+		</sql>
+	</changeSet>
+</databaseChangeLog>
