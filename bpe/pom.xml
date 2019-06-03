@@ -3,13 +3,12 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.highmed.dsf</groupId>
 	<artifactId>bpe-parent</artifactId>
-	<version>0.1.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<parent>
-		<groupId>de.rwh.pom</groupId>
-		<artifactId>rwh-pom</artifactId>
-		<version>0.5.0</version>
+		<groupId>org.highmed.dsf</groupId>
+		<artifactId>dsf-pom</artifactId>
+		<version>0.1.0-SNAPSHOT</version>
 	</parent>
 
 	<modules>
@@ -27,7 +26,6 @@
 	<properties>
 		<!-- if upgrading, add latest (and in between) versions to db-migration project, db-migration needs dependency to all versions since and including 7.10.0 for camunda-sql-scripts -->
 		<camunda.version>7.10.0</camunda.version>
-		<dsf.fhir.version>0.1.0-SNAPSHOT</dsf.fhir.version>
 	</properties>
 
 	<licenses>
@@ -39,28 +37,6 @@
 	</licenses>
 
 	<repositories>
-		<repository>
-			<id>repo-it-snapshot</id>
-			<name>libs-snapshot-mi</name>
-			<url>https://repository.it.hs-heilbronn.de/artifactory/libs-snapshot-mi-local</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-		</repository>
-		<repository>
-			<id>repo-it-release</id>
-			<name>libs-release-mi</name>
-			<url>https://repository.it.hs-heilbronn.de/artifactory/libs-release-mi-local</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-		</repository>
 		<repository>
 			<id>camunda-bpm</id>
 			<url>https://app.camunda.com/nexus/content/repositories/camunda-bpm/</url>
@@ -134,12 +110,12 @@
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
 				<artifactId>fhir-websocket-client</artifactId>
-				<version>${dsf.fhir.version}</version>
+				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
 				<artifactId>fhir-webservice-client</artifactId>
-				<version>${dsf.fhir.version}</version>
+				<version>${project.version}</version>
 			</dependency>
 
 			<dependency>
