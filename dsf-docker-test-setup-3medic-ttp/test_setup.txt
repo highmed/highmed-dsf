@@ -101,7 +101,7 @@ Windows Host
 		registry:5000
 		
 Upload Config Files
-	ansible-playbook MeDIC_1/upload.yml MeDIC_2/upload.yml MeDIC_3/upload.yml TTP/upload.yml
+	ansible-playbook medic1/upload.yml medic2/upload.yml medic3/upload.yml ttp/upload.yml
 
 FHIR Docker
 	docker build -t highmed/fhir .
