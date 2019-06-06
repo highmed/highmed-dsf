@@ -1,0 +1,72 @@
+version: '3.2'
+services:
+   proxy:
+      image: highmed/bpe_proxy
+      restart: always
+      ports:
+      - 8081:80
+      - 8444:443
+      volumes:
+      -  type: bind
+         source: ./proxy/ssl
+         target: /usr/local/apache2/ssl
+      environment:
+         HTTPS_SERVER_NAME_PORT: localhost:8444
+         APP_SERVER_IP: 172.28.3.3
+      networks:
+         frontend:
+            ipv4_address: 172.28.3.2
+      depends_on:
+      - app
+   app:
+      image: highmed/bpe
+      restart: always
+      volumes:
+      -  type: bind
+         source: ./app/conf
+         target: /opt/bpe/conf
+      networks:
+         frontend:
+            ipv4_address: 172.28.3.3
+         backend:
+            ipv4_address: 172.28.3.130
+         fhir_bpe:
+            ipv4_address: 172.28.2.3
+      depends_on:
+      - db
+   db:
+      image: postgres
+      restart: always
+      environment:
+         POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+         POSTGRES_USER_FILE: /run/secrets/postgres_user
+         POSTGRES_DB_FILE: /run/secrets/postgres_db
+      networks:
+         backend:
+            ipv4_address: 172.28.3.131
+      secrets:
+      - postgres_password
+      - postgres_user
+      - postgres_db
+secrets:
+   postgres_password:
+      file: ./db/conf/postgres_password
+   postgres_user:
+      file: ./db/conf/postgres_user
+   postgres_db:
+      file: ./db/conf/postgres_db
+networks:
+   frontend:
+      driver: bridge
+      ipam:
+         driver: default
+         config:
+         - subnet: 172.28.3.0/25
+   backend:
+      driver: bridge
+      ipam:
+         driver: default
+         config:
+         - subnet: 172.28.3.128/25
+   fhir_bpe:
+      external: true

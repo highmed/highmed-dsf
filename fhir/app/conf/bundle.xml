@@ -1,0 +1,72 @@
+<Bundle xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://hl7.org/fhir http://www.hl7.org/fhir/fhir-base.xsd">
+	<type value="transaction" />
+	<entry>
+		<fullUrl value="urn:uuid:bb73165c-c7b9-4342-8e28-531f07fa7735" />
+		<resource>
+			<Organization xmlns="http://hl7.org/fhir">
+				<identifier>
+					<system value="http://highmed.org/fhir/CodeSystem/organization" />
+					<value value="Test_TTP" />
+				</identifier>
+				<active value="true" />
+				<type>
+					<coding>
+						<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
+						<code value="TTP" />
+					</coding>
+				</type>
+				<name value="Test TTP" />
+				<endpoint>
+					<reference value="urn:uuid:b879e904-d666-45de-a995-accdd4429b79" />
+					<type value="Endpoint" />
+				</endpoint>
+				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
+					<valueString value="34b903e0ba645ce2afff9ba9c6182019c25b81eee5f757abd248c9bdac5f2bf77ba41de8c8502cbc30e856931b3f067e431eca8002caa50f36a9d92dcd6865f9" />
+				</extension>
+				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
+					<valueString value="aabbcb93f3f30d46fb4daf9dddaa3b0a101c3de7d3a344bbcc3b1f4abf0ba948a41a90e7be9095a3de2c775dfd0d31d1cc796329f073d5c90c1b30b594789f80" />
+				</extension>
+			</Organization>
+		</resource>
+		<request>
+			<method value="POST" />
+			<url value="Organization" />
+			<ifNoneExist value="identifier=http://highmed.org/fhir/CodeSystem/organization|Test_TTP" />
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:b879e904-d666-45de-a995-accdd4429b79" />
+		<resource>
+			<Endpoint xmlns="http://hl7.org/fhir">
+				<status value="active" />
+				<connectionType>
+					<system value="http://terminology.hl7.org/CodeSystem/endpoint-connection-type" />
+					<code value="hl7-fhir-rest" />
+				</connectionType>
+				<name value="Test Endpoint" />
+				<managingOrganization>
+					<type value="Organization" />
+					<identifier>
+						<system value="http://highmed.org/fhir/CodeSystem/organization" />
+						<value value="Test_TTP" />
+					</identifier>
+				</managingOrganization>
+				<payloadType>
+					<coding>
+						<system value="http://hl7.org/fhir/resource-types" />
+						<code value="Task" />
+					</coding>
+				</payloadType>
+				<payloadMimeType value="application/fhir+json" />
+				<payloadMimeType value="application/fhir+xml" />
+				<address value="https://localhost:8001/fhir" />
+			</Endpoint>
+		</resource>
+		<request>
+			<method value="POST" />
+			<url value="Endpoint" />
+			<ifNoneExist value="organization:identifier=http://highmed.org/fhir/CodeSystem/organization|Test_TTP" />
+		</request>
+	</entry>
+</Bundle>

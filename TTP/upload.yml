@@ -1,0 +1,21 @@
+-  hosts: ttp
+   vars:
+      user: '{{ lookup(''env'',''USER'') }}'
+   tasks:
+   -  name: Create /opt/highmed folder
+      file:
+         path: /opt/highmed
+         owner: '{{ user }}'
+         group: '{{ user }}'
+         state: directory
+      become: true
+   -  name: Synchronize bpe folder
+      synchronize:
+         src: bpe
+         dest: /opt/highmed
+         perms: no
+   -  name: Synchronize fhir folder
+      synchronize:
+         src: fhir
+         dest: /opt/highmed
+         perms: no 

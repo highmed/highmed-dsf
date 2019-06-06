@@ -1,0 +1,103 @@
+-  hosts: HiGHmed
+   gather_facts: false
+   vars:
+      user: '{{ lookup(''env'',''USER'') }}'
+   become: true
+   pre_tasks:
+   -  name: Install python2 for Ansible
+      raw: bash -c "test -e /usr/bin/python || (apt -qqy update && apt install -qqy python-minimal)"
+      register: output
+      changed_when: output.stdout != ""
+   -  name: Gathering Facts
+      setup: null
+   tasks:
+   -  name: Run dist-upgrade
+      apt:
+         upgrade: dist
+         update_cache: true
+   -  name: Install azure kernel
+      apt:
+         name: linux-azure
+         state: present
+   -  name: Remove dependencies that are no longer required
+      apt:
+         autoremove: true
+   -  name: Check if a reboot is required
+      shell: '[ -f /var/run/reboot-required ]'
+      failed_when: false
+      register: reboot_required
+      changed_when: reboot_required.rc == 0
+      notify: Reboot
+   -  name: Add Docker GPG key
+      apt_key:
+         url: https://download.docker.com/linux/ubuntu/gpg
+         state: present
+   -  name: Verify Docker GPG key
+      apt_key:
+         id: 0EBFCD88
+         state: present
+   -  name: Add Docker APT repository
+      apt_repository:
+         repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ansible_distribution_release}} stable
+         state: present
+         update_cache: true
+   -  name: Install Docker-CE and related packages
+      apt:
+         name:
+         - apt-transport-https
+         - ca-certificates
+         - curl
+         - gnupg-agent
+         - software-properties-common
+         - docker-ce
+         - docker-ce-cli
+         - containerd.io
+         state: present
+         update_cache: true
+   -  name: Setup Docker insecure registry 'registry:5000'
+      copy:
+         dest: /etc/docker/daemon.json
+         content: |
+            {
+              "insecure-registries" : ["registry:5000"]
+            }
+      notify: Restart Docker
+   -  name: Add user '{{ user }}' to group docker
+      user:
+         name: '{{ user }}'
+         groups: docker
+         append: true
+   -  name: Download docker-compose
+      get_url:
+         url: https://github.com/docker/compose/releases/download/1.24.0/docker-compose-{{ ansible_system }}-{{ ansible_userspace_architecture
+            }}
+         dest: /usr/local/bin/docker-compose
+         checksum: sha256:bee6460f96339d5d978bb63d17943f773e1a140242dfa6c941d5e020a302c91b
+         mode: '777'
+   -  name: update /etc/hosts file
+      blockinfile:
+         path: /etc/hosts
+         block: |
+            {{ item.ip }} {{ item.name }}
+         marker: '# {mark} ANSIBLE MANAGED BLOCK {{ item.name }}'
+      with_items:
+      -  name: registry
+         ip: 10.42.0.9
+      -  name: ttp
+         ip: 10.42.0.10
+      -  name: medic1
+         ip: 10.42.0.11
+      -  name: medic2
+         ip: 10.42.0.12
+      -  name: medic3
+         ip: 10.42.0.13
+   -  name: Set timezone to Europe/Berlin
+      timezone:
+         name: Europe/Berlin
+   handlers:
+   -  name: Reboot
+      reboot: null
+   -  name: Restart Docker
+      service:
+         name: docker
+         state: restarted
