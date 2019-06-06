@@ -25,9 +25,9 @@
 		<addPrimaryKey tableName="practitioner_roles" columnNames="practitioner_role_id, version" />
 
 		<sql dbms="postgresql">
-			ALTER TABLE practitioner_roles OWNER TO ${liquibase_user};
-			GRANT ALL ON TABLE practitioner_roles TO ${liquibase_user};
-			GRANT SELECT, INSERT, UPDATE ON TABLE practitioner_roles TO ${server_users_group};
+			ALTER TABLE practitioner_roles OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE practitioner_roles TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE ON TABLE practitioner_roles TO ${db.server_users_group};
 			CREATE INDEX practitioner_role_id_index ON practitioner_roles USING btree (practitioner_role_id);
 			CREATE INDEX practitioner_role_index ON practitioner_roles USING gin (practitioner_role);
 			CREATE INDEX practitioner_role_id_version_index ON practitioner_roles USING btree (practitioner_role_id, version);
@@ -39,9 +39,9 @@
 		</createView>
 
 		<sql dbms="postgresql">
-			ALTER TABLE current_practitioner_roles OWNER TO ${liquibase_user};
-			GRANT ALL ON TABLE current_practitioner_roles TO ${liquibase_user};
-			GRANT SELECT ON TABLE current_practitioner_roles TO ${server_users_group};
+			ALTER TABLE current_practitioner_roles OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_practitioner_roles TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_practitioner_roles TO ${db.server_users_group};
 		</sql>
 	</changeSet>
 </databaseChangeLog>

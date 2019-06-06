@@ -25,9 +25,9 @@
 		<addPrimaryKey tableName="tasks" columnNames="task_id, version" />
 
 		<sql dbms="postgresql">
-			ALTER TABLE tasks OWNER TO ${liquibase_user};
-			GRANT ALL ON TABLE tasks TO ${liquibase_user};
-			GRANT SELECT, INSERT, UPDATE ON TABLE tasks TO ${server_users_group};
+			ALTER TABLE tasks OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE tasks TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE ON TABLE tasks TO ${db.server_users_group};
 			CREATE INDEX task_id_index ON tasks USING btree (task_id);
 			CREATE INDEX task_index ON tasks USING gin (task);
 			CREATE INDEX task_id_version_index ON tasks USING btree (task_id, version);
@@ -39,9 +39,9 @@
 		</createView>
 
 		<sql dbms="postgresql">
-			ALTER TABLE current_tasks OWNER TO ${liquibase_user};
-			GRANT ALL ON TABLE current_tasks TO ${liquibase_user};
-			GRANT SELECT ON TABLE current_tasks TO ${server_users_group};
+			ALTER TABLE current_tasks OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_tasks TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_tasks TO ${db.server_users_group};
 		</sql>
 	</changeSet>
 </databaseChangeLog>

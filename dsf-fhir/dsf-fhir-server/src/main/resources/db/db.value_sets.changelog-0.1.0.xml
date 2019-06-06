@@ -25,9 +25,9 @@
 		<addPrimaryKey tableName="value_sets" columnNames="value_set_id, version" />
 
 		<sql dbms="postgresql">
-			ALTER TABLE value_sets OWNER TO ${liquibase_user};
-			GRANT ALL ON TABLE value_sets TO ${liquibase_user};
-			GRANT SELECT, INSERT, UPDATE ON TABLE value_sets TO ${server_users_group};
+			ALTER TABLE value_sets OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE value_sets TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE ON TABLE value_sets TO ${db.server_users_group};
 			CREATE INDEX value_set_id_index ON value_sets USING btree (value_set_id);
 			CREATE INDEX value_set_index ON value_sets USING gin (value_set);
 			CREATE INDEX value_set_id_version_index ON value_sets USING btree (value_set_id, version);
@@ -39,9 +39,9 @@
 		</createView>
 
 		<sql dbms="postgresql">
-			ALTER TABLE current_value_sets OWNER TO ${liquibase_user};
-			GRANT ALL ON TABLE current_value_sets TO ${liquibase_user};
-			GRANT SELECT ON TABLE current_value_sets TO ${server_users_group};
+			ALTER TABLE current_value_sets OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_value_sets TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_value_sets TO ${db.server_users_group};
 		</sql>
 	</changeSet>
 </databaseChangeLog>

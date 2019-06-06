@@ -1,6 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
 	<artifactId>dsf-bpe-pom</artifactId>
 	<packaging>pom</packaging>
 
@@ -11,8 +12,6 @@
 	</parent>
 
 	<modules>
-		<module>dsf-bpe-cert-generator</module>
-		<module>dsf-bpe-db-migration</module>
 		<module>dsf-bpe-process-base</module>
 		<module>dsf-bpe-process-ping</module>
 		<module>dsf-bpe-process-update-resources</module>
@@ -26,14 +25,6 @@
 		<!-- if upgrading, add latest (and in between) versions to db-migration project, db-migration needs dependency to all versions since and including 7.10.0 for camunda-sql-scripts -->
 		<camunda.version>7.10.0</camunda.version>
 	</properties>
-
-	<licenses>
-		<license>
-			<name>Apache License, Version 2.0</name>
-			<url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
-			<distribution>manual</distribution>
-		</license>
-	</licenses>
 
 	<repositories>
 		<repository>
@@ -77,11 +68,6 @@
 			</dependency>
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
-				<artifactId>dsf-bpe-db-migration</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.highmed.dsf</groupId>
 				<artifactId>dsf-bpe-process-base</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -118,24 +104,9 @@
 			</dependency>
 
 			<dependency>
-				<groupId>de.rwh.utils</groupId>
-				<artifactId>jetty-utils</artifactId>
-				<version>0.3.1</version>
-			</dependency>
-			<dependency>
-				<groupId>de.rwh.utils</groupId>
-				<artifactId>crypto-utils</artifactId>
-				<version>2.1.1</version>
-			</dependency>
-			<dependency>
-				<groupId>de.rwh.utils</groupId>
-				<artifactId>log4j2-utils</artifactId>
-				<version>0.2.1</version>
-			</dependency>
-			<dependency>
-				<groupId>de.rwh.utils</groupId>
-				<artifactId>db-test-utils</artifactId>
-				<version>0.2.1</version>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-tools-db-migration</artifactId>
+				<version>${project.version}</version>
 			</dependency>
 
 			<dependency>
@@ -195,22 +166,6 @@
 				<groupId>org.glassfish.jaxb</groupId>
 				<artifactId>jaxb-runtime</artifactId>
 				<version>2.3.2</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.apache.commons</groupId>
-				<artifactId>commons-dbcp2</artifactId>
-				<version>2.6.0</version>
-			</dependency>
-			<dependency>
-				<groupId>org.liquibase</groupId>
-				<artifactId>liquibase-core</artifactId>
-				<version>3.6.3</version>
-			</dependency>
-			<dependency>
-				<groupId>org.postgresql</groupId>
-				<artifactId>postgresql</artifactId>
-				<version>42.2.5</version>
 			</dependency>
 
 			<dependency>

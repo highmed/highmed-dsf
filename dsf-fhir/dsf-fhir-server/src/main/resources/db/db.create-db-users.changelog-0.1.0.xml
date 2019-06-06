@@ -7,14 +7,14 @@
 	<changeSet author="hhund" id="db.create-db-users.changelog-0.1.0" dbms="postgresql">
 		<preConditions onFail="MARK_RAN">
 			<and>
-				<sqlCheck expectedResult="0">SELECT COUNT(*) FROM pg_roles WHERE rolname='${server_user}'</sqlCheck>
-				<sqlCheck expectedResult="0">SELECT COUNT(*) FROM pg_roles WHERE rolname='${server_users_group}'</sqlCheck>
+				<sqlCheck expectedResult="0">SELECT COUNT(*) FROM pg_roles WHERE rolname='${db.server_user}'</sqlCheck>
+				<sqlCheck expectedResult="0">SELECT COUNT(*) FROM pg_roles WHERE rolname='${db.server_users_group}'</sqlCheck>
 			</and>
 		</preConditions>
 		<sql>
-			CREATE ROLE ${server_users_group} NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION;
-			CREATE ROLE ${server_user} LOGIN PASSWORD '${server_user_password}' NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION;
-			GRANT ${server_users_group} TO ${server_user};
+			CREATE ROLE ${db.server_users_group} NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION;
+			CREATE ROLE ${db.server_user} LOGIN PASSWORD '${db.server_user_password}' NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION;
+			GRANT ${db.server_users_group} TO ${db.server_user};
 		</sql>
 	</changeSet>
 </databaseChangeLog>

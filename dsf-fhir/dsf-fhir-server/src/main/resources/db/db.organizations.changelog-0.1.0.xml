@@ -25,9 +25,9 @@
 		<addPrimaryKey tableName="organizations" columnNames="organization_id, version" />
 
 		<sql dbms="postgresql">
-			ALTER TABLE organizations OWNER TO ${liquibase_user};
-			GRANT ALL ON TABLE organizations TO ${liquibase_user};
-			GRANT SELECT, INSERT, UPDATE ON TABLE organizations TO ${server_users_group};
+			ALTER TABLE organizations OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE organizations TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE ON TABLE organizations TO ${db.server_users_group};
 			CREATE INDEX organization_id_index ON organizations USING btree (organization_id);
 			CREATE INDEX organization_index ON organizations USING gin (organization);
 			CREATE INDEX organization_id_version_index ON organizations USING btree (organization_id, version)
@@ -39,9 +39,9 @@
 		</createView>
 
 		<sql dbms="postgresql">
-			ALTER TABLE current_organizations OWNER TO ${liquibase_user};
-			GRANT ALL ON TABLE current_organizations TO ${liquibase_user};
-			GRANT SELECT ON TABLE current_organizations TO ${server_users_group};
+			ALTER TABLE current_organizations OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_organizations TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_organizations TO ${db.server_users_group};
 		</sql>
 	</changeSet>
 </databaseChangeLog>

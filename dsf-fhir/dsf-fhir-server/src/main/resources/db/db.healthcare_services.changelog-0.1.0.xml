@@ -25,9 +25,9 @@
 		<addPrimaryKey tableName="healthcare_services" columnNames="healthcare_service_id, version" />
 
 		<sql dbms="postgresql">
-			ALTER TABLE healthcare_services OWNER TO ${liquibase_user};
-			GRANT ALL ON TABLE healthcare_services TO ${liquibase_user};
-			GRANT SELECT, INSERT, UPDATE ON TABLE healthcare_services TO ${server_users_group};
+			ALTER TABLE healthcare_services OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE healthcare_services TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE ON TABLE healthcare_services TO ${db.server_users_group};
 			CREATE INDEX healthcare_service_id_index ON healthcare_services USING btree (healthcare_service_id);
 			CREATE INDEX healthcare_service_index ON healthcare_services USING gin (healthcare_service);
 			CREATE INDEX healthcare_service_id_version_index ON healthcare_services USING btree (healthcare_service_id, version);
@@ -39,9 +39,9 @@
 		</createView>
 
 		<sql dbms="postgresql">
-			ALTER TABLE current_healthcare_services OWNER TO ${liquibase_user};
-			GRANT ALL ON TABLE current_healthcare_services TO ${liquibase_user};
-			GRANT SELECT ON TABLE current_healthcare_services TO ${server_users_group};
+			ALTER TABLE current_healthcare_services OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_healthcare_services TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_healthcare_services TO ${db.server_users_group};
 		</sql>
 	</changeSet>
 </databaseChangeLog>

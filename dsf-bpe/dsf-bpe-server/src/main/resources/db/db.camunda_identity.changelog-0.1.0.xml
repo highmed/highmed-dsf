@@ -9,18 +9,18 @@
 		<sqlFile dbms="postgresql" encoding="utf8" path="sql/create/postgres_identity_7.10.0.sql" />
 			
 		<sql dbms="postgresql">
-			GRANT ALL ON TABLE ACT_ID_GROUP TO ${liquibase_user};
-			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_ID_GROUP TO ${camunda_users_group};
-			GRANT ALL ON TABLE ACT_ID_MEMBERSHIP TO ${liquibase_user};
-			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_ID_MEMBERSHIP TO ${camunda_users_group};
-			GRANT ALL ON TABLE ACT_ID_USER TO ${liquibase_user};
-			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_ID_USER TO ${camunda_users_group};
-			GRANT ALL ON TABLE ACT_ID_INFO TO ${liquibase_user};
-			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_ID_INFO TO ${camunda_users_group};
-			GRANT ALL ON TABLE ACT_ID_TENANT TO ${liquibase_user};
-			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_ID_TENANT TO ${camunda_users_group};
-			GRANT ALL ON TABLE ACT_ID_TENANT_MEMBER TO ${liquibase_user};
-			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_ID_TENANT_MEMBER TO ${camunda_users_group};
+			GRANT ALL ON TABLE ACT_ID_GROUP TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_ID_GROUP TO ${db.camunda_users_group};
+			GRANT ALL ON TABLE ACT_ID_MEMBERSHIP TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_ID_MEMBERSHIP TO ${db.camunda_users_group};
+			GRANT ALL ON TABLE ACT_ID_USER TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_ID_USER TO ${db.camunda_users_group};
+			GRANT ALL ON TABLE ACT_ID_INFO TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_ID_INFO TO ${db.camunda_users_group};
+			GRANT ALL ON TABLE ACT_ID_TENANT TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_ID_TENANT TO ${db.camunda_users_group};
+			GRANT ALL ON TABLE ACT_ID_TENANT_MEMBER TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_ID_TENANT_MEMBER TO ${db.camunda_users_group};
 		</sql>
 	</changeSet>
 

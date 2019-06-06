@@ -1,0 +1,585 @@
+package org.highmed.dsf.tools.generator;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.InvalidKeyException;
+import java.security.KeyPair;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.security.interfaces.RSAPrivateCrtKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.apache.commons.codec.binary.Hex;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Streams;
+
+import de.rwh.utils.crypto.CertificateAuthority;
+import de.rwh.utils.crypto.CertificateAuthority.CertificateAuthorityBuilder;
+import de.rwh.utils.crypto.CertificateHelper;
+import de.rwh.utils.crypto.CertificationRequestBuilder;
+import de.rwh.utils.crypto.io.CertificateReader;
+import de.rwh.utils.crypto.io.CertificateWriter;
+import de.rwh.utils.crypto.io.CsrIo;
+import de.rwh.utils.crypto.io.PemIo;
+
+public class CertificateGenerator
+{
+	private static final Logger logger = LoggerFactory.getLogger(CertificateGenerator.class);
+
+	private static final String SERVER_DNS_ALTERNATIVE_NAME = "fhir";
+	private static final String CERT_PASSWORD = "password";
+
+	private static final String[] SERVER_COMMON_NAMES = { "ttp", "medic1", "medic2", "medic3", "localhost" };
+	private static final String[] CLIENT_COMMON_NAMES = { "ttp-client", "medic1-client", "medic2-client",
+			"medic3-client", "test-client", "Webbrowser Test User" };
+
+	private static enum CertificateType
+	{
+		CLIENT, SERVER
+	}
+
+	public static final class CertificateFiles
+	{
+		private final String commonName;
+		private final CertificateType certificateType;
+		private final JcaPKCS10CertificationRequest certificateRequest;
+		private final KeyStore p12KeyStore;
+		private final KeyPair keyPair;
+		private final X509Certificate certificate;
+		private final byte[] certificateSha512Thumbprint;
+
+		CertificateFiles(String commonName, CertificateType certificateType,
+				JcaPKCS10CertificationRequest certificateRequest, KeyStore p12KeyStore, KeyPair keyPair,
+				X509Certificate certificate, byte[] certificateSha512Thumbprint)
+		{
+			this.commonName = commonName;
+			this.certificateType = certificateType;
+			this.certificateRequest = certificateRequest;
+			this.p12KeyStore = p12KeyStore;
+			this.keyPair = keyPair;
+			this.certificate = certificate;
+			this.certificateSha512Thumbprint = certificateSha512Thumbprint;
+		}
+
+		public String getCommonName()
+		{
+			return commonName;
+		}
+
+		public CertificateType getCertificateType()
+		{
+			return certificateType;
+		}
+
+		public JcaPKCS10CertificationRequest getCertificateRequest()
+		{
+			return certificateRequest;
+		}
+
+		public KeyStore getP12KeyStore()
+		{
+			return p12KeyStore;
+		}
+
+		public KeyPair getKeyPair()
+		{
+			return keyPair;
+		}
+
+		public X509Certificate getCertificate()
+		{
+			return certificate;
+		}
+
+		public byte[] getCertificateSha512Thumbprint()
+		{
+			return certificateSha512Thumbprint;
+		}
+
+		public String getCertificateSha512ThumbprintHex()
+		{
+			return Hex.encodeHexString(certificateSha512Thumbprint);
+		}
+	}
+
+	private static final class CertificateAndP12File
+	{
+		final KeyStore p12KeyStore;
+		final X509Certificate certificate;
+
+		CertificateAndP12File(KeyStore p12KeyStore, X509Certificate certificate)
+		{
+			this.p12KeyStore = p12KeyStore;
+			this.certificate = certificate;
+		}
+	}
+
+	private CertificateAuthority ca;
+	private Map<String, CertificateFiles> serverCertificateFilesByCommonName;
+	private Map<String, CertificateFiles> clientCertificateFilesByCommonName;
+
+	public void generateCertificates()
+	{
+		ca = initCA();
+
+		serverCertificateFilesByCommonName = Arrays.stream(SERVER_COMMON_NAMES).map(createCert(CertificateType.SERVER))
+				.collect(Collectors.toMap(CertificateFiles::getCommonName, Function.identity()));
+		clientCertificateFilesByCommonName = Arrays.stream(CLIENT_COMMON_NAMES).map(createCert(CertificateType.CLIENT))
+				.collect(Collectors.toMap(CertificateFiles::getCommonName, Function.identity()));
+
+		writeThumbprints();
+	}
+
+	public Map<String, CertificateFiles> getServerCertificateFilesByCommonName()
+	{
+		return serverCertificateFilesByCommonName != null
+				? Collections.unmodifiableMap(serverCertificateFilesByCommonName)
+				: Collections.emptyMap();
+	}
+
+	public Map<String, CertificateFiles> getClientCertificateFilesByCommonName()
+	{
+		return clientCertificateFilesByCommonName != null
+				? Collections.unmodifiableMap(clientCertificateFilesByCommonName)
+				: Collections.emptyMap();
+	}
+
+	public CertificateAuthority initCA()
+	{
+		Path caCertFile = createFolderIfNotExists(Paths.get("cert/ca/testca_certificate.pem"));
+		Path caPrivateKeyFile = createFolderIfNotExists(Paths.get("cert/ca/testca_private-key.pem"));
+
+		if (Files.isReadable(caCertFile) && Files.isReadable(caPrivateKeyFile))
+		{
+			logger.info("Initializing CA from cert file: {}, private key {}", caCertFile.toString(),
+					caPrivateKeyFile.toString());
+
+			X509Certificate caCertificate = readCertificate(caCertFile);
+			RSAPrivateCrtKey caPrivateKey = readPrivatekey(caPrivateKeyFile);
+
+			return CertificateAuthorityBuilder.create(caCertificate, caPrivateKey).initialize();
+		}
+		else
+		{
+			logger.info("Initializing CA with new cert file: {}, private key {}", caCertFile.toString(),
+					caPrivateKeyFile.toString());
+
+			CertificateAuthority ca = CertificateAuthorityBuilder.create("DE", null, null, null, null, "Test")
+					.initialize();
+
+			writeCertificate(caCertFile, ca.getCertificate());
+			writePrivateKey(caPrivateKeyFile, (RSAPrivateCrtKey) ca.getCaKeyPair().getPrivate());
+
+			return ca;
+		}
+	}
+
+	private void writePrivateKey(Path privateKeyFile, RSAPrivateCrtKey privateKey)
+	{
+		try
+		{
+			PemIo.writePrivateKeyToPem(privateKey, privateKeyFile);
+		}
+		catch (IOException e)
+		{
+			logger.error("Error while writing private-key to " + privateKeyFile.toString(), e);
+			throw new RuntimeException(e);
+		}
+	}
+
+	private void writeCertificate(Path certificateFile, X509Certificate certificate)
+	{
+		try
+		{
+			PemIo.writeX509CertificateToPem(certificate, certificateFile);
+		}
+		catch (CertificateEncodingException | IllegalStateException | IOException e)
+		{
+			logger.error("Error while writing certificate to " + certificateFile.toString(), e);
+			throw new RuntimeException(e);
+		}
+	}
+
+	private RSAPrivateCrtKey readPrivatekey(Path privateKeyFile)
+	{
+		try
+		{
+			return PemIo.readPrivateKeyFromPem(privateKeyFile);
+		}
+		catch (NoSuchAlgorithmException | InvalidKeySpecException | IOException e)
+		{
+			logger.error("Error while reading private-key from " + privateKeyFile.toString(), e);
+			throw new RuntimeException(e);
+		}
+	}
+
+	private X509Certificate readCertificate(Path certFile)
+	{
+		try
+		{
+			return PemIo.readX509CertificateFromPem(certFile);
+		}
+		catch (CertificateException | IOException e)
+		{
+			logger.error("Error while reading certificate from " + certFile.toString(), e);
+			throw new RuntimeException(e);
+		}
+	}
+
+	public void writeThumbprints()
+	{
+		Path thumbprintsFile = Paths.get("cert", "thumbprints.txt");
+
+		Stream<String> certificates = Streams
+				.concat(serverCertificateFilesByCommonName.values().stream(),
+						clientCertificateFilesByCommonName.values().stream())
+				.sorted(Comparator.comparing(CertificateFiles::getCommonName))
+				.map(c -> c.getCommonName() + "\n\t" + c.getCertificateSha512ThumbprintHex() + " (SHA-512)\n");
+
+		try
+		{
+			logger.info("Writing certificate thumbprints file to {}", thumbprintsFile.toString());
+			Files.write(thumbprintsFile, (Iterable<String>) () -> certificates.iterator(), StandardCharsets.UTF_8);
+		}
+		catch (IOException e)
+		{
+			logger.error("Error while writing certificate thumbprints file to " + thumbprintsFile.toString(), e);
+			throw new RuntimeException(e);
+		}
+	}
+
+	public Function<String, CertificateFiles> createCert(CertificateType certificateType)
+	{
+		return commonName ->
+		{
+			Path privateKeyFile = createFolderIfNotExists(getPrivateKeyPath(commonName));
+			Path publicKeyFile = createFolderIfNotExists(getPublicKeyPath(commonName));
+			KeyPair keyPair = createOrReadKeyPair(privateKeyFile, publicKeyFile, commonName);
+
+			Path certificateRequestFile = createFolderIfNotExists(getCertReqPath(commonName));
+			JcaPKCS10CertificationRequest clientRequest = createOrReadCertificateRequest(certificateRequestFile,
+					keyPair, commonName, certificateType);
+
+			Path certificateP12File = createFolderIfNotExists(getCertP12Path(commonName));
+			Path certificatePemFile = createFolderIfNotExists(getCertPemPath(commonName));
+			CertificateAndP12File certificateAndP12File = signOrReadCertificate(certificatePemFile, certificateP12File,
+					clientRequest, keyPair.getPrivate(), commonName, certificateType);
+
+			return new CertificateFiles(commonName, certificateType, clientRequest, certificateAndP12File.p12KeyStore,
+					keyPair, certificateAndP12File.certificate,
+					calculateSha512CertificateThumbprint(certificateAndP12File.certificate));
+		};
+	}
+
+	private CertificateAndP12File signOrReadCertificate(Path certificateFile, Path certificateP12File,
+			JcaPKCS10CertificationRequest certificateRequest, PrivateKey privateKey, String commonName,
+			CertificateType certificateType)
+	{
+		if (Files.isReadable(certificateFile))
+		{
+			logger.info("Reading certificate (pem) from {} [{}]", certificateFile.toString(), commonName);
+			X509Certificate certificate = readCertificate(certificateFile);
+
+			KeyStore p12KeyStore;
+			if (!Files.isReadable(certificateP12File))
+				p12KeyStore = writeP12File(certificateP12File, privateKey, commonName, certificate);
+			else
+				p12KeyStore = readP12File(certificateP12File);
+
+			return new CertificateAndP12File(p12KeyStore, certificate);
+		}
+		else
+		{
+			logger.info("Signing {} certificate [{}]", certificateType.toString().toLowerCase(), commonName);
+			X509Certificate certificate = signCertificateRequest(certificateRequest, certificateType);
+
+			logger.info("Saving certificate (pem) to {} [{}]", certificateFile.toString(), commonName);
+			writeCertificate(certificateFile, certificate);
+
+			KeyStore p12KeyStore = writeP12File(certificateP12File, privateKey, commonName, certificate);
+
+			return new CertificateAndP12File(p12KeyStore, certificate);
+		}
+	}
+
+	private X509Certificate signCertificateRequest(JcaPKCS10CertificationRequest certificateRequest,
+			CertificateType certificateType)
+	{
+		try
+		{
+			switch (certificateType)
+			{
+				case CLIENT:
+					return ca.signWebClientCertificate(certificateRequest);
+				case SERVER:
+					return ca.signWebServerCertificate(certificateRequest);
+				default:
+					throw new RuntimeException("Unknown certificate type " + certificateType);
+			}
+		}
+		catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException | OperatorCreationException
+				| CertificateException | IllegalStateException | IOException e)
+		{
+			logger.error("Error while signing " + certificateType.toString().toLowerCase() + " certificate", e);
+			throw new RuntimeException(e);
+		}
+	}
+
+	private KeyStore writeP12File(Path p12File, PrivateKey privateKey, String commonName, X509Certificate certificate)
+	{
+		logger.info("Saving certificate (p21) to {}, password '{}' [{}]", p12File.toString(), CERT_PASSWORD,
+				commonName);
+		try
+		{
+			KeyStore p12KeyStore = CertificateHelper.toPkcs12KeyStore(privateKey,
+					new Certificate[] { certificate, ca.getCertificate() }, commonName, CERT_PASSWORD);
+
+			CertificateWriter.toPkcs12(p12File, p12KeyStore, CERT_PASSWORD);
+
+			return p12KeyStore;
+		}
+		catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e)
+		{
+			logger.error("Error while writing certificate P12 file to " + p12File.toString(), e);
+			throw new RuntimeException(e);
+		}
+	}
+
+	private KeyStore readP12File(Path p12File)
+	{
+		try
+		{
+			return CertificateReader.fromPkcs12(p12File, CERT_PASSWORD);
+		}
+		catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e)
+		{
+			logger.error("Error while reading certificate P12 file from " + p12File.toString(), e);
+			throw new RuntimeException(e);
+		}
+	}
+
+	private JcaPKCS10CertificationRequest createOrReadCertificateRequest(Path certificateRequestFile, KeyPair keyPair,
+			String commonName, CertificateType certificateType)
+	{
+		if (Files.isReadable(certificateRequestFile))
+		{
+			logger.info("Reading certificate request (csr) from {} [{}]", certificateRequestFile.toString(),
+					commonName);
+			return readCertificateRequest(certificateRequestFile);
+		}
+		else
+		{
+			X500Name subject = CertificationRequestBuilder.createSubject("DE", null, null, null, null, commonName);
+			JcaPKCS10CertificationRequest certificateRequest = createCertificateRequest(keyPair, commonName,
+					certificateType, subject);
+
+			logger.info("Saving certificate request (csr) to {} [{}]", certificateRequestFile.toString(), commonName);
+			writeCertificateRequest(certificateRequestFile, certificateRequest);
+
+			return certificateRequest;
+		}
+	}
+
+	private JcaPKCS10CertificationRequest createCertificateRequest(KeyPair keyPair, String commonName,
+			CertificateType certificateType, X500Name subject)
+	{
+		try
+		{
+			switch (certificateType)
+			{
+				case CLIENT:
+					return CertificationRequestBuilder.createClientCertificationRequest(subject, keyPair);
+				case SERVER:
+					return CertificationRequestBuilder.createServerCertificationRequest(subject, keyPair, null,
+							commonName, SERVER_DNS_ALTERNATIVE_NAME);
+				default:
+					throw new RuntimeException("Unknown certificate type " + certificateType);
+			}
+		}
+		catch (NoSuchAlgorithmException | OperatorCreationException | IllegalStateException | IOException e)
+		{
+			logger.error("Error while creating certificate-request", e);
+			throw new RuntimeException(e);
+		}
+	}
+
+	private void writeCertificateRequest(Path certificateRequestFile, JcaPKCS10CertificationRequest certificateRequest)
+	{
+		try
+		{
+			CsrIo.writeJcaPKCS10CertificationRequestToCsr(certificateRequest, certificateRequestFile);
+		}
+		catch (IOException e)
+		{
+			logger.error("Error while reading certificate-request from " + certificateRequestFile.toString(), e);
+			throw new RuntimeException(e);
+		}
+	}
+
+	private JcaPKCS10CertificationRequest readCertificateRequest(Path certificateRequestFile)
+	{
+		try
+		{
+			return CsrIo.readJcaPKCS10CertificationRequestFromCsr(certificateRequestFile);
+		}
+		catch (NoSuchAlgorithmException | InvalidKeySpecException | IOException e)
+		{
+			logger.error("Error while reading certificate-request from " + certificateRequestFile.toString(), e);
+			throw new RuntimeException(e);
+		}
+	}
+
+	private KeyPair createOrReadKeyPair(Path privateKeyFile, Path publicKeyFile, String commonName)
+	{
+		if (Files.isReadable(privateKeyFile) && Files.isReadable(publicKeyFile))
+		{
+			logger.info("Reading private-key from {} [{}]", privateKeyFile.toString(), commonName);
+			PrivateKey privateKey = readPrivatekey(privateKeyFile);
+
+			logger.info("Reading public-key from {} [{}]", publicKeyFile.toString(), commonName);
+			PublicKey publicKey = readPublicKey(publicKeyFile);
+
+			return new KeyPair(publicKey, privateKey);
+		}
+		else
+		{
+			logger.info("Generating 4096 bit key pair [{}]", commonName);
+			KeyPair keyPair = createKeyPair();
+
+			logger.info("Saving private-key to {} [{}]", privateKeyFile.toString(), commonName);
+			writePrivateKey(privateKeyFile, (RSAPrivateCrtKey) keyPair.getPrivate());
+
+			logger.info("Saving public-key to {} [{}]", publicKeyFile.toString(), commonName);
+			writePublicKey(publicKeyFile, keyPair);
+
+			return keyPair;
+		}
+	}
+
+	private void writePublicKey(Path publicKeyFile, KeyPair keyPair)
+	{
+		try
+		{
+			PemIo.writePublicKeyToPem((RSAPublicKey) keyPair.getPublic(), publicKeyFile);
+		}
+		catch (IOException e)
+		{
+			logger.error("Error while writing public-key to " + publicKeyFile.toString(), e);
+			throw new RuntimeException(e);
+		}
+	}
+
+	private KeyPair createKeyPair()
+	{
+		try
+		{
+			return CertificationRequestBuilder.createRsaKeyPair4096Bit();
+		}
+		catch (NoSuchAlgorithmException e)
+		{
+			logger.error("Error while creating RSA key pair", e);
+			throw new RuntimeException(e);
+		}
+	}
+
+	private RSAPublicKey readPublicKey(Path publicKeyFile)
+	{
+		try
+		{
+			return PemIo.readPublicKeyFromPem(publicKeyFile);
+		}
+		catch (NoSuchAlgorithmException | InvalidKeySpecException | IOException e)
+		{
+			logger.error("Error while reading public-key from " + publicKeyFile.toString(), e);
+			throw new RuntimeException(e);
+		}
+	}
+
+	private Path createFolderIfNotExists(Path file)
+	{
+		try
+		{
+			Files.createDirectories(file.getParent());
+		}
+		catch (IOException e)
+		{
+			logger.error("Error while creating directories " + file.getParent().toString(), e);
+			throw new RuntimeException(e);
+		}
+
+		return file;
+	}
+
+	private Path getCertReqPath(String commonName)
+	{
+		commonName = commonName.replaceAll("\\s+", "_");
+		return Paths.get("cert", commonName, commonName + "_" + "certificate.csr");
+	}
+
+	private Path getCertP12Path(String commonName)
+	{
+		commonName = commonName.replaceAll("\\s+", "_");
+		return Paths.get("cert", commonName, commonName + "_" + "certificate.p12");
+	}
+
+	private Path getCertPemPath(String commonName)
+	{
+		commonName = commonName.replaceAll("\\s+", "_");
+		return Paths.get("cert", commonName, commonName + "_" + "certificate.pem");
+	}
+
+	private Path getPrivateKeyPath(String commonName)
+	{
+		commonName = commonName.replaceAll("\\s+", "_");
+		return Paths.get("cert", commonName, commonName + "_" + "private-key.pem");
+	}
+
+	private Path getPublicKeyPath(String commonName)
+	{
+		commonName = commonName.replaceAll("\\s+", "_");
+		return Paths.get("cert", commonName, commonName + "_" + "public-key.pem");
+	}
+
+	private byte[] calculateSha512CertificateThumbprint(X509Certificate certificate)
+	{
+		try
+		{
+			return MessageDigest.getInstance("SHA-512").digest(certificate.getEncoded());
+		}
+		catch (CertificateEncodingException | NoSuchAlgorithmException e)
+		{
+			logger.error("Error while calculating SHA-512 certificate thumbprint", e);
+			throw new RuntimeException(e);
+		}
+	}
+
+	public void copyCertificates()
+	{
+		// TODO Auto-generated method stub
+
+	}
+}

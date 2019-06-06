@@ -25,9 +25,9 @@
 		<addPrimaryKey tableName="endpoints" columnNames="endpoint_id, version" />
 
 		<sql dbms="postgresql">
-			ALTER TABLE endpoints OWNER TO ${liquibase_user};
-			GRANT ALL ON TABLE endpoints TO ${liquibase_user};
-			GRANT SELECT, INSERT, UPDATE ON TABLE endpoints TO ${server_users_group};
+			ALTER TABLE endpoints OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE endpoints TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE ON TABLE endpoints TO ${db.server_users_group};
 			CREATE INDEX endpoint_id_index ON endpoints USING btree (endpoint_id);
 			CREATE INDEX endpoint_index ON endpoints USING gin (endpoint);
 			CREATE INDEX endpoint_id_version_index ON endpoints USING btree (endpoint_id, version);
@@ -39,9 +39,9 @@
 		</createView>
 
 		<sql dbms="postgresql">
-			ALTER TABLE current_endpoints OWNER TO ${liquibase_user};
-			GRANT ALL ON TABLE current_endpoints TO ${liquibase_user};
-			GRANT SELECT ON TABLE current_endpoints TO ${server_users_group};
+			ALTER TABLE current_endpoints OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_endpoints TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_endpoints TO ${db.server_users_group};
 		</sql>
 	</changeSet>
 </databaseChangeLog>

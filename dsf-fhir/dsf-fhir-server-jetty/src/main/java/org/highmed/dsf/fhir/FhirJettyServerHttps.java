@@ -26,7 +26,7 @@ import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
 import org.glassfish.jersey.servlet.init.JerseyServletContainerInitializer;
 import org.highmed.dsf.fhir.authentication.AuthenticationFilter;
-import org.highmed.dsf.fhir.db.DbMigrator;
+import org.highmed.dsf.tools.db.DbMigrator;
 import org.springframework.web.SpringServletContainerInitializer;
 
 import de.rwh.utils.jetty.JettyServer;
@@ -42,7 +42,8 @@ public class FhirJettyServerHttps
 		Log4jInitializer.initializeLog4j(properties);
 
 		Properties dbProperties = PropertiesReader.read(Paths.get("conf/db.properties"), StandardCharsets.UTF_8);
-		DbMigrator.retryOnConnectException(3, () -> DbMigrator.migrate(dbProperties));
+		DbMigrator dbMigrator = new DbMigrator(dbProperties);
+		DbMigrator.retryOnConnectException(3, dbMigrator::migrate);
 
 		HttpConfiguration httpConfiguration = httpConfiguration(secureRequestCustomizer());
 		Function<Server, ServerConnector> connector = httpsConnector(httpConfiguration, properties);

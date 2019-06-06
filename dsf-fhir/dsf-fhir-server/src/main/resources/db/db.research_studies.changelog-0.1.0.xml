@@ -25,9 +25,9 @@
 		<addPrimaryKey tableName="research_studies" columnNames="research_study_id, version" />
 
 		<sql dbms="postgresql">
-			ALTER TABLE research_studies OWNER TO ${liquibase_user};
-			GRANT ALL ON TABLE research_studies TO ${liquibase_user};
-			GRANT SELECT, INSERT, UPDATE ON TABLE research_studies TO ${server_users_group};
+			ALTER TABLE research_studies OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE research_studies TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE ON TABLE research_studies TO ${db.server_users_group};
 			CREATE INDEX research_study_id_index ON research_studies USING btree (research_study_id);
 			CREATE INDEX research_study_index ON research_studies USING gin (research_study);
 			CREATE INDEX research_study_id_version_index ON research_studies USING btree (research_study_id, version);
@@ -39,9 +39,9 @@
 		</createView>
 
 		<sql dbms="postgresql">
-			ALTER TABLE current_research_studies OWNER TO ${liquibase_user};
-			GRANT ALL ON TABLE current_research_studies TO ${liquibase_user};
-			GRANT SELECT ON TABLE current_research_studies TO ${server_users_group};
+			ALTER TABLE current_research_studies OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_research_studies TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_research_studies TO ${db.server_users_group};
 		</sql>
 	</changeSet>
 </databaseChangeLog>

@@ -28,9 +28,9 @@
 		<addPrimaryKey tableName="structure_definition_snapshots" columnNames="structure_definition_snapshot_id, version" />
 
 		<sql dbms="postgresql">
-			ALTER TABLE structure_definition_snapshots OWNER TO ${liquibase_user};
-			GRANT ALL ON TABLE structure_definition_snapshots TO ${liquibase_user};
-			GRANT SELECT, INSERT, UPDATE ON TABLE structure_definition_snapshots TO ${server_users_group};
+			ALTER TABLE structure_definition_snapshots OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE structure_definition_snapshots TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE ON TABLE structure_definition_snapshots TO ${db.server_users_group};
 			CREATE INDEX structure_definition_snapshot_id_index ON structure_definition_snapshots USING btree (structure_definition_snapshot_id);
 			CREATE INDEX structure_definition_snapshot_index ON structure_definition_snapshots USING gin (structure_definition_snapshot);
 			CREATE INDEX structure_definition_snapshot_id_version_index ON structure_definition_snapshots USING btree (structure_definition_snapshot_id, version);
@@ -43,9 +43,9 @@
 		</createView>
 
 		<sql dbms="postgresql">
-			ALTER TABLE current_structure_definition_snapshots OWNER TO ${liquibase_user};
-			GRANT ALL ON TABLE current_structure_definition_snapshots TO ${liquibase_user};
-			GRANT SELECT ON TABLE current_structure_definition_snapshots TO ${server_users_group};
+			ALTER TABLE current_structure_definition_snapshots OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_structure_definition_snapshots TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_structure_definition_snapshots TO ${db.server_users_group};
 		</sql>
 	</changeSet>
 </databaseChangeLog>

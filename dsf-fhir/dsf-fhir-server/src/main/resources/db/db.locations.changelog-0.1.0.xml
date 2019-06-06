@@ -25,9 +25,9 @@
 		<addPrimaryKey tableName="locations" columnNames="location_id, version" />
 
 		<sql dbms="postgresql">
-			ALTER TABLE locations OWNER TO ${liquibase_user};
-			GRANT ALL ON TABLE locations TO ${liquibase_user};
-			GRANT SELECT, INSERT, UPDATE ON TABLE locations TO ${server_users_group};
+			ALTER TABLE locations OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE locations TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE ON TABLE locations TO ${db.server_users_group};
 			CREATE INDEX location_id_index ON locations USING btree (location_id);
 			CREATE INDEX location_index ON locations USING gin (location);
 			CREATE INDEX location_id_version_index ON locations USING btree (location_id, version);
@@ -39,9 +39,9 @@
 		</createView>
 
 		<sql dbms="postgresql">
-			ALTER TABLE current_locations OWNER TO ${liquibase_user};
-			GRANT ALL ON TABLE current_locations TO ${liquibase_user};
-			GRANT SELECT ON TABLE current_locations TO ${server_users_group};
+			ALTER TABLE current_locations OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_locations TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_locations TO ${db.server_users_group};
 		</sql>
 	</changeSet>
 </databaseChangeLog>

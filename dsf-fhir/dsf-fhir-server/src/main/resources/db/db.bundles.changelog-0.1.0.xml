@@ -25,9 +25,9 @@
 		<addPrimaryKey tableName="bundles" columnNames="bundle_id, version" />
 
 		<sql dbms="postgresql">
-			ALTER TABLE bundles OWNER TO ${liquibase_user};
-			GRANT ALL ON TABLE bundles TO ${liquibase_user};
-			GRANT SELECT, INSERT, UPDATE ON TABLE bundles TO ${server_users_group};
+			ALTER TABLE bundles OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE bundles TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE ON TABLE bundles TO ${db.server_users_group};
 			CREATE INDEX bundle_id_index ON bundles USING btree (bundle_id);
 			CREATE INDEX bundle_index ON bundles USING gin (bundle);
 			CREATE INDEX bundle_id_version_index ON bundles USING btree (bundle_id, version);
@@ -39,9 +39,9 @@
 		</createView>
 
 		<sql dbms="postgresql">
-			ALTER TABLE current_bundles OWNER TO ${liquibase_user};
-			GRANT ALL ON TABLE current_bundles TO ${liquibase_user};
-			GRANT SELECT ON TABLE current_bundles TO ${server_users_group};
+			ALTER TABLE current_bundles OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_bundles TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_bundles TO ${db.server_users_group};
 		</sql>
 	</changeSet>
 </databaseChangeLog>

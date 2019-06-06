@@ -25,9 +25,9 @@
 		<addPrimaryKey tableName="subscriptions" columnNames="subscription_id, version" />
 
 		<sql dbms="postgresql">
-			ALTER TABLE subscriptions OWNER TO ${liquibase_user};
-			GRANT ALL ON TABLE subscriptions TO ${liquibase_user};
-			GRANT SELECT, INSERT, UPDATE ON TABLE subscriptions TO ${server_users_group};
+			ALTER TABLE subscriptions OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE subscriptions TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE ON TABLE subscriptions TO ${db.server_users_group};
 			CREATE INDEX subscription_id_index ON subscriptions USING btree (subscription_id);
 			CREATE INDEX subscription_index ON patients USING gin (patient);
 			CREATE INDEX subscription_id_version_index ON subscriptions USING btree (subscription_id, version);
@@ -39,9 +39,9 @@
 		</createView>
 
 		<sql dbms="postgresql">
-			ALTER TABLE current_subscriptions OWNER TO ${liquibase_user};
-			GRANT ALL ON TABLE current_subscriptions TO ${liquibase_user};
-			GRANT SELECT ON TABLE current_subscriptions TO ${server_users_group};
+			ALTER TABLE current_subscriptions OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_subscriptions TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_subscriptions TO ${db.server_users_group};
 		</sql>
 	</changeSet>
 </databaseChangeLog>

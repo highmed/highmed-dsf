@@ -1,6 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
 	<artifactId>dsf-fhir-pom</artifactId>
 	<packaging>pom</packaging>
 
@@ -11,8 +12,6 @@
 	</parent>
 
 	<modules>
-		<module>dsf-fhir-cert-generator</module>
-		<module>dsf-fhir-db-migration</module>
 		<module>dsf-fhir-rest-adapter</module>
 		<module>dsf-fhir-server</module>
 		<module>dsf-fhir-server-jetty</module>
@@ -22,30 +21,7 @@
 
 	<properties>
 		<tyrus.version>1.15</tyrus.version>
-		<hapi.version>3.8.0-SNAPSHOT</hapi.version>
 	</properties>
-
-	<licenses>
-		<license>
-			<name>Apache License, Version 2.0</name>
-			<url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
-			<distribution>manual</distribution>
-		</license>
-	</licenses>
-
-	<repositories>
-		<repository>
-			<id>sonatype-snapshot</id>
-			<name>oss.sonatype.org snapshots</name>
-			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-		</repository>
-	</repositories>
 
 	<dependencies>
 		<!-- Logging -->
@@ -67,11 +43,6 @@
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
 				<artifactId>dsf-fhir-rest-adapter</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.highmed.dsf</groupId>
-				<artifactId>dsf-fhir-db-migration</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -99,31 +70,11 @@
 				<artifactId>dsf-fhir-websocket-client</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>org.highmed.dsf</groupId>
-				<artifactId>dsf-fhir-cert-generator</artifactId>
-				<version>${project.version}</version>
-			</dependency>
 
 			<dependency>
-				<groupId>de.rwh.utils</groupId>
-				<artifactId>jetty-utils</artifactId>
-				<version>0.3.1</version>
-			</dependency>
-			<dependency>
-				<groupId>de.rwh.utils</groupId>
-				<artifactId>crypto-utils</artifactId>
-				<version>2.1.1</version>
-			</dependency>
-			<dependency>
-				<groupId>de.rwh.utils</groupId>
-				<artifactId>log4j2-utils</artifactId>
-				<version>0.2.1</version>
-			</dependency>
-			<dependency>
-				<groupId>de.rwh.utils</groupId>
-				<artifactId>db-test-utils</artifactId>
-				<version>0.2.1</version>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-tools-db-migration</artifactId>
+				<version>${project.version}</version>
 			</dependency>
 
 			<dependency>
@@ -247,28 +198,6 @@
 				<groupId>com.helger</groupId>
 				<artifactId>ph-schematron</artifactId>
 				<version>5.0.4</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.apache.commons</groupId>
-				<artifactId>commons-dbcp2</artifactId>
-				<version>2.6.0</version>
-			</dependency>
-			<dependency>
-				<groupId>org.liquibase</groupId>
-				<artifactId>liquibase-core</artifactId>
-				<version>3.6.3</version>
-			</dependency>
-			<dependency>
-				<groupId>org.postgresql</groupId>
-				<artifactId>postgresql</artifactId>
-				<version>42.2.5</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.mockito</groupId>
-				<artifactId>mockito-core</artifactId>
-				<version>2.27.0</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

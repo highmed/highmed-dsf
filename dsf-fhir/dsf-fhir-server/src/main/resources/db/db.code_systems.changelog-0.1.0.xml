@@ -25,9 +25,9 @@
 		<addPrimaryKey tableName="code_systems" columnNames="code_system_id, version" />
 
 		<sql dbms="postgresql">
-			ALTER TABLE code_systems OWNER TO ${liquibase_user};
-			GRANT ALL ON TABLE code_systems TO ${liquibase_user};
-			GRANT SELECT, INSERT, UPDATE ON TABLE code_systems TO ${server_users_group};
+			ALTER TABLE code_systems OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE code_systems TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE ON TABLE code_systems TO ${db.server_users_group};
 			CREATE INDEX code_system_id_index ON code_systems USING btree (code_system_id);
 			CREATE INDEX code_system_index ON code_systems USING gin (code_system);
 			CREATE INDEX code_system_id_version_index ON code_systems USING btree (code_system_id, version);
@@ -39,9 +39,9 @@
 		</createView>
 
 		<sql dbms="postgresql">
-			ALTER TABLE current_code_systems OWNER TO ${liquibase_user};
-			GRANT ALL ON TABLE current_code_systems TO ${liquibase_user};
-			GRANT SELECT ON TABLE current_code_systems TO ${server_users_group};
+			ALTER TABLE current_code_systems OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_code_systems TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_code_systems TO ${db.server_users_group};
 		</sql>
 	</changeSet>
 </databaseChangeLog>

@@ -25,9 +25,9 @@
 		<addPrimaryKey tableName="provenances" columnNames="provenance_id, version" />
 
 		<sql dbms="postgresql">
-			ALTER TABLE provenances OWNER TO ${liquibase_user};
-			GRANT ALL ON TABLE provenances TO ${liquibase_user};
-			GRANT SELECT, INSERT, UPDATE ON TABLE provenances TO ${server_users_group};
+			ALTER TABLE provenances OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE provenances TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE ON TABLE provenances TO ${db.server_users_group};
 			CREATE INDEX provenance_id_index ON provenances USING btree (provenance_id);
 			CREATE INDEX provenance_index ON provenances USING gin (provenance);
 			CREATE INDEX provenance_id_version_index ON provenances USING btree (provenance_id, version);
@@ -39,9 +39,9 @@
 		</createView>
 
 		<sql dbms="postgresql">
-			ALTER TABLE current_provenances OWNER TO ${liquibase_user};
-			GRANT ALL ON TABLE current_provenances TO ${liquibase_user};
-			GRANT SELECT ON TABLE current_provenances TO ${server_users_group};
+			ALTER TABLE current_provenances OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_provenances TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_provenances TO ${db.server_users_group};
 		</sql>
 	</changeSet>
 </databaseChangeLog>

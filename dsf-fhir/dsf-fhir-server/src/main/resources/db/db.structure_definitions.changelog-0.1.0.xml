@@ -25,9 +25,9 @@
 		<addPrimaryKey tableName="structure_definitions" columnNames="structure_definition_id, version" />
 
 		<sql dbms="postgresql">
-			ALTER TABLE structure_definitions OWNER TO ${liquibase_user};
-			GRANT ALL ON TABLE structure_definitions TO ${liquibase_user};
-			GRANT SELECT, INSERT, UPDATE ON TABLE structure_definitions TO ${server_users_group};
+			ALTER TABLE structure_definitions OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE structure_definitions TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE ON TABLE structure_definitions TO ${db.server_users_group};
 			CREATE INDEX structure_definition_id_index ON structure_definitions USING btree (structure_definition_id);
 			CREATE INDEX structure_definition_index ON structure_definitions USING gin (structure_definition);
 			CREATE INDEX structure_definition_id_version_index ON structure_definitions USING btree (structure_definition_id, version);
@@ -39,9 +39,9 @@
 		</createView>
 
 		<sql dbms="postgresql">
-			ALTER TABLE current_structure_definitions OWNER TO ${liquibase_user};
-			GRANT ALL ON TABLE current_structure_definitions TO ${liquibase_user};
-			GRANT SELECT ON TABLE current_structure_definitions TO ${server_users_group};
+			ALTER TABLE current_structure_definitions OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_structure_definitions TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_structure_definitions TO ${db.server_users_group};
 		</sql>
 	</changeSet>
 </databaseChangeLog>

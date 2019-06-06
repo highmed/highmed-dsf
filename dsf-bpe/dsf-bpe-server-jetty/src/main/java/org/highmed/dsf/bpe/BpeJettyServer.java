@@ -22,7 +22,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.glassfish.jersey.servlet.init.JerseyServletContainerInitializer;
-import org.highmed.dsf.bpe.db.DbMigrator;
+import org.highmed.dsf.tools.db.DbMigrator;
 import org.springframework.web.SpringServletContainerInitializer;
 
 import de.rwh.utils.jetty.JettyServer;
@@ -38,7 +38,9 @@ public class BpeJettyServer
 		Log4jInitializer.initializeLog4j(properties);
 
 		Properties dbProperties = PropertiesReader.read(Paths.get("conf/db.properties"), StandardCharsets.UTF_8);
-		DbMigrator.retryOnConnectException(3, () -> DbMigrator.migrate(dbProperties));
+		DbMigrator dbMigrator = new DbMigrator(dbProperties, "db.camunda_users_group", "db.camunda_user",
+				"db.camunda_user_password");
+		DbMigrator.retryOnConnectException(3, dbMigrator::migrate);
 
 		HttpConfiguration httpConfiguration = httpConfiguration(forwardedSecureRequestCustomizer());
 		Function<Server, ServerConnector> connector = httpConnector(httpConfiguration, properties);
