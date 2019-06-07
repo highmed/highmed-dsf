@@ -1,6 +1,8 @@
 # HiGHmed Data Sharing Framework (HiGHmed DSF)
 
-Documentation on how to setup the development and testing enviornment will be added shortly.
+[![Build Status](https://travis-ci.org/highmed/highmed-dsf.svg?branch=master)](https://travis-ci.org/highmed/highmed-dsf)
+
+A more detailed documentation on how to start developing and setting-up the testing environment will be added shortly.
 
 ## Building
 Prerequisite: Java 11, Maven 3.6
