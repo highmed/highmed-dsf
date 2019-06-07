@@ -66,22 +66,36 @@ public class CertificateGenerator
 	{
 		private final String commonName;
 		private final CertificateType certificateType;
+
 		private final JcaPKCS10CertificationRequest certificateRequest;
+		private final Path certificateRequestFile;
+
 		private final KeyStore p12KeyStore;
+		private final Path p12KeyStoreFile;
 		private final KeyPair keyPair;
+		private final Path keyPairPrivateKeyFile;
+		private final Path keyPairPublicKeyFile;
 		private final X509Certificate certificate;
+		private final Path certificateFile;
+
 		private final byte[] certificateSha512Thumbprint;
 
 		CertificateFiles(String commonName, CertificateType certificateType,
-				JcaPKCS10CertificationRequest certificateRequest, KeyStore p12KeyStore, KeyPair keyPair,
-				X509Certificate certificate, byte[] certificateSha512Thumbprint)
+				JcaPKCS10CertificationRequest certificateRequest, Path certificateRequestFile, KeyStore p12KeyStore,
+				Path p12KeyStoreFile, KeyPair keyPair, Path keyPairPrivateKeyFile, Path keyPairPublicKeyFile,
+				X509Certificate certificate, Path certificateFile, byte[] certificateSha512Thumbprint)
 		{
 			this.commonName = commonName;
 			this.certificateType = certificateType;
 			this.certificateRequest = certificateRequest;
+			this.certificateRequestFile = certificateRequestFile;
 			this.p12KeyStore = p12KeyStore;
+			this.p12KeyStoreFile = p12KeyStoreFile;
 			this.keyPair = keyPair;
+			this.keyPairPrivateKeyFile = keyPairPrivateKeyFile;
+			this.keyPairPublicKeyFile = keyPairPublicKeyFile;
 			this.certificate = certificate;
+			this.certificateFile = certificateFile;
 			this.certificateSha512Thumbprint = certificateSha512Thumbprint;
 		}
 
@@ -100,9 +114,19 @@ public class CertificateGenerator
 			return certificateRequest;
 		}
 
+		public Path getCertificateRequestFile()
+		{
+			return certificateRequestFile;
+		}
+
 		public KeyStore getP12KeyStore()
 		{
 			return p12KeyStore;
+		}
+
+		public Path getP12KeyStoreFile()
+		{
+			return p12KeyStoreFile;
 		}
 
 		public KeyPair getKeyPair()
@@ -110,9 +134,24 @@ public class CertificateGenerator
 			return keyPair;
 		}
 
+		public Path getKeyPairPrivateKeyFile()
+		{
+			return keyPairPrivateKeyFile;
+		}
+
+		public Path getKeyPairPublicKeyFile()
+		{
+			return keyPairPublicKeyFile;
+		}
+
 		public X509Certificate getCertificate()
 		{
 			return certificate;
+		}
+
+		public Path getCertificateFile()
+		{
+			return certificateFile;
 		}
 
 		public byte[] getCertificateSha512Thumbprint()
@@ -129,12 +168,17 @@ public class CertificateGenerator
 	private static final class CertificateAndP12File
 	{
 		final KeyStore p12KeyStore;
+		final Path p12KeyStoreFile;
 		final X509Certificate certificate;
+		final Path certificateFile;
 
-		CertificateAndP12File(KeyStore p12KeyStore, X509Certificate certificate)
+		CertificateAndP12File(KeyStore p12KeyStore, Path p12KeyStoreFile, X509Certificate certificate,
+				Path certificateFile)
 		{
 			this.p12KeyStore = p12KeyStore;
+			this.p12KeyStoreFile = p12KeyStoreFile;
 			this.certificate = certificate;
+			this.certificateFile = certificateFile;
 		}
 	}
 
@@ -281,21 +325,22 @@ public class CertificateGenerator
 			KeyPair keyPair = createOrReadKeyPair(privateKeyFile, publicKeyFile, commonName);
 
 			Path certificateRequestFile = createFolderIfNotExists(getCertReqPath(commonName));
-			JcaPKCS10CertificationRequest clientRequest = createOrReadCertificateRequest(certificateRequestFile,
+			JcaPKCS10CertificationRequest certificateRequest = createOrReadCertificateRequest(certificateRequestFile,
 					keyPair, commonName, certificateType);
 
 			Path certificateP12File = createFolderIfNotExists(getCertP12Path(commonName));
 			Path certificatePemFile = createFolderIfNotExists(getCertPemPath(commonName));
 			CertificateAndP12File certificateAndP12File = signOrReadCertificate(certificatePemFile, certificateP12File,
-					clientRequest, keyPair.getPrivate(), commonName, certificateType);
+					certificateRequest, keyPair.getPrivate(), commonName, certificateType);
 
-			return new CertificateFiles(commonName, certificateType, clientRequest, certificateAndP12File.p12KeyStore,
-					keyPair, certificateAndP12File.certificate,
+			return new CertificateFiles(commonName, certificateType, certificateRequest, certificateRequestFile,
+					certificateAndP12File.p12KeyStore, certificateAndP12File.p12KeyStoreFile, keyPair, privateKeyFile,
+					publicKeyFile, certificateAndP12File.certificate, certificateAndP12File.certificateFile,
 					calculateSha512CertificateThumbprint(certificateAndP12File.certificate));
 		};
 	}
 
-	private CertificateAndP12File signOrReadCertificate(Path certificateFile, Path certificateP12File,
+	private CertificateAndP12File signOrReadCertificate(Path certificateFile, Path p12KeyStoreFile,
 			JcaPKCS10CertificationRequest certificateRequest, PrivateKey privateKey, String commonName,
 			CertificateType certificateType)
 	{
@@ -305,12 +350,17 @@ public class CertificateGenerator
 			X509Certificate certificate = readCertificate(certificateFile);
 
 			KeyStore p12KeyStore;
-			if (!Files.isReadable(certificateP12File))
-				p12KeyStore = writeP12File(certificateP12File, privateKey, commonName, certificate);
+			if (!Files.isReadable(p12KeyStoreFile))
+			{
+				logger.info("Saving certificate (p21) to {}, password '{}' [{}]", p12KeyStoreFile.toString(),
+						CERT_PASSWORD, commonName);
+				p12KeyStore = createP12KeyStore(privateKey, commonName, certificate);
+				writeP12File(p12KeyStoreFile, p12KeyStore);
+			}
 			else
-				p12KeyStore = readP12File(certificateP12File);
+				p12KeyStore = readP12File(p12KeyStoreFile);
 
-			return new CertificateAndP12File(p12KeyStore, certificate);
+			return new CertificateAndP12File(p12KeyStore, p12KeyStoreFile, certificate, certificateFile);
 		}
 		else
 		{
@@ -320,9 +370,27 @@ public class CertificateGenerator
 			logger.info("Saving certificate (pem) to {} [{}]", certificateFile.toString(), commonName);
 			writeCertificate(certificateFile, certificate);
 
-			KeyStore p12KeyStore = writeP12File(certificateP12File, privateKey, commonName, certificate);
+			logger.info("Saving certificate (p21) to {}, password '{}' [{}]", p12KeyStoreFile.toString(), CERT_PASSWORD,
+					commonName);
+			KeyStore p12KeyStore = createP12KeyStore(privateKey, commonName, certificate);
+			writeP12File(p12KeyStoreFile, p12KeyStore);
 
-			return new CertificateAndP12File(p12KeyStore, certificate);
+			return new CertificateAndP12File(p12KeyStore, p12KeyStoreFile, certificate, certificateFile);
+		}
+	}
+
+	private KeyStore createP12KeyStore(PrivateKey privateKey, String commonName, X509Certificate certificate)
+	{
+		try
+		{
+			return CertificateHelper.toPkcs12KeyStore(privateKey,
+					new Certificate[] { certificate, ca.getCertificate() }, commonName, CERT_PASSWORD);
+		}
+		catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IllegalStateException
+				| IOException e)
+		{
+			logger.error("Error while creating P12 key-store", e);
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -349,18 +417,11 @@ public class CertificateGenerator
 		}
 	}
 
-	private KeyStore writeP12File(Path p12File, PrivateKey privateKey, String commonName, X509Certificate certificate)
+	private void writeP12File(Path p12File, KeyStore p12KeyStore)
 	{
-		logger.info("Saving certificate (p21) to {}, password '{}' [{}]", p12File.toString(), CERT_PASSWORD,
-				commonName);
 		try
 		{
-			KeyStore p12KeyStore = CertificateHelper.toPkcs12KeyStore(privateKey,
-					new Certificate[] { certificate, ca.getCertificate() }, commonName, CERT_PASSWORD);
-
 			CertificateWriter.toPkcs12(p12File, p12KeyStore, CERT_PASSWORD);
-
-			return p12KeyStore;
 		}
 		catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e)
 		{
@@ -579,7 +640,36 @@ public class CertificateGenerator
 
 	public void copyCertificates()
 	{
-		// TODO Auto-generated method stub
+		X509Certificate testCaCertificate = ca.getCertificate();
 
+		Path bpeCaCertFile = Paths.get("../../dsf-bpe/dsf-bpe-server-jetty/target/testca_certificate.pem");
+		logger.info("Copying Test CA certificate file to {}", bpeCaCertFile.toString());
+		writeCertificate(bpeCaCertFile, testCaCertificate);
+
+		Path fhirCacertFile = Paths.get("../../dsf-fhir/dsf-fhir-server-jetty/target/testca_certificate.pem");
+		logger.info("Copying Test CA certificate file to {}", fhirCacertFile.toString());
+		writeCertificate(fhirCacertFile, testCaCertificate);
+
+		CertificateFiles localhost = serverCertificateFilesByCommonName.get("localhost");
+
+		Path bpeP12File = Paths.get("../../dsf-bpe/dsf-bpe-server-jetty/target/localhost_certificate.p12");
+		logger.info("Copying localhost certificate p12 file to {}", bpeP12File);
+		writeP12File(bpeP12File, localhost.getP12KeyStore());
+
+		Path fhirP12File = Paths.get("../../dsf-fhir/dsf-fhir-server-jetty/target/localhost_certificate.p12");
+		logger.info("Copying localhost certificate p12 file to {}", fhirP12File);
+		writeP12File(fhirP12File, localhost.getP12KeyStore());
+
+		CertificateFiles testClient = clientCertificateFilesByCommonName.get("test-client");
+
+		Path bpeClientP12File = Paths.get("../../dsf-bpe/dsf-bpe-server-jetty/target/test-client_certificate.p12");
+		logger.info("Copying test-client certificate p12 file to {}", bpeClientP12File);
+		writeP12File(bpeClientP12File, testClient.getP12KeyStore());
+
+		Path fhirClientP12File = Paths.get("../../dsf-fhir/dsf-fhir-server-jetty/target/test-client_certificate.p12");
+		logger.info("Copying test-client certificate p12 file to {}", fhirClientP12File);
+		writeP12File(fhirClientP12File, testClient.getP12KeyStore());
+
+		// TODO copy files to docker test setup folders
 	}
 }

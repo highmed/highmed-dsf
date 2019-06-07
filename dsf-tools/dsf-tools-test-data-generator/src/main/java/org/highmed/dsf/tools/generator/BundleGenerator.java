@@ -26,6 +26,8 @@ public class BundleGenerator
 
 	private final FhirContext fhirContext = FhirContext.forR4();
 
+	private Bundle testBundle;
+
 	private Bundle readBundle(Path bundleTemplateFile)
 	{
 		try (InputStream in = Files.newInputStream(bundleTemplateFile))
@@ -63,17 +65,23 @@ public class BundleGenerator
 
 	public void createIdeTestServerBundle(Map<String, CertificateFiles> clientCertificateFilesByCommonName)
 	{
-		Path testBundleTemplateFile = Paths.get("src/main/resources/test-bundle.xml");
+		Path testBundleTemplateFile = Paths.get("src/main/resources/bundle-templates/test-bundle.xml");
 
-		Bundle testBundle = readBundle(testBundleTemplateFile);
+		testBundle = readBundle(testBundleTemplateFile);
 		Organization organization = (Organization) testBundle.getEntry().get(0).getResource();
 		Extension thumbprintExtension = organization
 				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
 		thumbprintExtension.setValue(new StringType(
 				clientCertificateFilesByCommonName.get("test-client").getCertificateSha512ThumbprintHex()));
 
-		// TODO
-		System.out.println(fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(testBundle));
+		writeBundle(Paths.get("bundle/test-bundle.xml"), testBundle);
+	}
+
+	public void copyIdeTestServerBundle()
+	{
+		Path testBundleFile = Paths.get("../../dsf-fhir/dsf-fhir-server-jetty/conf/bundle.xml");
+		logger.info("Copying fhir bundle to {}", testBundleFile);
+		writeBundle(testBundleFile, testBundle);
 	}
 
 	public void createDockerServerBundles(Map<String, CertificateFiles> clientCertificateFilesByCommonName)
@@ -82,15 +90,9 @@ public class BundleGenerator
 
 	}
 
-	public void copyIdeTestServerBundle()
-	{
-		// TODO Auto-generated method stub
-		
-	}
-
 	public void copyDockerServerBundles()
 	{
 		// TODO Auto-generated method stub
-		
+
 	}
 }
