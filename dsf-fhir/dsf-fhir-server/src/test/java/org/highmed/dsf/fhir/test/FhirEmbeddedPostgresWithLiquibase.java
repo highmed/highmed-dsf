@@ -13,8 +13,8 @@ public class FhirEmbeddedPostgresWithLiquibase extends EmbeddedPostgresWithLiqui
 	private static final String DATABASE_USER = "server_user";
 	private static final String DATABASE_PASSWORD = "server_user_password";
 
-	private static final Map<String, String> CHANGE_LOG_PARAMETERS = Map.of("liquibase_user", LIQUIBASE_USER,
-			"server_users_group", DATABASE_USER_GROUP, "server_user", DATABASE_USER, "server_user_password",
+	private static final Map<String, String> CHANGE_LOG_PARAMETERS = Map.of("db.liquibase_user", LIQUIBASE_USER,
+			"db.server_users_group", DATABASE_USER_GROUP, "db.server_user", DATABASE_USER, "db.server_user_password",
 			DATABASE_PASSWORD);
 
 	public FhirEmbeddedPostgresWithLiquibase()
