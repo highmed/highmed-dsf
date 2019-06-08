@@ -16,7 +16,7 @@ Prerequisite: Java 11, Maven 3.6, PostgreSQL 11
 
 * Build Project
 * Install PostgreSQL 11 (localhost:5432)
-* Add DB User *liquibase_user* SQL: *CREATE USER liquibase_user WITH LOGIN NOSUPERUSER INHERIT CREATEDB CREATEROLE NOREPLICATION;* Password: fLp6ZSd5QrMAkGZMjxqXjmcWrTfa3Dn8fA57h92Y
+* Add DB User *liquibase_user* SQL: *CREATE USER liquibase_user WITH LOGIN NOSUPERUSER INHERIT CREATEDB CREATEROLE NOREPLICATION PASSWORD 'fLp6ZSd5QrMAkGZMjxqXjmcWrTfa3Dn8fA57h92Y';*
 * Create Databases *fhir* and *bpe* with owner *liquibase_user*
 * Start *org.highmed.dsf.fhir.FhirJettyServerHttps* from your IDE with execution folder: *.../highmed-dsf/dsf-fhir/dsf-fhir-server-jetty*
 * Start *org.highmed.dsf.bpe.BpeJettyServerHttps* from your IDE with execition folder: *.../highmed-dsf/dsf-bpe/dsf-bpe-server-jetty*
