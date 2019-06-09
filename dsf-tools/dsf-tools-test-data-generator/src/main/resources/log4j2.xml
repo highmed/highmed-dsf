@@ -8,7 +8,7 @@
 	</Appenders>
 
 	<Loggers>
-		<Logger name="org.highmed" level="INFO" />
+		<Logger name="org.highmed" level="DEBUG" />
 		<logger name="de.rwh" level="INFO" />
 
 		<Root level="WARN">

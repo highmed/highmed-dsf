@@ -4,35 +4,50 @@
 		<fullUrl value="urn:uuid:bb73165c-c7b9-4342-8e28-531f07fa7735" />
 		<resource>
 			<Organization xmlns="http://hl7.org/fhir">
+				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
+					<valueString value="TODO" />
+				</extension>
 				<identifier>
 					<system value="http://highmed.org/fhir/CodeSystem/organization" />
 					<value value="Test_Organization" />
 				</identifier>
+				<active value="true" />
+				<type>
+					<coding>
+						<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
+						<code value="MeDIC" />
+					</coding>
+				</type>
 				<name value="Test Organization" />
 				<endpoint>
-					<reference value="urn:uuid:b879e904-d666-45de-a995-accdd4429b79" />
 					<type value="Endpoint" />
+					<reference value="urn:uuid:b879e904-d666-45de-a995-accdd4429b79" />
 				</endpoint>
-				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
-					<valueString value="TODO" />
-				</extension>
 			</Organization>
 		</resource>
 		<request>
-			<method value="POST" />
-			<url value="Organization" />
-			<ifNoneExist value="identifier=http://highmed.org/fhir/CodeSystem/organization|Test_Organization" />
+			<method value="PUT" />
+			<url value="Organization?identifier=http://highmed.org/fhir/CodeSystem/organization|Test_Organization" />
 		</request>
 	</entry>
 	<entry>
 		<fullUrl value="urn:uuid:b879e904-d666-45de-a995-accdd4429b79" />
 		<resource>
 			<Endpoint xmlns="http://hl7.org/fhir">
+				<identifier>
+					<system value="http://highmed.org/fhir/CodeSystem/endpoint" />
+					<value value="Test_Endpoint" />
+				</identifier>
 				<status value="active" />
 				<connectionType>
 					<system value="http://terminology.hl7.org/CodeSystem/endpoint-connection-type" />
 					<code value="hl7-fhir-rest" />
 				</connectionType>
+				<name value="Test Endpoint" />
+				<managingOrganization>
+					<type value="Organization" />
+					<reference value="urn:uuid:bb73165c-c7b9-4342-8e28-531f07fa7735" />
+				</managingOrganization>
 				<payloadType>
 					<coding>
 						<system value="http://hl7.org/fhir/resource-types" />
@@ -42,20 +57,11 @@
 				<payloadMimeType value="application/fhir+json" />
 				<payloadMimeType value="application/fhir+xml" />
 				<address value="https://localhost:8001/fhir" />
-				<name value="Test Endpoint" />
-				<managingOrganization>
-					<type value="Organization" />
-					<identifier>
-						<system value="http://highmed.org/fhir/CodeSystem/organization" />
-						<value value="Test_Organization" />
-					</identifier>
-				</managingOrganization>
 			</Endpoint>
 		</resource>
 		<request>
-			<method value="POST" />
-			<url value="Endpoint" />
-			<ifNoneExist value="organization:identifier=http://highmed.org/fhir/CodeSystem/organization|Test_Organization" />
+			<method value="PUT" />
+			<url value="Endpoint?identifier=http://highmed.org/fhir/CodeSystem/endpoint|Test_Endpoint" />
 		</request>
 	</entry>
 </Bundle>

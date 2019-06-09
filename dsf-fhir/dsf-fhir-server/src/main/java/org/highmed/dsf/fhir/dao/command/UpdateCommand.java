@@ -170,8 +170,9 @@ public class UpdateCommand<R extends DomainResource, D extends ResourceDao<R>> e
 		PartialResult<R> result = exceptionHandler
 				.handleSqlException(() -> dao.searchWithTransaction(connection, query));
 
-		// No matches, no id provided: The server creates the resource.
-		if (result.getOverallCount() <= 0 && !resource.hasId())
+		// No matches and no id provided or temp id: The server creates the resource.
+		if (result.getOverallCount() <= 0
+				&& (!resource.hasId() || resource.getIdElement().getValue().startsWith(URL_UUID_PREFIX)))
 		{
 			id = UUID.randomUUID();
 			idTranslationTable.put(entry.getFullUrl(),

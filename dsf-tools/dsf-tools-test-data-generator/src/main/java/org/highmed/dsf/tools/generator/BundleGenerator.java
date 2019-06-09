@@ -9,6 +9,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 
+import org.highmed.dsf.fhir.service.ReferenceExtractor;
+import org.highmed.dsf.fhir.service.ReferenceExtractorImpl;
 import org.highmed.dsf.tools.generator.CertificateGenerator.CertificateFiles;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Extension;
@@ -25,6 +27,7 @@ public class BundleGenerator
 	private static final Logger logger = LoggerFactory.getLogger(BundleGenerator.class);
 
 	private final FhirContext fhirContext = FhirContext.forR4();
+	private final ReferenceExtractor extractor = new ReferenceExtractorImpl();
 
 	private Bundle testBundle;
 
@@ -60,6 +63,7 @@ public class BundleGenerator
 		IParser parser = fhirContext.newXmlParser();
 		parser.setStripVersionsFromReferences(false);
 		parser.setOverrideResourceIdWithBundleEntryFullUrl(false);
+		parser.setPrettyPrint(true);
 		return parser;
 	}
 
@@ -74,7 +78,23 @@ public class BundleGenerator
 		thumbprintExtension.setValue(new StringType(
 				clientCertificateFilesByCommonName.get("test-client").getCertificateSha512ThumbprintHex()));
 
+		removeReferenceEmbeddedResources(testBundle);
+
 		writeBundle(Paths.get("bundle/test-bundle.xml"), testBundle);
+	}
+
+	// FIXME hapi parser can't handle embedded resources and creates them while parsing bundles
+	private void removeReferenceEmbeddedResources(Bundle bundle)
+	{
+		bundle.getEntry().stream().map(e -> e.getResource()).forEach(res ->
+		{
+			logger.debug("Extracting references from {} resource", res.getResourceType());
+			extractor.getReferences(res).forEach(ref ->
+			{
+				logger.debug("Setting reference embedded resource to null at {}", ref.getReferenceLocation());
+				ref.getReference().setResource(null);
+			});
+		});
 	}
 
 	public void copyIdeTestServerBundle()
