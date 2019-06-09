@@ -17,6 +17,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 
+import ca.uhn.fhir.parser.IParser;
+
 @Configuration
 public class InitialDataLoadConfig
 {
@@ -43,7 +45,7 @@ public class InitialDataLoadConfig
 		try (InputStream fileIn = ClassLoader.getSystemResourceAsStream("fhir/bundle.xml"))
 		{
 			logger.debug("Loading data from JAR bundle ...");
-			Bundle bundle = fhirConfig.fhirContext().newXmlParser().parseResource(Bundle.class, fileIn);
+			Bundle bundle = parseXmlBundle(fileIn);
 			initialDataLoader().load(bundle);
 		}
 
@@ -54,8 +56,17 @@ public class InitialDataLoadConfig
 		try (InputStream fileIn = Files.newInputStream(file))
 		{
 			logger.debug("Loading data from external bundle ...");
-			Bundle bundle = fhirConfig.fhirContext().newXmlParser().parseResource(Bundle.class, fileIn);
+			Bundle bundle = parseXmlBundle(fileIn);
 			initialDataLoader().load(bundle);
 		}
+	}
+
+	private Bundle parseXmlBundle(InputStream in)
+	{
+		IParser p = fhirConfig.fhirContext().newXmlParser();
+		p.setStripVersionsFromReferences(false);
+		p.setOverrideResourceIdWithBundleEntryFullUrl(false);
+
+		return p.parseResource(Bundle.class, in);
 	}
 }
