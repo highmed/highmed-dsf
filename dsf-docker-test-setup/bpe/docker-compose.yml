@@ -4,8 +4,8 @@ services:
       image: highmed/bpe_proxy
       restart: always
       ports:
-      - 8081:80
-      - 8444:443
+      - 8080:80
+      - 8443:443
       volumes:
       -  type: bind
          source: ./proxy/ssl

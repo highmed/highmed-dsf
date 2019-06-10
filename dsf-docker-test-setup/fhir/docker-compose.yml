@@ -4,8 +4,8 @@ services:
       image: highmed/fhir_proxy
       restart: always
       ports:
-      - 8080:80
-      - 8443:443
+      - 80:80
+      - 443:443
       volumes:
       -  type: bind
          source: ./proxy/ssl
