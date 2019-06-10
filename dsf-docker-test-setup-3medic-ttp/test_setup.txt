@@ -2,34 +2,7 @@ Windows 10
 
 Windows Host
 	Create VirtualSwitch and VMs (Admin-PowerShell):
-		New-VMSwitch -name HiGHmed -SwitchType Internal
-		New-NetIPAddress -InterfaceAlias 'vEthernet (HiGHmed)' -IPAddress 10.42.0.1 -PrefixLength 24
-		New-NetNat -Name HiGHmedNAT -InternalIPInterfaceAddressPrefix 10.42.0.0/24
-		New-VM -Name "HiGHmed_DockerRegistry" -MemoryStartupBytes 2GB -NewVHDPath 'C:\Users\Public\Documents\Hyper-V\Virtual Hard Disks\HiGHmed_DockerRegistry.vhdx' -NewVHDSizeBytes 24GB -SwitchName HiGHmed -Generation 2
-		New-VM -Name "HiGHmed_TTP" -MemoryStartupBytes 2GB -NewVHDPath 'C:\Users\Public\Documents\Hyper-V\Virtual Hard Disks\HiGHmed_TTP.vhdx' -NewVHDSizeBytes 24GB -SwitchName HiGHmed -Generation 2
-		New-VM -Name "HiGHmed_MeDIC_1" -MemoryStartupBytes 2GB -NewVHDPath 'C:\Users\Public\Documents\Hyper-V\Virtual Hard Disks\HiGHmed_MeDIC_1.vhdx' -NewVHDSizeBytes 24GB -SwitchName HiGHmed -Generation 2
-		New-VM -Name "HiGHmed_MeDIC_2" -MemoryStartupBytes 2GB -NewVHDPath 'C:\Users\Public\Documents\Hyper-V\Virtual Hard Disks\HiGHmed_MeDIC_2.vhdx' -NewVHDSizeBytes 24GB -SwitchName HiGHmed -Generation 2
-		New-VM -Name "HiGHmed_MeDIC_3" -MemoryStartupBytes 2GB -NewVHDPath 'C:\Users\Public\Documents\Hyper-V\Virtual Hard Disks\HiGHmed_MeDIC_3.vhdx' -NewVHDSizeBytes 24GB -SwitchName HiGHmed -Generation 2
-		Set-VMProcessor -VMName "HiGHmed_DockerRegistry" -Count 2
-		Set-VMProcessor -VMName "HiGHmed_TTP" -Count 2
-		Set-VMProcessor -VMName "HiGHmed_MeDIC_1" -Count 2
-		Set-VMProcessor -VMName "HiGHmed_MeDIC_2" -Count 2
-		Set-VMProcessor -VMName "HiGHmed_MeDIC_3" -Count 2
-		Add-VMDvdDrive -VMName 'HiGHmed_DockerRegistry' -Path $HOME\Downloads\ubuntu-18.04.2-live-server-amd64.iso
-		Add-VMDvdDrive -VMName 'HiGHmed_TTP' -Path $HOME\Downloads\ubuntu-18.04.2-live-server-amd64.iso
-		Add-VMDvdDrive -VMName 'HiGHmed_MeDIC_1' -Path $HOME\Downloads\ubuntu-18.04.2-live-server-amd64.iso
-		Add-VMDvdDrive -VMName 'HiGHmed_MeDIC_2' -Path $HOME\Downloads\ubuntu-18.04.2-live-server-amd64.iso
-		Add-VMDvdDrive -VMName 'HiGHmed_MeDIC_3' -Path $HOME\Downloads\ubuntu-18.04.2-live-server-amd64.iso
-		Set-VMFirmware -VMName "HiGHmed_DockerRegistry" -BootOrder $(Get-VMDvdDrive -VMName "HiGHmed_DockerRegistry"),$(Get-VMHardDiskDrive -VMName "HiGHmed_DockerRegistry"),$(Get-VMNetworkAdapter -VMName "HiGHmed_DockerRegistry") -SecureBootTemplate MicrosoftUEFICertificateAuthority
-		Set-VMFirmware -VMName "HiGHmed_TTP" -BootOrder $(Get-VMDvdDrive -VMName "HiGHmed_TTP"),$(Get-VMHardDiskDrive -VMName "HiGHmed_TTP"),$(Get-VMNetworkAdapter -VMName "HiGHmed_TTP") -SecureBootTemplate MicrosoftUEFICertificateAuthority
-		Set-VMFirmware -VMName "HiGHmed_MeDIC_1" -BootOrder $(Get-VMDvdDrive -VMName "HiGHmed_MeDIC_1"),$(Get-VMHardDiskDrive -VMName "HiGHmed_MeDIC_1"),$(Get-VMNetworkAdapter -VMName "HiGHmed_MeDIC_1") -SecureBootTemplate MicrosoftUEFICertificateAuthority
-		Set-VMFirmware -VMName "HiGHmed_MeDIC_2" -BootOrder $(Get-VMDvdDrive -VMName "HiGHmed_MeDIC_2"),$(Get-VMHardDiskDrive -VMName "HiGHmed_MeDIC_2"),$(Get-VMNetworkAdapter -VMName "HiGHmed_MeDIC_2") -SecureBootTemplate MicrosoftUEFICertificateAuthority
-		Set-VMFirmware -VMName "HiGHmed_MeDIC_3" -BootOrder $(Get-VMDvdDrive -VMName "HiGHmed_MeDIC_3"),$(Get-VMHardDiskDrive -VMName "HiGHmed_MeDIC_3"),$(Get-VMNetworkAdapter -VMName "HiGHmed_MeDIC_3") -SecureBootTemplate MicrosoftUEFICertificateAuthority
-		Set-VMMemory -VMName "HiGHmed_DockerRegistry" -MaximumBytes 2GB
-		Set-VMMemory -VMName "HiGHmed_TTP" -MaximumBytes 4GB
-		Set-VMMemory -VMName "HiGHmed_MeDIC_1" -MaximumBytes 4GB
-		Set-VMMemory -VMName "HiGHmed_MeDIC_2" -MaximumBytes 4GB
-		Set-VMMemory -VMName "HiGHmed_MeDIC_3" -MaximumBytes 4GB
+		execute ./vm-setup.ps1
 
 VMs (Setup Ubuntu Server)
 	Start-VM -VMName "HiGHmed_DockerRegistry"
