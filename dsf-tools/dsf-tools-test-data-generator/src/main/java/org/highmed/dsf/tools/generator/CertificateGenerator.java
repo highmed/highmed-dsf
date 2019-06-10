@@ -638,7 +638,7 @@ public class CertificateGenerator
 		}
 	}
 
-	public void copyCertificates()
+	public void copyJavaTestCertificates()
 	{
 		X509Certificate testCaCertificate = ca.getCertificate();
 
@@ -669,7 +669,36 @@ public class CertificateGenerator
 		Path fhirClientP12File = Paths.get("../../dsf-fhir/dsf-fhir-server-jetty/target/test-client_certificate.p12");
 		logger.info("Copying test-client certificate p12 file to {}", fhirClientP12File);
 		writeP12File(fhirClientP12File, testClient.getP12KeyStore());
+	}
 
-		// TODO copy files to docker test setup folders
+	public void copyDockerTestCertificates()
+	{
+		CertificateFiles localhost = serverCertificateFilesByCommonName.get("localhost");
+
+		Path bpeCertificateFile = Paths.get("../../dsf-docker-test-setup/bpe/proxy/ssl/certificate.pem");
+		logger.info("Copying localhost certificate pem file to {}", bpeCertificateFile);
+		writeCertificate(bpeCertificateFile, localhost.getCertificate());
+
+		Path fhirCertificateFile = Paths.get("../../dsf-docker-test-setup/fhir/proxy/ssl/certificate.pem");
+		logger.info("Copying localhost certificate pem file to {}", fhirCertificateFile);
+		writeCertificate(fhirCertificateFile, localhost.getCertificate());
+
+		Path bpePrivateKeyFile = Paths.get("../../dsf-docker-test-setup/bpe/proxy/ssl/private-key.pem");
+		logger.info("Copying localhost private-key file to {}", bpePrivateKeyFile);
+		writePrivateKey(bpePrivateKeyFile, (RSAPrivateCrtKey) localhost.getKeyPair().getPrivate());
+
+		Path fhirPrivateKeyFile = Paths.get("../../dsf-docker-test-setup/fhir/proxy/ssl/private-key.pem");
+		logger.info("Copying localhost private-key file to {}", fhirPrivateKeyFile);
+		writePrivateKey(fhirPrivateKeyFile, (RSAPrivateCrtKey) localhost.getKeyPair().getPrivate());
+
+		X509Certificate testCaCertificate = ca.getCertificate();
+
+		Path bpeCaCertFile = Paths.get("../../dsf-docker-test-setup/bpe/proxy/ssl/ca_certificate.pem");
+		logger.info("Copying Test CA certificate file to {}", bpeCaCertFile.toString());
+		writeCertificate(bpeCaCertFile, testCaCertificate);
+
+		Path fhirCacertFile = Paths.get("../../dsf-docker-test-setup/fhir/proxy/ssl/ca_certificate.pem");
+		logger.info("Copying Test CA certificate file to {}", fhirCacertFile.toString());
+		writeCertificate(fhirCacertFile, testCaCertificate);
 	}
 }

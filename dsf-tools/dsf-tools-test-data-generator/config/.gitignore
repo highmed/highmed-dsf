@@ -1,1 +1,2 @@
-/test-fhir-config.properties
+/docker-test-fhir-config.properties
+/java-test-fhir-config.properties

@@ -67,7 +67,7 @@ public class BundleGenerator
 		return parser;
 	}
 
-	public void createIdeTestServerBundle(Map<String, CertificateFiles> clientCertificateFilesByCommonName)
+	public void createJavaTestServerBundle(Map<String, CertificateFiles> clientCertificateFilesByCommonName)
 	{
 		Path testBundleTemplateFile = Paths.get("src/main/resources/bundle-templates/test-bundle.xml");
 
@@ -97,7 +97,7 @@ public class BundleGenerator
 		});
 	}
 
-	public void copyIdeTestServerBundle()
+	public void copyJavaTestServerBundle()
 	{
 		Path testBundleFile = Paths.get("../../dsf-fhir/dsf-fhir-server-jetty/conf/bundle.xml");
 		logger.info("Copying fhir bundle to {}", testBundleFile);

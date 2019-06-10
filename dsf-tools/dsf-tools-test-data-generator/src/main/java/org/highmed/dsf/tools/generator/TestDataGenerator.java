@@ -22,7 +22,9 @@ public class TestDataGenerator
 	public static void main(String[] args)
 	{
 		certificateGenerator.generateCertificates();
-		certificateGenerator.copyCertificates();
+		
+		certificateGenerator.copyJavaTestCertificates();
+		certificateGenerator.copyDockerTestCertificates();
 
 		CertificateFiles webbrowserTestUser = certificateGenerator.getClientCertificateFilesByCommonName()
 				.get("Webbrowser Test User");
@@ -30,14 +32,18 @@ public class TestDataGenerator
 				"Install client-certificate and CA certificate from \"{}\" into your browsers certificate store to access fhir and bpe servers with your webbrowser",
 				webbrowserTestUser.getP12KeyStoreFile().toAbsolutePath().toString());
 
-		bundleGenerator.createIdeTestServerBundle(certificateGenerator.getClientCertificateFilesByCommonName());
-		bundleGenerator.copyIdeTestServerBundle();
+		bundleGenerator.createJavaTestServerBundle(certificateGenerator.getClientCertificateFilesByCommonName());
+		bundleGenerator.copyJavaTestServerBundle();
 
 		bundleGenerator.createDockerServerBundles(certificateGenerator.getClientCertificateFilesByCommonName());
 		bundleGenerator.copyDockerServerBundles();
 
 		configGenerator
-				.modifyIdeTestServerConfigProperties(certificateGenerator.getClientCertificateFilesByCommonName());
-		configGenerator.copyIdeTestServerConfigProperties();
+				.modifyJavaTestServerConfigProperties(certificateGenerator.getClientCertificateFilesByCommonName());
+		configGenerator.copyJavaTestFhirServerConfigProperties();
+
+		configGenerator
+				.modifyDockerTestServerConfigProperties(certificateGenerator.getClientCertificateFilesByCommonName());
+		configGenerator.copyDockerTestFhirServerConfigProperties();
 	}
 }

@@ -20,7 +20,8 @@ public class ConfigGenerator
 {
 	private static final Logger logger = LoggerFactory.getLogger(ConfigGenerator.class);
 
-	private Properties testConfigProperties;
+	private Properties javaTestFhirConfigProperties;
+	private Properties dockerTestFhirConfigProperties;
 
 	private Properties readProperties(Path propertiesFile)
 	{
@@ -52,24 +53,47 @@ public class ConfigGenerator
 		}
 	}
 
-	public void modifyIdeTestServerConfigProperties(Map<String, CertificateFiles> clientCertificateFilesByCommonName)
+	public void modifyJavaTestServerConfigProperties(Map<String, CertificateFiles> clientCertificateFilesByCommonName)
 	{
 		CertificateFiles testClient = clientCertificateFilesByCommonName.get("test-client");
 		CertificateFiles webbrowserTestUser = clientCertificateFilesByCommonName.get("Webbrowser Test User");
 
-		Path testConfigTemplateFile = Paths.get("src/main/resources/config-templates/test-fhir-config.properties");
-		testConfigProperties = readProperties(testConfigTemplateFile);
-		testConfigProperties.setProperty("org.highmed.fhir.local-user.thumbprints",
+		Path javaTestFhirConfigTemplateFile = Paths
+				.get("src/main/resources/config-templates/java-test-fhir-config.properties");
+		javaTestFhirConfigProperties = readProperties(javaTestFhirConfigTemplateFile);
+		javaTestFhirConfigProperties.setProperty("org.highmed.fhir.local-user.thumbprints",
 				testClient.getCertificateSha512ThumbprintHex() + ","
 						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
 
-		writeProperties(Paths.get("config/test-fhir-config.properties"), testConfigProperties);
+		writeProperties(Paths.get("config/java-test-fhir-config.properties"), javaTestFhirConfigProperties);
 	}
 
-	public void copyIdeTestServerConfigProperties()
+	public void modifyDockerTestServerConfigProperties(Map<String, CertificateFiles> clientCertificateFilesByCommonName)
 	{
-		Path testConfigPropertiesFile = Paths.get("../../dsf-fhir/dsf-fhir-server-jetty/conf/config.properties");
-		logger.info("Copying config.properties to {}", testConfigPropertiesFile);
-		writeProperties(testConfigPropertiesFile, testConfigProperties);
+		CertificateFiles testClient = clientCertificateFilesByCommonName.get("test-client");
+		CertificateFiles webbrowserTestUser = clientCertificateFilesByCommonName.get("Webbrowser Test User");
+
+		Path dockerTestFhirConfigTemplateFile = Paths
+				.get("src/main/resources/config-templates/docker-test-fhir-config.properties");
+		dockerTestFhirConfigProperties = readProperties(dockerTestFhirConfigTemplateFile);
+		dockerTestFhirConfigProperties.setProperty("org.highmed.fhir.local-user.thumbprints",
+				testClient.getCertificateSha512ThumbprintHex() + ","
+						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
+
+		writeProperties(Paths.get("config/docker-test-fhir-config.properties"), dockerTestFhirConfigProperties);
+	}
+
+	public void copyJavaTestFhirServerConfigProperties()
+	{
+		Path javaTestConfigPropertiesFile = Paths.get("../../dsf-fhir/dsf-fhir-server-jetty/conf/config.properties");
+		logger.info("Copying config.properties to {}", javaTestConfigPropertiesFile);
+		writeProperties(javaTestConfigPropertiesFile, javaTestFhirConfigProperties);
+	}
+
+	public void copyDockerTestFhirServerConfigProperties()
+	{
+		Path dockerTestConfigPropertiesFile = Paths.get("../../dsf-docker-test-setup/fhir/app/conf/config.properties");
+		logger.info("Copying config.properties to {}", dockerTestConfigPropertiesFile);
+		writeProperties(dockerTestConfigPropertiesFile, dockerTestFhirConfigProperties);
 	}
 }
