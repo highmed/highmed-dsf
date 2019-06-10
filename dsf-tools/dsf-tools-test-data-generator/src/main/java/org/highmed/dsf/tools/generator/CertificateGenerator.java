@@ -700,5 +700,15 @@ public class CertificateGenerator
 		Path fhirCacertFile = Paths.get("../../dsf-docker-test-setup/fhir/proxy/ssl/ca_certificate.pem");
 		logger.info("Copying Test CA certificate file to {}", fhirCacertFile.toString());
 		writeCertificate(fhirCacertFile, testCaCertificate);
+
+		CertificateFiles testClient = clientCertificateFilesByCommonName.get("test-client");
+
+		Path bpeClientP12File = Paths.get("../../dsf-docker-test-setup/bpe/app/conf/test-client_certificate.p12");
+		logger.info("Copying test-client certificate p12 file to {}", bpeClientP12File);
+		writeP12File(bpeClientP12File, testClient.getP12KeyStore());
+
+		Path fhirClientP12File = Paths.get("../../dsf-docker-test-setup/fhir/app/conf/test-client_certificate.p12");
+		logger.info("Copying test-client certificate p12 file to {}", fhirClientP12File);
+		writeP12File(fhirClientP12File, testClient.getP12KeyStore());
 	}
 }

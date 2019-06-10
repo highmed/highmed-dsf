@@ -80,7 +80,7 @@ public class BundleGenerator
 
 		removeReferenceEmbeddedResources(testBundle);
 
-		writeBundle(Paths.get("bundle/test-bundle.xml"), testBundle);
+		writeBundle(Paths.get("bundle/java-test-bundle.xml"), testBundle);
 	}
 
 	// FIXME hapi parser can't handle embedded resources and creates them while parsing bundles
@@ -106,13 +106,24 @@ public class BundleGenerator
 
 	public void createDockerServerBundles(Map<String, CertificateFiles> clientCertificateFilesByCommonName)
 	{
-		// TODO Auto-generated method stub
+		Path testBundleTemplateFile = Paths.get("src/main/resources/bundle-templates/test-bundle.xml");
 
+		testBundle = readBundle(testBundleTemplateFile);
+		Organization organization = (Organization) testBundle.getEntry().get(0).getResource();
+		Extension thumbprintExtension = organization
+				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
+		thumbprintExtension.setValue(new StringType(
+				clientCertificateFilesByCommonName.get("test-client").getCertificateSha512ThumbprintHex()));
+
+		removeReferenceEmbeddedResources(testBundle);
+
+		writeBundle(Paths.get("bundle/docker-test-bundle.xml"), testBundle);
 	}
 
 	public void copyDockerServerBundles()
 	{
-		// TODO Auto-generated method stub
-
+		Path testBundleFile = Paths.get("../../dsf-docker-test-setup/fhir/app/conf/bundle.xml");
+		logger.info("Copying fhir bundle to {}", testBundleFile);
+		writeBundle(testBundleFile, testBundle);
 	}
 }
