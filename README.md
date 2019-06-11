@@ -4,6 +4,9 @@
 
 A more detailed documentation on how to start developing and setting-up the testing environment will be added shortly.
 
+## Introduction
+An introduction to the HiGHmed data sharing architecture can be found on [YouTube](http://www.youtube.com/watch?v=YPcryul5occ) (German).
+
 ## Building
 Prerequisite: Java 11, Maven 3.6
 
@@ -40,6 +43,23 @@ Prerequisite: Java 11, Maven 3.6, Docker 18
   ```
   mvn install
   ```
+* Build 4 docker images
+  * .../dsf-bpe/dsf-bpe-server-jetty
+    ```
+    docker build -t highmed/bpe .
+    ```
+  * .../dsf-fhir/dsf-fhir-server-jetty
+    ```
+    docker build -t highmed/fhir .
+    ```
+  * .../dsf-docker/bpe_proxy
+    ```
+    docker build -t highmed/bpe_proxy .
+    ```
+  * .../dsf-docker/fhir_proxy
+    ```
+    docker build -t highmed/fhir_proxy .
+    ```
 * Run docker-compose in fhir and bpe folder
   * .../dsf-docker-test-setup/fhir
     ```
