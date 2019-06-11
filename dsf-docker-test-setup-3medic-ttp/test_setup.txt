@@ -1,41 +1,45 @@
 Windows 10
 
 Windows Host
-	Create VirtualSwitch and VMs (Admin-PowerShell):
-		execute ./vm-setup.ps1
+	Install WSL with Ubuntu 18.04
+	Download Ubuntu Server 18.04.2 ISO (e.g. https://ftp-stud.hs-esslingen.de/pub/Mirrors/releases.ubuntu.com/18.04.2/ubuntu-18.04.2-live-server-amd64.iso) to your $HOME/Downloads folder
+	Create VirtualSwitch and VMs:
+		execute vm-setup.ps1 in PowerShell with administrator privileges
 
 VMs (Setup Ubuntu Server)
-	Start-VM -VMName "HiGHmed_DockerRegistry"
-	vmconnect localhost "HiGHmed_DockerRegistry"
+	Start and connect to VMs:
+		Start-VM -VMName "HiGHmed_DockerRegistry"
+		vmconnect localhost "HiGHmed_DockerRegistry"
 	
-	Start-VM -VMName "HiGHmed_TTP"
-	vmconnect localhost "HiGHmed_TTP"
+		Start-VM -VMName "HiGHmed_TTP"
+		vmconnect localhost "HiGHmed_TTP"
 	
-	Start-VM -VMName "HiGHmed_MeDIC_1"
-	vmconnect localhost "HiGHmed_MeDIC_1"
+		Start-VM -VMName "HiGHmed_MeDIC_1"
+		vmconnect localhost "HiGHmed_MeDIC_1"
 	
-	Start-VM -VMName "HiGHmed_MeDIC_2"
-	vmconnect localhost "HiGHmed_MeDIC_2"
+		Start-VM -VMName "HiGHmed_MeDIC_2"
+		vmconnect localhost "HiGHmed_MeDIC_2"
 	
-	Start-VM -VMName "HiGHmed_MeDIC_3"
-	vmconnect localhost "HiGHmed_MeDIC_3"
+		Start-VM -VMName "HiGHmed_MeDIC_3"
+		vmconnect localhost "HiGHmed_MeDIC_3"
 
-	Setup Ubuntu 18.04.2 (manual)
-	Network:
-		Subnet: 10.42.0.0/24
-		Address: 10.42.0.{9,10,11,12,13}
-		Gateway: 10.42.0.1
-		DNS: 8.8.8.8
-	Hostname: {registry, ttp, medic1, medic2, medic3}
-	Username same as WSL username
-	Install OpenSSH Server
+	Setup Ubuntu 18.04.2 (manually):
+		Network:
+			Subnet: 10.42.0.0/24
+			Address: 10.42.0.{9,10,11,12,13}
+			Gateway: 10.42.0.1
+			DNS: 8.8.8.8
+		Hostname: {registry, ttp, medic1, medic2, medic3}
+		Username same as WSL username
+		Install OpenSSH Server
 	
-	login to console and set sudo without password
-	sudo visudo
-	change
-	%sudo	ALL=(ALL:ALL) ALL
-	to
-	%sudo	ALL=(ALL:ALL) NOPASSWD:ALL
+	login to console and set sudo without password:
+		sudo visudo
+		
+		change
+			%sudo	ALL=(ALL:ALL) ALL
+		to
+			%sudo	ALL=(ALL:ALL) NOPASSWD:ALL
 	
 
 Windows Host
@@ -44,29 +48,35 @@ Windows Host
 		Restart-Service LxssManager
 
 Windows Host - WSL (Ubuntu)
-	ssh-keygen -o -a 100 -t ed25519 -f ~/.ssh/id_ed25519 -C "hhund" [create ssh key]
+	create ssh key:
+		ssh-keygen -o -a 100 -t ed25519 -f ~/.ssh/id_ed25519 -C $USER
 
-	ssh-agent bash
-	ssh-add ~/.ssh/id_ed25519
-
-	ssh-copy-id {host} [add ssh key to {ttp, medic1, medic2, medic3}]
+	copy ssh public-key to vms:
+		ssh-agent bash
+		ssh-add ~/.ssh/id_ed25519
+		ssh-copy-id {host} [add ssh key to {ttp, medic1, medic2, medic3}]
 	
-	sudo apt-add-repository ppa:ansible/ansible
-	sudo apt install ansible
+	install ansible:
+		sudo apt-add-repository ppa:ansible/ansible
+		sudo apt install ansible
 	
-	sudo nano /etc/ansible/hosts
-		[HiGHmed]
-		registry
-		ttp
-		medic1
-		medic2
-		medic3
-	
-	ansible-playbook highmed.yml
+	configure ansible hosts:
+		sudo nano /etc/ansible/hosts
+			[HiGHmed]
+			registry
+			ttp
+			medic1
+			medic2
+			medic3
+	run initial vm setup:
+		ansible-playbook highmed.yml
 
 DockerRegistry
-	ssh registry
-	docker run -d -p 5000:5000 --restart always --name registry registry:latest
+	login to registry vm:
+		ssh registry
+	
+	setup docker registry container:
+		docker run -d -p 5000:5000 --restart always --name registry registry:latest
 	
 Windows Host
 	Docker -> Preferences -> Daemon
@@ -75,16 +85,6 @@ Windows Host
 		
 Upload Config Files
 	ansible-playbook medic1/upload.yml medic2/upload.yml medic3/upload.yml ttp/upload.yml
-
-FHIR Docker
-	docker build -t highmed/fhir .
-	docker tag highmed/fhir:latest registry:5000/highmed/fhir:latest
-	docker push registry:5000/highmed/fhir
-	
-FHIR Proxy Docker
-	docker build -t highmed/fhir_proxy .
-	docker tag highmed/fhir_proxy:latest registry:5000/highmed/fhir_proxy:latest
-	docker push registry:5000/highmed/fhir_proxy
 	
 BPE Docker
 	docker build -t highmed/bpe .
@@ -95,6 +95,16 @@ BPE Proxy Docker
 	docker build -t highmed/bpe_proxy .
 	docker tag highmed/bpe_proxy:latest registry:5000/highmed/bpe_proxy:latest
 	docker push registry:5000/highmed/bpe_proxy
+
+FHIR Docker
+	docker build -t highmed/fhir .
+	docker tag highmed/fhir:latest registry:5000/highmed/fhir:latest
+	docker push registry:5000/highmed/fhir
+	
+FHIR Proxy Docker
+	docker build -t highmed/fhir_proxy .
+	docker tag highmed/fhir_proxy:latest registry:5000/highmed/fhir_proxy:latest
+	docker push registry:5000/highmed/fhir_proxy
 
 	
 Shutdown all:
