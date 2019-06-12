@@ -34,8 +34,7 @@ public class ServerEndpoint extends Endpoint implements InitializingBean, NeedsA
 
 	public static final String PATH = "/ws";
 	public static final String USER_PROPERTY = ServerEndpoint.class.getName() + ".user";
-
-	private static final String PINGER_PROPERTY = "pinger";
+	private static final String PINGER_PROPERTY = ServerEndpoint.class.getName() + ".pinger";
 	private static final String BIND_MESSAGE_START = "bind ";
 
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
