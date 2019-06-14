@@ -1,4 +1,0 @@
-copy cert files into ssl folder: 
-certificate.pem - server certificate
-private-key.pem - server certificate private key
-ca_certificate.pem - ca certificate used for signing client and server certificates

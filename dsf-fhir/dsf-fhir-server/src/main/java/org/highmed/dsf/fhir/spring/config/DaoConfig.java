@@ -45,13 +45,13 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class DaoConfig
 {
-	@Value("${org.highmed.fhir.db.url}")
+	@Value("${org.highmed.dsf.fhir.db.url}")
 	private String dbUrl;
 
-	@Value("${org.highmed.fhir.db.username}")
+	@Value("${org.highmed.dsf.fhir.db.server_user}")
 	private String dbUsername;
 
-	@Value("${org.highmed.fhir.db.password}")
+	@Value("${org.highmed.dsf.fhir.db.server_user_password}")
 	private String dbPassword;
 
 	@Autowired

@@ -94,10 +94,10 @@ import ca.uhn.fhir.model.api.annotation.ResourceDef;
 @Configuration
 public class WebserviceConfig
 {
-	@Value("${org.highmed.fhir.serverBase}")
+	@Value("${org.highmed.dsf.fhir.serverBase}")
 	private String serverBase;
 
-	@Value("${org.highmed.fhir.defaultPageCount}")
+	@Value("${org.highmed.dsf.fhir.defaultPageCount}")
 	private int defaultPageCount;
 
 	@Autowired

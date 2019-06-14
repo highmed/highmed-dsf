@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class HelperConfig
 {
-	@Value("${org.highmed.fhir.serverBase}")
+	@Value("${org.highmed.dsf.fhir.serverBase}")
 	private String serverBase;
 
 	@Bean

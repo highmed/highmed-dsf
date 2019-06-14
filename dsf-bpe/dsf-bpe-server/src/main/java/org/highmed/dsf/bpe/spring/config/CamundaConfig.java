@@ -19,13 +19,13 @@ public class CamundaConfig
 {
 	private static final Logger logger = LoggerFactory.getLogger(CamundaConfig.class);
 
-	@Value("${org.highmed.bpe.db.url}")
+	@Value("${org.highmed.dsf.bpe.db.url}")
 	private String dbUrl;
 
-	@Value("${org.highmed.bpe.db.username.camunda}")
+	@Value("${org.highmed.dsf.bpe.db.camunda_user}")
 	private String dbUsernameCamunda;
 
-	@Value("${org.highmed.bpe.db.password.camunda}")
+	@Value("${org.highmed.dsf.bpe.db.camunda_user_password}")
 	private String dbPasswordCamunda;
 
 	@Bean

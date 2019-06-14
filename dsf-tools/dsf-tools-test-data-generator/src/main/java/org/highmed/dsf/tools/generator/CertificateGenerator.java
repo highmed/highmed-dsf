@@ -23,6 +23,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -673,42 +674,61 @@ public class CertificateGenerator
 
 	public void copyDockerTestCertificates()
 	{
-		CertificateFiles localhost = serverCertificateFilesByCommonName.get("localhost");
+		copyProxyFiles("dsf-docker-test-setup", "localhost");
+		copyClientCertFiles("dsf-docker-test-setup", "test-client");
+	}
 
-		Path bpeCertificateFile = Paths.get("../../dsf-docker-test-setup/bpe/proxy/ssl/certificate.pem");
-		logger.info("Copying localhost certificate pem file to {}", bpeCertificateFile);
-		writeCertificate(bpeCertificateFile, localhost.getCertificate());
+	public void copyDockerTest3MedicTtpCertificates()
+	{
+		List<String> commonNames = Arrays.asList("medic1", "medic2", "medic3", "ttp");
+		commonNames.forEach(cn -> copyProxyFiles("dsf-docker-test-setup-3medic-ttp/" + cn, cn));
+		commonNames.forEach(cn -> copyClientCertFiles("dsf-docker-test-setup-3medic-ttp/" + cn, cn + "-client"));
+	}
 
-		Path fhirCertificateFile = Paths.get("../../dsf-docker-test-setup/fhir/proxy/ssl/certificate.pem");
-		logger.info("Copying localhost certificate pem file to {}", fhirCertificateFile);
-		writeCertificate(fhirCertificateFile, localhost.getCertificate());
-
-		Path bpePrivateKeyFile = Paths.get("../../dsf-docker-test-setup/bpe/proxy/ssl/private-key.pem");
-		logger.info("Copying localhost private-key file to {}", bpePrivateKeyFile);
-		writePrivateKey(bpePrivateKeyFile, (RSAPrivateCrtKey) localhost.getKeyPair().getPrivate());
-
-		Path fhirPrivateKeyFile = Paths.get("../../dsf-docker-test-setup/fhir/proxy/ssl/private-key.pem");
-		logger.info("Copying localhost private-key file to {}", fhirPrivateKeyFile);
-		writePrivateKey(fhirPrivateKeyFile, (RSAPrivateCrtKey) localhost.getKeyPair().getPrivate());
-
+	private void copyProxyFiles(String dockerTestFolder, String commonName)
+	{
 		X509Certificate testCaCertificate = ca.getCertificate();
+		CertificateFiles serverCertFiles = serverCertificateFilesByCommonName.get(commonName);
 
-		Path bpeCaCertFile = Paths.get("../../dsf-docker-test-setup/bpe/proxy/ssl/ca_certificate.pem");
+		Path baseFolder = Paths.get("../../", dockerTestFolder);
+
+		Path bpeCertificateFile = baseFolder.resolve("bpe/proxy/ssl/certificate.pem");
+		logger.info("Copying {} certificate pem file to {}", commonName, bpeCertificateFile);
+		writeCertificate(bpeCertificateFile, serverCertFiles.getCertificate());
+
+		Path fhirCertificateFile = baseFolder.resolve("fhir/proxy/ssl/certificate.pem");
+		logger.info("Copying {} certificate pem file to {}", commonName, fhirCertificateFile);
+		writeCertificate(fhirCertificateFile, serverCertFiles.getCertificate());
+
+		Path bpePrivateKeyFile = baseFolder.resolve("bpe/proxy/ssl/private-key.pem");
+		logger.info("Copying {} private-key file to {}", commonName, bpePrivateKeyFile);
+		writePrivateKey(bpePrivateKeyFile, (RSAPrivateCrtKey) serverCertFiles.getKeyPair().getPrivate());
+
+		Path fhirPrivateKeyFile = baseFolder.resolve("fhir/proxy/ssl/private-key.pem");
+		logger.info("Copying {} private-key file to {}", commonName, fhirPrivateKeyFile);
+		writePrivateKey(fhirPrivateKeyFile, (RSAPrivateCrtKey) serverCertFiles.getKeyPair().getPrivate());
+
+		Path bpeCaCertFile = baseFolder.resolve("bpe/proxy/ssl/ca_certificate.pem");
 		logger.info("Copying Test CA certificate file to {}", bpeCaCertFile.toString());
 		writeCertificate(bpeCaCertFile, testCaCertificate);
 
-		Path fhirCacertFile = Paths.get("../../dsf-docker-test-setup/fhir/proxy/ssl/ca_certificate.pem");
+		Path fhirCacertFile = baseFolder.resolve("fhir/proxy/ssl/ca_certificate.pem");
 		logger.info("Copying Test CA certificate file to {}", fhirCacertFile.toString());
 		writeCertificate(fhirCacertFile, testCaCertificate);
+	}
 
-		CertificateFiles testClient = clientCertificateFilesByCommonName.get("test-client");
+	private void copyClientCertFiles(String dockerTestFolder, String commonName)
+	{
+		CertificateFiles clientCertFiles = clientCertificateFilesByCommonName.get(commonName);
 
-		Path bpeClientP12File = Paths.get("../../dsf-docker-test-setup/bpe/app/conf/test-client_certificate.p12");
-		logger.info("Copying test-client certificate p12 file to {}", bpeClientP12File);
-		writeP12File(bpeClientP12File, testClient.getP12KeyStore());
+		Path baseFolder = Paths.get("../../", dockerTestFolder);
 
-		Path fhirClientP12File = Paths.get("../../dsf-docker-test-setup/fhir/app/conf/test-client_certificate.p12");
-		logger.info("Copying test-client certificate p12 file to {}", fhirClientP12File);
-		writeP12File(fhirClientP12File, testClient.getP12KeyStore());
+		Path bpeClientP12File = baseFolder.resolve("bpe/app/conf/" + commonName + "_certificate.p12");
+		logger.info("Copying {} certificate p12 file to {}", commonName, bpeClientP12File);
+		writeP12File(bpeClientP12File, clientCertFiles.getP12KeyStore());
+
+		Path fhirClientP12File = baseFolder.resolve("fhir/app/conf/" + commonName + "_certificate.p12");
+		logger.info("Copying {} certificate p12 file to {}", commonName, fhirClientP12File);
+		writeP12File(fhirClientP12File, clientCertFiles.getP12KeyStore());
 	}
 }

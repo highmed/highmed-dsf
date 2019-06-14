@@ -24,7 +24,7 @@ public class AuthenticationConfig
 	@Autowired
 	private HelperConfig helperConfig;
 
-	@Value("#{'${org.highmed.fhir.local-user.thumbprints}'.split(',')}")
+	@Value("#{'${org.highmed.dsf.fhir.local-user.thumbprints}'.split(',')}")
 	private List<String> localUserThumbprints;
 
 	@Bean

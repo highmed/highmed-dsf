@@ -1,2 +1,6 @@
 /docker-test-fhir-config.properties
 /java-test-fhir-config.properties
+/docker-test-medic1-fhir-config.properties
+/docker-test-medic2-fhir-config.properties
+/docker-test-medic3-fhir-config.properties
+/docker-test-ttp-fhir-config.properties

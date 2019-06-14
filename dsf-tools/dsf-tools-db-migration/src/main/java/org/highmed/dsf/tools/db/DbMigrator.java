@@ -38,15 +38,20 @@ public final class DbMigrator
 
 	private static final String[] STANDARD_PROPERTIES = { DB_DRIVER, DB_URL, DB_LIQUIBASE_USER,
 			DB_LIQUIBASE_USER_PASSWORD, DB_SERVER_USERS_GROUP, DB_SERVER_USER, DB_SERVER_USER_PASSWORD };
+	private static final String[] STANDARD_CHANGE_LOG_PARAMETER_NAMES = { DB_LIQUIBASE_USER, DB_SERVER_USERS_GROUP,
+			DB_SERVER_USER, DB_SERVER_USER_PASSWORD };
 
-	private final Properties dbProperties;
-	private final List<String> changeLogParameterNames = new ArrayList<String>(
-			Arrays.asList(DB_LIQUIBASE_USER, DB_SERVER_USERS_GROUP, DB_SERVER_USER, DB_SERVER_USER_PASSWORD));
+	private String prefix;
+	private final Properties properties;
+	private final List<String> changeLogParameterNames = new ArrayList<>();
 
 	// "camunda_users_group", "camunda_user", "camunda_user_password"
-	public DbMigrator(Properties dbProperties, String... additionalChangeLogParameterNames)
+	public DbMigrator(String prefix, Properties properties, String... additionalChangeLogParameterNames)
 	{
-		this.dbProperties = dbProperties;
+		this.prefix = prefix;
+		this.properties = properties;
+
+		this.changeLogParameterNames.addAll(Arrays.asList(STANDARD_CHANGE_LOG_PARAMETER_NAMES));
 		this.changeLogParameterNames.addAll(Arrays.asList(additionalChangeLogParameterNames));
 
 		checkProperties(STANDARD_PROPERTIES, additionalChangeLogParameterNames);
@@ -56,7 +61,9 @@ public final class DbMigrator
 	{
 		List<String> missingParameters = Stream
 				.concat(Arrays.stream(standardProperties), Arrays.stream(additionalChangeLogParameterNames))
-				.map(parameterName -> dbProperties.containsKey(parameterName) ? null : parameterName)
+				.map(parameterName -> prefix + parameterName)
+				.map(parameterName -> properties.get(parameterName) != null
+						&& !properties.get(parameterName).toString().isBlank() ? null : parameterName)
 				.filter(missingParameter -> missingParameter != null).collect(Collectors.toList());
 
 		if (!missingParameters.isEmpty())
@@ -70,7 +77,7 @@ public final class DbMigrator
 	{
 		try
 		{
-			Class.forName(dbProperties.getProperty(DB_DRIVER));
+			Class.forName(properties.getProperty(prefix + DB_DRIVER));
 		}
 		catch (ClassNotFoundException e)
 		{
@@ -80,10 +87,10 @@ public final class DbMigrator
 
 		try (BasicDataSource dataSource = new BasicDataSource())
 		{
-			dataSource.setDriverClassName(dbProperties.getProperty(DB_DRIVER));
-			dataSource.setUrl(dbProperties.getProperty(DB_URL));
-			dataSource.setUsername(dbProperties.getProperty(DB_LIQUIBASE_USER));
-			dataSource.setPassword(dbProperties.getProperty(DB_LIQUIBASE_USER_PASSWORD));
+			dataSource.setDriverClassName(properties.getProperty(prefix + DB_DRIVER));
+			dataSource.setUrl(properties.getProperty(prefix + DB_URL));
+			dataSource.setUsername(properties.getProperty(prefix + DB_LIQUIBASE_USER));
+			dataSource.setPassword(properties.getProperty(prefix + DB_LIQUIBASE_USER_PASSWORD));
 
 			try (Connection connection = dataSource.getConnection())
 			{
@@ -93,7 +100,7 @@ public final class DbMigrator
 
 				ChangeLogParameters changeLogParameters = liquibase.getChangeLogParameters();
 				changeLogParameterNames.forEach(parameterName -> changeLogParameters.set(parameterName,
-						dbProperties.getProperty(parameterName)));
+						properties.getProperty(prefix + parameterName)));
 
 				logger.info("Executing DB migration ...");
 				liquibase.update(new Contexts());

@@ -24,7 +24,7 @@ public class InitialDataLoadConfig
 {
 	private static final Logger logger = LoggerFactory.getLogger(InitialDataLoadConfig.class);
 
-	@Value("${org.highmed.fhir.init.bundle.file}")
+	@Value("${org.highmed.dsf.fhir.init.bundle.file}")
 	private String initBundleFile;
 
 	@Autowired

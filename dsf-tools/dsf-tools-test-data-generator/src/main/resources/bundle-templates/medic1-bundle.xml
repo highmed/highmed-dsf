@@ -5,6 +5,9 @@
 		<fullUrl value="urn:uuid:bb73165c-c7b9-4342-8e28-531f07fa7735" />
 		<resource>
 			<Organization xmlns="http://hl7.org/fhir">
+				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
+					<valueString value="TODO" />
+				</extension>
 				<identifier>
 					<system value="http://highmed.org/fhir/CodeSystem/organization" />
 					<value value="Test_TTP" />
@@ -17,25 +20,23 @@
 					</coding>
 				</type>
 				<name value="Test TTP" />
-				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
-					<valueString
-						value="532a7736fd2187c4895765fa211cd076e70d0e9405c466b650ca3c2e89b9cd796a063f1840f26b6422b08aafdaff677fb53bec14916185355ae1b6ee1b0afc5f" />
-				</extension>
 			</Organization>
 		</resource>
 		<request>
-			<method value="POST" />
-			<url value="Organization" />
-			<ifNoneExist value="identifier=http://highmed.org/fhir/CodeSystem/organization|Test_TTP" />
+			<method value="PUT" />
+			<url value="Organization?identifier=http://highmed.org/fhir/CodeSystem/organization|Test_TTP" />
 		</request>
 	</entry>
 	<entry>
-		<fullUrl value="urn:uuid:55901940-02db-40bf-9a6e-bdfdd0ddb7bf" />
+		<fullUrl value="urn:uuid:cf62edc2-cc5d-43ed-ac0e-caf09f7326c3" />
 		<resource>
 			<Organization xmlns="http://hl7.org/fhir">
+				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
+					<valueString value="TODO" />
+				</extension>
 				<identifier>
 					<system value="http://highmed.org/fhir/CodeSystem/organization" />
-					<value value="Test_MeDIC_2" />
+					<value value="Test_MeDIC_1" />
 				</identifier>
 				<active value="true" />
 				<type>
@@ -44,17 +45,12 @@
 						<code value="MeDIC" />
 					</coding>
 				</type>
-				<name value="Test MeDIC 2" />
-				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
-					<valueString
-						value="e4af921e6cbc35032ddb21b8a36f366ff7605bdb20bddddcbca6bcc437239b58e9189dfea3a66c584a9bb0a6006c243031c6c5504a43d059afa629d24f8b55bb" />
-				</extension>
+				<name value="Test MeDIC 1" />
 			</Organization>
 		</resource>
 		<request>
-			<method value="POST" />
-			<url value="Organization" />
-			<ifNoneExist value="identifier=http://highmed.org/fhir/CodeSystem/organization|Test_MeDIC_2" />
+			<method value="PUT" />
+			<url value="Organization?identifier=http://highmed.org/fhir/CodeSystem/organization|Test_MeDIC_1" />
 		</request>
 	</entry>
 </Bundle>

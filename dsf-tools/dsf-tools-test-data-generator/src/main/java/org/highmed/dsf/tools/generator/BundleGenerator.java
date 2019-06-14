@@ -30,6 +30,10 @@ public class BundleGenerator
 	private final ReferenceExtractor extractor = new ReferenceExtractorImpl();
 
 	private Bundle testBundle;
+	private Bundle medic1Bundle;
+	private Bundle medic2Bundle;
+	private Bundle medic3Bundle;
+	private Bundle ttpBundle;
 
 	private Bundle readBundle(Path bundleTemplateFile)
 	{
@@ -67,11 +71,12 @@ public class BundleGenerator
 		return parser;
 	}
 
-	public void createJavaTestServerBundle(Map<String, CertificateFiles> clientCertificateFilesByCommonName)
+	public void createTestBundle(Map<String, CertificateFiles> clientCertificateFilesByCommonName)
 	{
 		Path testBundleTemplateFile = Paths.get("src/main/resources/bundle-templates/test-bundle.xml");
 
 		testBundle = readBundle(testBundleTemplateFile);
+
 		Organization organization = (Organization) testBundle.getEntry().get(0).getResource();
 		Extension thumbprintExtension = organization
 				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
@@ -80,7 +85,7 @@ public class BundleGenerator
 
 		removeReferenceEmbeddedResources(testBundle);
 
-		writeBundle(Paths.get("bundle/java-test-bundle.xml"), testBundle);
+		writeBundle(Paths.get("bundle/test-bundle.xml"), testBundle);
 	}
 
 	// FIXME hapi parser can't handle embedded resources and creates them while parsing bundles
@@ -97,33 +102,150 @@ public class BundleGenerator
 		});
 	}
 
-	public void copyJavaTestServerBundle()
+	public void copyJavaTestBundle()
 	{
-		Path testBundleFile = Paths.get("../../dsf-fhir/dsf-fhir-server-jetty/conf/bundle.xml");
-		logger.info("Copying fhir bundle to {}", testBundleFile);
-		writeBundle(testBundleFile, testBundle);
+		Path javaTestBundleFile = Paths.get("../../dsf-fhir/dsf-fhir-server-jetty/conf/bundle.xml");
+		logger.info("Copying fhir bundle to {}", javaTestBundleFile);
+		writeBundle(javaTestBundleFile, testBundle);
 	}
 
-	public void createDockerServerBundles(Map<String, CertificateFiles> clientCertificateFilesByCommonName)
+	public void copyDockerTestBundle()
 	{
-		Path testBundleTemplateFile = Paths.get("src/main/resources/bundle-templates/test-bundle.xml");
+		Path dockerTestBundleFile = Paths.get("../../dsf-docker-test-setup/fhir/app/conf/bundle.xml");
+		logger.info("Copying fhir bundle to {}", dockerTestBundleFile);
+		writeBundle(dockerTestBundleFile, testBundle);
+	}
 
-		testBundle = readBundle(testBundleTemplateFile);
-		Organization organization = (Organization) testBundle.getEntry().get(0).getResource();
-		Extension thumbprintExtension = organization
+	public void createDockerTest3MedicTtpBundles(Map<String, CertificateFiles> clientCertificateFilesByCommonName)
+	{
+		createDockerTestMedic1Bundle(clientCertificateFilesByCommonName);
+		createDockerTestMedic2Bundle(clientCertificateFilesByCommonName);
+		createDockerTestMedic3Bundle(clientCertificateFilesByCommonName);
+		createDockerTestTtpBundle(clientCertificateFilesByCommonName);
+	}
+
+	private void createDockerTestMedic1Bundle(Map<String, CertificateFiles> clientCertificateFilesByCommonName)
+	{
+		Path medic1BundleTemplateFile = Paths.get("src/main/resources/bundle-templates/medic1-bundle.xml");
+
+		medic1Bundle = readBundle(medic1BundleTemplateFile);
+
+		Organization organizationTtp = (Organization) medic1Bundle.getEntry().get(0).getResource();
+		Extension organizationTtpThumbprintExtension = organizationTtp
 				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
-		thumbprintExtension.setValue(new StringType(
-				clientCertificateFilesByCommonName.get("test-client").getCertificateSha512ThumbprintHex()));
+		organizationTtpThumbprintExtension.setValue(new StringType(
+				clientCertificateFilesByCommonName.get("ttp-client").getCertificateSha512ThumbprintHex()));
 
-		removeReferenceEmbeddedResources(testBundle);
+		Organization organizationMedic1 = (Organization) medic1Bundle.getEntry().get(1).getResource();
+		Extension organizationMedic1thumbprintExtension = organizationMedic1
+				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
+		organizationMedic1thumbprintExtension.setValue(new StringType(
+				clientCertificateFilesByCommonName.get("medic1-client").getCertificateSha512ThumbprintHex()));
 
-		writeBundle(Paths.get("bundle/docker-test-bundle.xml"), testBundle);
+		removeReferenceEmbeddedResources(medic1Bundle);
+
+		writeBundle(Paths.get("bundle/medic1-bundle.xml"), medic1Bundle);
 	}
 
-	public void copyDockerServerBundles()
+	private void createDockerTestMedic2Bundle(Map<String, CertificateFiles> clientCertificateFilesByCommonName)
 	{
-		Path testBundleFile = Paths.get("../../dsf-docker-test-setup/fhir/app/conf/bundle.xml");
-		logger.info("Copying fhir bundle to {}", testBundleFile);
-		writeBundle(testBundleFile, testBundle);
+		Path medic2BundleTemplateFile = Paths.get("src/main/resources/bundle-templates/medic2-bundle.xml");
+
+		medic2Bundle = readBundle(medic2BundleTemplateFile);
+
+		Organization organizationTtp = (Organization) medic2Bundle.getEntry().get(0).getResource();
+		Extension organizationTtpThumbprintExtension = organizationTtp
+				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
+		organizationTtpThumbprintExtension.setValue(new StringType(
+				clientCertificateFilesByCommonName.get("ttp-client").getCertificateSha512ThumbprintHex()));
+
+		Organization organizationMedic2 = (Organization) medic2Bundle.getEntry().get(1).getResource();
+		Extension organizationMedic2thumbprintExtension = organizationMedic2
+				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
+		organizationMedic2thumbprintExtension.setValue(new StringType(
+				clientCertificateFilesByCommonName.get("medic2-client").getCertificateSha512ThumbprintHex()));
+
+		removeReferenceEmbeddedResources(medic2Bundle);
+
+		writeBundle(Paths.get("bundle/medic2-bundle.xml"), medic2Bundle);
+	}
+
+	private void createDockerTestMedic3Bundle(Map<String, CertificateFiles> clientCertificateFilesByCommonName)
+	{
+		Path medic3BundleTemplateFile = Paths.get("src/main/resources/bundle-templates/medic3-bundle.xml");
+
+		medic3Bundle = readBundle(medic3BundleTemplateFile);
+
+		Organization organizationTtp = (Organization) medic3Bundle.getEntry().get(0).getResource();
+		Extension organizationTtpThumbprintExtension = organizationTtp
+				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
+		organizationTtpThumbprintExtension.setValue(new StringType(
+				clientCertificateFilesByCommonName.get("ttp-client").getCertificateSha512ThumbprintHex()));
+
+		Organization organizationMedic3 = (Organization) medic3Bundle.getEntry().get(1).getResource();
+		Extension organizationMedic3thumbprintExtension = organizationMedic3
+				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
+		organizationMedic3thumbprintExtension.setValue(new StringType(
+				clientCertificateFilesByCommonName.get("medic3-client").getCertificateSha512ThumbprintHex()));
+
+		removeReferenceEmbeddedResources(medic3Bundle);
+
+		writeBundle(Paths.get("bundle/medic3-bundle.xml"), medic3Bundle);
+	}
+
+	private void createDockerTestTtpBundle(Map<String, CertificateFiles> clientCertificateFilesByCommonName)
+	{
+		Path medic3BundleTemplateFile = Paths.get("src/main/resources/bundle-templates/ttp-bundle.xml");
+
+		ttpBundle = readBundle(medic3BundleTemplateFile);
+
+		Organization organizationTtp = (Organization) ttpBundle.getEntry().get(0).getResource();
+		Extension organizationTtpThumbprintExtension = organizationTtp
+				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
+		organizationTtpThumbprintExtension.setValue(new StringType(
+				clientCertificateFilesByCommonName.get("ttp-client").getCertificateSha512ThumbprintHex()));
+
+		Organization organizationMedic1 = (Organization) ttpBundle.getEntry().get(1).getResource();
+		Extension organizationMedic1thumbprintExtension = organizationMedic1
+				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
+		organizationMedic1thumbprintExtension.setValue(new StringType(
+				clientCertificateFilesByCommonName.get("medic1-client").getCertificateSha512ThumbprintHex()));
+
+		Organization organizationMedic2 = (Organization) ttpBundle.getEntry().get(2).getResource();
+		Extension organizationMedic2thumbprintExtension = organizationMedic2
+				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
+		organizationMedic2thumbprintExtension.setValue(new StringType(
+				clientCertificateFilesByCommonName.get("medic2-client").getCertificateSha512ThumbprintHex()));
+
+		Organization organizationMedic3 = (Organization) ttpBundle.getEntry().get(3).getResource();
+		Extension organizationMedic3thumbprintExtension = organizationMedic3
+				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
+		organizationMedic3thumbprintExtension.setValue(new StringType(
+				clientCertificateFilesByCommonName.get("medic3-client").getCertificateSha512ThumbprintHex()));
+
+		removeReferenceEmbeddedResources(ttpBundle);
+
+		writeBundle(Paths.get("bundle/ttp-bundle.xml"), ttpBundle);
+
+	}
+
+	public void copyDockerTest3MedicTtpBundles()
+	{
+		Path medic1BundleFile = Paths.get("../../dsf-docker-test-setup-3medic-ttp/medic1/fhir/app/conf/bundle.xml");
+		logger.info("Copying fhir bundle to {}", medic1BundleFile);
+		writeBundle(medic1BundleFile, medic1Bundle);
+
+		Path medic2BundleFile = Paths.get("../../dsf-docker-test-setup-3medic-ttp/medic2/fhir/app/conf/bundle.xml");
+		logger.info("Copying fhir bundle to {}", medic2BundleFile);
+		writeBundle(medic2BundleFile, medic2Bundle);
+
+		Path medic3BundleFile = Paths.get("../../dsf-docker-test-setup-3medic-ttp/medic3/fhir/app/conf/bundle.xml");
+		logger.info("Copying fhir bundle to {}", medic3BundleFile);
+		writeBundle(medic3BundleFile, medic3Bundle);
+
+		Path ttpBundleFile = Paths.get("../../dsf-docker-test-setup-3medic-ttp/ttp/fhir/app/conf/bundle.xml");
+		logger.info("Copying fhir bundle to {}", ttpBundleFile);
+		writeBundle(ttpBundleFile, ttpBundle);
+
 	}
 }

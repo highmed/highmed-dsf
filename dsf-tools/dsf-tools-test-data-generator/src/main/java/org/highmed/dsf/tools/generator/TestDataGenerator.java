@@ -22,9 +22,10 @@ public class TestDataGenerator
 	public static void main(String[] args)
 	{
 		certificateGenerator.generateCertificates();
-		
+
 		certificateGenerator.copyJavaTestCertificates();
 		certificateGenerator.copyDockerTestCertificates();
+		certificateGenerator.copyDockerTest3MedicTtpCertificates();
 
 		CertificateFiles webbrowserTestUser = certificateGenerator.getClientCertificateFilesByCommonName()
 				.get("Webbrowser Test User");
@@ -32,18 +33,23 @@ public class TestDataGenerator
 				"Install client-certificate and CA certificate from \"{}\" into your browsers certificate store to access fhir and bpe servers with your webbrowser",
 				webbrowserTestUser.getP12KeyStoreFile().toAbsolutePath().toString());
 
-		bundleGenerator.createJavaTestServerBundle(certificateGenerator.getClientCertificateFilesByCommonName());
-		bundleGenerator.copyJavaTestServerBundle();
+		bundleGenerator.createTestBundle(certificateGenerator.getClientCertificateFilesByCommonName());
+		bundleGenerator.copyJavaTestBundle();
+		bundleGenerator.copyDockerTestBundle();
 
-		bundleGenerator.createDockerServerBundles(certificateGenerator.getClientCertificateFilesByCommonName());
-		bundleGenerator.copyDockerServerBundles();
-
-		configGenerator
-				.modifyJavaTestServerConfigProperties(certificateGenerator.getClientCertificateFilesByCommonName());
-		configGenerator.copyJavaTestFhirServerConfigProperties();
+		bundleGenerator.createDockerTest3MedicTtpBundles(certificateGenerator.getClientCertificateFilesByCommonName());
+		bundleGenerator.copyDockerTest3MedicTtpBundles();
 
 		configGenerator
-				.modifyDockerTestServerConfigProperties(certificateGenerator.getClientCertificateFilesByCommonName());
-		configGenerator.copyDockerTestFhirServerConfigProperties();
+				.modifyJavaTestFhirConfigProperties(certificateGenerator.getClientCertificateFilesByCommonName());
+		configGenerator.copyJavaTestFhirConfigProperties();
+
+		configGenerator
+				.modifyDockerTestFhirConfigProperties(certificateGenerator.getClientCertificateFilesByCommonName());
+		configGenerator.copyDockerTestFhirConfigProperties();
+
+		configGenerator.modifyDockerTest3MedicTtpFhirConfigProperties(
+				certificateGenerator.getClientCertificateFilesByCommonName());
+		configGenerator.copyDockerTest3MedicTtpFhirConfigProperties();
 	}
 }

@@ -46,52 +46,52 @@ import de.rwh.utils.crypto.io.CertificateReader;
 @Configuration
 public class FhirConfig
 {
-	@Value("${org.highmed.bpe.fhir.organization.identifier.localValue}")
+	@Value("${org.highmed.dsf.bpe.fhir.organization.identifier.localValue}")
 	private String organizationIdentifierLocalValue;
 
-	@Value("${org.highmed.bpe.fhir.local.webservice.keystore.p12file}")
+	@Value("${org.highmed.dsf.bpe.fhir.local.webservice.keystore.p12file}")
 	private String webserviceKeyStoreFile;
 
-	@Value("${org.highmed.bpe.fhir.local.webservice.keystore.password}")
+	@Value("${org.highmed.dsf.bpe.fhir.local.webservice.keystore.password}")
 	private String webserviceKeyStorePassword;
 
-	@Value("${org.highmed.bpe.fhir.remote.webservice.readTimeout}")
+	@Value("${org.highmed.dsf.bpe.fhir.remote.webservice.readTimeout}")
 	private int remoteReadTimeout;
 
-	@Value("${org.highmed.bpe.fhir.remote.webservice.connectTimeout}")
+	@Value("${org.highmed.dsf.bpe.fhir.remote.webservice.connectTimeout}")
 	private int remoteConnectTimeout;
 
-	@Value("${org.highmed.bpe.fhir.remote.webservice.proxy.password:#{null}}")
+	@Value("${org.highmed.dsf.bpe.fhir.remote.webservice.proxy.password:#{null}}")
 	private String remoteProxyPassword;
 
-	@Value("${org.highmed.bpe.fhir.remote.webservice.proxy.username:#{null}}")
+	@Value("${org.highmed.dsf.bpe.fhir.remote.webservice.proxy.username:#{null}}")
 	private String remoteProxyUsername;
 
-	@Value("${org.highmed.bpe.fhir.remote.webservice.proxy.schemeHostPort:#{null}}")
+	@Value("${org.highmed.dsf.bpe.fhir.remote.webservice.proxy.schemeHostPort:#{null}}")
 	private String remoteProxySchemeHostPort;
 
-	@Value("${org.highmed.bpe.fhir.local.webservice.baseUrl}")
+	@Value("${org.highmed.dsf.bpe.fhir.local.webservice.baseUrl}")
 	private String localWebserviceBaseUrl;
 
-	@Value("${org.highmed.bpe.fhir.local.webservice.readTimeout}")
+	@Value("${org.highmed.dsf.bpe.fhir.local.webservice.readTimeout}")
 	private int localReadTimeout;
 
-	@Value("${org.highmed.bpe.fhir.local.webservice.connectTimeout}")
+	@Value("${org.highmed.dsf.bpe.fhir.local.webservice.connectTimeout}")
 	private int localConnectTimeout;
 
-	@Value("${org.highmed.bpe.fhir.local.websocket.url}")
+	@Value("${org.highmed.dsf.bpe.fhir.local.websocket.url}")
 	private String localWebsocketUrl;
 
-	@Value("${org.highmed.bpe.fhir.local.websocket.keystore.p12file}")
+	@Value("${org.highmed.dsf.bpe.fhir.local.websocket.keystore.p12file}")
 	private String localWebsocketKeyStoreFile;
 
-	@Value("${org.highmed.bpe.fhir.local.websocket.keystore.password}")
+	@Value("${org.highmed.dsf.bpe.fhir.local.websocket.keystore.password}")
 	private String localWebsocketKeyStorePassword;
 
-	@Value("${org.highmed.bpe.fhir.task.subscription.searchParameter}")
+	@Value("${org.highmed.dsf.bpe.fhir.task.subscription.searchParameter}")
 	private String subscriptionSearchParameter;
 
-	@Value("${org.highmed.bpe.fhir.task.subscription.lastEventTimeFile}")
+	@Value("${org.highmed.dsf.bpe.fhir.task.subscription.lastEventTimeFile}")
 	private String lastEventTimeFile;
 
 	@Autowired

@@ -22,25 +22,25 @@ import de.rwh.utils.crypto.io.CertificateReader;
 @Configuration
 public class ClientConfig
 {
-	@Value("${org.highmed.fhir.webservice.keystore.p12file}")
+	@Value("${org.highmed.dsf.fhir.webservice.keystore.p12file}")
 	private String webserviceKeyStoreFile;
 
-	@Value("${org.highmed.fhir.webservice.keystore.password}")
+	@Value("${org.highmed.dsf.fhir.webservice.keystore.password}")
 	private String webserviceKeyStorePassword;
 
-	@Value("${org.highmed.fhir.remote.webservice.readTimeout}")
+	@Value("${org.highmed.dsf.fhir.remote.webservice.readTimeout}")
 	private int remoteReadTimeout;
 
-	@Value("${org.highmed.fhir.remote.webservice.connectTimeout}")
+	@Value("${org.highmed.dsf.fhir.remote.webservice.connectTimeout}")
 	private int remoteConnectTimeout;
 
-	@Value("${org.highmed.fhir.remote.webservice.proxy.password:#{null}}")
+	@Value("${org.highmed.dsf.fhir.remote.webservice.proxy.password:#{null}}")
 	private String remoteProxyPassword;
 
-	@Value("${org.highmed.fhir.remote.webservice.proxy.username:#{null}}")
+	@Value("${org.highmed.dsf.fhir.remote.webservice.proxy.username:#{null}}")
 	private String remoteProxyUsername;
 
-	@Value("${org.highmed.fhir.remote.webservice.proxy.schemeHostPort:#{null}}")
+	@Value("${org.highmed.dsf.fhir.remote.webservice.proxy.schemeHostPort:#{null}}")
 	private String remoteProxySchemeHostPort;
 
 	@Autowired
