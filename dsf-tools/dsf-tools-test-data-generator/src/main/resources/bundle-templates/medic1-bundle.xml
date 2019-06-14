@@ -1,5 +1,4 @@
-<Bundle xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://hl7.org/fhir http://www.hl7.org/fhir/fhir-base.xsd">
+<Bundle xmlns="http://hl7.org/fhir">
 	<type value="transaction" />
 	<entry>
 		<fullUrl value="urn:uuid:bb73165c-c7b9-4342-8e28-531f07fa7735" />
