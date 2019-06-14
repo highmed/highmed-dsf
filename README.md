@@ -25,7 +25,7 @@ Prerequisite: Java 11, Maven 3.6, PostgreSQL 11
 * Add DB User *liquibase_user*
   ``` SQL
   CREATE USER liquibase_user WITH LOGIN NOSUPERUSER INHERIT CREATEDB CREATEROLE NOREPLICATION
-   PASSWORD 'fLp6ZSd5QrMAkGZMjxqXjmcWrTfa3Dn8fA57h92Y';
+  PASSWORD 'fLp6ZSd5QrMAkGZMjxqXjmcWrTfa3Dn8fA57h92Y';
   ```
 * Create Databases *fhir* and *bpe* with owner *liquibase_user*
   ``` SQL
@@ -60,7 +60,7 @@ Prerequisite: Java 11, Maven 3.6, Docker 18
     ```
     docker build -t highmed/fhir_proxy .
     ```
-* Run docker-compose in fhir and bpe folder
+* Run docker-compose in fhir and bpe folders
   * .../dsf-docker-test-setup/fhir
     ```
     docker-compose up
