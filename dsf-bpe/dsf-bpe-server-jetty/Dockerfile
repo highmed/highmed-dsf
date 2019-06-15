@@ -21,5 +21,9 @@ RUN chmod 750 ./ ./lib
 RUN chmod 640 ./highmed_bpe.jar ./lib/*.jar
 RUN chmod 1775 ./log ./last_event	
 
+COPY start_dsf_bpe.sh ./start_dsf_bpe.sh
+RUN chown root:java ./start_dsf_bpe.sh
+RUN chmod 750 ./start_dsf_bpe.sh
+
 USER java
-ENTRYPOINT ["/usr/bin/java", "-cp", "lib/*:highmed_bpe.jar", "org.highmed.dsf.bpe.BpeJettyServer"]
+ENTRYPOINT ["./start_dsf_bpe.sh"]

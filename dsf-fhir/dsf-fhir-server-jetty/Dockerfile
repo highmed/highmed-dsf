@@ -20,5 +20,9 @@ RUN chmod 750 ./ ./lib
 RUN chmod 640 ./highmed_fhir.jar ./lib/*.jar
 RUN chmod 1775 ./log	
 
+COPY start_dsf_fhir.sh ./start_dsf_fhir.sh
+RUN chown root:java ./start_dsf_fhir.sh
+RUN chmod 750 ./start_dsf_fhir.sh
+
 USER java
-ENTRYPOINT ["/usr/bin/java", "-cp", "lib/*:highmed_fhir.jar", "org.highmed.dsf.fhir.FhirJettyServer"]
+ENTRYPOINT ["./start_dsf_fhir.sh"]
