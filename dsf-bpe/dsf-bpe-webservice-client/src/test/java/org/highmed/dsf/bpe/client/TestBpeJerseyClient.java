@@ -23,7 +23,7 @@ public class TestBpeJerseyClient
 	{
 		String keyStorePassword = "password";
 		KeyStore keyStore = CertificateReader
-				.fromPkcs12(Paths.get("../bpe-demo-cert-generator/cert/test-client_certificate.p12"), keyStorePassword);
+				.fromPkcs12(Paths.get("../../dsf-tools/dsf-tools-test-data-generator/cert/Webbrowser_Test_User/Webbrowser_Test_User_certificate.p12"), keyStorePassword);
 		KeyStore trustStore = CertificateHelper.extractTrust(keyStore);
 
 //		WebserviceClient client = new WebserviceClientJersey("https://localhost:8002/bpe", trustStore, keyStore,
@@ -37,7 +37,7 @@ public class TestBpeJerseyClient
 
 //		client.startProcessWithVersion("requestUpdateResources", "1.0.0", Map.of("target-identifier",
 //				Collections.singletonList("http://highmed.org/fhir/CodeSystem/organization|"), "bundle-id",
-//				Arrays.asList("Bundle/30a10cba-64e3-4340-8930-35fa5e0fd69d")));
+//				Arrays.asList("Bundle/42cb0764-5ddd-4032-87eb-76a62343d89c")));
 
 //		client.startProcessWithVersion("requestUpdateResources", "1.0.0", Map.of("target-identifier",
 //				Collections.singletonList("http://highmed.org/fhir/CodeSystem/organization|"), "bundle-id",

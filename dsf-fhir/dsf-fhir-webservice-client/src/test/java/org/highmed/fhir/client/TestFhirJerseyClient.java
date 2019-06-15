@@ -36,7 +36,7 @@ public class TestFhirJerseyClient
 	{
 		String keyStorePassword = "password";
 		KeyStore keyStore = CertificateReader.fromPkcs12(
-				Paths.get("../fhir-demo-cert-generator/cert/test-client_certificate.p12"), keyStorePassword);
+				Paths.get("../../dsf-tools/dsf-tools-test-data-generator/cert/Webbrowser_Test_User/Webbrowser_Test_User_certificate.p12"), keyStorePassword);
 		KeyStore trustStore = CertificateHelper.extractTrust(keyStore);
 
 		FhirContext context = FhirContext.forR4();
