@@ -55,7 +55,7 @@ public final class FhirServer
 
 		Properties configProperties = read(Paths.get("conf/config.properties"), StandardCharsets.UTF_8);
 
-		DbMigrator dbMigrator = new DbMigrator("org.highmed.fhir.", configProperties);
+		DbMigrator dbMigrator = new DbMigrator("org.highmed.dsf.fhir.", configProperties);
 		DbMigrator.retryOnConnectException(3, dbMigrator::migrate);
 
 		HttpConfiguration httpConfiguration = httpConfiguration(customizerBuilder.get());
