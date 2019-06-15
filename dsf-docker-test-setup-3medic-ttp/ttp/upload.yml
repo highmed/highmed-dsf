@@ -14,8 +14,12 @@
          src: bpe
          dest: /opt/highmed
          perms: no
+         recursive: yes
+         delete: yes
    -  name: Synchronize fhir folder
       synchronize:
          src: fhir
          dest: /opt/highmed
          perms: no 
+         recursive: yes
+         delete: yes
