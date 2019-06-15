@@ -2,7 +2,7 @@ version: '3.2'
 services:
    proxy:
       image: registry:5000/highmed/fhir_proxy
-      restart: always
+      restart: on-failure
       ports:
       - 80:80
       - 443:443
@@ -25,7 +25,7 @@ services:
       - app
    app:
       image: registry:5000/highmed/fhir
-      restart: always
+      restart: on-failure
       volumes:
       -  type: bind
          source: ./app/conf
@@ -41,7 +41,7 @@ services:
       - db
    db:
       image: postgres
-      restart: always
+      restart: on-failure
       environment:
          TZ: Europe/Berlin
          POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
