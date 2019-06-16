@@ -1,0 +1,1 @@
+empty last_event directory for docker build

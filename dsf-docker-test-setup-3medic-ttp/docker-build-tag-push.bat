@@ -1,7 +1,7 @@
 @echo off
 
 echo highmed/bpe ...
-docker build -t highmed/bpe ..\dsf-bpe\dsf-bpe-server-jetty
+docker build -t highmed/bpe ..\dsf-bpe\dsf-bpe-server-jetty\docker
 docker tag highmed/bpe:latest registry:5000/highmed/bpe:latest
 docker push registry:5000/highmed/bpe
 
@@ -11,7 +11,7 @@ docker tag highmed/bpe_proxy:latest registry:5000/highmed/bpe_proxy:latest
 docker push registry:5000/highmed/bpe_proxy
 
 echo highmed/fhir ...
-docker build -t highmed/fhir ..\dsf-fhir\dsf-fhir-server-jetty
+docker build -t highmed/fhir ..\dsf-fhir\dsf-fhir-server-jetty\docker
 docker tag highmed/fhir:latest registry:5000/highmed/fhir:latest
 docker push registry:5000/highmed/fhir
 

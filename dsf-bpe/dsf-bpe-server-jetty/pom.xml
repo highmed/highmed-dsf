@@ -43,8 +43,6 @@
 	</dependencies>
 
 	<build>
-		<finalName>highmed_bpe</finalName>
-
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -65,34 +63,50 @@
 				<executions>
 					<execution>
 						<id>copy-dependencies</id>
-						<phase>install</phase>
+						<phase>package</phase>
 						<goals>
 							<goal>copy-dependencies</goal>
 						</goals>
 						<configuration>
-							<outputDirectory>${project.build.directory}/lib</outputDirectory>
+							<outputDirectory>docker/lib</outputDirectory>
 							<includeScope>compile</includeScope>
+						</configuration>
+					</execution>
+					<execution>
+						<id>copy</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>${project.groupId}</groupId>
+									<artifactId>${project.artifactId}</artifactId>
+									<version>${project.version}</version>
+									<destFileName>dsf_bpe.jar</destFileName>
+								</artifactItem>
+							</artifactItems>
+							<outputDirectory>docker</outputDirectory>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
 			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
 				<configuration>
-					<appendAssemblyId>false</appendAssemblyId>
-					<descriptors>
-						<descriptor>src/assembly/zip.xml</descriptor>
-					</descriptors>
+					<filesets>
+						<fileset>
+							<directory>docker</directory>
+							<includes>
+								<include>dsf_bpe.jar</include>
+								<include>lib/*.jar</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+					</filesets>
 				</configuration>
-				<executions>
-					<execution>
-						<id>zip-assembly</id>
-						<phase>install</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>
