@@ -2,7 +2,8 @@ FROM openjdk:11-slim
 MAINTAINER Hauke Hund <hauke.hund@hs-heilbronn.de>
 
 EXPOSE 8080
-VOLUME /opt/fhir/conf /opt/fhir/log
+VOLUME /opt/fhir/conf
+#/opt/fhir/log
 
 RUN adduser --system --no-create-home --group java
 WORKDIR /opt/fhir
