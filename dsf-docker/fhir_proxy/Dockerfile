@@ -1,4 +1,4 @@
-FROM httpd:2.4
+FROM httpd:2.4-alpine
 MAINTAINER Hauke Hund <hauke.hund@hs-heilbronn.de>
 
 COPY ./conf/ /usr/local/apache2/conf/
