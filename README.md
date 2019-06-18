@@ -53,16 +53,14 @@ Prerequisite: Java 11, Maven 3.6, Docker 18
     docker-build.sh
     ```
 * Start docker containers
-  * In the .../dsf-docker-test-setup/fhir folder execute
+  * To start the FHIR server execute in the .../dsf-docker-test-setup/fhir folder
     ```
     docker-compose up
     ```
-    to start the FHIR server
-  * In the .../dsf-docker-test-setup/bpe folder execute
+  * To start the BPE server execute in the .../dsf-docker-test-setup/bpe folder
     ```
     docker-compose up
     ```
-    to start the BPE server
 * To access the FHIR endpoint (https://localhost/fhir/...) and BPE rest interface (https://localhost:8443/bpe/...) via WebBrowser install *.../highmed-dsf/dsf-tools/dsf-tools-test-data-generator/cert/Webbrowser_Test_User/Webbrowser_Test_User_certificate.p12* (Password: *password*) in your browsers certifiate store. The p12 file includes a client certificate for "Webbrowser Test User" and the "Test CA" certificate. All private-keys and certificates including the Test CA are generated during the maven build and are private to your machine. Make sure to protect the CA private-key at *.../highmed-dsf/dsf-tools/dsf-tools-test-data-generator/cert/ca/testca_private-key.pem* from third-party access if you have installed the Test CA certificate in your certificate store.
 
 ## Manual Integration Testing (VMs for Docker-Registry, 3 MeDICs, TTP)
