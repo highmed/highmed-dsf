@@ -16,43 +16,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.highmed.dsf.fhir.adapter.AbstractFhirAdapter;
-import org.highmed.dsf.fhir.adapter.BundleJsonFhirAdapter;
-import org.highmed.dsf.fhir.adapter.BundleXmlFhirAdapter;
-import org.highmed.dsf.fhir.adapter.CapabilityStatementJsonFhirAdapter;
-import org.highmed.dsf.fhir.adapter.CapabilityStatementXmlFhirAdapter;
-import org.highmed.dsf.fhir.adapter.CodeSystemJsonFhirAdapter;
-import org.highmed.dsf.fhir.adapter.CodeSystemXmlFhirAdapter;
-import org.highmed.dsf.fhir.adapter.EndpointJsonFhirAdapter;
-import org.highmed.dsf.fhir.adapter.EndpointXmlFhirAdapter;
-import org.highmed.dsf.fhir.adapter.HealthcareServiceJsonFhirAdapter;
-import org.highmed.dsf.fhir.adapter.HealthcareServiceXmlFhirAdapter;
-import org.highmed.dsf.fhir.adapter.LocationJsonFhirAdapter;
-import org.highmed.dsf.fhir.adapter.LocationXmlFhirAdapter;
-import org.highmed.dsf.fhir.adapter.OperationOutcomeJsonFhirAdapter;
-import org.highmed.dsf.fhir.adapter.OperationOutcomeXmlFhirAdapter;
-import org.highmed.dsf.fhir.adapter.OrganizationJsonFhirAdapter;
-import org.highmed.dsf.fhir.adapter.OrganizationXmlFhirAdapter;
-import org.highmed.dsf.fhir.adapter.ParametersJsonFhirAdapter;
-import org.highmed.dsf.fhir.adapter.ParametersXmlFhirAdapter;
-import org.highmed.dsf.fhir.adapter.PatientJsonFhirAdapter;
-import org.highmed.dsf.fhir.adapter.PatientXmlFhirAdapter;
-import org.highmed.dsf.fhir.adapter.PractitionerJsonFhirAdapter;
-import org.highmed.dsf.fhir.adapter.PractitionerRoleJsonFhirAdapter;
-import org.highmed.dsf.fhir.adapter.PractitionerRoleXmlFhirAdapter;
-import org.highmed.dsf.fhir.adapter.PractitionerXmlFhirAdapter;
-import org.highmed.dsf.fhir.adapter.ProvenanceJsonFhirAdapter;
-import org.highmed.dsf.fhir.adapter.ProvenanceXmlFhirAdapter;
-import org.highmed.dsf.fhir.adapter.ResearchStudyJsonFhirAdapter;
-import org.highmed.dsf.fhir.adapter.ResearchStudyXmlFhirAdapter;
-import org.highmed.dsf.fhir.adapter.StructureDefinitionJsonFhirAdapter;
-import org.highmed.dsf.fhir.adapter.StructureDefinitionXmlFhirAdapter;
-import org.highmed.dsf.fhir.adapter.SubscriptionJsonFhirAdapter;
-import org.highmed.dsf.fhir.adapter.SubscriptionXmlFhirAdapter;
-import org.highmed.dsf.fhir.adapter.TaskJsonFhirAdapter;
-import org.highmed.dsf.fhir.adapter.TaskXmlFhirAdapter;
-import org.highmed.dsf.fhir.adapter.ValueSetJsonFhirAdapter;
-import org.highmed.dsf.fhir.adapter.ValueSetXmlFhirAdapter;
+import org.highmed.dsf.fhir.adapter.*;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.Endpoint;
@@ -85,7 +49,9 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 
 	public static List<AbstractFhirAdapter<?>> components(FhirContext fhirContext)
 	{
-		return Arrays.asList(new BundleJsonFhirAdapter(fhirContext), new BundleXmlFhirAdapter(fhirContext),
+		return Arrays.asList(
+				new BinaryJsonFhirAdapter(fhirContext), new BinaryXmlFhirAdapter(fhirContext),
+				new BundleJsonFhirAdapter(fhirContext), new BundleXmlFhirAdapter(fhirContext),
 				new CapabilityStatementJsonFhirAdapter(fhirContext), new CapabilityStatementXmlFhirAdapter(fhirContext),
 				new CodeSystemJsonFhirAdapter(fhirContext), new CodeSystemXmlFhirAdapter(fhirContext),
 				new EndpointJsonFhirAdapter(fhirContext), new EndpointXmlFhirAdapter(fhirContext),
