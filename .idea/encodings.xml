@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding" addBOMForNewFiles="with NO BOM">
+    <file url="file://$PROJECT_DIR$" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/dsf-bpe" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/dsf-bpe/dsf-bpe-process-base" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/dsf-bpe/dsf-bpe-process-ping" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/dsf-bpe/dsf-bpe-process-update-resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/dsf-bpe/dsf-bpe-process-update-whitelist" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/dsf-bpe/dsf-bpe-server" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/dsf-bpe/dsf-bpe-server-jetty" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/dsf-bpe/dsf-bpe-webservice-client" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/dsf-fhir" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/dsf-fhir/dsf-fhir-rest-adapter" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/dsf-fhir/dsf-fhir-server" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/dsf-fhir/dsf-fhir-server-jetty" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/dsf-fhir/dsf-fhir-webservice-client" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/dsf-fhir/dsf-fhir-websocket-client" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/dsf-tools" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/dsf-tools/dsf-tools-db-migration" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/dsf-tools/dsf-tools-test-data-generator" charset="UTF-8" />
+  </component>
+</project>
