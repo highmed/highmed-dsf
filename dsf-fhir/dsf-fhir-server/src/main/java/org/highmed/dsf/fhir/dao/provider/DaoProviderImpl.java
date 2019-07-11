@@ -5,46 +5,15 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.highmed.dsf.fhir.dao.BundleDao;
-import org.highmed.dsf.fhir.dao.CodeSystemDao;
-import org.highmed.dsf.fhir.dao.EndpointDao;
-import org.highmed.dsf.fhir.dao.HealthcareServiceDao;
-import org.highmed.dsf.fhir.dao.LocationDao;
-import org.highmed.dsf.fhir.dao.OrganizationDao;
-import org.highmed.dsf.fhir.dao.PatientDao;
-import org.highmed.dsf.fhir.dao.PractitionerDao;
-import org.highmed.dsf.fhir.dao.PractitionerRoleDao;
-import org.highmed.dsf.fhir.dao.ProvenanceDao;
-import org.highmed.dsf.fhir.dao.ResearchStudyDao;
-import org.highmed.dsf.fhir.dao.ResourceDao;
-import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
-import org.highmed.dsf.fhir.dao.StructureDefinitionSnapshotDao;
-import org.highmed.dsf.fhir.dao.SubscriptionDao;
-import org.highmed.dsf.fhir.dao.TaskDao;
-import org.highmed.dsf.fhir.dao.ValueSetDao;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.DomainResource;
-import org.hl7.fhir.r4.model.Endpoint;
-import org.hl7.fhir.r4.model.HealthcareService;
-import org.hl7.fhir.r4.model.Location;
-import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Practitioner;
-import org.hl7.fhir.r4.model.PractitionerRole;
-import org.hl7.fhir.r4.model.Provenance;
-import org.hl7.fhir.r4.model.ResearchStudy;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.StructureDefinition;
-import org.hl7.fhir.r4.model.Subscription;
-import org.hl7.fhir.r4.model.Task;
-import org.hl7.fhir.r4.model.ValueSet;
+import org.highmed.dsf.fhir.dao.*;
+import org.hl7.fhir.r4.model.*;
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 
 public class DaoProviderImpl implements DaoProvider, InitializingBean
 {
+	private final BinaryDao binaryDao;
 	private final BundleDao bundleDao;
 	private final CodeSystemDao codeSystemDao;
 	private final EndpointDao endpointDao;
@@ -65,7 +34,7 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	private final Map<Class<? extends Resource>, ResourceDao<?>> daosByResourecClass = new HashMap<>();
 	private final Map<String, ResourceDao<?>> daosByResourceTypeName = new HashMap<>();
 
-	public DaoProviderImpl(BundleDao bundleDao, CodeSystemDao codeSystemDao, EndpointDao endpointDao,
+	public DaoProviderImpl(BinaryDao binaryDao, BundleDao bundleDao, CodeSystemDao codeSystemDao, EndpointDao endpointDao,
 			HealthcareServiceDao healthcareServiceDao, LocationDao locationDao, OrganizationDao organizationDao,
 			PatientDao patientDao, PractitionerDao practitionerDao, PractitionerRoleDao practitionerRoleDao,
 			ProvenanceDao provenanceDao, ResearchStudyDao researchStudyDao,
@@ -73,6 +42,7 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 			StructureDefinitionSnapshotDao structureDefinitionSnapshotDao, SubscriptionDao subscriptionDao,
 			TaskDao taskDao, ValueSetDao valueSetDao)
 	{
+		this.binaryDao = binaryDao;
 		this.bundleDao = bundleDao;
 		this.codeSystemDao = codeSystemDao;
 		this.endpointDao = endpointDao;
@@ -90,6 +60,7 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 		this.taskDao = taskDao;
 		this.valueSetDao = valueSetDao;
 
+		daosByResourecClass.put(Binary.class, binaryDao);
 		daosByResourecClass.put(Bundle.class, bundleDao);
 		daosByResourecClass.put(CodeSystem.class, codeSystemDao);
 		daosByResourecClass.put(Endpoint.class, endpointDao);
@@ -112,6 +83,8 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
+		Objects.requireNonNull(binaryDao, "binaryDao");
+		//Objects.requireNonNull(bundleDao, "bundleDao");
 		Objects.requireNonNull(codeSystemDao, "codeSystemDao");
 		Objects.requireNonNull(endpointDao, "endpointDao");
 		Objects.requireNonNull(healthcareServiceDao, "healthcareServiceDao");
@@ -126,6 +99,11 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 		Objects.requireNonNull(subscriptionDao, "subscriptionDao");
 		Objects.requireNonNull(taskDao, "taskDao");
 		Objects.requireNonNull(valueSetDao, "valueSetDao");
+	}
+
+	@Override
+	public BinaryDao getBinaryDao() {
+		return binaryDao;
 	}
 
 	@Override

@@ -1,39 +1,9 @@
 package org.highmed.dsf.fhir.spring.config;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.highmed.dsf.fhir.dao.BundleDao;
-import org.highmed.dsf.fhir.dao.CodeSystemDao;
-import org.highmed.dsf.fhir.dao.EndpointDao;
-import org.highmed.dsf.fhir.dao.HealthcareServiceDao;
-import org.highmed.dsf.fhir.dao.LocationDao;
-import org.highmed.dsf.fhir.dao.OrganizationDao;
-import org.highmed.dsf.fhir.dao.PatientDao;
-import org.highmed.dsf.fhir.dao.PractitionerDao;
-import org.highmed.dsf.fhir.dao.PractitionerRoleDao;
-import org.highmed.dsf.fhir.dao.ProvenanceDao;
-import org.highmed.dsf.fhir.dao.ResearchStudyDao;
-import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
-import org.highmed.dsf.fhir.dao.StructureDefinitionSnapshotDao;
-import org.highmed.dsf.fhir.dao.SubscriptionDao;
-import org.highmed.dsf.fhir.dao.TaskDao;
-import org.highmed.dsf.fhir.dao.ValueSetDao;
+import org.highmed.dsf.fhir.dao.*;
 import org.highmed.dsf.fhir.dao.converter.SnapshotInfoConverter;
-import org.highmed.dsf.fhir.dao.jdbc.BundleDaoJdbc;
-import org.highmed.dsf.fhir.dao.jdbc.CodeSystemDaoJdbc;
-import org.highmed.dsf.fhir.dao.jdbc.EndpointDaoJdbc;
-import org.highmed.dsf.fhir.dao.jdbc.HealthcareServiceDaoJdbc;
-import org.highmed.dsf.fhir.dao.jdbc.LocationDaoJdbc;
-import org.highmed.dsf.fhir.dao.jdbc.OrganizationDaoJdbc;
-import org.highmed.dsf.fhir.dao.jdbc.PatientDaoJdbc;
-import org.highmed.dsf.fhir.dao.jdbc.PractitionerDaoJdbc;
-import org.highmed.dsf.fhir.dao.jdbc.PractitionerRoleDaoJdbc;
-import org.highmed.dsf.fhir.dao.jdbc.ProvenanceDaoJdbc;
-import org.highmed.dsf.fhir.dao.jdbc.ResearchStudyDaoJdbc;
-import org.highmed.dsf.fhir.dao.jdbc.StructureDefinitionDaoJdbc;
-import org.highmed.dsf.fhir.dao.jdbc.StructureDefinitionSnapshotDaoJdbc;
-import org.highmed.dsf.fhir.dao.jdbc.SubscriptionDaoJdbc;
-import org.highmed.dsf.fhir.dao.jdbc.TaskDaoJdbc;
-import org.highmed.dsf.fhir.dao.jdbc.ValueSetDaoJdbc;
+import org.highmed.dsf.fhir.dao.jdbc.*;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.dao.provider.DaoProviderImpl;
 import org.postgresql.Driver;
@@ -73,6 +43,12 @@ public class DaoConfig
 		dataSource.setTestOnBorrow(true);
 		dataSource.setValidationQuery("SELECT 1");
 		return dataSource;
+	}
+
+	@Bean
+	public BinaryDao binaryDao()
+	{
+		return new BinaryDaoJdbc(dataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
@@ -180,7 +156,7 @@ public class DaoConfig
 	@Bean
 	public DaoProvider daoProvider()
 	{
-		return new DaoProviderImpl(bundleDao(), codeSystemDao(), endpointDao(), healthcareServiceDao(), locationDao(),
+		return new DaoProviderImpl(binaryDao(), bundleDao(), codeSystemDao(), endpointDao(), healthcareServiceDao(), locationDao(),
 				organizationDao(), patientDao(), practitionerDao(), practitionerRoleDao(), provenanceDao(),
 				researchStudyDao(), structureDefinitionDao(), structureDefinitionSnapshotDao(), subscriptionDao(),
 				taskDao(), valueSetDao());
