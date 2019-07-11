@@ -17,7 +17,7 @@ public class BinaryDaoJdbc extends AbstractDomainResourceDaoJdbc<Binary> impleme
 {
 	public BinaryDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
 	{
-		super(dataSource, fhirContext, Binary.class, "binaries", "binary", "binary_id", BinaryContentType::new);
+		super(dataSource, fhirContext, Binary.class, "binaries", "binary_data", "binary_id", BinaryContentType::new);
 	}
 
 	@Override
