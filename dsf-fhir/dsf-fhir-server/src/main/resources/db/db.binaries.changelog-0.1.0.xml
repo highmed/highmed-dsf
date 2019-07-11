@@ -17,6 +17,7 @@
 			<column name="deleted" type="BOOLEAN" defaultValue="false">
 				<constraints nullable="false" />
 			</column>
+			<!-- caveat: json column cannot be named binary, because binary is a reserved word in sql -->
 			<column name="binary_data" type="${json}">
 				<constraints nullable="false" />
 			</column>
