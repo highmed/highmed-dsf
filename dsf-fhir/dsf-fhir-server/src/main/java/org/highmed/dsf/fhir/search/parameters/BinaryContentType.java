@@ -67,13 +67,13 @@ public class BinaryContentType extends AbstractTokenParameter<Binary>
 	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement,
 			BiFunctionWithSqlException<String, Object[], Array> arrayCreator) throws SQLException
 	{
-		statement.setString(parameterIndex, contentType.getSystem());
+		statement.setString(parameterIndex, contentType.getValue());
 	}
 
 	@Override
 	public void modifyBundleUri(UriBuilder bundleUri)
 	{
-		bundleUri.replaceQueryParam(PARAMETER_NAME, contentType.getSystem());
+		bundleUri.replaceQueryParam(PARAMETER_NAME, contentType.getValue());
 	}
 
 	@Override
@@ -85,7 +85,7 @@ public class BinaryContentType extends AbstractTokenParameter<Binary>
 		if (!(resource instanceof Binary))
 			return false;
 
-		return ((Binary) resource).getContentType().equals(contentType.getSystem());
+		return ((Binary) resource).getContentType().equals(contentType.getValue());
 	}
 
 	@Override
