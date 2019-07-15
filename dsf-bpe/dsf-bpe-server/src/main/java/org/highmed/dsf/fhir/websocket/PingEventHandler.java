@@ -1,6 +1,7 @@
 package org.highmed.dsf.fhir.websocket;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -31,30 +32,12 @@ public class PingEventHandler implements InitializingBean
 	private final LastEventTimeIo lastEventTimeIo;
 	private final TaskHandler taskHandler;
 	private final WebserviceClient webserviceClient;
-	// private final String subscriptionIdPart;
-	// private final String subscriptionCriteria;
-	// private final String searchCriteriaPath;
-	// private final MultiValueMap<String, String> searchCriteriaQueryParameters;
 
 	public PingEventHandler(LastEventTimeIo lastEventTimeIo, TaskHandler taskHandler, WebserviceClient webserviceClient)
 	{
 		this.lastEventTimeIo = lastEventTimeIo;
 		this.taskHandler = taskHandler;
 		this.webserviceClient = webserviceClient;
-		// this.subscriptionIdPart = subscriptionIdPart;
-		// this.subscriptionCriteria = subscriptionCriteria;
-		//
-		// if (subscriptionCriteria != null)
-		// {
-		// UriComponents componentes = UriComponentsBuilder.fromUriString(subscriptionCriteria).build();
-		// searchCriteriaPath = componentes.getPath();
-		// searchCriteriaQueryParameters = componentes.getQueryParams();
-		// }
-		// else
-		// {
-		// searchCriteriaPath = null;
-		// searchCriteriaQueryParameters = null;
-		// }
 	}
 
 	@Override
@@ -63,35 +46,6 @@ public class PingEventHandler implements InitializingBean
 		Objects.requireNonNull(lastEventTimeIo, "lastEventTimeIo");
 		Objects.requireNonNull(taskHandler, "taskHandler");
 		Objects.requireNonNull(webserviceClient, "webserviceClient");
-		// Objects.requireNonNull(subscriptionCriteria, "subscriptionCriteria");
-		//
-		// if (!("Task".equals(searchCriteriaPath) || searchCriteriaPath.isEmpty()))
-		// logger.warn("Search criteria path for ping event handler not equal to 'Task'. '{}' will be ignored",
-		// searchCriteriaPath);
-		// if (searchCriteriaQueryParameters.containsKey(PARAM_LAST_UPDATE))
-		// logger.warn(
-		// "Search criteria query parameters for ping event handler contains parameter {}, parameter will be
-		// overridden",
-		// PARAM_LAST_UPDATE);
-		// if (searchCriteriaQueryParameters.containsKey(PARAM_COUNT))
-		// logger.warn(
-		// "Search criteria query parameters for ping event handler contains parameter {}, parameter will be
-		// overridden",
-		// PARAM_COUNT);
-		// if (searchCriteriaQueryParameters.containsKey(PARAM_PAGE))
-		// logger.warn(
-		// "Search criteria query parameters for ping event handler contains parameter {}, parameter will be
-		// overridden",
-		// PARAM_PAGE);
-		// if (searchCriteriaQueryParameters.containsKey(PARAM_SORT))
-		// logger.warn(
-		// "Search criteria query parameters for ping event handler contains parameter {}, parameter will be
-		// overridden",
-		// PARAM_SORT);
-		//
-		// logger.info("Ping event handler configured with subscription-id {} and search-criteria {}",
-		// subscriptionIdPart,
-		// subscriptionCriteria);
 	}
 
 	public void onPing(String ping, String subscriptionIdPart, Map<String, List<String>> searchCriteriaQueryParameters)
@@ -132,7 +86,12 @@ public class PingEventHandler implements InitializingBean
 		for (BundleEntryComponent entry : bundle.getEntry())
 		{
 			if (entry.getResource() instanceof Task)
-				taskHandler.onTask((Task) entry.getResource());
+			{
+				Task task = (Task) entry.getResource();
+				taskHandler.onTask(task);
+
+				lastEventTimeIo.writeLastEventTime(LocalDateTime.ofInstant(task.getMeta().getLastUpdated().toInstant(), ZoneId.systemDefault()));
+			}
 			else
 				logger.warn("Ignoring resource of type {}");
 		}
