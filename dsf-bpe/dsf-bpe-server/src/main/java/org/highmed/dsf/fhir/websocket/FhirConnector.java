@@ -76,26 +76,11 @@ public class FhirConnector implements InitializingBean
 	@EventListener({ ContextRefreshedEvent.class })
 	public void onContextRefreshedEvent(ContextRefreshedEvent event)
 	{
-		Bundle bundle = clientProvider.getLocalWebserviceClient().search(Subscription.class,
-				subscriptionSearchParameter);
-
-		if (!BundleType.SEARCHSET.equals(bundle.getType()))
-			throw new RuntimeException("Could not retrieve searchset for subscription search query "
-					+ subscriptionSearchParameter + ", but got " + bundle.getType());
-		if (bundle.getTotal() != 1)
-			throw new RuntimeException("Could not retrieve exactly one result for subscription search query "
-					+ subscriptionSearchParameter);
-		if (!(bundle.getEntryFirstRep().getResource() instanceof Subscription))
-			throw new RuntimeException("Could not retrieve exactly one Subscription for subscription search query "
-					+ subscriptionSearchParameter + ", but got "
-					+ bundle.getEntryFirstRep().getResource().getResourceType());
-
-		Subscription subscription = (Subscription) bundle.getEntryFirstRep().getResource();
+		Subscription subscription = retrieveWebsocketSubscription();
 
 		WebsocketClient client = clientProvider.getLocalWebsocketClient(subscription.getIdElement().getIdPart());
 
 		EventType eventType = toEventType(subscription.getChannel().getPayload());
-
 		if (EventType.PING.equals(eventType))
 		{
 			Map<String, List<String>> subscriptionCriteria = parse(subscription.getCriteria(), "Task");
@@ -104,8 +89,44 @@ public class FhirConnector implements InitializingBean
 		else
 			setResourceEventHandler(client, eventType);
 
-		logger.info("Connecting via websocket to subscription with id {} ...", subscription.getIdElement().getIdPart());
-		client.connect();
+		try
+		{
+			logger.info("Connecting websocket to loal FHIR server with subscription id {} ...",
+					subscription.getIdElement().getIdPart());
+			client.connect();
+		}
+		catch (Exception e)
+		{
+			logger.warn("Error while connecting websocket to local FHIR server", e);
+			throw e;
+		}
+	}
+
+	private Subscription retrieveWebsocketSubscription()
+	{
+		try
+		{
+			Bundle bundle = clientProvider.getLocalWebserviceClient().search(Subscription.class,
+					subscriptionSearchParameter);
+
+			if (!BundleType.SEARCHSET.equals(bundle.getType()))
+				throw new RuntimeException("Could not retrieve searchset for subscription search query "
+						+ subscriptionSearchParameter + ", but got " + bundle.getType());
+			if (bundle.getTotal() != 1)
+				throw new RuntimeException("Could not retrieve exactly one result for subscription search query "
+						+ subscriptionSearchParameter);
+			if (!(bundle.getEntryFirstRep().getResource() instanceof Subscription))
+				throw new RuntimeException("Could not retrieve exactly one Subscription for subscription search query "
+						+ subscriptionSearchParameter + ", but got "
+						+ bundle.getEntryFirstRep().getResource().getResourceType());
+
+			return (Subscription) bundle.getEntryFirstRep().getResource();
+		}
+		catch (Exception e)
+		{
+			logger.warn("Error while retrieving websocket subscription from local FHIR server", e);
+			throw e;
+		}
 	}
 
 	private EventType toEventType(String payload)
