@@ -54,7 +54,7 @@ public class BinaryContentType extends AbstractTokenParameter<Binary>
 	@Override
 	public String getFilterQuery()
 	{
-		return "binary_data->>'contentType' = ?";
+		return "binary_json->>'contentType' = ?";
 	}
 
 	@Override
@@ -91,6 +91,6 @@ public class BinaryContentType extends AbstractTokenParameter<Binary>
 	@Override
 	protected String getSortSql(String sortDirectionWithSpacePrefix)
 	{
-		return "binary_data->>'contentType'" + sortDirectionWithSpacePrefix;
+		return "binary_json->>'contentType'" + sortDirectionWithSpacePrefix;
 	}
 }

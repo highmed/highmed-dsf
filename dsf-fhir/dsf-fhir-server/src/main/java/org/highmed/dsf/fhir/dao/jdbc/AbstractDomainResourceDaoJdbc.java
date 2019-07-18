@@ -226,7 +226,7 @@ abstract class AbstractDomainResourceDaoJdbc<R extends Resource> implements Reso
 		return inserted;
 	}
 
-	private R create(Connection connection, R resource, UUID uuid) throws SQLException
+	protected R create(Connection connection, R resource, UUID uuid) throws SQLException
 	{
 		resource = copy(resource); // XXX defensive copy, might want to remove this call
 		resource.setIdElement(new IdType(resourceTypeName, uuid.toString(), FIRST_VERSION_STRING));
@@ -355,8 +355,8 @@ abstract class AbstractDomainResourceDaoJdbc<R extends Resource> implements Reso
 		if (uuid == null)
 			return Optional.empty();
 
-		try (PreparedStatement statement = connection.prepareStatement("SELECT " + resourceColumn + ", deleted FROM "
-				+ resourceTable + " WHERE " + resourceIdColumn + " = ? ORDER BY version DESC LIMIT 1"))
+		String sql = "SELECT " + resourceColumn + ", deleted FROM " + resourceTable + " WHERE " + resourceIdColumn + " = ? ORDER BY version DESC LIMIT 1";
+		try (PreparedStatement statement = connection.prepareStatement(sql))
 		{
 			statement.setObject(1, uuidToPgObject(uuid));
 
@@ -589,7 +589,7 @@ abstract class AbstractDomainResourceDaoJdbc<R extends Resource> implements Reso
 		}
 	}
 
-	private R update(Connection connection, R resource, long version) throws SQLException
+	protected R update(Connection connection, R resource, long version) throws SQLException
 	{
 		UUID uuid = toUuid(resource.getIdElement().getIdPart());
 		if (uuid == null)
@@ -615,7 +615,7 @@ abstract class AbstractDomainResourceDaoJdbc<R extends Resource> implements Reso
 		return resource;
 	}
 
-	private R updateSameRow(Connection connection, R resource) throws SQLException
+	protected R updateSameRow(Connection connection, R resource) throws SQLException
 	{
 		UUID uuid = toUuid(resource.getIdElement().getIdPart());
 		if (uuid == null)
