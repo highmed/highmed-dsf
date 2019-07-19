@@ -61,6 +61,7 @@ public class BinaryDaoJdbc extends AbstractAdditionalColumnsResourceDaoJdbc<Bina
 
 		Binary resourceWithoutContent = copy(resource);
 		resourceWithoutContent.setContent(new byte[0]);
+
 		statement.setObject(3, resourceToPgObject(resourceWithoutContent));
 		statement.setBinaryStream(4, new ByteArrayInputStream(resource.getContent()));
 
@@ -71,12 +72,26 @@ public class BinaryDaoJdbc extends AbstractAdditionalColumnsResourceDaoJdbc<Bina
 	protected PreparedStatement initializeUpdateSameRowStatement(PreparedStatement statement, Binary resource, UUID uuid, long version) throws SQLException {
 		Binary resourceWithoutContent = copy(resource);
 		resourceWithoutContent.setContent(new byte[0]);
+
 		statement.setObject(1, resourceToPgObject(resourceWithoutContent));
 		statement.setBinaryStream(2, new ByteArrayInputStream(resource.getContent()));
-
 		statement.setObject(3, uuidToPgObject(uuid));
 		statement.setLong(4, version);
 
 		return statement;
+	}
+
+	@Override
+	protected PreparedStatement initializeReadAdditionalColumnsStatement(PreparedStatement statement, UUID uuid, long version) throws SQLException {
+		statement.setObject(1, uuidToPgObject(uuid));
+		statement.setLong(2, version);
+
+		return statement;
+	}
+
+	@Override
+	protected Binary assembleResourceFromReadAdditionalColumnsResult(ResultSet result, Binary resource) throws SQLException{
+		resource.setContent(result.getBytes(1));
+		return resource;
 	}
 }

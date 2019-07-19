@@ -2,7 +2,10 @@ package org.highmed.dsf.fhir.dao.jdbc;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.highmed.dsf.fhir.dao.exception.ResourceDeletedException;
+import org.highmed.dsf.fhir.search.DbSearchQuery;
+import org.highmed.dsf.fhir.search.PartialResult;
 import org.highmed.dsf.fhir.search.SearchQueryParameter;
+import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
@@ -191,4 +194,54 @@ public abstract class AbstractAdditionalColumnsResourceDaoJdbc<R extends Resourc
 
     protected abstract PreparedStatement initializeUpdateSameRowStatement(PreparedStatement statement, R resource, UUID uuid, long version) throws SQLException;
 
+
+    @Override
+    public PartialResult<R> searchWithTransaction(Connection connection, DbSearchQuery query) throws SQLException {
+        PartialResult<R> resultWithoutAdditionalColumns = super.searchWithTransaction(connection, query);
+        return getSearchAdditionalColumns(connection, resultWithoutAdditionalColumns);
+
+    }
+
+    private PartialResult<R> getSearchAdditionalColumns(Connection connection, PartialResult partialResult) throws SQLException {
+        List<R> resources = partialResult.getPartialResult();
+        List<DomainResource> includes = partialResult.getIncludes();
+
+        for(R resource : resources) {
+            completeResource(connection, resource);
+        }
+
+        for(DomainResource resource : includes) {
+            if(getResourceType().isInstance(resource)) {
+                completeResource(connection, ((R) resource));
+            }
+        }
+
+        return new PartialResult<>(partialResult.getOverallCount(), partialResult.getPageAndCount(), resources, includes, partialResult.isCountOnly());
+    }
+
+    private void completeResource(Connection connection, R resource) throws SQLException {
+        UUID uuid = toUuid(resource.getIdElement().getIdPart());
+        if (uuid == null)
+            throw new IllegalArgumentException("resource.id.idPart is not a UUID");
+        Long version = toLong(resource.getMeta().getVersionId());
+        if (version == null)
+            throw new IllegalArgumentException(resource.getMeta().getVersionId() + " resource.meta.versionId is not a number >= " + FIRST_VERSION_STRING);
+
+        String sql = "SELECT " + getAdditionalColumnsSql().substring(1) + " FROM " + getResourceTable() + " WHERE " + getResourceIdColumn() + " = ? AND version = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql))
+        {
+            initializeReadAdditionalColumnsStatement(statement, uuid, version);
+            try(ResultSet result = statement.executeQuery()) {
+                if(result.next()) {
+                    assembleResourceFromReadAdditionalColumnsResult(result, resource);
+                }
+            }
+            logger.trace("Executing query '{}'", statement);
+            statement.execute();
+        }
+    }
+
+    protected abstract PreparedStatement initializeReadAdditionalColumnsStatement(PreparedStatement statement, UUID uuid, long version) throws SQLException;
+
+    protected abstract R assembleResourceFromReadAdditionalColumnsResult(ResultSet result, R resource) throws SQLException;
 }
