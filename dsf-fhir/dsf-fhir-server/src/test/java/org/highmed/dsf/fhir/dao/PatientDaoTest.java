@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.highmed.dsf.fhir.dao.PatientDao;
 import org.highmed.dsf.fhir.dao.jdbc.PatientDaoJdbc;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.Patient;

@@ -3,7 +3,6 @@ package org.highmed.dsf.fhir.dao;
 import static org.junit.Assert.assertEquals;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.highmed.dsf.fhir.dao.ValueSetDao;
 import org.highmed.dsf.fhir.dao.jdbc.ValueSetDaoJdbc;
 import org.hl7.fhir.r4.model.ValueSet;
 

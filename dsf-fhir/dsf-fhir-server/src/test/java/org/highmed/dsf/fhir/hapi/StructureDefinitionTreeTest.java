@@ -16,8 +16,8 @@ import java.util.stream.Collectors;
 
 import org.highmed.dsf.fhir.service.DefaultProfileValidationSupportWithCustomResources;
 import org.highmed.dsf.fhir.service.SnapshotGenerator;
-import org.highmed.dsf.fhir.service.SnapshotGeneratorImpl;
 import org.highmed.dsf.fhir.service.SnapshotGenerator.SnapshotWithValidationMessages;
+import org.highmed.dsf.fhir.service.SnapshotGeneratorImpl;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.ElementDefinition.TypeRefComponent;

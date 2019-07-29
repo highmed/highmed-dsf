@@ -10,7 +10,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.highmed.dsf.fhir.dao.ResourceDao;
 import org.highmed.dsf.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.dsf.fhir.dao.exception.ResourceNotFoundException;
 import org.highmed.dsf.fhir.dao.exception.ResourceVersionNoMatchException;

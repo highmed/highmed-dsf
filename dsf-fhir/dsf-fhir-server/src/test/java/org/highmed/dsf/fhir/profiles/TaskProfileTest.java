@@ -11,11 +11,11 @@ import org.highmed.dsf.fhir.service.DefaultProfileValidationSupportWithCustomRes
 import org.highmed.dsf.fhir.service.ResourceValidator;
 import org.highmed.dsf.fhir.service.ResourceValidatorImpl;
 import org.highmed.dsf.fhir.service.SnapshotGenerator;
+import org.highmed.dsf.fhir.service.SnapshotGenerator.SnapshotWithValidationMessages;
 import org.highmed.dsf.fhir.service.SnapshotGeneratorImpl;
 import org.highmed.dsf.fhir.service.StructureDefinitionReader;
 import org.highmed.dsf.fhir.service.ValueSetExpander;
 import org.highmed.dsf.fhir.service.ValueSetExpanderImpl;
-import org.highmed.dsf.fhir.service.SnapshotGenerator.SnapshotWithValidationMessages;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;

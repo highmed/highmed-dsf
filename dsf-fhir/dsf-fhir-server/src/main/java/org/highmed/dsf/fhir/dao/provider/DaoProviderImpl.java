@@ -5,8 +5,41 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.highmed.dsf.fhir.dao.*;
-import org.hl7.fhir.r4.model.*;
+import org.highmed.dsf.fhir.dao.BinaryDao;
+import org.highmed.dsf.fhir.dao.BundleDao;
+import org.highmed.dsf.fhir.dao.CodeSystemDao;
+import org.highmed.dsf.fhir.dao.EndpointDao;
+import org.highmed.dsf.fhir.dao.HealthcareServiceDao;
+import org.highmed.dsf.fhir.dao.LocationDao;
+import org.highmed.dsf.fhir.dao.OrganizationDao;
+import org.highmed.dsf.fhir.dao.PatientDao;
+import org.highmed.dsf.fhir.dao.PractitionerDao;
+import org.highmed.dsf.fhir.dao.PractitionerRoleDao;
+import org.highmed.dsf.fhir.dao.ProvenanceDao;
+import org.highmed.dsf.fhir.dao.ResearchStudyDao;
+import org.highmed.dsf.fhir.dao.ResourceDao;
+import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
+import org.highmed.dsf.fhir.dao.StructureDefinitionSnapshotDao;
+import org.highmed.dsf.fhir.dao.SubscriptionDao;
+import org.highmed.dsf.fhir.dao.TaskDao;
+import org.highmed.dsf.fhir.dao.ValueSetDao;
+import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.HealthcareService;
+import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.PractitionerRole;
+import org.hl7.fhir.r4.model.Provenance;
+import org.hl7.fhir.r4.model.ResearchStudy;
+import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.Subscription;
+import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
@@ -34,10 +67,10 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	private final Map<Class<? extends Resource>, ResourceDao<?>> daosByResourecClass = new HashMap<>();
 	private final Map<String, ResourceDao<?>> daosByResourceTypeName = new HashMap<>();
 
-	public DaoProviderImpl(BinaryDao binaryDao, BundleDao bundleDao, CodeSystemDao codeSystemDao, EndpointDao endpointDao,
-			HealthcareServiceDao healthcareServiceDao, LocationDao locationDao, OrganizationDao organizationDao,
-			PatientDao patientDao, PractitionerDao practitionerDao, PractitionerRoleDao practitionerRoleDao,
-			ProvenanceDao provenanceDao, ResearchStudyDao researchStudyDao,
+	public DaoProviderImpl(BinaryDao binaryDao, BundleDao bundleDao, CodeSystemDao codeSystemDao,
+			EndpointDao endpointDao, HealthcareServiceDao healthcareServiceDao, LocationDao locationDao,
+			OrganizationDao organizationDao, PatientDao patientDao, PractitionerDao practitionerDao,
+			PractitionerRoleDao practitionerRoleDao, ProvenanceDao provenanceDao, ResearchStudyDao researchStudyDao,
 			StructureDefinitionDao structureDefinitionDao,
 			StructureDefinitionSnapshotDao structureDefinitionSnapshotDao, SubscriptionDao subscriptionDao,
 			TaskDao taskDao, ValueSetDao valueSetDao)
@@ -84,7 +117,7 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	public void afterPropertiesSet() throws Exception
 	{
 		Objects.requireNonNull(binaryDao, "binaryDao");
-		//Objects.requireNonNull(bundleDao, "bundleDao");
+		Objects.requireNonNull(bundleDao, "bundleDao");
 		Objects.requireNonNull(codeSystemDao, "codeSystemDao");
 		Objects.requireNonNull(endpointDao, "endpointDao");
 		Objects.requireNonNull(healthcareServiceDao, "healthcareServiceDao");
@@ -102,7 +135,8 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	}
 
 	@Override
-	public BinaryDao getBinaryDao() {
+	public BinaryDao getBinaryDao()
+	{
 		return binaryDao;
 	}
 
@@ -204,7 +238,7 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <R extends DomainResource> Optional<? extends ResourceDao<R>> getDao(Class<R> resourceClass)
+	public <R extends Resource> Optional<? extends ResourceDao<R>> getDao(Class<R> resourceClass)
 	{
 		ResourceDao<R> value = (ResourceDao<R>) daosByResourecClass.get(resourceClass);
 		return Optional.ofNullable(value);

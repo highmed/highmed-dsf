@@ -1,5 +1,13 @@
 package org.highmed.dsf.fhir.search.parameters;
 
+import java.sql.Array;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
+
+import javax.ws.rs.core.UriBuilder;
+
 import org.highmed.dsf.fhir.function.BiFunctionWithSqlException;
 import org.highmed.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.dsf.fhir.search.parameters.basic.AbstractTokenParameter;
@@ -8,13 +16,6 @@ import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Resource;
-
-import javax.ws.rs.core.UriBuilder;
-import java.sql.Array;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.List;
-import java.util.Map;
 
 @SearchParameterDefinition(name = BinaryContentType.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Binary-contentType", type = SearchParamType.TOKEN, documentation = "The MIME type of the actual binary content")
 public class BinaryContentType extends AbstractTokenParameter<Binary>

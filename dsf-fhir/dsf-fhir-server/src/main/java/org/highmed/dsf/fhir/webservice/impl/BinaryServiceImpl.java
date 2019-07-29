@@ -15,9 +15,9 @@ import org.hl7.fhir.r4.model.Binary;
 public class BinaryServiceImpl extends AbstractServiceImpl<BinaryDao, Binary> implements BinaryService
 {
 	public BinaryServiceImpl(String resourceTypeName, String serverBase, String path, int defaultPageCount,
-                             BinaryDao dao, ResourceValidator validator, EventManager eventManager, ExceptionHandler exceptionHandler,
-                             EventGenerator eventGenerator, ResponseGenerator responseGenerator, ParameterConverter parameterConverter,
-                             ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver)
+			BinaryDao dao, ResourceValidator validator, EventManager eventManager, ExceptionHandler exceptionHandler,
+			EventGenerator eventGenerator, ResponseGenerator responseGenerator, ParameterConverter parameterConverter,
+			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver)
 	{
 		super(Binary.class, resourceTypeName, serverBase, path, defaultPageCount, dao, validator, eventManager,
 				exceptionHandler, eventGenerator, responseGenerator, parameterConverter, referenceExtractor,

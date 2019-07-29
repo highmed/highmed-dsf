@@ -3,7 +3,6 @@ package org.highmed.dsf.fhir.dao;
 import static org.junit.Assert.assertEquals;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.highmed.dsf.fhir.dao.StructureDefinitionSnapshotDao;
 import org.highmed.dsf.fhir.dao.converter.SnapshotInfoConverter;
 import org.highmed.dsf.fhir.dao.jdbc.StructureDefinitionSnapshotDaoJdbc;
 import org.highmed.dsf.fhir.spring.config.JsonConfig;
