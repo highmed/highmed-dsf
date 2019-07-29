@@ -17,13 +17,11 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.core.UriBuilder;
 
-import org.highmed.dsf.fhir.search.SearchQueryParameter;
 import org.highmed.dsf.fhir.search.SearchQueryParameterError;
 import org.highmed.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 import org.hl7.fhir.r4.model.DomainResource;
 
 public abstract class AbstractDateTimeParameter<R extends DomainResource> extends AbstractSearchParameter<R>
-		implements SearchQueryParameter<R>
 {
 	public static enum DateTimeSearchType
 	{
