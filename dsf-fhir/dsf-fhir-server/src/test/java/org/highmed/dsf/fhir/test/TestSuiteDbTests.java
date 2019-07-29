@@ -27,7 +27,7 @@ import org.junit.runners.Suite.SuiteClasses;
 		HealthcareServiceDaoTest.class, LocationDaoTest.class, OrganizationDaoTest.class, PatientDaoTest.class,
 		PractitionerDaoTest.class, PractitionerRoleDaoTest.class, ProvenanceDaoTest.class, ResearchStudyDaoTest.class,
 		StructureDefinitionDaoTest.class, StructureDefinitionSnapshotDaoTest.class, SubscriptionDaoTest.class,
-		TaskDaoTest.class, ValueSetDaoTest.class })
+		TaskDaoTest.class, ValueSetDaoTest.class, TestSuiteIntegrationTests.class })
 public class TestSuiteDbTests
 {
 	@ClassRule

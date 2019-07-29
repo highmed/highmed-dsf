@@ -6,6 +6,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.sql.Array;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
@@ -15,8 +16,8 @@ import java.util.stream.Stream;
 
 import javax.ws.rs.core.UriBuilder;
 
-import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.highmed.dsf.fhir.function.BiFunctionWithSqlException;
+import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Resource;
 
 public interface SearchQueryParameter<R extends Resource> extends MatcherParameter
@@ -63,4 +64,6 @@ public interface SearchQueryParameter<R extends Resource> extends MatcherParamet
 	String getParameterName();
 
 	Stream<String> getBaseAndModifiedParameterNames();
+
+	void modifyIncludeResource(Resource resource, Connection connection);
 }

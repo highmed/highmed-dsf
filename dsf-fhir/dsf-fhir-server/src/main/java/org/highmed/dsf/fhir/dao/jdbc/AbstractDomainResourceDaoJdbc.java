@@ -7,7 +7,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -26,12 +25,12 @@ import org.highmed.dsf.fhir.dao.exception.ResourceVersionNoMatchException;
 import org.highmed.dsf.fhir.search.DbSearchQuery;
 import org.highmed.dsf.fhir.search.PartialResult;
 import org.highmed.dsf.fhir.search.SearchQuery;
-import org.highmed.dsf.fhir.search.SearchQueryParameter;
 import org.highmed.dsf.fhir.search.SearchQuery.SearchQueryBuilder;
+import org.highmed.dsf.fhir.search.SearchQueryParameter;
 import org.highmed.dsf.fhir.search.parameters.ResourceId;
 import org.highmed.dsf.fhir.search.parameters.ResourceLastUpdated;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
 import org.postgresql.util.PGobject;
@@ -42,23 +41,27 @@ import org.springframework.beans.factory.InitializingBean;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import com.sun.xml.txw2.IllegalAnnotationException;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 
+/**
+ * @author hhund
+ *
+ * @param <R>
+ */
 abstract class AbstractDomainResourceDaoJdbc<R extends Resource> implements ResourceDao<R>, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractDomainResourceDaoJdbc.class);
 
-	private static final class DomainResourceDistinctById
+	private static final class ResourceDistinctById
 	{
 		private final IdType id;
-		private final DomainResource resource;
+		private final Resource resource;
 
-		public DomainResourceDistinctById(IdType id, DomainResource resource)
+		public ResourceDistinctById(IdType id, Resource resource)
 		{
 			this.id = id;
 			this.resource = resource;
@@ -82,7 +85,7 @@ abstract class AbstractDomainResourceDaoJdbc<R extends Resource> implements Reso
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			DomainResourceDistinctById other = (DomainResourceDistinctById) obj;
+			ResourceDistinctById other = (ResourceDistinctById) obj;
 			if (id == null)
 			{
 				if (other.id != null)
@@ -93,7 +96,7 @@ abstract class AbstractDomainResourceDaoJdbc<R extends Resource> implements Reso
 			return true;
 		}
 
-		public DomainResource getResource()
+		public Resource getResource()
 		{
 			return resource;
 		}
@@ -110,13 +113,31 @@ abstract class AbstractDomainResourceDaoJdbc<R extends Resource> implements Reso
 
 	private final List<Supplier<SearchQueryParameter<R>>> searchParameterFactories;
 
+	private final PreparedStatementFactory<R> preparedStatementFactory;
+
 	/*
-	 * Using a suppliers for SearchParameters, implementations are not thread safe and because of that need to be
+	 * Using a suppliers for SearchParameters, implementations are not thread safe and because of that they need to be
 	 * created on a request basis
 	 */
 	@SafeVarargs
-	public AbstractDomainResourceDaoJdbc(DataSource dataSource, FhirContext fhirContext, Class<R> resourceType,
+	AbstractDomainResourceDaoJdbc(DataSource dataSource, FhirContext fhirContext, Class<R> resourceType,
 			String resourceTable, String resourceColumn, String resourceIdColumn,
+			Supplier<SearchQueryParameter<R>>... searchParameterFactories)
+	{
+		this(dataSource, fhirContext, resourceType, resourceTable, resourceColumn, resourceIdColumn,
+				new PreparedStatementFactoryDefault<>(fhirContext, resourceType, resourceTable, resourceIdColumn,
+						resourceColumn),
+				searchParameterFactories);
+	}
+
+	/*
+	 * Using a suppliers for SearchParameters, implementations are not thread safe and because of that they need to be
+	 * created on a request basis
+	 */
+	@SafeVarargs
+	AbstractDomainResourceDaoJdbc(DataSource dataSource, FhirContext fhirContext, Class<R> resourceType,
+			String resourceTable, String resourceColumn, String resourceIdColumn,
+			PreparedStatementFactory<R> preparedStatementFactory,
 			Supplier<SearchQueryParameter<R>>... searchParameterFactories)
 	{
 		this.dataSource = dataSource;
@@ -127,14 +148,10 @@ abstract class AbstractDomainResourceDaoJdbc<R extends Resource> implements Reso
 		this.resourceTable = resourceTable;
 		this.resourceColumn = resourceColumn;
 		this.resourceIdColumn = resourceIdColumn;
-		this.searchParameterFactories = Arrays.asList(searchParameterFactories);
-	}
 
-	protected IParser getJsonParser()
-	{
-		IParser p = Objects.requireNonNull(fhirContext, "fhirContext").newJsonParser();
-		p.setStripVersionsFromReferences(false);
-		return p;
+		this.preparedStatementFactory = preparedStatementFactory;
+
+		this.searchParameterFactories = Arrays.asList(searchParameterFactories);
 	}
 
 	@Override
@@ -145,6 +162,7 @@ abstract class AbstractDomainResourceDaoJdbc<R extends Resource> implements Reso
 		Objects.requireNonNull(resourceTable, "resourceTable");
 		Objects.requireNonNull(resourceColumn, "resourceColumn");
 		Objects.requireNonNull(resourceIdColumn, "resourceIdColumn");
+		Objects.requireNonNull(preparedStatementFactory, "preparedStatementFactory");
 	}
 
 	protected DataSource getDataSource()
@@ -226,19 +244,16 @@ abstract class AbstractDomainResourceDaoJdbc<R extends Resource> implements Reso
 		return inserted;
 	}
 
-	protected R create(Connection connection, R resource, UUID uuid) throws SQLException
+	private R create(Connection connection, R resource, UUID uuid) throws SQLException
 	{
 		resource = copy(resource); // XXX defensive copy, might want to remove this call
 		resource.setIdElement(new IdType(resourceTypeName, uuid.toString(), FIRST_VERSION_STRING));
 		resource.getMeta().setVersionId(FIRST_VERSION_STRING);
 		resource.getMeta().setLastUpdated(new Date());
 
-		// db version set by default value
-		try (PreparedStatement statement = connection.prepareStatement(
-				"INSERT INTO " + resourceTable + " (" + resourceIdColumn + ", " + resourceColumn + ") VALUES (?, ?)"))
+		try (PreparedStatement statement = connection.prepareStatement(preparedStatementFactory.getCreateSql()))
 		{
-			statement.setObject(1, uuidToPgObject(uuid));
-			statement.setObject(2, resourceToPgObject(resource));
+			preparedStatementFactory.configureCreateStatement(statement, resource, uuid);
 
 			logger.trace("Executing query '{}'", statement);
 			statement.execute();
@@ -285,34 +300,17 @@ abstract class AbstractDomainResourceDaoJdbc<R extends Resource> implements Reso
 		}
 	}
 
+	private IParser getJsonParser()
+	{
+		IParser p = Objects.requireNonNull(fhirContext, "fhirContext").newJsonParser();
+		p.setStripVersionsFromReferences(false);
+		return p;
+	}
+
 	protected R getResource(ResultSet result, int index) throws SQLException
 	{
 		String json = result.getString(index);
 		return getJsonParser().parseResource(resourceType, json);
-	}
-
-	protected List<DomainResource> getResources(ResultSet result, int index) throws SQLException
-	{
-		String json = result.getString(index);
-
-		if (json == null)
-			return Collections.emptyList();
-
-		JsonArray array = (JsonArray) new JsonParser().parse(json);
-
-		List<DomainResource> includes = new ArrayList<>();
-		Iterator<JsonElement> it = array.iterator();
-		while (it.hasNext())
-		{
-			JsonElement jsonElement = it.next();
-			IBaseResource resource = getJsonParser().parseResource(jsonElement.toString());
-			if (resource instanceof DomainResource)
-				includes.add((DomainResource) resource);
-			else
-				logger.warn("parsed resouce of type {} not instance of {}", resource.getClass().getName(),
-						DomainResource.class.getName());
-		}
-		return includes;
 	}
 
 	/* caution: only works because we set all versions as deleted or not deleted in method markDeleted */
@@ -355,17 +353,16 @@ abstract class AbstractDomainResourceDaoJdbc<R extends Resource> implements Reso
 		if (uuid == null)
 			return Optional.empty();
 
-		String sql = "SELECT " + resourceColumn + ", deleted FROM " + resourceTable + " WHERE " + resourceIdColumn + " = ? ORDER BY version DESC LIMIT 1";
-		try (PreparedStatement statement = connection.prepareStatement(sql))
+		try (PreparedStatement statement = connection.prepareStatement(preparedStatementFactory.getReadByIdSql()))
 		{
-			statement.setObject(1, uuidToPgObject(uuid));
+			preparedStatementFactory.configureReadByIdStatement(statement, uuid);
 
 			logger.trace("Executing query '{}'", statement);
 			try (ResultSet result = statement.executeQuery())
 			{
 				if (result.next())
 				{
-					if (result.getBoolean(2))
+					if (preparedStatementFactory.isReadByIdDeleted(result))
 					{
 						logger.debug("{} with IdPart {} found, but marked as deleted", resourceTypeName, uuid);
 						throw new ResourceDeletedException(new IdType(resourceTypeName, uuid.toString()));
@@ -373,11 +370,14 @@ abstract class AbstractDomainResourceDaoJdbc<R extends Resource> implements Reso
 					else
 					{
 						logger.debug("{} with IdPart {} found", resourceTypeName, uuid);
-						return Optional.of(getResource(result, 1));
+						return Optional.of(preparedStatementFactory.getReadByIdResource(result));
 					}
 				}
 				else
+				{
+					logger.debug("{} with IdPart {} not found", resourceTypeName, uuid);
 					return Optional.empty();
+				}
 			}
 		}
 	}
@@ -401,11 +401,10 @@ abstract class AbstractDomainResourceDaoJdbc<R extends Resource> implements Reso
 		if (uuid == null || version < FIRST_VERSION)
 			return Optional.empty();
 
-		try (PreparedStatement statement = connection.prepareStatement("SELECT " + resourceColumn + " FROM "
-				+ resourceTable + " WHERE " + resourceIdColumn + " = ? AND version = ?"))
+		try (PreparedStatement statement = connection
+				.prepareStatement(preparedStatementFactory.getReadByIdAndVersionSql()))
 		{
-			statement.setObject(1, uuidToPgObject(uuid));
-			statement.setLong(2, version);
+			preparedStatementFactory.configureReadByIdAndVersionStatement(statement, uuid, version);
 
 			logger.trace("Executing query '{}'", statement);
 			try (ResultSet result = statement.executeQuery())
@@ -413,7 +412,7 @@ abstract class AbstractDomainResourceDaoJdbc<R extends Resource> implements Reso
 				if (result.next())
 				{
 					logger.debug("{} with IdPart {} and Version {} found", resourceTypeName, uuid, version);
-					return Optional.of(getResource(result, 1));
+					return Optional.of(preparedStatementFactory.getReadByIdAndVersionResource(result));
 				}
 				else
 				{
@@ -537,11 +536,11 @@ abstract class AbstractDomainResourceDaoJdbc<R extends Resource> implements Reso
 		Objects.requireNonNull(connection, "connection");
 		Objects.requireNonNull(resource, "resource");
 		if (!resource.hasIdElement())
-			throw new IllegalAnnotationException(resourceTypeName + " has no id element");
+			throw new IllegalArgumentException(resourceTypeName + " has no id element");
 		if (resource.hasIdElement() && !resource.getIdElement().hasIdPart())
-			throw new IllegalAnnotationException(resourceTypeName + ".id has not id part");
+			throw new IllegalArgumentException(resourceTypeName + ".id has not id part");
 		if (resource.hasIdElement() && !resource.getIdElement().hasVersionIdPart())
-			throw new IllegalAnnotationException(resourceTypeName + ".id has not version part");
+			throw new IllegalArgumentException(resourceTypeName + ".id has not version part");
 		if (connection.isReadOnly())
 			throw new IllegalArgumentException("Connection is read-only");
 		if (connection.getTransactionIsolation() != Connection.TRANSACTION_REPEATABLE_READ
@@ -589,7 +588,7 @@ abstract class AbstractDomainResourceDaoJdbc<R extends Resource> implements Reso
 		}
 	}
 
-	protected R update(Connection connection, R resource, long version) throws SQLException
+	private R update(Connection connection, R resource, long version) throws SQLException
 	{
 		UUID uuid = toUuid(resource.getIdElement().getIdPart());
 		if (uuid == null)
@@ -601,12 +600,9 @@ abstract class AbstractDomainResourceDaoJdbc<R extends Resource> implements Reso
 		resource.getMeta().setVersionId(versionAsString);
 		resource.getMeta().setLastUpdated(new Date());
 
-		try (PreparedStatement statement = connection.prepareStatement("INSERT INTO " + resourceTable + " ("
-				+ resourceIdColumn + ", version, " + resourceColumn + ") VALUES (?, ?, ?)"))
+		try (PreparedStatement statement = connection.prepareStatement(preparedStatementFactory.getUpdateNewRowSql()))
 		{
-			statement.setObject(1, uuidToPgObject(uuid));
-			statement.setLong(2, version);
-			statement.setObject(3, resourceToPgObject(resource));
+			preparedStatementFactory.configureUpdateNewRowSqlStatement(statement, uuid, version, resource);
 
 			logger.trace("Executing query '{}'", statement);
 			statement.execute();
@@ -615,7 +611,7 @@ abstract class AbstractDomainResourceDaoJdbc<R extends Resource> implements Reso
 		return resource;
 	}
 
-	protected R updateSameRow(Connection connection, R resource) throws SQLException
+	private R updateSameRow(Connection connection, R resource) throws SQLException
 	{
 		UUID uuid = toUuid(resource.getIdElement().getIdPart());
 		if (uuid == null)
@@ -625,17 +621,10 @@ abstract class AbstractDomainResourceDaoJdbc<R extends Resource> implements Reso
 			throw new IllegalArgumentException("resource.id.versionPart is not a number >= " + FIRST_VERSION_STRING);
 
 		resource = copy(resource);
-		// String versionAsString = String.valueOf(version);
-		// resource.setIdElement(new IdType(resourceTypeName, resource.getIdElement().getIdPart(), versionAsString));
-		// resource.getMeta().setVersionId(versionAsString);
-		// resource.getMeta().setLastUpdated(new Date());
 
-		try (PreparedStatement statement = connection.prepareStatement("UPDATE " + resourceTable + " SET "
-				+ resourceColumn + " = ? WHERE " + resourceIdColumn + " = ? AND version = ?"))
+		try (PreparedStatement statement = connection.prepareStatement(preparedStatementFactory.getUpdateSameRowSql()))
 		{
-			statement.setObject(1, resourceToPgObject(resource));
-			statement.setObject(2, uuidToPgObject(uuid));
-			statement.setLong(3, version);
+			preparedStatementFactory.configureUpdateSameRowSqlStatement(statement, uuid, version, resource);
 
 			logger.trace("Executing query '{}'", statement);
 			statement.execute();
@@ -685,10 +674,8 @@ abstract class AbstractDomainResourceDaoJdbc<R extends Resource> implements Reso
 					long version = result.getLong(1);
 					boolean deleted = result.getBoolean(2);
 
-					logger.debug(
-							"Latest version for {} with IdPart {} is {}"
-									+ (deleted ? ", resource marked as deleted" : ""),
-							resourceTypeName, uuid.toString(), version);
+					logger.debug("Latest version for {} with IdPart {} is {}{}", resourceTypeName, uuid.toString(),
+							version, deleted ? ", resource marked as deleted" : "");
 					return new LatestVersion(version, deleted);
 				}
 				else
@@ -787,7 +774,7 @@ abstract class AbstractDomainResourceDaoJdbc<R extends Resource> implements Reso
 		}
 
 		List<R> partialResult = new ArrayList<>();
-		List<DomainResource> includes = new ArrayList<>();
+		List<Resource> includes = new ArrayList<>();
 
 		if (!query.isCountOnly(overallCount)) // TODO ask db if count 0
 		{
@@ -801,20 +788,63 @@ abstract class AbstractDomainResourceDaoJdbc<R extends Resource> implements Reso
 					ResultSetMetaData metaData = result.getMetaData();
 					while (result.next())
 					{
-						partialResult.add(getResource(result, 1));
+						R resource = getResource(result, 1);
+						modifySearchResultResource(resource, connection);
+						partialResult.add(resource);
 
-						for (int c = 2; c <= metaData.getColumnCount(); c++)
-							includes.addAll(getResources(result, c));
+						for (int columnIndex = 2; columnIndex <= metaData.getColumnCount(); columnIndex++)
+							getResources(result, columnIndex, includes, connection, query);
 					}
 				}
 			}
 		}
 
-		includes = includes.stream().map(r -> new DomainResourceDistinctById(r.getIdElement(), r)).distinct()
-				.map(DomainResourceDistinctById::getResource).collect(Collectors.toList());
+		includes = includes.stream().map(r -> new ResourceDistinctById(r.getIdElement(), r)).distinct()
+				.map(ResourceDistinctById::getResource).collect(Collectors.toList());
 
 		return new PartialResult<>(overallCount, query.getPageAndCount(), partialResult, includes,
 				query.isCountOnly(overallCount));
+	}
+
+	/**
+	 * Override this method to modify resources retrieved by search queries before returning to the user. This method
+	 * can be used, if the resource returned by the search is not complete and additional content needs to be retrieved.
+	 * For example the content of a {@link Binary} resource might not be stored in the json column.
+	 * 
+	 * @param resource
+	 *            not <code>null</code>
+	 * @param connection
+	 *            not <code>null</code>
+	 * @throws SQLException
+	 */
+	protected void modifySearchResultResource(R resource, Connection connection) throws SQLException
+	{
+	}
+
+	private void getResources(ResultSet result, int columnIndex, List<? super Resource> includeResources,
+			Connection connection, DbSearchQuery query) throws SQLException
+	{
+		String json = result.getString(columnIndex);
+
+		if (json == null)
+			return;
+
+		JsonArray array = (JsonArray) new JsonParser().parse(json);
+
+		Iterator<JsonElement> it = array.iterator();
+		while (it.hasNext())
+		{
+			JsonElement jsonElement = it.next();
+			IBaseResource resource = getJsonParser().parseResource(jsonElement.toString());
+			if (resource instanceof Resource)
+			{
+				query.modifyIncludeResource((Resource) resource, columnIndex, connection);
+				includeResources.add((Resource) resource);
+			}
+			else
+				logger.warn("parsed resouce of type {} not instance of {}, ignoring include resource",
+						resource.getClass().getName(), Resource.class.getName());
+		}
 	}
 
 	@Override

@@ -1,22 +1,24 @@
 package org.highmed.dsf.fhir.dao.jdbc;
 
-import ca.uhn.fhir.context.FhirContext;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.dsf.fhir.dao.BinaryDao;
 import org.highmed.dsf.fhir.search.parameters.BinaryContentType;
 import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.IdType;
 
-import java.io.ByteArrayInputStream;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.*;
+import ca.uhn.fhir.context.FhirContext;
 
-public class BinaryDaoJdbc extends AbstractAdditionalColumnsResourceDaoJdbc<Binary> implements BinaryDao
+public class BinaryDaoJdbc extends AbstractDomainResourceDaoJdbc<Binary> implements BinaryDao
 {
 	public BinaryDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
 	{
-		super(dataSource, fhirContext, Binary.class, "binaries", "binary_json", "binary_id", Arrays.asList("binary_data"), BinaryContentType::new);
+		super(dataSource, fhirContext, Binary.class, "binaries", "binary_json", "binary_id",
+				new PreparedStatementFactoryBinary(fhirContext), BinaryContentType::new);
 	}
 
 	@Override
@@ -26,72 +28,36 @@ public class BinaryDaoJdbc extends AbstractAdditionalColumnsResourceDaoJdbc<Bina
 	}
 
 	@Override
-	protected PreparedStatement initializeCreateStatement(PreparedStatement statement, Binary resource, UUID uuid) throws SQLException {
+	protected Binary getResource(ResultSet result, int index) throws SQLException
+	{
+		// TODO Bugfix HAPI is removing version information from bundle.id
+		Binary binary = super.getResource(result, index);
+		IdType fixedId = new IdType(binary.getResourceType().name(), binary.getIdElement().getIdPart(),
+				binary.getMeta().getVersionId());
+		binary.setIdElement(fixedId);
+		return binary;
+	}
+
+	@Override
+	protected void modifySearchResultResource(Binary resource, Connection connection) throws SQLException
+	{
+		try (PreparedStatement statement = connection
+				.prepareStatement("SELECT binary_data FROM binaries WHERE binary_id = ? AND version = ?"))
 		{
-			statement.setObject(1, uuidToPgObject(uuid));
+			statement.setObject(1, uuidToPgObject(toUuid(resource.getIdElement().getIdPart())));
+			statement.setLong(2, resource.getMeta().getVersionIdElement().getIdPartAsLong());
 
-			Binary resourceWithoutContent = copy(resource);
-			resourceWithoutContent.setContent(new byte[0]);
-			statement.setObject(2, resourceToPgObject(resourceWithoutContent));
-
-			statement.setBinaryStream(3, new ByteArrayInputStream(resource.getContent()));
-
-			return statement;
+			try (ResultSet result = statement.executeQuery())
+			{
+				if (result.next())
+				{
+					byte[] data = result.getBytes(1);
+					resource.setData(data);
+				}
+				else
+					throw new SQLException(
+							"Binary resource with id " + resource.getIdElement().getIdPart() + " not found");
+			}
 		}
-	}
-
-	@Override
-	protected Optional<Binary> assembleResourceFromReadResult(ResultSet result) throws SQLException {
-		Optional<Binary> optional = Optional.of(getResource(result, 1));
-		optional.get().setContent(result.getBytes(3));
-		return optional;
-	}
-
-	@Override
-	protected Optional<Binary> assembleResourceFromReadVersionResult(ResultSet result) throws SQLException {
-		Optional<Binary> optional = Optional.of(getResource(result, 1));
-		optional.get().setContent(result.getBytes(2));
-		return optional;
-	}
-
-	@Override
-	protected PreparedStatement initializeUpdateStatement(PreparedStatement statement, Binary resource, UUID uuid, long version) throws SQLException {
-		statement.setObject(1, uuidToPgObject(uuid));
-		statement.setLong(2, version);
-
-		Binary resourceWithoutContent = copy(resource);
-		resourceWithoutContent.setContent(new byte[0]);
-
-		statement.setObject(3, resourceToPgObject(resourceWithoutContent));
-		statement.setBinaryStream(4, new ByteArrayInputStream(resource.getContent()));
-
-		return statement;
-	}
-
-	@Override
-	protected PreparedStatement initializeUpdateSameRowStatement(PreparedStatement statement, Binary resource, UUID uuid, long version) throws SQLException {
-		Binary resourceWithoutContent = copy(resource);
-		resourceWithoutContent.setContent(new byte[0]);
-
-		statement.setObject(1, resourceToPgObject(resourceWithoutContent));
-		statement.setBinaryStream(2, new ByteArrayInputStream(resource.getContent()));
-		statement.setObject(3, uuidToPgObject(uuid));
-		statement.setLong(4, version);
-
-		return statement;
-	}
-
-	@Override
-	protected PreparedStatement initializeReadAdditionalColumnsStatement(PreparedStatement statement, UUID uuid, long version) throws SQLException {
-		statement.setObject(1, uuidToPgObject(uuid));
-		statement.setLong(2, version);
-
-		return statement;
-	}
-
-	@Override
-	protected Binary assembleResourceFromReadAdditionalColumnsResult(ResultSet result, Binary resource) throws SQLException{
-		resource.setContent(result.getBytes(1));
-		return resource;
 	}
 }

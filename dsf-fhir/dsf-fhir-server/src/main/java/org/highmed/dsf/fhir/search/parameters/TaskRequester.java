@@ -1,6 +1,7 @@
 package org.highmed.dsf.fhir.search.parameters;
 
 import java.sql.Array;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -255,5 +256,11 @@ public class TaskRequester extends AbstractReferenceParameter<Task>
 			}
 		else
 			return null;
+	}
+
+	@Override
+	protected void doModifyIncludeResource(Resource resource, Connection connection)
+	{
+		// Nothing to do for practitioners, organizations, patients or practitioner-roles
 	}
 }
