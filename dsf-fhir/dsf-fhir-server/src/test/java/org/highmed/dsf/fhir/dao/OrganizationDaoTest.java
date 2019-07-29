@@ -15,7 +15,7 @@ import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class OrganizationDaoTest extends AbstractDomainResourceDaoTest<Organization, OrganizationDao>
+public class OrganizationDaoTest extends AbstractResourceDaoTest<Organization, OrganizationDao>
 {
 	private static final String name = "Demo Organization";
 	private static final boolean active = true;

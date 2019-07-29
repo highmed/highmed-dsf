@@ -24,7 +24,7 @@ import org.junit.Test;
 import ca.uhn.fhir.context.FhirContext;
 import de.rwh.utils.test.Database;
 
-public abstract class AbstractDomainResourceDaoTest<D extends Resource, C extends ResourceDao<D>>
+public abstract class AbstractResourceDaoTest<D extends Resource, C extends ResourceDao<D>>
 {
 	@ClassRule
 	public static final FhirEmbeddedPostgresWithLiquibase template = new FhirEmbeddedPostgresWithLiquibase(
@@ -38,7 +38,7 @@ public abstract class AbstractDomainResourceDaoTest<D extends Resource, C extend
 	protected final FhirContext fhirContext = FhirContext.forR4();
 	protected C dao;
 
-	protected AbstractDomainResourceDaoTest(Class<D> resouceClass)
+	protected AbstractResourceDaoTest(Class<D> resouceClass)
 	{
 		this.resouceClass = resouceClass;
 	}

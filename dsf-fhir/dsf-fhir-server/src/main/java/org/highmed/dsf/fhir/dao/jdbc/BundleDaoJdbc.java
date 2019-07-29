@@ -11,7 +11,7 @@ import org.hl7.fhir.r4.model.IdType;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class BundleDaoJdbc extends AbstractDomainResourceDaoJdbc<Bundle> implements BundleDao
+public class BundleDaoJdbc extends AbstractResourceDaoJdbc<Bundle> implements BundleDao
 {
 	public BundleDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
 	{

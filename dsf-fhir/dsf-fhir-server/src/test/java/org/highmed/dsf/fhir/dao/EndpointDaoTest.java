@@ -15,7 +15,7 @@ import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class EndpointDaoTest extends AbstractDomainResourceDaoTest<Endpoint, EndpointDao>
+public class EndpointDaoTest extends AbstractResourceDaoTest<Endpoint, EndpointDao>
 {
 	private static final String name = "Demo Endpoint Name";
 	private static final String address = "https://foo.bar/baz";

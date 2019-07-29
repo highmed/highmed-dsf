@@ -8,7 +8,7 @@ import org.hl7.fhir.r4.model.CodeSystem;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class CodeSystemDaoTest extends AbstractDomainResourceDaoTest<CodeSystem, CodeSystemDao>
+public class CodeSystemDaoTest extends AbstractResourceDaoTest<CodeSystem, CodeSystemDao>
 {
 	private static final String name = "Demo CodeSystem Name";
 	private static final String description = "Demo CodeSystem Description";

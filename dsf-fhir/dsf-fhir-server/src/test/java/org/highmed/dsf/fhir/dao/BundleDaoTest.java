@@ -9,7 +9,7 @@ import org.hl7.fhir.r4.model.Bundle.BundleType;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class BundleDaoTest extends AbstractDomainResourceDaoTest<Bundle, BundleDao>
+public class BundleDaoTest extends AbstractResourceDaoTest<Bundle, BundleDao>
 {
 	private static final BundleType type = BundleType.SEARCHSET;
 	private static final String language = "Demo Bundle language";

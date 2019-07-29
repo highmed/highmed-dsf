@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ca.uhn.fhir.context.FhirContext;
 
 public class StructureDefinitionSnapshotDaoTest
-		extends AbstractDomainResourceDaoTest<StructureDefinition, StructureDefinitionSnapshotDao>
+		extends AbstractResourceDaoTest<StructureDefinition, StructureDefinitionSnapshotDao>
 {
 	private static final String name = "StructureDefinitionSnapshot";
 	private static final String title = "Demo Structure Definition Snapshot";

@@ -8,7 +8,7 @@ import org.hl7.fhir.r4.model.Location;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class LocationDaoTest extends AbstractDomainResourceDaoTest<Location, LocationDao>
+public class LocationDaoTest extends AbstractResourceDaoTest<Location, LocationDao>
 {
 	private static final String name = "Demo Location";
 	private static final String description = "Demo Location Description";

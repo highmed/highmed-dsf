@@ -12,7 +12,7 @@ import org.hl7.fhir.r4.model.Practitioner;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class PractitionerDaoTest extends AbstractDomainResourceDaoTest<Practitioner, PractitionerDao>
+public class PractitionerDaoTest extends AbstractResourceDaoTest<Practitioner, PractitionerDao>
 {
 	private final Date birthday = new GregorianCalendar(1980, 0, 2).getTime();
 	private final AdministrativeGender gender = AdministrativeGender.FEMALE;

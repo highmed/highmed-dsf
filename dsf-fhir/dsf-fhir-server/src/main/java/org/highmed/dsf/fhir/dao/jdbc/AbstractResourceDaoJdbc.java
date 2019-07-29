@@ -47,14 +47,9 @@ import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 
-/**
- * @author hhund
- *
- * @param <R>
- */
-abstract class AbstractDomainResourceDaoJdbc<R extends Resource> implements ResourceDao<R>, InitializingBean
+abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDao<R>, InitializingBean
 {
-	private static final Logger logger = LoggerFactory.getLogger(AbstractDomainResourceDaoJdbc.class);
+	private static final Logger logger = LoggerFactory.getLogger(AbstractResourceDaoJdbc.class);
 
 	private static final class ResourceDistinctById
 	{
@@ -120,7 +115,7 @@ abstract class AbstractDomainResourceDaoJdbc<R extends Resource> implements Reso
 	 * created on a request basis
 	 */
 	@SafeVarargs
-	AbstractDomainResourceDaoJdbc(DataSource dataSource, FhirContext fhirContext, Class<R> resourceType,
+	AbstractResourceDaoJdbc(DataSource dataSource, FhirContext fhirContext, Class<R> resourceType,
 			String resourceTable, String resourceColumn, String resourceIdColumn,
 			Supplier<SearchQueryParameter<R>>... searchParameterFactories)
 	{
@@ -135,7 +130,7 @@ abstract class AbstractDomainResourceDaoJdbc<R extends Resource> implements Reso
 	 * created on a request basis
 	 */
 	@SafeVarargs
-	AbstractDomainResourceDaoJdbc(DataSource dataSource, FhirContext fhirContext, Class<R> resourceType,
+	AbstractResourceDaoJdbc(DataSource dataSource, FhirContext fhirContext, Class<R> resourceType,
 			String resourceTable, String resourceColumn, String resourceIdColumn,
 			PreparedStatementFactory<R> preparedStatementFactory,
 			Supplier<SearchQueryParameter<R>>... searchParameterFactories)

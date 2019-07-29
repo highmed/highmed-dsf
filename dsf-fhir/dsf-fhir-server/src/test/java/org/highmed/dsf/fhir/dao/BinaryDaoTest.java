@@ -18,7 +18,7 @@ import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class BinaryDaoTest extends AbstractDomainResourceDaoTest<Binary, BinaryDao>
+public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao>
 {
 	private static final String CONTENT_TYPE = "text/plain";
 	private static final byte[] DATA1 = "1234567890".getBytes();

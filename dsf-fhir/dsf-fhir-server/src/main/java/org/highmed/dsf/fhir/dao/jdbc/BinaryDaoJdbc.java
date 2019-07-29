@@ -13,7 +13,7 @@ import org.hl7.fhir.r4.model.IdType;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class BinaryDaoJdbc extends AbstractDomainResourceDaoJdbc<Binary> implements BinaryDao
+public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements BinaryDao
 {
 	public BinaryDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
 	{

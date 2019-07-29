@@ -12,7 +12,7 @@ import org.hl7.fhir.r4.model.ResearchStudy;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class ResearchStudyDaoTest extends AbstractDomainResourceDaoTest<ResearchStudy, ResearchStudyDao>
+public class ResearchStudyDaoTest extends AbstractResourceDaoTest<ResearchStudy, ResearchStudyDao>
 {
 	private static final String title = "Demo Research Study";
 	private final Date periodStart = new GregorianCalendar(2019, 0, 1).getTime();
