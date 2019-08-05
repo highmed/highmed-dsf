@@ -11,7 +11,7 @@ services:
          source: ./proxy/ssl
          target: /usr/local/apache2/ssl
       environment:
-         HTTPS_SERVER_NAME_PORT: localhost:8443
+         HTTPS_SERVER_NAME_PORT: localhost:443
          APP_SERVER_IP: 172.28.1.3
       networks:
          frontend:
