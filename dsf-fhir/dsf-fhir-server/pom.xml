@@ -125,6 +125,16 @@
 		</dependency>
 		<dependency>
 			<groupId>de.hs-heilbronn.mi</groupId>
+			<artifactId>jetty-utils</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty.websocket</groupId>
+			<artifactId>javax-websocket-server-impl</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>de.hs-heilbronn.mi</groupId>
 			<artifactId>log4j2-utils</artifactId>
 			<scope>test</scope>
 		</dependency>

@@ -3,13 +3,12 @@ package org.highmed.dsf.fhir.dao;
 import static org.junit.Assert.assertEquals;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.highmed.dsf.fhir.dao.LocationDao;
 import org.highmed.dsf.fhir.dao.jdbc.LocationDaoJdbc;
 import org.hl7.fhir.r4.model.Location;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class LocationDaoTest extends AbstractDomainResourceDaoTest<Location, LocationDao>
+public class LocationDaoTest extends AbstractResourceDaoTest<Location, LocationDao>
 {
 	private static final String name = "Demo Location";
 	private static final String description = "Demo Location Description";

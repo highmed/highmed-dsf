@@ -3,13 +3,12 @@ package org.highmed.dsf.fhir.dao;
 import static org.junit.Assert.assertEquals;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.highmed.dsf.fhir.dao.ValueSetDao;
 import org.highmed.dsf.fhir.dao.jdbc.ValueSetDaoJdbc;
 import org.hl7.fhir.r4.model.ValueSet;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class ValueSetDaoTest extends AbstractDomainResourceDaoTest<ValueSet, ValueSetDao>
+public class ValueSetDaoTest extends AbstractResourceDaoTest<ValueSet, ValueSetDao>
 {
 	private static final String name = "Demo ValueSet Name";
 	private static final String description = "Demo ValueSet Description";

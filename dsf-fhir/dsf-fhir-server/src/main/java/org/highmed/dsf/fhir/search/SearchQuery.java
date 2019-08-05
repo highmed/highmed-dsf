@@ -1,6 +1,7 @@
 package org.highmed.dsf.fhir.search;
 
 import java.sql.Array;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -318,5 +319,19 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 
 		return searchParameters.stream().filter(SearchQueryParameter::isDefined).map(p -> p.matches(resource))
 				.allMatch(b -> b);
+	}
+
+	@Override
+	public void modifyIncludeResource(Resource resource, int columnIndex, Connection connection) throws SQLException
+	{
+		if (columnIndex - 1 > includeParameters.size())
+		{
+			logger.warn("Unexpected column-index {}, column-index - 1 larger than include parameter count {}",
+					columnIndex, includeParameters.size());
+			throw new IllegalStateException("Unexpected column-index " + columnIndex
+					+ ", column-index - 1 larger than include parameter count " + includeParameters.size());
+		}
+
+		includeParameters.get(columnIndex - 2).modifyIncludeResource(resource, connection);
 	}
 }

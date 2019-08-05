@@ -17,6 +17,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.highmed.dsf.fhir.adapter.AbstractFhirAdapter;
+import org.highmed.dsf.fhir.adapter.BinaryJsonFhirAdapter;
+import org.highmed.dsf.fhir.adapter.BinaryXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.BundleJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.BundleXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.CapabilityStatementJsonFhirAdapter;
@@ -85,7 +87,8 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 
 	public static List<AbstractFhirAdapter<?>> components(FhirContext fhirContext)
 	{
-		return Arrays.asList(new BundleJsonFhirAdapter(fhirContext), new BundleXmlFhirAdapter(fhirContext),
+		return Arrays.asList(new BinaryJsonFhirAdapter(fhirContext), new BinaryXmlFhirAdapter(fhirContext),
+				new BundleJsonFhirAdapter(fhirContext), new BundleXmlFhirAdapter(fhirContext),
 				new CapabilityStatementJsonFhirAdapter(fhirContext), new CapabilityStatementXmlFhirAdapter(fhirContext),
 				new CodeSystemJsonFhirAdapter(fhirContext), new CodeSystemXmlFhirAdapter(fhirContext),
 				new EndpointJsonFhirAdapter(fhirContext), new EndpointXmlFhirAdapter(fhirContext),

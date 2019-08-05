@@ -1,6 +1,7 @@
 package org.highmed.dsf.fhir.search.parameters;
 
 import java.sql.Array;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.UUID;
@@ -188,5 +189,11 @@ public class EndpointOrganization extends AbstractReferenceParameter<Endpoint>
 			return "(SELECT jsonb_build_array(organization) FROM current_organizations WHERE concat('Organization/', organization->>'id') = endpoint->'managingOrganization'->>'reference') AS organizations";
 		else
 			return null;
+	}
+
+	@Override
+	protected void doModifyIncludeResource(Resource resource, Connection connection)
+	{
+		// Nothing to do for organizations
 	}
 }

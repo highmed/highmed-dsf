@@ -9,14 +9,13 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.highmed.dsf.fhir.dao.ProvenanceDao;
 import org.highmed.dsf.fhir.dao.jdbc.ProvenanceDaoJdbc;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Signature;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class ProvenanceDaoTest extends AbstractDomainResourceDaoTest<Provenance, ProvenanceDao>
+public class ProvenanceDaoTest extends AbstractResourceDaoTest<Provenance, ProvenanceDao>
 {
 	private final Date recorded = new GregorianCalendar(2019, 0, 1, 10, 20, 30).getTime();
 	private final byte[] signatureData = "foo bar baz".getBytes();

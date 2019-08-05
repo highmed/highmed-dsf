@@ -4,8 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.UUID;
 
-import org.highmed.dsf.fhir.dao.command.Command;
-import org.highmed.dsf.fhir.dao.command.ResourceReference;
 import org.highmed.dsf.fhir.dao.command.ResourceReference.ReferenceType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Reference;

@@ -3,13 +3,12 @@ package org.highmed.dsf.fhir.dao;
 import static org.junit.Assert.assertEquals;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.highmed.dsf.fhir.dao.HealthcareServiceDao;
 import org.highmed.dsf.fhir.dao.jdbc.HealthcareServiceDaoJdbc;
 import org.hl7.fhir.r4.model.HealthcareService;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class HealthcareServiceDaoTest extends AbstractDomainResourceDaoTest<HealthcareService, HealthcareServiceDao>
+public class HealthcareServiceDaoTest extends AbstractResourceDaoTest<HealthcareService, HealthcareServiceDao>
 {
 	private static final String name = "Demo Healthcare Service";
 	private static final boolean appointmentRequired = true;

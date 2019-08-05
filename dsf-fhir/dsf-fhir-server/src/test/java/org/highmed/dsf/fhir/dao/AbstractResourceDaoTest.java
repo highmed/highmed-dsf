@@ -5,11 +5,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.sql.Connection;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.highmed.dsf.fhir.dao.ResourceDao;
 import org.highmed.dsf.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.dsf.fhir.dao.exception.ResourceNotFoundException;
 import org.highmed.dsf.fhir.dao.exception.ResourceVersionNoMatchException;
@@ -24,7 +24,7 @@ import org.junit.Test;
 import ca.uhn.fhir.context.FhirContext;
 import de.rwh.utils.test.Database;
 
-public abstract class AbstractDomainResourceDaoTest<D extends Resource, C extends ResourceDao<D>>
+public abstract class AbstractResourceDaoTest<D extends Resource, C extends ResourceDao<D>>
 {
 	@ClassRule
 	public static final FhirEmbeddedPostgresWithLiquibase template = new FhirEmbeddedPostgresWithLiquibase(
@@ -38,7 +38,7 @@ public abstract class AbstractDomainResourceDaoTest<D extends Resource, C extend
 	protected final FhirContext fhirContext = FhirContext.forR4();
 	protected C dao;
 
-	protected AbstractDomainResourceDaoTest(Class<D> resouceClass)
+	protected AbstractResourceDaoTest(Class<D> resouceClass)
 	{
 		this.resouceClass = resouceClass;
 	}
@@ -92,7 +92,6 @@ public abstract class AbstractDomainResourceDaoTest<D extends Resource, C extend
 		assertNotNull(read.get().getMeta().getVersionId());
 		assertEquals("1", read.get().getIdElement().getVersionIdPart());
 		assertEquals("1", read.get().getMeta().getVersionId());
-
 	}
 
 	protected abstract void checkCreated(D resource);
@@ -118,6 +117,8 @@ public abstract class AbstractDomainResourceDaoTest<D extends Resource, C extend
 
 		D updatedResource = dao.update(updateResource(createdResource), null);
 		assertNotNull(updatedResource);
+		
+		checkUpdates(updatedResource);
 	}
 
 	@Test(expected = ResourceNotFoundException.class)
@@ -150,6 +151,7 @@ public abstract class AbstractDomainResourceDaoTest<D extends Resource, C extend
 		dao.update(updateResource(createdResource), 0L);
 	}
 
+	@Test
 	public void testUpdateLatest() throws Exception
 	{
 		D newResource = createResource();
@@ -283,5 +285,48 @@ public abstract class AbstractDomainResourceDaoTest<D extends Resource, C extend
 		String s2 = fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(read.get());
 		assertTrue(s1 + "\nvs\n" + s2, updatedResource2.equalsDeep(read.get()));
 		assertEquals("3", read.get().getIdElement().getVersionIdPart());
+	}
+
+	@Test
+	public void testUpdateSameRow() throws Exception
+	{
+		D newResource = createResource();
+		assertNull(newResource.getId());
+		assertNull(newResource.getMeta().getVersionId());
+
+		D createdResource = dao.create(newResource);
+		assertNotNull(createdResource);
+		assertNotNull(createdResource.getId());
+		assertNotNull(createdResource.getMeta().getVersionId());
+
+		newResource.setIdElement(createdResource.getIdElement().copy());
+		newResource.setMeta(createdResource.getMeta().copy());
+
+		assertTrue(newResource.equalsDeep(createdResource));
+
+		D updateResource = updateResource(createdResource);
+		try (Connection connection = dao.getNewTransaction())
+		{
+			D updatedResource = dao.updateSameRowWithTransaction(connection, updateResource);
+
+			connection.commit();
+
+			assertNotNull(updatedResource);
+			assertNotNull(updatedResource.getId());
+			assertNotNull(updatedResource.getMeta().getVersionId());
+
+			assertEquals(createdResource.getIdElement().getIdPart(), updatedResource.getIdElement().getIdPart());
+			assertEquals(createdResource.getMeta().getVersionId(), updatedResource.getMeta().getVersionId());
+		}
+
+		Optional<D> read = dao.read(UUID.fromString(createdResource.getIdElement().getIdPart()));
+		assertTrue(read.isPresent());
+
+		assertTrue(
+				fhirContext.newXmlParser().encodeResourceToString(read.get()) + "\nvs.\n"
+						+ fhirContext.newXmlParser().encodeResourceToString(updateResource),
+				read.get().equalsDeep(updateResource));
+		assertEquals(createdResource.getIdElement().getIdPart(), read.get().getIdElement().getIdPart());
+		assertEquals(createdResource.getMeta().getVersionId(), read.get().getMeta().getVersionId());
 	}
 }

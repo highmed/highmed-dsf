@@ -8,7 +8,6 @@ import java.util.UUID;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.highmed.dsf.fhir.dao.OrganizationDao;
 import org.highmed.dsf.fhir.dao.jdbc.OrganizationDaoJdbc;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.StringType;
@@ -16,7 +15,7 @@ import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class OrganizationDaoTest extends AbstractDomainResourceDaoTest<Organization, OrganizationDao>
+public class OrganizationDaoTest extends AbstractResourceDaoTest<Organization, OrganizationDao>
 {
 	private static final String name = "Demo Organization";
 	private static final boolean active = true;

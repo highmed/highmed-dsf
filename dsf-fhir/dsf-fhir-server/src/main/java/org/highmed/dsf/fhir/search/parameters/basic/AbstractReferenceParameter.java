@@ -1,5 +1,6 @@
 package org.highmed.dsf.fhir.search.parameters.basic;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,9 +17,10 @@ import javax.ws.rs.core.UriBuilder;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.search.SearchQuery;
 import org.highmed.dsf.fhir.search.SearchQueryIncludeParameter;
-import org.highmed.dsf.fhir.search.SearchQueryParameterError;
 import org.highmed.dsf.fhir.search.SearchQueryIncludeParameter.IncludeParts;
+import org.highmed.dsf.fhir.search.SearchQueryParameterError;
 import org.highmed.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
+import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Resource;
 
@@ -251,4 +253,22 @@ public abstract class AbstractReferenceParameter<R extends DomainResource> exten
 	}
 
 	protected abstract void doResolveReferencesForMatching(R resource, DaoProvider daoProvider) throws SQLException;
+
+	@Override
+	public void modifyIncludeResource(Resource resource, Connection connection)
+	{
+		doModifyIncludeResource(resource, connection);
+	}
+
+	/**
+	 * Use this method to modify the include resources. This method can be used if the resources returned by the include
+	 * SQL are not complete and additional content needs to be retrieved from a not included column. For example the
+	 * content of a {@link Binary} resource might not be stored in the json column.
+	 * 
+	 * @param resource
+	 *            not <code>null</code>
+	 * @param connection
+	 *            not <code>null</code>
+	 */
+	protected abstract void doModifyIncludeResource(Resource resource, Connection connection);
 }

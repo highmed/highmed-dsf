@@ -3,14 +3,13 @@ package org.highmed.dsf.fhir.dao;
 import static org.junit.Assert.assertEquals;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.highmed.dsf.fhir.dao.TaskDao;
 import org.highmed.dsf.fhir.dao.jdbc.TaskDaoJdbc;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.TaskStatus;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class TaskDaoTest extends AbstractDomainResourceDaoTest<Task, TaskDao>
+public class TaskDaoTest extends AbstractResourceDaoTest<Task, TaskDao>
 {
 	private static final TaskStatus status = TaskStatus.REQUESTED;
 	private static final String description = "Demo Task Description";
