@@ -9,7 +9,7 @@ import org.hl7.fhir.r4.model.Task;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class TaskDaoJdbc extends AbstractDomainResourceDaoJdbc<Task> implements TaskDao
+public class TaskDaoJdbc extends AbstractResourceDaoJdbc<Task> implements TaskDao
 {
 	public TaskDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
 	{

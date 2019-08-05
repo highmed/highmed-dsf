@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 
-abstract class AbstractStructureDefinitionDaoJdbc extends AbstractDomainResourceDaoJdbc<StructureDefinition>
+abstract class AbstractStructureDefinitionDaoJdbc extends AbstractResourceDaoJdbc<StructureDefinition>
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractStructureDefinitionDaoJdbc.class);
 

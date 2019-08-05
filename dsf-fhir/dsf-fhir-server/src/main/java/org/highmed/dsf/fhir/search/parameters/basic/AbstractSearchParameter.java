@@ -1,5 +1,6 @@
 package org.highmed.dsf.fhir.search.parameters.basic;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -112,5 +113,10 @@ public abstract class AbstractSearchParameter<R extends Resource> implements Sea
 	public Optional<SearchQueryIncludeParameter> getIncludeParameter()
 	{
 		return Optional.empty();
+	}
+
+	@Override
+	public void modifyIncludeResource(Resource resource, Connection connection)
+	{
 	}
 }

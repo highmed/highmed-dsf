@@ -8,7 +8,7 @@ import org.hl7.fhir.r4.model.HealthcareService;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class HealthcareServiceDaoJdbc extends AbstractDomainResourceDaoJdbc<HealthcareService>
+public class HealthcareServiceDaoJdbc extends AbstractResourceDaoJdbc<HealthcareService>
 		implements HealthcareServiceDao
 {
 	public HealthcareServiceDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)

@@ -1,5 +1,6 @@
 package org.highmed.dsf.fhir.test;
 
+import org.highmed.dsf.fhir.dao.BinaryDaoTest;
 import org.highmed.dsf.fhir.dao.BundleDaoTest;
 import org.highmed.dsf.fhir.dao.CodeSystemDaoTest;
 import org.highmed.dsf.fhir.dao.EndpointDaoTest;
@@ -22,11 +23,11 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({ BundleDaoTest.class, CodeSystemDaoTest.class, EndpointDaoTest.class, HealthcareServiceDaoTest.class,
-		LocationDaoTest.class, OrganizationDaoTest.class, PatientDaoTest.class, PractitionerDaoTest.class,
-		PractitionerRoleDaoTest.class, ProvenanceDaoTest.class, ResearchStudyDaoTest.class,
+@SuiteClasses({ BinaryDaoTest.class, BundleDaoTest.class, CodeSystemDaoTest.class, EndpointDaoTest.class,
+		HealthcareServiceDaoTest.class, LocationDaoTest.class, OrganizationDaoTest.class, PatientDaoTest.class,
+		PractitionerDaoTest.class, PractitionerRoleDaoTest.class, ProvenanceDaoTest.class, ResearchStudyDaoTest.class,
 		StructureDefinitionDaoTest.class, StructureDefinitionSnapshotDaoTest.class, SubscriptionDaoTest.class,
-		TaskDaoTest.class, ValueSetDaoTest.class })
+		TaskDaoTest.class, ValueSetDaoTest.class, TestSuiteIntegrationTests.class })
 public class TestSuiteDbTests
 {
 	@ClassRule

@@ -8,7 +8,7 @@ import org.hl7.fhir.r4.model.PractitionerRole;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class PractitionerRoleDaoJdbc extends AbstractDomainResourceDaoJdbc<PractitionerRole>
+public class PractitionerRoleDaoJdbc extends AbstractResourceDaoJdbc<PractitionerRole>
 		implements PractitionerRoleDao
 {
 	public PractitionerRoleDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)

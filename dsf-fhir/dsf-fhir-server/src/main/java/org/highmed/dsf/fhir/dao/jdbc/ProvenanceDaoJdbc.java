@@ -6,7 +6,7 @@ import org.hl7.fhir.r4.model.Provenance;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class ProvenanceDaoJdbc extends AbstractDomainResourceDaoJdbc<Provenance> implements ProvenanceDao
+public class ProvenanceDaoJdbc extends AbstractResourceDaoJdbc<Provenance> implements ProvenanceDao
 {
 	public ProvenanceDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
 	{

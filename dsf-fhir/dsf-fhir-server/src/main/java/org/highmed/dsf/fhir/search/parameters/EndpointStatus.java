@@ -9,8 +9,8 @@ import java.util.Map;
 import javax.ws.rs.core.UriBuilder;
 
 import org.highmed.dsf.fhir.function.BiFunctionWithSqlException;
-import org.highmed.dsf.fhir.search.SearchQueryParameterError;
 import org.highmed.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
+import org.highmed.dsf.fhir.search.SearchQueryParameterError;
 import org.highmed.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 import org.highmed.dsf.fhir.search.parameters.basic.AbstractTokenParameter;
 import org.highmed.dsf.fhir.search.parameters.basic.TokenSearchType;

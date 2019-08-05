@@ -16,6 +16,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
+import org.highmed.dsf.fhir.search.parameters.BinaryContentType;
 import org.highmed.dsf.fhir.search.parameters.BundleIdentifier;
 import org.highmed.dsf.fhir.search.parameters.CodeSystemIdentifier;
 import org.highmed.dsf.fhir.search.parameters.CodeSystemUrl;
@@ -55,6 +56,7 @@ import org.highmed.dsf.fhir.search.parameters.ValueSetUrl;
 import org.highmed.dsf.fhir.search.parameters.ValueSetVersion;
 import org.highmed.dsf.fhir.webservice.specification.ConformanceService;
 import org.highmed.dsf.fhir.websocket.ServerEndpoint;
+import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementImplementationComponent;
@@ -158,12 +160,15 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 		websocketExtension.setUrl("http://hl7.org/fhir/StructureDefinition/capabilitystatement-websocket");
 		websocketExtension.setValue(new UrlType(serverBase.replace("http", "ws") + ServerEndpoint.PATH));
 
-		var resources = Arrays.asList(Bundle.class, CodeSystem.class, Endpoint.class, HealthcareService.class,
-				Location.class, Organization.class, Patient.class, PractitionerRole.class, Practitioner.class,
-				Provenance.class, ResearchStudy.class, StructureDefinition.class, Subscription.class, Task.class,
-				ValueSet.class);
+		var resources = Arrays.asList(Binary.class, Bundle.class, CodeSystem.class, Endpoint.class,
+				HealthcareService.class, Location.class, Organization.class, Patient.class, PractitionerRole.class,
+				Practitioner.class, Provenance.class, ResearchStudy.class, StructureDefinition.class,
+				Subscription.class, Task.class, ValueSet.class);
 
 		var searchParameters = new HashMap<Class<? extends Resource>, List<CapabilityStatementRestResourceSearchParamComponent>>();
+
+		var binaryContentType = createSearchParameter(BinaryContentType.class);
+		searchParameters.put(Binary.class, Arrays.asList(binaryContentType));
 
 		var bundleIdentifier = createSearchParameter(BundleIdentifier.class);
 		searchParameters.put(Bundle.class, Arrays.asList(bundleIdentifier));

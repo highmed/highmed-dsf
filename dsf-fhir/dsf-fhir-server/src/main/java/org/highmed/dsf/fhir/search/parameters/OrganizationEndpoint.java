@@ -1,6 +1,7 @@
 package org.highmed.dsf.fhir.search.parameters;
 
 import java.sql.Array;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.UUID;
@@ -185,5 +186,11 @@ public class OrganizationEndpoint extends AbstractReferenceParameter<Organizatio
 					+ ") AS endpoints";
 		else
 			return null;
+	}
+
+	@Override
+	protected void doModifyIncludeResource(Resource resource, Connection connection)
+	{
+		// Nothing to do for endpoints
 	}
 }

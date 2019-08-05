@@ -7,7 +7,7 @@ import org.hl7.fhir.r4.model.ResearchStudy;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class ResearchStudyDaoJdbc extends AbstractDomainResourceDaoJdbc<ResearchStudy> implements ResearchStudyDao
+public class ResearchStudyDaoJdbc extends AbstractResourceDaoJdbc<ResearchStudy> implements ResearchStudyDao
 {
 	public ResearchStudyDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
 	{

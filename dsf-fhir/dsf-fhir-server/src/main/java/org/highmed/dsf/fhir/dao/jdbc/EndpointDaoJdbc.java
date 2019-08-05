@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class EndpointDaoJdbc extends AbstractDomainResourceDaoJdbc<Endpoint> implements EndpointDao
+public class EndpointDaoJdbc extends AbstractResourceDaoJdbc<Endpoint> implements EndpointDao
 {
 	private static final Logger logger = LoggerFactory.getLogger(EndpointDaoJdbc.class);
 

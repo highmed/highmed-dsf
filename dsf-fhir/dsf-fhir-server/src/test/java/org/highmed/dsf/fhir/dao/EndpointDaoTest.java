@@ -8,7 +8,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.UUID;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.highmed.dsf.fhir.dao.EndpointDao;
 import org.highmed.dsf.fhir.dao.jdbc.EndpointDaoJdbc;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Endpoint.EndpointStatus;
@@ -16,7 +15,7 @@ import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class EndpointDaoTest extends AbstractDomainResourceDaoTest<Endpoint, EndpointDao>
+public class EndpointDaoTest extends AbstractResourceDaoTest<Endpoint, EndpointDao>
 {
 	private static final String name = "Demo Endpoint Name";
 	private static final String address = "https://foo.bar/baz";

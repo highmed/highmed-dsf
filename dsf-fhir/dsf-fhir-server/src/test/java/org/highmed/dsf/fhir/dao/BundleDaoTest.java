@@ -3,14 +3,13 @@ package org.highmed.dsf.fhir.dao;
 import static org.junit.Assert.assertEquals;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.highmed.dsf.fhir.dao.BundleDao;
 import org.highmed.dsf.fhir.dao.jdbc.BundleDaoJdbc;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class BundleDaoTest extends AbstractDomainResourceDaoTest<Bundle, BundleDao>
+public class BundleDaoTest extends AbstractResourceDaoTest<Bundle, BundleDao>
 {
 	private static final BundleType type = BundleType.SEARCHSET;
 	private static final String language = "Demo Bundle language";

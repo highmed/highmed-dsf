@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class SubscriptionDaoJdbc extends AbstractDomainResourceDaoJdbc<Subscription> implements SubscriptionDao
+public class SubscriptionDaoJdbc extends AbstractResourceDaoJdbc<Subscription> implements SubscriptionDao
 {
 	private static final Logger logger = LoggerFactory.getLogger(SubscriptionDaoJdbc.class);
 

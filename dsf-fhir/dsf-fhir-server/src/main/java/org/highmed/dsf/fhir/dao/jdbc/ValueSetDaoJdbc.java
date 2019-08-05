@@ -12,7 +12,7 @@ import org.hl7.fhir.r4.model.ValueSet;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class ValueSetDaoJdbc extends AbstractDomainResourceDaoJdbc<ValueSet> implements ValueSetDao
+public class ValueSetDaoJdbc extends AbstractResourceDaoJdbc<ValueSet> implements ValueSetDao
 {
 	private final ReadByUrlDaoJdbc<ValueSet> readByUrl;
 

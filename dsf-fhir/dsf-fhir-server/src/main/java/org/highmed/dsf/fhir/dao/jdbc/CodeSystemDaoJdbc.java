@@ -12,7 +12,7 @@ import org.hl7.fhir.r4.model.CodeSystem;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class CodeSystemDaoJdbc extends AbstractDomainResourceDaoJdbc<CodeSystem> implements CodeSystemDao
+public class CodeSystemDaoJdbc extends AbstractResourceDaoJdbc<CodeSystem> implements CodeSystemDao
 {
 	private final ReadByUrlDaoJdbc<CodeSystem> readByUrl;
 

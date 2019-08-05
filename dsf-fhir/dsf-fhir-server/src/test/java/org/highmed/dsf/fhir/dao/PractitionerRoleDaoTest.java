@@ -6,14 +6,13 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.highmed.dsf.fhir.dao.PractitionerRoleDao;
 import org.highmed.dsf.fhir.dao.jdbc.PractitionerRoleDaoJdbc;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.PractitionerRole;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class PractitionerRoleDaoTest extends AbstractDomainResourceDaoTest<PractitionerRole, PractitionerRoleDao>
+public class PractitionerRoleDaoTest extends AbstractResourceDaoTest<PractitionerRole, PractitionerRoleDao>
 {
 	private final Date periodStart = new GregorianCalendar(2019, 0, 1).getTime();
 	private final Date periodEnd = new GregorianCalendar(2021, 11, 31).getTime();

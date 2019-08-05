@@ -9,12 +9,12 @@ import java.util.UUID;
 
 import javax.ws.rs.core.UriBuilder;
 
-import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.highmed.dsf.fhir.function.BiFunctionWithSqlException;
-import org.highmed.dsf.fhir.search.SearchQueryParameterError;
 import org.highmed.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
+import org.highmed.dsf.fhir.search.SearchQueryParameterError;
 import org.highmed.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 import org.highmed.dsf.fhir.search.parameters.basic.AbstractSearchParameter;
+import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Resource;
 import org.postgresql.util.PGobject;
 

@@ -8,11 +8,11 @@ import java.util.Map;
 
 import javax.ws.rs.core.UriBuilder;
 
-import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.highmed.dsf.fhir.function.BiFunctionWithSqlException;
 import org.highmed.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.dsf.fhir.search.parameters.basic.AbstractTokenParameter;
 import org.highmed.dsf.fhir.search.parameters.basic.TokenSearchType;
+import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Subscription;
 
