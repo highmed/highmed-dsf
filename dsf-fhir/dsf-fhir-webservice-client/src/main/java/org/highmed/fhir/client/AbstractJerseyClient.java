@@ -10,6 +10,8 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 
 import org.glassfish.jersey.SslConfigurator;
+import org.glassfish.jersey.apache.connector.ApacheConnectorProvider;
+import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.jackson.internal.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 import org.glassfish.jersey.jackson.internal.jackson.jaxrs.json.JacksonJsonProvider;
@@ -44,9 +46,12 @@ public class AbstractJerseyClient
 		if (sslContext != null)
 			builder = builder.sslContext(sslContext);
 
-		builder = builder.property(ClientProperties.PROXY_URI, proxySchemeHostPort)
-				.property(ClientProperties.PROXY_USERNAME, proxyUserName)
-				.property(ClientProperties.PROXY_PASSWORD, proxyPassword);
+		ClientConfig config = new ClientConfig();
+		config.connectorProvider(new ApacheConnectorProvider());
+		config.property(ClientProperties.PROXY_URI, proxySchemeHostPort);
+		config.property(ClientProperties.PROXY_USERNAME, proxyUserName);
+		config.property(ClientProperties.PROXY_PASSWORD, proxyPassword);
+		builder = builder.withConfig(config);
 
 		builder = builder.readTimeout(readTimeout, TimeUnit.MILLISECONDS).connectTimeout(connectTimeout,
 				TimeUnit.MILLISECONDS);
@@ -58,7 +63,8 @@ public class AbstractJerseyClient
 			builder.register(p);
 		}
 
-		componentsToRegister.forEach(builder::register);
+		if (componentsToRegister != null)
+			componentsToRegister.forEach(builder::register);
 
 		client = builder.build();
 

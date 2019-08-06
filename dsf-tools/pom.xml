@@ -14,6 +14,7 @@
 	<modules>
 		<module>dsf-tools-db-migration</module>
 		<module>dsf-tools-test-data-generator</module>
+		<module>dsf-tools-proxy-test</module>
 	</modules>
 
 	<dependencyManagement>
@@ -32,6 +33,43 @@
 				<groupId>org.highmed.dsf</groupId>
 				<artifactId>dsf-fhir-server</artifactId>
 				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-fhir-webservice-client</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.glassfish.jersey.core</groupId>
+				<artifactId>jersey-client</artifactId>
+				<version>${jersey.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish.jersey.inject</groupId>
+				<artifactId>jersey-hk2</artifactId>
+				<version>${jersey.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish.jersey.media</groupId>
+				<artifactId>jersey-media-jaxb</artifactId>
+				<version>${jersey.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish.jersey.media</groupId>
+				<artifactId>jersey-media-json-jackson</artifactId>
+				<version>${jersey.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish.jaxb</groupId>
+				<artifactId>jaxb-runtime</artifactId>
+				<version>2.3.2</version>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.ws.rs</groupId>
+				<artifactId>javax.ws.rs-api</artifactId>
+				<version>2.1</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
