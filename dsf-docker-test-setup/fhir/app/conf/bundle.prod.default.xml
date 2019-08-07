@@ -27,7 +27,7 @@
       </request>
    </entry>
    <entry>
-      <fullUrl value="urn:uuid:0b745717-d49c-4823-acaf-cc26b79553aa"></fullUrl>
+      <fullUrl value="urn:uuid:<set-your-uuid-here>"></fullUrl>
       <resource>
          <Organization xmlns="http://hl7.org/fhir">
             <extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
