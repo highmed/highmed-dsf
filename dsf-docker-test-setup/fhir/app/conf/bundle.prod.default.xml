@@ -1,0 +1,55 @@
+<Bundle xmlns="http://hl7.org/fhir">
+   <type value="transaction"></type>
+   <entry>
+      <fullUrl value="urn:uuid:832a2fd5-d55c-434f-bf8b-4356b7bf6548"></fullUrl>
+      <resource>
+         <Organization xmlns="http://hl7.org/fhir">
+            <extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
+               <valueString value="6d40e7c82ead96a9c5851976002d3732631d6e0e82e10e98c5ba568b2980b45a4436577d329ee47a8bc50fd35e39aa3c54faa23249d7b7a82a117824a4c430eb"></valueString>
+            </extension>
+            <identifier>
+               <system value="http://highmed.org/fhir/CodeSystem/organization"></system>
+               <value value="hs-heilbronn.de"></value>
+            </identifier>
+            <active value="true"></active>
+            <type>
+               <coding>
+                  <system value="http://highmed.org/fhir/CodeSystem/organization-type"></system>
+                  <code value="TTP"></code>
+               </coding>
+            </type>
+            <name value="Hochschule Heilbronn"></name>
+         </Organization>
+      </resource>
+      <request>
+         <method value="PUT"></method>
+         <url value="Organization?identifier=http://highmed.org/fhir/CodeSystem/organization|hs-heilbronn.de"></url>
+      </request>
+   </entry>
+   <entry>
+      <fullUrl value="urn:uuid:0b745717-d49c-4823-acaf-cc26b79553aa"></fullUrl>
+      <resource>
+         <Organization xmlns="http://hl7.org/fhir">
+            <extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
+               <valueString value="<set-your-thumbprint-here>"></valueString>
+            </extension>
+            <identifier>
+               <system value="http://highmed.org/fhir/CodeSystem/organization"></system>
+               <value value="<set-your-identifier-here>"></value>
+            </identifier>
+            <active value="true"></active>
+            <type>
+               <coding>
+                  <system value="http://highmed.org/fhir/CodeSystem/organization-type"></system>
+                  <code value="MeDIC"></code>
+               </coding>
+            </type>
+            <name value="<set-your-name-here>"></name>
+         </Organization>
+      </resource>
+      <request>
+         <method value="PUT"></method>
+         <url value="Organization?identifier=http://highmed.org/fhir/CodeSystem/organization|<set-your-identifier-here>"></url>
+      </request>
+   </entry>
+</Bundle>
