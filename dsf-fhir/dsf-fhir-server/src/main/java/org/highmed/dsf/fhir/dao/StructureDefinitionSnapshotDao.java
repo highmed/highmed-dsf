@@ -1,5 +1,6 @@
 package org.highmed.dsf.fhir.dao;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.UUID;
 
@@ -11,8 +12,16 @@ public interface StructureDefinitionSnapshotDao extends StructureDefinitionDaoBa
 {
 	StructureDefinition create(UUID uuid, StructureDefinition resource, SnapshotInfo info) throws SQLException;
 
+	StructureDefinition createWithTransaction(Connection connection, UUID uuid, StructureDefinition resource,
+			SnapshotInfo info) throws SQLException;
+
 	StructureDefinition update(StructureDefinition resource, SnapshotInfo info)
 			throws SQLException, ResourceNotFoundException;
 
+	StructureDefinition updateWithTransaction(Connection connection, StructureDefinition resource, SnapshotInfo info)
+			throws SQLException, ResourceNotFoundException;
+
 	void deleteAllByDependency(String url) throws SQLException;
+
+	void deleteAllByDependencyWithTransaction(Connection connection, String url) throws SQLException;
 }

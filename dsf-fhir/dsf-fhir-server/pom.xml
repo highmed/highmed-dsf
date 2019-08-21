@@ -161,6 +161,7 @@
 					<includes>
 						<include>org.highmed.dsf.fhir.test.TestSuiteAll</include>
 					</includes>
+					<argLine>-Xmx4096m</argLine>
 				</configuration>
 			</plugin>
 
@@ -190,6 +191,21 @@
 				<!-- https://github.com/mojohaus/exec-maven-plugin/issues/76 -->
 				<!-- <dependencies> <dependency> <groupId>org.highmed.dsf</groupId> <artifactId>dsf-tools-bundle-generator</artifactId> <version>0.1.0-SNAPSHOT</version> </dependency> 
 					</dependencies> -->
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
+				<configuration>
+					<filesets>
+						<fileset>
+							<directory>src/main/resources/fhir</directory>
+							<includes>
+								<include>bundle.xml</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+					</filesets>
+				</configuration>
 			</plugin>
 		</plugins>
 		<pluginManagement>

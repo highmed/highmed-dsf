@@ -7,6 +7,7 @@ import org.highmed.dsf.fhir.webservice.impl.ConformanceServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.EndpointServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.HealthcareServiceServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.LocationServiceImpl;
+import org.highmed.dsf.fhir.webservice.impl.NamingSystemServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.OrganizationServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.PatientServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.PractitionerRoleServiceImpl;
@@ -25,6 +26,7 @@ import org.highmed.dsf.fhir.webservice.jaxrs.ConformanceServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.EndpointServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.HealthcareServiceServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.LocationServiceJaxrs;
+import org.highmed.dsf.fhir.webservice.jaxrs.NamingSystemServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.OrganizationServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.PatientServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.PractitionerRoleServiceJaxrs;
@@ -43,6 +45,7 @@ import org.highmed.dsf.fhir.webservice.secure.ConformanceServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.EndpointServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.HealthcareServiceServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.LocationServiceSecure;
+import org.highmed.dsf.fhir.webservice.secure.NamingSystemServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.OrganizationServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.PatientServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.PractitionerRoleServiceSecure;
@@ -61,6 +64,7 @@ import org.highmed.dsf.fhir.webservice.specification.ConformanceService;
 import org.highmed.dsf.fhir.webservice.specification.EndpointService;
 import org.highmed.dsf.fhir.webservice.specification.HealthcareServiceService;
 import org.highmed.dsf.fhir.webservice.specification.LocationService;
+import org.highmed.dsf.fhir.webservice.specification.NamingSystemService;
 import org.highmed.dsf.fhir.webservice.specification.OrganizationService;
 import org.highmed.dsf.fhir.webservice.specification.PatientService;
 import org.highmed.dsf.fhir.webservice.specification.PractitionerRoleService;
@@ -78,6 +82,7 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.HealthcareService;
 import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.NamingSystem;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
@@ -224,6 +229,22 @@ public class WebserviceConfig
 	{
 		return new LocationServiceImpl(resourceTypeName(Location.class), serverBase, LocationServiceJaxrs.PATH,
 				defaultPageCount, daoConfig.locationDao(), validationConfig.resourceValidator(),
+				eventConfig.eventManager(), helperConfig.exceptionHandler(), eventConfig.eventGenerator(),
+				helperConfig.responseGenerator(), helperConfig.parameterConverter(), commandConfig.referenceExtractor(),
+				commandConfig.referenceResolver());
+	}
+
+	@Bean
+	public NamingSystemService namingSystemService()
+	{
+		return new NamingSystemServiceJaxrs(
+				new NamingSystemServiceSecure(namingSystemServiceImpl(), helperConfig.responseGenerator()));
+	}
+
+	private NamingSystemService namingSystemServiceImpl()
+	{
+		return new NamingSystemServiceImpl(resourceTypeName(NamingSystem.class), serverBase, LocationServiceJaxrs.PATH,
+				defaultPageCount, daoConfig.namingSystemDao(), validationConfig.resourceValidator(),
 				eventConfig.eventManager(), helperConfig.exceptionHandler(), eventConfig.eventGenerator(),
 				helperConfig.responseGenerator(), helperConfig.parameterConverter(), commandConfig.referenceExtractor(),
 				commandConfig.referenceResolver());

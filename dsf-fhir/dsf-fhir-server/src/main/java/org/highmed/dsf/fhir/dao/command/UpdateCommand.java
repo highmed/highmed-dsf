@@ -228,7 +228,7 @@ public class UpdateCommand<R extends DomainResource, D extends ResourceDao<R>> e
 	}
 
 	@Override
-	public BundleEntryComponent postExecute()
+	public BundleEntryComponent postExecute(Connection connection)
 	{
 		try
 		{

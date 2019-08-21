@@ -22,5 +22,5 @@ public interface Command
 	void execute(Map<String, IdType> idTranslationTable, Connection connection)
 			throws SQLException, WebApplicationException;
 
-	BundleEntryComponent postExecute();
+	BundleEntryComponent postExecute(Connection connection);
 }

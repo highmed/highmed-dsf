@@ -125,7 +125,7 @@ public class ResolveReferencesCommand<R extends DomainResource, D extends Resour
 	}
 
 	@Override
-	public BundleEntryComponent postExecute()
+	public BundleEntryComponent postExecute(Connection connection)
 	{
 		return null;
 	}

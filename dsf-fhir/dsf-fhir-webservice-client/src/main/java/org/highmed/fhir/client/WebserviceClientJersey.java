@@ -31,6 +31,8 @@ import org.highmed.dsf.fhir.adapter.HealthcareServiceJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.HealthcareServiceXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.LocationJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.LocationXmlFhirAdapter;
+import org.highmed.dsf.fhir.adapter.NamingSystemJsonFhirAdapter;
+import org.highmed.dsf.fhir.adapter.NamingSystemXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.OperationOutcomeJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.OperationOutcomeXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.OrganizationJsonFhirAdapter;
@@ -94,6 +96,7 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 				new EndpointJsonFhirAdapter(fhirContext), new EndpointXmlFhirAdapter(fhirContext),
 				new HealthcareServiceJsonFhirAdapter(fhirContext), new HealthcareServiceXmlFhirAdapter(fhirContext),
 				new LocationJsonFhirAdapter(fhirContext), new LocationXmlFhirAdapter(fhirContext),
+				new NamingSystemJsonFhirAdapter(fhirContext), new NamingSystemXmlFhirAdapter(fhirContext),
 				new OperationOutcomeJsonFhirAdapter(fhirContext), new OperationOutcomeXmlFhirAdapter(fhirContext),
 				new OrganizationJsonFhirAdapter(fhirContext), new OrganizationXmlFhirAdapter(fhirContext),
 				new ParametersJsonFhirAdapter(fhirContext), new ParametersXmlFhirAdapter(fhirContext),
