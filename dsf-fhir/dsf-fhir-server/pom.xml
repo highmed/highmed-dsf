@@ -143,6 +143,13 @@
 			<artifactId>mockito-core</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<!-- Workaround for exec maven plugin issue -->
+		<!-- https://github.com/mojohaus/exec-maven-plugin/issues/76 -->
+		<dependency>
+			<groupId>org.highmed.dsf</groupId>
+			<artifactId>dsf-tools-bundle-generator</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -156,6 +163,63 @@
 					</includes>
 				</configuration>
 			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>java</goal>
+						</goals>
+						<phase>generate-resources</phase>
+					</execution>
+				</executions>
+				<configuration>
+					<mainClass>org.highmed.dsf.tools.generator.BundleGenerator</mainClass>
+					<arguments>
+						<argument>${project.basedir}/src/main/resources/fhir</argument>
+					</arguments>
+					<workingDirectory>${project.basedir}</workingDirectory>
+					<!-- Workaround for exec maven plugin issue -->
+					<!-- https://github.com/mojohaus/exec-maven-plugin/issues/76 -->
+					<!-- <includePluginDependencies>true</includePluginDependencies> <includeProjectDependencies>false</includeProjectDependencies> -->
+					<!-- <executableDependency> <groupId>org.highmed.dsf</groupId> <artifactId>dsf-tools-bundle-generator</artifactId> </executableDependency> -->
+				</configuration>
+				<!-- Workaround for exec maven plugin issue -->
+				<!-- https://github.com/mojohaus/exec-maven-plugin/issues/76 -->
+				<!-- <dependencies> <dependency> <groupId>org.highmed.dsf</groupId> <artifactId>dsf-tools-bundle-generator</artifactId> <version>0.1.0-SNAPSHOT</version> </dependency> 
+					</dependencies> -->
+			</plugin>
 		</plugins>
+		<pluginManagement>
+			<plugins>
+				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself. -->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.codehaus.mojo</groupId>
+										<artifactId>exec-maven-plugin</artifactId>
+										<versionRange>[1.6.0,)</versionRange>
+										<goals>
+											<goal>java</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
 </project>
