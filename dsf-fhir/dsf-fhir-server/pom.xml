@@ -161,7 +161,9 @@
 					<includes>
 						<include>org.highmed.dsf.fhir.test.TestSuiteAll</include>
 					</includes>
-					<argLine>-Xmx4096m</argLine>
+					<systemPropertyVariables>
+						<log4j.configurationFile>log4j2-maven-surefire-config.xml</log4j.configurationFile>
+					</systemPropertyVariables>
 				</configuration>
 			</plugin>
 
