@@ -29,10 +29,13 @@ public class UpdateResourcesConfig
 	@Autowired
 	private FhirContext fhirContext;
 
+	@Autowired
+	private BaseProcessConfig baseProcessConfig;
+
 	@Bean
 	public ProcessEnginePlugin updateResourcesPlugin()
 	{
-		return new UpdateResourcesPlugin();
+		return new UpdateResourcesPlugin(baseProcessConfig.defaultBpmnParseListener());
 	}
 
 	@Bean
