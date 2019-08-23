@@ -171,8 +171,7 @@ public class FhirConfig
 	@Bean
 	public TaskHandler taskHandler()
 	{
-		return new TaskHandler(processEngine.getRuntimeService(), processEngine.getRepositoryService(),
-				clientProvider().getLocalWebserviceClient());
+		return new TaskHandler(processEngine.getRuntimeService(), processEngine.getRepositoryService(), clientProvider().getLocalWebserviceClient());
 	}
 
 	@Bean

@@ -12,6 +12,7 @@ import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.repository.ProcessDefinition;
 import org.camunda.bpm.engine.runtime.MessageCorrelationBuilder;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
+import org.camunda.bpm.engine.runtime.ProcessInstanceQuery;
 import org.camunda.bpm.engine.variable.Variables;
 import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.fhir.variables.DomainResourceValues;
@@ -19,7 +20,6 @@ import org.highmed.fhir.client.WebserviceClient;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.ParameterComponent;
-import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -33,8 +33,7 @@ public class TaskHandler implements InitializingBean
 	private final RepositoryService repositoryService;
 	private final WebserviceClient webserviceClient;
 
-	public TaskHandler(RuntimeService runtimeService, RepositoryService repositoryService,
-			WebserviceClient webserviceClient)
+	public TaskHandler(RuntimeService runtimeService, RepositoryService repositoryService, WebserviceClient webserviceClient)
 	{
 		this.runtimeService = runtimeService;
 		this.repositoryService = repositoryService;
@@ -46,12 +45,11 @@ public class TaskHandler implements InitializingBean
 	{
 		Objects.requireNonNull(runtimeService, "runtimeService");
 		Objects.requireNonNull(repositoryService, "repositoryService");
-		Objects.requireNonNull(webserviceClient, "webserviceClient");
 	}
 
 	public void onTask(Task task)
 	{
-		task.setStatus(TaskStatus.INPROGRESS);
+		task.setStatus(Task.TaskStatus.INPROGRESS);
 		task = webserviceClient.update(task);
 
 		// http://highmed.org/bpe/Process/processDefinitionKey
@@ -69,20 +67,7 @@ public class TaskHandler implements InitializingBean
 
 		Map<String, Object> variables = Map.of(Constants.VARIABLE_TASK, DomainResourceValues.create(task));
 
-		try
-		{
-			onMessage(businessKey, correlationKey, processDefinitionKey, versionTag, messageName, variables);
-			task.setStatus(TaskStatus.COMPLETED);
-		}
-		catch (Exception e)
-		{
-			logger.error("Error while handling task", e);
-			task.setStatus(TaskStatus.FAILED);
-		}
-		finally
-		{
-			webserviceClient.update(task);
-		}
+		onMessage(businessKey, correlationKey, processDefinitionKey, versionTag, messageName, variables);
 	}
 
 	private List<String> getPathSegments(String istantiatesUri)
@@ -109,18 +94,12 @@ public class TaskHandler implements InitializingBean
 	}
 
 	/**
-	 * @param businessKey
-	 *            not <code>null</code>
-	 * @param correlationKey
-	 *            may be <code>null</code>
-	 * @param processDefinitionKey
-	 *            not <code>null</code>
-	 * @param versionTag
-	 *            not <code>null</code>
-	 * @param messageName
-	 *            not <code>null</code>
-	 * @param variables
-	 *            may be <code>null</code>
+	 * @param businessKey          not <code>null</code>
+	 * @param correlationKey       may be <code>null</code>
+	 * @param processDefinitionKey not <code>null</code>
+	 * @param versionTag           not <code>null</code>
+	 * @param messageName          not <code>null</code>
+	 * @param variables            may be <code>null</code>
 	 */
 	protected void onMessage(String businessKey, String correlationKey, String processDefinitionKey, String versionTag,
 			String messageName, Map<String, Object> variables)
@@ -130,19 +109,18 @@ public class TaskHandler implements InitializingBean
 		Objects.requireNonNull(processDefinitionKey, "processDefinitionKey");
 		Objects.requireNonNull(versionTag, "versionTag");
 		Objects.requireNonNull(messageName, "messageName");
+
 		if (variables == null)
 			variables = Collections.emptyMap();
 
 		ProcessDefinition processDefinition = getProcessDefinition(processDefinitionKey, versionTag);
-		List<ProcessInstance> instances = runtimeService.createProcessInstanceQuery()
-				.processDefinitionId(processDefinition.getId()).processInstanceBusinessKey(businessKey).list();
+		List<ProcessInstance> instances = getProcessInstanceQuery(processDefinition, businessKey).list();
 
 		if (instances.size() > 1)
 			logger.warn("instance-ids {}",
 					instances.stream().map(ProcessInstance::getId).collect(Collectors.joining(", ", "[", "]")));
 
-		long instanceCount = runtimeService.createProcessInstanceQuery().processDefinitionId(processDefinition.getId())
-				.processInstanceBusinessKey(businessKey).count();
+		long instanceCount = getProcessInstanceQuery(processDefinition, businessKey).count();
 
 		if (instanceCount <= 0)
 		{
@@ -160,5 +138,11 @@ public class TaskHandler implements InitializingBean
 
 			correlation.correlate();
 		}
+	}
+
+	private ProcessInstanceQuery getProcessInstanceQuery(ProcessDefinition processDefinition, String businessKey)
+	{
+		return runtimeService.createProcessInstanceQuery().processDefinitionId(processDefinition.getId())
+				.processInstanceBusinessKey(businessKey);
 	}
 }
