@@ -1,9 +1,11 @@
 package org.highmed.dsf.fhir.task;
 
 import java.util.Date;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import ca.uhn.fhir.context.FhirContext;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.highmed.dsf.bpe.Constants;
@@ -36,15 +38,13 @@ public class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
 		this.clientProvider = clientProvider;
 	}
 
-	@Override
-	public void afterPropertiesSet() throws Exception
+	@Override public void afterPropertiesSet() throws Exception
 	{
 		Objects.requireNonNull(organizationProvider, "organizationProvider");
 		Objects.requireNonNull(clientProvider, "clientProvider");
 	}
 
-	@Override
-	public void execute(DelegateExecution execution) throws Exception
+	@Override public void execute(DelegateExecution execution) throws Exception
 	{
 		String processDefinitionKey = (String) execution.getVariable(Constants.VARIABLE_PROCESS_DEFINITION_KEY);
 		String versionTag = (String) execution.getVariable(Constants.VARIABLE_VERSION_TAG);
@@ -64,7 +64,7 @@ public class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
 
 	/**
 	 * Override this method to add additional input parameters to the task resource being send
-	 * 
+	 *
 	 * @return {@link Stream} of {@link ParameterComponent}s to be added as input parameters
 	 */
 	protected Stream<ParameterComponent> getAdditionalInputParameters(DelegateExecution execution)
@@ -93,26 +93,26 @@ public class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
 
 		// http://highmed.org/bpe/Process/processDefinitionKey
 		// http://highmed.org/bpe/Process/processDefinitionKey/versionTag
-		String instantiatesUri = Constants.PROCESS_URI_BASE + processDefinitionKey
-				+ (versionTag != null && !versionTag.isEmpty() ? ("/" + versionTag) : "");
+		String instantiatesUri =
+				Constants.PROCESS_URI_BASE + processDefinitionKey + (versionTag != null && !versionTag.isEmpty() ?
+						("/" + versionTag) :
+						"");
 		task.setInstantiatesUri(instantiatesUri);
 
-		ParameterComponent messageNameInput = new ParameterComponent(
-				new CodeableConcept(new Coding(Constants.CODESYSTEM_HIGHMED_BPMN,
-						Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME, null)),
-				new StringType(messageName));
+		ParameterComponent messageNameInput = new ParameterComponent(new CodeableConcept(
+				new Coding(Constants.CODESYSTEM_HIGHMED_BPMN, Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME,
+						null)), new StringType(messageName));
 		task.getInput().add(messageNameInput);
 
-		ParameterComponent businessKeyInput = new ParameterComponent(
-				new CodeableConcept(new Coding(Constants.CODESYSTEM_HIGHMED_BPMN,
-						Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY, null)),
-				new StringType(businessKey));
+		ParameterComponent businessKeyInput = new ParameterComponent(new CodeableConcept(
+				new Coding(Constants.CODESYSTEM_HIGHMED_BPMN, Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY,
+						null)), new StringType(businessKey));
 		task.getInput().add(businessKeyInput);
 
 		if (correlationKey != null)
 		{
-			ParameterComponent correlationKeyInput = new ParameterComponent(
-					new CodeableConcept(new Coding(Constants.CODESYSTEM_HIGHMED_BPMN,
+			ParameterComponent correlationKeyInput = new ParameterComponent(new CodeableConcept(
+					new Coding(Constants.CODESYSTEM_HIGHMED_BPMN,
 							Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY, null)),
 					new StringType(correlationKey));
 			task.getInput().add(correlationKeyInput);
@@ -120,8 +120,18 @@ public class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
 
 		additionalInputParameters.forEach(task.getInput()::add);
 
-		WebserviceClient client = clientProvider.getRemoteWebserviceClient(organizationProvider.getDefaultSystem(),
-				targetOrganizationIdentifierValue);
+		WebserviceClient client;
+		if(task.getRequester().equalsDeep(task.getRestriction().getRecipient().get(0)))
+		{
+			logger.trace("Using local webservice client");
+			client = clientProvider.getLocalWebserviceClient();
+		}
+		else
+		{
+			logger.trace("Using remote webservice client");
+			client = clientProvider.getRemoteWebserviceClient(organizationProvider.getDefaultSystem(),
+					targetOrganizationIdentifierValue);
+		}
 
 		logger.info("Sending task for process {} to organization {} (endpoint: {})", task.getInstantiatesUri(),
 				targetOrganizationIdentifierValue, client.getBaseUrl());
@@ -131,19 +141,19 @@ public class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
 	/*
 	 * private Optional<String> getMessageName(DelegateExecution execution) { String variable = (String)
 	 * execution.getVariable(VARIABLE_MESSAGE_NAME); if (variable != null) return Optional.of(variable);
-	 * 
+	 *
 	 * ThrowEvent event = (ThrowEvent) execution.getBpmnModelElementInstance(); for (EventDefinition eventDefinition :
 	 * event.getEventDefinitions()) { if (eventDefinition instanceof MessageEventDefinition) { MessageEventDefinition
 	 * med = (MessageEventDefinition) eventDefinition; Message message = med.getMessage(); return
 	 * Optional.of(message.getName()); } }
-	 * 
+	 *
 	 * return Optional.empty(); }
 	 */
 
 	/*
 	 * private Optional<String> getProcessDefinitionKey(DelegateExecution execution) { String variable = (String)
 	 * execution.getVariable(VARIABLE_PROCESS_DEFINITION_KEY); if (variable != null) return Optional.of(variable);
-	 * 
+	 *
 	 * final String currentElementId = execution.getBpmnModelElementInstance().getId(); for (Collaboration collaboration
 	 * : execution.getBpmnModelInstance().getModelElementsByType(Collaboration.class)) { for (MessageFlow messageFlow :
 	 * collaboration.getMessageFlows()) { if (messageFlow.getSource().getId().contentEquals(currentElementId)) {
@@ -152,10 +162,10 @@ public class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
 	 * org.camunda.bpm.model.bpmn.instance.Process) return Optional.of(((org.camunda.bpm.model.bpmn.instance.Process)
 	 * scope).getId()); else if (scope instanceof SubProcess) { while (scope instanceof SubProcess) scope =
 	 * scope.getScope();
-	 * 
+	 *
 	 * if (scope instanceof org.camunda.bpm.model.bpmn.instance.Process) return
 	 * Optional.of(((org.camunda.bpm.model.bpmn.instance.Process) scope).getId()); } } } } }
-	 * 
+	 *
 	 * return Optional.empty(); }
 	 */
 
@@ -163,9 +173,9 @@ public class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
 	 * private Optional<String> getVersionTag(DelegateExecution execution, Optional<String> processDefinitionKey) {
 	 * String variable = (String) execution.getVariable(VARIABLE_VERSION_TAG); if (variable != null) return
 	 * Optional.of(variable);
-	 * 
+	 *
 	 * if (processDefinitionKey.isEmpty()) return Optional.empty();
-	 * 
+	 *
 	 * ModelElementInstance element = execution.getBpmnModelInstance().getModelElementById(processDefinitionKey.get());
 	 * if (element instanceof org.camunda.bpm.model.bpmn.instance.Process) { String version =
 	 * ((org.camunda.bpm.model.bpmn.instance.Process) element).getCamundaVersionTag(); return

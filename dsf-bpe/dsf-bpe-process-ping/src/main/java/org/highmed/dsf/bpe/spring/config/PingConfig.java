@@ -27,10 +27,13 @@ public class PingConfig
 	@Autowired
 	private TaskHelper taskHelper;
 
+	@Autowired
+	private BaseProcessConfig baseProcessConfig;
+
 	@Bean
 	public ProcessEnginePlugin pingPlugin()
 	{
-		return new PingPlugin();
+		return new PingPlugin(baseProcessConfig.defaultBpmnParseListener());
 	}
 
 	@Bean

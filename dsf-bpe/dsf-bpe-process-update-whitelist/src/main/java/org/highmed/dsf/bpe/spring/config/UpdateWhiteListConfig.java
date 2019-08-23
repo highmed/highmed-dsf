@@ -18,10 +18,13 @@ public class UpdateWhiteListConfig
 	@Autowired
 	private OrganizationProvider organizationProvider;
 
+	@Autowired
+	private BaseProcessConfig baseProcessConfig;
+
 	@Bean
 	public ProcessEnginePlugin updateWhiteListPlugin()
 	{
-		return new UpdateWhiteListPlugin();
+		return new UpdateWhiteListPlugin(baseProcessConfig.defaultBpmnParseListener());
 	}
 
 	@Bean
