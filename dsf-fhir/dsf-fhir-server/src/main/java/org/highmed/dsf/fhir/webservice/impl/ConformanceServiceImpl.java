@@ -56,9 +56,7 @@ import org.highmed.dsf.fhir.search.parameters.ValueSetUrl;
 import org.highmed.dsf.fhir.search.parameters.ValueSetVersion;
 import org.highmed.dsf.fhir.webservice.specification.ConformanceService;
 import org.highmed.dsf.fhir.websocket.ServerEndpoint;
-import org.hl7.fhir.r4.model.Binary;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CapabilityStatement;
+import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementImplementationComponent;
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementKind;
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestComponent;
@@ -72,31 +70,9 @@ import org.hl7.fhir.r4.model.CapabilityStatement.ReferenceHandlingPolicy;
 import org.hl7.fhir.r4.model.CapabilityStatement.ResourceVersionPolicy;
 import org.hl7.fhir.r4.model.CapabilityStatement.RestfulCapabilityMode;
 import org.hl7.fhir.r4.model.CapabilityStatement.TypeRestfulInteraction;
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.CodeType;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.DomainResource;
-import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Enumerations.FHIRVersion;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.HealthcareService;
-import org.hl7.fhir.r4.model.Location;
-import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Practitioner;
-import org.hl7.fhir.r4.model.PractitionerRole;
-import org.hl7.fhir.r4.model.Provenance;
-import org.hl7.fhir.r4.model.ResearchStudy;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.StructureDefinition;
-import org.hl7.fhir.r4.model.Subscription;
-import org.hl7.fhir.r4.model.Task;
-import org.hl7.fhir.r4.model.UrlType;
-import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.codesystems.RestfulSecurityService;
 import org.springframework.beans.factory.InitializingBean;
 
@@ -160,7 +136,7 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 		websocketExtension.setUrl("http://hl7.org/fhir/StructureDefinition/capabilitystatement-websocket");
 		websocketExtension.setValue(new UrlType(serverBase.replace("http", "ws") + ServerEndpoint.PATH));
 
-		var resources = Arrays.asList(Binary.class, Bundle.class, CodeSystem.class, Endpoint.class,
+		var resources = Arrays.asList(Binary.class, Bundle.class, CodeSystem.class, Endpoint.class, Group.class,
 				HealthcareService.class, Location.class, Organization.class, Patient.class, PractitionerRole.class,
 				Practitioner.class, Provenance.class, ResearchStudy.class, StructureDefinition.class,
 				Subscription.class, Task.class, ValueSet.class);
