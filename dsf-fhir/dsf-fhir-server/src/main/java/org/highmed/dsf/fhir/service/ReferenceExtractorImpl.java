@@ -7,13 +7,36 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.highmed.dsf.fhir.dao.command.ResourceReference;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.BackboneElement;
+import org.hl7.fhir.r4.model.CareTeam;
+import org.hl7.fhir.r4.model.ClaimResponse;
+import org.hl7.fhir.r4.model.Coverage;
+import org.hl7.fhir.r4.model.Device;
+import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.r4.model.HealthcareService;
+import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Patient.ContactComponent;
 import org.hl7.fhir.r4.model.Patient.PatientLinkComponent;
+import org.hl7.fhir.r4.model.PlanDefinition;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Practitioner.PractitionerQualificationComponent;
+import org.hl7.fhir.r4.model.PractitionerRole;
+import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Provenance.ProvenanceAgentComponent;
 import org.hl7.fhir.r4.model.Provenance.ProvenanceEntityComponent;
-import org.hl7.fhir.r4.model.Task.TaskRestrictionComponent;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.RelatedPerson;
+import org.hl7.fhir.r4.model.ResearchStudy;
+import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.Substance;
+import org.hl7.fhir.r4.model.Task;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -383,7 +406,7 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 		var relevanteHistories = getReferences(resource, Task::hasRelevantHistory, Task::getRelevantHistory,
 				"Task.relevantHistory", Provenance.class);
 		var restriction_recipiets = getBackboneElementReferences(resource, Task::hasRestriction, Task::getRestriction,
-				TaskRestrictionComponent::hasRecipient, TaskRestrictionComponent::getRecipient,
+				Task.TaskRestrictionComponent::hasRecipient, Task.TaskRestrictionComponent::getRecipient,
 				"Task.restriction.recipient", Patient.class, Practitioner.class, PractitionerRole.class,
 				RelatedPerson.class, Group.class, Organization.class);
 
