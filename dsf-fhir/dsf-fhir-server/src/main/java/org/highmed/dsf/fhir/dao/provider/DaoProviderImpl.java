@@ -9,24 +9,27 @@ import org.highmed.dsf.fhir.dao.BinaryDao;
 import org.highmed.dsf.fhir.dao.BundleDao;
 import org.highmed.dsf.fhir.dao.CodeSystemDao;
 import org.highmed.dsf.fhir.dao.EndpointDao;
-import org.highmed.dsf.fhir.dao.HealthcareServiceDao;
+import org.highmed.dsf.fhir.dao.GroupDao;
 import org.highmed.dsf.fhir.dao.LocationDao;
+import org.highmed.dsf.fhir.dao.HealthcareServiceDao;
 import org.highmed.dsf.fhir.dao.OrganizationDao;
 import org.highmed.dsf.fhir.dao.PatientDao;
 import org.highmed.dsf.fhir.dao.PractitionerDao;
 import org.highmed.dsf.fhir.dao.PractitionerRoleDao;
 import org.highmed.dsf.fhir.dao.ProvenanceDao;
 import org.highmed.dsf.fhir.dao.ResearchStudyDao;
-import org.highmed.dsf.fhir.dao.ResourceDao;
 import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
 import org.highmed.dsf.fhir.dao.StructureDefinitionSnapshotDao;
 import org.highmed.dsf.fhir.dao.SubscriptionDao;
 import org.highmed.dsf.fhir.dao.TaskDao;
 import org.highmed.dsf.fhir.dao.ValueSetDao;
+import org.highmed.dsf.fhir.dao.ResourceDao;
+
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.HealthcareService;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Organization;
@@ -40,6 +43,7 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.ValueSet;
+
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
@@ -50,6 +54,7 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	private final BundleDao bundleDao;
 	private final CodeSystemDao codeSystemDao;
 	private final EndpointDao endpointDao;
+	private final GroupDao groupDao;
 	private final HealthcareServiceDao healthcareServiceDao;
 	private final LocationDao locationDao;
 	private final OrganizationDao organizationDao;
@@ -68,7 +73,7 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	private final Map<String, ResourceDao<?>> daosByResourceTypeName = new HashMap<>();
 
 	public DaoProviderImpl(BinaryDao binaryDao, BundleDao bundleDao, CodeSystemDao codeSystemDao,
-			EndpointDao endpointDao, HealthcareServiceDao healthcareServiceDao, LocationDao locationDao,
+			EndpointDao endpointDao, GroupDao groupDao, HealthcareServiceDao healthcareServiceDao, LocationDao locationDao,
 			OrganizationDao organizationDao, PatientDao patientDao, PractitionerDao practitionerDao,
 			PractitionerRoleDao practitionerRoleDao, ProvenanceDao provenanceDao, ResearchStudyDao researchStudyDao,
 			StructureDefinitionDao structureDefinitionDao,
@@ -79,6 +84,7 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 		this.bundleDao = bundleDao;
 		this.codeSystemDao = codeSystemDao;
 		this.endpointDao = endpointDao;
+		this.groupDao = groupDao;
 		this.healthcareServiceDao = healthcareServiceDao;
 		this.locationDao = locationDao;
 		this.organizationDao = organizationDao;
@@ -97,6 +103,7 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 		daosByResourecClass.put(Bundle.class, bundleDao);
 		daosByResourecClass.put(CodeSystem.class, codeSystemDao);
 		daosByResourecClass.put(Endpoint.class, endpointDao);
+		daosByResourecClass.put(Group.class, groupDao);
 		daosByResourecClass.put(HealthcareService.class, healthcareServiceDao);
 		daosByResourecClass.put(Location.class, locationDao);
 		daosByResourecClass.put(Organization.class, organizationDao);
@@ -156,6 +163,12 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	public EndpointDao getEndpointDao()
 	{
 		return endpointDao;
+	}
+
+	@Override
+	public GroupDao getGroupDao()
+	{
+		return groupDao;
 	}
 
 	@Override
