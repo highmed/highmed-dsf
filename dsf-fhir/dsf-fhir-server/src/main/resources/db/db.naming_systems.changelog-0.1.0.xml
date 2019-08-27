@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<property name="json" value="JSONB" dbms="postgresql" />
+	<property name="json" value="varchar(5000)" dbms="h2" />
+
+	<changeSet author="hhund" id="db.naming_systems.changelog-0.1.0">
+		<createTable tableName="naming_systems">
+			<column name="naming_system_id" type="UUID">
+				<constraints nullable="false" />
+			</column>
+			<column name="version" type="BIGINT" defaultValueNumeric="1">
+				<constraints nullable="false" />
+			</column>
+			<column name="deleted" type="BOOLEAN" defaultValue="false">
+				<constraints nullable="false" />
+			</column>
+			<column name="naming_system" type="${json}">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addPrimaryKey tableName="naming_systems" columnNames="naming_system_id, version" />
+
+		<sql dbms="postgresql">
+			ALTER TABLE naming_systems OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE naming_systems TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE ON TABLE naming_systems TO ${db.server_users_group};
+			CREATE INDEX naming_system_id_index ON naming_systems USING btree (naming_system_id);
+			CREATE INDEX naming_system_index ON naming_systems USING gin (naming_system);
+			CREATE INDEX naming_system_id_version_index ON naming_systems USING btree (naming_system_id, version);
+		</sql>
+
+		<createView viewName="current_naming_systems" replaceIfExists="true">
+			SELECT DISTINCT ON (naming_system_id) naming_system_id, version, naming_system
+			FROM naming_systems WHERE NOT deleted ORDER BY naming_system_id, version DESC
+		</createView>
+
+		<sql dbms="postgresql">
+			ALTER TABLE current_naming_systems OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_naming_systems TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_naming_systems TO ${db.server_users_group};
+		</sql>
+	</changeSet>
+</databaseChangeLog>

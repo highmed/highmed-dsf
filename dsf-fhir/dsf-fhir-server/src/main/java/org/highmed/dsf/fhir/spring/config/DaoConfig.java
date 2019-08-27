@@ -5,8 +5,10 @@ import org.highmed.dsf.fhir.dao.BinaryDao;
 import org.highmed.dsf.fhir.dao.BundleDao;
 import org.highmed.dsf.fhir.dao.CodeSystemDao;
 import org.highmed.dsf.fhir.dao.EndpointDao;
+import org.highmed.dsf.fhir.dao.GroupDao;
 import org.highmed.dsf.fhir.dao.HealthcareServiceDao;
 import org.highmed.dsf.fhir.dao.LocationDao;
+import org.highmed.dsf.fhir.dao.NamingSystemDao;
 import org.highmed.dsf.fhir.dao.OrganizationDao;
 import org.highmed.dsf.fhir.dao.PatientDao;
 import org.highmed.dsf.fhir.dao.PractitionerDao;
@@ -23,8 +25,10 @@ import org.highmed.dsf.fhir.dao.jdbc.BinaryDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.BundleDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.CodeSystemDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.EndpointDaoJdbc;
+import org.highmed.dsf.fhir.dao.jdbc.GroupDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.HealthcareServiceDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.LocationDaoJdbc;
+import org.highmed.dsf.fhir.dao.jdbc.NamingSystemDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.OrganizationDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.PatientDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.PractitionerDaoJdbc;
@@ -102,6 +106,12 @@ public class DaoConfig
 	}
 
 	@Bean
+	public GroupDao groupDao()
+	{
+		return new GroupDaoJdbc(dataSource(), fhirConfig.fhirContext());
+	}
+
+	@Bean
 	public HealthcareServiceDao healthcareServiceDao()
 	{
 		return new HealthcareServiceDaoJdbc(dataSource(), fhirConfig.fhirContext());
@@ -111,6 +121,12 @@ public class DaoConfig
 	public LocationDao locationDao()
 	{
 		return new LocationDaoJdbc(dataSource(), fhirConfig.fhirContext());
+	}
+
+	@Bean
+	public NamingSystemDao namingSystemDao()
+	{
+		return new NamingSystemDaoJdbc(dataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
@@ -188,9 +204,9 @@ public class DaoConfig
 	@Bean
 	public DaoProvider daoProvider()
 	{
-		return new DaoProviderImpl(binaryDao(), bundleDao(), codeSystemDao(), endpointDao(), healthcareServiceDao(),
-				locationDao(), organizationDao(), patientDao(), practitionerDao(), practitionerRoleDao(),
-				provenanceDao(), researchStudyDao(), structureDefinitionDao(), structureDefinitionSnapshotDao(),
-				subscriptionDao(), taskDao(), valueSetDao());
+		return new DaoProviderImpl(binaryDao(), bundleDao(), codeSystemDao(), endpointDao(), groupDao(),
+				healthcareServiceDao(), locationDao(), namingSystemDao(), organizationDao(), patientDao(),
+				practitionerDao(), practitionerRoleDao(), provenanceDao(), researchStudyDao(), structureDefinitionDao(),
+				structureDefinitionSnapshotDao(), subscriptionDao(), taskDao(), valueSetDao());
 	}
 }

@@ -1,5 +1,6 @@
 package org.highmed.dsf.fhir.dao.command;
 
+import java.sql.Connection;
 import java.util.Map;
 
 import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
@@ -56,10 +57,10 @@ public class CreateStructureDefinitionCommand extends CreateCommand<StructureDef
 	}
 
 	@Override
-	public BundleEntryComponent postExecute()
+	public BundleEntryComponent postExecute(Connection connection)
 	{
 		if (responseResult != null)
-			return super.postExecute();
+			return super.postExecute(connection);
 
 		if (resourceWithSnapshot != null)
 		{
@@ -86,7 +87,7 @@ public class CreateStructureDefinitionCommand extends CreateCommand<StructureDef
 			}
 		}
 
-		return super.postExecute();
+		return super.postExecute(connection);
 	}
 
 	private void handleSnapshot(StructureDefinition snapshot,

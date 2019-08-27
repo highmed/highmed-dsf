@@ -28,6 +28,7 @@ import org.highmed.dsf.fhir.search.parameters.EndpointStatus;
 import org.highmed.dsf.fhir.search.parameters.HealthcareServiceActive;
 import org.highmed.dsf.fhir.search.parameters.HealthcareServiceIdentifier;
 import org.highmed.dsf.fhir.search.parameters.LocationIdentifier;
+import org.highmed.dsf.fhir.search.parameters.NamingSystemName;
 import org.highmed.dsf.fhir.search.parameters.OrganizationActive;
 import org.highmed.dsf.fhir.search.parameters.OrganizationEndpoint;
 import org.highmed.dsf.fhir.search.parameters.OrganizationIdentifier;
@@ -82,8 +83,10 @@ import org.hl7.fhir.r4.model.Enumerations.FHIRVersion;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.HealthcareService;
 import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.NamingSystem;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
@@ -160,10 +163,10 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 		websocketExtension.setUrl("http://hl7.org/fhir/StructureDefinition/capabilitystatement-websocket");
 		websocketExtension.setValue(new UrlType(serverBase.replace("http", "ws") + ServerEndpoint.PATH));
 
-		var resources = Arrays.asList(Binary.class, Bundle.class, CodeSystem.class, Endpoint.class,
-				HealthcareService.class, Location.class, Organization.class, Patient.class, PractitionerRole.class,
-				Practitioner.class, Provenance.class, ResearchStudy.class, StructureDefinition.class,
-				Subscription.class, Task.class, ValueSet.class);
+		var resources = Arrays.asList(Binary.class, Bundle.class, CodeSystem.class, Endpoint.class, Group.class,
+				HealthcareService.class, Location.class, NamingSystem.class, Organization.class, Patient.class,
+				PractitionerRole.class, Practitioner.class, Provenance.class, ResearchStudy.class,
+				StructureDefinition.class, Subscription.class, Task.class, ValueSet.class);
 
 		var searchParameters = new HashMap<Class<? extends Resource>, List<CapabilityStatementRestResourceSearchParamComponent>>();
 
@@ -192,6 +195,9 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 
 		var locationIdentifier = createSearchParameter(LocationIdentifier.class);
 		searchParameters.put(Location.class, Arrays.asList(locationIdentifier));
+
+		var namingSystemName = createSearchParameter(NamingSystemName.class);
+		searchParameters.put(NamingSystem.class, Arrays.asList(namingSystemName));
 
 		var organizationActive = createSearchParameter(OrganizationActive.class);
 		var organizationEndpoint = createSearchParameter(OrganizationEndpoint.class);

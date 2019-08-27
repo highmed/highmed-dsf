@@ -6,8 +6,10 @@ import org.highmed.dsf.fhir.dao.BinaryDao;
 import org.highmed.dsf.fhir.dao.BundleDao;
 import org.highmed.dsf.fhir.dao.CodeSystemDao;
 import org.highmed.dsf.fhir.dao.EndpointDao;
+import org.highmed.dsf.fhir.dao.GroupDao;
 import org.highmed.dsf.fhir.dao.HealthcareServiceDao;
 import org.highmed.dsf.fhir.dao.LocationDao;
+import org.highmed.dsf.fhir.dao.NamingSystemDao;
 import org.highmed.dsf.fhir.dao.OrganizationDao;
 import org.highmed.dsf.fhir.dao.PatientDao;
 import org.highmed.dsf.fhir.dao.PractitionerDao;
@@ -32,9 +34,13 @@ public interface DaoProvider
 
 	EndpointDao getEndpointDao();
 
+	GroupDao getGroupDao();
+
 	HealthcareServiceDao getHealthcareServiceDao();
 
 	LocationDao getLocationDao();
+
+	NamingSystemDao getNamingSystemDao();
 
 	OrganizationDao getOrganizationDao();
 
