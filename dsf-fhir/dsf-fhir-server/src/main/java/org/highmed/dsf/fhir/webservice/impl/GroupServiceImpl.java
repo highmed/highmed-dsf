@@ -14,8 +14,8 @@ import org.hl7.fhir.r4.model.Group;
 
 public class GroupServiceImpl extends AbstractServiceImpl<GroupDao, Group> implements GroupService
 {
-	public GroupServiceImpl(String resourceTypeName, String serverBase, String path, int defaultPageCount,
-			GroupDao dao, ResourceValidator validator, EventManager eventManager, ExceptionHandler exceptionHandler,
+	public GroupServiceImpl(String resourceTypeName, String serverBase, String path, int defaultPageCount, GroupDao dao,
+			ResourceValidator validator, EventManager eventManager, ExceptionHandler exceptionHandler,
 			EventGenerator eventGenerator, ResponseGenerator responseGenerator, ParameterConverter parameterConverter,
 			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver)
 	{

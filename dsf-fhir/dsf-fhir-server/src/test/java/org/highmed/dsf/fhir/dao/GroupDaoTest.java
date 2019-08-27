@@ -1,11 +1,12 @@
 package org.highmed.dsf.fhir.dao;
 
-import ca.uhn.fhir.context.FhirContext;
+import static org.junit.Assert.assertEquals;
+
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.dsf.fhir.dao.jdbc.GroupDaoJdbc;
 import org.hl7.fhir.r4.model.Group;
 
-import static org.junit.Assert.assertEquals;
+import ca.uhn.fhir.context.FhirContext;
 
 public class GroupDaoTest extends AbstractResourceDaoTest<Group, GroupDao>
 {

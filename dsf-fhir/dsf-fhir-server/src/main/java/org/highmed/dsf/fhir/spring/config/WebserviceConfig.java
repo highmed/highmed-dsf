@@ -94,7 +94,6 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.ValueSet;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -349,9 +348,8 @@ public class WebserviceConfig
 	@Bean
 	public StructureDefinitionService structureDefinitionService()
 	{
-		return new StructureDefinitionServiceJaxrs(
-				new StructureDefinitionServiceSecure(structureDefinitionServiceImpl(),
-						helperConfig.responseGenerator()));
+		return new StructureDefinitionServiceJaxrs(new StructureDefinitionServiceSecure(
+				structureDefinitionServiceImpl(), helperConfig.responseGenerator()));
 	}
 
 	private StructureDefinitionServiceImpl structureDefinitionServiceImpl()

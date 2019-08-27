@@ -1,7 +1,6 @@
 package org.highmed.dsf.fhir.spring.config;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-
 import org.highmed.dsf.fhir.dao.BinaryDao;
 import org.highmed.dsf.fhir.dao.BundleDao;
 import org.highmed.dsf.fhir.dao.CodeSystemDao;
