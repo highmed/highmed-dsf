@@ -404,9 +404,25 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 				"Task.restriction.recipient", Patient.class, Practitioner.class, PractitionerRole.class,
 				RelatedPerson.class, Group.class, Organization.class);
 
+		var inputReferences = getInputReferences(resource);
+		var outputReferences = getOutputReferences(resource);
 		var extensionReferences = getExtensionReferences(resource);
 
 		return concat(basedOns, partOfs, focus, for_, encounter, requester, owner, location, reasonReference, insurance,
-				relevanteHistories, restriction_recipiets, extensionReferences);
+				relevanteHistories, restriction_recipiets, inputReferences, outputReferences, extensionReferences);
+	}
+
+	private Stream<ResourceReference> getInputReferences(Task resource)
+	{
+		return resource.getInput().stream().filter(in -> in.getValue() instanceof Reference)
+				.map(in -> (Reference) in.getValue())
+				.map(toResourceReference(resource.getResourceType().name() + ".input"));
+	}
+
+	private Stream<ResourceReference> getOutputReferences(Task resource)
+	{
+		return resource.getOutput().stream().filter(out -> out.getValue() instanceof Reference)
+				.map(out -> (Reference) out.getValue())
+				.map(toResourceReference(resource.getResourceType().name() + ".output"));
 	}
 }

@@ -91,6 +91,8 @@ public abstract class AbstractIntegrationTest
 	private static final FhirContext fhirContext = FhirContext.forR4();
 	private static final ReferenceExtractor extractor = new ReferenceExtractorImpl();
 
+	public static final String BASE_URL = "https://localhost:8001/fhir/";
+
 	@BeforeClass
 	public static void beforeClass() throws Exception
 	{
@@ -112,7 +114,7 @@ public abstract class AbstractIntegrationTest
 	private static WebserviceClient createWebserviceClient(KeyStore trustStore, KeyStore keyStore,
 			String keyStorePassword, FhirContext fhirContext)
 	{
-		return new WebserviceClientJersey("https://localhost:8001/fhir", trustStore, keyStore, keyStorePassword, null,
+		return new WebserviceClientJersey(BASE_URL, trustStore, keyStore, keyStorePassword, null,
 				null, null, 0, 0, null, fhirContext);
 	}
 
@@ -182,11 +184,11 @@ public abstract class AbstractIntegrationTest
 		}
 	}
 
-	private static Bundle readBundle(Path bundleTemplateFile)
+	protected static Bundle readBundle(Path bundleTemplateFile, IParser parser)
 	{
 		try (InputStream in = Files.newInputStream(bundleTemplateFile))
 		{
-			return newXmlParser().parseResource(Bundle.class, in);
+			return parser.parseResource(Bundle.class, in);
 		}
 		catch (IOException e)
 		{
@@ -195,7 +197,7 @@ public abstract class AbstractIntegrationTest
 		}
 	}
 
-	private static void writeBundle(Path bundleFile, Bundle bundle)
+	protected static void writeBundle(Path bundleFile, Bundle bundle)
 	{
 		try (OutputStream out = Files.newOutputStream(bundleFile);
 				OutputStreamWriter writer = new OutputStreamWriter(out))
@@ -209,7 +211,7 @@ public abstract class AbstractIntegrationTest
 		}
 	}
 
-	private static IParser newXmlParser()
+	protected static IParser newXmlParser()
 	{
 		IParser parser = fhirContext.newXmlParser();
 		parser.setStripVersionsFromReferences(false);
@@ -218,11 +220,21 @@ public abstract class AbstractIntegrationTest
 		return parser;
 	}
 
+	protected static IParser newJsonParser()
+	{
+		IParser parser = fhirContext.newJsonParser();
+		parser.setStripVersionsFromReferences(false);
+		parser.setOverrideResourceIdWithBundleEntryFullUrl(false);
+		parser.setPrettyPrint(true);
+		return parser;
+	}
+
+
 	private static void createTestBundle(X509Certificate certificate)
 	{
 		Path testBundleTemplateFile = Paths.get("src/test/resources/integration/test-bundle.xml");
 
-		Bundle testBundle = readBundle(testBundleTemplateFile);
+		Bundle testBundle = readBundle(testBundleTemplateFile, newXmlParser());
 
 		Organization organization = (Organization) testBundle.getEntry().get(0).getResource();
 		Extension thumbprintExtension = organization
