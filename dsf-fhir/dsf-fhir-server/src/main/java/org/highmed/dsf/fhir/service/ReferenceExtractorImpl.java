@@ -18,6 +18,7 @@ import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.HealthcareService;
 import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Patient.ContactComponent;
@@ -33,8 +34,8 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedPerson;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.Substance;
 import org.hl7.fhir.r4.model.Task;
-import org.hl7.fhir.r4.model.Task.TaskRestrictionComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -165,6 +166,8 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 
 		if (resource instanceof Endpoint)
 			return getReferences((Endpoint) resource);
+		else if (resource instanceof Group)
+			return getReferences((Group) resource);
 		else if (resource instanceof HealthcareService)
 			return getReferences((HealthcareService) resource);
 		else if (resource instanceof Location)
@@ -209,6 +212,26 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 		var extensionReferences = getExtensionReferences(resource);
 
 		return concat(managingOrganization, extensionReferences);
+	}
+
+	@Override
+	public Stream<ResourceReference> getReferences(Group resource)
+	{
+		if (resource == null)
+			return Stream.empty();
+
+		var managingEntity = getReference(resource, Group::hasManagingEntity, Group::getManagingEntity,
+				"Group.managingEntity", Organization.class, RelatedPerson.class, Practitioner.class,
+				PractitionerRole.class);
+
+		var memberEntities = getBackboneElementsReference(resource, Group::hasMember, Group::getMember,
+				Group.GroupMemberComponent::hasEntity, Group.GroupMemberComponent::getEntity, "Group.member.entity",
+				Patient.class, Practitioner.class, PractitionerRole.class, Device.class, Medication.class,
+				Substance.class, Group.class);
+
+		var extensionReferences = getExtensionReferences(resource);
+
+		return concat(managingEntity, memberEntities, extensionReferences);
 	}
 
 	@Override
@@ -377,7 +400,7 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 		var relevanteHistories = getReferences(resource, Task::hasRelevantHistory, Task::getRelevantHistory,
 				"Task.relevantHistory", Provenance.class);
 		var restriction_recipiets = getBackboneElementReferences(resource, Task::hasRestriction, Task::getRestriction,
-				TaskRestrictionComponent::hasRecipient, TaskRestrictionComponent::getRecipient,
+				Task.TaskRestrictionComponent::hasRecipient, Task.TaskRestrictionComponent::getRecipient,
 				"Task.restriction.recipient", Patient.class, Practitioner.class, PractitionerRole.class,
 				RelatedPerson.class, Group.class, Organization.class);
 
