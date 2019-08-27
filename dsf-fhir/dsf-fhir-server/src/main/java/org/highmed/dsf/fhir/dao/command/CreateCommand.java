@@ -37,8 +37,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import ca.uhn.fhir.rest.api.Constants;
 
-public class CreateCommand<R extends DomainResource, D extends ResourceDao<R>>
-		extends AbstractCommandWithResource<R, D> implements Command
+public class CreateCommand<R extends DomainResource, D extends ResourceDao<R>> extends AbstractCommandWithResource<R, D>
+		implements Command
 {
 	private static final Logger logger = LoggerFactory.getLogger(CreateCommand.class);
 
@@ -140,7 +140,7 @@ public class CreateCommand<R extends DomainResource, D extends ResourceDao<R>>
 	}
 
 	@Override
-	public BundleEntryComponent postExecute()
+	public BundleEntryComponent postExecute(Connection connection)
 	{
 		if (responseResult == null)
 		{

@@ -193,7 +193,7 @@ public class ReadCommand extends AbstractCommand implements Command
 	}
 
 	@Override
-	public BundleEntryComponent postExecute()
+	public BundleEntryComponent postExecute(Connection connection)
 	{
 		OperationOutcome searchWarning = null;
 

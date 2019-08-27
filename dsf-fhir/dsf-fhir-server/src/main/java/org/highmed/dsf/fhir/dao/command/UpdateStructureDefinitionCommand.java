@@ -1,5 +1,6 @@
 package org.highmed.dsf.fhir.dao.command;
 
+import java.sql.Connection;
 import java.util.Map;
 
 import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
@@ -57,11 +58,12 @@ public class UpdateStructureDefinitionCommand extends UpdateCommand<StructureDef
 	}
 
 	@Override
-	public BundleEntryComponent postExecute()
+	public BundleEntryComponent postExecute(Connection connection)
 	{
 		if (resourceWithSnapshot != null)
 		{
-			handleSnapshot(resourceWithSnapshot, info -> snapshotDao.update(resourceWithSnapshot, info));
+			handleSnapshot(connection, resourceWithSnapshot,
+					info -> snapshotDao.updateWithTransaction(connection, resourceWithSnapshot, info));
 		}
 		else if (updatedResource != null)
 		{
@@ -70,7 +72,8 @@ public class UpdateStructureDefinitionCommand extends UpdateCommand<StructureDef
 				SnapshotWithValidationMessages s = snapshotGenerator.generateSnapshot(updatedResource);
 
 				if (s != null && s.getSnapshot() != null && s.getMessages().isEmpty())
-					handleSnapshot(s.getSnapshot(), info -> snapshotDao.update(s.getSnapshot(), info));
+					handleSnapshot(connection, s.getSnapshot(),
+							info -> snapshotDao.updateWithTransaction(connection, s.getSnapshot(), info));
 			}
 			catch (Exception e)
 			{
@@ -79,15 +82,16 @@ public class UpdateStructureDefinitionCommand extends UpdateCommand<StructureDef
 			}
 		}
 
-		return super.postExecute();
+		return super.postExecute(connection);
 	}
 
-	private void handleSnapshot(StructureDefinition snapshot,
+	private void handleSnapshot(Connection connection, StructureDefinition snapshot,
 			ConsumerWithSqlAndResourceNotFoundException<SnapshotInfo> dbOp)
 	{
 		SnapshotDependencies dependencies = snapshotDependencyAnalyzer.analyzeSnapshotDependencies(snapshot);
 
-		exceptionHandler.catchAndLogSqlException(() -> snapshotDao.deleteAllByDependency(snapshot.getUrl()));
+		exceptionHandler.catchAndLogSqlException(
+				() -> snapshotDao.deleteAllByDependencyWithTransaction(connection, snapshot.getUrl()));
 
 		exceptionHandler.catchAndLogSqlAndResourceNotFoundException(resource.getResourceType().name(),
 				() -> dbOp.accept(new SnapshotInfo(dependencies)));

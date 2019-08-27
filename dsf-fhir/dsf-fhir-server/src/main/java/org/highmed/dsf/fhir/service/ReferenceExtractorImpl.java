@@ -36,7 +36,6 @@ import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Substance;
 import org.hl7.fhir.r4.model.Task;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,9 +55,9 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 			Function<R, Reference> getReference, String referenceLocation,
 			Class<? extends DomainResource>... referenceTypes)
 	{
-		return hasReference.test(resource) ?
-				Stream.of(getReference.apply(resource)).map(toResourceReference(referenceLocation, referenceTypes)) :
-				Stream.empty();
+		return hasReference.test(resource)
+				? Stream.of(getReference.apply(resource)).map(toResourceReference(referenceLocation, referenceTypes))
+				: Stream.empty();
 	}
 
 	@SafeVarargs
@@ -66,10 +65,8 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 			Function<R, List<Reference>> getReference, String referenceLocation,
 			Class<? extends Resource>... referenceTypes)
 	{
-		return hasReference.test(resource) ?
-				Stream.of(getReference.apply(resource)).flatMap(List::stream)
-						.map(toResourceReference(referenceLocation, referenceTypes)) :
-				Stream.empty();
+		return hasReference.test(resource) ? Stream.of(getReference.apply(resource)).flatMap(List::stream)
+				.map(toResourceReference(referenceLocation, referenceTypes)) : Stream.empty();
 	}
 
 	@SafeVarargs
@@ -94,10 +91,8 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 			Predicate<E> hasReference, Function<E, Reference> getReference, String referenceLocation,
 			Class<? extends Resource>... referenceTypes)
 	{
-		return hasReference.test(backboneElement) ?
-				Stream.of(getReference.apply(backboneElement))
-						.map(toResourceReference(referenceLocation, referenceTypes)) :
-				Stream.empty();
+		return hasReference.test(backboneElement) ? Stream.of(getReference.apply(backboneElement))
+				.map(toResourceReference(referenceLocation, referenceTypes)) : Stream.empty();
 	}
 
 	@SafeVarargs
@@ -139,10 +134,8 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 			Predicate<E> hasReference, Function<E, List<Reference>> getReference, String referenceLocation,
 			Class<? extends DomainResource>... referenceTypes)
 	{
-		return hasReference.test(backboneElement) ?
-				Stream.of(getReference.apply(backboneElement)).flatMap(List::stream)
-						.map(toResourceReference(referenceLocation, referenceTypes)) :
-				Stream.empty();
+		return hasReference.test(backboneElement) ? Stream.of(getReference.apply(backboneElement)).flatMap(List::stream)
+				.map(toResourceReference(referenceLocation, referenceTypes)) : Stream.empty();
 	}
 
 	private Stream<ResourceReference> getExtensionReferences(DomainResource resource)

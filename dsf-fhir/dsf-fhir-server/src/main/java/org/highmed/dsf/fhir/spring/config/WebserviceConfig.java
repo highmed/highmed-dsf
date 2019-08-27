@@ -8,6 +8,7 @@ import org.highmed.dsf.fhir.webservice.impl.EndpointServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.GroupServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.HealthcareServiceServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.LocationServiceImpl;
+import org.highmed.dsf.fhir.webservice.impl.NamingSystemServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.OrganizationServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.PatientServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.PractitionerRoleServiceImpl;
@@ -27,6 +28,7 @@ import org.highmed.dsf.fhir.webservice.jaxrs.EndpointServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.GroupServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.HealthcareServiceServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.LocationServiceJaxrs;
+import org.highmed.dsf.fhir.webservice.jaxrs.NamingSystemServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.OrganizationServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.PatientServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.PractitionerRoleServiceJaxrs;
@@ -46,6 +48,7 @@ import org.highmed.dsf.fhir.webservice.secure.EndpointServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.GroupServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.HealthcareServiceServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.LocationServiceSecure;
+import org.highmed.dsf.fhir.webservice.secure.NamingSystemServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.OrganizationServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.PatientServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.PractitionerRoleServiceSecure;
@@ -65,6 +68,7 @@ import org.highmed.dsf.fhir.webservice.specification.EndpointService;
 import org.highmed.dsf.fhir.webservice.specification.GroupService;
 import org.highmed.dsf.fhir.webservice.specification.HealthcareServiceService;
 import org.highmed.dsf.fhir.webservice.specification.LocationService;
+import org.highmed.dsf.fhir.webservice.specification.NamingSystemService;
 import org.highmed.dsf.fhir.webservice.specification.OrganizationService;
 import org.highmed.dsf.fhir.webservice.specification.PatientService;
 import org.highmed.dsf.fhir.webservice.specification.PractitionerRoleService;
@@ -83,6 +87,7 @@ import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.HealthcareService;
 import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.NamingSystem;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
@@ -94,7 +99,6 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.ValueSet;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -251,6 +255,22 @@ public class WebserviceConfig
 	}
 
 	@Bean
+	public NamingSystemService namingSystemService()
+	{
+		return new NamingSystemServiceJaxrs(
+				new NamingSystemServiceSecure(namingSystemServiceImpl(), helperConfig.responseGenerator()));
+	}
+
+	private NamingSystemService namingSystemServiceImpl()
+	{
+		return new NamingSystemServiceImpl(resourceTypeName(NamingSystem.class), serverBase, LocationServiceJaxrs.PATH,
+				defaultPageCount, daoConfig.namingSystemDao(), validationConfig.resourceValidator(),
+				eventConfig.eventManager(), helperConfig.exceptionHandler(), eventConfig.eventGenerator(),
+				helperConfig.responseGenerator(), helperConfig.parameterConverter(), commandConfig.referenceExtractor(),
+				commandConfig.referenceResolver());
+	}
+
+	@Bean
 	public OrganizationService organizationService()
 	{
 		return new OrganizationServiceJaxrs(
@@ -349,9 +369,8 @@ public class WebserviceConfig
 	@Bean
 	public StructureDefinitionService structureDefinitionService()
 	{
-		return new StructureDefinitionServiceJaxrs(
-				new StructureDefinitionServiceSecure(structureDefinitionServiceImpl(),
-						helperConfig.responseGenerator()));
+		return new StructureDefinitionServiceJaxrs(new StructureDefinitionServiceSecure(
+				structureDefinitionServiceImpl(), helperConfig.responseGenerator()));
 	}
 
 	private StructureDefinitionServiceImpl structureDefinitionServiceImpl()

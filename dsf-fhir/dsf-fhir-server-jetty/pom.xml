@@ -14,6 +14,14 @@
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-fhir-server</artifactId>
+			<!-- Workaround for exec maven plugin issue in dsf-fhir-server module -->
+			<!-- https://github.com/mojohaus/exec-maven-plugin/issues/76 -->
+			<exclusions>
+				<exclusion>
+					<groupId>org.highmed.dsf</groupId>
+					<artifactId>dsf-tools-bundle-generator</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>

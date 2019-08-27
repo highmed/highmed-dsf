@@ -60,16 +60,22 @@ public class StructureDefinitionSnapshotDaoJdbc extends AbstractStructureDefinit
 		{
 			connection.setReadOnly(false);
 
-			StructureDefinition inserted = create(connection, resource, info, uuid);
+			StructureDefinition inserted = createWithTransaction(connection, uuid, resource, info);
 
 			logger.debug("{} with ID {} created", getResourceTypeName(), inserted.getId());
 			return inserted;
 		}
 	}
 
-	private StructureDefinition create(Connection connection, StructureDefinition resource, SnapshotInfo info,
-			UUID uuid) throws SQLException
+	@Override
+	public StructureDefinition createWithTransaction(Connection connection, UUID uuid, StructureDefinition resource,
+			SnapshotInfo info) throws SQLException
 	{
+		Objects.requireNonNull(connection, "connection");
+		Objects.requireNonNull(uuid, "uuid");
+		Objects.requireNonNull(resource, "resource");
+		Objects.requireNonNull(info, "info");
+
 		resource = copy(resource);
 		resource.setIdElement(new IdType(getResourceTypeName(), uuid.toString(), "1"));
 		resource.getMeta().setVersionId("1");
@@ -106,17 +112,10 @@ public class StructureDefinitionSnapshotDaoJdbc extends AbstractStructureDefinit
 
 			try
 			{
-				LatestVersion latestVersion = getLatestVersion(resource, connection);
-				long newVersion = latestVersion.version + 1;
-
-				StructureDefinition updated = update(connection, resource, info, newVersion);
-				if (latestVersion.deleted)
-					markDeleted(connection, toUuid(updated.getIdElement().getIdPart()), false);
+				StructureDefinition updated = updateWithTransaction(connection, resource, info);
 
 				connection.commit();
 
-				logger.debug("{} with IdPart {} updated, new version {}.", getResourceTypeName(),
-						updated.getIdElement().getIdPart(), newVersion);
 				return updated;
 			}
 			catch (Exception e)
@@ -125,6 +124,26 @@ public class StructureDefinitionSnapshotDaoJdbc extends AbstractStructureDefinit
 				throw e;
 			}
 		}
+	}
+
+	@Override
+	public StructureDefinition updateWithTransaction(Connection connection, StructureDefinition resource,
+			SnapshotInfo info) throws SQLException, ResourceNotFoundException
+	{
+		Objects.requireNonNull(resource, "resource");
+		Objects.requireNonNull(info, "info");
+
+		LatestVersion latestVersion = getLatestVersionIfExists(resource, connection)
+				.orElse(new LatestVersion(0, false));
+		long newVersion = latestVersion.version + 1;
+
+		StructureDefinition updated = update(connection, resource, info, newVersion);
+		if (latestVersion.deleted)
+			markDeleted(connection, toUuid(updated.getIdElement().getIdPart()), false);
+
+		logger.debug("{} with IdPart {} updated, new version {}.", getResourceTypeName(),
+				updated.getIdElement().getIdPart(), newVersion);
+		return updated;
 	}
 
 	private StructureDefinition update(Connection connection, StructureDefinition resource, SnapshotInfo info,
@@ -167,17 +186,26 @@ public class StructureDefinitionSnapshotDaoJdbc extends AbstractStructureDefinit
 		{
 			connection.setReadOnly(false);
 
-			try (PreparedStatement statement = connection.prepareStatement("UPDATE " + getResourceTable()
-					+ " SET deleted = TRUE WHERE structure_definition_snapshot_info->'dependencies'->'profiles' ?? ?"))
-			{
-				statement.setString(1, url);
+			deleteAllByDependencyWithTransaction(connection, url);
+		}
+	}
 
-				logger.trace("Executing query '{}'", statement);
-				int count = statement.executeUpdate();
+	@Override
+	public void deleteAllByDependencyWithTransaction(Connection connection, String url) throws SQLException
+	{
+		Objects.requireNonNull(connection, "connection");
+		Objects.requireNonNull(url, "url");
 
-				logger.debug("{} {} snapshot{} with dependency url {} marked as deleted", count, getResourceTypeName(),
-						count != 1 ? "s" : "", url);
-			}
+		try (PreparedStatement statement = connection.prepareStatement("UPDATE " + getResourceTable()
+				+ " SET deleted = TRUE WHERE structure_definition_snapshot_info->'dependencies'->'profiles' ?? ?"))
+		{
+			statement.setString(1, url);
+
+			logger.trace("Executing query '{}'", statement);
+			int count = statement.executeUpdate();
+
+			logger.debug("{} {} snapshot{} with dependency url {} marked as deleted", count, getResourceTypeName(),
+					count != 1 ? "s" : "", url);
 		}
 	}
 }

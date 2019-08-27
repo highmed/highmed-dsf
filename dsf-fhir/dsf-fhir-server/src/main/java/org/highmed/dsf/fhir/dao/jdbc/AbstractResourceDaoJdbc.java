@@ -115,8 +115,8 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	 * created on a request basis
 	 */
 	@SafeVarargs
-	AbstractResourceDaoJdbc(DataSource dataSource, FhirContext fhirContext, Class<R> resourceType,
-			String resourceTable, String resourceColumn, String resourceIdColumn,
+	AbstractResourceDaoJdbc(DataSource dataSource, FhirContext fhirContext, Class<R> resourceType, String resourceTable,
+			String resourceColumn, String resourceIdColumn,
 			Supplier<SearchQueryParameter<R>>... searchParameterFactories)
 	{
 		this(dataSource, fhirContext, resourceType, resourceTable, resourceColumn, resourceIdColumn,
@@ -130,9 +130,8 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	 * created on a request basis
 	 */
 	@SafeVarargs
-	AbstractResourceDaoJdbc(DataSource dataSource, FhirContext fhirContext, Class<R> resourceType,
-			String resourceTable, String resourceColumn, String resourceIdColumn,
-			PreparedStatementFactory<R> preparedStatementFactory,
+	AbstractResourceDaoJdbc(DataSource dataSource, FhirContext fhirContext, Class<R> resourceType, String resourceTable,
+			String resourceColumn, String resourceIdColumn, PreparedStatementFactory<R> preparedStatementFactory,
 			Supplier<SearchQueryParameter<R>>... searchParameterFactories)
 	{
 		this.dataSource = dataSource;
@@ -650,11 +649,31 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		return getLatestVersion(uuid, connection);
 	}
 
+	protected final Optional<LatestVersion> getLatestVersionIfExists(R resource, Connection connection)
+			throws SQLException, ResourceNotFoundException
+	{
+		UUID uuid = toUuid(resource.getIdElement().getIdPart());
+		if (uuid == null)
+			throw new ResourceNotFoundException(resource.getId() != null ? resource.getId() : "'null'");
+
+		return getLatestVersionIfExists(uuid, connection);
+	}
+
 	protected final LatestVersion getLatestVersion(UUID uuid, Connection connection)
 			throws SQLException, ResourceNotFoundException
 	{
 		if (uuid == null)
 			throw new ResourceNotFoundException("'null'");
+
+		return getLatestVersionIfExists(uuid, connection)
+				.orElseThrow(() -> new ResourceNotFoundException(uuid.toString()));
+	}
+
+	protected final Optional<LatestVersion> getLatestVersionIfExists(UUID uuid, Connection connection)
+			throws SQLException, ResourceNotFoundException
+	{
+		if (uuid == null)
+			return Optional.empty();
 
 		try (PreparedStatement statement = connection.prepareStatement("SELECT version, deleted FROM " + resourceTable
 				+ " WHERE " + resourceIdColumn + " = ? ORDER BY version DESC LIMIT 1"))
@@ -671,12 +690,12 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 
 					logger.debug("Latest version for {} with IdPart {} is {}{}", resourceTypeName, uuid.toString(),
 							version, deleted ? ", resource marked as deleted" : "");
-					return new LatestVersion(version, deleted);
+					return Optional.of(new LatestVersion(version, deleted));
 				}
 				else
 				{
 					logger.debug("{} with IdPart {} not found", resourceTypeName, uuid.toString());
-					throw new ResourceNotFoundException(uuid.toString());
+					return Optional.empty();
 				}
 			}
 		}
