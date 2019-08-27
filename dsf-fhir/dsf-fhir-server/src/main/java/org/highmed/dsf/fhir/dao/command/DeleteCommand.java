@@ -173,7 +173,7 @@ public class DeleteCommand extends AbstractCommand implements Command
 	}
 
 	@Override
-	public BundleEntryComponent postExecute()
+	public BundleEntryComponent postExecute(Connection connection)
 	{
 		try
 		{

@@ -15,6 +15,7 @@
 		<module>dsf-tools-db-migration</module>
 		<module>dsf-tools-test-data-generator</module>
 		<module>dsf-tools-proxy-test</module>
+		<module>dsf-tools-bundle-generator</module>
 	</modules>
 
 	<dependencyManagement>
@@ -27,6 +28,11 @@
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
 				<artifactId>dsf-tools-test-data-generator</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-tools-bundle-generator</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

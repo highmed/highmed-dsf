@@ -134,7 +134,9 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 
 		searchParameters.stream().flatMap(p -> p.getErrors().stream()).forEach(errors::add);
 
-		logger.warn("Query parameters with error: {}", errors);
+		if (!errors.isEmpty())
+			logger.warn("Query parameters with error: {}", errors);
+		
 		return errors;
 	}
 

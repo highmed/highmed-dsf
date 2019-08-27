@@ -50,6 +50,7 @@ public class TransactionCommandList implements CommandList
 	@Override
 	public Bundle execute() throws WebApplicationException
 	{
+		Map<Integer, BundleEntryComponent> results = new HashMap<>((int) ((commands.size() / 0.75) + 1));
 		try
 		{
 			Map<String, IdType> idTranslationTable = new HashMap<>();
@@ -99,26 +100,25 @@ public class TransactionCommandList implements CommandList
 					}
 				}
 
+				for (Command c : commands)
+				{
+					try
+					{
+						logger.debug("Running post-execute of command {} for entry at index {}", c.getClass().getName(),
+								c.getIndex());
+						results.putIfAbsent(c.getIndex(), c.postExecute(connection));
+					}
+					catch (Exception e)
+					{
+						logger.warn("Error while running post-execute of command " + c.getClass().getSimpleName()
+								+ " for entry at index " + c.getIndex() + ", rolling back transaction", e);
+
+						throw e;
+					}
+				}
+
 				if (hasModifyingCommand)
 					connection.commit();
-			}
-
-			Map<Integer, BundleEntryComponent> results = new HashMap<>((int) ((commands.size() / 0.75) + 1));
-			for (Command c : commands)
-			{
-				try
-				{
-					logger.debug("Running post-execute of command {} for entry at index {}", c.getClass().getName(),
-							c.getIndex());
-					results.putIfAbsent(c.getIndex(), c.postExecute());
-				}
-				catch (Exception e)
-				{
-					logger.warn("Error while running post-execute of command " + c.getClass().getSimpleName()
-							+ " for entry at index " + c.getIndex() + ", rolling back transaction", e);
-
-					throw e;
-				}
 			}
 
 			Bundle result = new Bundle();

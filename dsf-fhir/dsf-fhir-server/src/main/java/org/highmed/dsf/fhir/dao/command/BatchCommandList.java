@@ -64,7 +64,7 @@ public class BatchCommandList implements CommandList
 			Map<Integer, BundleEntryComponent> results = new HashMap<>((int) ((commands.size() / 0.75) + 1));
 
 			IntStream.range(0, commands.size()).filter(index -> !caughtExceptions.containsKey(index))
-					.mapToObj(index -> commands.get(index)).forEach(postExecute(caughtExceptions, results));
+					.mapToObj(index -> commands.get(index)).forEach(postExecute(connection, caughtExceptions, results));
 
 			Bundle result = new Bundle();
 			result.setType(BundleType.BATCHRESPONSE);
@@ -161,7 +161,7 @@ public class BatchCommandList implements CommandList
 
 	}
 
-	private Consumer<Command> postExecute(Map<Integer, Exception> caughtExceptions,
+	private Consumer<Command> postExecute(Connection connection, Map<Integer, Exception> caughtExceptions,
 			Map<Integer, BundleEntryComponent> results)
 	{
 		return command ->
@@ -172,7 +172,7 @@ public class BatchCommandList implements CommandList
 				{
 					logger.debug("Running post-execute of command {} for entry at index {}",
 							command.getClass().getName(), command.getIndex());
-					results.put(command.getIndex(), command.postExecute());
+					results.put(command.getIndex(), command.postExecute(connection));
 				}
 				else
 				{
