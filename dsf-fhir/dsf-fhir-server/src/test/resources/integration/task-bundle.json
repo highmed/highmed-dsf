@@ -1,0 +1,60 @@
+{
+  "resourceType": "Bundle",
+  "type": "transaction",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+      "resource": {
+        "resourceType": "ResearchStudy",
+        "status": "active"
+      },
+      "request": {
+        "method": "POST",
+        "url": "ResearchStudy"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+      "resource": {
+        "resourceType": "Task",
+        "instantiatesUri": "http://highmed.org/bpe/Process/requestSimpleCohortSizeQuery/1.0.0",
+        "status": "requested",
+        "intent": "order",
+        "input": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://highmed.org/fhir/CodeSystem/bpmn-message",
+                  "code": "research-study-reference"
+                }
+              ]
+            },
+            "valueReference": {
+              "reference": "urn:uuid:aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+            }
+          }
+        ],
+        "output": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://highmed.org/fhir/CodeSystem/bpmn-message",
+                  "code": "research-study-reference"
+                }
+              ]
+            },
+            "valueReference": {
+              "reference": "urn:uuid:aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+            }
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "Task"
+      }
+    }
+  ]
+}
