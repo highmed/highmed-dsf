@@ -11,6 +11,7 @@
 	<include file="db/db.code_systems.changelog-0.1.0.xml" />
 	<include file="db/db.code_systems.changelog-0.1.0.xml" />
 	<include file="db/db.endpoints.changelog-0.1.0.xml" />
+	<include file="db/db.groups.changelog-0.1.0.xml" />
 	<include file="db/db.healthcare_services.changelog-0.1.0.xml" />
 	<include file="db/db.locations.changelog-0.1.0.xml" />
 	<include file="db/db.naming_systems.changelog-0.1.0.xml" />

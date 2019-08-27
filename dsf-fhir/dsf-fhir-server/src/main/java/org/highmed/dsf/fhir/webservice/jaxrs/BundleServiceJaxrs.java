@@ -6,8 +6,7 @@ import org.highmed.dsf.fhir.webservice.specification.BundleService;
 import org.hl7.fhir.r4.model.Bundle;
 
 @Path(BundleServiceJaxrs.PATH)
-public class BundleServiceJaxrs extends AbstractServiceJaxrs<Bundle, BundleService>
-		implements BundleService
+public class BundleServiceJaxrs extends AbstractServiceJaxrs<Bundle, BundleService> implements BundleService
 {
 	public static final String PATH = "Bundle";
 
