@@ -415,13 +415,14 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 	private Stream<ResourceReference> getInputReferences(Task resource)
 	{
 		return resource.getInput().stream().filter(in -> in.getValue() instanceof Reference)
-				.map(in -> (Reference) in.getValue()).map(toResourceReference(resource.getResourceType().name()));
+				.map(in -> (Reference) in.getValue())
+				.map(toResourceReference(resource.getResourceType().name() + ".input"));
 	}
 
 	private Stream<ResourceReference> getOutputReferences(Task resource)
 	{
 		return resource.getOutput().stream().filter(out -> out.getValue() instanceof Reference)
-				.map(out -> (Reference) out.getValue()).map(toResourceReference(resource.getResourceType().name()));
+				.map(out -> (Reference) out.getValue())
+				.map(toResourceReference(resource.getResourceType().name() + ".output"));
 	}
-
 }

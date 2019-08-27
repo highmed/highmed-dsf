@@ -1,58 +1,60 @@
 package org.highmed.dsf.fhir.integration;
 
-import org.highmed.fhir.client.WebserviceClient;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.Task;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static junit.framework.TestCase.assertEquals;
 
 import java.nio.file.Paths;
 import java.util.List;
 
-import static junit.framework.TestCase.assertEquals;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Task;
+import org.junit.Test;
 
 public class TaskIntegrationTest extends AbstractIntegrationTest
 {
-	private static WebserviceClient client;
-	private static Bundle resultBundle;
-	private static List<Bundle.BundleEntryComponent> resultBundleEntries;
-	private static String researchStudyId;
-	private static Task task;
-
-	@BeforeClass
-	public static void init()
+	private List<Bundle.BundleEntryComponent> createTaskBundle()
 	{
 		Bundle bundle = readBundle(Paths.get("src/test/resources/integration/task-bundle.json"), newJsonParser());
-
-		client = getWebserviceClient();
-
-		resultBundle = client.postBundle(bundle);
-		resultBundleEntries = resultBundle.getEntry();
-
-		researchStudyId = resultBundleEntries.get(0).getFullUrl().substring(BASE_URL.length());
-		task = client.read(Task.class, resultBundleEntries.get(1).getFullUrl().substring(BASE_URL.concat("Task/").length()));
+		Bundle resultBundle = getWebserviceClient().postBundle(bundle);
+		return resultBundle.getEntry();
 	}
 
 	@Test
 	public void testInputTransactionReferenceResolver() throws Exception
 	{
+		List<Bundle.BundleEntryComponent> resultBundleEntries = createTaskBundle();
+
+		String taskId = new IdType(resultBundleEntries.get(1).getFullUrl()).getIdPart();
+		Task task = getWebserviceClient().read(Task.class, taskId);
+
 		Task.ParameterComponent component = task.getInput().stream()
 				.filter(c -> c.getType().getCoding().get(0).getCode().equals("research-study-reference")).findFirst()
 				.orElse(new Task.ParameterComponent());
-		String taskInputResearchStudyId = ((Reference) component.getValue()).getReference();
 
-		assertEquals(researchStudyId, taskInputResearchStudyId);
+		IdType taskInputResearchStudyId = new IdType(((Reference) component.getValue()).getReference());
+		IdType researchStudyId = new IdType(resultBundleEntries.get(0).getFullUrl());
+
+		assertEquals(researchStudyId.getResourceType(), taskInputResearchStudyId.getResourceType());
+		assertEquals(researchStudyId.getIdPart(), taskInputResearchStudyId.getIdPart());
 	}
 
 	@Test
 	public void testOutputTransactionReferenceResolver() throws Exception
 	{
+		List<Bundle.BundleEntryComponent> resultBundleEntries = createTaskBundle();
+
+		String taskId = new IdType(resultBundleEntries.get(1).getFullUrl()).getIdPart();
+		Task task = getWebserviceClient().read(Task.class, taskId);
+
 		Task.TaskOutputComponent component = task.getOutput().stream()
 				.filter(c -> c.getType().getCoding().get(0).getCode().equals("research-study-reference")).findFirst()
 				.orElse(new Task.TaskOutputComponent());
-		String taskOutputResearchStudyId = ((Reference) component.getValue()).getReference();
 
-		assertEquals(researchStudyId, taskOutputResearchStudyId);
+		IdType taskOutputResearchStudyId = new IdType(((Reference) component.getValue()).getReference());
+		IdType researchStudyId = new IdType(resultBundleEntries.get(0).getFullUrl());
+
+		assertEquals(researchStudyId.getResourceType(), taskOutputResearchStudyId.getResourceType());
+		assertEquals(researchStudyId.getIdPart(), taskOutputResearchStudyId.getIdPart());
 	}
 }
