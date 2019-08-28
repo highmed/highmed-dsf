@@ -55,7 +55,8 @@ public class SnapshotTest
 
 		profileUtis.generateSnapshot(base, derived, url, profileName);
 
-		logger.info("Snapshot: " + context.newXmlParser().encodeResourceToString(derived));
+		if (logger.isDebugEnabled())
+			logger.debug("Snapshot: {}", context.newXmlParser().setPrettyPrint(true).encodeResourceToString(derived));
 
 		messages.forEach(m -> logger.error("Issue while generating snapshot: {} - {} - {}", m.getDisplay(), m.getLine(),
 				m.getMessage()));

@@ -23,12 +23,16 @@ import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.ElementDefinition.TypeRefComponent;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
 
 public class StructureDefinitionTreeTest
 {
+	private static final Logger logger = LoggerFactory.getLogger(StructureDefinitionTreeTest.class);
+
 	@Test
 	public void testTree() throws Exception
 	{
@@ -44,7 +48,7 @@ public class StructureDefinitionTreeTest
 
 	private void printTree(StructureDefinition def, Map<String, StructureDefinition> structureDefinitionsByUrl)
 	{
-		System.out.println("\n");
+		logger.debug("");
 
 		Set<String> profileDependencies = new HashSet<>();
 		Set<String> targetProfileDependencies = new HashSet<>();
@@ -52,13 +56,15 @@ public class StructureDefinitionTreeTest
 
 		if (!profileDependencies.isEmpty())
 		{
-			System.out.println("\n  Profile-Dependencies:");
-			profileDependencies.stream().sorted().forEach(url -> System.out.println("    " + url));
+			logger.debug("");
+			logger.debug("  Profile-Dependencies:");
+			profileDependencies.stream().sorted().forEach(url -> logger.debug("    " + url));
 		}
 		if (!targetProfileDependencies.isEmpty())
 		{
-			System.out.println("\n  TargetProfile-Dependencies:");
-			targetProfileDependencies.stream().sorted().forEach(url -> System.out.println("    " + url));
+			logger.debug("");
+			logger.debug("  TargetProfile-Dependencies:");
+			targetProfileDependencies.stream().sorted().forEach(url -> logger.debug("    " + url));
 		}
 	}
 
@@ -66,14 +72,13 @@ public class StructureDefinitionTreeTest
 			Map<String, StructureDefinition> structureDefinitionsByUrl, String indentation,
 			Set<String> profileDependencies, Set<String> targetProfileDependencies)
 	{
-		System.out.println(indentation + "Profile: " + k);
+		logger.debug(indentation + "Profile: " + k);
 		for (ElementDefinition element : def.getDifferential().getElement())
 		{
 			if (element.getType().stream().filter(t -> !t.getProfile().isEmpty() || !t.getTargetProfile().isEmpty())
 					.findAny().isPresent())
 			{
-				System.out
-						.println(indentation + "  Element: " + element.getId() + " (Path: " + element.getPath() + ")");
+				logger.debug(indentation + "  Element: " + element.getId() + " (Path: " + element.getPath() + ")");
 				for (TypeRefComponent type : element.getType())
 				{
 					if (!type.getProfile().isEmpty())
@@ -87,7 +92,7 @@ public class StructureDefinitionTreeTest
 										structureDefinitionsByUrl, indentation + "    ", profileDependencies,
 										targetProfileDependencies);
 							else
-								System.out.println(indentation + "    Profile: " + profile.getValue() + " ?");
+								logger.debug(indentation + "    Profile: " + profile.getValue() + " ?");
 						}
 					}
 					if (!type.getTargetProfile().isEmpty())
@@ -95,7 +100,7 @@ public class StructureDefinitionTreeTest
 						for (CanonicalType targetProfile : type.getTargetProfile())
 						{
 							targetProfileDependencies.add(targetProfile.getValue());
-							System.out.println(indentation + "    TargetProfile: " + targetProfile.getValue());
+							logger.debug(indentation + "    TargetProfile: " + targetProfile.getValue());
 						}
 					}
 				}
@@ -135,8 +140,8 @@ public class StructureDefinitionTreeTest
 
 		SnapshotWithValidationMessages snapshot = generator.generateSnapshot(patientDeBasis);
 
-		System.out.println(context.newXmlParser().encodeResourceToString(snapshot.getSnapshot()));
-		snapshot.getMessages().forEach(vm -> System.out.println(vm.getMessage()));
+		logger.debug(context.newXmlParser().encodeResourceToString(snapshot.getSnapshot()));
+		snapshot.getMessages().forEach(vm -> logger.debug(vm.getMessage()));
 
 		assertNotNull(snapshot.getSnapshot());
 	}
