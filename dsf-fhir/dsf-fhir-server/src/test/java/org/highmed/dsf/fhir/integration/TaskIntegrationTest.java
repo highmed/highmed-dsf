@@ -54,7 +54,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 			assertEquals(researchStudyId.getResourceType(), taskInputResearchStudyId.getResourceType());
 			assertEquals(researchStudyId.getIdPart(), taskInputResearchStudyId.getIdPart());
 
-			DomainResource event = events.pollFirst(2, TimeUnit.SECONDS);
+			DomainResource event = events.pollFirst(5, TimeUnit.SECONDS);
 			assertNotNull(event);
 			assertTrue(event instanceof Task);
 
@@ -102,7 +102,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 			assertEquals(researchStudyId.getResourceType(), taskOutputResearchStudyId.getResourceType());
 			assertEquals(researchStudyId.getIdPart(), taskOutputResearchStudyId.getIdPart());
 
-			DomainResource event = events.pollFirst(2, TimeUnit.SECONDS);
+			DomainResource event = events.pollFirst(5, TimeUnit.SECONDS);
 			assertNotNull(event);
 			assertTrue(event instanceof Task);
 
