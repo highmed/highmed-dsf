@@ -5,10 +5,10 @@ import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Resource;
 
-public abstract class AbstractCommandWithResource<R extends DomainResource, D extends ResourceDao<R>>
-		extends AbstractCommand implements Command
+public abstract class AbstractCommandWithResource<R extends Resource, D extends ResourceDao<R>> extends AbstractCommand
+		implements Command
 {
 	protected final R resource;
 	protected final D dao;

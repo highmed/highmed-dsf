@@ -26,6 +26,7 @@ import org.highmed.dsf.fhir.service.SnapshotGenerator;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.springframework.beans.factory.InitializingBean;
 
@@ -90,7 +91,7 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 	}
 
 	// create, conditional create
-	private <R extends DomainResource> Command post(Bundle bundle, int index, BundleEntryComponent entry, R resource)
+	private <R extends Resource> Command post(Bundle bundle, int index, BundleEntryComponent entry, R resource)
 	{
 		if (resource.getResourceType().name().equals(entry.getRequest().getUrl()))
 		{
@@ -155,11 +156,6 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 					"Request url " + entry.getRequest().getUrl() + " for method DELETE not supported");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.highmed.fhir.dao.command.CommandFactory#createCommands(org.hl7.fhir.r4.model.Bundle)
-	 */
 	@Override
 	public CommandList createCommands(Bundle bundle) throws BadBundleException
 	{

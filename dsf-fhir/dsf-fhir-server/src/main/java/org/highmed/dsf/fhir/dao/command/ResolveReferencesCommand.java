@@ -18,10 +18,10 @@ import org.highmed.dsf.fhir.service.ReferenceExtractor;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Resource;
 
-public class ResolveReferencesCommand<R extends DomainResource, D extends ResourceDao<R>>
+public class ResolveReferencesCommand<R extends Resource, D extends ResourceDao<R>>
 		extends AbstractCommandWithResource<R, D> implements Command
 {
 	private final ReferenceExtractor referenceExtractor;
