@@ -94,7 +94,10 @@ public class TransactionCommandList implements CommandList
 								+ " for entry at index " + c.getIndex() + ", rolling back transaction", e);
 
 						if (hasModifyingCommand)
+						{
+							logger.debug("Rolling back DB transaction");
 							connection.rollback();
+						}
 
 						throw e;
 					}
@@ -113,12 +116,21 @@ public class TransactionCommandList implements CommandList
 						logger.warn("Error while running post-execute of command " + c.getClass().getSimpleName()
 								+ " for entry at index " + c.getIndex() + ", rolling back transaction", e);
 
+						if (hasModifyingCommand)
+						{
+							logger.debug("Rolling back DB transaction");
+							connection.rollback();
+						}
+
 						throw e;
 					}
 				}
 
 				if (hasModifyingCommand)
+				{
+					logger.debug("Commiting DB transaction");
 					connection.commit();
+				}
 			}
 
 			Bundle result = new Bundle();
