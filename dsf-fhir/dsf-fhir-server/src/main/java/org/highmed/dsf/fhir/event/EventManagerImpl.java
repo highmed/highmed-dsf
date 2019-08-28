@@ -166,6 +166,8 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 			matchersByResource.replaceAll(matchers);
 			subscriptionsByIdPart.replaceAll(subscriptions.stream()
 					.collect(Collectors.toMap(s -> s.getIdElement().getIdPart(), Function.identity())));
+
+			logger.debug("Current active subscription-ids (after refreshing): {}", subscriptionsByIdPart.getAllKeys());
 		}
 		catch (SQLException e)
 		{
@@ -294,7 +296,12 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 			asyncRemote.sendText("bound " + subscriptionIdPart);
 		}
 		else
+		{
+			logger.warn("Could not bind websocket session {} to subscription {}, subscription not found", sessionId,
+					subscriptionIdPart);
+			logger.debug("Current active subscription-ids: {}", subscriptionsByIdPart.getAllKeys());
 			asyncRemote.sendText("not-found " + subscriptionIdPart); // TODO not part of FHIR specification
+		}
 	}
 
 	@Override
