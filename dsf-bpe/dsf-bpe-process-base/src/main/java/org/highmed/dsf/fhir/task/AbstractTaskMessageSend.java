@@ -1,14 +1,12 @@
 package org.highmed.dsf.fhir.task;
 
 import java.util.Date;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import ca.uhn.fhir.context.FhirContext;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.highmed.dsf.bpe.Constants;
+import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.WebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.variables.MultiInstanceTarget;
@@ -25,26 +23,29 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-public class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
+public class AbstractTaskMessageSend extends AbstractServiceDelegate implements InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractTaskMessageSend.class);
 
 	protected final WebserviceClientProvider clientProvider;
 	protected final OrganizationProvider organizationProvider;
 
-	public AbstractTaskMessageSend(OrganizationProvider organizationProvider, WebserviceClientProvider clientProvider)
+	public AbstractTaskMessageSend(OrganizationProvider organizationProvider, WebserviceClientProvider clientProvider, TaskHelper taskHelper)
 	{
+		super(clientProvider.getLocalWebserviceClient(), taskHelper);
 		this.organizationProvider = organizationProvider;
 		this.clientProvider = clientProvider;
 	}
 
-	@Override public void afterPropertiesSet() throws Exception
+	@Override
+	public void afterPropertiesSet() throws Exception
 	{
 		Objects.requireNonNull(organizationProvider, "organizationProvider");
 		Objects.requireNonNull(clientProvider, "clientProvider");
 	}
 
-	@Override public void execute(DelegateExecution execution) throws Exception
+	@Override
+	public void doExecute(DelegateExecution execution) throws Exception
 	{
 		String processDefinitionKey = (String) execution.getVariable(Constants.VARIABLE_PROCESS_DEFINITION_KEY);
 		String versionTag = (String) execution.getVariable(Constants.VARIABLE_VERSION_TAG);
@@ -121,7 +122,7 @@ public class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
 		additionalInputParameters.forEach(task.getInput()::add);
 
 		WebserviceClient client;
-		if(task.getRequester().equalsDeep(task.getRestriction().getRecipient().get(0)))
+		if (task.getRequester().equalsDeep(task.getRestriction().getRecipient().get(0)))
 		{
 			logger.trace("Using local webservice client");
 			client = clientProvider.getLocalWebserviceClient();

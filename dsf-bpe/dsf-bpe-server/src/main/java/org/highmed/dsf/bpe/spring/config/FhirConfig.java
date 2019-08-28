@@ -98,6 +98,9 @@ public class FhirConfig
 	@Lazy
 	private ProcessEngine processEngine;
 
+	@Autowired
+	private TaskHelper taskHelper;
+
 	@Bean
 	public ObjectMapper objectMapper()
 	{
@@ -171,7 +174,7 @@ public class FhirConfig
 	@Bean
 	public TaskHandler taskHandler()
 	{
-		return new TaskHandler(processEngine.getRuntimeService(), processEngine.getRepositoryService(), clientProvider().getLocalWebserviceClient());
+		return new TaskHandler(processEngine.getRuntimeService(), processEngine.getRepositoryService(), clientProvider().getLocalWebserviceClient(), taskHelper);
 	}
 
 	@Bean

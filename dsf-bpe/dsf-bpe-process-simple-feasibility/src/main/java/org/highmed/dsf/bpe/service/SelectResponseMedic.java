@@ -1,7 +1,6 @@
 package org.highmed.dsf.bpe.service;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
@@ -22,14 +21,16 @@ public class SelectResponseMedic extends AbstractServiceDelegate
 	private final TaskHelper taskHelper;
 	private final OrganizationProvider organizationProvider;
 
-	public SelectResponseMedic(OrganizationProvider organizationProvider, TaskHelper taskHelper, WebserviceClient webserviceClient) {
-		super(webserviceClient);
+	public SelectResponseMedic(OrganizationProvider organizationProvider, TaskHelper taskHelper,
+			WebserviceClient webserviceClient)
+	{
+		super(webserviceClient, taskHelper);
 		this.organizationProvider = organizationProvider;
 		this.taskHelper = taskHelper;
 	}
 
 	@Override
-	public void executeService(DelegateExecution execution) throws Exception
+	public void doExecute(DelegateExecution execution) throws Exception
 	{
 		Task task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
 
@@ -37,9 +38,9 @@ public class SelectResponseMedic extends AbstractServiceDelegate
 				Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY).get();
 
 		Identifier targetOrganizationIdentifier = organizationProvider
-				.getIdentifier(new IdType(task.getRequester().getReference()))
-				.orElseThrow(() -> new IllegalStateException(
-						"Organization with id " + task.getRequester().getReference() + " not found"));
+				.getIdentifier(new IdType(task.getRequester().getReference())).orElseThrow(
+						() -> new IllegalStateException(
+								"Organization with id " + task.getRequester().getReference() + " not found"));
 
 		execution.setVariable(Constants.VARIABLE_MULTI_INSTANCE_TARGET, MultiInstanceTargetValues
 				.create(new MultiInstanceTarget(targetOrganizationIdentifier.getValue(), correlationKey)));

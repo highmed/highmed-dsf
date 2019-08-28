@@ -1,9 +1,14 @@
 package org.highmed.dsf.fhir.task;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.fhir.task.TaskHelper;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
@@ -54,5 +59,19 @@ public class TaskHelperImpl implements TaskHelper
 				.filter(c -> c.getType().getCoding().stream()
 						.anyMatch(co -> system.equals(co.getSystem()) && code.equals(co.getCode())))
 				.map(c -> type.cast(c.getValue()));
+	}
+
+	@Override
+	public Task setErrorOutput(Task task, String errorMessage, String step)
+	{
+		Task.TaskOutputComponent failedReason = new Task.TaskOutputComponent(new CodeableConcept(
+				new Coding(Constants.CODESYSTEM_HIGHMED_BPMN, Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE,
+						null)), new StringType(
+				"Process failed in step '" + step + "', reason: " + errorMessage));
+
+		task.setOutput(List.of(failedReason));
+		task.setStatus(Task.TaskStatus.FAILED);
+
+		return task;
 	}
 }

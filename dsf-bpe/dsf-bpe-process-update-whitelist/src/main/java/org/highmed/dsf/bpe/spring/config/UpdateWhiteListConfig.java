@@ -5,6 +5,7 @@ import org.highmed.dsf.bpe.plugin.UpdateWhiteListPlugin;
 import org.highmed.dsf.bpe.service.UpdateWhiteList;
 import org.highmed.dsf.fhir.client.WebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
+import org.highmed.dsf.fhir.task.TaskHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,17 +20,17 @@ public class UpdateWhiteListConfig
 	private OrganizationProvider organizationProvider;
 
 	@Autowired
-	private BaseProcessConfig baseProcessConfig;
+	private TaskHelper taskHelper;
 
 	@Bean
 	public ProcessEnginePlugin updateWhiteListPlugin()
 	{
-		return new UpdateWhiteListPlugin(baseProcessConfig.defaultBpmnParseListener());
+		return new UpdateWhiteListPlugin();
 	}
 
 	@Bean
 	public UpdateWhiteList updateWhiteList()
 	{
-		return new UpdateWhiteList(clientProvider, organizationProvider);
+		return new UpdateWhiteList(clientProvider, organizationProvider, taskHelper);
 	}
 }

@@ -32,12 +32,15 @@ public class TaskHandler implements InitializingBean
 	private final RuntimeService runtimeService;
 	private final RepositoryService repositoryService;
 	private final WebserviceClient webserviceClient;
+	private final TaskHelper taskHelper;
 
-	public TaskHandler(RuntimeService runtimeService, RepositoryService repositoryService, WebserviceClient webserviceClient)
+	public TaskHandler(RuntimeService runtimeService, RepositoryService repositoryService,
+			WebserviceClient webserviceClient, TaskHelper taskHelper)
 	{
 		this.runtimeService = runtimeService;
 		this.repositoryService = repositoryService;
 		this.webserviceClient = webserviceClient;
+		this.taskHelper = taskHelper;
 	}
 
 	@Override
@@ -67,7 +70,15 @@ public class TaskHandler implements InitializingBean
 
 		Map<String, Object> variables = Map.of(Constants.VARIABLE_TASK, DomainResourceValues.create(task));
 
-		onMessage(businessKey, correlationKey, processDefinitionKey, versionTag, messageName, variables);
+		try
+		{
+			onMessage(businessKey, correlationKey, processDefinitionKey, versionTag, messageName, variables);
+		}
+		catch (Exception exception)
+		{
+			task = taskHelper.setErrorOutput(task, exception.getMessage(), "process start");
+			webserviceClient.update(task);
+		}
 	}
 
 	private List<String> getPathSegments(String istantiatesUri)
@@ -145,4 +156,5 @@ public class TaskHandler implements InitializingBean
 		return runtimeService.createProcessInstanceQuery().processDefinitionId(processDefinition.getId())
 				.processInstanceBusinessKey(businessKey);
 	}
+
 }

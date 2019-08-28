@@ -29,25 +29,22 @@ public class UpdateResourcesConfig
 	@Autowired
 	private FhirContext fhirContext;
 
-	@Autowired
-	private BaseProcessConfig baseProcessConfig;
-
 	@Bean
 	public ProcessEnginePlugin updateResourcesPlugin()
 	{
-		return new UpdateResourcesPlugin(baseProcessConfig.defaultBpmnParseListener());
+		return new UpdateResourcesPlugin();
 	}
 
 	@Bean
 	public SendRequest sendRequest()
 	{
-		return new SendRequest(organizationProvider, clientProvider);
+		return new SendRequest(organizationProvider, clientProvider, taskHelper);
 	}
 
 	@Bean
 	public SelectResourceAndTargets selectUpdateResourcesTargets()
 	{
-		return new SelectResourceAndTargets(organizationProvider);
+		return new SelectResourceAndTargets(organizationProvider, clientProvider.getLocalWebserviceClient(), taskHelper);
 	}
 
 	@Bean

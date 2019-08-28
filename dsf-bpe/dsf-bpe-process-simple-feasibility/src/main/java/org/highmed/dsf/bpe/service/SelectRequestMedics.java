@@ -1,22 +1,28 @@
 package org.highmed.dsf.bpe.service;
 
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
+import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.MultiInstanceTarget;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargets;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargetsValues;
 import org.highmed.fhir.client.WebserviceClient;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.ResearchStudy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 public class SelectRequestMedics extends AbstractServiceDelegate implements InitializingBean
 {
@@ -24,9 +30,9 @@ public class SelectRequestMedics extends AbstractServiceDelegate implements Init
 
 	private final OrganizationProvider organizationProvider;
 
-	public SelectRequestMedics(OrganizationProvider organizationProvider, WebserviceClient webserviceClient)
+	public SelectRequestMedics(OrganizationProvider organizationProvider, WebserviceClient webserviceClient, TaskHelper taskHelper)
 	{
-		super(webserviceClient);
+		super(webserviceClient, taskHelper);
 		this.organizationProvider = organizationProvider;
 	}
 
@@ -37,7 +43,7 @@ public class SelectRequestMedics extends AbstractServiceDelegate implements Init
 	}
 
 	@Override
-	public void executeService(DelegateExecution execution) throws Exception
+	public void doExecute(DelegateExecution execution) throws Exception
 	{
 		ResearchStudy researchStudy = (ResearchStudy) execution.getVariable(Constants.VARIABLE_RESEARCH_STUDY);
 

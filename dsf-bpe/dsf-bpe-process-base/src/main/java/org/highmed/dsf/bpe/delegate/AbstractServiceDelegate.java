@@ -3,12 +3,11 @@ package org.highmed.dsf.bpe.delegate;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.highmed.dsf.bpe.Constants;
+import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.fhir.client.WebserviceClient;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
 
 public abstract class AbstractServiceDelegate implements JavaDelegate
 {
@@ -16,9 +15,12 @@ public abstract class AbstractServiceDelegate implements JavaDelegate
 	private static final Logger logger = LoggerFactory.getLogger(AbstractServiceDelegate.class);
 
 	private WebserviceClient webserviceClient;
+	private TaskHelper taskHelper;
 
-	public AbstractServiceDelegate(WebserviceClient webserviceClient) {
+	public AbstractServiceDelegate(WebserviceClient webserviceClient, TaskHelper taskHelper)
+	{
 		this.webserviceClient = webserviceClient;
+		this.taskHelper = taskHelper;
 	}
 
 	@Override
@@ -26,32 +28,30 @@ public abstract class AbstractServiceDelegate implements JavaDelegate
 	{
 		try
 		{
-			executeService(execution);
+			doExecute(execution);
 		}
-		catch (Exception e)
+		catch (Exception exception)
 		{
 			Task task;
-			if(execution.getParentId() == null) {
+			if (execution.getParentId() == null)
+			{
 				task = (Task) execution.getVariable(Constants.VARIABLE_LEADING_TASK);
-			} else
+			}
+			else
 			{
 				task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
 			}
 
-			Task.TaskOutputComponent failedReason =  new Task.TaskOutputComponent(
-					new CodeableConcept(new Coding(Constants.CODESYSTEM_HIGHMED_BPMN, Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, null)), new StringType(
-					"process " + execution.getProcessDefinitionId() + " failed in step " + execution.getActivityInstanceId() + ", reason: " + e.getMessage()
-			));
-
-			task.setOutput(List.of(failedReason));
-			task.setStatus(Task.TaskStatus.FAILED);
-
+			task = taskHelper.setErrorOutput(task, exception.getMessage(), this.getClass().getName());
 			webserviceClient.update(task);
 
-			logger.error("process {} failed in step {} for task with id {}, reason: {}", execution.getProcessDefinitionId(), execution.getActivityInstanceId(), task.getId(), e.getMessage());
-			execution.getProcessEngine().getRuntimeService().deleteProcessInstance(execution.getProcessInstanceId(), e.getMessage());
+			logger.error("Process {} failed in step {} for task with id {}, reason: {}",
+					execution.getProcessDefinitionId(), execution.getActivityInstanceId(), task.getId(),
+					exception.getMessage());
+			execution.getProcessEngine().getRuntimeService()
+					.deleteProcessInstance(execution.getProcessInstanceId(), exception.getMessage());
 		}
 	}
 
-	protected abstract void executeService(DelegateExecution execution) throws Exception;
+	protected abstract void doExecute(DelegateExecution execution) throws Exception;
 }

@@ -12,8 +12,10 @@ import java.util.stream.Collectors;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.highmed.dsf.bpe.Constants;
+import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.WebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
+import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.fhir.client.WebserviceClient;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -27,13 +29,16 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Reference;
 import org.springframework.beans.factory.InitializingBean;
 
-public class UpdateWhiteList implements JavaDelegate, InitializingBean
+public class UpdateWhiteList extends AbstractServiceDelegate implements InitializingBean
 {
 	private final WebserviceClientProvider clientProvider;
 	private final OrganizationProvider organizationProvider;
 
-	public UpdateWhiteList(WebserviceClientProvider clientProvider, OrganizationProvider organizationProvider)
+	public UpdateWhiteList(WebserviceClientProvider clientProvider, OrganizationProvider organizationProvider,
+			TaskHelper taskHelper)
 	{
+		super(clientProvider.getLocalWebserviceClient(), taskHelper);
+
 		this.clientProvider = clientProvider;
 		this.organizationProvider = organizationProvider;
 	}
@@ -46,7 +51,7 @@ public class UpdateWhiteList implements JavaDelegate, InitializingBean
 	}
 
 	@Override
-	public void execute(DelegateExecution execution) throws Exception
+	public void doExecute(DelegateExecution execution) throws Exception
 	{
 		WebserviceClient client = clientProvider.getLocalWebserviceClient();
 
@@ -60,8 +65,8 @@ public class UpdateWhiteList implements JavaDelegate, InitializingBean
 				.setValue(Constants.WHITE_LIST_BUNDLE_IDENTIFIER_VALUE);
 		searchSet.getEntry().stream()
 				.filter(e -> e.hasSearch() && SearchEntryMode.MATCH.equals(e.getSearch().getMode()) && e.hasResource()
-						&& e.getResource() instanceof Organization)
-				.map(e -> (Organization) e.getResource()).forEach(addWhiteListEntry(transaction, searchSet));
+						&& e.getResource() instanceof Organization).map(e -> (Organization) e.getResource())
+				.forEach(addWhiteListEntry(transaction, searchSet));
 
 		client.updateConditionaly(transaction, Map.of("identifier", Collections.singletonList(
 				Constants.BUNDLE_IDENTIFIER_SYSTEM + "|" + Constants.WHITE_LIST_BUNDLE_IDENTIFIER_VALUE)));
@@ -69,8 +74,7 @@ public class UpdateWhiteList implements JavaDelegate, InitializingBean
 
 	private Consumer<? super Organization> addWhiteListEntry(Bundle transaction, Bundle searchSet)
 	{
-		return organization ->
-		{
+		return organization -> {
 			Identifier identifier = getDefaultIdentifier(organization).get();
 
 			BundleEntryComponent organizationEntry = transaction.addEntry();
@@ -92,8 +96,7 @@ public class UpdateWhiteList implements JavaDelegate, InitializingBean
 	private Function<Reference, Optional<Reference>> addWhiteListEntryReturnReference(Bundle transaction,
 			String organizationId, Bundle searchSet)
 	{
-		return endpointRef -> getEndpoint(endpointRef, searchSet).map(endpoint ->
-		{
+		return endpointRef -> getEndpoint(endpointRef, searchSet).map(endpoint -> {
 			Identifier identifier = getDefaultIdentifier(endpoint).get();
 
 			BundleEntryComponent endpointEntry = transaction.addEntry();
@@ -126,8 +129,7 @@ public class UpdateWhiteList implements JavaDelegate, InitializingBean
 	private Optional<Endpoint> getEndpoint(Reference endpoint, Bundle searchSet)
 	{
 		return searchSet.getEntry().stream()
-				.filter(e -> e.hasResource() && e.getResource() instanceof Endpoint
-						&& e.getFullUrl().endsWith(endpoint.getReference()))
-				.map(e -> (Endpoint) e.getResource()).findFirst();
+				.filter(e -> e.hasResource() && e.getResource() instanceof Endpoint && e.getFullUrl()
+						.endsWith(endpoint.getReference())).map(e -> (Endpoint) e.getResource()).findFirst();
 	}
 }

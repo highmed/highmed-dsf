@@ -10,15 +10,18 @@ import java.util.stream.Collectors;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.highmed.dsf.bpe.Constants;
+import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
+import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.MultiInstanceTarget;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargets;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargetsValues;
+import org.highmed.fhir.client.WebserviceClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-public class SelectResourceAndTargets implements JavaDelegate, InitializingBean
+public class SelectResourceAndTargets extends AbstractServiceDelegate implements InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(SelectResourceAndTargets.class);
 
@@ -29,8 +32,9 @@ public class SelectResourceAndTargets implements JavaDelegate, InitializingBean
 
 	private final OrganizationProvider organizationProvider;
 
-	public SelectResourceAndTargets(OrganizationProvider organizationProvider)
+	public SelectResourceAndTargets(OrganizationProvider organizationProvider, WebserviceClient webserviceClient, TaskHelper taskHelper)
 	{
+		super(webserviceClient, taskHelper);
 		this.organizationProvider = organizationProvider;
 	}
 
@@ -41,7 +45,7 @@ public class SelectResourceAndTargets implements JavaDelegate, InitializingBean
 	}
 
 	@Override
-	public void execute(DelegateExecution execution) throws Exception
+	public void doExecute(DelegateExecution execution) throws Exception
 	{
 		logger.debug("{}: Process-instance-id {}, business-key {}, variables {}, local-variables {}",
 				getClass().getName(), execution.getProcessInstanceId(), execution.getBusinessKey(),

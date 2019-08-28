@@ -27,48 +27,45 @@ public class PingConfig
 	@Autowired
 	private TaskHelper taskHelper;
 
-	@Autowired
-	private BaseProcessConfig baseProcessConfig;
-
 	@Bean
 	public ProcessEnginePlugin pingPlugin()
 	{
-		return new PingPlugin(baseProcessConfig.defaultBpmnParseListener());
+		return new PingPlugin();
 	}
 
 	@Bean
 	public SendPing sendPing()
 	{
-		return new SendPing(organizationProvider, clientProvider);
+		return new SendPing(organizationProvider, clientProvider, taskHelper);
 	}
 
 	@Bean
 	public SendPong sendPong()
 	{
-		return new SendPong(organizationProvider, clientProvider);
+		return new SendPong(organizationProvider, clientProvider, taskHelper);
 	}
 
 	@Bean
 	public LogPing logPing()
 	{
-		return new LogPing();
+		return new LogPing(clientProvider.getLocalWebserviceClient(), taskHelper);
 	}
 
 	@Bean
 	public LogPong logPong()
 	{
-		return new LogPong();
+		return new LogPong(clientProvider.getLocalWebserviceClient(), taskHelper);
 	}
 
 	@Bean
 	public SelectPingTargets selectPingTargets()
 	{
-		return new SelectPingTargets(organizationProvider);
+		return new SelectPingTargets(organizationProvider, clientProvider.getLocalWebserviceClient(), taskHelper);
 	}
 
 	@Bean
 	public SelectPongTarget selectPongTarget()
 	{
-		return new SelectPongTarget(organizationProvider, taskHelper);
+		return new SelectPongTarget(organizationProvider, clientProvider.getLocalWebserviceClient(), taskHelper);
 	}
 }

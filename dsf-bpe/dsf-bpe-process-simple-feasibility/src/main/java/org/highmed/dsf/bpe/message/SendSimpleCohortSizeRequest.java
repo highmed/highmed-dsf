@@ -5,6 +5,7 @@ import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.fhir.client.WebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.AbstractTaskMessageSend;
+import org.highmed.dsf.fhir.task.TaskHelper;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ResearchStudy;
@@ -17,9 +18,9 @@ import java.util.stream.Stream;
 public class SendSimpleCohortSizeRequest extends AbstractTaskMessageSend
 {
 	public SendSimpleCohortSizeRequest(OrganizationProvider organizationProvider,
-			WebserviceClientProvider clientProvider)
+			WebserviceClientProvider clientProvider, TaskHelper taskHelper)
 	{
-		super(organizationProvider, clientProvider);
+		super(organizationProvider, clientProvider, taskHelper);
 	}
 
 	@Override
