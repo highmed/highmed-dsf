@@ -11,6 +11,7 @@ import javax.ws.rs.WebApplicationException;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.highmed.dsf.bpe.Constants;
+import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.WebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.fhir.client.WebserviceClient;
@@ -25,7 +26,7 @@ import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class UpdateResources implements JavaDelegate, InitializingBean
+public class UpdateResources extends AbstractServiceDelegate implements InitializingBean
 {
 	private static final String BUNDLE_ID_PREFIX = "Bundle/";
 
@@ -37,6 +38,7 @@ public class UpdateResources implements JavaDelegate, InitializingBean
 
 	public UpdateResources(WebserviceClientProvider clientProvider, TaskHelper taskHelper, FhirContext context)
 	{
+		super(clientProvider.getLocalWebserviceClient(), taskHelper);
 		this.clientProvider = clientProvider;
 		this.taskHelper = taskHelper;
 		this.context = context;
@@ -50,7 +52,7 @@ public class UpdateResources implements JavaDelegate, InitializingBean
 	}
 
 	@Override
-	public void execute(DelegateExecution execution) throws Exception
+	public void doExecute(DelegateExecution execution) throws Exception
 	{
 		logger.debug("{}: Process-instance-id {}, business-key {}, variables {}, local-variables {}",
 				getClass().getName(), execution.getProcessInstanceId(), execution.getBusinessKey(),

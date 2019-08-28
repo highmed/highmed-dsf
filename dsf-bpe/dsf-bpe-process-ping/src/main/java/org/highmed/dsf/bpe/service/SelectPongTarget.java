@@ -4,11 +4,14 @@ import java.util.Objects;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
+import org.checkerframework.checker.units.qual.A;
 import org.highmed.dsf.bpe.Constants;
+import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.MultiInstanceTarget;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargetValues;
+import org.highmed.fhir.client.WebserviceClient;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Task;
@@ -16,15 +19,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-public class SelectPongTarget implements JavaDelegate, InitializingBean
+public class SelectPongTarget extends AbstractServiceDelegate implements InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(SelectPingTargets.class);
 
 	private final OrganizationProvider organizationProvider;
 	private final TaskHelper taskHelper;
 
-	public SelectPongTarget(OrganizationProvider organizationProvider, TaskHelper taskHelper)
+	public SelectPongTarget(OrganizationProvider organizationProvider, WebserviceClient webserviceClient, TaskHelper taskHelper)
 	{
+		super(webserviceClient, taskHelper);
 		this.organizationProvider = organizationProvider;
 		this.taskHelper = taskHelper;
 	}
@@ -37,7 +41,7 @@ public class SelectPongTarget implements JavaDelegate, InitializingBean
 	}
 
 	@Override
-	public void execute(DelegateExecution execution) throws Exception
+	public void doExecute(DelegateExecution execution) throws Exception
 	{
 		logger.debug("{}: Process-instance-id {}, business-key {}, variables {}, local-variables {}",
 				getClass().getName(), execution.getProcessInstanceId(), execution.getBusinessKey(),

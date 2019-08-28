@@ -1,7 +1,13 @@
 package org.highmed.dsf.bpe.service;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import javax.ws.rs.WebApplicationException;
+
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.WebserviceClientProvider;
@@ -15,12 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-import javax.ws.rs.WebApplicationException;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 public class DownloadResearchStudy extends AbstractServiceDelegate implements InitializingBean
 {
 	private static final String RESEARCH_STUDY_PREFIX = "ResearchStudy/";
@@ -32,7 +32,7 @@ public class DownloadResearchStudy extends AbstractServiceDelegate implements In
 
 	public DownloadResearchStudy(WebserviceClientProvider clientProvider, TaskHelper taskHelper)
 	{
-		super(clientProvider.getLocalWebserviceClient());
+		super(clientProvider.getLocalWebserviceClient(), taskHelper);
 
 		this.clientProvider = clientProvider;
 		this.taskHelper = taskHelper;
@@ -46,7 +46,7 @@ public class DownloadResearchStudy extends AbstractServiceDelegate implements In
 	}
 
 	@Override
-	public void executeService(DelegateExecution execution) throws Exception
+	public void doExecute(DelegateExecution execution) throws Exception
 	{
 		logger.debug("{}: Process-instance-id {}, business-key {}, variables {}, local-variables {}",
 				getClass().getName(), execution.getProcessInstanceId(), execution.getBusinessKey(),
@@ -85,8 +85,6 @@ public class DownloadResearchStudy extends AbstractServiceDelegate implements In
 		}
 
 		execution.setVariable(Constants.VARIABLE_RESEARCH_STUDY, researchStudy);
-
-		throw new RuntimeException("TEST");
 	}
 
 	private Reference getResearchStudyReference(Task task)

@@ -3,6 +3,7 @@ package org.highmed.dsf.bpe.service;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
+import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.fhir.client.WebserviceClient;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
@@ -14,13 +15,15 @@ public class CalculateMultiMedicSimpleCohortSizeResult extends AbstractServiceDe
 {
 	private static final Logger logger = LoggerFactory.getLogger(CalculateMultiMedicSimpleCohortSizeResult.class);
 
-	public CalculateMultiMedicSimpleCohortSizeResult(WebserviceClient webserviceClient) {
-		super(webserviceClient);
+	public CalculateMultiMedicSimpleCohortSizeResult(WebserviceClient webserviceClient, TaskHelper taskHelper)
+	{
+		super(webserviceClient, taskHelper);
 	}
 
 	@Override
-	public void executeService(DelegateExecution execution) throws Exception
+	public void doExecute(DelegateExecution execution) throws Exception
 	{
+		@SuppressWarnings("unchecked")
 		ArrayList<Integer> results = (ArrayList<Integer>) execution.getVariable(Constants.VARIABLE_COHORT_SIZE_RESULTS);
 
 		// TODO: add percentage filter over result

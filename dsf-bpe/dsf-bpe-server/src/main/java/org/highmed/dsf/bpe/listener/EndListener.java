@@ -1,5 +1,9 @@
 package org.highmed.dsf.bpe.listener;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.ExecutionListener;
 import org.highmed.dsf.bpe.Constants;
@@ -8,8 +12,6 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
-
-import java.util.*;
 
 public class EndListener implements ExecutionListener
 {
@@ -25,24 +27,27 @@ public class EndListener implements ExecutionListener
 	public void notify(DelegateExecution execution) throws Exception
 	{
 		Task task;
-		if(execution.getParentId() == null) {
+		if (execution.getParentId() == null)
+		{
 			// not in a subprocess --> end of main process
 			task = (Task) execution.getVariable(Constants.VARIABLE_LEADING_TASK);
 
+			@SuppressWarnings("unchecked")
 			Map<String, String> outputs = (Map<String, String>) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
 
 			List<Task.TaskOutputComponent> outputComponents = new ArrayList<>();
 			outputs.forEach((key, value) -> outputComponents.add(generateOutputComponent(key, value)));
 
 			task.setOutput(outputComponents);
-		} else {
+		}
+		else
+		{
 			task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
 		}
 
 		task.setStatus(Task.TaskStatus.COMPLETED);
 		webserviceClient.update(task);
 	}
-
 
 	private Task.TaskOutputComponent generateOutputComponent(String key, String value)
 	{

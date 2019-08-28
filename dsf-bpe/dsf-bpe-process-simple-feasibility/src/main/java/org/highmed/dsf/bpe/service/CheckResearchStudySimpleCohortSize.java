@@ -1,17 +1,18 @@
 package org.highmed.dsf.bpe.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
+import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.fhir.client.WebserviceClient;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class CheckResearchStudySimpleCohortSize extends AbstractServiceDelegate
 {
@@ -21,12 +22,13 @@ public class CheckResearchStudySimpleCohortSize extends AbstractServiceDelegate
 	// (if I already know the cohort size in my MeDIC)
 	public static final int MIN_PARTICIPATING_MEDICS = 3;
 
-	public CheckResearchStudySimpleCohortSize(WebserviceClient webserviceClient) {
-		super(webserviceClient);
+	public CheckResearchStudySimpleCohortSize(WebserviceClient webserviceClient, TaskHelper taskHelper)
+	{
+		super(webserviceClient, taskHelper);
 	}
 
 	@Override
-	public void executeService(DelegateExecution execution) throws Exception
+	public void doExecute(DelegateExecution execution) throws Exception
 	{
 		Task task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
 
