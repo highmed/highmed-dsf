@@ -1,8 +1,10 @@
 package org.highmed.dsf.bpe.service;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
@@ -13,6 +15,9 @@ import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.WebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.fhir.client.WebserviceClient;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.Task;
@@ -54,7 +59,7 @@ public class DownloadResearchStudy extends AbstractServiceDelegate implements In
 
 		Task task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
 		Reference researchStudyReference = getResearchStudyReference(task);
-		UrlType endpointAddress = getEndpointAddress(task);
+		String endpointAddress = getEndpointAddress(task);
 
 		WebserviceClient client;
 		if (task.getRequester().equalsDeep(task.getRestriction().getRecipient().get(0)))
@@ -65,8 +70,8 @@ public class DownloadResearchStudy extends AbstractServiceDelegate implements In
 		else
 		{
 			logger.trace("Downloading ResearchStudy referenced in task {} from remote endpoint {}", task.getId(),
-					endpointAddress.asStringValue());
-			client = clientProvider.getRemoteWebserviceClient(endpointAddress.asStringValue());
+					endpointAddress);
+			client = clientProvider.getRemoteWebserviceClient(endpointAddress);
 		}
 
 		ResearchStudy researchStudy;
@@ -114,20 +119,18 @@ public class DownloadResearchStudy extends AbstractServiceDelegate implements In
 		return researchStudyReferences.get(0);
 	}
 
-	private UrlType getEndpointAddress(Task task)
+	private String getEndpointAddress(Task task)
 	{
-		Optional<UrlType> endpointAddress = taskHelper
-				.getFirstInputParameterUrlValue(task, Constants.CODESYSTEM_HIGHMED_BPMN,
-						Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ENDPOINT_ADDRESS);
+		Identifier identifier = task.getRequester().getIdentifier();
 
-		if (endpointAddress.isEmpty())
-		{
-			logger.error("Task is missing input parameter {}",
-					Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ENDPOINT_ADDRESS);
-			throw new RuntimeException("Task is missing input parameter "
-					+ Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_RESEARCH_STUDY_REFERENCE);
-		}
+		Map<String, List<String>> searchParams = new HashMap<>();
+		searchParams.put("managingOrganization",
+				Collections.singletonList(identifier.getSystem() + "|" + identifier.getValue()));
 
-		return endpointAddress.get();
+		WebserviceClient client = clientProvider.getLocalWebserviceClient();
+		Bundle bundle = client.search(Endpoint.class, searchParams);
+
+		Endpoint endpoint = (Endpoint) bundle.getEntry().get(0).getResource();
+		return endpoint.getAddress();
 	}
 }
