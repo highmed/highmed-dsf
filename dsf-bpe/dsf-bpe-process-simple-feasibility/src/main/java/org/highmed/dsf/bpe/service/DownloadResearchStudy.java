@@ -21,16 +21,15 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.Task;
-import org.hl7.fhir.r4.model.UrlType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 public class DownloadResearchStudy extends AbstractServiceDelegate implements InitializingBean
 {
-	private static final String RESEARCH_STUDY_PREFIX = "ResearchStudy/";
-
 	private static final Logger logger = LoggerFactory.getLogger(DownloadResearchStudy.class);
+
+	private static final String RESEARCH_STUDY_PREFIX = "ResearchStudy/";
 
 	private final WebserviceClientProvider clientProvider;
 	private final TaskHelper taskHelper;
@@ -58,38 +57,57 @@ public class DownloadResearchStudy extends AbstractServiceDelegate implements In
 				execution.getVariables(), execution.getVariablesLocal());
 
 		Task task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
-		Reference researchStudyReference = getResearchStudyReference(task);
-		String endpointAddress = getEndpointAddress(task);
 
+		String endpointAddress = getEndpointAddress(task);
+		WebserviceClient client = getWebserviceClient(task, endpointAddress);
+
+		Reference researchStudyReference = getResearchStudyReference(task);
+		ResearchStudy researchStudy = getResearchStudy(task, researchStudyReference, client);
+
+		execution.setVariable(Constants.VARIABLE_RESEARCH_STUDY, researchStudy);
+	}
+
+	private String getEndpointAddress(Task task)
+	{
+		if(!task.getRequester().hasIdentifier()) {
+			logger.error("Task requester reference identifier parameter is null for task with id='{}'", task.getId());
+			throw new NullPointerException("Task requester reference identifier parameter is null");
+		}
+
+		Identifier requesterIdentifier = task.getRequester().getIdentifier();
+
+		Map<String, List<String>> searchParams = new HashMap<>();
+		searchParams.put("managingOrganization",
+				Collections.singletonList(requesterIdentifier.getSystem() + "|" + requesterIdentifier.getValue()));
+
+		WebserviceClient client = clientProvider.getLocalWebserviceClient();
+		Bundle bundle = client.search(Endpoint.class, searchParams);
+
+		if(bundle.getEntry().size() != 1) {
+			logger.error("Did not find endpoint of task requester: expected 1, found {}, for task with id={}''", bundle.getEntry().size(), task.getId());
+			throw new RuntimeException("Did not find endpoint of task requester: expected 1, found " + bundle.getEntry().size());
+		}
+
+		Endpoint endpoint = (Endpoint) bundle.getEntry().get(0).getResource();
+		return endpoint.getAddress();
+	}
+
+	private WebserviceClient getWebserviceClient(Task task, String endpointAddress)
+	{
 		WebserviceClient client;
 		if (task.getRequester().equalsDeep(task.getRestriction().getRecipient().get(0)))
 		{
-			logger.trace("Downloading ResearchStudy referenced in task  {} from local endpoint", task.getId());
+			logger.trace("Downloading ResearchStudy referenced in task with id='{}' from local endpoint", task.getId());
 			client = clientProvider.getLocalWebserviceClient();
 		}
 		else
 		{
-			logger.trace("Downloading ResearchStudy referenced in task {} from remote endpoint {}", task.getId(),
+			logger.trace("Downloading ResearchStudy referenced in task with id='{}' from remote endpoint {}", task.getId(),
 					endpointAddress);
 			client = clientProvider.getRemoteWebserviceClient(endpointAddress);
 		}
 
-		ResearchStudy researchStudy;
-		try
-		{
-			researchStudy = client.read(ResearchStudy.class,
-					researchStudyReference.getReference().substring(RESEARCH_STUDY_PREFIX.length()));
-		}
-		catch (WebApplicationException e)
-		{
-			logger.error("Error while reading ResearchStudy with id {} from organization {}",
-					researchStudyReference.getReference(), task.getRequester().getReference());
-			throw new RuntimeException(
-					"Error while reading ResearchStudy with id " + researchStudyReference.getReference()
-							+ " from organization " + task.getRequester().getReference(), e);
-		}
-
-		execution.setVariable(Constants.VARIABLE_RESEARCH_STUDY, researchStudy);
+		return client;
 	}
 
 	private Reference getResearchStudyReference(Task task)
@@ -107,7 +125,8 @@ public class DownloadResearchStudy extends AbstractServiceDelegate implements In
 							+ " contains unexpected number of ResearchStudy IDs, expected 1, got "
 							+ researchStudyReferences.size());
 		}
-		else if (!researchStudyReferences.get(0).hasReference())
+
+		if (!researchStudyReferences.get(0).hasReference())
 		{
 			logger.error("Task input parameter {} has no ResearchStudy reference",
 					Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_RESEARCH_STUDY_REFERENCE);
@@ -119,18 +138,23 @@ public class DownloadResearchStudy extends AbstractServiceDelegate implements In
 		return researchStudyReferences.get(0);
 	}
 
-	private String getEndpointAddress(Task task)
+	private ResearchStudy getResearchStudy(Task task, Reference researchStudyReference, WebserviceClient client)
 	{
-		Identifier identifier = task.getRequester().getIdentifier();
+		ResearchStudy researchStudy;
+		try
+		{
+			researchStudy = client.read(ResearchStudy.class,
+					researchStudyReference.getReference().substring(RESEARCH_STUDY_PREFIX.length()));
+		}
+		catch (WebApplicationException e)
+		{
+			logger.error("Error while reading ResearchStudy with id {} from organization {}",
+					researchStudyReference.getReference(), task.getRequester().getReference());
+			throw new RuntimeException(
+					"Error while reading ResearchStudy with id " + researchStudyReference.getReference()
+							+ " from organization " + task.getRequester().getReference(), e);
+		}
 
-		Map<String, List<String>> searchParams = new HashMap<>();
-		searchParams.put("managingOrganization",
-				Collections.singletonList(identifier.getSystem() + "|" + identifier.getValue()));
-
-		WebserviceClient client = clientProvider.getLocalWebserviceClient();
-		Bundle bundle = client.search(Endpoint.class, searchParams);
-
-		Endpoint endpoint = (Endpoint) bundle.getEntry().get(0).getResource();
-		return endpoint.getAddress();
+		return researchStudy;
 	}
 }
