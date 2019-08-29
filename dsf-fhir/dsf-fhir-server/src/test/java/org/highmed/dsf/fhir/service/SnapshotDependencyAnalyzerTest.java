@@ -8,11 +8,15 @@ import java.nio.file.Paths;
 
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 
 public class SnapshotDependencyAnalyzerTest
 {
+	private static final Logger logger = LoggerFactory.getLogger(SnapshotDependencyAnalyzerTest.class);
+
 	@Test
 	public void testAnalyze() throws Exception
 	{
@@ -28,7 +32,7 @@ public class SnapshotDependencyAnalyzerTest
 		SnapshotDependencies dependencies = analyzer.analyzeSnapshotDependencies(patientDeBasis);
 
 		assertNotNull(dependencies);
-		System.out.println("Profiles: " + dependencies.getProfiles());
-		System.out.println("TargetProfiles: " + dependencies.getTargetProfiles());
+		logger.debug("Profiles: {}", dependencies.getProfiles());
+		logger.debug("TargetProfiles: {}", dependencies.getTargetProfiles());
 	}
 }

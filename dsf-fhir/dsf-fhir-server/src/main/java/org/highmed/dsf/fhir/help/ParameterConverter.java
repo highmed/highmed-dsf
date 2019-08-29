@@ -43,6 +43,13 @@ public class ParameterConverter
 		this.exceptionHandler = exceptionHandler;
 	}
 
+	/**
+	 * @param resourceTypeName
+	 *            not <code>null</code>, will be part of the {@link WebApplicationException} if the given id can't be
+	 *            parsed (aka is not a {@link UUID})
+	 * @param id
+	 * @return <code>null</code> if the given id is <code>null</code>
+	 */
 	public UUID toUuid(String resourceTypeName, String id)
 	{
 		if (id == null)
@@ -124,7 +131,7 @@ public class ParameterConverter
 			}
 		}
 	}
-	
+
 	/**
 	 * URL-decodes all query-parameter values
 	 * 

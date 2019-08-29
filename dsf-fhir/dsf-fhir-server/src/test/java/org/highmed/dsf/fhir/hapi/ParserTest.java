@@ -14,12 +14,16 @@ import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Organization;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 
 public class ParserTest
 {
+	private static final Logger logger = LoggerFactory.getLogger(ParserTest.class);
+
 	private final FhirContext fhirContext = FhirContext.forR4();
 
 	@Test
@@ -63,7 +67,8 @@ public class ParserTest
 		b.addEntry().setFullUrl(ept.getIdElement().getIdPart()).setResource(ept);
 
 		String bString = fhirContext.newXmlParser().setPrettyPrint(false).encodeResourceToString(b);
-		System.out.println(bString);
+		if (logger.isDebugEnabled())
+			logger.debug(bString);
 
 		Bundle read = configureParser(fhirContext.newXmlParser()).parseResource(Bundle.class, bString);
 		configureParser(fhirContext.newXmlParser()).encodeResourceToString(read);

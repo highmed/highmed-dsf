@@ -25,7 +25,9 @@ import org.highmed.dsf.fhir.service.SnapshotDependencyAnalyzer;
 import org.highmed.dsf.fhir.service.SnapshotGenerator;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.springframework.beans.factory.InitializingBean;
 
@@ -90,7 +92,8 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 	}
 
 	// create, conditional create
-	private <R extends DomainResource> Command post(Bundle bundle, int index, BundleEntryComponent entry, R resource)
+	private <R extends Resource> Command post(Bundle bundle, int index, BundleEntryComponent entry,
+			EventManager eventManager, R resource)
 	{
 		if (resource.getResourceType().name().equals(entry.getRequest().getUrl()))
 		{
@@ -116,7 +119,8 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 	}
 
 	// update, conditional update
-	private <R extends DomainResource> Command put(Bundle bundle, int index, BundleEntryComponent entry, R resource)
+	private <R extends DomainResource> Command put(Bundle bundle, int index, BundleEntryComponent entry,
+			EventManager eventManager, R resource)
 	{
 		if (entry.getRequest().getUrl() != null && !entry.getRequest().getUrl().isBlank()
 				&& entry.getRequest().getUrl().startsWith(resource.getResourceType().name()))
@@ -143,7 +147,7 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 	}
 
 	// delete, conditional delete
-	private Command delete(Bundle bundle, int index, BundleEntryComponent entry)
+	private Command delete(Bundle bundle, int index, BundleEntryComponent entry, EventManager eventManager)
 	{
 		if (entry.getRequest().getUrl() != null && !entry.getRequest().getUrl().isBlank())
 		{
@@ -155,11 +159,6 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 					"Request url " + entry.getRequest().getUrl() + " for method DELETE not supported");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.highmed.fhir.dao.command.CommandFactory#createCommands(org.hl7.fhir.r4.model.Bundle)
-	 */
 	@Override
 	public CommandList createCommands(Bundle bundle) throws BadBundleException
 	{
@@ -167,8 +166,14 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 
 		if (bundle.getType() != null)
 		{
+			EventManager eventManager;
+			if (BundleType.TRANSACTION.equals(bundle.getType()))
+				eventManager = new TransactionEventManager(this.eventManager);
+			else
+				eventManager = this.eventManager;
+
 			List<Command> commands = IntStream.range(0, bundle.getEntry().size())
-					.mapToObj(index -> createCommand(bundle, index, bundle.getEntry().get(index)))
+					.mapToObj(index -> createCommand(bundle, index, bundle.getEntry().get(index), eventManager))
 					.flatMap(Function.identity()).collect(Collectors.toList());
 
 			switch (bundle.getType())
@@ -176,7 +181,8 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 				case BATCH:
 					return new BatchCommandList(dataSource, exceptionHandler, commands);
 				case TRANSACTION:
-					return new TransactionCommandList(dataSource, exceptionHandler, commands);
+					return new TransactionCommandList(dataSource, exceptionHandler, commands,
+							(TransactionEventManager) eventManager);
 				default:
 					throw new BadBundleException("Unsupported bundle type " + bundle.getType());
 			}
@@ -185,7 +191,8 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 			throw new BadBundleException("Missing bundle type");
 	}
 
-	protected Stream<Command> createCommand(Bundle bundle, int index, BundleEntryComponent entry)
+	protected Stream<Command> createCommand(Bundle bundle, int index, BundleEntryComponent entry,
+			EventManager eventManager)
 	{
 		if (entry.hasRequest() && entry.getRequest().hasMethod())
 		{
@@ -196,7 +203,7 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 					case GET:
 						return Stream.of(get(bundle, index, entry));
 					case DELETE:
-						return Stream.of(delete(bundle, index, entry));
+						return Stream.of(delete(bundle, index, entry, eventManager));
 					default:
 						throw new BadBundleException("Request method " + entry.getRequest().getMethod() + " at index "
 								+ index + " not supported without resource of type " + DomainResource.class.getName());
@@ -207,10 +214,10 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 				switch (entry.getRequest().getMethod())
 				{
 					case POST: // create
-						Command post = post(bundle, index, entry, (DomainResource) entry.getResource());
+						Command post = post(bundle, index, entry, eventManager, (DomainResource) entry.getResource());
 						return resolveReferences(post, bundle, index, entry, (DomainResource) entry.getResource());
 					case PUT: // update
-						Command put = put(bundle, index, entry, (DomainResource) entry.getResource());
+						Command put = put(bundle, index, entry, eventManager, (DomainResource) entry.getResource());
 						return resolveReferences(put, bundle, index, entry, (DomainResource) entry.getResource());
 					default:
 						throw new BadBundleException("Request method " + entry.getRequest().getMethod() + " at index "

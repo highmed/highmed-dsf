@@ -28,14 +28,17 @@ public class TransactionCommandList implements CommandList
 
 	private final DataSource dataSource;
 	private final ExceptionHandler exceptionHandler;
+	private final TransactionEventManager eventManager;
 
 	private final List<Command> commands = new ArrayList<>();
 	private final boolean hasModifyingCommand;
 
-	public TransactionCommandList(DataSource dataSource, ExceptionHandler exceptionHandler, List<Command> commands)
+	public TransactionCommandList(DataSource dataSource, ExceptionHandler exceptionHandler, List<Command> commands,
+			TransactionEventManager eventManager)
 	{
 		this.dataSource = dataSource;
 		this.exceptionHandler = exceptionHandler;
+		this.eventManager = eventManager;
 
 		if (commands != null)
 			this.commands.addAll(commands);
@@ -94,7 +97,10 @@ public class TransactionCommandList implements CommandList
 								+ " for entry at index " + c.getIndex() + ", rolling back transaction", e);
 
 						if (hasModifyingCommand)
+						{
+							logger.debug("Rolling back DB transaction");
 							connection.rollback();
+						}
 
 						throw e;
 					}
@@ -113,12 +119,31 @@ public class TransactionCommandList implements CommandList
 						logger.warn("Error while running post-execute of command " + c.getClass().getSimpleName()
 								+ " for entry at index " + c.getIndex() + ", rolling back transaction", e);
 
+						if (hasModifyingCommand)
+						{
+							logger.debug("Rolling back DB transaction");
+							connection.rollback();
+						}
+
 						throw e;
 					}
 				}
 
 				if (hasModifyingCommand)
+				{
+					logger.debug("Commiting DB transaction");
 					connection.commit();
+				}
+			}
+
+			try
+			{
+				logger.debug("Commiting events");
+				eventManager.commitEvents();
+			}
+			catch (Exception e)
+			{
+				logger.warn("Error while handling events", e);
 			}
 
 			Bundle result = new Bundle();

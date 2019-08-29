@@ -166,6 +166,8 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 			matchersByResource.replaceAll(matchers);
 			subscriptionsByIdPart.replaceAll(subscriptions.stream()
 					.collect(Collectors.toMap(s -> s.getIdElement().getIdPart(), Function.identity())));
+
+			logger.debug("Current active subscription-ids (after refreshing): {}", subscriptionsByIdPart.getAllKeys());
 		}
 		catch (SQLException e)
 		{
@@ -194,18 +196,37 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 	}
 
 	@Override
-	public void handleEvent(Event event)
+	public void handleEvents(List<Event> events)
 	{
-		executor.execute(() -> handleEventAsync(event));
+		executor.execute(() -> doHandleEventsAndRefreshMatchers(events));
 	}
 
-	private void handleEventAsync(Event event)
+	private void doHandleEventsAndRefreshMatchers(List<Event> events)
+	{
+		if (events.stream().anyMatch(e -> e.getResource() instanceof Subscription || firstCall.get()))
+			refreshMatchers();
+
+		events.stream().forEach(this::doHandleEvent);
+	}
+
+	@Override
+	public void handleEvent(Event event)
+	{
+		executor.execute(() -> doHandleEventAndRefreshMatchers(event));
+	}
+
+	private void doHandleEventAndRefreshMatchers(Event event)
+	{
+		if (event.getResource() instanceof Subscription || firstCall.get())
+			refreshMatchers();
+
+		doHandleEvent(event);
+	}
+
+	private void doHandleEvent(Event event)
 	{
 		logger.debug("handling event {} for resource of type {} with id {}", event.getClass().getName(),
 				event.getResourceType().getAnnotation(ResourceDef.class).name(), event.getId());
-
-		if (Subscription.class.equals(event.getResourceType()) || firstCall.get())
-			refreshMatchers();
 
 		Optional<List<SubscriptionAndMatcher>> optMatchers = matchersByResource.get(event.getResourceType());
 		if (optMatchers.isEmpty())
@@ -226,10 +247,10 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 			return;
 		}
 
-		matchingSubscriptions.forEach(sAndM -> this.handleEvent(sAndM.subscription, event));
+		matchingSubscriptions.forEach(sAndM -> doHandleEventWithSubscription(sAndM.subscription, event));
 	}
 
-	private void handleEvent(Subscription s, Event event)
+	private void doHandleEventWithSubscription(Subscription s, Event event)
 	{
 		Optional<List<SessionIdAndRemoteAsync>> optRemotes = asyncRemotesBySubscriptionIdPart
 				.get(s.getIdElement().getIdPart());
@@ -294,7 +315,12 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 			asyncRemote.sendText("bound " + subscriptionIdPart);
 		}
 		else
+		{
+			logger.warn("Could not bind websocket session {} to subscription {}, subscription not found", sessionId,
+					subscriptionIdPart);
+			logger.debug("Current active subscription-ids: {}", subscriptionsByIdPart.getAllKeys());
 			asyncRemote.sendText("not-found " + subscriptionIdPart); // TODO not part of FHIR specification
+		}
 	}
 
 	@Override

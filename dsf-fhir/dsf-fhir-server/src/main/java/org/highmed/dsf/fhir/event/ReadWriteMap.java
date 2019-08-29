@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -30,6 +31,20 @@ public class ReadWriteMap<K, V>
 		{
 			r.unlock();
 		}
+	}
+
+	public Set<K> getAllKeys()
+	{
+		r.lock();
+		try
+		{
+			return map.keySet();
+		}
+		finally
+		{
+			r.unlock();
+		}
+
 	}
 
 	public void replaceAll(Map<K, V> map)

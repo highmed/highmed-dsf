@@ -16,6 +16,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.highmed.dsf.fhir.dao.ResourceDao;
+import org.highmed.dsf.fhir.dao.exception.ResourceNotFoundException;
 import org.highmed.dsf.fhir.event.EventGenerator;
 import org.highmed.dsf.fhir.event.EventManager;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
@@ -27,8 +28,8 @@ import org.highmed.dsf.fhir.search.SearchQueryParameterError;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent;
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +38,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import ca.uhn.fhir.rest.api.Constants;
 
-public class CreateCommand<R extends DomainResource, D extends ResourceDao<R>> extends AbstractCommandWithResource<R, D>
+public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends AbstractCommandWithResource<R, D>
 		implements Command
 {
 	private static final Logger logger = LoggerFactory.getLogger(CreateCommand.class);
@@ -71,7 +72,7 @@ public class CreateCommand<R extends DomainResource, D extends ResourceDao<R>> e
 	public void execute(Map<String, IdType> idTranslationTable, Connection connection)
 			throws SQLException, WebApplicationException
 	{
-		Optional<DomainResource> exists = checkAlreadyExists(connection, entry.getRequest().getIfNoneExist(),
+		Optional<Resource> exists = checkAlreadyExists(connection, entry.getRequest().getIfNoneExist(),
 				resource.getResourceType());
 
 		if (exists.isEmpty())
@@ -83,15 +84,15 @@ public class CreateCommand<R extends DomainResource, D extends ResourceDao<R>> e
 		}
 		else
 		{
-			DomainResource existingResource = exists.get();
+			Resource existingResource = exists.get();
 			idTranslationTable.put(entry.getFullUrl(), new IdType(existingResource.getResourceType().toString(),
 					existingResource.getIdElement().getIdPart()));
 			responseResult = responseGenerator.oneExists(existingResource, entry.getRequest().getIfNoneExist());
 		}
 	}
 
-	private Optional<DomainResource> checkAlreadyExists(Connection connection, String ifNoneExist,
-			ResourceType resourceType) throws WebApplicationException
+	private Optional<Resource> checkAlreadyExists(Connection connection, String ifNoneExist, ResourceType resourceType)
+			throws WebApplicationException
 	{
 		if (ifNoneExist == null)
 			return Optional.empty();
@@ -146,7 +147,10 @@ public class CreateCommand<R extends DomainResource, D extends ResourceDao<R>> e
 		{
 			try
 			{
-				eventManager.handleEvent(eventGenerator.newResourceCreatedEvent(createdResource));
+				// retrieving the latest resource from db to include updated references
+				Resource createdResourceWithResolvedReferences = latestOrErrorIfDeletedOrNotFound(connection,
+						createdResource);
+				eventManager.handleEvent(eventGenerator.newResourceCreatedEvent(createdResourceWithResolvedReferences));
 			}
 			catch (Exception e)
 			{
@@ -181,5 +185,14 @@ public class CreateCommand<R extends DomainResource, D extends ResourceDao<R>> e
 
 			return resultEntry;
 		}
+	}
+
+	private R latestOrErrorIfDeletedOrNotFound(Connection connection, Resource resource) throws Exception
+	{
+		return dao
+				.readWithTransaction(connection,
+						parameterConverter.toUuid(resource.getResourceType().name(),
+								resource.getIdElement().getIdPart()))
+				.orElseThrow(() -> new ResourceNotFoundException(resource.getIdElement().getIdPart()));
 	}
 }

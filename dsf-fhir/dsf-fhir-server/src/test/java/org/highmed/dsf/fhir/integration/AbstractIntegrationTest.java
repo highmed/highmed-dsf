@@ -6,6 +6,7 @@ import static de.rwh.utils.jetty.JettyServer.secureRequestCustomizer;
 import static de.rwh.utils.jetty.JettyServer.statusCodeOnlyErrorHandler;
 import static de.rwh.utils.jetty.JettyServer.webInfClassesDirs;
 import static de.rwh.utils.jetty.JettyServer.webInfJars;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -13,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,7 +25,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.function.Function;
@@ -48,10 +52,13 @@ import org.highmed.dsf.fhir.test.TestSuiteIntegrationTests;
 import org.highmed.dsf.fhir.test.X509Certificates;
 import org.highmed.fhir.client.WebserviceClient;
 import org.highmed.fhir.client.WebserviceClientJersey;
+import org.highmed.fhir.client.WebsocketClient;
+import org.highmed.fhir.client.WebsocketClientTyrus;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Subscription;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -82,16 +89,17 @@ public abstract class AbstractIntegrationTest
 
 	private static final Logger logger = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
+	private static final String BASE_URL = "https://localhost:8001/fhir/";
+	private static final String WEBSOCKET_URL = "wss://localhost:8001/fhir/ws";
+
 	private static final Path FHIR_BUNDLE_FILE = Paths.get("target", UUID.randomUUID().toString() + ".xml");
 	private static final List<Path> FILES_TO_DELETE = Arrays.asList(FHIR_BUNDLE_FILE);
-
-	private static JettyServer fhirServer;
-	private static WebserviceClient webserviceClient;
 
 	private static final FhirContext fhirContext = FhirContext.forR4();
 	private static final ReferenceExtractor extractor = new ReferenceExtractorImpl();
 
-	public static final String BASE_URL = "https://localhost:8001/fhir/";
+	private static JettyServer fhirServer;
+	private static WebserviceClient webserviceClient;
 
 	@BeforeClass
 	public static void beforeClass() throws Exception
@@ -114,8 +122,15 @@ public abstract class AbstractIntegrationTest
 	private static WebserviceClient createWebserviceClient(KeyStore trustStore, KeyStore keyStore,
 			String keyStorePassword, FhirContext fhirContext)
 	{
-		return new WebserviceClientJersey(BASE_URL, trustStore, keyStore, keyStorePassword, null,
-				null, null, 0, 0, null, fhirContext);
+		return new WebserviceClientJersey(BASE_URL, trustStore, keyStore, keyStorePassword, null, null, null, 0, 0,
+				null, fhirContext);
+	}
+
+	private static WebsocketClient createWebsocketClient(KeyStore trustStore, KeyStore keyStore,
+			String keyStorePassword, FhirContext fhirContext, String subscriptionIdPart)
+	{
+		return new WebsocketClientTyrus(fhirContext, URI.create(WEBSOCKET_URL), trustStore, keyStore, keyStorePassword,
+				subscriptionIdPart);
 	}
 
 	private static JettyServer startFhirServer() throws Exception
@@ -229,7 +244,6 @@ public abstract class AbstractIntegrationTest
 		return parser;
 	}
 
-
 	private static void createTestBundle(X509Certificate certificate)
 	{
 		Path testBundleTemplateFile = Paths.get("src/test/resources/integration/test-bundle.xml");
@@ -324,5 +338,27 @@ public abstract class AbstractIntegrationTest
 	protected static WebserviceClient getWebserviceClient()
 	{
 		return webserviceClient;
+	}
+
+	protected static WebsocketClient getWebsocketClient()
+	{
+		Bundle bundle = getWebserviceClient().search(Subscription.class,
+				Map.of("criteria", Collections.singletonList("Task?status=requested"), "status",
+						Collections.singletonList("active"), "type", Collections.singletonList("websocket"), "payload",
+						Collections.singletonList("application/fhir+json")));
+
+		assertNotNull(bundle);
+		assertEquals(1, bundle.getTotal());
+		assertNotNull(bundle.getEntryFirstRep());
+		assertTrue(bundle.getEntryFirstRep().getResource() instanceof Subscription);
+
+		Subscription subscription = (Subscription) bundle.getEntryFirstRep().getResource();
+		assertNotNull(subscription.getIdElement());
+		assertNotNull(subscription.getIdElement().getIdPart());
+
+		return createWebsocketClient(certificates.getClientCertificate().getTrustStore(),
+				certificates.getClientCertificate().getKeyStore(),
+				certificates.getClientCertificate().getKeyStorePassword(), fhirContext,
+				subscription.getIdElement().getIdPart());
 	}
 }

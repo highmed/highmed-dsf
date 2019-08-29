@@ -9,6 +9,7 @@ import java.util.function.Supplier;
 import javax.net.ssl.SSLContext;
 import javax.websocket.CloseReason;
 import javax.websocket.DeploymentException;
+import javax.websocket.Session;
 
 import org.glassfish.jersey.SslConfigurator;
 import org.glassfish.tyrus.client.ClientManager;
@@ -40,7 +41,7 @@ public class WebsocketClientTyrus implements WebsocketClient
 		public boolean onDisconnect(CloseReason closeReason)
 		{
 			logger.warn("OnDisconnect {}", closeReason.getReasonPhrase());
-			return !close;
+			return !closed;
 		}
 	};
 
@@ -49,7 +50,8 @@ public class WebsocketClientTyrus implements WebsocketClient
 	private final ClientEndpoint endpoint;
 
 	private ClientManager manager;
-	private volatile boolean close;
+	private Session connection;
+	private volatile boolean closed;
 
 	public WebsocketClientTyrus(FhirContext fhirContext, URI wsUri, KeyStore trustStore, KeyStore keyStore,
 			String keyStorePassword, String subscriptionIdPart)
@@ -80,7 +82,7 @@ public class WebsocketClientTyrus implements WebsocketClient
 		try
 		{
 			logger.debug("Connecting to websocket {} and waiting for connection", wsUri);
-			manager.connectToServer(endpoint, wsUri);
+			connection = manager.connectToServer(endpoint, wsUri);
 		}
 		catch (DeploymentException e)
 		{
@@ -97,11 +99,24 @@ public class WebsocketClientTyrus implements WebsocketClient
 	@Override
 	public void disconnect()
 	{
+		if (closed)
+			return;
+
 		logger.debug("Closing websocket {}", wsUri);
-		close = true;
+		try
+		{
+			connection.close();
+			connection = null;
+		}
+		catch (IOException e)
+		{
+			logger.warn("Error while closing websocket", e);
+		}
 
 		manager.shutdown();
 		manager = null;
+
+		closed = true;
 	}
 
 	@Override

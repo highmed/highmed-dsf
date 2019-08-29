@@ -16,6 +16,7 @@ import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.Response.Status;
 
 import org.highmed.dsf.fhir.dao.ResourceDao;
+import org.highmed.dsf.fhir.dao.exception.ResourceNotFoundException;
 import org.highmed.dsf.fhir.event.EventGenerator;
 import org.highmed.dsf.fhir.event.EventManager;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
@@ -27,15 +28,15 @@ import org.highmed.dsf.fhir.search.SearchQueryParameterError;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent;
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-public class UpdateCommand<R extends DomainResource, D extends ResourceDao<R>> extends AbstractCommandWithResource<R, D>
+public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends AbstractCommandWithResource<R, D>
 		implements Command
 {
 	private static final Logger logger = LoggerFactory.getLogger(UpdateCommand.class);
@@ -232,7 +233,10 @@ public class UpdateCommand<R extends DomainResource, D extends ResourceDao<R>> e
 	{
 		try
 		{
-			eventManager.handleEvent(eventGenerator.newResourceUpdatedEvent(updatedResource));
+			// retrieving the latest resource from db to include updated references
+			Resource updatedResourceWithResolvedReferences = latestOrErrorIfDeletedOrNotFound(connection,
+					updatedResource);
+			eventManager.handleEvent(eventGenerator.newResourceUpdatedEvent(updatedResourceWithResolvedReferences));
 		}
 		catch (Exception e)
 		{
@@ -250,5 +254,14 @@ public class UpdateCommand<R extends DomainResource, D extends ResourceDao<R>> e
 		response.setLastModified(updatedResource.getMeta().getLastUpdated());
 
 		return resultEntry;
+	}
+
+	private R latestOrErrorIfDeletedOrNotFound(Connection connection, Resource resource) throws Exception
+	{
+		return dao
+				.readWithTransaction(connection,
+						parameterConverter.toUuid(resource.getResourceType().name(),
+								resource.getIdElement().getIdPart()))
+				.orElseThrow(() -> new ResourceNotFoundException(resource.getIdElement().getIdPart()));
 	}
 }
