@@ -53,5 +53,12 @@ public abstract class AbstractServiceDelegate implements JavaDelegate
 		}
 	}
 
+	/**
+	 * Method called by a BPMN service task
+	 *
+	 * @param execution holding the process instance information and variables
+	 * @throws Exception reason why process instance has failed, exception message will be stored in process associated
+	 *                   fhir task resource as output
+	 */
 	protected abstract void doExecute(DelegateExecution execution) throws Exception;
 }
