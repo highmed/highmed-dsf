@@ -1,5 +1,7 @@
 package org.highmed.dsf.bpe.delegate;
 
+import java.util.Objects;
+
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.highmed.dsf.bpe.Constants;
@@ -8,8 +10,9 @@ import org.highmed.fhir.client.WebserviceClient;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 
-public abstract class AbstractServiceDelegate implements JavaDelegate
+public abstract class AbstractServiceDelegate implements JavaDelegate, InitializingBean
 {
 
 	private static final Logger logger = LoggerFactory.getLogger(AbstractServiceDelegate.class);
@@ -21,6 +24,13 @@ public abstract class AbstractServiceDelegate implements JavaDelegate
 	{
 		this.webserviceClient = webserviceClient;
 		this.taskHelper = taskHelper;
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception
+	{
+		Objects.requireNonNull(webserviceClient, "webserviceClient");
+		Objects.requireNonNull(taskHelper, "taskHelper");
 	}
 
 	@Override
