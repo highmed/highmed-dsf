@@ -1,10 +1,12 @@
 package org.highmed.dsf.bpe.listener;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.ExecutionListener;
 import org.highmed.dsf.bpe.Constants;
+import org.highmed.dsf.fhir.variables.OutputWrapper;
 import org.hl7.fhir.r4.model.Task;
 
 public class StartListener implements ExecutionListener
@@ -19,7 +21,7 @@ public class StartListener implements ExecutionListener
 			Task task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
 			execution.setVariable(Constants.VARIABLE_LEADING_TASK, task);
 
-			execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, new HashMap<>());
+			execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, new ArrayList<OutputWrapper>());
 		}
 	}
 }

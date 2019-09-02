@@ -1,6 +1,5 @@
 package org.highmed.dsf.bpe.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -11,6 +10,7 @@ import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
+import org.highmed.dsf.bpe.variables.MultiInstanceResults;
 import org.highmed.dsf.fhir.variables.MultiInstanceTarget;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargets;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargetsValues;
@@ -20,11 +20,10 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
-public class SelectRequestMedics extends AbstractServiceDelegate implements InitializingBean
+public class SelectRequestMedics extends AbstractServiceDelegate
 {
 	private static final Logger logger = LoggerFactory.getLogger(SelectRequestMedics.class);
 
@@ -39,6 +38,8 @@ public class SelectRequestMedics extends AbstractServiceDelegate implements Init
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
+		super.afterPropertiesSet();
+
 		Objects.requireNonNull(organizationProvider, "organizationProvider");
 	}
 
@@ -61,7 +62,6 @@ public class SelectRequestMedics extends AbstractServiceDelegate implements Init
 		execution.setVariable(Constants.VARIABLE_MULTI_INSTANCE_TARGETS,
 				MultiInstanceTargetsValues.create(new MultiInstanceTargets(targets)));
 
-		// TODO: change to multiinstance for multiple queries in research study
-		execution.setVariable(Constants.VARIABLE_COHORT_SIZE_RESULTS, new ArrayList<Integer>());
+		execution.setVariable(Constants.VARIABLE_MULTI_INSTANCE_RESULTS, new MultiInstanceResults());
 	}
 }

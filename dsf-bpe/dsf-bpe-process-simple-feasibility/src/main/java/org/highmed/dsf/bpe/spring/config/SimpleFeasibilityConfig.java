@@ -2,18 +2,17 @@ package org.highmed.dsf.bpe.spring.config;
 
 import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
 import org.highmed.dsf.bpe.message.SendSimpleCohortSizeRequest;
-import org.highmed.dsf.bpe.message.SendSimpleCohortSizeResult;
+import org.highmed.dsf.bpe.message.SendSimpleCohortSizeResults;
 import org.highmed.dsf.bpe.plugin.SimpleFeasibilityPlugin;
-import org.highmed.dsf.bpe.service.CalculateMultiMedicSimpleCohortSizeResult;
-import org.highmed.dsf.bpe.service.CheckMultiMedicSimpleCohortSizeResult;
+import org.highmed.dsf.bpe.service.CalculateMultiMedicSimpleCohortSizeResults;
+import org.highmed.dsf.bpe.service.CheckMultiMedicSimpleCohortSizeResults;
 import org.highmed.dsf.bpe.service.CheckResearchStudySimpleCohortSize;
-import org.highmed.dsf.bpe.service.CheckSimpleCohortSizeQueryResult;
+import org.highmed.dsf.bpe.service.CheckSingleMedicSimpleCohortSizeResults;
 import org.highmed.dsf.bpe.service.DownloadResearchStudy;
-import org.highmed.dsf.bpe.service.ExecuteSimpleCohortSizeQuery;
-import org.highmed.dsf.bpe.service.PrepareSimpleCohortSizeQuery;
+import org.highmed.dsf.bpe.service.ExecuteSimpleCohortSizeQueries;
 import org.highmed.dsf.bpe.service.SelectRequestMedics;
-import org.highmed.dsf.bpe.service.SelectResponseMedic;
-import org.highmed.dsf.bpe.service.StoreSimpleCohortSizeResult;
+import org.highmed.dsf.bpe.service.SelectResponseMedics;
+import org.highmed.dsf.bpe.service.StoreSimpleCohortSizeResults;
 import org.highmed.dsf.fhir.client.WebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
@@ -42,7 +41,7 @@ public class SimpleFeasibilityConfig
 	@Bean
 	public DownloadResearchStudy downloadResearchStudy()
 	{
-		return new DownloadResearchStudy(clientProvider, taskHelper);
+		return new DownloadResearchStudy(organizationProvider, clientProvider, taskHelper);
 	}
 
 	@Bean
@@ -58,45 +57,39 @@ public class SimpleFeasibilityConfig
 	}
 
 	@Bean
-	public PrepareSimpleCohortSizeQuery prepareSimpleCohortSizeQuery()
+	public ExecuteSimpleCohortSizeQueries executeSimpleCohortSizeQuery()
 	{
-		return new PrepareSimpleCohortSizeQuery(clientProvider.getLocalWebserviceClient(), taskHelper);
+		return new ExecuteSimpleCohortSizeQueries(organizationProvider, clientProvider.getLocalWebserviceClient(), taskHelper);
 	}
 
 	@Bean
-	public ExecuteSimpleCohortSizeQuery executeSimpleCohortSizeQuery()
+	public CheckSingleMedicSimpleCohortSizeResults checkSimpleCohortSizeQueryResult()
 	{
-		return new ExecuteSimpleCohortSizeQuery(clientProvider.getLocalWebserviceClient(), taskHelper);
+		return new CheckSingleMedicSimpleCohortSizeResults(clientProvider.getLocalWebserviceClient(), taskHelper);
 	}
 
 	@Bean
-	public CheckSimpleCohortSizeQueryResult checkSimpleCohortSizeQueryResult()
+	public SelectResponseMedics selectResponseMedics()
 	{
-		return new CheckSimpleCohortSizeQueryResult(clientProvider.getLocalWebserviceClient(), taskHelper);
+		return new SelectResponseMedics(organizationProvider, taskHelper, clientProvider.getLocalWebserviceClient());
 	}
 
 	@Bean
-	public SelectResponseMedic selectResponseMedic()
+	public StoreSimpleCohortSizeResults storeSimpleCohortSizeResult()
 	{
-		return new SelectResponseMedic(organizationProvider, taskHelper, clientProvider.getLocalWebserviceClient());
+		return new StoreSimpleCohortSizeResults(organizationProvider, clientProvider.getLocalWebserviceClient(), taskHelper);
 	}
 
 	@Bean
-	public StoreSimpleCohortSizeResult storeSimpleCohortSizeResult()
+	public CalculateMultiMedicSimpleCohortSizeResults calculateMultiMedicSimpleCohortSize()
 	{
-		return new StoreSimpleCohortSizeResult(clientProvider.getLocalWebserviceClient(), taskHelper);
+		return new CalculateMultiMedicSimpleCohortSizeResults(clientProvider.getLocalWebserviceClient(), taskHelper);
 	}
 
 	@Bean
-	public CalculateMultiMedicSimpleCohortSizeResult calculateMultiMedicSimpleCohortSize()
+	public CheckMultiMedicSimpleCohortSizeResults checkMultiMedicSimpleCohortSizeResult()
 	{
-		return new CalculateMultiMedicSimpleCohortSizeResult(clientProvider.getLocalWebserviceClient(), taskHelper);
-	}
-
-	@Bean
-	public CheckMultiMedicSimpleCohortSizeResult checkMultiMedicSimpleCohortSizeResult()
-	{
-		return new CheckMultiMedicSimpleCohortSizeResult(clientProvider.getLocalWebserviceClient(), taskHelper);
+		return new CheckMultiMedicSimpleCohortSizeResults(clientProvider.getLocalWebserviceClient(), taskHelper);
 	}
 
 	@Bean
@@ -106,8 +99,8 @@ public class SimpleFeasibilityConfig
 	}
 
 	@Bean
-	public SendSimpleCohortSizeResult sendSimpleCohortSizeResultToMedic()
+	public SendSimpleCohortSizeResults sendSimpleCohortSizeResultToMedic()
 	{
-		return new SendSimpleCohortSizeResult(organizationProvider, clientProvider, taskHelper);
+		return new SendSimpleCohortSizeResults(organizationProvider, clientProvider, taskHelper);
 	}
 }

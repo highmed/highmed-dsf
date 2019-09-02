@@ -42,6 +42,8 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 		}
 		catch (Exception exception)
 		{
+			exception.printStackTrace();
+
 			Task task;
 			if (execution.getParentId() == null)
 			{

@@ -28,4 +28,14 @@
 		<display value="Correlation Key" />
 		<definition value="HiGHmed BPE correlation key used to identify multi-instance instances used for messaging multiple targets" />
 	</concept>
+    <concept>
+        <code value="resarch-study"/>
+        <display value="Research Study"/>
+        <definition value="HiGHmed Research Study Reference to define what data is requested from which MeDICs and for what purpose"/>
+    </concept>
+    <concept>
+        <code value="Error"/>
+        <display value="Error"/>
+        <definition value="Explaining why this task failed."/>
+    </concept>
 </CodeSystem> 

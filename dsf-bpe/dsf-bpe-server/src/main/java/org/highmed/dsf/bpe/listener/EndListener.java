@@ -2,17 +2,18 @@ package org.highmed.dsf.bpe.listener;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.ExecutionListener;
 import org.highmed.dsf.bpe.Constants;
+import org.highmed.dsf.fhir.variables.OutputWrapper;
 import org.highmed.fhir.client.WebserviceClient;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 
+@SuppressWarnings("unchecked")
 public class EndListener implements ExecutionListener
 {
 
@@ -32,11 +33,13 @@ public class EndListener implements ExecutionListener
 			// not in a subprocess --> end of main process
 			task = (Task) execution.getVariable(Constants.VARIABLE_LEADING_TASK);
 
-			@SuppressWarnings("unchecked")
-			Map<String, String> outputs = (Map<String, String>) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
-
+			List<OutputWrapper> outputs = (List<OutputWrapper>) execution
+					.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
 			List<Task.TaskOutputComponent> outputComponents = new ArrayList<>();
-			outputs.forEach((key, value) -> outputComponents.add(generateOutputComponent(key, value)));
+
+			outputs.forEach(outputWrapper -> {
+				outputWrapper.getKeyValueMap().forEach((key, value) -> outputComponents.add(generateOutputComponent(outputWrapper.getSystem(), key,value)));
+			});
 
 			task.setOutput(outputComponents);
 		}
@@ -49,9 +52,8 @@ public class EndListener implements ExecutionListener
 		webserviceClient.update(task);
 	}
 
-	private Task.TaskOutputComponent generateOutputComponent(String key, String value)
+	private Task.TaskOutputComponent generateOutputComponent(String system, String key, String value)
 	{
-		return new Task.TaskOutputComponent(
-				new CodeableConcept(new Coding(Constants.CODESYSTEM_HIGHMED_BPMN, key, null)), new StringType(value));
+		return new Task.TaskOutputComponent(new CodeableConcept(new Coding(system, key, null)), new StringType(value));
 	}
 }

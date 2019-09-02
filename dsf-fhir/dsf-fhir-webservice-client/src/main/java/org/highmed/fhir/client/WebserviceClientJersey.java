@@ -27,6 +27,8 @@ import org.highmed.dsf.fhir.adapter.CodeSystemJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.CodeSystemXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.EndpointJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.EndpointXmlFhirAdapter;
+import org.highmed.dsf.fhir.adapter.GroupJsonFhirAdapter;
+import org.highmed.dsf.fhir.adapter.GroupXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.HealthcareServiceJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.HealthcareServiceXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.LocationJsonFhirAdapter;
@@ -93,6 +95,7 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 				new BundleJsonFhirAdapter(fhirContext), new BundleXmlFhirAdapter(fhirContext),
 				new CapabilityStatementJsonFhirAdapter(fhirContext), new CapabilityStatementXmlFhirAdapter(fhirContext),
 				new CodeSystemJsonFhirAdapter(fhirContext), new CodeSystemXmlFhirAdapter(fhirContext),
+				new GroupJsonFhirAdapter(fhirContext), new GroupXmlFhirAdapter(fhirContext),
 				new EndpointJsonFhirAdapter(fhirContext), new EndpointXmlFhirAdapter(fhirContext),
 				new HealthcareServiceJsonFhirAdapter(fhirContext), new HealthcareServiceXmlFhirAdapter(fhirContext),
 				new LocationJsonFhirAdapter(fhirContext), new LocationXmlFhirAdapter(fhirContext),
@@ -238,8 +241,8 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 		logger.debug("HTTP header ETag: {}", response.getHeaderString(HttpHeaders.ETAG));
 		logger.debug("HTTP header Last-Modified: {}", response.getHeaderString(HttpHeaders.LAST_MODIFIED));
 
-		if (Status.OK.getStatusCode() != response.getStatus()
-				&& Status.NO_CONTENT.getStatusCode() != response.getStatus())
+		if (Status.OK.getStatusCode() != response.getStatus() && Status.NO_CONTENT.getStatusCode() != response
+				.getStatus())
 			throw new WebApplicationException(response);
 	}
 
@@ -263,8 +266,8 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 		logger.debug("HTTP header ETag: {}", response.getHeaderString(HttpHeaders.ETAG));
 		logger.debug("HTTP header Last-Modified: {}", response.getHeaderString(HttpHeaders.LAST_MODIFIED));
 
-		if (Status.OK.getStatusCode() != response.getStatus()
-				&& Status.NO_CONTENT.getStatusCode() != response.getStatus())
+		if (Status.OK.getStatusCode() != response.getStatus() && Status.NO_CONTENT.getStatusCode() != response
+				.getStatus())
 			throw new WebApplicationException(response);
 	}
 
