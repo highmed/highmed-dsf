@@ -19,11 +19,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("unchecked")
-public class CalculateMultiMedicSimpleCohortSizeResults extends AbstractServiceDelegate
+public class CalculateMultiMedicCohortSizeResults extends AbstractServiceDelegate
 {
-	private static final Logger logger = LoggerFactory.getLogger(CalculateMultiMedicSimpleCohortSizeResults.class);
+	private static final Logger logger = LoggerFactory.getLogger(CalculateMultiMedicCohortSizeResults.class);
 
-	public CalculateMultiMedicSimpleCohortSizeResults(WebserviceClient webserviceClient, TaskHelper taskHelper)
+	public CalculateMultiMedicCohortSizeResults(WebserviceClient webserviceClient, TaskHelper taskHelper)
 	{
 		super(webserviceClient, taskHelper);
 	}

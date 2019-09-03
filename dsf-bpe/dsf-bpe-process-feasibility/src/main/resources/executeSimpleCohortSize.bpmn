@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_0drkcb5" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="2.2.4">
   <bpmn:process id="executeSimpleCohortSize" isExecutable="true" camunda:versionTag="1.0.0">
-    <bpmn:serviceTask id="checkResult" name="check results" camunda:class="org.highmed.dsf.bpe.service.CheckSingleMedicSimpleCohortSizeResults">
+    <bpmn:serviceTask id="checkResult" name="check results" camunda:class="org.highmed.dsf.bpe.service.CheckSingleMedicCohortSizeResults">
       <bpmn:incoming>SequenceFlow_1rmqv20</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_04ouilq</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="executeQueries" name="execute queries" camunda:class="org.highmed.dsf.bpe.service.ExecuteSimpleCohortSizeQueries">
+    <bpmn:serviceTask id="executeQueries" name="execute queries" camunda:class="org.highmed.dsf.bpe.service.ExecuteCohortSizeQueries">
       <bpmn:incoming>SequenceFlow_1wwn9pl</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1rmqv20</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="checkResearchStudy" name="check research study" camunda:class="org.highmed.dsf.bpe.service.CheckResearchStudySimpleCohortSize">
+    <bpmn:serviceTask id="checkResearchStudy" name="check research study" camunda:class="org.highmed.dsf.bpe.service.CheckResearchStudyCohortSize">
       <bpmn:incoming>SequenceFlow_1etju4m</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1wwn9pl</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -34,7 +34,7 @@
         </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_1gynemm</bpmn:incoming>
-      <bpmn:messageEventDefinition id="MessageEventDefinition_13swtie" messageRef="Message_1dr71re" camunda:class="org.highmed.dsf.bpe.message.SendSimpleCohortSizeResults" />
+      <bpmn:messageEventDefinition id="MessageEventDefinition_13swtie" messageRef="Message_1dr71re" camunda:class="org.highmed.dsf.bpe.message.SendCohortSizeResults" />
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="SequenceFlow_04ouilq" sourceRef="checkResult" targetRef="selectResponseMedics" />
     <bpmn:sequenceFlow id="SequenceFlow_1gynemm" sourceRef="selectResponseMedics" targetRef="success" />

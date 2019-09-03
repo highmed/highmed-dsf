@@ -13,11 +13,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("unchecked")
-public class CheckMultiMedicSimpleCohortSizeResults extends AbstractServiceDelegate
+public class CheckMultiMedicCohortSizeResults extends AbstractServiceDelegate
 {
-	private static final Logger logger = LoggerFactory.getLogger(CheckMultiMedicSimpleCohortSizeResults.class);
+	private static final Logger logger = LoggerFactory.getLogger(CheckMultiMedicCohortSizeResults.class);
 
-	public CheckMultiMedicSimpleCohortSizeResults(WebserviceClient webserviceClient, TaskHelper taskHelper)
+	public CheckMultiMedicCohortSizeResults(WebserviceClient webserviceClient, TaskHelper taskHelper)
 	{
 		super(webserviceClient, taskHelper);
 	}

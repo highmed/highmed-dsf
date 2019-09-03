@@ -14,7 +14,7 @@
 	<modules>
 		<module>dsf-bpe-process-base</module>
 		<module>dsf-bpe-process-ping</module>
-		<module>dsf-bpe-process-simple-feasibility</module>
+		<module>dsf-bpe-process-feasibility</module>
 		<module>dsf-bpe-process-update-resources</module>
 		<module>dsf-bpe-process-update-whitelist</module>
 		<module>dsf-bpe-server</module>

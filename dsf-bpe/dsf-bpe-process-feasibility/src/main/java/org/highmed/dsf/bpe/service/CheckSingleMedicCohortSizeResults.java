@@ -9,11 +9,11 @@ import org.highmed.fhir.client.WebserviceClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CheckSingleMedicSimpleCohortSizeResults extends AbstractServiceDelegate
+public class CheckSingleMedicCohortSizeResults extends AbstractServiceDelegate
 {
-	private static final Logger logger = LoggerFactory.getLogger(CheckSingleMedicSimpleCohortSizeResults.class);
+	private static final Logger logger = LoggerFactory.getLogger(CheckSingleMedicCohortSizeResults.class);
 
-	public CheckSingleMedicSimpleCohortSizeResults(WebserviceClient webserviceClient, TaskHelper taskHelper)
+	public CheckSingleMedicCohortSizeResults(WebserviceClient webserviceClient, TaskHelper taskHelper)
 	{
 		super(webserviceClient, taskHelper);
 	}

@@ -10,23 +10,22 @@ import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.fhir.client.WebserviceClient;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Group;
-import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("unchecked")
-public class CheckResearchStudySimpleCohortSize extends AbstractServiceDelegate
+public class CheckResearchStudyCohortSize extends AbstractServiceDelegate
 {
-	private static final Logger logger = LoggerFactory.getLogger(CheckResearchStudySimpleCohortSize.class);
+	private static final Logger logger = LoggerFactory.getLogger(CheckResearchStudyCohortSize.class);
 
 	// Must be 3 or larger, as otherwise it is possible to draw conclusions about the individual MeDICs
 	// (if I already know the cohort size in my MeDIC)
 	public static final int MIN_PARTICIPATING_MEDICS = 3;
 	public static final int MIN_COHORT_DEFINITIONS = 1;
 
-	public CheckResearchStudySimpleCohortSize(WebserviceClient webserviceClient, TaskHelper taskHelper)
+	public CheckResearchStudyCohortSize(WebserviceClient webserviceClient, TaskHelper taskHelper)
 	{
 		super(webserviceClient, taskHelper);
 	}

@@ -17,9 +17,9 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 
-public class SendSimpleCohortSizeResults extends AbstractTaskMessageSend
+public class SendCohortSizeResults extends AbstractTaskMessageSend
 {
-	public SendSimpleCohortSizeResults(OrganizationProvider organizationProvider,
+	public SendCohortSizeResults(OrganizationProvider organizationProvider,
 			WebserviceClientProvider clientProvider, TaskHelper taskHelper)
 	{
 		super(organizationProvider, clientProvider, taskHelper);

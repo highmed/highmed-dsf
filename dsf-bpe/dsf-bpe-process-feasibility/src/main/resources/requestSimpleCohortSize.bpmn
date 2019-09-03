@@ -5,7 +5,7 @@
       <bpmn:outgoing>SequenceFlow_11k77gx</bpmn:outgoing>
       <bpmn:messageEventDefinition id="MessageEventDefinition_10c2suu" messageRef="Message_1pq9qxp" />
     </bpmn:startEvent>
-    <bpmn:serviceTask id="checkResearchStudy" name="check research study" camunda:class="org.highmed.dsf.bpe.service.CheckResearchStudySimpleCohortSize">
+    <bpmn:serviceTask id="checkResearchStudy" name="check research study" camunda:class="org.highmed.dsf.bpe.service.CheckResearchStudyCohortSize">
       <bpmn:incoming>SequenceFlow_0lvc1tl</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1k2k5uj</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -13,7 +13,7 @@
       <bpmn:incoming>SequenceFlow_1k2k5uj</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0b5s4ef</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sendTask id="distributeRequest" name="distribute request" camunda:class="org.highmed.dsf.bpe.message.SendSimpleCohortSizeRequest">
+    <bpmn:sendTask id="distributeRequest" name="distribute request" camunda:class="org.highmed.dsf.bpe.message.SendCohortSizeRequest">
       <bpmn:extensionElements>
         <camunda:inputOutput>
           <camunda:inputParameter name="processDefinitionKey">executeSimpleCohortSize</camunda:inputParameter>
@@ -25,12 +25,12 @@
       <bpmn:outgoing>SequenceFlow_0rd9moe</bpmn:outgoing>
       <bpmn:multiInstanceLoopCharacteristics camunda:collection="${multiInstanceTargets.targets}" camunda:elementVariable="multiInstanceTarget" />
     </bpmn:sendTask>
-    <bpmn:serviceTask id="calculateMultiMedicCohortSize" name="calculate multimedic cohort size" camunda:class="org.highmed.dsf.bpe.service.CalculateMultiMedicSimpleCohortSizeResults">
+    <bpmn:serviceTask id="calculateMultiMedicCohortSize" name="calculate multimedic cohort size" camunda:class="org.highmed.dsf.bpe.service.CalculateMultiMedicCohortSizeResults">
       <bpmn:incoming>SequenceFlow_06raddp</bpmn:incoming>
       <bpmn:incoming>SequenceFlow_0wvj5di</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0ol49yu</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="checkResult" name="check result" camunda:class="org.highmed.dsf.bpe.service.CheckMultiMedicSimpleCohortSizeResults">
+    <bpmn:serviceTask id="checkResult" name="check result" camunda:class="org.highmed.dsf.bpe.service.CheckMultiMedicCohortSizeResults">
       <bpmn:incoming>SequenceFlow_0ol49yu</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0h6ci9o</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -52,7 +52,7 @@
       <bpmn:endEvent id="EndEvent_1qj3nw6">
         <bpmn:incoming>SequenceFlow_1dumw8k</bpmn:incoming>
       </bpmn:endEvent>
-      <bpmn:serviceTask id="storeResult" name="store result" camunda:class="org.highmed.dsf.bpe.service.StoreSimpleCohortSizeResults">
+      <bpmn:serviceTask id="storeResult" name="store result" camunda:class="org.highmed.dsf.bpe.service.StoreCohortSizeResults">
         <bpmn:incoming>SequenceFlow_0m09sgk</bpmn:incoming>
         <bpmn:outgoing>SequenceFlow_1dumw8k</bpmn:outgoing>
       </bpmn:serviceTask>

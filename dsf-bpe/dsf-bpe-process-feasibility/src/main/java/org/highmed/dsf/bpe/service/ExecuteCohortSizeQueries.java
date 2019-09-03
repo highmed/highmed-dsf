@@ -20,14 +20,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 @SuppressWarnings("unchecked")
-public class ExecuteSimpleCohortSizeQueries extends AbstractServiceDelegate implements InitializingBean
+public class ExecuteCohortSizeQueries extends AbstractServiceDelegate implements InitializingBean
 {
 
-	private static final Logger logger = LoggerFactory.getLogger(ExecuteSimpleCohortSizeQueries.class);
+	private static final Logger logger = LoggerFactory.getLogger(ExecuteCohortSizeQueries.class);
 
 	private final OrganizationProvider organizationProvider;
 
-	public ExecuteSimpleCohortSizeQueries(OrganizationProvider organizationProvider, WebserviceClient webserviceClient, TaskHelper taskHelper)
+	public ExecuteCohortSizeQueries(OrganizationProvider organizationProvider, WebserviceClient webserviceClient, TaskHelper taskHelper)
 	{
 		super(webserviceClient, taskHelper);
 		this.organizationProvider = organizationProvider;

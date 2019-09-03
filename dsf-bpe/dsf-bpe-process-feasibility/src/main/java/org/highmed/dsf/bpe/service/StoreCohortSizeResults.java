@@ -21,13 +21,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 @SuppressWarnings("unchecked")
-public class StoreSimpleCohortSizeResults extends AbstractServiceDelegate implements InitializingBean
+public class StoreCohortSizeResults extends AbstractServiceDelegate implements InitializingBean
 {
-	private static final Logger logger = LoggerFactory.getLogger(StoreSimpleCohortSizeResults.class);
+	private static final Logger logger = LoggerFactory.getLogger(StoreCohortSizeResults.class);
 
 	private final OrganizationProvider organizationProvider;
 
-	public StoreSimpleCohortSizeResults(OrganizationProvider organizationProvider, WebserviceClient webserviceClient, TaskHelper taskHelper)
+	public StoreCohortSizeResults(OrganizationProvider organizationProvider, WebserviceClient webserviceClient, TaskHelper taskHelper)
 	{
 		super(webserviceClient, taskHelper);
 		this.organizationProvider = organizationProvider;
