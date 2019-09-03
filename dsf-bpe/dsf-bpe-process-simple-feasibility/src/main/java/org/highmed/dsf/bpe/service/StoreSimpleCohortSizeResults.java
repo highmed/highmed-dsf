@@ -56,11 +56,11 @@ public class StoreSimpleCohortSizeResults extends AbstractServiceDelegate implem
 		String requesterIdentifierString = requesterIdentifier.getSystem() + "|" + requesterIdentifier.getValue();
 
 		MultiInstanceResult result = new MultiInstanceResult(requesterIdentifierString, queryResults);
-		MultiInstanceResults results = (MultiInstanceResults) execution
+		MultiInstanceResults resultsWrapper = (MultiInstanceResults) execution
 				.getVariable(Constants.VARIABLE_MULTI_INSTANCE_RESULTS);
-		results.add(result);
+		resultsWrapper.add(result);
 
 		// race conditions are not possible, since tasks are received sequentially over the websocket connection
-		execution.setVariable(Constants.VARIABLE_MULTI_INSTANCE_RESULTS, results);
+		execution.setVariable(Constants.VARIABLE_MULTI_INSTANCE_RESULTS, resultsWrapper);
 	}
 }

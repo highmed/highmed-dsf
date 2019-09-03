@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <StructureDefinition xmlns="http://hl7.org/fhir">
-  <url value="http://highmed.org/fhir/StructureDefinition/highmed-task" />
+  <url value="http://highmed.org/fhir/StructureDefinition/highmed-task-result-simple-cohort-size" />
   <version value="0.1.0" />
-  <name value="Task" />
+  <name value="TaskResultSimpleCohortSize" />
   <status value="active" />
   <date value="2019-05-21" />
   <fhirVersion value="4.0.0" />
@@ -15,6 +15,11 @@
     <element id="Task.instantiatesUri">
       <path value="Task.instantiatesUri" />
       <min value="1" />
+      <fixedUri value="http://highmed.org/bpe/Process/requestSimpleCohortSize/1.0.0" />
+    </element>
+    <element id="Task.intent">
+      <path value="Task.intent" />
+      <fixedCode value="order" />
     </element>
     <element id="Task.authoredOn">
       <path value="Task.authoredOn" />
@@ -76,6 +81,7 @@
       <type>
         <code value="string" />
       </type>
+      <fixedString value="resultSimpleCohortSizeMessage" />
     </element>
     <element id="Task.input:business-key">
       <path value="Task.input" />
@@ -139,7 +145,7 @@
     </element>
     <element id="Task.input:research-study.type.coding.code">
       <path value="Task.input.type.coding.code" />
-      <fixedCode value="research-study" />
+      <fixedCode value="research-study-reference" />
     </element>
     <element id="Task.input:research-study.value[x]">
       <path value="Task.input.value[x]" />

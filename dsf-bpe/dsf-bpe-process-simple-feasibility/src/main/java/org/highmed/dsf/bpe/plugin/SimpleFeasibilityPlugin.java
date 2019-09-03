@@ -5,8 +5,8 @@ import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 
 public class SimpleFeasibilityPlugin extends AbstractProcessEnginePlugin
 {
-	private static final String REQUEST_FILE = "requestSimpleCohortSizeQuery.bpmn";
-	private static final String EXECUTION_FILE = "executeSimpleCohortSizeQuery.bpmn";
+	private static final String REQUEST_FILE = "requestSimpleCohortSize.bpmn";
+	private static final String EXECUTION_FILE = "executeSimpleCohortSize.bpmn";
 
 	@Override
 	public void postProcessEngineBuild(ProcessEngine processEngine)

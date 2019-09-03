@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_0inb4ax" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="2.2.4">
-  <bpmn:process id="requestSimpleCohortSizeQuery" isExecutable="true" camunda:versionTag="1.0.0">
+  <bpmn:process id="requestSimpleCohortSize" isExecutable="true" camunda:versionTag="1.0.0">
     <bpmn:startEvent id="StartEvent">
       <bpmn:outgoing>SequenceFlow_11k77gx</bpmn:outgoing>
       <bpmn:messageEventDefinition id="MessageEventDefinition_10c2suu" messageRef="Message_1pq9qxp" />
@@ -16,9 +16,9 @@
     <bpmn:sendTask id="distributeRequest" name="distribute request" camunda:class="org.highmed.dsf.bpe.message.SendSimpleCohortSizeRequest">
       <bpmn:extensionElements>
         <camunda:inputOutput>
-          <camunda:inputParameter name="processDefinitionKey">executeSimpleCohortSizeQuery</camunda:inputParameter>
+          <camunda:inputParameter name="processDefinitionKey">executeSimpleCohortSize</camunda:inputParameter>
           <camunda:inputParameter name="versionTag">1.0.0</camunda:inputParameter>
-          <camunda:inputParameter name="messageName">executeSimpleCohortSizeQueryMessage</camunda:inputParameter>
+          <camunda:inputParameter name="messageName">executeSimpleCohortSizeMessage</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_0b5s4ef</bpmn:incoming>
@@ -88,15 +88,15 @@
     </bpmn:textAnnotation>
     <bpmn:association id="Association_08ibpi5" sourceRef="checkResearchStudy" targetRef="TextAnnotation_0xo0pht" />
   </bpmn:process>
-  <bpmn:message id="Message_1pq9qxp" name="requestSimpleCohortSizeQueryMessage" />
-  <bpmn:message id="Message_07ayhv1" name="receiveCohortSizeResultMessage" />
+  <bpmn:message id="Message_1pq9qxp" name="requestSimpleCohortSizeMessage" />
+  <bpmn:message id="Message_07ayhv1" name="resultSimpleCohortSizeMessage" />
   <bpmn:message id="Message_0gifb86" name="Message_0hl2gli" />
   <bpmn:error id="Error_0dl03kn" />
   <bpmn:error id="Error_07exqe7" />
   <bpmn:error id="Error_1jhmarr" />
   <bpmn:message id="Message_0qfng3q" name="receiveMultiMedicCohortSizeResultMessage" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
-    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="requestSimpleCohortSizeQuery">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="requestSimpleCohortSize">
       <bpmndi:BPMNShape id="TextAnnotation_0xo0pht_di" bpmnElement="TextAnnotation_0xo0pht">
         <dc:Bounds x="95" y="22" width="261" height="50" />
       </bpmndi:BPMNShape>
