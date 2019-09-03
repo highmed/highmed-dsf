@@ -127,15 +127,29 @@
         <code value="string" />
       </type>
     </element>
-    <element id="Task.output.type.coding.system">
+    <element id="Task.output">
+      <path value="Task.output" />
+      <slicing>
+        <discriminator>
+          <type value="value" />
+          <path value="type.coding.code" />
+        </discriminator>
+        <rules value="open" />
+      </slicing>
+    </element>
+    <element id="Task.output:error">
+      <path value="Task.output" />
+      <sliceName value="error" />
+    </element>
+    <element id="Task.output:error.type.coding.system">
       <path value="Task.output.type.coding.system" />
       <fixedUri value="http://highmed.org/fhir/CodeSystem/bpmn-message" />
     </element>
-    <element id="Task.output.type.coding.code">
+    <element id="Task.output:error.type.coding.code">
       <path value="Task.output.type.coding.code" />
       <fixedCode value="error" />
     </element>
-    <element id="Task.output.value[x]">
+    <element id="Task.output:error.value[x]">
       <path value="Task.output.value[x]" />
       <type>
         <code value="string" />

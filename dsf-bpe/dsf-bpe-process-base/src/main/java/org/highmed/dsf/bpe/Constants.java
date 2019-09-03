@@ -5,7 +5,6 @@ public interface Constants
 	String VARIABLE_MESSAGE_NAME = "messageName";
 	String VARIABLE_PROCESS_DEFINITION_KEY = "processDefinitionKey";
 	String VARIABLE_VERSION_TAG = "versionTag";
-
 	// String VARIABLE_TARGET_ORGANIZATION_ID = "targetOrganizationId";
 	// String VARIABLE_CORRELATION_KEY = "correlationKey";
 	String VARIABLE_MULTI_INSTANCE_TARGET = "multiInstanceTarget";
@@ -19,21 +18,23 @@ public interface Constants
 	String VARIABLE_QUERY_PARAMETERS = "queryParameters";
 	String VARIABLE_BUNDLE_ID = "bundleId";
 	String VARIABLE_SIMPLE_COHORT_SIZE_QUERY_FINAL_RESULT = "simpleCohortSizeQueryFinalResult";
-	String VARIABLE_PROCESS_OUTPUTS = "outputs"; // stores Map<String, String>
+	String VARIABLE_PROCESS_OUTPUTS = "outputs";
 
 	String CODESYSTEM_HIGHMED_BPMN = "http://highmed.org/fhir/CodeSystem/bpmn-message";
 	String CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME = "message-name";
 	String CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY = "business-key";
 	String CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY = "correlation-key";
-	String CODESYSTEM_HIGHMED_BPMN_VALUE_BUNDLE_REFERENCE = "bundle-reference";
-	String CODESYSTEM_HIGHMED_BPMN_VALUE_RESEARCH_STUDY_REFERENCE = "research-study-reference";
-	String CODESYSTEM_HIGHMED_BPMN_VALUE_ENDPOINT_ADDRESS = "endpoint-address";
-	String CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE = "error";
 
-	String NAMINGSYSTEM_HIGHMED_BPMN_COHORT_SIZE_QUERY_RESULT = "http://highmed.org/fhir/NamingSystem/cohort-size-result";
-	String NAMINGSYSTEM_HIGHMED_BPMN_COHORT_SIZE_QUERY_RESULT_VALUE_PREFIX_SINGLE_RESULT = "singleResult|";
-	String NAMINGSYSTEM_HIGHMED_BPMN_COHORT_SIZE_QUERY_RESULT_VALUE_PREFIX_PARTICIPATING_MEDICS = "participatingMedics|";
-	String NAMINGSYSTEM_HIGHMED_BPMN_COHORT_SIZE_QUERY_RESULT_VALUE_PREFIX_COHORT_SIZE = "cohortSize|";
+	String CODESYSTEM_HIGHMED_TASK_INPUT = "http://highmed.org/fhir/CodeSystem/task-input";
+	String CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_BUNDLE_REFERENCE = "bundle-reference";
+	String CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_RESEARCH_STUDY_REFERENCE = "research-study-reference";
+	String CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_ENDPOINT_ADDRESS = "endpoint-address";
+	String CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_ERROR_MESSAGE = "error";
+
+	String NAMINGSYSTEM_HIGHMED_FEASIBILITY = "http://highmed.org/fhir/NamingSystem/feasibility";
+	String NAMINGSYSTEM_HIGHMED_FEASIBILITY_VALUE_PREFIX_SINGLE_RESULT = "singleResult|";
+	String NAMINGSYSTEM_HIGHMED_FEASIBILITY_VALUE_PREFIX_PARTICIPATING_MEDICS = "participatingMedics|";
+	String NAMINGSYSTEM_HIGHMED_FEASIBILITY_VALUE_PREFIX_COHORT_SIZE = "cohortSize|";
 
 	String PROCESS_URI_BASE = "http://highmed.org/bpe/Process/";
 

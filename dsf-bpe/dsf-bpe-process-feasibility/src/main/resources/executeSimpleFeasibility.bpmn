@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_0drkcb5" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="2.2.4">
-  <bpmn:process id="executeSimpleCohortSize" isExecutable="true" camunda:versionTag="1.0.0">
-    <bpmn:serviceTask id="checkResult" name="check results" camunda:class="org.highmed.dsf.bpe.service.CheckSingleMedicCohortSizeResults">
+  <bpmn:process id="executeSimpleFeasibility" isExecutable="true" camunda:versionTag="1.0.0">
+    <bpmn:serviceTask id="checkResult" name="check results" camunda:class="org.highmed.dsf.bpe.service.CheckSingleMedicFeasibilityResults">
       <bpmn:incoming>SequenceFlow_1rmqv20</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_04ouilq</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="executeQueries" name="execute queries" camunda:class="org.highmed.dsf.bpe.service.ExecuteCohortSizeQueries">
+    <bpmn:serviceTask id="executeQueries" name="execute queries" camunda:class="org.highmed.dsf.bpe.service.ExecuteFeasibilityQueries">
       <bpmn:incoming>SequenceFlow_1wwn9pl</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1rmqv20</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="checkResearchStudy" name="check research study" camunda:class="org.highmed.dsf.bpe.service.CheckResearchStudyCohortSize">
+    <bpmn:serviceTask id="checkFeasibilityResources" name="check feasibility resources" camunda:class="org.highmed.dsf.bpe.service.CheckFeasibilityResources">
       <bpmn:incoming>SequenceFlow_1etju4m</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1wwn9pl</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -18,23 +18,23 @@
       <bpmn:messageEventDefinition id="MessageEventDefinition_0sjtzj6" messageRef="Message_1yz2a31" />
     </bpmn:startEvent>
     <bpmn:sequenceFlow id="SequenceFlow_1rmqv20" sourceRef="executeQueries" targetRef="checkResult" />
-    <bpmn:sequenceFlow id="SequenceFlow_1wwn9pl" sourceRef="checkResearchStudy" targetRef="executeQueries" />
-    <bpmn:sequenceFlow id="SequenceFlow_14cn0vs" sourceRef="StartEvent" targetRef="downloadResearchStudy" />
-    <bpmn:sequenceFlow id="SequenceFlow_1etju4m" sourceRef="downloadResearchStudy" targetRef="checkResearchStudy" />
-    <bpmn:serviceTask id="downloadResearchStudy" name="download research study" camunda:class="org.highmed.dsf.bpe.service.DownloadResearchStudy">
+    <bpmn:sequenceFlow id="SequenceFlow_1wwn9pl" sourceRef="checkFeasibilityResources" targetRef="executeQueries" />
+    <bpmn:sequenceFlow id="SequenceFlow_14cn0vs" sourceRef="StartEvent" targetRef="downloadFeasibilityResources" />
+    <bpmn:sequenceFlow id="SequenceFlow_1etju4m" sourceRef="downloadFeasibilityResources" targetRef="checkFeasibilityResources" />
+    <bpmn:serviceTask id="downloadFeasibilityResources" name="download feasibility resources" camunda:class="org.highmed.dsf.bpe.service.DownloadFeasibilityResources">
       <bpmn:incoming>SequenceFlow_14cn0vs</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1etju4m</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:endEvent id="success" name="success">
       <bpmn:extensionElements>
         <camunda:inputOutput>
-          <camunda:inputParameter name="messageName">resultSimpleCohortSizeMessage</camunda:inputParameter>
+          <camunda:inputParameter name="messageName">resultSimpleFeasibilityMessage</camunda:inputParameter>
           <camunda:inputParameter name="versionTag">1.0.0</camunda:inputParameter>
-          <camunda:inputParameter name="processDefinitionKey">requestSimpleCohortSize</camunda:inputParameter>
+          <camunda:inputParameter name="processDefinitionKey">requestSimpleFeasibility</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_1gynemm</bpmn:incoming>
-      <bpmn:messageEventDefinition id="MessageEventDefinition_13swtie" messageRef="Message_1dr71re" camunda:class="org.highmed.dsf.bpe.message.SendCohortSizeResults" />
+      <bpmn:messageEventDefinition id="MessageEventDefinition_13swtie" messageRef="Message_1dr71re" camunda:class="org.highmed.dsf.bpe.message.SendFeasibilityResults" />
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="SequenceFlow_04ouilq" sourceRef="checkResult" targetRef="selectResponseMedics" />
     <bpmn:sequenceFlow id="SequenceFlow_1gynemm" sourceRef="selectResponseMedics" targetRef="success" />
@@ -52,13 +52,13 @@
       <bpmn:text>uac check, study definiton validity, type of cohort, ethics commitee vote, included medics, user authentication, rate limit, etc.</bpmn:text>
     </bpmn:textAnnotation>
     <bpmn:association id="Association_0hhfmwh" sourceRef="executeQueries" targetRef="TextAnnotation_0e4titr" />
-    <bpmn:association id="Association_1ncewqu" sourceRef="checkResearchStudy" targetRef="TextAnnotation_0euut3n" />
-    <bpmn:association id="Association_18cmrhf" sourceRef="checkResearchStudy" targetRef="TextAnnotation_1n3uvog" />
+    <bpmn:association id="Association_1ncewqu" sourceRef="checkFeasibilityResources" targetRef="TextAnnotation_0euut3n" />
+    <bpmn:association id="Association_18cmrhf" sourceRef="checkFeasibilityResources" targetRef="TextAnnotation_1n3uvog" />
   </bpmn:process>
-  <bpmn:message id="Message_1yz2a31" name="executeSimpleCohortSizeMessage" />
-  <bpmn:message id="Message_1dr71re" name="resultSimpleCohortSizeMessage" />
+  <bpmn:message id="Message_1yz2a31" name="executeSimpleFeasibilityMessage" />
+  <bpmn:message id="Message_1dr71re" name="resultSimpleFeasibilityMessage" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
-    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="executeSimpleCohortSize">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="executeSimpleFeasibility">
       <bpmndi:BPMNShape id="ServiceTask_0t2s0v7_di" bpmnElement="checkResult">
         <dc:Bounds x="507" y="102" width="100" height="80" />
       </bpmndi:BPMNShape>
@@ -68,7 +68,7 @@
       <bpmndi:BPMNShape id="TextAnnotation_0e4titr_di" bpmnElement="TextAnnotation_0e4titr">
         <dc:Bounds x="313" y="37" width="100" height="26" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="ServiceTask_0jna5l2_di" bpmnElement="checkResearchStudy">
+      <bpmndi:BPMNShape id="ServiceTask_0jna5l2_di" bpmnElement="checkFeasibilityResources">
         <dc:Bounds x="114" y="102" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="TextAnnotation_1n3uvog_di" bpmnElement="TextAnnotation_1n3uvog">
@@ -108,7 +108,7 @@
         <di:waypoint x="20" y="142" />
         <di:waypoint x="114" y="142" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="ServiceTask_0b8j3ka_di" bpmnElement="downloadResearchStudy">
+      <bpmndi:BPMNShape id="ServiceTask_0b8j3ka_di" bpmnElement="downloadFeasibilityResources">
         <dc:Bounds x="-80" y="102" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="EndEvent_10xdh63_di" bpmnElement="success">

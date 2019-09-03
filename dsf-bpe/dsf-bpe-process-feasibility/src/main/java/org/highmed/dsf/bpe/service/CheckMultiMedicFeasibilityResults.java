@@ -13,11 +13,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("unchecked")
-public class CheckMultiMedicCohortSizeResults extends AbstractServiceDelegate
+public class CheckMultiMedicFeasibilityResults extends AbstractServiceDelegate
 {
-	private static final Logger logger = LoggerFactory.getLogger(CheckMultiMedicCohortSizeResults.class);
+	private static final Logger logger = LoggerFactory.getLogger(CheckMultiMedicFeasibilityResults.class);
 
-	public CheckMultiMedicCohortSizeResults(WebserviceClient webserviceClient, TaskHelper taskHelper)
+	public CheckMultiMedicFeasibilityResults(WebserviceClient webserviceClient, TaskHelper taskHelper)
 	{
 		super(webserviceClient, taskHelper);
 	}
@@ -31,14 +31,14 @@ public class CheckMultiMedicCohortSizeResults extends AbstractServiceDelegate
 				.getVariable(Constants.VARIABLE_SIMPLE_COHORT_SIZE_QUERY_FINAL_RESULT);
 		List<OutputWrapper> outputs = (List<OutputWrapper>) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
 
-		OutputWrapper outputWrapper = new OutputWrapper(Constants.NAMINGSYSTEM_HIGHMED_BPMN_COHORT_SIZE_QUERY_RESULT);
+		OutputWrapper outputWrapper = new OutputWrapper(Constants.NAMINGSYSTEM_HIGHMED_FEASIBILITY);
 		finalResult.forEach(simpleCohortSizeResult -> {
 			outputWrapper.addKeyValue(
-					Constants.NAMINGSYSTEM_HIGHMED_BPMN_COHORT_SIZE_QUERY_RESULT_VALUE_PREFIX_PARTICIPATING_MEDICS
+					Constants.NAMINGSYSTEM_HIGHMED_FEASIBILITY_VALUE_PREFIX_PARTICIPATING_MEDICS
 							+ simpleCohortSizeResult.getCohortId(),
 					String.valueOf(simpleCohortSizeResult.getParticipatingMedics()));
 			outputWrapper.addKeyValue(
-					Constants.NAMINGSYSTEM_HIGHMED_BPMN_COHORT_SIZE_QUERY_RESULT_VALUE_PREFIX_COHORT_SIZE
+					Constants.NAMINGSYSTEM_HIGHMED_FEASIBILITY_VALUE_PREFIX_COHORT_SIZE
 							+ simpleCohortSizeResult.getCohortId(),
 					String.valueOf(simpleCohortSizeResult.getCohortSize()));
 		});
@@ -49,8 +49,13 @@ public class CheckMultiMedicCohortSizeResults extends AbstractServiceDelegate
 
 	private void doExecutePlugin(DelegateExecution execution)
 	{
+		List<SimpleCohortSizeResult> finalResult = (List<SimpleCohortSizeResult>) execution
+				.getVariable(Constants.VARIABLE_SIMPLE_COHORT_SIZE_QUERY_FINAL_RESULT);
+
 		// TODO: implement plugin system for individual checks in different medics, like:
 		// TODO:   - results check
 		// TODO:   - ...
+
+		// TODO: distinguish between simple and complex feasibility request
 	}
 }

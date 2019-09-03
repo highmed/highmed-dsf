@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <StructureDefinition xmlns="http://hl7.org/fhir">
-  <url value="http://highmed.org/fhir/StructureDefinition/highmed-task-execute-simple-cohort-size" />
+  <url value="http://highmed.org/fhir/StructureDefinition/highmed-task-result-simple-feasibility" />
   <version value="0.1.0" />
-  <name value="TaskExecuteSimpleCohortSize" />
+  <name value="TaskResultSimpleFeasibility" />
   <status value="active" />
   <date value="2019-05-21" />
   <fhirVersion value="4.0.0" />
@@ -15,7 +15,7 @@
     <element id="Task.instantiatesUri">
       <path value="Task.instantiatesUri" />
       <min value="1" />
-      <fixedUri value="http://highmed.org/bpe/Process/executeSimpleCohortSize/1.0.0" />
+      <fixedUri value="http://highmed.org/bpe/Process/requestSimpleFeasibility/1.0.0" />
     </element>
     <element id="Task.intent">
       <path value="Task.intent" />
@@ -81,7 +81,7 @@
       <type>
         <code value="string" />
       </type>
-      <fixedString value="executeSimpleCohortSizeMessage" />
+      <fixedString value="resultSimpleFeasibilityMessage" />
     </element>
     <element id="Task.input:business-key">
       <path value="Task.input" />
@@ -141,7 +141,7 @@
     </element>
     <element id="Task.input:research-study.type.coding.system">
       <path value="Task.input.type.coding.system" />
-      <fixedUri value="http://highmed.org/fhir/CodeSystem/bpmn-message" />
+      <fixedUri value="http://highmed.org/fhir/CodeSystem/task-input" />
     </element>
     <element id="Task.input:research-study.type.coding.code">
       <path value="Task.input.type.coding.code" />
@@ -154,15 +154,29 @@
         <targetProfile value="http://highmed.org/fhir/StructureDefinition/highmed-research-study" />
       </type>
     </element>
-    <element id="Task.output.type.coding.system">
+   <element id="Task.output">
+      <path value="Task.output" />
+      <slicing>
+        <discriminator>
+          <type value="value" />
+          <path value="type.coding.code" />
+        </discriminator>
+        <rules value="open" />
+      </slicing>
+    </element>
+    <element id="Task.output:error">
+      <path value="Task.output" />
+      <sliceName value="error" />
+    </element>
+    <element id="Task.output:error.type.coding.system">
       <path value="Task.output.type.coding.system" />
       <fixedUri value="http://highmed.org/fhir/CodeSystem/bpmn-message" />
     </element>
-    <element id="Task.output.type.coding.code">
+    <element id="Task.output:error.type.coding.code">
       <path value="Task.output.type.coding.code" />
       <fixedCode value="error" />
     </element>
-    <element id="Task.output.value[x]">
+    <element id="Task.output:error.value[x]">
       <path value="Task.output.value[x]" />
       <type>
         <code value="string" />

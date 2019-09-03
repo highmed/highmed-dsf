@@ -17,9 +17,9 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 
-public class SendCohortSizeResults extends AbstractTaskMessageSend
+public class SendFeasibilityResults extends AbstractTaskMessageSend
 {
-	public SendCohortSizeResults(OrganizationProvider organizationProvider,
+	public SendFeasibilityResults(OrganizationProvider organizationProvider,
 			WebserviceClientProvider clientProvider, TaskHelper taskHelper)
 	{
 		super(organizationProvider, clientProvider, taskHelper);
@@ -33,7 +33,8 @@ public class SendCohortSizeResults extends AbstractTaskMessageSend
 
 		List<Task.ParameterComponent> outputs = queryResults.entrySet().stream()
 				.map(entry -> new Task.ParameterComponent(new CodeableConcept(
-						new Coding(Constants.NAMINGSYSTEM_HIGHMED_BPMN_COHORT_SIZE_QUERY_RESULT, Constants.NAMINGSYSTEM_HIGHMED_BPMN_COHORT_SIZE_QUERY_RESULT_VALUE_PREFIX_SINGLE_RESULT + entry.getKey(), null)),
+						new Coding(Constants.NAMINGSYSTEM_HIGHMED_FEASIBILITY, Constants.NAMINGSYSTEM_HIGHMED_FEASIBILITY_VALUE_PREFIX_SINGLE_RESULT
+								+ entry.getKey(), null)),
 						new StringType(entry.getValue()))).collect(Collectors.toList());
 
 		return outputs.stream();

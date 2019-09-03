@@ -20,14 +20,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 @SuppressWarnings("unchecked")
-public class ExecuteCohortSizeQueries extends AbstractServiceDelegate implements InitializingBean
+public class ExecuteFeasibilityQueries extends AbstractServiceDelegate implements InitializingBean
 {
 
-	private static final Logger logger = LoggerFactory.getLogger(ExecuteCohortSizeQueries.class);
+	private static final Logger logger = LoggerFactory.getLogger(ExecuteFeasibilityQueries.class);
 
 	private final OrganizationProvider organizationProvider;
 
-	public ExecuteCohortSizeQueries(OrganizationProvider organizationProvider, WebserviceClient webserviceClient, TaskHelper taskHelper)
+	public ExecuteFeasibilityQueries(OrganizationProvider organizationProvider, WebserviceClient webserviceClient, TaskHelper taskHelper)
 	{
 		super(webserviceClient, taskHelper);
 		this.organizationProvider = organizationProvider;
@@ -44,13 +44,11 @@ public class ExecuteCohortSizeQueries extends AbstractServiceDelegate implements
 	@Override
 	public void doExecute(DelegateExecution execution) throws Exception
 	{
-		// TODO: is mock result, remove
-		// TODO: implement openehr client and execute query
-
 		Map<String, String> results = new HashMap<>();
 		List<Group> cohortDefinitions = (List<Group>) execution.getVariable(Constants.VARIABLE_COHORTS);
 
 		cohortDefinitions.forEach(group -> {
+			// TODO: retrieve query from group
 			IdType groupId = new IdType(group.getId());
 			String groupIdString = groupId.getResourceType() + "/" + groupId.getIdPart();
 			results.put(groupIdString, "10");
@@ -60,5 +58,8 @@ public class ExecuteCohortSizeQueries extends AbstractServiceDelegate implements
 
 		MultiInstanceResult multiInstanceResult = new MultiInstanceResult(identifier.getSystem() + "|" + identifier.getValue(), results);
 		execution.setVariable(Constants.VARIABLE_MULTI_INSTANCE_RESULT, multiInstanceResult);
+
+		// TODO: is mock result, remove
+		// TODO: implement openEHR client and execute query
 	}
 }

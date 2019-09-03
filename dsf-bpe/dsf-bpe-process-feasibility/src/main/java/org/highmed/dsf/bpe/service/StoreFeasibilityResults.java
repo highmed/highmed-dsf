@@ -21,13 +21,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 @SuppressWarnings("unchecked")
-public class StoreCohortSizeResults extends AbstractServiceDelegate implements InitializingBean
+public class StoreFeasibilityResults extends AbstractServiceDelegate implements InitializingBean
 {
-	private static final Logger logger = LoggerFactory.getLogger(StoreCohortSizeResults.class);
+	private static final Logger logger = LoggerFactory.getLogger(StoreFeasibilityResults.class);
 
 	private final OrganizationProvider organizationProvider;
 
-	public StoreCohortSizeResults(OrganizationProvider organizationProvider, WebserviceClient webserviceClient, TaskHelper taskHelper)
+	public StoreFeasibilityResults(OrganizationProvider organizationProvider, WebserviceClient webserviceClient, TaskHelper taskHelper)
 	{
 		super(webserviceClient, taskHelper);
 		this.organizationProvider = organizationProvider;
@@ -49,8 +49,9 @@ public class StoreCohortSizeResults extends AbstractServiceDelegate implements I
 
 		task.getInput().stream()
 				.filter(input -> input.getType().getCoding().get(0).getSystem()
-						.equals(Constants.NAMINGSYSTEM_HIGHMED_BPMN_COHORT_SIZE_QUERY_RESULT))
-				.forEach(input -> queryResults.put(input.getType().getCoding().get(0).getCode().substring(Constants.NAMINGSYSTEM_HIGHMED_BPMN_COHORT_SIZE_QUERY_RESULT_VALUE_PREFIX_SINGLE_RESULT.length()), ((StringType) input.getValue()).getValue()));
+						.equals(Constants.NAMINGSYSTEM_HIGHMED_FEASIBILITY))
+				.forEach(input -> queryResults.put(input.getType().getCoding().get(0).getCode().substring(Constants.NAMINGSYSTEM_HIGHMED_FEASIBILITY_VALUE_PREFIX_SINGLE_RESULT
+						.length()), ((StringType) input.getValue()).getValue()));
 
 		Identifier requesterIdentifier = organizationProvider.getIdentifier(new IdType(task.getRequester().getReference())).get();
 		String requesterIdentifierString = requesterIdentifier.getSystem() + "|" + requesterIdentifier.getValue();

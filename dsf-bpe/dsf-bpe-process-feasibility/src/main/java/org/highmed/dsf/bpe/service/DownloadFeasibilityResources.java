@@ -28,9 +28,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-public class DownloadResearchStudy extends AbstractServiceDelegate implements InitializingBean
+public class DownloadFeasibilityResources extends AbstractServiceDelegate implements InitializingBean
 {
-	private static final Logger logger = LoggerFactory.getLogger(DownloadResearchStudy.class);
+	private static final Logger logger = LoggerFactory.getLogger(DownloadFeasibilityResources.class);
 
 	private static final String RESEARCH_STUDY_PREFIX = "ResearchStudy/";
 	private static final String GROUP_PREFIX = "Group/";
@@ -40,7 +40,7 @@ public class DownloadResearchStudy extends AbstractServiceDelegate implements In
 	private final WebserviceClientProvider clientProvider;
 	private final TaskHelper taskHelper;
 
-	public DownloadResearchStudy(OrganizationProvider organizationProvider, WebserviceClientProvider clientProvider,
+	public DownloadFeasibilityResources(OrganizationProvider organizationProvider, WebserviceClientProvider clientProvider,
 			TaskHelper taskHelper)
 	{
 		super(clientProvider.getLocalWebserviceClient(), taskHelper);
@@ -78,6 +78,9 @@ public class DownloadResearchStudy extends AbstractServiceDelegate implements In
 
 		List<Group> cohortDefinitions = getCohortDefinitions(researchStudy, client);
 		execution.setVariable(Constants.VARIABLE_COHORTS, cohortDefinitions);
+
+		// TODO: distinguish between simple and complex feasibility request
+		//      (for complex request download additional documents)
 	}
 
 	private String getEndpointAddress(Task task)
@@ -122,15 +125,15 @@ public class DownloadResearchStudy extends AbstractServiceDelegate implements In
 	private Reference getResearchStudyReference(Task task)
 	{
 		List<Reference> researchStudyReferences = taskHelper
-				.getInputParameterReferenceValues(task, Constants.CODESYSTEM_HIGHMED_BPMN,
-						Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_RESEARCH_STUDY_REFERENCE).collect(Collectors.toList());
+				.getInputParameterReferenceValues(task, Constants.CODESYSTEM_HIGHMED_TASK_INPUT,
+						Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_RESEARCH_STUDY_REFERENCE).collect(Collectors.toList());
 
 		if (researchStudyReferences.size() != 1)
 		{
 			logger.error("Task input parameter {} contains unexpected number of ResearchStudy IDs, expected 1, got {}",
-					Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_RESEARCH_STUDY_REFERENCE, researchStudyReferences.size());
+					Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_RESEARCH_STUDY_REFERENCE, researchStudyReferences.size());
 			throw new RuntimeException(
-					"Task input parameter " + Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_RESEARCH_STUDY_REFERENCE
+					"Task input parameter " + Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_RESEARCH_STUDY_REFERENCE
 							+ " contains unexpected number of ResearchStudy IDs, expected 1, got "
 							+ researchStudyReferences.size());
 		}

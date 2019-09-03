@@ -9,11 +9,11 @@ import org.highmed.fhir.client.WebserviceClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CheckSingleMedicCohortSizeResults extends AbstractServiceDelegate
+public class CheckSingleMedicFeasibilityResults extends AbstractServiceDelegate
 {
-	private static final Logger logger = LoggerFactory.getLogger(CheckSingleMedicCohortSizeResults.class);
+	private static final Logger logger = LoggerFactory.getLogger(CheckSingleMedicFeasibilityResults.class);
 
-	public CheckSingleMedicCohortSizeResults(WebserviceClient webserviceClient, TaskHelper taskHelper)
+	public CheckSingleMedicFeasibilityResults(WebserviceClient webserviceClient, TaskHelper taskHelper)
 	{
 		super(webserviceClient, taskHelper);
 	}
@@ -21,14 +21,16 @@ public class CheckSingleMedicCohortSizeResults extends AbstractServiceDelegate
 	@Override
 	public void doExecute(DelegateExecution execution) throws Exception
 	{
-		MultiInstanceResult result = (MultiInstanceResult) execution.getVariable(Constants.VARIABLE_MULTI_INSTANCE_RESULT);
-
 		doExecutePlugin(execution);
 	}
 
 	private void doExecutePlugin(DelegateExecution execution) {
+		MultiInstanceResult result = (MultiInstanceResult) execution.getVariable(Constants.VARIABLE_MULTI_INSTANCE_RESULT);
+
 		// TODO: implement plugin system for individual checks in different medics, like:
 		// TODO:   - results check
 		// TODO:   - ...
+
+		// TODO: distinguish between simple and complex feasibility request
 	}
 }

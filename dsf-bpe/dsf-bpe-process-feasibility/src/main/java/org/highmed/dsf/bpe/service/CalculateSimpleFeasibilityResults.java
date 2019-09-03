@@ -19,11 +19,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("unchecked")
-public class CalculateMultiMedicCohortSizeResults extends AbstractServiceDelegate
+public class CalculateSimpleFeasibilityResults extends AbstractServiceDelegate
 {
-	private static final Logger logger = LoggerFactory.getLogger(CalculateMultiMedicCohortSizeResults.class);
+	private static final Logger logger = LoggerFactory.getLogger(CalculateSimpleFeasibilityResults.class);
 
-	public CalculateMultiMedicCohortSizeResults(WebserviceClient webserviceClient, TaskHelper taskHelper)
+	public CalculateSimpleFeasibilityResults(WebserviceClient webserviceClient, TaskHelper taskHelper)
 	{
 		super(webserviceClient, taskHelper);
 	}
@@ -31,15 +31,13 @@ public class CalculateMultiMedicCohortSizeResults extends AbstractServiceDelegat
 	@Override
 	public void doExecute(DelegateExecution execution) throws Exception
 	{
-		// TODO: distinguish between simple and complex query
-		// TODO: add percentage filter over result
-
 		MultiInstanceResults resultsWrapper = (MultiInstanceResults) execution.getVariable(Constants.VARIABLE_MULTI_INSTANCE_RESULTS);
 		List<Group> cohortDefinitions = (List<Group>) execution.getVariable(Constants.VARIABLE_COHORTS);
 
 		List<String> cohortIds = getCohortIds(cohortDefinitions);
 		List<MultiInstanceResult> locationBasedResults = resultsWrapper.getResults();
 		List<SimpleCohortSizeResult> finalResult = calculateResults(cohortIds, locationBasedResults);
+		// TODO: add percentage filter over result
 
 		execution.setVariable(Constants.VARIABLE_SIMPLE_COHORT_SIZE_QUERY_FINAL_RESULT, finalResult);
 	}

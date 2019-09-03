@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import javax.ws.rs.WebApplicationException;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.WebserviceClientProvider;
@@ -102,24 +101,24 @@ public class UpdateResources extends AbstractServiceDelegate implements Initiali
 	private Reference getBundleReference(Task task)
 	{
 		List<Reference> bundleReferences = taskHelper.getInputParameterReferenceValues(task,
-				Constants.CODESYSTEM_HIGHMED_BPMN, Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_BUNDLE_REFERENCE)
+				Constants.CODESYSTEM_HIGHMED_BPMN, Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_BUNDLE_REFERENCE)
 				.collect(Collectors.toList());
 
 		if (bundleReferences.size() != 1)
 		{
 			logger.error("Task input parameter {} contains unexpected number of Bundle IDs, expected 1, got {}",
-					Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_BUNDLE_REFERENCE, bundleReferences.size());
+					Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_BUNDLE_REFERENCE, bundleReferences.size());
 			throw new RuntimeException(
-					"Task input parameter " + Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_BUNDLE_REFERENCE
+					"Task input parameter " + Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_BUNDLE_REFERENCE
 							+ " contains unexpected number of Bundle IDs, expected 1, got " + bundleReferences.size());
 		}
 		else if (!bundleReferences.get(0).hasReference()
 				|| !bundleReferences.get(0).getReference().startsWith(BUNDLE_ID_PREFIX))
 		{
 			logger.error("Task input parameter {} has no Bundle reference",
-					Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_BUNDLE_REFERENCE);
+					Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_BUNDLE_REFERENCE);
 			throw new RuntimeException("Task input parameter "
-					+ Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_BUNDLE_REFERENCE + " has no Bundle reference");
+					+ Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_BUNDLE_REFERENCE + " has no Bundle reference");
 		}
 
 		return bundleReferences.get(0);
@@ -128,14 +127,14 @@ public class UpdateResources extends AbstractServiceDelegate implements Initiali
 	private UrlType getEndpointAddress(Task task)
 	{
 		Optional<UrlType> endpointAddress = taskHelper.getFirstInputParameterUrlValue(task,
-				Constants.CODESYSTEM_HIGHMED_BPMN, Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ENDPOINT_ADDRESS);
+				Constants.CODESYSTEM_HIGHMED_BPMN, Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_ENDPOINT_ADDRESS);
 
 		if (endpointAddress.isEmpty())
 		{
 			logger.error("Task is missing input parameter {}",
-					Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ENDPOINT_ADDRESS);
+					Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_ENDPOINT_ADDRESS);
 			throw new RuntimeException(
-					"Task is missing input parameter " + Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_BUNDLE_REFERENCE);
+					"Task is missing input parameter " + Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_BUNDLE_REFERENCE);
 		}
 
 		return endpointAddress.get();

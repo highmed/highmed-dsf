@@ -32,16 +32,16 @@ public class SendRequest extends AbstractTaskMessageSend
 	private ParameterComponent toInputParameterBundleReference(String bundleId)
 	{
 		return new ParameterComponent(
-				new CodeableConcept(new Coding(Constants.CODESYSTEM_HIGHMED_BPMN,
-						Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_BUNDLE_REFERENCE, null)),
+				new CodeableConcept(new Coding(Constants.CODESYSTEM_HIGHMED_TASK_INPUT,
+						Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_BUNDLE_REFERENCE, null)),
 				new Reference().setReference(bundleId));
 	}
 
 	private ParameterComponent toInputParameterEndpointAddress(String localBaseUrl)
 	{
 		return new ParameterComponent(
-				new CodeableConcept(new Coding(Constants.CODESYSTEM_HIGHMED_BPMN,
-						Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ENDPOINT_ADDRESS, null)),
+				new CodeableConcept(new Coding(Constants.CODESYSTEM_HIGHMED_TASK_INPUT,
+						Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_ENDPOINT_ADDRESS, null)),
 				new UrlType().setValue(localBaseUrl));
 	}
 }

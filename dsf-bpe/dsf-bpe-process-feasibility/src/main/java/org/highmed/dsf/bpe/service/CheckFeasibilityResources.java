@@ -16,16 +16,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("unchecked")
-public class CheckResearchStudyCohortSize extends AbstractServiceDelegate
+public class CheckFeasibilityResources extends AbstractServiceDelegate
 {
-	private static final Logger logger = LoggerFactory.getLogger(CheckResearchStudyCohortSize.class);
+	private static final Logger logger = LoggerFactory.getLogger(CheckFeasibilityResources.class);
 
 	// Must be 3 or larger, as otherwise it is possible to draw conclusions about the individual MeDICs
 	// (if I already know the cohort size in my MeDIC)
 	public static final int MIN_PARTICIPATING_MEDICS = 3;
 	public static final int MIN_COHORT_DEFINITIONS = 1;
 
-	public CheckResearchStudyCohortSize(WebserviceClient webserviceClient, TaskHelper taskHelper)
+	public CheckFeasibilityResources(WebserviceClient webserviceClient, TaskHelper taskHelper)
 	{
 		super(webserviceClient, taskHelper);
 	}
@@ -69,12 +69,14 @@ public class CheckResearchStudyCohortSize extends AbstractServiceDelegate
 	}
 
 	private void doExecutePlugin(DelegateExecution execution) {
-		// TODO: distinguish between simple and complex query
-
 		// TODO: implement plugin system for individual checks in different medics, like:
-		// TODO:   - PI check
-		// TODO:   - Queries check
-		// TODO:   - Requester check
-		// TODO:   - ...
+		//       - PI check
+		//       - Cohort characteristics check
+		//       - Queries check
+		//       - Requester check
+		//       - ...
+
+		// TODO: distinguish between simple and complex feasibility request
+		//      (for complex request check additional documents are attached)
 	}
 }

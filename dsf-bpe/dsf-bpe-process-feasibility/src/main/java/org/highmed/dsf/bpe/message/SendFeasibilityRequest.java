@@ -14,9 +14,9 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.Task;
 
-public class SendCohortSizeRequest extends AbstractTaskMessageSend
+public class SendFeasibilityRequest extends AbstractTaskMessageSend
 {
-	public SendCohortSizeRequest(OrganizationProvider organizationProvider,
+	public SendFeasibilityRequest(OrganizationProvider organizationProvider,
 			WebserviceClientProvider clientProvider, TaskHelper taskHelper)
 	{
 		super(organizationProvider, clientProvider, taskHelper);
@@ -31,8 +31,8 @@ public class SendCohortSizeRequest extends AbstractTaskMessageSend
 
 	private Task.ParameterComponent toInputParameterResearchStudyReference(String researchStudyId)
 	{
-		return new Task.ParameterComponent(new CodeableConcept(new Coding(Constants.CODESYSTEM_HIGHMED_BPMN,
-				Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_RESEARCH_STUDY_REFERENCE, null)),
+		return new Task.ParameterComponent(new CodeableConcept(new Coding(Constants.CODESYSTEM_HIGHMED_TASK_INPUT,
+				Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_RESEARCH_STUDY_REFERENCE, null)),
 				new Reference().setReference(researchStudyId));
 	}
 }
