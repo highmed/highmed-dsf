@@ -154,7 +154,7 @@
         <targetProfile value="http://highmed.org/fhir/StructureDefinition/highmed-research-study" />
       </type>
     </element>
-   <element id="Task.output">
+    <element id="Task.output">
       <path value="Task.output" />
       <slicing>
         <discriminator>
@@ -177,6 +177,42 @@
       <fixedCode value="error" />
     </element>
     <element id="Task.output:error.value[x]">
+      <path value="Task.output.value[x]" />
+      <type>
+        <code value="string" />
+      </type>
+    </element>
+    <element id="Task.output:participatingMedics">
+      <path value="Task.output" />
+      <sliceName value="participatingMedics" />
+    </element>
+    <element id="Task.output:participatingMedics.type.coding.system">
+      <path value="Task.output.type.coding.system" />
+      <fixedUri value="http://highmed.org/fhir/NamingSystem/feasibility" />
+    </element>
+    <element id="Task.output:participatingMedics.type.coding.code">
+      <path value="Task.output.type.coding.code" />
+      <patternCode value="participatingMedics|Group/[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}" />
+    </element>
+    <element id="Task.output:participatingMedics.value[x]">
+      <path value="Task.output.value[x]" />
+      <type>
+        <code value="string" />
+      </type>
+    </element>
+    <element id="Task.output:cohortSize">
+      <path value="Task.output" />
+      <sliceName value="cohortSize" />
+    </element>
+    <element id="Task.output:cohortSize.type.coding.system">
+      <path value="Task.output.type.coding.system" />
+      <fixedUri value="http://highmed.org/fhir/NamingSystem/feasibility" />
+    </element>
+    <element id="Task.output:cohortSize.type.coding.code">
+      <path value="Task.output.type.coding.code" />
+      <patternCode value="cohortSize|Group/[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}" />
+    </element>
+    <element id="Task.output:cohortSize.value[x]">
       <path value="Task.output.value[x]" />
       <type>
         <code value="string" />

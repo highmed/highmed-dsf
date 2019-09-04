@@ -133,28 +133,26 @@
         <code value="string" />
       </type>
     </element>
-    <element id="Task.input:research-study">
+    <element id="Task.input:singleResult">
       <path value="Task.input" />
-      <sliceName value="research-study" />
+      <sliceName value="singleResult" />
       <min value="1" />
-      <max value="1" />
     </element>
-    <element id="Task.input:research-study.type.coding.system">
+    <element id="Task.input:singleResult.type.coding.system">
       <path value="Task.input.type.coding.system" />
-      <fixedUri value="http://highmed.org/fhir/CodeSystem/task-input" />
+      <fixedUri value="http://highmed.org/fhir/NamingSystem/feasibility" />
     </element>
-    <element id="Task.input:research-study.type.coding.code">
+    <element id="Task.input:singleResult.type.coding.code">
       <path value="Task.input.type.coding.code" />
-      <fixedCode value="research-study-reference" />
+      <patternCode value="singelResult|Group/[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}" />
     </element>
-    <element id="Task.input:research-study.value[x]">
+    <element id="Task.input:singleResult.value[x]">
       <path value="Task.input.value[x]" />
       <type>
-        <code value="Reference" />
-        <targetProfile value="http://highmed.org/fhir/StructureDefinition/highmed-research-study" />
+        <code value="string" />
       </type>
     </element>
-   <element id="Task.output">
+    <element id="Task.output">
       <path value="Task.output" />
       <slicing>
         <discriminator>

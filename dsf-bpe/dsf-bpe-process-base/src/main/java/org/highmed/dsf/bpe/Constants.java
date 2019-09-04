@@ -5,6 +5,7 @@ public interface Constants
 	String VARIABLE_MESSAGE_NAME = "messageName";
 	String VARIABLE_PROCESS_DEFINITION_KEY = "processDefinitionKey";
 	String VARIABLE_VERSION_TAG = "versionTag";
+	String VARIABLE_PROFILE = "profile";
 	// String VARIABLE_TARGET_ORGANIZATION_ID = "targetOrganizationId";
 	// String VARIABLE_CORRELATION_KEY = "correlationKey";
 	String VARIABLE_MULTI_INSTANCE_TARGET = "multiInstanceTarget";

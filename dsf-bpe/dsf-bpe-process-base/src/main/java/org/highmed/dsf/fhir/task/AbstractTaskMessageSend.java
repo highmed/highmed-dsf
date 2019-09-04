@@ -13,6 +13,7 @@ import org.highmed.dsf.fhir.variables.MultiInstanceTarget;
 import org.highmed.fhir.client.WebserviceClient;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
@@ -50,6 +51,7 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 		String processDefinitionKey = (String) execution.getVariable(Constants.VARIABLE_PROCESS_DEFINITION_KEY);
 		String versionTag = (String) execution.getVariable(Constants.VARIABLE_VERSION_TAG);
 		String messageName = (String) execution.getVariable(Constants.VARIABLE_MESSAGE_NAME);
+		String profile = (String) execution.getVariable(Constants.VARIABLE_MESSAGE_NAME);
 		String businessKey = execution.getBusinessKey();
 
 		// TODO see Bug https://app.camunda.com/jira/browse/CAM-9444
@@ -60,7 +62,7 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 				.getVariable(Constants.VARIABLE_MULTI_INSTANCE_TARGET);
 
 		sendTask(target.getTargetOrganizationIdentifierValue(), processDefinitionKey, versionTag, messageName,
-				businessKey, target.getCorrelationKey(), getAdditionalInputParameters(execution));
+				businessKey, profile, target.getCorrelationKey(), getAdditionalInputParameters(execution));
 	}
 
 	/**
@@ -74,13 +76,14 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 	}
 
 	protected void sendTask(String targetOrganizationIdentifierValue, String processDefinitionKey, String versionTag,
-			String messageName, String businessKey, String correlationKey,
+			String messageName, String businessKey, String correlationKey, String profile,
 			Stream<ParameterComponent> additionalInputParameters)
 	{
 		if (messageName.isEmpty() || processDefinitionKey.isEmpty())
 			throw new IllegalStateException("Next process-id or message-name not definied");
 
 		Task task = new Task();
+		task.setMeta(new Meta().addProfile(profile));
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
