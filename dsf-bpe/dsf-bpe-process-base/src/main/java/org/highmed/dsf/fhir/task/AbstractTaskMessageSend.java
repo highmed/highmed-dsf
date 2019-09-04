@@ -51,7 +51,7 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 		String processDefinitionKey = (String) execution.getVariable(Constants.VARIABLE_PROCESS_DEFINITION_KEY);
 		String versionTag = (String) execution.getVariable(Constants.VARIABLE_VERSION_TAG);
 		String messageName = (String) execution.getVariable(Constants.VARIABLE_MESSAGE_NAME);
-		String profile = (String) execution.getVariable(Constants.VARIABLE_MESSAGE_NAME);
+		String profile = (String) execution.getVariable(Constants.VARIABLE_PROFILE);
 		String businessKey = execution.getBusinessKey();
 
 		// TODO see Bug https://app.camunda.com/jira/browse/CAM-9444

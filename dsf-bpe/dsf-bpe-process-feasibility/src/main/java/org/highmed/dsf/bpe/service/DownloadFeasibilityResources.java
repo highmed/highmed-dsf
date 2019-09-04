@@ -166,8 +166,6 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 		List<Group> cohortDefinitions = new ArrayList<>();
 		List<Reference> cohortDefinitionReferences = researchStudy.getEnrollment();
 
-		client.read(Organization.class, "22065705-b6ef-4398-be6d-2d9613b8c78a");
-
 		cohortDefinitionReferences.forEach(reference -> {
 			Group group = client.read(Group.class, reference.getReference().substring(GROUP_PREFIX.length()));
 			cohortDefinitions.add(group);

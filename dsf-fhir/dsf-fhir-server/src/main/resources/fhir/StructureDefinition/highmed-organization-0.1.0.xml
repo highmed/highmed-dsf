@@ -50,13 +50,15 @@
     </element>
     <element id="Organization.identifier:HiGHmed.system">
       <path value="Organization.identifier.system" />
-      <fixedUri value="http://highmed.org/fhir/CodeSystem/highmed-organization" />
+      <min value="1" />
+      <fixedUri value="http://highmed.org/fhir/CodeSystem/organization" />
     </element>
     <element id="Organization.identifier:HiGHmed.value">
       <path value="Organization.identifier.value" />
+      <min value="1" />
       <binding>
         <strength value="required" />
-        <valueSet value="http://highmed.org/fhir/ValueSet/highmed-organization" />
+        <valueSet value="http://highmed.org/fhir/ValueSet/organization" />
       </binding>
     </element>
     <element id="Organization.endpoint">

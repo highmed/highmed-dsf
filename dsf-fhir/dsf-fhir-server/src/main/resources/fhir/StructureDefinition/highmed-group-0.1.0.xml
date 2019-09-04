@@ -24,10 +24,9 @@
       <path value="Group.extension" />
       <sliceName value="query" />
       <min value="1" />
-      <max value="*" />
       <type>
         <code value="Extension" />
-        <profile value="http://highmed.org/fhir/StructureDefinition/highmed-extension-query" />
+        <profile value="http://highmed.org/fhir/StructureDefinition/query" />
       </type>
     </element>
     <element id="Group.actual">

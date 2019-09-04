@@ -25,7 +25,6 @@
       <path value="Extension.value[x]" />
       <short value="ParticipatingMedic" />
       <definition value="Organization reference used to denote the medic organizations that are requested to supply data for the study at hand." />
-      <min value="1" />
       <type>
         <code value="Reference" />
         <targetProfile value="http://highmed.org/fhir/StructureDefinition/highmed-organization" />
