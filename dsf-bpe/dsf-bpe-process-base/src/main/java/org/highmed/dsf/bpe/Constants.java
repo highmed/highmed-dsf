@@ -45,4 +45,5 @@ public interface Constants
 	String WHITE_LIST_BUNDLE_IDENTIFIER_VALUE = "HiGHmed_white_list";
 
 	String EXTENSION_PARTICIPATING_MEDIC_URI = "http://highmed.org/fhir/StructureDefinition/participating-medic";
+	String EXTENSION_QUERY_URI = "http://highmed.org/fhir/StructureDefinition/query";
 }

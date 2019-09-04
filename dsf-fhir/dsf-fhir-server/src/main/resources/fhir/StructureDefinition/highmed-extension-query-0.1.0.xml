@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <StructureDefinition xmlns="http://hl7.org/fhir">
-  <url value="http://highmed.org/fhir/StructureDefinition/highmed-extension-query" />
+  <url value="http://highmed.org/fhir/StructureDefinition/query" />
   <name value="Query" />
   <status value="active" />
   <fhirVersion value="4.0.0" />

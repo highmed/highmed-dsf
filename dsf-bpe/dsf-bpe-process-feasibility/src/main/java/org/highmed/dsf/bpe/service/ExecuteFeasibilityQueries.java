@@ -4,14 +4,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
+import org.highmed.dsf.bpe.variables.MultiInstanceResult;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.bpe.variables.MultiInstanceResult;
 import org.highmed.fhir.client.WebserviceClient;
+import org.hl7.fhir.r4.model.Expression;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
@@ -27,7 +30,8 @@ public class ExecuteFeasibilityQueries extends AbstractServiceDelegate implement
 
 	private final OrganizationProvider organizationProvider;
 
-	public ExecuteFeasibilityQueries(OrganizationProvider organizationProvider, WebserviceClient webserviceClient, TaskHelper taskHelper)
+	public ExecuteFeasibilityQueries(OrganizationProvider organizationProvider, WebserviceClient webserviceClient,
+			TaskHelper taskHelper)
 	{
 		super(webserviceClient, taskHelper);
 		this.organizationProvider = organizationProvider;
@@ -47,19 +51,41 @@ public class ExecuteFeasibilityQueries extends AbstractServiceDelegate implement
 		Map<String, String> results = new HashMap<>();
 		List<Group> cohortDefinitions = (List<Group>) execution.getVariable(Constants.VARIABLE_COHORTS);
 
-		cohortDefinitions.forEach(group -> {
-			// TODO: retrieve query from group
-			IdType groupId = new IdType(group.getId());
-			String groupIdString = groupId.getResourceType() + "/" + groupId.getIdPart();
-			results.put(groupIdString, "10");
-		});
+		cohortDefinitions.forEach(group -> executeQuery(group,results));
 
 		Identifier identifier = organizationProvider.getLocalIdentifier();
-
 		MultiInstanceResult multiInstanceResult = new MultiInstanceResult(identifier.getSystem() + "|" + identifier.getValue(), results);
+
 		execution.setVariable(Constants.VARIABLE_MULTI_INSTANCE_RESULT, multiInstanceResult);
+	}
+
+	private void executeQuery(Group group, Map<String, String> results) {
+		String aqlQuery = getAqlQuery(group);
+		logger.info("Executing aql-query '{}'", aqlQuery);
+
+		// TODO: implement openEHR client
+		// TODO: execute query
+
+		IdType groupId = new IdType(group.getId());
+		String groupIdString = groupId.getResourceType() + "/" + groupId.getIdPart();
 
 		// TODO: is mock result, remove
-		// TODO: implement openEHR client and execute query
+		results.put(groupIdString, "10");
+	}
+
+	private String getAqlQuery(Group group)
+	{
+		// TODO: fix TEXT_CQL to support AQL
+		List<Extension> queries = group.getExtension().stream()
+				.filter(extension -> extension.getUrl().equals(Constants.EXTENSION_QUERY_URI))
+				.filter(extension -> ((Expression) extension.getValue()).getLanguage() == Expression.ExpressionLanguage.TEXT_CQL)
+				.collect(Collectors.toList());
+
+		if(queries.size() != 1) {
+			logger.error("Number of aql queries is not =1, got {}", queries.size());
+			throw new IllegalArgumentException("Number of aql queries is not =1, got " + queries.size());
+		}
+
+		return ((Expression) queries.get(0).getValue()).getExpression();
 	}
 }
