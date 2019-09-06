@@ -1,6 +1,7 @@
 package org.highmed.dsf.bpe.service;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -10,12 +11,12 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.WebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
+import org.highmed.dsf.fhir.variables.OutputWrapper;
 import org.highmed.fhir.client.WebserviceClient;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -29,6 +30,7 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Reference;
 import org.springframework.beans.factory.InitializingBean;
 
+@SuppressWarnings("unchecked")
 public class UpdateWhiteList extends AbstractServiceDelegate implements InitializingBean
 {
 	private final WebserviceClientProvider clientProvider;
@@ -61,15 +63,17 @@ public class UpdateWhiteList extends AbstractServiceDelegate implements Initiali
 						Collections.singletonList("Organization:endpoint")));
 
 		Bundle transaction = new Bundle().setType(BundleType.TRANSACTION);
-		transaction.getIdentifier().setSystem(Constants.BUNDLE_IDENTIFIER_SYSTEM)
-				.setValue(Constants.WHITE_LIST_BUNDLE_IDENTIFIER_VALUE);
+		transaction.getIdentifier().setSystem(Constants.CODESYSTEM_HIGHMED_BUNDLE)
+				.setValue(Constants.CODESYSTEM_HIGHMED_BUNDLE_VALUE_WHITE_LIST);
 		searchSet.getEntry().stream()
 				.filter(e -> e.hasSearch() && SearchEntryMode.MATCH.equals(e.getSearch().getMode()) && e.hasResource()
 						&& e.getResource() instanceof Organization).map(e -> (Organization) e.getResource())
 				.forEach(addWhiteListEntry(transaction, searchSet));
 
-		client.updateConditionaly(transaction, Map.of("identifier", Collections.singletonList(
-				Constants.BUNDLE_IDENTIFIER_SYSTEM + "|" + Constants.WHITE_LIST_BUNDLE_IDENTIFIER_VALUE)));
+		Bundle result = client.updateConditionaly(transaction, Map.of("identifier", Collections.singletonList(
+				Constants.CODESYSTEM_HIGHMED_BUNDLE + "|" + Constants.CODESYSTEM_HIGHMED_BUNDLE_VALUE_WHITE_LIST)));
+
+		setTaskOutput(result, execution);
 	}
 
 	private Consumer<? super Organization> addWhiteListEntry(Bundle transaction, Bundle searchSet)
@@ -131,5 +135,17 @@ public class UpdateWhiteList extends AbstractServiceDelegate implements Initiali
 		return searchSet.getEntry().stream()
 				.filter(e -> e.hasResource() && e.getResource() instanceof Endpoint && e.getFullUrl()
 						.endsWith(endpoint.getReference())).map(e -> (Endpoint) e.getResource()).findFirst();
+	}
+
+	private void setTaskOutput(Bundle result, DelegateExecution execution)
+	{
+		List<OutputWrapper> outputs = (List<OutputWrapper>) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
+
+		OutputWrapper outputWrapper = new OutputWrapper(Constants.NAMINGSYSTEM_HIGHMED_FEASIBILITY);
+		outputWrapper.setSystem(Constants.CODESYSTEM_HIGHMED_BUNDLE);
+		outputWrapper.addKeyValue(Constants.CODESYSTEM_HIGHMED_BUNDLE_VALUE_WHITE_LIST, new IdType(result.getId()).getIdPart());
+		outputs.add(outputWrapper);
+
+		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, outputs);
 	}
 }

@@ -42,8 +42,8 @@ public interface Constants
 	String ORGANIZATION_IDENTIFIER_SYSTEM = "http://highmed.org/fhir/CodeSystem/organization";
 	String ENDPOINT_IDENTIFIER_SYSTEM = "http://highmed.org/fhir/CodeSystem/endpoint";
 
-	String BUNDLE_IDENTIFIER_SYSTEM = "http://highmed.org/fhir/CodeSystem/bundle";
-	String WHITE_LIST_BUNDLE_IDENTIFIER_VALUE = "HiGHmed_white_list";
+	String CODESYSTEM_HIGHMED_BUNDLE = "http://highmed.org/fhir/CodeSystem/bundle";
+	String CODESYSTEM_HIGHMED_BUNDLE_VALUE_WHITE_LIST = "HiGHmed_white_list";
 
 	String EXTENSION_PARTICIPATING_MEDIC_URI = "http://highmed.org/fhir/StructureDefinition/participating-medic";
 	String EXTENSION_QUERY_URI = "http://highmed.org/fhir/StructureDefinition/query";

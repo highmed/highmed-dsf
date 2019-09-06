@@ -26,7 +26,11 @@ public class CheckMultiMedicFeasibilityResults extends AbstractServiceDelegate
 	public void doExecute(DelegateExecution execution) throws Exception
 	{
 		doExecutePlugin(execution);
+		setTaskOutputs(execution);
+	}
 
+	private void setTaskOutputs(DelegateExecution execution)
+	{
 		List<SimpleCohortSizeResult> finalResult = (List<SimpleCohortSizeResult>) execution
 				.getVariable(Constants.VARIABLE_SIMPLE_COHORT_SIZE_QUERY_FINAL_RESULT);
 		List<OutputWrapper> outputs = (List<OutputWrapper>) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
