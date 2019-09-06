@@ -83,7 +83,7 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 			throw new IllegalStateException("Next process-id or message-name not definied");
 
 		Task task = new Task();
-		//task.setMeta(new Meta().addProfile(profile));
+		task.setMeta(new Meta().addProfile(profile));
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());

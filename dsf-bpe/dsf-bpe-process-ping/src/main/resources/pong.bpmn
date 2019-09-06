@@ -9,9 +9,10 @@
     <bpmn:endEvent id="EndEvent_1ivxrjg">
       <bpmn:extensionElements>
         <camunda:inputOutput>
-          <camunda:inputParameter name="messageName">pong</camunda:inputParameter>
+          <camunda:inputParameter name="messageName">pongMessage</camunda:inputParameter>
           <camunda:inputParameter name="versionTag">1.0.0</camunda:inputParameter>
           <camunda:inputParameter name="processDefinitionKey">ping</camunda:inputParameter>
+          <camunda:inputParameter name="profile">http://highmed.org/fhir/StructureDefinition/highmed-task-pong</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_1ism9wt</bpmn:incoming>
@@ -28,7 +29,7 @@
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="SequenceFlow_1ism9wt" sourceRef="ServiceTask_0ko681m" targetRef="EndEvent_1ivxrjg" />
   </bpmn:process>
-  <bpmn:message id="Message_0u91abp" name="ping" />
+  <bpmn:message id="Message_0u91abp" name="pingMessage" />
   <bpmn:message id="Message_1h0kvyq" name="pong" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="pong">
