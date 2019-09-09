@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<StructureDefinition xmlns="http://hl7.org/fhir">
+  <url value="http://highmed.org/fhir/StructureDefinition/highmed-task-execute-update-resources" />
+  <version value="0.1.0" />
+  <name value="TaskExecuteUpdateResources" />
+  <status value="active" />
+  <fhirVersion value="4.0.0" />
+  <kind value="resource" />
+  <abstract value="false" />
+  <type value="Task" />
+  <baseDefinition value="http://highmed.org/fhir/StructureDefinition/highmed-task-base" />
+  <derivation value="constraint" />
+  <differential>
+    <element id="Task.instantiatesUri">
+      <path value="Task.instantiatesUri" />
+      <fixedUri value="http://highmed.org/bpe/Process/executeUpdateResources/1.0.0" />
+    </element>
+    <element id="Task.input:bundle">
+      <path value="Task.input" />
+      <sliceName value="bundle" />
+      <min value="1" />
+      <max value="1" />
+    </element>
+    <element id="Task.input:bundle.type.coding.system">
+      <path value="Task.input.type.coding.system" />
+      <fixedUri value="http://highmed.org/fhir/CodeSystem/task-input" />
+    </element>
+    <element id="Task.input:bundle.type.coding.code">
+      <path value="Task.input.type.coding.code" />
+      <fixedCode value="bundle-reference" />
+    </element>
+    <element id="Task.input:bundle.value[x]">
+      <path value="Task.input.value[x]" />
+      <type>
+        <code value="Reference" />
+      </type>
+    </element>
+    <element id="Task.input:endpoint">
+      <path value="Task.input" />
+      <sliceName value="endpoint" />
+      <min value="1" />
+      <max value="1" />
+    </element>
+    <element id="Task.input:endpoint.type.coding.system">
+      <path value="Task.input.type.coding.system" />
+      <fixedUri value="http://highmed.org/fhir/CodeSystem/task-input" />
+    </element>
+    <element id="Task.input:endpoint.type.coding.code">
+      <path value="Task.input.type.coding.code" />
+      <fixedCode value="endpoint-address" />
+    </element>
+    <element id="Task.input:endpoint.value[x]">
+      <path value="Task.input.value[x]" />
+      <type>
+        <code value="url" />
+      </type>
+    </element>
+  </differential>
+</StructureDefinition>

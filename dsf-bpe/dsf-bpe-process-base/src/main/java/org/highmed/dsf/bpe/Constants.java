@@ -30,6 +30,7 @@ public interface Constants
 	String CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_BUNDLE_REFERENCE = "bundle-reference";
 	String CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_RESEARCH_STUDY_REFERENCE = "research-study-reference";
 	String CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_ENDPOINT_ADDRESS = "endpoint-address";
+	String CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_TARGET_IDENTIFIER = "target-identifier";
 	String CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_ERROR_MESSAGE = "error";
 
 	String NAMINGSYSTEM_HIGHMED_FEASIBILITY = "http://highmed.org/fhir/NamingSystem/feasibility";

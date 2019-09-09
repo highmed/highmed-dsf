@@ -1,14 +1,14 @@
 package org.highmed.dsf.bpe.service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
@@ -17,6 +17,8 @@ import org.highmed.dsf.fhir.variables.MultiInstanceTarget;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargets;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargetsValues;
 import org.highmed.fhir.client.WebserviceClient;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -25,17 +27,18 @@ public class SelectResourceAndTargets extends AbstractServiceDelegate implements
 {
 	private static final Logger logger = LoggerFactory.getLogger(SelectResourceAndTargets.class);
 
-	private static final String PARAMETER_TARGET_IDENTIFIER = "target-identifier";
-	private static final String PARAMETER_BUNDLE_ID = "bundle-id";
 	private static final String BUNDLE_ID_PATTERN_STRING = "Bundle/.+";
 	private static final Pattern BUNDLE_ID_PATTERN = Pattern.compile(BUNDLE_ID_PATTERN_STRING);
 
 	private final OrganizationProvider organizationProvider;
+	private final TaskHelper taskHelper;
 
-	public SelectResourceAndTargets(OrganizationProvider organizationProvider, WebserviceClient webserviceClient, TaskHelper taskHelper)
+	public SelectResourceAndTargets(OrganizationProvider organizationProvider, WebserviceClient webserviceClient,
+			TaskHelper taskHelper)
 	{
 		super(webserviceClient, taskHelper);
 		this.organizationProvider = organizationProvider;
+		this.taskHelper = taskHelper;
 	}
 
 	@Override
@@ -51,32 +54,30 @@ public class SelectResourceAndTargets extends AbstractServiceDelegate implements
 				getClass().getName(), execution.getProcessInstanceId(), execution.getBusinessKey(),
 				execution.getVariables(), execution.getVariablesLocal());
 
-		@SuppressWarnings("unchecked")
-		Map<String, List<String>> queryParameters = (Map<String, List<String>>) execution
-				.getVariable(Constants.VARIABLE_QUERY_PARAMETERS);
+		Task task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
+		Supplier<Stream<Reference>> bundles = () -> taskHelper
+				.getInputParameterReferenceValues(task, Constants.CODESYSTEM_HIGHMED_TASK_INPUT,
+						Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_BUNDLE_REFERENCE);
 
-		List<String> bundleIds = queryParameters.get(PARAMETER_BUNDLE_ID);
-		logger.debug(PARAMETER_BUNDLE_ID + ": {}", bundleIds);
-
-		if (bundleIds.size() != 1)
+		if (bundles.get().count() != 1)
 		{
-			logger.error("Process parameter {} contains unexpected number of Bundle IDs, expected 1, got {}",
-					PARAMETER_BUNDLE_ID, bundleIds.size());
-			throw new RuntimeException("Process parameter " + PARAMETER_BUNDLE_ID
-					+ " contains unexpected number of Bundle IDs, expected 1, got " + bundleIds.size());
+			logger.error("Task input contains unexpected number of Bundle IDs, expected 1, got {}",
+					bundles.get().count());
+			throw new RuntimeException(
+					"Task input contains unexpected number of Bundle IDs, expected 1, got " + bundles.get().count());
 		}
-		else if (bundleIds.stream().anyMatch(id -> !BUNDLE_ID_PATTERN.matcher(id).matches()))
+		else if (bundles.get().anyMatch(reference -> !BUNDLE_ID_PATTERN.matcher(reference.getReference()).matches()))
 		{
-			logger.error("Process parameter {} contains unexpected ids not matching {}", PARAMETER_BUNDLE_ID,
-					BUNDLE_ID_PATTERN_STRING);
-			throw new RuntimeException("Process parameter " + PARAMETER_BUNDLE_ID
-					+ " contains unexpected ids not matching " + BUNDLE_ID_PATTERN_STRING);
+			logger.error("Task input contains unexpected ids not matching {}", BUNDLE_ID_PATTERN_STRING);
+			throw new RuntimeException("Task input contains unexpected ids not matching " + BUNDLE_ID_PATTERN_STRING);
 		}
 
-		List<String> targetIdentifierSearchParameters = queryParameters.get(PARAMETER_TARGET_IDENTIFIER);
-		logger.debug(PARAMETER_TARGET_IDENTIFIER + ": {}", targetIdentifierSearchParameters);
+		String bundleId = bundles.get().findFirst().get().getId();
+		execution.setVariable(Constants.VARIABLE_BUNDLE_ID, bundleId);
 
-		execution.setVariable(Constants.VARIABLE_BUNDLE_ID, bundleIds.get(0));
+		List<String> targetIdentifierSearchParameters = taskHelper
+				.getInputParameterStringValues(task, Constants.CODESYSTEM_HIGHMED_TASK_INPUT,
+						Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_TARGET_IDENTIFIER).collect(Collectors.toList());
 
 		List<MultiInstanceTarget> targets = targetIdentifierSearchParameters.stream()
 				.flatMap(organizationProvider::searchRemoteOrganizationsIdentifiers)

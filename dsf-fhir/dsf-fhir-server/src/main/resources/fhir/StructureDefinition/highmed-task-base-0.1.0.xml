@@ -16,6 +16,10 @@
       <path value="Task.instantiatesUri" />
       <min value="1" />
     </element>
+    <element id="Task.intent">
+      <path value="Task.intent" />
+      <fixedCode value="order" />
+    </element>
     <element id="Task.authoredOn">
       <path value="Task.authoredOn" />
       <min value="1" />
