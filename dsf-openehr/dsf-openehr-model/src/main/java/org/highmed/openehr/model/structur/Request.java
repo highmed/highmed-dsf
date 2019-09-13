@@ -3,11 +3,14 @@ package org.highmed.openehr.model.structur;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class Request
 {
 	private String q;
-	private int offset;
-	private int fetch;
+	private String offset;
+	private String fetch;
 
 	private Map<String, Object> queryParameters;
 
@@ -26,22 +29,22 @@ public class Request
 		this.q = q;
 	}
 
-	public int getOffset()
+	public String getOffset()
 	{
 		return offset;
 	}
 
-	public void setOffset(int offset)
+	public void setOffset(String offset)
 	{
 		this.offset = offset;
 	}
 
-	public int getFetch()
+	public String getFetch()
 	{
 		return fetch;
 	}
 
-	public void setFetch(int fetch)
+	public void setFetch(String fetch)
 	{
 		this.fetch = fetch;
 	}

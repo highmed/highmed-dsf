@@ -20,7 +20,7 @@ public class RowElementDeserializer extends JsonDeserializer<RowElement>
         if (node.isInt())
             return new DV_Count(node.asInt());
         else {
-            return new DV_Other(node.asText());
+            return new DV_Other(node.toString());
         }
     }
 }
