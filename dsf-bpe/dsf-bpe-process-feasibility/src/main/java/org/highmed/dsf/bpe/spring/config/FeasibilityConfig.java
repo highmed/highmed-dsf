@@ -13,9 +13,10 @@ import org.highmed.dsf.bpe.service.ExecuteFeasibilityQueries;
 import org.highmed.dsf.bpe.service.SelectRequestMedics;
 import org.highmed.dsf.bpe.service.SelectResponseMedics;
 import org.highmed.dsf.bpe.service.StoreFeasibilityResults;
-import org.highmed.dsf.fhir.client.WebserviceClientProvider;
+import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
+import org.highmed.dsf.openehr.client.OpenehrWebserviceClientProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,7 +25,10 @@ import org.springframework.context.annotation.Configuration;
 public class FeasibilityConfig
 {
 	@Autowired
-	private WebserviceClientProvider clientProvider;
+	private FhirWebserviceClientProvider fhirClientProvider;
+
+	@Autowired
+	private OpenehrWebserviceClientProvider openehrClientProvider;
 
 	@Autowired
 	private OrganizationProvider organizationProvider;
@@ -41,66 +45,66 @@ public class FeasibilityConfig
 	@Bean
 	public DownloadFeasibilityResources downloadFeasibilityResources()
 	{
-		return new DownloadFeasibilityResources(organizationProvider, clientProvider, taskHelper);
+		return new DownloadFeasibilityResources(organizationProvider, fhirClientProvider, taskHelper);
 	}
 
 	@Bean
 	public CheckFeasibilityResources checkFeasibilityResources()
 	{
-		return new CheckFeasibilityResources(clientProvider.getLocalWebserviceClient(), taskHelper);
+		return new CheckFeasibilityResources(fhirClientProvider.getLocalWebserviceClient(), taskHelper);
 	}
 
 	@Bean
 	public SelectRequestMedics selectRequestMedics()
 	{
-		return new SelectRequestMedics(organizationProvider, clientProvider.getLocalWebserviceClient(), taskHelper);
+		return new SelectRequestMedics(organizationProvider, fhirClientProvider.getLocalWebserviceClient(), taskHelper);
 	}
 
 	@Bean
 	public ExecuteFeasibilityQueries executeFeasibilityQueries()
 	{
-		return new ExecuteFeasibilityQueries(organizationProvider, clientProvider.getLocalWebserviceClient(), taskHelper);
+		return new ExecuteFeasibilityQueries(organizationProvider, fhirClientProvider.getLocalWebserviceClient(), openehrClientProvider.getWebserviceClient(), taskHelper);
 	}
 
 	@Bean
 	public CheckSingleMedicFeasibilityResults checkSingleMedicFeasibilityResults()
 	{
-		return new CheckSingleMedicFeasibilityResults(clientProvider.getLocalWebserviceClient(), taskHelper);
+		return new CheckSingleMedicFeasibilityResults(fhirClientProvider.getLocalWebserviceClient(), taskHelper);
 	}
 
 	@Bean
 	public SelectResponseMedics selectResponseMedics()
 	{
-		return new SelectResponseMedics(organizationProvider, taskHelper, clientProvider.getLocalWebserviceClient());
+		return new SelectResponseMedics(organizationProvider, taskHelper, fhirClientProvider.getLocalWebserviceClient());
 	}
 
 	@Bean
 	public StoreFeasibilityResults storeFeasibilityResults()
 	{
-		return new StoreFeasibilityResults(organizationProvider, clientProvider.getLocalWebserviceClient(), taskHelper);
+		return new StoreFeasibilityResults(organizationProvider, fhirClientProvider.getLocalWebserviceClient(), taskHelper);
 	}
 
 	@Bean
 	public CalculateSimpleFeasibilityResults calculateSimpleFeasibilityResults()
 	{
-		return new CalculateSimpleFeasibilityResults(clientProvider.getLocalWebserviceClient(), taskHelper);
+		return new CalculateSimpleFeasibilityResults(fhirClientProvider.getLocalWebserviceClient(), taskHelper);
 	}
 
 	@Bean
 	public CheckMultiMedicFeasibilityResults checkMultiMedicFeasibilityResults()
 	{
-		return new CheckMultiMedicFeasibilityResults(clientProvider.getLocalWebserviceClient(), taskHelper);
+		return new CheckMultiMedicFeasibilityResults(fhirClientProvider.getLocalWebserviceClient(), taskHelper);
 	}
 
 	@Bean
 	public SendFeasibilityRequest sendFeasibilityRequest()
 	{
-		return new SendFeasibilityRequest(organizationProvider, clientProvider, taskHelper);
+		return new SendFeasibilityRequest(organizationProvider, fhirClientProvider, taskHelper);
 	}
 
 	@Bean
 	public SendFeasibilityResults sendCohortSizeResultToMedic()
 	{
-		return new SendFeasibilityResults(organizationProvider, clientProvider, taskHelper);
+		return new SendFeasibilityResults(organizationProvider, fhirClientProvider, taskHelper);
 	}
 }

@@ -10,8 +10,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.highmed.dsf.bpe.Constants;
-import org.highmed.dsf.fhir.client.WebserviceClientProvider;
-import org.highmed.dsf.fhir.organization.OrganizationProvider;
+import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
@@ -24,11 +23,11 @@ public class OrganizationProviderImpl implements OrganizationProvider, Initializ
 {
 	private static final Logger logger = LoggerFactory.getLogger(OrganizationProviderImpl.class);
 
-	private final WebserviceClientProvider clientProvider;
+	private final FhirWebserviceClientProvider clientProvider;
 	private final String organizationIdentifierLocalValue;
 	private final Identifier localIdentifier;
 
-	public OrganizationProviderImpl(WebserviceClientProvider clientProvider, String organizationIdentifierLocalValue)
+	public OrganizationProviderImpl(FhirWebserviceClientProvider clientProvider, String organizationIdentifierLocalValue)
 	{
 		this.clientProvider = clientProvider;
 		this.organizationIdentifierLocalValue = organizationIdentifierLocalValue;

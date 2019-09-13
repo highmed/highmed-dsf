@@ -50,8 +50,8 @@ import org.highmed.dsf.fhir.spring.config.InitialDataLoadConfig;
 import org.highmed.dsf.fhir.test.FhirEmbeddedPostgresWithLiquibase;
 import org.highmed.dsf.fhir.test.TestSuiteIntegrationTests;
 import org.highmed.dsf.fhir.test.X509Certificates;
-import org.highmed.fhir.client.WebserviceClient;
-import org.highmed.fhir.client.WebserviceClientJersey;
+import org.highmed.fhir.client.FhirWebserviceClient;
+import org.highmed.fhir.client.FhirWebserviceClientJersey;
 import org.highmed.fhir.client.WebsocketClient;
 import org.highmed.fhir.client.WebsocketClientTyrus;
 import org.hl7.fhir.r4.model.Bundle;
@@ -99,7 +99,7 @@ public abstract class AbstractIntegrationTest
 	private static final ReferenceExtractor extractor = new ReferenceExtractorImpl();
 
 	private static JettyServer fhirServer;
-	private static WebserviceClient webserviceClient;
+	private static FhirWebserviceClient webserviceClient;
 
 	@BeforeClass
 	public static void beforeClass() throws Exception
@@ -119,10 +119,10 @@ public abstract class AbstractIntegrationTest
 		fhirServer = startFhirServer();
 	}
 
-	private static WebserviceClient createWebserviceClient(KeyStore trustStore, KeyStore keyStore,
+	private static FhirWebserviceClient createWebserviceClient(KeyStore trustStore, KeyStore keyStore,
 			String keyStorePassword, FhirContext fhirContext)
 	{
-		return new WebserviceClientJersey(BASE_URL, trustStore, keyStore, keyStorePassword, null, null, null, 0, 0,
+		return new FhirWebserviceClientJersey(BASE_URL, trustStore, keyStore, keyStorePassword, null, null, null, 0, 0,
 				null, fhirContext);
 	}
 
@@ -335,7 +335,7 @@ public abstract class AbstractIntegrationTest
 		initialDataLoadConfig.onContextRefreshedEvent(null);
 	}
 
-	protected static WebserviceClient getWebserviceClient()
+	protected static FhirWebserviceClient getWebserviceClient()
 	{
 		return webserviceClient;
 	}

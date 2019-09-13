@@ -8,7 +8,7 @@ import org.highmed.dsf.bpe.service.LogPing;
 import org.highmed.dsf.bpe.service.LogPong;
 import org.highmed.dsf.bpe.service.SelectPingTargets;
 import org.highmed.dsf.bpe.service.SelectPongTarget;
-import org.highmed.dsf.fhir.client.WebserviceClientProvider;
+import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,7 @@ import org.springframework.context.annotation.Configuration;
 public class PingConfig
 {
 	@Autowired
-	private WebserviceClientProvider clientProvider;
+	private FhirWebserviceClientProvider clientProvider;
 
 	@Autowired
 	private OrganizationProvider organizationProvider;

@@ -7,7 +7,7 @@ import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.fhir.client.WebserviceClient;
+import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.ResearchStudy;
@@ -25,7 +25,7 @@ public class CheckFeasibilityResources extends AbstractServiceDelegate
 	public static final int MIN_PARTICIPATING_MEDICS = 3;
 	public static final int MIN_COHORT_DEFINITIONS = 1;
 
-	public CheckFeasibilityResources(WebserviceClient webserviceClient, TaskHelper taskHelper)
+	public CheckFeasibilityResources(FhirWebserviceClient webserviceClient, TaskHelper taskHelper)
 	{
 		super(webserviceClient, taskHelper);
 	}

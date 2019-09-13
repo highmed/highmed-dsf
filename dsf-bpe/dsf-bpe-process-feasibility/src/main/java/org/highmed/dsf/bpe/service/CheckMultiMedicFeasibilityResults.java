@@ -8,7 +8,7 @@ import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.OutputWrapper;
 import org.highmed.dsf.bpe.variables.SimpleCohortSizeResult;
-import org.highmed.fhir.client.WebserviceClient;
+import org.highmed.fhir.client.FhirWebserviceClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +17,7 @@ public class CheckMultiMedicFeasibilityResults extends AbstractServiceDelegate
 {
 	private static final Logger logger = LoggerFactory.getLogger(CheckMultiMedicFeasibilityResults.class);
 
-	public CheckMultiMedicFeasibilityResults(WebserviceClient webserviceClient, TaskHelper taskHelper)
+	public CheckMultiMedicFeasibilityResults(FhirWebserviceClient webserviceClient, TaskHelper taskHelper)
 	{
 		super(webserviceClient, taskHelper);
 	}

@@ -1,0 +1,8 @@
+org/highmed/openehr/model/structur/Request.class
+org/highmed/openehr/model/structur/ResultSet.class
+org/highmed/openehr/model/datatypes/DV_Count.class
+org/highmed/openehr/model/structur/Column.class
+org/highmed/openehr/model/structur/Meta.class
+org/highmed/openehr/deserializer/RowElementDeserializer.class
+org/highmed/openehr/model/structur/RowElement.class
+org/highmed/openehr/model/datatypes/DV_Other.class

@@ -3,15 +3,13 @@ package org.highmed.dsf.bpe.service;
 import java.util.Objects;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.JavaDelegate;
-import org.checkerframework.checker.units.qual.A;
 import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.MultiInstanceTarget;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargetValues;
-import org.highmed.fhir.client.WebserviceClient;
+import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Task;
@@ -26,7 +24,7 @@ public class SelectPongTarget extends AbstractServiceDelegate implements Initial
 	private final OrganizationProvider organizationProvider;
 	private final TaskHelper taskHelper;
 
-	public SelectPongTarget(OrganizationProvider organizationProvider, WebserviceClient webserviceClient, TaskHelper taskHelper)
+	public SelectPongTarget(OrganizationProvider organizationProvider, FhirWebserviceClient webserviceClient, TaskHelper taskHelper)
 	{
 		super(webserviceClient, taskHelper);
 		this.organizationProvider = organizationProvider;

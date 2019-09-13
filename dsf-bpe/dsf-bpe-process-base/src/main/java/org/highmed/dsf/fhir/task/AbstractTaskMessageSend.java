@@ -7,10 +7,10 @@ import java.util.stream.Stream;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
-import org.highmed.dsf.fhir.client.WebserviceClientProvider;
+import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.variables.MultiInstanceTarget;
-import org.highmed.fhir.client.WebserviceClient;
+import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Meta;
@@ -28,10 +28,10 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractTaskMessageSend.class);
 
-	protected final WebserviceClientProvider clientProvider;
+	protected final FhirWebserviceClientProvider clientProvider;
 	protected final OrganizationProvider organizationProvider;
 
-	public AbstractTaskMessageSend(OrganizationProvider organizationProvider, WebserviceClientProvider clientProvider, TaskHelper taskHelper)
+	public AbstractTaskMessageSend(OrganizationProvider organizationProvider, FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
 	{
 		super(clientProvider.getLocalWebserviceClient(), taskHelper);
 		this.organizationProvider = organizationProvider;
@@ -124,7 +124,7 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 
 		additionalInputParameters.forEach(task.getInput()::add);
 
-		WebserviceClient client;
+		FhirWebserviceClient client;
 		if (task.getRequester().equalsDeep(task.getRestriction().getRecipient().get(0)))
 		{
 			logger.trace("Using local webservice client");

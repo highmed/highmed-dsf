@@ -16,7 +16,7 @@ import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.MultiInstanceTarget;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargets;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargetsValues;
-import org.highmed.fhir.client.WebserviceClient;
+import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
@@ -33,7 +33,7 @@ public class SelectResourceAndTargets extends AbstractServiceDelegate implements
 	private final OrganizationProvider organizationProvider;
 	private final TaskHelper taskHelper;
 
-	public SelectResourceAndTargets(OrganizationProvider organizationProvider, WebserviceClient webserviceClient,
+	public SelectResourceAndTargets(OrganizationProvider organizationProvider, FhirWebserviceClient webserviceClient,
 			TaskHelper taskHelper)
 	{
 		super(webserviceClient, taskHelper);

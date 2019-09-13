@@ -1,0 +1,3 @@
+org/highmed/openehr/client/OpenehrWebserviceClient.class
+org/highmed/openehr/client/OpenehrWebserviceClientJersey.class
+org/highmed/openehr/client/AbstractJerseyClient.class

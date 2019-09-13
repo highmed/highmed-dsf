@@ -13,11 +13,11 @@ import java.util.stream.Collectors;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
-import org.highmed.dsf.fhir.client.WebserviceClientProvider;
+import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.OutputWrapper;
-import org.highmed.fhir.client.WebserviceClient;
+import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
@@ -33,10 +33,10 @@ import org.springframework.beans.factory.InitializingBean;
 @SuppressWarnings("unchecked")
 public class UpdateWhiteList extends AbstractServiceDelegate implements InitializingBean
 {
-	private final WebserviceClientProvider clientProvider;
+	private final FhirWebserviceClientProvider clientProvider;
 	private final OrganizationProvider organizationProvider;
 
-	public UpdateWhiteList(WebserviceClientProvider clientProvider, OrganizationProvider organizationProvider,
+	public UpdateWhiteList(FhirWebserviceClientProvider clientProvider, OrganizationProvider organizationProvider,
 			TaskHelper taskHelper)
 	{
 		super(clientProvider.getLocalWebserviceClient(), taskHelper);
@@ -55,7 +55,7 @@ public class UpdateWhiteList extends AbstractServiceDelegate implements Initiali
 	@Override
 	public void doExecute(DelegateExecution execution) throws Exception
 	{
-		WebserviceClient client = clientProvider.getLocalWebserviceClient();
+		FhirWebserviceClient client = clientProvider.getLocalWebserviceClient();
 
 		Bundle searchSet = client.search(Organization.class,
 				Map.of("active", Collections.singletonList("true"), "identifier",
