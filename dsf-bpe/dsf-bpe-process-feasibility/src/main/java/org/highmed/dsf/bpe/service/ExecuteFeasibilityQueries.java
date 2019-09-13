@@ -27,6 +27,7 @@ public class ExecuteFeasibilityQueries extends AbstractServiceDelegate implement
 {
 
 	private static final Logger logger = LoggerFactory.getLogger(ExecuteFeasibilityQueries.class);
+	public static final String SIMPLE_FEASIBILITY_QUERY_PREFIX = "select count";
 
 	private final OrganizationProvider organizationProvider;
 
@@ -51,15 +52,31 @@ public class ExecuteFeasibilityQueries extends AbstractServiceDelegate implement
 		Map<String, String> results = new HashMap<>();
 		List<Group> cohortDefinitions = (List<Group>) execution.getVariable(Constants.VARIABLE_COHORTS);
 
-		cohortDefinitions.forEach(group -> executeQuery(group,results));
+		cohortDefinitions.forEach(group -> {
+			checkQuery(group);
+			executeQuery(group, results);
+		});
 
 		Identifier identifier = organizationProvider.getLocalIdentifier();
-		MultiInstanceResult multiInstanceResult = new MultiInstanceResult(identifier.getSystem() + "|" + identifier.getValue(), results);
+		MultiInstanceResult multiInstanceResult = new MultiInstanceResult(
+				identifier.getSystem() + "|" + identifier.getValue(), results);
 
 		execution.setVariable(Constants.VARIABLE_MULTI_INSTANCE_RESULT, multiInstanceResult);
 	}
 
-	private void executeQuery(Group group, Map<String, String> results) {
+	private void checkQuery(Group group)
+	{
+		String aqlQuery = getAqlQuery(group).toLowerCase();
+
+		if (!aqlQuery.startsWith(SIMPLE_FEASIBILITY_QUERY_PREFIX))
+		{
+			logger.error("Cannot execute feasibility query, wrong format, expected query starting with '{}'", SIMPLE_FEASIBILITY_QUERY_PREFIX);
+			throw new IllegalArgumentException("Cannot execute feasibility query, wrong format, expected query starting with '" + SIMPLE_FEASIBILITY_QUERY_PREFIX + "'");
+		}
+	}
+
+	private void executeQuery(Group group, Map<String, String> results)
+	{
 		String aqlQuery = getAqlQuery(group);
 		logger.info("Executing aql-query '{}'", aqlQuery);
 
@@ -78,10 +95,11 @@ public class ExecuteFeasibilityQueries extends AbstractServiceDelegate implement
 		// TODO: fix TEXT_CQL to support AQL
 		List<Extension> queries = group.getExtension().stream()
 				.filter(extension -> extension.getUrl().equals(Constants.EXTENSION_QUERY_URI))
-				.filter(extension -> ((Expression) extension.getValue()).getLanguage() == Expression.ExpressionLanguage.TEXT_CQL)
-				.collect(Collectors.toList());
+				.filter(extension -> ((Expression) extension.getValue()).getLanguage()
+						== Expression.ExpressionLanguage.TEXT_CQL).collect(Collectors.toList());
 
-		if(queries.size() != 1) {
+		if (queries.size() != 1)
+		{
 			logger.error("Number of aql queries is not =1, got {}", queries.size());
 			throw new IllegalArgumentException("Number of aql queries is not =1, got " + queries.size());
 		}

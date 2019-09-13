@@ -20,6 +20,7 @@ import org.highmed.fhir.client.WebserviceClient;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
@@ -34,14 +35,14 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 
 	private static final String RESEARCH_STUDY_PREFIX = "ResearchStudy/";
 	private static final String GROUP_PREFIX = "Group/";
-	private static final String ORGANIZATION_PREFIX =  "Organization/";
+	private static final String ORGANIZATION_PREFIX = "Organization/";
 
 	private final OrganizationProvider organizationProvider;
 	private final WebserviceClientProvider clientProvider;
 	private final TaskHelper taskHelper;
 
-	public DownloadFeasibilityResources(OrganizationProvider organizationProvider, WebserviceClientProvider clientProvider,
-			TaskHelper taskHelper)
+	public DownloadFeasibilityResources(OrganizationProvider organizationProvider,
+			WebserviceClientProvider clientProvider, TaskHelper taskHelper)
 	{
 		super(clientProvider.getLocalWebserviceClient(), taskHelper);
 
@@ -86,8 +87,18 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 	private String getEndpointAddress(Task task)
 	{
 		Map<String, List<String>> searchParams = new HashMap<>();
-		searchParams.put("organization",
-				Collections.singletonList(task.getRequester().getReference().substring(ORGANIZATION_PREFIX.length())));
+
+		String requesterReference = task.getRequester().getReference();
+		if (requesterReference.startsWith(ORGANIZATION_PREFIX))
+		{
+			searchParams.put("organization",
+					Collections.singletonList(requesterReference.substring(ORGANIZATION_PREFIX.length())));
+		}
+		else
+		{
+			searchParams.put("organization",
+					Collections.singletonList(new IdType(organizationProvider.getLocalOrganization().getId()).getIdPart()));
+		}
 
 		WebserviceClient client = clientProvider.getLocalWebserviceClient();
 		Bundle bundle = client.search(Endpoint.class, searchParams);
@@ -126,12 +137,14 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 	{
 		List<Reference> researchStudyReferences = taskHelper
 				.getInputParameterReferenceValues(task, Constants.CODESYSTEM_HIGHMED_TASK_INPUT,
-						Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_RESEARCH_STUDY_REFERENCE).collect(Collectors.toList());
+						Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_RESEARCH_STUDY_REFERENCE)
+				.collect(Collectors.toList());
 
 		if (researchStudyReferences.size() != 1)
 		{
 			logger.error("Task input parameter {} contains unexpected number of ResearchStudy IDs, expected 1, got {}",
-					Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_RESEARCH_STUDY_REFERENCE, researchStudyReferences.size());
+					Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_RESEARCH_STUDY_REFERENCE,
+					researchStudyReferences.size());
 			throw new RuntimeException(
 					"Task input parameter " + Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_RESEARCH_STUDY_REFERENCE
 							+ " contains unexpected number of ResearchStudy IDs, expected 1, got "

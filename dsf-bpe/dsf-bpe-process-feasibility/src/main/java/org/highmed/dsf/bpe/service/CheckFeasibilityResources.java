@@ -55,20 +55,27 @@ public class CheckFeasibilityResources extends AbstractServiceDelegate
 				.filter(e -> e.getUrl().equals(Constants.EXTENSION_PARTICIPATING_MEDIC_URI))
 				.collect(Collectors.toList());
 
-		if (medics.size() < MIN_PARTICIPATING_MEDICS) {
+		if (medics.size() < MIN_PARTICIPATING_MEDICS)
+		{
 			logger.error("Number of participanting MeDICs is <{}, got {}", MIN_PARTICIPATING_MEDICS, medics.size());
-			throw new IllegalArgumentException("Number of participanting MeDICs is <" + MIN_PARTICIPATING_MEDICS + ", got " + medics.size());
+			throw new IllegalArgumentException(
+					"Number of participanting MeDICs is <" + MIN_PARTICIPATING_MEDICS + ", got " + medics.size());
 		}
 	}
 
 	private void checkNumberOfCohortDefinitions(List<Group> cohorts)
 	{
-		if (cohorts.size() < MIN_COHORT_DEFINITIONS)
+		int size = cohorts.size();
+		if (size < MIN_COHORT_DEFINITIONS)
+		{
 			logger.error("Number of defined cohorts is <{}, got {}", MIN_COHORT_DEFINITIONS, cohorts.size());
-			throw new IllegalArgumentException("Number of defined cohorts is <" + MIN_COHORT_DEFINITIONS + ", got " + cohorts.size());
+			throw new IllegalArgumentException(
+					"Number of defined cohorts is <" + MIN_COHORT_DEFINITIONS + ", got " + cohorts.size());
+		}
 	}
 
-	private void doExecutePlugin(DelegateExecution execution) {
+	private void doExecutePlugin(DelegateExecution execution)
+	{
 		// TODO: implement plugin system for individual checks in different medics, like:
 		//       - PI check
 		//       - Cohort characteristics check

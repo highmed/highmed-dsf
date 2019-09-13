@@ -39,7 +39,7 @@
                   "valueExpression":[
                      {
                         "language":"text/cql",
-                        "expression":"SELECT * FROM ehr WHERE gender = male AND age > 40;"
+                        "expression":"SELECT COUNT(e) FROM EHR e"
                      }
                   ]
                }
@@ -87,7 +87,7 @@
                   "valueExpression":[
                      {
                         "language":"text/cql",
-                        "expression":"SELECT * FROM ehr WHERE gender = female AND age > 50;"
+                        "expression":"SELECT COUNT(e) FROM EHR e"
                      }
                   ]
                }
