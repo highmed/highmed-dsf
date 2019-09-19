@@ -2,8 +2,6 @@ FROM openjdk:11-slim
 MAINTAINER Hauke Hund <hauke.hund@hs-heilbronn.de>
 
 EXPOSE 8080
-VOLUME /opt/bpe/conf
-#/opt/bpe/log
 
 RUN adduser --system --no-create-home --group java
 WORKDIR /opt/bpe
