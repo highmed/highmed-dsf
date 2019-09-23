@@ -29,6 +29,14 @@
         <profile value="http://highmed.org/fhir/StructureDefinition/query" />
       </type>
     </element>
+    <element id="Group.extension:query.value[x].language">
+      <path value="Group.extension.value[x].language" />
+      <short value="application/x-fhir-query | application/x-aql-query " />
+      <binding>
+        <strength value="extensible" />
+        <valueSet value="http://highmed.org/fhir/ValueSet/query-type" />
+      </binding>
+    </element>
     <element id="Group.actual">
       <path value="Group.actual" />
       <fixedBoolean value="true" />

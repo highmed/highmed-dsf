@@ -38,7 +38,7 @@
                   "url":"http://highmed.org/fhir/StructureDefinition/query",
                   "valueExpression":[
                      {
-                        "language":"text/cql",
+                        "language":"application/x-fhir-query",
                         "expression":"SELECT COUNT(e) FROM EHR e"
                      }
                   ]
@@ -86,7 +86,7 @@
                   "url":"http://highmed.org/fhir/StructureDefinition/query",
                   "valueExpression":[
                      {
-                        "language":"text/cql",
+                        "language":"application/x-fhir-query",
                         "expression":"SELECT COUNT(e) FROM EHR e"
                      }
                   ]

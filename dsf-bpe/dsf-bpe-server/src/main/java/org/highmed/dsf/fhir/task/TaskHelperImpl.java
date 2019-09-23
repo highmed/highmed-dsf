@@ -63,7 +63,7 @@ public class TaskHelperImpl implements TaskHelper
 	public Task setErrorOutput(Task task, String errorMessage, String step)
 	{
 		Task.TaskOutputComponent failedReason = new Task.TaskOutputComponent(new CodeableConcept(
-				new Coding(Constants.CODESYSTEM_HIGHMED_BPMN, Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_ERROR_MESSAGE,
+				new Coding(Constants.CODESYSTEM_HIGHMED_BPMN, Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE,
 						null)), new StringType(
 				"Process failed in step '" + step + "', reason: " + errorMessage));
 

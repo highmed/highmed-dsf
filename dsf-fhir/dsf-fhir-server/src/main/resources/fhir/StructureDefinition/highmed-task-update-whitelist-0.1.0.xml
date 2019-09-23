@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <url value="http://highmed.org/fhir/StructureDefinition/highmed-task-update-whitelist" />
+  <version value="0.1.0" />
   <name value="TaskUpdateWhiteList" />
-  <status value="draft" />
+  <status value="active" />
+  <date value="2019-05-21" />
   <fhirVersion value="4.0.0" />
   <kind value="resource" />
   <abstract value="false" />
@@ -10,9 +12,13 @@
   <baseDefinition value="http://highmed.org/fhir/StructureDefinition/highmed-task-base" />
   <derivation value="constraint" />
   <differential>
+    <element id="Task.input:message-name">
+      <path value="Task.input" />
+      <sliceName value="message-name" />
+    </element>
     <element id="Task.input:message-name.value[x]">
       <path value="Task.input.value[x]" />
-      <fixedString value="updateWhiteListMessage" />
+      <fixedString value="updateWhitelistMessage" />
     </element>
     <element id="Task.output:whitelist">
       <path value="Task.output" />

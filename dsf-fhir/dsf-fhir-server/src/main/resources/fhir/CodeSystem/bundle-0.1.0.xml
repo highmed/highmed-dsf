@@ -1,0 +1,21 @@
+<CodeSystem xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://hl7.org/fhir http://www.hl7.org/fhir/fhir-base.xsd">
+	<url value="http://highmed.org/fhir/CodeSystem/bundle" />
+	<version value="0.1.0" />
+	<name value="HiGHmed_Bundle_Values" />
+	<title value="HiGHmed Bundle Values" />
+	<status value="active" />
+	<experimental value="false" />
+	<date value="2019-09-23T09:40:00+02:00" />
+	<publisher value="HiGHmed" />
+	<description value="CodeSystem with standard values for Bundle resources" />
+	<caseSensitive value="true" />
+	<hierarchyMeaning value="grouped-by" />
+	<versionNeeded value="false" />
+	<content value="complete" />
+	<concept>
+		<code value="HiGHmed_white_list" />
+		<display value="HiGHmed White List" />
+		<definition value="White list identifying organizations as part of HiGHmed" />
+	</concept>
+</CodeSystem> 

@@ -4,6 +4,7 @@
   <version value="0.1.0" />
   <name value="TaskRequestUpdateResources" />
   <status value="active" />
+  <date value="2019-05-21" />
   <fhirVersion value="4.0.0" />
   <kind value="resource" />
   <abstract value="false" />
@@ -14,6 +15,18 @@
     <element id="Task.instantiatesUri">
       <path value="Task.instantiatesUri" />
       <fixedUri value="http://highmed.org/bpe/Process/requestUpdateResources/1.0.0" />
+    </element>
+    <element id="Task.input">
+      <path value="Task.input" />
+      <min value="5" />
+    </element>
+    <element id="Task.input:message-name">
+      <path value="Task.input" />
+      <sliceName value="message-name" />
+    </element>
+    <element id="Task.input:message-name.value[x]">
+      <path value="Task.input.value[x]" />
+      <fixedString value="requestUpdateResourcesMessage" />
     </element>
     <element id="Task.input:bundle">
       <path value="Task.input" />
