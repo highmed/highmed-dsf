@@ -14,6 +14,7 @@ import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.highmed.openehr.client.OpenehrWebserviceClient;
+import org.highmed.openehr.model.datatypes.DV_Count;
 import org.highmed.openehr.model.structur.ResultSet;
 import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.Extension;
@@ -55,7 +56,7 @@ public class ExecuteFeasibilityQueries extends AbstractServiceDelegate implement
 		Map<String, String> results = new HashMap<>();
 		List<Group> cohortDefinitions = (List<Group>) execution.getVariable(Constants.VARIABLE_COHORTS);
 
-		cohortDefinitions.forEach(group -> executeQuery(group,results));
+		cohortDefinitions.forEach(group -> executeQuery(group, results));
 
 		Identifier identifier = organizationProvider.getLocalIdentifier();
 		MultiInstanceResult multiInstanceResult = new MultiInstanceResult(identifier.getSystem() + "|" + identifier.getValue(), results);
@@ -70,9 +71,9 @@ public class ExecuteFeasibilityQueries extends AbstractServiceDelegate implement
 		IdType groupId = new IdType(group.getId());
 		String groupIdString = groupId.getResourceType() + "/" + groupId.getIdPart();
 
-//		ResultSet result = openehrWebserviceClient.query(aqlQuery, null);
-//		int count = (int) result.getRow(0).get(0).getValue();
-		int count = 10;
+		ResultSet result = openehrWebserviceClient.query(aqlQuery, null);
+		int count = ((DV_Count) result.getRow(0).get(0)).getValue();
+//		int count = 10;
 
 		results.put(groupIdString, String.valueOf(count));
 	}
@@ -82,7 +83,7 @@ public class ExecuteFeasibilityQueries extends AbstractServiceDelegate implement
 		// TODO: fix TEXT_CQL to support AQL
 		List<Extension> queries = group.getExtension().stream()
 				.filter(extension -> extension.getUrl().equals(Constants.EXTENSION_QUERY_URI))
-				.filter(extension -> ((Expression) extension.getValue()).getLanguage() == Expression.ExpressionLanguage.TEXT_CQL)
+				.filter(extension -> ((Expression) extension.getValue()).getLanguage() == Expression.ExpressionLanguage.APPLICATION_XFHIRQUERY)
 				.collect(Collectors.toList());
 
 		if(queries.size() != 1) {
