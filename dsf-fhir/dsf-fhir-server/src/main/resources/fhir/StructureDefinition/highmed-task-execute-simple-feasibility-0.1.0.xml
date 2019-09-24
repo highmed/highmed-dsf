@@ -34,6 +34,11 @@
       <min value="1" />
       <max value="1" />
     </element>
+    <element id="Task.input:research-study.type.coding">
+      <path value="Task.input.type.coding" />
+      <min value="1" />
+      <max value="1" />
+    </element>
     <element id="Task.input:research-study.type.coding.system">
       <path value="Task.input.type.coding.system" />
       <fixedUri value="http://highmed.org/fhir/CodeSystem/task-input" />

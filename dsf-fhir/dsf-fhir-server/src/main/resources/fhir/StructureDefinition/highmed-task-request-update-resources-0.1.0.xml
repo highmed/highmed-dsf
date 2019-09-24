@@ -34,6 +34,11 @@
       <min value="1" />
       <max value="1" />
     </element>
+    <element id="Task.input:bundle.type.coding">
+      <path value="Task.input.type.coding" />
+      <min value="1" />
+      <max value="1" />
+    </element>
     <element id="Task.input:bundle.type.coding.system">
       <path value="Task.input.type.coding.system" />
       <fixedUri value="http://highmed.org/fhir/CodeSystem/task-input" />
@@ -51,6 +56,11 @@
     <element id="Task.input:target-identifier">
       <path value="Task.input" />
       <sliceName value="target-identifier" />
+      <min value="1" />
+      <max value="1" />
+    </element>
+    <element id="Task.input:target-identifier.type.coding">
+      <path value="Task.input.type.coding" />
       <min value="1" />
       <max value="1" />
     </element>

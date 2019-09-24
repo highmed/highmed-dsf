@@ -33,6 +33,11 @@
       <sliceName value="singleResult" />
       <min value="1" />
     </element>
+    <element id="Task.input:singleResult.type.coding">
+      <path value="Task.input.type.coding" />
+      <min value="1" />
+      <max value="1" />
+    </element>
     <element id="Task.input:singleResult.type.coding.system">
       <path value="Task.input.type.coding.system" />
       <fixedUri value="http://highmed.org/fhir/NamingSystem/feasibility" />
