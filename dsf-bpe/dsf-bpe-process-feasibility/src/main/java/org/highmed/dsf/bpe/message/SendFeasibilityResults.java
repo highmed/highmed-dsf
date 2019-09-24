@@ -7,7 +7,7 @@ import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.Constants;
-import org.highmed.dsf.fhir.client.WebserviceClientProvider;
+import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.AbstractTaskMessageSend;
 import org.highmed.dsf.fhir.task.TaskHelper;
@@ -20,7 +20,7 @@ import org.hl7.fhir.r4.model.Task;
 public class SendFeasibilityResults extends AbstractTaskMessageSend
 {
 	public SendFeasibilityResults(OrganizationProvider organizationProvider,
-			WebserviceClientProvider clientProvider, TaskHelper taskHelper)
+			FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
 	{
 		super(organizationProvider, clientProvider, taskHelper);
 	}

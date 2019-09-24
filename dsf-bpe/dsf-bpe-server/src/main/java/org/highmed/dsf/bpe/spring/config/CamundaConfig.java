@@ -8,7 +8,7 @@ import org.camunda.bpm.engine.spring.SpringProcessEngineConfiguration;
 import org.highmed.dsf.bpe.listener.DefaultBpmnParseListener;
 import org.highmed.dsf.bpe.listener.EndListener;
 import org.highmed.dsf.bpe.listener.StartListener;
-import org.highmed.dsf.fhir.client.WebserviceClientProvider;
+import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +34,7 @@ public class CamundaConfig
 	private String dbPasswordCamunda;
 
 	@Autowired
-	private WebserviceClientProvider clientProvider;
+	private FhirWebserviceClientProvider clientProvider;
 
 	@Bean
 	public DataSourceTransactionManager transactionManager()

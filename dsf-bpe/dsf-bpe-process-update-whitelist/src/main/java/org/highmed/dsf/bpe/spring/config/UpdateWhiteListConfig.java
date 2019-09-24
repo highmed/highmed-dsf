@@ -3,7 +3,7 @@ package org.highmed.dsf.bpe.spring.config;
 import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
 import org.highmed.dsf.bpe.plugin.UpdateWhiteListPlugin;
 import org.highmed.dsf.bpe.service.UpdateWhiteList;
-import org.highmed.dsf.fhir.client.WebserviceClientProvider;
+import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
 public class UpdateWhiteListConfig
 {
 	@Autowired
-	private WebserviceClientProvider clientProvider;
+	private FhirWebserviceClientProvider clientProvider;
 
 	@Autowired
 	private OrganizationProvider organizationProvider;

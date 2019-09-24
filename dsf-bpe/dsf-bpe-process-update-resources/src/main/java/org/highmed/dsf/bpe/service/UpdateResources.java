@@ -11,9 +11,9 @@ import javax.ws.rs.WebApplicationException;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
-import org.highmed.dsf.fhir.client.WebserviceClientProvider;
+import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.fhir.client.WebserviceClient;
+import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Reference;
@@ -31,11 +31,11 @@ public class UpdateResources extends AbstractServiceDelegate implements Initiali
 
 	private static final Logger logger = LoggerFactory.getLogger(UpdateResources.class);
 
-	private final WebserviceClientProvider clientProvider;
+	private final FhirWebserviceClientProvider clientProvider;
 	private final TaskHelper taskHelper;
 	private final FhirContext context;
 
-	public UpdateResources(WebserviceClientProvider clientProvider, TaskHelper taskHelper, FhirContext context)
+	public UpdateResources(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper, FhirContext context)
 	{
 		super(clientProvider.getLocalWebserviceClient(), taskHelper);
 		this.clientProvider = clientProvider;
@@ -62,7 +62,7 @@ public class UpdateResources extends AbstractServiceDelegate implements Initiali
 		Reference bundleReference = getBundleReference(task);
 		UrlType endpointAddress = getEndpointAddress(task);
 
-		WebserviceClient requesterClient = clientProvider.getRemoteWebserviceClient(endpointAddress.asStringValue());
+		FhirWebserviceClient requesterClient = clientProvider.getRemoteWebserviceClient(endpointAddress.asStringValue());
 
 		Bundle bundle;
 		try

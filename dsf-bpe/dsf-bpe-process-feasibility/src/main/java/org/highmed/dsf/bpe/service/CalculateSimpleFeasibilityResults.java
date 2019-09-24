@@ -12,7 +12,7 @@ import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.bpe.variables.MultiInstanceResult;
 import org.highmed.dsf.bpe.variables.MultiInstanceResults;
 import org.highmed.dsf.bpe.variables.SimpleCohortSizeResult;
-import org.highmed.fhir.client.WebserviceClient;
+import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
@@ -23,7 +23,7 @@ public class CalculateSimpleFeasibilityResults extends AbstractServiceDelegate
 {
 	private static final Logger logger = LoggerFactory.getLogger(CalculateSimpleFeasibilityResults.class);
 
-	public CalculateSimpleFeasibilityResults(WebserviceClient webserviceClient, TaskHelper taskHelper)
+	public CalculateSimpleFeasibilityResults(FhirWebserviceClient webserviceClient, TaskHelper taskHelper)
 	{
 		super(webserviceClient, taskHelper);
 	}

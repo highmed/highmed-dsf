@@ -122,7 +122,7 @@
     <element id="Organization.meta">
       <path value="Organization.meta" />
       <short value="Metadata about the resource" />
-      <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource." />
+      <definition value="The meta about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource." />
       <min value="0" />
       <max value="1" />
       <base>

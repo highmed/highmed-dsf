@@ -16,7 +16,7 @@ import org.camunda.bpm.engine.runtime.ProcessInstanceQuery;
 import org.camunda.bpm.engine.variable.Variables;
 import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.fhir.variables.DomainResourceValues;
-import org.highmed.fhir.client.WebserviceClient;
+import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.ParameterComponent;
@@ -31,11 +31,11 @@ public class TaskHandler implements InitializingBean
 
 	private final RuntimeService runtimeService;
 	private final RepositoryService repositoryService;
-	private final WebserviceClient webserviceClient;
+	private final FhirWebserviceClient webserviceClient;
 	private final TaskHelper taskHelper;
 
 	public TaskHandler(RuntimeService runtimeService, RepositoryService repositoryService,
-			WebserviceClient webserviceClient, TaskHelper taskHelper)
+			FhirWebserviceClient webserviceClient, TaskHelper taskHelper)
 	{
 		this.runtimeService = runtimeService;
 		this.repositoryService = repositoryService;

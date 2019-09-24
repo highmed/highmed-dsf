@@ -5,7 +5,7 @@ import org.highmed.dsf.bpe.message.SendRequest;
 import org.highmed.dsf.bpe.plugin.UpdateResourcesPlugin;
 import org.highmed.dsf.bpe.service.SelectResourceAndTargets;
 import org.highmed.dsf.bpe.service.UpdateResources;
-import org.highmed.dsf.fhir.client.WebserviceClientProvider;
+import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,7 @@ import ca.uhn.fhir.context.FhirContext;
 public class UpdateResourcesConfig
 {
 	@Autowired
-	private WebserviceClientProvider clientProvider;
+	private FhirWebserviceClientProvider clientProvider;
 
 	@Autowired
 	private OrganizationProvider organizationProvider;

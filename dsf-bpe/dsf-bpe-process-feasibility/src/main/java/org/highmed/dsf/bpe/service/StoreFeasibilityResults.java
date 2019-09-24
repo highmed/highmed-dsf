@@ -11,7 +11,7 @@ import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.bpe.variables.MultiInstanceResult;
 import org.highmed.dsf.bpe.variables.MultiInstanceResults;
-import org.highmed.fhir.client.WebserviceClient;
+import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.StringType;
@@ -27,7 +27,7 @@ public class StoreFeasibilityResults extends AbstractServiceDelegate implements 
 
 	private final OrganizationProvider organizationProvider;
 
-	public StoreFeasibilityResults(OrganizationProvider organizationProvider, WebserviceClient webserviceClient, TaskHelper taskHelper)
+	public StoreFeasibilityResults(OrganizationProvider organizationProvider, FhirWebserviceClient webserviceClient, TaskHelper taskHelper)
 	{
 		super(webserviceClient, taskHelper);
 		this.organizationProvider = organizationProvider;

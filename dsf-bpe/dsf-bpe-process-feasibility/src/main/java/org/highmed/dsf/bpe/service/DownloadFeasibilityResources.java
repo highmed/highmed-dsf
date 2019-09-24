@@ -13,10 +13,10 @@ import javax.ws.rs.WebApplicationException;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
-import org.highmed.dsf.fhir.client.WebserviceClientProvider;
+import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.fhir.client.WebserviceClient;
+import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Group;
@@ -38,11 +38,11 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 	private static final String ORGANIZATION_PREFIX = "Organization/";
 
 	private final OrganizationProvider organizationProvider;
-	private final WebserviceClientProvider clientProvider;
+	private final FhirWebserviceClientProvider clientProvider;
 	private final TaskHelper taskHelper;
 
-	public DownloadFeasibilityResources(OrganizationProvider organizationProvider,
-			WebserviceClientProvider clientProvider, TaskHelper taskHelper)
+	public DownloadFeasibilityResources(OrganizationProvider organizationProvider, FhirWebserviceClientProvider clientProvider,
+			TaskHelper taskHelper)
 	{
 		super(clientProvider.getLocalWebserviceClient(), taskHelper);
 
@@ -71,7 +71,7 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 		Task task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
 
 		String endpointAddress = getEndpointAddress(task);
-		WebserviceClient client = getWebserviceClient(task, endpointAddress);
+		FhirWebserviceClient client = getWebserviceClient(task, endpointAddress);
 
 		Reference researchStudyReference = getResearchStudyReference(task);
 		ResearchStudy researchStudy = getResearchStudy(task, researchStudyReference, client);
@@ -100,7 +100,7 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 					Collections.singletonList(new IdType(organizationProvider.getLocalOrganization().getId()).getIdPart()));
 		}
 
-		WebserviceClient client = clientProvider.getLocalWebserviceClient();
+		FhirWebserviceClient client = clientProvider.getLocalWebserviceClient();
 		Bundle bundle = client.search(Endpoint.class, searchParams);
 
 		if (bundle.getEntry().size() != 1)
@@ -115,9 +115,9 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 		return endpoint.getAddress();
 	}
 
-	private WebserviceClient getWebserviceClient(Task task, String endpointAddress)
+	private FhirWebserviceClient getWebserviceClient(Task task, String endpointAddress)
 	{
-		WebserviceClient client;
+		FhirWebserviceClient client;
 		if (task.getRequester().equalsDeep(task.getRestriction().getRecipient().get(0)))
 		{
 			logger.trace("Downloading resources referenced in task with id='{}' from local endpoint", task.getId());
@@ -154,7 +154,7 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 		return researchStudyReferences.get(0);
 	}
 
-	private ResearchStudy getResearchStudy(Task task, Reference researchStudyReference, WebserviceClient client)
+	private ResearchStudy getResearchStudy(Task task, Reference researchStudyReference, FhirWebserviceClient client)
 	{
 		ResearchStudy researchStudy;
 		try
@@ -174,7 +174,7 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 		return researchStudy;
 	}
 
-	private List<Group> getCohortDefinitions(ResearchStudy researchStudy, WebserviceClient client)
+	private List<Group> getCohortDefinitions(ResearchStudy researchStudy, FhirWebserviceClient client)
 	{
 		List<Group> cohortDefinitions = new ArrayList<>();
 		List<Reference> cohortDefinitionReferences = researchStudy.getEnrollment();

@@ -7,7 +7,7 @@ import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.ExecutionListener;
 import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.fhir.variables.OutputWrapper;
-import org.highmed.fhir.client.WebserviceClient;
+import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.StringType;
@@ -17,9 +17,9 @@ import org.hl7.fhir.r4.model.Task;
 public class EndListener implements ExecutionListener
 {
 
-	private WebserviceClient webserviceClient;
+	private FhirWebserviceClient webserviceClient;
 
-	public EndListener(WebserviceClient webserviceClient)
+	public EndListener(FhirWebserviceClient webserviceClient)
 	{
 		this.webserviceClient = webserviceClient;
 	}

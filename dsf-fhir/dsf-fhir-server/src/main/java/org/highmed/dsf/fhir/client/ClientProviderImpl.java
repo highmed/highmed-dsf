@@ -5,8 +5,8 @@ import java.util.Optional;
 
 import org.highmed.dsf.fhir.dao.EndpointDao;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
-import org.highmed.fhir.client.WebserviceClient;
-import org.highmed.fhir.client.WebserviceClientJersey;
+import org.highmed.fhir.client.FhirWebserviceClient;
+import org.highmed.fhir.client.FhirWebserviceClientJersey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,14 +48,14 @@ public class ClientProviderImpl implements ClientProvider
 	}
 
 	@Override
-	public Optional<WebserviceClient> getClient(String serverBase)
+	public Optional<FhirWebserviceClient> getClient(String serverBase)
 	{
 		boolean endpointExists = exceptionHandler
 				.handleSqlException(() -> endpointDao.existsActiveNotDeletedByAddress(serverBase));
 
 		if (endpointExists)
 		{
-			WebserviceClient client = new WebserviceClientJersey(serverBase, webserviceTrustStore, webserviceKeyStore,
+			FhirWebserviceClient client = new FhirWebserviceClientJersey(serverBase, webserviceTrustStore, webserviceKeyStore,
 					webserviceKeyStorePassword, remoteProxySchemeHostPort, remoteProxyUsername, remoteProxyPassword,
 					remoteConnectTimeout, remoteReadTimeout, null, fhirContext);
 

@@ -11,7 +11,8 @@
 		<module>dsf-bpe</module>
 		<module>dsf-fhir</module>
 		<module>dsf-tools</module>
-	</modules>
+        <module>dsf-openehr</module>
+    </modules>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

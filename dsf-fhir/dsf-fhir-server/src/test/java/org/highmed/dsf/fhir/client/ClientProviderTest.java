@@ -15,7 +15,7 @@ import java.util.Optional;
 import org.highmed.dsf.fhir.dao.EndpointDao;
 import org.highmed.dsf.fhir.function.SupplierWithSqlException;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
-import org.highmed.fhir.client.WebserviceClient;
+import org.highmed.fhir.client.FhirWebserviceClient;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -60,7 +60,7 @@ public class ClientProviderTest
 
 		when(exceptionHandler.handleSqlException(any(SupplierWithSqlException.class))).thenReturn(true);
 		
-		Optional<WebserviceClient> client = provider.getClient(serverBase);
+		Optional<FhirWebserviceClient> client = provider.getClient(serverBase);
 		assertNotNull(client);
 		assertTrue(client.isPresent());
 		assertEquals(serverBase, client.get().getBaseUrl());
@@ -75,7 +75,7 @@ public class ClientProviderTest
 	{
 		when(exceptionHandler.handleSqlException(any(SupplierWithSqlException.class))).thenReturn(false);
 		
-		Optional<WebserviceClient> client = provider.getClient("http://does.not/exists/");
+		Optional<FhirWebserviceClient> client = provider.getClient("http://does.not/exists/");
 		assertNotNull(client);
 		assertTrue(client.isEmpty());
 		

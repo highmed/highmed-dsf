@@ -22,7 +22,7 @@ import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.highmed.dsf.fhir.search.PartialResult;
 import org.highmed.dsf.fhir.search.SearchQuery;
 import org.highmed.dsf.fhir.search.SearchQueryParameterError;
-import org.highmed.fhir.client.WebserviceClient;
+import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Resource;
@@ -151,7 +151,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 			throw new IllegalArgumentException("Not a literal external reference");
 
 		String remoteServerBase = resourceReference.getServerBase(serverBase);
-		Optional<WebserviceClient> client = clientProvider.getClient(remoteServerBase);
+		Optional<FhirWebserviceClient> client = clientProvider.getClient(remoteServerBase);
 
 		if (client.isEmpty())
 			throw new WebApplicationException(responseGenerator.noEndpointFoundForLiteralExternalReference(bundleIndex,

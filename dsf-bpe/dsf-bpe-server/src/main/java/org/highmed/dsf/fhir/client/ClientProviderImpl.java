@@ -8,9 +8,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import org.highmed.dsf.fhir.client.WebserviceClientProvider;
-import org.highmed.fhir.client.WebserviceClient;
-import org.highmed.fhir.client.WebserviceClientJersey;
+import org.highmed.fhir.client.FhirWebserviceClient;
+import org.highmed.fhir.client.FhirWebserviceClientJersey;
 import org.highmed.fhir.client.WebsocketClient;
 import org.highmed.fhir.client.WebsocketClientTyrus;
 import org.hl7.fhir.r4.model.Bundle;
@@ -23,11 +22,11 @@ import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class ClientProviderImpl implements WebserviceClientProvider, WebsocketClientProvider, InitializingBean
+public class ClientProviderImpl implements FhirWebserviceClientProvider, WebsocketClientProvider, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(ClientProviderImpl.class);
 
-	private final Map<String, WebserviceClient> webserviceClientsByUrl = new HashMap<>();
+	private final Map<String, FhirWebserviceClient> webserviceClientsByUrl = new HashMap<>();
 	private final Map<String, WebsocketClient> websocketClientsBySubscriptionId = new HashMap<>();
 
 	private final FhirContext fhirContext;
@@ -109,7 +108,7 @@ public class ClientProviderImpl implements WebserviceClientProvider, WebsocketCl
 		return localBaseUrl;
 	}
 
-	private WebserviceClient getClient(String webserviceUrl)
+	private FhirWebserviceClient getClient(String webserviceUrl)
 	{
 		synchronized (webserviceClientsByUrl)
 		{
@@ -117,13 +116,13 @@ public class ClientProviderImpl implements WebserviceClientProvider, WebsocketCl
 				return webserviceClientsByUrl.get(webserviceUrl);
 			else
 			{
-				WebserviceClient client;
+				FhirWebserviceClient client;
 				if (localBaseUrl.equals(webserviceUrl))
-					client = new WebserviceClientJersey(webserviceUrl, webserviceTrustStore, webserviceKeyStore,
+					client = new FhirWebserviceClientJersey(webserviceUrl, webserviceTrustStore, webserviceKeyStore,
 							webserviceKeyStorePassword, null, null, null, localConnectTimeout, localReadTimeout, null,
 							fhirContext);
 				else
-					client = new WebserviceClientJersey(webserviceUrl, webserviceTrustStore, webserviceKeyStore,
+					client = new FhirWebserviceClientJersey(webserviceUrl, webserviceTrustStore, webserviceKeyStore,
 							webserviceKeyStorePassword, remoteProxySchemeHostPort, remoteProxyUsername,
 							remoteProxyPassword, remoteConnectTimeout, remoteReadTimeout, null, fhirContext);
 
@@ -134,29 +133,29 @@ public class ClientProviderImpl implements WebserviceClientProvider, WebsocketCl
 	}
 
 	@Override
-	public WebserviceClient getLocalWebserviceClient()
+	public FhirWebserviceClient getLocalWebserviceClient()
 	{
 		return getRemoteWebserviceClient(localBaseUrl);
 	}
 
 	@Override
-	public WebserviceClient getRemoteWebserviceClient(String webserviceUrl)
+	public FhirWebserviceClient getRemoteWebserviceClient(String webserviceUrl)
 	{
 		Objects.requireNonNull(webserviceUrl, "webserviceUrl");
 
-		WebserviceClient cachedClient = webserviceClientsByUrl.get(webserviceUrl);
+		FhirWebserviceClient cachedClient = webserviceClientsByUrl.get(webserviceUrl);
 		if (cachedClient != null)
 			return cachedClient;
 		else
 		{
-			WebserviceClient newClient = getClient(webserviceUrl);
+			FhirWebserviceClient newClient = getClient(webserviceUrl);
 			webserviceClientsByUrl.put(webserviceUrl, newClient);
 			return newClient;
 		}
 	}
 
 	@Override
-	public WebserviceClient getRemoteWebserviceClient(IdType organizationReference)
+	public FhirWebserviceClient getRemoteWebserviceClient(IdType organizationReference)
 	{
 		Objects.requireNonNull(organizationReference, "organizationReference");
 		if (organizationReference.hasBaseUrl())
@@ -194,7 +193,7 @@ public class ClientProviderImpl implements WebserviceClientProvider, WebsocketCl
 	}
 
 	@Override
-	public WebserviceClient getRemoteWebserviceClient(String organizationIdentifierSystem,
+	public FhirWebserviceClient getRemoteWebserviceClient(String organizationIdentifierSystem,
 			String organizationIdentifierValue)
 	{
 		Objects.requireNonNull(organizationIdentifierSystem, "organizationIdentifierSystem");

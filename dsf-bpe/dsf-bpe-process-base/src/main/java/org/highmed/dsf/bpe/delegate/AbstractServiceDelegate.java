@@ -6,7 +6,7 @@ import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.fhir.client.WebserviceClient;
+import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,10 +17,10 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 
 	private static final Logger logger = LoggerFactory.getLogger(AbstractServiceDelegate.class);
 
-	private WebserviceClient webserviceClient;
+	private FhirWebserviceClient webserviceClient;
 	private TaskHelper taskHelper;
 
-	public AbstractServiceDelegate(WebserviceClient webserviceClient, TaskHelper taskHelper)
+	public AbstractServiceDelegate(FhirWebserviceClient webserviceClient, TaskHelper taskHelper)
 	{
 		this.webserviceClient = webserviceClient;
 		this.taskHelper = taskHelper;

@@ -10,7 +10,7 @@ import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.MultiInstanceTarget;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargetValues;
-import org.highmed.fhir.client.WebserviceClient;
+import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Task;
@@ -26,7 +26,7 @@ public class SelectResponseMedics extends AbstractServiceDelegate implements Ini
 	private final TaskHelper taskHelper;
 
 	public SelectResponseMedics(OrganizationProvider organizationProvider, TaskHelper taskHelper,
-			WebserviceClient webserviceClient)
+			FhirWebserviceClient webserviceClient)
 	{
 		super(webserviceClient, taskHelper);
 

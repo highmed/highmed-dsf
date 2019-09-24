@@ -12,7 +12,10 @@ import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.bpe.variables.MultiInstanceResult;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.fhir.client.WebserviceClient;
+import org.highmed.fhir.client.FhirWebserviceClient;
+import org.highmed.openehr.client.OpenehrWebserviceClient;
+import org.highmed.openehr.model.datatypes.DV_Count;
+import org.highmed.openehr.model.structur.ResultSet;
 import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Group;
@@ -30,12 +33,14 @@ public class ExecuteFeasibilityQueries extends AbstractServiceDelegate implement
 	public static final String SIMPLE_FEASIBILITY_QUERY_PREFIX = "select count";
 
 	private final OrganizationProvider organizationProvider;
+	private final OpenehrWebserviceClient openehrWebserviceClient;
 
-	public ExecuteFeasibilityQueries(OrganizationProvider organizationProvider, WebserviceClient webserviceClient,
+	public ExecuteFeasibilityQueries(OrganizationProvider organizationProvider, FhirWebserviceClient fhirWebserviceClient, OpenehrWebserviceClient openehrWebserviceClient,
 			TaskHelper taskHelper)
 	{
-		super(webserviceClient, taskHelper);
+		super(fhirWebserviceClient, taskHelper);
 		this.organizationProvider = organizationProvider;
+		this.openehrWebserviceClient = openehrWebserviceClient;
 	}
 
 	@Override
@@ -80,14 +85,14 @@ public class ExecuteFeasibilityQueries extends AbstractServiceDelegate implement
 		String aqlQuery = getAqlQuery(group);
 		logger.info("Executing aql-query '{}'", aqlQuery);
 
-		// TODO: implement openEHR client
-		// TODO: execute query
-
 		IdType groupId = new IdType(group.getId());
 		String groupIdString = groupId.getResourceType() + "/" + groupId.getIdPart();
 
-		// TODO: is mock result, remove
-		results.put(groupIdString, "10");
+		ResultSet result = openehrWebserviceClient.query(aqlQuery, null);
+		int count = ((DV_Count) result.getRow(0).get(0)).getValue();
+//		int count = 10;
+
+		results.put(groupIdString, String.valueOf(count));
 	}
 
 	private String getAqlQuery(Group group)
@@ -95,8 +100,8 @@ public class ExecuteFeasibilityQueries extends AbstractServiceDelegate implement
 		// TODO: fix TEXT_CQL to support AQL
 		List<Extension> queries = group.getExtension().stream()
 				.filter(extension -> extension.getUrl().equals(Constants.EXTENSION_QUERY_URI))
-				.filter(extension -> ((Expression) extension.getValue()).getLanguage()
-						== Expression.ExpressionLanguage.TEXT_CQL).collect(Collectors.toList());
+				.filter(extension -> ((Expression) extension.getValue()).getLanguage() == Expression.ExpressionLanguage.APPLICATION_XFHIRQUERY)
+				.collect(Collectors.toList());
 
 		if (queries.size() != 1)
 		{
