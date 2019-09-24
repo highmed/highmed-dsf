@@ -145,6 +145,11 @@
       <path value="Task.output" />
       <sliceName value="error" />
     </element>
+    <element id="Task.output:error.type.coding">
+      <path value="Task.output.type.coding" />
+      <min value="1" />
+      <max value="1" />
+    </element>
     <element id="Task.output:error.type.coding.system">
       <path value="Task.output.type.coding.system" />
       <fixedUri value="http://highmed.org/fhir/CodeSystem/bpmn-message" />
