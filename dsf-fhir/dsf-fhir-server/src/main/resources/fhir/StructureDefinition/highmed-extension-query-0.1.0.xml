@@ -27,9 +27,9 @@
     </element>
     <element id="Extension.value[x].language">
       <path value="Extension.value[x].language" />
-      <short value="application/x-fhir-query | application/x-aql-query " />
+      <short value="application/x-fhir-query | application/x-aql-query" />
       <binding>
-        <strength value="extensible" />
+        <strength value="required" />
         <valueSet value="http://highmed.org/fhir/ValueSet/query-type" />
       </binding>
     </element>

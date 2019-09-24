@@ -52,7 +52,7 @@
           <type value="value" />
           <path value="type.coding.code" />
         </discriminator>
-        <rules value="openAtEnd" />
+        <rules value="closed" />
       </slicing>
       <min value="3" />
     </element>

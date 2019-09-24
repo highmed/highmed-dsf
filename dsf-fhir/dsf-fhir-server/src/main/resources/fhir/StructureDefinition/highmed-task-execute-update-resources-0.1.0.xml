@@ -18,6 +18,13 @@
     </element>
     <element id="Task.input">
       <path value="Task.input" />
+      <slicing>
+        <discriminator>
+          <type value="value" />
+          <path value="type.coding.code" />
+        </discriminator>
+        <rules value="closed" />
+      </slicing>
       <min value="5" />
     </element>
     <element id="Task.input:message-name">
