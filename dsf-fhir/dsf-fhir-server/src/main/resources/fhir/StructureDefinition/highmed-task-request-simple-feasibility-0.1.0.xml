@@ -58,6 +58,11 @@
       <path value="Task.output" />
       <sliceName value="participatingMedics" />
     </element>
+    <element id="Task.output:participatingMedics.type.coding">
+      <path value="Task.output.type.coding" />
+      <min value="1" />
+      <max value="1" />
+    </element>
     <element id="Task.output:participatingMedics.type.coding.system">
       <path value="Task.output.type.coding.system" />
       <fixedUri value="http://highmed.org/fhir/NamingSystem/feasibility" />
@@ -75,6 +80,11 @@
     <element id="Task.output:cohortSize">
       <path value="Task.output" />
       <sliceName value="cohortSize" />
+    </element>
+    <element id="Task.output:cohortSize.type.coding">
+      <path value="Task.output.type.coding" />
+      <min value="1" />
+      <max value="1" />
     </element>
     <element id="Task.output:cohortSize.type.coding.system">
       <path value="Task.output.type.coding.system" />

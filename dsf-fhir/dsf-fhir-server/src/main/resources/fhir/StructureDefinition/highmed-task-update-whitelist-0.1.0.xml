@@ -26,6 +26,11 @@
       <min value="1" />
       <max value="1" />
     </element>
+    <element id="Task.output:whitelist.type.coding">
+      <path value="Task.output.type.coding" />
+      <min value="1" />
+      <max value="1" />
+    </element>
     <element id="Task.output:whitelist.type.coding.system">
       <path value="Task.output.type.coding.system" />
       <fixedUri value="http://highmed.org/fhir/CodeSystem/bundle" />
