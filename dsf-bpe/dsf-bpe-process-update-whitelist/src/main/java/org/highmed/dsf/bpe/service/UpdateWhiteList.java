@@ -141,8 +141,7 @@ public class UpdateWhiteList extends AbstractServiceDelegate implements Initiali
 	{
 		List<OutputWrapper> outputs = (List<OutputWrapper>) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
 
-		OutputWrapper outputWrapper = new OutputWrapper(Constants.NAMINGSYSTEM_HIGHMED_FEASIBILITY);
-		outputWrapper.setSystem(Constants.CODESYSTEM_HIGHMED_BUNDLE);
+		OutputWrapper outputWrapper = new OutputWrapper(Constants.CODESYSTEM_HIGHMED_BUNDLE);
 		outputWrapper.addKeyValue(Constants.CODESYSTEM_HIGHMED_BUNDLE_VALUE_WHITE_LIST, new IdType(result.getId()).getIdPart());
 		outputs.add(outputWrapper);
 
