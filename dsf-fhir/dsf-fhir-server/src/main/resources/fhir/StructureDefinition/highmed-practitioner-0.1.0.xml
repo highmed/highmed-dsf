@@ -46,7 +46,6 @@
       <max value="1" />
       <type>
         <code value="HumanName" />
-        <profile value="http://fhir.de/StructureDefinition/humanname-de-basis" />
       </type>
     </element>
     <element id="Practitioner.name.family">
@@ -103,7 +102,6 @@
       <min value="1" />
       <type>
         <code value="Address" />
-        <profile value="http://fhir.de/StructureDefinition/address-de-basis" />
       </type>
     </element>
     <element id="Practitioner.address.line">
