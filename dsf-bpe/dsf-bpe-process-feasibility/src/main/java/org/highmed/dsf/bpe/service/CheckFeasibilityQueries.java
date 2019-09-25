@@ -73,7 +73,12 @@ public class CheckFeasibilityQueries extends AbstractServiceDelegate implements 
 		logger.error(
 				"Initial feasibility query check failed, wrong format for query of group with id '{}', expected query to start with '{}' but got '{}'",
 				groupId, SIMPLE_FEASIBILITY_QUERY_PREFIX, query);
-		
-		// TODO: add error to outputs for this erroneous query
+
+		OutputWrapper outputWrapper = new OutputWrapper(Constants.CODESYSTEM_HIGHMED_BPMN);
+		outputWrapper.addKeyValue(Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE,
+				"Initial feasibility query check failed, wrong format for query of group with id '" + groupId
+						+ "', expected query to start with '" + SIMPLE_FEASIBILITY_QUERY_PREFIX + "' but got '" + query
+						+ "'");
+		outputs.add(outputWrapper);
 	}
 }
