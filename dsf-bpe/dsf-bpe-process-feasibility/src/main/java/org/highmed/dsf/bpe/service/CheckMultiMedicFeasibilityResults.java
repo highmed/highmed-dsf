@@ -57,10 +57,12 @@ public class CheckMultiMedicFeasibilityResults extends AbstractServiceDelegate
 	private void setTaskOutputErroneous(SimpleCohortSizeResult result, List<OutputWrapper> outputs)
 	{
 		logger.error(
-				"Final feasibility query result check failed for group with id '{}', not enough participating medics, expected > {}, got {}",
+				"Final feasibility query result check failed for group with id '{}', not enough participating medics, expected >= {}, got {}",
 				result.getCohortId(), MIN_PARTICIPATING_MEDICS, result.getParticipatingMedics());
 
-		// TODO: add error to outputs for multimedic query result
+		OutputWrapper outputWrapper = new OutputWrapper(Constants.CODESYSTEM_HIGHMED_BPMN);
+		outputWrapper.addKeyValue(Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, "Final feasibility query result check failed for group with id '" + result.getCohortId() + "', not enough participating medics, expected >= " + MIN_PARTICIPATING_MEDICS + ", got " + result.getParticipatingMedics());
+		outputs.add(outputWrapper);
 	}
 
 	private void setTaskOutputsSuccessful(List<SimpleCohortSizeResult> finalResult, List<OutputWrapper> outputs)
