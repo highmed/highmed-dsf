@@ -46,7 +46,7 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 			exception.printStackTrace();
 
 			Task task;
-			if (execution.getParentId() == null)
+			if (execution.getParentId() == null || execution.getParentId().equals(execution.getProcessInstanceId()))
 			{
 				task = (Task) execution.getVariable(Constants.VARIABLE_LEADING_TASK);
 			}
