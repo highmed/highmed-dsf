@@ -1,5 +1,8 @@
 package org.highmed.dsf.bpe.service;
 
+import static org.highmed.dsf.bpe.Constants.MIN_COHORT_DEFINITIONS;
+import static org.highmed.dsf.bpe.Constants.MIN_PARTICIPATING_MEDICS;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,11 +22,6 @@ import org.slf4j.LoggerFactory;
 public class CheckFeasibilityResources extends AbstractServiceDelegate
 {
 	private static final Logger logger = LoggerFactory.getLogger(CheckFeasibilityResources.class);
-
-	// Must be 3 or larger, as otherwise it is possible to draw conclusions about the individual MeDICs
-	// (if I already know the cohort size in my MeDIC)
-	public static final int MIN_PARTICIPATING_MEDICS = 3;
-	public static final int MIN_COHORT_DEFINITIONS = 1;
 
 	public CheckFeasibilityResources(FhirWebserviceClient webserviceClient, TaskHelper taskHelper)
 	{

@@ -87,7 +87,7 @@
                   "valueExpression":[
                      {
                         "language":"application/x-fhir-query",
-                        "expression":"SELECT COUNT(e) FROM EHR e"
+                        "expression":"SELECT e FROM EHR e"
                      }
                   ]
                }

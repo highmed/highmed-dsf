@@ -5,6 +5,7 @@ import org.highmed.dsf.bpe.message.SendFeasibilityRequest;
 import org.highmed.dsf.bpe.message.SendFeasibilityResults;
 import org.highmed.dsf.bpe.plugin.FeasibilityPlugin;
 import org.highmed.dsf.bpe.service.CalculateSimpleFeasibilityResults;
+import org.highmed.dsf.bpe.service.CheckFeasibilityQueries;
 import org.highmed.dsf.bpe.service.CheckMultiMedicFeasibilityResults;
 import org.highmed.dsf.bpe.service.CheckFeasibilityResources;
 import org.highmed.dsf.bpe.service.CheckSingleMedicFeasibilityResults;
@@ -14,6 +15,7 @@ import org.highmed.dsf.bpe.service.SelectRequestMedics;
 import org.highmed.dsf.bpe.service.SelectResponseMedics;
 import org.highmed.dsf.bpe.service.StoreFeasibilityResults;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
+import org.highmed.dsf.fhir.group.GroupHelper;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.openehr.client.OpenehrWebserviceClientProvider;
@@ -35,6 +37,9 @@ public class FeasibilityConfig
 
 	@Autowired
 	private TaskHelper taskHelper;
+
+	@Autowired
+	private GroupHelper groupHelper;
 
 	@Bean
 	public ProcessEnginePlugin feasibilityPlugin()
@@ -58,6 +63,12 @@ public class FeasibilityConfig
 	public SelectRequestMedics selectRequestMedics()
 	{
 		return new SelectRequestMedics(organizationProvider, fhirClientProvider.getLocalWebserviceClient(), taskHelper);
+	}
+
+	@Bean
+	public CheckFeasibilityQueries checkFeasibilityQueries()
+	{
+		return new CheckFeasibilityQueries(fhirClientProvider.getLocalWebserviceClient(), taskHelper, groupHelper);
 	}
 
 	@Bean

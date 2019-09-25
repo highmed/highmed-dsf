@@ -13,6 +13,8 @@ import org.camunda.bpm.engine.ProcessEngine;
 import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
 import org.highmed.dsf.fhir.client.ClientProviderImpl;
 import org.highmed.dsf.fhir.client.WebsocketClientProvider;
+import org.highmed.dsf.fhir.group.GroupHelper;
+import org.highmed.dsf.fhir.group.GroupHelperImpl;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProviderImpl;
 import org.highmed.dsf.fhir.task.TaskHandler;
@@ -26,6 +28,7 @@ import org.highmed.dsf.fhir.variables.OrganizationDeserializer;
 import org.highmed.dsf.fhir.variables.OrganizationSerializer;
 import org.highmed.dsf.fhir.websocket.FhirConnector;
 import org.highmed.dsf.fhir.websocket.LastEventTimeIo;
+import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Organization;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -232,5 +235,11 @@ public class FhirConfig
 	public TaskHelper taskHelper()
 	{
 		return new TaskHelperImpl();
+	}
+
+	@Bean
+	public GroupHelper groupHelper()
+	{
+		return new GroupHelperImpl();
 	}
 }

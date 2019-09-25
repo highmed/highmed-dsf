@@ -16,6 +16,7 @@ public interface Constants
 	String VARIABLE_LEADING_TASK = "leadingTask";
 	String VARIABLE_RESEARCH_STUDY = "researchStudy";
 	String VARIABLE_COHORTS = "cohorts";
+	String VARIABLE_QUERIES = "queries";
 	String VARIABLE_QUERY_PARAMETERS = "queryParameters";
 	String VARIABLE_BUNDLE_ID = "bundleId";
 	String VARIABLE_SIMPLE_COHORT_SIZE_QUERY_FINAL_RESULT = "simpleCohortSizeQueryFinalResult";
@@ -48,4 +49,10 @@ public interface Constants
 
 	String EXTENSION_PARTICIPATING_MEDIC_URI = "http://highmed.org/fhir/StructureDefinition/participating-medic";
 	String EXTENSION_QUERY_URI = "http://highmed.org/fhir/StructureDefinition/query";
+
+	// Must be 3 or larger, as otherwise it is possible to draw conclusions about the individual MeDICs
+	// (if I already know the cohort size in my MeDIC)
+	int MIN_PARTICIPATING_MEDICS = 3;
+	int MIN_COHORT_DEFINITIONS = 1;
+	String SIMPLE_FEASIBILITY_QUERY_PREFIX = "select count";
 }

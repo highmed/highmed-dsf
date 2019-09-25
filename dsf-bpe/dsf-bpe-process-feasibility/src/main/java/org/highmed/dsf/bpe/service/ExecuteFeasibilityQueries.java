@@ -10,6 +10,7 @@ import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.bpe.variables.MultiInstanceResult;
+import org.highmed.dsf.fhir.group.GroupHelper;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.fhir.client.FhirWebserviceClient;
@@ -25,12 +26,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @SuppressWarnings("unchecked")
 public class ExecuteFeasibilityQueries extends AbstractServiceDelegate implements InitializingBean
 {
-
 	private static final Logger logger = LoggerFactory.getLogger(ExecuteFeasibilityQueries.class);
-	public static final String SIMPLE_FEASIBILITY_QUERY_PREFIX = "select count";
 
 	private final OrganizationProvider organizationProvider;
 	private final OpenehrWebserviceClient openehrWebserviceClient;
@@ -49,17 +50,17 @@ public class ExecuteFeasibilityQueries extends AbstractServiceDelegate implement
 		super.afterPropertiesSet();
 
 		Objects.requireNonNull(organizationProvider, "organizationProvider");
+		Objects.requireNonNull(openehrWebserviceClient, "openehrWebserviceClient");
 	}
 
 	@Override
 	public void doExecute(DelegateExecution execution) throws Exception
 	{
+		Map<String, String> queries = (Map<String, String>) execution.getVariable(Constants.VARIABLE_QUERIES);
 		Map<String, String> results = new HashMap<>();
-		List<Group> cohortDefinitions = (List<Group>) execution.getVariable(Constants.VARIABLE_COHORTS);
 
-		cohortDefinitions.forEach(group -> {
-			checkQuery(group);
-			executeQuery(group, results);
+		queries.forEach((groupId, query) -> {
+			executeQuery(groupId, query, results);
 		});
 
 		Identifier identifier = organizationProvider.getLocalIdentifier();
@@ -69,46 +70,17 @@ public class ExecuteFeasibilityQueries extends AbstractServiceDelegate implement
 		execution.setVariable(Constants.VARIABLE_MULTI_INSTANCE_RESULT, multiInstanceResult);
 	}
 
-	private void checkQuery(Group group)
+	private void executeQuery(String groupId, String query, Map<String, String> results)
 	{
-		String aqlQuery = getAqlQuery(group).toLowerCase();
+		logger.info("Executing aql-query '{}' for group '{}'", query, groupId);
 
-		if (!aqlQuery.startsWith(SIMPLE_FEASIBILITY_QUERY_PREFIX))
-		{
-			logger.error("Cannot execute feasibility query, wrong format, expected query starting with '{}'", SIMPLE_FEASIBILITY_QUERY_PREFIX);
-			throw new IllegalArgumentException("Cannot execute feasibility query, wrong format, expected query starting with '" + SIMPLE_FEASIBILITY_QUERY_PREFIX + "'");
-		}
-	}
-
-	private void executeQuery(Group group, Map<String, String> results)
-	{
-		String aqlQuery = getAqlQuery(group);
-		logger.info("Executing aql-query '{}'", aqlQuery);
-
-		IdType groupId = new IdType(group.getId());
-		String groupIdString = groupId.getResourceType() + "/" + groupId.getIdPart();
-
-		ResultSet result = openehrWebserviceClient.query(aqlQuery, null);
+		ResultSet result = openehrWebserviceClient.query(query, null);
 		int count = ((DV_Count) result.getRow(0).get(0)).getValue();
+
+//		Dummy Result:
 //		int count = 10;
 
-		results.put(groupIdString, String.valueOf(count));
+		results.put(groupId, String.valueOf(count));
 	}
 
-	private String getAqlQuery(Group group)
-	{
-		// TODO: fix TEXT_CQL to support AQL
-		List<Extension> queries = group.getExtension().stream()
-				.filter(extension -> extension.getUrl().equals(Constants.EXTENSION_QUERY_URI))
-				.filter(extension -> ((Expression) extension.getValue()).getLanguage() == Expression.ExpressionLanguage.APPLICATION_XFHIRQUERY)
-				.collect(Collectors.toList());
-
-		if (queries.size() != 1)
-		{
-			logger.error("Number of aql queries is not =1, got {}", queries.size());
-			throw new IllegalArgumentException("Number of aql queries is not =1, got " + queries.size());
-		}
-
-		return ((Expression) queries.get(0).getValue()).getExpression();
-	}
 }

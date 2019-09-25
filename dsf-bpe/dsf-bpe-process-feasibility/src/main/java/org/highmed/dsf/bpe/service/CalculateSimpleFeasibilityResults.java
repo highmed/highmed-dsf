@@ -37,6 +37,7 @@ public class CalculateSimpleFeasibilityResults extends AbstractServiceDelegate
 		List<String> cohortIds = getCohortIds(cohortDefinitions);
 		List<MultiInstanceResult> locationBasedResults = resultsWrapper.getResults();
 		List<SimpleCohortSizeResult> finalResult = calculateResults(cohortIds, locationBasedResults);
+
 		// TODO: add percentage filter over result
 
 		execution.setVariable(Constants.VARIABLE_SIMPLE_COHORT_SIZE_QUERY_FINAL_RESULT, finalResult);

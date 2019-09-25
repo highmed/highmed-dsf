@@ -1,5 +1,9 @@
 package org.highmed.dsf.bpe.service;
 
+import static org.highmed.dsf.bpe.Constants.MIN_PARTICIPATING_MEDICS;
+import static org.highmed.dsf.bpe.Constants.SIMPLE_FEASIBILITY_QUERY_PREFIX;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
@@ -25,16 +29,44 @@ public class CheckMultiMedicFeasibilityResults extends AbstractServiceDelegate
 	@Override
 	public void doExecute(DelegateExecution execution) throws Exception
 	{
-		setTaskOutputs(execution);
-	}
-
-	private void setTaskOutputs(DelegateExecution execution)
-	{
 		List<SimpleCohortSizeResult> finalResult = (List<SimpleCohortSizeResult>) execution
 				.getVariable(Constants.VARIABLE_SIMPLE_COHORT_SIZE_QUERY_FINAL_RESULT);
 		List<OutputWrapper> outputs = (List<OutputWrapper>) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
 
+		checkResults(finalResult, outputs);
+		setTaskOutputsSuccessful(finalResult, outputs);
+
+		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, outputs);
+	}
+
+	private void checkResults(List<SimpleCohortSizeResult> finalResult, List<OutputWrapper> outputs)
+	{
+		List<SimpleCohortSizeResult> toRemove = new ArrayList<>();
+
+		finalResult.forEach(result -> {
+			if (result.getParticipatingMedics() < MIN_PARTICIPATING_MEDICS)
+			{
+				toRemove.add(result);
+				setTaskOutputErroneous(result, outputs);
+			}
+		});
+
+		finalResult.removeAll(toRemove);
+	}
+
+	private void setTaskOutputErroneous(SimpleCohortSizeResult result, List<OutputWrapper> outputs)
+	{
+		logger.error(
+				"Final feasibility query result check failed for group with id '{}', not enough participating medics, expected > {}, got {}",
+				result.getCohortId(), MIN_PARTICIPATING_MEDICS, result.getParticipatingMedics());
+
+		// TODO: add error to outputs for multimedic query result
+	}
+
+	private void setTaskOutputsSuccessful(List<SimpleCohortSizeResult> finalResult, List<OutputWrapper> outputs)
+	{
 		OutputWrapper outputWrapper = new OutputWrapper(Constants.NAMINGSYSTEM_HIGHMED_FEASIBILITY);
+
 		finalResult.forEach(simpleCohortSizeResult -> {
 			outputWrapper.addKeyValue(
 					Constants.NAMINGSYSTEM_HIGHMED_FEASIBILITY_VALUE_PREFIX_PARTICIPATING_MEDICS
@@ -45,8 +77,7 @@ public class CheckMultiMedicFeasibilityResults extends AbstractServiceDelegate
 							+ simpleCohortSizeResult.getCohortId(),
 					String.valueOf(simpleCohortSizeResult.getCohortSize()));
 		});
-		outputs.add(outputWrapper);
 
-		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, outputs);
+		outputs.add(outputWrapper);
 	}
 }
