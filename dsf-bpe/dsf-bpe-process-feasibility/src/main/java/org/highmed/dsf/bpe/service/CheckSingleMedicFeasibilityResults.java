@@ -21,16 +21,6 @@ public class CheckSingleMedicFeasibilityResults extends AbstractServiceDelegate
 	@Override
 	public void doExecute(DelegateExecution execution) throws Exception
 	{
-		doExecutePlugin(execution);
-	}
-
-	private void doExecutePlugin(DelegateExecution execution) {
-		MultiInstanceResult result = (MultiInstanceResult) execution.getVariable(Constants.VARIABLE_MULTI_INSTANCE_RESULT);
-
-		// TODO: implement plugin system for individual checks in different medics, like:
-		// TODO:   - results check
-		// TODO:   - ...
-
-		// TODO: distinguish between simple and complex feasibility request
+		// TODO
 	}
 }

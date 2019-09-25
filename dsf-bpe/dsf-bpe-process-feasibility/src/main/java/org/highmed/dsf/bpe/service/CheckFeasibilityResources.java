@@ -44,8 +44,6 @@ public class CheckFeasibilityResources extends AbstractServiceDelegate
 
 			checkNumberOfParticipatingMedics(researchStudy);
 			checkNumberOfCohortDefinitions(cohorts);
-
-			doExecutePlugin(execution);
 		}
 	}
 
@@ -72,18 +70,5 @@ public class CheckFeasibilityResources extends AbstractServiceDelegate
 			throw new IllegalArgumentException(
 					"Number of defined cohorts is <" + MIN_COHORT_DEFINITIONS + ", got " + cohorts.size());
 		}
-	}
-
-	private void doExecutePlugin(DelegateExecution execution)
-	{
-		// TODO: implement plugin system for individual checks in different medics, like:
-		//       - PI check
-		//       - Cohort characteristics check
-		//       - Queries check
-		//       - Requester check
-		//       - ...
-
-		// TODO: distinguish between simple and complex feasibility request
-		//      (for complex request check additional documents are attached)
 	}
 }

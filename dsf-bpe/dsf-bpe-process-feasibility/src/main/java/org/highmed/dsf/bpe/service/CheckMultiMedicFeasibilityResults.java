@@ -25,7 +25,6 @@ public class CheckMultiMedicFeasibilityResults extends AbstractServiceDelegate
 	@Override
 	public void doExecute(DelegateExecution execution) throws Exception
 	{
-		doExecutePlugin(execution);
 		setTaskOutputs(execution);
 	}
 
@@ -49,17 +48,5 @@ public class CheckMultiMedicFeasibilityResults extends AbstractServiceDelegate
 		outputs.add(outputWrapper);
 
 		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, outputs);
-	}
-
-	private void doExecutePlugin(DelegateExecution execution)
-	{
-		List<SimpleCohortSizeResult> finalResult = (List<SimpleCohortSizeResult>) execution
-				.getVariable(Constants.VARIABLE_SIMPLE_COHORT_SIZE_QUERY_FINAL_RESULT);
-
-		// TODO: implement plugin system for individual checks in different medics, like:
-		// TODO:   - results check
-		// TODO:   - ...
-
-		// TODO: distinguish between simple and complex feasibility request
 	}
 }

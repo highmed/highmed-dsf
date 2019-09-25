@@ -39,6 +39,7 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 		try
 		{
 			doExecute(execution);
+			doExecutePlugin(execution);
 		}
 		catch (Exception exception)
 		{
@@ -63,6 +64,19 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 			execution.getProcessEngine().getRuntimeService()
 					.deleteProcessInstance(execution.getProcessInstanceId(), exception.getMessage());
 		}
+	}
+
+	private void doExecutePlugin(DelegateExecution execution)
+	{
+		// TODO: implement plugin system for individual checks in different medics, like:
+		//       - PI check
+		//       - Cohort characteristics check
+		//       - Queries check
+		//       - Requester check
+		//       - ...
+
+		// TODO: distinguish between simple and complex feasibility request
+		//      (for complex request check additional documents are attached)
 	}
 
 	/**
