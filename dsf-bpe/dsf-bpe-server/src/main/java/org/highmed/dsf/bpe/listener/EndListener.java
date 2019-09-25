@@ -28,7 +28,7 @@ public class EndListener implements ExecutionListener
 	public void notify(DelegateExecution execution) throws Exception
 	{
 		Task task;
-		if (execution.getParentId() == null)
+		if (execution.getParentId() == null || execution.getParentId().equals(execution.getProcessInstanceId()))
 		{
 			// not in a subprocess --> end of main process
 			task = (Task) execution.getVariable(Constants.VARIABLE_LEADING_TASK);

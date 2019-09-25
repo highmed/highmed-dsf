@@ -16,7 +16,7 @@ public class StartListener implements ExecutionListener
 	{
 		// Task.status.INPROGRESS is set in the TaskHandler when the task is received
 		// start of main process instance if no parent available
-		if (execution.getParentId() == null)
+		if (execution.getParentId() == null || execution.getParentId().equals(execution.getProcessInstanceId()))
 		{
 			Task task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
 			execution.setVariable(Constants.VARIABLE_LEADING_TASK, task);
