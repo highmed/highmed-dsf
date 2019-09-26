@@ -38,7 +38,7 @@ public class EndListener implements ExecutionListener
 			List<Task.TaskOutputComponent> outputComponents = new ArrayList<>();
 
 			outputs.forEach(outputWrapper -> {
-				outputWrapper.getKeyValueMap().forEach((key, value) -> outputComponents.add(generateOutputComponent(outputWrapper.getSystem(), key,value)));
+				outputWrapper.getKeyValueMap().forEach(entry -> outputComponents.add(generateOutputComponent(outputWrapper.getSystem(), entry.getKey(), entry.getValue())));
 			});
 
 			task.setOutput(outputComponents);

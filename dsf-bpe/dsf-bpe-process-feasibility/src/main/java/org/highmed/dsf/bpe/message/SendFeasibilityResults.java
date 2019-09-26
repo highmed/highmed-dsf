@@ -1,8 +1,7 @@
 package org.highmed.dsf.bpe.message;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
@@ -11,12 +10,13 @@ import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.AbstractTaskMessageSend;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.bpe.variables.MultiInstanceResult;
+import org.highmed.dsf.fhir.variables.OutputWrapper;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 
+@SuppressWarnings("unchecked")
 public class SendFeasibilityResults extends AbstractTaskMessageSend
 {
 	public SendFeasibilityResults(OrganizationProvider organizationProvider,
@@ -28,15 +28,19 @@ public class SendFeasibilityResults extends AbstractTaskMessageSend
 	@Override
 	protected Stream<Task.ParameterComponent> getAdditionalInputParameters(DelegateExecution execution)
 	{
-		MultiInstanceResult result = ((MultiInstanceResult) execution.getVariable(Constants.VARIABLE_MULTI_INSTANCE_RESULT));
-		Map<String, String> queryResults = result.getQueryResults();
+		List<OutputWrapper> outputs = (List<OutputWrapper>) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
+		List<Task.ParameterComponent> inputs = new ArrayList<>();
 
-		List<Task.ParameterComponent> outputs = queryResults.entrySet().stream()
-				.map(entry -> new Task.ParameterComponent(new CodeableConcept(
-						new Coding(Constants.NAMINGSYSTEM_HIGHMED_FEASIBILITY, Constants.NAMINGSYSTEM_HIGHMED_FEASIBILITY_VALUE_PREFIX_SINGLE_RESULT
-								+ entry.getKey(), null)),
-						new StringType(entry.getValue()))).collect(Collectors.toList());
+		outputs.forEach(outputWrapper -> {
+			outputWrapper.getKeyValueMap()
+					.forEach(entry -> inputs.add(generateInputComponent(outputWrapper.getSystem(), entry.getKey(), entry.getValue())));
+		});
 
-		return outputs.stream();
+		return inputs.stream();
+	}
+
+	private Task.ParameterComponent generateInputComponent(String system, String key, String value)
+	{
+		return new Task.ParameterComponent(new CodeableConcept(new Coding(system, key, null)), new StringType(value));
 	}
 }

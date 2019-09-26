@@ -4,5 +4,5 @@ import org.hl7.fhir.r4.model.Group;
 
 public interface GroupHelper
 {
-	public String extractQuery(Group group);
+	public String extractAqlQuery(Group group);
 }

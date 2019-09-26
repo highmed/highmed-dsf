@@ -74,9 +74,6 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 		//       - Queries check
 		//       - Requester check
 		//       - ...
-
-		// TODO: distinguish between simple and complex feasibility request
-		//      (for complex request check additional documents are attached)
 	}
 
 	/**

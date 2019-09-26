@@ -33,14 +33,12 @@ public class ExecuteFeasibilityQueries extends AbstractServiceDelegate implement
 {
 	private static final Logger logger = LoggerFactory.getLogger(ExecuteFeasibilityQueries.class);
 
-	private final OrganizationProvider organizationProvider;
 	private final OpenehrWebserviceClient openehrWebserviceClient;
 
-	public ExecuteFeasibilityQueries(OrganizationProvider organizationProvider, FhirWebserviceClient fhirWebserviceClient, OpenehrWebserviceClient openehrWebserviceClient,
-			TaskHelper taskHelper)
+	public ExecuteFeasibilityQueries(FhirWebserviceClient fhirWebserviceClient,
+			OpenehrWebserviceClient openehrWebserviceClient, TaskHelper taskHelper)
 	{
 		super(fhirWebserviceClient, taskHelper);
-		this.organizationProvider = organizationProvider;
 		this.openehrWebserviceClient = openehrWebserviceClient;
 	}
 
@@ -49,7 +47,6 @@ public class ExecuteFeasibilityQueries extends AbstractServiceDelegate implement
 	{
 		super.afterPropertiesSet();
 
-		Objects.requireNonNull(organizationProvider, "organizationProvider");
 		Objects.requireNonNull(openehrWebserviceClient, "openehrWebserviceClient");
 	}
 
@@ -60,27 +57,25 @@ public class ExecuteFeasibilityQueries extends AbstractServiceDelegate implement
 		Map<String, String> results = new HashMap<>();
 
 		queries.forEach((groupId, query) -> {
-			executeQuery(groupId, query, results);
+			logger.info("Executing aql-query '{}' for group '{}'", query, groupId);
+
+			String result = executeQuery(query);
+			results.put(groupId, result);
 		});
 
-		Identifier identifier = organizationProvider.getLocalIdentifier();
-		MultiInstanceResult multiInstanceResult = new MultiInstanceResult(
-				identifier.getSystem() + "|" + identifier.getValue(), results);
-
+		MultiInstanceResult multiInstanceResult = new MultiInstanceResult(null, results);
 		execution.setVariable(Constants.VARIABLE_MULTI_INSTANCE_RESULT, multiInstanceResult);
 	}
 
-	private void executeQuery(String groupId, String query, Map<String, String> results)
+	private String executeQuery(String query)
 	{
-		logger.info("Executing aql-query '{}' for group '{}'", query, groupId);
-
 		ResultSet result = openehrWebserviceClient.query(query, null);
 		int count = ((DV_Count) result.getRow(0).get(0)).getValue();
 
-//		Dummy Result:
-//		int count = 10;
+		//		Dummy Result:
+		//		int count = 10;
 
-		results.put(groupId, String.valueOf(count));
+		return String.valueOf(count);
 	}
 
 }

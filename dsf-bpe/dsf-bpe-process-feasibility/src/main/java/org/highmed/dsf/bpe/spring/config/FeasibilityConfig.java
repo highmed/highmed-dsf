@@ -4,7 +4,7 @@ import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
 import org.highmed.dsf.bpe.message.SendFeasibilityRequest;
 import org.highmed.dsf.bpe.message.SendFeasibilityResults;
 import org.highmed.dsf.bpe.plugin.FeasibilityPlugin;
-import org.highmed.dsf.bpe.service.CalculateSimpleFeasibilityResults;
+import org.highmed.dsf.bpe.service.CalculateMultiMedicFeasibilityResults;
 import org.highmed.dsf.bpe.service.CheckFeasibilityQueries;
 import org.highmed.dsf.bpe.service.CheckMultiMedicFeasibilityResults;
 import org.highmed.dsf.bpe.service.CheckFeasibilityResources;
@@ -74,7 +74,7 @@ public class FeasibilityConfig
 	@Bean
 	public ExecuteFeasibilityQueries executeFeasibilityQueries()
 	{
-		return new ExecuteFeasibilityQueries(organizationProvider, fhirClientProvider.getLocalWebserviceClient(), openehrClientProvider.getWebserviceClient(), taskHelper);
+		return new ExecuteFeasibilityQueries(fhirClientProvider.getLocalWebserviceClient(), openehrClientProvider.getWebserviceClient(), taskHelper);
 	}
 
 	@Bean
@@ -96,9 +96,9 @@ public class FeasibilityConfig
 	}
 
 	@Bean
-	public CalculateSimpleFeasibilityResults calculateSimpleFeasibilityResults()
+	public CalculateMultiMedicFeasibilityResults calculateMultiMedicSimpleFeasibilityResults()
 	{
-		return new CalculateSimpleFeasibilityResults(fhirClientProvider.getLocalWebserviceClient(), taskHelper);
+		return new CalculateMultiMedicFeasibilityResults(fhirClientProvider.getLocalWebserviceClient(), taskHelper);
 	}
 
 	@Bean

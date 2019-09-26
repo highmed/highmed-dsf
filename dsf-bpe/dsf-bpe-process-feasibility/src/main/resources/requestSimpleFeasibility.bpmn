@@ -26,7 +26,7 @@
       <bpmn:outgoing>SequenceFlow_0rd9moe</bpmn:outgoing>
       <bpmn:multiInstanceLoopCharacteristics camunda:collection="${multiInstanceTargets.targets}" camunda:elementVariable="multiInstanceTarget" />
     </bpmn:sendTask>
-    <bpmn:serviceTask id="calculateMultiMedicCohortSize" name="calculate multimedic cohort size" camunda:class="org.highmed.dsf.bpe.service.CalculateSimpleFeasibilityResults">
+    <bpmn:serviceTask id="calculateMultiMedicCohortSize" name="calculate multimedic cohort size" camunda:class="org.highmed.dsf.bpe.service.CalculateMultiMedicFeasibilityResults">
       <bpmn:incoming>SequenceFlow_06raddp</bpmn:incoming>
       <bpmn:incoming>SequenceFlow_0wvj5di</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0ol49yu</bpmn:outgoing>

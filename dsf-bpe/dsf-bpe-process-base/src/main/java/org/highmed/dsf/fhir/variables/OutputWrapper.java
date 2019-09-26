@@ -1,29 +1,25 @@
 package org.highmed.dsf.fhir.variables;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
+import java.util.Collection;
+
 
 public class OutputWrapper implements Serializable
 {
 	private String system;
-	private Map<String, String> keyValueMap;
+	private final Collection<SimpleEntry<String, String>> keyValueList;
 
 	public OutputWrapper(String system)
 	{
 		this.system = system;
-		this.keyValueMap = new HashMap<>();
-	}
-
-	public OutputWrapper(String system, Map<String, String> keyValueMap)
-	{
-		this.system = system;
-		this.keyValueMap = keyValueMap;
+		this.keyValueList = new ArrayList<>();
 	}
 
 	public void addKeyValue(String key, String value)
 	{
-		keyValueMap.put(key, value);
+		keyValueList.add(new SimpleEntry<>(key, value));
 	}
 
 	public String getSystem()
@@ -36,8 +32,8 @@ public class OutputWrapper implements Serializable
 		this.system = system;
 	}
 
-	public Map<String, String> getKeyValueMap()
+	public Collection<SimpleEntry<String, String>> getKeyValueMap()
 	{
-		return keyValueMap;
+		return keyValueList;
 	}
 }

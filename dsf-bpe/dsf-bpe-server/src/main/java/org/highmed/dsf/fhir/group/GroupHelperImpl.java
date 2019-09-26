@@ -13,14 +13,15 @@ import org.slf4j.LoggerFactory;
 public class GroupHelperImpl implements GroupHelper
 {
 	private static final Logger logger = LoggerFactory.getLogger(GroupHelperImpl.class);
+
 	@Override
-	public String extractQuery(Group group)
+	public String extractAqlQuery(Group group)
 	{
 		// TODO: APPLICATION_XFHIRQUERY to support AQL
 		List<Extension> queries = group.getExtension().stream()
 				.filter(extension -> extension.getUrl().equals(Constants.EXTENSION_QUERY_URI))
-				.filter(extension -> ((Expression) extension.getValue()).getLanguage() == Expression.ExpressionLanguage.APPLICATION_XFHIRQUERY)
-				.collect(Collectors.toList());
+				.filter(extension -> ((Expression) extension.getValue()).getLanguage()
+						== Expression.ExpressionLanguage.APPLICATION_XFHIRQUERY).collect(Collectors.toList());
 
 		if (queries.size() != 1)
 		{

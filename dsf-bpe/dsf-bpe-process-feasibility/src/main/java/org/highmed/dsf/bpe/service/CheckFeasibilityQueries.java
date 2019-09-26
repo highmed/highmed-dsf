@@ -49,14 +49,15 @@ public class CheckFeasibilityQueries extends AbstractServiceDelegate implements 
 		Map<String, String> queries = new HashMap<>();
 
 		cohorts.forEach(group -> {
-			String aqlQuery = groupHelper.extractQuery(group).toLowerCase();
+			String aqlQuery = groupHelper.extractAqlQuery(group).toLowerCase();
 
 			IdType groupId = new IdType(group.getId());
 			String groupIdString = groupId.getResourceType() + "/" + groupId.getIdPart();
 
 			if (!aqlQuery.startsWith(SIMPLE_FEASIBILITY_QUERY_PREFIX))
 			{
-				setTaskOutputErroneous(aqlQuery, groupIdString, outputs);
+				OutputWrapper errorOutput = getOutputWrapperErroneous(aqlQuery, groupIdString);
+				outputs.add(errorOutput);
 			}
 			else
 			{
@@ -68,17 +69,18 @@ public class CheckFeasibilityQueries extends AbstractServiceDelegate implements 
 		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, outputs);
 	}
 
-	private void setTaskOutputErroneous(String query, String groupId, List<OutputWrapper> outputs)
+	private OutputWrapper getOutputWrapperErroneous(String query, String groupId)
 	{
 		logger.error(
-				"Initial feasibility query check failed, wrong format for query of group with id '{}', expected query to start with '{}' but got '{}'",
-				groupId, SIMPLE_FEASIBILITY_QUERY_PREFIX, query);
+				"Initial single medic feasibility query check failed, wrong format for query of group with id '{}', expected query "
+						+ "to start with '{}' but got '{}'", groupId, SIMPLE_FEASIBILITY_QUERY_PREFIX, query);
 
 		OutputWrapper outputWrapper = new OutputWrapper(Constants.CODESYSTEM_HIGHMED_BPMN);
 		outputWrapper.addKeyValue(Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE,
-				"Initial feasibility query check failed, wrong format for query of group with id '" + groupId
+				"Initial single medic feasibility query check failed, wrong format for query of group with id '" + groupId
 						+ "', expected query to start with '" + SIMPLE_FEASIBILITY_QUERY_PREFIX + "' but got '" + query
 						+ "'");
-		outputs.add(outputWrapper);
+
+		return  outputWrapper;
 	}
 }

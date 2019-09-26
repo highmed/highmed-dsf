@@ -1,5 +1,9 @@
 package org.highmed.dsf.bpe.service;
 
+import static org.highmed.dsf.bpe.Constants.GROUP_PREFIX;
+import static org.highmed.dsf.bpe.Constants.ORGANIZATION_PREFIX;
+import static org.highmed.dsf.bpe.Constants.RESEARCH_STUDY_PREFIX;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -21,7 +25,6 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.Task;
@@ -33,16 +36,12 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 {
 	private static final Logger logger = LoggerFactory.getLogger(DownloadFeasibilityResources.class);
 
-	private static final String RESEARCH_STUDY_PREFIX = "ResearchStudy/";
-	private static final String GROUP_PREFIX = "Group/";
-	private static final String ORGANIZATION_PREFIX = "Organization/";
-
 	private final OrganizationProvider organizationProvider;
 	private final FhirWebserviceClientProvider clientProvider;
 	private final TaskHelper taskHelper;
 
-	public DownloadFeasibilityResources(OrganizationProvider organizationProvider, FhirWebserviceClientProvider clientProvider,
-			TaskHelper taskHelper)
+	public DownloadFeasibilityResources(OrganizationProvider organizationProvider,
+			FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
 	{
 		super(clientProvider.getLocalWebserviceClient(), taskHelper);
 
@@ -79,9 +78,6 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 
 		List<Group> cohortDefinitions = getCohortDefinitions(researchStudy, client);
 		execution.setVariable(Constants.VARIABLE_COHORTS, cohortDefinitions);
-
-		// TODO: distinguish between simple and complex feasibility request
-		//      (for complex request download additional documents)
 	}
 
 	private String getEndpointAddress(Task task)
@@ -96,8 +92,8 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 		}
 		else
 		{
-			searchParams.put("organization",
-					Collections.singletonList(new IdType(organizationProvider.getLocalOrganization().getId()).getIdPart()));
+			searchParams.put("organization", Collections
+					.singletonList(new IdType(organizationProvider.getLocalOrganization().getId()).getIdPart()));
 		}
 
 		FhirWebserviceClient client = clientProvider.getLocalWebserviceClient();
@@ -118,7 +114,8 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 	private FhirWebserviceClient getWebserviceClient(Task task, String endpointAddress)
 	{
 		FhirWebserviceClient client;
-		if (task.getRequester().equalsDeep(task.getRestriction().getRecipient().get(0)))
+		if (task.getRequester().equalsDeep(task.getRestriction().getRecipient().get(0)) || !task.getRequester()
+				.getReference().startsWith(ORGANIZATION_PREFIX))
 		{
 			logger.trace("Downloading resources referenced in task with id='{}' from local endpoint", task.getId());
 			client = clientProvider.getLocalWebserviceClient();

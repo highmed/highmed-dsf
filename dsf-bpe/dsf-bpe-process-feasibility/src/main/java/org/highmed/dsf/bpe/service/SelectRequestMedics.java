@@ -8,9 +8,9 @@ import java.util.stream.Collectors;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
+import org.highmed.dsf.bpe.variables.MultiInstanceResults;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.bpe.variables.MultiInstanceResults;
 import org.highmed.dsf.fhir.variables.MultiInstanceTarget;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargets;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargetsValues;
@@ -29,7 +29,8 @@ public class SelectRequestMedics extends AbstractServiceDelegate
 
 	private final OrganizationProvider organizationProvider;
 
-	public SelectRequestMedics(OrganizationProvider organizationProvider, FhirWebserviceClient webserviceClient, TaskHelper taskHelper)
+	public SelectRequestMedics(OrganizationProvider organizationProvider, FhirWebserviceClient webserviceClient,
+			TaskHelper taskHelper)
 	{
 		super(webserviceClient, taskHelper);
 		this.organizationProvider = organizationProvider;
@@ -49,15 +50,14 @@ public class SelectRequestMedics extends AbstractServiceDelegate
 		ResearchStudy researchStudy = (ResearchStudy) execution.getVariable(Constants.VARIABLE_RESEARCH_STUDY);
 
 		List<String> targetReferences = researchStudy.getExtension().stream()
-				.filter(e -> e.getUrl().equals(Constants.EXTENSION_PARTICIPATING_MEDIC_URI))
-				.map(e -> ((Reference) e.getValue()).getReference()).collect(Collectors.toList());
+				.filter(extension -> extension.getUrl().equals(Constants.EXTENSION_PARTICIPATING_MEDIC_URI))
+				.map(extension -> ((Reference) extension.getValue()).getReference()).collect(Collectors.toList());
 
-		List<MultiInstanceTarget> targets = targetReferences.stream()
-				.map(r -> new MultiInstanceTarget(organizationProvider.getIdentifier(new IdType(r))
-						// Is only called if organization is deleted after research study is generated.
-						// Normally generating research studies with non existing references are caught by resource validation.
-						.orElseThrow(() -> new ResourceNotFoundException("Could not find organization reference: " + r))
-						.getValue(), UUID.randomUUID().toString())).collect(Collectors.toList());
+		List<MultiInstanceTarget> targets = targetReferences.stream().map(referenceString -> new MultiInstanceTarget(
+				organizationProvider.getIdentifier(new IdType(referenceString)).orElseThrow(
+						() -> new ResourceNotFoundException(
+								"Could not find organization reference: " + referenceString)).getValue(),
+				UUID.randomUUID().toString())).collect(Collectors.toList());
 
 		execution.setVariable(Constants.VARIABLE_MULTI_INSTANCE_TARGETS,
 				MultiInstanceTargetsValues.create(new MultiInstanceTargets(targets)));
