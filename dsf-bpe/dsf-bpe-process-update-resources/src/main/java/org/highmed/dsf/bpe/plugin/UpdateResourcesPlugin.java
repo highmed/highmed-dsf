@@ -24,9 +24,9 @@ public class UpdateResourcesPlugin extends AbstractProcessEnginePlugin
 	public void postProcessEngineBuild(ProcessEngine processEngine)
 	{
 		BpmnModelInstance executeUpdateResourcesProcess = readAndValidateModel("/" + EXECUTE_UPDATE_RESOURCES_FILE);
-		delpoy(processEngine, EXECUTE_UPDATE_RESOURCES_FILE, executeUpdateResourcesProcess);
+		deploy(processEngine, EXECUTE_UPDATE_RESOURCES_FILE, executeUpdateResourcesProcess);
 
 		BpmnModelInstance requestUpdateResourcesProcess = readAndValidateModel("/" + REQUEST_UPDATE_RESOURCES_FILE);
-		delpoy(processEngine, REQUEST_UPDATE_RESOURCES_FILE, requestUpdateResourcesProcess);
+		deploy(processEngine, REQUEST_UPDATE_RESOURCES_FILE, requestUpdateResourcesProcess);
 	}
 }

@@ -23,6 +23,6 @@ public class UpdateWhiteListPlugin extends AbstractProcessEnginePlugin
 	public void postProcessEngineBuild(ProcessEngine processEngine)
 	{
 		BpmnModelInstance updateWhiteListeProcess = readAndValidateModel("/" + UPDATE_WHITE_LISTE_FILE);
-		delpoy(processEngine, UPDATE_WHITE_LISTE_FILE, updateWhiteListeProcess);
+		deploy(processEngine, UPDATE_WHITE_LISTE_FILE, updateWhiteListeProcess);
 	}
 }

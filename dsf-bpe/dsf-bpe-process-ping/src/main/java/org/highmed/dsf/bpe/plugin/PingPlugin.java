@@ -24,9 +24,9 @@ public class PingPlugin extends AbstractProcessEnginePlugin
 	public void postProcessEngineBuild(ProcessEngine processEngine)
 	{
 		BpmnModelInstance pingProcess = readAndValidateModel("/" + PING_FILE);
-		delpoy(processEngine, PING_FILE, pingProcess);
+		deploy(processEngine, PING_FILE, pingProcess);
 
 		BpmnModelInstance pongProcess = readAndValidateModel("/" + PONG_FILE);
-		delpoy(processEngine, PONG_FILE, pongProcess);
+		deploy(processEngine, PONG_FILE, pongProcess);
 	}
 }
