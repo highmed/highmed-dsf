@@ -15,7 +15,7 @@ public class StartListener implements ExecutionListener
 	public void notify(DelegateExecution execution) throws Exception
 	{
 		// Task.status.INPROGRESS is set in the TaskHandler when the task is received
-		// start of main process instance if no parent available
+		// start of main process instance if no parent available or the parent id is same as the actual process id
 		if (execution.getParentId() == null || execution.getParentId().equals(execution.getProcessInstanceId()))
 		{
 			Task task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
