@@ -46,7 +46,6 @@ public class ExecuteFeasibilityQueries extends AbstractServiceDelegate implement
 	public void afterPropertiesSet() throws Exception
 	{
 		super.afterPropertiesSet();
-
 		Objects.requireNonNull(openehrWebserviceClient, "openehrWebserviceClient");
 	}
 
@@ -57,8 +56,6 @@ public class ExecuteFeasibilityQueries extends AbstractServiceDelegate implement
 		Map<String, String> results = new HashMap<>();
 
 		queries.forEach((groupId, query) -> {
-			logger.info("Executing aql-query '{}' for group '{}'", query, groupId);
-
 			String result = executeQuery(query);
 			results.put(groupId, result);
 		});

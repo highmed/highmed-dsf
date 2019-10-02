@@ -53,9 +53,8 @@ public class CheckFeasibilityResources extends AbstractServiceDelegate
 
 		if (medics.size() < MIN_PARTICIPATING_MEDICS)
 		{
-			logger.error("Number of participanting MeDICs is <{}, got {}", MIN_PARTICIPATING_MEDICS, medics.size());
 			throw new IllegalArgumentException(
-					"Number of participanting MeDICs is <" + MIN_PARTICIPATING_MEDICS + ", got " + medics.size());
+					"Number of participanting MeDICs is < " + MIN_PARTICIPATING_MEDICS + ", got " + medics.size());
 		}
 	}
 
@@ -64,9 +63,8 @@ public class CheckFeasibilityResources extends AbstractServiceDelegate
 		int size = cohorts.size();
 		if (size < MIN_COHORT_DEFINITIONS)
 		{
-			logger.error("Number of defined cohorts is <{}, got {}", MIN_COHORT_DEFINITIONS, cohorts.size());
 			throw new IllegalArgumentException(
-					"Number of defined cohorts is <" + MIN_COHORT_DEFINITIONS + ", got " + cohorts.size());
+					"Number of defined cohorts is < " + MIN_COHORT_DEFINITIONS + ", got " + cohorts.size());
 		}
 	}
 }

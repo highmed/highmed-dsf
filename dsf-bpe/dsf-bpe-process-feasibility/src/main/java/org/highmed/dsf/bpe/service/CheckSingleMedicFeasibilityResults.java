@@ -1,8 +1,7 @@
 package org.highmed.dsf.bpe.service;
 
-import static org.highmed.dsf.bpe.Constants.MIN_PARTICIPATING_MEDICS;
+import static org.highmed.dsf.bpe.Constants.CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,7 +9,6 @@ import java.util.Map;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
-import org.highmed.dsf.bpe.variables.SimpleCohortSizeResult;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.bpe.variables.MultiInstanceResult;
 import org.highmed.dsf.fhir.variables.OutputWrapper;
@@ -32,14 +30,11 @@ public class CheckSingleMedicFeasibilityResults extends AbstractServiceDelegate
 	public void doExecute(DelegateExecution execution) throws Exception
 	{
 		List<OutputWrapper> outputs = (List<OutputWrapper>) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
-		MultiInstanceResult results = (MultiInstanceResult) execution
-				.getVariable(Constants.VARIABLE_MULTI_INSTANCE_RESULT);
+		MultiInstanceResult results = (MultiInstanceResult) execution.getVariable(Constants.VARIABLE_MULTI_INSTANCE_RESULT);
 
 		Map<String, String> finalResults = results.getQueryResults();
 		Map<String, String> erroneousResults = checkQueryResults(finalResults);
 		finalResults.keySet().removeAll(erroneousResults.keySet());
-
-		// TODO: more checks
 
 		OutputWrapper errorOutput = getOutputWrapperErroneous(erroneousResults);
 		outputs.add(errorOutput);
@@ -63,29 +58,20 @@ public class CheckSingleMedicFeasibilityResults extends AbstractServiceDelegate
 	private OutputWrapper getOutputWrapperErroneous(Map<String, String> erroneousResults)
 	{
 		OutputWrapper outputWrapper = new OutputWrapper(Constants.CODESYSTEM_HIGHMED_BPMN);
-
 		erroneousResults.forEach((groupId, result) -> {
-			logger.error(
-					"Final single medic feasibility query result check failed for group with id '{}', reason unknown",
-					groupId);
-
 			outputWrapper.addKeyValue(Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE,
 					"Final single medic feasibility query result check failed for group with id '" + groupId
 							+ "', reason unknown");
 		});
-
 		return outputWrapper;
 	}
 
 	private OutputWrapper getOutputWrapperSuccessful(Map<String, String> successfulResults)
 	{
-		OutputWrapper outputWrapper = new OutputWrapper(Constants.NAMINGSYSTEM_HIGHMED_FEASIBILITY);
-
+		OutputWrapper outputWrapper = new OutputWrapper(Constants.CODESYSTEM_HIGHMED_FEASIBILITY);
 		successfulResults.forEach((groupId, result) -> {
-			outputWrapper.addKeyValue(Constants.NAMINGSYSTEM_HIGHMED_FEASIBILITY_VALUE_PREFIX_SINGLE_RESULT
-							+ groupId, result);
+			outputWrapper.addKeyValue(Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_SINGLE_MEDIC_RESULT, result + CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR + groupId);
 		});
-
 		return outputWrapper;
 	}
 }

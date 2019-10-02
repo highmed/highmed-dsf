@@ -56,7 +56,7 @@ public class SelectRequestMedics extends AbstractServiceDelegate
 		List<MultiInstanceTarget> targets = targetReferences.stream().map(referenceString -> new MultiInstanceTarget(
 				organizationProvider.getIdentifier(new IdType(referenceString)).orElseThrow(
 						() -> new ResourceNotFoundException(
-								"Could not find organization reference: " + referenceString)).getValue(),
+								"Organization with id " + referenceString + "not found")).getValue(),
 				UUID.randomUUID().toString())).collect(Collectors.toList());
 
 		execution.setVariable(Constants.VARIABLE_MULTI_INSTANCE_TARGETS,

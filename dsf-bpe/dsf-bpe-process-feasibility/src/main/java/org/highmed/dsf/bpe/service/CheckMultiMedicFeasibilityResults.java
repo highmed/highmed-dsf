@@ -8,7 +8,7 @@ import java.util.List;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
-import org.highmed.dsf.bpe.variables.SimpleCohortSizeResult;
+import org.highmed.dsf.bpe.variables.FinalSimpleFeasibilityResult;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.OutputWrapper;
 import org.highmed.fhir.client.FhirWebserviceClient;
@@ -28,14 +28,12 @@ public class CheckMultiMedicFeasibilityResults extends AbstractServiceDelegate
 	@Override
 	public void doExecute(DelegateExecution execution) throws Exception
 	{
-		List<SimpleCohortSizeResult> finalResult = (List<SimpleCohortSizeResult>) execution
+		List<FinalSimpleFeasibilityResult> finalResult = (List<FinalSimpleFeasibilityResult>) execution
 				.getVariable(Constants.VARIABLE_SIMPLE_COHORT_SIZE_QUERY_FINAL_RESULT);
 		List<OutputWrapper> outputs = (List<OutputWrapper>) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
 
-		List<SimpleCohortSizeResult> erroneousResults = checkNumberOfParticipatingMedics(finalResult);
+		List<FinalSimpleFeasibilityResult> erroneousResults = checkNumberOfParticipatingMedics(finalResult);
 		finalResult.removeAll(erroneousResults);
-
-		// TODO: more checks
 
 		OutputWrapper errorOutput = getOutputWrapperErroneous(erroneousResults);
 		outputs.add(errorOutput);
@@ -45,9 +43,9 @@ public class CheckMultiMedicFeasibilityResults extends AbstractServiceDelegate
 		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, outputs);
 	}
 
-	private List<SimpleCohortSizeResult> checkNumberOfParticipatingMedics(List<SimpleCohortSizeResult> finalResult)
+	private List<FinalSimpleFeasibilityResult> checkNumberOfParticipatingMedics(List<FinalSimpleFeasibilityResult> finalResult)
 	{
-		List<SimpleCohortSizeResult> toRemove = new ArrayList<>();
+		List<FinalSimpleFeasibilityResult> toRemove = new ArrayList<>();
 
 		finalResult.forEach(result -> {
 			if (result.getParticipatingMedics() < MIN_PARTICIPATING_MEDICS)
@@ -59,7 +57,7 @@ public class CheckMultiMedicFeasibilityResults extends AbstractServiceDelegate
 		return toRemove;
 	}
 
-	private OutputWrapper getOutputWrapperErroneous(List<SimpleCohortSizeResult> erroneousResults)
+	private OutputWrapper getOutputWrapperErroneous(List<FinalSimpleFeasibilityResult> erroneousResults)
 	{
 		OutputWrapper outputWrapper = new OutputWrapper(Constants.CODESYSTEM_HIGHMED_BPMN);
 		erroneousResults.forEach(result -> {
@@ -71,17 +69,15 @@ public class CheckMultiMedicFeasibilityResults extends AbstractServiceDelegate
 		return outputWrapper;
 	}
 
-	private OutputWrapper getOutputWrapperSuccessful(List<SimpleCohortSizeResult> successfulResults)
+	private OutputWrapper getOutputWrapperSuccessful(List<FinalSimpleFeasibilityResult> successfulResults)
 	{
-		OutputWrapper outputWrapper = new OutputWrapper(Constants.NAMINGSYSTEM_HIGHMED_FEASIBILITY);
-
-		successfulResults.forEach(simpleCohortSizeResult -> {
-			outputWrapper.addKeyValue(Constants.NAMINGSYSTEM_HIGHMED_FEASIBILITY_VALUE_PREFIX_PARTICIPATING_MEDICS
-							+ simpleCohortSizeResult.getCohortId(),
-					String.valueOf(simpleCohortSizeResult.getParticipatingMedics()));
+		OutputWrapper outputWrapper = new OutputWrapper(Constants.CODESYSTEM_HIGHMED_FEASIBILITY);
+		successfulResults.forEach(result -> {
+			outputWrapper.addKeyValue(Constants.CODSYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS,
+					result.getParticipatingMedics() + Constants.CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR + result.getCohortId());
 			outputWrapper.addKeyValue(
-					Constants.NAMINGSYSTEM_HIGHMED_FEASIBILITY_VALUE_PREFIX_COHORT_SIZE + simpleCohortSizeResult
-							.getCohortId(), String.valueOf(simpleCohortSizeResult.getCohortSize()));
+					Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT, result.getCohortSize() + Constants.CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR +  result
+							.getCohortId());
 		});
 
 		return outputWrapper;

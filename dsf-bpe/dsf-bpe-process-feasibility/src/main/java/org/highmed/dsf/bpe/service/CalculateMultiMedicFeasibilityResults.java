@@ -10,7 +10,7 @@ import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.bpe.variables.MultiInstanceResult;
 import org.highmed.dsf.bpe.variables.MultiInstanceResults;
-import org.highmed.dsf.bpe.variables.SimpleCohortSizeResult;
+import org.highmed.dsf.bpe.variables.FinalSimpleFeasibilityResult;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Group;
@@ -37,27 +37,26 @@ public class CalculateMultiMedicFeasibilityResults extends AbstractServiceDelega
 
 		List<String> cohortIds = getCohortIds(cohortDefinitions);
 		List<MultiInstanceResult> locationBasedResults = resultsWrapper.getResults();
-		List<SimpleCohortSizeResult> finalResult = calculateResults(cohortIds, locationBasedResults);
+		List<FinalSimpleFeasibilityResult> finalResult = calculateResults(cohortIds, locationBasedResults);
 
 		// TODO: add percentage filter over result
 
 		execution.setVariable(Constants.VARIABLE_SIMPLE_COHORT_SIZE_QUERY_FINAL_RESULT, finalResult);
 	}
 
-	private List<SimpleCohortSizeResult> calculateResults(List<String> ids, List<MultiInstanceResult> results)
+	private List<FinalSimpleFeasibilityResult> calculateResults(List<String> ids, List<MultiInstanceResult> results)
 	{
 		List<Map.Entry<String, String>> combinedResults = results.stream()
 				.flatMap(result -> result.getQueryResults().entrySet().stream()).collect(Collectors.toList());
 
-		List<SimpleCohortSizeResult> resultsByCohortId = new ArrayList<>();
+		List<FinalSimpleFeasibilityResult> resultsByCohortId = new ArrayList<>();
 
 		ids.forEach(id -> {
-			// TODO remove zero count result medics from count
 			long participatingMedics = combinedResults.stream().filter(resultEntry -> resultEntry.getKey().equals(id))
 					.count();
 			long result = combinedResults.stream().filter(resultEntry -> resultEntry.getKey().equals(id))
 					.mapToInt(resultEntry -> Integer.parseInt(resultEntry.getValue())).sum();
-			resultsByCohortId.add(new SimpleCohortSizeResult(id, participatingMedics, result));
+			resultsByCohortId.add(new FinalSimpleFeasibilityResult(id, participatingMedics, result));
 		});
 
 		return resultsByCohortId;

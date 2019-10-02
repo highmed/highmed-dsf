@@ -18,6 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+
 public class SelectResponseMedics extends AbstractServiceDelegate implements InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(SelectResponseMedics.class);
@@ -53,7 +55,7 @@ public class SelectResponseMedics extends AbstractServiceDelegate implements Ini
 
 		Identifier targetOrganizationIdentifier = organizationProvider
 				.getIdentifier(new IdType(task.getRequester().getReference())).orElseThrow(
-						() -> new IllegalStateException(
+						() -> new ResourceNotFoundException(
 								"Organization with id " + task.getRequester().getReference() + " not found"));
 
 		execution.setVariable(Constants.VARIABLE_MULTI_INSTANCE_TARGET, MultiInstanceTargetValues

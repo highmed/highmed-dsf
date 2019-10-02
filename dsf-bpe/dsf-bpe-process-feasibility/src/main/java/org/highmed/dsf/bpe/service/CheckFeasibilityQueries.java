@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.camunda.bpm.model.dmn.instance.Output;
 import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.group.GroupHelper;
@@ -48,6 +49,8 @@ public class CheckFeasibilityQueries extends AbstractServiceDelegate implements 
 		List<Group> cohorts = (List<Group>) execution.getVariable(Constants.VARIABLE_COHORTS);
 		Map<String, String> queries = new HashMap<>();
 
+		OutputWrapper errorOutput = new OutputWrapper(Constants.CODESYSTEM_HIGHMED_BPMN);
+
 		cohorts.forEach(group -> {
 			String aqlQuery = groupHelper.extractAqlQuery(group).toLowerCase();
 
@@ -56,8 +59,7 @@ public class CheckFeasibilityQueries extends AbstractServiceDelegate implements 
 
 			if (!aqlQuery.startsWith(SIMPLE_FEASIBILITY_QUERY_PREFIX))
 			{
-				OutputWrapper errorOutput = getOutputWrapperErroneous(aqlQuery, groupIdString);
-				outputs.add(errorOutput);
+				addErroneousOutputToWrapper(errorOutput, aqlQuery, groupIdString);
 			}
 			else
 			{
@@ -65,22 +67,16 @@ public class CheckFeasibilityQueries extends AbstractServiceDelegate implements 
 			}
 		});
 
+		outputs.add(errorOutput);
 		execution.setVariable(Constants.VARIABLE_QUERIES, queries);
 		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, outputs);
 	}
 
-	private OutputWrapper getOutputWrapperErroneous(String query, String groupId)
+	private void addErroneousOutputToWrapper(OutputWrapper wrapper, String query, String groupId)
 	{
-		logger.error(
-				"Initial single medic feasibility query check failed, wrong format for query of group with id '{}', expected query "
-						+ "to start with '{}' but got '{}'", groupId, SIMPLE_FEASIBILITY_QUERY_PREFIX, query);
-
-		OutputWrapper outputWrapper = new OutputWrapper(Constants.CODESYSTEM_HIGHMED_BPMN);
-		outputWrapper.addKeyValue(Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE,
+		wrapper.addKeyValue(Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE,
 				"Initial single medic feasibility query check failed, wrong format for query of group with id '" + groupId
 						+ "', expected query to start with '" + SIMPLE_FEASIBILITY_QUERY_PREFIX + "' but got '" + query
 						+ "'");
-
-		return  outputWrapper;
 	}
 }

@@ -32,6 +32,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+
 public class DownloadFeasibilityResources extends AbstractServiceDelegate implements InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(DownloadFeasibilityResources.class);
@@ -69,22 +71,24 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 
 		Task task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
 
-		String endpointAddress = getEndpointAddress(task);
-		FhirWebserviceClient client = getWebserviceClient(task, endpointAddress);
+		Reference requester = task.getRequester();
+		Reference recipient = task.getRestriction().getRecipient().get(0);
 
-		Reference researchStudyReference = getResearchStudyReference(task);
-		ResearchStudy researchStudy = getResearchStudy(task, researchStudyReference, client);
+		String endpointAddress = getEndpointAddress(requester);
+		FhirWebserviceClient client = getWebserviceClient(requester, recipient, endpointAddress);
+
+		ResearchStudy researchStudy = getResearchStudy(task, client);
 		execution.setVariable(Constants.VARIABLE_RESEARCH_STUDY, researchStudy);
 
 		List<Group> cohortDefinitions = getCohortDefinitions(researchStudy, client);
 		execution.setVariable(Constants.VARIABLE_COHORTS, cohortDefinitions);
 	}
 
-	private String getEndpointAddress(Task task)
+	private String getEndpointAddress(Reference requester)
 	{
 		Map<String, List<String>> searchParams = new HashMap<>();
 
-		String requesterReference = task.getRequester().getReference();
+		String requesterReference = requester.getReference();
 		if (requesterReference.startsWith(ORGANIZATION_PREFIX))
 		{
 			searchParams.put("organization",
@@ -101,9 +105,7 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 
 		if (bundle.getEntry().size() != 1)
 		{
-			logger.error("Did not find endpoint of task requester: expected 1, found {}, for task with id={}''",
-					bundle.getEntry().size(), task.getId());
-			throw new RuntimeException(
+			throw new ResourceNotFoundException(
 					"Did not find endpoint of task requester: expected 1, found " + bundle.getEntry().size());
 		}
 
@@ -111,48 +113,28 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 		return endpoint.getAddress();
 	}
 
-	private FhirWebserviceClient getWebserviceClient(Task task, String endpointAddress)
+	private FhirWebserviceClient getWebserviceClient(Reference requester, Reference recipient, String endpointAddress)
 	{
 		FhirWebserviceClient client;
-		if (task.getRequester().equalsDeep(task.getRestriction().getRecipient().get(0)) || !task.getRequester()
-				.getReference().startsWith(ORGANIZATION_PREFIX))
+		if (requester.equalsDeep(recipient) || !requester.getReference().startsWith(ORGANIZATION_PREFIX))
 		{
-			logger.trace("Downloading resources referenced in task with id='{}' from local endpoint", task.getId());
 			client = clientProvider.getLocalWebserviceClient();
 		}
 		else
 		{
-			logger.trace("Downloading resources referenced in task with id='{}' from remote endpoint {}", task.getId(),
-					endpointAddress);
 			client = clientProvider.getRemoteWebserviceClient(endpointAddress);
 		}
 
 		return client;
 	}
 
-	private Reference getResearchStudyReference(Task task)
+	private ResearchStudy getResearchStudy(Task task, FhirWebserviceClient client)
 	{
-		List<Reference> researchStudyReferences = taskHelper
+		Reference researchStudyReference = taskHelper
 				.getInputParameterReferenceValues(task, Constants.CODESYSTEM_HIGHMED_TASK_INPUT,
 						Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_RESEARCH_STUDY_REFERENCE)
-				.collect(Collectors.toList());
+				.collect(Collectors.toList()).get(0);
 
-		if (researchStudyReferences.size() != 1)
-		{
-			logger.error("Task input parameter {} contains unexpected number of ResearchStudy IDs, expected 1, got {}",
-					Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_RESEARCH_STUDY_REFERENCE,
-					researchStudyReferences.size());
-			throw new RuntimeException(
-					"Task input parameter " + Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_RESEARCH_STUDY_REFERENCE
-							+ " contains unexpected number of ResearchStudy IDs, expected 1, got "
-							+ researchStudyReferences.size());
-		}
-
-		return researchStudyReferences.get(0);
-	}
-
-	private ResearchStudy getResearchStudy(Task task, Reference researchStudyReference, FhirWebserviceClient client)
-	{
 		ResearchStudy researchStudy;
 		try
 		{
@@ -161,11 +143,9 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 		}
 		catch (WebApplicationException e)
 		{
-			logger.error("Error while reading ResearchStudy with id {} from organization {}",
-					researchStudyReference.getReference(), task.getRequester().getReference());
-			throw new RuntimeException(
-					"Error while reading ResearchStudy with id " + researchStudyReference.getReference()
-							+ " from organization " + task.getRequester().getReference(), e);
+			throw new ResourceNotFoundException(
+					"Error while reading ResearchStudy with id " + researchStudyReference.getReference() + " from "
+							+ client.getBaseUrl());
 		}
 
 		return researchStudy;
