@@ -34,10 +34,10 @@ public interface Constants
 	String CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_ENDPOINT_ADDRESS = "endpoint-address";
 	String CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_TARGET_IDENTIFIER = "target-identifier";
 
-	String CODESYSTEM_HIGHMED_FEASIBILITY = "http://highmed.org/fhir/NamingSystem/feasibility";
-	String CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_SINGLE_MEDIC_RESULT = "singleMedicResult";
-	String CODSYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS = "participatingMedics";
-	String CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT = "multiMedicResult";
+	String CODESYSTEM_HIGHMED_FEASIBILITY = "http://highmed.org/fhir/CodeSystem/feasibility";
+	String CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_SINGLE_MEDIC_RESULT = "single-medic-result";
+	String CODSYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS = "participating-medics";
+	String CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT = "multi-medic-result";
 
 	// do not remove backslashes, pipe is a meta character in regex and need to be escaped
 	String CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR = "|";
