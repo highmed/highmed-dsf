@@ -9,19 +9,17 @@ import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.bpe.variables.MultiInstanceResults;
+import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.MultiInstanceTarget;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargets;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargetsValues;
-import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 public class SelectRequestMedics extends AbstractServiceDelegate
 {
@@ -29,10 +27,10 @@ public class SelectRequestMedics extends AbstractServiceDelegate
 
 	private final OrganizationProvider organizationProvider;
 
-	public SelectRequestMedics(OrganizationProvider organizationProvider, FhirWebserviceClient webserviceClient,
+	public SelectRequestMedics(OrganizationProvider organizationProvider, FhirWebserviceClientProvider clientProvider,
 			TaskHelper taskHelper)
 	{
-		super(webserviceClient, taskHelper);
+		super(clientProvider, taskHelper);
 		this.organizationProvider = organizationProvider;
 	}
 
@@ -40,7 +38,6 @@ public class SelectRequestMedics extends AbstractServiceDelegate
 	public void afterPropertiesSet() throws Exception
 	{
 		super.afterPropertiesSet();
-
 		Objects.requireNonNull(organizationProvider, "organizationProvider");
 	}
 
@@ -53,11 +50,10 @@ public class SelectRequestMedics extends AbstractServiceDelegate
 				.filter(extension -> extension.getUrl().equals(Constants.EXTENSION_PARTICIPATING_MEDIC_URI))
 				.map(extension -> ((Reference) extension.getValue()).getReference()).collect(Collectors.toList());
 
-		List<MultiInstanceTarget> targets = targetReferences.stream().map(referenceString -> new MultiInstanceTarget(
-				organizationProvider.getIdentifier(new IdType(referenceString)).orElseThrow(
-						() -> new ResourceNotFoundException(
-								"Organization with id " + referenceString + "not found")).getValue(),
-				UUID.randomUUID().toString())).collect(Collectors.toList());
+		List<MultiInstanceTarget> targets = targetReferences.stream()
+				.flatMap(reference -> organizationProvider.getIdentifier(new IdType(reference)).stream())
+				.map(identifier -> new MultiInstanceTarget(identifier.getValue(), UUID.randomUUID().toString()))
+				.collect(Collectors.toList());
 
 		execution.setVariable(Constants.VARIABLE_MULTI_INSTANCE_TARGETS,
 				MultiInstanceTargetsValues.create(new MultiInstanceTargets(targets)));

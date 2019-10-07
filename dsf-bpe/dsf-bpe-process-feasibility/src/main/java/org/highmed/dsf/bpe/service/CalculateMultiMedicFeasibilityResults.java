@@ -8,11 +8,11 @@ import java.util.stream.Collectors;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
+import org.highmed.dsf.bpe.variables.FinalSimpleFeasibilityResult;
 import org.highmed.dsf.bpe.variables.MultiInstanceResult;
 import org.highmed.dsf.bpe.variables.MultiInstanceResults;
-import org.highmed.dsf.bpe.variables.FinalSimpleFeasibilityResult;
+import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
@@ -23,9 +23,9 @@ public class CalculateMultiMedicFeasibilityResults extends AbstractServiceDelega
 {
 	private static final Logger logger = LoggerFactory.getLogger(CalculateMultiMedicFeasibilityResults.class);
 
-	public CalculateMultiMedicFeasibilityResults(FhirWebserviceClient webserviceClient, TaskHelper taskHelper)
+	public CalculateMultiMedicFeasibilityResults(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
 	{
-		super(webserviceClient, taskHelper);
+		super(clientProvider, taskHelper);
 	}
 
 	@Override

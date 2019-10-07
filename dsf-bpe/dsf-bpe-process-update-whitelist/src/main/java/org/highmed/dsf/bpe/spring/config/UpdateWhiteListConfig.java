@@ -31,6 +31,6 @@ public class UpdateWhiteListConfig
 	@Bean
 	public UpdateWhiteList updateWhiteList()
 	{
-		return new UpdateWhiteList(clientProvider, organizationProvider, taskHelper);
+		return new UpdateWhiteList(organizationProvider, clientProvider, taskHelper);
 	}
 }

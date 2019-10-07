@@ -28,21 +28,19 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractTaskMessageSend.class);
 
-	protected final FhirWebserviceClientProvider clientProvider;
 	protected final OrganizationProvider organizationProvider;
 
 	public AbstractTaskMessageSend(OrganizationProvider organizationProvider, FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
 	{
-		super(clientProvider.getLocalWebserviceClient(), taskHelper);
+		super(clientProvider, taskHelper);
 		this.organizationProvider = organizationProvider;
-		this.clientProvider = clientProvider;
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
+		super.afterPropertiesSet();
 		Objects.requireNonNull(organizationProvider, "organizationProvider");
-		Objects.requireNonNull(clientProvider, "clientProvider");
 	}
 
 	@Override
@@ -128,12 +126,12 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 		if (task.getRequester().equalsDeep(task.getRestriction().getRecipient().get(0)))
 		{
 			logger.trace("Using local webservice client");
-			client = clientProvider.getLocalWebserviceClient();
+			client = getFhirWebserviceClientProvider().getLocalWebserviceClient();
 		}
 		else
 		{
 			logger.trace("Using remote webservice client");
-			client = clientProvider.getRemoteWebserviceClient(organizationProvider.getDefaultSystem(),
+			client = getFhirWebserviceClientProvider().getRemoteWebserviceClient(organizationProvider.getDefaultSystem(),
 					targetOrganizationIdentifierValue);
 		}
 

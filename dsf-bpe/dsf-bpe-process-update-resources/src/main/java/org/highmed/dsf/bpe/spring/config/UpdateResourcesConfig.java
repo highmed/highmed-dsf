@@ -44,7 +44,7 @@ public class UpdateResourcesConfig
 	@Bean
 	public SelectResourceAndTargets selectUpdateResourcesTargets()
 	{
-		return new SelectResourceAndTargets(organizationProvider, clientProvider.getLocalWebserviceClient(), taskHelper);
+		return new SelectResourceAndTargets(organizationProvider, clientProvider, taskHelper);
 	}
 
 	@Bean

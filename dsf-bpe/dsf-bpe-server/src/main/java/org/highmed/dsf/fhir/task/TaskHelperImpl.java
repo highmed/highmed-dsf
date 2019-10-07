@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.highmed.dsf.bpe.Constants;
+import org.highmed.dsf.fhir.variables.OutputWrapper;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Reference;
@@ -60,15 +61,33 @@ public class TaskHelperImpl implements TaskHelper
 	}
 
 	@Override
-	public Task setErrorOutput(Task task, String errorMessage, String step)
+	public Task.ParameterComponent createInput(String system, String code, String value)
 	{
-		Task.TaskOutputComponent failedReason = new Task.TaskOutputComponent(new CodeableConcept(
-				new Coding(Constants.CODESYSTEM_HIGHMED_BPMN, Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE,
-						null)), new StringType(
-				"Process failed in step '" + step + "', reason: " + errorMessage));
+		return  new Task.ParameterComponent(new CodeableConcept(
+				new Coding(system, code, null)), new StringType(value));
+	}
 
-		task.setOutput(List.of(failedReason));
-		task.setStatus(Task.TaskStatus.FAILED);
+	@Override
+	public Task.ParameterComponent createInput(String system, String code, Reference reference)
+	{
+		return  new Task.ParameterComponent(new CodeableConcept(
+				new Coding(system, code, null)), reference);
+	}
+
+	@Override
+	public Task.TaskOutputComponent createOutput(String system, String code, String value)
+	{
+		return  new Task.TaskOutputComponent(new CodeableConcept(
+				new Coding(system, code, null)), new StringType(value));
+	}
+
+	@Override
+	public Task addOutputs(Task task, List<OutputWrapper> outputs)
+	{
+		outputs.forEach(outputWrapper -> outputWrapper.getKeyValueMap().forEach(entry -> {
+			Task.TaskOutputComponent output = createOutput(outputWrapper.getSystem(), entry.getKey(), entry.getValue());
+			task.addOutput(output);
+		}));
 
 		return task;
 	}

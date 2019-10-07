@@ -3,9 +3,6 @@ package org.highmed.dsf.bpe.variables;
 import java.io.Serializable;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public class MultiInstanceResult implements Serializable
 {
 	private final String organizationIdentifier;

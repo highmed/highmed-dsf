@@ -34,6 +34,9 @@ public class CamundaConfig
 	private String dbPasswordCamunda;
 
 	@Autowired
+	private FhirConfig fhirConfig;
+
+	@Autowired
 	private FhirWebserviceClientProvider clientProvider;
 
 	@Bean
@@ -63,7 +66,7 @@ public class CamundaConfig
 	@Bean
 	public EndListener endListener()
 	{
-		return new EndListener(clientProvider.getLocalWebserviceClient());
+		return new EndListener(clientProvider.getLocalWebserviceClient(), fhirConfig.taskHelper());
 	}
 
 	@Bean

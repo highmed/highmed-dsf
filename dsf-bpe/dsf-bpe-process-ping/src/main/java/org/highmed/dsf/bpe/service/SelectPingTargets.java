@@ -7,12 +7,12 @@ import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
+import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.MultiInstanceTarget;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargets;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargetsValues;
-import org.highmed.fhir.client.FhirWebserviceClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -23,15 +23,17 @@ public class SelectPingTargets extends AbstractServiceDelegate implements Initia
 
 	private final OrganizationProvider organizationProvider;
 
-	public SelectPingTargets(OrganizationProvider organizationProvider, FhirWebserviceClient webserviceClient, TaskHelper taskHelper)
+	public SelectPingTargets(OrganizationProvider organizationProvider, FhirWebserviceClientProvider clientProvider,
+			TaskHelper taskHelper)
 	{
-		super(webserviceClient, taskHelper);
+		super(clientProvider, taskHelper);
 		this.organizationProvider = organizationProvider;
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
+		super.afterPropertiesSet();
 		Objects.requireNonNull(organizationProvider, "organizationProvider");
 	}
 

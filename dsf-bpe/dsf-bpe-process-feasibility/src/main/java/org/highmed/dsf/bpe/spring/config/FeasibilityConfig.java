@@ -6,8 +6,8 @@ import org.highmed.dsf.bpe.message.SendFeasibilityResults;
 import org.highmed.dsf.bpe.plugin.FeasibilityPlugin;
 import org.highmed.dsf.bpe.service.CalculateMultiMedicFeasibilityResults;
 import org.highmed.dsf.bpe.service.CheckFeasibilityQueries;
-import org.highmed.dsf.bpe.service.CheckMultiMedicFeasibilityResults;
 import org.highmed.dsf.bpe.service.CheckFeasibilityResources;
+import org.highmed.dsf.bpe.service.CheckMultiMedicFeasibilityResults;
 import org.highmed.dsf.bpe.service.CheckSingleMedicFeasibilityResults;
 import org.highmed.dsf.bpe.service.DownloadFeasibilityResources;
 import org.highmed.dsf.bpe.service.ExecuteFeasibilityQueries;
@@ -56,55 +56,56 @@ public class FeasibilityConfig
 	@Bean
 	public CheckFeasibilityResources checkFeasibilityResources()
 	{
-		return new CheckFeasibilityResources(fhirClientProvider.getLocalWebserviceClient(), taskHelper);
+		return new CheckFeasibilityResources(fhirClientProvider, taskHelper);
 	}
 
 	@Bean
 	public SelectRequestMedics selectRequestMedics()
 	{
-		return new SelectRequestMedics(organizationProvider, fhirClientProvider.getLocalWebserviceClient(), taskHelper);
+		return new SelectRequestMedics(organizationProvider, fhirClientProvider, taskHelper);
 	}
 
 	@Bean
 	public CheckFeasibilityQueries checkFeasibilityQueries()
 	{
-		return new CheckFeasibilityQueries(fhirClientProvider.getLocalWebserviceClient(), taskHelper, groupHelper);
+		return new CheckFeasibilityQueries(fhirClientProvider, taskHelper, groupHelper);
 	}
 
 	@Bean
 	public ExecuteFeasibilityQueries executeFeasibilityQueries()
 	{
-		return new ExecuteFeasibilityQueries(fhirClientProvider.getLocalWebserviceClient(), openehrClientProvider.getWebserviceClient(), taskHelper);
+		return new ExecuteFeasibilityQueries(fhirClientProvider, openehrClientProvider.getWebserviceClient(),
+				taskHelper);
 	}
 
 	@Bean
 	public CheckSingleMedicFeasibilityResults checkSingleMedicFeasibilityResults()
 	{
-		return new CheckSingleMedicFeasibilityResults(fhirClientProvider.getLocalWebserviceClient(), taskHelper);
+		return new CheckSingleMedicFeasibilityResults(fhirClientProvider, taskHelper);
 	}
 
 	@Bean
 	public SelectResponseMedics selectResponseMedics()
 	{
-		return new SelectResponseMedics(organizationProvider, taskHelper, fhirClientProvider.getLocalWebserviceClient());
+		return new SelectResponseMedics(organizationProvider, fhirClientProvider, taskHelper);
 	}
 
 	@Bean
 	public StoreFeasibilityResults storeFeasibilityResults()
 	{
-		return new StoreFeasibilityResults(organizationProvider, fhirClientProvider.getLocalWebserviceClient(), taskHelper);
+		return new StoreFeasibilityResults(organizationProvider, fhirClientProvider, taskHelper);
 	}
 
 	@Bean
 	public CalculateMultiMedicFeasibilityResults calculateMultiMedicSimpleFeasibilityResults()
 	{
-		return new CalculateMultiMedicFeasibilityResults(fhirClientProvider.getLocalWebserviceClient(), taskHelper);
+		return new CalculateMultiMedicFeasibilityResults(fhirClientProvider, taskHelper);
 	}
 
 	@Bean
 	public CheckMultiMedicFeasibilityResults checkMultiMedicFeasibilityResults()
 	{
-		return new CheckMultiMedicFeasibilityResults(fhirClientProvider.getLocalWebserviceClient(), taskHelper);
+		return new CheckMultiMedicFeasibilityResults(fhirClientProvider, taskHelper);
 	}
 
 	@Bean

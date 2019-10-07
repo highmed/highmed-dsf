@@ -9,9 +9,9 @@ import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.bpe.variables.FinalSimpleFeasibilityResult;
+import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.OutputWrapper;
-import org.highmed.fhir.client.FhirWebserviceClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,9 +20,9 @@ public class CheckMultiMedicFeasibilityResults extends AbstractServiceDelegate
 {
 	private static final Logger logger = LoggerFactory.getLogger(CheckMultiMedicFeasibilityResults.class);
 
-	public CheckMultiMedicFeasibilityResults(FhirWebserviceClient webserviceClient, TaskHelper taskHelper)
+	public CheckMultiMedicFeasibilityResults(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
 	{
-		super(webserviceClient, taskHelper);
+		super(clientProvider, taskHelper);
 	}
 
 	@Override
@@ -43,7 +43,8 @@ public class CheckMultiMedicFeasibilityResults extends AbstractServiceDelegate
 		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, outputs);
 	}
 
-	private List<FinalSimpleFeasibilityResult> checkNumberOfParticipatingMedics(List<FinalSimpleFeasibilityResult> finalResult)
+	private List<FinalSimpleFeasibilityResult> checkNumberOfParticipatingMedics(
+			List<FinalSimpleFeasibilityResult> finalResult)
 	{
 		List<FinalSimpleFeasibilityResult> toRemove = new ArrayList<>();
 
@@ -61,10 +62,12 @@ public class CheckMultiMedicFeasibilityResults extends AbstractServiceDelegate
 	{
 		OutputWrapper outputWrapper = new OutputWrapper(Constants.CODESYSTEM_HIGHMED_BPMN);
 		erroneousResults.forEach(result -> {
-			outputWrapper.addKeyValue(Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE,
-					"Final multi medic feasibility query result check failed for group with id '" + result.getCohortId()
-							+ "', not enough participating medics, expected >= " + MIN_PARTICIPATING_MEDICS + ", got "
-							+ result.getParticipatingMedics());
+			String errorMessage = "Final multi medic feasibility query result check failed for group with id '" + result.getCohortId()
+					+ "', not enough participating medics, expected >= " + MIN_PARTICIPATING_MEDICS + ", got "
+					+ result.getParticipatingMedics();
+
+			logger.info(errorMessage);
+			outputWrapper.addKeyValue(Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, errorMessage);
 		});
 		return outputWrapper;
 	}
@@ -74,9 +77,10 @@ public class CheckMultiMedicFeasibilityResults extends AbstractServiceDelegate
 		OutputWrapper outputWrapper = new OutputWrapper(Constants.CODESYSTEM_HIGHMED_FEASIBILITY);
 		successfulResults.forEach(result -> {
 			outputWrapper.addKeyValue(Constants.CODSYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS,
-					result.getParticipatingMedics() + Constants.CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR + result.getCohortId());
-			outputWrapper.addKeyValue(
-					Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT, result.getCohortSize() + Constants.CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR +  result
+					result.getParticipatingMedics() + Constants.CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR + result
+							.getCohortId());
+			outputWrapper.addKeyValue(Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT,
+					result.getCohortSize() + Constants.CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR + result
 							.getCohortId());
 		});
 

@@ -48,24 +48,24 @@ public class PingConfig
 	@Bean
 	public LogPing logPing()
 	{
-		return new LogPing(clientProvider.getLocalWebserviceClient(), taskHelper);
+		return new LogPing(clientProvider, taskHelper);
 	}
 
 	@Bean
 	public LogPong logPong()
 	{
-		return new LogPong(clientProvider.getLocalWebserviceClient(), taskHelper);
+		return new LogPong(clientProvider, taskHelper);
 	}
 
 	@Bean
 	public SelectPingTargets selectPingTargets()
 	{
-		return new SelectPingTargets(organizationProvider, clientProvider.getLocalWebserviceClient(), taskHelper);
+		return new SelectPingTargets(organizationProvider, clientProvider, taskHelper);
 	}
 
 	@Bean
 	public SelectPongTarget selectPongTarget()
 	{
-		return new SelectPongTarget(organizationProvider, clientProvider.getLocalWebserviceClient(), taskHelper);
+		return new SelectPongTarget(organizationProvider, clientProvider, taskHelper);
 	}
 }

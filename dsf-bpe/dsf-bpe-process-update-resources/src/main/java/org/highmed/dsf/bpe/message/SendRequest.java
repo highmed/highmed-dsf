@@ -16,7 +16,8 @@ import org.hl7.fhir.r4.model.UrlType;
 
 public class SendRequest extends AbstractTaskMessageSend
 {
-	public SendRequest(OrganizationProvider organizationProvider, FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
+	public SendRequest(OrganizationProvider organizationProvider, FhirWebserviceClientProvider clientProvider,
+			TaskHelper taskHelper)
 	{
 		super(organizationProvider, clientProvider, taskHelper);
 	}
@@ -26,22 +27,20 @@ public class SendRequest extends AbstractTaskMessageSend
 	{
 		String bundleId = (String) execution.getVariable(Constants.VARIABLE_BUNDLE_ID);
 		return Stream.of(toInputParameterBundleReference(bundleId),
-				toInputParameterEndpointAddress(clientProvider.getLocalBaseUrl()));
+				toInputParameterEndpointAddress(getFhirWebserviceClientProvider().getLocalBaseUrl()));
 	}
 
 	private ParameterComponent toInputParameterBundleReference(String bundleId)
 	{
-		return new ParameterComponent(
-				new CodeableConcept(new Coding(Constants.CODESYSTEM_HIGHMED_TASK_INPUT,
-						Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_BUNDLE_REFERENCE, null)),
+		return new ParameterComponent(new CodeableConcept(new Coding(Constants.CODESYSTEM_HIGHMED_TASK_INPUT,
+				Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_BUNDLE_REFERENCE, null)),
 				new Reference().setReference(bundleId));
 	}
 
 	private ParameterComponent toInputParameterEndpointAddress(String localBaseUrl)
 	{
-		return new ParameterComponent(
-				new CodeableConcept(new Coding(Constants.CODESYSTEM_HIGHMED_TASK_INPUT,
-						Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_ENDPOINT_ADDRESS, null)),
+		return new ParameterComponent(new CodeableConcept(new Coding(Constants.CODESYSTEM_HIGHMED_TASK_INPUT,
+				Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_ENDPOINT_ADDRESS, null)),
 				new UrlType().setValue(localBaseUrl));
 	}
 }

@@ -3,8 +3,8 @@ package org.highmed.dsf.bpe.service;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
+import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,8 +13,9 @@ public class LogPing extends AbstractServiceDelegate
 {
 	private static final Logger logger = LoggerFactory.getLogger(LogPing.class);
 
-	public LogPing(FhirWebserviceClient webserviceClient, TaskHelper taskHelper) {
-		super(webserviceClient, taskHelper);
+	public LogPing(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
+	{
+		super(clientProvider, taskHelper);
 	}
 
 	@Override

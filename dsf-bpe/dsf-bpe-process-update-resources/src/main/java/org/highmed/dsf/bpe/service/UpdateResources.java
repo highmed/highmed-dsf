@@ -31,23 +31,19 @@ public class UpdateResources extends AbstractServiceDelegate implements Initiali
 
 	private static final Logger logger = LoggerFactory.getLogger(UpdateResources.class);
 
-	private final FhirWebserviceClientProvider clientProvider;
-	private final TaskHelper taskHelper;
 	private final FhirContext context;
 
 	public UpdateResources(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper, FhirContext context)
 	{
-		super(clientProvider.getLocalWebserviceClient(), taskHelper);
-		this.clientProvider = clientProvider;
-		this.taskHelper = taskHelper;
+		super(clientProvider, taskHelper);
 		this.context = context;
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
-		Objects.requireNonNull(clientProvider, "clientProvider");
-		Objects.requireNonNull(taskHelper, "taskHelper");
+		super.afterPropertiesSet();
+		Objects.requireNonNull(context, "fhirContext");
 	}
 
 	@Override
@@ -62,20 +58,22 @@ public class UpdateResources extends AbstractServiceDelegate implements Initiali
 		Reference bundleReference = getBundleReference(task);
 		UrlType endpointAddress = getEndpointAddress(task);
 
-		FhirWebserviceClient requesterClient = clientProvider.getRemoteWebserviceClient(endpointAddress.asStringValue());
+		FhirWebserviceClient requesterClient = getFhirWebserviceClientProvider()
+				.getRemoteWebserviceClient(endpointAddress.asStringValue());
 
 		Bundle bundle;
 		try
 		{
-			bundle = requesterClient.read(Bundle.class,
-					bundleReference.getReference().substring(BUNDLE_ID_PREFIX.length()));
+			bundle = requesterClient
+					.read(Bundle.class, bundleReference.getReference().substring(BUNDLE_ID_PREFIX.length()));
 		}
 		catch (WebApplicationException e)
 		{
 			logger.error("Error while reading Bundle with id {} from organization {}", bundleReference.getReference(),
 					task.getRequester().getReference());
-			throw new RuntimeException("Error while reading Bundle with id " + bundleReference.getReference()
-					+ " from organization " + task.getRequester().getReference(), e);
+			throw new RuntimeException(
+					"Error while reading Bundle with id " + bundleReference.getReference() + " from organization "
+							+ task.getRequester().getReference(), e);
 		}
 
 		if (!EnumSet.of(BundleType.TRANSACTION, BundleType.BATCH).contains(bundle.getType()))
@@ -87,7 +85,7 @@ public class UpdateResources extends AbstractServiceDelegate implements Initiali
 		try
 		{
 			logger.debug("Posting bundle to local endpoint: {}", context.newXmlParser().encodeResourceToString(bundle));
-			clientProvider.getLocalWebserviceClient().postBundle(bundle);
+			getFhirWebserviceClientProvider().getLocalWebserviceClient().postBundle(bundle);
 		}
 		catch (Exception e)
 		{
@@ -100,9 +98,9 @@ public class UpdateResources extends AbstractServiceDelegate implements Initiali
 
 	private Reference getBundleReference(Task task)
 	{
-		List<Reference> bundleReferences = taskHelper.getInputParameterReferenceValues(task,
-				Constants.CODESYSTEM_HIGHMED_BPMN, Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_BUNDLE_REFERENCE)
-				.collect(Collectors.toList());
+		List<Reference> bundleReferences = getTaskHelper()
+				.getInputParameterReferenceValues(task, Constants.CODESYSTEM_HIGHMED_BPMN,
+						Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_BUNDLE_REFERENCE).collect(Collectors.toList());
 
 		if (bundleReferences.size() != 1)
 		{
@@ -112,13 +110,14 @@ public class UpdateResources extends AbstractServiceDelegate implements Initiali
 					"Task input parameter " + Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_BUNDLE_REFERENCE
 							+ " contains unexpected number of Bundle IDs, expected 1, got " + bundleReferences.size());
 		}
-		else if (!bundleReferences.get(0).hasReference()
-				|| !bundleReferences.get(0).getReference().startsWith(BUNDLE_ID_PREFIX))
+		else if (!bundleReferences.get(0).hasReference() || !bundleReferences.get(0).getReference()
+				.startsWith(BUNDLE_ID_PREFIX))
 		{
 			logger.error("Task input parameter {} has no Bundle reference",
 					Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_BUNDLE_REFERENCE);
-			throw new RuntimeException("Task input parameter "
-					+ Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_BUNDLE_REFERENCE + " has no Bundle reference");
+			throw new RuntimeException(
+					"Task input parameter " + Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_BUNDLE_REFERENCE
+							+ " has no Bundle reference");
 		}
 
 		return bundleReferences.get(0);
@@ -126,15 +125,16 @@ public class UpdateResources extends AbstractServiceDelegate implements Initiali
 
 	private UrlType getEndpointAddress(Task task)
 	{
-		Optional<UrlType> endpointAddress = taskHelper.getFirstInputParameterUrlValue(task,
-				Constants.CODESYSTEM_HIGHMED_BPMN, Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_ENDPOINT_ADDRESS);
+		Optional<UrlType> endpointAddress = getTaskHelper()
+				.getFirstInputParameterUrlValue(task, Constants.CODESYSTEM_HIGHMED_BPMN,
+						Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_ENDPOINT_ADDRESS);
 
 		if (endpointAddress.isEmpty())
 		{
 			logger.error("Task is missing input parameter {}",
 					Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_ENDPOINT_ADDRESS);
-			throw new RuntimeException(
-					"Task is missing input parameter " + Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_BUNDLE_REFERENCE);
+			throw new RuntimeException("Task is missing input parameter "
+					+ Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_BUNDLE_REFERENCE);
 		}
 
 		return endpointAddress.get();

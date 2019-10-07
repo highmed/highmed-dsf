@@ -9,8 +9,8 @@ import java.util.stream.Collectors;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
+import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.ResearchStudy;
@@ -23,9 +23,9 @@ public class CheckFeasibilityResources extends AbstractServiceDelegate
 {
 	private static final Logger logger = LoggerFactory.getLogger(CheckFeasibilityResources.class);
 
-	public CheckFeasibilityResources(FhirWebserviceClient webserviceClient, TaskHelper taskHelper)
+	public CheckFeasibilityResources(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
 	{
-		super(webserviceClient, taskHelper);
+		super(clientProvider, taskHelper);
 	}
 
 	@Override
@@ -53,7 +53,7 @@ public class CheckFeasibilityResources extends AbstractServiceDelegate
 
 		if (medics.size() < MIN_PARTICIPATING_MEDICS)
 		{
-			throw new IllegalArgumentException(
+			throw new IllegalStateException(
 					"Number of participanting MeDICs is < " + MIN_PARTICIPATING_MEDICS + ", got " + medics.size());
 		}
 	}
@@ -63,7 +63,7 @@ public class CheckFeasibilityResources extends AbstractServiceDelegate
 		int size = cohorts.size();
 		if (size < MIN_COHORT_DEFINITIONS)
 		{
-			throw new IllegalArgumentException(
+			throw new IllegalStateException(
 					"Number of defined cohorts is < " + MIN_COHORT_DEFINITIONS + ", got " + cohorts.size());
 		}
 	}

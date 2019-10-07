@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
+import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.MultiInstanceTarget;
@@ -31,19 +32,18 @@ public class SelectResourceAndTargets extends AbstractServiceDelegate implements
 	private static final Pattern BUNDLE_ID_PATTERN = Pattern.compile(BUNDLE_ID_PATTERN_STRING);
 
 	private final OrganizationProvider organizationProvider;
-	private final TaskHelper taskHelper;
 
-	public SelectResourceAndTargets(OrganizationProvider organizationProvider, FhirWebserviceClient webserviceClient,
+	public SelectResourceAndTargets(OrganizationProvider organizationProvider, FhirWebserviceClientProvider clientProvider,
 			TaskHelper taskHelper)
 	{
-		super(webserviceClient, taskHelper);
+		super(clientProvider, taskHelper);
 		this.organizationProvider = organizationProvider;
-		this.taskHelper = taskHelper;
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
+		super.afterPropertiesSet();
 		Objects.requireNonNull(organizationProvider, "organizationProvider");
 	}
 
@@ -55,7 +55,7 @@ public class SelectResourceAndTargets extends AbstractServiceDelegate implements
 				execution.getVariables(), execution.getVariablesLocal());
 
 		Task task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
-		Supplier<Stream<Reference>> bundles = () -> taskHelper
+		Supplier<Stream<Reference>> bundles = () -> getTaskHelper()
 				.getInputParameterReferenceValues(task, Constants.CODESYSTEM_HIGHMED_TASK_INPUT,
 						Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_BUNDLE_REFERENCE);
 
@@ -75,7 +75,7 @@ public class SelectResourceAndTargets extends AbstractServiceDelegate implements
 		String bundleId = bundles.get().findFirst().get().getId();
 		execution.setVariable(Constants.VARIABLE_BUNDLE_ID, bundleId);
 
-		List<String> targetIdentifierSearchParameters = taskHelper
+		List<String> targetIdentifierSearchParameters = getTaskHelper()
 				.getInputParameterStringValues(task, Constants.CODESYSTEM_HIGHMED_TASK_INPUT,
 						Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_TARGET_IDENTIFIER).collect(Collectors.toList());
 

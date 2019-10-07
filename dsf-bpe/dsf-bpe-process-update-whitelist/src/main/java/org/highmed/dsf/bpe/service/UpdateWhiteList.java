@@ -33,29 +33,26 @@ import org.springframework.beans.factory.InitializingBean;
 @SuppressWarnings("unchecked")
 public class UpdateWhiteList extends AbstractServiceDelegate implements InitializingBean
 {
-	private final FhirWebserviceClientProvider clientProvider;
 	private final OrganizationProvider organizationProvider;
 
-	public UpdateWhiteList(FhirWebserviceClientProvider clientProvider, OrganizationProvider organizationProvider,
+	public UpdateWhiteList(OrganizationProvider organizationProvider, FhirWebserviceClientProvider clientProvider,
 			TaskHelper taskHelper)
 	{
-		super(clientProvider.getLocalWebserviceClient(), taskHelper);
-
-		this.clientProvider = clientProvider;
+		super(clientProvider, taskHelper);
 		this.organizationProvider = organizationProvider;
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
-		Objects.requireNonNull(clientProvider, "clientProvider");
+		super.afterPropertiesSet();
 		Objects.requireNonNull(organizationProvider, "organizationProvider");
 	}
 
 	@Override
 	public void doExecute(DelegateExecution execution) throws Exception
 	{
-		FhirWebserviceClient client = clientProvider.getLocalWebserviceClient();
+		FhirWebserviceClient client = getFhirWebserviceClientProvider().getLocalWebserviceClient();
 
 		Bundle searchSet = client.search(Organization.class,
 				Map.of("active", Collections.singletonList("true"), "identifier",
@@ -142,7 +139,8 @@ public class UpdateWhiteList extends AbstractServiceDelegate implements Initiali
 		List<OutputWrapper> outputs = (List<OutputWrapper>) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
 
 		OutputWrapper outputWrapper = new OutputWrapper(Constants.CODESYSTEM_HIGHMED_BUNDLE);
-		outputWrapper.addKeyValue(Constants.CODESYSTEM_HIGHMED_BUNDLE_VALUE_WHITE_LIST, new IdType(result.getId()).getIdPart());
+		outputWrapper.addKeyValue(Constants.CODESYSTEM_HIGHMED_BUNDLE_VALUE_WHITE_LIST,
+				new IdType(result.getId()).getIdPart());
 		outputs.add(outputWrapper);
 
 		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, outputs);
