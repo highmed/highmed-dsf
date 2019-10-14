@@ -4,7 +4,7 @@ echo "Executing DSF BPE with"
 java --version
 
 trap 'kill -TERM $PID' TERM INT
-java -cp lib/*:dsf_bpe.jar org.highmed.dsf.bpe.BpeJettyServer &
+java -cp lib/*:plugin/*:dsf_bpe.jar org.highmed.dsf.bpe.BpeJettyServer &
 PID=$!
 wait $PID
 trap - TERM INT
