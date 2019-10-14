@@ -62,25 +62,23 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 				getClass().getName(), execution.getProcessInstanceId(), execution.getBusinessKey(),
 				execution.getVariables(), execution.getVariablesLocal());
 
-		throw new RuntimeException("TESTTESTTESTTEST");
-//
-//		Task task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
-//
-//		Reference requester = task.getRequester();
-//		Reference recipient = task.getRestriction().getRecipient().get(0);
-//
-//		String endpointAddress = getEndpointAddress(requester, recipient);
-//		FhirWebserviceClient client = getWebserviceClient(requester, recipient, endpointAddress);
-//
-//		ResearchStudy researchStudy = getResearchStudy(task, client);
-//		execution.setVariable(Constants.VARIABLE_RESEARCH_STUDY, researchStudy);
-//
-//		List<OutputWrapper> outputs = (List<OutputWrapper>) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
-//
-//		List<Group> cohortDefinitions = getCohortDefinitions(researchStudy, outputs, client);
-//		execution.setVariable(Constants.VARIABLE_COHORTS, cohortDefinitions);
-//
-//		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, outputs);
+		Task task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
+
+		Reference requester = task.getRequester();
+		Reference recipient = task.getRestriction().getRecipient().get(0);
+
+		String endpointAddress = getEndpointAddress(requester, recipient);
+		FhirWebserviceClient client = getWebserviceClient(requester, recipient, endpointAddress);
+
+		ResearchStudy researchStudy = getResearchStudy(task, client);
+		execution.setVariable(Constants.VARIABLE_RESEARCH_STUDY, researchStudy);
+
+		List<OutputWrapper> outputs = (List<OutputWrapper>) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
+
+		List<Group> cohortDefinitions = getCohortDefinitions(researchStudy, outputs, client);
+		execution.setVariable(Constants.VARIABLE_COHORTS, cohortDefinitions);
+
+		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, outputs);
 	}
 
 	private String getEndpointAddress(Reference requester, Reference recipient)
