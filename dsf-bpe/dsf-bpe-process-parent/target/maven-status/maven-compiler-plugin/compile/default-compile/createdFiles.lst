@@ -1,0 +1,4 @@
+org/highmed/dsf/bpe/service/AfterPlugin.class
+org/highmed/dsf/bpe/spring/config/ParentConfig.class
+org/highmed/dsf/bpe/plugin/ParentPlugin.class
+org/highmed/dsf/bpe/service/BeforePlugin.class

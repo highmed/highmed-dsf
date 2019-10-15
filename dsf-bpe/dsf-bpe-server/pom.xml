@@ -17,11 +17,21 @@
 		</dependency>
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
-			<artifactId>dsf-bpe-process-ping</artifactId>
+			<artifactId>dsf-bpe-process-feasibility</artifactId>
+		</dependency>
+		<!-- provided as jar and injected on startup as plugin
+		<dependency>
+			<groupId>org.highmed.dsf</groupId>
+			<artifactId>dsf-bpe-process-parent</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
-			<artifactId>dsf-bpe-process-feasibility</artifactId>
+			<artifactId>dsf-bpe-process-child</artifactId>
+		</dependency>
+		-->
+		<dependency>
+			<groupId>org.highmed.dsf</groupId>
+			<artifactId>dsf-bpe-process-ping</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
@@ -31,7 +41,6 @@
 			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-bpe-process-update-whitelist</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-fhir-websocket-client</artifactId>

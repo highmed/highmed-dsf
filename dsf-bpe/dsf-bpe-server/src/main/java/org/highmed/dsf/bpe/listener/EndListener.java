@@ -39,7 +39,11 @@ public class EndListener implements ExecutionListener
 			task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
 		}
 
-		task.setStatus(Task.TaskStatus.COMPLETED);
-		webserviceClient.update(task);
+		// Task can be null if we are in a subprocess (e.g. in a call activity)
+		if(task != null)
+		{
+			task.setStatus(Task.TaskStatus.COMPLETED);
+			webserviceClient.update(task);
+		}
 	}
 }
