@@ -21,6 +21,7 @@ public interface Constants
 	String VARIABLE_BUNDLE_ID = "bundleId";
 	String VARIABLE_SIMPLE_COHORT_SIZE_QUERY_FINAL_RESULT = "simpleCohortSizeQueryFinalResult";
 	String VARIABLE_PROCESS_OUTPUTS = "outputs";
+	String VARIABLE_IS_CALL_ACTIVITY = "isCallActivity";
 
 	String CODESYSTEM_HIGHMED_BPMN = "http://highmed.org/fhir/CodeSystem/bpmn-message";
 	String CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME = "message-name";

@@ -5,6 +5,7 @@ import java.util.List;
 import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
 import org.camunda.bpm.engine.spring.ProcessEngineFactoryBean;
 import org.camunda.bpm.engine.spring.SpringProcessEngineConfiguration;
+import org.highmed.dsf.bpe.listener.CallActivityListener;
 import org.highmed.dsf.bpe.listener.DefaultBpmnParseListener;
 import org.highmed.dsf.bpe.listener.EndListener;
 import org.highmed.dsf.bpe.listener.StartListener;
@@ -70,9 +71,15 @@ public class CamundaConfig
 	}
 
 	@Bean
+	public CallActivityListener callActivityListener()
+	{
+		return new CallActivityListener();
+	}
+
+	@Bean
 	public DefaultBpmnParseListener defaultBpmnParseListener()
 	{
-		return new DefaultBpmnParseListener(startListener(), endListener());
+		return new DefaultBpmnParseListener(startListener(), endListener(), callActivityListener());
 	}
 
 	@Bean
