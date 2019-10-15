@@ -21,6 +21,10 @@
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="SequenceFlow_00k7wb9" sourceRef="executeSubprocess" targetRef="afterPlugin" />
     <bpmn:callActivity id="executeSubprocess" name="execute subprocess" calledElement="childPlugin" camunda:calledElementBinding="versionTag" camunda:calledElementVersionTag="1.0.0">
+      <bpmn:extensionElements>
+        <camunda:in variables="all" />
+        <camunda:out variables="all" />
+      </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_10h1j1a</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_00k7wb9</bpmn:outgoing>
     </bpmn:callActivity>
