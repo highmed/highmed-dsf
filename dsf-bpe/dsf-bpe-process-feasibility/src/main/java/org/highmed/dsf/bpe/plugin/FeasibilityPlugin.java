@@ -12,9 +12,9 @@ public class FeasibilityPlugin extends AbstractProcessEnginePlugin
 	public void postProcessEngineBuild(ProcessEngine processEngine)
 	{
 		BpmnModelInstance requestProcess = readAndValidateModel("/" + REQUEST_FILE);
-		delpoy(processEngine, REQUEST_FILE, requestProcess);
+		deploy(processEngine, REQUEST_FILE, requestProcess);
 
 		BpmnModelInstance executionProcess = readAndValidateModel("/" + EXECUTION_FILE);
-		delpoy(processEngine, EXECUTION_FILE, executionProcess);
+		deploy(processEngine, EXECUTION_FILE, executionProcess);
 	}
 }

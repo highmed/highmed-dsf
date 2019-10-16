@@ -10,7 +10,6 @@ import org.highmed.dsf.fhir.variables.OutputWrapper;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Task;
 
-@SuppressWarnings("unchecked")
 public class EndListener implements ExecutionListener
 {
 	private final TaskHelper taskHelper;
@@ -35,6 +34,7 @@ public class EndListener implements ExecutionListener
 				// not in a subprocess --> end of main process
 				task = (Task) execution.getVariable(Constants.VARIABLE_LEADING_TASK);
 
+				@SuppressWarnings("unchecked")
 				List<OutputWrapper> outputs = (List<OutputWrapper>) execution
 						.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
 				task = taskHelper.addOutputs(task, outputs);

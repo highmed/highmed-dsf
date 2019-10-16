@@ -11,6 +11,6 @@ public class ParentPlugin extends AbstractProcessEnginePlugin
 	public void postProcessEngineBuild(ProcessEngine processEngine)
 	{
 		BpmnModelInstance parentProcess = readAndValidateModel("/" + PARENT_FILE);
-		delpoy(processEngine, PARENT_FILE, parentProcess);
+		deploy(processEngine, PARENT_FILE, parentProcess);
 	}
 }

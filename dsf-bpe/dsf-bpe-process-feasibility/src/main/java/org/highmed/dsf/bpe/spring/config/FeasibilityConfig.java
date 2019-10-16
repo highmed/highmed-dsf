@@ -18,7 +18,7 @@ import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.group.GroupHelper;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.openehr.client.OpenehrWebserviceClientProvider;
+import org.highmed.dsf.openehr.client.OpenEhrWebserviceClientProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,7 +30,7 @@ public class FeasibilityConfig
 	private FhirWebserviceClientProvider fhirClientProvider;
 
 	@Autowired
-	private OpenehrWebserviceClientProvider openehrClientProvider;
+	private OpenEhrWebserviceClientProvider openehrClientProvider;
 
 	@Autowired
 	private OrganizationProvider organizationProvider;

@@ -15,10 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-@SuppressWarnings("unchecked")
 public abstract class AbstractServiceDelegate implements JavaDelegate, InitializingBean
 {
-
 	private static final Logger logger = LoggerFactory.getLogger(AbstractServiceDelegate.class);
 
 	private final FhirWebserviceClientProvider clientProvider;
@@ -76,6 +74,7 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 					Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, errorMessage);
 			task.addOutput(errorOutput);
 
+			@SuppressWarnings("unchecked")
 			List<OutputWrapper> outputs = (List<OutputWrapper>) execution
 					.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
 			task = taskHelper.addOutputs(task, outputs);

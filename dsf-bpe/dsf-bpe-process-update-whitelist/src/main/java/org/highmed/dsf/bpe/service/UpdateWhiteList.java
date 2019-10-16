@@ -30,7 +30,6 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Reference;
 import org.springframework.beans.factory.InitializingBean;
 
-@SuppressWarnings("unchecked")
 public class UpdateWhiteList extends AbstractServiceDelegate implements InitializingBean
 {
 	private final OrganizationProvider organizationProvider;
@@ -136,6 +135,7 @@ public class UpdateWhiteList extends AbstractServiceDelegate implements Initiali
 
 	private void setTaskOutput(Bundle result, DelegateExecution execution)
 	{
+		@SuppressWarnings("unchecked")
 		List<OutputWrapper> outputs = (List<OutputWrapper>) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
 
 		OutputWrapper outputWrapper = new OutputWrapper(Constants.CODESYSTEM_HIGHMED_BUNDLE);

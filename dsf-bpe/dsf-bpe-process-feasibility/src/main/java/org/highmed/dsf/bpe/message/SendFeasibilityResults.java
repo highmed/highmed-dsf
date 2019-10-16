@@ -13,7 +13,6 @@ import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.OutputWrapper;
 import org.hl7.fhir.r4.model.Task;
 
-@SuppressWarnings("unchecked")
 public class SendFeasibilityResults extends AbstractTaskMessageSend
 {
 	public SendFeasibilityResults(OrganizationProvider organizationProvider,
@@ -25,6 +24,7 @@ public class SendFeasibilityResults extends AbstractTaskMessageSend
 	@Override
 	protected Stream<Task.ParameterComponent> getAdditionalInputParameters(DelegateExecution execution)
 	{
+		@SuppressWarnings("unchecked")
 		List<OutputWrapper> outputs = (List<OutputWrapper>) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
 		List<Task.ParameterComponent> inputs = new ArrayList<>();
 

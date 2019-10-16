@@ -18,7 +18,6 @@ import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings("unchecked")
 public class CheckFeasibilityResources extends AbstractServiceDelegate
 {
 	private static final Logger logger = LoggerFactory.getLogger(CheckFeasibilityResources.class);
@@ -38,6 +37,7 @@ public class CheckFeasibilityResources extends AbstractServiceDelegate
 		if (!task.getRequester().equalsDeep(task.getRestriction().getRecipient().get(0)))
 		{
 			ResearchStudy researchStudy = (ResearchStudy) execution.getVariable(Constants.VARIABLE_RESEARCH_STUDY);
+			@SuppressWarnings("unchecked")
 			List<Group> cohorts = (List<Group>) execution.getVariable(Constants.VARIABLE_COHORTS);
 
 			checkNumberOfParticipatingMedics(researchStudy);

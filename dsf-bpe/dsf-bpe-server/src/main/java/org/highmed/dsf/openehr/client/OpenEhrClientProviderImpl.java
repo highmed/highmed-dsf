@@ -10,9 +10,9 @@ import org.springframework.beans.factory.InitializingBean;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class ClientProviderImpl implements OpenehrWebserviceClientProvider, InitializingBean
+public class OpenEhrClientProviderImpl implements OpenEhrWebserviceClientProvider, InitializingBean
 {
-	private static final Logger logger = LoggerFactory.getLogger(ClientProviderImpl.class);
+	private static final Logger logger = LoggerFactory.getLogger(OpenEhrClientProviderImpl.class);
 
 	private String baseUrl;
 
@@ -24,8 +24,8 @@ public class ClientProviderImpl implements OpenehrWebserviceClientProvider, Init
 
 	private ObjectMapper objectMapper;
 
-	public ClientProviderImpl(String baseUrl, String basicAuthUsername, String basicAuthPassword, int connectionTimeout,
-			int readTimeout, ObjectMapper objectMapper)
+	public OpenEhrClientProviderImpl(String baseUrl, String basicAuthUsername, String basicAuthPassword,
+			int connectionTimeout, int readTimeout, ObjectMapper objectMapper)
 	{
 		this.baseUrl = baseUrl;
 
@@ -52,7 +52,8 @@ public class ClientProviderImpl implements OpenehrWebserviceClientProvider, Init
 	@Override
 	public OpenehrWebserviceClient getWebserviceClient()
 	{
-		return new OpenehrWebserviceClientJersey(baseUrl, basicAuthUsername, basicAuthPassword, connectionTimeout, readTimeout, objectMapper);
+		return new OpenehrWebserviceClientJersey(baseUrl, basicAuthUsername, basicAuthPassword, connectionTimeout,
+				readTimeout, objectMapper);
 	}
 
 	@Override

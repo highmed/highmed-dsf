@@ -11,8 +11,8 @@ import java.security.cert.CertificateException;
 
 import org.camunda.bpm.engine.ProcessEngine;
 import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
-import org.highmed.dsf.fhir.client.ClientProviderImpl;
-import org.highmed.dsf.fhir.client.WebsocketClientProvider;
+import org.highmed.dsf.fhir.client.FhirClientProviderImpl;
+import org.highmed.dsf.fhir.client.FhirWebsocketClientProvider;
 import org.highmed.dsf.fhir.group.GroupHelper;
 import org.highmed.dsf.fhir.group.GroupHelperImpl;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
@@ -28,7 +28,6 @@ import org.highmed.dsf.fhir.variables.OrganizationDeserializer;
 import org.highmed.dsf.fhir.variables.OrganizationSerializer;
 import org.highmed.dsf.fhir.websocket.FhirConnector;
 import org.highmed.dsf.fhir.websocket.LastEventTimeIo;
-import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Organization;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -183,7 +182,7 @@ public class FhirConfig
 	}
 
 	@Bean
-	public WebsocketClientProvider clientProvider()
+	public FhirWebsocketClientProvider clientProvider()
 	{
 		try
 		{
@@ -206,7 +205,7 @@ public class FhirConfig
 					.fromPkcs12(localWebsocketKsFile, localWebsocketKeyStorePassword);
 			KeyStore localWebsocketTrustStore = CertificateHelper.extractTrust(localWebsocketKeyStore);
 
-			return new ClientProviderImpl(fhirContext(), localWebserviceBaseUrl, localReadTimeout, localConnectTimeout,
+			return new FhirClientProviderImpl(fhirContext(), localWebserviceBaseUrl, localReadTimeout, localConnectTimeout,
 					localWebserviceTrustStore, localWebserviceKeyStore, webserviceKeyStorePassword, remoteReadTimeout,
 					remoteConnectTimeout, remoteProxyPassword, remoteProxyUsername, remoteProxySchemeHostPort,
 					localWebsocketUrl, localWebsocketTrustStore, localWebsocketKeyStore,

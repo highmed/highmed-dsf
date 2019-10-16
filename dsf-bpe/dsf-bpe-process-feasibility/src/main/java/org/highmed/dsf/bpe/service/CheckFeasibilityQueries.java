@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-@SuppressWarnings("unchecked")
 public class CheckFeasibilityQueries extends AbstractServiceDelegate implements InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(CheckFeasibilityQueries.class);
@@ -42,6 +41,7 @@ public class CheckFeasibilityQueries extends AbstractServiceDelegate implements 
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
 		List<OutputWrapper> outputs = (List<OutputWrapper>) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);

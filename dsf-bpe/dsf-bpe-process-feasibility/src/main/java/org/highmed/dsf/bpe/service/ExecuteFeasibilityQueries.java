@@ -11,13 +11,10 @@ import org.highmed.dsf.bpe.variables.MultiInstanceResult;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.openehr.client.OpenehrWebserviceClient;
-import org.highmed.openehr.model.datatypes.DV_Count;
-import org.highmed.openehr.model.structur.ResultSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-@SuppressWarnings("unchecked")
 public class ExecuteFeasibilityQueries extends AbstractServiceDelegate implements InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(ExecuteFeasibilityQueries.class);
@@ -39,6 +36,7 @@ public class ExecuteFeasibilityQueries extends AbstractServiceDelegate implement
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public void doExecute(DelegateExecution execution) throws Exception
 	{
 		Map<String, String> queries = (Map<String, String>) execution.getVariable(Constants.VARIABLE_QUERIES);

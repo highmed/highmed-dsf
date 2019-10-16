@@ -1,8 +1,5 @@
 package org.highmed.openehr.client;
 
-import java.security.KeyStore;
-import java.util.Collections;
-
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.HttpHeaders;
@@ -10,7 +7,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
-import org.highmed.openehr.client.AbstractJerseyClient;
 import org.highmed.openehr.model.structur.Request;
 import org.highmed.openehr.model.structur.ResultSet;
 import org.slf4j.Logger;
@@ -18,7 +14,6 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@SuppressWarnings("unchecked")
 public class OpenehrWebserviceClientJersey extends AbstractJerseyClient implements OpenehrWebserviceClient
 {
 	private static final Logger logger = LoggerFactory.getLogger(OpenehrWebserviceClientJersey.class);

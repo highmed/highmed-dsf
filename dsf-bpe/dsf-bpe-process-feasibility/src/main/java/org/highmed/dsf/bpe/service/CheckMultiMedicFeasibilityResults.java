@@ -15,7 +15,6 @@ import org.highmed.dsf.fhir.variables.OutputWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings("unchecked")
 public class CheckMultiMedicFeasibilityResults extends AbstractServiceDelegate
 {
 	private static final Logger logger = LoggerFactory.getLogger(CheckMultiMedicFeasibilityResults.class);
@@ -26,6 +25,7 @@ public class CheckMultiMedicFeasibilityResults extends AbstractServiceDelegate
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public void doExecute(DelegateExecution execution) throws Exception
 	{
 		List<FinalSimpleFeasibilityResult> finalResult = (List<FinalSimpleFeasibilityResult>) execution

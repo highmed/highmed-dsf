@@ -34,7 +34,6 @@ import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
-@SuppressWarnings("unchecked")
 public class DownloadFeasibilityResources extends AbstractServiceDelegate implements InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(DownloadFeasibilityResources.class);
@@ -73,6 +72,7 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 		ResearchStudy researchStudy = getResearchStudy(task, client);
 		execution.setVariable(Constants.VARIABLE_RESEARCH_STUDY, researchStudy);
 
+		@SuppressWarnings("unchecked")
 		List<OutputWrapper> outputs = (List<OutputWrapper>) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
 
 		List<Group> cohortDefinitions = getCohortDefinitions(researchStudy, outputs, client);

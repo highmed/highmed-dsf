@@ -1,7 +1,7 @@
 package org.highmed.dsf.bpe.spring.config;
 
-import org.highmed.dsf.openehr.client.ClientProviderImpl;
-import org.highmed.dsf.openehr.client.OpenehrWebserviceClientProvider;
+import org.highmed.dsf.openehr.client.OpenEhrClientProviderImpl;
+import org.highmed.dsf.openehr.client.OpenEhrWebserviceClientProvider;
 
 import org.highmed.openehr.deserializer.RowElementDeserializer;
 import org.highmed.openehr.model.structur.RowElement;
@@ -57,8 +57,8 @@ public class OpenEhrConfig
 	}
 
 	@Bean
-	public OpenehrWebserviceClientProvider webserviceClientProvider()
+	public OpenEhrWebserviceClientProvider webserviceClientProvider()
 	{
-		return new ClientProviderImpl(baseUrl, basicAuthUsername, basicAuthPassword, connectTimeout, readTimeout, objectMapper());
+		return new OpenEhrClientProviderImpl(baseUrl, basicAuthUsername, basicAuthPassword, connectTimeout, readTimeout, objectMapper());
 	}
 }

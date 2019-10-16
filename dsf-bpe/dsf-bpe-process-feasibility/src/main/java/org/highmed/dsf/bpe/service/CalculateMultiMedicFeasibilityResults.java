@@ -18,7 +18,6 @@ import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings("unchecked")
 public class CalculateMultiMedicFeasibilityResults extends AbstractServiceDelegate
 {
 	private static final Logger logger = LoggerFactory.getLogger(CalculateMultiMedicFeasibilityResults.class);
@@ -29,6 +28,7 @@ public class CalculateMultiMedicFeasibilityResults extends AbstractServiceDelega
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public void doExecute(DelegateExecution execution) throws Exception
 	{
 		MultiInstanceResults resultsWrapper = (MultiInstanceResults) execution
