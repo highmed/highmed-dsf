@@ -1,1 +1,272 @@
-<Bundle xmlns="http://hl7.org/fhir"><id value="30a376fa-f3ba-4f68-8e04-c5b9c0c4f5c9"></id><meta><versionId value="2"></versionId><lastUpdated value="2019-05-14T14:13:49.362+00:00"></lastUpdated></meta><identifier><system value="http://highmed.org/fhir/CodeSystem/bundle"></system><value value="HiGHmed_white_list"></value></identifier><type value="transaction"></type><entry><fullUrl value="urn:uuid:ca7b7dcd-818b-4c57-849c-61c6fbf41f6a"></fullUrl><resource><Organization xmlns="http://hl7.org/fhir"><extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint"><valueString value="821be11d134e7070e3bcc402032fdab9d8ee865ef2b98ac70605864572fcd4e13cd55cb9d3841785a497234f1fb8447434cd07ca47e524db36fcfcccdea0d56f"></valueString></extension><identifier><system value="http://highmed.org/fhir/CodeSystem/organization"></system><value value="Test_MeDIC_3"></value></identifier><active value="true"></active><type><coding><system value="http://highmed.org/fhir/CodeSystem/organization-type"></system><code value="MeDIC"></code></coding></type><name value="Test MeDIC 3"></name><endpoint><reference value="urn:uuid:68907804-c798-4022-8b16-a90e3d48730c"></reference><type value="Endpoint"></type></endpoint></Organization></resource><request><method value="PUT"></method><url value="Organization?identifier=http://highmed.org/fhir/CodeSystem/organization|Test_MeDIC_3"></url></request></entry><entry><fullUrl value="urn:uuid:68907804-c798-4022-8b16-a90e3d48730c"></fullUrl><resource><Endpoint xmlns="http://hl7.org/fhir"><identifier><system value="http://highmed.org/fhir/CodeSystem/endpoint"></system><value value="Test_MeDIC_3_Endpoint"></value></identifier><status value="active"></status><connectionType><system value="http://terminology.hl7.org/CodeSystem/endpoint-connection-type"></system><code value="hl7-fhir-rest"></code></connectionType><name value="Test MeDIC 3 Endpoint"></name><managingOrganization><reference value="urn:uuid:ca7b7dcd-818b-4c57-849c-61c6fbf41f6a"></reference><type value="Organization"></type></managingOrganization><payloadType><coding><system value="http://hl7.org/fhir/resource-types"></system><code value="Task"></code></coding></payloadType><payloadMimeType value="application/fhir+json"></payloadMimeType><payloadMimeType value="application/fhir+xml"></payloadMimeType><address value="https://medic3/fhir"></address></Endpoint></resource><request><method value="PUT"></method><url value="Endpoint?identifier=http://highmed.org/fhir/CodeSystem/endpoint|Test_MeDIC_3_Endpoint"></url></request></entry><entry><fullUrl value="urn:uuid:c87d9528-a25f-4349-9d0e-5ffef0b4f090"></fullUrl><resource><Organization xmlns="http://hl7.org/fhir"><extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint"><valueString value="532a7736fd2187c4895765fa211cd076e70d0e9405c466b650ca3c2e89b9cd796a063f1840f26b6422b08aafdaff677fb53bec14916185355ae1b6ee1b0afc5f"></valueString></extension><identifier><system value="http://highmed.org/fhir/CodeSystem/organization"></system><value value="Test_TTP"></value></identifier><active value="true"></active><type><coding><system value="http://highmed.org/fhir/CodeSystem/organization-type"></system><code value="TTP"></code></coding></type><name value="Test TTP"></name><endpoint><reference value="urn:uuid:f75d263a-9345-4f5d-a77b-4ea405874e14"></reference><type value="Endpoint"></type></endpoint></Organization></resource><request><method value="PUT"></method><url value="Organization?identifier=http://highmed.org/fhir/CodeSystem/organization|Test_TTP"></url></request></entry><entry><fullUrl value="urn:uuid:f75d263a-9345-4f5d-a77b-4ea405874e14"></fullUrl><resource><Endpoint xmlns="http://hl7.org/fhir"><identifier><system value="http://highmed.org/fhir/CodeSystem/endpoint"></system><value value="Test_TTP_Endpoint"></value></identifier><status value="active"></status><connectionType><system value="http://terminology.hl7.org/CodeSystem/endpoint-connection-type"></system><code value="hl7-fhir-rest"></code></connectionType><name value="Test TTP Endpoint"></name><managingOrganization><reference value="urn:uuid:c87d9528-a25f-4349-9d0e-5ffef0b4f090"></reference><type value="Organization"></type></managingOrganization><payloadType><coding><system value="http://hl7.org/fhir/resource-types"></system><code value="Task"></code></coding></payloadType><payloadMimeType value="application/fhir+json"></payloadMimeType><payloadMimeType value="application/fhir+xml"></payloadMimeType><address value="https://ttp/fhir"></address></Endpoint></resource><request><method value="PUT"></method><url value="Endpoint?identifier=http://highmed.org/fhir/CodeSystem/endpoint|Test_TTP_Endpoint"></url></request></entry><entry><fullUrl value="urn:uuid:e3dd1182-b396-406d-b8a2-9bb199a6731b"></fullUrl><resource><Organization xmlns="http://hl7.org/fhir"><extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint"><valueString value="f143826e22f1a95830ab32dde7b388c154039ed0633c9b0d1526078a9ee7f403540e3cd3459331a3c2caf72e006daff2f71ab7cd2136272e5e022ef392c32246"></valueString></extension><identifier><system value="http://highmed.org/fhir/CodeSystem/organization"></system><value value="Test_MeDIC_1"></value></identifier><active value="true"></active><type><coding><system value="http://highmed.org/fhir/CodeSystem/organization-type"></system><code value="MeDIC"></code></coding></type><name value="Test MeDIC 1"></name><endpoint><reference value="urn:uuid:13ee998b-dd89-4178-aef8-1326115d7bb5"></reference><type value="Endpoint"></type></endpoint></Organization></resource><request><method value="PUT"></method><url value="Organization?identifier=http://highmed.org/fhir/CodeSystem/organization|Test_MeDIC_1"></url></request></entry><entry><fullUrl value="urn:uuid:13ee998b-dd89-4178-aef8-1326115d7bb5"></fullUrl><resource><Endpoint xmlns="http://hl7.org/fhir"><identifier><system value="http://highmed.org/fhir/CodeSystem/endpoint"></system><value value="Test_MeDIC_1_Endpoint"></value></identifier><status value="active"></status><connectionType><system value="http://terminology.hl7.org/CodeSystem/endpoint-connection-type"></system><code value="hl7-fhir-rest"></code></connectionType><name value="Test MeDIC 1 Endpoint"></name><managingOrganization><reference value="urn:uuid:e3dd1182-b396-406d-b8a2-9bb199a6731b"></reference><type value="Organization"></type></managingOrganization><payloadType><coding><system value="http://hl7.org/fhir/resource-types"></system><code value="Task"></code></coding></payloadType><payloadMimeType value="application/fhir+json"></payloadMimeType><payloadMimeType value="application/fhir+xml"></payloadMimeType><address value="https://medic1/fhir"></address></Endpoint></resource><request><method value="PUT"></method><url value="Endpoint?identifier=http://highmed.org/fhir/CodeSystem/endpoint|Test_MeDIC_1_Endpoint"></url></request></entry><entry><fullUrl value="urn:uuid:c656a1a4-e2d4-452e-ae69-b527fe5a42b7"></fullUrl><resource><Organization xmlns="http://hl7.org/fhir"><extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint"><valueString value="e4af921e6cbc35032ddb21b8a36f366ff7605bdb20bddddcbca6bcc437239b58e9189dfea3a66c584a9bb0a6006c243031c6c5504a43d059afa629d24f8b55bb"></valueString></extension><identifier><system value="http://highmed.org/fhir/CodeSystem/organization"></system><value value="Test_MeDIC_2"></value></identifier><active value="true"></active><type><coding><system value="http://highmed.org/fhir/CodeSystem/organization-type"></system><code value="MeDIC"></code></coding></type><name value="Test MeDIC 2"></name><endpoint><reference value="urn:uuid:71805641-e04e-400d-bb3b-9847292f9d54"></reference><type value="Endpoint"></type></endpoint></Organization></resource><request><method value="PUT"></method><url value="Organization?identifier=http://highmed.org/fhir/CodeSystem/organization|Test_MeDIC_2"></url></request></entry><entry><fullUrl value="urn:uuid:71805641-e04e-400d-bb3b-9847292f9d54"></fullUrl><resource><Endpoint xmlns="http://hl7.org/fhir"><identifier><system value="http://highmed.org/fhir/CodeSystem/endpoint"></system><value value="Test_MeDIC_2_Endpoint"></value></identifier><status value="active"></status><connectionType><system value="http://terminology.hl7.org/CodeSystem/endpoint-connection-type"></system><code value="hl7-fhir-rest"></code></connectionType><name value="Test MeDIC 2 Endpoint"></name><managingOrganization><reference value="urn:uuid:c656a1a4-e2d4-452e-ae69-b527fe5a42b7"></reference><type value="Organization"></type></managingOrganization><payloadType><coding><system value="http://hl7.org/fhir/resource-types"></system><code value="Task"></code></coding></payloadType><payloadMimeType value="application/fhir+json"></payloadMimeType><payloadMimeType value="application/fhir+xml"></payloadMimeType><address value="https://medic2/fhir"></address></Endpoint></resource><request><method value="PUT"></method><url value="Endpoint?identifier=http://highmed.org/fhir/CodeSystem/endpoint|Test_MeDIC_2_Endpoint"></url></request></entry></Bundle>
+<Bundle xmlns="http://hl7.org/fhir">
+	<id value="30a376fa-f3ba-4f68-8e04-c5b9c0c4f5c9"></id>
+	<meta>
+		<versionId value="2"></versionId>
+		<lastUpdated value="2019-05-14T14:13:49.362+00:00"></lastUpdated>
+	</meta>
+	<identifier>
+		<system value="http://highmed.org/fhir/CodeSystem/bundle"></system>
+		<value value="HiGHmed_white_list"></value>
+	</identifier>
+	<type value="transaction"></type>
+	<entry>
+		<fullUrl value="urn:uuid:ca7b7dcd-818b-4c57-849c-61c6fbf41f6a"></fullUrl>
+		<resource>
+			<Organization xmlns="http://hl7.org/fhir">
+				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
+					<valueString
+							value="821be11d134e7070e3bcc402032fdab9d8ee865ef2b98ac70605864572fcd4e13cd55cb9d3841785a497234f1fb8447434cd07ca47e524db36fcfcccdea0d56f"></valueString>
+				</extension>
+				<identifier>
+					<system value="http://highmed.org/fhir/CodeSystem/organization"></system>
+					<value value="Test_MeDIC_3"></value>
+				</identifier>
+				<active value="true"></active>
+				<type>
+					<coding>
+						<system value="http://highmed.org/fhir/CodeSystem/organization-type"></system>
+						<code value="MeDIC"></code>
+					</coding>
+				</type>
+				<name value="Test MeDIC 3"></name>
+				<endpoint>
+					<reference value="urn:uuid:68907804-c798-4022-8b16-a90e3d48730c"></reference>
+					<type value="Endpoint"></type>
+				</endpoint>
+			</Organization>
+		</resource>
+		<request>
+			<method value="PUT"></method>
+			<url value="Organization?identifier=http://highmed.org/fhir/CodeSystem/organization|Test_MeDIC_3"></url>
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:68907804-c798-4022-8b16-a90e3d48730c"></fullUrl>
+		<resource>
+			<Endpoint xmlns="http://hl7.org/fhir">
+				<identifier>
+					<system value="http://highmed.org/fhir/CodeSystem/endpoint"></system>
+					<value value="Test_MeDIC_3_Endpoint"></value>
+				</identifier>
+				<status value="active"></status>
+				<connectionType>
+					<system value="http://terminology.hl7.org/CodeSystem/endpoint-connection-type"></system>
+					<code value="hl7-fhir-rest"></code>
+				</connectionType>
+				<name value="Test MeDIC 3 Endpoint"></name>
+				<managingOrganization>
+					<reference value="urn:uuid:ca7b7dcd-818b-4c57-849c-61c6fbf41f6a"></reference>
+					<type value="Organization"></type>
+				</managingOrganization>
+				<payloadType>
+					<coding>
+						<system value="http://hl7.org/fhir/resource-types"></system>
+						<code value="Task"></code>
+					</coding>
+				</payloadType>
+				<payloadMimeType value="application/fhir+json"></payloadMimeType>
+				<payloadMimeType value="application/fhir+xml"></payloadMimeType>
+				<address value="https://medic3/fhir"></address>
+			</Endpoint>
+		</resource>
+		<request>
+			<method value="PUT"></method>
+			<url value="Endpoint?identifier=http://highmed.org/fhir/CodeSystem/endpoint|Test_MeDIC_3_Endpoint"></url>
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:c87d9528-a25f-4349-9d0e-5ffef0b4f090"></fullUrl>
+		<resource>
+			<Organization xmlns="http://hl7.org/fhir">
+				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
+					<valueString
+							value="532a7736fd2187c4895765fa211cd076e70d0e9405c466b650ca3c2e89b9cd796a063f1840f26b6422b08aafdaff677fb53bec14916185355ae1b6ee1b0afc5f"></valueString>
+				</extension>
+				<identifier>
+					<system value="http://highmed.org/fhir/CodeSystem/organization"></system>
+					<value value="Test_TTP"></value>
+				</identifier>
+				<active value="true"></active>
+				<type>
+					<coding>
+						<system value="http://highmed.org/fhir/CodeSystem/organization-type"></system>
+						<code value="TTP"></code>
+					</coding>
+				</type>
+				<name value="Test TTP"></name>
+				<endpoint>
+					<reference value="urn:uuid:f75d263a-9345-4f5d-a77b-4ea405874e14"></reference>
+					<type value="Endpoint"></type>
+				</endpoint>
+			</Organization>
+		</resource>
+		<request>
+			<method value="PUT"></method>
+			<url value="Organization?identifier=http://highmed.org/fhir/CodeSystem/organization|Test_TTP"></url>
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:f75d263a-9345-4f5d-a77b-4ea405874e14"></fullUrl>
+		<resource>
+			<Endpoint xmlns="http://hl7.org/fhir">
+				<identifier>
+					<system value="http://highmed.org/fhir/CodeSystem/endpoint"></system>
+					<value value="Test_TTP_Endpoint"></value>
+				</identifier>
+				<status value="active"></status>
+				<connectionType>
+					<system value="http://terminology.hl7.org/CodeSystem/endpoint-connection-type"></system>
+					<code value="hl7-fhir-rest"></code>
+				</connectionType>
+				<name value="Test TTP Endpoint"></name>
+				<managingOrganization>
+					<reference value="urn:uuid:c87d9528-a25f-4349-9d0e-5ffef0b4f090"></reference>
+					<type value="Organization"></type>
+				</managingOrganization>
+				<payloadType>
+					<coding>
+						<system value="http://hl7.org/fhir/resource-types"></system>
+						<code value="Task"></code>
+					</coding>
+				</payloadType>
+				<payloadMimeType value="application/fhir+json"></payloadMimeType>
+				<payloadMimeType value="application/fhir+xml"></payloadMimeType>
+				<address value="https://ttp/fhir"></address>
+			</Endpoint>
+		</resource>
+		<request>
+			<method value="PUT"></method>
+			<url value="Endpoint?identifier=http://highmed.org/fhir/CodeSystem/endpoint|Test_TTP_Endpoint"></url>
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:e3dd1182-b396-406d-b8a2-9bb199a6731b"></fullUrl>
+		<resource>
+			<Organization xmlns="http://hl7.org/fhir">
+				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
+					<valueString
+							value="f143826e22f1a95830ab32dde7b388c154039ed0633c9b0d1526078a9ee7f403540e3cd3459331a3c2caf72e006daff2f71ab7cd2136272e5e022ef392c32246"></valueString>
+				</extension>
+				<identifier>
+					<system value="http://highmed.org/fhir/CodeSystem/organization"></system>
+					<value value="Test_MeDIC_1"></value>
+				</identifier>
+				<active value="true"></active>
+				<type>
+					<coding>
+						<system value="http://highmed.org/fhir/CodeSystem/organization-type"></system>
+						<code value="MeDIC"></code>
+					</coding>
+				</type>
+				<name value="Test MeDIC 1"></name>
+				<endpoint>
+					<reference value="urn:uuid:13ee998b-dd89-4178-aef8-1326115d7bb5"></reference>
+					<type value="Endpoint"></type>
+				</endpoint>
+			</Organization>
+		</resource>
+		<request>
+			<method value="PUT"></method>
+			<url value="Organization?identifier=http://highmed.org/fhir/CodeSystem/organization|Test_MeDIC_1"></url>
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:13ee998b-dd89-4178-aef8-1326115d7bb5"></fullUrl>
+		<resource>
+			<Endpoint xmlns="http://hl7.org/fhir">
+				<identifier>
+					<system value="http://highmed.org/fhir/CodeSystem/endpoint"></system>
+					<value value="Test_MeDIC_1_Endpoint"></value>
+				</identifier>
+				<status value="active"></status>
+				<connectionType>
+					<system value="http://terminology.hl7.org/CodeSystem/endpoint-connection-type"></system>
+					<code value="hl7-fhir-rest"></code>
+				</connectionType>
+				<name value="Test MeDIC 1 Endpoint"></name>
+				<managingOrganization>
+					<reference value="urn:uuid:e3dd1182-b396-406d-b8a2-9bb199a6731b"></reference>
+					<type value="Organization"></type>
+				</managingOrganization>
+				<payloadType>
+					<coding>
+						<system value="http://hl7.org/fhir/resource-types"></system>
+						<code value="Task"></code>
+					</coding>
+				</payloadType>
+				<payloadMimeType value="application/fhir+json"></payloadMimeType>
+				<payloadMimeType value="application/fhir+xml"></payloadMimeType>
+				<address value="https://medic1/fhir"></address>
+			</Endpoint>
+		</resource>
+		<request>
+			<method value="PUT"></method>
+			<url value="Endpoint?identifier=http://highmed.org/fhir/CodeSystem/endpoint|Test_MeDIC_1_Endpoint"></url>
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:c656a1a4-e2d4-452e-ae69-b527fe5a42b7"></fullUrl>
+		<resource>
+			<Organization xmlns="http://hl7.org/fhir">
+				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
+					<valueString
+							value="e4af921e6cbc35032ddb21b8a36f366ff7605bdb20bddddcbca6bcc437239b58e9189dfea3a66c584a9bb0a6006c243031c6c5504a43d059afa629d24f8b55bb"></valueString>
+				</extension>
+				<identifier>
+					<system value="http://highmed.org/fhir/CodeSystem/organization"></system>
+					<value value="Test_MeDIC_2"></value>
+				</identifier>
+				<active value="true"></active>
+				<type>
+					<coding>
+						<system value="http://highmed.org/fhir/CodeSystem/organization-type"></system>
+						<code value="MeDIC"></code>
+					</coding>
+				</type>
+				<name value="Test MeDIC 2"></name>
+				<endpoint>
+					<reference value="urn:uuid:71805641-e04e-400d-bb3b-9847292f9d54"></reference>
+					<type value="Endpoint"></type>
+				</endpoint>
+			</Organization>
+		</resource>
+		<request>
+			<method value="PUT"></method>
+			<url value="Organization?identifier=http://highmed.org/fhir/CodeSystem/organization|Test_MeDIC_2"></url>
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:71805641-e04e-400d-bb3b-9847292f9d54"></fullUrl>
+		<resource>
+			<Endpoint xmlns="http://hl7.org/fhir">
+				<identifier>
+					<system value="http://highmed.org/fhir/CodeSystem/endpoint"></system>
+					<value value="Test_MeDIC_2_Endpoint"></value>
+				</identifier>
+				<status value="active"></status>
+				<connectionType>
+					<system value="http://terminology.hl7.org/CodeSystem/endpoint-connection-type"></system>
+					<code value="hl7-fhir-rest"></code>
+				</connectionType>
+				<name value="Test MeDIC 2 Endpoint"></name>
+				<managingOrganization>
+					<reference value="urn:uuid:c656a1a4-e2d4-452e-ae69-b527fe5a42b7"></reference>
+					<type value="Organization"></type>
+				</managingOrganization>
+				<payloadType>
+					<coding>
+						<system value="http://hl7.org/fhir/resource-types"></system>
+						<code value="Task"></code>
+					</coding>
+				</payloadType>
+				<payloadMimeType value="application/fhir+json"></payloadMimeType>
+				<payloadMimeType value="application/fhir+xml"></payloadMimeType>
+				<address value="https://medic2/fhir"></address>
+			</Endpoint>
+		</resource>
+		<request>
+			<method value="PUT"></method>
+			<url value="Endpoint?identifier=http://highmed.org/fhir/CodeSystem/endpoint|Test_MeDIC_2_Endpoint"></url>
+		</request>
+	</entry>
+</Bundle>

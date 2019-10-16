@@ -1,28 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
 
-	<property name="json" value="JSONB" dbms="postgresql" />
-	<property name="json" value="varchar(5000)" dbms="h2" />
+	<property name="json" value="JSONB" dbms="postgresql"/>
+	<property name="json" value="varchar(5000)" dbms="h2"/>
 
 	<changeSet author="hhund" id="db.naming_systems.changelog-0.1.0">
 		<createTable tableName="naming_systems">
 			<column name="naming_system_id" type="UUID">
-				<constraints nullable="false" />
+				<constraints nullable="false"/>
 			</column>
 			<column name="version" type="BIGINT" defaultValueNumeric="1">
-				<constraints nullable="false" />
+				<constraints nullable="false"/>
 			</column>
 			<column name="deleted" type="BOOLEAN" defaultValue="false">
-				<constraints nullable="false" />
+				<constraints nullable="false"/>
 			</column>
 			<column name="naming_system" type="${json}">
-				<constraints nullable="false" />
+				<constraints nullable="false"/>
 			</column>
 		</createTable>
 
-		<addPrimaryKey tableName="naming_systems" columnNames="naming_system_id, version" />
+		<addPrimaryKey tableName="naming_systems" columnNames="naming_system_id, version"/>
 
 		<sql dbms="postgresql">
 			ALTER TABLE naming_systems OWNER TO ${db.liquibase_user};

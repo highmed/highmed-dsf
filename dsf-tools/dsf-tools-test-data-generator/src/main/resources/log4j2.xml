@@ -3,16 +3,16 @@
 
 	<Appenders>
 		<Console name="CONSOLE" target="SYSTEM_OUT">
-			<PatternLayout pattern="%p\t%t - %C{1}.%M(%L) | %m%n" />
+			<PatternLayout pattern="%p\t%t - %C{1}.%M(%L) | %m%n"/>
 		</Console>
 	</Appenders>
 
 	<Loggers>
-		<Logger name="org.highmed" level="DEBUG" />
-		<logger name="de.rwh" level="INFO" />
+		<Logger name="org.highmed" level="DEBUG"/>
+		<logger name="de.rwh" level="INFO"/>
 
 		<Root level="WARN">
-			<AppenderRef ref="CONSOLE" />
+			<AppenderRef ref="CONSOLE"/>
 		</Root>
 	</Loggers>
 </Configuration>
