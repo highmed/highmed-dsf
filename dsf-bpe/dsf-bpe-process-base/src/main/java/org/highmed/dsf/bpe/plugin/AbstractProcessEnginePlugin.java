@@ -24,7 +24,7 @@ public abstract class AbstractProcessEnginePlugin implements ProcessEnginePlugin
 	{
 	}
 
-	protected void delpoy(ProcessEngine processEngine, String modelFilename, BpmnModelInstance model)
+	protected void deploy(ProcessEngine processEngine, String modelFilename, BpmnModelInstance model)
 	{
 		RepositoryService repositoryService = processEngine.getRepositoryService();
 

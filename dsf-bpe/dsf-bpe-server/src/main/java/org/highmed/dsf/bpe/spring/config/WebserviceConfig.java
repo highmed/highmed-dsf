@@ -1,7 +1,7 @@
 package org.highmed.dsf.bpe.spring.config;
 
 import org.camunda.bpm.engine.ProcessEngine;
-import org.highmed.dsf.bpe.werbservice.ProcessService;
+import org.highmed.dsf.bpe.webservice.ProcessService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
