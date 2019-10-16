@@ -25,21 +25,29 @@ public class EndListener implements ExecutionListener
 	@Override
 	public void notify(DelegateExecution execution) throws Exception
 	{
-		Task task;
-		if (execution.getParentId() == null || execution.getParentId().equals(execution.getProcessInstanceId()))
-		{
-			// not in a subprocess --> end of main process
-			task = (Task) execution.getVariable(Constants.VARIABLE_LEADING_TASK);
+		boolean isCallActivity = (boolean) execution.getVariable(Constants.VARIABLE_IS_CALL_ACTIVITY);
 
-			List<OutputWrapper> outputs = (List<OutputWrapper>) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
-			task = taskHelper.addOutputs(task, outputs);
-		}
-		else
+		if (!isCallActivity)
 		{
-			task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
-		}
+			Task task;
+			if (execution.getParentId() == null || execution.getParentId().equals(execution.getProcessInstanceId()))
+			{
+				// not in a subprocess --> end of main process
+				task = (Task) execution.getVariable(Constants.VARIABLE_LEADING_TASK);
 
-		task.setStatus(Task.TaskStatus.COMPLETED);
-		webserviceClient.update(task);
+				List<OutputWrapper> outputs = (List<OutputWrapper>) execution
+						.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
+				task = taskHelper.addOutputs(task, outputs);
+			}
+			else
+			{
+				task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
+			}
+
+			task.setStatus(Task.TaskStatus.COMPLETED);
+			webserviceClient.update(task);
+		} else {
+			execution.setVariable(Constants.VARIABLE_IS_CALL_ACTIVITY, false);
+		}
 	}
 }

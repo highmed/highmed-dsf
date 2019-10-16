@@ -1,50 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <StructureDefinition xmlns="http://hl7.org/fhir">
-  <url value="http://highmed.org/fhir/StructureDefinition/highmed-endpoint" />
-  <version value="0.5.0" />
-  <name value="Endpoint" />
-  <status value="active" />
-  <date value="2019-05-21" />
-  <fhirVersion value="4.0.0" />
-  <kind value="resource" />
-  <abstract value="false" />
-  <type value="Endpoint" />
-  <baseDefinition value="http://hl7.org/fhir/StructureDefinition/Endpoint" />
-  <derivation value="constraint" />
-  <differential>
-    <element id="Endpoint.identifier">
-      <path value="Endpoint.identifier" />
-      <slicing>
-        <discriminator>
-          <type value="value" />
-          <path value="system" />
-        </discriminator>
-        <rules value="open" />
-      </slicing>
-      <min value="1" />
-    </element>
-    <element id="Endpoint.identifier:sliceIdentifier">
-      <path value="Endpoint.identifier" />
-      <sliceName value="sliceIdentifier" />
-    </element>
-    <element id="Endpoint.identifier:sliceIdentifier.system">
-      <path value="Endpoint.identifier.system" />
-      <fixedUri value="http://highmed.org/fhir/CodeSystem/highmed-endpoint" />
-    </element>
-    <element id="Endpoint.identifier:sliceIdentifier.value">
-      <path value="Endpoint.identifier.value" />
-      <binding>
-        <strength value="required" />
-        <valueSet value="http://highmed.org/fhir/ValueSet/highmed-endpoint" />
-      </binding>
-    </element>
-    <element id="Endpoint.managingOrganization">
-      <path value="Endpoint.managingOrganization" />
-      <min value="1" />
-      <type>
-        <code value="Reference" />
-        <targetProfile value="http://highmed.org/fhir/StructureDefinition/highmed-organization" />
-      </type>
-    </element>
-  </differential>
+	<url value="http://highmed.org/fhir/StructureDefinition/highmed-endpoint"/>
+	<version value="0.5.0"/>
+	<name value="Endpoint"/>
+	<status value="active"/>
+	<date value="2019-05-21"/>
+	<fhirVersion value="4.0.0"/>
+	<kind value="resource"/>
+	<abstract value="false"/>
+	<type value="Endpoint"/>
+	<baseDefinition value="http://hl7.org/fhir/StructureDefinition/Endpoint"/>
+	<derivation value="constraint"/>
+	<differential>
+		<element id="Endpoint.identifier">
+			<path value="Endpoint.identifier"/>
+			<slicing>
+				<discriminator>
+					<type value="value"/>
+					<path value="system"/>
+				</discriminator>
+				<rules value="open"/>
+			</slicing>
+			<min value="1"/>
+		</element>
+		<element id="Endpoint.identifier:sliceIdentifier">
+			<path value="Endpoint.identifier"/>
+			<sliceName value="sliceIdentifier"/>
+		</element>
+		<element id="Endpoint.identifier:sliceIdentifier.system">
+			<path value="Endpoint.identifier.system"/>
+			<fixedUri value="http://highmed.org/fhir/CodeSystem/highmed-endpoint"/>
+		</element>
+		<element id="Endpoint.identifier:sliceIdentifier.value">
+			<path value="Endpoint.identifier.value"/>
+			<binding>
+				<strength value="required"/>
+				<valueSet value="http://highmed.org/fhir/ValueSet/highmed-endpoint"/>
+			</binding>
+		</element>
+		<element id="Endpoint.managingOrganization">
+			<path value="Endpoint.managingOrganization"/>
+			<min value="1"/>
+			<type>
+				<code value="Reference"/>
+				<targetProfile value="http://highmed.org/fhir/StructureDefinition/highmed-organization"/>
+			</type>
+		</element>
+	</differential>
 </StructureDefinition>

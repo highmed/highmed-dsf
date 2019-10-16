@@ -1,34 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <StructureDefinition xmlns="http://hl7.org/fhir">
-  <url value="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint" />
-  <version value="0.1.0" />
-  <name value="CertificateThumbprint" />
-  <status value="active" />
-  <date value="2019-05-21" />
-  <fhirVersion value="4.0.0" />
-  <kind value="complex-type" />
-  <abstract value="false" />
-  <context>
-    <type value="element" />
-    <expression value="Organization" />
-  </context>
-  <type value="Extension" />
-  <baseDefinition value="http://hl7.org/fhir/StructureDefinition/Extension" />
-  <derivation value="constraint" />
-  <differential>
-    <element id="Extension.url">
-      <path value="Extension.url" />
-      <type>
-        <code value="uri" />
-      </type>
-      <fixedUri value="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint" />
-    </element>
-    <element id="Extension.value[x]">
-      <path value="Extension.value[x]" />
-      <min value="1" />
-      <type>
-        <code value="string" />
-      </type>
-    </element>
-  </differential>
+	<url value="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint"/>
+	<version value="0.1.0"/>
+	<name value="CertificateThumbprint"/>
+	<status value="active"/>
+	<date value="2019-05-21"/>
+	<fhirVersion value="4.0.0"/>
+	<kind value="complex-type"/>
+	<abstract value="false"/>
+	<context>
+		<type value="element"/>
+		<expression value="Organization"/>
+	</context>
+	<type value="Extension"/>
+	<baseDefinition value="http://hl7.org/fhir/StructureDefinition/Extension"/>
+	<derivation value="constraint"/>
+	<differential>
+		<element id="Extension.url">
+			<path value="Extension.url"/>
+			<type>
+				<code value="uri"/>
+			</type>
+			<fixedUri value="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint"/>
+		</element>
+		<element id="Extension.value[x]">
+			<path value="Extension.value[x]"/>
+			<min value="1"/>
+			<type>
+				<code value="string"/>
+			</type>
+		</element>
+	</differential>
 </StructureDefinition>

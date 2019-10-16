@@ -46,6 +46,8 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 	{
 		try
 		{
+			logger.trace("Execution of task with id='{}'", execution.getCurrentActivityId());
+
 			doExecute(execution);
 			doExecutePlugin(execution);
 		}

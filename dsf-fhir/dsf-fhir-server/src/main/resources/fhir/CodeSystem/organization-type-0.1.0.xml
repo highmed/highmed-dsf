@@ -1,24 +1,24 @@
-<CodeSystem xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://hl7.org/fhir http://www.hl7.org/fhir/fhir-base.xsd">
-	<url value="http://highmed.org/fhir/CodeSystem/organization-type" />
-	<version value="0.1.0" />
-	<name value="HiGHmed_Organization_Type" />
-	<title value="HiGHmed Organization Type" />
-	<status value="active" />
-	<experimental value="false" />
-	<date value="2019-08-21T18:40:00+02:00" />
-	<publisher value="HiGHmed" />
-	<description value="CodeSystem with HiGHmed organization roles used in Organization resources" />
-	<caseSensitive value="true" />
-	<hierarchyMeaning value="grouped-by" />
-	<versionNeeded value="false" />
-	<content value="complete" />
+<CodeSystem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://hl7.org/fhir"
+			xsi:schemaLocation="http://hl7.org/fhir http://www.hl7.org/fhir/fhir-base.xsd">
+	<url value="http://highmed.org/fhir/CodeSystem/organization-type"/>
+	<version value="0.1.0"/>
+	<name value="HiGHmed_Organization_Type"/>
+	<title value="HiGHmed Organization Type"/>
+	<status value="active"/>
+	<experimental value="false"/>
+	<date value="2019-08-21T18:40:00+02:00"/>
+	<publisher value="HiGHmed"/>
+	<description value="CodeSystem with HiGHmed organization roles used in Organization resources"/>
+	<caseSensitive value="true"/>
+	<hierarchyMeaning value="grouped-by"/>
+	<versionNeeded value="false"/>
+	<content value="complete"/>
 	<concept>
-		<code value="TTP" />
-		<definition value="Trusted Third Party" />
+		<code value="TTP"/>
+		<definition value="Trusted Third Party"/>
 	</concept>
 	<concept>
-		<code value="MeDIC" />
-		<definition value="Medical Data Integration Center" />
+		<code value="MeDIC"/>
+		<definition value="Medical Data Integration Center"/>
 	</concept>
 </CodeSystem>

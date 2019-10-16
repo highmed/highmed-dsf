@@ -1,5 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>dsf-bpe-server</artifactId>
@@ -17,11 +17,21 @@
 		</dependency>
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
-			<artifactId>dsf-bpe-process-ping</artifactId>
+			<artifactId>dsf-bpe-process-feasibility</artifactId>
+		</dependency>
+		<!-- provided as jar and injected on startup as plugin
+		<dependency>
+			<groupId>org.highmed.dsf</groupId>
+			<artifactId>dsf-bpe-process-parent</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
-			<artifactId>dsf-bpe-process-feasibility</artifactId>
+			<artifactId>dsf-bpe-process-child</artifactId>
+		</dependency>
+		-->
+		<dependency>
+			<groupId>org.highmed.dsf</groupId>
+			<artifactId>dsf-bpe-process-ping</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
@@ -31,7 +41,6 @@
 			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-bpe-process-update-whitelist</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-fhir-websocket-client</artifactId>

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="INFO" monitorInterval="30"
-	verbose="false">
+			   verbose="false">
 
 	<Appenders>
 		<Console name="CONSOLE" target="SYSTEM_OUT">
-			<PatternLayout pattern="%p\t%t - %C{1}.%M(%L) | %m%n" />
+			<PatternLayout pattern="%p\t%t - %C{1}.%M(%L) | %m%n"/>
 		</Console>
 		<!-- <RollingFile name="FILE" fileName="log/adt_db.log"
 			filePattern="log/adt_db_%d{MM-dd-yyyy}_%i.log.gz"
@@ -41,16 +41,16 @@
 	</Appenders>
 
 	<Loggers>
-		<Logger name="de.rwh" level="TRACE" />
-		<Logger name="org.highmed" level="TRACE" />
-		<Logger name="org.apache" level="WARN" />
-		<Logger name="org.springframework" level="WARN" />
-		<Logger name="jndi" level="WARN" />
-		<Logger name="org.eclipse.jetty" level="INFO" />
-		<Logger name="com.sun.jersey" level="WARN" />
-		<Logger name="liquibase" level="WARN" />
-		<Logger name="ca.uhn.hl7v2" level="WARN" />
-		
+		<Logger name="de.rwh" level="TRACE"/>
+		<Logger name="org.highmed" level="TRACE"/>
+		<Logger name="org.apache" level="WARN"/>
+		<Logger name="org.springframework" level="WARN"/>
+		<Logger name="jndi" level="WARN"/>
+		<Logger name="org.eclipse.jetty" level="INFO"/>
+		<Logger name="com.sun.jersey" level="WARN"/>
+		<Logger name="liquibase" level="WARN"/>
+		<Logger name="ca.uhn.hl7v2" level="WARN"/>
+
 		<!-- <Logger name="certificate-warning-logger" level="INFO">
 			<AppenderRef ref="MAIL_CERTIFICATE" />
 		</Logger>
@@ -59,7 +59,7 @@
 		</Logger> -->
 
 		<Root level="WARN">
-			<AppenderRef ref="CONSOLE" />
+			<AppenderRef ref="CONSOLE"/>
 			<!-- <AppenderRef ref="FILE" /> -->
 			<!-- <AppenderRef ref="MAIL" /> -->
 		</Root>

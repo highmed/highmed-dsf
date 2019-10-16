@@ -23,5 +23,9 @@ public class StartListener implements ExecutionListener
 
 			execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, new ArrayList<OutputWrapper>());
 		}
+
+		if (!execution.getVariableNames().contains(Constants.VARIABLE_IS_CALL_ACTIVITY)) {
+			execution.setVariable(Constants.VARIABLE_IS_CALL_ACTIVITY, false);
+		}
 	}
 }

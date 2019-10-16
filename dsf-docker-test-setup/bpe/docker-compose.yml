@@ -25,6 +25,9 @@ services:
       -  type: bind
          source: ./app/conf
          target: /opt/bpe/conf
+      -  type: bind
+         source: ./app/plugin
+         target: /opt/bpe/plugin
       networks:
          frontend:
             ipv4_address: 172.28.3.3

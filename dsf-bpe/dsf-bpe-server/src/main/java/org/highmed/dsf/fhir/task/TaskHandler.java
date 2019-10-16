@@ -79,6 +79,7 @@ public class TaskHandler implements InitializingBean
 			Task.TaskOutputComponent errorOutput = taskHelper.createOutput(Constants.CODESYSTEM_HIGHMED_BPMN,
 					Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, exception.getMessage());
 			task.addOutput(errorOutput);
+			task.setStatus(Task.TaskStatus.FAILED);
 			webserviceClient.update(task);
 		}
 	}
