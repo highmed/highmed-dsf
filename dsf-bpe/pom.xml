@@ -13,10 +13,9 @@
 
 	<modules>
 		<module>dsf-bpe-process-base</module>
-		<module>dsf-bpe-process-child</module>
 		<module>dsf-bpe-process-feasibility</module>
-		<module>dsf-bpe-process-parent</module>
 		<module>dsf-bpe-process-ping</module>
+		<module>dsf-bpe-process-plugin-example</module>
 		<module>dsf-bpe-process-update-resources</module>
 		<module>dsf-bpe-process-update-whitelist</module>
 		<module>dsf-bpe-server</module>
@@ -111,15 +110,9 @@
 				<artifactId>dsf-bpe-webservice-client</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
 				<artifactId>dsf-fhir-websocket-client</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.highmed.dsf</groupId>
-				<artifactId>dsf-fhir-webservice-client</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
