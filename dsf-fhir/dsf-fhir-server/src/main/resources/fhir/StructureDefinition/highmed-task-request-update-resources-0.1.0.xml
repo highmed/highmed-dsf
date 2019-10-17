@@ -48,7 +48,7 @@
 		</element>
 		<element id="Task.input:bundle.type.coding.system">
 			<path value="Task.input.type.coding.system"/>
-			<fixedUri value="http://highmed.org/fhir/CodeSystem/task-input"/>
+			<fixedUri value="http://highmed.org/fhir/CodeSystem/update-resources"/>
 		</element>
 		<element id="Task.input:bundle.type.coding.code">
 			<path value="Task.input.type.coding.code"/>
@@ -73,11 +73,11 @@
 		</element>
 		<element id="Task.input:target-identifier.type.coding.system">
 			<path value="Task.input.type.coding.system"/>
-			<fixedUri value="http://highmed.org/fhir/CodeSystem/task-input"/>
+			<fixedUri value="http://highmed.org/fhir/CodeSystem/update-resources"/>
 		</element>
 		<element id="Task.input:target-identifier.type.coding.code">
 			<path value="Task.input.type.coding.code"/>
-			<fixedCode value="target-identifier"/>
+			<fixedCode value="organization-identifier-search-parameter"/>
 		</element>
 		<element id="Task.input:target-identifier.value[x]">
 			<path value="Task.input.value[x]"/>

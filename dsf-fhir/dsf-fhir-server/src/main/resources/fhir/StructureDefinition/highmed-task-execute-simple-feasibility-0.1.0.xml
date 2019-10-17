@@ -48,7 +48,7 @@
 		</element>
 		<element id="Task.input:research-study.type.coding.system">
 			<path value="Task.input.type.coding.system"/>
-			<fixedUri value="http://highmed.org/fhir/CodeSystem/task-input"/>
+			<fixedUri value="http://highmed.org/fhir/CodeSystem/feasibility"/>
 		</element>
 		<element id="Task.input:research-study.type.coding.code">
 			<path value="Task.input.type.coding.code"/>

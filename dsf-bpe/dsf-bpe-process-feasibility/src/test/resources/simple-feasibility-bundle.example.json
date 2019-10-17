@@ -302,7 +302,7 @@
                   "type":{
                      "coding":[
                         {
-                           "system":"http://highmed.org/fhir/CodeSystem/task-input",
+                           "system":"http://highmed.org/fhir/CodeSystem/feasibility",
                            "code":"research-study-reference"
                         }
                      ]

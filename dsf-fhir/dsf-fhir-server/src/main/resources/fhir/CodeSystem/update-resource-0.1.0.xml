@@ -1,6 +1,6 @@
 <CodeSystem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://hl7.org/fhir"
 			xsi:schemaLocation="http://hl7.org/fhir http://www.hl7.org/fhir/fhir-base.xsd">
-	<url value="http://highmed.org/fhir/CodeSystem/task-input"/>
+	<url value="http://highmed.org/fhir/CodeSystem/update-resources"/>
 	<version value="0.1.0"/>
 	<name value="HiGHmed_Update_Resource"/>
 	<title value="HiGHmed Update Resource"/>

@@ -1,9 +1,9 @@
 {
   "resourceType":"Task",
   "meta":{
-    "profile":"http://highmed.org/fhir/StructureDefinition/highmed-task-request-update-resources"
+    "profile":"http://highmed.org/fhir/StructureDefinition/highmed-task-plugin-base"
   },
-  "instantiatesUri":"http://highmed.org/bpe/Process/requestUpdateResources/1.0.0",
+  "instantiatesUri":"http://highmed.org/bpe/Process/parentPlugin/1.0.0",
   "status":"requested",
   "intent":"order",
   "requester":{
@@ -34,7 +34,7 @@
           }
         ]
       },
-      "valueString":"requestUpdateResourcesMessage"
+      "valueString":"parentPluginMessage"
     },
     {
       "type":{
@@ -45,7 +45,7 @@
           }
         ]
       },
-      "valueString":"96868ec8-09c3-4856-82ec-792c8949ebdc"
+      "valueString":"96868ec8-09c3-4856-82ec-792c8p49ebdc"
     },
     {
       "type":{
@@ -56,31 +56,7 @@
           }
         ]
       },
-      "valueString":"6d58fab1-537b-404b-a4b4-b326da37ccf7"
-    },
-    {
-      "type":{
-        "coding":[
-          {
-            "system":"http://highmed.org/fhir/CodeSystem/update-resources",
-            "code":"bundle-reference"
-          }
-        ]
-      },
-      "valueReference": {
-        "reference": "Bundle/6d58fab1-537b-404b-a4b4-b326da37ccf7"
-      }
-    },
-    {
-      "type":{
-        "coding":[
-          {
-            "system":"http://highmed.org/fhir/CodeSystem/update-resources",
-            "code":"organization-identifier-search-parameter"
-          }
-        ]
-      },
-      "valueString":"http://highmed.org/fhir/CodeSystem/organization|"
+      "valueString":"6d58fab1-537b-404b-a4j4-b326da37ccf7"
     }
   ]
 }

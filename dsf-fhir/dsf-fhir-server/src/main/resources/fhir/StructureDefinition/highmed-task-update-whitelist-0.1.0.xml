@@ -43,7 +43,7 @@
 		</element>
 		<element id="Task.output:whitelist.type.coding.system">
 			<path value="Task.output.type.coding.system"/>
-			<fixedUri value="http://highmed.org/fhir/CodeSystem/bundle"/>
+			<fixedUri value="http://highmed.org/fhir/CodeSystem/update-whitelist"/>
 		</element>
 		<element id="Task.output:whitelist.type.coding.code">
 			<path value="Task.output.type.coding.code"/>
