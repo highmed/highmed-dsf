@@ -6,15 +6,15 @@
       <bpmn:messageEventDefinition messageRef="Message_1r6vnvn" />
     </bpmn:startEvent>
     <bpmn:sequenceFlow id="SequenceFlow_0djh0eg" sourceRef="StartEvent_1" targetRef="checkRequest" />
-    <bpmn:serviceTask id="Task_1hj13pf" name="updateResources" camunda:class="org.highmed.dsf.bpe.service.UpdateResources">
+    <bpmn:serviceTask id="updateResources" name="updateResources" camunda:class="org.highmed.dsf.bpe.service.UpdateResources">
       <bpmn:incoming>SequenceFlow_141lpsf</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0eygcor</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:endEvent id="EndEvent_1i1w8yx">
       <bpmn:incoming>SequenceFlow_0eygcor</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="SequenceFlow_0eygcor" sourceRef="Task_1hj13pf" targetRef="EndEvent_1i1w8yx" />
-    <bpmn:sequenceFlow id="SequenceFlow_141lpsf" sourceRef="checkRequest" targetRef="Task_1hj13pf" />
+    <bpmn:sequenceFlow id="SequenceFlow_0eygcor" sourceRef="updateResources" targetRef="EndEvent_1i1w8yx" />
+    <bpmn:sequenceFlow id="SequenceFlow_141lpsf" sourceRef="checkRequest" targetRef="updateResources" />
     <bpmn:serviceTask id="checkRequest" name="checkRequest" camunda:class="org.highmed.dsf.bpe.service.CheckRequest">
       <bpmn:incoming>SequenceFlow_0djh0eg</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_141lpsf</bpmn:outgoing>
@@ -22,7 +22,7 @@
     <bpmn:textAnnotation id="TextAnnotation_0rr4guv">
       <bpmn:text>TODO: add step to check requesting organization is of type TTP</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="Association_1sc5e0d" sourceRef="Task_1hj13pf" targetRef="TextAnnotation_0rr4guv" />
+    <bpmn:association id="Association_1sc5e0d" sourceRef="updateResources" targetRef="TextAnnotation_0rr4guv" />
   </bpmn:process>
   <bpmn:message id="Message_1r6vnvn" name="executeUpdateResourcesMessage" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
@@ -34,7 +34,7 @@
         <di:waypoint x="215" y="121" />
         <di:waypoint x="257" y="121" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="ServiceTask_1t3955f_di" bpmnElement="Task_1hj13pf">
+      <bpmndi:BPMNShape id="ServiceTask_1t3955f_di" bpmnElement="updateResources">
         <dc:Bounds x="433" y="81" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="EndEvent_1i1w8yx_di" bpmnElement="EndEvent_1i1w8yx">
