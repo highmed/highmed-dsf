@@ -3,7 +3,13 @@ package org.highmed.dsf.bpe.service;
 import static org.highmed.dsf.bpe.Constants.MIN_COHORT_DEFINITIONS;
 import static org.highmed.dsf.bpe.Constants.MIN_PARTICIPATING_MEDICS;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
@@ -13,8 +19,10 @@ import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.r4.model.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,14 +55,15 @@ public class CheckFeasibilityResources extends AbstractServiceDelegate
 
 	private void checkNumberOfParticipatingMedics(ResearchStudy researchStudy)
 	{
-		List<Extension> medics = researchStudy.getExtension().stream()
+		Set<String> medics = researchStudy.getExtension().stream()
 				.filter(e -> e.getUrl().equals(Constants.EXTENSION_PARTICIPATING_MEDIC_URI))
-				.collect(Collectors.toList());
+				.map(extension -> ((Reference)extension.getValue()).getReference())
+				.collect(Collectors.toSet());
 
 		if (medics.size() < MIN_PARTICIPATING_MEDICS)
 		{
 			throw new IllegalStateException(
-					"Number of participanting MeDICs is < " + MIN_PARTICIPATING_MEDICS + ", got " + medics.size());
+					"Number of distinct participanting MeDICs is < " + MIN_PARTICIPATING_MEDICS + ", got " + medics.size());
 		}
 	}
 
