@@ -61,7 +61,4 @@ public interface Constants
 	int MIN_COHORT_DEFINITIONS = 1;
 
 	String SIMPLE_FEASIBILITY_QUERY_PREFIX = "select count";
-	String RESEARCH_STUDY_PREFIX = "ResearchStudy/";
-	String GROUP_PREFIX = "Group/";
-	String ORGANIZATION_PREFIX = "Organization/";
 }

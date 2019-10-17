@@ -1,15 +1,9 @@
 package org.highmed.dsf.bpe.service;
 
-import static org.highmed.dsf.bpe.Constants.GROUP_PREFIX;
-import static org.highmed.dsf.bpe.Constants.ORGANIZATION_PREFIX;
-import static org.highmed.dsf.bpe.Constants.RESEARCH_STUDY_PREFIX;
-
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
@@ -22,9 +16,8 @@ import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.OutputWrapper;
 import org.highmed.fhir.client.FhirWebserviceClient;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.Task;
@@ -63,13 +56,9 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 
 		Task task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
 
-		Reference requester = task.getRequester();
-		Reference recipient = task.getRestriction().getRecipient().get(0);
-
-		String endpointAddress = getEndpointAddress(requester, recipient);
-		FhirWebserviceClient client = getWebserviceClient(requester, recipient, endpointAddress);
-
-		ResearchStudy researchStudy = getResearchStudy(task, client);
+		IdType researchStudyType = getResearchStudyIdType(task);
+		FhirWebserviceClient client = getWebserviceClient(researchStudyType);
+		ResearchStudy researchStudy = getResearchStudy(researchStudyType, client);
 		execution.setVariable(Constants.VARIABLE_RESEARCH_STUDY, researchStudy);
 
 		@SuppressWarnings("unchecked")
@@ -81,64 +70,45 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, outputs);
 	}
 
-	private String getEndpointAddress(Reference requester, Reference recipient)
+	private IdType getResearchStudyIdType(Task task)
 	{
-		String requesterReference = requester.getReference();
-		if (requesterReference.startsWith(ORGANIZATION_PREFIX) && !requester.equalsDeep(recipient))
-		{
-			Map<String, List<String>> searchParams = new HashMap<>();
-			searchParams.put("organization",
-					Collections.singletonList(requesterReference.substring(ORGANIZATION_PREFIX.length())));
+		Reference researchStudyReference = getTaskHelper()
+				.getInputParameterReferenceValues(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
+						Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_RESEARCH_STUDY_REFERENCE)
+				.collect(Collectors.toList()).get(0);
 
-			FhirWebserviceClient client = getFhirWebserviceClientProvider().getLocalWebserviceClient();
-			Bundle bundle = client.search(Endpoint.class, searchParams);
-
-			if (bundle.getEntry().size() != 1)
-			{
-				throw new ResourceNotFoundException(
-						"Did not find endpoint of task requester: expected 1, found " + bundle.getEntry().size());
-			}
-
-			Endpoint endpoint = (Endpoint) bundle.getEntry().get(0).getResource();
-			return endpoint.getAddress();
-		}
-
-		return getFhirWebserviceClientProvider().getLocalBaseUrl();
+		return new IdType(researchStudyReference.getReference());
 	}
 
-	private FhirWebserviceClient getWebserviceClient(Reference requester, Reference recipient, String endpointAddress)
+	private FhirWebserviceClient getWebserviceClient(IdType researchStudyType)
 	{
+		String baseUrl = Optional.ofNullable(researchStudyType.getBaseUrl()).orElse("");
+
 		FhirWebserviceClient client;
-		if (requester.equalsDeep(recipient) || !requester.getReference().startsWith(ORGANIZATION_PREFIX))
+		if (baseUrl.equals(getFhirWebserviceClientProvider().getLocalBaseUrl()) || baseUrl.isEmpty())
 		{
 			client = getFhirWebserviceClientProvider().getLocalWebserviceClient();
 		}
 		else
 		{
-			client = getFhirWebserviceClientProvider().getRemoteWebserviceClient(endpointAddress);
+			client = getFhirWebserviceClientProvider().getRemoteWebserviceClient(baseUrl);
 		}
 
 		return client;
 	}
 
-	private ResearchStudy getResearchStudy(Task task, FhirWebserviceClient client)
+	private ResearchStudy getResearchStudy(IdType researchStudyType, FhirWebserviceClient client)
 	{
-		Reference researchStudyReference = getTaskHelper()
-				.getInputParameterReferenceValues(task, Constants.CODESYSTEM_HIGHMED_UPDATE_RESOURCE,
-						Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_RESEARCH_STUDY_REFERENCE)
-				.collect(Collectors.toList()).get(0);
-
 		ResearchStudy researchStudy;
 		try
 		{
-			researchStudy = client.read(ResearchStudy.class,
-					researchStudyReference.getReference().substring(RESEARCH_STUDY_PREFIX.length()));
+			researchStudy = client.read(ResearchStudy.class, researchStudyType.getIdPart());
 		}
 		catch (WebApplicationException e)
 		{
 			throw new ResourceNotFoundException(
-					"Error while reading ResearchStudy with id " + researchStudyReference.getReference() + " from "
-							+ client.getBaseUrl());
+					"Error while reading ResearchStudy with id " + researchStudyType.getIdPart() + " from " + client
+							.getBaseUrl());
 		}
 
 		return researchStudy;
@@ -155,7 +125,8 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 		cohortDefinitionReferences.forEach(reference -> {
 			try
 			{
-				Group group = client.read(Group.class, reference.getReference().substring(GROUP_PREFIX.length()));
+				IdType type = new IdType(reference.getReference());
+				Group group = client.read(Group.class, type.getIdPart());
 				cohortDefinitions.add(group);
 			}
 			catch (WebApplicationException e)

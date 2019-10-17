@@ -20,23 +20,23 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 	private static final Logger logger = LoggerFactory.getLogger(AbstractServiceDelegate.class);
 
 	private final FhirWebserviceClientProvider clientProvider;
-	private FhirWebserviceClient webserviceClient;
+	private final FhirWebserviceClient webserviceClient;
 	private final TaskHelper taskHelper;
 
 	public AbstractServiceDelegate(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
 	{
 		this.clientProvider = clientProvider;
+		Objects.requireNonNull(clientProvider, "clientProvider");
+
+		this.webserviceClient = clientProvider.getLocalWebserviceClient();
 		this.taskHelper = taskHelper;
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
-		Objects.requireNonNull(taskHelper, "taskHelper");
-		Objects.requireNonNull(clientProvider, "clientProvider");
-
-		this.webserviceClient = clientProvider.getLocalWebserviceClient();
 		Objects.requireNonNull(webserviceClient, "webserviceClient");
+		Objects.requireNonNull(taskHelper, "taskHelper");
 	}
 
 	@Override
@@ -67,8 +67,7 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 
 			String errorMessage =
 					"Process " + execution.getProcessDefinitionId() + "has fatal error in step " + execution
-							.getActivityInstanceId() + " for task with id " + task.getId() + ", reason: " + exception
-							.getMessage();
+							.getActivityInstanceId() + ", reason: " + exception.getMessage();
 
 			Task.TaskOutputComponent errorOutput = taskHelper.createOutput(Constants.CODESYSTEM_HIGHMED_BPMN,
 					Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, errorMessage);

@@ -24,6 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
+import ca.uhn.fhir.context.FhirContext;
+
 public class AbstractTaskMessageSend extends AbstractServiceDelegate implements InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractTaskMessageSend.class);
@@ -137,6 +139,8 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 
 		logger.info("Sending task for process {} to organization {} (endpoint: {})", task.getInstantiatesUri(),
 				targetOrganizationIdentifierValue, client.getBaseUrl());
+
+		//System.out.println(FhirContext.forR4().newJsonParser().encodeResourceToString(task));
 		client.create(task);
 	}
 
