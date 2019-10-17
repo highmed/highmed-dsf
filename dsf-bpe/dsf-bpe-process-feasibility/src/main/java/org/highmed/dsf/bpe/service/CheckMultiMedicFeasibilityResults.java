@@ -76,7 +76,7 @@ public class CheckMultiMedicFeasibilityResults extends AbstractServiceDelegate
 	{
 		OutputWrapper outputWrapper = new OutputWrapper(Constants.CODESYSTEM_HIGHMED_FEASIBILITY);
 		successfulResults.forEach(result -> {
-			outputWrapper.addKeyValue(Constants.CODSYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS,
+			outputWrapper.addKeyValue(Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS,
 					result.getParticipatingMedics() + Constants.CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR + result
 							.getCohortId());
 			outputWrapper.addKeyValue(Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT,

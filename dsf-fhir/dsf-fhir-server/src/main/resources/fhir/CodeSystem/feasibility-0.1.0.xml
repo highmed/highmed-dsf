@@ -8,11 +8,16 @@
 	<experimental value="false"/>
 	<date value="2019-09-23T09:40:00+02:00"/>
 	<publisher value="HiGHmed"/>
-	<description value="CodeSystem with standard feasibility values"/>
+	<description value="CodeSystem with standard values for feasibility processes"/>
 	<caseSensitive value="true"/>
 	<hierarchyMeaning value="grouped-by"/>
 	<versionNeeded value="false"/>
 	<content value="complete"/>
+	<concept>
+		<code value="research-study-reference"/>
+		<display value="Research Study Reference"/>
+		<definition value="HiGHmed Research Study Reference to define what data is requested from which MeDICs and for what purpose"/>
+	</concept>
 	<concept>
 		<code value="single-medic-result"/>
 		<display value="Single MeDIC Result"/>

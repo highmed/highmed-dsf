@@ -24,8 +24,8 @@ public class SendFeasibilityRequest extends AbstractTaskMessageSend
 	protected Stream<Task.ParameterComponent> getAdditionalInputParameters(DelegateExecution execution)
 	{
 		ResearchStudy researchStudy = (ResearchStudy) execution.getVariable(Constants.VARIABLE_RESEARCH_STUDY);
-		Task.ParameterComponent input = getTaskHelper().createInput(Constants.CODESYSTEM_HIGHMED_TASK_INPUT,
-				Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_RESEARCH_STUDY_REFERENCE,
+		Task.ParameterComponent input = getTaskHelper().createInput(Constants.CODESYSTEM_HIGHMED_UPDATE_RESOURCE,
+				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_RESEARCH_STUDY_REFERENCE,
 				new Reference().setReference(researchStudy.getId()));
 
 		return Stream.of(input);

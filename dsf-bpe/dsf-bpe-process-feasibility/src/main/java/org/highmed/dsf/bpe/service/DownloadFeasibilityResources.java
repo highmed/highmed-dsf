@@ -124,8 +124,8 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 	private ResearchStudy getResearchStudy(Task task, FhirWebserviceClient client)
 	{
 		Reference researchStudyReference = getTaskHelper()
-				.getInputParameterReferenceValues(task, Constants.CODESYSTEM_HIGHMED_TASK_INPUT,
-						Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_RESEARCH_STUDY_REFERENCE)
+				.getInputParameterReferenceValues(task, Constants.CODESYSTEM_HIGHMED_UPDATE_RESOURCE,
+						Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_RESEARCH_STUDY_REFERENCE)
 				.collect(Collectors.toList()).get(0);
 
 		ResearchStudy researchStudy;

@@ -8,7 +8,7 @@
 	<experimental value="false"/>
 	<date value="2019-09-23T09:40:00+02:00"/>
 	<publisher value="HiGHmed"/>
-	<description value="CodeSystem with HiGHmed query types"/>
+	<description value="CodeSystem with HiGHmed query types for medical data stored in the data lake repositories"/>
 	<caseSensitive value="true"/>
 	<hierarchyMeaning value="grouped-by"/>
 	<versionNeeded value="false"/>

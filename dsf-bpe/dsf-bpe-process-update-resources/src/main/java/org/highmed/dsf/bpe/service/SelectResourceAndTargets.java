@@ -17,7 +17,6 @@ import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.MultiInstanceTarget;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargets;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargetsValues;
-import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
@@ -56,8 +55,8 @@ public class SelectResourceAndTargets extends AbstractServiceDelegate implements
 
 		Task task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
 		Supplier<Stream<Reference>> bundles = () -> getTaskHelper()
-				.getInputParameterReferenceValues(task, Constants.CODESYSTEM_HIGHMED_TASK_INPUT,
-						Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_BUNDLE_REFERENCE);
+				.getInputParameterReferenceValues(task, Constants.CODESYSTEM_HIGHMED_UPDATE_RESOURCE,
+						Constants.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE);
 
 		if (bundles.get().count() != 1)
 		{
@@ -76,8 +75,8 @@ public class SelectResourceAndTargets extends AbstractServiceDelegate implements
 		execution.setVariable(Constants.VARIABLE_BUNDLE_ID, bundleId);
 
 		List<String> targetIdentifierSearchParameters = getTaskHelper()
-				.getInputParameterStringValues(task, Constants.CODESYSTEM_HIGHMED_TASK_INPUT,
-						Constants.CODESYSTEM_HIGHMED_TASK_INPUT_VALUE_TARGET_IDENTIFIER).collect(Collectors.toList());
+				.getInputParameterStringValues(task, Constants.CODESYSTEM_HIGHMED_UPDATE_RESOURCE,
+						Constants.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_ORGANIZATION_IDENTIFIER_SEARCH_PARAMETER).collect(Collectors.toList());
 
 		List<MultiInstanceTarget> targets = targetIdentifierSearchParameters.stream()
 				.flatMap(organizationProvider::searchRemoteOrganizationsIdentifiers)

@@ -59,15 +59,15 @@ public class UpdateWhiteList extends AbstractServiceDelegate implements Initiali
 						Collections.singletonList("Organization:endpoint")));
 
 		Bundle transaction = new Bundle().setType(BundleType.TRANSACTION);
-		transaction.getIdentifier().setSystem(Constants.CODESYSTEM_HIGHMED_BUNDLE)
-				.setValue(Constants.CODESYSTEM_HIGHMED_BUNDLE_VALUE_WHITE_LIST);
+		transaction.getIdentifier().setSystem(Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST)
+				.setValue(Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST);
 		searchSet.getEntry().stream()
 				.filter(e -> e.hasSearch() && SearchEntryMode.MATCH.equals(e.getSearch().getMode()) && e.hasResource()
 						&& e.getResource() instanceof Organization).map(e -> (Organization) e.getResource())
 				.forEach(addWhiteListEntry(transaction, searchSet));
 
 		Bundle result = client.updateConditionaly(transaction, Map.of("identifier", Collections.singletonList(
-				Constants.CODESYSTEM_HIGHMED_BUNDLE + "|" + Constants.CODESYSTEM_HIGHMED_BUNDLE_VALUE_WHITE_LIST)));
+				Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST + "|" + Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST)));
 
 		setTaskOutput(result, execution);
 	}
@@ -138,8 +138,8 @@ public class UpdateWhiteList extends AbstractServiceDelegate implements Initiali
 		@SuppressWarnings("unchecked")
 		List<OutputWrapper> outputs = (List<OutputWrapper>) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
 
-		OutputWrapper outputWrapper = new OutputWrapper(Constants.CODESYSTEM_HIGHMED_BUNDLE);
-		outputWrapper.addKeyValue(Constants.CODESYSTEM_HIGHMED_BUNDLE_VALUE_WHITE_LIST,
+		OutputWrapper outputWrapper = new OutputWrapper(Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST);
+		outputWrapper.addKeyValue(Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST,
 				new IdType(result.getId()).getIdPart());
 		outputs.add(outputWrapper);
 
