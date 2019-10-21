@@ -1,30 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-				   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
 
-	<property name="json" value="JSONB" dbms="postgresql"/>
-	<property name="json" value="varchar(5000)" dbms="h2"/>
+	<property name="json" value="JSONB" dbms="postgresql" />
+	<property name="json" value="varchar(5000)" dbms="h2" />
 
 	<changeSet author="retwet" id="db.binaries.changelog-0.1.0">
 		<createTable tableName="binaries">
 			<column name="binary_id" type="UUID">
-				<constraints nullable="false"/>
+				<constraints nullable="false" />
 			</column>
 			<column name="version" type="BIGINT" defaultValueNumeric="1">
-				<constraints nullable="false"/>
+				<constraints nullable="false" />
 			</column>
 			<column name="deleted" type="BOOLEAN" defaultValue="false">
-				<constraints nullable="false"/>
+				<constraints nullable="false" />
 			</column>
 			<!-- caveat: json column cannot be named binary, because binary is a reserved word in sql -->
 			<column name="binary_data" type="${json}">
-				<constraints nullable="false"/>
+				<constraints nullable="false" />
 			</column>
 		</createTable>
 
-		<addPrimaryKey tableName="binaries" columnNames="binary_id, version"/>
+		<addPrimaryKey tableName="binaries" columnNames="binary_id, version" />
 
 		<sql dbms="postgresql">
 			ALTER TABLE binaries OWNER TO ${db.liquibase_user};
