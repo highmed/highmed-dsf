@@ -1,7 +1,7 @@
 version: '3.2'
 services:
    proxy:
-      image: registry:5000/highmed/fhir_proxy
+      image: docker.pkg.github.com/highmed/highmed-dsf/fhir_proxy
       restart: on-failure
       ports:
       - 80:80
@@ -24,7 +24,7 @@ services:
       depends_on:
       - app
    app:
-      image: registry:5000/highmed/fhir
+      image: docker.pkg.github.com/highmed/highmed-dsf/fhir
       restart: on-failure
       volumes:
       -  type: bind
