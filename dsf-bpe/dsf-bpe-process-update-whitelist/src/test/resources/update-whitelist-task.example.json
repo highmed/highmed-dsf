@@ -6,6 +6,7 @@
   "instantiatesUri":"http://highmed.org/bpe/Process/updateWhiteList/1.0.0",
   "status":"requested",
   "intent":"order",
+  "authoredOn":"2019-10-21",
   "requester":{
     "identifier":{
       "system":"http://highmed.org/fhir/CodeSystem/organization",

@@ -87,7 +87,7 @@
                   "valueExpression":[
                      {
                         "language":"application/x-fhir-query",
-                        "expression":"SELECT e FROM EHR e"
+                        "expression":"SELECT COUNT(e) FROM EHR e"
                      }
                   ]
                }
@@ -155,17 +155,17 @@
                "value":"Test_Practitioner_Role"
             },
             "practitioner":{
-            	"identifier":{
-                    "system":"http://highmed.org/fhir/CodeSystem/practitioner",
-                    "value":"Test_Practitioner"
-                },
+               "identifier":{
+                  "system":"http://highmed.org/fhir/CodeSystem/practitioner",
+                  "value":"Test_Practitioner"
+               },
                "type":"Practitioner"
             },
             "organization":{
-            	"identifier":{
-                    "system":"http://highmed.org/fhir/CodeSystem/organization",
-                    "value":"Test_Organization"
-                },
+               "identifier":{
+                  "system":"http://highmed.org/fhir/CodeSystem/organization",
+                  "value":"Test_Organization"
+               },
                "type":"Organization"
             }
          },
@@ -181,8 +181,9 @@
             "meta":{
                "profile":"http://highmed.org/fhir/StructureDefinition/highmed-research-study"
             },
+            "title": "Research Study Test",
             "status":"active",
-            "description":"This is a test research study based on the highmed profile.",
+            "description":"This is a test research study based on the highmed profile. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.",
             "enrollment":[
                {
                   "reference":"urn:uuid:ae194285-d08e-46c7-a9a7-9a47624dd8aa"
@@ -192,11 +193,11 @@
                }
             ],
             "principalInvestigator":{
-                  "identifier":{
-                     "system":"http://highmed.org/fhir/CodeSystem/practitioner",
-                     "value":"Test_Practitioner"
-                  },
-                  "type":"Practitioner"
+               "identifier":{
+                  "system":"http://highmed.org/fhir/CodeSystem/practitioner",
+                  "value":"Test_Practitioner"
+               },
+               "type":"Practitioner"
             },
             "extension":[
                {
@@ -214,7 +215,7 @@
                   "valueReference":{
                      "identifier":{
                         "system":"http://highmed.org/fhir/CodeSystem/organization",
-                        "value":"Test_Organization"
+                        "value":"Test_Organization_2"
                      },
                      "type":"Organization"
                   }
@@ -224,7 +225,7 @@
                   "valueReference":{
                      "identifier":{
                         "system":"http://highmed.org/fhir/CodeSystem/organization",
-                        "value":"Test_Organization"
+                        "value":"Test_Organization_3"
                      },
                      "type":"Organization"
                   }
@@ -246,6 +247,7 @@
             "instantiatesUri":"http://highmed.org/bpe/Process/requestSimpleFeasibility/1.0.0",
             "status":"requested",
             "intent":"order",
+            "authoredOn":"2019-10-21",
             "requester":{
                "identifier":{
                   "system":"http://highmed.org/fhir/CodeSystem/practitioner",
@@ -285,7 +287,7 @@
                         }
                      ]
                   },
-                  "valueString":"96868ec8-09c3-4856-82ec-792c8949ebdc"
+                  "valueString":"96868ec8-09a3-4856-82ec-792c8949ebdc"
                },
                {
                   "type":{
@@ -296,7 +298,7 @@
                         }
                      ]
                   },
-                  "valueString":"6d58fab1-537b-404b-a4b4-b326da37ccf7"
+                  "valueString":"6d58fab1-537b-904b-a4b4-b326da37ccf7"
                },
                {
                   "type":{
