@@ -154,14 +154,26 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 		Optional<FhirWebserviceClient> client = clientProvider.getClient(remoteServerBase);
 
 		if (client.isEmpty())
+		{
+			logger.error(
+					"Error while resolving literal external reference {}, no remote client found for server base {}",
+					resourceReference.getReference().getReference(), remoteServerBase);
 			throw new WebApplicationException(responseGenerator.noEndpointFoundForLiteralExternalReference(bundleIndex,
 					resource, resourceReference));
+		}
 		else
 		{
 			IdType referenceId = new IdType(resourceReference.getReference().getReference());
+			logger.debug("Trying to resolve literal external reference {}, at remote server {}",
+					resourceReference.getReference().getReference(), remoteServerBase);
 			if (!client.get().exists(referenceId))
+			{
+				logger.error(
+						"Error while resolving literal external reference {}, resource could not be found on remote server {}",
+						resourceReference.getReference().getReference(), remoteServerBase);
 				throw new WebApplicationException(responseGenerator.referenceTargetNotFoundRemote(bundleIndex, resource,
 						resourceReference, remoteServerBase));
+			}
 		}
 
 		return true; // throws exception if reference could not be resolved
