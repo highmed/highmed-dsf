@@ -14,14 +14,10 @@ import org.highmed.dsf.fhir.variables.MultiInstanceTargetValues;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Task;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 public class SelectResponseMedics extends AbstractServiceDelegate implements InitializingBean
 {
-	private static final Logger logger = LoggerFactory.getLogger(SelectResponseMedics.class);
-
 	private final OrganizationProvider organizationProvider;
 
 	public SelectResponseMedics(OrganizationProvider organizationProvider, FhirWebserviceClientProvider clientProvider,

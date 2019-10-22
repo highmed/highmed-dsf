@@ -1,5 +1,5 @@
 /.project
 /.settings/
 /.idea
-**.ipr
-**.iws
+/*.ipr
+/*.iws

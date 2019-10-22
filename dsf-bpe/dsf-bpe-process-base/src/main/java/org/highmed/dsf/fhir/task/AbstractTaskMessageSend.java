@@ -140,7 +140,6 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 		logger.info("Sending task for process {} to organization {} (endpoint: {})", task.getInstantiatesUri(),
 				targetOrganizationIdentifierValue, client.getBaseUrl());
 
-		//System.out.println(FhirContext.forR4().newJsonParser().encodeResourceToString(task));
 		client.create(task);
 	}
 

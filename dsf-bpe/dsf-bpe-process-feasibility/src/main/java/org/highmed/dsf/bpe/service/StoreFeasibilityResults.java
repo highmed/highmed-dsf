@@ -16,14 +16,10 @@ import org.highmed.dsf.fhir.task.TaskHelper;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Task;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 public class StoreFeasibilityResults extends AbstractServiceDelegate implements InitializingBean
 {
-	private static final Logger logger = LoggerFactory.getLogger(StoreFeasibilityResults.class);
-
 	private final OrganizationProvider organizationProvider;
 
 	public StoreFeasibilityResults(OrganizationProvider organizationProvider,

@@ -15,13 +15,9 @@ import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class CalculateMultiMedicFeasibilityResults extends AbstractServiceDelegate
 {
-	private static final Logger logger = LoggerFactory.getLogger(CalculateMultiMedicFeasibilityResults.class);
-
 	public CalculateMultiMedicFeasibilityResults(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
 	{
 		super(clientProvider, taskHelper);

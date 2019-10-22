@@ -2,7 +2,7 @@ package org.highmed.openehr.model.structur;
 
 public abstract class RowElement<T>
 {
-	private T value;
+	private final T value;
 
 	public RowElement(T value) {
 		this.value = value;

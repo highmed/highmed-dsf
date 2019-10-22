@@ -11,10 +11,9 @@ import org.springframework.beans.factory.InitializingBean;
 
 public class DefaultBpmnParseListener extends AbstractBpmnParseListener implements InitializingBean
 {
-
-	private StartListener startListener;
-	private EndListener endListener;
-	private CallActivityListener callActivityListener;
+	private final StartListener startListener;
+	private final EndListener endListener;
+	private final CallActivityListener callActivityListener;
 
 	public DefaultBpmnParseListener(StartListener startListener, EndListener endListener, CallActivityListener callActivityListener) {
 		this.startListener = startListener;

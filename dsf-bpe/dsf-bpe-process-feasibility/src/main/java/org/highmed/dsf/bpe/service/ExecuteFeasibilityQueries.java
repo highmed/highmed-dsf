@@ -11,14 +11,10 @@ import org.highmed.dsf.bpe.variables.MultiInstanceResult;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.openehr.client.OpenehrWebserviceClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 public class ExecuteFeasibilityQueries extends AbstractServiceDelegate implements InitializingBean
 {
-	private static final Logger logger = LoggerFactory.getLogger(ExecuteFeasibilityQueries.class);
-
 	private final OpenehrWebserviceClient openehrWebserviceClient;
 
 	public ExecuteFeasibilityQueries(FhirWebserviceClientProvider clientProvider,
@@ -53,8 +49,8 @@ public class ExecuteFeasibilityQueries extends AbstractServiceDelegate implement
 
 	private String executeQuery(String query)
 	{
-//		ResultSet result = openehrWebserviceClient.query(query, null);
-//		int count = ((DV_Count) result.getRow(0).get(0)).getValue();
+		//		ResultSet result = openehrWebserviceClient.query(query, null);
+		//		int count = ((DV_Count) result.getRow(0).get(0)).getValue();
 
 		// TODO: remove dummy result
 		int count = 15;
