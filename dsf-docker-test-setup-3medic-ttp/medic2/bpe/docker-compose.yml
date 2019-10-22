@@ -1,7 +1,7 @@
 version: '3.2'
 services:
    proxy:
-      image: docker.pkg.github.com/highmed/highmed-dsf/bpe_proxy
+      image: registry:5000/highmed/bpe_proxy
       restart: on-failure
       ports:
       - 8080:80
@@ -20,7 +20,7 @@ services:
       depends_on:
       - app
    app:
-      image: docker.pkg.github.com/highmed/highmed-dsf/bpe
+      image: registry:5000/highmed/bpe
       restart: on-failure
       volumes:
       -  type: bind
