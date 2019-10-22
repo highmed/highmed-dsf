@@ -3,10 +3,8 @@ package org.highmed.dsf.bpe.service;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.Constants;
@@ -32,8 +30,8 @@ public class SelectResourceAndTargets extends AbstractServiceDelegate implements
 
 	private final OrganizationProvider organizationProvider;
 
-	public SelectResourceAndTargets(OrganizationProvider organizationProvider, FhirWebserviceClientProvider clientProvider,
-			TaskHelper taskHelper)
+	public SelectResourceAndTargets(OrganizationProvider organizationProvider,
+			FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
 	{
 		super(clientProvider, taskHelper);
 		this.organizationProvider = organizationProvider;
@@ -54,29 +52,30 @@ public class SelectResourceAndTargets extends AbstractServiceDelegate implements
 				execution.getVariables(), execution.getVariablesLocal());
 
 		Task task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
-		Supplier<Stream<Reference>> bundles = () -> getTaskHelper()
+		List<Reference> references = getTaskHelper()
 				.getInputParameterReferenceValues(task, Constants.CODESYSTEM_HIGHMED_UPDATE_RESOURCE,
-						Constants.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE);
+						Constants.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE)
+				.collect(Collectors.toList());
 
-		if (bundles.get().count() != 1)
+		if (references.size() != 1)
 		{
-			logger.error("Task input contains unexpected number of Bundle IDs, expected 1, got {}",
-					bundles.get().count());
+			logger.error("Task input contains unexpected number of Bundle IDs, expected 1, got {}", references.size());
 			throw new RuntimeException(
-					"Task input contains unexpected number of Bundle IDs, expected 1, got " + bundles.get().count());
+					"Task input contains unexpected number of Bundle IDs, expected 1, got " + references.size());
 		}
-		else if (bundles.get().anyMatch(reference -> !BUNDLE_ID_PATTERN.matcher(reference.getReference()).matches()))
+		else if (!BUNDLE_ID_PATTERN.matcher(references.get(0).getReference()).matches())
 		{
 			logger.error("Task input contains unexpected ids not matching {}", BUNDLE_ID_PATTERN_STRING);
 			throw new RuntimeException("Task input contains unexpected ids not matching " + BUNDLE_ID_PATTERN_STRING);
 		}
 
-		String bundleId = bundles.get().findFirst().get().getId();
+		String bundleId = references.get(0).getReference();
 		execution.setVariable(Constants.VARIABLE_BUNDLE_ID, bundleId);
 
 		List<String> targetIdentifierSearchParameters = getTaskHelper()
 				.getInputParameterStringValues(task, Constants.CODESYSTEM_HIGHMED_UPDATE_RESOURCE,
-						Constants.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_ORGANIZATION_IDENTIFIER_SEARCH_PARAMETER).collect(Collectors.toList());
+						Constants.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_ORGANIZATION_IDENTIFIER_SEARCH_PARAMETER)
+				.collect(Collectors.toList());
 
 		List<MultiInstanceTarget> targets = targetIdentifierSearchParameters.stream()
 				.flatMap(organizationProvider::searchRemoteOrganizationsIdentifiers)
