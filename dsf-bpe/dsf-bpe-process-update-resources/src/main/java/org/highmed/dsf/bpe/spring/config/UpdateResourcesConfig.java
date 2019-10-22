@@ -3,6 +3,7 @@ package org.highmed.dsf.bpe.spring.config;
 import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
 import org.highmed.dsf.bpe.message.SendRequest;
 import org.highmed.dsf.bpe.plugin.UpdateResourcesPlugin;
+import org.highmed.dsf.bpe.service.CheckRequest;
 import org.highmed.dsf.bpe.service.SelectResourceAndTargets;
 import org.highmed.dsf.bpe.service.UpdateResources;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
@@ -38,7 +39,7 @@ public class UpdateResourcesConfig
 	@Bean
 	public SendRequest sendRequest()
 	{
-		return new SendRequest(organizationProvider, clientProvider, taskHelper);
+		return new SendRequest(organizationProvider, clientProvider, taskHelper, fhirContext);
 	}
 
 	@Bean
@@ -51,5 +52,11 @@ public class UpdateResourcesConfig
 	public UpdateResources updateResources()
 	{
 		return new UpdateResources(clientProvider, taskHelper, fhirContext);
+	}
+
+	@Bean
+	public CheckRequest checkRequest()
+	{
+		return new CheckRequest(clientProvider, taskHelper);
 	}
 }

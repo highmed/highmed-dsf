@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import ca.uhn.fhir.context.FhirContext;
+
 @Configuration
 public class PingConfig
 {
@@ -27,6 +29,9 @@ public class PingConfig
 	@Autowired
 	private TaskHelper taskHelper;
 
+	@Autowired
+	private FhirContext fhirContext;
+
 	@Bean
 	public ProcessEnginePlugin pingPlugin()
 	{
@@ -36,13 +41,13 @@ public class PingConfig
 	@Bean
 	public SendPing sendPing()
 	{
-		return new SendPing(organizationProvider, clientProvider, taskHelper);
+		return new SendPing(organizationProvider, clientProvider, taskHelper, fhirContext);
 	}
 
 	@Bean
 	public SendPong sendPong()
 	{
-		return new SendPong(organizationProvider, clientProvider, taskHelper);
+		return new SendPong(organizationProvider, clientProvider, taskHelper, fhirContext);
 	}
 
 	@Bean
