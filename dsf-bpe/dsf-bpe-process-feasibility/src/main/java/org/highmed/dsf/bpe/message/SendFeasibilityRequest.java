@@ -13,14 +13,16 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.Task;
 
+import ca.uhn.fhir.context.FhirContext;
+
 public class SendFeasibilityRequest extends AbstractTaskMessageSend
 {
 	private final FhirWebserviceClientProvider clientProvider;
 
 	public SendFeasibilityRequest(OrganizationProvider organizationProvider,
-			FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
+			FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper, FhirContext fhirContext)
 	{
-		super(organizationProvider, clientProvider, taskHelper);
+		super(organizationProvider, clientProvider, taskHelper, fhirContext);
 		this.clientProvider = clientProvider;
 	}
 
