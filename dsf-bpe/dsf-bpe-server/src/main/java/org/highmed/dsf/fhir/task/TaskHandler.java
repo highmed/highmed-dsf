@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.RepositoryService;
@@ -108,17 +109,23 @@ public class TaskHandler implements InitializingBean
 	}
 
 	/**
-	 * @param businessKey          not <code>null</code>
-	 * @param correlationKey       may be <code>null</code>
-	 * @param processDefinitionKey not <code>null</code>
-	 * @param versionTag           not <code>null</code>
-	 * @param messageName          not <code>null</code>
-	 * @param variables            may be <code>null</code>
+	 * @param businessKey
+	 *            may be <code>null</code>
+	 * @param correlationKey
+	 *            may be <code>null</code>
+	 * @param processDefinitionKey
+	 *            not <code>null</code>
+	 * @param versionTag
+	 *            not <code>null</code>
+	 * @param messageName
+	 *            not <code>null</code>
+	 * @param variables
+	 *            may be <code>null</code>
 	 */
 	protected void onMessage(String businessKey, String correlationKey, String processDefinitionKey, String versionTag,
 			String messageName, Map<String, Object> variables)
 	{
-		Objects.requireNonNull(businessKey, "businessKey");
+		// businessKey may be null
 		// correlationKey may be null
 		Objects.requireNonNull(processDefinitionKey, "processDefinitionKey");
 		Objects.requireNonNull(versionTag, "versionTag");
@@ -128,29 +135,37 @@ public class TaskHandler implements InitializingBean
 			variables = Collections.emptyMap();
 
 		ProcessDefinition processDefinition = getProcessDefinition(processDefinitionKey, versionTag);
-		List<ProcessInstance> instances = getProcessInstanceQuery(processDefinition, businessKey).list();
 
-		if (instances.size() > 1)
-			logger.warn("instance-ids {}",
-					instances.stream().map(ProcessInstance::getId).collect(Collectors.joining(", ", "[", "]")));
-
-		long instanceCount = getProcessInstanceQuery(processDefinition, businessKey).count();
-
-		if (instanceCount <= 0)
+		if (businessKey == null)
 		{
-			runtimeService.createMessageCorrelation(messageName).processDefinitionId(processDefinition.getId())
-					.processInstanceBusinessKey(businessKey).setVariables(variables).correlateStartMessage();
+			runtimeService.startProcessInstanceById(processDefinition.getId(), UUID.randomUUID().toString(), variables);
 		}
 		else
 		{
-			MessageCorrelationBuilder correlation = runtimeService.createMessageCorrelation(messageName)
-					.setVariables(variables).processInstanceBusinessKey(businessKey);
+			List<ProcessInstance> instances = getProcessInstanceQuery(processDefinition, businessKey).list();
 
-			if (correlationKey != null)
-				correlation = correlation
-						.localVariablesEqual(Map.of("correlationKey", Variables.stringValue(correlationKey)));
+			if (instances.size() > 1)
+				logger.warn("instance-ids {}",
+						instances.stream().map(ProcessInstance::getId).collect(Collectors.joining(", ", "[", "]")));
 
-			correlation.correlate();
+			long instanceCount = getProcessInstanceQuery(processDefinition, businessKey).count();
+
+			if (instanceCount <= 0)
+			{
+				runtimeService.createMessageCorrelation(messageName).processDefinitionId(processDefinition.getId())
+						.processInstanceBusinessKey(businessKey).setVariables(variables).correlateStartMessage();
+			}
+			else
+			{
+				MessageCorrelationBuilder correlation = runtimeService.createMessageCorrelation(messageName)
+						.setVariables(variables).processInstanceBusinessKey(businessKey);
+
+				if (correlationKey != null)
+					correlation = correlation
+							.localVariablesEqual(Map.of("correlationKey", Variables.stringValue(correlationKey)));
+
+				correlation.correlate();
+			}
 		}
 	}
 
@@ -159,5 +174,4 @@ public class TaskHandler implements InitializingBean
 		return runtimeService.createProcessInstanceQuery().processDefinitionId(processDefinition.getId())
 				.processInstanceBusinessKey(businessKey);
 	}
-
 }
