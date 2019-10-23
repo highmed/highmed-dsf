@@ -4,25 +4,21 @@ import java.util.Objects;
 
 import org.highmed.openehr.client.OpenehrWebserviceClient;
 import org.highmed.openehr.client.OpenehrWebserviceClientJersey;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class OpenEhrClientProviderImpl implements OpenEhrWebserviceClientProvider, InitializingBean
 {
-	private static final Logger logger = LoggerFactory.getLogger(OpenEhrClientProviderImpl.class);
+	private final String baseUrl;
 
-	private String baseUrl;
+	private final String basicAuthUsername;
+	private final String basicAuthPassword;
 
-	private String basicAuthUsername;
-	private String basicAuthPassword;
+	private final int connectionTimeout;
+	private final int readTimeout;
 
-	private int connectionTimeout;
-	private int readTimeout;
-
-	private ObjectMapper objectMapper;
+	private final ObjectMapper objectMapper;
 
 	public OpenEhrClientProviderImpl(String baseUrl, String basicAuthUsername, String basicAuthPassword,
 			int connectionTimeout, int readTimeout, ObjectMapper objectMapper)
