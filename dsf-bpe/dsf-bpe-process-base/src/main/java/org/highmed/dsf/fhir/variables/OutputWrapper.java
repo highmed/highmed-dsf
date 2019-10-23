@@ -4,12 +4,12 @@ import java.io.Serializable;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collection;
-
+import java.util.List;
 
 public class OutputWrapper implements Serializable
 {
-	private String system;
-	private final Collection<SimpleEntry<String, String>> keyValueList;
+	private final String system;
+	private final List<SimpleEntry<String, String>> keyValueList;
 
 	public OutputWrapper(String system)
 	{
@@ -17,23 +17,18 @@ public class OutputWrapper implements Serializable
 		this.keyValueList = new ArrayList<>();
 	}
 
-	public void addKeyValue(String key, String value)
-	{
-		keyValueList.add(new SimpleEntry<>(key, value));
-	}
-
 	public String getSystem()
 	{
 		return system;
 	}
 
-	public void setSystem(String system)
-	{
-		this.system = system;
-	}
-
 	public Collection<SimpleEntry<String, String>> getKeyValueMap()
 	{
 		return keyValueList;
+	}
+
+	public void addKeyValue(String key, String value)
+	{
+		keyValueList.add(new SimpleEntry<>(key, value));
 	}
 }

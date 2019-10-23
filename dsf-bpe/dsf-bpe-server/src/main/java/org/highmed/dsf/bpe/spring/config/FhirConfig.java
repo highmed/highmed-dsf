@@ -105,7 +105,7 @@ public class FhirConfig
 	private TaskHelper taskHelper;
 
 	@Bean
-	public ObjectMapper objectMapper()
+	public ObjectMapper fhirObjectMapper()
 	{
 		ObjectMapper mapper = new ObjectMapper();
 
@@ -159,13 +159,13 @@ public class FhirConfig
 	@Bean
 	public MultiInstanceTargetSerializer multiInstanceTargetSerializer()
 	{
-		return new MultiInstanceTargetSerializer(objectMapper());
+		return new MultiInstanceTargetSerializer(fhirObjectMapper());
 	}
 
 	@Bean
 	public MultiInstanceTargetsSerializer multiInstanceTargetsSerializer()
 	{
-		return new MultiInstanceTargetsSerializer(objectMapper());
+		return new MultiInstanceTargetsSerializer(fhirObjectMapper());
 	}
 
 	@Bean

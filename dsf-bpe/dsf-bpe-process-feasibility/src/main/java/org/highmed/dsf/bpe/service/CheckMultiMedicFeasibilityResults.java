@@ -2,8 +2,8 @@ package org.highmed.dsf.bpe.service;
 
 import static org.highmed.dsf.bpe.Constants.MIN_PARTICIPATING_MEDICS;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.Constants;
@@ -43,28 +43,25 @@ public class CheckMultiMedicFeasibilityResults extends AbstractServiceDelegate
 		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, outputs);
 	}
 
+	/**
+	 * @param finalResult from the distributed aql execution and amtching of the results
+	 * @return all results which are erroneous and did not have enough participating medics
+	 */
 	private List<FinalSimpleFeasibilityResult> checkNumberOfParticipatingMedics(
 			List<FinalSimpleFeasibilityResult> finalResult)
 	{
-		List<FinalSimpleFeasibilityResult> toRemove = new ArrayList<>();
-
-		finalResult.forEach(result -> {
-			if (result.getParticipatingMedics() < MIN_PARTICIPATING_MEDICS)
-			{
-				toRemove.add(result);
-			}
-		});
-
-		return toRemove;
+		return finalResult.stream().filter(result -> result.getParticipatingMedics() < MIN_PARTICIPATING_MEDICS)
+				.collect(Collectors.toList());
 	}
 
 	private OutputWrapper getOutputWrapperErroneous(List<FinalSimpleFeasibilityResult> erroneousResults)
 	{
 		OutputWrapper outputWrapper = new OutputWrapper(Constants.CODESYSTEM_HIGHMED_BPMN);
 		erroneousResults.forEach(result -> {
-			String errorMessage = "Final multi medic feasibility query result check failed for group with id '" + result.getCohortId()
-					+ "', not enough participating medics, expected >= " + MIN_PARTICIPATING_MEDICS + ", got "
-					+ result.getParticipatingMedics();
+			String errorMessage =
+					"Final multi medic feasibility query result check failed for group with id '" + result.getCohortId()
+							+ "', not enough participating medics, expected >= " + MIN_PARTICIPATING_MEDICS + ", got "
+							+ result.getParticipatingMedics();
 
 			logger.info(errorMessage);
 			outputWrapper.addKeyValue(Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, errorMessage);

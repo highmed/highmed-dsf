@@ -34,7 +34,7 @@ public class OpenEhrConfig
 	private int connectTimeout;
 
 	@Bean
-	public ObjectMapper objectMapper()
+	public ObjectMapper openEhrObjectMapper()
 	{
 		ObjectMapper mapper = new ObjectMapper();
 
@@ -59,6 +59,6 @@ public class OpenEhrConfig
 	@Bean
 	public OpenEhrWebserviceClientProvider webserviceClientProvider()
 	{
-		return new OpenEhrClientProviderImpl(baseUrl, basicAuthUsername, basicAuthPassword, connectTimeout, readTimeout, objectMapper());
+		return new OpenEhrClientProviderImpl(baseUrl, basicAuthUsername, basicAuthPassword, connectTimeout, readTimeout,  openEhrObjectMapper());
 	}
 }

@@ -20,8 +20,8 @@ public class GroupHelperImpl implements GroupHelper
 		// TODO: APPLICATION_XFHIRQUERY to support AQL
 		List<Extension> queries = group.getExtension().stream()
 				.filter(extension -> extension.getUrl().equals(Constants.EXTENSION_QUERY_URI))
-				.filter(extension -> ((Expression) extension.getValue()).getLanguage()
-						== Expression.ExpressionLanguage.APPLICATION_XFHIRQUERY).collect(Collectors.toList());
+				.filter(extension -> Expression.ExpressionLanguage.APPLICATION_XFHIRQUERY
+						.equals(((Expression) extension.getValue()).getLanguage())).collect(Collectors.toList());
 
 		if (queries.size() != 1)
 		{

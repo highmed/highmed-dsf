@@ -84,25 +84,21 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 	{
 		String baseUrl = Optional.ofNullable(researchStudyType.getBaseUrl()).orElse("");
 
-		FhirWebserviceClient client;
 		if (baseUrl.equals(getFhirWebserviceClientProvider().getLocalBaseUrl()) || baseUrl.isEmpty())
 		{
-			client = getFhirWebserviceClientProvider().getLocalWebserviceClient();
+			return getFhirWebserviceClientProvider().getLocalWebserviceClient();
 		}
 		else
 		{
-			client = getFhirWebserviceClientProvider().getRemoteWebserviceClient(baseUrl);
+			return getFhirWebserviceClientProvider().getRemoteWebserviceClient(baseUrl);
 		}
-
-		return client;
 	}
 
 	private ResearchStudy getResearchStudy(IdType researchStudyType, FhirWebserviceClient client)
 	{
-		ResearchStudy researchStudy;
 		try
 		{
-			researchStudy = client.read(ResearchStudy.class, researchStudyType.getIdPart());
+			return client.read(ResearchStudy.class, researchStudyType.getIdPart());
 		}
 		catch (WebApplicationException e)
 		{
@@ -110,8 +106,6 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 					"Error while reading ResearchStudy with id " + researchStudyType.getIdPart() + " from " + client
 							.getBaseUrl());
 		}
-
-		return researchStudy;
 	}
 
 	private List<Group> getCohortDefinitions(ResearchStudy researchStudy, List<OutputWrapper> outputs,

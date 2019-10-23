@@ -44,15 +44,15 @@ public class CheckFeasibilityResources extends AbstractServiceDelegate
 
 	private void checkNumberOfParticipatingMedics(ResearchStudy researchStudy)
 	{
-		Set<String> medics = researchStudy.getExtension().stream()
+		long medics = researchStudy.getExtension().stream()
 				.filter(e -> e.getUrl().equals(Constants.EXTENSION_PARTICIPATING_MEDIC_URI))
-				.map(extension -> ((Reference) extension.getValue()).getReference()).collect(Collectors.toSet());
+				.map(extension -> ((Reference) extension.getValue()).getReference())
+				.distinct().count();
 
-		if (medics.size() < MIN_PARTICIPATING_MEDICS)
+		if (medics < MIN_PARTICIPATING_MEDICS)
 		{
 			throw new IllegalStateException(
-					"Number of distinct participanting MeDICs is < " + MIN_PARTICIPATING_MEDICS + ", got " + medics
-							.size());
+					"Number of distinct participanting MeDICs is < " + MIN_PARTICIPATING_MEDICS + ", got " + medics);
 		}
 	}
 

@@ -4,9 +4,9 @@ import java.io.Serializable;
 
 public class FinalSimpleFeasibilityResult implements Serializable
 {
-	private String cohortId;
-	private long participatingMedics;
-	private long cohortSize;
+	private final String cohortId;
+	private final long participatingMedics;
+	private final long cohortSize;
 
 	public FinalSimpleFeasibilityResult(String cohortId, long participatingMedics, long cohortSize)
 	{
