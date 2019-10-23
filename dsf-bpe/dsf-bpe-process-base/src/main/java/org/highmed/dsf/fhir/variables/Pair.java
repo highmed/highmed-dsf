@@ -2,6 +2,7 @@ package org.highmed.dsf.fhir.variables;
 
 import java.io.Serializable;
 
+// TODO: check if Serializable can be replaced by JSON serialization
 public class Pair<K, V> implements Serializable
 {
 	private final K key;

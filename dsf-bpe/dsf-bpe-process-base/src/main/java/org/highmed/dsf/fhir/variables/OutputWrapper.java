@@ -3,6 +3,7 @@ package org.highmed.dsf.fhir.variables;
 import java.io.Serializable;
 import java.util.List;
 
+// TODO: check if Serializable can be replaced by JSON serialization
 public class OutputWrapper implements Serializable
 {
 	private final String system;

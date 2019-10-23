@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+// TODO: check if Serializable can be replaced by JSON serialization
 public class MultiInstanceResults implements Serializable
 {
 	private final List<MultiInstanceResult> results;

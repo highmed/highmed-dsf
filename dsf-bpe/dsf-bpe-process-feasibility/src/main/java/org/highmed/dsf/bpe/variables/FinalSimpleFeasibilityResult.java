@@ -2,6 +2,7 @@ package org.highmed.dsf.bpe.variables;
 
 import java.io.Serializable;
 
+// TODO: check if Serializable can be replaced by JSON serialization
 public class FinalSimpleFeasibilityResult implements Serializable
 {
 	private final String cohortId;

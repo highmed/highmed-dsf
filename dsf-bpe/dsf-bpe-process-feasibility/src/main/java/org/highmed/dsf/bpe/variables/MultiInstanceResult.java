@@ -3,6 +3,7 @@ package org.highmed.dsf.bpe.variables;
 import java.io.Serializable;
 import java.util.Map;
 
+// TODO: check if Serializable can be replaced by JSON serialization
 public class MultiInstanceResult implements Serializable
 {
 	private final String organizationIdentifier;
