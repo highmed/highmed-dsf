@@ -2,6 +2,7 @@ package org.highmed.openehr.model.structur;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ResultSet
@@ -14,6 +15,7 @@ public class ResultSet
 	private final List<Column> columns;
 	private final List<List<RowElement>> rows;
 
+	@JsonCreator
 	public ResultSet(
 			@JsonProperty("meta")
 					Meta meta,

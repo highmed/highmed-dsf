@@ -2,6 +2,7 @@ package org.highmed.openehr.model.structur;
 
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -15,6 +16,7 @@ public class Request
 
 	private final Map<String, Object> queryParameters;
 
+	@JsonCreator
 	public Request(
 			@JsonProperty("q")
 					String query,

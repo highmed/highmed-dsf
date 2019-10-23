@@ -1,5 +1,6 @@
 package org.highmed.openehr.model.structur;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Meta
@@ -11,6 +12,7 @@ public class Meta
 	private final String generator;
 	private final String executedAql;
 
+	@JsonCreator
 	public Meta(
 			@JsonProperty("_href")
 					String href,

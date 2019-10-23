@@ -1,5 +1,6 @@
 package org.highmed.openehr.model.structur;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Column
@@ -7,6 +8,7 @@ public class Column
 	private final String name;
 	private final String path;
 
+	@JsonCreator
 	private Column(
 			@JsonProperty("name")
 					String name,
