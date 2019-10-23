@@ -1,7 +1,6 @@
 package org.highmed.dsf.bpe.listener;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.ExecutionListener;
@@ -32,9 +31,10 @@ public class StartListener implements ExecutionListener
 			execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, new ArrayList<OutputWrapper>());
 		}
 
-		// if a main process is started (not a call- or subprocess), this variable has to be initialized
-		if (!execution.getVariableNames().contains(Constants.VARIABLE_IS_CALL_ACTIVITY)) {
-			execution.setVariable(Constants.VARIABLE_IS_CALL_ACTIVITY, false);
+		// if a main process is started (not a call- or subprocess), this variable has to be initialized.
+		// it is set to false, since a main process is not a called process
+		if (!execution.getVariableNames().contains(Constants.VARIABLE_IN_CALLED_PROCESS)) {
+			execution.setVariable(Constants.VARIABLE_IN_CALLED_PROCESS, false);
 		}
 	}
 }

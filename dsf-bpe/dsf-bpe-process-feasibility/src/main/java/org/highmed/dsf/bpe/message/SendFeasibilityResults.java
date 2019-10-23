@@ -28,7 +28,7 @@ public class SendFeasibilityResults extends AbstractTaskMessageSend
 		List<OutputWrapper> outputs = (List<OutputWrapper>) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
 		List<Task.ParameterComponent> inputs = new ArrayList<>();
 
-		outputs.forEach(outputWrapper -> outputWrapper.getKeyValueMap().forEach(entry -> inputs
+		outputs.forEach(outputWrapper -> outputWrapper.getKeyValueList().forEach(entry -> inputs
 				.add(getTaskHelper().createInput(outputWrapper.getSystem(), entry.getKey(), entry.getValue()))));
 
 		return inputs.stream();

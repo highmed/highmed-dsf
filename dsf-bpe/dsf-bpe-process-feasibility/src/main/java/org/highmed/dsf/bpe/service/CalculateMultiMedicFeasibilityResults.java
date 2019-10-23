@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.Constants;
@@ -31,7 +32,7 @@ public class CalculateMultiMedicFeasibilityResults extends AbstractServiceDelega
 				.getVariable(Constants.VARIABLE_MULTI_INSTANCE_RESULTS);
 		List<Group> cohortDefinitions = (List<Group>) execution.getVariable(Constants.VARIABLE_COHORTS);
 
-		List<String> cohortIds = getCohortIds(cohortDefinitions);
+		Stream<String> cohortIds = getCohortIds(cohortDefinitions);
 		List<MultiInstanceResult> locationBasedResults = resultsWrapper.getResults();
 		List<FinalSimpleFeasibilityResult> finalResult = calculateResults(cohortIds, locationBasedResults);
 
@@ -40,14 +41,22 @@ public class CalculateMultiMedicFeasibilityResults extends AbstractServiceDelega
 		execution.setVariable(Constants.VARIABLE_SIMPLE_COHORT_SIZE_QUERY_FINAL_RESULT, finalResult);
 	}
 
-	private List<FinalSimpleFeasibilityResult> calculateResults(List<String> ids, List<MultiInstanceResult> results)
+	private Stream<String> getCohortIds(List<Group> cohortDefinitions)
+	{
+		return cohortDefinitions.stream().map(cohort -> {
+			IdType cohortId = new IdType(cohort.getId());
+			return cohortId.getResourceType() + "/" + cohortId.getIdPart();
+		});
+	}
+
+	private List<FinalSimpleFeasibilityResult> calculateResults(Stream<String> cohortIds, List<MultiInstanceResult> results)
 	{
 		List<Map.Entry<String, String>> combinedResults = results.stream()
 				.flatMap(result -> result.getQueryResults().entrySet().stream()).collect(Collectors.toList());
 
 		List<FinalSimpleFeasibilityResult> resultsByCohortId = new ArrayList<>();
 
-		ids.forEach(id -> {
+		cohortIds.forEach(id -> {
 			long participatingMedics = combinedResults.stream().filter(resultEntry -> resultEntry.getKey().equals(id))
 					.count();
 			long result = combinedResults.stream().filter(resultEntry -> resultEntry.getKey().equals(id))
@@ -56,13 +65,5 @@ public class CalculateMultiMedicFeasibilityResults extends AbstractServiceDelega
 		});
 
 		return resultsByCohortId;
-	}
-
-	private List<String> getCohortIds(List<Group> cohortDefinitions)
-	{
-		return cohortDefinitions.stream().map(cohort -> {
-			IdType cohortId = new IdType(cohort.getId());
-			return cohortId.getResourceType() + "/" + cohortId.getIdPart();
-		}).collect(Collectors.toList());
 	}
 }

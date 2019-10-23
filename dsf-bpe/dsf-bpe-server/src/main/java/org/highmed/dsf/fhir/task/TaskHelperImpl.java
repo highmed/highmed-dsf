@@ -84,7 +84,8 @@ public class TaskHelperImpl implements TaskHelper
 	@Override
 	public Task addOutputs(Task task, List<OutputWrapper> outputs)
 	{
-		outputs.forEach(outputWrapper -> outputWrapper.getKeyValueMap().forEach(entry -> {
+		outputs.forEach(outputWrapper -> outputWrapper.getKeyValueList().forEach(entry ->
+		{
 			Task.TaskOutputComponent output = createOutput(outputWrapper.getSystem(), entry.getKey(), entry.getValue());
 			task.addOutput(output);
 		}));

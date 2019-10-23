@@ -49,6 +49,9 @@ public class ExecuteFeasibilityQueries extends AbstractServiceDelegate implement
 
 	private String executeQuery(String query)
 	{
+		// TODO We might want to introduce a more complex result type to represent a count,
+		//      errors and possible meta-data.
+
 		//		ResultSet result = openehrWebserviceClient.query(query, null);
 		//		int count = ((DV_Count) result.getRow(0).get(0)).getValue();
 

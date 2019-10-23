@@ -14,6 +14,6 @@ public class CallActivityListener implements ExecutionListener
 	public void notify(DelegateExecution execution) throws Exception
 	{
 		// mark that we enter a process called by another process.
-		execution.setVariable(Constants.VARIABLE_IS_CALL_ACTIVITY, true);
+		execution.setVariable(Constants.VARIABLE_IN_CALLED_PROCESS, true);
 	}
 }

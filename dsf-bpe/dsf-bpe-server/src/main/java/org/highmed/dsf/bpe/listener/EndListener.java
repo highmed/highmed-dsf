@@ -28,10 +28,10 @@ public class EndListener implements ExecutionListener
 	@Override
 	public void notify(DelegateExecution execution) throws Exception
 	{
-		boolean isCallActivity = (boolean) execution.getVariable(Constants.VARIABLE_IS_CALL_ACTIVITY);
+		boolean inCalledProcess = (boolean) execution.getVariable(Constants.VARIABLE_IN_CALLED_PROCESS);
 
-		// not in a call activity --> process end if it is not a subprocess
-		if (!isCallActivity)
+		// not in a called process --> process end if it is not a subprocess
+		if (!inCalledProcess)
 		{
 			Task task;
 			if (execution.getParentId() == null || execution.getParentId().equals(execution.getProcessInstanceId()))
@@ -53,9 +53,9 @@ public class EndListener implements ExecutionListener
 			task.setStatus(Task.TaskStatus.COMPLETED);
 			webserviceClient.update(task);
 		} else {
-			// in a call activity --> process does not end here, don't change the task variable
+			// in a called process --> process does not end here, don't change the task variable
 			// reset VARIABLE_IS_CALL_ACTIVITY to false, since we leave the called process
-			execution.setVariable(Constants.VARIABLE_IS_CALL_ACTIVITY, false);
+			execution.setVariable(Constants.VARIABLE_IN_CALLED_PROCESS, false);
 		}
 	}
 }

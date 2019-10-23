@@ -17,6 +17,7 @@ import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.OutputWrapper;
+import org.highmed.dsf.fhir.variables.Pair;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -67,7 +68,8 @@ public class UpdateWhiteList extends AbstractServiceDelegate implements Initiali
 				.forEach(addWhiteListEntry(transaction, searchSet));
 
 		Bundle result = client.updateConditionaly(transaction, Map.of("identifier", Collections.singletonList(
-				Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST + "|" + Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST)));
+				Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST + "|"
+						+ Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST)));
 
 		setTaskOutput(result, execution);
 	}
@@ -138,9 +140,9 @@ public class UpdateWhiteList extends AbstractServiceDelegate implements Initiali
 		@SuppressWarnings("unchecked")
 		List<OutputWrapper> outputs = (List<OutputWrapper>) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
 
-		OutputWrapper outputWrapper = new OutputWrapper(Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST);
-		outputWrapper.addKeyValue(Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST,
-				new IdType(result.getId()).getIdPart());
+		OutputWrapper outputWrapper = new OutputWrapper(Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST,
+				List.of(new Pair<>(Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST,
+						new IdType(result.getId()).getIdPart())));
 		outputs.add(outputWrapper);
 
 		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, outputs);

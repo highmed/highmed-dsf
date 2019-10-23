@@ -2,6 +2,7 @@ package org.highmed.dsf.bpe.service;
 
 import static org.highmed.dsf.bpe.Constants.CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import org.highmed.dsf.bpe.variables.MultiInstanceResult;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.OutputWrapper;
+import org.highmed.dsf.fhir.variables.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,23 +60,25 @@ public class CheckSingleMedicFeasibilityResults extends AbstractServiceDelegate
 
 	private OutputWrapper getOutputWrapperErroneous(Map<String, String> erroneousResults)
 	{
-		OutputWrapper outputWrapper = new OutputWrapper(Constants.CODESYSTEM_HIGHMED_BPMN);
+		List<Pair<String, String>> errors = new ArrayList<>();
+
 		erroneousResults.forEach((groupId, result) -> {
 			String errorMessage =
 					"Final single medic feasibility query result check failed for group with id '" + groupId
 							+ "', reason unknown";
 
 			logger.info(errorMessage);
-			outputWrapper.addKeyValue(Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, errorMessage);
+			errors.add(new Pair<>(Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, errorMessage));
 		});
-		return outputWrapper;
+
+		return new OutputWrapper(Constants.CODESYSTEM_HIGHMED_BPMN, errors);
 	}
 
 	private OutputWrapper getOutputWrapperSuccessful(Map<String, String> successfulResults)
 	{
-		OutputWrapper outputWrapper = new OutputWrapper(Constants.CODESYSTEM_HIGHMED_FEASIBILITY);
-		successfulResults.forEach((groupId, result) -> outputWrapper.addKeyValue(Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_SINGLE_MEDIC_RESULT,
-					result + CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR + groupId));
-		return outputWrapper;
+		List<Pair<String, String>> success = new ArrayList<>();
+		successfulResults.forEach((groupId, result) -> success.add(new Pair<>(Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_SINGLE_MEDIC_RESULT,
+					result + CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR + groupId)));
+		return new OutputWrapper(Constants.CODESYSTEM_HIGHMED_FEASIBILITY, success);
 	}
 }

@@ -122,23 +122,26 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 
 		additionalInputParameters.forEach(task.getInput()::add);
 
-		FhirWebserviceClient client;
-		if (task.getRequester().equalsDeep(task.getRestriction().getRecipient().get(0)))
-		{
-			logger.trace("Using local webservice client");
-			client = getFhirWebserviceClientProvider().getLocalWebserviceClient();
-		}
-		else
-		{
-			logger.trace("Using remote webservice client");
-			client = getFhirWebserviceClientProvider().getRemoteWebserviceClient(organizationProvider.getDefaultSystem(),
-					targetOrganizationIdentifierValue);
-		}
+		FhirWebserviceClient client = getFhirClient(task, targetOrganizationIdentifierValue);
 
 		logger.info("Sending task for process {} to organization {} (endpoint: {})", task.getInstantiatesUri(),
 				targetOrganizationIdentifierValue, client.getBaseUrl());
 
 		client.create(task);
+	}
+
+	private FhirWebserviceClient getFhirClient(Task task, String targetOrganizationIdentifierValue) {
+		if (task.getRequester().equalsDeep(task.getRestriction().getRecipient().get(0)))
+		{
+			logger.trace("Using local webservice client");
+			return getFhirWebserviceClientProvider().getLocalWebserviceClient();
+		}
+		else
+		{
+			logger.trace("Using remote webservice client");
+			return getFhirWebserviceClientProvider().getRemoteWebserviceClient(organizationProvider.getDefaultSystem(),
+					targetOrganizationIdentifierValue);
+		}
 	}
 
 	/*

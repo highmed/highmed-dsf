@@ -19,9 +19,23 @@ public interface Constants
 	String VARIABLE_QUERIES = "queries";
 	String VARIABLE_QUERY_PARAMETERS = "queryParameters";
 	String VARIABLE_BUNDLE_ID = "bundleId";
+
+	/**
+	 * Stores a List<{@link org.highmed.dsf.bpe.variables.FinalSimpleFeasibilityResult}> of the final results of
+	 * a multi medic simple cohort size query. Do not override, only add new entries to the list.
+	 */
 	String VARIABLE_SIMPLE_COHORT_SIZE_QUERY_FINAL_RESULT = "simpleCohortSizeQueryFinalResult";
+
+	/**
+	 * Stores a List<{@link org.highmed.dsf.fhir.variables.OutputWrapper}> </>of outputs that have to be written to a
+	 * task resource after the process terminates. Do not override, only add new entries to the list.
+	 */
 	String VARIABLE_PROCESS_OUTPUTS = "outputs";
-	String VARIABLE_IS_CALL_ACTIVITY = "isCallActivity";
+
+	/**
+	 * Used to distinguish if I am at the moment in a process called by another process by a CallActivity or not
+	 */
+	String VARIABLE_IN_CALLED_PROCESS = "inCalledProcess";
 
 	String CODESYSTEM_HIGHMED_BPMN = "http://highmed.org/fhir/CodeSystem/bpmn-message";
 	String CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME = "message-name";

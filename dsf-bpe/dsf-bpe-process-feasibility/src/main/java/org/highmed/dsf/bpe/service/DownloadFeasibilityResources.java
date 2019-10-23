@@ -15,6 +15,7 @@ import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.OutputWrapper;
+import org.highmed.dsf.fhir.variables.Pair;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
@@ -114,8 +115,7 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 		List<Group> cohortDefinitions = new ArrayList<>();
 		List<Reference> cohortDefinitionReferences = researchStudy.getEnrollment();
 
-		OutputWrapper errors = new OutputWrapper(Constants.CODESYSTEM_HIGHMED_BPMN);
-
+		List<Pair<String, String>> errors = new ArrayList<>();
 		cohortDefinitionReferences.forEach(reference -> {
 			try
 			{
@@ -130,11 +130,12 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 								.getBaseUrl();
 
 				logger.info(errorMessage);
-				errors.addKeyValue(Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, errorMessage);
+				errors.add(new Pair<>(Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, errorMessage));
 			}
 		});
 
-		outputs.add(errors);
+		outputs.add(new OutputWrapper(Constants.CODESYSTEM_HIGHMED_BPMN, errors));
+
 		return cohortDefinitions;
 	}
 }
