@@ -2,18 +2,35 @@ package org.highmed.openehr.model.structur;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class ResultSet
 {
-	private Meta meta;
+	private final Meta meta;
 
-	private String name;
-	private String q;
+	private final String name;
+	private final String query;
 
-	private List<Column> columns;
-	private List<List<RowElement>> rows;
+	private final List<Column> columns;
+	private final List<List<RowElement>> rows;
 
-	public ResultSet()
+	public ResultSet(
+			@JsonProperty("meta")
+					Meta meta,
+			@JsonProperty("name")
+					String name,
+			@JsonProperty("q")
+					String query,
+			@JsonProperty("columns")
+					List<Column> columns,
+			@JsonProperty("rows")
+					List<List<RowElement>> rows)
 	{
+		this.meta = meta;
+		this.name = name;
+		this.query = query;
+		this.columns = columns;
+		this.rows = rows;
 	}
 
 	public Meta getMeta()
@@ -21,29 +38,14 @@ public class ResultSet
 		return meta;
 	}
 
-	public void setMeta(Meta meta)
-	{
-		this.meta = meta;
-	}
-
 	public String getName()
 	{
 		return name;
 	}
 
-	public void setName(String name)
+	public String getQuery()
 	{
-		this.name = name;
-	}
-
-	public String getQ()
-	{
-		return q;
-	}
-
-	public void setQ(String q)
-	{
-		this.q = q;
+		return query;
 	}
 
 	public List<Column> getColumns()
@@ -51,22 +53,13 @@ public class ResultSet
 		return columns;
 	}
 
-	public void setColumns(List<Column> columns)
-	{
-		this.columns = columns;
-	}
-
 	public List<List<RowElement>> getRows()
 	{
 		return rows;
 	}
 
-	public List<RowElement> getRow(int index) {
-		return rows.get(index);
-	}
-
-	public void addRow(List<RowElement> row)
+	public List<RowElement> getRow(int index)
 	{
-		rows.add(row);
+		return rows.get(index);
 	}
 }

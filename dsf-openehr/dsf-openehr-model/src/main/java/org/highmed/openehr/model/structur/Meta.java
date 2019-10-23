@@ -1,74 +1,65 @@
 package org.highmed.openehr.model.structur;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Meta
 {
-	private String _href;
-	private String _type;
-	private String _schema_version;
-	private String _created;
-	private String _generator;
-	private String _executed_aql;
+	private final String href;
+	private final String type;
+	private final String schemaVersion;
+	private final String created;
+	private final String generator;
+	private final String executedAql;
 
-	private Meta()
-	{}
-
-	public String get_href()
+	public Meta(
+			@JsonProperty("_href")
+					String href,
+			@JsonProperty("_type")
+					String type,
+			@JsonProperty("_schema_version")
+					String schemaVersion,
+			@JsonProperty("_created")
+					String created,
+			@JsonProperty("_generator")
+					String generator,
+			@JsonProperty("_executed_aql")
+					String executedAql)
 	{
-		return _href;
+		this.href = href;
+		this.type = type;
+		this.schemaVersion = schemaVersion;
+		this.created = created;
+		this.generator = generator;
+		this.executedAql = executedAql;
 	}
 
-	public void set_href(String _href)
+	public String getHref()
 	{
-		this._href = _href;
+		return href;
 	}
 
-	public String get_type()
+	public String getType()
 	{
-		return _type;
+		return type;
 	}
 
-	public void set_type(String _type)
+	public String getSchemaVersion()
 	{
-		this._type = _type;
+		return schemaVersion;
 	}
 
-	public String get_schema_version()
+	public String geCreated()
 	{
-		return _schema_version;
+		return created;
 	}
 
-	public void set_schema_version(String _schema_version)
+	public String getGenerator()
 	{
-		this._schema_version = _schema_version;
+		return generator;
 	}
 
-	public String get_created()
+	public String getExecutedAql()
 	{
-		return _created;
-	}
-
-	public void set_created(String _created)
-	{
-		this._created = _created;
-	}
-
-	public String get_generator()
-	{
-		return _generator;
-	}
-
-	public void set_generator(String _generator)
-	{
-		this._generator = _generator;
-	}
-
-	public String get_executed_aql()
-	{
-		return _executed_aql;
-	}
-
-	public void set_executed_aql(String _executed_aql)
-	{
-		this._executed_aql = _executed_aql;
+		return executedAql;
 	}
 }

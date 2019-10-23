@@ -1,30 +1,29 @@
 package org.highmed.openehr.model.structur;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Column
 {
-	private String name;
-	private String path;
+	private final String name;
+	private final String path;
 
-	private Column()
-	{}
+	private Column(
+			@JsonProperty("name")
+					String name,
+			@JsonProperty("path")
+					String path)
+	{
+		this.name = name;
+		this.path = path;
+	}
 
 	public String getName()
 	{
 		return name;
 	}
 
-	public void setName(String name)
-	{
-		this.name = name;
-	}
-
 	public String getPath()
 	{
 		return path;
-	}
-
-	public void setPath(String path)
-	{
-		this.path = path;
 	}
 }

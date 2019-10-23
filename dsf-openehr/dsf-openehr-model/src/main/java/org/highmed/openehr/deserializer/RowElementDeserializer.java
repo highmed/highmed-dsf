@@ -5,8 +5,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
-import org.highmed.openehr.model.datatypes.DV_Count;
-import org.highmed.openehr.model.datatypes.DV_Other;
+import org.highmed.openehr.model.datatypes.DvCount;
+import org.highmed.openehr.model.datatypes.DvOther;
 import org.highmed.openehr.model.structur.RowElement;
 
 import java.io.IOException;
@@ -18,9 +18,9 @@ public class RowElementDeserializer extends JsonDeserializer<RowElement>
         JsonNode node = jsonParser.getCodec().readTree(jsonParser);
 
         if (node.isInt())
-            return new DV_Count(node.asInt());
+            return new DvCount(node.asInt());
         else {
-            return new DV_Other(node.toString());
+            return new DvOther(node.toString());
         }
     }
 }

@@ -2,9 +2,9 @@ package org.highmed.openehr.model.datatypes;
 
 import org.highmed.openehr.model.structur.RowElement;
 
-public class DV_Other extends RowElement<Object>
+public class DvOther extends RowElement<Object>
 {
-    public DV_Other(Object value) {
+    public DvOther(Object value) {
         super(value);
     }
 }

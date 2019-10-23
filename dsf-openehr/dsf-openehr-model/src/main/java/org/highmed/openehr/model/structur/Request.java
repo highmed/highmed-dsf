@@ -1,32 +1,39 @@
 package org.highmed.openehr.model.structur;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class Request
 {
-	private String q;
-	private String offset;
-	private String fetch;
+	private final String query;
 
-	private Map<String, Object> queryParameters;
+	private final String offset;
+	private final String fetch;
 
-	public Request(String q) {
-		this.q = q;
-		this.queryParameters = new HashMap<>();
+	private final Map<String, Object> queryParameters;
+
+	public Request(
+			@JsonProperty("q")
+					String query,
+			@JsonProperty("offset")
+					String offset,
+			@JsonProperty("fetch")
+					String fetch,
+			@JsonProperty("query-parameters")
+					Map<String, Object> queryParameters)
+	{
+		this.query = query;
+		this.offset = offset;
+		this.fetch = fetch;
+		this.queryParameters = queryParameters;
 	}
 
-	public String getQ()
+	public String getQuery()
 	{
-		return q;
-	}
-
-	public void setQ(String q)
-	{
-		this.q = q;
+		return query;
 	}
 
 	public String getOffset()
@@ -34,25 +41,9 @@ public class Request
 		return offset;
 	}
 
-	public void setOffset(String offset)
-	{
-		this.offset = offset;
-	}
-
 	public String getFetch()
 	{
 		return fetch;
-	}
-
-	public void setFetch(String fetch)
-	{
-		this.fetch = fetch;
-	}
-
-	public Request addParameter(String key, Object value)
-	{
-		queryParameters.put(key, value);
-		return this;
 	}
 
 	public Map<String, Object> getQueryParameters()

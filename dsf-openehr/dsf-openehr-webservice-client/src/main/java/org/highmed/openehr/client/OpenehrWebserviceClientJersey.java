@@ -31,7 +31,7 @@ public class OpenehrWebserviceClientJersey extends AbstractJerseyClient implemen
 	{
 		Response response = getResource().path(OPENEHR_QUERY_PATH).request().headers(headers)
 				.header("Accept", MediaType.APPLICATION_JSON).header("Content-Type", MediaType.APPLICATION_JSON)
-				.post(Entity.entity(new Request(query), MediaType.APPLICATION_JSON));
+				.post(Entity.entity(new Request(query, null, null, null), MediaType.APPLICATION_JSON));
 
 		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
 				response.getStatusInfo().getReasonPhrase());
