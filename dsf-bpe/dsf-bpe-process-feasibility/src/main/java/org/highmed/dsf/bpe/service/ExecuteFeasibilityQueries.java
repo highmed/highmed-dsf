@@ -11,6 +11,8 @@ import org.highmed.dsf.bpe.variables.MultiInstanceResult;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.openehr.client.OpenehrWebserviceClient;
+import org.highmed.openehr.model.datatypes.DvCount;
+import org.highmed.openehr.model.structur.ResultSet;
 import org.springframework.beans.factory.InitializingBean;
 
 public class ExecuteFeasibilityQueries extends AbstractServiceDelegate implements InitializingBean
@@ -52,8 +54,8 @@ public class ExecuteFeasibilityQueries extends AbstractServiceDelegate implement
 		// TODO We might want to introduce a more complex result type to represent a count,
 		//      errors and possible meta-data.
 
-		//		ResultSet result = openehrWebserviceClient.query(query, null);
-		//		int count = ((DV_Count) result.getRow(0).get(0)).getValue();
+//		ResultSet result = openehrWebserviceClient.query(query, null);
+//		int count = ((DvCount) result.getRow(0).get(0)).getValue();
 
 		// TODO: remove dummy result
 		int count = 15;
