@@ -75,7 +75,7 @@ public final class FhirServer
 
 		List<Class<? extends Filter>> filters = new ArrayList<>();
 		filters.add(AuthenticationFilter.class);
-		if (Boolean.parseBoolean(properties.getProperty("jetty.cors")))
+		if (Boolean.parseBoolean(properties.getProperty("jetty.cors.enable")))
 			filters.add(CorsFilter.class);
 
 		@SuppressWarnings("unchecked")
