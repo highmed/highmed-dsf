@@ -6,6 +6,8 @@ import java.util.List;
 // TODO: check if Serializable can be replaced by JSON serialization
 public class OutputWrapper implements Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	private final String system;
 	private final List<Pair<String, String>> keyValueList;
 

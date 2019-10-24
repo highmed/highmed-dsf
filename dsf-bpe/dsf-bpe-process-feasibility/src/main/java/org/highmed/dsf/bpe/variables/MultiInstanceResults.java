@@ -7,6 +7,8 @@ import java.util.List;
 // TODO: check if Serializable can be replaced by JSON serialization
 public class MultiInstanceResults implements Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	private final List<MultiInstanceResult> results;
 
 	public MultiInstanceResults()

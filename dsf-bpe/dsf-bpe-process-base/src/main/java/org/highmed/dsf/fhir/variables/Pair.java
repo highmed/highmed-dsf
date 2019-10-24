@@ -5,6 +5,8 @@ import java.io.Serializable;
 // TODO: check if Serializable can be replaced by JSON serialization
 public class Pair<K, V> implements Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	private final K key;
 	private final V value;
 

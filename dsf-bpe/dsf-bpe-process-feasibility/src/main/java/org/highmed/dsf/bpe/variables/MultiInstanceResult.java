@@ -6,6 +6,8 @@ import java.util.Map;
 // TODO: check if Serializable can be replaced by JSON serialization
 public class MultiInstanceResult implements Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	private final String organizationIdentifier;
 
 	// key = group cohort id
