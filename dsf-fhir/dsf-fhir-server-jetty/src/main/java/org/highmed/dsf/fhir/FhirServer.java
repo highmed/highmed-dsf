@@ -9,6 +9,7 @@ import static de.rwh.utils.jetty.PropertiesReader.read;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
@@ -18,6 +19,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import javax.servlet.Filter;
 import javax.servlet.ServletException;
 
 import org.eclipse.jetty.server.HttpConfiguration;
@@ -28,6 +30,7 @@ import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
 import org.glassfish.jersey.servlet.init.JerseyServletContainerInitializer;
 import org.highmed.dsf.fhir.authentication.AuthenticationFilter;
+import org.highmed.dsf.fhir.cors.CorsFilter;
 import org.highmed.dsf.tools.db.DbMigrator;
 import org.springframework.web.SpringServletContainerInitializer;
 
@@ -70,8 +73,14 @@ public final class FhirServer
 
 		ErrorHandler errorHandler = statusCodeOnlyErrorHandler();
 
+		List<Class<? extends Filter>> filters = new ArrayList<>();
+		filters.add(AuthenticationFilter.class);
+		if (Boolean.parseBoolean(properties.getProperty("jetty.cors")))
+			filters.add(CorsFilter.class);
+
+		@SuppressWarnings("unchecked")
 		JettyServer server = new JettyServer(connector, errorHandler, "/fhir", initializers, configProperties,
-				webInfClassesDirs, webInfJars, AuthenticationFilter.class);
+				webInfClassesDirs, webInfJars, filters.toArray(new Class[filters.size()]));
 
 		initializeWebSocketServerContainer(server);
 
