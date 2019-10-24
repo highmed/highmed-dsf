@@ -24,16 +24,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
+import ca.uhn.fhir.context.FhirContext;
+
 public class AbstractTaskMessageSend extends AbstractServiceDelegate implements InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractTaskMessageSend.class);
 
 	protected final OrganizationProvider organizationProvider;
+	private final FhirContext fhirContext;
 
-	public AbstractTaskMessageSend(OrganizationProvider organizationProvider, FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
+	public AbstractTaskMessageSend(OrganizationProvider organizationProvider,
+			FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper, FhirContext fhirContext)
 	{
 		super(clientProvider, taskHelper);
+
 		this.organizationProvider = organizationProvider;
+		this.fhirContext = fhirContext;
 	}
 
 	@Override
@@ -41,6 +47,7 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 	{
 		super.afterPropertiesSet();
 		Objects.requireNonNull(organizationProvider, "organizationProvider");
+		Objects.requireNonNull(fhirContext, "fhirContext");
 	}
 
 	@Override
@@ -95,26 +102,26 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 
 		// http://highmed.org/bpe/Process/processDefinitionKey
 		// http://highmed.org/bpe/Process/processDefinitionKey/versionTag
-		String instantiatesUri =
-				Constants.PROCESS_URI_BASE + processDefinitionKey + (versionTag != null && !versionTag.isEmpty() ?
-						("/" + versionTag) :
-						"");
+		String instantiatesUri = Constants.PROCESS_URI_BASE + processDefinitionKey
+				+ (versionTag != null && !versionTag.isEmpty() ? ("/" + versionTag) : "");
 		task.setInstantiatesUri(instantiatesUri);
 
-		ParameterComponent messageNameInput = new ParameterComponent(new CodeableConcept(
-				new Coding(Constants.CODESYSTEM_HIGHMED_BPMN, Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME,
-						null)), new StringType(messageName));
+		ParameterComponent messageNameInput = new ParameterComponent(
+				new CodeableConcept(new Coding(Constants.CODESYSTEM_HIGHMED_BPMN,
+						Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME, null)),
+				new StringType(messageName));
 		task.getInput().add(messageNameInput);
 
-		ParameterComponent businessKeyInput = new ParameterComponent(new CodeableConcept(
-				new Coding(Constants.CODESYSTEM_HIGHMED_BPMN, Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY,
-						null)), new StringType(businessKey));
+		ParameterComponent businessKeyInput = new ParameterComponent(
+				new CodeableConcept(new Coding(Constants.CODESYSTEM_HIGHMED_BPMN,
+						Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY, null)),
+				new StringType(businessKey));
 		task.getInput().add(businessKeyInput);
 
 		if (correlationKey != null)
 		{
-			ParameterComponent correlationKeyInput = new ParameterComponent(new CodeableConcept(
-					new Coding(Constants.CODESYSTEM_HIGHMED_BPMN,
+			ParameterComponent correlationKeyInput = new ParameterComponent(
+					new CodeableConcept(new Coding(Constants.CODESYSTEM_HIGHMED_BPMN,
 							Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY, null)),
 					new StringType(correlationKey));
 			task.getInput().add(correlationKeyInput);
@@ -126,6 +133,7 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 
 		logger.info("Sending task for process {} to organization {} (endpoint: {})", task.getInstantiatesUri(),
 				targetOrganizationIdentifierValue, client.getBaseUrl());
+		logger.trace("Task resource to send: {}", fhirContext.newJsonParser().encodeResourceToString(task));
 
 		client.create(task);
 	}
@@ -143,48 +151,4 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 					targetOrganizationIdentifierValue);
 		}
 	}
-
-	/*
-	 * private Optional<String> getMessageName(DelegateExecution execution) { String variable = (String)
-	 * execution.getVariable(VARIABLE_MESSAGE_NAME); if (variable != null) return Optional.of(variable);
-	 *
-	 * ThrowEvent event = (ThrowEvent) execution.getBpmnModelElementInstance(); for (EventDefinition eventDefinition :
-	 * event.getEventDefinitions()) { if (eventDefinition instanceof MessageEventDefinition) { MessageEventDefinition
-	 * med = (MessageEventDefinition) eventDefinition; Message message = med.getMessage(); return
-	 * Optional.of(message.getName()); } }
-	 *
-	 * return Optional.empty(); }
-	 */
-
-	/*
-	 * private Optional<String> getProcessDefinitionKey(DelegateExecution execution) { String variable = (String)
-	 * execution.getVariable(VARIABLE_PROCESS_DEFINITION_KEY); if (variable != null) return Optional.of(variable);
-	 *
-	 * final String currentElementId = execution.getBpmnModelElementInstance().getId(); for (Collaboration collaboration
-	 * : execution.getBpmnModelInstance().getModelElementsByType(Collaboration.class)) { for (MessageFlow messageFlow :
-	 * collaboration.getMessageFlows()) { if (messageFlow.getSource().getId().contentEquals(currentElementId)) {
-	 * InteractionNode target = messageFlow.getTarget(); if (target instanceof CatchEvent) { CatchEvent catchEvent =
-	 * (CatchEvent) target; BpmnModelElementInstance scope = catchEvent.getScope(); if (scope instanceof
-	 * org.camunda.bpm.model.bpmn.instance.Process) return Optional.of(((org.camunda.bpm.model.bpmn.instance.Process)
-	 * scope).getId()); else if (scope instanceof SubProcess) { while (scope instanceof SubProcess) scope =
-	 * scope.getScope();
-	 *
-	 * if (scope instanceof org.camunda.bpm.model.bpmn.instance.Process) return
-	 * Optional.of(((org.camunda.bpm.model.bpmn.instance.Process) scope).getId()); } } } } }
-	 *
-	 * return Optional.empty(); }
-	 */
-
-	/*
-	 * private Optional<String> getVersionTag(DelegateExecution execution, Optional<String> processDefinitionKey) {
-	 * String variable = (String) execution.getVariable(VARIABLE_VERSION_TAG); if (variable != null) return
-	 * Optional.of(variable);
-	 *
-	 * if (processDefinitionKey.isEmpty()) return Optional.empty();
-	 *
-	 * ModelElementInstance element = execution.getBpmnModelInstance().getModelElementById(processDefinitionKey.get());
-	 * if (element instanceof org.camunda.bpm.model.bpmn.instance.Process) { String version =
-	 * ((org.camunda.bpm.model.bpmn.instance.Process) element).getCamundaVersionTag(); return
-	 * Optional.ofNullable(version == null || version.isBlank() ? null : version); } else return Optional.empty(); }
-	 */
 }

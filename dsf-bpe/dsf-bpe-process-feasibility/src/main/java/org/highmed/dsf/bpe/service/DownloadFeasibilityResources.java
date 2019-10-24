@@ -3,7 +3,6 @@ package org.highmed.dsf.bpe.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
@@ -57,9 +56,9 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 
 		Task task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
 
-		IdType researchStudyType = getResearchStudyIdType(task);
-		FhirWebserviceClient client = getWebserviceClient(researchStudyType);
-		ResearchStudy researchStudy = getResearchStudy(researchStudyType, client);
+		IdType researchStudyId = getResearchStudyId(task);
+		FhirWebserviceClient client = getWebserviceClient(researchStudyId);
+		ResearchStudy researchStudy = getResearchStudy(researchStudyId, client);
 		execution.setVariable(Constants.VARIABLE_RESEARCH_STUDY, researchStudy);
 
 		@SuppressWarnings("unchecked")
@@ -71,7 +70,7 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, outputs);
 	}
 
-	private IdType getResearchStudyIdType(Task task)
+	private IdType getResearchStudyId(Task task)
 	{
 		Reference researchStudyReference = getTaskHelper()
 				.getInputParameterReferenceValues(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
@@ -81,30 +80,29 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 		return new IdType(researchStudyReference.getReference());
 	}
 
-	private FhirWebserviceClient getWebserviceClient(IdType researchStudyType)
+	private FhirWebserviceClient getWebserviceClient(IdType researchStudyId)
 	{
-		String baseUrl = Optional.ofNullable(researchStudyType.getBaseUrl()).orElse("");
-
-		if (baseUrl.equals(getFhirWebserviceClientProvider().getLocalBaseUrl()) || baseUrl.isEmpty())
+		if (researchStudyId.getBaseUrl() == null || researchStudyId.getBaseUrl()
+				.equals(getFhirWebserviceClientProvider().getLocalBaseUrl()))
 		{
 			return getFhirWebserviceClientProvider().getLocalWebserviceClient();
 		}
 		else
 		{
-			return getFhirWebserviceClientProvider().getRemoteWebserviceClient(baseUrl);
+			return getFhirWebserviceClientProvider().getRemoteWebserviceClient(researchStudyId.getBaseUrl());
 		}
 	}
 
-	private ResearchStudy getResearchStudy(IdType researchStudyType, FhirWebserviceClient client)
+	private ResearchStudy getResearchStudy(IdType researchStudyid, FhirWebserviceClient client)
 	{
 		try
 		{
-			return client.read(ResearchStudy.class, researchStudyType.getIdPart());
+			return client.read(ResearchStudy.class, researchStudyid.getIdPart());
 		}
 		catch (WebApplicationException e)
 		{
 			throw new ResourceNotFoundException(
-					"Error while reading ResearchStudy with id " + researchStudyType.getIdPart() + " from " + client
+					"Error while reading ResearchStudy with id " + researchStudyid.getIdPart() + " from " + client
 							.getBaseUrl());
 		}
 	}

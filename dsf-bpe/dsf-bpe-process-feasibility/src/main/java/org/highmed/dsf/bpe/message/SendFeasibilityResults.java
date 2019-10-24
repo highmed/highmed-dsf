@@ -13,12 +13,14 @@ import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.OutputWrapper;
 import org.hl7.fhir.r4.model.Task;
 
+import ca.uhn.fhir.context.FhirContext;
+
 public class SendFeasibilityResults extends AbstractTaskMessageSend
 {
 	public SendFeasibilityResults(OrganizationProvider organizationProvider,
-			FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
+			FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper, FhirContext fhirContext)
 	{
-		super(organizationProvider, clientProvider, taskHelper);
+		super(organizationProvider, clientProvider, taskHelper, fhirContext);
 	}
 
 	@Override

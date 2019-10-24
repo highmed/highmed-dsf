@@ -23,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import ca.uhn.fhir.context.FhirContext;
+
 @Configuration
 public class FeasibilityConfig
 {
@@ -40,6 +42,9 @@ public class FeasibilityConfig
 
 	@Autowired
 	private GroupHelper groupHelper;
+
+	@Autowired
+	private FhirContext fhirContext;
 
 	@Bean
 	public ProcessEnginePlugin feasibilityPlugin()
@@ -111,12 +116,12 @@ public class FeasibilityConfig
 	@Bean
 	public SendFeasibilityRequest sendFeasibilityRequest()
 	{
-		return new SendFeasibilityRequest(organizationProvider, fhirClientProvider, taskHelper);
+		return new SendFeasibilityRequest(organizationProvider, fhirClientProvider, taskHelper, fhirContext);
 	}
 
 	@Bean
 	public SendFeasibilityResults sendCohortSizeResultToMedic()
 	{
-		return new SendFeasibilityResults(organizationProvider, fhirClientProvider, taskHelper);
+		return new SendFeasibilityResults(organizationProvider, fhirClientProvider, taskHelper, fhirContext);
 	}
 }

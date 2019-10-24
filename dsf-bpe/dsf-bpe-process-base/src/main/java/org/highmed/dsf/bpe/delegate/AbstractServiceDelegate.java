@@ -66,7 +66,7 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 					exception.getMessage());
 
 			String errorMessage =
-					"Process " + execution.getProcessDefinitionId() + "has fatal error in step " + execution
+					"Process " + execution.getProcessDefinitionId() + " has fatal error in step " + execution
 							.getActivityInstanceId() + ", reason: " + exception.getMessage();
 
 			Task.TaskOutputComponent errorOutput = taskHelper.createOutput(Constants.CODESYSTEM_HIGHMED_BPMN,
