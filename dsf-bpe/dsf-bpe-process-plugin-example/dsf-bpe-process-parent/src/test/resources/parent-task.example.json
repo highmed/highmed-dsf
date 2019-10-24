@@ -27,37 +27,15 @@
   },
   "input":[
     {
-      "type":{
-        "coding":[
+      "type": {
+        "coding": [
           {
-            "system":"http://highmed.org/fhir/CodeSystem/bpmn-message",
-            "code":"message-name"
+            "system": "http://highmed.org/fhir/CodeSystem/bpmn-message",
+            "code": "message-name"
           }
         ]
       },
-      "valueString":"parentPluginMessage"
-    },
-    {
-      "type":{
-        "coding":[
-          {
-            "system":"http://highmed.org/fhir/CodeSystem/bpmn-message",
-            "code":"business-key"
-          }
-        ]
-      },
-      "valueString":"96868ec8-09c3-4856-82ec-792c8p49ebdc"
-    },
-    {
-      "type":{
-        "coding":[
-          {
-            "system":"http://highmed.org/fhir/CodeSystem/bpmn-message",
-            "code":"correlation-key"
-          }
-        ]
-      },
-      "valueString":"6d58fab1-537b-404b-a4j4-b326da37ccf7"
+      "valueString": "parentPluginMessage"
     }
   ]
 }

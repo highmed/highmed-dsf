@@ -6,7 +6,6 @@
   "instantiatesUri":"http://highmed.org/bpe/Process/requestUpdateResources/1.0.0",
   "status":"requested",
   "intent":"order",
-  "authoredOn":"2019-10-21",
   "requester":{
     "identifier":{
       "system":"http://highmed.org/fhir/CodeSystem/organization",
@@ -41,35 +40,13 @@
       "type":{
         "coding":[
           {
-            "system":"http://highmed.org/fhir/CodeSystem/bpmn-message",
-            "code":"business-key"
-          }
-        ]
-      },
-      "valueString":"96868ec8-09c3-4856-82ec-792c8949ebdc"
-    },
-    {
-      "type":{
-        "coding":[
-          {
-            "system":"http://highmed.org/fhir/CodeSystem/bpmn-message",
-            "code":"correlation-key"
-          }
-        ]
-      },
-      "valueString":"6d58fab1-537b-404b-a4b4-b326da37ccf7"
-    },
-    {
-      "type":{
-        "coding":[
-          {
             "system":"http://highmed.org/fhir/CodeSystem/update-resources",
             "code":"bundle-reference"
           }
         ]
       },
       "valueReference": {
-        "reference": "Bundle/6d58fab1-537b-404b-a4b4-b326da37ccf7"
+        "reference": "Bundle/31fcdb44-2950-4195-8f5f-89d5dcba812b"
       }
     },
     {

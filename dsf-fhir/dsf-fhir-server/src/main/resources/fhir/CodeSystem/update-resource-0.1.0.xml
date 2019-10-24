@@ -19,12 +19,6 @@
 		<definition value="Bundle reference to be downloaded to update local resources"/>
 	</concept>
 	<concept>
-		<code value="endpoint-address"/>
-		<display value="Endpoint Address"/>
-		<definition
-				value="Endpoint address to define the location where the bundle resource should be downloaded from"/>
-	</concept>
-	<concept>
 		<code value="organization-identifier-search-parameter"/>
 		<display value="Organization Identifier Search Parameter"/>
 		<definition value="Organization system identifier as search parameter to define which organization are targets"/>
