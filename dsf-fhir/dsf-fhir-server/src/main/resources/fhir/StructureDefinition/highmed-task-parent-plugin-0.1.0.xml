@@ -16,6 +16,17 @@
       <path value="Task.instantiatesUri" />
       <fixedUri value="http://highmed.org/bpe/Process/parentPlugin/1.0.0" />
     </element>
+    <element id="Task.input">
+      <path value="Task.input" />
+      <slicing>
+        <discriminator>
+          <type value="value" />
+          <path value="type.coding.code" />
+        </discriminator>
+        <rules value="closed" />
+      </slicing>
+      <min value="1" />
+    </element>
     <element id="Task.input:message-name">
       <path value="Task.input" />
       <sliceName value="message-name" />

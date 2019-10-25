@@ -54,7 +54,7 @@
         </discriminator>
         <rules value="closed" />
       </slicing>
-      <min value="3" />
+      <min value="1" />
     </element>
     <element id="Task.input:message-name">
       <path value="Task.input" />

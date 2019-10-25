@@ -18,6 +18,13 @@
     </element>
     <element id="Task.input">
       <path value="Task.input" />
+      <slicing>
+        <discriminator>
+          <type value="value" />
+          <path value="type.coding.code" />
+        </discriminator>
+        <rules value="closed" />
+      </slicing>
       <min value="4" />
     </element>
     <element id="Task.input:message-name">
@@ -63,6 +70,17 @@
         <code value="Reference" />
         <targetProfile value="http://highmed.org/fhir/StructureDefinition/highmed-research-study" />
       </type>
+    </element>
+    <element id="Task.output">
+      <path value="Task.output" />
+      <slicing>
+        <discriminator>
+          <type value="value" />
+          <path value="type.coding.code" />
+        </discriminator>
+        <rules value="closed" />
+      </slicing>
+      <min value="1" />
     </element>
     <element id="Task.output:singleResult">
       <path value="Task.output" />

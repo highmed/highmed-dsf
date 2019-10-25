@@ -12,6 +12,17 @@
   <baseDefinition value="http://highmed.org/fhir/StructureDefinition/highmed-task-base" />
   <derivation value="constraint" />
   <differential>
+    <element id="Task.input">
+      <path value="Task.input" />
+      <slicing>
+        <discriminator>
+          <type value="value" />
+          <path value="type.coding.code" />
+        </discriminator>
+        <rules value="closed" />
+      </slicing>
+      <min value="1" />
+    </element>
     <element id="Task.input:message-name">
       <path value="Task.input" />
       <sliceName value="message-name" />
@@ -30,10 +41,21 @@
       <sliceName value="correlation-key" />
       <max value="0" />
     </element>
+    <element id="Task.output">
+      <path value="Task.output"/>
+        <slicing>
+        <discriminator>
+          <type value="value"/>
+          <path value="type.coding.code"/>
+        </discriminator>
+        <rules value="open"/>
+      </slicing>
+      <min value="1" />
+    </element>
     <element id="Task.output:whitelist">
       <path value="Task.output" />
       <sliceName value="whitelist" />
-      <min value="1" />
+      <min value="0" />
       <max value="1" />
     </element>
     <element id="Task.output:whitelist.type.coding">

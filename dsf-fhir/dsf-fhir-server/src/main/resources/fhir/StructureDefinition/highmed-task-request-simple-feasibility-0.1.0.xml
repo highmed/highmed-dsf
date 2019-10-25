@@ -19,9 +19,13 @@
     <element id="Task.input">
       <path value="Task.input" />
       <slicing>
-        <rules value="open" />
+        <discriminator>
+          <type value="value"/>
+          <path value="type.coding.code"/>
+        </discriminator>
+        <rules value="open"/>
       </slicing>
-      <min value="4" />
+      <min value="2" />
     </element>
     <element id="Task.input:message-name">
       <path value="Task.input" />
@@ -69,7 +73,14 @@
     </element>
     <element id="Task.output">
       <path value="Task.output" />
-      <min value="2" />
+      <slicing>
+        <discriminator>
+          <type value="value" />
+          <path value="type.coding.code" />
+        </discriminator>
+        <rules value="closed" />
+      </slicing>
+       <min value="1" />
     </element>
     <element id="Task.output:participatingMedics">
       <path value="Task.output" />
