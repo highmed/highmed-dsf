@@ -11,8 +11,6 @@ import org.highmed.dsf.bpe.variables.MultiInstanceResult;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.openehr.client.OpenehrWebserviceClient;
-import org.highmed.openehr.model.datatypes.DvCount;
-import org.highmed.openehr.model.structur.ResultSet;
 import org.springframework.beans.factory.InitializingBean;
 
 public class ExecuteFeasibilityQueries extends AbstractServiceDelegate implements InitializingBean

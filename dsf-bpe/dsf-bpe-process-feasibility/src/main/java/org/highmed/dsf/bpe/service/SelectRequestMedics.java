@@ -18,8 +18,6 @@ import org.highmed.dsf.fhir.variables.MultiInstanceTargetsValues;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SelectRequestMedics extends AbstractServiceDelegate
 {

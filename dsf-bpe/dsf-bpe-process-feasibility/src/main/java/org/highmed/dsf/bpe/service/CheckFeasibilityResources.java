@@ -4,8 +4,6 @@ import static org.highmed.dsf.bpe.Constants.MIN_COHORT_DEFINITIONS;
 import static org.highmed.dsf.bpe.Constants.MIN_PARTICIPATING_MEDICS;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.Constants;
