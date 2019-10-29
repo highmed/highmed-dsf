@@ -18,7 +18,9 @@ public class DefaultBpmnParseListener extends AbstractBpmnParseListener implemen
 	private final EndListener endListener;
 	private final CallActivityListener callActivityListener;
 
-	public DefaultBpmnParseListener(StartListener startListener, EndListener endListener, CallActivityListener callActivityListener) {
+	public DefaultBpmnParseListener(StartListener startListener, EndListener endListener,
+			CallActivityListener callActivityListener)
+	{
 		this.startListener = startListener;
 		this.endListener = endListener;
 		this.callActivityListener = callActivityListener;
@@ -35,21 +37,18 @@ public class DefaultBpmnParseListener extends AbstractBpmnParseListener implemen
 	@Override
 	public void parseStartEvent(Element startEventElement, ScopeImpl scope, ActivityImpl startEventActivity)
 	{
-		super.parseStartEvent(startEventElement, scope, startEventActivity);
 		startEventActivity.addListener(ExecutionListener.EVENTNAME_START, startListener);
 	}
 
 	@Override
 	public void parseEndEvent(Element endEventElement, ScopeImpl scope, ActivityImpl endEventActivity)
 	{
-		super.parseEndEvent(endEventElement, scope, endEventActivity);
 		endEventActivity.addListener(ExecutionListener.EVENTNAME_END, endListener);
 	}
 
 	@Override
 	public void parseCallActivity(Element callActivityElement, ScopeImpl scope, ActivityImpl activity)
 	{
-		super.parseCallActivity(callActivityElement, scope, activity);
 		activity.addListener(ExecutionListener.EVENTNAME_START, callActivityListener);
 	}
 }
