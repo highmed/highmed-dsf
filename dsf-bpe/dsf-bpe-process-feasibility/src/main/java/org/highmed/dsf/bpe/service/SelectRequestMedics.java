@@ -23,8 +23,6 @@ import org.slf4j.LoggerFactory;
 
 public class SelectRequestMedics extends AbstractServiceDelegate
 {
-	private static final Logger logger = LoggerFactory.getLogger(SelectRequestMedics.class);
-
 	private final OrganizationProvider organizationProvider;
 
 	public SelectRequestMedics(OrganizationProvider organizationProvider, FhirWebserviceClientProvider clientProvider,
