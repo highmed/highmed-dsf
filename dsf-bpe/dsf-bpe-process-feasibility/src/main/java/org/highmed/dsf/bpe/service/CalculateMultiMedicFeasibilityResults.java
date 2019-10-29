@@ -54,16 +54,12 @@ public class CalculateMultiMedicFeasibilityResults extends AbstractServiceDelega
 		List<Map.Entry<String, String>> combinedResults = results.stream()
 				.flatMap(result -> result.getQueryResults().entrySet().stream()).collect(Collectors.toList());
 
-		List<FinalSimpleFeasibilityResult> resultsByCohortId = new ArrayList<>();
-
-		cohortIds.forEach(id -> {
+		return cohortIds.map(id -> {
 			long participatingMedics = combinedResults.stream().filter(resultEntry -> resultEntry.getKey().equals(id))
 					.count();
 			long result = combinedResults.stream().filter(resultEntry -> resultEntry.getKey().equals(id))
 					.mapToInt(resultEntry -> Integer.parseInt(resultEntry.getValue())).sum();
-			resultsByCohortId.add(new FinalSimpleFeasibilityResult(id, participatingMedics, result));
-		});
-
-		return resultsByCohortId;
+			return new FinalSimpleFeasibilityResult(id, participatingMedics, result);
+		}).collect(Collectors.toCollection(ArrayList::new));
 	}
 }
