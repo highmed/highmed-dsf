@@ -69,8 +69,6 @@ public class ConfigGenerator
 				testClient.getCertificateSha512ThumbprintHex() + ","
 						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
 
-		System.out.println("PPPP " + javaTestFhirConfigProperties);
-
 		writeProperties(Paths.get("config/java-test-fhir-config.properties"), javaTestFhirConfigProperties);
 	}
 
