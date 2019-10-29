@@ -52,13 +52,15 @@ public class OpenEhrConfig
 	}
 
 	@Bean
-	public RowElementDeserializer rowElementDeserializer() {
+	public RowElementDeserializer rowElementDeserializer()
+	{
 		return new RowElementDeserializer();
 	}
 
 	@Bean
 	public OpenEhrWebserviceClientProvider webserviceClientProvider()
 	{
-		return new OpenEhrClientProviderImpl(baseUrl, basicAuthUsername, basicAuthPassword, connectTimeout, readTimeout,  openEhrObjectMapper());
+		return new OpenEhrClientProviderImpl(baseUrl, basicAuthUsername, basicAuthPassword, connectTimeout, readTimeout,
+				openEhrObjectMapper());
 	}
 }
