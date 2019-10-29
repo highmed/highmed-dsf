@@ -1,5 +1,8 @@
 package org.highmed.openehr.model.structur;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -12,27 +15,24 @@ public class ResultSet
 	private final String name;
 	private final String query;
 
-	private final List<Column> columns;
-	private final List<List<RowElement>> rows;
+	private final List<Column> columns = new ArrayList<>();
+	private final List<List<RowElement<?>>> rows = new ArrayList<>();
 
 	@JsonCreator
-	public ResultSet(
-			@JsonProperty("meta")
-					Meta meta,
-			@JsonProperty("name")
-					String name,
-			@JsonProperty("q")
-					String query,
-			@JsonProperty("columns")
-					List<Column> columns,
-			@JsonProperty("rows")
-					List<List<RowElement>> rows)
+	public ResultSet(@JsonProperty("meta") Meta meta, @JsonProperty("name") String name,
+			@JsonProperty("q") String query, @JsonProperty("columns") Collection<? extends Column> columns,
+			@JsonProperty("rows") Collection<? extends List<RowElement<?>>> rows)
 	{
 		this.meta = meta;
 		this.name = name;
 		this.query = query;
-		this.columns = columns;
-		this.rows = rows;
+
+		if (columns != null)
+			this.columns.addAll(columns);
+
+		if (rows != null)
+			for (List<RowElement<?>> r : rows)
+				this.rows.add(new ArrayList<RowElement<?>>(r));
 	}
 
 	public Meta getMeta()
@@ -55,13 +55,17 @@ public class ResultSet
 		return columns;
 	}
 
-	public List<List<RowElement>> getRows()
+	public List<List<RowElement<?>>> getRows()
 	{
-		return rows;
+		List<List<RowElement<?>>> rows = new ArrayList<List<RowElement<?>>>();
+		for (List<RowElement<?>> r : this.rows)
+			rows.add(Collections.unmodifiableList(r));
+
+		return Collections.unmodifiableList(rows);
 	}
 
-	public List<RowElement> getRow(int index)
+	public List<RowElement<?>> getRow(int index)
 	{
-		return rows.get(index);
+		return Collections.unmodifiableList(rows.get(index));
 	}
 }

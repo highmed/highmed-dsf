@@ -14,7 +14,11 @@
 		<dependency>
 			<groupId>org.glassfish.jersey.media</groupId>
 			<artifactId>jersey-media-json-jackson</artifactId>
-			<version>${jersey.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>de.hs-heilbronn.mi</groupId>
+			<artifactId>log4j2-utils</artifactId>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>

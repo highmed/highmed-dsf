@@ -9,11 +9,7 @@ public class Column
 	private final String path;
 
 	@JsonCreator
-	private Column(
-			@JsonProperty("name")
-					String name,
-			@JsonProperty("path")
-					String path)
+	public Column(@JsonProperty("name") String name, @JsonProperty("path") String path)
 	{
 		this.name = name;
 		this.path = path;

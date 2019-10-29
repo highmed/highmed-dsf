@@ -13,19 +13,9 @@ public class Meta
 	private final String executedAql;
 
 	@JsonCreator
-	public Meta(
-			@JsonProperty("_href")
-					String href,
-			@JsonProperty("_type")
-					String type,
-			@JsonProperty("_schema_version")
-					String schemaVersion,
-			@JsonProperty("_created")
-					String created,
-			@JsonProperty("_generator")
-					String generator,
-			@JsonProperty("_executed_aql")
-					String executedAql)
+	public Meta(@JsonProperty("_href") String href, @JsonProperty("_type") String type,
+			@JsonProperty("_schema_version") String schemaVersion, @JsonProperty("_created") String created,
+			@JsonProperty("_generator") String generator, @JsonProperty("_executed_aql") String executedAql)
 	{
 		this.href = href;
 		this.type = type;
@@ -50,7 +40,7 @@ public class Meta
 		return schemaVersion;
 	}
 
-	public String geCreated()
+	public String getCreated()
 	{
 		return created;
 	}

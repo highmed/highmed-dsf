@@ -1,5 +1,7 @@
 package org.highmed.openehr.model.structur;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -14,23 +16,18 @@ public class Request
 	private final String offset;
 	private final String fetch;
 
-	private final Map<String, Object> queryParameters;
+	private final Map<String, Object> queryParameters = new HashMap<>();
 
 	@JsonCreator
-	public Request(
-			@JsonProperty("q")
-					String query,
-			@JsonProperty("offset")
-					String offset,
-			@JsonProperty("fetch")
-					String fetch,
-			@JsonProperty("query-parameters")
-					Map<String, Object> queryParameters)
+	public Request(@JsonProperty("q") String query, @JsonProperty("offset") String offset,
+			@JsonProperty("fetch") String fetch, @JsonProperty("query-parameters") Map<String, Object> queryParameters)
 	{
 		this.query = query;
 		this.offset = offset;
 		this.fetch = fetch;
-		this.queryParameters = queryParameters;
+
+		if (queryParameters != null)
+			this.queryParameters.putAll(queryParameters);
 	}
 
 	public String getQuery()
@@ -50,6 +47,6 @@ public class Request
 
 	public Map<String, Object> getQueryParameters()
 	{
-		return queryParameters;
+		return Collections.unmodifiableMap(queryParameters);
 	}
 }

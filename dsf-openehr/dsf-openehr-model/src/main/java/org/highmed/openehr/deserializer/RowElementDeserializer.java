@@ -11,16 +11,17 @@ import org.highmed.openehr.model.structur.RowElement;
 
 import java.io.IOException;
 
-public class RowElementDeserializer extends JsonDeserializer<RowElement>
+public class RowElementDeserializer extends JsonDeserializer<RowElement<?>>
 {
-    @Override
-    public RowElement deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
-        JsonNode node = jsonParser.getCodec().readTree(jsonParser);
+	@Override
+	public RowElement<?> deserialize(JsonParser jsonParser, DeserializationContext deserializationContext)
+			throws IOException, JsonProcessingException
+	{
+		JsonNode node = jsonParser.getCodec().readTree(jsonParser);
 
-        if (node.isInt())
-            return new DvCount(node.asInt());
-        else {
-            return new DvOther(node.toString());
-        }
-    }
+		if (node.isInt())
+			return new DvCount(node.asInt());
+		else
+			return new DvOther(node.toString());
+	}
 }
