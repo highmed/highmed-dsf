@@ -1,4 +1,4 @@
-package org.highmed.openehr.model.structur;
+package org.highmed.openehr.model.structure;
 
 import java.util.ArrayList;
 import java.util.Collection;

@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.highmed.openehr.model.datatypes.DvCount;
 import org.highmed.openehr.model.datatypes.DvOther;
-import org.highmed.openehr.model.structur.RowElement;
+import org.highmed.openehr.model.structure.RowElement;
 
 import java.io.IOException;
 

@@ -1,4 +1,4 @@
-package org.highmed.openehr.model.structur;
+package org.highmed.openehr.model.structure;
 
 public abstract class RowElement<T>
 {

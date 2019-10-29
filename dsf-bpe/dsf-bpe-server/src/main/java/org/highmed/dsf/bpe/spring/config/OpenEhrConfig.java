@@ -4,7 +4,7 @@ import org.highmed.dsf.openehr.client.OpenEhrClientProviderImpl;
 import org.highmed.dsf.openehr.client.OpenEhrWebserviceClientProvider;
 
 import org.highmed.openehr.deserializer.RowElementDeserializer;
-import org.highmed.openehr.model.structur.RowElement;
+import org.highmed.openehr.model.structure.RowElement;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
