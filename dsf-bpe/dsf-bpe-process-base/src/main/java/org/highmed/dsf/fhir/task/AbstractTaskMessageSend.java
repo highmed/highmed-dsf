@@ -1,6 +1,8 @@
 package org.highmed.dsf.fhir.task;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -10,6 +12,9 @@ import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.variables.MultiInstanceTarget;
+import org.highmed.dsf.fhir.variables.MultiInstanceTargets;
+import org.highmed.dsf.fhir.variables.OutputWrapper;
+import org.highmed.dsf.fhir.variables.Pair;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -66,8 +71,32 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 		MultiInstanceTarget target = (MultiInstanceTarget) execution
 				.getVariable(Constants.VARIABLE_MULTI_INSTANCE_TARGET);
 
-		sendTask(target.getTargetOrganizationIdentifierValue(), processDefinitionKey, versionTag, messageName,
-				businessKey, target.getCorrelationKey(), profile, getAdditionalInputParameters(execution));
+		try
+		{
+			sendTask(target.getTargetOrganizationIdentifierValue(), processDefinitionKey, versionTag, messageName,
+					businessKey, target.getCorrelationKey(), profile, getAdditionalInputParameters(execution));
+		}
+		catch (Exception e)
+		{
+			String errorMessage = "Error while sending Task (process: " + processDefinitionKey + ", version: "
+					+ versionTag + ", message-name: " + messageName + ", business-key: " + businessKey
+					+ ", correlation-key: " + target.getCorrelationKey() + ") to organization with identifier "
+					+ target.getTargetOrganizationIdentifierValue() + ": " + e.getMessage();
+			logger.warn(errorMessage);
+
+			@SuppressWarnings("unchecked")
+			List<OutputWrapper> outputs = (List<OutputWrapper>) execution
+					.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
+
+			outputs.add(new OutputWrapper(Constants.CODESYSTEM_HIGHMED_BPMN, Collections
+					.singleton(new Pair<>(Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, errorMessage))));
+
+			logger.debug("Removing target organization {} with error {} from multi instance target list",
+					target.getTargetOrganizationIdentifierValue(), e.getMessage());
+			MultiInstanceTargets targets = (MultiInstanceTargets) execution
+					.getVariable(Constants.VARIABLE_MULTI_INSTANCE_TARGETS);
+			targets.removeTarget(target);
+		}
 	}
 
 	/**
@@ -138,7 +167,8 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 		client.create(task);
 	}
 
-	private FhirWebserviceClient getFhirClient(Task task, String targetOrganizationIdentifierValue) {
+	private FhirWebserviceClient getFhirClient(Task task, String targetOrganizationIdentifierValue)
+	{
 		if (task.getRequester().equalsDeep(task.getRestriction().getRecipient().get(0)))
 		{
 			logger.trace("Using local webservice client");
