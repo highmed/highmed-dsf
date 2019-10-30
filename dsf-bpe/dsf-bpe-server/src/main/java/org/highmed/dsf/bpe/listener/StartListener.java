@@ -9,8 +9,9 @@ import org.highmed.dsf.fhir.variables.OutputWrapper;
 import org.hl7.fhir.r4.model.Task;
 
 /**
- * Added to each StartEvent by the {@link DefaultBpmnParseListener}.
- * Can be used to execute certain things before a (sub- or call-) process starts.
+ * Added to each BPMN StartEvent by the {@link DefaultBpmnParseListener}.
+ * Initializes the {@link Constants#VARIABLE_IN_CALLED_PROCESS} variable with <code>false</code> for processes started
+ * via a {@link Task} resource.
  */
 public class StartListener implements ExecutionListener
 {
@@ -33,7 +34,8 @@ public class StartListener implements ExecutionListener
 
 		// if a main process is started (not a call- or subprocess), this variable has to be initialized.
 		// it is set to false, since a main process is not a called process
-		if (!execution.getVariableNames().contains(Constants.VARIABLE_IN_CALLED_PROCESS)) {
+		if (!execution.getVariableNames().contains(Constants.VARIABLE_IN_CALLED_PROCESS))
+		{
 			execution.setVariable(Constants.VARIABLE_IN_CALLED_PROCESS, false);
 		}
 	}

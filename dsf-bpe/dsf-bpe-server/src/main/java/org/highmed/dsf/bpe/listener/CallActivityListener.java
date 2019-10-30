@@ -5,8 +5,9 @@ import org.camunda.bpm.engine.delegate.ExecutionListener;
 import org.highmed.dsf.bpe.Constants;
 
 /**
- * Added to each CallActivity Task by the {@link DefaultBpmnParseListener}.
- * Can be used to execute certain things before the called process is executed.
+ * Added to each BPMN CallActivity Task by the {@link DefaultBpmnParseListener}.
+ * Sets the variable {@link Constants#VARIABLE_IN_CALLED_PROCESS} to <code>true</code> if a  sub process was
+ * called inside the same BPE.
  */
 public class CallActivityListener implements ExecutionListener
 {

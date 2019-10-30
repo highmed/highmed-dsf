@@ -10,7 +10,10 @@ import org.camunda.bpm.engine.impl.util.xml.Element;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
- * Adds listener classes to certain types of BPMN activities before execution of a process
+ * Adds before execution of a process a listener to every BPMN Start- and EndEvent as well as to CallActivities
+ * @see StartListener
+ * @see CallActivityListener
+ * @see EndListener
  */
 public class DefaultBpmnParseListener extends AbstractBpmnParseListener implements InitializingBean
 {

@@ -11,8 +11,10 @@ import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Task;
 
 /**
- * Added to each EndEvent by the {@link DefaultBpmnParseListener}.
- * Can be used to execute certain things before a (sub- or call-) process ends completely.
+ * Added to each BPMN EndEvent by the {@link DefaultBpmnParseListener}.
+ * Is used to set the FHIR {@link Task} status as {@link Task.TaskStatus#COMPLETED} if the process ends successfully
+ * and sets {@link Task}.output values. Sets the {@link Constants#VARIABLE_IN_CALLED_PROCESS} back to <code>false</code>
+ * if a called sub process ends.
  */
 public class EndListener implements ExecutionListener
 {
@@ -52,7 +54,9 @@ public class EndListener implements ExecutionListener
 
 			task.setStatus(Task.TaskStatus.COMPLETED);
 			webserviceClient.update(task);
-		} else {
+		}
+		else
+		{
 			// in a called process --> process does not end here, don't change the task variable
 			// reset VARIABLE_IS_CALL_ACTIVITY to false, since we leave the called process
 			execution.setVariable(Constants.VARIABLE_IN_CALLED_PROCESS, false);
