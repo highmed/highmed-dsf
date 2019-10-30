@@ -1,6 +1,5 @@
 package org.highmed.dsf.bpe.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -60,6 +59,6 @@ public class CalculateMultiMedicFeasibilityResults extends AbstractServiceDelega
 			long result = combinedResults.stream().filter(resultEntry -> resultEntry.getKey().equals(id))
 					.mapToInt(resultEntry -> Integer.parseInt(resultEntry.getValue())).sum();
 			return new FinalSimpleFeasibilityResult(id, participatingMedics, result);
-		}).collect(Collectors.toCollection(ArrayList::new));
+		}).collect(Collectors.toUnmodifiableList());
 	}
 }

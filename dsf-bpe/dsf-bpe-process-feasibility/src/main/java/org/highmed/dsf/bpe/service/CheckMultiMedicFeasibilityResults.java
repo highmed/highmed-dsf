@@ -4,7 +4,9 @@ import static org.highmed.dsf.bpe.Constants.MIN_PARTICIPATING_MEDICS;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.Constants;
@@ -34,53 +36,55 @@ public class CheckMultiMedicFeasibilityResults extends AbstractServiceDelegate
 				.getVariable(Constants.VARIABLE_SIMPLE_COHORT_SIZE_QUERY_FINAL_RESULT);
 		List<OutputWrapper> outputs = (List<OutputWrapper>) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
 
-		List<FinalSimpleFeasibilityResult> erroneousResults = checkNumberOfParticipatingMedics(finalResult);
-		finalResult.removeAll(erroneousResults);
+		List<FinalSimpleFeasibilityResult> erroneousResults = filterNumberOfParticipatingMedics(finalResult, lowerThenThreshold());
+		List<FinalSimpleFeasibilityResult> correctResults = filterNumberOfParticipatingMedics(finalResult, higherOrEqualThenThreshold());
 
-		OutputWrapper errorOutput = getOutputWrapperErroneous(erroneousResults);
-		outputs.add(errorOutput);
-		OutputWrapper successOutput = getOutputWrapperSuccessful(finalResult);
-		outputs.add(successOutput);
+		outputs.add(getOutputWrapperErroneous(erroneousResults.stream()));
+		outputs.add(getOutputWrapperSuccessful(correctResults.stream()));
 
 		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, outputs);
 	}
 
-	//  returns all results which are erroneous and did not have enough participating medics
-	private List<FinalSimpleFeasibilityResult> checkNumberOfParticipatingMedics(
-			List<FinalSimpleFeasibilityResult> finalResult)
+	private List<FinalSimpleFeasibilityResult> filterNumberOfParticipatingMedics(
+			List<FinalSimpleFeasibilityResult> finalResult, Predicate<FinalSimpleFeasibilityResult> thresholdFilter)
 	{
-		return finalResult.stream().filter(result -> result.getParticipatingMedics() < MIN_PARTICIPATING_MEDICS)
-				.collect(Collectors.toList());
+		return finalResult.stream().filter(thresholdFilter).collect(Collectors.toList());
 	}
 
-	private OutputWrapper getOutputWrapperErroneous(List<FinalSimpleFeasibilityResult> erroneousResults)
+	private Predicate<FinalSimpleFeasibilityResult> lowerThenThreshold()
 	{
-		List<Pair<String, String>> errors = new ArrayList<>();
-		erroneousResults.forEach(result -> {
+		return result -> result.getParticipatingMedics() < MIN_PARTICIPATING_MEDICS;
+	}
+
+	private Predicate<FinalSimpleFeasibilityResult> higherOrEqualThenThreshold()
+	{
+		return result -> result.getParticipatingMedics() >= MIN_PARTICIPATING_MEDICS;
+	}
+
+	private OutputWrapper getOutputWrapperErroneous(Stream<FinalSimpleFeasibilityResult> erroneousResults)
+	{
+		List<Pair<String, String>> errors = erroneousResults.map(result -> {
 			String errorMessage =
 					"Final multi medic feasibility query result check failed for group with id '" + result.getCohortId()
 							+ "', not enough participating medics, expected >= " + MIN_PARTICIPATING_MEDICS + ", got "
 							+ result.getParticipatingMedics();
 
 			logger.info(errorMessage);
-			errors.add(new Pair<>(Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, errorMessage));
-		});
+			return new Pair<>(Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, errorMessage);
+		}).collect(Collectors.toList());
 
 		return new OutputWrapper(Constants.CODESYSTEM_HIGHMED_BPMN, errors);
 	}
 
-	private OutputWrapper getOutputWrapperSuccessful(List<FinalSimpleFeasibilityResult> successfulResults)
+	private OutputWrapper getOutputWrapperSuccessful(Stream<FinalSimpleFeasibilityResult> successfulResults)
 	{
-		List<Pair<String, String>> success = new ArrayList<>();
-
-		successfulResults.forEach(result -> {
-			success.add(new Pair<>(Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS,
+		List<Pair<String, String>> success = successfulResults.flatMap(result -> Stream.of(
+			new Pair<>(Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS,
 					result.getParticipatingMedics() + Constants.CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR + result
-							.getCohortId()));
-			success.add(new Pair<>(Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT,
+							.getCohortId()),
+			new Pair<>(Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT,
 					result.getCohortSize() + Constants.CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR + result
-							.getCohortId()));
-		});
+							.getCohortId()))).collect(Collectors.toList());
 
 		return new OutputWrapper(Constants.CODESYSTEM_HIGHMED_FEASIBILITY, success);
 	}
