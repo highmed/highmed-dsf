@@ -1,7 +1,6 @@
 package org.highmed.dsf.fhir.variables;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
