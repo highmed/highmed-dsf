@@ -2,7 +2,6 @@ package org.highmed.dsf.bpe.service;
 
 import static org.highmed.dsf.bpe.Constants.MIN_PARTICIPATING_MEDICS;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -36,8 +35,11 @@ public class CheckMultiMedicFeasibilityResults extends AbstractServiceDelegate
 				.getVariable(Constants.VARIABLE_SIMPLE_COHORT_SIZE_QUERY_FINAL_RESULT);
 		List<OutputWrapper> outputs = (List<OutputWrapper>) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
 
-		List<FinalSimpleFeasibilityResult> erroneousResults = filterNumberOfParticipatingMedics(finalResult, lowerThenThreshold());
-		List<FinalSimpleFeasibilityResult> correctResults = filterNumberOfParticipatingMedics(finalResult, higherOrEqualThenThreshold());
+		// TODO: use single stream with groupby for outputs
+		List<FinalSimpleFeasibilityResult> erroneousResults = filterNumberOfParticipatingMedics(finalResult,
+				this::lowerThenThreshold);
+		List<FinalSimpleFeasibilityResult> correctResults = filterNumberOfParticipatingMedics(finalResult,
+				this::higherOrEqualThenThreshold);
 
 		outputs.add(getOutputWrapperErroneous(erroneousResults.stream()));
 		outputs.add(getOutputWrapperSuccessful(correctResults.stream()));
@@ -51,19 +53,19 @@ public class CheckMultiMedicFeasibilityResults extends AbstractServiceDelegate
 		return finalResult.stream().filter(thresholdFilter).collect(Collectors.toList());
 	}
 
-	private Predicate<FinalSimpleFeasibilityResult> lowerThenThreshold()
+	private boolean lowerThenThreshold(FinalSimpleFeasibilityResult result)
 	{
-		return result -> result.getParticipatingMedics() < MIN_PARTICIPATING_MEDICS;
+		return result.getParticipatingMedics() < MIN_PARTICIPATING_MEDICS;
 	}
 
-	private Predicate<FinalSimpleFeasibilityResult> higherOrEqualThenThreshold()
+	private boolean higherOrEqualThenThreshold(FinalSimpleFeasibilityResult result)
 	{
-		return result -> result.getParticipatingMedics() >= MIN_PARTICIPATING_MEDICS;
+		return result.getParticipatingMedics() >= MIN_PARTICIPATING_MEDICS;
 	}
 
 	private OutputWrapper getOutputWrapperErroneous(Stream<FinalSimpleFeasibilityResult> erroneousResults)
 	{
-		List<Pair<String, String>> errors = erroneousResults.map(result -> {
+		Stream<Pair<String, String>> errors = erroneousResults.map(result -> {
 			String errorMessage =
 					"Final multi medic feasibility query result check failed for group with id '" + result.getCohortId()
 							+ "', not enough participating medics, expected >= " + MIN_PARTICIPATING_MEDICS + ", got "
@@ -71,20 +73,20 @@ public class CheckMultiMedicFeasibilityResults extends AbstractServiceDelegate
 
 			logger.info(errorMessage);
 			return new Pair<>(Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, errorMessage);
-		}).collect(Collectors.toList());
+		});
 
 		return new OutputWrapper(Constants.CODESYSTEM_HIGHMED_BPMN, errors);
 	}
 
 	private OutputWrapper getOutputWrapperSuccessful(Stream<FinalSimpleFeasibilityResult> successfulResults)
 	{
-		List<Pair<String, String>> success = successfulResults.flatMap(result -> Stream.of(
-			new Pair<>(Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS,
-					result.getParticipatingMedics() + Constants.CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR + result
-							.getCohortId()),
-			new Pair<>(Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT,
-					result.getCohortSize() + Constants.CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR + result
-							.getCohortId()))).collect(Collectors.toList());
+		Stream<Pair<String, String>> success = successfulResults.flatMap(result -> Stream
+				.of(new Pair<>(Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS,
+								result.getParticipatingMedics() + Constants.CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR
+										+ result.getCohortId()),
+						new Pair<>(Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT,
+								result.getCohortSize() + Constants.CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR
+										+ result.getCohortId())));
 
 		return new OutputWrapper(Constants.CODESYSTEM_HIGHMED_FEASIBILITY, success);
 	}

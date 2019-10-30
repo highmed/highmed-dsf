@@ -1,6 +1,9 @@
 package org.highmed.dsf.bpe.variables;
 
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 // TODO: check if Serializable can be replaced by JSON serialization
@@ -12,12 +15,14 @@ public class MultiInstanceResult implements Serializable
 
 	// key = group cohort id
 	// value = cohort size
-	private final Map<String, String> queryResults;
+	private final Map<String, String> queryResults = new HashMap<>();
 
 	public MultiInstanceResult(String organizationIdentifier, Map<String, String> queryResult)
 	{
 		this.organizationIdentifier = organizationIdentifier;
-		this.queryResults = queryResult;
+
+		if(queryResult != null)
+			this.queryResults.putAll(queryResult);
 	}
 
 	public String getOrganizationIdentifier()
@@ -27,6 +32,6 @@ public class MultiInstanceResult implements Serializable
 
 	public Map<String, String> getQueryResults()
 	{
-		return queryResults;
+		return Collections.unmodifiableMap(queryResults);
 	}
 }

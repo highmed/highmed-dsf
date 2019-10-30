@@ -2,10 +2,10 @@ package org.highmed.dsf.bpe.service;
 
 import static org.highmed.dsf.bpe.Constants.CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.Constants;
@@ -36,13 +36,13 @@ public class CheckSingleMedicFeasibilityResults extends AbstractServiceDelegate
 				.getVariable(Constants.VARIABLE_MULTI_INSTANCE_RESULT);
 
 		Map<String, String> finalResults = results.getQueryResults();
-		Map<String, String> erroneousResults = checkQueryResults(finalResults);
-		finalResults.keySet().removeAll(erroneousResults.keySet());
 
-		OutputWrapper errorOutput = getOutputWrapperErroneous(erroneousResults);
-		outputs.add(errorOutput);
-		OutputWrapper successOutput = getOutputWrapperSuccessful(finalResults);
-		outputs.add(successOutput);
+		// TODO: implement check and execute twice for filter in erroneous and correct results
+		Map<String, String> erroneousResults = checkQueryResults(finalResults); // checkQueryResults(finalResults, negativeFilter);
+		Map<String, String> correctResults = finalResults; // checkQueryResults(finalResults, positiveFilter);
+
+		outputs.add(getOutputWrapperErroneous(erroneousResults.entrySet().stream()));
+		outputs.add(getOutputWrapperSuccessful(correctResults.entrySet().stream()));
 
 		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, outputs);
 	}
@@ -58,27 +58,26 @@ public class CheckSingleMedicFeasibilityResults extends AbstractServiceDelegate
 		return toRemove;
 	}
 
-	private OutputWrapper getOutputWrapperErroneous(Map<String, String> erroneousResults)
+	private OutputWrapper getOutputWrapperErroneous(Stream<Map.Entry<String, String>> erroneousResults)
 	{
-		List<Pair<String, String>> errors = new ArrayList<>();
-
-		erroneousResults.forEach((groupId, result) -> {
+		Stream<Pair<String, String>> errors = erroneousResults.map(entry -> {
 			String errorMessage =
-					"Final single medic feasibility query result check failed for group with id '" + groupId
+					"Final single medic feasibility query result check failed for group with id '" + entry.getKey()
 							+ "', reason unknown";
 
 			logger.info(errorMessage);
-			errors.add(new Pair<>(Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, errorMessage));
+			return new Pair<>(Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, errorMessage);
 		});
 
 		return new OutputWrapper(Constants.CODESYSTEM_HIGHMED_BPMN, errors);
 	}
 
-	private OutputWrapper getOutputWrapperSuccessful(Map<String, String> successfulResults)
+	private OutputWrapper getOutputWrapperSuccessful(Stream<Map.Entry<String, String>> successfulResults)
 	{
-		List<Pair<String, String>> success = new ArrayList<>();
-		successfulResults.forEach((groupId, result) -> success.add(new Pair<>(Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_SINGLE_MEDIC_RESULT,
-					result + CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR + groupId)));
+		Stream<Pair<String, String>> success = successfulResults
+				.map(entry -> new Pair<>(Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_SINGLE_MEDIC_RESULT,
+						entry.getValue() + CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR + entry.getKey()));
+
 		return new OutputWrapper(Constants.CODESYSTEM_HIGHMED_FEASIBILITY, success);
 	}
 }
