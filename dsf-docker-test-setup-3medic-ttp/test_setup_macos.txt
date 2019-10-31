@@ -17,7 +17,7 @@ VMs (Setup Ubuntu Server)
 	
 		VBoxManage startvm HiGHmed_MeDIC_2
 	
-		VBoxManage startvm  HiGHmed_MeDIC_3
+		VBoxManage startvm HiGHmed_MeDIC_3
 
 	Setup Ubuntu 18.04.3 (manually):
 		Network enp0s3:
@@ -25,8 +25,8 @@ VMs (Setup Ubuntu Server)
 		Network enp0s8:
 			Subnet: 10.42.0.0/24
 			Address: 10.42.0.{9,10,11,12,13}
-			Gateway: leave empty --> is already set in the hostonly adapter of the VMs and destroys netplan config
-			DNS: 8.8.8.8
+			Gateway: leave empty
+			DNS: 8.8.8.8,8.8.4.4
 		Hostname: {registry, ttp, medic1, medic2, medic3}
 		Username same as MacOS username
 		Install OpenSSH Server
@@ -38,10 +38,9 @@ VMs (Setup Ubuntu Server)
 			%sudo	ALL=(ALL:ALL) ALL
 		to
 			%sudo	ALL=(ALL:ALL) NOPASSWD:ALL
-	
 
 Mac Host
-	Add {registry, ttp, medic1, medic2, medic3} to /etc/hosts IPs: 10.24.0.{9,10,11,12,13}
+	Add {registry, ttp, medic1, medic2, medic3} to /etc/hosts IPs: 10.42.0.{9,10,11,12,13}
 
 Mac Host
 	Create ssh key:
@@ -58,12 +57,17 @@ Mac Host
 	
 	Configure ansible hosts:
 		sudo nano /etc/ansible/hosts
-			[HiGHmed]
-			registry
-			ttp
-			medic1
-			medic2
-			medic3
+		    ansible_python_interpreter=/usr/bin/python3
+
+            [all:vars]
+            os_type=macos
+
+            [HiGHmed]
+            registry
+            ttp
+            medic1
+            medic2
+            medic3
 	Run initial VM setup:
 		ansible-playbook highmed.yml
 
@@ -102,18 +106,17 @@ Mac Host
 		docker tag highmed/fhir_proxy:latest registry:5000/highmed/fhir_proxy:latest
 		docker push registry:5000/highmed/fhir_proxy
 
-	
 	Shutdown all:
 		ansible HiGHmed -a "shutdown -h now" --become
 
 Mac Host
-	Future start-up in headless mode:
-		VBoxManage startvm HiGHmed_DockerRegistry --type headless ; sleep 30 ; ssh registry
+	Future start-up in headless mode and tmux sessions for bpe and fhir:
+		VBoxManage startvm HiGHmed_DockerRegistry --type headless ; echo "Waiting for the VM to be fully up und running..." ; sleep 30 ; ssh registry -t "tmux new-session -s highmed \\; set-option status-style bg=yellow,fg=black"
 
-		VBoxManage startvm HiGHmed_TTP --type headless ; sleep 30 ; ssh ttp
+		VBoxManage startvm HiGHmed_TTP --type headless ; echo "Waiting for the VM to be fully up und running..." ; sleep 30 ; ssh ttp -t "tmux new-session -c /opt/highmed/bpe -s highmed \\; set-option status-style bg=red,fg=white \\; split-window -c /opt/highmed/fhir"
 
-		VBoxManage startvm HiGHmed_MeDIC_1 --type headless ; sleep 30 ; ssh medic1
+		VBoxManage startvm HiGHmed_MeDIC_1 --type headless ; echo "Waiting for the VM to be fully up und running..." ; sleep 30 ; ssh medic1 -t "tmux new-session -c /opt/highmed/bpe -s highmed \\; set-option status-style bg=blue,fg=white \\; split-window -c /opt/highmed/fhir"
 
-		VBoxManage startvm HiGHmed_MeDIC_2 --type headless ; sleep 30 ; ssh medic2
+		VBoxManage startvm HiGHmed_MeDIC_2 --type headless ; echo "Waiting for the VM to be fully up und running..." ; sleep 30 ; ssh medic2 -t "tmux new-session -c /opt/highmed/bpe -s highmed \\; set-option status-style bg=cyan,fg=black \\; split-window -c /opt/highmed/fhir"
 
-		VBoxManage startvm HiGHmed_MeDIC_3 --type headless ; sleep 30 ; ssh medic3
+		VBoxManage startvm HiGHmed_MeDIC_3 --type headless ; echo "Waiting for the VM to be fully up und running..." ; sleep 30 ; ssh medic3 -t "tmux new-session -c /opt/highmed/bpe -s highmed \\; set-option status-style bg=green,fg=black \\; split-window -c /opt/highmed/fhir"
