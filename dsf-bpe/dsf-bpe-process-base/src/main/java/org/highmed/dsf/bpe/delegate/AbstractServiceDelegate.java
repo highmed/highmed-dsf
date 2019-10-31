@@ -53,21 +53,17 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 		{
 			Task task;
 			if (execution.getParentId() == null || execution.getParentId().equals(execution.getProcessInstanceId()))
-			{
 				task = (Task) execution.getVariable(Constants.VARIABLE_LEADING_TASK);
-			}
 			else
-			{
 				task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
-			}
 
+			logger.debug("Error while executing service delegate " + getClass().getName(), exception);
 			logger.error("Process {} has fatal error in step {} for task with id {}, reason: {}",
 					execution.getProcessDefinitionId(), execution.getActivityInstanceId(), task.getId(),
 					exception.getMessage());
 
-			String errorMessage =
-					"Process " + execution.getProcessDefinitionId() + " has fatal error in step " + execution
-							.getActivityInstanceId() + ", reason: " + exception.getMessage();
+			String errorMessage = "Process " + execution.getProcessDefinitionId() + " has fatal error in step "
+					+ execution.getActivityInstanceId() + ", reason: " + exception.getMessage();
 
 			Task.TaskOutputComponent errorOutput = taskHelper.createOutput(Constants.CODESYSTEM_HIGHMED_BPMN,
 					Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, errorMessage);
@@ -81,8 +77,8 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 			task.setStatus(Task.TaskStatus.FAILED);
 			webserviceClient.update(task);
 
-			execution.getProcessEngine().getRuntimeService()
-					.deleteProcessInstance(execution.getProcessInstanceId(), exception.getMessage());
+			execution.getProcessEngine().getRuntimeService().deleteProcessInstance(execution.getProcessInstanceId(),
+					exception.getMessage());
 
 		}
 	}
@@ -90,19 +86,21 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 	private void doExecutePlugin(DelegateExecution execution)
 	{
 		// TODO: implement plugin system for individual checks in different medics, like:
-		//       - PI check
-		//       - Cohort characteristics check
-		//       - Queries check
-		//       - Requester check
-		//       - ...
+		// - PI check
+		// - Cohort characteristics check
+		// - Queries check
+		// - Requester check
+		// - ...
 	}
 
 	/**
 	 * Method called by a BPMN service task
 	 *
-	 * @param execution holding the process instance information and variables
-	 * @throws Exception reason why process instance has failed, exception message will be stored in process associated
-	 *                   fhir task resource as output
+	 * @param execution
+	 *            holding the process instance information and variables
+	 * @throws Exception
+	 *             reason why process instance has failed, exception message will be stored in process associated fhir
+	 *             task resource as output
 	 */
 	protected abstract void doExecute(DelegateExecution execution) throws Exception;
 
