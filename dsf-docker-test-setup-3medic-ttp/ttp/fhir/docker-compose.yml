@@ -47,25 +47,24 @@ services:
    db:
       image: postgres
       restart: on-failure
+      healthcheck:
+         test: ["CMD-SHELL", "pg_isready -U liquibase_user -d fhir"]
+         interval: 10s
+         timeout: 5s
+         retries: 5
       environment:
          TZ: Europe/Berlin
          POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
-         POSTGRES_USER_FILE: /run/secrets/postgres_user
-         POSTGRES_DB_FILE: /run/secrets/postgres_db
+         POSTGRES_USER: liquibase_user
+         POSTGRES_DB: fhir
       networks:
          backend:
             ipv4_address: 172.28.1.131
       secrets:
       - postgres_password
-      - postgres_user
-      - postgres_db
 secrets:
    postgres_password:
       file: ./db/conf/postgres_password
-   postgres_user:
-      file: ./db/conf/postgres_user
-   postgres_db:
-      file: ./db/conf/postgres_db
 networks:
    frontend:
       driver: bridge
