@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<StructureDefinition xmlns="http://hl7.org/fhir">
+  <url value="http://highmed.org/fhir/StructureDefinition/highmed-task-update-whitelist" />
+  <version value="0.1.0" />
+  <name value="TaskUpdateWhiteList" />
+  <status value="active" />
+  <date value="2019-05-21" />
+  <fhirVersion value="4.0.0" />
+  <kind value="resource" />
+  <abstract value="false" />
+  <type value="Task" />
+  <baseDefinition value="http://highmed.org/fhir/StructureDefinition/highmed-task-base" />
+  <derivation value="constraint" />
+  <differential>
+    <element id="Task.input">
+      <path value="Task.input" />
+      <slicing>
+        <discriminator>
+          <type value="value" />
+          <path value="type.coding.code" />
+        </discriminator>
+        <rules value="closed" />
+      </slicing>
+      <min value="1" />
+    </element>
+    <element id="Task.input:message-name">
+      <path value="Task.input" />
+      <sliceName value="message-name" />
+    </element>
+    <element id="Task.input:message-name.value[x]">
+      <path value="Task.input.value[x]" />
+      <fixedString value="updateWhitelistMessage" />
+    </element>
+    <element id="Task.input:business-key">
+      <path value="Task.input" />
+      <sliceName value="business-key" />
+      <max value="0" />
+    </element>
+    <element id="Task.input:correlation-key">
+      <path value="Task.input" />
+      <sliceName value="correlation-key" />
+      <max value="0" />
+    </element>
+    <element id="Task.output">
+      <path value="Task.output"/>
+        <slicing>
+        <discriminator>
+          <type value="value"/>
+          <path value="type.coding.code"/>
+        </discriminator>
+        <rules value="open"/>
+      </slicing>
+      <min value="1" />
+    </element>
+    <element id="Task.output:whitelist">
+      <path value="Task.output" />
+      <sliceName value="whitelist" />
+      <min value="0" />
+      <max value="1" />
+    </element>
+    <element id="Task.output:whitelist.type.coding">
+      <path value="Task.output.type.coding" />
+      <min value="1" />
+      <max value="1" />
+    </element>
+    <element id="Task.output:whitelist.type.coding.system">
+      <path value="Task.output.type.coding.system" />
+      <fixedUri value="http://highmed.org/fhir/CodeSystem/update-whitelist" />
+    </element>
+    <element id="Task.output:whitelist.type.coding.code">
+      <path value="Task.output.type.coding.code" />
+      <fixedCode value="HiGHmed_white_list" />
+    </element>
+    <element id="Task.output:whitelist.value[x]">
+      <path value="Task.output.value[x]" />
+      <type>
+        <code value="string" />
+      </type>
+    </element>
+  </differential>
+</StructureDefinition>

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<StructureDefinition xmlns="http://hl7.org/fhir">
+	<url value="http://highmed.org/fhir/StructureDefinition/highmed-practitioner"/>
+	<name value="Practitioner"/>
+	<status value="draft"/>
+	<fhirVersion value="4.0.0"/>
+	<kind value="resource"/>
+	<abstract value="false"/>
+	<type value="Practitioner"/>
+	<baseDefinition value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
+	<derivation value="constraint"/>
+	<differential>
+		<element id="Practitioner.identifier">
+			<path value="Practitioner.identifier"/>
+			<slicing>
+				<discriminator>
+					<type value="value"/>
+					<path value="system"/>
+				</discriminator>
+				<rules value="open"/>
+			</slicing>
+			<min value="1"/>
+		</element>
+		<element id="Practitioner.identifier:HiGHmed">
+			<path value="Practitioner.identifier"/>
+			<sliceName value="HiGHmed"/>
+			<min value="1"/>
+			<max value="1"/>
+		</element>
+		<element id="Practitioner.identifier:HiGHmed.system">
+			<path value="Practitioner.identifier.system"/>
+			<min value="1"/>
+			<fixedUri value="http://highmed.org/fhir/CodeSystem/practitioner"/>
+		</element>
+		<element id="Practitioner.identifier:HiGHmed.value">
+			<path value="Practitioner.identifier.value"/>
+			<min value="1"/>
+			<binding>
+				<strength value="required"/>
+				<valueSet value="http://highmed.org/fhir/ValueSet/practitioner"/>
+			</binding>
+		</element>
+		<element id="Practitioner.name">
+			<path value="Practitioner.name"/>
+			<min value="1"/>
+			<max value="1"/>
+			<type>
+				<code value="HumanName"/>
+			</type>
+		</element>
+		<element id="Practitioner.name.family">
+			<path value="Practitioner.name.family"/>
+			<min value="1"/>
+		</element>
+		<element id="Practitioner.name.given">
+			<path value="Practitioner.name.given"/>
+			<min value="1"/>
+		</element>
+		<element id="Practitioner.telecom">
+			<path value="Practitioner.telecom"/>
+			<slicing>
+				<discriminator>
+					<type value="value"/>
+					<path value="system"/>
+				</discriminator>
+				<rules value="open"/>
+			</slicing>
+			<min value="1"/>
+		</element>
+		<element id="Practitioner.telecom:email">
+			<path value="Practitioner.telecom"/>
+			<sliceName value="email"/>
+			<min value="1"/>
+			<max value="1"/>
+		</element>
+		<element id="Practitioner.telecom:email.system">
+			<path value="Practitioner.telecom.system"/>
+			<min value="1"/>
+			<fixedCode value="email"/>
+		</element>
+		<element id="Practitioner.telecom:email.value">
+			<path value="Practitioner.telecom.value"/>
+			<min value="1"/>
+		</element>
+		<element id="Practitioner.telecom:phone">
+			<path value="Practitioner.telecom"/>
+			<sliceName value="phone"/>
+			<min value="1"/>
+			<max value="1"/>
+		</element>
+		<element id="Practitioner.telecom:phone.system">
+			<path value="Practitioner.telecom.system"/>
+			<min value="1"/>
+			<fixedCode value="phone"/>
+		</element>
+		<element id="Practitioner.telecom:phone.value">
+			<path value="Practitioner.telecom.value"/>
+			<min value="1"/>
+		</element>
+		<element id="Practitioner.address">
+			<path value="Practitioner.address"/>
+			<min value="1"/>
+			<type>
+				<code value="Address"/>
+			</type>
+		</element>
+		<element id="Practitioner.address.line">
+			<path value="Practitioner.address.line"/>
+			<min value="1"/>
+		</element>
+		<element id="Practitioner.address.city">
+			<path value="Practitioner.address.city"/>
+			<min value="1"/>
+		</element>
+		<element id="Practitioner.address.postalCode">
+			<path value="Practitioner.address.postalCode"/>
+			<min value="1"/>
+		</element>
+		<element id="Practitioner.address.country">
+			<path value="Practitioner.address.country"/>
+			<min value="1"/>
+		</element>
+	</differential>
+</StructureDefinition>

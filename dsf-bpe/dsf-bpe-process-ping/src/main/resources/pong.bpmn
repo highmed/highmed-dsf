@@ -5,30 +5,31 @@
       <bpmn:outgoing>SequenceFlow_07w11cw</bpmn:outgoing>
       <bpmn:messageEventDefinition messageRef="Message_0u91abp" />
     </bpmn:startEvent>
-    <bpmn:sequenceFlow id="SequenceFlow_07w11cw" sourceRef="StartEvent_1" targetRef="Task_0ltampw" />
+    <bpmn:sequenceFlow id="SequenceFlow_07w11cw" sourceRef="StartEvent_1" targetRef="logPing" />
     <bpmn:endEvent id="EndEvent_1ivxrjg">
       <bpmn:extensionElements>
         <camunda:inputOutput>
-          <camunda:inputParameter name="messageName">pong</camunda:inputParameter>
+          <camunda:inputParameter name="messageName">pongMessage</camunda:inputParameter>
           <camunda:inputParameter name="versionTag">1.0.0</camunda:inputParameter>
           <camunda:inputParameter name="processDefinitionKey">ping</camunda:inputParameter>
+          <camunda:inputParameter name="profile">http://highmed.org/fhir/StructureDefinition/highmed-task-pong</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_1ism9wt</bpmn:incoming>
       <bpmn:messageEventDefinition messageRef="Message_1h0kvyq" camunda:class="org.highmed.dsf.bpe.message.SendPong" />
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="SequenceFlow_09i9zb8" sourceRef="Task_0ltampw" targetRef="ServiceTask_0ko681m" />
-    <bpmn:serviceTask id="Task_0ltampw" name="logPing" camunda:class="org.highmed.dsf.bpe.service.LogPing">
+    <bpmn:sequenceFlow id="SequenceFlow_09i9zb8" sourceRef="logPing" targetRef="selectTarget" />
+    <bpmn:serviceTask id="logPing" name="logPing" camunda:class="org.highmed.dsf.bpe.service.LogPing">
       <bpmn:incoming>SequenceFlow_07w11cw</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_09i9zb8</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="ServiceTask_0ko681m" name="selectTarget" camunda:class="org.highmed.dsf.bpe.service.SelectPongTarget">
+    <bpmn:serviceTask id="selectTarget" name="selectTarget" camunda:class="org.highmed.dsf.bpe.service.SelectPongTarget">
       <bpmn:incoming>SequenceFlow_09i9zb8</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1ism9wt</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="SequenceFlow_1ism9wt" sourceRef="ServiceTask_0ko681m" targetRef="EndEvent_1ivxrjg" />
+    <bpmn:sequenceFlow id="SequenceFlow_1ism9wt" sourceRef="selectTarget" targetRef="EndEvent_1ivxrjg" />
   </bpmn:process>
-  <bpmn:message id="Message_0u91abp" name="ping" />
+  <bpmn:message id="Message_0u91abp" name="pingMessage" />
   <bpmn:message id="Message_1h0kvyq" name="pong" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="pong">
@@ -46,10 +47,10 @@
         <di:waypoint x="362" y="120" />
         <di:waypoint x="428" y="120" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="ServiceTask_1uea92o_di" bpmnElement="Task_0ltampw">
+      <bpmndi:BPMNShape id="ServiceTask_1uea92o_di" bpmnElement="logPing">
         <dc:Bounds x="262" y="80" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="ServiceTask_0ko681m_di" bpmnElement="ServiceTask_0ko681m">
+      <bpmndi:BPMNShape id="ServiceTask_0ko681m_di" bpmnElement="selectTarget">
         <dc:Bounds x="428" y="80" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_1ism9wt_di" bpmnElement="SequenceFlow_1ism9wt">

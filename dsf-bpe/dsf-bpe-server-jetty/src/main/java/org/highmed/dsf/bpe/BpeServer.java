@@ -9,6 +9,7 @@ import static de.rwh.utils.jetty.PropertiesReader.read;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
@@ -18,6 +19,8 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import javax.servlet.Filter;
+
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConfiguration.Customizer;
 import org.eclipse.jetty.server.Server;
@@ -26,6 +29,7 @@ import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.glassfish.jersey.servlet.init.JerseyServletContainerInitializer;
 import org.highmed.dsf.tools.db.DbMigrator;
 import org.springframework.web.SpringServletContainerInitializer;
+import org.springframework.web.filter.CorsFilter;
 
 import de.rwh.utils.jetty.JettyServer;
 import de.rwh.utils.jetty.Log4jInitializer;
@@ -67,8 +71,14 @@ public final class BpeServer
 
 		ErrorHandler errorHandler = statusCodeOnlyErrorHandler();
 
+		List<Class<? extends Filter>> filters = new ArrayList<>();
+		/* filters.add(AuthenticationFilter.class); */
+		if (Boolean.parseBoolean(properties.getProperty("jetty.cors.enable")))
+			filters.add(CorsFilter.class);
+
+		@SuppressWarnings("unchecked")
 		JettyServer server = new JettyServer(connector, errorHandler, "/bpe", initializers, configProperties,
-				webInfClassesDirs, webInfJars /* , AuthenticationFilter.class */);
+				webInfClassesDirs, webInfJars, filters.toArray(new Class[filters.size()]));
 
 		start(server);
 	}

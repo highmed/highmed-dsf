@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-import org.highmed.dsf.fhir.client.WebsocketClientProvider;
+import org.highmed.dsf.fhir.client.FhirWebsocketClientProvider;
 import org.highmed.dsf.fhir.task.TaskHandler;
 import org.highmed.fhir.client.WebsocketClient;
 import org.hl7.fhir.r4.model.Bundle;
@@ -28,14 +28,14 @@ public class FhirConnector implements InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(FhirConnector.class);
 
-	private final WebsocketClientProvider clientProvider;
+	private final FhirWebsocketClientProvider clientProvider;
 	private final TaskHandler taskHandler;
 	private final LastEventTimeIo lastEventTimeIo;
 	private final FhirContext fhirContext;
 
 	private final Map<String, List<String>> subscriptionSearchParameter;
 
-	public FhirConnector(WebsocketClientProvider clientProvider, TaskHandler taskHandler,
+	public FhirConnector(FhirWebsocketClientProvider clientProvider, TaskHandler taskHandler,
 			LastEventTimeIo lastEventTimeIo, FhirContext fhirContext, String subscriptionSearchParameter)
 	{
 		this.clientProvider = clientProvider;

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<StructureDefinition xmlns="http://hl7.org/fhir">
+	<url value="http://highmed.org/fhir/StructureDefinition/highmed-practitioner-role"/>
+	<name value="PractitionerRole"/>
+	<status value="draft"/>
+	<fhirVersion value="4.0.0"/>
+	<kind value="resource"/>
+	<abstract value="false"/>
+	<type value="PractitionerRole"/>
+	<baseDefinition value="http://hl7.org/fhir/StructureDefinition/PractitionerRole"/>
+	<derivation value="constraint"/>
+	<differential>
+		<element id="PractitionerRole.identifier">
+			<path value="PractitionerRole.identifier"/>
+			<slicing>
+				<discriminator>
+					<type value="value"/>
+					<path value="system"/>
+				</discriminator>
+				<rules value="open"/>
+			</slicing>
+			<min value="1"/>
+		</element>
+		<element id="PractitionerRole.identifier:HiGHmed">
+			<path value="PractitionerRole.identifier"/>
+			<sliceName value="HiGHmed"/>
+			<min value="1"/>
+			<max value="1"/>
+		</element>
+		<element id="PractitionerRole.identifier:HiGHmed.system">
+			<path value="PractitionerRole.identifier.system"/>
+			<min value="1"/>
+			<fixedUri value="http://highmed.org/fhir/CodeSystem/practitioner-role"/>
+		</element>
+		<element id="PractitionerRole.identifier:HiGHmed.value">
+			<path value="PractitionerRole.identifier.value"/>
+			<min value="1"/>
+			<binding>
+				<strength value="required"/>
+				<valueSet value="http://highmed.org/fhir/ValueSet/practitioner-role"/>
+			</binding>
+		</element>
+		<element id="PractitionerRole.practitioner">
+			<path value="PractitionerRole.practitioner"/>
+			<min value="1"/>
+			<type>
+				<code value="Reference"/>
+				<targetProfile value="http://highmed.org/fhir/StructureDefinition/highmed-practitioner"/>
+			</type>
+		</element>
+		<element id="PractitionerRole.organization">
+			<path value="PractitionerRole.organization"/>
+			<min value="1"/>
+			<type>
+				<code value="Reference"/>
+				<targetProfile value="http://highmed.org/fhir/StructureDefinition/highmed-organization"/>
+			</type>
+		</element>
+	</differential>
+</StructureDefinition>

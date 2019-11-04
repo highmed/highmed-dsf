@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<StructureDefinition xmlns="http://hl7.org/fhir">
+	<url value="http://highmed.org/fhir/StructureDefinition/query"/>
+	<name value="Query"/>
+	<status value="active"/>
+	<fhirVersion value="4.0.0"/>
+	<kind value="complex-type"/>
+	<abstract value="false"/>
+	<context>
+		<type value="element"/>
+		<expression value="Group"/>
+	</context>
+	<type value="Extension"/>
+	<baseDefinition value="http://hl7.org/fhir/StructureDefinition/Extension"/>
+	<derivation value="constraint"/>
+	<differential>
+		<element id="Extension.url">
+			<path value="Extension.url"/>
+			<fixedString value="http://highmed.org/fhir/StructureDefinition/query"/>
+		</element>
+		<element id="Extension.value[x]">
+			<path value="Extension.value[x]"/>
+			<min value="1"/>
+			<type>
+				<code value="Expression"/>
+			</type>
+		</element>
+		<element id="Extension.value[x].language">
+			<path value="Extension.value[x].language"/>
+			<short value="application/x-fhir-query | application/x-aql-query"/>
+			<binding>
+				<strength value="required"/>
+				<valueSet value="http://highmed.org/fhir/ValueSet/query-type"/>
+			</binding>
+		</element>
+		<element id="Extension.value[x].expression">
+			<path value="Extension.value[x].expression"/>
+			<min value="1"/>
+		</element>
+	</differential>
+</StructureDefinition>

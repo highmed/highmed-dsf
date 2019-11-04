@@ -1,15 +1,16 @@
-<NamingSystem xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://hl7.org/fhir http://www.hl7.org/fhir/fhir-base.xsd">
-	<name value="HiGHmed_Organization_Identifiers" />
-	<status value="active" />
-	<kind value="identifier" />
-	<date value="2015-08-31" />
-	<publisher value="HiGHmed" />
-	<responsible value="HiGHmed, TPP Heilbronn" />
-	<description value="Shortest DNS that resolves the homepage of the organization, e.g. hs-heilbronn.de, klinikum.uni-heidelberg.de, uksh.de" />
-	<usage value="Used withing HiGHmed to identify organizations" />
+<NamingSystem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://hl7.org/fhir"
+			  xsi:schemaLocation="http://hl7.org/fhir http://www.hl7.org/fhir/fhir-base.xsd">
+	<name value="HiGHmed_Organization_Identifiers"/>
+	<status value="active"/>
+	<kind value="identifier"/>
+	<date value="2015-08-31"/>
+	<publisher value="HiGHmed"/>
+	<responsible value="HiGHmed, TPP Heilbronn"/>
+	<description
+			value="Shortest DNS that resolves the homepage of the organization, e.g. hs-heilbronn.de, klinikum.uni-heidelberg.de, uksh.de"/>
+	<usage value="Used withing HiGHmed to identify organizations"/>
 	<uniqueId>
-		<type value="uri" />
-		<value value="http://highmed.org/fhir/NamingSystem/organization-identifiers" />
+		<type value="uri"/>
+		<value value="http://highmed.org/fhir/NamingSystem/organization-identifiers"/>
 	</uniqueId>
 </NamingSystem> 

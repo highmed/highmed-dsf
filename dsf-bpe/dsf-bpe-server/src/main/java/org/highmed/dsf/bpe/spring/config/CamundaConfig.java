@@ -5,8 +5,14 @@ import java.util.List;
 import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
 import org.camunda.bpm.engine.spring.ProcessEngineFactoryBean;
 import org.camunda.bpm.engine.spring.SpringProcessEngineConfiguration;
+import org.highmed.dsf.bpe.listener.CallActivityListener;
+import org.highmed.dsf.bpe.listener.DefaultBpmnParseListener;
+import org.highmed.dsf.bpe.listener.EndListener;
+import org.highmed.dsf.bpe.listener.StartListener;
+import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,6 +34,12 @@ public class CamundaConfig
 	@Value("${org.highmed.dsf.bpe.db.camunda_user_password}")
 	private String dbPasswordCamunda;
 
+	@Autowired
+	private FhirConfig fhirConfig;
+
+	@Autowired
+	private FhirWebserviceClientProvider clientProvider;
+
 	@Bean
 	public DataSourceTransactionManager transactionManager()
 	{
@@ -47,6 +59,30 @@ public class CamundaConfig
 	}
 
 	@Bean
+	public StartListener startListener()
+	{
+		return new StartListener();
+	}
+
+	@Bean
+	public EndListener endListener()
+	{
+		return new EndListener(clientProvider.getLocalWebserviceClient(), fhirConfig.taskHelper());
+	}
+
+	@Bean
+	public CallActivityListener callActivityListener()
+	{
+		return new CallActivityListener();
+	}
+
+	@Bean
+	public DefaultBpmnParseListener defaultBpmnParseListener()
+	{
+		return new DefaultBpmnParseListener(startListener(), endListener(), callActivityListener());
+	}
+
+	@Bean
 	public SpringProcessEngineConfiguration processEngineConfiguration(List<ProcessEnginePlugin> processEnginePlugins)
 	{
 		var c = new SpringProcessEngineConfiguration();
@@ -55,6 +91,7 @@ public class CamundaConfig
 		c.setTransactionManager(transactionManager());
 		c.setDatabaseSchemaUpdate("false");
 		c.setJobExecutorActivate(true);
+		c.setCustomPreBPMNParseListeners(List.of(defaultBpmnParseListener()));
 
 		logger.info("{} process engine plugin{} configured", processEnginePlugins.size(),
 				processEnginePlugins.size() != 1 ? "s" : "");

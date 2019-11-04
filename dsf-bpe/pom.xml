@@ -1,5 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>dsf-bpe-pom</artifactId>
@@ -13,7 +13,9 @@
 
 	<modules>
 		<module>dsf-bpe-process-base</module>
+		<module>dsf-bpe-process-feasibility</module>
 		<module>dsf-bpe-process-ping</module>
+		<module>dsf-bpe-process-plugin-example</module>
 		<module>dsf-bpe-process-update-resources</module>
 		<module>dsf-bpe-process-update-whitelist</module>
 		<module>dsf-bpe-server</module>
@@ -73,6 +75,23 @@
 			</dependency>
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-bpe-process-feasibility</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<!-- provided as jar and injected on startup as plugin
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-bpe-process-parent</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-bpe-process-child</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			-->
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
 				<artifactId>dsf-bpe-process-ping</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -91,7 +110,6 @@
 				<artifactId>dsf-bpe-webservice-client</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
 				<artifactId>dsf-fhir-websocket-client</artifactId>
@@ -100,6 +118,16 @@
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
 				<artifactId>dsf-fhir-webservice-client</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-openehr-model</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-openehr-webservice-client</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 

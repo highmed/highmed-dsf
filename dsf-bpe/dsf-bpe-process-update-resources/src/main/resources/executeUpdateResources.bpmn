@@ -5,21 +5,26 @@
       <bpmn:outgoing>SequenceFlow_0djh0eg</bpmn:outgoing>
       <bpmn:messageEventDefinition messageRef="Message_1r6vnvn" />
     </bpmn:startEvent>
-    <bpmn:sequenceFlow id="SequenceFlow_0djh0eg" sourceRef="StartEvent_1" targetRef="Task_1hj13pf" />
-    <bpmn:serviceTask id="Task_1hj13pf" name="updateResources" camunda:class="org.highmed.dsf.bpe.service.UpdateResources">
-      <bpmn:incoming>SequenceFlow_0djh0eg</bpmn:incoming>
+    <bpmn:sequenceFlow id="SequenceFlow_0djh0eg" sourceRef="StartEvent_1" targetRef="checkRequest" />
+    <bpmn:serviceTask id="updateResources" name="updateResources" camunda:class="org.highmed.dsf.bpe.service.UpdateResources">
+      <bpmn:incoming>SequenceFlow_141lpsf</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0eygcor</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:endEvent id="EndEvent_1i1w8yx">
       <bpmn:incoming>SequenceFlow_0eygcor</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="SequenceFlow_0eygcor" sourceRef="Task_1hj13pf" targetRef="EndEvent_1i1w8yx" />
+    <bpmn:sequenceFlow id="SequenceFlow_0eygcor" sourceRef="updateResources" targetRef="EndEvent_1i1w8yx" />
+    <bpmn:sequenceFlow id="SequenceFlow_141lpsf" sourceRef="checkRequest" targetRef="updateResources" />
+    <bpmn:serviceTask id="checkRequest" name="checkRequest" camunda:class="org.highmed.dsf.bpe.service.CheckRequest">
+      <bpmn:incoming>SequenceFlow_0djh0eg</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_141lpsf</bpmn:outgoing>
+    </bpmn:serviceTask>
     <bpmn:textAnnotation id="TextAnnotation_0rr4guv">
       <bpmn:text>TODO: add step to check requesting organization is of type TTP</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="Association_1sc5e0d" sourceRef="Task_1hj13pf" targetRef="TextAnnotation_0rr4guv" />
+    <bpmn:association id="Association_1sc5e0d" sourceRef="updateResources" targetRef="TextAnnotation_0rr4guv" />
   </bpmn:process>
-  <bpmn:message id="Message_1r6vnvn" name="updateResources" />
+  <bpmn:message id="Message_1r6vnvn" name="executeUpdateResourcesMessage" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="executeUpdateResources">
       <bpmndi:BPMNShape id="StartEvent_1orek60_di" bpmnElement="StartEvent_1">
@@ -27,25 +32,32 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_0djh0eg_di" bpmnElement="SequenceFlow_0djh0eg">
         <di:waypoint x="215" y="121" />
-        <di:waypoint x="265" y="121" />
+        <di:waypoint x="257" y="121" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="ServiceTask_1t3955f_di" bpmnElement="Task_1hj13pf">
-        <dc:Bounds x="265" y="81" width="100" height="80" />
+      <bpmndi:BPMNShape id="ServiceTask_1t3955f_di" bpmnElement="updateResources">
+        <dc:Bounds x="433" y="81" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="EndEvent_1i1w8yx_di" bpmnElement="EndEvent_1i1w8yx">
-        <dc:Bounds x="415" y="103" width="36" height="36" />
+        <dc:Bounds x="622" y="103" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_0eygcor_di" bpmnElement="SequenceFlow_0eygcor">
-        <di:waypoint x="365" y="121" />
-        <di:waypoint x="415" y="121" />
+        <di:waypoint x="533" y="121" />
+        <di:waypoint x="622" y="121" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="TextAnnotation_0rr4guv_di" bpmnElement="TextAnnotation_0rr4guv">
-        <dc:Bounds x="270" y="188" width="227.98828125" height="42.99609375" />
+        <dc:Bounds x="357" y="189" width="228" height="43" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Association_1sc5e0d_di" bpmnElement="Association_1sc5e0d">
-        <di:waypoint x="347" y="161" />
-        <di:waypoint x="368" y="188" />
+        <di:waypoint x="478" y="161" />
+        <di:waypoint x="474" y="189" />
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_141lpsf_di" bpmnElement="SequenceFlow_141lpsf">
+        <di:waypoint x="357" y="121" />
+        <di:waypoint x="433" y="121" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_1aaurev_di" bpmnElement="checkRequest">
+        <dc:Bounds x="257" y="81" width="100" height="80" />
+      </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>

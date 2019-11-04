@@ -1,15 +1,15 @@
-<NamingSystem xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://hl7.org/fhir http://www.hl7.org/fhir/fhir-base.xsd">
-	<name value="HiGHmed_Endpoint_Identifiers" />
-	<status value="active" />
-	<kind value="identifier" />
-	<date value="2015-08-31" />
-	<publisher value="HiGHmed" />
-	<responsible value="HiGHmed, TPP Heilbronn" />
-	<description value="Shortest DNS that resolves the endpoint typically the DNS used in endpoint.address" />
-	<usage value="Used withing HiGHmed to identify endpoints" />
+<NamingSystem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://hl7.org/fhir"
+			  xsi:schemaLocation="http://hl7.org/fhir http://www.hl7.org/fhir/fhir-base.xsd">
+	<name value="HiGHmed_Endpoint_Identifiers"/>
+	<status value="active"/>
+	<kind value="identifier"/>
+	<date value="2019-09-23"/>
+	<publisher value="HiGHmed"/>
+	<responsible value="HiGHmed, TTP Heilbronn"/>
+	<description value="Shortest DNS that resolves the endpoint typically the DNS used in endpoint.address"/>
+	<usage value="Used withing HiGHmed to identify endpoints"/>
 	<uniqueId>
-		<type value="uri" />
-		<value value="http://highmed.org/fhir/NamingSystem/endpoint-identifiers" />
+		<type value="uri"/>
+		<value value="http://highmed.org/fhir/NamingSystem/endpoint-identifiers"/>
 	</uniqueId>
 </NamingSystem> 

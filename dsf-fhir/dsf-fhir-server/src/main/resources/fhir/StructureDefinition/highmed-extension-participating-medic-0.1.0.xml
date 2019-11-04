@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<StructureDefinition xmlns="http://hl7.org/fhir">
+	<url value="http://highmed.org/fhir/StructureDefinition/participating-medic"/>
+	<version value="0.1.0"/>
+	<name value="ParticipatingMedic"/>
+	<status value="active"/>
+	<date value="2019-08-05"/>
+	<fhirVersion value="4.0.0"/>
+	<kind value="complex-type"/>
+	<abstract value="false"/>
+	<context>
+		<type value="element"/>
+		<expression value="ResearchStudy"/>
+	</context>
+	<type value="Extension"/>
+	<baseDefinition value="http://hl7.org/fhir/StructureDefinition/Extension"/>
+	<derivation value="constraint"/>
+	<differential>
+		<element id="Extension">
+			<path value="Extension"/>
+			<short value="ParticipatingMedic"/>
+			<definition
+					value="Used to denote the medic organizations that are requested to supply data for the study at hand."/>
+		</element>
+		<element id="Extension.value[x]">
+			<path value="Extension.value[x]"/>
+			<short value="ParticipatingMedic"/>
+			<definition
+					value="Organization reference used to denote the medic organizations that are requested to supply data for the study at hand."/>
+			<type>
+				<code value="Reference"/>
+				<targetProfile value="http://highmed.org/fhir/StructureDefinition/highmed-organization"/>
+			</type>
+		</element>
+		<element id="Extension.value[x].reference">
+			<path value="Extension.value[x].reference"/>
+			<min value="1"/>
+		</element>
+	</differential>
+</StructureDefinition>

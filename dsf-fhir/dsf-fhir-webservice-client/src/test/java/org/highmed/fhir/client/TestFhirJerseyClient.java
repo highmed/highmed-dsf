@@ -13,11 +13,9 @@ import java.util.UUID;
 import javax.ws.rs.WebApplicationException;
 
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.Endpoint;
-import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
@@ -40,7 +38,7 @@ public class TestFhirJerseyClient
 		KeyStore trustStore = CertificateHelper.extractTrust(keyStore);
 
 		FhirContext context = FhirContext.forR4();
-		WebserviceClient client = new WebserviceClientJersey("https://localhost:8001/fhir/", trustStore, keyStore,
+		FhirWebserviceClient client = new FhirWebserviceClientJersey("https://localhost:8001/fhir/", trustStore, keyStore,
 				keyStorePassword, null, null, null, 0, 0, null, context);
 
 		try
@@ -268,7 +266,7 @@ public class TestFhirJerseyClient
 		}
 	}
 
-	private static void deleteOrganizationsAndEndpoints(FhirContext context, WebserviceClient client)
+	private static void deleteOrganizationsAndEndpoints(FhirContext context, FhirWebserviceClient client)
 	{
 		Bundle orgs = client.search(Organization.class, Collections.emptyMap());
 		orgs.getEntry().stream().filter(e -> e.getResource() instanceof Organization)
@@ -281,7 +279,7 @@ public class TestFhirJerseyClient
 
 	}
 
-	private static void deleteCreateUpdateReadTaskBundleTest(FhirContext context, WebserviceClient client)
+	private static void deleteCreateUpdateReadTaskBundleTest(FhirContext context, FhirWebserviceClient client)
 	{
 		final String taskIdentifierSystem = "http://highmed.org/fhir/CodeSystem/task";
 		final String taskIdentifierValue = "Transaction Update Test Task";
@@ -328,7 +326,7 @@ public class TestFhirJerseyClient
 				"result bundle:\n" + context.newXmlParser().setPrettyPrint(true).encodeResourceToString(result));
 	}
 
-	private static void deleteCreateBundleTest(FhirContext context, WebserviceClient client)
+	private static void deleteCreateBundleTest(FhirContext context, FhirWebserviceClient client)
 	{
 		var bundle = deleteCreateBundle();
 
@@ -389,7 +387,7 @@ public class TestFhirJerseyClient
 		return bundle;
 	}
 
-	private static void updateBundleTest(FhirContext context, WebserviceClient client)
+	private static void updateBundleTest(FhirContext context, FhirWebserviceClient client)
 	{
 		final String orgIdentifierSystem = "http://highmed.org/fhir/CodeSystem/organization";
 		final String orgIdentifierValue = "Transaction Test Organization";

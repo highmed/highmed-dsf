@@ -1,24 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1yb5vw3" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="2.2.4">
   <bpmn:process id="updateWhiteList" isExecutable="true" camunda:versionTag="1.0.0">
-    <bpmn:startEvent id="StartEvent_1">
-      <bpmn:outgoing>SequenceFlow_0bbhq2r</bpmn:outgoing>
-    </bpmn:startEvent>
-    <bpmn:sequenceFlow id="SequenceFlow_0bbhq2r" sourceRef="StartEvent_1" targetRef="Task_0im0htk" />
+    <bpmn:sequenceFlow id="SequenceFlow_0bbhq2r" sourceRef="StartEvent_1" targetRef="updateWhiteListTask" />
     <bpmn:endEvent id="EndEvent_0xd0x8k">
       <bpmn:incoming>SequenceFlow_0oyvmcd</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="SequenceFlow_0oyvmcd" sourceRef="Task_0im0htk" targetRef="EndEvent_0xd0x8k" />
-    <bpmn:serviceTask id="Task_0im0htk" name="updateWhiteList" camunda:class="org.highmed.dsf.bpe.service.UpdateWhiteList">
+    <bpmn:sequenceFlow id="SequenceFlow_0oyvmcd" sourceRef="updateWhiteListTask" targetRef="EndEvent_0xd0x8k" />
+    <bpmn:serviceTask id="updateWhiteListTask" name="updateWhiteList" camunda:class="org.highmed.dsf.bpe.service.UpdateWhiteList">
       <bpmn:incoming>SequenceFlow_0bbhq2r</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0oyvmcd</bpmn:outgoing>
     </bpmn:serviceTask>
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>SequenceFlow_0bbhq2r</bpmn:outgoing>
+      <bpmn:messageEventDefinition messageRef="Message_1nn2wdw" />
+    </bpmn:startEvent>
   </bpmn:process>
+  <bpmn:message id="Message_1nn2wdw" name="updateWhiteListMessage" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="updateWhiteList">
-      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
-        <dc:Bounds x="179" y="103" width="36" height="36" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_0bbhq2r_di" bpmnElement="SequenceFlow_0bbhq2r">
         <di:waypoint x="215" y="121" />
         <di:waypoint x="265" y="121" />
@@ -30,8 +29,11 @@
         <di:waypoint x="365" y="121" />
         <di:waypoint x="415" y="121" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="ServiceTask_0um3ad2_di" bpmnElement="Task_0im0htk">
+      <bpmndi:BPMNShape id="ServiceTask_0um3ad2_di" bpmnElement="updateWhiteListTask">
         <dc:Bounds x="265" y="81" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_0x5gijn_di" bpmnElement="StartEvent_1">
+        <dc:Bounds x="179" y="103" width="36" height="36" />
       </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

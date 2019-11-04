@@ -1,55 +1,96 @@
 <Bundle xmlns="http://hl7.org/fhir">
-	<type value="transaction" />
+	<type value="transaction"/>
 	<entry>
-		<fullUrl value="urn:uuid:bb73165c-c7b9-4342-8e28-531f07fa7735" />
+		<fullUrl value="urn:uuid:bb73165c-c7b9-4342-8e28-531f07fa7735"/>
 		<resource>
 			<Organization xmlns="http://hl7.org/fhir">
 				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
-					<valueString value="TODO" />
+					<valueString value="TODO"/>
 				</extension>
 				<identifier>
-					<system value="http://highmed.org/fhir/CodeSystem/organization" />
-					<value value="Test_TTP" />
+					<system value="http://highmed.org/fhir/CodeSystem/organization"/>
+					<value value="Test_TTP"/>
 				</identifier>
-				<active value="true" />
+				<active value="true"/>
 				<type>
 					<coding>
-						<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
-						<code value="TTP" />
+						<system value="http://highmed.org/fhir/CodeSystem/organization-type"/>
+						<code value="TTP"/>
 					</coding>
 				</type>
-				<name value="Test TTP" />
+				<name value="Test TTP"/>
+				<endpoint>
+					<reference value="urn:uuid:dae83c31-e478-4bc2-a6bc-61e8b9b41fd7"/>
+					<type value="Endpoint"/>
+				</endpoint>
 			</Organization>
 		</resource>
 		<request>
-			<method value="PUT" />
-			<url value="Organization?identifier=http://highmed.org/fhir/CodeSystem/organization|Test_TTP" />
+			<method value="PUT"/>
+			<url value="Organization?identifier=http://highmed.org/fhir/CodeSystem/organization|Test_TTP"/>
 		</request>
 	</entry>
 	<entry>
-		<fullUrl value="urn:uuid:55901940-02db-40bf-9a6e-bdfdd0ddb7bf" />
+		<fullUrl value="urn:uuid:55901940-02db-40bf-9a6e-bdfdd0ddb7bf"/>
 		<resource>
 			<Organization xmlns="http://hl7.org/fhir">
 				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
-					<valueString value="TODO" />
+					<valueString value="TODO"/>
 				</extension>
 				<identifier>
-					<system value="http://highmed.org/fhir/CodeSystem/organization" />
-					<value value="Test_MeDIC_2" />
+					<system value="http://highmed.org/fhir/CodeSystem/organization"/>
+					<value value="Test_MeDIC_2"/>
 				</identifier>
-				<active value="true" />
+				<active value="true"/>
 				<type>
 					<coding>
-						<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
-						<code value="MeDIC" />
+						<system value="http://highmed.org/fhir/CodeSystem/organization-type"/>
+						<code value="MeDIC"/>
 					</coding>
 				</type>
-				<name value="Test MeDIC 2" />
+				<name value="Test MeDIC 2"/>
 			</Organization>
 		</resource>
 		<request>
-			<method value="PUT" />
-			<url value="Organization?identifier=http://highmed.org/fhir/CodeSystem/organization|Test_MeDIC_2" />
+			<method value="PUT"/>
+			<url value="Organization?identifier=http://highmed.org/fhir/CodeSystem/organization|Test_MeDIC_2"/>
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:dae83c31-e478-4bc2-a6bc-61e8b9b41fd7"/>
+		<resource>
+			<Endpoint xmlns="http://hl7.org/fhir">
+				<identifier>
+					<system value="http://highmed.org/fhir/CodeSystem/endpoint"/>
+					<value value="Test_TTP_Endpoint"/>
+				</identifier>
+				<status value="active"/>
+				<connectionType>
+					<system value="http://terminology.hl7.org/CodeSystem/endpoint-connection-type"/>
+					<code value="hl7-fhir-rest"/>
+				</connectionType>
+				<name value="Test TTP Endpoint"/>
+				<managingOrganization>
+					<type value="Organization"/>
+					<identifier>
+						<system value="http://highmed.org/fhir/CodeSystem/organization"/>
+						<value value="Test_TTP"/>
+					</identifier>
+				</managingOrganization>
+				<payloadType>
+					<coding>
+						<system value="http://hl7.org/fhir/resource-types"/>
+						<code value="Task"/>
+					</coding>
+				</payloadType>
+				<payloadMimeType value="application/fhir+json"/>
+				<payloadMimeType value="application/fhir+xml"/>
+				<address value="https://ttp/fhir"/>
+			</Endpoint>
+		</resource>
+		<request>
+			<method value="PUT"/>
+			<url value="Endpoint?identifier=http://highmed.org/fhir/CodeSystem/endpoint|Test_TTP_Endpoint"/>
 		</request>
 	</entry>
 </Bundle>

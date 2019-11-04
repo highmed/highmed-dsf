@@ -1,0 +1,36 @@
+<CodeSystem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://hl7.org/fhir"
+			xsi:schemaLocation="http://hl7.org/fhir http://www.hl7.org/fhir/fhir-base.xsd">
+	<url value="http://highmed.org/fhir/CodeSystem/feasibility"/>
+	<version value="0.1.0"/>
+	<name value="HiGHmed_Feasibility_Values"/>
+	<title value="HiGHmed Feasibility Values"/>
+	<status value="active"/>
+	<experimental value="false"/>
+	<date value="2019-09-23T09:40:00+02:00"/>
+	<publisher value="HiGHmed"/>
+	<description value="CodeSystem with standard values for feasibility processes"/>
+	<caseSensitive value="true"/>
+	<hierarchyMeaning value="grouped-by"/>
+	<versionNeeded value="false"/>
+	<content value="complete"/>
+	<concept>
+		<code value="research-study-reference"/>
+		<display value="Research Study Reference"/>
+		<definition value="HiGHmed Research Study Reference to define what data is requested from which MeDICs and for what purpose"/>
+	</concept>
+	<concept>
+		<code value="single-medic-result"/>
+		<display value="Single MeDIC Result"/>
+		<definition value="Result of a single feasibility query execution"/>
+	</concept>
+	<concept>
+		<code value="multi-medic-result"/>
+		<display value="Multi MeDIC Result"/>
+		<definition value="Aggregated result of all single medic results"/>
+	</concept>
+	<concept>
+		<code value="participating-medics"/>
+		<display value="Participating MeDICs"/>
+		<definition value="Count of all MeDICs who participated in a feasibility query"/>
+	</concept>
+</CodeSystem> 

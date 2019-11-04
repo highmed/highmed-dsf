@@ -11,7 +11,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.highmed.dsf.fhir.task.TaskHandler;
-import org.highmed.fhir.client.WebserviceClient;
+import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Task;
@@ -31,9 +31,9 @@ public class PingEventHandler implements InitializingBean
 
 	private final LastEventTimeIo lastEventTimeIo;
 	private final TaskHandler taskHandler;
-	private final WebserviceClient webserviceClient;
+	private final FhirWebserviceClient webserviceClient;
 
-	public PingEventHandler(LastEventTimeIo lastEventTimeIo, TaskHandler taskHandler, WebserviceClient webserviceClient)
+	public PingEventHandler(LastEventTimeIo lastEventTimeIo, TaskHandler taskHandler, FhirWebserviceClient webserviceClient)
 	{
 		this.lastEventTimeIo = lastEventTimeIo;
 		this.taskHandler = taskHandler;

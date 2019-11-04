@@ -8,24 +8,29 @@ import org.highmed.dsf.bpe.service.LogPing;
 import org.highmed.dsf.bpe.service.LogPong;
 import org.highmed.dsf.bpe.service.SelectPingTargets;
 import org.highmed.dsf.bpe.service.SelectPongTarget;
-import org.highmed.dsf.fhir.client.WebserviceClientProvider;
+import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import ca.uhn.fhir.context.FhirContext;
+
 @Configuration
 public class PingConfig
 {
 	@Autowired
-	private WebserviceClientProvider clientProvider;
+	private FhirWebserviceClientProvider clientProvider;
 
 	@Autowired
 	private OrganizationProvider organizationProvider;
 
 	@Autowired
 	private TaskHelper taskHelper;
+
+	@Autowired
+	private FhirContext fhirContext;
 
 	@Bean
 	public ProcessEnginePlugin pingPlugin()
@@ -36,36 +41,36 @@ public class PingConfig
 	@Bean
 	public SendPing sendPing()
 	{
-		return new SendPing(organizationProvider, clientProvider);
+		return new SendPing(organizationProvider, clientProvider, taskHelper, fhirContext);
 	}
 
 	@Bean
 	public SendPong sendPong()
 	{
-		return new SendPong(organizationProvider, clientProvider);
+		return new SendPong(organizationProvider, clientProvider, taskHelper, fhirContext);
 	}
 
 	@Bean
 	public LogPing logPing()
 	{
-		return new LogPing();
+		return new LogPing(clientProvider, taskHelper);
 	}
 
 	@Bean
 	public LogPong logPong()
 	{
-		return new LogPong();
+		return new LogPong(clientProvider, taskHelper);
 	}
 
 	@Bean
 	public SelectPingTargets selectPingTargets()
 	{
-		return new SelectPingTargets(organizationProvider);
+		return new SelectPingTargets(organizationProvider, clientProvider, taskHelper);
 	}
 
 	@Bean
 	public SelectPongTarget selectPongTarget()
 	{
-		return new SelectPongTarget(organizationProvider, taskHelper);
+		return new SelectPongTarget(organizationProvider, clientProvider, taskHelper);
 	}
 }

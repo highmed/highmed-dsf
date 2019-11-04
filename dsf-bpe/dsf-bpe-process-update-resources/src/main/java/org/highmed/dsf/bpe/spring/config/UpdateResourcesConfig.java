@@ -3,9 +3,10 @@ package org.highmed.dsf.bpe.spring.config;
 import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
 import org.highmed.dsf.bpe.message.SendRequest;
 import org.highmed.dsf.bpe.plugin.UpdateResourcesPlugin;
+import org.highmed.dsf.bpe.service.CheckRequest;
 import org.highmed.dsf.bpe.service.SelectResourceAndTargets;
 import org.highmed.dsf.bpe.service.UpdateResources;
-import org.highmed.dsf.fhir.client.WebserviceClientProvider;
+import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,7 @@ import ca.uhn.fhir.context.FhirContext;
 public class UpdateResourcesConfig
 {
 	@Autowired
-	private WebserviceClientProvider clientProvider;
+	private FhirWebserviceClientProvider clientProvider;
 
 	@Autowired
 	private OrganizationProvider organizationProvider;
@@ -38,18 +39,24 @@ public class UpdateResourcesConfig
 	@Bean
 	public SendRequest sendRequest()
 	{
-		return new SendRequest(organizationProvider, clientProvider);
+		return new SendRequest(organizationProvider, clientProvider, taskHelper, fhirContext);
 	}
 
 	@Bean
 	public SelectResourceAndTargets selectUpdateResourcesTargets()
 	{
-		return new SelectResourceAndTargets(organizationProvider);
+		return new SelectResourceAndTargets(organizationProvider, clientProvider, taskHelper);
 	}
 
 	@Bean
 	public UpdateResources updateResources()
 	{
 		return new UpdateResources(clientProvider, taskHelper, fhirContext);
+	}
+
+	@Bean
+	public CheckRequest checkRequest()
+	{
+		return new CheckRequest(clientProvider, taskHelper);
 	}
 }

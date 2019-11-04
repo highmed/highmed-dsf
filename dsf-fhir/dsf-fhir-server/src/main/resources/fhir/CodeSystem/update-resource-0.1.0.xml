@@ -1,0 +1,26 @@
+<CodeSystem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://hl7.org/fhir"
+			xsi:schemaLocation="http://hl7.org/fhir http://www.hl7.org/fhir/fhir-base.xsd">
+	<url value="http://highmed.org/fhir/CodeSystem/update-resources"/>
+	<version value="0.1.0"/>
+	<name value="HiGHmed_Update_Resource"/>
+	<title value="HiGHmed Update Resource"/>
+	<status value="active"/>
+	<experimental value="false"/>
+	<date value="2019-10-17T08:40:00+02:00"/>
+	<publisher value="HiGHmed"/>
+	<description value="CodeSystem with standard values for the process update resources"/>
+	<caseSensitive value="true"/>
+	<hierarchyMeaning value="grouped-by"/>
+	<versionNeeded value="false"/>
+	<content value="complete"/>
+	<concept>
+		<code value="bundle-reference"/>
+		<display value="Bundle Reference"/>
+		<definition value="Bundle reference to be downloaded to update local resources"/>
+	</concept>
+	<concept>
+		<code value="organization-identifier-search-parameter"/>
+		<display value="Organization Identifier Search Parameter"/>
+		<definition value="Organization system identifier as search parameter to define which organization are targets"/>
+	</concept>
+</CodeSystem> 

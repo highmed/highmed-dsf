@@ -1,0 +1,41 @@
+{
+  "resourceType":"Task",
+  "meta":{
+    "profile":"http://highmed.org/fhir/StructureDefinition/highmed-task-plugin-base"
+  },
+  "instantiatesUri":"http://highmed.org/bpe/Process/parentPlugin/1.0.0",
+  "status":"requested",
+  "intent":"order",
+  "authoredOn":"2019-10-21",
+  "requester":{
+    "identifier":{
+      "system":"http://highmed.org/fhir/CodeSystem/organization",
+      "value":"Test_Organization"
+    },
+    "type":"Organization"
+  },
+  "restriction":{
+    "recipient":[
+      {
+        "identifier":{
+          "system":"http://highmed.org/fhir/CodeSystem/organization",
+          "value":"Test_Organization"
+        },
+        "type":"Organization"
+      }
+    ]
+  },
+  "input":[
+    {
+      "type": {
+        "coding": [
+          {
+            "system": "http://highmed.org/fhir/CodeSystem/bpmn-message",
+            "code": "message-name"
+          }
+        ]
+      },
+      "valueString": "parentPluginMessage"
+    }
+  ]
+}

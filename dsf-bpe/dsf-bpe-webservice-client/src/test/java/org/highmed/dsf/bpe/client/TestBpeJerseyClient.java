@@ -23,24 +23,27 @@ public class TestBpeJerseyClient
 	{
 		String keyStorePassword = "password";
 		KeyStore keyStore = CertificateReader
-				.fromPkcs12(Paths.get("../../dsf-tools/dsf-tools-test-data-generator/cert/Webbrowser_Test_User/Webbrowser_Test_User_certificate.p12"), keyStorePassword);
+				.fromPkcs12(Paths.get("dsf-tools/dsf-tools-test-data-generator/cert/Webbrowser_Test_User/Webbrowser_Test_User_certificate.p12"), keyStorePassword);
 		KeyStore trustStore = CertificateHelper.extractTrust(keyStore);
 
-//		WebserviceClient client = new WebserviceClientJersey("https://localhost:8002/bpe", trustStore, keyStore,
-//				keyStorePassword, null, null, null, 0, 0, null);
-		WebserviceClient client = new WebserviceClientJersey("https://ttp:8443/bpe", trustStore, keyStore,
+		WebserviceClient client = new WebserviceClientJersey("https://localhost:8002/bpe", trustStore, keyStore,
 				keyStorePassword, null, null, null, 0, 0, null);
+//		WebserviceClient client = new WebserviceClientJersey("https://localhost:8443/bpe", trustStore, keyStore,
+//				keyStorePassword, null, null, null, 0, 0, null);
 
-		client.startProcessWithVersion("ping", "1.0.0");
+//		client.startProcessWithVersion("ping", "1.0.0");
 
 //		client.startProcessWithVersion("updateWhiteList", "1.0.0");
 
-//		client.startProcessWithVersion("requestUpdateResources", "1.0.0", Map.of("target-identifier",
-//				Collections.singletonList("http://highmed.org/fhir/CodeSystem/organization|"), "bundle-id",
-//				Arrays.asList("Bundle/42cb0764-5ddd-4032-87eb-76a62343d89c")));
+		client.startProcessWithVersion("requestUpdateResources", "1.0.0", Map.of("target-identifier",
+				Collections.singletonList("http://highmed.org/fhir/CodeSystem/organization|"), "bundle-id",
+				Arrays.asList("Bundle/2548395d-83d3-488a-859e-a844e62ce3fd")));
 
 //		client.startProcessWithVersion("requestUpdateResources", "1.0.0", Map.of("target-identifier",
 //				Collections.singletonList("http://highmed.org/fhir/CodeSystem/organization|"), "bundle-id",
 //				Arrays.asList("Bundle/30a376fa-f3ba-4f68-8e04-c5b9c0c4f5c9")));
+
+//		client.startProcessWithVersion("requestSimpleCohortSizeQuery", "1.0.0");
+//		client.startProcessWithVersion("executeSimpleCohortSizeQuery", "1.0.0");
 	}
 }

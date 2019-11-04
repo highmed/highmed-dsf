@@ -1,31 +1,37 @@
-<CodeSystem xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://hl7.org/fhir http://www.hl7.org/fhir/fhir-base.xsd">
-	<url value="http://highmed.org/fhir/CodeSystem/bpmn-message" />
-	<version value="0.1.0" />
-	<name value="HiGHmed_Bpmn_Message_Values" />
-	<title value="HiGHmed BPMN message values" />
-	<status value="active" />
-	<experimental value="false" />
-	<date value="2019-08-21T18:40:00+02:00" />
-	<publisher value="HiGHmed" />
-	<description value="CodeSystem with standard BPMN message values for Task resources" />
-	<caseSensitive value="true" />
-	<hierarchyMeaning value="grouped-by" />
-	<versionNeeded value="false" />
-	<content value="complete" />
+<CodeSystem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://hl7.org/fhir"
+			xsi:schemaLocation="http://hl7.org/fhir http://www.hl7.org/fhir/fhir-base.xsd">
+	<url value="http://highmed.org/fhir/CodeSystem/bpmn-message"/>
+	<version value="0.1.0"/>
+	<name value="HiGHmed_Bpmn_Message_Values"/>
+	<title value="HiGHmed BPMN message values"/>
+	<status value="active"/>
+	<experimental value="false"/>
+	<date value="2019-08-21T18:40:00+02:00"/>
+	<publisher value="HiGHmed"/>
+	<description value="CodeSystem with standard BPMN message values for Task resources"/>
+	<caseSensitive value="true"/>
+	<hierarchyMeaning value="grouped-by"/>
+	<versionNeeded value="false"/>
+	<content value="complete"/>
 	<concept>
-		<code value="message-name" />
-		<display value="Message Name" />
-		<definition value="BPMN 2.0 message event name" />
+		<code value="message-name"/>
+		<display value="Message Name"/>
+		<definition value="BPMN 2.0 message event name"/>
 	</concept>
 	<concept>
-		<code value="business-key" />
-		<display value="Business Key" />
-		<definition value="Camunda business key used to identify process instances" />
+		<code value="business-key"/>
+		<display value="Business Key"/>
+		<definition value="Camunda business key used to identify process instances"/>
 	</concept>
 	<concept>
-		<code value="correlation-key" />
-		<display value="Correlation Key" />
-		<definition value="HiGHmed BPE correlation key used to identify multi-instance instances used for messaging multiple targets" />
+		<code value="correlation-key"/>
+		<display value="Correlation Key"/>
+		<definition
+				value="HiGHmed BPE correlation key used to identify multi-instance instances used for messaging multiple targets"/>
+	</concept>
+	<concept>
+		<code value="error"/>
+		<display value="Error"/>
+		<definition value="Explaining why this task failed."/>
 	</concept>
 </CodeSystem> 

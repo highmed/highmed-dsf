@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<StructureDefinition xmlns="http://hl7.org/fhir">
+  <url value="http://highmed.org/fhir/StructureDefinition/highmed-task-request-simple-feasibility" />
+  <version value="0.1.0" />
+  <name value="TaskRequestSimpleFeasibility" />
+  <status value="active" />
+  <date value="2019-05-21" />
+  <fhirVersion value="4.0.0" />
+  <kind value="resource" />
+  <abstract value="false" />
+  <type value="Task" />
+  <baseDefinition value="http://highmed.org/fhir/StructureDefinition/highmed-task-base" />
+  <derivation value="constraint" />
+  <differential>
+    <element id="Task.instantiatesUri">
+      <path value="Task.instantiatesUri" />
+      <fixedUri value="http://highmed.org/bpe/Process/requestSimpleFeasibility/1.0.0" />
+    </element>
+    <element id="Task.input">
+      <path value="Task.input" />
+      <slicing>
+        <discriminator>
+          <type value="value"/>
+          <path value="type.coding.code"/>
+        </discriminator>
+        <rules value="open"/>
+      </slicing>
+      <min value="2" />
+    </element>
+    <element id="Task.input:message-name">
+      <path value="Task.input" />
+      <sliceName value="message-name" />
+    </element>
+    <element id="Task.input:message-name.value[x]">
+      <path value="Task.input.value[x]" />
+      <fixedString value="requestSimpleFeasibilityMessage" />
+    </element>
+    <element id="Task.input:business-key">
+      <path value="Task.input" />
+      <sliceName value="business-key" />
+      <max value="0" />
+    </element>
+    <element id="Task.input:correlation-key">
+      <path value="Task.input" />
+      <sliceName value="correlation-key" />
+      <max value="0" />
+    </element>
+    <element id="Task.input:research-study">
+      <path value="Task.input" />
+      <sliceName value="research-study" />
+      <min value="1" />
+      <max value="1" />
+    </element>
+    <element id="Task.input:research-study.type.coding">
+      <path value="Task.input.type.coding" />
+      <min value="1" />
+      <max value="1" />
+    </element>
+    <element id="Task.input:research-study.type.coding.system">
+      <path value="Task.input.type.coding.system" />
+      <fixedUri value="http://highmed.org/fhir/CodeSystem/feasibility" />
+    </element>
+    <element id="Task.input:research-study.type.coding.code">
+      <path value="Task.input.type.coding.code" />
+      <fixedCode value="research-study-reference" />
+    </element>
+    <element id="Task.input:research-study.value[x]">
+      <path value="Task.input.value[x]" />
+      <type>
+        <code value="Reference" />
+        <targetProfile value="http://highmed.org/fhir/StructureDefinition/highmed-research-study" />
+      </type>
+    </element>
+    <element id="Task.output">
+      <path value="Task.output" />
+      <slicing>
+        <discriminator>
+          <type value="value" />
+          <path value="type.coding.code" />
+        </discriminator>
+        <rules value="closed" />
+      </slicing>
+       <min value="1" />
+    </element>
+    <element id="Task.output:participatingMedics">
+      <path value="Task.output" />
+      <sliceName value="participatingMedics" />
+    </element>
+    <element id="Task.output:participatingMedics.type.coding">
+      <path value="Task.output.type.coding" />
+      <min value="1" />
+      <max value="1" />
+    </element>
+    <element id="Task.output:participatingMedics.type.coding.system">
+      <path value="Task.output.type.coding.system" />
+      <fixedUri value="http://highmed.org/fhir/NamingSystem/feasibility" />
+    </element>
+    <element id="Task.output:participatingMedics.type.coding.code">
+      <path value="Task.output.type.coding.code" />
+      <patternCode value="participating-medics" />
+    </element>
+    <element id="Task.output:participatingMedics.value[x]">
+      <path value="Task.output.value[x]" />
+      <type>
+        <code value="string" />
+      </type>
+    </element>
+    <element id="Task.output:cohortSize">
+      <path value="Task.output" />
+      <sliceName value="cohortSize" />
+    </element>
+    <element id="Task.output:cohortSize.type.coding">
+      <path value="Task.output.type.coding" />
+      <min value="1" />
+      <max value="1" />
+    </element>
+    <element id="Task.output:cohortSize.type.coding.system">
+      <path value="Task.output.type.coding.system" />
+      <fixedUri value="http://highmed.org/fhir/NamingSystem/feasibility" />
+    </element>
+    <element id="Task.output:cohortSize.type.coding.code">
+      <path value="Task.output.type.coding.code" />
+      <patternCode value="multi-medic-result" />
+    </element>
+    <element id="Task.output:cohortSize.value[x]">
+      <path value="Task.output.value[x]" />
+      <type>
+        <code value="string" />
+      </type>
+    </element>
+  </differential>
+</StructureDefinition>

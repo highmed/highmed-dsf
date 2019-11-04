@@ -22,7 +22,7 @@ import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.highmed.dsf.fhir.search.PartialResult;
 import org.highmed.dsf.fhir.search.SearchQuery;
 import org.highmed.dsf.fhir.search.SearchQueryParameterError;
-import org.highmed.fhir.client.WebserviceClient;
+import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Resource;
@@ -151,17 +151,29 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 			throw new IllegalArgumentException("Not a literal external reference");
 
 		String remoteServerBase = resourceReference.getServerBase(serverBase);
-		Optional<WebserviceClient> client = clientProvider.getClient(remoteServerBase);
+		Optional<FhirWebserviceClient> client = clientProvider.getClient(remoteServerBase);
 
 		if (client.isEmpty())
+		{
+			logger.error(
+					"Error while resolving literal external reference {}, no remote client found for server base {}",
+					resourceReference.getReference().getReference(), remoteServerBase);
 			throw new WebApplicationException(responseGenerator.noEndpointFoundForLiteralExternalReference(bundleIndex,
 					resource, resourceReference));
+		}
 		else
 		{
 			IdType referenceId = new IdType(resourceReference.getReference().getReference());
+			logger.debug("Trying to resolve literal external reference {}, at remote server {}",
+					resourceReference.getReference().getReference(), remoteServerBase);
 			if (!client.get().exists(referenceId))
+			{
+				logger.error(
+						"Error while resolving literal external reference {}, resource could not be found on remote server {}",
+						resourceReference.getReference().getReference(), remoteServerBase);
 				throw new WebApplicationException(responseGenerator.referenceTargetNotFoundRemote(bundleIndex, resource,
 						resourceReference, remoteServerBase));
+			}
 		}
 
 		return true; // throws exception if reference could not be resolved

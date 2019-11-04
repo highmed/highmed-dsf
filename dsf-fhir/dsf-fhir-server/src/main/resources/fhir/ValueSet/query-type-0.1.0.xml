@@ -1,0 +1,29 @@
+<ValueSet xmlns="http://hl7.org/fhir">
+	<url value="http://highmed.org/fhir/ValueSet/query-type"/>
+	<version value="0.1.0"/>
+	<name value="HiGHmed_Query_Type"/>
+	<title value="HiGHmed Query Type"/>
+	<status value="active"/>
+	<experimental value="false"/>
+	<date value="2019-09-23T09:40:00+02:00"/>
+	<publisher value="HiGHmed"/>
+	<description
+			value="ValueSystem with HiGHmed query types used in Group resources query extension of the expression datatype"/>
+	<immutable value="true"/>
+	<compose>
+		<include>
+			<system value="http://hl7.org/fhir/expression-language"/>
+			<concept>
+				<code value="application/x-fhir-query"/>
+				<display value="FHIR Query"/>
+			</concept>
+		</include>
+		<include>
+			<system value="http://highmed.org/fhir/CodeSystem/query-type"/>
+			<concept>
+				<code value="application/x-aql-query"/>
+				<display value="AQL Query"/>
+			</concept>
+		</include>
+	</compose>
+</ValueSet> 

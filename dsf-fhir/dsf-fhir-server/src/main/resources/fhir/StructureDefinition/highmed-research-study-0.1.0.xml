@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<StructureDefinition xmlns="http://hl7.org/fhir">
+	<url value="http://highmed.org/fhir/StructureDefinition/highmed-research-study"/>
+	<name value="ResearchStudy"/>
+	<status value="draft"/>
+	<fhirVersion value="4.0.0"/>
+	<kind value="resource"/>
+	<abstract value="false"/>
+	<type value="ResearchStudy"/>
+	<baseDefinition value="http://hl7.org/fhir/StructureDefinition/ResearchStudy"/>
+	<derivation value="constraint"/>
+	<differential>
+		<element id="ResearchStudy.extension">
+			<path value="ResearchStudy.extension"/>
+			<slicing>
+				<discriminator>
+					<type value="value"/>
+					<path value="url"/>
+				</discriminator>
+				<rules value="open"/>
+			</slicing>
+		</element>
+		<element id="ResearchStudy.extension:participatingMedic">
+			<path value="ResearchStudy.extension"/>
+			<sliceName value="participatingMedic"/>
+			<min value="1"/>
+			<type>
+				<code value="Extension"/>
+				<profile value="http://highmed.org/fhir/StructureDefinition/participating-medic"/>
+			</type>
+		</element>
+		<element id="ResearchStudy.description">
+			<path value="ResearchStudy.description"/>
+			<min value="1"/>
+		</element>
+		<element id="ResearchStudy.enrollment">
+			<path value="ResearchStudy.enrollment"/>
+			<min value="1"/>
+			<type>
+				<code value="Reference"/>
+				<targetProfile value="http://highmed.org/fhir/StructureDefinition/highmed-group"/>
+			</type>
+		</element>
+		<element id="ResearchStudy.enrollment.reference">
+			<path value="ResearchStudy.enrollment.reference"/>
+			<min value="1"/>
+		</element>
+		<element id="ResearchStudy.principalInvestigator">
+			<path value="ResearchStudy.principalInvestigator"/>
+			<min value="1"/>
+			<type>
+				<code value="Reference"/>
+				<targetProfile value="http://highmed.org/fhir/StructureDefinition/highmed-practitioner"/>
+				<targetProfile value="http://highmed.org/fhir/StructureDefinition/highmed-practitioner-role"/>
+			</type>
+		</element>
+	</differential>
+</StructureDefinition>

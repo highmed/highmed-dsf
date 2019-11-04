@@ -11,8 +11,10 @@ import java.security.cert.CertificateException;
 
 import org.camunda.bpm.engine.ProcessEngine;
 import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
-import org.highmed.dsf.fhir.client.ClientProviderImpl;
-import org.highmed.dsf.fhir.client.WebsocketClientProvider;
+import org.highmed.dsf.fhir.client.FhirClientProviderImpl;
+import org.highmed.dsf.fhir.client.FhirWebsocketClientProvider;
+import org.highmed.dsf.fhir.group.GroupHelper;
+import org.highmed.dsf.fhir.group.GroupHelperImpl;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProviderImpl;
 import org.highmed.dsf.fhir.task.TaskHandler;
@@ -40,6 +42,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import ca.uhn.fhir.context.FhirContext;
+
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.CertificateReader;
 
@@ -98,8 +101,11 @@ public class FhirConfig
 	@Lazy
 	private ProcessEngine processEngine;
 
+	@Autowired
+	private TaskHelper taskHelper;
+
 	@Bean
-	public ObjectMapper objectMapper()
+	public ObjectMapper fhirObjectMapper()
 	{
 		ObjectMapper mapper = new ObjectMapper();
 
@@ -153,13 +159,13 @@ public class FhirConfig
 	@Bean
 	public MultiInstanceTargetSerializer multiInstanceTargetSerializer()
 	{
-		return new MultiInstanceTargetSerializer(objectMapper());
+		return new MultiInstanceTargetSerializer(fhirObjectMapper());
 	}
 
 	@Bean
 	public MultiInstanceTargetsSerializer multiInstanceTargetsSerializer()
 	{
-		return new MultiInstanceTargetsSerializer(objectMapper());
+		return new MultiInstanceTargetsSerializer(fhirObjectMapper());
 	}
 
 	@Bean
@@ -172,11 +178,11 @@ public class FhirConfig
 	public TaskHandler taskHandler()
 	{
 		return new TaskHandler(processEngine.getRuntimeService(), processEngine.getRepositoryService(),
-				clientProvider().getLocalWebserviceClient());
+				clientProvider().getLocalWebserviceClient(), taskHelper);
 	}
 
 	@Bean
-	public WebsocketClientProvider clientProvider()
+	public FhirWebsocketClientProvider clientProvider()
 	{
 		try
 		{
@@ -186,8 +192,8 @@ public class FhirConfig
 				throw new IOException(
 						"Webservice keystore file '" + localWebserviceKsFile.toString() + "' not readable");
 
-			KeyStore localWebserviceKeyStore = CertificateReader.fromPkcs12(localWebserviceKsFile,
-					webserviceKeyStorePassword);
+			KeyStore localWebserviceKeyStore = CertificateReader
+					.fromPkcs12(localWebserviceKsFile, webserviceKeyStorePassword);
 			KeyStore localWebserviceTrustStore = CertificateHelper.extractTrust(localWebserviceKeyStore);
 
 			Path localWebsocketKsFile = Paths.get(localWebsocketKeyStoreFile);
@@ -195,11 +201,11 @@ public class FhirConfig
 			if (!Files.isReadable(localWebsocketKsFile))
 				throw new IOException("Websocket keystore file '" + localWebsocketKsFile.toString() + "' not readable");
 
-			KeyStore localWebsocketKeyStore = CertificateReader.fromPkcs12(localWebsocketKsFile,
-					localWebsocketKeyStorePassword);
+			KeyStore localWebsocketKeyStore = CertificateReader
+					.fromPkcs12(localWebsocketKsFile, localWebsocketKeyStorePassword);
 			KeyStore localWebsocketTrustStore = CertificateHelper.extractTrust(localWebsocketKeyStore);
 
-			return new ClientProviderImpl(fhirContext(), localWebserviceBaseUrl, localReadTimeout, localConnectTimeout,
+			return new FhirClientProviderImpl(fhirContext(), localWebserviceBaseUrl, localReadTimeout, localConnectTimeout,
 					localWebserviceTrustStore, localWebserviceKeyStore, webserviceKeyStorePassword, remoteReadTimeout,
 					remoteConnectTimeout, remoteProxyPassword, remoteProxyUsername, remoteProxySchemeHostPort,
 					localWebsocketUrl, localWebsocketTrustStore, localWebsocketKeyStore,
@@ -228,5 +234,11 @@ public class FhirConfig
 	public TaskHelper taskHelper()
 	{
 		return new TaskHelperImpl();
+	}
+
+	@Bean
+	public GroupHelper groupHelper()
+	{
+		return new GroupHelperImpl();
 	}
 }

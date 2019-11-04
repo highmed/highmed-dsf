@@ -26,8 +26,8 @@ public class BundleEntryFileVisitor implements FileVisitor<Path>
 		this.putReader = putReader;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
+	@SuppressWarnings("unchecked")
 	public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException
 	{
 		if (dir.equals(baseFolder))
