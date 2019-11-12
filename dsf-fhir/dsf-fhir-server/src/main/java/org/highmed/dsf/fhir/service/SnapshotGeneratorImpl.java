@@ -87,7 +87,7 @@ public class SnapshotGeneratorImpl implements SnapshotGenerator
 			}
 		};
 
-		profileUtils.generateSnapshot(base, differential, baseAbsoluteUrlPrefix, null);
+		profileUtils.generateSnapshot(base, differential, baseAbsoluteUrlPrefix, baseAbsoluteUrlPrefix, null);
 
 		if (messages.isEmpty())
 			logger.debug("Snapshot generated for StructureDefinition with id {}, url {}, version {}",
