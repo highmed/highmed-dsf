@@ -91,7 +91,7 @@ public final class FhirServer
 	{
 		try
 		{
-			WebSocketServerContainerInitializer.configureContext(server.getWebAppContext());
+			WebSocketServerContainerInitializer.initialize(server.getWebAppContext());
 		}
 		catch (ServletException e)
 		{
