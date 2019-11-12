@@ -2,6 +2,7 @@ package org.highmed.dsf.bpe.spring.config;
 
 import java.util.List;
 
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
 import org.camunda.bpm.engine.spring.ProcessEngineFactoryBean;
 import org.camunda.bpm.engine.spring.SpringProcessEngineConfiguration;
@@ -10,6 +11,7 @@ import org.highmed.dsf.bpe.listener.DefaultBpmnParseListener;
 import org.highmed.dsf.bpe.listener.EndListener;
 import org.highmed.dsf.bpe.listener.StartListener;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
+import org.postgresql.Driver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +19,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 public class CamundaConfig
@@ -41,9 +43,9 @@ public class CamundaConfig
 	private FhirWebserviceClientProvider clientProvider;
 
 	@Bean
-	public DataSourceTransactionManager transactionManager()
+	public PlatformTransactionManager transactionManager()
 	{
-		return new DataSourceTransactionManager(transactionAwareDataSource());
+		return new DataSourceTransactionManager(dataSource());
 	}
 
 	@Bean
@@ -53,9 +55,17 @@ public class CamundaConfig
 	}
 
 	@Bean
-	public SimpleDriverDataSource dataSource()
+	public BasicDataSource dataSource()
 	{
-		return new SimpleDriverDataSource(new org.postgresql.Driver(), dbUrl, dbUsernameCamunda, dbPasswordCamunda);
+		BasicDataSource dataSource = new BasicDataSource();
+		dataSource.setDriverClassName(Driver.class.getName());
+		dataSource.setUrl(dbUrl);
+		dataSource.setUsername(dbUsernameCamunda);
+		dataSource.setPassword(dbPasswordCamunda);
+
+		dataSource.setTestOnBorrow(true);
+		dataSource.setValidationQuery("SELECT 1");
+		return dataSource;
 	}
 
 	@Bean
