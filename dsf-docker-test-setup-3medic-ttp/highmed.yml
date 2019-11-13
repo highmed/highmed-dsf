@@ -15,12 +15,12 @@
       apt:
          name: linux-azure
          state: present
-      when: "(os_type == 'windows')"
+      when: "(hypervisor_type == 'hyper-v')"
    -  name: Install linux-virtual kernel
       apt:
          name: linux-virtual
          state: present
-      when: "(os_type == 'macos')"
+      when: "(hypervisor_type == 'virtual-box' or hypervisor_type == 'vm-ware')"
    -  name: Remove dependencies that are no longer required
       apt:
          autoremove: true

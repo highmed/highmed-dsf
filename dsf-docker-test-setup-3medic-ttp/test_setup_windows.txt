@@ -64,15 +64,16 @@ Windows Host - WSL (Ubuntu)
 		sudo nano /etc/ansible/hosts
 			ansible_python_interpreter=/usr/bin/python3
 
-            [all:vars]
-            os_type=windows
-
             [HiGHmed]
             registry
             ttp
             medic1
             medic2
             medic3
+
+            [HiGHmed:vars]
+            hypervisor_type=hyper-v
+
 	Run initial vm setup:
 		ansible-playbook highmed.yml
 
