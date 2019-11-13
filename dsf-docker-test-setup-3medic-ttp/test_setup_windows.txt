@@ -1,0 +1,116 @@
+Windows 10
+
+Windows Host
+	Install WSL with Ubuntu 18.04
+	Download Ubuntu Server 18.04.3 ISO (e.g. https://ftp-stud.hs-esslingen.de/pub/Mirrors/releases.ubuntu.com/18.04.3/ubuntu-18.04.3-live-server-amd64.iso) to your $HOME/Downloads folder
+	Create VirtualSwitch and VMs:
+		execute vm-setup.ps1 in PowerShell with administrator privileges
+
+VMs (Setup Ubuntu Server)
+	Start and connect to VMs:
+		Start-VM -VMName "HiGHmed_DockerRegistry"
+		vmconnect localhost "HiGHmed_DockerRegistry"
+	
+		Start-VM -VMName "HiGHmed_TTP"
+		vmconnect localhost "HiGHmed_TTP"
+	
+		Start-VM -VMName "HiGHmed_MeDIC_1"
+		vmconnect localhost "HiGHmed_MeDIC_1"
+	
+		Start-VM -VMName "HiGHmed_MeDIC_2"
+		vmconnect localhost "HiGHmed_MeDIC_2"
+	
+		Start-VM -VMName "HiGHmed_MeDIC_3"
+		vmconnect localhost "HiGHmed_MeDIC_3"
+
+	Setup Ubuntu 18.04.2 (manually):
+		Network:
+			Subnet: 10.42.0.0/24
+			Address: 10.42.0.{9,10,11,12,13}
+			Gateway: 10.42.0.1
+			DNS: 8.8.8.8,8.8.4.4
+		Hostname: {registry, ttp, medic1, medic2, medic3}
+		Username same as WSL username
+		Install OpenSSH Server
+	
+	Login to console and set sudo without password:
+		sudo visudo
+		
+		change
+			%sudo	ALL=(ALL:ALL) ALL
+		to
+			%sudo	ALL=(ALL:ALL) NOPASSWD:ALL
+	
+
+Windows Host
+	Add {registry, ttp, medic1, medic2, medic3} to %windir%\system32\drivers\etc\hosts IPs: 10.42.0.{9,10,11,12,13}
+	Restart WSL (Admin-PowerShell):
+		Restart-Service LxssManager
+
+Windows Host - WSL (Ubuntu)
+	Create ssh key:
+		ssh-keygen -o -a 100 -t ed25519 -f ~/.ssh/id_ed25519 -C $USER
+
+	Copy ssh public-key to vms:
+		ssh-agent bash
+		ssh-add ~/.ssh/id_ed25519
+		ssh-copy-id {host} [add ssh key to {ttp, medic1, medic2, medic3}]
+	
+	Install ansible:
+		sudo apt-add-repository ppa:ansible/ansible
+		sudo apt install ansible
+	
+	Configure ansible hosts:
+		sudo nano /etc/ansible/hosts
+			ansible_python_interpreter=/usr/bin/python3
+
+            [HiGHmed]
+            registry
+            ttp
+            medic1
+            medic2
+            medic3
+
+            [HiGHmed:vars]
+            hypervisor_type=hyper-v
+
+	Run initial vm setup:
+		ansible-playbook highmed.yml
+
+DockerRegistry
+	Login to registry vm:
+		ssh registry
+	
+	Setup docker registry container:
+		docker run -d -p 5000:5000 --restart always --name registry registry:latest
+	
+Windows Host
+	Docker -> Preferences -> Daemon
+	Add insecure registry:
+		registry:5000
+		
+Upload Config Files
+	ansible-playbook medic1/upload.yml medic2/upload.yml medic3/upload.yml ttp/upload.yml
+	
+BPE Docker
+	docker build -t highmed/bpe .
+	docker tag highmed/bpe:latest registry:5000/highmed/bpe:latest
+	docker push registry:5000/highmed/bpe
+
+BPE Proxy Docker
+	docker build -t highmed/bpe_proxy .
+	docker tag highmed/bpe_proxy:latest registry:5000/highmed/bpe_proxy:latest
+	docker push registry:5000/highmed/bpe_proxy
+
+FHIR Docker
+	docker build -t highmed/fhir .
+	docker tag highmed/fhir:latest registry:5000/highmed/fhir:latest
+	docker push registry:5000/highmed/fhir
+	
+FHIR Proxy Docker
+	docker build -t highmed/fhir_proxy .
+	docker tag highmed/fhir_proxy:latest registry:5000/highmed/fhir_proxy:latest
+	docker push registry:5000/highmed/fhir_proxy
+	
+Shutdown all:
+	ansible HiGHmed -a "shutdown -h now" --become
