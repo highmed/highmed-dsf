@@ -25,7 +25,7 @@ If (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 }
 
 $vmSwitchName = 'HiGHmed'
-$vms = @(@{name="HiGHmed_DockerRegistry";maxRam=2GB}, @{name="HiGHmed_TTP";maxRam=4GB}, @{name="HiGHmed_MeDIC_1";maxRam=4GB}, @{name="HiGHmed_MeDIC_2";maxRam=4GB}, @{name="HiGHmed_MeDIC_3";maxRam=4GB});
+$vms = @(@{name="HiGHmed_DockerRegistry";maxRam=1GB}, @{name="HiGHmed_TTP";maxRam=2GB}, @{name="HiGHmed_MeDIC_1";maxRam=2GB}, @{name="HiGHmed_MeDIC_2";maxRam=2GB}, @{name="HiGHmed_MeDIC_3";maxRam=2GB});
 
 Write-Progress -Activity HiGHmed -Status 'Progress' -PercentComplete (100/($vms.Length+1)) -CurrentOperation "Configuring Network ..."
 New-VMSwitch -name $vmSwitchName -SwitchType Internal
@@ -38,7 +38,7 @@ for ($i=0; $i -lt $vms.Length; $i++)
     $vhdPath = Join-Path $vhdParentPath ($vm.name + '.vhdx');
    
     Write-Progress -Activity HiGHmed -Status 'Progress' -PercentComplete (($i+2)*(100/($vms.Length+1))) -CurrentOperation "Creating VM $($vm.name) ..."
-    New-VM -Name $vm.name -MemoryStartupBytes 2GB -NewVHDPath $vhdPath -NewVHDSizeBytes 24GB -SwitchName $vmSwitchName -Generation 2;
+    New-VM -Name $vm.name -MemoryStartupBytes 512MB -NewVHDPath $vhdPath -NewVHDSizeBytes 16GB -SwitchName $vmSwitchName -Generation 2;
     Set-VMProcessor -VMName $vm.name -Count 2;
     Add-VMDvdDrive -VMName $vm.name -Path $ubuntuIsoPath;
     Set-VMFirmware -VMName $vm.name -BootOrder $(Get-VMDvdDrive -VMName $vm.name),$(Get-VMHardDiskDrive -VMName $vm.name),$(Get-VMNetworkAdapter -VMName $vm.name) -SecureBootTemplate MicrosoftUEFICertificateAuthority

@@ -23,10 +23,10 @@ do
 	VBoxManage createvm --name $VmName --ostype Ubuntu_64 --basefolder $Folder --register
 
 	echo "Set memory ..."
-	VBoxManage modifyvm $VmName --memory 3072
+	VBoxManage modifyvm $VmName --memory 2048
 
 	echo "Create and add HD ..."
-	VBoxManage createhd --filename $Folder/$VmName/$VmName.vdi --size 10000 --format VDI
+	VBoxManage createhd --filename $Folder/$VmName/$VmName.vdi --size 16000 --format VDI
 
 	VBoxManage storagectl $VmName --name "SATA Controller" --add sata --controller IntelAhci
 	VBoxManage storageattach $VmName --storagectl "SATA Controller" --port 0 --device 0 --type hdd --medium $Folder/$VmName/$VmName.vdi

@@ -67,7 +67,7 @@ Mac Host
             medic3
 
             [HiGHmed:vars]
-            hypervisor_type=virtual-box
+            hypervisor_type=virtualbox
 
 	Run initial VM setup:
 		ansible-playbook highmed.yml
