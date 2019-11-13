@@ -53,7 +53,7 @@ public class SnapshotTest
 				.copy();
 		StructureDefinition derived = reader.readXml(Paths.get("src/test/resources/profiles/highmed-task-0.5.0.xml"));
 
-		profileUtis.generateSnapshot(base, derived, url, profileName);
+		profileUtis.generateSnapshot(base, derived, url, url, profileName);
 
 		if (logger.isDebugEnabled())
 			logger.debug("Snapshot: {}", context.newXmlParser().setPrettyPrint(true).encodeResourceToString(derived));

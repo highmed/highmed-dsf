@@ -5,6 +5,8 @@
 
 	<property name="json" value="JSONB" dbms="postgresql" />
 	<property name="json" value="varchar(5000)" dbms="h2" />
+	<property name="binary_type" value="BYTEA" dbms="postgresql" />
+	<property name="binary_type" value="binary" dbms="h2" />
 
 	<changeSet author="retwet" id="db.binaries.changelog-0.1.0">
 		<createTable tableName="binaries">
@@ -18,9 +20,10 @@
 				<constraints nullable="false" />
 			</column>
 			<!-- caveat: json column cannot be named binary, because binary is a reserved word in sql -->
-			<column name="binary_data" type="${json}">
+			<column name="binary_json" type="${json}">
 				<constraints nullable="false" />
 			</column>
+			<column name="binary_data" type="${binary_type}"/>
 		</createTable>
 
 		<addPrimaryKey tableName="binaries" columnNames="binary_id, version" />
@@ -30,12 +33,12 @@
 			GRANT ALL ON TABLE binaries TO ${db.liquibase_user};
 			GRANT SELECT, INSERT, UPDATE ON TABLE binaries TO ${db.server_users_group};
 			CREATE INDEX binary_id_index ON binaries USING btree (binary_id);
-			CREATE INDEX binary_data_index ON binaries USING gin (binary_data);
+			CREATE INDEX binary_json_index ON binaries USING gin (binary_json);
 			CREATE INDEX binary_id_version_index ON binaries USING btree (binary_id, version);
 		</sql>
 
 		<createView viewName="current_binaries" replaceIfExists="true">
-			SELECT DISTINCT ON (binary_id) binary_id, version, binary_data
+			SELECT DISTINCT ON (binary_id) binary_id, version, binary_json, binary_data
 			FROM binaries WHERE NOT deleted ORDER BY binary_id, version DESC
 		</createView>
 

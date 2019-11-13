@@ -6,7 +6,6 @@
 	<include file="db/db.create-db-users.changelog-0.1.0.xml" />
 
 	<include file="db/db.binaries.changelog-0.1.0.xml" />
-	<include file="db/db.binaries.changelog-0.1.1.xml" />
 	<include file="db/db.bundles.changelog-0.1.0.xml" />
 	<include file="db/db.code_systems.changelog-0.1.0.xml" />
 	<include file="db/db.code_systems.changelog-0.1.0.xml" />

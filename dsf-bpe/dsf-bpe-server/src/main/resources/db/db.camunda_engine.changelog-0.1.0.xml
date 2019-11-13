@@ -6,9 +6,11 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
 
 	<changeSet author="camunda.org" id="db.camunda_engine.changelog-0.1.0">
-		<sqlFile dbms="postgresql" encoding="utf8" path="sql/create/postgres_engine_7.10.0.sql" />
+		<sqlFile dbms="postgresql" encoding="utf8" path="db/camunda/postgres_engine_7.11.0.sql" />
 			
 		<sql dbms="postgresql">
+			GRANT ALL ON TABLE ACT_GE_SCHEMA_LOG TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_GE_SCHEMA_LOG TO ${db.camunda_users_group};
 			GRANT ALL ON TABLE ACT_GE_PROPERTY TO ${db.liquibase_user};
 			GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ACT_GE_PROPERTY TO ${db.camunda_users_group};
 			GRANT ALL ON TABLE ACT_GE_BYTEARRAY TO ${db.liquibase_user};

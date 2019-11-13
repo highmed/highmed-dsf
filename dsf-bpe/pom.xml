@@ -1,5 +1,5 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>dsf-bpe-pom</artifactId>
@@ -24,8 +24,8 @@
 	</modules>
 
 	<properties>
-		<!-- if upgrading, add latest (and in between) versions to db-migration project, db-migration needs dependency to all versions since and including 7.10.0 for camunda-sql-scripts -->
-		<camunda.version>7.10.0</camunda.version>
+		<!-- if upgrading, copy version specific camunda sql scripts to dsf-bpe-server/src/main/resource/db/camunda and create a corresponding liquibase migration script -->
+		<camunda.version>7.11.0</camunda.version>
 	</properties>
 
 	<repositories>
@@ -138,65 +138,6 @@
 			</dependency>
 
 			<dependency>
-				<groupId>org.glassfish.jersey.core</groupId>
-				<artifactId>jersey-server</artifactId>
-				<version>${jersey.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.glassfish.jersey.containers</groupId>
-				<artifactId>jersey-container-servlet</artifactId>
-				<version>${jersey.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.glassfish.jersey.inject</groupId>
-				<artifactId>jersey-hk2</artifactId>
-				<version>${jersey.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.glassfish.jersey.core</groupId>
-				<artifactId>jersey-client</artifactId>
-				<version>${jersey.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.glassfish.jersey.media</groupId>
-				<artifactId>jersey-media-jaxb</artifactId>
-				<version>${jersey.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.glassfish.jersey.media</groupId>
-				<artifactId>jersey-media-json-jackson</artifactId>
-				<version>${jersey.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.springframework</groupId>
-				<artifactId>spring-context</artifactId>
-				<version>${spring.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework</groupId>
-				<artifactId>spring-web</artifactId>
-				<version>${spring.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>javax.ws.rs</groupId>
-				<artifactId>javax.ws.rs-api</artifactId>
-				<version>2.1</version>
-			</dependency>
-			<dependency>
-				<groupId>javax.servlet</groupId>
-				<artifactId>javax.servlet-api</artifactId>
-				<version>3.1.0</version>
-			</dependency>
-			<dependency>
-				<groupId>org.glassfish.jaxb</groupId>
-				<artifactId>jaxb-runtime</artifactId>
-				<version>2.3.2</version>
-			</dependency>
-
-			<dependency>
 				<groupId>org.camunda.bpm</groupId>
 				<artifactId>camunda-bom</artifactId>
 				<version>${camunda.version}</version>
@@ -204,15 +145,9 @@
 				<type>pom</type>
 			</dependency>
 			<dependency>
-				<groupId>org.camunda.bpm.distro</groupId>
-				<artifactId>camunda-sql-scripts</artifactId>
-				<version>${camunda.version}</version>
-			</dependency>
-
-			<dependency>
 				<groupId>org.mybatis</groupId>
 				<artifactId>mybatis</artifactId>
-				<version>3.5.0</version>
+				<version>3.5.3</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

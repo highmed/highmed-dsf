@@ -101,7 +101,7 @@ public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter
 		group.setActual(true);
 		group.setActive(true);
 		group.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/query").setValue(new Expression()
-				.setLanguage(ExpressionLanguage.APPLICATION_XFHIRQUERY).setExpression("SELECT COUNT(e) FROM EHR e"));
+				.setLanguage(ExpressionLanguage.APPLICATION_XFHIRQUERY.toCode()).setExpression("SELECT COUNT(e) FROM EHR e"));
 		group.setName(name);
 
 		return group;

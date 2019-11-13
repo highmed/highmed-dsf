@@ -6,7 +6,7 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
 
 	<changeSet author="camunda.org" id="db.camunda_identity.changelog-0.1.0">
-		<sqlFile dbms="postgresql" encoding="utf8" path="sql/create/postgres_identity_7.10.0.sql" />
+		<sqlFile dbms="postgresql" encoding="utf8" path="db/camunda/postgres_identity_7.11.0.sql" />
 			
 		<sql dbms="postgresql">
 			GRANT ALL ON TABLE ACT_ID_GROUP TO ${db.liquibase_user};

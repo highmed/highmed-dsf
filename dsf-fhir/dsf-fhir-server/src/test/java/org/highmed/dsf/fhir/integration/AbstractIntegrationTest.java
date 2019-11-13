@@ -158,7 +158,7 @@ public abstract class AbstractIntegrationTest
 		JettyServer server = new JettyServer(connector, errorHandler, "/fhir", initializers, initParameter,
 				webInfClassesDirs, webInfJars, AuthenticationFilter.class);
 
-		WebSocketServerContainerInitializer.configureContext(server.getWebAppContext());
+		WebSocketServerContainerInitializer.initialize(server.getWebAppContext());
 
 		server.start();
 
