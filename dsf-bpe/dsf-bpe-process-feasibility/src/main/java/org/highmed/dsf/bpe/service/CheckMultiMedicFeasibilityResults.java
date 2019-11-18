@@ -3,6 +3,7 @@ package org.highmed.dsf.bpe.service;
 import static org.highmed.dsf.bpe.Constants.MIN_PARTICIPATING_MEDICS;
 
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -35,32 +36,19 @@ public class CheckMultiMedicFeasibilityResults extends AbstractServiceDelegate
 				.getVariable(Constants.VARIABLE_SIMPLE_COHORT_SIZE_QUERY_FINAL_RESULT);
 		Outputs outputs = (Outputs) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
 
-		// TODO: use single stream with groupby for outputs
-		List<FinalSimpleFeasibilityResult> erroneousResults = filterNumberOfParticipatingMedics(finalResult,
-				this::lowerThenThreshold);
-		List<FinalSimpleFeasibilityResult> correctResults = filterNumberOfParticipatingMedics(finalResult,
-				this::higherOrEqualThenThreshold);
-
-		addErroneousResultsToOutputs(erroneousResults.stream(), outputs);
-		addSuccessfulResultsToOutputs(correctResults.stream(), outputs);
+		finalResult.stream().collect(Collectors.groupingBy(this::lowerThenThreshold)).forEach((isLower, list) -> {
+			if(isLower)
+				addErroneousResultsToOutputs(list.stream(), outputs);
+			else
+				addSuccessfulResultsToOutputs(list.stream(), outputs);
+		});
 
 		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, outputs);
-	}
-
-	private List<FinalSimpleFeasibilityResult> filterNumberOfParticipatingMedics(
-			List<FinalSimpleFeasibilityResult> finalResult, Predicate<FinalSimpleFeasibilityResult> thresholdFilter)
-	{
-		return finalResult.stream().filter(thresholdFilter).collect(Collectors.toList());
 	}
 
 	private boolean lowerThenThreshold(FinalSimpleFeasibilityResult result)
 	{
 		return result.getParticipatingMedics() < MIN_PARTICIPATING_MEDICS;
-	}
-
-	private boolean higherOrEqualThenThreshold(FinalSimpleFeasibilityResult result)
-	{
-		return result.getParticipatingMedics() >= MIN_PARTICIPATING_MEDICS;
 	}
 
 	private void addErroneousResultsToOutputs(Stream<FinalSimpleFeasibilityResult> erroneousResults, Outputs outputs)
