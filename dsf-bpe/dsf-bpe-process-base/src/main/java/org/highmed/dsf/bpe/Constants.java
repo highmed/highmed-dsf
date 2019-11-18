@@ -1,5 +1,7 @@
 package org.highmed.dsf.bpe;
 
+import org.hl7.fhir.r4.model.CodeType;
+
 public interface Constants
 {
 	String VARIABLE_MESSAGE_NAME = "messageName";
@@ -74,4 +76,6 @@ public interface Constants
 	int MIN_COHORT_DEFINITIONS = 1;
 
 	String SIMPLE_FEASIBILITY_QUERY_PREFIX = "select count";
+
+	CodeType AQL_QUERY_TYPE = new CodeType("application/x-aql-query").setSystem("http://highmed.org/fhir/CodeSystem/query-type");
 }
