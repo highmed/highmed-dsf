@@ -17,11 +17,10 @@ public class GroupHelperImpl implements GroupHelper
 	@Override
 	public String extractAqlQuery(Group group)
 	{
-		// TODO: APPLICATION_XFHIRQUERY to support AQL
 		List<Extension> queries = group.getExtension().stream()
-				.filter(extension -> extension.getUrl().equals(Constants.EXTENSION_QUERY_URI))
-				.filter(extension -> Expression.ExpressionLanguage.APPLICATION_XFHIRQUERY.toCode()
-						.equals(((Expression) extension.getValue()).getLanguage())).collect(Collectors.toList());
+				.filter(extension -> extension.getUrl().equals(Constants.EXTENSION_QUERY_URI)).filter(extension ->
+						Constants.AQL_QUERY_TYPE.compareTo(((Expression) extension.getValue()).getLanguageElement())
+								== 0).collect(Collectors.toList());
 
 		if (queries.size() != 1)
 		{
