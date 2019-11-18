@@ -14,6 +14,7 @@ import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.Output;
 import org.highmed.dsf.fhir.variables.Outputs;
+import org.highmed.dsf.fhir.variables.OutputsValues;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +44,7 @@ public class CheckSingleMedicFeasibilityResults extends AbstractServiceDelegate
 		addErroneousResultsToOutputs(erroneousResults.entrySet().stream(), outputs);
 		addSuccessfulResultsToOutputs(correctResults.entrySet().stream(), outputs);
 
-		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, outputs);
+		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, OutputsValues.create(outputs));
 	}
 
 	private Map<String, String> checkQueryResults(Map<String, String> queryResults)

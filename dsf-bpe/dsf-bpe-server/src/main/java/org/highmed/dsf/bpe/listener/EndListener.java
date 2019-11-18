@@ -1,12 +1,9 @@
 package org.highmed.dsf.bpe.listener;
 
-import java.util.List;
-
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.ExecutionListener;
 import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.fhir.variables.Output;
 import org.highmed.dsf.fhir.variables.Outputs;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Task;

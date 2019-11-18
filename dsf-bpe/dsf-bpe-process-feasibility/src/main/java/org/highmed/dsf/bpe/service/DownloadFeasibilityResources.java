@@ -14,6 +14,7 @@ import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.Outputs;
+import org.highmed.dsf.fhir.variables.OutputsValues;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
@@ -65,7 +66,7 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 		List<Group> cohortDefinitions = getCohortDefinitions(researchStudy, outputs, client);
 		execution.setVariable(Constants.VARIABLE_COHORTS, cohortDefinitions);
 
-		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, outputs);
+		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, OutputsValues.create(outputs));
 	}
 
 	private IdType getResearchStudyId(Task task)
@@ -105,8 +106,7 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 		}
 	}
 
-	private List<Group> getCohortDefinitions(ResearchStudy researchStudy, Outputs outputs,
-			FhirWebserviceClient client)
+	private List<Group> getCohortDefinitions(ResearchStudy researchStudy, Outputs outputs, FhirWebserviceClient client)
 	{
 		List<Group> cohortDefinitions = new ArrayList<>();
 		List<Reference> cohortDefinitionReferences = researchStudy.getEnrollment();

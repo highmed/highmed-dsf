@@ -1,8 +1,6 @@
 package org.highmed.dsf.fhir.variables;
 
-import java.io.Serializable;
-
-public class Output implements Serializable
+public class Output
 {
 	private final String system;
 	private final String code;

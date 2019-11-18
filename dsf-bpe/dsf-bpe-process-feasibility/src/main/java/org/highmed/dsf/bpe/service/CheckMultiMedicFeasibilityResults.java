@@ -3,8 +3,6 @@ package org.highmed.dsf.bpe.service;
 import static org.highmed.dsf.bpe.Constants.MIN_PARTICIPATING_MEDICS;
 
 import java.util.List;
-import java.util.Map;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -16,6 +14,7 @@ import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.Output;
 import org.highmed.dsf.fhir.variables.Outputs;
+import org.highmed.dsf.fhir.variables.OutputsValues;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,13 +36,13 @@ public class CheckMultiMedicFeasibilityResults extends AbstractServiceDelegate
 		Outputs outputs = (Outputs) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
 
 		finalResult.stream().collect(Collectors.groupingBy(this::lowerThenThreshold)).forEach((isLower, list) -> {
-			if(isLower)
+			if (isLower)
 				addErroneousResultsToOutputs(list.stream(), outputs);
 			else
 				addSuccessfulResultsToOutputs(list.stream(), outputs);
 		});
 
-		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, outputs);
+		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, OutputsValues.create(outputs));
 	}
 
 	private boolean lowerThenThreshold(FinalSimpleFeasibilityResult result)

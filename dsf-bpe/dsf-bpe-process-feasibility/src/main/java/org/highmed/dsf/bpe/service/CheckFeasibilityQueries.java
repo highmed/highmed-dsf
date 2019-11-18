@@ -14,6 +14,7 @@ import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.group.GroupHelper;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.Outputs;
+import org.highmed.dsf.fhir.variables.OutputsValues;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
@@ -72,6 +73,6 @@ public class CheckFeasibilityQueries extends AbstractServiceDelegate implements 
 		});
 
 		execution.setVariable(Constants.VARIABLE_QUERIES, queries);
-		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, outputs);
+		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, OutputsValues.create(outputs));
 	}
 }
