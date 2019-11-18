@@ -1,6 +1,5 @@
 package org.highmed.dsf.bpe.delegate;
 
-import java.util.List;
 import java.util.Objects;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
@@ -8,7 +7,7 @@ import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.fhir.variables.OutputWrapper;
+import org.highmed.dsf.fhir.variables.Outputs;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
@@ -62,23 +61,22 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 					execution.getProcessDefinitionId(), execution.getActivityInstanceId(), task.getId(),
 					exception.getMessage());
 
-			String errorMessage = "Process " + execution.getProcessDefinitionId() + " has fatal error in step "
-					+ execution.getActivityInstanceId() + ", reason: " + exception.getMessage();
+			String errorMessage =
+					"Process " + execution.getProcessDefinitionId() + " has fatal error in step " + execution
+							.getActivityInstanceId() + ", reason: " + exception.getMessage();
 
 			Task.TaskOutputComponent errorOutput = taskHelper.createOutput(Constants.CODESYSTEM_HIGHMED_BPMN,
 					Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, errorMessage);
 			task.addOutput(errorOutput);
 
-			@SuppressWarnings("unchecked")
-			List<OutputWrapper> outputs = (List<OutputWrapper>) execution
-					.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
+			Outputs outputs = (Outputs) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
 			task = taskHelper.addOutputs(task, outputs);
 
 			task.setStatus(Task.TaskStatus.FAILED);
 			webserviceClient.update(task);
 
-			execution.getProcessEngine().getRuntimeService().deleteProcessInstance(execution.getProcessInstanceId(),
-					exception.getMessage());
+			execution.getProcessEngine().getRuntimeService()
+					.deleteProcessInstance(execution.getProcessInstanceId(), exception.getMessage());
 
 		}
 	}
@@ -96,11 +94,9 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 	/**
 	 * Method called by a BPMN service task
 	 *
-	 * @param execution
-	 *            holding the process instance information and variables
-	 * @throws Exception
-	 *             reason why process instance has failed, exception message will be stored in process associated fhir
-	 *             task resource as output
+	 * @param execution holding the process instance information and variables
+	 * @throws Exception reason why process instance has failed, exception message will be stored in process associated fhir
+	 *                   task resource as output
 	 */
 	protected abstract void doExecute(DelegateExecution execution) throws Exception;
 

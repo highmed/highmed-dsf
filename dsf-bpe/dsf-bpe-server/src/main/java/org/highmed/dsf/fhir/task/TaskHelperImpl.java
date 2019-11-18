@@ -1,10 +1,9 @@
 package org.highmed.dsf.fhir.task;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import org.highmed.dsf.fhir.variables.OutputWrapper;
+import org.highmed.dsf.fhir.variables.Outputs;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Reference;
@@ -81,13 +80,13 @@ public class TaskHelperImpl implements TaskHelper
 	}
 
 	@Override
-	public Task addOutputs(Task task, List<OutputWrapper> outputs)
+	public Task addOutputs(Task task, Outputs outputs)
 	{
-		outputs.forEach(outputWrapper -> outputWrapper.getKeyValueList().forEach(entry ->
+		outputs.getOutputs().forEach(output ->
 		{
-			Task.TaskOutputComponent output = createOutput(outputWrapper.getSystem(), entry.getKey(), entry.getValue());
-			task.addOutput(output);
-		}));
+			Task.TaskOutputComponent component = createOutput(output.getSystem(), output.getCode(), output.getValue());
+			task.addOutput(component);
+		});
 
 		return task;
 	}

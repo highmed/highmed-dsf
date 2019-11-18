@@ -2,7 +2,6 @@ package org.highmed.dsf.bpe.service;
 
 import static org.highmed.dsf.bpe.Constants.SIMPLE_FEASIBILITY_QUERY_PREFIX;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,8 +13,7 @@ import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.group.GroupHelper;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.fhir.variables.OutputWrapper;
-import org.highmed.dsf.fhir.variables.Pair;
+import org.highmed.dsf.fhir.variables.Outputs;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
@@ -46,11 +44,10 @@ public class CheckFeasibilityQueries extends AbstractServiceDelegate implements 
 	@SuppressWarnings("unchecked")
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
-		List<OutputWrapper> outputs = (List<OutputWrapper>) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
+		Outputs outputs = (Outputs) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
 		List<Group> cohorts = (List<Group>) execution.getVariable(Constants.VARIABLE_COHORTS);
 
 		Map<String, String> queries = new HashMap<>();
-		List<Pair<String, String>> errors = new ArrayList<>();
 
 		cohorts.forEach(group -> {
 			String aqlQuery = groupHelper.extractAqlQuery(group).toLowerCase();
@@ -66,15 +63,13 @@ public class CheckFeasibilityQueries extends AbstractServiceDelegate implements 
 								+ "' but got '" + aqlQuery + "'";
 
 				logger.info(errorMessage);
-				errors.add(new Pair<>(Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, errorMessage));
+				outputs.addErrorOutput(errorMessage);
 			}
 			else
 			{
 				queries.put(groupIdString, aqlQuery);
 			}
 		});
-
-		outputs.add(new OutputWrapper(Constants.CODESYSTEM_HIGHMED_BPMN, errors));
 
 		execution.setVariable(Constants.VARIABLE_QUERIES, queries);
 		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, outputs);

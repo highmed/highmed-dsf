@@ -13,8 +13,7 @@ import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.fhir.variables.OutputWrapper;
-import org.highmed.dsf.fhir.variables.Pair;
+import org.highmed.dsf.fhir.variables.Outputs;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
@@ -61,8 +60,7 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 		ResearchStudy researchStudy = getResearchStudy(researchStudyId, client);
 		execution.setVariable(Constants.VARIABLE_RESEARCH_STUDY, researchStudy);
 
-		@SuppressWarnings("unchecked")
-		List<OutputWrapper> outputs = (List<OutputWrapper>) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
+		Outputs outputs = (Outputs) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
 
 		List<Group> cohortDefinitions = getCohortDefinitions(researchStudy, outputs, client);
 		execution.setVariable(Constants.VARIABLE_COHORTS, cohortDefinitions);
@@ -107,13 +105,12 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 		}
 	}
 
-	private List<Group> getCohortDefinitions(ResearchStudy researchStudy, List<OutputWrapper> outputs,
+	private List<Group> getCohortDefinitions(ResearchStudy researchStudy, Outputs outputs,
 			FhirWebserviceClient client)
 	{
 		List<Group> cohortDefinitions = new ArrayList<>();
 		List<Reference> cohortDefinitionReferences = researchStudy.getEnrollment();
 
-		List<Pair<String, String>> errors = new ArrayList<>();
 		cohortDefinitionReferences.forEach(reference -> {
 			try
 			{
@@ -128,11 +125,9 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 								.getBaseUrl();
 
 				logger.info(errorMessage);
-				errors.add(new Pair<>(Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, errorMessage));
+				outputs.addErrorOutput(errorMessage);
 			}
 		});
-
-		outputs.add(new OutputWrapper(Constants.CODESYSTEM_HIGHMED_BPMN, errors));
 
 		return cohortDefinitions;
 	}

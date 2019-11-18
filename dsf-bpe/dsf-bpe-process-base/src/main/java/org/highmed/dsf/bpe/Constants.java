@@ -27,7 +27,7 @@ public interface Constants
 	String VARIABLE_SIMPLE_COHORT_SIZE_QUERY_FINAL_RESULT = "simpleCohortSizeQueryFinalResult";
 
 	/**
-	 * Stores a List<{@link org.highmed.dsf.fhir.variables.OutputWrapper}> </>of outputs that have to be written to a
+	 * Stores a List<{@link org.highmed.dsf.fhir.variables.Outputs}> </>of outputs that have to be written to a
 	 * task resource after the process terminates. Do not override, only add new entries to the list.
 	 */
 	String VARIABLE_PROCESS_OUTPUTS = "outputs";

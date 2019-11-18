@@ -1,7 +1,6 @@
 package org.highmed.dsf.bpe.service;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -16,8 +15,8 @@ import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.fhir.variables.OutputWrapper;
-import org.highmed.dsf.fhir.variables.Pair;
+import org.highmed.dsf.fhir.variables.Output;
+import org.highmed.dsf.fhir.variables.Outputs;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -137,13 +136,11 @@ public class UpdateWhiteList extends AbstractServiceDelegate implements Initiali
 
 	private void setTaskOutput(Bundle result, DelegateExecution execution)
 	{
-		@SuppressWarnings("unchecked")
-		List<OutputWrapper> outputs = (List<OutputWrapper>) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
+		Outputs outputs = (Outputs) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
 
-		OutputWrapper outputWrapper = new OutputWrapper(Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST,
-				List.of(new Pair<>(Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST,
-						new IdType(result.getId()).getIdPart())));
-		outputs.add(outputWrapper);
+		outputs.add(new Output(Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST,
+				Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST,
+				new IdType(result.getId()).getIdPart()));
 
 		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, outputs);
 	}

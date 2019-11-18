@@ -10,7 +10,7 @@ import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.AbstractTaskMessageSend;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.fhir.variables.OutputWrapper;
+import org.highmed.dsf.fhir.variables.Outputs;
 import org.hl7.fhir.r4.model.Task;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -26,12 +26,15 @@ public class SendFeasibilityResults extends AbstractTaskMessageSend
 	@Override
 	protected Stream<Task.ParameterComponent> getAdditionalInputParameters(DelegateExecution execution)
 	{
-		@SuppressWarnings("unchecked")
-		List<OutputWrapper> outputs = (List<OutputWrapper>) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
+		Outputs outputs = (Outputs) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
+
 		List<Task.ParameterComponent> inputs = new ArrayList<>();
 
-		outputs.forEach(outputWrapper -> outputWrapper.getKeyValueList().forEach(entry -> inputs
-				.add(getTaskHelper().createInput(outputWrapper.getSystem(), entry.getKey(), entry.getValue()))));
+		outputs.getOutputs().forEach(output -> {
+			Task.ParameterComponent input = getTaskHelper()
+					.createInput(output.getSystem(), output.getCode(), output.getValue());
+			inputs.add(input);
+		});
 
 		return inputs.stream();
 	}

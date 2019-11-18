@@ -13,8 +13,8 @@ import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.bpe.variables.FinalSimpleFeasibilityResult;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.fhir.variables.OutputWrapper;
-import org.highmed.dsf.fhir.variables.Pair;
+import org.highmed.dsf.fhir.variables.Output;
+import org.highmed.dsf.fhir.variables.Outputs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +33,7 @@ public class CheckMultiMedicFeasibilityResults extends AbstractServiceDelegate
 	{
 		List<FinalSimpleFeasibilityResult> finalResult = (List<FinalSimpleFeasibilityResult>) execution
 				.getVariable(Constants.VARIABLE_SIMPLE_COHORT_SIZE_QUERY_FINAL_RESULT);
-		List<OutputWrapper> outputs = (List<OutputWrapper>) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
+		Outputs outputs = (Outputs) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
 
 		// TODO: use single stream with groupby for outputs
 		List<FinalSimpleFeasibilityResult> erroneousResults = filterNumberOfParticipatingMedics(finalResult,
@@ -41,8 +41,8 @@ public class CheckMultiMedicFeasibilityResults extends AbstractServiceDelegate
 		List<FinalSimpleFeasibilityResult> correctResults = filterNumberOfParticipatingMedics(finalResult,
 				this::higherOrEqualThenThreshold);
 
-		outputs.add(getOutputWrapperErroneous(erroneousResults.stream()));
-		outputs.add(getOutputWrapperSuccessful(correctResults.stream()));
+		addErroneousResultsToOutputs(erroneousResults.stream(), outputs);
+		addSuccessfulResultsToOutputs(correctResults.stream(), outputs);
 
 		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, outputs);
 	}
@@ -63,31 +63,27 @@ public class CheckMultiMedicFeasibilityResults extends AbstractServiceDelegate
 		return result.getParticipatingMedics() >= MIN_PARTICIPATING_MEDICS;
 	}
 
-	private OutputWrapper getOutputWrapperErroneous(Stream<FinalSimpleFeasibilityResult> erroneousResults)
+	private void addErroneousResultsToOutputs(Stream<FinalSimpleFeasibilityResult> erroneousResults, Outputs outputs)
 	{
-		Stream<Pair<String, String>> errors = erroneousResults.map(result -> {
+		erroneousResults.forEach(result -> {
 			String errorMessage =
 					"Final multi medic feasibility query result check failed for group with id '" + result.getCohortId()
 							+ "', not enough participating medics, expected >= " + MIN_PARTICIPATING_MEDICS + ", got "
 							+ result.getParticipatingMedics();
 
 			logger.info(errorMessage);
-			return new Pair<>(Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, errorMessage);
+			outputs.addErrorOutput(errorMessage);
 		});
-
-		return new OutputWrapper(Constants.CODESYSTEM_HIGHMED_BPMN, errors);
 	}
 
-	private OutputWrapper getOutputWrapperSuccessful(Stream<FinalSimpleFeasibilityResult> successfulResults)
+	private void addSuccessfulResultsToOutputs(Stream<FinalSimpleFeasibilityResult> successfulResults, Outputs outputs)
 	{
-		Stream<Pair<String, String>> success = successfulResults.flatMap(result -> Stream
-				.of(new Pair<>(Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS,
-								result.getParticipatingMedics() + Constants.CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR
-										+ result.getCohortId()),
-						new Pair<>(Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT,
-								result.getCohortSize() + Constants.CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR
-										+ result.getCohortId())));
-
-		return new OutputWrapper(Constants.CODESYSTEM_HIGHMED_FEASIBILITY, success);
+		successfulResults.flatMap(result -> Stream.of(new Output(Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
+				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS,
+				result.getParticipatingMedics() + Constants.CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR + result
+						.getCohortId()), new Output(Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
+				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT,
+				result.getCohortSize() + Constants.CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR + result
+						.getCohortId()))).forEach(outputs::add);
 	}
 }

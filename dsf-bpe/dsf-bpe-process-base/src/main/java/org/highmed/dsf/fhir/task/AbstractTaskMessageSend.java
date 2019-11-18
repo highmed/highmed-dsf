@@ -1,8 +1,6 @@
 package org.highmed.dsf.fhir.task;
 
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -13,8 +11,7 @@ import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.variables.MultiInstanceTarget;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargets;
-import org.highmed.dsf.fhir.variables.OutputWrapper;
-import org.highmed.dsf.fhir.variables.Pair;
+import org.highmed.dsf.fhir.variables.Outputs;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -78,18 +75,15 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 		}
 		catch (Exception e)
 		{
-			String errorMessage = "Error while sending Task (process: " + processDefinitionKey + ", version: "
-					+ versionTag + ", message-name: " + messageName + ", business-key: " + businessKey
-					+ ", correlation-key: " + target.getCorrelationKey() + ") to organization with identifier "
-					+ target.getTargetOrganizationIdentifierValue() + ": " + e.getMessage();
+			String errorMessage =
+					"Error while sending Task (process: " + processDefinitionKey + ", version: " + versionTag
+							+ ", message-name: " + messageName + ", business-key: " + businessKey
+							+ ", correlation-key: " + target.getCorrelationKey() + ") to organization with identifier "
+							+ target.getTargetOrganizationIdentifierValue() + ": " + e.getMessage();
 			logger.warn(errorMessage);
 
-			@SuppressWarnings("unchecked")
-			List<OutputWrapper> outputs = (List<OutputWrapper>) execution
-					.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
-
-			outputs.add(new OutputWrapper(Constants.CODESYSTEM_HIGHMED_BPMN, Collections
-					.singleton(new Pair<>(Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, errorMessage))));
+			Outputs outputs = (Outputs) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
+			outputs.addErrorOutput(errorMessage);
 
 			logger.debug("Removing target organization {} with error {} from multi instance target list",
 					target.getTargetOrganizationIdentifierValue(), e.getMessage());
@@ -131,26 +125,26 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 
 		// http://highmed.org/bpe/Process/processDefinitionKey
 		// http://highmed.org/bpe/Process/processDefinitionKey/versionTag
-		String instantiatesUri = Constants.PROCESS_URI_BASE + processDefinitionKey
-				+ (versionTag != null && !versionTag.isEmpty() ? ("/" + versionTag) : "");
+		String instantiatesUri =
+				Constants.PROCESS_URI_BASE + processDefinitionKey + (versionTag != null && !versionTag.isEmpty() ?
+						("/" + versionTag) :
+						"");
 		task.setInstantiatesUri(instantiatesUri);
 
-		ParameterComponent messageNameInput = new ParameterComponent(
-				new CodeableConcept(new Coding(Constants.CODESYSTEM_HIGHMED_BPMN,
-						Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME, null)),
-				new StringType(messageName));
+		ParameterComponent messageNameInput = new ParameterComponent(new CodeableConcept(
+				new Coding(Constants.CODESYSTEM_HIGHMED_BPMN, Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME,
+						null)), new StringType(messageName));
 		task.getInput().add(messageNameInput);
 
-		ParameterComponent businessKeyInput = new ParameterComponent(
-				new CodeableConcept(new Coding(Constants.CODESYSTEM_HIGHMED_BPMN,
-						Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY, null)),
-				new StringType(businessKey));
+		ParameterComponent businessKeyInput = new ParameterComponent(new CodeableConcept(
+				new Coding(Constants.CODESYSTEM_HIGHMED_BPMN, Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY,
+						null)), new StringType(businessKey));
 		task.getInput().add(businessKeyInput);
 
 		if (correlationKey != null)
 		{
-			ParameterComponent correlationKeyInput = new ParameterComponent(
-					new CodeableConcept(new Coding(Constants.CODESYSTEM_HIGHMED_BPMN,
+			ParameterComponent correlationKeyInput = new ParameterComponent(new CodeableConcept(
+					new Coding(Constants.CODESYSTEM_HIGHMED_BPMN,
 							Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY, null)),
 					new StringType(correlationKey));
 			task.getInput().add(correlationKeyInput);

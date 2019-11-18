@@ -3,7 +3,6 @@ package org.highmed.dsf.bpe.service;
 import static org.highmed.dsf.bpe.Constants.CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -13,8 +12,8 @@ import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.bpe.variables.MultiInstanceResult;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.fhir.variables.OutputWrapper;
-import org.highmed.dsf.fhir.variables.Pair;
+import org.highmed.dsf.fhir.variables.Output;
+import org.highmed.dsf.fhir.variables.Outputs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,21 +27,21 @@ public class CheckSingleMedicFeasibilityResults extends AbstractServiceDelegate
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public void doExecute(DelegateExecution execution) throws Exception
 	{
-		List<OutputWrapper> outputs = (List<OutputWrapper>) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
+		Outputs outputs = (Outputs) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
 		MultiInstanceResult results = (MultiInstanceResult) execution
 				.getVariable(Constants.VARIABLE_MULTI_INSTANCE_RESULT);
 
 		Map<String, String> finalResults = results.getQueryResults();
 
 		// TODO: implement check and execute twice for filter in erroneous and correct results
-		Map<String, String> erroneousResults = checkQueryResults(finalResults); // checkQueryResults(finalResults, negativeFilter);
+		Map<String, String> erroneousResults = checkQueryResults(
+				finalResults); // checkQueryResults(finalResults, negativeFilter);
 		Map<String, String> correctResults = finalResults; // checkQueryResults(finalResults, positiveFilter);
 
-		outputs.add(getOutputWrapperErroneous(erroneousResults.entrySet().stream()));
-		outputs.add(getOutputWrapperSuccessful(correctResults.entrySet().stream()));
+		addErroneousResultsToOutputs(erroneousResults.entrySet().stream(), outputs);
+		addSuccessfulResultsToOutputs(correctResults.entrySet().stream(), outputs);
 
 		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, outputs);
 	}
@@ -58,26 +57,24 @@ public class CheckSingleMedicFeasibilityResults extends AbstractServiceDelegate
 		return toRemove;
 	}
 
-	private OutputWrapper getOutputWrapperErroneous(Stream<Map.Entry<String, String>> erroneousResults)
+	private void addErroneousResultsToOutputs(Stream<Map.Entry<String, String>> erroneousResults, Outputs outputs)
 	{
-		Stream<Pair<String, String>> errors = erroneousResults.map(entry -> {
+		erroneousResults.forEach(entry -> {
 			String errorMessage =
 					"Final single medic feasibility query result check failed for group with id '" + entry.getKey()
 							+ "', reason unknown";
 
 			logger.info(errorMessage);
-			return new Pair<>(Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, errorMessage);
+			outputs.addErrorOutput(errorMessage);
 		});
 
-		return new OutputWrapper(Constants.CODESYSTEM_HIGHMED_BPMN, errors);
 	}
 
-	private OutputWrapper getOutputWrapperSuccessful(Stream<Map.Entry<String, String>> successfulResults)
+	private void addSuccessfulResultsToOutputs(Stream<Map.Entry<String, String>> successfulResults, Outputs outputs)
 	{
-		Stream<Pair<String, String>> success = successfulResults
-				.map(entry -> new Pair<>(Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_SINGLE_MEDIC_RESULT,
-						entry.getValue() + CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR + entry.getKey()));
-
-		return new OutputWrapper(Constants.CODESYSTEM_HIGHMED_FEASIBILITY, success);
+		successfulResults.map(entry -> new Output(Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
+				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_SINGLE_MEDIC_RESULT,
+				entry.getValue() + CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR + entry.getKey()))
+				.forEach(outputs::add);
 	}
 }
