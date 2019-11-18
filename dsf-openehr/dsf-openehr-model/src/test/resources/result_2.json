@@ -1,0 +1,1536 @@
+{
+  "meta": {
+    "_type": "RESULTSET",
+    "_created": "2019-10-07T19:08:13.449Z",
+    "_executed_aql": "select     a_a/data[at0002]/events[at0003]/state as State,     a_a/data[at0002]/events[at0003]/data[at0001]/items[at0004]/value/magnitude as Body_Temperature_Magnitude,     a_a/data[at0002]/events[at0003]/time/value as Time from EHR e contains COMPOSITION a contains OBSERVATION a_a[openEHR-EHR-OBSERVATION.body_temperature.v1] "
+  },
+  "q": "select     a_a/data[at0002]/events[at0003]/state as State,     a_a/data[at0002]/events[at0003]/data[at0001]/items[at0004]/value/magnitude as Body_Temperature_Magnitude,     a_a/data[at0002]/events[at0003]/time/value as Time from EHR e contains COMPOSITION a contains OBSERVATION a_a[openEHR-EHR-OBSERVATION.body_temperature.v1] ",
+  "columns": [
+    {
+      "name": "State",
+      "path": "/data[at0002]/events[at0003]/state"
+    },
+    {
+      "name": "Body_Temperature_Magnitude",
+      "path": "/data[at0002]/events[at0003]/data[at0001]/items[at0004]/value/magnitude"
+    },
+    {
+      "name": "Time",
+      "path": "/data[at0002]/events[at0003]/time/value"
+    }
+  ],
+  "rows": [
+    [
+      {
+        "_type": "ITEM_TREE",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "State"
+        },
+        "archetype_node_id": "at0029",
+        "items": [
+          {
+            "_type": "ELEMENT",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Body exposure"
+            },
+            "archetype_node_id": "at0030",
+            "value": {
+              "_type": "DV_CODED_TEXT",
+              "value": "Naked",
+              "defining_code": {
+                "_type": "CODE_PHRASE",
+                "terminology_id": {
+                  "_type": "TERMINOLOGY_ID",
+                  "value": "local"
+                },
+                "code_string": "at0031"
+              }
+            }
+          }
+        ]
+      },
+      1000,
+      "2019-04-06T21:37:46.929+02:00"
+    ],
+    [
+      {
+        "_type": "ITEM_TREE",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "State"
+        },
+        "archetype_node_id": "at0029",
+        "items": [
+          {
+            "_type": "ELEMENT",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Body exposure"
+            },
+            "archetype_node_id": "at0030",
+            "value": {
+              "_type": "DV_CODED_TEXT",
+              "value": "Appropriate clothing/bedding",
+              "defining_code": {
+                "_type": "CODE_PHRASE",
+                "terminology_id": {
+                  "_type": "TERMINOLOGY_ID",
+                  "value": "local"
+                },
+                "code_string": "at0033"
+              }
+            }
+          }
+        ]
+      },
+      18,
+      "2019-04-06T21:50:48.914+02:00"
+    ],
+    [
+      {
+        "_type": "ITEM_TREE",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "State"
+        },
+        "archetype_node_id": "at0029",
+        "items": [
+          {
+            "_type": "ELEMENT",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Body exposure"
+            },
+            "archetype_node_id": "at0030",
+            "value": {
+              "_type": "DV_CODED_TEXT",
+              "value": "Appropriate clothing/bedding",
+              "defining_code": {
+                "_type": "CODE_PHRASE",
+                "terminology_id": {
+                  "_type": "TERMINOLOGY_ID",
+                  "value": "local"
+                },
+                "code_string": "at0033"
+              }
+            }
+          },
+          {
+            "_type": "ELEMENT",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Description of thermal stress"
+            },
+            "archetype_node_id": "at0041",
+            "value": {
+              "_type": "DV_TEXT",
+              "value": "Description of thermal stress 78"
+            }
+          }
+        ]
+      },
+      37.3,
+      "2019-03-31T22:01:17.322+02:00"
+    ],
+    [
+      null,
+      37.3,
+      "2016-01-12T15:00:33.01+01:00"
+    ],
+    [
+      null,
+      37.3,
+      "2016-01-12T15:00:33.01+01:00"
+    ],
+    [
+      null,
+      37.3,
+      "2016-01-12T15:00:33.01+01:00"
+    ],
+    [
+      null,
+      37.3,
+      "2016-01-12T15:00:46.533+01:00"
+    ],
+    [
+      null,
+      37.3,
+      "2016-01-12T15:51:31.88+01:00"
+    ],
+    [
+      null,
+      37.3,
+      "2016-01-12T15:52:05.554+01:00"
+    ],
+    [
+      null,
+      37.3,
+      "2016-01-12T16:00:48.303+01:00"
+    ],
+    [
+      {
+        "_type": "ITEM_TREE",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "State"
+        },
+        "archetype_node_id": "at0029",
+        "items": [
+          {
+            "_type": "ELEMENT",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Body exposure"
+            },
+            "archetype_node_id": "at0030",
+            "value": {
+              "_type": "DV_CODED_TEXT",
+              "value": "Reduced clothing/bedding",
+              "defining_code": {
+                "_type": "CODE_PHRASE",
+                "terminology_id": {
+                  "_type": "TERMINOLOGY_ID",
+                  "value": "local"
+                },
+                "code_string": "at0032"
+              }
+            }
+          }
+        ]
+      },
+      37.3,
+      "2014-02-27T01:35:11.000+01:00"
+    ],
+    [
+      {
+        "_type": "ITEM_TREE",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "State"
+        },
+        "archetype_node_id": "at0029",
+        "items": [
+          {
+            "_type": "ELEMENT",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Body exposure"
+            },
+            "archetype_node_id": "at0030",
+            "value": {
+              "_type": "DV_CODED_TEXT",
+              "value": "Naked",
+              "defining_code": {
+                "_type": "CODE_PHRASE",
+                "terminology_id": {
+                  "_type": "TERMINOLOGY_ID",
+                  "value": "local"
+                },
+                "code_string": "at0031"
+              }
+            }
+          }
+        ]
+      },
+      38.4,
+      "2014-02-06T08:26:28.000+01:00"
+    ],
+    [
+      null,
+      36.2,
+      "2014-02-25T21:17:11.000+01:00"
+    ],
+    [
+      null,
+      36,
+      "2014-02-27T14:37:43.000+01:00"
+    ],
+    [
+      null,
+      37.7,
+      "2014-03-03T07:28:33.000+01:00"
+    ],
+    [
+      null,
+      36.7,
+      "2014-01-22T17:30:10.000+01:00"
+    ],
+    [
+      {
+        "_type": "ITEM_TREE",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "State"
+        },
+        "archetype_node_id": "at0029",
+        "items": [
+          {
+            "_type": "ELEMENT",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Body exposure"
+            },
+            "archetype_node_id": "at0030",
+            "value": {
+              "_type": "DV_CODED_TEXT",
+              "value": "Appropriate clothing/bedding",
+              "defining_code": {
+                "_type": "CODE_PHRASE",
+                "terminology_id": {
+                  "_type": "TERMINOLOGY_ID",
+                  "value": "local"
+                },
+                "code_string": "at0033"
+              }
+            }
+          }
+        ]
+      },
+      37.5,
+      "2013-08-17T03:08:32.000+02:00"
+    ],
+    [
+      {
+        "_type": "ITEM_TREE",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "State"
+        },
+        "archetype_node_id": "at0029",
+        "items": [
+          {
+            "_type": "ELEMENT",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Body exposure"
+            },
+            "archetype_node_id": "at0030",
+            "value": {
+              "_type": "DV_CODED_TEXT",
+              "value": "Increased clothing/bedding",
+              "defining_code": {
+                "_type": "CODE_PHRASE",
+                "terminology_id": {
+                  "_type": "TERMINOLOGY_ID",
+                  "value": "local"
+                },
+                "code_string": "at0034"
+              }
+            }
+          }
+        ]
+      },
+      37.6,
+      "2005-12-16T20:05:13.000+01:00"
+    ],
+    [
+      {
+        "_type": "ITEM_TREE",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "State"
+        },
+        "archetype_node_id": "at0029",
+        "items": [
+          {
+            "_type": "ELEMENT",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Body exposure"
+            },
+            "archetype_node_id": "at0030",
+            "value": {
+              "_type": "DV_CODED_TEXT",
+              "value": "Reduced clothing/bedding",
+              "defining_code": {
+                "_type": "CODE_PHRASE",
+                "terminology_id": {
+                  "_type": "TERMINOLOGY_ID",
+                  "value": "local"
+                },
+                "code_string": "at0032"
+              }
+            }
+          }
+        ]
+      },
+      37.4,
+      "2013-01-17T11:07:56.000+01:00"
+    ],
+    [
+      {
+        "_type": "ITEM_TREE",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "State"
+        },
+        "archetype_node_id": "at0029",
+        "items": [
+          {
+            "_type": "ELEMENT",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Body exposure"
+            },
+            "archetype_node_id": "at0030",
+            "value": {
+              "_type": "DV_CODED_TEXT",
+              "value": "Naked",
+              "defining_code": {
+                "_type": "CODE_PHRASE",
+                "terminology_id": {
+                  "_type": "TERMINOLOGY_ID",
+                  "value": "local"
+                },
+                "code_string": "at0031"
+              }
+            }
+          }
+        ]
+      },
+      38.2,
+      "2005-07-27T23:03:30.000+02:00"
+    ],
+    [
+      {
+        "_type": "ITEM_TREE",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "State"
+        },
+        "archetype_node_id": "at0029",
+        "items": [
+          {
+            "_type": "ELEMENT",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Body exposure"
+            },
+            "archetype_node_id": "at0030",
+            "value": {
+              "_type": "DV_CODED_TEXT",
+              "value": "Naked",
+              "defining_code": {
+                "_type": "CODE_PHRASE",
+                "terminology_id": {
+                  "_type": "TERMINOLOGY_ID",
+                  "value": "local"
+                },
+                "code_string": "at0031"
+              }
+            }
+          }
+        ]
+      },
+      39.7,
+      "2005-12-20T17:49:46.000+01:00"
+    ],
+    [
+      {
+        "_type": "ITEM_TREE",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "State"
+        },
+        "archetype_node_id": "at0029",
+        "items": [
+          {
+            "_type": "ELEMENT",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Body exposure"
+            },
+            "archetype_node_id": "at0030",
+            "value": {
+              "_type": "DV_CODED_TEXT",
+              "value": "Naked",
+              "defining_code": {
+                "_type": "CODE_PHRASE",
+                "terminology_id": {
+                  "_type": "TERMINOLOGY_ID",
+                  "value": "local"
+                },
+                "code_string": "at0031"
+              }
+            }
+          }
+        ]
+      },
+      39.2,
+      "2008-06-03T22:34:30.000+02:00"
+    ],
+    [
+      {
+        "_type": "ITEM_TREE",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "State"
+        },
+        "archetype_node_id": "at0029",
+        "items": [
+          {
+            "_type": "ELEMENT",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Body exposure"
+            },
+            "archetype_node_id": "at0030",
+            "value": {
+              "_type": "DV_CODED_TEXT",
+              "value": "Naked",
+              "defining_code": {
+                "_type": "CODE_PHRASE",
+                "terminology_id": {
+                  "_type": "TERMINOLOGY_ID",
+                  "value": "local"
+                },
+                "code_string": "at0031"
+              }
+            }
+          }
+        ]
+      },
+      36,
+      "2009-05-10T09:03:05.000+02:00"
+    ],
+    [
+      null,
+      38.1,
+      "2013-01-11T11:42:28.000+01:00"
+    ],
+    [
+      null,
+      39.9,
+      "2007-03-30T03:44:01.000+02:00"
+    ],
+    [
+      {
+        "_type": "ITEM_TREE",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "State"
+        },
+        "archetype_node_id": "at0029",
+        "items": [
+          {
+            "_type": "ELEMENT",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Body exposure"
+            },
+            "archetype_node_id": "at0030",
+            "value": {
+              "_type": "DV_CODED_TEXT",
+              "value": "Appropriate clothing/bedding",
+              "defining_code": {
+                "_type": "CODE_PHRASE",
+                "terminology_id": {
+                  "_type": "TERMINOLOGY_ID",
+                  "value": "local"
+                },
+                "code_string": "at0033"
+              }
+            }
+          }
+        ]
+      },
+      39.5,
+      "2009-03-14T20:58:29.000+01:00"
+    ],
+    [
+      {
+        "_type": "ITEM_TREE",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "State"
+        },
+        "archetype_node_id": "at0029",
+        "items": [
+          {
+            "_type": "ELEMENT",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Body exposure"
+            },
+            "archetype_node_id": "at0030",
+            "value": {
+              "_type": "DV_CODED_TEXT",
+              "value": "Appropriate clothing/bedding",
+              "defining_code": {
+                "_type": "CODE_PHRASE",
+                "terminology_id": {
+                  "_type": "TERMINOLOGY_ID",
+                  "value": "local"
+                },
+                "code_string": "at0033"
+              }
+            }
+          }
+        ]
+      },
+      39.2,
+      "2009-12-08T04:58:27.000+01:00"
+    ],
+    [
+      {
+        "_type": "ITEM_TREE",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "State"
+        },
+        "archetype_node_id": "at0029",
+        "items": [
+          {
+            "_type": "ELEMENT",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Body exposure"
+            },
+            "archetype_node_id": "at0030",
+            "value": {
+              "_type": "DV_CODED_TEXT",
+              "value": "Appropriate clothing/bedding",
+              "defining_code": {
+                "_type": "CODE_PHRASE",
+                "terminology_id": {
+                  "_type": "TERMINOLOGY_ID",
+                  "value": "local"
+                },
+                "code_string": "at0033"
+              }
+            }
+          }
+        ]
+      },
+      36.2,
+      "2008-04-02T03:03:37.000+02:00"
+    ],
+    [
+      {
+        "_type": "ITEM_TREE",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "State"
+        },
+        "archetype_node_id": "at0029",
+        "items": [
+          {
+            "_type": "ELEMENT",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Body exposure"
+            },
+            "archetype_node_id": "at0030",
+            "value": {
+              "_type": "DV_CODED_TEXT",
+              "value": "Naked",
+              "defining_code": {
+                "_type": "CODE_PHRASE",
+                "terminology_id": {
+                  "_type": "TERMINOLOGY_ID",
+                  "value": "local"
+                },
+                "code_string": "at0031"
+              }
+            }
+          }
+        ]
+      },
+      36.8,
+      "2012-01-16T18:49:04.000+01:00"
+    ],
+    [
+      {
+        "_type": "ITEM_TREE",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "State"
+        },
+        "archetype_node_id": "at0029",
+        "items": [
+          {
+            "_type": "ELEMENT",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Body exposure"
+            },
+            "archetype_node_id": "at0030",
+            "value": {
+              "_type": "DV_CODED_TEXT",
+              "value": "Naked",
+              "defining_code": {
+                "_type": "CODE_PHRASE",
+                "terminology_id": {
+                  "_type": "TERMINOLOGY_ID",
+                  "value": "local"
+                },
+                "code_string": "at0031"
+              }
+            }
+          }
+        ]
+      },
+      37.9,
+      "2007-05-15T19:23:06.000+02:00"
+    ],
+    [
+      null,
+      39.9,
+      "2010-05-28T12:34:32.000+02:00"
+    ],
+    [
+      null,
+      37.4,
+      "2011-01-19T08:25:17.000+01:00"
+    ],
+    [
+      null,
+      39.4,
+      "2008-03-29T12:01:29.000+01:00"
+    ],
+    [
+      null,
+      39.1,
+      "2005-04-01T10:31:32.000+02:00"
+    ],
+    [
+      {
+        "_type": "ITEM_TREE",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "State"
+        },
+        "archetype_node_id": "at0029",
+        "items": [
+          {
+            "_type": "ELEMENT",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Body exposure"
+            },
+            "archetype_node_id": "at0030",
+            "value": {
+              "_type": "DV_CODED_TEXT",
+              "value": "Appropriate clothing/bedding",
+              "defining_code": {
+                "_type": "CODE_PHRASE",
+                "terminology_id": {
+                  "_type": "TERMINOLOGY_ID",
+                  "value": "local"
+                },
+                "code_string": "at0033"
+              }
+            }
+          }
+        ]
+      },
+      38.8,
+      "2008-01-11T07:51:14.000+01:00"
+    ],
+    [
+      {
+        "_type": "ITEM_TREE",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "State"
+        },
+        "archetype_node_id": "at0029",
+        "items": [
+          {
+            "_type": "ELEMENT",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Body exposure"
+            },
+            "archetype_node_id": "at0030",
+            "value": {
+              "_type": "DV_CODED_TEXT",
+              "value": "Reduced clothing/bedding",
+              "defining_code": {
+                "_type": "CODE_PHRASE",
+                "terminology_id": {
+                  "_type": "TERMINOLOGY_ID",
+                  "value": "local"
+                },
+                "code_string": "at0032"
+              }
+            }
+          }
+        ]
+      },
+      38.3,
+      "2010-12-07T16:13:32.000+01:00"
+    ],
+    [
+      {
+        "_type": "ITEM_TREE",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "State"
+        },
+        "archetype_node_id": "at0029",
+        "items": [
+          {
+            "_type": "ELEMENT",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Body exposure"
+            },
+            "archetype_node_id": "at0030",
+            "value": {
+              "_type": "DV_CODED_TEXT",
+              "value": "Appropriate clothing/bedding",
+              "defining_code": {
+                "_type": "CODE_PHRASE",
+                "terminology_id": {
+                  "_type": "TERMINOLOGY_ID",
+                  "value": "local"
+                },
+                "code_string": "at0033"
+              }
+            }
+          }
+        ]
+      },
+      38.5,
+      "2007-02-07T06:19:10.000+01:00"
+    ],
+    [
+      null,
+      37.1,
+      "2012-02-09T03:27:43.000+01:00"
+    ],
+    [
+      null,
+      37.3,
+      "2012-06-12T14:59:27.000+02:00"
+    ],
+    [
+      null,
+      36.5,
+      "2008-10-28T11:59:38.000+01:00"
+    ],
+    [
+      null,
+      38.7,
+      "2006-08-04T11:44:47.000+02:00"
+    ],
+    [
+      null,
+      38.5,
+      "2008-06-20T18:08:47.000+02:00"
+    ],
+    [
+      null,
+      39.3,
+      "2005-09-26T14:38:31.000+02:00"
+    ],
+    [
+      {
+        "_type": "ITEM_TREE",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "State"
+        },
+        "archetype_node_id": "at0029",
+        "items": [
+          {
+            "_type": "ELEMENT",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Body exposure"
+            },
+            "archetype_node_id": "at0030",
+            "value": {
+              "_type": "DV_CODED_TEXT",
+              "value": "Increased clothing/bedding",
+              "defining_code": {
+                "_type": "CODE_PHRASE",
+                "terminology_id": {
+                  "_type": "TERMINOLOGY_ID",
+                  "value": "local"
+                },
+                "code_string": "at0034"
+              }
+            }
+          }
+        ]
+      },
+      37.9,
+      "2009-11-27T00:42:29.000+01:00"
+    ],
+    [
+      {
+        "_type": "ITEM_TREE",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "State"
+        },
+        "archetype_node_id": "at0029",
+        "items": [
+          {
+            "_type": "ELEMENT",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Body exposure"
+            },
+            "archetype_node_id": "at0030",
+            "value": {
+              "_type": "DV_CODED_TEXT",
+              "value": "Reduced clothing/bedding",
+              "defining_code": {
+                "_type": "CODE_PHRASE",
+                "terminology_id": {
+                  "_type": "TERMINOLOGY_ID",
+                  "value": "local"
+                },
+                "code_string": "at0032"
+              }
+            }
+          }
+        ]
+      },
+      39,
+      "2009-07-09T05:36:36.000+02:00"
+    ],
+    [
+      {
+        "_type": "ITEM_TREE",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "State"
+        },
+        "archetype_node_id": "at0029",
+        "items": [
+          {
+            "_type": "ELEMENT",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Body exposure"
+            },
+            "archetype_node_id": "at0030",
+            "value": {
+              "_type": "DV_CODED_TEXT",
+              "value": "Appropriate clothing/bedding",
+              "defining_code": {
+                "_type": "CODE_PHRASE",
+                "terminology_id": {
+                  "_type": "TERMINOLOGY_ID",
+                  "value": "local"
+                },
+                "code_string": "at0033"
+              }
+            }
+          }
+        ]
+      },
+      36,
+      "2014-04-08T07:17:11.000+02:00"
+    ],
+    [
+      {
+        "_type": "ITEM_TREE",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "State"
+        },
+        "archetype_node_id": "at0029",
+        "items": [
+          {
+            "_type": "ELEMENT",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Body exposure"
+            },
+            "archetype_node_id": "at0030",
+            "value": {
+              "_type": "DV_CODED_TEXT",
+              "value": "Naked",
+              "defining_code": {
+                "_type": "CODE_PHRASE",
+                "terminology_id": {
+                  "_type": "TERMINOLOGY_ID",
+                  "value": "local"
+                },
+                "code_string": "at0031"
+              }
+            }
+          }
+        ]
+      },
+      37.1,
+      "2011-02-16T08:59:58.000+01:00"
+    ],
+    [
+      null,
+      36.3,
+      "2013-06-12T22:21:59.000+02:00"
+    ],
+    [
+      null,
+      36.6,
+      "2013-10-13T14:12:43.000+02:00"
+    ],
+    [
+      null,
+      37.4,
+      "2013-04-10T11:27:49.000+02:00"
+    ],
+    [
+      null,
+      37.2,
+      "2009-12-17T16:18:43.000+01:00"
+    ],
+    [
+      null,
+      39.7,
+      "2011-09-10T16:42:15.000+02:00"
+    ],
+    [
+      {
+        "_type": "ITEM_TREE",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "State"
+        },
+        "archetype_node_id": "at0029",
+        "items": [
+          {
+            "_type": "ELEMENT",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Body exposure"
+            },
+            "archetype_node_id": "at0030",
+            "value": {
+              "_type": "DV_CODED_TEXT",
+              "value": "Appropriate clothing/bedding",
+              "defining_code": {
+                "_type": "CODE_PHRASE",
+                "terminology_id": {
+                  "_type": "TERMINOLOGY_ID",
+                  "value": "local"
+                },
+                "code_string": "at0033"
+              }
+            }
+          }
+        ]
+      },
+      38,
+      "2013-03-20T17:12:26.000+01:00"
+    ],
+    [
+      {
+        "_type": "ITEM_TREE",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "State"
+        },
+        "archetype_node_id": "at0029",
+        "items": [
+          {
+            "_type": "ELEMENT",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Body exposure"
+            },
+            "archetype_node_id": "at0030",
+            "value": {
+              "_type": "DV_CODED_TEXT",
+              "value": "Naked",
+              "defining_code": {
+                "_type": "CODE_PHRASE",
+                "terminology_id": {
+                  "_type": "TERMINOLOGY_ID",
+                  "value": "local"
+                },
+                "code_string": "at0031"
+              }
+            }
+          }
+        ]
+      },
+      38.9,
+      "2012-01-24T07:38:43.000+01:00"
+    ],
+    [
+      {
+        "_type": "ITEM_TREE",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "State"
+        },
+        "archetype_node_id": "at0029",
+        "items": [
+          {
+            "_type": "ELEMENT",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Body exposure"
+            },
+            "archetype_node_id": "at0030",
+            "value": {
+              "_type": "DV_CODED_TEXT",
+              "value": "Naked",
+              "defining_code": {
+                "_type": "CODE_PHRASE",
+                "terminology_id": {
+                  "_type": "TERMINOLOGY_ID",
+                  "value": "local"
+                },
+                "code_string": "at0031"
+              }
+            }
+          }
+        ]
+      },
+      36.6,
+      "2008-05-28T15:25:32.000+02:00"
+    ],
+    [
+      null,
+      36.4,
+      "2012-11-13T22:12:32.000+01:00"
+    ],
+    [
+      null,
+      37.2,
+      "2012-01-27T18:43:15.000+01:00"
+    ],
+    [
+      null,
+      39,
+      "2009-09-02T22:06:54.000+02:00"
+    ],
+    [
+      null,
+      39.4,
+      "2013-12-23T07:54:18.000+01:00"
+    ],
+    [
+      null,
+      36.6,
+      "2007-10-24T15:46:43.000+02:00"
+    ],
+    [
+      null,
+      36.7,
+      "2009-05-03T23:00:35.000+02:00"
+    ],
+    [
+      {
+        "_type": "ITEM_TREE",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "State"
+        },
+        "archetype_node_id": "at0029",
+        "items": [
+          {
+            "_type": "ELEMENT",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Body exposure"
+            },
+            "archetype_node_id": "at0030",
+            "value": {
+              "_type": "DV_CODED_TEXT",
+              "value": "Reduced clothing/bedding",
+              "defining_code": {
+                "_type": "CODE_PHRASE",
+                "terminology_id": {
+                  "_type": "TERMINOLOGY_ID",
+                  "value": "local"
+                },
+                "code_string": "at0032"
+              }
+            }
+          }
+        ]
+      },
+      36.3,
+      "2010-03-02T15:42:42.000+01:00"
+    ],
+    [
+      {
+        "_type": "ITEM_TREE",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "State"
+        },
+        "archetype_node_id": "at0029",
+        "items": [
+          {
+            "_type": "ELEMENT",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Body exposure"
+            },
+            "archetype_node_id": "at0030",
+            "value": {
+              "_type": "DV_CODED_TEXT",
+              "value": "Reduced clothing/bedding",
+              "defining_code": {
+                "_type": "CODE_PHRASE",
+                "terminology_id": {
+                  "_type": "TERMINOLOGY_ID",
+                  "value": "local"
+                },
+                "code_string": "at0032"
+              }
+            }
+          }
+        ]
+      },
+      39.3,
+      "2009-03-01T12:25:25.000+01:00"
+    ],
+    [
+      {
+        "_type": "ITEM_TREE",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "State"
+        },
+        "archetype_node_id": "at0029",
+        "items": [
+          {
+            "_type": "ELEMENT",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Body exposure"
+            },
+            "archetype_node_id": "at0030",
+            "value": {
+              "_type": "DV_CODED_TEXT",
+              "value": "Reduced clothing/bedding",
+              "defining_code": {
+                "_type": "CODE_PHRASE",
+                "terminology_id": {
+                  "_type": "TERMINOLOGY_ID",
+                  "value": "local"
+                },
+                "code_string": "at0032"
+              }
+            }
+          }
+        ]
+      },
+      37.8,
+      "2010-04-21T21:23:34.000+02:00"
+    ],
+    [
+      null,
+      37.3,
+      "2010-03-25T11:10:50.000+01:00"
+    ],
+    [
+      null,
+      39,
+      "2009-01-18T09:58:06.000+01:00"
+    ],
+    [
+      {
+        "_type": "ITEM_TREE",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "Status"
+        },
+        "archetype_node_id": "at0029",
+        "items": [
+          {
+            "_type": "ELEMENT",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Körperexposition"
+            },
+            "archetype_node_id": "at0030",
+            "value": {
+              "_type": "DV_CODED_TEXT",
+              "value": "Angemessene Kleidung/Bettzeug",
+              "defining_code": {
+                "_type": "CODE_PHRASE",
+                "terminology_id": {
+                  "_type": "TERMINOLOGY_ID",
+                  "value": "local"
+                },
+                "code_string": "at0033"
+              }
+            }
+          }
+        ]
+      },
+      38,
+      "2017-09-27T22:28:31.246+02:00"
+    ],
+    [
+      {
+        "_type": "ITEM_TREE",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "Status"
+        },
+        "archetype_node_id": "at0029",
+        "items": [
+          {
+            "_type": "ELEMENT",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Körperexposition"
+            },
+            "archetype_node_id": "at0030",
+            "value": {
+              "_type": "DV_CODED_TEXT",
+              "value": "Angemessene Kleidung/Bettzeug",
+              "defining_code": {
+                "_type": "CODE_PHRASE",
+                "terminology_id": {
+                  "_type": "TERMINOLOGY_ID",
+                  "value": "local"
+                },
+                "code_string": "at0033"
+              }
+            }
+          }
+        ]
+      },
+      38,
+      "2017-09-28T13:47:43.262+02:00"
+    ],
+    [
+      {
+        "_type": "ITEM_TREE",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "Status"
+        },
+        "archetype_node_id": "at0029",
+        "items": [
+          {
+            "_type": "ELEMENT",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Körperexposition"
+            },
+            "archetype_node_id": "at0030",
+            "value": {
+              "_type": "DV_CODED_TEXT",
+              "value": "Angemessene Kleidung/Bettzeug",
+              "defining_code": {
+                "_type": "CODE_PHRASE",
+                "terminology_id": {
+                  "_type": "TERMINOLOGY_ID",
+                  "value": "local"
+                },
+                "code_string": "at0033"
+              }
+            }
+          }
+        ]
+      },
+      37.5,
+      "2017-10-15T19:48:13.665+02:00"
+    ],
+    [
+      {
+        "_type": "ITEM_TREE",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "Status"
+        },
+        "archetype_node_id": "at0029",
+        "items": [
+          {
+            "_type": "ELEMENT",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Körperexposition"
+            },
+            "archetype_node_id": "at0030",
+            "value": {
+              "_type": "DV_CODED_TEXT",
+              "value": "Angemessene Kleidung/Bettzeug",
+              "defining_code": {
+                "_type": "CODE_PHRASE",
+                "terminology_id": {
+                  "_type": "TERMINOLOGY_ID",
+                  "value": "local"
+                },
+                "code_string": "at0033"
+              }
+            }
+          }
+        ]
+      },
+      -5,
+      "2017-10-15T20:12:33.481+02:00"
+    ],
+    [
+      {
+        "_type": "ITEM_TREE",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "Status"
+        },
+        "archetype_node_id": "at0029",
+        "items": [
+          {
+            "_type": "ELEMENT",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Körperexposition"
+            },
+            "archetype_node_id": "at0030",
+            "value": {
+              "_type": "DV_CODED_TEXT",
+              "value": "Angemessene Kleidung/Bettzeug",
+              "defining_code": {
+                "_type": "CODE_PHRASE",
+                "terminology_id": {
+                  "_type": "TERMINOLOGY_ID",
+                  "value": "local"
+                },
+                "code_string": "at0033"
+              }
+            }
+          }
+        ]
+      },
+      -500,
+      "2017-10-15T20:12:47.35+02:00"
+    ],
+    [
+      null,
+      37.1,
+      "2016-01-12T14:59:09.715+01:00"
+    ],
+    [
+      null,
+      37.1,
+      "2016-01-12T15:00:33.01+01:00"
+    ],
+    [
+      null,
+      37.1,
+      "2016-01-12T15:00:46.533+01:00"
+    ],
+    [
+      null,
+      37.1,
+      "2016-01-12T15:51:31.88+01:00"
+    ],
+    [
+      null,
+      37.1,
+      "2016-01-12T15:52:05.554+01:00"
+    ],
+    [
+      null,
+      37.1,
+      "2016-01-12T16:00:48.303+01:00"
+    ],
+    [
+      null,
+      37.4,
+      "2016-01-12T15:00:33.01+01:00"
+    ],
+    [
+      null,
+      37.4,
+      "2016-01-12T15:00:46.533+01:00"
+    ],
+    [
+      null,
+      37.4,
+      "2016-01-12T15:51:31.88+01:00"
+    ],
+    [
+      null,
+      37.4,
+      "2016-01-12T15:52:05.554+01:00"
+    ],
+    [
+      null,
+      37.4,
+      "2016-01-12T16:00:48.303+01:00"
+    ],
+    [
+      null,
+      37.3,
+      "2016-01-12T15:00:33.01+01:00"
+    ],
+    [
+      null,
+      37.3,
+      "2016-01-12T15:00:33.01+01:00"
+    ],
+    [
+      null,
+      37,
+      "2015-11-19T11:27:00.000Z"
+    ],
+    [
+      null,
+      37.3,
+      "2016-01-12T15:00:33.01+01:00"
+    ],
+    [
+      null,
+      37.3,
+      "2016-01-12T15:00:33.01+01:00"
+    ],
+    [
+      null,
+      37.5,
+      "2016-01-12T15:00:33.01+01:00"
+    ],
+    [
+      null,
+      37.5,
+      "2016-01-12T15:00:46.533+01:00"
+    ],
+    [
+      null,
+      37.5,
+      "2016-01-12T15:51:31.88+01:00"
+    ],
+    [
+      null,
+      37.5,
+      "2016-01-12T15:52:05.554+01:00"
+    ],
+    [
+      null,
+      37.5,
+      "2016-01-12T16:00:48.303+01:00"
+    ],
+    [
+      null,
+      37.2,
+      "2016-01-12T15:00:33.01+01:00"
+    ],
+    [
+      null,
+      37.2,
+      "2016-01-12T15:00:46.533+01:00"
+    ],
+    [
+      null,
+      37.2,
+      "2016-01-12T15:51:31.88+01:00"
+    ],
+    [
+      null,
+      37.2,
+      "2016-01-12T15:52:05.554+01:00"
+    ],
+    [
+      null,
+      37.2,
+      "2016-01-12T16:00:48.303+01:00"
+    ]
+  ]
+}

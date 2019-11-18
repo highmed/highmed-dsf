@@ -1,50 +1,68 @@
 package org.highmed.openehr.model.structure;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
-import org.highmed.openehr.deserializer.RowElementDeserializer;
-import org.highmed.openehr.model.datatypes.DvCount;
-import org.highmed.openehr.model.datatypes.DvOther;
-import org.highmed.openehr.model.structure.Column;
-import org.highmed.openehr.model.structure.Meta;
-import org.highmed.openehr.model.structure.ResultSet;
-import org.highmed.openehr.model.structure.RowElement;
+import org.highmed.openehr.OpenEhrObjectMapperFactory;
+import org.highmed.openehr.model.datatypes.IntegerRowElement;
+import org.highmed.openehr.model.datatypes.StringRowElement;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 
 public class ResultSetTest
 {
 	private static final Logger logger = LoggerFactory.getLogger(ResultSetTest.class);
 
+	private static ObjectMapper objectMapper;
+
+	@BeforeClass
+	public static void objectMapper()
+	{
+		ResultSetTest.objectMapper = OpenEhrObjectMapperFactory.createObjectMapper();
+	}
+
 	@Test
-	public void testReadWrite() throws Exception
+	public void testReadWriteSimple() throws Exception
 	{
 		Meta meta = new Meta("href", "type", "schemaVersion", "created", "generator", "executedAql");
 		List<Column> columns = Arrays.asList(new Column("name1", "path1"), new Column("name2", "path2"));
-		List<List<RowElement<?>>> rows = Arrays.asList(Arrays.asList(new DvCount(123)),
-				Arrays.asList(new DvOther("456")));
+		List<List<RowElement>> rows = Arrays.asList(Arrays.asList(new IntegerRowElement(123)),
+				Arrays.asList(new StringRowElement("456")));
 		ResultSet resultSet1 = new ResultSet(meta, "name", "query", columns, rows);
+
+		printResultSetRowElements(resultSet1);
 
 		String json;
 		try (StringWriter w = new StringWriter())
 		{
-			objectMapper().writeValue(w, resultSet1);
+			objectMapper.writeValue(w, resultSet1);
 			json = w.toString();
 			logger.debug("ResultSet json: {}", json);
 		}
 
 		try (StringReader r = new StringReader(json))
 		{
-			ResultSet resultSet2 = objectMapper().readValue(r, ResultSet.class);
+			ResultSet resultSet2 = objectMapper.readValue(r, ResultSet.class);
+
+			printResultSetRowElements(resultSet2);
+
 			assertNotNull(resultSet2);
 
 			assertNotNull(resultSet2.getColumns());
@@ -81,13 +99,89 @@ public class ResultSetTest
 		}
 	}
 
-	private static ObjectMapper objectMapper()
+	@Test
+	public void testReadWriteJson1() throws Exception
 	{
-		ObjectMapper objectMapper = new ObjectMapper();
-		SimpleModule module = new SimpleModule();
-		module.addDeserializer(RowElement.class, new RowElementDeserializer());
-		objectMapper.registerModule(module);
+		testReadWriteFromFile(Paths.get("src/test/resources/result_1.json"),
+				Paths.get("src/test/resources/result_1_min.json"));
+	}
 
-		return objectMapper;
+	@Test
+	public void testReadWriteJson2() throws Exception
+	{
+		testReadWriteFromFile(Paths.get("src/test/resources/result_2.json"),
+				Paths.get("src/test/resources/result_2_min.json"));
+	}
+
+	@Test
+	public void testReadWriteJson3() throws Exception
+	{
+		testReadWriteFromFile(Paths.get("src/test/resources/result_3.json"),
+				Paths.get("src/test/resources/result_3_min.json"));
+	}
+
+	@Test
+	public void testReadWriteJson4() throws Exception
+	{
+		testReadWriteFromFile(Paths.get("src/test/resources/result_4.json"),
+				Paths.get("src/test/resources/result_4_min.json"));
+	}
+
+	@Test
+	public void testReadWriteJson5() throws Exception
+	{
+		testReadWriteFromFile(Paths.get("src/test/resources/result_5.json"),
+				Paths.get("src/test/resources/result_5_min.json"));
+	}
+
+	private void testReadWriteFromFile(Path jsonWithWiteSpace, Path jsonMin)
+			throws IOException, JsonParseException, JsonMappingException, JsonGenerationException
+	{
+		ResultSet resultSet;
+		try (InputStream in = Files.newInputStream(jsonWithWiteSpace))
+		{
+			resultSet = objectMapper.readValue(in, ResultSet.class);
+			assertNotNull(resultSet);
+
+			printResultSetRowElements(resultSet);
+		}
+
+		String json;
+		try (StringWriter w = new StringWriter())
+		{
+			objectMapper.writeValue(w, resultSet);
+			json = w.toString();
+			logger.debug("ResultSet json: {}", json);
+		}
+
+		try (StringReader r = new StringReader(json))
+		{
+			ResultSet resultSet2 = objectMapper.readValue(r, ResultSet.class);
+
+			printResultSetRowElements(resultSet2);
+		}
+
+		String readMinJson = Files.readString(jsonMin);
+		assertEquals(readMinJson, json);
+	}
+
+	private void printResultSetRowElements(ResultSet resultSet)
+	{
+		for (int p = 0; p < resultSet.getRows().size(); p++)
+		{
+			List<RowElement> columns = resultSet.getRow(p);
+			if (columns != null)
+			{
+				for (int c = 0; c < columns.size(); c++)
+				{
+					RowElement rowElement = columns.get(c);
+					logger.debug(
+							p + "," + c + " (" + (rowElement == null ? "null" : rowElement.getClass().getSimpleName())
+									+ "): " + (rowElement == null ? "null" : rowElement.getValueAsString()));
+				}
+			}
+			else
+				logger.debug(p + ",-: null");
+		}
 	}
 }
