@@ -51,15 +51,11 @@
     <bpmn:textAnnotation id="TextAnnotation_0e4titr">
       <bpmn:text>check consent?</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:textAnnotation id="TextAnnotation_1n3uvog">
-      <bpmn:text>IMPORTANT: can be ommitted for leading medic (already done in request process) --&gt; task.requester == task.recipient</bpmn:text>
-    </bpmn:textAnnotation>
     <bpmn:textAnnotation id="TextAnnotation_0euut3n">
       <bpmn:text>uac check, study definiton validity, type of cohort, ethics commitee vote, included medics, user authentication, rate limit, etc.</bpmn:text>
     </bpmn:textAnnotation>
     <bpmn:association id="Association_0hhfmwh" sourceRef="executeQueries" targetRef="TextAnnotation_0e4titr" />
     <bpmn:association id="Association_1ncewqu" sourceRef="checkFeasibilityResources" targetRef="TextAnnotation_0euut3n" />
-    <bpmn:association id="Association_18cmrhf" sourceRef="checkFeasibilityResources" targetRef="TextAnnotation_1n3uvog" />
   </bpmn:process>
   <bpmn:message id="Message_1yz2a31" name="executeSimpleFeasibilityMessage" />
   <bpmn:message id="Message_1dr71re" name="resultSimpleFeasibilityMessage" />
@@ -76,9 +72,6 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ServiceTask_0jna5l2_di" bpmnElement="checkFeasibilityResources">
         <dc:Bounds x="100" y="102" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="TextAnnotation_1n3uvog_di" bpmnElement="TextAnnotation_1n3uvog">
-        <dc:Bounds x="24" y="234" width="251" height="54" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="StartEvent_1fzso6r_di" bpmnElement="StartEvent">
         <dc:Bounds x="-209" y="124" width="36" height="36" />
@@ -105,10 +98,6 @@
       <bpmndi:BPMNEdge id="Association_1ncewqu_di" bpmnElement="Association_1ncewqu">
         <di:waypoint x="150" y="102" />
         <di:waypoint x="150" y="78" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Association_18cmrhf_di" bpmnElement="Association_18cmrhf">
-        <di:waypoint x="150" y="182" />
-        <di:waypoint x="150" y="234" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_1etju4m_di" bpmnElement="SequenceFlow_1etju4m">
         <di:waypoint x="20" y="142" />
