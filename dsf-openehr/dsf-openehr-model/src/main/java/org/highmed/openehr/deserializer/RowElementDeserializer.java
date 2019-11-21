@@ -44,6 +44,7 @@ public class RowElementDeserializer extends JsonDeserializer<RowElement>
 
 	private ZonedDateTimeRowElement getZonedDateTime(String value)
 	{
+		// TODO control flow by exception
 		try
 		{
 			return new ZonedDateTimeRowElement(ZonedDateTime.parse(value, DateTimeFormatter.ISO_OFFSET_DATE_TIME));
