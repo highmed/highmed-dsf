@@ -39,6 +39,7 @@ import org.highmed.dsf.fhir.search.parameters.PractitionerActive;
 import org.highmed.dsf.fhir.search.parameters.PractitionerIdentifier;
 import org.highmed.dsf.fhir.search.parameters.PractitionerRoleActive;
 import org.highmed.dsf.fhir.search.parameters.PractitionerRoleIdentifier;
+import org.highmed.dsf.fhir.search.parameters.ResearchStudyEnrollment;
 import org.highmed.dsf.fhir.search.parameters.ResearchStudyIdentifier;
 import org.highmed.dsf.fhir.search.parameters.ResourceId;
 import org.highmed.dsf.fhir.search.parameters.ResourceLastUpdated;
@@ -233,7 +234,8 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 		searchParameters.put(PractitionerRole.class, Arrays.asList(practitionerRoleActive, practitionerRoleIdentifier));
 
 		var researchStudyIdentifier = createSearchParameter(ResearchStudyIdentifier.class);
-		searchParameters.put(ResearchStudy.class, Arrays.asList(researchStudyIdentifier));
+		var researchStudyEnrollment = createSearchParameter(ResearchStudyEnrollment.class);
+		searchParameters.put(ResearchStudy.class, Arrays.asList(researchStudyIdentifier, researchStudyEnrollment));
 
 		var structureDefinitionIdentifier = createSearchParameter(StructureDefinitionIdentifier.class);
 		var structureDefinitionUrl = createSearchParameter(StructureDefinitionUrl.class);
