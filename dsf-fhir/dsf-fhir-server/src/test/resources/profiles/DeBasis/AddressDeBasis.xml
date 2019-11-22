@@ -105,29 +105,6 @@
 				<source value="Address" />
 			</constraint>
 		</element>
-		<element id="Address.extension">
-			<path value="Address.extension" />
-			<slicing>
-				<discriminator>
-					<type value="value" />
-					<path value="url" />
-				</discriminator>
-				<rules value="open" />
-			</slicing>
-		</element>
-		<element id="Address.extension:Stadtteil">
-			<path value="Address.extension" />
-			<sliceName value="Stadtteil" />
-			<short value="Stadt- oder Ortsteil" />
-			<type>
-				<code value="Extension" />
-				<profile value="http://hl7.org/fhir/StructureDefinition/iso21090-ADXP-precinct" />
-			</type>
-		</element>
-		<element id="Address.extension:Stadtteil.url">
-			<path value="Address.extension.url" />
-			<fixedUri value="http://hl7.org/fhir/StructureDefinition/iso21090-ADXP-precinct" />
-		</element>
 		<element id="Address.type">
 			<path value="Address.type" />
 			<mapping>
@@ -265,6 +242,20 @@
 		<element id="Address.line.extension:Postfach.url">
 			<path value="Address.line.extension.url" />
 			<fixedUri value="http://hl7.org/fhir/StructureDefinition/iso21090-ADXP-postBox" />
+		</element>
+		<element id="Address.line.extension:Stadtteil">
+			<path value="Address.line.extension" />
+			<sliceName value="Stadtteil" />
+			<short value="Stadt- oder Ortsteil" />
+			<max value="1" />
+			<type>
+				<code value="Extension" />
+				<profile value="http://hl7.org/fhir/StructureDefinition/iso21090-ADXP-precinct" />
+			</type>
+		</element>
+		<element id="Address.line.extension:Stadtteil.url">
+			<path value="Address.line.extension.url" />
+			<fixedUri value="http://hl7.org/fhir/StructureDefinition/iso21090-ADXP-precinct" />
 		</element>
 		<element id="Address.city">
 			<path value="Address.city" />
