@@ -22,6 +22,7 @@ import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Group.GroupType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
@@ -97,6 +98,8 @@ public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter
 		group.setIdElement(new IdType("urn:uuid:" + UUID.randomUUID().toString()));
 
 		group.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-group");
+		group.getText().getDiv().addText("This is the description");
+		group.getText().setStatus(Narrative.NarrativeStatus.ADDITIONAL);
 		group.setType(GroupType.PERSON);
 		group.setActual(true);
 		group.setActive(true);

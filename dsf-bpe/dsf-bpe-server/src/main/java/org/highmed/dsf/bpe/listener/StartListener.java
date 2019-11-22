@@ -1,11 +1,10 @@
 package org.highmed.dsf.bpe.listener;
 
-import java.util.ArrayList;
-
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.ExecutionListener;
 import org.highmed.dsf.bpe.Constants;
-import org.highmed.dsf.fhir.variables.OutputWrapper;
+import org.highmed.dsf.fhir.variables.Outputs;
+import org.highmed.dsf.fhir.variables.OutputsValues;
 import org.hl7.fhir.r4.model.Task;
 
 /**
@@ -29,7 +28,7 @@ public class StartListener implements ExecutionListener
 			execution.setVariable(Constants.VARIABLE_LEADING_TASK, task);
 
 			// initialized process outputs variable, used in the EndListener
-			execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, new ArrayList<OutputWrapper>());
+			execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, OutputsValues.create(new Outputs()));
 		}
 
 		// if a main process is started (not a call- or subprocess), this variable has to be initialized.

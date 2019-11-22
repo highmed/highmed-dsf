@@ -26,6 +26,8 @@ import org.highmed.dsf.fhir.variables.MultiInstanceTargetSerializer;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargetsSerializer;
 import org.highmed.dsf.fhir.variables.OrganizationDeserializer;
 import org.highmed.dsf.fhir.variables.OrganizationSerializer;
+import org.highmed.dsf.fhir.variables.OutputSerializer;
+import org.highmed.dsf.fhir.variables.OutputsSerializer;
 import org.highmed.dsf.fhir.websocket.FhirConnector;
 import org.highmed.dsf.fhir.websocket.LastEventTimeIo;
 import org.hl7.fhir.r4.model.Organization;
@@ -147,7 +149,7 @@ public class FhirConfig
 	public ProcessEnginePlugin fhirPlugin()
 	{
 		return new FhirPlugin(domainResourceSerializer(), multiInstanceTargetSerializer(),
-				multiInstanceTargetsSerializer());
+				multiInstanceTargetsSerializer(), outputSerializer(), outputsSerializer());
 	}
 
 	@Bean
@@ -166,6 +168,18 @@ public class FhirConfig
 	public MultiInstanceTargetsSerializer multiInstanceTargetsSerializer()
 	{
 		return new MultiInstanceTargetsSerializer(fhirObjectMapper());
+	}
+
+	@Bean
+	public OutputSerializer outputSerializer()
+	{
+		return new OutputSerializer(fhirObjectMapper());
+	}
+
+	@Bean
+	public OutputsSerializer outputsSerializer()
+	{
+		return new OutputsSerializer(fhirObjectMapper());
 	}
 
 	@Bean
@@ -205,10 +219,10 @@ public class FhirConfig
 					.fromPkcs12(localWebsocketKsFile, localWebsocketKeyStorePassword);
 			KeyStore localWebsocketTrustStore = CertificateHelper.extractTrust(localWebsocketKeyStore);
 
-			return new FhirClientProviderImpl(fhirContext(), localWebserviceBaseUrl, localReadTimeout, localConnectTimeout,
-					localWebserviceTrustStore, localWebserviceKeyStore, webserviceKeyStorePassword, remoteReadTimeout,
-					remoteConnectTimeout, remoteProxyPassword, remoteProxyUsername, remoteProxySchemeHostPort,
-					localWebsocketUrl, localWebsocketTrustStore, localWebsocketKeyStore,
+			return new FhirClientProviderImpl(fhirContext(), localWebserviceBaseUrl, localReadTimeout,
+					localConnectTimeout, localWebserviceTrustStore, localWebserviceKeyStore, webserviceKeyStorePassword,
+					remoteReadTimeout, remoteConnectTimeout, remoteProxyPassword, remoteProxyUsername,
+					remoteProxySchemeHostPort, localWebsocketUrl, localWebsocketTrustStore, localWebsocketKeyStore,
 					localWebsocketKeyStorePassword);
 		}
 		catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e)

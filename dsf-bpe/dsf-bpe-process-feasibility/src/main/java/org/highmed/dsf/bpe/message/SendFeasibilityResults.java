@@ -1,7 +1,5 @@
 package org.highmed.dsf.bpe.message;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
@@ -10,7 +8,7 @@ import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.AbstractTaskMessageSend;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.fhir.variables.OutputWrapper;
+import org.highmed.dsf.fhir.variables.Outputs;
 import org.hl7.fhir.r4.model.Task;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -26,13 +24,8 @@ public class SendFeasibilityResults extends AbstractTaskMessageSend
 	@Override
 	protected Stream<Task.ParameterComponent> getAdditionalInputParameters(DelegateExecution execution)
 	{
-		@SuppressWarnings("unchecked")
-		List<OutputWrapper> outputs = (List<OutputWrapper>) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
-		List<Task.ParameterComponent> inputs = new ArrayList<>();
-
-		outputs.forEach(outputWrapper -> outputWrapper.getKeyValueList().forEach(entry -> inputs
-				.add(getTaskHelper().createInput(outputWrapper.getSystem(), entry.getKey(), entry.getValue()))));
-
-		return inputs.stream();
+		Outputs outputs = (Outputs) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
+		return outputs.getOutputs().stream()
+				.map(o -> getTaskHelper().createInput(o.getSystem(), o.getCode(), o.getValue()));
 	}
 }

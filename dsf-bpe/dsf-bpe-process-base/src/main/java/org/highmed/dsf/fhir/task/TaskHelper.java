@@ -1,10 +1,9 @@
 package org.highmed.dsf.fhir.task;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import org.highmed.dsf.fhir.variables.OutputWrapper;
+import org.highmed.dsf.fhir.variables.Outputs;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.UrlType;
@@ -29,5 +28,5 @@ public interface TaskHelper
 
 	public Task.TaskOutputComponent createOutput(String system, String code, String value);
 
-	public Task addOutputs(Task task, List<OutputWrapper> outputs);
+	public Task addOutputs(Task task, Outputs outputs);
 }

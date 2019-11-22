@@ -9,30 +9,12 @@
             "meta":{
                "profile":"http://highmed.org/fhir/StructureDefinition/highmed-group"
             },
+            "text": {
+               "div":"This is the description",
+               "status":"additional"
+            },
             "type":"person",
             "actual":true,
-            "characteristic":[
-               {
-                  "code":{
-                     "text":"gender"
-                  },
-                  "valueCodeableConcept":{
-                     "text":"male"
-                  },
-                  "exclude":false
-               },
-               {
-                  "code":{
-                     "text":"age"
-                  },
-                  "valueRange":{
-                     "low":{
-                        "value":40
-                     }
-                  },
-                  "exclude":false
-               }
-            ],
             "extension":[
                {
                   "url":"http://highmed.org/fhir/StructureDefinition/query",
@@ -57,30 +39,12 @@
             "meta":{
                "profile":"http://highmed.org/fhir/StructureDefinition/highmed-group"
             },
+            "text": {
+               "div":"This is the description",
+               "status":"additional"
+            },
             "type":"person",
             "actual":true,
-            "characteristic":[
-               {
-                  "code":{
-                     "text":"gender"
-                  },
-                  "valueCodeableConcept":{
-                     "text":"female"
-                  },
-                  "exclude":false
-               },
-               {
-                  "code":{
-                     "text":"age"
-                  },
-                  "valueRange":{
-                     "low":{
-                        "value":50
-                     }
-                  },
-                  "exclude":false
-               }
-            ],
             "extension":[
                {
                   "url":"http://highmed.org/fhir/StructureDefinition/query",
@@ -104,10 +68,6 @@
             "resourceType":"Practitioner",
             "meta":{
                "profile":"http://highmed.org/fhir/StructureDefinition/highmed-practitioner"
-            },
-            "identifier":{
-               "system":"http://highmed.org/fhir/CodeSystem/practitioner",
-               "value":"Test_Practitioner"
             },
             "name":[
                {
@@ -139,8 +99,8 @@
             ]
          },
          "request":{
-            "method":"PUT",
-            "url":"Practitioner?identifier=http://highmed.org/fhir/CodeSystem/practitioner|Test_Practitioner"
+            "method":"POST",
+            "url":"Practitioner"
          }
       },
       {
@@ -150,16 +110,8 @@
             "meta":{
                "profile":"http://highmed.org/fhir/StructureDefinition/highmed-practitioner-role"
             },
-            "identifier":{
-               "system":"http://highmed.org/fhir/CodeSystem/practitioner-role",
-               "value":"Test_Practitioner_Role"
-            },
             "practitioner":{
-               "identifier":{
-                  "system":"http://highmed.org/fhir/CodeSystem/practitioner",
-                  "value":"Test_Practitioner"
-               },
-               "type":"Practitioner"
+               "reference":"urn:uuid:ae194285-d08e-46c7-a9a7-9a47624dd8xx"
             },
             "organization":{
                "identifier":{
@@ -170,8 +122,8 @@
             }
          },
          "request":{
-            "method":"PUT",
-            "url":"PractitionerRole?identifier=http://highmed.org/fhir/CodeSystem/practitioner-role|Test_Practitioner_Role"
+            "method":"POST",
+            "url":"PractitionerRole"
          }
       },
       {
@@ -193,11 +145,7 @@
                }
             ],
             "principalInvestigator":{
-               "identifier":{
-                  "system":"http://highmed.org/fhir/CodeSystem/practitioner",
-                  "value":"Test_Practitioner"
-               },
-               "type":"Practitioner"
+               "reference":"urn:uuid:ae194285-d08e-46c7-a9a7-9a47624dd8xx"
             },
             "extension":[
                {
@@ -249,11 +197,7 @@
             "intent":"order",
             "authoredOn":"2019-10-21",
             "requester":{
-               "identifier":{
-                  "system":"http://highmed.org/fhir/CodeSystem/practitioner",
-                  "value":"Test_Practitioner"
-               },
-               "type":"Practitioner"
+               "reference":"urn:uuid:ae194285-d08e-46c7-a9a7-9a47624dd8xx"
             },
             "restriction":{
                "recipient":[
