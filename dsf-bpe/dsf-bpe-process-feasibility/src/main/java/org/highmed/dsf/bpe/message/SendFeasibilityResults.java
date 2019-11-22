@@ -1,7 +1,5 @@
 package org.highmed.dsf.bpe.message;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
@@ -27,15 +25,7 @@ public class SendFeasibilityResults extends AbstractTaskMessageSend
 	protected Stream<Task.ParameterComponent> getAdditionalInputParameters(DelegateExecution execution)
 	{
 		Outputs outputs = (Outputs) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
-
-		List<Task.ParameterComponent> inputs = new ArrayList<>();
-
-		outputs.getOutputs().forEach(output -> {
-			Task.ParameterComponent input = getTaskHelper()
-					.createInput(output.getSystem(), output.getCode(), output.getValue());
-			inputs.add(input);
-		});
-
-		return inputs.stream();
+		return outputs.getOutputs().stream()
+				.map(o -> getTaskHelper().createInput(o.getSystem(), o.getCode(), o.getValue()));
 	}
 }

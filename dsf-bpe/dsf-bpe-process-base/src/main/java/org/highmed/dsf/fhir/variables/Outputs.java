@@ -31,10 +31,14 @@ public class Outputs
 		outputs.add(output);
 	}
 
+	public void add(String system, String code, String value)
+	{
+		Output output = new Output(system, code, value);
+		add(output);
+	}
+
 	public void addErrorOutput(String error)
 	{
-		Output output = new Output(Constants.CODESYSTEM_HIGHMED_BPMN,
-				Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, error);
-		outputs.add(output);
+		add(Constants.CODESYSTEM_HIGHMED_BPMN, Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, error);
 	}
 }

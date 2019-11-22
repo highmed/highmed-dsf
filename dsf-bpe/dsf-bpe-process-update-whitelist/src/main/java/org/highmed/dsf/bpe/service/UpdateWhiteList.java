@@ -15,7 +15,6 @@ import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.fhir.variables.Output;
 import org.highmed.dsf.fhir.variables.Outputs;
 import org.highmed.dsf.fhir.variables.OutputsValues;
 import org.highmed.fhir.client.FhirWebserviceClient;
@@ -139,9 +138,8 @@ public class UpdateWhiteList extends AbstractServiceDelegate implements Initiali
 	{
 		Outputs outputs = (Outputs) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
 
-		outputs.add(new Output(Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST,
-				Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST,
-				new IdType(result.getId()).getIdPart()));
+		outputs.add(Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST,
+				Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST, new IdType(result.getId()).getIdPart());
 
 		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, OutputsValues.create(outputs));
 	}

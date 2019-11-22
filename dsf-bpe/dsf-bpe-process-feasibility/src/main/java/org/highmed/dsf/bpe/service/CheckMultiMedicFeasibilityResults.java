@@ -12,7 +12,6 @@ import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.bpe.variables.FinalSimpleFeasibilityResult;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.fhir.variables.Output;
 import org.highmed.dsf.fhir.variables.Outputs;
 import org.highmed.dsf.fhir.variables.OutputsValues;
 import org.slf4j.Logger;
@@ -65,12 +64,15 @@ public class CheckMultiMedicFeasibilityResults extends AbstractServiceDelegate
 
 	private void addSuccessfulResultsToOutputs(Stream<FinalSimpleFeasibilityResult> successfulResults, Outputs outputs)
 	{
-		successfulResults.flatMap(result -> Stream.of(new Output(Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
-				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS,
-				result.getParticipatingMedics() + Constants.CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR + result
-						.getCohortId()), new Output(Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
-				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT,
-				result.getCohortSize() + Constants.CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR + result
-						.getCohortId()))).forEach(outputs::add);
+		successfulResults.forEach(result -> {
+			outputs.add(Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
+					Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS,
+					result.getParticipatingMedics() + Constants.CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR + result
+							.getCohortId());
+			outputs.add(Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
+					Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT,
+					result.getCohortSize() + Constants.CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR + result
+							.getCohortId());
+		});
 	}
 }

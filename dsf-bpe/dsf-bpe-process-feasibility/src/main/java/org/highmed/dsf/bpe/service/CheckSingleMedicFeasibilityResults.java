@@ -12,7 +12,6 @@ import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.bpe.variables.MultiInstanceResult;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.fhir.variables.Output;
 import org.highmed.dsf.fhir.variables.Outputs;
 import org.highmed.dsf.fhir.variables.OutputsValues;
 import org.slf4j.Logger;
@@ -37,8 +36,7 @@ public class CheckSingleMedicFeasibilityResults extends AbstractServiceDelegate
 		Map<String, String> finalResults = results.getQueryResults();
 
 		// TODO: implement check and execute twice for filter in erroneous and correct results
-		Map<String, String> erroneousResults = checkQueryResults(
-				finalResults); // checkQueryResults(finalResults, negativeFilter);
+		Map<String, String> erroneousResults = checkQueryResults(finalResults); // checkQueryResults(finalResults, negativeFilter);
 		Map<String, String> correctResults = finalResults; // checkQueryResults(finalResults, positiveFilter);
 
 		addErroneousResultsToOutputs(erroneousResults.entrySet().stream(), outputs);
@@ -73,9 +71,10 @@ public class CheckSingleMedicFeasibilityResults extends AbstractServiceDelegate
 
 	private void addSuccessfulResultsToOutputs(Stream<Map.Entry<String, String>> successfulResults, Outputs outputs)
 	{
-		successfulResults.map(entry -> new Output(Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
-				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_SINGLE_MEDIC_RESULT,
-				entry.getValue() + CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR + entry.getKey()))
-				.forEach(outputs::add);
+		successfulResults.forEach(entry -> {
+			outputs.add(Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
+					Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_SINGLE_MEDIC_RESULT,
+					entry.getValue() + CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR + entry.getKey());
+		});
 	}
 }
