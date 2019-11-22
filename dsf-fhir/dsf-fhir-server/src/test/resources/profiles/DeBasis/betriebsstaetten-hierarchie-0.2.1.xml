@@ -1,0 +1,52 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+	<meta>
+		<lastUpdated value="2017-09-09T14:37:26.16-07:00" />
+	</meta>
+	<url value="http://fhir.de/StructureDefinition/betriebsstaetten-hierarchie" />
+	<version value="0.2.1" />
+	<name value="BetriebsstaettenHierarchieDeBasis" />
+	<title value="Extension zur Erfassung der Betriebstättenhierarchie gemäß KBV (Version 0.2.1)" />
+	<status value="draft" />
+	<date value="2018-06-28" />
+	<publisher value="HL7 Deutschland e.V. (Technisches Komitee FHIR), hhund" />
+	<contact>
+		<telecom>
+			<system value="url" />
+			<value value="http://hl7.de/technische-komitees/fhir/" />
+		</telecom>
+	</contact>
+	<description value="Extension zur Codierung der Hierarchieebene der Betriebstätte (Haupt/Neben) gemäß KBV" />
+	<copyright value="HL7 Deutschland e.V." />
+	<fhirVersion value="4.0.0" />
+	<kind value="complex-type" />
+	<abstract value="false" />
+	<contextType value="resource" />
+	<context value="Organization" />
+	<type value="Extension" />
+	<baseDefinition value="http://hl7.org/fhir/StructureDefinition/Extension" />
+	<differential>
+		<element id="Extension">
+			<path value="Extension" />
+			<short value="Betriebsstätten-Hierarchie (Haupt/Nebenbetriebsstätte)" />
+			<definition
+				value="Für Betriebsstätten gemäß KBV ist die Angabe erforderlich, ob es sich um eine Haupt- oder Nebenbetriebsstätte handelt.&#xD;&#xA;Bei der Modellierung von Betriebsstätten als Organization-Resource ist daher eine Extension erforderlich um diese Eigenschaft abzubilden." />
+		</element>
+		<element id="Extension.url">
+			<path value="Extension.url" />
+			<fixedUri value="http://fhir.de/StructureDefinition/betriebsstaetten-hierarchie" />
+		</element>
+		<element id="Extension.value[x]:valueCode">
+			<path value="Extension.valueCode" />
+			<sliceName value="valueCode" />
+			<short value="BSNR | NBSNR" />
+			<definition value="BSNR | NBSNR" />
+			<type>
+				<code value="code" />
+			</type>
+			<binding>
+				<strength value="required" />
+				<valueSetUri value="http://fhir.de/ValueSet/kbv/betriebsstaetten-hierarchie" />
+			</binding>
+		</element>
+	</differential>
+</StructureDefinition>
