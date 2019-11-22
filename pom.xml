@@ -27,7 +27,7 @@
 		<tyrus.version>1.15</tyrus.version>
 		<spring.version>5.2.1.RELEASE</spring.version>
 
-		<hapi.version>4.0.3</hapi.version>
+		<hapi.version>4.1.0</hapi.version>
 	</properties>
 
 	<licenses>
