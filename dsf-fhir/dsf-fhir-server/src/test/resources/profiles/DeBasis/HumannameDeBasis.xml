@@ -131,6 +131,9 @@
 		<element id="HumanName.family.extension:nachname.value[x]:valueString">
 			<path value="HumanName.family.extension.valueString" />
 			<sliceName value="valueString" />
+			<type>
+				<code value="string" />
+			</type>
 		</element>
 		<element id="HumanName.family.extension:vorsatzwort">
 			<path value="HumanName.family.extension" />
@@ -154,6 +157,9 @@
 		<element id="HumanName.family.extension:vorsatzwort.value[x]:valueString">
 			<path value="HumanName.family.extension.valueString" />
 			<sliceName value="valueString" />
+			<type>
+				<code value="string" />
+			</type>
 		</element>
 		<element id="HumanName.given">
 			<path value="HumanName.given" />
@@ -203,6 +209,9 @@
 		<element id="HumanName.prefix.extension:prefix-qualifier.value[x]:valueCode">
 			<path value="HumanName.prefix.extension.valueCode" />
 			<sliceName value="valueCode" />
+			<type>
+				<code value="code" />
+			</type>
 		</element>
 		<element id="HumanName.suffix">
 			<path value="HumanName.suffix" />
