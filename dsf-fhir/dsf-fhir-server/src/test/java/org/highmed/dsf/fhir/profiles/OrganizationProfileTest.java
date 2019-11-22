@@ -126,9 +126,6 @@ public class OrganizationProfileTest
 
 		assertEquals(2,
 				result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())).count());
-		assertEquals(1, result.getMessages().stream().filter(m -> ResultSeverityEnum.WARNING.equals(m.getSeverity())
-				&& "ValueSet http://highmed.org/fhir/ValueSet/highmed-organization not found".equals(m.getMessage()))
-				.count());
 	}
 
 	@Test
