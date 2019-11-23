@@ -29,6 +29,8 @@ services:
       -  type: bind
          source: ./app/conf
          target: /opt/fhir/conf
+      environment:
+         TZ: Europe/Berlin
       networks:
          frontend:
             ipv4_address: 172.28.1.3
