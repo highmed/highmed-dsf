@@ -28,6 +28,9 @@ services:
       -  type: bind
          source: ./app/plugin
          target: /opt/bpe/plugin
+      -  type: bind
+         source: ./app/log
+         target: /opt/bpe/log
       environment:
          TZ: Europe/Berlin
       networks:
