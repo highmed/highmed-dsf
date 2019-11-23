@@ -1,9 +1,5 @@
 package org.highmed.dsf.fhir.spring.config;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-
 import org.highmed.dsf.fhir.webservice.impl.BinaryServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.BundleServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.CodeSystemServiceImpl;
@@ -137,25 +133,14 @@ public class WebserviceConfig
 	@Autowired
 	private CommandConfig commandConfig;
 
+	@Autowired
+	private BuildInfoReaderConfig buildInfoReaderConfig;
+
 	@Bean
 	public ConformanceService conformanceService()
 	{
 		return new ConformanceServiceJaxrs(new ConformanceServiceSecure(new ConformanceServiceImpl(serverBase,
-				defaultPageCount, readVersionProperties(), helperConfig.parameterConverter())));
-	}
-
-	private Properties readVersionProperties()
-	{
-		try (InputStream in = WebserviceConfig.class.getResourceAsStream("/version.properties"))
-		{
-			Properties versionProperties = new Properties();
-			versionProperties.load(in);
-			return versionProperties;
-		}
-		catch (IOException e)
-		{
-			throw new RuntimeException(e);
-		}
+				defaultPageCount, buildInfoReaderConfig.buildInfoReader(), helperConfig.parameterConverter())));
 	}
 
 	private String resourceTypeName(Class<? extends Resource> r)

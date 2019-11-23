@@ -16,6 +16,7 @@
 		<module>dsf-tools-test-data-generator</module>
 		<module>dsf-tools-proxy-test</module>
 		<module>dsf-tools-bundle-generator</module>
+		<module>dsf-tools-build-info-reader</module>
 	</modules>
 
 	<dependencyManagement>
