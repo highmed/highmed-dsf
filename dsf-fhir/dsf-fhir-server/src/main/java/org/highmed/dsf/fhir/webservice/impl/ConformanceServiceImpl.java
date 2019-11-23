@@ -1,12 +1,19 @@
 package org.highmed.dsf.fhir.webservice.impl;
 
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -101,6 +108,8 @@ import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.UrlType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.codesystems.RestfulSecurityService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import com.google.common.collect.Streams;
@@ -110,12 +119,16 @@ import ca.uhn.fhir.rest.api.Constants;
 
 public class ConformanceServiceImpl implements ConformanceService, InitializingBean
 {
+	private static final Logger logger = LoggerFactory.getLogger(ConformanceServiceImpl.class);
+
 	private final CapabilityStatement capabilityStatement;
 	private final ParameterConverter parameterConverter;
 
-	public ConformanceServiceImpl(String serverBase, int defaultPageCount, ParameterConverter parameterConverter)
+	public ConformanceServiceImpl(String serverBase, int defaultPageCount, Properties versionProperties,
+			ParameterConverter parameterConverter)
 	{
-		capabilityStatement = createCapabilityStatement(serverBase, defaultPageCount);
+		capabilityStatement = createCapabilityStatement(serverBase, defaultPageCount, getDate(versionProperties),
+				getVersion(versionProperties));
 		this.parameterConverter = parameterConverter;
 	}
 
@@ -137,18 +150,58 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 		return Response.ok(capabilityStatement, parameterConverter.getMediaType(uri, headers)).build();
 	}
 
-	private CapabilityStatement createCapabilityStatement(String serverBase, int defaultPageCount)
+	private Date getDate(Properties versionProperties)
+	{
+		String timestamp = versionProperties.getProperty("build.date");
+		if ("${timestamp}".equals(timestamp))
+		{
+			logger.warn("No build date provided via version properties");
+			return new Date();
+		}
+		else
+		{
+			logger.info("System default timezone: {}",
+					ZoneOffset.systemDefault().getDisplayName(TextStyle.NARROW, Locale.ENGLISH));
+
+			ZonedDateTime date = ZonedDateTime.parse(timestamp, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+
+			logger.info("Software build date: {}",
+					date.withZoneSameInstant(ZoneId.systemDefault()).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+			return Date.from(date.toInstant());
+		}
+	}
+
+	private String getVersion(Properties versionProperties)
+	{
+		String branch = versionProperties.getProperty("build.branch");
+		String number = versionProperties.getProperty("build.number");
+		String version = versionProperties.getProperty("project.version");
+
+		if ("${scmBranch}".equals(branch) || "${buildNumber}".equals(number))
+		{
+			logger.warn("No build branch or build number provided via version properties");
+			return version;
+		}
+		else
+		{
+			logger.info("Software build version: {}, branch: {}, commit: {}", version, branch, number);
+			return version + " (" + branch + "/" + number.substring(0, 7) + ")";
+		}
+	}
+
+	private CapabilityStatement createCapabilityStatement(String serverBase, int defaultPageCount, Date date,
+			String version)
 	{
 		CapabilityStatement statement = new CapabilityStatement();
 		statement.setStatus(PublicationStatus.ACTIVE);
-		statement.setDate(new Date());
-		statement.setPublisher("Publisher - TODO"); // TODO
+		statement.setDate(date);
+		statement.setPublisher("HiGHmed");
 		statement.setKind(CapabilityStatementKind.INSTANCE);
 		statement.setSoftware(new CapabilityStatementSoftwareComponent());
-		statement.getSoftware().setName("Software Name -  TODO"); // TODO
-		statement.getSoftware().setVersion("Software Version - TODO"); // TODO
+		statement.getSoftware().setName("HiGHmed DataSharing Framework");
+		statement.getSoftware().setVersion(version);
 		statement.setImplementation(new CapabilityStatementImplementationComponent());
-		statement.getImplementation().setDescription("Implementation Description - TODO"); // TODO
+		// statement.getImplementation().setDescription("Implementation Description - TODO"); // TODO
 		statement.getImplementation().setUrl(serverBase);
 		statement.setFhirVersion(FHIRVersion._4_0_0);
 		statement.setFormat(
