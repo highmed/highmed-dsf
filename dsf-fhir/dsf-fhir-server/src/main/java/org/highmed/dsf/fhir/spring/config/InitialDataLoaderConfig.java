@@ -6,7 +6,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.highmed.dsf.fhir.init.InitialDataLoader;
+import org.highmed.dsf.fhir.service.InitialDataLoader;
+import org.highmed.dsf.fhir.service.InitialDataLoaderImpl;
 import org.hl7.fhir.r4.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +21,9 @@ import org.springframework.context.event.EventListener;
 import ca.uhn.fhir.parser.IParser;
 
 @Configuration
-public class InitialDataLoadConfig
+public class InitialDataLoaderConfig
 {
-	private static final Logger logger = LoggerFactory.getLogger(InitialDataLoadConfig.class);
+	private static final Logger logger = LoggerFactory.getLogger(InitialDataLoaderConfig.class);
 
 	@Value("${org.highmed.dsf.fhir.init.bundle.file}")
 	private String initBundleFile;
@@ -36,7 +37,7 @@ public class InitialDataLoadConfig
 	@Bean
 	public InitialDataLoader initialDataLoader()
 	{
-		return new InitialDataLoader(commandConfig.commandFactory(), fhirConfig.fhirContext());
+		return new InitialDataLoaderImpl(commandConfig.commandFactory(), fhirConfig.fhirContext());
 	}
 
 	@EventListener({ ContextRefreshedEvent.class })
@@ -44,7 +45,7 @@ public class InitialDataLoadConfig
 	{
 		try (InputStream fileIn = ClassLoader.getSystemResourceAsStream("fhir/bundle.xml"))
 		{
-			logger.debug("Loading data from JAR bundle ...");
+			logger.info("Loading data from JAR bundle ...");
 			Bundle bundle = parseXmlBundle(fileIn);
 			initialDataLoader().load(bundle);
 		}
@@ -55,7 +56,7 @@ public class InitialDataLoadConfig
 
 		try (InputStream fileIn = Files.newInputStream(file))
 		{
-			logger.debug("Loading data from external bundle ...");
+			logger.info("Loading data from external bundle ...");
 			Bundle bundle = parseXmlBundle(fileIn);
 			initialDataLoader().load(bundle);
 		}

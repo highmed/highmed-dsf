@@ -46,7 +46,7 @@ import org.highmed.dsf.fhir.FhirContextLoaderListener;
 import org.highmed.dsf.fhir.authentication.AuthenticationFilter;
 import org.highmed.dsf.fhir.service.ReferenceExtractor;
 import org.highmed.dsf.fhir.service.ReferenceExtractorImpl;
-import org.highmed.dsf.fhir.spring.config.InitialDataLoadConfig;
+import org.highmed.dsf.fhir.spring.config.InitialDataLoaderConfig;
 import org.highmed.dsf.fhir.test.FhirEmbeddedPostgresWithLiquibase;
 import org.highmed.dsf.fhir.test.TestSuiteIntegrationTests;
 import org.highmed.dsf.fhir.test.X509Certificates;
@@ -329,8 +329,8 @@ public abstract class AbstractIntegrationTest
 	public void before() throws Exception
 	{
 		logger.info("Loading initial FHIR data bundles ...");
-		InitialDataLoadConfig initialDataLoadConfig = getSpringWebApplicationContext()
-				.getBean(InitialDataLoadConfig.class);
+		InitialDataLoaderConfig initialDataLoadConfig = getSpringWebApplicationContext()
+				.getBean(InitialDataLoaderConfig.class);
 		assertNotNull(initialDataLoadConfig);
 		initialDataLoadConfig.onContextRefreshedEvent(null);
 	}
