@@ -107,7 +107,7 @@ public class BuildInfoReaderImpl implements BuildInfoReader
 	public ZonedDateTime getBuildDate()
 	{
 		String timestamp = getVersionProperties().getProperty(PROPERTY_BUILD_DATE);
-		if ("${timestamp}".equals(timestamp))
+		if ("${maven.build.timestamp}".equals(timestamp))
 		{
 			logger.warn("No build date provided via version properties, returning current date");
 			return ZonedDateTime.now();

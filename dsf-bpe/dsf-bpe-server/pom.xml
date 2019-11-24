@@ -1,5 +1,5 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>dsf-bpe-server</artifactId>
@@ -19,16 +19,8 @@
 			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-bpe-process-feasibility</artifactId>
 		</dependency>
-		<!-- provided as jar and injected on startup as plugin
-		<dependency>
-			<groupId>org.highmed.dsf</groupId>
-			<artifactId>dsf-bpe-process-parent</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.highmed.dsf</groupId>
-			<artifactId>dsf-bpe-process-child</artifactId>
-		</dependency>
-		-->
+		<!-- provided as jar and injected on startup as plugin <dependency> <groupId>org.highmed.dsf</groupId> <artifactId>dsf-bpe-process-parent</artifactId> </dependency> 
+			<dependency> <groupId>org.highmed.dsf</groupId> <artifactId>dsf-bpe-process-child</artifactId> </dependency> -->
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-bpe-process-ping</artifactId>
@@ -155,4 +147,23 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
+	<build>
+		<testResources>
+			<testResource>
+				<directory>src/test/resources</directory>
+				<filtering>false</filtering>
+				<excludes>
+					<exclude>**/version.properties</exclude>
+				</excludes>
+			</testResource>
+			<testResource>
+				<directory>src/test/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>**/version.properties</include>
+				</includes>
+			</testResource>
+		</testResources>
+	</build>
 </project>

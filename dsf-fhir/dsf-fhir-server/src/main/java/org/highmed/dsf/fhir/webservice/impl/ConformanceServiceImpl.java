@@ -144,9 +144,10 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 	{
 		String branch = buildInfoReader.getBuildBranch();
 		String number = buildInfoReader.getBuildNumber();
+		number = number.length() >= 7 ? number.substring(0, 7) : number;
 		String version = buildInfoReader.getProjectVersion();
 
-		return version + " (" + branch + "/" + number.substring(0, 7) + ")";
+		return version + " (" + branch + "/" + number + ")";
 	}
 
 	private CapabilityStatement createCapabilityStatement(String serverBase, int defaultPageCount, Date date,
