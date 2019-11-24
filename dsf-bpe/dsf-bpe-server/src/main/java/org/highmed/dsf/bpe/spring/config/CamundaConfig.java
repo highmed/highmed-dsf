@@ -71,7 +71,7 @@ public class CamundaConfig
 	@Bean
 	public StartListener startListener()
 	{
-		return new StartListener();
+		return new StartListener(fhirConfig.taskHelper());
 	}
 
 	@Bean

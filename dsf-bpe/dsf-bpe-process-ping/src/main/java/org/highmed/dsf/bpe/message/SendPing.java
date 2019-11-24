@@ -9,9 +9,9 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class SendPing extends AbstractTaskMessageSend
 {
-	public SendPing(OrganizationProvider organizationProvider, FhirWebserviceClientProvider clientProvider,
-			TaskHelper taskHelper, FhirContext fhirContext)
+	public SendPing(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
+			OrganizationProvider organizationProvider, FhirContext fhirContext)
 	{
-		super(organizationProvider, clientProvider, taskHelper, fhirContext);
+		super(clientProvider, taskHelper, organizationProvider, fhirContext);
 	}
 }

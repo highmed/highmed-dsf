@@ -100,12 +100,12 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 	 */
 	protected abstract void doExecute(DelegateExecution execution) throws Exception;
 
-	protected TaskHelper getTaskHelper()
+	protected final TaskHelper getTaskHelper()
 	{
 		return taskHelper;
 	}
 
-	protected FhirWebserviceClientProvider getFhirWebserviceClientProvider()
+	protected final FhirWebserviceClientProvider getFhirWebserviceClientProvider()
 	{
 		return clientProvider;
 	}

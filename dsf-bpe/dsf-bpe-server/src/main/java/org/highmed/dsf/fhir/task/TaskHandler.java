@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -18,9 +17,7 @@ import org.camunda.bpm.engine.variable.Variables;
 import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.fhir.variables.DomainResourceValues;
 import org.highmed.fhir.client.FhirWebserviceClient;
-import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
-import org.hl7.fhir.r4.model.Task.ParameterComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -62,11 +59,11 @@ public class TaskHandler implements InitializingBean
 		String processDefinitionKey = pathSegments.get(2);
 		String versionTag = pathSegments.size() == 4 ? pathSegments.get(3) : null;
 
-		String messageName = getString(task.getInput(), Constants.CODESYSTEM_HIGHMED_BPMN,
+		String messageName = taskHelper.getFirstInputParameterStringValue(task, Constants.CODESYSTEM_HIGHMED_BPMN,
 				Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME).orElse(null);
-		String businessKey = getString(task.getInput(), Constants.CODESYSTEM_HIGHMED_BPMN,
+		String businessKey = taskHelper.getFirstInputParameterStringValue(task, Constants.CODESYSTEM_HIGHMED_BPMN,
 				Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY).orElse(null);
-		String correlationKey = getString(task.getInput(), Constants.CODESYSTEM_HIGHMED_BPMN,
+		String correlationKey = taskHelper.getFirstInputParameterStringValue(task, Constants.CODESYSTEM_HIGHMED_BPMN,
 				Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY).orElse(null);
 
 		Map<String, Object> variables = Map.of(Constants.VARIABLE_TASK, DomainResourceValues.create(task));
@@ -88,14 +85,6 @@ public class TaskHandler implements InitializingBean
 	private List<String> getPathSegments(String istantiatesUri)
 	{
 		return UriComponentsBuilder.fromUriString(istantiatesUri).build().getPathSegments();
-	}
-
-	private Optional<String> getString(List<ParameterComponent> list, String system, String code)
-	{
-		return list.stream().filter(c -> c.getValue() instanceof StringType)
-				.filter(c -> c.getType().getCoding().stream()
-						.anyMatch(co -> system.equals(co.getSystem()) && code.equals(co.getCode())))
-				.map(c -> ((StringType) c.getValue()).asStringValue()).findFirst();
 	}
 
 	private ProcessDefinition getProcessDefinition(String processDefinitionKey, String versionTag)

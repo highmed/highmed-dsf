@@ -9,9 +9,9 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class SendPong extends AbstractTaskMessageSend
 {
-	public SendPong(OrganizationProvider organizationProvider, FhirWebserviceClientProvider clientProvider,
-			TaskHelper taskHelper, FhirContext fhirContext)
+	public SendPong(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
+			OrganizationProvider organizationProvider, FhirContext fhirContext)
 	{
-		super(organizationProvider, clientProvider, taskHelper, fhirContext);
+		super(clientProvider, taskHelper, organizationProvider, fhirContext);
 	}
 }

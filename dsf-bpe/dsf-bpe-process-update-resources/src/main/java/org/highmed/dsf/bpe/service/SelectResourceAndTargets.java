@@ -30,10 +30,11 @@ public class SelectResourceAndTargets extends AbstractServiceDelegate implements
 
 	private final OrganizationProvider organizationProvider;
 
-	public SelectResourceAndTargets(OrganizationProvider organizationProvider,
-			FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
+	public SelectResourceAndTargets(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
+			OrganizationProvider organizationProvider)
 	{
 		super(clientProvider, taskHelper);
+
 		this.organizationProvider = organizationProvider;
 	}
 
@@ -41,6 +42,7 @@ public class SelectResourceAndTargets extends AbstractServiceDelegate implements
 	public void afterPropertiesSet() throws Exception
 	{
 		super.afterPropertiesSet();
+
 		Objects.requireNonNull(organizationProvider, "organizationProvider");
 	}
 

@@ -17,20 +17,17 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class SendFeasibilityRequest extends AbstractTaskMessageSend
 {
-	private final FhirWebserviceClientProvider clientProvider;
-
-	public SendFeasibilityRequest(OrganizationProvider organizationProvider,
-			FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper, FhirContext fhirContext)
+	public SendFeasibilityRequest(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
+			OrganizationProvider organizationProvider, FhirContext fhirContext)
 	{
-		super(organizationProvider, clientProvider, taskHelper, fhirContext);
-		this.clientProvider = clientProvider;
+		super(clientProvider, taskHelper, organizationProvider, fhirContext);
 	}
 
 	@Override
 	protected Stream<Task.ParameterComponent> getAdditionalInputParameters(DelegateExecution execution)
 	{
 		ResearchStudy researchStudy = (ResearchStudy) execution.getVariable(Constants.VARIABLE_RESEARCH_STUDY);
-		IdType type = new IdType(clientProvider.getLocalBaseUrl() + "/" + researchStudy.getId());
+		IdType type = new IdType(getFhirWebserviceClientProvider().getLocalBaseUrl() + "/" + researchStudy.getId());
 
 		Task.ParameterComponent input = getTaskHelper().createInput(Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
 				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_RESEARCH_STUDY_REFERENCE,

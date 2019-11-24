@@ -17,10 +17,10 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class SendRequest extends AbstractTaskMessageSend
 {
-	public SendRequest(OrganizationProvider organizationProvider, FhirWebserviceClientProvider clientProvider,
-			TaskHelper taskHelper, FhirContext fhirContext)
+	public SendRequest(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
+			OrganizationProvider organizationProvider, FhirContext fhirContext)
 	{
-		super(organizationProvider, clientProvider, taskHelper, fhirContext);
+		super(clientProvider, taskHelper, organizationProvider, fhirContext);
 	}
 
 	@Override

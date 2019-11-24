@@ -7,15 +7,18 @@ import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.Outputs;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Task;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Added to each BPMN EndEvent by the {@link DefaultBpmnParseListener}.
- * Is used to set the FHIR {@link Task} status as {@link Task.TaskStatus#COMPLETED} if the process ends successfully
- * and sets {@link Task}.output values. Sets the {@link Constants#VARIABLE_IN_CALLED_PROCESS} back to <code>false</code>
- * if a called sub process ends.
+ * Added to each BPMN EndEvent by the {@link DefaultBpmnParseListener}. Is used to set the FHIR {@link Task} status as
+ * {@link Task.TaskStatus#COMPLETED} if the process ends successfully and sets {@link Task}.output values. Sets the
+ * {@link Constants#VARIABLE_IN_CALLED_PROCESS} back to <code>false</code> if a called sub process ends.
  */
 public class EndListener implements ExecutionListener
 {
+	private static final Logger logger = LoggerFactory.getLogger(EndListener.class);
+
 	private final TaskHelper taskHelper;
 	private final FhirWebserviceClient webserviceClient;
 
@@ -41,6 +44,8 @@ public class EndListener implements ExecutionListener
 
 				Outputs outputs = (Outputs) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
 				task = taskHelper.addOutputs(task, outputs);
+
+				log(execution, task);
 			}
 			else
 			{
@@ -57,5 +62,20 @@ public class EndListener implements ExecutionListener
 			// reset VARIABLE_IS_CALL_ACTIVITY to false, since we leave the called process
 			execution.setVariable(Constants.VARIABLE_IN_CALLED_PROCESS, false);
 		}
+	}
+
+	private void log(DelegateExecution execution, Task task)
+	{
+		String processUrl = task.getInstantiatesUri();
+		String messageName = taskHelper.getFirstInputParameterStringValue(task, Constants.CODESYSTEM_HIGHMED_BPMN,
+				Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME).orElse(null);
+		String businessKey = taskHelper.getFirstInputParameterStringValue(task, Constants.CODESYSTEM_HIGHMED_BPMN,
+				Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY).orElse(null);
+		String correlationKey = taskHelper.getFirstInputParameterStringValue(task, Constants.CODESYSTEM_HIGHMED_BPMN,
+				Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY).orElse(null);
+		String taskId = task.getIdElement().getIdPart();
+
+		logger.info("Process {} finished [message: {}, businessKey: {}, correlationKey: {}, taskId: {}]", processUrl,
+				messageName, businessKey, correlationKey, taskId);
 	}
 }

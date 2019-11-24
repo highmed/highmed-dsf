@@ -32,11 +32,11 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractTaskMessageSend.class);
 
-	protected final OrganizationProvider organizationProvider;
+	private final OrganizationProvider organizationProvider;
 	private final FhirContext fhirContext;
 
-	public AbstractTaskMessageSend(OrganizationProvider organizationProvider,
-			FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper, FhirContext fhirContext)
+	public AbstractTaskMessageSend(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
+			OrganizationProvider organizationProvider, FhirContext fhirContext)
 	{
 		super(clientProvider, taskHelper);
 
@@ -75,11 +75,10 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 		}
 		catch (Exception e)
 		{
-			String errorMessage =
-					"Error while sending Task (process: " + processDefinitionKey + ", version: " + versionTag
-							+ ", message-name: " + messageName + ", business-key: " + businessKey
-							+ ", correlation-key: " + target.getCorrelationKey() + ") to organization with identifier "
-							+ target.getTargetOrganizationIdentifierValue() + ": " + e.getMessage();
+			String errorMessage = "Error while sending Task (process: " + processDefinitionKey + ", version: "
+					+ versionTag + ", message-name: " + messageName + ", business-key: " + businessKey
+					+ ", correlation-key: " + target.getCorrelationKey() + ") to organization with identifier "
+					+ target.getTargetOrganizationIdentifierValue() + ": " + e.getMessage();
 			logger.warn(errorMessage);
 
 			Outputs outputs = (Outputs) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
@@ -125,26 +124,26 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 
 		// http://highmed.org/bpe/Process/processDefinitionKey
 		// http://highmed.org/bpe/Process/processDefinitionKey/versionTag
-		String instantiatesUri =
-				Constants.PROCESS_URI_BASE + processDefinitionKey + (versionTag != null && !versionTag.isEmpty() ?
-						("/" + versionTag) :
-						"");
+		String instantiatesUri = Constants.PROCESS_URI_BASE + processDefinitionKey
+				+ (versionTag != null && !versionTag.isEmpty() ? ("/" + versionTag) : "");
 		task.setInstantiatesUri(instantiatesUri);
 
-		ParameterComponent messageNameInput = new ParameterComponent(new CodeableConcept(
-				new Coding(Constants.CODESYSTEM_HIGHMED_BPMN, Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME,
-						null)), new StringType(messageName));
+		ParameterComponent messageNameInput = new ParameterComponent(
+				new CodeableConcept(new Coding(Constants.CODESYSTEM_HIGHMED_BPMN,
+						Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME, null)),
+				new StringType(messageName));
 		task.getInput().add(messageNameInput);
 
-		ParameterComponent businessKeyInput = new ParameterComponent(new CodeableConcept(
-				new Coding(Constants.CODESYSTEM_HIGHMED_BPMN, Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY,
-						null)), new StringType(businessKey));
+		ParameterComponent businessKeyInput = new ParameterComponent(
+				new CodeableConcept(new Coding(Constants.CODESYSTEM_HIGHMED_BPMN,
+						Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY, null)),
+				new StringType(businessKey));
 		task.getInput().add(businessKeyInput);
 
 		if (correlationKey != null)
 		{
-			ParameterComponent correlationKeyInput = new ParameterComponent(new CodeableConcept(
-					new Coding(Constants.CODESYSTEM_HIGHMED_BPMN,
+			ParameterComponent correlationKeyInput = new ParameterComponent(
+					new CodeableConcept(new Coding(Constants.CODESYSTEM_HIGHMED_BPMN,
 							Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY, null)),
 					new StringType(correlationKey));
 			task.getInput().add(correlationKeyInput);
@@ -154,8 +153,9 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 
 		FhirWebserviceClient client = getFhirClient(task, targetOrganizationIdentifierValue);
 
-		logger.info("Sending task for process {} to organization {} (endpoint: {})", task.getInstantiatesUri(),
-				targetOrganizationIdentifierValue, client.getBaseUrl());
+		logger.info("Sending task {} to {} [message: {}, businessKey: {}, correlationKey: {}, endpoint: {}]",
+				task.getInstantiatesUri(), targetOrganizationIdentifierValue, messageName, businessKey, correlationKey,
+				client.getBaseUrl());
 		logger.trace("Task resource to send: {}", fhirContext.newJsonParser().encodeResourceToString(task));
 
 		client.create(task);
@@ -174,5 +174,10 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 			return getFhirWebserviceClientProvider().getRemoteWebserviceClient(organizationProvider.getDefaultSystem(),
 					targetOrganizationIdentifierValue);
 		}
+	}
+	
+	protected final OrganizationProvider getOrganizationProvider()
+	{
+		return organizationProvider;
 	}
 }
