@@ -39,7 +39,7 @@ public class StructureDefinitionTreeTest
 		FhirContext context = FhirContext.forR4();
 
 		Map<String, StructureDefinition> structureDefinitionsByUrl = Files
-				.list(Paths.get("src/test/resources/profiles"))
+				.list(Paths.get("src/test/resources/profiles")).filter(Files::isRegularFile)
 				.map(p -> readStructureDefinition(context, p).setSnapshot(null))
 				.collect(Collectors.toMap(StructureDefinition::getUrl, Function.identity()));
 
@@ -126,7 +126,7 @@ public class StructureDefinitionTreeTest
 		FhirContext context = FhirContext.forR4();
 
 		Map<String, StructureDefinition> structureDefinitionsByUrl = Files
-				.list(Paths.get("src/test/resources/profiles"))
+				.list(Paths.get("src/test/resources/profiles/DeBasis/"))
 				.map(p -> readStructureDefinition(context, p).setSnapshot(null))
 				.filter(sd -> sd.getUrl().startsWith("http://fhir.de/"))
 				.collect(Collectors.toMap(StructureDefinition::getUrl, Function.identity()));

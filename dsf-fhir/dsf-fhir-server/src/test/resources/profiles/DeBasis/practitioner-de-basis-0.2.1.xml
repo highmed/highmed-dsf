@@ -1,0 +1,98 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+	<meta>
+		<lastUpdated value="2017-10-20T11:03:43.079+02:00" />
+	</meta>
+	<url value="http://fhir.de/StructureDefinition/practitioner-de-basis/0.2.1" />
+	<version value="0.2.1" />
+	<name value="PractitionerDeBasis" />
+	<title value="Practitioner, deutsches Basisprofil (Version 0.2.1)" />
+	<status value="draft" />
+	<date value="2018-11-06" />
+	<publisher value="HL7 Deutschland e.V. (Technisches Komitee FHIR), hhund" />
+	<contact>
+		<telecom>
+			<system value="other" />
+			<value value="http://hl7.de/technische-komitees/fhir/" />
+		</telecom>
+	</contact>
+	<description value="Basisprofil für die Verwendung der Practitioner-Ressource in Deutschland" />
+	<copyright value="HL7 Deutschland e.V." />
+	<fhirVersion value="4.0.0" />
+	<kind value="resource" />
+	<abstract value="false" />
+	<type value="Practitioner" />
+	<baseDefinition value="http://hl7.org/fhir/StructureDefinition/Practitioner" />
+	<derivation value="constraint" />
+	<differential>
+		<element id="Practitioner">
+			<path value="Practitioner" />
+			<short
+				value="Eine Person mit einer formellen Verantwortung für die Bereitstellung von Gesundheitsleistungen oder damit zusammenhängenden Dienstleistungen." />
+			<definition value="Eine Person, die direkt oder indirekt an der Gesundheitsversorgung beteiligt ist." />
+		</element>
+		<element id="Practitioner.identifier">
+			<path value="Practitioner.identifier" />
+			<slicing>
+				<discriminator>
+					<type value="value" />
+					<path value="system" />
+				</discriminator>
+				<rules value="open" />
+			</slicing>
+			<short value="Identifikator der Person" />
+			<definition value="Identifikaotr der Person" />
+		</element>
+		<element id="Practitioner.identifier:LANR">
+			<path value="Practitioner.identifier" />
+			<sliceName value="LANR" />
+			<short value="Lebenslange Arztnummer (LANR)" />
+			<definition value="Lebenslange Arztnummer (LANR) vergeben durch die kassenärztlichen Vereinigungen." />
+		</element>
+		<element id="Practitioner.identifier:LANR.system">
+			<path value="Practitioner.identifier.system" />
+			<short value="Namespace für die LANR der KBV" />
+			<definition value="Die URL dient als eindeutiger Name des LANR-Nummernkreises." />
+			<min value="1" />
+			<fixedUri value="http://fhir.de/NamingSystem/kbv/lanr" />
+		</element>
+		<element id="Practitioner.identifier:LANR.value">
+			<path value="Practitioner.identifier.value" />
+			<short value="LANR des Arztes" />
+			<definition value="LANR des Arztes" />
+			<min value="1" />
+		</element>
+		<element id="Practitioner.name">
+			<path value="Practitioner.name" />
+			<short value="Personenname nach deutschem Profil" />
+			<definition value="Personenname nach deutschem Profil.&#xD;&#xA;Dieser enthält bestimmte Extensions, die in Deutschland Verwendung finden." />
+			<type>
+				<code value="HumanName" />
+				<profile value="http://fhir.de/StructureDefinition/humanname-de-basis" />
+			</type>
+		</element>
+		<element id="Practitioner.address">
+			<path value="Practitioner.address" />
+			<type>
+				<code value="Address" />
+				<profile value="http://fhir.de/StructureDefinition/address-de-basis" />
+			</type>
+		</element>
+		<element id="Practitioner.qualification">
+			<path value="Practitioner.qualification" />
+			<short value="Fachgruppe des Arztes" />
+			<definition value="Fachgruppe des Arztes" />
+		</element>
+		<element id="Practitioner.qualification.code">
+			<path value="Practitioner.qualification.code" />
+			<short value="Fachgruppenschlüssel aus der LANR" />
+			<definition value="Stelle 8-9 der LANR  welche die Fachgruppe des Arztes definiert." />
+			<binding>
+				<extension url="http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName">
+					<valueString value="Qualification" />
+				</extension>
+				<strength value="preferred" />
+				<valueSetUri value="http://fhir.de/ValueSet/kbv/s-bar2-arztnrfachgruppe" />
+			</binding>
+		</element>
+	</differential>
+</StructureDefinition>
