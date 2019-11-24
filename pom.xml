@@ -30,6 +30,16 @@
 		<hapi.version>4.1.0</hapi.version>
 	</properties>
 
+	<name>highmed-dsf</name>
+	<description>HiGHmed Data Sharing Framework (HiGHmed DSF)</description>
+	<url>https://github.com/highmed/highmed-dsf</url>
+
+	<scm>
+		<connection>scm:git:git://github.com/highmed/highmed-dsf.git</connection>
+		<developerConnection>scm:git:git@github.com:highmed/highmed-dsf.git</developerConnection>
+		<url>https://github.com/highmed/highmed-dsf</url>
+	</scm>
+
 	<licenses>
 		<license>
 			<name>Apache License, Version 2.0</name>
@@ -290,7 +300,10 @@
 								<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
 								<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
 							</manifest>
-							<!-- <manifestEntries><Implementation-Version-Revision>${buildNumber}</Implementation-Version-Revision></manifestEntries> -->
+							<manifestEntries>
+								<Implementation-Build>${buildNumber}</Implementation-Build>
+								<Implementation-Branch>${scmBranch}</Implementation-Branch>
+							</manifestEntries>
 						</archive>
 					</configuration>
 				</plugin>
@@ -300,7 +313,14 @@
 					<version>3.2.3</version>
 					<configuration>
 						<archive>
-							<!-- <manifestEntries><Implementation-Version-Revision>${buildNumber}</Implementation-Version-Revision></manifestEntries> -->
+							<manifest>
+								<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+								<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+							</manifest>
+							<manifestEntries>
+								<Implementation-Build>${buildNumber}</Implementation-Build>
+								<Implementation-Branch>${scmBranch}</Implementation-Branch>
+							</manifestEntries>
 						</archive>
 					</configuration>
 				</plugin>
@@ -351,6 +371,50 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
+
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>buildnumber-maven-plugin</artifactId>
+				<version>1.4</version>
+				<executions>
+					<execution>
+						<phase>validate</phase>
+						<goals>
+							<goal>create</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<revisionOnScmFailure>?</revisionOnScmFailure>
+					<useLastCommittedRevision>true</useLastCommittedRevision>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
+				<configuration>
+					<filesets>
+						<fileset>
+							<directory>dsf-docker-test-setup/bpe/app/log</directory>
+							<includes>
+								<include>*.log</include>
+								<include>*.log.gz</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+						<fileset>
+							<directory>dsf-docker-test-setup/fhir/app/log</directory>
+							<includes>
+								<include>*.log</include>
+								<include>*.log.gz</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+					</filesets>
+				</configuration>
+			</plugin>
+		</plugins>
 	</build>
 
 	<repositories>

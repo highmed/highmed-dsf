@@ -23,10 +23,11 @@ public class SelectPongTarget extends AbstractServiceDelegate implements Initial
 
 	private final OrganizationProvider organizationProvider;
 
-	public SelectPongTarget(OrganizationProvider organizationProvider, FhirWebserviceClientProvider clientProvider,
-			TaskHelper taskHelper)
+	public SelectPongTarget(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
+			OrganizationProvider organizationProvider)
 	{
 		super(clientProvider, taskHelper);
+
 		this.organizationProvider = organizationProvider;
 	}
 
@@ -34,6 +35,7 @@ public class SelectPongTarget extends AbstractServiceDelegate implements Initial
 	public void afterPropertiesSet() throws Exception
 	{
 		super.afterPropertiesSet();
+
 		Objects.requireNonNull(organizationProvider, "organizationProvider");
 	}
 
@@ -46,14 +48,13 @@ public class SelectPongTarget extends AbstractServiceDelegate implements Initial
 
 		Task task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
 
-		String correlationKey = getTaskHelper()
-				.getFirstInputParameterStringValue(task, Constants.CODESYSTEM_HIGHMED_BPMN,
-						Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY).get();
+		String correlationKey = getTaskHelper().getFirstInputParameterStringValue(task,
+				Constants.CODESYSTEM_HIGHMED_BPMN, Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY).get();
 
 		Identifier targetOrganizationIdentifier = organizationProvider
-				.getIdentifier(new IdType(task.getRequester().getReference())).orElseThrow(
-						() -> new IllegalStateException(
-								"Organization with id " + task.getRequester().getReference() + " not found"));
+				.getIdentifier(new IdType(task.getRequester().getReference()))
+				.orElseThrow(() -> new IllegalStateException(
+						"Organization with id " + task.getRequester().getReference() + " not found"));
 
 		execution.setVariable(Constants.VARIABLE_MULTI_INSTANCE_TARGET, MultiInstanceTargetValues
 				.create(new MultiInstanceTarget(targetOrganizationIdentifier.getValue(), correlationKey)));

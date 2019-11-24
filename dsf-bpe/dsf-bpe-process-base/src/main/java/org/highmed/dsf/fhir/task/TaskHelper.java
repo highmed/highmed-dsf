@@ -10,23 +10,23 @@ import org.hl7.fhir.r4.model.UrlType;
 
 public interface TaskHelper
 {
-	public Optional<String> getFirstInputParameterStringValue(Task task, String system, String code);
+	Optional<String> getFirstInputParameterStringValue(Task task, String system, String code);
 
-	public Stream<String> getInputParameterStringValues(Task task, String system, String code);
+	Stream<String> getInputParameterStringValues(Task task, String system, String code);
 
-	public Optional<Reference> getFirstInputParameterReferenceValue(Task task, String system, String code);
+	Optional<Reference> getFirstInputParameterReferenceValue(Task task, String system, String code);
 
-	public Stream<Reference> getInputParameterReferenceValues(Task task, String system, String code);
+	Stream<Reference> getInputParameterReferenceValues(Task task, String system, String code);
 
-	public Optional<UrlType> getFirstInputParameterUrlValue(Task task, String system, String code);
+	Optional<UrlType> getFirstInputParameterUrlValue(Task task, String system, String code);
 
-	public Stream<UrlType> getInputParameterUrlValues(Task task, String system, String code);
+	Stream<UrlType> getInputParameterUrlValues(Task task, String system, String code);
 
-	public Task.ParameterComponent createInput(String system, String code, String value);
+	Task.ParameterComponent createInput(String system, String code, String value);
 
-	public Task.ParameterComponent createInput(String system, String code, Reference reference);
+	Task.ParameterComponent createInput(String system, String code, Reference reference);
 
-	public Task.TaskOutputComponent createOutput(String system, String code, String value);
+	Task.TaskOutputComponent createOutput(String system, String code, String value);
 
-	public Task addOutputs(Task task, Outputs outputs);
+	Task addOutputs(Task task, Outputs outputs);
 }

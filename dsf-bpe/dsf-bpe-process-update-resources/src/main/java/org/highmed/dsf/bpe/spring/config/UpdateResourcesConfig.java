@@ -39,13 +39,13 @@ public class UpdateResourcesConfig
 	@Bean
 	public SendRequest sendRequest()
 	{
-		return new SendRequest(organizationProvider, clientProvider, taskHelper, fhirContext);
+		return new SendRequest(clientProvider, taskHelper, organizationProvider, fhirContext);
 	}
 
 	@Bean
 	public SelectResourceAndTargets selectUpdateResourcesTargets()
 	{
-		return new SelectResourceAndTargets(organizationProvider, clientProvider, taskHelper);
+		return new SelectResourceAndTargets(clientProvider, taskHelper, organizationProvider);
 	}
 
 	@Bean

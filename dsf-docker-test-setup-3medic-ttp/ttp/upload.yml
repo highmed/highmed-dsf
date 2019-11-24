@@ -23,3 +23,17 @@
          perms: no 
          recursive: yes
          delete: yes
+   -  name: Set bpe/app/log permissions
+      file:
+         path: /opt/highmed/bpe/app/log
+         owner: '{{ user }}'
+         group: '2202'
+         mode: '2775'
+      become: true
+   -  name: Set fhir/app/log permissions
+      file:
+         path: /opt/highmed/fhir/app/log
+         owner: '{{ user }}'
+         group: '2101'
+         mode: '2775'
+      become: true

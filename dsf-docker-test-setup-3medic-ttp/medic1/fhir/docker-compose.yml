@@ -30,6 +30,9 @@ services:
       -  type: bind
          source: ./app/conf
          target: /opt/fhir/conf
+      -  type: bind
+         source: ./app/log
+         target: /opt/fhir/log
       environment:
          TZ: Europe/Berlin
       networks:

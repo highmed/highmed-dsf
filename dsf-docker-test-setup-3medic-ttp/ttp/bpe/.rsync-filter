@@ -1,0 +1,5 @@
+- .rsync-filter
+- app/conf/.gitignore
+- app/log/README.md
+- app/plugin/.gitignore
+- proxy/ssl/.gitignore

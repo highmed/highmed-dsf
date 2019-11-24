@@ -57,6 +57,7 @@ import org.highmed.dsf.fhir.search.parameters.ValueSetUrl;
 import org.highmed.dsf.fhir.search.parameters.ValueSetVersion;
 import org.highmed.dsf.fhir.webservice.specification.ConformanceService;
 import org.highmed.dsf.fhir.websocket.ServerEndpoint;
+import org.highmed.dsf.tools.build.BuildInfoReader;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
@@ -113,9 +114,11 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 	private final CapabilityStatement capabilityStatement;
 	private final ParameterConverter parameterConverter;
 
-	public ConformanceServiceImpl(String serverBase, int defaultPageCount, ParameterConverter parameterConverter)
+	public ConformanceServiceImpl(String serverBase, int defaultPageCount, BuildInfoReader buildInfoReader,
+			ParameterConverter parameterConverter)
 	{
-		capabilityStatement = createCapabilityStatement(serverBase, defaultPageCount);
+		capabilityStatement = createCapabilityStatement(serverBase, defaultPageCount,
+				buildInfoReader.getBuildDateAsDate(), getVersion(buildInfoReader));
 		this.parameterConverter = parameterConverter;
 	}
 
@@ -137,18 +140,29 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 		return Response.ok(capabilityStatement, parameterConverter.getMediaType(uri, headers)).build();
 	}
 
-	private CapabilityStatement createCapabilityStatement(String serverBase, int defaultPageCount)
+	private String getVersion(BuildInfoReader buildInfoReader)
+	{
+		String branch = buildInfoReader.getBuildBranch();
+		String number = buildInfoReader.getBuildNumber();
+		number = number.length() >= 7 ? number.substring(0, 7) : number;
+		String version = buildInfoReader.getProjectVersion();
+
+		return version + " (" + branch + "/" + number + ")";
+	}
+
+	private CapabilityStatement createCapabilityStatement(String serverBase, int defaultPageCount, Date date,
+			String version)
 	{
 		CapabilityStatement statement = new CapabilityStatement();
 		statement.setStatus(PublicationStatus.ACTIVE);
-		statement.setDate(new Date());
-		statement.setPublisher("Publisher - TODO"); // TODO
+		statement.setDate(date);
+		statement.setPublisher("HiGHmed");
 		statement.setKind(CapabilityStatementKind.INSTANCE);
 		statement.setSoftware(new CapabilityStatementSoftwareComponent());
-		statement.getSoftware().setName("Software Name -  TODO"); // TODO
-		statement.getSoftware().setVersion("Software Version - TODO"); // TODO
+		statement.getSoftware().setName("HiGHmed DataSharing Framework");
+		statement.getSoftware().setVersion(version);
 		statement.setImplementation(new CapabilityStatementImplementationComponent());
-		statement.getImplementation().setDescription("Implementation Description - TODO"); // TODO
+		// statement.getImplementation().setDescription("Implementation Description - TODO"); // TODO
 		statement.getImplementation().setUrl(serverBase);
 		statement.setFhirVersion(FHIRVersion._4_0_0);
 		statement.setFormat(

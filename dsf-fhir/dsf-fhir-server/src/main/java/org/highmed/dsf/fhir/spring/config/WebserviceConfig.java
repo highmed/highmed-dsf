@@ -133,11 +133,14 @@ public class WebserviceConfig
 	@Autowired
 	private CommandConfig commandConfig;
 
+	@Autowired
+	private BuildInfoReaderConfig buildInfoReaderConfig;
+
 	@Bean
 	public ConformanceService conformanceService()
 	{
-		return new ConformanceServiceJaxrs(new ConformanceServiceSecure(
-				new ConformanceServiceImpl(serverBase, defaultPageCount, helperConfig.parameterConverter())));
+		return new ConformanceServiceJaxrs(new ConformanceServiceSecure(new ConformanceServiceImpl(serverBase,
+				defaultPageCount, buildInfoReaderConfig.buildInfoReader(), helperConfig.parameterConverter())));
 	}
 
 	private String resourceTypeName(Class<? extends Resource> r)

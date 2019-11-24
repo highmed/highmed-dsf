@@ -23,8 +23,8 @@ public class SelectPingTargets extends AbstractServiceDelegate implements Initia
 
 	private final OrganizationProvider organizationProvider;
 
-	public SelectPingTargets(OrganizationProvider organizationProvider, FhirWebserviceClientProvider clientProvider,
-			TaskHelper taskHelper)
+	public SelectPingTargets(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
+			OrganizationProvider organizationProvider)
 	{
 		super(clientProvider, taskHelper);
 		this.organizationProvider = organizationProvider;
@@ -34,6 +34,7 @@ public class SelectPingTargets extends AbstractServiceDelegate implements Initia
 	public void afterPropertiesSet() throws Exception
 	{
 		super.afterPropertiesSet();
+
 		Objects.requireNonNull(organizationProvider, "organizationProvider");
 	}
 

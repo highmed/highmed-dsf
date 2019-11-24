@@ -20,10 +20,11 @@ public class SelectResponseMedics extends AbstractServiceDelegate implements Ini
 {
 	private final OrganizationProvider organizationProvider;
 
-	public SelectResponseMedics(OrganizationProvider organizationProvider, FhirWebserviceClientProvider clientProvider,
-			TaskHelper taskHelper)
+	public SelectResponseMedics(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
+			OrganizationProvider organizationProvider)
 	{
 		super(clientProvider, taskHelper);
+
 		this.organizationProvider = organizationProvider;
 	}
 
@@ -31,6 +32,7 @@ public class SelectResponseMedics extends AbstractServiceDelegate implements Ini
 	public void afterPropertiesSet() throws Exception
 	{
 		super.afterPropertiesSet();
+
 		Objects.requireNonNull(organizationProvider, "organizationProvider");
 	}
 
@@ -39,14 +41,14 @@ public class SelectResponseMedics extends AbstractServiceDelegate implements Ini
 	{
 		Task task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
 
-		String correlationKey = getTaskHelper()
-				.getFirstInputParameterStringValue(task, Constants.CODESYSTEM_HIGHMED_BPMN,
-						Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY).orElse(UUID.randomUUID().toString());
+		String correlationKey = getTaskHelper().getFirstInputParameterStringValue(task,
+				Constants.CODESYSTEM_HIGHMED_BPMN, Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY)
+				.orElse(UUID.randomUUID().toString());
 
 		Identifier targetOrganizationIdentifier = organizationProvider
-				.getIdentifier(new IdType(task.getRequester().getReference())).orElseThrow(
-						() -> new IllegalStateException(
-								"Organization with id " + task.getRequester().getReference() + " not found"));
+				.getIdentifier(new IdType(task.getRequester().getReference()))
+				.orElseThrow(() -> new IllegalStateException(
+						"Organization with id " + task.getRequester().getReference() + " not found"));
 
 		execution.setVariable(Constants.VARIABLE_MULTI_INSTANCE_TARGET, MultiInstanceTargetValues
 				.create(new MultiInstanceTarget(targetOrganizationIdentifier.getValue(), correlationKey)));

@@ -92,13 +92,13 @@ public class FeasibilityConfig
 	@Bean
 	public SelectResponseMedics selectResponseMedics()
 	{
-		return new SelectResponseMedics(organizationProvider, fhirClientProvider, taskHelper);
+		return new SelectResponseMedics(fhirClientProvider, taskHelper, organizationProvider);
 	}
 
 	@Bean
 	public StoreFeasibilityResults storeFeasibilityResults()
 	{
-		return new StoreFeasibilityResults(organizationProvider, fhirClientProvider, taskHelper);
+		return new StoreFeasibilityResults(fhirClientProvider, taskHelper, organizationProvider);
 	}
 
 	@Bean
@@ -116,12 +116,12 @@ public class FeasibilityConfig
 	@Bean
 	public SendFeasibilityRequest sendFeasibilityRequest()
 	{
-		return new SendFeasibilityRequest(organizationProvider, fhirClientProvider, taskHelper, fhirContext);
+		return new SendFeasibilityRequest(fhirClientProvider, taskHelper, organizationProvider, fhirContext);
 	}
 
 	@Bean
 	public SendFeasibilityResults sendCohortSizeResultToMedic()
 	{
-		return new SendFeasibilityResults(organizationProvider, fhirClientProvider, taskHelper, fhirContext);
+		return new SendFeasibilityResults(fhirClientProvider, taskHelper, organizationProvider, fhirContext);
 	}
 }

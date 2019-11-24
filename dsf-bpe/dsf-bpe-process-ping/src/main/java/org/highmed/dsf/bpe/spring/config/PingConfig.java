@@ -41,36 +41,36 @@ public class PingConfig
 	@Bean
 	public SendPing sendPing()
 	{
-		return new SendPing(organizationProvider, clientProvider, taskHelper, fhirContext);
+		return new SendPing(clientProvider, taskHelper, organizationProvider, fhirContext);
 	}
 
 	@Bean
 	public SendPong sendPong()
 	{
-		return new SendPong(organizationProvider, clientProvider, taskHelper, fhirContext);
+		return new SendPong(clientProvider, taskHelper, organizationProvider, fhirContext);
 	}
 
 	@Bean
 	public LogPing logPing()
 	{
-		return new LogPing(clientProvider, taskHelper);
+		return new LogPing(clientProvider, taskHelper, organizationProvider);
 	}
 
 	@Bean
 	public LogPong logPong()
 	{
-		return new LogPong(clientProvider, taskHelper);
+		return new LogPong(clientProvider, taskHelper, organizationProvider);
 	}
 
 	@Bean
 	public SelectPingTargets selectPingTargets()
 	{
-		return new SelectPingTargets(organizationProvider, clientProvider, taskHelper);
+		return new SelectPingTargets(clientProvider, taskHelper, organizationProvider);
 	}
 
 	@Bean
 	public SelectPongTarget selectPongTarget()
 	{
-		return new SelectPongTarget(organizationProvider, clientProvider, taskHelper);
+		return new SelectPongTarget(clientProvider, taskHelper, organizationProvider);
 	}
 }

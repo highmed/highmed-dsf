@@ -1,5 +1,5 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>dsf-fhir-server</artifactId>
@@ -18,6 +18,10 @@
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-fhir-webservice-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.highmed.dsf</groupId>
+			<artifactId>dsf-tools-build-info-reader</artifactId>
 		</dependency>
 
 		<dependency>
@@ -157,6 +161,23 @@
 	</dependencies>
 
 	<build>
+		<testResources>
+			<testResource>
+				<directory>src/test/resources</directory>
+				<filtering>false</filtering>
+				<excludes>
+					<exclude>**/version.properties</exclude>
+				</excludes>
+			</testResource>
+			<testResource>
+				<directory>src/test/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>**/version.properties</include>
+				</includes>
+			</testResource>
+		</testResources>
+		
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
