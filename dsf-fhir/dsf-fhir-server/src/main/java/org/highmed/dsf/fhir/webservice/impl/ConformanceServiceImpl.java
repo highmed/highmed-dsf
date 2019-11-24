@@ -33,6 +33,7 @@ import org.highmed.dsf.fhir.search.parameters.OrganizationActive;
 import org.highmed.dsf.fhir.search.parameters.OrganizationEndpoint;
 import org.highmed.dsf.fhir.search.parameters.OrganizationIdentifier;
 import org.highmed.dsf.fhir.search.parameters.OrganizationName;
+import org.highmed.dsf.fhir.search.parameters.OrganizationType;
 import org.highmed.dsf.fhir.search.parameters.PatientActive;
 import org.highmed.dsf.fhir.search.parameters.PatientIdentifier;
 import org.highmed.dsf.fhir.search.parameters.PractitionerActive;
@@ -204,8 +205,9 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 		var organizationEndpoint = createSearchParameter(OrganizationEndpoint.class);
 		var organizationIdentifier = createSearchParameter(OrganizationIdentifier.class);
 		var organizationNameOrAlias = createSearchParameter(OrganizationName.class);
+		var organizationType = createSearchParameter(OrganizationType.class);
 		searchParameters.put(Organization.class, Arrays.asList(organizationActive, organizationEndpoint,
-				organizationIdentifier, organizationNameOrAlias));
+				organizationIdentifier, organizationNameOrAlias, organizationType));
 
 		var patientActive = createSearchParameter(PatientActive.class);
 		var patientIdentifier = createSearchParameter(PatientIdentifier.class);
