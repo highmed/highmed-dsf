@@ -20,7 +20,7 @@
                   "url":"http://highmed.org/fhir/StructureDefinition/query",
                   "valueExpression":[
                      {
-			"language":"application/x-aql-query",
+                        "language":"application/x-aql-query",
                         "expression":"SELECT COUNT(e) FROM EHR e"
                      }
                   ]
@@ -50,7 +50,11 @@
                   "url":"http://highmed.org/fhir/StructureDefinition/query",
                   "valueExpression":[
                      {
+<<<<<<< HEAD
 			"language":"application/x-aql-query",
+=======
+                        "language":"application/x-aql-query",
+>>>>>>> 6176fbcda1d1a7e842d37736b44a026073fca790
                         "expression":"SELECT COUNT(e) FROM EHR e"
                      }
                   ]
