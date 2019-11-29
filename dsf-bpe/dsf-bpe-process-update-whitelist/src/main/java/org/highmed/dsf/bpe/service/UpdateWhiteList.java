@@ -55,7 +55,7 @@ public class UpdateWhiteList extends AbstractServiceDelegate implements Initiali
 
 		Bundle searchSet = client.search(Organization.class,
 				Map.of("active", Collections.singletonList("true"), "identifier",
-						Collections.singletonList(organizationProvider.getDefaultSystem() + "|"), "_include",
+						Collections.singletonList(organizationProvider.getDefaultIdentifierSystem() + "|"), "_include",
 						Collections.singletonList("Organization:endpoint")));
 
 		Bundle transaction = new Bundle().setType(BundleType.TRANSACTION);
@@ -117,8 +117,8 @@ public class UpdateWhiteList extends AbstractServiceDelegate implements Initiali
 
 	private Optional<Identifier> getDefaultIdentifier(Organization org)
 	{
-		return org.getIdentifier().stream().filter(i -> organizationProvider.getDefaultSystem().equals(i.getSystem()))
-				.findFirst();
+		return org.getIdentifier().stream()
+				.filter(i -> organizationProvider.getDefaultIdentifierSystem().equals(i.getSystem())).findFirst();
 	}
 
 	private Optional<Identifier> getDefaultIdentifier(Endpoint ept)

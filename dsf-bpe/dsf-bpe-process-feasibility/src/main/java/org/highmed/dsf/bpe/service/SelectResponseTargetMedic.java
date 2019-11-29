@@ -1,7 +1,6 @@
 package org.highmed.dsf.bpe.service;
 
 import java.util.Objects;
-import java.util.UUID;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.Constants;
@@ -16,11 +15,11 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Task;
 import org.springframework.beans.factory.InitializingBean;
 
-public class SelectResponseMedics extends AbstractServiceDelegate implements InitializingBean
+public class SelectResponseTargetMedic extends AbstractServiceDelegate implements InitializingBean
 {
 	private final OrganizationProvider organizationProvider;
 
-	public SelectResponseMedics(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
+	public SelectResponseTargetMedic(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
 			OrganizationProvider organizationProvider)
 	{
 		super(clientProvider, taskHelper);
@@ -39,18 +38,19 @@ public class SelectResponseMedics extends AbstractServiceDelegate implements Ini
 	@Override
 	public void doExecute(DelegateExecution execution) throws Exception
 	{
-		Task task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
+		Task task = (Task) execution.getVariable(Constants.VARIABLE_LEADING_TASK);
 
-		String correlationKey = getTaskHelper().getFirstInputParameterStringValue(task,
-				Constants.CODESYSTEM_HIGHMED_BPMN, Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY)
-				.orElse(UUID.randomUUID().toString());
+		String correlationKey = getTaskHelper()
+				.getFirstInputParameterStringValue(task, Constants.CODESYSTEM_HIGHMED_BPMN,
+						Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY).orElseThrow(
+						() -> new IllegalStateException(
+								"No correlation key found, this error should have been caught by resource validation"));
 
-		Identifier targetOrganizationIdentifier = organizationProvider
-				.getIdentifier(new IdType(task.getRequester().getReference()))
+		Identifier medicIdentifier = organizationProvider.getIdentifier(new IdType(task.getRequester().getReference()))
 				.orElseThrow(() -> new IllegalStateException(
 						"Organization with id " + task.getRequester().getReference() + " not found"));
 
-		execution.setVariable(Constants.VARIABLE_MULTI_INSTANCE_TARGET, MultiInstanceTargetValues
-				.create(new MultiInstanceTarget(targetOrganizationIdentifier.getValue(), correlationKey)));
+		MultiInstanceTarget medicTarget = new MultiInstanceTarget(medicIdentifier.getValue(), correlationKey);
+		execution.setVariable(Constants.VARIABLE_MULTI_INSTANCE_TARGET, MultiInstanceTargetValues.create(medicTarget));
 	}
 }

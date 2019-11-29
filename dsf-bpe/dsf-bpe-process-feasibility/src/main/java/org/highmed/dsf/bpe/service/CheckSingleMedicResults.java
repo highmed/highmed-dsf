@@ -17,11 +17,11 @@ import org.highmed.dsf.fhir.variables.OutputsValues;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CheckSingleMedicFeasibilityResults extends AbstractServiceDelegate
+public class CheckSingleMedicResults extends AbstractServiceDelegate
 {
-	private static final Logger logger = LoggerFactory.getLogger(CheckSingleMedicFeasibilityResults.class);
+	private static final Logger logger = LoggerFactory.getLogger(CheckSingleMedicResults.class);
 
-	public CheckSingleMedicFeasibilityResults(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
+	public CheckSingleMedicResults(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
 	{
 		super(clientProvider, taskHelper);
 	}

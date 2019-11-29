@@ -50,8 +50,9 @@ public interface Constants
 	String CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_ORGANIZATION_IDENTIFIER_SEARCH_PARAMETER = "organization-identifier-search-parameter";
 
 	String CODESYSTEM_HIGHMED_FEASIBILITY = "http://highmed.org/fhir/CodeSystem/feasibility";
+	String CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDIC_CORRELATION_KEY = "medic-correlation-key";
 	String CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_SINGLE_MEDIC_RESULT = "single-medic-result";
-	String CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS = "participating-medics";
+	String CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS_COUNT = "participating-medics";
 	String CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT = "multi-medic-result";
 	String CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_RESEARCH_STUDY_REFERENCE = "research-study-reference";
 
@@ -65,6 +66,7 @@ public interface Constants
 	String PROCESS_URI_BASE = "http://highmed.org/bpe/Process/";
 
 	String ORGANIZATION_IDENTIFIER_SYSTEM = "http://highmed.org/fhir/CodeSystem/organization";
+	String ORGANIZATION_TYPE_SYSTEM = "http://highmed.org/fhir/CodeSystem/organization-type";
 	String ENDPOINT_IDENTIFIER_SYSTEM = "http://highmed.org/fhir/CodeSystem/endpoint";
 
 	String EXTENSION_PARTICIPATING_MEDIC_URI = "http://highmed.org/fhir/StructureDefinition/participating-medic";
@@ -77,5 +79,6 @@ public interface Constants
 
 	String SIMPLE_FEASIBILITY_QUERY_PREFIX = "select count";
 
-	CodeType AQL_QUERY_TYPE = new CodeType("application/x-aql-query").setSystem("http://highmed.org/fhir/CodeSystem/query-type");
+	CodeType AQL_QUERY_TYPE = new CodeType("application/x-aql-query")
+			.setSystem("http://highmed.org/fhir/CodeSystem/query-type");
 }

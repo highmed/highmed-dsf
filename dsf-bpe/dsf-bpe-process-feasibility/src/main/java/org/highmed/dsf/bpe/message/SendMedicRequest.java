@@ -15,9 +15,9 @@ import org.hl7.fhir.r4.model.Task;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class SendFeasibilityRequest extends AbstractTaskMessageSend
+public class SendMedicRequest extends AbstractTaskMessageSend
 {
-	public SendFeasibilityRequest(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
+	public SendMedicRequest(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
 			OrganizationProvider organizationProvider, FhirContext fhirContext)
 	{
 		super(clientProvider, taskHelper, organizationProvider, fhirContext);

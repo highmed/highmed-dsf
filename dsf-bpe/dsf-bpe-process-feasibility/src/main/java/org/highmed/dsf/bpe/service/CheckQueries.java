@@ -21,14 +21,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-public class CheckFeasibilityQueries extends AbstractServiceDelegate implements InitializingBean
+public class CheckQueries extends AbstractServiceDelegate implements InitializingBean
 {
-	private static final Logger logger = LoggerFactory.getLogger(CheckFeasibilityQueries.class);
+	private static final Logger logger = LoggerFactory.getLogger(CheckQueries.class);
 
 	private final GroupHelper groupHelper;
 
-	public CheckFeasibilityQueries(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
-			GroupHelper groupHelper)
+	public CheckQueries(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper, GroupHelper groupHelper)
 	{
 		super(clientProvider, taskHelper);
 		this.groupHelper = groupHelper;

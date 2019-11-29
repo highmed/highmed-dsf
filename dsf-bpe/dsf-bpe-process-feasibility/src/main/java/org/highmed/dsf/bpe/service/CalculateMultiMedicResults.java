@@ -1,5 +1,7 @@
 package org.highmed.dsf.bpe.service;
 
+import static org.highmed.dsf.bpe.Constants.CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR;
+
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -13,12 +15,11 @@ import org.highmed.dsf.bpe.variables.MultiInstanceResult;
 import org.highmed.dsf.bpe.variables.MultiInstanceResults;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.hl7.fhir.r4.model.Group;
-import org.hl7.fhir.r4.model.IdType;
+import org.highmed.dsf.fhir.variables.Outputs;
 
-public class CalculateMultiMedicFeasibilityResults extends AbstractServiceDelegate
+public class CalculateMultiMedicResults extends AbstractServiceDelegate
 {
-	public CalculateMultiMedicFeasibilityResults(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
+	public CalculateMultiMedicResults(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
 	{
 		super(clientProvider, taskHelper);
 	}
@@ -27,28 +28,38 @@ public class CalculateMultiMedicFeasibilityResults extends AbstractServiceDelega
 	@SuppressWarnings("unchecked")
 	public void doExecute(DelegateExecution execution) throws Exception
 	{
-		MultiInstanceResults resultsWrapper = (MultiInstanceResults) execution
+		MultiInstanceResults results = (MultiInstanceResults) execution
 				.getVariable(Constants.VARIABLE_MULTI_INSTANCE_RESULTS);
-		List<Group> cohortDefinitions = (List<Group>) execution.getVariable(Constants.VARIABLE_COHORTS);
 
-		Stream<String> cohortIds = getCohortIds(cohortDefinitions);
-		List<MultiInstanceResult> locationBasedResults = resultsWrapper.getResults();
+		List<MultiInstanceResult> locationBasedResults = results.getResults();
+		Stream<String> cohortIds = getCohortIds(locationBasedResults);
 		List<FinalSimpleFeasibilityResult> finalResult = calculateResults(cohortIds, locationBasedResults);
 
 		// TODO: add percentage filter over result
 
-		execution.setVariable(Constants.VARIABLE_SIMPLE_COHORT_SIZE_QUERY_FINAL_RESULT, finalResult);
-	}
+		Outputs outputs = (Outputs) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
 
-	private Stream<String> getCohortIds(List<Group> cohortDefinitions)
-	{
-		return cohortDefinitions.stream().map(cohort -> {
-			IdType cohortId = new IdType(cohort.getId());
-			return cohortId.getResourceType() + "/" + cohortId.getIdPart();
+		finalResult.forEach(result -> {
+			outputs.add(Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
+					Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT,
+					result.getCohortSize() + CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR + result.getCohortId());
+
+			outputs.add(Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
+					Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS_COUNT,
+					result.getParticipatingMedics() + CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR + result
+							.getCohortId());
 		});
+
+		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, outputs);
 	}
 
-	private List<FinalSimpleFeasibilityResult> calculateResults(Stream<String> cohortIds, List<MultiInstanceResult> results)
+	private Stream<String> getCohortIds(List<MultiInstanceResult> results)
+	{
+		return results.stream().flatMap(result -> result.getQueryResults().keySet().stream()).distinct();
+	}
+
+	private List<FinalSimpleFeasibilityResult> calculateResults(Stream<String> cohortIds,
+			List<MultiInstanceResult> results)
 	{
 		List<Map.Entry<String, String>> combinedResults = results.stream()
 				.flatMap(result -> result.getQueryResults().entrySet().stream()).collect(Collectors.toList());

@@ -1,19 +1,29 @@
 package org.highmed.dsf.bpe.spring.config;
 
 import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
-import org.highmed.dsf.bpe.message.SendFeasibilityRequest;
-import org.highmed.dsf.bpe.message.SendFeasibilityResults;
+import org.highmed.dsf.bpe.message.SendMedicRequest;
+import org.highmed.dsf.bpe.message.SendMultiMedicResults;
+import org.highmed.dsf.bpe.message.SendSingleMedicResults;
+import org.highmed.dsf.bpe.message.SendTtpRequest;
 import org.highmed.dsf.bpe.plugin.FeasibilityPlugin;
-import org.highmed.dsf.bpe.service.CalculateMultiMedicFeasibilityResults;
-import org.highmed.dsf.bpe.service.CheckFeasibilityQueries;
+import org.highmed.dsf.bpe.service.CalculateMultiMedicResults;
 import org.highmed.dsf.bpe.service.CheckFeasibilityResources;
-import org.highmed.dsf.bpe.service.CheckMultiMedicFeasibilityResults;
-import org.highmed.dsf.bpe.service.CheckSingleMedicFeasibilityResults;
+import org.highmed.dsf.bpe.service.CheckMultiMedicResults;
+import org.highmed.dsf.bpe.service.CheckQueries;
+import org.highmed.dsf.bpe.service.CheckSingleMedicResults;
 import org.highmed.dsf.bpe.service.DownloadFeasibilityResources;
-import org.highmed.dsf.bpe.service.ExecuteFeasibilityQueries;
-import org.highmed.dsf.bpe.service.SelectRequestMedics;
-import org.highmed.dsf.bpe.service.SelectResponseMedics;
-import org.highmed.dsf.bpe.service.StoreFeasibilityResults;
+import org.highmed.dsf.bpe.service.DownloadResearchStudyResource;
+import org.highmed.dsf.bpe.service.ExecuteEpiLink;
+import org.highmed.dsf.bpe.service.ExecuteQueries;
+import org.highmed.dsf.bpe.service.FilterQueryResultsByConsent;
+import org.highmed.dsf.bpe.service.GenerateBloomFilters;
+import org.highmed.dsf.bpe.service.GenerateCountFromIds;
+import org.highmed.dsf.bpe.service.ModifyQueries;
+import org.highmed.dsf.bpe.service.SelectRequestTargets;
+import org.highmed.dsf.bpe.service.SelectResponseTargetMedic;
+import org.highmed.dsf.bpe.service.SelectResponseTargetTtp;
+import org.highmed.dsf.bpe.service.StoreCorrelationKeys;
+import org.highmed.dsf.bpe.service.StoreResults;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.group.GroupHelper;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
@@ -52,6 +62,44 @@ public class FeasibilityConfig
 		return new FeasibilityPlugin();
 	}
 
+	//
+	// process requestSimpleFeasibility implementations
+	//
+
+	@Bean
+	public DownloadResearchStudyResource downloadResearchStudyResource()
+	{
+		return new DownloadResearchStudyResource(fhirClientProvider, taskHelper);
+	}
+
+	@Bean
+	public SelectRequestTargets selectRequestTargets()
+	{
+		return new SelectRequestTargets(fhirClientProvider, taskHelper, organizationProvider);
+	}
+
+	@Bean
+	public SendTtpRequest sendTtpRequest()
+	{
+		return new SendTtpRequest(fhirClientProvider, taskHelper, organizationProvider, fhirContext);
+	}
+
+	@Bean
+	public SendMedicRequest sendMedicRequest()
+	{
+		return new SendMedicRequest(fhirClientProvider, taskHelper, organizationProvider, fhirContext);
+	}
+
+	@Bean
+	public CheckMultiMedicResults checkMultiMedicResults()
+	{
+		return new CheckMultiMedicResults(fhirClientProvider, taskHelper);
+	}
+
+	//
+	// process executeSimpleFeasibility implementations
+	//
+
 	@Bean
 	public DownloadFeasibilityResources downloadFeasibilityResources()
 	{
@@ -65,63 +113,97 @@ public class FeasibilityConfig
 	}
 
 	@Bean
-	public SelectRequestMedics selectRequestMedics()
+	public CheckQueries checkQueries()
 	{
-		return new SelectRequestMedics(organizationProvider, fhirClientProvider, taskHelper);
+		return new CheckQueries(fhirClientProvider, taskHelper, groupHelper);
 	}
 
 	@Bean
-	public CheckFeasibilityQueries checkFeasibilityQueries()
+	public ModifyQueries modifyQueries()
 	{
-		return new CheckFeasibilityQueries(fhirClientProvider, taskHelper, groupHelper);
+		return new ModifyQueries(fhirClientProvider, taskHelper);
 	}
 
 	@Bean
-	public ExecuteFeasibilityQueries executeFeasibilityQueries()
+	public ExecuteQueries executeQueries()
 	{
-		return new ExecuteFeasibilityQueries(fhirClientProvider, openehrClientProvider.getWebserviceClient(),
-				taskHelper);
+		return new ExecuteQueries(fhirClientProvider, openehrClientProvider.getWebserviceClient(), taskHelper);
 	}
 
 	@Bean
-	public CheckSingleMedicFeasibilityResults checkSingleMedicFeasibilityResults()
+	public FilterQueryResultsByConsent filterQueryResultsByConsent()
 	{
-		return new CheckSingleMedicFeasibilityResults(fhirClientProvider, taskHelper);
+		return new FilterQueryResultsByConsent(fhirClientProvider, taskHelper);
 	}
 
 	@Bean
-	public SelectResponseMedics selectResponseMedics()
+	public GenerateBloomFilters generateBloomFilters()
 	{
-		return new SelectResponseMedics(fhirClientProvider, taskHelper, organizationProvider);
+		return new GenerateBloomFilters(fhirClientProvider, taskHelper);
 	}
 
 	@Bean
-	public StoreFeasibilityResults storeFeasibilityResults()
+	public GenerateCountFromIds generateCountFromIds()
 	{
-		return new StoreFeasibilityResults(fhirClientProvider, taskHelper, organizationProvider);
+		return new GenerateCountFromIds(fhirClientProvider, taskHelper);
 	}
 
 	@Bean
-	public CalculateMultiMedicFeasibilityResults calculateMultiMedicSimpleFeasibilityResults()
+	public CheckSingleMedicResults checkSingleMedicResults()
 	{
-		return new CalculateMultiMedicFeasibilityResults(fhirClientProvider, taskHelper);
+		return new CheckSingleMedicResults(fhirClientProvider, taskHelper);
 	}
 
 	@Bean
-	public CheckMultiMedicFeasibilityResults checkMultiMedicFeasibilityResults()
+	public SelectResponseTargetTtp selectResponseTargetTtp()
 	{
-		return new CheckMultiMedicFeasibilityResults(fhirClientProvider, taskHelper);
+		return new SelectResponseTargetTtp(fhirClientProvider, taskHelper, organizationProvider);
 	}
 
 	@Bean
-	public SendFeasibilityRequest sendFeasibilityRequest()
+	public SendSingleMedicResults sendSingleMedicResults()
 	{
-		return new SendFeasibilityRequest(fhirClientProvider, taskHelper, organizationProvider, fhirContext);
+		return new SendSingleMedicResults(fhirClientProvider, taskHelper, organizationProvider, fhirContext);
+	}
+
+	//
+	// process computeSimpleFeasibility implementations
+	//
+
+	@Bean
+	public StoreCorrelationKeys storeCorrelationKeys()
+	{
+		return new StoreCorrelationKeys(fhirClientProvider, taskHelper);
 	}
 
 	@Bean
-	public SendFeasibilityResults sendCohortSizeResultToMedic()
+	public StoreResults storeResults()
 	{
-		return new SendFeasibilityResults(fhirClientProvider, taskHelper, organizationProvider, fhirContext);
+		return new StoreResults(fhirClientProvider, taskHelper, organizationProvider);
 	}
+
+	@Bean
+	public ExecuteEpiLink executeEpiLink()
+	{
+		return new ExecuteEpiLink(fhirClientProvider, taskHelper);
+	}
+
+	@Bean
+	public CalculateMultiMedicResults calculateMultiMedicResults()
+	{
+		return new CalculateMultiMedicResults(fhirClientProvider, taskHelper);
+	}
+
+	@Bean
+	public SelectResponseTargetMedic selectResponseTargetMedic()
+	{
+		return new SelectResponseTargetMedic(fhirClientProvider, taskHelper, organizationProvider);
+	}
+
+	@Bean
+	public SendMultiMedicResults sendMultiMedicResults()
+	{
+		return new SendMultiMedicResults(fhirClientProvider, taskHelper, organizationProvider, fhirContext);
+	}
+
 }

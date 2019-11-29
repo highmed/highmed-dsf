@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_0drkcb5" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="2.2.4">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_0drkcb5" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="2.2.4">
   <bpmn:process id="executeSimpleFeasibility" isExecutable="true" camunda:versionTag="1.0.0">
-    <bpmn:serviceTask id="checkResult" name="check results" camunda:class="org.highmed.dsf.bpe.service.CheckSingleMedicFeasibilityResults">
-      <bpmn:incoming>SequenceFlow_1rmqv20</bpmn:incoming>
+    <bpmn:serviceTask id="checkResults" name="check results" camunda:class="org.highmed.dsf.bpe.service.CheckSingleMedicResults">
+      <bpmn:incoming>SequenceFlow_0q803rh</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_04ouilq</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="executeQueries" name="execute queries" camunda:class="org.highmed.dsf.bpe.service.ExecuteFeasibilityQueries">
-      <bpmn:incoming>SequenceFlow_07wtgee</bpmn:incoming>
+    <bpmn:serviceTask id="executeQueries" name="execute queries" camunda:class="org.highmed.dsf.bpe.service.ExecuteQueries">
+      <bpmn:incoming>SequenceFlow_0bwn08k</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1rmqv20</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="checkFeasibilityResources" name="check feasibility resources" camunda:class="org.highmed.dsf.bpe.service.CheckFeasibilityResources">
       <bpmn:incoming>SequenceFlow_1etju4m</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1wwn9pl</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:startEvent id="StartEvent">
+    <bpmn:startEvent id="StartEvent" name="start">
       <bpmn:outgoing>SequenceFlow_14cn0vs</bpmn:outgoing>
       <bpmn:messageEventDefinition id="MessageEventDefinition_0sjtzj6" messageRef="Message_1yz2a31" />
     </bpmn:startEvent>
-    <bpmn:sequenceFlow id="SequenceFlow_1rmqv20" sourceRef="executeQueries" targetRef="checkResult" />
+    <bpmn:sequenceFlow id="SequenceFlow_1rmqv20" sourceRef="executeQueries" targetRef="ExclusiveGateway_0bq7zdz" />
     <bpmn:sequenceFlow id="SequenceFlow_1wwn9pl" sourceRef="checkFeasibilityResources" targetRef="checkQueries" />
     <bpmn:sequenceFlow id="SequenceFlow_14cn0vs" sourceRef="StartEvent" targetRef="downloadFeasibilityResources" />
     <bpmn:sequenceFlow id="SequenceFlow_1etju4m" sourceRef="downloadFeasibilityResources" targetRef="checkFeasibilityResources" />
@@ -25,71 +25,139 @@
       <bpmn:incoming>SequenceFlow_14cn0vs</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1etju4m</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:endEvent id="success" name="success">
+    <bpmn:endEvent id="EndEvent" name="send result to TTP">
       <bpmn:extensionElements>
         <camunda:inputOutput>
-          <camunda:inputParameter name="messageName">resultSimpleFeasibilityMessage</camunda:inputParameter>
+          <camunda:inputParameter name="messageName">resultSingleMedicSimpleFeasibilityMessage</camunda:inputParameter>
           <camunda:inputParameter name="versionTag">1.0.0</camunda:inputParameter>
-          <camunda:inputParameter name="processDefinitionKey">requestSimpleFeasibility</camunda:inputParameter>
-          <camunda:inputParameter name="profile">http://highmed.org/fhir/StructureDefinition/highmed-task-result-simple-feasibility</camunda:inputParameter>
+          <camunda:inputParameter name="processDefinitionKey">computeSimpleFeasibility</camunda:inputParameter>
+          <camunda:inputParameter name="profile">http://highmed.org/fhir/StructureDefinition/highmed-task-result-single-medic-simple-feasibility</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
-      <bpmn:incoming>SequenceFlow_1gynemm</bpmn:incoming>
-      <bpmn:messageEventDefinition id="MessageEventDefinition_13swtie" messageRef="Message_1dr71re" camunda:class="org.highmed.dsf.bpe.message.SendFeasibilityResults" />
+      <bpmn:incoming>SequenceFlow_0ascyjc</bpmn:incoming>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_13swtie" messageRef="Message_1dr71re" camunda:class="org.highmed.dsf.bpe.message.SendSingleMedicResults" />
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="SequenceFlow_04ouilq" sourceRef="checkResult" targetRef="selectResponseMedics" />
-    <bpmn:sequenceFlow id="SequenceFlow_1gynemm" sourceRef="selectResponseMedics" targetRef="success" />
-    <bpmn:serviceTask id="selectResponseMedics" name="select response medics" camunda:class="org.highmed.dsf.bpe.service.SelectResponseMedics">
-      <bpmn:incoming>SequenceFlow_04ouilq</bpmn:incoming>
-      <bpmn:outgoing>SequenceFlow_1gynemm</bpmn:outgoing>
-    </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="SequenceFlow_07wtgee" sourceRef="checkQueries" targetRef="executeQueries" />
-    <bpmn:serviceTask id="checkQueries" name="check queries" camunda:class="org.highmed.dsf.bpe.service.CheckFeasibilityQueries">
+    <bpmn:sequenceFlow id="SequenceFlow_04ouilq" sourceRef="checkResults" targetRef="selectResponseTargetTtp" />
+    <bpmn:sequenceFlow id="SequenceFlow_07wtgee" sourceRef="checkQueries" targetRef="ExclusiveGateway_1dln3in" />
+    <bpmn:serviceTask id="checkQueries" name="check queries" camunda:class="org.highmed.dsf.bpe.service.CheckQueries">
       <bpmn:incoming>SequenceFlow_1wwn9pl</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_07wtgee</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:textAnnotation id="TextAnnotation_0e4titr">
-      <bpmn:text>check consent?</bpmn:text>
-    </bpmn:textAnnotation>
+    <bpmn:exclusiveGateway id="ExclusiveGateway_1dln3in">
+      <bpmn:incoming>SequenceFlow_07wtgee</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0zlq6j4</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_0yqpkri</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="SequenceFlow_0zlq6j4" sourceRef="ExclusiveGateway_1dln3in" targetRef="ExclusiveGateway_1r4c9fx">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${true}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="SequenceFlow_0yqpkri" name="needs consent check and/or record linkage" sourceRef="ExclusiveGateway_1dln3in" targetRef="replaceCountpartWithIdSelection">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${false}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:serviceTask id="replaceCountpartWithIdSelection" name="replace countpart with id selection" camunda:class="org.highmed.dsf.bpe.service.ModifyQueries">
+      <bpmn:incoming>SequenceFlow_0yqpkri</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1u1p9j2</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway_1r4c9fx">
+      <bpmn:incoming>SequenceFlow_0zlq6j4</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_1u1p9j2</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0bwn08k</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="SequenceFlow_0bwn08k" sourceRef="ExclusiveGateway_1r4c9fx" targetRef="executeQueries" />
+    <bpmn:sequenceFlow id="SequenceFlow_1u1p9j2" sourceRef="replaceCountpartWithIdSelection" targetRef="ExclusiveGateway_1r4c9fx" />
+    <bpmn:exclusiveGateway id="ExclusiveGateway_0bq7zdz">
+      <bpmn:incoming>SequenceFlow_1rmqv20</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_05r9whd</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_0isxkuy</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="SequenceFlow_05r9whd" sourceRef="ExclusiveGateway_0bq7zdz" targetRef="ExclusiveGateway_0lecmy5">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${true}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="SequenceFlow_0isxkuy" name="needs consent check" sourceRef="ExclusiveGateway_0bq7zdz" targetRef="filterByConsent">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${false}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:serviceTask id="filterByConsent" name="filter by consent" camunda:class="org.highmed.dsf.bpe.service.FilterQueryResultsByConsent">
+      <bpmn:incoming>SequenceFlow_0isxkuy</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0kzp6tl</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway_0lecmy5">
+      <bpmn:incoming>SequenceFlow_05r9whd</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_0kzp6tl</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1b4h5qz</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="SequenceFlow_1b4h5qz" sourceRef="ExclusiveGateway_0lecmy5" targetRef="ExclusiveGateway_0sff9xb" />
+    <bpmn:sequenceFlow id="SequenceFlow_0kzp6tl" sourceRef="filterByConsent" targetRef="ExclusiveGateway_0lecmy5" />
+    <bpmn:exclusiveGateway id="ExclusiveGateway_0sff9xb">
+      <bpmn:incoming>SequenceFlow_1b4h5qz</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_17otl7p</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_1futlo2</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_0kfeekm</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="SequenceFlow_17otl7p" sourceRef="ExclusiveGateway_0sff9xb" targetRef="ExclusiveGateway_002t87f">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${true}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="SequenceFlow_1futlo2" name="needs record linkage" sourceRef="ExclusiveGateway_0sff9xb" targetRef="generateBloomFilters">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${false}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:serviceTask id="generateBloomFilters" name="generate bloom filters" camunda:class="org.highmed.dsf.bpe.service.GenerateBloomFilters">
+      <bpmn:incoming>SequenceFlow_1futlo2</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1ug2kru</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway_002t87f">
+      <bpmn:incoming>SequenceFlow_17otl7p</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_1ug2kru</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_1kpvsx9</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0q803rh</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="SequenceFlow_0q803rh" sourceRef="ExclusiveGateway_002t87f" targetRef="checkResults" />
+    <bpmn:sequenceFlow id="SequenceFlow_1ug2kru" sourceRef="generateBloomFilters" targetRef="ExclusiveGateway_002t87f" />
+    <bpmn:sequenceFlow id="SequenceFlow_0kfeekm" name="needs consent check and no record linkage" sourceRef="ExclusiveGateway_0sff9xb" targetRef="countIds">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${false}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="SequenceFlow_1kpvsx9" sourceRef="countIds" targetRef="ExclusiveGateway_002t87f" />
+    <bpmn:serviceTask id="countIds" name="count id&#39;s" camunda:class="org.highmed.dsf.bpe.service.GenerateCountFromIds">
+      <bpmn:incoming>SequenceFlow_0kfeekm</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1kpvsx9</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="SequenceFlow_0ascyjc" sourceRef="selectResponseTargetTtp" targetRef="EndEvent" />
+    <bpmn:serviceTask id="selectResponseTargetTtp" name="select response target TTP" camunda:class="org.highmed.dsf.bpe.service.SelectResponseTargetTtp">
+      <bpmn:incoming>SequenceFlow_04ouilq</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0ascyjc</bpmn:outgoing>
+    </bpmn:serviceTask>
     <bpmn:textAnnotation id="TextAnnotation_0euut3n">
       <bpmn:text>uac check, study definiton validity, type of cohort, ethics commitee vote, included medics, user authentication, rate limit, etc.</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="Association_0hhfmwh" sourceRef="executeQueries" targetRef="TextAnnotation_0e4titr" />
     <bpmn:association id="Association_1ncewqu" sourceRef="checkFeasibilityResources" targetRef="TextAnnotation_0euut3n" />
   </bpmn:process>
   <bpmn:message id="Message_1yz2a31" name="executeSimpleFeasibilityMessage" />
-  <bpmn:message id="Message_1dr71re" name="resultSimpleFeasibilityMessage" />
+  <bpmn:message id="Message_1dr71re" name="resultSingleMedicSimpleFeasibilityMessage" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="executeSimpleFeasibility">
-      <bpmndi:BPMNShape id="ServiceTask_0t2s0v7_di" bpmnElement="checkResult">
-        <dc:Bounds x="638" y="102" width="100" height="80" />
+      <bpmndi:BPMNShape id="ServiceTask_0t2s0v7_di" bpmnElement="checkResults">
+        <dc:Bounds x="1450" y="102" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ServiceTask_0u5pb4i_di" bpmnElement="executeQueries">
-        <dc:Bounds x="459" y="102" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="TextAnnotation_0e4titr_di" bpmnElement="TextAnnotation_0e4titr">
-        <dc:Bounds x="438" y="37" width="100" height="26" />
+        <dc:Bounds x="726" y="102" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ServiceTask_0jna5l2_di" bpmnElement="checkFeasibilityResources">
         <dc:Bounds x="100" y="102" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="StartEvent_1fzso6r_di" bpmnElement="StartEvent">
         <dc:Bounds x="-209" y="124" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="-202" y="167" width="22" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="TextAnnotation_0euut3n_di" bpmnElement="TextAnnotation_0euut3n">
         <dc:Bounds x="16" y="22" width="267" height="56" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_1rmqv20_di" bpmnElement="SequenceFlow_1rmqv20">
-        <di:waypoint x="559" y="142" />
-        <di:waypoint x="638" y="142" />
+        <di:waypoint x="826" y="142" />
+        <di:waypoint x="878" y="142" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_1wwn9pl_di" bpmnElement="SequenceFlow_1wwn9pl">
         <di:waypoint x="200" y="142" />
-        <di:waypoint x="276" y="142" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Association_0hhfmwh_di" bpmnElement="Association_0hhfmwh">
-        <di:waypoint x="500" y="102" />
-        <di:waypoint x="491" y="63" />
+        <di:waypoint x="289" y="142" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_14cn0vs_di" bpmnElement="SequenceFlow_14cn0vs">
         <di:waypoint x="-173" y="142" />
@@ -106,29 +174,131 @@
       <bpmndi:BPMNShape id="ServiceTask_0b8j3ka_di" bpmnElement="downloadFeasibilityResources">
         <dc:Bounds x="-80" y="102" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="EndEvent_10xdh63_di" bpmnElement="success">
-        <dc:Bounds x="1015" y="124" width="36" height="36" />
+      <bpmndi:BPMNShape id="EndEvent_10xdh63_di" bpmnElement="EndEvent">
+        <dc:Bounds x="1831" y="124" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1013" y="167" width="40" height="14" />
+          <dc:Bounds x="1804" y="167" width="90" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_04ouilq_di" bpmnElement="SequenceFlow_04ouilq">
-        <di:waypoint x="738" y="142" />
-        <di:waypoint x="819" y="142" />
+        <di:waypoint x="1550" y="142" />
+        <di:waypoint x="1636" y="142" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="SequenceFlow_1gynemm_di" bpmnElement="SequenceFlow_1gynemm">
-        <di:waypoint x="919" y="142" />
-        <di:waypoint x="1015" y="142" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="ServiceTask_1dkz79h_di" bpmnElement="selectResponseMedics">
-        <dc:Bounds x="819" y="102" width="100" height="80" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_07wtgee_di" bpmnElement="SequenceFlow_07wtgee">
-        <di:waypoint x="376" y="142" />
-        <di:waypoint x="459" y="142" />
+        <di:waypoint x="389" y="142" />
+        <di:waypoint x="457" y="142" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="ServiceTask_1pt9xhp_di" bpmnElement="checkQueries">
-        <dc:Bounds x="276" y="102" width="100" height="80" />
+        <dc:Bounds x="289" y="102" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway_1dln3in_di" bpmnElement="ExclusiveGateway_1dln3in" isMarkerVisible="true">
+        <dc:Bounds x="457" y="117" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0zlq6j4_di" bpmnElement="SequenceFlow_0zlq6j4">
+        <di:waypoint x="507" y="142" />
+        <di:waypoint x="613" y="142" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0yqpkri_di" bpmnElement="SequenceFlow_0yqpkri">
+        <di:waypoint x="482" y="117" />
+        <di:waypoint x="482" y="11" />
+        <di:waypoint x="588" y="11" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="492" y="16" width="72" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_02nwn9u_di" bpmnElement="replaceCountpartWithIdSelection">
+        <dc:Bounds x="588" y="-29" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway_1r4c9fx_di" bpmnElement="ExclusiveGateway_1r4c9fx" isMarkerVisible="true">
+        <dc:Bounds x="613" y="117" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0bwn08k_di" bpmnElement="SequenceFlow_0bwn08k">
+        <di:waypoint x="663" y="142" />
+        <di:waypoint x="726" y="142" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1u1p9j2_di" bpmnElement="SequenceFlow_1u1p9j2">
+        <di:waypoint x="638" y="51" />
+        <di:waypoint x="638" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ExclusiveGateway_0bq7zdz_di" bpmnElement="ExclusiveGateway_0bq7zdz" isMarkerVisible="true">
+        <dc:Bounds x="878" y="117" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_05r9whd_di" bpmnElement="SequenceFlow_05r9whd">
+        <di:waypoint x="928" y="142" />
+        <di:waypoint x="1029" y="142" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0isxkuy_di" bpmnElement="SequenceFlow_0isxkuy">
+        <di:waypoint x="903" y="167" />
+        <di:waypoint x="903" y="285" />
+        <di:waypoint x="1004" y="285" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="912" y="253" width="72" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_0l3b9as_di" bpmnElement="filterByConsent">
+        <dc:Bounds x="1004" y="245" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway_0lecmy5_di" bpmnElement="ExclusiveGateway_0lecmy5" isMarkerVisible="true">
+        <dc:Bounds x="1029" y="117" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1b4h5qz_di" bpmnElement="SequenceFlow_1b4h5qz">
+        <di:waypoint x="1079" y="142" />
+        <di:waypoint x="1163" y="142" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0kzp6tl_di" bpmnElement="SequenceFlow_0kzp6tl">
+        <di:waypoint x="1054" y="245" />
+        <di:waypoint x="1054" y="167" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ExclusiveGateway_0sff9xb_di" bpmnElement="ExclusiveGateway_0sff9xb" isMarkerVisible="true">
+        <dc:Bounds x="1163" y="117" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_17otl7p_di" bpmnElement="SequenceFlow_17otl7p">
+        <di:waypoint x="1213" y="142" />
+        <di:waypoint x="1316" y="142" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1futlo2_di" bpmnElement="SequenceFlow_1futlo2">
+        <di:waypoint x="1188" y="167" />
+        <di:waypoint x="1188" y="285" />
+        <di:waypoint x="1291" y="285" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1195" y="250" width="65" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_0akkess_di" bpmnElement="generateBloomFilters">
+        <dc:Bounds x="1291" y="245" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway_002t87f_di" bpmnElement="ExclusiveGateway_002t87f" isMarkerVisible="true">
+        <dc:Bounds x="1316" y="117" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0q803rh_di" bpmnElement="SequenceFlow_0q803rh">
+        <di:waypoint x="1366" y="142" />
+        <di:waypoint x="1450" y="142" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1ug2kru_di" bpmnElement="SequenceFlow_1ug2kru">
+        <di:waypoint x="1341" y="245" />
+        <di:waypoint x="1341" y="167" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0kfeekm_di" bpmnElement="SequenceFlow_0kfeekm">
+        <di:waypoint x="1188" y="117" />
+        <di:waypoint x="1188" y="-10" />
+        <di:waypoint x="1291" y="-10" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1194" y="-5" width="72" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1kpvsx9_di" bpmnElement="SequenceFlow_1kpvsx9">
+        <di:waypoint x="1341" y="30" />
+        <di:waypoint x="1341" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_17kpyle_di" bpmnElement="countIds">
+        <dc:Bounds x="1291" y="-50" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0ascyjc_di" bpmnElement="SequenceFlow_0ascyjc">
+        <di:waypoint x="1736" y="142" />
+        <di:waypoint x="1831" y="142" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_15aifhd_di" bpmnElement="selectResponseTargetTtp">
+        <dc:Bounds x="1636" y="102" width="100" height="80" />
       </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

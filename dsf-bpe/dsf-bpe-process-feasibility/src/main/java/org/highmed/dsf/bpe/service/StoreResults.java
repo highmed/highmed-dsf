@@ -18,11 +18,11 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Task;
 import org.springframework.beans.factory.InitializingBean;
 
-public class StoreFeasibilityResults extends AbstractServiceDelegate implements InitializingBean
+public class StoreResults extends AbstractServiceDelegate implements InitializingBean
 {
 	private final OrganizationProvider organizationProvider;
 
-	public StoreFeasibilityResults(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
+	public StoreResults(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
 			OrganizationProvider organizationProvider)
 	{
 		super(clientProvider, taskHelper);
@@ -44,30 +44,35 @@ public class StoreFeasibilityResults extends AbstractServiceDelegate implements 
 		Task task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
 
 		Map<String, String> queryResults = new HashMap<>();
-		Stream<String> resultInputs = getTaskHelper().getInputParameterStringValues(task,
-				Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
-				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_SINGLE_MEDIC_RESULT);
+		Stream<String> resultInputs = getTaskHelper()
+				.getInputParameterStringValues(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
+						Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_SINGLE_MEDIC_RESULT);
 
-		resultInputs.forEach(input ->
-		{
+		resultInputs.forEach(input -> {
 			String[] resultParts = input.split("\\" + Constants.CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR);
 			queryResults.put(resultParts[Constants.CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_GROUP_ID_INDEX],
 					resultParts[Constants.CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_COHORT_SIZE_INDEX]);
 		});
 
 		String requesterReference = task.getRequester().getReference();
-		Identifier requesterIdentifier = organizationProvider.getIdentifier(new IdType(requesterReference))
-				.orElseThrow(() -> new IllegalStateException(
+		Identifier requesterIdentifier = organizationProvider.getIdentifier(new IdType(requesterReference)).orElseThrow(
+				() -> new IllegalStateException(
 						"Could not find organization reference: " + requesterReference + ", dropping received result"));
 
 		MultiInstanceResult result = new MultiInstanceResult(
 				requesterIdentifier.getSystem() + "|" + requesterIdentifier.getValue(), queryResults);
 
-		MultiInstanceResults resultsWrapper = (MultiInstanceResults) execution
+		MultiInstanceResults results = (MultiInstanceResults) execution
 				.getVariable(Constants.VARIABLE_MULTI_INSTANCE_RESULTS);
-		resultsWrapper.add(result);
+
+		if (results == null)
+		{
+			results = new MultiInstanceResults();
+		}
+
+		results.add(result);
 
 		// race conditions are not possible, since tasks are received sequentially over the websocket connection
-		execution.setVariable(Constants.VARIABLE_MULTI_INSTANCE_RESULTS, resultsWrapper);
+		execution.setVariable(Constants.VARIABLE_MULTI_INSTANCE_RESULTS, results);
 	}
 }
