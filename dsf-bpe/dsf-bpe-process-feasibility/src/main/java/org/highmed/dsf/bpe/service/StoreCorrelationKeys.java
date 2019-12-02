@@ -41,5 +41,9 @@ public class StoreCorrelationKeys extends AbstractServiceDelegate
 
 		execution.setVariable(Constants.VARIABLE_MULTI_INSTANCE_TARGETS,
 				MultiInstanceTargetsValues.create(new MultiInstanceTargets(targets)));
+
+		// TODO: replace by input variable from task input
+		execution.setVariable(Constants.VARIABLE_NEEDS_RECORD_LINKAGE, false);
+		execution.setVariable(Constants.VARIABLE_NEEDS_CONSENT_CHECK, false);
 	}
 }

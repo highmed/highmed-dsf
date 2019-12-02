@@ -21,6 +21,8 @@ public interface Constants
 	String VARIABLE_QUERIES = "queries";
 	String VARIABLE_QUERY_PARAMETERS = "queryParameters";
 	String VARIABLE_BUNDLE_ID = "bundleId";
+	String VARIABLE_NEEDS_CONSENT_CHECK = "needsConsentCheck";
+	String VARIABLE_NEEDS_RECORD_LINKAGE = "needsRecordLinkage";
 
 	/**
 	 * Stores a List<{@link org.highmed.dsf.bpe.variables.FinalSimpleFeasibilityResult}> of the final results of

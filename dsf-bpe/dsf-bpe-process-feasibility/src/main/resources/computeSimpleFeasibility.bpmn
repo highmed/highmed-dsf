@@ -65,11 +65,11 @@
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="SequenceFlow_0xxpamp" sourceRef="SubProcess_1gopxt4" targetRef="ExclusiveGateway_07e71aa" />
     <bpmn:sequenceFlow id="SequenceFlow_0h3to47" sourceRef="BoundaryEvent_1g0rcyp" targetRef="ExclusiveGateway_07e71aa" />
-    <bpmn:sequenceFlow id="SequenceFlow_0t4lx4v" sourceRef="ExclusiveGateway_07e71aa" targetRef="ExclusiveGateway_1r8ow3i">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${true}</bpmn:conditionExpression>
+    <bpmn:sequenceFlow id="SequenceFlow_0t4lx4v" name="else" sourceRef="ExclusiveGateway_07e71aa" targetRef="ExclusiveGateway_1r8ow3i">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${needsRecordLinkage == false}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="SequenceFlow_0calilw" name="needs record linkage" sourceRef="ExclusiveGateway_07e71aa" targetRef="executeEpiLink">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${false}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${needsRecordLinkage == true}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:serviceTask id="executeEpiLink" name="execute epi link" camunda:class="org.highmed.dsf.bpe.service.ExecuteEpiLink">
       <bpmn:incoming>SequenceFlow_0calilw</bpmn:incoming>
@@ -177,6 +177,9 @@
       <bpmndi:BPMNEdge id="SequenceFlow_0t4lx4v_di" bpmnElement="SequenceFlow_0t4lx4v">
         <di:waypoint x="943" y="132" />
         <di:waypoint x="1226" y="132" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="948" y="114" width="21" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_0calilw_di" bpmnElement="SequenceFlow_0calilw">
         <di:waypoint x="918" y="107" />

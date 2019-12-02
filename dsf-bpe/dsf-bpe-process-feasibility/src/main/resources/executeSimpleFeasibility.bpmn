@@ -48,11 +48,11 @@
       <bpmn:outgoing>SequenceFlow_0zlq6j4</bpmn:outgoing>
       <bpmn:outgoing>SequenceFlow_0yqpkri</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:sequenceFlow id="SequenceFlow_0zlq6j4" sourceRef="ExclusiveGateway_1dln3in" targetRef="ExclusiveGateway_1r4c9fx">
+    <bpmn:sequenceFlow id="SequenceFlow_0zlq6j4" name="else" sourceRef="ExclusiveGateway_1dln3in" targetRef="ExclusiveGateway_1r4c9fx">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${true}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="SequenceFlow_0yqpkri" name="needs consent check and/or record linkage" sourceRef="ExclusiveGateway_1dln3in" targetRef="replaceCountpartWithIdSelection">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${false}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${needsRecordLinkage == true || needsConsentCheck == true}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:serviceTask id="replaceCountpartWithIdSelection" name="replace countpart with id selection" camunda:class="org.highmed.dsf.bpe.service.ModifyQueries">
       <bpmn:incoming>SequenceFlow_0yqpkri</bpmn:incoming>
@@ -70,11 +70,11 @@
       <bpmn:outgoing>SequenceFlow_05r9whd</bpmn:outgoing>
       <bpmn:outgoing>SequenceFlow_0isxkuy</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:sequenceFlow id="SequenceFlow_05r9whd" sourceRef="ExclusiveGateway_0bq7zdz" targetRef="ExclusiveGateway_0lecmy5">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${true}</bpmn:conditionExpression>
+    <bpmn:sequenceFlow id="SequenceFlow_05r9whd" name="else" sourceRef="ExclusiveGateway_0bq7zdz" targetRef="ExclusiveGateway_0lecmy5">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${needsConsentCheck == false}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="SequenceFlow_0isxkuy" name="needs consent check" sourceRef="ExclusiveGateway_0bq7zdz" targetRef="filterByConsent">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${false}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${needsConsentCheck == true}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:serviceTask id="filterByConsent" name="filter by consent" camunda:class="org.highmed.dsf.bpe.service.FilterQueryResultsByConsent">
       <bpmn:incoming>SequenceFlow_0isxkuy</bpmn:incoming>
@@ -93,11 +93,11 @@
       <bpmn:outgoing>SequenceFlow_1futlo2</bpmn:outgoing>
       <bpmn:outgoing>SequenceFlow_0kfeekm</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:sequenceFlow id="SequenceFlow_17otl7p" sourceRef="ExclusiveGateway_0sff9xb" targetRef="ExclusiveGateway_002t87f">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${true}</bpmn:conditionExpression>
+    <bpmn:sequenceFlow id="SequenceFlow_17otl7p" name="else" sourceRef="ExclusiveGateway_0sff9xb" targetRef="ExclusiveGateway_002t87f">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${needsRecordLinkage == false &amp;&amp; needsConsentCheck == false}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="SequenceFlow_1futlo2" name="needs record linkage" sourceRef="ExclusiveGateway_0sff9xb" targetRef="generateBloomFilters">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${false}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${needsRecordLinkage == true}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:serviceTask id="generateBloomFilters" name="generate bloom filters" camunda:class="org.highmed.dsf.bpe.service.GenerateBloomFilters">
       <bpmn:incoming>SequenceFlow_1futlo2</bpmn:incoming>
@@ -112,7 +112,7 @@
     <bpmn:sequenceFlow id="SequenceFlow_0q803rh" sourceRef="ExclusiveGateway_002t87f" targetRef="checkResults" />
     <bpmn:sequenceFlow id="SequenceFlow_1ug2kru" sourceRef="generateBloomFilters" targetRef="ExclusiveGateway_002t87f" />
     <bpmn:sequenceFlow id="SequenceFlow_0kfeekm" name="needs consent check and no record linkage" sourceRef="ExclusiveGateway_0sff9xb" targetRef="countIds">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${false}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${needsConsentCheck == true &amp;&amp; needsRecordLinkage == false}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="SequenceFlow_1kpvsx9" sourceRef="countIds" targetRef="ExclusiveGateway_002t87f" />
     <bpmn:serviceTask id="countIds" name="count id&#39;s" camunda:class="org.highmed.dsf.bpe.service.GenerateCountFromIds">
@@ -197,6 +197,9 @@
       <bpmndi:BPMNEdge id="SequenceFlow_0zlq6j4_di" bpmnElement="SequenceFlow_0zlq6j4">
         <di:waypoint x="507" y="142" />
         <di:waypoint x="613" y="142" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="512" y="124" width="21" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_0yqpkri_di" bpmnElement="SequenceFlow_0yqpkri">
         <di:waypoint x="482" y="117" />
@@ -226,6 +229,9 @@
       <bpmndi:BPMNEdge id="SequenceFlow_05r9whd_di" bpmnElement="SequenceFlow_05r9whd">
         <di:waypoint x="928" y="142" />
         <di:waypoint x="1029" y="142" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="932" y="125" width="21" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_0isxkuy_di" bpmnElement="SequenceFlow_0isxkuy">
         <di:waypoint x="903" y="167" />
@@ -255,6 +261,9 @@
       <bpmndi:BPMNEdge id="SequenceFlow_17otl7p_di" bpmnElement="SequenceFlow_17otl7p">
         <di:waypoint x="1213" y="142" />
         <di:waypoint x="1316" y="142" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1215" y="124" width="21" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_1futlo2_di" bpmnElement="SequenceFlow_1futlo2">
         <di:waypoint x="1188" y="167" />

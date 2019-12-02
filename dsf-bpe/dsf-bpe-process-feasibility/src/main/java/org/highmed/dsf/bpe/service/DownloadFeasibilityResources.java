@@ -63,6 +63,10 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 		execution.setVariable(Constants.VARIABLE_COHORTS, cohortDefinitions);
 
 		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, OutputsValues.create(outputs));
+
+		// TODO: replace by input variable from task input
+		execution.setVariable(Constants.VARIABLE_NEEDS_RECORD_LINKAGE, false);
+		execution.setVariable(Constants.VARIABLE_NEEDS_CONSENT_CHECK, false);
 	}
 
 	private IdType getResearchStudyId(Task task)
