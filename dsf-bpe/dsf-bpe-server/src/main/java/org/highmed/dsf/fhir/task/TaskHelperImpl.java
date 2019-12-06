@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.highmed.dsf.fhir.variables.Outputs;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Reference;
@@ -24,6 +25,18 @@ public class TaskHelperImpl implements TaskHelper
 	public Stream<String> getInputParameterStringValues(Task task, String system, String code)
 	{
 		return getInputParameterValues(task, system, code, StringType.class).map(t -> t.asStringValue());
+	}
+
+	@Override
+	public Optional<Boolean> getFirstInputParameterBooleanValue(Task task, String system, String code)
+	{
+		return getInputParameterBooleanValues(task, system, code).findFirst();
+	}
+
+	@Override
+	public Stream<Boolean> getInputParameterBooleanValues(Task task, String system, String code)
+	{
+		return getInputParameterValues(task, system, code, BooleanType.class).map(t -> t.getValue());
 	}
 
 	@Override
@@ -63,6 +76,13 @@ public class TaskHelperImpl implements TaskHelper
 	{
 		return  new Task.ParameterComponent(new CodeableConcept(
 				new Coding(system, code, null)), new StringType(value));
+	}
+
+	@Override
+	public Task.ParameterComponent createInput(String system, String code, boolean value)
+	{
+		return  new Task.ParameterComponent(new CodeableConcept(
+				new Coding(system, code, null)), new BooleanType(value));
 	}
 
 	@Override

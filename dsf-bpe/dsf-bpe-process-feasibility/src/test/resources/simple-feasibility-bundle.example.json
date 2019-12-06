@@ -234,6 +234,28 @@
                   "valueReference":{
                      "reference":"urn:uuid:ae194285-d08e-46c7-a9a7-9a47624dd8cc"
                   }
+               },
+               {
+                  "type":{
+                     "coding":[
+                        {
+                           "system":"http://highmed.org/fhir/CodeSystem/feasibility",
+                           "code":"needs-record-linkage"
+                        }
+                     ]
+                  },
+                  "valueBoolean": false
+               },
+               {
+                  "type":{
+                     "coding":[
+                        {
+                           "system":"http://highmed.org/fhir/CodeSystem/feasibility",
+                           "code":"needs-consent-check"
+                        }
+                     ]
+                  },
+                  "valueBoolean": false
                }
             ]
          },

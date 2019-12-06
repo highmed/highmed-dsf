@@ -49,7 +49,7 @@
       <bpmn:outgoing>SequenceFlow_0yqpkri</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="SequenceFlow_0zlq6j4" name="else" sourceRef="ExclusiveGateway_1dln3in" targetRef="ExclusiveGateway_1r4c9fx">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${true}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${needsRecordLinkage == false &amp;&amp; needsConsentCheck == false}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="SequenceFlow_0yqpkri" name="needs consent check and/or record linkage" sourceRef="ExclusiveGateway_1dln3in" targetRef="replaceCountpartWithIdSelection">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${needsRecordLinkage == true || needsConsentCheck == true}</bpmn:conditionExpression>

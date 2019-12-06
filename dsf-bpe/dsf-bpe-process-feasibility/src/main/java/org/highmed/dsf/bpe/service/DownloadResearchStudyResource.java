@@ -14,16 +14,12 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.Task;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 public class DownloadResearchStudyResource extends AbstractServiceDelegate implements InitializingBean
 {
-	private static final Logger logger = LoggerFactory.getLogger(DownloadResearchStudyResource.class);
-
 	public DownloadResearchStudyResource(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
 	{
 		super(clientProvider, taskHelper);
@@ -45,6 +41,12 @@ public class DownloadResearchStudyResource extends AbstractServiceDelegate imple
 		ResearchStudy researchStudy = getResearchStudy(researchStudyId, client);
 
 		execution.setVariable(Constants.VARIABLE_RESEARCH_STUDY, researchStudy);
+
+		boolean needsConsentCheck = getNeedsConsentCheck(task);
+		execution.setVariable(Constants.VARIABLE_NEEDS_CONSENT_CHECK, needsConsentCheck);
+
+		boolean needsRecordLinkage = getNeedsRecordLinkageCheck(task);
+		execution.setVariable(Constants.VARIABLE_NEEDS_RECORD_LINKAGE, needsRecordLinkage);
 	}
 
 	private IdType getResearchStudyId(Task task)
@@ -71,5 +73,21 @@ public class DownloadResearchStudyResource extends AbstractServiceDelegate imple
 					"Error while reading ResearchStudy with id " + researchStudyid.getIdPart() + " from " + client
 							.getBaseUrl());
 		}
+	}
+
+	private boolean getNeedsConsentCheck(Task task)
+	{
+		return getTaskHelper().getFirstInputParameterBooleanValue(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
+				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_CONSENT_CHECK).orElseThrow(() -> new InvalidParameterException(
+				"NeedsConsentCheck boolean is not set in task with id='" + task.getId() + "', this error should "
+						+ "have been caught by resource validation"));
+	}
+
+	private boolean getNeedsRecordLinkageCheck(Task task)
+	{
+		return getTaskHelper().getFirstInputParameterBooleanValue(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
+				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_RECORD_LINKAGE).orElseThrow(() -> new InvalidParameterException(
+				"NeedsRecordLinkage boolean is not set in task with id='" + task.getId() + "', this error should "
+						+ "have been caught by resource validation"));
 	}
 }

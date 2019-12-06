@@ -1,5 +1,6 @@
 package org.highmed.dsf.bpe.service;
 
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -61,12 +62,13 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 
 		List<Group> cohortDefinitions = getCohortDefinitions(researchStudy, outputs, client);
 		execution.setVariable(Constants.VARIABLE_COHORTS, cohortDefinitions);
-
 		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, OutputsValues.create(outputs));
 
-		// TODO: replace by input variable from task input
-		execution.setVariable(Constants.VARIABLE_NEEDS_RECORD_LINKAGE, false);
-		execution.setVariable(Constants.VARIABLE_NEEDS_CONSENT_CHECK, false);
+		boolean needsConsentCheck = getNeedsConsentCheck(task);
+		execution.setVariable(Constants.VARIABLE_NEEDS_CONSENT_CHECK, needsConsentCheck);
+
+		boolean needsRecordLinkage = getNeedsRecordLinkageCheck(task);
+		execution.setVariable(Constants.VARIABLE_NEEDS_RECORD_LINKAGE, needsRecordLinkage);
 	}
 
 	private IdType getResearchStudyId(Task task)
@@ -130,5 +132,22 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 		});
 
 		return cohortDefinitions;
+	}
+
+
+	private boolean getNeedsConsentCheck(Task task)
+	{
+		return getTaskHelper().getFirstInputParameterBooleanValue(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
+				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_CONSENT_CHECK).orElseThrow(() -> new InvalidParameterException(
+				"NeedsConsentCheck boolean is not set in task with id='" + task.getId() + "', this error should "
+						+ "have been caught by resource validation"));
+	}
+
+	private boolean getNeedsRecordLinkageCheck(Task task)
+	{
+		return getTaskHelper().getFirstInputParameterBooleanValue(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
+				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_RECORD_LINKAGE).orElseThrow(() -> new InvalidParameterException(
+				"NeedsRecordLinkage boolean is not set in task with id='" + task.getId() + "', this error should "
+						+ "have been caught by resource validation"));
 	}
 }

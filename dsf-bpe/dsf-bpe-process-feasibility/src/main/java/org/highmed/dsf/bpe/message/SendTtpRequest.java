@@ -24,12 +24,26 @@ public class SendTtpRequest extends AbstractTaskMessageSend
 	@Override
 	protected Stream<Task.ParameterComponent> getAdditionalInputParameters(DelegateExecution execution)
 	{
+		// TODO extract needsRecordLinkage and needsConsentCheck from process variables and add to sending task
+
 		MultiInstanceTargets multiInstanceTargets = (MultiInstanceTargets) execution
 				.getVariable(Constants.VARIABLE_MULTI_INSTANCE_TARGETS);
 
-		return multiInstanceTargets.getTargets().stream().map(target -> getTaskHelper()
-				.createInput(Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
+		Stream<Task.ParameterComponent> inputTargets = multiInstanceTargets.getTargets().stream()
+				.map(target -> getTaskHelper().createInput(Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
 						Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDIC_CORRELATION_KEY,
 						target.getCorrelationKey()));
+
+		boolean needsConsentCheck = (boolean) execution.getVariable(Constants.VARIABLE_NEEDS_CONSENT_CHECK);
+		Task.ParameterComponent inputNeedsConsentCheck = getTaskHelper()
+				.createInput(Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
+						Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_CONSENT_CHECK, needsConsentCheck);
+
+		boolean needsRecordLinkage = (boolean) execution.getVariable(Constants.VARIABLE_NEEDS_RECORD_LINKAGE);
+		Task.ParameterComponent inputNeedsRecordLinkage = getTaskHelper()
+				.createInput(Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
+						Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_RECORD_LINKAGE	, needsRecordLinkage);
+
+		return Stream.concat(inputTargets, Stream.of(inputNeedsConsentCheck, inputNeedsRecordLinkage));
 	}
 }

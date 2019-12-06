@@ -1,5 +1,6 @@
 package org.highmed.dsf.bpe.service;
 
+import java.security.InvalidParameterException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,14 +37,35 @@ public class StoreCorrelationKeys extends AbstractServiceDelegate
 
 		for (MultiInstanceTarget target : targets)
 		{
-			logger.info("Correlcation-Key: {}", target.getCorrelationKey());
+			logger.trace("Correlation-Key: {}", target.getCorrelationKey());
 		}
 
 		execution.setVariable(Constants.VARIABLE_MULTI_INSTANCE_TARGETS,
 				MultiInstanceTargetsValues.create(new MultiInstanceTargets(targets)));
 
-		// TODO: replace by input variable from task input
-		execution.setVariable(Constants.VARIABLE_NEEDS_RECORD_LINKAGE, false);
-		execution.setVariable(Constants.VARIABLE_NEEDS_CONSENT_CHECK, false);
+		boolean needsConsentCheck = getNeedsConsentCheck(task);
+		execution.setVariable(Constants.VARIABLE_NEEDS_CONSENT_CHECK, needsConsentCheck);
+
+		boolean needsRecordLinkage = getNeedsRecordLinkageCheck(task);
+		execution.setVariable(Constants.VARIABLE_NEEDS_RECORD_LINKAGE, needsRecordLinkage);
 	}
+
+
+	private boolean getNeedsConsentCheck(Task task)
+	{
+		return getTaskHelper().getFirstInputParameterBooleanValue(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
+				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_CONSENT_CHECK).orElseThrow(() -> new InvalidParameterException(
+				"NeedsConsentCheck boolean is not set in task with id='" + task.getId() + "', this error should "
+						+ "have been caught by resource validation"));
+	}
+
+	private boolean getNeedsRecordLinkageCheck(Task task)
+	{
+		return getTaskHelper().getFirstInputParameterBooleanValue(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
+				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_RECORD_LINKAGE).orElseThrow(() -> new InvalidParameterException(
+				"NeedsRecordLinkage boolean is not set in task with id='" + task.getId() + "', this error should "
+						+ "have been caught by resource validation"));
+	}
+
+
 }
