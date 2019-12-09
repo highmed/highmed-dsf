@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <StructureDefinition xmlns="http://hl7.org/fhir">
-  <url value="http://highmed.org/fhir/StructureDefinition/highmed-task-request-simple-feasibility" />
+  <url value="http://highmed.org/fhir/StructureDefinition/highmed-task-compute-simple-feasibility" />
   <version value="0.1.0" />
-  <name value="TaskRequestSimpleFeasibility" />
+  <name value="TaskComputeSimpleFeasibility" />
   <status value="active" />
   <date value="2019-05-21" />
   <fhirVersion value="4.0.0" />
@@ -14,18 +14,18 @@
   <differential>
     <element id="Task.instantiatesUri">
       <path value="Task.instantiatesUri" />
-      <fixedUri value="http://highmed.org/bpe/Process/requestSimpleFeasibility/1.0.0" />
+      <fixedUri value="http://highmed.org/bpe/Process/computeSimpleFeasibility/1.0.0" />
     </element>
     <element id="Task.input">
       <path value="Task.input" />
       <slicing>
         <discriminator>
-          <type value="value"/>
-          <path value="type.coding.code"/>
+          <type value="value" />
+          <path value="type.coding.code" />
         </discriminator>
-        <rules value="open"/>
+        <rules value="closed" />
       </slicing>
-      <min value="4" />
+      <min value="5" />
     </element>
     <element id="Task.input:message-name">
       <path value="Task.input" />
@@ -33,45 +33,43 @@
     </element>
     <element id="Task.input:message-name.value[x]">
       <path value="Task.input.value[x]" />
-      <fixedString value="requestSimpleFeasibilityMessage" />
+      <fixedString value="computeSimpleFeasibilityMessage" />
     </element>
     <element id="Task.input:business-key">
       <path value="Task.input" />
       <sliceName value="business-key" />
-      <max value="0" />
+      <min value="1" />
     </element>
     <element id="Task.input:correlation-key">
       <path value="Task.input" />
       <sliceName value="correlation-key" />
-      <max value="0" />
-    </element>
-    <element id="Task.input:research-study">
-      <path value="Task.input" />
-      <sliceName value="research-study" />
       <min value="1" />
-      <max value="1" />
     </element>
-    <element id="Task.input:research-study.type.coding">
+    <element id="Task.input:medic-correlation-key">
+      <path value="Task.input" />
+      <sliceName value="medic-correlation-key" />
+      <min value="1" />
+    </element>
+    <element id="Task.input:medic-correlation-key.type.coding">
       <path value="Task.input.type.coding" />
       <min value="1" />
       <max value="1" />
     </element>
-    <element id="Task.input:research-study.type.coding.system">
+    <element id="Task.input:medic-correlation-key.type.coding.system">
       <path value="Task.input.type.coding.system" />
       <fixedUri value="http://highmed.org/fhir/CodeSystem/feasibility" />
     </element>
-    <element id="Task.input:research-study.type.coding.code">
+    <element id="Task.input:medic-correlation-key.type.coding.code">
       <path value="Task.input.type.coding.code" />
-      <fixedCode value="research-study-reference" />
+      <fixedCode value="medic-correlation-key" />
     </element>
-    <element id="Task.input:research-study.value[x]">
+    <element id="Task.input:medic-correlation-key.value[x]">
       <path value="Task.input.value[x]" />
       <type>
-        <code value="Reference" />
-        <targetProfile value="http://highmed.org/fhir/StructureDefinition/highmed-research-study" />
+        <code value="string" />
       </type>
     </element>
-    <element id="Task.input:needs-record-linkage">
+     <element id="Task.input:needs-record-linkage">
       <path value="Task.input" />
       <sliceName value="needs-record-linkage" />
       <min value="1" />
@@ -96,31 +94,6 @@
          <code value="boolean" />
       </type>
     </element>
-    <element id="Task.input:needs-consent-check">
-      <path value="Task.input" />
-      <sliceName value="needs-consent-check" />
-      <min value="1" />
-      <max value="1" />
-    </element>
-    <element id="Task.input:needs-consent-check.type.coding">
-      <path value="Task.input.type.coding" />
-      <min value="1" />
-      <max value="1" />
-    </element>
-    <element id="Task.input:needs-consent-check.type.coding.system">
-      <path value="Task.input.type.coding.system" />
-      <fixedUri value="http://highmed.org/fhir/CodeSystem/feasibility" />
-    </element>
-    <element id="Task.input:needs-consent-check.type.coding.code">
-      <path value="Task.input.type.coding.code" />
-      <fixedCode value="needs-consent-check" />
-    </element>
-    <element id="Task.input:needs-consent-check.value[x]">
-      <path value="Task.input.value[x]" />
-      <type>
-         <code value="boolean" />
-      </type>
-    </element>
     <element id="Task.output">
       <path value="Task.output" />
       <slicing>
@@ -130,7 +103,7 @@
         </discriminator>
         <rules value="closed" />
       </slicing>
-       <min value="1" />
+      <min value="1" />
     </element>
     <element id="Task.output:participating-medics">
       <path value="Task.output" />

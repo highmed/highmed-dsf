@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <StructureDefinition xmlns="http://hl7.org/fhir">
-  <url value="http://highmed.org/fhir/StructureDefinition/highmed-task-result-simple-feasibility" />
+  <url value="http://highmed.org/fhir/StructureDefinition/highmed-task-single-medic-result-simple-feasibility" />
   <version value="0.1.0" />
-  <name value="TaskResultSimpleFeasibility" />
+  <name value="TaskSingleMedicResultSimpleFeasibility" />
   <status value="active" />
   <date value="2019-05-21" />
   <fhirVersion value="4.0.0" />
@@ -14,7 +14,7 @@
   <differential>
     <element id="Task.instantiatesUri">
       <path value="Task.instantiatesUri" />
-      <fixedUri value="http://highmed.org/bpe/Process/requestSimpleFeasibility/1.0.0" />
+      <fixedUri value="http://highmed.org/bpe/Process/computeSimpleFeasibility/1.0.0" />
     </element>
     <element id="Task.input">
       <path value="Task.input" />
@@ -45,25 +45,47 @@
       <sliceName value="correlation-key" />
       <min value="1" />
     </element>
-    <element id="Task.input:singleResult">
+    <element id="Task.input:single-medic-result">
       <path value="Task.input" />
-      <sliceName value="singleResult" />
-      <min value="1" />
+      <sliceName value="single-medic-result" />
     </element>
-    <element id="Task.input:singleResult.type.coding">
+    <element id="Task.input:single-medic-result.type.coding">
       <path value="Task.input.type.coding" />
       <min value="1" />
       <max value="1" />
     </element>
-    <element id="Task.input:singleResult.type.coding.system">
+    <element id="Task.input:single-medic-result.type.coding.system">
       <path value="Task.input.type.coding.system" />
       <fixedUri value="http://highmed.org/fhir/NamingSystem/feasibility" />
     </element>
-    <element id="Task.input:singleResult.type.coding.code">
+    <element id="Task.input:single-medic-result.type.coding.code">
       <path value="Task.input.type.coding.code" />
       <patternCode value="single-medic-result" />
     </element>
-    <element id="Task.input:singleResult.value[x]">
+    <element id="Task.input:single-medic-result.value[x]">
+      <path value="Task.input.value[x]" />
+      <type>
+        <code value="string" />
+      </type>
+    </element>
+     <element id="Task.input:error">
+      <path value="Task.input" />
+      <sliceName value="error" />
+    </element>
+    <element id="Task.input:error.type.coding">
+      <path value="Task.input.type.coding" />
+      <min value="1" />
+      <max value="1" />
+    </element>
+    <element id="Task.input:error.type.coding.system">
+      <path value="Task.input.type.coding.system" />
+      <fixedUri value="http://highmed.org/fhir/NamingSystem/feasibility" />
+    </element>
+    <element id="Task.input:error.type.coding.code">
+      <path value="Task.input.type.coding.code" />
+      <patternCode value="error" />
+    </element>
+    <element id="Task.input:error.value[x]">
       <path value="Task.input.value[x]" />
       <type>
         <code value="string" />
