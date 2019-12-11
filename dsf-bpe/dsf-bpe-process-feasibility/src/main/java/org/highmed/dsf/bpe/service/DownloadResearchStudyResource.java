@@ -47,6 +47,12 @@ public class DownloadResearchStudyResource extends AbstractServiceDelegate imple
 
 		boolean needsRecordLinkage = getNeedsRecordLinkageCheck(task);
 		execution.setVariable(Constants.VARIABLE_NEEDS_RECORD_LINKAGE, needsRecordLinkage);
+
+		// TODO: remove when implemented
+		if(needsConsentCheck || needsRecordLinkage)
+		{
+			throw new UnsupportedOperationException("Consent Check and Record Linkage not yet supported.");
+		}
 	}
 
 	private IdType getResearchStudyId(Task task)
