@@ -7,6 +7,7 @@ import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -22,10 +23,13 @@ public class UpdateWhiteListConfig
 	@Autowired
 	private TaskHelper taskHelper;
 
+	@Autowired
+	private ApplicationContext context;
+
 	@Bean
 	public ProcessEnginePlugin updateWhiteListPlugin()
 	{
-		return new UpdateWhiteListPlugin();
+		return new UpdateWhiteListPlugin(context);
 	}
 
 	@Bean

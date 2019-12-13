@@ -10,6 +10,7 @@ import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -30,10 +31,13 @@ public class UpdateResourcesConfig
 	@Autowired
 	private FhirContext fhirContext;
 
+	@Autowired
+	private ApplicationContext context;
+
 	@Bean
 	public ProcessEnginePlugin updateResourcesPlugin()
 	{
-		return new UpdateResourcesPlugin();
+		return new UpdateResourcesPlugin(context);
 	}
 
 	@Bean

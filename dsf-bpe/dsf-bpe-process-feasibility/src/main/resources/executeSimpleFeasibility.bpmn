@@ -5,10 +5,6 @@
       <bpmn:incoming>SequenceFlow_0q803rh</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_04ouilq</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="executeQueries" name="execute queries" camunda:class="org.highmed.dsf.bpe.service.ExecuteQueries">
-      <bpmn:incoming>SequenceFlow_0bwn08k</bpmn:incoming>
-      <bpmn:outgoing>SequenceFlow_1rmqv20</bpmn:outgoing>
-    </bpmn:serviceTask>
     <bpmn:serviceTask id="checkFeasibilityResources" name="check feasibility resources" camunda:class="org.highmed.dsf.bpe.service.CheckFeasibilityResources">
       <bpmn:incoming>SequenceFlow_1etju4m</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1wwn9pl</bpmn:outgoing>
@@ -124,6 +120,10 @@
       <bpmn:incoming>SequenceFlow_04ouilq</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0ascyjc</bpmn:outgoing>
     </bpmn:serviceTask>
+    <bpmn:serviceTask id="executeQueries" name="execute queries" camunda:class="org.highmed.dsf.bpe.service.ExecuteQueries">
+      <bpmn:incoming>SequenceFlow_0bwn08k</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1rmqv20</bpmn:outgoing>
+    </bpmn:serviceTask>
     <bpmn:textAnnotation id="TextAnnotation_0euut3n">
       <bpmn:text>uac check, study definiton validity, type of cohort, ethics commitee vote, included medics, user authentication, rate limit, etc.</bpmn:text>
     </bpmn:textAnnotation>
@@ -135,9 +135,6 @@
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="executeSimpleFeasibility">
       <bpmndi:BPMNShape id="ServiceTask_0t2s0v7_di" bpmnElement="checkResults">
         <dc:Bounds x="1450" y="102" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="ServiceTask_0u5pb4i_di" bpmnElement="executeQueries">
-        <dc:Bounds x="726" y="102" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ServiceTask_0jna5l2_di" bpmnElement="checkFeasibilityResources">
         <dc:Bounds x="100" y="102" width="100" height="80" />
@@ -308,6 +305,9 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="ServiceTask_15aifhd_di" bpmnElement="selectResponseTargetTtp">
         <dc:Bounds x="1636" y="102" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_0u5pb4i_di" bpmnElement="executeQueries">
+        <dc:Bounds x="726" y="102" width="100" height="80" />
       </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

@@ -30,6 +30,7 @@ import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.openehr.client.OpenEhrWebserviceClientProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -56,10 +57,13 @@ public class FeasibilityConfig
 	@Autowired
 	private FhirContext fhirContext;
 
+	@Autowired
+	private ApplicationContext context;
+
 	@Bean
 	public ProcessEnginePlugin feasibilityPlugin()
 	{
-		return new FeasibilityPlugin();
+		return new FeasibilityPlugin(context);
 	}
 
 	//
@@ -205,5 +209,4 @@ public class FeasibilityConfig
 	{
 		return new SendMultiMedicResults(fhirClientProvider, taskHelper, organizationProvider, fhirContext);
 	}
-
 }
