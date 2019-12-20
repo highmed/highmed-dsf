@@ -24,6 +24,8 @@ public interface TaskHelper
 
 	Optional<UrlType> getFirstInputParameterUrlValue(Task task, String system, String code);
 
+	Stream<Task.ParameterComponent> getInputParameterWithExtension(Task task, String system, String code, String url);
+
 	Stream<UrlType> getInputParameterUrlValues(Task task, String system, String code);
 
 	Task.ParameterComponent createInput(String system, String code, String value);

@@ -12,8 +12,7 @@ public interface Constants
 	// String VARIABLE_CORRELATION_KEY = "correlationKey";
 	String VARIABLE_MULTI_INSTANCE_TARGET = "multiInstanceTarget";
 	String VARIABLE_MULTI_INSTANCE_TARGETS = "multiInstanceTargets";
-	String VARIABLE_MULTI_INSTANCE_RESULT = "mutliInstanceResult";
-	String VARIABLE_MULTI_INSTANCE_RESULTS = "mutliInstanceResults";
+	String VARIABLE_QUERY_RESULTS = "queryResults";
 	String VARIABLE_TASK = "task";
 	String VARIABLE_LEADING_TASK = "leadingTask";
 	String VARIABLE_RESEARCH_STUDY = "researchStudy";
@@ -63,10 +62,6 @@ public interface Constants
 	String CODESYSTEM_HIGHMED_UPDATE_WHITELIST = "http://highmed.org/fhir/CodeSystem/update-whitelist";
 	String CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST = "HiGHmed_white_list";
 
-	String CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR = "|";
-	int CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_COHORT_SIZE_INDEX = 0;
-	int CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_GROUP_ID_INDEX = 1;
-
 	String PROCESS_URI_BASE = "http://highmed.org/bpe/Process/";
 
 	String ORGANIZATION_IDENTIFIER_SYSTEM = "http://highmed.org/fhir/CodeSystem/organization";
@@ -75,6 +70,7 @@ public interface Constants
 
 	String EXTENSION_PARTICIPATING_MEDIC_URI = "http://highmed.org/fhir/StructureDefinition/participating-medic";
 	String EXTENSION_QUERY_URI = "http://highmed.org/fhir/StructureDefinition/query";
+	String EXTENSION_GROUP_ID_URI = "http://highmed.org/fhir/StructureDefinition/group-id";
 
 	// Must be 3 or larger, as otherwise it is possible to draw conclusions about the individual MeDICs
 	// (if I already know the cohort size in my MeDIC)

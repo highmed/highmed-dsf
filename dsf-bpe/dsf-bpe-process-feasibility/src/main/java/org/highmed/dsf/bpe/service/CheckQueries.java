@@ -16,7 +16,6 @@ import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.Outputs;
 import org.highmed.dsf.fhir.variables.OutputsValues;
 import org.hl7.fhir.r4.model.Group;
-import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -52,8 +51,7 @@ public class CheckQueries extends AbstractServiceDelegate implements Initializin
 		cohorts.forEach(group -> {
 			String aqlQuery = groupHelper.extractAqlQuery(group).toLowerCase();
 
-			IdType groupId = new IdType(group.getId());
-			String groupIdString = groupId.getResourceType() + "/" + groupId.getIdPart();
+			String groupId = group.getId();
 
 			if (!aqlQuery.startsWith(SIMPLE_FEASIBILITY_QUERY_PREFIX))
 			{
@@ -67,7 +65,7 @@ public class CheckQueries extends AbstractServiceDelegate implements Initializin
 			}
 			else
 			{
-				queries.put(groupIdString, aqlQuery);
+				queries.put(groupId, aqlQuery);
 			}
 		});
 

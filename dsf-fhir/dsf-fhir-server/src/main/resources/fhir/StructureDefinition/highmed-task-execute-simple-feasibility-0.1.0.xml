@@ -136,6 +136,26 @@
       <path value="Task.output" />
       <sliceName value="single-medic-result" />
     </element>
+     <element id="Task.output:single-medic-result.extension">
+      <path value="Task.output.extension" />
+      <slicing>
+        <discriminator>
+          <type value="value" />
+          <path value="url" />
+        </discriminator>
+        <rules value="open" />
+      </slicing>
+    </element>
+    <element id="Task.output:single-medic-result.extension:group-id">
+      <path value="Task.output.extension" />
+      <sliceName value="group-id" />
+      <min value="1" />
+      <max value="1" />
+      <type>
+        <code value="Extension" />
+        <profile value="http://highmed.org/fhir/StructureDefinition/group-id" />
+      </type>
+    </element>
     <element id="Task.output:single-medic-result.type.coding">
       <path value="Task.output.type.coding" />
       <min value="1" />

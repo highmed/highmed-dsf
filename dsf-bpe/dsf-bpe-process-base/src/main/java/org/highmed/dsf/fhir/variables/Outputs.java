@@ -28,13 +28,19 @@ public class Outputs
 
 	public void add(Output output)
 	{
-		outputs.add(output);
+		if(output != null)
+			outputs.add(output);
+	}
+
+	public void add(String system, String code, String value, String extensionUrl, String extensionValue)
+	{
+		Output output = new Output(system, code, value, extensionUrl, extensionValue);
+		add(output);
 	}
 
 	public void add(String system, String code, String value)
 	{
-		Output output = new Output(system, code, value);
-		add(output);
+		this.add(system, code, value, null, null);
 	}
 
 	public void addErrorOutput(String error)

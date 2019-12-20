@@ -1,4 +1,4 @@
-package org.highmed.dsf.bpe.variables;
+package org.highmed.dsf.fhir.variables;
 
 import java.io.Serializable;
 
@@ -33,4 +33,3 @@ public class FinalSimpleFeasibilityResult implements Serializable
 		return cohortSize;
 	}
 }
-

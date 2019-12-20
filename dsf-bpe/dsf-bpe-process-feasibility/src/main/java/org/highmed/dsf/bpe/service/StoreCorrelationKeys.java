@@ -9,6 +9,7 @@ import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
+import org.highmed.dsf.fhir.variables.FeasibilityQueryResults;
 import org.highmed.dsf.fhir.variables.MultiInstanceTarget;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargets;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargetsValues;
@@ -35,11 +36,6 @@ public class StoreCorrelationKeys extends AbstractServiceDelegate
 						Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDIC_CORRELATION_KEY)
 				.map(correlationKey -> new MultiInstanceTarget("", correlationKey)).collect(Collectors.toList());
 
-		for (MultiInstanceTarget target : targets)
-		{
-			logger.trace("Correlation-Key: {}", target.getCorrelationKey());
-		}
-
 		execution.setVariable(Constants.VARIABLE_MULTI_INSTANCE_TARGETS,
 				MultiInstanceTargetsValues.create(new MultiInstanceTargets(targets)));
 
@@ -48,24 +44,26 @@ public class StoreCorrelationKeys extends AbstractServiceDelegate
 
 		boolean needsRecordLinkage = getNeedsRecordLinkageCheck(task);
 		execution.setVariable(Constants.VARIABLE_NEEDS_RECORD_LINKAGE, needsRecordLinkage);
-	}
 
+		execution.setVariable(Constants.VARIABLE_QUERY_RESULTS, new FeasibilityQueryResults());
+	}
 
 	private boolean getNeedsConsentCheck(Task task)
 	{
 		return getTaskHelper().getFirstInputParameterBooleanValue(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
-				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_CONSENT_CHECK).orElseThrow(() -> new InvalidParameterException(
-				"NeedsConsentCheck boolean is not set in task with id='" + task.getId() + "', this error should "
-						+ "have been caught by resource validation"));
+				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_CONSENT_CHECK).orElseThrow(
+				() -> new InvalidParameterException(
+						"NeedsConsentCheck boolean is not set in task with id='" + task.getId()
+								+ "', this error should " + "have been caught by resource validation"));
 	}
 
 	private boolean getNeedsRecordLinkageCheck(Task task)
 	{
 		return getTaskHelper().getFirstInputParameterBooleanValue(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
-				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_RECORD_LINKAGE).orElseThrow(() -> new InvalidParameterException(
-				"NeedsRecordLinkage boolean is not set in task with id='" + task.getId() + "', this error should "
-						+ "have been caught by resource validation"));
+				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_RECORD_LINKAGE).orElseThrow(
+				() -> new InvalidParameterException(
+						"NeedsRecordLinkage boolean is not set in task with id='" + task.getId()
+								+ "', this error should " + "have been caught by resource validation"));
 	}
-
 
 }

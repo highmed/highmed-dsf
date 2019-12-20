@@ -1,20 +1,18 @@
 package org.highmed.dsf.bpe.service;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.Objects;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
-import org.highmed.dsf.bpe.variables.MultiInstanceResult;
-import org.highmed.dsf.bpe.variables.MultiInstanceResults;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Identifier;
+import org.highmed.dsf.fhir.variables.FeasibilityQueryResult;
+import org.highmed.dsf.fhir.variables.FeasibilityQueryResults;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
 import org.springframework.beans.factory.InitializingBean;
 
@@ -34,45 +32,30 @@ public class StoreResults extends AbstractServiceDelegate implements Initializin
 	public void afterPropertiesSet() throws Exception
 	{
 		super.afterPropertiesSet();
-
 		Objects.requireNonNull(organizationProvider, "organizationProvider");
 	}
 
 	@Override
 	public void doExecute(DelegateExecution execution) throws Exception
 	{
+		FeasibilityQueryResults results = (FeasibilityQueryResults) execution
+				.getVariable(Constants.VARIABLE_QUERY_RESULTS);
+
 		Task task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
+		String requester = task.getRequester().getReference();
 
-		Map<String, String> queryResults = new HashMap<>();
-		Stream<String> resultInputs = getTaskHelper()
-				.getInputParameterStringValues(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
-						Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_SINGLE_MEDIC_RESULT);
+		List<FeasibilityQueryResult> resultInputs = getTaskHelper()
+				.getInputParameterWithExtension(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
+						Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_SINGLE_MEDIC_RESULT,
+						Constants.EXTENSION_GROUP_ID_URI).map(input -> {
+					String groupId = ((Reference) input.getExtension().get(0).getValue()).getReference();
+					int groupSize = Integer.parseInt(input.getValue().primitiveValue());
+					return new FeasibilityQueryResult(requester, groupId, groupSize);
+				}).collect(Collectors.toList());
 
-		resultInputs.forEach(input -> {
-			String[] resultParts = input.split("\\" + Constants.CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_SEPARATOR);
-			queryResults.put(resultParts[Constants.CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_GROUP_ID_INDEX],
-					resultParts[Constants.CODESYSTEM_HIGHMED_FEASIBILITY_RESULT_COHORT_SIZE_INDEX]);
-		});
-
-		String requesterReference = task.getRequester().getReference();
-		Identifier requesterIdentifier = organizationProvider.getIdentifier(new IdType(requesterReference)).orElseThrow(
-				() -> new IllegalStateException(
-						"Could not find organization reference: " + requesterReference + ", dropping received result"));
-
-		MultiInstanceResult result = new MultiInstanceResult(
-				requesterIdentifier.getSystem() + "|" + requesterIdentifier.getValue(), queryResults);
-
-		MultiInstanceResults results = (MultiInstanceResults) execution
-				.getVariable(Constants.VARIABLE_MULTI_INSTANCE_RESULTS);
-
-		if (results == null)
-		{
-			results = new MultiInstanceResults();
-		}
-
-		results.add(result);
+		results.addAll(resultInputs);
 
 		// race conditions are not possible, since tasks are received sequentially over the websocket connection
-		execution.setVariable(Constants.VARIABLE_MULTI_INSTANCE_RESULTS, results);
+		execution.setVariable(Constants.VARIABLE_QUERY_RESULTS, results);
 	}
 }

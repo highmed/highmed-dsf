@@ -118,6 +118,10 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 			{
 				IdType type = new IdType(reference.getReference());
 				Group group = client.read(Group.class, type.getIdPart());
+
+				IdType groupId = new IdType(group.getId());
+				group.setId(client.getBaseUrl() + groupId.getResourceType() + "/" + groupId.getIdPart());
+
 				cohortDefinitions.add(group);
 			}
 			catch (WebApplicationException e)
@@ -134,20 +138,21 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 		return cohortDefinitions;
 	}
 
-
 	private boolean getNeedsConsentCheck(Task task)
 	{
 		return getTaskHelper().getFirstInputParameterBooleanValue(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
-				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_CONSENT_CHECK).orElseThrow(() -> new InvalidParameterException(
-				"NeedsConsentCheck boolean is not set in task with id='" + task.getId() + "', this error should "
-						+ "have been caught by resource validation"));
+				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_CONSENT_CHECK).orElseThrow(
+				() -> new InvalidParameterException(
+						"NeedsConsentCheck boolean is not set in task with id='" + task.getId()
+								+ "', this error should " + "have been caught by resource validation"));
 	}
 
 	private boolean getNeedsRecordLinkageCheck(Task task)
 	{
 		return getTaskHelper().getFirstInputParameterBooleanValue(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
-				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_RECORD_LINKAGE).orElseThrow(() -> new InvalidParameterException(
-				"NeedsRecordLinkage boolean is not set in task with id='" + task.getId() + "', this error should "
-						+ "have been caught by resource validation"));
+				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_RECORD_LINKAGE).orElseThrow(
+				() -> new InvalidParameterException(
+						"NeedsRecordLinkage boolean is not set in task with id='" + task.getId()
+								+ "', this error should " + "have been caught by resource validation"));
 	}
 }

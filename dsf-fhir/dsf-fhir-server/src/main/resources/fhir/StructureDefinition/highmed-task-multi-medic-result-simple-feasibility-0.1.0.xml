@@ -49,6 +49,26 @@
       <path value="Task.input" />
       <sliceName value="participating-medics" />
     </element>
+    <element id="Task.input:participating-medics.extension">
+      <path value="Task.input.extension" />
+      <slicing>
+        <discriminator>
+          <type value="value" />
+          <path value="url" />
+        </discriminator>
+        <rules value="open" />
+      </slicing>
+    </element>
+    <element id="Task.input:participating-medics.extension:group-id">
+      <path value="Task.input.extension" />
+      <sliceName value="group-id" />
+      <min value="1" />
+      <max value="1" />
+      <type>
+        <code value="Extension" />
+        <profile value="http://highmed.org/fhir/StructureDefinition/group-id" />
+      </type>
+    </element>
     <element id="Task.input:participating-medics.type.coding">
       <path value="Task.input.type.coding" />
       <min value="1" />
@@ -72,6 +92,26 @@
       <path value="Task.input" />
       <sliceName value="multi-medic-result" />
     </element>
+    <element id="Task.input:multi-medic-result.extension">
+      <path value="Task.input.extension" />
+      <slicing>
+        <discriminator>
+          <type value="value" />
+          <path value="url" />
+        </discriminator>
+        <rules value="open" />
+      </slicing>
+    </element>
+    <element id="Task.input:multi-medic-result.extension:group-id">
+      <path value="Task.input.extension" />
+      <sliceName value="group-id" />
+      <min value="1" />
+      <max value="1" />
+      <type>
+        <code value="Extension" />
+        <profile value="http://highmed.org/fhir/StructureDefinition/group-id" />
+      </type>
+    </element>
     <element id="Task.input:multi-medic-result.type.coding">
       <path value="Task.input.type.coding" />
       <min value="1" />
@@ -91,7 +131,6 @@
         <code value="string" />
       </type>
     </element>
-
      <element id="Task.input:error">
       <path value="Task.input" />
       <sliceName value="error" />
