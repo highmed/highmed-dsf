@@ -6,21 +6,16 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-// TODO: check if Serializable can be replaced by JSON serialization
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class FeasibilityQueryResults implements Serializable
 {
-	private static final long serialVersionUID = 1L;
+	private final List<FeasibilityQueryResult> results = new ArrayList<>();
 
-	private final List<FeasibilityQueryResult> results;
-
-	public FeasibilityQueryResults()
+	@JsonCreator
+	public FeasibilityQueryResults(@JsonProperty("results") Collection<? extends FeasibilityQueryResult> results)
 	{
-		results = new ArrayList<>();
-	}
-
-	public FeasibilityQueryResults(Collection<? extends FeasibilityQueryResult> results)
-	{
-		this();
 		if (results != null)
 			this.results.addAll(results);
 	}

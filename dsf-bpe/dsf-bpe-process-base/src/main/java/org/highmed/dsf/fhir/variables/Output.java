@@ -1,5 +1,8 @@
 package org.highmed.dsf.fhir.variables;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Output
 {
 	private final String system;
@@ -8,22 +11,23 @@ public class Output
 	private final String extensionUrl;
 	private final String extensionValue;
 
-	private boolean hasExtension;
+	private final boolean hasExtension;
 
-	public Output(String system, String code, String value)
-	{
-		this(system, code, value, null, null);
-		hasExtension = false;
-	}
-
-	public Output(String system, String code, String value, String extensionUrl, String extensionValue)
+	@JsonCreator
+	public Output(
+			@JsonProperty("system") String system,
+			@JsonProperty("code") String code,
+			@JsonProperty("value") String value,
+			@JsonProperty("extensionUrl") String extensionUrl,
+			@JsonProperty("extensionValue") String extensionValue)
 	{
 		this.system = system;
 		this.code = code;
 		this.value = value;
 		this.extensionUrl = extensionUrl;
 		this.extensionValue = extensionValue;
-		this.hasExtension = true;
+
+		this.hasExtension = extensionUrl != null;
 	}
 
 	public String getSystem()

@@ -7,15 +7,15 @@ import java.util.List;
 
 import org.highmed.dsf.bpe.Constants;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Outputs
 {
 	private final List<Output> outputs = new ArrayList<>();
 
-	public Outputs()
-	{
-	}
-
-	public Outputs(Collection<? extends Output> outputs)
+	@JsonCreator
+	public Outputs(@JsonProperty("outputs") Collection<? extends Output> outputs)
 	{
 		if (outputs != null)
 			this.outputs.addAll(outputs);
@@ -28,7 +28,7 @@ public class Outputs
 
 	public void add(Output output)
 	{
-		if(output != null)
+		if (output != null)
 			outputs.add(output);
 	}
 

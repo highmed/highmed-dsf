@@ -10,6 +10,7 @@ import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.FeasibilityQueryResults;
+import org.highmed.dsf.fhir.variables.FeasibilityQueryResultsValues;
 import org.highmed.dsf.fhir.variables.MultiInstanceTarget;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargets;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargetsValues;
@@ -45,7 +46,7 @@ public class StoreCorrelationKeys extends AbstractServiceDelegate
 		boolean needsRecordLinkage = getNeedsRecordLinkageCheck(task);
 		execution.setVariable(Constants.VARIABLE_NEEDS_RECORD_LINKAGE, needsRecordLinkage);
 
-		execution.setVariable(Constants.VARIABLE_QUERY_RESULTS, new FeasibilityQueryResults());
+		execution.setVariable(Constants.VARIABLE_QUERY_RESULTS, FeasibilityQueryResultsValues.create(new FeasibilityQueryResults(null)));
 	}
 
 	private boolean getNeedsConsentCheck(Task task)

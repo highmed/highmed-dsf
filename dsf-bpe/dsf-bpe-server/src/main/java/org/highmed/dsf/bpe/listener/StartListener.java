@@ -42,7 +42,7 @@ public class StartListener implements ExecutionListener
 			execution.setVariable(Constants.VARIABLE_LEADING_TASK, task);
 
 			// initialized process outputs variable, used in the EndListener
-			execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, OutputsValues.create(new Outputs()));
+			execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, OutputsValues.create(new Outputs(null)));
 
 			log(execution, task);
 		}

@@ -2,16 +2,20 @@ package org.highmed.dsf.fhir.variables;
 
 import java.io.Serializable;
 
-// TODO: check if Serializable can be replaced by JSON serialization
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class FeasibilityQueryResult implements Serializable
 {
-	private static final long serialVersionUID = 1L;
-
 	private final String organizationIdentifier;
 	private final String cohortId;
 	private final int cohortSize;
 
-	public FeasibilityQueryResult(String organizationIdentifier, String groupId, int groupSize)
+	@JsonCreator
+	public FeasibilityQueryResult(
+			@JsonProperty("organizationIdentifier") String organizationIdentifier,
+			@JsonProperty("groupId") String groupId,
+			@JsonProperty("groupSize") int groupSize)
 	{
 		this.organizationIdentifier = organizationIdentifier;
 		this.cohortId = groupId;
