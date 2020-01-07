@@ -1,12 +1,7 @@
 package org.highmed.dsf.fhir.variables;
 
-import java.io.Serializable;
-
-// TODO: check if Serializable can be replaced by JSON serialization
-public class FinalSimpleFeasibilityResult implements Serializable
+public class FinalSimpleFeasibilityResult
 {
-	private static final long serialVersionUID = 1L;
-
 	private final String cohortId;
 	private final long participatingMedics;
 	private final long cohortSize;
