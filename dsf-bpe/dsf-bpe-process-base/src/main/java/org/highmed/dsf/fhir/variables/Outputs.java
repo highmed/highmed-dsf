@@ -15,7 +15,14 @@ public class Outputs
 	private final List<Output> outputs = new ArrayList<>();
 
 	@JsonCreator
-	public Outputs(@JsonProperty("outputs") Collection<? extends Output> outputs)
+	public Outputs()
+	{
+	}
+
+	@JsonCreator
+	public Outputs(
+			@JsonProperty("outputs")
+					Collection<? extends Output> outputs)
 	{
 		if (outputs != null)
 			this.outputs.addAll(outputs);

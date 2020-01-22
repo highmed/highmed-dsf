@@ -19,6 +19,6 @@ public class FilterQueryResultsByConsent extends AbstractServiceDelegate
 	@Override
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
-
+		// TODO: implement
 	}
 }

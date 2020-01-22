@@ -1,6 +1,5 @@
 package org.highmed.dsf.fhir.variables;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -9,7 +8,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class FeasibilityQueryResults implements Serializable
+public class FeasibilityQueryResults
 {
 	private final List<FeasibilityQueryResult> results = new ArrayList<>();
 

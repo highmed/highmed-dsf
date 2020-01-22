@@ -24,8 +24,6 @@ public class SendTtpRequest extends AbstractTaskMessageSend
 	@Override
 	protected Stream<Task.ParameterComponent> getAdditionalInputParameters(DelegateExecution execution)
 	{
-		// TODO extract needsRecordLinkage and needsConsentCheck from process variables and add to sending task
-
 		MultiInstanceTargets multiInstanceTargets = (MultiInstanceTargets) execution
 				.getVariable(Constants.VARIABLE_MULTI_INSTANCE_TARGETS);
 

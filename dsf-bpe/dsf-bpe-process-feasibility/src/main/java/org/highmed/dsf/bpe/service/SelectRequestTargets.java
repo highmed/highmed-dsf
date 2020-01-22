@@ -65,6 +65,8 @@ public class SelectRequestTargets extends AbstractServiceDelegate
 
 	private void setTtpTarget(DelegateExecution execution)
 	{
+		// TODO implement ttp selection strategy, if there are multiple TTPs available
+
 		Organization ttp = organizationProvider.getOrganizationsByType("TTP").findFirst().orElseThrow(
 				() -> new IllegalArgumentException("No organization of type TTP could be found, aborting request"));
 

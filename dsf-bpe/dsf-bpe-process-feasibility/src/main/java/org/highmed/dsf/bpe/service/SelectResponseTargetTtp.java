@@ -47,6 +47,10 @@ public class SelectResponseTargetTtp extends AbstractServiceDelegate implements 
 
 	private Identifier getTtpIdentifier(DelegateExecution execution)
 	{
+		// TODO implement ttp selection strategy, if there are multiple TTPs available
+		//      has to mach the selection strategy from the service SelectRequestTarget,
+		//      because this sends the Query results for record linkage to the TTP
+
 		Organization ttp = organizationProvider.getOrganizationsByType("TTP").findFirst().orElseThrow(
 				() -> new IllegalArgumentException("No organization of type TTP could be found, aborting request"));
 

@@ -33,7 +33,7 @@ public class CheckSingleMedicResults extends AbstractServiceDelegate
 		List<FeasibilityQueryResult> results = ((FeasibilityQueryResults) execution
 				.getVariable(Constants.VARIABLE_QUERY_RESULTS)).getResults();
 
-		Stream<FeasibilityQueryResult> positiveResults = results.stream(); //checkQueryResults(results, getFilter());
+		Stream<FeasibilityQueryResult> positiveResults = checkQueryResults(results, getFilter());
 		Stream<FeasibilityQueryResult> negativeResults = checkQueryResults(results, getNegativeFilter());
 
 		addSuccessfulResultsToOutputs(positiveResults, outputs);
@@ -45,18 +45,22 @@ public class CheckSingleMedicResults extends AbstractServiceDelegate
 	private Stream<FeasibilityQueryResult> checkQueryResults(List<FeasibilityQueryResult> queryResults,
 			Predicate<FeasibilityQueryResult> filter)
 	{
-		return queryResults.stream().filter(result -> false);
+		return queryResults.stream().filter(filter);
 	}
 
 	private Predicate<FeasibilityQueryResult> getFilter()
 	{
 		// TODO: implement check
+		//		 cohort size > 0
+		//       other filter criteria tbd
+
 		return result -> true;
 	}
 
 	private Predicate<FeasibilityQueryResult> getNegativeFilter()
 	{
-		// TODO: implement check
+		// TODO: implement check, should match the opposite criteria of getFilter()
+
 		return result -> false;
 	}
 

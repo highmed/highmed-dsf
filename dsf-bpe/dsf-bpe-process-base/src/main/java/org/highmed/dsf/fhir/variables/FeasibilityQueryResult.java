@@ -1,11 +1,9 @@
 package org.highmed.dsf.fhir.variables;
 
-import java.io.Serializable;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class FeasibilityQueryResult implements Serializable
+public class FeasibilityQueryResult
 {
 	private final String organizationIdentifier;
 	private final String cohortId;

@@ -17,6 +17,15 @@ public class Output
 	public Output(
 			@JsonProperty("system") String system,
 			@JsonProperty("code") String code,
+			@JsonProperty("value") String value)
+	{
+		this(system, code, value, null, null);
+	}
+
+	@JsonCreator
+	public Output(
+			@JsonProperty("system") String system,
+			@JsonProperty("code") String code,
 			@JsonProperty("value") String value,
 			@JsonProperty("extensionUrl") String extensionUrl,
 			@JsonProperty("extensionValue") String extensionValue)

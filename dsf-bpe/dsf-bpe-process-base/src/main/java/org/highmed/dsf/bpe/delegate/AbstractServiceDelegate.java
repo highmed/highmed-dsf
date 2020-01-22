@@ -39,7 +39,7 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 	}
 
 	@Override
-	public void execute(DelegateExecution execution) throws Exception
+	public final void execute(DelegateExecution execution) throws Exception
 	{
 		try
 		{

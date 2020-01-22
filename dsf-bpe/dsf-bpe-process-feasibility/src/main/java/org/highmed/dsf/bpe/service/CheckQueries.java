@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
@@ -20,7 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-public class CheckQueries extends AbstractServiceDelegate implements InitializingBean
+public class CheckQueries extends AbstractServiceDelegate implements InitializingBean, JavaDelegate
 {
 	private static final Logger logger = LoggerFactory.getLogger(CheckQueries.class);
 
@@ -41,7 +42,7 @@ public class CheckQueries extends AbstractServiceDelegate implements Initializin
 
 	@Override
 	@SuppressWarnings("unchecked")
-	protected void doExecute(DelegateExecution execution) throws Exception
+	public void doExecute(DelegateExecution execution) throws Exception
 	{
 		Outputs outputs = (Outputs) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
 		List<Group> cohorts = (List<Group>) execution.getVariable(Constants.VARIABLE_COHORTS);

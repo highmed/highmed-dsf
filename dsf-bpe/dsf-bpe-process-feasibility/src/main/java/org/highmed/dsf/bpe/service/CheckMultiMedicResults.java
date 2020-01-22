@@ -27,13 +27,16 @@ public class CheckMultiMedicResults extends AbstractServiceDelegate
 		Outputs outputs = (Outputs) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
 
 		// TODO implement check for results with filter
+		//      - check resulting cohort sizes is not an exact number
+		//      - check participating medics is > 3
+		//      - other criterias tbd
 
-		transformAndAddToOutput(outputs, task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT);
-		transformAndAddToOutput(outputs, task,
+		transformAndAddToTaskOutput(outputs, task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT);
+		transformAndAddToTaskOutput(outputs, task,
 				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS_COUNT);
 	}
 
-	private void transformAndAddToOutput(Outputs outputs, Task task, String code)
+	private void transformAndAddToTaskOutput(Outputs outputs, Task task, String code)
 	{
 		getTaskHelper().getInputParameterWithExtension(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY, code,
 				Constants.EXTENSION_GROUP_ID_URI).forEach(result -> outputs

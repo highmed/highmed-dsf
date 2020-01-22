@@ -1,6 +1,5 @@
 package org.highmed.dsf.bpe.service;
 
-import java.security.InvalidParameterException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -53,7 +52,7 @@ public class StoreCorrelationKeys extends AbstractServiceDelegate
 	{
 		return getTaskHelper().getFirstInputParameterBooleanValue(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
 				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_CONSENT_CHECK).orElseThrow(
-				() -> new InvalidParameterException(
+				() -> new IllegalArgumentException(
 						"NeedsConsentCheck boolean is not set in task with id='" + task.getId()
 								+ "', this error should " + "have been caught by resource validation"));
 	}
@@ -62,7 +61,7 @@ public class StoreCorrelationKeys extends AbstractServiceDelegate
 	{
 		return getTaskHelper().getFirstInputParameterBooleanValue(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
 				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_RECORD_LINKAGE).orElseThrow(
-				() -> new InvalidParameterException(
+				() -> new IllegalArgumentException(
 						"NeedsRecordLinkage boolean is not set in task with id='" + task.getId()
 								+ "', this error should " + "have been caught by resource validation"));
 	}
