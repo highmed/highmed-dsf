@@ -12,7 +12,7 @@ wait $PID
 
 JAVA_EXIT=$?
 if [ $JAVA_EXIT -eq 143 ]; then
-	echo java exited with code $JAVA_EXIT, converting to 0	
+	echo java exited with code $JAVA_EXIT, converting to 0
 	exit 0
 else
 	echo java exited with code $JAVA_EXIT
