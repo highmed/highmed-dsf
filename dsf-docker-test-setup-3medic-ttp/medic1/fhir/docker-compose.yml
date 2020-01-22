@@ -10,6 +10,7 @@ services:
       -  type: bind
          source: ./proxy/ssl
          target: /usr/local/apache2/ssl
+         read_only: true
       environment:
          TZ: Europe/Berlin
          HTTPS_SERVER_NAME_PORT: medic1:443
@@ -30,6 +31,7 @@ services:
       -  type: bind
          source: ./app/conf
          target: /opt/fhir/conf
+         read_only: true
       -  type: bind
          source: ./app/log
          target: /opt/fhir/log

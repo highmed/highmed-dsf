@@ -10,6 +10,7 @@ services:
       -  type: bind
          source: ./proxy/ssl
          target: /usr/local/apache2/ssl
+         read_only: true
       environment:
          TZ: Europe/Berlin
          HTTPS_SERVER_NAME_PORT: ttp:8443
@@ -26,9 +27,11 @@ services:
       -  type: bind
          source: ./app/conf
          target: /opt/bpe/conf
+         read_only: true
       -  type: bind
          source: ./app/plugin
          target: /opt/bpe/plugin
+         read_only: true
       -  type: bind
          source: ./app/log
          target: /opt/bpe/log
