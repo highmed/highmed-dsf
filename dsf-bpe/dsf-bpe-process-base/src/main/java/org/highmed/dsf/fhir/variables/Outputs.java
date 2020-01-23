@@ -32,22 +32,22 @@ public class Outputs
 	{
 		return Collections.unmodifiableList(outputs);
 	}
-
+	
 	public void add(Output output)
 	{
 		if (output != null)
 			outputs.add(output);
 	}
 
+	public void add(String system, String code, String value)
+	{
+		add(system, code, value, null, null);
+	}
+	
 	public void add(String system, String code, String value, String extensionUrl, String extensionValue)
 	{
 		Output output = new Output(system, code, value, extensionUrl, extensionValue);
-		add(output);
-	}
-
-	public void add(String system, String code, String value)
-	{
-		this.add(system, code, value, null, null);
+		outputs.add(output);
 	}
 
 	public void addErrorOutput(String error)
