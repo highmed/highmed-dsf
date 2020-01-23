@@ -20,19 +20,19 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 
-public class ValidationService implements InitializingBean
+public class BpmnServiceDelegateValidationService implements InitializingBean
 {
-	private static final Logger logger = LoggerFactory.getLogger(ValidationService.class);
+	private static final Logger logger = LoggerFactory.getLogger(BpmnServiceDelegateValidationService.class);
 
-	private ProcessEngine processEngine;
-	private List<String> serviceBeans;
+	private final ProcessEngine processEngine;
+	private final List<String> serviceDelegateClassNames;
 
-	public ValidationService(ProcessEngine processEngine, List<AbstractServiceDelegate> serviceBeans)
+	public BpmnServiceDelegateValidationService(ProcessEngine processEngine, List<AbstractServiceDelegate> serviceBeans)
 	{
 		this.processEngine = processEngine;
 
 		Objects.requireNonNull(serviceBeans, "serviceBeans");
-		this.serviceBeans = serviceBeans.stream().map(b -> b.getClass().getCanonicalName())
+		this.serviceDelegateClassNames = serviceBeans.stream().map(b -> b.getClass().getCanonicalName())
 				.collect(Collectors.toList());
 	}
 
@@ -40,7 +40,6 @@ public class ValidationService implements InitializingBean
 	public void afterPropertiesSet() throws Exception
 	{
 		Objects.requireNonNull(processEngine, "processEngine");
-		Objects.requireNonNull(serviceBeans, "serviceBeans");
 	}
 
 	@EventListener({ ContextRefreshedEvent.class })
@@ -75,7 +74,7 @@ public class ValidationService implements InitializingBean
 	{
 		String referencedClassName = serviceTask.getCamundaClass();
 
-		if (!serviceBeans.contains(referencedClassName))
+		if (!serviceDelegateClassNames.contains(referencedClassName))
 		{
 			logger.error("Could not find bean for service task {} in process {}", referencedClassName, processId);
 			throw new RuntimeException(

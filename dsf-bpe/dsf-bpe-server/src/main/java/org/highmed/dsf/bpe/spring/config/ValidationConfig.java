@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.camunda.bpm.engine.ProcessEngine;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
-import org.highmed.dsf.bpe.service.ValidationService;
+import org.highmed.dsf.bpe.service.BpmnServiceDelegateValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,8 +19,8 @@ public class ValidationConfig
 	private ProcessEngine processEngine;
 
 	@Bean
-	protected ValidationService validatonService()
+	protected BpmnServiceDelegateValidationService bpmnServiceDelegateValidationService()
 	{
-		return new ValidationService(processEngine, serviceBeans);
+		return new BpmnServiceDelegateValidationService(processEngine, serviceBeans);
 	}
 }
