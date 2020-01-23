@@ -57,13 +57,10 @@ public class FeasibilityConfig
 	@Autowired
 	private FhirContext fhirContext;
 
-	@Autowired
-	private ApplicationContext context;
-
 	@Bean
 	public ProcessEnginePlugin feasibilityPlugin()
 	{
-		return new FeasibilityPlugin(context);
+		return new FeasibilityPlugin();
 	}
 
 	//

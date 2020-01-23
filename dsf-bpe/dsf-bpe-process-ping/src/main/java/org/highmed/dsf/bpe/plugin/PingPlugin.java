@@ -2,17 +2,11 @@ package org.highmed.dsf.bpe.plugin;
 
 import org.camunda.bpm.engine.ProcessEngine;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.springframework.context.ApplicationContext;
 
 public class PingPlugin extends AbstractProcessEnginePlugin
 {
 	private static final String PING_FILE = "ping.bpmn";
 	private static final String PONG_FILE = "pong.bpmn";
-
-	public PingPlugin(ApplicationContext context)
-	{
-		super(context);
-	}
 
 	@Override
 	public void postProcessEngineBuild(ProcessEngine processEngine)

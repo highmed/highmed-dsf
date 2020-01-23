@@ -23,13 +23,10 @@ public class UpdateWhiteListConfig
 	@Autowired
 	private TaskHelper taskHelper;
 
-	@Autowired
-	private ApplicationContext context;
-
 	@Bean
 	public ProcessEnginePlugin updateWhiteListPlugin()
 	{
-		return new UpdateWhiteListPlugin(context);
+		return new UpdateWhiteListPlugin();
 	}
 
 	@Bean
