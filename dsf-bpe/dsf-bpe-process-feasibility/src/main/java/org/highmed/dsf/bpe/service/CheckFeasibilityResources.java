@@ -13,7 +13,6 @@ import org.highmed.dsf.fhir.task.TaskHelper;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
-import org.hl7.fhir.r4.model.Task;
 
 public class CheckFeasibilityResources extends AbstractServiceDelegate
 {
@@ -25,8 +24,6 @@ public class CheckFeasibilityResources extends AbstractServiceDelegate
 	@Override
 	public void doExecute(DelegateExecution execution) throws Exception
 	{
-		Task task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
-
 		ResearchStudy researchStudy = (ResearchStudy) execution.getVariable(Constants.VARIABLE_RESEARCH_STUDY);
 
 		@SuppressWarnings("unchecked")

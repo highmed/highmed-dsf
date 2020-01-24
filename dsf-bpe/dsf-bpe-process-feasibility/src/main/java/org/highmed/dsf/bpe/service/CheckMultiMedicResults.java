@@ -8,13 +8,9 @@ import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.Outputs;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class CheckMultiMedicResults extends AbstractServiceDelegate
 {
-	private static final Logger logger = LoggerFactory.getLogger(CheckMultiMedicResults.class);
-
 	public CheckMultiMedicResults(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
 	{
 		super(clientProvider, taskHelper);

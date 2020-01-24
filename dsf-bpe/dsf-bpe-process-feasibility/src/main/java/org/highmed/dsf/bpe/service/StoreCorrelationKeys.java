@@ -14,13 +14,9 @@ import org.highmed.dsf.fhir.variables.MultiInstanceTarget;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargets;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargetsValues;
 import org.hl7.fhir.r4.model.Task;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class StoreCorrelationKeys extends AbstractServiceDelegate
 {
-	private static final Logger logger = LoggerFactory.getLogger(StoreCorrelationKeys.class);
-
 	public StoreCorrelationKeys(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
 	{
 		super(clientProvider, taskHelper);

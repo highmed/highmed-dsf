@@ -21,7 +21,6 @@ public class CalculateMultiMedicResults extends AbstractServiceDelegate
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public void doExecute(DelegateExecution execution) throws Exception
 	{
 
