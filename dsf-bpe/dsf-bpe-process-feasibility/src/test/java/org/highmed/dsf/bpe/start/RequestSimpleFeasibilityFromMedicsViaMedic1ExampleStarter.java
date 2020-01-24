@@ -14,6 +14,7 @@ import javax.ws.rs.WebApplicationException;
 import org.highmed.dsf.bpe.Constants;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.highmed.fhir.client.FhirWebserviceClientJersey;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
@@ -185,6 +186,10 @@ public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter
 						new Reference().setReference(researchStudy.getIdElement().getIdPart()).setType("ResearchStudy"))
 				.getType().addCoding().setSystem("http://highmed.org/fhir/CodeSystem/feasibility")
 				.setCode("research-study-reference");
+		task.addInput().setValue(new BooleanType(false)).getType().addCoding()
+				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("needs-record-linkage");
+		task.addInput().setValue(new BooleanType(false)).getType().addCoding()
+				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("needs-consent-check");
 
 		return task;
 	}
