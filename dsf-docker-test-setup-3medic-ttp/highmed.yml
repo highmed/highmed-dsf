@@ -67,10 +67,10 @@
          append: true
    -  name: Download docker-compose
       get_url:
-         url: https://github.com/docker/compose/releases/download/1.24.0/docker-compose-{{ ansible_system }}-{{ ansible_userspace_architecture
+         url: https://github.com/docker/compose/releases/download/v1.25.2/docker-compose-{{ ansible_system }}-{{ ansible_userspace_architecture
             }}
          dest: /usr/local/bin/docker-compose
-         checksum: sha256:bee6460f96339d5d978bb63d17943f773e1a140242dfa6c941d5e020a302c91b
+         checksum: sha256:786f9390aa8d72bcf34a1757df71577b7d8b7cb915205f72f12b9ee3ca0e0cc6
          mode: '777'
    -  name: update /etc/hosts file
       blockinfile:
