@@ -14,7 +14,6 @@ public class Outputs
 {
 	private final List<Output> outputs = new ArrayList<>();
 
-	@JsonCreator
 	public Outputs()
 	{
 	}

@@ -13,11 +13,7 @@ public class Output
 
 	private final boolean hasExtension;
 
-	@JsonCreator
-	public Output(
-			@JsonProperty("system") String system,
-			@JsonProperty("code") String code,
-			@JsonProperty("value") String value)
+	public Output(String system, String code, String value)
 	{
 		this(system, code, value, null, null);
 	}
