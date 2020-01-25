@@ -33,12 +33,14 @@ import org.highmed.dsf.fhir.search.parameters.OrganizationActive;
 import org.highmed.dsf.fhir.search.parameters.OrganizationEndpoint;
 import org.highmed.dsf.fhir.search.parameters.OrganizationIdentifier;
 import org.highmed.dsf.fhir.search.parameters.OrganizationName;
+import org.highmed.dsf.fhir.search.parameters.OrganizationType;
 import org.highmed.dsf.fhir.search.parameters.PatientActive;
 import org.highmed.dsf.fhir.search.parameters.PatientIdentifier;
 import org.highmed.dsf.fhir.search.parameters.PractitionerActive;
 import org.highmed.dsf.fhir.search.parameters.PractitionerIdentifier;
 import org.highmed.dsf.fhir.search.parameters.PractitionerRoleActive;
 import org.highmed.dsf.fhir.search.parameters.PractitionerRoleIdentifier;
+import org.highmed.dsf.fhir.search.parameters.ResearchStudyEnrollment;
 import org.highmed.dsf.fhir.search.parameters.ResearchStudyIdentifier;
 import org.highmed.dsf.fhir.search.parameters.ResourceId;
 import org.highmed.dsf.fhir.search.parameters.ResourceLastUpdated;
@@ -217,8 +219,9 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 		var organizationEndpoint = createSearchParameter(OrganizationEndpoint.class);
 		var organizationIdentifier = createSearchParameter(OrganizationIdentifier.class);
 		var organizationNameOrAlias = createSearchParameter(OrganizationName.class);
+		var organizationType = createSearchParameter(OrganizationType.class);
 		searchParameters.put(Organization.class, Arrays.asList(organizationActive, organizationEndpoint,
-				organizationIdentifier, organizationNameOrAlias));
+				organizationIdentifier, organizationNameOrAlias, organizationType));
 
 		var patientActive = createSearchParameter(PatientActive.class);
 		var patientIdentifier = createSearchParameter(PatientIdentifier.class);
@@ -233,7 +236,8 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 		searchParameters.put(PractitionerRole.class, Arrays.asList(practitionerRoleActive, practitionerRoleIdentifier));
 
 		var researchStudyIdentifier = createSearchParameter(ResearchStudyIdentifier.class);
-		searchParameters.put(ResearchStudy.class, Arrays.asList(researchStudyIdentifier));
+		var researchStudyEnrollment = createSearchParameter(ResearchStudyEnrollment.class);
+		searchParameters.put(ResearchStudy.class, Arrays.asList(researchStudyIdentifier, researchStudyEnrollment));
 
 		var structureDefinitionIdentifier = createSearchParameter(StructureDefinitionIdentifier.class);
 		var structureDefinitionUrl = createSearchParameter(StructureDefinitionUrl.class);

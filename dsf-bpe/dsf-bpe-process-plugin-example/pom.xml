@@ -16,6 +16,7 @@
 	<modules>
 		<module>dsf-bpe-process-child</module>
 		<module>dsf-bpe-process-parent</module>
+		<module>dsf-bpe-process-service-overwrite</module>
 	</modules>
 
 	<dependencies>

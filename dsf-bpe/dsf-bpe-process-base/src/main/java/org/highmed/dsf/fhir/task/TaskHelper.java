@@ -14,15 +14,23 @@ public interface TaskHelper
 
 	Stream<String> getInputParameterStringValues(Task task, String system, String code);
 
+	Optional<Boolean> getFirstInputParameterBooleanValue(Task task, String system, String code);
+
+	Stream<Boolean> getInputParameterBooleanValues(Task task, String system, String code);
+
 	Optional<Reference> getFirstInputParameterReferenceValue(Task task, String system, String code);
 
 	Stream<Reference> getInputParameterReferenceValues(Task task, String system, String code);
 
 	Optional<UrlType> getFirstInputParameterUrlValue(Task task, String system, String code);
 
+	Stream<Task.ParameterComponent> getInputParameterWithExtension(Task task, String system, String code, String url);
+
 	Stream<UrlType> getInputParameterUrlValues(Task task, String system, String code);
 
 	Task.ParameterComponent createInput(String system, String code, String value);
+
+	Task.ParameterComponent createInput(String system, String code, boolean value);
 
 	Task.ParameterComponent createInput(String system, String code, Reference reference);
 

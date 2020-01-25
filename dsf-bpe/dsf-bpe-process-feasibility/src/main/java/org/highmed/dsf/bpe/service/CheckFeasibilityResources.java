@@ -13,7 +13,6 @@ import org.highmed.dsf.fhir.task.TaskHelper;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
-import org.hl7.fhir.r4.model.Task;
 
 public class CheckFeasibilityResources extends AbstractServiceDelegate
 {
@@ -25,27 +24,20 @@ public class CheckFeasibilityResources extends AbstractServiceDelegate
 	@Override
 	public void doExecute(DelegateExecution execution) throws Exception
 	{
-		Task task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
+		ResearchStudy researchStudy = (ResearchStudy) execution.getVariable(Constants.VARIABLE_RESEARCH_STUDY);
 
-		// Do nothing if requester and recipient are the same, because check was already done in
-		// the requestSimpleCohortSizeQuery process (leading medic).
-		if (!task.getRequester().equalsDeep(task.getRestriction().getRecipient().get(0)))
-		{
-			ResearchStudy researchStudy = (ResearchStudy) execution.getVariable(Constants.VARIABLE_RESEARCH_STUDY);
-			@SuppressWarnings("unchecked")
-			List<Group> cohorts = (List<Group>) execution.getVariable(Constants.VARIABLE_COHORTS);
+		@SuppressWarnings("unchecked")
+		List<Group> cohorts = (List<Group>) execution.getVariable(Constants.VARIABLE_COHORTS);
 
-			checkNumberOfParticipatingMedics(researchStudy);
-			checkNumberOfCohortDefinitions(cohorts);
-		}
+		checkNumberOfParticipatingMedics(researchStudy);
+		checkNumberOfCohortDefinitions(cohorts);
 	}
 
 	private void checkNumberOfParticipatingMedics(ResearchStudy researchStudy)
 	{
 		long medics = researchStudy.getExtension().stream()
 				.filter(e -> e.getUrl().equals(Constants.EXTENSION_PARTICIPATING_MEDIC_URI))
-				.map(extension -> ((Reference) extension.getValue()).getReference())
-				.distinct().count();
+				.map(extension -> ((Reference) extension.getValue()).getReference()).distinct().count();
 
 		if (medics < MIN_PARTICIPATING_MEDICS)
 		{

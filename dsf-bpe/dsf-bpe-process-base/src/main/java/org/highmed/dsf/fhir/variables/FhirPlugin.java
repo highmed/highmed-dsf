@@ -15,12 +15,15 @@ public class FhirPlugin implements ProcessEnginePlugin
 
 	public FhirPlugin(DomainResourceSerializer domainResourceSerializer,
 			MultiInstanceTargetSerializer multiInstanceTargetSerializer,
-			MultiInstanceTargetsSerializer multiInstanceTargetsSerializer, OutputSerializer outputSerializer,
+			MultiInstanceTargetsSerializer multiInstanceTargetsSerializer,
+			FeasibilityQueryResultSerializer feasibilityQueryResultSerializer,
+			FeasibilityQueryResultsSerializer feasibilityQueryResultsSerializer, OutputSerializer outputSerializer,
 			OutputsSerializer outputsSerializer)
 	{
 		serializer = Arrays
 				.asList(domainResourceSerializer, multiInstanceTargetSerializer, multiInstanceTargetsSerializer,
-						outputSerializer, outputsSerializer);
+						feasibilityQueryResultSerializer, feasibilityQueryResultsSerializer, outputSerializer,
+						outputsSerializer);
 	}
 
 	@Override

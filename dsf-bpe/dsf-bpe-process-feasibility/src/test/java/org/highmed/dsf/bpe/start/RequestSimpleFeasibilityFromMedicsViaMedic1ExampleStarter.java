@@ -11,13 +11,14 @@ import java.util.UUID;
 
 import javax.ws.rs.WebApplicationException;
 
+import org.highmed.dsf.bpe.Constants;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.highmed.fhir.client.FhirWebserviceClientJersey;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.Expression;
-import org.hl7.fhir.r4.model.Expression.ExpressionLanguage;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Group.GroupType;
 import org.hl7.fhir.r4.model.IdType;
@@ -104,7 +105,7 @@ public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter
 		group.setActual(true);
 		group.setActive(true);
 		group.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/query").setValue(new Expression()
-				.setLanguage(ExpressionLanguage.APPLICATION_XFHIRQUERY.toCode()).setExpression("SELECT COUNT(e) FROM EHR e"));
+				.setLanguageElement(Constants.AQL_QUERY_TYPE).setExpression("SELECT COUNT(e) FROM EHR e"));
 		group.setName(name);
 
 		return group;
@@ -185,6 +186,10 @@ public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter
 						new Reference().setReference(researchStudy.getIdElement().getIdPart()).setType("ResearchStudy"))
 				.getType().addCoding().setSystem("http://highmed.org/fhir/CodeSystem/feasibility")
 				.setCode("research-study-reference");
+		task.addInput().setValue(new BooleanType(false)).getType().addCoding()
+				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("needs-record-linkage");
+		task.addInput().setValue(new BooleanType(false)).getType().addCoding()
+				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("needs-consent-check");
 
 		return task;
 	}

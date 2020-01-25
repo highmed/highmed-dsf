@@ -38,7 +38,9 @@ public abstract class AbstractProcessEnginePlugin implements ProcessEnginePlugin
 	{
 		BpmnModelInstance model = Bpmn
 				.readModelFromStream(AbstractProcessEnginePlugin.class.getResourceAsStream(modelFilename));
+
 		Bpmn.validateModel(model);
+
 		return model;
 	}
 }

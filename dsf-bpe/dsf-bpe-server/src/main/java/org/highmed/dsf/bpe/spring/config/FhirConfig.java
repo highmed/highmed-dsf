@@ -21,6 +21,8 @@ import org.highmed.dsf.fhir.task.TaskHandler;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.task.TaskHelperImpl;
 import org.highmed.dsf.fhir.variables.DomainResourceSerializer;
+import org.highmed.dsf.fhir.variables.FeasibilityQueryResultSerializer;
+import org.highmed.dsf.fhir.variables.FeasibilityQueryResultsSerializer;
 import org.highmed.dsf.fhir.variables.FhirPlugin;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargetSerializer;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargetsSerializer;
@@ -44,6 +46,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import ca.uhn.fhir.context.FhirContext;
+
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.CertificateReader;
 
@@ -145,7 +148,8 @@ public class FhirConfig
 	public ProcessEnginePlugin fhirPlugin()
 	{
 		return new FhirPlugin(domainResourceSerializer(), multiInstanceTargetSerializer(),
-				multiInstanceTargetsSerializer(), outputSerializer(), outputsSerializer());
+				multiInstanceTargetsSerializer(), feasibilityQueryResultSerializer(),
+				feasibilityQueryResultsSerializer(), outputSerializer(), outputsSerializer());
 	}
 
 	@Bean
@@ -179,6 +183,18 @@ public class FhirConfig
 	}
 
 	@Bean
+	public FeasibilityQueryResultSerializer feasibilityQueryResultSerializer()
+	{
+		return new FeasibilityQueryResultSerializer(fhirObjectMapper());
+	}
+
+	@Bean
+	public FeasibilityQueryResultsSerializer feasibilityQueryResultsSerializer()
+	{
+		return new FeasibilityQueryResultsSerializer(fhirObjectMapper());
+	}
+
+	@Bean
 	public LastEventTimeIo lastEventTimeIo()
 	{
 		return new LastEventTimeIo(Paths.get(lastEventTimeFile));
@@ -202,8 +218,8 @@ public class FhirConfig
 				throw new IOException(
 						"Webservice keystore file '" + localWebserviceKsFile.toString() + "' not readable");
 
-			KeyStore localWebserviceKeyStore = CertificateReader.fromPkcs12(localWebserviceKsFile,
-					webserviceKeyStorePassword);
+			KeyStore localWebserviceKeyStore = CertificateReader
+					.fromPkcs12(localWebserviceKsFile, webserviceKeyStorePassword);
 			KeyStore localWebserviceTrustStore = CertificateHelper.extractTrust(localWebserviceKeyStore);
 
 			Path localWebsocketKsFile = Paths.get(localWebsocketKeyStoreFile);
@@ -211,8 +227,8 @@ public class FhirConfig
 			if (!Files.isReadable(localWebsocketKsFile))
 				throw new IOException("Websocket keystore file '" + localWebsocketKsFile.toString() + "' not readable");
 
-			KeyStore localWebsocketKeyStore = CertificateReader.fromPkcs12(localWebsocketKsFile,
-					localWebsocketKeyStorePassword);
+			KeyStore localWebsocketKeyStore = CertificateReader
+					.fromPkcs12(localWebsocketKsFile, localWebsocketKeyStorePassword);
 			KeyStore localWebsocketTrustStore = CertificateHelper.extractTrust(localWebsocketKeyStore);
 
 			return new FhirClientProviderImpl(fhirContext(), localWebserviceBaseUrl, localReadTimeout,

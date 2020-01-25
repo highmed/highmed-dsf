@@ -25,7 +25,7 @@
         </discriminator>
         <rules value="closed" />
       </slicing>
-      <min value="4" />
+      <min value="6" />
     </element>
     <element id="Task.input:message-name">
       <path value="Task.input" />
@@ -71,6 +71,56 @@
         <targetProfile value="http://highmed.org/fhir/StructureDefinition/highmed-research-study" />
       </type>
     </element>
+     <element id="Task.input:needs-record-linkage">
+      <path value="Task.input" />
+      <sliceName value="needs-record-linkage" />
+      <min value="1" />
+      <max value="1" />
+    </element>
+    <element id="Task.input:needs-record-linkage.type.coding">
+      <path value="Task.input.type.coding" />
+      <min value="1" />
+      <max value="1" />
+    </element>
+    <element id="Task.input:needs-record-linkage.type.coding.system">
+      <path value="Task.input.type.coding.system" />
+      <fixedUri value="http://highmed.org/fhir/CodeSystem/feasibility" />
+    </element>
+    <element id="Task.input:needs-record-linkage.type.coding.code">
+      <path value="Task.input.type.coding.code" />
+      <fixedCode value="needs-record-linkage" />
+    </element>
+    <element id="Task.input:needs-record-linkage.value[x]">
+      <path value="Task.input.value[x]" />
+      <type>
+         <code value="boolean" />
+      </type>
+    </element>
+    <element id="Task.input:needs-consent-check">
+      <path value="Task.input" />
+      <sliceName value="needs-consent-check" />
+      <min value="1" />
+      <max value="1" />
+    </element>
+    <element id="Task.input:needs-consent-check.type.coding">
+      <path value="Task.input.type.coding" />
+      <min value="1" />
+      <max value="1" />
+    </element>
+    <element id="Task.input:needs-consent-check.type.coding.system">
+      <path value="Task.input.type.coding.system" />
+      <fixedUri value="http://highmed.org/fhir/CodeSystem/feasibility" />
+    </element>
+    <element id="Task.input:needs-consent-check.type.coding.code">
+      <path value="Task.input.type.coding.code" />
+      <fixedCode value="needs-consent-check" />
+    </element>
+    <element id="Task.input:needs-consent-check.value[x]">
+      <path value="Task.input.value[x]" />
+      <type>
+         <code value="boolean" />
+      </type>
+    </element>
     <element id="Task.output">
       <path value="Task.output" />
       <slicing>
@@ -82,17 +132,48 @@
       </slicing>
       <min value="1" />
     </element>
-    <element id="Task.output:singleResult">
+    <element id="Task.output:single-medic-result">
       <path value="Task.output" />
-      <sliceName value="singleResult" />
+      <sliceName value="single-medic-result" />
     </element>
-    <element id="Task.output:singleResult.type.coding.system">
+     <element id="Task.output:single-medic-result.extension">
+      <path value="Task.output.extension" />
+      <slicing>
+        <discriminator>
+          <type value="value" />
+          <path value="url" />
+        </discriminator>
+        <rules value="open" />
+      </slicing>
+    </element>
+    <element id="Task.output:single-medic-result.extension:group-id">
+      <path value="Task.output.extension" />
+      <sliceName value="group-id" />
+      <min value="1" />
+      <max value="1" />
+      <type>
+        <code value="Extension" />
+        <profile value="http://highmed.org/fhir/StructureDefinition/group-id" />
+      </type>
+    </element>
+    <element id="Task.output:single-medic-result.type.coding">
+      <path value="Task.output.type.coding" />
+      <min value="1" />
+      <max value="1" />
+    </element>
+    <element id="Task.output:single-medic-result.type.coding.system">
       <path value="Task.output.type.coding.system" />
       <fixedUri value="http://highmed.org/fhir/NamingSystem/feasibility" />
     </element>
-    <element id="Task.output:singleResult.type.coding.code">
+    <element id="Task.output:single-medic-result.type.coding.code">
       <path value="Task.output.type.coding.code" />
-      <fixedCode value="single-medic-result" />
+      <patternCode value="single-medic-result" />
+    </element>
+    <element id="Task.output:single-medic-result.value[x]">
+      <path value="Task.output.value[x]" />
+      <type>
+        <code value="string" />
+      </type>
     </element>
   </differential>
 </StructureDefinition>

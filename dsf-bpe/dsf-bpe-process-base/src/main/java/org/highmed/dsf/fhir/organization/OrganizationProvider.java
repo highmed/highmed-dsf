@@ -11,7 +11,9 @@ import org.hl7.fhir.r4.model.Organization;
 
 public interface OrganizationProvider
 {
-	String getDefaultSystem();
+	String getDefaultIdentifierSystem();
+
+	String getDefaultTypeSystem();
 
 	String getLocalIdentifierValue();
 
@@ -22,21 +24,26 @@ public interface OrganizationProvider
 	/**
 	 * @return the local organization
 	 * @throws NoSuchElementException
-	 *             if no {@link Organization} with {@link #getDefaultSystem()} and {@link #getLocalIdentifierValue()}
+	 *             if no {@link Organization} with {@link #getDefaultIdentifierSystem()} and {@link #getLocalIdentifierValue()}
 	 *             could be found
 	 */
 	Organization getLocalOrganization();
 
 	/**
-	 * @return {@link Organization}s with {@link #getDefaultSystem()} and identifier other than
+	 * @return {@link Organization}s with {@link #getDefaultIdentifierSystem()} and identifier other than
 	 *         {@link #getLocalIdentifierValue()}
 	 */
 	List<Organization> getRemoteOrganizations();
 
+	/**
+	 * @return {@link Organization}s with {@link #getDefaultTypeSystem()} and given type
+	 */
+	Stream<Organization> getOrganizationsByType(String type);
+
 	Identifier getLocalIdentifier();
 
 	/**
-	 * @return {@link Organization}s {@link Identifier} with {@link #getDefaultSystem()} and identifier other than
+	 * @return {@link Organization}s {@link Identifier} with {@link #getDefaultIdentifierSystem()} and identifier other than
 	 *         {@link #getLocalIdentifierValue()}
 	 */
 	List<Identifier> getRemoteIdentifiers();

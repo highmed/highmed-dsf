@@ -65,8 +65,7 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 		// String targetOrganizationId = (String) execution.getVariable(Constants.VARIABLE_TARGET_ORGANIZATION_ID);
 		// String correlationKey = (String) execution.getVariable(Constants.VARIABLE_CORRELATION_KEY);
 
-		MultiInstanceTarget target = (MultiInstanceTarget) execution
-				.getVariable(Constants.VARIABLE_MULTI_INSTANCE_TARGET);
+		MultiInstanceTarget target = getMultiInstanceTarget(execution);
 
 		try
 		{
@@ -75,10 +74,11 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 		}
 		catch (Exception e)
 		{
-			String errorMessage = "Error while sending Task (process: " + processDefinitionKey + ", version: "
-					+ versionTag + ", message-name: " + messageName + ", business-key: " + businessKey
-					+ ", correlation-key: " + target.getCorrelationKey() + ") to organization with identifier "
-					+ target.getTargetOrganizationIdentifierValue() + ": " + e.getMessage();
+			String errorMessage =
+					"Error while sending Task (process: " + processDefinitionKey + ", version: " + versionTag
+							+ ", message-name: " + messageName + ", business-key: " + businessKey
+							+ ", correlation-key: " + target.getCorrelationKey() + ") to organization with identifier "
+							+ target.getTargetOrganizationIdentifierValue() + ": " + e.getMessage();
 			logger.warn(errorMessage);
 
 			Outputs outputs = (Outputs) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
@@ -90,6 +90,18 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 					.getVariable(Constants.VARIABLE_MULTI_INSTANCE_TARGETS);
 			targets.removeTarget(target);
 		}
+	}
+
+	/**
+	 * Override this method to set a different multiinstance target then the one defined in the process variable
+	 * {@link Constants#VARIABLE_MULTI_INSTANCE_TARGET}
+	 *
+	 * @param execution the delegate execution of this process instance
+	 * @return {@link MultiInstanceTarget} that should receive the message
+	 */
+	protected MultiInstanceTarget getMultiInstanceTarget(DelegateExecution execution)
+	{
+		return (MultiInstanceTarget) execution.getVariable(Constants.VARIABLE_MULTI_INSTANCE_TARGET);
 	}
 
 	/**
@@ -118,32 +130,32 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 				new Reference().setType("Organization").setIdentifier(organizationProvider.getLocalIdentifier()));
 		Reference targetReference = new Reference();
 		targetReference.setType("Organization");
-		targetReference.getIdentifier().setSystem(organizationProvider.getDefaultSystem())
+		targetReference.getIdentifier().setSystem(organizationProvider.getDefaultIdentifierSystem())
 				.setValue(targetOrganizationIdentifierValue);
 		task.getRestriction().addRecipient(targetReference);
 
 		// http://highmed.org/bpe/Process/processDefinitionKey
 		// http://highmed.org/bpe/Process/processDefinitionKey/versionTag
-		String instantiatesUri = Constants.PROCESS_URI_BASE + processDefinitionKey
-				+ (versionTag != null && !versionTag.isEmpty() ? ("/" + versionTag) : "");
+		String instantiatesUri =
+				Constants.PROCESS_URI_BASE + processDefinitionKey + (versionTag != null && !versionTag.isEmpty() ?
+						("/" + versionTag) :
+						"");
 		task.setInstantiatesUri(instantiatesUri);
 
-		ParameterComponent messageNameInput = new ParameterComponent(
-				new CodeableConcept(new Coding(Constants.CODESYSTEM_HIGHMED_BPMN,
-						Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME, null)),
-				new StringType(messageName));
+		ParameterComponent messageNameInput = new ParameterComponent(new CodeableConcept(
+				new Coding(Constants.CODESYSTEM_HIGHMED_BPMN, Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME,
+						null)), new StringType(messageName));
 		task.getInput().add(messageNameInput);
 
-		ParameterComponent businessKeyInput = new ParameterComponent(
-				new CodeableConcept(new Coding(Constants.CODESYSTEM_HIGHMED_BPMN,
-						Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY, null)),
-				new StringType(businessKey));
+		ParameterComponent businessKeyInput = new ParameterComponent(new CodeableConcept(
+				new Coding(Constants.CODESYSTEM_HIGHMED_BPMN, Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY,
+						null)), new StringType(businessKey));
 		task.getInput().add(businessKeyInput);
 
 		if (correlationKey != null)
 		{
-			ParameterComponent correlationKeyInput = new ParameterComponent(
-					new CodeableConcept(new Coding(Constants.CODESYSTEM_HIGHMED_BPMN,
+			ParameterComponent correlationKeyInput = new ParameterComponent(new CodeableConcept(
+					new Coding(Constants.CODESYSTEM_HIGHMED_BPMN,
 							Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY, null)),
 					new StringType(correlationKey));
 			task.getInput().add(correlationKeyInput);
@@ -171,11 +183,12 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 		else
 		{
 			logger.trace("Using remote webservice client");
-			return getFhirWebserviceClientProvider().getRemoteWebserviceClient(organizationProvider.getDefaultSystem(),
-					targetOrganizationIdentifierValue);
+			return getFhirWebserviceClientProvider()
+					.getRemoteWebserviceClient(organizationProvider.getDefaultIdentifierSystem(),
+							targetOrganizationIdentifierValue);
 		}
 	}
-	
+
 	protected final OrganizationProvider getOrganizationProvider()
 	{
 		return organizationProvider;
