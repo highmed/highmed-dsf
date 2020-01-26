@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.highmed.dsf.fhir.dao.ActivityDefinitionDao;
 import org.highmed.dsf.fhir.dao.BinaryDao;
 import org.highmed.dsf.fhir.dao.BundleDao;
 import org.highmed.dsf.fhir.dao.CodeSystemDao;
@@ -25,6 +26,7 @@ import org.highmed.dsf.fhir.dao.StructureDefinitionSnapshotDao;
 import org.highmed.dsf.fhir.dao.SubscriptionDao;
 import org.highmed.dsf.fhir.dao.TaskDao;
 import org.highmed.dsf.fhir.dao.ValueSetDao;
+import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -50,6 +52,7 @@ import ca.uhn.fhir.model.api.annotation.ResourceDef;
 
 public class DaoProviderImpl implements DaoProvider, InitializingBean
 {
+	private final ActivityDefinitionDao activityDefinitionDao;
 	private final BinaryDao binaryDao;
 	private final BundleDao bundleDao;
 	private final CodeSystemDao codeSystemDao;
@@ -73,15 +76,16 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	private final Map<Class<? extends Resource>, ResourceDao<?>> daosByResourecClass = new HashMap<>();
 	private final Map<String, ResourceDao<?>> daosByResourceTypeName = new HashMap<>();
 
-	public DaoProviderImpl(BinaryDao binaryDao, BundleDao bundleDao, CodeSystemDao codeSystemDao,
-			EndpointDao endpointDao, GroupDao groupDao, HealthcareServiceDao healthcareServiceDao,
-			LocationDao locationDao, NamingSystemDao namingSystemDao, OrganizationDao organizationDao,
-			PatientDao patientDao, PractitionerDao practitionerDao, PractitionerRoleDao practitionerRoleDao,
-			ProvenanceDao provenanceDao, ResearchStudyDao researchStudyDao,
+	public DaoProviderImpl(ActivityDefinitionDao activityDefinitionDao, BinaryDao binaryDao, BundleDao bundleDao,
+			CodeSystemDao codeSystemDao, EndpointDao endpointDao, GroupDao groupDao,
+			HealthcareServiceDao healthcareServiceDao, LocationDao locationDao, NamingSystemDao namingSystemDao,
+			OrganizationDao organizationDao, PatientDao patientDao, PractitionerDao practitionerDao,
+			PractitionerRoleDao practitionerRoleDao, ProvenanceDao provenanceDao, ResearchStudyDao researchStudyDao,
 			StructureDefinitionDao structureDefinitionDao,
 			StructureDefinitionSnapshotDao structureDefinitionSnapshotDao, SubscriptionDao subscriptionDao,
 			TaskDao taskDao, ValueSetDao valueSetDao)
 	{
+		this.activityDefinitionDao = activityDefinitionDao;
 		this.binaryDao = binaryDao;
 		this.bundleDao = bundleDao;
 		this.codeSystemDao = codeSystemDao;
@@ -102,6 +106,7 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 		this.taskDao = taskDao;
 		this.valueSetDao = valueSetDao;
 
+		daosByResourecClass.put(ActivityDefinition.class, activityDefinitionDao);
 		daosByResourecClass.put(Binary.class, binaryDao);
 		daosByResourecClass.put(Bundle.class, bundleDao);
 		daosByResourecClass.put(CodeSystem.class, codeSystemDao);
@@ -127,6 +132,7 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
+		Objects.requireNonNull(activityDefinitionDao, "activityDefinitionDao");
 		Objects.requireNonNull(binaryDao, "binaryDao");
 		Objects.requireNonNull(bundleDao, "bundleDao");
 		Objects.requireNonNull(codeSystemDao, "codeSystemDao");
@@ -146,6 +152,12 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 		Objects.requireNonNull(subscriptionDao, "subscriptionDao");
 		Objects.requireNonNull(taskDao, "taskDao");
 		Objects.requireNonNull(valueSetDao, "valueSetDao");
+	}
+
+	@Override
+	public ActivityDefinitionDao getActivityDefinitionDao()
+	{
+		return activityDefinitionDao;
 	}
 
 	@Override

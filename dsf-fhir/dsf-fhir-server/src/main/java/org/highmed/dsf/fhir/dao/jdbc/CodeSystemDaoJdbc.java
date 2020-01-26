@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.dsf.fhir.dao.CodeSystemDao;
 import org.highmed.dsf.fhir.search.parameters.CodeSystemIdentifier;
+import org.highmed.dsf.fhir.search.parameters.CodeSystemStatus;
 import org.highmed.dsf.fhir.search.parameters.CodeSystemUrl;
 import org.highmed.dsf.fhir.search.parameters.CodeSystemVersion;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -19,10 +20,10 @@ public class CodeSystemDaoJdbc extends AbstractResourceDaoJdbc<CodeSystem> imple
 	public CodeSystemDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, CodeSystem.class, "code_systems", "code_system", "code_system_id",
-				CodeSystemUrl::new, CodeSystemVersion::new, CodeSystemIdentifier::new);
+				CodeSystemIdentifier::new, CodeSystemStatus::new, CodeSystemUrl::new, CodeSystemVersion::new);
 
-		readByUrl = new ReadByUrlDaoJdbc<>(this::getDataSource, this::getResource, getResourceTable(), getResourceColumn(),
-				getResourceIdColumn());
+		readByUrl = new ReadByUrlDaoJdbc<>(this::getDataSource, this::getResource, getResourceTable(),
+				getResourceColumn(), getResourceIdColumn());
 	}
 
 	@Override

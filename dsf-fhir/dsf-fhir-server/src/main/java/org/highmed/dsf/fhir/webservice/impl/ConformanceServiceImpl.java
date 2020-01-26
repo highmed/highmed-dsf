@@ -16,9 +16,15 @@ import javax.ws.rs.core.UriInfo;
 
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
+import org.highmed.dsf.fhir.search.parameters.ActivityDefinitionIdentifier;
+import org.highmed.dsf.fhir.search.parameters.ActivityDefinitionName;
+import org.highmed.dsf.fhir.search.parameters.ActivityDefinitionStatus;
+import org.highmed.dsf.fhir.search.parameters.ActivityDefinitionUrl;
+import org.highmed.dsf.fhir.search.parameters.ActivityDefinitionVersion;
 import org.highmed.dsf.fhir.search.parameters.BinaryContentType;
 import org.highmed.dsf.fhir.search.parameters.BundleIdentifier;
 import org.highmed.dsf.fhir.search.parameters.CodeSystemIdentifier;
+import org.highmed.dsf.fhir.search.parameters.CodeSystemStatus;
 import org.highmed.dsf.fhir.search.parameters.CodeSystemUrl;
 import org.highmed.dsf.fhir.search.parameters.CodeSystemVersion;
 import org.highmed.dsf.fhir.search.parameters.EndpointIdentifier;
@@ -55,11 +61,13 @@ import org.highmed.dsf.fhir.search.parameters.TaskIdentifier;
 import org.highmed.dsf.fhir.search.parameters.TaskRequester;
 import org.highmed.dsf.fhir.search.parameters.TaskStatus;
 import org.highmed.dsf.fhir.search.parameters.ValueSetIdentifier;
+import org.highmed.dsf.fhir.search.parameters.ValueSetStatus;
 import org.highmed.dsf.fhir.search.parameters.ValueSetUrl;
 import org.highmed.dsf.fhir.search.parameters.ValueSetVersion;
 import org.highmed.dsf.fhir.webservice.specification.ConformanceService;
 import org.highmed.dsf.fhir.websocket.ServerEndpoint;
 import org.highmed.dsf.tools.build.BuildInfoReader;
+import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
@@ -186,6 +194,15 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 
 		var searchParameters = new HashMap<Class<? extends Resource>, List<CapabilityStatementRestResourceSearchParamComponent>>();
 
+		var activityDefinitionUrl = createSearchParameter(ActivityDefinitionUrl.class);
+		var activityDefinitionIdentifier = createSearchParameter(ActivityDefinitionIdentifier.class);
+		var activityDefinitionVersion = createSearchParameter(ActivityDefinitionVersion.class);
+		var activityDefinitionName = createSearchParameter(ActivityDefinitionName.class);
+		var activityDefinitionStatus = createSearchParameter(ActivityDefinitionStatus.class);
+		searchParameters.put(ActivityDefinition.class,
+				Arrays.asList(activityDefinitionUrl, activityDefinitionIdentifier, activityDefinitionVersion,
+						activityDefinitionName, activityDefinitionStatus));
+
 		var binaryContentType = createSearchParameter(BinaryContentType.class);
 		searchParameters.put(Binary.class, Arrays.asList(binaryContentType));
 
@@ -195,7 +212,9 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 		var codeSystemIdentifier = createSearchParameter(CodeSystemIdentifier.class);
 		var codeSystemUrl = createSearchParameter(CodeSystemUrl.class);
 		var codeSystemVersion = createSearchParameter(CodeSystemVersion.class);
-		searchParameters.put(CodeSystem.class, Arrays.asList(codeSystemIdentifier, codeSystemUrl, codeSystemVersion));
+		var codeSystemStatus = createSearchParameter(CodeSystemStatus.class);
+		searchParameters.put(CodeSystem.class,
+				Arrays.asList(codeSystemIdentifier, codeSystemUrl, codeSystemVersion, codeSystemStatus));
 
 		var endpointIdentifier = createSearchParameter(EndpointIdentifier.class);
 		var endpointName = createSearchParameter(EndpointName.class);
@@ -260,7 +279,9 @@ public class ConformanceServiceImpl implements ConformanceService, InitializingB
 		var valueSetIdentifier = createSearchParameter(ValueSetIdentifier.class);
 		var valueSetUrl = createSearchParameter(ValueSetUrl.class);
 		var valueSetVersion = createSearchParameter(ValueSetVersion.class);
-		searchParameters.put(ValueSet.class, Arrays.asList(valueSetIdentifier, valueSetUrl, valueSetVersion));
+		var valueSetStatus = createSearchParameter(ValueSetStatus.class);
+		searchParameters.put(ValueSet.class,
+				Arrays.asList(valueSetIdentifier, valueSetUrl, valueSetVersion, valueSetStatus));
 
 		var operations = new HashMap<Class<? extends DomainResource>, List<CapabilityStatementRestResourceOperationComponent>>();
 

@@ -1,5 +1,6 @@
 package org.highmed.dsf.fhir.spring.config;
 
+import org.highmed.dsf.fhir.webservice.impl.ActivityDefinitionServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.BinaryServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.BundleServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.CodeSystemServiceImpl;
@@ -20,6 +21,7 @@ import org.highmed.dsf.fhir.webservice.impl.StructureDefinitionServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.SubscriptionServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.TaskServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.ValueSetServiceImpl;
+import org.highmed.dsf.fhir.webservice.jaxrs.ActivityDefinitionServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.BinaryServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.BundleServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.CodeSystemServiceJaxrs;
@@ -40,6 +42,7 @@ import org.highmed.dsf.fhir.webservice.jaxrs.StructureDefinitionServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.SubscriptionServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.TaskServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.ValueSetServiceJaxrs;
+import org.highmed.dsf.fhir.webservice.secure.ActivityDefinitionServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.BinaryServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.BundleServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.CodeSystemServiceSecure;
@@ -60,6 +63,7 @@ import org.highmed.dsf.fhir.webservice.secure.StructureDefinitionServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.SubscriptionServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.TaskServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.ValueSetServiceSecure;
+import org.highmed.dsf.fhir.webservice.specification.ActivityDefinitionService;
 import org.highmed.dsf.fhir.webservice.specification.BinaryService;
 import org.highmed.dsf.fhir.webservice.specification.BundleService;
 import org.highmed.dsf.fhir.webservice.specification.CodeSystemService;
@@ -80,6 +84,7 @@ import org.highmed.dsf.fhir.webservice.specification.StructureDefinitionService;
 import org.highmed.dsf.fhir.webservice.specification.SubscriptionService;
 import org.highmed.dsf.fhir.webservice.specification.TaskService;
 import org.highmed.dsf.fhir.webservice.specification.ValueSetService;
+import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -146,6 +151,22 @@ public class WebserviceConfig
 	private String resourceTypeName(Class<? extends Resource> r)
 	{
 		return r.getAnnotation(ResourceDef.class).name();
+	}
+
+	@Bean
+	public ActivityDefinitionService activityDefinitionService()
+	{
+		return new ActivityDefinitionServiceJaxrs(
+				new ActivityDefinitionServiceSecure(activityDefinitionServiceImpl(), helperConfig.responseGenerator()));
+	}
+
+	private ActivityDefinitionServiceImpl activityDefinitionServiceImpl()
+	{
+		return new ActivityDefinitionServiceImpl(resourceTypeName(ActivityDefinition.class), serverBase,
+				ActivityDefinitionServiceJaxrs.PATH, defaultPageCount, daoConfig.activityDefinitionDao(),
+				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
+				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter(),
+				commandConfig.referenceExtractor(), commandConfig.referenceResolver());
 	}
 
 	@Bean

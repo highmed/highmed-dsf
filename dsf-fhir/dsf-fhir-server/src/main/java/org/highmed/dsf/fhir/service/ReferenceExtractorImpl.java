@@ -7,6 +7,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.highmed.dsf.fhir.dao.command.ResourceReference;
+import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.BackboneElement;
 import org.hl7.fhir.r4.model.CareTeam;
 import org.hl7.fhir.r4.model.ClaimResponse;
@@ -19,6 +20,7 @@ import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.HealthcareService;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.ObservationDefinition;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Patient.ContactComponent;
@@ -34,6 +36,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedPerson;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.SpecimenDefinition;
 import org.hl7.fhir.r4.model.Substance;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
@@ -198,6 +201,35 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 			return Stream.empty();
 
 		}
+	}
+
+	@Override
+	public Stream<ResourceReference> getReferences(ActivityDefinition resource)
+	{
+		if (resource == null)
+			return Stream.empty();
+
+		var subjectReference = getReference(resource, ActivityDefinition::hasSubjectReference,
+				ActivityDefinition::getSubjectReference, "ActivityDefinition.subjectReference", Group.class);
+		var location = getReference(resource, ActivityDefinition::hasLocation, ActivityDefinition::getLocation,
+				"ActivityDefinition.location", Location.class);
+		var productReference = getReference(resource, ActivityDefinition::hasProductReference,
+				ActivityDefinition::getProductReference, "ActivityDefinition.productReference", Medication.class,
+				Substance.class);
+		var specimenRequirement = getReferences(resource, ActivityDefinition::hasSpecimenRequirement,
+				ActivityDefinition::getSpecimenRequirement, "ActivityDefinition.specimenRequirement",
+				SpecimenDefinition.class);
+		var observationRequirement = getReferences(resource, ActivityDefinition::hasObservationRequirement,
+				ActivityDefinition::getObservationRequirement, "ActivityDefinition.observationRequirement",
+				ObservationDefinition.class);
+		var observationResultRequirement = getReferences(resource, ActivityDefinition::hasObservationResultRequirement,
+				ActivityDefinition::getObservationResultRequirement, "ActivityDefinition.observationResultRequirement",
+				ObservationDefinition.class);
+
+		var extensionReferences = getExtensionReferences(resource);
+
+		return concat(subjectReference, location, productReference, specimenRequirement, observationRequirement,
+				observationResultRequirement, extensionReferences);
 	}
 
 	@Override

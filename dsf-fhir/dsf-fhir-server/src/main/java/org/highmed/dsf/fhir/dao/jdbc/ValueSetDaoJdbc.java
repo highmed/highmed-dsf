@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.dsf.fhir.dao.ValueSetDao;
 import org.highmed.dsf.fhir.search.parameters.ValueSetIdentifier;
+import org.highmed.dsf.fhir.search.parameters.ValueSetStatus;
 import org.highmed.dsf.fhir.search.parameters.ValueSetUrl;
 import org.highmed.dsf.fhir.search.parameters.ValueSetVersion;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -19,10 +20,10 @@ public class ValueSetDaoJdbc extends AbstractResourceDaoJdbc<ValueSet> implement
 	public ValueSetDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, ValueSet.class, "value_sets", "value_set", "value_set_id",
-				ValueSetIdentifier::new, ValueSetUrl::new, ValueSetVersion::new);
+				ValueSetIdentifier::new, ValueSetStatus::new, ValueSetUrl::new, ValueSetVersion::new);
 
-		readByUrl = new ReadByUrlDaoJdbc<>(this::getDataSource, this::getResource, getResourceTable(), getResourceColumn(),
-				getResourceIdColumn());
+		readByUrl = new ReadByUrlDaoJdbc<>(this::getDataSource, this::getResource, getResourceTable(),
+				getResourceColumn(), getResourceIdColumn());
 	}
 
 	@Override

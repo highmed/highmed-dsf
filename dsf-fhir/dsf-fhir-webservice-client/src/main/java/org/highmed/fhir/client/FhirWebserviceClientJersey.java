@@ -17,6 +17,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.highmed.dsf.fhir.adapter.AbstractFhirAdapter;
+import org.highmed.dsf.fhir.adapter.ActivityDefinitionJsonFhirAdapter;
+import org.highmed.dsf.fhir.adapter.ActivityDefinitionXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.BinaryJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.BinaryXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.BundleJsonFhirAdapter;
@@ -91,27 +93,29 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 
 	public static List<AbstractFhirAdapter<?>> components(FhirContext fhirContext)
 	{
-		return Arrays.asList(new BinaryJsonFhirAdapter(fhirContext), new BinaryXmlFhirAdapter(fhirContext),
-				new BundleJsonFhirAdapter(fhirContext), new BundleXmlFhirAdapter(fhirContext),
-				new CapabilityStatementJsonFhirAdapter(fhirContext), new CapabilityStatementXmlFhirAdapter(fhirContext),
-				new CodeSystemJsonFhirAdapter(fhirContext), new CodeSystemXmlFhirAdapter(fhirContext),
-				new GroupJsonFhirAdapter(fhirContext), new GroupXmlFhirAdapter(fhirContext),
-				new EndpointJsonFhirAdapter(fhirContext), new EndpointXmlFhirAdapter(fhirContext),
-				new HealthcareServiceJsonFhirAdapter(fhirContext), new HealthcareServiceXmlFhirAdapter(fhirContext),
-				new LocationJsonFhirAdapter(fhirContext), new LocationXmlFhirAdapter(fhirContext),
-				new NamingSystemJsonFhirAdapter(fhirContext), new NamingSystemXmlFhirAdapter(fhirContext),
-				new OperationOutcomeJsonFhirAdapter(fhirContext), new OperationOutcomeXmlFhirAdapter(fhirContext),
-				new OrganizationJsonFhirAdapter(fhirContext), new OrganizationXmlFhirAdapter(fhirContext),
-				new ParametersJsonFhirAdapter(fhirContext), new ParametersXmlFhirAdapter(fhirContext),
-				new PatientJsonFhirAdapter(fhirContext), new PatientXmlFhirAdapter(fhirContext),
-				new PractitionerJsonFhirAdapter(fhirContext), new PractitionerXmlFhirAdapter(fhirContext),
-				new PractitionerRoleJsonFhirAdapter(fhirContext), new PractitionerRoleXmlFhirAdapter(fhirContext),
-				new ProvenanceJsonFhirAdapter(fhirContext), new ProvenanceXmlFhirAdapter(fhirContext),
-				new ResearchStudyJsonFhirAdapter(fhirContext), new ResearchStudyXmlFhirAdapter(fhirContext),
-				new StructureDefinitionJsonFhirAdapter(fhirContext), new StructureDefinitionXmlFhirAdapter(fhirContext),
-				new SubscriptionJsonFhirAdapter(fhirContext), new SubscriptionXmlFhirAdapter(fhirContext),
-				new TaskJsonFhirAdapter(fhirContext), new TaskXmlFhirAdapter(fhirContext),
-				new ValueSetJsonFhirAdapter(fhirContext), new ValueSetXmlFhirAdapter(fhirContext));
+		return Arrays.asList(new ActivityDefinitionJsonFhirAdapter(fhirContext),
+				new ActivityDefinitionXmlFhirAdapter(fhirContext), new BinaryJsonFhirAdapter(fhirContext),
+				new BinaryXmlFhirAdapter(fhirContext), new BundleJsonFhirAdapter(fhirContext),
+				new BundleXmlFhirAdapter(fhirContext), new CapabilityStatementJsonFhirAdapter(fhirContext),
+				new CapabilityStatementXmlFhirAdapter(fhirContext), new CodeSystemJsonFhirAdapter(fhirContext),
+				new CodeSystemXmlFhirAdapter(fhirContext), new GroupJsonFhirAdapter(fhirContext),
+				new GroupXmlFhirAdapter(fhirContext), new EndpointJsonFhirAdapter(fhirContext),
+				new EndpointXmlFhirAdapter(fhirContext), new HealthcareServiceJsonFhirAdapter(fhirContext),
+				new HealthcareServiceXmlFhirAdapter(fhirContext), new LocationJsonFhirAdapter(fhirContext),
+				new LocationXmlFhirAdapter(fhirContext), new NamingSystemJsonFhirAdapter(fhirContext),
+				new NamingSystemXmlFhirAdapter(fhirContext), new OperationOutcomeJsonFhirAdapter(fhirContext),
+				new OperationOutcomeXmlFhirAdapter(fhirContext), new OrganizationJsonFhirAdapter(fhirContext),
+				new OrganizationXmlFhirAdapter(fhirContext), new ParametersJsonFhirAdapter(fhirContext),
+				new ParametersXmlFhirAdapter(fhirContext), new PatientJsonFhirAdapter(fhirContext),
+				new PatientXmlFhirAdapter(fhirContext), new PractitionerJsonFhirAdapter(fhirContext),
+				new PractitionerXmlFhirAdapter(fhirContext), new PractitionerRoleJsonFhirAdapter(fhirContext),
+				new PractitionerRoleXmlFhirAdapter(fhirContext), new ProvenanceJsonFhirAdapter(fhirContext),
+				new ProvenanceXmlFhirAdapter(fhirContext), new ResearchStudyJsonFhirAdapter(fhirContext),
+				new ResearchStudyXmlFhirAdapter(fhirContext), new StructureDefinitionJsonFhirAdapter(fhirContext),
+				new StructureDefinitionXmlFhirAdapter(fhirContext), new SubscriptionJsonFhirAdapter(fhirContext),
+				new SubscriptionXmlFhirAdapter(fhirContext), new TaskJsonFhirAdapter(fhirContext),
+				new TaskXmlFhirAdapter(fhirContext), new ValueSetJsonFhirAdapter(fhirContext),
+				new ValueSetXmlFhirAdapter(fhirContext));
 	}
 
 	@Override
@@ -241,8 +245,8 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		logger.debug("HTTP header ETag: {}", response.getHeaderString(HttpHeaders.ETAG));
 		logger.debug("HTTP header Last-Modified: {}", response.getHeaderString(HttpHeaders.LAST_MODIFIED));
 
-		if (Status.OK.getStatusCode() != response.getStatus() && Status.NO_CONTENT.getStatusCode() != response
-				.getStatus())
+		if (Status.OK.getStatusCode() != response.getStatus()
+				&& Status.NO_CONTENT.getStatusCode() != response.getStatus())
 			throw new WebApplicationException(response);
 	}
 
@@ -266,8 +270,8 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		logger.debug("HTTP header ETag: {}", response.getHeaderString(HttpHeaders.ETAG));
 		logger.debug("HTTP header Last-Modified: {}", response.getHeaderString(HttpHeaders.LAST_MODIFIED));
 
-		if (Status.OK.getStatusCode() != response.getStatus() && Status.NO_CONTENT.getStatusCode() != response
-				.getStatus())
+		if (Status.OK.getStatusCode() != response.getStatus()
+				&& Status.NO_CONTENT.getStatusCode() != response.getStatus())
 			throw new WebApplicationException(response);
 	}
 

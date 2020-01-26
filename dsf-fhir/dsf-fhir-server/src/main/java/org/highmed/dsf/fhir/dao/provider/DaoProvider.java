@@ -2,6 +2,7 @@ package org.highmed.dsf.fhir.dao.provider;
 
 import java.util.Optional;
 
+import org.highmed.dsf.fhir.dao.ActivityDefinitionDao;
 import org.highmed.dsf.fhir.dao.BinaryDao;
 import org.highmed.dsf.fhir.dao.BundleDao;
 import org.highmed.dsf.fhir.dao.CodeSystemDao;
@@ -26,6 +27,8 @@ import org.hl7.fhir.r4.model.Resource;
 
 public interface DaoProvider
 {
+	ActivityDefinitionDao getActivityDefinitionDao();
+
 	BinaryDao getBinaryDao();
 
 	BundleDao getBundleDao();
