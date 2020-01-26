@@ -5,14 +5,13 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.highmed.dsf.fhir.function.BiFunctionWithSqlException;
 import org.highmed.dsf.fhir.search.SearchQueryParameterError;
 import org.highmed.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.Resource;
-
-import com.google.common.base.Objects;
 
 public abstract class AbstractVersionParameter<R extends MetadataResource> extends AbstractTokenParameter<R>
 {
@@ -79,7 +78,7 @@ public abstract class AbstractVersionParameter<R extends MetadataResource> exten
 
 		MetadataResource mRes = (MetadataResource) resource;
 
-		return Objects.equal(mRes.getVersion(), version);
+		return Objects.equals(mRes.getVersion(), version);
 	}
 
 	@Override

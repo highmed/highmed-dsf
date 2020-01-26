@@ -3,6 +3,7 @@ package org.highmed.dsf.fhir.search.parameters;
 import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Objects;
 
 import org.highmed.dsf.fhir.function.BiFunctionWithSqlException;
 import org.highmed.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
@@ -10,8 +11,6 @@ import org.highmed.dsf.fhir.search.parameters.basic.AbstractStringParameter;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Resource;
-
-import com.google.common.base.Objects;
 
 @SearchParameterDefinition(name = OrganizationName.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Organization-name", type = SearchParamType.STRING, documentation = "A portion of the organization's name or alias")
 public class OrganizationName extends AbstractStringParameter<Organization>
@@ -84,7 +83,7 @@ public class OrganizationName extends AbstractStringParameter<Organization>
 			case CONTAINS:
 				return o.getName() != null && o.getName().toLowerCase().contains(valueAndType.value.toLowerCase());
 			case EXACT:
-				return Objects.equal(o.getName(), valueAndType.value);
+				return Objects.equals(o.getName(), valueAndType.value);
 			default:
 				throw notDefined();
 		}

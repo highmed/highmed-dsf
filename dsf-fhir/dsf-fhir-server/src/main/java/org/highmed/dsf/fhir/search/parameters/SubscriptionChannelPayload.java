@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.ws.rs.core.UriBuilder;
 
@@ -15,8 +16,6 @@ import org.highmed.dsf.fhir.search.parameters.basic.TokenSearchType;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Subscription;
-
-import com.google.common.base.Objects;
 
 @SearchParameterDefinition(name = SubscriptionChannelPayload.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Subscription.channel.payload", type = SearchParamType.TOKEN, documentation = "The mime-type of the notification payload")
 public class SubscriptionChannelPayload extends AbstractTokenParameter<Subscription>
@@ -79,7 +78,7 @@ public class SubscriptionChannelPayload extends AbstractTokenParameter<Subscript
 		if (!(resource instanceof Subscription))
 			return false;
 
-		return Objects.equal(((Subscription) resource).getChannel().getPayload(), payloadMimeType);
+		return Objects.equals(((Subscription) resource).getChannel().getPayload(), payloadMimeType);
 	}
 
 	@Override

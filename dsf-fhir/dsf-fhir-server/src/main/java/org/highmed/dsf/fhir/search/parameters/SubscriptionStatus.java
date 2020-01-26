@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.ws.rs.core.UriBuilder;
 
@@ -16,8 +17,6 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Subscription;
-
-import com.google.common.base.Objects;
 
 @SearchParameterDefinition(name = SubscriptionStatus.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Subscription.status", type = SearchParamType.TOKEN, documentation = "Search by subscription status")
 public class SubscriptionStatus extends AbstractTokenParameter<Subscription>
@@ -95,7 +94,7 @@ public class SubscriptionStatus extends AbstractTokenParameter<Subscription>
 		if (!(resource instanceof Subscription))
 			return false;
 
-		return Objects.equal(((Subscription) resource).getStatus(), status);
+		return Objects.equals(((Subscription) resource).getStatus(), status);
 	}
 
 	@Override

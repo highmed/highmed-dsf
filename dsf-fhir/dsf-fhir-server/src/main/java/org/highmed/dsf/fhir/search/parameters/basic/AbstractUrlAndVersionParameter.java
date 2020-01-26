@@ -3,12 +3,11 @@ package org.highmed.dsf.fhir.search.parameters.basic;
 import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Objects;
 
 import org.highmed.dsf.fhir.function.BiFunctionWithSqlException;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.Resource;
-
-import com.google.common.base.Objects;
 
 public abstract class AbstractUrlAndVersionParameter<R extends MetadataResource>
 		extends AbstractCanonicalUrlParameter<R>
@@ -83,11 +82,11 @@ public abstract class AbstractUrlAndVersionParameter<R extends MetadataResource>
 		switch (valueAndType.type)
 		{
 			case PRECISE:
-				return Objects.equal(mRes.getUrl(), valueAndType.url)
-						&& (valueAndType.version == null || Objects.equal(mRes.getVersion(), valueAndType.version));
+				return Objects.equals(mRes.getUrl(), valueAndType.url)
+						&& (valueAndType.version == null || Objects.equals(mRes.getVersion(), valueAndType.version));
 			case BELOW:
 				return mRes.getUrl() != null && mRes.getUrl().startsWith(valueAndType.url)
-						&& (valueAndType.version == null || Objects.equal(mRes.getVersion(), valueAndType.version));
+						&& (valueAndType.version == null || Objects.equals(mRes.getVersion(), valueAndType.version));
 			default:
 				throw notDefined();
 		}
