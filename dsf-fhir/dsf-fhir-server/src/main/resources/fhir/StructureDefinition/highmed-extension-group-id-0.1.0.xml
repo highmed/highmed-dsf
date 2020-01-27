@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <url value="http://highmed.org/fhir/StructureDefinition/group-id" />
+  <version value="0.1.0" />
   <name value="group-id" />
   <status value="active" />
   <date value="2019-12-16" />
