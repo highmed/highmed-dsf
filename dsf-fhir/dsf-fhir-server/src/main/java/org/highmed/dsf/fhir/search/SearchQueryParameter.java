@@ -6,7 +6,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.sql.Array;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
@@ -59,11 +58,9 @@ public interface SearchQueryParameter<R extends Resource> extends MatcherParamet
 
 	Optional<SearchQuerySortParameter> getSortParameter();
 
-	Optional<SearchQueryIncludeParameter> getIncludeParameter();
+	List<SearchQueryIncludeParameter> getIncludeParameters();
 
 	String getParameterName();
 
 	Stream<String> getBaseAndModifiedParameterNames();
-
-	void modifyIncludeResource(Resource resource, Connection connection);
 }

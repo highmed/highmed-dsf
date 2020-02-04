@@ -10,7 +10,7 @@ import org.highmed.dsf.fhir.dao.OrganizationDao;
 import org.highmed.dsf.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.function.BiFunctionWithSqlException;
-import org.highmed.dsf.fhir.search.SearchQueryIncludeParameter.IncludeParts;
+import org.highmed.dsf.fhir.search.IncludeParts;
 import org.highmed.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.dsf.fhir.search.parameters.basic.AbstractIdentifierParameter;
 import org.highmed.dsf.fhir.search.parameters.basic.AbstractReferenceParameter;
@@ -182,17 +182,14 @@ public class EndpointOrganization extends AbstractReferenceParameter<Endpoint>
 	@Override
 	protected String getIncludeSql(IncludeParts includeParts)
 	{
-		if (RESOURCE_TYPE_NAME.equals(includeParts.getSourceResourceTypeName())
-				&& PARAMETER_NAME.equals(includeParts.getSearchParameterName())
-				&& (includeParts.getTargetResourceTypeName() == null
-						|| TARGET_RESOURCE_TYPE_NAME.equals(includeParts.getTargetResourceTypeName())))
+		if (includeParts.matches(RESOURCE_TYPE_NAME, PARAMETER_NAME, TARGET_RESOURCE_TYPE_NAME))
 			return "(SELECT jsonb_build_array(organization) FROM current_organizations WHERE concat('Organization/', organization->>'id') = endpoint->'managingOrganization'->>'reference') AS organizations";
 		else
 			return null;
 	}
 
 	@Override
-	protected void doModifyIncludeResource(Resource resource, Connection connection)
+	protected void modifyIncludeResource(IncludeParts includeParts, Resource resource, Connection connection)
 	{
 		// Nothing to do for organizations
 	}

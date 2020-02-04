@@ -11,7 +11,7 @@ import org.highmed.dsf.fhir.dao.ResourceDao;
 import org.highmed.dsf.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.function.BiFunctionWithSqlException;
-import org.highmed.dsf.fhir.search.SearchQueryIncludeParameter.IncludeParts;
+import org.highmed.dsf.fhir.search.IncludeParts;
 import org.highmed.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.dsf.fhir.search.parameters.basic.AbstractIdentifierParameter;
 import org.highmed.dsf.fhir.search.parameters.basic.AbstractReferenceParameter;
@@ -259,7 +259,7 @@ public class TaskRequester extends AbstractReferenceParameter<Task>
 	}
 
 	@Override
-	protected void doModifyIncludeResource(Resource resource, Connection connection)
+	protected void modifyIncludeResource(IncludeParts includeParts, Resource resource, Connection connection)
 	{
 		// Nothing to do for practitioners, organizations, patients or practitioner-roles
 	}

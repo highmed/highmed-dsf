@@ -13,7 +13,7 @@ public class ResearchStudyDaoJdbc extends AbstractResourceDaoJdbc<ResearchStudy>
 	public ResearchStudyDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, ResearchStudy.class, "research_studies", "research_study", "research_study_id",
-				ResearchStudyIdentifier::new, ResearchStudyEnrollment::new);
+				with(ResearchStudyIdentifier::new, ResearchStudyEnrollment::new), with());
 	}
 
 	@Override

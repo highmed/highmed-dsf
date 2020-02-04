@@ -1,8 +1,8 @@
 package org.highmed.dsf.fhir.search.parameters.basic;
 
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -66,7 +66,7 @@ public abstract class AbstractSearchParameter<R extends Resource> implements Sea
 	@Override
 	public List<SearchQueryParameterError> getErrors()
 	{
-		return errors;
+		return Collections.unmodifiableList(errors);
 	}
 
 	protected final void addError(SearchQueryParameterError error)
@@ -110,13 +110,8 @@ public abstract class AbstractSearchParameter<R extends Resource> implements Sea
 	protected abstract String getSortSql(String sortDirectionWithSpacePrefix);
 
 	@Override
-	public Optional<SearchQueryIncludeParameter> getIncludeParameter()
+	public List<SearchQueryIncludeParameter> getIncludeParameters()
 	{
-		return Optional.empty();
-	}
-
-	@Override
-	public void modifyIncludeResource(Resource resource, Connection connection)
-	{
+		return Collections.emptyList();
 	}
 }

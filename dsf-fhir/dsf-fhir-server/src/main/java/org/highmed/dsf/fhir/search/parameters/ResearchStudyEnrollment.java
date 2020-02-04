@@ -10,7 +10,7 @@ import org.highmed.dsf.fhir.dao.GroupDao;
 import org.highmed.dsf.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.function.BiFunctionWithSqlException;
-import org.highmed.dsf.fhir.search.SearchQueryIncludeParameter;
+import org.highmed.dsf.fhir.search.IncludeParts;
 import org.highmed.dsf.fhir.search.SearchQueryParameter;
 import org.highmed.dsf.fhir.search.parameters.basic.AbstractIdentifierParameter;
 import org.highmed.dsf.fhir.search.parameters.basic.AbstractReferenceParameter;
@@ -21,9 +21,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.Resource;
 
-@SearchQueryParameter.SearchParameterDefinition(name = ResearchStudyEnrollment.PARAMETER_NAME,
-		definition = "http://highmed.org/fhir/SearchParameter/research-study-enrollment",
-		type = Enumerations.SearchParamType.REFERENCE, documentation = "Search by research study enrollment")
+@SearchQueryParameter.SearchParameterDefinition(name = ResearchStudyEnrollment.PARAMETER_NAME, definition = "http://highmed.org/fhir/SearchParameter/research-study-enrollment", type = Enumerations.SearchParamType.REFERENCE, documentation = "Search by research study enrollment")
 public class ResearchStudyEnrollment extends AbstractReferenceParameter<ResearchStudy>
 {
 	public static final String PARAMETER_NAME = "enrollment";
@@ -96,9 +94,8 @@ public class ResearchStudyEnrollment extends AbstractReferenceParameter<Research
 								"[{\"value\": \"" + valueAndType.identifier.codeValue + "\"}]");
 						break;
 					case CODE_AND_SYSTEM:
-						statement.setString(parameterIndex,
-								"[{\"value\": \"" + valueAndType.identifier.codeValue + "\", \"system\": \""
-										+ valueAndType.identifier.systemValue + "\"}]");
+						statement.setString(parameterIndex, "[{\"value\": \"" + valueAndType.identifier.codeValue
+								+ "\", \"system\": \"" + valueAndType.identifier.systemValue + "\"}]");
 						break;
 					case CODE_AND_NO_SYSTEM_PROPERTY:
 						statement.setString(parameterIndex, valueAndType.identifier.codeValue);
@@ -158,7 +155,8 @@ public class ResearchStudyEnrollment extends AbstractReferenceParameter<Research
 		}
 		else
 		{
-			return rs.getEnrollment().stream().map(Reference::getResource).anyMatch(ref -> {
+			return rs.getEnrollment().stream().map(Reference::getReference).anyMatch(ref ->
+			{
 				switch (valueAndType.type)
 				{
 					case ID:
@@ -181,7 +179,7 @@ public class ResearchStudyEnrollment extends AbstractReferenceParameter<Research
 	}
 
 	@Override
-	protected String getIncludeSql(SearchQueryIncludeParameter.IncludeParts includeParts)
+	protected String getIncludeSql(IncludeParts includeParts)
 	{
 		if (includeParts.matches(RESOURCE_TYPE_NAME, PARAMETER_NAME, TARGET_RESOURCE_TYPE_NAME))
 			return "(SELECT jsonb_agg(group_json) FROM current_groups"
@@ -192,7 +190,7 @@ public class ResearchStudyEnrollment extends AbstractReferenceParameter<Research
 	}
 
 	@Override
-	protected void doModifyIncludeResource(Resource resource, Connection connection)
+	protected void modifyIncludeResource(IncludeParts includeParts, Resource resource, Connection connection)
 	{
 		// Nothing to do for groups
 	}

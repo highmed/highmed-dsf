@@ -11,6 +11,7 @@ import org.highmed.dsf.fhir.search.parameters.EndpointIdentifier;
 import org.highmed.dsf.fhir.search.parameters.EndpointName;
 import org.highmed.dsf.fhir.search.parameters.EndpointOrganization;
 import org.highmed.dsf.fhir.search.parameters.EndpointStatus;
+import org.highmed.dsf.fhir.search.parameters.rev.include.OrganizationEndpointRevInclude;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +25,8 @@ public class EndpointDaoJdbc extends AbstractResourceDaoJdbc<Endpoint> implement
 	public EndpointDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, Endpoint.class, "endpoints", "endpoint", "endpoint_id",
-				EndpointOrganization::new, EndpointIdentifier::new, EndpointName::new, EndpointStatus::new);
+				with(EndpointOrganization::new, EndpointIdentifier::new, EndpointName::new, EndpointStatus::new),
+				with(OrganizationEndpointRevInclude::new));
 	}
 
 	@Override

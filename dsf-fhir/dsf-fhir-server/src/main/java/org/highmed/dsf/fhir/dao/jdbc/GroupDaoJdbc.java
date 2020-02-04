@@ -10,7 +10,7 @@ public class GroupDaoJdbc extends AbstractResourceDaoJdbc<Group> implements Grou
 {
 	public GroupDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
 	{
-		super(dataSource, fhirContext, Group.class, "groups", "group_json", "group_id");
+		super(dataSource, fhirContext, Group.class, "groups", "group_json", "group_id", with(), with());
 	}
 
 	@Override

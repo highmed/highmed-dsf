@@ -26,7 +26,9 @@ public class OrganizationDaoJdbc extends AbstractResourceDaoJdbc<Organization> i
 	public OrganizationDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, Organization.class, "organizations", "organization", "organization_id",
-				OrganizationName::new, OrganizationEndpoint::new, OrganizationIdentifier::new, OrganizationActive::new, OrganizationType::new);
+				with(OrganizationName::new, OrganizationEndpoint::new, OrganizationIdentifier::new,
+						OrganizationActive::new, OrganizationType::new),
+				with());
 	}
 
 	@Override

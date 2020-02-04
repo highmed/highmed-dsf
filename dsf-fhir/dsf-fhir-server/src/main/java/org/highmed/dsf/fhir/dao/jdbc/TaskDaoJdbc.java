@@ -13,8 +13,8 @@ public class TaskDaoJdbc extends AbstractResourceDaoJdbc<Task> implements TaskDa
 {
 	public TaskDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
 	{
-		super(dataSource, fhirContext, Task.class, "tasks", "task", "task_id", TaskIdentifier::new, TaskRequester::new,
-				TaskStatus::new);
+		super(dataSource, fhirContext, Task.class, "tasks", "task", "task_id",
+				with(TaskIdentifier::new, TaskRequester::new, TaskStatus::new), with());
 	}
 
 	@Override

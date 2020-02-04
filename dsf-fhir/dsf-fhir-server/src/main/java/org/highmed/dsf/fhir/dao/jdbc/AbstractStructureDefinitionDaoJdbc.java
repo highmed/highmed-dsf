@@ -28,8 +28,10 @@ abstract class AbstractStructureDefinitionDaoJdbc extends AbstractResourceDaoJdb
 			String resourceColumn, String resourceIdColumn)
 	{
 		super(dataSource, fhirContext, StructureDefinition.class, resourceTable, resourceColumn, resourceIdColumn,
-				() -> new StructureDefinitionIdentifier(resourceColumn),
-				() -> new StructureDefinitionUrl(resourceColumn), () -> new StructureDefinitionVersion(resourceColumn));
+				with(() -> new StructureDefinitionIdentifier(resourceColumn),
+						() -> new StructureDefinitionUrl(resourceColumn),
+						() -> new StructureDefinitionVersion(resourceColumn)),
+				with());
 
 		readByUrl = new ReadByUrlDaoJdbc<StructureDefinition>(this::getDataSource, this::getResource, resourceTable,
 				resourceColumn, resourceIdColumn);
