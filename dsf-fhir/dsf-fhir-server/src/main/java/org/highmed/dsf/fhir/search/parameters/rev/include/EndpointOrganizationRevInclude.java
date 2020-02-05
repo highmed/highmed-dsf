@@ -15,7 +15,7 @@ public class EndpointOrganizationRevInclude extends AbstractRevIncludeParameterF
 	@Override
 	protected String getRevIncludeSql(IncludeParts includeParts)
 	{
-		return "(SELECT jsonb_build_array(organization) FROM current_organizations WHERE concat('Organization/', organization->>'id') = endpoint->'managingOrganization'->>'reference') AS organizations";
+		return "(SELECT jsonb_build_array(endpoint) FROM current_endpoints WHERE endpoint->'managingOrganization'->>'reference' = concat('Organization/', organization->>'id')) AS endpoints";
 	}
 
 	@Override

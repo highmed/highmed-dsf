@@ -13,6 +13,7 @@ import org.highmed.dsf.fhir.search.parameters.OrganizationEndpoint;
 import org.highmed.dsf.fhir.search.parameters.OrganizationIdentifier;
 import org.highmed.dsf.fhir.search.parameters.OrganizationName;
 import org.highmed.dsf.fhir.search.parameters.OrganizationType;
+import org.highmed.dsf.fhir.search.parameters.rev.include.EndpointOrganizationRevInclude;
 import org.hl7.fhir.r4.model.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +29,7 @@ public class OrganizationDaoJdbc extends AbstractResourceDaoJdbc<Organization> i
 		super(dataSource, fhirContext, Organization.class, "organizations", "organization", "organization_id",
 				with(OrganizationName::new, OrganizationEndpoint::new, OrganizationIdentifier::new,
 						OrganizationActive::new, OrganizationType::new),
-				with());
+				with(EndpointOrganizationRevInclude::new));
 	}
 
 	@Override

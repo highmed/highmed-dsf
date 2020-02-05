@@ -24,9 +24,8 @@ import org.hl7.fhir.r4.model.Resource;
 @SearchParameterDefinition(name = EndpointOrganization.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Endpoint.managingOrganization", type = SearchParamType.REFERENCE, documentation = "The organization that is managing the endpoint, search by identifier is supported")
 public class EndpointOrganization extends AbstractReferenceParameter<Endpoint>
 {
-	public static final String PARAMETER_NAME = "organization";
-
 	private static final String RESOURCE_TYPE_NAME = "Endpoint";
+	public static final String PARAMETER_NAME = "organization";
 	private static final String TARGET_RESOURCE_TYPE_NAME = "Organization";
 
 	private static final String ORGANIZATION_IDENTIFIERS_SUBQUERY = "(SELECT organization->'identifier' FROM current_organizations"

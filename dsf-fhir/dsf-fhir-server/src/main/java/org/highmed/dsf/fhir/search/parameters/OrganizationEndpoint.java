@@ -181,9 +181,7 @@ public class OrganizationEndpoint extends AbstractReferenceParameter<Organizatio
 	protected String getIncludeSql(IncludeParts includeParts)
 	{
 		if (includeParts.matches(RESOURCE_TYPE_NAME, PARAMETER_NAME, TARGET_RESOURCE_TYPE_NAME))
-			return "(SELECT jsonb_agg(endpoint) FROM current_endpoints"
-					+ " WHERE concat('Endpoint/', endpoint->>'id') IN (SELECT reference->>'reference' FROM jsonb_array_elements(organization->'endpoint') AS reference)"
-					+ ") AS endpoints";
+			return "(SELECT jsonb_agg(endpoint) FROM current_endpoints WHERE concat('Endpoint/', endpoint->>'id') IN (SELECT reference->>'reference' FROM jsonb_array_elements(organization->'endpoint') AS reference)) AS endpoints";
 		else
 			return null;
 	}
