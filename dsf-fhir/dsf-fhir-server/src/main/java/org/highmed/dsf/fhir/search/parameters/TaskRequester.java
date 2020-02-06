@@ -29,9 +29,8 @@ import org.hl7.fhir.r4.model.Task;
 @SearchParameterDefinition(name = TaskRequester.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Task-requester", type = SearchParamType.REFERENCE, documentation = "Search by task requester")
 public class TaskRequester extends AbstractReferenceParameter<Task>
 {
-	public static final String PARAMETER_NAME = "requester";
-
 	private static final String RESOURCE_TYPE_NAME = "Task";
+	public static final String PARAMETER_NAME = "requester";
 	private static final String[] TARGET_RESOURCE_TYPE_NAMES = { "Practitioner", "Organization", "Patient",
 			"PractitionerRole" };
 	// TODO add Device, RelatedPerson if supported, see also doResolveReferencesForMatching, matches, getIncludeSql

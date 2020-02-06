@@ -24,9 +24,8 @@ import org.hl7.fhir.r4.model.Resource;
 @SearchQueryParameter.SearchParameterDefinition(name = ResearchStudyEnrollment.PARAMETER_NAME, definition = "http://highmed.org/fhir/SearchParameter/research-study-enrollment", type = Enumerations.SearchParamType.REFERENCE, documentation = "Search by research study enrollment")
 public class ResearchStudyEnrollment extends AbstractReferenceParameter<ResearchStudy>
 {
-	public static final String PARAMETER_NAME = "enrollment";
-
 	private static final String RESOURCE_TYPE_NAME = "ResearchStudy";
+	public static final String PARAMETER_NAME = "enrollment";
 	private static final String TARGET_RESOURCE_TYPE_NAME = "Group";
 
 	public ResearchStudyEnrollment()
