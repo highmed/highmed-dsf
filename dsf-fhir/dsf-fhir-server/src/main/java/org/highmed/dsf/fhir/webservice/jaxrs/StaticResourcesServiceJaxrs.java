@@ -56,7 +56,7 @@ public class StaticResourcesServiceJaxrs implements StaticResourcesService, Init
 	@Override
 	public Response getFile(@PathParam("fileName") String fileName, @Context UriInfo uri, @Context HttpHeaders headers)
 	{
-		logger.trace("POST {}", uri.getRequestUri().toString());
+		logger.trace("GET {}", uri.getRequestUri().toString());
 		
 		return delegate.getFile(fileName, uri, headers);
 	}
