@@ -115,8 +115,10 @@ public abstract class AbstractServiceImpl<D extends ResourceDao<R>, R extends Re
 
 	public void afterPropertiesSet() throws Exception
 	{
+		Objects.requireNonNull(resourceType, "resourceType");
 		Objects.requireNonNull(resourceTypeName, "resourceTypeName");
 		Objects.requireNonNull(serverBase, "serverBase");
+		Objects.requireNonNull(path, "path");
 		Objects.requireNonNull(defaultPageCount, "defaultPageCount");
 		Objects.requireNonNull(dao, "dao");
 		Objects.requireNonNull(validator, "validator");

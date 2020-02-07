@@ -27,8 +27,8 @@ import ca.uhn.fhir.rest.api.Constants;
 
 @Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
 		Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
-@Produces({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
-		Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
+		Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
 public abstract class AbstractServiceJaxrs<R extends Resource, S extends BasicService<R>>
 		implements BasicService<R>, InitializingBean
 {

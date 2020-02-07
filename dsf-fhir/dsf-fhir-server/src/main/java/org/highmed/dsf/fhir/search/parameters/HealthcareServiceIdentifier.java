@@ -6,7 +6,7 @@ import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.HealthcareService;
 import org.hl7.fhir.r4.model.Resource;
 
-@SearchParameterDefinition(name = AbstractIdentifierParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/HealthcareService.​identifier", type = SearchParamType.TOKEN, documentation = "External identifiers for this item")
+@SearchParameterDefinition(name = AbstractIdentifierParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/HealthcareService.identifier", type = SearchParamType.TOKEN, documentation = "External identifiers for this item")
 public class HealthcareServiceIdentifier extends AbstractIdentifierParameter<HealthcareService>
 {
 	public static final String RESOURCE_COLUMN = "healthcare_service";

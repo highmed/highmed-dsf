@@ -17,8 +17,8 @@ import org.slf4j.LoggerFactory;
 import ca.uhn.fhir.rest.api.Constants;
 
 @Path(ConformanceServiceJaxrs.PATH)
-@Produces({ Constants.CT_FHIR_JSON_NEW, Constants.CT_FHIR_XML_NEW, Constants.CT_FHIR_JSON, Constants.CT_FHIR_XML,
-		MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON_NEW, Constants.CT_FHIR_XML_NEW, Constants.CT_FHIR_JSON,
+		Constants.CT_FHIR_XML, MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 public class ConformanceServiceJaxrs implements ConformanceService
 {
 	public static final String PATH = "metadata";
