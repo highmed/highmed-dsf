@@ -98,11 +98,13 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 				+ "<meta name=\"theme-color\" content=\"#29235c\">"
 				+ "<script src=\"/fhir/static/prettify.js\"></script>"
 				+ "<link rel=\"stylesheet\" type=\"text/css\" href=\"/fhir/static/prettify.css\">"
-				+ "<style>li.L0, li.L1, li.L2, li.L3, li.L5, li.L6, li.L7, li.L8 {list-style-type: decimal !important;}</style></head>"
+				+ "<style>li.L0, li.L1, li.L2, li.L3, li.L5, li.L6, li.L7, li.L8 {list-style-type: decimal !important;}</style>"
+				+ "<title>DSF: " + uriInfo.getPath() + "</title></head>"
 				+ "<body onload=\"prettyPrint()\" style=\"margin:2em;\">"
 				+ "<table style=\"margin-bottom:2em;\"><tr><td><image src=\"/fhir/static/highmed.svg\" style=\"height:6em;margin-bottom:0.2em\"></td>"
 				+ "<td style=\"vertical-align:bottom;\"><h1 style=\"font-family:monospace;color:#29235c;margin:0 0 0 1em;\">"
-				+ URLDecoder.decode(getResourceUrl(t, uriInfo.getRequestUri().toURL()).orElse(""),
+				+ URLDecoder.decode(
+						getResourceUrl(t, uriInfo.getRequestUri().toURL()).orElse(uriInfo.getRequestUri().toString()),
 						StandardCharsets.UTF_8)
 				+ "</h1></td></tr></table>" + "<pre class=\"prettyprint linenums\">");
 		String content = getParser().encodeResourceToString(t).replace("<", "&lt;").replace(">", "&gt;");
@@ -143,7 +145,8 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		if (t instanceof Bundle)
 			return ((Bundle) t).getLink().stream().filter(c -> "self".equals(c.getRelation())).findFirst()
 					.map(c -> c.getUrl());
-		else if (t instanceof Resource)
+		else if (t instanceof Resource && t.getIdElement().getResourceType() != null
+				&& t.getIdElement().getIdPart() != null)
 			return Optional.of(String.format("%s://%s/fhir/%s/%s", url.getProtocol(), url.getAuthority(),
 					t.getIdElement().getResourceType(), t.getIdElement().getIdPart()));
 		else
