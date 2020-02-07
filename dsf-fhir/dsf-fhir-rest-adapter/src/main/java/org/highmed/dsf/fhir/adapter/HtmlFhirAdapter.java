@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
@@ -101,7 +102,8 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 				+ "<body onload=\"prettyPrint()\" style=\"margin:2em;\">"
 				+ "<table style=\"margin-bottom:2em;\"><tr><td><image src=\"/fhir/static/highmed.svg\" style=\"height:6em;margin-bottom:0.2em\"></td>"
 				+ "<td style=\"vertical-align:bottom;\"><h1 style=\"font-family:monospace;color:#29235c;margin:0 0 0 1em;\">"
-				+ URLDecoder.decode(uriInfo.getRequestUri().toString(), StandardCharsets.UTF_8)
+				+ URLDecoder.decode(getResourceUrl(t, uriInfo.getRequestUri().toURL()).orElse(""),
+						StandardCharsets.UTF_8)
 				+ "</h1></td></tr></table>" + "<pre class=\"prettyprint linenums\">");
 		String content = getParser().encodeResourceToString(t).replace("<", "&lt;").replace(">", "&gt;");
 
@@ -132,6 +134,18 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 					.map(c -> c.getResource().getClass().getAnnotation(ResourceDef.class).name()).findFirst();
 		else if (t instanceof Resource)
 			return Optional.of(t.getClass().getAnnotation(ResourceDef.class).name());
+		else
+			return Optional.empty();
+	}
+
+	private Optional<String> getResourceUrl(T t, URL url)
+	{
+		if (t instanceof Bundle)
+			return ((Bundle) t).getLink().stream().filter(c -> "self".equals(c.getRelation())).findFirst()
+					.map(c -> c.getUrl());
+		else if (t instanceof Resource)
+			return Optional.of(String.format("%s://%s/fhir/%s/%s", url.getProtocol(), url.getAuthority(),
+					t.getIdElement().getResourceType(), t.getIdElement().getIdPart()));
 		else
 			return Optional.empty();
 	}
