@@ -562,6 +562,15 @@ public class ResponseGenerator
 		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
+	public Response badReadRequestUrl(int bundleIndex, String url)
+	{
+		logger.warn("Bad read request url {} at bundle index {}", url, bundleIndex);
+
+		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+				"Bad read request url " + url + " at bundle index " + bundleIndex);
+		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
+	}
+
 	public Response resourceTypeNotSupportedByImplementation(int bundleIndex, String resourceTypeName)
 	{
 		logger.warn("Resource type {} at bundle index {} not supported by this implementation", resourceTypeName,
