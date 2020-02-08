@@ -15,6 +15,9 @@ import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.highmed.dsf.fhir.webservice.specification.RootService;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
+import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
 import org.springframework.beans.factory.InitializingBean;
 
 public class RootServiceImpl implements RootService, InitializingBean
@@ -51,6 +54,15 @@ public class RootServiceImpl implements RootService, InitializingBean
 	public String getPath()
 	{
 		throw new UnsupportedOperationException("implemented by jaxrs service layer");
+	}
+
+	@Override
+	public Response root(UriInfo uri, HttpHeaders headers)
+	{
+		OperationOutcome outcome = responseGenerator.createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+				"This is the base URL of the FHIR server. GET method not allowed");
+		return responseGenerator
+				.response(Status.METHOD_NOT_ALLOWED, outcome, parameterConverter.getMediaType(uri, headers)).build();
 	}
 
 	@Override

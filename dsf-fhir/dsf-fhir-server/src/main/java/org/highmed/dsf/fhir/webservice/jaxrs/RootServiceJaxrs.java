@@ -2,6 +2,7 @@ package org.highmed.dsf.fhir.webservice.jaxrs;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -57,6 +58,15 @@ public class RootServiceJaxrs implements RootService, InitializingBean
 	public String getPath()
 	{
 		return PATH;
+	}
+
+	@GET
+	@Override
+	public Response root(@Context UriInfo uri, @Context HttpHeaders headers)
+	{
+		logger.trace("GET {}", uri.getRequestUri().toString());
+
+		return delegate.root(uri, headers);
 	}
 
 	@POST

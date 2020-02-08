@@ -1,5 +1,6 @@
 package org.highmed.dsf.fhir.webservice.specification;
 
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
@@ -12,5 +13,7 @@ public interface RootService extends NeedsAuthentication
 {
 	void setUserProvider(UserProvider provider);
 
+	Response root(@Context UriInfo uri, @Context HttpHeaders headers);
+	
 	Response handleBundle(Bundle bundle, UriInfo uri, HttpHeaders headers);
 }
