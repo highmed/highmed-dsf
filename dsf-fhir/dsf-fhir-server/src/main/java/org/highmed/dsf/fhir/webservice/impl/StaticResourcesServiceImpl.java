@@ -63,12 +63,11 @@ public class StaticResourcesServiceImpl implements StaticResourcesService
 
 		private Optional<CacheEntry> read(String fileName)
 		{
-			InputStream stream = StaticResourcesServiceImpl.class.getResourceAsStream("/static/" + fileName);
-			if (stream == null)
-				return Optional.empty();
-			else
+			try (InputStream stream = StaticResourcesServiceImpl.class.getResourceAsStream("/static/" + fileName))
 			{
-				try
+				if (stream == null)
+					return Optional.empty();
+				else
 				{
 					byte[] data = stream.readAllBytes();
 					byte[] hash = hash(data);
@@ -77,10 +76,10 @@ public class StaticResourcesServiceImpl implements StaticResourcesService
 					entries.put(fileName, new SoftReference<>(entry));
 					return Optional.of(entry);
 				}
-				catch (IOException e)
-				{
-					throw new WebApplicationException(e);
-				}
+			}
+			catch (IOException e)
+			{
+				throw new WebApplicationException(e);
 			}
 		}
 
