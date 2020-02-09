@@ -5,9 +5,10 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -49,12 +50,16 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 			+ "|SubstanceReferenceInformation|SubstanceSourceMaterial|SubstanceSpecification|SupplyDelivery|SupplyRequest|Task|TerminologyCapabilities|TestReport"
 			+ "|TestScript|ValueSet|VerificationResult|VisionPrescription";
 
+	private static final String UUID = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
+
 	private static final Pattern URL_PATTERN = Pattern
 			.compile("(https?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_.|]");
-	private static final Pattern REFERENCE_UUID_PATTERN = Pattern.compile("&lt;reference value=\"((" + RESOURCE_NAMES
-			+ ")/[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})\"&gt;");
-	private static final Pattern ID_UUID_PATTERN = Pattern.compile(
-			"&lt;id value=\"([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})\"&gt;");
+	private static final Pattern XML_REFERENCE_UUID_PATTERN = Pattern
+			.compile("&lt;reference value=\"((" + RESOURCE_NAMES + ")/" + UUID + ")\"&gt;");
+	private static final Pattern JSON_REFERENCE_UUID_PATTERN = Pattern
+			.compile("\"reference\": \"((" + RESOURCE_NAMES + ")/" + UUID + ")\",");
+	private static final Pattern XML_ID_UUID_PATTERN = Pattern.compile("&lt;id value=\"(" + UUID + ")\"&gt;");
+	private static final Pattern JSON_ID_UUID_PATTERN = Pattern.compile("\"id\": \"(" + UUID + ")\",");
 
 	private final FhirContext fhirContext;
 	private final Class<T> resourceType;
@@ -68,10 +73,21 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		this.resourceType = resourceType;
 	}
 
-	private IParser getParser()
+	private IParser getXmlParser()
 	{
 		/* Parsers are not guaranteed to be thread safe */
 		IParser p = fhirContext.newXmlParser();
+		p.setStripVersionsFromReferences(false);
+		p.setOverrideResourceIdWithBundleEntryFullUrl(false);
+		p.setPrettyPrint(true);
+
+		return p;
+	}
+
+	private IParser getJsonParser()
+	{
+		/* Parsers are not guaranteed to be thread safe */
+		IParser p = fhirContext.newJsonParser();
 		p.setStripVersionsFromReferences(false);
 		p.setOverrideResourceIdWithBundleEntryFullUrl(false);
 		p.setPrettyPrint(true);
@@ -91,32 +107,95 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 			throws IOException, WebApplicationException
 	{
 		OutputStreamWriter out = new OutputStreamWriter(entityStream);
-		out.write("<html><head>"
-				+ "<link rel=\"icon\" type=\"image/svg+xml\" href=\"/fhir/static/favicon.svg\" sizes=\"any\">"
-				+ "<link rel=\"icon\" type=\"image/png\" href=\"/fhir/static/favicon_32x32.png\" sizes=\"32x32\">"
-				+ "<link rel=\"icon\" type=\"image/png\" href=\"/fhir/static/favicon_96x96.png\" sizes=\"96x96\">"
-				+ "<meta name=\"theme-color\" content=\"#29235c\">"
-				+ "<script src=\"/fhir/static/prettify.js\"></script>"
-				+ "<link rel=\"stylesheet\" type=\"text/css\" href=\"/fhir/static/prettify.css\">"
-				+ "<style>li.L0, li.L1, li.L2, li.L3, li.L5, li.L6, li.L7, li.L8 {list-style-type: decimal !important;}</style>"
-				+ "<title>DSF: " + uriInfo.getPath() + "</title></head>"
-				+ "<body onload=\"prettyPrint()\" style=\"margin:2em;\">"
-				+ "<table style=\"margin-bottom:2em;\"><tr><td><image src=\"/fhir/static/highmed.svg\" style=\"height:6em;margin-bottom:0.2em\"></td>"
-				+ "<td style=\"vertical-align:bottom;\"><h1 style=\"font-family:monospace;color:#29235c;margin:0 0 0 1em;\">"
-				+ URLDecoder.decode(
-						getResourceUrl(t, uriInfo.getRequestUri().toURL()).orElse(uriInfo.getRequestUri().toString()),
-						StandardCharsets.UTF_8)
-				+ "</h1></td></tr></table>" + "<pre class=\"prettyprint linenums\">");
-		String content = getParser().encodeResourceToString(t).replace("<", "&lt;").replace(">", "&gt;");
+		out.write("<html>\n<head>\n");
+		out.write("<link rel=\"icon\" type=\"image/svg+xml\" href=\"/fhir/static/favicon.svg\">\n");
+		out.write("<link rel=\"icon\" type=\"image/png\" href=\"/fhir/static/favicon_32x32.png\" sizes=\"32x32\">\n");
+		out.write("<link rel=\"icon\" type=\"image/png\" href=\"/fhir/static/favicon_96x96.png\" sizes=\"96x96\">\n");
+		out.write("<meta name=\"theme-color\" content=\"#29235c\">\n");
+		out.write("<script src=\"/fhir/static/prettify.js\"></script>\n");
+		out.write("<script src=\"/fhir/static/tabs.js\"></script>\n");
+		out.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"/fhir/static/prettify.css\">\n");
+		out.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"/fhir/static/highmed.css\">\n");
+		out.write("<title>DSF" + (uriInfo.getPath() == null || uriInfo.getPath().isEmpty() ? "" : ": ")
+				+ uriInfo.getPath() + "</title>\n</head>\n");
+		out.write("<body onload=\"prettyPrint();openInitialTab();\" style=\"margin:2em;\">\n");
+		out.write("<table style=\"margin-bottom:0.4em;\"><tr>\n");
+		out.write("<td><image src=\"/fhir/static/highmed.svg\" style=\"height:6em;\"></td>\n");
+		out.write("<td style=\"vertical-align:bottom;\"><h1 id=\"url\">");
+		out.write(getUrlHeading(t));
+		out.write("</h1></td>\n");
+		out.write("</tr></table>\n");
+		out.write("<div class=\"tab\">\n");
+		out.write("<button id=\"json-button\" class=\"tablinks\" onclick=\"openTab('json')\">json</button>\n");
+		out.write("<button id=\"xml-button\" class=\"tablinks\" onclick=\"openTab('xml')\">xml</button>\n");
+		out.write("</div>\n");
+
+		writeXml(t, out);
+		writeJson(t, out);
+
+		out.write("</html>");
+		out.flush();
+	}
+
+	private String getUrlHeading(T t) throws MalformedURLException
+	{
+		URI uri = getResourceUrl(t).map(this::toURI).orElse(uriInfo.getRequestUri());
+		String[] pathSegments = uri.getPath().split("/");
+
+		String u = uri.getScheme() + "://" + uri.getAuthority() + "/fhir";
+		String heading = "<a href=\"" + u + "\">" + u + "</a>";
+
+		for (int i = 2; i < pathSegments.length; i++)
+		{
+			u += "/" + pathSegments[i] + (uri.getQuery() != null ? "?" + uri.getQuery() : "");
+			heading += "<a href=\"" + u + "\">/" + pathSegments[i]
+					+ (uri.getQuery() != null ? "?" + uri.getQuery() : "") + "</a>";
+		}
+
+		return heading;
+	}
+
+	private URI toURI(String str)
+	{
+		try
+		{
+			return new URI(str);
+		}
+		catch (URISyntaxException e)
+		{
+			throw new RuntimeException(e);
+		}
+	}
+
+	private Optional<String> getResourceUrl(T t) throws MalformedURLException
+	{
+		if (t instanceof Bundle)
+			return ((Bundle) t).getLink().stream().filter(c -> "self".equals(c.getRelation())).findFirst()
+					.map(c -> c.getUrl());
+		else if (t instanceof Resource && t.getIdElement().getResourceType() != null
+				&& t.getIdElement().getIdPart() != null)
+		{
+			URL url = uriInfo.getRequestUri().toURL();
+			return Optional.of(String.format("%s://%s/fhir/%s/%s", url.getProtocol(), url.getAuthority(),
+					t.getIdElement().getResourceType(), t.getIdElement().getIdPart()));
+		}
+		else
+			return Optional.empty();
+	}
+
+	private void writeXml(T t, OutputStreamWriter out) throws IOException
+	{
+		out.write("<pre id=\"xml\" class=\"prettyprint linenums lang-xml\" style=\"display:none;\">");
+		String content = getXmlParser().encodeResourceToString(t).replace("<", "&lt;").replace(">", "&gt;");
 
 		Matcher urlMatcher = URL_PATTERN.matcher(content);
 		content = urlMatcher.replaceAll(result -> "<a href=\"" + result.group() + "\">" + result.group() + "</a>");
 
-		Matcher referenceUuidMatcher = REFERENCE_UUID_PATTERN.matcher(content);
+		Matcher referenceUuidMatcher = XML_REFERENCE_UUID_PATTERN.matcher(content);
 		content = referenceUuidMatcher.replaceAll(result -> "&lt;reference value=\"<a href=\"/fhir/" + result.group(1)
 				+ "\">" + result.group(1) + "</a>\"&gt");
 
-		Matcher idUuidMatcher = ID_UUID_PATTERN.matcher(content);
+		Matcher idUuidMatcher = XML_ID_UUID_PATTERN.matcher(content);
 		content = idUuidMatcher.replaceAll(result ->
 		{
 			Optional<String> resourceName = getResourceName(t, result.group(1));
@@ -125,8 +204,31 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		});
 
 		out.write(content);
-		out.write("</pre></html>");
-		out.flush();
+		out.write("</pre>\n");
+	}
+
+	private void writeJson(T t, OutputStreamWriter out) throws IOException
+	{
+		out.write("<pre id=\"json\" class=\"prettyprint linenums lang-json\" style=\"display:none;\">");
+		String content = getJsonParser().encodeResourceToString(t).replace("<", "&lt;").replace(">", "&gt;");
+
+		Matcher urlMatcher = URL_PATTERN.matcher(content);
+		content = urlMatcher.replaceAll(result -> "<a href=\"" + result.group() + "\">" + result.group() + "</a>");
+
+		Matcher referenceUuidMatcher = JSON_REFERENCE_UUID_PATTERN.matcher(content);
+		content = referenceUuidMatcher.replaceAll(
+				result -> "\"reference\": \"<a href=\"/fhir/" + result.group(1) + "\">" + result.group(1) + "</a>\",");
+
+		Matcher idUuidMatcher = JSON_ID_UUID_PATTERN.matcher(content);
+		content = idUuidMatcher.replaceAll(result ->
+		{
+			Optional<String> resourceName = getResourceName(t, result.group(1));
+			return resourceName.map(rN -> "\"id\": \"<a href=\"/fhir/" + rN + "/" + result.group(1) + "\">"
+					+ result.group(1) + "</a>\",").orElse(result.group(0));
+		});
+
+		out.write(content);
+		out.write("</pre>\n");
 	}
 
 	private Optional<String> getResourceName(T t, String uuid)
@@ -136,19 +238,6 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 					.map(c -> c.getResource().getClass().getAnnotation(ResourceDef.class).name()).findFirst();
 		else if (t instanceof Resource)
 			return Optional.of(t.getClass().getAnnotation(ResourceDef.class).name());
-		else
-			return Optional.empty();
-	}
-
-	private Optional<String> getResourceUrl(T t, URL url)
-	{
-		if (t instanceof Bundle)
-			return ((Bundle) t).getLink().stream().filter(c -> "self".equals(c.getRelation())).findFirst()
-					.map(c -> c.getUrl());
-		else if (t instanceof Resource && t.getIdElement().getResourceType() != null
-				&& t.getIdElement().getIdPart() != null)
-			return Optional.of(String.format("%s://%s/fhir/%s/%s", url.getProtocol(), url.getAuthority(),
-					t.getIdElement().getResourceType(), t.getIdElement().getIdPart()));
 		else
 			return Optional.empty();
 	}
