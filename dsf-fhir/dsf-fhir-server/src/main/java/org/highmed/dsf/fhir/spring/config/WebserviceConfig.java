@@ -1,5 +1,6 @@
 package org.highmed.dsf.fhir.spring.config;
 
+import org.highmed.dsf.fhir.adapter.HtmlFhirAdapter.ServerBaseProvider;
 import org.highmed.dsf.fhir.webservice.impl.BinaryServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.BundleServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.CodeSystemServiceImpl;
@@ -139,6 +140,12 @@ public class WebserviceConfig
 
 	@Autowired
 	private BuildInfoReaderConfig buildInfoReaderConfig;
+
+	@Bean
+	public ServerBaseProvider serverBaseProvider()
+	{
+		return () -> serverBase;
+	}
 
 	@Bean
 	public ConformanceService conformanceService()

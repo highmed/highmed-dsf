@@ -8,7 +8,6 @@ import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -32,6 +31,12 @@ import ca.uhn.fhir.parser.IParser;
 @Produces({ MediaType.TEXT_HTML })
 public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWriter<T>
 {
+	@FunctionalInterface
+	public static interface ServerBaseProvider
+	{
+		String getServerBase();
+	}
+
 	private static final String RESOURCE_NAMES = "Account|ActivityDefinition|AdverseEvent|AllergyIntolerance|Appointment|AppointmentResponse|AuditEvent|Basic|Binary"
 			+ "|BiologicallyDerivedProduct|BodyStructure|Bundle|CapabilityStatement|CarePlan|CareTeam|CatalogEntry|ChargeItem|ChargeItemDefinition|Claim|ClaimResponse"
 			+ "|ClinicalImpression|CodeSystem|Communication|CommunicationRequest|CompartmentDefinition|Composition|ConceptMap|Condition|Consent|Contract|Coverage"
@@ -62,14 +67,16 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 	private static final Pattern JSON_ID_UUID_PATTERN = Pattern.compile("\"id\": \"(" + UUID + ")\",");
 
 	private final FhirContext fhirContext;
+	private final ServerBaseProvider serverBaseProvider;
 	private final Class<T> resourceType;
 
 	@Context
 	private UriInfo uriInfo;
 
-	protected HtmlFhirAdapter(FhirContext fhirContext, Class<T> resourceType)
+	protected HtmlFhirAdapter(FhirContext fhirContext, ServerBaseProvider serverBaseProvider, Class<T> resourceType)
 	{
 		this.fhirContext = fhirContext;
+		this.serverBaseProvider = serverBaseProvider;
 		this.resourceType = resourceType;
 	}
 
@@ -142,7 +149,7 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		URI uri = getResourceUrl(t).map(this::toURI).orElse(uriInfo.getRequestUri());
 		String[] pathSegments = uri.getPath().split("/");
 
-		String u = uri.getScheme() + "://" + uri.getAuthority() + "/fhir";
+		String u = serverBaseProvider.getServerBase();
 		String heading = "<a href=\"" + u + "\">" + u + "</a>";
 
 		for (int i = 2; i < pathSegments.length; i++)
@@ -175,8 +182,7 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		else if (t instanceof Resource && t.getIdElement().getResourceType() != null
 				&& t.getIdElement().getIdPart() != null)
 		{
-			URL url = uriInfo.getRequestUri().toURL();
-			return Optional.of(String.format("%s://%s/fhir/%s/%s", url.getProtocol(), url.getAuthority(),
+			return Optional.of(String.format("%s/%s/%s", serverBaseProvider.getServerBase(),
 					t.getIdElement().getResourceType(), t.getIdElement().getIdPart()));
 		}
 		else

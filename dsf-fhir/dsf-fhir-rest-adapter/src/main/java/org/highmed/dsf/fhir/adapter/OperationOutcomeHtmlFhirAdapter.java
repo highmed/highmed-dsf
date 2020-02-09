@@ -9,8 +9,8 @@ import ca.uhn.fhir.context.FhirContext;
 @Provider
 public class OperationOutcomeHtmlFhirAdapter extends HtmlFhirAdapter<OperationOutcome>
 {
-	public OperationOutcomeHtmlFhirAdapter(FhirContext fhirContext)
+	public OperationOutcomeHtmlFhirAdapter(FhirContext fhirContext, ServerBaseProvider serverBaseProvider)
 	{
-		super(fhirContext, OperationOutcome.class);
+		super(fhirContext, serverBaseProvider, OperationOutcome.class);
 	}
 }

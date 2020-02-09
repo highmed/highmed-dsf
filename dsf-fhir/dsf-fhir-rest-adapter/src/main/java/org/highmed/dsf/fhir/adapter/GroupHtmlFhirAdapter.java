@@ -9,8 +9,8 @@ import ca.uhn.fhir.context.FhirContext;
 @Provider
 public class GroupHtmlFhirAdapter extends HtmlFhirAdapter<Group>
 {
-	public GroupHtmlFhirAdapter(FhirContext fhirContext)
+	public GroupHtmlFhirAdapter(FhirContext fhirContext, ServerBaseProvider serverBaseProvider)
 	{
-		super(fhirContext, Group.class);
+		super(fhirContext, serverBaseProvider, Group.class);
 	}
 }

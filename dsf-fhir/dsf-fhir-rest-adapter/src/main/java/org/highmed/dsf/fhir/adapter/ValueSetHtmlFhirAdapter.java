@@ -9,8 +9,8 @@ import ca.uhn.fhir.context.FhirContext;
 @Provider
 public class ValueSetHtmlFhirAdapter extends HtmlFhirAdapter<ValueSet>
 {
-	public ValueSetHtmlFhirAdapter(FhirContext fhirContext)
+	public ValueSetHtmlFhirAdapter(FhirContext fhirContext, ServerBaseProvider serverBaseProvider)
 	{
-		super(fhirContext, ValueSet.class);
+		super(fhirContext, serverBaseProvider, ValueSet.class);
 	}
 }

@@ -9,8 +9,8 @@ import ca.uhn.fhir.context.FhirContext;
 @Provider
 public class CapabilityStatementHtmlFhirAdapter extends HtmlFhirAdapter<CapabilityStatement>
 {
-	public CapabilityStatementHtmlFhirAdapter(FhirContext fhirContext)
+	public CapabilityStatementHtmlFhirAdapter(FhirContext fhirContext, ServerBaseProvider serverBaseProvider)
 	{
-		super(fhirContext, CapabilityStatement.class);
+		super(fhirContext, serverBaseProvider, CapabilityStatement.class);
 	}
 }

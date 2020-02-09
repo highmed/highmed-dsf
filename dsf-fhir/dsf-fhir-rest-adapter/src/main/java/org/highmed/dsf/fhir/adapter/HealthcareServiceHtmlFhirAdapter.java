@@ -9,8 +9,8 @@ import ca.uhn.fhir.context.FhirContext;
 @Provider
 public class HealthcareServiceHtmlFhirAdapter extends HtmlFhirAdapter<HealthcareService>
 {
-	public HealthcareServiceHtmlFhirAdapter(FhirContext fhirContext)
+	public HealthcareServiceHtmlFhirAdapter(FhirContext fhirContext, ServerBaseProvider serverBaseProvider)
 	{
-		super(fhirContext, HealthcareService.class);
+		super(fhirContext, serverBaseProvider, HealthcareService.class);
 	}
 }

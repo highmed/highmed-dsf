@@ -9,8 +9,8 @@ import ca.uhn.fhir.context.FhirContext;
 @Provider
 public class SubscriptionHtmlFhirAdapter extends HtmlFhirAdapter<Subscription>
 {
-	public SubscriptionHtmlFhirAdapter(FhirContext fhirContext)
+	public SubscriptionHtmlFhirAdapter(FhirContext fhirContext, ServerBaseProvider serverBaseProvider)
 	{
-		super(fhirContext, Subscription.class);
+		super(fhirContext, serverBaseProvider, Subscription.class);
 	}
 }

@@ -9,8 +9,8 @@ import ca.uhn.fhir.context.FhirContext;
 @Provider
 public class NamingSystemHtmlFhirAdapter extends HtmlFhirAdapter<NamingSystem>
 {
-	public NamingSystemHtmlFhirAdapter(FhirContext fhirContext)
+	public NamingSystemHtmlFhirAdapter(FhirContext fhirContext, ServerBaseProvider serverBaseProvider)
 	{
-		super(fhirContext, NamingSystem.class);
+		super(fhirContext, serverBaseProvider, NamingSystem.class);
 	}
 }
