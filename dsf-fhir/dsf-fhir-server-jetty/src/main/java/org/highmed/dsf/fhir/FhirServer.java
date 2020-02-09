@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.function.BiFunction;
@@ -21,6 +22,7 @@ import java.util.stream.Stream;
 
 import javax.servlet.Filter;
 import javax.servlet.ServletException;
+import javax.servlet.SessionTrackingMode;
 
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConfiguration.Customizer;
@@ -81,6 +83,9 @@ public final class FhirServer
 		@SuppressWarnings("unchecked")
 		JettyServer server = new JettyServer(connector, errorHandler, "/fhir", initializers, configProperties,
 				webInfClassesDirs, webInfJars, filters.toArray(new Class[filters.size()]));
+
+		server.getWebAppContext().addEventListener(new SessionInvalidater());
+		server.getWebAppContext().getSessionHandler().setSessionTrackingModes(Collections.singleton(SessionTrackingMode.SSL));
 
 		initializeWebSocketServerContainer(server);
 
