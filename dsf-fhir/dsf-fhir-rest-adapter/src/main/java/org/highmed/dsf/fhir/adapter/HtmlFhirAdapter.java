@@ -154,9 +154,14 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 
 		for (int i = 2; i < pathSegments.length; i++)
 		{
-			u += "/" + pathSegments[i] + (uri.getQuery() != null ? "?" + uri.getQuery() : "");
-			heading += "<a href=\"" + u + "\">/" + pathSegments[i]
-					+ (uri.getQuery() != null ? "?" + uri.getQuery() : "") + "</a>";
+			u += "/" + pathSegments[i];
+			heading += "<a href=\"" + u + "\">/" + pathSegments[i] + "</a>";
+		}
+
+		if (uri.getQuery() != null)
+		{
+			u += "?" + uri.getQuery();
+			heading += "<a href=\"" + u + "\">?" + uri.getQuery() + "</a>";
 		}
 
 		return heading;
