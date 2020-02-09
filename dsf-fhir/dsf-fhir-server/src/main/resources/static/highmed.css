@@ -8,6 +8,7 @@ h1
 	font-family: monospace;
 	color: #29235c;
 	margin: 0 0 0 1em;
+	word-break: break-word;
 }
 
 h1 a:link, h1 a:visited, h1 a:active
