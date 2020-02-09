@@ -7,7 +7,7 @@ import javax.ws.rs.core.UriInfo;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StructureDefinition;
 
-public interface StructureDefinitionService extends BasicService<StructureDefinition>
+public interface StructureDefinitionService extends BasicResourceService<StructureDefinition>
 {
 	Response postSnapshotNew(String snapshotPath, Parameters parameters, UriInfo uri, HttpHeaders headers);
 

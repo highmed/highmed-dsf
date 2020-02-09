@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class StructureDefinitionServiceSecure extends
-		AbstractServiceSecure<StructureDefinition, StructureDefinitionService> implements StructureDefinitionService
+		AbstractResourceServiceSecure<StructureDefinition, StructureDefinitionService> implements StructureDefinitionService
 {
 	private static final Logger logger = LoggerFactory.getLogger(StructureDefinitionServiceSecure.class);
 

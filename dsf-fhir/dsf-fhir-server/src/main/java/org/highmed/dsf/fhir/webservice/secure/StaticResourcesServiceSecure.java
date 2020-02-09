@@ -4,36 +4,18 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.highmed.dsf.fhir.authentication.UserProvider;
+import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.highmed.dsf.fhir.webservice.specification.StaticResourcesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class StaticResourcesServiceSecure implements StaticResourcesService
+public class StaticResourcesServiceSecure extends AbstractServiceSecure<StaticResourcesService> implements StaticResourcesService
 {
-	private static final Logger logger = LoggerFactory.getLogger(AbstractServiceSecure.class);
+	private static final Logger logger = LoggerFactory.getLogger(StaticResourcesServiceSecure.class);
 
-	protected final StaticResourcesService delegate;
-
-	protected UserProvider provider;
-
-	public StaticResourcesServiceSecure(StaticResourcesService delegate)
+	public StaticResourcesServiceSecure(StaticResourcesService delegate, ResponseGenerator responseGenerator)
 	{
-		this.delegate = delegate;
-	}
-
-	@Override
-	public String getPath()
-	{
-		return delegate.getPath();
-	}
-
-	@Override
-	public void setUserProvider(UserProvider provider)
-	{
-		delegate.setUserProvider(provider);
-
-		this.provider = provider;
+		super(delegate, responseGenerator);
 	}
 
 	@Override

@@ -19,12 +19,11 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.codec.binary.Hex;
-import org.highmed.dsf.fhir.authentication.UserProvider;
 import org.highmed.dsf.fhir.webservice.specification.StaticResourcesService;
 
 import ca.uhn.fhir.rest.api.Constants;
 
-public class StaticResourcesServiceImpl implements StaticResourcesService
+public class StaticResourcesServiceImpl extends AbstractServiceImpl implements StaticResourcesService
 {
 	private static final class CacheEntry
 	{
@@ -103,22 +102,9 @@ public class StaticResourcesServiceImpl implements StaticResourcesService
 
 	private final Cache cache = new Cache();
 
-	private final String path;
-
 	public StaticResourcesServiceImpl(String path)
 	{
-		this.path = path;
-	}
-
-	@Override
-	public String getPath()
-	{
-		return path;
-	}
-
-	@Override
-	public void setUserProvider(UserProvider provider)
-	{
+		super(path);
 	}
 
 	@Override

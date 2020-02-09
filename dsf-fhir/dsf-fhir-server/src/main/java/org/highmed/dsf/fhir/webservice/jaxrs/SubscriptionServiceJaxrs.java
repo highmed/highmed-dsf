@@ -6,7 +6,7 @@ import org.highmed.dsf.fhir.webservice.specification.SubscriptionService;
 import org.hl7.fhir.r4.model.Subscription;
 
 @Path(SubscriptionServiceJaxrs.PATH)
-public class SubscriptionServiceJaxrs extends AbstractServiceJaxrs<Subscription, SubscriptionService>
+public class SubscriptionServiceJaxrs extends AbstractResourceServiceJaxrs<Subscription, SubscriptionService>
 		implements SubscriptionService
 {
 	public static final String PATH = "Subscription";

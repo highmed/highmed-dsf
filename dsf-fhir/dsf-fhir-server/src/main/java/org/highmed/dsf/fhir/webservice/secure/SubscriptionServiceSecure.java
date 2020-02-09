@@ -8,7 +8,7 @@ import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.highmed.dsf.fhir.webservice.specification.SubscriptionService;
 import org.hl7.fhir.r4.model.Subscription;
 
-public class SubscriptionServiceSecure extends AbstractServiceSecure<Subscription, SubscriptionService>
+public class SubscriptionServiceSecure extends AbstractResourceServiceSecure<Subscription, SubscriptionService>
 		implements SubscriptionService
 {
 	public SubscriptionServiceSecure(SubscriptionService delegate, ResponseGenerator responseGenerator)

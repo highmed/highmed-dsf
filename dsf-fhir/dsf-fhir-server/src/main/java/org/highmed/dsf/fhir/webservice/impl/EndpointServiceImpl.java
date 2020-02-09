@@ -12,15 +12,14 @@ import org.highmed.dsf.fhir.service.ResourceValidator;
 import org.highmed.dsf.fhir.webservice.specification.EndpointService;
 import org.hl7.fhir.r4.model.Endpoint;
 
-public class EndpointServiceImpl extends AbstractServiceImpl<EndpointDao, Endpoint> implements EndpointService
+public class EndpointServiceImpl extends AbstractResourceServiceImpl<EndpointDao, Endpoint> implements EndpointService
 {
-	public EndpointServiceImpl(String resourceTypeName, String serverBase, String path, int defaultPageCount,
-			EndpointDao dao, ResourceValidator validator, EventManager eventManager, ExceptionHandler exceptionHandler,
+	public EndpointServiceImpl(String path, String serverBase, int defaultPageCount, EndpointDao dao,
+			ResourceValidator validator, EventManager eventManager, ExceptionHandler exceptionHandler,
 			EventGenerator eventGenerator, ResponseGenerator responseGenerator, ParameterConverter parameterConverter,
 			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver)
 	{
-		super(Endpoint.class, resourceTypeName, serverBase, path, defaultPageCount, dao, validator, eventManager,
-				exceptionHandler, eventGenerator, responseGenerator, parameterConverter, referenceExtractor,
-				referenceResolver);
+		super(path, Endpoint.class, serverBase, defaultPageCount, dao, validator, eventManager, exceptionHandler,
+				eventGenerator, responseGenerator, parameterConverter, referenceExtractor, referenceResolver);
 	}
 }

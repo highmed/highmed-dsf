@@ -12,17 +12,15 @@ import org.highmed.dsf.fhir.service.ResourceValidator;
 import org.highmed.dsf.fhir.webservice.specification.OrganizationService;
 import org.hl7.fhir.r4.model.Organization;
 
-public class OrganizationServiceImpl extends AbstractServiceImpl<OrganizationDao, Organization>
+public class OrganizationServiceImpl extends AbstractResourceServiceImpl<OrganizationDao, Organization>
 		implements OrganizationService
 {
-	public OrganizationServiceImpl(String resourceTypeName, String serverBase, String path, int defaultPageCount,
-			OrganizationDao dao, ResourceValidator validator, EventManager eventManager,
-			ExceptionHandler exceptionHandler, EventGenerator eventGenerator, ResponseGenerator responseGenerator,
-			ParameterConverter parameterConverter, ReferenceExtractor referenceExtractor,
-			ReferenceResolver referenceResolver)
+	public OrganizationServiceImpl(String path, String serverBase, int defaultPageCount, OrganizationDao dao,
+			ResourceValidator validator, EventManager eventManager, ExceptionHandler exceptionHandler,
+			EventGenerator eventGenerator, ResponseGenerator responseGenerator, ParameterConverter parameterConverter,
+			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver)
 	{
-		super(Organization.class, resourceTypeName, serverBase, path, defaultPageCount, dao, validator, eventManager,
-				exceptionHandler, eventGenerator, responseGenerator, parameterConverter, referenceExtractor,
-				referenceResolver);
+		super(path, Organization.class, serverBase, defaultPageCount, dao, validator, eventManager, exceptionHandler,
+				eventGenerator, responseGenerator, parameterConverter, referenceExtractor, referenceResolver);
 	}
 }

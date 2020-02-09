@@ -7,7 +7,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import org.highmed.dsf.fhir.authentication.UserProvider;
 import org.highmed.dsf.fhir.dao.command.CommandFactory;
 import org.highmed.dsf.fhir.dao.command.CommandList;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
@@ -20,16 +19,18 @@ import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
 import org.springframework.beans.factory.InitializingBean;
 
-public class RootServiceImpl implements RootService, InitializingBean
+public class RootServiceImpl extends AbstractServiceImpl implements RootService, InitializingBean
 {
 	private final CommandFactory commandFactory;
 	private final ResponseGenerator responseGenerator;
 	private final ParameterConverter parameterConverter;
 	private final ExceptionHandler exceptionHandler;
 
-	public RootServiceImpl(CommandFactory commandFactory, ResponseGenerator responseGenerator,
+	public RootServiceImpl(String path, CommandFactory commandFactory, ResponseGenerator responseGenerator,
 			ParameterConverter parameterConverter, ExceptionHandler exceptionHandler)
 	{
+		super(path);
+
 		this.commandFactory = commandFactory;
 		this.responseGenerator = responseGenerator;
 		this.parameterConverter = parameterConverter;
@@ -39,21 +40,12 @@ public class RootServiceImpl implements RootService, InitializingBean
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
+		super.afterPropertiesSet();
+
 		Objects.requireNonNull(commandFactory, "commandFactory");
 		Objects.requireNonNull(responseGenerator, "responseGenerator");
 		Objects.requireNonNull(parameterConverter, "parameterConverter");
 		Objects.requireNonNull(exceptionHandler, "exceptionHandler");
-	}
-
-	@Override
-	public void setUserProvider(UserProvider provider)
-	{
-	}
-
-	@Override
-	public String getPath()
-	{
-		throw new UnsupportedOperationException("implemented by jaxrs service layer");
 	}
 
 	@Override
