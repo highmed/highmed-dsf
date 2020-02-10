@@ -8,7 +8,7 @@ import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.highmed.dsf.fhir.webservice.specification.TaskService;
 import org.hl7.fhir.r4.model.Task;
 
-public class TaskServiceSecure extends AbstractServiceSecure<Task, TaskService> implements TaskService
+public class TaskServiceSecure extends AbstractResourceServiceSecure<Task, TaskService> implements TaskService
 {
 	public TaskServiceSecure(TaskService delegate, ResponseGenerator responseGenerator)
 	{

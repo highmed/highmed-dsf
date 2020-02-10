@@ -6,7 +6,7 @@ import org.highmed.dsf.fhir.webservice.specification.EndpointService;
 import org.hl7.fhir.r4.model.Endpoint;
 
 @Path(EndpointServiceJaxrs.PATH)
-public class EndpointServiceJaxrs extends AbstractServiceJaxrs<Endpoint, EndpointService> implements EndpointService
+public class EndpointServiceJaxrs extends AbstractResourceServiceJaxrs<Endpoint, EndpointService> implements EndpointService
 {
 	public static final String PATH = "Endpoint";
 

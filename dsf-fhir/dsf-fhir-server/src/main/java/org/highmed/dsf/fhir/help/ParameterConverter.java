@@ -29,6 +29,7 @@ public class ParameterConverter
 {
 	private static final Logger logger = LoggerFactory.getLogger(ParameterConverter.class);
 
+	public static final String HTML_FORMAT = "html";
 	public static final String JSON_FORMAT = "json";
 	public static final List<String> JSON_FORMATS = Arrays.asList(Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW,
 			MediaType.APPLICATION_JSON);
@@ -74,19 +75,23 @@ public class ParameterConverter
 
 		if (format == null || format.isBlank())
 			return getMediaType(accept, pretty);
-		else if (XML_FORMATS.contains(format) || JSON_FORMATS.contains(format))
+		else if (XML_FORMATS.contains(format) || JSON_FORMATS.contains(format) || MediaType.TEXT_HTML.equals(format))
 			return getMediaType(format, pretty);
 		else if (XML_FORMAT.equals(format))
 			return mediaType("application", "fhir+xml", pretty);
 		else if (JSON_FORMAT.equals(format))
 			return mediaType("application", "fhir+json", pretty);
+		else if (HTML_FORMAT.equals(format))
+			return mediaType("text", "html", pretty);
 		else
 			throw new WebApplicationException(Status.UNSUPPORTED_MEDIA_TYPE);
 	}
 
 	private MediaType getMediaType(String mediaType, boolean pretty)
 	{
-		if (mediaType.contains(Constants.CT_FHIR_JSON_NEW))
+		if (mediaType.contains(MediaType.TEXT_HTML))
+			return mediaType("text", "html", pretty);
+		else if (mediaType.contains(Constants.CT_FHIR_JSON_NEW))
 			return mediaType("application", "fhir+json", pretty);
 		else if (mediaType.contains(Constants.CT_FHIR_JSON))
 			return mediaType("application", "json+fhir", pretty);

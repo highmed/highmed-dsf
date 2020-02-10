@@ -12,17 +12,16 @@ import org.highmed.dsf.fhir.service.ResourceValidator;
 import org.highmed.dsf.fhir.webservice.specification.HealthcareServiceService;
 import org.hl7.fhir.r4.model.HealthcareService;
 
-public class HealthcareServiceServiceImpl extends AbstractServiceImpl<HealthcareServiceDao, HealthcareService>
+public class HealthcareServiceServiceImpl extends AbstractResourceServiceImpl<HealthcareServiceDao, HealthcareService>
 		implements HealthcareServiceService
 {
-	public HealthcareServiceServiceImpl(String resourceTypeName, String serverBase, String path, int defaultPageCount,
-			HealthcareServiceDao dao, ResourceValidator validator, EventManager eventManager,
-			ExceptionHandler exceptionHandler, EventGenerator eventGenerator, ResponseGenerator responseGenerator,
-			ParameterConverter parameterConverter, ReferenceExtractor referenceExtractor,
-			ReferenceResolver referenceResolver)
+	public HealthcareServiceServiceImpl(String path, String serverBase, int defaultPageCount, HealthcareServiceDao dao,
+			ResourceValidator validator, EventManager eventManager, ExceptionHandler exceptionHandler,
+			EventGenerator eventGenerator, ResponseGenerator responseGenerator, ParameterConverter parameterConverter,
+			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver)
 	{
-		super(HealthcareService.class, resourceTypeName, serverBase, path, defaultPageCount, dao, validator,
-				eventManager, exceptionHandler, eventGenerator, responseGenerator, parameterConverter,
-				referenceExtractor, referenceResolver);
+		super(path, HealthcareService.class, serverBase, defaultPageCount, dao, validator, eventManager,
+				exceptionHandler, eventGenerator, responseGenerator, parameterConverter, referenceExtractor,
+				referenceResolver);
 	}
 }
