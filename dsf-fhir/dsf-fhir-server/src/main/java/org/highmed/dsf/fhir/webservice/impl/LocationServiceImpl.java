@@ -12,15 +12,14 @@ import org.highmed.dsf.fhir.service.ResourceValidator;
 import org.highmed.dsf.fhir.webservice.specification.LocationService;
 import org.hl7.fhir.r4.model.Location;
 
-public class LocationServiceImpl extends AbstractServiceImpl<LocationDao, Location> implements LocationService
+public class LocationServiceImpl extends AbstractResourceServiceImpl<LocationDao, Location> implements LocationService
 {
-	public LocationServiceImpl(String resourceTypeName, String serverBase, String path, int defaultPageCount,
-			LocationDao dao, ResourceValidator validator, EventManager eventManager, ExceptionHandler exceptionHandler,
+	public LocationServiceImpl(String path, String serverBase, int defaultPageCount, LocationDao dao,
+			ResourceValidator validator, EventManager eventManager, ExceptionHandler exceptionHandler,
 			EventGenerator eventGenerator, ResponseGenerator responseGenerator, ParameterConverter parameterConverter,
 			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver)
 	{
-		super(Location.class, resourceTypeName, serverBase, path, defaultPageCount, dao, validator, eventManager,
-				exceptionHandler, eventGenerator, responseGenerator, parameterConverter, referenceExtractor,
-				referenceResolver);
+		super(path, Location.class, serverBase, defaultPageCount, dao, validator, eventManager, exceptionHandler,
+				eventGenerator, responseGenerator, parameterConverter, referenceExtractor, referenceResolver);
 	}
 }

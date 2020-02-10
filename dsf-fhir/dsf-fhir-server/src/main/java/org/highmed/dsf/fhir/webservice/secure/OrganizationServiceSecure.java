@@ -8,7 +8,7 @@ import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.highmed.dsf.fhir.webservice.specification.OrganizationService;
 import org.hl7.fhir.r4.model.Organization;
 
-public class OrganizationServiceSecure extends AbstractServiceSecure<Organization, OrganizationService>
+public class OrganizationServiceSecure extends AbstractResourceServiceSecure<Organization, OrganizationService>
 		implements OrganizationService
 {
 	public OrganizationServiceSecure(OrganizationService delegate, ResponseGenerator responseGenerator)

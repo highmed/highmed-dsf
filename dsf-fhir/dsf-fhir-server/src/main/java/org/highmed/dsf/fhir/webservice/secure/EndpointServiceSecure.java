@@ -8,7 +8,7 @@ import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.highmed.dsf.fhir.webservice.specification.EndpointService;
 import org.hl7.fhir.r4.model.Endpoint;
 
-public class EndpointServiceSecure extends AbstractServiceSecure<Endpoint, EndpointService> implements EndpointService
+public class EndpointServiceSecure extends AbstractResourceServiceSecure<Endpoint, EndpointService> implements EndpointService
 {
 	public EndpointServiceSecure(EndpointService delegate, ResponseGenerator responseGenerator)
 	{

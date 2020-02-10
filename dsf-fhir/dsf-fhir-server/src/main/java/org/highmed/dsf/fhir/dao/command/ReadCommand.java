@@ -94,7 +94,7 @@ public class ReadCommand extends AbstractCommand implements Command
 			readByCondition(connection, componentes.getPathSegments().get(0),
 					parameterConverter.urlDecodeQueryParameters(componentes.getQueryParams()));
 		else
-			throw new WebApplicationException(responseGenerator.badUpdateRequestUrl(index, requestUrl));
+			throw new WebApplicationException(responseGenerator.badReadRequestUrl(index, requestUrl));
 	}
 
 	private void readById(Connection connection, String resourceTypeName, String id)

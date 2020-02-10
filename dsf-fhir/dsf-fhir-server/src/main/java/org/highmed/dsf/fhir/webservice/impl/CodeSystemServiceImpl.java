@@ -12,16 +12,15 @@ import org.highmed.dsf.fhir.service.ResourceValidator;
 import org.highmed.dsf.fhir.webservice.specification.CodeSystemService;
 import org.hl7.fhir.r4.model.CodeSystem;
 
-public class CodeSystemServiceImpl extends AbstractServiceImpl<CodeSystemDao, CodeSystem> implements CodeSystemService
+public class CodeSystemServiceImpl extends AbstractResourceServiceImpl<CodeSystemDao, CodeSystem>
+		implements CodeSystemService
 {
-	public CodeSystemServiceImpl(String resourceTypeName, String serverBase, String path, int defaultPageCount,
-			CodeSystemDao dao, ResourceValidator validator, EventManager eventManager,
-			ExceptionHandler exceptionHandler, EventGenerator eventGenerator, ResponseGenerator responseGenerator,
-			ParameterConverter parameterConverter, ReferenceExtractor referenceExtractor,
-			ReferenceResolver referenceResolver)
+	public CodeSystemServiceImpl(String path, String serverBase, int defaultPageCount, CodeSystemDao dao,
+			ResourceValidator validator, EventManager eventManager, ExceptionHandler exceptionHandler,
+			EventGenerator eventGenerator, ResponseGenerator responseGenerator, ParameterConverter parameterConverter,
+			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver)
 	{
-		super(CodeSystem.class, resourceTypeName, serverBase, path, defaultPageCount, dao, validator, eventManager,
-				exceptionHandler, eventGenerator, responseGenerator, parameterConverter, referenceExtractor,
-				referenceResolver);
+		super(path, CodeSystem.class, serverBase, defaultPageCount, dao, validator, eventManager, exceptionHandler,
+				eventGenerator, responseGenerator, parameterConverter, referenceExtractor, referenceResolver);
 	}
 }
