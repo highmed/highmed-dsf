@@ -50,8 +50,8 @@ import org.hl7.fhir.r4.model.UriType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class StructureDefinitionServiceImpl extends AbstractServiceImpl<StructureDefinitionDao, StructureDefinition>
-		implements StructureDefinitionService
+public class StructureDefinitionServiceImpl extends
+		AbstractResourceServiceImpl<StructureDefinitionDao, StructureDefinition> implements StructureDefinitionService
 {
 	private static final Logger logger = LoggerFactory.getLogger(StructureDefinitionServiceImpl.class);
 
@@ -59,16 +59,16 @@ public class StructureDefinitionServiceImpl extends AbstractServiceImpl<Structur
 	private final SnapshotGenerator snapshotGenerator;
 	private final SnapshotDependencyAnalyzer snapshotDependencyAnalyzer;
 
-	public StructureDefinitionServiceImpl(String resourceTypeName, String serverBase, String path, int defaultPageCount,
+	public StructureDefinitionServiceImpl(String path, String serverBase, int defaultPageCount,
 			StructureDefinitionDao dao, ResourceValidator validator, EventManager eventManager,
 			ExceptionHandler exceptionHandler, EventGenerator eventGenerator, ResponseGenerator responseGenerator,
 			ParameterConverter parameterConverter, StructureDefinitionSnapshotDao structureDefinitionSnapshotDao,
 			SnapshotGenerator sanapshotGenerator, SnapshotDependencyAnalyzer snapshotDependencyAnalyzer,
 			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver)
 	{
-		super(StructureDefinition.class, resourceTypeName, serverBase, path, defaultPageCount, dao, validator,
-				eventManager, exceptionHandler, eventGenerator, responseGenerator, parameterConverter,
-				referenceExtractor, referenceResolver);
+		super(path, StructureDefinition.class, serverBase, defaultPageCount, dao, validator, eventManager,
+				exceptionHandler, eventGenerator, responseGenerator, parameterConverter, referenceExtractor,
+				referenceResolver);
 
 		this.snapshotDao = structureDefinitionSnapshotDao;
 		this.snapshotGenerator = sanapshotGenerator;

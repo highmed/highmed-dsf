@@ -116,28 +116,26 @@ import com.google.common.collect.Streams;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.rest.api.Constants;
 
-public class ConformanceServiceImpl implements ConformanceService, InitializingBean
+public class ConformanceServiceImpl extends AbstractServiceImpl implements ConformanceService, InitializingBean
 {
 	private final CapabilityStatement capabilityStatement;
 	private final ParameterConverter parameterConverter;
 
-	public ConformanceServiceImpl(String serverBase, int defaultPageCount, BuildInfoReader buildInfoReader,
+	public ConformanceServiceImpl(String path, String serverBase, int defaultPageCount, BuildInfoReader buildInfoReader,
 			ParameterConverter parameterConverter)
 	{
+		super(path);
+
 		capabilityStatement = createCapabilityStatement(serverBase, defaultPageCount,
 				buildInfoReader.getBuildDateAsDate(), getVersion(buildInfoReader));
 		this.parameterConverter = parameterConverter;
 	}
 
 	@Override
-	public String getPath()
-	{
-		throw new UnsupportedOperationException("implemented by jaxrs service layer");
-	}
-
-	@Override
 	public void afterPropertiesSet() throws Exception
 	{
+		super.afterPropertiesSet();
+
 		Objects.requireNonNull(parameterConverter, "parameterConverter");
 	}
 

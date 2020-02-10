@@ -1,0 +1,108 @@
+body
+{
+	margin: 2em;
+}
+
+table#header
+{
+	margin-bottom: 0.4em;
+}
+
+table#header img
+{
+	height: 6em;
+}
+
+td#url
+{
+	vertical-align: bottom;
+}
+
+td#url h1
+{
+	font-family: monospace;
+	color: #29235c;
+	margin: 0 0 0 1em;
+	word-break: break-word;
+}
+
+td#url h1 a:link, h1 a:visited, h1 a:active
+{
+	color: #29235c;
+	text-decoration: none;
+}
+
+td#url h1 a:hover
+{
+	color: #29235c;
+	text-decoration: underline;
+}
+
+.tab
+{
+	text-align: right;
+}
+
+.tab button
+{
+	padding: 0.2em 0.6em;
+	background-color: #f1f1f1;
+	border: none;
+	outline: none;
+	cursor: pointer;
+	transition: 0.3s;
+}
+
+.tab button:hover
+{
+	background-color: #ddd;
+}
+	
+.tab button.active
+{
+	background-color: #ccc;
+}
+
+pre
+{
+	white-space: pre-wrap;
+	margin-top: 0;
+}
+
+li.L0, li.L1, li.L2, li.L3, li.L5, li.L6, li.L7, li.L8
+{
+	list-style-type: decimal !important;
+}
+
+@media print
+{
+	body
+	{
+		margin: 0;
+	}
+	
+	table#header
+	{
+		margin-bottom: 2em;
+	}
+	
+	table#header img
+	{
+		height: 3em;
+	}
+	
+	td#url h1
+	{
+		font-size: 1.5em;
+	}
+	
+	.tab
+	{
+		display: none;
+	}
+	
+	pre.prettyprint
+	{
+		border: 0 !important;
+	}
+}

@@ -12,17 +12,15 @@ import org.highmed.dsf.fhir.service.ResourceValidator;
 import org.highmed.dsf.fhir.webservice.specification.ResearchStudyService;
 import org.hl7.fhir.r4.model.ResearchStudy;
 
-public class ResearchStudyServiceImpl extends AbstractServiceImpl<ResearchStudyDao, ResearchStudy>
+public class ResearchStudyServiceImpl extends AbstractResourceServiceImpl<ResearchStudyDao, ResearchStudy>
 		implements ResearchStudyService
 {
-	public ResearchStudyServiceImpl(String resourceTypeName, String serverBase, String path, int defaultPageCount,
-			ResearchStudyDao dao, ResourceValidator validator, EventManager eventManager,
-			ExceptionHandler exceptionHandler, EventGenerator eventGenerator, ResponseGenerator responseGenerator,
-			ParameterConverter parameterConverter, ReferenceExtractor referenceExtractor,
-			ReferenceResolver referenceResolver)
+	public ResearchStudyServiceImpl(String path, String serverBase, int defaultPageCount, ResearchStudyDao dao,
+			ResourceValidator validator, EventManager eventManager, ExceptionHandler exceptionHandler,
+			EventGenerator eventGenerator, ResponseGenerator responseGenerator, ParameterConverter parameterConverter,
+			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver)
 	{
-		super(ResearchStudy.class, resourceTypeName, serverBase, path, defaultPageCount, dao, validator, eventManager,
-				exceptionHandler, eventGenerator, responseGenerator, parameterConverter, referenceExtractor,
-				referenceResolver);
+		super(path, ResearchStudy.class, serverBase, defaultPageCount, dao, validator, eventManager, exceptionHandler,
+				eventGenerator, responseGenerator, parameterConverter, referenceExtractor, referenceResolver);
 	}
 }

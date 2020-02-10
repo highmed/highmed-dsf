@@ -6,7 +6,7 @@ import org.highmed.dsf.fhir.webservice.specification.CodeSystemService;
 import org.hl7.fhir.r4.model.CodeSystem;
 
 @Path(CodeSystemServiceJaxrs.PATH)
-public class CodeSystemServiceJaxrs extends AbstractServiceJaxrs<CodeSystem, CodeSystemService>
+public class CodeSystemServiceJaxrs extends AbstractResourceServiceJaxrs<CodeSystem, CodeSystemService>
 		implements CodeSystemService
 {
 	public static final String PATH = "CodeSystem";
