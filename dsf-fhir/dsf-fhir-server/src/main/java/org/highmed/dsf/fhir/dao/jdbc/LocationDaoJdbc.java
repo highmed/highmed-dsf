@@ -11,7 +11,8 @@ public class LocationDaoJdbc extends AbstractResourceDaoJdbc<Location> implement
 {
 	public LocationDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
 	{
-		super(dataSource, fhirContext, Location.class, "locations", "location", "location_id", LocationIdentifier::new);
+		super(dataSource, fhirContext, Location.class, "locations", "location", "location_id",
+				with(LocationIdentifier::new), with());
 	}
 
 	@Override
