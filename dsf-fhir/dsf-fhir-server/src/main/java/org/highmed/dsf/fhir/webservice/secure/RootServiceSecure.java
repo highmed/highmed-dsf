@@ -1,9 +1,12 @@
 package org.highmed.dsf.fhir.webservice.secure;
 
+import java.util.Optional;
+
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.highmed.dsf.fhir.authentication.UserRole;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.highmed.dsf.fhir.webservice.specification.RootService;
 import org.hl7.fhir.r4.model.Bundle;
@@ -25,6 +28,8 @@ public class RootServiceSecure extends AbstractServiceSecure<RootService> implem
 		logger.debug("Current user '{}', role '{}'", provider.getCurrentUser().getName(),
 				provider.getCurrentUser().getRole());
 
+		// get root allowed for all authenticated users
+
 		return delegate.root(uri, headers);
 	}
 
@@ -34,6 +39,20 @@ public class RootServiceSecure extends AbstractServiceSecure<RootService> implem
 		logger.debug("Current user '{}', role '{}'", provider.getCurrentUser().getName(),
 				provider.getCurrentUser().getRole());
 
-		return delegate.handleBundle(bundle, uri, headers);
+		return reasonHandleBundleNotAllowed(bundle).map(forbidden("POST"))
+				.orElse(delegate.handleBundle(bundle, uri, headers));
+	}
+
+	private Optional<String> reasonHandleBundleNotAllowed(Bundle bundle)
+	{
+		/*
+		 * TODO check if operation for each entry in transaction / batch bundle is allowed, batch can have not allowed
+		 * operations and will return 403 for those, transaction can't and will return 403 for all
+		 */
+
+		if (!UserRole.LOCAL.equals(provider.getCurrentUser().getRole()))
+			return Optional.of("Missing role 'LOCAL'");
+		else
+			return Optional.empty();
 	}
 }
