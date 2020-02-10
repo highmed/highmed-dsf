@@ -4,7 +4,7 @@ import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.highmed.dsf.fhir.webservice.specification.ResearchStudyService;
 import org.hl7.fhir.r4.model.ResearchStudy;
 
-public class ResearchStudyServiceSecure extends AbstractServiceSecure<ResearchStudy, ResearchStudyService>
+public class ResearchStudyServiceSecure extends AbstractResourceServiceSecure<ResearchStudy, ResearchStudyService>
 		implements ResearchStudyService
 {
 	public ResearchStudyServiceSecure(ResearchStudyService delegate, ResponseGenerator responseGenerator)

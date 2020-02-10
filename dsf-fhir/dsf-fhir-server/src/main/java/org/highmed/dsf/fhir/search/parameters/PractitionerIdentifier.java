@@ -6,7 +6,7 @@ import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Resource;
 
-@SearchParameterDefinition(name = AbstractIdentifierParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Practitioner.​identifier", type = SearchParamType.TOKEN, documentation = "A practitioner's Identifier")
+@SearchParameterDefinition(name = AbstractIdentifierParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Practitioner.identifier", type = SearchParamType.TOKEN, documentation = "A practitioner's Identifier")
 public class PractitionerIdentifier extends AbstractIdentifierParameter<Practitioner>
 {
 	public static final String RESOURCE_COLUMN = "practitioner";

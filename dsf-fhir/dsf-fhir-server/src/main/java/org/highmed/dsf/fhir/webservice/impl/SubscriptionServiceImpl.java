@@ -12,17 +12,15 @@ import org.highmed.dsf.fhir.service.ResourceValidator;
 import org.highmed.dsf.fhir.webservice.specification.SubscriptionService;
 import org.hl7.fhir.r4.model.Subscription;
 
-public class SubscriptionServiceImpl extends AbstractServiceImpl<SubscriptionDao, Subscription>
+public class SubscriptionServiceImpl extends AbstractResourceServiceImpl<SubscriptionDao, Subscription>
 		implements SubscriptionService
 {
-	public SubscriptionServiceImpl(String resourceTypeName, String serverBase, String path, int defaultPageCount,
-			SubscriptionDao dao, ResourceValidator validator, EventManager eventManager,
-			ExceptionHandler exceptionHandler, EventGenerator eventGenerator, ResponseGenerator responseGenerator,
-			ParameterConverter parameterConverter, ReferenceExtractor referenceExtractor,
-			ReferenceResolver referenceResolver)
+	public SubscriptionServiceImpl(String path, String serverBase, int defaultPageCount, SubscriptionDao dao,
+			ResourceValidator validator, EventManager eventManager, ExceptionHandler exceptionHandler,
+			EventGenerator eventGenerator, ResponseGenerator responseGenerator, ParameterConverter parameterConverter,
+			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver)
 	{
-		super(Subscription.class, resourceTypeName, serverBase, path, defaultPageCount, dao, validator, eventManager,
-				exceptionHandler, eventGenerator, responseGenerator, parameterConverter, referenceExtractor,
-				referenceResolver);
+		super(path, Subscription.class, serverBase, defaultPageCount, dao, validator, eventManager, exceptionHandler,
+				eventGenerator, responseGenerator, parameterConverter, referenceExtractor, referenceResolver);
 	}
 }

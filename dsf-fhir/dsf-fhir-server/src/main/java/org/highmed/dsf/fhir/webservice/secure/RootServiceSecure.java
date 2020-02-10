@@ -1,40 +1,36 @@
 package org.highmed.dsf.fhir.webservice.secure;
 
+import java.util.Optional;
+
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.highmed.dsf.fhir.authentication.UserProvider;
+import org.highmed.dsf.fhir.authentication.UserRole;
+import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.highmed.dsf.fhir.webservice.specification.RootService;
 import org.hl7.fhir.r4.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RootServiceSecure implements RootService
+public class RootServiceSecure extends AbstractServiceSecure<RootService> implements RootService
 {
-	private static final Logger logger = LoggerFactory.getLogger(AbstractServiceSecure.class);
+	private static final Logger logger = LoggerFactory.getLogger(AbstractResourceServiceSecure.class);
 
-	protected final RootService delegate;
-
-	protected UserProvider provider;
-
-	public RootServiceSecure(RootService delegate)
+	public RootServiceSecure(RootService delegate, ResponseGenerator responseGenerator)
 	{
-		this.delegate = delegate;
+		super(delegate, responseGenerator);
 	}
 
 	@Override
-	public void setUserProvider(UserProvider provider)
+	public Response root(UriInfo uri, HttpHeaders headers)
 	{
-		delegate.setUserProvider(provider);
+		logger.debug("Current user '{}', role '{}'", provider.getCurrentUser().getName(),
+				provider.getCurrentUser().getRole());
 
-		this.provider = provider;
-	}
+		// get root allowed for all authenticated users
 
-	@Override
-	public String getPath()
-	{
-		throw new UnsupportedOperationException("implemented by jaxrs service layer");
+		return delegate.root(uri, headers);
 	}
 
 	@Override
@@ -43,6 +39,20 @@ public class RootServiceSecure implements RootService
 		logger.debug("Current user '{}', role '{}'", provider.getCurrentUser().getName(),
 				provider.getCurrentUser().getRole());
 
-		return delegate.handleBundle(bundle, uri, headers);
+		return reasonHandleBundleNotAllowed(bundle).map(forbidden("POST"))
+				.orElse(delegate.handleBundle(bundle, uri, headers));
+	}
+
+	private Optional<String> reasonHandleBundleNotAllowed(Bundle bundle)
+	{
+		/*
+		 * TODO check if operation for each entry in transaction / batch bundle is allowed, batch can have not allowed
+		 * operations and will return 403 for those, transaction can't and will return 403 for all
+		 */
+
+		if (!UserRole.LOCAL.equals(provider.getCurrentUser().getRole()))
+			return Optional.of("Missing role 'LOCAL'");
+		else
+			return Optional.empty();
 	}
 }

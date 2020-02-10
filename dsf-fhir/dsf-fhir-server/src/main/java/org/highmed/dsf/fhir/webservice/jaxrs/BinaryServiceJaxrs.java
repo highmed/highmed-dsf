@@ -6,7 +6,7 @@ import org.highmed.dsf.fhir.webservice.specification.BinaryService;
 import org.hl7.fhir.r4.model.Binary;
 
 @Path(BinaryServiceJaxrs.PATH)
-public class BinaryServiceJaxrs extends AbstractServiceJaxrs<Binary, BinaryService> implements BinaryService
+public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, BinaryService> implements BinaryService
 {
 	public static final String PATH = "Binary";
 

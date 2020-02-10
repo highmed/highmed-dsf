@@ -4,25 +4,28 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.highmed.dsf.fhir.webservice.specification.ConformanceService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class ConformanceServiceSecure implements ConformanceService
+public class ConformanceServiceSecure extends AbstractServiceSecure<ConformanceService> implements ConformanceService
 {
-	private final ConformanceService delegate;
+	private static final Logger logger = LoggerFactory.getLogger(ConformanceServiceSecure.class);
 
-	public ConformanceServiceSecure(ConformanceService delegate)
+	public ConformanceServiceSecure(ConformanceService delegate, ResponseGenerator responseGenerator)
 	{
-		this.delegate = delegate;
+		super(delegate, responseGenerator);
 	}
 
 	@Override
-	public String getPath()
-	{
-		throw new UnsupportedOperationException("implemented by jaxrs service layer");
-	}
-
 	public Response getMetadata(String mode, UriInfo uri, HttpHeaders headers)
 	{
+		logger.debug("Current user '{}', role '{}'", provider.getCurrentUser().getName(),
+				provider.getCurrentUser().getRole());
+
+		// get metadata allowed for all authenticated users
+
 		return delegate.getMetadata(mode, uri, headers);
 	}
 }

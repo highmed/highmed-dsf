@@ -6,8 +6,8 @@ import org.highmed.dsf.fhir.webservice.specification.ActivityDefinitionService;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 
 @Path(ActivityDefinitionServiceJaxrs.PATH)
-public class ActivityDefinitionServiceJaxrs extends AbstractServiceJaxrs<ActivityDefinition, ActivityDefinitionService>
-		implements ActivityDefinitionService
+public class ActivityDefinitionServiceJaxrs extends
+		AbstractResourceServiceJaxrs<ActivityDefinition, ActivityDefinitionService> implements ActivityDefinitionService
 {
 	public static final String PATH = "ActivityDefinition";
 

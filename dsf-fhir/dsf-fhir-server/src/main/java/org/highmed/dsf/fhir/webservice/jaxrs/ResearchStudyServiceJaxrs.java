@@ -6,7 +6,7 @@ import org.highmed.dsf.fhir.webservice.specification.ResearchStudyService;
 import org.hl7.fhir.r4.model.ResearchStudy;
 
 @Path(ResearchStudyServiceJaxrs.PATH)
-public class ResearchStudyServiceJaxrs extends AbstractServiceJaxrs<ResearchStudy, ResearchStudyService>
+public class ResearchStudyServiceJaxrs extends AbstractResourceServiceJaxrs<ResearchStudy, ResearchStudyService>
 		implements ResearchStudyService
 {
 	public static final String PATH = "ResearchStudy";
