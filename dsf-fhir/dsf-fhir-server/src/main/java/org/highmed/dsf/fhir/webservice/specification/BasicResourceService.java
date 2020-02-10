@@ -10,7 +10,7 @@ import org.hl7.fhir.r4.model.Resource;
 public interface BasicResourceService<R extends Resource> extends BasicService
 {
 	/**
-	 * regular and conditional create
+	 * standard and conditional create
 	 * 
 	 * @param resource
 	 * @param uri
@@ -19,10 +19,36 @@ public interface BasicResourceService<R extends Resource> extends BasicService
 	 */
 	Response create(R resource, UriInfo uri, HttpHeaders headers);
 
+	/**
+	 * read by id
+	 * 
+	 * @param id
+	 * @param uri
+	 * @param headers
+	 * @return
+	 */
 	Response read(String id, UriInfo uri, HttpHeaders headers);
 
+	/**
+	 * read by id and version
+	 * 
+	 * @param id
+	 * @param version
+	 * @param uri
+	 * @param headers
+	 * @return
+	 */
 	Response vread(String id, long version, UriInfo uri, HttpHeaders headers);
 
+	/**
+	 * standard update
+	 * 
+	 * @param id
+	 * @param resource
+	 * @param uri
+	 * @param headers
+	 * @return
+	 */
 	Response update(String id, R resource, UriInfo uri, HttpHeaders headers);
 
 	/**
@@ -35,6 +61,14 @@ public interface BasicResourceService<R extends Resource> extends BasicService
 	 */
 	Response update(R resource, UriInfo uri, HttpHeaders headers);
 
+	/**
+	 * standard delete
+	 * 
+	 * @param id
+	 * @param uri
+	 * @param headers
+	 * @return
+	 */
 	Response delete(String id, UriInfo uri, HttpHeaders headers);
 
 	/**
@@ -46,6 +80,13 @@ public interface BasicResourceService<R extends Resource> extends BasicService
 	 */
 	Response delete(UriInfo uri, HttpHeaders headers);
 
+	/**
+	 * search by request parameter
+	 * 
+	 * @param uri
+	 * @param headers
+	 * @return
+	 */
 	Response search(UriInfo uri, HttpHeaders headers);
 
 	Response postValidateNew(String validatePath, Parameters parameters, UriInfo uri, HttpHeaders headers);
