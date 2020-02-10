@@ -9,6 +9,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -80,21 +81,10 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		this.resourceType = resourceType;
 	}
 
-	private IParser getXmlParser()
+	/* Parsers are not guaranteed to be thread safe */
+	private IParser getParser(Supplier<IParser> parser)
 	{
-		/* Parsers are not guaranteed to be thread safe */
-		IParser p = fhirContext.newXmlParser();
-		p.setStripVersionsFromReferences(false);
-		p.setOverrideResourceIdWithBundleEntryFullUrl(false);
-		p.setPrettyPrint(true);
-
-		return p;
-	}
-
-	private IParser getJsonParser()
-	{
-		/* Parsers are not guaranteed to be thread safe */
-		IParser p = fhirContext.newJsonParser();
+		IParser p = parser.get();
 		p.setStripVersionsFromReferences(false);
 		p.setOverrideResourceIdWithBundleEntryFullUrl(false);
 		p.setPrettyPrint(true);
@@ -125,10 +115,10 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		out.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"/fhir/static/highmed.css\">\n");
 		out.write("<title>DSF" + (uriInfo.getPath() == null || uriInfo.getPath().isEmpty() ? "" : ": ")
 				+ uriInfo.getPath() + "</title>\n</head>\n");
-		out.write("<body onload=\"prettyPrint();openInitialTab();\" style=\"margin:2em;\">\n");
-		out.write("<table style=\"margin-bottom:0.4em;\"><tr>\n");
-		out.write("<td><image src=\"/fhir/static/highmed.svg\" style=\"height:6em;\"></td>\n");
-		out.write("<td style=\"vertical-align:bottom;\"><h1 id=\"url\">");
+		out.write("<body onload=\"prettyPrint();openInitialTab();\">\n");
+		out.write("<table id=\"header\"><tr>\n");
+		out.write("<td><image src=\"/fhir/static/highmed.svg\"></td>\n");
+		out.write("<td id=\"url\"><h1>");
 		out.write(getUrlHeading(t));
 		out.write("</h1></td>\n");
 		out.write("</tr></table>\n");
@@ -196,8 +186,10 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 
 	private void writeXml(T t, OutputStreamWriter out) throws IOException
 	{
+		IParser parser = getParser(fhirContext::newXmlParser);
+
 		out.write("<pre id=\"xml\" class=\"prettyprint linenums lang-xml\" style=\"display:none;\">");
-		String content = getXmlParser().encodeResourceToString(t).replace("<", "&lt;").replace(">", "&gt;");
+		String content = parser.encodeResourceToString(t).replace("<", "&lt;").replace(">", "&gt;");
 
 		Matcher urlMatcher = URL_PATTERN.matcher(content);
 		content = urlMatcher.replaceAll(result -> "<a href=\"" + result.group() + "\">" + result.group() + "</a>");
@@ -220,8 +212,10 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 
 	private void writeJson(T t, OutputStreamWriter out) throws IOException
 	{
+		IParser parser = getParser(fhirContext::newJsonParser);
+
 		out.write("<pre id=\"json\" class=\"prettyprint linenums lang-json\" style=\"display:none;\">");
-		String content = getJsonParser().encodeResourceToString(t).replace("<", "&lt;").replace(">", "&gt;");
+		String content = parser.encodeResourceToString(t).replace("<", "&lt;").replace(">", "&gt;");
 
 		Matcher urlMatcher = URL_PATTERN.matcher(content);
 		content = urlMatcher.replaceAll(result -> "<a href=\"" + result.group() + "\">" + result.group() + "</a>");
