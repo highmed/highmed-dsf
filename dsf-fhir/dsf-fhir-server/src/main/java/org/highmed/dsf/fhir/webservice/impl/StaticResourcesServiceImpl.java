@@ -9,12 +9,14 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
@@ -29,11 +31,13 @@ public class StaticResourcesServiceImpl extends AbstractServiceImpl implements S
 	{
 		private final byte[] data;
 		private final byte[] hash;
+		private final String mimeType;
 
-		CacheEntry(byte[] data, byte[] hash)
+		CacheEntry(byte[] data, byte[] hash, String mimeType)
 		{
 			this.data = data;
 			this.hash = hash;
+			this.mimeType = mimeType;
 		}
 
 		byte[] getData()
@@ -44,6 +48,11 @@ public class StaticResourcesServiceImpl extends AbstractServiceImpl implements S
 		EntityTag getTag()
 		{
 			return new EntityTag(Hex.encodeHexString(hash));
+		}
+
+		String getMimeType()
+		{
+			return mimeType;
 		}
 	}
 
@@ -70,8 +79,9 @@ public class StaticResourcesServiceImpl extends AbstractServiceImpl implements S
 				{
 					byte[] data = stream.readAllBytes();
 					byte[] hash = hash(data);
+					String mimeType = mimeType(fileName);
 
-					CacheEntry entry = new CacheEntry(data, hash);
+					CacheEntry entry = new CacheEntry(data, hash, mimeType);
 					entries.put(fileName, new SoftReference<>(entry));
 					return Optional.of(entry);
 				}
@@ -93,6 +103,12 @@ public class StaticResourcesServiceImpl extends AbstractServiceImpl implements S
 			{
 				throw new RuntimeException(e);
 			}
+		}
+
+		private String mimeType(String fileName)
+		{
+			String[] parts = fileName.split("\\.");
+			return MIME_TYPE_BY_SUFFIX.get(parts[parts.length - 1]);
 		}
 	}
 
@@ -120,17 +136,19 @@ public class StaticResourcesServiceImpl extends AbstractServiceImpl implements S
 			Optional<String> matchTag = Arrays.asList(Constants.HEADER_IF_NONE_MATCH, Constants.HEADER_IF_NONE_MATCH_LC)
 					.stream().map(name -> headers.getHeaderString(name)).filter(h -> h != null).findFirst();
 
-			return entry.map(e ->
-			{
-				if (e.getTag().getValue().equals(matchTag.orElse("").replace("\"", "")))
-					return Response.status(Status.NOT_MODIFIED);
-				else
-				{
-					String[] parts = fileName.split("\\.");
-					return Response.ok(e.getData(), MediaType.valueOf(MIME_TYPE_BY_SUFFIX.get(parts[parts.length - 1])))
-							.tag(e.getTag());
-				}
-			}).orElse(Response.status(Status.NOT_FOUND)).build();
+			return entry.map(toNotModifiedOrOkResponse(matchTag.orElse(""))).orElse(Response.status(Status.NOT_FOUND))
+					.build();
 		}
+	}
+
+	private Function<CacheEntry, ResponseBuilder> toNotModifiedOrOkResponse(String matchTag)
+	{
+		return entry ->
+		{
+			if (entry.getTag().getValue().equals(matchTag.replace("\"", "")))
+				return Response.status(Status.NOT_MODIFIED);
+			else
+				return Response.ok(entry.getData(), MediaType.valueOf(entry.getMimeType())).tag(entry.getTag());
+		};
 	}
 }
