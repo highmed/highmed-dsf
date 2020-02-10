@@ -15,9 +15,9 @@ import java.util.stream.Stream;
 import javax.ws.rs.core.UriBuilder;
 
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
+import org.highmed.dsf.fhir.search.IncludeParts;
 import org.highmed.dsf.fhir.search.SearchQuery;
 import org.highmed.dsf.fhir.search.SearchQueryIncludeParameter;
-import org.highmed.dsf.fhir.search.SearchQueryIncludeParameter.IncludeParts;
 import org.highmed.dsf.fhir.search.SearchQueryParameterError;
 import org.highmed.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 import org.hl7.fhir.r4.model.Binary;
@@ -124,7 +124,7 @@ public abstract class AbstractReferenceParameter<R extends DomainResource> exten
 	private final String resourceTypeName;
 	private final List<String> targetResourceTypeNames;
 
-	private SearchQueryIncludeParameter includeParameter;
+	private final List<SearchQueryIncludeParameter> includeParameters = new ArrayList<>();
 
 	protected ReferenceValueAndSearchType valueAndType;
 
@@ -156,11 +156,12 @@ public abstract class AbstractReferenceParameter<R extends DomainResource> exten
 	{
 		List<IncludeParts> includeParts = getIncludeParts(queryParameters);
 
-		if (!includeParts.isEmpty())
+		for (IncludeParts ip : includeParts)
 		{
-			List<String> includeSqls = includeParts.stream().map(this::getIncludeSql).filter(s -> s != null)
-					.collect(Collectors.toList());
-			includeParameter = new SearchQueryIncludeParameter(includeSqls, includeParts);
+			String includeSql = getIncludeSql(ip);
+			if (includeSql != null)
+				includeParameters.add(new SearchQueryIncludeParameter(includeSql, ip,
+						(resource, connection) -> modifyIncludeResource(ip, resource, connection)));
 		}
 	}
 
@@ -181,12 +182,14 @@ public abstract class AbstractReferenceParameter<R extends DomainResource> exten
 					SearchQuery.PARAMETER_INCLUDE, includeParameterValues, "Non matching include parameter"
 							+ (nonMatchingIncludeParameters.size() != 1 ? "s " : " ") + nonMatchingIncludeParameters));
 
-		return includeParameterValues.stream().map(IncludeParts::fromString)
+		List<IncludeParts> includeParts = includeParameterValues.stream().map(IncludeParts::fromString)
 				.filter(p -> resourceTypeName.equals(p.getSourceResourceTypeName())
 						&& parameterName.equals(p.getSearchParameterName())
 						&& ((targetResourceTypeNames.size() == 1 && p.getTargetResourceTypeName() == null)
 								|| targetResourceTypeNames.contains(p.getTargetResourceTypeName())))
 				.collect(Collectors.toList());
+
+		return includeParts;
 	}
 
 	@Override
@@ -238,9 +241,9 @@ public abstract class AbstractReferenceParameter<R extends DomainResource> exten
 	}
 
 	@Override
-	public Optional<SearchQueryIncludeParameter> getIncludeParameter()
+	public List<SearchQueryIncludeParameter> getIncludeParameters()
 	{
-		return Optional.ofNullable(includeParameter);
+		return Collections.unmodifiableList(includeParameters);
 	}
 
 	protected abstract String getIncludeSql(IncludeParts includeParts);
@@ -254,21 +257,18 @@ public abstract class AbstractReferenceParameter<R extends DomainResource> exten
 
 	protected abstract void doResolveReferencesForMatching(R resource, DaoProvider daoProvider) throws SQLException;
 
-	@Override
-	public void modifyIncludeResource(Resource resource, Connection connection)
-	{
-		doModifyIncludeResource(resource, connection);
-	}
-
 	/**
 	 * Use this method to modify the include resources. This method can be used if the resources returned by the include
 	 * SQL are not complete and additional content needs to be retrieved from a not included column. For example the
 	 * content of a {@link Binary} resource might not be stored in the json column.
 	 * 
+	 * @param includeParts
+	 *            not <code>null</code>
 	 * @param resource
 	 *            not <code>null</code>
 	 * @param connection
 	 *            not <code>null</code>
 	 */
-	protected abstract void doModifyIncludeResource(Resource resource, Connection connection);
+	protected abstract void modifyIncludeResource(IncludeParts includeParts, Resource resource,
+			Connection connection);
 }

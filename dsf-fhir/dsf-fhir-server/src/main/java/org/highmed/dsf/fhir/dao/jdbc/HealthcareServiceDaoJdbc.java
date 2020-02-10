@@ -8,13 +8,12 @@ import org.hl7.fhir.r4.model.HealthcareService;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class HealthcareServiceDaoJdbc extends AbstractResourceDaoJdbc<HealthcareService>
-		implements HealthcareServiceDao
+public class HealthcareServiceDaoJdbc extends AbstractResourceDaoJdbc<HealthcareService> implements HealthcareServiceDao
 {
 	public HealthcareServiceDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, HealthcareService.class, "healthcare_services", "healthcare_service",
-				"healthcare_service_id", HealthcareServiceIdentifier::new, HealthcareServiceActive::new);
+				"healthcare_service_id", with(HealthcareServiceIdentifier::new, HealthcareServiceActive::new), with());
 	}
 
 	@Override

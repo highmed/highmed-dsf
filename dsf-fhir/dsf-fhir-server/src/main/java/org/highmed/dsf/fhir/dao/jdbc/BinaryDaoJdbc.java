@@ -18,7 +18,7 @@ public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements Bi
 	public BinaryDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, Binary.class, "binaries", "binary_json", "binary_id",
-				new PreparedStatementFactoryBinary(fhirContext), BinaryContentType::new);
+				new PreparedStatementFactoryBinary(fhirContext), with(BinaryContentType::new), with());
 	}
 
 	@Override

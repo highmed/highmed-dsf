@@ -27,6 +27,7 @@ import org.highmed.dsf.fhir.search.PartialResult;
 import org.highmed.dsf.fhir.search.SearchQuery;
 import org.highmed.dsf.fhir.search.SearchQuery.SearchQueryBuilder;
 import org.highmed.dsf.fhir.search.SearchQueryParameter;
+import org.highmed.dsf.fhir.search.SearchQueryRevIncludeParameterFactory;
 import org.highmed.dsf.fhir.search.parameters.ResourceId;
 import org.highmed.dsf.fhir.search.parameters.ResourceLastUpdated;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -106,33 +107,40 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	private final String resourceColumn;
 	private final String resourceIdColumn;
 
-	private final List<Supplier<SearchQueryParameter<R>>> searchParameterFactories;
+	private final List<Supplier<SearchQueryParameter<R>>> searchParameterFactories = new ArrayList<>();
+	private final List<Supplier<SearchQueryRevIncludeParameterFactory>> searchRevIncludeParameterFactories = new ArrayList<>();
 
 	private final PreparedStatementFactory<R> preparedStatementFactory;
 
-	/*
-	 * Using a suppliers for SearchParameters, implementations are not thread safe and because of that they need to be
-	 * created on a request basis
-	 */
 	@SafeVarargs
-	AbstractResourceDaoJdbc(DataSource dataSource, FhirContext fhirContext, Class<R> resourceType, String resourceTable,
-			String resourceColumn, String resourceIdColumn,
-			Supplier<SearchQueryParameter<R>>... searchParameterFactories)
+	protected static <T> List<T> with(T... t)
 	{
-		this(dataSource, fhirContext, resourceType, resourceTable, resourceColumn, resourceIdColumn,
-				new PreparedStatementFactoryDefault<>(fhirContext, resourceType, resourceTable, resourceIdColumn,
-						resourceColumn),
-				searchParameterFactories);
+		return Arrays.asList(t);
 	}
 
 	/*
 	 * Using a suppliers for SearchParameters, implementations are not thread safe and because of that they need to be
 	 * created on a request basis
 	 */
-	@SafeVarargs
+	AbstractResourceDaoJdbc(DataSource dataSource, FhirContext fhirContext, Class<R> resourceType, String resourceTable,
+			String resourceColumn, String resourceIdColumn,
+			List<Supplier<SearchQueryParameter<R>>> searchParameterFactories,
+			List<Supplier<SearchQueryRevIncludeParameterFactory>> searchRevIncludeParameterFactories)
+	{
+		this(dataSource, fhirContext, resourceType, resourceTable, resourceColumn, resourceIdColumn,
+				new PreparedStatementFactoryDefault<>(fhirContext, resourceType, resourceTable, resourceIdColumn,
+						resourceColumn),
+				searchParameterFactories, searchRevIncludeParameterFactories);
+	}
+
+	/*
+	 * Using a suppliers for SearchParameters, implementations are not thread safe and because of that they need to be
+	 * created on a request basis
+	 */
 	AbstractResourceDaoJdbc(DataSource dataSource, FhirContext fhirContext, Class<R> resourceType, String resourceTable,
 			String resourceColumn, String resourceIdColumn, PreparedStatementFactory<R> preparedStatementFactory,
-			Supplier<SearchQueryParameter<R>>... searchParameterFactories)
+			List<Supplier<SearchQueryParameter<R>>> searchParameterFactories,
+			List<Supplier<SearchQueryRevIncludeParameterFactory>> searchRevIncludeParameterFactories)
 	{
 		this.dataSource = dataSource;
 		this.fhirContext = fhirContext;
@@ -145,7 +153,10 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 
 		this.preparedStatementFactory = preparedStatementFactory;
 
-		this.searchParameterFactories = Arrays.asList(searchParameterFactories);
+		if (searchParameterFactories != null)
+			this.searchParameterFactories.addAll(searchParameterFactories);
+		if (searchRevIncludeParameterFactories != null)
+			this.searchRevIncludeParameterFactories.addAll(searchRevIncludeParameterFactories);
 	}
 
 	@Override
@@ -789,7 +800,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 
 		List<R> partialResult = new ArrayList<>();
 		List<Resource> includes = new ArrayList<>();
-
+		
 		if (!query.isCountOnly(overallCount)) // TODO ask db if count 0
 		{
 			try (PreparedStatement statement = connection.prepareStatement(query.getSearchSql()))
@@ -868,6 +879,8 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		return SearchQueryBuilder.create(resourceType, getResourceTable(), getResourceColumn(), page, count)
 				.with(new ResourceId(getResourceIdColumn()), new ResourceLastUpdated(getResourceColumn()))
 				.with(searchParameterFactories.stream().map(Supplier::get).toArray(SearchQueryParameter[]::new))
+				.withRevInclude(searchRevIncludeParameterFactories.stream().map(Supplier::get)
+						.toArray(SearchQueryRevIncludeParameterFactory[]::new))
 				.build();
 	}
 }

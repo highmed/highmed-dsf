@@ -27,13 +27,14 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 {
 	public static final String PARAMETER_SORT = "_sort";
 	public static final String PARAMETER_INCLUDE = "_include";
+	public static final String PARAMETER_REVINCLUDE = "_revinclude";
 	public static final String PARAMETER_PAGE = "_page";
 	public static final String PARAMETER_COUNT = "_count";
 	public static final String PARAMETER_FORMAT = "_format";
 	public static final String PARAMETER_PRETTY = "_pretty";
 
-	public static final String[] STANDARD_PARAMETERS = { PARAMETER_SORT, PARAMETER_INCLUDE, PARAMETER_PAGE,
-			PARAMETER_COUNT, PARAMETER_FORMAT, PARAMETER_PRETTY };
+	public static final String[] STANDARD_PARAMETERS = { PARAMETER_SORT, PARAMETER_INCLUDE, PARAMETER_REVINCLUDE,
+			PARAMETER_PAGE, PARAMETER_COUNT, PARAMETER_FORMAT, PARAMETER_PRETTY };
 
 	public static class SearchQueryBuilder<R extends Resource>
 	{
@@ -50,6 +51,7 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 		private final int count;
 
 		private final List<SearchQueryParameter<R>> searchParameters = new ArrayList<SearchQueryParameter<R>>();
+		private final List<SearchQueryRevIncludeParameterFactory> revIncludeParameters = new ArrayList<>();
 
 		private SearchQueryBuilder(Class<R> resourceType, String resourceTable, String resourceColumn, int page,
 				int count)
@@ -78,9 +80,27 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 			return this;
 		}
 
+		public SearchQueryBuilder<R> withRevInclude(SearchQueryRevIncludeParameterFactory searchParameters)
+		{
+			this.revIncludeParameters.add(searchParameters);
+			return this;
+		}
+
+		public SearchQueryBuilder<R> withRevInclude(SearchQueryRevIncludeParameterFactory... searchParameters)
+		{
+			return withRevInclude(Arrays.asList(searchParameters));
+		}
+
+		public SearchQueryBuilder<R> withRevInclude(List<SearchQueryRevIncludeParameterFactory> searchParameters)
+		{
+			this.revIncludeParameters.addAll(searchParameters);
+			return this;
+		}
+
 		public SearchQuery<R> build()
 		{
-			return new SearchQuery<R>(resourceType, resourceTable, resourceColumn, page, count, searchParameters);
+			return new SearchQuery<R>(resourceType, resourceTable, resourceColumn, page, count, searchParameters,
+					revIncludeParameters);
 		}
 	}
 
@@ -90,22 +110,27 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 	private final String resourceColumn;
 	private final String resourceTable;
 	private final List<SearchQueryParameter<R>> searchParameters = new ArrayList<>();
+	private final List<SearchQueryRevIncludeParameterFactory> revIncludeParameterFactories = new ArrayList<>();
 	private final PageAndCount pageAndCount;
 
-	private String filterQuery = "";
-	private String sortSql = "";
-	private String includeSql = "";
+	private String filterQuery;
+	private String sortSql;
+	private String includeSql;
+	private String revIncludeSql;
 	private List<SearchQueryParameter<R>> sortParameters = Collections.emptyList();
-	private List<SearchQueryParameter<R>> includeParameters = Collections.emptyList();
+	private List<SearchQueryIncludeParameter> includeParameters = Collections.emptyList();
+	private List<SearchQueryIncludeParameter> revIncludeParameters = Collections.emptyList();
 
 	SearchQuery(Class<R> resourceType, String resourceTable, String resourceColumn, int page, int count,
-			List<? extends SearchQueryParameter<R>> searchParameters)
+			List<? extends SearchQueryParameter<R>> searchParameters,
+			List<? extends SearchQueryRevIncludeParameterFactory> revIncludeParameters)
 	{
 		this.resourceType = resourceType;
 		this.resourceTable = resourceTable;
 		this.resourceColumn = resourceColumn;
 
 		this.searchParameters.addAll(searchParameters);
+		this.revIncludeParameterFactories.addAll(revIncludeParameters);
 		this.pageAndCount = new PageAndCount(page, count);
 	}
 
@@ -113,11 +138,16 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 	{
 		searchParameters.forEach(p -> p.configure(queryParameters));
 
+		List<String> revIncludeParameterValues = queryParameters.getOrDefault(PARAMETER_REVINCLUDE,
+				Collections.emptyList());
+		revIncludeParameterFactories.forEach(p -> p.configure(revIncludeParameterValues));
+
 		filterQuery = searchParameters.stream().filter(SearchQueryParameter::isDefined)
 				.map(SearchQueryParameter::getFilterQuery).collect(Collectors.joining(" AND "));
 
-		createSortSql(getFirst(queryParameters, PARAMETER_SORT));
-		createIncludeSql(queryParameters.get(PARAMETER_INCLUDE));
+		sortSql = createSortSql(getFirst(queryParameters, PARAMETER_SORT));
+		includeSql = createIncludeSql(queryParameters.get(PARAMETER_INCLUDE));
+		revIncludeSql = createRevIncludeSql();
 	}
 
 	public List<SearchQueryParameterError> getUnsupportedQueryParameters(Map<String, List<String>> queryParameters)
@@ -133,10 +163,20 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 				.forEach(errors::add);
 
 		searchParameters.stream().flatMap(p -> p.getErrors().stream()).forEach(errors::add);
+		revIncludeParameterFactories.stream().flatMap(p -> p.getErrors().stream()).forEach(errors::add);
+
+		List<String> revIncludeParameterValues = new ArrayList<>(
+				queryParameters.getOrDefault(PARAMETER_REVINCLUDE, Collections.emptyList()));
+
+		revIncludeParameters.stream().map(SearchQueryIncludeParameter::getBundleUriQueryParameterValues)
+				.forEach(v -> revIncludeParameterValues.remove(v));
+		if (!revIncludeParameterValues.isEmpty())
+			errors.add(new SearchQueryParameterError(SearchQueryParameterErrorType.UNSUPPORTED_PARAMETER,
+					PARAMETER_REVINCLUDE, revIncludeParameterValues));
 
 		if (!errors.isEmpty())
 			logger.warn("Query parameters with error: {}", errors);
-		
+
 		return errors;
 	}
 
@@ -148,7 +188,8 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 			List<String> values = queryParameters.get(parameter);
 			if (values != null && values.size() > 1)
 			{
-				if (!PARAMETER_INCLUDE.equals(parameter) || hasDuplicates(values))
+				if ((!PARAMETER_INCLUDE.equals(parameter) && !PARAMETER_REVINCLUDE.equals(parameter))
+						|| hasDuplicates(values))
 					errors.add(new SearchQueryParameterError(SearchQueryParameterErrorType.UNSUPPORTED_NUMBER_OF_VALUES,
 							parameter, values));
 			}
@@ -169,33 +210,48 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 			return null;
 	}
 
-	private void createSortSql(String sortParameterValue)
+	private String createSortSql(String sortParameterValue)
 	{
 		if (sortParameterValue == null)
-			return;
+			return "";
 
 		sortParameters = searchParameters.stream().filter(sp -> sp.getSortParameter().isPresent())
 				.collect(Collectors.toList());
 
 		if (sortParameters.isEmpty())
-			return;
+			return "";
 
-		sortSql = sortParameters.stream().map(sp -> sp.getSortParameter().get().getSql())
+		return sortParameters.stream().map(sp -> sp.getSortParameter().get().getSql())
 				.collect(Collectors.joining(", ", " ORDER BY ", ""));
 	}
 
-	private void createIncludeSql(List<String> includeParameterValues)
+	private String createIncludeSql(List<String> includeParameterValues)
 	{
 		if (includeParameterValues == null || includeParameterValues.isEmpty())
-			return;
+			return "";
 
-		includeParameters = searchParameters.stream().filter(sp -> sp.getIncludeParameter().isPresent())
+		includeParameters = searchParameters.stream().flatMap(sp -> sp.getIncludeParameters().stream())
 				.collect(Collectors.toList());
 
 		if (includeParameters.isEmpty())
-			return;
+			return "";
 
-		includeSql = includeParameters.stream().map(sp -> sp.getIncludeParameter().get().getSql())
+		return includeParameters.stream().map(SearchQueryIncludeParameter::getSql)
+				.collect(Collectors.joining(", ", ", ", ""));
+	}
+
+	private String createRevIncludeSql()
+	{
+		if (revIncludeParameterFactories == null || revIncludeParameterFactories.isEmpty())
+			return "";
+
+		revIncludeParameters = revIncludeParameterFactories.stream().flatMap(f -> f.getRevIncludeParameters().stream())
+				.collect(Collectors.toList());
+
+		if (revIncludeParameters.isEmpty())
+			return "";
+
+		return revIncludeParameters.stream().map(SearchQueryIncludeParameter::getSql)
 				.collect(Collectors.joining(", ", ", ", ""));
 	}
 
@@ -210,7 +266,8 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 	@Override
 	public String getSearchSql()
 	{
-		String searchQueryMain = "SELECT " + resourceColumn + includeSql + " FROM current_" + resourceTable;
+		String searchQueryMain = "SELECT " + resourceColumn + includeSql + revIncludeSql + " FROM current_"
+				+ resourceTable;
 
 		return searchQueryMain + (!filterQuery.isEmpty() ? (" WHERE " + filterQuery) : "") + sortSql
 				+ pageAndCount.sql();
@@ -259,6 +316,8 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 			bundleUri.replaceQueryParam(PARAMETER_SORT, sortParameter());
 		if (!includeParameters.isEmpty())
 			bundleUri.replaceQueryParam(PARAMETER_INCLUDE, includeParameters());
+		if (!revIncludeParameterFactories.isEmpty())
+			bundleUri.replaceQueryParam(PARAMETER_REVINCLUDE, revIncludeParameters());
 
 		return bundleUri;
 	}
@@ -271,7 +330,12 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 
 	private Object[] includeParameters()
 	{
-		return includeParameters.stream().flatMap(p -> p.getIncludeParameter().get().getBundleUriQueryParameterValues())
+		return includeParameters.stream().map(SearchQueryIncludeParameter::getBundleUriQueryParameterValues).toArray();
+	}
+
+	private Object[] revIncludeParameters()
+	{
+		return revIncludeParameters.stream().map(SearchQueryIncludeParameter::getBundleUriQueryParameterValues)
 				.toArray();
 	}
 
@@ -326,14 +390,28 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 	@Override
 	public void modifyIncludeResource(Resource resource, int columnIndex, Connection connection) throws SQLException
 	{
-		if (columnIndex - 1 > includeParameters.size())
-		{
-			logger.warn("Unexpected column-index {}, column-index - 1 larger than include parameter count {}",
-					columnIndex, includeParameters.size());
-			throw new IllegalStateException("Unexpected column-index " + columnIndex
-					+ ", column-index - 1 larger than include parameter count " + includeParameters.size());
-		}
+		int includeParameterCount = includeParameters.size();
+		int revIncludeParameterCount = revIncludeParameters.size();
 
-		includeParameters.get(columnIndex - 2).modifyIncludeResource(resource, connection);
+		if (includeParameterCount > 0 && columnIndex - 1 <= includeParameterCount)
+		{
+			includeParameters.get(columnIndex - 2).modifyIncludeResource(resource, connection);
+		}
+		else if (revIncludeParameters.size() > 0 && columnIndex - 1 - includeParameterCount <= revIncludeParameterCount)
+		{
+			revIncludeParameters.get(columnIndex - 2 - includeParameterCount).modifyIncludeResource(resource,
+					connection);
+		}
+		else
+		{
+			logger.warn(
+					"Unexpected column-index {}, column-index - 1 larger than include ({}) + revinclude ({}) parameter count {}",
+					columnIndex, includeParameterCount, revIncludeParameterCount,
+					includeParameterCount + revIncludeParameterCount);
+			throw new IllegalStateException(
+					"Unexpected column-index " + columnIndex + ", column-index - 1 larger than include ("
+							+ includeParameterCount + ") + revinclude (" + revIncludeParameterCount
+							+ ") parameter count " + (includeParameterCount + revIncludeParameterCount));
+		}
 	}
 }

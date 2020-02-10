@@ -10,7 +10,7 @@ public class ProvenanceDaoJdbc extends AbstractResourceDaoJdbc<Provenance> imple
 {
 	public ProvenanceDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
 	{
-		super(dataSource, fhirContext, Provenance.class, "provenances", "provenance", "provenance_id");
+		super(dataSource, fhirContext, Provenance.class, "provenances", "provenance", "provenance_id", with(), with());
 	}
 
 	@Override

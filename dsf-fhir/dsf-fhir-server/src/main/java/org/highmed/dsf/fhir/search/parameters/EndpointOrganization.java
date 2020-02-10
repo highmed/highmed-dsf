@@ -10,7 +10,7 @@ import org.highmed.dsf.fhir.dao.OrganizationDao;
 import org.highmed.dsf.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.function.BiFunctionWithSqlException;
-import org.highmed.dsf.fhir.search.SearchQueryIncludeParameter.IncludeParts;
+import org.highmed.dsf.fhir.search.IncludeParts;
 import org.highmed.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.dsf.fhir.search.parameters.basic.AbstractIdentifierParameter;
 import org.highmed.dsf.fhir.search.parameters.basic.AbstractReferenceParameter;
@@ -24,9 +24,8 @@ import org.hl7.fhir.r4.model.Resource;
 @SearchParameterDefinition(name = EndpointOrganization.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Endpoint.managingOrganization", type = SearchParamType.REFERENCE, documentation = "The organization that is managing the endpoint, search by identifier is supported")
 public class EndpointOrganization extends AbstractReferenceParameter<Endpoint>
 {
-	public static final String PARAMETER_NAME = "organization";
-
 	private static final String RESOURCE_TYPE_NAME = "Endpoint";
+	public static final String PARAMETER_NAME = "organization";
 	private static final String TARGET_RESOURCE_TYPE_NAME = "Organization";
 
 	private static final String ORGANIZATION_IDENTIFIERS_SUBQUERY = "(SELECT organization->'identifier' FROM current_organizations"
@@ -182,17 +181,14 @@ public class EndpointOrganization extends AbstractReferenceParameter<Endpoint>
 	@Override
 	protected String getIncludeSql(IncludeParts includeParts)
 	{
-		if (RESOURCE_TYPE_NAME.equals(includeParts.getSourceResourceTypeName())
-				&& PARAMETER_NAME.equals(includeParts.getSearchParameterName())
-				&& (includeParts.getTargetResourceTypeName() == null
-						|| TARGET_RESOURCE_TYPE_NAME.equals(includeParts.getTargetResourceTypeName())))
+		if (includeParts.matches(RESOURCE_TYPE_NAME, PARAMETER_NAME, TARGET_RESOURCE_TYPE_NAME))
 			return "(SELECT jsonb_build_array(organization) FROM current_organizations WHERE concat('Organization/', organization->>'id') = endpoint->'managingOrganization'->>'reference') AS organizations";
 		else
 			return null;
 	}
 
 	@Override
-	protected void doModifyIncludeResource(Resource resource, Connection connection)
+	protected void modifyIncludeResource(IncludeParts includeParts, Resource resource, Connection connection)
 	{
 		// Nothing to do for organizations
 	}
