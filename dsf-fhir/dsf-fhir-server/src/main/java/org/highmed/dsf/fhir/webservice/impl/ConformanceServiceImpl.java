@@ -16,6 +16,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
+import org.highmed.dsf.fhir.search.SearchQueryRevIncludeParameterFactory.RevIncludeDefinition;
 import org.highmed.dsf.fhir.search.parameters.ActivityDefinitionIdentifier;
 import org.highmed.dsf.fhir.search.parameters.ActivityDefinitionName;
 import org.highmed.dsf.fhir.search.parameters.ActivityDefinitionStatus;
@@ -64,6 +65,10 @@ import org.highmed.dsf.fhir.search.parameters.ValueSetIdentifier;
 import org.highmed.dsf.fhir.search.parameters.ValueSetStatus;
 import org.highmed.dsf.fhir.search.parameters.ValueSetUrl;
 import org.highmed.dsf.fhir.search.parameters.ValueSetVersion;
+import org.highmed.dsf.fhir.search.parameters.rev.include.AbstractRevIncludeParameterFactory;
+import org.highmed.dsf.fhir.search.parameters.rev.include.EndpointOrganizationRevInclude;
+import org.highmed.dsf.fhir.search.parameters.rev.include.OrganizationEndpointRevInclude;
+import org.highmed.dsf.fhir.search.parameters.rev.include.ResearchStudyEnrollmentRevInclude;
 import org.highmed.dsf.fhir.webservice.specification.ConformanceService;
 import org.highmed.dsf.fhir.websocket.ServerEndpoint;
 import org.highmed.dsf.tools.build.BuildInfoReader;
@@ -191,6 +196,7 @@ public class ConformanceServiceImpl extends AbstractServiceImpl implements Confo
 				StructureDefinition.class, Subscription.class, Task.class, ValueSet.class);
 
 		var searchParameters = new HashMap<Class<? extends Resource>, List<CapabilityStatementRestResourceSearchParamComponent>>();
+		var revIncludeParameters = new HashMap<Class<? extends Resource>, List<Class<? extends AbstractRevIncludeParameterFactory>>>();
 
 		var activityDefinitionUrl = createSearchParameter(ActivityDefinitionUrl.class);
 		var activityDefinitionIdentifier = createSearchParameter(ActivityDefinitionIdentifier.class);
@@ -220,6 +226,10 @@ public class ConformanceServiceImpl extends AbstractServiceImpl implements Confo
 		var endpointStatus = createSearchParameter(EndpointStatus.class);
 		searchParameters.put(Endpoint.class,
 				Arrays.asList(endpointIdentifier, endpointName, endpointOrganization, endpointStatus));
+		revIncludeParameters.put(Endpoint.class, Collections.singletonList(OrganizationEndpointRevInclude.class));
+
+		// Group
+		revIncludeParameters.put(Group.class, Collections.singletonList(ResearchStudyEnrollmentRevInclude.class));
 
 		var healthcareServiceActive = createSearchParameter(HealthcareServiceActive.class);
 		var healthcareServiceIdentifier = createSearchParameter(HealthcareServiceIdentifier.class);
@@ -239,6 +249,7 @@ public class ConformanceServiceImpl extends AbstractServiceImpl implements Confo
 		var organizationType = createSearchParameter(OrganizationType.class);
 		searchParameters.put(Organization.class, Arrays.asList(organizationActive, organizationEndpoint,
 				organizationIdentifier, organizationNameOrAlias, organizationType));
+		revIncludeParameters.put(Organization.class, Collections.singletonList(EndpointOrganizationRevInclude.class));
 
 		var patientActive = createSearchParameter(PatientActive.class);
 		var patientIdentifier = createSearchParameter(PatientIdentifier.class);
@@ -302,7 +313,7 @@ public class ConformanceServiceImpl extends AbstractServiceImpl implements Confo
 			r.setConditionalRead(ConditionalReadStatus.FULLSUPPORT);
 			r.setConditionalUpdate(true);
 			r.setConditionalDelete(ConditionalDeleteStatus.SINGLE);
-			r.addReferencePolicy(ReferenceHandlingPolicy.LITERAL); // TODO ReferenceHandlingPolicy.ENFORCED
+			r.addReferencePolicy(ReferenceHandlingPolicy.ENFORCED);
 
 			r.setType(resource.getAnnotation(ResourceDef.class).name());
 			r.setProfile(resource.getAnnotation(ResourceDef.class).profile());
@@ -327,6 +338,23 @@ public class ConformanceServiceImpl extends AbstractServiceImpl implements Confo
 					.filter(s -> SearchParamType.REFERENCE.equals(s.getType()))
 					.map(s -> new StringType(resource.getAnnotation(ResourceDef.class).name() + ":" + s.getName()))
 					.collect(Collectors.toList()));
+
+			r.setSearchRevInclude(
+					revIncludeParameters.getOrDefault(resource, Collections.emptyList()).stream().flatMap(c ->
+					{
+						RevIncludeDefinition def = c.getAnnotation(RevIncludeDefinition.class);
+						if (def == null)
+							return Stream.empty();
+						else
+						{
+							String resourceTypeName = def.resourceType().getAnnotation(ResourceDef.class).name();
+							String parameterName = def.parameterName();
+							return Arrays.stream(def.targetResourceTypes())
+									.map(t -> t.getAnnotation(ResourceDef.class).name())
+									.map(targetResourceTypeName -> new StringType(
+											resourceTypeName + ":" + parameterName + ":" + targetResourceTypeName));
+						}
+					}).collect(Collectors.toList()));
 
 			r.addSearchParam(createFormatParameter());
 			r.addSearchParam(createPrettyParameter());

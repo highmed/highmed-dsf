@@ -17,8 +17,9 @@ public class ActivityDefinitionDaoJdbc extends AbstractResourceDaoJdbc<ActivityD
 	public ActivityDefinitionDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, ActivityDefinition.class, "activity_definitions", "activity_definition",
-				"activity_definition_id", ActivityDefinitionIdentifier::new, ActivityDefinitionName::new,
-				ActivityDefinitionStatus::new, ActivityDefinitionUrl::new, ActivityDefinitionVersion::new);
+				"activity_definition_id", with(ActivityDefinitionIdentifier::new, ActivityDefinitionName::new,
+						ActivityDefinitionStatus::new, ActivityDefinitionUrl::new, ActivityDefinitionVersion::new),
+				with());
 	}
 
 	@Override

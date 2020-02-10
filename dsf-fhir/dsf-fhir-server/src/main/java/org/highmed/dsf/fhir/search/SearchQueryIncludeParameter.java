@@ -1,100 +1,53 @@
 package org.highmed.dsf.fhir.search;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import org.highmed.dsf.fhir.function.BiConsumerWithSqlException;
+import org.hl7.fhir.r4.model.Resource;
 
 public class SearchQueryIncludeParameter
 {
-	public static class IncludeParts
+	private final String sql;
+	private final IncludeParts includeParts;
+
+	private final BiConsumerWithSqlException<Resource, Connection> includeResourceModifier;
+
+	public SearchQueryIncludeParameter(String sql, IncludeParts includeParts)
 	{
-		private final String sourceResourceTypeName;
-		private final String searchParameterName;
-		private final String targetResourceTypeName;
-
-		public IncludeParts(String sourceResourceTypeName, String searchParameterName, String targetResourceTypeName)
-		{
-			this.sourceResourceTypeName = sourceResourceTypeName;
-			this.searchParameterName = searchParameterName;
-			this.targetResourceTypeName = targetResourceTypeName;
-		}
-
-		public static IncludeParts fromString(String includeParameterValue)
-		{
-			if (includeParameterValue == null || includeParameterValue.isBlank())
-				return new IncludeParts(null, null, null);
-			else
-			{
-				String[] parts = includeParameterValue.split(":");
-
-				String sourceResourceTypeName = null, searchParameterName = null, targetResourceTypeName = null;
-				if (parts.length > 0)
-					sourceResourceTypeName = parts[0];
-				if (parts.length > 1)
-					searchParameterName = parts[1];
-				if (parts.length > 2)
-					targetResourceTypeName = parts[2];
-
-				return new IncludeParts(sourceResourceTypeName, searchParameterName, targetResourceTypeName);
-			}
-		}
-
-		public String toBundleUriQueryParameterValue()
-		{
-			return getSourceResourceTypeName() + ":" + getSearchParameterName()
-					+ (getTargetResourceTypeName() != null ? (":" + getTargetResourceTypeName()) : "");
-		}
-
-		public String getSourceResourceTypeName()
-		{
-			return sourceResourceTypeName;
-		}
-
-		public String getSearchParameterName()
-		{
-			return searchParameterName;
-		}
-
-		public String getTargetResourceTypeName()
-		{
-			return targetResourceTypeName;
-		}
-
-		public boolean matches(String resourceTypeName, String parameterName, String targetResourceTypeName)
-		{
-			return resourceTypeName.equals(getSourceResourceTypeName())
-					&& parameterName.equals(getSearchParameterName()) && (getTargetResourceTypeName() == null
-							|| targetResourceTypeName.equals(getTargetResourceTypeName()));
-		}
-
-		@Override
-		public String toString()
-		{
-			if (searchParameterName == null && targetResourceTypeName == null)
-				return sourceResourceTypeName;
-			else if (targetResourceTypeName == null)
-				return sourceResourceTypeName + ":" + searchParameterName;
-			else
-				return sourceResourceTypeName + ":" + searchParameterName + ":" + targetResourceTypeName;
-		}
+		this(sql, includeParts, null);
 	}
 
-	private final List<String> sql;
-	private final List<IncludeParts> includeParts;
-
-	public SearchQueryIncludeParameter(List<String> sql, List<IncludeParts> includeParts)
+	/**
+	 * @param sql
+	 * @param includeParts
+	 * @param includeResourceModifier
+	 *            Use this {@link BiConsumerWithSqlException} to modify the include resources. This consumer can be used
+	 *            if the resources returned by the include SQL are not complete and additional content needs to be
+	 *            retrieved from a not included column. For example the content of a {@link Binary} resource might not
+	 *            be stored in the json column.
+	 */
+	public SearchQueryIncludeParameter(String sql, IncludeParts includeParts,
+			BiConsumerWithSqlException<Resource, Connection> includeResourceModifier)
 	{
 		this.sql = sql;
 		this.includeParts = includeParts;
+		this.includeResourceModifier = includeResourceModifier;
 	}
 
-	public Stream<String> getBundleUriQueryParameterValues()
+	public String getBundleUriQueryParameterValues()
 	{
-		return includeParts.stream().map(IncludeParts::toBundleUriQueryParameterValue);
+		return includeParts.toBundleUriQueryParameterValue();
 	}
 
 	public String getSql()
 	{
-		return sql.stream().collect(Collectors.joining(", "));
+		return sql;
+	}
+
+	public void modifyIncludeResource(Resource resource, Connection connection) throws SQLException
+	{
+		if (includeResourceModifier != null)
+			includeResourceModifier.accept(resource, connection);
 	}
 }

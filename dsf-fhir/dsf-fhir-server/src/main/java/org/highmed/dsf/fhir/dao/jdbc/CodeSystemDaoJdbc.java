@@ -20,7 +20,8 @@ public class CodeSystemDaoJdbc extends AbstractResourceDaoJdbc<CodeSystem> imple
 	public CodeSystemDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, CodeSystem.class, "code_systems", "code_system", "code_system_id",
-				CodeSystemIdentifier::new, CodeSystemStatus::new, CodeSystemUrl::new, CodeSystemVersion::new);
+				with(CodeSystemIdentifier::new, CodeSystemStatus::new, CodeSystemUrl::new, CodeSystemVersion::new),
+				with());
 
 		readByUrl = new ReadByUrlDaoJdbc<>(this::getDataSource, this::getResource, getResourceTable(),
 				getResourceColumn(), getResourceIdColumn());

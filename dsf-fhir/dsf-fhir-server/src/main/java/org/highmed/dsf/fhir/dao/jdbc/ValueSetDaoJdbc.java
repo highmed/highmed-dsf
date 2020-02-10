@@ -20,7 +20,7 @@ public class ValueSetDaoJdbc extends AbstractResourceDaoJdbc<ValueSet> implement
 	public ValueSetDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, ValueSet.class, "value_sets", "value_set", "value_set_id",
-				ValueSetIdentifier::new, ValueSetStatus::new, ValueSetUrl::new, ValueSetVersion::new);
+				with(ValueSetIdentifier::new, ValueSetStatus::new, ValueSetUrl::new, ValueSetVersion::new), with());
 
 		readByUrl = new ReadByUrlDaoJdbc<>(this::getDataSource, this::getResource, getResourceTable(),
 				getResourceColumn(), getResourceIdColumn());

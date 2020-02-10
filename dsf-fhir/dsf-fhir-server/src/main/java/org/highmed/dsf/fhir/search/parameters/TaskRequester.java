@@ -11,7 +11,7 @@ import org.highmed.dsf.fhir.dao.ResourceDao;
 import org.highmed.dsf.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.function.BiFunctionWithSqlException;
-import org.highmed.dsf.fhir.search.SearchQueryIncludeParameter.IncludeParts;
+import org.highmed.dsf.fhir.search.IncludeParts;
 import org.highmed.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.dsf.fhir.search.parameters.basic.AbstractIdentifierParameter;
 import org.highmed.dsf.fhir.search.parameters.basic.AbstractReferenceParameter;
@@ -29,9 +29,8 @@ import org.hl7.fhir.r4.model.Task;
 @SearchParameterDefinition(name = TaskRequester.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Task-requester", type = SearchParamType.REFERENCE, documentation = "Search by task requester")
 public class TaskRequester extends AbstractReferenceParameter<Task>
 {
-	public static final String PARAMETER_NAME = "requester";
-
 	private static final String RESOURCE_TYPE_NAME = "Task";
+	public static final String PARAMETER_NAME = "requester";
 	private static final String[] TARGET_RESOURCE_TYPE_NAMES = { "Practitioner", "Organization", "Patient",
 			"PractitionerRole" };
 	// TODO add Device, RelatedPerson if supported, see also doResolveReferencesForMatching, matches, getIncludeSql
@@ -259,7 +258,7 @@ public class TaskRequester extends AbstractReferenceParameter<Task>
 	}
 
 	@Override
-	protected void doModifyIncludeResource(Resource resource, Connection connection)
+	protected void modifyIncludeResource(IncludeParts includeParts, Resource resource, Connection connection)
 	{
 		// Nothing to do for practitioners, organizations, patients or practitioner-roles
 	}
