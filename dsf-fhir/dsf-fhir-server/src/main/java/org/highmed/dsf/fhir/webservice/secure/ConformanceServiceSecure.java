@@ -18,6 +18,7 @@ public class ConformanceServiceSecure extends AbstractServiceSecure<ConformanceS
 		super(delegate, responseGenerator);
 	}
 
+	@Override
 	public Response getMetadata(String mode, UriInfo uri, HttpHeaders headers)
 	{
 		logger.debug("Current user '{}', role '{}'", provider.getCurrentUser().getName(),
