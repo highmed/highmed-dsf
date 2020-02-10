@@ -82,7 +82,7 @@ public final class BpeServer
 		JettyServer server = new JettyServer(connector, errorHandler, "/bpe", initializers, configProperties,
 				webInfClassesDirs, webInfJars, filters.toArray(new Class[filters.size()]));
 
-		server.getWebAppContext().addEventListener(new SessionInvalidater());
+		server.getWebAppContext().addEventListener(new SessionInvalidator());
 		server.getWebAppContext().getSessionHandler().setSessionTrackingModes(Collections.singleton(SessionTrackingMode.SSL));
 		
 		start(server);

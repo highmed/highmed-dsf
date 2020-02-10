@@ -84,7 +84,7 @@ public final class FhirServer
 		JettyServer server = new JettyServer(connector, errorHandler, "/fhir", initializers, configProperties,
 				webInfClassesDirs, webInfJars, filters.toArray(new Class[filters.size()]));
 
-		server.getWebAppContext().addEventListener(new SessionInvalidater());
+		server.getWebAppContext().addEventListener(new SessionInvalidator());
 		server.getWebAppContext().getSessionHandler().setSessionTrackingModes(Collections.singleton(SessionTrackingMode.SSL));
 
 		initializeWebSocketServerContainer(server);

@@ -5,7 +5,7 @@ import javax.servlet.ServletRequestListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-public class SessionInvalidater implements ServletRequestListener
+public class SessionInvalidator implements ServletRequestListener
 {
 	@Override
 	public void requestInitialized(ServletRequestEvent sre)
