@@ -113,17 +113,17 @@ public abstract class AbstractIntegrationTest
 		logger.info("Creating webservice client ...");
 		webserviceClient = createWebserviceClient(certificates.getClientCertificate().getTrustStore(),
 				certificates.getClientCertificate().getKeyStore(),
-				certificates.getClientCertificate().getKeyStorePassword(), fhirContext);
+				certificates.getClientCertificate().getKeyStorePassword(), fhirContext, extractor);
 
 		logger.info("Starting FHIR Server ...");
 		fhirServer = startFhirServer();
 	}
 
 	private static FhirWebserviceClient createWebserviceClient(KeyStore trustStore, KeyStore keyStore,
-			String keyStorePassword, FhirContext fhirContext)
+			String keyStorePassword, FhirContext fhirContext, ReferenceExtractor referenceExtractor)
 	{
 		return new FhirWebserviceClientJersey(BASE_URL, trustStore, keyStore, keyStorePassword, null, null, null, 0, 0,
-				null, fhirContext);
+				null, fhirContext, referenceExtractor);
 	}
 
 	private static WebsocketClient createWebsocketClient(KeyStore trustStore, KeyStore keyStore,

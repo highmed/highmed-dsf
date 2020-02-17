@@ -52,6 +52,9 @@ public class ClientConfig
 	@Autowired
 	private HelperConfig helperConfig;
 
+	@Autowired
+	private CommandConfig commandConfig;
+
 	@Bean
 	public ClientProvider clientProvider()
 	{
@@ -67,8 +70,8 @@ public class ClientConfig
 
 			return new ClientProviderImpl(webserviceTrustStore, webserviceKeyStore, webserviceKeyStorePassword,
 					remoteReadTimeout, remoteConnectTimeout, remoteProxyPassword, remoteProxyUsername,
-					remoteProxySchemeHostPort, fhirConfig.fhirContext(), daoConfig.endpointDao(),
-					helperConfig.exceptionHandler());
+					remoteProxySchemeHostPort, fhirConfig.fhirContext(), commandConfig.referenceExtractor(),
+					daoConfig.endpointDao(), helperConfig.exceptionHandler());
 		}
 		catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e)
 		{

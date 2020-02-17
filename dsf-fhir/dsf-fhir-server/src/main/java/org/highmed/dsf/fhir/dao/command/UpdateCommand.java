@@ -140,7 +140,7 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		Optional<Long> ifMatch = Optional.ofNullable(entry.getRequest().getIfMatch())
 				.flatMap(parameterConverter::toEntityTag).flatMap(parameterConverter::toVersion);
 
-		updatedResource = exceptionHandler.handleSqlExAndResourceNotFoundExForUpdateAsCreateAndResouceVersionNonMatchEx(
+		updatedResource = exceptionHandler.handleSqlExAndResourceNotFoundExAndResouceVersionNonMatchEx(
 				resourceTypeName, () -> dao.updateWithTransaction(connection, resource, ifMatch.orElse(null)));
 	}
 

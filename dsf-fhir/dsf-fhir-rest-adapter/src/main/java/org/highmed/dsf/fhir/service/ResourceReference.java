@@ -1,6 +1,8 @@
-package org.highmed.dsf.fhir.dao.command;
+package org.highmed.dsf.fhir.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -13,7 +15,7 @@ import org.hl7.fhir.r4.model.Resource;
 
 public class ResourceReference
 {
-	private static final Pattern TEMP_ID_PATTERN = Pattern.compile(Command.URL_UUID_PREFIX + ".+");
+	private static final Pattern TEMP_ID_PATTERN = Pattern.compile("urn:uuid:.+");
 
 	private static final Pattern ID_PATTERN = Pattern
 			.compile("(?<base>(http|https):\\/\\/([A-Za-z0-9\\-\\\\\\.\\:\\%\\$]*\\/)+)?"
@@ -101,8 +103,14 @@ public class ResourceReference
 	private final Reference reference;
 	private final List<Class<? extends Resource>> referenceTypes = new ArrayList<>();
 
+	@SafeVarargs
+	public ResourceReference(String referenceLocation, Reference reference, Class<? extends Resource>... referenceTypes)
+	{
+		this(referenceLocation, reference, Arrays.asList(referenceTypes));
+	}
+
 	public ResourceReference(String referenceLocation, Reference reference,
-			List<Class<? extends Resource>> referenceTypes)
+			Collection<Class<? extends Resource>> referenceTypes)
 	{
 		this.referenceLocation = referenceLocation;
 		this.reference = reference;

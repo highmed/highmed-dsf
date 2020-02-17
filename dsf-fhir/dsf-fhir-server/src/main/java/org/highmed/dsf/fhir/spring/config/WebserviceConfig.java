@@ -138,7 +138,9 @@ public class WebserviceConfig
 
 	private ActivityDefinitionServiceSecure activityDefinitionServiceSecure()
 	{
-		return new ActivityDefinitionServiceSecure(activityDefinitionServiceImpl(), helperConfig.responseGenerator());
+		return new ActivityDefinitionServiceSecure(activityDefinitionServiceImpl(), serverBase,
+				helperConfig.responseGenerator(), commandConfig.referenceResolver(), daoConfig.activityDefinitionDao(),
+				helperConfig.exceptionHandler(), helperConfig.parameterConverter());
 	}
 
 	private ActivityDefinitionServiceImpl activityDefinitionServiceImpl()
@@ -158,7 +160,9 @@ public class WebserviceConfig
 
 	private CodeSystemServiceSecure codeSystemServiceSecure()
 	{
-		return new CodeSystemServiceSecure(codeSystemServiceImpl(), helperConfig.responseGenerator());
+		return new CodeSystemServiceSecure(codeSystemServiceImpl(), serverBase, helperConfig.responseGenerator(),
+				commandConfig.referenceResolver(), daoConfig.codeSystemDao(), helperConfig.exceptionHandler(),
+				helperConfig.parameterConverter());
 	}
 
 	private CodeSystemServiceImpl codeSystemServiceImpl()
@@ -178,7 +182,9 @@ public class WebserviceConfig
 
 	private BinaryServiceSecure binaryServiceSecure()
 	{
-		return new BinaryServiceSecure(binaryServiceImpl(), helperConfig.responseGenerator());
+		return new BinaryServiceSecure(binaryServiceImpl(), serverBase, helperConfig.responseGenerator(),
+				commandConfig.referenceResolver(), daoConfig.binaryDao(), helperConfig.exceptionHandler(),
+				helperConfig.parameterConverter());
 	}
 
 	private BinaryService binaryServiceImpl()
@@ -197,7 +203,9 @@ public class WebserviceConfig
 
 	private BundleServiceSecure bundleServiceSecure()
 	{
-		return new BundleServiceSecure(bundleServiceImpl(), helperConfig.responseGenerator());
+		return new BundleServiceSecure(bundleServiceImpl(), serverBase, helperConfig.responseGenerator(),
+				commandConfig.referenceResolver(), daoConfig.bundleDao(), helperConfig.exceptionHandler(),
+				helperConfig.parameterConverter());
 	}
 
 	private BundleService bundleServiceImpl()
@@ -216,7 +224,9 @@ public class WebserviceConfig
 
 	private EndpointServiceSecure endpointServiceSecure()
 	{
-		return new EndpointServiceSecure(endpointServiceImpl(), helperConfig.responseGenerator());
+		return new EndpointServiceSecure(endpointServiceImpl(), serverBase, helperConfig.responseGenerator(),
+				commandConfig.referenceResolver(), daoConfig.endpointDao(), helperConfig.exceptionHandler(),
+				helperConfig.parameterConverter());
 	}
 
 	private EndpointServiceImpl endpointServiceImpl()
@@ -235,7 +245,9 @@ public class WebserviceConfig
 
 	private GroupServiceSecure groupServiceSecure()
 	{
-		return new GroupServiceSecure(groupServiceImpl(), helperConfig.responseGenerator());
+		return new GroupServiceSecure(groupServiceImpl(), serverBase, helperConfig.responseGenerator(),
+				commandConfig.referenceResolver(), daoConfig.groupDao(), helperConfig.exceptionHandler(),
+				helperConfig.parameterConverter());
 	}
 
 	private GroupServiceImpl groupServiceImpl()
@@ -254,7 +266,9 @@ public class WebserviceConfig
 
 	private HealthcareServiceServiceSecure healthcareServiceServiceSecure()
 	{
-		return new HealthcareServiceServiceSecure(healthcareServiceServiceImpl(), helperConfig.responseGenerator());
+		return new HealthcareServiceServiceSecure(healthcareServiceServiceImpl(), serverBase,
+				helperConfig.responseGenerator(), commandConfig.referenceResolver(), daoConfig.healthcareServiceDao(),
+				helperConfig.exceptionHandler(), helperConfig.parameterConverter());
 	}
 
 	private HealthcareServiceServiceImpl healthcareServiceServiceImpl()
@@ -274,7 +288,9 @@ public class WebserviceConfig
 
 	private LocationServiceSecure locationServiceSecure()
 	{
-		return new LocationServiceSecure(locationServiceImpl(), helperConfig.responseGenerator());
+		return new LocationServiceSecure(locationServiceImpl(), serverBase, helperConfig.responseGenerator(),
+				commandConfig.referenceResolver(), daoConfig.locationDao(), helperConfig.exceptionHandler(),
+				helperConfig.parameterConverter());
 	}
 
 	private LocationServiceImpl locationServiceImpl()
@@ -293,7 +309,9 @@ public class WebserviceConfig
 
 	private NamingSystemServiceSecure namingSystemServiceSecure()
 	{
-		return new NamingSystemServiceSecure(namingSystemServiceImpl(), helperConfig.responseGenerator());
+		return new NamingSystemServiceSecure(namingSystemServiceImpl(), serverBase, helperConfig.responseGenerator(),
+				commandConfig.referenceResolver(), daoConfig.namingSystemDao(), helperConfig.exceptionHandler(),
+				helperConfig.parameterConverter());
 	}
 
 	private NamingSystemService namingSystemServiceImpl()
@@ -313,7 +331,9 @@ public class WebserviceConfig
 
 	private OrganizationServiceSecure organizationServiceSecure()
 	{
-		return new OrganizationServiceSecure(organizationServiceImpl(), helperConfig.responseGenerator());
+		return new OrganizationServiceSecure(organizationServiceImpl(), serverBase, helperConfig.responseGenerator(),
+				commandConfig.referenceResolver(), daoConfig.organizationDao(), helperConfig.exceptionHandler(),
+				helperConfig.parameterConverter());
 	}
 
 	private OrganizationServiceImpl organizationServiceImpl()
@@ -333,7 +353,9 @@ public class WebserviceConfig
 
 	private PatientServiceSecure patientServiceSecure()
 	{
-		return new PatientServiceSecure(patientServiceImpl(), helperConfig.responseGenerator());
+		return new PatientServiceSecure(patientServiceImpl(), serverBase, helperConfig.responseGenerator(),
+				commandConfig.referenceResolver(), daoConfig.patientDao(), helperConfig.exceptionHandler(),
+				helperConfig.parameterConverter());
 	}
 
 	private PatientServiceImpl patientServiceImpl()
@@ -352,7 +374,9 @@ public class WebserviceConfig
 
 	private PractitionerRoleServiceSecure practitionerRoleServiceSecure()
 	{
-		return new PractitionerRoleServiceSecure(practitionerRoleServiceImpl(), helperConfig.responseGenerator());
+		return new PractitionerRoleServiceSecure(practitionerRoleServiceImpl(), serverBase,
+				helperConfig.responseGenerator(), commandConfig.referenceResolver(), daoConfig.practitionerRoleDao(),
+				helperConfig.exceptionHandler(), helperConfig.parameterConverter());
 	}
 
 	private PractitionerRoleServiceImpl practitionerRoleServiceImpl()
@@ -372,7 +396,9 @@ public class WebserviceConfig
 
 	private PractitionerServiceSecure practitionerServiceSecure()
 	{
-		return new PractitionerServiceSecure(practitionerServiceImpl(), helperConfig.responseGenerator());
+		return new PractitionerServiceSecure(practitionerServiceImpl(), serverBase, helperConfig.responseGenerator(),
+				commandConfig.referenceResolver(), daoConfig.practitionerDao(), helperConfig.exceptionHandler(),
+				helperConfig.parameterConverter());
 	}
 
 	private PractitionerServiceImpl practitionerServiceImpl()
@@ -392,7 +418,9 @@ public class WebserviceConfig
 
 	private ProvenanceServiceSecure provenanceServiceSecure()
 	{
-		return new ProvenanceServiceSecure(provenanceServiceImpl(), helperConfig.responseGenerator());
+		return new ProvenanceServiceSecure(provenanceServiceImpl(), serverBase, helperConfig.responseGenerator(),
+				commandConfig.referenceResolver(), daoConfig.provenanceDao(), helperConfig.exceptionHandler(),
+				helperConfig.parameterConverter());
 	}
 
 	private ProvenanceServiceImpl provenanceServiceImpl()
@@ -412,7 +440,9 @@ public class WebserviceConfig
 
 	private ResearchStudyServiceSecure researchStudyServiceSecure()
 	{
-		return new ResearchStudyServiceSecure(researchStudyServiceImpl(), helperConfig.responseGenerator());
+		return new ResearchStudyServiceSecure(researchStudyServiceImpl(), serverBase, helperConfig.responseGenerator(),
+				commandConfig.referenceResolver(), daoConfig.researchStudyDao(), helperConfig.exceptionHandler(),
+				helperConfig.parameterConverter());
 	}
 
 	private ResearchStudyServiceImpl researchStudyServiceImpl()
@@ -432,7 +462,9 @@ public class WebserviceConfig
 
 	private StructureDefinitionServiceSecure structureDefinitionServiceSecure()
 	{
-		return new StructureDefinitionServiceSecure(structureDefinitionServiceImpl(), helperConfig.responseGenerator());
+		return new StructureDefinitionServiceSecure(structureDefinitionServiceImpl(), serverBase,
+				helperConfig.responseGenerator(), commandConfig.referenceResolver(), daoConfig.structureDefinitionDao(),
+				helperConfig.exceptionHandler(), helperConfig.parameterConverter());
 	}
 
 	private StructureDefinitionServiceImpl structureDefinitionServiceImpl()
@@ -453,7 +485,9 @@ public class WebserviceConfig
 
 	private SubscriptionServiceSecure subscriptionServiceSecure()
 	{
-		return new SubscriptionServiceSecure(subscriptionServiceImpl(), helperConfig.responseGenerator());
+		return new SubscriptionServiceSecure(subscriptionServiceImpl(), serverBase, helperConfig.responseGenerator(),
+				commandConfig.referenceResolver(), daoConfig.subscriptionDao(), helperConfig.exceptionHandler(),
+				helperConfig.parameterConverter());
 	}
 
 	private SubscriptionServiceImpl subscriptionServiceImpl()
@@ -473,7 +507,9 @@ public class WebserviceConfig
 
 	private TaskServiceSecure taskServiceSecure()
 	{
-		return new TaskServiceSecure(taskServiceImpl(), helperConfig.responseGenerator());
+		return new TaskServiceSecure(taskServiceImpl(), serverBase, helperConfig.responseGenerator(),
+				commandConfig.referenceResolver(), daoConfig.taskDao(), helperConfig.exceptionHandler(),
+				helperConfig.parameterConverter(), daoConfig.activityDefinitionDao());
 	}
 
 	private TaskServiceImpl taskServiceImpl()
@@ -492,7 +528,9 @@ public class WebserviceConfig
 
 	private ValueSetServiceSecure valueSetServiceSecure()
 	{
-		return new ValueSetServiceSecure(valueSetServiceImpl(), helperConfig.responseGenerator());
+		return new ValueSetServiceSecure(valueSetServiceImpl(), serverBase, helperConfig.responseGenerator(),
+				commandConfig.referenceResolver(), daoConfig.valueSetDao(), helperConfig.exceptionHandler(),
+				helperConfig.parameterConverter());
 	}
 
 	private ValueSetServiceImpl valueSetServiceImpl()
@@ -511,7 +549,8 @@ public class WebserviceConfig
 
 	private RootServiceSecure rootServiceSecure()
 	{
-		return new RootServiceSecure(rootServiceImpl(), helperConfig.responseGenerator());
+		return new RootServiceSecure(rootServiceImpl(), serverBase, helperConfig.responseGenerator(),
+				commandConfig.referenceResolver());
 	}
 
 	private RootServiceImpl rootServiceImpl()
@@ -528,7 +567,8 @@ public class WebserviceConfig
 
 	private ConformanceServiceSecure conformanceServiceSecure()
 	{
-		return new ConformanceServiceSecure(conformanceServiceImpl(), helperConfig.responseGenerator());
+		return new ConformanceServiceSecure(conformanceServiceImpl(), serverBase, helperConfig.responseGenerator(),
+				commandConfig.referenceResolver());
 	}
 
 	private ConformanceServiceImpl conformanceServiceImpl()
@@ -545,7 +585,8 @@ public class WebserviceConfig
 
 	private StaticResourcesServiceSecure staticResourcesServiceSecure()
 	{
-		return new StaticResourcesServiceSecure(staticResourcesServiceImpl(), helperConfig.responseGenerator());
+		return new StaticResourcesServiceSecure(staticResourcesServiceImpl(), serverBase,
+				helperConfig.responseGenerator(), commandConfig.referenceResolver());
 	}
 
 	private StaticResourcesServiceImpl staticResourcesServiceImpl()

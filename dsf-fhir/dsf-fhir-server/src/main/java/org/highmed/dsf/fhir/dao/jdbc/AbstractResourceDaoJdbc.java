@@ -429,6 +429,50 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	}
 
 	@Override
+	public Optional<R> readIncludingDeleted(UUID uuid) throws SQLException
+	{
+		if (uuid == null)
+			return Optional.empty();
+
+		try (Connection connection = dataSource.getConnection())
+		{
+			return readIncludingDeletedWithTransaction(connection, uuid);
+		}
+	}
+
+	@Override
+	public Optional<R> readIncludingDeletedWithTransaction(Connection connection, UUID uuid) throws SQLException
+	{
+		Objects.requireNonNull(connection, "connection");
+		if (uuid == null)
+			return Optional.empty();
+
+		try (PreparedStatement statement = connection.prepareStatement(preparedStatementFactory.getReadByIdSql()))
+		{
+			preparedStatementFactory.configureReadByIdStatement(statement, uuid);
+
+			logger.trace("Executing query '{}'", statement);
+			try (ResultSet result = statement.executeQuery())
+			{
+				if (result.next())
+				{
+					if (preparedStatementFactory.isReadByIdDeleted(result))
+						logger.warn("{} with IdPart {} found, but marked as deleted", resourceTypeName, uuid);
+					else
+						logger.debug("{} with IdPart {} found", resourceTypeName, uuid);
+
+					return Optional.of(preparedStatementFactory.getReadByIdResource(result));
+				}
+				else
+				{
+					logger.debug("{} with IdPart {} not found", resourceTypeName, uuid);
+					return Optional.empty();
+				}
+			}
+		}
+	}
+
+	@Override
 	public boolean existsNotDeleted(String idString, String versionString) throws SQLException
 	{
 		return existsNotDeletedWithTransaction(dataSource.getConnection(), idString, versionString);
@@ -800,7 +844,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 
 		List<R> partialResult = new ArrayList<>();
 		List<Resource> includes = new ArrayList<>();
-		
+
 		if (!query.isCountOnly(overallCount)) // TODO ask db if count 0
 		{
 			try (PreparedStatement statement = connection.prepareStatement(query.getSearchSql()))

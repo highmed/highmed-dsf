@@ -44,7 +44,7 @@ public class CommandConfig
 	public ReferenceResolver referenceResolver()
 	{
 		return new ReferenceResolverImpl(serverBase, daoConfig.daoProvider(), helperConfig.responseGenerator(),
-				helperConfig.exceptionHandler(), clientConfig.clientProvider());
+				helperConfig.exceptionHandler(), clientConfig.clientProvider(), helperConfig.parameterConverter());
 	}
 
 	@Bean

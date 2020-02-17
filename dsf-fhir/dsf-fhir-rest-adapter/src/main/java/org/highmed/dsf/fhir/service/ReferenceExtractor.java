@@ -2,7 +2,6 @@ package org.highmed.dsf.fhir.service;
 
 import java.util.stream.Stream;
 
-import org.highmed.dsf.fhir.dao.command.ResourceReference;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Group;

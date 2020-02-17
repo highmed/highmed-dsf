@@ -8,6 +8,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.Date;
 
+import org.highmed.dsf.fhir.service.ReferenceExtractor;
+import org.highmed.dsf.fhir.service.ReferenceExtractorImpl;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.highmed.fhir.client.FhirWebserviceClientJersey;
 import org.hl7.fhir.r4.model.StringType;
@@ -31,8 +33,9 @@ public class UpdateWhiteList3MedicTtpExampleStarter
 		KeyStore trustStore = CertificateHelper.extractTrust(keyStore);
 
 		FhirContext context = FhirContext.forR4();
+		ReferenceExtractor referenceExtractor = new ReferenceExtractorImpl();
 		FhirWebserviceClient client = new FhirWebserviceClientJersey("https://ttp/fhir/", trustStore, keyStore,
-				keyStorePassword, null, null, null, 0, 0, null, context);
+				keyStorePassword, null, null, null, 0, 0, null, context, referenceExtractor);
 
 		Task task = new Task();
 		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-update-whitelist");

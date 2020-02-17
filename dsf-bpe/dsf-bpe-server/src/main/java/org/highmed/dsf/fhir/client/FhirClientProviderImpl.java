@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.highmed.dsf.fhir.service.ReferenceExtractor;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.highmed.fhir.client.FhirWebserviceClientJersey;
 import org.highmed.fhir.client.WebsocketClient;
@@ -22,7 +23,8 @@ import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class FhirClientProviderImpl implements FhirWebserviceClientProvider, FhirWebsocketClientProvider, InitializingBean
+public class FhirClientProviderImpl
+		implements FhirWebserviceClientProvider, FhirWebsocketClientProvider, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(FhirClientProviderImpl.class);
 
@@ -30,6 +32,7 @@ public class FhirClientProviderImpl implements FhirWebserviceClientProvider, Fhi
 	private final Map<String, WebsocketClient> websocketClientsBySubscriptionId = new HashMap<>();
 
 	private final FhirContext fhirContext;
+	private final ReferenceExtractor referenceExtractor;
 
 	private final String localBaseUrl;
 	private final int localReadTimeout;
@@ -50,14 +53,15 @@ public class FhirClientProviderImpl implements FhirWebserviceClientProvider, Fhi
 	private final KeyStore localWebsocketKeyStore;
 	private final String localWebsocketKeyStorePassword;
 
-	public FhirClientProviderImpl(FhirContext fhirContext, String localBaseUrl, int localReadTimeout,
-			int localConnectTimeout, KeyStore webserviceTrustStore, KeyStore webserviceKeyStore,
+	public FhirClientProviderImpl(FhirContext fhirContext, ReferenceExtractor referenceExtractor, String localBaseUrl,
+			int localReadTimeout, int localConnectTimeout, KeyStore webserviceTrustStore, KeyStore webserviceKeyStore,
 			String webserviceKeyStorePassword, int remoteReadTimeout, int remoteConnectTimeout,
 			String remoteProxyPassword, String remoteProxyUsername, String remoteProxySchemeHostPort,
 			String localWebsocketUrl, KeyStore localWebsocketTrustStore, KeyStore localWebsocketKeyStore,
 			String localWebsocketKeyStorePassword)
 	{
 		this.fhirContext = fhirContext;
+		this.referenceExtractor = referenceExtractor;
 		this.localBaseUrl = localBaseUrl;
 		this.localReadTimeout = localReadTimeout;
 		this.localConnectTimeout = localConnectTimeout;
@@ -120,11 +124,12 @@ public class FhirClientProviderImpl implements FhirWebserviceClientProvider, Fhi
 				if (localBaseUrl.equals(webserviceUrl))
 					client = new FhirWebserviceClientJersey(webserviceUrl, webserviceTrustStore, webserviceKeyStore,
 							webserviceKeyStorePassword, null, null, null, localConnectTimeout, localReadTimeout, null,
-							fhirContext);
+							fhirContext, referenceExtractor);
 				else
 					client = new FhirWebserviceClientJersey(webserviceUrl, webserviceTrustStore, webserviceKeyStore,
 							webserviceKeyStorePassword, remoteProxySchemeHostPort, remoteProxyUsername,
-							remoteProxyPassword, remoteConnectTimeout, remoteReadTimeout, null, fhirContext);
+							remoteProxyPassword, remoteConnectTimeout, remoteReadTimeout, null, fhirContext,
+							referenceExtractor);
 
 				webserviceClientsByUrl.put(webserviceUrl, client);
 				return client;
@@ -172,9 +177,8 @@ public class FhirClientProviderImpl implements FhirWebserviceClientProvider, Fhi
 						Collections.singletonList("Organization:endpoint")));
 
 		if (resultSet.getTotal() != 1 || resultSet.getEntry().size() != 2)
-			throw new IllegalStateException(
-					"Resultset with total 1 and 2 entries expected, but got (" + resultSet.getTotal() + "/" + resultSet
-							.getEntry().size() + ")");
+			throw new IllegalStateException("Resultset with total 1 and 2 entries expected, but got ("
+					+ resultSet.getTotal() + "/" + resultSet.getEntry().size() + ")");
 
 		final Endpoint endpoint;
 		if (resultSet.getEntry().get(1).getResource() instanceof Endpoint)
@@ -186,9 +190,10 @@ public class FhirClientProviderImpl implements FhirWebserviceClientProvider, Fhi
 
 		if (endpoint == null)
 			throw new IllegalStateException(
-					"Resultset missing resource of type " + Endpoint.class.getName() + ", found (" + resultSet
-							.getEntry().stream().map(e -> e.getResource().getClass().getName())
-							.collect(Collectors.joining(", ")) + ")");
+					"Resultset missing resource of type "
+							+ Endpoint.class.getName() + ", found (" + resultSet.getEntry().stream()
+									.map(e -> e.getResource().getClass().getName()).collect(Collectors.joining(", "))
+							+ ")");
 		return endpoint;
 	}
 

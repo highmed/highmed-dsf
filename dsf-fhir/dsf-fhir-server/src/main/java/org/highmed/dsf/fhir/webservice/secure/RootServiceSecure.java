@@ -6,8 +6,8 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.highmed.dsf.fhir.authentication.UserRole;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
+import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.highmed.dsf.fhir.webservice.specification.RootService;
 import org.hl7.fhir.r4.model.Bundle;
 import org.slf4j.Logger;
@@ -17,16 +17,17 @@ public class RootServiceSecure extends AbstractServiceSecure<RootService> implem
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractResourceServiceSecure.class);
 
-	public RootServiceSecure(RootService delegate, ResponseGenerator responseGenerator)
+	public RootServiceSecure(RootService delegate, String serverBase, ResponseGenerator responseGenerator,
+			ReferenceResolver referenceResolver)
 	{
-		super(delegate, responseGenerator);
+		super(delegate, serverBase, responseGenerator, referenceResolver);
 	}
 
 	@Override
 	public Response root(UriInfo uri, HttpHeaders headers)
 	{
-		logger.debug("Current user '{}', role '{}'", provider.getCurrentUser().getName(),
-				provider.getCurrentUser().getRole());
+		logger.debug("Current user '{}', role '{}'", userProvider.getCurrentUser().getName(),
+				userProvider.getCurrentUser().getRole());
 
 		// get root allowed for all authenticated users
 
@@ -36,23 +37,33 @@ public class RootServiceSecure extends AbstractServiceSecure<RootService> implem
 	@Override
 	public Response handleBundle(Bundle bundle, UriInfo uri, HttpHeaders headers)
 	{
-		logger.debug("Current user '{}', role '{}'", provider.getCurrentUser().getName(),
-				provider.getCurrentUser().getRole());
+		logger.debug("Current user '{}', role '{}'", userProvider.getCurrentUser().getName(),
+				userProvider.getCurrentUser().getRole());
 
-		return reasonHandleBundleNotAllowed(bundle).map(forbidden("POST"))
-				.orElse(delegate.handleBundle(bundle, uri, headers));
+		Optional<String> reasonHandleBundleAllowed = reasonHandleBundleAllowed(bundle);
+
+		if (reasonHandleBundleAllowed.isEmpty())
+		{
+			audit.info("Handling of transaction and batch bundles denied for user '{}'", getCurrentUser().getName());
+			return forbidden("bundle");
+		}
+		else
+		{
+			audit.info("Handling of transaction or batch bundle allowed for user '{}'", getCurrentUser().getName());
+			return delegate.handleBundle(bundle, uri, headers);
+		}
 	}
 
-	private Optional<String> reasonHandleBundleNotAllowed(Bundle bundle)
+	private Optional<String> reasonHandleBundleAllowed(Bundle bundle)
 	{
 		/*
 		 * TODO check if operation for each entry in transaction / batch bundle is allowed, batch can have not allowed
 		 * operations and will return 403 for those, transaction can't and will return 403 for all
 		 */
 
-		if (!UserRole.LOCAL.equals(provider.getCurrentUser().getRole()))
-			return Optional.of("Missing role 'LOCAL'");
-		else
-			return Optional.empty();
+		// if (!UserRole.LOCAL.equals(userProvider.getCurrentUser().getRole()))
+		// return Optional.of("Missing role 'LOCAL'");
+		// else
+		return Optional.empty();
 	}
 }

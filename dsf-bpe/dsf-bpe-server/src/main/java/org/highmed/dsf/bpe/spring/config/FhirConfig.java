@@ -17,6 +17,8 @@ import org.highmed.dsf.fhir.group.GroupHelper;
 import org.highmed.dsf.fhir.group.GroupHelperImpl;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProviderImpl;
+import org.highmed.dsf.fhir.service.ReferenceExtractor;
+import org.highmed.dsf.fhir.service.ReferenceExtractorImpl;
 import org.highmed.dsf.fhir.task.TaskHandler;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.task.TaskHelperImpl;
@@ -46,7 +48,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import ca.uhn.fhir.context.FhirContext;
-
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.CertificateReader;
 
@@ -145,6 +146,12 @@ public class FhirConfig
 	}
 
 	@Bean
+	public ReferenceExtractor referenceExtractor()
+	{
+		return new ReferenceExtractorImpl();
+	}
+
+	@Bean
 	public ProcessEnginePlugin fhirPlugin()
 	{
 		return new FhirPlugin(domainResourceSerializer(), multiInstanceTargetSerializer(),
@@ -218,8 +225,8 @@ public class FhirConfig
 				throw new IOException(
 						"Webservice keystore file '" + localWebserviceKsFile.toString() + "' not readable");
 
-			KeyStore localWebserviceKeyStore = CertificateReader
-					.fromPkcs12(localWebserviceKsFile, webserviceKeyStorePassword);
+			KeyStore localWebserviceKeyStore = CertificateReader.fromPkcs12(localWebserviceKsFile,
+					webserviceKeyStorePassword);
 			KeyStore localWebserviceTrustStore = CertificateHelper.extractTrust(localWebserviceKeyStore);
 
 			Path localWebsocketKsFile = Paths.get(localWebsocketKeyStoreFile);
@@ -227,15 +234,15 @@ public class FhirConfig
 			if (!Files.isReadable(localWebsocketKsFile))
 				throw new IOException("Websocket keystore file '" + localWebsocketKsFile.toString() + "' not readable");
 
-			KeyStore localWebsocketKeyStore = CertificateReader
-					.fromPkcs12(localWebsocketKsFile, localWebsocketKeyStorePassword);
+			KeyStore localWebsocketKeyStore = CertificateReader.fromPkcs12(localWebsocketKsFile,
+					localWebsocketKeyStorePassword);
 			KeyStore localWebsocketTrustStore = CertificateHelper.extractTrust(localWebsocketKeyStore);
 
-			return new FhirClientProviderImpl(fhirContext(), localWebserviceBaseUrl, localReadTimeout,
-					localConnectTimeout, localWebserviceTrustStore, localWebserviceKeyStore, webserviceKeyStorePassword,
-					remoteReadTimeout, remoteConnectTimeout, remoteProxyPassword, remoteProxyUsername,
-					remoteProxySchemeHostPort, localWebsocketUrl, localWebsocketTrustStore, localWebsocketKeyStore,
-					localWebsocketKeyStorePassword);
+			return new FhirClientProviderImpl(fhirContext(), referenceExtractor(), localWebserviceBaseUrl,
+					localReadTimeout, localConnectTimeout, localWebserviceTrustStore, localWebserviceKeyStore,
+					webserviceKeyStorePassword, remoteReadTimeout, remoteConnectTimeout, remoteProxyPassword,
+					remoteProxyUsername, remoteProxySchemeHostPort, localWebsocketUrl, localWebsocketTrustStore,
+					localWebsocketKeyStore, localWebsocketKeyStorePassword);
 		}
 		catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e)
 		{

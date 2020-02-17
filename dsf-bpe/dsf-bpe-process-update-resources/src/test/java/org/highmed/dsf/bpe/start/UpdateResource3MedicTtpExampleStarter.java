@@ -10,6 +10,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 
+import org.highmed.dsf.fhir.service.ReferenceExtractor;
+import org.highmed.dsf.fhir.service.ReferenceExtractorImpl;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.highmed.fhir.client.FhirWebserviceClientJersey;
 import org.hl7.fhir.r4.model.Bundle;
@@ -35,8 +37,9 @@ public class UpdateResource3MedicTtpExampleStarter
 		KeyStore trustStore = CertificateHelper.extractTrust(keyStore);
 
 		FhirContext context = FhirContext.forR4();
+		ReferenceExtractor referenceExtractor = new ReferenceExtractorImpl();
 		FhirWebserviceClient client = new FhirWebserviceClientJersey("https://ttp/fhir/", trustStore, keyStore,
-				keyStorePassword, null, null, null, 0, 0, null, context);
+				keyStorePassword, null, null, null, 0, 0, null, context, referenceExtractor);
 
 		Bundle searchResult = client.search(Bundle.class, Map.of("identifier",
 				Collections.singletonList("http://highmed.org/fhir/CodeSystem/update-whitelist|HiGHmed_white_list")));

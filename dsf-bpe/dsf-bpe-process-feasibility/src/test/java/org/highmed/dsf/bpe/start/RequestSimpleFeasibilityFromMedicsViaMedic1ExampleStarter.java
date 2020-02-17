@@ -12,6 +12,8 @@ import java.util.UUID;
 import javax.ws.rs.WebApplicationException;
 
 import org.highmed.dsf.bpe.Constants;
+import org.highmed.dsf.fhir.service.ReferenceExtractor;
+import org.highmed.dsf.fhir.service.ReferenceExtractorImpl;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.highmed.fhir.client.FhirWebserviceClientJersey;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -51,8 +53,9 @@ public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter
 		KeyStore trustStore = CertificateHelper.extractTrust(keyStore);
 
 		FhirContext context = FhirContext.forR4();
+		ReferenceExtractor referenceExtractor = new ReferenceExtractorImpl();
 		FhirWebserviceClient client = new FhirWebserviceClientJersey("https://medic1/fhir/", trustStore, keyStore,
-				keyStorePassword, null, null, null, 0, 0, null, context);
+				keyStorePassword, null, null, null, 0, 0, null, context, referenceExtractor);
 
 		try
 		{

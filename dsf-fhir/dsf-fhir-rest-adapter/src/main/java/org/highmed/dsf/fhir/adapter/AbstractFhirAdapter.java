@@ -17,6 +17,7 @@ import javax.ws.rs.ext.MessageBodyWriter;
 
 import org.hl7.fhir.r4.model.BaseResource;
 
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.parser.IParser;
 
 public abstract class AbstractFhirAdapter<T extends BaseResource> implements MessageBodyReader<T>, MessageBodyWriter<T>
@@ -30,6 +31,16 @@ public abstract class AbstractFhirAdapter<T extends BaseResource> implements Mes
 	{
 		this.resourceType = resourceType;
 		this.parser = parser;
+	}
+
+	public final Class<? extends BaseResource> getResourceType()
+	{
+		return resourceType;
+	}
+
+	public final String getResourceTypeName()
+	{
+		return getResourceType().getAnnotation(ResourceDef.class).name();
 	}
 
 	private IParser getParser(MediaType mediaType)

@@ -22,6 +22,8 @@ public class AbstractJerseyClient
 {
 	private final Client client;
 	private final String baseUrl;
+	
+	protected final List<?> registeredComponents;
 
 	public AbstractJerseyClient(String baseUrl, KeyStore trustStore, KeyStore keyStore, String keyStorePassword,
 			ObjectMapper objectMapper, List<?> componentsToRegister)
@@ -70,6 +72,8 @@ public class AbstractJerseyClient
 
 		this.baseUrl = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
 		// making sure the root url works, this might be a workaround for a jersey client bug
+		
+		this.registeredComponents = componentsToRegister;
 	}
 
 	protected WebTarget getResource()

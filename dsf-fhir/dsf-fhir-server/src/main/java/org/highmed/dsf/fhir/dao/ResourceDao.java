@@ -111,6 +111,26 @@ public interface ResourceDao<R extends Resource>
 	Optional<R> readVersionWithTransaction(Connection connection, UUID uuid, long version) throws SQLException;
 
 	/**
+	 * @param uuid
+	 *            may be <code>null</code>
+	 * @return {@link Optional#empty()} if the given uuid is <code>null</code> or no resource could be found for the
+	 *         given uuid
+	 * @throws SQLException
+	 */
+	Optional<R> readIncludingDeleted(UUID uuid) throws SQLException;
+
+	/**
+	 * @param connection
+	 *            not <code>null</code>
+	 * @param uuid
+	 *            may be <code>null</code>
+	 * @return {@link Optional#empty()} if the given uuid is <code>null</code> or no resource could be found for the
+	 *         given uuid
+	 * @throws SQLException
+	 */
+	Optional<R> readIncludingDeletedWithTransaction(Connection connection, UUID uuid) throws SQLException;
+	
+	/**
 	 * @param id
 	 *            not <code>null</code>
 	 * @param version

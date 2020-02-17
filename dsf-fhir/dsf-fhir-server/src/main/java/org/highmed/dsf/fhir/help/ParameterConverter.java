@@ -56,14 +56,26 @@ public class ParameterConverter
 		if (id == null)
 			return null;
 
+		return toUuid(id).orElseThrow(() -> exceptionHandler.notFound(resourceTypeName));
+	}
+
+	/**
+	 * @param id
+	 * @return {@link Optional#empty()} if the given id is <code>null</code> or is not a {@link UUID}
+	 */
+	public Optional<UUID> toUuid(String id)
+	{
+		if (id == null)
+			return Optional.empty();
+
 		// TODO control flow by exception
 		try
 		{
-			return UUID.fromString(id);
+			return Optional.of(UUID.fromString(id));
 		}
 		catch (IllegalArgumentException e)
 		{
-			throw exceptionHandler.notFound(resourceTypeName, e);
+			return Optional.empty();
 		}
 	}
 

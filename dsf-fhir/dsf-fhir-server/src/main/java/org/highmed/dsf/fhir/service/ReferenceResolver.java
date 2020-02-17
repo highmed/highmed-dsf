@@ -1,14 +1,43 @@
 package org.highmed.dsf.fhir.service;
 
 import java.sql.Connection;
+import java.util.List;
+import java.util.Optional;
 
 import javax.ws.rs.WebApplicationException;
 
-import org.highmed.dsf.fhir.dao.command.ResourceReference;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 
 public interface ReferenceResolver
 {
+	/**
+	 * @param referenceLocation
+	 * @param reference
+	 *            not <code>null</code>
+	 * @param referenceTypes
+	 * @return {@link Optional#empty()} if the reference could not be resolved
+	 * @throws IllegalArgumentException
+	 *             if the reference is not of type {@link ResourceReference.ReferenceType#LITERAL_INTERNAL},
+	 *             {@link ResourceReference.ReferenceType#LITERAL_EXTERNAL},
+	 *             {@link ResourceReference.ReferenceType#CONDITIONAL} or
+	 *             {@link ResourceReference.ReferenceType#LOGICAL}
+	 */
+	Optional<Resource> resolveReference(String referenceLocation, Reference reference,
+			List<Class<? extends Resource>> referenceTypes);
+
+	/**
+	 * @param reference
+	 *            not <code>null</code>
+	 * @return {@link Optional#empty()} if the reference could not be resolved
+	 * @throws IllegalArgumentException
+	 *             if the reference is not of type {@link ResourceReference.ReferenceType#LITERAL_INTERNAL},
+	 *             {@link ResourceReference.ReferenceType#LITERAL_EXTERNAL},
+	 *             {@link ResourceReference.ReferenceType#CONDITIONAL} or
+	 *             {@link ResourceReference.ReferenceType#LOGICAL}
+	 */
+	Optional<Resource> resolveReference(ResourceReference reference);
+
 	/**
 	 * @param resource
 	 *            not <code>null</code>
@@ -142,8 +171,8 @@ public interface ReferenceResolver
 	 *             if the reference is not of type {@link ResourceReference.ReferenceType#CONDITIONAL}
 	 * @see ResourceReference#getType(String)
 	 */
-	boolean resolveConditionalReference(Resource resource, ResourceReference resourceReference,
-			Connection connection) throws WebApplicationException, IllegalArgumentException;
+	boolean resolveConditionalReference(Resource resource, ResourceReference resourceReference, Connection connection)
+			throws WebApplicationException, IllegalArgumentException;
 
 	/**
 	 * @param resource

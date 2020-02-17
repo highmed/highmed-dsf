@@ -6,7 +6,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import org.highmed.dsf.fhir.dao.command.ResourceReference;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.BackboneElement;
 import org.hl7.fhir.r4.model.CareTeam;
@@ -317,7 +316,7 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 	@Override
 	public Stream<ResourceReference> getReferences(Patient resource)
 	{
-		var contacts_organization = getBackboneElementsReference(resource, Patient::hasContact, Patient::getContact,
+		var contactsOrganization = getBackboneElementsReference(resource, Patient::hasContact, Patient::getContact,
 				ContactComponent::hasOrganization, ContactComponent::getOrganization, "Patient.contact.organization",
 				Organization.class);
 		var generalPractitioners = getReferences(resource, Patient::hasGeneralPractitioner,
@@ -325,26 +324,26 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 				PractitionerRole.class);
 		var managingOrganization = getReference(resource, Patient::hasManagingOrganization,
 				Patient::getManagingOrganization, "Patient.managingOrganization", Organization.class);
-		var links_other = getBackboneElementsReference(resource, Patient::hasLink, Patient::getLink,
+		var linksOther = getBackboneElementsReference(resource, Patient::hasLink, Patient::getLink,
 				PatientLinkComponent::hasOther, PatientLinkComponent::getOther, "Patient.link.other", Patient.class,
 				RelatedPerson.class);
 
 		var extensionReferences = getExtensionReferences(resource);
 
-		return concat(contacts_organization, generalPractitioners, managingOrganization, links_other,
+		return concat(contactsOrganization, generalPractitioners, managingOrganization, linksOther,
 				extensionReferences);
 	}
 
 	@Override
 	public Stream<ResourceReference> getReferences(Practitioner resource)
 	{
-		var qualifications_issuer = getBackboneElementsReference(resource, Practitioner::hasQualification,
+		var qualificationsIssuer = getBackboneElementsReference(resource, Practitioner::hasQualification,
 				Practitioner::getQualification, PractitionerQualificationComponent::hasIssuer,
 				PractitionerQualificationComponent::getIssuer, "Practitioner.qualification.issuer", Organization.class);
 
 		var extensionReferences = getExtensionReferences(resource);
 
-		return concat(qualifications_issuer, extensionReferences);
+		return concat(qualificationsIssuer, extensionReferences);
 	}
 
 	@Override
@@ -372,20 +371,20 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 		var targets = getReferences(resource, Provenance::hasTarget, Provenance::getTarget, "Provenance.target");
 		var location = getReference(resource, Provenance::hasLocation, Provenance::getLocation, "Provenance.location",
 				Location.class);
-		var agents_who = getBackboneElementsReference(resource, Provenance::hasAgent, Provenance::getAgent,
+		var agentsWho = getBackboneElementsReference(resource, Provenance::hasAgent, Provenance::getAgent,
 				ProvenanceAgentComponent::hasWho, ProvenanceAgentComponent::getWho, "Provenance.agent.who",
 				Practitioner.class, PractitionerRole.class, RelatedPerson.class, Patient.class, Device.class,
 				Organization.class);
-		var agents_onBehalfOf = getBackboneElementsReference(resource, Provenance::hasAgent, Provenance::getAgent,
+		var agentsOnBehalfOf = getBackboneElementsReference(resource, Provenance::hasAgent, Provenance::getAgent,
 				ProvenanceAgentComponent::hasOnBehalfOf, ProvenanceAgentComponent::getOnBehalfOf,
 				"Provenance.agent.onBehalfOf", Practitioner.class, PractitionerRole.class, RelatedPerson.class,
 				Patient.class, Device.class, Organization.class);
-		var entities_what = getBackboneElementsReference(resource, Provenance::hasEntity, Provenance::getEntity,
+		var entitiesWhat = getBackboneElementsReference(resource, Provenance::hasEntity, Provenance::getEntity,
 				ProvenanceEntityComponent::hasWhat, ProvenanceEntityComponent::getWhat, "Provenance.entity.what");
 
 		var extensionReferences = getExtensionReferences(resource);
 
-		return concat(targets, location, agents_who, agents_onBehalfOf, entities_what, extensionReferences);
+		return concat(targets, location, agentsWho, agentsOnBehalfOf, entitiesWhat, extensionReferences);
 	}
 
 	@Override
@@ -416,7 +415,7 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 		var basedOns = getReferences(resource, Task::hasBasedOn, Task::getBasedOn, "Task.basedOn");
 		var partOfs = getReferences(resource, Task::hasPartOf, Task::getPartOf, "Task.partOf", Task.class);
 		var focus = getReference(resource, Task::hasFocus, Task::getFocus, "Task.focus");
-		var for_ = getReference(resource, Task::hasFor, Task::getFor, "Task.for");
+		var forRef = getReference(resource, Task::hasFor, Task::getFor, "Task.for");
 		var encounter = getReference(resource, Task::hasEncounter, Task::getEncounter, "Task.encounter",
 				Encounter.class);
 		var requester = getReference(resource, Task::hasRequester, Task::getRequester, "Task.requester", Device.class,
@@ -431,7 +430,7 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 				Coverage.class, ClaimResponse.class);
 		var relevanteHistories = getReferences(resource, Task::hasRelevantHistory, Task::getRelevantHistory,
 				"Task.relevantHistory", Provenance.class);
-		var restriction_recipiets = getBackboneElementReferences(resource, Task::hasRestriction, Task::getRestriction,
+		var restrictionRecipiets = getBackboneElementReferences(resource, Task::hasRestriction, Task::getRestriction,
 				Task.TaskRestrictionComponent::hasRecipient, Task.TaskRestrictionComponent::getRecipient,
 				"Task.restriction.recipient", Patient.class, Practitioner.class, PractitionerRole.class,
 				RelatedPerson.class, Group.class, Organization.class);
@@ -440,8 +439,8 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 		var outputReferences = getOutputReferences(resource);
 		var extensionReferences = getExtensionReferences(resource);
 
-		return concat(basedOns, partOfs, focus, for_, encounter, requester, owner, location, reasonReference, insurance,
-				relevanteHistories, restriction_recipiets, inputReferences, outputReferences, extensionReferences);
+		return concat(basedOns, partOfs, focus, forRef, encounter, requester, owner, location, reasonReference, insurance,
+				relevanteHistories, restrictionRecipiets, inputReferences, outputReferences, extensionReferences);
 	}
 
 	private Stream<ResourceReference> getInputReferences(Task resource)
