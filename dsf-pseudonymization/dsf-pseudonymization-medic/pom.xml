@@ -9,4 +9,11 @@
 		<artifactId>dsf-pseudonymization-pom</artifactId>
 		<version>0.1.0-SNAPSHOT</version>
 	</parent>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.highmed.dsf</groupId>
+			<artifactId>dsf-pseudonymization-base</artifactId>
+		</dependency>
+	</dependencies>
 </project>
