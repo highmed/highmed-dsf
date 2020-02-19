@@ -38,7 +38,7 @@ public class SubscriptionCriteria extends AbstractStringParameter<Subscription>
 	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement,
 			BiFunctionWithSqlException<String, Object[], Array> arrayCreator) throws SQLException
 	{
-		statement.setString(1, valueAndType.value);
+		statement.setString(parameterIndex, valueAndType.value);
 	}
 
 	@Override

@@ -14,6 +14,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
+import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.ResourceDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
@@ -51,11 +52,11 @@ public class ReadCommand extends AbstractCommand implements Command
 	private Resource singleResult;
 	private Response responseResult;
 
-	public ReadCommand(int index, Bundle bundle, BundleEntryComponent entry, String serverBase, int defaultPageCount,
-			DaoProvider daoProvider, ParameterConverter parameterConverter, ResponseGenerator responseGenerator,
-			ExceptionHandler exceptionHandler)
+	public ReadCommand(int index, User user, Bundle bundle, BundleEntryComponent entry, String serverBase,
+			int defaultPageCount, DaoProvider daoProvider, ParameterConverter parameterConverter,
+			ResponseGenerator responseGenerator, ExceptionHandler exceptionHandler)
 	{
-		super(5, index, bundle, entry, serverBase);
+		super(5, index, user, bundle, entry, serverBase);
 
 		this.defaultPageCount = defaultPageCount;
 
@@ -179,7 +180,7 @@ public class ReadCommand extends AbstractCommand implements Command
 		Integer count = parameterConverter.getFirstInt(cleanQueryParameters, SearchQuery.PARAMETER_COUNT);
 		int effectiveCount = (count == null || count < 0) ? defaultPageCount : count;
 
-		SearchQuery<? extends Resource> query = optDao.get().createSearchQuery(effectivePage, effectiveCount);
+		SearchQuery<? extends Resource> query = optDao.get().createSearchQuery(user, effectivePage, effectiveCount);
 		query.configureParameters(cleanQueryParameters);
 		List<SearchQueryParameterError> errors = query.getUnsupportedQueryParameters(cleanQueryParameters);
 		// TODO throw error if strict param handling is configured, include warning else

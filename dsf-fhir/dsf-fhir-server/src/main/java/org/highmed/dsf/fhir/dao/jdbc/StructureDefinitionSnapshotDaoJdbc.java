@@ -8,9 +8,11 @@ import java.util.Objects;
 import java.util.UUID;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.highmed.dsf.fhir.OrganizationType;
 import org.highmed.dsf.fhir.dao.StructureDefinitionSnapshotDao;
 import org.highmed.dsf.fhir.dao.converter.SnapshotInfoConverter;
 import org.highmed.dsf.fhir.dao.exception.ResourceNotFoundException;
+import org.highmed.dsf.fhir.search.parameters.user.StructureDefinitionSnapshotUserFilter;
 import org.highmed.dsf.fhir.service.SnapshotInfo;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.StructureDefinition;
@@ -27,10 +29,11 @@ public class StructureDefinitionSnapshotDaoJdbc extends AbstractStructureDefinit
 	private final SnapshotInfoConverter converter;
 
 	public StructureDefinitionSnapshotDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext,
-			SnapshotInfoConverter converter)
+			OrganizationType organizationType, SnapshotInfoConverter converter)
 	{
-		super(dataSource, fhirContext, "structure_definition_snapshots", "structure_definition_snapshot",
-				"structure_definition_snapshot_id");
+		super(dataSource, fhirContext, organizationType, "structure_definition_snapshots",
+				"structure_definition_snapshot", "structure_definition_snapshot_id",
+				StructureDefinitionSnapshotUserFilter::new);
 
 		this.converter = converter;
 	}

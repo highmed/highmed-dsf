@@ -1,5 +1,6 @@
 package org.highmed.dsf.fhir.webservice.secure;
 
+import org.highmed.dsf.fhir.authorization.ActivityDefinitionAuthorizationRule;
 import org.highmed.dsf.fhir.dao.ActivityDefinitionDao;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
@@ -12,12 +13,12 @@ public class ActivityDefinitionServiceSecure
 		extends AbstractResourceServiceSecure<ActivityDefinitionDao, ActivityDefinition, ActivityDefinitionService>
 		implements ActivityDefinitionService
 {
-	public ActivityDefinitionServiceSecure(ActivityDefinitionService delegate, String serverBase, ResponseGenerator responseGenerator,
-			ReferenceResolver referenceResolver, ActivityDefinitionDao activityDefinitionDao, ExceptionHandler exceptionHandler,
-			ParameterConverter parameterConverter)
+	public ActivityDefinitionServiceSecure(ActivityDefinitionService delegate, String serverBase,
+			ResponseGenerator responseGenerator, ReferenceResolver referenceResolver,
+			ActivityDefinitionDao activityDefinitionDao, ExceptionHandler exceptionHandler,
+			ParameterConverter parameterConverter, ActivityDefinitionAuthorizationRule authorizationRule)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver, ActivityDefinition.class,
-				activityDefinitionDao, exceptionHandler,
-				parameterConverter);
+				activityDefinitionDao, exceptionHandler, parameterConverter, authorizationRule);
 	}
 }

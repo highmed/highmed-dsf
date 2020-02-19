@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.highmed.dsf.fhir.OrganizationType;
 import org.highmed.dsf.fhir.dao.jdbc.PractitionerDaoJdbc;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.Practitioner;
@@ -23,9 +24,10 @@ public class PractitionerDaoTest extends AbstractResourceDaoTest<Practitioner, P
 	}
 
 	@Override
-	protected PractitionerDao createDao(BasicDataSource dataSource, FhirContext fhirContext)
+	protected PractitionerDao createDao(BasicDataSource dataSource, FhirContext fhirContext,
+			OrganizationType organizationType)
 	{
-		return new PractitionerDaoJdbc(dataSource, fhirContext);
+		return new PractitionerDaoJdbc(dataSource, fhirContext, organizationType);
 	}
 
 	@Override

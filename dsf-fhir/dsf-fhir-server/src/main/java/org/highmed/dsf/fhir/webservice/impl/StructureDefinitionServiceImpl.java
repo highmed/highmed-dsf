@@ -230,7 +230,7 @@ public class StructureDefinitionServiceImpl extends
 
 	private Response getSnapshot(String url, UriInfo uri, HttpHeaders headers)
 	{
-		SearchQuery<StructureDefinition> query = snapshotDao.createSearchQuery(1, 1);
+		SearchQuery<StructureDefinition> query = snapshotDao.createSearchQuery(getCurrentUser(), 1, 1);
 		Map<String, List<String>> searchParameters = new HashMap<>();
 		searchParameters.put(StructureDefinitionUrl.PARAMETER_NAME, Collections.singletonList(url));
 		searchParameters.put(SearchQuery.PARAMETER_SORT,

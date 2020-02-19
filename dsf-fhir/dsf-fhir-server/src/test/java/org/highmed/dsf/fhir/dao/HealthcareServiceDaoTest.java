@@ -3,6 +3,7 @@ package org.highmed.dsf.fhir.dao;
 import static org.junit.Assert.assertEquals;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.highmed.dsf.fhir.OrganizationType;
 import org.highmed.dsf.fhir.dao.jdbc.HealthcareServiceDaoJdbc;
 import org.hl7.fhir.r4.model.HealthcareService;
 
@@ -19,9 +20,10 @@ public class HealthcareServiceDaoTest extends AbstractResourceDaoTest<Healthcare
 	}
 
 	@Override
-	protected HealthcareServiceDao createDao(BasicDataSource dataSource, FhirContext fhirContext)
+	protected HealthcareServiceDao createDao(BasicDataSource dataSource, FhirContext fhirContext,
+			OrganizationType organizationType)
 	{
-		return new HealthcareServiceDaoJdbc(dataSource, fhirContext);
+		return new HealthcareServiceDaoJdbc(dataSource, fhirContext, organizationType);
 	}
 
 	@Override

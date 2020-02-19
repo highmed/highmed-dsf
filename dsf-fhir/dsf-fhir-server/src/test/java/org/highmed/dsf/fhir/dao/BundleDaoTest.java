@@ -3,6 +3,7 @@ package org.highmed.dsf.fhir.dao;
 import static org.junit.Assert.assertEquals;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.highmed.dsf.fhir.OrganizationType;
 import org.highmed.dsf.fhir.dao.jdbc.BundleDaoJdbc;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
@@ -20,9 +21,10 @@ public class BundleDaoTest extends AbstractResourceDaoTest<Bundle, BundleDao>
 	}
 
 	@Override
-	protected BundleDao createDao(BasicDataSource dataSource, FhirContext fhirContext)
+	protected BundleDao createDao(BasicDataSource dataSource, FhirContext fhirContext,
+			OrganizationType organizationType)
 	{
-		return new BundleDaoJdbc(dataSource, fhirContext);
+		return new BundleDaoJdbc(dataSource, fhirContext, organizationType);
 	}
 
 	@Override

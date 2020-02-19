@@ -13,11 +13,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
+import org.highmed.dsf.fhir.OrganizationType;
+import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.ResourceDao;
 import org.highmed.dsf.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.dsf.fhir.dao.exception.ResourceNotFoundException;
@@ -28,6 +31,7 @@ import org.highmed.dsf.fhir.search.SearchQuery;
 import org.highmed.dsf.fhir.search.SearchQuery.SearchQueryBuilder;
 import org.highmed.dsf.fhir.search.SearchQueryParameter;
 import org.highmed.dsf.fhir.search.SearchQueryRevIncludeParameterFactory;
+import org.highmed.dsf.fhir.search.SearchQueryUserFilter;
 import org.highmed.dsf.fhir.search.parameters.ResourceId;
 import org.highmed.dsf.fhir.search.parameters.ResourceLastUpdated;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -107,10 +111,11 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	private final String resourceColumn;
 	private final String resourceIdColumn;
 
+	private final PreparedStatementFactory<R> preparedStatementFactory;
+	private final OrganizationType organizationType;
+	private final BiFunction<OrganizationType, User, SearchQueryUserFilter> userFilter;
 	private final List<Supplier<SearchQueryParameter<R>>> searchParameterFactories = new ArrayList<>();
 	private final List<Supplier<SearchQueryRevIncludeParameterFactory>> searchRevIncludeParameterFactories = new ArrayList<>();
-
-	private final PreparedStatementFactory<R> preparedStatementFactory;
 
 	@SafeVarargs
 	protected static <T> List<T> with(T... t)
@@ -123,14 +128,15 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	 * created on a request basis
 	 */
 	AbstractResourceDaoJdbc(DataSource dataSource, FhirContext fhirContext, Class<R> resourceType, String resourceTable,
-			String resourceColumn, String resourceIdColumn,
+			String resourceColumn, String resourceIdColumn, OrganizationType organizationType,
+			BiFunction<OrganizationType, User, SearchQueryUserFilter> userFilter,
 			List<Supplier<SearchQueryParameter<R>>> searchParameterFactories,
 			List<Supplier<SearchQueryRevIncludeParameterFactory>> searchRevIncludeParameterFactories)
 	{
 		this(dataSource, fhirContext, resourceType, resourceTable, resourceColumn, resourceIdColumn,
 				new PreparedStatementFactoryDefault<>(fhirContext, resourceType, resourceTable, resourceIdColumn,
 						resourceColumn),
-				searchParameterFactories, searchRevIncludeParameterFactories);
+				organizationType, userFilter, searchParameterFactories, searchRevIncludeParameterFactories);
 	}
 
 	/*
@@ -139,6 +145,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	 */
 	AbstractResourceDaoJdbc(DataSource dataSource, FhirContext fhirContext, Class<R> resourceType, String resourceTable,
 			String resourceColumn, String resourceIdColumn, PreparedStatementFactory<R> preparedStatementFactory,
+			OrganizationType organizationType, BiFunction<OrganizationType, User, SearchQueryUserFilter> userFilter,
 			List<Supplier<SearchQueryParameter<R>>> searchParameterFactories,
 			List<Supplier<SearchQueryRevIncludeParameterFactory>> searchRevIncludeParameterFactories)
 	{
@@ -152,6 +159,9 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		this.resourceIdColumn = resourceIdColumn;
 
 		this.preparedStatementFactory = preparedStatementFactory;
+
+		this.organizationType = organizationType;
+		this.userFilter = userFilter;
 
 		if (searchParameterFactories != null)
 			this.searchParameterFactories.addAll(searchParameterFactories);
@@ -918,13 +928,21 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public final SearchQuery<R> createSearchQuery(int page, int count)
+	public final SearchQuery<R> createSearchQuery(User user, int page, int count)
 	{
 		return SearchQueryBuilder.create(resourceType, getResourceTable(), getResourceColumn(), page, count)
+				.with(userFilter.apply(organizationType, user))
 				.with(new ResourceId(getResourceIdColumn()), new ResourceLastUpdated(getResourceColumn()))
 				.with(searchParameterFactories.stream().map(Supplier::get).toArray(SearchQueryParameter[]::new))
 				.withRevInclude(searchRevIncludeParameterFactories.stream().map(Supplier::get)
 						.toArray(SearchQueryRevIncludeParameterFactory[]::new))
 				.build();
+	}
+
+	@Override
+	public SearchQuery<R> createSearchQueryWithoutUserFilter(int page, int count)
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

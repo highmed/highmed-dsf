@@ -1,5 +1,6 @@
 package org.highmed.dsf.fhir.webservice.secure;
 
+import org.highmed.dsf.fhir.authorization.PatientAuthorizationRule;
 import org.highmed.dsf.fhir.dao.PatientDao;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
@@ -13,9 +14,9 @@ public class PatientServiceSecure extends AbstractResourceServiceSecure<PatientD
 {
 	public PatientServiceSecure(PatientService delegate, String serverBase, ResponseGenerator responseGenerator,
 			ReferenceResolver referenceResolver, PatientDao patientDao, ExceptionHandler exceptionHandler,
-			ParameterConverter parameterConverter)
+			ParameterConverter parameterConverter, PatientAuthorizationRule authorizationRule)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver, Patient.class, patientDao, exceptionHandler,
-				parameterConverter);
+				parameterConverter, authorizationRule);
 	}
 }

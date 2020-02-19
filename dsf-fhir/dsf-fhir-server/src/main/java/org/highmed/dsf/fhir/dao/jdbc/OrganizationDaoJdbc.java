@@ -14,6 +14,7 @@ import org.highmed.dsf.fhir.search.parameters.OrganizationIdentifier;
 import org.highmed.dsf.fhir.search.parameters.OrganizationName;
 import org.highmed.dsf.fhir.search.parameters.OrganizationType;
 import org.highmed.dsf.fhir.search.parameters.rev.include.EndpointOrganizationRevInclude;
+import org.highmed.dsf.fhir.search.parameters.user.OrganizationUserFilter;
 import org.hl7.fhir.r4.model.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,11 +25,12 @@ public class OrganizationDaoJdbc extends AbstractResourceDaoJdbc<Organization> i
 {
 	private static final Logger logger = LoggerFactory.getLogger(OrganizationDaoJdbc.class);
 
-	public OrganizationDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
+	public OrganizationDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext,
+			org.highmed.dsf.fhir.OrganizationType organizationType)
 	{
 		super(dataSource, fhirContext, Organization.class, "organizations", "organization", "organization_id",
-				with(OrganizationName::new, OrganizationEndpoint::new, OrganizationIdentifier::new,
-						OrganizationActive::new, OrganizationType::new),
+				organizationType, OrganizationUserFilter::new, with(OrganizationName::new, OrganizationEndpoint::new,
+						OrganizationIdentifier::new, OrganizationActive::new, OrganizationType::new),
 				with(EndpointOrganizationRevInclude::new));
 	}
 

@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
 
+import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.client.ClientProvider;
 import org.highmed.dsf.fhir.dao.ResourceDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
@@ -69,17 +70,21 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 	}
 
 	@Override
-	public Optional<Resource> resolveReference(String referenceLocation, Reference reference,
+	public Optional<Resource> resolveReference(User user, String referenceLocation, Reference reference,
 			List<Class<? extends Resource>> referenceTypes)
 	{
+		Objects.requireNonNull(user, "user");
 		Objects.requireNonNull(reference, "reference");
-		return resolveReference(new ResourceReference(referenceLocation, reference, referenceTypes));
+		
+		return resolveReference(user, new ResourceReference(referenceLocation, reference, referenceTypes));
 	}
 
 	@Override
-	public Optional<Resource> resolveReference(ResourceReference reference)
+	public Optional<Resource> resolveReference(User user, ResourceReference reference)
 	{
+		Objects.requireNonNull(user, "user");
 		Objects.requireNonNull(reference, "reference");
+		
 		switch (reference.getType(serverBase))
 		{
 			case LITERAL_INTERNAL:
@@ -87,9 +92,9 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 			case LITERAL_EXTERNAL:
 				return resolveLiteralExternalReference(reference);
 			case CONDITIONAL:
-				return resolveConditionalReference(reference);
+				return resolveConditionalReference(user, reference);
 			case LOGICAL:
-				return resolveLogicalReference(reference);
+				return resolveLogicalReference(user, reference);
 			default:
 				throw new IllegalArgumentException(
 						"Reference of type " + reference.getType(serverBase) + " not supported");
@@ -97,15 +102,16 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 	}
 
 	@Override
-	public boolean resolveReference(Resource resource, ResourceReference resourceReference, Connection connection)
+	public boolean resolveReference(User user, Resource resource, ResourceReference resourceReference, Connection connection)
 	{
-		return resolveReference(resource, null, resourceReference, connection);
+		return resolveReference(user, resource, null, resourceReference, connection);
 	}
 
 	@Override
-	public boolean resolveReference(Resource resource, Integer bundleIndex, ResourceReference resourceReference,
-			Connection connection)
+	public boolean resolveReference(User user, Resource resource, Integer bundleIndex,
+			ResourceReference resourceReference, Connection connection)
 	{
+		Objects.requireNonNull(user, "user");
 		Objects.requireNonNull(resource, "resource");
 		Objects.requireNonNull(resourceReference, "resourceReference");
 		Objects.requireNonNull(connection, "connection");
@@ -117,9 +123,9 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 			case LITERAL_EXTERNAL:
 				return resolveLiteralExternalReference(resource, bundleIndex, resourceReference);
 			case CONDITIONAL:
-				return resolveConditionalReference(resource, bundleIndex, resourceReference, connection);
+				return resolveConditionalReference(user, resource, bundleIndex, resourceReference, connection);
 			case LOGICAL:
-				return resolveLogicalReference(resource, bundleIndex, resourceReference, connection);
+				return resolveLogicalReference(user, resource, bundleIndex, resourceReference, connection);
 			default:
 				throw new IllegalArgumentException(
 						"Reference of type " + resourceReference.getType(serverBase) + " not supported");
@@ -279,7 +285,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 		return true; // throws exception if reference could not be resolved
 	}
 
-	private Optional<Resource> resolveConditionalReference(ResourceReference resourceReference)
+	private Optional<Resource> resolveConditionalReference(User user, ResourceReference resourceReference)
 	{
 		Objects.requireNonNull(resourceReference, "resourceReference");
 		if (!ReferenceType.CONDITIONAL.equals(resourceReference.getType(serverBase)))
@@ -313,22 +319,23 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 				return Optional.empty();
 			}
 
-			return search(d, resourceReference, condition.getQueryParams(), true);
+			return search(user, d, resourceReference, condition.getQueryParams(), true);
 		}
 	}
 
 	@Override
-	public boolean resolveConditionalReference(Resource resource, ResourceReference resourceReference,
+	public boolean resolveConditionalReference(User user, Resource resource, ResourceReference resourceReference,
 			Connection connection) throws WebApplicationException, IllegalArgumentException
 	{
-		return resolveConditionalReference(resource, null, resourceReference, connection);
+		return resolveConditionalReference(user, resource, null, resourceReference, connection);
 	}
 
 	@Override
-	public boolean resolveConditionalReference(Resource resource, Integer bundleIndex,
+	public boolean resolveConditionalReference(User user, Resource resource, Integer bundleIndex,
 			ResourceReference resourceReference, Connection connection)
 			throws WebApplicationException, IllegalArgumentException
 	{
+		Objects.requireNonNull(user, "user");
 		Objects.requireNonNull(resource, "resource");
 		Objects.requireNonNull(resourceReference, "resourceReference");
 		Objects.requireNonNull(connection, "connection");
@@ -354,7 +361,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 				throw new WebApplicationException(responseGenerator
 						.referenceTargetTypeNotSupportedByResource(bundleIndex, resource, resourceReference));
 
-			Resource target = search(resource, bundleIndex, connection, d, resourceReference,
+			Resource target = search(user, resource, bundleIndex, connection, d, resourceReference,
 					condition.getQueryParams(), true);
 
 			resourceReference.getReference().setIdentifier(null).setReferenceElement(
@@ -364,7 +371,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 		return true; // throws exception if reference could not be resolved
 	}
 
-	private Optional<Resource> resolveLogicalReference(ResourceReference resourceReference)
+	private Optional<Resource> resolveLogicalReference(User user, ResourceReference resourceReference)
 	{
 		Objects.requireNonNull(resourceReference, "resourceReference");
 		if (!ReferenceType.LOGICAL.equals(resourceReference.getType(serverBase)))
@@ -391,22 +398,24 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 			}
 
 			Identifier targetIdentifier = resourceReference.getReference().getIdentifier();
-			return search(d, resourceReference, Map.of("identifier",
+			return search(user, d, resourceReference, Map.of("identifier",
 					Collections.singletonList(targetIdentifier.getSystem() + "|" + targetIdentifier.getValue())), true);
 		}
 	}
 
 	@Override
-	public boolean resolveLogicalReference(Resource resource, ResourceReference resourceReference,
+	public boolean resolveLogicalReference(User user, Resource resource, ResourceReference resourceReference,
 			Connection connection) throws WebApplicationException, IllegalArgumentException
 	{
-		return resolveLogicalReference(resource, null, resourceReference, connection);
+		return resolveLogicalReference(user, resource, null, resourceReference, connection);
 	}
 
 	@Override
-	public boolean resolveLogicalReference(Resource resource, Integer bundleIndex, ResourceReference resourceReference,
-			Connection connection) throws WebApplicationException, IllegalArgumentException
+	public boolean resolveLogicalReference(User user, Resource resource, Integer bundleIndex,
+			ResourceReference resourceReference, Connection connection)
+			throws WebApplicationException, IllegalArgumentException
 	{
+		Objects.requireNonNull(user, "user");
 		Objects.requireNonNull(resource, "resource");
 		Objects.requireNonNull(resourceReference, "resourceReference");
 		Objects.requireNonNull(connection, "connection");
@@ -428,7 +437,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 						.referenceTargetTypeNotSupportedByResource(bundleIndex, resource, resourceReference));
 
 			Identifier targetIdentifier = resourceReference.getReference().getIdentifier();
-			Resource target = search(resource, bundleIndex, connection, d, resourceReference, Map.of("identifier",
+			Resource target = search(user, resource, bundleIndex, connection, d, resourceReference, Map.of("identifier",
 					Collections.singletonList(targetIdentifier.getSystem() + "|" + targetIdentifier.getValue())), true);
 
 			resourceReference.getReference().setIdentifier(null).setReferenceElement(
@@ -438,7 +447,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 		return true; // throws exception if reference could not be resolved
 	}
 
-	private Optional<Resource> search(ResourceDao<?> referenceTargetDao, ResourceReference resourceReference,
+	private Optional<Resource> search(User user, ResourceDao<?> referenceTargetDao, ResourceReference resourceReference,
 			Map<String, List<String>> queryParameters, boolean logicalNotConditional)
 	{
 		if (Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(queryParameters::containsKey))
@@ -454,7 +463,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 					.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 		}
 
-		SearchQuery<?> query = referenceTargetDao.createSearchQuery(1, 1);
+		SearchQuery<?> query = referenceTargetDao.createSearchQuery(user, 1, 1);
 		query.configureParameters(queryParameters);
 
 		List<SearchQueryParameterError> unsupportedQueryParameters = query
@@ -510,7 +519,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 		}
 	}
 
-	private Resource search(Resource resource, Integer bundleIndex, Connection connection,
+	private Resource search(User user, Resource resource, Integer bundleIndex, Connection connection,
 			ResourceDao<?> referenceTargetDao, ResourceReference resourceReference,
 			Map<String, List<String>> queryParameters, boolean logicalNotConditional)
 	{
@@ -527,7 +536,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 					.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 		}
 
-		SearchQuery<?> query = referenceTargetDao.createSearchQuery(1, 1);
+		SearchQuery<?> query = referenceTargetDao.createSearchQuery(user, 1, 1);
 		query.configureParameters(queryParameters);
 
 		List<SearchQueryParameterError> unsupportedQueryParameters = query

@@ -1,0 +1,32 @@
+<CodeSystem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://hl7.org/fhir"
+			xsi:schemaLocation="http://hl7.org/fhir http://www.hl7.org/fhir/fhir-base.xsd">
+	<meta>
+		<tag>
+			<system value="http://highmed.org/fhir/CodeSystem/authorization"/>
+			<code value="REMOTE"/>
+		</tag>		
+	</meta>
+	<url value="http://highmed.org/fhir/CodeSystem/authorization"/>
+	<version value="0.1.0"/>
+	<name value="HiGHmed_Authorization_Values"/>
+	<title value="HiGHmed authorization values"/>
+	<status value="active"/>
+	<experimental value="false"/>
+	<date value="2020-02-18T11:00:00+02:00"/>
+	<publisher value="HiGHmed"/>
+	<description value="CodeSystem with authorization roles"/>
+	<caseSensitive value="true"/>
+	<hierarchyMeaning value="grouped-by"/>
+	<versionNeeded value="false"/>
+	<content value="complete"/>
+	<concept>
+		<code value="REMOTE"/>
+		<display value="REMOTE"/>
+		<definition value="Remote and local use"/>
+	</concept>
+	<concept>
+		<code value="LOCAL"/>
+		<display value="LOCAL"/>
+		<definition value="Local use only"/>
+	</concept>
+</CodeSystem> 

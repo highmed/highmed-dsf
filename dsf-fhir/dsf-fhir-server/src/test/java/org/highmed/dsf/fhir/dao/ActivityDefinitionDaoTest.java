@@ -3,6 +3,7 @@ package org.highmed.dsf.fhir.dao;
 import static org.junit.Assert.assertEquals;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.highmed.dsf.fhir.OrganizationType;
 import org.highmed.dsf.fhir.dao.jdbc.ActivityDefinitionDaoJdbc;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 
@@ -19,9 +20,10 @@ public class ActivityDefinitionDaoTest extends AbstractResourceDaoTest<ActivityD
 	}
 
 	@Override
-	protected ActivityDefinitionDao createDao(BasicDataSource dataSource, FhirContext fhirContext)
+	protected ActivityDefinitionDao createDao(BasicDataSource dataSource, FhirContext fhirContext,
+			OrganizationType organizationType)
 	{
-		return new ActivityDefinitionDaoJdbc(dataSource, fhirContext);
+		return new ActivityDefinitionDaoJdbc(dataSource, fhirContext, organizationType);
 	}
 
 	@Override

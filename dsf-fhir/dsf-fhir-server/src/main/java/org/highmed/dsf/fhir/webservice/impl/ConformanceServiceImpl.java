@@ -69,6 +69,7 @@ import org.highmed.dsf.fhir.search.parameters.rev.include.AbstractRevIncludePara
 import org.highmed.dsf.fhir.search.parameters.rev.include.EndpointOrganizationRevInclude;
 import org.highmed.dsf.fhir.search.parameters.rev.include.OrganizationEndpointRevInclude;
 import org.highmed.dsf.fhir.search.parameters.rev.include.ResearchStudyEnrollmentRevInclude;
+import org.highmed.dsf.fhir.webservice.base.AbstractBasicService;
 import org.highmed.dsf.fhir.webservice.specification.ConformanceService;
 import org.highmed.dsf.fhir.websocket.ServerEndpoint;
 import org.highmed.dsf.tools.build.BuildInfoReader;
@@ -124,7 +125,7 @@ import com.google.common.collect.Streams;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.rest.api.Constants;
 
-public class ConformanceServiceImpl extends AbstractServiceImpl implements ConformanceService, InitializingBean
+public class ConformanceServiceImpl extends AbstractBasicService implements ConformanceService, InitializingBean
 {
 	private final CapabilityStatement capabilityStatement;
 	private final ParameterConverter parameterConverter;

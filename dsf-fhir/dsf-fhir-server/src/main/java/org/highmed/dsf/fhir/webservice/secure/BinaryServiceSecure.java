@@ -1,5 +1,6 @@
 package org.highmed.dsf.fhir.webservice.secure;
 
+import org.highmed.dsf.fhir.authorization.BinaryAuthorizationRule;
 import org.highmed.dsf.fhir.dao.BinaryDao;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
@@ -13,9 +14,9 @@ public class BinaryServiceSecure extends AbstractResourceServiceSecure<BinaryDao
 {
 	public BinaryServiceSecure(BinaryService delegate, String serverBase, ResponseGenerator responseGenerator,
 			ReferenceResolver referenceResolver, BinaryDao binaryDao, ExceptionHandler exceptionHandler,
-			ParameterConverter parameterConverter)
+			ParameterConverter parameterConverter, BinaryAuthorizationRule authorizationRule)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver, Binary.class, binaryDao, exceptionHandler,
-				parameterConverter);
+				parameterConverter, authorizationRule);
 	}
 }

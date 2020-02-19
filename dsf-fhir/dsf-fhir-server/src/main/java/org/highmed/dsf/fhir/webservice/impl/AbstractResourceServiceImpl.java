@@ -42,6 +42,7 @@ import org.highmed.dsf.fhir.service.ReferenceExtractor;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.highmed.dsf.fhir.service.ResourceReference;
 import org.highmed.dsf.fhir.service.ResourceValidator;
+import org.highmed.dsf.fhir.webservice.base.AbstractBasicService;
 import org.highmed.dsf.fhir.webservice.specification.BasicResourceService;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -71,7 +72,7 @@ import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 
 public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R extends Resource>
-		extends AbstractServiceImpl implements BasicResourceService<R>, InitializingBean
+		extends AbstractBasicService implements BasicResourceService<R>, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractResourceServiceImpl.class);
 
@@ -89,11 +90,10 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	protected final ReferenceExtractor referenceExtractor;
 	protected final ReferenceResolver referenceResolver;
 
-	public AbstractResourceServiceImpl(String path, Class<R> resourceType, String serverBase,
-			int defaultPageCount, D dao, ResourceValidator validator, EventManager eventManager,
-			ExceptionHandler exceptionHandler, EventGenerator eventGenerator, ResponseGenerator responseGenerator,
-			ParameterConverter parameterConverter, ReferenceExtractor referenceExtractor,
-			ReferenceResolver referenceResolver)
+	public AbstractResourceServiceImpl(String path, Class<R> resourceType, String serverBase, int defaultPageCount,
+			D dao, ResourceValidator validator, EventManager eventManager, ExceptionHandler exceptionHandler,
+			EventGenerator eventGenerator, ResponseGenerator responseGenerator, ParameterConverter parameterConverter,
+			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver)
 	{
 		super(path);
 
@@ -210,7 +210,8 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 			case LITERAL_EXTERNAL:
 				return referenceResolver.resolveLiteralExternalReference(resource, resourceReference);
 			case LOGICAL:
-				return referenceResolver.resolveLogicalReference(resource, resourceReference, connection);
+				return referenceResolver.resolveLogicalReference(getCurrentUser(), resource, resourceReference,
+						connection);
 			default:
 				throw new WebApplicationException(responseGenerator.unknownReference(resource, resourceReference));
 		}
@@ -250,7 +251,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 					.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 		}
 
-		SearchQuery<R> query = dao.createSearchQuery(1, 1);
+		SearchQuery<R> query = dao.createSearchQuery(getCurrentUser(), 1, 1);
 		query.configureParameters(queryParameters);
 
 		List<SearchQueryParameterError> unsupportedQueryParameters = query
@@ -430,78 +431,80 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	public Response update(R resource, UriInfo uri, HttpHeaders headers)
 	{
 		throw new UnsupportedOperationException("Implemented and delegated by security layer");
-		
-//		Map<String, List<String>> queryParameters = uri.getQueryParameters();
-//		if (Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(queryParameters::containsKey))
-//		{
-//			logger.warn(
-//					"Query contains parameter not applicable in this conditional update context: '{}', parameters {} will be ignored",
-//					UriComponentsBuilder.newInstance()
-//							.replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString(),
-//					Arrays.toString(SearchQuery.STANDARD_PARAMETERS));
-//
-//			queryParameters = queryParameters.entrySet().stream()
-//					.filter(e -> !Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(p -> p.equals(e.getKey())))
-//					.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
-//		}
-//
-//		SearchQuery<R> query = dao.createSearchQuery(1, 1);
-//		query.configureParameters(queryParameters);
-//
-//		List<SearchQueryParameterError> unsupportedQueryParameters = query
-//				.getUnsupportedQueryParameters(queryParameters);
-//		if (!unsupportedQueryParameters.isEmpty())
-//			return responseGenerator.badRequest(
-//					UriComponentsBuilder.newInstance()
-//							.replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString(),
-//					unsupportedQueryParameters);
-//
-//		PartialResult<R> result = exceptionHandler.handleSqlException(() -> dao.search(query));
-//
-//		// No matches, no id provided: The server creates the resource.
-//		if (result.getOverallCount() <= 0 && !resource.hasId())
-//			return create(resource, uri, headers);
-//
-//		// No matches, id provided: The server treats the interaction as an Update as Create interaction (or rejects it,
-//		// if it does not support Update as Create) -> reject
-//		else if (result.getOverallCount() <= 0 && resource.hasId())
-//			return responseGenerator.updateAsCreateNotAllowed(resourceTypeName, resource.getId());
-//
-//		// One Match, no resource id provided OR (resource id provided and it matches the found resource):
-//		// The server performs the update against the matching resource
-//		else if (result.getOverallCount() == 1)
-//		{
-//			R dbResource = result.getPartialResult().get(0);
-//			IdType dbResourceId = dbResource.getIdElement();
-//
-//			// BaseUrl - The server base URL (e.g. "http://example.com/fhir")
-//			// ResourceType - The resource type (e.g. "Patient")
-//			// IdPart - The ID (e.g. "123")
-//			// Version - The version ID ("e.g. "456")
-//			if (!resource.hasId())
-//			{
-//				resource.setIdElement(dbResourceId);
-//				return update(resource.getIdElement().getIdPart(), resource, uri, headers);
-//			}
-//			else if (resource.hasId()
-//					&& (!resource.getIdElement().hasBaseUrl()
-//							|| serverBase.equals(resource.getIdElement().getBaseUrl()))
-//					&& (!resource.getIdElement().hasResourceType()
-//							|| resourceTypeName.equals(resource.getIdElement().getResourceType()))
-//					&& (dbResourceId.getIdPart().equals(resource.getIdElement().getIdPart())))
-//				return update(resource.getIdElement().getIdPart(), resource, uri, headers);
-//			else
-//				return responseGenerator.badRequestIdsNotMatching(
-//						dbResourceId.withServerBase(serverBase, resourceTypeName),
-//						resource.getIdElement().hasBaseUrl() && resource.getIdElement().hasResourceType()
-//								? resource.getIdElement()
-//								: resource.getIdElement().withServerBase(serverBase, resourceTypeName));
-//		}
-//		// Multiple matches: The server returns a 412 Precondition Failed error indicating the client's criteria were
-//		// not selective enough preferably with an OperationOutcome
-//		else // if (result.getOverallCount() > 1)
-//			throw new WebApplicationException(responseGenerator.multipleExists(resourceTypeName, UriComponentsBuilder
-//					.newInstance().replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString()));
+
+		// Map<String, List<String>> queryParameters = uri.getQueryParameters();
+		// if (Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(queryParameters::containsKey))
+		// {
+		// logger.warn(
+		// "Query contains parameter not applicable in this conditional update context: '{}', parameters {} will be
+		// ignored",
+		// UriComponentsBuilder.newInstance()
+		// .replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString(),
+		// Arrays.toString(SearchQuery.STANDARD_PARAMETERS));
+		//
+		// queryParameters = queryParameters.entrySet().stream()
+		// .filter(e -> !Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(p -> p.equals(e.getKey())))
+		// .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+		// }
+		//
+		// SearchQuery<R> query = dao.createSearchQuery(1, 1);
+		// query.configureParameters(queryParameters);
+		//
+		// List<SearchQueryParameterError> unsupportedQueryParameters = query
+		// .getUnsupportedQueryParameters(queryParameters);
+		// if (!unsupportedQueryParameters.isEmpty())
+		// return responseGenerator.badRequest(
+		// UriComponentsBuilder.newInstance()
+		// .replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString(),
+		// unsupportedQueryParameters);
+		//
+		// PartialResult<R> result = exceptionHandler.handleSqlException(() -> dao.search(query));
+		//
+		// // No matches, no id provided: The server creates the resource.
+		// if (result.getOverallCount() <= 0 && !resource.hasId())
+		// return create(resource, uri, headers);
+		//
+		// // No matches, id provided: The server treats the interaction as an Update as Create interaction (or rejects
+		// it,
+		// // if it does not support Update as Create) -> reject
+		// else if (result.getOverallCount() <= 0 && resource.hasId())
+		// return responseGenerator.updateAsCreateNotAllowed(resourceTypeName, resource.getId());
+		//
+		// // One Match, no resource id provided OR (resource id provided and it matches the found resource):
+		// // The server performs the update against the matching resource
+		// else if (result.getOverallCount() == 1)
+		// {
+		// R dbResource = result.getPartialResult().get(0);
+		// IdType dbResourceId = dbResource.getIdElement();
+		//
+		// // BaseUrl - The server base URL (e.g. "http://example.com/fhir")
+		// // ResourceType - The resource type (e.g. "Patient")
+		// // IdPart - The ID (e.g. "123")
+		// // Version - The version ID ("e.g. "456")
+		// if (!resource.hasId())
+		// {
+		// resource.setIdElement(dbResourceId);
+		// return update(resource.getIdElement().getIdPart(), resource, uri, headers);
+		// }
+		// else if (resource.hasId()
+		// && (!resource.getIdElement().hasBaseUrl()
+		// || serverBase.equals(resource.getIdElement().getBaseUrl()))
+		// && (!resource.getIdElement().hasResourceType()
+		// || resourceTypeName.equals(resource.getIdElement().getResourceType()))
+		// && (dbResourceId.getIdPart().equals(resource.getIdElement().getIdPart())))
+		// return update(resource.getIdElement().getIdPart(), resource, uri, headers);
+		// else
+		// return responseGenerator.badRequestIdsNotMatching(
+		// dbResourceId.withServerBase(serverBase, resourceTypeName),
+		// resource.getIdElement().hasBaseUrl() && resource.getIdElement().hasResourceType()
+		// ? resource.getIdElement()
+		// : resource.getIdElement().withServerBase(serverBase, resourceTypeName));
+		// }
+		// // Multiple matches: The server returns a 412 Precondition Failed error indicating the client's criteria were
+		// // not selective enough preferably with an OperationOutcome
+		// else // if (result.getOverallCount() > 1)
+		// throw new WebApplicationException(responseGenerator.multipleExists(resourceTypeName, UriComponentsBuilder
+		// .newInstance().replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString()));
 	}
 
 	@Override
@@ -543,50 +546,52 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	public Response delete(UriInfo uri, HttpHeaders headers)
 	{
 		throw new UnsupportedOperationException("Implemented and delegated by security layer");
-		
-//		Map<String, List<String>> queryParameters = uri.getQueryParameters();
-//		if (Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(queryParameters::containsKey))
-//		{
-//			logger.warn(
-//					"Query contains parameter not applicable in this conditional delete context: '{}', parameters {} will be ignored",
-//					UriComponentsBuilder.newInstance()
-//							.replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString(),
-//					Arrays.toString(SearchQuery.STANDARD_PARAMETERS));
-//
-//			queryParameters = queryParameters.entrySet().stream()
-//					.filter(e -> !Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(p -> p.equals(e.getKey())))
-//					.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
-//		}
-//
-//		SearchQuery<R> query = dao.createSearchQuery(1, 1);
-//		query.configureParameters(queryParameters);
-//
-//		List<SearchQueryParameterError> unsupportedQueryParameters = query
-//				.getUnsupportedQueryParameters(queryParameters);
-//		if (!unsupportedQueryParameters.isEmpty())
-//			return responseGenerator.badRequest(
-//					UriComponentsBuilder.newInstance()
-//							.replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString(),
-//					unsupportedQueryParameters);
-//
-//		PartialResult<R> result = exceptionHandler.handleSqlException(() -> dao.search(query));
-//
-//		// No matches
-//		if (result.getOverallCount() <= 0)
-//		{
-//			return Response.noContent().build(); // TODO return OperationOutcome
-//		}
-//		// One Match: The server performs an ordinary delete on the matching resource
-//		else if (result.getOverallCount() == 1)
-//		{
-//			R resource = result.getPartialResult().get(0);
-//			return delete(resource.getIdElement().getIdPart(), uri, headers);
-//		}
-//		// Multiple matches: A server may choose to delete all the matching resources, or it may choose to return a 412
-//		// Precondition Failed error indicating the client's criteria were not selective enough.
-//		else
-//			throw new WebApplicationException(responseGenerator.multipleExists(resourceTypeName, UriComponentsBuilder
-//					.newInstance().replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString()));
+
+		// Map<String, List<String>> queryParameters = uri.getQueryParameters();
+		// if (Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(queryParameters::containsKey))
+		// {
+		// logger.warn(
+		// "Query contains parameter not applicable in this conditional delete context: '{}', parameters {} will be
+		// ignored",
+		// UriComponentsBuilder.newInstance()
+		// .replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString(),
+		// Arrays.toString(SearchQuery.STANDARD_PARAMETERS));
+		//
+		// queryParameters = queryParameters.entrySet().stream()
+		// .filter(e -> !Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(p -> p.equals(e.getKey())))
+		// .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+		// }
+		//
+		// SearchQuery<R> query = dao.createSearchQuery(1, 1);
+		// query.configureParameters(queryParameters);
+		//
+		// List<SearchQueryParameterError> unsupportedQueryParameters = query
+		// .getUnsupportedQueryParameters(queryParameters);
+		// if (!unsupportedQueryParameters.isEmpty())
+		// return responseGenerator.badRequest(
+		// UriComponentsBuilder.newInstance()
+		// .replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString(),
+		// unsupportedQueryParameters);
+		//
+		// PartialResult<R> result = exceptionHandler.handleSqlException(() -> dao.search(query));
+		//
+		// // No matches
+		// if (result.getOverallCount() <= 0)
+		// {
+		// return Response.noContent().build(); // TODO return OperationOutcome
+		// }
+		// // One Match: The server performs an ordinary delete on the matching resource
+		// else if (result.getOverallCount() == 1)
+		// {
+		// R resource = result.getPartialResult().get(0);
+		// return delete(resource.getIdElement().getIdPart(), uri, headers);
+		// }
+		// // Multiple matches: A server may choose to delete all the matching resources, or it may choose to return a
+		// 412
+		// // Precondition Failed error indicating the client's criteria were not selective enough.
+		// else
+		// throw new WebApplicationException(responseGenerator.multipleExists(resourceTypeName, UriComponentsBuilder
+		// .newInstance().replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString()));
 	}
 
 	@Override
@@ -600,7 +605,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		Integer count = parameterConverter.getFirstInt(queryParameters, SearchQuery.PARAMETER_COUNT);
 		int effectiveCount = (count == null || count < 0) ? defaultPageCount : count;
 
-		SearchQuery<R> query = dao.createSearchQuery(effectivePage, effectiveCount);
+		SearchQuery<R> query = dao.createSearchQuery(getCurrentUser(), effectivePage, effectiveCount);
 		query.configureParameters(queryParameters);
 		List<SearchQueryParameterError> errors = query.getUnsupportedQueryParameters(queryParameters);
 		// TODO throw error if strict param handling is configured, include warning else

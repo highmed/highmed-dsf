@@ -1,5 +1,6 @@
 package org.highmed.dsf.fhir.webservice.secure;
 
+import org.highmed.dsf.fhir.authorization.GroupAuthorizationRule;
 import org.highmed.dsf.fhir.dao.GroupDao;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
@@ -13,9 +14,9 @@ public class GroupServiceSecure extends AbstractResourceServiceSecure<GroupDao, 
 {
 	public GroupServiceSecure(GroupService delegate, String serverBase, ResponseGenerator responseGenerator,
 			ReferenceResolver referenceResolver, GroupDao groupDao, ExceptionHandler exceptionHandler,
-			ParameterConverter parameterConverter)
+			ParameterConverter parameterConverter, GroupAuthorizationRule authorizationRule)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver, Group.class, groupDao, exceptionHandler,
-				parameterConverter);
+				parameterConverter, authorizationRule);
 	}
 }

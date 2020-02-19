@@ -3,6 +3,7 @@ package org.highmed.dsf.fhir.dao;
 import static org.junit.Assert.assertEquals;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.highmed.dsf.fhir.OrganizationType;
 import org.highmed.dsf.fhir.dao.jdbc.SubscriptionDaoJdbc;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
@@ -20,9 +21,10 @@ public class SubscriptionDaoTest extends AbstractResourceDaoTest<Subscription, S
 	}
 
 	@Override
-	protected SubscriptionDao createDao(BasicDataSource dataSource, FhirContext fhirContext)
+	protected SubscriptionDao createDao(BasicDataSource dataSource, FhirContext fhirContext,
+			OrganizationType organizationType)
 	{
-		return new SubscriptionDaoJdbc(dataSource, fhirContext);
+		return new SubscriptionDaoJdbc(dataSource, fhirContext, organizationType);
 	}
 
 	@Override

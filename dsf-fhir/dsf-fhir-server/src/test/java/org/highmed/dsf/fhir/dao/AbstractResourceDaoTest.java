@@ -6,10 +6,12 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.highmed.dsf.fhir.OrganizationType;
 import org.highmed.dsf.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.dsf.fhir.dao.exception.ResourceNotFoundException;
 import org.highmed.dsf.fhir.dao.exception.ResourceVersionNoMatchException;
@@ -36,7 +38,7 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 	protected final Class<D> resouceClass;
 
 	protected final FhirContext fhirContext = FhirContext.forR4();
-	protected C dao;
+	protected C ttpDao, medicDao;
 
 	protected AbstractResourceDaoTest(Class<D> resouceClass)
 	{
@@ -46,20 +48,33 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 	@Before
 	public void before() throws Exception
 	{
-		dao = createDao(database.getDataSource(), fhirContext);
+		ttpDao = createDao(database.getDataSource(), fhirContext, OrganizationType.TTP);
+		medicDao = createDao(database.getDataSource(), fhirContext, OrganizationType.MeDIC);
 	}
 
-	protected abstract C createDao(BasicDataSource dataSource, FhirContext fhirContext);
+	protected abstract C createDao(BasicDataSource dataSource, FhirContext fhirContext,
+			OrganizationType organizationType);
 
 	@Test
-	public void testEmpty() throws Exception
+	public void testEmptyForTtp() throws Exception
 	{
-		Optional<D> read = dao.read(UUID.randomUUID());
+		Optional<D> read = ttpDao.read(UUID.randomUUID());
 		assertTrue(read.isEmpty());
 	}
 
 	@Test
+	public void testEmptyForMedic() throws Exception
+	{
+		testEmpty(medicDao);
+	}
+
+	@Test
 	public void testEmptyWithVersion() throws Exception
+	{
+		testEmpty(ttpDao);
+	}
+
+	private void testEmpty(C dao) throws SQLException
 	{
 		Optional<D> read = dao.readVersion(UUID.randomUUID(), 1L);
 		assertTrue(read.isEmpty());
@@ -68,7 +83,18 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 	protected abstract D createResource();
 
 	@Test
-	public void testCreate() throws Exception
+	public void testCreateForTtp() throws Exception
+	{
+		testCreate(ttpDao);
+	}
+
+	@Test
+	public void testCreateForMedic() throws Exception
+	{
+		testCreate(medicDao);
+	}
+
+	private void testCreate(C dao) throws SQLException, ResourceDeletedException
 	{
 		D newResource = createResource();
 		assertNull(newResource.getId());
@@ -99,7 +125,18 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 	protected abstract D updateResource(D resource);
 
 	@Test
-	public void testUpdate() throws Exception
+	public void testUpdateForTtp() throws Exception
+	{
+		testUpdate(ttpDao);
+	}
+
+	@Test
+	public void testUpdateForMedic() throws Exception
+	{
+		testUpdate(medicDao);
+	}
+
+	private void testUpdate(C dao) throws SQLException, ResourceNotFoundException, ResourceVersionNoMatchException
 	{
 		D newResource = createResource();
 		assertNull(newResource.getId());
@@ -117,12 +154,24 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 
 		D updatedResource = dao.update(updateResource(createdResource), null);
 		assertNotNull(updatedResource);
-		
+
 		checkUpdates(updatedResource);
 	}
 
 	@Test(expected = ResourceNotFoundException.class)
-	public void testUpdateNonExisting() throws Exception
+	public void testUpdateNonExistingForTtp() throws Exception
+	{
+		testUpdateNonExisting(ttpDao);
+	}
+
+	@Test(expected = ResourceNotFoundException.class)
+	public void testUpdateNonExistingForMedic() throws Exception
+	{
+		testUpdateNonExisting(medicDao);
+	}
+
+	private void testUpdateNonExisting(C dao)
+			throws SQLException, ResourceNotFoundException, ResourceVersionNoMatchException
 	{
 		D newResource = createResource();
 		assertNull(newResource.getId());
@@ -132,7 +181,19 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 	}
 
 	@Test(expected = ResourceVersionNoMatchException.class)
-	public void testUpdateNotLatest() throws Exception
+	public void testUpdateNotLatestForTtp() throws Exception
+	{
+		testUpdateNotLatest(ttpDao);
+	}
+
+	@Test(expected = ResourceVersionNoMatchException.class)
+	public void testUpdateNotLatestForMedic() throws Exception
+	{
+		testUpdateNotLatest(medicDao);
+	}
+
+	private void testUpdateNotLatest(C dao)
+			throws SQLException, ResourceNotFoundException, ResourceVersionNoMatchException
 	{
 		D newResource = createResource();
 		assertNull(newResource.getId());
@@ -152,7 +213,18 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 	}
 
 	@Test
-	public void testUpdateLatest() throws Exception
+	public void testUpdateLatestForTtp() throws Exception
+	{
+		testUpdateLatest(ttpDao);
+	}
+
+	@Test
+	public void testUpdateLatestForMedic() throws Exception
+	{
+		testUpdateLatest(medicDao);
+	}
+
+	private void testUpdateLatest(C dao) throws SQLException, ResourceNotFoundException, ResourceVersionNoMatchException
 	{
 		D newResource = createResource();
 		assertNull(newResource.getId());
@@ -175,7 +247,18 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 	protected abstract void checkUpdates(D resource);
 
 	@Test(expected = ResourceDeletedException.class)
-	public void testDelete() throws Exception
+	public void testDeleteForTtp() throws Exception
+	{
+		testDelete(ttpDao);
+	}
+
+	@Test(expected = ResourceDeletedException.class)
+	public void testDeleteForMedic() throws Exception
+	{
+		testDelete(medicDao);
+	}
+
+	private void testDelete(C dao) throws SQLException, ResourceDeletedException, ResourceNotFoundException
 	{
 		D newResource = createResource();
 		assertNull(newResource.getId());
@@ -200,7 +283,18 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 	}
 
 	@Test
-	public void testReadWithVersion() throws Exception
+	public void testReadWithVersionForTtp() throws Exception
+	{
+		testReadWithVersion(ttpDao);
+	}
+
+	@Test
+	public void testReadWithVersionFotMedic() throws Exception
+	{
+		testReadWithVersion(medicDao);
+	}
+
+	private void testReadWithVersion(C dao) throws SQLException
 	{
 		D newResource = createResource();
 		assertNull(newResource.getId());
@@ -224,7 +318,18 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 	}
 
 	@Test
-	public void testRead() throws Exception
+	public void testReadForTtp() throws Exception
+	{
+		testRead(ttpDao);
+	}
+
+	@Test
+	public void testReadForMedic() throws Exception
+	{
+		testRead(medicDao);
+	}
+
+	private void testRead(C dao) throws SQLException, ResourceDeletedException
 	{
 		D newResource = createResource();
 		assertNull(newResource.getId());
@@ -249,7 +354,19 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 	}
 
 	@Test
-	public void testReadLatest() throws Exception
+	public void testReadLatestForTtp() throws Exception
+	{
+		testReadLatest(ttpDao);
+	}
+
+	@Test
+	public void testReadLatestForMedic() throws Exception
+	{
+		testReadLatest(medicDao);
+	}
+
+	private void testReadLatest(C dao)
+			throws SQLException, ResourceNotFoundException, ResourceVersionNoMatchException, ResourceDeletedException
 	{
 		D newResource = createResource();
 		assertNull(newResource.getId());
@@ -288,7 +405,18 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 	}
 
 	@Test
-	public void testUpdateSameRow() throws Exception
+	public void testUpdateSameRowForTtp() throws Exception
+	{
+		testUpdateSameRow(ttpDao);
+	}
+
+	@Test
+	public void testUpdateSameRowForMedic() throws Exception
+	{
+		testUpdateSameRow(medicDao);
+	}
+
+	private void testUpdateSameRow(C dao) throws SQLException, ResourceNotFoundException, ResourceDeletedException
 	{
 		D newResource = createResource();
 		assertNull(newResource.getId());

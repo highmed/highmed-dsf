@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import java.util.Arrays;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.highmed.dsf.fhir.OrganizationType;
 import org.highmed.dsf.fhir.dao.jdbc.BinaryDaoJdbc;
 import org.hl7.fhir.r4.model.Binary;
 import org.junit.Test;
@@ -31,9 +32,10 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao>
 	}
 
 	@Override
-	protected BinaryDao createDao(BasicDataSource dataSource, FhirContext fhirContext)
+	protected BinaryDao createDao(BasicDataSource dataSource, FhirContext fhirContext,
+			OrganizationType organizationType)
 	{
-		return new BinaryDaoJdbc(dataSource, fhirContext);
+		return new BinaryDaoJdbc(dataSource, fhirContext, organizationType);
 	}
 
 	@Override
@@ -75,7 +77,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao>
 		assertNull(newResource.getId());
 		assertNull(newResource.getMeta().getVersionId());
 
-		Binary createdResource = dao.create(newResource);
+		Binary createdResource = ttpDao.create(newResource);
 		assertNotNull(createdResource);
 		assertNotNull(createdResource.getId());
 		assertNotNull(createdResource.getMeta().getVersionId());

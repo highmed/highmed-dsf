@@ -4,6 +4,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.highmed.dsf.fhir.authorization.StructureDefinitionAuthorizationRule;
 import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
@@ -24,51 +25,10 @@ public class StructureDefinitionServiceSecure
 	public StructureDefinitionServiceSecure(StructureDefinitionService delegate, String serverBase,
 			ResponseGenerator responseGenerator, ReferenceResolver referenceResolver,
 			StructureDefinitionDao structureDefinitionDao, ExceptionHandler exceptionHandler,
-			ParameterConverter parameterConverter)
+			ParameterConverter parameterConverter, StructureDefinitionAuthorizationRule authorizationRule)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver, StructureDefinition.class,
-				structureDefinitionDao, exceptionHandler, parameterConverter);
-	}
-
-	@Override
-	public Response create(StructureDefinition resource, UriInfo uri, HttpHeaders headers)
-	{
-		// check logged in, check "local" user (local user only could be default)
-		// check against existing profiles, no create if profile with same URL, version and status exists
-
-		// TODO Auto-generated method stub
-		return super.create(resource, uri, headers);
-	}
-
-	@Override
-	public Response update(String id, StructureDefinition resource, UriInfo uri, HttpHeaders headers)
-	{
-		// check logged in, check "local" user (local user only could be default)
-		// check resource exists for given path id
-		// check against existing profile (by path id), no update if profile has different URL, version or status,
-		// status change via create
-		// check against existing profile (by path id), no update if status ACTIVE or RETIRED
-
-		// TODO Auto-generated method stub
-		return super.update(id, resource, uri, headers);
-	}
-
-	@Override
-	public Response update(StructureDefinition resource, UriInfo uri, HttpHeaders headers)
-	{
-		// see update above
-
-		// TODO Auto-generated method stub
-		return super.update(resource, uri, headers);
-	}
-
-	@Override
-	public Response delete(String id, UriInfo uri, HttpHeaders headers)
-	{
-		// check logger in, check "local" user (local user only could be default)
-
-		// TODO Auto-generated method stub
-		return super.delete(id, uri, headers);
+				structureDefinitionDao, exceptionHandler, parameterConverter, authorizationRule);
 	}
 
 	@Override

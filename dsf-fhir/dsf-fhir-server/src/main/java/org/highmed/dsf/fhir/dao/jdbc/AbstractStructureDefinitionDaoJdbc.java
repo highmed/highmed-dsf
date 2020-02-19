@@ -7,8 +7,13 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.highmed.dsf.fhir.OrganizationType;
+import org.highmed.dsf.fhir.authentication.User;
+import org.highmed.dsf.fhir.dao.StructureDefinitionDaoBase;
+import org.highmed.dsf.fhir.search.SearchQueryUserFilter;
 import org.highmed.dsf.fhir.search.parameters.StructureDefinitionIdentifier;
 import org.highmed.dsf.fhir.search.parameters.StructureDefinitionUrl;
 import org.highmed.dsf.fhir.search.parameters.StructureDefinitionVersion;
@@ -19,15 +24,18 @@ import org.slf4j.LoggerFactory;
 import ca.uhn.fhir.context.FhirContext;
 
 abstract class AbstractStructureDefinitionDaoJdbc extends AbstractResourceDaoJdbc<StructureDefinition>
+		implements StructureDefinitionDaoBase
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractStructureDefinitionDaoJdbc.class);
 
 	private final ReadByUrlDaoJdbc<StructureDefinition> readByUrl;
 
-	public AbstractStructureDefinitionDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext, String resourceTable,
-			String resourceColumn, String resourceIdColumn)
+	public AbstractStructureDefinitionDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext,
+			OrganizationType organizationType, String resourceTable, String resourceColumn, String resourceIdColumn,
+			BiFunction<OrganizationType, User, SearchQueryUserFilter> userFilter)
 	{
 		super(dataSource, fhirContext, StructureDefinition.class, resourceTable, resourceColumn, resourceIdColumn,
+				organizationType, userFilter,
 				with(() -> new StructureDefinitionIdentifier(resourceColumn),
 						() -> new StructureDefinitionUrl(resourceColumn),
 						() -> new StructureDefinitionVersion(resourceColumn)),
@@ -37,6 +45,7 @@ abstract class AbstractStructureDefinitionDaoJdbc extends AbstractResourceDaoJdb
 				resourceColumn, resourceIdColumn);
 	}
 
+	@Override
 	public List<StructureDefinition> readAll() throws SQLException
 	{
 		try (Connection connection = getDataSource().getConnection();
@@ -57,8 +66,22 @@ abstract class AbstractStructureDefinitionDaoJdbc extends AbstractResourceDaoJdb
 		}
 	}
 
-	public Optional<StructureDefinition> readByUrl(String urlAndVersion) throws SQLException
+	@Override
+	public Optional<StructureDefinition> readByUrlAndVersion(String urlAndVersion) throws SQLException
 	{
-		return readByUrl.readByUrl(urlAndVersion);
+		return readByUrl.readByUrlAndVersion(urlAndVersion);
+	}
+
+	@Override
+	public Optional<StructureDefinition> readByUrlAndVersion(String url, String version) throws SQLException
+	{
+		return readByUrl.readByUrlAndVersion(url, version);
+	}
+
+	@Override
+	public Optional<StructureDefinition> readByUrlAndVersionWithTransaction(Connection connection, String url,
+			String version) throws SQLException
+	{
+		return readByUrl.readByUrlAndVersionWithTransaction(connection, url, version);
 	}
 }

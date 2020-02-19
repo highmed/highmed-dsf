@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
 
+import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.ResourceDao;
 import org.highmed.dsf.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.dsf.fhir.dao.exception.ResourceNotFoundException;
@@ -29,12 +30,12 @@ public class ResolveReferencesCommand<R extends Resource, D extends ResourceDao<
 	private final ResponseGenerator responseGenerator;
 	private final ReferenceResolver referenceResolver;
 
-	public ResolveReferencesCommand(int index, Bundle bundle, BundleEntryComponent entry, String serverBase, R resource,
-			D dao, ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
+	public ResolveReferencesCommand(int index, User user, Bundle bundle, BundleEntryComponent entry, String serverBase,
+			R resource, D dao, ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
 			ReferenceExtractor referenceExtractor, ResponseGenerator responseGenerator,
 			ReferenceResolver referenceResolver)
 	{
-		super(4, index, bundle, entry, serverBase, resource, dao, exceptionHandler, parameterConverter);
+		super(4, index, user, bundle, entry, serverBase, resource, dao, exceptionHandler, parameterConverter);
 
 		this.referenceExtractor = referenceExtractor;
 		this.responseGenerator = responseGenerator;
@@ -103,9 +104,10 @@ public class ResolveReferencesCommand<R extends Resource, D extends ResourceDao<
 			case LITERAL_EXTERNAL:
 				return referenceResolver.resolveLiteralExternalReference(resource, index, resourceReference);
 			case CONDITIONAL:
-				return referenceResolver.resolveConditionalReference(resource, index, resourceReference, connection);
+				return referenceResolver.resolveConditionalReference(user, resource, index, resourceReference,
+						connection);
 			case LOGICAL:
-				return referenceResolver.resolveLogicalReference(resource, index, resourceReference, connection);
+				return referenceResolver.resolveLogicalReference(user, resource, index, resourceReference, connection);
 			case UNKNOWN:
 			default:
 				throw new WebApplicationException(

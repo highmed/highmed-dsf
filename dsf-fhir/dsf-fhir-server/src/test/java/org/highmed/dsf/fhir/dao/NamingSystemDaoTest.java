@@ -3,6 +3,7 @@ package org.highmed.dsf.fhir.dao;
 import static org.junit.Assert.assertEquals;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.highmed.dsf.fhir.OrganizationType;
 import org.highmed.dsf.fhir.dao.jdbc.NamingSystemDaoJdbc;
 import org.hl7.fhir.r4.model.NamingSystem;
 
@@ -19,9 +20,10 @@ public class NamingSystemDaoTest extends AbstractResourceDaoTest<NamingSystem, N
 	}
 
 	@Override
-	protected NamingSystemDao createDao(BasicDataSource dataSource, FhirContext fhirContext)
+	protected NamingSystemDao createDao(BasicDataSource dataSource, FhirContext fhirContext,
+			OrganizationType organizationType)
 	{
-		return new NamingSystemDaoJdbc(dataSource, fhirContext);
+		return new NamingSystemDaoJdbc(dataSource, fhirContext, organizationType);
 	}
 
 	@Override

@@ -9,11 +9,13 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.highmed.dsf.fhir.OrganizationType;
 import org.highmed.dsf.fhir.dao.SubscriptionDao;
 import org.highmed.dsf.fhir.search.parameters.SubscriptionChannelPayload;
 import org.highmed.dsf.fhir.search.parameters.SubscriptionChannelType;
 import org.highmed.dsf.fhir.search.parameters.SubscriptionCriteria;
 import org.highmed.dsf.fhir.search.parameters.SubscriptionStatus;
+import org.highmed.dsf.fhir.search.parameters.user.SubscriptionUserFilter;
 import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,11 +26,11 @@ public class SubscriptionDaoJdbc extends AbstractResourceDaoJdbc<Subscription> i
 {
 	private static final Logger logger = LoggerFactory.getLogger(SubscriptionDaoJdbc.class);
 
-	public SubscriptionDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
+	public SubscriptionDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext, OrganizationType organizationType)
 	{
 		super(dataSource, fhirContext, Subscription.class, "subscriptions", "subscription", "subscription_id",
-				with(SubscriptionCriteria::new, SubscriptionStatus::new, SubscriptionChannelType::new,
-						SubscriptionChannelPayload::new),
+				organizationType, SubscriptionUserFilter::new, with(SubscriptionCriteria::new, SubscriptionStatus::new,
+						SubscriptionChannelType::new, SubscriptionChannelPayload::new),
 				with());
 	}
 

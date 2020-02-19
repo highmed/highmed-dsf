@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
+import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.ResourceDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.event.EventGenerator;
@@ -49,11 +50,11 @@ public class DeleteCommand extends AbstractCommand implements Command
 	private Class<? extends Resource> resourceType;
 	private String id;
 
-	public DeleteCommand(int index, Bundle bundle, BundleEntryComponent entry, String serverBase,
+	public DeleteCommand(int index, User user, Bundle bundle, BundleEntryComponent entry, String serverBase,
 			ResponseGenerator responseGenerator, DaoProvider daoProvider, ExceptionHandler exceptionHandler,
 			ParameterConverter parameterConverter, EventManager eventManager, EventGenerator eventGenerator)
 	{
-		super(1, index, bundle, entry, serverBase);
+		super(1, index, user, bundle, entry, serverBase);
 
 		this.responseGenerator = responseGenerator;
 		this.daoProvider = daoProvider;
@@ -142,7 +143,7 @@ public class DeleteCommand extends AbstractCommand implements Command
 					.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 		}
 
-		SearchQuery<?> query = dao.createSearchQuery(1, 1);
+		SearchQuery<?> query = dao.createSearchQuery(user, 1, 1);
 		query.configureParameters(queryParameters);
 
 		List<SearchQueryParameterError> unsupportedQueryParameters = query

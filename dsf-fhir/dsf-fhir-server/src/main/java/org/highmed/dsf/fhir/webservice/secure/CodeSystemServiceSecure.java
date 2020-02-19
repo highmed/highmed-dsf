@@ -1,5 +1,6 @@
 package org.highmed.dsf.fhir.webservice.secure;
 
+import org.highmed.dsf.fhir.authorization.CodeSystemAuthorizationRule;
 import org.highmed.dsf.fhir.dao.CodeSystemDao;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
@@ -13,9 +14,9 @@ public class CodeSystemServiceSecure extends AbstractResourceServiceSecure<CodeS
 {
 	public CodeSystemServiceSecure(CodeSystemService delegate, String serverBase, ResponseGenerator responseGenerator,
 			ReferenceResolver referenceResolver, CodeSystemDao codeSystemDao, ExceptionHandler exceptionHandler,
-			ParameterConverter parameterConverter)
+			ParameterConverter parameterConverter, CodeSystemAuthorizationRule authorizationRule)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver, CodeSystem.class, codeSystemDao,
-				exceptionHandler, parameterConverter);
+				exceptionHandler, parameterConverter, authorizationRule);
 	}
 }

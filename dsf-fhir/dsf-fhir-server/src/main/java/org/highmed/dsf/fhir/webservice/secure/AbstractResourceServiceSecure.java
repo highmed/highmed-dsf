@@ -3,6 +3,7 @@ package org.highmed.dsf.fhir.webservice.secure;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -12,6 +13,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.highmed.dsf.fhir.authorization.AuthorizationRule;
 import org.highmed.dsf.fhir.dao.ResourceDao;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
@@ -27,13 +29,14 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 
 public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R extends Resource, S extends BasicResourceService<R>>
-		extends AbstractServiceSecure<S> implements BasicResourceService<R>
+		extends AbstractServiceSecure<S> implements BasicResourceService<R>, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractResourceServiceSecure.class);
 
@@ -43,10 +46,11 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	protected final D dao;
 	protected final ExceptionHandler exceptionHandler;
 	protected final ParameterConverter parameterConverter;
+	protected final AuthorizationRule<R> authorizationRule;
 
 	public AbstractResourceServiceSecure(S delegate, String serverBase, ResponseGenerator responseGenerator,
 			ReferenceResolver referenceResolver, Class<R> resourceType, D dao, ExceptionHandler exceptionHandler,
-			ParameterConverter parameterConverter)
+			ParameterConverter parameterConverter, AuthorizationRule<R> authorizationRule)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver);
 
@@ -56,6 +60,21 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		this.dao = dao;
 		this.exceptionHandler = exceptionHandler;
 		this.parameterConverter = parameterConverter;
+		this.authorizationRule = authorizationRule;
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception
+	{
+		super.afterPropertiesSet();
+
+		Objects.requireNonNull(resourceType, "resourceType");
+		Objects.requireNonNull(resourceTypeName, "resourceTypeName");
+		Objects.requireNonNull(serverBase, "serverBase");
+		Objects.requireNonNull(dao, "dao");
+		Objects.requireNonNull(exceptionHandler, "exceptionHandler");
+		Objects.requireNonNull(parameterConverter, "parameterConverter");
+		Objects.requireNonNull(authorizationRule, "authorizationRule");
 	}
 
 	@Override
@@ -64,7 +83,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		logger.debug("Current user '{}', role '{}'", userProvider.getCurrentUser().getName(),
 				userProvider.getCurrentUser().getRole());
 
-		Optional<String> reasonCreateAllowed = reasonCreateAllowed(resource);
+		Optional<String> reasonCreateAllowed = authorizationRule.reasonCreateAllowed(getCurrentUser(), resource);
 
 		if (reasonCreateAllowed.isEmpty())
 		{
@@ -78,17 +97,6 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		}
 	}
 
-	/**
-	 * Override this method for non default behavior. Default: Not allowed.
-	 * 
-	 * @param resource
-	 * @return Reason as String in {@link Optional#of(Object))} if create allowed
-	 */
-	protected Optional<String> reasonCreateAllowed(R resource)
-	{
-		return Optional.empty();
-	}
-
 	@Override
 	public Response read(String id, UriInfo uri, HttpHeaders headers)
 	{
@@ -100,7 +108,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		if (read.hasEntity() && resourceType.isInstance(read.getEntity()))
 		{
 			R entity = resourceType.cast(read.getEntity());
-			Optional<String> reasonReadAllowed = reasonReadAllowed(entity);
+			Optional<String> reasonReadAllowed = authorizationRule.reasonReadAllowed(getCurrentUser(), entity);
 
 			if (reasonReadAllowed.isEmpty())
 			{
@@ -152,7 +160,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		if (read.hasEntity() && resourceType.isInstance(read.getEntity()))
 		{
 			R entity = resourceType.cast(read.getEntity());
-			Optional<String> reasonReadAllowed = reasonReadAllowed(entity);
+			Optional<String> reasonReadAllowed = authorizationRule.reasonReadAllowed(getCurrentUser(), entity);
 
 			if (reasonReadAllowed.isEmpty())
 			{
@@ -193,17 +201,6 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		}
 	}
 
-	/**
-	 * Override this method for non default behavior. Default: Not allowed.
-	 * 
-	 * @param resource
-	 * @return Reason as String in {@link Optional#of(Object)} if read allowed
-	 */
-	protected Optional<String> reasonReadAllowed(R resource)
-	{
-		return Optional.empty();
-	}
-
 	@Override
 	public Response update(String id, R resource, UriInfo uri, HttpHeaders headers)
 	{
@@ -225,7 +222,8 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 
 	private Response update(String id, R newResource, UriInfo uri, HttpHeaders headers, R oldResource)
 	{
-		Optional<String> reasonUpdateAllowed = reasonUpdateAllowed(oldResource, newResource);
+		Optional<String> reasonUpdateAllowed = authorizationRule.reasonUpdateAllowed(getCurrentUser(), oldResource,
+				newResource);
 
 		if (reasonUpdateAllowed.isEmpty())
 		{
@@ -247,18 +245,6 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 
 			return update;
 		}
-	}
-
-	/**
-	 * Override this method for non default behavior. Default: Not allowed.
-	 * 
-	 * @param oldResource
-	 * @param newResource
-	 * @return Reason as String in {@link Optional#of(Object))} if update allowed
-	 */
-	protected Optional<String> reasonUpdateAllowed(R oldResource, R newResource)
-	{
-		return Optional.empty();
 	}
 
 	@Override
@@ -348,7 +334,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 					.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 		}
 
-		SearchQuery<R> query = dao.createSearchQuery(1, 1);
+		SearchQuery<R> query = dao.createSearchQuery(getCurrentUser(), 1, 1);
 		query.configureParameters(queryParameters);
 
 		List<SearchQueryParameterError> unsupportedQueryParameters = query
@@ -431,7 +417,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 					.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 		}
 
-		SearchQuery<R> query = dao.createSearchQuery(1, 1);
+		SearchQuery<R> query = dao.createSearchQuery(getCurrentUser(), 1, 1);
 		query.configureParameters(queryParameters);
 
 		List<SearchQueryParameterError> unsupportedQueryParameters = query
@@ -479,7 +465,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		logger.debug("Current user '{}', role '{}'", userProvider.getCurrentUser().getName(),
 				userProvider.getCurrentUser().getRole());
 
-		Optional<String> reasonSearchAllowed = reasonSearchAllowed();
+		Optional<String> reasonSearchAllowed = authorizationRule.reasonSearchAllowed(getCurrentUser());
 		if (reasonSearchAllowed.isEmpty())
 		{
 			audit.info("Search of resource {} denied for user '{}'", resourceTypeName, getCurrentUser().getName());
@@ -490,17 +476,6 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 			audit.info("Search of resource {} allowed for user '{}'", resourceTypeName, getCurrentUser().getName());
 			return delegate.search(uri, headers);
 		}
-	}
-
-	/**
-	 * Override this method for non default behavior. Default: Not allowed.
-	 * 
-	 * @param uri
-	 * @return Reason as String in {@link Optional#of(Object)} if delete allowed
-	 */
-	protected Optional<String> reasonSearchAllowed()
-	{
-		return Optional.empty();
 	}
 
 	@Override

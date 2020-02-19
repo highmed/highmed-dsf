@@ -1,6 +1,7 @@
 package org.highmed.dsf.fhir.spring.config;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.highmed.dsf.fhir.OrganizationType;
 import org.highmed.dsf.fhir.dao.ActivityDefinitionDao;
 import org.highmed.dsf.fhir.dao.BinaryDao;
 import org.highmed.dsf.fhir.dao.BundleDao;
@@ -62,6 +63,9 @@ public class DaoConfig
 	@Value("${org.highmed.dsf.fhir.db.server_user_password}")
 	private String dbPassword;
 
+	@Value("${org.highmed.dsf.fhir.organizationType}")
+	private String organizationType;
+
 	@Autowired
 	private FhirConfig fhirConfig;
 
@@ -84,99 +88,105 @@ public class DaoConfig
 	}
 
 	@Bean
+	public OrganizationType organizationType()
+	{
+		return OrganizationType.valueOf(organizationType);
+	}
+
+	@Bean
 	public ActivityDefinitionDao activityDefinitionDao()
 	{
-		return new ActivityDefinitionDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new ActivityDefinitionDaoJdbc(dataSource(), fhirConfig.fhirContext(), organizationType());
 	}
 
 	@Bean
 	public BinaryDao binaryDao()
 	{
-		return new BinaryDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new BinaryDaoJdbc(dataSource(), fhirConfig.fhirContext(), organizationType());
 	}
 
 	@Bean
 	public BundleDao bundleDao()
 	{
-		return new BundleDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new BundleDaoJdbc(dataSource(), fhirConfig.fhirContext(), organizationType());
 	}
 
 	@Bean
 	public CodeSystemDao codeSystemDao()
 	{
-		return new CodeSystemDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new CodeSystemDaoJdbc(dataSource(), fhirConfig.fhirContext(), organizationType());
 	}
 
 	@Bean
 	public EndpointDao endpointDao()
 	{
-		return new EndpointDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new EndpointDaoJdbc(dataSource(), fhirConfig.fhirContext(), organizationType());
 	}
 
 	@Bean
 	public GroupDao groupDao()
 	{
-		return new GroupDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new GroupDaoJdbc(dataSource(), fhirConfig.fhirContext(), organizationType());
 	}
 
 	@Bean
 	public HealthcareServiceDao healthcareServiceDao()
 	{
-		return new HealthcareServiceDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new HealthcareServiceDaoJdbc(dataSource(), fhirConfig.fhirContext(), organizationType());
 	}
 
 	@Bean
 	public LocationDao locationDao()
 	{
-		return new LocationDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new LocationDaoJdbc(dataSource(), fhirConfig.fhirContext(), organizationType());
 	}
 
 	@Bean
 	public NamingSystemDao namingSystemDao()
 	{
-		return new NamingSystemDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new NamingSystemDaoJdbc(dataSource(), fhirConfig.fhirContext(), organizationType());
 	}
 
 	@Bean
 	public OrganizationDao organizationDao()
 	{
-		return new OrganizationDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new OrganizationDaoJdbc(dataSource(), fhirConfig.fhirContext(), organizationType());
 	}
 
 	@Bean
 	public PatientDao patientDao()
 	{
-		return new PatientDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new PatientDaoJdbc(dataSource(), fhirConfig.fhirContext(), organizationType());
 	}
 
 	@Bean
 	public PractitionerDao practitionerDao()
 	{
-		return new PractitionerDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new PractitionerDaoJdbc(dataSource(), fhirConfig.fhirContext(), organizationType());
 	}
 
 	@Bean
 	public PractitionerRoleDao practitionerRoleDao()
 	{
-		return new PractitionerRoleDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new PractitionerRoleDaoJdbc(dataSource(), fhirConfig.fhirContext(), organizationType());
 	}
 
 	@Bean
 	public ProvenanceDao provenanceDao()
 	{
-		return new ProvenanceDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new ProvenanceDaoJdbc(dataSource(), fhirConfig.fhirContext(), organizationType());
 	}
 
 	@Bean
 	public ResearchStudyDao researchStudyDao()
 	{
-		return new ResearchStudyDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new ResearchStudyDaoJdbc(dataSource(), fhirConfig.fhirContext(), organizationType());
 	}
 
 	@Bean
 	public StructureDefinitionDao structureDefinitionDao()
 	{
-		return new StructureDefinitionDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new StructureDefinitionDaoJdbc(dataSource(), fhirConfig.fhirContext(), organizationType());
 	}
 
 	@Bean
@@ -188,25 +198,26 @@ public class DaoConfig
 	@Bean
 	public StructureDefinitionSnapshotDao structureDefinitionSnapshotDao()
 	{
-		return new StructureDefinitionSnapshotDaoJdbc(dataSource(), fhirConfig.fhirContext(), snapshotInfoConverter());
+		return new StructureDefinitionSnapshotDaoJdbc(dataSource(), fhirConfig.fhirContext(), organizationType(),
+				snapshotInfoConverter());
 	}
 
 	@Bean
 	public SubscriptionDao subscriptionDao()
 	{
-		return new SubscriptionDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new SubscriptionDaoJdbc(dataSource(), fhirConfig.fhirContext(), organizationType());
 	}
 
 	@Bean
 	public TaskDao taskDao()
 	{
-		return new TaskDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new TaskDaoJdbc(dataSource(), fhirConfig.fhirContext(), organizationType());
 	}
 
 	@Bean
 	public ValueSetDao valueSetDao()
 	{
-		return new ValueSetDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new ValueSetDaoJdbc(dataSource(), fhirConfig.fhirContext(), organizationType());
 	}
 
 	@Bean

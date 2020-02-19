@@ -67,11 +67,11 @@ public class DefaultProfileValidationSupportWithFetchFromDb extends DefaultProfi
 	public StructureDefinition fetchStructureDefinition(FhirContext context, String url)
 	{
 		Optional<StructureDefinition> structureDefinition = null;
-		structureDefinition = throwRuntimeException(() -> structureDefinitionSnapshotDao.readByUrl(url));
+		structureDefinition = throwRuntimeException(() -> structureDefinitionSnapshotDao.readByUrlAndVersion(url));
 		if (structureDefinition.isPresent())
 			return structureDefinition.get();
 
-		structureDefinition = throwRuntimeException(() -> structureDefinitionDao.readByUrl(url));
+		structureDefinition = throwRuntimeException(() -> structureDefinitionDao.readByUrlAndVersion(url));
 		if (structureDefinition.isPresent())
 			return structureDefinition.get();
 
@@ -94,7 +94,7 @@ public class DefaultProfileValidationSupportWithFetchFromDb extends DefaultProfi
 	@Override
 	public CodeSystem fetchCodeSystem(FhirContext context, String url)
 	{
-		Optional<CodeSystem> codeSystem = throwRuntimeException(() -> codeSystemDao.readByUrl(url));
+		Optional<CodeSystem> codeSystem = throwRuntimeException(() -> codeSystemDao.readByUrlAndVersion(url));
 		if (codeSystem.isPresent())
 			return codeSystem.get();
 
@@ -104,7 +104,7 @@ public class DefaultProfileValidationSupportWithFetchFromDb extends DefaultProfi
 	@Override
 	public ValueSet fetchValueSet(FhirContext context, String url)
 	{
-		Optional<ValueSet> valueSet = throwRuntimeException(() -> valueSetDao.readByUrl(url));
+		Optional<ValueSet> valueSet = throwRuntimeException(() -> valueSetDao.readByUrlAndVersion(url));
 		if (valueSet.isPresent())
 			return valueSet.get();
 

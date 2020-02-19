@@ -1,5 +1,6 @@
 package org.highmed.dsf.fhir.webservice.secure;
 
+import org.highmed.dsf.fhir.authorization.ValueSetAuthorizationRule;
 import org.highmed.dsf.fhir.dao.ValueSetDao;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
@@ -13,9 +14,9 @@ public class ValueSetServiceSecure extends AbstractResourceServiceSecure<ValueSe
 {
 	public ValueSetServiceSecure(ValueSetService delegate, String serverBase, ResponseGenerator responseGenerator,
 			ReferenceResolver referenceResolver, ValueSetDao valueSetDao, ExceptionHandler exceptionHandler,
-			ParameterConverter parameterConverter)
+			ParameterConverter parameterConverter, ValueSetAuthorizationRule authorizationRule)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver, ValueSet.class, valueSetDao, exceptionHandler,
-				parameterConverter);
+				parameterConverter, authorizationRule);
 	}
 }

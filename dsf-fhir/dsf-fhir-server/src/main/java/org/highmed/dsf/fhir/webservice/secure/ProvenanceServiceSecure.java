@@ -1,5 +1,6 @@
 package org.highmed.dsf.fhir.webservice.secure;
 
+import org.highmed.dsf.fhir.authorization.ProvenanceAuthorizationRule;
 import org.highmed.dsf.fhir.dao.ProvenanceDao;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
@@ -13,9 +14,9 @@ public class ProvenanceServiceSecure extends AbstractResourceServiceSecure<Prove
 {
 	public ProvenanceServiceSecure(ProvenanceService delegate, String serverBase, ResponseGenerator responseGenerator,
 			ReferenceResolver referenceResolver, ProvenanceDao provenanceDao, ExceptionHandler exceptionHandler,
-			ParameterConverter parameterConverter)
+			ParameterConverter parameterConverter, ProvenanceAuthorizationRule authorizationRule)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver, Provenance.class, provenanceDao,
-				exceptionHandler, parameterConverter);
+				exceptionHandler, parameterConverter, authorizationRule);
 	}
 }

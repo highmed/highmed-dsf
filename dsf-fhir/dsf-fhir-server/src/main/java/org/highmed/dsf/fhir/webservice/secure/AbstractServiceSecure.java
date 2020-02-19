@@ -7,13 +7,12 @@ import java.util.Optional;
 
 import javax.ws.rs.core.Response;
 
-import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.authentication.UserProvider;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.highmed.dsf.fhir.service.ResourceReference;
 import org.highmed.dsf.fhir.service.ResourceReference.ReferenceType;
-import org.highmed.dsf.fhir.webservice.specification.BasicService;
+import org.highmed.dsf.fhir.webservice.base.AbstractDelegatingBasicService;
+import org.highmed.dsf.fhir.webservice.base.BasicService;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
@@ -21,23 +20,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-public abstract class AbstractServiceSecure<S extends BasicService> implements BasicService, InitializingBean
+public abstract class AbstractServiceSecure<S extends BasicService> extends AbstractDelegatingBasicService<S>
+		implements BasicService, InitializingBean
 {
 	protected static final Logger audit = LoggerFactory.getLogger("dsf-audit-logger");
 	private static final Logger logger = LoggerFactory.getLogger(AbstractServiceSecure.class);
 
-	protected final S delegate;
 	protected final String serverBase;
 	protected final ResponseGenerator responseGenerator;
 	protected final ReferenceResolver referenceResolver;
 
-	protected UserProvider userProvider;
-
 	public AbstractServiceSecure(S delegate, String serverBase, ResponseGenerator responseGenerator,
 			ReferenceResolver referenceResolver)
 	{
+		super(delegate);
+
 		this.serverBase = serverBase;
-		this.delegate = delegate;
 		this.referenceResolver = referenceResolver;
 		this.responseGenerator = responseGenerator;
 	}
@@ -45,23 +43,11 @@ public abstract class AbstractServiceSecure<S extends BasicService> implements B
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
-		Objects.requireNonNull(delegate, "delegate");
+		super.afterPropertiesSet();
+
 		Objects.requireNonNull(serverBase, "serverBase");
 		Objects.requireNonNull(responseGenerator, "responseGenerator");
 		Objects.requireNonNull(referenceResolver, "referenceResolver");
-	}
-
-	@Override
-	public final void setUserProvider(UserProvider userProvider)
-	{
-		delegate.setUserProvider(userProvider);
-
-		this.userProvider = userProvider;
-	}
-
-	protected final User getCurrentUser()
-	{
-		return userProvider.getCurrentUser();
 	}
 
 	protected final boolean isCurrentUserPartOfReferencedOrganizations(String referenceLocation,
@@ -95,7 +81,7 @@ public abstract class AbstractServiceSecure<S extends BasicService> implements B
 				return false;
 			}
 
-			Optional<Resource> resource = referenceResolver.resolveReference(resReference);
+			Optional<Resource> resource = referenceResolver.resolveReference(getCurrentUser(), resReference);
 			if (resource.isPresent() && resource.get() instanceof Organization)
 			{
 				boolean sameOrganization = userProvider.getCurrentUser().getOrganization().getIdElement()
@@ -114,12 +100,6 @@ public abstract class AbstractServiceSecure<S extends BasicService> implements B
 				return false;
 			}
 		}
-	}
-
-	@Override
-	public final String getPath()
-	{
-		return delegate.getPath();
 	}
 
 	protected final Response forbidden(String operation)

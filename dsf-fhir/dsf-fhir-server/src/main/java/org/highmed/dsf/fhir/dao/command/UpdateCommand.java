@@ -15,6 +15,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.Response.Status;
 
+import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.ResourceDao;
 import org.highmed.dsf.fhir.dao.exception.ResourceNotFoundException;
 import org.highmed.dsf.fhir.event.EventGenerator;
@@ -48,11 +49,11 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	protected UUID id;
 	protected R updatedResource;
 
-	public UpdateCommand(int index, Bundle bundle, BundleEntryComponent entry, String serverBase, R resource, D dao,
-			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
+	public UpdateCommand(int index, User user, Bundle bundle, BundleEntryComponent entry, String serverBase, R resource,
+			D dao, ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
 			ResponseGenerator responseGenerator, EventManager eventManager, EventGenerator eventGenerator)
 	{
-		super(3, index, bundle, entry, serverBase, resource, dao, exceptionHandler, parameterConverter);
+		super(3, index, user, bundle, entry, serverBase, resource, dao, exceptionHandler, parameterConverter);
 
 		this.responseGenerator = responseGenerator;
 		this.eventManager = eventManager;
@@ -140,8 +141,8 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		Optional<Long> ifMatch = Optional.ofNullable(entry.getRequest().getIfMatch())
 				.flatMap(parameterConverter::toEntityTag).flatMap(parameterConverter::toVersion);
 
-		updatedResource = exceptionHandler.handleSqlExAndResourceNotFoundExAndResouceVersionNonMatchEx(
-				resourceTypeName, () -> dao.updateWithTransaction(connection, resource, ifMatch.orElse(null)));
+		updatedResource = exceptionHandler.handleSqlExAndResourceNotFoundExAndResouceVersionNonMatchEx(resourceTypeName,
+				() -> dao.updateWithTransaction(connection, resource, ifMatch.orElse(null)));
 	}
 
 	private void updateByCondition(Map<String, IdType> idTranslationTable, Connection connection,
@@ -160,7 +161,7 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 					.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 		}
 
-		SearchQuery<R> query = dao.createSearchQuery(1, 1);
+		SearchQuery<R> query = dao.createSearchQuery(user, 1, 1);
 		query.configureParameters(queryParameters);
 
 		List<SearchQueryParameterError> unsupportedParams = query.getUnsupportedQueryParameters(queryParameters);

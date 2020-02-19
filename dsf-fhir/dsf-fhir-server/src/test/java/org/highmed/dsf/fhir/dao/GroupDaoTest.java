@@ -3,6 +3,7 @@ package org.highmed.dsf.fhir.dao;
 import static org.junit.Assert.assertEquals;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.highmed.dsf.fhir.OrganizationType;
 import org.highmed.dsf.fhir.dao.jdbc.GroupDaoJdbc;
 import org.hl7.fhir.r4.model.Group;
 
@@ -20,9 +21,9 @@ public class GroupDaoTest extends AbstractResourceDaoTest<Group, GroupDao>
 	}
 
 	@Override
-	protected GroupDao createDao(BasicDataSource dataSource, FhirContext fhirContext)
+	protected GroupDao createDao(BasicDataSource dataSource, FhirContext fhirContext, OrganizationType organizationType)
 	{
-		return new GroupDaoJdbc(dataSource, fhirContext);
+		return new GroupDaoJdbc(dataSource, fhirContext, organizationType);
 	}
 
 	@Override

@@ -6,12 +6,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.highmed.dsf.fhir.OrganizationType;
 import org.highmed.dsf.fhir.dao.EndpointDao;
 import org.highmed.dsf.fhir.search.parameters.EndpointIdentifier;
 import org.highmed.dsf.fhir.search.parameters.EndpointName;
 import org.highmed.dsf.fhir.search.parameters.EndpointOrganization;
 import org.highmed.dsf.fhir.search.parameters.EndpointStatus;
 import org.highmed.dsf.fhir.search.parameters.rev.include.OrganizationEndpointRevInclude;
+import org.highmed.dsf.fhir.search.parameters.user.EndpointUserFilter;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,9 +24,10 @@ public class EndpointDaoJdbc extends AbstractResourceDaoJdbc<Endpoint> implement
 {
 	private static final Logger logger = LoggerFactory.getLogger(EndpointDaoJdbc.class);
 
-	public EndpointDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
+	public EndpointDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext, OrganizationType organizationType)
 	{
-		super(dataSource, fhirContext, Endpoint.class, "endpoints", "endpoint", "endpoint_id",
+		super(dataSource, fhirContext, Endpoint.class, "endpoints", "endpoint", "endpoint_id", organizationType,
+				EndpointUserFilter::new,
 				with(EndpointOrganization::new, EndpointIdentifier::new, EndpointName::new, EndpointStatus::new),
 				with(OrganizationEndpointRevInclude::new));
 	}

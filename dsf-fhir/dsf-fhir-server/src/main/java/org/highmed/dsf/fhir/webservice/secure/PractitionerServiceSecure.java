@@ -1,5 +1,6 @@
 package org.highmed.dsf.fhir.webservice.secure;
 
+import org.highmed.dsf.fhir.authorization.PractitionerAuthorizationRule;
 import org.highmed.dsf.fhir.dao.PractitionerDao;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
@@ -13,9 +14,10 @@ public class PractitionerServiceSecure extends
 {
 	public PractitionerServiceSecure(PractitionerService delegate, String serverBase,
 			ResponseGenerator responseGenerator, ReferenceResolver referenceResolver, PractitionerDao practitionerDao,
-			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter)
+			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
+			PractitionerAuthorizationRule authorizationRule)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver, Practitioner.class, practitionerDao,
-				exceptionHandler, parameterConverter);
+				exceptionHandler, parameterConverter, authorizationRule);
 	}
 }

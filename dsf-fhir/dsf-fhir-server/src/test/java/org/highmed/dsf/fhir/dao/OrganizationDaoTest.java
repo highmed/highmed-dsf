@@ -1,6 +1,8 @@
 package org.highmed.dsf.fhir.dao;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
@@ -8,6 +10,7 @@ import java.util.UUID;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.highmed.dsf.fhir.OrganizationType;
 import org.highmed.dsf.fhir.dao.jdbc.OrganizationDaoJdbc;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.StringType;
@@ -26,9 +29,10 @@ public class OrganizationDaoTest extends AbstractResourceDaoTest<Organization, O
 	}
 
 	@Override
-	protected OrganizationDao createDao(BasicDataSource dataSource, FhirContext fhirContext)
+	protected OrganizationDao createDao(BasicDataSource dataSource, FhirContext fhirContext,
+			OrganizationType organizationType)
 	{
-		return new OrganizationDaoJdbc(dataSource, fhirContext);
+		return new OrganizationDaoJdbc(dataSource, fhirContext, organizationType);
 	}
 
 	@Override
@@ -69,10 +73,10 @@ public class OrganizationDaoTest extends AbstractResourceDaoTest<Organization, O
 		org.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint")
 				.setValue(new StringType(certHex));
 
-		Organization created = dao.create(org);
+		Organization created = ttpDao.create(org);
 		assertNotNull(created);
 
-		Optional<Organization> read = dao.readActiveNotDeletedByThumbprint(certHex);
+		Optional<Organization> read = ttpDao.readActiveNotDeletedByThumbprint(certHex);
 		assertNotNull(read);
 		assertTrue(read.isPresent());
 		assertNotNull(
@@ -97,14 +101,14 @@ public class OrganizationDaoTest extends AbstractResourceDaoTest<Organization, O
 		org.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint")
 				.setValue(new StringType(certHex));
 
-		Organization created = dao.create(org);
+		Organization created = ttpDao.create(org);
 		assertNotNull(created);
 
-		Optional<Organization> read = dao.readActiveNotDeletedByThumbprint(certHex);
+		Optional<Organization> read = ttpDao.readActiveNotDeletedByThumbprint(certHex);
 		assertNotNull(read);
 		assertTrue(read.isEmpty());
 
-		Optional<Organization> read2 = dao.read(UUID.fromString(created.getIdElement().getIdPart()));
+		Optional<Organization> read2 = ttpDao.read(UUID.fromString(created.getIdElement().getIdPart()));
 		assertNotNull(read2);
 		assertTrue(read2.isPresent());
 	}
@@ -120,11 +124,11 @@ public class OrganizationDaoTest extends AbstractResourceDaoTest<Organization, O
 		org.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint")
 				.setValue(new StringType(certHex));
 
-		Organization created = dao.create(org);
+		Organization created = ttpDao.create(org);
 		assertNotNull(created);
-		dao.delete(UUID.fromString(created.getIdElement().getIdPart()));
+		ttpDao.delete(UUID.fromString(created.getIdElement().getIdPart()));
 
-		Optional<Organization> read = dao.readActiveNotDeletedByThumbprint(certHex);
+		Optional<Organization> read = ttpDao.readActiveNotDeletedByThumbprint(certHex);
 		assertNotNull(read);
 		assertTrue(read.isEmpty());
 	}
@@ -134,7 +138,7 @@ public class OrganizationDaoTest extends AbstractResourceDaoTest<Organization, O
 	{
 		final String certHex = Hex.encodeHexString("FooBarBaz".getBytes(StandardCharsets.UTF_8));
 
-		Optional<Organization> read = dao.readActiveNotDeletedByThumbprint(certHex);
+		Optional<Organization> read = ttpDao.readActiveNotDeletedByThumbprint(certHex);
 		assertNotNull(read);
 		assertTrue(read.isEmpty());
 	}
@@ -142,7 +146,7 @@ public class OrganizationDaoTest extends AbstractResourceDaoTest<Organization, O
 	@Test
 	public void testReadActiveNotDeletedByThumbprintNull() throws Exception
 	{
-		Optional<Organization> read = dao.readActiveNotDeletedByThumbprint(null);
+		Optional<Organization> read = ttpDao.readActiveNotDeletedByThumbprint(null);
 		assertNotNull(read);
 		assertTrue(read.isEmpty());
 	}
@@ -150,7 +154,7 @@ public class OrganizationDaoTest extends AbstractResourceDaoTest<Organization, O
 	@Test
 	public void testReadActiveNotDeletedByThumbprintBlank() throws Exception
 	{
-		Optional<Organization> read = dao.readActiveNotDeletedByThumbprint("  ");
+		Optional<Organization> read = ttpDao.readActiveNotDeletedByThumbprint("  ");
 		assertNotNull(read);
 		assertTrue(read.isEmpty());
 	}

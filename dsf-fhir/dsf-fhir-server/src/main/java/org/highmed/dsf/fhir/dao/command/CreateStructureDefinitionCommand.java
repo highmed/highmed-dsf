@@ -3,6 +3,7 @@ package org.highmed.dsf.fhir.dao.command;
 import java.sql.Connection;
 import java.util.Map;
 
+import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
 import org.highmed.dsf.fhir.dao.StructureDefinitionSnapshotDao;
 import org.highmed.dsf.fhir.event.EventGenerator;
@@ -33,14 +34,15 @@ public class CreateStructureDefinitionCommand extends CreateCommand<StructureDef
 
 	private StructureDefinition resourceWithSnapshot;
 
-	public CreateStructureDefinitionCommand(int index, Bundle bundle, BundleEntryComponent entry, String serverBase,
-			StructureDefinition resource, StructureDefinitionDao dao, ExceptionHandler exceptionHandler,
-			ParameterConverter parameterConverter, ResponseGenerator responseGenerator, EventManager eventManager,
-			EventGenerator eventGenerator, StructureDefinitionSnapshotDao snapshotDao,
-			SnapshotGenerator snapshotGenerator, SnapshotDependencyAnalyzer snapshotDependencyAnalyzer)
+	public CreateStructureDefinitionCommand(int index, User user, Bundle bundle, BundleEntryComponent entry,
+			String serverBase, StructureDefinition resource, StructureDefinitionDao dao,
+			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
+			ResponseGenerator responseGenerator, EventManager eventManager, EventGenerator eventGenerator,
+			StructureDefinitionSnapshotDao snapshotDao, SnapshotGenerator snapshotGenerator,
+			SnapshotDependencyAnalyzer snapshotDependencyAnalyzer)
 	{
-		super(index, bundle, entry, serverBase, resource, dao, exceptionHandler, parameterConverter, responseGenerator,
-				eventManager, eventGenerator);
+		super(index, user, bundle, entry, serverBase, resource, dao, exceptionHandler, parameterConverter,
+				responseGenerator, eventManager, eventGenerator);
 
 		this.snapshotDao = snapshotDao;
 		this.snapshotGenerator = snapshotGenerator;

@@ -1,5 +1,6 @@
 package org.highmed.dsf.fhir.webservice.secure;
 
+import org.highmed.dsf.fhir.authorization.NamingSystemAuthorizationRule;
 import org.highmed.dsf.fhir.dao.NamingSystemDao;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
@@ -13,9 +14,10 @@ public class NamingSystemServiceSecure extends
 {
 	public NamingSystemServiceSecure(NamingSystemService delegate, String serverBase,
 			ResponseGenerator responseGenerator, ReferenceResolver referenceResolver, NamingSystemDao naminngSystemDao,
-			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter)
+			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
+			NamingSystemAuthorizationRule authorizationRule)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver, NamingSystem.class, naminngSystemDao,
-				exceptionHandler, parameterConverter);
+				exceptionHandler, parameterConverter, authorizationRule);
 	}
 }

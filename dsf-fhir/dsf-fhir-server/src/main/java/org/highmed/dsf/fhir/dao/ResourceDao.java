@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.dsf.fhir.dao.exception.ResourceNotFoundException;
 import org.highmed.dsf.fhir.dao.exception.ResourceVersionNoMatchException;
@@ -129,7 +130,7 @@ public interface ResourceDao<R extends Resource>
 	 * @throws SQLException
 	 */
 	Optional<R> readIncludingDeletedWithTransaction(Connection connection, UUID uuid) throws SQLException;
-	
+
 	/**
 	 * @param id
 	 *            not <code>null</code>
@@ -278,5 +279,7 @@ public interface ResourceDao<R extends Resource>
 	 */
 	PartialResult<R> searchWithTransaction(Connection connection, DbSearchQuery query) throws SQLException;
 
-	SearchQuery<R> createSearchQuery(int page, int count);
+	SearchQuery<R> createSearchQuery(User user, int page, int count);
+
+	SearchQuery<R> createSearchQueryWithoutUserFilter(int page, int count);
 }

@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.websocket.RemoteEndpoint.Async;
 
+import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.event.Event;
 import org.highmed.dsf.fhir.event.EventManager;
 
@@ -36,9 +37,9 @@ public class TransactionEventManager implements EventManager
 	}
 
 	@Override
-	public void bind(String sessionId, Async asyncRemote, String subscriptionIdPart)
+	public void bind(User user, String sessionId, Async asyncRemote, String subscriptionIdPart)
 	{
-		delegate.bind(sessionId, asyncRemote, subscriptionIdPart);
+		delegate.bind(user, sessionId, asyncRemote, subscriptionIdPart);
 	}
 
 	@Override

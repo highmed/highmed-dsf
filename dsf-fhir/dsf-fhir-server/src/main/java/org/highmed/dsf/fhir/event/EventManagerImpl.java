@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import javax.websocket.RemoteEndpoint.Async;
 
+import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.SubscriptionDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
@@ -65,11 +66,13 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 
 	private static class SessionIdAndRemoteAsync
 	{
+		final User user;
 		final String sessionId;
 		final Async remoteAsync;
 
-		SessionIdAndRemoteAsync(String sessionId, Async remoteAsync)
+		SessionIdAndRemoteAsync(User user, String sessionId, Async remoteAsync)
 		{
+			this.user = user;
 			this.sessionId = sessionId;
 			this.remoteAsync = remoteAsync;
 		}
@@ -272,9 +275,21 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 		logger.debug("Calling {} remote{} connected to subscription with id {}", optRemotes.get().size(),
 				optRemotes.get().size() != 1 ? "s" : "", s.getIdElement().getIdPart());
 
-		// defensive copy since since list could be changed by other threads while we are reading
+		// defensive copy because list could be changed by other threads while we are reading
 		List<SessionIdAndRemoteAsync> remotes = new ArrayList<>(optRemotes.get());
-		remotes.forEach(r -> send(r, text));
+		remotes.stream().filter(r -> filterByReadAccess(r, event)).forEach(r -> send(r, text));
+	}
+
+	private boolean filterByReadAccess(SessionIdAndRemoteAsync sessionAndRemote, Event event)
+	{
+		// TODO Filter by read access
+
+		User user = sessionAndRemote.user;
+		logger.warn("Implement filter by read access in EventManagerImpl for user '{}' and event {} with resource {}",
+				user.getName(), event.getClass().getName(), event.getResource() == null ? ""
+						: event.getResource().getClass().getAnnotation(ResourceDef.class).name());
+
+		return true;
 	}
 
 	private void send(SessionIdAndRemoteAsync sessionAndRemote, String text)
@@ -290,7 +305,7 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 	}
 
 	@Override
-	public void bind(String sessionId, Async asyncRemote, String subscriptionIdPart)
+	public void bind(User user, String sessionId, Async asyncRemote, String subscriptionIdPart)
 	{
 		if (firstCall.get())
 			refreshMatchers();
@@ -303,12 +318,12 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 				if (list == null)
 				{
 					List<SessionIdAndRemoteAsync> newList = new ArrayList<>();
-					newList.add(new SessionIdAndRemoteAsync(sessionId, asyncRemote));
+					newList.add(new SessionIdAndRemoteAsync(user, sessionId, asyncRemote));
 					return newList;
 				}
 				else
 				{
-					list.add(new SessionIdAndRemoteAsync(sessionId, asyncRemote));
+					list.add(new SessionIdAndRemoteAsync(user, sessionId, asyncRemote));
 					return list;
 				}
 			});
@@ -328,6 +343,6 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 	{
 		logger.debug("Removing websocket session {}", sessionId);
 		asyncRemotesBySubscriptionIdPart.removeWhereValueMatches(list -> list.isEmpty(),
-				list -> list.remove(new SessionIdAndRemoteAsync(sessionId, null)));
+				list -> list.remove(new SessionIdAndRemoteAsync(null, sessionId, null)));
 	}
 }
