@@ -20,126 +20,144 @@ import org.highmed.dsf.fhir.authorization.SubscriptionAuthorizationRule;
 import org.highmed.dsf.fhir.authorization.TaskAuthorizationRule;
 import org.highmed.dsf.fhir.authorization.ValueSetAuthorizationRule;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class AuthorizationConfig
 {
+	@Value("${org.highmed.dsf.fhir.serverBase}")
+	private String serverBase;
+
 	@Autowired
 	private DaoConfig daoConfig;
+
+	@Autowired
+	private ReferenceConfig referenceConfig;
 
 	@Bean
 	public ActivityDefinitionAuthorizationRule activityDefinitionAuthorizationRule()
 	{
-		return new ActivityDefinitionAuthorizationRule(daoConfig.activityDefinitionDao());
+		return new ActivityDefinitionAuthorizationRule(daoConfig.daoProvider(), serverBase,
+				referenceConfig.referenceResolver());
 	}
 
 	@Bean
 	public BinaryAuthorizationRule binaryAuthorizationRule()
 	{
-		return new BinaryAuthorizationRule(daoConfig.binaryDao());
+		return new BinaryAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver());
 	}
 
 	@Bean
 	public BundleAuthorizationRule bundleAuthorizationRule()
 	{
-		return new BundleAuthorizationRule(daoConfig.bundleDao());
+		return new BundleAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver());
 	}
 
 	@Bean
 	public CodeSystemAuthorizationRule codeSystemAuthorizationRule()
 	{
-		return new CodeSystemAuthorizationRule(daoConfig.codeSystemDao());
+		return new CodeSystemAuthorizationRule(daoConfig.daoProvider(), serverBase,
+				referenceConfig.referenceResolver());
 	}
 
 	@Bean
 	public EndpointAuthorizationRule endpointAuthorizationRule()
 	{
-		return new EndpointAuthorizationRule(daoConfig.endpointDao());
+		return new EndpointAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver());
 	}
 
 	@Bean
 	public GroupAuthorizationRule groupAuthorizationRule()
 	{
-		return new GroupAuthorizationRule(daoConfig.groupDao());
+		return new GroupAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver());
 	}
 
 	@Bean
 	public HealthcareServiceAuthorizationRule healthcareServiceAuthorizationRule()
 	{
-		return new HealthcareServiceAuthorizationRule(daoConfig.healthcareServiceDao());
+		return new HealthcareServiceAuthorizationRule(daoConfig.daoProvider(), serverBase,
+				referenceConfig.referenceResolver());
 	}
 
 	@Bean
 	public LocationAuthorizationRule locationAuthorizationRule()
 	{
-		return new LocationAuthorizationRule(daoConfig.locationDao());
+		return new LocationAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver());
 	}
 
 	@Bean
 	public NamingSystemAuthorizationRule namingSystemAuthorizationRule()
 	{
-		return new NamingSystemAuthorizationRule(daoConfig.namingSystemDao());
+		return new NamingSystemAuthorizationRule(daoConfig.daoProvider(), serverBase,
+				referenceConfig.referenceResolver());
 	}
 
 	@Bean
 	public OrganizationAuthorizationRule organizationAuthorizationRule()
 	{
-		return new OrganizationAuthorizationRule(daoConfig.organizationDao());
+		return new OrganizationAuthorizationRule(daoConfig.daoProvider(), serverBase,
+				referenceConfig.referenceResolver());
 	}
 
 	@Bean
 	public PatientAuthorizationRule patientAuthorizationRule()
 	{
-		return new PatientAuthorizationRule(daoConfig.patientDao());
+		return new PatientAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver());
 	}
 
 	@Bean
 	public PractitionerAuthorizationRule practitionerAuthorizationRule()
 	{
-		return new PractitionerAuthorizationRule(daoConfig.practitionerDao());
+		return new PractitionerAuthorizationRule(daoConfig.daoProvider(), serverBase,
+				referenceConfig.referenceResolver());
 	}
 
 	@Bean
 	public PractitionerRoleAuthorizationRule practitionerRoleAuthorizationRule()
 	{
-		return new PractitionerRoleAuthorizationRule(daoConfig.practitionerRoleDao());
+		return new PractitionerRoleAuthorizationRule(daoConfig.daoProvider(), serverBase,
+				referenceConfig.referenceResolver());
 	}
 
 	@Bean
 	public ProvenanceAuthorizationRule provenanceAuthorizationRule()
 	{
-		return new ProvenanceAuthorizationRule(daoConfig.provenanceDao());
+		return new ProvenanceAuthorizationRule(daoConfig.daoProvider(), serverBase,
+				referenceConfig.referenceResolver());
 	}
 
 	@Bean
 	public ResearchStudyAuthorizationRule researchStudyAuthorizationRule()
 	{
-		return new ResearchStudyAuthorizationRule(daoConfig.researchStudyDao());
+		return new ResearchStudyAuthorizationRule(daoConfig.daoProvider(), serverBase,
+				referenceConfig.referenceResolver());
 	}
 
 	@Bean
 	public StructureDefinitionAuthorizationRule structureDefinitionAuthorizationRule()
 	{
-		return new StructureDefinitionAuthorizationRule(daoConfig.structureDefinitionDao());
+		return new StructureDefinitionAuthorizationRule(daoConfig.daoProvider(), serverBase,
+				referenceConfig.referenceResolver());
 	}
 
 	@Bean
 	public SubscriptionAuthorizationRule subscriptionAuthorizationRule()
 	{
-		return new SubscriptionAuthorizationRule(daoConfig.subscriptionDao());
+		return new SubscriptionAuthorizationRule(daoConfig.daoProvider(), serverBase,
+				referenceConfig.referenceResolver());
 	}
 
 	@Bean
 	public TaskAuthorizationRule taskAuthorizationRule()
 	{
-		return new TaskAuthorizationRule(daoConfig.taskDao());
+		return new TaskAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver());
 	}
 
 	@Bean
 	public ValueSetAuthorizationRule valueSetAuthorizationRule()
 	{
-		return new ValueSetAuthorizationRule(daoConfig.valueSetDao());
+		return new ValueSetAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver());
 	}
 }

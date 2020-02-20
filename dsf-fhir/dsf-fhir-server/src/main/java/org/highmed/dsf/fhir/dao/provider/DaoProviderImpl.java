@@ -275,9 +275,9 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public <R extends Resource> Optional<? extends ResourceDao<R>> getDao(Class<R> resourceClass)
 	{
+		@SuppressWarnings("unchecked")
 		ResourceDao<R> value = (ResourceDao<R>) daosByResourecClass.get(resourceClass);
 		return Optional.ofNullable(value);
 	}

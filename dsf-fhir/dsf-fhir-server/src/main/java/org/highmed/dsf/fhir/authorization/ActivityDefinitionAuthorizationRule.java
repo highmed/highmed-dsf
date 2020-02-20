@@ -4,14 +4,17 @@ import java.util.Optional;
 
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.ActivityDefinitionDao;
+import org.highmed.dsf.fhir.dao.provider.DaoProvider;
+import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 
 public class ActivityDefinitionAuthorizationRule
 		extends AbstractAuthorizationRule<ActivityDefinition, ActivityDefinitionDao>
 {
-	public ActivityDefinitionAuthorizationRule(ActivityDefinitionDao dao)
+	public ActivityDefinitionAuthorizationRule(DaoProvider daoProvider, String serverBase,
+			ReferenceResolver referenceResolver)
 	{
-		super(dao);
+		super(ActivityDefinition.class, daoProvider, serverBase, referenceResolver);
 	}
 
 	@Override

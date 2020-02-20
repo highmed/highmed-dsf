@@ -4,13 +4,15 @@ import java.util.Optional;
 
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.TaskDao;
+import org.highmed.dsf.fhir.dao.provider.DaoProvider;
+import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.Task;
 
 public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskDao>
 {
-	public TaskAuthorizationRule(TaskDao dao)
+	public TaskAuthorizationRule(DaoProvider daoProvider, String serverBase, ReferenceResolver referenceResolver)
 	{
-		super(dao);
+		super(Task.class, daoProvider, serverBase, referenceResolver);
 	}
 
 	@Override

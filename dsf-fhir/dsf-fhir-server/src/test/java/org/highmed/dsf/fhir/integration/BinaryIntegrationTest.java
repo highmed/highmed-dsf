@@ -9,9 +9,12 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import org.highmed.dsf.fhir.dao.BinaryDao;
+import org.highmed.dsf.fhir.dao.ResearchStudyDao;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.ResearchStudy;
 import org.junit.Test;
 
 public class BinaryIntegrationTest extends AbstractIntegrationTest
@@ -19,12 +22,16 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testCreate() throws Exception
 	{
+		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
+		ResearchStudy createdRS = researchStudyDao.create(new ResearchStudy());
+		
 		final String contentType = "text/plain";
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data);
+		binary.setSecurityContext(new Reference(createdRS.getIdElement().toVersionless()));
 
 		Binary created = getWebserviceClient().create(binary);
 
@@ -36,11 +43,17 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(created.getContentType());
 		assertEquals(contentType, created.getContentType());
 		assertTrue(Arrays.equals(data, created.getData()));
+		
+		assertNotNull(created.getSecurityContext());
+		assertEquals(createdRS.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
 	}
 
 	@Test
 	public void testUpdate() throws Exception
 	{
+		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
+		ResearchStudy createdRS = researchStudyDao.create(new ResearchStudy());
+		
 		final String contentType = "text/plain";
 		final byte[] data1 = "Hello World".getBytes(StandardCharsets.UTF_8);
 		final byte[] data2 = "Hello World and goodbye".getBytes(StandardCharsets.UTF_8);
@@ -48,6 +61,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data1);
+		binary.setSecurityContext(new Reference(createdRS.getIdElement().toVersionless()));
 
 		BinaryDao binaryDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
 		Binary created = binaryDao.create(binary);
@@ -60,8 +74,15 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(created.getContentType());
 		assertEquals(contentType, created.getContentType());
 		assertTrue(Arrays.equals(data1, created.getData()));
+		
+		assertNotNull(created.getSecurityContext());
+		assertEquals(createdRS.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
 
 		created.setData(data2);
+
+		assertNotNull(created.getSecurityContext());
+		assertEquals(createdRS.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
+		
 		Binary updated = getWebserviceClient().update(created);
 
 		assertNotNull(updated);

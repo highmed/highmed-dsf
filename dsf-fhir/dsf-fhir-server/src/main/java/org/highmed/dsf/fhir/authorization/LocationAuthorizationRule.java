@@ -4,13 +4,15 @@ import java.util.Optional;
 
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.LocationDao;
+import org.highmed.dsf.fhir.dao.provider.DaoProvider;
+import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.Location;
 
 public class LocationAuthorizationRule extends AbstractAuthorizationRule<Location, LocationDao>
 {
-	public LocationAuthorizationRule(LocationDao dao)
+	public LocationAuthorizationRule(DaoProvider daoProvider, String serverBase, ReferenceResolver referenceResolver)
 	{
-		super(dao);
+		super(Location.class, daoProvider, serverBase, referenceResolver);
 	}
 
 	@Override

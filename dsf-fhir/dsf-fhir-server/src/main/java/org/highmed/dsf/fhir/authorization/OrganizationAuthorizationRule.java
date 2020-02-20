@@ -4,13 +4,16 @@ import java.util.Optional;
 
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.OrganizationDao;
+import org.highmed.dsf.fhir.dao.provider.DaoProvider;
+import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.Organization;
 
 public class OrganizationAuthorizationRule extends AbstractAuthorizationRule<Organization, OrganizationDao>
 {
-	public OrganizationAuthorizationRule(OrganizationDao dao)
+	public OrganizationAuthorizationRule(DaoProvider daoProvider, String serverBase,
+			ReferenceResolver referenceResolver)
 	{
-		super(dao);
+		super(Organization.class, daoProvider, serverBase, referenceResolver);
 	}
 
 	@Override
@@ -19,7 +22,7 @@ public class OrganizationAuthorizationRule extends AbstractAuthorizationRule<Org
 		// check organization not existing if contains identifier with identifier.system (or extension)
 		// http://highmed.org/fhir/NamingSystem/certificate-thumbprint-hex with same identifier.value
 		// no two organizations can have the same certificate thumb-print
-		
+
 		// TODO Auto-generated method stub
 		return Optional.empty();
 	}
@@ -28,7 +31,7 @@ public class OrganizationAuthorizationRule extends AbstractAuthorizationRule<Org
 	public Optional<String> reasonReadAllowed(User user, Organization existingResource)
 	{
 		// see create, no two organizations can have the same certificate thumb-print
-		
+
 		// TODO Auto-generated method stub
 		return Optional.empty();
 	}

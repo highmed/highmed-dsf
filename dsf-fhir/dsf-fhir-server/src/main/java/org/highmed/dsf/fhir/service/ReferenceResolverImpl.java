@@ -75,7 +75,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 	{
 		Objects.requireNonNull(user, "user");
 		Objects.requireNonNull(reference, "reference");
-		
+
 		return resolveReference(user, new ResourceReference(referenceLocation, reference, referenceTypes));
 	}
 
@@ -84,7 +84,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 	{
 		Objects.requireNonNull(user, "user");
 		Objects.requireNonNull(reference, "reference");
-		
+
 		switch (reference.getType(serverBase))
 		{
 			case LITERAL_INTERNAL:
@@ -102,7 +102,8 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 	}
 
 	@Override
-	public boolean resolveReference(User user, Resource resource, ResourceReference resourceReference, Connection connection)
+	public boolean resolveReference(User user, Resource resource, ResourceReference resourceReference,
+			Connection connection)
 	{
 		return resolveReference(user, resource, null, resourceReference, connection);
 	}
@@ -160,7 +161,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 
 			Optional<UUID> uuid = parameterConverter.toUuid(id.getIdPart());
 
-			if (id.hasVersionIdPart())
+			if (!id.hasVersionIdPart())
 				return uuid.flatMap(i -> exceptionHandler.catchAndLogSqlAndResourceDeletedExceptionAndIfReturn(
 						() -> d.read(i), Optional::empty, Optional::empty));
 			else

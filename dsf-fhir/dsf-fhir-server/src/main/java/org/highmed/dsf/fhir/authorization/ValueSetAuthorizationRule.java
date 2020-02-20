@@ -5,6 +5,8 @@ import java.util.Optional;
 
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.ValueSetDao;
+import org.highmed.dsf.fhir.dao.provider.DaoProvider;
+import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,9 +15,9 @@ public class ValueSetAuthorizationRule extends AbstractAuthorizationRule<ValueSe
 {
 	private static final Logger logger = LoggerFactory.getLogger(ValueSetAuthorizationRule.class);
 
-	public ValueSetAuthorizationRule(ValueSetDao dao)
+	public ValueSetAuthorizationRule(DaoProvider daoProvider, String serverBase, ReferenceResolver referenceResolver)
 	{
-		super(dao);
+		super(ValueSet.class, daoProvider, serverBase, referenceResolver);
 	}
 
 	@Override
@@ -23,12 +25,12 @@ public class ValueSetAuthorizationRule extends AbstractAuthorizationRule<ValueSe
 	{
 		if (isLocalUser(user))
 		{
+			// TODO move check for url, version, authorization tag, to validation layer
 			if (newResource.hasUrl() && newResource.hasVersion() && hasLocalOrRemoteAuthorizationRole(newResource))
 			{
 				try
 				{
-					// TODO move check for url, version, authorization tag, to validation layer
-					Optional<ValueSet> existing = dao.readByUrlAndVersion(newResource.getUrl(),
+					Optional<ValueSet> existing = getDao().readByUrlAndVersion(newResource.getUrl(),
 							newResource.getVersion());
 					if (existing.isEmpty())
 					{

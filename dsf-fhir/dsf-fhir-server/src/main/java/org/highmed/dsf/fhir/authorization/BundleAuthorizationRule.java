@@ -4,13 +4,15 @@ import java.util.Optional;
 
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.BundleDao;
+import org.highmed.dsf.fhir.dao.provider.DaoProvider;
+import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.Bundle;
 
 public class BundleAuthorizationRule extends AbstractAuthorizationRule<Bundle, BundleDao>
 {
-	public BundleAuthorizationRule(BundleDao dao)
+	public BundleAuthorizationRule(DaoProvider daoProvider, String serverBase, ReferenceResolver referenceResolver)
 	{
-		super(dao);
+		super(Bundle.class, daoProvider, serverBase, referenceResolver);
 	}
 
 	@Override

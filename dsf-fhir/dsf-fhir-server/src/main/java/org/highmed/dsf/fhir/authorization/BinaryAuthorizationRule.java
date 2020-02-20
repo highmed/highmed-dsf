@@ -1,50 +1,221 @@
 package org.highmed.dsf.fhir.authorization;
 
+import java.util.EnumSet;
 import java.util.Optional;
 
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.BinaryDao;
+import org.highmed.dsf.fhir.dao.provider.DaoProvider;
+import org.highmed.dsf.fhir.service.ReferenceResolver;
+import org.highmed.dsf.fhir.service.ResourceReference;
+import org.highmed.dsf.fhir.service.ResourceReference.ReferenceType;
+import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.ResearchStudy;
+import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.Task;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BinaryAuthorizationRule extends AbstractAuthorizationRule<Binary, BinaryDao>
 {
-	public BinaryAuthorizationRule(BinaryDao dao)
+	private static final Logger logger = LoggerFactory.getLogger(BinaryAuthorizationRule.class);
+
+	public BinaryAuthorizationRule(DaoProvider daoProvider, String serverBase, ReferenceResolver referenceResolver)
 	{
-		super(dao);
+		super(Binary.class, daoProvider, serverBase, referenceResolver);
 	}
 
 	@Override
 	public Optional<String> reasonCreateAllowed(User user, Binary newResource)
 	{
-		// TODO Auto-generated method stub
-		return Optional.empty();
+		if (isLocalUser(user))
+		{
+			if (newResource.hasData() && newResource.hasContentType() && newResource.hasSecurityContext())
+			{
+				ResourceReference reference = new ResourceReference("Binary.SecurityContext",
+						newResource.getSecurityContext(), ActivityDefinition.class, Organization.class,
+						ResearchStudy.class, Task.class);
+				if (EnumSet.of(ReferenceType.LITERAL_INTERNAL, ReferenceType.LOGICAL)
+						.contains(reference.getType(serverBase)))
+				{
+					Optional<Resource> securityContext = referenceResolver.resolveReference(user, reference);
+					if (securityContext.isPresent())
+					{
+						logger.info("Create of Binary authorized for local user '{}', Binary.SecurityContext resolved",
+								user.getName());
+						return Optional.of("local user, Binary.SecurityContext resolved");
+					}
+					else
+					{
+						logger.warn("Create of Binary unauthorized, securityContext reference could not be resolved");
+						return Optional.empty();
+					}
+				}
+				else
+				{
+					logger.warn(
+							"Create of Binary unauthorized, securityContext not a literal internal or logical reference");
+					return Optional.empty();
+				}
+			}
+			else
+			{
+				logger.warn("Create of Binary unauthorized, missing data or contentType or securityContext");
+				return Optional.empty();
+			}
+		}
+		else
+		{
+			logger.warn("Create of Binary unauthorized, not a local user");
+			return Optional.empty();
+		}
 	}
 
 	@Override
 	public Optional<String> reasonReadAllowed(User user, Binary existingResource)
 	{
-		// TODO Auto-generated method stub
-		return Optional.empty();
+		ResourceReference reference = new ResourceReference("Binary.SecurityContext",
+				existingResource.getSecurityContext(), ActivityDefinition.class, Organization.class,
+				ResearchStudy.class, Task.class);
+		if (EnumSet.of(ReferenceType.LITERAL_INTERNAL, ReferenceType.LOGICAL).contains(reference.getType(serverBase)))
+		{
+			Optional<Resource> securityContext = referenceResolver.resolveReference(user, reference);
+			if (securityContext.isPresent())
+			{
+				logger.info(
+						"Read of Binary authorized, Binary.SecurityContext reference could be resolved for user '{}'",
+						user.getName());
+				return Optional.of("Binary.SecurityContext resolved");
+			}
+			else
+			{
+				logger.warn(
+						"Read of Binary unauthorized, securityContext reference could not be resolved for user '{}'",
+						user.getName());
+				return Optional.empty();
+			}
+		}
+		else
+		{
+			logger.warn("Read of Binary unauthorized, securityContext not a literal internal or logical reference");
+			return Optional.empty();
+		}
 	}
 
 	@Override
 	public Optional<String> reasonUpdateAllowed(User user, Binary oldResource, Binary newResource)
 	{
-		// TODO Auto-generated method stub
-		return Optional.empty();
+		if (isLocalUser(user))
+		{
+			if (newResource.hasData() && newResource.hasContentType() && newResource.hasSecurityContext())
+			{
+				ResourceReference oldReference = new ResourceReference("Binary.SecurityContext",
+						oldResource.getSecurityContext(), ActivityDefinition.class, Organization.class,
+						ResearchStudy.class, Task.class);
+				ResourceReference newReference = new ResourceReference("Binary.SecurityContext",
+						newResource.getSecurityContext(), ActivityDefinition.class, Organization.class,
+						ResearchStudy.class, Task.class);
+				if (EnumSet.of(ReferenceType.LITERAL_INTERNAL, ReferenceType.LOGICAL)
+						.contains(oldReference.getType(serverBase))
+						&& EnumSet.of(ReferenceType.LITERAL_INTERNAL, ReferenceType.LOGICAL)
+								.contains(newReference.getType(serverBase)))
+				{
+					Optional<Resource> oldSecurityContext = referenceResolver.resolveReference(user, oldReference);
+					Optional<Resource> newSecurityContext = referenceResolver.resolveReference(user, newReference);
+					if (oldSecurityContext.isPresent() && newSecurityContext.isPresent())
+					{
+						logger.info(
+								"Update of Binary authorized for local user '{}', Binary.SecurityContext could be resolved (old and new)",
+								user.getName());
+						return Optional.of("local user, Binary.SecurityContext resolved");
+					}
+					else
+					{
+						logger.warn(
+								"Update of Binary unauthorized, securityContext reference could not be resolved (old or new)");
+						return Optional.empty();
+					}
+				}
+				else
+				{
+					logger.warn(
+							"Update of Binary unauthorized, securityContext not a literal internal or logical reference (old or new)");
+					return Optional.empty();
+				}
+			}
+			else
+			{
+				logger.warn("Update of Binary unauthorized, missing data or contentType or securityContext");
+				return Optional.empty();
+			}
+		}
+		else
+		{
+			logger.warn("Update of Binary unauthorized, not a local user");
+			return Optional.empty();
+		}
 	}
 
 	@Override
 	public Optional<String> reasonDeleteAllowed(User user, Binary oldResource)
 	{
-		// TODO Auto-generated method stub
-		return Optional.empty();
+		if (isLocalUser(user))
+		{
+			if (oldResource.hasData() && oldResource.hasContentType() && oldResource.hasSecurityContext())
+			{
+				ResourceReference reference = new ResourceReference("Binary.SecurityContext",
+						oldResource.getSecurityContext(), ActivityDefinition.class, Organization.class,
+						ResearchStudy.class, Task.class);
+				if (EnumSet.of(ReferenceType.LITERAL_INTERNAL, ReferenceType.LOGICAL)
+						.contains(reference.getType(serverBase)))
+				{
+					Optional<Resource> securityContext = referenceResolver.resolveReference(user, reference);
+					if (securityContext.isPresent())
+					{
+						logger.info("Delete of Binary authorized for local user '{}', Binary.SecurityContext resolved",
+								user.getName());
+						return Optional.of("local user, Binary.SecurityContext resolved");
+					}
+					else
+					{
+						logger.warn("Delete of Binary unauthorized, securityContext reference could not be resolved");
+						return Optional.empty();
+					}
+				}
+				else
+				{
+					logger.warn(
+							"Delete of Binary unauthorized, securityContext not a literal internal or logical reference");
+					return Optional.empty();
+				}
+			}
+			else
+			{
+				logger.warn("Delete of Binary unauthorized, missing data or contentType or securityContext");
+				return Optional.empty();
+			}
+		}
+		else
+		{
+			logger.warn("Delete of Binary unauthorized, not a local user");
+			return Optional.empty();
+		}
 	}
 
 	@Override
 	public Optional<String> reasonSearchAllowed(User user)
 	{
-		// TODO Auto-generated method stub
-		return Optional.empty();
+		if (isLocalUser(user))
+		{
+			logger.info("Search of Binary authorized for {} user '{}'", user.getRole(), user.getName());
+			return Optional.of("Allowed for local users");
+		}
+		else
+		{
+			logger.warn("Search of Binary unauthorized, not a local user");
+			return Optional.empty();
+		}
 	}
 }

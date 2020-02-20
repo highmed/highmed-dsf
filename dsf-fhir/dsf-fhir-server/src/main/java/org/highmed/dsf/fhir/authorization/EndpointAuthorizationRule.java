@@ -4,13 +4,15 @@ import java.util.Optional;
 
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.EndpointDao;
+import org.highmed.dsf.fhir.dao.provider.DaoProvider;
+import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.Endpoint;
 
 public class EndpointAuthorizationRule extends AbstractAuthorizationRule<Endpoint, EndpointDao>
 {
-	public EndpointAuthorizationRule(EndpointDao dao)
+	public EndpointAuthorizationRule(DaoProvider daoProvider, String serverBase, ReferenceResolver referenceResolver)
 	{
-		super(dao);
+		super(Endpoint.class, daoProvider, serverBase, referenceResolver);
 	}
 
 	@Override

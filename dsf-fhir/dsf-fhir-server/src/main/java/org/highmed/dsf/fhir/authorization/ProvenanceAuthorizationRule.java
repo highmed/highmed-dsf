@@ -4,13 +4,15 @@ import java.util.Optional;
 
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.ProvenanceDao;
+import org.highmed.dsf.fhir.dao.provider.DaoProvider;
+import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.Provenance;
 
 public class ProvenanceAuthorizationRule extends AbstractAuthorizationRule<Provenance, ProvenanceDao>
 {
-	public ProvenanceAuthorizationRule(ProvenanceDao dao)
+	public ProvenanceAuthorizationRule(DaoProvider daoProvider, String serverBase, ReferenceResolver referenceResolver)
 	{
-		super(dao);
+		super(Provenance.class, daoProvider, serverBase, referenceResolver);
 	}
 
 	@Override

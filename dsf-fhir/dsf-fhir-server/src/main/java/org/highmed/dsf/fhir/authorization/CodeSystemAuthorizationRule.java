@@ -5,6 +5,8 @@ import java.util.Optional;
 
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.CodeSystemDao;
+import org.highmed.dsf.fhir.dao.provider.DaoProvider;
+import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,9 +15,9 @@ public class CodeSystemAuthorizationRule extends AbstractAuthorizationRule<CodeS
 {
 	private static final Logger logger = LoggerFactory.getLogger(CodeSystemAuthorizationRule.class);
 
-	public CodeSystemAuthorizationRule(CodeSystemDao dao)
+	public CodeSystemAuthorizationRule(DaoProvider daoProvider, String serverBase, ReferenceResolver referenceResolver)
 	{
-		super(dao);
+		super(CodeSystem.class, daoProvider, serverBase, referenceResolver);
 	}
 
 	@Override
@@ -23,12 +25,12 @@ public class CodeSystemAuthorizationRule extends AbstractAuthorizationRule<CodeS
 	{
 		if (isLocalUser(user))
 		{
+			// TODO move check for url, version, authorization tag, to validation layer
 			if (newResource.hasUrl() && newResource.hasVersion() && hasLocalOrRemoteAuthorizationRole(newResource))
 			{
 				try
 				{
-					// TODO move check for url, version, authorization tag, to validation layer
-					Optional<CodeSystem> existing = dao.readByUrlAndVersion(newResource.getUrl(),
+					Optional<CodeSystem> existing = getDao().readByUrlAndVersion(newResource.getUrl(),
 							newResource.getVersion());
 					if (existing.isEmpty())
 					{
