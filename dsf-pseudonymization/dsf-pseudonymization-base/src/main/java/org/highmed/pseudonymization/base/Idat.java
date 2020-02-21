@@ -3,34 +3,34 @@ package org.highmed.pseudonymization.base;
 public interface Idat
 {
 
-	public String getFirstName();
+	String getFirstName();
 
 
-	public String getLastName();
+	String getLastName();
 
 
-	public String getSex();
+	String getSex();
 
 
-	public String getBirthday();
+	String getBirthday();
 
 
-	public String getZipCode();
+	String getZipCode();
 
 
-	public String getCity();
+	String getCity();
 
 
-	public String getCountry();
+	String getCountry();
 
 
-	public String getInsuranceNr();
+	String getInsuranceNr();
 
 
-	public String getLocalPsn();
+	String getLocalPsn();
 
 
-	public String getStreet();
+	String getStreet();
 
 
 }
