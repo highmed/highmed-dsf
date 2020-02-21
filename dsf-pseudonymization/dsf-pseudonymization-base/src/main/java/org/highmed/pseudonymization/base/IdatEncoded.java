@@ -2,6 +2,11 @@ package org.highmed.pseudonymization.base;
 
 import org.highmed.pseudonymization.bloomfilter.RecordBloomFilter;
 
+/**
+ * Bloom-Filter encoded version of a subject's IDAT
+ * Containing a {@link TtpId} with their encrypted Local ID and Origin
+ * as well as a Record-Level Bloom Filter of their IDAT for linkage.
+ */
 public interface IdatEncoded
 {
 
