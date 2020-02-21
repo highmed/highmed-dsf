@@ -18,7 +18,7 @@ public interface MpiLookup
 	 *
 	 * @param ehrID A subject's ehrID String as returned in OpenEHR
 	 *              result sets
-	 * @return A filled {@link IdatContainer}
+	 * @return A filled {@link Idat}
 	 */
 	public Idat fetchIdat(String ehrID);
 }
