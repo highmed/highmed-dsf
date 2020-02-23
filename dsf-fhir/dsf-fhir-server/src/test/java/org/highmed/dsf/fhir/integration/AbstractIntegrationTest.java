@@ -103,6 +103,7 @@ public abstract class AbstractIntegrationTest
 
 	private static JettyServer fhirServer;
 	private static FhirWebserviceClient webserviceClient;
+	private static FhirWebserviceClient externalWebserviceClient;
 
 	@BeforeClass
 	public static void beforeClass() throws Exception
@@ -111,12 +112,18 @@ public abstract class AbstractIntegrationTest
 		template.createSchema();
 
 		logger.info("Creating Bundle ...");
-		createTestBundle(certificates.getClientCertificate().getCertificate());
+		createTestBundle(certificates.getClientCertificate().getCertificate(),
+				certificates.getExternalClientCertificate().getCertificate());
 
 		logger.info("Creating webservice client ...");
 		webserviceClient = createWebserviceClient(certificates.getClientCertificate().getTrustStore(),
 				certificates.getClientCertificate().getKeyStore(),
 				certificates.getClientCertificate().getKeyStorePassword(), fhirContext, extractor);
+
+		logger.info("Creating external webservice client ...");
+		externalWebserviceClient = createWebserviceClient(certificates.getExternalClientCertificate().getTrustStore(),
+				certificates.getExternalClientCertificate().getKeyStore(),
+				certificates.getExternalClientCertificate().getKeyStorePassword(), fhirContext, extractor);
 
 		logger.info("Starting FHIR Server ...");
 		fhirServer = startFhirServer();
@@ -125,8 +132,8 @@ public abstract class AbstractIntegrationTest
 	private static FhirWebserviceClient createWebserviceClient(KeyStore trustStore, KeyStore keyStore,
 			String keyStorePassword, FhirContext fhirContext, ReferenceExtractor referenceExtractor)
 	{
-		return new FhirWebserviceClientJersey(BASE_URL, trustStore, keyStore, keyStorePassword, null, null, null, 500, 5000,
-				null, fhirContext, referenceExtractor);
+		return new FhirWebserviceClientJersey(BASE_URL, trustStore, keyStore, keyStorePassword, null, null, null, 500,
+				5000, null, fhirContext, referenceExtractor);
 	}
 
 	private static WebsocketClient createWebsocketClient(KeyStore trustStore, KeyStore keyStore,
@@ -247,7 +254,7 @@ public abstract class AbstractIntegrationTest
 		return parser;
 	}
 
-	private static void createTestBundle(X509Certificate certificate)
+	private static void createTestBundle(X509Certificate certificate, X509Certificate externalCertificate)
 	{
 		Path testBundleTemplateFile = Paths.get("src/test/resources/integration/test-bundle.xml");
 
@@ -259,6 +266,13 @@ public abstract class AbstractIntegrationTest
 
 		String clientCertHashHex = calculateSha512CertificateThumbprintHex(certificate);
 		thumbprintExtension.setValue(new StringType(clientCertHashHex));
+
+		Organization externalOrganization = (Organization) testBundle.getEntry().get(2).getResource();
+		Extension externalThumbprintExtension = externalOrganization
+				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
+
+		String externalClientCertHashHex = calculateSha512CertificateThumbprintHex(externalCertificate);
+		externalThumbprintExtension.setValue(new StringType(externalClientCertHashHex));
 
 		removeReferenceEmbeddedResources(testBundle);
 
@@ -352,6 +366,11 @@ public abstract class AbstractIntegrationTest
 	protected static FhirWebserviceClient getWebserviceClient()
 	{
 		return webserviceClient;
+	}
+
+	protected static FhirWebserviceClient getExternalWebserviceClient()
+	{
+		return externalWebserviceClient;
 	}
 
 	protected static WebsocketClient getWebsocketClient()

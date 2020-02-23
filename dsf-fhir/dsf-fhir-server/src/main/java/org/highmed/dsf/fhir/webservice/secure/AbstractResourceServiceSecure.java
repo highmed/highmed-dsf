@@ -364,7 +364,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		{
 			R oldResource = dbResource.get();
 
-			Optional<String> reasonDeleteAllowed = reasonDeleteAllowed(oldResource);
+			Optional<String> reasonDeleteAllowed = authorizationRule.reasonDeleteAllowed(getCurrentUser(), oldResource);
 			if (reasonDeleteAllowed.isEmpty())
 			{
 				audit.info("Delete of resource {} denied for user '{}'", oldResource.getIdElement().getValue(),
@@ -384,17 +384,6 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 					getCurrentUser().getName());
 			return responseGenerator.notFound(id, resourceTypeName);
 		}
-	}
-
-	/**
-	 * Override this method for non default behavior. Default: Not allowed.
-	 * 
-	 * @param oldResource
-	 * @return Reason as String in {@link Optional#of(Object)} if delete allowed
-	 */
-	protected Optional<String> reasonDeleteAllowed(R oldResource)
-	{
-		return Optional.empty();
 	}
 
 	@Override

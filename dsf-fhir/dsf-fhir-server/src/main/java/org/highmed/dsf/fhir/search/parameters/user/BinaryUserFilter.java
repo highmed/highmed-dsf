@@ -6,13 +6,9 @@ import java.sql.SQLException;
 import org.highmed.dsf.fhir.OrganizationType;
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.authentication.UserRole;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class BinaryUserFilter extends AbstractUserFilter
 {
-	private static final Logger logger = LoggerFactory.getLogger(BinaryUserFilter.class);
-
 	public BinaryUserFilter(OrganizationType organizationType, User user)
 	{
 		super(organizationType, user);
@@ -24,21 +20,24 @@ public class BinaryUserFilter extends AbstractUserFilter
 		if (UserRole.LOCAL.equals(user.getRole()))
 			return "";
 		else
-		{
-			logger.warn("Filter query for non local user -> 'false'");
-			return "false";
-		}
+			return "(binary_json->'securityContext'->>'reference' = ? OR binary_json->'securityContext'->>'reference' = ?)";
 	}
 
 	@Override
 	public int getSqlParameterCount()
 	{
-		return 0;
+		return UserRole.LOCAL.equals(user.getRole()) ? 0 : 2;
 	}
 
 	@Override
 	public void modifyStatement(int parameterIndex, PreparedStatement statement) throws SQLException
 	{
-		// nothing to do
+		if (!UserRole.LOCAL.equals(user.getRole()))
+		{
+			if (parameterIndex == 1)
+				statement.setString(1, user.getOrganization().getIdElement().getValue());
+			else if (parameterIndex == 2)
+				statement.setString(2, user.getOrganization().getIdElement().toVersionless().getValue());
+		}
 	}
 }

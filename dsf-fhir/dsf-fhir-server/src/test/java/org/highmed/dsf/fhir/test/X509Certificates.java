@@ -75,11 +75,14 @@ public class X509Certificates extends ExternalResource
 	private final X509Certificates parent;
 
 	private ClientCertificate clientCertificate;
-	private Path caCertificateFile = Paths.get("target", UUID.randomUUID().toString() + ".pem");
-	private Path serverCertificateFile = Paths.get("target", UUID.randomUUID().toString() + ".p12");
-	private Path clientCertificateFile = Paths.get("target", UUID.randomUUID().toString() + ".p12");
+	private ClientCertificate externalClientCertificate;
 
-	private List<Path> filesToDelete = Arrays.asList(caCertificateFile, serverCertificateFile, clientCertificateFile);
+	private Path caCertificateFile;
+	private Path serverCertificateFile;
+	private Path clientCertificateFile;
+	private Path externalClientCertificateFile;
+
+	private List<Path> filesToDelete;
 
 	public X509Certificates()
 	{
@@ -124,6 +127,14 @@ public class X509Certificates extends ExternalResource
 			return clientCertificate;
 	}
 
+	public ClientCertificate getExternalClientCertificate()
+	{
+		if (parentBeforeRan())
+			return parent.getExternalClientCertificate();
+		else
+			return externalClientCertificate;
+	}
+
 	public Path getCaCertificateFile()
 	{
 		if (parentBeforeRan())
@@ -148,14 +159,23 @@ public class X509Certificates extends ExternalResource
 		return clientCertificateFile;
 	}
 
+	public Path getExternalClientCertificateFile()
+	{
+		if (parentBeforeRan())
+			return parent.getExternalClientCertificateFile();
+
+		return externalClientCertificateFile;
+	}
+
 	private void createX509Certificates() throws InvalidKeyException, NoSuchAlgorithmException, KeyStoreException,
 			CertificateException, OperatorCreationException, IllegalStateException, IOException, InvalidKeySpecException
 	{
 		logger.info("Creating certificates ...");
 
-		caCertificateFile = Paths.get("target", UUID.randomUUID().toString() + ".pem");
-		serverCertificateFile = Paths.get("target", UUID.randomUUID().toString() + ".p12");
-		clientCertificateFile = Paths.get("target", UUID.randomUUID().toString() + ".p12");
+		Path caCertificateFile = Paths.get("target", UUID.randomUUID().toString() + ".pem");
+		Path serverCertificateFile = Paths.get("target", UUID.randomUUID().toString() + ".p12");
+		Path clientCertificateFile = Paths.get("target", UUID.randomUUID().toString() + ".p12");
+		Path externalClientCertificateFile = Paths.get("target", UUID.randomUUID().toString() + ".p12");
 
 		CertificateAuthority.registerBouncyCastleProvider();
 
@@ -165,6 +185,7 @@ public class X509Certificates extends ExternalResource
 
 		PemIo.writeX509CertificateToPem(caCertificate, caCertificateFile);
 
+		// -- server
 		X500Name serverSubject = CertificationRequestBuilder.createSubject("DE", null, null, null, null, "test-server");
 		KeyPair serverRsaKeyPair = CertificationRequestBuilder.createRsaKeyPair4096Bit();
 		JcaPKCS10CertificationRequest serverRequest = CertificationRequestBuilder
@@ -174,7 +195,9 @@ public class X509Certificates extends ExternalResource
 
 		CertificateWriter.toPkcs12(serverCertificateFile, serverRsaKeyPair.getPrivate(), "password", serverCertificate,
 				caCertificate, "test-server");
+		// server --
 
+		// -- client
 		X500Name clientSubject = CertificationRequestBuilder.createSubject("DE", null, null, null, null, "test-client");
 		KeyPair clientRsaKeyPair = CertificationRequestBuilder.createRsaKeyPair4096Bit();
 		JcaPKCS10CertificationRequest clientRequest = CertificationRequestBuilder
@@ -188,12 +211,39 @@ public class X509Certificates extends ExternalResource
 
 		CertificateWriter.toPkcs12(clientCertificateFile, clientRsaKeyPair.getPrivate(), "password", clientCertificate,
 				caCertificate, "client");
+		// client --
 
-		KeyStore clientTrustStore = CertificateHelper.extractTrust(clientKeyStore);
+		// -- external client
+		X500Name externalClientSubject = CertificationRequestBuilder.createSubject("DE", null, null, null, null,
+				"external-client");
+		KeyPair externalClientRsaKeyPair = CertificationRequestBuilder.createRsaKeyPair4096Bit();
+		JcaPKCS10CertificationRequest externalClientRequest = CertificationRequestBuilder
+				.createClientCertificationRequest(externalClientSubject, externalClientRsaKeyPair);
 
-		this.clientCertificate = new ClientCertificate(clientCertificate, clientTrustStore, clientKeyStore,
-				clientKeyStorePassword);
-		this.filesToDelete = Arrays.asList(caCertificateFile, serverCertificateFile, clientCertificateFile);
+		X509Certificate externalClientCertificate = ca.signWebClientCertificate(externalClientRequest);
+
+		String externalClientKeyStorePassword = "password";
+		KeyStore externalClientKeyStore = CertificateHelper.toPkcs12KeyStore(externalClientRsaKeyPair.getPrivate(),
+				new Certificate[] { externalClientCertificate, caCertificate }, "external-client",
+				externalClientKeyStorePassword);
+
+		CertificateWriter.toPkcs12(externalClientCertificateFile, externalClientRsaKeyPair.getPrivate(), "password",
+				externalClientCertificate, caCertificate, "client");
+		// external client --
+
+		this.clientCertificate = new ClientCertificate(clientCertificate,
+				CertificateHelper.extractTrust(clientKeyStore), clientKeyStore, clientKeyStorePassword);
+		this.externalClientCertificate = new ClientCertificate(externalClientCertificate,
+				CertificateHelper.extractTrust(externalClientKeyStore), externalClientKeyStore,
+				externalClientKeyStorePassword);
+
+		this.caCertificateFile = caCertificateFile;
+		this.serverCertificateFile = serverCertificateFile;
+		this.clientCertificateFile = clientCertificateFile;
+		this.externalClientCertificateFile = externalClientCertificateFile;
+
+		this.filesToDelete = Arrays.asList(caCertificateFile, serverCertificateFile, clientCertificateFile,
+				externalClientCertificateFile);
 	}
 
 	private void deleteX509Certificates()
