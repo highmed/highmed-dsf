@@ -7,31 +7,92 @@ import static org.junit.Assert.assertTrue;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.UUID;
+
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response.Status;
 
 import org.highmed.dsf.fhir.dao.BinaryDao;
-import org.highmed.dsf.fhir.dao.ResearchStudyDao;
+import org.highmed.dsf.fhir.dao.OrganizationDao;
+import org.highmed.dsf.fhir.search.PartialResult;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.ResearchStudy;
 import org.junit.Test;
 
 public class BinaryIntegrationTest extends AbstractIntegrationTest
 {
 	@Test
-	public void testCreate() throws Exception
+	public void testReadAllowed() throws Exception
 	{
-		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
-		ResearchStudy createdRS = researchStudyDao.create(new ResearchStudy());
-		
+		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
+		PartialResult<Organization> result = orgDao
+				.search(orgDao.createSearchQueryWithoutUserFilter(1, 1).configureParameters(Collections.emptyMap()));
+		assertNotNull(result);
+		assertEquals(1, result.getOverallCount());
+		assertNotNull(result.getPartialResult());
+		assertEquals(1, result.getPartialResult().size());
+		assertNotNull(result.getPartialResult().get(0));
+
+		Organization org = result.getPartialResult().get(0);
+
 		final String contentType = "text/plain";
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data);
-		binary.setSecurityContext(new Reference(createdRS.getIdElement().toVersionless()));
+		binary.setSecurityContext(new Reference(org.getIdElement().toVersionless()));
+
+		BinaryDao binDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
+		Binary created = binDao.create(binary);
+
+		getWebserviceClient().read(Binary.class, created.getIdElement().getIdPart());
+	}
+
+	@Test(expected = WebApplicationException.class)
+	public void testReadNotAllowed() throws Exception
+	{
+		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
+		Organization createdOrg = orgDao.create(new Organization());
+
+		final String contentType = "text/plain";
+		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
+
+		Binary binary = new Binary();
+		binary.setContentType(contentType);
+		binary.setData(data);
+		binary.setSecurityContext(new Reference(createdOrg.getIdElement().toVersionless()));
+
+		BinaryDao binDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
+		Binary created = binDao.create(binary);
+
+		try
+		{
+			getWebserviceClient().read(Binary.class, created.getIdElement().getIdPart());
+		}
+		catch (WebApplicationException e)
+		{
+			assertEquals(Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
+			throw e;
+		}
+	}
+
+	@Test
+	public void testCreate() throws Exception
+	{
+		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
+		Organization createdOrg = orgDao.create(new Organization());
+
+		final String contentType = "text/plain";
+		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
+
+		Binary binary = new Binary();
+		binary.setContentType(contentType);
+		binary.setData(data);
+		binary.setSecurityContext(new Reference(createdOrg.getIdElement().toVersionless()));
 
 		Binary created = getWebserviceClient().create(binary);
 
@@ -43,17 +104,39 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(created.getContentType());
 		assertEquals(contentType, created.getContentType());
 		assertTrue(Arrays.equals(data, created.getData()));
-		
+
 		assertNotNull(created.getSecurityContext());
-		assertEquals(createdRS.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
+		assertEquals(createdOrg.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
+	}
+
+	@Test(expected = WebApplicationException.class)
+	public void testCreateSecurityContextOrgNotExisting() throws Exception
+	{
+		final String contentType = "text/plain";
+		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
+
+		Binary binary = new Binary();
+		binary.setContentType(contentType);
+		binary.setData(data);
+		binary.setSecurityContext(new Reference("Organization/" + UUID.randomUUID().toString()));
+
+		try
+		{
+			getWebserviceClient().create(binary);
+		}
+		catch (WebApplicationException e)
+		{
+			assertEquals(Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
+			throw e;
+		}
 	}
 
 	@Test
 	public void testUpdate() throws Exception
 	{
-		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
-		ResearchStudy createdRS = researchStudyDao.create(new ResearchStudy());
-		
+		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
+		Organization createdOrg = orgDao.create(new Organization());
+
 		final String contentType = "text/plain";
 		final byte[] data1 = "Hello World".getBytes(StandardCharsets.UTF_8);
 		final byte[] data2 = "Hello World and goodbye".getBytes(StandardCharsets.UTF_8);
@@ -61,7 +144,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data1);
-		binary.setSecurityContext(new Reference(createdRS.getIdElement().toVersionless()));
+		binary.setSecurityContext(new Reference(createdOrg.getIdElement().toVersionless()));
 
 		BinaryDao binaryDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
 		Binary created = binaryDao.create(binary);
@@ -74,15 +157,15 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(created.getContentType());
 		assertEquals(contentType, created.getContentType());
 		assertTrue(Arrays.equals(data1, created.getData()));
-		
+
 		assertNotNull(created.getSecurityContext());
-		assertEquals(createdRS.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
+		assertEquals(createdOrg.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
 
 		created.setData(data2);
 
 		assertNotNull(created.getSecurityContext());
-		assertEquals(createdRS.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
-		
+		assertEquals(createdOrg.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
+
 		Binary updated = getWebserviceClient().update(created);
 
 		assertNotNull(updated);

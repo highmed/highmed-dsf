@@ -7,8 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
@@ -68,6 +70,8 @@ import org.highmed.dsf.fhir.service.ResourceReference;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StructureDefinition;
@@ -128,6 +132,24 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 				new ValueSetXmlFhirAdapter(fhirContext));
 	}
 
+	private WebApplicationException handleError(Response response)
+	{
+		try
+		{
+			OperationOutcome outcome = response.readEntity(OperationOutcome.class);
+			String message = toString(outcome);
+
+			logger.warn("OperationOutcome: {}", message);
+			return new WebApplicationException(message, response.getStatus());
+		}
+		catch (ProcessingException e)
+		{
+			response.close();
+			logger.warn("{}: {}", e.getClass().getName(), e.getMessage());
+			return new WebApplicationException(e, response.getStatus());
+		}
+	}
+
 	@Override
 	public <R extends Resource> R create(R resource)
 	{
@@ -149,7 +171,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 			return read;
 		}
 		else
-			throw new WebApplicationException(response);
+			throw handleError(response);
 	}
 
 	@Override
@@ -175,7 +197,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 			return read;
 		}
 		else
-			throw new WebApplicationException(response);
+			throw handleError(response);
 	}
 
 	@Override
@@ -203,7 +225,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 			return read;
 		}
 		else
-			throw new WebApplicationException(response);
+			throw handleError(response);
 	}
 
 	@Override
@@ -238,7 +260,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 			return read;
 		}
 		else
-			throw new WebApplicationException(response);
+			throw handleError(response);
 	}
 
 	@Override
@@ -257,7 +279,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 
 		if (Status.OK.getStatusCode() != response.getStatus()
 				&& Status.NO_CONTENT.getStatusCode() != response.getStatus())
-			throw new WebApplicationException(response);
+			throw handleError(response);
 	}
 
 	@Override
@@ -282,7 +304,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 
 		if (Status.OK.getStatusCode() != response.getStatus()
 				&& Status.NO_CONTENT.getStatusCode() != response.getStatus())
-			throw new WebApplicationException(response);
+			throw handleError(response);
 	}
 
 	@Override
@@ -297,7 +319,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		if (Status.OK.getStatusCode() == response.getStatus())
 			return response.readEntity(CapabilityStatement.class);
 		else
-			throw new WebApplicationException(response);
+			throw handleError(response);
 	}
 
 	@Override
@@ -317,7 +339,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		if (Status.OK.getStatusCode() == response.getStatus())
 			return response.readEntity(StructureDefinition.class);
 		else
-			throw new WebApplicationException(response);
+			throw handleError(response);
 	}
 
 	@Override
@@ -337,7 +359,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		if (Status.OK.getStatusCode() == response.getStatus())
 			return response.readEntity(StructureDefinition.class);
 		else
-			throw new WebApplicationException(response);
+			throw handleError(response);
 	}
 
 	@Override
@@ -355,7 +377,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 			// TODO remove workaround if HAPI bug fixed
 			return fixBundle(response.readEntity(resourceType));
 		else
-			throw new WebApplicationException(response);
+			throw handleError(response);
 	}
 
 	@Override
@@ -374,7 +396,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 			// TODO remove workaround if HAPI bug fixed
 			return fixBundle(response.readEntity(resourceType));
 		else
-			throw new WebApplicationException(response);
+			throw handleError(response);
 	}
 
 	@Override
@@ -394,7 +416,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 			// TODO remove workaround if HAPI bug fixed
 			return fixBundle((Resource) response.readEntity(resourceTypeByNames.get(resourceTypeName)));
 		else
-			throw new WebApplicationException(response);
+			throw handleError(response);
 
 	}
 
@@ -416,7 +438,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 			// TODO remove workaround if HAPI bug fixed
 			return fixBundle((Resource) response.readEntity(resourceTypeByNames.get(resourceTypeName)));
 		else
-			throw new WebApplicationException(response);
+			throw handleError(response);
 	}
 
 	@Override
@@ -435,7 +457,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		else if (Status.NOT_FOUND.getStatusCode() == response.getStatus())
 			return false;
 		else
-			throw new WebApplicationException(response);
+			throw handleError(response);
 	}
 
 	@Override
@@ -461,7 +483,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		else if (Status.NOT_FOUND.getStatusCode() == response.getStatus())
 			return false;
 		else
-			throw new WebApplicationException(response);
+			throw handleError(response);
 	}
 
 	// FIXME bug in HAPI framework
@@ -499,7 +521,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		else if (Status.NOT_FOUND.getStatusCode() == response.getStatus())
 			return false;
 		else
-			throw new WebApplicationException(response);
+			throw handleError(response);
 	}
 
 	@Override
@@ -521,7 +543,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		if (Status.OK.getStatusCode() == response.getStatus())
 			return response.readEntity(Bundle.class);
 		else
-			throw new WebApplicationException(response);
+			throw handleError(response);
 	}
 
 	// private <R extends DomainResource> List<R> bundleToList(Class<R> resourceType, Bundle bundle)
@@ -547,6 +569,16 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		if (Status.OK.getStatusCode() == response.getStatus())
 			return response.readEntity(Bundle.class);
 		else
-			throw new WebApplicationException(response);
+			throw handleError(response);
+	}
+
+	private String toString(OperationOutcome outcome)
+	{
+		return outcome.getIssue().stream().map(i -> toString(i)).collect(Collectors.joining("\n"));
+	}
+
+	private String toString(OperationOutcomeIssueComponent issue)
+	{
+		return issue == null ? "" : issue.getSeverity() + " " + issue.getCode() + " " + issue.getDiagnostics();
 	}
 }

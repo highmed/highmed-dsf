@@ -7,9 +7,13 @@ import org.highmed.dsf.fhir.dao.EndpointDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.Endpoint;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class EndpointAuthorizationRule extends AbstractAuthorizationRule<Endpoint, EndpointDao>
 {
+	private static final Logger logger = LoggerFactory.getLogger(EndpointAuthorizationRule.class);
+
 	public EndpointAuthorizationRule(DaoProvider daoProvider, String serverBase, ReferenceResolver referenceResolver)
 	{
 		super(Endpoint.class, daoProvider, serverBase, referenceResolver);
@@ -48,7 +52,8 @@ public class EndpointAuthorizationRule extends AbstractAuthorizationRule<Endpoin
 	@Override
 	public Optional<String> reasonSearchAllowed(User user)
 	{
-		// TODO Auto-generated method stub
-		return Optional.empty();
+		logger.info("Search of Endpoint authorized for {} user '{}', will be fitered by user role", user.getRole(),
+				user.getName());
+		return Optional.of("Allowed for all, filtered by user role");
 	}
 }

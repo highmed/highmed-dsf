@@ -9,12 +9,9 @@ import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.highmed.dsf.fhir.service.ResourceReference;
 import org.highmed.dsf.fhir.service.ResourceReference.ReferenceType;
-import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,8 +32,7 @@ public class BinaryAuthorizationRule extends AbstractAuthorizationRule<Binary, B
 			if (newResource.hasData() && newResource.hasContentType() && newResource.hasSecurityContext())
 			{
 				ResourceReference reference = new ResourceReference("Binary.SecurityContext",
-						newResource.getSecurityContext(), ActivityDefinition.class, Organization.class,
-						ResearchStudy.class, Task.class);
+						newResource.getSecurityContext(), Organization.class);
 				if (EnumSet.of(ReferenceType.LITERAL_INTERNAL, ReferenceType.LOGICAL)
 						.contains(reference.getType(serverBase)))
 				{
@@ -77,24 +73,24 @@ public class BinaryAuthorizationRule extends AbstractAuthorizationRule<Binary, B
 	public Optional<String> reasonReadAllowed(User user, Binary existingResource)
 	{
 		ResourceReference reference = new ResourceReference("Binary.SecurityContext",
-				existingResource.getSecurityContext(), ActivityDefinition.class, Organization.class,
-				ResearchStudy.class, Task.class);
+				existingResource.getSecurityContext(), Organization.class);
 		if (EnumSet.of(ReferenceType.LITERAL_INTERNAL, ReferenceType.LOGICAL).contains(reference.getType(serverBase)))
 		{
-			Optional<Resource> securityContext = referenceResolver.resolveReference(user, reference);
-			if (securityContext.isPresent())
+			if (isCurrentUserPartOfReferencedOrganization(user, "Binary.SecurityContext",
+					existingResource.getSecurityContext()))
 			{
 				logger.info(
-						"Read of Binary authorized, Binary.SecurityContext reference could be resolved for user '{}'",
+						"Read of Binary authorized, Binary.SecurityContext reference could be resolved and user '{}' is part of referenced organization",
 						user.getName());
-				return Optional.of("Binary.SecurityContext resolved");
+				return Optional.of("Binary.SecurityContext resolved and user part of referenced organization");
 			}
 			else
 			{
 				logger.warn(
-						"Read of Binary unauthorized, securityContext reference could not be resolved for user '{}'",
+						"Read of Binary unauthorized, securityContext reference could not be resolved or user '{}' not part of referenced organization",
 						user.getName());
 				return Optional.empty();
+
 			}
 		}
 		else
@@ -112,11 +108,9 @@ public class BinaryAuthorizationRule extends AbstractAuthorizationRule<Binary, B
 			if (newResource.hasData() && newResource.hasContentType() && newResource.hasSecurityContext())
 			{
 				ResourceReference oldReference = new ResourceReference("Binary.SecurityContext",
-						oldResource.getSecurityContext(), ActivityDefinition.class, Organization.class,
-						ResearchStudy.class, Task.class);
+						oldResource.getSecurityContext(), Organization.class);
 				ResourceReference newReference = new ResourceReference("Binary.SecurityContext",
-						newResource.getSecurityContext(), ActivityDefinition.class, Organization.class,
-						ResearchStudy.class, Task.class);
+						newResource.getSecurityContext(), Organization.class);
 				if (EnumSet.of(ReferenceType.LITERAL_INTERNAL, ReferenceType.LOGICAL)
 						.contains(oldReference.getType(serverBase))
 						&& EnumSet.of(ReferenceType.LITERAL_INTERNAL, ReferenceType.LOGICAL)
@@ -166,8 +160,7 @@ public class BinaryAuthorizationRule extends AbstractAuthorizationRule<Binary, B
 			if (oldResource.hasData() && oldResource.hasContentType() && oldResource.hasSecurityContext())
 			{
 				ResourceReference reference = new ResourceReference("Binary.SecurityContext",
-						oldResource.getSecurityContext(), ActivityDefinition.class, Organization.class,
-						ResearchStudy.class, Task.class);
+						oldResource.getSecurityContext(), Organization.class);
 				if (EnumSet.of(ReferenceType.LITERAL_INTERNAL, ReferenceType.LOGICAL)
 						.contains(reference.getType(serverBase)))
 				{

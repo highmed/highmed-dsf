@@ -24,6 +24,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -122,7 +125,7 @@ public abstract class AbstractIntegrationTest
 	private static FhirWebserviceClient createWebserviceClient(KeyStore trustStore, KeyStore keyStore,
 			String keyStorePassword, FhirContext fhirContext, ReferenceExtractor referenceExtractor)
 	{
-		return new FhirWebserviceClientJersey(BASE_URL, trustStore, keyStore, keyStorePassword, null, null, null, 0, 0,
+		return new FhirWebserviceClientJersey(BASE_URL, trustStore, keyStore, keyStorePassword, null, null, null, 500, 5000,
 				null, fhirContext, referenceExtractor);
 	}
 
@@ -328,11 +331,22 @@ public abstract class AbstractIntegrationTest
 	@Before
 	public void before() throws Exception
 	{
-		logger.info("Loading initial FHIR data bundles ...");
-		InitialDataLoaderConfig initialDataLoadConfig = getSpringWebApplicationContext()
-				.getBean(InitialDataLoaderConfig.class);
-		assertNotNull(initialDataLoadConfig);
-		initialDataLoadConfig.onContextRefreshedEvent(null);
+		try (Connection connection = database.getDataSource().getConnection();
+				PreparedStatement statement = connection.prepareStatement("SELECT count(*) FROM current_organizations");
+				ResultSet result = statement.executeQuery())
+		{
+			assertTrue(result.next());
+			if (result.getInt(1) <= 0)
+			{
+				logger.info("Loading initial FHIR data bundles for next test case ...");
+				InitialDataLoaderConfig initialDataLoadConfig = getSpringWebApplicationContext()
+						.getBean(InitialDataLoaderConfig.class);
+				assertNotNull(initialDataLoadConfig);
+				initialDataLoadConfig.onContextRefreshedEvent(null);
+			}
+			else
+				logger.info("Not loading initial FHIR data bundles for first test case");
+		}
 	}
 
 	protected static FhirWebserviceClient getWebserviceClient()

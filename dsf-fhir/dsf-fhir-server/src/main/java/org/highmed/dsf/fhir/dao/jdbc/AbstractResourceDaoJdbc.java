@@ -940,9 +940,14 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	}
 
 	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public SearchQuery<R> createSearchQueryWithoutUserFilter(int page, int count)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return SearchQueryBuilder.create(resourceType, getResourceTable(), getResourceColumn(), page, count)
+				.with(new ResourceId(getResourceIdColumn()), new ResourceLastUpdated(getResourceColumn()))
+				.with(searchParameterFactories.stream().map(Supplier::get).toArray(SearchQueryParameter[]::new))
+				.withRevInclude(searchRevIncludeParameterFactories.stream().map(Supplier::get)
+						.toArray(SearchQueryRevIncludeParameterFactory[]::new))
+				.build();
 	}
 }

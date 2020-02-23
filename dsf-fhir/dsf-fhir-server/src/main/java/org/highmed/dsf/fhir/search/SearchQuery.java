@@ -152,7 +152,7 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 		this.revIncludeParameterFactories.addAll(revIncludeParameters);
 	}
 
-	public void configureParameters(Map<String, List<String>> queryParameters)
+	public SearchQuery<R> configureParameters(Map<String, List<String>> queryParameters)
 	{
 		searchParameters.forEach(p -> p.configure(queryParameters));
 
@@ -166,6 +166,8 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 		filterQuery = createFilterQuery();
 
 		sortSql = createSortSql(getFirst(queryParameters, PARAMETER_SORT));
+
+		return this;
 	}
 
 	private String createFilterQuery()
