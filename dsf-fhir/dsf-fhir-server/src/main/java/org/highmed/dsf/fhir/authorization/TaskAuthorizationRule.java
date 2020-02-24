@@ -7,9 +7,13 @@ import org.highmed.dsf.fhir.dao.TaskDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.Task;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskDao>
 {
+	private static final Logger logger = LoggerFactory.getLogger(TaskAuthorizationRule.class);
+
 	public TaskAuthorizationRule(DaoProvider daoProvider, String serverBase, ReferenceResolver referenceResolver)
 	{
 		super(Task.class, daoProvider, serverBase, referenceResolver);
@@ -56,7 +60,8 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 	@Override
 	public Optional<String> reasonSearchAllowed(User user)
 	{
-		// TODO Auto-generated method stub
-		return Optional.empty();
+		logger.info("Search of Task authorized for {} user '{}', will be fitered by users organization {}",
+				user.getRole(), user.getName(), user.getOrganization().getIdElement().getValueAsString());
+		return Optional.of("Allowed for all, filtered by users organization");
 	}
 }

@@ -115,7 +115,7 @@
             },
             "organization":{
                "identifier":{
-                  "system":"http://highmed.org/fhir/CodeSystem/organization",
+                  "system":"http://highmed.org/fhir/NamingSystem/organization-identifier",
                   "value":"Test_Organization"
                },
                "type":"Organization"
@@ -152,7 +152,7 @@
                   "url":"http://highmed.org/fhir/StructureDefinition/participating-medic",
                   "valueReference":{
                      "identifier":{
-                        "system":"http://highmed.org/fhir/CodeSystem/organization",
+                        "system":"http://highmed.org/fhir/NamingSystem/organization-identifier",
                         "value":"Test_Organization"
                      },
                      "type":"Organization"
@@ -162,7 +162,7 @@
                   "url":"http://highmed.org/fhir/StructureDefinition/participating-medic",
                   "valueReference":{
                      "identifier":{
-                        "system":"http://highmed.org/fhir/CodeSystem/organization",
+                        "system":"http://highmed.org/fhir/NamingSystem/organization-identifier",
                         "value":"Test_Organization_2"
                      },
                      "type":"Organization"
@@ -172,7 +172,7 @@
                   "url":"http://highmed.org/fhir/StructureDefinition/participating-medic",
                   "valueReference":{
                      "identifier":{
-                        "system":"http://highmed.org/fhir/CodeSystem/organization",
+                        "system":"http://highmed.org/fhir/NamingSystem/organization-identifier",
                         "value":"Test_Organization_3"
                      },
                      "type":"Organization"
@@ -203,7 +203,7 @@
                "recipient":[
                   {
                      "identifier":{
-                        "system":"http://highmed.org/fhir/CodeSystem/organization",
+                        "system":"http://highmed.org/fhir/NamingSystem/organization-identifier",
                         "value":"Test_Organization"
                      },
                      "type":"Organization"

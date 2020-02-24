@@ -35,9 +35,9 @@ public class BinaryUserFilter extends AbstractUserFilter
 		if (!UserRole.LOCAL.equals(user.getRole()))
 		{
 			if (parameterIndex == 1)
-				statement.setString(1, user.getOrganization().getIdElement().getValue());
+				statement.setString(parameterIndex, user.getOrganization().getIdElement().getValue());
 			else if (parameterIndex == 2)
-				statement.setString(2, user.getOrganization().getIdElement().toVersionless().getValue());
+				statement.setString(parameterIndex, user.getOrganization().getIdElement().toVersionless().getValue());
 		}
 	}
 }

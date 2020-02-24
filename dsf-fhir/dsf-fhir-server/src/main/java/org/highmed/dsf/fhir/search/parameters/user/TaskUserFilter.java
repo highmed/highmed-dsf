@@ -5,13 +5,9 @@ import java.sql.SQLException;
 
 import org.highmed.dsf.fhir.OrganizationType;
 import org.highmed.dsf.fhir.authentication.User;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class TaskUserFilter extends AbstractUserFilter
 {
-	private static final Logger logger = LoggerFactory.getLogger(TaskUserFilter.class);
-
 	public TaskUserFilter(OrganizationType organizationType, User user)
 	{
 		super(organizationType, user);
@@ -20,24 +16,28 @@ public class TaskUserFilter extends AbstractUserFilter
 	@Override
 	public String getFilterQuery()
 	{
-		// TODO implement
-
-		logger.warn("{}#getFilterQuery not implemented yet", getClass().getName());
-		return "false";
+		return "(task->'requester'->>'reference' = ? OR task->'requester'->>'reference' = ? OR"
+				+ " task->'restriction'->'recipient' @> ?::jsonb OR task->'restriction'->'recipient' @> ?::jsonb)";
 	}
 
 	@Override
 	public int getSqlParameterCount()
 	{
-		logger.warn("{}#getSqlParameterCount not implemented yet", getClass().getName());
-		return 0;
+		return 4;
 	}
 
 	@Override
 	public void modifyStatement(int parameterIndex, PreparedStatement statement) throws SQLException
 	{
-		// TODO implement
-
-		logger.warn("{}#modifyStatement not implemented yet", getClass().getName());
+		if (parameterIndex == 1)
+			statement.setString(parameterIndex, user.getOrganization().getIdElement().getValue());
+		else if (parameterIndex == 2)
+			statement.setString(parameterIndex, user.getOrganization().getIdElement().toVersionless().getValue());
+		else if (parameterIndex == 3)
+			statement.setString(parameterIndex,
+					"[{\"reference\": \"" + user.getOrganization().getIdElement().getValue() + "\"}]");
+		else if (parameterIndex == 4)
+			statement.setString(parameterIndex,
+					"[{\"reference\": \"" + user.getOrganization().getIdElement().toVersionless().getValue() + "\"}]");
 	}
 }

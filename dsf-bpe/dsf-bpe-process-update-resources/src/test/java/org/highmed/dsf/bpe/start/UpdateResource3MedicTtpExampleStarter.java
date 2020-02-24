@@ -54,9 +54,9 @@ public class UpdateResource3MedicTtpExampleStarter
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
 		task.getRequester().setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/CodeSystem/organization").setValue("Test_TTP");
+				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_TTP");
 		task.getRestriction().addRecipient().setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/CodeSystem/organization").setValue("Test_TTP");
+				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_TTP");
 
 		task.addInput().setValue(new StringType("requestUpdateResourcesMessage")).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("message-name");
@@ -64,7 +64,7 @@ public class UpdateResource3MedicTtpExampleStarter
 		task.addInput().setValue(new Reference("Bundle/" + whiteList.getIdElement().getIdPart())).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/update-resources").setCode("bundle-reference");
 
-		task.addInput().setValue(new StringType("http://highmed.org/fhir/CodeSystem/organization|")).getType()
+		task.addInput().setValue(new StringType("http://highmed.org/fhir/NamingSystem/organization-identifier|")).getType()
 				.addCoding().setSystem("http://highmed.org/fhir/CodeSystem/update-resources")
 				.setCode("organization-identifier-search-parameter");
 

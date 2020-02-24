@@ -44,9 +44,9 @@ public class UpdateWhiteList3MedicTtpExampleStarter
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
 		task.getRequester().setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/CodeSystem/organization").setValue("Test_TTP");
+				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_TTP");
 		task.getRestriction().addRecipient().setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/CodeSystem/organization").setValue("Test_TTP");
+				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_TTP");
 
 		task.addInput().setValue(new StringType("updateWhiteListMessage")).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("message-name");

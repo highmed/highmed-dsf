@@ -134,8 +134,8 @@ public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter
 		practitionerRole.getPractitioner().setReference(practitioner.getIdElement().getIdPart())
 				.setType("Practitioner");
 		practitionerRole.getOrganization().setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/CodeSystem/organization").setValue("Test_MeDIC_1");
-
+				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_MeDIC_1");
+		
 		return practitionerRole;
 	}
 
@@ -156,13 +156,13 @@ public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter
 
 		researchStudy.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/participating-medic")
 				.setValue(new Reference().setType("Organization").setIdentifier(new Identifier()
-						.setSystem("http://highmed.org/fhir/CodeSystem/organization").setValue("Test_MeDIC_1")));
+						.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_MeDIC_1")));
 		researchStudy.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/participating-medic")
 				.setValue(new Reference().setType("Organization").setIdentifier(new Identifier()
-						.setSystem("http://highmed.org/fhir/CodeSystem/organization").setValue("Test_MeDIC_2")));
+						.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_MeDIC_2")));
 		researchStudy.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/participating-medic")
 				.setValue(new Reference().setType("Organization").setIdentifier(new Identifier()
-						.setSystem("http://highmed.org/fhir/CodeSystem/organization").setValue("Test_MeDIC_3")));
+						.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_MeDIC_3")));
 
 		return researchStudy;
 	}
@@ -180,7 +180,7 @@ public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter
 		task.setAuthoredOn(new Date());
 		task.getRequester().setType("Practitioner").setReference(practitioner.getIdElement().getIdPart());
 		task.getRestriction().addRecipient().setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/CodeSystem/organization").setValue("Test_MeDIC_1");
+				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_MeDIC_1");
 
 		task.addInput().setValue(new StringType("requestSimpleFeasibilityMessage")).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("message-name");

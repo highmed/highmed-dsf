@@ -9,7 +9,7 @@
   "authoredOn":"2019-10-21",
   "requester":{
     "identifier":{
-      "system":"http://highmed.org/fhir/CodeSystem/organization",
+      "system":"http://highmed.org/fhir/NamingSystem/organization-identifier",
       "value":"Test_Organization"
     },
     "type":"Organization"
@@ -18,7 +18,7 @@
     "recipient":[
       {
         "identifier":{
-          "system":"http://highmed.org/fhir/CodeSystem/organization",
+          "system":"http://highmed.org/fhir/NamingSystem/organization-identifier",
           "value":"Test_Organization"
         },
         "type":"Organization"

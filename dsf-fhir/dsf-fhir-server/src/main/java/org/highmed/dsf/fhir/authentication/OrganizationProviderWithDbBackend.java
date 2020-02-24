@@ -5,7 +5,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -15,6 +17,8 @@ import javax.security.auth.x500.X500Principal;
 import org.apache.commons.codec.binary.Hex;
 import org.highmed.dsf.fhir.dao.OrganizationDao;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
+import org.highmed.dsf.fhir.search.PartialResult;
+import org.highmed.dsf.fhir.search.SearchQuery;
 import org.hl7.fhir.r4.model.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,15 +31,17 @@ public class OrganizationProviderWithDbBackend implements OrganizationProvider, 
 	private final OrganizationDao dao;
 	private final ExceptionHandler exceptionHandler;
 	private final List<String> localUserThumbprints = new ArrayList<String>();
+	private final String localSystemAndIdentifier;
 
 	public OrganizationProviderWithDbBackend(OrganizationDao dao, ExceptionHandler exceptionHandler,
-			List<String> localUserThumbprints)
+			List<String> localUserThumbprints, String localSystemAndIdentifier)
 	{
 		this.dao = dao;
 		this.exceptionHandler = exceptionHandler;
 
 		if (localUserThumbprints != null)
 			localUserThumbprints.stream().map(t -> t.toLowerCase()).forEach(this.localUserThumbprints::add);
+		this.localSystemAndIdentifier = localSystemAndIdentifier;
 	}
 
 	@Override
@@ -50,6 +56,9 @@ public class OrganizationProviderWithDbBackend implements OrganizationProvider, 
 			logger.info("{} local user{} configured with tumbprint{}: {}", localUserThumbprints.size(),
 					localUserThumbprints.size() != 1 ? "s" : "", localUserThumbprints.size() != 1 ? "s" : "",
 					localUserThumbprints.stream().collect(Collectors.joining(", ", "[", "]")));
+
+		if (getLocalOrganization().isEmpty())
+			logger.warn("Local organization not found by identifier: {}", localSystemAndIdentifier);
 	}
 
 	@Override
@@ -69,9 +78,23 @@ public class OrganizationProviderWithDbBackend implements OrganizationProvider, 
 				() -> dao.readActiveNotDeletedByThumbprint(loginThumbprintHex), Optional::empty);
 
 		if (optOrg.isEmpty() && UserRole.LOCAL.equals(userRole))
-			return Optional.of(new User(new Organization().setName("Local Admin User"), userRole));
+			return getLocalOrganization().map(org -> new User(org, userRole));
 
 		return optOrg.map(org -> new User(org, userRole));
+	}
+
+	private Optional<Organization> getLocalOrganization()
+	{
+		SearchQuery<Organization> query = dao.createSearchQueryWithoutUserFilter(1, 1)
+				.configureParameters(Map.of("identifier", Arrays.asList(localSystemAndIdentifier)));
+
+		PartialResult<Organization> result = exceptionHandler
+				.catchAndLogSqlExceptionAndIfReturn(() -> dao.search(query), null);
+
+		if (result != null && result.getOverallCount() == 1)
+			return Optional.of(result.getPartialResult().get(0));
+		else
+			return Optional.empty();
 	}
 
 	private byte[] getThumbprint(X509Certificate certificate)

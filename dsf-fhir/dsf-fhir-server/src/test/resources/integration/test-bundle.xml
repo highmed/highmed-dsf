@@ -14,7 +14,7 @@
 					<valueString value="TODO"/>
 				</extension>
 				<identifier>
-					<system value="http://highmed.org/fhir/CodeSystem/organization"/>
+					<system value="http://highmed.org/fhir/NamingSystem/organization-identifier"/>
 					<value value="Test_Organization"/>
 				</identifier>
 				<active value="true"/>
@@ -33,7 +33,7 @@
 		</resource>
 		<request>
 			<method value="PUT"/>
-			<url value="Organization?identifier=http://highmed.org/fhir/CodeSystem/organization|Test_Organization"/>
+			<url value="Organization?identifier=http://highmed.org/fhir/NamingSystem/organization-identifier|Test_Organization"/>
 		</request>
 	</entry>
 	<entry>
@@ -47,7 +47,7 @@
 					</tag>		
 				</meta>
 				<identifier>
-					<system value="http://highmed.org/fhir/CodeSystem/endpoint"/>
+					<system value="http://highmed.org/fhir/NamingSystem/endpoint-identifier"/>
 					<value value="Test_Endpoint"/>
 				</identifier>
 				<status value="active"/>
@@ -73,7 +73,7 @@
 		</resource>
 		<request>
 			<method value="PUT"/>
-			<url value="Endpoint?identifier=http://highmed.org/fhir/CodeSystem/endpoint|Test_Endpoint"/>
+			<url value="Endpoint?identifier=http://highmed.org/fhir/NamingSystem/endpoint-identifier|Test_Endpoint"/>
 		</request>
 	</entry>
 	<entry>
@@ -90,7 +90,7 @@
 					<valueString value="TODO"/>
 				</extension>
 				<identifier>
-					<system value="http://highmed.org/fhir/CodeSystem/organization"/>
+					<system value="http://highmed.org/fhir/NamingSystem/organization-identifier"/>
 					<value value="External_Test_Organization"/>
 				</identifier>
 				<active value="true"/>
@@ -105,7 +105,7 @@
 		</resource>
 		<request>
 			<method value="PUT"/>
-			<url value="Organization?identifier=http://highmed.org/fhir/CodeSystem/organization|External_Test_Organization"/>
+			<url value="Organization?identifier=http://highmed.org/fhir/NamingSystem/organization-identifier|External_Test_Organization"/>
 		</request>
 	</entry>
 </Bundle>

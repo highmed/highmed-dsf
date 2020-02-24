@@ -27,6 +27,9 @@ public class AuthenticationConfig
 	@Value("#{'${org.highmed.dsf.fhir.local-user.thumbprints}'.split(',')}")
 	private List<String> localUserThumbprints;
 
+	@Value("${org.highmed.dsf.fhir.local-organization.systemAndIdentifier}")
+	private String localSystemAndIdentifier;
+
 	@Bean
 	public AuthenticationFilterConfig authenticationFilterConfig()
 	{
@@ -37,6 +40,6 @@ public class AuthenticationConfig
 	public OrganizationProvider organizationProvider()
 	{
 		return new OrganizationProviderWithDbBackend(daoConfig.organizationDao(), helperConfig.exceptionHandler(),
-				localUserThumbprints);
+				localUserThumbprints, localSystemAndIdentifier);
 	}
 }

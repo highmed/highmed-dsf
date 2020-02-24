@@ -36,11 +36,11 @@ public class TestBpeJerseyClient
 //		client.startProcessWithVersion("updateWhiteList", "1.0.0");
 
 		client.startProcessWithVersion("requestUpdateResources", "1.0.0", Map.of("target-identifier",
-				Collections.singletonList("http://highmed.org/fhir/CodeSystem/organization|"), "bundle-id",
+				Collections.singletonList("http://highmed.org/fhir/NamingSystem/organization-identifier|"), "bundle-id",
 				Arrays.asList("Bundle/2548395d-83d3-488a-859e-a844e62ce3fd")));
 
 //		client.startProcessWithVersion("requestUpdateResources", "1.0.0", Map.of("target-identifier",
-//				Collections.singletonList("http://highmed.org/fhir/CodeSystem/organization|"), "bundle-id",
+//				Collections.singletonList("http://highmed.org/fhir/NamingSystem/organization-identifier|"), "bundle-id",
 //				Arrays.asList("Bundle/30a376fa-f3ba-4f68-8e04-c5b9c0c4f5c9")));
 
 //		client.startProcessWithVersion("requestSimpleCohortSizeQuery", "1.0.0");

@@ -64,9 +64,9 @@ public interface Constants
 
 	String PROCESS_URI_BASE = "http://highmed.org/bpe/Process/";
 
-	String ORGANIZATION_IDENTIFIER_SYSTEM = "http://highmed.org/fhir/CodeSystem/organization";
+	String ORGANIZATION_IDENTIFIER_SYSTEM = "http://highmed.org/fhir/NamingSystem/organization-identifier";
 	String ORGANIZATION_TYPE_SYSTEM = "http://highmed.org/fhir/CodeSystem/organization-type";
-	String ENDPOINT_IDENTIFIER_SYSTEM = "http://highmed.org/fhir/CodeSystem/endpoint";
+	String ENDPOINT_IDENTIFIER_SYSTEM = "http://highmed.org/fhir/NamingSystem/endpoint-identifier";
 
 	String EXTENSION_PARTICIPATING_MEDIC_URI = "http://highmed.org/fhir/StructureDefinition/participating-medic";
 	String EXTENSION_QUERY_URI = "http://highmed.org/fhir/StructureDefinition/query";

@@ -175,20 +175,20 @@ public class TestFhirJerseyClient
 			// client.update(org);
 			//
 			// Organization org = client.read(Organization.class, "e8aa9c06-9789-4c2b-8292-1c2a9601c2cc");
-			// org.addIdentifier().setSystem("http://highmed.org/fhir/CodeSystem/organizations").setValue("Hochschule
+			// org.addIdentifier().setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Hochschule
 			// Heilbronn");
 			//
 			// client.update(org);
 
 			// Organization org = new Organization();
-			// org.addIdentifier().setSystem("http://highmed.org/fhir/CodeSystem/organization")
+			// org.addIdentifier().setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
 			// .setValue("Test Organization");
 			// org.setActive(true);
 			// org.setName("Test Organization");
 			// org = client.create(org);
 			//
 			// Endpoint endpoint1 = new Endpoint();
-			// endpoint1.addIdentifier().setSystem("http://highmed.org/fhir/CodeSystem/endpoint").setValue("Endpoint1");
+			// endpoint1.addIdentifier().setSystem("http://highmed.org/fhir/NamingSystem/endpoint-identifier").setValue("Endpoint1");
 			// endpoint1.setStatus(EndpointStatus.ACTIVE);
 			// endpoint1.setConnectionType(new Coding("http://terminology.hl7.org/CodeSystem/endpoint-connection-type",
 			// "hl7-fhir-rest", "HL7 FHIR"));
@@ -202,7 +202,7 @@ public class TestFhirJerseyClient
 			// endpoint1 = client.create(endpoint1);
 			//
 			// Endpoint endpoint2 = new Endpoint();
-			// endpoint2.addIdentifier().setSystem("http://highmed.org/fhir/CodeSystem/endpoint").setValue("Endpoint2");
+			// endpoint2.addIdentifier().setSystem("http://highmed.org/fhir/NamingSystem/endpoint-identifier").setValue("Endpoint2");
 			// endpoint2.setStatus(EndpointStatus.ACTIVE);
 			// endpoint2.setConnectionType(new Coding("http://terminology.hl7.org/CodeSystem/endpoint-connection-type",
 			// "hl7-fhir-rest", "HL7 FHIR"));
@@ -223,7 +223,7 @@ public class TestFhirJerseyClient
 			// client.update(org);
 
 			// Organization org = new Organization();
-			// client.create(org, "identifier=http://highmed.org/fhir/CodeSystem/organization|Test
+			// client.create(org, "identifier=http://highmed.org/fhir/NamingSystem/organization-identifier|Test
 			// Organization&_format=json");
 
 			// Organization org = new Organization();
@@ -340,9 +340,9 @@ public class TestFhirJerseyClient
 
 	private static Bundle deleteCreateBundle()
 	{
-		final String orgIdentifierSystem = "http://highmed.org/fhir/CodeSystem/organization";
+		final String orgIdentifierSystem = "http://highmed.org/fhir/NamingSystem/organization-identifier";
 		final String orgIdentifierValue = "Transaction Test Organization";
-		final String eptIdentifierSystem = "http://highmed.org/fhir/CodeSystem/endpoint";
+		final String eptIdentifierSystem = "http://highmed.org/fhir/NamingSystem/endpoint-identifier";
 		final String eptIdentifierValue = "Transaction Test Endpoint";
 
 		var bundle = new Bundle();
@@ -392,9 +392,9 @@ public class TestFhirJerseyClient
 
 	private static void updateBundleTest(FhirContext context, FhirWebserviceClient client)
 	{
-		final String orgIdentifierSystem = "http://highmed.org/fhir/CodeSystem/organization";
+		final String orgIdentifierSystem = "http://highmed.org/fhir/NamingSystem/organization-identifier";
 		final String orgIdentifierValue = "Transaction Test Organization";
-		final String eptIdentifierSystem = "http://highmed.org/fhir/CodeSystem/endpoint";
+		final String eptIdentifierSystem = "http://highmed.org/fhir/NamingSystem/endpoint-identifier";
 		final String eptIdentifierValue = "Transaction Test Endpoint";
 
 		var bundle = new Bundle();
