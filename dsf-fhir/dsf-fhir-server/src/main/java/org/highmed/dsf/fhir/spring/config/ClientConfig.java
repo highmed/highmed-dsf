@@ -26,7 +26,7 @@ public class ClientConfig
 	private String webserviceKeyStoreFile;
 
 	@Value("${org.highmed.dsf.fhir.webservice.keystore.password}")
-	private String webserviceKeyStorePassword;
+	private char[] webserviceKeyStorePassword;
 
 	@Value("${org.highmed.dsf.fhir.remote.webservice.readTimeout}")
 	private int remoteReadTimeout;
@@ -35,7 +35,7 @@ public class ClientConfig
 	private int remoteConnectTimeout;
 
 	@Value("${org.highmed.dsf.fhir.remote.webservice.proxy.password:#{null}}")
-	private String remoteProxyPassword;
+	private char[] remoteProxyPassword;
 
 	@Value("${org.highmed.dsf.fhir.remote.webservice.proxy.username:#{null}}")
 	private String remoteProxyUsername;

@@ -96,15 +96,17 @@ public final class DbMigrator
 			{
 				Database database = DatabaseFactory.getInstance()
 						.findCorrectDatabaseImplementation(new JdbcConnection(connection));
-				Liquibase liquibase = new Liquibase("db/db.changelog.xml", new ClassLoaderResourceAccessor(), database);
+				try (Liquibase liquibase = new Liquibase("db/db.changelog.xml", new ClassLoaderResourceAccessor(),
+						database))
+				{
+					ChangeLogParameters changeLogParameters = liquibase.getChangeLogParameters();
+					changeLogParameterNames.forEach(parameterName -> changeLogParameters.set(parameterName,
+							properties.getProperty(prefix + parameterName)));
 
-				ChangeLogParameters changeLogParameters = liquibase.getChangeLogParameters();
-				changeLogParameterNames.forEach(parameterName -> changeLogParameters.set(parameterName,
-						properties.getProperty(prefix + parameterName)));
-
-				logger.info("Executing DB migration ...");
-				liquibase.update(new Contexts());
-				logger.info("Executing DB migration [Done]");
+					logger.info("Executing DB migration ...");
+					liquibase.update(new Contexts());
+					logger.info("Executing DB migration [Done]");
+				}
 			}
 		}
 		catch (SQLException e)
@@ -113,6 +115,11 @@ public final class DbMigrator
 			throw new RuntimeException(e);
 		}
 		catch (LiquibaseException e)
+		{
+			logger.error("Error while running liquibase", e);
+			throw new RuntimeException(e);
+		}
+		catch (Exception e)
 		{
 			logger.error("Error while running liquibase", e);
 			throw new RuntimeException(e);

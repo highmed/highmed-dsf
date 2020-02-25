@@ -22,15 +22,15 @@ public class AbstractJerseyClient
 	private final Client client;
 	private final String baseUrl;
 
-	public AbstractJerseyClient(String baseUrl, KeyStore trustStore, KeyStore keyStore, String keyStorePassword,
+	public AbstractJerseyClient(String baseUrl, KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword,
 			ObjectMapper objectMapper, List<?> componentsToRegister)
 	{
 		this(baseUrl, trustStore, keyStore, keyStorePassword, null, null, null, 0, 0, objectMapper,
 				componentsToRegister);
 	}
 
-	public AbstractJerseyClient(String baseUrl, KeyStore trustStore, KeyStore keyStore, String keyStorePassword,
-			String proxySchemeHostPort, String proxyUserName, String proxyPassword, int connectTimeout, int readTimeout,
+	public AbstractJerseyClient(String baseUrl, KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword,
+			String proxySchemeHostPort, String proxyUserName, char[] proxyPassword, int connectTimeout, int readTimeout,
 			ObjectMapper objectMapper, List<?> componentsToRegister)
 	{
 		SSLContext sslContext = null;
@@ -47,7 +47,7 @@ public class AbstractJerseyClient
 
 		builder = builder.property(ClientProperties.PROXY_URI, proxySchemeHostPort)
 				.property(ClientProperties.PROXY_USERNAME, proxyUserName)
-				.property(ClientProperties.PROXY_PASSWORD, proxyPassword);
+				.property(ClientProperties.PROXY_PASSWORD, String.valueOf(proxyPassword));
 
 		builder = builder.readTimeout(readTimeout, TimeUnit.MILLISECONDS).connectTimeout(connectTimeout,
 				TimeUnit.MILLISECONDS);

@@ -30,7 +30,7 @@ public class UpdateResource3MedicTtpExampleStarter
 	public static void main(String[] args)
 			throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException
 	{
-		String keyStorePassword = "password";
+		char[] keyStorePassword = "password".toCharArray();
 		KeyStore keyStore = CertificateReader.fromPkcs12(Paths.get(
 				"../../dsf-tools/dsf-tools-test-data-generator/cert/Webbrowser_Test_User/Webbrowser_Test_User_certificate.p12"),
 				keyStorePassword);

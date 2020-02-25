@@ -1,5 +1,11 @@
 <NamingSystem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://hl7.org/fhir"
 			  xsi:schemaLocation="http://hl7.org/fhir http://www.hl7.org/fhir/fhir-base.xsd">
+	<meta>
+		<tag>
+			<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
+			<code value="REMOTE"/>
+		</tag>		
+	</meta>
 	<name value="HiGHmed_Endpoint_Identifier"/>
 	<status value="active"/>
 	<kind value="identifier"/>

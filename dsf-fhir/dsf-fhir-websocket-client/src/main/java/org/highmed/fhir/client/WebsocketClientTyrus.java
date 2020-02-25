@@ -54,7 +54,7 @@ public class WebsocketClientTyrus implements WebsocketClient
 	private volatile boolean closed;
 
 	public WebsocketClientTyrus(FhirContext fhirContext, URI wsUri, KeyStore trustStore, KeyStore keyStore,
-			String keyStorePassword, String subscriptionIdPart)
+			char[] keyStorePassword, String subscriptionIdPart)
 	{
 		this.wsUri = wsUri;
 

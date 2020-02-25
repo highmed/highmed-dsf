@@ -22,7 +22,7 @@ public class WebserviceClientJersey extends AbstractJerseyClient implements Webs
 	private static final Logger logger = LoggerFactory.getLogger(WebserviceClientJersey.class);
 
 	public WebserviceClientJersey(String schemaHostPort, KeyStore trustStore, KeyStore keyStore,
-			String keyStorePassword, String proxySchemeHostPort, String proxyUserName, String proxyPassword,
+			char[] keyStorePassword, String proxySchemeHostPort, String proxyUserName, char[] proxyPassword,
 			int connectTimeout, int readTimeout, ObjectMapper objectMapper)
 	{
 		super(schemaHostPort, trustStore, keyStore, keyStorePassword, proxySchemeHostPort, proxyUserName, proxyPassword,

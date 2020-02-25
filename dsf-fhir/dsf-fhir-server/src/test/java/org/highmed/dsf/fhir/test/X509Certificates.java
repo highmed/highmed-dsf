@@ -37,9 +37,9 @@ public class X509Certificates extends ExternalResource
 		private final X509Certificate certificate;
 		private final KeyStore trustStore;
 		private final KeyStore keyStore;
-		private final String keyStorePassword;
+		private final char[] keyStorePassword;
 
-		ClientCertificate(X509Certificate certificate, KeyStore trustStore, KeyStore keyStore, String keyStorePassword)
+		ClientCertificate(X509Certificate certificate, KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword)
 		{
 			this.certificate = certificate;
 			this.trustStore = trustStore;
@@ -62,7 +62,7 @@ public class X509Certificates extends ExternalResource
 			return keyStore;
 		}
 
-		public String getKeyStorePassword()
+		public char[] getKeyStorePassword()
 		{
 			return keyStorePassword;
 		}
@@ -193,8 +193,8 @@ public class X509Certificates extends ExternalResource
 
 		X509Certificate serverCertificate = ca.signWebServerCertificate(serverRequest);
 
-		CertificateWriter.toPkcs12(serverCertificateFile, serverRsaKeyPair.getPrivate(), "password", serverCertificate,
-				caCertificate, "test-server");
+		CertificateWriter.toPkcs12(serverCertificateFile, serverRsaKeyPair.getPrivate(), "password".toCharArray(),
+				serverCertificate, caCertificate, "test-server");
 		// server --
 
 		// -- client
@@ -205,12 +205,12 @@ public class X509Certificates extends ExternalResource
 
 		X509Certificate clientCertificate = ca.signWebClientCertificate(clientRequest);
 
-		String clientKeyStorePassword = "password";
+		char[] clientKeyStorePassword = "password".toCharArray();
 		KeyStore clientKeyStore = CertificateHelper.toPkcs12KeyStore(clientRsaKeyPair.getPrivate(),
 				new Certificate[] { clientCertificate, caCertificate }, "test-client", clientKeyStorePassword);
 
-		CertificateWriter.toPkcs12(clientCertificateFile, clientRsaKeyPair.getPrivate(), "password", clientCertificate,
-				caCertificate, "client");
+		CertificateWriter.toPkcs12(clientCertificateFile, clientRsaKeyPair.getPrivate(), "password".toCharArray(),
+				clientCertificate, caCertificate, "client");
 		// client --
 
 		// -- external client
@@ -222,13 +222,13 @@ public class X509Certificates extends ExternalResource
 
 		X509Certificate externalClientCertificate = ca.signWebClientCertificate(externalClientRequest);
 
-		String externalClientKeyStorePassword = "password";
+		char[] externalClientKeyStorePassword = "password".toCharArray();
 		KeyStore externalClientKeyStore = CertificateHelper.toPkcs12KeyStore(externalClientRsaKeyPair.getPrivate(),
 				new Certificate[] { externalClientCertificate, caCertificate }, "external-client",
 				externalClientKeyStorePassword);
 
-		CertificateWriter.toPkcs12(externalClientCertificateFile, externalClientRsaKeyPair.getPrivate(), "password",
-				externalClientCertificate, caCertificate, "client");
+		CertificateWriter.toPkcs12(externalClientCertificateFile, externalClientRsaKeyPair.getPrivate(),
+				"password".toCharArray(), externalClientCertificate, caCertificate, "client");
 		// external client --
 
 		this.clientCertificate = new ClientCertificate(clientCertificate,

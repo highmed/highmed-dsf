@@ -7,9 +7,13 @@ import org.highmed.dsf.fhir.dao.OrganizationDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.Organization;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OrganizationAuthorizationRule extends AbstractAuthorizationRule<Organization, OrganizationDao>
 {
+	private static final Logger logger = LoggerFactory.getLogger(OrganizationAuthorizationRule.class);
+
 	public OrganizationAuthorizationRule(DaoProvider daoProvider, String serverBase,
 			ReferenceResolver referenceResolver)
 	{
@@ -53,7 +57,8 @@ public class OrganizationAuthorizationRule extends AbstractAuthorizationRule<Org
 	@Override
 	public Optional<String> reasonSearchAllowed(User user)
 	{
-		// TODO Auto-generated method stub
-		return Optional.empty();
+		logger.info("Search of Organization authorized for {} user '{}', will be fitered by user role", user.getRole(),
+				user.getName());
+		return Optional.of("Allowed for all, filtered by user role");
 	}
 }

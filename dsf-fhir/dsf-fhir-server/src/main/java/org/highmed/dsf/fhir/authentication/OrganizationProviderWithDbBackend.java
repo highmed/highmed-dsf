@@ -5,9 +5,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -17,8 +15,6 @@ import javax.security.auth.x500.X500Principal;
 import org.apache.commons.codec.binary.Hex;
 import org.highmed.dsf.fhir.dao.OrganizationDao;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
-import org.highmed.dsf.fhir.search.PartialResult;
-import org.highmed.dsf.fhir.search.SearchQuery;
 import org.hl7.fhir.r4.model.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,17 +27,17 @@ public class OrganizationProviderWithDbBackend implements OrganizationProvider, 
 	private final OrganizationDao dao;
 	private final ExceptionHandler exceptionHandler;
 	private final List<String> localUserThumbprints = new ArrayList<String>();
-	private final String localSystemAndIdentifier;
+	private final String localIdentifierValue;
 
 	public OrganizationProviderWithDbBackend(OrganizationDao dao, ExceptionHandler exceptionHandler,
-			List<String> localUserThumbprints, String localSystemAndIdentifier)
+			List<String> localUserThumbprints, String localIdentifier)
 	{
 		this.dao = dao;
 		this.exceptionHandler = exceptionHandler;
 
 		if (localUserThumbprints != null)
 			localUserThumbprints.stream().map(t -> t.toLowerCase()).forEach(this.localUserThumbprints::add);
-		this.localSystemAndIdentifier = localSystemAndIdentifier;
+		this.localIdentifierValue = localIdentifier;
 	}
 
 	@Override
@@ -57,8 +53,9 @@ public class OrganizationProviderWithDbBackend implements OrganizationProvider, 
 					localUserThumbprints.size() != 1 ? "s" : "", localUserThumbprints.size() != 1 ? "s" : "",
 					localUserThumbprints.stream().collect(Collectors.joining(", ", "[", "]")));
 
+		Objects.requireNonNull(localIdentifierValue, "localIdentifierValue");
 		if (getLocalOrganization().isEmpty())
-			logger.warn("Local organization not found by identifier: {}", localSystemAndIdentifier);
+			logger.warn("Local organization not found by identifier: {}", localIdentifierValue);
 	}
 
 	@Override
@@ -74,27 +71,31 @@ public class OrganizationProviderWithDbBackend implements OrganizationProvider, 
 		UserRole userRole = localUserThumbprints.contains(loginThumbprintHex.toLowerCase()) ? UserRole.LOCAL
 				: UserRole.REMOTE;
 
-		Optional<Organization> optOrg = exceptionHandler.catchAndLogSqlExceptionAndIfReturn(
-				() -> dao.readActiveNotDeletedByThumbprint(loginThumbprintHex), Optional::empty);
-
-		if (optOrg.isEmpty() && UserRole.LOCAL.equals(userRole))
+		if (UserRole.LOCAL.equals(userRole))
+		{
 			return getLocalOrganization().map(org -> new User(org, userRole));
+		}
+		else if (UserRole.REMOTE.equals(userRole))
+		{
+			return getOrganization(loginThumbprintHex).map(org -> new User(org, userRole));
+		}
+		else
+		{
+			logger.warn("UserRole {} not supported", userRole);
+			return Optional.empty();
+		}
+	}
 
-		return optOrg.map(org -> new User(org, userRole));
+	private Optional<Organization> getOrganization(String loginThumbprintHex)
+	{
+		return exceptionHandler.catchAndLogSqlExceptionAndIfReturn(
+				() -> dao.readActiveNotDeletedByThumbprint(loginThumbprintHex), Optional::empty);
 	}
 
 	private Optional<Organization> getLocalOrganization()
 	{
-		SearchQuery<Organization> query = dao.createSearchQueryWithoutUserFilter(1, 1)
-				.configureParameters(Map.of("identifier", Arrays.asList(localSystemAndIdentifier)));
-
-		PartialResult<Organization> result = exceptionHandler
-				.catchAndLogSqlExceptionAndIfReturn(() -> dao.search(query), null);
-
-		if (result != null && result.getOverallCount() == 1)
-			return Optional.of(result.getPartialResult().get(0));
-		else
-			return Optional.empty();
+		return exceptionHandler.catchAndLogSqlExceptionAndIfReturn(
+				() -> dao.readActiveNotDeletedByIdentifier(localIdentifierValue), Optional::empty);
 	}
 
 	private byte[] getThumbprint(X509Certificate certificate)

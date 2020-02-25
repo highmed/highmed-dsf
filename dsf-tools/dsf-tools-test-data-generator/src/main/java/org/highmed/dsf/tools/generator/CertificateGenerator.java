@@ -52,7 +52,7 @@ public class CertificateGenerator
 	private static final Logger logger = LoggerFactory.getLogger(CertificateGenerator.class);
 
 	private static final String SERVER_DNS_ALTERNATIVE_NAME = "fhir";
-	private static final String CERT_PASSWORD = "password";
+	private static final char[] CERT_PASSWORD = "password".toCharArray();
 
 	private static final String[] SERVER_COMMON_NAMES = { "ttp", "medic1", "medic2", "medic3", "localhost" };
 	private static final String[] CLIENT_COMMON_NAMES = { "ttp-client", "medic1-client", "medic2-client",

@@ -39,9 +39,19 @@ public class BinaryAuthorizationRule extends AbstractAuthorizationRule<Binary, B
 					Optional<Resource> securityContext = referenceResolver.resolveReference(user, reference);
 					if (securityContext.isPresent())
 					{
-						logger.info("Create of Binary authorized for local user '{}', Binary.SecurityContext resolved",
-								user.getName());
-						return Optional.of("local user, Binary.SecurityContext resolved");
+						if (securityContext.get() instanceof Organization)
+						{
+							logger.info(
+									"Create of Binary authorized for local user '{}', Binary.SecurityContext resolved and instance of Organization",
+									user.getName());
+							return Optional.of("local user, Binary.SecurityContext(Organization) resolved");
+						}
+						else
+						{
+							logger.warn(
+									"Create of Binary unauthorized, securityContext reference could be resolved but not instance of Organization");
+							return Optional.empty();
+						}
 					}
 					else
 					{
@@ -114,10 +124,20 @@ public class BinaryAuthorizationRule extends AbstractAuthorizationRule<Binary, B
 					Optional<Resource> newSecurityContext = referenceResolver.resolveReference(user, newReference);
 					if (oldSecurityContext.isPresent() && newSecurityContext.isPresent())
 					{
-						logger.info(
-								"Update of Binary authorized for local user '{}', Binary.SecurityContext could be resolved (old and new)",
-								user.getName());
-						return Optional.of("local user, Binary.SecurityContext resolved");
+						if (oldSecurityContext.get() instanceof Organization
+								&& newSecurityContext.get() instanceof Organization)
+						{
+							logger.info(
+									"Create of Binary authorized for local user '{}', Binary.SecurityContext resolved and instance of Organization (old and new)",
+									user.getName());
+							return Optional.of("local user, Binary.SecurityContext(Organization) resolved");
+						}
+						else
+						{
+							logger.warn(
+									"Create of Binary unauthorized, securityContext reference could be resolved (old and new) but not instance of Organization (old or new)");
+							return Optional.empty();
+						}
 					}
 					else
 					{

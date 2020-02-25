@@ -40,25 +40,25 @@ public class FhirClientProviderImpl
 
 	private final KeyStore webserviceTrustStore;
 	private final KeyStore webserviceKeyStore;
-	private final String webserviceKeyStorePassword;
+	private final char[] webserviceKeyStorePassword;
 
 	private final int remoteReadTimeout;
 	private final int remoteConnectTimeout;
-	private final String remoteProxyPassword;
+	private final char[] remoteProxyPassword;
 	private final String remoteProxyUsername;
 	private final String remoteProxySchemeHostPort;
 
 	private final String localWebsocketUrl;
 	private final KeyStore localWebsocketTrustStore;
 	private final KeyStore localWebsocketKeyStore;
-	private final String localWebsocketKeyStorePassword;
+	private final char[] localWebsocketKeyStorePassword;
 
 	public FhirClientProviderImpl(FhirContext fhirContext, ReferenceExtractor referenceExtractor, String localBaseUrl,
 			int localReadTimeout, int localConnectTimeout, KeyStore webserviceTrustStore, KeyStore webserviceKeyStore,
-			String webserviceKeyStorePassword, int remoteReadTimeout, int remoteConnectTimeout,
-			String remoteProxyPassword, String remoteProxyUsername, String remoteProxySchemeHostPort,
+			char[] webserviceKeyStorePassword, int remoteReadTimeout, int remoteConnectTimeout,
+			char[] remoteProxyPassword, String remoteProxyUsername, String remoteProxySchemeHostPort,
 			String localWebsocketUrl, KeyStore localWebsocketTrustStore, KeyStore localWebsocketKeyStore,
-			String localWebsocketKeyStorePassword)
+			char[] localWebsocketKeyStorePassword)
 	{
 		this.fhirContext = fhirContext;
 		this.referenceExtractor = referenceExtractor;

@@ -38,10 +38,10 @@ public class ClientProviderTest
 		KeyStore webserviceTrustStore = KeyStore.getInstance(KeyStore.getDefaultType());
 		webserviceTrustStore.load(null);
 
-		String webserviceKeyStorePassword = "password";
+		char[] webserviceKeyStorePassword = "password".toCharArray();
 		int remoteReadTimeout = 0;
 		int remoteConnectTimeout = 0;
-		String remoteProxyPassword = null;
+		char[] remoteProxyPassword = null;
 		String remoteProxyUsername = null;
 		String remoteProxySchemeHostPort = null;
 		FhirContext fhirContext = mock(FhirContext.class);

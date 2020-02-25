@@ -130,14 +130,14 @@ public abstract class AbstractIntegrationTest
 	}
 
 	private static FhirWebserviceClient createWebserviceClient(KeyStore trustStore, KeyStore keyStore,
-			String keyStorePassword, FhirContext fhirContext, ReferenceExtractor referenceExtractor)
+			char[] keyStorePassword, FhirContext fhirContext, ReferenceExtractor referenceExtractor)
 	{
 		return new FhirWebserviceClientJersey(BASE_URL, trustStore, keyStore, keyStorePassword, null, null, null, 500,
 				5000, null, fhirContext, referenceExtractor);
 	}
 
 	private static WebsocketClient createWebsocketClient(KeyStore trustStore, KeyStore keyStore,
-			String keyStorePassword, FhirContext fhirContext, String subscriptionIdPart)
+			char[] keyStorePassword, FhirContext fhirContext, String subscriptionIdPart)
 	{
 		return new WebsocketClientTyrus(fhirContext, URI.create(WEBSOCKET_URL), trustStore, keyStore, keyStorePassword,
 				subscriptionIdPart);

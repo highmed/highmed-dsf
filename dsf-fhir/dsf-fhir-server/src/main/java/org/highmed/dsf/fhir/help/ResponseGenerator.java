@@ -1,6 +1,7 @@
 package org.highmed.dsf.fhir.help;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -66,7 +67,7 @@ public class ResponseGenerator
 		ResponseBuilder b = Response.status(status).entity(resource);
 
 		if (mediaType != null)
-			b = b.type(mediaType);
+			b = b.type(mediaType.withCharset(StandardCharsets.UTF_8.displayName()));
 
 		if (resource.getMeta() != null && resource.getMeta().getLastUpdated() != null
 				&& resource.getMeta().getVersionId() != null)

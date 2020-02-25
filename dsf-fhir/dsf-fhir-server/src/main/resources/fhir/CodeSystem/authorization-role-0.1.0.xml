@@ -2,11 +2,11 @@
 			xsi:schemaLocation="http://hl7.org/fhir http://www.hl7.org/fhir/fhir-base.xsd">
 	<meta>
 		<tag>
-			<system value="http://highmed.org/fhir/CodeSystem/authorization"/>
+			<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
 			<code value="REMOTE"/>
 		</tag>		
 	</meta>
-	<url value="http://highmed.org/fhir/CodeSystem/authorization"/>
+	<url value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
 	<version value="0.1.0"/>
 	<name value="HiGHmed_Authorization_Values"/>
 	<title value="HiGHmed authorization values"/>

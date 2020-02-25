@@ -92,8 +92,8 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 	private final ReferenceExtractor referenceExtractor;
 	private final Map<String, Class<?>> resourceTypeByNames = new HashMap<>();
 
-	public FhirWebserviceClientJersey(String baseUrl, KeyStore trustStore, KeyStore keyStore, String keyStorePassword,
-			String proxySchemeHostPort, String proxyUserName, String proxyPassword, int connectTimeout, int readTimeout,
+	public FhirWebserviceClientJersey(String baseUrl, KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword,
+			String proxySchemeHostPort, String proxyUserName, char[] proxyPassword, int connectTimeout, int readTimeout,
 			ObjectMapper objectMapper, FhirContext fhirContext, ReferenceExtractor referenceExtractor)
 	{
 		super(baseUrl, trustStore, keyStore, keyStorePassword, proxySchemeHostPort, proxyUserName, proxyPassword,
@@ -151,6 +151,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public <R extends Resource> R create(R resource)
 	{
 		Objects.requireNonNull(resource, "resource");
@@ -165,16 +166,13 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		logger.debug("HTTP header Last-Modified: {}", response.getHeaderString(HttpHeaders.LAST_MODIFIED));
 
 		if (Status.CREATED.getStatusCode() == response.getStatus())
-		{
-			@SuppressWarnings("unchecked")
-			R read = (R) response.readEntity(resource.getClass());
-			return read;
-		}
+			return (R) response.readEntity(resource.getClass());
 		else
 			throw handleError(response);
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public <R extends Resource> R createConditionaly(R resource, String ifNoneExistCriteria)
 	{
 		Objects.requireNonNull(resource, "resource");
@@ -191,16 +189,13 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		logger.debug("HTTP header Last-Modified: {}", response.getHeaderString(HttpHeaders.LAST_MODIFIED));
 
 		if (Status.CREATED.getStatusCode() == response.getStatus())
-		{
-			@SuppressWarnings("unchecked")
-			R read = (R) response.readEntity(resource.getClass());
-			return read;
-		}
+			return (R) response.readEntity(resource.getClass());
 		else
 			throw handleError(response);
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public <R extends Resource> R update(R resource)
 	{
 		Objects.requireNonNull(resource, "resource");
@@ -219,16 +214,13 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		logger.debug("HTTP header Last-Modified: {}", response.getHeaderString(HttpHeaders.LAST_MODIFIED));
 
 		if (Status.OK.getStatusCode() == response.getStatus())
-		{
-			@SuppressWarnings("unchecked")
-			R read = (R) response.readEntity(resource.getClass());
-			return read;
-		}
+			return (R) response.readEntity(resource.getClass());
 		else
 			throw handleError(response);
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public <R extends Resource> R updateConditionaly(R resource, Map<String, List<String>> criteria)
 	{
 		Objects.requireNonNull(resource, "resource");
@@ -254,11 +246,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		logger.debug("HTTP header Last-Modified: {}", response.getHeaderString(HttpHeaders.LAST_MODIFIED));
 
 		if (Status.CREATED.getStatusCode() == response.getStatus() || Status.OK.getStatusCode() == response.getStatus())
-		{
-			@SuppressWarnings("unchecked")
-			R read = (R) response.readEntity(resource.getClass());
-			return read;
-		}
+			return (R) response.readEntity(resource.getClass());
 		else
 			throw handleError(response);
 	}
@@ -545,12 +533,6 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		else
 			throw handleError(response);
 	}
-
-	// private <R extends DomainResource> List<R> bundleToList(Class<R> resourceType, Bundle bundle)
-	// {
-	// return bundle.getEntry().stream().filter(c -> resourceType.isInstance(c.getResource()))
-	// .map(c -> resourceType.cast(c.getResource())).collect(Collectors.toList());
-	// }
 
 	@Override
 	public Bundle postBundle(Bundle bundle)

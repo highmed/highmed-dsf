@@ -23,7 +23,7 @@ public class TestFhirWebsocketClient
 	public static void main(String[] args)
 			throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException, InterruptedException
 	{
-		String keyStorePassword = "password";
+		char[] keyStorePassword = "password".toCharArray();
 		KeyStore keyStore = CertificateReader.fromPkcs12(
 				Paths.get("../fhir-demo-cert-generator/cert/test-client_certificate.p12"), keyStorePassword);
 		KeyStore trustStore = CertificateHelper.extractTrust(keyStore);

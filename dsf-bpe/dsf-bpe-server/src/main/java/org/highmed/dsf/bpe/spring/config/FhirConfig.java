@@ -61,7 +61,7 @@ public class FhirConfig
 	private String webserviceKeyStoreFile;
 
 	@Value("${org.highmed.dsf.bpe.fhir.local.webservice.keystore.password}")
-	private String webserviceKeyStorePassword;
+	private char[] webserviceKeyStorePassword;
 
 	@Value("${org.highmed.dsf.bpe.fhir.remote.webservice.readTimeout}")
 	private int remoteReadTimeout;
@@ -70,7 +70,7 @@ public class FhirConfig
 	private int remoteConnectTimeout;
 
 	@Value("${org.highmed.dsf.bpe.fhir.remote.webservice.proxy.password:#{null}}")
-	private String remoteProxyPassword;
+	private char[] remoteProxyPassword;
 
 	@Value("${org.highmed.dsf.bpe.fhir.remote.webservice.proxy.username:#{null}}")
 	private String remoteProxyUsername;
@@ -94,7 +94,7 @@ public class FhirConfig
 	private String localWebsocketKeyStoreFile;
 
 	@Value("${org.highmed.dsf.bpe.fhir.local.websocket.keystore.password}")
-	private String localWebsocketKeyStorePassword;
+	private char[] localWebsocketKeyStorePassword;
 
 	@Value("${org.highmed.dsf.bpe.fhir.task.subscription.searchParameter}")
 	private String subscriptionSearchParameter;
