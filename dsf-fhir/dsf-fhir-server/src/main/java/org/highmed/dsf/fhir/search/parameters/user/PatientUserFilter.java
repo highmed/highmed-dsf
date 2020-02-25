@@ -3,7 +3,6 @@ package org.highmed.dsf.fhir.search.parameters.user;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import org.highmed.dsf.fhir.OrganizationType;
 import org.highmed.dsf.fhir.authentication.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,9 +11,9 @@ public class PatientUserFilter extends AbstractUserFilter
 {
 	private static final Logger logger = LoggerFactory.getLogger(PatientUserFilter.class);
 
-	public PatientUserFilter(OrganizationType organizationType, User user)
+	public PatientUserFilter(User user)
 	{
-		super(organizationType, user);
+		super(user);
 	}
 
 	@Override

@@ -8,7 +8,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.UUID;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.highmed.dsf.fhir.OrganizationType;
 import org.highmed.dsf.fhir.dao.jdbc.EndpointDaoJdbc;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Endpoint.EndpointStatus;
@@ -27,10 +26,9 @@ public class EndpointDaoTest extends AbstractResourceDaoTest<Endpoint, EndpointD
 	}
 
 	@Override
-	protected EndpointDao createDao(BasicDataSource dataSource, FhirContext fhirContext,
-			OrganizationType organizationType)
+	protected EndpointDao createDao(BasicDataSource dataSource, FhirContext fhirContext)
 	{
-		return new EndpointDaoJdbc(dataSource, fhirContext, organizationType);
+		return new EndpointDaoJdbc(dataSource, fhirContext);
 	}
 
 	@Override
@@ -69,10 +67,10 @@ public class EndpointDaoTest extends AbstractResourceDaoTest<Endpoint, EndpointD
 		e.setStatus(EndpointStatus.ACTIVE);
 		e.setAddress(address);
 
-		Endpoint created = ttpDao.create(e);
+		Endpoint created = dao.create(e);
 		assertNotNull(created);
 
-		assertTrue(ttpDao.existsActiveNotDeletedByAddress(address));
+		assertTrue(dao.existsActiveNotDeletedByAddress(address));
 	}
 
 	@Test
@@ -84,10 +82,10 @@ public class EndpointDaoTest extends AbstractResourceDaoTest<Endpoint, EndpointD
 		e.setStatus(EndpointStatus.OFF);
 		e.setAddress(address);
 
-		Endpoint created = ttpDao.create(e);
+		Endpoint created = dao.create(e);
 		assertNotNull(created);
 
-		assertFalse(ttpDao.existsActiveNotDeletedByAddress(address));
+		assertFalse(dao.existsActiveNotDeletedByAddress(address));
 	}
 
 	@Test
@@ -99,10 +97,10 @@ public class EndpointDaoTest extends AbstractResourceDaoTest<Endpoint, EndpointD
 		e.setStatus(EndpointStatus.ACTIVE);
 		e.setAddress(address);
 
-		Endpoint created = ttpDao.create(e);
+		Endpoint created = dao.create(e);
 		assertNotNull(created);
-		ttpDao.delete(UUID.fromString(created.getIdElement().getIdPart()));
+		dao.delete(UUID.fromString(created.getIdElement().getIdPart()));
 
-		assertFalse(ttpDao.existsActiveNotDeletedByAddress(address));
+		assertFalse(dao.existsActiveNotDeletedByAddress(address));
 	}
 }

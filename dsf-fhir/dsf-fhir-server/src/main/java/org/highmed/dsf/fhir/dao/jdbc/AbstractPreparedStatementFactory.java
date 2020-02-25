@@ -36,7 +36,8 @@ abstract class AbstractPreparedStatementFactory<R extends Resource> implements P
 		this.updateSameRowSql = Objects.requireNonNull(updateSameRowSql, "updateSameRowSql");
 	}
 
-	private IParser getJsonParser()
+	@Override
+	public IParser getJsonParser()
 	{
 		IParser p = fhirContext.newJsonParser();
 		p.setStripVersionsFromReferences(false);
@@ -58,7 +59,8 @@ abstract class AbstractPreparedStatementFactory<R extends Resource> implements P
 		return resource;
 	}
 
-	protected final PGobject resourceToPgObject(R resource)
+	@Override
+	public final PGobject resourceToPgObject(R resource)
 	{
 		if (resource == null)
 			return null;

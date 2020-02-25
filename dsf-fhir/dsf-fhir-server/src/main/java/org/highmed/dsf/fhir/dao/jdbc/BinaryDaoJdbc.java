@@ -6,22 +6,22 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.highmed.dsf.fhir.OrganizationType;
 import org.highmed.dsf.fhir.dao.BinaryDao;
 import org.highmed.dsf.fhir.search.parameters.BinaryContentType;
 import org.highmed.dsf.fhir.search.parameters.user.BinaryUserFilter;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.IdType;
+import org.postgresql.util.PGobject;
 
 import ca.uhn.fhir.context.FhirContext;
 
 public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements BinaryDao
 {
-	public BinaryDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext, OrganizationType organizationType)
+	public BinaryDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, Binary.class, "binaries", "binary_json", "binary_id",
-				new PreparedStatementFactoryBinary(fhirContext), organizationType, BinaryUserFilter::new,
-				with(BinaryContentType::new), with());
+				new PreparedStatementFactoryBinary(fhirContext), BinaryUserFilter::new, with(BinaryContentType::new),
+				with());
 	}
 
 	@Override
@@ -47,8 +47,12 @@ public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements Bi
 		try (PreparedStatement statement = connection
 				.prepareStatement("SELECT binary_data FROM binaries WHERE binary_id = ? AND version = ?"))
 		{
-			statement.setObject(1, uuidToPgObject(toUuid(resource.getIdElement().getIdPart())));
-			statement.setLong(2, resource.getMeta().getVersionIdElement().getIdPartAsLong());
+			PGobject uuidObject = getPreparedStatementFactory()
+					.uuidToPgObject(toUuid(resource.getIdElement().getIdPart()));
+			Long version = resource.getMeta().getVersionIdElement().getIdPartAsLong();
+
+			statement.setObject(1, uuidObject);
+			statement.setLong(2, version);
 
 			try (ResultSet result = statement.executeQuery())
 			{

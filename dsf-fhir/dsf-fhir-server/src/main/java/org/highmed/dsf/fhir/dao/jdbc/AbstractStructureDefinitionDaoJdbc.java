@@ -7,10 +7,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.highmed.dsf.fhir.OrganizationType;
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.StructureDefinitionDaoBase;
 import org.highmed.dsf.fhir.search.SearchQueryUserFilter;
@@ -30,12 +29,11 @@ abstract class AbstractStructureDefinitionDaoJdbc extends AbstractResourceDaoJdb
 
 	private final ReadByUrlDaoJdbc<StructureDefinition> readByUrl;
 
-	public AbstractStructureDefinitionDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext,
-			OrganizationType organizationType, String resourceTable, String resourceColumn, String resourceIdColumn,
-			BiFunction<OrganizationType, User, SearchQueryUserFilter> userFilter)
+	public AbstractStructureDefinitionDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext, String resourceTable,
+			String resourceColumn, String resourceIdColumn, Function<User, SearchQueryUserFilter> userFilter)
 	{
 		super(dataSource, fhirContext, StructureDefinition.class, resourceTable, resourceColumn, resourceIdColumn,
-				organizationType, userFilter,
+				userFilter,
 				with(() -> new StructureDefinitionIdentifier(resourceColumn),
 						() -> new StructureDefinitionUrl(resourceColumn),
 						() -> new StructureDefinitionVersion(resourceColumn)),

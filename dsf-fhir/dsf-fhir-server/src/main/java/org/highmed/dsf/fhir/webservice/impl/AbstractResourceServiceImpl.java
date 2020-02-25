@@ -140,7 +140,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 		R createdResource = exceptionHandler.handleSqlException(() ->
 		{
-			try (Connection connection = dao.getNewTransaction())
+			try (Connection connection = dao.newReadWriteTransaction())
 			{
 				try
 				{
@@ -381,7 +381,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		R updatedResource = exceptionHandler
 				.handleSqlExAndResourceNotFoundExAndResouceVersionNonMatchEx(resourceTypeName, () ->
 				{
-					try (Connection connection = dao.getNewTransaction())
+					try (Connection connection = dao.newReadWriteTransaction())
 					{
 						try
 						{

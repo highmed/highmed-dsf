@@ -1,7 +1,6 @@
 package org.highmed.dsf.fhir.dao.jdbc;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.highmed.dsf.fhir.OrganizationType;
 import org.highmed.dsf.fhir.dao.PatientDao;
 import org.highmed.dsf.fhir.search.parameters.PatientActive;
 import org.highmed.dsf.fhir.search.parameters.PatientIdentifier;
@@ -12,10 +11,10 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class PatientDaoJdbc extends AbstractResourceDaoJdbc<Patient> implements PatientDao
 {
-	public PatientDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext, OrganizationType organizationType)
+	public PatientDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
 	{
-		super(dataSource, fhirContext, Patient.class, "patients", "patient", "patient_id", organizationType,
-				PatientUserFilter::new, with(PatientIdentifier::new, PatientActive::new), with());
+		super(dataSource, fhirContext, Patient.class, "patients", "patient", "patient_id", PatientUserFilter::new,
+				with(PatientIdentifier::new, PatientActive::new), with());
 	}
 
 	@Override

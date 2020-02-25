@@ -8,8 +8,14 @@ import java.util.UUID;
 import org.hl7.fhir.r4.model.Resource;
 import org.postgresql.util.PGobject;
 
+import ca.uhn.fhir.parser.IParser;
+
 interface PreparedStatementFactory<R extends Resource>
 {
+	IParser getJsonParser();
+
+	PGobject resourceToPgObject(R resource);
+
 	PGobject uuidToPgObject(UUID uuid);
 
 	String getCreateSql();

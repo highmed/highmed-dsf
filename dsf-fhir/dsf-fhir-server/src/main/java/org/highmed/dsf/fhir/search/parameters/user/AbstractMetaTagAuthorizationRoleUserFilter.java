@@ -3,7 +3,6 @@ package org.highmed.dsf.fhir.search.parameters.user;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import org.highmed.dsf.fhir.OrganizationType;
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.authentication.UserRole;
 
@@ -11,10 +10,9 @@ abstract class AbstractMetaTagAuthorizationRoleUserFilter extends AbstractUserFi
 {
 	private final String resourceColumn;
 
-	public AbstractMetaTagAuthorizationRoleUserFilter(OrganizationType organizationType, User user,
-			String resourceColumn)
+	public AbstractMetaTagAuthorizationRoleUserFilter(User user, String resourceColumn)
 	{
-		super(organizationType, user);
+		super(user);
 
 		this.resourceColumn = resourceColumn;
 	}

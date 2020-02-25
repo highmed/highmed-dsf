@@ -3,15 +3,14 @@ package org.highmed.dsf.fhir.search.parameters.user;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import org.highmed.dsf.fhir.OrganizationType;
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.authentication.UserRole;
 
 public class BinaryUserFilter extends AbstractUserFilter
 {
-	public BinaryUserFilter(OrganizationType organizationType, User user)
+	public BinaryUserFilter(User user)
 	{
-		super(organizationType, user);
+		super(user);
 	}
 
 	@Override

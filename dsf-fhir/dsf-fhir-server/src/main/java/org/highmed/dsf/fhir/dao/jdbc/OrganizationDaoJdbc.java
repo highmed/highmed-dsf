@@ -25,11 +25,10 @@ public class OrganizationDaoJdbc extends AbstractResourceDaoJdbc<Organization> i
 {
 	private static final Logger logger = LoggerFactory.getLogger(OrganizationDaoJdbc.class);
 
-	public OrganizationDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext,
-			org.highmed.dsf.fhir.OrganizationType organizationType)
+	public OrganizationDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, Organization.class, "organizations", "organization", "organization_id",
-				organizationType, OrganizationUserFilter::new, with(OrganizationName::new, OrganizationEndpoint::new,
+				OrganizationUserFilter::new, with(OrganizationName::new, OrganizationEndpoint::new,
 						OrganizationIdentifier::new, OrganizationActive::new, OrganizationType::new),
 				with(EndpointOrganizationRevInclude::new));
 	}

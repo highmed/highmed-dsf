@@ -13,13 +13,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
-import org.highmed.dsf.fhir.OrganizationType;
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.ResourceDao;
 import org.highmed.dsf.fhir.dao.exception.ResourceDeletedException;
@@ -38,7 +37,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
-import org.postgresql.util.PGobject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -49,8 +47,6 @@ import com.google.gson.JsonParser;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.parser.IParser;
 
 abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDao<R>, InitializingBean
 {
@@ -103,7 +99,6 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	}
 
 	private final DataSource dataSource;
-	private final FhirContext fhirContext;
 	private final Class<R> resourceType;
 	private final String resourceTypeName;
 
@@ -112,8 +107,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	private final String resourceIdColumn;
 
 	private final PreparedStatementFactory<R> preparedStatementFactory;
-	private final OrganizationType organizationType;
-	private final BiFunction<OrganizationType, User, SearchQueryUserFilter> userFilter;
+	private final Function<User, SearchQueryUserFilter> userFilter;
 	private final List<Supplier<SearchQueryParameter<R>>> searchParameterFactories = new ArrayList<>();
 	private final List<Supplier<SearchQueryRevIncludeParameterFactory>> searchRevIncludeParameterFactories = new ArrayList<>();
 
@@ -128,15 +122,14 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	 * created on a request basis
 	 */
 	AbstractResourceDaoJdbc(DataSource dataSource, FhirContext fhirContext, Class<R> resourceType, String resourceTable,
-			String resourceColumn, String resourceIdColumn, OrganizationType organizationType,
-			BiFunction<OrganizationType, User, SearchQueryUserFilter> userFilter,
+			String resourceColumn, String resourceIdColumn, Function<User, SearchQueryUserFilter> userFilter,
 			List<Supplier<SearchQueryParameter<R>>> searchParameterFactories,
 			List<Supplier<SearchQueryRevIncludeParameterFactory>> searchRevIncludeParameterFactories)
 	{
 		this(dataSource, fhirContext, resourceType, resourceTable, resourceColumn, resourceIdColumn,
 				new PreparedStatementFactoryDefault<>(fhirContext, resourceType, resourceTable, resourceIdColumn,
 						resourceColumn),
-				organizationType, userFilter, searchParameterFactories, searchRevIncludeParameterFactories);
+				userFilter, searchParameterFactories, searchRevIncludeParameterFactories);
 	}
 
 	/*
@@ -145,12 +138,11 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	 */
 	AbstractResourceDaoJdbc(DataSource dataSource, FhirContext fhirContext, Class<R> resourceType, String resourceTable,
 			String resourceColumn, String resourceIdColumn, PreparedStatementFactory<R> preparedStatementFactory,
-			OrganizationType organizationType, BiFunction<OrganizationType, User, SearchQueryUserFilter> userFilter,
+			Function<User, SearchQueryUserFilter> userFilter,
 			List<Supplier<SearchQueryParameter<R>>> searchParameterFactories,
 			List<Supplier<SearchQueryRevIncludeParameterFactory>> searchRevIncludeParameterFactories)
 	{
 		this.dataSource = dataSource;
-		this.fhirContext = fhirContext;
 		this.resourceType = resourceType;
 		resourceTypeName = Objects.requireNonNull(resourceType, "resourceType").getAnnotation(ResourceDef.class).name();
 
@@ -160,7 +152,6 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 
 		this.preparedStatementFactory = preparedStatementFactory;
 
-		this.organizationType = organizationType;
 		this.userFilter = userFilter;
 
 		if (searchParameterFactories != null)
@@ -200,6 +191,11 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		return resourceColumn;
 	}
 
+	protected PreparedStatementFactory<R> getPreparedStatementFactory()
+	{
+		return preparedStatementFactory;
+	}
+
 	@Override
 	public String getResourceTypeName()
 	{
@@ -213,7 +209,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	}
 
 	@Override
-	public Connection getNewTransaction() throws SQLException
+	public Connection newReadWriteTransaction() throws SQLException
 	{
 		Connection connection = dataSource.getConnection();
 		connection.setReadOnly(false);
@@ -279,53 +275,10 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 
 	protected abstract R copy(R resource);
 
-	protected final Object resourceToPgObject(R resource)
-	{
-		if (resource == null)
-			return null;
-
-		try
-		{
-			PGobject o = new PGobject();
-			o.setType("JSONB");
-			o.setValue(getJsonParser().encodeResourceToString(resource));
-			return o;
-		}
-		catch (DataFormatException | SQLException e)
-		{
-			throw new RuntimeException(e);
-		}
-	}
-
-	protected final PGobject uuidToPgObject(UUID uuid)
-	{
-		if (uuid == null)
-			return null;
-
-		try
-		{
-			PGobject o = new PGobject();
-			o.setType("UUID");
-			o.setValue(uuid.toString());
-			return o;
-		}
-		catch (DataFormatException | SQLException e)
-		{
-			throw new RuntimeException(e);
-		}
-	}
-
-	private IParser getJsonParser()
-	{
-		IParser p = Objects.requireNonNull(fhirContext, "fhirContext").newJsonParser();
-		p.setStripVersionsFromReferences(false);
-		return p;
-	}
-
 	protected R getResource(ResultSet result, int index) throws SQLException
 	{
 		String json = result.getString(index);
-		return getJsonParser().parseResource(resourceType, json);
+		return preparedStatementFactory.getJsonParser().parseResource(resourceType, json);
 	}
 
 	/* caution: only works because we set all versions as deleted or not deleted in method markDeleted */
@@ -338,7 +291,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 				PreparedStatement statement = connection.prepareStatement("SELECT count(*) FROM " + resourceTable
 						+ " WHERE " + resourceIdColumn + " = ? AND NOT deleted"))
 		{
-			statement.setObject(1, uuidToPgObject(uuid));
+			statement.setObject(1, preparedStatementFactory.uuidToPgObject(uuid));
 
 			logger.trace("Executing query '{}'", statement);
 			try (ResultSet result = statement.executeQuery())
@@ -510,7 +463,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 			try (PreparedStatement statement = connection.prepareStatement("SELECT count(*) FROM " + resourceTable
 					+ " WHERE " + resourceIdColumn + " = ? AND version = ? AND NOT deleted"))
 			{
-				statement.setObject(1, uuidToPgObject(uuid));
+				statement.setObject(1, preparedStatementFactory.uuidToPgObject(uuid));
 				statement.setLong(2, version);
 
 				logger.trace("Executing query '{}'", statement);
@@ -743,7 +696,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		try (PreparedStatement statement = connection.prepareStatement("SELECT version, deleted FROM " + resourceTable
 				+ " WHERE " + resourceIdColumn + " = ? ORDER BY version DESC LIMIT 1"))
 		{
-			statement.setObject(1, uuidToPgObject(uuid));
+			statement.setObject(1, preparedStatementFactory.uuidToPgObject(uuid));
 
 			logger.trace("Executing query '{}'", statement);
 			try (ResultSet result = statement.executeQuery())
@@ -812,7 +765,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 				.prepareStatement("UPDATE " + resourceTable + " SET deleted = ? WHERE " + resourceIdColumn + " = ?"))
 		{
 			statement.setBoolean(1, deleted);
-			statement.setObject(2, uuidToPgObject(uuid));
+			statement.setObject(2, preparedStatementFactory.uuidToPgObject(uuid));
 
 			logger.trace("Executing query '{}'", statement);
 			statement.execute();
@@ -914,7 +867,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		while (it.hasNext())
 		{
 			JsonElement jsonElement = it.next();
-			IBaseResource resource = getJsonParser().parseResource(jsonElement.toString());
+			IBaseResource resource = preparedStatementFactory.getJsonParser().parseResource(jsonElement.toString());
 			if (resource instanceof Resource)
 			{
 				query.modifyIncludeResource((Resource) resource, columnIndex, connection);
@@ -931,7 +884,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	public final SearchQuery<R> createSearchQuery(User user, int page, int count)
 	{
 		return SearchQueryBuilder.create(resourceType, getResourceTable(), getResourceColumn(), page, count)
-				.with(userFilter.apply(organizationType, user))
+				.with(userFilter.apply(user))
 				.with(new ResourceId(getResourceIdColumn()), new ResourceLastUpdated(getResourceColumn()))
 				.with(searchParameterFactories.stream().map(Supplier::get).toArray(SearchQueryParameter[]::new))
 				.withRevInclude(searchRevIncludeParameterFactories.stream().map(Supplier::get)

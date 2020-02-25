@@ -27,7 +27,7 @@
 		<tyrus.version>1.15</tyrus.version>
 		<spring.version>5.2.3.RELEASE</spring.version>
 
-		<hapi.version>4.1.0</hapi.version>
+		<hapi.version>4.2.0</hapi.version>
 	</properties>
 
 	<name>highmed-dsf</name>
@@ -130,7 +130,7 @@
 			<dependency>
 				<groupId>de.hs-heilbronn.mi</groupId>
 				<artifactId>db-test-utils</artifactId>
-				<version>0.5.0</version>
+				<version>0.6.0</version>
 			</dependency>
 
 			<dependency>

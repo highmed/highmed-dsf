@@ -3,7 +3,6 @@ package org.highmed.dsf.fhir.dao;
 import static org.junit.Assert.assertEquals;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.highmed.dsf.fhir.OrganizationType;
 import org.highmed.dsf.fhir.dao.jdbc.TaskDaoJdbc;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.TaskStatus;
@@ -21,9 +20,9 @@ public class TaskDaoTest extends AbstractResourceDaoTest<Task, TaskDao>
 	}
 
 	@Override
-	protected TaskDao createDao(BasicDataSource dataSource, FhirContext fhirContext, OrganizationType organizationType)
+	protected TaskDao createDao(BasicDataSource dataSource, FhirContext fhirContext)
 	{
-		return new TaskDaoJdbc(dataSource, fhirContext, organizationType);
+		return new TaskDaoJdbc(dataSource, fhirContext);
 	}
 
 	@Override

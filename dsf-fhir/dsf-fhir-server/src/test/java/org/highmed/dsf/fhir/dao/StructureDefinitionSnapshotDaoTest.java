@@ -3,7 +3,6 @@ package org.highmed.dsf.fhir.dao;
 import static org.junit.Assert.assertEquals;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.highmed.dsf.fhir.OrganizationType;
 import org.highmed.dsf.fhir.dao.converter.SnapshotInfoConverter;
 import org.highmed.dsf.fhir.dao.jdbc.StructureDefinitionSnapshotDaoJdbc;
 import org.highmed.dsf.fhir.spring.config.JsonConfig;
@@ -27,11 +26,9 @@ public class StructureDefinitionSnapshotDaoTest
 	}
 
 	@Override
-	protected StructureDefinitionSnapshotDao createDao(BasicDataSource dataSource, FhirContext fhirContext,
-			OrganizationType organizationType)
+	protected StructureDefinitionSnapshotDao createDao(BasicDataSource dataSource, FhirContext fhirContext)
 	{
-		return new StructureDefinitionSnapshotDaoJdbc(dataSource, fhirContext, organizationType,
-				new SnapshotInfoConverter(objectMapper));
+		return new StructureDefinitionSnapshotDaoJdbc(dataSource, fhirContext, new SnapshotInfoConverter(objectMapper));
 	}
 
 	@Override

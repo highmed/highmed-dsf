@@ -3,7 +3,6 @@ package org.highmed.dsf.fhir.dao;
 import static org.junit.Assert.assertEquals;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.highmed.dsf.fhir.OrganizationType;
 import org.highmed.dsf.fhir.dao.jdbc.ValueSetDaoJdbc;
 import org.hl7.fhir.r4.model.ValueSet;
 
@@ -20,10 +19,9 @@ public class ValueSetDaoTest extends AbstractResourceDaoTest<ValueSet, ValueSetD
 	}
 
 	@Override
-	protected ValueSetDao createDao(BasicDataSource dataSource, FhirContext fhirContext,
-			OrganizationType organizationType)
+	protected ValueSetDao createDao(BasicDataSource dataSource, FhirContext fhirContext)
 	{
-		return new ValueSetDaoJdbc(dataSource, fhirContext, organizationType);
+		return new ValueSetDaoJdbc(dataSource, fhirContext);
 	}
 
 	@Override
