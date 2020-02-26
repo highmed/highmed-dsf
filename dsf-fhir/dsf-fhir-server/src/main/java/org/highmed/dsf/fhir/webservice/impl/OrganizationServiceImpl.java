@@ -1,5 +1,6 @@
 package org.highmed.dsf.fhir.webservice.impl;
 
+import org.highmed.dsf.fhir.authorization.AuthorizationRuleProvider;
 import org.highmed.dsf.fhir.dao.OrganizationDao;
 import org.highmed.dsf.fhir.event.EventGenerator;
 import org.highmed.dsf.fhir.event.EventManager;
@@ -18,9 +19,11 @@ public class OrganizationServiceImpl extends AbstractResourceServiceImpl<Organiz
 	public OrganizationServiceImpl(String path, String serverBase, int defaultPageCount, OrganizationDao dao,
 			ResourceValidator validator, EventManager eventManager, ExceptionHandler exceptionHandler,
 			EventGenerator eventGenerator, ResponseGenerator responseGenerator, ParameterConverter parameterConverter,
-			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver)
+			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver,
+			AuthorizationRuleProvider authorizationRuleProvider)
 	{
 		super(path, Organization.class, serverBase, defaultPageCount, dao, validator, eventManager, exceptionHandler,
-				eventGenerator, responseGenerator, parameterConverter, referenceExtractor, referenceResolver);
+				eventGenerator, responseGenerator, parameterConverter, referenceExtractor, referenceResolver,
+				authorizationRuleProvider);
 	}
 }

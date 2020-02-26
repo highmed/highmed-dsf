@@ -1,6 +1,8 @@
 package org.highmed.dsf.fhir.spring.config;
 
 import org.highmed.dsf.fhir.authorization.ActivityDefinitionAuthorizationRule;
+import org.highmed.dsf.fhir.authorization.AuthorizationRuleProvider;
+import org.highmed.dsf.fhir.authorization.AuthorizationRuleProviderImpl;
 import org.highmed.dsf.fhir.authorization.BinaryAuthorizationRule;
 import org.highmed.dsf.fhir.authorization.BundleAuthorizationRule;
 import org.highmed.dsf.fhir.authorization.CodeSystemAuthorizationRule;
@@ -159,5 +161,17 @@ public class AuthorizationConfig
 	public ValueSetAuthorizationRule valueSetAuthorizationRule()
 	{
 		return new ValueSetAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver());
+	}
+
+	@Bean
+	public AuthorizationRuleProvider authorizationRuleProvider()
+	{
+		return new AuthorizationRuleProviderImpl(activityDefinitionAuthorizationRule(), binaryAuthorizationRule(),
+				bundleAuthorizationRule(), codeSystemAuthorizationRule(), endpointAuthorizationRule(),
+				groupAuthorizationRule(), healthcareServiceAuthorizationRule(), locationAuthorizationRule(),
+				namingSystemAuthorizationRule(), organizationAuthorizationRule(), patientAuthorizationRule(),
+				practitionerAuthorizationRule(), practitionerRoleAuthorizationRule(), provenanceAuthorizationRule(),
+				researchStudyAuthorizationRule(), structureDefinitionAuthorizationRule(),
+				subscriptionAuthorizationRule(), taskAuthorizationRule(), valueSetAuthorizationRule());
 	}
 }

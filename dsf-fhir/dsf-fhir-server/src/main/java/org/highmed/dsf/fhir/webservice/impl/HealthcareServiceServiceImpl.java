@@ -1,5 +1,6 @@
 package org.highmed.dsf.fhir.webservice.impl;
 
+import org.highmed.dsf.fhir.authorization.AuthorizationRuleProvider;
 import org.highmed.dsf.fhir.dao.HealthcareServiceDao;
 import org.highmed.dsf.fhir.event.EventGenerator;
 import org.highmed.dsf.fhir.event.EventManager;
@@ -18,10 +19,11 @@ public class HealthcareServiceServiceImpl extends AbstractResourceServiceImpl<He
 	public HealthcareServiceServiceImpl(String path, String serverBase, int defaultPageCount, HealthcareServiceDao dao,
 			ResourceValidator validator, EventManager eventManager, ExceptionHandler exceptionHandler,
 			EventGenerator eventGenerator, ResponseGenerator responseGenerator, ParameterConverter parameterConverter,
-			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver)
+			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver,
+			AuthorizationRuleProvider authorizationRuleProvider)
 	{
 		super(path, HealthcareService.class, serverBase, defaultPageCount, dao, validator, eventManager,
 				exceptionHandler, eventGenerator, responseGenerator, parameterConverter, referenceExtractor,
-				referenceResolver);
+				referenceResolver, authorizationRuleProvider);
 	}
 }

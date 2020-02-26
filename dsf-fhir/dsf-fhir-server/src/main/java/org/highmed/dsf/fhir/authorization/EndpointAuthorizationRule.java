@@ -30,8 +30,24 @@ public class EndpointAuthorizationRule extends AbstractAuthorizationRule<Endpoin
 	@Override
 	public Optional<String> reasonReadAllowed(User user, Endpoint existingResource)
 	{
-		// TODO Auto-generated method stub
-		return Optional.empty();
+		if (isLocalUser(user) && hasLocalOrRemoteAuthorizationRole(existingResource))
+		{
+			logger.info(
+					"Read of Endpoint authorized for local user '{}', Endpoint has local or remote authorization role",
+					user.getName());
+			return Optional.of("local user, local or remote authorized Endpoint");
+		}
+		else if (isRemoteUser(user) && hasRemoteAuthorizationRole(existingResource))
+		{
+			logger.info("Read of Endpoint authorized for remote user '{}', Endpoint has remote authorization role",
+					user.getName());
+			return Optional.of("remote user, remote authorized Endpoint");
+		}
+		else
+		{
+			logger.warn("Read of Endpoint unauthorized, no matching user role resource authorization role found");
+			return Optional.empty();
+		}
 	}
 
 	@Override

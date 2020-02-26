@@ -2,8 +2,6 @@ package org.highmed.dsf.fhir.authorization;
 
 import java.util.Optional;
 
-import org.hl7.fhir.r4.model.Resource;
-
 public interface AuthorizationRuleProvider
 {
 	ActivityDefinitionAuthorizationRule getActivityDefinitionAuthorizationRule();
@@ -32,7 +30,7 @@ public interface AuthorizationRuleProvider
 
 	PractitionerRoleAuthorizationRule getPractitionerRoleAuthorizationRule();
 
-	ProvenanceAuthorizationRule getpProvenanceAuthorizationRule();
+	ProvenanceAuthorizationRule getProvenanceAuthorizationRule();
 
 	ResearchStudyAuthorizationRule getResearchStudyAuthorizationRule();
 
@@ -44,7 +42,7 @@ public interface AuthorizationRuleProvider
 
 	ValueSetAuthorizationRule getValueSetAuthorizationRule();
 
-	<R extends Resource> Optional<? extends AuthorizationRule<R>> getAuthorizationRule(Class<R> resourceClass);
+	Optional<AuthorizationRule<?>> getAuthorizationRule(Class<?> resourceClass);
 
 	Optional<AuthorizationRule<?>> getAuthorizationRule(String resourceTypeName);
 }

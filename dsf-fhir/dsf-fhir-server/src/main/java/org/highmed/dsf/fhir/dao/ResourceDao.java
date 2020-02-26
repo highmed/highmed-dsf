@@ -25,7 +25,7 @@ public interface ResourceDao<R extends Resource>
 	Class<R> getResourceType();
 
 	Connection newReadWriteTransaction() throws SQLException;
-	
+
 	/**
 	 * @param resource
 	 *            not <code>null</code>

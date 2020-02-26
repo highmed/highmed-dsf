@@ -34,10 +34,25 @@ public class OrganizationAuthorizationRule extends AbstractAuthorizationRule<Org
 	@Override
 	public Optional<String> reasonReadAllowed(User user, Organization existingResource)
 	{
-		// see create, no two organizations can have the same certificate thumb-print
-
-		// TODO Auto-generated method stub
-		return Optional.empty();
+		if (isLocalUser(user) && hasLocalOrRemoteAuthorizationRole(existingResource))
+		{
+			logger.info(
+					"Read of Organization authorized for local user '{}', Organization has local or remote authorization role",
+					user.getName());
+			return Optional.of("local user, local or remote authorized Organization");
+		}
+		else if (isRemoteUser(user) && hasRemoteAuthorizationRole(existingResource))
+		{
+			logger.info(
+					"Read of Organization authorized for remote user '{}', Organization has remote authorization role",
+					user.getName());
+			return Optional.of("remote user, remote authorized Organization");
+		}
+		else
+		{
+			logger.warn("Read of Organization unauthorized, no matching user role resource authorization role found");
+			return Optional.empty();
+		}
 	}
 
 	@Override

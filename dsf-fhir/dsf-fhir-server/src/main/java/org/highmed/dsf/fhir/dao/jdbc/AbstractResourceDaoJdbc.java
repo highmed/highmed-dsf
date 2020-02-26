@@ -169,6 +169,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		Objects.requireNonNull(resourceColumn, "resourceColumn");
 		Objects.requireNonNull(resourceIdColumn, "resourceIdColumn");
 		Objects.requireNonNull(preparedStatementFactory, "preparedStatementFactory");
+		Objects.requireNonNull(userFilter, "userFilter");
 	}
 
 	protected DataSource getDataSource()
@@ -831,6 +832,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 			}
 		}
 
+		// needs to be filtered by read rules, before returning to user, see rest access layer
 		includes = includes.stream().map(r -> new ResourceDistinctById(r.getIdElement(), r)).distinct()
 				.map(ResourceDistinctById::getResource).collect(Collectors.toList());
 

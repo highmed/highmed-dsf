@@ -156,7 +156,7 @@ public class WebserviceConfig
 				daoConfig.activityDefinitionDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
 				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
 				helperConfig.parameterConverter(), referenceConfig.referenceExtractor(),
-				referenceConfig.referenceResolver());
+				referenceConfig.referenceResolver(), authorizationConfig.authorizationRuleProvider());
 	}
 
 	@Bean
@@ -178,7 +178,7 @@ public class WebserviceConfig
 				daoConfig.codeSystemDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
 				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
 				helperConfig.parameterConverter(), referenceConfig.referenceExtractor(),
-				referenceConfig.referenceResolver());
+				referenceConfig.referenceResolver(), authorizationConfig.authorizationRuleProvider());
 	}
 
 	@Bean
@@ -199,7 +199,8 @@ public class WebserviceConfig
 		return new BinaryServiceImpl(BinaryServiceJaxrs.PATH, serverBase, defaultPageCount, daoConfig.binaryDao(),
 				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
 				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter(),
-				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver());
+				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver(),
+				authorizationConfig.authorizationRuleProvider());
 	}
 
 	@Bean
@@ -220,7 +221,8 @@ public class WebserviceConfig
 		return new BundleServiceImpl(BundleServiceJaxrs.PATH, serverBase, defaultPageCount, daoConfig.bundleDao(),
 				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
 				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter(),
-				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver());
+				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver(),
+				authorizationConfig.authorizationRuleProvider());
 	}
 
 	@Bean
@@ -241,7 +243,8 @@ public class WebserviceConfig
 		return new EndpointServiceImpl(EndpointServiceJaxrs.PATH, serverBase, defaultPageCount, daoConfig.endpointDao(),
 				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
 				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter(),
-				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver());
+				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver(),
+				authorizationConfig.authorizationRuleProvider());
 	}
 
 	@Bean
@@ -262,7 +265,8 @@ public class WebserviceConfig
 		return new GroupServiceImpl(GroupServiceJaxrs.PATH, serverBase, defaultPageCount, daoConfig.groupDao(),
 				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
 				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter(),
-				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver());
+				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver(),
+				authorizationConfig.authorizationRuleProvider());
 	}
 
 	@Bean
@@ -285,7 +289,7 @@ public class WebserviceConfig
 				daoConfig.healthcareServiceDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
 				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
 				helperConfig.parameterConverter(), referenceConfig.referenceExtractor(),
-				referenceConfig.referenceResolver());
+				referenceConfig.referenceResolver(), authorizationConfig.authorizationRuleProvider());
 	}
 
 	@Bean
@@ -306,7 +310,8 @@ public class WebserviceConfig
 		return new LocationServiceImpl(LocationServiceJaxrs.PATH, serverBase, defaultPageCount, daoConfig.locationDao(),
 				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
 				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter(),
-				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver());
+				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver(),
+				authorizationConfig.authorizationRuleProvider());
 	}
 
 	@Bean
@@ -328,7 +333,7 @@ public class WebserviceConfig
 				daoConfig.namingSystemDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
 				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
 				helperConfig.parameterConverter(), referenceConfig.referenceExtractor(),
-				referenceConfig.referenceResolver());
+				referenceConfig.referenceResolver(), authorizationConfig.authorizationRuleProvider());
 	}
 
 	@Bean
@@ -350,7 +355,7 @@ public class WebserviceConfig
 				daoConfig.organizationDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
 				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
 				helperConfig.parameterConverter(), referenceConfig.referenceExtractor(),
-				referenceConfig.referenceResolver());
+				referenceConfig.referenceResolver(), authorizationConfig.authorizationRuleProvider());
 	}
 
 	@Bean
@@ -371,7 +376,8 @@ public class WebserviceConfig
 		return new PatientServiceImpl(PatientServiceJaxrs.PATH, serverBase, defaultPageCount, daoConfig.patientDao(),
 				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
 				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter(),
-				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver());
+				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver(),
+				authorizationConfig.authorizationRuleProvider());
 	}
 
 	@Bean
@@ -394,7 +400,7 @@ public class WebserviceConfig
 				daoConfig.practitionerRoleDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
 				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
 				helperConfig.parameterConverter(), referenceConfig.referenceExtractor(),
-				referenceConfig.referenceResolver());
+				referenceConfig.referenceResolver(), authorizationConfig.authorizationRuleProvider());
 	}
 
 	@Bean
@@ -416,7 +422,7 @@ public class WebserviceConfig
 				daoConfig.practitionerDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
 				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
 				helperConfig.parameterConverter(), referenceConfig.referenceExtractor(),
-				referenceConfig.referenceResolver());
+				referenceConfig.referenceResolver(), authorizationConfig.authorizationRuleProvider());
 	}
 
 	@Bean
@@ -438,7 +444,7 @@ public class WebserviceConfig
 				daoConfig.provenanceDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
 				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
 				helperConfig.parameterConverter(), referenceConfig.referenceExtractor(),
-				referenceConfig.referenceResolver());
+				referenceConfig.referenceResolver(), authorizationConfig.authorizationRuleProvider());
 	}
 
 	@Bean
@@ -460,7 +466,7 @@ public class WebserviceConfig
 				daoConfig.researchStudyDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
 				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
 				helperConfig.parameterConverter(), referenceConfig.referenceExtractor(),
-				referenceConfig.referenceResolver());
+				referenceConfig.referenceResolver(), authorizationConfig.authorizationRuleProvider());
 	}
 
 	@Bean
@@ -482,9 +488,10 @@ public class WebserviceConfig
 		return new StructureDefinitionServiceImpl(StructureDefinitionServiceJaxrs.PATH, serverBase, defaultPageCount,
 				daoConfig.structureDefinitionDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
 				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
-				helperConfig.parameterConverter(), daoConfig.structureDefinitionSnapshotDao(),
-				snapshotConfig.snapshotGenerator(), snapshotConfig.snapshotDependencyAnalyzer(),
-				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver());
+				helperConfig.parameterConverter(), referenceConfig.referenceExtractor(),
+				referenceConfig.referenceResolver(), authorizationConfig.authorizationRuleProvider(),
+				daoConfig.structureDefinitionSnapshotDao(), snapshotConfig.snapshotGenerator(),
+				snapshotConfig.snapshotDependencyAnalyzer());
 	}
 
 	@Bean
@@ -506,7 +513,7 @@ public class WebserviceConfig
 				daoConfig.subscriptionDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
 				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
 				helperConfig.parameterConverter(), referenceConfig.referenceExtractor(),
-				referenceConfig.referenceResolver());
+				referenceConfig.referenceResolver(), authorizationConfig.authorizationRuleProvider());
 	}
 
 	@Bean
@@ -527,7 +534,8 @@ public class WebserviceConfig
 		return new TaskServiceImpl(TaskServiceJaxrs.PATH, serverBase, defaultPageCount, daoConfig.taskDao(),
 				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
 				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter(),
-				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver());
+				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver(),
+				authorizationConfig.authorizationRuleProvider());
 	}
 
 	@Bean
@@ -548,7 +556,8 @@ public class WebserviceConfig
 		return new ValueSetServiceImpl(ValueSetServiceJaxrs.PATH, serverBase, defaultPageCount, daoConfig.valueSetDao(),
 				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
 				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter(),
-				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver());
+				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver(),
+				authorizationConfig.authorizationRuleProvider());
 	}
 
 	@Bean

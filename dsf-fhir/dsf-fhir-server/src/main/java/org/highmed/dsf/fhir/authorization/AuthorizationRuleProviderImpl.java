@@ -88,7 +88,7 @@ public class AuthorizationRuleProviderImpl implements AuthorizationRuleProvider
 		this.subscriptionAuthorizationRule = subscriptionAuthorizationRule;
 		this.taskAuthorizationRule = taskAuthorizationRule;
 		this.valueSetAuthorizationRule = valueSetAuthorizationRule;
-		
+
 		authorizationRulesByResourecClass.put(ActivityDefinition.class, activityDefinitionAuthorizationRule);
 		authorizationRulesByResourecClass.put(Binary.class, binaryAuthorizationRule);
 		authorizationRulesByResourecClass.put(Bundle.class, bundleAuthorizationRule);
@@ -109,7 +109,8 @@ public class AuthorizationRuleProviderImpl implements AuthorizationRuleProvider
 		authorizationRulesByResourecClass.put(Task.class, taskAuthorizationRule);
 		authorizationRulesByResourecClass.put(ValueSet.class, valueSetAuthorizationRule);
 
-		authorizationRulesByResourecClass.forEach((k, v) -> authorizationRulesByResourceTypeName.put(k.getAnnotation(ResourceDef.class).name(), v));
+		authorizationRulesByResourecClass.forEach(
+				(k, v) -> authorizationRulesByResourceTypeName.put(k.getAnnotation(ResourceDef.class).name(), v));
 	}
 
 	@Override
@@ -191,7 +192,7 @@ public class AuthorizationRuleProviderImpl implements AuthorizationRuleProvider
 	}
 
 	@Override
-	public ProvenanceAuthorizationRule getpProvenanceAuthorizationRule()
+	public ProvenanceAuthorizationRule getProvenanceAuthorizationRule()
 	{
 		return provenanceAuthorizationRule;
 	}
@@ -227,11 +228,9 @@ public class AuthorizationRuleProviderImpl implements AuthorizationRuleProvider
 	}
 
 	@Override
-	public <R extends Resource> Optional<? extends AuthorizationRule<R>> getAuthorizationRule(Class<R> resourceClass)
+	public Optional<AuthorizationRule<?>> getAuthorizationRule(Class<?> resourceClass)
 	{
-		@SuppressWarnings("unchecked")
-		AuthorizationRule<R> authorizationRule = (AuthorizationRule<R>) authorizationRulesByResourecClass
-				.get(resourceClass);
+		AuthorizationRule<?> authorizationRule = authorizationRulesByResourecClass.get(resourceClass);
 		return Optional.ofNullable(authorizationRule);
 	}
 

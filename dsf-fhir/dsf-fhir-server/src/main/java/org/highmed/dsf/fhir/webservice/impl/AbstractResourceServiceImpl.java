@@ -28,6 +28,8 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
+import org.highmed.dsf.fhir.authorization.AuthorizationRule;
+import org.highmed.dsf.fhir.authorization.AuthorizationRuleProvider;
 import org.highmed.dsf.fhir.dao.ResourceDao;
 import org.highmed.dsf.fhir.dao.exception.ResourceNotFoundException;
 import org.highmed.dsf.fhir.event.EventGenerator;
@@ -89,11 +91,13 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	protected final ParameterConverter parameterConverter;
 	protected final ReferenceExtractor referenceExtractor;
 	protected final ReferenceResolver referenceResolver;
+	protected final AuthorizationRuleProvider authorizationRuleProvider;
 
 	public AbstractResourceServiceImpl(String path, Class<R> resourceType, String serverBase, int defaultPageCount,
 			D dao, ResourceValidator validator, EventManager eventManager, ExceptionHandler exceptionHandler,
 			EventGenerator eventGenerator, ResponseGenerator responseGenerator, ParameterConverter parameterConverter,
-			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver)
+			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver,
+			AuthorizationRuleProvider authorizationRuleProvider)
 	{
 		super(path);
 
@@ -110,6 +114,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		this.parameterConverter = parameterConverter;
 		this.referenceExtractor = referenceExtractor;
 		this.referenceResolver = referenceResolver;
+		this.authorizationRuleProvider = authorizationRuleProvider;
 	}
 
 	public void afterPropertiesSet() throws Exception
@@ -129,6 +134,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		Objects.requireNonNull(parameterConverter, "parameterConverter");
 		Objects.requireNonNull(referenceExtractor, "referenceExtractor");
 		Objects.requireNonNull(referenceResolver, "referenceResolver");
+		Objects.requireNonNull(authorizationRuleProvider, "authorizationRuleProvider");
 	}
 
 	@Override
@@ -612,6 +618,8 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 		PartialResult<R> result = exceptionHandler.handleSqlException(() -> dao.search(query));
 
+		result = filterIncludeResources(result);
+
 		UriBuilder bundleUri = query.configureBundleUri(UriBuilder.fromPath(serverBase).path(getPath()));
 
 		String format = queryParameters.getFirst(SearchQuery.PARAMETER_FORMAT);
@@ -619,6 +627,40 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		Bundle searchSet = responseGenerator.createSearchSet(result, errors, bundleUri, format, pretty);
 
 		return responseGenerator.response(Status.OK, searchSet, parameterConverter.getMediaType(uri, headers)).build();
+	}
+
+	private PartialResult<R> filterIncludeResources(PartialResult<R> result)
+	{
+		List<Resource> includes = filterIncludeResources(result.getIncludes());
+		return new PartialResult<R>(result.getOverallCount(), result.getPageAndCount(), result.getPartialResult(),
+				includes, result.isCountOnly());
+	}
+
+	private List<Resource> filterIncludeResources(List<Resource> includes)
+	{
+		return includes.stream().filter(this::filterIncludeResource).collect(Collectors.toList());
+	}
+
+	@SuppressWarnings("unchecked")
+	private boolean filterIncludeResource(Resource include)
+	{
+		Optional<AuthorizationRule<? extends Resource>> optRule = authorizationRuleProvider
+				.getAuthorizationRule(include.getClass());
+
+		return optRule.map(rule -> (AuthorizationRule<Resource>) rule)
+				.flatMap(rule -> rule.reasonReadAllowed(getCurrentUser(), include)).map(reason ->
+				{
+					logger.debug("Include resource of type {} with id {}, allowed - {}",
+							include.getClass().getAnnotation(ResourceDef.class).name(),
+							include.getIdElement().getValue(), reason);
+					return true;
+				}).orElseGet(() ->
+				{
+					logger.debug("Include resource of type {} with id {}, filtered (read not allowed)",
+							include.getClass().getAnnotation(ResourceDef.class).name(),
+							include.getIdElement().getValue());
+					return false;
+				});
 	}
 
 	private Optional<Resource> getResource(Parameters parameters, String parameterName)
