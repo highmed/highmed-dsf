@@ -554,6 +554,15 @@ public class ResponseGenerator
 		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
+	public Response badCreateRequestUrl(int bundleIndex, String url)
+	{
+		logger.warn("Bad crate request url {} at bundle index {}", url, bundleIndex);
+
+		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+				"Bad crete request url " + url + " at bundle index " + bundleIndex);
+		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
+	}
+
 	public Response badUpdateRequestUrl(int bundleIndex, String url)
 	{
 		logger.warn("Bad update request url {} at bundle index {}", url, bundleIndex);

@@ -3,6 +3,7 @@ package org.highmed.dsf.fhir.dao.command;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.ws.rs.WebApplicationException;
 
@@ -22,5 +23,5 @@ public interface Command
 	void execute(Map<String, IdType> idTranslationTable, Connection connection)
 			throws SQLException, WebApplicationException;
 
-	BundleEntryComponent postExecute(Connection connection);
+	Optional<BundleEntryComponent> postExecute(Connection connection);
 }

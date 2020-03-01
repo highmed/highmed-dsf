@@ -1,5 +1,6 @@
 package org.highmed.dsf.fhir.authorization;
 
+import java.sql.Connection;
 import java.util.Optional;
 
 import org.highmed.dsf.fhir.authentication.User;
@@ -18,35 +19,36 @@ public class HealthcareServiceAuthorizationRule
 	}
 
 	@Override
-	public Optional<String> reasonCreateAllowed(User user, HealthcareService newResource)
+	public Optional<String> reasonCreateAllowed(Connection connection, User user, HealthcareService newResource)
 	{
 		// TODO Auto-generated method stub
 		return Optional.empty();
 	}
 
 	@Override
-	public Optional<String> reasonReadAllowed(User user, HealthcareService existingResource)
+	public Optional<String> reasonReadAllowed(Connection connection, User user, HealthcareService existingResource)
 	{
 		// TODO Auto-generated method stub
 		return Optional.empty();
 	}
 
 	@Override
-	public Optional<String> reasonUpdateAllowed(User user, HealthcareService oldResource, HealthcareService newResource)
+	public Optional<String> reasonUpdateAllowed(Connection connection, User user, HealthcareService oldResource,
+			HealthcareService newResource)
 	{
 		// TODO Auto-generated method stub
 		return Optional.empty();
 	}
 
 	@Override
-	public Optional<String> reasonDeleteAllowed(User user, HealthcareService oldResource)
+	public Optional<String> reasonDeleteAllowed(Connection connection, User user, HealthcareService oldResource)
 	{
 		// TODO Auto-generated method stub
 		return Optional.empty();
 	}
 
 	@Override
-	public Optional<String> reasonSearchAllowed(User user)
+	public Optional<String> reasonSearchAllowed(Connection connection, User user)
 	{
 		// TODO Auto-generated method stub
 		return Optional.empty();

@@ -1,5 +1,6 @@
 package org.highmed.dsf.fhir.authorization;
 
+import java.sql.Connection;
 import java.util.Optional;
 
 import org.highmed.dsf.fhir.authentication.User;
@@ -17,35 +18,36 @@ public class PractitionerRoleAuthorizationRule extends AbstractAuthorizationRule
 	}
 
 	@Override
-	public Optional<String> reasonCreateAllowed(User user, PractitionerRole newResource)
+	public Optional<String> reasonCreateAllowed(Connection connection, User user, PractitionerRole newResource)
 	{
 		// TODO Auto-generated method stub
 		return Optional.empty();
 	}
 
 	@Override
-	public Optional<String> reasonReadAllowed(User user, PractitionerRole existingResource)
+	public Optional<String> reasonReadAllowed(Connection connection, User user, PractitionerRole existingResource)
 	{
 		// TODO Auto-generated method stub
 		return Optional.empty();
 	}
 
 	@Override
-	public Optional<String> reasonUpdateAllowed(User user, PractitionerRole oldResource, PractitionerRole newResource)
+	public Optional<String> reasonUpdateAllowed(Connection connection, User user, PractitionerRole oldResource,
+			PractitionerRole newResource)
 	{
 		// TODO Auto-generated method stub
 		return Optional.empty();
 	}
 
 	@Override
-	public Optional<String> reasonDeleteAllowed(User user, PractitionerRole oldResource)
+	public Optional<String> reasonDeleteAllowed(Connection connection, User user, PractitionerRole oldResource)
 	{
 		// TODO Auto-generated method stub
 		return Optional.empty();
 	}
 
 	@Override
-	public Optional<String> reasonSearchAllowed(User user)
+	public Optional<String> reasonSearchAllowed(Connection connection, User user)
 	{
 		// TODO Auto-generated method stub
 		return Optional.empty();

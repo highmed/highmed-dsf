@@ -1,5 +1,7 @@
 package org.highmed.dsf.fhir.spring.config;
 
+import org.highmed.dsf.fhir.dao.command.AuthorizationCommandFactory;
+import org.highmed.dsf.fhir.dao.command.AuthorizationCommandFactoryImpl;
 import org.highmed.dsf.fhir.dao.command.CommandFactory;
 import org.highmed.dsf.fhir.dao.command.CommandFactoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,9 @@ public class CommandConfig
 	@Autowired
 	private ReferenceConfig referenceConfig;
 
+	@Autowired
+	private AuthorizationConfig authorizationConfig;
+
 	@Bean
 	public CommandFactory commandFactory()
 	{
@@ -38,6 +43,14 @@ public class CommandConfig
 				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver(),
 				helperConfig.responseGenerator(), helperConfig.exceptionHandler(), eventConfig.eventManager(),
 				eventConfig.eventGenerator(), snapshotConfig.snapshotGenerator(),
-				snapshotConfig.snapshotDependencyAnalyzer(), helperConfig.parameterConverter());
+				snapshotConfig.snapshotDependencyAnalyzer(), helperConfig.parameterConverter(),
+				authorizationCommandFactory());
+	}
+
+	@Bean
+	public AuthorizationCommandFactory authorizationCommandFactory()
+	{
+		return new AuthorizationCommandFactoryImpl(authorizationConfig.authorizationRuleProvider(),
+				helperConfig.responseGenerator());
 	}
 }

@@ -51,11 +51,13 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	protected R createdResource;
 	protected Response responseResult;
 
-	public CreateCommand(int index, User user, Bundle bundle, BundleEntryComponent entry, String serverBase, R resource,
-			D dao, ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
+	public CreateCommand(int index, User user, Bundle bundle, BundleEntryComponent entry, String serverBase,
+			AuthorizationCommandFactory authorizationCommandFactory, R resource, D dao,
+			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
 			ResponseGenerator responseGenerator, EventManager eventManager, EventGenerator eventGenerator)
 	{
-		super(2, index, user, bundle, entry, serverBase, resource, dao, exceptionHandler, parameterConverter);
+		super(2, index, user, bundle, entry, serverBase, authorizationCommandFactory, resource, dao, exceptionHandler,
+				parameterConverter);
 
 		this.responseGenerator = responseGenerator;
 		this.eventManager = eventManager;
@@ -65,14 +67,34 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	@Override
 	public void preExecute(Map<String, IdType> idTranslationTable)
 	{
-		// TODO validate entry.getFullUrl() vs resource.getIdElement()
-		// TODO validate entry.getFullUrl() is urn:uuid:...
+		UriComponents eruComponentes = UriComponentsBuilder.fromUriString(entry.getRequest().getUrl()).build();
+
+		// check standard update request url: Patient
+		if (eruComponentes.getPathSegments().size() == 1 && eruComponentes.getQueryParams().isEmpty())
+		{
+			if (!entry.getFullUrl().startsWith(URL_UUID_PREFIX))
+				throw new WebApplicationException(
+						responseGenerator.badCreateRequestUrl(index, entry.getRequest().getUrl()));
+			else if (resource.hasIdElement() && !resource.getIdElement().getValue().startsWith(URL_UUID_PREFIX))
+				throw new WebApplicationException(responseGenerator.bundleEntryBadResourceId(index,
+						resource.getResourceType().name(), URL_UUID_PREFIX));
+			else if (resource.hasIdElement() && !entry.getFullUrl().equals(resource.getIdElement().getValue()))
+				throw new WebApplicationException(responseGenerator.badBundleEntryFullUrlVsResourceId(index,
+						entry.getFullUrl(), resource.getIdElement().getValue()));
+		}
+
+		// all other request urls
+		else
+			throw new WebApplicationException(
+					responseGenerator.badCreateRequestUrl(index, entry.getRequest().getUrl()));
 	}
 
 	@Override
 	public void execute(Map<String, IdType> idTranslationTable, Connection connection)
 			throws SQLException, WebApplicationException
 	{
+		authorizationCommandFactory.checkCreateAllowed(connection, user, resource);
+
 		Optional<Resource> exists = checkAlreadyExists(connection, entry.getRequest().getIfNoneExist(),
 				resource.getResourceType());
 
@@ -142,7 +164,7 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	}
 
 	@Override
-	public BundleEntryComponent postExecute(Connection connection)
+	public Optional<BundleEntryComponent> postExecute(Connection connection)
 	{
 		if (responseResult == null)
 		{
@@ -168,7 +190,7 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 			response.setEtag(new EntityTag(createdResource.getMeta().getVersionId(), true).toString());
 			response.setLastModified(createdResource.getMeta().getLastUpdated());
 
-			return resultEntry;
+			return Optional.of(resultEntry);
 		}
 		else
 		{
@@ -184,7 +206,7 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 			if (responseResult.getLastModified() != null)
 				response.setLastModified(responseResult.getLastModified());
 
-			return resultEntry;
+			return Optional.of(resultEntry);
 		}
 	}
 

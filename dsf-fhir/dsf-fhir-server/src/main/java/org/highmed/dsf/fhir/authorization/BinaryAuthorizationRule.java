@@ -1,5 +1,6 @@
 package org.highmed.dsf.fhir.authorization;
 
+import java.sql.Connection;
 import java.util.EnumSet;
 import java.util.Optional;
 
@@ -25,7 +26,7 @@ public class BinaryAuthorizationRule extends AbstractAuthorizationRule<Binary, B
 	}
 
 	@Override
-	public Optional<String> reasonCreateAllowed(User user, Binary newResource)
+	public Optional<String> reasonCreateAllowed(Connection connection, User user, Binary newResource)
 	{
 		if (isLocalUser(user))
 		{
@@ -36,7 +37,8 @@ public class BinaryAuthorizationRule extends AbstractAuthorizationRule<Binary, B
 				if (EnumSet.of(ReferenceType.LITERAL_INTERNAL, ReferenceType.LOGICAL)
 						.contains(reference.getType(serverBase)))
 				{
-					Optional<Resource> securityContext = referenceResolver.resolveReference(user, reference);
+					Optional<Resource> securityContext = referenceResolver.resolveReference(user, reference,
+							connection);
 					if (securityContext.isPresent())
 					{
 						if (securityContext.get() instanceof Organization)
@@ -80,14 +82,14 @@ public class BinaryAuthorizationRule extends AbstractAuthorizationRule<Binary, B
 	}
 
 	@Override
-	public Optional<String> reasonReadAllowed(User user, Binary existingResource)
+	public Optional<String> reasonReadAllowed(Connection connection, User user, Binary existingResource)
 	{
 		if (isLocalUser(user))
 		{
 			logger.info("Read of Binary authorized for local user '{}'", user.getName());
 			return Optional.of("local user");
 		}
-		else if (isCurrentUserPartOfReferencedOrganization(user, "Binary.SecurityContext",
+		else if (isCurrentUserPartOfReferencedOrganization(connection, user, "Binary.SecurityContext",
 				existingResource.getSecurityContext()))
 		{
 			logger.info(
@@ -105,7 +107,8 @@ public class BinaryAuthorizationRule extends AbstractAuthorizationRule<Binary, B
 	}
 
 	@Override
-	public Optional<String> reasonUpdateAllowed(User user, Binary oldResource, Binary newResource)
+	public Optional<String> reasonUpdateAllowed(Connection connection, User user, Binary oldResource,
+			Binary newResource)
 	{
 		if (isLocalUser(user))
 		{
@@ -120,8 +123,10 @@ public class BinaryAuthorizationRule extends AbstractAuthorizationRule<Binary, B
 						&& EnumSet.of(ReferenceType.LITERAL_INTERNAL, ReferenceType.LOGICAL)
 								.contains(newReference.getType(serverBase)))
 				{
-					Optional<Resource> oldSecurityContext = referenceResolver.resolveReference(user, oldReference);
-					Optional<Resource> newSecurityContext = referenceResolver.resolveReference(user, newReference);
+					Optional<Resource> oldSecurityContext = referenceResolver.resolveReference(user, oldReference,
+							connection);
+					Optional<Resource> newSecurityContext = referenceResolver.resolveReference(user, newReference,
+							connection);
 					if (oldSecurityContext.isPresent() && newSecurityContext.isPresent())
 					{
 						if (oldSecurityContext.get() instanceof Organization
@@ -167,7 +172,7 @@ public class BinaryAuthorizationRule extends AbstractAuthorizationRule<Binary, B
 	}
 
 	@Override
-	public Optional<String> reasonDeleteAllowed(User user, Binary oldResource)
+	public Optional<String> reasonDeleteAllowed(Connection connection, User user, Binary oldResource)
 	{
 		if (isLocalUser(user))
 		{
@@ -182,7 +187,7 @@ public class BinaryAuthorizationRule extends AbstractAuthorizationRule<Binary, B
 	}
 
 	@Override
-	public Optional<String> reasonSearchAllowed(User user)
+	public Optional<String> reasonSearchAllowed(Connection connection, User user)
 	{
 		logger.info("Search of Binary authorized for {} user '{}', will be fitered by users organization {}",
 				user.getRole(), user.getName(), user.getOrganization().getIdElement().getValueAsString());

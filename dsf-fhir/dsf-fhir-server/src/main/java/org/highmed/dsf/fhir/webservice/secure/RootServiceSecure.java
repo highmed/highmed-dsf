@@ -10,6 +10,7 @@ import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.highmed.dsf.fhir.webservice.specification.RootService;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,21 +50,24 @@ public class RootServiceSecure extends AbstractServiceSecure<RootService> implem
 		}
 		else
 		{
-			audit.info("Handling of transaction or batch bundle allowed for user '{}'", getCurrentUser().getName());
+			audit.info("Handling of transaction or batch bundle allowed for user '{}': {}", getCurrentUser().getName(),
+					reasonHandleBundleAllowed.get());
 			return delegate.handleBundle(bundle, uri, headers);
 		}
 	}
 
 	private Optional<String> reasonHandleBundleAllowed(Bundle bundle)
 	{
-		/*
-		 * TODO check if operation for each entry in transaction / batch bundle is allowed, batch can have not allowed
-		 * operations and will return 403 for those, transaction can't and will return 403 for all
-		 */
-
-		// if (!UserRole.LOCAL.equals(userProvider.getCurrentUser().getRole()))
-		// return Optional.of("Missing role 'LOCAL'");
-		// else
-		return Optional.empty();
+		if (BundleType.BATCH.equals(bundle.getType()) || BundleType.TRANSACTION.equals(bundle.getType()))
+		{
+			logger.info(
+					"Handling of batch or transaction bundles generaly allowed for all, entries will be individualy evaluated");
+			return Optional.of("Allowed for all, entries individualy evaluated");
+		}
+		else
+		{
+			logger.warn("Handling bundle denied, not a batch or transaction bundle");
+			return Optional.empty();
+		}
 	}
 }

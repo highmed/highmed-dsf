@@ -92,8 +92,8 @@ public abstract class AbstractIntegrationTest
 
 	private static final Logger logger = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
-	private static final String BASE_URL = "https://localhost:8001/fhir/";
-	private static final String WEBSOCKET_URL = "wss://localhost:8001/fhir/ws";
+	protected static final String BASE_URL = "https://localhost:8001/fhir/";
+	protected static final String WEBSOCKET_URL = "wss://localhost:8001/fhir/ws";
 
 	private static final Path FHIR_BUNDLE_FILE = Paths.get("target", UUID.randomUUID().toString() + ".xml");
 	private static final List<Path> FILES_TO_DELETE = Arrays.asList(FHIR_BUNDLE_FILE);

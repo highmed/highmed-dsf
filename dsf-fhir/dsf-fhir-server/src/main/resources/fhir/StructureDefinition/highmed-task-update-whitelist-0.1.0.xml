@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <StructureDefinition xmlns="http://hl7.org/fhir">
+  <meta>
+    <tag>
+      <system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
+      <code value="REMOTE"/>
+    </tag>		
+  </meta>
   <url value="http://highmed.org/fhir/StructureDefinition/highmed-task-update-whitelist" />
   <version value="0.1.0" />
   <name value="TaskUpdateWhiteList" />

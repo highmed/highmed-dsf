@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
@@ -51,10 +52,11 @@ public class DeleteCommand extends AbstractCommand implements Command
 	private String id;
 
 	public DeleteCommand(int index, User user, Bundle bundle, BundleEntryComponent entry, String serverBase,
-			ResponseGenerator responseGenerator, DaoProvider daoProvider, ExceptionHandler exceptionHandler,
-			ParameterConverter parameterConverter, EventManager eventManager, EventGenerator eventGenerator)
+			AuthorizationCommandFactory authorizationCommandFactory, ResponseGenerator responseGenerator,
+			DaoProvider daoProvider, ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
+			EventManager eventManager, EventGenerator eventGenerator)
 	{
-		super(1, index, user, bundle, entry, serverBase);
+		super(1, index, user, bundle, entry, serverBase, authorizationCommandFactory);
 
 		this.responseGenerator = responseGenerator;
 		this.daoProvider = daoProvider;
@@ -74,6 +76,7 @@ public class DeleteCommand extends AbstractCommand implements Command
 			throws SQLException, WebApplicationException
 	{
 		UriComponents componentes = UriComponentsBuilder.fromUriString(entry.getRequest().getUrl()).build();
+		resourceTypeName = componentes.getPathSegments().get(0);
 
 		if (componentes.getPathSegments().size() == 2 && componentes.getQueryParams().isEmpty())
 			deleteById(connection, componentes.getPathSegments().get(0), componentes.getPathSegments().get(1));
@@ -83,24 +86,33 @@ public class DeleteCommand extends AbstractCommand implements Command
 		else
 			throw new WebApplicationException(
 					responseGenerator.badDeleteRequestUrl(index, entry.getRequest().getUrl()));
-
-		resourceTypeName = componentes.getPathSegments().get(0);
 	}
 
 	private void deleteById(Connection connection, String resourceTypeName, String id)
 	{
-		Optional<ResourceDao<?>> dao = daoProvider.getDao(resourceTypeName);
+		Optional<ResourceDao<?>> optDao = daoProvider.getDao(resourceTypeName);
 
-		if (dao.isEmpty())
+		if (optDao.isEmpty())
 			throw new WebApplicationException(
 					responseGenerator.resourceTypeNotSupportedByImplementation(index, resourceTypeName));
 		else
 		{
-			deleted = exceptionHandler.handleSqlAndResourceNotFoundException(resourceTypeName,
-					() -> dao.get().deleteWithTransaction(connection, parameterConverter.toUuid(resourceTypeName, id)));
+			@SuppressWarnings("unchecked")
+			ResourceDao<Resource> dao = (ResourceDao<Resource>) optDao.get();
+			UUID uuid = parameterConverter.toUuid(resourceTypeName, id);
 
-			this.resourceType = dao.get().getResourceType();
+			Optional<Resource> dbResource = exceptionHandler
+					.handleSqlException(() -> dao.readIncludingDeletedWithTransaction(connection, uuid));
+
+			dbResource.ifPresent(
+					oldResource -> authorizationCommandFactory.checkDeleteAllowed(connection, user, oldResource));
+
+			deleted = exceptionHandler.handleSqlAndResourceNotFoundException(resourceTypeName,
+					() -> dao.deleteWithTransaction(connection, uuid));
+
+			this.resourceType = dao.getResourceType();
 			this.id = id;
+
 		}
 	}
 
@@ -117,6 +129,8 @@ public class DeleteCommand extends AbstractCommand implements Command
 			Optional<Resource> resourceToDelete = search(connection, dao.get(), queryParameters);
 			if (resourceToDelete.isPresent())
 			{
+				authorizationCommandFactory.checkDeleteAllowed(connection, user, resourceToDelete.get());
+
 				deleted = exceptionHandler.handleSqlAndResourceNotFoundException(resourceTypeName,
 						() -> dao.get().deleteWithTransaction(connection, parameterConverter.toUuid(resourceTypeName,
 								resourceToDelete.get().getIdElement().getIdPart())));
@@ -174,7 +188,7 @@ public class DeleteCommand extends AbstractCommand implements Command
 	}
 
 	@Override
-	public BundleEntryComponent postExecute(Connection connection)
+	public Optional<BundleEntryComponent> postExecute(Connection connection)
 	{
 		try
 		{
@@ -196,6 +210,6 @@ public class DeleteCommand extends AbstractCommand implements Command
 		else
 			response.setStatus(Status.NO_CONTENT.getStatusCode() + " " + Status.NO_CONTENT.getReasonPhrase());
 
-		return resultEntry;
+		return Optional.of(resultEntry);
 	}
 }

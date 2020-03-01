@@ -92,7 +92,8 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		}
 		else
 		{
-			audit.info("Create of resource {} allowed for user '{}'", resourceTypeName, getCurrentUser().getName());
+			audit.info("Create of resource {} allowed for user '{}': {}", resourceTypeName, getCurrentUser().getName(),
+					reasonCreateAllowed.get());
 			return delegate.create(resource, uri, headers);
 		}
 	}
@@ -118,8 +119,8 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 			}
 			else
 			{
-				audit.info("Read of resource {} allowed for user '{}'", entity.getIdElement().getValue(),
-						getCurrentUser().getName());
+				audit.info("Read of resource {} allowed for user '{}': {}", entity.getIdElement().getValue(),
+						getCurrentUser().getName(), reasonReadAllowed.get());
 				return read;
 			}
 		}
@@ -170,8 +171,8 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 			}
 			else
 			{
-				audit.info("Read of resource {} allowed for user '{}'", entity.getIdElement().getValue(),
-						getCurrentUser().getName());
+				audit.info("Read of resource {} allowed for user '{}': {}", entity.getIdElement().getValue(),
+						getCurrentUser().getName(), reasonReadAllowed.get());
 				return read;
 			}
 		}
@@ -233,8 +234,8 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		}
 		else
 		{
-			audit.info("Update of resource {} allowed for user '{}'", oldResource.getIdElement().getValue(),
-					getCurrentUser().getName());
+			audit.info("Update of resource {} allowed for user '{}': {}", oldResource.getIdElement().getValue(),
+					getCurrentUser().getName(), reasonUpdateAllowed.get());
 
 			Response update = delegate.update(id, newResource, uri, headers);
 
@@ -279,7 +280,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 			R dbResource = result.getPartialResult().get(0);
 			IdType dbResourceId = dbResource.getIdElement();
 
-			// update resource has no id
+			// update: resource has no id
 			if (!resource.hasId())
 			{
 				resource.setIdElement(dbResourceId);
@@ -287,15 +288,17 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 				return update(resource.getIdElement().getIdPart(), resource, uri, headers, resource);
 			}
 
-			// update resource has same id
+			// update: resource has same id
 			else if (resource.hasId()
 					&& (!resource.getIdElement().hasBaseUrl()
 							|| serverBase.equals(resource.getIdElement().getBaseUrl()))
 					&& (!resource.getIdElement().hasResourceType()
 							|| resourceTypeName.equals(resource.getIdElement().getResourceType()))
 					&& (dbResourceId.getIdPart().equals(resource.getIdElement().getIdPart())))
+			{
 				// more security checks and audit log in update method
 				return update(resource.getIdElement().getIdPart(), resource, uri, headers, resource);
+			}
 
 			// update resource has different id -> 400 Bad Request
 			else
@@ -373,8 +376,8 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 			}
 			else
 			{
-				audit.info("Delete of resource {} allowed for user '{}'", oldResource.getIdElement().getValue(),
-						getCurrentUser().getName());
+				audit.info("Delete of resource {} allowed for user '{}': {}", oldResource.getIdElement().getValue(),
+						getCurrentUser().getName(), reasonDeleteAllowed.get());
 				return delegate.delete(id, uri, headers);
 			}
 		}
@@ -462,7 +465,8 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		}
 		else
 		{
-			audit.info("Search of resource {} allowed for user '{}'", resourceTypeName, getCurrentUser().getName());
+			audit.info("Search of resource {} allowed for user '{}': {}", resourceTypeName, getCurrentUser().getName(),
+					reasonSearchAllowed.get());
 			return delegate.search(uri, headers);
 		}
 	}

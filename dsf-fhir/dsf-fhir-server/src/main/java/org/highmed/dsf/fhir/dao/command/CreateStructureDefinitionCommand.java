@@ -2,6 +2,7 @@ package org.highmed.dsf.fhir.dao.command;
 
 import java.sql.Connection;
 import java.util.Map;
+import java.util.Optional;
 
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
@@ -35,14 +36,14 @@ public class CreateStructureDefinitionCommand extends CreateCommand<StructureDef
 	private StructureDefinition resourceWithSnapshot;
 
 	public CreateStructureDefinitionCommand(int index, User user, Bundle bundle, BundleEntryComponent entry,
-			String serverBase, StructureDefinition resource, StructureDefinitionDao dao,
-			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
+			String serverBase, AuthorizationCommandFactory authorizationCommandFactory, StructureDefinition resource,
+			StructureDefinitionDao dao, ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
 			ResponseGenerator responseGenerator, EventManager eventManager, EventGenerator eventGenerator,
 			StructureDefinitionSnapshotDao snapshotDao, SnapshotGenerator snapshotGenerator,
 			SnapshotDependencyAnalyzer snapshotDependencyAnalyzer)
 	{
-		super(index, user, bundle, entry, serverBase, resource, dao, exceptionHandler, parameterConverter,
-				responseGenerator, eventManager, eventGenerator);
+		super(index, user, bundle, entry, serverBase, authorizationCommandFactory, resource, dao, exceptionHandler,
+				parameterConverter, responseGenerator, eventManager, eventGenerator);
 
 		this.snapshotDao = snapshotDao;
 		this.snapshotGenerator = snapshotGenerator;
@@ -59,7 +60,7 @@ public class CreateStructureDefinitionCommand extends CreateCommand<StructureDef
 	}
 
 	@Override
-	public BundleEntryComponent postExecute(Connection connection)
+	public Optional<BundleEntryComponent> postExecute(Connection connection)
 	{
 		if (responseResult != null)
 			return super.postExecute(connection);

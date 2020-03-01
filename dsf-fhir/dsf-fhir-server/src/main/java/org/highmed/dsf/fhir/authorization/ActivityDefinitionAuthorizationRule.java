@@ -1,5 +1,6 @@
 package org.highmed.dsf.fhir.authorization;
 
+import java.sql.Connection;
 import java.util.Optional;
 
 import org.highmed.dsf.fhir.authentication.User;
@@ -18,21 +19,21 @@ public class ActivityDefinitionAuthorizationRule
 	}
 
 	@Override
-	public Optional<String> reasonCreateAllowed(User user, ActivityDefinition newResource)
+	public Optional<String> reasonCreateAllowed(Connection connection, User user, ActivityDefinition newResource)
 	{
 		// TODO Auto-generated method stub
 		return Optional.empty();
 	}
 
 	@Override
-	public Optional<String> reasonReadAllowed(User user, ActivityDefinition existingResource)
+	public Optional<String> reasonReadAllowed(Connection connection, User user, ActivityDefinition existingResource)
 	{
 		// TODO Auto-generated method stub
 		return Optional.empty();
 	}
 
 	@Override
-	public Optional<String> reasonUpdateAllowed(User user, ActivityDefinition oldResource,
+	public Optional<String> reasonUpdateAllowed(Connection connection, User user, ActivityDefinition oldResource,
 			ActivityDefinition newResource)
 	{
 		// TODO Auto-generated method stub
@@ -40,14 +41,14 @@ public class ActivityDefinitionAuthorizationRule
 	}
 
 	@Override
-	public Optional<String> reasonDeleteAllowed(User user, ActivityDefinition oldResource)
+	public Optional<String> reasonDeleteAllowed(Connection connection, User user, ActivityDefinition oldResource)
 	{
 		// TODO Auto-generated method stub
 		return Optional.empty();
 	}
 
 	@Override
-	public Optional<String> reasonSearchAllowed(User user)
+	public Optional<String> reasonSearchAllowed(Connection connection, User user)
 	{
 		// TODO Auto-generated method stub
 		return Optional.empty();

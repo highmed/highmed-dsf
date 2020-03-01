@@ -1,5 +1,7 @@
 package org.highmed.dsf.fhir.authorization;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.Objects;
@@ -52,6 +54,76 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		Objects.requireNonNull(daoProvider, "daoProvider");
 	}
 
+	@Override
+	public final Optional<String> reasonCreateAllowed(User user, R newResource)
+	{
+		try (Connection connection = daoProvider.newReadOnlyAutoCommitTransaction())
+		{
+			return reasonCreateAllowed(connection, user, newResource);
+		}
+		catch (SQLException e)
+		{
+			logger.warn("Error while accessing database", e);
+			throw new RuntimeException(e);
+		}
+	}
+
+	@Override
+	public final Optional<String> reasonReadAllowed(User user, R existingResource)
+	{
+		try (Connection connection = daoProvider.newReadOnlyAutoCommitTransaction())
+		{
+			return reasonReadAllowed(connection, user, existingResource);
+		}
+		catch (SQLException e)
+		{
+			logger.warn("Error while accessing database", e);
+			throw new RuntimeException(e);
+		}
+	}
+
+	@Override
+	public final Optional<String> reasonUpdateAllowed(User user, R oldResource, R newResource)
+	{
+		try (Connection connection = daoProvider.newReadOnlyAutoCommitTransaction())
+		{
+			return reasonUpdateAllowed(connection, user, oldResource, newResource);
+		}
+		catch (SQLException e)
+		{
+			logger.warn("Error while accessing database", e);
+			throw new RuntimeException(e);
+		}
+	}
+
+	@Override
+	public final Optional<String> reasonDeleteAllowed(User user, R oldResource)
+	{
+		try (Connection connection = daoProvider.newReadOnlyAutoCommitTransaction())
+		{
+			return reasonDeleteAllowed(connection, user, oldResource);
+		}
+		catch (SQLException e)
+		{
+			logger.warn("Error while accessing database", e);
+			throw new RuntimeException(e);
+		}
+	}
+
+	@Override
+	public final Optional<String> reasonSearchAllowed(User user)
+	{
+		try (Connection connection = daoProvider.newReadOnlyAutoCommitTransaction())
+		{
+			return reasonSearchAllowed(connection, user);
+		}
+		catch (SQLException e)
+		{
+			logger.warn("Error while accessing database", e);
+			throw new RuntimeException(e);
+		}
+	}
+
 	protected final boolean isLocalUser(User user)
 	{
 		return user != null && UserRole.LOCAL.equals(user.getRole());
@@ -86,14 +158,15 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 				c -> SearchQueryUserFilter.AUTHORIZATION_ROLE_SYSTEM.equals(c.getSystem()) && role.equals(c.getCode()));
 	}
 
-	protected final boolean isCurrentUserPartOfReferencedOrganizations(User user, String referenceLocation,
-			Collection<? extends Reference> references)
+	protected final boolean isCurrentUserPartOfReferencedOrganizations(Connection connection, User user,
+			String referenceLocation, Collection<? extends Reference> references)
 	{
-		return references.stream().anyMatch(r -> isCurrentUserPartOfReferencedOrganization(user, referenceLocation, r));
+		return references.stream()
+				.anyMatch(r -> isCurrentUserPartOfReferencedOrganization(connection, user, referenceLocation, r));
 	}
 
-	protected final boolean isCurrentUserPartOfReferencedOrganization(User user, String referenceLocation,
-			Reference reference)
+	protected final boolean isCurrentUserPartOfReferencedOrganization(Connection connection, User user,
+			String referenceLocation, Reference reference)
 	{
 		if (reference == null)
 		{
@@ -112,13 +185,13 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 				return false;
 			}
 
-			Optional<Resource> resource = referenceResolver.resolveReference(user, resReference);
+			Optional<Resource> resource = referenceResolver.resolveReference(user, resReference, connection);
 			if (resource.isPresent() && resource.get() instanceof Organization)
 			{
 				boolean sameOrganization = user.getOrganization().getIdElement().equals(resource.get().getIdElement());
 				if (!sameOrganization)
 					logger.warn(
-							"Current user not part organization {} while checking if user part of referenced organization",
+							"Current user not part of organization {} while checking if user part of referenced organization",
 							resource.get().getIdElement().getValue());
 
 				return sameOrganization;
@@ -131,5 +204,4 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 			}
 		}
 	}
-
 }

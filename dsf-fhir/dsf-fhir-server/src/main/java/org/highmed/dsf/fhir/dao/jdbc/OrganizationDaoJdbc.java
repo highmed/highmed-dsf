@@ -124,4 +124,38 @@ public class OrganizationDaoJdbc extends AbstractResourceDaoJdbc<Organization> i
 			}
 		}
 	}
+
+	@Override
+	public boolean existsNotDeletedByThumbprintWithTransaction(Connection connection, String thumbprintHex)
+			throws SQLException
+	{
+		if (thumbprintHex == null || thumbprintHex.isBlank())
+			return false;
+
+		try (PreparedStatement statement = connection.prepareStatement(
+				"SELECT organization FROM current_organizations WHERE organization->'extension' @> ?::jsonb"))
+		{
+			String search = "[{\"url\": \"http://highmed.org/fhir/StructureDefinition/certificate-thumbprint\", \"valueString\": \""
+					+ thumbprintHex + "\"}]";
+			statement.setString(1, search);
+
+			logger.trace("Executing query '{}'", statement);
+			try (ResultSet result = statement.executeQuery())
+			{
+				if (result.next())
+				{
+					Organization organization = getResource(result, 1);
+					logger.debug("Organization with thumprint {}, IdPart {} found", thumbprintHex,
+							organization.getIdElement().getIdPart());
+					return true;
+				}
+				else
+				{
+					logger.debug("Organization with thumprint {} not found", thumbprintHex);
+					return false;
+				}
+			}
+		}
+	}
+
 }

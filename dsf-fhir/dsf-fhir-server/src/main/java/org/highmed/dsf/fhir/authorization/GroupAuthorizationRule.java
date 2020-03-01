@@ -1,5 +1,6 @@
 package org.highmed.dsf.fhir.authorization;
 
+import java.sql.Connection;
 import java.util.Optional;
 
 import org.highmed.dsf.fhir.authentication.User;
@@ -16,35 +17,35 @@ public class GroupAuthorizationRule extends AbstractAuthorizationRule<Group, Gro
 	}
 
 	@Override
-	public Optional<String> reasonCreateAllowed(User user, Group newResource)
+	public Optional<String> reasonCreateAllowed(Connection connection, User user, Group newResource)
 	{
 		// TODO Auto-generated method stub
 		return Optional.empty();
 	}
 
 	@Override
-	public Optional<String> reasonReadAllowed(User user, Group existingResource)
+	public Optional<String> reasonReadAllowed(Connection connection, User user, Group existingResource)
 	{
 		// TODO Auto-generated method stub
 		return Optional.empty();
 	}
 
 	@Override
-	public Optional<String> reasonUpdateAllowed(User user, Group oldResource, Group newResource)
+	public Optional<String> reasonUpdateAllowed(Connection connection, User user, Group oldResource, Group newResource)
 	{
 		// TODO Auto-generated method stub
 		return Optional.empty();
 	}
 
 	@Override
-	public Optional<String> reasonDeleteAllowed(User user, Group oldResource)
+	public Optional<String> reasonDeleteAllowed(Connection connection, User user, Group oldResource)
 	{
 		// TODO Auto-generated method stub
 		return Optional.empty();
 	}
 
 	@Override
-	public Optional<String> reasonSearchAllowed(User user)
+	public Optional<String> reasonSearchAllowed(Connection connection, User user)
 	{
 		// TODO Auto-generated method stub
 		return Optional.empty();

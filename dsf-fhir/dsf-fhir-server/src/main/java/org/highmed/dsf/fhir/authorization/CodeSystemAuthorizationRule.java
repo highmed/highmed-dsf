@@ -1,5 +1,6 @@
 package org.highmed.dsf.fhir.authorization;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Optional;
 
@@ -21,17 +22,17 @@ public class CodeSystemAuthorizationRule extends AbstractAuthorizationRule<CodeS
 	}
 
 	@Override
-	public Optional<String> reasonCreateAllowed(User user, CodeSystem newResource)
+	public Optional<String> reasonCreateAllowed(Connection connection, User user, CodeSystem newResource)
 	{
 		if (isLocalUser(user))
 		{
-			// TODO move check for url, version, authorization tag, to validation layer
+			// TODO move check for url, version and authorization tag to validation layer
 			if (newResource.hasUrl() && newResource.hasVersion() && hasLocalOrRemoteAuthorizationRole(newResource))
 			{
 				try
 				{
-					Optional<CodeSystem> existing = getDao().readByUrlAndVersion(newResource.getUrl(),
-							newResource.getVersion());
+					Optional<CodeSystem> existing = getDao().readByUrlAndVersionWithTransaction(connection,
+							newResource.getUrl(), newResource.getVersion());
 					if (existing.isEmpty())
 					{
 						logger.info(
@@ -42,7 +43,7 @@ public class CodeSystemAuthorizationRule extends AbstractAuthorizationRule<CodeS
 					else
 					{
 						logger.warn(
-								"Create of CodeSystem unauthorized, CodeSystem wirh url and version already exists");
+								"Create of CodeSystem unauthorized, CodeSystem with url and version already exists");
 						return Optional.empty();
 					}
 				}
@@ -68,7 +69,7 @@ public class CodeSystemAuthorizationRule extends AbstractAuthorizationRule<CodeS
 	}
 
 	@Override
-	public Optional<String> reasonReadAllowed(User user, CodeSystem existingResource)
+	public Optional<String> reasonReadAllowed(Connection connection, User user, CodeSystem existingResource)
 	{
 		if (isLocalUser(user) && hasLocalOrRemoteAuthorizationRole(existingResource))
 		{
@@ -91,20 +92,21 @@ public class CodeSystemAuthorizationRule extends AbstractAuthorizationRule<CodeS
 	}
 
 	@Override
-	public Optional<String> reasonUpdateAllowed(User user, CodeSystem oldResource, CodeSystem newResource)
+	public Optional<String> reasonUpdateAllowed(Connection connection, User user, CodeSystem oldResource,
+			CodeSystem newResource)
 	{
 		if (isLocalUser(user))
 		{
-			// TODO move check for url, version, authorization tag, to validation layer
+			// TODO move check for url, version and authorization tag to validation layer
 			if (newResource.hasUrl() && newResource.hasVersion() && hasLocalOrRemoteAuthorizationRole(newResource))
 			{
 				if (oldResource.getUrl().equals(newResource.getUrl())
 						&& oldResource.getVersion().equals(newResource.getVersion()))
 				{
 					logger.info(
-							"Update of CodeSystem authorized for local user '{}', version and url same as existing one",
+							"Update of CodeSystem authorized for local user '{}', CodeSystem with version and url exists",
 							user.getName());
-					return Optional.of("local user, CodeSystem with version and url does not exist yet");
+					return Optional.of("local user, CodeSystem with version and url exists");
 				}
 				else
 				{
@@ -126,22 +128,22 @@ public class CodeSystemAuthorizationRule extends AbstractAuthorizationRule<CodeS
 	}
 
 	@Override
-	public Optional<String> reasonDeleteAllowed(User user, CodeSystem oldResource)
+	public Optional<String> reasonDeleteAllowed(Connection connection, User user, CodeSystem oldResource)
 	{
 		if (isLocalUser(user))
 		{
-			logger.info("Delete of new CodeSystem authorized for local user '{}'", user.getName());
+			logger.info("Delete of CodeSystem authorized for local user '{}'", user.getName());
 			return Optional.of("local user");
 		}
 		else
 		{
-			logger.warn("Update of CodeSystem unauthorized, not a local user");
+			logger.warn("Delete of CodeSystem unauthorized, not a local user");
 			return Optional.empty();
 		}
 	}
 
 	@Override
-	public Optional<String> reasonSearchAllowed(User user)
+	public Optional<String> reasonSearchAllowed(Connection connection, User user)
 	{
 		logger.info("Search of CodeSystem authorized for {} user '{}', will be fitered by user role", user.getRole(),
 				user.getName());

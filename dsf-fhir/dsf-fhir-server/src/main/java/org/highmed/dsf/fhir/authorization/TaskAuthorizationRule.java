@@ -1,5 +1,6 @@
 package org.highmed.dsf.fhir.authorization;
 
+import java.sql.Connection;
 import java.util.Optional;
 
 import org.highmed.dsf.fhir.authentication.User;
@@ -20,7 +21,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 	}
 
 	@Override
-	public Optional<String> reasonCreateAllowed(User user, Task newResource)
+	public Optional<String> reasonCreateAllowed(Connection connection, User user, Task newResource)
 	{
 		// allowed status draft | requested for all users
 		// task.requester must be organization of current user
@@ -30,14 +31,14 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 	}
 
 	@Override
-	public Optional<String> reasonReadAllowed(User user, Task existingResource)
+	public Optional<String> reasonReadAllowed(Connection connection, User user, Task existingResource)
 	{
 		// TODO Auto-generated method stub
 		return Optional.empty();
 	}
 
 	@Override
-	public Optional<String> reasonUpdateAllowed(User user, Task oldResource, Task newResource)
+	public Optional<String> reasonUpdateAllowed(Connection connection, User user, Task oldResource, Task newResource)
 	{
 		// allowed status change from draft to requested for remote users
 		// update only allowed at status draft for remote users
@@ -49,7 +50,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 	}
 
 	@Override
-	public Optional<String> reasonDeleteAllowed(User user, Task oldResource)
+	public Optional<String> reasonDeleteAllowed(Connection connection, User user, Task oldResource)
 	{
 		// allowed if oldResouce created by current user and status draft
 
@@ -58,7 +59,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 	}
 
 	@Override
-	public Optional<String> reasonSearchAllowed(User user)
+	public Optional<String> reasonSearchAllowed(Connection connection, User user)
 	{
 		logger.info("Search of Task authorized for {} user '{}', will be fitered by users organization {}",
 				user.getRole(), user.getName(), user.getOrganization().getIdElement().getValueAsString());

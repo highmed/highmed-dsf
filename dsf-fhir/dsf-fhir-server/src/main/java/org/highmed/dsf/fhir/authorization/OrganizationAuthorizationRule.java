@@ -1,18 +1,35 @@
 package org.highmed.dsf.fhir.authorization;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.OrganizationDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
+import org.highmed.dsf.fhir.search.PartialResult;
+import org.highmed.dsf.fhir.search.SearchQuery;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.StringType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class OrganizationAuthorizationRule extends AbstractAuthorizationRule<Organization, OrganizationDao>
 {
 	private static final Logger logger = LoggerFactory.getLogger(OrganizationAuthorizationRule.class);
+
+	private static final String IDENTIFIER_SYSTEM = "http://highmed.org/fhir/NamingSystem/organization-identifier";
+	private static final String EXTENSION_THUMBPRINT_URL = "http://highmed.org/fhir/StructureDefinition/certificate-thumbprint";
+	private static final String EXTENSION_THUMBPRINT_VALUE_PATTERN_STRING = "[a-z0-9]{128}";
+	private static final Pattern EXTENSION_THUMBPRINT_VALUE_PATTERN = Pattern
+			.compile(EXTENSION_THUMBPRINT_VALUE_PATTERN_STRING);
 
 	public OrganizationAuthorizationRule(DaoProvider daoProvider, String serverBase,
 			ReferenceResolver referenceResolver)
@@ -21,18 +38,137 @@ public class OrganizationAuthorizationRule extends AbstractAuthorizationRule<Org
 	}
 
 	@Override
-	public Optional<String> reasonCreateAllowed(User user, Organization newResource)
+	public Optional<String> reasonCreateAllowed(Connection connection, User user, Organization newResource)
 	{
+		if (isLocalUser(user))
+		{
+			Optional<String> errors = newResourceOk(newResource);
+			if (errors.isEmpty())
+			{
+				if (!organizationExists(connection, newResource))
+				{
+					logger.info(
+							"Create of Organization authorized for local user '{}', Organization with certificate-thumbprint and identifier does not exist",
+							user.getName());
+					return Optional.of(
+							"local user, Organization with certificate-thumbprint and identifier does not exist yet");
+				}
+				else
+				{
+					logger.warn(
+							"Create of Organization unauthorized, Organization with certificate-thumbprint and identifier already exists");
+					return Optional.empty();
+				}
+			}
+			else
+			{
+				logger.warn("Create of Organization unauthorized, " + errors.get());
+				return Optional.empty();
+			}
+		}
+		else
+		{
+			logger.warn("Create of Organization unauthorized, not a local user");
+			return Optional.empty();
+		}
+
 		// check organization not existing if contains identifier with identifier.system (or extension)
 		// http://highmed.org/fhir/NamingSystem/certificate-thumbprint-hex with same identifier.value
 		// no two organizations can have the same certificate thumb-print
 
-		// TODO Auto-generated method stub
-		return Optional.empty();
+	}
+
+	private Optional<String> newResourceOk(Organization newResource)
+	{
+		List<String> errors = new ArrayList<String>();
+
+		if (newResource.hasIdentifier())
+		{
+			if (newResource.getIdentifier().stream()
+					.map(i -> i.hasSystem() && i.hasValue() && IDENTIFIER_SYSTEM.equals(i.getSystem())).count() != 1)
+			{
+				errors.add("organization.identifier one with system '" + IDENTIFIER_SYSTEM
+						+ "' and non empty value expected");
+			}
+		}
+		else
+		{
+			errors.add("organization.identifier missing");
+		}
+
+		if (newResource.hasExtension())
+		{
+			if (!newResource.getExtension().stream().anyMatch(e -> e.hasUrl() && e.hasValue()
+					&& (e.getValue() instanceof StringType) && EXTENSION_THUMBPRINT_URL.equals(e.getUrl())
+					&& EXTENSION_THUMBPRINT_VALUE_PATTERN.matcher(((StringType) e.getValue()).getValue()).matches()))
+			{
+				errors.add("organization.extension missing extension with url '" + EXTENSION_THUMBPRINT_URL
+						+ "' and value matching " + EXTENSION_THUMBPRINT_VALUE_PATTERN_STRING + " pattern");
+			}
+		}
+		else
+		{
+			errors.add("organization.extension missing");
+		}
+
+		if (!hasLocalOrRemoteAuthorizationRole(newResource))
+		{
+			errors.add("organization missing authorization tag");
+		}
+
+		if (errors.isEmpty())
+			return Optional.empty();
+		else
+			return Optional.of(errors.stream().collect(Collectors.joining(", ")));
+	}
+
+	private boolean organizationExists(Connection connection, Organization newResource)
+	{
+		String identifierValue = newResource.getIdentifier().stream()
+				.filter(i -> IDENTIFIER_SYSTEM.equals(i.getSystem())).map(i -> i.getValue()).findFirst().orElseThrow();
+		String thumbPrintValue = newResource.getExtension().stream()
+				.filter(e -> EXTENSION_THUMBPRINT_URL.equals(e.getUrl()))
+				.map(e -> ((StringType) e.getValue()).getValue()).findFirst().orElseThrow();
+
+		return organizationWithThumbPrintExists(connection, thumbPrintValue)
+				|| organizationWithIdentifierExists(connection, identifierValue);
+	}
+
+	private boolean organizationWithThumbPrintExists(Connection connection, String thumbprintHex)
+	{
+		try
+		{
+			OrganizationDao dao = getDao();
+			return dao.existsNotDeletedByThumbprintWithTransaction(connection, thumbprintHex);
+		}
+		catch (SQLException e)
+		{
+			logger.warn("Error while searching for Endpoint with thumbprint", e);
+			return false;
+		}
+	}
+
+	private boolean organizationWithIdentifierExists(Connection connection, String identifierValue)
+	{
+		Map<String, List<String>> queryParameters = Map.of("identifier",
+				Collections.singletonList(IDENTIFIER_SYSTEM + "|" + identifierValue));
+		OrganizationDao dao = getDao();
+		SearchQuery<Organization> query = dao.createSearchQueryWithoutUserFilter(1, 1)
+				.configureParameters(queryParameters);
+		try
+		{
+			PartialResult<Organization> result = dao.searchWithTransaction(connection, query);
+			return result.getOverallCount() >= 1;
+		}
+		catch (SQLException e)
+		{
+			logger.warn("Error while searching for Endpoint with identifier", e);
+			return false;
+		}
 	}
 
 	@Override
-	public Optional<String> reasonReadAllowed(User user, Organization existingResource)
+	public Optional<String> reasonReadAllowed(Connection connection, User user, Organization existingResource)
 	{
 		if (isLocalUser(user) && hasLocalOrRemoteAuthorizationRole(existingResource))
 		{
@@ -56,21 +192,22 @@ public class OrganizationAuthorizationRule extends AbstractAuthorizationRule<Org
 	}
 
 	@Override
-	public Optional<String> reasonUpdateAllowed(User user, Organization oldResource, Organization newResource)
+	public Optional<String> reasonUpdateAllowed(Connection connection, User user, Organization oldResource,
+			Organization newResource)
 	{
 		// TODO Auto-generated method stub
 		return Optional.empty();
 	}
 
 	@Override
-	public Optional<String> reasonDeleteAllowed(User user, Organization oldResource)
+	public Optional<String> reasonDeleteAllowed(Connection connection, User user, Organization oldResource)
 	{
 		// TODO Auto-generated method stub
 		return Optional.empty();
 	}
 
 	@Override
-	public Optional<String> reasonSearchAllowed(User user)
+	public Optional<String> reasonSearchAllowed(Connection connection, User user)
 	{
 		logger.info("Search of Organization authorized for {} user '{}', will be fitered by user role", user.getRole(),
 				user.getName());

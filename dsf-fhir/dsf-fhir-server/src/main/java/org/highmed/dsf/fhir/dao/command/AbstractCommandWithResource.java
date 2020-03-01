@@ -17,10 +17,10 @@ public abstract class AbstractCommandWithResource<R extends Resource, D extends 
 	protected final ParameterConverter parameterConverter;
 
 	public AbstractCommandWithResource(int transactionPriority, int index, User user, Bundle bundle,
-			BundleEntryComponent entry, String serverBase, R resource, D dao, ExceptionHandler exceptionHandler,
-			ParameterConverter parameterConverter)
+			BundleEntryComponent entry, String serverBase, AuthorizationCommandFactory authorizationCommandFactory,
+			R resource, D dao, ExceptionHandler exceptionHandler, ParameterConverter parameterConverter)
 	{
-		super(transactionPriority, index, user, bundle, entry, serverBase);
+		super(transactionPriority, index, user, bundle, entry, serverBase, authorizationCommandFactory);
 
 		this.resource = resource;
 		this.dao = dao;

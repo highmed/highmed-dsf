@@ -28,6 +28,7 @@ import org.highmed.dsf.fhir.search.parameters.CodeSystemIdentifier;
 import org.highmed.dsf.fhir.search.parameters.CodeSystemStatus;
 import org.highmed.dsf.fhir.search.parameters.CodeSystemUrl;
 import org.highmed.dsf.fhir.search.parameters.CodeSystemVersion;
+import org.highmed.dsf.fhir.search.parameters.EndpointAddress;
 import org.highmed.dsf.fhir.search.parameters.EndpointIdentifier;
 import org.highmed.dsf.fhir.search.parameters.EndpointName;
 import org.highmed.dsf.fhir.search.parameters.EndpointOrganization;
@@ -221,12 +222,13 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 		searchParameters.put(CodeSystem.class,
 				Arrays.asList(codeSystemIdentifier, codeSystemUrl, codeSystemVersion, codeSystemStatus));
 
+		var endpointAddress = createSearchParameter(EndpointAddress.class);
 		var endpointIdentifier = createSearchParameter(EndpointIdentifier.class);
 		var endpointName = createSearchParameter(EndpointName.class);
 		var endpointOrganization = createSearchParameter(EndpointOrganization.class);
 		var endpointStatus = createSearchParameter(EndpointStatus.class);
 		searchParameters.put(Endpoint.class,
-				Arrays.asList(endpointIdentifier, endpointName, endpointOrganization, endpointStatus));
+				Arrays.asList(endpointAddress, endpointIdentifier, endpointName, endpointOrganization, endpointStatus));
 		revIncludeParameters.put(Endpoint.class, Collections.singletonList(OrganizationEndpointRevInclude.class));
 
 		// Group

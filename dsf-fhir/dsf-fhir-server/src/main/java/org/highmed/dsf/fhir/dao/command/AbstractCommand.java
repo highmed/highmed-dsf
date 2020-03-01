@@ -3,9 +3,13 @@ package org.highmed.dsf.fhir.dao.command;
 import org.highmed.dsf.fhir.authentication.User;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AbstractCommand implements Command
 {
+	protected static final Logger audit = LoggerFactory.getLogger("dsf-audit-logger");
+
 	private final int transactionPriority;
 
 	protected final int index;
@@ -16,8 +20,10 @@ public abstract class AbstractCommand implements Command
 
 	protected final String serverBase;
 
+	protected final AuthorizationCommandFactory authorizationCommandFactory;
+
 	public AbstractCommand(int transactionPriority, int index, User user, Bundle bundle, BundleEntryComponent entry,
-			String serverBase)
+			String serverBase, AuthorizationCommandFactory authorizationCommandFactory)
 	{
 		this.transactionPriority = transactionPriority;
 
@@ -27,6 +33,8 @@ public abstract class AbstractCommand implements Command
 		this.bundle = bundle;
 		this.entry = entry;
 		this.serverBase = serverBase;
+
+		this.authorizationCommandFactory = authorizationCommandFactory;
 	}
 
 	@Override

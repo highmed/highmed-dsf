@@ -60,7 +60,6 @@ public abstract class AbstractUrlAndVersionParameter<R extends MetadataResource>
 					return;
 				default:
 					return;
-
 			}
 		else if (subqueryParameterIndex == 2)
 			statement.setString(parameterIndex, valueAndType.version);

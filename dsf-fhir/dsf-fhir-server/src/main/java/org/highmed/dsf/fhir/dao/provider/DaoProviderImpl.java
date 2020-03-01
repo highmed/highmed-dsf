@@ -1,9 +1,13 @@
 package org.highmed.dsf.fhir.dao.provider;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+
+import javax.sql.DataSource;
 
 import org.highmed.dsf.fhir.dao.ActivityDefinitionDao;
 import org.highmed.dsf.fhir.dao.BinaryDao;
@@ -52,6 +56,7 @@ import ca.uhn.fhir.model.api.annotation.ResourceDef;
 
 public class DaoProviderImpl implements DaoProvider, InitializingBean
 {
+	private final DataSource dataSource;
 	private final ActivityDefinitionDao activityDefinitionDao;
 	private final BinaryDao binaryDao;
 	private final BundleDao bundleDao;
@@ -76,8 +81,8 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	private final Map<Class<? extends Resource>, ResourceDao<?>> daosByResourecClass = new HashMap<>();
 	private final Map<String, ResourceDao<?>> daosByResourceTypeName = new HashMap<>();
 
-	public DaoProviderImpl(ActivityDefinitionDao activityDefinitionDao, BinaryDao binaryDao, BundleDao bundleDao,
-			CodeSystemDao codeSystemDao, EndpointDao endpointDao, GroupDao groupDao,
+	public DaoProviderImpl(DataSource dataSource, ActivityDefinitionDao activityDefinitionDao, BinaryDao binaryDao,
+			BundleDao bundleDao, CodeSystemDao codeSystemDao, EndpointDao endpointDao, GroupDao groupDao,
 			HealthcareServiceDao healthcareServiceDao, LocationDao locationDao, NamingSystemDao namingSystemDao,
 			OrganizationDao organizationDao, PatientDao patientDao, PractitionerDao practitionerDao,
 			PractitionerRoleDao practitionerRoleDao, ProvenanceDao provenanceDao, ResearchStudyDao researchStudyDao,
@@ -85,6 +90,7 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 			StructureDefinitionSnapshotDao structureDefinitionSnapshotDao, SubscriptionDao subscriptionDao,
 			TaskDao taskDao, ValueSetDao valueSetDao)
 	{
+		this.dataSource = dataSource;
 		this.activityDefinitionDao = activityDefinitionDao;
 		this.binaryDao = binaryDao;
 		this.bundleDao = bundleDao;
@@ -152,6 +158,28 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 		Objects.requireNonNull(subscriptionDao, "subscriptionDao");
 		Objects.requireNonNull(taskDao, "taskDao");
 		Objects.requireNonNull(valueSetDao, "valueSetDao");
+	}
+
+	@Override
+	public Connection newReadOnlyAutoCommitTransaction() throws SQLException
+	{
+		Connection connection = dataSource.getConnection();
+
+		if (!connection.isReadOnly() || !connection.getAutoCommit())
+			throw new IllegalStateException("read only, auto commit connection expected from data source");
+
+		return connection;
+	}
+
+	@Override
+	public Connection newReadWriteTransaction() throws SQLException
+	{
+		Connection connection = dataSource.getConnection();
+		connection.setReadOnly(false);
+		connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
+		connection.setAutoCommit(false);
+
+		return connection;
 	}
 
 	@Override

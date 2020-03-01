@@ -88,13 +88,36 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 		switch (reference.getType(serverBase))
 		{
 			case LITERAL_INTERNAL:
-				return resolveLiteralInternalReference(reference);
+				return resolveLiteralInternalReference(reference, null);
 			case LITERAL_EXTERNAL:
 				return resolveLiteralExternalReference(reference);
 			case CONDITIONAL:
-				return resolveConditionalReference(user, reference);
+				return resolveConditionalReference(user, reference, null);
 			case LOGICAL:
-				return resolveLogicalReference(user, reference);
+				return resolveLogicalReference(user, reference, null);
+			default:
+				throw new IllegalArgumentException(
+						"Reference of type " + reference.getType(serverBase) + " not supported");
+		}
+	}
+
+	@Override
+	public Optional<Resource> resolveReference(User user, ResourceReference reference, Connection connection)
+	{
+		Objects.requireNonNull(user, "user");
+		Objects.requireNonNull(reference, "reference");
+		Objects.requireNonNull(connection, "connection");
+
+		switch (reference.getType(serverBase))
+		{
+			case LITERAL_INTERNAL:
+				return resolveLiteralInternalReference(reference, connection);
+			case LITERAL_EXTERNAL:
+				return resolveLiteralExternalReference(reference);
+			case CONDITIONAL:
+				return resolveConditionalReference(user, reference, connection);
+			case LOGICAL:
+				return resolveLogicalReference(user, reference, connection);
 			default:
 				throw new IllegalArgumentException(
 						"Reference of type " + reference.getType(serverBase) + " not supported");
@@ -133,7 +156,8 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 		}
 	}
 
-	private Optional<Resource> resolveLiteralInternalReference(ResourceReference resourceReference)
+	private Optional<Resource> resolveLiteralInternalReference(ResourceReference resourceReference,
+			Connection connection)
 	{
 		Objects.requireNonNull(resourceReference, "resourceReference");
 		if (!ReferenceType.LITERAL_INTERNAL.equals(resourceReference.getType(serverBase)))
@@ -162,11 +186,21 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 			Optional<UUID> uuid = parameterConverter.toUuid(id.getIdPart());
 
 			if (!id.hasVersionIdPart())
-				return uuid.flatMap(i -> exceptionHandler.catchAndLogSqlAndResourceDeletedExceptionAndIfReturn(
-						() -> d.read(i), Optional::empty, Optional::empty));
+				return uuid.flatMap(i -> exceptionHandler.catchAndLogSqlAndResourceDeletedExceptionAndIfReturn(() ->
+				{
+					if (connection == null)
+						return d.read(i);
+					else
+						return d.readWithTransaction(connection, i);
+				}, Optional::empty, Optional::empty));
 			else
-				return uuid.flatMap(i -> exceptionHandler.catchAndLogSqlAndResourceDeletedExceptionAndIfReturn(
-						() -> d.readVersion(i, id.getVersionIdPartAsLong()), Optional::empty, Optional::empty));
+				return uuid.flatMap(i -> exceptionHandler.catchAndLogSqlAndResourceDeletedExceptionAndIfReturn(() ->
+				{
+					if (connection == null)
+						return d.readVersion(i, id.getVersionIdPartAsLong());
+					else
+						return d.readVersionWithTransaction(connection, i, id.getVersionIdPartAsLong());
+				}, Optional::empty, Optional::empty));
 		}
 	}
 
@@ -286,7 +320,8 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 		return true; // throws exception if reference could not be resolved
 	}
 
-	private Optional<Resource> resolveConditionalReference(User user, ResourceReference resourceReference)
+	private Optional<Resource> resolveConditionalReference(User user, ResourceReference resourceReference,
+			Connection connection)
 	{
 		Objects.requireNonNull(resourceReference, "resourceReference");
 		if (!ReferenceType.CONDITIONAL.equals(resourceReference.getType(serverBase)))
@@ -320,7 +355,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 				return Optional.empty();
 			}
 
-			return search(user, d, resourceReference, condition.getQueryParams(), true);
+			return search(user, connection, d, resourceReference, condition.getQueryParams(), true);
 		}
 	}
 
@@ -372,7 +407,8 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 		return true; // throws exception if reference could not be resolved
 	}
 
-	private Optional<Resource> resolveLogicalReference(User user, ResourceReference resourceReference)
+	private Optional<Resource> resolveLogicalReference(User user, ResourceReference resourceReference,
+			Connection connection)
 	{
 		Objects.requireNonNull(resourceReference, "resourceReference");
 		if (!ReferenceType.LOGICAL.equals(resourceReference.getType(serverBase)))
@@ -399,7 +435,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 			}
 
 			Identifier targetIdentifier = resourceReference.getReference().getIdentifier();
-			return search(user, d, resourceReference, Map.of("identifier",
+			return search(user, connection, d, resourceReference, Map.of("identifier",
 					Collections.singletonList(targetIdentifier.getSystem() + "|" + targetIdentifier.getValue())), true);
 		}
 	}
@@ -448,8 +484,9 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 		return true; // throws exception if reference could not be resolved
 	}
 
-	private Optional<Resource> search(User user, ResourceDao<?> referenceTargetDao, ResourceReference resourceReference,
-			Map<String, List<String>> queryParameters, boolean logicalNotConditional)
+	private Optional<Resource> search(User user, Connection connection, ResourceDao<?> referenceTargetDao,
+			ResourceReference resourceReference, Map<String, List<String>> queryParameters,
+			boolean logicalNotConditional)
 	{
 		if (Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(queryParameters::containsKey))
 		{
@@ -482,7 +519,13 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 			return Optional.empty();
 		}
 
-		PartialResult<?> result = exceptionHandler.handleSqlException(() -> referenceTargetDao.search(query));
+		PartialResult<?> result = exceptionHandler.handleSqlException(() ->
+		{
+			if (connection == null)
+				return referenceTargetDao.search(query);
+			else
+				return referenceTargetDao.searchWithTransaction(connection, query);
+		});
 
 		if (result.getOverallCount() <= 0)
 		{

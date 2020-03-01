@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
@@ -31,11 +32,13 @@ public class ResolveReferencesCommand<R extends Resource, D extends ResourceDao<
 	private final ReferenceResolver referenceResolver;
 
 	public ResolveReferencesCommand(int index, User user, Bundle bundle, BundleEntryComponent entry, String serverBase,
-			R resource, D dao, ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
+			AuthorizationCommandFactory authorizationCommandFactory, R resource, D dao,
+			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
 			ReferenceExtractor referenceExtractor, ResponseGenerator responseGenerator,
 			ReferenceResolver referenceResolver)
 	{
-		super(4, index, user, bundle, entry, serverBase, resource, dao, exceptionHandler, parameterConverter);
+		super(4, index, user, bundle, entry, serverBase, authorizationCommandFactory, resource, dao, exceptionHandler,
+				parameterConverter);
 
 		this.referenceExtractor = referenceExtractor;
 		this.responseGenerator = responseGenerator;
@@ -128,8 +131,8 @@ public class ResolveReferencesCommand<R extends Resource, D extends ResourceDao<
 	}
 
 	@Override
-	public BundleEntryComponent postExecute(Connection connection)
+	public Optional<BundleEntryComponent> postExecute(Connection connection)
 	{
-		return null;
+		return Optional.empty();
 	}
 }

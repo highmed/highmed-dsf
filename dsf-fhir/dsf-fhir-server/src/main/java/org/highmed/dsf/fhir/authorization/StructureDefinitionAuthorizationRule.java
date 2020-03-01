@@ -1,5 +1,7 @@
 package org.highmed.dsf.fhir.authorization;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Optional;
 
 import org.highmed.dsf.fhir.authentication.User;
@@ -7,10 +9,14 @@ import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.StructureDefinition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class StructureDefinitionAuthorizationRule
 		extends AbstractAuthorizationRule<StructureDefinition, StructureDefinitionDao>
 {
+	private static final Logger logger = LoggerFactory.getLogger(StructureDefinitionAuthorizationRule.class);
+
 	public StructureDefinitionAuthorizationRule(DaoProvider daoProvider, String serverBase,
 			ReferenceResolver referenceResolver)
 	{
@@ -18,24 +24,61 @@ public class StructureDefinitionAuthorizationRule
 	}
 
 	@Override
-	public Optional<String> reasonCreateAllowed(User user, StructureDefinition newResource)
+	public Optional<String> reasonCreateAllowed(Connection connection, User user, StructureDefinition newResource)
 	{
-		// check logged in, check "local" user (local user only could be default)
-		// check against existing profiles, no create if profile with same URL, version and status exists
+		if (isLocalUser(user))
+		{
+			// TODO move check for url, version and authorization tag to validation layer
+			if (newResource.hasUrl() && newResource.hasVersion() && hasLocalOrRemoteAuthorizationRole(newResource))
+			{
+				try
+				{
+					Optional<StructureDefinition> existing = getDao().readByUrlAndVersionWithTransaction(connection,
+							newResource.getUrl(), newResource.getVersion());
+					if (existing.isEmpty())
+					{
+						logger.info(
+								"Create of StructureDefinition authorized for local user '{}', StructureDefinition with version and url does not exist",
+								user.getName());
+						return Optional.of("local user, StructureDefinition with version and url does not exist yet");
+					}
+					else
+					{
+						logger.warn(
+								"Create of StructureDefinition unauthorized, StructureDefinition with url and version already exists");
+						return Optional.empty();
+					}
+				}
+				catch (SQLException e)
+				{
+					logger.warn(
+							"Create of StructureDefinition unauthorized, error while checking for existing StructureDefinition with version and url",
+							e);
+					return Optional.empty();
+				}
+			}
+			else
+			{
+				logger.warn("Create of StructureDefinition unauthorized, missing url or version or authorization tag");
+				return Optional.empty();
+			}
+		}
+		else
+		{
+			logger.warn("Create of StructureDefinition unauthorized, not a local user");
+			return Optional.empty();
+		}
+	}
 
+	@Override
+	public Optional<String> reasonReadAllowed(Connection connection, User user, StructureDefinition existingResource)
+	{
 		// TODO Auto-generated method stub
 		return Optional.empty();
 	}
 
 	@Override
-	public Optional<String> reasonReadAllowed(User user, StructureDefinition existingResource)
-	{
-		// TODO Auto-generated method stub
-		return Optional.empty();
-	}
-
-	@Override
-	public Optional<String> reasonUpdateAllowed(User user, StructureDefinition oldResource,
+	public Optional<String> reasonUpdateAllowed(Connection connection, User user, StructureDefinition oldResource,
 			StructureDefinition newResource)
 	{
 		// check logged in, check "local" user (local user only could be default)
@@ -49,14 +92,14 @@ public class StructureDefinitionAuthorizationRule
 	}
 
 	@Override
-	public Optional<String> reasonDeleteAllowed(User user, StructureDefinition oldResource)
+	public Optional<String> reasonDeleteAllowed(Connection connection, User user, StructureDefinition oldResource)
 	{
 		// TODO Auto-generated method stub
 		return Optional.empty();
 	}
 
 	@Override
-	public Optional<String> reasonSearchAllowed(User user)
+	public Optional<String> reasonSearchAllowed(Connection connection, User user)
 	{
 		// TODO Auto-generated method stub
 		return Optional.empty();

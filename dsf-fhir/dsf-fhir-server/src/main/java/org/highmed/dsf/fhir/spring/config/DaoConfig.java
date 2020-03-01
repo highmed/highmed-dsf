@@ -222,9 +222,10 @@ public class DaoConfig
 	@Bean
 	public DaoProvider daoProvider()
 	{
-		return new DaoProviderImpl(activityDefinitionDao(), binaryDao(), bundleDao(), codeSystemDao(), endpointDao(),
-				groupDao(), healthcareServiceDao(), locationDao(), namingSystemDao(), organizationDao(), patientDao(),
-				practitionerDao(), practitionerRoleDao(), provenanceDao(), researchStudyDao(), structureDefinitionDao(),
-				structureDefinitionSnapshotDao(), subscriptionDao(), taskDao(), valueSetDao());
+		return new DaoProviderImpl(dataSource(), activityDefinitionDao(), binaryDao(), bundleDao(), codeSystemDao(),
+				endpointDao(), groupDao(), healthcareServiceDao(), locationDao(), namingSystemDao(), organizationDao(),
+				patientDao(), practitionerDao(), practitionerRoleDao(), provenanceDao(), researchStudyDao(),
+				structureDefinitionDao(), structureDefinitionSnapshotDao(), subscriptionDao(), taskDao(),
+				valueSetDao());
 	}
 }

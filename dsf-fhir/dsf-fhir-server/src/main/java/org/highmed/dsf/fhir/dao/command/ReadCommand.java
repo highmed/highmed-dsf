@@ -50,13 +50,15 @@ public class ReadCommand extends AbstractCommand implements Command
 
 	private Bundle multipleResult;
 	private Resource singleResult;
+	private OperationOutcome singleResultSearchWarning;
 	private Response responseResult;
 
 	public ReadCommand(int index, User user, Bundle bundle, BundleEntryComponent entry, String serverBase,
-			int defaultPageCount, DaoProvider daoProvider, ParameterConverter parameterConverter,
-			ResponseGenerator responseGenerator, ExceptionHandler exceptionHandler)
+			AuthorizationCommandFactory authorizationCommandFactory, int defaultPageCount, DaoProvider daoProvider,
+			ParameterConverter parameterConverter, ResponseGenerator responseGenerator,
+			ExceptionHandler exceptionHandler)
 	{
-		super(5, index, user, bundle, entry, serverBase);
+		super(5, index, user, bundle, entry, serverBase, authorizationCommandFactory);
 
 		this.defaultPageCount = defaultPageCount;
 
@@ -102,19 +104,13 @@ public class ReadCommand extends AbstractCommand implements Command
 	{
 		Optional<ResourceDao<? extends Resource>> optDao = daoProvider.getDao(resourceTypeName);
 		if (optDao.isEmpty())
-		{
 			responseResult = Response.status(Status.NOT_FOUND).build();
-			return;
-		}
 
 		ResourceDao<? extends Resource> dao = optDao.get();
 		Optional<?> read = exceptionHandler.handleSqlAndResourceDeletedException(resourceTypeName,
 				() -> dao.readWithTransaction(connection, parameterConverter.toUuid(resourceTypeName, id)));
 		if (read.isEmpty())
-		{
 			responseResult = Response.status(Status.NOT_FOUND).build();
-			return;
-		}
 
 		Resource r = (Resource) read.get();
 
@@ -128,6 +124,8 @@ public class ReadCommand extends AbstractCommand implements Command
 			responseResult = Response.notModified(resourceTag).lastModified(r.getMeta().getLastUpdated()).build();
 		else
 			singleResult = r;
+
+		authorizationCommandFactory.checkReadAllowed(connection, user, r);
 	}
 
 	private void readByIdAndVersion(Connection connection, String resourceTypeName, String id, String version)
@@ -135,20 +133,14 @@ public class ReadCommand extends AbstractCommand implements Command
 		Optional<ResourceDao<? extends Resource>> optDao = daoProvider.getDao(resourceTypeName);
 		Optional<Long> longVersion = parameterConverter.toVersion(version);
 		if (optDao.isEmpty() || longVersion.isEmpty())
-		{
 			responseResult = Response.status(Status.NOT_FOUND).build();
-			return;
-		}
 
 		ResourceDao<? extends Resource> dao = optDao.get();
 		Optional<?> read = exceptionHandler.handleSqlAndResourceDeletedException(resourceTypeName,
 				() -> dao.readVersionWithTransaction(connection, parameterConverter.toUuid(resourceTypeName, id),
 						longVersion.get()));
 		if (read.isEmpty())
-		{
 			responseResult = Response.status(Status.NOT_FOUND).build();
-			return;
-		}
 
 		Resource r = (Resource) read.get();
 
@@ -162,6 +154,8 @@ public class ReadCommand extends AbstractCommand implements Command
 			responseResult = Response.notModified(resourceTag).lastModified(r.getMeta().getLastUpdated()).build();
 		else
 			singleResult = r;
+
+		authorizationCommandFactory.checkReadAllowed(connection, user, r);
 	}
 
 	private void readByCondition(Connection connection, String resourceTypeName,
@@ -169,10 +163,7 @@ public class ReadCommand extends AbstractCommand implements Command
 	{
 		Optional<ResourceDao<? extends Resource>> optDao = daoProvider.getDao(resourceTypeName);
 		if (optDao.isEmpty())
-		{
 			responseResult = Response.status(Status.NOT_FOUND).build();
-			return;
-		}
 
 		Integer page = parameterConverter.getFirstInt(cleanQueryParameters, SearchQuery.PARAMETER_PAGE);
 		int effectivePage = page == null ? 1 : page;
@@ -191,27 +182,45 @@ public class ReadCommand extends AbstractCommand implements Command
 		UriBuilder bundleUri = query.configureBundleUri(UriBuilder.fromPath(serverBase + "/" + resourceTypeName));
 
 		multipleResult = responseGenerator.createSearchSet(result, errors, bundleUri, null, null);
+
+		// map single search result from multipleResult field to singleResult field
+		if (multipleResult != null && multipleResult.getEntry().size() == 1)
+		{
+			singleResult = (Resource) multipleResult.getEntry().get(0).getResource();
+			multipleResult = null;
+
+			authorizationCommandFactory.checkReadAllowed(connection, user, singleResult);
+		}
+		else if (multipleResult != null && multipleResult.getEntry().size() == 2
+				&& SearchEntryMode.MATCH.equals(multipleResult.getEntry().get(0).getSearch().getMode())
+				&& SearchEntryMode.OUTCOME.equals(multipleResult.getEntry().get(1).getSearch().getMode()))
+		{
+			singleResult = (Resource) multipleResult.getEntry().get(0).getResource();
+			singleResultSearchWarning = (OperationOutcome) multipleResult.getEntry().get(1).getResource();
+			multipleResult = null;
+
+			authorizationCommandFactory.checkReadAllowed(connection, user, singleResult);
+		}
+		else if (multipleResult != null && multipleResult.getEntry().size() == 2
+				&& SearchEntryMode.MATCH.equals(multipleResult.getEntry().get(1).getSearch().getMode())
+				&& SearchEntryMode.OUTCOME.equals(multipleResult.getEntry().get(0).getSearch().getMode()))
+		{
+			singleResult = (Resource) multipleResult.getEntry().get(1).getResource();
+			singleResultSearchWarning = (OperationOutcome) multipleResult.getEntry().get(0).getResource();
+			multipleResult = null;
+
+			authorizationCommandFactory.checkReadAllowed(connection, user, singleResult);
+		}
+		else
+		{
+			authorizationCommandFactory.checkSearchAllowed(connection, user, resourceTypeName);
+			authorizationCommandFactory.filterIncludeResults(connection, user, multipleResult);
+		}
 	}
 
 	@Override
-	public BundleEntryComponent postExecute(Connection connection)
+	public Optional<BundleEntryComponent> postExecute(Connection connection)
 	{
-		OperationOutcome searchWarning = null;
-
-		if (multipleResult != null && multipleResult.getEntry().size() == 1)
-			singleResult = (Resource) multipleResult.getEntry().get(0).getResource();
-		else if (multipleResult != null && multipleResult.getEntry().size() == 2 && multipleResult.getEntry().stream()
-				.filter(e -> SearchEntryMode.MATCH.equals(e.getSearch().getMode())).count() == 1)
-		{
-			singleResult = (Resource) multipleResult.getEntry().stream()
-					.filter(e -> SearchEntryMode.MATCH.equals(e.getSearch().getMode())).findFirst()
-					.map(BundleEntryComponent::getResource).get();
-
-			searchWarning = (OperationOutcome) multipleResult.getEntry().stream()
-					.filter(e -> SearchEntryMode.OUTCOME.equals(e.getSearch().getMode())).findFirst()
-					.map(BundleEntryComponent::getResource).get();
-		}
-
 		if (singleResult != null)
 		{
 			BundleEntryComponent resultEntry = new BundleEntryComponent();
@@ -225,10 +234,10 @@ public class ReadCommand extends AbstractCommand implements Command
 			response.setLastModified(singleResult.getMeta().getLastUpdated());
 			resultEntry.setResource(singleResult);
 
-			if (searchWarning != null)
-				response.setOutcome(searchWarning);
+			if (singleResultSearchWarning != null)
+				response.setOutcome(singleResultSearchWarning);
 
-			return resultEntry;
+			return Optional.of(resultEntry);
 		}
 		else if (multipleResult != null)
 		{
@@ -237,7 +246,8 @@ public class ReadCommand extends AbstractCommand implements Command
 			BundleEntryResponseComponent response = resultEntry.getResponse();
 			response.setStatus(Status.OK.getStatusCode() + " " + Status.OK.getReasonPhrase());
 			resultEntry.setResource(multipleResult);
-			return resultEntry;
+
+			return Optional.of(resultEntry);
 		}
 		else
 		{
@@ -251,7 +261,7 @@ public class ReadCommand extends AbstractCommand implements Command
 			if (responseResult.getLastModified() != null)
 				response.setLastModified(responseResult.getLastModified());
 
-			return resultEntry;
+			return Optional.of(resultEntry);
 		}
 	}
 }
