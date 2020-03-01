@@ -9,7 +9,7 @@
   <url value="http://highmed.org/fhir/StructureDefinition/highmed-task-request-simple-feasibility" />
   <version value="0.1.0" />
   <name value="TaskRequestSimpleFeasibility" />
-  <status value="active" />
+  <status value="draft" />
   <date value="2019-05-21" />
   <fhirVersion value="4.0.0" />
   <kind value="resource" />

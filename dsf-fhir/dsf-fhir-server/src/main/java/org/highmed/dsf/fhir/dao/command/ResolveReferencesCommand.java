@@ -32,12 +32,12 @@ public class ResolveReferencesCommand<R extends Resource, D extends ResourceDao<
 	private final ReferenceResolver referenceResolver;
 
 	public ResolveReferencesCommand(int index, User user, Bundle bundle, BundleEntryComponent entry, String serverBase,
-			AuthorizationCommandFactory authorizationCommandFactory, R resource, D dao,
+			AuthorizationHelper authorizationHelper, R resource, D dao,
 			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
 			ReferenceExtractor referenceExtractor, ResponseGenerator responseGenerator,
 			ReferenceResolver referenceResolver)
 	{
-		super(4, index, user, bundle, entry, serverBase, authorizationCommandFactory, resource, dao, exceptionHandler,
+		super(4, index, user, bundle, entry, serverBase, authorizationHelper, resource, dao, exceptionHandler,
 				parameterConverter);
 
 		this.referenceExtractor = referenceExtractor;

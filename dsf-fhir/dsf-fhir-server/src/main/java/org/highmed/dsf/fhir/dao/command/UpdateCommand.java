@@ -50,11 +50,11 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	protected R updatedResource;
 
 	public UpdateCommand(int index, User user, Bundle bundle, BundleEntryComponent entry, String serverBase,
-			AuthorizationCommandFactory authorizationCommandFactory, R resource, D dao,
+			AuthorizationHelper authorizationHelper, R resource, D dao,
 			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
 			ResponseGenerator responseGenerator, EventManager eventManager, EventGenerator eventGenerator)
 	{
-		super(3, index, user, bundle, entry, serverBase, authorizationCommandFactory, resource, dao, exceptionHandler,
+		super(3, index, user, bundle, entry, serverBase, authorizationHelper, resource, dao, exceptionHandler,
 				parameterConverter);
 
 		this.responseGenerator = responseGenerator;
@@ -173,7 +173,7 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		else
 		{
 			R oldResource = dbResource.get();
-			authorizationCommandFactory.checkUpdateAllowed(connection, user, oldResource, newResource);
+			authorizationHelper.checkUpdateAllowed(connection, user, oldResource, newResource);
 		}
 	}
 
@@ -208,7 +208,7 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		if (result.getOverallCount() <= 0
 				&& (!resource.hasId() || resource.getIdElement().getValue().startsWith(URL_UUID_PREFIX)))
 		{
-			authorizationCommandFactory.checkCreateAllowed(connection, user, resource);
+			authorizationHelper.checkCreateAllowed(connection, user, resource);
 
 			id = UUID.randomUUID();
 			idTranslationTable.put(entry.getFullUrl(),

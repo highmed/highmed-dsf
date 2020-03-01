@@ -37,13 +37,13 @@ public class UpdateStructureDefinitionCommand extends UpdateCommand<StructureDef
 	private StructureDefinition resourceWithSnapshot;
 
 	public UpdateStructureDefinitionCommand(int index, User user, Bundle bundle, BundleEntryComponent entry,
-			String serverBase, AuthorizationCommandFactory authorizationCommandFactory, StructureDefinition resource,
+			String serverBase, AuthorizationHelper authorizationHelper, StructureDefinition resource,
 			StructureDefinitionDao dao, ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
 			ResponseGenerator responseGenerator, EventManager eventManager, EventGenerator eventGenerator,
 			StructureDefinitionSnapshotDao snapshotDao, SnapshotGenerator snapshotGenerator,
 			SnapshotDependencyAnalyzer snapshotDependencyAnalyzer)
 	{
-		super(index, user, bundle, entry, serverBase, authorizationCommandFactory, resource, dao, exceptionHandler,
+		super(index, user, bundle, entry, serverBase, authorizationHelper, resource, dao, exceptionHandler,
 				parameterConverter, responseGenerator, eventManager, eventGenerator);
 
 		this.snapshotDao = snapshotDao;

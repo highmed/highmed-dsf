@@ -54,11 +54,11 @@ public class ReadCommand extends AbstractCommand implements Command
 	private Response responseResult;
 
 	public ReadCommand(int index, User user, Bundle bundle, BundleEntryComponent entry, String serverBase,
-			AuthorizationCommandFactory authorizationCommandFactory, int defaultPageCount, DaoProvider daoProvider,
+			AuthorizationHelper authorizationHelper, int defaultPageCount, DaoProvider daoProvider,
 			ParameterConverter parameterConverter, ResponseGenerator responseGenerator,
 			ExceptionHandler exceptionHandler)
 	{
-		super(5, index, user, bundle, entry, serverBase, authorizationCommandFactory);
+		super(5, index, user, bundle, entry, serverBase, authorizationHelper);
 
 		this.defaultPageCount = defaultPageCount;
 
@@ -125,7 +125,7 @@ public class ReadCommand extends AbstractCommand implements Command
 		else
 			singleResult = r;
 
-		authorizationCommandFactory.checkReadAllowed(connection, user, r);
+		authorizationHelper.checkReadAllowed(connection, user, r);
 	}
 
 	private void readByIdAndVersion(Connection connection, String resourceTypeName, String id, String version)
@@ -155,7 +155,7 @@ public class ReadCommand extends AbstractCommand implements Command
 		else
 			singleResult = r;
 
-		authorizationCommandFactory.checkReadAllowed(connection, user, r);
+		authorizationHelper.checkReadAllowed(connection, user, r);
 	}
 
 	private void readByCondition(Connection connection, String resourceTypeName,
@@ -189,7 +189,7 @@ public class ReadCommand extends AbstractCommand implements Command
 			singleResult = (Resource) multipleResult.getEntry().get(0).getResource();
 			multipleResult = null;
 
-			authorizationCommandFactory.checkReadAllowed(connection, user, singleResult);
+			authorizationHelper.checkReadAllowed(connection, user, singleResult);
 		}
 		else if (multipleResult != null && multipleResult.getEntry().size() == 2
 				&& SearchEntryMode.MATCH.equals(multipleResult.getEntry().get(0).getSearch().getMode())
@@ -199,7 +199,7 @@ public class ReadCommand extends AbstractCommand implements Command
 			singleResultSearchWarning = (OperationOutcome) multipleResult.getEntry().get(1).getResource();
 			multipleResult = null;
 
-			authorizationCommandFactory.checkReadAllowed(connection, user, singleResult);
+			authorizationHelper.checkReadAllowed(connection, user, singleResult);
 		}
 		else if (multipleResult != null && multipleResult.getEntry().size() == 2
 				&& SearchEntryMode.MATCH.equals(multipleResult.getEntry().get(1).getSearch().getMode())
@@ -209,12 +209,12 @@ public class ReadCommand extends AbstractCommand implements Command
 			singleResultSearchWarning = (OperationOutcome) multipleResult.getEntry().get(0).getResource();
 			multipleResult = null;
 
-			authorizationCommandFactory.checkReadAllowed(connection, user, singleResult);
+			authorizationHelper.checkReadAllowed(connection, user, singleResult);
 		}
 		else
 		{
-			authorizationCommandFactory.checkSearchAllowed(connection, user, resourceTypeName);
-			authorizationCommandFactory.filterIncludeResults(connection, user, multipleResult);
+			authorizationHelper.checkSearchAllowed(connection, user, resourceTypeName);
+			authorizationHelper.filterIncludeResults(connection, user, multipleResult);
 		}
 	}
 

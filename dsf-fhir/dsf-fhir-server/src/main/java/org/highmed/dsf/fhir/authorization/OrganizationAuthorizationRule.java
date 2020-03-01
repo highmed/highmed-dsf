@@ -45,7 +45,7 @@ public class OrganizationAuthorizationRule extends AbstractAuthorizationRule<Org
 			Optional<String> errors = newResourceOk(newResource);
 			if (errors.isEmpty())
 			{
-				if (!organizationExists(connection, newResource))
+				if (!resourceExists(connection, newResource))
 				{
 					logger.info(
 							"Create of Organization authorized for local user '{}', Organization with certificate-thumbprint and identifier does not exist",
@@ -71,11 +71,6 @@ public class OrganizationAuthorizationRule extends AbstractAuthorizationRule<Org
 			logger.warn("Create of Organization unauthorized, not a local user");
 			return Optional.empty();
 		}
-
-		// check organization not existing if contains identifier with identifier.system (or extension)
-		// http://highmed.org/fhir/NamingSystem/certificate-thumbprint-hex with same identifier.value
-		// no two organizations can have the same certificate thumb-print
-
 	}
 
 	private Optional<String> newResourceOk(Organization newResource)
@@ -113,7 +108,7 @@ public class OrganizationAuthorizationRule extends AbstractAuthorizationRule<Org
 
 		if (!hasLocalOrRemoteAuthorizationRole(newResource))
 		{
-			errors.add("organization missing authorization tag");
+			errors.add("missing authorization tag");
 		}
 
 		if (errors.isEmpty())
@@ -122,15 +117,15 @@ public class OrganizationAuthorizationRule extends AbstractAuthorizationRule<Org
 			return Optional.of(errors.stream().collect(Collectors.joining(", ")));
 	}
 
-	private boolean organizationExists(Connection connection, Organization newResource)
+	private boolean resourceExists(Connection connection, Organization newResource)
 	{
 		String identifierValue = newResource.getIdentifier().stream()
 				.filter(i -> IDENTIFIER_SYSTEM.equals(i.getSystem())).map(i -> i.getValue()).findFirst().orElseThrow();
-		String thumbPrintValue = newResource.getExtension().stream()
+		String thumbprintValue = newResource.getExtension().stream()
 				.filter(e -> EXTENSION_THUMBPRINT_URL.equals(e.getUrl()))
 				.map(e -> ((StringType) e.getValue()).getValue()).findFirst().orElseThrow();
 
-		return organizationWithThumbPrintExists(connection, thumbPrintValue)
+		return organizationWithThumbPrintExists(connection, thumbprintValue)
 				|| organizationWithIdentifierExists(connection, identifierValue);
 	}
 
@@ -195,15 +190,78 @@ public class OrganizationAuthorizationRule extends AbstractAuthorizationRule<Org
 	public Optional<String> reasonUpdateAllowed(Connection connection, User user, Organization oldResource,
 			Organization newResource)
 	{
-		// TODO Auto-generated method stub
-		return Optional.empty();
+		if (isLocalUser(user))
+		{
+			Optional<String> errors = newResourceOk(newResource);
+			if (errors.isEmpty())
+			{
+				if (isSame(oldResource, newResource))
+				{
+					logger.info(
+							"Update of Organization authorized for local user '{}', certificate-thumbprint and identifier same as existing Organization",
+							user.getName());
+					return Optional
+							.of("local user; certificate-thumbprint and identifier same as existing Organization");
+
+				}
+				else if (!resourceExists(connection, newResource))
+				{
+					logger.info(
+							"Update of Organization authorized for local user '{}', other Organization with certificate-thumbprint and identifier does not exist",
+							user.getName());
+					return Optional.of(
+							"local user; other Organization with certificate-thumbprint and identifier does not exist yet");
+				}
+				else
+				{
+					logger.warn(
+							"Create of Organization unauthorized, other Organization with certificate-thumbprint and identifier already exists");
+					return Optional.empty();
+				}
+			}
+			else
+			{
+				logger.warn("Update of Organization unauthorized, " + errors.get());
+				return Optional.empty();
+			}
+		}
+		else
+		{
+			logger.warn("Update of Organization unauthorized, not a local user");
+			return Optional.empty();
+		}
+	}
+
+	private boolean isSame(Organization oldResource, Organization newResource)
+	{
+		String oldIdentifierValue = oldResource.getIdentifier().stream()
+				.filter(i -> IDENTIFIER_SYSTEM.equals(i.getSystem())).map(i -> i.getValue()).findFirst().orElseThrow();
+		String oldThumbprintValue = oldResource.getExtension().stream()
+				.filter(e -> EXTENSION_THUMBPRINT_URL.equals(e.getUrl()))
+				.map(e -> ((StringType) e.getValue()).getValue()).findFirst().orElseThrow();
+
+		String newIdentifierValue = newResource.getIdentifier().stream()
+				.filter(i -> IDENTIFIER_SYSTEM.equals(i.getSystem())).map(i -> i.getValue()).findFirst().orElseThrow();
+		String newThumbprintValue = newResource.getExtension().stream()
+				.filter(e -> EXTENSION_THUMBPRINT_URL.equals(e.getUrl()))
+				.map(e -> ((StringType) e.getValue()).getValue()).findFirst().orElseThrow();
+
+		return oldIdentifierValue.equals(newIdentifierValue) && oldThumbprintValue.equals(newThumbprintValue);
 	}
 
 	@Override
 	public Optional<String> reasonDeleteAllowed(Connection connection, User user, Organization oldResource)
 	{
-		// TODO Auto-generated method stub
-		return Optional.empty();
+		if (isLocalUser(user))
+		{
+			logger.info("Delete of Organization authorized for local user '{}'", user.getName());
+			return Optional.of("local user");
+		}
+		else
+		{
+			logger.warn("Delete of Organization unauthorized, not a local user");
+			return Optional.empty();
+		}
 	}
 
 	@Override

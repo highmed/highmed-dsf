@@ -52,11 +52,11 @@ public class DeleteCommand extends AbstractCommand implements Command
 	private String id;
 
 	public DeleteCommand(int index, User user, Bundle bundle, BundleEntryComponent entry, String serverBase,
-			AuthorizationCommandFactory authorizationCommandFactory, ResponseGenerator responseGenerator,
+			AuthorizationHelper authorizationHelper, ResponseGenerator responseGenerator,
 			DaoProvider daoProvider, ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
 			EventManager eventManager, EventGenerator eventGenerator)
 	{
-		super(1, index, user, bundle, entry, serverBase, authorizationCommandFactory);
+		super(1, index, user, bundle, entry, serverBase, authorizationHelper);
 
 		this.responseGenerator = responseGenerator;
 		this.daoProvider = daoProvider;
@@ -105,7 +105,7 @@ public class DeleteCommand extends AbstractCommand implements Command
 					.handleSqlException(() -> dao.readIncludingDeletedWithTransaction(connection, uuid));
 
 			dbResource.ifPresent(
-					oldResource -> authorizationCommandFactory.checkDeleteAllowed(connection, user, oldResource));
+					oldResource -> authorizationHelper.checkDeleteAllowed(connection, user, oldResource));
 
 			deleted = exceptionHandler.handleSqlAndResourceNotFoundException(resourceTypeName,
 					() -> dao.deleteWithTransaction(connection, uuid));
@@ -129,7 +129,7 @@ public class DeleteCommand extends AbstractCommand implements Command
 			Optional<Resource> resourceToDelete = search(connection, dao.get(), queryParameters);
 			if (resourceToDelete.isPresent())
 			{
-				authorizationCommandFactory.checkDeleteAllowed(connection, user, resourceToDelete.get());
+				authorizationHelper.checkDeleteAllowed(connection, user, resourceToDelete.get());
 
 				deleted = exceptionHandler.handleSqlAndResourceNotFoundException(resourceTypeName,
 						() -> dao.get().deleteWithTransaction(connection, parameterConverter.toUuid(resourceTypeName,

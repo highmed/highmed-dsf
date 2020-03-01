@@ -44,7 +44,7 @@ public class SubscriptionAuthorizationRule extends AbstractAuthorizationRule<Sub
 			Optional<String> errors = newResourceOk(newResource);
 			if (errors.isEmpty())
 			{
-				if (!subscriptionExists(connection, newResource))
+				if (!resourceExists(connection, newResource))
 				{
 					logger.info(
 							"Create of Subscription authorized for local user '{}', Subscription with criteria, type and payload does not exist",
@@ -81,7 +81,8 @@ public class SubscriptionAuthorizationRule extends AbstractAuthorizationRule<Sub
 					&& !(Constants.CT_FHIR_JSON_NEW.equals(newResource.getChannel().getPayload())
 							|| Constants.CT_FHIR_XML_NEW.equals(newResource.getChannel().getPayload())))
 			{
-				errors.add("subscription.channel.payload not " + Constants.CT_FHIR_JSON_NEW + " or " + Constants.CT_FHIR_XML_NEW);
+				errors.add("subscription.channel.payload not " + Constants.CT_FHIR_JSON_NEW + " or "
+						+ Constants.CT_FHIR_XML_NEW);
 			}
 
 			if (!SubscriptionChannelType.WEBSOCKET.equals(newResource.getChannel().getType()))
@@ -115,7 +116,8 @@ public class SubscriptionAuthorizationRule extends AbstractAuthorizationRule<Sub
 				}
 				else
 				{
-					errors.add("subscription.criteria invalid (resource '" + cComponentes.getPath() + "' not supported)");
+					errors.add(
+							"subscription.criteria invalid (resource '" + cComponentes.getPath() + "' not supported)");
 				}
 			}
 			else
@@ -128,13 +130,18 @@ public class SubscriptionAuthorizationRule extends AbstractAuthorizationRule<Sub
 			errors.add("subscription.criteria not defined");
 		}
 
+		if (!hasLocalOrRemoteAuthorizationRole(newResource))
+		{
+			errors.add("missing authorization tag");
+		}
+
 		if (errors.isEmpty())
 			return Optional.empty();
 		else
 			return Optional.of(errors.stream().collect(Collectors.joining(", ")));
 	}
 
-	private boolean subscriptionExists(Connection connection, Subscription newResource)
+	private boolean resourceExists(Connection connection, Subscription newResource)
 	{
 		Map<String, List<String>> queryParameters = Map.of("criteria",
 				Collections.singletonList(newResource.getCriteria()), "type",
@@ -158,29 +165,101 @@ public class SubscriptionAuthorizationRule extends AbstractAuthorizationRule<Sub
 	@Override
 	public Optional<String> reasonReadAllowed(Connection connection, User user, Subscription existingResource)
 	{
-		// TODO Auto-generated method stub
-		return Optional.empty();
+		if (isLocalUser(user) && hasLocalOrRemoteAuthorizationRole(existingResource))
+		{
+			logger.info(
+					"Read of Subscription authorized for local user '{}', Subscription has local or remote authorization role",
+					user.getName());
+			return Optional.of("local user, local or remote authorized Subscription");
+		}
+		else if (isRemoteUser(user) && hasRemoteAuthorizationRole(existingResource))
+		{
+			logger.info(
+					"Read of Subscription authorized for remote user '{}', Subscription has remote authorization role",
+					user.getName());
+			return Optional.of("remote user, remote authorized Subscription");
+		}
+		else
+		{
+			logger.warn("Read of Subscription unauthorized, no matching user role resource authorization role found");
+			return Optional.empty();
+		}
 	}
 
 	@Override
 	public Optional<String> reasonUpdateAllowed(Connection connection, User user, Subscription oldResource,
 			Subscription newResource)
 	{
-		// TODO Auto-generated method stub
-		return Optional.empty();
+		if (isLocalUser(user))
+		{
+			Optional<String> errors = newResourceOk(newResource);
+			if (errors.isEmpty())
+			{
+				if (isSame(oldResource, newResource))
+				{
+					logger.info(
+							"Update of Subscription authorized for local user '{}', criteria, type and payload same as existing Subscription",
+							user.getName());
+					return Optional.of("local user; criteria, type and payload same as existing Subscription");
+
+				}
+				else if (!resourceExists(connection, newResource))
+				{
+					logger.info(
+							"Update of Subscription authorized for local user '{}', other Subscription with criteria, type and payload does not exist",
+							user.getName());
+					return Optional
+							.of("local user; other Subscription with criteria, type and payload does not exist yet");
+				}
+				else
+				{
+					logger.warn(
+							"Create of Subscription unauthorized, other Subscription with criteria, type and payload already exists");
+					return Optional.empty();
+				}
+			}
+			else
+			{
+				logger.warn("Update of Subscription unauthorized, " + errors.get());
+				return Optional.empty();
+			}
+		}
+		else
+		{
+			logger.warn("Update of Subscription unauthorized, not a local user");
+			return Optional.empty();
+		}
+	}
+
+	private boolean isSame(Subscription oldResource, Subscription newResource)
+	{
+		return oldResource.getCriteria().equals(newResource.getCriteria())
+				&& oldResource.getChannel().getType().equals(newResource.getChannel().getType())
+				&& (oldResource.getChannel().getPayload().equals(newResource.getChannel().getPayload())
+						|| (oldResource.getChannel().getPayload() == null
+								&& newResource.getChannel().getPayload() == null));
 	}
 
 	@Override
 	public Optional<String> reasonDeleteAllowed(Connection connection, User user, Subscription oldResource)
 	{
-		// TODO Auto-generated method stub
-		return Optional.empty();
+		if (isLocalUser(user))
+		{
+			logger.info("Delete of Subscription authorized for local user '{}'", user.getName());
+			return Optional.of("local user");
+		}
+		else
+		{
+			logger.warn("Delete of Subscription unauthorized, not a local user");
+			return Optional.empty();
+		}
 	}
 
 	@Override
 	public Optional<String> reasonSearchAllowed(Connection connection, User user)
 	{
-		// TODO Auto-generated method stub
-		return Optional.empty();
+		logger.info("Search of Subscription authorized for {} user '{}', will be fitered by user role", user.getRole(),
+				user.getName());
+		return Optional.of("Allowed for all, filtered by user role");
 	}
 }

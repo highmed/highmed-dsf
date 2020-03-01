@@ -9,7 +9,7 @@
 	<url value="http://highmed.org/fhir/StructureDefinition/participating-medic"/>
 	<version value="0.1.0"/>
 	<name value="ParticipatingMedic"/>
-	<status value="active"/>
+	<status value="draft"/>
 	<date value="2019-08-05"/>
 	<fhirVersion value="4.0.0"/>
 	<kind value="complex-type"/>

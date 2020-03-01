@@ -6,7 +6,7 @@ import org.highmed.dsf.fhir.authentication.User;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Resource;
 
-public interface AuthorizationCommandFactory
+public interface AuthorizationHelper
 {
 	void checkCreateAllowed(Connection connection, User user, Resource newResource);
 

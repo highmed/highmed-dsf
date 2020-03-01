@@ -41,7 +41,7 @@ public class EndpointAuthorizationRule extends AbstractAuthorizationRule<Endpoin
 			Optional<String> errors = newResourceOk(newResource);
 			if (errors.isEmpty())
 			{
-				if (!endpointExists(connection, newResource))
+				if (!resourceExists(connection, newResource))
 				{
 					logger.info(
 							"Create of Endpoint authorized for local user '{}', Endpoint with address and identifier does not exist",
@@ -99,7 +99,7 @@ public class EndpointAuthorizationRule extends AbstractAuthorizationRule<Endpoin
 
 		if (!hasLocalOrRemoteAuthorizationRole(newResource))
 		{
-			errors.add("endpoint missing authorization tag");
+			errors.add("missing authorization tag");
 		}
 
 		if (errors.isEmpty())
@@ -108,7 +108,7 @@ public class EndpointAuthorizationRule extends AbstractAuthorizationRule<Endpoin
 			return Optional.of(errors.stream().collect(Collectors.joining(", ")));
 	}
 
-	private boolean endpointExists(Connection connection, Endpoint newResource)
+	private boolean resourceExists(Connection connection, Endpoint newResource)
 	{
 		String identifierValue = newResource.getIdentifier().stream()
 				.filter(i -> IDENTIFIER_SYSTEM.equals(i.getSystem())).map(i -> i.getValue()).findFirst().orElseThrow();
@@ -179,16 +179,70 @@ public class EndpointAuthorizationRule extends AbstractAuthorizationRule<Endpoin
 	public Optional<String> reasonUpdateAllowed(Connection connection, User user, Endpoint oldResource,
 			Endpoint newResource)
 	{
-		// TODO validate unique on Endpoint.address
-		// TODO Auto-generated method stub
-		return Optional.empty();
+		if (isLocalUser(user))
+		{
+			Optional<String> errors = newResourceOk(newResource);
+			if (errors.isEmpty())
+			{
+				if (isSame(oldResource, newResource))
+				{
+					logger.info(
+							"Update of Endpoint authorized for local user '{}', address and identifier same as existing Endpoint",
+							user.getName());
+					return Optional.of("local user; address and identifier same as existing Endpoint");
+
+				}
+				else if (!resourceExists(connection, newResource))
+				{
+					logger.info(
+							"Update of Endpoint authorized for local user '{}', other Endpoint with address and identifier does not exist",
+							user.getName());
+					return Optional.of("local user; other Endpoint with address and identifier does not exist yet");
+				}
+				else
+				{
+					logger.warn(
+							"Create of Endpoint unauthorized, other Endpoint with address and identifier already exists");
+					return Optional.empty();
+				}
+			}
+			else
+			{
+				logger.warn("Update of Endpoint unauthorized, " + errors.get());
+				return Optional.empty();
+			}
+		}
+		else
+		{
+			logger.warn("Update of Endpoint unauthorized, not a local user");
+			return Optional.empty();
+		}
+	}
+
+	private boolean isSame(Endpoint oldResource, Endpoint newResource)
+	{
+		String oldIdentifierValue = oldResource.getIdentifier().stream()
+				.filter(i -> IDENTIFIER_SYSTEM.equals(i.getSystem())).map(i -> i.getValue()).findFirst().orElseThrow();
+		String newIdentifierValue = newResource.getIdentifier().stream()
+				.filter(i -> IDENTIFIER_SYSTEM.equals(i.getSystem())).map(i -> i.getValue()).findFirst().orElseThrow();
+
+		return oldResource.getAddress().equals(newResource.getAddress())
+				&& oldIdentifierValue.equals(newIdentifierValue);
 	}
 
 	@Override
 	public Optional<String> reasonDeleteAllowed(Connection connection, User user, Endpoint oldResource)
 	{
-		// TODO Auto-generated method stub
-		return Optional.empty();
+		if (isLocalUser(user))
+		{
+			logger.info("Delete of Endpoint authorized for local user '{}'", user.getName());
+			return Optional.of("local user");
+		}
+		else
+		{
+			logger.warn("Delete of Endpoint unauthorized, not a local user");
+			return Optional.empty();
+		}
 	}
 
 	@Override

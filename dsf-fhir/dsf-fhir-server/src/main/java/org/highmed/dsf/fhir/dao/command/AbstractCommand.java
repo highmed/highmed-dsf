@@ -20,10 +20,10 @@ public abstract class AbstractCommand implements Command
 
 	protected final String serverBase;
 
-	protected final AuthorizationCommandFactory authorizationCommandFactory;
+	protected final AuthorizationHelper authorizationHelper;
 
 	public AbstractCommand(int transactionPriority, int index, User user, Bundle bundle, BundleEntryComponent entry,
-			String serverBase, AuthorizationCommandFactory authorizationCommandFactory)
+			String serverBase, AuthorizationHelper authorizationHelper)
 	{
 		this.transactionPriority = transactionPriority;
 
@@ -34,7 +34,7 @@ public abstract class AbstractCommand implements Command
 		this.entry = entry;
 		this.serverBase = serverBase;
 
-		this.authorizationCommandFactory = authorizationCommandFactory;
+		this.authorizationHelper = authorizationHelper;
 	}
 
 	@Override

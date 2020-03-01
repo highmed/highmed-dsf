@@ -52,11 +52,11 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	protected Response responseResult;
 
 	public CreateCommand(int index, User user, Bundle bundle, BundleEntryComponent entry, String serverBase,
-			AuthorizationCommandFactory authorizationCommandFactory, R resource, D dao,
+			AuthorizationHelper authorizationHelper, R resource, D dao,
 			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
 			ResponseGenerator responseGenerator, EventManager eventManager, EventGenerator eventGenerator)
 	{
-		super(2, index, user, bundle, entry, serverBase, authorizationCommandFactory, resource, dao, exceptionHandler,
+		super(2, index, user, bundle, entry, serverBase, authorizationHelper, resource, dao, exceptionHandler,
 				parameterConverter);
 
 		this.responseGenerator = responseGenerator;
@@ -93,7 +93,7 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	public void execute(Map<String, IdType> idTranslationTable, Connection connection)
 			throws SQLException, WebApplicationException
 	{
-		authorizationCommandFactory.checkCreateAllowed(connection, user, resource);
+		authorizationHelper.checkCreateAllowed(connection, user, resource);
 
 		Optional<Resource> exists = checkAlreadyExists(connection, entry.getRequest().getIfNoneExist(),
 				resource.getResourceType());

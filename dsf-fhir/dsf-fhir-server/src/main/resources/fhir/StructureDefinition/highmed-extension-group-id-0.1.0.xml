@@ -9,7 +9,7 @@
   <url value="http://highmed.org/fhir/StructureDefinition/group-id" />
   <version value="0.1.0" />
   <name value="group-id" />
-  <status value="active" />
+  <status value="draft" />
   <date value="2019-12-16" />
   <fhirVersion value="4.0.0" />
   <mapping>

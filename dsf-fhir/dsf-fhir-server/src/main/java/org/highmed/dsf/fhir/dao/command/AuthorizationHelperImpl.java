@@ -20,15 +20,15 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 
-public class AuthorizationCommandFactoryImpl implements AuthorizationCommandFactory
+public class AuthorizationHelperImpl implements AuthorizationHelper
 {
-	private static final Logger logger = LoggerFactory.getLogger(AuthorizationCommandFactoryImpl.class);
+	private static final Logger logger = LoggerFactory.getLogger(AuthorizationHelperImpl.class);
 	private static final Logger audit = LoggerFactory.getLogger("dsf-audit-logger");
 
 	private final AuthorizationRuleProvider authorizationRuleProvider;
 	private final ResponseGenerator responseGenerator;
 
-	public AuthorizationCommandFactoryImpl(AuthorizationRuleProvider authorizationRuleProvider,
+	public AuthorizationHelperImpl(AuthorizationRuleProvider authorizationRuleProvider,
 			ResponseGenerator responseGenerator)
 	{
 		this.authorizationRuleProvider = authorizationRuleProvider;

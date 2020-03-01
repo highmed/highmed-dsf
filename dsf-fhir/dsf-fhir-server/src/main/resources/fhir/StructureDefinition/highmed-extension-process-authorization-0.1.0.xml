@@ -9,7 +9,7 @@
   <url value="http://highmed.org/fhir/StructureDefinition/process-authorization" />
   <version value="0.1.0" />
   <name value="ProcessAuthorization" />
-  <status value="active" />
+  <status value="draft" />
   <experimental value="false" />
   <date value="2020-02-24" />
   <fhirVersion value="4.0.0" />
