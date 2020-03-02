@@ -2,15 +2,36 @@ package org.highmed.pseudonymization.base;
 
 import java.util.BitSet;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Bloom-Filter encoded version of a subject's IDAT
- * Containing a {@link TtpId} with their encrypted Local ID and Origin
- * as well as a Record-Level Bloom Filter of their IDAT for linkage.
  */
-public interface IdatEncoded
+public class IdatEncoded
 {
 
-	TtpId getEncodedID();
+	private TtpId localPsn;
+	private BitSet rbf;
 
-	BitSet getRBF();
+	@JsonCreator
+	public IdatEncoded(
+			@JsonProperty("localPsn")
+					TtpId localPsn,
+			@JsonProperty("rbf")
+					BitSet rbf)
+	{
+		this.localPsn = localPsn;
+		this.rbf = rbf;
+	}
+
+	public TtpId getEncodedID()
+	{
+		return localPsn;
+	}
+
+	public BitSet getRBF()
+	{
+		return rbf;
+	}
 }
