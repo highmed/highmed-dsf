@@ -1,6 +1,6 @@
 package org.highmed.pseudonymization.base;
 
-import org.highmed.pseudonymization.bloomfilter.RecordBloomFilter;
+import java.util.BitSet;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -12,14 +12,14 @@ public class IdatEncodedImpl implements IdatEncoded
 {
 
 	private TtpId localPsn;
-	private RecordBloomFilter rbf;
+	private BitSet rbf;
 
 	@JsonCreator
 	public IdatEncodedImpl(
 			@JsonProperty("localPsn")
 					TtpId localPsn,
 			@JsonProperty("rbf")
-					RecordBloomFilter rbf)
+					BitSet rbf)
 	{
 		this.localPsn = localPsn;
 		this.rbf = rbf;
@@ -31,7 +31,7 @@ public class IdatEncodedImpl implements IdatEncoded
 		return localPsn;
 	}
 
-	public RecordBloomFilter getRBF()
+	public BitSet getRBF()
 	{
 		return rbf;
 	}

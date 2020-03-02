@@ -1,6 +1,6 @@
 package org.highmed.pseudonymization.base;
 
-import org.highmed.pseudonymization.bloomfilter.RecordBloomFilter;
+import java.util.BitSet;
 
 /**
  * Bloom-Filter encoded version of a subject's IDAT
@@ -12,5 +12,5 @@ public interface IdatEncoded
 
 	TtpId getEncodedID();
 
-	RecordBloomFilter getRBF();
+	BitSet getRBF();
 }
