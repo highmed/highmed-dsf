@@ -25,18 +25,17 @@ public class MdatEncoder
 {
 
 	private final SecretKey mdatKey;
-	private final byte[] aadTag;
+	private final String studyID;
 	private static final Logger logger = LoggerFactory.getLogger(MdatEncoder.class);
 
 	/**
 	 * @param mdatKey 32 byte key for AES Encryption
-	 * @param aadTag  Study ID
+	 * @param studyID Study ID
 	 */
-	public MdatEncoder(SecretKey mdatKey, String aadTag)
+	public MdatEncoder(SecretKey mdatKey, String studyID)
 	{
 		this.mdatKey = Objects.requireNonNull(mdatKey, "mdatKey");
-		String tag = Objects.requireNonNull(aadTag, "aadTag");
-		this.aadTag = tag.getBytes(StandardCharsets.UTF_8);
+		this.studyID = Objects.requireNonNull(studyID, "studyID");
 	}
 
 	public List<RowElement> encryptRow(List<RowElement> inputMDAT, int idColIdx)
@@ -100,7 +99,7 @@ public class MdatEncoder
 
 		try
 		{
-			encrypted = AesGcmUtil.encrypt(plain, this.aadTag, this.mdatKey);
+			encrypted = AesGcmUtil.encrypt(plain, this.studyID.getBytes(StandardCharsets.UTF_8), this.mdatKey);
 			return new StringRowElement(Base64.getEncoder().encodeToString(encrypted));
 		}
 		catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException | ShortBufferException e)
@@ -121,7 +120,7 @@ public class MdatEncoder
 
 		try
 		{
-			decrypted = AesGcmUtil.decrypt(encryptedText, this.aadTag, this.mdatKey);
+			decrypted = AesGcmUtil.decrypt(encryptedText, this.studyID.getBytes(StandardCharsets.UTF_8), this.mdatKey);
 			return new StringRowElement(new String(decrypted, StandardCharsets.UTF_8));
 		}
 		catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException e)

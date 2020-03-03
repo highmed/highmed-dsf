@@ -5,7 +5,6 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
-import java.util.UUID;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -32,21 +31,21 @@ public class IdatEncoder
 
 	private static final Logger logger = LoggerFactory.getLogger(IdatEncoder.class);
 	private SecretKey projectKey;
-	private byte[] aadTag;
+	private String studyID;
 	private byte[] seed;
 	private String origin;
 	private RBFGenerator rbfGen;
 
 	/**
 	 * @param projectKey 32 byte key for AES Encryption
-	 * @param aadTag     Study ID
-	 * @param seed       Seed for RBF Permutation
+	 * @param studyID     Study ID
+	 * @param seed       Seed byte array for RBF Permutation
 	 * @param origin     Institution where the encoded IDAT hail from
 	 */
-	public IdatEncoder(SecretKey projectKey, String aadTag, String seed, String origin)
+	public IdatEncoder(SecretKey projectKey, String studyID, byte[] seed, String origin)
 	{
 		setProjectKey(projectKey);
-		setAadTag(aadTag);
+		setStudyID(studyID);
 		setSeed(seed);
 		setOrigin(origin);
 		this.rbfGen = new RBFGenerator();
@@ -88,7 +87,7 @@ public class IdatEncoder
 		byte[] plain = plainText.getBytes(StandardCharsets.UTF_8);
 		try
 		{
-			byte[] encrypted = AesGcmUtil.encrypt(plain, this.aadTag, this.projectKey);
+			byte[] encrypted = AesGcmUtil.encrypt(plain, this.studyID.getBytes(StandardCharsets.UTF_8), this.projectKey);
 			return new TtpId(this.origin, Base64.getEncoder().encodeToString(encrypted));
 		}
 		catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException | ShortBufferException e)
@@ -107,7 +106,7 @@ public class IdatEncoder
 		byte[] encryptedText = Base64.getDecoder().decode(encrypted.getIdString());
 		try
 		{
-			byte[] decrypted = AesGcmUtil.decrypt(encryptedText, this.aadTag, this.projectKey);
+			byte[] decrypted = AesGcmUtil.decrypt(encryptedText, this.studyID.getBytes(StandardCharsets.UTF_8), this.projectKey);
 			return new String(decrypted, StandardCharsets.UTF_8);
 		}
 		catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException e)
@@ -136,22 +135,22 @@ public class IdatEncoder
 		}
 	}
 
-	private void setAadTag(String aadTag)
+	private void setStudyID(String studyID)
 	{
-		if (aadTag == null)
+		if (studyID == null || studyID.equals(""))
 		{
-			throw new IllegalArgumentException("Provided study ID must not be null.");
+			throw new IllegalArgumentException("Provided study ID must not be null or empty.");
 		}
-		this.aadTag = aadTag.getBytes(StandardCharsets.UTF_8);
+		this.studyID = studyID;
 	}
 
-	private void setSeed(String seed)
+	private void setSeed(byte[] seed)
 	{
-		if (seed == null)
+		if (seed.length == 0)
 		{
-			throw new IllegalArgumentException("Provided permutation seed must not be null.");
+			throw new IllegalArgumentException("Provided permutation seed must not be empty.");
 		}
-		this.seed = seed.getBytes(StandardCharsets.UTF_8);
+		this.seed = seed;
 	}
 
 	private void setOrigin(String origin)

@@ -11,8 +11,8 @@ import org.highmed.openehr.model.structure.RowElement;
 import org.highmed.pseudonymization.base.Idat;
 import org.highmed.pseudonymization.base.IdatEncoded;
 import org.highmed.pseudonymization.io.MpiLookup;
-import org.highmed.pseudonymization.util.BitSetSerializer;
 
+import org.highmed.pseudonymization.util.BitSetSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,15 +40,15 @@ public class ResultSetEncoder
 	/**
 	 * @param projectKey 32 byte medic-specific key for AES Encryption of identifying data
 	 * @param mdatKey    32 byte project-specific key for AES Encryption of medical data
-	 * @param aadTag     Study ID
+	 * @param studyID    Study ID
 	 * @param seed       Seed for RBF Permutation
 	 * @param origin     Institution where the encoded IDAT hail from
 	 */
-	public ResultSetEncoder(SecretKey projectKey, SecretKey mdatKey, String aadTag, String seed, String origin,
+	public ResultSetEncoder(SecretKey projectKey, SecretKey mdatKey, String studyID, byte[] seed, String origin,
 			MpiLookup mpi)
 	{
-		this.idEnc = new IdatEncoder(projectKey, aadTag, seed, origin);
-		this.medEnc = new MdatEncoder(mdatKey, aadTag);
+		this.idEnc = new IdatEncoder(projectKey, studyID, seed, origin);
+		this.medEnc = new MdatEncoder(mdatKey, studyID);
 		setMpi(mpi);
 
 		mapper = new ObjectMapper();
