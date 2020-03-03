@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.util.EnumSet;
 import java.util.Optional;
 
+import org.highmed.dsf.fhir.authentication.OrganizationProvider;
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.BinaryDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
@@ -20,9 +21,10 @@ public class BinaryAuthorizationRule extends AbstractAuthorizationRule<Binary, B
 {
 	private static final Logger logger = LoggerFactory.getLogger(BinaryAuthorizationRule.class);
 
-	public BinaryAuthorizationRule(DaoProvider daoProvider, String serverBase, ReferenceResolver referenceResolver)
+	public BinaryAuthorizationRule(DaoProvider daoProvider, String serverBase, ReferenceResolver referenceResolver,
+			OrganizationProvider organizationProvider)
 	{
-		super(Binary.class, daoProvider, serverBase, referenceResolver);
+		super(Binary.class, daoProvider, serverBase, referenceResolver, organizationProvider);
 	}
 
 	@Override

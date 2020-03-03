@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.highmed.dsf.fhir.authentication.OrganizationProvider;
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.ResourceDao;
 import org.highmed.dsf.fhir.dao.SubscriptionDao;
@@ -31,9 +32,9 @@ public class SubscriptionAuthorizationRule extends AbstractAuthorizationRule<Sub
 	private static final Logger logger = LoggerFactory.getLogger(SubscriptionAuthorizationRule.class);
 
 	public SubscriptionAuthorizationRule(DaoProvider daoProvider, String serverBase,
-			ReferenceResolver referenceResolver)
+			ReferenceResolver referenceResolver, OrganizationProvider organizationProvider)
 	{
-		super(Subscription.class, daoProvider, serverBase, referenceResolver);
+		super(Subscription.class, daoProvider, serverBase, referenceResolver, organizationProvider);
 	}
 
 	@Override

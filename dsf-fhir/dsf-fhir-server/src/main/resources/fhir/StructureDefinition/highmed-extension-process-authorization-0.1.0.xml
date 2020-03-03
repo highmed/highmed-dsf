@@ -2,9 +2,9 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <meta>
     <tag>
-      <system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
-      <code value="REMOTE"/>
-    </tag>		
+      <system value="http://highmed.org/fhir/CodeSystem/authorization-role" />
+      <code value="REMOTE" />
+    </tag>
   </meta>
   <url value="http://highmed.org/fhir/StructureDefinition/process-authorization" />
   <version value="0.1.0" />
@@ -62,7 +62,6 @@
     </element>
     <element id="Extension.extension:authorization-role.value[x]">
       <path value="Extension.extension.value[x]" />
-      <min value="1" />
       <type>
         <code value="Coding" />
       </type>
@@ -72,27 +71,76 @@
       <min value="1" />
       <fixedUri value="http://highmed.org/fhir/CodeSystem/authorization-role" />
     </element>
-    <element id="Extension.extension:organization-type">
+    <element id="Extension.extension:authorization-role.value[x].code">
+      <path value="Extension.extension.value[x].code" />
+      <min value="1" />
+    </element>
+    <element id="Extension.extension:organization-types">
       <path value="Extension.extension" />
-      <sliceName value="organization-type" />
+      <sliceName value="organization-types" />
       <min value="1" />
       <max value="1" />
     </element>
-    <element id="Extension.extension:organization-type.url">
-      <path value="Extension.extension.url" />
+    <element id="Extension.extension:organization-types.extension">
+      <path value="Extension.extension.extension" />
+      <slicing>
+        <discriminator>
+          <type value="value" />
+          <path value="url" />
+        </discriminator>
+        <rules value="open" />
+      </slicing>
+    </element>
+    <element id="Extension.extension:organization-types.extension:organization-type">
+      <path value="Extension.extension.extension" />
+      <sliceName value="organization-type" />
+      <min value="1" />
+      <max value="2" />
+    </element>
+    <element id="Extension.extension:organization-types.extension:organization-type.url">
+      <path value="Extension.extension.extension.url" />
       <fixedUri value="organization-type" />
     </element>
-    <element id="Extension.extension:organization-type.value[x]">
-      <path value="Extension.extension.value[x]" />
-      <min value="1" />
+    <element id="Extension.extension:organization-types.extension:organization-type.value[x]">
+      <path value="Extension.extension.extension.value[x]" />
       <type>
         <code value="Coding" />
       </type>
     </element>
-    <element id="Extension.extension:organization-type.value[x].system">
-      <path value="Extension.extension.value[x].system" />
+    <element id="Extension.extension:organization-types.extension:organization-type.value[x].system">
+      <path value="Extension.extension.extension.value[x].system" />
       <min value="1" />
-      <fixedUri value="http://highmed.org/fhir/CodeSystem/organization-type" />
+      <fixedUri value="http://highmed.org/fhir/CodeSystem/authorization-role" />
+    </element>
+    <element id="Extension.extension:organization-types.extension:organization-type.value[x].code">
+      <path value="Extension.extension.extension.value[x].code" />
+      <min value="1" />
+    </element>
+    <element id="Extension.extension:organization-types.url">
+      <path value="Extension.extension.url" />
+      <fixedUri value="organization-types" />
+    </element>
+    <element id="Extension.extension:organization-types.value[x]">
+      <path value="Extension.extension.value[x]" />
+      <max value="0" />
+    </element>
+    <element id="Extension.extension:task-profile">
+      <path value="Extension.extension" />
+      <sliceName value="task-profile" />
+      <min value="1" />
+      <max value="1" />
+    </element>
+    <element id="Extension.extension:task-profile.url">
+      <path value="Extension.extension.url" />
+      <fixedUri value="task-profile" />
+    </element>
+    <element id="Extension.extension:task-profile.value[x]">
+      <path value="Extension.extension.value[x]" />
+      <min value="1" />
+      <type>
+        <code value="canonical" />
+        <targetProfile value="http://hl7.org/fhir/StructureDefinition/StructureDefinition" />
+      </type>
     </element>
     <element id="Extension.url">
       <path value="Extension.url" />

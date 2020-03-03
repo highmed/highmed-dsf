@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.highmed.dsf.fhir.authentication.OrganizationProvider;
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.OrganizationDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
@@ -32,9 +33,9 @@ public class OrganizationAuthorizationRule extends AbstractAuthorizationRule<Org
 			.compile(EXTENSION_THUMBPRINT_VALUE_PATTERN_STRING);
 
 	public OrganizationAuthorizationRule(DaoProvider daoProvider, String serverBase,
-			ReferenceResolver referenceResolver)
+			ReferenceResolver referenceResolver, OrganizationProvider organizationProvider)
 	{
-		super(Organization.class, daoProvider, serverBase, referenceResolver);
+		super(Organization.class, daoProvider, serverBase, referenceResolver, organizationProvider);
 	}
 
 	@Override
@@ -215,7 +216,7 @@ public class OrganizationAuthorizationRule extends AbstractAuthorizationRule<Org
 				else
 				{
 					logger.warn(
-							"Create of Organization unauthorized, other Organization with certificate-thumbprint and identifier already exists");
+							"Update of Organization unauthorized, other Organization with certificate-thumbprint and identifier already exists");
 					return Optional.empty();
 				}
 			}

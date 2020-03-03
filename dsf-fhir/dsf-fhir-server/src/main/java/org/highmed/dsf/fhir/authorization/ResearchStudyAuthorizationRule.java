@@ -3,6 +3,7 @@ package org.highmed.dsf.fhir.authorization;
 import java.sql.Connection;
 import java.util.Optional;
 
+import org.highmed.dsf.fhir.authentication.OrganizationProvider;
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.ResearchStudyDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
@@ -12,9 +13,9 @@ import org.hl7.fhir.r4.model.ResearchStudy;
 public class ResearchStudyAuthorizationRule extends AbstractAuthorizationRule<ResearchStudy, ResearchStudyDao>
 {
 	public ResearchStudyAuthorizationRule(DaoProvider daoProvider, String serverBase,
-			ReferenceResolver referenceResolver)
+			ReferenceResolver referenceResolver, OrganizationProvider organizationProvider)
 	{
-		super(ResearchStudy.class, daoProvider, serverBase, referenceResolver);
+		super(ResearchStudy.class, daoProvider, serverBase, referenceResolver, organizationProvider);
 	}
 
 	@Override

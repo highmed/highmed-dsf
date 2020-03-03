@@ -14,4 +14,6 @@ public interface OrganizationProvider
 	 *         <code>null</code>
 	 */
 	Optional<User> getOrganization(X509Certificate certificate);
+
+	Optional<Organization> getLocalOrganization();
 }

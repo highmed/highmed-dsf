@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Optional;
 
+import org.highmed.dsf.fhir.authentication.OrganizationProvider;
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.CodeSystemDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
@@ -16,9 +17,10 @@ public class CodeSystemAuthorizationRule extends AbstractAuthorizationRule<CodeS
 {
 	private static final Logger logger = LoggerFactory.getLogger(CodeSystemAuthorizationRule.class);
 
-	public CodeSystemAuthorizationRule(DaoProvider daoProvider, String serverBase, ReferenceResolver referenceResolver)
+	public CodeSystemAuthorizationRule(DaoProvider daoProvider, String serverBase, ReferenceResolver referenceResolver,
+			OrganizationProvider organizationProvider)
 	{
-		super(CodeSystem.class, daoProvider, serverBase, referenceResolver);
+		super(CodeSystem.class, daoProvider, serverBase, referenceResolver, organizationProvider);
 	}
 
 	@Override

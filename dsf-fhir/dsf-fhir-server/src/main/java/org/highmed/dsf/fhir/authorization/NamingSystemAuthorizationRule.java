@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Optional;
 
+import org.highmed.dsf.fhir.authentication.OrganizationProvider;
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.NamingSystemDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
@@ -17,9 +18,9 @@ public class NamingSystemAuthorizationRule extends AbstractAuthorizationRule<Nam
 	private static final Logger logger = LoggerFactory.getLogger(NamingSystemAuthorizationRule.class);
 
 	public NamingSystemAuthorizationRule(DaoProvider daoProvider, String serverBase,
-			ReferenceResolver referenceResolver)
+			ReferenceResolver referenceResolver, OrganizationProvider organizationProvider)
 	{
-		super(NamingSystem.class, daoProvider, serverBase, referenceResolver);
+		super(NamingSystem.class, daoProvider, serverBase, referenceResolver, organizationProvider);
 	}
 
 	@Override

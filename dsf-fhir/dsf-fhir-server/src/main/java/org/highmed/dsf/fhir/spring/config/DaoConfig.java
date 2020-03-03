@@ -1,7 +1,6 @@
 package org.highmed.dsf.fhir.spring.config;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.highmed.dsf.fhir.OrganizationType;
 import org.highmed.dsf.fhir.dao.ActivityDefinitionDao;
 import org.highmed.dsf.fhir.dao.BinaryDao;
 import org.highmed.dsf.fhir.dao.BundleDao;
@@ -63,9 +62,6 @@ public class DaoConfig
 	@Value("${org.highmed.dsf.fhir.db.server_user_password}")
 	private String dbPassword;
 
-	@Value("${org.highmed.dsf.fhir.organizationType}")
-	private String organizationType;
-
 	@Autowired
 	private FhirConfig fhirConfig;
 
@@ -85,12 +81,6 @@ public class DaoConfig
 		dataSource.setTestOnBorrow(true);
 		dataSource.setValidationQuery("SELECT 1");
 		return dataSource;
-	}
-
-	@Bean
-	public OrganizationType organizationType()
-	{
-		return OrganizationType.valueOf(organizationType);
 	}
 
 	@Bean

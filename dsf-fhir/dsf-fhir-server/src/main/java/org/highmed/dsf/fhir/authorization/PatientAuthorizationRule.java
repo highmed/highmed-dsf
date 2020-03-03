@@ -3,6 +3,7 @@ package org.highmed.dsf.fhir.authorization;
 import java.sql.Connection;
 import java.util.Optional;
 
+import org.highmed.dsf.fhir.authentication.OrganizationProvider;
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.PatientDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
@@ -11,9 +12,10 @@ import org.hl7.fhir.r4.model.Patient;
 
 public class PatientAuthorizationRule extends AbstractAuthorizationRule<Patient, PatientDao>
 {
-	public PatientAuthorizationRule(DaoProvider daoProvider, String serverBase, ReferenceResolver referenceResolver)
+	public PatientAuthorizationRule(DaoProvider daoProvider, String serverBase, ReferenceResolver referenceResolver,
+			OrganizationProvider organizationProvider)
 	{
-		super(Patient.class, daoProvider, serverBase, referenceResolver);
+		super(Patient.class, daoProvider, serverBase, referenceResolver, organizationProvider);
 	}
 
 	@Override

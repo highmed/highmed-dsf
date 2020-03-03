@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.highmed.dsf.fhir.authentication.OrganizationProvider;
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.EndpointDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
@@ -25,12 +26,13 @@ public class EndpointAuthorizationRule extends AbstractAuthorizationRule<Endpoin
 	private static final Logger logger = LoggerFactory.getLogger(EndpointAuthorizationRule.class);
 
 	private static final String IDENTIFIER_SYSTEM = "http://highmed.org/fhir/NamingSystem/endpoint-identifier";
-	private static final String ENDPOINT_ADDRESS_PATTERN_STRING = "https:\\/\\/([0-9a-zA-Z\\.]+)+(:\\d{1,4})?([-\\w\\/]*)";
+	private static final String ENDPOINT_ADDRESS_PATTERN_STRING = "https://([0-9a-zA-Z\\.]+)+(:\\d{1,4})?([-\\w/]*)";
 	private static final Pattern ENDPOINT_ADDRESS_PATTERN = Pattern.compile(ENDPOINT_ADDRESS_PATTERN_STRING);
 
-	public EndpointAuthorizationRule(DaoProvider daoProvider, String serverBase, ReferenceResolver referenceResolver)
+	public EndpointAuthorizationRule(DaoProvider daoProvider, String serverBase, ReferenceResolver referenceResolver,
+			OrganizationProvider organizationProvider)
 	{
-		super(Endpoint.class, daoProvider, serverBase, referenceResolver);
+		super(Endpoint.class, daoProvider, serverBase, referenceResolver, organizationProvider);
 	}
 
 	@Override
@@ -202,7 +204,7 @@ public class EndpointAuthorizationRule extends AbstractAuthorizationRule<Endpoin
 				else
 				{
 					logger.warn(
-							"Create of Endpoint unauthorized, other Endpoint with address and identifier already exists");
+							"Update of Endpoint unauthorized, other Endpoint with address and identifier already exists");
 					return Optional.empty();
 				}
 			}

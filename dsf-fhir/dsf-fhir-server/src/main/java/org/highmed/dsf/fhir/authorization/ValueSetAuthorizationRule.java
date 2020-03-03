@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Optional;
 
+import org.highmed.dsf.fhir.authentication.OrganizationProvider;
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.ValueSetDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
@@ -16,9 +17,10 @@ public class ValueSetAuthorizationRule extends AbstractAuthorizationRule<ValueSe
 {
 	private static final Logger logger = LoggerFactory.getLogger(ValueSetAuthorizationRule.class);
 
-	public ValueSetAuthorizationRule(DaoProvider daoProvider, String serverBase, ReferenceResolver referenceResolver)
+	public ValueSetAuthorizationRule(DaoProvider daoProvider, String serverBase, ReferenceResolver referenceResolver,
+			OrganizationProvider organizationProvider)
 	{
-		super(ValueSet.class, daoProvider, serverBase, referenceResolver);
+		super(ValueSet.class, daoProvider, serverBase, referenceResolver, organizationProvider);
 	}
 
 	@Override

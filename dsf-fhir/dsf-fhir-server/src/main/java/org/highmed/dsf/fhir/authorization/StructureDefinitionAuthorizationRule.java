@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.highmed.dsf.fhir.authentication.OrganizationProvider;
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
@@ -23,9 +24,9 @@ public class StructureDefinitionAuthorizationRule
 	private static final Logger logger = LoggerFactory.getLogger(StructureDefinitionAuthorizationRule.class);
 
 	public StructureDefinitionAuthorizationRule(DaoProvider daoProvider, String serverBase,
-			ReferenceResolver referenceResolver)
+			ReferenceResolver referenceResolver, OrganizationProvider organizationProvider)
 	{
-		super(StructureDefinition.class, daoProvider, serverBase, referenceResolver);
+		super(StructureDefinition.class, daoProvider, serverBase, referenceResolver, organizationProvider);
 	}
 
 	@Override
@@ -159,7 +160,7 @@ public class StructureDefinitionAuthorizationRule
 				else
 				{
 					logger.warn(
-							"Create of StructureDefinition unauthorized, other StructureDefinition with criteria, type and payload already exists");
+							"Update of StructureDefinition unauthorized, other StructureDefinition with criteria, type and payload already exists");
 					return Optional.empty();
 				}
 			}

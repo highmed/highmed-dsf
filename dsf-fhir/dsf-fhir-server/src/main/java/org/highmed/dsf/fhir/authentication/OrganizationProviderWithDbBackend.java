@@ -71,18 +71,15 @@ public class OrganizationProviderWithDbBackend implements OrganizationProvider, 
 		UserRole userRole = localUserThumbprints.contains(loginThumbprintHex.toLowerCase()) ? UserRole.LOCAL
 				: UserRole.REMOTE;
 
-		if (UserRole.LOCAL.equals(userRole))
+		switch (userRole)
 		{
-			return getLocalOrganization().map(org -> new User(org, userRole));
-		}
-		else if (UserRole.REMOTE.equals(userRole))
-		{
-			return getOrganization(loginThumbprintHex).map(org -> new User(org, userRole));
-		}
-		else
-		{
-			logger.warn("UserRole {} not supported", userRole);
-			return Optional.empty();
+			case LOCAL:
+				return getLocalOrganization().map(org -> new User(org, userRole));
+			case REMOTE:
+				return getOrganization(loginThumbprintHex).map(org -> new User(org, userRole));
+			default:
+				logger.warn("UserRole {} not supported", userRole);
+				return Optional.empty();
 		}
 	}
 
@@ -92,7 +89,8 @@ public class OrganizationProviderWithDbBackend implements OrganizationProvider, 
 				() -> dao.readActiveNotDeletedByThumbprint(loginThumbprintHex), Optional::empty);
 	}
 
-	private Optional<Organization> getLocalOrganization()
+	@Override
+	public Optional<Organization> getLocalOrganization()
 	{
 		return exceptionHandler.catchAndLogSqlExceptionAndIfReturn(
 				() -> dao.readActiveNotDeletedByIdentifier(localIdentifierValue), Optional::empty);

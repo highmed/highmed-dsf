@@ -3,6 +3,7 @@ package org.highmed.dsf.fhir.authorization;
 import java.sql.Connection;
 import java.util.Optional;
 
+import org.highmed.dsf.fhir.authentication.OrganizationProvider;
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.GroupDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
@@ -11,9 +12,10 @@ import org.hl7.fhir.r4.model.Group;
 
 public class GroupAuthorizationRule extends AbstractAuthorizationRule<Group, GroupDao>
 {
-	public GroupAuthorizationRule(DaoProvider daoProvider, String serverBase, ReferenceResolver referenceResolver)
+	public GroupAuthorizationRule(DaoProvider daoProvider, String serverBase, ReferenceResolver referenceResolver,
+			OrganizationProvider organizationProvider)
 	{
-		super(Group.class, daoProvider, serverBase, referenceResolver);
+		super(Group.class, daoProvider, serverBase, referenceResolver, organizationProvider);
 	}
 
 	@Override

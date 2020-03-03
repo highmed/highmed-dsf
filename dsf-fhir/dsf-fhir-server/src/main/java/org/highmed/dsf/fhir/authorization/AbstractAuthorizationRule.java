@@ -7,6 +7,7 @@ import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.highmed.dsf.fhir.authentication.OrganizationProvider;
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.authentication.UserRole;
 import org.highmed.dsf.fhir.dao.ResourceDao;
@@ -31,14 +32,16 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 	protected final DaoProvider daoProvider;
 	protected final String serverBase;
 	protected final ReferenceResolver referenceResolver;
+	protected final OrganizationProvider organizationProvider;
 
 	public AbstractAuthorizationRule(Class<R> resourceType, DaoProvider daoProvider, String serverBase,
-			ReferenceResolver referenceResolver)
+			ReferenceResolver referenceResolver, OrganizationProvider organizationProvider)
 	{
 		this.resourceType = resourceType;
 		this.daoProvider = daoProvider;
 		this.serverBase = serverBase;
 		this.referenceResolver = referenceResolver;
+		this.organizationProvider = organizationProvider;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -51,6 +54,9 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 	public void afterPropertiesSet() throws Exception
 	{
 		Objects.requireNonNull(resourceType, "resourceType");
+		Objects.requireNonNull(daoProvider, "daoProvider");
+		Objects.requireNonNull(serverBase, "serverBase");
+		Objects.requireNonNull(referenceResolver, "referenceResolver");
 		Objects.requireNonNull(daoProvider, "daoProvider");
 	}
 
@@ -203,5 +209,16 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 				return false;
 			}
 		}
+	}
+
+	protected final boolean isLocalOrganization(Organization organization)
+	{
+		if (organization == null)
+			return false;
+		if (!organization.hasIdElement())
+			return false;
+
+		return organizationProvider.getLocalOrganization()
+				.map(localOrg -> localOrg.getIdElement().equals(organization.getIdElement())).orElse(false);
 	}
 }
