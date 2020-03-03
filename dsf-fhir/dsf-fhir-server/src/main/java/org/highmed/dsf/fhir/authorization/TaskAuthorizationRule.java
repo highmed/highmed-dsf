@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -189,13 +189,18 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 
 	private boolean taskAllowedForUser(Connection connection, User user, String instantiatesUri, String messageName)
 	{
-		MatchResult matchResult = INSTANTIATES_URI_PATTERN.matcher(instantiatesUri).toMatchResult();
-		String processUrl = matchResult.group(1);
-		String processVersion = matchResult.group(2);
+		Matcher matcher = INSTANTIATES_URI_PATTERN.matcher(instantiatesUri);
+		if (matcher.matches())
+		{
+			String processUrl = matcher.group(1);
+			String processVersion = matcher.group(2);
 
-		return activityDefinitionProvider
-				.getActivityDefinition(connection, user.getRole(), processUrl, processVersion, messageName)
-				.map(ad -> true).orElse(false);
+			return activityDefinitionProvider
+					.getActivityDefinition(connection, user.getRole(), processUrl, processVersion, messageName)
+					.map(ad -> true).orElse(false);
+		}
+		else
+			return false;
 	}
 
 	@Override
