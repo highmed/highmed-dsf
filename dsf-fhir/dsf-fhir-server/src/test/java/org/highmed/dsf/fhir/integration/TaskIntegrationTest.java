@@ -15,6 +15,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
 import org.highmed.dsf.fhir.authentication.OrganizationProvider;
+import org.highmed.dsf.fhir.dao.TaskDao;
 import org.highmed.fhir.client.WebsocketClient;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DomainResource;
@@ -241,5 +242,63 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		t.getInputFirstRep().setValue(new StringType("pongMessage"));
 
 		getExternalWebserviceClient().create(t);
+	}
+
+	@Test
+	public void testUpdateTaskStartPingProcessStatusRequestedToInProgress() throws Exception
+	{
+		OrganizationProvider organizationProvider = getSpringWebApplicationContext()
+				.getBean(OrganizationProvider.class);
+		assertNotNull(organizationProvider);
+
+		Task t = new Task();
+		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-process");
+		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/1.0.0");
+		t.setStatus(TaskStatus.REQUESTED);
+		t.setIntent(TaskIntent.ORDER);
+		t.setAuthoredOn(new Date());
+		Reference localOrg = new Reference()
+				.setReferenceElement(organizationProvider.getLocalOrganization().get().getIdElement().toVersionless());
+		t.setRequester(localOrg);
+		t.getRestriction().addRecipient(localOrg);
+		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+				.setCode("message-name");
+		t.getInputFirstRep().setValue(new StringType("startProcessMessage"));
+
+		TaskDao dao = getSpringWebApplicationContext().getBean(TaskDao.class);
+		Task created = dao.create(t);
+
+		created.setStatus(TaskStatus.INPROGRESS);
+
+		getWebserviceClient().update(created);
+	}
+
+	@Test
+	public void testUpdateTaskStartPingProcessStatusInProgressToCompleted() throws Exception
+	{
+		OrganizationProvider organizationProvider = getSpringWebApplicationContext()
+				.getBean(OrganizationProvider.class);
+		assertNotNull(organizationProvider);
+
+		Task t = new Task();
+		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-process");
+		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/1.0.0");
+		t.setStatus(TaskStatus.INPROGRESS);
+		t.setIntent(TaskIntent.ORDER);
+		t.setAuthoredOn(new Date());
+		Reference localOrg = new Reference()
+				.setReferenceElement(organizationProvider.getLocalOrganization().get().getIdElement().toVersionless());
+		t.setRequester(localOrg);
+		t.getRestriction().addRecipient(localOrg);
+		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+				.setCode("message-name");
+		t.getInputFirstRep().setValue(new StringType("startProcessMessage"));
+
+		TaskDao dao = getSpringWebApplicationContext().getBean(TaskDao.class);
+		Task created = dao.create(t);
+
+		created.setStatus(TaskStatus.COMPLETED);
+
+		getWebserviceClient().update(created);
 	}
 }

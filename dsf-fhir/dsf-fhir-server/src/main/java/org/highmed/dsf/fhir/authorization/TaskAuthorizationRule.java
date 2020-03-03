@@ -262,8 +262,49 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 					&& isCurrentUserPartOfReferencedOrganization(connection, user, "task.restriction.recipient",
 							oldResource.getRestriction().getRecipientFirstRep()))
 			{
-				// TODO
-				return Optional.empty();
+				Optional<String> same = reasonNotSame(oldResource, newResource);
+				if (same.isEmpty())
+				{
+					// REQUESTED -> INPROGRESS
+					if (TaskStatus.REQUESTED.equals(oldResource.getStatus())
+							&& TaskStatus.INPROGRESS.equals(newResource.getStatus()))
+					{
+						if (!newResource.hasOutput())
+						{
+							logger.info(
+									"local user (user is part of task.restriction.recipient organization), task.status inprogress, properties task.instantiatesUri, task.requester, task.restriction, task.input not changed");
+							return Optional.of(
+									"local user (user part of task.restriction.recipient), task.status inprogress, properties task.instantiatesUri, task.requester, task.restriction, task.input not changed");
+						}
+						else
+						{
+							logger.warn("Update of Task unauthorized, task.output not expected");
+							return Optional.empty();
+						}
+					}
+					// INPROGRESS -> COMPLETED or FAILED
+					else if (TaskStatus.INPROGRESS.equals(oldResource.getStatus())
+							&& (TaskStatus.COMPLETED.equals(newResource.getStatus())
+									|| TaskStatus.FAILED.equals(newResource.getStatus())))
+					{
+						// might have output
+						logger.info(
+								"local user (user is part of task.restriction.recipient organization), task.status completed or failed, properties task.instantiatesUri, task.requester, task.restriction, task.input not changed");
+						return Optional.of(
+								"local user (user part of task.restriction.recipient), task.status completed or failed, properties task.instantiatesUri, task.requester, task.restriction, task.input not changed");
+					}
+					else
+					{
+						logger.warn("Update of Task unauthorized, task.status change {} -> {} not allowed",
+								oldResource.getStatus(), newResource.getStatus());
+						return Optional.empty();
+					}
+				}
+				else
+				{
+					logger.warn("Update of Task unauthorized, task properties {} changed", same.get());
+					return Optional.empty();
+				}
 			}
 			else
 			{
@@ -277,6 +318,46 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 			logger.warn("Update of Task unauthorized, not a local or remote user");
 			return Optional.empty();
 		}
+	}
+
+	private Optional<String> reasonNotSame(Task oldResource, Task newResource)
+	{
+		List<String> errors = new ArrayList<String>();
+		if (!oldResource.getRequester().equalsDeep(newResource.getRequester()))
+		{
+			errors.add("task.requester");
+		}
+
+		if (!oldResource.getRestriction().equalsDeep(newResource.getRestriction()))
+		{
+			errors.add("task.restriction");
+		}
+
+		if (!oldResource.getInstantiatesUri().equals(newResource.getInstantiatesUri()))
+		{
+			errors.add("task.instantiatesUri");
+		}
+
+		if (oldResource.getInput().size() != newResource.getInput().size())
+		{
+			errors.add("task.input");
+		}
+		else
+		{
+			for (int i = 0; i < oldResource.getInput().size(); i++)
+			{
+				if (!oldResource.getInput().get(i).equalsDeep(newResource.getInput().get(i)))
+				{
+					errors.add("task.input[" + i + "]");
+					break;
+				}
+			}
+		}
+
+		if (errors.isEmpty())
+			return Optional.empty();
+		else
+			return Optional.of(errors.stream().collect(Collectors.joining(", ")));
 	}
 
 	@Override
