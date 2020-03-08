@@ -175,7 +175,7 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 		Stream<String> elements = searchParameters.stream().filter(SearchQueryParameter::isDefined)
 				.map(SearchQueryParameter::getFilterQuery);
 
-		if (userFilter != null)
+		if (userFilter != null && !userFilter.getFilterQuery().isEmpty())
 			elements = Stream.concat(Stream.of(userFilter.getFilterQuery()), elements);
 
 		return elements.collect(Collectors.joining(" AND "));

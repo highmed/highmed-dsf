@@ -4,9 +4,10 @@ import java.sql.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.UUID;
 
-import org.highmed.dsf.fhir.dao.OrganizationDao;
+import org.highmed.dsf.fhir.dao.ResourceDao;
 import org.highmed.dsf.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.function.BiFunctionWithSqlException;
@@ -15,25 +16,28 @@ import org.highmed.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinitio
 import org.highmed.dsf.fhir.search.parameters.basic.AbstractIdentifierParameter;
 import org.highmed.dsf.fhir.search.parameters.basic.AbstractReferenceParameter;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
-import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.Resource;
 
-@SearchParameterDefinition(name = EndpointOrganization.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Endpoint.managingOrganization", type = SearchParamType.REFERENCE, documentation = "The organization that is managing the endpoint, search by identifier is supported")
-public class EndpointOrganization extends AbstractReferenceParameter<Endpoint>
+@SearchParameterDefinition(name = ResearchStudyPrincipalInvestigator.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/ResearchStudy-principalinvestigator", type = SearchParamType.REFERENCE, documentation = "Researcher who oversees multiple aspects of the study")
+public class ResearchStudyPrincipalInvestigator extends AbstractReferenceParameter<ResearchStudy>
 {
-	private static final String RESOURCE_TYPE_NAME = "Endpoint";
-	public static final String PARAMETER_NAME = "organization";
-	private static final String TARGET_RESOURCE_TYPE_NAME = "Organization";
+	private static final String RESOURCE_TYPE_NAME = "ResearchStudy";
+	public static final String PARAMETER_NAME = "principalinvestigator";
+	private static final String[] TARGET_RESOURCE_TYPE_NAMES = { "Practitioner", "PractitionerRole" };
 
-	private static final String IDENTIFIERS_SUBQUERY = "(SELECT organization->'identifier' FROM current_organizations"
-			+ " WHERE concat('Organization/', organization->>'id') = endpoint->'managingOrganization'->>'reference')";
+	private static final String IDENTIFIERS_SUBQUERY = "(SELECT practitioner->'identifier' FROM current_practitioners "
+			+ "WHERE concat('Practitioner/', practitioner->>'id') = research_study->'principalInvestigator'->>'reference' "
+			+ "UNION SELECT practitioner_role->'identifier' FROM current_practitioner_roles "
+			+ "WHERE concat('PractitionerRole/', practitioner_role->>'id') = research_study->'principalInvestigator'->>'reference')";
 
-	public EndpointOrganization()
+	public ResearchStudyPrincipalInvestigator()
 	{
-		super(Endpoint.class, RESOURCE_TYPE_NAME, PARAMETER_NAME, TARGET_RESOURCE_TYPE_NAME);
+		super(ResearchStudy.class, RESOURCE_TYPE_NAME, PARAMETER_NAME, TARGET_RESOURCE_TYPE_NAMES);
 	}
 
 	@Override
@@ -42,9 +46,10 @@ public class EndpointOrganization extends AbstractReferenceParameter<Endpoint>
 		switch (valueAndType.type)
 		{
 			case ID:
+				return "research_study->'principalInvestigator'->>'reference' IN ?";
 			case RESOURCE_NAME_AND_ID:
 			case URL:
-				return "endpoint->'managingOrganization'->>'reference' = ?";
+				return "research_study->'principalInvestigator'->>'reference' = ?";
 			case IDENTIFIER:
 			{
 				switch (valueAndType.identifier.type)
@@ -76,7 +81,7 @@ public class EndpointOrganization extends AbstractReferenceParameter<Endpoint>
 		switch (valueAndType.type)
 		{
 			case ID:
-				statement.setString(parameterIndex, TARGET_RESOURCE_TYPE_NAME + "/" + valueAndType.id);
+				statement.setString(parameterIndex, TARGET_RESOURCE_TYPE_NAMES + "/" + valueAndType.id);
 				break;
 			case RESOURCE_NAME_AND_ID:
 				statement.setString(parameterIndex, valueAndType.resourceName + "/" + valueAndType.id);
@@ -109,12 +114,22 @@ public class EndpointOrganization extends AbstractReferenceParameter<Endpoint>
 	}
 
 	@Override
-	protected void doResolveReferencesForMatching(Endpoint resource, DaoProvider daoProvider) throws SQLException
+	protected void doResolveReferencesForMatching(ResearchStudy resource, DaoProvider daoProvider) throws SQLException
 	{
-		OrganizationDao dao = daoProvider.getOrganizationDao();
-		Reference reference = resource.getManagingOrganization();
+		Reference reference = resource.getPrincipalInvestigator();
 		IIdType idType = reference.getReferenceElement();
 
+		if (idType.hasResourceType())
+		{
+			if ("Practitioner".equals(idType.getResourceType()))
+				setResource(reference, idType, daoProvider.getPractitionerDao());
+			else if ("PractitionerRole".equals(idType.getResourceType()))
+				setResource(reference, idType, daoProvider.getPractitionerRoleDao());
+		}
+	}
+
+	private void setResource(Reference reference, IIdType idType, ResourceDao<?> dao) throws SQLException
+	{
 		if (idType.hasVersionIdPart())
 		{
 			dao.readVersion(UUID.fromString(idType.getIdPart()), idType.getVersionIdPartAsLong())
@@ -139,17 +154,23 @@ public class EndpointOrganization extends AbstractReferenceParameter<Endpoint>
 		if (!isDefined())
 			throw notDefined();
 
-		if (!(resource instanceof Endpoint))
+		if (!(resource instanceof ResearchStudy))
 			return false;
 
-		Endpoint e = (Endpoint) resource;
+		ResearchStudy r = (ResearchStudy) resource;
 
 		if (ReferenceSearchType.IDENTIFIER.equals(valueAndType.type))
 		{
-			if (e.getManagingOrganization().getResource() instanceof Organization)
+			if (r.getPrincipalInvestigator().getResource() instanceof Practitioner)
 			{
-				Organization o = (Organization) e.getManagingOrganization().getResource();
-				return o.getIdentifier().stream()
+				Practitioner p = (Practitioner) r.getPrincipalInvestigator().getResource();
+				return p.getIdentifier().stream()
+						.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
+			}
+			else if (r.getPrincipalInvestigator().getResource() instanceof PractitionerRole)
+			{
+				PractitionerRole p = (PractitionerRole) r.getPrincipalInvestigator().getResource();
+				return p.getIdentifier().stream()
 						.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
 			}
 			else
@@ -157,11 +178,12 @@ public class EndpointOrganization extends AbstractReferenceParameter<Endpoint>
 		}
 		else
 		{
-			String ref = e.getManagingOrganization().getReference();
+			String ref = r.getPrincipalInvestigator().getReference();
 			switch (valueAndType.type)
 			{
 				case ID:
-					return ref.equals(TARGET_RESOURCE_TYPE_NAME + "/" + valueAndType.id);
+					return ref.equals("Practitioner" + "/" + valueAndType.id)
+							|| ref.equals("PractitionerRole" + "/" + valueAndType.id);
 				case RESOURCE_NAME_AND_ID:
 					return ref.equals(valueAndType.resourceName + "/" + valueAndType.id);
 				case URL:
@@ -175,14 +197,27 @@ public class EndpointOrganization extends AbstractReferenceParameter<Endpoint>
 	@Override
 	protected String getSortSql(String sortDirectionWithSpacePrefix)
 	{
-		return "endpoint->'managingOrganization'->>'reference'";
+		return "research_study->'principalInvestigator'->>'reference'";
 	}
 
 	@Override
 	protected String getIncludeSql(IncludeParts includeParts)
 	{
-		if (includeParts.matches(RESOURCE_TYPE_NAME, PARAMETER_NAME, TARGET_RESOURCE_TYPE_NAME))
-			return "(SELECT jsonb_build_array(organization) FROM current_organizations WHERE concat('Organization/', organization->>'id') = endpoint->'managingOrganization'->>'reference') AS organizations";
+		if (RESOURCE_TYPE_NAME.equals(includeParts.getSourceResourceTypeName())
+				&& PARAMETER_NAME.equals(includeParts.getSearchParameterName())
+				&& Arrays.stream(TARGET_RESOURCE_TYPE_NAMES)
+						.anyMatch(n -> n.equals(includeParts.getTargetResourceTypeName())))
+			switch (includeParts.getTargetResourceTypeName())
+			{
+				case "Practitioner":
+					return "(SELECT jsonb_build_array(practitioner) FROM current_practitioners"
+							+ " WHERE concat('Practitioner/', practitioner->>'id') = research_study->'principalInvestigator'->>'reference') AS practitioners";
+				case "PractitionerRole":
+					return "(SELECT jsonb_build_array(practitioner_role) FROM current_practitioner_roles"
+							+ " WHERE concat('PractitionerRole/', practitioner_role->>'id') = research_study->'principalInvestigator'->>'reference') AS practitioner_roles";
+				default:
+					return null;
+			}
 		else
 			return null;
 	}
@@ -190,6 +225,6 @@ public class EndpointOrganization extends AbstractReferenceParameter<Endpoint>
 	@Override
 	protected void modifyIncludeResource(IncludeParts includeParts, Resource resource, Connection connection)
 	{
-		// Nothing to do for organizations
+		// Nothing to do for practitioners
 	}
 }

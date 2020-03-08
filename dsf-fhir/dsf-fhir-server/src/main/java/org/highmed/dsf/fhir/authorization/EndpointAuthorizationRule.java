@@ -76,27 +76,27 @@ public class EndpointAuthorizationRule extends AbstractAuthorizationRule<Endpoin
 		if (newResource.hasIdentifier())
 		{
 			if (newResource.getIdentifier().stream()
-					.map(i -> i.hasSystem() && i.hasValue() && IDENTIFIER_SYSTEM.equals(i.getSystem())).count() != 1)
+					.filter(i -> i.hasSystem() && i.hasValue() && IDENTIFIER_SYSTEM.equals(i.getSystem())).count() != 1)
 			{
 				errors.add(
-						"endpoint.identifier one with system '" + IDENTIFIER_SYSTEM + "' and non empty value expected");
+						"Endpoint.identifier one with system '" + IDENTIFIER_SYSTEM + "' and non empty value expected");
 			}
 		}
 		else
 		{
-			errors.add("endpoint.identifier missing");
+			errors.add("Endpoint.identifier missing");
 		}
 
 		if (newResource.hasAddress())
 		{
 			if (!ENDPOINT_ADDRESS_PATTERN.matcher(newResource.getAddress()).matches())
 			{
-				errors.add("endpoint.address not matching " + ENDPOINT_ADDRESS_PATTERN_STRING + " pattern");
+				errors.add("Endpoint.address not matching " + ENDPOINT_ADDRESS_PATTERN_STRING + " pattern");
 			}
 		}
 		else
 		{
-			errors.add("endpoint.address missing");
+			errors.add("Endpoint.address missing");
 		}
 
 		if (!hasLocalOrRemoteAuthorizationRole(newResource))
@@ -113,7 +113,8 @@ public class EndpointAuthorizationRule extends AbstractAuthorizationRule<Endpoin
 	private boolean resourceExists(Connection connection, Endpoint newResource)
 	{
 		String identifierValue = newResource.getIdentifier().stream()
-				.filter(i -> IDENTIFIER_SYSTEM.equals(i.getSystem())).map(i -> i.getValue()).findFirst().orElseThrow();
+				.filter(i -> i.hasSystem() && i.hasValue() && IDENTIFIER_SYSTEM.equals(i.getSystem()))
+				.map(i -> i.getValue()).findFirst().orElseThrow();
 
 		return endpointWithAddressExists(connection, newResource.getAddress())
 				|| endpointWithIdentifierExists(connection, identifierValue);
@@ -124,7 +125,7 @@ public class EndpointAuthorizationRule extends AbstractAuthorizationRule<Endpoin
 		Map<String, List<String>> queryParameters = Map.of("identifier",
 				Collections.singletonList(IDENTIFIER_SYSTEM + "|" + identifierValue));
 		EndpointDao dao = getDao();
-		SearchQuery<Endpoint> query = dao.createSearchQueryWithoutUserFilter(1, 1).configureParameters(queryParameters);
+		SearchQuery<Endpoint> query = dao.createSearchQueryWithoutUserFilter(0, 0).configureParameters(queryParameters);
 		try
 		{
 			PartialResult<Endpoint> result = dao.searchWithTransaction(connection, query);

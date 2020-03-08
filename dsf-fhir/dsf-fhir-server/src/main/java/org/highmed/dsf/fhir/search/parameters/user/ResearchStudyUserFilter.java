@@ -4,13 +4,10 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import org.highmed.dsf.fhir.authentication.User;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.highmed.dsf.fhir.authentication.UserRole;
 
 public class ResearchStudyUserFilter extends AbstractUserFilter
 {
-	private static final Logger logger = LoggerFactory.getLogger(ResearchStudyUserFilter.class);
-
 	public ResearchStudyUserFilter(User user)
 	{
 		super(user);
@@ -19,24 +16,47 @@ public class ResearchStudyUserFilter extends AbstractUserFilter
 	@Override
 	public String getFilterQuery()
 	{
-		// TODO implement
-
-		logger.warn("{}#getFilterQuery not implemented yet", getClass().getName());
-		return "false";
+		if (UserRole.LOCAL.equals(user.getRole()))
+			return "";
+		else
+			return "(research_study->'extension' @> ?::jsonb OR research_study->'extension' @> ?::jsonb)";
 	}
 
 	@Override
 	public int getSqlParameterCount()
 	{
-		logger.warn("{}#getSqlParameterCount not implemented yet", getClass().getName());
-		return 0;
+		return UserRole.LOCAL.equals(user.getRole()) ? 0 : 2;
 	}
 
 	@Override
 	public void modifyStatement(int parameterIndex, PreparedStatement statement) throws SQLException
 	{
-		// TODO implement
-
-		logger.warn("{}#modifyStatement not implemented yet", getClass().getName());
+		if (!UserRole.LOCAL.equals(user.getRole()))
+		{
+			switch (user.getOrganizationType())
+			{
+				case MeDIC:
+					if (parameterIndex == 1)
+						statement.setString(parameterIndex,
+								"[{\"url\":\"http://highmed.org/fhir/StructureDefinition/participating-medic\",\"valueReference\":{\"reference\":\""
+										+ user.getOrganization().getIdElement().getValue() + "\"}}]");
+					else if (parameterIndex == 2)
+						statement.setString(parameterIndex,
+								"[{\"url\":\"http://highmed.org/fhir/StructureDefinition/participating-medic\",\"valueReference\":{\"reference\":\""
+										+ user.getOrganization().getIdElement().toVersionless().getValue() + "\"}}]");
+					break;
+					
+				case TTP:
+					if (parameterIndex == 1)
+						statement.setString(parameterIndex,
+								"[{\"url\":\"http://highmed.org/fhir/StructureDefinition/participating-ttp\",\"valueReference\":{\"reference\":\""
+										+ user.getOrganization().getIdElement().getValue() + "\"}}]");
+					else if (parameterIndex == 2)
+						statement.setString(parameterIndex,
+								"[{\"url\":\"http://highmed.org/fhir/StructureDefinition/participating-ttp\",\"valueReference\":{\"reference\":\""
+										+ user.getOrganization().getIdElement().toVersionless().getValue() + "\"}}]");
+					break;
+			}
+		}
 	}
 }

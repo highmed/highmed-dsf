@@ -34,13 +34,11 @@ public class BinaryAuthorizationRule extends AbstractAuthorizationRule<Binary, B
 		{
 			if (newResource.hasData() && newResource.hasContentType() && newResource.hasSecurityContext())
 			{
-				ResourceReference reference = new ResourceReference("Binary.SecurityContext",
-						newResource.getSecurityContext(), Organization.class);
-				if (EnumSet.of(ReferenceType.LITERAL_INTERNAL, ReferenceType.LOGICAL)
-						.contains(reference.getType(serverBase)))
+				Optional<ResourceReference> reference = createIfLiteralInternalOrLogicalReference(
+						"Binary.SecurityContext", newResource.getSecurityContext(), Organization.class);
+				if (reference.isPresent())
 				{
-					Optional<Resource> securityContext = referenceResolver.resolveReference(user, reference,
-							connection);
+					Optional<Resource> securityContext = resolveReference(connection, user, reference);
 					if (securityContext.isPresent())
 					{
 						if (securityContext.get() instanceof Organization)
@@ -91,13 +89,14 @@ public class BinaryAuthorizationRule extends AbstractAuthorizationRule<Binary, B
 			logger.info("Read of Binary authorized for local user '{}'", user.getName());
 			return Optional.of("local user");
 		}
-		else if (isCurrentUserPartOfReferencedOrganization(connection, user, "Binary.SecurityContext",
-				existingResource.getSecurityContext()))
+		else if ((isLocalUser(user) || isRemoteUser(user)) && isCurrentUserPartOfReferencedOrganization(connection,
+				user, "Binary.securityContext", existingResource.getSecurityContext()))
 		{
 			logger.info(
-					"Read of Binary authorized, Binary.SecurityContext reference could be resolved and user '{}' is part of referenced organization",
+					"Read of Binary authorized, Binary.securityContext reference could be resolved and user '{}' is part of referenced organization",
 					user.getName());
-			return Optional.of("Binary.SecurityContext resolved and user part of referenced organization");
+			return Optional.of(
+					"local or remote user, Binary.securityContext resolved and user part of referenced organization");
 		}
 		else
 		{

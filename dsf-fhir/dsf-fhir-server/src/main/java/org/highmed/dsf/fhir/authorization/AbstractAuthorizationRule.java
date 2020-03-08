@@ -6,7 +6,9 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
+import org.highmed.dsf.fhir.OrganizationType;
 import org.highmed.dsf.fhir.authentication.OrganizationProvider;
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.authentication.UserRole;
@@ -140,6 +142,16 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		return user != null && UserRole.REMOTE.equals(user.getRole());
 	}
 
+	protected final boolean isUserPartOfMeDic(User user)
+	{
+		return user != null && OrganizationType.MeDIC.equals(user.getOrganizationType());
+	}
+
+	protected final boolean isUserPartOfTtp(User user)
+	{
+		return user != null && OrganizationType.TTP.equals(user.getOrganizationType());
+	}
+
 	protected final boolean hasLocalOrRemoteAuthorizationRole(Resource resource)
 	{
 		return resource.hasMeta() && resource.getMeta().getTag().stream()
@@ -167,7 +179,13 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 	protected final boolean isCurrentUserPartOfReferencedOrganizations(Connection connection, User user,
 			String referenceLocation, Collection<? extends Reference> references)
 	{
-		return references.stream()
+		return isCurrentUserPartOfReferencedOrganizations(connection, user, referenceLocation, references.stream());
+	}
+
+	protected final boolean isCurrentUserPartOfReferencedOrganizations(Connection connection, User user,
+			String referenceLocation, Stream<? extends Reference> references)
+	{
+		return references
 				.anyMatch(r -> isCurrentUserPartOfReferencedOrganization(connection, user, referenceLocation, r));
 	}
 
@@ -220,5 +238,22 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 
 		return organizationProvider.getLocalOrganization()
 				.map(localOrg -> localOrg.getIdElement().equals(organization.getIdElement())).orElse(false);
+	}
+
+	@SafeVarargs
+	protected final Optional<ResourceReference> createIfLiteralInternalOrLogicalReference(String referenceLocation,
+			Reference reference, Class<? extends Resource>... referenceTypes)
+	{
+		ResourceReference r = new ResourceReference(referenceLocation, reference, referenceTypes);
+		if (EnumSet.of(ReferenceType.LITERAL_INTERNAL, ReferenceType.LOGICAL).contains(r.getType(serverBase)))
+			return Optional.of(r);
+		else
+			return Optional.empty();
+	}
+
+	protected final Optional<Resource> resolveReference(Connection connection, User user,
+			Optional<ResourceReference> reference)
+	{
+		return reference.flatMap(ref -> referenceResolver.resolveReference(user, ref, connection));
 	}
 }
