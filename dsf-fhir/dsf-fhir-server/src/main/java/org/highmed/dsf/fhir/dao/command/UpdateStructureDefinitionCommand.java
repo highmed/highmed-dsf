@@ -13,6 +13,8 @@ import org.highmed.dsf.fhir.function.ConsumerWithSqlAndResourceNotFoundException
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
+import org.highmed.dsf.fhir.service.ReferenceExtractor;
+import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.highmed.dsf.fhir.service.SnapshotDependencies;
 import org.highmed.dsf.fhir.service.SnapshotDependencyAnalyzer;
 import org.highmed.dsf.fhir.service.SnapshotGenerator;
@@ -39,12 +41,14 @@ public class UpdateStructureDefinitionCommand extends UpdateCommand<StructureDef
 	public UpdateStructureDefinitionCommand(int index, User user, Bundle bundle, BundleEntryComponent entry,
 			String serverBase, AuthorizationHelper authorizationHelper, StructureDefinition resource,
 			StructureDefinitionDao dao, ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
-			ResponseGenerator responseGenerator, EventManager eventManager, EventGenerator eventGenerator,
+			ResponseGenerator responseGenerator, ReferenceExtractor referenceExtractor,
+			ReferenceResolver referenceResolver, EventManager eventManager, EventGenerator eventGenerator,
 			StructureDefinitionSnapshotDao snapshotDao, SnapshotGenerator snapshotGenerator,
 			SnapshotDependencyAnalyzer snapshotDependencyAnalyzer)
 	{
 		super(index, user, bundle, entry, serverBase, authorizationHelper, resource, dao, exceptionHandler,
-				parameterConverter, responseGenerator, eventManager, eventGenerator);
+				parameterConverter, responseGenerator, referenceExtractor, referenceResolver, eventManager,
+				eventGenerator);
 
 		this.snapshotDao = snapshotDao;
 		this.snapshotGenerator = snapshotGenerator;

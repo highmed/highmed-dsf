@@ -1,60 +1,265 @@
 {
-  "resourceType": "Bundle",
-  "type": "transaction",
-  "entry": [
-    {
-      "fullUrl": "urn:uuid:aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
-      "resource": {
-        "resourceType": "ResearchStudy",
-        "status": "active"
-      },
-      "request": {
-        "method": "POST",
-        "url": "ResearchStudy"
-      }
-    },
-    {
-      "fullUrl": "urn:uuid:bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
-      "resource": {
-        "resourceType": "Task",
-        "instantiatesUri": "http://highmed.org/bpe/Process/requestSimpleCohortSizeQuery/1.0.0",
-        "status": "requested",
-        "intent": "order",
-        "input": [
-          {
-            "type": {
-              "coding": [
-                {
-                  "system": "http://highmed.org/fhir/CodeSystem/bpmn-message",
-                  "code": "research-study-reference"
-                }
-              ]
-            },
-            "valueReference": {
-              "reference": "urn:uuid:aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
-            }
-          }
-        ],
-        "output": [
-          {
-            "type": {
-              "coding": [
-                {
-                  "system": "http://highmed.org/fhir/CodeSystem/bpmn-message",
-                  "code": "research-study-reference"
-                }
-              ]
-            },
-            "valueReference": {
-              "reference": "urn:uuid:aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
-            }
-          }
-        ]
-      },
-      "request": {
-        "method": "POST",
-        "url": "Task"
-      }
-    }
-  ]
+	"resourceType": "Bundle",
+	"type": "transaction",
+	"entry": [
+		{
+			"fullUrl": "urn:uuid:ae194285-d08e-46c7-a9a7-9a47624dd8aa",
+			"resource": {
+				"resourceType": "Group",
+				"meta": {
+					"profile": "http://highmed.org/fhir/StructureDefinition/highmed-group"
+				},
+				"text": {
+					"div": "This is the description",
+					"status": "additional"
+				},
+				"type": "person",
+				"actual": true,
+				"extension": [
+					{
+						"url": "http://highmed.org/fhir/StructureDefinition/query",
+						"valueExpression": [
+							{
+								"language": "application/x-aql-query",
+								"expression": "SELECT COUNT(e) FROM EHR e"
+							}
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Group"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:ae194285-d08e-46c7-a9a7-9a47624dd8bb",
+			"resource": {
+				"resourceType": "Group",
+				"meta": {
+					"profile": "http://highmed.org/fhir/StructureDefinition/highmed-group"
+				},
+				"text": {
+					"div": "This is the description",
+					"status": "additional"
+				},
+				"type": "person",
+				"actual": true,
+				"extension": [
+					{
+						"url": "http://highmed.org/fhir/StructureDefinition/query",
+						"valueExpression": [
+							{
+								"language": "application/x-aql-query",
+								"expression": "SELECT COUNT(e) FROM EHR e"
+							}
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Group"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:ae194285-d08e-46c7-a9a7-9a47624dd8xx",
+			"resource": {
+				"resourceType": "Practitioner",
+				"meta": {
+					"profile": "http://highmed.org/fhir/StructureDefinition/highmed-practitioner"
+				},
+				"name": [
+					{
+						"family": "HiGHmed",
+						"given": [
+							"Test"
+						]
+					}
+				],
+				"telecom": [
+					{
+						"system": "phone",
+						"value": "+491710001122"
+					},
+					{
+						"system": "email",
+						"value": "test-practitioner@highmed.org"
+					}
+				],
+				"address": [
+					{
+						"line": [
+							"Highmedstraﬂe 12"
+						],
+						"city": "Berlin",
+						"postalCode": "10115",
+						"country": "DE"
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Practitioner"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:ae194285-d08e-46c7-a9a7-9a47624dd8yy",
+			"resource": {
+				"resourceType": "PractitionerRole",
+				"meta": {
+					"profile": "http://highmed.org/fhir/StructureDefinition/highmed-practitioner-role"
+				},
+				"active": true,
+				"practitioner": {
+					"reference": "urn:uuid:ae194285-d08e-46c7-a9a7-9a47624dd8xx"
+				},
+				"organization": {
+					"identifier": {
+						"system": "http://highmed.org/fhir/NamingSystem/organization-identifier",
+						"value": "Test_Organization"
+					},
+					"type": "Organization"
+				}
+			},
+			"request": {
+				"method": "POST",
+				"url": "PractitionerRole"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+			"resource": {
+				"resourceType": "ResearchStudy",
+				"meta": {
+					"profile": "http://highmed.org/fhir/StructureDefinition/highmed-research-study"
+				},
+				"identifier": [
+					{
+						"value": "c4d3e590-890a-4840-848f-412cf4b7f1fa",
+						"system": "http://highmed.org/fhir/NamingSystem/research-study-identifier"
+					}
+				],
+				"title": "Research Study Test",
+				"status": "active",
+				"description": "This is a test research study based on the highmed profile. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.",
+				"enrollment": [
+					{
+						"reference": "urn:uuid:ae194285-d08e-46c7-a9a7-9a47624dd8aa"
+					},
+					{
+						"reference": "urn:uuid:ae194285-d08e-46c7-a9a7-9a47624dd8bb"
+					}
+				],
+				"principalInvestigator": {
+					"reference": "urn:uuid:ae194285-d08e-46c7-a9a7-9a47624dd8xx"
+				},
+				"extension": [
+					{
+						"url": "http://highmed.org/fhir/StructureDefinition/participating-medic",
+						"valueReference": {
+							"identifier": {
+								"system": "http://highmed.org/fhir/NamingSystem/organization-identifier",
+								"value": "Test_Organization"
+							},
+							"type": "Organization"
+						}
+					},
+					{
+						"url": "http://highmed.org/fhir/StructureDefinition/participating-ttp",
+						"valueReference": {
+							"identifier": {
+								"system": "http://highmed.org/fhir/NamingSystem/organization-identifier",
+								"value": "External_Test_Organization"
+							},
+							"type": "Organization"
+						}
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "ResearchStudy"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+			"resource": {
+				"resourceType": "Task",
+				"instantiatesUri": "http://highmed.org/bpe/Process/requestSimpleFeasibility/1.0.0",
+				"status": "requested",
+				"intent": "order",
+				"requester": {
+					"identifier": {
+						"system": "http://highmed.org/fhir/NamingSystem/organization-identifier",
+						"value": "Test_Organization"
+					},
+					"type": "Organization"
+				},
+				"restriction": {
+					"recipient": [
+						{
+							"identifier": {
+								"system": "http://highmed.org/fhir/NamingSystem/organization-identifier",
+								"value": "Test_Organization"
+							},
+							"type": "Organization"
+						}
+					]
+				},
+				"input": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://highmed.org/fhir/CodeSystem/bpmn-message",
+									"code": "message-name"
+								}
+							]
+						},
+						"valueString": "requestSimpleFeasibilityMessage"
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://highmed.org/fhir/CodeSystem/bpmn-message",
+									"code": "research-study-reference"
+								}
+							]
+						},
+						"valueReference": {
+							"reference": "urn:uuid:aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+						}
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://highmed.org/fhir/CodeSystem/feasibility",
+									"code": "needs-record-linkage"
+								}
+							]
+						},
+						"valueBoolean": false
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://highmed.org/fhir/CodeSystem/feasibility",
+									"code": "needs-consent-check"
+								}
+							]
+						},
+						"valueBoolean": false
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "Task"
+			}
+		}
+	]
 }

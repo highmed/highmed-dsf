@@ -283,14 +283,13 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	}
 
 	/* caution: only works because we set all versions as deleted or not deleted in method markDeleted */
-	public final boolean hasNonDeletedResource(UUID uuid) throws SQLException
+	public final boolean hasNonDeletedResource(Connection connection, UUID uuid) throws SQLException
 	{
 		if (uuid == null)
 			return false;
 
-		try (Connection connection = dataSource.getConnection();
-				PreparedStatement statement = connection.prepareStatement("SELECT count(*) FROM " + resourceTable
-						+ " WHERE " + resourceIdColumn + " = ? AND NOT deleted"))
+		try (PreparedStatement statement = connection.prepareStatement(
+				"SELECT count(*) FROM " + resourceTable + " WHERE " + resourceIdColumn + " = ? AND NOT deleted"))
 		{
 			statement.setObject(1, preparedStatementFactory.uuidToPgObject(uuid));
 
@@ -454,7 +453,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 			return false;
 
 		if (versionString == null || versionString.isBlank())
-			return hasNonDeletedResource(uuid);
+			return hasNonDeletedResource(connection, uuid);
 		else
 		{
 			Long version = toLong(versionString);

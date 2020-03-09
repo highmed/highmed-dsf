@@ -26,6 +26,8 @@ import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.highmed.dsf.fhir.search.PartialResult;
 import org.highmed.dsf.fhir.search.SearchQuery;
 import org.highmed.dsf.fhir.search.SearchQueryParameterError;
+import org.highmed.dsf.fhir.service.ReferenceExtractor;
+import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent;
@@ -42,7 +44,9 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 {
 	private static final Logger logger = LoggerFactory.getLogger(UpdateCommand.class);
 
-	protected final ResponseGenerator responseGenerator;
+	private final ResponseGenerator responseGenerator;
+	private final ResolveReferencesHelper<R> resolveReferencesHelper;
+
 	protected final EventManager eventManager;
 	protected final EventGenerator eventGenerator;
 
@@ -50,14 +54,18 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	protected R updatedResource;
 
 	public UpdateCommand(int index, User user, Bundle bundle, BundleEntryComponent entry, String serverBase,
-			AuthorizationHelper authorizationHelper, R resource, D dao,
-			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
-			ResponseGenerator responseGenerator, EventManager eventManager, EventGenerator eventGenerator)
+			AuthorizationHelper authorizationHelper, R resource, D dao, ExceptionHandler exceptionHandler,
+			ParameterConverter parameterConverter, ResponseGenerator responseGenerator,
+			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver, EventManager eventManager,
+			EventGenerator eventGenerator)
 	{
 		super(3, index, user, bundle, entry, serverBase, authorizationHelper, resource, dao, exceptionHandler,
 				parameterConverter);
 
 		this.responseGenerator = responseGenerator;
+		resolveReferencesHelper = new ResolveReferencesHelper<R>(index, user, serverBase, referenceExtractor,
+				referenceResolver, responseGenerator);
+
 		this.eventManager = eventManager;
 		this.eventGenerator = eventGenerator;
 	}
@@ -146,7 +154,7 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 			throw new WebApplicationException(responseGenerator.nonMatchingResourceTypeAndRequestUrlInBundle(index,
 					resourceTypeName, entry.getRequest().getUrl()));
 
-		checkUpdateAllowed(user, connection, resource);
+		checkUpdateAllowed(idTranslationTable, connection, user, resource);
 
 		Optional<Long> ifMatch = Optional.ofNullable(entry.getRequest().getIfMatch())
 				.flatMap(parameterConverter::toEntityTag).flatMap(parameterConverter::toVersion);
@@ -155,7 +163,8 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 				() -> dao.updateWithTransaction(connection, resource, ifMatch.orElse(null)));
 	}
 
-	private void checkUpdateAllowed(User user, Connection connection, Resource newResource)
+	private void checkUpdateAllowed(Map<String, IdType> idTranslationTable, Connection connection, User user,
+			R newResource)
 	{
 		String resourceTypeName = newResource.getResourceType().name();
 		String id = newResource.getIdElement().getIdPart();
@@ -172,6 +181,8 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		}
 		else
 		{
+			resolveReferencesHelper.resolveReferencesIgnoreAndLogExceptions(idTranslationTable, connection, resource);
+
 			R oldResource = dbResource.get();
 			authorizationHelper.checkUpdateAllowed(connection, user, oldResource, newResource);
 		}
@@ -208,6 +219,8 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		if (result.getOverallCount() <= 0
 				&& (!resource.hasId() || resource.getIdElement().getValue().startsWith(URL_UUID_PREFIX)))
 		{
+			resolveReferencesHelper.resolveReferencesIgnoreAndLogExceptions(idTranslationTable, connection, resource);
+
 			authorizationHelper.checkCreateAllowed(connection, user, resource);
 
 			id = UUID.randomUUID();

@@ -99,13 +99,11 @@ public class ResearchStudyAuthorizationRule extends AbstractAuthorizationRule<Re
 			errors.add("ResearchStudy.identifier missing");
 		}
 
-		Stream<Reference> participatingMedicReferences = ResearchStudyHelper
-				.getParticipatingMedicReferences(newResource);
-		if (participatingMedicReferences.count() >= 0)
+		if (ResearchStudyHelper.getParticipatingMedicReferences(newResource).count() >= 0)
 		{
 			if (!organizationsResolvable(connection, user,
 					"ResearchStudy.extension(url:http://highmed.org/fhir/StructureDefinition/participating-medic)",
-					participatingMedicReferences).allMatch(t -> t))
+					ResearchStudyHelper.getParticipatingMedicReferences(newResource)).allMatch(t -> t))
 			{
 				errors.add(
 						"ResearchStudy.extension(url:http://highmed.org/fhir/StructureDefinition/participating-medic) one or more participating-medic Organizations not resolved");
@@ -131,7 +129,7 @@ public class ResearchStudyAuthorizationRule extends AbstractAuthorizationRule<Re
 		else
 		{
 			errors.add(
-					"ResearchStudy.extension(url:http://highmed.org/fhir/StructureDefinition/participating-ttp) participating-ttp Organization references missing");
+					"ResearchStudy.extension(url:http://highmed.org/fhir/StructureDefinition/participating-ttp) participating-ttp Organization reference missing");
 		}
 
 		if (newResource.getEnrollment().size() >= 0)
@@ -217,7 +215,7 @@ public class ResearchStudyAuthorizationRule extends AbstractAuthorizationRule<Re
 
 		try
 		{
-			return dao.search(query).getOverallCount() == 1;
+			return dao.searchWithTransaction(connection, query).getOverallCount() == 1;
 		}
 		catch (SQLException e)
 		{

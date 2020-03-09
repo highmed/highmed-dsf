@@ -9,9 +9,13 @@ import org.highmed.dsf.fhir.dao.GroupDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.Group;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GroupAuthorizationRule extends AbstractAuthorizationRule<Group, GroupDao>
 {
+	private static final Logger logger = LoggerFactory.getLogger(GroupAuthorizationRule.class);
+
 	public GroupAuthorizationRule(DaoProvider daoProvider, String serverBase, ReferenceResolver referenceResolver,
 			OrganizationProvider organizationProvider)
 	{
@@ -21,8 +25,16 @@ public class GroupAuthorizationRule extends AbstractAuthorizationRule<Group, Gro
 	@Override
 	public Optional<String> reasonCreateAllowed(Connection connection, User user, Group newResource)
 	{
-		// TODO Auto-generated method stub
-		return Optional.empty();
+		if (isLocalUser(user))
+		{
+			logger.info("Create of Group authorized for local user '{}'", user.getName());
+			return Optional.of("local user");
+		}
+		else
+		{
+			logger.warn("Create of Group unauthorized, not a local user");
+			return Optional.empty();
+		}
 	}
 
 	@Override
