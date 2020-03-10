@@ -7,7 +7,7 @@
 	</meta>
 	<extension url="http://highmed.org/fhir/StructureDefinition/process-authorization">
 		<extension url="message-name">
-			<valueString value="updateWhitelistMessage" />
+			<valueString value="executeUpdateResourcesMessage" />
 		</extension>
 		<extension url="authorization-role">
 			<valueCoding>
