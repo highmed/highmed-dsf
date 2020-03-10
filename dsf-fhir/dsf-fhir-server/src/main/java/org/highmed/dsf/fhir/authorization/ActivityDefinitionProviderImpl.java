@@ -6,7 +6,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.highmed.dsf.fhir.OrganizationType;
-import org.highmed.dsf.fhir.authentication.UserRole;
+import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.ActivityDefinitionDao;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.slf4j.Logger;
@@ -34,23 +34,45 @@ public class ActivityDefinitionProviderImpl implements ActivityDefinitionProvide
 	}
 
 	@Override
-	public Optional<ActivityDefinition> getActivityDefinition(Connection connection, UserRole userRole,
-			String processUrl, String processVersion, String messageName)
+	public Optional<ActivityDefinition> getActivityDefinition(Connection connection, User user, String processUrl,
+			String processVersion, String messageName)
 	{
+		Objects.requireNonNull(connection, "connection");
+		Objects.requireNonNull(user, "user");
+
+		if (processUrl == null || processUrl.isBlank())
+		{
+			logger.warn("processUrl null or blank");
+			return Optional.empty();
+		}
+		else if (processVersion == null || processVersion.isBlank())
+		{
+			logger.warn("processVersion null or blank");
+			return Optional.empty();
+		}
+		else if (messageName == null || messageName.isBlank())
+		{
+			logger.warn("messageName null or blank");
+			return Optional.empty();
+		}
+
 		try
 		{
 			Optional<ActivityDefinition> optAD = dao
 					.readByOrganizationTypeUserRoleProcessUrlVersionMessageNameAndNotRetiredWithTransaction(connection,
-							organizationType, userRole, processUrl, processVersion, messageName);
+							organizationType, user.getOrganizationType(), user.getRole(), processUrl, processVersion,
+							messageName);
 
 			if (optAD.isPresent())
 				logger.debug(
-						"ActivityDefinition with organization-type {}, user-role {}, process-url {}, process-version {} and message-name {} found",
-						organizationType, userRole, processUrl, processVersion, messageName);
+						"ActivityDefinition with recipient-organization-type {}, requester-organization-type {}, user-role {}, process-url {}, process-version {} and message-name {} found",
+						organizationType, user.getOrganizationType(), user.getRole(), processUrl, processVersion,
+						messageName);
 			else
 				logger.warn(
-						"ActivityDefinition with organization-type {}, user-role {}, process-url {}, process-version {} and message-name {} not found",
-						organizationType, userRole, processUrl, processVersion, messageName);
+						"ActivityDefinition with recipient-organization-type {}, requester-organization-type {}, user-role {}, process-url {}, process-version {} and message-name {} not found",
+						organizationType, user.getOrganizationType(), user.getRole(), processUrl, processVersion,
+						messageName);
 
 			return optAD;
 		}

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_0k0v4i2" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="2.2.4">
-  <bpmn:process id="executeUpdateResources" isExecutable="true" camunda:versionTag="1.0.0">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_0k0v4i2" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.5.0">
+  <bpmn:process id="executeUpdateResources" isExecutable="true" camunda:versionTag="0.1.0">
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>SequenceFlow_0djh0eg</bpmn:outgoing>
       <bpmn:messageEventDefinition messageRef="Message_1r6vnvn" />
@@ -19,10 +19,6 @@
       <bpmn:incoming>SequenceFlow_0djh0eg</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_141lpsf</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:textAnnotation id="TextAnnotation_0rr4guv">
-      <bpmn:text>TODO: add step to check requesting organization is of type TTP</bpmn:text>
-    </bpmn:textAnnotation>
-    <bpmn:association id="Association_1sc5e0d" sourceRef="updateResources" targetRef="TextAnnotation_0rr4guv" />
   </bpmn:process>
   <bpmn:message id="Message_1r6vnvn" name="executeUpdateResourcesMessage" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
@@ -43,13 +39,6 @@
       <bpmndi:BPMNEdge id="SequenceFlow_0eygcor_di" bpmnElement="SequenceFlow_0eygcor">
         <di:waypoint x="533" y="121" />
         <di:waypoint x="622" y="121" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="TextAnnotation_0rr4guv_di" bpmnElement="TextAnnotation_0rr4guv">
-        <dc:Bounds x="357" y="189" width="228" height="43" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Association_1sc5e0d_di" bpmnElement="Association_1sc5e0d">
-        <di:waypoint x="478" y="161" />
-        <di:waypoint x="474" y="189" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_141lpsf_di" bpmnElement="SequenceFlow_141lpsf">
         <di:waypoint x="357" y="121" />

@@ -75,13 +75,13 @@
       <path value="Extension.extension.value[x].code" />
       <min value="1" />
     </element>
-    <element id="Extension.extension:organization-types">
+    <element id="Extension.extension:requester-organization-types">
       <path value="Extension.extension" />
-      <sliceName value="organization-types" />
+      <sliceName value="requester-organization-types" />
       <min value="1" />
       <max value="1" />
     </element>
-    <element id="Extension.extension:organization-types.extension">
+    <element id="Extension.extension:requester-organization-types.extension">
       <path value="Extension.extension.extension" />
       <slicing>
         <discriminator>
@@ -91,36 +91,85 @@
         <rules value="open" />
       </slicing>
     </element>
-    <element id="Extension.extension:organization-types.extension:organization-type">
+    <element id="Extension.extension:requester-organization-types.extension:requester-organization-type">
       <path value="Extension.extension.extension" />
-      <sliceName value="organization-type" />
+      <sliceName value="requester-organization-type" />
       <min value="1" />
       <max value="2" />
     </element>
-    <element id="Extension.extension:organization-types.extension:organization-type.url">
+    <element id="Extension.extension:requester-organization-types.extension:requester-organization-type.url">
       <path value="Extension.extension.extension.url" />
-      <fixedUri value="organization-type" />
+      <fixedUri value="requester-organization-type" />
     </element>
-    <element id="Extension.extension:organization-types.extension:organization-type.value[x]">
+    <element id="Extension.extension:requester-organization-types.extension:requester-organization-type.value[x]">
       <path value="Extension.extension.extension.value[x]" />
       <type>
         <code value="Coding" />
       </type>
     </element>
-    <element id="Extension.extension:organization-types.extension:organization-type.value[x].system">
+    <element id="Extension.extension:requester-organization-types.extension:requester-organization-type.value[x].system">
       <path value="Extension.extension.extension.value[x].system" />
       <min value="1" />
-      <fixedUri value="http://highmed.org/fhir/CodeSystem/authorization-role" />
+      <fixedUri value="http://highmed.org/fhir/CodeSystem/organization-type" />
     </element>
-    <element id="Extension.extension:organization-types.extension:organization-type.value[x].code">
+    <element id="Extension.extension:requester-organization-types.extension:requester-organization-type.value[x].code">
       <path value="Extension.extension.extension.value[x].code" />
       <min value="1" />
     </element>
-    <element id="Extension.extension:organization-types.url">
+    <element id="Extension.extension:requester-organization-types.url">
       <path value="Extension.extension.url" />
-      <fixedUri value="organization-types" />
+      <fixedUri value="requester-organization-types" />
     </element>
-    <element id="Extension.extension:organization-types.value[x]">
+    <element id="Extension.extension:requester-organization-types.value[x]">
+      <path value="Extension.extension.value[x]" />
+      <max value="0" />
+    </element>
+    <element id="Extension.extension:recipient-organization-types">
+      <path value="Extension.extension" />
+      <sliceName value="recipient-organization-types" />
+      <min value="1" />
+      <max value="1" />
+    </element>
+    <element id="Extension.extension:recipient-organization-type.extension">
+      <path value="Extension.extension.extension" />
+      <slicing>
+        <discriminator>
+          <type value="value" />
+          <path value="url" />
+        </discriminator>
+        <rules value="open" />
+      </slicing>
+    </element>
+    <element id="Extension.extension:recipient-organization-types.extension:recipient-organization-type">
+      <path value="Extension.extension.extension" />
+      <sliceName value="recipient-organization-type" />
+      <min value="1" />
+      <max value="2" />
+    </element>
+    <element id="Extension.extension:recipient-organization-types.extension:recipient-organization-type.url">
+      <path value="Extension.extension.extension.url" />
+      <fixedUri value="recipient-organization-type" />
+    </element>
+    <element id="Extension.extension:recipient-organization-types.extension:recipient-organization-type.value[x]">
+      <path value="Extension.extension.extension.value[x]" />
+      <type>
+        <code value="Coding" />
+      </type>
+    </element>
+    <element id="Extension.extension:recipient-organization-types.extension:recipient-organization-type.value[x].system">
+      <path value="Extension.extension.extension.value[x].system" />
+      <min value="1" />
+      <fixedUri value="http://highmed.org/fhir/CodeSystem/organization-type" />
+    </element>
+    <element id="Extension.extension:recipient-organization-types.extension:recipient-organization-type.value[x].code">
+      <path value="Extension.extension.extension.value[x].code" />
+      <min value="1" />
+    </element>
+    <element id="Extension.extension:recipient-organization-types.url">
+      <path value="Extension.extension.url" />
+      <fixedUri value="recipient-organization-types" />
+    </element>
+    <element id="Extension.extension:recipient-organization-types.value[x]">
       <path value="Extension.extension.value[x]" />
       <max value="0" />
     </element>

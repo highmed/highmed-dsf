@@ -93,7 +93,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 
 		Task t = new Task();
 		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-process");
-		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/1.0.0");
+		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.1.0");
 		t.setStatus(TaskStatus.REQUESTED);
 		t.setIntent(TaskIntent.ORDER);
 		t.setAuthoredOn(new Date());
@@ -116,7 +116,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 
 		Task t = new Task();
 		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-process");
-		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/1.0.0");
+		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.1.0");
 		t.setStatus(TaskStatus.REQUESTED);
 		t.setIntent(TaskIntent.ORDER);
 		t.setAuthoredOn(new Date());
@@ -151,7 +151,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 
 		Task t = new Task();
 		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-ping");
-		t.setInstantiatesUri("http://highmed.org/bpe/Process/pong/1.0.0");
+		t.setInstantiatesUri("http://highmed.org/bpe/Process/pong/0.1.0");
 		t.setStatus(TaskStatus.REQUESTED);
 		t.setIntent(TaskIntent.ORDER);
 		t.setAuthoredOn(new Date());
@@ -178,7 +178,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 
 		Task t = new Task();
 		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-pong");
-		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/1.0.0");
+		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.1.0");
 		t.setStatus(TaskStatus.REQUESTED);
 		t.setIntent(TaskIntent.ORDER);
 		t.setAuthoredOn(new Date());
@@ -205,7 +205,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 
 		Task t = new Task();
 		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-process");
-		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/1.0.0");
+		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.1.0");
 		t.setStatus(TaskStatus.REQUESTED);
 		t.setIntent(TaskIntent.ORDER);
 		t.setAuthoredOn(new Date());
@@ -234,7 +234,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 
 		Task t = new Task();
 		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-process");
-		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/1.0.0");
+		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.1.0");
 		t.setStatus(TaskStatus.INPROGRESS);
 		t.setIntent(TaskIntent.ORDER);
 		t.setAuthoredOn(new Date());

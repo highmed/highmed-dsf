@@ -11,6 +11,7 @@ import org.hl7.fhir.r4.model.ActivityDefinition;
 public interface ActivityDefinitionDao extends ResourceDao<ActivityDefinition>, ReadByUrlDao<ActivityDefinition>
 {
 	Optional<ActivityDefinition> readByOrganizationTypeUserRoleProcessUrlVersionMessageNameAndNotRetiredWithTransaction(
-			Connection connection, OrganizationType organizationType, UserRole userRole, String processUrl,
-			String processVersion, String messageName) throws SQLException;
+			Connection connection, OrganizationType requesterOrganizationType,
+			OrganizationType recipientOrganizationType, UserRole userRole, String processUrl, String processVersion,
+			String messageName) throws SQLException;
 }

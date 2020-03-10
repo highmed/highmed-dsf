@@ -15,16 +15,30 @@
 				<code value="LOCAL" />
 			</valueCoding>
 		</extension>
-		<extension url="organization-types">
-			<extension url="organization-type">
+		<extension url="requester-organization-types">
+			<extension url="requester-organization-type">
 				<valueCoding>
-					<system value="http://highmed.org/fhir/CodeSystem/authorization-role" />
+					<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
 					<code value="TTP" />
 				</valueCoding>
 			</extension>
-			<extension url="organization-type">
+			<extension url="requester-organization-type">
 				<valueCoding>
-					<system value="http://highmed.org/fhir/CodeSystem/authorization-role" />
+					<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
+					<code value="MeDIC" />
+				</valueCoding>
+			</extension>
+		</extension>
+		<extension url="recipient-organization-types">
+			<extension url="recipient-organization-type">
+				<valueCoding>
+					<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
+					<code value="TTP" />
+				</valueCoding>
+			</extension>
+			<extension url="recipient-organization-type">
+				<valueCoding>
+					<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
 					<code value="MeDIC" />
 				</valueCoding>
 			</extension>
@@ -43,16 +57,30 @@
 				<code value="REMOTE" />
 			</valueCoding>
 		</extension>
-		<extension url="organization-types">
-			<extension url="organization-type">
+		<extension url="requester-organization-types">
+			<extension url="requester-organization-type">
 				<valueCoding>
-					<system value="http://highmed.org/fhir/CodeSystem/authorization-role" />
+					<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
 					<code value="TTP" />
 				</valueCoding>
 			</extension>
-			<extension url="organization-type">
+			<extension url="requester-organization-type">
 				<valueCoding>
-					<system value="http://highmed.org/fhir/CodeSystem/authorization-role" />
+					<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
+					<code value="MeDIC" />
+				</valueCoding>
+			</extension>
+		</extension>
+		<extension url="recipient-organization-types">
+			<extension url="recipient-organization-type">
+				<valueCoding>
+					<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
+					<code value="TTP" />
+				</valueCoding>
+			</extension>
+			<extension url="recipient-organization-type">
+				<valueCoding>
+					<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
 					<code value="MeDIC" />
 				</valueCoding>
 			</extension>
@@ -62,7 +90,7 @@
 		</extension>
 	</extension>
 	<url value="http://highmed.org/bpe/Process/ping" />
-	<version value="1.0.0" />
+	<version value="0.1.0" />
 	<name value="PingProcess" />
 	<title value="PING process" />
 	<subtitle value="Communication Testing Process" />

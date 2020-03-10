@@ -69,11 +69,13 @@ public class ActivityDefinitionDaoJdbc extends AbstractResourceDaoJdbc<ActivityD
 
 	@Override
 	public Optional<ActivityDefinition> readByOrganizationTypeUserRoleProcessUrlVersionMessageNameAndNotRetiredWithTransaction(
-			Connection connection, OrganizationType organizationType, UserRole userRole, String processUrl,
-			String processVersion, String messageName) throws SQLException
+			Connection connection, OrganizationType recipientOrganizationType,
+			OrganizationType requesterOrganizationType, UserRole userRole, String processUrl, String processVersion,
+			String messageName) throws SQLException
 	{
 		Objects.requireNonNull(connection, "connection");
-		Objects.requireNonNull(organizationType, "organizationType");
+		Objects.requireNonNull(recipientOrganizationType, "recipientOrganizationType");
+		Objects.requireNonNull(requesterOrganizationType, "requesterOrganizationType");
 		Objects.requireNonNull(userRole, "userRole");
 		Objects.requireNonNull(processUrl, "processUrl");
 		if (processUrl.isBlank())
@@ -95,9 +97,12 @@ public class ActivityDefinitionDaoJdbc extends AbstractResourceDaoJdbc<ActivityD
 					+ "{\"url\":\"message-name\",\"valueString\":\"" + messageName + "\"},"
 					+ "{\"url\":\"authorization-role\",\"valueCoding\":{\"code\":\"" + userRole.toString()
 					+ "\",\"system\":\"http://highmed.org/fhir/CodeSystem/authorization-role\"}},"
-					+ "{\"url\":\"organization-types\",\"extension\":[{\"url\":\"organization-type\",\"valueCoding\":{\"code\":\""
-					+ organizationType.toString()
-					+ "\",\"system\":\"http://highmed.org/fhir/CodeSystem/authorization-role\"}}]}]}]";
+					+ "{\"url\":\"requester-organization-types\",\"extension\":[{\"url\":\"requester-organization-type\",\"valueCoding\":{\"code\":\""
+					+ requesterOrganizationType.toString()
+					+ "\",\"system\":\"http://highmed.org/fhir/CodeSystem/organization-type\"}}]},"
+					+ "{\"url\":\"recipient-organization-types\",\"extension\":[{\"url\":\"recipient-organization-type\",\"valueCoding\":{\"code\":\""
+					+ recipientOrganizationType.toString()
+					+ "\",\"system\":\"http://highmed.org/fhir/CodeSystem/organization-type\"}}]}]}]";
 
 			statement.setString(1, processUrl);
 			statement.setString(2, processVersion);

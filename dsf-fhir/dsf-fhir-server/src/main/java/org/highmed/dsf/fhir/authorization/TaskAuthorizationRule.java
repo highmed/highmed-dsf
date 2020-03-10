@@ -196,8 +196,8 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 			String processVersion = matcher.group(2);
 
 			return activityDefinitionProvider
-					.getActivityDefinition(connection, user.getRole(), processUrl, processVersion, messageName)
-					.map(ad -> true).orElse(false);
+					.getActivityDefinition(connection, user, processUrl, processVersion, messageName).map(ad -> true)
+					.orElse(false);
 		}
 		else
 			return false;
