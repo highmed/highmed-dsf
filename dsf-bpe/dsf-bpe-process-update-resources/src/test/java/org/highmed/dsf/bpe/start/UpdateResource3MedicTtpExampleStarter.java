@@ -49,7 +49,7 @@ public class UpdateResource3MedicTtpExampleStarter
 
 		Task task = new Task();
 		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-request-update-resources");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/requestUpdateResources/1.0.0");
+		task.setInstantiatesUri("http://highmed.org/bpe/Process/requestUpdateResources/0.1.0");
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());

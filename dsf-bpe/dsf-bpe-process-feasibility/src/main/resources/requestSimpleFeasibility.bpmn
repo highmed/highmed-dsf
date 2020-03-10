@@ -13,7 +13,7 @@
       <bpmn:extensionElements>
         <camunda:inputOutput>
           <camunda:inputParameter name="processDefinitionKey">executeSimpleFeasibility</camunda:inputParameter>
-          <camunda:inputParameter name="versionTag">1.0.0</camunda:inputParameter>
+          <camunda:inputParameter name="versionTag">0.1.0</camunda:inputParameter>
           <camunda:inputParameter name="messageName">executeSimpleFeasibilityMessage</camunda:inputParameter>
           <camunda:inputParameter name="profile">http://highmed.org/fhir/StructureDefinition/highmed-task-execute-simple-feasibility</camunda:inputParameter>
         </camunda:inputOutput>
@@ -42,7 +42,7 @@
       <bpmn:extensionElements>
         <camunda:inputOutput>
           <camunda:inputParameter name="processDefinitionKey">computeSimpleFeasibility</camunda:inputParameter>
-          <camunda:inputParameter name="versionTag">1.0.0</camunda:inputParameter>
+          <camunda:inputParameter name="versionTag">0.1.0</camunda:inputParameter>
           <camunda:inputParameter name="messageName">computeSimpleFeasibilityMessage</camunda:inputParameter>
           <camunda:inputParameter name="profile">http://highmed.org/fhir/StructureDefinition/highmed-task-compute-simple-feasibility</camunda:inputParameter>
         </camunda:inputOutput>

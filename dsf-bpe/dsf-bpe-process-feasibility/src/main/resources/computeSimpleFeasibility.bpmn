@@ -47,7 +47,7 @@
         <camunda:inputOutput>
           <camunda:inputParameter name="processDefinitionKey">requestSimpleFeasibility</camunda:inputParameter>
           <camunda:inputParameter name="profile">http://highmed.org/fhir/StructureDefinition/highmed-task-result-multi-medic-simple-feasibility</camunda:inputParameter>
-          <camunda:inputParameter name="versionTag">1.0.0</camunda:inputParameter>
+          <camunda:inputParameter name="versionTag">0.1.0</camunda:inputParameter>
           <camunda:inputParameter name="messageName">resultMultiMedicSimpleFeasibilityMessage</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>

@@ -10,7 +10,7 @@
       <bpmn:extensionElements>
         <camunda:inputOutput>
           <camunda:inputParameter name="messageName">pongMessage</camunda:inputParameter>
-          <camunda:inputParameter name="versionTag">1.0.0</camunda:inputParameter>
+          <camunda:inputParameter name="versionTag">0.1.0</camunda:inputParameter>
           <camunda:inputParameter name="processDefinitionKey">ping</camunda:inputParameter>
           <camunda:inputParameter name="profile">http://highmed.org/fhir/StructureDefinition/highmed-task-pong</camunda:inputParameter>
         </camunda:inputOutput>
