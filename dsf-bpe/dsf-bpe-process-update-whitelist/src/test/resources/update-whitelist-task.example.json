@@ -3,7 +3,7 @@
   "meta":{
     "profile":"http://highmed.org/fhir/StructureDefinition/highmed-task-update-whitelist"
   },
-  "instantiatesUri":"http://highmed.org/bpe/Process/updateWhiteList/1.0.0",
+  "instantiatesUri":"http://highmed.org/bpe/Process/updateWhiteList/0.1.0",
   "status":"requested",
   "intent":"order",
   "authoredOn":"2019-10-21",
@@ -35,7 +35,7 @@
           }
         ]
       },
-      "valueString":"updateWhiteListMessage"
+      "valueString":"updateWhitelistMessage"
     }
   ]
 }

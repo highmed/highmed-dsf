@@ -39,7 +39,7 @@ public class UpdateWhiteList3MedicTtpExampleStarter
 
 		Task task = new Task();
 		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-update-whitelist");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/updateWhiteList/1.0.0");
+		task.setInstantiatesUri("http://highmed.org/bpe/Process/updateWhiteList/0.1.0");
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
@@ -48,7 +48,7 @@ public class UpdateWhiteList3MedicTtpExampleStarter
 		task.getRestriction().addRecipient().setType("Organization").getIdentifier()
 				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_TTP");
 
-		task.addInput().setValue(new StringType("updateWhiteListMessage")).getType().addCoding()
+		task.addInput().setValue(new StringType("updateWhitelistMessage")).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("message-name");
 
 		client.create(task);
