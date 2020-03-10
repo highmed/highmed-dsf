@@ -4,6 +4,12 @@
 		<fullUrl value="urn:uuid:bb73165c-c7b9-4342-8e28-531f07fa7735"/>
 		<resource>
 			<Organization xmlns="http://hl7.org/fhir">
+				<meta>
+					<tag>
+						<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
+						<code value="REMOTE"/>
+					</tag>		
+				</meta>
 				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
 					<valueString value="TODO"/>
 				</extension>
@@ -34,6 +40,12 @@
 		<fullUrl value="urn:uuid:55901940-02db-40bf-9a6e-bdfdd0ddb7bf"/>
 		<resource>
 			<Organization xmlns="http://hl7.org/fhir">
+				<meta>
+					<tag>
+						<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
+						<code value="REMOTE"/>
+					</tag>		
+				</meta>
 				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
 					<valueString value="TODO"/>
 				</extension>
@@ -60,6 +72,12 @@
 		<fullUrl value="urn:uuid:dae83c31-e478-4bc2-a6bc-61e8b9b41fd7"/>
 		<resource>
 			<Endpoint xmlns="http://hl7.org/fhir">
+				<meta>
+					<tag>
+						<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
+						<code value="REMOTE"/>
+					</tag>		
+				</meta>
 				<identifier>
 					<system value="http://highmed.org/fhir/NamingSystem/endpoint-identifier"/>
 					<value value="Test_TTP_Endpoint"/>
