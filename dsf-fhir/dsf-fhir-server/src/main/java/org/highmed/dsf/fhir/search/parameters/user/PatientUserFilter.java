@@ -4,13 +4,10 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import org.highmed.dsf.fhir.authentication.User;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.highmed.dsf.fhir.authentication.UserRole;
 
 public class PatientUserFilter extends AbstractUserFilter
 {
-	private static final Logger logger = LoggerFactory.getLogger(PatientUserFilter.class);
-
 	public PatientUserFilter(User user)
 	{
 		super(user);
@@ -19,24 +16,21 @@ public class PatientUserFilter extends AbstractUserFilter
 	@Override
 	public String getFilterQuery()
 	{
-		// TODO implement
-
-		logger.warn("{}#getFilterQuery not implemented yet", getClass().getName());
-		return "false";
+		if (UserRole.LOCAL.equals(user.getRole()))
+			return ""; // not filtered for local users
+		else
+			return "false";
 	}
 
 	@Override
 	public int getSqlParameterCount()
 	{
-		logger.warn("{}#getSqlParameterCount not implemented yet", getClass().getName());
 		return 0;
 	}
 
 	@Override
 	public void modifyStatement(int parameterIndex, PreparedStatement statement) throws SQLException
 	{
-		// TODO implement
-
-		logger.warn("{}#modifyStatement not implemented yet", getClass().getName());
+		// nothing to do
 	}
 }

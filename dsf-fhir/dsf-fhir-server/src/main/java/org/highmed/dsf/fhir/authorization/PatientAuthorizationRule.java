@@ -9,9 +9,13 @@ import org.highmed.dsf.fhir.dao.PatientDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.Patient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PatientAuthorizationRule extends AbstractAuthorizationRule<Patient, PatientDao>
 {
+	private static final Logger logger = LoggerFactory.getLogger(PatientAuthorizationRule.class);
+
 	public PatientAuthorizationRule(DaoProvider daoProvider, String serverBase, ReferenceResolver referenceResolver,
 			OrganizationProvider organizationProvider)
 	{
@@ -21,36 +25,70 @@ public class PatientAuthorizationRule extends AbstractAuthorizationRule<Patient,
 	@Override
 	public Optional<String> reasonCreateAllowed(Connection connection, User user, Patient newResource)
 	{
-		// TODO Auto-generated method stub
-		return Optional.empty();
+		if (isLocalUser(user))
+		{
+			logger.info("Create of Patient authorized for local user '{}'", user.getName());
+			return Optional.of("local user");
+		}
+		else
+		{
+			logger.warn("Create of Patient unauthorized, not a local user");
+			return Optional.empty();
+		}
 	}
 
 	@Override
 	public Optional<String> reasonReadAllowed(Connection connection, User user, Patient existingResource)
 	{
-		// TODO Auto-generated method stub
-		return Optional.empty();
+		if (isLocalUser(user))
+		{
+			logger.info("Read of Patient authorized for local user '{}'", user.getName());
+			return Optional.of("local user");
+		}
+		else
+		{
+			logger.warn("Read of Patient unauthorized, not a local user");
+			return Optional.empty();
+		}
 	}
 
 	@Override
 	public Optional<String> reasonUpdateAllowed(Connection connection, User user, Patient oldResource,
 			Patient newResource)
 	{
-		// TODO Auto-generated method stub
-		return Optional.empty();
+		if (isLocalUser(user))
+		{
+			logger.info("Update of Patient authorized for local user '{}'", user.getName());
+			return Optional.of("local user");
+
+		}
+		else
+		{
+			logger.warn("Update of Patient unauthorized, not a local user");
+			return Optional.empty();
+		}
 	}
 
 	@Override
 	public Optional<String> reasonDeleteAllowed(Connection connection, User user, Patient oldResource)
 	{
-		// TODO Auto-generated method stub
-		return Optional.empty();
+		if (isLocalUser(user))
+		{
+			logger.info("Delete of Patient authorized for local user '{}'", user.getName());
+			return Optional.of("local user");
+		}
+		else
+		{
+			logger.warn("Delete of Patient unauthorized, not a local user");
+			return Optional.empty();
+		}
 	}
 
 	@Override
 	public Optional<String> reasonSearchAllowed(Connection connection, User user)
 	{
-		// TODO Auto-generated method stub
-		return Optional.empty();
+		logger.info("Search of Patient authorized for {} user '{}', will be fitered by users organization {}",
+				user.getRole(), user.getName(), user.getOrganization().getIdElement().getValueAsString());
+		return Optional.of("Allowed for all, filtered by users organization");
 	}
 }
