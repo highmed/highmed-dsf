@@ -7,6 +7,7 @@ import java.sql.SQLException;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.dsf.fhir.dao.EndpointDao;
+import org.highmed.dsf.fhir.search.parameters.EndpointAddress;
 import org.highmed.dsf.fhir.search.parameters.EndpointIdentifier;
 import org.highmed.dsf.fhir.search.parameters.EndpointName;
 import org.highmed.dsf.fhir.search.parameters.EndpointOrganization;
@@ -26,7 +27,8 @@ public class EndpointDaoJdbc extends AbstractResourceDaoJdbc<Endpoint> implement
 	public EndpointDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, Endpoint.class, "endpoints", "endpoint", "endpoint_id", EndpointUserFilter::new,
-				with(EndpointOrganization::new, EndpointIdentifier::new, EndpointName::new, EndpointStatus::new),
+				with(EndpointAddress::new, EndpointIdentifier::new, EndpointName::new, EndpointOrganization::new,
+						EndpointStatus::new),
 				with(OrganizationEndpointRevInclude::new));
 	}
 
