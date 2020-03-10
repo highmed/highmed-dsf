@@ -185,7 +185,7 @@ public class ActivityDefinitionAuthorizationRule
 				else
 				{
 					logger.warn(
-							"Update of ActivityDefinition unauthorized, other Endpoint with address and identifier already exists");
+							"Update of ActivityDefinition unauthorized, other ActivityDefinition with url and version already exists");
 					return Optional.empty();
 				}
 			}
