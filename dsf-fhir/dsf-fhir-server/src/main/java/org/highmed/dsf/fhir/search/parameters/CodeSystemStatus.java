@@ -22,7 +22,7 @@ import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ValueSet;
 
-@SearchParameterDefinition(name = CodeSystemStatus.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/CodeSystem.status", type = SearchParamType.TOKEN, documentation = "The current status of the code system")
+@SearchParameterDefinition(name = CodeSystemStatus.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/CodeSystem-status", type = SearchParamType.TOKEN, documentation = "The current status of the code system")
 public class CodeSystemStatus extends AbstractTokenParameter<CodeSystem>
 {
 	public static final String PARAMETER_NAME = "status";

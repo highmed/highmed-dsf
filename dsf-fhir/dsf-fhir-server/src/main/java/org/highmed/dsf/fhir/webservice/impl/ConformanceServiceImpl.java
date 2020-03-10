@@ -59,10 +59,10 @@ import org.highmed.dsf.fhir.search.parameters.StructureDefinitionIdentifier;
 import org.highmed.dsf.fhir.search.parameters.StructureDefinitionStatus;
 import org.highmed.dsf.fhir.search.parameters.StructureDefinitionUrl;
 import org.highmed.dsf.fhir.search.parameters.StructureDefinitionVersion;
-import org.highmed.dsf.fhir.search.parameters.SubscriptionChannelPayload;
-import org.highmed.dsf.fhir.search.parameters.SubscriptionChannelType;
 import org.highmed.dsf.fhir.search.parameters.SubscriptionCriteria;
+import org.highmed.dsf.fhir.search.parameters.SubscriptionPayload;
 import org.highmed.dsf.fhir.search.parameters.SubscriptionStatus;
+import org.highmed.dsf.fhir.search.parameters.SubscriptionType;
 import org.highmed.dsf.fhir.search.parameters.TaskIdentifier;
 import org.highmed.dsf.fhir.search.parameters.TaskRequester;
 import org.highmed.dsf.fhir.search.parameters.TaskStatus;
@@ -287,11 +287,11 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 				structureDefinitionStatus, structureDefinitionUrl, structureDefinitionVersion));
 
 		var subscriptionCriteria = createSearchParameter(SubscriptionCriteria.class);
+		var subscriptionPayload = createSearchParameter(SubscriptionPayload.class);
 		var subscriptionStatus = createSearchParameter(SubscriptionStatus.class);
-		var subscriptionChannelPayload = createSearchParameter(SubscriptionChannelPayload.class);
-		var subscriptionChannelType = createSearchParameter(SubscriptionChannelType.class);
-		searchParameters.put(Subscription.class, Arrays.asList(subscriptionCriteria, subscriptionStatus,
-				subscriptionChannelPayload, subscriptionChannelType));
+		var subscriptionType = createSearchParameter(SubscriptionType.class);
+		searchParameters.put(Subscription.class,
+				Arrays.asList(subscriptionCriteria, subscriptionPayload, subscriptionStatus, subscriptionType));
 
 		var taskIdentifier = createSearchParameter(TaskIdentifier.class);
 		var taskRequester = createSearchParameter(TaskRequester.class);

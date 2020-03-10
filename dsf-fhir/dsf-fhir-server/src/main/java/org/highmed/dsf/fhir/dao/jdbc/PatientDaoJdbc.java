@@ -14,7 +14,7 @@ public class PatientDaoJdbc extends AbstractResourceDaoJdbc<Patient> implements 
 	public PatientDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, Patient.class, "patients", "patient", "patient_id", PatientUserFilter::new,
-				with(PatientIdentifier::new, PatientActive::new), with());
+				with(PatientActive::new, PatientIdentifier::new), with());
 	}
 
 	@Override

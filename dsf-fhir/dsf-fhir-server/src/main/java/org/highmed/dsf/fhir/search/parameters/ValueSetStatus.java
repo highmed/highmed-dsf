@@ -21,7 +21,7 @@ import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ValueSet;
 
-@SearchParameterDefinition(name = ValueSetStatus.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/ValueSet.status", type = SearchParamType.TOKEN, documentation = "The current status of the value set")
+@SearchParameterDefinition(name = ValueSetStatus.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/ValueSet-status", type = SearchParamType.TOKEN, documentation = "The current status of the value set")
 public class ValueSetStatus extends AbstractTokenParameter<ValueSet>
 {
 	public static final String PARAMETER_NAME = "status";

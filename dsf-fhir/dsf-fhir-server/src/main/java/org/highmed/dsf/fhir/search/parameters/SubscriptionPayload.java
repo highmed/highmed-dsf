@@ -13,19 +13,18 @@ import org.highmed.dsf.fhir.function.BiFunctionWithSqlException;
 import org.highmed.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.dsf.fhir.search.parameters.basic.AbstractTokenParameter;
 import org.highmed.dsf.fhir.search.parameters.basic.TokenSearchType;
-import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Subscription;
 
-@SearchParameterDefinition(name = SubscriptionChannelType.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Subscription.channel.type", type = SearchParamType.TOKEN, documentation = "The type of channel for the sent notifications")
-public class SubscriptionChannelType extends AbstractTokenParameter<Subscription>
+@SearchParameterDefinition(name = SubscriptionPayload.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Subscription-payload", type = SearchParamType.TOKEN, documentation = "The mime-type of the notification payload")
+public class SubscriptionPayload extends AbstractTokenParameter<Subscription>
 {
-	public static final String PARAMETER_NAME = "type";
+	public static final String PARAMETER_NAME = "payload";
 
-	private org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType channelType;
+	private String payloadMimeType;
 
-	public SubscriptionChannelType()
+	public SubscriptionPayload()
 	{
 		super(PARAMETER_NAME);
 	}
@@ -36,34 +35,19 @@ public class SubscriptionChannelType extends AbstractTokenParameter<Subscription
 		super.configureSearchParameter(queryParameters);
 
 		if (valueAndType != null && valueAndType.type == TokenSearchType.CODE)
-			channelType = toChannelType(valueAndType.codeValue);
-	}
-
-	private org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType toChannelType(String status)
-	{
-		if (status == null || status.isBlank())
-			return null;
-
-		try
-		{
-			return org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType.fromCode(status);
-		}
-		catch (FHIRException e)
-		{
-			return null;
-		}
+			payloadMimeType = valueAndType.codeValue;
 	}
 
 	@Override
 	public boolean isDefined()
 	{
-		return super.isDefined() && channelType != null;
+		return super.isDefined() && payloadMimeType != null;
 	}
 
 	@Override
 	public String getFilterQuery()
 	{
-		return "subscription->'channel'->>'type' = ?";
+		return "subscription->'channel'->>'payload' = ?";
 	}
 
 	@Override
@@ -76,13 +60,13 @@ public class SubscriptionChannelType extends AbstractTokenParameter<Subscription
 	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement,
 			BiFunctionWithSqlException<String, Object[], Array> arrayCreator) throws SQLException
 	{
-		statement.setString(parameterIndex, channelType.toCode());
+		statement.setString(parameterIndex, payloadMimeType);
 	}
 
 	@Override
 	public void modifyBundleUri(UriBuilder bundleUri)
 	{
-		bundleUri.replaceQueryParam(PARAMETER_NAME, channelType.toCode());
+		bundleUri.replaceQueryParam(PARAMETER_NAME, payloadMimeType);
 	}
 
 	@Override
@@ -94,12 +78,12 @@ public class SubscriptionChannelType extends AbstractTokenParameter<Subscription
 		if (!(resource instanceof Subscription))
 			return false;
 
-		return Objects.equals(((Subscription) resource).getChannel().getType(), channelType);
+		return Objects.equals(((Subscription) resource).getChannel().getPayload(), payloadMimeType);
 	}
 
 	@Override
 	protected String getSortSql(String sortDirectionWithSpacePrefix)
 	{
-		return "subscription->'channel'->>'type'" + sortDirectionWithSpacePrefix;
+		return "subscription->'channel'->>'payload'" + sortDirectionWithSpacePrefix;
 	}
 }

@@ -18,7 +18,7 @@ import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Subscription;
 
-@SearchParameterDefinition(name = SubscriptionStatus.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Subscription.status", type = SearchParamType.TOKEN, documentation = "Search by subscription status")
+@SearchParameterDefinition(name = SubscriptionStatus.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Subscription-status", type = SearchParamType.TOKEN, documentation = "Search by subscription status")
 public class SubscriptionStatus extends AbstractTokenParameter<Subscription>
 {
 	public static final String PARAMETER_NAME = "status";

@@ -21,7 +21,7 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 
-@SearchParameterDefinition(name = EndpointOrganization.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Endpoint.managingOrganization", type = SearchParamType.REFERENCE, documentation = "The organization that is managing the endpoint, search by identifier is supported")
+@SearchParameterDefinition(name = EndpointOrganization.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Endpoint-organization", type = SearchParamType.REFERENCE, documentation = "The organization that is managing the endpoint")
 public class EndpointOrganization extends AbstractReferenceParameter<Endpoint>
 {
 	private static final String RESOURCE_TYPE_NAME = "Endpoint";

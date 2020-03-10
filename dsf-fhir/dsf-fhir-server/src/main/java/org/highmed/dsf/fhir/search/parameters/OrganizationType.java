@@ -17,8 +17,7 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Resource;
 
-@SearchParameterDefinition(name = PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Organization.type",
-		type = SearchParamType.TOKEN, documentation = "A code for the type of organization")
+@SearchParameterDefinition(name = PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Organization-type", type = SearchParamType.TOKEN, documentation = "A code for the type of organization")
 public class OrganizationType extends AbstractTokenParameter<Organization>
 {
 	public static final String PARAMETER_NAME = "type";
@@ -64,9 +63,8 @@ public class OrganizationType extends AbstractTokenParameter<Organization>
 				statement.setString(parameterIndex, "[{\"code\": \"" + valueAndType.codeValue + "\"}]");
 				return;
 			case CODE_AND_SYSTEM:
-				statement.setString(parameterIndex,
-						"[{\"code\": \"" + valueAndType.codeValue + "\", \"system\": \"" + valueAndType.systemValue
-								+ "\"}]");
+				statement.setString(parameterIndex, "[{\"code\": \"" + valueAndType.codeValue + "\", \"system\": \""
+						+ valueAndType.systemValue + "\"}]");
 				return;
 			case CODE_AND_NO_SYSTEM_PROPERTY:
 				statement.setString(parameterIndex, valueAndType.codeValue);
@@ -89,11 +87,11 @@ public class OrganizationType extends AbstractTokenParameter<Organization>
 			case CODE:
 				return Objects.equals(valueAndType.codeValue, identifier.getValue());
 			case CODE_AND_SYSTEM:
-				return Objects.equals(valueAndType.codeValue, identifier.getValue()) && Objects
-						.equals(valueAndType.systemValue, identifier.getSystem());
+				return Objects.equals(valueAndType.codeValue, identifier.getValue())
+						&& Objects.equals(valueAndType.systemValue, identifier.getSystem());
 			case CODE_AND_NO_SYSTEM_PROPERTY:
-				return Objects.equals(valueAndType.codeValue, identifier.getValue()) && (identifier.getSystem() == null
-						|| identifier.getSystem().isBlank());
+				return Objects.equals(valueAndType.codeValue, identifier.getValue())
+						&& (identifier.getSystem() == null || identifier.getSystem().isBlank());
 			case SYSTEM:
 				return Objects.equals(valueAndType.systemValue, identifier.getSystem());
 			default:

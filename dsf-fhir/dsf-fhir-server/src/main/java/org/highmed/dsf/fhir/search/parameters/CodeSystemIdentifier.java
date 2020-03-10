@@ -6,7 +6,7 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Resource;
 
-@SearchParameterDefinition(name = AbstractIdentifierParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/CodeSystem.identifier", type = SearchParamType.TOKEN, documentation = "External identifier for the code system")
+@SearchParameterDefinition(name = AbstractIdentifierParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/CodeSystem-identifier", type = SearchParamType.TOKEN, documentation = "External identifier for the code system")
 public class CodeSystemIdentifier extends AbstractIdentifierParameter<CodeSystem>
 {
 	public static final String RESOURCE_COLUMN = "code_system";

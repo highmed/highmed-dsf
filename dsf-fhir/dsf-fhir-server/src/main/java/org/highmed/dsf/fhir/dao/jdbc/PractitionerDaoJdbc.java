@@ -14,7 +14,7 @@ public class PractitionerDaoJdbc extends AbstractResourceDaoJdbc<Practitioner> i
 	public PractitionerDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, Practitioner.class, "practitioners", "practitioner", "practitioner_id",
-				PractitionerUserFilter::new, with(PractitionerIdentifier::new, PractitionerActive::new), with());
+				PractitionerUserFilter::new, with(PractitionerActive::new, PractitionerIdentifier::new), with());
 	}
 
 	@Override
