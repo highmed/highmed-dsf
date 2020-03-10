@@ -21,10 +21,11 @@ public class PractitionerUserFilter extends AbstractUserFilter
 		else
 			// Practitioner part of ResearchStudy as principal investigator and users Organization part of same
 			// ResearchStudy or
-			// Practitioner part of PractitionerRole and users Organization part of same PractitionerRole
 			return "(concat('Practitioner/', practitioner->>'id') IN ("
 					+ "SELECT research_study->'principalInvestigator'->>'reference' FROM current_research_studies WHERE "
 					+ "research_study->'extension' @> ?::jsonb OR research_study->'extension' @> ?::jsonb) OR "
+
+					// Practitioner part of PractitionerRole and users Organization part of same PractitionerRole
 					+ "concat('Practitioner/', practitioner->>'id') IN ("
 					+ "SELECT practitioner_role->'practitioner'->>'reference' FROM current_practitioner_roles WHERE "
 					+ "practitioner_role->'organization'->>'reference' = ? OR practitioner_role->'organization'->>'reference' = ?))";
@@ -53,7 +54,7 @@ public class PractitionerUserFilter extends AbstractUserFilter
 								"[{\"url\":\"http://highmed.org/fhir/StructureDefinition/participating-medic\",\"valueReference\":{\"reference\":\""
 										+ user.getOrganization().getIdElement().toVersionless().getValue() + "\"}}]");
 					break;
-					
+
 				case TTP:
 					if (parameterIndex == 1)
 						statement.setString(parameterIndex,

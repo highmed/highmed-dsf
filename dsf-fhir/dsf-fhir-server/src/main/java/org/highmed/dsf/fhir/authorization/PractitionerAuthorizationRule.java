@@ -3,7 +3,6 @@ package org.highmed.dsf.fhir.authorization;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -17,7 +16,6 @@ import org.highmed.dsf.fhir.search.SearchQuery;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
-import org.hl7.fhir.r4.model.ResearchStudy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,11 +89,10 @@ public class PractitionerAuthorizationRule extends AbstractAuthorizationRule<Pra
 	{
 		try
 		{
-			List<ResearchStudy> studies = daoProvider.getResearchStudyDao()
-					.readByPrincipalInvestigatorIdAndOrganizationTypeAndOrganizationIdWithTransaction(connection,
+			return daoProvider.getResearchStudyDao()
+					.existsByPrincipalInvestigatorIdAndOrganizationTypeAndOrganizationIdWithTransaction(connection,
 							existingResource.getIdElement(), user.getOrganizationType(),
 							user.getOrganization().getIdElement());
-			return !studies.isEmpty();
 		}
 		catch (SQLException e)
 		{

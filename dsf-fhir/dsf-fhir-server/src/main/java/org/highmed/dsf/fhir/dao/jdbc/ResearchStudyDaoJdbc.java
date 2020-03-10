@@ -4,8 +4,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 import org.apache.commons.dbcp2.BasicDataSource;
@@ -25,7 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 public class ResearchStudyDaoJdbc extends AbstractResourceDaoJdbc<ResearchStudy> implements ResearchStudyDao
 {
 	private static final Logger logger = LoggerFactory.getLogger(ResearchStudyDaoJdbc.class);
-	
+
 	public ResearchStudyDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, ResearchStudy.class, "research_studies", "research_study", "research_study_id",
@@ -41,7 +39,7 @@ public class ResearchStudyDaoJdbc extends AbstractResourceDaoJdbc<ResearchStudy>
 	}
 
 	@Override
-	public List<ResearchStudy> readByPrincipalInvestigatorIdAndOrganizationTypeAndOrganizationIdWithTransaction(
+	public boolean existsByPrincipalInvestigatorIdAndOrganizationTypeAndOrganizationIdWithTransaction(
 			Connection connection, IdType principalInvestigatorId, OrganizationType organizationType,
 			IdType organizationId) throws SQLException
 	{
@@ -51,44 +49,79 @@ public class ResearchStudyDaoJdbc extends AbstractResourceDaoJdbc<ResearchStudy>
 		Objects.requireNonNull(organizationId, "organizationId");
 
 		try (PreparedStatement statement = connection
-				.prepareStatement("SELECT research_study FROM current_research_studies WHERE "
+				.prepareStatement("SELECT COUNT(*) FROM current_research_studies WHERE "
 						+ "(research_study->'principalInvestigator'->>'reference' = ? OR research_study->'principalInvestigator'->>'reference' = ?) AND "
 						+ "(research_study->'extension' @> ?::jsonb OR research_study->'extension' @> ?::jsonb)"))
 		{
 			statement.setString(1, principalInvestigatorId.getValue());
 			statement.setString(2, principalInvestigatorId.toVersionless().getValue());
 
-			switch (organizationType)
-			{
-				case MeDIC:
-					statement.setString(3,
-							"[{\"url\":\"http://highmed.org/fhir/StructureDefinition/participating-medic\",\"valueReference\":{\"reference\":\""
-									+ organizationId.getValue() + "\"}}]");
-					statement.setString(4,
-							"[{\"url\":\"http://highmed.org/fhir/StructureDefinition/participating-medic\",\"valueReference\":{\"reference\":\""
-									+ organizationId.toVersionless().getValue() + "\"}}]");
-					break;
-
-				case TTP:
-					statement.setString(3,
-							"[{\"url\":\"http://highmed.org/fhir/StructureDefinition/participating-ttp\",\"valueReference\":{\"reference\":\""
-									+ organizationId.getValue() + "\"}}]");
-					statement.setString(4,
-							"[{\"url\":\"http://highmed.org/fhir/StructureDefinition/participating-ttp\",\"valueReference\":{\"reference\":\""
-									+ organizationId.toVersionless().getValue() + "\"}}]");
-					break;
-			}
+			setOrganization(statement, organizationType, organizationId);
 
 			logger.trace("Executing query '{}'", statement);
 			try (ResultSet result = statement.executeQuery())
 			{
-				List<ResearchStudy> results = new ArrayList<>();
-
-				while (result.next())
-					results.add(getResource(result, 1));
-
-				return results;
+				if (result.next())
+					return result.getInt(1) > 0;
+				else
+					return false;
 			}
+		}
+	}
+
+	@Override
+	public boolean existsByEnrollmentIdAndOrganizationTypeAndOrganizationIdWithTransaction(Connection connection,
+			IdType enrollmentId, OrganizationType organizationType, IdType organizationId) throws SQLException
+	{
+		Objects.requireNonNull(connection, "connection");
+		Objects.requireNonNull(enrollmentId, "enrollmentId");
+		Objects.requireNonNull(organizationType, "organizationType");
+		Objects.requireNonNull(organizationId, "organizationId");
+
+		try (PreparedStatement statement = connection
+				.prepareStatement("SELECT COUNT(*) FROM current_research_studies WHERE "
+						+ "(? IN (SELECT enrollment->>'reference' FROM jsonb_array_elements(research_study->'enrollment') AS enrollment) OR "
+						+ "? IN (SELECT enrollment->>'reference' FROM jsonb_array_elements(research_study->'enrollment') AS enrollment)) AND "
+						+ "(research_study->'extension' @> ?::jsonb OR research_study->'extension' @> ?::jsonb)"))
+		{
+			statement.setString(1, enrollmentId.getValue());
+			statement.setString(2, enrollmentId.toVersionless().getValue());
+
+			setOrganization(statement, organizationType, organizationId);
+
+			logger.trace("Executing query '{}'", statement);
+			try (ResultSet result = statement.executeQuery())
+			{
+				if (result.next())
+					return result.getInt(1) > 0;
+				else
+					return false;
+			}
+		}
+	}
+
+	private void setOrganization(PreparedStatement statement, OrganizationType organizationType, IdType organizationId)
+			throws SQLException
+	{
+		switch (organizationType)
+		{
+			case MeDIC:
+				statement.setString(3,
+						"[{\"url\":\"http://highmed.org/fhir/StructureDefinition/participating-medic\",\"valueReference\":{\"reference\":\""
+								+ organizationId.getValue() + "\"}}]");
+				statement.setString(4,
+						"[{\"url\":\"http://highmed.org/fhir/StructureDefinition/participating-medic\",\"valueReference\":{\"reference\":\""
+								+ organizationId.toVersionless().getValue() + "\"}}]");
+				break;
+
+			case TTP:
+				statement.setString(3,
+						"[{\"url\":\"http://highmed.org/fhir/StructureDefinition/participating-ttp\",\"valueReference\":{\"reference\":\""
+								+ organizationId.getValue() + "\"}}]");
+				statement.setString(4,
+						"[{\"url\":\"http://highmed.org/fhir/StructureDefinition/participating-ttp\",\"valueReference\":{\"reference\":\""
+								+ organizationId.toVersionless().getValue() + "\"}}]");
+				break;
 		}
 	}
 }

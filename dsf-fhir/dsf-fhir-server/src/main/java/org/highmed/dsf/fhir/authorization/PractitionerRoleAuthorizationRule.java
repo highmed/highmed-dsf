@@ -17,7 +17,6 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
-import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -170,10 +169,9 @@ public class PractitionerRoleAuthorizationRule extends AbstractAuthorizationRule
 	{
 		try
 		{
-			List<ResearchStudy> studies = daoProvider.getResearchStudyDao()
-					.readByPrincipalInvestigatorIdAndOrganizationTypeAndOrganizationIdWithTransaction(connection,
+			return daoProvider.getResearchStudyDao()
+					.existsByPrincipalInvestigatorIdAndOrganizationTypeAndOrganizationIdWithTransaction(connection,
 							principalInvestigatorId, user.getOrganizationType(), user.getOrganization().getIdElement());
-			return !studies.isEmpty();
 		}
 		catch (SQLException e)
 		{
