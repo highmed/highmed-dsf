@@ -153,6 +153,10 @@ public class OrganizationAuthorizationRule extends AbstractAuthorizationRule<Org
 		OrganizationDao dao = getDao();
 		SearchQuery<Organization> query = dao.createSearchQueryWithoutUserFilter(0, 0)
 				.configureParameters(queryParameters);
+
+		if (!query.getUnsupportedQueryParameters(queryParameters).isEmpty())
+			return false;
+
 		try
 		{
 			PartialResult<Organization> result = dao.searchWithTransaction(connection, query);

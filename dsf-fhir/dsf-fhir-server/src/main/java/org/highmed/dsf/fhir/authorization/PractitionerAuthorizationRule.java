@@ -3,6 +3,7 @@ package org.highmed.dsf.fhir.authorization;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -104,15 +105,20 @@ public class PractitionerAuthorizationRule extends AbstractAuthorizationRule<Pra
 	private boolean practitionerRoleWithPractitionerAndUsersOrganizationExists(Connection connection, User user,
 			Practitioner existingResource)
 	{
+		Map<String, List<String>> queryParameters = Map.of("practitioner",
+				Collections.singletonList(existingResource.getIdElement().toVersionless().getValueAsString()),
+				"organization",
+				Collections.singletonList(user.getOrganization().getIdElement().toVersionless().getValueAsString()));
+		PractitionerRoleDao dao = daoProvider.getPractitionerRoleDao();
+
+		SearchQuery<PractitionerRole> query = dao.createSearchQueryWithoutUserFilter(0, 0)
+				.configureParameters(queryParameters);
+
+		if (!query.getUnsupportedQueryParameters(queryParameters).isEmpty())
+			return false;
+
 		try
 		{
-			PractitionerRoleDao dao = daoProvider.getPractitionerRoleDao();
-			SearchQuery<PractitionerRole> query = dao.createSearchQueryWithoutUserFilter(0, 0)
-					.configureParameters(Map.of("practitioner",
-							Collections
-									.singletonList(existingResource.getIdElement().toVersionless().getValueAsString()),
-							"organization", Collections.singletonList(
-									user.getOrganization().getIdElement().toVersionless().getValueAsString())));
 			PartialResult<PractitionerRole> result = dao.searchWithTransaction(connection, query);
 			return result.getOverallCount() > 0;
 		}

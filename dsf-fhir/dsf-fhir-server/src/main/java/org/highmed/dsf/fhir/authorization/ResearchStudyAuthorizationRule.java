@@ -208,10 +208,14 @@ public class ResearchStudyAuthorizationRule extends AbstractAuthorizationRule<Re
 
 	private boolean practitionerRoleExists(Connection connection, User user, IdType practitionerId)
 	{
+		Map<String, List<String>> queryParameters = Map.of("practitioner",
+				Collections.singletonList("Practitioner/" + practitionerId.getIdPart()), "active",
+				Collections.singletonList("true"));
 		PractitionerRoleDao dao = daoProvider.getPractitionerRoleDao();
-		SearchQuery<PractitionerRole> query = dao.createSearchQuery(user, 0, 0).configureParameters(
-				Map.of("practitioner", Collections.singletonList("Practitioner/" + practitionerId.getIdPart()),
-						"active", Collections.singletonList("true")));
+		SearchQuery<PractitionerRole> query = dao.createSearchQuery(user, 0, 0).configureParameters(queryParameters);
+
+		if (!query.getUnsupportedQueryParameters(queryParameters).isEmpty())
+			return false;
 
 		try
 		{
@@ -240,6 +244,10 @@ public class ResearchStudyAuthorizationRule extends AbstractAuthorizationRule<Re
 		ResearchStudyDao dao = getDao();
 		SearchQuery<ResearchStudy> query = dao.createSearchQueryWithoutUserFilter(0, 0)
 				.configureParameters(queryParameters);
+
+		if (!query.getUnsupportedQueryParameters(queryParameters).isEmpty())
+			return false;
+
 		try
 		{
 			PartialResult<ResearchStudy> result = dao.searchWithTransaction(connection, query);

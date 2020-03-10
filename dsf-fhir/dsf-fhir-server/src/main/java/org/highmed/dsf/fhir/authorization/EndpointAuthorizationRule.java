@@ -120,29 +120,15 @@ public class EndpointAuthorizationRule extends AbstractAuthorizationRule<Endpoin
 				|| endpointWithIdentifierExists(connection, identifierValue);
 	}
 
-	private boolean endpointWithIdentifierExists(Connection connection, String identifierValue)
-	{
-		Map<String, List<String>> queryParameters = Map.of("identifier",
-				Collections.singletonList(IDENTIFIER_SYSTEM + "|" + identifierValue));
-		EndpointDao dao = getDao();
-		SearchQuery<Endpoint> query = dao.createSearchQueryWithoutUserFilter(0, 0).configureParameters(queryParameters);
-		try
-		{
-			PartialResult<Endpoint> result = dao.searchWithTransaction(connection, query);
-			return result.getOverallCount() >= 1;
-		}
-		catch (SQLException e)
-		{
-			logger.warn("Error while searching for Endpoint with identifier", e);
-			return false;
-		}
-	}
-
 	private boolean endpointWithAddressExists(Connection connection, String address)
 	{
 		Map<String, List<String>> queryParameters = Map.of("address", Collections.singletonList(address));
 		EndpointDao dao = getDao();
-		SearchQuery<Endpoint> query = dao.createSearchQueryWithoutUserFilter(1, 1).configureParameters(queryParameters);
+		SearchQuery<Endpoint> query = dao.createSearchQueryWithoutUserFilter(0, 0).configureParameters(queryParameters);
+
+		if (!query.getUnsupportedQueryParameters(queryParameters).isEmpty())
+			return false;
+
 		try
 		{
 			PartialResult<Endpoint> result = dao.searchWithTransaction(connection, query);
@@ -151,6 +137,28 @@ public class EndpointAuthorizationRule extends AbstractAuthorizationRule<Endpoin
 		catch (SQLException e)
 		{
 			logger.warn("Error while searching for Endpoint with address", e);
+			return false;
+		}
+	}
+
+	private boolean endpointWithIdentifierExists(Connection connection, String identifierValue)
+	{
+		Map<String, List<String>> queryParameters = Map.of("identifier",
+				Collections.singletonList(IDENTIFIER_SYSTEM + "|" + identifierValue));
+		EndpointDao dao = getDao();
+		SearchQuery<Endpoint> query = dao.createSearchQueryWithoutUserFilter(0, 0).configureParameters(queryParameters);
+
+		if (!query.getUnsupportedQueryParameters(queryParameters).isEmpty())
+			return false;
+
+		try
+		{
+			PartialResult<Endpoint> result = dao.searchWithTransaction(connection, query);
+			return result.getOverallCount() >= 1;
+		}
+		catch (SQLException e)
+		{
+			logger.warn("Error while searching for Endpoint with identifier", e);
 			return false;
 		}
 	}

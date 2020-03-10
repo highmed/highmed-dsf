@@ -151,6 +151,10 @@ public class SubscriptionAuthorizationRule extends AbstractAuthorizationRule<Sub
 		SubscriptionDao dao = getDao();
 		SearchQuery<Subscription> query = dao.createSearchQueryWithoutUserFilter(1, 1)
 				.configureParameters(queryParameters);
+
+		if (!query.getUnsupportedQueryParameters(queryParameters).isEmpty())
+			return false;
+
 		try
 		{
 			PartialResult<Subscription> result = dao.searchWithTransaction(connection, query);
