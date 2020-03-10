@@ -12,7 +12,7 @@ import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Subscription;
 
-@SearchParameterDefinition(name = SubscriptionCriteria.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Subscription.​criteria", type = SearchParamType.STRING, documentation = "The search rules used to determine when to send a notification (always matches exact)")
+@SearchParameterDefinition(name = SubscriptionCriteria.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Subscription.criteria", type = SearchParamType.STRING, documentation = "The search rules used to determine when to send a notification (always matches exact)")
 public class SubscriptionCriteria extends AbstractStringParameter<Subscription>
 {
 	public static final String PARAMETER_NAME = "criteria";

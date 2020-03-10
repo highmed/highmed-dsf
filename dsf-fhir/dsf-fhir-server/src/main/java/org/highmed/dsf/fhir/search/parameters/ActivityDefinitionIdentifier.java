@@ -6,7 +6,7 @@ import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Resource;
 
-@SearchParameterDefinition(name = AbstractIdentifierParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/ActivityDefinition.​identifier", type = SearchParamType.TOKEN, documentation = "External identifier for the activity definition")
+@SearchParameterDefinition(name = AbstractIdentifierParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/ActivityDefinition.identifier", type = SearchParamType.TOKEN, documentation = "External identifier for the activity definition")
 public class ActivityDefinitionIdentifier extends AbstractIdentifierParameter<ActivityDefinition>
 {
 	public static final String RESOURCE_COLUMN = "activity_definition";

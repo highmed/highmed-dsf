@@ -17,7 +17,7 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Resource;
 
-@SearchParameterDefinition(name = PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Organization.​type",
+@SearchParameterDefinition(name = PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Organization.type",
 		type = SearchParamType.TOKEN, documentation = "A code for the type of organization")
 public class OrganizationType extends AbstractTokenParameter<Organization>
 {

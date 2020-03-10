@@ -12,7 +12,7 @@ import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Resource;
 
-@SearchParameterDefinition(name = ActivityDefinitionName.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/ActivityDefinition.​name", type = SearchParamType.STRING, documentation = "Computationally friendly name of the activity definition")
+@SearchParameterDefinition(name = ActivityDefinitionName.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/ActivityDefinition.name", type = SearchParamType.STRING, documentation = "Computationally friendly name of the activity definition")
 public class ActivityDefinitionName extends AbstractStringParameter<ActivityDefinition>
 {
 	public static final String PARAMETER_NAME = "name";
