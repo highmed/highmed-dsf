@@ -24,6 +24,8 @@ import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ca.uhn.fhir.context.FhirContext;
+
 public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskDao>
 {
 	private static final Logger logger = LoggerFactory.getLogger(TaskAuthorizationRule.class);
@@ -234,11 +236,6 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 	@Override
 	public Optional<String> reasonUpdateAllowed(Connection connection, User user, Task oldResource, Task newResource)
 	{
-		// allowed status change from draft to requested for remote users
-		// update only allowed at status draft for remote users
-		// task.requester must be organization of current user or local user
-		// only update of tasks with requester = current user allowed for remote users
-
 		if (isRemoteUser(user) || isLocalUser(user))
 		{
 			if (TaskStatus.DRAFT.equals(oldResource.getStatus()) && isCurrentUserPartOfReferencedOrganization(
@@ -357,7 +354,13 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 		if (errors.isEmpty())
 			return Optional.empty();
 		else
+		{
+			logger.debug("Old Task: {}", FhirContext.forR4().newJsonParser().setStripVersionsFromReferences(false)
+					.encodeResourceToString(oldResource));
+			logger.debug("New Task: {}", FhirContext.forR4().newJsonParser().setStripVersionsFromReferences(false)
+					.encodeResourceToString(newResource));
 			return Optional.of(errors.stream().collect(Collectors.joining(", ")));
+		}
 	}
 
 	@Override
