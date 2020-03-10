@@ -196,10 +196,10 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 		websocketExtension.setUrl("http://hl7.org/fhir/StructureDefinition/capabilitystatement-websocket");
 		websocketExtension.setValue(new UrlType(serverBase.replace("http", "ws") + ServerEndpoint.PATH));
 
-		var resources = Arrays.asList(Binary.class, Bundle.class, CodeSystem.class, Endpoint.class, Group.class,
-				HealthcareService.class, Location.class, NamingSystem.class, Organization.class, Patient.class,
-				PractitionerRole.class, Practitioner.class, Provenance.class, ResearchStudy.class,
-				StructureDefinition.class, Subscription.class, Task.class, ValueSet.class);
+		var resources = Arrays.asList(ActivityDefinition.class, Binary.class, Bundle.class, CodeSystem.class,
+				Endpoint.class, Group.class, HealthcareService.class, Location.class, NamingSystem.class,
+				Organization.class, Patient.class, PractitionerRole.class, Practitioner.class, Provenance.class,
+				ResearchStudy.class, StructureDefinition.class, Subscription.class, Task.class, ValueSet.class);
 
 		var searchParameters = new HashMap<Class<? extends Resource>, List<CapabilityStatementRestResourceSearchParamComponent>>();
 		var revIncludeParameters = new HashMap<Class<? extends Resource>, List<Class<? extends AbstractRevIncludeParameterFactory>>>();
