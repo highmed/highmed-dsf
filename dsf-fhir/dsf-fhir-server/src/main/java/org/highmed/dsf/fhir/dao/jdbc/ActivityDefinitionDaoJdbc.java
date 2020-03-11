@@ -95,8 +95,9 @@ public class ActivityDefinitionDaoJdbc extends AbstractResourceDaoJdbc<ActivityD
 		{
 			String extension = "[{\"url\":\"http://highmed.org/fhir/StructureDefinition/process-authorization\",\"extension\":["
 					+ "{\"url\":\"message-name\",\"valueString\":\"" + messageName + "\"},"
-					+ "{\"url\":\"authorization-role\",\"valueCoding\":{\"code\":\"" + userRole.toString()
-					+ "\",\"system\":\"http://highmed.org/fhir/CodeSystem/authorization-role\"}},"
+					+ "{\"url\":\"authorization-roles\",\"extension\":[{\"url\":\"authorization-role\",\"valueCoding\":{\"code\":\""
+					+ userRole.toString()
+					+ "\",\"system\":\"http://highmed.org/fhir/CodeSystem/authorization-role\"}}]},"
 					+ "{\"url\":\"requester-organization-types\",\"extension\":[{\"url\":\"requester-organization-type\",\"valueCoding\":{\"code\":\""
 					+ requesterOrganizationType.toString()
 					+ "\",\"system\":\"http://highmed.org/fhir/CodeSystem/organization-type\"}}]},"

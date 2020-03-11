@@ -19,7 +19,7 @@ public class ActivityDefinitionProcessAuthorizationExtensions
 
 	public boolean isValid()
 	{
-		return doGetExtensions().map(ActivityDefinitionProcessAuthorizationExtension::isValid).count() >= 1;
+		return doGetExtensions().allMatch(ActivityDefinitionProcessAuthorizationExtension::isValid);
 	}
 
 	public List<ActivityDefinitionProcessAuthorizationExtension> getExtensions()

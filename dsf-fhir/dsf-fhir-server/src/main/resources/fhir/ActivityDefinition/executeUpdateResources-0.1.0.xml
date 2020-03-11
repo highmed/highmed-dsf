@@ -9,11 +9,13 @@
 		<extension url="message-name">
 			<valueString value="executeUpdateResourcesMessage" />
 		</extension>
-		<extension url="authorization-role">
-			<valueCoding>
-				<system value="http://highmed.org/fhir/CodeSystem/authorization-role" />
-				<code value="REMOTE" />
-			</valueCoding>
+		<extension url="authorization-roles">
+			<extension url="authorization-role">
+				<valueCoding>
+					<system value="http://highmed.org/fhir/CodeSystem/authorization-role" />
+					<code value="REMOTE" />
+				</valueCoding>
+			</extension>
 		</extension>
 		<extension url="requester-organization-types">
 			<extension url="requester-organization-type">
