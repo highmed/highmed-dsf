@@ -15,7 +15,7 @@ import org.camunda.bpm.engine.runtime.ProcessInstance;
 import org.camunda.bpm.engine.runtime.ProcessInstanceQuery;
 import org.camunda.bpm.engine.variable.Variables;
 import org.highmed.dsf.bpe.Constants;
-import org.highmed.dsf.fhir.variables.DomainResourceValues;
+import org.highmed.dsf.fhir.variables.FhirResourceValues;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
@@ -66,7 +66,7 @@ public class TaskHandler implements InitializingBean
 		String correlationKey = taskHelper.getFirstInputParameterStringValue(task, Constants.CODESYSTEM_HIGHMED_BPMN,
 				Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY).orElse(null);
 
-		Map<String, Object> variables = Map.of(Constants.VARIABLE_TASK, DomainResourceValues.create(task));
+		Map<String, Object> variables = Map.of(Constants.VARIABLE_TASK, FhirResourceValues.create(task));
 
 		try
 		{

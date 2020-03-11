@@ -13,17 +13,17 @@ public class FhirPlugin implements ProcessEnginePlugin
 	@SuppressWarnings("rawtypes")
 	private final List<TypedValueSerializer> serializer;
 
-	public FhirPlugin(DomainResourceSerializer domainResourceSerializer,
+	public FhirPlugin(FhirResourceSerializer fhirResourceSerializer,
+			FhirResourcesListSerializer fhirResourcesListSerializer,
 			MultiInstanceTargetSerializer multiInstanceTargetSerializer,
 			MultiInstanceTargetsSerializer multiInstanceTargetsSerializer,
 			FeasibilityQueryResultSerializer feasibilityQueryResultSerializer,
 			FeasibilityQueryResultsSerializer feasibilityQueryResultsSerializer, OutputSerializer outputSerializer,
 			OutputsSerializer outputsSerializer)
 	{
-		serializer = Arrays
-				.asList(domainResourceSerializer, multiInstanceTargetSerializer, multiInstanceTargetsSerializer,
-						feasibilityQueryResultSerializer, feasibilityQueryResultsSerializer, outputSerializer,
-						outputsSerializer);
+		serializer = Arrays.asList(fhirResourceSerializer, fhirResourcesListSerializer, multiInstanceTargetSerializer,
+				multiInstanceTargetsSerializer, feasibilityQueryResultSerializer, feasibilityQueryResultsSerializer,
+				outputSerializer, outputsSerializer);
 	}
 
 	@Override

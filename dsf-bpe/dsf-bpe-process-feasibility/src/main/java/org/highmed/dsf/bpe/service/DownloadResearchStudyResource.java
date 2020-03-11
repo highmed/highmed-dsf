@@ -47,7 +47,7 @@ public class DownloadResearchStudyResource extends AbstractServiceDelegate imple
 		execution.setVariable(Constants.VARIABLE_NEEDS_RECORD_LINKAGE, needsRecordLinkage);
 
 		// TODO: remove when implemented
-		if(needsConsentCheck || needsRecordLinkage)
+		if (needsConsentCheck || needsRecordLinkage)
 		{
 			throw new UnsupportedOperationException("Consent Check and Record Linkage not yet supported.");
 		}
@@ -57,10 +57,10 @@ public class DownloadResearchStudyResource extends AbstractServiceDelegate imple
 	{
 		Reference researchStudyReference = getTaskHelper()
 				.getInputParameterReferenceValues(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
-						Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_RESEARCH_STUDY_REFERENCE).findFirst()
-				.orElseThrow(() -> new IllegalArgumentException(
-						"ResearchStudy reference is not set in task with id='" + task.getId() + "', this error should "
-								+ "have been caught by resource validation"));
+						Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_RESEARCH_STUDY_REFERENCE)
+				.findFirst()
+				.orElseThrow(() -> new IllegalArgumentException("ResearchStudy reference is not set in task with id='"
+						+ task.getId() + "', this error should " + "have been caught by resource validation"));
 
 		return new IdType(researchStudyReference.getReference());
 	}
@@ -73,25 +73,27 @@ public class DownloadResearchStudyResource extends AbstractServiceDelegate imple
 		}
 		catch (WebApplicationException e)
 		{
-			throw new ResourceNotFoundException(
-					"Error while reading ResearchStudy with id " + researchStudyid.getIdPart() + " from " + client
-							.getBaseUrl());
+			throw new ResourceNotFoundException("Error while reading ResearchStudy with id "
+					+ researchStudyid.getIdPart() + " from " + client.getBaseUrl());
 		}
 	}
 
 	private boolean getNeedsConsentCheck(Task task)
 	{
-		return getTaskHelper().getFirstInputParameterBooleanValue(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
-				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_CONSENT_CHECK).orElseThrow(() -> new IllegalArgumentException(
-				"NeedsConsentCheck boolean is not set in task with id='" + task.getId() + "', this error should "
-						+ "have been caught by resource validation"));
+		return getTaskHelper()
+				.getFirstInputParameterBooleanValue(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
+						Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_CONSENT_CHECK)
+				.orElseThrow(() -> new IllegalArgumentException("NeedsConsentCheck boolean is not set in task with id='"
+						+ task.getId() + "', this error should " + "have been caught by resource validation"));
 	}
 
 	private boolean getNeedsRecordLinkageCheck(Task task)
 	{
-		return getTaskHelper().getFirstInputParameterBooleanValue(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
-				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_RECORD_LINKAGE).orElseThrow(() -> new IllegalArgumentException(
-				"NeedsRecordLinkage boolean is not set in task with id='" + task.getId() + "', this error should "
-						+ "have been caught by resource validation"));
+		return getTaskHelper()
+				.getFirstInputParameterBooleanValue(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
+						Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_RECORD_LINKAGE)
+				.orElseThrow(
+						() -> new IllegalArgumentException("NeedsRecordLinkage boolean is not set in task with id='"
+								+ task.getId() + "', this error should " + "have been caught by resource validation"));
 	}
 }

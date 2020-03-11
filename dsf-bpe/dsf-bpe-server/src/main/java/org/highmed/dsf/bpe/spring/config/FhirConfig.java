@@ -22,19 +22,20 @@ import org.highmed.dsf.fhir.service.ReferenceExtractorImpl;
 import org.highmed.dsf.fhir.task.TaskHandler;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.task.TaskHelperImpl;
-import org.highmed.dsf.fhir.variables.DomainResourceSerializer;
 import org.highmed.dsf.fhir.variables.FeasibilityQueryResultSerializer;
 import org.highmed.dsf.fhir.variables.FeasibilityQueryResultsSerializer;
 import org.highmed.dsf.fhir.variables.FhirPlugin;
+import org.highmed.dsf.fhir.variables.FhirResourceJacksonDeserializer;
+import org.highmed.dsf.fhir.variables.FhirResourceJacksonSerializer;
+import org.highmed.dsf.fhir.variables.FhirResourceSerializer;
+import org.highmed.dsf.fhir.variables.FhirResourcesListSerializer;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargetSerializer;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargetsSerializer;
-import org.highmed.dsf.fhir.variables.OrganizationDeserializer;
-import org.highmed.dsf.fhir.variables.OrganizationSerializer;
 import org.highmed.dsf.fhir.variables.OutputSerializer;
 import org.highmed.dsf.fhir.variables.OutputsSerializer;
 import org.highmed.dsf.fhir.websocket.FhirConnector;
 import org.highmed.dsf.fhir.websocket.LastEventTimeIo;
-import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -119,24 +120,12 @@ public class FhirConfig
 		// mapper.enable(SerializationFeature.INDENT_OUTPUT);
 
 		SimpleModule module = new SimpleModule();
-		module.addSerializer(Organization.class, organizationSerializer());
-		module.addDeserializer(Organization.class, organizationDeserializer());
+		module.addSerializer(Resource.class, new FhirResourceJacksonSerializer(fhirContext()));
+		module.addDeserializer(Resource.class, new FhirResourceJacksonDeserializer(fhirContext()));
 
 		mapper.registerModule(module);
 
 		return mapper;
-	}
-
-	@Bean
-	public OrganizationSerializer organizationSerializer()
-	{
-		return new OrganizationSerializer(fhirContext());
-	}
-
-	@Bean
-	public OrganizationDeserializer organizationDeserializer()
-	{
-		return new OrganizationDeserializer(fhirContext());
 	}
 
 	@Bean
@@ -154,15 +143,21 @@ public class FhirConfig
 	@Bean
 	public ProcessEnginePlugin fhirPlugin()
 	{
-		return new FhirPlugin(domainResourceSerializer(), multiInstanceTargetSerializer(),
+		return new FhirPlugin(fhirResourceSerializer(), fhirResourcesListSerializer(), multiInstanceTargetSerializer(),
 				multiInstanceTargetsSerializer(), feasibilityQueryResultSerializer(),
 				feasibilityQueryResultsSerializer(), outputSerializer(), outputsSerializer());
 	}
 
 	@Bean
-	public DomainResourceSerializer domainResourceSerializer()
+	public FhirResourceSerializer fhirResourceSerializer()
 	{
-		return new DomainResourceSerializer(fhirContext());
+		return new FhirResourceSerializer(fhirContext());
+	}
+
+	@Bean
+	public FhirResourcesListSerializer fhirResourcesListSerializer()
+	{
+		return new FhirResourcesListSerializer(fhirObjectMapper());
 	}
 
 	@Bean
