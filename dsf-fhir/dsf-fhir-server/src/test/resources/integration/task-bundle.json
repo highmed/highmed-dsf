@@ -69,6 +69,7 @@
 				"meta": {
 					"profile": "http://highmed.org/fhir/StructureDefinition/highmed-practitioner"
 				},
+				"active": true,
 				"name": [
 					{
 						"family": "HiGHmed",
