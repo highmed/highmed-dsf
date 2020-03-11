@@ -212,7 +212,9 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 			Optional<Resource> resource = referenceResolver.resolveReference(user, resReference, connection);
 			if (resource.isPresent() && resource.get() instanceof Organization)
 			{
-				boolean sameOrganization = user.getOrganization().getIdElement().equals(resource.get().getIdElement());
+				// ignoring updates (version changes) to the organization id
+				boolean sameOrganization = user.getOrganization().getIdElement().getIdPart()
+						.equals(resource.get().getIdElement().getIdPart());
 				if (!sameOrganization)
 					logger.warn(
 							"Current user not part of organization {} while checking if user part of referenced organization",
