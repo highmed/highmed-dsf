@@ -137,9 +137,9 @@ public abstract class AbstractIntegrationTest
 	}
 
 	private static WebsocketClient createWebsocketClient(KeyStore trustStore, KeyStore keyStore,
-			char[] keyStorePassword, FhirContext fhirContext, String subscriptionIdPart)
+			char[] keyStorePassword, String subscriptionIdPart)
 	{
-		return new WebsocketClientTyrus(fhirContext, URI.create(WEBSOCKET_URL), trustStore, keyStore, keyStorePassword,
+		return new WebsocketClientTyrus(URI.create(WEBSOCKET_URL), trustStore, keyStore, keyStorePassword,
 				subscriptionIdPart);
 	}
 
@@ -391,7 +391,6 @@ public abstract class AbstractIntegrationTest
 
 		return createWebsocketClient(certificates.getClientCertificate().getTrustStore(),
 				certificates.getClientCertificate().getKeyStore(),
-				certificates.getClientCertificate().getKeyStorePassword(), fhirContext,
-				subscription.getIdElement().getIdPart());
+				certificates.getClientCertificate().getKeyStorePassword(), subscription.getIdElement().getIdPart());
 	}
 }

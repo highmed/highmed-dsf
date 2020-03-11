@@ -214,7 +214,7 @@ public class FhirClientProviderImpl
 	{
 		if (!websocketClientsBySubscriptionId.containsKey(subscriptionId))
 		{
-			WebsocketClientTyrus client = new WebsocketClientTyrus(fhirContext, URI.create(localWebsocketUrl),
+			WebsocketClientTyrus client = new WebsocketClientTyrus(URI.create(localWebsocketUrl),
 					localWebsocketTrustStore, localWebsocketKeyStore, localWebsocketKeyStorePassword, subscriptionId);
 			websocketClientsBySubscriptionId.put(subscriptionId, client);
 			return client;

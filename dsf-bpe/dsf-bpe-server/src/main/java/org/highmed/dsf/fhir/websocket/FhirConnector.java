@@ -172,11 +172,18 @@ public class FhirConnector implements InitializingBean
 		switch (eventType)
 		{
 			case XML:
-				return () -> fhirContext.newXmlParser();
+				return () -> configureParser(fhirContext.newXmlParser());
 			case JSON:
-				return () -> fhirContext.newJsonParser();
+				return () -> configureParser(fhirContext.newJsonParser());
 			default:
 				throw new RuntimeException("EventType " + eventType + " not supported");
 		}
+	}
+
+	private IParser configureParser(IParser p)
+	{
+		p.setStripVersionsFromReferences(false);
+		p.setOverrideResourceIdWithBundleEntryFullUrl(false);
+		return p;
 	}
 }

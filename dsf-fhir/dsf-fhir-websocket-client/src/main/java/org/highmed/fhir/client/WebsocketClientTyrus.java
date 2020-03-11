@@ -20,7 +20,6 @@ import org.hl7.fhir.r4.model.DomainResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 
 public class WebsocketClientTyrus implements WebsocketClient
@@ -53,8 +52,8 @@ public class WebsocketClientTyrus implements WebsocketClient
 	private Session connection;
 	private volatile boolean closed;
 
-	public WebsocketClientTyrus(FhirContext fhirContext, URI wsUri, KeyStore trustStore, KeyStore keyStore,
-			char[] keyStorePassword, String subscriptionIdPart)
+	public WebsocketClientTyrus(URI wsUri, KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword,
+			String subscriptionIdPart)
 	{
 		this.wsUri = wsUri;
 

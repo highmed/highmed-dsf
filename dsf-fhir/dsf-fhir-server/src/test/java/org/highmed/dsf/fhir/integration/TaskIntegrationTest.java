@@ -62,6 +62,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 
 			assertEquals(researchStudyId.getResourceType(), taskInputResearchStudyId.getResourceType());
 			assertEquals(researchStudyId.getIdPart(), taskInputResearchStudyId.getIdPart());
+			assertEquals(researchStudyId.getVersionIdPart(), taskInputResearchStudyId.getVersionIdPart());
 
 			DomainResource event = events.pollFirst(5, TimeUnit.SECONDS);
 			assertNotNull(event);
@@ -76,6 +77,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 					((Reference) inputViaWebsocket.getValue()).getReference());
 			assertEquals(researchStudyId.getResourceType(), taskInputResearchStudyIdViaWebsocket.getResourceType());
 			assertEquals(researchStudyId.getIdPart(), taskInputResearchStudyIdViaWebsocket.getIdPart());
+			assertEquals(researchStudyId.getVersionIdPart(), taskInputResearchStudyIdViaWebsocket.getVersionIdPart());
 		}
 		finally
 		{
