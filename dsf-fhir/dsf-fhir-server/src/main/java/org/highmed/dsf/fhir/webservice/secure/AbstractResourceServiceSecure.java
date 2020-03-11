@@ -94,7 +94,16 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		{
 			audit.info("Create of resource {} allowed for user '{}': {}", resourceTypeName, getCurrentUser().getName(),
 					reasonCreateAllowed.get());
-			return delegate.create(resource, uri, headers);
+
+			Response created = delegate.create(resource, uri, headers);
+
+			if (created.hasEntity() && !resourceType.isInstance(created.getEntity())
+					&& !(created.getEntity() instanceof OperationOutcome))
+				logger.warn("Update returned with entity of type {}", created.getEntity().getClass().getName());
+			else if (!created.hasEntity())
+				logger.info("Update returned with status {}, but no entity", created.getStatus());
+
+			return created;
 		}
 	}
 
@@ -237,14 +246,15 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 			audit.info("Update of resource {} allowed for user '{}': {}", oldResource.getIdElement().getValue(),
 					getCurrentUser().getName(), reasonUpdateAllowed.get());
 
-			Response update = delegate.update(id, newResource, uri, headers);
+			Response updated = delegate.update(id, newResource, uri, headers);
 
-			if (update.hasEntity() && !(update.getEntity() instanceof OperationOutcome))
-				logger.warn("Update returned with entity of type {}", update.getEntity().getClass().getName());
-			else
-				logger.info("Update returned with status {}, but no entity", update.getStatus());
+			if (updated.hasEntity() && !resourceType.isInstance(updated.getEntity())
+					&& !(updated.getEntity() instanceof OperationOutcome))
+				logger.warn("Update returned with entity of type {}", updated.getEntity().getClass().getName());
+			else if (!updated.hasEntity())
+				logger.info("Update returned with status {}, but no entity", updated.getStatus());
 
-			return update;
+			return updated;
 		}
 	}
 
