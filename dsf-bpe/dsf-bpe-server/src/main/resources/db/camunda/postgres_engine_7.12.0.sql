@@ -63,7 +63,7 @@ create table ACT_GE_SCHEMA_LOG (
 );
 
 insert into ACT_GE_SCHEMA_LOG
-values ('0', CURRENT_TIMESTAMP, '7.11.0');
+values ('0', CURRENT_TIMESTAMP, '7.12.0');
 
 create table ACT_RE_DEPLOYMENT (
     ID_ varchar(64),
@@ -114,6 +114,7 @@ create table ACT_RU_JOB (
     EXCEPTION_MSG_ varchar(4000),
     DUEDATE_ timestamp,
     REPEAT_ varchar(255),
+    REPEAT_OFFSET_ bigint DEFAULT 0,
     HANDLER_TYPE_ varchar(255),
     HANDLER_CFG_ varchar(4000),
     DEPLOYMENT_ID_ varchar(64),
@@ -971,6 +972,7 @@ create table ACT_HI_OP_LOG (
     REMOVAL_TIME_ timestamp,
 	CATEGORY_ varchar(64),
 	EXTERNAL_TASK_ID_ varchar(64),
+	ANNOTATION_ varchar(4000),
     primary key (ID_)
 );
 
@@ -989,6 +991,7 @@ create table ACT_HI_INCIDENT (
   CAUSE_INCIDENT_ID_ varchar(64),
   ROOT_CAUSE_INCIDENT_ID_ varchar(64),
   CONFIGURATION_ varchar(255),
+  HISTORY_CONFIGURATION_ varchar(255),
   INCIDENT_STATE_ integer,
   TENANT_ID_ varchar(64),
   JOB_DEF_ID_ varchar(64),
@@ -1104,6 +1107,7 @@ create index ACT_IDX_HI_DETAIL_PROC_DEF_KEY on ACT_HI_DETAIL(PROC_DEF_KEY_);
 create index ACT_IDX_HI_DETAIL_BYTEAR on ACT_HI_DETAIL(BYTEARRAY_ID_);
 create index ACT_IDX_HI_DETAIL_RM_TIME on ACT_HI_DETAIL(REMOVAL_TIME_);
 create index ACT_IDX_HI_DETAIL_TASK_BYTEAR on ACT_HI_DETAIL(BYTEARRAY_ID_, TASK_ID_);
+create index ACT_IDX_HI_DETAIL_VAR_INST_ID on ACT_HI_DETAIL(VAR_INST_ID_);
 
 create index ACT_IDX_HI_IDENT_LNK_ROOT_PI on ACT_HI_IDENTITYLINK(ROOT_PROC_INST_ID_);
 create index ACT_IDX_HI_IDENT_LNK_USER on ACT_HI_IDENTITYLINK(USER_ID_);
@@ -1137,6 +1141,7 @@ create index ACT_IDX_HI_JOB_LOG_JOB_DEF_ID on ACT_HI_JOB_LOG(JOB_DEF_ID_);
 create index ACT_IDX_HI_JOB_LOG_PROC_DEF_KEY on ACT_HI_JOB_LOG(PROCESS_DEF_KEY_);
 create index ACT_IDX_HI_JOB_LOG_EX_STACK on ACT_HI_JOB_LOG(JOB_EXCEPTION_STACK_ID_);
 create index ACT_IDX_HI_JOB_LOG_RM_TIME on ACT_HI_JOB_LOG(REMOVAL_TIME_);
+create index ACT_IDX_HI_JOB_LOG_JOB_CONF on ACT_HI_JOB_LOG(JOB_DEF_CONFIGURATION_);
 
 create index ACT_HI_BAT_RM_TIME on ACT_HI_BATCH(REMOVAL_TIME_);
 
