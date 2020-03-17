@@ -15,6 +15,7 @@ import java.util.Optional;
 import org.highmed.dsf.fhir.dao.EndpointDao;
 import org.highmed.dsf.fhir.function.SupplierWithSqlException;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
+import org.highmed.dsf.fhir.service.ReferenceExtractor;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class ClientProviderTest
 {
+	private ReferenceExtractor referenceExtractor;
 	private EndpointDao endpointDao;
 	private ExceptionHandler exceptionHandler;
 	private ClientProvider provider;
@@ -32,24 +34,24 @@ public class ClientProviderTest
 	{
 		KeyStore webserviceKeyStore = KeyStore.getInstance(KeyStore.getDefaultType());
 		webserviceKeyStore.load(null);
-		
+
 		KeyStore webserviceTrustStore = KeyStore.getInstance(KeyStore.getDefaultType());
 		webserviceTrustStore.load(null);
-		
 
-		String webserviceKeyStorePassword = "password";
+		char[] webserviceKeyStorePassword = "password".toCharArray();
 		int remoteReadTimeout = 0;
 		int remoteConnectTimeout = 0;
-		String remoteProxyPassword = null;
+		char[] remoteProxyPassword = null;
 		String remoteProxyUsername = null;
 		String remoteProxySchemeHostPort = null;
 		FhirContext fhirContext = mock(FhirContext.class);
+		referenceExtractor = mock(ReferenceExtractor.class);
 		endpointDao = mock(EndpointDao.class);
 		exceptionHandler = mock(ExceptionHandler.class);
 
 		provider = new ClientProviderImpl(webserviceTrustStore, webserviceKeyStore, webserviceKeyStorePassword,
 				remoteReadTimeout, remoteConnectTimeout, remoteProxyPassword, remoteProxyUsername,
-				remoteProxySchemeHostPort, fhirContext, endpointDao, exceptionHandler);
+				remoteProxySchemeHostPort, fhirContext, referenceExtractor, endpointDao, exceptionHandler);
 	}
 
 	@Test
@@ -59,14 +61,14 @@ public class ClientProviderTest
 		final String serverBase = "http://foo/fhir/";
 
 		when(exceptionHandler.handleSqlException(any(SupplierWithSqlException.class))).thenReturn(true);
-		
+
 		Optional<FhirWebserviceClient> client = provider.getClient(serverBase);
 		assertNotNull(client);
 		assertTrue(client.isPresent());
 		assertEquals(serverBase, client.get().getBaseUrl());
 
 		verify(exceptionHandler).handleSqlException(any(SupplierWithSqlException.class));
-		verifyNoMoreInteractions(endpointDao, exceptionHandler);
+		verifyNoMoreInteractions(referenceExtractor, endpointDao, exceptionHandler);
 	}
 
 	@Test
@@ -74,12 +76,12 @@ public class ClientProviderTest
 	public void testGetClientExistingNotFound() throws Exception
 	{
 		when(exceptionHandler.handleSqlException(any(SupplierWithSqlException.class))).thenReturn(false);
-		
+
 		Optional<FhirWebserviceClient> client = provider.getClient("http://does.not/exists/");
 		assertNotNull(client);
 		assertTrue(client.isEmpty());
-		
+
 		verify(exceptionHandler).handleSqlException(any(SupplierWithSqlException.class));
-		verifyNoMoreInteractions(endpointDao, exceptionHandler);
+		verifyNoMoreInteractions(referenceExtractor, endpointDao, exceptionHandler);
 	}
 }

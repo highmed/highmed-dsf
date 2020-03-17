@@ -25,6 +25,9 @@ public class EventConfig
 	@Autowired
 	private FhirConfig fhirConfig;
 
+	@Autowired
+	private AuthorizationConfig authorizationConfig;
+
 	@Bean
 	public MatcherFactory matcherFactory()
 	{
@@ -57,7 +60,7 @@ public class EventConfig
 	public EventManager eventManager()
 	{
 		return new EventManagerImpl(daoConfig.daoProvider(), helperConfig.exceptionHandler(), matcherFactory(),
-				fhirConfig.fhirContext());
+				fhirConfig.fhirContext(), authorizationConfig.authorizationRuleProvider());
 	}
 
 	@Bean

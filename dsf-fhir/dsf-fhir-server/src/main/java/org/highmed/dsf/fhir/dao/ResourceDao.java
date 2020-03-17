@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.dsf.fhir.dao.exception.ResourceNotFoundException;
 import org.highmed.dsf.fhir.dao.exception.ResourceVersionNoMatchException;
@@ -23,12 +24,7 @@ public interface ResourceDao<R extends Resource>
 
 	Class<R> getResourceType();
 
-	/**
-	 * @return new connection (read-only <code>false</code>, auto-commit <code>false</code>, isolation-level
-	 *         {@link Connection#TRANSACTION_REPEATABLE_READ})
-	 * @throws SQLException
-	 */
-	Connection getNewTransaction() throws SQLException;
+	Connection newReadWriteTransaction() throws SQLException;
 
 	/**
 	 * @param resource
@@ -109,6 +105,26 @@ public interface ResourceDao<R extends Resource>
 	 * @throws SQLException
 	 */
 	Optional<R> readVersionWithTransaction(Connection connection, UUID uuid, long version) throws SQLException;
+
+	/**
+	 * @param uuid
+	 *            may be <code>null</code>
+	 * @return {@link Optional#empty()} if the given uuid is <code>null</code> or no resource could be found for the
+	 *         given uuid
+	 * @throws SQLException
+	 */
+	Optional<R> readIncludingDeleted(UUID uuid) throws SQLException;
+
+	/**
+	 * @param connection
+	 *            not <code>null</code>
+	 * @param uuid
+	 *            may be <code>null</code>
+	 * @return {@link Optional#empty()} if the given uuid is <code>null</code> or no resource could be found for the
+	 *         given uuid
+	 * @throws SQLException
+	 */
+	Optional<R> readIncludingDeletedWithTransaction(Connection connection, UUID uuid) throws SQLException;
 
 	/**
 	 * @param id
@@ -258,5 +274,7 @@ public interface ResourceDao<R extends Resource>
 	 */
 	PartialResult<R> searchWithTransaction(Connection connection, DbSearchQuery query) throws SQLException;
 
-	SearchQuery<R> createSearchQuery(int page, int count);
+	SearchQuery<R> createSearchQuery(User user, int page, int count);
+
+	SearchQuery<R> createSearchQueryWithoutUserFilter(int page, int count);
 }

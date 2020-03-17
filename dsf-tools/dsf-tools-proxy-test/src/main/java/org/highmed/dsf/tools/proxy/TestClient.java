@@ -13,14 +13,14 @@ public class TestClient extends AbstractJerseyClient
 {
 	private static final Logger logger = LoggerFactory.getLogger(TestClient.class);
 
-	public TestClient(String baseUrl, String proxySchemeHostPort, String proxyUserName, String proxyPassword)
+	public TestClient(String baseUrl, String proxySchemeHostPort, String proxyUserName, char[] proxyPassword)
 	{
 		super(baseUrl, null, null, null, proxySchemeHostPort, proxyUserName, proxyPassword, 5_000, 5_000, null, null);
 
 		logger.info("baseUrl: {}", baseUrl);
 		logger.info("proxySchemeHostPort: {}", proxySchemeHostPort);
 		logger.info("proxyUserName: {}", proxyUserName);
-		logger.info("proxyPassword: {}", IntStream.range(0, proxyPassword != null ? proxyPassword.length() : 0)
+		logger.info("proxyPassword: {}", IntStream.range(0, proxyPassword != null ? proxyPassword.length : 0)
 				.mapToObj(i -> "*").collect(Collectors.joining()));
 	}
 

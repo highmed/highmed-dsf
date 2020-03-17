@@ -6,7 +6,7 @@ import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Resource;
 
-@SearchParameterDefinition(name = AbstractIdentifierParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Organization.identifier", type = SearchParamType.TOKEN, documentation = "Any identifier for the organization (not the accreditation issuer's identifier)")
+@SearchParameterDefinition(name = AbstractIdentifierParameter.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Organization-identifier", type = SearchParamType.TOKEN, documentation = "Any identifier for the organization (not the accreditation issuer's identifier)")
 public class OrganizationIdentifier extends AbstractIdentifierParameter<Organization>
 {
 	public static final String RESOURCE_COLUMN = "organization";

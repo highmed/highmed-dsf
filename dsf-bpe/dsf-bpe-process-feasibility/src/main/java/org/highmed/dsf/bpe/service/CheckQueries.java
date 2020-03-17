@@ -14,6 +14,7 @@ import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.group.GroupHelper;
 import org.highmed.dsf.fhir.task.TaskHelper;
+import org.highmed.dsf.fhir.variables.FhirResourcesList;
 import org.highmed.dsf.fhir.variables.Outputs;
 import org.highmed.dsf.fhir.variables.OutputsValues;
 import org.hl7.fhir.r4.model.Group;
@@ -41,25 +42,25 @@ public class CheckQueries extends AbstractServiceDelegate implements Initializin
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public void doExecute(DelegateExecution execution) throws Exception
 	{
 		Outputs outputs = (Outputs) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
-		List<Group> cohorts = (List<Group>) execution.getVariable(Constants.VARIABLE_COHORTS);
+		List<Group> cohorts = ((FhirResourcesList) execution.getVariable(Constants.VARIABLE_COHORTS))
+				.getResourcesAndCast();
 
 		Map<String, String> queries = new HashMap<>();
 
-		cohorts.forEach(group -> {
+		cohorts.forEach(group ->
+		{
 			String aqlQuery = groupHelper.extractAqlQuery(group).toLowerCase();
 
 			String groupId = group.getId();
 
 			if (!aqlQuery.startsWith(SIMPLE_FEASIBILITY_QUERY_PREFIX))
 			{
-				String errorMessage =
-						"Initial single medic feasibility query check failed, wrong format for query of group with id '"
-								+ groupId + "', expected query to start with '" + SIMPLE_FEASIBILITY_QUERY_PREFIX
-								+ "' but got '" + aqlQuery + "'";
+				String errorMessage = "Initial single medic feasibility query check failed, wrong format for query of group with id '"
+						+ groupId + "', expected query to start with '" + SIMPLE_FEASIBILITY_QUERY_PREFIX
+						+ "' but got '" + aqlQuery + "'";
 
 				logger.info(errorMessage);
 				outputs.addErrorOutput(errorMessage);

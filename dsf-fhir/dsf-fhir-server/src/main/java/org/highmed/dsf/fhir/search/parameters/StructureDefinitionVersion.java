@@ -6,7 +6,7 @@ import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StructureDefinition;
 
-@SearchParameterDefinition(name = StructureDefinitionVersion.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/StructureDefinition.version", type = SearchParamType.TOKEN, documentation = "The business version of the structure definition")
+@SearchParameterDefinition(name = StructureDefinitionVersion.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/StructureDefinition-version", type = SearchParamType.TOKEN, documentation = "The business version of the structure definition")
 public class StructureDefinitionVersion extends AbstractVersionParameter<StructureDefinition>
 {
 	public static final String RESOURCE_COLUMN = "structure_definition";

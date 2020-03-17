@@ -1,7 +1,10 @@
 package org.highmed.dsf.fhir.dao.provider;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Optional;
 
+import org.highmed.dsf.fhir.dao.ActivityDefinitionDao;
 import org.highmed.dsf.fhir.dao.BinaryDao;
 import org.highmed.dsf.fhir.dao.BundleDao;
 import org.highmed.dsf.fhir.dao.CodeSystemDao;
@@ -26,6 +29,12 @@ import org.hl7.fhir.r4.model.Resource;
 
 public interface DaoProvider
 {
+	Connection newReadOnlyAutoCommitTransaction() throws SQLException;
+
+	Connection newReadWriteTransaction() throws SQLException;
+
+	ActivityDefinitionDao getActivityDefinitionDao();
+
 	BinaryDao getBinaryDao();
 
 	BundleDao getBundleDao();

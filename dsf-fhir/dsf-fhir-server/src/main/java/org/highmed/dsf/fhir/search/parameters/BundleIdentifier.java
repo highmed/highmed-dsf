@@ -13,7 +13,7 @@ import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Resource;
 
-@SearchParameterDefinition(name = BundleIdentifier.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Bundle.identifier", type = SearchParamType.TOKEN, documentation = "Persistent identifier for the bundle")
+@SearchParameterDefinition(name = BundleIdentifier.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Bundle-identifier", type = SearchParamType.TOKEN, documentation = "Persistent identifier for the bundle")
 public class BundleIdentifier extends AbstractTokenParameter<Bundle>
 {
 	public static final String PARAMETER_NAME = "identifier";

@@ -17,22 +17,25 @@ import org.highmed.dsf.fhir.group.GroupHelper;
 import org.highmed.dsf.fhir.group.GroupHelperImpl;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProviderImpl;
+import org.highmed.dsf.fhir.service.ReferenceExtractor;
+import org.highmed.dsf.fhir.service.ReferenceExtractorImpl;
 import org.highmed.dsf.fhir.task.TaskHandler;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.task.TaskHelperImpl;
-import org.highmed.dsf.fhir.variables.DomainResourceSerializer;
 import org.highmed.dsf.fhir.variables.FeasibilityQueryResultSerializer;
 import org.highmed.dsf.fhir.variables.FeasibilityQueryResultsSerializer;
 import org.highmed.dsf.fhir.variables.FhirPlugin;
+import org.highmed.dsf.fhir.variables.FhirResourceJacksonDeserializer;
+import org.highmed.dsf.fhir.variables.FhirResourceJacksonSerializer;
+import org.highmed.dsf.fhir.variables.FhirResourceSerializer;
+import org.highmed.dsf.fhir.variables.FhirResourcesListSerializer;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargetSerializer;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargetsSerializer;
-import org.highmed.dsf.fhir.variables.OrganizationDeserializer;
-import org.highmed.dsf.fhir.variables.OrganizationSerializer;
 import org.highmed.dsf.fhir.variables.OutputSerializer;
 import org.highmed.dsf.fhir.variables.OutputsSerializer;
 import org.highmed.dsf.fhir.websocket.FhirConnector;
 import org.highmed.dsf.fhir.websocket.LastEventTimeIo;
-import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -46,7 +49,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import ca.uhn.fhir.context.FhirContext;
-
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.CertificateReader;
 
@@ -60,7 +62,7 @@ public class FhirConfig
 	private String webserviceKeyStoreFile;
 
 	@Value("${org.highmed.dsf.bpe.fhir.local.webservice.keystore.password}")
-	private String webserviceKeyStorePassword;
+	private char[] webserviceKeyStorePassword;
 
 	@Value("${org.highmed.dsf.bpe.fhir.remote.webservice.readTimeout}")
 	private int remoteReadTimeout;
@@ -69,7 +71,7 @@ public class FhirConfig
 	private int remoteConnectTimeout;
 
 	@Value("${org.highmed.dsf.bpe.fhir.remote.webservice.proxy.password:#{null}}")
-	private String remoteProxyPassword;
+	private char[] remoteProxyPassword;
 
 	@Value("${org.highmed.dsf.bpe.fhir.remote.webservice.proxy.username:#{null}}")
 	private String remoteProxyUsername;
@@ -93,7 +95,7 @@ public class FhirConfig
 	private String localWebsocketKeyStoreFile;
 
 	@Value("${org.highmed.dsf.bpe.fhir.local.websocket.keystore.password}")
-	private String localWebsocketKeyStorePassword;
+	private char[] localWebsocketKeyStorePassword;
 
 	@Value("${org.highmed.dsf.bpe.fhir.task.subscription.searchParameter}")
 	private String subscriptionSearchParameter;
@@ -118,24 +120,12 @@ public class FhirConfig
 		// mapper.enable(SerializationFeature.INDENT_OUTPUT);
 
 		SimpleModule module = new SimpleModule();
-		module.addSerializer(Organization.class, organizationSerializer());
-		module.addDeserializer(Organization.class, organizationDeserializer());
+		module.addSerializer(Resource.class, new FhirResourceJacksonSerializer(fhirContext()));
+		module.addDeserializer(Resource.class, new FhirResourceJacksonDeserializer(fhirContext()));
 
 		mapper.registerModule(module);
 
 		return mapper;
-	}
-
-	@Bean
-	public OrganizationSerializer organizationSerializer()
-	{
-		return new OrganizationSerializer(fhirContext());
-	}
-
-	@Bean
-	public OrganizationDeserializer organizationDeserializer()
-	{
-		return new OrganizationDeserializer(fhirContext());
 	}
 
 	@Bean
@@ -145,17 +135,29 @@ public class FhirConfig
 	}
 
 	@Bean
+	public ReferenceExtractor referenceExtractor()
+	{
+		return new ReferenceExtractorImpl();
+	}
+
+	@Bean
 	public ProcessEnginePlugin fhirPlugin()
 	{
-		return new FhirPlugin(domainResourceSerializer(), multiInstanceTargetSerializer(),
+		return new FhirPlugin(fhirResourceSerializer(), fhirResourcesListSerializer(), multiInstanceTargetSerializer(),
 				multiInstanceTargetsSerializer(), feasibilityQueryResultSerializer(),
 				feasibilityQueryResultsSerializer(), outputSerializer(), outputsSerializer());
 	}
 
 	@Bean
-	public DomainResourceSerializer domainResourceSerializer()
+	public FhirResourceSerializer fhirResourceSerializer()
 	{
-		return new DomainResourceSerializer(fhirContext());
+		return new FhirResourceSerializer(fhirContext());
+	}
+
+	@Bean
+	public FhirResourcesListSerializer fhirResourcesListSerializer()
+	{
+		return new FhirResourcesListSerializer(fhirObjectMapper());
 	}
 
 	@Bean
@@ -218,8 +220,8 @@ public class FhirConfig
 				throw new IOException(
 						"Webservice keystore file '" + localWebserviceKsFile.toString() + "' not readable");
 
-			KeyStore localWebserviceKeyStore = CertificateReader
-					.fromPkcs12(localWebserviceKsFile, webserviceKeyStorePassword);
+			KeyStore localWebserviceKeyStore = CertificateReader.fromPkcs12(localWebserviceKsFile,
+					webserviceKeyStorePassword);
 			KeyStore localWebserviceTrustStore = CertificateHelper.extractTrust(localWebserviceKeyStore);
 
 			Path localWebsocketKsFile = Paths.get(localWebsocketKeyStoreFile);
@@ -227,15 +229,15 @@ public class FhirConfig
 			if (!Files.isReadable(localWebsocketKsFile))
 				throw new IOException("Websocket keystore file '" + localWebsocketKsFile.toString() + "' not readable");
 
-			KeyStore localWebsocketKeyStore = CertificateReader
-					.fromPkcs12(localWebsocketKsFile, localWebsocketKeyStorePassword);
+			KeyStore localWebsocketKeyStore = CertificateReader.fromPkcs12(localWebsocketKsFile,
+					localWebsocketKeyStorePassword);
 			KeyStore localWebsocketTrustStore = CertificateHelper.extractTrust(localWebsocketKeyStore);
 
-			return new FhirClientProviderImpl(fhirContext(), localWebserviceBaseUrl, localReadTimeout,
-					localConnectTimeout, localWebserviceTrustStore, localWebserviceKeyStore, webserviceKeyStorePassword,
-					remoteReadTimeout, remoteConnectTimeout, remoteProxyPassword, remoteProxyUsername,
-					remoteProxySchemeHostPort, localWebsocketUrl, localWebsocketTrustStore, localWebsocketKeyStore,
-					localWebsocketKeyStorePassword);
+			return new FhirClientProviderImpl(fhirContext(), referenceExtractor(), localWebserviceBaseUrl,
+					localReadTimeout, localConnectTimeout, localWebserviceTrustStore, localWebserviceKeyStore,
+					webserviceKeyStorePassword, remoteReadTimeout, remoteConnectTimeout, remoteProxyPassword,
+					remoteProxyUsername, remoteProxySchemeHostPort, localWebsocketUrl, localWebsocketTrustStore,
+					localWebsocketKeyStore, localWebsocketKeyStorePassword);
 		}
 		catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e)
 		{

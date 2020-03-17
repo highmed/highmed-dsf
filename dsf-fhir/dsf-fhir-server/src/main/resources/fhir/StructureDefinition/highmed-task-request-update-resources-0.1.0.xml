@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <StructureDefinition xmlns="http://hl7.org/fhir">
+  <meta>
+    <tag>
+      <system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
+      <code value="REMOTE"/>
+    </tag>		
+  </meta>
   <url value="http://highmed.org/fhir/StructureDefinition/highmed-task-request-update-resources" />
   <version value="0.1.0" />
   <name value="TaskRequestUpdateResources" />
-  <status value="active" />
+  <status value="draft" />
   <date value="2019-05-21" />
   <fhirVersion value="4.0.0" />
   <kind value="resource" />
@@ -33,7 +39,7 @@
     </element>
     <element id="Task.input:message-name.value[x]">
       <path value="Task.input.value[x]" />
-      <fixedString value="requestUpdateResourcesMessage" />
+      <fixedString value="executeUpdateResourcesMessage" />
     </element>
     <element id="Task.input:business-key">
       <path value="Task.input" />

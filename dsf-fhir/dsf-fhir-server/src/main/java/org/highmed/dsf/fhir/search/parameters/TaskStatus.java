@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.ws.rs.core.UriBuilder;
 
@@ -18,8 +19,6 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
-
-import com.google.common.base.Objects;
 
 @SearchParameterDefinition(name = TaskStatus.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Task-status", type = SearchParamType.TOKEN, documentation = "Search by task status")
 public class TaskStatus extends AbstractTokenParameter<Task>
@@ -99,7 +98,7 @@ public class TaskStatus extends AbstractTokenParameter<Task>
 		if (!(resource instanceof Task))
 			return false;
 
-		return Objects.equal(((Task) resource).getStatus(), status);
+		return Objects.equals(((Task) resource).getStatus(), status);
 	}
 
 	@Override

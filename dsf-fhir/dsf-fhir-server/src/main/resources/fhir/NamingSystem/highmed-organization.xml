@@ -1,6 +1,12 @@
 <NamingSystem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://hl7.org/fhir"
 			  xsi:schemaLocation="http://hl7.org/fhir http://www.hl7.org/fhir/fhir-base.xsd">
-	<name value="HiGHmed_Organization_Identifiers"/>
+	<meta>
+		<tag>
+			<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
+			<code value="REMOTE"/>
+		</tag>		
+	</meta>
+	<name value="HiGHmed_Organization_Identifier"/>
 	<status value="active"/>
 	<kind value="identifier"/>
 	<date value="2015-08-31"/>
@@ -11,6 +17,6 @@
 	<usage value="Used withing HiGHmed to identify organizations"/>
 	<uniqueId>
 		<type value="uri"/>
-		<value value="http://highmed.org/fhir/NamingSystem/organization-identifiers"/>
+		<value value="http://highmed.org/fhir/NamingSystem/organization-identifier"/>
 	</uniqueId>
 </NamingSystem> 

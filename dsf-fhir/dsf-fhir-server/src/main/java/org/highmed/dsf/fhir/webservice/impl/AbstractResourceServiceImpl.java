@@ -28,8 +28,9 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
+import org.highmed.dsf.fhir.authorization.AuthorizationRule;
+import org.highmed.dsf.fhir.authorization.AuthorizationRuleProvider;
 import org.highmed.dsf.fhir.dao.ResourceDao;
-import org.highmed.dsf.fhir.dao.command.ResourceReference;
 import org.highmed.dsf.fhir.dao.exception.ResourceNotFoundException;
 import org.highmed.dsf.fhir.event.EventGenerator;
 import org.highmed.dsf.fhir.event.EventManager;
@@ -41,7 +42,9 @@ import org.highmed.dsf.fhir.search.SearchQuery;
 import org.highmed.dsf.fhir.search.SearchQueryParameterError;
 import org.highmed.dsf.fhir.service.ReferenceExtractor;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
+import org.highmed.dsf.fhir.service.ResourceReference;
 import org.highmed.dsf.fhir.service.ResourceValidator;
+import org.highmed.dsf.fhir.webservice.base.AbstractBasicService;
 import org.highmed.dsf.fhir.webservice.specification.BasicResourceService;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -61,7 +64,6 @@ import org.hl7.fhir.r4.model.UrlType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -72,11 +74,11 @@ import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 
 public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R extends Resource>
-		extends AbstractServiceImpl implements BasicResourceService<R>, InitializingBean
+		extends AbstractBasicService implements BasicResourceService<R>, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractResourceServiceImpl.class);
 
-	protected final Class<? extends Resource> resourceType;
+	protected final Class<R> resourceType;
 	protected final String resourceTypeName;
 	protected final String serverBase;
 	protected final int defaultPageCount;
@@ -89,12 +91,13 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	protected final ParameterConverter parameterConverter;
 	protected final ReferenceExtractor referenceExtractor;
 	protected final ReferenceResolver referenceResolver;
+	protected final AuthorizationRuleProvider authorizationRuleProvider;
 
-	public AbstractResourceServiceImpl(String path, Class<? extends Resource> resourceType, String serverBase,
-			int defaultPageCount, D dao, ResourceValidator validator, EventManager eventManager,
-			ExceptionHandler exceptionHandler, EventGenerator eventGenerator, ResponseGenerator responseGenerator,
-			ParameterConverter parameterConverter, ReferenceExtractor referenceExtractor,
-			ReferenceResolver referenceResolver)
+	public AbstractResourceServiceImpl(String path, Class<R> resourceType, String serverBase, int defaultPageCount,
+			D dao, ResourceValidator validator, EventManager eventManager, ExceptionHandler exceptionHandler,
+			EventGenerator eventGenerator, ResponseGenerator responseGenerator, ParameterConverter parameterConverter,
+			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver,
+			AuthorizationRuleProvider authorizationRuleProvider)
 	{
 		super(path);
 
@@ -111,6 +114,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		this.parameterConverter = parameterConverter;
 		this.referenceExtractor = referenceExtractor;
 		this.referenceResolver = referenceResolver;
+		this.authorizationRuleProvider = authorizationRuleProvider;
 	}
 
 	public void afterPropertiesSet() throws Exception
@@ -130,6 +134,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		Objects.requireNonNull(parameterConverter, "parameterConverter");
 		Objects.requireNonNull(referenceExtractor, "referenceExtractor");
 		Objects.requireNonNull(referenceResolver, "referenceResolver");
+		Objects.requireNonNull(authorizationRuleProvider, "authorizationRuleProvider");
 	}
 
 	@Override
@@ -141,7 +146,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 		R createdResource = exceptionHandler.handleSqlException(() ->
 		{
-			try (Connection connection = dao.getNewTransaction())
+			try (Connection connection = dao.newReadWriteTransaction())
 			{
 				try
 				{
@@ -211,7 +216,8 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 			case LITERAL_EXTERNAL:
 				return referenceResolver.resolveLiteralExternalReference(resource, resourceReference);
 			case LOGICAL:
-				return referenceResolver.resolveLogicalReference(resource, resourceReference, connection);
+				return referenceResolver.resolveLogicalReference(getCurrentUser(), resource, resourceReference,
+						connection);
 			default:
 				throw new WebApplicationException(responseGenerator.unknownReference(resource, resourceReference));
 		}
@@ -251,7 +257,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 					.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 		}
 
-		SearchQuery<R> query = dao.createSearchQuery(1, 1);
+		SearchQuery<R> query = dao.createSearchQuery(getCurrentUser(), 1, 1);
 		query.configureParameters(queryParameters);
 
 		List<SearchQueryParameterError> unsupportedQueryParameters = query
@@ -379,9 +385,9 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 				.flatMap(parameterConverter::toEntityTag).flatMap(parameterConverter::toVersion);
 
 		R updatedResource = exceptionHandler
-				.handleSqlExAndResourceNotFoundExForUpdateAsCreateAndResouceVersionNonMatchEx(resourceTypeName, () ->
+				.handleSqlExAndResourceNotFoundExAndResouceVersionNonMatchEx(resourceTypeName, () ->
 				{
-					try (Connection connection = dao.getNewTransaction())
+					try (Connection connection = dao.newReadWriteTransaction())
 					{
 						try
 						{
@@ -430,77 +436,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	@Override
 	public Response update(R resource, UriInfo uri, HttpHeaders headers)
 	{
-		Map<String, List<String>> queryParameters = uri.getQueryParameters();
-		if (Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(queryParameters::containsKey))
-		{
-			logger.warn(
-					"Query contains parameter not applicable in this conditional update context: '{}', parameters {} will be ignored",
-					UriComponentsBuilder.newInstance()
-							.replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString(),
-					Arrays.toString(SearchQuery.STANDARD_PARAMETERS));
-
-			queryParameters = queryParameters.entrySet().stream()
-					.filter(e -> !Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(p -> p.equals(e.getKey())))
-					.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
-		}
-
-		SearchQuery<R> query = dao.createSearchQuery(1, 1);
-		query.configureParameters(queryParameters);
-
-		List<SearchQueryParameterError> unsupportedQueryParameters = query
-				.getUnsupportedQueryParameters(queryParameters);
-		if (!unsupportedQueryParameters.isEmpty())
-			return responseGenerator.badRequest(
-					UriComponentsBuilder.newInstance()
-							.replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString(),
-					unsupportedQueryParameters);
-
-		PartialResult<R> result = exceptionHandler.handleSqlException(() -> dao.search(query));
-
-		// No matches, no id provided: The server creates the resource.
-		if (result.getOverallCount() <= 0 && !resource.hasId())
-			return create(resource, uri, headers);
-
-		// No matches, id provided: The server treats the interaction as an Update as Create interaction (or rejects it,
-		// if it does not support Update as Create) -> reject
-		else if (result.getOverallCount() <= 0 && resource.hasId())
-			return responseGenerator.updateAsCreateNotAllowed(resourceTypeName, resource.getId());
-
-		// One Match, no resource id provided OR (resource id provided and it matches the found resource):
-		// The server performs the update against the matching resource
-		else if (result.getOverallCount() == 1)
-		{
-			R dbResource = result.getPartialResult().get(0);
-			IdType dbResourceId = dbResource.getIdElement();
-
-			// BaseUrl - The server base URL (e.g. "http://example.com/fhir")
-			// ResourceType - The resource type (e.g. "Patient")
-			// IdPart - The ID (e.g. "123")
-			// Version - The version ID ("e.g. "456")
-			if (!resource.hasId())
-			{
-				resource.setIdElement(dbResourceId);
-				return update(resource.getIdElement().getIdPart(), resource, uri, headers);
-			}
-			else if (resource.hasId()
-					&& (!resource.getIdElement().hasBaseUrl()
-							|| serverBase.equals(resource.getIdElement().getBaseUrl()))
-					&& (!resource.getIdElement().hasResourceType()
-							|| resourceTypeName.equals(resource.getIdElement().getResourceType()))
-					&& (dbResourceId.getIdPart().equals(resource.getIdElement().getIdPart())))
-				return update(resource.getIdElement().getIdPart(), resource, uri, headers);
-			else
-				return responseGenerator.badRequestIdsNotMatching(
-						dbResourceId.withServerBase(serverBase, resourceTypeName),
-						resource.getIdElement().hasBaseUrl() && resource.getIdElement().hasResourceType()
-								? resource.getIdElement()
-								: resource.getIdElement().withServerBase(serverBase, resourceTypeName));
-		}
-		// Multiple matches: The server returns a 412 Precondition Failed error indicating the client's criteria were
-		// not selective enough preferably with an OperationOutcome
-		else // if (result.getOverallCount() > 1)
-			throw new WebApplicationException(responseGenerator.multipleExists(resourceTypeName, UriComponentsBuilder
-					.newInstance().replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString()));
+		throw new UnsupportedOperationException("Implemented and delegated by security layer");
 	}
 
 	@Override
@@ -541,49 +477,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	@Override
 	public Response delete(UriInfo uri, HttpHeaders headers)
 	{
-		Map<String, List<String>> queryParameters = uri.getQueryParameters();
-		if (Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(queryParameters::containsKey))
-		{
-			logger.warn(
-					"Query contains parameter not applicable in this conditional delete context: '{}', parameters {} will be ignored",
-					UriComponentsBuilder.newInstance()
-							.replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString(),
-					Arrays.toString(SearchQuery.STANDARD_PARAMETERS));
-
-			queryParameters = queryParameters.entrySet().stream()
-					.filter(e -> !Arrays.stream(SearchQuery.STANDARD_PARAMETERS).anyMatch(p -> p.equals(e.getKey())))
-					.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
-		}
-
-		SearchQuery<R> query = dao.createSearchQuery(1, 1);
-		query.configureParameters(queryParameters);
-
-		List<SearchQueryParameterError> unsupportedQueryParameters = query
-				.getUnsupportedQueryParameters(queryParameters);
-		if (!unsupportedQueryParameters.isEmpty())
-			return responseGenerator.badRequest(
-					UriComponentsBuilder.newInstance()
-							.replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString(),
-					unsupportedQueryParameters);
-
-		PartialResult<R> result = exceptionHandler.handleSqlException(() -> dao.search(query));
-
-		// No matches
-		if (result.getOverallCount() <= 0)
-		{
-			return Response.noContent().build(); // TODO return OperationOutcome
-		}
-		// One Match: The server performs an ordinary delete on the matching resource
-		else if (result.getOverallCount() == 1)
-		{
-			R resource = result.getPartialResult().get(0);
-			return delete(resource.getIdElement().getIdPart(), uri, headers);
-		}
-		// Multiple matches: A server may choose to delete all the matching resources, or it may choose to return a 412
-		// Precondition Failed error indicating the client's criteria were not selective enough.
-		else
-			throw new WebApplicationException(responseGenerator.multipleExists(resourceTypeName, UriComponentsBuilder
-					.newInstance().replaceQueryParams(CollectionUtils.toMultiValueMap(queryParameters)).toUriString()));
+		throw new UnsupportedOperationException("Implemented and delegated by security layer");
 	}
 
 	@Override
@@ -597,12 +491,14 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		Integer count = parameterConverter.getFirstInt(queryParameters, SearchQuery.PARAMETER_COUNT);
 		int effectiveCount = (count == null || count < 0) ? defaultPageCount : count;
 
-		SearchQuery<R> query = dao.createSearchQuery(effectivePage, effectiveCount);
+		SearchQuery<R> query = dao.createSearchQuery(getCurrentUser(), effectivePage, effectiveCount);
 		query.configureParameters(queryParameters);
 		List<SearchQueryParameterError> errors = query.getUnsupportedQueryParameters(queryParameters);
 		// TODO throw error if strict param handling is configured, include warning else
 
 		PartialResult<R> result = exceptionHandler.handleSqlException(() -> dao.search(query));
+
+		result = filterIncludeResources(result);
 
 		UriBuilder bundleUri = query.configureBundleUri(UriBuilder.fromPath(serverBase).path(getPath()));
 
@@ -611,6 +507,40 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		Bundle searchSet = responseGenerator.createSearchSet(result, errors, bundleUri, format, pretty);
 
 		return responseGenerator.response(Status.OK, searchSet, parameterConverter.getMediaType(uri, headers)).build();
+	}
+
+	private PartialResult<R> filterIncludeResources(PartialResult<R> result)
+	{
+		List<Resource> includes = filterIncludeResources(result.getIncludes());
+		return new PartialResult<R>(result.getOverallCount(), result.getPageAndCount(), result.getPartialResult(),
+				includes, result.isCountOnly());
+	}
+
+	private List<Resource> filterIncludeResources(List<Resource> includes)
+	{
+		return includes.stream().filter(this::filterIncludeResource).collect(Collectors.toList());
+	}
+
+	@SuppressWarnings("unchecked")
+	private boolean filterIncludeResource(Resource include)
+	{
+		Optional<AuthorizationRule<? extends Resource>> optRule = authorizationRuleProvider
+				.getAuthorizationRule(include.getClass());
+
+		return optRule.map(rule -> (AuthorizationRule<Resource>) rule)
+				.flatMap(rule -> rule.reasonReadAllowed(getCurrentUser(), include)).map(reason ->
+				{
+					logger.debug("Include resource of type {} with id {}, allowed - {}",
+							include.getClass().getAnnotation(ResourceDef.class).name(),
+							include.getIdElement().getValue(), reason);
+					return true;
+				}).orElseGet(() ->
+				{
+					logger.debug("Include resource of type {} with id {}, filtered (read not allowed)",
+							include.getClass().getAnnotation(ResourceDef.class).name(),
+							include.getIdElement().getValue());
+					return false;
+				});
 	}
 
 	private Optional<Resource> getResource(Parameters parameters, String parameterName)

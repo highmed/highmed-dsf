@@ -24,6 +24,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -89,8 +92,8 @@ public abstract class AbstractIntegrationTest
 
 	private static final Logger logger = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
-	private static final String BASE_URL = "https://localhost:8001/fhir/";
-	private static final String WEBSOCKET_URL = "wss://localhost:8001/fhir/ws";
+	protected static final String BASE_URL = "https://localhost:8001/fhir/";
+	protected static final String WEBSOCKET_URL = "wss://localhost:8001/fhir/ws";
 
 	private static final Path FHIR_BUNDLE_FILE = Paths.get("target", UUID.randomUUID().toString() + ".xml");
 	private static final List<Path> FILES_TO_DELETE = Arrays.asList(FHIR_BUNDLE_FILE);
@@ -100,6 +103,7 @@ public abstract class AbstractIntegrationTest
 
 	private static JettyServer fhirServer;
 	private static FhirWebserviceClient webserviceClient;
+	private static FhirWebserviceClient externalWebserviceClient;
 
 	@BeforeClass
 	public static void beforeClass() throws Exception
@@ -108,28 +112,34 @@ public abstract class AbstractIntegrationTest
 		template.createSchema();
 
 		logger.info("Creating Bundle ...");
-		createTestBundle(certificates.getClientCertificate().getCertificate());
+		createTestBundle(certificates.getClientCertificate().getCertificate(),
+				certificates.getExternalClientCertificate().getCertificate());
 
 		logger.info("Creating webservice client ...");
 		webserviceClient = createWebserviceClient(certificates.getClientCertificate().getTrustStore(),
 				certificates.getClientCertificate().getKeyStore(),
-				certificates.getClientCertificate().getKeyStorePassword(), fhirContext);
+				certificates.getClientCertificate().getKeyStorePassword(), fhirContext, extractor);
+
+		logger.info("Creating external webservice client ...");
+		externalWebserviceClient = createWebserviceClient(certificates.getExternalClientCertificate().getTrustStore(),
+				certificates.getExternalClientCertificate().getKeyStore(),
+				certificates.getExternalClientCertificate().getKeyStorePassword(), fhirContext, extractor);
 
 		logger.info("Starting FHIR Server ...");
 		fhirServer = startFhirServer();
 	}
 
 	private static FhirWebserviceClient createWebserviceClient(KeyStore trustStore, KeyStore keyStore,
-			String keyStorePassword, FhirContext fhirContext)
+			char[] keyStorePassword, FhirContext fhirContext, ReferenceExtractor referenceExtractor)
 	{
-		return new FhirWebserviceClientJersey(BASE_URL, trustStore, keyStore, keyStorePassword, null, null, null, 0, 0,
-				null, fhirContext);
+		return new FhirWebserviceClientJersey(BASE_URL, trustStore, keyStore, keyStorePassword, null, null, null, 500,
+				5000, null, fhirContext, referenceExtractor);
 	}
 
 	private static WebsocketClient createWebsocketClient(KeyStore trustStore, KeyStore keyStore,
-			String keyStorePassword, FhirContext fhirContext, String subscriptionIdPart)
+			char[] keyStorePassword, String subscriptionIdPart)
 	{
-		return new WebsocketClientTyrus(fhirContext, URI.create(WEBSOCKET_URL), trustStore, keyStore, keyStorePassword,
+		return new WebsocketClientTyrus(URI.create(WEBSOCKET_URL), trustStore, keyStore, keyStorePassword,
 				subscriptionIdPart);
 	}
 
@@ -244,7 +254,7 @@ public abstract class AbstractIntegrationTest
 		return parser;
 	}
 
-	private static void createTestBundle(X509Certificate certificate)
+	private static void createTestBundle(X509Certificate certificate, X509Certificate externalCertificate)
 	{
 		Path testBundleTemplateFile = Paths.get("src/test/resources/integration/test-bundle.xml");
 
@@ -256,6 +266,13 @@ public abstract class AbstractIntegrationTest
 
 		String clientCertHashHex = calculateSha512CertificateThumbprintHex(certificate);
 		thumbprintExtension.setValue(new StringType(clientCertHashHex));
+
+		Organization externalOrganization = (Organization) testBundle.getEntry().get(2).getResource();
+		Extension externalThumbprintExtension = externalOrganization
+				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
+
+		String externalClientCertHashHex = calculateSha512CertificateThumbprintHex(externalCertificate);
+		externalThumbprintExtension.setValue(new StringType(externalClientCertHashHex));
 
 		removeReferenceEmbeddedResources(testBundle);
 
@@ -328,16 +345,32 @@ public abstract class AbstractIntegrationTest
 	@Before
 	public void before() throws Exception
 	{
-		logger.info("Loading initial FHIR data bundles ...");
-		InitialDataLoaderConfig initialDataLoadConfig = getSpringWebApplicationContext()
-				.getBean(InitialDataLoaderConfig.class);
-		assertNotNull(initialDataLoadConfig);
-		initialDataLoadConfig.onContextRefreshedEvent(null);
+		try (Connection connection = database.getDataSource().getConnection();
+				PreparedStatement statement = connection.prepareStatement("SELECT count(*) FROM current_organizations");
+				ResultSet result = statement.executeQuery())
+		{
+			assertTrue(result.next());
+			if (result.getInt(1) <= 0)
+			{
+				logger.info("Loading initial FHIR data bundles for next test case ...");
+				InitialDataLoaderConfig initialDataLoadConfig = getSpringWebApplicationContext()
+						.getBean(InitialDataLoaderConfig.class);
+				assertNotNull(initialDataLoadConfig);
+				initialDataLoadConfig.onContextRefreshedEvent(null);
+			}
+			else
+				logger.info("Not loading initial FHIR data bundles for first test case");
+		}
 	}
 
 	protected static FhirWebserviceClient getWebserviceClient()
 	{
 		return webserviceClient;
+	}
+
+	protected static FhirWebserviceClient getExternalWebserviceClient()
+	{
+		return externalWebserviceClient;
 	}
 
 	protected static WebsocketClient getWebsocketClient()
@@ -358,7 +391,6 @@ public abstract class AbstractIntegrationTest
 
 		return createWebsocketClient(certificates.getClientCertificate().getTrustStore(),
 				certificates.getClientCertificate().getKeyStore(),
-				certificates.getClientCertificate().getKeyStorePassword(), fhirContext,
-				subscription.getIdElement().getIdPart());
+				certificates.getClientCertificate().getKeyStorePassword(), subscription.getIdElement().getIdPart());
 	}
 }

@@ -32,7 +32,7 @@ public class MatcherFactory
 		if (daosByResourceName.containsKey(path))
 		{
 			ResourceDao<? extends DomainResource> dao = daosByResourceName.get(path);
-			SearchQuery<? extends DomainResource> query = dao.createSearchQuery(1, 1);
+			SearchQuery<? extends DomainResource> query = dao.createSearchQueryWithoutUserFilter(1, 1);
 			query.configureParameters(queryParameters);
 			return Optional.of(query);
 		}

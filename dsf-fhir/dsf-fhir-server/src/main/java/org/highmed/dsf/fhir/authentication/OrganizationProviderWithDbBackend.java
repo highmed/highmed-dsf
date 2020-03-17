@@ -27,15 +27,17 @@ public class OrganizationProviderWithDbBackend implements OrganizationProvider, 
 	private final OrganizationDao dao;
 	private final ExceptionHandler exceptionHandler;
 	private final List<String> localUserThumbprints = new ArrayList<String>();
+	private final String localIdentifierValue;
 
 	public OrganizationProviderWithDbBackend(OrganizationDao dao, ExceptionHandler exceptionHandler,
-			List<String> localUserThumbprints)
+			List<String> localUserThumbprints, String localIdentifier)
 	{
 		this.dao = dao;
 		this.exceptionHandler = exceptionHandler;
 
 		if (localUserThumbprints != null)
 			localUserThumbprints.stream().map(t -> t.toLowerCase()).forEach(this.localUserThumbprints::add);
+		this.localIdentifierValue = localIdentifier;
 	}
 
 	@Override
@@ -50,6 +52,10 @@ public class OrganizationProviderWithDbBackend implements OrganizationProvider, 
 			logger.info("{} local user{} configured with tumbprint{}: {}", localUserThumbprints.size(),
 					localUserThumbprints.size() != 1 ? "s" : "", localUserThumbprints.size() != 1 ? "s" : "",
 					localUserThumbprints.stream().collect(Collectors.joining(", ", "[", "]")));
+
+		Objects.requireNonNull(localIdentifierValue, "localIdentifierValue");
+		if (getLocalOrganization().isEmpty())
+			logger.warn("Local organization not found by identifier: {}", localIdentifierValue);
 	}
 
 	@Override
@@ -65,13 +71,29 @@ public class OrganizationProviderWithDbBackend implements OrganizationProvider, 
 		UserRole userRole = localUserThumbprints.contains(loginThumbprintHex.toLowerCase()) ? UserRole.LOCAL
 				: UserRole.REMOTE;
 
-		Optional<Organization> optOrg = exceptionHandler.catchAndLogSqlExceptionAndIfReturn(
+		switch (userRole)
+		{
+			case LOCAL:
+				return getLocalOrganization().map(org -> new User(org, userRole));
+			case REMOTE:
+				return getOrganization(loginThumbprintHex).map(org -> new User(org, userRole));
+			default:
+				logger.warn("UserRole {} not supported", userRole);
+				return Optional.empty();
+		}
+	}
+
+	private Optional<Organization> getOrganization(String loginThumbprintHex)
+	{
+		return exceptionHandler.catchAndLogSqlExceptionAndIfReturn(
 				() -> dao.readActiveNotDeletedByThumbprint(loginThumbprintHex), Optional::empty);
+	}
 
-		if (optOrg.isEmpty() && UserRole.LOCAL.equals(userRole))
-			return Optional.of(new User(new Organization().setName("Local Admin User"), userRole));
-
-		return optOrg.map(org -> new User(org, userRole));
+	@Override
+	public Optional<Organization> getLocalOrganization()
+	{
+		return exceptionHandler.catchAndLogSqlExceptionAndIfReturn(
+				() -> dao.readActiveNotDeletedByIdentifier(localIdentifierValue), Optional::empty);
 	}
 
 	private byte[] getThumbprint(X509Certificate certificate)

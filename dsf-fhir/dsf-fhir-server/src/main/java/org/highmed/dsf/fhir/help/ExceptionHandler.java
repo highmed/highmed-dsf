@@ -104,7 +104,7 @@ public class ExceptionHandler
 		return new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR).entity(outcome).build());
 	}
 
-	public <T> T handleSqlExAndResourceNotFoundExForUpdateAsCreateAndResouceVersionNonMatchEx(String resourceTypeName,
+	public <T> T handleSqlExAndResourceNotFoundExAndResouceVersionNonMatchEx(String resourceTypeName,
 			SupplierWithSqlAndResourceNotFoundAndResouceVersionNoMatchException<T> s)
 	{
 		try
@@ -136,7 +136,7 @@ public class ExceptionHandler
 		return new WebApplicationException(Response.status(Status.PRECONDITION_FAILED).entity(outcome).build());
 	}
 
-	public WebApplicationException notFound(String resourceTypeName, IllegalArgumentException e)
+	public WebApplicationException notFound(String resourceTypeName)
 	{
 		logger.error("{} with id (not a UUID) not found", resourceTypeName);
 

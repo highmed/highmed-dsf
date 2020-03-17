@@ -17,6 +17,17 @@
 				<TimeBasedTriggeringPolicy/>
 			</Policies>
 		</RollingFile>
+		<RollingFile name="AUDIT" fileName="log/fhir-audit.log"
+					 filePattern="log/fhir-audit_%d{MM-dd-yyyy}_%i.log.gz"
+					 ignoreExceptions="false">
+			<PatternLayout>
+				<Pattern>%d [%t] %-5p %c - %m%n</Pattern>
+			</PatternLayout>
+			<Policies>
+				<OnStartupTriggeringPolicy/>
+				<TimeBasedTriggeringPolicy/>
+			</Policies>
+		</RollingFile>
 
 		<!-- <SMTP name="MAIL" subject="FHIR Error"
 			to="foo@bar.de, baz@bar.de"
@@ -34,6 +45,10 @@
 	</Appenders>
 
 	<Loggers>
+		<Logger name="dsf-audit-logger" level="INFO">
+			<AppenderRef ref="AUDIT"/>
+		</Logger>
+	
 		<Logger name="org.highmed" level="TRACE"/>
 		<logger name="de.rwh" level="DEBUG"/>
 		<Logger name="org.apache" level="WARN"/>

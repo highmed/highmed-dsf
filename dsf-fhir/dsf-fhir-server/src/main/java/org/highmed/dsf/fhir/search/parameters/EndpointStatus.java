@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.ws.rs.core.UriBuilder;
 
@@ -18,8 +19,6 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Resource;
-
-import com.google.common.base.Objects;
 
 @SearchParameterDefinition(name = EndpointStatus.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Endpoint-status", type = SearchParamType.TOKEN, documentation = "The current status of the Endpoint (usually expected to be active)")
 public class EndpointStatus extends AbstractTokenParameter<Endpoint>
@@ -99,7 +98,7 @@ public class EndpointStatus extends AbstractTokenParameter<Endpoint>
 		if (!(resource instanceof Endpoint))
 			return false;
 
-		return Objects.equal(((Endpoint) resource).getStatus(), status);
+		return Objects.equals(((Endpoint) resource).getStatus(), status);
 	}
 
 	@Override

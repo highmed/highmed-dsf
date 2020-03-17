@@ -1,5 +1,11 @@
 <Subscription xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://hl7.org/fhir"
 			  xsi:schemaLocation="http://hl7.org/fhir http://www.hl7.org/fhir/fhir-base.xsd">
+	<meta>
+		<tag>
+			<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
+			<code value="LOCAL"/>
+		</tag>
+	</meta>
 	<status value="active"/>
 	<reason value="Businness Process Engine"/>
 	<criteria value="Task?status=requested"/>

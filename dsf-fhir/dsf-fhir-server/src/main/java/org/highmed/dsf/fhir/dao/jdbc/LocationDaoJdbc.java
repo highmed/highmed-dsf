@@ -3,6 +3,7 @@ package org.highmed.dsf.fhir.dao.jdbc;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.dsf.fhir.dao.LocationDao;
 import org.highmed.dsf.fhir.search.parameters.LocationIdentifier;
+import org.highmed.dsf.fhir.search.parameters.user.LocationUserFilter;
 import org.hl7.fhir.r4.model.Location;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -11,7 +12,7 @@ public class LocationDaoJdbc extends AbstractResourceDaoJdbc<Location> implement
 {
 	public LocationDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
 	{
-		super(dataSource, fhirContext, Location.class, "locations", "location", "location_id",
+		super(dataSource, fhirContext, Location.class, "locations", "location", "location_id", LocationUserFilter::new,
 				with(LocationIdentifier::new), with());
 	}
 

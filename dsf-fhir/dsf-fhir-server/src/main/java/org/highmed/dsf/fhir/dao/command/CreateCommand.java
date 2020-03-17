@@ -15,6 +15,7 @@ import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.ResourceDao;
 import org.highmed.dsf.fhir.dao.exception.ResourceNotFoundException;
 import org.highmed.dsf.fhir.event.EventGenerator;
@@ -25,6 +26,8 @@ import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.highmed.dsf.fhir.search.PartialResult;
 import org.highmed.dsf.fhir.search.SearchQuery;
 import org.highmed.dsf.fhir.search.SearchQueryParameterError;
+import org.highmed.dsf.fhir.service.ReferenceExtractor;
+import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent;
@@ -43,20 +46,28 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 {
 	private static final Logger logger = LoggerFactory.getLogger(CreateCommand.class);
 
-	protected final ResponseGenerator responseGenerator;
+	private final ResponseGenerator responseGenerator;
+	private final ResolveReferencesHelper<R> resolveReferencesHelper;
+
 	protected final EventManager eventManager;
 	protected final EventGenerator eventGenerator;
 
 	protected R createdResource;
 	protected Response responseResult;
 
-	public CreateCommand(int index, Bundle bundle, BundleEntryComponent entry, String serverBase, R resource, D dao,
-			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
-			ResponseGenerator responseGenerator, EventManager eventManager, EventGenerator eventGenerator)
+	public CreateCommand(int index, User user, Bundle bundle, BundleEntryComponent entry, String serverBase,
+			AuthorizationHelper authorizationHelper, R resource, D dao, ExceptionHandler exceptionHandler,
+			ParameterConverter parameterConverter, ResponseGenerator responseGenerator,
+			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver, EventManager eventManager,
+			EventGenerator eventGenerator)
 	{
-		super(2, index, bundle, entry, serverBase, resource, dao, exceptionHandler, parameterConverter);
+		super(2, index, user, bundle, entry, serverBase, authorizationHelper, resource, dao, exceptionHandler,
+				parameterConverter);
 
 		this.responseGenerator = responseGenerator;
+		resolveReferencesHelper = new ResolveReferencesHelper<R>(index, user, serverBase, referenceExtractor,
+				referenceResolver, responseGenerator);
+
 		this.eventManager = eventManager;
 		this.eventGenerator = eventGenerator;
 	}
@@ -64,14 +75,36 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	@Override
 	public void preExecute(Map<String, IdType> idTranslationTable)
 	{
-		// TODO validate entry.getFullUrl() vs resource.getIdElement()
-		// TODO validate entry.getFullUrl() is urn:uuid:...
+		UriComponents eruComponentes = UriComponentsBuilder.fromUriString(entry.getRequest().getUrl()).build();
+
+		// check standard update request url: Patient
+		if (eruComponentes.getPathSegments().size() == 1 && eruComponentes.getQueryParams().isEmpty())
+		{
+			if (!entry.getFullUrl().startsWith(URL_UUID_PREFIX))
+				throw new WebApplicationException(
+						responseGenerator.badCreateRequestUrl(index, entry.getRequest().getUrl()));
+			else if (resource.hasIdElement() && !resource.getIdElement().getValue().startsWith(URL_UUID_PREFIX))
+				throw new WebApplicationException(responseGenerator.bundleEntryBadResourceId(index,
+						resource.getResourceType().name(), URL_UUID_PREFIX));
+			else if (resource.hasIdElement() && !entry.getFullUrl().equals(resource.getIdElement().getValue()))
+				throw new WebApplicationException(responseGenerator.badBundleEntryFullUrlVsResourceId(index,
+						entry.getFullUrl(), resource.getIdElement().getValue()));
+		}
+
+		// all other request urls
+		else
+			throw new WebApplicationException(
+					responseGenerator.badCreateRequestUrl(index, entry.getRequest().getUrl()));
 	}
 
 	@Override
 	public void execute(Map<String, IdType> idTranslationTable, Connection connection)
 			throws SQLException, WebApplicationException
 	{
+		resolveReferencesHelper.resolveReferencesIgnoreAndLogExceptions(idTranslationTable, connection, resource);
+
+		authorizationHelper.checkCreateAllowed(connection, user, resource);
+
 		Optional<Resource> exists = checkAlreadyExists(connection, entry.getRequest().getIfNoneExist(),
 				resource.getResourceType());
 
@@ -121,7 +154,7 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 					.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 		}
 
-		SearchQuery<R> query = dao.createSearchQuery(1, 1);
+		SearchQuery<R> query = dao.createSearchQuery(user, 1, 1);
 		query.configureParameters(queryParameters);
 
 		List<SearchQueryParameterError> unsupportedQueryParameters = query
@@ -141,7 +174,7 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	}
 
 	@Override
-	public BundleEntryComponent postExecute(Connection connection)
+	public Optional<BundleEntryComponent> postExecute(Connection connection)
 	{
 		if (responseResult == null)
 		{
@@ -167,7 +200,7 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 			response.setEtag(new EntityTag(createdResource.getMeta().getVersionId(), true).toString());
 			response.setLastModified(createdResource.getMeta().getLastUpdated());
 
-			return resultEntry;
+			return Optional.of(resultEntry);
 		}
 		else
 		{
@@ -183,7 +216,7 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 			if (responseResult.getLastModified() != null)
 				response.setLastModified(responseResult.getLastModified());
 
-			return resultEntry;
+			return Optional.of(resultEntry);
 		}
 	}
 

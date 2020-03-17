@@ -1,5 +1,6 @@
 package org.highmed.dsf.fhir.authentication;
 
+import org.highmed.dsf.fhir.OrganizationType;
 import org.hl7.fhir.r4.model.Organization;
 
 public class User
@@ -21,6 +22,11 @@ public class User
 	public Organization getOrganization()
 	{
 		return organization;
+	}
+
+	public OrganizationType getOrganizationType()
+	{
+		return OrganizationType.fromString(organization.getTypeFirstRep().getCodingFirstRep().getCode()).orElseThrow();
 	}
 
 	public String getName()

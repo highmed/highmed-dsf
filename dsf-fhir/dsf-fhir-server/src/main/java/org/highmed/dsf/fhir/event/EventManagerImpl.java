@@ -17,6 +17,9 @@ import java.util.stream.Collectors;
 
 import javax.websocket.RemoteEndpoint.Async;
 
+import org.highmed.dsf.fhir.authentication.User;
+import org.highmed.dsf.fhir.authorization.AuthorizationRule;
+import org.highmed.dsf.fhir.authorization.AuthorizationRuleProvider;
 import org.highmed.dsf.fhir.dao.SubscriptionDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
@@ -31,6 +34,7 @@ import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 
 public class EventManagerImpl implements EventManager, InitializingBean, DisposableBean
@@ -65,11 +69,13 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 
 	private static class SessionIdAndRemoteAsync
 	{
+		final User user;
 		final String sessionId;
 		final Async remoteAsync;
 
-		SessionIdAndRemoteAsync(String sessionId, Async remoteAsync)
+		SessionIdAndRemoteAsync(User user, String sessionId, Async remoteAsync)
 		{
+			this.user = user;
 			this.sessionId = sessionId;
 			this.remoteAsync = remoteAsync;
 		}
@@ -111,6 +117,7 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 	private final ExceptionHandler exceptionHandler;
 	private final MatcherFactory matcherFactory;
 	private final FhirContext fhirContext;
+	private final AuthorizationRuleProvider authorizationRuleProvider;
 
 	private final AtomicBoolean firstCall = new AtomicBoolean(true);
 	private final ReadWriteMap<String, Subscription> subscriptionsByIdPart = new ReadWriteMap<>();
@@ -118,23 +125,25 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 	private final ReadWriteMap<String, List<SessionIdAndRemoteAsync>> asyncRemotesBySubscriptionIdPart = new ReadWriteMap<>();
 
 	public EventManagerImpl(DaoProvider daoProvider, ExceptionHandler exceptionHandler, MatcherFactory matcherFactory,
-			FhirContext fhirContext)
+			FhirContext fhirContext, AuthorizationRuleProvider authorizationRuleProvider)
 	{
 		this.daoProvider = daoProvider;
 		this.subscriptionDao = daoProvider.getSubscriptionDao();
 		this.exceptionHandler = exceptionHandler;
 		this.matcherFactory = matcherFactory;
 		this.fhirContext = fhirContext;
+		this.authorizationRuleProvider = authorizationRuleProvider;
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
+		Objects.requireNonNull(daoProvider, "daoProvider");
 		Objects.requireNonNull(subscriptionDao, "subscriptionDao");
 		Objects.requireNonNull(exceptionHandler, "exceptionHandler");
 		Objects.requireNonNull(matcherFactory, "matcherFactory");
 		Objects.requireNonNull(fhirContext, "fhirContext");
-		Objects.requireNonNull(daoProvider, "daoProvider");
+		Objects.requireNonNull(authorizationRuleProvider, "authorizationRuleProvider");
 	}
 
 	private void refreshMatchers()
@@ -263,18 +272,67 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 
 		final String text;
 		if (Constants.CT_FHIR_JSON_NEW.equals(s.getChannel().getPayload()))
-			text = fhirContext.newJsonParser().encodeResourceToString(event.getResource());
+			text = newJsonParser().encodeResourceToString(event.getResource());
 		else if (Constants.CT_FHIR_XML_NEW.contentEquals(s.getChannel().getPayload()))
-			text = fhirContext.newXmlParser().encodeResourceToString(event.getResource());
+			text = newXmlParser().encodeResourceToString(event.getResource());
 		else
 			text = "ping " + s.getIdElement().getIdPart();
 
 		logger.debug("Calling {} remote{} connected to subscription with id {}", optRemotes.get().size(),
 				optRemotes.get().size() != 1 ? "s" : "", s.getIdElement().getIdPart());
 
-		// defensive copy since since list could be changed by other threads while we are reading
+		// defensive copy because list could be changed by other threads while we are reading
 		List<SessionIdAndRemoteAsync> remotes = new ArrayList<>(optRemotes.get());
-		remotes.forEach(r -> send(r, text));
+		remotes.stream().filter(r -> userHasReadAccess(r, event)).forEach(r -> send(r, text));
+	}
+
+	private IParser newXmlParser()
+	{
+		return configureParser(fhirContext.newXmlParser());
+	}
+
+	private IParser newJsonParser()
+	{
+		return configureParser(fhirContext.newJsonParser());
+	}
+
+	private IParser configureParser(IParser p)
+	{
+		p.setStripVersionsFromReferences(false);
+		p.setOverrideResourceIdWithBundleEntryFullUrl(false);
+		return p;
+	}
+
+	private boolean userHasReadAccess(SessionIdAndRemoteAsync sessionAndRemote, Event event)
+	{
+		Optional<AuthorizationRule<?>> optRule = authorizationRuleProvider
+				.getAuthorizationRule(event.getResourceType());
+		if (optRule.isPresent())
+		{
+			@SuppressWarnings("unchecked")
+			AuthorizationRule<Resource> rule = (AuthorizationRule<Resource>) optRule.get();
+			Optional<String> optReason = rule.reasonReadAllowed(sessionAndRemote.user, event.getResource());
+
+			if (optReason.isPresent())
+			{
+				logger.info("Sending event {} to user {}, read of {} allowed {}", event.getClass().getSimpleName(),
+						sessionAndRemote.user.getName(), event.getResourceType().getSimpleName(), optReason.get());
+				return true;
+			}
+			else
+			{
+				logger.warn("Skipping event {} for user {}, read of {} not allowed", event.getClass().getSimpleName(),
+						sessionAndRemote.user.getName(), event.getResourceType().getSimpleName());
+				return false;
+			}
+		}
+		else
+		{
+			logger.warn("Skipping event {} for user {}, no authorization rule for resource of type {} found",
+					event.getClass().getSimpleName(), sessionAndRemote.user.getName(),
+					event.getResourceType().getSimpleName());
+			return false;
+		}
 	}
 
 	private void send(SessionIdAndRemoteAsync sessionAndRemote, String text)
@@ -290,7 +348,7 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 	}
 
 	@Override
-	public void bind(String sessionId, Async asyncRemote, String subscriptionIdPart)
+	public void bind(User user, String sessionId, Async asyncRemote, String subscriptionIdPart)
 	{
 		if (firstCall.get())
 			refreshMatchers();
@@ -303,12 +361,12 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 				if (list == null)
 				{
 					List<SessionIdAndRemoteAsync> newList = new ArrayList<>();
-					newList.add(new SessionIdAndRemoteAsync(sessionId, asyncRemote));
+					newList.add(new SessionIdAndRemoteAsync(user, sessionId, asyncRemote));
 					return newList;
 				}
 				else
 				{
-					list.add(new SessionIdAndRemoteAsync(sessionId, asyncRemote));
+					list.add(new SessionIdAndRemoteAsync(user, sessionId, asyncRemote));
 					return list;
 				}
 			});
@@ -328,6 +386,6 @@ public class EventManagerImpl implements EventManager, InitializingBean, Disposa
 	{
 		logger.debug("Removing websocket session {}", sessionId);
 		asyncRemotesBySubscriptionIdPart.removeWhereValueMatches(list -> list.isEmpty(),
-				list -> list.remove(new SessionIdAndRemoteAsync(sessionId, null)));
+				list -> list.remove(new SessionIdAndRemoteAsync(null, sessionId, null)));
 	}
 }

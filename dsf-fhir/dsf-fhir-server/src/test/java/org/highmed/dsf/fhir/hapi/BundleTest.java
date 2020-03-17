@@ -66,10 +66,10 @@ public class BundleTest
 		String eptTempId = "urn:uuid:" + UUID.randomUUID().toString();
 
 		Organization org = new Organization();
-		org.addIdentifier().setSystem("http://highmed.org/fhir/CodeSystem/organization").setValue("Test_Organization");
+		org.addIdentifier().setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_Organization");
 
 		Endpoint ept = new Endpoint();
-		ept.addIdentifier().setSystem("http://highmed.org/fhir/CodeSystem/endpoint").setValue("Test_Endpoint");
+		ept.addIdentifier().setSystem("http://highmed.org/fhir/NamingSystem/endpoint-identifier").setValue("Test_Endpoint");
 
 		org.getEndpointFirstRep().setType("Endpoint").setReference(eptTempId);
 		ept.getManagingOrganization().setType("Organization").setReference(orgTempId);
@@ -78,13 +78,13 @@ public class BundleTest
 		orgEntry.setFullUrl(orgTempId);
 		orgEntry.setResource(org);
 		orgEntry.getRequest().setMethod(HTTPVerb.PUT)
-				.setUrl("Organization?identifier=http://highmed.org/fhir/CodeSystem/organization|Test_Organization");
+				.setUrl("Organization?identifier=http://highmed.org/fhir/NamingSystem/organization-identifier|Test_Organization");
 
 		BundleEntryComponent eptEntry = bundle1.addEntry();
 		eptEntry.setFullUrl(eptTempId);
 		eptEntry.setResource(ept);
 		eptEntry.getRequest().setMethod(HTTPVerb.PUT)
-				.setUrl("Endpoint?identifier=http://highmed.org/fhir/CodeSystem/endpoint|Test_Endpoint");
+				.setUrl("Endpoint?identifier=http://highmed.org/fhir/NamingSystem/endpoint-identifier|Test_Endpoint");
 
 		String bundle1String = parser.encodeResourceToString(bundle1);
 		logger.debug("Bundle1: {}", bundle1String);

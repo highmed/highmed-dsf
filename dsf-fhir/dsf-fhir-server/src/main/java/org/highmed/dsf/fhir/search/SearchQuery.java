@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.ws.rs.core.UriBuilder;
 
@@ -47,11 +48,14 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 		private final Class<R> resourceType;
 		private final String resourceTable;
 		private final String resourceColumn;
+
 		private final int page;
 		private final int count;
 
 		private final List<SearchQueryParameter<R>> searchParameters = new ArrayList<SearchQueryParameter<R>>();
 		private final List<SearchQueryRevIncludeParameterFactory> revIncludeParameters = new ArrayList<>();
+
+		private SearchQueryUserFilter userFilter; // may be null
 
 		private SearchQueryBuilder(Class<R> resourceType, String resourceTable, String resourceColumn, int page,
 				int count)
@@ -59,8 +63,15 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 			this.resourceType = resourceType;
 			this.resourceTable = resourceTable;
 			this.resourceColumn = resourceColumn;
+
 			this.page = page;
 			this.count = count;
+		}
+
+		public SearchQueryBuilder<R> with(SearchQueryUserFilter userFilter)
+		{
+			this.userFilter = userFilter;
+			return this;
 		}
 
 		public SearchQueryBuilder<R> with(SearchQueryParameter<R> searchParameters)
@@ -99,8 +110,8 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 
 		public SearchQuery<R> build()
 		{
-			return new SearchQuery<R>(resourceType, resourceTable, resourceColumn, page, count, searchParameters,
-					revIncludeParameters);
+			return new SearchQuery<R>(resourceType, resourceTable, resourceColumn, userFilter, page, count,
+					searchParameters, revIncludeParameters);
 		}
 	}
 
@@ -109,9 +120,13 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 	private final Class<R> resourceType;
 	private final String resourceColumn;
 	private final String resourceTable;
+
+	private final SearchQueryUserFilter userFilter;
+
+	private final PageAndCount pageAndCount;
+
 	private final List<SearchQueryParameter<R>> searchParameters = new ArrayList<>();
 	private final List<SearchQueryRevIncludeParameterFactory> revIncludeParameterFactories = new ArrayList<>();
-	private final PageAndCount pageAndCount;
 
 	private String filterQuery;
 	private String sortSql;
@@ -121,20 +136,23 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 	private List<SearchQueryIncludeParameter> includeParameters = Collections.emptyList();
 	private List<SearchQueryIncludeParameter> revIncludeParameters = Collections.emptyList();
 
-	SearchQuery(Class<R> resourceType, String resourceTable, String resourceColumn, int page, int count,
-			List<? extends SearchQueryParameter<R>> searchParameters,
+	SearchQuery(Class<R> resourceType, String resourceTable, String resourceColumn, SearchQueryUserFilter userFilter,
+			int page, int count, List<? extends SearchQueryParameter<R>> searchParameters,
 			List<? extends SearchQueryRevIncludeParameterFactory> revIncludeParameters)
 	{
 		this.resourceType = resourceType;
 		this.resourceTable = resourceTable;
 		this.resourceColumn = resourceColumn;
 
+		this.userFilter = userFilter;
+
+		this.pageAndCount = new PageAndCount(page, count);
+
 		this.searchParameters.addAll(searchParameters);
 		this.revIncludeParameterFactories.addAll(revIncludeParameters);
-		this.pageAndCount = new PageAndCount(page, count);
 	}
 
-	public void configureParameters(Map<String, List<String>> queryParameters)
+	public SearchQuery<R> configureParameters(Map<String, List<String>> queryParameters)
 	{
 		searchParameters.forEach(p -> p.configure(queryParameters));
 
@@ -142,12 +160,25 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 				Collections.emptyList());
 		revIncludeParameterFactories.forEach(p -> p.configure(revIncludeParameterValues));
 
-		filterQuery = searchParameters.stream().filter(SearchQueryParameter::isDefined)
-				.map(SearchQueryParameter::getFilterQuery).collect(Collectors.joining(" AND "));
-
-		sortSql = createSortSql(getFirst(queryParameters, PARAMETER_SORT));
 		includeSql = createIncludeSql(queryParameters.get(PARAMETER_INCLUDE));
 		revIncludeSql = createRevIncludeSql();
+
+		filterQuery = createFilterQuery();
+
+		sortSql = createSortSql(getFirst(queryParameters, PARAMETER_SORT));
+
+		return this;
+	}
+
+	private String createFilterQuery()
+	{
+		Stream<String> elements = searchParameters.stream().filter(SearchQueryParameter::isDefined)
+				.map(SearchQueryParameter::getFilterQuery);
+
+		if (userFilter != null && !userFilter.getFilterQuery().isEmpty())
+			elements = Stream.concat(Stream.of(userFilter.getFilterQuery()), elements);
+
+		return elements.collect(Collectors.joining(" AND "));
 	}
 
 	public List<SearchQueryParameterError> getUnsupportedQueryParameters(Map<String, List<String>> queryParameters)
@@ -283,6 +314,10 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 					.collect(Collectors.toList());
 
 			int index = 0;
+			if (userFilter != null)
+				while (index < userFilter.getSqlParameterCount())
+					userFilter.modifyStatement(++index, statement);
+
 			for (SearchQueryParameter<?> q : filtered)
 				for (int i = 0; i < q.getSqlParameterCount(); i++)
 					q.modifyStatement(++index, i + 1, statement, arrayCreator);

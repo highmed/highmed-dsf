@@ -59,15 +59,17 @@ public class UpdateWhiteList extends AbstractServiceDelegate implements Initiali
 						Collections.singletonList("Organization:endpoint")));
 
 		Bundle transaction = new Bundle().setType(BundleType.TRANSACTION);
+		transaction.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/authorization-role")
+				.setCode("REMOTE");
 		transaction.getIdentifier().setSystem(Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST)
 				.setValue(Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST);
 		searchSet.getEntry().stream()
 				.filter(e -> e.hasSearch() && SearchEntryMode.MATCH.equals(e.getSearch().getMode()) && e.hasResource()
-						&& e.getResource() instanceof Organization).map(e -> (Organization) e.getResource())
-				.forEach(addWhiteListEntry(transaction, searchSet));
+						&& e.getResource() instanceof Organization)
+				.map(e -> (Organization) e.getResource()).forEach(addWhiteListEntry(transaction, searchSet));
 
-		Bundle result = client.updateConditionaly(transaction, Map.of("identifier", Collections.singletonList(
-				Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST + "|"
+		Bundle result = client.updateConditionaly(transaction,
+				Map.of("identifier", Collections.singletonList(Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST + "|"
 						+ Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST)));
 
 		setTaskOutput(result, execution);
@@ -75,7 +77,8 @@ public class UpdateWhiteList extends AbstractServiceDelegate implements Initiali
 
 	private Consumer<? super Organization> addWhiteListEntry(Bundle transaction, Bundle searchSet)
 	{
-		return organization -> {
+		return organization ->
+		{
 			Identifier identifier = getDefaultIdentifier(organization).get();
 
 			BundleEntryComponent organizationEntry = transaction.addEntry();
@@ -97,7 +100,8 @@ public class UpdateWhiteList extends AbstractServiceDelegate implements Initiali
 	private Function<Reference, Optional<Reference>> addWhiteListEntryReturnReference(Bundle transaction,
 			String organizationId, Bundle searchSet)
 	{
-		return endpointRef -> getEndpoint(endpointRef, searchSet).map(endpoint -> {
+		return endpointRef -> getEndpoint(endpointRef, searchSet).map(endpoint ->
+		{
 			Identifier identifier = getDefaultIdentifier(endpoint).get();
 
 			BundleEntryComponent endpointEntry = transaction.addEntry();
@@ -130,8 +134,9 @@ public class UpdateWhiteList extends AbstractServiceDelegate implements Initiali
 	private Optional<Endpoint> getEndpoint(Reference endpoint, Bundle searchSet)
 	{
 		return searchSet.getEntry().stream()
-				.filter(e -> e.hasResource() && e.getResource() instanceof Endpoint && e.getFullUrl()
-						.endsWith(endpoint.getReference())).map(e -> (Endpoint) e.getResource()).findFirst();
+				.filter(e -> e.hasResource() && e.getResource() instanceof Endpoint
+						&& e.getFullUrl().endsWith(endpoint.getReference()))
+				.map(e -> (Endpoint) e.getResource()).findFirst();
 	}
 
 	private void setTaskOutput(Bundle result, DelegateExecution execution)

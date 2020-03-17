@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 
 import javax.sql.DataSource;
 
+import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.ResourceDao;
 import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
 import org.highmed.dsf.fhir.dao.exception.BadBundleException;
@@ -26,7 +27,6 @@ import org.highmed.dsf.fhir.service.SnapshotGenerator;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.springframework.beans.factory.InitializingBean;
@@ -46,12 +46,14 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 	private final SnapshotGenerator snapshotGenerator;
 	private final SnapshotDependencyAnalyzer snapshotDependencyAnalyzer;
 	private final ParameterConverter parameterConverter;
+	private final AuthorizationHelper authorizationHelper;
 
 	public CommandFactoryImpl(String serverBase, int defaultPageCount, DataSource dataSource, DaoProvider daoProvider,
 			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver,
 			ResponseGenerator responseGenerator, ExceptionHandler exceptionHandler, EventManager eventManager,
 			EventGenerator eventGenerator, SnapshotGenerator snapshotGenerator,
-			SnapshotDependencyAnalyzer snapshotDependencyAnalyzer, ParameterConverter parameterConverter)
+			SnapshotDependencyAnalyzer snapshotDependencyAnalyzer, ParameterConverter parameterConverter,
+			AuthorizationHelper authorizationHelper)
 	{
 		this.serverBase = serverBase;
 		this.defaultPageCount = defaultPageCount;
@@ -66,6 +68,7 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 		this.snapshotGenerator = snapshotGenerator;
 		this.snapshotDependencyAnalyzer = snapshotDependencyAnalyzer;
 		this.parameterConverter = parameterConverter;
+		this.authorizationHelper = authorizationHelper;
 	}
 
 	@Override
@@ -82,17 +85,18 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 		Objects.requireNonNull(snapshotGenerator, "snapshotGenerator");
 		Objects.requireNonNull(snapshotDependencyAnalyzer, "snapshotDependencyAnalyzer");
 		Objects.requireNonNull(parameterConverter, "parameterConverter");
+		Objects.requireNonNull(authorizationHelper, "authorizationHelper");
 	}
 
 	// read, vread
-	private Command get(Bundle bundle, int index, BundleEntryComponent entry)
+	private Command get(int index, User user, Bundle bundle, BundleEntryComponent entry)
 	{
-		return new ReadCommand(index, bundle, entry, serverBase, defaultPageCount, daoProvider, parameterConverter,
-				responseGenerator, exceptionHandler);
+		return new ReadCommand(index, user, bundle, entry, serverBase, authorizationHelper, defaultPageCount,
+				daoProvider, parameterConverter, responseGenerator, exceptionHandler);
 	}
 
 	// create, conditional create
-	private <R extends Resource> Command post(Bundle bundle, int index, BundleEntryComponent entry,
+	private <R extends Resource> Command post(int index, User user, Bundle bundle, BundleEntryComponent entry,
 			EventManager eventManager, R resource)
 	{
 		if (resource.getResourceType().name().equals(entry.getRequest().getUrl()))
@@ -102,14 +106,16 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 					.getDao(resource.getClass());
 
 			if (resource instanceof StructureDefinition)
-				return new CreateStructureDefinitionCommand(index, bundle, entry, serverBase,
+				return new CreateStructureDefinitionCommand(index, user, bundle, entry, serverBase, authorizationHelper,
 						(StructureDefinition) resource, (StructureDefinitionDao) dao.get(), exceptionHandler,
-						parameterConverter, responseGenerator, eventManager, eventGenerator,
-						daoProvider.getStructureDefinitionSnapshotDao(), snapshotGenerator, snapshotDependencyAnalyzer);
+						parameterConverter, responseGenerator, referenceExtractor, referenceResolver, eventManager,
+						eventGenerator, daoProvider.getStructureDefinitionSnapshotDao(), snapshotGenerator,
+						snapshotDependencyAnalyzer);
 			else
 				return dao
-						.map(d -> new CreateCommand<R, ResourceDao<R>>(index, bundle, entry, serverBase, resource, d,
-								exceptionHandler, parameterConverter, responseGenerator, eventManager, eventGenerator))
+						.map(d -> new CreateCommand<R, ResourceDao<R>>(index, user, bundle, entry, serverBase,
+								authorizationHelper, resource, d, exceptionHandler, parameterConverter,
+								responseGenerator, referenceExtractor, referenceResolver, eventManager, eventGenerator))
 						.orElseThrow(() -> new IllegalStateException(
 								"Resource of type " + resource.getClass().getName() + " not supported"));
 		}
@@ -119,7 +125,7 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 	}
 
 	// update, conditional update
-	private <R extends DomainResource> Command put(Bundle bundle, int index, BundleEntryComponent entry,
+	private <R extends Resource> Command put(int index, User user, Bundle bundle, BundleEntryComponent entry,
 			EventManager eventManager, R resource)
 	{
 		if (entry.getRequest().getUrl() != null && !entry.getRequest().getUrl().isBlank()
@@ -130,14 +136,16 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 					.getDao(resource.getClass());
 
 			if (resource instanceof StructureDefinition)
-				return new UpdateStructureDefinitionCommand(index, bundle, entry, serverBase,
+				return new UpdateStructureDefinitionCommand(index, user, bundle, entry, serverBase, authorizationHelper,
 						(StructureDefinition) resource, (StructureDefinitionDao) dao.get(), exceptionHandler,
-						parameterConverter, responseGenerator, eventManager, eventGenerator,
-						daoProvider.getStructureDefinitionSnapshotDao(), snapshotGenerator, snapshotDependencyAnalyzer);
+						parameterConverter, responseGenerator, referenceExtractor, referenceResolver, eventManager,
+						eventGenerator, daoProvider.getStructureDefinitionSnapshotDao(), snapshotGenerator,
+						snapshotDependencyAnalyzer);
 			else
 				return dao
-						.map(d -> new UpdateCommand<R, ResourceDao<R>>(index, bundle, entry, serverBase, resource, d,
-								exceptionHandler, parameterConverter, responseGenerator, eventManager, eventGenerator))
+						.map(d -> new UpdateCommand<R, ResourceDao<R>>(index, user, bundle, entry, serverBase,
+								authorizationHelper, resource, d, exceptionHandler, parameterConverter,
+								responseGenerator, referenceExtractor, referenceResolver, eventManager, eventGenerator))
 						.orElseThrow(() -> new IllegalStateException(
 								"Resource of type " + resource.getClass().getName() + " not supported"));
 		}
@@ -147,12 +155,12 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 	}
 
 	// delete, conditional delete
-	private Command delete(Bundle bundle, int index, BundleEntryComponent entry, EventManager eventManager)
+	private Command delete(int index, User user, Bundle bundle, BundleEntryComponent entry, EventManager eventManager)
 	{
 		if (entry.getRequest().getUrl() != null && !entry.getRequest().getUrl().isBlank())
 		{
-			return new DeleteCommand(index, bundle, entry, serverBase, responseGenerator, daoProvider, exceptionHandler,
-					parameterConverter, eventManager, eventGenerator);
+			return new DeleteCommand(index, user, bundle, entry, serverBase, authorizationHelper, responseGenerator,
+					daoProvider, exceptionHandler, parameterConverter, eventManager, eventGenerator);
 		}
 		else
 			throw new BadBundleException(
@@ -160,9 +168,10 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 	}
 
 	@Override
-	public CommandList createCommands(Bundle bundle) throws BadBundleException
+	public CommandList createCommands(Bundle bundle, User user) throws BadBundleException
 	{
 		Objects.requireNonNull(bundle, "bundle");
+		Objects.requireNonNull(user, "user");
 
 		if (bundle.getType() != null)
 		{
@@ -173,7 +182,7 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 				eventManager = this.eventManager;
 
 			List<Command> commands = IntStream.range(0, bundle.getEntry().size())
-					.mapToObj(index -> createCommand(bundle, index, bundle.getEntry().get(index), eventManager))
+					.mapToObj(index -> createCommand(index, bundle, user, bundle.getEntry().get(index), eventManager))
 					.flatMap(Function.identity()).collect(Collectors.toList());
 
 			switch (bundle.getType())
@@ -191,7 +200,7 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 			throw new BadBundleException("Missing bundle type");
 	}
 
-	protected Stream<Command> createCommand(Bundle bundle, int index, BundleEntryComponent entry,
+	protected Stream<Command> createCommand(int index, Bundle bundle, User user, BundleEntryComponent entry,
 			EventManager eventManager)
 	{
 		if (entry.hasRequest() && entry.getRequest().hasMethod())
@@ -200,39 +209,36 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 			{
 				switch (entry.getRequest().getMethod())
 				{
-					case GET:
-						return Stream.of(get(bundle, index, entry));
-					case DELETE:
-						return Stream.of(delete(bundle, index, entry, eventManager));
+					case GET: // read
+						return Stream.of(get(index, user, bundle, entry));
+					case DELETE: // delete
+						return Stream.of(delete(index, user, bundle, entry, eventManager));
 					default:
 						throw new BadBundleException("Request method " + entry.getRequest().getMethod() + " at index "
-								+ index + " not supported without resource of type " + DomainResource.class.getName());
+								+ index + " not supported without resource");
 				}
 			}
-			else if (entry.getResource() instanceof DomainResource)
+			else
 			{
 				switch (entry.getRequest().getMethod())
 				{
 					case POST: // create
-						Command post = post(bundle, index, entry, eventManager, (DomainResource) entry.getResource());
-						return resolveReferences(post, bundle, index, entry, (DomainResource) entry.getResource());
+						Command post = post(index, user, bundle, entry, eventManager, (Resource) entry.getResource());
+						return resolveReferences(post, index, user, bundle, entry, (Resource) entry.getResource());
 					case PUT: // update
-						Command put = put(bundle, index, entry, eventManager, (DomainResource) entry.getResource());
-						return resolveReferences(put, bundle, index, entry, (DomainResource) entry.getResource());
+						Command put = put(index, user, bundle, entry, eventManager, (Resource) entry.getResource());
+						return resolveReferences(put, index, user, bundle, entry, (Resource) entry.getResource());
 					default:
 						throw new BadBundleException("Request method " + entry.getRequest().getMethod() + " at index "
 								+ index + " not supported with resource");
 				}
 			}
-			else
-				throw new BadBundleException("BundleEntry  at index " + index + " has no resource of type "
-						+ DomainResource.class.getName());
 		}
 		else
 			throw new BadBundleException("BundleEntry at index " + index + " has no request or request has no method");
 	}
 
-	private <R extends DomainResource> Stream<Command> resolveReferences(Command cmd, Bundle bundle, int index,
+	private <R extends Resource> Stream<Command> resolveReferences(Command cmd, int index, User user, Bundle bundle,
 			BundleEntryComponent entry, R resource)
 	{
 		@SuppressWarnings("unchecked")
@@ -243,9 +249,9 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 		{
 			return dao
 					.map(d -> Stream.of(cmd,
-							new ResolveReferencesCommand<R, ResourceDao<R>>(index, bundle, entry, serverBase, resource,
-									d, exceptionHandler, parameterConverter, referenceExtractor, responseGenerator,
-									referenceResolver)))
+							new ResolveReferencesCommand<R, ResourceDao<R>>(index, user, bundle, entry, serverBase,
+									authorizationHelper, resource, d, exceptionHandler, parameterConverter,
+									responseGenerator, referenceExtractor, referenceResolver)))
 					.orElseThrow(() -> new IllegalStateException(
 							"Resource of type " + resource.getClass().getName() + " not supported"));
 		}

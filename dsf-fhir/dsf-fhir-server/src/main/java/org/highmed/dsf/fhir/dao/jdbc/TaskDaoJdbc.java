@@ -5,6 +5,7 @@ import org.highmed.dsf.fhir.dao.TaskDao;
 import org.highmed.dsf.fhir.search.parameters.TaskIdentifier;
 import org.highmed.dsf.fhir.search.parameters.TaskRequester;
 import org.highmed.dsf.fhir.search.parameters.TaskStatus;
+import org.highmed.dsf.fhir.search.parameters.user.TaskUserFilter;
 import org.hl7.fhir.r4.model.Task;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -13,7 +14,7 @@ public class TaskDaoJdbc extends AbstractResourceDaoJdbc<Task> implements TaskDa
 {
 	public TaskDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
 	{
-		super(dataSource, fhirContext, Task.class, "tasks", "task", "task_id",
+		super(dataSource, fhirContext, Task.class, "tasks", "task", "task_id", TaskUserFilter::new,
 				with(TaskIdentifier::new, TaskRequester::new, TaskStatus::new), with());
 	}
 

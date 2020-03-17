@@ -11,6 +11,7 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.dsf.fhir.dao.StructureDefinitionSnapshotDao;
 import org.highmed.dsf.fhir.dao.converter.SnapshotInfoConverter;
 import org.highmed.dsf.fhir.dao.exception.ResourceNotFoundException;
+import org.highmed.dsf.fhir.search.parameters.user.StructureDefinitionSnapshotUserFilter;
 import org.highmed.dsf.fhir.service.SnapshotInfo;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.StructureDefinition;
@@ -30,7 +31,7 @@ public class StructureDefinitionSnapshotDaoJdbc extends AbstractStructureDefinit
 			SnapshotInfoConverter converter)
 	{
 		super(dataSource, fhirContext, "structure_definition_snapshots", "structure_definition_snapshot",
-				"structure_definition_snapshot_id");
+				"structure_definition_snapshot_id", StructureDefinitionSnapshotUserFilter::new);
 
 		this.converter = converter;
 	}
@@ -86,8 +87,8 @@ public class StructureDefinitionSnapshotDaoJdbc extends AbstractStructureDefinit
 				.prepareStatement("INSERT INTO " + getResourceTable() + " (" + getResourceIdColumn() + ", "
 						+ getResourceColumn() + ", structure_definition_snapshot_info) VALUES (?, ?, ?)"))
 		{
-			statement.setObject(1, uuidToPgObject(uuid));
-			statement.setObject(2, resourceToPgObject(resource));
+			statement.setObject(1, getPreparedStatementFactory().uuidToPgObject(uuid));
+			statement.setObject(2, getPreparedStatementFactory().resourceToPgObject(resource));
 			statement.setObject(3, converter.toDb(info));
 
 			logger.trace("Executing query '{}'", statement);
@@ -165,9 +166,9 @@ public class StructureDefinitionSnapshotDaoJdbc extends AbstractStructureDefinit
 				.prepareStatement("INSERT INTO " + getResourceTable() + " (" + getResourceIdColumn() + ", version, "
 						+ getResourceColumn() + ", structure_definition_snapshot_info) VALUES (?, ?, ?, ?)"))
 		{
-			statement.setObject(1, uuidToPgObject(uuid));
+			statement.setObject(1, getPreparedStatementFactory().uuidToPgObject(uuid));
 			statement.setLong(2, newVersion);
-			statement.setObject(3, resourceToPgObject(resource));
+			statement.setObject(3, getPreparedStatementFactory().resourceToPgObject(resource));
 			statement.setObject(4, converter.toDb(info));
 
 			logger.trace("Executing query '{}'", statement);

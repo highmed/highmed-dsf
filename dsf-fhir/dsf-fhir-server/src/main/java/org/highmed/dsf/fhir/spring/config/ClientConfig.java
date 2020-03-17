@@ -26,7 +26,7 @@ public class ClientConfig
 	private String webserviceKeyStoreFile;
 
 	@Value("${org.highmed.dsf.fhir.webservice.keystore.password}")
-	private String webserviceKeyStorePassword;
+	private char[] webserviceKeyStorePassword;
 
 	@Value("${org.highmed.dsf.fhir.remote.webservice.readTimeout}")
 	private int remoteReadTimeout;
@@ -35,7 +35,7 @@ public class ClientConfig
 	private int remoteConnectTimeout;
 
 	@Value("${org.highmed.dsf.fhir.remote.webservice.proxy.password:#{null}}")
-	private String remoteProxyPassword;
+	private char[] remoteProxyPassword;
 
 	@Value("${org.highmed.dsf.fhir.remote.webservice.proxy.username:#{null}}")
 	private String remoteProxyUsername;
@@ -52,6 +52,9 @@ public class ClientConfig
 	@Autowired
 	private HelperConfig helperConfig;
 
+	@Autowired
+	private ReferenceConfig referenceConfig;
+
 	@Bean
 	public ClientProvider clientProvider()
 	{
@@ -67,8 +70,8 @@ public class ClientConfig
 
 			return new ClientProviderImpl(webserviceTrustStore, webserviceKeyStore, webserviceKeyStorePassword,
 					remoteReadTimeout, remoteConnectTimeout, remoteProxyPassword, remoteProxyUsername,
-					remoteProxySchemeHostPort, fhirConfig.fhirContext(), daoConfig.endpointDao(),
-					helperConfig.exceptionHandler());
+					remoteProxySchemeHostPort, fhirConfig.fhirContext(), referenceConfig.referenceExtractor(),
+					daoConfig.endpointDao(), helperConfig.exceptionHandler());
 		}
 		catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e)
 		{

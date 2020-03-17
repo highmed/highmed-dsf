@@ -21,14 +21,14 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 
-@SearchParameterDefinition(name = EndpointOrganization.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Endpoint.managingOrganization", type = SearchParamType.REFERENCE, documentation = "The organization that is managing the endpoint, search by identifier is supported")
+@SearchParameterDefinition(name = EndpointOrganization.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Endpoint-organization", type = SearchParamType.REFERENCE, documentation = "The organization that is managing the endpoint")
 public class EndpointOrganization extends AbstractReferenceParameter<Endpoint>
 {
 	private static final String RESOURCE_TYPE_NAME = "Endpoint";
 	public static final String PARAMETER_NAME = "organization";
 	private static final String TARGET_RESOURCE_TYPE_NAME = "Organization";
 
-	private static final String ORGANIZATION_IDENTIFIERS_SUBQUERY = "(SELECT organization->'identifier' FROM current_organizations"
+	private static final String IDENTIFIERS_SUBQUERY = "(SELECT organization->'identifier' FROM current_organizations"
 			+ " WHERE concat('Organization/', organization->>'id') = endpoint->'managingOrganization'->>'reference')";
 
 	public EndpointOrganization()
@@ -52,9 +52,9 @@ public class EndpointOrganization extends AbstractReferenceParameter<Endpoint>
 					case CODE:
 					case CODE_AND_SYSTEM:
 					case SYSTEM:
-						return ORGANIZATION_IDENTIFIERS_SUBQUERY + " @> ?::jsonb";
+						return IDENTIFIERS_SUBQUERY + " @> ?::jsonb";
 					case CODE_AND_NO_SYSTEM_PROPERTY:
-						return "(SELECT count(*) FROM jsonb_array_elements(" + ORGANIZATION_IDENTIFIERS_SUBQUERY
+						return "(SELECT count(*) FROM jsonb_array_elements(" + IDENTIFIERS_SUBQUERY
 								+ ") identifier WHERE identifier->>'value' = ? AND NOT (identifier ?? 'system')) > 0";
 				}
 			}

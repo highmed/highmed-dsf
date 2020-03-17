@@ -2,7 +2,9 @@ package org.highmed.dsf.fhir.dao.command;
 
 import java.sql.Connection;
 import java.util.Map;
+import java.util.Optional;
 
+import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
 import org.highmed.dsf.fhir.dao.StructureDefinitionSnapshotDao;
 import org.highmed.dsf.fhir.event.EventGenerator;
@@ -11,6 +13,8 @@ import org.highmed.dsf.fhir.function.ConsumerWithSqlAndResourceNotFoundException
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
+import org.highmed.dsf.fhir.service.ReferenceExtractor;
+import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.highmed.dsf.fhir.service.SnapshotDependencies;
 import org.highmed.dsf.fhir.service.SnapshotDependencyAnalyzer;
 import org.highmed.dsf.fhir.service.SnapshotGenerator;
@@ -34,14 +38,17 @@ public class UpdateStructureDefinitionCommand extends UpdateCommand<StructureDef
 
 	private StructureDefinition resourceWithSnapshot;
 
-	public UpdateStructureDefinitionCommand(int index, Bundle bundle, BundleEntryComponent entry, String serverBase,
-			StructureDefinition resource, StructureDefinitionDao dao, ExceptionHandler exceptionHandler,
-			ParameterConverter parameterConverter, ResponseGenerator responseGenerator, EventManager eventManager,
-			EventGenerator eventGenerator, StructureDefinitionSnapshotDao snapshotDao,
-			SnapshotGenerator snapshotGenerator, SnapshotDependencyAnalyzer snapshotDependencyAnalyzer)
+	public UpdateStructureDefinitionCommand(int index, User user, Bundle bundle, BundleEntryComponent entry,
+			String serverBase, AuthorizationHelper authorizationHelper, StructureDefinition resource,
+			StructureDefinitionDao dao, ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
+			ResponseGenerator responseGenerator, ReferenceExtractor referenceExtractor,
+			ReferenceResolver referenceResolver, EventManager eventManager, EventGenerator eventGenerator,
+			StructureDefinitionSnapshotDao snapshotDao, SnapshotGenerator snapshotGenerator,
+			SnapshotDependencyAnalyzer snapshotDependencyAnalyzer)
 	{
-		super(index, bundle, entry, serverBase, resource, dao, exceptionHandler, parameterConverter, responseGenerator,
-				eventManager, eventGenerator);
+		super(index, user, bundle, entry, serverBase, authorizationHelper, resource, dao, exceptionHandler,
+				parameterConverter, responseGenerator, referenceExtractor, referenceResolver, eventManager,
+				eventGenerator);
 
 		this.snapshotDao = snapshotDao;
 		this.snapshotGenerator = snapshotGenerator;
@@ -58,7 +65,7 @@ public class UpdateStructureDefinitionCommand extends UpdateCommand<StructureDef
 	}
 
 	@Override
-	public BundleEntryComponent postExecute(Connection connection)
+	public Optional<BundleEntryComponent> postExecute(Connection connection)
 	{
 		if (resourceWithSnapshot != null)
 		{
