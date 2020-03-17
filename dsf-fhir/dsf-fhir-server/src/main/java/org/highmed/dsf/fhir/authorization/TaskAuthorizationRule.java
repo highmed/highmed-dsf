@@ -111,7 +111,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 
 		if (newResource.hasRestriction())
 		{
-			if (newResource.getRestriction().hasRecipient() && newResource.getRestriction().getRecipient().size() == 1)
+			if (newResource.getRestriction().getRecipient().size() == 1)
 			{
 				ResourceReference reference = new ResourceReference("task.restriction.recipient",
 						newResource.getRestriction().getRecipientFirstRep(), Organization.class);
@@ -160,7 +160,8 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 			if (getBpmnMessageName(newResource).count() != 1)
 			{
 				errors.add("task.input with system " + CODE_SYSTEM_BPMN_MESSAGE + " and code "
-						+ CODE_SYSTEM_BPMN_MESSAGE_MESSAGE_NAME + " with string value not empty missing");
+						+ CODE_SYSTEM_BPMN_MESSAGE_MESSAGE_NAME
+						+ " with string value not empty missing or more than one");
 			}
 		}
 		else
