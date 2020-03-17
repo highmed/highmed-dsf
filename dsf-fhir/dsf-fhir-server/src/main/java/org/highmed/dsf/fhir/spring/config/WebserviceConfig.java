@@ -1,6 +1,7 @@
 package org.highmed.dsf.fhir.spring.config;
 
 import org.highmed.dsf.fhir.adapter.HtmlFhirAdapter.ServerBaseProvider;
+import org.highmed.dsf.fhir.exception.DataFormatExceptionHandler;
 import org.highmed.dsf.fhir.webservice.impl.ActivityDefinitionServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.BinaryServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.BundleServiceImpl;
@@ -134,6 +135,12 @@ public class WebserviceConfig
 	public ServerBaseProvider serverBaseProvider()
 	{
 		return () -> serverBase;
+	}
+
+	@Bean
+	public DataFormatExceptionHandler dataFormatExceptionHandler()
+	{
+		return new DataFormatExceptionHandler(helperConfig.responseGenerator());
 	}
 
 	@Bean
