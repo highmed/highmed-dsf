@@ -11,6 +11,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
 import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.Endpoint.EndpointStatus;
 import org.hl7.fhir.r4.model.Organization;
 import org.junit.Test;
 
@@ -67,5 +68,29 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 		assertEquals(SearchEntryMode.INCLUDE, eptEntry.getSearch().getMode());
 		assertNotNull(eptEntry.getResource());
 		assertTrue(eptEntry.getResource() instanceof Organization);
+	}
+
+	@Test
+	public void testCreateValidByLocalUser() throws Exception
+	{
+		Endpoint endpoint = new Endpoint();
+		endpoint.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/authorization-role")
+				.setCode("REMOTE");
+		endpoint.addIdentifier().setSystem("http://highmed.org/fhir/NamingSystem/endpoint-identifier")
+				.setValue("foo-bar-baz.test.bla-bla.de");
+		endpoint.setStatus(EndpointStatus.ACTIVE);
+		endpoint.getConnectionType().setSystem("http://terminology.hl7.org/CodeSystem/endpoint-connection-type")
+				.setCode("hl7-fhir-rest");
+		endpoint.setName("Test TTP");
+		endpoint.getPayloadTypeFirstRep().getCodingFirstRep().setSystem("http://hl7.org/fhir/resource-types")
+				.setCode("Task");
+		endpoint.addPayloadMimeType("application/fhir+json");
+		endpoint.addPayloadMimeType("application/fhir+xml");
+		endpoint.setAddress("https://foo-bar-baz.test.bla-bla.de/fhir");
+
+		Endpoint created = getWebserviceClient().create(endpoint);
+		assertNotNull(created);
+		assertNotNull(created.getIdElement().getIdPart());
+		assertNotNull(created.getIdElement().getVersionIdPart());
 	}
 }
