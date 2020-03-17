@@ -556,7 +556,8 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 
 	private String toString(OperationOutcome outcome)
 	{
-		return outcome.getIssue().stream().map(i -> toString(i)).collect(Collectors.joining("\n"));
+		return outcome == null ? ""
+				: outcome.getIssue().stream().map(i -> toString(i)).collect(Collectors.joining("\n"));
 	}
 
 	private String toString(OperationOutcomeIssueComponent issue)
