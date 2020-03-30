@@ -17,8 +17,6 @@ public class RBFGenerator
 
 	public RecordBloomFilter generateRbfFromIdat(Idat idat, byte[] seed)
 	{
-		double weight = 0.111; // 1/9 for each of the 9 fields, experimental/testing
-
 		BitSet firstName = bfg.generateBitSet(idat.getFirstName());
 		BitSet lastName = bfg.generateBitSet(idat.getLastName());
 		BitSet sex = bfg.generateBitSet(idat.getSex());
@@ -30,15 +28,15 @@ public class RBFGenerator
 		BitSet street = bfg.generateBitSet(idat.getStreet());
 
 		ArrayList<FieldBloomFilter> fbfList = new ArrayList<>();
-		fbfList.add(new FieldBloomFilter(firstName, weight));
-		fbfList.add(new FieldBloomFilter(lastName, weight));
-		fbfList.add(new FieldBloomFilter(sex, weight));
-		fbfList.add(new FieldBloomFilter(birthday, weight));
-		fbfList.add(new FieldBloomFilter(zipCode, weight));
-		fbfList.add(new FieldBloomFilter(city, weight));
-		fbfList.add(new FieldBloomFilter(country, weight));
-		fbfList.add(new FieldBloomFilter(insuranceNr, weight));
-		fbfList.add(new FieldBloomFilter(street, weight));
+		fbfList.add(new FieldBloomFilter(firstName, 0.1));
+		fbfList.add(new FieldBloomFilter(lastName, 0.1));
+		fbfList.add(new FieldBloomFilter(sex, 0.2));
+		fbfList.add(new FieldBloomFilter(birthday, 0.1));
+		fbfList.add(new FieldBloomFilter(zipCode, 0.1));
+		fbfList.add(new FieldBloomFilter(city, 0.05));
+		fbfList.add(new FieldBloomFilter(country, 0.2));
+		fbfList.add(new FieldBloomFilter(insuranceNr, 0.1));
+		fbfList.add(new FieldBloomFilter(street, 0.05));
 
 		RecordBloomFilter rbf = new RecordBloomFilter(seed, fbfList);
 
