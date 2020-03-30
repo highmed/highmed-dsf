@@ -36,7 +36,7 @@ public abstract class AbstractMatcher
 		}
 	}
 
-	public static final double DEFAULT_POSITIVE_MATCH_THRESHOLD = 0.95;
+	public static final double DEFAULT_POSITIVE_MATCH_THRESHOLD = 0.8;
 
 	private final MatchCalculator matchCalculator;
 	private final double positiveMatchThreshold;
@@ -44,7 +44,7 @@ public abstract class AbstractMatcher
 	/**
 	 * Uses {@value #DEFAULT_POSITIVE_MATCH_THRESHOLD} as the {@link #positiveMatchThreshold}.<br>
 	 * Uses {@link MatchCalculatorStrategy#MIN} as the {@link #matchCalculator}
-	 * 
+	 *
 	 */
 	protected AbstractMatcher()
 	{
@@ -53,7 +53,7 @@ public abstract class AbstractMatcher
 
 	/**
 	 * Uses {@value #DEFAULT_POSITIVE_MATCH_THRESHOLD} as the {@link #positiveMatchThreshold}
-	 * 
+	 *
 	 * @param matchCalculator
 	 *            not <code>null</code>
 	 */
@@ -79,6 +79,7 @@ public abstract class AbstractMatcher
 		return person -> matchPerson(person, matchedPersons);
 	}
 
+
 	protected final MatchedPerson matchPerson(Person person, Collection<? extends MatchedPerson> matchedPersons)
 	{
 		Optional<MatchResult> bestMatch = matchedPersons.parallelStream().map(matchCalculator.calculateMatch(person))
@@ -86,7 +87,19 @@ public abstract class AbstractMatcher
 
 		Optional<MatchedPerson> matchedPerson = bestMatch.map(MatchResult::getMatchedPerson);
 
-		return matchedPerson.map(MatchedPerson.add(person)).orElseGet(MatchedPerson.from(person));
+		return matchedPerson.map(add(person)).orElseGet(MatchedPerson.from(person));
+	}
+
+	private Function<MatchedPerson, MatchedPerson> add(Person person)
+	{
+		return matchedPerson ->
+		{
+			synchronized (matchedPerson)
+			{
+				matchedPerson.addMatch(person);
+			}
+			return matchedPerson;
+		};
 	}
 
 	public static interface MatchCalculator
@@ -117,99 +130,101 @@ public abstract class AbstractMatcher
 	{
 		/**
 		 * Matches against the first person already matched
-		 * 
+		 *
 		 * @see MatchedPerson#getMatches()
 		 */
 		FIRST
-		{
-			@Override
-			public MatchResult calculateMatch(MatchedPerson matchedPerson, Person personToMatch)
-			{
-				double firstMatch = matchedPerson.getFirstMatch().compareTo(personToMatch);
-				return new MatchResult(firstMatch, matchedPerson);
-			}
-		},
+				{
+					@Override
+					public MatchResult calculateMatch(MatchedPerson matchedPerson, Person personToMatch)
+					{
+						double firstMatch = matchedPerson.getFirstMatch().compareTo(personToMatch);
+						return new MatchResult(firstMatch, matchedPerson);
+					}
+				},
 		/**
 		 * Matches against the last person already matched
-		 * 
+		 *
 		 * @see MatchedPerson#getMatches()
 		 */
 		LAST
-		{
-			@Override
-			public MatchResult calculateMatch(MatchedPerson matchedPerson, Person personToMatch)
-			{
-				double lastMatch = matchedPerson.getLastMatch().compareTo(personToMatch);
-				return new MatchResult(lastMatch, matchedPerson);
-			}
-		},
+				{
+					@Override
+					public MatchResult calculateMatch(MatchedPerson matchedPerson, Person personToMatch)
+					{
+						double lastMatch = matchedPerson.getLastMatch().compareTo(personToMatch);
+						return new MatchResult(lastMatch, matchedPerson);
+					}
+				},
 		/**
 		 * Matches against all persons already matched and selects the maximum (best) match
-		 * 
+		 *
 		 * @see MatchedPerson#getMatches()
 		 */
 		MAX
-		{
-			@Override
-			public MatchResult calculateMatch(MatchedPerson matchedPerson, Person personToMatch)
-			{
-				double maxMatch = matchedPerson.getMatches().stream().mapToDouble(p -> p.compareTo(personToMatch)).max()
-						.orElseThrow();
-				return new MatchResult(maxMatch, matchedPerson);
-			}
-		},
+				{
+					@Override
+					public MatchResult calculateMatch(MatchedPerson matchedPerson, Person personToMatch)
+					{
+
+						double maxMatch = matchedPerson.getMatches().stream().mapToDouble(p -> p.compareTo(personToMatch)).max()
+								.orElseThrow();
+						System.out.println("With match confidence: " + maxMatch);
+						return new MatchResult(maxMatch, matchedPerson);
+					}
+				},
 		/**
 		 * Matches against all persons already matched and selects the minimum (worst) match
-		 * 
+		 *
 		 * @see MatchedPerson#getMatches()
 		 */
 		MIN
-		{
-			@Override
-			public MatchResult calculateMatch(MatchedPerson matchedPerson, Person personToMatch)
-			{
-				double minMatch = matchedPerson.getMatches().stream().mapToDouble(p -> p.compareTo(personToMatch)).min()
-						.orElseThrow();
-				return new MatchResult(minMatch, matchedPerson);
-			}
-		},
+				{
+					@Override
+					public MatchResult calculateMatch(MatchedPerson matchedPerson, Person personToMatch)
+					{
+						double minMatch = matchedPerson.getMatches().stream().mapToDouble(p -> p.compareTo(personToMatch)).min()
+								.orElseThrow();
+						return new MatchResult(minMatch, matchedPerson);
+					}
+				},
 		/**
 		 * Matches against all personss already matched and calculates the average match
-		 * 
+		 *
 		 * @see MatchedPerson#getMatches()
 		 */
 		AVG
-		{
-			@Override
-			public MatchResult calculateMatch(MatchedPerson matchedPerson, Person personToMatch)
-			{
-				double avgMatch = matchedPerson.getMatches().stream().mapToDouble(p -> p.compareTo(personToMatch))
-						.average().orElseThrow();
-				return new MatchResult(avgMatch, matchedPerson);
-			}
-		},
+				{
+					@Override
+					public MatchResult calculateMatch(MatchedPerson matchedPerson, Person personToMatch)
+					{
+						double avgMatch = matchedPerson.getMatches().stream().mapToDouble(p -> p.compareTo(personToMatch))
+								.average().orElseThrow();
+						return new MatchResult(avgMatch, matchedPerson);
+					}
+				},
 		/**
 		 * Matches against all persons already matched and calculates the median match
-		 * 
+		 *
 		 * @see MatchedPerson#getMatches()
 		 */
 		MEDIAN
-		{
-			@Override
-			public MatchResult calculateMatch(MatchedPerson matchedPerson, Person personToMatch)
-			{
-				if (matchedPerson.getMatches().isEmpty())
-					throw new NoSuchElementException();
+				{
+					@Override
+					public MatchResult calculateMatch(MatchedPerson matchedPerson, Person personToMatch)
+					{
+						if (matchedPerson.getMatches().isEmpty())
+							throw new NoSuchElementException();
 
-				DoubleStream sorted = matchedPerson.getMatches().stream().mapToDouble(p -> p.compareTo(personToMatch))
-						.sorted();
+						DoubleStream sorted = matchedPerson.getMatches().stream().mapToDouble(p -> p.compareTo(personToMatch))
+								.sorted();
 
-				double median = matchedPerson.getMatches().size() % 2 == 0
-						? sorted.skip(matchedPerson.getMatches().size() / 2 - 1).limit(2).average().getAsDouble()
-						: sorted.skip(matchedPerson.getMatches().size() / 2).findFirst().getAsDouble();
+						double median = matchedPerson.getMatches().size() % 2 == 0
+								? sorted.skip(matchedPerson.getMatches().size() / 2 - 1).limit(2).average().getAsDouble()
+								: sorted.skip(matchedPerson.getMatches().size() / 2).findFirst().getAsDouble();
 
-				return new MatchResult(median, matchedPerson);
-			}
-		}
+						return new MatchResult(median, matchedPerson);
+					}
+				}
 	}
 }
