@@ -38,6 +38,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-fhir-rest-adapter</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
 				<artifactId>dsf-fhir-server</artifactId>
 				<version>${project.version}</version>
 			</dependency>

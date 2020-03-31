@@ -12,6 +12,8 @@ import java.util.UUID;
 import javax.ws.rs.WebApplicationException;
 
 import org.highmed.dsf.bpe.Constants;
+import org.highmed.dsf.fhir.service.ReferenceExtractor;
+import org.highmed.dsf.fhir.service.ReferenceExtractorImpl;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.highmed.fhir.client.FhirWebserviceClientJersey;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -44,15 +46,16 @@ public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter
 	public static void main(String[] args)
 			throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException
 	{
-		String keyStorePassword = "password";
+		char[] keyStorePassword = "password".toCharArray();
 		KeyStore keyStore = CertificateReader.fromPkcs12(Paths.get(
 				"../../dsf-tools/dsf-tools-test-data-generator/cert/Webbrowser_Test_User/Webbrowser_Test_User_certificate.p12"),
 				keyStorePassword);
 		KeyStore trustStore = CertificateHelper.extractTrust(keyStore);
 
 		FhirContext context = FhirContext.forR4();
+		ReferenceExtractor referenceExtractor = new ReferenceExtractorImpl();
 		FhirWebserviceClient client = new FhirWebserviceClientJersey("https://medic1/fhir/", trustStore, keyStore,
-				keyStorePassword, null, null, null, 0, 0, null, context);
+				keyStorePassword, null, null, null, 0, 0, null, context, referenceExtractor);
 
 		try
 		{
@@ -115,6 +118,7 @@ public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter
 	{
 		Practitioner practitioner = new Practitioner();
 		practitioner.setIdElement(new IdType("urn:uuid:" + UUID.randomUUID().toString()));
+		practitioner.setActive(true);
 
 		practitioner.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-practitioner");
 		practitioner.getNameFirstRep().setFamily("HiGHmed").addGiven("Test");
@@ -126,13 +130,13 @@ public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter
 	{
 		PractitionerRole practitionerRole = new PractitionerRole();
 		practitionerRole.setIdElement(new IdType("urn:uuid:" + UUID.randomUUID().toString()));
+		practitionerRole.setActive(true);
 
 		practitioner.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-practitioner-role");
-		practitionerRole.getPractitioner().setReference(practitioner.getIdElement().getIdPart())
-				.setType("Practitioner");
+		practitionerRole.getPractitioner().setReference(practitioner.getIdElement().getIdPart());
 		practitionerRole.getOrganization().setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/CodeSystem/organization").setValue("Test_MeDIC_1");
-
+				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_MeDIC_1");
+		
 		return practitionerRole;
 	}
 
@@ -142,24 +146,28 @@ public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter
 		researchStudy.setIdElement(new IdType("urn:uuid:" + UUID.randomUUID().toString()));
 
 		researchStudy.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-research-study");
+		researchStudy.addIdentifier().setSystem("http://highmed.org/fhir/NamingSystem/research-study-identifier")
+				.setValue(UUID.randomUUID().toString());
 		researchStudy.setTitle("Research Study Test");
 		researchStudy.setStatus(ResearchStudyStatus.ACTIVE);
 		researchStudy.setDescription(
 				"This is a test research study based on the highmed profile. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.");
-		researchStudy.addEnrollment().setReference(group1.getIdElement().getIdPart()).setType("Group");
-		researchStudy.addEnrollment().setReference(group2.getIdElement().getIdPart()).setType("Group");
-		researchStudy.getPrincipalInvestigator().setReference(practitioner.getIdElement().getIdPart())
-				.setType("Practitioner");
+		researchStudy.addEnrollment().setReference(group1.getIdElement().getIdPart());
+		researchStudy.addEnrollment().setReference(group2.getIdElement().getIdPart());
+		researchStudy.getPrincipalInvestigator().setReference(practitioner.getIdElement().getIdPart());
 
 		researchStudy.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/participating-medic")
 				.setValue(new Reference().setType("Organization").setIdentifier(new Identifier()
-						.setSystem("http://highmed.org/fhir/CodeSystem/organization").setValue("Test_MeDIC_1")));
+						.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_MeDIC_1")));
 		researchStudy.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/participating-medic")
 				.setValue(new Reference().setType("Organization").setIdentifier(new Identifier()
-						.setSystem("http://highmed.org/fhir/CodeSystem/organization").setValue("Test_MeDIC_2")));
+						.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_MeDIC_2")));
 		researchStudy.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/participating-medic")
 				.setValue(new Reference().setType("Organization").setIdentifier(new Identifier()
-						.setSystem("http://highmed.org/fhir/CodeSystem/organization").setValue("Test_MeDIC_3")));
+						.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_MeDIC_3")));
+		researchStudy.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/participating-ttp")
+				.setValue(new Reference().setType("Organization").setIdentifier(new Identifier()
+						.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_TTP")));
 
 		return researchStudy;
 	}
@@ -171,13 +179,14 @@ public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter
 
 		task.getMeta()
 				.addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-request-simple-feasibility");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/requestSimpleFeasibility/1.0.0");
+		task.setInstantiatesUri("http://highmed.org/bpe/Process/requestSimpleFeasibility/0.1.0");
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
-		task.getRequester().setType("Practitioner").setReference(practitioner.getIdElement().getIdPart());
+		task.getRequester().setType("Organization").getIdentifier()
+				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_MeDIC_1");
 		task.getRestriction().addRecipient().setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/CodeSystem/organization").setValue("Test_MeDIC_1");
+				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_MeDIC_1");
 
 		task.addInput().setValue(new StringType("requestSimpleFeasibilityMessage")).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("message-name");

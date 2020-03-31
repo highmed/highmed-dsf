@@ -21,7 +21,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.Resource;
 
-@SearchQueryParameter.SearchParameterDefinition(name = ResearchStudyEnrollment.PARAMETER_NAME, definition = "http://highmed.org/fhir/SearchParameter/research-study-enrollment", type = Enumerations.SearchParamType.REFERENCE, documentation = "Search by research study enrollment")
+@SearchQueryParameter.SearchParameterDefinition(name = ResearchStudyEnrollment.PARAMETER_NAME, definition = "http://highmed.org/fhir/SearchParameter/ResearchStudy-enrollment", type = Enumerations.SearchParamType.REFERENCE, documentation = "Search by research study enrollment")
 public class ResearchStudyEnrollment extends AbstractReferenceParameter<ResearchStudy>
 {
 	private static final String RESOURCE_TYPE_NAME = "ResearchStudy";

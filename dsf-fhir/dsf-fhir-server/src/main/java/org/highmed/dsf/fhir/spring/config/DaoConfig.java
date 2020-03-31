@@ -1,6 +1,7 @@
 package org.highmed.dsf.fhir.spring.config;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.highmed.dsf.fhir.dao.ActivityDefinitionDao;
 import org.highmed.dsf.fhir.dao.BinaryDao;
 import org.highmed.dsf.fhir.dao.BundleDao;
 import org.highmed.dsf.fhir.dao.CodeSystemDao;
@@ -21,6 +22,7 @@ import org.highmed.dsf.fhir.dao.SubscriptionDao;
 import org.highmed.dsf.fhir.dao.TaskDao;
 import org.highmed.dsf.fhir.dao.ValueSetDao;
 import org.highmed.dsf.fhir.dao.converter.SnapshotInfoConverter;
+import org.highmed.dsf.fhir.dao.jdbc.ActivityDefinitionDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.BinaryDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.BundleDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.CodeSystemDaoJdbc;
@@ -79,6 +81,12 @@ public class DaoConfig
 		dataSource.setTestOnBorrow(true);
 		dataSource.setValidationQuery("SELECT 1");
 		return dataSource;
+	}
+
+	@Bean
+	public ActivityDefinitionDao activityDefinitionDao()
+	{
+		return new ActivityDefinitionDaoJdbc(dataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
@@ -204,9 +212,10 @@ public class DaoConfig
 	@Bean
 	public DaoProvider daoProvider()
 	{
-		return new DaoProviderImpl(binaryDao(), bundleDao(), codeSystemDao(), endpointDao(), groupDao(),
-				healthcareServiceDao(), locationDao(), namingSystemDao(), organizationDao(), patientDao(),
-				practitionerDao(), practitionerRoleDao(), provenanceDao(), researchStudyDao(), structureDefinitionDao(),
-				structureDefinitionSnapshotDao(), subscriptionDao(), taskDao(), valueSetDao());
+		return new DaoProviderImpl(dataSource(), activityDefinitionDao(), binaryDao(), bundleDao(), codeSystemDao(),
+				endpointDao(), groupDao(), healthcareServiceDao(), locationDao(), namingSystemDao(), organizationDao(),
+				patientDao(), practitionerDao(), practitionerRoleDao(), provenanceDao(), researchStudyDao(),
+				structureDefinitionDao(), structureDefinitionSnapshotDao(), subscriptionDao(), taskDao(),
+				valueSetDao());
 	}
 }

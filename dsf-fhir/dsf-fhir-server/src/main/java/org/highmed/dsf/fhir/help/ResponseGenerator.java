@@ -1,6 +1,7 @@
 package org.highmed.dsf.fhir.help;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -14,9 +15,9 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
 import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.dao.command.ResourceReference;
 import org.highmed.dsf.fhir.search.PartialResult;
 import org.highmed.dsf.fhir.search.SearchQueryParameterError;
+import org.highmed.dsf.fhir.service.ResourceReference;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
@@ -66,7 +67,7 @@ public class ResponseGenerator
 		ResponseBuilder b = Response.status(status).entity(resource);
 
 		if (mediaType != null)
-			b = b.type(mediaType);
+			b = b.type(mediaType.withCharset(StandardCharsets.UTF_8.displayName()));
 
 		if (resource.getMeta() != null && resource.getMeta().getLastUpdated() != null
 				&& resource.getMeta().getVersionId() != null)
@@ -392,7 +393,7 @@ public class ResponseGenerator
 		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
-	public Response badReference(boolean logicalNoConditional, Integer bundleIndex, Resource resource,
+	public Response badReference(boolean logicalNotConditional, Integer bundleIndex, Resource resource,
 			ResourceReference resourceReference, String queryParameters,
 			List<SearchQueryParameterError> unsupportedQueryParameters)
 	{
@@ -402,18 +403,18 @@ public class ResponseGenerator
 		if (bundleIndex == null)
 			logger.warn(
 					"{} reference {} at {} in resource of type {} with id {} contains unsupported queryparameter{} {}",
-					logicalNoConditional ? "Logical" : "Conditional", queryParameters,
+					logicalNotConditional ? "Logical" : "Conditional", queryParameters,
 					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId(),
 					unsupportedQueryParameters.size() != 1 ? "s" : "", unsupportedQueryParametersString);
 		else
 			logger.warn(
 					"{} reference {} at {} in resource of type {} with id {} at bundle index {} contains unsupported queryparameter{} {}",
-					logicalNoConditional ? "Logical" : "Conditional", queryParameters,
+					logicalNotConditional ? "Logical" : "Conditional", queryParameters,
 					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId(),
 					bundleIndex, unsupportedQueryParameters.size() != 1 ? "s" : "", unsupportedQueryParametersString);
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
-				(logicalNoConditional ? "Logical" : "Conditional") + " reference " + queryParameters + " at "
+				(logicalNotConditional ? "Logical" : "Conditional") + " reference " + queryParameters + " at "
 						+ resourceReference.getReferenceLocation() + " in resource of type "
 						+ resource.getResourceType().name() + " with id " + resource.getId()
 						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex)
@@ -550,6 +551,15 @@ public class ResponseGenerator
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Bad delete request url " + url + " at bundle index " + bundleIndex);
+		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
+	}
+
+	public Response badCreateRequestUrl(int bundleIndex, String url)
+	{
+		logger.warn("Bad crate request url {} at bundle index {}", url, bundleIndex);
+
+		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+				"Bad crete request url " + url + " at bundle index " + bundleIndex);
 		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
@@ -707,13 +717,21 @@ public class ResponseGenerator
 		return Response.status(Status.BAD_REQUEST).entity(out).build();
 	}
 
-	public Response forbiddenNotAllowed(String operation, User user, String reason)
+	public Response forbiddenNotAllowed(String operation, User user)
 	{
-		logger.warn("Operation {} forbidden for user '{}'{}", operation, user.getName(),
-				reason != null ? " " + reason : "");
+		logger.warn("Operation {} forbidden for user '{}'", operation, user.getName());
 
 		OperationOutcome out = createOutcome(IssueSeverity.ERROR, IssueType.FORBIDDEN,
 				"Operation " + operation + " forbidden");
 		return Response.status(Status.FORBIDDEN).entity(out).build();
+	}
+
+	public Response notFound(String id, String resourceTypeName)
+	{
+		logger.warn("{} with id {} not found", resourceTypeName, id);
+
+		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+				resourceTypeName + " with id " + id + " not found");
+		return Response.status(Status.NOT_FOUND).entity(outcome).build();
 	}
 }

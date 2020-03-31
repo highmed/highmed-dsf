@@ -21,7 +21,7 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 	{
 		Bundle searchBundle = getWebserviceClient().search(Organization.class, Collections.emptyMap());
 		assertNotNull(searchBundle);
-		assertEquals(1, searchBundle.getTotal());
+		assertEquals(2, searchBundle.getTotal());
 		assertTrue(searchBundle.getEntryFirstRep().getResource() instanceof Organization);
 	}
 
@@ -31,16 +31,22 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 		Bundle searchBundle = getWebserviceClient().search(Organization.class,
 				Map.of("_include", Collections.singletonList("Organization:endpoint")));
 		assertNotNull(searchBundle);
-		assertEquals(1, searchBundle.getTotal());
-		assertEquals(2, searchBundle.getEntry().size());
+		assertEquals(2, searchBundle.getTotal());
+		assertEquals(3, searchBundle.getEntry().size());
 
-		BundleEntryComponent orgEntry = searchBundle.getEntry().get(0);
-		assertNotNull(orgEntry);
-		assertEquals(SearchEntryMode.MATCH, orgEntry.getSearch().getMode());
-		assertNotNull(orgEntry.getResource());
-		assertTrue(orgEntry.getResource() instanceof Organization);
+		BundleEntryComponent orgEntry1 = searchBundle.getEntry().get(0);
+		assertNotNull(orgEntry1);
+		assertEquals(SearchEntryMode.MATCH, orgEntry1.getSearch().getMode());
+		assertNotNull(orgEntry1.getResource());
+		assertTrue(orgEntry1.getResource() instanceof Organization);
 
-		BundleEntryComponent eptEntry = searchBundle.getEntry().get(1);
+		BundleEntryComponent orgEntry2 = searchBundle.getEntry().get(1);
+		assertNotNull(orgEntry2);
+		assertEquals(SearchEntryMode.MATCH, orgEntry2.getSearch().getMode());
+		assertNotNull(orgEntry2.getResource());
+		assertTrue(orgEntry2.getResource() instanceof Organization);
+
+		BundleEntryComponent eptEntry = searchBundle.getEntry().get(2);
 		assertNotNull(eptEntry);
 		assertEquals(SearchEntryMode.INCLUDE, eptEntry.getSearch().getMode());
 		assertNotNull(eptEntry.getResource());
@@ -53,16 +59,22 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 		Bundle searchBundle = getWebserviceClient().search(Organization.class,
 				Map.of("_revinclude", Collections.singletonList("Endpoint:organization")));
 		assertNotNull(searchBundle);
-		assertEquals(1, searchBundle.getTotal());
-		assertEquals(2, searchBundle.getEntry().size());
+		assertEquals(2, searchBundle.getTotal());
+		assertEquals(3, searchBundle.getEntry().size());
 
-		BundleEntryComponent orgEntry = searchBundle.getEntry().get(0);
-		assertNotNull(orgEntry);
-		assertEquals(SearchEntryMode.MATCH, orgEntry.getSearch().getMode());
-		assertNotNull(orgEntry.getResource());
-		assertTrue(orgEntry.getResource() instanceof Organization);
+		BundleEntryComponent orgEntry1 = searchBundle.getEntry().get(0);
+		assertNotNull(orgEntry1);
+		assertEquals(SearchEntryMode.MATCH, orgEntry1.getSearch().getMode());
+		assertNotNull(orgEntry1.getResource());
+		assertTrue(orgEntry1.getResource() instanceof Organization);
 
-		BundleEntryComponent eptEntry = searchBundle.getEntry().get(1);
+		BundleEntryComponent orgEntry2 = searchBundle.getEntry().get(1);
+		assertNotNull(orgEntry2);
+		assertEquals(SearchEntryMode.MATCH, orgEntry2.getSearch().getMode());
+		assertNotNull(orgEntry2.getResource());
+		assertTrue(orgEntry2.getResource() instanceof Organization);
+
+		BundleEntryComponent eptEntry = searchBundle.getEntry().get(2);
 		assertNotNull(eptEntry);
 		assertEquals(SearchEntryMode.INCLUDE, eptEntry.getSearch().getMode());
 		assertNotNull(eptEntry.getResource());

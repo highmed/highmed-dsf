@@ -4,6 +4,7 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.dsf.fhir.dao.PractitionerDao;
 import org.highmed.dsf.fhir.search.parameters.PractitionerActive;
 import org.highmed.dsf.fhir.search.parameters.PractitionerIdentifier;
+import org.highmed.dsf.fhir.search.parameters.user.PractitionerUserFilter;
 import org.hl7.fhir.r4.model.Practitioner;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -13,7 +14,7 @@ public class PractitionerDaoJdbc extends AbstractResourceDaoJdbc<Practitioner> i
 	public PractitionerDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, Practitioner.class, "practitioners", "practitioner", "practitioner_id",
-				with(PractitionerIdentifier::new, PractitionerActive::new), with());
+				PractitionerUserFilter::new, with(PractitionerActive::new, PractitionerIdentifier::new), with());
 	}
 
 	@Override

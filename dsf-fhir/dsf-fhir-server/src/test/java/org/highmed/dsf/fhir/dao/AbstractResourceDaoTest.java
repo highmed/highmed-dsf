@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -117,7 +118,7 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 
 		D updatedResource = dao.update(updateResource(createdResource), null);
 		assertNotNull(updatedResource);
-		
+
 		checkUpdates(updatedResource);
 	}
 
@@ -305,7 +306,7 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 		assertTrue(newResource.equalsDeep(createdResource));
 
 		D updateResource = updateResource(createdResource);
-		try (Connection connection = dao.getNewTransaction())
+		try (Connection connection = getNewTransaction())
 		{
 			D updatedResource = dao.updateSameRowWithTransaction(connection, updateResource);
 
@@ -328,5 +329,15 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 				read.get().equalsDeep(updateResource));
 		assertEquals(createdResource.getIdElement().getIdPart(), read.get().getIdElement().getIdPart());
 		assertEquals(createdResource.getMeta().getVersionId(), read.get().getMeta().getVersionId());
+	}
+
+	private Connection getNewTransaction() throws SQLException
+	{
+		Connection connection = database.getDataSource().getConnection();
+		connection.setReadOnly(false);
+		connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
+		connection.setAutoCommit(false);
+
+		return connection;
 	}
 }

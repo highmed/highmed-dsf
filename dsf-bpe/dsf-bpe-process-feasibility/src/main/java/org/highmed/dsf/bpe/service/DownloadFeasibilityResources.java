@@ -13,6 +13,7 @@ import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
+import org.highmed.dsf.fhir.variables.FhirResourcesListValues;
 import org.highmed.dsf.fhir.variables.Outputs;
 import org.highmed.dsf.fhir.variables.OutputsValues;
 import org.highmed.fhir.client.FhirWebserviceClient;
@@ -60,7 +61,7 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 		Outputs outputs = (Outputs) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
 
 		List<Group> cohortDefinitions = getCohortDefinitions(researchStudy, outputs, client);
-		execution.setVariable(Constants.VARIABLE_COHORTS, cohortDefinitions);
+		execution.setVariable(Constants.VARIABLE_COHORTS, FhirResourcesListValues.create(cohortDefinitions));
 		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, OutputsValues.create(outputs));
 
 		boolean needsConsentCheck = getNeedsConsentCheck(task);
@@ -82,8 +83,8 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 
 	private FhirWebserviceClient getWebserviceClient(IdType researchStudyId)
 	{
-		if (researchStudyId.getBaseUrl() == null || researchStudyId.getBaseUrl()
-				.equals(getFhirWebserviceClientProvider().getLocalBaseUrl()))
+		if (researchStudyId.getBaseUrl() == null
+				|| researchStudyId.getBaseUrl().equals(getFhirWebserviceClientProvider().getLocalBaseUrl()))
 		{
 			return getFhirWebserviceClientProvider().getLocalWebserviceClient();
 		}
@@ -101,9 +102,8 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 		}
 		catch (WebApplicationException e)
 		{
-			throw new ResourceNotFoundException(
-					"Error while reading ResearchStudy with id " + researchStudyid.getIdPart() + " from " + client
-							.getBaseUrl());
+			throw new ResourceNotFoundException("Error while reading ResearchStudy with id "
+					+ researchStudyid.getIdPart() + " from " + client.getBaseUrl());
 		}
 	}
 
@@ -112,7 +112,8 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 		List<Group> cohortDefinitions = new ArrayList<>();
 		List<Reference> cohortDefinitionReferences = researchStudy.getEnrollment();
 
-		cohortDefinitionReferences.forEach(reference -> {
+		cohortDefinitionReferences.forEach(reference ->
+		{
 			try
 			{
 				IdType type = new IdType(reference.getReference());
@@ -125,9 +126,8 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 			}
 			catch (WebApplicationException e)
 			{
-				String errorMessage =
-						"Error while reading cohort definition with id " + reference.getReference() + " from " + client
-								.getBaseUrl();
+				String errorMessage = "Error while reading cohort definition with id " + reference.getReference()
+						+ " from " + client.getBaseUrl();
 
 				logger.info(errorMessage);
 				outputs.addErrorOutput(errorMessage);
@@ -139,19 +139,20 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 
 	private boolean getNeedsConsentCheck(Task task)
 	{
-		return getTaskHelper().getFirstInputParameterBooleanValue(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
-				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_CONSENT_CHECK).orElseThrow(
-				() -> new IllegalArgumentException(
-						"NeedsConsentCheck boolean is not set in task with id='" + task.getId()
-								+ "', this error should " + "have been caught by resource validation"));
+		return getTaskHelper()
+				.getFirstInputParameterBooleanValue(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
+						Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_CONSENT_CHECK)
+				.orElseThrow(() -> new IllegalArgumentException("NeedsConsentCheck boolean is not set in task with id='"
+						+ task.getId() + "', this error should " + "have been caught by resource validation"));
 	}
 
 	private boolean getNeedsRecordLinkageCheck(Task task)
 	{
-		return getTaskHelper().getFirstInputParameterBooleanValue(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
-				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_RECORD_LINKAGE).orElseThrow(
-				() -> new IllegalArgumentException(
-						"NeedsRecordLinkage boolean is not set in task with id='" + task.getId()
-								+ "', this error should " + "have been caught by resource validation"));
+		return getTaskHelper()
+				.getFirstInputParameterBooleanValue(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
+						Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_RECORD_LINKAGE)
+				.orElseThrow(
+						() -> new IllegalArgumentException("NeedsRecordLinkage boolean is not set in task with id='"
+								+ task.getId() + "', this error should " + "have been caught by resource validation"));
 	}
 }

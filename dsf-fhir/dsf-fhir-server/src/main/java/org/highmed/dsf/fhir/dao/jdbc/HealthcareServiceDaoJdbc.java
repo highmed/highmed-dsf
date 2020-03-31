@@ -4,6 +4,7 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.dsf.fhir.dao.HealthcareServiceDao;
 import org.highmed.dsf.fhir.search.parameters.HealthcareServiceActive;
 import org.highmed.dsf.fhir.search.parameters.HealthcareServiceIdentifier;
+import org.highmed.dsf.fhir.search.parameters.user.HealthcareServiceUserFilter;
 import org.hl7.fhir.r4.model.HealthcareService;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -13,7 +14,8 @@ public class HealthcareServiceDaoJdbc extends AbstractResourceDaoJdbc<Healthcare
 	public HealthcareServiceDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, HealthcareService.class, "healthcare_services", "healthcare_service",
-				"healthcare_service_id", with(HealthcareServiceIdentifier::new, HealthcareServiceActive::new), with());
+				"healthcare_service_id", HealthcareServiceUserFilter::new,
+				with(HealthcareServiceActive::new, HealthcareServiceIdentifier::new), with());
 	}
 
 	@Override

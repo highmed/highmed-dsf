@@ -4,7 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.UUID;
 
-import org.highmed.dsf.fhir.dao.command.ResourceReference.ReferenceType;
+import org.highmed.dsf.fhir.service.ResourceReference;
+import org.highmed.dsf.fhir.service.ResourceReference.ReferenceType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.Test;
@@ -16,9 +17,9 @@ public class ResourceReferenceTest
 	@Test
 	public void testGetTypeTemporary() throws Exception
 	{
-		var r1 = new ResourceReference("Foo.bar", new Reference(Command.URL_UUID_PREFIX + UUID.randomUUID().toString()),
-				null);
-		var r2 = new ResourceReference("Foo.bar", new Reference(UUID.randomUUID().toString()), null);
+		var r1 = new ResourceReference("Foo.bar",
+				new Reference(Command.URL_UUID_PREFIX + UUID.randomUUID().toString()));
+		var r2 = new ResourceReference("Foo.bar", new Reference(UUID.randomUUID().toString()));
 
 		assertEquals(ReferenceType.TEMPORARY, r1.getType(serverBase));
 		assertEquals(ReferenceType.UNKNOWN, r2.getType(serverBase));
@@ -27,21 +28,20 @@ public class ResourceReferenceTest
 	@Test
 	public void testGetTypeLiteralInternal() throws Exception
 	{
-		var r1 = new ResourceReference("Foo.bar", new Reference("Patient/" + UUID.randomUUID().toString()), null);
+		var r1 = new ResourceReference("Foo.bar", new Reference("Patient/" + UUID.randomUUID().toString()));
 		var r2 = new ResourceReference("Foo.bar",
-				new Reference("Patient/" + UUID.randomUUID().toString() + "/_history/123"), null);
+				new Reference("Patient/" + UUID.randomUUID().toString() + "/_history/123"));
 		var r3 = new ResourceReference("Foo.bar",
-				new Reference(serverBase + "/Patient/" + UUID.randomUUID().toString()), null);
+				new Reference(serverBase + "/Patient/" + UUID.randomUUID().toString()));
 		var r4 = new ResourceReference("Foo.bar",
-				new Reference(serverBase + "/Patient/" + UUID.randomUUID().toString() + "/_history/123"), null);
-		var r5 = new ResourceReference("Foo.bar", new Reference("Patient/" + UUID.randomUUID().toString() + "/foo"),
-				null);
+				new Reference(serverBase + "/Patient/" + UUID.randomUUID().toString() + "/_history/123"));
+		var r5 = new ResourceReference("Foo.bar", new Reference("Patient/" + UUID.randomUUID().toString() + "/foo"));
 		var r6 = new ResourceReference("Foo.bar",
-				new Reference("Patient/" + UUID.randomUUID().toString() + "/_history/123/foo"), null);
+				new Reference("Patient/" + UUID.randomUUID().toString() + "/_history/123/foo"));
 		var r7 = new ResourceReference("Foo.bar",
-				new Reference(serverBase + "/Patient/" + UUID.randomUUID().toString() + "/foo"), null);
+				new Reference(serverBase + "/Patient/" + UUID.randomUUID().toString() + "/foo"));
 		var r8 = new ResourceReference("Foo.bar",
-				new Reference(serverBase + "/Patient/" + UUID.randomUUID().toString() + "/_history/123/foo"), null);
+				new Reference(serverBase + "/Patient/" + UUID.randomUUID().toString() + "/_history/123/foo"));
 
 		assertEquals(ReferenceType.LITERAL_INTERNAL, r1.getType(serverBase));
 		assertEquals(ReferenceType.LITERAL_INTERNAL, r2.getType(serverBase));
@@ -58,14 +58,13 @@ public class ResourceReferenceTest
 	public void testGetTypeLiteralExternal() throws Exception
 	{
 		var r1 = new ResourceReference("Foo.bar",
-				new Reference("http://blub.com/fhir/Patient/" + UUID.randomUUID().toString()), null);
+				new Reference("http://blub.com/fhir/Patient/" + UUID.randomUUID().toString()));
 		var r2 = new ResourceReference("Foo.bar",
-				new Reference("http://blub.com/fhir/Patient/" + UUID.randomUUID().toString() + "/_history/123"), null);
+				new Reference("http://blub.com/fhir/Patient/" + UUID.randomUUID().toString() + "/_history/123"));
 		var r3 = new ResourceReference("Foo.bar",
-				new Reference("http://blub.com/fhir/Patient/" + UUID.randomUUID().toString() + "/foo"), null);
+				new Reference("http://blub.com/fhir/Patient/" + UUID.randomUUID().toString() + "/foo"));
 		var r4 = new ResourceReference("Foo.bar",
-				new Reference("http://blub.com/fhir/Patient/" + UUID.randomUUID().toString() + "/_history/123/foo"),
-				null);
+				new Reference("http://blub.com/fhir/Patient/" + UUID.randomUUID().toString() + "/_history/123/foo"));
 
 		assertEquals(ReferenceType.LITERAL_EXTERNAL, r1.getType(serverBase));
 		assertEquals(ReferenceType.LITERAL_EXTERNAL, r2.getType(serverBase));
@@ -77,8 +76,8 @@ public class ResourceReferenceTest
 	@Test
 	public void testGetTypeConditional() throws Exception
 	{
-		var r1 = new ResourceReference("Foo.bar", new Reference("Patient?foo=bar"), null);
-		var r2 = new ResourceReference("Foo.bar", new Reference("?foo=bar"), null);
+		var r1 = new ResourceReference("Foo.bar", new Reference("Patient?foo=bar"));
+		var r2 = new ResourceReference("Foo.bar", new Reference("?foo=bar"));
 
 		assertEquals(ReferenceType.CONDITIONAL, r1.getType(serverBase));
 
@@ -89,16 +88,15 @@ public class ResourceReferenceTest
 	public void testGetTypeLogical() throws Exception
 	{
 		var r1 = new ResourceReference("Foo.bar", new Reference().setType("Patient")
-				.setIdentifier(new Identifier().setSystem("system").setValue("value")), null);
+				.setIdentifier(new Identifier().setSystem("system").setValue("value")));
 		var r2 = new ResourceReference("Foo.bar",
-				new Reference().setIdentifier(new Identifier().setSystem("system").setValue("value")), null);
-		var r3 = new ResourceReference("Foo.bar", new Reference().setType("Patient"), null);
-		var r4 = new ResourceReference("Foo.bar", new Reference().setType("Patient").setIdentifier(new Identifier()),
-				null);
+				new Reference().setIdentifier(new Identifier().setSystem("system").setValue("value")));
+		var r3 = new ResourceReference("Foo.bar", new Reference().setType("Patient"));
+		var r4 = new ResourceReference("Foo.bar", new Reference().setType("Patient").setIdentifier(new Identifier()));
 		var r5 = new ResourceReference("Foo.bar",
-				new Reference().setType("Patient").setIdentifier(new Identifier().setValue("value")), null);
+				new Reference().setType("Patient").setIdentifier(new Identifier().setValue("value")));
 		var r6 = new ResourceReference("Foo.bar",
-				new Reference().setType("Patient").setIdentifier(new Identifier().setSystem("system")), null);
+				new Reference().setType("Patient").setIdentifier(new Identifier().setSystem("system")));
 
 		assertEquals(ReferenceType.LOGICAL, r1.getType(serverBase));
 

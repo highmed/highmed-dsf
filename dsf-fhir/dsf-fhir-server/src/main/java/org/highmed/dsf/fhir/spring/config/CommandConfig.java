@@ -1,10 +1,9 @@
 package org.highmed.dsf.fhir.spring.config;
 
+import org.highmed.dsf.fhir.dao.command.AuthorizationHelper;
+import org.highmed.dsf.fhir.dao.command.AuthorizationHelperImpl;
 import org.highmed.dsf.fhir.dao.command.CommandFactory;
 import org.highmed.dsf.fhir.dao.command.CommandFactoryImpl;
-import org.highmed.dsf.fhir.service.ReferenceExtractorImpl;
-import org.highmed.dsf.fhir.service.ReferenceResolver;
-import org.highmed.dsf.fhir.service.ReferenceResolverImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -32,28 +31,26 @@ public class CommandConfig
 	private EventConfig eventConfig;
 
 	@Autowired
-	private ClientConfig clientConfig;
+	private ReferenceConfig referenceConfig;
 
-	@Bean
-	public ReferenceExtractorImpl referenceExtractor()
-	{
-		return new ReferenceExtractorImpl();
-	}
-
-	@Bean
-	public ReferenceResolver referenceResolver()
-	{
-		return new ReferenceResolverImpl(serverBase, daoConfig.daoProvider(), helperConfig.responseGenerator(),
-				helperConfig.exceptionHandler(), clientConfig.clientProvider());
-	}
+	@Autowired
+	private AuthorizationConfig authorizationConfig;
 
 	@Bean
 	public CommandFactory commandFactory()
 	{
 		return new CommandFactoryImpl(serverBase, defaultPageCount, daoConfig.dataSource(), daoConfig.daoProvider(),
-				referenceExtractor(), referenceResolver(), helperConfig.responseGenerator(),
-				helperConfig.exceptionHandler(), eventConfig.eventManager(), eventConfig.eventGenerator(),
-				snapshotConfig.snapshotGenerator(), snapshotConfig.snapshotDependencyAnalyzer(),
-				helperConfig.parameterConverter());
+				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver(),
+				helperConfig.responseGenerator(), helperConfig.exceptionHandler(), eventConfig.eventManager(),
+				eventConfig.eventGenerator(), snapshotConfig.snapshotGenerator(),
+				snapshotConfig.snapshotDependencyAnalyzer(), helperConfig.parameterConverter(),
+				authorizationHelper());
+	}
+
+	@Bean
+	public AuthorizationHelper authorizationHelper()
+	{
+		return new AuthorizationHelperImpl(authorizationConfig.authorizationRuleProvider(),
+				helperConfig.responseGenerator());
 	}
 }

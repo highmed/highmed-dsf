@@ -1,15 +1,26 @@
 package org.highmed.dsf.fhir.hapi;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.context.FhirContext;
 
 public class ReferenceTypTest
 {
+	private static final Logger logger = LoggerFactory.getLogger(ReferenceTypTest.class);
+
 	private static final Pattern ID_PATTERN = Pattern
 			.compile("(?<base>(http|https):\\/\\/([A-Za-z0-9\\-\\\\\\.\\:\\%\\$]*\\/)+)?"
 					+ "(?<resource>Account|ActivityDefinition|AdverseEvent|AllergyIntolerance|Appointment|AppointmentResponse"
@@ -167,5 +178,26 @@ public class ReferenceTypTest
 		assertTrue(id5.isLocal());
 		assertFalse(id5.isUrn());
 		assertFalse(id5.isAbsolute());
+	}
+
+	@Test
+	public void testType() throws Exception
+	{
+//		Reference ref = new Reference();
+//		ref.setType("Organization");
+//		ref.setReferenceElement(new IdType().setParts(null, "Organization", UUID.randomUUID().toString(), null));
+
+		Organization org = new Organization();
+		org.setIdElement(new IdType(UUID.randomUUID().toString()));
+		
+		Binary b = new Binary();
+		Reference ref = new Reference(org);
+		b.setSecurityContext(ref);
+		b.getSecurityContext().setType("Organization");
+
+		FhirContext context = FhirContext.forR4();
+		String string = context.newXmlParser().encodeResourceToString(b);
+
+		logger.debug(string);
 	}
 }

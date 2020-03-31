@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import javax.ws.rs.core.UriBuilder;
@@ -17,8 +18,6 @@ import org.highmed.dsf.fhir.search.parameters.basic.AbstractSearchParameter;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Resource;
 import org.postgresql.util.PGobject;
-
-import com.google.common.base.Objects;
 
 import ca.uhn.fhir.parser.DataFormatException;
 
@@ -126,7 +125,7 @@ public class ResourceId<R extends Resource> extends AbstractSearchParameter<R>
 	public boolean matches(Resource resource)
 	{
 		if (isDefined())
-			return Objects.equal(resource.getId(), id.toString());
+			return Objects.equals(resource.getId(), id.toString());
 		else
 			throw notDefined();
 	}

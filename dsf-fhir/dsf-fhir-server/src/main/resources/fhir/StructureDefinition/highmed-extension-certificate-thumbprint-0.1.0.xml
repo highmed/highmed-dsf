@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <StructureDefinition xmlns="http://hl7.org/fhir">
+	<meta>
+		<tag>
+			<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
+			<code value="REMOTE"/>
+		</tag>		
+	</meta>
 	<url value="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint"/>
 	<version value="0.1.0"/>
 	<name value="CertificateThumbprint"/>
-	<status value="active"/>
+	<status value="draft"/>
 	<date value="2019-05-21"/>
 	<fhirVersion value="4.0.0"/>
 	<kind value="complex-type"/>

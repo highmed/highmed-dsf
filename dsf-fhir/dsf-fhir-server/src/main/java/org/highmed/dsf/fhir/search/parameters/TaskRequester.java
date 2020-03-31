@@ -35,14 +35,14 @@ public class TaskRequester extends AbstractReferenceParameter<Task>
 			"PractitionerRole" };
 	// TODO add Device, RelatedPerson if supported, see also doResolveReferencesForMatching, matches, getIncludeSql
 
-	private static final String ORGANIZATION_IDENTIFIERS_SUBQUERY = "(SELECT practitioner->'identifier' FROM current_practitioners"
-			+ " WHERE concat('Practitioner/', practitioner->>'id') = task->'requester'->>'reference' "
-			+ " UNION SELECT organization->'identifier' FROM current_organizations"
-			+ " WHERE concat('Organization/', organization->>'id') = task->'requester'->>'reference' "
-			+ " UNION SELECT patient->'identifier' FROM current_patients"
-			+ " WHERE concat('Patient/', patient->>'id') = task->'requester'->>'reference' "
-			+ " UNION SELECT practitioner_role->'identifier' FROM current_practitioner_roles"
-			+ " WHERE concat('PractitionerRole/', practitioner_role->>'id') = task->'requester'->>'reference')";
+	private static final String IDENTIFIERS_SUBQUERY = "(SELECT practitioner->'identifier' FROM current_practitioners "
+			+ "WHERE concat('Practitioner/', practitioner->>'id') = task->'requester'->>'reference' "
+			+ "UNION SELECT organization->'identifier' FROM current_organizations "
+			+ "WHERE concat('Organization/', organization->>'id') = task->'requester'->>'reference' "
+			+ "UNION SELECT patient->'identifier' FROM current_patients "
+			+ "WHERE concat('Patient/', patient->>'id') = task->'requester'->>'reference' "
+			+ "UNION SELECT practitioner_role->'identifier' FROM current_practitioner_roles "
+			+ "WHERE concat('PractitionerRole/', practitioner_role->>'id') = task->'requester'->>'reference')";
 
 	public TaskRequester()
 	{
@@ -66,9 +66,9 @@ public class TaskRequester extends AbstractReferenceParameter<Task>
 					case CODE:
 					case CODE_AND_SYSTEM:
 					case SYSTEM:
-						return ORGANIZATION_IDENTIFIERS_SUBQUERY + " @> ?::jsonb";
+						return IDENTIFIERS_SUBQUERY + " @> ?::jsonb";
 					case CODE_AND_NO_SYSTEM_PROPERTY:
-						return "(SELECT count(*) FROM jsonb_array_elements(" + ORGANIZATION_IDENTIFIERS_SUBQUERY
+						return "(SELECT count(*) FROM jsonb_array_elements(" + IDENTIFIERS_SUBQUERY
 								+ ") identifier WHERE identifier->>'value' = ? AND NOT (identifier ?? 'system')) > 0";
 				}
 			}

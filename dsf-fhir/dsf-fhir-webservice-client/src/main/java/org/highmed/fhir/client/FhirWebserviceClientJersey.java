@@ -2,11 +2,15 @@ package org.highmed.fhir.client;
 
 import java.security.KeyStore;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
@@ -17,6 +21,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.highmed.dsf.fhir.adapter.AbstractFhirAdapter;
+import org.highmed.dsf.fhir.adapter.ActivityDefinitionJsonFhirAdapter;
+import org.highmed.dsf.fhir.adapter.ActivityDefinitionXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.BinaryJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.BinaryXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.BundleJsonFhirAdapter;
@@ -59,11 +65,13 @@ import org.highmed.dsf.fhir.adapter.TaskJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.TaskXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.ValueSetJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.ValueSetXmlFhirAdapter;
+import org.highmed.dsf.fhir.service.ReferenceExtractor;
+import org.highmed.dsf.fhir.service.ResourceReference;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
-import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StructureDefinition;
@@ -81,40 +89,69 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 {
 	private static final Logger logger = LoggerFactory.getLogger(FhirWebserviceClientJersey.class);
 
-	public FhirWebserviceClientJersey(String baseUrl, KeyStore trustStore, KeyStore keyStore, String keyStorePassword,
-			String proxySchemeHostPort, String proxyUserName, String proxyPassword, int connectTimeout, int readTimeout,
-			ObjectMapper objectMapper, FhirContext fhirContext)
+	private final ReferenceExtractor referenceExtractor;
+	private final Map<String, Class<?>> resourceTypeByNames = new HashMap<>();
+
+	public FhirWebserviceClientJersey(String baseUrl, KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword,
+			String proxySchemeHostPort, String proxyUserName, char[] proxyPassword, int connectTimeout, int readTimeout,
+			ObjectMapper objectMapper, FhirContext fhirContext, ReferenceExtractor referenceExtractor)
 	{
 		super(baseUrl, trustStore, keyStore, keyStorePassword, proxySchemeHostPort, proxyUserName, proxyPassword,
 				connectTimeout, readTimeout, objectMapper, components(fhirContext));
+
+		this.referenceExtractor = referenceExtractor;
+
+		registeredComponents.stream().filter(e -> e instanceof AbstractFhirAdapter).map(e -> (AbstractFhirAdapter<?>) e)
+				.forEach(a -> resourceTypeByNames.put(a.getResourceTypeName(), a.getResourceType()));
 	}
 
 	public static List<AbstractFhirAdapter<?>> components(FhirContext fhirContext)
 	{
-		return Arrays.asList(new BinaryJsonFhirAdapter(fhirContext), new BinaryXmlFhirAdapter(fhirContext),
-				new BundleJsonFhirAdapter(fhirContext), new BundleXmlFhirAdapter(fhirContext),
-				new CapabilityStatementJsonFhirAdapter(fhirContext), new CapabilityStatementXmlFhirAdapter(fhirContext),
-				new CodeSystemJsonFhirAdapter(fhirContext), new CodeSystemXmlFhirAdapter(fhirContext),
-				new GroupJsonFhirAdapter(fhirContext), new GroupXmlFhirAdapter(fhirContext),
-				new EndpointJsonFhirAdapter(fhirContext), new EndpointXmlFhirAdapter(fhirContext),
-				new HealthcareServiceJsonFhirAdapter(fhirContext), new HealthcareServiceXmlFhirAdapter(fhirContext),
-				new LocationJsonFhirAdapter(fhirContext), new LocationXmlFhirAdapter(fhirContext),
-				new NamingSystemJsonFhirAdapter(fhirContext), new NamingSystemXmlFhirAdapter(fhirContext),
-				new OperationOutcomeJsonFhirAdapter(fhirContext), new OperationOutcomeXmlFhirAdapter(fhirContext),
-				new OrganizationJsonFhirAdapter(fhirContext), new OrganizationXmlFhirAdapter(fhirContext),
-				new ParametersJsonFhirAdapter(fhirContext), new ParametersXmlFhirAdapter(fhirContext),
-				new PatientJsonFhirAdapter(fhirContext), new PatientXmlFhirAdapter(fhirContext),
-				new PractitionerJsonFhirAdapter(fhirContext), new PractitionerXmlFhirAdapter(fhirContext),
-				new PractitionerRoleJsonFhirAdapter(fhirContext), new PractitionerRoleXmlFhirAdapter(fhirContext),
-				new ProvenanceJsonFhirAdapter(fhirContext), new ProvenanceXmlFhirAdapter(fhirContext),
-				new ResearchStudyJsonFhirAdapter(fhirContext), new ResearchStudyXmlFhirAdapter(fhirContext),
-				new StructureDefinitionJsonFhirAdapter(fhirContext), new StructureDefinitionXmlFhirAdapter(fhirContext),
-				new SubscriptionJsonFhirAdapter(fhirContext), new SubscriptionXmlFhirAdapter(fhirContext),
-				new TaskJsonFhirAdapter(fhirContext), new TaskXmlFhirAdapter(fhirContext),
-				new ValueSetJsonFhirAdapter(fhirContext), new ValueSetXmlFhirAdapter(fhirContext));
+		return Arrays.asList(new ActivityDefinitionJsonFhirAdapter(fhirContext),
+				new ActivityDefinitionXmlFhirAdapter(fhirContext), new BinaryJsonFhirAdapter(fhirContext),
+				new BinaryXmlFhirAdapter(fhirContext), new BundleJsonFhirAdapter(fhirContext),
+				new BundleXmlFhirAdapter(fhirContext), new CapabilityStatementJsonFhirAdapter(fhirContext),
+				new CapabilityStatementXmlFhirAdapter(fhirContext), new CodeSystemJsonFhirAdapter(fhirContext),
+				new CodeSystemXmlFhirAdapter(fhirContext), new GroupJsonFhirAdapter(fhirContext),
+				new GroupXmlFhirAdapter(fhirContext), new EndpointJsonFhirAdapter(fhirContext),
+				new EndpointXmlFhirAdapter(fhirContext), new HealthcareServiceJsonFhirAdapter(fhirContext),
+				new HealthcareServiceXmlFhirAdapter(fhirContext), new LocationJsonFhirAdapter(fhirContext),
+				new LocationXmlFhirAdapter(fhirContext), new NamingSystemJsonFhirAdapter(fhirContext),
+				new NamingSystemXmlFhirAdapter(fhirContext), new OperationOutcomeJsonFhirAdapter(fhirContext),
+				new OperationOutcomeXmlFhirAdapter(fhirContext), new OrganizationJsonFhirAdapter(fhirContext),
+				new OrganizationXmlFhirAdapter(fhirContext), new ParametersJsonFhirAdapter(fhirContext),
+				new ParametersXmlFhirAdapter(fhirContext), new PatientJsonFhirAdapter(fhirContext),
+				new PatientXmlFhirAdapter(fhirContext), new PractitionerJsonFhirAdapter(fhirContext),
+				new PractitionerXmlFhirAdapter(fhirContext), new PractitionerRoleJsonFhirAdapter(fhirContext),
+				new PractitionerRoleXmlFhirAdapter(fhirContext), new ProvenanceJsonFhirAdapter(fhirContext),
+				new ProvenanceXmlFhirAdapter(fhirContext), new ResearchStudyJsonFhirAdapter(fhirContext),
+				new ResearchStudyXmlFhirAdapter(fhirContext), new StructureDefinitionJsonFhirAdapter(fhirContext),
+				new StructureDefinitionXmlFhirAdapter(fhirContext), new SubscriptionJsonFhirAdapter(fhirContext),
+				new SubscriptionXmlFhirAdapter(fhirContext), new TaskJsonFhirAdapter(fhirContext),
+				new TaskXmlFhirAdapter(fhirContext), new ValueSetJsonFhirAdapter(fhirContext),
+				new ValueSetXmlFhirAdapter(fhirContext));
+	}
+
+	private WebApplicationException handleError(Response response)
+	{
+		try
+		{
+			OperationOutcome outcome = response.readEntity(OperationOutcome.class);
+			String message = toString(outcome);
+
+			logger.warn("OperationOutcome: {}", message);
+			return new WebApplicationException(message, response.getStatus());
+		}
+		catch (ProcessingException e)
+		{
+			response.close();
+			logger.warn("{}: {}", e.getClass().getName(), e.getMessage());
+			return new WebApplicationException(e, response.getStatus());
+		}
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public <R extends Resource> R create(R resource)
 	{
 		Objects.requireNonNull(resource, "resource");
@@ -129,16 +166,13 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		logger.debug("HTTP header Last-Modified: {}", response.getHeaderString(HttpHeaders.LAST_MODIFIED));
 
 		if (Status.CREATED.getStatusCode() == response.getStatus())
-		{
-			@SuppressWarnings("unchecked")
-			R read = (R) response.readEntity(resource.getClass());
-			return read;
-		}
+			return (R) response.readEntity(resource.getClass());
 		else
-			throw new WebApplicationException(response);
+			throw handleError(response);
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public <R extends Resource> R createConditionaly(R resource, String ifNoneExistCriteria)
 	{
 		Objects.requireNonNull(resource, "resource");
@@ -155,16 +189,13 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		logger.debug("HTTP header Last-Modified: {}", response.getHeaderString(HttpHeaders.LAST_MODIFIED));
 
 		if (Status.CREATED.getStatusCode() == response.getStatus())
-		{
-			@SuppressWarnings("unchecked")
-			R read = (R) response.readEntity(resource.getClass());
-			return read;
-		}
+			return (R) response.readEntity(resource.getClass());
 		else
-			throw new WebApplicationException(response);
+			throw handleError(response);
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public <R extends Resource> R update(R resource)
 	{
 		Objects.requireNonNull(resource, "resource");
@@ -183,16 +214,13 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		logger.debug("HTTP header Last-Modified: {}", response.getHeaderString(HttpHeaders.LAST_MODIFIED));
 
 		if (Status.OK.getStatusCode() == response.getStatus())
-		{
-			@SuppressWarnings("unchecked")
-			R read = (R) response.readEntity(resource.getClass());
-			return read;
-		}
+			return (R) response.readEntity(resource.getClass());
 		else
-			throw new WebApplicationException(response);
+			throw handleError(response);
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public <R extends Resource> R updateConditionaly(R resource, Map<String, List<String>> criteria)
 	{
 		Objects.requireNonNull(resource, "resource");
@@ -218,13 +246,9 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		logger.debug("HTTP header Last-Modified: {}", response.getHeaderString(HttpHeaders.LAST_MODIFIED));
 
 		if (Status.CREATED.getStatusCode() == response.getStatus() || Status.OK.getStatusCode() == response.getStatus())
-		{
-			@SuppressWarnings("unchecked")
-			R read = (R) response.readEntity(resource.getClass());
-			return read;
-		}
+			return (R) response.readEntity(resource.getClass());
 		else
-			throw new WebApplicationException(response);
+			throw handleError(response);
 	}
 
 	@Override
@@ -241,9 +265,9 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		logger.debug("HTTP header ETag: {}", response.getHeaderString(HttpHeaders.ETAG));
 		logger.debug("HTTP header Last-Modified: {}", response.getHeaderString(HttpHeaders.LAST_MODIFIED));
 
-		if (Status.OK.getStatusCode() != response.getStatus() && Status.NO_CONTENT.getStatusCode() != response
-				.getStatus())
-			throw new WebApplicationException(response);
+		if (Status.OK.getStatusCode() != response.getStatus()
+				&& Status.NO_CONTENT.getStatusCode() != response.getStatus())
+			throw handleError(response);
 	}
 
 	@Override
@@ -266,9 +290,9 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		logger.debug("HTTP header ETag: {}", response.getHeaderString(HttpHeaders.ETAG));
 		logger.debug("HTTP header Last-Modified: {}", response.getHeaderString(HttpHeaders.LAST_MODIFIED));
 
-		if (Status.OK.getStatusCode() != response.getStatus() && Status.NO_CONTENT.getStatusCode() != response
-				.getStatus())
-			throw new WebApplicationException(response);
+		if (Status.OK.getStatusCode() != response.getStatus()
+				&& Status.NO_CONTENT.getStatusCode() != response.getStatus())
+			throw handleError(response);
 	}
 
 	@Override
@@ -283,7 +307,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		if (Status.OK.getStatusCode() == response.getStatus())
 			return response.readEntity(CapabilityStatement.class);
 		else
-			throw new WebApplicationException(response);
+			throw handleError(response);
 	}
 
 	@Override
@@ -303,7 +327,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		if (Status.OK.getStatusCode() == response.getStatus())
 			return response.readEntity(StructureDefinition.class);
 		else
-			throw new WebApplicationException(response);
+			throw handleError(response);
 	}
 
 	@Override
@@ -323,7 +347,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		if (Status.OK.getStatusCode() == response.getStatus())
 			return response.readEntity(StructureDefinition.class);
 		else
-			throw new WebApplicationException(response);
+			throw handleError(response);
 	}
 
 	@Override
@@ -339,9 +363,70 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 				response.getStatusInfo().getReasonPhrase());
 		if (Status.OK.getStatusCode() == response.getStatus())
 			// TODO remove workaround if HAPI bug fixed
-			return fixBundle(resourceType, response.readEntity(resourceType));
+			return fixBundle(response.readEntity(resourceType));
 		else
-			throw new WebApplicationException(response);
+			throw handleError(response);
+	}
+
+	@Override
+	public <R extends Resource> R read(Class<R> resourceType, String id, String version)
+	{
+		Objects.requireNonNull(resourceType, "resourceType");
+		Objects.requireNonNull(id, "id");
+		Objects.requireNonNull(version, "version");
+
+		Response response = getResource().path(resourceType.getAnnotation(ResourceDef.class).name()).path(id)
+				.path("_history").path(version).request().accept(Constants.CT_FHIR_JSON_NEW).get();
+
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		if (Status.OK.getStatusCode() == response.getStatus())
+			// TODO remove workaround if HAPI bug fixed
+			return fixBundle(response.readEntity(resourceType));
+		else
+			throw handleError(response);
+	}
+
+	@Override
+	public Resource read(String resourceTypeName, String id)
+	{
+		Objects.requireNonNull(resourceTypeName, "resourceTypeName");
+		Objects.requireNonNull(id, "id");
+		if (!resourceTypeByNames.containsKey(resourceTypeName))
+			throw new IllegalArgumentException("Resource of type " + resourceTypeName + " not supported");
+
+		Response response = getResource().path(resourceTypeName).path(id).request().accept(Constants.CT_FHIR_JSON_NEW)
+				.get();
+
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		if (Status.OK.getStatusCode() == response.getStatus())
+			// TODO remove workaround if HAPI bug fixed
+			return fixBundle((Resource) response.readEntity(resourceTypeByNames.get(resourceTypeName)));
+		else
+			throw handleError(response);
+
+	}
+
+	@Override
+	public Resource read(String resourceTypeName, String id, String version)
+	{
+		Objects.requireNonNull(resourceTypeName, "resourceTypeName");
+		Objects.requireNonNull(id, "id");
+		Objects.requireNonNull(version, "version");
+		if (!resourceTypeByNames.containsKey(resourceTypeName))
+			throw new IllegalArgumentException("Resource of type " + resourceTypeName + " not supported");
+
+		Response response = getResource().path(resourceTypeName).path(id).path("_history").path(version).request()
+				.accept(Constants.CT_FHIR_JSON_NEW).get();
+
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		if (Status.OK.getStatusCode() == response.getStatus())
+			// TODO remove workaround if HAPI bug fixed
+			return fixBundle((Resource) response.readEntity(resourceTypeByNames.get(resourceTypeName)));
+		else
+			throw handleError(response);
 	}
 
 	@Override
@@ -360,7 +445,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		else if (Status.NOT_FOUND.getStatusCode() == response.getStatus())
 			return false;
 		else
-			throw new WebApplicationException(response);
+			throw handleError(response);
 	}
 
 	@Override
@@ -386,52 +471,25 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		else if (Status.NOT_FOUND.getStatusCode() == response.getStatus())
 			return false;
 		else
-			throw new WebApplicationException(response);
+			throw handleError(response);
 	}
 
 	// FIXME bug in HAPI framework
-	// TODO workaround using ReferenceExtractorImpl to remove all reference->resources
-	private <R extends Resource> R fixBundle(Class<R> resourceType, R readEntity)
+	private <R extends Resource> R fixBundle(R readEntity)
 	{
-		if (Bundle.class.equals(resourceType))
+		if (readEntity instanceof Bundle)
 		{
 			Bundle b = (Bundle) readEntity;
-			b.getEntry().stream().filter(e -> e.hasResource() && e.getResource() instanceof Organization)
-					.map(e -> (Organization) e.getResource()).forEach(this::fixOrganization);
-			b.getEntry().stream().filter(e -> e.hasResource() && e.getResource() instanceof Endpoint)
-					.map(e -> (Endpoint) e.getResource()).forEach(this::fixEndpoint);
+			b.getEntry().stream().map(e -> e.getResource()).forEach(this::fix);
 		}
 
 		return readEntity;
 	}
 
-	private void fixOrganization(Organization organization)
+	private void fix(Resource resource)
 	{
-		organization.getEndpoint().forEach(ref -> ref.setResource(null));
-	}
-
-	private void fixEndpoint(Endpoint endpoint)
-	{
-		endpoint.getManagingOrganization().setResource(null);
-	}
-
-	@Override
-	public <R extends Resource> R read(Class<R> resourceType, String id, String version)
-	{
-		Objects.requireNonNull(resourceType, "resourceType");
-		Objects.requireNonNull(id, "id");
-		Objects.requireNonNull(version, "version");
-
-		Response response = getResource().path(resourceType.getAnnotation(ResourceDef.class).name()).path(id)
-				.path("_history").path(version).request().accept(Constants.CT_FHIR_JSON_NEW).get();
-
-		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
-				response.getStatusInfo().getReasonPhrase());
-		if (Status.OK.getStatusCode() == response.getStatus())
-			// TODO remove workaround if HAPI bug fixed
-			return fixBundle(resourceType, response.readEntity(resourceType));
-		else
-			throw new WebApplicationException(response);
+		Stream<ResourceReference> references = referenceExtractor.getReferences(resource);
+		references.forEach(r -> r.getReference().setResource(null));
 	}
 
 	@Override
@@ -451,7 +509,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		else if (Status.NOT_FOUND.getStatusCode() == response.getStatus())
 			return false;
 		else
-			throw new WebApplicationException(response);
+			throw handleError(response);
 	}
 
 	@Override
@@ -473,14 +531,8 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		if (Status.OK.getStatusCode() == response.getStatus())
 			return response.readEntity(Bundle.class);
 		else
-			throw new WebApplicationException(response);
+			throw handleError(response);
 	}
-
-	// private <R extends DomainResource> List<R> bundleToList(Class<R> resourceType, Bundle bundle)
-	// {
-	// return bundle.getEntry().stream().filter(c -> resourceType.isInstance(c.getResource()))
-	// .map(c -> resourceType.cast(c.getResource())).collect(Collectors.toList());
-	// }
 
 	@Override
 	public Bundle postBundle(Bundle bundle)
@@ -499,6 +551,17 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		if (Status.OK.getStatusCode() == response.getStatus())
 			return response.readEntity(Bundle.class);
 		else
-			throw new WebApplicationException(response);
+			throw handleError(response);
+	}
+
+	private String toString(OperationOutcome outcome)
+	{
+		return outcome == null ? ""
+				: outcome.getIssue().stream().map(i -> toString(i)).collect(Collectors.joining("\n"));
+	}
+
+	private String toString(OperationOutcomeIssueComponent issue)
+	{
+		return issue == null ? "" : issue.getSeverity() + " " + issue.getCode() + " " + issue.getDiagnostics();
 	}
 }

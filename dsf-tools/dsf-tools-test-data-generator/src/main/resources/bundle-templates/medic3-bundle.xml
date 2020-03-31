@@ -4,11 +4,17 @@
 		<fullUrl value="urn:uuid:bb73165c-c7b9-4342-8e28-531f07fa7735"/>
 		<resource>
 			<Organization xmlns="http://hl7.org/fhir">
+				<meta>
+					<tag>
+						<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
+						<code value="REMOTE"/>
+					</tag>		
+				</meta>
 				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
 					<valueString value="TODO"/>
 				</extension>
 				<identifier>
-					<system value="http://highmed.org/fhir/CodeSystem/organization"/>
+					<system value="http://highmed.org/fhir/NamingSystem/organization-identifier"/>
 					<value value="Test_TTP"/>
 				</identifier>
 				<active value="true"/>
@@ -27,18 +33,24 @@
 		</resource>
 		<request>
 			<method value="PUT"/>
-			<url value="Organization?identifier=http://highmed.org/fhir/CodeSystem/organization|Test_TTP"/>
+			<url value="Organization?identifier=http://highmed.org/fhir/NamingSystem/organization-identifier|Test_TTP"/>
 		</request>
 	</entry>
 	<entry>
 		<fullUrl value="urn:uuid:a49a45d2-88cc-4830-a028-413d68d9a439"/>
 		<resource>
 			<Organization xmlns="http://hl7.org/fhir">
+				<meta>
+					<tag>
+						<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
+						<code value="REMOTE"/>
+					</tag>		
+				</meta>
 				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
 					<valueString value="TODO"/>
 				</extension>
 				<identifier>
-					<system value="http://highmed.org/fhir/CodeSystem/organization"/>
+					<system value="http://highmed.org/fhir/NamingSystem/organization-identifier"/>
 					<value value="Test_MeDIC_3"/>
 				</identifier>
 				<active value="true"/>
@@ -53,15 +65,21 @@
 		</resource>
 		<request>
 			<method value="PUT"/>
-			<url value="Organization?identifier=http://highmed.org/fhir/CodeSystem/organization|Test_MeDIC_3"/>
+			<url value="Organization?identifier=http://highmed.org/fhir/NamingSystem/organization-identifier|Test_MeDIC_3"/>
 		</request>
 	</entry>
 	<entry>
 		<fullUrl value="urn:uuid:a3dc8452-0eba-4db7-9c18-4c2cf925b655"/>
 		<resource>
 			<Endpoint xmlns="http://hl7.org/fhir">
+				<meta>
+					<tag>
+						<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
+						<code value="REMOTE"/>
+					</tag>		
+				</meta>
 				<identifier>
-					<system value="http://highmed.org/fhir/CodeSystem/endpoint"/>
+					<system value="http://highmed.org/fhir/NamingSystem/endpoint-identifier"/>
 					<value value="Test_TTP_Endpoint"/>
 				</identifier>
 				<status value="active"/>
@@ -73,7 +91,7 @@
 				<managingOrganization>
 					<type value="Organization"/>
 					<identifier>
-						<system value="http://highmed.org/fhir/CodeSystem/organization"/>
+						<system value="http://highmed.org/fhir/NamingSystem/organization-identifier"/>
 						<value value="Test_TTP"/>
 					</identifier>
 				</managingOrganization>
@@ -90,7 +108,7 @@
 		</resource>
 		<request>
 			<method value="PUT"/>
-			<url value="Endpoint?identifier=http://highmed.org/fhir/CodeSystem/endpoint|Test_TTP_Endpoint"/>
+			<url value="Endpoint?identifier=http://highmed.org/fhir/NamingSystem/endpoint-identifier|Test_TTP_Endpoint"/>
 		</request>
 	</entry>
 </Bundle>

@@ -17,11 +17,18 @@ import javax.ws.rs.core.UriInfo;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.dsf.fhir.search.SearchQueryRevIncludeParameterFactory.RevIncludeDefinition;
+import org.highmed.dsf.fhir.search.parameters.ActivityDefinitionIdentifier;
+import org.highmed.dsf.fhir.search.parameters.ActivityDefinitionName;
+import org.highmed.dsf.fhir.search.parameters.ActivityDefinitionStatus;
+import org.highmed.dsf.fhir.search.parameters.ActivityDefinitionUrl;
+import org.highmed.dsf.fhir.search.parameters.ActivityDefinitionVersion;
 import org.highmed.dsf.fhir.search.parameters.BinaryContentType;
 import org.highmed.dsf.fhir.search.parameters.BundleIdentifier;
 import org.highmed.dsf.fhir.search.parameters.CodeSystemIdentifier;
+import org.highmed.dsf.fhir.search.parameters.CodeSystemStatus;
 import org.highmed.dsf.fhir.search.parameters.CodeSystemUrl;
 import org.highmed.dsf.fhir.search.parameters.CodeSystemVersion;
+import org.highmed.dsf.fhir.search.parameters.EndpointAddress;
 import org.highmed.dsf.fhir.search.parameters.EndpointIdentifier;
 import org.highmed.dsf.fhir.search.parameters.EndpointName;
 import org.highmed.dsf.fhir.search.parameters.EndpointOrganization;
@@ -41,30 +48,37 @@ import org.highmed.dsf.fhir.search.parameters.PractitionerActive;
 import org.highmed.dsf.fhir.search.parameters.PractitionerIdentifier;
 import org.highmed.dsf.fhir.search.parameters.PractitionerRoleActive;
 import org.highmed.dsf.fhir.search.parameters.PractitionerRoleIdentifier;
+import org.highmed.dsf.fhir.search.parameters.PractitionerRoleOrganization;
+import org.highmed.dsf.fhir.search.parameters.PractitionerRolePractitioner;
 import org.highmed.dsf.fhir.search.parameters.ResearchStudyEnrollment;
 import org.highmed.dsf.fhir.search.parameters.ResearchStudyIdentifier;
+import org.highmed.dsf.fhir.search.parameters.ResearchStudyPrincipalInvestigator;
 import org.highmed.dsf.fhir.search.parameters.ResourceId;
 import org.highmed.dsf.fhir.search.parameters.ResourceLastUpdated;
 import org.highmed.dsf.fhir.search.parameters.StructureDefinitionIdentifier;
+import org.highmed.dsf.fhir.search.parameters.StructureDefinitionStatus;
 import org.highmed.dsf.fhir.search.parameters.StructureDefinitionUrl;
 import org.highmed.dsf.fhir.search.parameters.StructureDefinitionVersion;
-import org.highmed.dsf.fhir.search.parameters.SubscriptionChannelPayload;
-import org.highmed.dsf.fhir.search.parameters.SubscriptionChannelType;
 import org.highmed.dsf.fhir.search.parameters.SubscriptionCriteria;
+import org.highmed.dsf.fhir.search.parameters.SubscriptionPayload;
 import org.highmed.dsf.fhir.search.parameters.SubscriptionStatus;
+import org.highmed.dsf.fhir.search.parameters.SubscriptionType;
 import org.highmed.dsf.fhir.search.parameters.TaskIdentifier;
 import org.highmed.dsf.fhir.search.parameters.TaskRequester;
 import org.highmed.dsf.fhir.search.parameters.TaskStatus;
 import org.highmed.dsf.fhir.search.parameters.ValueSetIdentifier;
+import org.highmed.dsf.fhir.search.parameters.ValueSetStatus;
 import org.highmed.dsf.fhir.search.parameters.ValueSetUrl;
 import org.highmed.dsf.fhir.search.parameters.ValueSetVersion;
 import org.highmed.dsf.fhir.search.parameters.rev.include.AbstractRevIncludeParameterFactory;
 import org.highmed.dsf.fhir.search.parameters.rev.include.EndpointOrganizationRevInclude;
 import org.highmed.dsf.fhir.search.parameters.rev.include.OrganizationEndpointRevInclude;
 import org.highmed.dsf.fhir.search.parameters.rev.include.ResearchStudyEnrollmentRevInclude;
+import org.highmed.dsf.fhir.webservice.base.AbstractBasicService;
 import org.highmed.dsf.fhir.webservice.specification.ConformanceService;
 import org.highmed.dsf.fhir.websocket.ServerEndpoint;
 import org.highmed.dsf.tools.build.BuildInfoReader;
+import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
@@ -116,7 +130,7 @@ import com.google.common.collect.Streams;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.rest.api.Constants;
 
-public class ConformanceServiceImpl extends AbstractServiceImpl implements ConformanceService, InitializingBean
+public class ConformanceServiceImpl extends AbstractBasicService implements ConformanceService, InitializingBean
 {
 	private final CapabilityStatement capabilityStatement;
 	private final ParameterConverter parameterConverter;
@@ -182,13 +196,22 @@ public class ConformanceServiceImpl extends AbstractServiceImpl implements Confo
 		websocketExtension.setUrl("http://hl7.org/fhir/StructureDefinition/capabilitystatement-websocket");
 		websocketExtension.setValue(new UrlType(serverBase.replace("http", "ws") + ServerEndpoint.PATH));
 
-		var resources = Arrays.asList(Binary.class, Bundle.class, CodeSystem.class, Endpoint.class, Group.class,
-				HealthcareService.class, Location.class, NamingSystem.class, Organization.class, Patient.class,
-				PractitionerRole.class, Practitioner.class, Provenance.class, ResearchStudy.class,
-				StructureDefinition.class, Subscription.class, Task.class, ValueSet.class);
+		var resources = Arrays.asList(ActivityDefinition.class, Binary.class, Bundle.class, CodeSystem.class,
+				Endpoint.class, Group.class, HealthcareService.class, Location.class, NamingSystem.class,
+				Organization.class, Patient.class, PractitionerRole.class, Practitioner.class, Provenance.class,
+				ResearchStudy.class, StructureDefinition.class, Subscription.class, Task.class, ValueSet.class);
 
 		var searchParameters = new HashMap<Class<? extends Resource>, List<CapabilityStatementRestResourceSearchParamComponent>>();
 		var revIncludeParameters = new HashMap<Class<? extends Resource>, List<Class<? extends AbstractRevIncludeParameterFactory>>>();
+
+		var activityDefinitionUrl = createSearchParameter(ActivityDefinitionUrl.class);
+		var activityDefinitionIdentifier = createSearchParameter(ActivityDefinitionIdentifier.class);
+		var activityDefinitionVersion = createSearchParameter(ActivityDefinitionVersion.class);
+		var activityDefinitionName = createSearchParameter(ActivityDefinitionName.class);
+		var activityDefinitionStatus = createSearchParameter(ActivityDefinitionStatus.class);
+		searchParameters.put(ActivityDefinition.class,
+				Arrays.asList(activityDefinitionUrl, activityDefinitionIdentifier, activityDefinitionVersion,
+						activityDefinitionName, activityDefinitionStatus));
 
 		var binaryContentType = createSearchParameter(BinaryContentType.class);
 		searchParameters.put(Binary.class, Arrays.asList(binaryContentType));
@@ -199,14 +222,17 @@ public class ConformanceServiceImpl extends AbstractServiceImpl implements Confo
 		var codeSystemIdentifier = createSearchParameter(CodeSystemIdentifier.class);
 		var codeSystemUrl = createSearchParameter(CodeSystemUrl.class);
 		var codeSystemVersion = createSearchParameter(CodeSystemVersion.class);
-		searchParameters.put(CodeSystem.class, Arrays.asList(codeSystemIdentifier, codeSystemUrl, codeSystemVersion));
+		var codeSystemStatus = createSearchParameter(CodeSystemStatus.class);
+		searchParameters.put(CodeSystem.class,
+				Arrays.asList(codeSystemIdentifier, codeSystemUrl, codeSystemVersion, codeSystemStatus));
 
+		var endpointAddress = createSearchParameter(EndpointAddress.class);
 		var endpointIdentifier = createSearchParameter(EndpointIdentifier.class);
 		var endpointName = createSearchParameter(EndpointName.class);
 		var endpointOrganization = createSearchParameter(EndpointOrganization.class);
 		var endpointStatus = createSearchParameter(EndpointStatus.class);
 		searchParameters.put(Endpoint.class,
-				Arrays.asList(endpointIdentifier, endpointName, endpointOrganization, endpointStatus));
+				Arrays.asList(endpointAddress, endpointIdentifier, endpointName, endpointOrganization, endpointStatus));
 		revIncludeParameters.put(Endpoint.class, Collections.singletonList(OrganizationEndpointRevInclude.class));
 
 		// Group
@@ -242,24 +268,30 @@ public class ConformanceServiceImpl extends AbstractServiceImpl implements Confo
 
 		var practitionerRoleActive = createSearchParameter(PractitionerRoleActive.class);
 		var practitionerRoleIdentifier = createSearchParameter(PractitionerRoleIdentifier.class);
-		searchParameters.put(PractitionerRole.class, Arrays.asList(practitionerRoleActive, practitionerRoleIdentifier));
+		var practitionerRoleOrganization = createSearchParameter(PractitionerRoleOrganization.class);
+		var practitionerRolePractitioner = createSearchParameter(PractitionerRolePractitioner.class);
+		searchParameters.put(PractitionerRole.class, Arrays.asList(practitionerRoleActive, practitionerRoleIdentifier,
+				practitionerRoleOrganization, practitionerRolePractitioner));
 
 		var researchStudyIdentifier = createSearchParameter(ResearchStudyIdentifier.class);
 		var researchStudyEnrollment = createSearchParameter(ResearchStudyEnrollment.class);
-		searchParameters.put(ResearchStudy.class, Arrays.asList(researchStudyIdentifier, researchStudyEnrollment));
+		var researchStudyPrincipalInvestigator = createSearchParameter(ResearchStudyPrincipalInvestigator.class);
+		searchParameters.put(ResearchStudy.class,
+				Arrays.asList(researchStudyIdentifier, researchStudyEnrollment, researchStudyPrincipalInvestigator));
 
 		var structureDefinitionIdentifier = createSearchParameter(StructureDefinitionIdentifier.class);
+		var structureDefinitionStatus = createSearchParameter(StructureDefinitionStatus.class);
 		var structureDefinitionUrl = createSearchParameter(StructureDefinitionUrl.class);
 		var structureDefinitionVersion = createSearchParameter(StructureDefinitionVersion.class);
-		searchParameters.put(StructureDefinition.class,
-				Arrays.asList(structureDefinitionIdentifier, structureDefinitionUrl, structureDefinitionVersion));
+		searchParameters.put(StructureDefinition.class, Arrays.asList(structureDefinitionIdentifier,
+				structureDefinitionStatus, structureDefinitionUrl, structureDefinitionVersion));
 
 		var subscriptionCriteria = createSearchParameter(SubscriptionCriteria.class);
+		var subscriptionPayload = createSearchParameter(SubscriptionPayload.class);
 		var subscriptionStatus = createSearchParameter(SubscriptionStatus.class);
-		var subscriptionChannelPayload = createSearchParameter(SubscriptionChannelPayload.class);
-		var subscriptionChannelType = createSearchParameter(SubscriptionChannelType.class);
-		searchParameters.put(Subscription.class, Arrays.asList(subscriptionCriteria, subscriptionStatus,
-				subscriptionChannelPayload, subscriptionChannelType));
+		var subscriptionType = createSearchParameter(SubscriptionType.class);
+		searchParameters.put(Subscription.class,
+				Arrays.asList(subscriptionCriteria, subscriptionPayload, subscriptionStatus, subscriptionType));
 
 		var taskIdentifier = createSearchParameter(TaskIdentifier.class);
 		var taskRequester = createSearchParameter(TaskRequester.class);
@@ -269,7 +301,9 @@ public class ConformanceServiceImpl extends AbstractServiceImpl implements Confo
 		var valueSetIdentifier = createSearchParameter(ValueSetIdentifier.class);
 		var valueSetUrl = createSearchParameter(ValueSetUrl.class);
 		var valueSetVersion = createSearchParameter(ValueSetVersion.class);
-		searchParameters.put(ValueSet.class, Arrays.asList(valueSetIdentifier, valueSetUrl, valueSetVersion));
+		var valueSetStatus = createSearchParameter(ValueSetStatus.class);
+		searchParameters.put(ValueSet.class,
+				Arrays.asList(valueSetIdentifier, valueSetUrl, valueSetVersion, valueSetStatus));
 
 		var operations = new HashMap<Class<? extends DomainResource>, List<CapabilityStatementRestResourceOperationComponent>>();
 

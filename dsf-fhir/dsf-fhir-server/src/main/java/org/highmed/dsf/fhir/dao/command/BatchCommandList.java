@@ -1,15 +1,15 @@
 package org.highmed.dsf.fhir.dao.command;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.stream.IntStream;
 
 import javax.sql.DataSource;
 import javax.ws.rs.WebApplicationException;
@@ -42,14 +42,24 @@ public class BatchCommandList implements CommandList
 			this.commands.addAll(commands);
 	}
 
+	private boolean hasModifyingCommands()
+	{
+		return commands.stream()
+				.anyMatch(c -> c instanceof CreateCommand || c instanceof UpdateCommand || c instanceof DeleteCommand);
+	}
+
 	@Override
 	public Bundle execute() throws WebApplicationException
 	{
 		try (Connection connection = dataSource.getConnection())
 		{
-			if (commands.stream().anyMatch(
-					c -> c instanceof CreateCommand || c instanceof UpdateCommand || c instanceof DeleteCommand))
-				connection.setReadOnly(false);
+			boolean initialReadOnly = connection.isReadOnly();
+			boolean initialAutoCommit = connection.getAutoCommit();
+			int initialTransactionIsolationLevel = connection.getTransactionIsolation();
+			logger.debug(
+					"Running batch with DB connection setting: read-only {}, auto-commit {}, transaction-isolation-level {}",
+					initialReadOnly, initialAutoCommit,
+					getTransactionIsolationLevelString(initialTransactionIsolationLevel));
 
 			Map<Integer, Exception> caughtExceptions = new HashMap<Integer, Exception>(
 					(int) (commands.size() / 0.75) + 1);
@@ -57,14 +67,34 @@ public class BatchCommandList implements CommandList
 
 			commands.forEach(preExecute(idTranslationTable, caughtExceptions));
 
-			IntStream.range(0, commands.size()).filter(index -> !caughtExceptions.containsKey(index))
-					.mapToObj(index -> commands.get(index))
-					.forEach(execute(idTranslationTable, connection, caughtExceptions));
+			if (hasModifyingCommands())
+			{
+				logger.debug(
+						"Elevating DB connection setting to: read-only {}, auto-commit {}, transaction-isolation-level {}",
+						false, false, getTransactionIsolationLevelString(Connection.TRANSACTION_REPEATABLE_READ));
+
+				connection.setReadOnly(false);
+				connection.setAutoCommit(false);
+				connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
+			}
+
+			commands.forEach(execute(idTranslationTable, connection, caughtExceptions));
+
+			if (hasModifyingCommands())
+			{
+				logger.debug(
+						"Reseting DB connection setting to: read-only {}, auto-commit {}, transaction-isolation-level {}",
+						initialReadOnly, initialAutoCommit,
+						getTransactionIsolationLevelString(initialTransactionIsolationLevel));
+
+				connection.setReadOnly(initialReadOnly);
+				connection.setAutoCommit(initialAutoCommit);
+				connection.setTransactionIsolation(initialTransactionIsolationLevel);
+			}
 
 			Map<Integer, BundleEntryComponent> results = new HashMap<>((int) ((commands.size() / 0.75) + 1));
 
-			IntStream.range(0, commands.size()).filter(index -> !caughtExceptions.containsKey(index))
-					.mapToObj(index -> commands.get(index)).forEach(postExecute(connection, caughtExceptions, results));
+			commands.forEach(postExecute(connection, caughtExceptions, results));
 
 			Bundle result = new Bundle();
 			result.setType(BundleType.BATCHRESPONSE);
@@ -78,6 +108,26 @@ public class BatchCommandList implements CommandList
 		catch (Exception e)
 		{
 			throw exceptionHandler.internalServerErrorBundleTransaction(e);
+		}
+	}
+
+	private String getTransactionIsolationLevelString(int level)
+	{
+		switch (level)
+		{
+			case Connection.TRANSACTION_NONE:
+				return "NONE";
+			case Connection.TRANSACTION_READ_UNCOMMITTED:
+				return "READ_UNCOMMITTED";
+			case Connection.TRANSACTION_READ_COMMITTED:
+				return "READ_COMMITTED";
+			case Connection.TRANSACTION_REPEATABLE_READ:
+				return "REPEATABLE_READ";
+			case Connection.TRANSACTION_SERIALIZABLE:
+				return "SERIALIZABLE";
+
+			default:
+				return "?";
 		}
 	}
 
@@ -141,7 +191,7 @@ public class BatchCommandList implements CommandList
 				{
 					logger.debug("Running execute of command {} for entry at index {}", command.getClass().getName(),
 							command.getIndex());
-					command.execute(Collections.unmodifiableMap(idTranslationTable), connection);
+					command.execute(idTranslationTable, connection);
 				}
 				else
 				{
@@ -150,15 +200,31 @@ public class BatchCommandList implements CommandList
 							caughtExceptions.get(command.getIndex()).getClass().getName() + ": "
 									+ caughtExceptions.get(command.getIndex()).getMessage());
 				}
+
+				if (!connection.getAutoCommit())
+					connection.commit();
 			}
 			catch (Exception e)
 			{
-				logger.warn("Error while executing command " + command.getClass().getName() + " for entry at index "
-						+ command.getIndex(), e);
+				logger.warn("Error while executing command " + command.getClass().getName()
+						+ ", rolling back transaction for entry at index " + command.getIndex(), e);
 				caughtExceptions.put(command.getIndex(), e);
+
+				try
+				{
+					if (!connection.getAutoCommit())
+						connection.rollback();
+				}
+				catch (SQLException e1)
+				{
+					logger.warn(
+							"Error while executing command " + command.getClass().getName()
+									+ ", error while rolling back transaction for entry at index " + command.getIndex(),
+							e1);
+					caughtExceptions.put(command.getIndex(), e1);
+				}
 			}
 		};
-
 	}
 
 	private Consumer<Command> postExecute(Connection connection, Map<Integer, Exception> caughtExceptions,
@@ -172,7 +238,9 @@ public class BatchCommandList implements CommandList
 				{
 					logger.debug("Running post-execute of command {} for entry at index {}",
 							command.getClass().getName(), command.getIndex());
-					results.put(command.getIndex(), command.postExecute(connection));
+
+					Optional<BundleEntryComponent> optResult = command.postExecute(connection);
+					optResult.ifPresent(result -> results.put(command.getIndex(), result));
 				}
 				else
 				{

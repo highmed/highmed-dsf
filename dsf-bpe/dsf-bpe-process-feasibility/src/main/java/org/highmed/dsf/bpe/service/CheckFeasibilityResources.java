@@ -10,6 +10,7 @@ import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
+import org.highmed.dsf.fhir.variables.FhirResourcesList;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
@@ -26,8 +27,8 @@ public class CheckFeasibilityResources extends AbstractServiceDelegate
 	{
 		ResearchStudy researchStudy = (ResearchStudy) execution.getVariable(Constants.VARIABLE_RESEARCH_STUDY);
 
-		@SuppressWarnings("unchecked")
-		List<Group> cohorts = (List<Group>) execution.getVariable(Constants.VARIABLE_COHORTS);
+		List<Group> cohorts = ((FhirResourcesList) execution.getVariable(Constants.VARIABLE_COHORTS))
+				.getResourcesAndCast();
 
 		checkNumberOfParticipatingMedics(researchStudy);
 		checkNumberOfCohortDefinitions(cohorts);

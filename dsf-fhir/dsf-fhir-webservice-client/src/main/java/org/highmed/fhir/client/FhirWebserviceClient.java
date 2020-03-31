@@ -25,9 +25,13 @@ public interface FhirWebserviceClient
 
 	void deleteConditionaly(Class<? extends Resource> resourceClass, Map<String, List<String>> criteria);
 
+	Resource read(String resourceTypeName, String id);
+
 	<R extends Resource> R read(Class<R> resourceType, String id);
 
 	<R extends Resource> boolean exists(Class<R> resourceType, String id);
+
+	Resource read(String resourceTypeName, String id, String version);
 
 	<R extends Resource> R read(Class<R> resourceType, String id, String version);
 

@@ -5,9 +5,16 @@
 		<Console name="CONSOLE" target="SYSTEM_OUT">
 			<PatternLayout pattern="%p\t%t - %C{1}.%M(%L) | %m%n"/>
 		</Console>
+		<Console name="AUDIT" target="SYSTEM_ERR">
+			<PatternLayout pattern="%p\t%t - %C{1}.%M(%L) | %m%n"/>
+		</Console>
 	</Appenders>
 
 	<Loggers>
+		<Logger name="dsf-audit-logger" level="INFO" additivity="false">
+			<AppenderRef ref="AUDIT"/>
+		</Logger>
+		
 		<Logger name="de.rwh" level="TRACE"/>
 		<Logger name="org.highmed" level="TRACE"/>
 		<Logger name="org.apache" level="WARN"/>
@@ -17,7 +24,7 @@
 		<Logger name="com.sun.jersey" level="WARN"/>
 		<Logger name="liquibase" level="WARN"/>
 		<Logger name="ca.uhn.hl7v2" level="WARN"/>
-
+		
 		<Root level="WARN">
 			<AppenderRef ref="CONSOLE"/>
 		</Root>

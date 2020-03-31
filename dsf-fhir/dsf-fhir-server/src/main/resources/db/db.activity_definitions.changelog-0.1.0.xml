@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<property name="json" value="JSONB" dbms="postgresql" />
+	<property name="json" value="varchar(5000)" dbms="h2" />
+
+	<changeSet author="hhund" id="db.activity_definitions.changelog-0.1.0">
+		<createTable tableName="activity_definitions">
+			<column name="activity_definition_id" type="UUID">
+				<constraints nullable="false" />
+			</column>
+			<column name="version" type="BIGINT" defaultValueNumeric="1">
+				<constraints nullable="false" />
+			</column>
+			<column name="deleted" type="BOOLEAN" defaultValue="false">
+				<constraints nullable="false" />
+			</column>
+			<column name="activity_definition" type="${json}">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addPrimaryKey tableName="activity_definitions" columnNames="activity_definition_id, version" />
+
+		<sql dbms="postgresql">
+			ALTER TABLE activity_definitions OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE activity_definitions TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE ON TABLE activity_definitions TO ${db.server_users_group};
+			CREATE INDEX activity_definition_id_index ON activity_definitions USING btree (activity_definition_id);
+			CREATE INDEX activity_definition_index ON activity_definitions USING gin (activity_definition);
+			CREATE INDEX activity_definition_id_version_index ON activity_definitions USING btree (activity_definition_id, version);
+		</sql>
+
+		<createView viewName="current_activity_definitions" replaceIfExists="true">
+			SELECT DISTINCT ON (activity_definition_id) activity_definition_id, version, activity_definition
+			FROM activity_definitions WHERE NOT deleted ORDER BY activity_definition_id, version DESC
+		</createView>
+
+		<sql dbms="postgresql">
+			ALTER TABLE current_activity_definitions OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_activity_definitions TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_activity_definitions TO ${db.server_users_group};
+		</sql>
+	</changeSet>
+</databaseChangeLog>

@@ -15,6 +15,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.Response.Status;
 
+import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.ResourceDao;
 import org.highmed.dsf.fhir.dao.exception.ResourceNotFoundException;
 import org.highmed.dsf.fhir.event.EventGenerator;
@@ -25,6 +26,8 @@ import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.highmed.dsf.fhir.search.PartialResult;
 import org.highmed.dsf.fhir.search.SearchQuery;
 import org.highmed.dsf.fhir.search.SearchQueryParameterError;
+import org.highmed.dsf.fhir.service.ReferenceExtractor;
+import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent;
@@ -41,20 +44,28 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 {
 	private static final Logger logger = LoggerFactory.getLogger(UpdateCommand.class);
 
-	protected final ResponseGenerator responseGenerator;
+	private final ResponseGenerator responseGenerator;
+	private final ResolveReferencesHelper<R> resolveReferencesHelper;
+
 	protected final EventManager eventManager;
 	protected final EventGenerator eventGenerator;
 
 	protected UUID id;
 	protected R updatedResource;
 
-	public UpdateCommand(int index, Bundle bundle, BundleEntryComponent entry, String serverBase, R resource, D dao,
-			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
-			ResponseGenerator responseGenerator, EventManager eventManager, EventGenerator eventGenerator)
+	public UpdateCommand(int index, User user, Bundle bundle, BundleEntryComponent entry, String serverBase,
+			AuthorizationHelper authorizationHelper, R resource, D dao, ExceptionHandler exceptionHandler,
+			ParameterConverter parameterConverter, ResponseGenerator responseGenerator,
+			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver, EventManager eventManager,
+			EventGenerator eventGenerator)
 	{
-		super(3, index, bundle, entry, serverBase, resource, dao, exceptionHandler, parameterConverter);
+		super(3, index, user, bundle, entry, serverBase, authorizationHelper, resource, dao, exceptionHandler,
+				parameterConverter);
 
 		this.responseGenerator = responseGenerator;
+		resolveReferencesHelper = new ResolveReferencesHelper<R>(index, user, serverBase, referenceExtractor,
+				referenceResolver, responseGenerator);
+
 		this.eventManager = eventManager;
 		this.eventGenerator = eventGenerator;
 	}
@@ -62,8 +73,10 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	@Override
 	public void preExecute(Map<String, IdType> idTranslationTable)
 	{
-		UriComponents componentes = UriComponentsBuilder.fromUriString(entry.getRequest().getUrl()).build();
-		if (componentes.getPathSegments().size() == 2 && componentes.getQueryParams().isEmpty())
+		UriComponents eruComponentes = UriComponentsBuilder.fromUriString(entry.getRequest().getUrl()).build();
+
+		// check standard update request url: Patient/123
+		if (eruComponentes.getPathSegments().size() == 2 && eruComponentes.getQueryParams().isEmpty())
 		{
 			if (entry.getFullUrl().startsWith(URL_UUID_PREFIX))
 				throw new WebApplicationException(
@@ -82,12 +95,14 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 
 			if (!expectedfullUrl.equals(entry.getFullUrl()))
 				throw new WebApplicationException(responseGenerator.badBundleEntryFullUrl(index, entry.getFullUrl()));
-			else if (!expectedResourceTypeName.equals(componentes.getPathSegments().get(0))
-					|| !expectedId.equals(componentes.getPathSegments().get(1)))
+			else if (!expectedResourceTypeName.equals(eruComponentes.getPathSegments().get(0))
+					|| !expectedId.equals(eruComponentes.getPathSegments().get(1)))
 				throw new WebApplicationException(
 						responseGenerator.badUpdateRequestUrl(index, entry.getRequest().getUrl()));
 		}
-		else if (componentes.getPathSegments().size() == 1 && !componentes.getQueryParams().isEmpty())
+
+		// check conditional update request url: Patient?...
+		else if (eruComponentes.getPathSegments().size() == 1 && !eruComponentes.getQueryParams().isEmpty())
 		{
 			if (!entry.getFullUrl().startsWith(URL_UUID_PREFIX))
 				throw new WebApplicationException(
@@ -99,6 +114,8 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 				throw new WebApplicationException(responseGenerator.badBundleEntryFullUrlVsResourceId(index,
 						entry.getFullUrl(), resource.getIdElement().getValue()));
 		}
+
+		// all other request urls
 		else
 			throw new WebApplicationException(
 					responseGenerator.badUpdateRequestUrl(index, entry.getRequest().getUrl()));
@@ -137,11 +154,38 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 			throw new WebApplicationException(responseGenerator.nonMatchingResourceTypeAndRequestUrlInBundle(index,
 					resourceTypeName, entry.getRequest().getUrl()));
 
+		checkUpdateAllowed(idTranslationTable, connection, user, resource);
+
 		Optional<Long> ifMatch = Optional.ofNullable(entry.getRequest().getIfMatch())
 				.flatMap(parameterConverter::toEntityTag).flatMap(parameterConverter::toVersion);
 
-		updatedResource = exceptionHandler.handleSqlExAndResourceNotFoundExForUpdateAsCreateAndResouceVersionNonMatchEx(
-				resourceTypeName, () -> dao.updateWithTransaction(connection, resource, ifMatch.orElse(null)));
+		updatedResource = exceptionHandler.handleSqlExAndResourceNotFoundExAndResouceVersionNonMatchEx(resourceTypeName,
+				() -> dao.updateWithTransaction(connection, resource, ifMatch.orElse(null)));
+	}
+
+	private void checkUpdateAllowed(Map<String, IdType> idTranslationTable, Connection connection, User user,
+			R newResource)
+	{
+		String resourceTypeName = newResource.getResourceType().name();
+		String id = newResource.getIdElement().getIdPart();
+
+		Optional<R> dbResource = exceptionHandler.handleSqlAndResourceDeletedException(resourceTypeName,
+				() -> dao.readWithTransaction(connection, parameterConverter.toUuid(resourceTypeName, id)));
+
+		if (dbResource.isEmpty())
+		{
+			audit.info("Create as Update of non existing resource {} denied for user '{}'", resourceTypeName + "/" + id,
+					user.getName());
+			throw new WebApplicationException(
+					responseGenerator.updateAsCreateNotAllowed(resourceTypeName, resourceTypeName + "/" + id));
+		}
+		else
+		{
+			resolveReferencesHelper.resolveReferencesIgnoreAndLogExceptions(idTranslationTable, connection, resource);
+
+			R oldResource = dbResource.get();
+			authorizationHelper.checkUpdateAllowed(connection, user, oldResource, newResource);
+		}
 	}
 
 	private void updateByCondition(Map<String, IdType> idTranslationTable, Connection connection,
@@ -160,7 +204,7 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 					.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 		}
 
-		SearchQuery<R> query = dao.createSearchQuery(1, 1);
+		SearchQuery<R> query = dao.createSearchQuery(user, 1, 1);
 		query.configureParameters(queryParameters);
 
 		List<SearchQueryParameterError> unsupportedParams = query.getUnsupportedQueryParameters(queryParameters);
@@ -175,6 +219,10 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		if (result.getOverallCount() <= 0
 				&& (!resource.hasId() || resource.getIdElement().getValue().startsWith(URL_UUID_PREFIX)))
 		{
+			resolveReferencesHelper.resolveReferencesIgnoreAndLogExceptions(idTranslationTable, connection, resource);
+
+			authorizationHelper.checkCreateAllowed(connection, user, resource);
+
 			id = UUID.randomUUID();
 			idTranslationTable.put(entry.getFullUrl(),
 					new IdType(resource.getResourceType().toString(), id.toString()));
@@ -195,24 +243,28 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 			R dbResource = result.getPartialResult().get(0);
 			IdType dbResourceId = dbResource.getIdElement();
 
-			// BaseUrl - The server base URL (e.g. "http://example.com/fhir")
-			// ResourceType - The resource type (e.g. "Patient")
-			// IdPart - The ID (e.g. "123")
-			// Version - The version ID ("e.g. "456")
+			// update: resource has no id or resource has temporary id
 			if (!resource.hasId() || resource.getIdElement().getValue().startsWith(URL_UUID_PREFIX))
 			{
 				resource.setIdElement(dbResourceId);
+
+				// more security checks and audit log in update method
+				updateById(idTranslationTable, connection, resourceTypeName, resource.getIdElement().getIdPart());
+
 				idTranslationTable.put(entry.getFullUrl(),
 						new IdType(resource.getResourceType().toString(), dbResource.getIdElement().getIdPart()));
-				updateById(idTranslationTable, connection, resourceTypeName, resource.getIdElement().getIdPart());
 			}
+			// update: resource has same id
 			else if (resource.hasId()
 					&& (!resource.getIdElement().hasBaseUrl()
 							|| serverBase.equals(resource.getIdElement().getBaseUrl()))
 					&& (!resource.getIdElement().hasResourceType()
 							|| resourceTypeName.equals(resource.getIdElement().getResourceType()))
 					&& (dbResourceId.getIdPart().equals(resource.getIdElement().getIdPart())))
+			{
+				// more security checks and audit log in update method
 				updateById(idTranslationTable, connection, resourceTypeName, resource.getIdElement().getIdPart());
+			}
 			else
 				// TODO bundle specific error
 				throw new WebApplicationException(responseGenerator.badRequestIdsNotMatching(
@@ -229,7 +281,7 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	}
 
 	@Override
-	public BundleEntryComponent postExecute(Connection connection)
+	public Optional<BundleEntryComponent> postExecute(Connection connection)
 	{
 		try
 		{
@@ -253,7 +305,7 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		response.setEtag(new EntityTag(updatedResource.getMeta().getVersionId(), true).toString());
 		response.setLastModified(updatedResource.getMeta().getLastUpdated());
 
-		return resultEntry;
+		return Optional.of(resultEntry);
 	}
 
 	private R latestOrErrorIfDeletedOrNotFound(Connection connection, Resource resource) throws Exception

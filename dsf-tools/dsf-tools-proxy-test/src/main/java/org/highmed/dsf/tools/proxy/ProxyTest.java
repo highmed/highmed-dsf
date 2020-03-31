@@ -19,7 +19,7 @@ public class ProxyTest
 		if ((cons = System.console()) != null && (passwd = cons.readPassword("[%s]", "Password:")) != null)
 		{
 			TestClient client = new TestClient(args[0], args.length > 1 ? args[1] : null,
-					args.length > 2 ? args[2] : null, passwd != null ? String.valueOf(passwd) : null);
+					args.length > 2 ? args[2] : null, passwd);
 			client.testBaseUrl();
 
 			java.util.Arrays.fill(passwd, ' ');

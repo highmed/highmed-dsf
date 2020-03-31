@@ -1,51 +1,48 @@
 package org.highmed.dsf.fhir.webservice.secure;
 
 import java.util.Objects;
-import java.util.function.Function;
 
 import javax.ws.rs.core.Response;
 
-import org.highmed.dsf.fhir.authentication.UserProvider;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
-import org.highmed.dsf.fhir.webservice.specification.BasicService;
+import org.highmed.dsf.fhir.service.ReferenceResolver;
+import org.highmed.dsf.fhir.webservice.base.AbstractDelegatingBasicService;
+import org.highmed.dsf.fhir.webservice.base.BasicService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-public abstract class AbstractServiceSecure<S extends BasicService> implements BasicService, InitializingBean
+public abstract class AbstractServiceSecure<S extends BasicService> extends AbstractDelegatingBasicService<S>
+		implements BasicService, InitializingBean
 {
-	protected final S delegate;
+	protected static final Logger audit = LoggerFactory.getLogger("dsf-audit-logger");
+
+	protected final String serverBase;
 	protected final ResponseGenerator responseGenerator;
+	protected final ReferenceResolver referenceResolver;
 
-	protected UserProvider provider;
-
-	public AbstractServiceSecure(S delegate, ResponseGenerator responseGenerator)
+	public AbstractServiceSecure(S delegate, String serverBase, ResponseGenerator responseGenerator,
+			ReferenceResolver referenceResolver)
 	{
-		this.delegate = delegate;
+		super(delegate);
+
+		this.serverBase = serverBase;
+		this.referenceResolver = referenceResolver;
 		this.responseGenerator = responseGenerator;
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
-		Objects.requireNonNull(delegate, "delegate");
+		super.afterPropertiesSet();
+
+		Objects.requireNonNull(serverBase, "serverBase");
 		Objects.requireNonNull(responseGenerator, "responseGenerator");
+		Objects.requireNonNull(referenceResolver, "referenceResolver");
 	}
 
-	@Override
-	public final void setUserProvider(UserProvider provider)
+	protected final Response forbidden(String operation)
 	{
-		delegate.setUserProvider(provider);
-
-		this.provider = provider;
-	}
-
-	@Override
-	public final String getPath()
-	{
-		return delegate.getPath();
-	}
-
-	protected final Function<String, Response> forbidden(String operation)
-	{
-		return reason -> responseGenerator.forbiddenNotAllowed(operation, provider.getCurrentUser(), reason);
+		return responseGenerator.forbiddenNotAllowed(operation, userProvider.getCurrentUser());
 	}
 }

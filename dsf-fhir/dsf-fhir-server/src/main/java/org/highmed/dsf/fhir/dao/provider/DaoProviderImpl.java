@@ -1,10 +1,15 @@
 package org.highmed.dsf.fhir.dao.provider;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import javax.sql.DataSource;
+
+import org.highmed.dsf.fhir.dao.ActivityDefinitionDao;
 import org.highmed.dsf.fhir.dao.BinaryDao;
 import org.highmed.dsf.fhir.dao.BundleDao;
 import org.highmed.dsf.fhir.dao.CodeSystemDao;
@@ -25,6 +30,7 @@ import org.highmed.dsf.fhir.dao.StructureDefinitionSnapshotDao;
 import org.highmed.dsf.fhir.dao.SubscriptionDao;
 import org.highmed.dsf.fhir.dao.TaskDao;
 import org.highmed.dsf.fhir.dao.ValueSetDao;
+import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -50,6 +56,8 @@ import ca.uhn.fhir.model.api.annotation.ResourceDef;
 
 public class DaoProviderImpl implements DaoProvider, InitializingBean
 {
+	private final DataSource dataSource;
+	private final ActivityDefinitionDao activityDefinitionDao;
 	private final BinaryDao binaryDao;
 	private final BundleDao bundleDao;
 	private final CodeSystemDao codeSystemDao;
@@ -73,15 +81,17 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	private final Map<Class<? extends Resource>, ResourceDao<?>> daosByResourecClass = new HashMap<>();
 	private final Map<String, ResourceDao<?>> daosByResourceTypeName = new HashMap<>();
 
-	public DaoProviderImpl(BinaryDao binaryDao, BundleDao bundleDao, CodeSystemDao codeSystemDao,
-			EndpointDao endpointDao, GroupDao groupDao, HealthcareServiceDao healthcareServiceDao,
-			LocationDao locationDao, NamingSystemDao namingSystemDao, OrganizationDao organizationDao,
-			PatientDao patientDao, PractitionerDao practitionerDao, PractitionerRoleDao practitionerRoleDao,
-			ProvenanceDao provenanceDao, ResearchStudyDao researchStudyDao,
+	public DaoProviderImpl(DataSource dataSource, ActivityDefinitionDao activityDefinitionDao, BinaryDao binaryDao,
+			BundleDao bundleDao, CodeSystemDao codeSystemDao, EndpointDao endpointDao, GroupDao groupDao,
+			HealthcareServiceDao healthcareServiceDao, LocationDao locationDao, NamingSystemDao namingSystemDao,
+			OrganizationDao organizationDao, PatientDao patientDao, PractitionerDao practitionerDao,
+			PractitionerRoleDao practitionerRoleDao, ProvenanceDao provenanceDao, ResearchStudyDao researchStudyDao,
 			StructureDefinitionDao structureDefinitionDao,
 			StructureDefinitionSnapshotDao structureDefinitionSnapshotDao, SubscriptionDao subscriptionDao,
 			TaskDao taskDao, ValueSetDao valueSetDao)
 	{
+		this.dataSource = dataSource;
+		this.activityDefinitionDao = activityDefinitionDao;
 		this.binaryDao = binaryDao;
 		this.bundleDao = bundleDao;
 		this.codeSystemDao = codeSystemDao;
@@ -102,6 +112,7 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 		this.taskDao = taskDao;
 		this.valueSetDao = valueSetDao;
 
+		daosByResourecClass.put(ActivityDefinition.class, activityDefinitionDao);
 		daosByResourecClass.put(Binary.class, binaryDao);
 		daosByResourecClass.put(Bundle.class, bundleDao);
 		daosByResourecClass.put(CodeSystem.class, codeSystemDao);
@@ -127,6 +138,7 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
+		Objects.requireNonNull(activityDefinitionDao, "activityDefinitionDao");
 		Objects.requireNonNull(binaryDao, "binaryDao");
 		Objects.requireNonNull(bundleDao, "bundleDao");
 		Objects.requireNonNull(codeSystemDao, "codeSystemDao");
@@ -146,6 +158,34 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 		Objects.requireNonNull(subscriptionDao, "subscriptionDao");
 		Objects.requireNonNull(taskDao, "taskDao");
 		Objects.requireNonNull(valueSetDao, "valueSetDao");
+	}
+
+	@Override
+	public Connection newReadOnlyAutoCommitTransaction() throws SQLException
+	{
+		Connection connection = dataSource.getConnection();
+
+		if (!connection.isReadOnly() || !connection.getAutoCommit())
+			throw new IllegalStateException("read only, auto commit connection expected from data source");
+
+		return connection;
+	}
+
+	@Override
+	public Connection newReadWriteTransaction() throws SQLException
+	{
+		Connection connection = dataSource.getConnection();
+		connection.setReadOnly(false);
+		connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
+		connection.setAutoCommit(false);
+
+		return connection;
+	}
+
+	@Override
+	public ActivityDefinitionDao getActivityDefinitionDao()
+	{
+		return activityDefinitionDao;
 	}
 
 	@Override
@@ -263,9 +303,9 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public <R extends Resource> Optional<? extends ResourceDao<R>> getDao(Class<R> resourceClass)
 	{
+		@SuppressWarnings("unchecked")
 		ResourceDao<R> value = (ResourceDao<R>) daosByResourecClass.get(resourceClass);
 		return Optional.ofNullable(value);
 	}

@@ -27,6 +27,12 @@ public class UserProvider
 		return (User) httpRequest.get().getSession().getAttribute(AuthenticationFilter.USER_PROPERTY);
 	}
 
+	/**
+	 * @param expectedRoles
+	 * @throws WebApplicationException
+	 *             with status {@link Status#UNAUTHORIZED} if there is no current user, with status
+	 *             {@link Status#FORBIDDEN} if the current user does not have one of the provided role
+	 */
 	public void checkCurrentUserHasOneOfRoles(UserRole... expectedRoles)
 	{
 		User user = getCurrentUser();
@@ -45,4 +51,5 @@ public class UserProvider
 			throw new WebApplicationException(Status.FORBIDDEN);
 		}
 	}
+
 }

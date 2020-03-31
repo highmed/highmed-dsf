@@ -12,6 +12,7 @@ import org.highmed.dsf.fhir.dao.command.CommandList;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
+import org.highmed.dsf.fhir.webservice.base.AbstractBasicService;
 import org.highmed.dsf.fhir.webservice.specification.RootService;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -19,7 +20,7 @@ import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
 import org.springframework.beans.factory.InitializingBean;
 
-public class RootServiceImpl extends AbstractServiceImpl implements RootService, InitializingBean
+public class RootServiceImpl extends AbstractBasicService implements RootService, InitializingBean
 {
 	private final CommandFactory commandFactory;
 	private final ResponseGenerator responseGenerator;
@@ -60,7 +61,8 @@ public class RootServiceImpl extends AbstractServiceImpl implements RootService,
 	@Override
 	public Response handleBundle(Bundle bundle, UriInfo uri, HttpHeaders headers)
 	{
-		CommandList commands = exceptionHandler.handleBadBundleException(() -> commandFactory.createCommands(bundle));
+		CommandList commands = exceptionHandler
+				.handleBadBundleException(() -> commandFactory.createCommands(bundle, getCurrentUser()));
 
 		Bundle result = commands.execute(); // throws WebApplicationException
 
