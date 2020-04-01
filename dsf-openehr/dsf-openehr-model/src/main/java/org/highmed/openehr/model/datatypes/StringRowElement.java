@@ -21,4 +21,9 @@ public class StringRowElement implements RowElement
 	{
 		return getValue();
 	}
+
+	public static StringRowElement fromString(String value)
+	{
+		return new StringRowElement(value);
+	}
 }

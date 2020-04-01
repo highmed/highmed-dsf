@@ -21,4 +21,16 @@ public class DoubleRowElement implements RowElement
 	{
 		return String.valueOf(getValue());
 	}
+
+	public static DoubleRowElement fromString(String value)
+	{
+		try
+		{
+			return new DoubleRowElement(Double.valueOf(value));
+		}
+		catch (NumberFormatException e)
+		{
+			throw e;
+		}
+	}
 }

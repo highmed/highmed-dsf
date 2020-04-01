@@ -12,6 +12,7 @@
 		<module>dsf-fhir</module>
 		<module>dsf-tools</module>
 		<module>dsf-openehr</module>
+		<module>dsf-pseudonymization</module>
 	</modules>
 
 	<properties>

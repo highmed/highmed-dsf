@@ -21,4 +21,16 @@ public class IntegerRowElement implements RowElement
 	{
 		return String.valueOf(getValue());
 	}
+
+	public static IntegerRowElement fromString(String value)
+	{
+		try
+		{
+			return new IntegerRowElement(Integer.valueOf(value));
+		}
+		catch (NumberFormatException e)
+		{
+			throw e;
+		}
+	}
 }
