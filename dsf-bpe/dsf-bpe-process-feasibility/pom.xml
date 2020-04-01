@@ -8,7 +8,7 @@
 	<parent>
 		<artifactId>dsf-bpe-pom</artifactId>
 		<groupId>org.highmed.dsf</groupId>
-		<version>0.1.0</version>
+		<version>0.2.0-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
