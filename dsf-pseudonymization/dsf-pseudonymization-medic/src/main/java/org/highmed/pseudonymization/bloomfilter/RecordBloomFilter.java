@@ -2,22 +2,29 @@ package org.highmed.pseudonymization.bloomfilter;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class RecordBloomFilter
 {
 	private final int length;
-	private final byte[] seed;
+	private final byte[] permutationSeed;
 
 	private final List<FieldBloomFilter> fieldBloomFilters = new ArrayList<>();
 
 	private BitSet bitSet;
 
-	public RecordBloomFilter(byte[] seed, List<? extends FieldBloomFilter> fieldBloomFilters)
+	public RecordBloomFilter(byte[] permutationSeed, FieldBloomFilter... fieldBloomFilters)
 	{
-		this(calculateLength(fieldBloomFilters), seed, fieldBloomFilters);
+		this(permutationSeed, Arrays.asList(fieldBloomFilters));
+	}
+
+	public RecordBloomFilter(byte[] permutationSeed, List<? extends FieldBloomFilter> fieldBloomFilters)
+	{
+		this(calculateLength(fieldBloomFilters), permutationSeed, fieldBloomFilters);
 	}
 
 	private static int calculateLength(List<? extends FieldBloomFilter> fieldBloomFilters)
@@ -26,13 +33,18 @@ public class RecordBloomFilter
 				: fieldBloomFilters.stream().mapToInt(f -> (int) (f.length() / f.weight())).max().orElse(0);
 	}
 
-	public RecordBloomFilter(int length, byte[] seed, List<? extends FieldBloomFilter> fieldBloomFilters)
+	public RecordBloomFilter(int length, byte[] permutationSeed, FieldBloomFilter... fieldBloomFilters)
+	{
+		this(length, permutationSeed, Arrays.asList(fieldBloomFilters));
+	}
+
+	public RecordBloomFilter(int length, byte[] permutationSeed, List<? extends FieldBloomFilter> fieldBloomFilters)
 	{
 		if (fieldBloomFilters != null && fieldBloomFilters.stream().mapToDouble(f -> (double) f.weight()).sum() > 1)
 			throw new IllegalArgumentException(FieldBloomFilter.class.getName() + " weight sum <= 1 expected");
 
 		this.length = length;
-		this.seed = seed;
+		this.permutationSeed = Objects.requireNonNull(permutationSeed, "permutationSeed");
 
 		if (fieldBloomFilters != null)
 			this.fieldBloomFilters.addAll(fieldBloomFilters);
@@ -49,7 +61,7 @@ public class RecordBloomFilter
 	private BitSet createBitSet()
 	{
 		List<Boolean> bits = createSorted();
-		Collections.shuffle(bits, new SecureRandom(seed));
+		Collections.shuffle(bits, new SecureRandom(permutationSeed));
 
 		return toBitSet(bits);
 	}

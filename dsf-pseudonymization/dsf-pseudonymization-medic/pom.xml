@@ -18,13 +18,17 @@
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-openehr-model</artifactId>
-			<version>0.1.0-SNAPSHOT</version>
-			<scope>compile</scope>
 		</dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>de.hs-heilbronn.mi</groupId>
+			<artifactId>log4j2-utils</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 </project>
