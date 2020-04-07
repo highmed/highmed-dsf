@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNotNull;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
@@ -31,112 +30,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ResultSetTranslatorToTtpTest
 {
-	private static class IdatTestImpl implements Idat
-	{
-		final String medicId;
-		final String firstName;
-		final String lastName;
-		final String birthday;
-		final String sex;
-		final String street;
-		final String zipCode;
-		final String city;
-		final String country;
-		final String insuranceNumber;
-
-		IdatTestImpl(String medicId, String firstName, String lastName, String birthday, String sex, String street,
-				String zipCode, String city, String country, String insuranceNumber)
-		{
-			this.medicId = medicId;
-			this.firstName = firstName;
-			this.lastName = lastName;
-			this.birthday = birthday;
-			this.sex = sex;
-			this.street = street;
-			this.zipCode = zipCode;
-			this.city = city;
-			this.country = country;
-			this.insuranceNumber = insuranceNumber;
-		}
-
-		@Override
-		public String getMedicId()
-		{
-			return medicId;
-		}
-
-		@Override
-		public String getFirstName()
-		{
-			return firstName;
-		}
-
-		@Override
-		public String getLastName()
-		{
-			return lastName;
-		}
-
-		@Override
-		public String getBirthday()
-		{
-			return birthday;
-		}
-
-		@Override
-		public String getSex()
-		{
-			return sex;
-		}
-
-		@Override
-		public String getStreet()
-		{
-			return street;
-		}
-
-		@Override
-		public String getZipCode()
-		{
-			return zipCode;
-		}
-
-		@Override
-		public String getCity()
-		{
-			return city;
-		}
-
-		@Override
-		public String getCountry()
-		{
-			return country;
-		}
-
-		@Override
-		public String getInsuranceNumber()
-		{
-			return insuranceNumber;
-		}
-	}
-
-	private static class MasterPatientIndexClientTestImpl implements MasterPatientIndexClient
-	{
-		final Map<String, Idat> idats = new HashMap<>();
-
-		MasterPatientIndexClientTestImpl(Map<String, Idat> idats)
-		{
-			if (idats != null)
-				this.idats.putAll(idats);
-		}
-
-		@Override
-		public Idat fetchIdat(String ehrID)
-		{
-			return idats.get(ehrID);
-		}
-	}
-
 	private static final Logger logger = LoggerFactory.getLogger(ResultSetTranslatorToTtpTest.class);
 
 	@Test
