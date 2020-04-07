@@ -2,7 +2,7 @@ package org.highmed.pseudonymization.encoding;
 
 import org.highmed.openehr.model.structure.ResultSet;
 
-public interface ResultSetEncoder
+public interface ResultSetTranslator
 {
 	String EHRID_COLUMN_NAME = "EHRID";
 	String EHRID_COLUMN_PATH = "/ehr_id/value";
@@ -12,8 +12,6 @@ public interface ResultSetEncoder
 	String RBF_COLUMN_PATH = "/rbf/value";
 	String PSN_COLUMN_NAME = "PSN";
 	String PSN_COLUMN_PATH = "/psn/value";
-
-	ResultSet encode(ResultSet resultSet);
 	
-	ResultSet decode(ResultSet resultSet);
+	ResultSet translate(ResultSet resultSet);
 }

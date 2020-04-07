@@ -1,5 +1,6 @@
 package org.highmed.pseudonymization.encoding;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.nio.file.Files;
@@ -28,7 +29,7 @@ import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class ResultSetEncoderImplTest
+public class ResultSetTranslatorToTtpTest
 {
 	private static class IdatTestImpl implements Idat
 	{
@@ -136,10 +137,10 @@ public class ResultSetEncoderImplTest
 		}
 	}
 
-	private static final Logger logger = LoggerFactory.getLogger(ResultSetEncoderImplTest.class);
+	private static final Logger logger = LoggerFactory.getLogger(ResultSetTranslatorToTtpTest.class);
 
 	@Test
-	public void testEncodeForTtp() throws Exception
+	public void testTranslateForTtp() throws Exception
 	{
 		Random random = new Random();
 
@@ -166,23 +167,34 @@ public class ResultSetEncoderImplTest
 		SecretKey organizationKey = AesGcmUtil.generateAES256Key();
 		String researchStudyIdentifier = "researchStudy1";
 		SecretKey researchStudyKey = AesGcmUtil.generateAES256Key();
+
+		ResultSetTranslatorToTtp translator = new ResultSetTranslatorToTtp(organizationIdentifier, organizationKey,
+				researchStudyIdentifier, researchStudyKey, recordBloomFilterGenerator, masterPatientIndexClient);
+
 		ObjectMapper openEhrObjectMapper = OpenEhrObjectMapperFactory.createObjectMapper();
-
-		ResultSetEncoder encoder = new ResultSetEncoderImpl(recordBloomFilterGenerator, masterPatientIndexClient,
-				organizationIdentifier, organizationKey, researchStudyIdentifier, researchStudyKey,
-				openEhrObjectMapper);
-
 		ResultSet resultSet = openEhrObjectMapper
 				.readValue(Files.readAllBytes(Paths.get("src/test/resources/result_5.json")), ResultSet.class);
 		assertNotNull(resultSet);
+		assertNotNull(resultSet.getColumns());
+		assertEquals(4, resultSet.getColumns().size());
+		assertNotNull(resultSet.getRows());
+		assertEquals(1, resultSet.getRows().size());
+		assertNotNull(resultSet.getRow(0));
+		assertEquals(4, resultSet.getRow(0).size());
 
-		ResultSet encodedResultSet = encoder.encode(resultSet);
-		assertNotNull(encodedResultSet);
+		ResultSet translatedResultSet = translator.translate(resultSet);
+		assertNotNull(translatedResultSet);
+		assertNotNull(translatedResultSet.getColumns());
+		assertEquals(5, translatedResultSet.getColumns().size());
+		assertNotNull(translatedResultSet.getRows());
+		assertEquals(1, translatedResultSet.getRows().size());
+		assertNotNull(translatedResultSet.getRow(0));
+		assertEquals(5, translatedResultSet.getRow(0).size());
 
 		DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter();
 		prettyPrinter.indentArraysWith(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE);
 
 		logger.debug("Encoded ResultSet {}",
-				openEhrObjectMapper.writer(prettyPrinter).writeValueAsString(encodedResultSet));
+				openEhrObjectMapper.writer(prettyPrinter).writeValueAsString(translatedResultSet));
 	}
 }

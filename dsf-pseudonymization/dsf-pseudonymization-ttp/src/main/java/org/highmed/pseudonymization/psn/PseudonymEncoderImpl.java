@@ -34,7 +34,7 @@ public class PseudonymEncoderImpl implements PseudonymEncoder
 {
 	private static final Logger logger = LoggerFactory.getLogger(PseudonymEncoderImpl.class);
 
-	private static class PseudonymWithJsonLength
+	private static final class PseudonymWithJsonLength
 	{
 		final int jsonLength;
 		final List<MedicId> medicIds = new ArrayList<>();
@@ -52,7 +52,7 @@ public class PseudonymEncoderImpl implements PseudonymEncoder
 		}
 	}
 
-	private static class PseudonymWithPadding
+	private static final class PseudonymWithPadding
 	{
 		@JsonProperty
 		final List<MedicId> medicIds = new ArrayList<>();
@@ -156,7 +156,6 @@ public class PseudonymEncoderImpl implements PseudonymEncoder
 	{
 		return encryptedPwpBase64 ->
 		{
-
 			try
 			{
 				byte[] encryptedPwp = Base64.getDecoder().decode(encryptedPwpBase64);
