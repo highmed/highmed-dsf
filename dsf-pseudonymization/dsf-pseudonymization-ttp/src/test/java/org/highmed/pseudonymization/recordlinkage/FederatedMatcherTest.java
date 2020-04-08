@@ -15,15 +15,15 @@ public class FederatedMatcherTest
 	@Test
 	public void testMatch() throws Exception
 	{
-		FederatedMatcher m = new FederatedMatcher();
+		FederatedMatcher<TestPerson> m = new FederatedMatcher<TestPerson>(TestMatchedPerson::new);
 
-		List<List<Person>> personLists = Arrays.asList(
-				Arrays.asList(
-						new TestPerson("org1", "id1", createRecordBloomFilter(200, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9))),
-				Arrays.asList(
-						new TestPerson("org2", "id2", createRecordBloomFilter(200, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9))));
+		List<List<TestPerson>> personLists = Arrays.asList(
+				Arrays.asList(new TestPerson(new TestMedicId("org1", "id1"),
+						createRecordBloomFilter(200, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9))),
+				Arrays.asList(new TestPerson(new TestMedicId("org2", "id2"),
+						createRecordBloomFilter(200, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9))));
 
-		Set<MatchedPerson> matchedPersons = m.matchPersons(personLists);
+		Set<MatchedPerson<TestPerson>> matchedPersons = m.matchPersons(personLists);
 		assertNotNull(matchedPersons);
 		assertEquals(1, matchedPersons.size());
 	}

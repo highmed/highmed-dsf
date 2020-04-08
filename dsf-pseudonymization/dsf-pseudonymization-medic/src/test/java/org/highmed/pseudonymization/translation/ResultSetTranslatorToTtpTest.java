@@ -1,4 +1,4 @@
-package org.highmed.pseudonymization.encoding;
+package org.highmed.pseudonymization.translation;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -20,6 +20,7 @@ import org.highmed.pseudonymization.bloomfilter.RecordBloomFilterGeneratorImpl.F
 import org.highmed.pseudonymization.crypto.AesGcmUtil;
 import org.highmed.pseudonymization.mpi.Idat;
 import org.highmed.pseudonymization.mpi.MasterPatientIndexClient;
+import org.highmed.pseudonymization.translation.ResultSetTranslatorToTtp;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

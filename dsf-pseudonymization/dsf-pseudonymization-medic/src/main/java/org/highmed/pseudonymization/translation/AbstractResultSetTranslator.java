@@ -1,4 +1,4 @@
-package org.highmed.pseudonymization.encoding;
+package org.highmed.pseudonymization.translation;
 
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
@@ -25,6 +25,7 @@ import org.highmed.openehr.model.structure.Column;
 import org.highmed.openehr.model.structure.Meta;
 import org.highmed.openehr.model.structure.RowElement;
 import org.highmed.pseudonymization.crypto.AesGcmUtil;
+import org.highmed.pseudonymization.openehr.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -133,7 +134,8 @@ public abstract class AbstractResultSetTranslator implements ResultSetTranslator
 
 	protected final Predicate<? super Column> isPsnColumn()
 	{
-		return column -> PSN_COLUMN_NAME.equals(column.getName()) && PSN_COLUMN_PATH.equals(column.getPath());
+		return column -> Constants.PSN_COLUMN_NAME.equals(column.getName())
+				&& Constants.PSN_COLUMN_PATH.equals(column.getPath());
 	}
 
 	protected final RowElement toDecryptedMdatRowElement(RowElement rowElement, SecretKey researchStudyKey,

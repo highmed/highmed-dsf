@@ -10,36 +10,45 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class FederatedMatcher extends AbstractMatcher
+public class FederatedMatcher<P extends Person> extends AbstractMatcher<P>
 {
 	/**
-	 * See {@link AbstractMatcher#AbstractEpiLinkMatcher()}
+	 * See {@link AbstractMatcher#AbstractMatcher(MatchedPersonFactory)}
+	 * 
+	 * @param matchedPersonFactory
+	 *            not <code>null</code>
 	 */
-	public FederatedMatcher()
+	public FederatedMatcher(MatchedPersonFactory<P> matchedPersonFactory)
 	{
+		super(matchedPersonFactory);
 	}
 
 	/**
-	 * See {@link AbstractMatcher#AbstractEpiLinkMatcher(MatchCalculator)}
+	 * See {@link AbstractMatcher#AbstractMatcher(MatchedPersonFactory, MatchCalculator)}
 	 * 
+	 * @param matchedPersonFactory
+	 *            not <code>null</code>
 	 * @param matchCalculator
 	 *            not <code>null</code>
 	 */
-	public FederatedMatcher(MatchCalculator matchCalculator)
+	public FederatedMatcher(MatchedPersonFactory<P> matchedPersonFactory, MatchCalculator matchCalculator)
 	{
-		super(matchCalculator);
+		super(matchedPersonFactory, matchCalculator);
 	}
 
 	/**
-	 * See {@link AbstractMatcher#AbstractEpiLinkMatcher(MatchCalculator, double)}
+	 * See {@link AbstractMatcher#AbstractMatcher(MatchedPersonFactory, MatchCalculator, double)}
 	 * 
+	 * @param matchedPersonFactory
+	 *            not <code>null</code>
 	 * @param matchCalculator
 	 *            not <code>null</code>
 	 * @param positiveMatchThreshold
 	 */
-	public FederatedMatcher(MatchCalculator matchCalculator, double positiveMatchThreshold)
+	public FederatedMatcher(MatchedPersonFactory<P> matchedPersonFactory, MatchCalculator matchCalculator,
+			double positiveMatchThreshold)
 	{
-		super(matchCalculator, positiveMatchThreshold);
+		super(matchedPersonFactory, matchCalculator, positiveMatchThreshold);
 	}
 
 	/**
@@ -53,17 +62,16 @@ public class FederatedMatcher extends AbstractMatcher
 	 * @return matched persons, converted persons from param {@code personList} if param {@code personLists} is empty
 	 * @see #matchPersons(List)
 	 */
-	public Set<MatchedPerson> matchPersons(List<Person> personList,
-			@SuppressWarnings("unchecked") List<Person>... personLists)
+	public Set<MatchedPerson<P>> matchPersons(List<P> personList, @SuppressWarnings("unchecked") List<P>... personLists)
 	{
 		Objects.requireNonNull(personList, "personList");
 		Objects.requireNonNull(personLists, "personLists");
 
 		if (personLists.length == 0)
-			return personList.stream().map(Person::toMatchedPerson).collect(Collectors.toSet());
+			return personList.stream().map(toMatchedPerson()).collect(Collectors.toSet());
 		else
 		{
-			List<List<Person>> lists = new ArrayList<>(1 + personLists.length);
+			List<List<P>> lists = new ArrayList<>(1 + personLists.length);
 			lists.add(personList);
 			lists.addAll(Arrays.asList(personLists));
 
@@ -81,47 +89,47 @@ public class FederatedMatcher extends AbstractMatcher
 	 *         one entry (aka one organization), empty list if param {@code personLists} has no entries
 	 * @see #matchPersons(List, List...)
 	 */
-	public Set<MatchedPerson> matchPersons(List<List<Person>> personLists)
+	public Set<MatchedPerson<P>> matchPersons(List<List<P>> personLists)
 	{
 		Objects.requireNonNull(personLists, "personLists");
 
 		if (personLists.isEmpty())
 			return Collections.emptySet();
 		else if (personLists.size() == 1)
-			return personLists.get(0).stream().map(Person::toMatchedPerson).collect(Collectors.toSet());
+			return personLists.get(0).stream().map(toMatchedPerson()).collect(Collectors.toSet());
 		else
 		{
-			List<Person> largestList = findLargestList(personLists);
-			List<List<Person>> remainingLists = exceptLargest(personLists, largestList);
-			Set<MatchedPerson> matchedPersons = toMatchedPersons(largestList);
+			List<P> largestList = findLargestList(personLists);
+			List<List<P>> remainingLists = exceptLargest(personLists, largestList);
+			Set<MatchedPerson<P>> matchedPersons = toMatchedPersons(largestList);
 
-			for (List<Person> personList : remainingLists)
+			for (List<P> personList : remainingLists)
 				matchedPersons = matchPersonList(personList, matchedPersons);
 
 			return Collections.unmodifiableSet(matchedPersons);
 		}
 	}
 
-	private List<Person> findLargestList(List<List<Person>> personLists)
+	private List<P> findLargestList(List<List<P>> personLists)
 	{
 		return personLists.stream().max(Comparator.comparing(List::size)).orElseThrow();
 	}
 
-	private List<List<Person>> exceptLargest(List<List<Person>> personLists, List<Person> largestList)
+	private List<List<P>> exceptLargest(List<List<P>> personLists, List<P> largestList)
 	{
-		List<List<Person>> remainingLists = new ArrayList<List<Person>>(personLists);
+		List<List<P>> remainingLists = new ArrayList<>(personLists);
 		remainingLists.remove(largestList);
 		return remainingLists;
 	}
 
-	private Set<MatchedPerson> toMatchedPersons(List<Person> largestList)
+	private Set<MatchedPerson<P>> toMatchedPersons(List<P> largestList)
 	{
-		return largestList.parallelStream().map(Person::toMatchedPerson).collect(Collectors.toSet());
+		return largestList.parallelStream().map(toMatchedPerson()).collect(Collectors.toSet());
 	}
 
-	private Set<MatchedPerson> matchPersonList(List<Person> personList, Set<MatchedPerson> matchedPersons)
+	private Set<MatchedPerson<P>> matchPersonList(List<P> personList, Set<MatchedPerson<P>> matchedPersons)
 	{
-		Set<MatchedPerson> newMatches = personList.parallelStream().map(matchPerson(matchedPersons))
+		Set<MatchedPerson<P>> newMatches = personList.parallelStream().map(matchPerson(matchedPersons))
 				.collect(Collectors.toCollection(HashSet::new));
 		newMatches.addAll(matchedPersons);
 

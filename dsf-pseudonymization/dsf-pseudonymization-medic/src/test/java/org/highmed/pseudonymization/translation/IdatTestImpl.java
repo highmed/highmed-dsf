@@ -1,4 +1,4 @@
-package org.highmed.pseudonymization.encoding;
+package org.highmed.pseudonymization.translation;
 
 import org.highmed.pseudonymization.mpi.Idat;
 

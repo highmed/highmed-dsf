@@ -8,36 +8,45 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-public class SingleOrganizationMatcher extends AbstractMatcher
+public class SingleOrganizationMatcher<P extends Person> extends AbstractMatcher<P>
 {
 	/**
-	 * See {@link AbstractMatcher#AbstractEpiLinkMatcher()}
+	 * See {@link AbstractMatcher#AbstractMatcher(MatchedPersonFactory)}
+	 * 
+	 * @param matchedPersonFactory
+	 *            not <code>null</code>
 	 */
-	public SingleOrganizationMatcher()
+	public SingleOrganizationMatcher(MatchedPersonFactory<P> matchedPersonFactory)
 	{
+		super(matchedPersonFactory);
 	}
 
 	/**
-	 * See {@link AbstractMatcher#AbstractEpiLinkMatcher(MatchCalculator)}
+	 * See {@link AbstractMatcher#AbstractMatcher(MatchedPersonFactory, MatchCalculator)}
 	 * 
+	 * @param matchedPersonFactory
+	 *            not <code>null</code>
 	 * @param matchCalculator
 	 *            not <code>null</code>
 	 */
-	public SingleOrganizationMatcher(MatchCalculator matchCalculator)
+	public SingleOrganizationMatcher(MatchedPersonFactory<P> matchedPersonFactory, MatchCalculator matchCalculator)
 	{
-		super(matchCalculator);
+		super(matchedPersonFactory, matchCalculator);
 	}
 
 	/**
-	 * See {@link AbstractMatcher#AbstractEpiLinkMatcher(MatchCalculator, double)}
+	 * See {@link AbstractMatcher#AbstractMatcher(MatchedPersonFactory, MatchCalculator, double)}
 	 * 
+	 * @param matchedPersonFactory
+	 *            not <code>null</code>
 	 * @param matchCalculator
 	 *            not <code>null</code>
 	 * @param positiveMatchThreshold
 	 */
-	public SingleOrganizationMatcher(MatchCalculator matchCalculator, double positiveMatchThreshold)
+	public SingleOrganizationMatcher(MatchedPersonFactory<P> matchedPersonFactory, MatchCalculator matchCalculator,
+			double positiveMatchThreshold)
 	{
-		super(matchCalculator, positiveMatchThreshold);
+		super(matchedPersonFactory, matchCalculator, positiveMatchThreshold);
 	}
 
 	/**
@@ -50,16 +59,16 @@ public class SingleOrganizationMatcher extends AbstractMatcher
 	 * @return matched persons, converted person from param {@code person} if param {@code persons} is empty
 	 * @see #matchPersons(List)
 	 */
-	public Set<MatchedPerson> matchPersons(Person person, Person... persons)
+	public Set<MatchedPerson<P>> matchPersons(P person, @SuppressWarnings("unchecked") P... persons)
 	{
 		Objects.requireNonNull(person, "person");
 		Objects.requireNonNull(persons, "persons");
 
 		if (persons.length == 0)
-			return Collections.singleton(person.toMatchedPerson());
+			return Collections.singleton(create(person));
 		else
 		{
-			List<Person> list = new ArrayList<>(1 + persons.length);
+			List<P> list = new ArrayList<>(1 + persons.length);
 			list.add(person);
 			list.addAll(Arrays.asList(persons));
 
@@ -74,22 +83,22 @@ public class SingleOrganizationMatcher extends AbstractMatcher
 	 * @return matched persons, converted person from param {@code persons} if param {@code persons} has only one entry,
 	 *         empty list if param {@code persons} has no entries
 	 */
-	public Set<MatchedPerson> matchPersons(List<Person> persons)
+	public Set<MatchedPerson<P>> matchPersons(List<P> persons)
 	{
 		Objects.requireNonNull(persons, "persons");
 
 		if (persons.isEmpty())
 			return Collections.emptySet();
 		else if (persons.size() == 1)
-			return Collections.singleton(persons.get(0).toMatchedPerson());
+			return Collections.singleton(create(persons.get(0)));
 		else
 		{
-			Set<MatchedPerson> matchedPersons = new HashSet<>();
-			matchedPersons.add(persons.get(0).toMatchedPerson());
+			Set<MatchedPerson<P>> matchedPersons = new HashSet<>();
+			matchedPersons.add(create(persons.get(0)));
 
 			persons.stream().skip(1).forEach(person ->
 			{
-				MatchedPerson matchedPerson = matchPerson(person, matchedPersons);
+				MatchedPerson<P> matchedPerson = matchPerson(person, matchedPersons);
 				matchedPersons.add(matchedPerson);
 			});
 

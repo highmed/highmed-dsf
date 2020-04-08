@@ -1,4 +1,4 @@
-package org.highmed.pseudonymization.encoding;
+package org.highmed.pseudonymization.translation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,22 +12,17 @@ import org.highmed.openehr.model.structure.Column;
 import org.highmed.openehr.model.structure.Meta;
 import org.highmed.openehr.model.structure.ResultSet;
 import org.highmed.openehr.model.structure.RowElement;
+import org.highmed.pseudonymization.openehr.Constants;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-public class ResultSetTranslatorFromTtp extends AbstractResultSetTranslator
+public class ResultSetTranslatorResearchResultToTtp extends AbstractResultSetTranslator
 {
 	private final String researchStudyIdentifier;
 	private final SecretKey researchStudyKey;
 
-	private final ObjectMapper openEhrObjectMapper;
-
-	public ResultSetTranslatorFromTtp(String researchStudyIdentifier, SecretKey researchStudyKey,
-			ObjectMapper openEhrObjectMapper)
+	public ResultSetTranslatorResearchResultToTtp(String researchStudyIdentifier, SecretKey researchStudyKey)
 	{
 		this.researchStudyIdentifier = Objects.requireNonNull(researchStudyIdentifier, "researchStudyIdentifier");
 		this.researchStudyKey = Objects.requireNonNull(researchStudyKey, "researchStudyKey");
-		this.openEhrObjectMapper = Objects.requireNonNull(openEhrObjectMapper, "openEhrObjectMapper");
 	}
 
 	@Override
@@ -36,22 +31,22 @@ public class ResultSetTranslatorFromTtp extends AbstractResultSetTranslator
 		int psnColumnIndex = getPsnColumnIndex(resultSet.getColumns());
 
 		if (psnColumnIndex < 0)
-			throw new IllegalArgumentException(
-					"Missing psn column with name '" + PSN_COLUMN_NAME + "' and path '" + PSN_COLUMN_PATH + "'");
+			throw new IllegalArgumentException("Missing psn column with name '" + Constants.PSN_COLUMN_NAME
+					+ "' and path '" + Constants.PSN_COLUMN_PATH + "'");
 
 		Meta meta = copyMeta(resultSet.getMeta());
 		List<Column> columns = copyColumns(resultSet.getColumns());
-		List<List<RowElement>> rows = decodeRowsWithPsnColumn(psnColumnIndex, resultSet.getRows());
+		List<List<RowElement>> rows = encodeRowsWithPsn(psnColumnIndex, resultSet.getRows());
 
 		return new ResultSet(meta, resultSet.getName(), resultSet.getQuery(), columns, rows);
 	}
 
-	private List<List<RowElement>> decodeRowsWithPsnColumn(int psnColumnIndex, List<List<RowElement>> rows)
+	private List<List<RowElement>> encodeRowsWithPsn(int psnColumnIndex, List<List<RowElement>> rows)
 	{
-		return rows.parallelStream().map(decodeRowWithPsnColumn(psnColumnIndex)).collect(Collectors.toList());
+		return rows.parallelStream().map(encodeRowWithPsn(psnColumnIndex)).collect(Collectors.toList());
 	}
 
-	private Function<List<RowElement>, List<RowElement>> decodeRowWithPsnColumn(int psnColumnIndex)
+	private Function<List<RowElement>, List<RowElement>> encodeRowWithPsn(int psnColumnIndex)
 	{
 		return rowElements ->
 		{
@@ -60,10 +55,10 @@ public class ResultSetTranslatorFromTtp extends AbstractResultSetTranslator
 			List<RowElement> newRowElements = new ArrayList<>();
 			for (int i = 0; i < rowElements.size(); i++)
 				if (i != psnColumnIndex)
-					newRowElements.add(toDecryptedMdatRowElement(rowElements.get(i), researchStudyKey,
-							researchStudyIdentifier, openEhrObjectMapper));
+					newRowElements.add(
+							toEncryptedMdatRowElement(rowElements.get(i), researchStudyKey, researchStudyIdentifier));
 
-			newRowElements.add(psn);
+			newRowElements.add(copyRowElement(psn));
 
 			return newRowElements;
 		};

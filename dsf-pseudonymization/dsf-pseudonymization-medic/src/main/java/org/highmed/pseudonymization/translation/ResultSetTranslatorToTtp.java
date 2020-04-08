@@ -1,4 +1,4 @@
-package org.highmed.pseudonymization.encoding;
+package org.highmed.pseudonymization.translation;
 
 import java.util.ArrayList;
 import java.util.Base64;
@@ -20,6 +20,7 @@ import org.highmed.pseudonymization.bloomfilter.RecordBloomFilter;
 import org.highmed.pseudonymization.bloomfilter.RecordBloomFilterGenerator;
 import org.highmed.pseudonymization.mpi.Idat;
 import org.highmed.pseudonymization.mpi.MasterPatientIndexClient;
+import org.highmed.pseudonymization.openehr.Constants;
 
 public class ResultSetTranslatorToTtp extends AbstractResultSetTranslator
 {
@@ -51,8 +52,8 @@ public class ResultSetTranslatorToTtp extends AbstractResultSetTranslator
 		int ehrIdColumnIndex = getEhrColumnIndex(resultSet.getColumns());
 
 		if (ehrIdColumnIndex < 0)
-			throw new IllegalArgumentException(
-					"Missing ehr id column with name '" + EHRID_COLUMN_NAME + "' and path '" + EHRID_COLUMN_PATH + "'");
+			throw new IllegalArgumentException("Missing ehr id column with name '" + Constants.EHRID_COLUMN_NAME
+					+ "' and path '" + Constants.EHRID_COLUMN_PATH + "'");
 
 		Meta meta = copyMeta(resultSet.getMeta());
 		List<Column> columns = encodeColumnsWithEhrId(resultSet.getColumns());
@@ -72,7 +73,8 @@ public class ResultSetTranslatorToTtp extends AbstractResultSetTranslator
 
 	private Predicate<? super Column> isEhrIdColumn()
 	{
-		return column -> EHRID_COLUMN_NAME.equals(column.getName()) && EHRID_COLUMN_PATH.equals(column.getPath());
+		return column -> Constants.EHRID_COLUMN_NAME.equals(column.getName())
+				&& Constants.EHRID_COLUMN_PATH.equals(column.getPath());
 	}
 
 	private List<Column> encodeColumnsWithEhrId(List<Column> columns)
@@ -84,8 +86,8 @@ public class ResultSetTranslatorToTtp extends AbstractResultSetTranslator
 
 	private Stream<Column> newMedicIdAndRbfColumn()
 	{
-		return Stream.of(new Column(MEDICID_COLUMN_NAME, MEDICID_COLUMN_PATH),
-				new Column(RBF_COLUMN_NAME, RBF_COLUMN_PATH));
+		return Stream.of(new Column(Constants.MEDICID_COLUMN_NAME, Constants.MEDICID_COLUMN_PATH),
+				new Column(Constants.RBF_COLUMN_NAME, Constants.RBF_COLUMN_PATH));
 	}
 
 	private List<List<RowElement>> encodeRowsWithEhrId(int ehrIdColumnIndex, List<List<RowElement>> rows)

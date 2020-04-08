@@ -1,28 +1,34 @@
 package org.highmed.pseudonymization.recordlinkage;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class TestMatchedPerson implements MatchedPerson
+public class TestMatchedPerson implements MatchedPerson<TestPerson>
 {
-	private final List<Person> matches = new ArrayList<>();
+	private final List<TestPerson> matches = new ArrayList<>();
 
-	public TestMatchedPerson(Person person)
+	public TestMatchedPerson(TestPerson person)
 	{
 		if (person != null)
 			addMatch(person);
 	}
 
+	public TestMatchedPerson(TestPerson... persons)
+	{
+		matches.addAll(Arrays.asList(persons));
+	}
+
 	@Override
-	public List<Person> getMatches()
+	public List<TestPerson> getMatches()
 	{
 		return Collections.unmodifiableList(matches);
 	}
 
 	@Override
-	public void addMatch(Person person)
+	public void addMatch(TestPerson person)
 	{
 		if (person != null)
 			matches.add(person);
@@ -31,6 +37,6 @@ public class TestMatchedPerson implements MatchedPerson
 	@Override
 	public String toString()
 	{
-		return matches.stream().map(Person::toString).collect(Collectors.joining(", ", "[", "]"));
+		return matches.stream().map(TestPerson::toString).collect(Collectors.joining(", ", "[", "]"));
 	}
 }

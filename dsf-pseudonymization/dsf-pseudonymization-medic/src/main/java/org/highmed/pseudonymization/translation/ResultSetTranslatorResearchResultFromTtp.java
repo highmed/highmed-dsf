@@ -1,4 +1,4 @@
-package org.highmed.pseudonymization.encoding;
+package org.highmed.pseudonymization.translation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +14,7 @@ import org.highmed.openehr.model.structure.Column;
 import org.highmed.openehr.model.structure.Meta;
 import org.highmed.openehr.model.structure.ResultSet;
 import org.highmed.openehr.model.structure.RowElement;
+import org.highmed.pseudonymization.openehr.Constants;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -42,8 +43,8 @@ public class ResultSetTranslatorResearchResultFromTtp extends AbstractResultSetT
 		int medicIdColumnIndex = getMedicIdColumnIndex(resultSet.getColumns());
 
 		if (medicIdColumnIndex < 0)
-			throw new IllegalArgumentException("Missing MeDIC id column with name '" + MEDICID_COLUMN_NAME
-					+ "' and path '" + MEDICID_COLUMN_PATH + "'");
+			throw new IllegalArgumentException("Missing MeDIC id column with name '" + Constants.MEDICID_COLUMN_NAME
+					+ "' and path '" + Constants.MEDICID_COLUMN_PATH + "'");
 
 		Meta meta = copyMeta(resultSet.getMeta());
 		List<Column> columns = copyColumns(resultSet.getColumns());
@@ -63,7 +64,8 @@ public class ResultSetTranslatorResearchResultFromTtp extends AbstractResultSetT
 
 	private Predicate<? super Column> isMedicIdColumn()
 	{
-		return column -> MEDICID_COLUMN_NAME.equals(column.getName()) && MEDICID_COLUMN_PATH.equals(column.getPath());
+		return column -> Constants.MEDICID_COLUMN_NAME.equals(column.getName())
+				&& Constants.MEDICID_COLUMN_PATH.equals(column.getPath());
 	}
 
 	private List<List<RowElement>> decodeRowsWithMedicIdColumn(int medicIdColumnIndex, List<List<RowElement>> rows)
