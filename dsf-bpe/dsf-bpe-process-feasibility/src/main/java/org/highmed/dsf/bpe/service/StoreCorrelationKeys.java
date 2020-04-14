@@ -41,7 +41,8 @@ public class StoreCorrelationKeys extends AbstractServiceDelegate
 		boolean needsRecordLinkage = getNeedsRecordLinkageCheck(task);
 		execution.setVariable(Constants.VARIABLE_NEEDS_RECORD_LINKAGE, needsRecordLinkage);
 
-		execution.setVariable(Constants.VARIABLE_QUERY_RESULTS, FeasibilityQueryResultsValues.create(new FeasibilityQueryResults(null)));
+		execution.setVariable(Constants.VARIABLE_QUERY_RESULTS,
+				FeasibilityQueryResultsValues.create(new FeasibilityQueryResults(null)));
 	}
 
 	private boolean getNeedsConsentCheck(Task task)

@@ -30,7 +30,8 @@ public class DownloadResearchStudyResource extends AbstractServiceDelegate imple
 
 	private final OrganizationProvider organizationProvider;
 
-	public DownloadResearchStudyResource(OrganizationProvider organizationProvider, FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
+	public DownloadResearchStudyResource(OrganizationProvider organizationProvider,
+			FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
 	{
 		super(clientProvider, taskHelper);
 		this.organizationProvider = organizationProvider;
@@ -95,19 +96,20 @@ public class DownloadResearchStudyResource extends AbstractServiceDelegate imple
 
 	private ResearchStudy addMissingOrganizations(ResearchStudy researchStudy, FhirWebserviceClient client)
 	{
-		List<String> medicReferences = organizationProvider.getOrganizationsByType("MeDIC")
-				.map(organization -> {
-					IdType type = IdType.of(organization);
-					return type.getResourceType() + "/" + type.getIdPart();
-				}).collect(Collectors.toList());
+		List<String> medicReferences = organizationProvider.getOrganizationsByType("MeDIC").map(organization -> {
+			IdType type = IdType.of(organization);
+			return type.getResourceType() + "/" + type.getIdPart();
+		}).collect(Collectors.toList());
 
 		List<String> targetReferences = researchStudy.getExtension().stream()
 				.filter(extension -> extension.getUrl().equals(Constants.EXTENSION_PARTICIPATING_MEDIC_URI))
 				.map(extension -> ((Reference) extension.getValue()).getReference()).collect(Collectors.toList());
 
 		medicReferences.forEach(reference -> {
-			if(!targetReferences.contains(reference)) {
-				Extension extension = new Extension(Constants.EXTENSION_PARTICIPATING_MEDIC_URI, new Reference(reference));
+			if (!targetReferences.contains(reference))
+			{
+				Extension extension = new Extension(Constants.EXTENSION_PARTICIPATING_MEDIC_URI,
+						new Reference(reference));
 				researchStudy.addExtension(extension);
 			}
 		});

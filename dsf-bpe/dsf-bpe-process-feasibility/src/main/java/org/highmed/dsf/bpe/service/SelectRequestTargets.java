@@ -2,7 +2,6 @@ package org.highmed.dsf.bpe.service;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -17,10 +16,8 @@ import org.highmed.dsf.fhir.variables.MultiInstanceTarget;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargetValues;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargets;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargetsValues;
-import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
 
@@ -51,8 +48,7 @@ public class SelectRequestTargets extends AbstractServiceDelegate
 
 	private void setMedicTargets(DelegateExecution execution)
 	{
-		Stream<Identifier> identifiers = organizationProvider
-				.getOrganizationsByType("MeDIC")
+		Stream<Identifier> identifiers = organizationProvider.getOrganizationsByType("MeDIC")
 				.map(medic -> medic.getIdentifier().stream().filter(identifier -> identifier.getSystem()
 						.equals(organizationProvider.getDefaultIdentifierSystem())).findFirst().get());
 
@@ -67,8 +63,10 @@ public class SelectRequestTargets extends AbstractServiceDelegate
 	private void setTtpTarget(DelegateExecution execution)
 	{
 		ResearchStudy researchStudy = (ResearchStudy) execution.getVariable(Constants.VARIABLE_RESEARCH_STUDY);
-		Reference ttpReference = (Reference) researchStudy.getExtension().stream().filter(extension -> extension.getUrl()
-				.equals("http://highmed.org/fhir/StructureDefinition/participating-ttp")).findFirst().get().getValue();
+		Reference ttpReference = (Reference) researchStudy.getExtension().stream()
+				.filter(extension -> extension.getUrl()
+						.equals("http://highmed.org/fhir/StructureDefinition/participating-ttp")).findFirst().get()
+				.getValue();
 
 		Identifier ttpIdentifier = organizationProvider.getIdentifier(new IdType(ttpReference.getReference())).get();
 
