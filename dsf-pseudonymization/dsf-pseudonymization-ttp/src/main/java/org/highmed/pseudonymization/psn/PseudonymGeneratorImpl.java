@@ -35,7 +35,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class PseudonymGeneratorImpl<P extends Person> implements PseudonymGenerator<P>
+public class PseudonymGeneratorImpl<P extends Person, PP extends PseudonymizedPerson>
+		implements PseudonymGenerator<P, PP>
 {
 	private static final Logger logger = LoggerFactory.getLogger(PseudonymGeneratorImpl.class);
 
@@ -76,10 +77,10 @@ public class PseudonymGeneratorImpl<P extends Person> implements PseudonymGenera
 	private final SecretKey researchStudyTtpKey;
 	private final ObjectMapper psnObjectMapper;
 
-	private final PseudonymizedPersonFactory<P> pseudonymizedPersonFactory;
+	private final PseudonymizedPersonFactory<P, PP> pseudonymizedPersonFactory;
 
 	public PseudonymGeneratorImpl(String researchStudyIdentifier, SecretKey researchStudyTtpKey,
-			ObjectMapper psnObjectMapper, PseudonymizedPersonFactory<P> pseudonymizedPersonFactory)
+			ObjectMapper psnObjectMapper, PseudonymizedPersonFactory<P, PP> pseudonymizedPersonFactory)
 	{
 		this.researchStudyIdentifier = Objects.requireNonNull(researchStudyIdentifier, "researchStudyIdentifier");
 		researchStudyIdentifierAadTag = researchStudyIdentifier.getBytes(StandardCharsets.UTF_8);
@@ -92,7 +93,7 @@ public class PseudonymGeneratorImpl<P extends Person> implements PseudonymGenera
 	}
 
 	@Override
-	public List<PseudonymizedPerson> createPseudonyms(List<MatchedPerson<P>> persons)
+	public List<PP> createPseudonymsAndShuffle(Collection<? extends MatchedPerson<P>> persons)
 	{
 		Objects.requireNonNull(persons, "persons");
 		if (persons.isEmpty())
@@ -107,7 +108,11 @@ public class PseudonymGeneratorImpl<P extends Person> implements PseudonymGenera
 
 		return pseudonyms.entrySet().parallelStream()
 				.map(e -> pseudonymizedPersonFactory.create(e.getKey(), encrypt(e.getValue(), maxLength)))
-				.collect(Collectors.toList());
+				.collect(Collectors.collectingAndThen(Collectors.toCollection(ArrayList::new), list ->
+				{
+					Collections.shuffle(list);
+					return list;
+				}));
 	}
 
 	private Function<MatchedPerson<P>, PseudonymWithJsonLength> toPseudonym()

@@ -15,7 +15,7 @@ public class FederatedMatcherTest
 	@Test
 	public void testMatch() throws Exception
 	{
-		FederatedMatcher<TestPerson> m = new FederatedMatcher<TestPerson>(TestMatchedPerson::new);
+		FederatedMatcher<TestPerson> m = new FederatedMatcherImpl<TestPerson>(TestMatchedPerson::new);
 
 		List<List<TestPerson>> personLists = Arrays.asList(
 				Arrays.asList(new TestPerson(new TestMedicId("org1", "id1"),

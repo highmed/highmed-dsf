@@ -5,7 +5,7 @@ import org.highmed.pseudonymization.recordlinkage.MatchedPerson;
 import org.highmed.pseudonymization.recordlinkage.Person;
 
 @FunctionalInterface
-public interface PseudonymizedPersonFactory<P extends Person>
+public interface PseudonymizedPersonFactory<P extends Person, PP extends PseudonymizedPerson>
 {
-	PseudonymizedPerson create(MatchedPerson<P> person, String pseudonym);
+	PP create(MatchedPerson<P> person, String pseudonym);
 }

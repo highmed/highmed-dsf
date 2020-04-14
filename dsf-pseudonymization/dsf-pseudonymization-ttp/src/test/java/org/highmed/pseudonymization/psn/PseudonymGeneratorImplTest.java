@@ -34,15 +34,16 @@ public class PseudonymGeneratorImplTest
 		ObjectMapper psnObjectMapper = new ObjectMapper();
 		psnObjectMapper.registerSubtypes(new NamedType(TestMedicId.class, "TestMedicId"));
 
-		PseudonymGenerator<TestPerson> generator = new PseudonymGeneratorImpl<TestPerson>(researchStudyIdentifier,
-				researchStudyTtpKey, psnObjectMapper, (person, pseudonym) -> new TestPseudonymizedPerson(pseudonym));
+		PseudonymGenerator<TestPerson, PseudonymizedPerson> generator = new PseudonymGeneratorImpl<>(
+				researchStudyIdentifier, researchStudyTtpKey, psnObjectMapper,
+				(person, pseudonym) -> new TestPseudonymizedPerson(pseudonym));
 
-		List<MatchedPerson<TestPerson>> pseudonyms = Arrays.asList(
+		List<MatchedPerson<TestPerson>> ids = Arrays.asList(
 				new TestMatchedPerson(new TestPerson(new TestMedicId("org1", "value11"), null),
 						new TestPerson(new TestMedicId("org2", "value21"), null)),
 				new TestMatchedPerson(new TestPerson(new TestMedicId("org1", "value12"), null)));
 
-		List<PseudonymizedPerson> encodedPseudonyms = generator.createPseudonyms(pseudonyms);
+		List<PseudonymizedPerson> encodedPseudonyms = generator.createPseudonymsAndShuffle(ids);
 
 		encodedPseudonyms.forEach(s -> logger.debug("Encoded Pseudonym: {}", s));
 
@@ -50,36 +51,39 @@ public class PseudonymGeneratorImplTest
 				researchStudyTtpKey, psnObjectMapper, (person, medicIds) -> new TestMatchedPerson(
 						medicIds.stream().map(i -> new TestPerson(i, null)).toArray(TestPerson[]::new)));
 
-		List<MatchedPerson<TestPerson>> decodePseudonyms = decoder.decodePseudonyms(encodedPseudonyms);
+		List<MatchedPerson<TestPerson>> pseudonyms = decoder.decodePseudonyms(encodedPseudonyms);
 
-		assertNotNull(decodePseudonyms);
-		assertEquals(2, decodePseudonyms.size());
+		assertNotNull(pseudonyms);
+		assertEquals(2, pseudonyms.size());
 
-		assertNotNull(decodePseudonyms.get(0));
-		assertNotNull(decodePseudonyms.get(0).getMatches());
-		assertEquals(pseudonyms.get(0).getMatches().size(), decodePseudonyms.get(0).getMatches().size());
-		assertNotNull(decodePseudonyms.get(0).getMatches().get(0));
-		assertNotNull(decodePseudonyms.get(0).getMatches().get(0).getMedicId());
-		assertEquals(pseudonyms.get(0).getMatches().get(0).getMedicId().getOrganization(),
-				decodePseudonyms.get(0).getMatches().get(0).getMedicId().getOrganization());
-		assertEquals(pseudonyms.get(0).getMatches().get(0).getMedicId().getValue(),
-				decodePseudonyms.get(0).getMatches().get(0).getMedicId().getValue());
+		int doubleMatch = pseudonyms.get(0).getMatches().size() == 2 ? 0 : 1;
+		int singleMatch = pseudonyms.get(0).getMatches().size() == 2 ? 1 : 0;
 
-		assertNotNull(decodePseudonyms.get(0).getMatches().get(1));
-		assertNotNull(decodePseudonyms.get(0).getMatches().get(1).getMedicId());
-		assertEquals(pseudonyms.get(0).getMatches().get(1).getMedicId().getOrganization(),
-				decodePseudonyms.get(0).getMatches().get(1).getMedicId().getOrganization());
-		assertEquals(pseudonyms.get(0).getMatches().get(1).getMedicId().getValue(),
-				decodePseudonyms.get(0).getMatches().get(1).getMedicId().getValue());
+		assertNotNull(pseudonyms.get(doubleMatch));
+		assertNotNull(pseudonyms.get(doubleMatch).getMatches());
+		assertEquals(ids.get(0).getMatches().size(), pseudonyms.get(doubleMatch).getMatches().size());
+		assertNotNull(pseudonyms.get(doubleMatch).getMatches().get(0));
+		assertNotNull(pseudonyms.get(doubleMatch).getMatches().get(0).getMedicId());
+		assertEquals(ids.get(0).getMatches().get(0).getMedicId().getOrganization(),
+				pseudonyms.get(doubleMatch).getMatches().get(0).getMedicId().getOrganization());
+		assertEquals(ids.get(0).getMatches().get(0).getMedicId().getValue(),
+				pseudonyms.get(doubleMatch).getMatches().get(0).getMedicId().getValue());
 
-		assertNotNull(decodePseudonyms.get(1));
-		assertNotNull(decodePseudonyms.get(1).getMatches());
-		assertNotNull(decodePseudonyms.get(1).getMatches().get(0).getMedicId());
-		assertEquals(pseudonyms.get(1).getMatches().size(), decodePseudonyms.get(1).getMatches().size());
-		assertNotNull(decodePseudonyms.get(1).getMatches().get(0));
-		assertEquals(pseudonyms.get(1).getMatches().get(0).getMedicId().getOrganization(),
-				decodePseudonyms.get(1).getMatches().get(0).getMedicId().getOrganization());
-		assertEquals(pseudonyms.get(1).getMatches().get(0).getMedicId().getValue(),
-				decodePseudonyms.get(1).getMatches().get(0).getMedicId().getValue());
+		assertNotNull(pseudonyms.get(doubleMatch).getMatches().get(1));
+		assertNotNull(pseudonyms.get(doubleMatch).getMatches().get(1).getMedicId());
+		assertEquals(ids.get(0).getMatches().get(1).getMedicId().getOrganization(),
+				pseudonyms.get(doubleMatch).getMatches().get(1).getMedicId().getOrganization());
+		assertEquals(ids.get(0).getMatches().get(1).getMedicId().getValue(),
+				pseudonyms.get(doubleMatch).getMatches().get(1).getMedicId().getValue());
+
+		assertNotNull(pseudonyms.get(singleMatch));
+		assertNotNull(pseudonyms.get(singleMatch).getMatches());
+		assertNotNull(pseudonyms.get(singleMatch).getMatches().get(0).getMedicId());
+		assertEquals(ids.get(1).getMatches().size(), pseudonyms.get(singleMatch).getMatches().size());
+		assertNotNull(pseudonyms.get(singleMatch).getMatches().get(0));
+		assertEquals(ids.get(1).getMatches().get(0).getMedicId().getOrganization(),
+				pseudonyms.get(singleMatch).getMatches().get(0).getMedicId().getOrganization());
+		assertEquals(ids.get(1).getMatches().get(0).getMedicId().getValue(),
+				pseudonyms.get(singleMatch).getMatches().get(0).getMedicId().getValue());
 	}
 }

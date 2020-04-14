@@ -15,7 +15,7 @@ public class SingleOrganizationMatcherTest
 	@Test
 	public void testMatch() throws Exception
 	{
-		SingleOrganizationMatcher<TestPerson> m = new SingleOrganizationMatcher<TestPerson>(TestMatchedPerson::new);
+		SingleOrganizationMatcher<TestPerson> m = new SingleOrganizationMatcherImpl<TestPerson>(TestMatchedPerson::new);
 
 		List<TestPerson> personLists = Arrays.asList(
 				new TestPerson(new TestMedicId("org1", "id1"),

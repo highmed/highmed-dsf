@@ -17,13 +17,15 @@ public class MatchedPersonImpl implements MatchedPersonWithMdat
 	private final List<PersonWithMdat> matches = new ArrayList<>();
 	private final List<MdatContainer> mdatContainers = new ArrayList<>();
 
-	public MatchedPersonImpl(PersonWithMdat person, MdatContainer mdatContainer)
+	public MatchedPersonImpl(PersonWithMdat person)
 	{
 		if (person != null)
+		{
 			matches.add(person);
-
-		if (mdatContainer != null)
-			mdatContainers.add(mdatContainer);
+			
+			if (person.getMdatContainer() != null)
+				mdatContainers.add(person.getMdatContainer());
+		}
 	}
 
 	@JsonCreator
