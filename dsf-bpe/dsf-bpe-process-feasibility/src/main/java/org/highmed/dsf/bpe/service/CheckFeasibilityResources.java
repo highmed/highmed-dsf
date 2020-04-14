@@ -40,11 +40,11 @@ public class CheckFeasibilityResources extends AbstractServiceDelegate
 				.filter(e -> e.getUrl().equals(Constants.EXTENSION_PARTICIPATING_MEDIC_URI))
 				.map(extension -> ((Reference) extension.getValue()).getReference()).distinct().count();
 
-		if (medics < MIN_PARTICIPATING_MEDICS)
-		{
-			throw new IllegalStateException(
-					"Number of distinct participanting MeDICs is < " + MIN_PARTICIPATING_MEDICS + ", got " + medics);
-		}
+//		if (medics < MIN_PARTICIPATING_MEDICS)
+//		{
+//			throw new IllegalStateException(
+//					"Number of distinct participanting MeDICs is < " + MIN_PARTICIPATING_MEDICS + ", got " + medics);
+//		}
 	}
 
 	private void checkNumberOfCohortDefinitions(List<Group> cohorts)

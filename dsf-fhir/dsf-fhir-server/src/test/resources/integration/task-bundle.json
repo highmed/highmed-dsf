@@ -91,7 +91,7 @@
 				"address": [
 					{
 						"line": [
-							"Highmedstraße 12"
+							"Highmedstraï¿½e 12"
 						],
 						"city": "Berlin",
 						"postalCode": "10115",
@@ -133,7 +133,7 @@
 			"resource": {
 				"resourceType": "ResearchStudy",
 				"meta": {
-					"profile": "http://highmed.org/fhir/StructureDefinition/highmed-research-study"
+					"profile": "http://highmed.org/fhir/StructureDefinition/highmed-research-study-feasibility"
 				},
 				"identifier": [
 					{

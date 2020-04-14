@@ -30,6 +30,8 @@ public class CheckMultiMedicResults extends AbstractServiceDelegate
 		transformAndAddToTaskOutput(outputs, task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT);
 		transformAndAddToTaskOutput(outputs, task,
 				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS_COUNT);
+		transformAndAddToTaskOutput(outputs, task,
+				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NOT_ENOUGH_PARTICIPATION);
 	}
 
 	private void transformAndAddToTaskOutput(Outputs outputs, Task task, String code)
