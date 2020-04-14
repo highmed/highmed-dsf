@@ -1,4 +1,4 @@
-package org.highmed.openehr.deserializer;
+package org.highmed.openehr.json;
 
 import java.io.IOException;
 

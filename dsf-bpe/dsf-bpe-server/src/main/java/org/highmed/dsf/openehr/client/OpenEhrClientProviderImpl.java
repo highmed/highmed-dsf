@@ -2,8 +2,8 @@ package org.highmed.dsf.openehr.client;
 
 import java.util.Objects;
 
-import org.highmed.openehr.client.OpenehrWebserviceClient;
-import org.highmed.openehr.client.OpenehrWebserviceClientJersey;
+import org.highmed.openehr.client.OpenEhrWebserviceClient;
+import org.highmed.openehr.client.OpenEhrWebserviceClientJersey;
 import org.springframework.beans.factory.InitializingBean;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -46,9 +46,9 @@ public class OpenEhrClientProviderImpl implements OpenEhrWebserviceClientProvide
 	}
 
 	@Override
-	public OpenehrWebserviceClient getWebserviceClient()
+	public OpenEhrWebserviceClient getWebserviceClient()
 	{
-		return new OpenehrWebserviceClientJersey(baseUrl, basicAuthUsername, basicAuthPassword, connectionTimeout,
+		return new OpenEhrWebserviceClientJersey(baseUrl, basicAuthUsername, basicAuthPassword, connectionTimeout,
 				readTimeout, objectMapper);
 	}
 

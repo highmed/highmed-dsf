@@ -1,7 +1,5 @@
-package org.highmed.openehr;
+package org.highmed.openehr.json;
 
-import org.highmed.openehr.deserializer.RowElementDeserializer;
-import org.highmed.openehr.deserializer.RowElementSerializer;
 import org.highmed.openehr.model.datatypes.DoubleRowElement;
 import org.highmed.openehr.model.datatypes.IntegerRowElement;
 import org.highmed.openehr.model.datatypes.JsonNodeRowElement;
@@ -13,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
-public class OpenEhrObjectMapperFactory
+public final class OpenEhrObjectMapperFactory
 {
 	private OpenEhrObjectMapperFactory()
 	{
@@ -25,15 +23,22 @@ public class OpenEhrObjectMapperFactory
 		objectMapper.setSerializationInclusion(Include.NON_NULL);
 		objectMapper.setSerializationInclusion(Include.NON_EMPTY);
 
+		objectMapper.registerModule(openEhrModule());
+
+		return objectMapper;
+	}
+
+	public static SimpleModule openEhrModule()
+	{
 		SimpleModule module = new SimpleModule();
+
 		module.addDeserializer(RowElement.class, new RowElementDeserializer());
 		module.addSerializer(IntegerRowElement.class, new RowElementSerializer());
 		module.addSerializer(DoubleRowElement.class, new RowElementSerializer());
 		module.addSerializer(StringRowElement.class, new RowElementSerializer());
 		module.addSerializer(ZonedDateTimeRowElement.class, new RowElementSerializer());
 		module.addSerializer(JsonNodeRowElement.class, new RowElementSerializer());
-		objectMapper.registerModule(module);
 
-		return objectMapper;
+		return module;
 	}
 }

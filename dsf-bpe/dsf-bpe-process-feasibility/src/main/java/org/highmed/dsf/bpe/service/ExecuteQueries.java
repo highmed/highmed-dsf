@@ -12,14 +12,14 @@ import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.FeasibilityQueryResult;
 import org.highmed.dsf.fhir.variables.FeasibilityQueryResults;
-import org.highmed.openehr.client.OpenehrWebserviceClient;
+import org.highmed.openehr.client.OpenEhrWebserviceClient;
 import org.springframework.beans.factory.InitializingBean;
 
 public class ExecuteQueries extends AbstractServiceDelegate implements InitializingBean
 {
-	private final OpenehrWebserviceClient openehrWebserviceClient;
+	private final OpenEhrWebserviceClient openehrWebserviceClient;
 
-	public ExecuteQueries(FhirWebserviceClientProvider clientProvider, OpenehrWebserviceClient openehrWebserviceClient,
+	public ExecuteQueries(FhirWebserviceClientProvider clientProvider, OpenEhrWebserviceClient openehrWebserviceClient,
 			TaskHelper taskHelper)
 	{
 		super(clientProvider, taskHelper);

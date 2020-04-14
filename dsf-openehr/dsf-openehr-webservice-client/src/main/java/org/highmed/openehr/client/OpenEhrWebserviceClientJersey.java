@@ -14,13 +14,13 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class OpenehrWebserviceClientJersey extends AbstractJerseyClient implements OpenehrWebserviceClient
+public class OpenEhrWebserviceClientJersey extends AbstractJerseyClient implements OpenEhrWebserviceClient
 {
-	private static final Logger logger = LoggerFactory.getLogger(OpenehrWebserviceClientJersey.class);
+	private static final Logger logger = LoggerFactory.getLogger(OpenEhrWebserviceClientJersey.class);
 
 	public static final String OPENEHR_QUERY_PATH = "query/aql";
 
-	public OpenehrWebserviceClientJersey(String baseUrl, String basicAuthUsername, String basicAuthPassword,
+	public OpenEhrWebserviceClientJersey(String baseUrl, String basicAuthUsername, String basicAuthPassword,
 			int connectTimeout, int readTimeout, ObjectMapper objectMapper)
 	{
 		super(baseUrl, basicAuthUsername, basicAuthPassword, connectTimeout, readTimeout, objectMapper);
@@ -44,6 +44,9 @@ public class OpenehrWebserviceClientJersey extends AbstractJerseyClient implemen
 			return response.readEntity(ResultSet.class);
 		}
 		else
-			throw new WebApplicationException(response);
+		{
+			response.close();
+			throw new WebApplicationException(response.getStatus());
+		}
 	}
 }
