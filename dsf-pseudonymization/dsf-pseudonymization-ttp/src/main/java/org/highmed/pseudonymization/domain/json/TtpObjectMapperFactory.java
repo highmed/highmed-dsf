@@ -4,8 +4,10 @@ import java.util.BitSet;
 
 import org.highmed.openehr.json.OpenEhrObjectMapperFactory;
 import org.highmed.pseudonymization.domain.impl.FhirMdatContainer;
+import org.highmed.pseudonymization.domain.impl.MatchedPersonImpl;
 import org.highmed.pseudonymization.domain.impl.MedicIdImpl;
 import org.highmed.pseudonymization.domain.impl.OpenEhrMdatContainer;
+import org.highmed.pseudonymization.domain.impl.PersonImpl;
 import org.highmed.pseudonymization.json.BitSetDeserializer;
 import org.highmed.pseudonymization.json.BitSetSerializer;
 import org.hl7.fhir.r4.model.Resource;
@@ -41,6 +43,8 @@ public final class TtpObjectMapperFactory
 		objectMapper.registerSubtypes(new NamedType(MedicIdImpl.class, "MedicId"));
 		objectMapper.registerSubtypes(new NamedType(OpenEhrMdatContainer.class, "OpenEhrMdatContainer"));
 		objectMapper.registerSubtypes(new NamedType(FhirMdatContainer.class, "FhirMdatContainer"));
+		objectMapper.registerSubtypes(new NamedType(PersonImpl.class, "Person"));
+		objectMapper.registerSubtypes(new NamedType(MatchedPersonImpl.class, "MatchedPerson"));
 
 		return objectMapper;
 	}

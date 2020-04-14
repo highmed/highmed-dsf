@@ -3,6 +3,11 @@ package org.highmed.pseudonymization.recordlinkage;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+
+@JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "@type")
 public interface MatchedPerson<P extends Person>
 {
 	/**
