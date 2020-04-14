@@ -10,7 +10,7 @@ import java.util.Random;
 
 import javax.crypto.SecretKey;
 
-import org.highmed.openehr.OpenEhrObjectMapperFactory;
+import org.highmed.openehr.json.OpenEhrObjectMapperFactory;
 import org.highmed.openehr.model.structure.ResultSet;
 import org.highmed.pseudonymization.bloomfilter.BloomFilterGenerator;
 import org.highmed.pseudonymization.bloomfilter.RecordBloomFilterGenerator;
