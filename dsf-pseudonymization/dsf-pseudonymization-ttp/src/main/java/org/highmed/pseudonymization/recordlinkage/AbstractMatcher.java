@@ -208,7 +208,7 @@ public abstract class AbstractMatcher<P extends Person>
 			}
 		},
 		/**
-		 * Matches against all personss already matched and calculates the average match
+		 * Matches against all persons already matched and calculates the average match
 		 *
 		 * @see MatchedPerson#getMatches()
 		 */
