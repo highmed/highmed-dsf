@@ -1,7 +1,6 @@
 package org.highmed.dsf.bpe.service;
 
 import java.util.Objects;
-import java.util.UUID;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.Constants;
@@ -11,12 +10,8 @@ import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.MultiInstanceTarget;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargetValues;
-import org.highmed.fhir.client.FhirWebserviceClient;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,14 +20,13 @@ import org.springframework.beans.factory.InitializingBean;
 public class SelectResponseTargetTtp extends AbstractServiceDelegate implements InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(SelectResponseTargetTtp.class);
-	
+
 	private final OrganizationProvider organizationProvider;
 
 	public SelectResponseTargetTtp(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
 			OrganizationProvider organizationProvider)
 	{
 		super(clientProvider, taskHelper);
-
 		this.organizationProvider = organizationProvider;
 	}
 
@@ -40,7 +34,6 @@ public class SelectResponseTargetTtp extends AbstractServiceDelegate implements 
 	public void afterPropertiesSet() throws Exception
 	{
 		super.afterPropertiesSet();
-
 		Objects.requireNonNull(organizationProvider, "organizationProvider");
 	}
 
@@ -56,28 +49,11 @@ public class SelectResponseTargetTtp extends AbstractServiceDelegate implements 
 
 	private Identifier getTtpIdentifier(DelegateExecution execution)
 	{
-		ResearchStudy researchStudy = (ResearchStudy) execution.getVariable(Constants.VARIABLE_RESEARCH_STUDY);
-		Reference ttpReference = (Reference) researchStudy.getExtension().stream().filter(extension -> extension.getUrl()
-				.equals("http://highmed.org/fhir/StructureDefinition/participating-ttp")).findFirst().get().getValue();
+		Organization ttp = (Organization) execution.getVariable(Constants.VARIABLE_TTP);
 
-
-
-
-
-		return organizationProvider.getIdentifier(new IdType(ttpReference.getReference())).get();
-	}
-
-	private FhirWebserviceClient getWebserviceClient(IdType researchStudyId)
-	{
-		if (researchStudyId.getBaseUrl() == null
-				|| researchStudyId.getBaseUrl().equals(getFhirWebserviceClientProvider().getLocalBaseUrl()))
-		{
-			return getFhirWebserviceClientProvider().getLocalWebserviceClient();
-		}
-		else
-		{
-			return getFhirWebserviceClientProvider().getRemoteWebserviceClient(researchStudyId.getBaseUrl());
-		}
+		return ttp.getIdentifier().stream()
+				.filter(identifier -> identifier.getSystem().equals(organizationProvider.getDefaultIdentifierSystem()))
+				.findFirst().get();
 	}
 
 	private String getCorrelationKey(DelegateExecution execution)

@@ -17,6 +17,7 @@ public interface Constants
 	String VARIABLE_LEADING_TASK = "leadingTask";
 	String VARIABLE_RESEARCH_STUDY = "researchStudy";
 	String VARIABLE_COHORTS = "cohorts";
+	String VARIABLE_TTP = "ttp";
 	String VARIABLE_QUERIES = "queries";
 	String VARIABLE_QUERY_PARAMETERS = "queryParameters";
 	String VARIABLE_BUNDLE_ID = "bundleId";
