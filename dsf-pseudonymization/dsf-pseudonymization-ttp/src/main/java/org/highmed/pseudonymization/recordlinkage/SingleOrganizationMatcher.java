@@ -3,6 +3,12 @@ package org.highmed.pseudonymization.recordlinkage;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Single organization record linkage matcher to match {@link Person}s from a single organization.
+ *
+ * @param <P>
+ *            the type of the persons matched by this single organization matcher
+ */
 public interface SingleOrganizationMatcher<P extends Person>
 {
 	/**

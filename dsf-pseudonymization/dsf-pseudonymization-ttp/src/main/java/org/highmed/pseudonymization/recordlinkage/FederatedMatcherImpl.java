@@ -10,6 +10,13 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Federated record linkage matcher implementation to match {@link Person}s from multiple organizations. The matcher
+ * assumes that the supplied lists of persons are unique per organization.
+ *
+ * @param <P>
+ *            the type of the persons matched by this federated matcher
+ */
 public class FederatedMatcherImpl<P extends Person> extends AbstractMatcher<P> implements FederatedMatcher<P>
 {
 	/**

@@ -8,6 +8,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * Single organization record linkage matcher implementation to match {@link Person}s from a single organization.
+ *
+ * @param <P>
+ *            the type of the persons matched by this single organization matcher
+ */
 public class SingleOrganizationMatcherImpl<P extends Person> extends AbstractMatcher<P>
 		implements SingleOrganizationMatcher<P>
 {
