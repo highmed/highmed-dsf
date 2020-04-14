@@ -7,6 +7,7 @@ import org.highmed.pseudonymization.domain.PersonWithMdat;
 import org.highmed.pseudonymization.recordlinkage.MedicId;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class PersonImpl implements PersonWithMdat
@@ -41,5 +42,13 @@ public class PersonImpl implements PersonWithMdat
 	public MdatContainer getMdatContainer()
 	{
 		return mdatContainer;
+	}
+
+	@JsonIgnore
+	@Override
+	// overriding default implementation to add JsonIgnore annotation
+	public int getBloomFilterCardinality()
+	{
+		return PersonWithMdat.super.getBloomFilterCardinality();
 	}
 }
