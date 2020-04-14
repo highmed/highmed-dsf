@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import org.highmed.openehr.OpenEhrObjectMapperFactory;
+import org.highmed.openehr.json.OpenEhrObjectMapperFactory;
 import org.highmed.openehr.model.structure.ResultSet;
 import org.highmed.pseudonymization.crypto.AesGcmUtil;
 import org.highmed.pseudonymization.domain.PersonWithMdat;
