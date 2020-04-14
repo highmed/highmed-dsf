@@ -40,7 +40,7 @@
     <element id="ResearchStudy.extension:participating-medic">
       <path value="ResearchStudy.extension" />
       <sliceName value="participating-medic" />
-      <min value="1" />
+      <min value="0" />
       <max value="*" />
       <type>
         <code value="Extension" />
