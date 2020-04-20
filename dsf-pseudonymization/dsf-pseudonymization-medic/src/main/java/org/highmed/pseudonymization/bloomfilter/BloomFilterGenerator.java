@@ -36,6 +36,17 @@ public class BloomFilterGenerator
 		return new BloomFilterGenerator(bitSetLength, () -> new HmacMd5HmacSha1BiGramHasher(key1, key2));
 	}
 
+	public static BloomFilterGenerator withSha1Sha2BiGramHasher(int bitSetLength)
+	{
+		return new BloomFilterGenerator(bitSetLength, Sha1Sha2BiGramHasher::new);
+	}
+
+	public static BloomFilterGenerator withHmacSha1HmacSha2BiGramHasher(int bitSetLength, byte[] key1, byte[] key2,
+			Provider provider)
+	{
+		return new BloomFilterGenerator(bitSetLength, () -> new HmacSha1HmacSha2BiGramHasher(key1, key2, provider));
+	}
+
 	public static BloomFilterGenerator withSha2Sha3BiGramHasher(int bitSetLength)
 	{
 		return new BloomFilterGenerator(bitSetLength, Sha2Sha3BiGramHasher::new);
@@ -178,6 +189,107 @@ public class BloomFilterGenerator
 			try
 			{
 				return sha1Mac.doFinal(biGram);
+			}
+			catch (IllegalStateException e)
+			{
+				throw new RuntimeException(e);
+			}
+		}
+	}
+
+	public static class Sha1Sha2BiGramHasher implements BiGramHasher
+	{
+		private final MessageDigest sha1Digest;
+		private final MessageDigest sha2Digest;
+
+		public Sha1Sha2BiGramHasher()
+		{
+			try
+			{
+				sha1Digest = MessageDigest.getInstance("SHA-1");
+				sha2Digest = MessageDigest.getInstance("SHA-256");
+			}
+			catch (NoSuchAlgorithmException e)
+			{
+				throw new RuntimeException(e);
+			}
+		}
+
+		@Override
+		public byte[] firstHash(byte[] biGram)
+		{
+			try
+			{
+				return sha1Digest.digest(biGram);
+			}
+			finally
+			{
+				sha1Digest.reset();
+			}
+		}
+
+		@Override
+		public byte[] secondHash(byte[] biGram)
+		{
+			try
+			{
+				return sha2Digest.digest(biGram);
+			}
+			finally
+			{
+				sha2Digest.reset();
+			}
+		}
+	}
+
+	public static class HmacSha1HmacSha2BiGramHasher implements BiGramHasher
+	{
+		private final Mac sha1Mac;
+		private final Mac sha2Mac;
+
+		public HmacSha1HmacSha2BiGramHasher(byte[] key1, byte[] key2)
+		{
+			this(key1, key2, null);
+		}
+
+		public HmacSha1HmacSha2BiGramHasher(byte[] key1, byte[] key2, Provider provider)
+		{
+			try
+			{
+				sha1Mac = Mac.getInstance("HmacSHA1");
+				sha1Mac.init(new SecretKeySpec(key1, "HmacSHA1"));
+
+				if (provider == null)
+					sha2Mac = Mac.getInstance("HmacSHA256");
+				else
+					sha2Mac = Mac.getInstance("HmacSHA256", provider);
+				sha2Mac.init(new SecretKeySpec(key2, "HmacSHA256"));
+			}
+			catch (InvalidKeyException | NoSuchAlgorithmException e)
+			{
+				throw new RuntimeException(e);
+			}
+		}
+
+		@Override
+		public byte[] firstHash(byte[] biGram)
+		{
+			try
+			{
+				return sha1Mac.doFinal(biGram);
+			}
+			catch (IllegalStateException e)
+			{
+				throw new RuntimeException(e);
+			}
+		}
+
+		@Override
+		public byte[] secondHash(byte[] biGram)
+		{
+			try
+			{
+				return sha2Mac.doFinal(biGram);
 			}
 			catch (IllegalStateException e)
 			{
