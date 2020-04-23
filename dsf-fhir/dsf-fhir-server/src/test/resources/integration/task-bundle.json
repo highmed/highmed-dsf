@@ -63,72 +63,6 @@
 			}
 		},
 		{
-			"fullUrl": "urn:uuid:ae194285-d08e-46c7-a9a7-9a47624dd8xx",
-			"resource": {
-				"resourceType": "Practitioner",
-				"meta": {
-					"profile": "http://highmed.org/fhir/StructureDefinition/highmed-practitioner"
-				},
-				"active": true,
-				"name": [
-					{
-						"family": "HiGHmed",
-						"given": [
-							"Test"
-						]
-					}
-				],
-				"telecom": [
-					{
-						"system": "phone",
-						"value": "+491710001122"
-					},
-					{
-						"system": "email",
-						"value": "test-practitioner@highmed.org"
-					}
-				],
-				"address": [
-					{
-						"line": [
-							"Highmedstra�e 12"
-						],
-						"city": "Berlin",
-						"postalCode": "10115",
-						"country": "DE"
-					}
-				]
-			},
-			"request": {
-				"method": "POST",
-				"url": "Practitioner"
-			}
-		},
-		{
-			"fullUrl": "urn:uuid:ae194285-d08e-46c7-a9a7-9a47624dd8yy",
-			"resource": {
-				"resourceType": "PractitionerRole",
-				"meta": {
-					"profile": "http://highmed.org/fhir/StructureDefinition/highmed-practitioner-role"
-				},
-				"active": true,
-				"practitioner": {
-					"reference": "urn:uuid:ae194285-d08e-46c7-a9a7-9a47624dd8xx"
-				},
-				"organization": {
-					"identifier": {
-						"system": "http://highmed.org/fhir/NamingSystem/organization-identifier",
-						"value": "Test_Organization"
-					},
-					"type": "Organization"
-				}
-			},
-			"request": {
-				"method": "POST",
-				"url": "PractitionerRole"
-			}
-		},
-		{
 			"fullUrl": "urn:uuid:aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
 			"resource": {
 				"resourceType": "ResearchStudy",
@@ -152,9 +86,6 @@
 						"reference": "urn:uuid:ae194285-d08e-46c7-a9a7-9a47624dd8bb"
 					}
 				],
-				"principalInvestigator": {
-					"reference": "urn:uuid:ae194285-d08e-46c7-a9a7-9a47624dd8xx"
-				},
 				"extension": [
 					{
 						"url": "http://highmed.org/fhir/StructureDefinition/participating-medic",
