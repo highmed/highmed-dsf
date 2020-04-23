@@ -111,6 +111,7 @@ public class DownloadResearchStudyResource extends AbstractServiceDelegate imple
 				Extension extension = new Extension(Constants.EXTENSION_PARTICIPATING_MEDIC_URI,
 						new Reference(reference));
 				researchStudy.addExtension(extension);
+				logger.warn("Added missing organization with id='{}' to research study with id='{}'", reference, researchStudy.getId());
 			}
 		});
 
