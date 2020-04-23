@@ -145,25 +145,25 @@ public class ResearchStudyAuthorizationRule extends AbstractAuthorizationRule<Re
 			errors.add("ResearchStudy.enrollment one or more Group references missing");
 		}
 
-//		if (newResource.hasPrincipalInvestigator())
-//		{
-//			Optional<Resource> practitioner = resolvePractitioner(connection, user,
-//					"ResearchStudy.principalInvestigator", newResource.getPrincipalInvestigator());
-//			if (practitioner.isPresent() && practitioner.get() instanceof Practitioner
-//					&& ((Practitioner) practitioner.get()).getActive())
-//			{
-//				if (!practitionerRoleExists(connection, user, practitioner.get().getIdElement()))
-//				{
-//					errors.add(
-//							"ResearchStudy.principalInvestigator corresponding PractitionerRole.practitioner not found");
-//				}
-//			}
-//			else
-//			{
-//				errors.add(
-//						"ResearchStudy.principalInvestigator not resolved or not instance of Practitioner or not active");
-//			}
-//		}
+		if (newResource.hasPrincipalInvestigator())
+		{
+			Optional<Resource> practitioner = resolvePractitioner(connection, user,
+					"ResearchStudy.principalInvestigator", newResource.getPrincipalInvestigator());
+			if (practitioner.isPresent() && practitioner.get() instanceof Practitioner
+					&& ((Practitioner) practitioner.get()).getActive())
+			{
+				if (!practitionerRoleExists(connection, user, practitioner.get().getIdElement()))
+				{
+					errors.add(
+							"ResearchStudy.principalInvestigator corresponding PractitionerRole.practitioner not found");
+				}
+			}
+			else
+			{
+				errors.add(
+						"ResearchStudy.principalInvestigator not resolved or not instance of Practitioner or not active");
+			}
+		}
 //		else
 //		{
 //			errors.add("ResearchStudy.principalInvestigator missing");
