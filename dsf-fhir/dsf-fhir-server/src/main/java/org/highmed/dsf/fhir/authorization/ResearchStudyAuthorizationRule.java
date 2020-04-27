@@ -145,6 +145,8 @@ public class ResearchStudyAuthorizationRule extends AbstractAuthorizationRule<Re
 			errors.add("ResearchStudy.enrollment one or more Group references missing");
 		}
 
+		// TODO: hasPrincipalInvestigator check is only optional for Feasability Requests. For full Data Sharing
+		//       processes, the field is mandatory and should lead to a validation error if not supplied.
 		if (newResource.hasPrincipalInvestigator())
 		{
 			Optional<Resource> practitioner = resolvePractitioner(connection, user,
@@ -164,10 +166,6 @@ public class ResearchStudyAuthorizationRule extends AbstractAuthorizationRule<Re
 						"ResearchStudy.principalInvestigator not resolved or not instance of Practitioner or not active");
 			}
 		}
-//		else
-//		{
-//			errors.add("ResearchStudy.principalInvestigator missing");
-//		}
 
 		if (errors.isEmpty())
 			return Optional.empty();
