@@ -37,7 +37,7 @@ public class ResultSetTranslatorResearchResultToMedicImpl implements ResultSetTr
 	{
 		return Stream
 				.concat(columns.stream().map(toNewColumn()),
-						Stream.of(new Column(Constants.PSN_COLUMN_NAME, Constants.PSN_COLUMN_PATH)))
+						Stream.of(new Column(Constants.MEDICID_COLUMN_NAME, Constants.MEDICID_COLUMN_PATH)))
 				.collect(Collectors.toList());
 	}
 
