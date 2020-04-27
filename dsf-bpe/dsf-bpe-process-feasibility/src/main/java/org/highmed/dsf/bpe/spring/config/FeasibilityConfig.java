@@ -69,7 +69,7 @@ public class FeasibilityConfig
 	@Bean
 	public DownloadResearchStudyResource downloadResearchStudyResource()
 	{
-		return new DownloadResearchStudyResource(fhirClientProvider, taskHelper);
+		return new DownloadResearchStudyResource(organizationProvider, fhirClientProvider, taskHelper);
 	}
 
 	@Bean

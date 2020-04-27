@@ -23,7 +23,6 @@ public class SelectResponseTargetTtp extends AbstractServiceDelegate implements 
 			OrganizationProvider organizationProvider)
 	{
 		super(clientProvider, taskHelper);
-
 		this.organizationProvider = organizationProvider;
 	}
 
@@ -31,7 +30,6 @@ public class SelectResponseTargetTtp extends AbstractServiceDelegate implements 
 	public void afterPropertiesSet() throws Exception
 	{
 		super.afterPropertiesSet();
-
 		Objects.requireNonNull(organizationProvider, "organizationProvider");
 	}
 
@@ -47,17 +45,11 @@ public class SelectResponseTargetTtp extends AbstractServiceDelegate implements 
 
 	private Identifier getTtpIdentifier(DelegateExecution execution)
 	{
-		// TODO implement ttp selection strategy, if there are multiple TTPs available
-		//      has to mach the selection strategy from the service SelectRequestTarget,
-		//      because this sends the Query results for record linkage to the TTP
-
-		Organization ttp = organizationProvider.getOrganizationsByType("TTP").findFirst().orElseThrow(
-				() -> new IllegalArgumentException("No organization of type TTP could be found, aborting request"));
+		Organization ttp = (Organization) execution.getVariable(Constants.VARIABLE_TTP);
 
 		return ttp.getIdentifier().stream()
-				.filter(identifier -> identifier.getSystem().equals(Constants.ORGANIZATION_IDENTIFIER_SYSTEM))
-				.findFirst().orElseThrow(() -> new IllegalArgumentException(
-						"No organization identifier of type TTP could be found, aborting request"));
+				.filter(identifier -> identifier.getSystem().equals(organizationProvider.getDefaultIdentifierSystem()))
+				.findFirst().get();
 	}
 
 	private String getCorrelationKey(DelegateExecution execution)
