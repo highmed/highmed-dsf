@@ -50,15 +50,24 @@ public class CalculateMultiMedicResults extends AbstractServiceDelegate
 	private void addResultsToOutput(Outputs outputs, List<FinalSimpleFeasibilityResult> finalResults)
 	{
 		finalResults.forEach(result -> {
-			outputs.add(Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
-					Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT,
-					String.valueOf(result.getCohortSize()), Constants.EXTENSION_GROUP_ID_URI, result.getCohortId());
-			;
+			if (result.getParticipatingMedics() >= Constants.MIN_PARTICIPATING_MEDICS)
+			{
+				outputs.add(Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
+						Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT,
+						String.valueOf(result.getCohortSize()), Constants.EXTENSION_GROUP_ID_URI, result.getCohortId());
+				;
 
-			outputs.add(Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
-					Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS_COUNT,
-					String.valueOf(result.getParticipatingMedics()), Constants.EXTENSION_GROUP_ID_URI,
-					result.getCohortId());
+				outputs.add(Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
+						Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS_COUNT,
+						String.valueOf(result.getParticipatingMedics()), Constants.EXTENSION_GROUP_ID_URI,
+						result.getCohortId());
+			}
+			else
+			{
+				outputs.add(Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
+						Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NOT_ENOUGH_PARTICIPATION,
+						"Not enough participating MeDICs.", Constants.EXTENSION_GROUP_ID_URI, result.getCohortId());
+			}
 		});
 	}
 }

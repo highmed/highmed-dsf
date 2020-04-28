@@ -57,7 +57,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		{
 			List<Bundle.BundleEntryComponent> resultBundleEntries = createTaskBundle();
 
-			String taskId = new IdType(resultBundleEntries.get(5).getFullUrl()).getIdPart();
+			String taskId = new IdType(resultBundleEntries.get(3).getFullUrl()).getIdPart();
 			Task task = getWebserviceClient().read(Task.class, taskId);
 
 			Task.ParameterComponent input = task.getInput().stream()
@@ -65,7 +65,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 					.findFirst().orElse(new Task.ParameterComponent());
 
 			IdType taskInputResearchStudyId = new IdType(((Reference) input.getValue()).getReference());
-			IdType researchStudyId = new IdType(resultBundleEntries.get(4).getFullUrl());
+			IdType researchStudyId = new IdType(resultBundleEntries.get(2).getFullUrl());
 
 			assertEquals(researchStudyId.getResourceType(), taskInputResearchStudyId.getResourceType());
 			assertEquals(researchStudyId.getIdPart(), taskInputResearchStudyId.getIdPart());
