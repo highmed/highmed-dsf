@@ -6,7 +6,7 @@
       <code value="REMOTE" />
     </tag>
   </meta>
-  <url value="http://highmed.org/fhir/StructureDefinition/highmed-research-study" />
+  <url value="http://highmed.org/fhir/StructureDefinition/highmed-research-study-feasibility" />
   <version value="0.1.0" />
   <name value="ResearchStudy" />
   <status value="draft" />
@@ -40,7 +40,7 @@
     <element id="ResearchStudy.extension:participating-medic">
       <path value="ResearchStudy.extension" />
       <sliceName value="participating-medic" />
-      <min value="1" />
+      <min value="0" />
       <max value="*" />
       <type>
         <code value="Extension" />
@@ -68,10 +68,6 @@
       <path value="ResearchStudy.identifier.system" />
       <fixedUri value="http://highmed.org/fhir/NamingSystem/research-study-identifier" />
     </element>
-    <element id="ResearchStudy.description">
-      <path value="ResearchStudy.description" />
-      <min value="1" />
-    </element>
     <element id="ResearchStudy.enrollment">
       <path value="ResearchStudy.enrollment" />
       <min value="1" />
@@ -86,7 +82,6 @@
     </element>
     <element id="ResearchStudy.principalInvestigator">
       <path value="ResearchStudy.principalInvestigator" />
-      <min value="1" />
       <type>
         <code value="Reference" />
         <targetProfile value="http://highmed.org/fhir/StructureDefinition/highmed-practitioner" />

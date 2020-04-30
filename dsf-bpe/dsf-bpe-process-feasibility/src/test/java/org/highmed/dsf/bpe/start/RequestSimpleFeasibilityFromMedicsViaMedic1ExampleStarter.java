@@ -27,8 +27,6 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.Practitioner;
-import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.ResearchStudy.ResearchStudyStatus;
@@ -61,10 +59,8 @@ public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter
 		{
 			Group group1 = createGroup("Group 1");
 			Group group2 = createGroup("Group 2");
-			Practitioner practitioner = createPractitioner();
-			PractitionerRole practitionerRole = createPractitionerRole(practitioner);
-			ResearchStudy researchStudy = createResearchStudy(group1, group2, practitioner);
-			Task task = createTask(practitioner, researchStudy);
+			ResearchStudy researchStudy = createResearchStudy(group1, group2);
+			Task task = createTask(researchStudy);
 
 			Bundle bundle = new Bundle();
 			bundle.setType(BundleType.TRANSACTION);
@@ -72,10 +68,6 @@ public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter
 					.setMethod(HTTPVerb.POST).setUrl("Group");
 			bundle.addEntry().setResource(group2).setFullUrl(group2.getIdElement().getIdPart()).getRequest()
 					.setMethod(HTTPVerb.POST).setUrl("Group");
-			bundle.addEntry().setResource(practitioner).setFullUrl(practitioner.getIdElement().getIdPart()).getRequest()
-					.setMethod(HTTPVerb.POST).setUrl("Practitioner");
-			bundle.addEntry().setResource(practitionerRole).setFullUrl(practitionerRole.getIdElement().getIdPart())
-					.getRequest().setMethod(HTTPVerb.POST).setUrl("PractitionerRole");
 			bundle.addEntry().setResource(researchStudy).setFullUrl(researchStudy.getIdElement().getIdPart())
 					.getRequest().setMethod(HTTPVerb.POST).setUrl("ResearchStudy");
 			bundle.addEntry().setResource(task).setFullUrl(task.getIdElement().getIdPart()).getRequest()
@@ -114,47 +106,17 @@ public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter
 		return group;
 	}
 
-	private static Practitioner createPractitioner()
-	{
-		Practitioner practitioner = new Practitioner();
-		practitioner.setIdElement(new IdType("urn:uuid:" + UUID.randomUUID().toString()));
-		practitioner.setActive(true);
-
-		practitioner.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-practitioner");
-		practitioner.getNameFirstRep().setFamily("HiGHmed").addGiven("Test");
-
-		return practitioner;
-	}
-
-	private static PractitionerRole createPractitionerRole(Practitioner practitioner)
-	{
-		PractitionerRole practitionerRole = new PractitionerRole();
-		practitionerRole.setIdElement(new IdType("urn:uuid:" + UUID.randomUUID().toString()));
-		practitionerRole.setActive(true);
-
-		practitioner.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-practitioner-role");
-		practitionerRole.getPractitioner().setReference(practitioner.getIdElement().getIdPart());
-		practitionerRole.getOrganization().setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_MeDIC_1");
-		
-		return practitionerRole;
-	}
-
-	private static ResearchStudy createResearchStudy(Group group1, Group group2, Practitioner practitioner)
+	private static ResearchStudy createResearchStudy(Group group1, Group group2)
 	{
 		ResearchStudy researchStudy = new ResearchStudy();
 		researchStudy.setIdElement(new IdType("urn:uuid:" + UUID.randomUUID().toString()));
 
-		researchStudy.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-research-study");
+		researchStudy.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-research-study-feasibility");
 		researchStudy.addIdentifier().setSystem("http://highmed.org/fhir/NamingSystem/research-study-identifier")
 				.setValue(UUID.randomUUID().toString());
-		researchStudy.setTitle("Research Study Test");
 		researchStudy.setStatus(ResearchStudyStatus.ACTIVE);
-		researchStudy.setDescription(
-				"This is a test research study based on the highmed profile. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.");
 		researchStudy.addEnrollment().setReference(group1.getIdElement().getIdPart());
 		researchStudy.addEnrollment().setReference(group2.getIdElement().getIdPart());
-		researchStudy.getPrincipalInvestigator().setReference(practitioner.getIdElement().getIdPart());
 
 		researchStudy.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/participating-medic")
 				.setValue(new Reference().setType("Organization").setIdentifier(new Identifier()
@@ -172,7 +134,7 @@ public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter
 		return researchStudy;
 	}
 
-	private static Task createTask(Practitioner practitioner, ResearchStudy researchStudy)
+	private static Task createTask(ResearchStudy researchStudy)
 	{
 		Task task = new Task();
 		task.setIdElement(new IdType("urn:uuid:" + UUID.randomUUID().toString()));

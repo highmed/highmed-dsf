@@ -24,7 +24,6 @@ public class StoreResults extends AbstractServiceDelegate implements Initializin
 			OrganizationProvider organizationProvider)
 	{
 		super(clientProvider, taskHelper);
-
 		this.organizationProvider = organizationProvider;
 	}
 
@@ -44,6 +43,7 @@ public class StoreResults extends AbstractServiceDelegate implements Initializin
 		Task task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
 		String requester = task.getRequester().getReference();
 
+		// cohort size is only stored if it is > 0
 		List<FeasibilityQueryResult> resultInputs = getTaskHelper()
 				.getInputParameterWithExtension(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
 						Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_SINGLE_MEDIC_RESULT,
@@ -51,7 +51,7 @@ public class StoreResults extends AbstractServiceDelegate implements Initializin
 					String groupId = ((Reference) input.getExtension().get(0).getValue()).getReference();
 					int groupSize = Integer.parseInt(input.getValue().primitiveValue());
 					return new FeasibilityQueryResult(requester, groupId, groupSize);
-				}).collect(Collectors.toList());
+				}).filter(result -> result.getCohortSize() > 0).collect(Collectors.toList());
 
 		results.addAll(resultInputs);
 

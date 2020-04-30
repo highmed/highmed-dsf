@@ -17,17 +17,12 @@ public interface Constants
 	String VARIABLE_LEADING_TASK = "leadingTask";
 	String VARIABLE_RESEARCH_STUDY = "researchStudy";
 	String VARIABLE_COHORTS = "cohorts";
+	String VARIABLE_TTP = "ttp";
 	String VARIABLE_QUERIES = "queries";
 	String VARIABLE_QUERY_PARAMETERS = "queryParameters";
 	String VARIABLE_BUNDLE_ID = "bundleId";
 	String VARIABLE_NEEDS_CONSENT_CHECK = "needsConsentCheck";
 	String VARIABLE_NEEDS_RECORD_LINKAGE = "needsRecordLinkage";
-
-	/**
-	 * Stores a List<{@link org.highmed.dsf.bpe.variables.FinalSimpleFeasibilityResult}> of the final results of
-	 * a multi medic simple cohort size query. Do not override, only add new entries to the list.
-	 */
-	String VARIABLE_SIMPLE_COHORT_SIZE_QUERY_FINAL_RESULT = "simpleCohortSizeQueryFinalResult";
 
 	/**
 	 * Stores a List<{@link org.highmed.dsf.fhir.variables.Outputs}> </>of outputs that have to be written to a
@@ -56,6 +51,7 @@ public interface Constants
 	String CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_RECORD_LINKAGE = "needs-record-linkage";
 	String CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_SINGLE_MEDIC_RESULT = "single-medic-result";
 	String CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS_COUNT = "participating-medics";
+	String CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NOT_ENOUGH_PARTICIPATION = "not-enough-participation";
 	String CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT = "multi-medic-result";
 	String CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_RESEARCH_STUDY_REFERENCE = "research-study-reference";
 

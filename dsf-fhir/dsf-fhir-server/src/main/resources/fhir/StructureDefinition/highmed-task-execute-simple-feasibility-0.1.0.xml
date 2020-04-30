@@ -74,7 +74,7 @@
       <path value="Task.input.value[x]" />
       <type>
         <code value="Reference" />
-        <targetProfile value="http://highmed.org/fhir/StructureDefinition/highmed-research-study" />
+        <targetProfile value="http://highmed.org/fhir/StructureDefinition/highmed-research-study-feasibility" />
       </type>
     </element>
      <element id="Task.input:needs-record-linkage">

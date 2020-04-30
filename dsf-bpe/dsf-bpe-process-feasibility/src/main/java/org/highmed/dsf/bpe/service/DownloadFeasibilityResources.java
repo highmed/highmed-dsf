@@ -19,6 +19,7 @@ import org.highmed.dsf.fhir.variables.OutputsValues;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.Task;
@@ -55,6 +56,7 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 
 		IdType researchStudyId = getResearchStudyId(task);
 		FhirWebserviceClient client = getWebserviceClient(researchStudyId);
+
 		ResearchStudy researchStudy = getResearchStudy(researchStudyId, client);
 		execution.setVariable(Constants.VARIABLE_RESEARCH_STUDY, researchStudy);
 
@@ -63,6 +65,9 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 		List<Group> cohortDefinitions = getCohortDefinitions(researchStudy, outputs, client);
 		execution.setVariable(Constants.VARIABLE_COHORTS, FhirResourcesListValues.create(cohortDefinitions));
 		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, OutputsValues.create(outputs));
+
+		Organization ttp = getTtp(researchStudy, client);
+		execution.setVariable(Constants.VARIABLE_TTP, ttp);
 
 		boolean needsConsentCheck = getNeedsConsentCheck(task);
 		execution.setVariable(Constants.VARIABLE_NEEDS_CONSENT_CHECK, needsConsentCheck);
@@ -83,8 +88,8 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 
 	private FhirWebserviceClient getWebserviceClient(IdType researchStudyId)
 	{
-		if (researchStudyId.getBaseUrl() == null
-				|| researchStudyId.getBaseUrl().equals(getFhirWebserviceClientProvider().getLocalBaseUrl()))
+		if (researchStudyId.getBaseUrl() == null || researchStudyId.getBaseUrl()
+				.equals(getFhirWebserviceClientProvider().getLocalBaseUrl()))
 		{
 			return getFhirWebserviceClientProvider().getLocalWebserviceClient();
 		}
@@ -102,8 +107,9 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 		}
 		catch (WebApplicationException e)
 		{
-			throw new ResourceNotFoundException("Error while reading ResearchStudy with id "
-					+ researchStudyid.getIdPart() + " from " + client.getBaseUrl());
+			throw new ResourceNotFoundException(
+					"Error while reading ResearchStudy with id " + researchStudyid.getIdPart() + " from " + client
+							.getBaseUrl());
 		}
 	}
 
@@ -112,8 +118,7 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 		List<Group> cohortDefinitions = new ArrayList<>();
 		List<Reference> cohortDefinitionReferences = researchStudy.getEnrollment();
 
-		cohortDefinitionReferences.forEach(reference ->
-		{
+		cohortDefinitionReferences.forEach(reference -> {
 			try
 			{
 				IdType type = new IdType(reference.getReference());
@@ -126,8 +131,9 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 			}
 			catch (WebApplicationException e)
 			{
-				String errorMessage = "Error while reading cohort definition with id " + reference.getReference()
-						+ " from " + client.getBaseUrl();
+				String errorMessage =
+						"Error while reading cohort definition with id " + reference.getReference() + " from " + client
+								.getBaseUrl();
 
 				logger.info(errorMessage);
 				outputs.addErrorOutput(errorMessage);
@@ -137,22 +143,41 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 		return cohortDefinitions;
 	}
 
+	private Organization getTtp(ResearchStudy researchStudy, FhirWebserviceClient client)
+	{
+		try
+		{
+			Reference ttpReference = (Reference) researchStudy.getExtension().stream()
+					.filter(extension -> extension.getUrl()
+							.equals("http://highmed.org/fhir/StructureDefinition/participating-ttp")).findFirst().get()
+					.getValue();
+			IdType type = new IdType(ttpReference.getReference());
+
+			return client.read(Organization.class, type.getIdPart());
+		}
+		catch (WebApplicationException e)
+		{
+			throw new ResourceNotFoundException(
+					"Error while reading TTP in research study with id " + researchStudy.getId() + " from " + client
+							.getBaseUrl());
+		}
+	}
+
 	private boolean getNeedsConsentCheck(Task task)
 	{
-		return getTaskHelper()
-				.getFirstInputParameterBooleanValue(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
-						Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_CONSENT_CHECK)
-				.orElseThrow(() -> new IllegalArgumentException("NeedsConsentCheck boolean is not set in task with id='"
-						+ task.getId() + "', this error should " + "have been caught by resource validation"));
+		return getTaskHelper().getFirstInputParameterBooleanValue(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
+				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_CONSENT_CHECK).orElseThrow(
+				() -> new IllegalArgumentException(
+						"NeedsConsentCheck boolean is not set in task with id='" + task.getId()
+								+ "', this error should " + "have been caught by resource validation"));
 	}
 
 	private boolean getNeedsRecordLinkageCheck(Task task)
 	{
-		return getTaskHelper()
-				.getFirstInputParameterBooleanValue(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
-						Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_RECORD_LINKAGE)
-				.orElseThrow(
-						() -> new IllegalArgumentException("NeedsRecordLinkage boolean is not set in task with id='"
-								+ task.getId() + "', this error should " + "have been caught by resource validation"));
+		return getTaskHelper().getFirstInputParameterBooleanValue(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
+				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_RECORD_LINKAGE).orElseThrow(
+				() -> new IllegalArgumentException(
+						"NeedsRecordLinkage boolean is not set in task with id='" + task.getId()
+								+ "', this error should " + "have been caught by resource validation"));
 	}
 }
