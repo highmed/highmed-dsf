@@ -32,13 +32,13 @@ import org.slf4j.LoggerFactory;
 
 public class MatchingTimeTest
 {
-
 	private static final Logger logger = LoggerFactory.getLogger(MatchingTimeTest.class);
+
 	private static final int BIT_SET_LENGTH = 500;
 	private static final int BIT_SET_LENGTH_MEDIUM = 250;
 	private static final int BIT_SET_LENGTH_SHORT = 50;
+
 	private static List<IdatImpl> org1, org2 = new ArrayList<>();
-	private static ConcurrentHashMap<List<Double>, List<Double>> results = new ConcurrentHashMap<>();
 	private static List<Duration> rbftimes = new ArrayList<>();
 	private static List<Duration> rltimes = new ArrayList<>();
 
@@ -57,7 +57,10 @@ public class MatchingTimeTest
 		BloomFilterGenerator generatorMedium = BloomFilterGenerator.withMd5Sha1BiGramHasher(BIT_SET_LENGTH_MEDIUM);
 		BloomFilterGenerator generatorShort = BloomFilterGenerator.withMd5Sha1BiGramHasher(BIT_SET_LENGTH_SHORT);
 
-		testRuntime(generatorLong, generatorMedium, generatorShort);
+		for (int i = 0; i < 70; i++)
+		{
+			testRuntime(generatorLong, generatorMedium, generatorShort);
+		}
 		logTimes("Md5", "SHA1");
 	}
 
@@ -77,7 +80,10 @@ public class MatchingTimeTest
 		BloomFilterGenerator generatorShort = BloomFilterGenerator
 				.withHmacMd5HmacSha1BiGramHasher(BIT_SET_LENGTH_SHORT, key1, key2);
 
-		testRuntime(generatorLong, generatorMedium, generatorShort);
+		for (int i = 0; i < 70; i++)
+		{
+			testRuntime(generatorLong, generatorMedium, generatorShort);
+		}
 		logTimes("Md5", "SHA1 HMAC");
 	}
 
@@ -88,7 +94,10 @@ public class MatchingTimeTest
 		BloomFilterGenerator generatorMedium = BloomFilterGenerator.withSha1Sha2BiGramHasher(BIT_SET_LENGTH_MEDIUM);
 		BloomFilterGenerator generatorShort = BloomFilterGenerator.withSha1Sha2BiGramHasher(BIT_SET_LENGTH_SHORT);
 
-		testRuntime(generatorLong, generatorMedium, generatorShort);
+		for (int i = 0; i < 70; i++)
+		{
+			testRuntime(generatorLong, generatorMedium, generatorShort);
+		}
 		logTimes("SHA1", "SHA2");
 	}
 
@@ -110,7 +119,10 @@ public class MatchingTimeTest
 		BloomFilterGenerator generatorShort = BloomFilterGenerator
 				.withHmacSha1HmacSha2BiGramHasher(BIT_SET_LENGTH_SHORT, key1, key2, bcProvider);
 
-		testRuntime(generatorLong, generatorMedium, generatorShort);
+		for (int i = 0; i < 70; i++)
+		{
+			testRuntime(generatorLong, generatorMedium, generatorShort);
+		}
 		logTimes("SHA1 HMAC", "SHA2 HMAC");
 	}
 
@@ -121,7 +133,10 @@ public class MatchingTimeTest
 		BloomFilterGenerator generatorMedium = BloomFilterGenerator.withSha2Sha3BiGramHasher(BIT_SET_LENGTH_MEDIUM);
 		BloomFilterGenerator generatorShort = BloomFilterGenerator.withSha2Sha3BiGramHasher(BIT_SET_LENGTH_SHORT);
 
-		testRuntime(generatorLong, generatorMedium, generatorShort);
+		for (int i = 0; i < 70; i++)
+		{
+			testRuntime(generatorLong, generatorMedium, generatorShort);
+		}
 		logTimes("SHA2", "SHA3");
 	}
 
@@ -143,50 +158,31 @@ public class MatchingTimeTest
 		BloomFilterGenerator generatorShort = BloomFilterGenerator
 				.withHmacSha2HmacSha3BiGramHasher(BIT_SET_LENGTH_SHORT, key1, key2, bcProvider);
 
-		testRuntime(generatorLong, generatorMedium, generatorShort);
+		for (int i = 0; i < 70; i++)
+		{
+			testRuntime(generatorLong, generatorMedium, generatorShort);
+		}
 		logTimes("SHA2 HMAC", "SHA3 HMAC");
 	}
 
 	private void testRuntime(BloomFilterGenerator generatorLong, BloomFilterGenerator generatorMedium,
 			BloomFilterGenerator generatorShort)
 	{
-		LocalDateTime starttime = LocalDateTime.now();
-
-		List<TestPerson> org1Pts = new ArrayList<>();
-		List<TestPerson> org2Pts = new ArrayList<>();
 		List<Double> weightList = Arrays
 				.asList(0.1, 0.1, 0.2, 0.1, 0.1, 0.05, 0.2, 0.1, 0.05); // Best weights for SHA23Hmac, MD5SHA1
 
-		for (IdatImpl r : org1)
-		{
-			String recId = r.getMedicId();
-			List<FieldBloomFilter> inputList = createFbfList(r, weightList, generatorLong, generatorMedium,
-					generatorShort);
-			org1Pts.add(createPatientFromRecord(recId, inputList, "org1"));
-			inputList = null;
-		}
-
-		for (IdatImpl r : org2)
-		{
-			String recId = r.getMedicId();
-			List<FieldBloomFilter> inputList = createFbfList(r, weightList, generatorLong, generatorMedium,
-					generatorShort);
-			org2Pts.add(createPatientFromRecord(recId, inputList, "org2"));
-			inputList = null;
-		}
-
-		LocalDateTime rbftime = LocalDateTime.now();
-		Duration rbfduration = Duration.between(starttime, rbftime);
-		rbftimes.add(rbfduration);
+		List<List<TestPerson>> combinedPtRbfs = createPatientsFromRecord(org1, org2, weightList,
+				generatorLong, generatorMedium, generatorShort);
+		List<TestPerson> org1Pts = combinedPtRbfs.get(0);
+		List<TestPerson> org2Pts = combinedPtRbfs.get(1);
 
 		FederatedMatcher<TestPerson> matcher = new FederatedMatcherImpl<>(TestMatchedPerson::new);
-		LocalDateTime t0 = LocalDateTime.now();
+		LocalDateTime rlStartTime = LocalDateTime.now();
 		Set<MatchedPerson<TestPerson>> matchPatients = matcher.matchPersons(org1Pts, org2Pts);
-		LocalDateTime t1 = LocalDateTime.now();
+		LocalDateTime rlEndTime = LocalDateTime.now();
 		assertNotNull(matchPatients);
 
-		LocalDateTime endtime = LocalDateTime.now();
-		Duration rlduration = Duration.between(rbftime, endtime);
+		Duration rlduration = Duration.between(rlStartTime, rlEndTime);
 		rltimes.add(rlduration);
 
 		org1Pts = null;
@@ -196,9 +192,10 @@ public class MatchingTimeTest
 
 	private void logTimes(String hash1, String hash2)
 	{
-		logger.debug("Measured times for Hashing Combination " + hash1 + " + " + hash2 + "\n\n");
-		logger.debug("Avg Duration BF Gen: " + calculateAvgDuration(rbftimes) + " ms.");
-		logger.debug("Avg Duration Linkage: " + calculateAvgDuration(rltimes) + " ms.");
+		logger.debug("Average Duration Bloom Filter Generation for combination {} + {}: {} ms. ",
+				hash1, hash2, calculateAvgDuration(rbftimes));
+		logger.debug("Average Duration Record Linkage for combination {} + {}: {} ms.",
+				hash1, hash2, calculateAvgDuration(rltimes));
 	}
 
 	private List<FieldBloomFilter> createFbfList(IdatImpl r, List<Double> weightList,
@@ -235,22 +232,55 @@ public class MatchingTimeTest
 		return fbfList;
 	}
 
-	private TestPerson createPatientFromRecord(String id, List<FieldBloomFilter> inputList, String organization)
+	private List<List<TestPerson>> createPatientsFromRecord(List<IdatImpl> org1Idat, List<IdatImpl> org2Idat, List<Double> weightList,
+			BloomFilterGenerator generatorLong, BloomFilterGenerator generatorMedium,
+			BloomFilterGenerator generatorShort)
 	{
-		RecordBloomFilter rbf = new RecordBloomFilter(3000, "42L".getBytes(StandardCharsets.UTF_8), inputList);
-		return new TestPerson(new MedicIdImpl(organization, id), rbf.getBitSet());
+		List<TestPerson> org1Pts = new ArrayList<>();
+		List<TestPerson> org2Pts = new ArrayList<>();
+		List<RecordBloomFilter> rbfList = new ArrayList<>();
+
+		org1Idat.addAll(org2Idat);
+
+		LocalDateTime rbfStartTime = LocalDateTime.now();
+		for (IdatImpl r : org1Idat)
+		{
+			List<FieldBloomFilter> fbfList = createFbfList(r, weightList, generatorLong,
+					generatorMedium, generatorShort);
+			RecordBloomFilter rbf = new RecordBloomFilter(3000, "42L".getBytes(StandardCharsets.UTF_8), fbfList);
+			rbfList.add(rbf);
+		}
+
+		LocalDateTime rbfEndTime = LocalDateTime.now();
+		Duration duration = Duration.between(rbfStartTime, rbfEndTime);
+		rbftimes.add(duration);
+
+		for (IdatImpl r : org1Idat)
+		{
+			int idx = org1Idat.indexOf(r);
+			if (r.getMedicId().contains("org")) // Org 1 IDAT have org (original) id, org 2 idat have dup
+			{
+				org1Pts.add(new TestPerson(new MedicIdImpl("org1", r.getMedicId()), rbfList.get(idx).getBitSet()));
+			} else
+			{
+				org2Pts.add(new TestPerson(new MedicIdImpl("org2", r.getMedicId()), rbfList.get(idx).getBitSet()));
+			}
+		}
+
+		return Arrays.asList(org1Pts, org2Pts);
 	}
 
 	public static long calculateAvgDuration(List<Duration> durations)
 	{
-		if (durations.size() == 70)
+		long sum;
+		if (durations.size() >= 70)
 		{
-			for (int i = 0; i < 20; i++)
-			{
-				durations.remove(0); //Remove first 20 runs to disregard "warmup" times
-			}
+			sum = durations.stream().mapToLong(Duration::toMillis).skip(20).sum();
+		} else
+		{
+			logger.warn("Less than 70 test runs have been performed, thus the first 20 runs will not be discarded.");
+			sum = durations.stream().mapToLong(Duration::toMillis).sum();
 		}
-		long sum = durations.stream().mapToLong(Duration::toMillis).sum();
 		return sum / durations.size();
 	}
 
