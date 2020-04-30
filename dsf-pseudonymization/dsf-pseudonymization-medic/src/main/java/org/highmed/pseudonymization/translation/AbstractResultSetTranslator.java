@@ -70,8 +70,8 @@ public abstract class AbstractResultSetTranslator implements ResultSetTranslator
 	protected final RowElement toEncryptedMdatRowElement(RowElement rowElement, SecretKey researchStudyKey,
 			String researchStudyIdentifier)
 	{
-		return new StringRowElement(encrypt(researchStudyKey, researchStudyIdentifier,
-				toTypeTag(rowElement) + rowElement.getValueAsString()));
+		return new StringRowElement(toTypeTag(rowElement) + encrypt(researchStudyKey, researchStudyIdentifier,
+				 rowElement.getValueAsString()));
 	}
 
 	private String toTypeTag(RowElement rowElement)
