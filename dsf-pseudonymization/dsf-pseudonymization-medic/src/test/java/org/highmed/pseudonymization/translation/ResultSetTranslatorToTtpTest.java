@@ -38,8 +38,7 @@ public class ResultSetTranslatorToTtpTest
 		Random random = new Random();
 
 		int recordBloomFilterLength = 2000;
-		byte[] permutationSeed = new byte[64];
-		random.nextBytes(permutationSeed);
+		long permutationSeed = 42L;
 
 		FieldWeights weights = new FieldWeights(0.1, 0.1, 0.1, 0.2, 0.05, 0.1, 0.05, 0.2, 0.1);
 		FieldBloomFilterLengths lengths = new FieldBloomFilterLengths(500, 500, 250, 50, 500, 250, 500, 500, 500);

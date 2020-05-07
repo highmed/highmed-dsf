@@ -24,7 +24,7 @@ public class RecordBloomFilterTest
 		bitSet3.set(128, 256);
 		FieldBloomFilter fbf3 = new FieldBloomFilter(bitSet3, 0.5);
 
-		RecordBloomFilter rbf = new RecordBloomFilter("seed".getBytes(), Arrays.asList(fbf1, fbf2, fbf3));
+		RecordBloomFilter rbf = new RecordBloomFilter(42L, Arrays.asList(fbf1, fbf2, fbf3));
 		assertEquals(1024, rbf.length());
 
 		BitSet rbfBitSet = rbf.getBitSet();
@@ -48,8 +48,8 @@ public class RecordBloomFilterTest
 		bitSet3.set(128, 256);
 		FieldBloomFilter fbf3 = new FieldBloomFilter(bitSet3, 0.5);
 
-		RecordBloomFilter rbf1 = new RecordBloomFilter("seed 1".getBytes(), Arrays.asList(fbf1, fbf2, fbf3));
-		RecordBloomFilter rbf2 = new RecordBloomFilter("seed 2".getBytes(), Arrays.asList(fbf1, fbf2, fbf3));
+		RecordBloomFilter rbf1 = new RecordBloomFilter(42L, Arrays.asList(fbf1, fbf2, fbf3));
+		RecordBloomFilter rbf2 = new RecordBloomFilter(27L, Arrays.asList(fbf1, fbf2, fbf3));
 
 		assertFalse(Arrays.equals(rbf1.getBitSet().toByteArray(), rbf2.getBitSet().toByteArray()));
 	}

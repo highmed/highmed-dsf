@@ -64,7 +64,7 @@ public class RecordBloomFilterGeneratorImpl implements RecordBloomFilterGenerato
 	}
 
 	private final int length;
-	private final byte[] permutationSeed;
+	private final long permutationSeed;
 	private final FieldWeights weights;
 	private final BloomFilterGenerator firstNameGenerator;
 	private final BloomFilterGenerator lastNameGenerator;
@@ -76,7 +76,7 @@ public class RecordBloomFilterGeneratorImpl implements RecordBloomFilterGenerato
 	private final BloomFilterGenerator countryGenerator;
 	private final BloomFilterGenerator insuranceNumberGenerator;
 
-	public RecordBloomFilterGeneratorImpl(int length, byte[] permutationSeed, FieldWeights weights,
+	public RecordBloomFilterGeneratorImpl(int length, long permutationSeed, FieldWeights weights,
 			FieldBloomFilterLengths lengths, Supplier<BiGramHasher> biGramHasherSupplier)
 	{
 		this.length = length;
