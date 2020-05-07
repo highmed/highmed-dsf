@@ -104,10 +104,10 @@ public abstract class AbstractMatcher<P extends Person>
 	{
 		return matchedPerson ->
 		{
-//			synchronized (matchedPerson) // Comment out 107-109
-//			{
-//				matchedPerson.addMatch(person);
-//			}
+			synchronized (matchedPerson)
+			{
+				matchedPerson.addMatch(person);
+			}
 			return matchedPerson;
 		};
 	}

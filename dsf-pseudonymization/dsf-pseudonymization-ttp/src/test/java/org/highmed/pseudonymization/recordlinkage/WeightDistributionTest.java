@@ -2,6 +2,7 @@ package org.highmed.pseudonymization.recordlinkage;
 
 import static org.junit.Assert.assertNotNull;
 
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
@@ -19,6 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.highmed.pseudonymization.bloomfilter.BloomFilterGenerator;
@@ -31,17 +33,17 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MatchingTimeTest
+public class WeightDistributionTest
 {
-	private static final Logger logger = LoggerFactory.getLogger(MatchingTimeTest.class);
+	private static final Logger logger = LoggerFactory.getLogger(WeightDistributionTest.class);
 
 	private static final int BIT_SET_LENGTH = 500;
 	private static final int BIT_SET_LENGTH_MEDIUM = 250;
 	private static final int BIT_SET_LENGTH_SHORT = 50;
 
+	private static ConcurrentHashMap<List<Double>, List<Double>> results = new ConcurrentHashMap<>();
+
 	private static List<IdatImpl> org1, org2 = new ArrayList<>();
-	private static List<Duration> rbftimes = new ArrayList<>();
-	private static List<Duration> rltimes = new ArrayList<>();
 
 	@BeforeClass
 	public static void readFromTwoOrgs()
@@ -52,21 +54,22 @@ public class MatchingTimeTest
 	}
 
 	@Test
-	public void testTimeWithMd5Sha1()
+	public void testWeightsWithMd5Sha1()
 	{
 		BloomFilterGenerator generatorLong = BloomFilterGenerator.withMd5Sha1BiGramHasher(BIT_SET_LENGTH);
 		BloomFilterGenerator generatorMedium = BloomFilterGenerator.withMd5Sha1BiGramHasher(BIT_SET_LENGTH_MEDIUM);
 		BloomFilterGenerator generatorShort = BloomFilterGenerator.withMd5Sha1BiGramHasher(BIT_SET_LENGTH_SHORT);
 
-		for (int i = 0; i < 2; i++)
-		{
-			testRuntime(generatorLong, generatorMedium, generatorShort);
-		}
-		logTimes("Md5", "SHA1");
+		List<List<Double>> weightLists = getWeightLists();
+
+		// Todo: Run tests in parallel with different weightlists once ConcModException is fixed
+		testWeights(weightLists.get(0), generatorLong, generatorMedium, generatorShort);
+
+		writeResultsAsCsv("Md5_SHA1.csv");
 	}
 
 	@Test
-	public void testTimeWithMd5Sha1Hmac()
+	public void testWeightsWithMd5Sha1Hmac()
 	{
 		Random rand = new Random(42L);
 		byte[] key1 = new byte[32];
@@ -81,29 +84,29 @@ public class MatchingTimeTest
 		BloomFilterGenerator generatorShort = BloomFilterGenerator
 				.withHmacMd5HmacSha1BiGramHasher(BIT_SET_LENGTH_SHORT, key1, key2);
 
-		for (int i = 0; i < 70; i++)
-		{
-			testRuntime(generatorLong, generatorMedium, generatorShort);
-		}
-		logTimes("Md5", "SHA1 HMAC");
+		List<List<Double>> weightLists = getWeightLists();
+
+		testWeights(weightLists.get(0), generatorLong, generatorMedium, generatorShort);
+
+		writeResultsAsCsv("Md5_SHA1_HMAC.csv");
 	}
 
 	@Test
-	public void testTimeWithSha1Sha2()
+	public void testWeightsWithSha1Sha2()
 	{
 		BloomFilterGenerator generatorLong = BloomFilterGenerator.withSha1Sha2BiGramHasher(BIT_SET_LENGTH);
 		BloomFilterGenerator generatorMedium = BloomFilterGenerator.withSha1Sha2BiGramHasher(BIT_SET_LENGTH_MEDIUM);
 		BloomFilterGenerator generatorShort = BloomFilterGenerator.withSha1Sha2BiGramHasher(BIT_SET_LENGTH_SHORT);
 
-		for (int i = 0; i < 70; i++)
-		{
-			testRuntime(generatorLong, generatorMedium, generatorShort);
-		}
-		logTimes("SHA1", "SHA2");
+		List<List<Double>> weightLists = getWeightLists();
+
+		testWeights(weightLists.get(0), generatorLong, generatorMedium, generatorShort);
+
+		writeResultsAsCsv("SHA1_SHA2.csv");
 	}
 
 	@Test
-	public void testTimeWithSha1Sha2Hmac()
+	public void testWeightsWithSha1Sha2Hmac()
 	{
 		BouncyCastleProvider bcProvider = new BouncyCastleProvider();
 
@@ -120,29 +123,29 @@ public class MatchingTimeTest
 		BloomFilterGenerator generatorShort = BloomFilterGenerator
 				.withHmacSha1HmacSha2BiGramHasher(BIT_SET_LENGTH_SHORT, key1, key2, bcProvider);
 
-		for (int i = 0; i < 70; i++)
-		{
-			testRuntime(generatorLong, generatorMedium, generatorShort);
-		}
-		logTimes("SHA1 HMAC", "SHA2 HMAC");
+		List<List<Double>> weightLists = getWeightLists();
+
+		testWeights(weightLists.get(0), generatorLong, generatorMedium, generatorShort);
+
+		writeResultsAsCsv("SHA1_HMAC_SHA2_HMAC.csv");
 	}
 
 	@Test
-	public void testTimeWithSha2Sha3()
+	public void testWeightsWithSha2Sha3()
 	{
 		BloomFilterGenerator generatorLong = BloomFilterGenerator.withSha2Sha3BiGramHasher(BIT_SET_LENGTH);
 		BloomFilterGenerator generatorMedium = BloomFilterGenerator.withSha2Sha3BiGramHasher(BIT_SET_LENGTH_MEDIUM);
 		BloomFilterGenerator generatorShort = BloomFilterGenerator.withSha2Sha3BiGramHasher(BIT_SET_LENGTH_SHORT);
 
-		for (int i = 0; i < 70; i++)
-		{
-			testRuntime(generatorLong, generatorMedium, generatorShort);
-		}
-		logTimes("SHA2", "SHA3");
+		List<List<Double>> weightLists = getWeightLists();
+
+		testWeights(weightLists.get(0), generatorLong, generatorMedium, generatorShort);
+
+		writeResultsAsCsv("SHA2_SHA3.csv");
 	}
 
 	@Test
-	public void testTimeWithSha2Sha3Hmac()
+	public void testWeightsWithSha2Sha3Hmac()
 	{
 		BouncyCastleProvider bcProvider = new BouncyCastleProvider();
 
@@ -159,45 +162,154 @@ public class MatchingTimeTest
 		BloomFilterGenerator generatorShort = BloomFilterGenerator
 				.withHmacSha2HmacSha3BiGramHasher(BIT_SET_LENGTH_SHORT, key1, key2, bcProvider);
 
-		for (int i = 0; i < 70; i++)
-		{
-			testRuntime(generatorLong, generatorMedium, generatorShort);
-		}
-		logTimes("SHA2 HMAC", "SHA3 HMAC");
+		List<List<Double>> weightLists = getWeightLists();
+
+		testWeights(weightLists.get(0), generatorLong, generatorMedium, generatorShort);
+
+		writeResultsAsCsv("SHA2_HMAC_SHA3_HMAC.csv");
 	}
 
-	private void testRuntime(BloomFilterGenerator generatorLong, BloomFilterGenerator generatorMedium,
+	private void testWeights(List<Double> weightList, BloomFilterGenerator generatorLong, BloomFilterGenerator generatorMedium,
 			BloomFilterGenerator generatorShort)
 	{
-		List<Double> weightList = Arrays
-				.asList(0.1, 0.1, 0.2, 0.1, 0.1, 0.05, 0.2, 0.1, 0.05); // Best weights for SHA23Hmac, MD5SHA1
-
 		List<List<TestPerson>> combinedPtRbfs = createPatientsFromRecord(org1, org2, weightList,
 				generatorLong, generatorMedium, generatorShort);
 		List<TestPerson> org1Pts = combinedPtRbfs.get(0);
 		List<TestPerson> org2Pts = combinedPtRbfs.get(1);
 
 		FederatedMatcher<TestPerson> matcher = new FederatedMatcherImpl<>(TestMatchedPerson::new);
-		LocalDateTime rlStartTime = LocalDateTime.now();
 		Set<MatchedPerson<TestPerson>> matchPatients = matcher.matchPersons(org1Pts, org2Pts);
-		LocalDateTime rlEndTime = LocalDateTime.now();
 		assertNotNull(matchPatients);
 
-		Duration rlduration = Duration.between(rlStartTime, rlEndTime);
-		rltimes.add(rlduration);
+		List<Integer> confusionMt = calculateConfusionMatrixWithTrueNeg(matchPatients);
+		List<Double> measures = calculateMeasures(confusionMt);
 
-		logger.debug("Single run Record Linkage Time: {}", rlduration);
-		org1Pts = null;
-		org2Pts = null;
-		matchPatients = null;
+		double tp = confusionMt.get(0);
+		double fp = confusionMt.get(1);
+		double fn = confusionMt.get(2);
+		double tn = confusionMt.get(3);
+
+		List<Double> resultsList = Arrays.asList(tp,fp,fn,tn,
+				measures.get(0),measures.get(1),measures.get(2),measures.get(3));
+		results.put(weightList, resultsList);
 	}
 
-	private void logTimes(String hash1, String hash2)
+	private List<Double> calculateMeasures(List<Integer> confMt)
 	{
-		logger.debug("Average Duration Bloom Filter Generation for combination {} + {}: {} ms. ",
-				hash1, hash2, calculateAvgDuration(rbftimes));
-		logger.debug("Average Duration Record Linkage for combination {} + {}: {} ms.",
-				hash1, hash2, calculateAvgDuration(rltimes));
+		double tp = confMt.get(0);
+		double fp = confMt.get(1);
+		double fn = confMt.get(2);
+		double tn = confMt.get(3);
+
+		double precision = tp / (tp + fp);
+		double recall = tp / (tp + fn);
+		double accuracy = (tp + tn) / (tp + fp + fn + tn);
+		double f1 = 2 * ((precision * recall) / (precision + recall));
+
+		return Arrays.asList(precision, recall, accuracy, f1);
+	}
+
+	private List<Integer> calculateConfusionMatrixWithTrueNeg(Set<MatchedPerson<TestPerson>> matchPatients)
+	{
+		int truePos = 0;
+		int falsePos = 0;
+		int trueNeg = 0;
+		int falseNeg = 0;
+
+		for (MatchedPerson mP : matchPatients)
+		{
+			if (mP.getMatches().size() == 1)
+			{
+				String mPId = mP.getFirstMatch().getMedicId().getValue().substring(0, 8).replaceAll("\\D+", "");
+				boolean isInOrg1 = false;
+				boolean isInOrg2 = false;
+
+				for (IdatImpl pt : org1) {
+					String ptId1 = pt.getMedicId().substring(0, 8).replaceAll("\\D+", "");
+					if (ptId1.equals(mPId)) {
+						isInOrg1 = true;
+						break;
+					}
+				}
+				for (IdatImpl pt : org2) {
+					String ptId2 = pt.getMedicId().substring(0, 8).replaceAll("\\D+", "");
+					if (ptId2.equals(mPId)) {
+						isInOrg2 = true;
+						break;
+					}
+				}
+
+				if (isInOrg1 && isInOrg2) {
+					falseNeg++;
+				} else {
+					trueNeg++;
+				}
+			}
+			else if (mP.getMatches().size() == 2)
+			{
+				String firstID = mP.getFirstMatch().getMedicId().getValue().substring(0, 8).replaceAll("\\D+", "");
+				String lastID = mP.getLastMatch().getMedicId().getValue().substring(0, 8).replaceAll("\\D+", "");
+				if (firstID.equals(lastID))
+				{
+					truePos++;
+				}
+				else
+				{
+					falsePos++;
+				}
+			}
+			else
+			{
+				String firstID = mP.getFirstMatch().getMedicId().getValue().substring(0, 8).replaceAll("\\D+", "");
+				for (int i = 1; i < mP.getMatches().size(); i++)
+				{
+					Person match = (Person) mP.getMatches().get(i);
+					String lastID = match.getMedicId().getValue().substring(0, 8).replaceAll("\\D+", "");
+					if (firstID.equals(lastID))
+					{
+						truePos++;
+					}
+					else
+					{
+						falsePos++;
+					}
+				}
+			}
+		}
+
+		falseNeg /= 2; //Since theyre unmatched, false negatives get counted twice
+		return Arrays.asList(truePos, falsePos, falseNeg, trueNeg);
+	}
+
+	private List<List<TestPerson>> createPatientsFromRecord(List<IdatImpl> org1Idat, List<IdatImpl> org2Idat, List<Double> weightList,
+			BloomFilterGenerator generatorLong, BloomFilterGenerator generatorMedium,
+			BloomFilterGenerator generatorShort)
+	{
+		List<TestPerson> org1Pts = new ArrayList<>();
+		List<TestPerson> org2Pts = new ArrayList<>();
+
+		List<IdatImpl> allPts = new ArrayList<>();
+		allPts.addAll(org1Idat);
+		allPts.addAll(org2Idat);
+
+		List<RecordBloomFilter> rbfList = allPts.parallelStream()
+				.map(r -> {return new RecordBloomFilter(3000, 42L,
+						createFbfList(r, weightList, generatorLong, generatorMedium, generatorShort));})
+				.collect(Collectors.toList());
+
+		for (IdatImpl r : allPts)
+		{
+			int idx = allPts.indexOf(r);
+			if (r.getMedicId().contains("org")) // Org 1 IDAT have org (original) id, org 2 idat have dup
+			{
+				org1Pts.add(new TestPerson(new MedicIdImpl("org1", r.getMedicId()), rbfList.get(idx).getBitSet()));
+			} else
+			{
+				org2Pts.add(new TestPerson(new MedicIdImpl("org2", r.getMedicId()), rbfList.get(idx).getBitSet()));
+			}
+		}
+
+		return Arrays.asList(org1Pts, org2Pts);
 	}
 
 	private List<FieldBloomFilter> createFbfList(IdatImpl r, List<Double> weightList,
@@ -234,56 +346,9 @@ public class MatchingTimeTest
 		return fbfList;
 	}
 
-	private List<List<TestPerson>> createPatientsFromRecord(List<IdatImpl> org1Idat, List<IdatImpl> org2Idat, List<Double> weightList,
-			BloomFilterGenerator generatorLong, BloomFilterGenerator generatorMedium,
-			BloomFilterGenerator generatorShort)
+	private FieldBloomFilter toField(double weight, String input, BloomFilterGenerator generator)
 	{
-		List<TestPerson> org1Pts = new ArrayList<>();
-		List<TestPerson> org2Pts = new ArrayList<>();
-
-		List<IdatImpl> allPts = new ArrayList<>();
-		allPts.addAll(org1Idat);
-		allPts.addAll(org2Idat);
-
-		LocalDateTime rbfStartTime = LocalDateTime.now();
-
-		List<RecordBloomFilter> rbfList = allPts.parallelStream()
-				.map(r -> {return new RecordBloomFilter(3000, 42L,
-						createFbfList(r, weightList, generatorLong, generatorMedium, generatorShort));})
-				.collect(Collectors.toList());
-
-		LocalDateTime rbfEndTime = LocalDateTime.now();
-		Duration duration = Duration.between(rbfStartTime, rbfEndTime);
-		rbftimes.add(duration);
-		logger.debug("Single run Bloom Filter generation time: {}ms", duration);
-
-		for (IdatImpl r : allPts)
-		{
-			int idx = allPts.indexOf(r);
-			if (r.getMedicId().contains("org")) // Org 1 IDAT have org (original) id, org 2 idat have dup
-			{
-				org1Pts.add(new TestPerson(new MedicIdImpl("org1", r.getMedicId()), rbfList.get(idx).getBitSet()));
-			} else
-			{
-				org2Pts.add(new TestPerson(new MedicIdImpl("org2", r.getMedicId()), rbfList.get(idx).getBitSet()));
-			}
-		}
-
-		return Arrays.asList(org1Pts, org2Pts);
-	}
-
-	public static long calculateAvgDuration(List<Duration> durations)
-	{
-		long sum;
-		if (durations.size() >= 70)
-		{
-			sum = durations.stream().mapToLong(Duration::toMillis).skip(20).sum();
-		} else
-		{
-			logger.warn("Less than 70 test runs have been performed, thus the first 20 runs will not be discarded.");
-			sum = durations.stream().mapToLong(Duration::toMillis).sum();
-		}
-		return sum / durations.size();
+		return new FieldBloomFilter(generator.generateBitSet(input), weight);
 	}
 
 	private static List<IdatImpl> read2(Path path)
@@ -366,8 +431,55 @@ public class MatchingTimeTest
 		}
 	}
 
-	private FieldBloomFilter toField(double weight, String input, BloomFilterGenerator generator)
+	private static List<List<Double>> getWeightLists()
 	{
-		return new FieldBloomFilter(generator.generateBitSet(input), weight);
+		List<List<Double>> top10 = Arrays.asList(
+				Arrays.asList(0.1,0.1,0.2,0.05,0.15,0.1,0.15,0.1,0.05),
+				Arrays.asList(0.1,0.1,0.2,0.1,0.1,0.1,0.2,0.05,0.05),
+				Arrays.asList(0.1,0.1,0.2,0.05,0.15,0.05,0.2,0.1,0.05),
+				Arrays.asList(0.1,0.1,0.2,0.1,0.1,0.05,0.2,0.1,0.05),
+				Arrays.asList(0.1,0.1,0.2,0.05,0.15,0.05,0.15,0.1,0.1),
+				Arrays.asList(0.1,0.1,0.2,0.1,0.05,0.05,0.2,0.1,0.1),
+				Arrays.asList(0.1,0.1,0.2,0.1,0.05,0.1,0.2,0.1,0.05),
+				Arrays.asList(0.1,0.1,0.2,0.1,0.1,0.05,0.15,0.1,0.1),
+				Arrays.asList(0.1,0.1,0.2,0.05,0.1,0.05,0.15,0.15,0.1),
+				Arrays.asList(0.1,0.1,0.2,0.1,0.1,0.05,0.2,0.05,0.1)
+		);
+
+		return top10;
+	}
+
+	public static void writeResultsAsCsv(String filename) {
+		String[] header = { "firstname", "lastname", "sex", "birthday", "zipcode", "city", "country", "insurancenr",
+				"street", "tp", "fp", "fn", "tn", "Prec", "Rec", "Acc", "F1" };
+		FileWriter out = null;
+		try
+		{
+			out = new FileWriter("src/test/resources/" + filename);
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		try (CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT.withHeader(header)))
+		{
+			results.entrySet().forEach(result -> {
+				try
+				{
+					List<Double> resultList = new ArrayList<>();
+					resultList.addAll(result.getKey());
+					resultList.addAll(result.getValue());
+					printer.printRecord(resultList);
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
+			});
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
 	}
 }
