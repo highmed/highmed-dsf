@@ -158,7 +158,7 @@ public abstract class AbstractResultSetTranslator implements ResultSetTranslator
 					.fromString(decrypt(researchStudyKey, researchStudyIdentifier, tagAndEncrypted.substring(7)));
 		else if (tagAndEncrypted.startsWith("timestamp:"))
 			return ZonedDateTimeRowElement
-					.fromString(decrypt(researchStudyKey, researchStudyIdentifier, tagAndEncrypted.substring(9)));
+					.fromString(decrypt(researchStudyKey, researchStudyIdentifier, tagAndEncrypted.substring(10)));
 		else
 			throw new IllegalStateException("rowElement with unknown type tag");
 	}
