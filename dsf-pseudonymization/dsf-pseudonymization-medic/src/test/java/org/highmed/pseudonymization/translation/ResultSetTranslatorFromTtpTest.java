@@ -5,12 +5,13 @@ import static org.junit.Assert.assertNotNull;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Base64;
 
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 import org.highmed.openehr.json.OpenEhrObjectMapperFactory;
 import org.highmed.openehr.model.structure.ResultSet;
-import org.highmed.pseudonymization.crypto.AesGcmUtil;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +28,8 @@ public class ResultSetTranslatorFromTtpTest
 	public void testTranslateFromTtp() throws Exception
 	{
 		String researchStudyIdentifier = "researchStudy1";
-		SecretKey researchStudyKey = AesGcmUtil.generateAES256Key();
+		byte[] decodedKey = Base64.getDecoder().decode("Loy75q55b/L3yxk3BoRgNUSAJJLan643alkrWHathBk=");
+		SecretKey researchStudyKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES"); 
 		ObjectMapper openEhrObjectMapper = OpenEhrObjectMapperFactory.createObjectMapper();
 
 		ResultSetTranslatorFromTtp translator = new ResultSetTranslatorFromTtp(researchStudyIdentifier,

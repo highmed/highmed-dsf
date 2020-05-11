@@ -5,12 +5,13 @@ import static org.junit.Assert.assertNotNull;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Base64;
 
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 import org.highmed.openehr.json.OpenEhrObjectMapperFactory;
 import org.highmed.openehr.model.structure.ResultSet;
-import org.highmed.pseudonymization.crypto.AesGcmUtil;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,32 +28,36 @@ public class ResultSetTranslatorResearchResultFromTtpTest
 	public void testTranslateResearchResultFromTtp() throws Exception
 	{
 		String organizationIdentifier = "org1";
-		SecretKey organizationKey = AesGcmUtil.generateAES256Key();
+		byte[] decodedOrganizationKey = Base64.getDecoder().decode("KollbDbopQK1t6hZncLicT7X64H1TfrzjpYdF4jehHo=");
+		SecretKey organizationKey = new SecretKeySpec(decodedOrganizationKey, 0, decodedOrganizationKey.length, "AES"); 
+		
 		String researchStudyIdentifier = "researchStudy1";
-		SecretKey researchStudyKey = AesGcmUtil.generateAES256Key();
+		byte[] decodedKey = Base64.getDecoder().decode("Loy75q55b/L3yxk3BoRgNUSAJJLan643alkrWHathBk=");
+		SecretKey researchStudyKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES"); 
 
 		ObjectMapper openEhrObjectMapper = OpenEhrObjectMapperFactory.createObjectMapper();
 
 		ResultSetTranslatorResearchResultFromTtp translator = new ResultSetTranslatorResearchResultFromTtp(organizationKey,
 				organizationIdentifier, researchStudyIdentifier, researchStudyKey, openEhrObjectMapper);
+		
 		ResultSet resultSet = openEhrObjectMapper
 				.readValue(Files.readAllBytes(Paths.get("src/test/resources/researchresult_from_ttp.json")), ResultSet.class);
 		assertNotNull(resultSet);
 		assertNotNull(resultSet.getColumns());
-		assertEquals(4, resultSet.getColumns().size());
+		assertEquals(3, resultSet.getColumns().size());
 		assertNotNull(resultSet.getRows());
 		assertEquals(1, resultSet.getRows().size());
 		assertNotNull(resultSet.getRow(0));
-		assertEquals(4, resultSet.getRow(0).size());
+		assertEquals(3, resultSet.getRow(0).size());
 
 		ResultSet translatedResultSet = translator.translate(resultSet);
 		assertNotNull(translatedResultSet);
 		assertNotNull(translatedResultSet.getColumns());
-		assertEquals(4, translatedResultSet.getColumns().size());
+		assertEquals(3, translatedResultSet.getColumns().size());
 		assertNotNull(translatedResultSet.getRows());
 		assertEquals(1, translatedResultSet.getRows().size());
 		assertNotNull(translatedResultSet.getRow(0));
-		assertEquals(4, translatedResultSet.getRow(0).size());
+		assertEquals(3, translatedResultSet.getRow(0).size());
 
 		DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter();
 		prettyPrinter.indentArraysWith(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE);

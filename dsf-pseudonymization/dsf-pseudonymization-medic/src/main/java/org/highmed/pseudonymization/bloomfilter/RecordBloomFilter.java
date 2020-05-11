@@ -1,6 +1,5 @@
 package org.highmed.pseudonymization.bloomfilter;
 
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;

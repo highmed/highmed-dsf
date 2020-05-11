@@ -4,16 +4,16 @@ import org.highmed.pseudonymization.mpi.Idat;
 
 class IdatTestImpl implements Idat
 {
-	final String medicId;
-	final String firstName;
-	final String lastName;
-	final String birthday;
-	final String sex;
-	final String street;
-	final String zipCode;
-	final String city;
-	final String country;
-	final String insuranceNumber;
+	private final String medicId;
+	private final String firstName;
+	private final String lastName;
+	private final String birthday;
+	private final String sex;
+	private final String street;
+	private final String zipCode;
+	private final String city;
+	private final String country;
+	private final String insuranceNumber;
 
 	IdatTestImpl(String medicId, String firstName, String lastName, String birthday, String sex, String street,
 			String zipCode, String city, String country, String insuranceNumber)

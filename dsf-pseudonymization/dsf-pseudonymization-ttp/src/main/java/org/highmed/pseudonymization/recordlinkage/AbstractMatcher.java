@@ -104,10 +104,7 @@ public abstract class AbstractMatcher<P extends Person>
 	{
 		return matchedPerson ->
 		{
-			synchronized (matchedPerson)
-			{
-				matchedPerson.addMatch(person);
-			}
+			matchedPerson.addMatch(person);
 			return matchedPerson;
 		};
 	}
@@ -116,7 +113,7 @@ public abstract class AbstractMatcher<P extends Person>
 	{
 		return person -> matchedPersonFactory.create(person);
 	}
-	
+
 	protected final MatchedPerson<P> create(P person)
 	{
 		return matchedPersonFactory.create(person);

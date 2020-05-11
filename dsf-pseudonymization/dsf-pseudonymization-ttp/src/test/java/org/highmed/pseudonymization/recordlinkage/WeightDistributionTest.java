@@ -9,8 +9,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -30,13 +28,9 @@ import org.highmed.pseudonymization.domain.IdatImpl;
 import org.highmed.pseudonymization.domain.impl.MedicIdImpl;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class WeightDistributionTest
 {
-	private static final Logger logger = LoggerFactory.getLogger(WeightDistributionTest.class);
-
 	private static final int BIT_SET_LENGTH = 500;
 	private static final int BIT_SET_LENGTH_MEDIUM = 250;
 	private static final int BIT_SET_LENGTH_SHORT = 50;
@@ -77,12 +71,12 @@ public class WeightDistributionTest
 		rand.nextBytes(key1);
 		rand.nextBytes(key2);
 
-		BloomFilterGenerator generatorLong = BloomFilterGenerator
-				.withHmacMd5HmacSha1BiGramHasher(BIT_SET_LENGTH, key1, key2);
+		BloomFilterGenerator generatorLong = BloomFilterGenerator.withHmacMd5HmacSha1BiGramHasher(BIT_SET_LENGTH, key1,
+				key2);
 		BloomFilterGenerator generatorMedium = BloomFilterGenerator
 				.withHmacMd5HmacSha1BiGramHasher(BIT_SET_LENGTH_MEDIUM, key1, key2);
-		BloomFilterGenerator generatorShort = BloomFilterGenerator
-				.withHmacMd5HmacSha1BiGramHasher(BIT_SET_LENGTH_SHORT, key1, key2);
+		BloomFilterGenerator generatorShort = BloomFilterGenerator.withHmacMd5HmacSha1BiGramHasher(BIT_SET_LENGTH_SHORT,
+				key1, key2);
 
 		List<List<Double>> weightLists = getWeightLists();
 
@@ -116,8 +110,8 @@ public class WeightDistributionTest
 		rand.nextBytes(key1);
 		rand.nextBytes(key2);
 
-		BloomFilterGenerator generatorLong = BloomFilterGenerator
-				.withHmacSha1HmacSha2BiGramHasher(BIT_SET_LENGTH, key1, key2, bcProvider);
+		BloomFilterGenerator generatorLong = BloomFilterGenerator.withHmacSha1HmacSha2BiGramHasher(BIT_SET_LENGTH, key1,
+				key2, bcProvider);
 		BloomFilterGenerator generatorMedium = BloomFilterGenerator
 				.withHmacSha1HmacSha2BiGramHasher(BIT_SET_LENGTH_MEDIUM, key1, key2, bcProvider);
 		BloomFilterGenerator generatorShort = BloomFilterGenerator
@@ -155,8 +149,8 @@ public class WeightDistributionTest
 		rand.nextBytes(key1);
 		rand.nextBytes(key2);
 
-		BloomFilterGenerator generatorLong = BloomFilterGenerator
-				.withHmacSha2HmacSha3BiGramHasher(BIT_SET_LENGTH, key1, key2, bcProvider);
+		BloomFilterGenerator generatorLong = BloomFilterGenerator.withHmacSha2HmacSha3BiGramHasher(BIT_SET_LENGTH, key1,
+				key2, bcProvider);
 		BloomFilterGenerator generatorMedium = BloomFilterGenerator
 				.withHmacSha2HmacSha3BiGramHasher(BIT_SET_LENGTH_MEDIUM, key1, key2, bcProvider);
 		BloomFilterGenerator generatorShort = BloomFilterGenerator
@@ -169,16 +163,16 @@ public class WeightDistributionTest
 		writeResultsAsCsv("SHA2_HMAC_SHA3_HMAC.csv");
 	}
 
-	private void testWeights(List<Double> weightList, BloomFilterGenerator generatorLong, BloomFilterGenerator generatorMedium,
-			BloomFilterGenerator generatorShort)
+	private void testWeights(List<Double> weightList, BloomFilterGenerator generatorLong,
+			BloomFilterGenerator generatorMedium, BloomFilterGenerator generatorShort)
 	{
-		List<List<TestPerson>> combinedPtRbfs = createPatientsFromRecord(org1, org2, weightList,
-				generatorLong, generatorMedium, generatorShort);
+		List<List<TestPerson>> combinedPtRbfs = createPatientsFromRecord(org1, org2, weightList, generatorLong,
+				generatorMedium, generatorShort);
 		List<TestPerson> org1Pts = combinedPtRbfs.get(0);
 		List<TestPerson> org2Pts = combinedPtRbfs.get(1);
 
 		FederatedMatcher<TestPerson> matcher = new FederatedMatcherImpl<>(TestMatchedPerson::new);
-		Set<MatchedPerson<TestPerson>> matchPatients = matcher.matchPersons(org1Pts, org2Pts);
+		Set<MatchedPerson<TestPerson>> matchPatients = matcher.matchPersons(Arrays.asList(org1Pts, org2Pts));
 		assertNotNull(matchPatients);
 
 		List<Integer> confusionMt = calculateConfusionMatrixWithTrueNeg(matchPatients);
@@ -189,8 +183,8 @@ public class WeightDistributionTest
 		double fn = confusionMt.get(2);
 		double tn = confusionMt.get(3);
 
-		List<Double> resultsList = Arrays.asList(tp,fp,fn,tn,
-				measures.get(0),measures.get(1),measures.get(2),measures.get(3));
+		List<Double> resultsList = Arrays.asList(tp, fp, fn, tn, measures.get(0), measures.get(1), measures.get(2),
+				measures.get(3));
 		results.put(weightList, resultsList);
 	}
 
@@ -216,7 +210,7 @@ public class WeightDistributionTest
 		int trueNeg = 0;
 		int falseNeg = 0;
 
-		for (MatchedPerson mP : matchPatients)
+		for (MatchedPerson<TestPerson> mP : matchPatients)
 		{
 			if (mP.getMatches().size() == 1)
 			{
@@ -224,24 +218,31 @@ public class WeightDistributionTest
 				boolean isInOrg1 = false;
 				boolean isInOrg2 = false;
 
-				for (IdatImpl pt : org1) {
+				for (IdatImpl pt : org1)
+				{
 					String ptId1 = pt.getMedicId().substring(0, 8).replaceAll("\\D+", "");
-					if (ptId1.equals(mPId)) {
+					if (ptId1.equals(mPId))
+					{
 						isInOrg1 = true;
 						break;
 					}
 				}
-				for (IdatImpl pt : org2) {
+				for (IdatImpl pt : org2)
+				{
 					String ptId2 = pt.getMedicId().substring(0, 8).replaceAll("\\D+", "");
-					if (ptId2.equals(mPId)) {
+					if (ptId2.equals(mPId))
+					{
 						isInOrg2 = true;
 						break;
 					}
 				}
 
-				if (isInOrg1 && isInOrg2) {
+				if (isInOrg1 && isInOrg2)
+				{
 					falseNeg++;
-				} else {
+				}
+				else
+				{
 					trueNeg++;
 				}
 			}
@@ -277,12 +278,12 @@ public class WeightDistributionTest
 			}
 		}
 
-		falseNeg /= 2; //Since theyre unmatched, false negatives get counted twice
+		falseNeg /= 2; // Since theyre unmatched, false negatives get counted twice
 		return Arrays.asList(truePos, falsePos, falseNeg, trueNeg);
 	}
 
-	private List<List<TestPerson>> createPatientsFromRecord(List<IdatImpl> org1Idat, List<IdatImpl> org2Idat, List<Double> weightList,
-			BloomFilterGenerator generatorLong, BloomFilterGenerator generatorMedium,
+	private List<List<TestPerson>> createPatientsFromRecord(List<IdatImpl> org1Idat, List<IdatImpl> org2Idat,
+			List<Double> weightList, BloomFilterGenerator generatorLong, BloomFilterGenerator generatorMedium,
 			BloomFilterGenerator generatorShort)
 	{
 		List<TestPerson> org1Pts = new ArrayList<>();
@@ -292,10 +293,11 @@ public class WeightDistributionTest
 		allPts.addAll(org1Idat);
 		allPts.addAll(org2Idat);
 
-		List<RecordBloomFilter> rbfList = allPts.parallelStream()
-				.map(r -> {return new RecordBloomFilter(3000, 42L,
-						createFbfList(r, weightList, generatorLong, generatorMedium, generatorShort));})
-				.collect(Collectors.toList());
+		List<RecordBloomFilter> rbfList = allPts.parallelStream().map(r ->
+		{
+			return new RecordBloomFilter(3000, 42L,
+					createFbfList(r, weightList, generatorLong, generatorMedium, generatorShort));
+		}).collect(Collectors.toList());
 
 		for (IdatImpl r : allPts)
 		{
@@ -303,7 +305,8 @@ public class WeightDistributionTest
 			if (r.getMedicId().contains("org")) // Org 1 IDAT have org (original) id, org 2 idat have dup
 			{
 				org1Pts.add(new TestPerson(new MedicIdImpl("org1", r.getMedicId()), rbfList.get(idx).getBitSet()));
-			} else
+			}
+			else
 			{
 				org2Pts.add(new TestPerson(new MedicIdImpl("org2", r.getMedicId()), rbfList.get(idx).getBitSet()));
 			}
@@ -340,9 +343,8 @@ public class WeightDistributionTest
 		FieldBloomFilter countryInput = toField(country, r.getCountry(), generatorLong);
 		FieldBloomFilter insuranceInput = toField(insurancenr, r.getInsuranceNumber(), generatorLong);
 		FieldBloomFilter streetInput = toField(street, r.getStreet(), generatorLong);
-		List<FieldBloomFilter> fbfList = Arrays
-				.asList(firstNameInput, lastNameInput, sexInput, birthdayInput, zipCodeInput, cityInput, countryInput,
-						insuranceInput, streetInput);
+		List<FieldBloomFilter> fbfList = Arrays.asList(firstNameInput, lastNameInput, sexInput, birthdayInput,
+				zipCodeInput, cityInput, countryInput, insuranceInput, streetInput);
 		return fbfList;
 	}
 
@@ -357,7 +359,8 @@ public class WeightDistributionTest
 		{
 			Iterable<CSVRecord> records = CSVFormat.RFC4180
 					.withHeader("rec_id", "given_name", "surname", "street_number", "address_1", "address_2", "suburb",
-							"postcode", "state", "date_of_birth", "soc_sec_id").withSkipHeaderRecord().parse(reader);
+							"postcode", "state", "date_of_birth", "soc_sec_id")
+					.withSkipHeaderRecord().parse(reader);
 			ArrayList<IdatImpl> idats = new ArrayList<>();
 			for (CSVRecord r : records)
 			{
@@ -395,7 +398,8 @@ public class WeightDistributionTest
 		{
 			Iterable<CSVRecord> records = CSVFormat.RFC4180
 					.withHeader("rec_id", "given_name", "surname", "street_number", "address_1", "address_2", "suburb",
-							"postcode", "state", "date_of_birth", "soc_sec_id").withSkipHeaderRecord().parse(reader);
+							"postcode", "state", "date_of_birth", "soc_sec_id")
+					.withSkipHeaderRecord().parse(reader);
 			ArrayList<IdatImpl> idats = new ArrayList<>();
 			for (CSVRecord r : records)
 			{
@@ -433,23 +437,22 @@ public class WeightDistributionTest
 
 	private static List<List<Double>> getWeightLists()
 	{
-		List<List<Double>> top10 = Arrays.asList(
-				Arrays.asList(0.1,0.1,0.2,0.05,0.15,0.1,0.15,0.1,0.05),
-				Arrays.asList(0.1,0.1,0.2,0.1,0.1,0.1,0.2,0.05,0.05),
-				Arrays.asList(0.1,0.1,0.2,0.05,0.15,0.05,0.2,0.1,0.05),
-				Arrays.asList(0.1,0.1,0.2,0.1,0.1,0.05,0.2,0.1,0.05),
-				Arrays.asList(0.1,0.1,0.2,0.05,0.15,0.05,0.15,0.1,0.1),
-				Arrays.asList(0.1,0.1,0.2,0.1,0.05,0.05,0.2,0.1,0.1),
-				Arrays.asList(0.1,0.1,0.2,0.1,0.05,0.1,0.2,0.1,0.05),
-				Arrays.asList(0.1,0.1,0.2,0.1,0.1,0.05,0.15,0.1,0.1),
-				Arrays.asList(0.1,0.1,0.2,0.05,0.1,0.05,0.15,0.15,0.1),
-				Arrays.asList(0.1,0.1,0.2,0.1,0.1,0.05,0.2,0.05,0.1)
-		);
+		List<List<Double>> top10 = Arrays.asList(Arrays.asList(0.1, 0.1, 0.2, 0.05, 0.15, 0.1, 0.15, 0.1, 0.05),
+				Arrays.asList(0.1, 0.1, 0.2, 0.1, 0.1, 0.1, 0.2, 0.05, 0.05),
+				Arrays.asList(0.1, 0.1, 0.2, 0.05, 0.15, 0.05, 0.2, 0.1, 0.05),
+				Arrays.asList(0.1, 0.1, 0.2, 0.1, 0.1, 0.05, 0.2, 0.1, 0.05),
+				Arrays.asList(0.1, 0.1, 0.2, 0.05, 0.15, 0.05, 0.15, 0.1, 0.1),
+				Arrays.asList(0.1, 0.1, 0.2, 0.1, 0.05, 0.05, 0.2, 0.1, 0.1),
+				Arrays.asList(0.1, 0.1, 0.2, 0.1, 0.05, 0.1, 0.2, 0.1, 0.05),
+				Arrays.asList(0.1, 0.1, 0.2, 0.1, 0.1, 0.05, 0.15, 0.1, 0.1),
+				Arrays.asList(0.1, 0.1, 0.2, 0.05, 0.1, 0.05, 0.15, 0.15, 0.1),
+				Arrays.asList(0.1, 0.1, 0.2, 0.1, 0.1, 0.05, 0.2, 0.05, 0.1));
 
 		return top10;
 	}
 
-	public static void writeResultsAsCsv(String filename) {
+	public static void writeResultsAsCsv(String filename)
+	{
 		String[] header = { "firstname", "lastname", "sex", "birthday", "zipcode", "city", "country", "insurancenr",
 				"street", "tp", "fp", "fn", "tn", "Prec", "Rec", "Acc", "F1" };
 		FileWriter out = null;
@@ -463,7 +466,8 @@ public class WeightDistributionTest
 		}
 		try (CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT.withHeader(header)))
 		{
-			results.entrySet().forEach(result -> {
+			results.entrySet().forEach(result ->
+			{
 				try
 				{
 					List<Double> resultList = new ArrayList<>();

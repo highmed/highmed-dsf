@@ -1,7 +1,6 @@
 package org.highmed.pseudonymization.recordlinkage;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -62,35 +61,6 @@ public class FederatedMatcherImpl<P extends Person> extends AbstractMatcher<P> i
 	 * Matches {@link Person}s from multiple organizations, expects the {@link Person}s to be unique within
 	 * organizations - distributed matching.
 	 * 
-	 * @param personList
-	 *            not <code>null</code>
-	 * @param personLists
-	 *            not <code>null</code>, may be of length 0
-	 * @return matched persons, converted persons from param {@code personList} if param {@code personLists} is empty
-	 * @see #matchPersons(List)
-	 */
-	@Override
-	public Set<MatchedPerson<P>> matchPersons(List<P> personList, @SuppressWarnings("unchecked") List<P>... personLists)
-	{
-		Objects.requireNonNull(personList, "personList");
-		Objects.requireNonNull(personLists, "personLists");
-
-		if (personLists.length == 0)
-			return personList.stream().map(toMatchedPerson()).collect(Collectors.toSet());
-		else
-		{
-			List<List<P>> lists = new ArrayList<>(1 + personLists.length);
-			lists.add(personList);
-			lists.addAll(Arrays.asList(personLists));
-
-			return matchPersons(lists);
-		}
-	}
-
-	/**
-	 * Matches {@link Person}s from multiple organizations, expects the {@link Person}s to be unique within
-	 * organizations - distributed matching.
-	 * 
 	 * @param personLists
 	 *            not <code>null</code>
 	 * @return matched persons, converted persons from param {@code personLists} if param {@code personLists} has only
@@ -138,7 +108,7 @@ public class FederatedMatcherImpl<P extends Person> extends AbstractMatcher<P> i
 
 	private Set<MatchedPerson<P>> matchPersonList(List<P> personList, Set<MatchedPerson<P>> matchedPersons)
 	{
-		Set<MatchedPerson<P>> newMatches = personList.parallelStream().map(matchPerson(matchedPersons))
+		Set<MatchedPerson<P>> newMatches = personList.stream().map(matchPerson(matchedPersons))
 				.collect(Collectors.toCollection(HashSet::new));
 		newMatches.addAll(matchedPersons);
 

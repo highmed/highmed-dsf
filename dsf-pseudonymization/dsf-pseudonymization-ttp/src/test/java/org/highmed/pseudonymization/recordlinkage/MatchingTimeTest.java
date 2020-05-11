@@ -15,7 +15,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import org.apache.commons.csv.CSVFormat;
@@ -58,7 +57,7 @@ public class MatchingTimeTest
 		BloomFilterGenerator generatorMedium = BloomFilterGenerator.withMd5Sha1BiGramHasher(BIT_SET_LENGTH_MEDIUM);
 		BloomFilterGenerator generatorShort = BloomFilterGenerator.withMd5Sha1BiGramHasher(BIT_SET_LENGTH_SHORT);
 
-		for (int i = 0; i < 2; i++)
+		for (int i = 0; i < 70; i++)
 		{
 			testRuntime(generatorLong, generatorMedium, generatorShort);
 		}
@@ -179,7 +178,7 @@ public class MatchingTimeTest
 
 		FederatedMatcher<TestPerson> matcher = new FederatedMatcherImpl<>(TestMatchedPerson::new);
 		LocalDateTime rlStartTime = LocalDateTime.now();
-		Set<MatchedPerson<TestPerson>> matchPatients = matcher.matchPersons(org1Pts, org2Pts);
+		Set<MatchedPerson<TestPerson>> matchPatients = matcher.matchPersons(Arrays.asList(org1Pts, org2Pts));
 		LocalDateTime rlEndTime = LocalDateTime.now();
 		assertNotNull(matchPatients);
 

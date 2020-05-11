@@ -8,7 +8,7 @@ import org.highmed.pseudonymization.mpi.MasterPatientIndexClient;
 
 class MasterPatientIndexClientTestImpl implements MasterPatientIndexClient
 {
-	final Map<String, Idat> idats = new HashMap<>();
+	private final Map<String, Idat> idats = new HashMap<>();
 
 	MasterPatientIndexClientTestImpl(Map<String, Idat> idats)
 	{
