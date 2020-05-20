@@ -37,7 +37,7 @@ public class ResultSetTranslatorResearchResultFromTtpTest
 
 		ObjectMapper openEhrObjectMapper = OpenEhrObjectMapperFactory.createObjectMapper();
 
-		ResultSetTranslatorResearchResultFromTtp translator = new ResultSetTranslatorResearchResultFromTtp(organizationKey,
+		ResultSetTranslatorResearchResultFromTtpImpl translator = new ResultSetTranslatorResearchResultFromTtpImpl(organizationKey,
 				organizationIdentifier, researchStudyIdentifier, researchStudyKey, openEhrObjectMapper);
 		
 		ResultSet resultSet = openEhrObjectMapper

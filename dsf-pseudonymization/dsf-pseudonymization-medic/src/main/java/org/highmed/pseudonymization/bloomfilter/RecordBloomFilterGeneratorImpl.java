@@ -1,5 +1,6 @@
 package org.highmed.pseudonymization.bloomfilter;
 
+import java.math.BigInteger;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -63,6 +64,12 @@ public class RecordBloomFilterGeneratorImpl implements RecordBloomFilterGenerato
 		}
 	}
 
+	public static final int DEFAULT_RECORD_BLOOM_FILTER_LENGTH = 2000;
+	public static final FieldWeights DEFAULT_FIELD_WEIGHTS = new FieldWeights(0.1, 0.1, 0.1, 0.2, 0.05, 0.1, 0.05, 0.2,
+			0.1);
+	public static final FieldBloomFilterLengths DEFAULT_FIELD_BLOOM_FILTER_LENGTHS = new FieldBloomFilterLengths(500,
+			500, 250, 50, 500, 250, 500, 500, 500);
+
 	private final int length;
 	private final long permutationSeed;
 	private final FieldWeights weights;
@@ -75,6 +82,28 @@ public class RecordBloomFilterGeneratorImpl implements RecordBloomFilterGenerato
 	private final BloomFilterGenerator cityGenerator;
 	private final BloomFilterGenerator countryGenerator;
 	private final BloomFilterGenerator insuranceNumberGenerator;
+
+	public static RecordBloomFilterGeneratorImpl defaultConfiguration(byte[] permutationSeed, byte[] hmacMd5Key,
+			byte[] hmacSha1Key)
+	{
+		if (permutationSeed.length != 8)
+			throw new IllegalArgumentException("permutationSeed.length = 8 expected");
+
+		return defaultConfiguration(new BigInteger(permutationSeed).longValue(), hmacMd5Key, hmacSha1Key);
+	}
+
+	public static RecordBloomFilterGeneratorImpl defaultConfiguration(long permutationSeed, byte[] hmacMd5Key,
+			byte[] hmacSha1Key)
+	{
+		if (hmacMd5Key.length != 64)
+			throw new IllegalArgumentException("md5HmacKey.length = 64 expected");
+		if (hmacSha1Key.length != 64)
+			throw new IllegalArgumentException("hmacSha1Key.length = 64 expected");
+
+		return new RecordBloomFilterGeneratorImpl(DEFAULT_RECORD_BLOOM_FILTER_LENGTH, permutationSeed,
+				DEFAULT_FIELD_WEIGHTS, DEFAULT_FIELD_BLOOM_FILTER_LENGTHS,
+				() -> new BloomFilterGenerator.HmacMd5HmacSha1BiGramHasher(hmacMd5Key, hmacSha1Key));
+	}
 
 	public RecordBloomFilterGeneratorImpl(int length, long permutationSeed, FieldWeights weights,
 			FieldBloomFilterLengths lengths, Supplier<BiGramHasher> biGramHasherSupplier)

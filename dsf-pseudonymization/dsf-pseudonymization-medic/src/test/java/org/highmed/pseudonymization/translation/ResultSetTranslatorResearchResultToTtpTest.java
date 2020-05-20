@@ -29,7 +29,7 @@ public class ResultSetTranslatorResearchResultToTtpTest
 		String researchStudyIdentifier = "researchStudy1";
 		SecretKey researchStudyKey = AesGcmUtil.generateAES256Key();
 
-		ResultSetTranslatorResearchResultToTtp translator = new ResultSetTranslatorResearchResultToTtp(
+		ResultSetTranslatorResearchResultToTtpImpl translator = new ResultSetTranslatorResearchResultToTtpImpl(
 				researchStudyIdentifier, researchStudyKey);
 
 		ObjectMapper openEhrObjectMapper = OpenEhrObjectMapperFactory.createObjectMapper();

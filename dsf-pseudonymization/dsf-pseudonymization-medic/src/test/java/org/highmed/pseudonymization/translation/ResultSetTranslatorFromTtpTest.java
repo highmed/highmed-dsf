@@ -32,7 +32,7 @@ public class ResultSetTranslatorFromTtpTest
 		SecretKey researchStudyKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES"); 
 		ObjectMapper openEhrObjectMapper = OpenEhrObjectMapperFactory.createObjectMapper();
 
-		ResultSetTranslatorFromTtp translator = new ResultSetTranslatorFromTtp(researchStudyIdentifier,
+		ResultSetTranslatorFromTtpImpl translator = new ResultSetTranslatorFromTtpImpl(researchStudyIdentifier,
 				researchStudyKey, openEhrObjectMapper);
 		ResultSet resultSet = openEhrObjectMapper
 				.readValue(Files.readAllBytes(Paths.get("src/test/resources/result_5_PSN.json")), ResultSet.class);

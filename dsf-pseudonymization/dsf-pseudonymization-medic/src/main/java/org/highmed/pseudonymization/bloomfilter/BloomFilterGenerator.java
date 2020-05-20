@@ -3,6 +3,7 @@ package org.highmed.pseudonymization.bloomfilter;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
+import java.security.Key;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
@@ -156,13 +157,23 @@ public class BloomFilterGenerator
 
 		public HmacMd5HmacSha1BiGramHasher(byte[] key1, byte[] key2)
 		{
+			this(new SecretKeySpec(key1, "HmacMD5"), new SecretKeySpec(key2, "HmacSHA1"));
+		}
+
+		public HmacMd5HmacSha1BiGramHasher(Key key1, Key key2)
+		{
+			if (!"HmacMD5".equals(key1.getAlgorithm()))
+				throw new IllegalArgumentException("key1.algorithm HmacMD5 expected, but got " + key1.getAlgorithm());
+			if (!"HmacSHA1".equals(key2.getAlgorithm()))
+				throw new IllegalArgumentException("key2.algorithm HmacSHA1 expected, but got " + key2.getAlgorithm());
+
 			try
 			{
 				md5Mac = Mac.getInstance("HmacMD5");
-				md5Mac.init(new SecretKeySpec(key1, "HmacMD5"));
+				md5Mac.init(key1);
 
 				sha1Mac = Mac.getInstance("HmacSHA1");
-				sha1Mac.init(new SecretKeySpec(key2, "HmacSHA1"));
+				sha1Mac.init(key2);
 			}
 			catch (InvalidKeyException | NoSuchAlgorithmException e)
 			{
@@ -254,16 +265,35 @@ public class BloomFilterGenerator
 
 		public HmacSha1HmacSha2BiGramHasher(byte[] key1, byte[] key2, Provider provider)
 		{
+			this(new SecretKeySpec(key1, "HmacSHA1"), new SecretKeySpec(key2, "HmacSHA256"), provider);
+		}
+
+		public HmacSha1HmacSha2BiGramHasher(Key key1, Key key2)
+		{
+			this(key1, key2, null);
+		}
+
+		public HmacSha1HmacSha2BiGramHasher(Key key1, Key key2, Provider provider)
+		{
+			if (!"HmacSHA1".equals(key1.getAlgorithm()))
+				throw new IllegalArgumentException("key1.algorithm HmacSHA1 expected, but got " + key1.getAlgorithm());
+			if (!"HmacSHA256".equals(key2.getAlgorithm()))
+				throw new IllegalArgumentException(
+						"key2.algorithm HmacSHA256 expected, but got " + key2.getAlgorithm());
+
 			try
 			{
-				sha1Mac = Mac.getInstance("HmacSHA1");
-				sha1Mac.init(new SecretKeySpec(key1, "HmacSHA1"));
+				if (provider == null)
+					sha1Mac = Mac.getInstance("HmacSHA1", provider);
+				else
+					sha1Mac = Mac.getInstance("HmacSHA1");
+				sha1Mac.init(key1);
 
 				if (provider == null)
 					sha2Mac = Mac.getInstance("HmacSHA256");
 				else
 					sha2Mac = Mac.getInstance("HmacSHA256", provider);
-				sha2Mac.init(new SecretKeySpec(key2, "HmacSHA256"));
+				sha2Mac.init(key2);
 			}
 			catch (InvalidKeyException | NoSuchAlgorithmException e)
 			{
@@ -355,19 +385,35 @@ public class BloomFilterGenerator
 
 		public HmacSha2HmacSha3BiGramHasher(byte[] key1, byte[] key2, Provider provider)
 		{
+			this(new SecretKeySpec(key1, "HmacSHA256"), new SecretKeySpec(key2, "HmacSHA3-256"), provider);
+		}
+
+		public HmacSha2HmacSha3BiGramHasher(Key key1, Key key2)
+		{
+			this(key1, key2, null);
+		}
+
+		public HmacSha2HmacSha3BiGramHasher(Key key1, Key key2, Provider provider)
+		{
+			if (!"HmacSHA256".equals(key1.getAlgorithm()))
+				throw new IllegalArgumentException(
+						"key1.algorithm HmacSHA256 expected, but got " + key1.getAlgorithm());
+			if (!"HmacSHA3-256".equals(key2.getAlgorithm()))
+				throw new IllegalArgumentException(
+						"key2.algorithm HmacSHA3-256 expected, but got " + key2.getAlgorithm());
 			try
 			{
 				if (provider == null)
 					sha2Mac = Mac.getInstance("HmacSHA256");
 				else
 					sha2Mac = Mac.getInstance("HmacSHA256", provider);
-				sha2Mac.init(new SecretKeySpec(key1, "HmacSHA256"));
+				sha2Mac.init(key1);
 
 				if (provider == null)
 					sha3Mac = Mac.getInstance("HmacSHA3-256");
 				else
 					sha3Mac = Mac.getInstance("HmacSHA3-256", provider);
-				sha3Mac.init(new SecretKeySpec(key2, "HmacSHA3-256"));
+				sha3Mac.init(key2);
 			}
 			catch (InvalidKeyException | NoSuchAlgorithmException e)
 			{

@@ -37,6 +37,9 @@ public abstract class AbstractResultSetTranslator implements ResultSetTranslator
 
 	protected final Meta copyMeta(Meta meta)
 	{
+		if (meta == null)
+			return null;
+
 		return new Meta(meta.getHref(), meta.getType(), meta.getSchemaVersion(), meta.getCreated(), meta.getGenerator(),
 				meta.getExecutedAql());
 	}
@@ -70,8 +73,12 @@ public abstract class AbstractResultSetTranslator implements ResultSetTranslator
 	protected final RowElement toEncryptedMdatRowElement(RowElement rowElement, SecretKey researchStudyKey,
 			String researchStudyIdentifier)
 	{
-		return new StringRowElement(toTypeTag(rowElement) + encrypt(researchStudyKey, researchStudyIdentifier,
-				 rowElement.getValueAsString()));
+		if (researchStudyKey == null || researchStudyIdentifier == null)
+			throw new IllegalStateException(
+					"researchStudyKey or researchStudyIdentifier null, unable to encrypted MDAT row element");
+
+		return new StringRowElement(toTypeTag(rowElement)
+				+ encrypt(researchStudyKey, researchStudyIdentifier, rowElement.getValueAsString()));
 	}
 
 	private String toTypeTag(RowElement rowElement)
