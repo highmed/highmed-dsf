@@ -17,8 +17,8 @@ class MasterPatientIndexClientTestImpl implements MasterPatientIndexClient
 	}
 
 	@Override
-	public Idat fetchIdat(String ehrID)
+	public Idat fetchIdat(String ehrId)
 	{
-		return idats.get(ehrID);
+		return idats.get(ehrId);
 	}
 }
