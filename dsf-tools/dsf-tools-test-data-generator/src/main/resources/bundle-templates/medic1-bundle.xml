@@ -89,11 +89,8 @@
 				</connectionType>
 				<name value="Test TTP Endpoint"/>
 				<managingOrganization>
+					<reference value="urn:uuid:bb73165c-c7b9-4342-8e28-531f07fa7735"/>
 					<type value="Organization"/>
-					<identifier>
-						<system value="http://highmed.org/fhir/NamingSystem/organization-identifier"/>
-						<value value="Test_TTP"/>
-					</identifier>
 				</managingOrganization>
 				<payloadType>
 					<coding>

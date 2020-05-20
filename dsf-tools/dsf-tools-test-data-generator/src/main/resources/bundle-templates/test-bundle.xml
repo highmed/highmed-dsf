@@ -26,8 +26,8 @@
 				</type>
 				<name value="Test Organization"/>
 				<endpoint>
-					<type value="Endpoint"/>
 					<reference value="urn:uuid:b879e904-d666-45de-a995-accdd4429b79"/>
+					<type value="Endpoint"/>
 				</endpoint>
 			</Organization>
 		</resource>
@@ -57,8 +57,8 @@
 				</connectionType>
 				<name value="Test Endpoint"/>
 				<managingOrganization>
-					<type value="Organization"/>
 					<reference value="urn:uuid:bb73165c-c7b9-4342-8e28-531f07fa7735"/>
+					<type value="Organization"/>
 				</managingOrganization>
 				<payloadType>
 					<coding>
