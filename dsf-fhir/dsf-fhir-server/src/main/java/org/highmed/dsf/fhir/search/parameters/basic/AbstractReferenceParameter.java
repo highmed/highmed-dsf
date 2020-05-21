@@ -170,18 +170,6 @@ public abstract class AbstractReferenceParameter<R extends DomainResource> exten
 		List<String> includeParameterValues = queryParameters.getOrDefault(SearchQuery.PARAMETER_INCLUDE,
 				Collections.emptyList());
 
-		List<String> nonMatchingIncludeParameters = includeParameterValues.stream().map(IncludeParts::fromString)
-				.filter(p -> !resourceTypeName.equals(p.getSourceResourceTypeName())
-						|| !parameterName.equals(p.getSearchParameterName())
-						|| !((targetResourceTypeNames.size() == 1 && p.getTargetResourceTypeName() == null)
-								|| targetResourceTypeNames.contains(p.getTargetResourceTypeName())))
-				.map(IncludeParts::toString).collect(Collectors.toList());
-
-		if (!nonMatchingIncludeParameters.isEmpty())
-			addError(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE,
-					SearchQuery.PARAMETER_INCLUDE, includeParameterValues, "Non matching include parameter"
-							+ (nonMatchingIncludeParameters.size() != 1 ? "s " : " ") + nonMatchingIncludeParameters));
-
 		List<IncludeParts> includeParts = includeParameterValues.stream().map(IncludeParts::fromString)
 				.filter(p -> resourceTypeName.equals(p.getSourceResourceTypeName())
 						&& parameterName.equals(p.getSearchParameterName())
@@ -269,6 +257,5 @@ public abstract class AbstractReferenceParameter<R extends DomainResource> exten
 	 * @param connection
 	 *            not <code>null</code>
 	 */
-	protected abstract void modifyIncludeResource(IncludeParts includeParts, Resource resource,
-			Connection connection);
+	protected abstract void modifyIncludeResource(IncludeParts includeParts, Resource resource, Connection connection);
 }

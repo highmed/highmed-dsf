@@ -11,17 +11,17 @@ import org.highmed.dsf.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.function.BiFunctionWithSqlException;
 import org.highmed.dsf.fhir.search.IncludeParts;
-import org.highmed.dsf.fhir.search.SearchQueryParameter;
+import org.highmed.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.dsf.fhir.search.parameters.basic.AbstractIdentifierParameter;
 import org.highmed.dsf.fhir.search.parameters.basic.AbstractReferenceParameter;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.Resource;
 
-@SearchQueryParameter.SearchParameterDefinition(name = ResearchStudyEnrollment.PARAMETER_NAME, definition = "http://highmed.org/fhir/SearchParameter/ResearchStudy-enrollment", type = Enumerations.SearchParamType.REFERENCE, documentation = "Search by research study enrollment")
+@SearchParameterDefinition(name = ResearchStudyEnrollment.PARAMETER_NAME, definition = "http://highmed.org/fhir/SearchParameter/ResearchStudy-enrollment", type = SearchParamType.REFERENCE, documentation = "Search by research study enrollment")
 public class ResearchStudyEnrollment extends AbstractReferenceParameter<ResearchStudy>
 {
 	private static final String RESOURCE_TYPE_NAME = "ResearchStudy";
@@ -181,9 +181,7 @@ public class ResearchStudyEnrollment extends AbstractReferenceParameter<Research
 	protected String getIncludeSql(IncludeParts includeParts)
 	{
 		if (includeParts.matches(RESOURCE_TYPE_NAME, PARAMETER_NAME, TARGET_RESOURCE_TYPE_NAME))
-			return "(SELECT jsonb_agg(group_json) FROM current_groups"
-					+ " WHERE concat('Group/', group_json->>'id') IN (SELECT reference->>'reference' FROM jsonb_array_elements(research_study->'enrollment') AS reference)"
-					+ ") AS groups";
+			return "(SELECT jsonb_agg(group_json) FROM current_groups WHERE concat('Group/', group_json->>'id') IN (SELECT reference->>'reference' FROM jsonb_array_elements(research_study->'enrollment') AS reference)) AS groups";
 		else
 			return null;
 	}

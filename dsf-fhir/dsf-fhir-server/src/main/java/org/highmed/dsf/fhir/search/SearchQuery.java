@@ -196,9 +196,15 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 		searchParameters.stream().flatMap(p -> p.getErrors().stream()).forEach(errors::add);
 		revIncludeParameterFactories.stream().flatMap(p -> p.getErrors().stream()).forEach(errors::add);
 
+		List<String> includeParameterValues = queryParameters.getOrDefault(PARAMETER_INCLUDE, Collections.emptyList());
+		includeParameters.stream().map(SearchQueryIncludeParameter::getBundleUriQueryParameterValues)
+				.forEach(v -> includeParameterValues.remove(v));
+		if (!includeParameterValues.isEmpty())
+			errors.add(new SearchQueryParameterError(SearchQueryParameterErrorType.UNSUPPORTED_PARAMETER,
+					PARAMETER_INCLUDE, includeParameterValues));
+
 		List<String> revIncludeParameterValues = new ArrayList<>(
 				queryParameters.getOrDefault(PARAMETER_REVINCLUDE, Collections.emptyList()));
-
 		revIncludeParameters.stream().map(SearchQueryIncludeParameter::getBundleUriQueryParameterValues)
 				.forEach(v -> revIncludeParameterValues.remove(v));
 		if (!revIncludeParameterValues.isEmpty())

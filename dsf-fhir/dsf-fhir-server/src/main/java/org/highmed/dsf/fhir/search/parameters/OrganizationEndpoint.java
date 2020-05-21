@@ -148,7 +148,7 @@ public class OrganizationEndpoint extends AbstractReferenceParameter<Organizatio
 
 		if (ReferenceSearchType.IDENTIFIER.equals(valueAndType.type))
 		{
-			return o.getEndpoint().stream().map(e -> e.getResource()).filter(r -> r instanceof Endpoint)
+			return o.getEndpoint().stream().map(Reference::getResource).filter(r -> r instanceof Endpoint)
 					.flatMap(r -> ((Endpoint) r).getIdentifier().stream())
 					.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
 		}
