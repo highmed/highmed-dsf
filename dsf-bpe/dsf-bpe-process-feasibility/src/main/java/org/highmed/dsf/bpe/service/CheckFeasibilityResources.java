@@ -31,6 +31,7 @@ public class CheckFeasibilityResources extends AbstractServiceDelegate
 				.getResourcesAndCast();
 
 		checkNumberOfParticipatingMedics(researchStudy);
+		checkFullyQualifiedCohortIds(cohorts);
 		checkNumberOfCohortDefinitions(cohorts);
 	}
 
@@ -44,8 +45,16 @@ public class CheckFeasibilityResources extends AbstractServiceDelegate
 
 		if (medics < MIN_PARTICIPATING_MEDICS)
 		{
-			throw new IllegalStateException(
+			throw new RuntimeException(
 					"Number of distinct participanting MeDICs is < " + MIN_PARTICIPATING_MEDICS + ", got " + medics);
+		}
+	}
+
+	private void checkFullyQualifiedCohortIds(List<Group> cohorts)
+	{
+		if (cohorts.stream().anyMatch(g -> !g.getIdElement().hasBaseUrl()))
+		{
+			throw new RuntimeException("Not all cohorts have fully qualified ids (containing server base url)");
 		}
 	}
 
@@ -54,7 +63,7 @@ public class CheckFeasibilityResources extends AbstractServiceDelegate
 		int size = cohorts.size();
 		if (size < MIN_COHORT_DEFINITIONS)
 		{
-			throw new IllegalStateException(
+			throw new RuntimeException(
 					"Number of defined cohorts is < " + MIN_COHORT_DEFINITIONS + ", got " + cohorts.size());
 		}
 	}
