@@ -8,17 +8,21 @@ import java.util.stream.Stream;
 
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.BackboneElement;
+import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.CareTeam;
 import org.hl7.fhir.r4.model.ClaimResponse;
+import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.HealthcareService;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.NamingSystem;
 import org.hl7.fhir.r4.model.ObservationDefinition;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
@@ -36,8 +40,11 @@ import org.hl7.fhir.r4.model.RelatedPerson;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.SpecimenDefinition;
+import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Substance;
 import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -142,9 +149,38 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 
 	private Stream<ResourceReference> getExtensionReferences(DomainResource resource)
 	{
-		return resource.getExtension().stream().filter(e -> e.getValue() instanceof Reference)
-				.map(e -> (Reference) e.getValue())
+		Stream<ResourceReference> extensions = resource.getExtension().stream()
+				.filter(e -> e.getValue() instanceof Reference).map(e -> (Reference) e.getValue())
 				.map(toResourceReference(resource.getResourceType().name() + ".extension"));
+
+		Stream<ResourceReference> extensionExtensions = resource.getExtension().stream()
+				.flatMap(e -> getExtensionReferences(resource.getResourceType().name() + ".extension", e));
+
+		return Stream.concat(extensions, extensionExtensions);
+	}
+
+	private Stream<ResourceReference> getExtensionReferences(String baseElementName, BackboneElement resource)
+	{
+		Stream<ResourceReference> extensions = resource.getExtension().stream()
+				.filter(e -> e.getValue() instanceof Reference).map(e -> (Reference) e.getValue())
+				.map(toResourceReference(baseElementName + ".extension"));
+
+		Stream<ResourceReference> extensionExtensions = resource.getExtension().stream()
+				.flatMap(e -> getExtensionReferences(baseElementName + ".extension", e));
+
+		return Stream.concat(extensions, extensionExtensions);
+	}
+
+	private Stream<ResourceReference> getExtensionReferences(String baseElementName, Extension resource)
+	{
+		Stream<ResourceReference> extensions = resource.getExtension().stream()
+				.filter(e -> e.getValue() instanceof Reference).map(e -> (Reference) e.getValue())
+				.map(toResourceReference(baseElementName + ".extension"));
+
+		Stream<ResourceReference> extensionExtensions = resource.getExtension().stream()
+				.flatMap(e -> getExtensionReferences(baseElementName + ".extension", e));
+
+		return Stream.concat(extensions, extensionExtensions);
 	}
 
 	@SafeVarargs
@@ -166,7 +202,16 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 		if (resource == null)
 			return Stream.empty();
 
-		if (resource instanceof Endpoint)
+		if (resource instanceof ActivityDefinition)
+			return getReferences((ActivityDefinition) resource);
+		// not implemented yet, special rules apply for tmp ids
+		// else if (resource instanceof Bundle)
+		// return getReferences((Bundle) resource);
+		else if (resource instanceof Binary)
+			return getReferences((Binary) resource);
+		else if (resource instanceof CodeSystem)
+			return getReferences((CodeSystem) resource);
+		else if (resource instanceof Endpoint)
 			return getReferences((Endpoint) resource);
 		else if (resource instanceof Group)
 			return getReferences((Group) resource);
@@ -174,6 +219,8 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 			return getReferences((HealthcareService) resource);
 		else if (resource instanceof Location)
 			return getReferences((Location) resource);
+		else if (resource instanceof NamingSystem)
+			return getReferences((NamingSystem) resource);
 		else if (resource instanceof Organization)
 			return getReferences((Organization) resource);
 		else if (resource instanceof Patient)
@@ -186,8 +233,14 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 			return getReferences((Provenance) resource);
 		else if (resource instanceof ResearchStudy)
 			return getReferences((ResearchStudy) resource);
+		else if (resource instanceof StructureDefinition)
+			return getReferences((StructureDefinition) resource);
+		else if (resource instanceof Subscription)
+			return getReferences((Subscription) resource);
 		else if (resource instanceof Task)
 			return getReferences((Task) resource);
+		else if (resource instanceof ValueSet)
+			return getReferences((ValueSet) resource);
 		else if (resource instanceof DomainResource)
 		{
 			logger.debug("DomainResource of type {} not supported, returning extension references only",
@@ -229,6 +282,29 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 
 		return concat(subjectReference, location, productReference, specimenRequirement, observationRequirement,
 				observationResultRequirement, extensionReferences);
+	}
+
+	@Override
+	public Stream<ResourceReference> getReferences(Binary resource)
+	{
+		if (resource == null)
+			return Stream.empty();
+
+		var securityContext = getReference(resource, Binary::hasSecurityContext, Binary::getSecurityContext,
+				"Binary.securityContext");
+
+		return securityContext;
+	}
+
+	@Override
+	public Stream<ResourceReference> getReferences(CodeSystem resource)
+	{
+		if (resource == null)
+			return Stream.empty();
+
+		var extensionReferences = getExtensionReferences(resource);
+
+		return extensionReferences;
 	}
 
 	@Override
@@ -288,6 +364,9 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 	@Override
 	public Stream<ResourceReference> getReferences(Location resource)
 	{
+		if (resource == null)
+			return Stream.empty();
+
 		var managingOrganization = getReference(resource, Location::hasManagingOrganization,
 				Location::getManagingOrganization, "Location.managingOrganization", Organization.class);
 		var partOf = getReference(resource, Location::hasPartOf, Location::getPartOf, "Location.partOf",
@@ -301,8 +380,22 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 	}
 
 	@Override
+	public Stream<ResourceReference> getReferences(NamingSystem resource)
+	{
+		if (resource == null)
+			return Stream.empty();
+
+		var extensionReferences = getExtensionReferences(resource);
+
+		return extensionReferences;
+	}
+
+	@Override
 	public Stream<ResourceReference> getReferences(Organization resource)
 	{
+		if (resource == null)
+			return Stream.empty();
+
 		var partOf = getReference(resource, Organization::hasPartOf, Organization::getPartOf, "Organization.partOf",
 				Organization.class);
 		var endpoints = getReferences(resource, Organization::hasEndpoint, Organization::getEndpoint,
@@ -316,6 +409,9 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 	@Override
 	public Stream<ResourceReference> getReferences(Patient resource)
 	{
+		if (resource == null)
+			return Stream.empty();
+
 		var contactsOrganization = getBackboneElementsReference(resource, Patient::hasContact, Patient::getContact,
 				ContactComponent::hasOrganization, ContactComponent::getOrganization, "Patient.contact.organization",
 				Organization.class);
@@ -337,6 +433,9 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 	@Override
 	public Stream<ResourceReference> getReferences(Practitioner resource)
 	{
+		if (resource == null)
+			return Stream.empty();
+
 		var qualificationsIssuer = getBackboneElementsReference(resource, Practitioner::hasQualification,
 				Practitioner::getQualification, PractitionerQualificationComponent::hasIssuer,
 				PractitionerQualificationComponent::getIssuer, "Practitioner.qualification.issuer", Organization.class);
@@ -349,6 +448,9 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 	@Override
 	public Stream<ResourceReference> getReferences(PractitionerRole resource)
 	{
+		if (resource == null)
+			return Stream.empty();
+
 		var practitioner = getReference(resource, PractitionerRole::hasPractitioner, PractitionerRole::getPractitioner,
 				"PractitionerRole.practitioner", Practitioner.class);
 		var organization = getReference(resource, PractitionerRole::hasOrganization, PractitionerRole::getOrganization,
@@ -368,6 +470,9 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 	@Override
 	public Stream<ResourceReference> getReferences(Provenance resource)
 	{
+		if (resource == null)
+			return Stream.empty();
+
 		var targets = getReferences(resource, Provenance::hasTarget, Provenance::getTarget, "Provenance.target");
 		var location = getReference(resource, Provenance::hasLocation, Provenance::getLocation, "Provenance.location",
 				Location.class);
@@ -390,6 +495,9 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 	@Override
 	public Stream<ResourceReference> getReferences(ResearchStudy resource)
 	{
+		if (resource == null)
+			return Stream.empty();
+
 		var protocols = getReferences(resource, ResearchStudy::hasProtocol, ResearchStudy::getProtocol,
 				"ResearchStudy.protocol", PlanDefinition.class);
 		var partOfs = getReferences(resource, ResearchStudy::hasPartOf, ResearchStudy::getPartOf,
@@ -410,8 +518,33 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 	}
 
 	@Override
+	public Stream<ResourceReference> getReferences(StructureDefinition resource)
+	{
+		if (resource == null)
+			return Stream.empty();
+
+		var extensionReferences = getExtensionReferences(resource);
+
+		return extensionReferences;
+	}
+
+	@Override
+	public Stream<ResourceReference> getReferences(Subscription resource)
+	{
+		if (resource == null)
+			return Stream.empty();
+
+		var extensionReferences = getExtensionReferences(resource);
+
+		return extensionReferences;
+	}
+
+	@Override
 	public Stream<ResourceReference> getReferences(Task resource)
 	{
+		if (resource == null)
+			return Stream.empty();
+
 		var basedOns = getReferences(resource, Task::hasBasedOn, Task::getBasedOn, "Task.basedOn");
 		var partOfs = getReferences(resource, Task::hasPartOf, Task::getPartOf, "Task.partOf", Task.class);
 		var focus = getReference(resource, Task::hasFocus, Task::getFocus, "Task.focus");
@@ -439,21 +572,49 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 		var outputReferences = getOutputReferences(resource);
 		var extensionReferences = getExtensionReferences(resource);
 
-		return concat(basedOns, partOfs, focus, forRef, encounter, requester, owner, location, reasonReference, insurance,
-				relevanteHistories, restrictionRecipiets, inputReferences, outputReferences, extensionReferences);
+		return concat(basedOns, partOfs, focus, forRef, encounter, requester, owner, location, reasonReference,
+				insurance, relevanteHistories, restrictionRecipiets, inputReferences, outputReferences,
+				extensionReferences);
 	}
 
 	private Stream<ResourceReference> getInputReferences(Task resource)
 	{
-		return resource.getInput().stream().filter(in -> in.getValue() instanceof Reference)
-				.map(in -> (Reference) in.getValue())
+		if (resource == null)
+			return Stream.empty();
+
+		Stream<ResourceReference> inputReferences = resource.getInput().stream()
+				.filter(in -> in.getValue() instanceof Reference).map(in -> (Reference) in.getValue())
 				.map(toResourceReference(resource.getResourceType().name() + ".input"));
+
+		Stream<ResourceReference> inputExtensionReferences = resource.getInput().stream()
+				.flatMap(in -> getExtensionReferences(resource.getResourceType().name() + ".input", in));
+
+		return Stream.concat(inputReferences, inputExtensionReferences);
 	}
 
 	private Stream<ResourceReference> getOutputReferences(Task resource)
 	{
-		return resource.getOutput().stream().filter(out -> out.getValue() instanceof Reference)
-				.map(out -> (Reference) out.getValue())
+		if (resource == null)
+			return Stream.empty();
+
+		Stream<ResourceReference> outputReferences = resource.getOutput().stream()
+				.filter(out -> out.getValue() instanceof Reference).map(in -> (Reference) in.getValue())
 				.map(toResourceReference(resource.getResourceType().name() + ".output"));
+
+		Stream<ResourceReference> outputExtensionReferences = resource.getOutput().stream()
+				.flatMap(out -> getExtensionReferences(resource.getResourceType().name() + ".output", out));
+
+		return Stream.concat(outputReferences, outputExtensionReferences);
+	}
+
+	@Override
+	public Stream<ResourceReference> getReferences(ValueSet resource)
+	{
+		if (resource == null)
+			return Stream.empty();
+
+		var extensionReferences = getExtensionReferences(resource);
+
+		return extensionReferences;
 	}
 }

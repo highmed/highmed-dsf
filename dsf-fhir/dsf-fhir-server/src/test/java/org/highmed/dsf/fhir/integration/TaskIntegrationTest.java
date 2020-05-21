@@ -1,6 +1,7 @@
 package org.highmed.dsf.fhir.integration;
 
 import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -24,8 +25,10 @@ import org.highmed.fhir.client.WebsocketClient;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.ParameterComponent;
@@ -33,9 +36,15 @@ import org.hl7.fhir.r4.model.Task.TaskIntent;
 import org.hl7.fhir.r4.model.Task.TaskRestrictionComponent;
 import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.context.FhirContext;
 
 public class TaskIntegrationTest extends AbstractIntegrationTest
 {
+	private static final Logger logger = LoggerFactory.getLogger(TaskIntegrationTest.class);
+
 	private List<Bundle.BundleEntryComponent> createTaskBundle()
 	{
 		Bundle bundle = readBundle(Paths.get("src/test/resources/integration/task-bundle.json"), newJsonParser());
@@ -56,6 +65,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		try
 		{
 			List<Bundle.BundleEntryComponent> resultBundleEntries = createTaskBundle();
+			assertEquals(4, resultBundleEntries.size());
 
 			String taskId = new IdType(resultBundleEntries.get(3).getFullUrl()).getIdPart();
 			Task task = getWebserviceClient().read(Task.class, taskId);
@@ -85,6 +95,32 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 			assertEquals(researchStudyId.getResourceType(), taskInputResearchStudyIdViaWebsocket.getResourceType());
 			assertEquals(researchStudyId.getIdPart(), taskInputResearchStudyIdViaWebsocket.getIdPart());
 			assertEquals(researchStudyId.getVersionIdPart(), taskInputResearchStudyIdViaWebsocket.getVersionIdPart());
+
+			ResearchStudy researchStudy = getWebserviceClient().read(ResearchStudy.class, researchStudyId.getIdPart());
+			logger.debug("ResearchStudy: {}",
+					FhirContext.forR4().newXmlParser().setPrettyPrint(true).encodeResourceToString(researchStudy));
+
+			List<Extension> medics = researchStudy
+					.getExtensionsByUrl("http://highmed.org/fhir/StructureDefinition/participating-medic");
+			assertNotNull(medics);
+			assertEquals(1, medics.size());
+			Extension medicExt = medics.get(0);
+			assertTrue(medicExt.hasValue());
+			assertTrue(medicExt.getValue() instanceof Reference);
+			Reference medicRef = (Reference) medicExt.getValue();
+			assertTrue(medicRef.hasIdentifier());
+			assertFalse(medicRef.hasReference());
+
+			List<Extension> ttps = researchStudy
+					.getExtensionsByUrl("http://highmed.org/fhir/StructureDefinition/participating-ttp");
+			assertNotNull(ttps);
+			assertEquals(1, ttps.size());
+			Extension ttpExt = medics.get(0);
+			assertTrue(ttpExt.hasValue());
+			assertTrue(ttpExt.getValue() instanceof Reference);
+			Reference ttpRef = (Reference) ttpExt.getValue();
+			assertTrue(ttpRef.hasIdentifier());
+			assertFalse(ttpRef.hasReference());
 		}
 		finally
 		{

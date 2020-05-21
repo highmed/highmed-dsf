@@ -146,7 +146,7 @@ public class ResearchStudyAuthorizationRule extends AbstractAuthorizationRule<Re
 		}
 
 		// TODO: hasPrincipalInvestigator check is only optional for Feasability Requests. For full Data Sharing
-		//       processes, the field is mandatory and should lead to a validation error if not supplied.
+		// processes, the field is mandatory and should lead to a validation error if not supplied.
 		if (newResource.hasPrincipalInvestigator())
 		{
 			Optional<Resource> practitioner = resolvePractitioner(connection, user,

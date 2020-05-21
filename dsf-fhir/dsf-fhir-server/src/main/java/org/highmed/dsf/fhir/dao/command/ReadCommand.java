@@ -23,6 +23,7 @@ import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.highmed.dsf.fhir.search.PartialResult;
 import org.highmed.dsf.fhir.search.SearchQuery;
 import org.highmed.dsf.fhir.search.SearchQueryParameterError;
+import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent;
@@ -47,6 +48,7 @@ public class ReadCommand extends AbstractCommand implements Command
 	private final ParameterConverter parameterConverter;
 	private final ResponseGenerator responseGenerator;
 	private final ExceptionHandler exceptionHandler;
+	private final ReferenceCleaner referenceCleaner;
 
 	private Bundle multipleResult;
 	private Resource singleResult;
@@ -56,7 +58,7 @@ public class ReadCommand extends AbstractCommand implements Command
 	public ReadCommand(int index, User user, Bundle bundle, BundleEntryComponent entry, String serverBase,
 			AuthorizationHelper authorizationHelper, int defaultPageCount, DaoProvider daoProvider,
 			ParameterConverter parameterConverter, ResponseGenerator responseGenerator,
-			ExceptionHandler exceptionHandler)
+			ExceptionHandler exceptionHandler, ReferenceCleaner referenceCleaner)
 	{
 		super(5, index, user, bundle, entry, serverBase, authorizationHelper);
 
@@ -66,6 +68,7 @@ public class ReadCommand extends AbstractCommand implements Command
 		this.parameterConverter = parameterConverter;
 		this.responseGenerator = responseGenerator;
 		this.exceptionHandler = exceptionHandler;
+		this.referenceCleaner = referenceCleaner;
 	}
 
 	@Override
@@ -223,6 +226,8 @@ public class ReadCommand extends AbstractCommand implements Command
 	{
 		if (singleResult != null)
 		{
+			referenceCleaner.cleanupReferences(singleResult);
+			
 			BundleEntryComponent resultEntry = new BundleEntryComponent();
 			resultEntry.setFullUrl(new IdType(serverBase, singleResult.getResourceType().name(),
 					singleResult.getIdElement().getIdPart(), null).getValue());
@@ -241,6 +246,8 @@ public class ReadCommand extends AbstractCommand implements Command
 		}
 		else if (multipleResult != null)
 		{
+			referenceCleaner.cleanupReferences(multipleResult);
+			
 			BundleEntryComponent resultEntry = new BundleEntryComponent();
 			resultEntry.setFullUrl(URL_UUID_PREFIX + UUID.randomUUID().toString());
 			BundleEntryResponseComponent response = resultEntry.getResponse();

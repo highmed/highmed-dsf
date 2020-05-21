@@ -119,10 +119,11 @@ public class BinaryAuthorizationRule extends AbstractAuthorizationRule<Binary, B
 						oldResource.getSecurityContext(), Organization.class);
 				ResourceReference newReference = new ResourceReference("Binary.SecurityContext",
 						newResource.getSecurityContext(), Organization.class);
-				if (EnumSet.of(ReferenceType.LITERAL_INTERNAL, ReferenceType.LOGICAL)
-						.contains(oldReference.getType(serverBase))
-						&& EnumSet.of(ReferenceType.LITERAL_INTERNAL, ReferenceType.LOGICAL)
-								.contains(newReference.getType(serverBase)))
+				ReferenceType oldType = oldReference.getType(serverBase);
+				ReferenceType newType = newReference.getType(serverBase);
+
+				if (EnumSet.of(ReferenceType.LITERAL_INTERNAL, ReferenceType.LOGICAL).contains(oldType)
+						&& EnumSet.of(ReferenceType.LITERAL_INTERNAL, ReferenceType.LOGICAL).contains(newType))
 				{
 					Optional<Resource> oldSecurityContext = referenceResolver.resolveReference(user, oldReference,
 							connection);

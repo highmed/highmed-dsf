@@ -12,6 +12,7 @@ import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.highmed.dsf.fhir.service.ReferenceExtractor;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.highmed.dsf.fhir.service.ResourceReference;
+import org.highmed.dsf.fhir.service.ResourceReference.ReferenceType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
@@ -73,26 +74,24 @@ public final class ResolveReferencesHelper<R extends Resource>
 	}
 
 	private boolean resolveReference(Map<String, IdType> idTranslationTable, Connection connection, R resource,
-			ResourceReference resourceReference) throws WebApplicationException
+			ResourceReference reference) throws WebApplicationException
 	{
-		switch (resourceReference.getType(serverBase))
+		ReferenceType type = reference.getType(serverBase);
+		switch (type)
 		{
 			case TEMPORARY:
-				return resolveTemporaryReference(resourceReference, idTranslationTable, resource);
+				return resolveTemporaryReference(reference, idTranslationTable, resource);
 			case LITERAL_INTERNAL:
-				return referenceResolver.resolveLiteralInternalReference(resource, index, resourceReference,
-						connection);
+				return referenceResolver.resolveLiteralInternalReference(resource, index, reference, connection);
 			case LITERAL_EXTERNAL:
-				return referenceResolver.resolveLiteralExternalReference(resource, index, resourceReference);
+				return referenceResolver.resolveLiteralExternalReference(resource, index, reference);
 			case CONDITIONAL:
-				return referenceResolver.resolveConditionalReference(user, resource, index, resourceReference,
-						connection);
+				return referenceResolver.resolveConditionalReference(user, resource, index, reference, connection);
 			case LOGICAL:
-				return referenceResolver.resolveLogicalReference(user, resource, index, resourceReference, connection);
+				return referenceResolver.resolveLogicalReference(user, resource, index, reference, connection);
 			case UNKNOWN:
 			default:
-				throw new WebApplicationException(
-						responseGenerator.unknownReference(index, resource, resourceReference));
+				throw new WebApplicationException(responseGenerator.unknownReference(index, resource, reference));
 		}
 	}
 

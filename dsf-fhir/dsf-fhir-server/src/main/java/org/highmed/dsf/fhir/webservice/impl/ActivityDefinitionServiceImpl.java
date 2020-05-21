@@ -7,6 +7,7 @@ import org.highmed.dsf.fhir.event.EventManager;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
+import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.highmed.dsf.fhir.service.ReferenceExtractor;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.highmed.dsf.fhir.service.ResourceValidator;
@@ -20,10 +21,11 @@ public class ActivityDefinitionServiceImpl extends
 			ActivityDefinitionDao dao, ResourceValidator validator, EventManager eventManager,
 			ExceptionHandler exceptionHandler, EventGenerator eventGenerator, ResponseGenerator responseGenerator,
 			ParameterConverter parameterConverter, ReferenceExtractor referenceExtractor,
-			ReferenceResolver referenceResolver, AuthorizationRuleProvider authorizationRuleProvider)
+			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
+			AuthorizationRuleProvider authorizationRuleProvider)
 	{
 		super(path, ActivityDefinition.class, serverBase, defaultPageCount, dao, validator, eventManager,
 				exceptionHandler, eventGenerator, responseGenerator, parameterConverter, referenceExtractor,
-				referenceResolver, authorizationRuleProvider);
+				referenceResolver, referenceCleaner, authorizationRuleProvider);
 	}
 }

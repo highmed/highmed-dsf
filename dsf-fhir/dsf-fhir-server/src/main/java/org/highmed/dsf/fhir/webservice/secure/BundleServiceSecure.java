@@ -5,6 +5,7 @@ import org.highmed.dsf.fhir.dao.BundleDao;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
+import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.highmed.dsf.fhir.webservice.specification.BundleService;
 import org.hl7.fhir.r4.model.Bundle;
@@ -13,10 +14,11 @@ public class BundleServiceSecure extends AbstractResourceServiceSecure<BundleDao
 		implements BundleService
 {
 	public BundleServiceSecure(BundleService delegate, String serverBase, ResponseGenerator responseGenerator,
-			ReferenceResolver referenceResolver, BundleDao bundleDao, ExceptionHandler exceptionHandler,
-			ParameterConverter parameterConverter, BundleAuthorizationRule authorizationRule)
+			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner, BundleDao bundleDao,
+			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
+			BundleAuthorizationRule authorizationRule)
 	{
-		super(delegate, serverBase, responseGenerator, referenceResolver, Bundle.class, bundleDao, exceptionHandler,
-				parameterConverter, authorizationRule);
+		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, Bundle.class, bundleDao,
+				exceptionHandler, parameterConverter, authorizationRule);
 	}
 }

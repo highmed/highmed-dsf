@@ -9,6 +9,7 @@ import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
+import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.highmed.dsf.fhir.webservice.specification.StructureDefinitionService;
 import org.hl7.fhir.r4.model.Parameters;
@@ -23,11 +24,11 @@ public class StructureDefinitionServiceSecure
 	private static final Logger logger = LoggerFactory.getLogger(StructureDefinitionServiceSecure.class);
 
 	public StructureDefinitionServiceSecure(StructureDefinitionService delegate, String serverBase,
-			ResponseGenerator responseGenerator, ReferenceResolver referenceResolver,
+			ResponseGenerator responseGenerator, ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
 			StructureDefinitionDao structureDefinitionDao, ExceptionHandler exceptionHandler,
 			ParameterConverter parameterConverter, StructureDefinitionAuthorizationRule authorizationRule)
 	{
-		super(delegate, serverBase, responseGenerator, referenceResolver, StructureDefinition.class,
+		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, StructureDefinition.class,
 				structureDefinitionDao, exceptionHandler, parameterConverter, authorizationRule);
 	}
 
