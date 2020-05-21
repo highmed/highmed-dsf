@@ -28,16 +28,23 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+
+import ca.uhn.fhir.context.FhirContext;
 
 public class UpdateWhiteList extends AbstractServiceDelegate implements InitializingBean
 {
+	private static final Logger logger = LoggerFactory.getLogger(UpdateWhiteList.class);
+
 	private final OrganizationProvider organizationProvider;
 
 	public UpdateWhiteList(OrganizationProvider organizationProvider, FhirWebserviceClientProvider clientProvider,
 			TaskHelper taskHelper)
 	{
 		super(clientProvider, taskHelper);
+
 		this.organizationProvider = organizationProvider;
 	}
 
@@ -45,6 +52,7 @@ public class UpdateWhiteList extends AbstractServiceDelegate implements Initiali
 	public void afterPropertiesSet() throws Exception
 	{
 		super.afterPropertiesSet();
+
 		Objects.requireNonNull(organizationProvider, "organizationProvider");
 	}
 
@@ -67,6 +75,9 @@ public class UpdateWhiteList extends AbstractServiceDelegate implements Initiali
 				.filter(e -> e.hasSearch() && SearchEntryMode.MATCH.equals(e.getSearch().getMode()) && e.hasResource()
 						&& e.getResource() instanceof Organization)
 				.map(e -> (Organization) e.getResource()).forEach(addWhiteListEntry(transaction, searchSet));
+
+		logger.debug("Uploading new white-list transaction bundle: {}",
+				FhirContext.forR4().newJsonParser().encodeResourceToString(transaction));
 
 		Bundle result = client.updateConditionaly(transaction,
 				Map.of("identifier", Collections.singletonList(Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST + "|"

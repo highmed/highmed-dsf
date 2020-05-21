@@ -8,22 +8,26 @@ import org.camunda.bpm.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
 import org.camunda.bpm.engine.impl.variable.serializer.TypedValueSerializer;
 
-public class FhirPlugin implements ProcessEnginePlugin
+public class SerializerPlugin implements ProcessEnginePlugin
 {
 	@SuppressWarnings("rawtypes")
 	private final List<TypedValueSerializer> serializer;
 
-	public FhirPlugin(FhirResourceSerializer fhirResourceSerializer,
+	public SerializerPlugin(FhirResourceSerializer fhirResourceSerializer,
 			FhirResourcesListSerializer fhirResourcesListSerializer,
 			MultiInstanceTargetSerializer multiInstanceTargetSerializer,
 			MultiInstanceTargetsSerializer multiInstanceTargetsSerializer,
 			FeasibilityQueryResultSerializer feasibilityQueryResultSerializer,
-			FeasibilityQueryResultsSerializer feasibilityQueryResultsSerializer, OutputSerializer outputSerializer,
+			FeasibilityQueryResultsSerializer feasibilityQueryResultsSerializer,
+			FinalFeasibilityQueryResultSerializer finalFeasibilityQueryResultSerializer,
+			FinalFeasibilityQueryResultsSerializer finalFeasibilityQueryResultsSerializer,
+			BloomFilterConfigSerializer bloomFilterConfigSerializer, OutputSerializer outputSerializer,
 			OutputsSerializer outputsSerializer)
 	{
 		serializer = Arrays.asList(fhirResourceSerializer, fhirResourcesListSerializer, multiInstanceTargetSerializer,
 				multiInstanceTargetsSerializer, feasibilityQueryResultSerializer, feasibilityQueryResultsSerializer,
-				outputSerializer, outputsSerializer);
+				finalFeasibilityQueryResultSerializer, finalFeasibilityQueryResultsSerializer,
+				bloomFilterConfigSerializer, outputSerializer, outputsSerializer);
 	}
 
 	@Override

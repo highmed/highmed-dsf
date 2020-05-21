@@ -8,10 +8,11 @@ import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.AbstractTaskMessageSend;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.fhir.variables.Outputs;
+import org.highmed.dsf.fhir.variables.FinalFeasibilityQueryResult;
+import org.highmed.dsf.fhir.variables.FinalFeasibilityQueryResults;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.r4.model.Task.ParameterComponent;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -24,19 +25,30 @@ public class SendMultiMedicResults extends AbstractTaskMessageSend
 	}
 
 	@Override
-	protected Stream<Task.ParameterComponent> getAdditionalInputParameters(DelegateExecution execution)
+	protected Stream<ParameterComponent> getAdditionalInputParameters(DelegateExecution execution)
 	{
-		Outputs outputs = (Outputs) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
+		FinalFeasibilityQueryResults results = (FinalFeasibilityQueryResults) execution
+				.getVariable(Constants.VARIABLE_FINAL_QUERY_RESULTS);
 
-		return outputs.getOutputs().stream().map(output -> {
-			Task.ParameterComponent component = getTaskHelper()
-					.createInput(output.getSystem(), output.getCode(), output.getValue());
+		return results.getResults().stream().flatMap(this::toInputs);
+	}
 
-			if (output.hasExtension())
-				component.addExtension(
-						new Extension(output.getExtensionUrl(), new Reference(output.getExtensionValue())));
+	private Stream<ParameterComponent> toInputs(FinalFeasibilityQueryResult result)
+	{
+		ParameterComponent input1 = getTaskHelper().createInputUnsignedInt(Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
+				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT, result.getCohortSize());
+		input1.addExtension(createCohortIdExtension(result.getCohortId()));
 
-			return component;
-		});
+		ParameterComponent input2 = getTaskHelper().createInputUnsignedInt(Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
+				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS_COUNT,
+				result.getParticipatingMedics());
+		input2.addExtension(createCohortIdExtension(result.getCohortId()));
+
+		return Stream.of(input1, input2);
+	}
+
+	private Extension createCohortIdExtension(String cohortId)
+	{
+		return new Extension(Constants.EXTENSION_GROUP_ID_URI, new Reference(cohortId));
 	}
 }

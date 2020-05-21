@@ -1,6 +1,7 @@
 package org.highmed.dsf.bpe.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
@@ -10,8 +11,9 @@ import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.FeasibilityQueryResult;
 import org.highmed.dsf.fhir.variables.FeasibilityQueryResults;
-import org.highmed.dsf.fhir.variables.FinalSimpleFeasibilityResult;
-import org.highmed.dsf.fhir.variables.Outputs;
+import org.highmed.dsf.fhir.variables.FinalFeasibilityQueryResult;
+import org.highmed.dsf.fhir.variables.FinalFeasibilityQueryResults;
+import org.highmed.dsf.fhir.variables.FinalFeasibilityQueryResultsValues;
 
 public class CalculateMultiMedicResults extends AbstractServiceDelegate
 {
@@ -21,53 +23,35 @@ public class CalculateMultiMedicResults extends AbstractServiceDelegate
 	}
 
 	@Override
-	public void doExecute(DelegateExecution execution) throws Exception
+	protected void doExecute(DelegateExecution execution) throws Exception
 	{
-
-		List<FeasibilityQueryResult> locationBasedResults = ((FeasibilityQueryResults) execution
+		List<FeasibilityQueryResult> results = ((FeasibilityQueryResults) execution
 				.getVariable(Constants.VARIABLE_QUERY_RESULTS)).getResults();
-		List<FinalSimpleFeasibilityResult> finalResults = calculateResults(locationBasedResults);
 
 		// TODO: add percentage filter over result
+		List<FinalFeasibilityQueryResult> finalResults = calculateResults(results);
 
-		Outputs outputs = (Outputs) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
-		addResultsToOutput(outputs, finalResults);
-
-		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, outputs);
+		execution.setVariable(Constants.VARIABLE_FINAL_QUERY_RESULTS,
+				FinalFeasibilityQueryResultsValues.create(new FinalFeasibilityQueryResults(finalResults)));
 	}
 
-	private List<FinalSimpleFeasibilityResult> calculateResults(List<FeasibilityQueryResult> results)
+	private List<FinalFeasibilityQueryResult> calculateResults(List<FeasibilityQueryResult> results)
 	{
-		return results.stream().map(FeasibilityQueryResult::getCohortId).distinct().map(groupId -> {
-			long participatingMedics = results.stream().filter(resultEntry -> resultEntry.getCohortId().equals(groupId))
-					.count();
-			long result = results.stream().filter(resultEntry -> resultEntry.getCohortId().equals(groupId))
-					.mapToInt(FeasibilityQueryResult::getCohortSize).sum();
-			return new FinalSimpleFeasibilityResult(groupId, participatingMedics, result);
-		}).collect(Collectors.toUnmodifiableList());
+		Map<String, List<FeasibilityQueryResult>> byCohortId = results.stream()
+				.collect(Collectors.groupingBy(FeasibilityQueryResult::getCohortId));
+
+		return byCohortId.entrySet().stream()
+				.map(e -> new FinalFeasibilityQueryResult(e.getKey(),
+						toInt(e.getValue().stream().filter(r -> r.getCohortSize() > 0).count()),
+						toInt(e.getValue().stream().mapToLong(FeasibilityQueryResult::getCohortSize).sum())))
+				.collect(Collectors.toList());
 	}
 
-	private void addResultsToOutput(Outputs outputs, List<FinalSimpleFeasibilityResult> finalResults)
+	private int toInt(long l)
 	{
-		finalResults.forEach(result -> {
-			if (result.getParticipatingMedics() >= Constants.MIN_PARTICIPATING_MEDICS)
-			{
-				outputs.add(Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
-						Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT,
-						String.valueOf(result.getCohortSize()), Constants.EXTENSION_GROUP_ID_URI, result.getCohortId());
-				;
-
-				outputs.add(Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
-						Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS_COUNT,
-						String.valueOf(result.getParticipatingMedics()), Constants.EXTENSION_GROUP_ID_URI,
-						result.getCohortId());
-			}
-			else
-			{
-				outputs.add(Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
-						Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NOT_ENOUGH_PARTICIPATION,
-						"Not enough participating MeDICs.", Constants.EXTENSION_GROUP_ID_URI, result.getCohortId());
-			}
-		});
+		if (l > Integer.MAX_VALUE)
+			throw new IllegalArgumentException("long > " + Integer.MAX_VALUE);
+		else
+			return (int) l;
 	}
 }

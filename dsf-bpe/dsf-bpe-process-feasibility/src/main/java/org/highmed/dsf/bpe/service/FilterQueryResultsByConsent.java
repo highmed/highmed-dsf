@@ -1,9 +1,17 @@
 package org.highmed.dsf.bpe.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
+import org.highmed.dsf.fhir.variables.FeasibilityQueryResult;
+import org.highmed.dsf.fhir.variables.FeasibilityQueryResults;
+import org.highmed.dsf.fhir.variables.FeasibilityQueryResultsValues;
+import org.highmed.openehr.model.structure.ResultSet;
 
 public class FilterQueryResultsByConsent extends AbstractServiceDelegate
 {
@@ -15,6 +23,30 @@ public class FilterQueryResultsByConsent extends AbstractServiceDelegate
 	@Override
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
-		// TODO: implement
+		FeasibilityQueryResults results = (FeasibilityQueryResults) execution
+				.getVariable(Constants.VARIABLE_QUERY_RESULTS);
+
+		List<FeasibilityQueryResult> filteredResults = filterResults(results.getResults());
+
+		execution.setVariable(Constants.VARIABLE_QUERY_RESULTS,
+				FeasibilityQueryResultsValues.create(new FeasibilityQueryResults(filteredResults)));
+	}
+
+	private List<FeasibilityQueryResult> filterResults(List<FeasibilityQueryResult> results)
+	{
+		return results.stream().map(this::filterResult).collect(Collectors.toList());
+	}
+
+	protected FeasibilityQueryResult filterResult(FeasibilityQueryResult result)
+	{
+		return FeasibilityQueryResult.idResult(result.getOrganizationIdentifier(), result.getCohortId(),
+				filterResultSet(result.getResultSet()));
+	}
+
+	private ResultSet filterResultSet(ResultSet resultSet)
+	{
+		// TODO implement
+
+		return resultSet;
 	}
 }

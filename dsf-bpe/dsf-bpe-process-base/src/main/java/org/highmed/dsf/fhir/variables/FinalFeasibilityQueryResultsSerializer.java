@@ -6,20 +6,20 @@ import java.util.Objects;
 import org.camunda.bpm.engine.impl.variable.serializer.PrimitiveValueSerializer;
 import org.camunda.bpm.engine.impl.variable.serializer.ValueFields;
 import org.camunda.bpm.engine.variable.impl.value.UntypedValueImpl;
-import org.highmed.dsf.fhir.variables.FeasibilityQueryResultsValues.FeasibilityQueryResultsValue;
+import org.highmed.dsf.fhir.variables.FinalFeasibilityQueryResultsValues.FinalFeasibilityQueryResultsValue;
 import org.springframework.beans.factory.InitializingBean;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class FeasibilityQueryResultsSerializer extends PrimitiveValueSerializer<FeasibilityQueryResultsValue>
+public class FinalFeasibilityQueryResultsSerializer extends PrimitiveValueSerializer<FinalFeasibilityQueryResultsValue>
 		implements InitializingBean
 {
 	private final ObjectMapper objectMapper;
 
-	public FeasibilityQueryResultsSerializer(ObjectMapper objectMapper)
+	public FinalFeasibilityQueryResultsSerializer(ObjectMapper objectMapper)
 	{
-		super(FeasibilityQueryResultsValues.VALUE_TYPE);
+		super(FinalFeasibilityQueryResultsValues.VALUE_TYPE);
 
 		this.objectMapper = objectMapper;
 	}
@@ -31,9 +31,9 @@ public class FeasibilityQueryResultsSerializer extends PrimitiveValueSerializer<
 	}
 
 	@Override
-	public void writeValue(FeasibilityQueryResultsValue value, ValueFields valueFields)
+	public void writeValue(FinalFeasibilityQueryResultsValue value, ValueFields valueFields)
 	{
-		FeasibilityQueryResults results = value.getValue();
+		FinalFeasibilityQueryResults results = value.getValue();
 		try
 		{
 			if (results != null)
@@ -46,21 +46,21 @@ public class FeasibilityQueryResultsSerializer extends PrimitiveValueSerializer<
 	}
 
 	@Override
-	public FeasibilityQueryResultsValue convertToTypedValue(UntypedValueImpl untypedValue)
+	public FinalFeasibilityQueryResultsValue convertToTypedValue(UntypedValueImpl untypedValue)
 	{
-		return FeasibilityQueryResultsValues.create((FeasibilityQueryResults) untypedValue.getValue());
+		return FinalFeasibilityQueryResultsValues.create((FinalFeasibilityQueryResults) untypedValue.getValue());
 	}
 
 	@Override
-	public FeasibilityQueryResultsValue readValue(ValueFields valueFields)
+	public FinalFeasibilityQueryResultsValue readValue(ValueFields valueFields)
 	{
 		byte[] bytes = valueFields.getByteArrayValue();
 
 		try
 		{
-			FeasibilityQueryResults results = (bytes == null || bytes.length <= 0) ? null
-					: objectMapper.readValue(bytes, FeasibilityQueryResults.class);
-			return FeasibilityQueryResultsValues.create(results);
+			FinalFeasibilityQueryResults results = (bytes == null || bytes.length <= 0) ? null
+					: objectMapper.readValue(bytes, FinalFeasibilityQueryResults.class);
+			return FinalFeasibilityQueryResultsValues.create(results);
 		}
 		catch (IOException e)
 		{

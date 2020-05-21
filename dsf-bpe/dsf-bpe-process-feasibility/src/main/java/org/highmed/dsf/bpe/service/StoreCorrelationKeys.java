@@ -62,5 +62,4 @@ public class StoreCorrelationKeys extends AbstractServiceDelegate
 						"NeedsRecordLinkage boolean is not set in task with id='" + task.getId()
 								+ "', this error should " + "have been caught by resource validation"));
 	}
-
 }

@@ -10,7 +10,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 
 import org.camunda.bpm.engine.ProcessEngine;
-import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
 import org.highmed.dsf.fhir.client.FhirClientProviderImpl;
 import org.highmed.dsf.fhir.client.FhirWebsocketClientProvider;
 import org.highmed.dsf.fhir.group.GroupHelper;
@@ -22,31 +21,13 @@ import org.highmed.dsf.fhir.service.ReferenceExtractorImpl;
 import org.highmed.dsf.fhir.task.TaskHandler;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.task.TaskHelperImpl;
-import org.highmed.dsf.fhir.variables.FeasibilityQueryResultSerializer;
-import org.highmed.dsf.fhir.variables.FeasibilityQueryResultsSerializer;
-import org.highmed.dsf.fhir.variables.FhirPlugin;
-import org.highmed.dsf.fhir.variables.FhirResourceJacksonDeserializer;
-import org.highmed.dsf.fhir.variables.FhirResourceJacksonSerializer;
-import org.highmed.dsf.fhir.variables.FhirResourceSerializer;
-import org.highmed.dsf.fhir.variables.FhirResourcesListSerializer;
-import org.highmed.dsf.fhir.variables.MultiInstanceTargetSerializer;
-import org.highmed.dsf.fhir.variables.MultiInstanceTargetsSerializer;
-import org.highmed.dsf.fhir.variables.OutputSerializer;
-import org.highmed.dsf.fhir.variables.OutputsSerializer;
 import org.highmed.dsf.fhir.websocket.FhirConnector;
 import org.highmed.dsf.fhir.websocket.LastEventTimeIo;
-import org.hl7.fhir.r4.model.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import ca.uhn.fhir.context.FhirContext;
 import de.rwh.utils.crypto.CertificateHelper;
@@ -108,27 +89,6 @@ public class FhirConfig
 	private ProcessEngine processEngine;
 
 	@Bean
-	public ObjectMapper fhirObjectMapper()
-	{
-		ObjectMapper mapper = new ObjectMapper();
-
-		mapper.getFactory().disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
-		mapper.disable(MapperFeature.DEFAULT_VIEW_INCLUSION);
-		mapper.setSerializationInclusion(Include.NON_NULL);
-		mapper.setSerializationInclusion(Include.NON_EMPTY);
-
-		// mapper.enable(SerializationFeature.INDENT_OUTPUT);
-
-		SimpleModule module = new SimpleModule();
-		module.addSerializer(Resource.class, new FhirResourceJacksonSerializer(fhirContext()));
-		module.addDeserializer(Resource.class, new FhirResourceJacksonDeserializer(fhirContext()));
-
-		mapper.registerModule(module);
-
-		return mapper;
-	}
-
-	@Bean
 	public FhirContext fhirContext()
 	{
 		return FhirContext.forR4();
@@ -138,62 +98,6 @@ public class FhirConfig
 	public ReferenceExtractor referenceExtractor()
 	{
 		return new ReferenceExtractorImpl();
-	}
-
-	@Bean
-	public ProcessEnginePlugin fhirPlugin()
-	{
-		return new FhirPlugin(fhirResourceSerializer(), fhirResourcesListSerializer(), multiInstanceTargetSerializer(),
-				multiInstanceTargetsSerializer(), feasibilityQueryResultSerializer(),
-				feasibilityQueryResultsSerializer(), outputSerializer(), outputsSerializer());
-	}
-
-	@Bean
-	public FhirResourceSerializer fhirResourceSerializer()
-	{
-		return new FhirResourceSerializer(fhirContext());
-	}
-
-	@Bean
-	public FhirResourcesListSerializer fhirResourcesListSerializer()
-	{
-		return new FhirResourcesListSerializer(fhirObjectMapper());
-	}
-
-	@Bean
-	public MultiInstanceTargetSerializer multiInstanceTargetSerializer()
-	{
-		return new MultiInstanceTargetSerializer(fhirObjectMapper());
-	}
-
-	@Bean
-	public MultiInstanceTargetsSerializer multiInstanceTargetsSerializer()
-	{
-		return new MultiInstanceTargetsSerializer(fhirObjectMapper());
-	}
-
-	@Bean
-	public OutputSerializer outputSerializer()
-	{
-		return new OutputSerializer(fhirObjectMapper());
-	}
-
-	@Bean
-	public OutputsSerializer outputsSerializer()
-	{
-		return new OutputsSerializer(fhirObjectMapper());
-	}
-
-	@Bean
-	public FeasibilityQueryResultSerializer feasibilityQueryResultSerializer()
-	{
-		return new FeasibilityQueryResultSerializer(fhirObjectMapper());
-	}
-
-	@Bean
-	public FeasibilityQueryResultsSerializer feasibilityQueryResultsSerializer()
-	{
-		return new FeasibilityQueryResultsSerializer(fhirObjectMapper());
 	}
 
 	@Bean

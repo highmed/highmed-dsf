@@ -42,7 +42,7 @@ public class CheckQueries extends AbstractServiceDelegate implements Initializin
 	}
 
 	@Override
-	public void doExecute(DelegateExecution execution) throws Exception
+	protected void doExecute(DelegateExecution execution) throws Exception
 	{
 		Outputs outputs = (Outputs) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
 		List<Group> cohorts = ((FhirResourcesList) execution.getVariable(Constants.VARIABLE_COHORTS))
