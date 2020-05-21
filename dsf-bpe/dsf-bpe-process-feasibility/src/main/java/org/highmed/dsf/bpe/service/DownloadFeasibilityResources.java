@@ -1,10 +1,10 @@
 package org.highmed.dsf.bpe.service;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-
-import javax.ws.rs.WebApplicationException;
+import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.Constants;
@@ -16,9 +16,8 @@ import org.highmed.dsf.fhir.variables.BloomFilterConfig;
 import org.highmed.dsf.fhir.variables.BloomFilterConfigValues;
 import org.highmed.dsf.fhir.variables.FhirResourceValues;
 import org.highmed.dsf.fhir.variables.FhirResourcesListValues;
-import org.highmed.dsf.fhir.variables.Outputs;
-import org.highmed.dsf.fhir.variables.OutputsValues;
 import org.highmed.fhir.client.FhirWebserviceClient;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
@@ -28,8 +27,6 @@ import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
-
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 public class DownloadFeasibilityResources extends AbstractServiceDelegate implements InitializingBean
 {
@@ -58,15 +55,13 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 
 		IdType researchStudyId = getResearchStudyId(task);
 		FhirWebserviceClient client = getWebserviceClient(researchStudyId);
+		Bundle bundle = getResearchStudyAndCohortDefinitions(researchStudyId, client);
 
-		ResearchStudy researchStudy = getResearchStudy(researchStudyId, client);
+		ResearchStudy researchStudy = (ResearchStudy) bundle.getEntryFirstRep().getResource();
 		execution.setVariable(Constants.VARIABLE_RESEARCH_STUDY, FhirResourceValues.create(researchStudy));
 
-		Outputs outputs = (Outputs) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
-
-		List<Group> cohortDefinitions = getCohortDefinitions(researchStudy, outputs, client);
+		List<Group> cohortDefinitions = getCohortDefinitions(bundle, client.getBaseUrl());
 		execution.setVariable(Constants.VARIABLE_COHORTS, FhirResourcesListValues.create(cohortDefinitions));
-		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, OutputsValues.create(outputs));
 
 		String ttpIdentifier = getTtpIdentifier(researchStudy, client);
 		execution.setVariable(Constants.VARIABLE_TTP_IDENTIFIER, ttpIdentifier);
@@ -108,47 +103,49 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 		}
 	}
 
-	private ResearchStudy getResearchStudy(IdType researchStudyid, FhirWebserviceClient client)
+	private Bundle getResearchStudyAndCohortDefinitions(IdType researchStudyId, FhirWebserviceClient client)
 	{
 		try
 		{
-			return client.read(ResearchStudy.class, researchStudyid.getIdPart());
+			Bundle bundle = client.search(ResearchStudy.class,
+					Map.of("_id", Collections.singletonList(researchStudyId.getIdPart()), "_include",
+							Collections.singletonList("ResearchStudy:enrollment")));
+
+			if (bundle.getEntry().size() < 2)
+			{
+				throw new RuntimeException("Returned search-set contained less then two entries");
+			}
+			else if (!bundle.getEntryFirstRep().hasResource()
+					|| !(bundle.getEntryFirstRep().getResource() instanceof ResearchStudy))
+			{
+				throw new RuntimeException("Returned search-set did not contain ResearchStudy at index == 0");
+			}
+			else if (bundle.getEntry().stream().skip(1).map(c -> c.hasResource() && c.getResource() instanceof Group)
+					.filter(b -> !b).findAny().isPresent())
+			{
+				throw new RuntimeException("Returned search-set contained unexpected resource at index >= 1");
+			}
+
+			return bundle;
 		}
-		catch (WebApplicationException e)
+		catch (Exception e)
 		{
-			throw new ResourceNotFoundException("Error while reading ResearchStudy with id "
-					+ researchStudyid.getIdPart() + " from " + client.getBaseUrl());
+			logger.warn("Error while reading ResearchStudy  with id {} including Groups from {}: {}",
+					researchStudyId.getIdPart(), client.getBaseUrl(), e.getMessage());
+			throw e;
 		}
 	}
 
-	private List<Group> getCohortDefinitions(ResearchStudy researchStudy, Outputs outputs, FhirWebserviceClient client)
+	private List<Group> getCohortDefinitions(Bundle bundle, String baseUrl)
 	{
-		List<Group> cohortDefinitions = new ArrayList<>();
-		List<Reference> cohortDefinitionReferences = researchStudy.getEnrollment();
-
-		cohortDefinitionReferences.forEach(reference ->
+		return bundle.getEntry().stream().skip(1).map(e ->
 		{
-			try
-			{
-				IdType type = new IdType(reference.getReference());
-				Group group = client.read(Group.class, type.getIdPart());
-
-				IdType groupId = new IdType(group.getId());
-				group.setId(client.getBaseUrl() + groupId.getResourceType() + "/" + groupId.getIdPart());
-
-				cohortDefinitions.add(group);
-			}
-			catch (WebApplicationException e)
-			{
-				String errorMessage = "Error while reading cohort definition with id " + reference.getReference()
-						+ " from " + client.getBaseUrl();
-
-				logger.info(errorMessage);
-				outputs.addErrorOutput(errorMessage);
-			}
-		});
-
-		return cohortDefinitions;
+			Group group = (Group) e.getResource();
+			IdType oldId = group.getIdElement();
+			group.setIdElement(
+					new IdType(baseUrl, oldId.getResourceType(), oldId.getIdPart(), oldId.getVersionIdPart()));
+			return group;
+		}).collect(Collectors.toList());
 	}
 
 	private String getTtpIdentifier(ResearchStudy researchStudy, FhirWebserviceClient client)
