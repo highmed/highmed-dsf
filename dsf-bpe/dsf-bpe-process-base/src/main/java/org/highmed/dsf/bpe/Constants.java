@@ -60,7 +60,7 @@ public interface Constants
 	String CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_RESEARCH_STUDY_REFERENCE = "research-study-reference";
 
 	String CODESYSTEM_HIGHMED_UPDATE_WHITELIST = "http://highmed.org/fhir/CodeSystem/update-whitelist";
-	String CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST = "HiGHmed_white_list";
+	String CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST = "highmed_whitelist";
 
 	String PROCESS_URI_BASE = "http://highmed.org/bpe/Process/";
 
