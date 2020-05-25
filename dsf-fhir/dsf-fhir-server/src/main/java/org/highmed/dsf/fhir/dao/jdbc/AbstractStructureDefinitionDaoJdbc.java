@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -48,10 +49,20 @@ abstract class AbstractStructureDefinitionDaoJdbc extends AbstractResourceDaoJdb
 	@Override
 	public List<StructureDefinition> readAll() throws SQLException
 	{
-		try (Connection connection = getDataSource().getConnection();
-				PreparedStatement statement = connection.prepareStatement("SELECT DISTINCT ON(" + getResourceIdColumn()
-						+ ") " + getResourceColumn() + " FROM " + getResourceTable() + " WHERE NOT deleted ORDER BY "
-						+ getResourceIdColumn() + ", version"))
+		try (Connection connection = getDataSource().getConnection())
+		{
+			return readAllWithTransaction(connection);
+		}
+	}
+
+	@Override
+	public List<StructureDefinition> readAllWithTransaction(Connection connection) throws SQLException
+	{
+		Objects.requireNonNull(connection, "connection");
+
+		try (PreparedStatement statement = connection
+				.prepareStatement("SELECT DISTINCT ON(" + getResourceIdColumn() + ") " + getResourceColumn() + " FROM "
+						+ getResourceTable() + " WHERE NOT deleted ORDER BY " + getResourceIdColumn() + ", version"))
 		{
 			logger.trace("Executing query '{}'", statement);
 			try (ResultSet result = statement.executeQuery())
@@ -70,6 +81,13 @@ abstract class AbstractStructureDefinitionDaoJdbc extends AbstractResourceDaoJdb
 	public Optional<StructureDefinition> readByUrlAndVersion(String urlAndVersion) throws SQLException
 	{
 		return readByUrl.readByUrlAndVersion(urlAndVersion);
+	}
+
+	@Override
+	public Optional<StructureDefinition> readByUrlAndVersionWithTransaction(Connection connection, String urlAndVersion)
+			throws SQLException
+	{
+		return readByUrl.readByUrlAndVersionWithTransaction(connection, urlAndVersion);
 	}
 
 	@Override

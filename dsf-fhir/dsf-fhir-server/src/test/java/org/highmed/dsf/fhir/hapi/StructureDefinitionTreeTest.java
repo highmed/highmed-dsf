@@ -1,23 +1,16 @@
 package org.highmed.dsf.fhir.hapi;
 
-import static org.junit.Assert.assertNotNull;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.highmed.dsf.fhir.service.DefaultProfileValidationSupportWithCustomResources;
-import org.highmed.dsf.fhir.service.SnapshotGenerator;
-import org.highmed.dsf.fhir.service.SnapshotGenerator.SnapshotWithValidationMessages;
-import org.highmed.dsf.fhir.service.SnapshotGeneratorImpl;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.ElementDefinition.TypeRefComponent;
@@ -118,31 +111,5 @@ public class StructureDefinitionTreeTest
 		{
 			throw new RuntimeException(e);
 		}
-	}
-
-	@Test
-	public void testBuildPatient() throws Exception
-	{
-		FhirContext context = FhirContext.forR4();
-
-		Map<String, StructureDefinition> structureDefinitionsByUrl = Files
-				.list(Paths.get("src/test/resources/profiles/DeBasis/"))
-				.map(p -> readStructureDefinition(context, p).setSnapshot(null))
-				.filter(sd -> sd.getUrl().startsWith("http://fhir.de/"))
-				.collect(Collectors.toMap(StructureDefinition::getUrl, Function.identity()));
-
-		StructureDefinition patientDeBasis = structureDefinitionsByUrl
-				.get("http://fhir.de/StructureDefinition/patient-de-basis/0.2.1");
-
-		SnapshotGenerator generator = new SnapshotGeneratorImpl(context,
-				new DefaultProfileValidationSupportWithCustomResources(structureDefinitionsByUrl.values(),
-						Collections.emptyList(), Collections.emptyList()));
-
-		SnapshotWithValidationMessages snapshot = generator.generateSnapshot(patientDeBasis);
-
-		logger.debug(context.newXmlParser().encodeResourceToString(snapshot.getSnapshot()));
-		snapshot.getMessages().forEach(vm -> logger.debug(vm.getMessage()));
-
-		assertNotNull(snapshot.getSnapshot());
 	}
 }

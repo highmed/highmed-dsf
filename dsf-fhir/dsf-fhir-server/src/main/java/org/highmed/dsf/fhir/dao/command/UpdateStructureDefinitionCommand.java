@@ -3,6 +3,7 @@ package org.highmed.dsf.fhir.dao.command;
 import java.sql.Connection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
@@ -34,7 +35,7 @@ public class UpdateStructureDefinitionCommand extends UpdateCommand<StructureDef
 	private static final Logger logger = LoggerFactory.getLogger(UpdateStructureDefinitionCommand.class);
 
 	private final StructureDefinitionSnapshotDao snapshotDao;
-	private final SnapshotGenerator snapshotGenerator;
+	private final Function<Connection, SnapshotGenerator> snapshotGenerator;
 	private final SnapshotDependencyAnalyzer snapshotDependencyAnalyzer;
 
 	private StructureDefinition resourceWithSnapshot;
@@ -45,7 +46,8 @@ public class UpdateStructureDefinitionCommand extends UpdateCommand<StructureDef
 			ResponseGenerator responseGenerator, ReferenceExtractor referenceExtractor,
 			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner, EventManager eventManager,
 			EventGenerator eventGenerator, StructureDefinitionSnapshotDao snapshotDao,
-			SnapshotGenerator snapshotGenerator, SnapshotDependencyAnalyzer snapshotDependencyAnalyzer)
+			Function<Connection, SnapshotGenerator> snapshotGenerator,
+			SnapshotDependencyAnalyzer snapshotDependencyAnalyzer)
 	{
 		super(index, user, bundle, entry, serverBase, authorizationHelper, resource, dao, exceptionHandler,
 				parameterConverter, responseGenerator, referenceExtractor, referenceResolver, referenceCleaner,
@@ -70,6 +72,9 @@ public class UpdateStructureDefinitionCommand extends UpdateCommand<StructureDef
 	{
 		if (resourceWithSnapshot != null)
 		{
+			if (updatedResource != null)
+				resourceWithSnapshot.setIdElement(updatedResource.getIdElement().copy());
+
 			handleSnapshot(connection, resourceWithSnapshot,
 					info -> snapshotDao.updateWithTransaction(connection, resourceWithSnapshot, info));
 		}
@@ -77,7 +82,8 @@ public class UpdateStructureDefinitionCommand extends UpdateCommand<StructureDef
 		{
 			try
 			{
-				SnapshotWithValidationMessages s = snapshotGenerator.generateSnapshot(updatedResource);
+				SnapshotWithValidationMessages s = snapshotGenerator.apply(connection)
+						.generateSnapshot(updatedResource);
 
 				if (s != null && s.getSnapshot() != null && s.getMessages().isEmpty())
 					handleSnapshot(connection, s.getSnapshot(),

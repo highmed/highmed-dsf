@@ -1,5 +1,6 @@
 package org.highmed.dsf.fhir.dao.command;
 
+import java.sql.Connection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -45,7 +46,7 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 	private final ExceptionHandler exceptionHandler;
 	private final EventManager eventManager;
 	private final EventGenerator eventGenerator;
-	private final SnapshotGenerator snapshotGenerator;
+	private final Function<Connection, SnapshotGenerator> snapshotGenerator;
 	private final SnapshotDependencyAnalyzer snapshotDependencyAnalyzer;
 	private final ParameterConverter parameterConverter;
 	private final AuthorizationHelper authorizationHelper;
@@ -53,7 +54,8 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 	public CommandFactoryImpl(String serverBase, int defaultPageCount, DataSource dataSource, DaoProvider daoProvider,
 			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver,
 			ReferenceCleaner referenceCleaner, ResponseGenerator responseGenerator, ExceptionHandler exceptionHandler,
-			EventManager eventManager, EventGenerator eventGenerator, SnapshotGenerator snapshotGenerator,
+			EventManager eventManager, EventGenerator eventGenerator,
+			Function<Connection, SnapshotGenerator> snapshotGenerator,
 			SnapshotDependencyAnalyzer snapshotDependencyAnalyzer, ParameterConverter parameterConverter,
 			AuthorizationHelper authorizationHelper)
 	{

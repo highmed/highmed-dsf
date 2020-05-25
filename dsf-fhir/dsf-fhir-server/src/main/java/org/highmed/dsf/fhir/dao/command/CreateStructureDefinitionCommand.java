@@ -3,6 +3,7 @@ package org.highmed.dsf.fhir.dao.command;
 import java.sql.Connection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
@@ -33,7 +34,7 @@ public class CreateStructureDefinitionCommand extends CreateCommand<StructureDef
 	private static final Logger logger = LoggerFactory.getLogger(CreateStructureDefinitionCommand.class);
 
 	private final StructureDefinitionSnapshotDao snapshotDao;
-	private final SnapshotGenerator snapshotGenerator;
+	private final Function<Connection, SnapshotGenerator> snapshotGenerator;
 	private final SnapshotDependencyAnalyzer snapshotDependencyAnalyzer;
 
 	private StructureDefinition resourceWithSnapshot;
@@ -44,7 +45,8 @@ public class CreateStructureDefinitionCommand extends CreateCommand<StructureDef
 			ResponseGenerator responseGenerator, ReferenceExtractor referenceExtractor,
 			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner, EventManager eventManager,
 			EventGenerator eventGenerator, StructureDefinitionSnapshotDao snapshotDao,
-			SnapshotGenerator snapshotGenerator, SnapshotDependencyAnalyzer snapshotDependencyAnalyzer)
+			Function<Connection, SnapshotGenerator> snapshotGenerator,
+			SnapshotDependencyAnalyzer snapshotDependencyAnalyzer)
 	{
 		super(index, user, bundle, entry, serverBase, authorizationHelper, resource, dao, exceptionHandler,
 				parameterConverter, responseGenerator, referenceExtractor, referenceResolver, referenceCleaner,
@@ -72,21 +74,26 @@ public class CreateStructureDefinitionCommand extends CreateCommand<StructureDef
 
 		if (resourceWithSnapshot != null)
 		{
-			handleSnapshot(resourceWithSnapshot,
-					info -> snapshotDao.create(parameterConverter.toUuid(resourceWithSnapshot.getResourceType().name(),
-							createdResource.getIdElement().getIdPart()), resourceWithSnapshot, info));
+			handleSnapshot(connection, resourceWithSnapshot,
+					info -> snapshotDao.createWithTransaction(connection,
+							parameterConverter.toUuid(resourceWithSnapshot.getResourceType().name(),
+									createdResource.getIdElement().getIdPart()),
+							resourceWithSnapshot, info));
 		}
 		else if (createdResource != null)
 		{
 			try
 			{
-				SnapshotWithValidationMessages s = snapshotGenerator.generateSnapshot(createdResource);
+				SnapshotWithValidationMessages s = snapshotGenerator.apply(connection)
+						.generateSnapshot(createdResource);
 
 				if (s != null && s.getSnapshot() != null && s.getMessages().isEmpty())
-					handleSnapshot(s.getSnapshot(),
+					handleSnapshot(connection, s.getSnapshot(),
 							info -> snapshotDao
-									.create(parameterConverter.toUuid(createdResource.getResourceType().name(),
-											createdResource.getIdElement().getIdPart()), createdResource, info));
+									.createWithTransaction(connection,
+											parameterConverter.toUuid(createdResource.getResourceType().name(),
+													createdResource.getIdElement().getIdPart()),
+											createdResource, info));
 			}
 			catch (Exception e)
 			{
@@ -98,12 +105,13 @@ public class CreateStructureDefinitionCommand extends CreateCommand<StructureDef
 		return super.postExecute(connection);
 	}
 
-	private void handleSnapshot(StructureDefinition snapshot,
+	private void handleSnapshot(Connection connection, StructureDefinition snapshot,
 			ConsumerWithSqlAndResourceNotFoundException<SnapshotInfo> dbOp)
 	{
 		SnapshotDependencies dependencies = snapshotDependencyAnalyzer.analyzeSnapshotDependencies(snapshot);
 
-		exceptionHandler.catchAndLogSqlException(() -> snapshotDao.deleteAllByDependency(snapshot.getUrl()));
+		exceptionHandler.catchAndLogSqlException(
+				() -> snapshotDao.deleteAllByDependencyWithTransaction(connection, snapshot.getUrl()));
 
 		exceptionHandler.catchAndLogSqlAndResourceNotFoundException(resource.getResourceType().name(),
 				() -> dbOp.accept(new SnapshotInfo(dependencies)));

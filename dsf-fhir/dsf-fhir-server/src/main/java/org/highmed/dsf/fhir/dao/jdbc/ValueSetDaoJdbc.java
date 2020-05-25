@@ -42,6 +42,13 @@ public class ValueSetDaoJdbc extends AbstractResourceDaoJdbc<ValueSet> implement
 	}
 
 	@Override
+	public Optional<ValueSet> readByUrlAndVersionWithTransaction(Connection connection, String urlAndVersion)
+			throws SQLException
+	{
+		return readByUrl.readByUrlAndVersionWithTransaction(connection, urlAndVersion);
+	}
+
+	@Override
 	public Optional<ValueSet> readByUrlAndVersion(String url, String version) throws SQLException
 	{
 		return readByUrl.readByUrlAndVersion(url, version);

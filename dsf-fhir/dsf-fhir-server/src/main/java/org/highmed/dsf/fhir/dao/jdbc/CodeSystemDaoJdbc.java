@@ -43,6 +43,13 @@ public class CodeSystemDaoJdbc extends AbstractResourceDaoJdbc<CodeSystem> imple
 	}
 
 	@Override
+	public Optional<CodeSystem> readByUrlAndVersionWithTransaction(Connection connection, String urlAndVersion)
+			throws SQLException
+	{
+		return readByUrl.readByUrlAndVersionWithTransaction(connection, urlAndVersion);
+	}
+
+	@Override
 	public Optional<CodeSystem> readByUrlAndVersion(String url, String version) throws SQLException
 	{
 		return readByUrl.readByUrlAndVersion(url, version);

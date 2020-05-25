@@ -44,7 +44,7 @@ public class SnapshotDependencyAnalyzer
 		}
 
 		List<String> profilesList = profiles.stream().sorted().collect(Collectors.toList());
-		logger.debug("Profile dependencies: {}", targetProfiles);
+		logger.debug("Profile dependencies: {}", profilesList);
 		List<String> targetProfilesList = targetProfiles.stream().sorted().collect(Collectors.toList());
 		logger.debug("TargetProfile dependencies: {}", targetProfilesList);
 
