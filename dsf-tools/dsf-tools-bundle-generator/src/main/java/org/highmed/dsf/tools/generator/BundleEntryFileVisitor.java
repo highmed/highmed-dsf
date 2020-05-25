@@ -17,13 +17,15 @@ public class BundleEntryFileVisitor implements FileVisitor<Path>
 
 	private final Path baseFolder;
 	private final BundleEntryPutReader putReader;
+	private final BundleEntryPostReader postReader;
 
 	private Class<Resource> resource;
 
-	public BundleEntryFileVisitor(Path baseFolder, BundleEntryPutReader putReader)
+	public BundleEntryFileVisitor(Path baseFolder, BundleEntryPutReader putReader, BundleEntryPostReader postReader)
 	{
 		this.baseFolder = baseFolder;
 		this.putReader = putReader;
+		this.postReader = postReader;
 	}
 
 	@Override
@@ -66,14 +68,25 @@ public class BundleEntryFileVisitor implements FileVisitor<Path>
 		if (resource != null && file.getFileName().toString().endsWith(".xml"))
 		{
 			Path putFile = file.resolveSibling(file.getFileName().toString() + ".put");
-			if (!Files.isReadable(putFile))
+			Path postFile = file.resolveSibling(file.getFileName().toString() + ".post");
+			if (!Files.isReadable(putFile) && !Files.isReadable(postFile))
 			{
-				logger.error("Put file for {} at {} not readable. Redable file {} expected", resource.getSimpleName(),
-						file.toString(), putFile.toString());
+				logger.error("put or post file for {} at {} not readable. Redable file {} or {} expected",
+						resource.getSimpleName(), file.toString(), putFile.toString(), postFile);
 				throw new IOException("Put file " + putFile.toString() + " not readable");
 			}
-			else
+			else if (Files.isReadable(putFile) && Files.isReadable(postFile))
+			{
+
+			}
+			else if (Files.isReadable(putFile))
+			{
 				putReader.read(resource, file, putFile);
+			}
+			else if (Files.isReadable(postFile))
+			{
+				postReader.read(resource, file, putFile);
+			}
 		}
 		else
 			logger.debug("Ignoring {}", file.toString());
