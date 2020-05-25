@@ -144,6 +144,9 @@ public class StructureDefinitionServiceImpl extends
 		{
 			if (preResource != null && preResource.hasSnapshot())
 			{
+				if (postResource != null)
+					preResource.setIdElement(postResource.getIdElement().copy());
+
 				handleSnapshot(preResource, info -> snapshotDao.update(preResource, info));
 			}
 			else if (postResource != null)
