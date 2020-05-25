@@ -10,12 +10,12 @@
   <version value="0.2.0" />
   <name value="TaskExecuteSimpleFeasibility" />
   <status value="draft" />
-  <date value="2020-05-20" />
+  <date value="2020-05-25" />
   <fhirVersion value="4.0.1" />
   <kind value="resource" />
   <abstract value="false" />
   <type value="Task" />
-  <baseDefinition value="http://highmed.org/fhir/StructureDefinition/highmed-task-base|0.2.0" />
+  <baseDefinition value="http://highmed.org/fhir/StructureDefinition/highmed-task-base" />
   <derivation value="constraint" />
   <differential>
     <element id="Task.instantiatesUri">
@@ -28,6 +28,7 @@
       </extension>
       <path value="Task.input" />
       <min value="6" />
+      <max value="7" />
     </element>
     <element id="Task.input:message-name">
       <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
@@ -65,6 +66,16 @@
       <min value="1" />
       <max value="1" />
     </element>
+    <element id="Task.input:research-study.type">
+      <path value="Task.input.type" />
+      <binding>
+        <extension url="http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName">
+          <valueString value="TaskInputParameterType" />
+        </extension>
+        <strength value="required" />
+        <valueSet value="http://highmed.org/fhir/ValueSet/feasibility" />
+      </binding>
+    </element>
     <element id="Task.input:research-study.type.coding">
       <path value="Task.input.type.coding" />
       <min value="1" />
@@ -72,10 +83,12 @@
     </element>
     <element id="Task.input:research-study.type.coding.system">
       <path value="Task.input.type.coding.system" />
+      <min value="1" />
       <fixedUri value="http://highmed.org/fhir/CodeSystem/feasibility" />
     </element>
     <element id="Task.input:research-study.type.coding.code">
       <path value="Task.input.type.coding.code" />
+      <min value="1" />
       <fixedCode value="research-study-reference" />
     </element>
     <element id="Task.input:research-study.value[x]">
@@ -94,6 +107,16 @@
       <min value="1" />
       <max value="1" />
     </element>
+    <element id="Task.input:needs-record-linkage.type">
+      <path value="Task.input.type" />
+      <binding>
+        <extension url="http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName">
+          <valueString value="TaskInputParameterType" />
+        </extension>
+        <strength value="required" />
+        <valueSet value="http://highmed.org/fhir/ValueSet/feasibility" />
+      </binding>
+    </element>
     <element id="Task.input:needs-record-linkage.type.coding">
       <path value="Task.input.type.coding" />
       <min value="1" />
@@ -101,10 +124,12 @@
     </element>
     <element id="Task.input:needs-record-linkage.type.coding.system">
       <path value="Task.input.type.coding.system" />
+      <min value="1" />
       <fixedUri value="http://highmed.org/fhir/CodeSystem/feasibility" />
     </element>
     <element id="Task.input:needs-record-linkage.type.coding.code">
       <path value="Task.input.type.coding.code" />
+      <min value="1" />
       <fixedCode value="needs-record-linkage" />
     </element>
     <element id="Task.input:needs-record-linkage.value[x]">
@@ -122,6 +147,16 @@
       <min value="1" />
       <max value="1" />
     </element>
+    <element id="Task.input:needs-consent-check.type">
+      <path value="Task.input.type" />
+      <binding>
+        <extension url="http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName">
+          <valueString value="TaskInputParameterType" />
+        </extension>
+        <strength value="required" />
+        <valueSet value="http://highmed.org/fhir/ValueSet/feasibility" />
+      </binding>
+    </element>
     <element id="Task.input:needs-consent-check.type.coding">
       <path value="Task.input.type.coding" />
       <min value="1" />
@@ -129,10 +164,12 @@
     </element>
     <element id="Task.input:needs-consent-check.type.coding.system">
       <path value="Task.input.type.coding.system" />
+      <min value="1" />
       <fixedUri value="http://highmed.org/fhir/CodeSystem/feasibility" />
     </element>
     <element id="Task.input:needs-consent-check.type.coding.code">
       <path value="Task.input.type.coding.code" />
+      <min value="1" />
       <fixedCode value="needs-consent-check" />
     </element>
     <element id="Task.input:needs-consent-check.value[x]">
@@ -147,7 +184,18 @@
       </extension>
       <path value="Task.input" />
       <sliceName value="bloom-filter-configuration" />
+      <min value="0" />
       <max value="1" />
+    </element>
+    <element id="Task.input:bloom-filter-configuration.type">
+      <path value="Task.input.type" />
+      <binding>
+        <extension url="http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName">
+          <valueString value="TaskInputParameterType" />
+        </extension>
+        <strength value="required" />
+        <valueSet value="http://highmed.org/fhir/ValueSet/feasibility" />
+      </binding>
     </element>
     <element id="Task.input:bloom-filter-configuration.type.coding">
       <path value="Task.input.type.coding" />
@@ -156,65 +204,18 @@
     </element>
     <element id="Task.input:bloom-filter-configuration.type.coding.system">
       <path value="Task.input.type.coding.system" />
+      <min value="1" />
       <fixedUri value="http://highmed.org/fhir/CodeSystem/feasibility" />
     </element>
     <element id="Task.input:bloom-filter-configuration.type.coding.code">
       <path value="Task.input.type.coding.code" />
+      <min value="1" />
       <fixedCode value="bloom-filter-configuration" />
     </element>
     <element id="Task.input:bloom-filter-configuration.value[x]">
       <path value="Task.input.value[x]" />
       <type>
         <code value="base64Binary" />
-      </type>
-    </element>
-    <element id="Task.output">
-      <path value="Task.output" />
-      <slicing>
-        <rules value="closed" />
-      </slicing>
-      <min value="1" />
-    </element>
-    <element id="Task.output:single-medic-result">
-      <path value="Task.output" />
-      <sliceName value="single-medic-result" />
-    </element>
-    <element id="Task.output:single-medic-result.extension">
-      <path value="Task.output.extension" />
-      <slicing>
-        <discriminator>
-          <type value="value" />
-          <path value="url" />
-        </discriminator>
-        <rules value="open" />
-      </slicing>
-    </element>
-    <element id="Task.output:single-medic-result.extension:group-id">
-      <path value="Task.output.extension" />
-      <sliceName value="group-id" />
-      <min value="1" />
-      <type>
-        <code value="Extension" />
-        <profile value="http://highmed.org/fhir/StructureDefinition/group-id" />
-      </type>
-    </element>
-    <element id="Task.output:single-medic-result.type.coding">
-      <path value="Task.output.type.coding" />
-      <min value="1" />
-      <max value="1" />
-    </element>
-    <element id="Task.output:single-medic-result.type.coding.system">
-      <path value="Task.output.type.coding.system" />
-      <fixedUri value="http://highmed.org/fhir/NamingSystem/feasibility" />
-    </element>
-    <element id="Task.output:single-medic-result.type.coding.code">
-      <path value="Task.output.type.coding.code" />
-      <patternCode value="single-medic-result" />
-    </element>
-    <element id="Task.output:single-medic-result.value[x]">
-      <path value="Task.output.value[x]" />
-      <type>
-        <code value="string" />
       </type>
     </element>
   </differential>

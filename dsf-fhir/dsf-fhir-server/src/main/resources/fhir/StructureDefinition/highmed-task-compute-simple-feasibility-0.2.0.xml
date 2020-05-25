@@ -10,12 +10,12 @@
   <version value="0.2.0" />
   <name value="TaskComputeSimpleFeasibility" />
   <status value="draft" />
-  <date value="2020-05-20" />
+  <date value="2020-05-25" />
   <fhirVersion value="4.0.1" />
   <kind value="resource" />
   <abstract value="false" />
   <type value="Task" />
-  <baseDefinition value="http://highmed.org/fhir/StructureDefinition/highmed-task-base|0.2.0" />
+  <baseDefinition value="http://highmed.org/fhir/StructureDefinition/highmed-task-base" />
   <derivation value="constraint" />
   <differential>
     <element id="Task.instantiatesUri">
@@ -64,6 +64,16 @@
       <sliceName value="medic-correlation-key" />
       <min value="1" />
     </element>
+    <element id="Task.input:medic-correlation-key.type">
+      <path value="Task.input.type" />
+      <binding>
+        <extension url="http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName">
+          <valueString value="TaskInputParameterType" />
+        </extension>
+        <strength value="required" />
+        <valueSet value="http://highmed.org/fhir/ValueSet/feasibility" />
+      </binding>
+    </element>
     <element id="Task.input:medic-correlation-key.type.coding">
       <path value="Task.input.type.coding" />
       <min value="1" />
@@ -71,10 +81,12 @@
     </element>
     <element id="Task.input:medic-correlation-key.type.coding.system">
       <path value="Task.input.type.coding.system" />
+      <min value="1" />
       <fixedUri value="http://highmed.org/fhir/CodeSystem/feasibility" />
     </element>
     <element id="Task.input:medic-correlation-key.type.coding.code">
       <path value="Task.input.type.coding.code" />
+      <min value="1" />
       <fixedCode value="medic-correlation-key" />
     </element>
     <element id="Task.input:medic-correlation-key.value[x]">
@@ -92,6 +104,16 @@
       <min value="1" />
       <max value="1" />
     </element>
+    <element id="Task.input:needs-record-linkage.type">
+      <path value="Task.input.type" />
+      <binding>
+        <extension url="http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName">
+          <valueString value="TaskInputParameterType" />
+        </extension>
+        <strength value="required" />
+        <valueSet value="http://highmed.org/fhir/ValueSet/feasibility" />
+      </binding>
+    </element>
     <element id="Task.input:needs-record-linkage.type.coding">
       <path value="Task.input.type.coding" />
       <min value="1" />
@@ -99,10 +121,12 @@
     </element>
     <element id="Task.input:needs-record-linkage.type.coding.system">
       <path value="Task.input.type.coding.system" />
+      <min value="1" />
       <fixedUri value="http://highmed.org/fhir/CodeSystem/feasibility" />
     </element>
     <element id="Task.input:needs-record-linkage.type.coding.code">
       <path value="Task.input.type.coding.code" />
+      <min value="1" />
       <fixedCode value="needs-record-linkage" />
     </element>
     <element id="Task.input:needs-record-linkage.value[x]">
@@ -110,13 +134,6 @@
       <type>
         <code value="boolean" />
       </type>
-    </element>
-    <element id="Task.output">
-      <path value="Task.output" />
-      <slicing>
-        <rules value="closed" />
-      </slicing>
-      <min value="1" />
     </element>
   </differential>
 </StructureDefinition>

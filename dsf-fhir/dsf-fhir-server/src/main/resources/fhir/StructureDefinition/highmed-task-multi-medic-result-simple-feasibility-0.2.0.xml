@@ -10,12 +10,12 @@
   <version value="0.2.0" />
   <name value="TaskMultiMedicResultSimpleFeasibility" />
   <status value="draft" />
-  <date value="2020-05-20" />
+  <date value="2020-05-25" />
   <fhirVersion value="4.0.1" />
   <kind value="resource" />
   <abstract value="false" />
   <type value="Task" />
-  <baseDefinition value="http://highmed.org/fhir/StructureDefinition/highmed-task-base|0.2.0" />
+  <baseDefinition value="http://highmed.org/fhir/StructureDefinition/highmed-task-base" />
   <derivation value="constraint" />
   <differential>
     <element id="Task.instantiatesUri">
@@ -27,7 +27,7 @@
         <valueString value="Parameter" />
       </extension>
       <path value="Task.input" />
-      <min value="4" />
+      <min value="5" />
     </element>
     <element id="Task.input:message-name">
       <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
@@ -62,6 +62,7 @@
       </extension>
       <path value="Task.input" />
       <sliceName value="participating-medics" />
+      <min value="1" />
     </element>
     <element id="Task.input:participating-medics.extension">
       <path value="Task.input.extension" />
@@ -82,6 +83,16 @@
         <profile value="http://highmed.org/fhir/StructureDefinition/group-id" />
       </type>
     </element>
+    <element id="Task.input:participating-medics.type">
+      <path value="Task.input.type" />
+      <binding>
+        <extension url="http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName">
+          <valueString value="TaskInputParameterType" />
+        </extension>
+        <strength value="required" />
+        <valueSet value="http://highmed.org/fhir/ValueSet/feasibility" />
+      </binding>
+    </element>
     <element id="Task.input:participating-medics.type.coding">
       <path value="Task.input.type.coding" />
       <min value="1" />
@@ -89,11 +100,13 @@
     </element>
     <element id="Task.input:participating-medics.type.coding.system">
       <path value="Task.input.type.coding.system" />
-      <fixedUri value="http://highmed.org/fhir/NamingSystem/feasibility" />
+      <min value="1" />
+      <fixedUri value="http://highmed.org/fhir/CodeSystem/feasibility" />
     </element>
     <element id="Task.input:participating-medics.type.coding.code">
       <path value="Task.input.type.coding.code" />
-      <patternCode value="participating-medics" />
+      <min value="1" />
+      <fixedCode value="participating-medics" />
     </element>
     <element id="Task.input:participating-medics.value[x]">
       <path value="Task.input.value[x]" />
@@ -107,6 +120,7 @@
       </extension>
       <path value="Task.input" />
       <sliceName value="multi-medic-result" />
+      <min value="1" />
     </element>
     <element id="Task.input:multi-medic-result.extension">
       <path value="Task.input.extension" />
@@ -127,6 +141,16 @@
         <profile value="http://highmed.org/fhir/StructureDefinition/group-id" />
       </type>
     </element>
+    <element id="Task.input:multi-medic-result.type">
+      <path value="Task.input.type" />
+      <binding>
+        <extension url="http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName">
+          <valueString value="TaskInputParameterType" />
+        </extension>
+        <strength value="required" />
+        <valueSet value="http://highmed.org/fhir/ValueSet/feasibility" />
+      </binding>
+    </element>
     <element id="Task.input:multi-medic-result.type.coding">
       <path value="Task.input.type.coding" />
       <min value="1" />
@@ -134,11 +158,13 @@
     </element>
     <element id="Task.input:multi-medic-result.type.coding.system">
       <path value="Task.input.type.coding.system" />
-      <fixedUri value="http://highmed.org/fhir/NamingSystem/feasibility" />
+      <min value="1" />
+      <fixedUri value="http://highmed.org/fhir/CodeSystem/feasibility" />
     </element>
     <element id="Task.input:multi-medic-result.type.coding.code">
       <path value="Task.input.type.coding.code" />
-      <patternCode value="multi-medic-result" />
+      <min value="1" />
+      <fixedCode value="multi-medic-result" />
     </element>
     <element id="Task.input:multi-medic-result.value[x]">
       <path value="Task.input.value[x]" />

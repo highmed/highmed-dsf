@@ -10,7 +10,7 @@
   <version value="0.2.0" />
   <name value="TaskBase" />
   <status value="draft" />
-  <date value="2020-05-20" />
+  <date value="2020-05-25" />
   <fhirVersion value="4.0.1" />
   <kind value="resource" />
   <abstract value="false" />
@@ -93,9 +93,13 @@
       <slicing>
         <discriminator>
           <type value="value" />
+          <path value="type.coding.system" />
+        </discriminator>
+        <discriminator>
+          <type value="value" />
           <path value="type.coding.code" />
         </discriminator>
-        <rules value="closed" />
+        <rules value="openAtEnd" />
       </slicing>
       <min value="1" />
     </element>
@@ -108,6 +112,16 @@
       <min value="1" />
       <max value="1" />
     </element>
+    <element id="Task.input:message-name.type">
+      <path value="Task.input.type" />
+      <binding>
+        <extension url="http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName">
+          <valueString value="TaskInputParameterType" />
+        </extension>
+        <strength value="required" />
+        <valueSet value="http://highmed.org/fhir/ValueSet/bpmn-message" />
+      </binding>
+    </element>
     <element id="Task.input:message-name.type.coding">
       <path value="Task.input.type.coding" />
       <min value="1" />
@@ -115,10 +129,12 @@
     </element>
     <element id="Task.input:message-name.type.coding.system">
       <path value="Task.input.type.coding.system" />
+      <min value="1" />
       <fixedUri value="http://highmed.org/fhir/CodeSystem/bpmn-message" />
     </element>
     <element id="Task.input:message-name.type.coding.code">
       <path value="Task.input.type.coding.code" />
+      <min value="1" />
       <fixedCode value="message-name" />
     </element>
     <element id="Task.input:message-name.value[x]">
@@ -135,6 +151,16 @@
       <sliceName value="business-key" />
       <max value="1" />
     </element>
+    <element id="Task.input:business-key.type">
+      <path value="Task.input.type" />
+      <binding>
+        <extension url="http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName">
+          <valueString value="TaskInputParameterType" />
+        </extension>
+        <strength value="required" />
+        <valueSet value="http://highmed.org/fhir/ValueSet/bpmn-message" />
+      </binding>
+    </element>
     <element id="Task.input:business-key.type.coding">
       <path value="Task.input.type.coding" />
       <min value="1" />
@@ -142,10 +168,12 @@
     </element>
     <element id="Task.input:business-key.type.coding.system">
       <path value="Task.input.type.coding.system" />
+      <min value="1" />
       <fixedUri value="http://highmed.org/fhir/CodeSystem/bpmn-message" />
     </element>
     <element id="Task.input:business-key.type.coding.code">
       <path value="Task.input.type.coding.code" />
+      <min value="1" />
       <fixedCode value="business-key" />
     </element>
     <element id="Task.input:business-key.value[x]">
@@ -162,6 +190,16 @@
       <sliceName value="correlation-key" />
       <max value="1" />
     </element>
+    <element id="Task.input:correlation-key.type">
+      <path value="Task.input.type" />
+      <binding>
+        <extension url="http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName">
+          <valueString value="TaskInputParameterType" />
+        </extension>
+        <strength value="required" />
+        <valueSet value="http://highmed.org/fhir/ValueSet/bpmn-message" />
+      </binding>
+    </element>
     <element id="Task.input:correlation-key.type.coding">
       <path value="Task.input.type.coding" />
       <min value="1" />
@@ -169,10 +207,12 @@
     </element>
     <element id="Task.input:correlation-key.type.coding.system">
       <path value="Task.input.type.coding.system" />
+      <min value="1" />
       <fixedUri value="http://highmed.org/fhir/CodeSystem/bpmn-message" />
     </element>
     <element id="Task.input:correlation-key.type.coding.code">
       <path value="Task.input.type.coding.code" />
+      <min value="1" />
       <fixedCode value="correlation-key" />
     </element>
     <element id="Task.input:correlation-key.value[x]">
@@ -186,14 +226,28 @@
       <slicing>
         <discriminator>
           <type value="value" />
+          <path value="type.coding.system" />
+        </discriminator>
+        <discriminator>
+          <type value="value" />
           <path value="type.coding.code" />
         </discriminator>
-        <rules value="open" />
+        <rules value="openAtEnd" />
       </slicing>
     </element>
     <element id="Task.output:error">
       <path value="Task.output" />
       <sliceName value="error" />
+    </element>
+    <element id="Task.output:error.type">
+      <path value="Task.output.type" />
+      <binding>
+        <extension url="http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName">
+          <valueString value="TaskOutputParameterType" />
+        </extension>
+        <strength value="required" />
+        <valueSet value="http://highmed.org/fhir/ValueSet/bpmn-message" />
+      </binding>
     </element>
     <element id="Task.output:error.type.coding">
       <path value="Task.output.type.coding" />
@@ -202,10 +256,12 @@
     </element>
     <element id="Task.output:error.type.coding.system">
       <path value="Task.output.type.coding.system" />
+      <min value="1" />
       <fixedUri value="http://highmed.org/fhir/CodeSystem/bpmn-message" />
     </element>
     <element id="Task.output:error.type.coding.code">
       <path value="Task.output.type.coding.code" />
+      <min value="1" />
       <fixedCode value="error" />
     </element>
     <element id="Task.output:error.value[x]">
