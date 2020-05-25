@@ -135,7 +135,7 @@ public class BundleGenerator
 				.filter(s -> !s.hasExpansion()).forEach(valueSetExpander::expand);
 	}
 
-	public static void main(String[] args) throws IOException
+	public static void main(String[] args) throws Exception
 	{
 		try
 		{
@@ -175,6 +175,7 @@ public class BundleGenerator
 		catch (Exception e)
 		{
 			e.printStackTrace();
+			throw e;
 		}
 	}
 
