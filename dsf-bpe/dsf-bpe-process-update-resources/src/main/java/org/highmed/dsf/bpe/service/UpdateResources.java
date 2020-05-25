@@ -58,7 +58,10 @@ public class UpdateResources extends AbstractServiceDelegate implements Initiali
 		Bundle bundle;
 		try
 		{
-			bundle = requesterClient.read(Bundle.class, bundleId.getIdPart());
+			if (bundleId.hasVersionIdPart())
+				bundle = requesterClient.read(Bundle.class, bundleId.getIdPart(), bundleId.getVersionIdPart());
+			else
+				bundle = requesterClient.read(Bundle.class, bundleId.getIdPart());
 		}
 		catch (WebApplicationException e)
 		{
