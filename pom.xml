@@ -28,7 +28,7 @@
 		<tyrus.version>1.15</tyrus.version>
 		<spring.version>5.2.3.RELEASE</spring.version>
 
-		<hapi.version>4.2.0</hapi.version>
+		<hapi.version>5.0.1</hapi.version>
 	</properties>
 
 	<name>highmed-dsf</name>
@@ -263,12 +263,22 @@
 			</dependency>
 			<dependency>
 				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>hapi-fhir-structures-r5</artifactId>
+				<version>${hapi.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-fhir-validation</artifactId>
 				<version>${hapi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-fhir-validation-resources-r4</artifactId>
+				<version>${hapi.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>hapi-fhir-validation-resources-r5</artifactId>
 				<version>${hapi.version}</version>
 			</dependency>
 			<dependency>

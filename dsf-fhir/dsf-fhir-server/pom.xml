@@ -81,11 +81,19 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-r5</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-r4</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-validation-resources-r5</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.helger</groupId>
@@ -209,6 +217,7 @@
 						<argument>${project.basedir}/src/main/resources/fhir</argument>
 					</arguments>
 					<workingDirectory>${project.basedir}</workingDirectory>
+					<cleanupDaemonThreads>false</cleanupDaemonThreads>
 					<!-- Workaround for exec maven plugin issue -->
 					<!-- https://github.com/mojohaus/exec-maven-plugin/issues/76 -->
 					<!-- <includePluginDependencies>true</includePluginDependencies> <includeProjectDependencies>false</includeProjectDependencies> -->
