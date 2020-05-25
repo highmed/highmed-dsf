@@ -5,12 +5,12 @@ import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 
 public class UpdateWhitelistPlugin extends AbstractProcessEnginePlugin
 {
-	private static final String UPDATE_WHITE_LISTE_FILE = "updateWhiteliste.bpmn";
+	private static final String UPDATE_WHITELIST_FILE = "updateWhitelist.bpmn";
 
 	@Override
 	public void postProcessEngineBuild(ProcessEngine processEngine)
 	{
-		BpmnModelInstance updateWhiteListeProcess = readAndValidateModel("/" + UPDATE_WHITE_LISTE_FILE);
-		deploy(processEngine, UPDATE_WHITE_LISTE_FILE, updateWhiteListeProcess);
+		BpmnModelInstance updateWhiteListeProcess = readAndValidateModel("/" + UPDATE_WHITELIST_FILE);
+		deploy(processEngine, UPDATE_WHITELIST_FILE, updateWhiteListeProcess);
 	}
 }
