@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_0k0v4i2" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.5.0">
-  <bpmn:process id="executeUpdateResources" isExecutable="true" camunda:versionTag="0.1.0">
+  <bpmn:process id="executeUpdateResources" isExecutable="true" camunda:versionTag="0.2.0">
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>SequenceFlow_0djh0eg</bpmn:outgoing>
       <bpmn:messageEventDefinition messageRef="Message_1r6vnvn" />
@@ -28,7 +28,7 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_0djh0eg_di" bpmnElement="SequenceFlow_0djh0eg">
         <di:waypoint x="215" y="121" />
-        <di:waypoint x="257" y="121" />
+        <di:waypoint x="270" y="121" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="ServiceTask_1t3955f_di" bpmnElement="updateResources">
         <dc:Bounds x="433" y="81" width="100" height="80" />
@@ -41,11 +41,11 @@
         <di:waypoint x="622" y="121" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_141lpsf_di" bpmnElement="SequenceFlow_141lpsf">
-        <di:waypoint x="357" y="121" />
+        <di:waypoint x="370" y="121" />
         <di:waypoint x="433" y="121" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="ServiceTask_1aaurev_di" bpmnElement="checkRequest">
-        <dc:Bounds x="257" y="81" width="100" height="80" />
+        <dc:Bounds x="270" y="81" width="100" height="80" />
       </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

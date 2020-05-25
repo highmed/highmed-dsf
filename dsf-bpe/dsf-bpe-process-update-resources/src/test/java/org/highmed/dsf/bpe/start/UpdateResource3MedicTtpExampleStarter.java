@@ -61,11 +61,11 @@ public class UpdateResource3MedicTtpExampleStarter
 		task.addInput().setValue(new StringType("requestUpdateResourcesMessage")).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("message-name");
 
-		task.addInput().setValue(new Reference("Bundle/" + whiteList.getIdElement().getIdPart())).getType().addCoding()
+		task.addInput().setValue(new Reference(whiteList.getIdElement())).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/update-resources").setCode("bundle-reference");
 
-		task.addInput().setValue(new StringType("http://highmed.org/fhir/NamingSystem/organization-identifier|")).getType()
-				.addCoding().setSystem("http://highmed.org/fhir/CodeSystem/update-resources")
+		task.addInput().setValue(new StringType("http://highmed.org/fhir/NamingSystem/organization-identifier|"))
+				.getType().addCoding().setSystem("http://highmed.org/fhir/CodeSystem/update-resources")
 				.setCode("organization-identifier-search-parameter");
 
 		client.create(task);
