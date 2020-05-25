@@ -15,8 +15,6 @@ import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.fhir.variables.Outputs;
-import org.highmed.dsf.fhir.variables.OutputsValues;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -28,19 +26,20 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class UpdateWhiteList extends AbstractServiceDelegate implements InitializingBean
+public class UpdateWhitelist extends AbstractServiceDelegate implements InitializingBean
 {
-	private static final Logger logger = LoggerFactory.getLogger(UpdateWhiteList.class);
+	private static final Logger logger = LoggerFactory.getLogger(UpdateWhitelist.class);
 
 	private final OrganizationProvider organizationProvider;
 
-	public UpdateWhiteList(OrganizationProvider organizationProvider, FhirWebserviceClientProvider clientProvider,
+	public UpdateWhitelist(OrganizationProvider organizationProvider, FhirWebserviceClientProvider clientProvider,
 			TaskHelper taskHelper)
 	{
 		super(clientProvider, taskHelper);
@@ -83,7 +82,10 @@ public class UpdateWhiteList extends AbstractServiceDelegate implements Initiali
 				Map.of("identifier", Collections.singletonList(Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST + "|"
 						+ Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST)));
 
-		setTaskOutput(result, execution);
+		Task task = (Task) execution.getVariable(Constants.VARIABLE_LEADING_TASK);
+		task.addOutput().setValue(new Reference(result.getIdElement())).getType().addCoding()
+				.setSystem(Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST)
+				.setCode(Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST);
 	}
 
 	private Consumer<? super Organization> addWhiteListEntry(Bundle transaction, Bundle searchSet)
@@ -148,15 +150,5 @@ public class UpdateWhiteList extends AbstractServiceDelegate implements Initiali
 				.filter(e -> e.hasResource() && e.getResource() instanceof Endpoint
 						&& e.getFullUrl().endsWith(endpoint.getReference()))
 				.map(e -> (Endpoint) e.getResource()).findFirst();
-	}
-
-	private void setTaskOutput(Bundle result, DelegateExecution execution)
-	{
-		Outputs outputs = (Outputs) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
-
-		outputs.add(Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST,
-				Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST, new IdType(result.getId()).getIdPart());
-
-		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, OutputsValues.create(outputs));
 	}
 }

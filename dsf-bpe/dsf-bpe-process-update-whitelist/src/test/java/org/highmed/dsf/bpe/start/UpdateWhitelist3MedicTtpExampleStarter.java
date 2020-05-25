@@ -21,7 +21,7 @@ import ca.uhn.fhir.context.FhirContext;
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.CertificateReader;
 
-public class UpdateWhiteList3MedicTtpExampleStarter
+public class UpdateWhitelist3MedicTtpExampleStarter
 {
 	public static void main(String[] args)
 			throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException
@@ -39,7 +39,7 @@ public class UpdateWhiteList3MedicTtpExampleStarter
 
 		Task task = new Task();
 		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-update-whitelist");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/updateWhiteList/0.1.0");
+		task.setInstantiatesUri("http://highmed.org/bpe/Process/updateWhiteList/0.2.0");
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
