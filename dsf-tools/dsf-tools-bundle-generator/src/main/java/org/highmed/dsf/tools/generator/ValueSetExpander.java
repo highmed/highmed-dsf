@@ -35,7 +35,7 @@ public class ValueSetExpander
 	{
 		Objects.requireNonNull(valueSet, "valueSet");
 
-		logger.debug("Generating expansion for ValueSet url {}, version {}", valueSet.getUrl(), valueSet.getVersion());
+		logger.info("Generating expansion for ValueSet url {}, version {}", valueSet.getUrl(), valueSet.getVersion());
 
 		// ValueSetExpanderSimple can't be reused
 		ValueSetExpanderSimple valueSetExpander = new ValueSetExpanderSimple(workerContext);

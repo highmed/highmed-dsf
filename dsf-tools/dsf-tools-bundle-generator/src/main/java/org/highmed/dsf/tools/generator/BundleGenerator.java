@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.UUID;
 
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
@@ -63,7 +64,7 @@ public class BundleGenerator
 
 		BundleEntryPutReader putReader = (resource, resourceFile, putFile) ->
 		{
-			logger.info("Reading {} at {} with put file {}", resource.getSimpleName(), resourceFile.toString(),
+			logger.debug("Reading {} at {} with put file {}", resource.getSimpleName(), resourceFile.toString(),
 					putFile.toString());
 
 			try (InputStream in = Files.newInputStream(resourceFile))
@@ -124,10 +125,11 @@ public class BundleGenerator
 		SnapshotGenerator generator = new SnapshotGenerator(fhirContext, validationSupport);
 
 		bundle.getEntry().stream().map(e -> e.getResource()).filter(r -> r instanceof StructureDefinition)
-				.map(r -> (StructureDefinition) r).filter(s -> !s.hasSnapshot()).forEach(s ->
+				.map(r -> (StructureDefinition) r).sorted(Comparator.comparing(StructureDefinition::getUrl).reversed())
+				.forEach(s ->
 				{
-					generator.generateSnapshot(s);
-					System.out.println("Snapshot generated: " + s.getUrl() + "|" + s.getVersion());
+					if (!s.hasSnapshot())
+						generator.generateSnapshot(s);
 				});
 	}
 
@@ -136,10 +138,10 @@ public class BundleGenerator
 		ValueSetExpander valueSetExpander = new ValueSetExpander(fhirContext, validationSupport);
 
 		bundle.getEntry().stream().map(e -> e.getResource()).filter(r -> r instanceof ValueSet).map(r -> (ValueSet) r)
-				.filter(s -> !s.hasExpansion()).forEach(v ->
+				.forEach(v ->
 				{
-					valueSetExpander.expand(v);
-					System.out.println("Expansion generated: " + v.getUrl() + "|" + v.getVersion());
+					if (!v.hasExpansion())
+						valueSetExpander.expand(v);
 				});
 	}
 

@@ -37,13 +37,15 @@ public class SnapshotGenerator
 	{
 		Objects.requireNonNull(differential, "differential");
 
-		logger.debug("Generating snapshot for StructureDefinition with url {}, version {}, base {}",
-				differential.getUrl(), differential.getVersion(), differential.getBaseDefinition());
-
 		StructureDefinition base = worker.fetchResource(StructureDefinition.class, differential.getBaseDefinition());
 
 		if (base == null)
 			logger.warn("Base definition with url {} not found", differential.getBaseDefinition());
+		else if (!base.hasSnapshot())
+			generateSnapshot(base);
+
+		logger.info("Generating snapshot for StructureDefinition with url {}, version {}, base {}",
+				differential.getUrl(), differential.getVersion(), differential.getBaseDefinition());
 
 		/* ProfileUtilities is not thread safe */
 		List<ValidationMessage> messages = new ArrayList<>();
