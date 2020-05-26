@@ -166,7 +166,8 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		logger.debug("HTTP header Last-Modified: {}", response.getHeaderString(HttpHeaders.LAST_MODIFIED));
 
 		if (Status.CREATED.getStatusCode() == response.getStatus())
-			return (R) response.readEntity(resource.getClass());
+			// TODO remove workaround if HAPI bug fixed
+			return (R) fixBundle(response.readEntity(resource.getClass()));
 		else
 			throw handleError(response);
 	}
@@ -189,7 +190,8 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		logger.debug("HTTP header Last-Modified: {}", response.getHeaderString(HttpHeaders.LAST_MODIFIED));
 
 		if (Status.CREATED.getStatusCode() == response.getStatus())
-			return (R) response.readEntity(resource.getClass());
+			// TODO remove workaround if HAPI bug fixed
+			return (R) fixBundle(response.readEntity(resource.getClass()));
 		else
 			throw handleError(response);
 	}
@@ -214,7 +216,8 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		logger.debug("HTTP header Last-Modified: {}", response.getHeaderString(HttpHeaders.LAST_MODIFIED));
 
 		if (Status.OK.getStatusCode() == response.getStatus())
-			return (R) response.readEntity(resource.getClass());
+			// TODO remove workaround if HAPI bug fixed
+			return (R) fixBundle(response.readEntity(resource.getClass()));
 		else
 			throw handleError(response);
 	}
@@ -246,7 +249,8 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		logger.debug("HTTP header Last-Modified: {}", response.getHeaderString(HttpHeaders.LAST_MODIFIED));
 
 		if (Status.CREATED.getStatusCode() == response.getStatus() || Status.OK.getStatusCode() == response.getStatus())
-			return (R) response.readEntity(resource.getClass());
+			// TODO remove workaround if HAPI bug fixed
+			return (R) fixBundle(response.readEntity(resource.getClass()));
 		else
 			throw handleError(response);
 	}
@@ -488,8 +492,15 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 
 	private void fix(Resource resource)
 	{
-		Stream<ResourceReference> references = referenceExtractor.getReferences(resource);
-		references.forEach(r -> r.getReference().setResource(null));
+		if (resource instanceof Bundle)
+		{
+			fixBundle(resource);
+		}
+		else
+		{
+			Stream<ResourceReference> references = referenceExtractor.getReferences(resource);
+			references.forEach(r -> r.getReference().setResource(null));
+		}
 	}
 
 	@Override
@@ -529,7 +540,8 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
 				response.getStatusInfo().getReasonPhrase());
 		if (Status.OK.getStatusCode() == response.getStatus())
-			return response.readEntity(Bundle.class);
+			// TODO remove workaround if HAPI bug fixed
+			return fixBundle(response.readEntity(Bundle.class));
 		else
 			throw handleError(response);
 	}
@@ -549,7 +561,8 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		logger.debug("HTTP header Last-Modified: {}", response.getHeaderString(HttpHeaders.LAST_MODIFIED));
 
 		if (Status.OK.getStatusCode() == response.getStatus())
-			return response.readEntity(Bundle.class);
+			// TODO remove workaround if HAPI bug fixed
+			return fixBundle(response.readEntity(Bundle.class));
 		else
 			throw handleError(response);
 	}
