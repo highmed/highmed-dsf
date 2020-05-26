@@ -1,19 +1,28 @@
 package org.highmed.dsf.fhir.profiles;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.UUID;
 
 import org.highmed.dsf.fhir.service.ResourceValidator;
 import org.highmed.dsf.fhir.service.ResourceValidatorImpl;
+import org.highmed.dsf.fhir.service.SnapshotGenerator.SnapshotWithValidationMessages;
+import org.highmed.dsf.fhir.service.SnapshotGeneratorImpl;
+import org.highmed.dsf.fhir.service.StructureDefinitionReader;
+import org.highmed.dsf.fhir.service.ValidationSupportWithCustomResources;
+import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.r4.model.Base64BinaryType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.ParameterComponent;
 import org.hl7.fhir.r4.model.Task.TaskIntent;
@@ -25,6 +34,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.ValidationResult;
 
@@ -33,15 +43,17 @@ public class TaskProfileTest
 	private static final Logger logger = LoggerFactory.getLogger(OrganizationProfileTest.class);
 
 	@ClassRule
-	public static final ValidationSupportRule validationRule = new ValidationSupportRule(Arrays.asList("highmed-task-base-0.2.0.xml",
-			"highmed-task-start-process-0.2.0.xml", "highmed-task-ping-0.2.0.xml", "highmed-task-pong-0.2.0.xml",
-			"highmed-task-update-whitelist-0.2.0.xml", "highmed-task-request-update-resources-0.2.0.xml",
-			"highmed-task-execute-update-resources-0.2.0.xml", "highmed-group-0.2.0.xml",
-			"highmed-extension-group-id-0.2.0.xml", "highmed-research-study-feasibility-0.2.0.xml",
-			"highmed-task-request-simple-feasibility-0.2.0.xml", "highmed-task-execute-simple-feasibility-0.2.0.xml",
-			"highmed-task-single-medic-result-simple-feasibility-0.2.0.xml",
-			"highmed-task-compute-simple-feasibility-0.2.0.xml",
-			"highmed-task-multi-medic-result-simple-feasibility-0.2.0.xml"),
+	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
+			Arrays.asList("highmed-task-base-0.2.0.xml", "highmed-task-start-process-0.2.0.xml",
+					"highmed-task-ping-0.2.0.xml", "highmed-task-pong-0.2.0.xml",
+					"highmed-task-update-whitelist-0.2.0.xml", "highmed-task-request-update-resources-0.2.0.xml",
+					"highmed-task-execute-update-resources-0.2.0.xml", "highmed-group-0.2.0.xml",
+					"highmed-extension-group-id-0.2.0.xml", "highmed-research-study-feasibility-0.2.0.xml",
+					"highmed-task-request-simple-feasibility-0.2.0.xml",
+					"highmed-task-execute-simple-feasibility-0.2.0.xml",
+					"highmed-task-single-medic-result-simple-feasibility-0.2.0.xml",
+					"highmed-task-compute-simple-feasibility-0.2.0.xml",
+					"highmed-task-multi-medic-result-simple-feasibility-0.2.0.xml"),
 			Arrays.asList("authorization-role-0.2.0.xml", "bpmn-message-0.2.0.xml", "update-whitelist-0.2.0.xml",
 					"update-resources-0.2.0.xml", "feasibility-0.2.0.xml"),
 			Arrays.asList("authorization-role-0.2.0.xml", "bpmn-message-0.2.0.xml", "update-whitelist-0.2.0.xml",
@@ -49,6 +61,27 @@ public class TaskProfileTest
 
 	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
+
+	@Test
+	public void testGenerateSnapshotNotWorkingWithoutBaseSnapshot() throws Exception
+	{
+		var reader = new StructureDefinitionReader(validationRule.getFhirContext());
+
+		StructureDefinition base = reader
+				.readXml(Paths.get("src/main/resources/fhir/StructureDefinition/highmed-task-base-0.2.0.xml"));
+		StructureDefinition differential = reader.readXml(Paths
+				.get("src/main/resources/fhir/StructureDefinition/highmed-task-execute-update-resources-0.2.0.xml"));
+
+		var validationSupport = new ValidationSupportChain(
+				new InMemoryTerminologyServerValidationSupport(validationRule.getFhirContext()),
+				new ValidationSupportWithCustomResources(validationRule.getFhirContext(), Arrays.asList(base),
+						Collections.emptyList(), Collections.emptyList()),
+				new DefaultProfileValidationSupport(validationRule.getFhirContext()));
+		var snapshotGenerator = new SnapshotGeneratorImpl(validationRule.getFhirContext(), validationSupport);
+
+		SnapshotWithValidationMessages messages = snapshotGenerator.generateSnapshot(differential);
+		assertFalse(messages.getMessages().isEmpty());
+	}
 
 	@Test
 	public void testTaskStartProcessProfileValid() throws Exception
