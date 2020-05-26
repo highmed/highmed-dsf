@@ -135,11 +135,12 @@
 			<artifactId>javax-websocket-server-impl</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
+		<!-- See workaround exec plugin below-->
+		<!-- <dependency>
 			<groupId>de.hs-heilbronn.mi</groupId>
 			<artifactId>log4j2-utils</artifactId>
 			<scope>test</scope>
-		</dependency>
+		</dependency>-->
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
@@ -151,6 +152,12 @@
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-tools-bundle-generator</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>de.hs-heilbronn.mi</groupId>
+			<artifactId>log4j2-utils</artifactId>
+			<scope>runtime</scope>
 		</dependency>
 	</dependencies>
 
