@@ -124,7 +124,11 @@ public class BundleGenerator
 		SnapshotGenerator generator = new SnapshotGenerator(fhirContext, validationSupport);
 
 		bundle.getEntry().stream().map(e -> e.getResource()).filter(r -> r instanceof StructureDefinition)
-				.map(r -> (StructureDefinition) r).filter(s -> !s.hasSnapshot()).forEach(generator::generateSnapshot);
+				.map(r -> (StructureDefinition) r).filter(s -> !s.hasSnapshot()).forEach(s ->
+				{
+					generator.generateSnapshot(s);
+					System.out.println("Snapshot generated: " + s.getUrl() + "|" + s.getVersion());
+				});
 	}
 
 	private void expandValueSets(Bundle bundle, ValidationSupportChain validationSupport)
@@ -132,7 +136,11 @@ public class BundleGenerator
 		ValueSetExpander valueSetExpander = new ValueSetExpander(fhirContext, validationSupport);
 
 		bundle.getEntry().stream().map(e -> e.getResource()).filter(r -> r instanceof ValueSet).map(r -> (ValueSet) r)
-				.filter(s -> !s.hasExpansion()).forEach(valueSetExpander::expand);
+				.filter(s -> !s.hasExpansion()).forEach(v ->
+				{
+					valueSetExpander.expand(v);
+					System.out.println("Expansion generated: " + v.getUrl() + "|" + v.getVersion());
+				});
 	}
 
 	public static void main(String[] args) throws Exception
