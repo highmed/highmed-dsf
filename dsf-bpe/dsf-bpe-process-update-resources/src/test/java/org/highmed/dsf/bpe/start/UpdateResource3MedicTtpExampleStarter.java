@@ -15,6 +15,7 @@ import org.highmed.dsf.fhir.service.ReferenceExtractorImpl;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.highmed.fhir.client.FhirWebserviceClientJersey;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
@@ -42,14 +43,16 @@ public class UpdateResource3MedicTtpExampleStarter
 				keyStorePassword, null, null, null, 0, 0, null, context, referenceExtractor);
 
 		Bundle searchResult = client.search(Bundle.class, Map.of("identifier",
-				Collections.singletonList("http://highmed.org/fhir/CodeSystem/update-whitelist|HiGHmed_white_list")));
+				Collections.singletonList("http://highmed.org/fhir/CodeSystem/update-whitelist|highmed_whitelist")));
 		if (searchResult.getTotal() != 1 && searchResult.getEntryFirstRep().getResource() instanceof Bundle)
 			throw new IllegalStateException("Expected a single White-List Bundle");
 		Bundle whiteList = (Bundle) searchResult.getEntryFirstRep().getResource();
 
+		System.out.println(context.newXmlParser().encodeResourceToString(whiteList));
+
 		Task task = new Task();
 		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-request-update-resources");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/requestUpdateResources/0.1.0");
+		task.setInstantiatesUri("http://highmed.org/bpe/Process/requestUpdateResources/0.2.0");
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
@@ -61,8 +64,11 @@ public class UpdateResource3MedicTtpExampleStarter
 		task.addInput().setValue(new StringType("requestUpdateResourcesMessage")).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("message-name");
 
-		task.addInput().setValue(new Reference(whiteList.getIdElement())).getType().addCoding()
-				.setSystem("http://highmed.org/fhir/CodeSystem/update-resources").setCode("bundle-reference");
+		task.addInput()
+				.setValue(new Reference(new IdType("Bundle", whiteList.getIdElement().getIdPart(),
+						whiteList.getIdElement().getVersionIdPart())))
+				.getType().addCoding().setSystem("http://highmed.org/fhir/CodeSystem/update-resources")
+				.setCode("bundle-reference");
 
 		task.addInput().setValue(new StringType("http://highmed.org/fhir/NamingSystem/organization-identifier|"))
 				.getType().addCoding().setSystem("http://highmed.org/fhir/CodeSystem/update-resources")
