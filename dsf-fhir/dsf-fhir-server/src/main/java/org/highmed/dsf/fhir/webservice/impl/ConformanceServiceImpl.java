@@ -184,7 +184,7 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 		statement.setImplementation(new CapabilityStatementImplementationComponent());
 		// statement.getImplementation().setDescription("Implementation Description - TODO"); // TODO
 		statement.getImplementation().setUrl(serverBase);
-		statement.setFhirVersion(FHIRVersion._4_0_0);
+		statement.setFhirVersion(FHIRVersion._4_0_1);
 		statement.setFormat(
 				Arrays.asList(new CodeType(Constants.CT_FHIR_JSON_NEW), new CodeType(Constants.CT_FHIR_XML_NEW)));
 		CapabilityStatementRestComponent rest = statement.addRest();
