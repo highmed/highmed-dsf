@@ -83,8 +83,10 @@ public class UpdateWhitelist extends AbstractServiceDelegate implements Initiali
 						+ Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST)));
 
 		Task task = (Task) execution.getVariable(Constants.VARIABLE_LEADING_TASK);
-		task.addOutput().setValue(new Reference(result.getIdElement())).getType().addCoding()
-				.setSystem(Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST)
+		task.addOutput()
+				.setValue(new Reference(new IdType("Bundle", result.getIdElement().getIdPart(),
+						result.getIdElement().getVersionIdPart())))
+				.getType().addCoding().setSystem(Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST)
 				.setCode(Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST);
 	}
 
