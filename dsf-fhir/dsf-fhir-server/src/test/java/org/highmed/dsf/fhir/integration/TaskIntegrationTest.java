@@ -142,7 +142,10 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		t.setStatus(TaskStatus.REQUESTED);
 		t.setIntent(TaskIntent.ORDER);
 		t.setAuthoredOn(new Date());
-		Reference localOrg = new Reference(organizationProvider.getLocalOrganization().get());
+		Reference localOrg = new Reference();
+		localOrg.setType("Organization").getIdentifier()
+				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
+				.setValue("Test_Organization");
 		t.setRequester(localOrg);
 		t.getRestriction().addRecipient(localOrg);
 		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
@@ -206,10 +209,26 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 				.setValue("External_Test_Organization");
 		t.setRequester(requester);
 
-		t.getRestriction().addRecipient(new Reference(organizationProvider.getLocalOrganization().get()));
-		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+		Reference localOrg = new Reference();
+		localOrg.setType("Organization").getIdentifier()
+				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
+				.setValue("Test_Organization");
+		t.getRestriction().addRecipient(localOrg);
+
+		ParameterComponent in1 = t.addInput();
+		in1.getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
-		t.getInputFirstRep().setValue(new StringType("pingMessage"));
+		in1.setValue(new StringType("pingMessage"));
+
+		ParameterComponent in2 = t.addInput();
+		in2.getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+				.setCode("business-key");
+		in2.setValue(new StringType(UUID.randomUUID().toString()));
+
+		ParameterComponent in3 = t.addInput();
+		in3.getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+				.setCode("correlation-key");
+		in3.setValue(new StringType(UUID.randomUUID().toString()));
 
 		getExternalWebserviceClient().create(t);
 	}
@@ -233,10 +252,26 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 				.setValue("External_Test_Organization");
 		t.setRequester(requester);
 
-		t.getRestriction().addRecipient(new Reference(organizationProvider.getLocalOrganization().get()));
-		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+		Reference localOrg = new Reference();
+		localOrg.setType("Organization").getIdentifier()
+				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
+				.setValue("Test_Organization");
+		t.getRestriction().addRecipient(localOrg);
+
+		ParameterComponent in1 = t.addInput();
+		in1.getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
-		t.getInputFirstRep().setValue(new StringType("pongMessage"));
+		in1.setValue(new StringType("pongMessage"));
+
+		ParameterComponent in2 = t.addInput();
+		in2.getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+				.setCode("business-key");
+		in2.setValue(new StringType(UUID.randomUUID().toString()));
+
+		ParameterComponent in3 = t.addInput();
+		in3.getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+				.setCode("correlation-key");
+		in3.setValue(new StringType(UUID.randomUUID().toString()));
 
 		getExternalWebserviceClient().create(t);
 	}
@@ -254,8 +289,10 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		t.setStatus(TaskStatus.REQUESTED);
 		t.setIntent(TaskIntent.ORDER);
 		t.setAuthoredOn(new Date());
-		Reference localOrg = new Reference()
-				.setReferenceElement(organizationProvider.getLocalOrganization().get().getIdElement().toVersionless());
+		Reference localOrg = new Reference();
+		localOrg.setType("Organization").getIdentifier()
+				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
+				.setValue("Test_Organization");
 		t.setRequester(localOrg);
 		t.getRestriction().addRecipient(localOrg);
 		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
@@ -283,10 +320,14 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		t.setStatus(TaskStatus.INPROGRESS);
 		t.setIntent(TaskIntent.ORDER);
 		t.setAuthoredOn(new Date());
-		Reference localOrg = new Reference()
-				.setReferenceElement(organizationProvider.getLocalOrganization().get().getIdElement().toVersionless());
+		
+		Reference localOrg = new Reference();
+		localOrg.setType("Organization").getIdentifier()
+				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
+				.setValue("Test_Organization");
 		t.setRequester(localOrg);
 		t.getRestriction().addRecipient(localOrg);
+
 		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
 		t.getInputFirstRep().setValue(new StringType("startProcessMessage"));

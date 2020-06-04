@@ -17,6 +17,7 @@ import org.highmed.dsf.fhir.service.SnapshotGenerator;
 import org.highmed.dsf.fhir.service.SnapshotGenerator.SnapshotWithValidationMessages;
 import org.highmed.dsf.fhir.service.SnapshotGeneratorImpl;
 import org.highmed.dsf.fhir.service.StructureDefinitionReader;
+import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -56,7 +57,8 @@ public class ValidationSupportRule extends ExternalResource
 		var customValidationSupport = new ValidationSupportWithCustomResources(context);
 
 		validationSupport = new ValidationSupportChain(new InMemoryTerminologyServerValidationSupport(context),
-				customValidationSupport, new DefaultProfileValidationSupport(context));
+				customValidationSupport, new DefaultProfileValidationSupport(context),
+				new CommonCodeSystemsTerminologyService(context));
 
 		readProfilesAndGenerateSnapshots(context, customValidationSupport,
 				new SnapshotGeneratorImpl(context, validationSupport),

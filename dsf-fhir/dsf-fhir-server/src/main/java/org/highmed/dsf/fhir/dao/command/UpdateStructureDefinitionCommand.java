@@ -41,17 +41,17 @@ public class UpdateStructureDefinitionCommand extends UpdateCommand<StructureDef
 	private StructureDefinition resourceWithSnapshot;
 
 	public UpdateStructureDefinitionCommand(int index, User user, Bundle bundle, BundleEntryComponent entry,
-			String serverBase, AuthorizationHelper authorizationHelper, StructureDefinition resource,
-			StructureDefinitionDao dao, ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
-			ResponseGenerator responseGenerator, ReferenceExtractor referenceExtractor,
-			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner, EventManager eventManager,
-			EventGenerator eventGenerator, StructureDefinitionSnapshotDao snapshotDao,
-			Function<Connection, SnapshotGenerator> snapshotGenerator,
+			String serverBase, AuthorizationHelper authorizationHelper, ValidationHelper validationHelper,
+			StructureDefinition resource, StructureDefinitionDao dao, ExceptionHandler exceptionHandler,
+			ParameterConverter parameterConverter, ResponseGenerator responseGenerator,
+			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver,
+			ReferenceCleaner referenceCleaner, EventManager eventManager, EventGenerator eventGenerator,
+			StructureDefinitionSnapshotDao snapshotDao, Function<Connection, SnapshotGenerator> snapshotGenerator,
 			SnapshotDependencyAnalyzer snapshotDependencyAnalyzer)
 	{
-		super(index, user, bundle, entry, serverBase, authorizationHelper, resource, dao, exceptionHandler,
-				parameterConverter, responseGenerator, referenceExtractor, referenceResolver, referenceCleaner,
-				eventManager, eventGenerator);
+		super(index, user, bundle, entry, serverBase, authorizationHelper, validationHelper, resource, dao,
+				exceptionHandler, parameterConverter, responseGenerator, referenceExtractor, referenceResolver,
+				referenceCleaner, eventManager, eventGenerator);
 
 		this.snapshotDao = snapshotDao;
 		this.snapshotGenerator = snapshotGenerator;
@@ -59,12 +59,12 @@ public class UpdateStructureDefinitionCommand extends UpdateCommand<StructureDef
 	}
 
 	@Override
-	public void preExecute(Map<String, IdType> idTranslationTable)
+	public void preExecute(Map<String, IdType> idTranslationTable, Connection connection)
 	{
 		resourceWithSnapshot = resource.hasSnapshot() ? resource.copy() : null;
 		resource.setSnapshot(null);
 
-		super.preExecute(idTranslationTable);
+		super.preExecute(idTranslationTable, connection);
 	}
 
 	@Override

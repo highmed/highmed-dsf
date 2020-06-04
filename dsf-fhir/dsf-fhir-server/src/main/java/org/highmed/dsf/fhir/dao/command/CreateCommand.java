@@ -48,7 +48,6 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	private static final Logger logger = LoggerFactory.getLogger(CreateCommand.class);
 
 	private final ResponseGenerator responseGenerator;
-	private final ResolveReferencesHelper<R> resolveReferencesHelper;
 	private final ReferenceCleaner referenceCleaner;
 
 	protected final EventManager eventManager;
@@ -58,17 +57,16 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	protected Response responseResult;
 
 	public CreateCommand(int index, User user, Bundle bundle, BundleEntryComponent entry, String serverBase,
-			AuthorizationHelper authorizationHelper, R resource, D dao, ExceptionHandler exceptionHandler,
-			ParameterConverter parameterConverter, ResponseGenerator responseGenerator,
-			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver,
-			ReferenceCleaner referenceCleaner, EventManager eventManager, EventGenerator eventGenerator)
+			AuthorizationHelper authorizationHelper, ValidationHelper validationHelper, R resource, D dao,
+			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
+			ResponseGenerator responseGenerator, ReferenceExtractor referenceExtractor,
+			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner, EventManager eventManager,
+			EventGenerator eventGenerator)
 	{
-		super(2, index, user, bundle, entry, serverBase, authorizationHelper, resource, dao, exceptionHandler,
-				parameterConverter);
+		super(2, index, user, bundle, entry, serverBase, authorizationHelper, validationHelper, resource, dao,
+				exceptionHandler, parameterConverter, responseGenerator, referenceExtractor, referenceResolver);
 
 		this.responseGenerator = responseGenerator;
-		resolveReferencesHelper = new ResolveReferencesHelper<R>(index, user, serverBase, referenceExtractor,
-				referenceResolver, responseGenerator);
 		this.referenceCleaner = referenceCleaner;
 
 		this.eventManager = eventManager;
@@ -76,11 +74,11 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	}
 
 	@Override
-	public void preExecute(Map<String, IdType> idTranslationTable)
+	public void preExecute(Map<String, IdType> idTranslationTable, Connection connection)
 	{
 		UriComponents eruComponentes = UriComponentsBuilder.fromUriString(entry.getRequest().getUrl()).build();
 
-		// check standard update request url: Patient
+		// check standard update request url: e.g. Patient
 		if (eruComponentes.getPathSegments().size() == 1 && eruComponentes.getQueryParams().isEmpty())
 		{
 			if (!entry.getFullUrl().startsWith(URL_UUID_PREFIX))
@@ -92,6 +90,9 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 			else if (resource.hasIdElement() && !entry.getFullUrl().equals(resource.getIdElement().getValue()))
 				throw new WebApplicationException(responseGenerator.badBundleEntryFullUrlVsResourceId(index,
 						entry.getFullUrl(), resource.getIdElement().getValue()));
+
+			// add new or existing id to the id translation table
+			addToIdTranslationTable(idTranslationTable, connection);
 		}
 
 		// all other request urls
@@ -100,25 +101,15 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 					responseGenerator.badCreateRequestUrl(index, entry.getRequest().getUrl()));
 	}
 
-	@Override
-	public void execute(Map<String, IdType> idTranslationTable, Connection connection)
-			throws SQLException, WebApplicationException
+	private void addToIdTranslationTable(Map<String, IdType> idTranslationTable, Connection connection)
 	{
-		@SuppressWarnings("unchecked")
-		R copy = (R) resource.copy();
-		resolveReferencesHelper.resolveReferencesIgnoreAndLogExceptions(idTranslationTable, connection, copy);
-
-		authorizationHelper.checkCreateAllowed(connection, user, copy);
-
 		Optional<Resource> exists = checkAlreadyExists(connection, entry.getRequest().getIfNoneExist(),
 				resource.getResourceType());
-
 		if (exists.isEmpty())
 		{
 			UUID id = UUID.randomUUID();
 			idTranslationTable.put(entry.getFullUrl(),
 					new IdType(resource.getResourceType().toString(), id.toString()));
-			createdResource = dao.createWithTransactionAndId(connection, resource, id);
 		}
 		else
 		{
@@ -127,6 +118,38 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 					existingResource.getIdElement().getIdPart()));
 			responseResult = responseGenerator.oneExists(existingResource, entry.getRequest().getIfNoneExist());
 		}
+	}
+
+	@Override
+	public void execute(Map<String, IdType> idTranslationTable, Connection connection)
+			throws SQLException, WebApplicationException
+	{
+		if (responseResult == null)
+		{
+			// TODO maybe check again if resource exists, could be that a previous command created it
+			referencesHelper.resolveTemporaryAndConditionalReferences(idTranslationTable, connection);
+
+			validationHelper.checkResourceValidForCreate(user, resource);
+
+			referencesHelper.resolveLogicalReferences(connection);
+
+			authorizationHelper.checkCreateAllowed(connection, user, resource);
+
+			createdResource = dao.createWithTransactionAndId(connection, resource, getId(idTranslationTable));
+		}
+	}
+
+	private UUID getId(Map<String, IdType> idTranslationTable)
+	{
+		IdType idType = idTranslationTable.get(entry.getFullUrl());
+		if (idType != null)
+		{
+			Optional<UUID> uuid = parameterConverter.toUuid(idType.getIdPart());
+			if (uuid.isPresent())
+				return uuid.get();
+		}
+
+		throw new RuntimeException("Error while retrieving id from id translation table");
 	}
 
 	private Optional<Resource> checkAlreadyExists(Connection connection, String ifNoneExist, ResourceType resourceType)
@@ -188,7 +211,7 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 				// retrieving the latest resource from db to include updated references
 				Resource createdResourceWithResolvedReferences = latestOrErrorIfDeletedOrNotFound(connection,
 						createdResource);
-				referenceCleaner.cleanupReferences(createdResourceWithResolvedReferences);
+				referenceCleaner.cleanLiteralReferences(createdResourceWithResolvedReferences);
 				eventManager.handleEvent(eventGenerator.newResourceCreatedEvent(createdResourceWithResolvedReferences));
 			}
 			catch (Exception e)

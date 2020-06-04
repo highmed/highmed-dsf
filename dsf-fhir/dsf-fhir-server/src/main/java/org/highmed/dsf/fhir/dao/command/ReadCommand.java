@@ -72,7 +72,7 @@ public class ReadCommand extends AbstractCommand implements Command
 	}
 
 	@Override
-	public void preExecute(Map<String, IdType> idTranslationTable)
+	public void preExecute(Map<String, IdType> idTranslationTable, Connection connection)
 	{
 	}
 
@@ -226,8 +226,8 @@ public class ReadCommand extends AbstractCommand implements Command
 	{
 		if (singleResult != null)
 		{
-			referenceCleaner.cleanupReferences(singleResult);
-			
+			referenceCleaner.cleanLiteralReferences(singleResult);
+
 			BundleEntryComponent resultEntry = new BundleEntryComponent();
 			resultEntry.setFullUrl(new IdType(serverBase, singleResult.getResourceType().name(),
 					singleResult.getIdElement().getIdPart(), null).getValue());
@@ -246,8 +246,8 @@ public class ReadCommand extends AbstractCommand implements Command
 		}
 		else if (multipleResult != null)
 		{
-			referenceCleaner.cleanupReferences(multipleResult);
-			
+			referenceCleaner.cleanLiteralReferences(multipleResult);
+
 			BundleEntryComponent resultEntry = new BundleEntryComponent();
 			resultEntry.setFullUrl(URL_UUID_PREFIX + UUID.randomUUID().toString());
 			BundleEntryResponseComponent response = resultEntry.getResponse();

@@ -57,24 +57,6 @@ public class TransactionCommandList implements CommandList
 		Map<Integer, BundleEntryComponent> results = new HashMap<>((int) ((commands.size() / 0.75) + 1));
 		try
 		{
-			Map<String, IdType> idTranslationTable = new HashMap<>();
-			for (Command c : commands)
-			{
-				try
-				{
-					logger.debug("Running pre-execute of command {} for entry at index {}", c.getClass().getName(),
-							c.getIndex());
-					c.preExecute(idTranslationTable);
-				}
-				catch (Exception e)
-				{
-					logger.warn("Error while running pre-execute of command " + c.getClass().getSimpleName()
-							+ " for entry at index " + c.getIndex() + ", abborting transaction", e);
-
-					throw e;
-				}
-			}
-
 			try (Connection connection = dataSource.getConnection())
 			{
 				if (hasModifyingCommand)
@@ -82,6 +64,24 @@ public class TransactionCommandList implements CommandList
 					connection.setReadOnly(false);
 					connection.setAutoCommit(false);
 					connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
+				}
+
+				Map<String, IdType> idTranslationTable = new HashMap<>();
+				for (Command c : commands)
+				{
+					try
+					{
+						logger.debug("Running pre-execute of command {} for entry at index {}", c.getClass().getName(),
+								c.getIndex());
+						c.preExecute(idTranslationTable, connection);
+					}
+					catch (Exception e)
+					{
+						logger.warn("Error while running pre-execute of command " + c.getClass().getSimpleName()
+								+ " for entry at index " + c.getIndex() + ", abborting transaction", e);
+
+						throw e;
+					}
 				}
 
 				for (Command c : commands)

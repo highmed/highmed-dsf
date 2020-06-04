@@ -32,7 +32,7 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 				Map.of("_include", Collections.singletonList("Organization:endpoint")));
 		assertNotNull(searchBundle);
 		assertEquals(2, searchBundle.getTotal());
-		assertEquals(3, searchBundle.getEntry().size());
+		assertEquals(4, searchBundle.getEntry().size());
 
 		BundleEntryComponent orgEntry1 = searchBundle.getEntry().get(0);
 		assertNotNull(orgEntry1);
@@ -46,11 +46,17 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(orgEntry2.getResource());
 		assertTrue(orgEntry2.getResource() instanceof Organization);
 
-		BundleEntryComponent eptEntry = searchBundle.getEntry().get(2);
-		assertNotNull(eptEntry);
-		assertEquals(SearchEntryMode.INCLUDE, eptEntry.getSearch().getMode());
-		assertNotNull(eptEntry.getResource());
-		assertTrue(eptEntry.getResource() instanceof Endpoint);
+		BundleEntryComponent eptEntry1 = searchBundle.getEntry().get(2);
+		assertNotNull(eptEntry1);
+		assertEquals(SearchEntryMode.INCLUDE, eptEntry1.getSearch().getMode());
+		assertNotNull(eptEntry1.getResource());
+		assertTrue(eptEntry1.getResource() instanceof Endpoint);
+		
+		BundleEntryComponent eptEntry2 = searchBundle.getEntry().get(3);
+		assertNotNull(eptEntry2);
+		assertEquals(SearchEntryMode.INCLUDE, eptEntry2.getSearch().getMode());
+		assertNotNull(eptEntry2.getResource());
+		assertTrue(eptEntry2.getResource() instanceof Endpoint);
 	}
 
 	@Test
@@ -60,7 +66,7 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 				Map.of("_revinclude", Collections.singletonList("Endpoint:organization")));
 		assertNotNull(searchBundle);
 		assertEquals(2, searchBundle.getTotal());
-		assertEquals(3, searchBundle.getEntry().size());
+		assertEquals(4, searchBundle.getEntry().size());
 
 		BundleEntryComponent orgEntry1 = searchBundle.getEntry().get(0);
 		assertNotNull(orgEntry1);
@@ -74,10 +80,16 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(orgEntry2.getResource());
 		assertTrue(orgEntry2.getResource() instanceof Organization);
 
-		BundleEntryComponent eptEntry = searchBundle.getEntry().get(2);
-		assertNotNull(eptEntry);
-		assertEquals(SearchEntryMode.INCLUDE, eptEntry.getSearch().getMode());
-		assertNotNull(eptEntry.getResource());
-		assertTrue(eptEntry.getResource() instanceof Endpoint);
+		BundleEntryComponent eptEntry1 = searchBundle.getEntry().get(2);
+		assertNotNull(eptEntry1);
+		assertEquals(SearchEntryMode.INCLUDE, eptEntry1.getSearch().getMode());
+		assertNotNull(eptEntry1.getResource());
+		assertTrue(eptEntry1.getResource() instanceof Endpoint);
+		
+		BundleEntryComponent eptEntry2 = searchBundle.getEntry().get(3);
+		assertNotNull(eptEntry2);
+		assertEquals(SearchEntryMode.INCLUDE, eptEntry2.getSearch().getMode());
+		assertNotNull(eptEntry2.getResource());
+		assertTrue(eptEntry2.getResource() instanceof Endpoint);
 	}
 }

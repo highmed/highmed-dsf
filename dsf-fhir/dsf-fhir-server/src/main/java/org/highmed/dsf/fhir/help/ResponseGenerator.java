@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.validation.ValidationResult;
 
 public class ResponseGenerator
 {
@@ -265,12 +266,13 @@ public class ResponseGenerator
 				.tag(new EntityTag(resource.getMeta().getVersionId(), true)).build();
 	}
 
-	public Response unknownReference(Resource resource, ResourceReference resourceReference)
+	public OperationOutcome unknownReference(Resource resource, ResourceReference resourceReference)
 	{
-		return unknownReference(null, resource, resourceReference);
+		return unknownReference(resource, resourceReference, null);
 	}
 
-	public Response unknownReference(Integer bundleIndex, Resource resource, ResourceReference resourceReference)
+	public OperationOutcome unknownReference(Resource resource, ResourceReference resourceReference,
+			Integer bundleIndex)
 	{
 		if (bundleIndex == null)
 			logger.warn("Unknown reference at {} in resource of type {} with id {}",
@@ -280,14 +282,13 @@ public class ResponseGenerator
 					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId(),
 					bundleIndex);
 
-		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+		return createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Unknown reference at " + resourceReference.getReferenceLocation() + " in resource of type "
 						+ resource.getResourceType().name() + " with id " + resource.getId()
 						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex));
-		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
-	public Response referenceTargetTypeNotSupportedByImplementation(Integer bundleIndex, Resource resource,
+	public OperationOutcome referenceTargetTypeNotSupportedByImplementation(Integer bundleIndex, Resource resource,
 			ResourceReference resourceReference)
 	{
 		if (bundleIndex == null)
@@ -300,15 +301,14 @@ public class ResponseGenerator
 					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId(),
 					bundleIndex);
 
-		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+		return createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Reference target type of reference at " + resourceReference.getReferenceLocation()
 						+ " in resource of type " + resource.getResourceType().name() + " with id " + resource.getId()
 						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex)
 						+ " not supported by this implementation");
-		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
-	public Response referenceTargetTypeNotSupportedByResource(Integer bundleIndex, Resource resource,
+	public OperationOutcome referenceTargetTypeNotSupportedByResource(Integer bundleIndex, Resource resource,
 			ResourceReference resourceReference)
 	{
 		if (bundleIndex == null)
@@ -320,14 +320,13 @@ public class ResponseGenerator
 					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId(),
 					bundleIndex);
 
-		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+		return createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Reference target type of reference at " + resourceReference.getReferenceLocation()
 						+ " in resource of type " + resource.getResourceType().name() + " with id " + resource.getId()
 						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex) + " not supported");
-		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
-	public Response referenceTargetNotFoundLocally(Integer bundleIndex, Resource resource,
+	public OperationOutcome referenceTargetNotFoundLocally(Integer bundleIndex, Resource resource,
 			ResourceReference resourceReference)
 	{
 		if (bundleIndex == null)
@@ -340,15 +339,14 @@ public class ResponseGenerator
 					resourceReference.getReference().getReference(), resourceReference.getReferenceLocation(),
 					resource.getResourceType().name(), resource.getId(), bundleIndex);
 
-		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+		return createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Reference target " + resourceReference.getReference().getReference() + " of reference at "
 						+ resourceReference.getReferenceLocation() + " in resource of type "
 						+ resource.getResourceType().name() + " with id " + resource.getId()
 						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex) + " not found");
-		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
-	public Response referenceTargetNotFoundRemote(Integer bundleIndex, Resource resource,
+	public OperationOutcome referenceTargetNotFoundRemote(Integer bundleIndex, Resource resource,
 			ResourceReference resourceReference, String serverBase)
 	{
 		if (bundleIndex == null)
@@ -362,16 +360,15 @@ public class ResponseGenerator
 					resourceReference.getReference().getReference(), resourceReference.getReferenceLocation(),
 					resource.getResourceType().name(), resource.getId(), bundleIndex, serverBase);
 
-		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+		return createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Reference target " + resourceReference.getReference().getReference() + " of reference at "
 						+ resourceReference.getReferenceLocation() + " in resource of type "
 						+ resource.getResourceType().name() + " with id " + resource.getId()
 						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex) + " not found on server "
 						+ serverBase);
-		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
-	public Response noEndpointFoundForLiteralExternalReference(Integer bundleIndex, Resource resource,
+	public OperationOutcome noEndpointFoundForLiteralExternalReference(Integer bundleIndex, Resource resource,
 			ResourceReference resourceReference)
 	{
 		if (bundleIndex == null)
@@ -385,15 +382,14 @@ public class ResponseGenerator
 					resourceReference.getReference().getReference(), resourceReference.getReferenceLocation(),
 					resource.getResourceType().name(), resource.getId(), bundleIndex);
 
-		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+		return createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"No Endpoint found for reference target " + resourceReference.getReference().getReference()
 						+ " of reference at " + resourceReference.getReferenceLocation() + " in resource of type "
 						+ resource.getResourceType().name() + " with id " + resource.getId()
 						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex) + " not found");
-		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
-	public Response badReference(boolean logicalNotConditional, Integer bundleIndex, Resource resource,
+	public OperationOutcome badReference(boolean logicalNotConditional, Integer bundleIndex, Resource resource,
 			ResourceReference resourceReference, String queryParameters,
 			List<SearchQueryParameterError> unsupportedQueryParameters)
 	{
@@ -413,17 +409,22 @@ public class ResponseGenerator
 					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId(),
 					bundleIndex, unsupportedQueryParameters.size() != 1 ? "s" : "", unsupportedQueryParametersString);
 
-		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+		return createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				(logicalNotConditional ? "Logical" : "Conditional") + " reference " + queryParameters + " at "
 						+ resourceReference.getReferenceLocation() + " in resource of type "
 						+ resource.getResourceType().name() + " with id " + resource.getId()
 						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex)
 						+ " contains unsupported queryparameter" + (unsupportedQueryParameters.size() != 1 ? "s" : "")
 						+ " " + unsupportedQueryParametersString);
-		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
-	public Response referenceTargetNotFoundLocallyByIdentifier(Integer bundleIndex, Resource resource,
+	public OperationOutcome referenceTargetNotFoundLocallyByIdentifier(Resource resource,
+			ResourceReference resourceReference)
+	{
+		return referenceTargetNotFoundLocallyByIdentifier(null, resource, resourceReference);
+	}
+
+	public OperationOutcome referenceTargetNotFoundLocallyByIdentifier(Integer bundleIndex, Resource resource,
 			ResourceReference resourceReference)
 	{
 		if (bundleIndex == null)
@@ -440,16 +441,15 @@ public class ResponseGenerator
 					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId(),
 					bundleIndex);
 
-		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+		return createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Reference target by identifier '" + resourceReference.getReference().getIdentifier().getSystem() + "|"
 						+ resourceReference.getReference().getIdentifier().getValue() + "' of reference at "
 						+ resourceReference.getReferenceLocation() + " in resource of type "
 						+ resource.getResourceType().name() + " with id " + resource.getId()
 						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex) + " not found");
-		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
-	public Response referenceTargetMultipleMatchesLocallyByIdentifier(Integer bundleIndex, Resource resource,
+	public OperationOutcome referenceTargetMultipleMatchesLocallyByIdentifier(Integer bundleIndex, Resource resource,
 			ResourceReference resourceReference, int overallCount)
 	{
 		if (bundleIndex == null)
@@ -466,65 +466,60 @@ public class ResponseGenerator
 					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId(),
 					bundleIndex);
 
-		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+		return createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Found " + overallCount + " matches for reference target by identifier '"
 						+ resourceReference.getReference().getIdentifier().getSystem() + "|"
 						+ resourceReference.getReference().getIdentifier().getValue() + "' of reference at "
 						+ resourceReference.getReferenceLocation() + " in resource of type "
 						+ resource.getResourceType().name() + " with id " + resource.getId()
 						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex) + " not found");
-		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
-	public Response referenceTargetNotFoundLocallyByCondition(Integer bundleIndex, Resource resource,
-			ResourceReference resourceReference, String queryParameters)
+	public OperationOutcome referenceTargetNotFoundLocallyByCondition(Integer bundleIndex, Resource resource,
+			ResourceReference resourceReference)
 	{
 		if (bundleIndex == null)
 			logger.warn(
-					"Reference target by identifier '{}|{}' of reference at {} in resource of type {} with id {} not found",
-					resourceReference.getReference().getIdentifier().getSystem(),
-					resourceReference.getReference().getIdentifier().getValue(),
-					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId());
+					"Reference target by condition '{}' of reference at {} in resource of type {} with id {} not found",
+					resourceReference.getReference().getReference(), resourceReference.getReferenceLocation(),
+					resource.getResourceType().name(), resource.getId());
 		else
 			logger.warn(
-					"Reference target by identifier '{}|{}' of reference at {} in resource of type {} with id {} at bundle index {} not found",
-					resourceReference.getReference().getIdentifier().getSystem(),
-					resourceReference.getReference().getIdentifier().getValue(),
-					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId(),
-					bundleIndex);
+					"Reference target by condition '{}' of reference at {} in resource of type {} with id {} at bundle index {} not found",
+					resourceReference.getReference().getReference(), resourceReference.getReferenceLocation(),
+					resource.getResourceType().name(), resource.getId(), bundleIndex);
 
-		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
-				"Reference target by identifier '" + resourceReference.getReference().getIdentifier().getSystem() + "|"
-						+ resourceReference.getReference().getIdentifier().getValue() + "' of reference at "
-						+ resourceReference.getReferenceLocation() + " in resource of type "
+		return createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+				"Reference target by condition '" + resourceReference.getReference().getReference()
+						+ "' of reference at " + resourceReference.getReferenceLocation() + " in resource of type "
 						+ resource.getResourceType().name() + " with id " + resource.getId()
 						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex) + " not found");
-		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
-	public Response referenceTargetMultipleMatchesLocallyByCondition(Integer bundleIndex, Resource resource,
-			ResourceReference resourceReference, int overallCount, String queryParameters)
+	public OperationOutcome referenceTargetMultipleMatchesLocallyByCondition(Integer bundleIndex, Resource resource,
+			ResourceReference resourceReference, int overallCount)
 	{
 		if (bundleIndex == null)
 			logger.warn(
 					"Found {} matches for reference target by condition '{}' of reference at {} in resource of type {} with id {}",
-					overallCount, queryParameters, resourceReference.getReferenceLocation(),
-					resource.getResourceType().name(), resource.getId());
+					overallCount, resourceReference.getReference().getReference(),
+					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId());
 		else
 			logger.warn(
 					"Found {} matches for reference target by condition '{}' of reference at {} in resource of type {} with id {} at bundle index {}",
-					overallCount, queryParameters, resourceReference.getReferenceLocation(),
-					resource.getResourceType().name(), resource.getId(), bundleIndex);
+					overallCount, resourceReference.getReference().getReference(),
+					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId(),
+					bundleIndex);
 
-		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
-				"Found " + overallCount + " matches for reference target by condition '" + queryParameters
-						+ "' of reference at " + resourceReference.getReferenceLocation() + " in resource of type "
+		return createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+				"Found " + overallCount + " matches for reference target by condition '"
+						+ resourceReference.getReference().getReference() + "' of reference at "
+						+ resourceReference.getReferenceLocation() + " in resource of type "
 						+ resource.getResourceType().name() + " with id " + resource.getId()
 						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex) + " not found");
-		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
-	public Response referenceTargetBadCondition(Integer bundleIndex, Resource resource,
+	public OperationOutcome referenceTargetBadCondition(Integer bundleIndex, Resource resource,
 			ResourceReference resourceReference)
 	{
 		if (bundleIndex == null)
@@ -537,12 +532,11 @@ public class ResponseGenerator
 					resourceReference.getReference().getReference(), resourceReference.getReferenceLocation(),
 					resource.getResourceType().name(), resource.getId(), bundleIndex);
 
-		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+		return createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Bad conditional reference target '" + resourceReference.getReference().getReference()
 						+ "' of reference at " + resourceReference.getReferenceLocation() + " in resource of type "
 						+ resource.getResourceType().name() + " with id " + resource.getId()
 						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex) + " not found");
-		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
 	public Response badDeleteRequestUrl(int bundleIndex, String url)
@@ -733,5 +727,17 @@ public class ResponseGenerator
 		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				resourceTypeName + " with id " + id + " not found");
 		return Response.status(Status.NOT_FOUND).entity(outcome).build();
+	}
+
+	public Response forbiddenNotValid(String operation, User user, String resourceType,
+			ValidationResult validationResult)
+	{
+		OperationOutcome outcome = new OperationOutcome();
+		validationResult.populateOperationOutcome(outcome);
+
+		logger.warn("Operation {} forbidden, {} resource not valid for user '{}'", operation, resourceType,
+				user.getName());
+
+		return Response.status(Status.FORBIDDEN).entity(outcome).build();
 	}
 }
