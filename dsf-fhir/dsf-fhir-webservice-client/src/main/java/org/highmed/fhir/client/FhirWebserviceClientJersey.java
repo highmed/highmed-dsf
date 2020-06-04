@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
@@ -65,8 +64,7 @@ import org.highmed.dsf.fhir.adapter.TaskJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.TaskXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.ValueSetJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.ValueSetXmlFhirAdapter;
-import org.highmed.dsf.fhir.service.ReferenceExtractor;
-import org.highmed.dsf.fhir.service.ResourceReference;
+import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.IdType;
@@ -89,17 +87,17 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 {
 	private static final Logger logger = LoggerFactory.getLogger(FhirWebserviceClientJersey.class);
 
-	private final ReferenceExtractor referenceExtractor;
+	private final ReferenceCleaner referenceCleaner;
 	private final Map<String, Class<?>> resourceTypeByNames = new HashMap<>();
 
 	public FhirWebserviceClientJersey(String baseUrl, KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword,
 			String proxySchemeHostPort, String proxyUserName, char[] proxyPassword, int connectTimeout, int readTimeout,
-			ObjectMapper objectMapper, FhirContext fhirContext, ReferenceExtractor referenceExtractor)
+			ObjectMapper objectMapper, FhirContext fhirContext, ReferenceCleaner referenceCleaner)
 	{
 		super(baseUrl, trustStore, keyStore, keyStorePassword, proxySchemeHostPort, proxyUserName, proxyPassword,
 				connectTimeout, readTimeout, objectMapper, components(fhirContext));
 
-		this.referenceExtractor = referenceExtractor;
+		this.referenceCleaner = referenceCleaner;
 
 		registeredComponents.stream().filter(e -> e instanceof AbstractFhirAdapter).map(e -> (AbstractFhirAdapter<?>) e)
 				.forEach(a -> resourceTypeByNames.put(a.getResourceTypeName(), a.getResourceType()));
@@ -167,7 +165,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 
 		if (Status.CREATED.getStatusCode() == response.getStatus())
 			// TODO remove workaround if HAPI bug fixed
-			return (R) fixBundle(response.readEntity(resource.getClass()));
+			return (R) referenceCleaner.cleanReferenceResourcesIfBundle(response.readEntity(resource.getClass()));
 		else
 			throw handleError(response);
 	}
@@ -191,7 +189,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 
 		if (Status.CREATED.getStatusCode() == response.getStatus())
 			// TODO remove workaround if HAPI bug fixed
-			return (R) fixBundle(response.readEntity(resource.getClass()));
+			return (R) referenceCleaner.cleanReferenceResourcesIfBundle(response.readEntity(resource.getClass()));
 		else
 			throw handleError(response);
 	}
@@ -217,7 +215,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 
 		if (Status.OK.getStatusCode() == response.getStatus())
 			// TODO remove workaround if HAPI bug fixed
-			return (R) fixBundle(response.readEntity(resource.getClass()));
+			return (R) referenceCleaner.cleanReferenceResourcesIfBundle(response.readEntity(resource.getClass()));
 		else
 			throw handleError(response);
 	}
@@ -250,7 +248,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 
 		if (Status.CREATED.getStatusCode() == response.getStatus() || Status.OK.getStatusCode() == response.getStatus())
 			// TODO remove workaround if HAPI bug fixed
-			return (R) fixBundle(response.readEntity(resource.getClass()));
+			return (R) referenceCleaner.cleanReferenceResourcesIfBundle(response.readEntity(resource.getClass()));
 		else
 			throw handleError(response);
 	}
@@ -367,7 +365,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 				response.getStatusInfo().getReasonPhrase());
 		if (Status.OK.getStatusCode() == response.getStatus())
 			// TODO remove workaround if HAPI bug fixed
-			return fixBundle(response.readEntity(resourceType));
+			return referenceCleaner.cleanReferenceResourcesIfBundle(response.readEntity(resourceType));
 		else
 			throw handleError(response);
 	}
@@ -386,7 +384,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 				response.getStatusInfo().getReasonPhrase());
 		if (Status.OK.getStatusCode() == response.getStatus())
 			// TODO remove workaround if HAPI bug fixed
-			return fixBundle(response.readEntity(resourceType));
+			return referenceCleaner.cleanReferenceResourcesIfBundle(response.readEntity(resourceType));
 		else
 			throw handleError(response);
 	}
@@ -406,7 +404,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 				response.getStatusInfo().getReasonPhrase());
 		if (Status.OK.getStatusCode() == response.getStatus())
 			// TODO remove workaround if HAPI bug fixed
-			return fixBundle((Resource) response.readEntity(resourceTypeByNames.get(resourceTypeName)));
+			return referenceCleaner.cleanReferenceResourcesIfBundle((Resource) response.readEntity(resourceTypeByNames.get(resourceTypeName)));
 		else
 			throw handleError(response);
 
@@ -428,7 +426,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 				response.getStatusInfo().getReasonPhrase());
 		if (Status.OK.getStatusCode() == response.getStatus())
 			// TODO remove workaround if HAPI bug fixed
-			return fixBundle((Resource) response.readEntity(resourceTypeByNames.get(resourceTypeName)));
+			return referenceCleaner.cleanReferenceResourcesIfBundle((Resource) response.readEntity(resourceTypeByNames.get(resourceTypeName)));
 		else
 			throw handleError(response);
 	}
@@ -478,30 +476,30 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 			throw handleError(response);
 	}
 
-	// FIXME bug in HAPI framework
-	private <R extends Resource> R fixBundle(R readEntity)
-	{
-		if (readEntity instanceof Bundle)
-		{
-			Bundle b = (Bundle) readEntity;
-			b.getEntry().stream().map(e -> e.getResource()).forEach(this::fix);
-		}
-
-		return readEntity;
-	}
-
-	private void fix(Resource resource)
-	{
-		if (resource instanceof Bundle)
-		{
-			fixBundle(resource);
-		}
-		else
-		{
-			Stream<ResourceReference> references = referenceExtractor.getReferences(resource);
-			references.forEach(r -> r.getReference().setResource(null));
-		}
-	}
+	// // FIXME bug in HAPI framework
+	// private <R extends Resource> R fixBundle(R readEntity)
+	// {
+	// if (readEntity instanceof Bundle)
+	// {
+	// Bundle b = (Bundle) readEntity;
+	// b.getEntry().stream().map(e -> e.getResource()).forEach(this::fixBundleEntry);
+	// }
+	//
+	// return readEntity;
+	// }
+	//
+	// private void fixBundleEntry(Resource resource)
+	// {
+	// if (resource instanceof Bundle)
+	// {
+	// fixBundle(resource);
+	// }
+	// else
+	// {
+	// Stream<ResourceReference> references = referenceExtractor.getReferences(resource);
+	// references.forEach(r -> r.getReference().setResource(null));
+	// }
+	// }
 
 	@Override
 	public <R extends Resource> boolean exists(Class<R> resourceType, String id, String version)
@@ -541,7 +539,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 				response.getStatusInfo().getReasonPhrase());
 		if (Status.OK.getStatusCode() == response.getStatus())
 			// TODO remove workaround if HAPI bug fixed
-			return fixBundle(response.readEntity(Bundle.class));
+			return referenceCleaner.cleanReferenceResourcesIfBundle(response.readEntity(Bundle.class));
 		else
 			throw handleError(response);
 	}
@@ -562,7 +560,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 
 		if (Status.OK.getStatusCode() == response.getStatus())
 			// TODO remove workaround if HAPI bug fixed
-			return fixBundle(response.readEntity(Bundle.class));
+			return referenceCleaner.cleanReferenceResourcesIfBundle(response.readEntity(Bundle.class));
 		else
 			throw handleError(response);
 	}
