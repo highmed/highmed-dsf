@@ -1,0 +1,61 @@
+<ValueSet xmlns="http://hl7.org/fhir">
+  <meta>
+    <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
+    <tag>
+      <system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
+	  <code value="REMOTE"/>
+	</tag>
+  </meta>
+  <text>
+    <status value="generated"/>
+    <div xmlns="http://www.w3.org/1999/xhtml">
+      <h2>MimeType</h2>
+      <div>
+        <p>This value set includes all possible codes from BCP-13 (http://tools.ietf.org/html/bcp13)</p>
+
+      </div>
+      <p>This value set includes codes from the following code systems:</p>
+      <ul>
+        <li>Include all codes defined in 
+          <code>urn:ietf:bcp:13</code>
+        </li>
+      </ul>
+    </div>
+  </text>
+  <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+    <valueCode value="fhir"/>
+  </extension>
+  <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status">
+    <valueCode value="normative"/>
+  </extension>
+  <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-normative-version">
+    <valueCode value="4.0.0"/>
+  </extension>
+  <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
+    <valueInteger value="5"/>
+  </extension>
+  <url value="http://hl7.org/fhir/ValueSet/mimetypes"/>
+  <identifier>
+    <system value="urn:ietf:rfc:3986"/>
+    <value value="urn:oid:2.16.840.1.113883.4.642.3.1024"/>
+  </identifier>
+  <version value="4.0.1"/>
+  <name value="Mime Types"/>
+  <title value="MimeType"/>
+  <status value="active"/>
+  <experimental value="false"/>
+  <date value="2019-11-01T09:29:23+11:00"/>
+  <publisher value="HL7 International - FHIR-Infrastructure"/>
+  <contact>
+    <telecom>
+      <system value="url"/>
+      <value value="http://hl7.org/fhir"/>
+    </telecom>
+  </contact>
+  <description value="This value set includes all possible codes from BCP-13 (http://tools.ietf.org/html/bcp13)"/>
+  <compose>
+    <include>
+      <system value="urn:ietf:bcp:13"/>
+    </include>
+  </compose>
+</ValueSet>
