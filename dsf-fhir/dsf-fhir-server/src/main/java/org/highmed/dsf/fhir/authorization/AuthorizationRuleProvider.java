@@ -2,45 +2,65 @@ package org.highmed.dsf.fhir.authorization;
 
 import java.util.Optional;
 
+import org.hl7.fhir.r4.model.ActivityDefinition;
+import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.r4.model.HealthcareService;
+import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.NamingSystem;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.PractitionerRole;
+import org.hl7.fhir.r4.model.Provenance;
+import org.hl7.fhir.r4.model.ResearchStudy;
+import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.Subscription;
+import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.r4.model.ValueSet;
+
 public interface AuthorizationRuleProvider
 {
-	ActivityDefinitionAuthorizationRule getActivityDefinitionAuthorizationRule();
+	AuthorizationRule<ActivityDefinition> getActivityDefinitionAuthorizationRule();
 
-	BinaryAuthorizationRule getBinaryAuthorizationRule();
+	AuthorizationRule<Binary> getBinaryAuthorizationRule();
 
-	BundleAuthorizationRule getBundleAuthorizationRule();
+	AuthorizationRule<Bundle> getBundleAuthorizationRule();
 
-	CodeSystemAuthorizationRule getCodeSystemAuthorizationRule();
+	AuthorizationRule<CodeSystem> getCodeSystemAuthorizationRule();
 
-	EndpointAuthorizationRule getEndpointAuthorizationRule();
+	AuthorizationRule<Endpoint> getEndpointAuthorizationRule();
 
-	GroupAuthorizationRule getGroupAuthorizationRule();
+	AuthorizationRule<Group> getGroupAuthorizationRule();
 
-	HealthcareServiceAuthorizationRule getHealthcareServiceAuthorizationRule();
+	AuthorizationRule<HealthcareService> getHealthcareServiceAuthorizationRule();
 
-	LocationAuthorizationRule getLocationAuthorizationRule();
+	AuthorizationRule<Location> getLocationAuthorizationRule();
 
-	NamingSystemAuthorizationRule getNamingSystemAuthorizationRule();
+	AuthorizationRule<NamingSystem> getNamingSystemAuthorizationRule();
 
-	OrganizationAuthorizationRule getOrganizationAuthorizationRule();
+	AuthorizationRule<Organization> getOrganizationAuthorizationRule();
 
-	PatientAuthorizationRule getPatientAuthorizationRule();
+	AuthorizationRule<Patient> getPatientAuthorizationRule();
 
-	PractitionerAuthorizationRule getPractitionerAuthorizationRule();
+	AuthorizationRule<Practitioner> getPractitionerAuthorizationRule();
 
-	PractitionerRoleAuthorizationRule getPractitionerRoleAuthorizationRule();
+	AuthorizationRule<PractitionerRole> getPractitionerRoleAuthorizationRule();
 
-	ProvenanceAuthorizationRule getProvenanceAuthorizationRule();
+	AuthorizationRule<Provenance> getProvenanceAuthorizationRule();
 
-	ResearchStudyAuthorizationRule getResearchStudyAuthorizationRule();
+	AuthorizationRule<ResearchStudy> getResearchStudyAuthorizationRule();
 
-	StructureDefinitionAuthorizationRule getStructureDefinitionAuthorizationRule();
+	AuthorizationRule<StructureDefinition> getStructureDefinitionAuthorizationRule();
 
-	SubscriptionAuthorizationRule getSubscriptionAuthorizationRule();
+	AuthorizationRule<Subscription> getSubscriptionAuthorizationRule();
 
-	TaskAuthorizationRule getTaskAuthorizationRule();
+	AuthorizationRule<Task> getTaskAuthorizationRule();
 
-	ValueSetAuthorizationRule getValueSetAuthorizationRule();
+	AuthorizationRule<ValueSet> getValueSetAuthorizationRule();
 
 	Optional<AuthorizationRule<?>> getAuthorizationRule(Class<?> resourceClass);
 

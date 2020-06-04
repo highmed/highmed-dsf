@@ -2,6 +2,7 @@ package org.highmed.dsf.fhir.spring.config;
 
 import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.highmed.dsf.fhir.service.ReferenceCleanerImpl;
+import org.highmed.dsf.fhir.service.ReferenceExtractor;
 import org.highmed.dsf.fhir.service.ReferenceExtractorImpl;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.highmed.dsf.fhir.service.ReferenceResolverImpl;
@@ -26,7 +27,7 @@ public class ReferenceConfig
 	private ClientConfig clientConfig;
 
 	@Bean
-	public ReferenceExtractorImpl referenceExtractor()
+	public ReferenceExtractor referenceExtractor()
 	{
 		return new ReferenceExtractorImpl();
 	}
