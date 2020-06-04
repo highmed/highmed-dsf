@@ -30,11 +30,27 @@ public class ValidationSupportWithCustomResources implements IValidationSupport
 				.forEach(r ->
 				{
 					if (r instanceof StructureDefinition)
-						structureDefinitionsByUrl.put(((StructureDefinition) r).getUrl(), (StructureDefinition) r);
+					{
+						StructureDefinition sd = (StructureDefinition) r;
+
+						structureDefinitionsByUrl.put(sd.getUrl(), sd);
+						if (sd.hasVersion())
+							structureDefinitionsByUrl.put(sd.getUrl() + "|" + sd.getVersion(), sd);
+					}
 					else if (r instanceof CodeSystem)
-						codeSystemsByUrl.put(((CodeSystem) r).getUrl(), (CodeSystem) r);
+					{
+						CodeSystem cs = (CodeSystem) r;
+						codeSystemsByUrl.put(cs.getUrl(), cs);
+						if (cs.hasVersion())
+							codeSystemsByUrl.put(cs.getUrl() + "|" + cs.getVersion(), cs);
+					}
 					else if (r instanceof ValueSet)
-						valueSetsByUrl.put(((ValueSet) r).getUrl(), (ValueSet) r);
+					{
+						ValueSet vs = (ValueSet) r;
+						valueSetsByUrl.put(vs.getUrl(), vs);
+						if (vs.hasVersion())
+							valueSetsByUrl.put(vs.getUrl() + "|" + vs.getVersion(), vs);
+					}
 				});
 	}
 
