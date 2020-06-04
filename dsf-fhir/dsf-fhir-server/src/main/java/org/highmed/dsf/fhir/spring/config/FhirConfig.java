@@ -5,6 +5,7 @@ import java.util.Locale;
 
 import org.highmed.dsf.fhir.service.ValidationSupportWithFetchFromDb;
 import org.highmed.dsf.fhir.service.ValidationSupportWithFetchFromDbWithTransaction;
+import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +47,8 @@ public class FhirConfig
 		return new ValidationSupportChain(new InMemoryTerminologyServerValidationSupport(fhirContext()),
 				new ValidationSupportWithFetchFromDb(fhirContext(), daoConfig.structureDefinitionDao(),
 						daoConfig.structureDefinitionSnapshotDao(), daoConfig.codeSystemDao(), daoConfig.valueSetDao()),
-				new DefaultProfileValidationSupport(fhirContext()));
+				new DefaultProfileValidationSupport(fhirContext()),
+				new CommonCodeSystemsTerminologyService(fhirContext()));
 	}
 
 	@Bean
@@ -54,9 +56,10 @@ public class FhirConfig
 	public IValidationSupport validationSupportWithTransaction(Connection connection)
 	{
 		return new ValidationSupportChain(new InMemoryTerminologyServerValidationSupport(fhirContext()),
-				new ValidationSupportWithFetchFromDbWithTransaction(fhirContext(),
-						daoConfig.structureDefinitionDao(), daoConfig.structureDefinitionSnapshotDao(),
-						daoConfig.codeSystemDao(), daoConfig.valueSetDao(), connection),
-				new DefaultProfileValidationSupport(fhirContext()));
+				new ValidationSupportWithFetchFromDbWithTransaction(fhirContext(), daoConfig.structureDefinitionDao(),
+						daoConfig.structureDefinitionSnapshotDao(), daoConfig.codeSystemDao(), daoConfig.valueSetDao(),
+						connection),
+				new DefaultProfileValidationSupport(fhirContext()),
+				new CommonCodeSystemsTerminologyService(fhirContext()));
 	}
 }
