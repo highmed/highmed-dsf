@@ -153,14 +153,15 @@ public class StructureDefinitionAuthorizationRule
 				if (isSame(oldResource, newResource) && statusOk(oldResource, newResource))
 				{
 					logger.info(
-							"Update of StructureDefinition authorized for local user '{}', criteria, type and payload same as existing StructureDefinition",
-							user.getName());
-					return Optional.of("local user; criteria, type and payload same as existing StructureDefinition");
+							"Update of StructureDefinition authorized for local user '{}', url and version same as existing StructureDefinition, status change {} -> {} ok",
+							user.getName(), oldResource.getStatus(), newResource.getStatus());
+					return Optional.of("local user; url and version same as existing StructureDefinition");
 				}
 				else
 				{
 					logger.warn(
-							"Update of StructureDefinition unauthorized, other StructureDefinition with criteria, type and payload already exists");
+							"Update of StructureDefinition unauthorized, other StructureDefinition with same url and version exists, illegal status change {} -> {}",
+							oldResource.getStatus(), newResource.getStatus());
 					return Optional.empty();
 				}
 			}
