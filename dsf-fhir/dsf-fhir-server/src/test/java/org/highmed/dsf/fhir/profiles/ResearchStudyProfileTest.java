@@ -58,9 +58,7 @@ public class ResearchStudyProfileTest
 		result.getMessages().stream().map(m -> m.getLocationString() + " " + m.getLocationLine() + ":"
 				+ m.getLocationCol() + " - " + m.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
 
-		assertEquals(0,
-				result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())).count());
-		
-		System.out.println(validationRule.getFhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(res));
+		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
 	}
 }
