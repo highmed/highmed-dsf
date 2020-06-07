@@ -1,31 +1,30 @@
 package org.highmed.dsf.fhir.dao.command;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Map;
-import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Function;
+
+import javax.ws.rs.WebApplicationException;
 
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
-import org.highmed.dsf.fhir.dao.StructureDefinitionSnapshotDao;
 import org.highmed.dsf.fhir.event.EventGenerator;
 import org.highmed.dsf.fhir.event.EventManager;
-import org.highmed.dsf.fhir.function.ConsumerWithSqlAndResourceNotFoundException;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.highmed.dsf.fhir.service.ReferenceExtractor;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
-import org.highmed.dsf.fhir.service.SnapshotDependencies;
-import org.highmed.dsf.fhir.service.SnapshotDependencyAnalyzer;
 import org.highmed.dsf.fhir.service.SnapshotGenerator;
 import org.highmed.dsf.fhir.service.SnapshotGenerator.SnapshotWithValidationMessages;
-import org.highmed.dsf.fhir.service.SnapshotInfo;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,9 +32,8 @@ public class CreateStructureDefinitionCommand extends CreateCommand<StructureDef
 {
 	private static final Logger logger = LoggerFactory.getLogger(CreateStructureDefinitionCommand.class);
 
-	private final StructureDefinitionSnapshotDao snapshotDao;
+	private final StructureDefinitionDao snapshotDao;
 	private final Function<Connection, SnapshotGenerator> snapshotGenerator;
-	private final SnapshotDependencyAnalyzer snapshotDependencyAnalyzer;
 
 	private StructureDefinition resourceWithSnapshot;
 
@@ -45,8 +43,7 @@ public class CreateStructureDefinitionCommand extends CreateCommand<StructureDef
 			ParameterConverter parameterConverter, ResponseGenerator responseGenerator,
 			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver,
 			ReferenceCleaner referenceCleaner, EventManager eventManager, EventGenerator eventGenerator,
-			StructureDefinitionSnapshotDao snapshotDao, Function<Connection, SnapshotGenerator> snapshotGenerator,
-			SnapshotDependencyAnalyzer snapshotDependencyAnalyzer)
+			StructureDefinitionDao snapshotDao, Function<Connection, SnapshotGenerator> snapshotGenerator)
 	{
 		super(index, user, bundle, entry, serverBase, authorizationHelper, validationHelper, resource, dao,
 				exceptionHandler, parameterConverter, responseGenerator, referenceExtractor, referenceResolver,
@@ -54,66 +51,41 @@ public class CreateStructureDefinitionCommand extends CreateCommand<StructureDef
 
 		this.snapshotDao = snapshotDao;
 		this.snapshotGenerator = snapshotGenerator;
-		this.snapshotDependencyAnalyzer = snapshotDependencyAnalyzer;
 	}
 
 	@Override
 	public void preExecute(Map<String, IdType> idTranslationTable, Connection connection)
 	{
-		resourceWithSnapshot = resource.hasSnapshot() ? resource.copy() : null;
+		resourceWithSnapshot = resource.hasSnapshot() ? resource.copy() : generateSnapshot(connection, resource.copy());
 		resource.setSnapshot(null);
 
 		super.preExecute(idTranslationTable, connection);
 	}
 
-	@Override
-	public Optional<BundleEntryComponent> postExecute(Connection connection)
+	private StructureDefinition generateSnapshot(Connection connection, StructureDefinition resource)
 	{
-		if (responseResult != null)
-			return super.postExecute(connection);
+		logger.debug("Generating snapshot for bundle entry at index {}", index);
+		SnapshotWithValidationMessages s = snapshotGenerator.apply(connection).generateSnapshot(resource);
 
-		if (resourceWithSnapshot != null)
+		if (s.getMessages().stream()
+				.anyMatch(m -> IssueSeverity.FATAL.equals(m.getLevel()) || IssueSeverity.ERROR.equals(m.getLevel())))
 		{
-			handleSnapshot(connection, resourceWithSnapshot,
-					info -> snapshotDao.createWithTransaction(connection,
-							parameterConverter.toUuid(resourceWithSnapshot.getResourceType().name(),
-									createdResource.getIdElement().getIdPart()),
-							resourceWithSnapshot, info));
-		}
-		else if (createdResource != null)
-		{
-			try
-			{
-				SnapshotWithValidationMessages s = snapshotGenerator.apply(connection)
-						.generateSnapshot(createdResource);
-
-				if (s != null && s.getSnapshot() != null && s.getMessages().isEmpty())
-					handleSnapshot(connection, s.getSnapshot(),
-							info -> snapshotDao
-									.createWithTransaction(connection,
-											parameterConverter.toUuid(createdResource.getResourceType().name(),
-													createdResource.getIdElement().getIdPart()),
-											createdResource, info));
-			}
-			catch (Exception e)
-			{
-				logger.warn("Error while generating snapshot for StructureDefinition with id "
-						+ createdResource.getIdElement().getIdPart(), e);
-			}
+			throw new WebApplicationException(
+					responseGenerator.unableToGenerateSnapshot(resource, index, s.getMessages()));
 		}
 
-		return super.postExecute(connection);
+		return s.getSnapshot();
 	}
 
-	private void handleSnapshot(Connection connection, StructureDefinition snapshot,
-			ConsumerWithSqlAndResourceNotFoundException<SnapshotInfo> dbOp)
+	@Override
+	protected StructureDefinition createWithTransactionAndId(Connection connection, StructureDefinition resource,
+			UUID uuid) throws SQLException
 	{
-		SnapshotDependencies dependencies = snapshotDependencyAnalyzer.analyzeSnapshotDependencies(snapshot);
+		StructureDefinition created = super.createWithTransactionAndId(connection, resource, uuid);
 
-		exceptionHandler.catchAndLogSqlException(
-				() -> snapshotDao.deleteAllByDependencyWithTransaction(connection, snapshot.getUrl()));
+		if (resourceWithSnapshot != null)
+			snapshotDao.createWithTransactionAndId(connection, resourceWithSnapshot, uuid);
 
-		exceptionHandler.catchAndLogSqlAndResourceNotFoundException(resource.getResourceType().name(),
-				() -> dbOp.accept(new SnapshotInfo(dependencies)));
+		return created;
 	}
 }

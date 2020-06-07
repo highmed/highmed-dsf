@@ -27,7 +27,9 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.UriType;
+import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -739,5 +741,118 @@ public class ResponseGenerator
 				user.getName());
 
 		return Response.status(Status.FORBIDDEN).entity(outcome).build();
+	}
+
+	public Response unableToGenerateSnapshot(StructureDefinition resource, Integer bundleIndex,
+			List<ValidationMessage> messages)
+	{
+		if (bundleIndex == null)
+			logger.warn(
+					"Unable to generate StructureDefinition snapshot for profile with url {}, version {} and id {}: {}",
+					resource.getUrl(), resource.getVersion(), resource.getId());
+		else
+			logger.warn(
+					"Unable to generate StructureDefinition snapshot for profile with url {}, version {} and id {} at bundle index {}: {}",
+					resource.getUrl(), resource.getVersion(), resource.getId(), bundleIndex);
+
+		OperationOutcome outcome = new OperationOutcome();
+
+		messages.forEach(m -> outcome.addIssue().setSeverity(convert(m.getLevel())).setCode(convert(m.getType()))
+				.setDiagnostics(m.summary()));
+
+		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
+	}
+
+	private IssueSeverity convert(org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity severity)
+	{
+		switch (severity)
+		{
+			case FATAL:
+				return IssueSeverity.FATAL;
+			case ERROR:
+				return IssueSeverity.ERROR;
+			case WARNING:
+				return IssueSeverity.WARNING;
+			case INFORMATION:
+				return IssueSeverity.INFORMATION;
+			case NULL:
+				return IssueSeverity.NULL;
+			default:
+				throw new RuntimeException("IssueSeverity " + severity + " not supported");
+		}
+	}
+
+	private IssueType convert(org.hl7.fhir.utilities.validation.ValidationMessage.IssueType type)
+	{
+		switch (type)
+		{
+			case INVALID:
+				return IssueType.INVALID;
+			case STRUCTURE:
+				return IssueType.STRUCTURE;
+			case REQUIRED:
+				return IssueType.REQUIRED;
+			case VALUE:
+				return IssueType.VALUE;
+			case INVARIANT:
+				return IssueType.INVARIANT;
+			case SECURITY:
+				return IssueType.SECURITY;
+			case LOGIN:
+				return IssueType.LOGIN;
+			case UNKNOWN:
+				return IssueType.UNKNOWN;
+			case EXPIRED:
+				return IssueType.EXPIRED;
+			case FORBIDDEN:
+				return IssueType.FORBIDDEN;
+			case SUPPRESSED:
+				return IssueType.SUPPRESSED;
+			case PROCESSING:
+				return IssueType.PROCESSING;
+			case NOTSUPPORTED:
+				return IssueType.NOTSUPPORTED;
+			case DUPLICATE:
+				return IssueType.DUPLICATE;
+			case MULTIPLEMATCHES:
+				return IssueType.MULTIPLEMATCHES;
+			case NOTFOUND:
+				return IssueType.NOTFOUND;
+			case DELETED:
+				return IssueType.DELETED;
+			case TOOLONG:
+				return IssueType.TOOLONG;
+			case CODEINVALID:
+				return IssueType.CODEINVALID;
+			case EXTENSION:
+				return IssueType.EXTENSION;
+			case TOOCOSTLY:
+				return IssueType.TOOCOSTLY;
+			case BUSINESSRULE:
+				return IssueType.BUSINESSRULE;
+			case CONFLICT:
+				return IssueType.CONFLICT;
+			case TRANSIENT:
+				return IssueType.TRANSIENT;
+			case LOCKERROR:
+				return IssueType.LOCKERROR;
+			case NOSTORE:
+				return IssueType.NOSTORE;
+			case EXCEPTION:
+				return IssueType.EXCEPTION;
+			case TIMEOUT:
+				return IssueType.TIMEOUT;
+			case INCOMPLETE:
+				return IssueType.INCOMPLETE;
+			case THROTTLED:
+				return IssueType.THROTTLED;
+			case INFORMATIONAL:
+				return IssueType.INFORMATIONAL;
+			case NULL:
+				return IssueType.NULL;
+
+			default:
+				throw new RuntimeException("IssueType " + type + " not supported");
+		}
 	}
 }

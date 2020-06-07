@@ -2,7 +2,6 @@ package org.highmed.dsf.fhir.spring.config;
 
 import java.sql.Connection;
 
-import org.highmed.dsf.fhir.service.SnapshotDependencyAnalyzer;
 import org.highmed.dsf.fhir.service.SnapshotGenerator;
 import org.highmed.dsf.fhir.service.SnapshotGeneratorImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,10 +16,13 @@ public class SnapshotConfig
 	@Autowired
 	private FhirConfig fhirConfig;
 
+	@Autowired
+	private ValidationConfig validationConfig;
+
 	@Bean
 	public SnapshotGenerator snapshotGenerator()
 	{
-		return new SnapshotGeneratorImpl(fhirConfig.fhirContext(), fhirConfig.validationSupport());
+		return new SnapshotGeneratorImpl(fhirConfig.fhirContext(), validationConfig.validationSupport());
 	}
 
 	@Bean
@@ -28,12 +30,6 @@ public class SnapshotConfig
 	public SnapshotGenerator snapshotGeneratorWithTransaction(Connection connection)
 	{
 		return new SnapshotGeneratorImpl(fhirConfig.fhirContext(),
-				fhirConfig.validationSupportWithTransaction(connection));
-	}
-
-	@Bean
-	public SnapshotDependencyAnalyzer snapshotDependencyAnalyzer()
-	{
-		return new SnapshotDependencyAnalyzer();
+				validationConfig.validationSupportWithTransaction(connection));
 	}
 }

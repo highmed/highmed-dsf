@@ -26,7 +26,6 @@ import org.highmed.dsf.fhir.dao.ProvenanceDao;
 import org.highmed.dsf.fhir.dao.ResearchStudyDao;
 import org.highmed.dsf.fhir.dao.ResourceDao;
 import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
-import org.highmed.dsf.fhir.dao.StructureDefinitionSnapshotDao;
 import org.highmed.dsf.fhir.dao.SubscriptionDao;
 import org.highmed.dsf.fhir.dao.TaskDao;
 import org.highmed.dsf.fhir.dao.ValueSetDao;
@@ -73,7 +72,7 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	private final ProvenanceDao provenanceDao;
 	private final ResearchStudyDao researchStudyDao;
 	private final StructureDefinitionDao structureDefinitionDao;
-	private final StructureDefinitionSnapshotDao structureDefinitionSnapshotDao;
+	private final StructureDefinitionDao structureDefinitionSnapshotDao;
 	private final SubscriptionDao subscriptionDao;
 	private final TaskDao taskDao;
 	private final ValueSetDao valueSetDao;
@@ -86,9 +85,8 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 			HealthcareServiceDao healthcareServiceDao, LocationDao locationDao, NamingSystemDao namingSystemDao,
 			OrganizationDao organizationDao, PatientDao patientDao, PractitionerDao practitionerDao,
 			PractitionerRoleDao practitionerRoleDao, ProvenanceDao provenanceDao, ResearchStudyDao researchStudyDao,
-			StructureDefinitionDao structureDefinitionDao,
-			StructureDefinitionSnapshotDao structureDefinitionSnapshotDao, SubscriptionDao subscriptionDao,
-			TaskDao taskDao, ValueSetDao valueSetDao)
+			StructureDefinitionDao structureDefinitionDao, StructureDefinitionDao structureDefinitionSnapshotDao,
+			SubscriptionDao subscriptionDao, TaskDao taskDao, ValueSetDao valueSetDao)
 	{
 		this.dataSource = dataSource;
 		this.activityDefinitionDao = activityDefinitionDao;
@@ -279,7 +277,7 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	}
 
 	@Override
-	public StructureDefinitionSnapshotDao getStructureDefinitionSnapshotDao()
+	public StructureDefinitionDao getStructureDefinitionSnapshotDao()
 	{
 		return structureDefinitionSnapshotDao;
 	}

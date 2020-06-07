@@ -153,6 +153,34 @@ public interface ResourceDao<R extends Resource>
 	/**
 	 * Sets the version of the stored resource to latest version from DB plus 1.
 	 * 
+	 * Does not check the latest version in DB before storing the update.
+	 * 
+	 * Resurrects all old versions (removes deleted flag) if the latest version in DB is marked as deleted.
+	 *
+	 * @param resource
+	 *            not <code>null</code>
+	 * @return the stored resource, not the same object as the given resource (defensive copy)
+	 * @throws SQLException
+	 * @throws ResourceNotFoundException
+	 *             if the given resource could not be found
+	 * @see ResourceDao#update(Resource, Long)
+	 */
+	default R update(R resource) throws SQLException, ResourceNotFoundException
+	{
+		try
+		{
+			return update(resource, null);
+		}
+		catch (ResourceVersionNoMatchException e)
+		{
+			// should never be thrown if update is called with a null expectedVersion
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 * Sets the version of the stored resource to latest version from DB plus 1.
+	 * 
 	 * If the given expectedVersion is not <code>null</code>, checks if the given expectedVersion is the latest version
 	 * in DB before storing the update.
 	 * 
@@ -172,6 +200,41 @@ public interface ResourceDao<R extends Resource>
 	 */
 	R update(R resource, Long expectedVersion)
 			throws SQLException, ResourceNotFoundException, ResourceVersionNoMatchException;
+
+	/**
+	 * Sets the version of the stored resource to latest version from DB plus 1.
+	 * 
+	 * Does not check the latest version in DB before storing the update.
+	 * 
+	 * Resurrects all old versions (removes deleted flag) if the latest version in DB is marked as deleted.
+	 * 
+	 * @param connection
+	 *            not <code>null</code>, not {@link Connection#isReadOnly()} and not {@link Connection#getAutoCommit()}
+	 *            and {@link Connection#getTransactionIsolation()} one of {@link Connection#TRANSACTION_REPEATABLE_READ}
+	 *            or {@link Connection#TRANSACTION_SERIALIZABLE}
+	 * @param resource
+	 *            not <code>null</code>
+	 * @return
+	 * @throws SQLException
+	 * @throws ResourceNotFoundException
+	 *             if the given resource could not be found
+	 * @throws IllegalArgumentException
+	 *             if the given connection is {@link Connection#isReadOnly()} or is {@link Connection#getAutoCommit()}
+	 *             or {@link Connection#getTransactionIsolation()} is not one of
+	 *             {@link Connection#TRANSACTION_REPEATABLE_READ} or {@link Connection#TRANSACTION_SERIALIZABLE}
+	 */
+	default R updateWithTransaction(Connection connection, R resource) throws SQLException, ResourceNotFoundException
+	{
+		try
+		{
+			return updateWithTransaction(connection, resource, null);
+		}
+		catch (ResourceVersionNoMatchException e)
+		{
+			// should never be thrown if update is called with a null expectedVersion
+			throw new RuntimeException(e);
+		}
+	}
 
 	/**
 	 * Sets the version of the stored resource to latest version from DB plus 1.

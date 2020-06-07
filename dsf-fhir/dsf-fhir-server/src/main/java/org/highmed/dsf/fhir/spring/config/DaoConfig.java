@@ -17,11 +17,9 @@ import org.highmed.dsf.fhir.dao.PractitionerRoleDao;
 import org.highmed.dsf.fhir.dao.ProvenanceDao;
 import org.highmed.dsf.fhir.dao.ResearchStudyDao;
 import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
-import org.highmed.dsf.fhir.dao.StructureDefinitionSnapshotDao;
 import org.highmed.dsf.fhir.dao.SubscriptionDao;
 import org.highmed.dsf.fhir.dao.TaskDao;
 import org.highmed.dsf.fhir.dao.ValueSetDao;
-import org.highmed.dsf.fhir.dao.converter.SnapshotInfoConverter;
 import org.highmed.dsf.fhir.dao.jdbc.ActivityDefinitionDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.BinaryDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.BundleDaoJdbc;
@@ -64,9 +62,6 @@ public class DaoConfig
 
 	@Autowired
 	private FhirConfig fhirConfig;
-
-	@Autowired
-	private JsonConfig jsonConfig;
 
 	@Bean
 	public BasicDataSource dataSource()
@@ -180,15 +175,9 @@ public class DaoConfig
 	}
 
 	@Bean
-	public SnapshotInfoConverter snapshotInfoConverter()
+	public StructureDefinitionDao structureDefinitionSnapshotDao()
 	{
-		return new SnapshotInfoConverter(jsonConfig.objectMapper());
-	}
-
-	@Bean
-	public StructureDefinitionSnapshotDao structureDefinitionSnapshotDao()
-	{
-		return new StructureDefinitionSnapshotDaoJdbc(dataSource(), fhirConfig.fhirContext(), snapshotInfoConverter());
+		return new StructureDefinitionSnapshotDaoJdbc(dataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean

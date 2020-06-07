@@ -10,7 +10,6 @@ import java.util.Optional;
 
 import org.highmed.dsf.fhir.dao.CodeSystemDao;
 import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
-import org.highmed.dsf.fhir.dao.StructureDefinitionSnapshotDao;
 import org.highmed.dsf.fhir.dao.ValueSetDao;
 import org.highmed.dsf.fhir.function.SupplierWithSqlException;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -30,14 +29,12 @@ public class ValidationSupportWithFetchFromDb implements IValidationSupport, Ini
 	private final FhirContext context;
 
 	private final StructureDefinitionDao structureDefinitionDao;
-	private final StructureDefinitionSnapshotDao structureDefinitionSnapshotDao;
+	private final StructureDefinitionDao structureDefinitionSnapshotDao;
 	private final CodeSystemDao codeSystemDao;
 	private final ValueSetDao valueSetDao;
 
-	public ValidationSupportWithFetchFromDb(FhirContext context,
-			StructureDefinitionDao structureDefinitionDao,
-			StructureDefinitionSnapshotDao structureDefinitionSnapshotDao, CodeSystemDao codeSystemDao,
-			ValueSetDao valueSetDao)
+	public ValidationSupportWithFetchFromDb(FhirContext context, StructureDefinitionDao structureDefinitionDao,
+			StructureDefinitionDao structureDefinitionSnapshotDao, CodeSystemDao codeSystemDao, ValueSetDao valueSetDao)
 	{
 		this.context = context;
 

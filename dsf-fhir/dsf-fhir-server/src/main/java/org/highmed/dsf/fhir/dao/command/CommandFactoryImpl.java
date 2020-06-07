@@ -24,7 +24,6 @@ import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.highmed.dsf.fhir.service.ReferenceExtractor;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
-import org.highmed.dsf.fhir.service.SnapshotDependencyAnalyzer;
 import org.highmed.dsf.fhir.service.SnapshotGenerator;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -47,7 +46,6 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 	private final EventManager eventManager;
 	private final EventGenerator eventGenerator;
 	private final Function<Connection, SnapshotGenerator> snapshotGenerator;
-	private final SnapshotDependencyAnalyzer snapshotDependencyAnalyzer;
 	private final ParameterConverter parameterConverter;
 	private final AuthorizationHelper authorizationHelper;
 	private final ValidationHelper validationHelper;
@@ -56,8 +54,7 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver,
 			ReferenceCleaner referenceCleaner, ResponseGenerator responseGenerator, ExceptionHandler exceptionHandler,
 			EventManager eventManager, EventGenerator eventGenerator,
-			Function<Connection, SnapshotGenerator> snapshotGenerator,
-			SnapshotDependencyAnalyzer snapshotDependencyAnalyzer, ParameterConverter parameterConverter,
+			Function<Connection, SnapshotGenerator> snapshotGenerator, ParameterConverter parameterConverter,
 			AuthorizationHelper authorizationHelper, ValidationHelper validationHelper)
 	{
 		this.serverBase = serverBase;
@@ -72,7 +69,6 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 		this.eventManager = eventManager;
 		this.eventGenerator = eventGenerator;
 		this.snapshotGenerator = snapshotGenerator;
-		this.snapshotDependencyAnalyzer = snapshotDependencyAnalyzer;
 		this.parameterConverter = parameterConverter;
 		this.authorizationHelper = authorizationHelper;
 		this.validationHelper = validationHelper;
@@ -82,6 +78,7 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 	public void afterPropertiesSet() throws Exception
 	{
 		Objects.requireNonNull(serverBase, "serverBase");
+		Objects.requireNonNull(dataSource, "dataSource");
 		Objects.requireNonNull(daoProvider, "daoProvider");
 		Objects.requireNonNull(referenceExtractor, "referenceExtractor");
 		Objects.requireNonNull(referenceResolver, "referenceResolver");
@@ -91,9 +88,9 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 		Objects.requireNonNull(eventManager, "eventManager");
 		Objects.requireNonNull(eventGenerator, "eventGenerator");
 		Objects.requireNonNull(snapshotGenerator, "snapshotGenerator");
-		Objects.requireNonNull(snapshotDependencyAnalyzer, "snapshotDependencyAnalyzer");
 		Objects.requireNonNull(parameterConverter, "parameterConverter");
 		Objects.requireNonNull(authorizationHelper, "authorizationHelper");
+		Objects.requireNonNull(validationHelper, "validationHelper");
 	}
 
 	// read, vread
@@ -118,7 +115,7 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 						validationHelper, (StructureDefinition) resource, (StructureDefinitionDao) dao.get(),
 						exceptionHandler, parameterConverter, responseGenerator, referenceExtractor, referenceResolver,
 						referenceCleaner, eventManager, eventGenerator, daoProvider.getStructureDefinitionSnapshotDao(),
-						snapshotGenerator, snapshotDependencyAnalyzer);
+						snapshotGenerator);
 			else
 				return dao
 						.map(d -> new CreateCommand<R, ResourceDao<R>>(index, user, bundle, entry, serverBase,
@@ -149,7 +146,7 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 						validationHelper, (StructureDefinition) resource, (StructureDefinitionDao) dao.get(),
 						exceptionHandler, parameterConverter, responseGenerator, referenceExtractor, referenceResolver,
 						referenceCleaner, eventManager, eventGenerator, daoProvider.getStructureDefinitionSnapshotDao(),
-						snapshotGenerator, snapshotDependencyAnalyzer);
+						snapshotGenerator);
 			else
 				return dao
 						.map(d -> new UpdateCommand<R, ResourceDao<R>>(index, user, bundle, entry, serverBase,

@@ -11,7 +11,6 @@ import java.util.Optional;
 
 import org.highmed.dsf.fhir.dao.CodeSystemDao;
 import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
-import org.highmed.dsf.fhir.dao.StructureDefinitionSnapshotDao;
 import org.highmed.dsf.fhir.dao.ValueSetDao;
 import org.highmed.dsf.fhir.function.SupplierWithSqlException;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -26,22 +25,20 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 
 public class ValidationSupportWithFetchFromDbWithTransaction implements IValidationSupport, InitializingBean
 {
-	private static final Logger logger = LoggerFactory
-			.getLogger(ValidationSupportWithFetchFromDbWithTransaction.class);
+	private static final Logger logger = LoggerFactory.getLogger(ValidationSupportWithFetchFromDbWithTransaction.class);
 
 	private final FhirContext context;
 
 	private final StructureDefinitionDao structureDefinitionDao;
-	private final StructureDefinitionSnapshotDao structureDefinitionSnapshotDao;
+	private final StructureDefinitionDao structureDefinitionSnapshotDao;
 	private final CodeSystemDao codeSystemDao;
 	private final ValueSetDao valueSetDao;
 
 	private final Connection connection;
 
 	public ValidationSupportWithFetchFromDbWithTransaction(FhirContext context,
-			StructureDefinitionDao structureDefinitionDao,
-			StructureDefinitionSnapshotDao structureDefinitionSnapshotDao, CodeSystemDao codeSystemDao,
-			ValueSetDao valueSetDao, Connection connection)
+			StructureDefinitionDao structureDefinitionDao, StructureDefinitionDao structureDefinitionSnapshotDao,
+			CodeSystemDao codeSystemDao, ValueSetDao valueSetDao, Connection connection)
 	{
 		this.context = context;
 

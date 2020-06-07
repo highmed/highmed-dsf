@@ -17,10 +17,8 @@ import javax.ws.rs.core.UriInfo;
 
 import org.highmed.dsf.fhir.authorization.AuthorizationRuleProvider;
 import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
-import org.highmed.dsf.fhir.dao.StructureDefinitionSnapshotDao;
 import org.highmed.dsf.fhir.event.EventGenerator;
 import org.highmed.dsf.fhir.event.EventManager;
-import org.highmed.dsf.fhir.function.ConsumerWithSqlAndResourceNotFoundException;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
@@ -32,11 +30,8 @@ import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.highmed.dsf.fhir.service.ReferenceExtractor;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.highmed.dsf.fhir.service.ResourceValidator;
-import org.highmed.dsf.fhir.service.SnapshotDependencies;
-import org.highmed.dsf.fhir.service.SnapshotDependencyAnalyzer;
 import org.highmed.dsf.fhir.service.SnapshotGenerator;
 import org.highmed.dsf.fhir.service.SnapshotGenerator.SnapshotWithValidationMessages;
-import org.highmed.dsf.fhir.service.SnapshotInfo;
 import org.highmed.dsf.fhir.webservice.specification.StructureDefinitionService;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
@@ -57,18 +52,16 @@ public class StructureDefinitionServiceImpl extends
 {
 	private static final Logger logger = LoggerFactory.getLogger(StructureDefinitionServiceImpl.class);
 
-	private final StructureDefinitionSnapshotDao snapshotDao;
+	private final StructureDefinitionDao snapshotDao;
 	private final SnapshotGenerator snapshotGenerator;
-	private final SnapshotDependencyAnalyzer snapshotDependencyAnalyzer;
 
 	public StructureDefinitionServiceImpl(String path, String serverBase, int defaultPageCount,
 			StructureDefinitionDao dao, ResourceValidator validator, EventManager eventManager,
 			ExceptionHandler exceptionHandler, EventGenerator eventGenerator, ResponseGenerator responseGenerator,
 			ParameterConverter parameterConverter, ReferenceExtractor referenceExtractor,
 			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
-			AuthorizationRuleProvider authorizationRuleProvider,
-			StructureDefinitionSnapshotDao structureDefinitionSnapshotDao, SnapshotGenerator sanapshotGenerator,
-			SnapshotDependencyAnalyzer snapshotDependencyAnalyzer)
+			AuthorizationRuleProvider authorizationRuleProvider, StructureDefinitionDao structureDefinitionSnapshotDao,
+			SnapshotGenerator sanapshotGenerator)
 	{
 		super(path, StructureDefinition.class, serverBase, defaultPageCount, dao, validator, eventManager,
 				exceptionHandler, eventGenerator, responseGenerator, parameterConverter, referenceExtractor,
@@ -76,7 +69,6 @@ public class StructureDefinitionServiceImpl extends
 
 		this.snapshotDao = structureDefinitionSnapshotDao;
 		this.snapshotGenerator = sanapshotGenerator;
-		this.snapshotDependencyAnalyzer = snapshotDependencyAnalyzer;
 	}
 
 	@Override
@@ -113,10 +105,9 @@ public class StructureDefinitionServiceImpl extends
 		{
 			if (preResource != null && preResource.hasSnapshot())
 			{
-				handleSnapshot(preResource,
-						info -> snapshotDao.create(
-								parameterConverter.toUuid(resourceTypeName, postResource.getIdElement().getIdPart()),
-								preResource, info));
+				exceptionHandler.catchAndLogSqlAndResourceNotFoundException(resourceTypeName,
+						() -> snapshotDao.createWithId(preResource,
+								parameterConverter.toUuid(resourceTypeName, postResource.getIdElement().getIdPart())));
 			}
 			else if (postResource != null)
 			{
@@ -125,9 +116,9 @@ public class StructureDefinitionServiceImpl extends
 					SnapshotWithValidationMessages s = snapshotGenerator.generateSnapshot(postResource);
 
 					if (s != null && s.getSnapshot() != null && s.getMessages().isEmpty())
-						handleSnapshot(s.getSnapshot(), info -> snapshotDao.create(
-								parameterConverter.toUuid(resourceTypeName, postResource.getIdElement().getIdPart()),
-								postResource, info));
+						exceptionHandler.catchAndLogSqlAndResourceNotFoundException(resourceTypeName,
+								() -> snapshotDao.createWithId(postResource, parameterConverter.toUuid(resourceTypeName,
+										postResource.getIdElement().getIdPart())));
 				}
 				catch (Exception e)
 				{
@@ -147,7 +138,8 @@ public class StructureDefinitionServiceImpl extends
 				if (postResource != null)
 					preResource.setIdElement(postResource.getIdElement().copy());
 
-				handleSnapshot(preResource, info -> snapshotDao.update(preResource, info));
+				exceptionHandler.catchAndLogSqlAndResourceNotFoundException(resourceTypeName,
+						() -> snapshotDao.update(preResource));
 			}
 			else if (postResource != null)
 			{
@@ -156,7 +148,8 @@ public class StructureDefinitionServiceImpl extends
 					SnapshotWithValidationMessages s = snapshotGenerator.generateSnapshot(postResource);
 
 					if (s != null && s.getSnapshot() != null && s.getMessages().isEmpty())
-						handleSnapshot(s.getSnapshot(), info -> snapshotDao.update(s.getSnapshot(), info));
+						exceptionHandler.catchAndLogSqlAndResourceNotFoundException(resourceTypeName,
+								() -> snapshotDao.update(s.getSnapshot()));
 				}
 				catch (Exception e)
 				{
@@ -165,17 +158,6 @@ public class StructureDefinitionServiceImpl extends
 				}
 			}
 		};
-	}
-
-	private void handleSnapshot(StructureDefinition snapshot,
-			ConsumerWithSqlAndResourceNotFoundException<SnapshotInfo> dbOp)
-	{
-		SnapshotDependencies dependencies = snapshotDependencyAnalyzer.analyzeSnapshotDependencies(snapshot);
-
-		exceptionHandler.catchAndLogSqlException(() -> snapshotDao.deleteAllByDependency(snapshot.getUrl()));
-
-		exceptionHandler.catchAndLogSqlAndResourceNotFoundException(resourceTypeName,
-				() -> dbOp.accept(new SnapshotInfo(dependencies)));
 	}
 
 	@Override

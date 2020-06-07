@@ -523,7 +523,7 @@ public class WebserviceConfig
 				helperConfig.parameterConverter(), referenceConfig.referenceExtractor(),
 				referenceConfig.referenceResolver(), referenceConfig.referenceCleaner(),
 				authorizationConfig.authorizationRuleProvider(), daoConfig.structureDefinitionSnapshotDao(),
-				snapshotConfig.snapshotGenerator(), snapshotConfig.snapshotDependencyAnalyzer());
+				snapshotConfig.snapshotGenerator());
 	}
 
 	@Bean

@@ -18,6 +18,7 @@ import javax.ws.rs.core.Response.Status;
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.ResourceDao;
 import org.highmed.dsf.fhir.dao.exception.ResourceNotFoundException;
+import org.highmed.dsf.fhir.dao.exception.ResourceVersionNoMatchException;
 import org.highmed.dsf.fhir.event.EventGenerator;
 import org.highmed.dsf.fhir.event.EventManager;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
@@ -45,9 +46,8 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 {
 	private static final Logger logger = LoggerFactory.getLogger(UpdateCommand.class);
 
-	private final ResponseGenerator responseGenerator;
-	private final ReferenceCleaner referenceCleaner;
-
+	protected final ResponseGenerator responseGenerator;
+	protected final ReferenceCleaner referenceCleaner;
 	protected final EventManager eventManager;
 	protected final EventGenerator eventGenerator;
 
@@ -258,7 +258,13 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 				.flatMap(parameterConverter::toEntityTag).flatMap(parameterConverter::toVersion);
 
 		updatedResource = exceptionHandler.handleSqlExAndResourceNotFoundExAndResouceVersionNonMatchEx(resourceTypeName,
-				() -> dao.updateWithTransaction(connection, resource, ifMatch.orElse(null)));
+				() -> updateWithTransaction(connection, resource, ifMatch.orElse(null)));
+	}
+
+	protected R updateWithTransaction(Connection connection, R resource, Long expectedVersion)
+			throws SQLException, ResourceNotFoundException, ResourceVersionNoMatchException
+	{
+		return dao.updateWithTransaction(connection, resource, expectedVersion);
 	}
 
 	private void checkUpdateAllowed(Map<String, IdType> idTranslationTable, Connection connection, User user,
@@ -302,7 +308,7 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 
 			authorizationHelper.checkCreateAllowed(connection, user, resource);
 
-			updatedResource = dao.createWithTransactionAndId(connection, resource, getUuid(idTranslationTable));
+			updatedResource = createWithTransactionAndId(connection, resource, getUuid(idTranslationTable));
 		}
 		else if (Boolean.TRUE.equals(foundByCondition))
 		{
@@ -311,6 +317,11 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 			updateById(idTranslationTable, connection, resourceTypeName, resource.getIdElement().getIdPart());
 		}
 		// else errors thrown by preExecute
+	}
+
+	protected R createWithTransactionAndId(Connection connection, R resource, UUID uuid) throws SQLException
+	{
+		return dao.createWithTransactionAndId(connection, resource, uuid);
 	}
 
 	private IdType getId(Map<String, IdType> idTranslationTable)

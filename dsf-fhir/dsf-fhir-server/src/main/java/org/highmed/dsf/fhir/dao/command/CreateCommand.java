@@ -47,9 +47,8 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 {
 	private static final Logger logger = LoggerFactory.getLogger(CreateCommand.class);
 
-	private final ResponseGenerator responseGenerator;
-	private final ReferenceCleaner referenceCleaner;
-
+	protected final ResponseGenerator responseGenerator;
+	protected final ReferenceCleaner referenceCleaner;
 	protected final EventManager eventManager;
 	protected final EventGenerator eventGenerator;
 
@@ -135,8 +134,13 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 
 			authorizationHelper.checkCreateAllowed(connection, user, resource);
 
-			createdResource = dao.createWithTransactionAndId(connection, resource, getId(idTranslationTable));
+			createdResource = createWithTransactionAndId(connection, resource, getId(idTranslationTable));
 		}
+	}
+
+	protected R createWithTransactionAndId(Connection connection, R resource, UUID uuid) throws SQLException
+	{
+		return dao.createWithTransactionAndId(connection, resource, uuid);
 	}
 
 	private UUID getId(Map<String, IdType> idTranslationTable)

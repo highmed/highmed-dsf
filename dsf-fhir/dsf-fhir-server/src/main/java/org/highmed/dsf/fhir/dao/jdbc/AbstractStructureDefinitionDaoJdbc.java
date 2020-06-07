@@ -12,7 +12,7 @@ import java.util.function.Function;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.dao.StructureDefinitionDaoBase;
+import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
 import org.highmed.dsf.fhir.search.SearchQueryUserFilter;
 import org.highmed.dsf.fhir.search.parameters.StructureDefinitionIdentifier;
 import org.highmed.dsf.fhir.search.parameters.StructureDefinitionStatus;
@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 import ca.uhn.fhir.context.FhirContext;
 
 abstract class AbstractStructureDefinitionDaoJdbc extends AbstractResourceDaoJdbc<StructureDefinition>
-		implements StructureDefinitionDaoBase
+		implements StructureDefinitionDao
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractStructureDefinitionDaoJdbc.class);
 

@@ -48,8 +48,8 @@ public class CommandConfig
 				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver(),
 				referenceConfig.referenceCleaner(), helperConfig.responseGenerator(), helperConfig.exceptionHandler(),
 				eventConfig.eventManager(), eventConfig.eventGenerator(),
-				snapshotConfig::snapshotGeneratorWithTransaction, snapshotConfig.snapshotDependencyAnalyzer(),
-				helperConfig.parameterConverter(), authorizationHelper(), validationHelper());
+				snapshotConfig::snapshotGeneratorWithTransaction, helperConfig.parameterConverter(),
+				authorizationHelper(), validationHelper());
 	}
 
 	@Bean
