@@ -29,8 +29,7 @@ public class CheckReferencesCommand<R extends Resource, D extends ResourceDao<R>
 			ReferenceResolver referenceResolver)
 	{
 		super(4, index, user, bundle, entry, serverBase, authorizationHelper, validationHelper, resource, dao,
-				exceptionHandler, parameterConverter, responseGenerator,
-				referenceExtractor, referenceResolver);
+				exceptionHandler, parameterConverter, responseGenerator, referenceExtractor, referenceResolver);
 	}
 
 	@Override
