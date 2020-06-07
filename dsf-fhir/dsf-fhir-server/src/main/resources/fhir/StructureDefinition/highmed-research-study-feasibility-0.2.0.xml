@@ -88,13 +88,5 @@
       <path value="ResearchStudy.enrollment.identifier" />
       <max value="0" />
     </element>
-    <element id="ResearchStudy.principalInvestigator">
-      <path value="ResearchStudy.principalInvestigator" />
-      <type>
-        <code value="Reference" />
-        <targetProfile value="http://highmed.org/fhir/StructureDefinition/highmed-practitioner" />
-        <targetProfile value="http://highmed.org/fhir/StructureDefinition/highmed-practitioner-role" />
-      </type>
-    </element>
   </differential>
 </StructureDefinition>
