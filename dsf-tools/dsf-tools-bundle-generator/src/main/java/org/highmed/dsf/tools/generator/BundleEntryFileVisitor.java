@@ -72,12 +72,16 @@ public class BundleEntryFileVisitor implements FileVisitor<Path>
 			if (!Files.isReadable(putFile) && !Files.isReadable(postFile))
 			{
 				logger.error("put or post file for {} at {} not readable. Redable file {} or {} expected",
-						resource.getSimpleName(), file.toString(), putFile.toString(), postFile);
-				throw new IOException("Put file " + putFile.toString() + " not readable");
+						resource.getSimpleName(), file.toString(), putFile.toString(), postFile.toString());
+				throw new IOException(
+						"put file " + putFile.toString() + " or post file " + postFile.toString() + " not readable");
 			}
 			else if (Files.isReadable(putFile) && Files.isReadable(postFile))
 			{
-
+				logger.error("put and post file for {} at {} readable. One redable file {} or {} expected",
+						resource.getSimpleName(), file.toString(), putFile.toString(), postFile.toString());
+				throw new IOException(
+						"put file " + putFile.toString() + " and post file " + postFile.toString() + " readable");
 			}
 			else if (Files.isReadable(putFile))
 			{
@@ -85,7 +89,7 @@ public class BundleEntryFileVisitor implements FileVisitor<Path>
 			}
 			else if (Files.isReadable(postFile))
 			{
-				postReader.read(resource, file, putFile);
+				postReader.read(resource, file, postFile);
 			}
 		}
 		else
