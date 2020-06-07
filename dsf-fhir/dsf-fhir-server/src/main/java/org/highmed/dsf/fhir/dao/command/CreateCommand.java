@@ -77,7 +77,7 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	{
 		UriComponents eruComponentes = UriComponentsBuilder.fromUriString(entry.getRequest().getUrl()).build();
 
-		// check standard update request url: e.g. Patient
+		// check standard create request url: e.g. Patient
 		if (eruComponentes.getPathSegments().size() == 1 && eruComponentes.getQueryParams().isEmpty())
 		{
 			if (!entry.getFullUrl().startsWith(URL_UUID_PREFIX))
@@ -123,11 +123,12 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	public void execute(Map<String, IdType> idTranslationTable, Connection connection)
 			throws SQLException, WebApplicationException
 	{
+		// always resolve temp and conditional references, necessary if conditional create and resource exists
+		referencesHelper.resolveTemporaryAndConditionalReferences(idTranslationTable, connection);
+		// TODO maybe check again if resource exists, could be that a previous command created it
+
 		if (responseResult == null)
 		{
-			// TODO maybe check again if resource exists, could be that a previous command created it
-			referencesHelper.resolveTemporaryAndConditionalReferences(idTranslationTable, connection);
-
 			validationHelper.checkResourceValidForCreate(user, resource);
 
 			referencesHelper.resolveLogicalReferences(connection);
