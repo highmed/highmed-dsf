@@ -87,7 +87,17 @@ public class UpdateStructureDefinitionCommand extends UpdateCommand<StructureDef
 		StructureDefinition created = super.createWithTransactionAndId(connection, resource, uuid);
 
 		if (resourceWithSnapshot != null)
-			snapshotDao.createWithTransactionAndId(connection, resourceWithSnapshot, uuid);
+		{
+			try
+			{
+				snapshotDao.createWithTransactionAndId(connection, resourceWithSnapshot, uuid);
+			}
+			catch (SQLException e)
+			{
+				logger.warn("Error while creating StructureDefinition snapshot: " + e.getMessage(), e);
+				throw e;
+			}
+		}
 
 		return created;
 	}
@@ -99,7 +109,20 @@ public class UpdateStructureDefinitionCommand extends UpdateCommand<StructureDef
 		StructureDefinition updated = super.updateWithTransaction(connection, resource, expectedVersion);
 
 		if (resourceWithSnapshot != null)
-			snapshotDao.updateWithTransaction(connection, resourceWithSnapshot, expectedVersion);
+		{
+			if (!resourceWithSnapshot.hasId() && resource.hasId())
+				resourceWithSnapshot.setIdElement(resource.getIdElement().copy());
+
+			try
+			{
+				snapshotDao.updateWithTransaction(connection, resourceWithSnapshot, expectedVersion);
+			}
+			catch (SQLException | ResourceNotFoundException | ResourceVersionNoMatchException e)
+			{
+				logger.warn("Error while updating StructureDefinition snapshot: " + e.getMessage(), e);
+				throw e;
+			}
+		}
 
 		return updated;
 	}

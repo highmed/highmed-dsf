@@ -84,7 +84,17 @@ public class CreateStructureDefinitionCommand extends CreateCommand<StructureDef
 		StructureDefinition created = super.createWithTransactionAndId(connection, resource, uuid);
 
 		if (resourceWithSnapshot != null)
-			snapshotDao.createWithTransactionAndId(connection, resourceWithSnapshot, uuid);
+		{
+			try
+			{
+				snapshotDao.createWithTransactionAndId(connection, resourceWithSnapshot, uuid);
+			}
+			catch (SQLException e)
+			{
+				logger.warn("Error while creating StructureDefinition snapshot: " + e.getMessage(), e);
+				throw e;
+			}
+		}
 
 		return created;
 	}
