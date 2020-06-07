@@ -91,13 +91,13 @@ public class BundleGenerator
 			try (InputStream in = Files.newInputStream(resourceFile))
 			{
 				Resource r = newXmlParser().parseResource(resource, in);
-				String idNoneExistValue = Files.readString(postFile);
+				String ifNoneExistValue = Files.readString(postFile);
 
 				BundleEntryComponent entry = bundle.addEntry();
 				entry.setFullUrl("urn:uuid:" + UUID.randomUUID().toString());
 				entry.setResource(r);
 				entry.getRequest().setMethod(HTTPVerb.POST).setUrl(r.getResourceType().name())
-						.setIfNoneExist(idNoneExistValue);
+						.setIfNoneExist(ifNoneExistValue);
 			}
 			catch (IOException e)
 			{
