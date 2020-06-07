@@ -32,8 +32,9 @@
 			</Organization>
 		</resource>
 		<request>
-			<method value="PUT"/>
-			<url value="Organization?identifier=http://highmed.org/fhir/NamingSystem/organization-identifier|Test_TTP"/>
+			<method value="POST"/>
+			<url value="Organization"/>
+			<ifNoneExist value="identifier=http://highmed.org/fhir/NamingSystem/organization-identifier|Test_TTP"/>
 		</request>
 	</entry>
 	<entry>
@@ -64,8 +65,9 @@
 			</Organization>
 		</resource>
 		<request>
-			<method value="PUT"/>
-			<url value="Organization?identifier=http://highmed.org/fhir/NamingSystem/organization-identifier|Test_MeDIC_1"/>
+			<method value="POST"/>
+			<url value="Organization"/>
+			<ifNoneExist value="identifier=http://highmed.org/fhir/NamingSystem/organization-identifier|Test_MeDIC_1"/>
 		</request>
 	</entry>
 	<entry>
@@ -101,8 +103,9 @@
 			</Endpoint>
 		</resource>
 		<request>
-			<method value="PUT"/>
-			<url value="Endpoint?identifier=http://highmed.org/fhir/NamingSystem/endpoint-identifier|Test_TTP_Endpoint"/>
+			<method value="POST"/>
+			<url value="Endpoint"/>
+			<ifNoneExist value="identifier=http://highmed.org/fhir/NamingSystem/endpoint-identifier|Test_TTP_Endpoint"/>
 		</request>
 	</entry>
 </Bundle>
