@@ -254,7 +254,7 @@ public class ResponseGenerator
 
 	public Response oneExists(Resource resource, String ifNoneExistsHeaderValue)
 	{
-		logger.info("{} with criteria {} exists", resource, ifNoneExistsHeaderValue);
+		logger.info("{} with criteria {} exists", resource.getResourceType().name(), ifNoneExistsHeaderValue);
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.INFORMATION, IssueType.DUPLICATE,
 				"Resource with criteria '" + ifNoneExistsHeaderValue + "' exists");
