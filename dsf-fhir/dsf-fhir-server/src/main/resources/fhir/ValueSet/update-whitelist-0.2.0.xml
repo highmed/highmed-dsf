@@ -1,0 +1,24 @@
+<ValueSet xmlns="http://hl7.org/fhir">
+	<meta>
+		<tag>
+			<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
+			<code value="REMOTE"/>
+		</tag>		
+	</meta>
+	<url value="http://highmed.org/fhir/ValueSet/update-whitelist"/>
+	<version value="0.2.0"/>
+	<name value="HiGHmed_Update_Whitelist"/>
+	<title value="HiGHmed Update Whitelist"/>
+	<status value="active"/>
+	<experimental value="false"/>
+	<date value="2020-05-25"/>
+	<publisher value="HiGHmed"/>
+	<description
+			value="ValueSet with standard values for the process update whitelist"/>
+	<immutable value="true"/>
+	<compose>
+		<include>
+			<system value="http://highmed.org/fhir/CodeSystem/update-whitelist"/>
+		</include>
+	</compose>
+</ValueSet> 

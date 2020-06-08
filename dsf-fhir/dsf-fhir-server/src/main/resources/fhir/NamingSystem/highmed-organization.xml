@@ -1,5 +1,4 @@
-<NamingSystem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://hl7.org/fhir"
-			  xsi:schemaLocation="http://hl7.org/fhir http://www.hl7.org/fhir/fhir-base.xsd">
+<NamingSystem xmlns="http://hl7.org/fhir">
 	<meta>
 		<tag>
 			<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>

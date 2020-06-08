@@ -55,6 +55,13 @@ public class ActivityDefinitionDaoJdbc extends AbstractResourceDaoJdbc<ActivityD
 	}
 
 	@Override
+	public Optional<ActivityDefinition> readByUrlAndVersionWithTransaction(Connection connection, String urlAndVersion)
+			throws SQLException
+	{
+		return readByUrl.readByUrlAndVersionWithTransaction(connection, urlAndVersion);
+	}
+
+	@Override
 	public Optional<ActivityDefinition> readByUrlAndVersion(String url, String version) throws SQLException
 	{
 		return readByUrl.readByUrlAndVersion(url, version);

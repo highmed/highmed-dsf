@@ -18,7 +18,7 @@ public interface Command
 
 	int getTransactionPriority();
 
-	void preExecute(Map<String, IdType> idTranslationTable);
+	void preExecute(Map<String, IdType> idTranslationTable, Connection connection);
 
 	void execute(Map<String, IdType> idTranslationTable, Connection connection)
 			throws SQLException, WebApplicationException;

@@ -28,8 +28,8 @@ public interface SnapshotGenerator
 			return messages;
 		}
 	}
-	
+
 	SnapshotWithValidationMessages generateSnapshot(StructureDefinition differential);
 
-	SnapshotWithValidationMessages generateSnapshot(String baseAbsoluteUrlPrefix, StructureDefinition differential);
+	SnapshotWithValidationMessages generateSnapshot(StructureDefinition differential, String baseAbsoluteUrlPrefix);
 }

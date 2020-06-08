@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <meta>
     <tag>
@@ -88,14 +87,6 @@
     <element id="ResearchStudy.enrollment.identifier">
       <path value="ResearchStudy.enrollment.identifier" />
       <max value="0" />
-    </element>
-    <element id="ResearchStudy.principalInvestigator">
-      <path value="ResearchStudy.principalInvestigator" />
-      <type>
-        <code value="Reference" />
-        <targetProfile value="http://highmed.org/fhir/StructureDefinition/highmed-practitioner" />
-        <targetProfile value="http://highmed.org/fhir/StructureDefinition/highmed-practitioner-role" />
-      </type>
     </element>
   </differential>
 </StructureDefinition>

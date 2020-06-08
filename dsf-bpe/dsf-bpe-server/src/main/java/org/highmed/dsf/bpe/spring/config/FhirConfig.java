@@ -16,6 +16,8 @@ import org.highmed.dsf.fhir.group.GroupHelper;
 import org.highmed.dsf.fhir.group.GroupHelperImpl;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProviderImpl;
+import org.highmed.dsf.fhir.service.ReferenceCleaner;
+import org.highmed.dsf.fhir.service.ReferenceCleanerImpl;
 import org.highmed.dsf.fhir.service.ReferenceExtractor;
 import org.highmed.dsf.fhir.service.ReferenceExtractorImpl;
 import org.highmed.dsf.fhir.task.TaskHandler;
@@ -93,6 +95,12 @@ public class FhirConfig
 	{
 		return FhirContext.forR4();
 	}
+	
+	@Bean
+	public ReferenceCleaner referenceCleaner()
+	{
+		return new ReferenceCleanerImpl(referenceExtractor());
+	}
 
 	@Bean
 	public ReferenceExtractor referenceExtractor()
@@ -137,7 +145,7 @@ public class FhirConfig
 					localWebsocketKeyStorePassword);
 			KeyStore localWebsocketTrustStore = CertificateHelper.extractTrust(localWebsocketKeyStore);
 
-			return new FhirClientProviderImpl(fhirContext(), referenceExtractor(), localWebserviceBaseUrl,
+			return new FhirClientProviderImpl(fhirContext(), referenceCleaner(), localWebserviceBaseUrl,
 					localReadTimeout, localConnectTimeout, localWebserviceTrustStore, localWebserviceKeyStore,
 					webserviceKeyStorePassword, remoteReadTimeout, remoteConnectTimeout, remoteProxyPassword,
 					remoteProxyUsername, remoteProxySchemeHostPort, localWebsocketUrl, localWebsocketTrustStore,

@@ -8,7 +8,8 @@
 					<tag>
 						<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
 						<code value="REMOTE"/>
-					</tag>		
+					</tag>
+					<profile value="http://highmed.org/fhir/StructureDefinition/highmed-organization"/>
 				</meta>
 				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
 					<valueString value="TODO"/>
@@ -44,7 +45,8 @@
 					<tag>
 						<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
 						<code value="REMOTE"/>
-					</tag>		
+					</tag>
+					<profile value="http://highmed.org/fhir/StructureDefinition/highmed-organization"/>
 				</meta>
 				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
 					<valueString value="TODO"/>
@@ -80,7 +82,8 @@
 					<tag>
 						<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
 						<code value="REMOTE"/>
-					</tag>		
+					</tag>
+					<profile value="http://highmed.org/fhir/StructureDefinition/highmed-organization"/>
 				</meta>
 				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
 					<valueString value="TODO"/>
@@ -116,7 +119,8 @@
 					<tag>
 						<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
 						<code value="REMOTE"/>
-					</tag>		
+					</tag>
+					<profile value="http://highmed.org/fhir/StructureDefinition/highmed-organization"/>
 				</meta>
 				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
 					<valueString value="TODO"/>
@@ -152,7 +156,8 @@
 					<tag>
 						<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
 						<code value="REMOTE"/>
-					</tag>		
+					</tag>
+					<profile value="http://highmed.org/fhir/StructureDefinition/highmed-endpoint"/>
 				</meta>
 				<identifier>
 					<system value="http://highmed.org/fhir/NamingSystem/endpoint-identifier"/>
@@ -192,7 +197,8 @@
 					<tag>
 						<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
 						<code value="REMOTE"/>
-					</tag>		
+					</tag>
+					<profile value="http://highmed.org/fhir/StructureDefinition/highmed-endpoint"/>
 				</meta>
 				<identifier>
 					<system value="http://highmed.org/fhir/NamingSystem/endpoint-identifier"/>
@@ -232,7 +238,8 @@
 					<tag>
 						<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
 						<code value="REMOTE"/>
-					</tag>		
+					</tag>
+					<profile value="http://highmed.org/fhir/StructureDefinition/highmed-endpoint"/>
 				</meta>
 				<identifier>
 					<system value="http://highmed.org/fhir/NamingSystem/endpoint-identifier"/>
@@ -272,7 +279,8 @@
 					<tag>
 						<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
 						<code value="REMOTE"/>
-					</tag>		
+					</tag>
+					<profile value="http://highmed.org/fhir/StructureDefinition/highmed-endpoint"/>
 				</meta>
 				<identifier>
 					<system value="http://highmed.org/fhir/NamingSystem/endpoint-identifier"/>

@@ -27,7 +27,7 @@
           <camunda:inputParameter name="messageName">resultSingleMedicSimpleFeasibilityMessage</camunda:inputParameter>
           <camunda:inputParameter name="versionTag">0.2.0</camunda:inputParameter>
           <camunda:inputParameter name="processDefinitionKey">computeSimpleFeasibility</camunda:inputParameter>
-          <camunda:inputParameter name="profile">http://highmed.org/fhir/StructureDefinition/highmed-task-result-single-medic-simple-feasibility</camunda:inputParameter>
+          <camunda:inputParameter name="profile">http://highmed.org/fhir/StructureDefinition/highmed-task-single-medic-result-simple-feasibility</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_0ascyjc</bpmn:incoming>

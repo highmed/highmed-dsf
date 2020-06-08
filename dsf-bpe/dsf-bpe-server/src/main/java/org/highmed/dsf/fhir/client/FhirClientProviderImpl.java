@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import org.highmed.dsf.fhir.service.ReferenceExtractor;
+import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.highmed.fhir.client.FhirWebserviceClientJersey;
 import org.highmed.fhir.client.WebsocketClient;
@@ -32,7 +32,7 @@ public class FhirClientProviderImpl
 	private final Map<String, WebsocketClient> websocketClientsBySubscriptionId = new HashMap<>();
 
 	private final FhirContext fhirContext;
-	private final ReferenceExtractor referenceExtractor;
+	private final ReferenceCleaner referenceCleaner;
 
 	private final String localBaseUrl;
 	private final int localReadTimeout;
@@ -53,7 +53,7 @@ public class FhirClientProviderImpl
 	private final KeyStore localWebsocketKeyStore;
 	private final char[] localWebsocketKeyStorePassword;
 
-	public FhirClientProviderImpl(FhirContext fhirContext, ReferenceExtractor referenceExtractor, String localBaseUrl,
+	public FhirClientProviderImpl(FhirContext fhirContext, ReferenceCleaner referenceCleaner, String localBaseUrl,
 			int localReadTimeout, int localConnectTimeout, KeyStore webserviceTrustStore, KeyStore webserviceKeyStore,
 			char[] webserviceKeyStorePassword, int remoteReadTimeout, int remoteConnectTimeout,
 			char[] remoteProxyPassword, String remoteProxyUsername, String remoteProxySchemeHostPort,
@@ -61,7 +61,7 @@ public class FhirClientProviderImpl
 			char[] localWebsocketKeyStorePassword)
 	{
 		this.fhirContext = fhirContext;
-		this.referenceExtractor = referenceExtractor;
+		this.referenceCleaner = referenceCleaner;
 		this.localBaseUrl = localBaseUrl;
 		this.localReadTimeout = localReadTimeout;
 		this.localConnectTimeout = localConnectTimeout;
@@ -124,12 +124,12 @@ public class FhirClientProviderImpl
 				if (localBaseUrl.equals(webserviceUrl))
 					client = new FhirWebserviceClientJersey(webserviceUrl, webserviceTrustStore, webserviceKeyStore,
 							webserviceKeyStorePassword, null, null, null, localConnectTimeout, localReadTimeout, null,
-							fhirContext, referenceExtractor);
+							fhirContext, referenceCleaner);
 				else
 					client = new FhirWebserviceClientJersey(webserviceUrl, webserviceTrustStore, webserviceKeyStore,
 							webserviceKeyStorePassword, remoteProxySchemeHostPort, remoteProxyUsername,
 							remoteProxyPassword, remoteConnectTimeout, remoteReadTimeout, null, fhirContext,
-							referenceExtractor);
+							referenceCleaner);
 
 				webserviceClientsByUrl.put(webserviceUrl, client);
 				return client;

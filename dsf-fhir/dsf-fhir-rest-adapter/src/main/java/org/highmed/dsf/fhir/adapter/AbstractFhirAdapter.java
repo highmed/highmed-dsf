@@ -81,6 +81,11 @@ public abstract class AbstractFhirAdapter<T extends BaseResource> implements Mes
 			MultivaluedMap<String, String> httpHeaders, InputStream entityStream)
 			throws IOException, WebApplicationException
 	{
-		return getParser(null).parseResource(type, new InputStreamReader(entityStream));
+		return fixResource(getParser(null).parseResource(type, new InputStreamReader(entityStream)));
+	}
+
+	protected T fixResource(T resource)
+	{
+		return resource;
 	}
 }

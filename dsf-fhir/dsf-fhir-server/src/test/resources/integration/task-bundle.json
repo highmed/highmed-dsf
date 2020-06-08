@@ -14,7 +14,7 @@
 					"status": "additional"
 				},
 				"type": "person",
-				"actual": true,
+				"actual": false,
 				"extension": [
 					{
 						"url": "http://highmed.org/fhir/StructureDefinition/query",
@@ -44,7 +44,7 @@
 					"status": "additional"
 				},
 				"type": "person",
-				"actual": true,
+				"actual": false,
 				"extension": [
 					{
 						"url": "http://highmed.org/fhir/StructureDefinition/query",
@@ -67,47 +67,37 @@
 			"resource": {
 				"resourceType": "ResearchStudy",
 				"meta": {
-					"profile": "http://highmed.org/fhir/StructureDefinition/highmed-research-study-feasibility"
+					"profile": [ "http://highmed.org/fhir/StructureDefinition/highmed-research-study-feasibility" ]
 				},
-				"identifier": [
-					{
-						"value": "c4d3e590-890a-4840-848f-412cf4b7f1fa",
-						"system": "http://highmed.org/fhir/NamingSystem/research-study-identifier"
+				"extension": [ {
+					"url": "http://highmed.org/fhir/StructureDefinition/participating-medic",
+					"valueReference": {
+						"type": "Organization",
+						"identifier": {
+							"system": "http://highmed.org/fhir/NamingSystem/organization-identifier",
+							"value": "Test_Organization"
+						}
 					}
-				],
-				"title": "Research Study Test",
+				}, {
+					"url": "http://highmed.org/fhir/StructureDefinition/participating-ttp",
+					"valueReference": {
+						"type": "Organization",
+						"identifier": {
+							"system": "http://highmed.org/fhir/NamingSystem/organization-identifier",
+							"value": "External_Test_Organization"
+						}
+					}
+				} ],
+				"identifier": [ {
+					"system": "http://highmed.org/fhir/NamingSystem/research-study-identifier",
+					"value": "886ec806-9bbb-4217-84d0-42f149c6767e"
+				} ],
 				"status": "active",
-				"description": "This is a test research study based on the highmed profile. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.",
-				"enrollment": [
-					{
-						"reference": "urn:uuid:ae194285-d08e-46c7-a9a7-9a47624dd8aa"
-					},
-					{
-						"reference": "urn:uuid:ae194285-d08e-46c7-a9a7-9a47624dd8bb"
-					}
-				],
-				"extension": [
-					{
-						"url": "http://highmed.org/fhir/StructureDefinition/participating-medic",
-						"valueReference": {
-							"identifier": {
-								"system": "http://highmed.org/fhir/NamingSystem/organization-identifier",
-								"value": "Test_Organization"
-							},
-							"type": "Organization"
-						}
-					},
-					{
-						"url": "http://highmed.org/fhir/StructureDefinition/participating-ttp",
-						"valueReference": {
-							"identifier": {
-								"system": "http://highmed.org/fhir/NamingSystem/organization-identifier",
-								"value": "External_Test_Organization"
-							},
-							"type": "Organization"
-						}
-					}
-				]
+				"enrollment": [ {
+					"reference": "urn:uuid:ae194285-d08e-46c7-a9a7-9a47624dd8aa"
+				}, {
+					"reference": "urn:uuid:ae194285-d08e-46c7-a9a7-9a47624dd8bb"
+				} ]
 			},
 			"request": {
 				"method": "POST",
@@ -155,7 +145,7 @@
 						"type": {
 							"coding": [
 								{
-									"system": "http://highmed.org/fhir/CodeSystem/bpmn-message",
+									"system": "http://highmed.org/fhir/CodeSystem/feasibility",
 									"code": "research-study-reference"
 								}
 							]

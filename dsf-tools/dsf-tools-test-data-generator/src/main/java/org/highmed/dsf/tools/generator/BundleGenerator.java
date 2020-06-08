@@ -9,6 +9,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 
+import org.highmed.dsf.fhir.service.ReferenceCleaner;
+import org.highmed.dsf.fhir.service.ReferenceCleanerImpl;
 import org.highmed.dsf.fhir.service.ReferenceExtractor;
 import org.highmed.dsf.fhir.service.ReferenceExtractorImpl;
 import org.highmed.dsf.tools.generator.CertificateGenerator.CertificateFiles;
@@ -28,6 +30,7 @@ public class BundleGenerator
 
 	private final FhirContext fhirContext = FhirContext.forR4();
 	private final ReferenceExtractor extractor = new ReferenceExtractorImpl();
+	private final ReferenceCleaner cleaner = new ReferenceCleanerImpl(extractor);
 
 	private Bundle testBundle;
 	private Bundle medic1Bundle;
@@ -35,11 +38,14 @@ public class BundleGenerator
 	private Bundle medic3Bundle;
 	private Bundle ttpBundle;
 
-	private Bundle readBundle(Path bundleTemplateFile)
+	private Bundle readAndCleanBundle(Path bundleTemplateFile)
 	{
 		try (InputStream in = Files.newInputStream(bundleTemplateFile))
 		{
-			return newXmlParser().parseResource(Bundle.class, in);
+			Bundle bundle = newXmlParser().parseResource(Bundle.class, in);
+			
+			// FIXME hapi parser can't handle embedded resources and creates them while parsing bundles
+			return cleaner.cleanReferenceResourcesIfBundle(bundle);
 		}
 		catch (IOException e)
 		{
@@ -75,7 +81,7 @@ public class BundleGenerator
 	{
 		Path testBundleTemplateFile = Paths.get("src/main/resources/bundle-templates/test-bundle.xml");
 
-		testBundle = readBundle(testBundleTemplateFile);
+		testBundle = readAndCleanBundle(testBundleTemplateFile);
 
 		Organization organization = (Organization) testBundle.getEntry().get(0).getResource();
 		Extension thumbprintExtension = organization
@@ -83,23 +89,7 @@ public class BundleGenerator
 		thumbprintExtension.setValue(new StringType(
 				clientCertificateFilesByCommonName.get("test-client").getCertificateSha512ThumbprintHex()));
 
-		removeReferenceEmbeddedResources(testBundle);
-
 		writeBundle(Paths.get("bundle/test-bundle.xml"), testBundle);
-	}
-
-	// FIXME hapi parser can't handle embedded resources and creates them while parsing bundles
-	private void removeReferenceEmbeddedResources(Bundle bundle)
-	{
-		bundle.getEntry().stream().map(e -> e.getResource()).forEach(res ->
-		{
-			logger.debug("Extracting references from {} resource", res.getResourceType());
-			extractor.getReferences(res).forEach(ref ->
-			{
-				logger.debug("Setting reference embedded resource to null at {}", ref.getReferenceLocation());
-				ref.getReference().setResource(null);
-			});
-		});
 	}
 
 	public void copyJavaTestBundle()
@@ -128,7 +118,7 @@ public class BundleGenerator
 	{
 		Path medic1BundleTemplateFile = Paths.get("src/main/resources/bundle-templates/medic1-bundle.xml");
 
-		medic1Bundle = readBundle(medic1BundleTemplateFile);
+		medic1Bundle = readAndCleanBundle(medic1BundleTemplateFile);
 
 		Organization organizationTtp = (Organization) medic1Bundle.getEntry().get(0).getResource();
 		Extension organizationTtpThumbprintExtension = organizationTtp
@@ -142,8 +132,6 @@ public class BundleGenerator
 		organizationMedic1thumbprintExtension.setValue(new StringType(
 				clientCertificateFilesByCommonName.get("medic1-client").getCertificateSha512ThumbprintHex()));
 
-		removeReferenceEmbeddedResources(medic1Bundle);
-
 		writeBundle(Paths.get("bundle/medic1-bundle.xml"), medic1Bundle);
 	}
 
@@ -151,7 +139,7 @@ public class BundleGenerator
 	{
 		Path medic2BundleTemplateFile = Paths.get("src/main/resources/bundle-templates/medic2-bundle.xml");
 
-		medic2Bundle = readBundle(medic2BundleTemplateFile);
+		medic2Bundle = readAndCleanBundle(medic2BundleTemplateFile);
 
 		Organization organizationTtp = (Organization) medic2Bundle.getEntry().get(0).getResource();
 		Extension organizationTtpThumbprintExtension = organizationTtp
@@ -165,8 +153,6 @@ public class BundleGenerator
 		organizationMedic2thumbprintExtension.setValue(new StringType(
 				clientCertificateFilesByCommonName.get("medic2-client").getCertificateSha512ThumbprintHex()));
 
-		removeReferenceEmbeddedResources(medic2Bundle);
-
 		writeBundle(Paths.get("bundle/medic2-bundle.xml"), medic2Bundle);
 	}
 
@@ -174,7 +160,7 @@ public class BundleGenerator
 	{
 		Path medic3BundleTemplateFile = Paths.get("src/main/resources/bundle-templates/medic3-bundle.xml");
 
-		medic3Bundle = readBundle(medic3BundleTemplateFile);
+		medic3Bundle = readAndCleanBundle(medic3BundleTemplateFile);
 
 		Organization organizationTtp = (Organization) medic3Bundle.getEntry().get(0).getResource();
 		Extension organizationTtpThumbprintExtension = organizationTtp
@@ -188,8 +174,6 @@ public class BundleGenerator
 		organizationMedic3thumbprintExtension.setValue(new StringType(
 				clientCertificateFilesByCommonName.get("medic3-client").getCertificateSha512ThumbprintHex()));
 
-		removeReferenceEmbeddedResources(medic3Bundle);
-
 		writeBundle(Paths.get("bundle/medic3-bundle.xml"), medic3Bundle);
 	}
 
@@ -197,7 +181,7 @@ public class BundleGenerator
 	{
 		Path medic3BundleTemplateFile = Paths.get("src/main/resources/bundle-templates/ttp-bundle.xml");
 
-		ttpBundle = readBundle(medic3BundleTemplateFile);
+		ttpBundle = readAndCleanBundle(medic3BundleTemplateFile);
 
 		Organization organizationTtp = (Organization) ttpBundle.getEntry().get(0).getResource();
 		Extension organizationTtpThumbprintExtension = organizationTtp
@@ -222,8 +206,6 @@ public class BundleGenerator
 				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
 		organizationMedic3thumbprintExtension.setValue(new StringType(
 				clientCertificateFilesByCommonName.get("medic3-client").getCertificateSha512ThumbprintHex()));
-
-		removeReferenceEmbeddedResources(ttpBundle);
 
 		writeBundle(Paths.get("bundle/ttp-bundle.xml"), ttpBundle);
 

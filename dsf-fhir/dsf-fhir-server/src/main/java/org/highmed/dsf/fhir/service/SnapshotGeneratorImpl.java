@@ -2,19 +2,18 @@ package org.highmed.dsf.fhir.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-import org.hl7.fhir.exceptions.DefinitionException;
 import org.hl7.fhir.r4.conformance.ProfileUtilities;
 import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
-import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.model.StructureDefinition;
-import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionMappingComponent;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IValidationSupport;
 
 public class SnapshotGeneratorImpl implements SnapshotGenerator
 {
@@ -29,63 +28,35 @@ public class SnapshotGeneratorImpl implements SnapshotGenerator
 
 	protected HapiWorkerContext createWorker(FhirContext context, IValidationSupport validationSupport)
 	{
-		return new HapiWorkerContext(context, validationSupport);
+		HapiWorkerContext workerContext = new HapiWorkerContext(context, validationSupport);
+		workerContext.setLocale(context.getLocalizer().getLocale());
+		return workerContext;
 	}
 
 	@Override
 	public SnapshotWithValidationMessages generateSnapshot(StructureDefinition differential)
 	{
-		return generateSnapshot("", differential);
+		return generateSnapshot(differential, "");
 	}
 
 	@Override
-	public SnapshotWithValidationMessages generateSnapshot(String baseAbsoluteUrlPrefix,
-			StructureDefinition differential)
+	public SnapshotWithValidationMessages generateSnapshot(StructureDefinition differential,
+			String baseAbsoluteUrlPrefix)
 	{
-		logger.debug("Generating snapshot for StructureDefinition with id {}, url {}, version {}",
-				differential.getIdElement().getIdPart(), differential.getUrl(), differential.getVersion());
+		Objects.requireNonNull(differential, "differential");
 
-		StructureDefinition base = worker.fetchTypeDefinition(differential.getType());
+		logger.debug("Generating snapshot for StructureDefinition with id {}, url {}, version {}, base {}",
+				differential.getIdElement().getIdPart(), differential.getUrl(), differential.getVersion(),
+				differential.getBaseDefinition());
+
+		StructureDefinition base = worker.fetchResource(StructureDefinition.class, differential.getBaseDefinition());
+
+		if (base == null)
+			logger.warn("Base definition with url {} not found", differential.getBaseDefinition());
 
 		/* ProfileUtilities is not thread safe */
 		List<ValidationMessage> messages = new ArrayList<>();
-		ProfileUtilities profileUtils = new ProfileUtilities(worker, messages, null)
-		{
-			@Override
-			public void updateMaps(StructureDefinition base, StructureDefinition derived) throws DefinitionException
-			{
-				if (base == null)
-					throw new DefinitionException("no base profile provided");
-				if (derived == null)
-					throw new DefinitionException("no derived structure provided");
-
-				for (StructureDefinitionMappingComponent baseMap : base.getMapping())
-				{
-					boolean found = false;
-					for (StructureDefinitionMappingComponent derivedMap : derived.getMapping())
-					{
-						/*
-						 * XXX NullPointerException if mapping.uri is null, see original if statement:
-						 * 
-						 * if (derivedMap.getUri().equals(baseMap.getUri()))
-						 * 
-						 * NPE fix by checking getUri != null
-						 * 
-						 * also fixes missing name based matching, via specification rule: StructureDefinition.mapping
-						 * "Must have at least a name or a uri (or both)"
-						 */
-						if ((derivedMap.getUri() != null && derivedMap.getUri().equals(baseMap.getUri()))
-								|| (derivedMap.getName() != null && derivedMap.getName().equals(baseMap.getName())))
-						{
-							found = true;
-							break;
-						}
-					}
-					if (!found)
-						derived.getMapping().add(baseMap);
-				}
-			}
-		};
+		ProfileUtilities profileUtils = new ProfileUtilities(worker, messages, null);
 
 		profileUtils.generateSnapshot(base, differential, baseAbsoluteUrlPrefix, baseAbsoluteUrlPrefix, null);
 

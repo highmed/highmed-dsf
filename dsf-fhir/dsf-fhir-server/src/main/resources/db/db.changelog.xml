@@ -23,6 +23,7 @@
 	<include file="db/db.research_studies.changelog-0.1.0.xml" />
 	<include file="db/db.structure_definitions.changelog-0.1.0.xml" />
 	<include file="db/db.structure_definition_snapshots.changelog-0.1.0.xml" />
+	<include file="db/db.structure_definition_snapshots.changelog-0.2.0.xml" />
 	<include file="db/db.subscriptions.changelog-0.1.0.xml" />
 	<include file="db/db.tasks.changelog-0.1.0.xml" />
 	<include file="db/db.value_sets.changelog-0.1.0.xml" />

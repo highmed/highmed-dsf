@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.Constants;
 
 public class EndpointIntegrationTest extends AbstractIntegrationTest
 {
@@ -35,7 +36,7 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 	{
 		Bundle searchBundle = getWebserviceClient().search(Endpoint.class, Collections.emptyMap());
 		assertNotNull(searchBundle);
-		assertEquals(1, searchBundle.getTotal());
+		assertEquals(2, searchBundle.getTotal());
 		assertTrue(searchBundle.getEntryFirstRep().getResource() instanceof Endpoint);
 	}
 
@@ -45,20 +46,32 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 		Bundle searchBundle = getWebserviceClient().search(Endpoint.class,
 				Map.of("_include", Collections.singletonList("Endpoint:organization")));
 		assertNotNull(searchBundle);
-		assertEquals(1, searchBundle.getTotal());
-		assertEquals(2, searchBundle.getEntry().size());
+		assertEquals(2, searchBundle.getTotal());
+		assertEquals(4, searchBundle.getEntry().size());
 
-		BundleEntryComponent eptEntry = searchBundle.getEntry().get(0);
-		assertNotNull(eptEntry);
-		assertEquals(SearchEntryMode.MATCH, eptEntry.getSearch().getMode());
-		assertNotNull(eptEntry.getResource());
-		assertTrue(eptEntry.getResource() instanceof Endpoint);
+		BundleEntryComponent eptEntry1 = searchBundle.getEntry().get(0);
+		assertNotNull(eptEntry1);
+		assertEquals(SearchEntryMode.MATCH, eptEntry1.getSearch().getMode());
+		assertNotNull(eptEntry1.getResource());
+		assertTrue(eptEntry1.getResource() instanceof Endpoint);
 
-		BundleEntryComponent orgEntry = searchBundle.getEntry().get(1);
-		assertNotNull(orgEntry);
-		assertEquals(SearchEntryMode.INCLUDE, orgEntry.getSearch().getMode());
-		assertNotNull(orgEntry.getResource());
-		assertTrue(orgEntry.getResource() instanceof Organization);
+		BundleEntryComponent eptEntry2 = searchBundle.getEntry().get(1);
+		assertNotNull(eptEntry2);
+		assertEquals(SearchEntryMode.MATCH, eptEntry2.getSearch().getMode());
+		assertNotNull(eptEntry2.getResource());
+		assertTrue(eptEntry2.getResource() instanceof Endpoint);
+
+		BundleEntryComponent orgEntry1 = searchBundle.getEntry().get(2);
+		assertNotNull(orgEntry1);
+		assertEquals(SearchEntryMode.INCLUDE, orgEntry1.getSearch().getMode());
+		assertNotNull(orgEntry1.getResource());
+		assertTrue(orgEntry1.getResource() instanceof Organization);
+
+		BundleEntryComponent orgEntry2 = searchBundle.getEntry().get(3);
+		assertNotNull(orgEntry2);
+		assertEquals(SearchEntryMode.INCLUDE, orgEntry2.getSearch().getMode());
+		assertNotNull(orgEntry2.getResource());
+		assertTrue(orgEntry2.getResource() instanceof Organization);
 	}
 
 	@Test
@@ -67,20 +80,32 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 		Bundle searchBundle = getWebserviceClient().search(Endpoint.class,
 				Map.of("_revinclude", Collections.singletonList("Organization:endpoint")));
 		assertNotNull(searchBundle);
-		assertEquals(1, searchBundle.getTotal());
-		assertEquals(2, searchBundle.getEntry().size());
+		assertEquals(2, searchBundle.getTotal());
+		assertEquals(4, searchBundle.getEntry().size());
 
-		BundleEntryComponent orgEntry = searchBundle.getEntry().get(0);
-		assertNotNull(orgEntry);
-		assertEquals(SearchEntryMode.MATCH, orgEntry.getSearch().getMode());
-		assertNotNull(orgEntry.getResource());
-		assertTrue(orgEntry.getResource() instanceof Endpoint);
+		BundleEntryComponent eptEntry1 = searchBundle.getEntry().get(0);
+		assertNotNull(eptEntry1);
+		assertEquals(SearchEntryMode.MATCH, eptEntry1.getSearch().getMode());
+		assertNotNull(eptEntry1.getResource());
+		assertTrue(eptEntry1.getResource() instanceof Endpoint);
 
-		BundleEntryComponent eptEntry = searchBundle.getEntry().get(1);
-		assertNotNull(eptEntry);
-		assertEquals(SearchEntryMode.INCLUDE, eptEntry.getSearch().getMode());
-		assertNotNull(eptEntry.getResource());
-		assertTrue(eptEntry.getResource() instanceof Organization);
+		BundleEntryComponent eptEntry2 = searchBundle.getEntry().get(1);
+		assertNotNull(eptEntry2);
+		assertEquals(SearchEntryMode.MATCH, eptEntry2.getSearch().getMode());
+		assertNotNull(eptEntry2.getResource());
+		assertTrue(eptEntry2.getResource() instanceof Endpoint);
+
+		BundleEntryComponent orgEntry1 = searchBundle.getEntry().get(2);
+		assertNotNull(orgEntry1);
+		assertEquals(SearchEntryMode.INCLUDE, orgEntry1.getSearch().getMode());
+		assertNotNull(orgEntry1.getResource());
+		assertTrue(orgEntry1.getResource() instanceof Organization);
+
+		BundleEntryComponent orgEntry2 = searchBundle.getEntry().get(3);
+		assertNotNull(orgEntry2);
+		assertEquals(SearchEntryMode.INCLUDE, orgEntry2.getSearch().getMode());
+		assertNotNull(orgEntry2.getResource());
+		assertTrue(orgEntry2.getResource() instanceof Organization);
 	}
 
 	@Test
@@ -127,11 +152,20 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 		Endpoint endpoint = new Endpoint();
 		endpoint.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/authorization-role")
 				.setCode("REMOTE");
+		endpoint.setStatus(EndpointStatus.ACTIVE);
 		endpoint.addIdentifier().setSystem("http://highmed.org/fhir/NamingSystem/endpoint-identifier")
 				.setValue("foo-bar-baz.test.bla-bla.de");
-		endpoint.setAddress("https://foo-bar-baz.test.bla-bla.de/fhir");
 		endpoint.getManagingOrganization().setType("Organization").getIdentifier()
 				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("bla-bla.de");
+		endpoint.getConnectionType().setSystem("http://terminology.hl7.org/CodeSystem/endpoint-connection-type")
+				.setCode("hl7-fhir-rest");
+		endpoint.getPayloadTypeFirstRep().getCodingFirstRep().setSystem("http://hl7.org/fhir/resource-types")
+				.setCode("Task");
+		endpoint.addPayloadMimeTypeElement().setSystem("urn:ietf:bcp:13").setValue(Constants.CT_FHIR_XML_NEW);
+		endpoint.addPayloadMimeTypeElement().setSystem("urn:ietf:bcp:13").setValue(Constants.CT_FHIR_JSON_NEW);
+		endpoint.setAddress("https://foo-bar-baz.test.bla-bla.de/fhir");
+
+		logger.debug("endpoint: {}", context.newXmlParser().setPrettyPrint(true).encodeResourceToString(endpoint));
 
 		Endpoint createdEdp = getWebserviceClient().create(endpoint);
 		assertNotNull(createdEdp);
@@ -177,6 +211,9 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 	{
 		FhirContext context = FhirContext.forR4();
 
+		String orgTempId = "urn:uuid:" + UUID.randomUUID().toString();
+		String endTempId = "urn:uuid:" + UUID.randomUUID().toString();
+
 		Organization organization = new Organization();
 		organization.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/authorization-role")
 				.setCode("REMOTE");
@@ -184,25 +221,34 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 				.setValue("bla-bla.de");
 		organization.addExtension("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint", new StringType(
 				"6b83a92506d67265697c74f50a9cac0ec7182adcc5302e5ed487ae1a782fe278f5ca79808c971e061fadded2c303a2223140ef3450d1d27717dd704a823f95e9"));
+		organization.addEndpoint().setReference(endTempId);
 
 		Endpoint endpoint = new Endpoint();
+		endpoint.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-endpoint");
 		endpoint.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/authorization-role")
 				.setCode("REMOTE");
 		endpoint.addIdentifier().setSystem("http://highmed.org/fhir/NamingSystem/endpoint-identifier")
 				.setValue("foo-bar-baz.test.bla-bla.de");
+		endpoint.setStatus(EndpointStatus.ACTIVE);
+		endpoint.getConnectionType().setSystem("http://terminology.hl7.org/CodeSystem/endpoint-connection-type")
+				.setCode("hl7-fhir-rest");
+		endpoint.getManagingOrganization().setReference(orgTempId);
+		endpoint.getPayloadTypeFirstRep().getCodingFirstRep().setSystem("http://hl7.org/fhir/resource-types")
+				.setCode("Task");
+		endpoint.addPayloadMimeTypeElement().setSystem("urn:ietf:bcp:13").setValue(Constants.CT_FHIR_XML_NEW);
+		endpoint.addPayloadMimeTypeElement().setSystem("urn:ietf:bcp:13").setValue(Constants.CT_FHIR_JSON_NEW);
 		endpoint.setAddress("https://foo-bar-baz.test.bla-bla.de/fhir");
-		endpoint.getManagingOrganization().setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("bla-bla.de");
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
-		bundle.addEntry().setFullUrl("urn:uuid:" + UUID.randomUUID().toString()).setResource(organization).getRequest()
-				.setMethod(HTTPVerb.POST).setUrl("Organization");
-		bundle.addEntry().setFullUrl("urn:uuid:" + UUID.randomUUID().toString()).setResource(endpoint).getRequest()
-				.setMethod(HTTPVerb.POST).setUrl("Endpoint");
+		bundle.addEntry().setFullUrl(orgTempId).setResource(organization).getRequest().setMethod(HTTPVerb.POST)
+				.setUrl("Organization");
+		bundle.addEntry().setFullUrl(endTempId).setResource(endpoint).getRequest().setMethod(HTTPVerb.POST)
+				.setUrl("Endpoint");
 		bundle.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(
 				"Endpoint?identifier=http://highmed.org/fhir/NamingSystem/endpoint-identifier|foo-bar-baz.test.bla-bla.de");
 
+		logger.debug("bundle: {}", context.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		Bundle postBundle = getWebserviceClient().postBundle(bundle);
 		logger.debug("post: {}", context.newXmlParser().setPrettyPrint(true).encodeResourceToString(postBundle));
 
@@ -216,7 +262,6 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 		assertTrue(readEdp.hasIdElement());
 		assertTrue(readEdp.getIdElement().hasIdPart());
 		assertTrue(readEdp.hasManagingOrganization());
-		assertTrue(readEdp.getManagingOrganization().hasIdentifier());
-		assertFalse(readEdp.getManagingOrganization().hasReference());
+		assertTrue(readEdp.getManagingOrganization().hasReference());
 	}
 }
