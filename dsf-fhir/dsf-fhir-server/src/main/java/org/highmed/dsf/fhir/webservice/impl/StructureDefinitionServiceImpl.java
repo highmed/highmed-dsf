@@ -28,6 +28,7 @@ import org.highmed.dsf.fhir.search.PartialResult;
 import org.highmed.dsf.fhir.search.SearchQuery;
 import org.highmed.dsf.fhir.search.parameters.ResourceLastUpdated;
 import org.highmed.dsf.fhir.search.parameters.StructureDefinitionUrl;
+import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.highmed.dsf.fhir.service.ReferenceExtractor;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.highmed.dsf.fhir.service.ResourceValidator;
@@ -64,13 +65,14 @@ public class StructureDefinitionServiceImpl extends
 			StructureDefinitionDao dao, ResourceValidator validator, EventManager eventManager,
 			ExceptionHandler exceptionHandler, EventGenerator eventGenerator, ResponseGenerator responseGenerator,
 			ParameterConverter parameterConverter, ReferenceExtractor referenceExtractor,
-			ReferenceResolver referenceResolver, AuthorizationRuleProvider authorizationRuleProvider,
+			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
+			AuthorizationRuleProvider authorizationRuleProvider,
 			StructureDefinitionSnapshotDao structureDefinitionSnapshotDao, SnapshotGenerator sanapshotGenerator,
 			SnapshotDependencyAnalyzer snapshotDependencyAnalyzer)
 	{
 		super(path, StructureDefinition.class, serverBase, defaultPageCount, dao, validator, eventManager,
 				exceptionHandler, eventGenerator, responseGenerator, parameterConverter, referenceExtractor,
-				referenceResolver, authorizationRuleProvider);
+				referenceResolver, referenceCleaner, authorizationRuleProvider);
 
 		this.snapshotDao = structureDefinitionSnapshotDao;
 		this.snapshotGenerator = sanapshotGenerator;

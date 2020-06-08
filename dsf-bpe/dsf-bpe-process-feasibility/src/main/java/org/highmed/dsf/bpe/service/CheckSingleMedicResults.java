@@ -1,8 +1,8 @@
 package org.highmed.dsf.bpe.service;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
-import java.util.stream.Stream;
+import java.util.Optional;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.Constants;
@@ -11,8 +11,8 @@ import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.FeasibilityQueryResult;
 import org.highmed.dsf.fhir.variables.FeasibilityQueryResults;
+import org.highmed.dsf.fhir.variables.FeasibilityQueryResultsValues;
 import org.highmed.dsf.fhir.variables.Outputs;
-import org.highmed.dsf.fhir.variables.OutputsValues;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,63 +26,48 @@ public class CheckSingleMedicResults extends AbstractServiceDelegate
 	}
 
 	@Override
-	public void doExecute(DelegateExecution execution) throws Exception
+	protected void doExecute(DelegateExecution execution) throws Exception
 	{
 		Outputs outputs = (Outputs) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
 
-		List<FeasibilityQueryResult> results = ((FeasibilityQueryResults) execution
-				.getVariable(Constants.VARIABLE_QUERY_RESULTS)).getResults();
+		FeasibilityQueryResults results = (FeasibilityQueryResults) execution
+				.getVariable(Constants.VARIABLE_QUERY_RESULTS);
 
-		Stream<FeasibilityQueryResult> positiveResults = checkQueryResults(results, getFilter());
-		Stream<FeasibilityQueryResult> negativeResults = checkQueryResults(results, getNegativeFilter());
+		List<FeasibilityQueryResult> filteredResults = filterErronesResultsAndAddErrorsToOutput(results, outputs);
 
-		addSuccessfulResultsToOutputs(positiveResults, outputs);
-		addErroneousResultsToOutputs(negativeResults, outputs);
-
-		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, OutputsValues.create(outputs));
+		execution.setVariable(Constants.VARIABLE_QUERY_RESULTS,
+				FeasibilityQueryResultsValues.create(new FeasibilityQueryResults(filteredResults)));
 	}
 
-	private Stream<FeasibilityQueryResult> checkQueryResults(List<FeasibilityQueryResult> queryResults,
-			Predicate<FeasibilityQueryResult> filter)
+	private List<FeasibilityQueryResult> filterErronesResultsAndAddErrorsToOutput(FeasibilityQueryResults results,
+			Outputs outputs)
 	{
-		return queryResults.stream().filter(filter);
+		List<FeasibilityQueryResult> filteredResults = new ArrayList<>();
+		for (FeasibilityQueryResult result : results.getResults())
+		{
+			Optional<String> errorReason = testResultAndReturnErrorReason(result);
+			if (errorReason.isPresent())
+				addError(outputs, result.getCohortId(), errorReason.get());
+			else
+				filteredResults.add(result);
+		}
+
+		return filteredResults;
 	}
 
-	private Predicate<FeasibilityQueryResult> getFilter()
+	protected Optional<String> testResultAndReturnErrorReason(FeasibilityQueryResult result)
 	{
 		// TODO: implement check
-		//		 cohort size > 0
-		//       other filter criteria tbd
-
-		return result -> true;
+		// cohort size > 0
+		// other filter criteria tbd
+		return Optional.empty();
 	}
 
-	private Predicate<FeasibilityQueryResult> getNegativeFilter()
+	private void addError(Outputs outputs, String cohortId, String error)
 	{
-		// TODO: implement check, should match the opposite criteria of getFilter()
+		String errorMessage = "Feasibility query result check failed for group with id '" + cohortId + "': " + error;
 
-		return result -> false;
-	}
-
-	private void addErroneousResultsToOutputs(Stream<FeasibilityQueryResult> erroneousResults, Outputs outputs)
-	{
-		erroneousResults.forEach(result -> {
-			String errorMessage =
-					"Final single medic feasibility query result check failed for group with id '" + result
-							.getCohortId() + "', reason unknown";
-
-			logger.info(errorMessage);
-			outputs.addErrorOutput(errorMessage);
-		});
-
-	}
-
-	private void addSuccessfulResultsToOutputs(Stream<FeasibilityQueryResult> successfulResults, Outputs outputs)
-	{
-		successfulResults.forEach(result -> {
-			outputs.add(Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
-					Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_SINGLE_MEDIC_RESULT,
-					String.valueOf(result.getCohortSize()), Constants.EXTENSION_GROUP_ID_URI, result.getCohortId());
-		});
+		logger.info(errorMessage);
+		outputs.addErrorOutput(errorMessage);
 	}
 }

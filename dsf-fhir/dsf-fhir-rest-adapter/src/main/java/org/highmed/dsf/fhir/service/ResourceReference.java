@@ -135,9 +135,14 @@ public class ResourceReference
 	}
 
 	/**
+	 * Determines the {@link ReferenceType} based {@link Reference#getReference()} first and then looks at
+	 * {@link Reference#getIdentifier()}
+	 * 
 	 * @param localServerBase
 	 *            not <code>null</code>
-	 * @return
+	 * @return one of this priority list: {@link ReferenceType#TEMPORARY}, {@link ReferenceType#LITERAL_INTERNAL},
+	 *         {@link ReferenceType#LITERAL_EXTERNAL}, {@link ReferenceType#CONDITIONAL}, {@link ReferenceType#LOGICAL},
+	 *         {@link ReferenceType#UNKNOWN}
 	 */
 	public ReferenceType getType(String localServerBase)
 	{

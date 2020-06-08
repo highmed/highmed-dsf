@@ -85,20 +85,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 		Objects.requireNonNull(user, "user");
 		Objects.requireNonNull(reference, "reference");
 
-		switch (reference.getType(serverBase))
-		{
-			case LITERAL_INTERNAL:
-				return resolveLiteralInternalReference(reference, null);
-			case LITERAL_EXTERNAL:
-				return resolveLiteralExternalReference(reference);
-			case CONDITIONAL:
-				return resolveConditionalReference(user, reference, null);
-			case LOGICAL:
-				return resolveLogicalReference(user, reference, null);
-			default:
-				throw new IllegalArgumentException(
-						"Reference of type " + reference.getType(serverBase) + " not supported");
-		}
+		return doResolveReference(user, reference, null);
 	}
 
 	@Override
@@ -108,7 +95,13 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 		Objects.requireNonNull(reference, "reference");
 		Objects.requireNonNull(connection, "connection");
 
-		switch (reference.getType(serverBase))
+		return doResolveReference(user, reference, connection);
+	}
+
+	private Optional<Resource> doResolveReference(User user, ResourceReference reference, Connection connection)
+	{
+		ReferenceType type = reference.getType(serverBase);
+		switch (type)
 		{
 			case LITERAL_INTERNAL:
 				return resolveLiteralInternalReference(reference, connection);
@@ -119,8 +112,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 			case LOGICAL:
 				return resolveLogicalReference(user, reference, connection);
 			default:
-				throw new IllegalArgumentException(
-						"Reference of type " + reference.getType(serverBase) + " not supported");
+				throw new IllegalArgumentException("Reference of type " + type + " not supported");
 		}
 	}
 
@@ -132,54 +124,54 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 	}
 
 	@Override
-	public boolean resolveReference(User user, Resource resource, Integer bundleIndex,
-			ResourceReference resourceReference, Connection connection)
+	public boolean resolveReference(User user, Resource resource, Integer bundleIndex, ResourceReference reference,
+			Connection connection)
 	{
 		Objects.requireNonNull(user, "user");
 		Objects.requireNonNull(resource, "resource");
-		Objects.requireNonNull(resourceReference, "resourceReference");
+		Objects.requireNonNull(reference, "reference");
 		Objects.requireNonNull(connection, "connection");
 
-		switch (resourceReference.getType(serverBase))
+		ReferenceType type = reference.getType(serverBase);
+		switch (type)
 		{
 			case LITERAL_INTERNAL:
-				return resolveLiteralInternalReference(resource, bundleIndex, resourceReference, connection);
+				return resolveLiteralInternalReference(resource, bundleIndex, reference, connection);
 			case LITERAL_EXTERNAL:
-				return resolveLiteralExternalReference(resource, bundleIndex, resourceReference);
+				return resolveLiteralExternalReference(resource, bundleIndex, reference);
 			case CONDITIONAL:
-				return resolveConditionalReference(user, resource, bundleIndex, resourceReference, connection);
+				return resolveConditionalReference(user, resource, bundleIndex, reference, connection);
 			case LOGICAL:
-				return resolveLogicalReference(user, resource, bundleIndex, resourceReference, connection);
+				return resolveLogicalReference(user, resource, bundleIndex, reference, connection);
 			default:
-				throw new IllegalArgumentException(
-						"Reference of type " + resourceReference.getType(serverBase) + " not supported");
+				throw new IllegalArgumentException("Reference of type " + type + " not supported");
 		}
 	}
 
-	private Optional<Resource> resolveLiteralInternalReference(ResourceReference resourceReference,
-			Connection connection)
+	private Optional<Resource> resolveLiteralInternalReference(ResourceReference reference, Connection connection)
 	{
-		Objects.requireNonNull(resourceReference, "resourceReference");
-		if (!ReferenceType.LITERAL_INTERNAL.equals(resourceReference.getType(serverBase)))
+		Objects.requireNonNull(reference, "reference");
+
+		ReferenceType type = reference.getType(serverBase);
+		if (!ReferenceType.LITERAL_INTERNAL.equals(type))
 			throw new IllegalArgumentException("Not a literal internal reference");
 
-		IdType id = new IdType(resourceReference.getReference().getReference());
+		IdType id = new IdType(reference.getReference().getReference());
 		Optional<ResourceDao<?>> referenceDao = daoProvider.getDao(id.getResourceType());
 
 		if (referenceDao.isEmpty())
 		{
 			logger.warn("Reference target type of reference at {} not supported by this implementation",
-					resourceReference.getReferenceLocation());
+					reference.getReferenceLocation());
 			return Optional.empty();
 		}
 		else
 		{
 			@SuppressWarnings("unchecked")
 			ResourceDao<Resource> d = (ResourceDao<Resource>) referenceDao.get();
-			if (!resourceReference.supportsType(d.getResourceType()))
+			if (!reference.supportsType(d.getResourceType()))
 			{
-				logger.warn("Reference target type of reference at {} not supported",
-						resourceReference.getReferenceLocation());
+				logger.warn("Reference target type of reference at {} not supported", reference.getReferenceLocation());
 				return Optional.empty();
 			}
 
@@ -212,60 +204,63 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 	}
 
 	@Override
-	public boolean resolveLiteralInternalReference(Resource resource, Integer bundleIndex,
-			ResourceReference resourceReference, Connection connection)
-			throws WebApplicationException, IllegalArgumentException
+	public boolean resolveLiteralInternalReference(Resource resource, Integer bundleIndex, ResourceReference reference,
+			Connection connection) throws WebApplicationException, IllegalArgumentException
 	{
 		Objects.requireNonNull(resource, "resource");
-		Objects.requireNonNull(resourceReference, "resourceReference");
+		Objects.requireNonNull(reference, "reference");
 		Objects.requireNonNull(connection, "connection");
-		if (!ReferenceType.LITERAL_INTERNAL.equals(resourceReference.getType(serverBase)))
+
+		ReferenceType type = reference.getType(serverBase);
+		if (!ReferenceType.LITERAL_INTERNAL.equals(type))
 			throw new IllegalArgumentException("Not a literal internal reference");
 
-		IdType id = new IdType(resourceReference.getReference().getReference());
+		IdType id = new IdType(reference.getReference().getReference());
 		Optional<ResourceDao<?>> referenceDao = daoProvider.getDao(id.getResourceType());
 
 		if (referenceDao.isEmpty())
 			throw new WebApplicationException(responseGenerator
-					.referenceTargetTypeNotSupportedByImplementation(bundleIndex, resource, resourceReference));
+					.referenceTargetTypeNotSupportedByImplementation(bundleIndex, resource, reference));
 		else
 		{
 			ResourceDao<?> d = referenceDao.get();
-			if (!resourceReference.supportsType(d.getResourceType()))
-				throw new WebApplicationException(responseGenerator
-						.referenceTargetTypeNotSupportedByResource(bundleIndex, resource, resourceReference));
+			if (!reference.supportsType(d.getResourceType()))
+				throw new WebApplicationException(
+						responseGenerator.referenceTargetTypeNotSupportedByResource(bundleIndex, resource, reference));
 
 			boolean exists = exceptionHandler.handleSqlException(
 					() -> d.existsNotDeletedWithTransaction(connection, id.getIdPart(), id.getVersionIdPart()));
 			if (!exists)
 				throw new WebApplicationException(
-						responseGenerator.referenceTargetNotFoundLocally(bundleIndex, resource, resourceReference));
+						responseGenerator.referenceTargetNotFoundLocally(bundleIndex, resource, reference));
 		}
 
 		return false; // throws exception if reference could not be resolved
 	}
 
-	private Optional<Resource> resolveLiteralExternalReference(ResourceReference resourceReference)
+	private Optional<Resource> resolveLiteralExternalReference(ResourceReference reference)
 	{
-		Objects.requireNonNull(resourceReference, "resourceReference");
-		if (!ReferenceType.LITERAL_EXTERNAL.equals(resourceReference.getType(serverBase)))
+		Objects.requireNonNull(reference, "reference");
+
+		ReferenceType type = reference.getType(serverBase);
+		if (!ReferenceType.LITERAL_EXTERNAL.equals(type))
 			throw new IllegalArgumentException("Not a literal external reference");
 
-		String remoteServerBase = resourceReference.getServerBase(serverBase);
+		String remoteServerBase = reference.getServerBase(serverBase);
 		Optional<FhirWebserviceClient> client = clientProvider.getClient(remoteServerBase);
 
 		if (client.isEmpty())
 		{
 			logger.warn(
 					"Error while resolving literal external reference {}, no remote client found for server base {}",
-					resourceReference.getReference().getReference(), remoteServerBase);
+					reference.getReference().getReference(), remoteServerBase);
 			return Optional.empty();
 		}
 		else
 		{
-			IdType referenceId = new IdType(resourceReference.getReference().getReference());
+			IdType referenceId = new IdType(reference.getReference().getReference());
 			logger.debug("Trying to resolve literal external reference {}, at remote server {}",
-					resourceReference.getReference().getReference(), remoteServerBase);
+					reference.getReference().getReference(), remoteServerBase);
 
 			if (!referenceId.hasVersionIdPart())
 				return Optional.ofNullable(client.get().read(referenceId.getResourceType(), referenceId.getIdPart()));
@@ -283,57 +278,60 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 	}
 
 	@Override
-	public boolean resolveLiteralExternalReference(Resource resource, Integer bundleIndex,
-			ResourceReference resourceReference) throws WebApplicationException, IllegalArgumentException
+	public boolean resolveLiteralExternalReference(Resource resource, Integer bundleIndex, ResourceReference reference)
+			throws WebApplicationException, IllegalArgumentException
 	{
 		Objects.requireNonNull(resource, "resource");
-		Objects.requireNonNull(resourceReference, "resourceReference");
-		if (!ReferenceType.LITERAL_EXTERNAL.equals(resourceReference.getType(serverBase)))
+		Objects.requireNonNull(reference, "reference");
+
+		ReferenceType type = reference.getType(serverBase);
+		if (!ReferenceType.LITERAL_EXTERNAL.equals(type))
 			throw new IllegalArgumentException("Not a literal external reference");
 
-		String remoteServerBase = resourceReference.getServerBase(serverBase);
+		String remoteServerBase = reference.getServerBase(serverBase);
 		Optional<FhirWebserviceClient> client = clientProvider.getClient(remoteServerBase);
 
 		if (client.isEmpty())
 		{
 			logger.error(
 					"Error while resolving literal external reference {}, no remote client found for server base {}",
-					resourceReference.getReference().getReference(), remoteServerBase);
-			throw new WebApplicationException(responseGenerator.noEndpointFoundForLiteralExternalReference(bundleIndex,
-					resource, resourceReference));
+					reference.getReference().getReference(), remoteServerBase);
+			throw new WebApplicationException(
+					responseGenerator.noEndpointFoundForLiteralExternalReference(bundleIndex, resource, reference));
 		}
 		else
 		{
-			IdType referenceId = new IdType(resourceReference.getReference().getReference());
+			IdType referenceId = new IdType(reference.getReference().getReference());
 			logger.debug("Trying to resolve literal external reference {}, at remote server {}",
-					resourceReference.getReference().getReference(), remoteServerBase);
+					reference.getReference().getReference(), remoteServerBase);
 			if (!client.get().exists(referenceId))
 			{
 				logger.error(
 						"Error while resolving literal external reference {}, resource could not be found on remote server {}",
-						resourceReference.getReference().getReference(), remoteServerBase);
+						reference.getReference().getReference(), remoteServerBase);
 				throw new WebApplicationException(responseGenerator.referenceTargetNotFoundRemote(bundleIndex, resource,
-						resourceReference, remoteServerBase));
+						reference, remoteServerBase));
 			}
 		}
 
 		return true; // throws exception if reference could not be resolved
 	}
 
-	private Optional<Resource> resolveConditionalReference(User user, ResourceReference resourceReference,
+	private Optional<Resource> resolveConditionalReference(User user, ResourceReference reference,
 			Connection connection)
 	{
-		Objects.requireNonNull(resourceReference, "resourceReference");
-		if (!ReferenceType.CONDITIONAL.equals(resourceReference.getType(serverBase)))
+		Objects.requireNonNull(reference, "reference");
+
+		ReferenceType type = reference.getType(serverBase);
+		if (!ReferenceType.CONDITIONAL.equals(type))
 			throw new IllegalArgumentException("Not a conditional reference");
 
-		UriComponents condition = UriComponentsBuilder.fromUriString(resourceReference.getReference().getReference())
-				.build();
+		UriComponents condition = UriComponentsBuilder.fromUriString(reference.getReference().getReference()).build();
 		String path = condition.getPath();
 		if (path == null || path.isBlank())
 		{
 			logger.warn("Bad conditional reference target '{}' of reference at {}",
-					resourceReference.getReference().getReference(), resourceReference.getReferenceLocation());
+					reference.getReference().getReference(), reference.getReferenceLocation());
 			return Optional.empty();
 		}
 
@@ -342,20 +340,19 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 		if (referenceDao.isEmpty())
 		{
 			logger.warn("Reference target type of reference at {} not supported by this implementation",
-					resourceReference.getReferenceLocation());
+					reference.getReferenceLocation());
 			return Optional.empty();
 		}
 		else
 		{
 			ResourceDao<?> d = referenceDao.get();
-			if (!resourceReference.supportsType(d.getResourceType()))
+			if (!reference.supportsType(d.getResourceType()))
 			{
-				logger.warn("Reference target type of reference at {} not supported",
-						resourceReference.getReferenceLocation());
+				logger.warn("Reference target type of reference at {} not supported", reference.getReferenceLocation());
 				return Optional.empty();
 			}
 
-			return search(user, connection, d, resourceReference, condition.getQueryParams(), true);
+			return search(user, connection, d, reference, condition.getQueryParams(), true);
 		}
 	}
 
@@ -368,74 +365,75 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 
 	@Override
 	public boolean resolveConditionalReference(User user, Resource resource, Integer bundleIndex,
-			ResourceReference resourceReference, Connection connection)
-			throws WebApplicationException, IllegalArgumentException
+			ResourceReference reference, Connection connection) throws WebApplicationException, IllegalArgumentException
 	{
 		Objects.requireNonNull(user, "user");
 		Objects.requireNonNull(resource, "resource");
-		Objects.requireNonNull(resourceReference, "resourceReference");
+		Objects.requireNonNull(reference, "reference");
 		Objects.requireNonNull(connection, "connection");
-		if (!ReferenceType.CONDITIONAL.equals(resourceReference.getType(serverBase)))
+
+		ReferenceType type = reference.getType(serverBase);
+		if (!ReferenceType.CONDITIONAL.equals(type))
 			throw new IllegalArgumentException("Not a conditional reference");
 
-		UriComponents condition = UriComponentsBuilder.fromUriString(resourceReference.getReference().getReference())
-				.build();
+		UriComponents condition = UriComponentsBuilder.fromUriString(reference.getReference().getReference()).build();
 		String path = condition.getPath();
 		if (path == null || path.isBlank())
 			throw new WebApplicationException(
-					responseGenerator.referenceTargetBadCondition(bundleIndex, resource, resourceReference));
+					responseGenerator.referenceTargetBadCondition(bundleIndex, resource, reference));
 
 		Optional<ResourceDao<?>> referenceDao = daoProvider.getDao(path);
 
 		if (referenceDao.isEmpty())
 			throw new WebApplicationException(responseGenerator
-					.referenceTargetTypeNotSupportedByImplementation(bundleIndex, resource, resourceReference));
+					.referenceTargetTypeNotSupportedByImplementation(bundleIndex, resource, reference));
 		else
 		{
 			ResourceDao<?> d = referenceDao.get();
-			if (!resourceReference.supportsType(d.getResourceType()))
-				throw new WebApplicationException(responseGenerator
-						.referenceTargetTypeNotSupportedByResource(bundleIndex, resource, resourceReference));
+			if (!reference.supportsType(d.getResourceType()))
+				throw new WebApplicationException(
+						responseGenerator.referenceTargetTypeNotSupportedByResource(bundleIndex, resource, reference));
 
-			Resource target = search(user, resource, bundleIndex, connection, d, resourceReference,
-					condition.getQueryParams(), true);
+			Resource target = search(user, resource, bundleIndex, connection, d, reference, condition.getQueryParams(),
+					true);
 
-			resourceReference.getReference().setIdentifier(null).setReferenceElement(
+			reference.getReference().setIdentifier(null).setReferenceElement(
 					new IdType(target.getResourceType().name(), target.getIdElement().getIdPart()));
 		}
 
 		return true; // throws exception if reference could not be resolved
 	}
 
-	private Optional<Resource> resolveLogicalReference(User user, ResourceReference resourceReference,
-			Connection connection)
+	private Optional<Resource> resolveLogicalReference(User user, ResourceReference reference, Connection connection)
 	{
-		Objects.requireNonNull(resourceReference, "resourceReference");
-		if (!ReferenceType.LOGICAL.equals(resourceReference.getType(serverBase)))
+		Objects.requireNonNull(reference, "reference");
+
+		ReferenceType type = reference.getType(serverBase);
+		if (!ReferenceType.LOGICAL.equals(type))
 			throw new IllegalArgumentException("Not a logical reference");
 
-		String targetType = resourceReference.getReference().getType();
+		String targetType = reference.getReference().getType();
 
 		Optional<ResourceDao<?>> referenceDao = daoProvider.getDao(targetType);
 
 		if (referenceDao.isEmpty())
 		{
 			logger.warn("Reference target type of reference at {} not supported by this implementation",
-					resourceReference.getReferenceLocation());
+					reference.getReferenceLocation());
 			return Optional.empty();
 		}
 		else
 		{
 			ResourceDao<?> d = referenceDao.get();
-			if (!resourceReference.supportsType(d.getResourceType()))
+			if (!reference.supportsType(d.getResourceType()))
 			{
 				logger.warn("Reference target type of reference at {} not supported by this implementation",
-						resourceReference.getReferenceLocation());
+						reference.getReferenceLocation());
 				return Optional.empty();
 			}
 
-			Identifier targetIdentifier = resourceReference.getReference().getIdentifier();
-			return search(user, connection, d, resourceReference, Map.of("identifier",
+			Identifier targetIdentifier = reference.getReference().getIdentifier();
+			return search(user, connection, d, reference, Map.of("identifier",
 					Collections.singletonList(targetIdentifier.getSystem() + "|" + targetIdentifier.getValue())), true);
 		}
 	}
@@ -449,35 +447,38 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 
 	@Override
 	public boolean resolveLogicalReference(User user, Resource resource, Integer bundleIndex,
-			ResourceReference resourceReference, Connection connection)
-			throws WebApplicationException, IllegalArgumentException
+			ResourceReference reference, Connection connection) throws WebApplicationException, IllegalArgumentException
 	{
 		Objects.requireNonNull(user, "user");
 		Objects.requireNonNull(resource, "resource");
-		Objects.requireNonNull(resourceReference, "resourceReference");
+		Objects.requireNonNull(reference, "reference");
 		Objects.requireNonNull(connection, "connection");
-		if (!ReferenceType.LOGICAL.equals(resourceReference.getType(serverBase)))
+
+		ReferenceType type = reference.getType(serverBase);
+		if (!ReferenceType.LOGICAL.equals(type))
 			throw new IllegalArgumentException("Not a logical reference");
 
-		String targetType = resourceReference.getReference().getType();
+		String targetType = reference.getReference().getType();
 
 		Optional<ResourceDao<?>> referenceDao = daoProvider.getDao(targetType);
 
 		if (referenceDao.isEmpty())
 			throw new WebApplicationException(responseGenerator
-					.referenceTargetTypeNotSupportedByImplementation(bundleIndex, resource, resourceReference));
+					.referenceTargetTypeNotSupportedByImplementation(bundleIndex, resource, reference));
 		else
 		{
 			ResourceDao<?> d = referenceDao.get();
-			if (!resourceReference.supportsType(d.getResourceType()))
-				throw new WebApplicationException(responseGenerator
-						.referenceTargetTypeNotSupportedByResource(bundleIndex, resource, resourceReference));
+			if (!reference.supportsType(d.getResourceType()))
+				throw new WebApplicationException(
+						responseGenerator.referenceTargetTypeNotSupportedByResource(bundleIndex, resource, reference));
 
-			Identifier targetIdentifier = resourceReference.getReference().getIdentifier();
-			Resource target = search(user, resource, bundleIndex, connection, d, resourceReference, Map.of("identifier",
+			Identifier targetIdentifier = reference.getReference().getIdentifier();
+			Resource target = search(user, resource, bundleIndex, connection, d, reference, Map.of("identifier",
 					Collections.singletonList(targetIdentifier.getSystem() + "|" + targetIdentifier.getValue())), true);
 
-			resourceReference.getReference().setIdentifier(null).setReferenceElement(
+			// resourceReference.getReference().setIdentifier(null).setReferenceElement(
+			// new IdType(target.getResourceType().name(), target.getIdElement().getIdPart()));
+			reference.getReference().setReferenceElement(
 					new IdType(target.getResourceType().name(), target.getIdElement().getIdPart()));
 		}
 

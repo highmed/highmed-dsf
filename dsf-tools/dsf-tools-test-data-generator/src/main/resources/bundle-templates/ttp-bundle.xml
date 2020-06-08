@@ -165,11 +165,8 @@
 				</connectionType>
 				<name value="Test TTP Endpoint"/>
 				<managingOrganization>
+					<reference value="urn:uuid:bb73165c-c7b9-4342-8e28-531f07fa7735"/>
 					<type value="Organization"/>
-					<identifier>
-						<system value="http://highmed.org/fhir/NamingSystem/organization-identifier"/>
-						<value value="Test_TTP"/>
-					</identifier>
 				</managingOrganization>
 				<payloadType>
 					<coding>
@@ -208,11 +205,8 @@
 				</connectionType>
 				<name value="Test MeDIC 1 Endpoint"/>
 				<managingOrganization>
+					<reference value="urn:uuid:cf62edc2-cc5d-43ed-ac0e-caf09f7326c3"/>
 					<type value="Organization"/>
-					<identifier>
-						<system value="http://highmed.org/fhir/NamingSystem/organization-identifier"/>
-						<value value="Test_MeDIC_1"/>
-					</identifier>
 				</managingOrganization>
 				<payloadType>
 					<coding>
@@ -251,11 +245,8 @@
 				</connectionType>
 				<name value="Test MeDIC 2 Endpoint"/>
 				<managingOrganization>
+					<reference value="urn:uuid:55901940-02db-40bf-9a6e-bdfdd0ddb7bf"/>
 					<type value="Organization"/>
-					<identifier>
-						<system value="http://highmed.org/fhir/NamingSystem/organization-identifier"/>
-						<value value="Test_MeDIC_2"/>
-					</identifier>
 				</managingOrganization>
 				<payloadType>
 					<coding>
@@ -294,11 +285,8 @@
 				</connectionType>
 				<name value="Test MeDIC 3 Endpoint"/>
 				<managingOrganization>
+					<reference value="urn:uuid:a49a45d2-88cc-4830-a028-413d68d9a439"/>
 					<type value="Organization"/>
-					<identifier>
-						<system value="http://highmed.org/fhir/NamingSystem/organization-identifier"/>
-						<value value="Test_MeDIC_3"/>
-					</identifier>
 				</managingOrganization>
 				<payloadType>
 					<coding>

@@ -4,27 +4,19 @@ import java.util.BitSet;
 
 public class TestPerson implements Person
 {
-	private final String organization;
-	private final String id;
+	private final MedicId medicId;
 	private final BitSet recordBloomFilter;
 
-	public TestPerson(String organization, String id, BitSet recordBloomFilter)
+	public TestPerson(MedicId medicId, BitSet recordBloomFilter)
 	{
-		this.organization = organization;
-		this.id = id;
+		this.medicId = medicId;
 		this.recordBloomFilter = recordBloomFilter;
 	}
 
 	@Override
-	public String getOrganization()
+	public MedicId getMedicId()
 	{
-		return organization;
-	}
-
-	@Override
-	public String getId()
-	{
-		return id;
+		return medicId;
 	}
 
 	@Override
@@ -34,14 +26,8 @@ public class TestPerson implements Person
 	}
 
 	@Override
-	public MatchedPerson toMatchedPerson()
-	{
-		return new TestMatchedPerson(this);
-	}
-
-	@Override
 	public String toString()
 	{
-		return "org: " + getOrganization() + ", id: " + getId();
+		return "org: " + medicId.getOrganization() + ", id: " + medicId.getValue();
 	}
 }

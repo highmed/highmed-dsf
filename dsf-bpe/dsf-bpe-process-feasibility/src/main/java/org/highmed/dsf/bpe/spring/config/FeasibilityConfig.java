@@ -1,5 +1,6 @@
 package org.highmed.dsf.bpe.spring.config;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
 import org.highmed.dsf.bpe.message.SendMedicRequest;
 import org.highmed.dsf.bpe.message.SendMultiMedicResults;
@@ -13,11 +14,13 @@ import org.highmed.dsf.bpe.service.CheckQueries;
 import org.highmed.dsf.bpe.service.CheckSingleMedicResults;
 import org.highmed.dsf.bpe.service.DownloadFeasibilityResources;
 import org.highmed.dsf.bpe.service.DownloadResearchStudyResource;
-import org.highmed.dsf.bpe.service.ExecuteEpiLink;
+import org.highmed.dsf.bpe.service.DownloadResultSets;
 import org.highmed.dsf.bpe.service.ExecuteQueries;
+import org.highmed.dsf.bpe.service.ExecuteRecordLink;
 import org.highmed.dsf.bpe.service.FilterQueryResultsByConsent;
 import org.highmed.dsf.bpe.service.GenerateBloomFilters;
 import org.highmed.dsf.bpe.service.GenerateCountFromIds;
+import org.highmed.dsf.bpe.service.MasterPatientIndexClientStub;
 import org.highmed.dsf.bpe.service.ModifyQueries;
 import org.highmed.dsf.bpe.service.SelectRequestTargets;
 import org.highmed.dsf.bpe.service.SelectResponseTargetMedic;
@@ -29,9 +32,14 @@ import org.highmed.dsf.fhir.group.GroupHelper;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.openehr.client.OpenEhrWebserviceClientProvider;
+import org.highmed.pseudonymization.mpi.MasterPatientIndexClient;
+import org.highmed.pseudonymization.translation.ResultSetTranslatorFromMedicRbfOnly;
+import org.highmed.pseudonymization.translation.ResultSetTranslatorFromMedicRbfOnlyImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -56,6 +64,9 @@ public class FeasibilityConfig
 	@Autowired
 	private FhirContext fhirContext;
 
+	@Autowired
+	private ObjectMapper objectMapper;
+
 	@Bean
 	public ProcessEnginePlugin feasibilityPlugin()
 	{
@@ -75,7 +86,7 @@ public class FeasibilityConfig
 	@Bean
 	public SelectRequestTargets selectRequestTargets()
 	{
-		return new SelectRequestTargets(fhirClientProvider, taskHelper, organizationProvider);
+		return new SelectRequestTargets(fhirClientProvider, taskHelper, organizationProvider, bouncyCastleProvider());
 	}
 
 	@Bean
@@ -127,7 +138,8 @@ public class FeasibilityConfig
 	@Bean
 	public ExecuteQueries executeQueries()
 	{
-		return new ExecuteQueries(fhirClientProvider, openehrClientProvider.getWebserviceClient(), taskHelper);
+		return new ExecuteQueries(fhirClientProvider, openehrClientProvider.getWebserviceClient(), taskHelper,
+				organizationProvider);
 	}
 
 	@Bean
@@ -137,15 +149,29 @@ public class FeasibilityConfig
 	}
 
 	@Bean
-	public GenerateBloomFilters generateBloomFilters()
-	{
-		return new GenerateBloomFilters(fhirClientProvider, taskHelper);
-	}
-
-	@Bean
 	public GenerateCountFromIds generateCountFromIds()
 	{
 		return new GenerateCountFromIds(fhirClientProvider, taskHelper);
+	}
+
+	@Bean
+	public MasterPatientIndexClient masterPatientIndexClient()
+	{
+		// TODO IHE PDQ implementation
+		return new MasterPatientIndexClientStub();
+	}
+
+	@Bean
+	public GenerateBloomFilters generateBloomFilters()
+	{
+		return new GenerateBloomFilters(fhirClientProvider, taskHelper, masterPatientIndexClient(), objectMapper,
+				bouncyCastleProvider());
+	}
+
+	@Bean
+	public BouncyCastleProvider bouncyCastleProvider()
+	{
+		return new BouncyCastleProvider();
 	}
 
 	@Bean
@@ -183,9 +209,21 @@ public class FeasibilityConfig
 	}
 
 	@Bean
-	public ExecuteEpiLink executeEpiLink()
+	public DownloadResultSets downloadResultSets()
 	{
-		return new ExecuteEpiLink(fhirClientProvider, taskHelper);
+		return new DownloadResultSets(fhirClientProvider, taskHelper, objectMapper);
+	}
+
+	@Bean
+	public ResultSetTranslatorFromMedicRbfOnly resultSetTranslatorFromMedicRbfOnly()
+	{
+		return new ResultSetTranslatorFromMedicRbfOnlyImpl();
+	}
+
+	@Bean
+	public ExecuteRecordLink executeRecordLink()
+	{
+		return new ExecuteRecordLink(fhirClientProvider, taskHelper, resultSetTranslatorFromMedicRbfOnly());
 	}
 
 	@Bean

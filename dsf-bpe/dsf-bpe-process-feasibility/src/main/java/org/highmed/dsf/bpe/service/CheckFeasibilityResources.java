@@ -23,7 +23,7 @@ public class CheckFeasibilityResources extends AbstractServiceDelegate
 	}
 
 	@Override
-	public void doExecute(DelegateExecution execution) throws Exception
+	protected void doExecute(DelegateExecution execution) throws Exception
 	{
 		ResearchStudy researchStudy = (ResearchStudy) execution.getVariable(Constants.VARIABLE_RESEARCH_STUDY);
 
@@ -31,19 +31,30 @@ public class CheckFeasibilityResources extends AbstractServiceDelegate
 				.getResourcesAndCast();
 
 		checkNumberOfParticipatingMedics(researchStudy);
+		checkFullyQualifiedCohortIds(cohorts);
 		checkNumberOfCohortDefinitions(cohorts);
 	}
 
 	private void checkNumberOfParticipatingMedics(ResearchStudy researchStudy)
 	{
-		long medics = researchStudy.getExtension().stream()
-				.filter(e -> e.getUrl().equals(Constants.EXTENSION_PARTICIPATING_MEDIC_URI))
-				.map(extension -> ((Reference) extension.getValue()).getReference()).distinct().count();
+		long medics = researchStudy.getExtensionsByUrl(Constants.EXTENSION_PARTICIPATING_MEDIC_URI).stream()
+				.filter(e -> e.getValue() instanceof Reference).map(e -> (Reference) e.getValue())
+				.map(r -> r.getIdentifier())
+				.filter(i -> "http://highmed.org/fhir/NamingSystem/organization-identifier".equals(i.getSystem()))
+				.map(i -> i.getValue()).distinct().count();
 
 		if (medics < MIN_PARTICIPATING_MEDICS)
 		{
-			throw new IllegalStateException(
+			throw new RuntimeException(
 					"Number of distinct participanting MeDICs is < " + MIN_PARTICIPATING_MEDICS + ", got " + medics);
+		}
+	}
+
+	private void checkFullyQualifiedCohortIds(List<Group> cohorts)
+	{
+		if (cohorts.stream().anyMatch(g -> !g.getIdElement().hasBaseUrl()))
+		{
+			throw new RuntimeException("Not all cohorts have fully qualified ids (containing server base url)");
 		}
 	}
 
@@ -52,7 +63,7 @@ public class CheckFeasibilityResources extends AbstractServiceDelegate
 		int size = cohorts.size();
 		if (size < MIN_COHORT_DEFINITIONS)
 		{
-			throw new IllegalStateException(
+			throw new RuntimeException(
 					"Number of defined cohorts is < " + MIN_COHORT_DEFINITIONS + ", got " + cohorts.size());
 		}
 	}

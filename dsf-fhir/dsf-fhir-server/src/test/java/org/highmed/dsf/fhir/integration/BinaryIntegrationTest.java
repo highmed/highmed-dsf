@@ -27,9 +27,15 @@ import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.context.FhirContext;
 
 public class BinaryIntegrationTest extends AbstractIntegrationTest
 {
+	private static final Logger logger = LoggerFactory.getLogger(BinaryIntegrationTest.class);
+
 	@Test
 	public void testReadAllowedLocalUser() throws Exception
 	{
@@ -436,6 +442,27 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 			assertEquals(Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
 			throw e;
 		}
+	}
+
+	@Test
+	public void testCreateSecurityContextLogicalReference() throws Exception
+	{
+		final String contentType = "text/plain";
+		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
+
+		Binary binary = new Binary();
+		binary.setContentType(contentType);
+		binary.setData(data);
+		Reference securityContext = new Reference();
+		securityContext.setType("Organization").getIdentifier().setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
+				.setValue("External_Test_Organization");
+		binary.setSecurityContext(securityContext);
+
+		logger.debug("Binary: {}",
+				FhirContext.forR4().newXmlParser().setPrettyPrint(true).encodeResourceToString(binary));
+
+		Binary created = getWebserviceClient().create(binary);
+		assertNotNull(created);
 	}
 
 	@Test

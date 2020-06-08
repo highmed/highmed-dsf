@@ -3,13 +3,12 @@ package org.highmed.dsf.fhir.search.parameters.rev.include;
 import java.sql.Connection;
 
 import org.highmed.dsf.fhir.search.IncludeParts;
-import org.highmed.dsf.fhir.search.SearchQueryRevIncludeParameterFactory.RevIncludeDefinition;
+import org.highmed.dsf.fhir.search.IncludeParameterDefinition;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Resource;
 
-@RevIncludeDefinition(resourceType = Organization.class, parameterName = "endpoint", targetResourceTypes = {
-		Endpoint.class })
+@IncludeParameterDefinition(resourceType = Organization.class, parameterName = "endpoint", targetResourceTypes = Endpoint.class)
 public class OrganizationEndpointRevInclude extends AbstractRevIncludeParameterFactory
 {
 	public OrganizationEndpointRevInclude()

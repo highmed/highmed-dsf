@@ -41,10 +41,9 @@ public class CommandConfig
 	{
 		return new CommandFactoryImpl(serverBase, defaultPageCount, daoConfig.dataSource(), daoConfig.daoProvider(),
 				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver(),
-				helperConfig.responseGenerator(), helperConfig.exceptionHandler(), eventConfig.eventManager(),
-				eventConfig.eventGenerator(), snapshotConfig.snapshotGenerator(),
-				snapshotConfig.snapshotDependencyAnalyzer(), helperConfig.parameterConverter(),
-				authorizationHelper());
+				referenceConfig.referenceCleaner(), helperConfig.responseGenerator(), helperConfig.exceptionHandler(),
+				eventConfig.eventManager(), eventConfig.eventGenerator(), snapshotConfig.snapshotGenerator(),
+				snapshotConfig.snapshotDependencyAnalyzer(), helperConfig.parameterConverter(), authorizationHelper());
 	}
 
 	@Bean

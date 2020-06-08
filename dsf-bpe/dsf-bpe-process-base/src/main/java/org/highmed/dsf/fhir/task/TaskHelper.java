@@ -6,6 +6,8 @@ import java.util.stream.Stream;
 import org.highmed.dsf.fhir.variables.Outputs;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.r4.model.Task.ParameterComponent;
+import org.hl7.fhir.r4.model.Task.TaskOutputComponent;
 import org.hl7.fhir.r4.model.UrlType;
 
 public interface TaskHelper
@@ -24,17 +26,27 @@ public interface TaskHelper
 
 	Optional<UrlType> getFirstInputParameterUrlValue(Task task, String system, String code);
 
-	Stream<Task.ParameterComponent> getInputParameterWithExtension(Task task, String system, String code, String url);
-
 	Stream<UrlType> getInputParameterUrlValues(Task task, String system, String code);
 
-	Task.ParameterComponent createInput(String system, String code, String value);
+	Optional<byte[]> getFirstInputParameterByteValue(Task task, String system, String code);
 
-	Task.ParameterComponent createInput(String system, String code, boolean value);
+	Stream<ParameterComponent> getInputParameterWithExtension(Task task, String system, String code, String url);
 
-	Task.ParameterComponent createInput(String system, String code, Reference reference);
+	ParameterComponent createInput(String system, String code, String value);
 
-	Task.TaskOutputComponent createOutput(String system, String code, String value);
+	ParameterComponent createInput(String system, String code, boolean value);
+
+	ParameterComponent createInput(String system, String code, Reference reference);
+
+	ParameterComponent createInput(String system, String code, byte[] bytes);
+
+	ParameterComponent createInputUnsignedInt(String system, String code, int value);
+
+	ParameterComponent createInput(String system, String code, int value);
+
+	TaskOutputComponent createOutput(String system, String code, String value);
+
+	TaskOutputComponent createOutputUnsignedInt(String system, String code, int value);
 
 	Task addOutputs(Task task, Outputs outputs);
 }

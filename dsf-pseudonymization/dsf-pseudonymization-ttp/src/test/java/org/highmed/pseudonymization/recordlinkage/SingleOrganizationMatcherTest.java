@@ -15,13 +15,15 @@ public class SingleOrganizationMatcherTest
 	@Test
 	public void testMatch() throws Exception
 	{
-		SingleOrganizationMatcher m = new SingleOrganizationMatcher();
+		SingleOrganizationMatcher<TestPerson> m = new SingleOrganizationMatcherImpl<TestPerson>(TestMatchedPerson::new);
 
-		List<Person> personLists = Arrays.asList(
-				new TestPerson("org1", "id1", createRecordBloomFilter(200, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9)),
-				new TestPerson("org2", "id2", createRecordBloomFilter(200, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9)));
+		List<TestPerson> personLists = Arrays.asList(
+				new TestPerson(new TestMedicId("org1", "id1"),
+						createRecordBloomFilter(200, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9)),
+				new TestPerson(new TestMedicId("org2", "id2"),
+						createRecordBloomFilter(200, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9)));
 
-		Set<MatchedPerson> matchedPersons = m.matchPersons(personLists);
+		Set<MatchedPerson<TestPerson>> matchedPersons = m.matchPersons(personLists);
 		assertNotNull(matchedPersons);
 		assertEquals(1, matchedPersons.size());
 	}

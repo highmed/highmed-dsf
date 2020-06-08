@@ -1,5 +1,7 @@
 package org.highmed.dsf.fhir.spring.config;
 
+import org.highmed.dsf.fhir.service.ReferenceCleaner;
+import org.highmed.dsf.fhir.service.ReferenceCleanerImpl;
 import org.highmed.dsf.fhir.service.ReferenceExtractorImpl;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.highmed.dsf.fhir.service.ReferenceResolverImpl;
@@ -34,5 +36,11 @@ public class ReferenceConfig
 	{
 		return new ReferenceResolverImpl(serverBase, daoConfig.daoProvider(), helperConfig.responseGenerator(),
 				helperConfig.exceptionHandler(), clientConfig.clientProvider(), helperConfig.parameterConverter());
+	}
+
+	@Bean
+	public ReferenceCleaner referenceCleaner()
+	{
+		return new ReferenceCleanerImpl(referenceExtractor());
 	}
 }

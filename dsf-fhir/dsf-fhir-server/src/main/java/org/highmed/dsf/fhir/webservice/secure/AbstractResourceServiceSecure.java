@@ -21,6 +21,7 @@ import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.highmed.dsf.fhir.search.PartialResult;
 import org.highmed.dsf.fhir.search.SearchQuery;
 import org.highmed.dsf.fhir.search.SearchQueryParameterError;
+import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.highmed.dsf.fhir.webservice.specification.BasicResourceService;
 import org.hl7.fhir.r4.model.IdType;
@@ -40,6 +41,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractResourceServiceSecure.class);
 
+	protected final ReferenceCleaner referenceCleaner;
 	protected final Class<R> resourceType;
 	protected final String resourceTypeName;
 	protected final String serverBase;
@@ -49,11 +51,13 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	protected final AuthorizationRule<R> authorizationRule;
 
 	public AbstractResourceServiceSecure(S delegate, String serverBase, ResponseGenerator responseGenerator,
-			ReferenceResolver referenceResolver, Class<R> resourceType, D dao, ExceptionHandler exceptionHandler,
-			ParameterConverter parameterConverter, AuthorizationRule<R> authorizationRule)
+			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner, Class<R> resourceType, D dao,
+			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
+			AuthorizationRule<R> authorizationRule)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver);
 
+		this.referenceCleaner = referenceCleaner;
 		this.resourceType = resourceType;
 		this.resourceTypeName = resourceType.getAnnotation(ResourceDef.class).name();
 		this.serverBase = serverBase;
@@ -227,7 +231,10 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 			return responseGenerator.updateAsCreateNotAllowed(resourceTypeName, resourceTypeName + "/" + id);
 		}
 		else
-			return update(id, resource, uri, headers, dbResource.get());
+		{
+			R cleanedResource = referenceCleaner.cleanupReferences(dbResource.get());
+			return update(id, resource, uri, headers, cleanedResource);
+		}
 	}
 
 	private Response update(String id, R newResource, UriInfo uri, HttpHeaders headers, R oldResource)

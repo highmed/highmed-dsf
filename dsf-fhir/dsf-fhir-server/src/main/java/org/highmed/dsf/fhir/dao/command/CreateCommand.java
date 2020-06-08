@@ -26,6 +26,7 @@ import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.highmed.dsf.fhir.search.PartialResult;
 import org.highmed.dsf.fhir.search.SearchQuery;
 import org.highmed.dsf.fhir.search.SearchQueryParameterError;
+import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.highmed.dsf.fhir.service.ReferenceExtractor;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.Bundle;
@@ -48,6 +49,7 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 
 	private final ResponseGenerator responseGenerator;
 	private final ResolveReferencesHelper<R> resolveReferencesHelper;
+	private final ReferenceCleaner referenceCleaner;
 
 	protected final EventManager eventManager;
 	protected final EventGenerator eventGenerator;
@@ -58,8 +60,8 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	public CreateCommand(int index, User user, Bundle bundle, BundleEntryComponent entry, String serverBase,
 			AuthorizationHelper authorizationHelper, R resource, D dao, ExceptionHandler exceptionHandler,
 			ParameterConverter parameterConverter, ResponseGenerator responseGenerator,
-			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver, EventManager eventManager,
-			EventGenerator eventGenerator)
+			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver,
+			ReferenceCleaner referenceCleaner, EventManager eventManager, EventGenerator eventGenerator)
 	{
 		super(2, index, user, bundle, entry, serverBase, authorizationHelper, resource, dao, exceptionHandler,
 				parameterConverter);
@@ -67,6 +69,7 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		this.responseGenerator = responseGenerator;
 		resolveReferencesHelper = new ResolveReferencesHelper<R>(index, user, serverBase, referenceExtractor,
 				referenceResolver, responseGenerator);
+		this.referenceCleaner = referenceCleaner;
 
 		this.eventManager = eventManager;
 		this.eventGenerator = eventGenerator;
@@ -101,9 +104,11 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	public void execute(Map<String, IdType> idTranslationTable, Connection connection)
 			throws SQLException, WebApplicationException
 	{
-		resolveReferencesHelper.resolveReferencesIgnoreAndLogExceptions(idTranslationTable, connection, resource);
+		@SuppressWarnings("unchecked")
+		R copy = (R) resource.copy();
+		resolveReferencesHelper.resolveReferencesIgnoreAndLogExceptions(idTranslationTable, connection, copy);
 
-		authorizationHelper.checkCreateAllowed(connection, user, resource);
+		authorizationHelper.checkCreateAllowed(connection, user, copy);
 
 		Optional<Resource> exists = checkAlreadyExists(connection, entry.getRequest().getIfNoneExist(),
 				resource.getResourceType());
@@ -183,6 +188,7 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 				// retrieving the latest resource from db to include updated references
 				Resource createdResourceWithResolvedReferences = latestOrErrorIfDeletedOrNotFound(connection,
 						createdResource);
+				referenceCleaner.cleanupReferences(createdResourceWithResolvedReferences);
 				eventManager.handleEvent(eventGenerator.newResourceCreatedEvent(createdResourceWithResolvedReferences));
 			}
 			catch (Exception e)

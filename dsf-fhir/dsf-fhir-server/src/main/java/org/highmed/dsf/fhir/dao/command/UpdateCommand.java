@@ -26,6 +26,7 @@ import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.highmed.dsf.fhir.search.PartialResult;
 import org.highmed.dsf.fhir.search.SearchQuery;
 import org.highmed.dsf.fhir.search.SearchQueryParameterError;
+import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.highmed.dsf.fhir.service.ReferenceExtractor;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.Bundle;
@@ -46,6 +47,7 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 
 	private final ResponseGenerator responseGenerator;
 	private final ResolveReferencesHelper<R> resolveReferencesHelper;
+	private final ReferenceCleaner referenceCleaner;
 
 	protected final EventManager eventManager;
 	protected final EventGenerator eventGenerator;
@@ -56,8 +58,8 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	public UpdateCommand(int index, User user, Bundle bundle, BundleEntryComponent entry, String serverBase,
 			AuthorizationHelper authorizationHelper, R resource, D dao, ExceptionHandler exceptionHandler,
 			ParameterConverter parameterConverter, ResponseGenerator responseGenerator,
-			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver, EventManager eventManager,
-			EventGenerator eventGenerator)
+			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver,
+			ReferenceCleaner referenceCleaner, EventManager eventManager, EventGenerator eventGenerator)
 	{
 		super(3, index, user, bundle, entry, serverBase, authorizationHelper, resource, dao, exceptionHandler,
 				parameterConverter);
@@ -65,6 +67,7 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		this.responseGenerator = responseGenerator;
 		resolveReferencesHelper = new ResolveReferencesHelper<R>(index, user, serverBase, referenceExtractor,
 				referenceResolver, responseGenerator);
+		this.referenceCleaner = referenceCleaner;
 
 		this.eventManager = eventManager;
 		this.eventGenerator = eventGenerator;
@@ -154,7 +157,9 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 			throw new WebApplicationException(responseGenerator.nonMatchingResourceTypeAndRequestUrlInBundle(index,
 					resourceTypeName, entry.getRequest().getUrl()));
 
-		checkUpdateAllowed(idTranslationTable, connection, user, resource);
+		@SuppressWarnings("unchecked")
+		R copy = (R) resource.copy();
+		checkUpdateAllowed(idTranslationTable, connection, user, copy);
 
 		Optional<Long> ifMatch = Optional.ofNullable(entry.getRequest().getIfMatch())
 				.flatMap(parameterConverter::toEntityTag).flatMap(parameterConverter::toVersion);
@@ -181,9 +186,10 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		}
 		else
 		{
-			resolveReferencesHelper.resolveReferencesIgnoreAndLogExceptions(idTranslationTable, connection, resource);
+			resolveReferencesHelper.resolveReferencesIgnoreAndLogExceptions(idTranslationTable, connection,
+					newResource);
 
-			R oldResource = dbResource.get();
+			R oldResource = referenceCleaner.cleanupReferences(dbResource.get());
 			authorizationHelper.checkUpdateAllowed(connection, user, oldResource, newResource);
 		}
 	}
@@ -288,6 +294,7 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 			// retrieving the latest resource from db to include updated references
 			Resource updatedResourceWithResolvedReferences = latestOrErrorIfDeletedOrNotFound(connection,
 					updatedResource);
+			referenceCleaner.cleanupReferences(updatedResourceWithResolvedReferences);
 			eventManager.handleEvent(eventGenerator.newResourceUpdatedEvent(updatedResourceWithResolvedReferences));
 		}
 		catch (Exception e)

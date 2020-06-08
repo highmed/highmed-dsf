@@ -2,18 +2,21 @@ package org.highmed.pseudonymization.recordlinkage;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
-public interface MatchedPerson
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+
+@JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "@type")
+public interface MatchedPerson<P extends Person>
 {
 	/**
 	 * @return list of matched persons, sorted in the order in which they were added
 	 * @see #addMatch(Person)
 	 */
-	List<Person> getMatches();
+	List<P> getMatches();
 
-	default Person getFirstMatch() throws NoSuchElementException
+	default P getFirstMatch() throws NoSuchElementException
 	{
 		if (getMatches().isEmpty())
 			throw new NoSuchElementException();
@@ -21,7 +24,7 @@ public interface MatchedPerson
 			return getMatches().get(0);
 	}
 
-	default Person getLastMatch() throws NoSuchElementException
+	default P getLastMatch() throws NoSuchElementException
 	{
 		if (getMatches().isEmpty())
 			throw new NoSuchElementException();
@@ -33,19 +36,5 @@ public interface MatchedPerson
 	 * @param person
 	 *            not <code>null</code>
 	 */
-	void addMatch(Person person);
-
-	static Function<MatchedPerson, MatchedPerson> add(Person person)
-	{
-		return matchedPerson ->
-		{
-			matchedPerson.addMatch(person);
-			return matchedPerson;
-		};
-	}
-
-	static Supplier<MatchedPerson> from(Person person)
-	{
-		return () -> person.toMatchedPerson();
-	}
+	void addMatch(P person);
 }

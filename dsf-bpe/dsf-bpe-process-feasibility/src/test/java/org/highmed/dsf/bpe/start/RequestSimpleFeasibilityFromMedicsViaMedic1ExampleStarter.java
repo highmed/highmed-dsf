@@ -97,7 +97,7 @@ public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter
 		group.getText().getDiv().addText("This is the description");
 		group.getText().setStatus(Narrative.NarrativeStatus.ADDITIONAL);
 		group.setType(GroupType.PERSON);
-		group.setActual(true);
+		group.setActual(false);
 		group.setActive(true);
 		group.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/query").setValue(new Expression()
 				.setLanguageElement(Constants.AQL_QUERY_TYPE).setExpression("SELECT COUNT(e) FROM EHR e"));
@@ -141,7 +141,7 @@ public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter
 
 		task.getMeta()
 				.addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-request-simple-feasibility");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/requestSimpleFeasibility/0.1.0");
+		task.setInstantiatesUri("http://highmed.org/bpe/Process/requestSimpleFeasibility/0.2.0");
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
@@ -157,9 +157,9 @@ public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter
 						new Reference().setReference(researchStudy.getIdElement().getIdPart()).setType("ResearchStudy"))
 				.getType().addCoding().setSystem("http://highmed.org/fhir/CodeSystem/feasibility")
 				.setCode("research-study-reference");
-		task.addInput().setValue(new BooleanType(false)).getType().addCoding()
+		task.addInput().setValue(new BooleanType(true)).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("needs-record-linkage");
-		task.addInput().setValue(new BooleanType(false)).getType().addCoding()
+		task.addInput().setValue(new BooleanType(true)).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("needs-consent-check");
 
 		return task;

@@ -201,11 +201,11 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		{
 			ResourceReference resReference = new ResourceReference(referenceLocation, reference, Organization.class);
 
-			if (!EnumSet.of(ReferenceType.LITERAL_INTERNAL, ReferenceType.LOGICAL)
-					.contains(resReference.getType(serverBase)))
+			ReferenceType type = resReference.getType(serverBase);
+			if (!EnumSet.of(ReferenceType.LITERAL_INTERNAL, ReferenceType.LOGICAL).contains(type))
 			{
 				logger.warn("Reference of type {} not supported while checking if user part of referenced organization",
-						resReference.getType(serverBase));
+						type);
 				return false;
 			}
 
@@ -247,7 +247,8 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 			Reference reference, Class<? extends Resource>... referenceTypes)
 	{
 		ResourceReference r = new ResourceReference(referenceLocation, reference, referenceTypes);
-		if (EnumSet.of(ReferenceType.LITERAL_INTERNAL, ReferenceType.LOGICAL).contains(r.getType(serverBase)))
+		ReferenceType type = r.getType(serverBase);
+		if (EnumSet.of(ReferenceType.LITERAL_INTERNAL, ReferenceType.LOGICAL).contains(type))
 			return Optional.of(r);
 		else
 			return Optional.empty();

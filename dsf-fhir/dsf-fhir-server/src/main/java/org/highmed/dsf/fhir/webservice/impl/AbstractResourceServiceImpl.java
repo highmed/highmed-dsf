@@ -40,9 +40,11 @@ import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.highmed.dsf.fhir.search.PartialResult;
 import org.highmed.dsf.fhir.search.SearchQuery;
 import org.highmed.dsf.fhir.search.SearchQueryParameterError;
+import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.highmed.dsf.fhir.service.ReferenceExtractor;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.highmed.dsf.fhir.service.ResourceReference;
+import org.highmed.dsf.fhir.service.ResourceReference.ReferenceType;
 import org.highmed.dsf.fhir.service.ResourceValidator;
 import org.highmed.dsf.fhir.webservice.base.AbstractBasicService;
 import org.highmed.dsf.fhir.webservice.specification.BasicResourceService;
@@ -91,13 +93,14 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	protected final ParameterConverter parameterConverter;
 	protected final ReferenceExtractor referenceExtractor;
 	protected final ReferenceResolver referenceResolver;
+	protected final ReferenceCleaner referenceCleaner;
 	protected final AuthorizationRuleProvider authorizationRuleProvider;
 
 	public AbstractResourceServiceImpl(String path, Class<R> resourceType, String serverBase, int defaultPageCount,
 			D dao, ResourceValidator validator, EventManager eventManager, ExceptionHandler exceptionHandler,
 			EventGenerator eventGenerator, ResponseGenerator responseGenerator, ParameterConverter parameterConverter,
 			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver,
-			AuthorizationRuleProvider authorizationRuleProvider)
+			ReferenceCleaner referenceCleaner, AuthorizationRuleProvider authorizationRuleProvider)
 	{
 		super(path);
 
@@ -114,6 +117,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		this.parameterConverter = parameterConverter;
 		this.referenceExtractor = referenceExtractor;
 		this.referenceResolver = referenceResolver;
+		this.referenceCleaner = referenceCleaner;
 		this.authorizationRuleProvider = authorizationRuleProvider;
 	}
 
@@ -134,6 +138,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		Objects.requireNonNull(parameterConverter, "parameterConverter");
 		Objects.requireNonNull(referenceExtractor, "referenceExtractor");
 		Objects.requireNonNull(referenceResolver, "referenceResolver");
+		Objects.requireNonNull(referenceCleaner, "referenceCleaner");
 		Objects.requireNonNull(authorizationRuleProvider, "authorizationRuleProvider");
 	}
 
@@ -165,6 +170,8 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 				}
 			}
 		});
+
+		referenceCleaner.cleanupReferences(createdResource);
 
 		eventManager.handleEvent(eventGenerator.newResourceCreatedEvent(createdResource));
 
@@ -209,7 +216,8 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	private boolean resolveReference(Resource resource, Connection connection, ResourceReference resourceReference)
 			throws WebApplicationException
 	{
-		switch (resourceReference.getType(serverBase))
+		ReferenceType type = resourceReference.getType(serverBase);
+		switch (type)
 		{
 			case LITERAL_INTERNAL:
 				return referenceResolver.resolveLiteralInternalReference(resource, resourceReference, connection);
@@ -310,6 +318,8 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 		return read.map(resource ->
 		{
+			referenceCleaner.cleanupReferences(resource);
+
 			EntityTag resourceTag = new EntityTag(resource.getMeta().getVersionId(), true);
 			if (ifNoneMatch.map(t -> t.equals(resourceTag)).orElse(false))
 				return Response.notModified(resourceTag).lastModified(resource.getMeta().getLastUpdated()).build();
@@ -358,6 +368,8 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 		return read.map(resource ->
 		{
+			referenceCleaner.cleanupReferences(resource);
+
 			EntityTag resourceTag = new EntityTag(resource.getMeta().getVersionId(), true);
 			if (ifNoneMatch.map(t -> t.equals(resourceTag)).orElse(false))
 				return Response.notModified(resourceTag).lastModified(resource.getMeta().getLastUpdated()).build();
@@ -406,6 +418,8 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 						}
 					}
 				});
+
+		referenceCleaner.cleanupReferences(updatedResource);
 
 		eventManager.handleEvent(eventGenerator.newResourceUpdatedEvent(updatedResource));
 
@@ -506,7 +520,8 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		String pretty = queryParameters.getFirst(SearchQuery.PARAMETER_PRETTY);
 		Bundle searchSet = responseGenerator.createSearchSet(result, errors, bundleUri, format, pretty);
 
-		return responseGenerator.response(Status.OK, searchSet, parameterConverter.getMediaType(uri, headers)).build();
+		return responseGenerator.response(Status.OK, referenceCleaner.cleanupReferences(searchSet),
+				parameterConverter.getMediaType(uri, headers)).build();
 	}
 
 	private PartialResult<R> filterIncludeResources(PartialResult<R> result)

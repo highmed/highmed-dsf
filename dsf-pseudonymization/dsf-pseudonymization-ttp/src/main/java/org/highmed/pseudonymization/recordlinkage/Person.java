@@ -2,11 +2,14 @@ package org.highmed.pseudonymization.recordlinkage;
 
 import java.util.BitSet;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+
+@JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "@type")
 public interface Person
 {
-	String getOrganization();
-
-	String getId();
+	MedicId getMedicId();
 
 	BitSet getRecordBloomFilter();
 
@@ -17,12 +20,9 @@ public interface Person
 
 	default double compareTo(Person other)
 	{
-		// TODO look for faster combined bits calculation that doesn't require cloning
 		BitSet combinedBits = ((BitSet) getRecordBloomFilter().clone());
 		combinedBits.and(other.getRecordBloomFilter());
 
 		return (2.0 * combinedBits.cardinality() / (getBloomFilterCardinality() + other.getBloomFilterCardinality()));
 	}
-
-	MatchedPerson toMatchedPerson();
 }
