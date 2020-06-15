@@ -110,7 +110,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 				.forEach(a -> resourceTypeByNames.put(a.getResourceTypeName(), a.getResourceType()));
 
 		preferReturnMinimal = createPreferReturnMinimal();
-		preferReturnOutcome = crePreferReturnOutcome();
+		preferReturnOutcome = createPreferReturnOutcome();
 	}
 
 	public static List<AbstractFhirAdapter<?>> components(FhirContext fhirContext)
@@ -145,29 +145,9 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		return new PreferReturnMinimal()
 		{
 			@Override
-			public IdType updateConditionaly(Resource resource, Map<String, List<String>> criteria)
+			public IdType create(Resource resource)
 			{
-				return FhirWebserviceClientJersey.this.updateConditionaly(PreferReturnType.MINIMAL, resource, criteria)
-						.getId();
-			}
-
-			@Override
-			public IdType updateBinary(String id, InputStream in, MediaType mediaType, String securityContextReference)
-			{
-				return FhirWebserviceClientJersey.this
-						.updateBinary(PreferReturnType.MINIMAL, id, in, mediaType, securityContextReference).getId();
-			}
-
-			@Override
-			public IdType update(Resource resource)
-			{
-				return FhirWebserviceClientJersey.this.update(PreferReturnType.MINIMAL, resource).getId();
-			}
-
-			@Override
-			public Bundle postBundle(Bundle bundle)
-			{
-				return FhirWebserviceClientJersey.this.postBundle(PreferReturnType.MINIMAL, bundle);
+				return FhirWebserviceClientJersey.this.create(PreferReturnType.MINIMAL, resource).getId();
 			}
 
 			@Override
@@ -185,45 +165,42 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 			}
 
 			@Override
-			public IdType create(Resource resource)
+			public IdType update(Resource resource)
 			{
-				return FhirWebserviceClientJersey.this.create(PreferReturnType.MINIMAL, resource).getId();
+				return FhirWebserviceClientJersey.this.update(PreferReturnType.MINIMAL, resource).getId();
 			}
-		};
-	}
 
-	private PreferReturnOutcome crePreferReturnOutcome()
-	{
-		return new PreferReturnOutcome()
-		{
 			@Override
-			public OperationOutcome updateConditionaly(Resource resource, Map<String, List<String>> criteria)
+			public IdType updateConditionaly(Resource resource, Map<String, List<String>> criteria)
+			{
+				return FhirWebserviceClientJersey.this.updateConditionaly(PreferReturnType.MINIMAL, resource, criteria)
+						.getId();
+			}
+
+			@Override
+			public IdType updateBinary(String id, InputStream in, MediaType mediaType, String securityContextReference)
 			{
 				return FhirWebserviceClientJersey.this
-						.updateConditionaly(PreferReturnType.OPERATION_OUTCOME, resource, criteria)
-						.getOperationOutcome();
-			}
-
-			@Override
-			public OperationOutcome updateBinary(String id, InputStream in, MediaType mediaType,
-					String securityContextReference)
-			{
-				return FhirWebserviceClientJersey.this
-						.updateBinary(PreferReturnType.OPERATION_OUTCOME, id, in, mediaType, securityContextReference)
-						.getOperationOutcome();
-			}
-
-			@Override
-			public OperationOutcome update(Resource resource)
-			{
-				return FhirWebserviceClientJersey.this.update(PreferReturnType.OPERATION_OUTCOME, resource)
-						.getOperationOutcome();
+						.updateBinary(PreferReturnType.MINIMAL, id, in, mediaType, securityContextReference).getId();
 			}
 
 			@Override
 			public Bundle postBundle(Bundle bundle)
 			{
-				return FhirWebserviceClientJersey.this.postBundle(PreferReturnType.OPERATION_OUTCOME, bundle);
+				return FhirWebserviceClientJersey.this.postBundle(PreferReturnType.MINIMAL, bundle);
+			}
+		};
+	}
+
+	private PreferReturnOutcome createPreferReturnOutcome()
+	{
+		return new PreferReturnOutcome()
+		{
+			@Override
+			public OperationOutcome create(Resource resource)
+			{
+				return FhirWebserviceClientJersey.this.create(PreferReturnType.OPERATION_OUTCOME, resource)
+						.getOperationOutcome();
 			}
 
 			@Override
@@ -243,10 +220,33 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 			}
 
 			@Override
-			public OperationOutcome create(Resource resource)
+			public OperationOutcome update(Resource resource)
 			{
-				return FhirWebserviceClientJersey.this.create(PreferReturnType.OPERATION_OUTCOME, resource)
+				return FhirWebserviceClientJersey.this.update(PreferReturnType.OPERATION_OUTCOME, resource)
 						.getOperationOutcome();
+			}
+
+			@Override
+			public OperationOutcome updateConditionaly(Resource resource, Map<String, List<String>> criteria)
+			{
+				return FhirWebserviceClientJersey.this
+						.updateConditionaly(PreferReturnType.OPERATION_OUTCOME, resource, criteria)
+						.getOperationOutcome();
+			}
+
+			@Override
+			public OperationOutcome updateBinary(String id, InputStream in, MediaType mediaType,
+					String securityContextReference)
+			{
+				return FhirWebserviceClientJersey.this
+						.updateBinary(PreferReturnType.OPERATION_OUTCOME, id, in, mediaType, securityContextReference)
+						.getOperationOutcome();
+			}
+
+			@Override
+			public Bundle postBundle(Bundle bundle)
+			{
+				return FhirWebserviceClientJersey.this.postBundle(PreferReturnType.OPERATION_OUTCOME, bundle);
 			}
 		};
 	}
@@ -267,6 +267,17 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 			logger.warn("{}: {}", e.getClass().getName(), e.getMessage());
 			return new WebApplicationException(e, response.getStatus());
 		}
+	}
+
+	private String toString(OperationOutcome outcome)
+	{
+		return outcome == null ? ""
+				: outcome.getIssue().stream().map(i -> toString(i)).collect(Collectors.joining("\n"));
+	}
+
+	private String toString(OperationOutcomeIssueComponent issue)
+	{
+		return issue == null ? "" : issue.getSeverity() + " " + issue.getCode() + " " + issue.getDiagnostics();
 	}
 
 	private void logStatusAndHeaders(Response response)
@@ -294,6 +305,18 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 			default:
 				throw new RuntimeException(PreferReturn.class.getName() + " value " + returnType + " not supported");
 		}
+	}
+
+	@Override
+	public PreferReturnMinimal withMinimalReturn()
+	{
+		return preferReturnMinimal;
+	}
+
+	@Override
+	public PreferReturnOutcome withOperationOutcomeReturn()
+	{
+		return preferReturnOutcome;
 	}
 
 	private PreferReturn create(PreferReturnType returnType, Resource resource)
@@ -532,6 +555,208 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 	}
 
 	@Override
+	public Resource read(String resourceTypeName, String id)
+	{
+		Objects.requireNonNull(resourceTypeName, "resourceTypeName");
+		Objects.requireNonNull(id, "id");
+		if (!resourceTypeByNames.containsKey(resourceTypeName))
+			throw new IllegalArgumentException("Resource of type " + resourceTypeName + " not supported");
+
+		Response response = getResource().path(resourceTypeName).path(id).request().accept(Constants.CT_FHIR_JSON_NEW)
+				.get();
+
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		if (Status.OK.getStatusCode() == response.getStatus())
+			// TODO remove workaround if HAPI bug fixed
+			return referenceCleaner.cleanReferenceResourcesIfBundle(
+					(Resource) response.readEntity(resourceTypeByNames.get(resourceTypeName)));
+		else
+			throw handleError(response);
+	}
+
+	@Override
+	public <R extends Resource> R read(Class<R> resourceType, String id)
+	{
+		Objects.requireNonNull(resourceType, "resourceType");
+		Objects.requireNonNull(id, "id");
+
+		Response response = getResource().path(resourceType.getAnnotation(ResourceDef.class).name()).path(id).request()
+				.accept(Constants.CT_FHIR_JSON_NEW).get();
+
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		if (Status.OK.getStatusCode() == response.getStatus())
+			// TODO remove workaround if HAPI bug fixed
+			return referenceCleaner.cleanReferenceResourcesIfBundle(response.readEntity(resourceType));
+		else
+			throw handleError(response);
+	}
+
+	@Override
+	public <R extends Resource> boolean exists(Class<R> resourceType, String id)
+	{
+		Objects.requireNonNull(resourceType, "resourceType");
+		Objects.requireNonNull(id, "id");
+
+		Response response = getResource().path(resourceType.getAnnotation(ResourceDef.class).name()).path(id).request()
+				.accept(Constants.CT_FHIR_JSON_NEW).head();
+
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		if (Status.OK.getStatusCode() == response.getStatus())
+			return true;
+		else if (Status.NOT_FOUND.getStatusCode() == response.getStatus())
+			return false;
+		else
+			throw handleError(response);
+	}
+
+	@Override
+	public InputStream readBinary(String id, MediaType mediaType)
+	{
+		Objects.requireNonNull(id, "id");
+		Objects.requireNonNull(mediaType, "mediaType");
+
+		Response response = getResource().path("Binary").path(id).request().accept(mediaType).get();
+
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		if (Status.OK.getStatusCode() == response.getStatus())
+			return response.readEntity(InputStream.class);
+		else
+			throw handleError(response);
+	}
+
+	@Override
+	public Resource read(String resourceTypeName, String id, String version)
+	{
+		Objects.requireNonNull(resourceTypeName, "resourceTypeName");
+		Objects.requireNonNull(id, "id");
+		Objects.requireNonNull(version, "version");
+		if (!resourceTypeByNames.containsKey(resourceTypeName))
+			throw new IllegalArgumentException("Resource of type " + resourceTypeName + " not supported");
+
+		Response response = getResource().path(resourceTypeName).path(id).path("_history").path(version).request()
+				.accept(Constants.CT_FHIR_JSON_NEW).get();
+
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		if (Status.OK.getStatusCode() == response.getStatus())
+			// TODO remove workaround if HAPI bug fixed
+			return referenceCleaner.cleanReferenceResourcesIfBundle(
+					(Resource) response.readEntity(resourceTypeByNames.get(resourceTypeName)));
+		else
+			throw handleError(response);
+	}
+
+	@Override
+	public <R extends Resource> R read(Class<R> resourceType, String id, String version)
+	{
+		Objects.requireNonNull(resourceType, "resourceType");
+		Objects.requireNonNull(id, "id");
+		Objects.requireNonNull(version, "version");
+
+		Response response = getResource().path(resourceType.getAnnotation(ResourceDef.class).name()).path(id)
+				.path("_history").path(version).request().accept(Constants.CT_FHIR_JSON_NEW).get();
+
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		if (Status.OK.getStatusCode() == response.getStatus())
+			// TODO remove workaround if HAPI bug fixed
+			return referenceCleaner.cleanReferenceResourcesIfBundle(response.readEntity(resourceType));
+		else
+			throw handleError(response);
+	}
+
+	@Override
+	public <R extends Resource> boolean exists(Class<R> resourceType, String id, String version)
+	{
+		Objects.requireNonNull(resourceType, "resourceType");
+		Objects.requireNonNull(id, "id");
+		Objects.requireNonNull(version, "version");
+
+		Response response = getResource().path(resourceType.getAnnotation(ResourceDef.class).name()).path(id)
+				.path("_history").path(version).request().accept(Constants.CT_FHIR_JSON_NEW).head();
+
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		if (Status.OK.getStatusCode() == response.getStatus())
+			return true;
+		else if (Status.NOT_FOUND.getStatusCode() == response.getStatus())
+			return false;
+		else
+			throw handleError(response);
+	}
+
+	@Override
+	public InputStream readBinary(String id, String version, MediaType mediaType)
+	{
+		Objects.requireNonNull(id, "id");
+		Objects.requireNonNull(version, "version");
+		Objects.requireNonNull(mediaType, "mediaType");
+
+		Response response = getResource().path("Binary").path(id).path("_history").path(version).request()
+				.accept(mediaType).get();
+
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		if (Status.OK.getStatusCode() == response.getStatus())
+			return response.readEntity(InputStream.class);
+		else
+			throw handleError(response);
+	}
+
+	@Override
+	public boolean exists(IdType resourceTypeIdVersion)
+	{
+		Objects.requireNonNull(resourceTypeIdVersion, "resourceTypeIdVersion");
+		Objects.requireNonNull(resourceTypeIdVersion.getResourceType(), "resourceTypeIdVersion.resourceType");
+		Objects.requireNonNull(resourceTypeIdVersion.getIdPart(), "resourceTypeIdVersion.idPart");
+		// version may be null
+
+		WebTarget path = getResource().path(resourceTypeIdVersion.getResourceType())
+				.path(resourceTypeIdVersion.getIdPart());
+
+		if (resourceTypeIdVersion.hasVersionIdPart())
+			path = path.path("_history").path(resourceTypeIdVersion.getVersionIdPart());
+
+		Response response = path.request().accept(Constants.CT_FHIR_JSON_NEW).head();
+
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		if (Status.OK.getStatusCode() == response.getStatus())
+			return true;
+		else if (Status.NOT_FOUND.getStatusCode() == response.getStatus())
+			return false;
+		else
+			throw handleError(response);
+	}
+
+	@Override
+	public Bundle search(Class<? extends Resource> resourceType, Map<String, List<String>> parameters)
+	{
+		Objects.requireNonNull(resourceType, "resourceType");
+
+		WebTarget target = getResource().path(resourceType.getAnnotation(ResourceDef.class).name());
+		if (parameters != null)
+		{
+			for (Entry<String, List<String>> entry : parameters.entrySet())
+				target = target.queryParam(entry.getKey(), entry.getValue().toArray());
+		}
+
+		Response response = target.request().accept(Constants.CT_FHIR_JSON_NEW).get();
+
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		if (Status.OK.getStatusCode() == response.getStatus())
+			// TODO remove workaround if HAPI bug fixed
+			return referenceCleaner.cleanReferenceResourcesIfBundle(response.readEntity(Bundle.class));
+		else
+			throw handleError(response);
+	}
+
+	@Override
 	public CapabilityStatement getConformance()
 	{
 		Response response = getResource().path("metadata").request()
@@ -584,197 +809,5 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 			return response.readEntity(StructureDefinition.class);
 		else
 			throw handleError(response);
-	}
-
-	@Override
-	public <R extends Resource> R read(Class<R> resourceType, String id)
-	{
-		Objects.requireNonNull(resourceType, "resourceType");
-		Objects.requireNonNull(id, "id");
-
-		Response response = getResource().path(resourceType.getAnnotation(ResourceDef.class).name()).path(id).request()
-				.accept(Constants.CT_FHIR_JSON_NEW).get();
-
-		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
-				response.getStatusInfo().getReasonPhrase());
-		if (Status.OK.getStatusCode() == response.getStatus())
-			// TODO remove workaround if HAPI bug fixed
-			return referenceCleaner.cleanReferenceResourcesIfBundle(response.readEntity(resourceType));
-		else
-			throw handleError(response);
-	}
-
-	@Override
-	public <R extends Resource> R read(Class<R> resourceType, String id, String version)
-	{
-		Objects.requireNonNull(resourceType, "resourceType");
-		Objects.requireNonNull(id, "id");
-		Objects.requireNonNull(version, "version");
-
-		Response response = getResource().path(resourceType.getAnnotation(ResourceDef.class).name()).path(id)
-				.path("_history").path(version).request().accept(Constants.CT_FHIR_JSON_NEW).get();
-
-		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
-				response.getStatusInfo().getReasonPhrase());
-		if (Status.OK.getStatusCode() == response.getStatus())
-			// TODO remove workaround if HAPI bug fixed
-			return referenceCleaner.cleanReferenceResourcesIfBundle(response.readEntity(resourceType));
-		else
-			throw handleError(response);
-	}
-
-	@Override
-	public Resource read(String resourceTypeName, String id)
-	{
-		Objects.requireNonNull(resourceTypeName, "resourceTypeName");
-		Objects.requireNonNull(id, "id");
-		if (!resourceTypeByNames.containsKey(resourceTypeName))
-			throw new IllegalArgumentException("Resource of type " + resourceTypeName + " not supported");
-
-		Response response = getResource().path(resourceTypeName).path(id).request().accept(Constants.CT_FHIR_JSON_NEW)
-				.get();
-
-		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
-				response.getStatusInfo().getReasonPhrase());
-		if (Status.OK.getStatusCode() == response.getStatus())
-			// TODO remove workaround if HAPI bug fixed
-			return referenceCleaner.cleanReferenceResourcesIfBundle(
-					(Resource) response.readEntity(resourceTypeByNames.get(resourceTypeName)));
-		else
-			throw handleError(response);
-
-	}
-
-	@Override
-	public Resource read(String resourceTypeName, String id, String version)
-	{
-		Objects.requireNonNull(resourceTypeName, "resourceTypeName");
-		Objects.requireNonNull(id, "id");
-		Objects.requireNonNull(version, "version");
-		if (!resourceTypeByNames.containsKey(resourceTypeName))
-			throw new IllegalArgumentException("Resource of type " + resourceTypeName + " not supported");
-
-		Response response = getResource().path(resourceTypeName).path(id).path("_history").path(version).request()
-				.accept(Constants.CT_FHIR_JSON_NEW).get();
-
-		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
-				response.getStatusInfo().getReasonPhrase());
-		if (Status.OK.getStatusCode() == response.getStatus())
-			// TODO remove workaround if HAPI bug fixed
-			return referenceCleaner.cleanReferenceResourcesIfBundle(
-					(Resource) response.readEntity(resourceTypeByNames.get(resourceTypeName)));
-		else
-			throw handleError(response);
-	}
-
-	@Override
-	public <R extends Resource> boolean exists(Class<R> resourceType, String id)
-	{
-		Objects.requireNonNull(resourceType, "resourceType");
-		Objects.requireNonNull(id, "id");
-
-		Response response = getResource().path(resourceType.getAnnotation(ResourceDef.class).name()).path(id).request()
-				.accept(Constants.CT_FHIR_JSON_NEW).head();
-
-		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
-				response.getStatusInfo().getReasonPhrase());
-		if (Status.OK.getStatusCode() == response.getStatus())
-			return true;
-		else if (Status.NOT_FOUND.getStatusCode() == response.getStatus())
-			return false;
-		else
-			throw handleError(response);
-	}
-
-	@Override
-	public boolean exists(IdType resourceTypeIdVersion)
-	{
-		Objects.requireNonNull(resourceTypeIdVersion, "resourceTypeIdVersion");
-		Objects.requireNonNull(resourceTypeIdVersion.getResourceType(), "resourceTypeIdVersion.resourceType");
-		Objects.requireNonNull(resourceTypeIdVersion.getIdPart(), "resourceTypeIdVersion.idPart");
-		// version may be null
-
-		WebTarget path = getResource().path(resourceTypeIdVersion.getResourceType())
-				.path(resourceTypeIdVersion.getIdPart());
-
-		if (resourceTypeIdVersion.hasVersionIdPart())
-			path = path.path("_history").path(resourceTypeIdVersion.getVersionIdPart());
-
-		Response response = path.request().accept(Constants.CT_FHIR_JSON_NEW).head();
-
-		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
-				response.getStatusInfo().getReasonPhrase());
-		if (Status.OK.getStatusCode() == response.getStatus())
-			return true;
-		else if (Status.NOT_FOUND.getStatusCode() == response.getStatus())
-			return false;
-		else
-			throw handleError(response);
-	}
-
-	@Override
-	public <R extends Resource> boolean exists(Class<R> resourceType, String id, String version)
-	{
-		Objects.requireNonNull(resourceType, "resourceType");
-		Objects.requireNonNull(id, "id");
-		Objects.requireNonNull(version, "version");
-
-		Response response = getResource().path(resourceType.getAnnotation(ResourceDef.class).name()).path(id)
-				.path("_history").path(version).request().accept(Constants.CT_FHIR_JSON_NEW).head();
-
-		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
-				response.getStatusInfo().getReasonPhrase());
-		if (Status.OK.getStatusCode() == response.getStatus())
-			return true;
-		else if (Status.NOT_FOUND.getStatusCode() == response.getStatus())
-			return false;
-		else
-			throw handleError(response);
-	}
-
-	@Override
-	public Bundle search(Class<? extends Resource> resourceType, Map<String, List<String>> parameters)
-	{
-		Objects.requireNonNull(resourceType, "resourceType");
-
-		WebTarget target = getResource().path(resourceType.getAnnotation(ResourceDef.class).name());
-		if (parameters != null)
-		{
-			for (Entry<String, List<String>> entry : parameters.entrySet())
-				target = target.queryParam(entry.getKey(), entry.getValue().toArray());
-		}
-
-		Response response = target.request().accept(Constants.CT_FHIR_JSON_NEW).get();
-
-		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
-				response.getStatusInfo().getReasonPhrase());
-		if (Status.OK.getStatusCode() == response.getStatus())
-			// TODO remove workaround if HAPI bug fixed
-			return referenceCleaner.cleanReferenceResourcesIfBundle(response.readEntity(Bundle.class));
-		else
-			throw handleError(response);
-	}
-
-	private String toString(OperationOutcome outcome)
-	{
-		return outcome == null ? ""
-				: outcome.getIssue().stream().map(i -> toString(i)).collect(Collectors.joining("\n"));
-	}
-
-	private String toString(OperationOutcomeIssueComponent issue)
-	{
-		return issue == null ? "" : issue.getSeverity() + " " + issue.getCode() + " " + issue.getDiagnostics();
-	}
-
-	@Override
-	public PreferReturnMinimal withMinimalReturn()
-	{
-		return preferReturnMinimal;
-	}
-
-	@Override
-	public PreferReturnOutcome withOperationOutcomeReturn()
-	{
-		return preferReturnOutcome;
 	}
 }
