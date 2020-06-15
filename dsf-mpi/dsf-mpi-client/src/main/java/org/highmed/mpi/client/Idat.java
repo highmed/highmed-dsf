@@ -9,7 +9,7 @@ import java.util.Locale;
  */
 public interface Idat
 {
-	DateTimeFormatter GERMAN_DATE = DateTimeFormatter.ofPattern("yyyy.MM.dd", Locale.GERMANY);
+	DateTimeFormatter GERMAN_DATE = DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.GERMANY);
 
 	/**
 	 * @return long-term patient identifier used inside the medical data integration center (MeDIC)

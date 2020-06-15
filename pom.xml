@@ -29,7 +29,8 @@
 		<tyrus.version>1.15</tyrus.version>
 		<spring.version>5.2.3.RELEASE</spring.version>
 
-		<hapi.version>5.0.2</hapi.version>
+		<hapi.fhir.version>5.0.2</hapi.fhir.version>
+		<hapi.hl7v2.version>2.3</hapi.hl7v2.version>
 	</properties>
 
 	<name>highmed-dsf</name>
@@ -250,37 +251,49 @@
 			<dependency>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-fhir-jaxrsserver-base</artifactId>
-				<version>${hapi.version}</version>
+				<version>${hapi.fhir.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-fhir-client</artifactId>
-				<version>${hapi.version}</version>
+				<version>${hapi.fhir.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-fhir-structures-r4</artifactId>
-				<version>${hapi.version}</version>
+				<version>${hapi.fhir.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-fhir-structures-r5</artifactId>
-				<version>${hapi.version}</version>
+				<version>${hapi.fhir.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-fhir-validation</artifactId>
-				<version>${hapi.version}</version>
+				<version>${hapi.fhir.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-fhir-validation-resources-r4</artifactId>
-				<version>${hapi.version}</version>
+				<version>${hapi.fhir.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-fhir-validation-resources-r5</artifactId>
-				<version>${hapi.version}</version>
+				<version>${hapi.fhir.version}</version>
+			</dependency>
+
+			<!-- HL7 V2 -->
+			<dependency>
+				<groupId>ca.uhn.hapi</groupId>
+				<artifactId>hapi-base</artifactId>
+				<version>${hapi.hl7v2.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>ca.uhn.hapi</groupId>
+				<artifactId>hapi-structures-v25</artifactId>
+				<version>${hapi.hl7v2.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
