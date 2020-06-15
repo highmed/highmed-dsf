@@ -1,9 +1,12 @@
 package org.highmed.dsf.bpe.service;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import javax.ws.rs.core.MediaType;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.Constants;
@@ -15,7 +18,6 @@ import org.highmed.dsf.fhir.variables.FeasibilityQueryResults;
 import org.highmed.dsf.fhir.variables.FeasibilityQueryResultsValues;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.highmed.openehr.model.structure.ResultSet;
-import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,18 +68,19 @@ public class DownloadResultSets extends AbstractServiceDelegate
 		IdType id = new IdType(result.getResultSetUrl());
 		FhirWebserviceClient client = getFhirWebserviceClientProvider().getRemoteWebserviceClient(id.getBaseUrl());
 
-		Binary binary = readBinaryResource(client, id.getIdPart());
-		ResultSet resultSet = deserializeResultSet(binary.getData());
+		InputStream binary = readBinaryResource(client, id.getIdPart());
+		ResultSet resultSet = deserializeResultSet(binary);
 
 		return FeasibilityQueryResult.idResult(result.getOrganizationIdentifier(), result.getCohortId(), resultSet);
 	}
 
-	private Binary readBinaryResource(FhirWebserviceClient client, String id)
+	private InputStream readBinaryResource(FhirWebserviceClient client, String id)
 	{
 		try
 		{
 			logger.info("Reading binary from {} with id {}", client.getBaseUrl(), id);
-			return client.read(Binary.class, id);
+			return client.readBinary(id, MediaType.valueOf(Constants.OPENEHR_MIMETYPE_JSON));
+			// return client.read(Binary.class, id);
 		}
 		catch (Exception e)
 		{
@@ -86,9 +89,9 @@ public class DownloadResultSets extends AbstractServiceDelegate
 		}
 	}
 
-	private ResultSet deserializeResultSet(byte[] content)
+	private ResultSet deserializeResultSet(InputStream content)
 	{
-		try
+		try (content)
 		{
 			return openEhrObjectMapper.readValue(content, ResultSet.class);
 		}
