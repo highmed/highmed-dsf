@@ -3,9 +3,9 @@ package org.highmed.dsf.bpe.service;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.highmed.pseudonymization.mpi.Idat;
-import org.highmed.pseudonymization.mpi.IdatNotFoundException;
-import org.highmed.pseudonymization.mpi.MasterPatientIndexClient;
+import org.highmed.mpi.client.Idat;
+import org.highmed.mpi.client.IdatNotFoundException;
+import org.highmed.mpi.client.MasterPatientIndexClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

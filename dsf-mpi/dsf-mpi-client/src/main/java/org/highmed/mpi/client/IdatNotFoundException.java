@@ -1,4 +1,4 @@
-package org.highmed.pseudonymization.mpi;
+package org.highmed.mpi.client;
 
 public class IdatNotFoundException extends RuntimeException
 {

@@ -1,4 +1,4 @@
-package org.highmed.pseudonymization.mpi;
+package org.highmed.mpi.client;
 
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;

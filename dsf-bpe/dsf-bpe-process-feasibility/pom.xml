@@ -24,6 +24,14 @@
 			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-pseudonymization-ttp</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.highmed.dsf</groupId>
+			<artifactId>dsf-mpi-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.highmed.dsf</groupId>
+			<artifactId>dsf-mpi-client-pdq</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>de.hs-heilbronn.mi</groupId>

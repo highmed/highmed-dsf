@@ -32,7 +32,7 @@ import org.highmed.dsf.fhir.group.GroupHelper;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.openehr.client.OpenEhrWebserviceClientProvider;
-import org.highmed.pseudonymization.mpi.MasterPatientIndexClient;
+import org.highmed.mpi.client.MasterPatientIndexClient;
 import org.highmed.pseudonymization.translation.ResultSetTranslatorFromMedicRbfOnly;
 import org.highmed.pseudonymization.translation.ResultSetTranslatorFromMedicRbfOnlyImpl;
 import org.springframework.beans.factory.annotation.Autowired;
