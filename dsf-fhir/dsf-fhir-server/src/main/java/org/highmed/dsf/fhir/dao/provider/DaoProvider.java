@@ -21,7 +21,6 @@ import org.highmed.dsf.fhir.dao.ProvenanceDao;
 import org.highmed.dsf.fhir.dao.ResearchStudyDao;
 import org.highmed.dsf.fhir.dao.ResourceDao;
 import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
-import org.highmed.dsf.fhir.dao.StructureDefinitionSnapshotDao;
 import org.highmed.dsf.fhir.dao.SubscriptionDao;
 import org.highmed.dsf.fhir.dao.TaskDao;
 import org.highmed.dsf.fhir.dao.ValueSetDao;
@@ -65,7 +64,7 @@ public interface DaoProvider
 
 	StructureDefinitionDao getStructureDefinitionDao();
 
-	StructureDefinitionSnapshotDao getStructureDefinitionSnapshotDao();
+	StructureDefinitionDao getStructureDefinitionSnapshotDao();
 
 	SubscriptionDao getSubscriptionDao();
 

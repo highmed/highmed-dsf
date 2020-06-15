@@ -1,13 +1,12 @@
 package org.highmed.dsf.fhir.dao.jdbc;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
 import org.highmed.dsf.fhir.search.parameters.user.StructureDefinitionUserFilter;
 import org.hl7.fhir.r4.model.StructureDefinition;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class StructureDefinitionDaoJdbc extends AbstractStructureDefinitionDaoJdbc implements StructureDefinitionDao
+public class StructureDefinitionDaoJdbc extends AbstractStructureDefinitionDaoJdbc
 {
 	public StructureDefinitionDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
 	{

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<property name="json" value="JSONB" dbms="postgresql" />
+	<property name="json" value="varchar(5000)" dbms="h2" />
+
+	<changeSet author="hhund" id="db.structure_definition_snapshots.changelog-0.2.0">
+		<dropColumn tableName="structure_definition_snapshots" columnName="structure_definition_snapshot_info" />
+		
+		<sql dbms="postgresql">
+			DROP INDEX IF EXISTS structure_definition_snapshot_info_index;
+		</sql>
+	</changeSet>
+</databaseChangeLog>

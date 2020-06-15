@@ -12,6 +12,7 @@ import org.highmed.dsf.fhir.dao.command.CommandList;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
+import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.highmed.dsf.fhir.webservice.base.AbstractBasicService;
 import org.highmed.dsf.fhir.webservice.specification.RootService;
 import org.hl7.fhir.r4.model.Bundle;
@@ -26,9 +27,10 @@ public class RootServiceImpl extends AbstractBasicService implements RootService
 	private final ResponseGenerator responseGenerator;
 	private final ParameterConverter parameterConverter;
 	private final ExceptionHandler exceptionHandler;
+	private final ReferenceCleaner referenceCleaner;
 
 	public RootServiceImpl(String path, CommandFactory commandFactory, ResponseGenerator responseGenerator,
-			ParameterConverter parameterConverter, ExceptionHandler exceptionHandler)
+			ParameterConverter parameterConverter, ExceptionHandler exceptionHandler, ReferenceCleaner referenceCleaner)
 	{
 		super(path);
 
@@ -36,6 +38,7 @@ public class RootServiceImpl extends AbstractBasicService implements RootService
 		this.responseGenerator = responseGenerator;
 		this.parameterConverter = parameterConverter;
 		this.exceptionHandler = exceptionHandler;
+		this.referenceCleaner = referenceCleaner;
 	}
 
 	@Override
@@ -61,6 +64,9 @@ public class RootServiceImpl extends AbstractBasicService implements RootService
 	@Override
 	public Response handleBundle(Bundle bundle, UriInfo uri, HttpHeaders headers)
 	{
+		// FIXME hapi parser bug workaround
+		referenceCleaner.cleanReferenceResourcesIfBundle(bundle);
+
 		CommandList commands = exceptionHandler
 				.handleBadBundleException(() -> commandFactory.createCommands(bundle, getCurrentUser()));
 

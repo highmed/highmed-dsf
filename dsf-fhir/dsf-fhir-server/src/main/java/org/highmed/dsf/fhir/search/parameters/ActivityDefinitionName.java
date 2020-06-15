@@ -88,15 +88,6 @@ public class ActivityDefinitionName extends AbstractStringParameter<ActivityDefi
 	@Override
 	protected String getSortSql(String sortDirectionWithSpacePrefix)
 	{
-		switch (valueAndType.type)
-		{
-			case STARTS_WITH:
-			case CONTAINS:
-				return "lower(activity_definition->>'name')" + sortDirectionWithSpacePrefix;
-			case EXACT:
-				return "activity_definition->>'name'" + sortDirectionWithSpacePrefix;
-			default:
-				return "";
-		}
+		return "activity_definition->>'name'" + sortDirectionWithSpacePrefix;
 	}
 }

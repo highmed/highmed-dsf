@@ -1,5 +1,6 @@
 package org.highmed.dsf.fhir.dao.command;
 
+import java.sql.Connection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -23,7 +24,6 @@ import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.highmed.dsf.fhir.service.ReferenceExtractor;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
-import org.highmed.dsf.fhir.service.SnapshotDependencyAnalyzer;
 import org.highmed.dsf.fhir.service.SnapshotGenerator;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -45,17 +45,17 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 	private final ExceptionHandler exceptionHandler;
 	private final EventManager eventManager;
 	private final EventGenerator eventGenerator;
-	private final SnapshotGenerator snapshotGenerator;
-	private final SnapshotDependencyAnalyzer snapshotDependencyAnalyzer;
+	private final Function<Connection, SnapshotGenerator> snapshotGenerator;
 	private final ParameterConverter parameterConverter;
 	private final AuthorizationHelper authorizationHelper;
+	private final ValidationHelper validationHelper;
 
 	public CommandFactoryImpl(String serverBase, int defaultPageCount, DataSource dataSource, DaoProvider daoProvider,
 			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver,
 			ReferenceCleaner referenceCleaner, ResponseGenerator responseGenerator, ExceptionHandler exceptionHandler,
-			EventManager eventManager, EventGenerator eventGenerator, SnapshotGenerator snapshotGenerator,
-			SnapshotDependencyAnalyzer snapshotDependencyAnalyzer, ParameterConverter parameterConverter,
-			AuthorizationHelper authorizationHelper)
+			EventManager eventManager, EventGenerator eventGenerator,
+			Function<Connection, SnapshotGenerator> snapshotGenerator, ParameterConverter parameterConverter,
+			AuthorizationHelper authorizationHelper, ValidationHelper validationHelper)
 	{
 		this.serverBase = serverBase;
 		this.defaultPageCount = defaultPageCount;
@@ -69,15 +69,16 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 		this.eventManager = eventManager;
 		this.eventGenerator = eventGenerator;
 		this.snapshotGenerator = snapshotGenerator;
-		this.snapshotDependencyAnalyzer = snapshotDependencyAnalyzer;
 		this.parameterConverter = parameterConverter;
 		this.authorizationHelper = authorizationHelper;
+		this.validationHelper = validationHelper;
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
 		Objects.requireNonNull(serverBase, "serverBase");
+		Objects.requireNonNull(dataSource, "dataSource");
 		Objects.requireNonNull(daoProvider, "daoProvider");
 		Objects.requireNonNull(referenceExtractor, "referenceExtractor");
 		Objects.requireNonNull(referenceResolver, "referenceResolver");
@@ -87,9 +88,9 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 		Objects.requireNonNull(eventManager, "eventManager");
 		Objects.requireNonNull(eventGenerator, "eventGenerator");
 		Objects.requireNonNull(snapshotGenerator, "snapshotGenerator");
-		Objects.requireNonNull(snapshotDependencyAnalyzer, "snapshotDependencyAnalyzer");
 		Objects.requireNonNull(parameterConverter, "parameterConverter");
 		Objects.requireNonNull(authorizationHelper, "authorizationHelper");
+		Objects.requireNonNull(validationHelper, "validationHelper");
 	}
 
 	// read, vread
@@ -111,14 +112,16 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 
 			if (resource instanceof StructureDefinition)
 				return new CreateStructureDefinitionCommand(index, user, bundle, entry, serverBase, authorizationHelper,
-						(StructureDefinition) resource, (StructureDefinitionDao) dao.get(), exceptionHandler,
-						parameterConverter, responseGenerator, referenceExtractor, referenceResolver, referenceCleaner,
-						eventManager, eventGenerator, daoProvider.getStructureDefinitionSnapshotDao(),
-						snapshotGenerator, snapshotDependencyAnalyzer);
+						validationHelper, (StructureDefinition) resource, (StructureDefinitionDao) dao.get(),
+						exceptionHandler, parameterConverter, responseGenerator, referenceExtractor, referenceResolver,
+						referenceCleaner, eventManager, eventGenerator, daoProvider.getStructureDefinitionSnapshotDao(),
+						snapshotGenerator);
 			else
-				return dao.map(d -> new CreateCommand<R, ResourceDao<R>>(index, user, bundle, entry, serverBase,
-						authorizationHelper, resource, d, exceptionHandler, parameterConverter, responseGenerator,
-						referenceExtractor, referenceResolver, referenceCleaner, eventManager, eventGenerator))
+				return dao
+						.map(d -> new CreateCommand<R, ResourceDao<R>>(index, user, bundle, entry, serverBase,
+								authorizationHelper, validationHelper, resource, d, exceptionHandler,
+								parameterConverter, responseGenerator, referenceExtractor, referenceResolver,
+								referenceCleaner, eventManager, eventGenerator))
 						.orElseThrow(() -> new IllegalStateException(
 								"Resource of type " + resource.getClass().getName() + " not supported"));
 		}
@@ -140,14 +143,16 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 
 			if (resource instanceof StructureDefinition)
 				return new UpdateStructureDefinitionCommand(index, user, bundle, entry, serverBase, authorizationHelper,
-						(StructureDefinition) resource, (StructureDefinitionDao) dao.get(), exceptionHandler,
-						parameterConverter, responseGenerator, referenceExtractor, referenceResolver, referenceCleaner,
-						eventManager, eventGenerator, daoProvider.getStructureDefinitionSnapshotDao(),
-						snapshotGenerator, snapshotDependencyAnalyzer);
+						validationHelper, (StructureDefinition) resource, (StructureDefinitionDao) dao.get(),
+						exceptionHandler, parameterConverter, responseGenerator, referenceExtractor, referenceResolver,
+						referenceCleaner, eventManager, eventGenerator, daoProvider.getStructureDefinitionSnapshotDao(),
+						snapshotGenerator);
 			else
-				return dao.map(d -> new UpdateCommand<R, ResourceDao<R>>(index, user, bundle, entry, serverBase,
-						authorizationHelper, resource, d, exceptionHandler, parameterConverter, responseGenerator,
-						referenceExtractor, referenceResolver, referenceCleaner, eventManager, eventGenerator))
+				return dao
+						.map(d -> new UpdateCommand<R, ResourceDao<R>>(index, user, bundle, entry, serverBase,
+								authorizationHelper, validationHelper, resource, d, exceptionHandler,
+								parameterConverter, responseGenerator, referenceExtractor, referenceResolver,
+								referenceCleaner, eventManager, eventGenerator))
 						.orElseThrow(() -> new IllegalStateException(
 								"Resource of type " + resource.getClass().getName() + " not supported"));
 		}
@@ -251,9 +256,9 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 		{
 			return dao
 					.map(d -> Stream.of(cmd,
-							new ResolveReferencesCommand<R, ResourceDao<R>>(index, user, bundle, entry, serverBase,
-									authorizationHelper, resource, d, exceptionHandler, parameterConverter,
-									responseGenerator, referenceExtractor, referenceResolver)))
+							new CheckReferencesCommand<R, ResourceDao<R>>(index, user, bundle, entry, serverBase,
+									authorizationHelper, validationHelper, resource, d, exceptionHandler,
+									parameterConverter, responseGenerator, referenceExtractor, referenceResolver)))
 					.orElseThrow(() -> new IllegalStateException(
 							"Resource of type " + resource.getClass().getName() + " not supported"));
 		}

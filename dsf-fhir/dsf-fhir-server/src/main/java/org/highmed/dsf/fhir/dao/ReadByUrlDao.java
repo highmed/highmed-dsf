@@ -12,6 +12,8 @@ public interface ReadByUrlDao<R extends DomainResource>
 
 	Optional<R> readByUrlAndVersion(String url, String version) throws SQLException;
 
+	Optional<R> readByUrlAndVersionWithTransaction(Connection connection, String urlAndVersion) throws SQLException;
+
 	Optional<R> readByUrlAndVersionWithTransaction(Connection connection, String url, String version)
 			throws SQLException;
 }

@@ -9,17 +9,24 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.UUID;
 
+import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.parser.IParser;
 
 public class BundleGenerator
@@ -57,7 +64,7 @@ public class BundleGenerator
 
 		BundleEntryPutReader putReader = (resource, resourceFile, putFile) ->
 		{
-			logger.info("Reading {} at {} with put file {}", resource.getSimpleName(), resourceFile.toString(),
+			logger.debug("Reading {} at {} with put file {}", resource.getSimpleName(), resourceFile.toString(),
 					putFile.toString());
 
 			try (InputStream in = Files.newInputStream(resourceFile))
@@ -76,7 +83,29 @@ public class BundleGenerator
 			}
 		};
 
-		FileVisitor<Path> visitor = new BundleEntryFileVisitor(baseFolder, putReader);
+		BundleEntryPostReader postReader = (resource, resourceFile, postFile) ->
+		{
+			logger.info("Reading {} at {} with post file {}", resource.getSimpleName(), resourceFile.toString(),
+					postFile.toString());
+
+			try (InputStream in = Files.newInputStream(resourceFile))
+			{
+				Resource r = newXmlParser().parseResource(resource, in);
+				String ifNoneExistValue = Files.readString(postFile);
+
+				BundleEntryComponent entry = bundle.addEntry();
+				entry.setFullUrl("urn:uuid:" + UUID.randomUUID().toString());
+				entry.setResource(r);
+				entry.getRequest().setMethod(HTTPVerb.POST).setUrl(r.getResourceType().name())
+						.setIfNoneExist(ifNoneExistValue);
+			}
+			catch (IOException e)
+			{
+				logger.error("Error while parsing {} from {}", resource.getSimpleName(), resourceFile.toString());
+			}
+		};
+
+		FileVisitor<Path> visitor = new BundleEntryFileVisitor(baseFolder, putReader, postReader);
 		Files.walkFileTree(baseFolder, visitor);
 
 		return bundle;
@@ -91,29 +120,71 @@ public class BundleGenerator
 		}
 	}
 
-	public static void main(String[] args) throws IOException
+	private void generateStructureDefinitionSnapshots(Bundle bundle, IValidationSupport validationSupport)
 	{
-		BundleGenerator bundleGenerator = new BundleGenerator(getBaseFolder(args));
+		SnapshotGenerator generator = new SnapshotGenerator(fhirContext, validationSupport);
 
-		Bundle bundle;
+		bundle.getEntry().stream().map(e -> e.getResource()).filter(r -> r instanceof StructureDefinition)
+				.map(r -> (StructureDefinition) r).sorted(Comparator.comparing(StructureDefinition::getUrl).reversed())
+				.forEach(s ->
+				{
+					if (!s.hasSnapshot())
+						generator.generateSnapshot(s);
+				});
+	}
+
+	private void expandValueSets(Bundle bundle, ValidationSupportChain validationSupport)
+	{
+		ValueSetExpander valueSetExpander = new ValueSetExpander(fhirContext, validationSupport);
+
+		bundle.getEntry().stream().map(e -> e.getResource()).filter(r -> r instanceof ValueSet).map(r -> (ValueSet) r)
+				.forEach(v ->
+				{
+					if (!v.hasExpansion())
+						valueSetExpander.expand(v);
+				});
+	}
+
+	public static void main(String[] args) throws Exception
+	{
 		try
 		{
-			logger.info("Generating bundle at " + bundleGenerator.getBundleFilename() + " ...");
-			bundle = bundleGenerator.generateBundle();
+			BundleGenerator bundleGenerator = new BundleGenerator(getBaseFolder(args));
+
+			Bundle bundle;
+			try
+			{
+				logger.info("Generating bundle at " + bundleGenerator.getBundleFilename() + " ...");
+				bundle = bundleGenerator.generateBundle();
+			}
+			catch (IOException e)
+			{
+				logger.error("Error while generating bundle", e);
+				throw e;
+			}
+
+			ValidationSupportChain validationSupport = new ValidationSupportChain(
+					new InMemoryTerminologyServerValidationSupport(bundleGenerator.fhirContext),
+					new ValidationSupportWithCustomResources(bundleGenerator.fhirContext, bundle),
+					new DefaultProfileValidationSupport(bundleGenerator.fhirContext));
+
+			bundleGenerator.expandValueSets(bundle, validationSupport);
+			bundleGenerator.generateStructureDefinitionSnapshots(bundle, validationSupport);
+
+			try
+			{
+				bundleGenerator.saveBundle(bundle);
+				logger.info("Bundle saved at " + bundleGenerator.getBundleFilename());
+			}
+			catch (IOException e)
+			{
+				logger.error("Error while generating bundle", e);
+				throw e;
+			}
 		}
-		catch (IOException e)
+		catch (Exception e)
 		{
-			logger.error("Error while generating bundle", e);
-			throw e;
-		}
-		try
-		{
-			bundleGenerator.saveBundle(bundle);
-			logger.info("Bundle saved at " + bundleGenerator.getBundleFilename());
-		}
-		catch (IOException e)
-		{
-			logger.error("Error while generating bundle", e);
+			e.printStackTrace();
 			throw e;
 		}
 	}

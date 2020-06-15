@@ -65,8 +65,6 @@ public class BatchCommandList implements CommandList
 					(int) (commands.size() / 0.75) + 1);
 			Map<String, IdType> idTranslationTable = new HashMap<>();
 
-			commands.forEach(preExecute(idTranslationTable, caughtExceptions));
-
 			if (hasModifyingCommands())
 			{
 				logger.debug(
@@ -77,6 +75,8 @@ public class BatchCommandList implements CommandList
 				connection.setAutoCommit(false);
 				connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
 			}
+
+			commands.forEach(preExecute(idTranslationTable, connection, caughtExceptions));
 
 			commands.forEach(execute(idTranslationTable, connection, caughtExceptions));
 
@@ -150,7 +150,7 @@ public class BatchCommandList implements CommandList
 		return entry;
 	}
 
-	private Consumer<Command> preExecute(Map<String, IdType> idTranslationTable,
+	private Consumer<Command> preExecute(Map<String, IdType> idTranslationTable, Connection connection,
 			Map<Integer, Exception> caughtExceptions)
 	{
 		return command ->
@@ -161,7 +161,7 @@ public class BatchCommandList implements CommandList
 				{
 					logger.debug("Running pre-execute of command {} for entry at index {}",
 							command.getClass().getName(), command.getIndex());
-					command.preExecute(idTranslationTable);
+					command.preExecute(idTranslationTable, connection);
 				}
 				else
 				{

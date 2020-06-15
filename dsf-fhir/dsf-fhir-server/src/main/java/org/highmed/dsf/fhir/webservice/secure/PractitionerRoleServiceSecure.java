@@ -1,12 +1,13 @@
 package org.highmed.dsf.fhir.webservice.secure;
 
-import org.highmed.dsf.fhir.authorization.PractitionerRoleAuthorizationRule;
+import org.highmed.dsf.fhir.authorization.AuthorizationRule;
 import org.highmed.dsf.fhir.dao.PractitionerRoleDao;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
+import org.highmed.dsf.fhir.service.ResourceValidator;
 import org.highmed.dsf.fhir.webservice.specification.PractitionerRoleService;
 import org.hl7.fhir.r4.model.PractitionerRole;
 
@@ -17,9 +18,10 @@ public class PractitionerRoleServiceSecure
 	public PractitionerRoleServiceSecure(PractitionerRoleService delegate, String serverBase,
 			ResponseGenerator responseGenerator, ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
 			PractitionerRoleDao practitionerRoleDao, ExceptionHandler exceptionHandler,
-			ParameterConverter parameterConverter, PractitionerRoleAuthorizationRule authorizationRule)
+			ParameterConverter parameterConverter, AuthorizationRule<PractitionerRole> authorizationRule,
+			ResourceValidator resourceValidator)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, PractitionerRole.class,
-				practitionerRoleDao, exceptionHandler, parameterConverter, authorizationRule);
+				practitionerRoleDao, exceptionHandler, parameterConverter, authorizationRule, resourceValidator);
 	}
 }

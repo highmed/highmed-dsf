@@ -52,9 +52,9 @@ public class DeleteCommand extends AbstractCommand implements Command
 	private String id;
 
 	public DeleteCommand(int index, User user, Bundle bundle, BundleEntryComponent entry, String serverBase,
-			AuthorizationHelper authorizationHelper, ResponseGenerator responseGenerator,
-			DaoProvider daoProvider, ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
-			EventManager eventManager, EventGenerator eventGenerator)
+			AuthorizationHelper authorizationHelper, ResponseGenerator responseGenerator, DaoProvider daoProvider,
+			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter, EventManager eventManager,
+			EventGenerator eventGenerator)
 	{
 		super(1, index, user, bundle, entry, serverBase, authorizationHelper);
 
@@ -67,7 +67,7 @@ public class DeleteCommand extends AbstractCommand implements Command
 	}
 
 	@Override
-	public void preExecute(Map<String, IdType> idTranslationTable)
+	public void preExecute(Map<String, IdType> idTranslationTable, Connection connection)
 	{
 	}
 
@@ -104,8 +104,7 @@ public class DeleteCommand extends AbstractCommand implements Command
 			Optional<Resource> dbResource = exceptionHandler
 					.handleSqlException(() -> dao.readIncludingDeletedWithTransaction(connection, uuid));
 
-			dbResource.ifPresent(
-					oldResource -> authorizationHelper.checkDeleteAllowed(connection, user, oldResource));
+			dbResource.ifPresent(oldResource -> authorizationHelper.checkDeleteAllowed(connection, user, oldResource));
 
 			deleted = exceptionHandler.handleSqlAndResourceNotFoundException(resourceTypeName,
 					() -> dao.deleteWithTransaction(connection, uuid));

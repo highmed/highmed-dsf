@@ -35,23 +35,11 @@ public class StoreCorrelationKeys extends AbstractServiceDelegate
 		execution.setVariable(Constants.VARIABLE_MULTI_INSTANCE_TARGETS,
 				MultiInstanceTargetsValues.create(new MultiInstanceTargets(targets)));
 
-		boolean needsConsentCheck = getNeedsConsentCheck(task);
-		execution.setVariable(Constants.VARIABLE_NEEDS_CONSENT_CHECK, needsConsentCheck);
-
 		boolean needsRecordLinkage = getNeedsRecordLinkageCheck(task);
 		execution.setVariable(Constants.VARIABLE_NEEDS_RECORD_LINKAGE, needsRecordLinkage);
 
 		execution.setVariable(Constants.VARIABLE_QUERY_RESULTS,
 				FeasibilityQueryResultsValues.create(new FeasibilityQueryResults(null)));
-	}
-
-	private boolean getNeedsConsentCheck(Task task)
-	{
-		return getTaskHelper().getFirstInputParameterBooleanValue(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
-				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_CONSENT_CHECK).orElseThrow(
-				() -> new IllegalArgumentException(
-						"NeedsConsentCheck boolean is not set in task with id='" + task.getId()
-								+ "', this error should " + "have been caught by resource validation"));
 	}
 
 	private boolean getNeedsRecordLinkageCheck(Task task)

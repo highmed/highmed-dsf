@@ -1,12 +1,13 @@
 package org.highmed.dsf.fhir.webservice.secure;
 
-import org.highmed.dsf.fhir.authorization.HealthcareServiceAuthorizationRule;
+import org.highmed.dsf.fhir.authorization.AuthorizationRule;
 import org.highmed.dsf.fhir.dao.HealthcareServiceDao;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
+import org.highmed.dsf.fhir.service.ResourceValidator;
 import org.highmed.dsf.fhir.webservice.specification.HealthcareServiceService;
 import org.hl7.fhir.r4.model.HealthcareService;
 
@@ -17,9 +18,10 @@ public class HealthcareServiceServiceSecure
 	public HealthcareServiceServiceSecure(HealthcareServiceService delegate, String serverBase,
 			ResponseGenerator responseGenerator, ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
 			HealthcareServiceDao healthcareServiceDao, ExceptionHandler exceptionHandler,
-			ParameterConverter parameterConverter, HealthcareServiceAuthorizationRule authorizationRule)
+			ParameterConverter parameterConverter, AuthorizationRule<HealthcareService> authorizationRule,
+			ResourceValidator resourceValidator)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, HealthcareService.class,
-				healthcareServiceDao, exceptionHandler, parameterConverter, authorizationRule);
+				healthcareServiceDao, exceptionHandler, parameterConverter, authorizationRule, resourceValidator);
 	}
 }

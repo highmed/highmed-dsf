@@ -34,6 +34,9 @@ public class InitialDataLoaderConfig
 	@Autowired
 	private FhirConfig fhirConfig;
 
+	@Autowired
+	private ReferenceConfig referenceConfig;
+
 	@Bean
 	public InitialDataLoader initialDataLoader()
 	{
@@ -49,6 +52,11 @@ public class InitialDataLoaderConfig
 			Bundle bundle = parseXmlBundle(fileIn);
 			initialDataLoader().load(bundle);
 		}
+		catch (Exception e)
+		{
+			logger.warn("Error while loading data from JAR bundle", e);
+			throw e;
+		}
 
 		Path file = Paths.get(initBundleFile);
 		if (!Files.isReadable(file))
@@ -60,6 +68,11 @@ public class InitialDataLoaderConfig
 			Bundle bundle = parseXmlBundle(fileIn);
 			initialDataLoader().load(bundle);
 		}
+		catch (Exception e)
+		{
+			logger.warn("Error while loading data from external bundle", e);
+			throw e;
+		}
 	}
 
 	private Bundle parseXmlBundle(InputStream in)
@@ -68,6 +81,7 @@ public class InitialDataLoaderConfig
 		p.setStripVersionsFromReferences(false);
 		p.setOverrideResourceIdWithBundleEntryFullUrl(false);
 
-		return p.parseResource(Bundle.class, in);
+		Bundle bundle = p.parseResource(Bundle.class, in);
+		return referenceConfig.referenceCleaner().cleanReferenceResourcesIfBundle(bundle);
 	}
 }

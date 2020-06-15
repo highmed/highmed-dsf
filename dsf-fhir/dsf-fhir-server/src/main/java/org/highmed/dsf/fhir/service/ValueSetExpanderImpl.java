@@ -1,28 +1,45 @@
 package org.highmed.dsf.fhir.service;
 
+import java.util.Objects;
+
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
-import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
+import org.hl7.fhir.r4.terminologies.ValueSetExpanderSimple;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IValidationSupport;
 
 public class ValueSetExpanderImpl implements ValueSetExpander
 {
-	private final HapiWorkerContext worker;
+	private static final Logger logger = LoggerFactory.getLogger(ValueSetExpanderImpl.class);
+
+	private final HapiWorkerContext workerContext;
 
 	public ValueSetExpanderImpl(FhirContext fhirContext, IValidationSupport validationSupport)
 	{
-		worker = createWorker(fhirContext, validationSupport);
+		workerContext = createWorkerContext(fhirContext, validationSupport);
 	}
 
-	protected HapiWorkerContext createWorker(FhirContext context, IValidationSupport validationSupport)
+	protected HapiWorkerContext createWorkerContext(FhirContext fhirContext, IValidationSupport validationSupport)
 	{
-		return new HapiWorkerContext(context, validationSupport);
+		HapiWorkerContext workerContext = new HapiWorkerContext(fhirContext, validationSupport);
+		workerContext.setLocale(fhirContext.getLocalizer().getLocale());
+		return workerContext;
 	}
 
 	public ValueSetExpansionOutcome expand(ValueSet valueSet)
 	{
-		return worker.expand(valueSet, null);
+		Objects.requireNonNull(valueSet, "valueSet");
+
+		// ValueSetExpanderSimple can't be reused
+		ValueSetExpanderSimple valueSetExpander = new ValueSetExpanderSimple(workerContext);
+
+		logger.debug("Generating expansion for ValueSet with id {}, url {}, version {}",
+				valueSet.getIdElement().getIdPart(), valueSet.getUrl(), valueSet.getVersion());
+
+		return valueSetExpander.expand(valueSet, null);
 	}
 }

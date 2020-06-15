@@ -12,7 +12,8 @@ import java.util.UUID;
 
 import javax.ws.rs.WebApplicationException;
 
-import org.highmed.dsf.fhir.service.ReferenceExtractor;
+import org.highmed.dsf.fhir.service.ReferenceCleaner;
+import org.highmed.dsf.fhir.service.ReferenceCleanerImpl;
 import org.highmed.dsf.fhir.service.ReferenceExtractorImpl;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
@@ -35,14 +36,15 @@ public class TestFhirJerseyClient
 			throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException
 	{
 		char[] keyStorePassword = "password".toCharArray();
-		KeyStore keyStore = CertificateReader.fromPkcs12(
-				Paths.get("../../dsf-tools/dsf-tools-test-data-generator/cert/Webbrowser_Test_User/Webbrowser_Test_User_certificate.p12"), keyStorePassword);
+		KeyStore keyStore = CertificateReader.fromPkcs12(Paths.get(
+				"../../dsf-tools/dsf-tools-test-data-generator/cert/Webbrowser_Test_User/Webbrowser_Test_User_certificate.p12"),
+				keyStorePassword);
 		KeyStore trustStore = CertificateHelper.extractTrust(keyStore);
 
 		FhirContext context = FhirContext.forR4();
-		ReferenceExtractor referenceExtractor = new ReferenceExtractorImpl();
-		FhirWebserviceClient client = new FhirWebserviceClientJersey("https://localhost:8001/fhir/", trustStore, keyStore,
-				keyStorePassword, null, null, null, 0, 0, null, context, referenceExtractor);
+		ReferenceCleaner referenceCleaner = new ReferenceCleanerImpl(new ReferenceExtractorImpl());
+		FhirWebserviceClient client = new FhirWebserviceClientJersey("https://localhost:8001/fhir/", trustStore,
+				keyStore, keyStorePassword, null, null, null, 0, 0, null, context, referenceCleaner);
 
 		try
 		{

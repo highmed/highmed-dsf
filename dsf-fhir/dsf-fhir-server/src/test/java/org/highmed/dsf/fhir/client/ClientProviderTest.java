@@ -15,7 +15,7 @@ import java.util.Optional;
 import org.highmed.dsf.fhir.dao.EndpointDao;
 import org.highmed.dsf.fhir.function.SupplierWithSqlException;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
-import org.highmed.dsf.fhir.service.ReferenceExtractor;
+import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,7 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class ClientProviderTest
 {
-	private ReferenceExtractor referenceExtractor;
+	private ReferenceCleaner referenceCleaner;
 	private EndpointDao endpointDao;
 	private ExceptionHandler exceptionHandler;
 	private ClientProvider provider;
@@ -45,13 +45,13 @@ public class ClientProviderTest
 		String remoteProxyUsername = null;
 		String remoteProxySchemeHostPort = null;
 		FhirContext fhirContext = mock(FhirContext.class);
-		referenceExtractor = mock(ReferenceExtractor.class);
+		referenceCleaner = mock(ReferenceCleaner.class);
 		endpointDao = mock(EndpointDao.class);
 		exceptionHandler = mock(ExceptionHandler.class);
 
 		provider = new ClientProviderImpl(webserviceTrustStore, webserviceKeyStore, webserviceKeyStorePassword,
 				remoteReadTimeout, remoteConnectTimeout, remoteProxyPassword, remoteProxyUsername,
-				remoteProxySchemeHostPort, fhirContext, referenceExtractor, endpointDao, exceptionHandler);
+				remoteProxySchemeHostPort, fhirContext, referenceCleaner, endpointDao, exceptionHandler);
 	}
 
 	@Test
@@ -68,7 +68,7 @@ public class ClientProviderTest
 		assertEquals(serverBase, client.get().getBaseUrl());
 
 		verify(exceptionHandler).handleSqlException(any(SupplierWithSqlException.class));
-		verifyNoMoreInteractions(referenceExtractor, endpointDao, exceptionHandler);
+		verifyNoMoreInteractions(referenceCleaner, endpointDao, exceptionHandler);
 	}
 
 	@Test
@@ -82,6 +82,6 @@ public class ClientProviderTest
 		assertTrue(client.isEmpty());
 
 		verify(exceptionHandler).handleSqlException(any(SupplierWithSqlException.class));
-		verifyNoMoreInteractions(referenceExtractor, endpointDao, exceptionHandler);
+		verifyNoMoreInteractions(referenceCleaner, endpointDao, exceptionHandler);
 	}
 }

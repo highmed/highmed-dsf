@@ -31,7 +31,6 @@ import javax.ws.rs.core.UriInfo;
 import org.highmed.dsf.fhir.authorization.AuthorizationRule;
 import org.highmed.dsf.fhir.authorization.AuthorizationRuleProvider;
 import org.highmed.dsf.fhir.dao.ResourceDao;
-import org.highmed.dsf.fhir.dao.exception.ResourceNotFoundException;
 import org.highmed.dsf.fhir.event.EventGenerator;
 import org.highmed.dsf.fhir.event.EventManager;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
@@ -155,9 +154,9 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 			{
 				try
 				{
+					resolveLogicalReferences(resource, connection);
+					
 					R created = dao.createWithTransactionAndId(connection, resource, UUID.randomUUID());
-
-					created = resolveReferences(connection, created);
 
 					connection.commit();
 
@@ -171,7 +170,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 			}
 		});
 
-		referenceCleaner.cleanupReferences(createdResource);
+		referenceCleaner.cleanLiteralReferences(createdResource);
 
 		eventManager.handleEvent(eventGenerator.newResourceCreatedEvent(createdResource));
 
@@ -187,48 +186,35 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 				.tag(new EntityTag(createdResource.getMeta().getVersionId(), true)).build();
 	}
 
-	private R resolveReferences(Connection connection, final R created) throws SQLException
+	private void resolveLogicalReferences(Resource resource, Connection connection) throws WebApplicationException
 	{
-		boolean resourceNeedsUpdated = false;
-		List<ResourceReference> references = referenceExtractor.getReferences(created).collect(Collectors.toList());
-		// Don't use stream.map(...).anyMatch(b -> b), anyMatch is a shortcut operation stopping after first match
-		for (ResourceReference ref : references)
-		{
-			boolean needsUpdate = resolveReference(created, connection, ref);
-			if (needsUpdate)
-				resourceNeedsUpdated = true;
-		}
-
-		if (resourceNeedsUpdated)
-		{
-			try
-			{
-				return dao.updateSameRowWithTransaction(connection, created);
-			}
-			catch (ResourceNotFoundException e)
-			{
-				throw exceptionHandler.internalServerError(e);
-			}
-		}
-		return created;
+		referenceExtractor.getReferences(resource).filter(ref -> ReferenceType.LOGICAL.equals(ref.getType(serverBase)))
+				.forEach(ref ->
+				{
+					Optional<OperationOutcome> outcome = resolveLogicalReference(resource, ref, connection);
+					if (outcome.isPresent())
+					{
+						Response response = Response.status(Status.FORBIDDEN).entity(outcome.get()).build();
+						throw new WebApplicationException(response);
+					}
+				});
 	}
 
-	private boolean resolveReference(Resource resource, Connection connection, ResourceReference resourceReference)
-			throws WebApplicationException
+	private Optional<OperationOutcome> resolveLogicalReference(Resource resource, ResourceReference reference,
+			Connection connection)
 	{
-		ReferenceType type = resourceReference.getType(serverBase);
-		switch (type)
+		Optional<Resource> resolvedResource = referenceResolver.resolveReference(getCurrentUser(), reference,
+				connection);
+		if (resolvedResource.isPresent())
 		{
-			case LITERAL_INTERNAL:
-				return referenceResolver.resolveLiteralInternalReference(resource, resourceReference, connection);
-			case LITERAL_EXTERNAL:
-				return referenceResolver.resolveLiteralExternalReference(resource, resourceReference);
-			case LOGICAL:
-				return referenceResolver.resolveLogicalReference(getCurrentUser(), resource, resourceReference,
-						connection);
-			default:
-				throw new WebApplicationException(responseGenerator.unknownReference(resource, resourceReference));
+			Resource target = resolvedResource.get();
+			reference.getReference().setReferenceElement(
+					new IdType(target.getResourceType().name(), target.getIdElement().getIdPart()));
+
+			return Optional.empty();
 		}
+		else
+			return Optional.of(responseGenerator.referenceTargetNotFoundLocallyByIdentifier(resource, reference));
 	}
 
 	private void checkAlreadyExists(HttpHeaders headers) throws WebApplicationException
@@ -318,7 +304,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 		return read.map(resource ->
 		{
-			referenceCleaner.cleanupReferences(resource);
+			referenceCleaner.cleanLiteralReferences(resource);
 
 			EntityTag resourceTag = new EntityTag(resource.getMeta().getVersionId(), true);
 			if (ifNoneMatch.map(t -> t.equals(resourceTag)).orElse(false))
@@ -368,7 +354,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 		return read.map(resource ->
 		{
-			referenceCleaner.cleanupReferences(resource);
+			referenceCleaner.cleanLiteralReferences(resource);
 
 			EntityTag resourceTag = new EntityTag(resource.getMeta().getVersionId(), true);
 			if (ifNoneMatch.map(t -> t.equals(resourceTag)).orElse(false))
@@ -403,9 +389,11 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 					{
 						try
 						{
+							resolveLogicalReferences(resource, connection);
+							
 							R updated = dao.update(resource, ifMatch.orElse(null));
 
-							updated = resolveReferences(connection, updated);
+//							updated = resolveReferences(connection, updated);
 
 							connection.commit();
 
@@ -419,7 +407,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 					}
 				});
 
-		referenceCleaner.cleanupReferences(updatedResource);
+		referenceCleaner.cleanLiteralReferences(updatedResource);
 
 		eventManager.handleEvent(eventGenerator.newResourceUpdatedEvent(updatedResource));
 
@@ -520,7 +508,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		String pretty = queryParameters.getFirst(SearchQuery.PARAMETER_PRETTY);
 		Bundle searchSet = responseGenerator.createSearchSet(result, errors, bundleUri, format, pretty);
 
-		return responseGenerator.response(Status.OK, referenceCleaner.cleanupReferences(searchSet),
+		return responseGenerator.response(Status.OK, referenceCleaner.cleanLiteralReferences(searchSet),
 				parameterConverter.getMediaType(uri, headers)).build();
 	}
 

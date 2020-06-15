@@ -67,7 +67,7 @@ public class BundleAuthorizationRule extends AbstractAuthorizationRule<Bundle, B
 	@Override
 	public Optional<String> reasonReadAllowed(Connection connection, User user, Bundle existingResource)
 	{
-		if (isLocalUser(user) && hasLocalAuthorizationRole(existingResource))
+		if (isLocalUser(user) && hasLocalOrRemoteAuthorizationRole(existingResource))
 		{
 			logger.info("Read of Bundle authorized for local user '{}', Bundle has local or remote authorization role",
 					user.getName());
