@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
@@ -54,7 +55,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 
 		Organization org = result.getPartialResult().get(0);
 
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
@@ -66,6 +67,142 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		Binary created = binDao.create(binary);
 
 		getWebserviceClient().read(Binary.class, created.getIdElement().getIdPart());
+	}
+
+	@Test
+	public void testReadAllowedLocalUserViaStream() throws Exception
+	{
+		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
+		PartialResult<Organization> result = orgDao.search(orgDao.createSearchQueryWithoutUserFilter(1, 1)
+				.configureParameters(Map.of("name", Arrays.asList("Test Organization"))));
+		assertNotNull(result);
+		assertEquals(1, result.getOverallCount());
+		assertNotNull(result.getPartialResult());
+		assertEquals(1, result.getPartialResult().size());
+		assertNotNull(result.getPartialResult().get(0));
+
+		Organization org = result.getPartialResult().get(0);
+
+		final String contentType = MediaType.TEXT_PLAIN;
+		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
+
+		Binary binary = new Binary();
+		binary.setContentType(contentType);
+		binary.setData(data);
+		binary.setSecurityContext(new Reference(org.getIdElement().toVersionless()));
+
+		BinaryDao binDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
+		Binary created = binDao.create(binary);
+
+		try (InputStream in = getWebserviceClient().readBinary(created.getIdElement().getIdPart(),
+				MediaType.TEXT_PLAIN_TYPE))
+		{
+			assertTrue(Arrays.equals(data, in.readAllBytes()));
+		}
+	}
+
+	@Test
+	public void testReadAllowedLocalUserViaStreamWithVersion() throws Exception
+	{
+		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
+		PartialResult<Organization> result = orgDao.search(orgDao.createSearchQueryWithoutUserFilter(1, 1)
+				.configureParameters(Map.of("name", Arrays.asList("Test Organization"))));
+		assertNotNull(result);
+		assertEquals(1, result.getOverallCount());
+		assertNotNull(result.getPartialResult());
+		assertEquals(1, result.getPartialResult().size());
+		assertNotNull(result.getPartialResult().get(0));
+
+		Organization org = result.getPartialResult().get(0);
+
+		final String contentType = MediaType.TEXT_PLAIN;
+		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
+
+		Binary binary = new Binary();
+		binary.setContentType(contentType);
+		binary.setData(data);
+		binary.setSecurityContext(new Reference(org.getIdElement().toVersionless()));
+
+		BinaryDao binDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
+		Binary created = binDao.create(binary);
+
+		try (InputStream in = getWebserviceClient().readBinary(created.getIdElement().getIdPart(),
+				created.getIdElement().getVersionIdPart(), MediaType.TEXT_PLAIN_TYPE))
+		{
+			assertTrue(Arrays.equals(data, in.readAllBytes()));
+		}
+	}
+
+	@Test
+	public void testReadAllowedLocalUserViaStreamAcceptWildcard() throws Exception
+	{
+		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
+		PartialResult<Organization> result = orgDao.search(orgDao.createSearchQueryWithoutUserFilter(1, 1)
+				.configureParameters(Map.of("name", Arrays.asList("Test Organization"))));
+		assertNotNull(result);
+		assertEquals(1, result.getOverallCount());
+		assertNotNull(result.getPartialResult());
+		assertEquals(1, result.getPartialResult().size());
+		assertNotNull(result.getPartialResult().get(0));
+
+		Organization org = result.getPartialResult().get(0);
+
+		final String contentType = MediaType.TEXT_PLAIN;
+		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
+
+		Binary binary = new Binary();
+		binary.setContentType(contentType);
+		binary.setData(data);
+		binary.setSecurityContext(new Reference(org.getIdElement().toVersionless()));
+
+		BinaryDao binDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
+		Binary created = binDao.create(binary);
+
+		try (InputStream in = getWebserviceClient().readBinary(created.getIdElement().getIdPart(),
+				MediaType.WILDCARD_TYPE))
+		{
+			assertTrue(Arrays.equals(data, in.readAllBytes()));
+		}
+	}
+
+	@Test(expected = WebApplicationException.class)
+	public void testReadAllowedLocalUserViaStreamMediaTypeNotSupported() throws Exception
+	{
+		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
+		PartialResult<Organization> result = orgDao.search(orgDao.createSearchQueryWithoutUserFilter(1, 1)
+				.configureParameters(Map.of("name", Arrays.asList("Test Organization"))));
+		assertNotNull(result);
+		assertEquals(1, result.getOverallCount());
+		assertNotNull(result.getPartialResult());
+		assertEquals(1, result.getPartialResult().size());
+		assertNotNull(result.getPartialResult().get(0));
+
+		Organization org = result.getPartialResult().get(0);
+
+		final String contentType = MediaType.TEXT_PLAIN;
+		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
+
+		Binary binary = new Binary();
+		binary.setContentType(contentType);
+		binary.setData(data);
+		binary.setSecurityContext(new Reference(org.getIdElement().toVersionless()));
+
+		BinaryDao binDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
+		Binary created = binDao.create(binary);
+
+		try
+		{
+			try (InputStream in = getWebserviceClient().readBinary(created.getIdElement().getIdPart(),
+					MediaType.APPLICATION_XML_TYPE))
+			{
+				assertTrue(Arrays.equals(data, in.readAllBytes()));
+			}
+		}
+		catch (WebApplicationException e)
+		{
+			assertEquals(Status.NOT_ACCEPTABLE.getStatusCode(), e.getResponse().getStatus());
+			throw e;
+		}
 	}
 
 	@Test
@@ -82,7 +219,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 
 		Organization org = result.getPartialResult().get(0);
 
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
@@ -110,7 +247,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 
 		Organization org = result.getPartialResult().get(0);
 
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
@@ -146,7 +283,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 
 		Organization org = result.getPartialResult().get(0);
 
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
@@ -186,7 +323,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 
 		Organization org = result.getPartialResult().get(0);
 
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
@@ -226,7 +363,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 
 		Organization org = result.getPartialResult().get(0);
 
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
@@ -266,7 +403,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 
 		Organization org = result.getPartialResult().get(0);
 
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
@@ -306,7 +443,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 
 		Organization org = result.getPartialResult().get(0);
 
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
@@ -346,7 +483,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 
 		Organization org = result.getPartialResult().get(0);
 
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
@@ -378,7 +515,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		Organization createdOrg = orgDao.create(new Organization());
 
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
@@ -407,7 +544,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		Organization createdOrg = orgDao.create(new Organization());
 
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
@@ -434,7 +571,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		Organization createdOrg = orgDao.create(new Organization());
 
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
@@ -453,7 +590,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		Organization createdOrg = orgDao.create(new Organization());
 
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary created = getWebserviceClient().createBinary(new ByteArrayInputStream(data),
@@ -478,7 +615,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		Organization createdOrg = orgDao.create(new Organization());
 
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		IdType created = getWebserviceClient().withMinimalReturn().createBinary(new ByteArrayInputStream(data),
@@ -501,7 +638,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		Organization createdOrg = orgDao.create(new Organization());
 
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		OperationOutcome created = getWebserviceClient().withOperationOutcomeReturn().createBinary(
@@ -517,7 +654,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		Organization createdOrg = orgDao.create(new Organization());
 
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
@@ -539,7 +676,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	@Test(expected = WebApplicationException.class)
 	public void testCreateSecurityContextOrgNotExisting() throws Exception
 	{
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
@@ -561,7 +698,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testCreateSecurityContextLogicalReference() throws Exception
 	{
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
@@ -586,7 +723,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		Organization createdOrg = orgDao.create(new Organization());
 
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
@@ -622,7 +759,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		Organization createdOrg = orgDao.create(new Organization());
 
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
@@ -657,7 +794,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		Organization createdOrg = orgDao.create(new Organization());
 
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
@@ -693,7 +830,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		Organization createdOrg = orgDao.create(new Organization());
 
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
@@ -720,7 +857,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	@Test(expected = WebApplicationException.class)
 	public void testCreateSecurityContextOrgNotExistingViaTransactionBundle() throws Exception
 	{
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
@@ -750,7 +887,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		Organization createdOrg = orgDao.create(new Organization());
 
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
@@ -783,7 +920,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		Organization createdOrg = orgDao.create(new Organization());
 
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
@@ -810,7 +947,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testCreateSecurityContextOrgNotExistingViaBatchBundle() throws Exception
 	{
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
@@ -840,7 +977,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		Organization createdOrg = orgDao.create(new Organization());
 
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data1 = "Hello World".getBytes(StandardCharsets.UTF_8);
 		final byte[] data2 = "Hello World and goodbye".getBytes(StandardCharsets.UTF_8);
 
@@ -887,7 +1024,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		Organization createdOrg = orgDao.create(new Organization());
 
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data1 = "Hello World".getBytes(StandardCharsets.UTF_8);
 		final byte[] data2 = "Hello World and goodbye".getBytes(StandardCharsets.UTF_8);
 
@@ -935,7 +1072,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		Organization createdOrg = orgDao.create(new Organization());
 
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data1 = "Hello World".getBytes(StandardCharsets.UTF_8);
 		final byte[] data2 = "Hello World and goodbye".getBytes(StandardCharsets.UTF_8);
 
@@ -975,7 +1112,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		Organization createdOrg = orgDao.create(new Organization());
 
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data1 = "Hello World".getBytes(StandardCharsets.UTF_8);
 		final byte[] data2 = "Hello World and goodbye".getBytes(StandardCharsets.UTF_8);
 
@@ -1021,7 +1158,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		Organization createdOrg = orgDao.create(new Organization());
 
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data1 = "Hello World".getBytes(StandardCharsets.UTF_8);
 		final byte[] data2 = "Hello World and goodbye".getBytes(StandardCharsets.UTF_8);
 
@@ -1076,7 +1213,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		Organization createdOrg = orgDao.create(new Organization());
 
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data1 = "Hello World".getBytes(StandardCharsets.UTF_8);
 		final byte[] data2 = "Hello World and goodbye".getBytes(StandardCharsets.UTF_8);
 
@@ -1127,7 +1264,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		Organization createdOrg = orgDao.create(new Organization());
 
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data1 = "Hello World".getBytes(StandardCharsets.UTF_8);
 		final byte[] data2 = "Hello World and goodbye".getBytes(StandardCharsets.UTF_8);
 
@@ -1178,7 +1315,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		Organization createdOrg = orgDao.create(new Organization());
 
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data1 = "Hello World".getBytes(StandardCharsets.UTF_8);
 		final byte[] data2 = "Hello World and goodbye".getBytes(StandardCharsets.UTF_8);
 
@@ -1232,7 +1369,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		Organization createdOrg = orgDao.create(new Organization());
 
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data1 = "Hello World".getBytes(StandardCharsets.UTF_8);
 		final byte[] data2 = "Hello World and goodbye".getBytes(StandardCharsets.UTF_8);
 
@@ -1283,7 +1420,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		Organization createdOrg = orgDao.create(new Organization());
 
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data1 = "Hello World".getBytes(StandardCharsets.UTF_8);
 		final byte[] data2 = "Hello World and goodbye".getBytes(StandardCharsets.UTF_8);
 
@@ -1344,7 +1481,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		Organization org1 = result.getPartialResult().get(0);
 		Organization org2 = result.getPartialResult().get(1);
 
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary b1 = new Binary();
@@ -1400,7 +1537,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		Organization org1 = result.getPartialResult().get(0);
 		Organization org2 = result.getPartialResult().get(1);
 
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary b1 = new Binary();
@@ -1448,7 +1585,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		Organization createdOrg = orgDao.create(new Organization());
 
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data1 = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
@@ -1482,7 +1619,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		Organization createdOrg = orgDao.create(new Organization());
 
-		final String contentType = "text/plain";
+		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data1 = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
