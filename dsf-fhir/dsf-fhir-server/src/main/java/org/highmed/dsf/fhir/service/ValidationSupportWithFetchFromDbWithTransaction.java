@@ -8,11 +8,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.highmed.dsf.fhir.dao.CodeSystemDao;
 import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
 import org.highmed.dsf.fhir.dao.ValueSetDao;
 import org.highmed.dsf.fhir.function.SupplierWithSqlException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -63,6 +66,16 @@ public class ValidationSupportWithFetchFromDbWithTransaction implements IValidat
 	public FhirContext getFhirContext()
 	{
 		return context;
+	}
+
+	@Override
+	public List<IBaseResource> fetchAllConformanceResources()
+	{
+		return Stream
+				.concat(throwRuntimeException(() -> codeSystemDao.readAllWithTransaction(connection)).stream(),
+						Stream.concat(fetchAllStructureDefinitions().stream(),
+								throwRuntimeException(() -> valueSetDao.readAllWithTransaction(connection)).stream()))
+				.collect(Collectors.toList());
 	}
 
 	@Override

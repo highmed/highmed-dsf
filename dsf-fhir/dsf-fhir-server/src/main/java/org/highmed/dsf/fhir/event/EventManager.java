@@ -1,18 +1,17 @@
 package org.highmed.dsf.fhir.event;
 
-import java.util.List;
-
-import javax.websocket.RemoteEndpoint.Async;
-
-import org.highmed.dsf.fhir.authentication.User;
-
-public interface EventManager
+public interface EventManager extends EventHandler
 {
-	void handleEvent(Event event);
+	/**
+	 * @param eventHandler
+	 *            not <code>null</code>
+	 * @return handler remover, calls {@link EventManager#removeHandler(EventHandler)}
+	 */
+	Runnable addHandler(EventHandler eventHandler);
 
-	void handleEvents(List<Event> events);
-
-	void bind(User user, String sessionId, Async asyncRemote, String subscriptionIdPart);
-
-	void close(String sessionId);
+	/**
+	 * @param eventHandler
+	 *            not <code>null</code>
+	 */
+	void removeHandler(EventHandler eventHandler);
 }

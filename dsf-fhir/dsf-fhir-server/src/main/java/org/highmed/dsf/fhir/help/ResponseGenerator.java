@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.core.EntityTag;
@@ -15,6 +16,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
 import org.highmed.dsf.fhir.authentication.User;
+import org.highmed.dsf.fhir.prefer.PreferReturnType;
 import org.highmed.dsf.fhir.search.PartialResult;
 import org.highmed.dsf.fhir.search.SearchQueryParameterError;
 import org.highmed.dsf.fhir.service.ResourceReference;
@@ -64,10 +66,31 @@ public class ResponseGenerator
 
 	public ResponseBuilder response(Status status, Resource resource, MediaType mediaType)
 	{
+		return response(status, resource, mediaType, PreferReturnType.REPRESENTATION, null);
+	}
+
+	public ResponseBuilder response(Status status, Resource resource, MediaType mediaType, PreferReturnType prefer,
+			Supplier<OperationOutcome> operationOutcomeCreator)
+	{
 		Objects.requireNonNull(status, "status");
 		Objects.requireNonNull(resource, "resource");
 
-		ResponseBuilder b = Response.status(status).entity(resource);
+		ResponseBuilder b = Response.status(status);
+
+		switch (prefer)
+		{
+			case REPRESENTATION:
+				b = b.entity(resource);
+				break;
+			case OPERATION_OUTCOME:
+				b = b.entity(operationOutcomeCreator.get());
+				break;
+			case MINIMAL:
+				// do nothing, headers only
+				break;
+			default:
+				throw new RuntimeException(PreferReturnType.class.getName() + " value " + prefer + " not supported");
+		}
 
 		if (mediaType != null)
 			b = b.type(mediaType.withCharset(StandardCharsets.UTF_8.displayName()));
@@ -80,6 +103,28 @@ public class ResponseGenerator
 		}
 
 		return b;
+	}
+
+	public OperationOutcome created(URI location, Resource resource)
+	{
+		return created(location.toString(), resource);
+	}
+
+	public OperationOutcome created(String location, Resource resource)
+	{
+		String message = String.format("%s created at location %s", resource.getResourceType().name(), location);
+		return createOutcome(IssueSeverity.INFORMATION, IssueType.INFORMATIONAL, message);
+	}
+
+	public OperationOutcome updated(URI location, Resource resource)
+	{
+		return updated(location.toString(), resource);
+	}
+
+	public OperationOutcome updated(String location, Resource resource)
+	{
+		String message = String.format("%s updated at location %s", resource.getResourceType().name(), location);
+		return createOutcome(IssueSeverity.INFORMATION, IssueType.INFORMATIONAL, message);
 	}
 
 	public BundleEntryComponent toBundleEntryComponent(Resource resource, SearchEntryMode mode)

@@ -20,6 +20,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import org.highmed.dsf.fhir.adapter.AbstractFhirAdapter;
+import org.highmed.dsf.fhir.prefer.PreferReturnType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +29,7 @@ import ca.uhn.fhir.rest.api.Constants;
 public class ParameterConverter
 {
 	private static final Logger logger = LoggerFactory.getLogger(ParameterConverter.class);
-
+	
 	public static final String HTML_FORMAT = "html";
 	public static final String JSON_FORMAT = "json";
 	public static final List<String> JSON_FORMATS = Arrays.asList(Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW,
@@ -79,7 +80,13 @@ public class ParameterConverter
 		}
 	}
 
-	public MediaType getMediaType(UriInfo uri, HttpHeaders headers)
+	public MediaType getMediaType(UriInfo uri, HttpHeaders headers) throws WebApplicationException
+	{
+		return getMediaTypeIfSupported(uri, headers)
+				.orElseThrow(() -> new WebApplicationException(Status.UNSUPPORTED_MEDIA_TYPE));
+	}
+
+	public Optional<MediaType> getMediaTypeIfSupported(UriInfo uri, HttpHeaders headers)
 	{
 		String format = uri.getQueryParameters().getFirst("_format");
 		boolean pretty = "true".equals(uri.getQueryParameters().getFirst("_pretty"));
@@ -90,37 +97,37 @@ public class ParameterConverter
 		else if (XML_FORMATS.contains(format) || JSON_FORMATS.contains(format) || MediaType.TEXT_HTML.equals(format))
 			return getMediaType(format, pretty);
 		else if (XML_FORMAT.equals(format))
-			return mediaType("application", "fhir+xml", pretty);
+			return Optional.of(mediaType("application", "fhir+xml", pretty));
 		else if (JSON_FORMAT.equals(format))
-			return mediaType("application", "fhir+json", pretty);
+			return Optional.of(mediaType("application", "fhir+json", pretty));
 		else if (HTML_FORMAT.equals(format))
-			return mediaType("text", "html", pretty);
+			return Optional.of(mediaType("text", "html", pretty));
 		else
-			throw new WebApplicationException(Status.UNSUPPORTED_MEDIA_TYPE);
+			return Optional.empty();
 	}
 
-	private MediaType getMediaType(String mediaType, boolean pretty)
+	private Optional<MediaType> getMediaType(String mediaType, boolean pretty)
 	{
 		if (mediaType.contains(MediaType.TEXT_HTML))
-			return mediaType("text", "html", pretty);
+			return Optional.of(mediaType("text", "html", pretty));
 		else if (mediaType.contains(Constants.CT_FHIR_JSON_NEW))
-			return mediaType("application", "fhir+json", pretty);
+			return Optional.of(mediaType("application", "fhir+json", pretty));
 		else if (mediaType.contains(Constants.CT_FHIR_JSON))
-			return mediaType("application", "json+fhir", pretty);
+			return Optional.of(mediaType("application", "json+fhir", pretty));
 		else if (mediaType.contains(MediaType.APPLICATION_JSON))
-			return mediaType("application", "json", pretty);
+			return Optional.of(mediaType("application", "json", pretty));
 		else if (mediaType.contains(Constants.CT_FHIR_XML_NEW))
-			return mediaType("application", "fhir+xml", pretty);
+			return Optional.of(mediaType("application", "fhir+xml", pretty));
 		else if (mediaType.contains(Constants.CT_FHIR_XML))
-			return mediaType("application", "xml+fhir", pretty);
+			return Optional.of(mediaType("application", "xml+fhir", pretty));
 		else if (mediaType.contains(MediaType.APPLICATION_XML))
-			return mediaType("application", "xml", pretty);
+			return Optional.of(mediaType("application", "xml", pretty));
 		else if (mediaType.contains(MediaType.TEXT_XML))
-			return mediaType("text", "xml", pretty);
+			return Optional.of(mediaType("text", "xml", pretty));
 		else
 		{
-			logger.error("Media type '{}' not supported", mediaType);
-			throw new WebApplicationException(Status.UNSUPPORTED_MEDIA_TYPE);
+			logger.debug("Media type '{}' not supported", mediaType);
+			return Optional.empty();
 		}
 	}
 
@@ -128,6 +135,12 @@ public class ParameterConverter
 	{
 		return new MediaType(type, subtype,
 				!pretty ? null : Map.of(AbstractFhirAdapter.PRETTY, String.valueOf(pretty)));
+	}
+	
+	public PreferReturnType getPrefer(HttpHeaders headers)
+	{
+		String prefer = headers.getHeaderString(Constants.HEADER_PREFER);
+		return PreferReturnType.fromString(prefer);
 	}
 
 	public Integer getFirstInt(Map<String, List<String>> queryParameters, String key)

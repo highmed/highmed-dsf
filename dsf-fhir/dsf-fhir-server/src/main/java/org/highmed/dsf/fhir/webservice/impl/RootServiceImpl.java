@@ -67,8 +67,8 @@ public class RootServiceImpl extends AbstractBasicService implements RootService
 		// FIXME hapi parser bug workaround
 		referenceCleaner.cleanReferenceResourcesIfBundle(bundle);
 
-		CommandList commands = exceptionHandler
-				.handleBadBundleException(() -> commandFactory.createCommands(bundle, getCurrentUser()));
+		CommandList commands = exceptionHandler.handleBadBundleException(
+				() -> commandFactory.createCommands(bundle, getCurrentUser(), parameterConverter.getPrefer(headers)));
 
 		Bundle result = commands.execute(); // throws WebApplicationException
 

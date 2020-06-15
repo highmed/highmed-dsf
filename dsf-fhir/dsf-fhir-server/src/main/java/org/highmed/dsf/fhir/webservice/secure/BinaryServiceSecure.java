@@ -1,5 +1,11 @@
 package org.highmed.dsf.fhir.webservice.secure;
 
+import java.io.InputStream;
+
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+
 import org.highmed.dsf.fhir.authorization.AuthorizationRule;
 import org.highmed.dsf.fhir.dao.BinaryDao;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
@@ -21,5 +27,17 @@ public class BinaryServiceSecure extends AbstractResourceServiceSecure<BinaryDao
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, Binary.class, binaryDao,
 				exceptionHandler, parameterConverter, authorizationRule, resourceValidator);
+	}
+
+	@Override
+	public Response create(InputStream in, UriInfo uri, HttpHeaders headers)
+	{
+		throw new UnsupportedOperationException("Implemented and delegated by jaxrs layer");
+	}
+
+	@Override
+	public Response update(String id, InputStream in, UriInfo uri, HttpHeaders headers)
+	{
+		throw new UnsupportedOperationException("Implemented and delegated by jaxrs layer");
 	}
 }

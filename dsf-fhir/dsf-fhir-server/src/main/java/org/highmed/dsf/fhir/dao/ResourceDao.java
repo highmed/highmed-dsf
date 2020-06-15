@@ -2,6 +2,7 @@ package org.highmed.dsf.fhir.dao;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -23,7 +24,7 @@ public interface ResourceDao<R extends Resource>
 	String getResourceTypeName();
 
 	Class<R> getResourceType();
-
+	
 	Connection newReadWriteTransaction() throws SQLException;
 
 	/**
@@ -125,6 +126,16 @@ public interface ResourceDao<R extends Resource>
 	 * @throws SQLException
 	 */
 	Optional<R> readIncludingDeletedWithTransaction(Connection connection, UUID uuid) throws SQLException;
+
+	List<R> readAll() throws SQLException;
+
+	/**
+	 * @param connection
+	 *            not <code>null</code>
+	 * @return
+	 * @throws SQLException
+	 */
+	List<R> readAllWithTransaction(Connection connection) throws SQLException;
 
 	/**
 	 * @param id

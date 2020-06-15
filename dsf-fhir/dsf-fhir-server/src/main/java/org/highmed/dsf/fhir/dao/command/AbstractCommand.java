@@ -1,6 +1,7 @@
 package org.highmed.dsf.fhir.dao.command;
 
 import org.highmed.dsf.fhir.authentication.User;
+import org.highmed.dsf.fhir.prefer.PreferReturnType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.slf4j.Logger;
@@ -15,6 +16,7 @@ public abstract class AbstractCommand implements Command
 	protected final int index;
 
 	protected final User user;
+	protected final PreferReturnType returnType;
 	protected final Bundle bundle;
 	protected final BundleEntryComponent entry;
 
@@ -22,14 +24,15 @@ public abstract class AbstractCommand implements Command
 
 	protected final AuthorizationHelper authorizationHelper;
 
-	public AbstractCommand(int transactionPriority, int index, User user, Bundle bundle, BundleEntryComponent entry,
-			String serverBase, AuthorizationHelper authorizationHelper)
+	public AbstractCommand(int transactionPriority, int index, User user, PreferReturnType returnType, Bundle bundle,
+			BundleEntryComponent entry, String serverBase, AuthorizationHelper authorizationHelper)
 	{
 		this.transactionPriority = transactionPriority;
 
 		this.index = index;
 
 		this.user = user;
+		this.returnType = returnType;
 		this.bundle = bundle;
 		this.entry = entry;
 		this.serverBase = serverBase;

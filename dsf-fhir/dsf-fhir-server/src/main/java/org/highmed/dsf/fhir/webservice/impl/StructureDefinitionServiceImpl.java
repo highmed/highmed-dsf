@@ -18,7 +18,7 @@ import javax.ws.rs.core.UriInfo;
 import org.highmed.dsf.fhir.authorization.AuthorizationRuleProvider;
 import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
 import org.highmed.dsf.fhir.event.EventGenerator;
-import org.highmed.dsf.fhir.event.EventManager;
+import org.highmed.dsf.fhir.event.EventHandler;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
@@ -56,14 +56,14 @@ public class StructureDefinitionServiceImpl extends
 	private final SnapshotGenerator snapshotGenerator;
 
 	public StructureDefinitionServiceImpl(String path, String serverBase, int defaultPageCount,
-			StructureDefinitionDao dao, ResourceValidator validator, EventManager eventManager,
+			StructureDefinitionDao dao, ResourceValidator validator, EventHandler eventHandler,
 			ExceptionHandler exceptionHandler, EventGenerator eventGenerator, ResponseGenerator responseGenerator,
 			ParameterConverter parameterConverter, ReferenceExtractor referenceExtractor,
 			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
 			AuthorizationRuleProvider authorizationRuleProvider, StructureDefinitionDao structureDefinitionSnapshotDao,
 			SnapshotGenerator sanapshotGenerator)
 	{
-		super(path, StructureDefinition.class, serverBase, defaultPageCount, dao, validator, eventManager,
+		super(path, StructureDefinition.class, serverBase, defaultPageCount, dao, validator, eventHandler,
 				exceptionHandler, eventGenerator, responseGenerator, parameterConverter, referenceExtractor,
 				referenceResolver, referenceCleaner, authorizationRuleProvider);
 

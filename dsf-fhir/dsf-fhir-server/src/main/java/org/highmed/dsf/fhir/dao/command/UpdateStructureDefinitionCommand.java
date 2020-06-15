@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Function;
 
 import javax.ws.rs.WebApplicationException;
 
@@ -13,10 +12,10 @@ import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
 import org.highmed.dsf.fhir.dao.exception.ResourceNotFoundException;
 import org.highmed.dsf.fhir.dao.exception.ResourceVersionNoMatchException;
 import org.highmed.dsf.fhir.event.EventGenerator;
-import org.highmed.dsf.fhir.event.EventManager;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
+import org.highmed.dsf.fhir.prefer.PreferReturnType;
 import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.highmed.dsf.fhir.service.ReferenceExtractor;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
@@ -36,39 +35,38 @@ public class UpdateStructureDefinitionCommand extends UpdateCommand<StructureDef
 	private static final Logger logger = LoggerFactory.getLogger(UpdateStructureDefinitionCommand.class);
 
 	private final StructureDefinitionDao snapshotDao;
-	private final Function<Connection, SnapshotGenerator> snapshotGenerator;
 
 	private StructureDefinition resourceWithSnapshot;
 
-	public UpdateStructureDefinitionCommand(int index, User user, Bundle bundle, BundleEntryComponent entry,
-			String serverBase, AuthorizationHelper authorizationHelper, ValidationHelper validationHelper,
+	public UpdateStructureDefinitionCommand(int index, User user, PreferReturnType returnType, Bundle bundle,
+			BundleEntryComponent entry, String serverBase, AuthorizationHelper authorizationHelper,
 			StructureDefinition resource, StructureDefinitionDao dao, ExceptionHandler exceptionHandler,
 			ParameterConverter parameterConverter, ResponseGenerator responseGenerator,
 			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver,
-			ReferenceCleaner referenceCleaner, EventManager eventManager, EventGenerator eventGenerator,
-			StructureDefinitionDao snapshotDao, Function<Connection, SnapshotGenerator> snapshotGenerator)
+			ReferenceCleaner referenceCleaner, EventGenerator eventGenerator, StructureDefinitionDao snapshotDao)
 	{
-		super(index, user, bundle, entry, serverBase, authorizationHelper, validationHelper, resource, dao,
-				exceptionHandler, parameterConverter, responseGenerator, referenceExtractor, referenceResolver,
-				referenceCleaner, eventManager, eventGenerator);
+		super(index, user, returnType, bundle, entry, serverBase, authorizationHelper, resource, dao, exceptionHandler,
+				parameterConverter, responseGenerator, referenceExtractor, referenceResolver, referenceCleaner,
+				eventGenerator);
 
 		this.snapshotDao = snapshotDao;
-		this.snapshotGenerator = snapshotGenerator;
 	}
 
 	@Override
-	public void preExecute(Map<String, IdType> idTranslationTable, Connection connection)
+	public void preExecute(Map<String, IdType> idTranslationTable, Connection connection,
+			ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator)
 	{
-		resourceWithSnapshot = resource.hasSnapshot() ? resource.copy() : generateSnapshot(connection, resource.copy());
+		resourceWithSnapshot = resource.hasSnapshot() ? resource.copy()
+				: generateSnapshot(snapshotGenerator, resource.copy());
 		resource.setSnapshot(null);
 
-		super.preExecute(idTranslationTable, connection);
+		super.preExecute(idTranslationTable, connection, validationHelper, snapshotGenerator);
 	}
 
-	private StructureDefinition generateSnapshot(Connection connection, StructureDefinition resource)
+	private StructureDefinition generateSnapshot(SnapshotGenerator snapshotGenerator, StructureDefinition resource)
 	{
 		logger.debug("Generating snapshot for bundle entry at index {}", index);
-		SnapshotWithValidationMessages s = snapshotGenerator.apply(connection).generateSnapshot(resource);
+		SnapshotWithValidationMessages s = snapshotGenerator.generateSnapshot(resource);
 
 		if (s.getMessages().stream()
 				.anyMatch(m -> IssueSeverity.FATAL.equals(m.getLevel()) || IssueSeverity.ERROR.equals(m.getLevel())))
