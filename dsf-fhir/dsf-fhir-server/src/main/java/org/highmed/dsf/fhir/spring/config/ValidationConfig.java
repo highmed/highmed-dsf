@@ -18,6 +18,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 
@@ -44,9 +45,12 @@ public class ValidationConfig
 
 	private ValidationSupportChain validationSupportChain(IValidationSupport dbSupport)
 	{
+		DefaultProfileValidationSupport dpvs = new DefaultProfileValidationSupport(FhirContext.forR4());
+		dpvs.fetchCodeSystem(""); // FIXME HAPI bug workaround, to initialize
+		dpvs.fetchAllStructureDefinitions(); // FIXME HAPI bug workaround, to initialize
+
 		return new ValidationSupportChain(new InMemoryTerminologyServerValidationSupport(fhirConfig.fhirContext()),
-				dbSupport, new DefaultProfileValidationSupport(fhirConfig.fhirContext()),
-				new CommonCodeSystemsTerminologyService(fhirConfig.fhirContext()));
+				dbSupport, dpvs, new CommonCodeSystemsTerminologyService(fhirConfig.fhirContext()));
 	}
 
 	@Bean
@@ -65,9 +69,11 @@ public class ValidationConfig
 	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 	public IValidationSupport validationSupportWithTransaction(Connection connection)
 	{
-		return new ValidationSupportWithCache(fhirConfig.fhirContext(),
+		ValidationSupportWithCache validationSupport = new ValidationSupportWithCache(fhirConfig.fhirContext(),
 				validationSupportChain(new ValidationSupportWithFetchFromDbWithTransaction(fhirConfig.fhirContext(),
 						daoConfig.structureDefinitionDao(), daoConfig.structureDefinitionSnapshotDao(),
 						daoConfig.codeSystemDao(), daoConfig.valueSetDao(), connection)));
+
+		return validationSupport.populateCache(validationSupport().fetchAllConformanceResources());
 	}
 }

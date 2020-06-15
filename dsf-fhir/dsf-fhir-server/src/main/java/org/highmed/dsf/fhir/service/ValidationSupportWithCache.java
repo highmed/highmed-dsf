@@ -52,11 +52,8 @@ public class ValidationSupportWithCache implements IValidationSupport, EventHand
 		{
 			if (ref == null || ref.get() == null)
 			{
-				logger.trace("cache miss");
 				ref = read();
 			}
-			else
-				logger.trace("cache hit");
 
 			return ref.get();
 		}
@@ -76,6 +73,18 @@ public class ValidationSupportWithCache implements IValidationSupport, EventHand
 	{
 		this.context = context;
 		this.delegate = delegate;
+	}
+
+	public ValidationSupportWithCache populateCache(List<IBaseResource> cacheValues)
+	{
+		logger.trace("populating cache");
+
+		cacheValues.stream().filter(r -> r instanceof Resource).map(r -> (Resource) r).forEach(this::add);
+
+		fetchAllConformanceResourcesDone.set(true);
+		fetchAllStructureDefinitionsDone.set(true);
+
+		return this;
 	}
 
 	@Override
@@ -108,8 +117,6 @@ public class ValidationSupportWithCache implements IValidationSupport, EventHand
 
 	private void add(Resource resource)
 	{
-		logger.trace("Adding {} to cache", resource.getResourceType().name());
-
 		if (resource instanceof CodeSystem)
 			doAdd((CodeSystem) resource, codeSystems, CodeSystem::getUrl, CodeSystem::getVersion,
 					url -> (CodeSystem) delegate.fetchCodeSystem(url));
@@ -139,16 +146,12 @@ public class ValidationSupportWithCache implements IValidationSupport, EventHand
 
 	private void update(Resource resource)
 	{
-		logger.trace("Updating {} in cache", resource.getResourceType().name());
-
 		remove(resource);
 		add(resource);
 	}
 
 	private void remove(Resource resource)
 	{
-		logger.trace("Removing {} from cache", resource.getResourceType().name());
-
 		if (resource instanceof CodeSystem)
 			doRemove((CodeSystem) resource, codeSystems, CodeSystem::getUrl, CodeSystem::getVersion);
 		else if (resource instanceof StructureDefinition)
