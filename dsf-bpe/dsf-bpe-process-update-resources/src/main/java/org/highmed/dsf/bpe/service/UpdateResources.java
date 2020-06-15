@@ -80,13 +80,13 @@ public class UpdateResources extends AbstractServiceDelegate implements Initiali
 		try
 		{
 			logger.debug("Posting bundle to local endpoint: {}", context.newXmlParser().encodeResourceToString(bundle));
-			getFhirWebserviceClientProvider().getLocalWebserviceClient().postBundle(bundle);
+			getFhirWebserviceClientProvider().getLocalWebserviceClient().withMinimalReturn().postBundle(bundle);
 		}
 		catch (Exception e)
 		{
-			logger.error("Error while executing read Bundle with id {} from organization {} locally: {}",
+			logger.error("Error while executing Bundle with id {} from organization {} locally: {}",
 					bundleId.getValue(), task.getRequester().getReference(), e.getMessage());
-			throw new RuntimeException("Error while executing read Bundle with id " + bundleId.getValue()
+			throw new RuntimeException("Error while executing Bundle with id " + bundleId.getValue()
 					+ " from organization " + task.getRequester().getReference() + " locally, " + e.getMessage(), e);
 		}
 	}

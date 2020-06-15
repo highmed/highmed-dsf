@@ -75,6 +75,6 @@ public class UpdateResource3MedicTtpExampleStarter
 				.getType().addCoding().setSystem("http://highmed.org/fhir/CodeSystem/update-resources")
 				.setCode("organization-identifier-search-parameter");
 
-		client.create(task);
+		client.withMinimalReturn().create(task);
 	}
 }

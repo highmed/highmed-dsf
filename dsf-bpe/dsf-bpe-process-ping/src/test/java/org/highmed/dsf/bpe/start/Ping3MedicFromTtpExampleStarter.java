@@ -52,6 +52,6 @@ public class Ping3MedicFromTtpExampleStarter
 		task.addInput().setValue(new StringType("startProcessMessage")).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("message-name");
 
-		client.create(task);
+		client.withMinimalReturn().create(task);
 	}
 }

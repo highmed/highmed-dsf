@@ -73,7 +73,7 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 			task = taskHelper.addOutputs(task, outputs);
 
 			task.setStatus(Task.TaskStatus.FAILED);
-			webserviceClient.update(task);
+			webserviceClient.withMinimalReturn().update(task);
 
 			execution.getProcessEngine().getRuntimeService()
 					.deleteProcessInstance(execution.getProcessInstanceId(), exception.getMessage());

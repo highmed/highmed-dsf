@@ -54,7 +54,7 @@ public class EndListener implements ExecutionListener
 			}
 
 			task.setStatus(Task.TaskStatus.COMPLETED);
-			webserviceClient.update(task);
+			webserviceClient.withMinimalReturn().update(task);
 		}
 		else
 		{
