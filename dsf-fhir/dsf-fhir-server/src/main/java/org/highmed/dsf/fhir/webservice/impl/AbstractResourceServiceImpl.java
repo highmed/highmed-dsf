@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -180,7 +181,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		URI location = toLocation(uri, createdResource);
 
 		return responseGenerator
-				.response(Status.CREATED, createdResource, parameterConverter.getMediaType(uri, headers),
+				.response(Status.CREATED, createdResource, parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers),
 						parameterConverter.getPrefer(headers),
 						() -> responseGenerator.created(location, createdResource))
 				.location(location).lastModified(createdResource.getMeta().getLastUpdated())
@@ -320,9 +321,13 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 			else if (ifModifiedSince.map(d -> resource.getMeta().getLastUpdated().after(d)).orElse(false))
 				return Response.notModified(resourceTag).lastModified(resource.getMeta().getLastUpdated()).build();
 			else
-				return responseGenerator.response(Status.OK, resource, parameterConverter.getMediaType(uri, headers))
-						.build();
+				return responseGenerator.response(Status.OK, resource, getMediaTypeForRead(uri, headers)).build();
 		}).orElseGet(() -> Response.status(Status.NOT_FOUND).build()); // TODO return OperationOutcome
+	}
+
+	protected MediaType getMediaTypeForRead(UriInfo uri, HttpHeaders headers)
+	{
+		return parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers);
 	}
 
 	/**
@@ -370,9 +375,13 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 			else if (ifModifiedSince.map(d -> resource.getMeta().getLastUpdated().after(d)).orElse(false))
 				return Response.notModified(resourceTag).lastModified(resource.getMeta().getLastUpdated()).build();
 			else
-				return responseGenerator.response(Status.OK, resource, parameterConverter.getMediaType(uri, headers))
-						.build();
+				return responseGenerator.response(Status.OK, resource, getMediaTypeForVRead(uri, headers)).build();
 		}).orElseGet(() -> Response.status(Status.NOT_FOUND).build()); // TODO return OperationOutcome
+	}
+
+	protected MediaType getMediaTypeForVRead(UriInfo uri, HttpHeaders headers)
+	{
+		return parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers);
 	}
 
 	@Override
@@ -424,7 +433,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 		URI location = toLocation(uri, updatedResource);
 
-		return responseGenerator.response(Status.OK, updatedResource, parameterConverter.getMediaType(uri, headers),
+		return responseGenerator.response(Status.OK, updatedResource, parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers),
 				parameterConverter.getPrefer(headers), () -> responseGenerator.updated(location, updatedResource))
 				.location(location).lastModified(updatedResource.getMeta().getLastUpdated())
 				.tag(new EntityTag(updatedResource.getMeta().getVersionId(), true)).build();
@@ -468,7 +477,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 			afterDelete.accept(id);
 
 		return responseGenerator.response(Status.OK, responseGenerator.resourceDeleted(resourceTypeName, id),
-				parameterConverter.getMediaType(uri, headers)).build();
+				parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
 	}
 
 	/**
@@ -521,7 +530,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		Bundle searchSet = responseGenerator.createSearchSet(result, errors, bundleUri, format, pretty);
 
 		return responseGenerator.response(Status.OK, referenceCleaner.cleanLiteralReferences(searchSet),
-				parameterConverter.getMediaType(uri, headers)).build();
+				parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
 	}
 
 	private PartialResult<R> filterIncludeResources(PartialResult<R> result)
@@ -678,10 +687,10 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		if (result.isSuccessful())
 			return responseGenerator.response(Status.OK,
 					createValidationOutcomeOk(result.getMessages(), Collections.singletonList(profileUri.getValue())),
-					parameterConverter.getMediaType(uri, headers)).build();
+					parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
 		else
 			return responseGenerator.response(Status.OK, createValidationOutcomeError(result.getMessages()),
-					parameterConverter.getMediaType(uri, headers)).build();
+					parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
 	}
 
 	@Override
@@ -710,10 +719,10 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 						createValidationOutcomeOk(result.getMessages(),
 								resource.getMeta().getProfile().stream().map(t -> t.getValue())
 										.collect(Collectors.toList())),
-						parameterConverter.getMediaType(uri, headers)).build();
+						parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
 			else
 				return responseGenerator.response(Status.OK, createValidationOutcomeError(result.getMessages()),
-						parameterConverter.getMediaType(uri, headers)).build();
+						parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
 		}
 		else if ("delete".equals(mode))
 			return Response.status(Status.METHOD_NOT_ALLOWED).build(); // TODO mode = delete

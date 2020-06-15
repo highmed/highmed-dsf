@@ -3,6 +3,7 @@ package org.highmed.dsf.fhir.webservice.impl;
 import java.io.InputStream;
 
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
@@ -43,5 +44,23 @@ public class BinaryServiceImpl extends AbstractResourceServiceImpl<BinaryDao, Bi
 	public Response update(String id, InputStream in, UriInfo uri, HttpHeaders headers)
 	{
 		throw new UnsupportedOperationException("Implemented and delegated by jaxrs layer");
+	}
+
+	@Override
+	protected MediaType getMediaTypeForRead(UriInfo uri, HttpHeaders headers)
+	{
+		return getMediaType(uri, headers);
+	}
+
+	@Override
+	protected MediaType getMediaTypeForVRead(UriInfo uri, HttpHeaders headers)
+	{
+		return getMediaType(uri, headers);
+	}
+
+	private MediaType getMediaType(UriInfo uri, HttpHeaders headers)
+	{
+		String accept = headers.getHeaderString(HttpHeaders.ACCEPT);
+		return parameterConverter.getMediaTypeIfSupported(uri, headers).orElse(MediaType.valueOf(accept));
 	}
 }

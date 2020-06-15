@@ -29,7 +29,7 @@ import ca.uhn.fhir.rest.api.Constants;
 public class ParameterConverter
 {
 	private static final Logger logger = LoggerFactory.getLogger(ParameterConverter.class);
-	
+
 	public static final String HTML_FORMAT = "html";
 	public static final String JSON_FORMAT = "json";
 	public static final List<String> JSON_FORMATS = Arrays.asList(Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW,
@@ -80,10 +80,13 @@ public class ParameterConverter
 		}
 	}
 
-	public MediaType getMediaType(UriInfo uri, HttpHeaders headers) throws WebApplicationException
+	public MediaType getMediaTypeThrowIfNotSupported(UriInfo uri, HttpHeaders headers) throws WebApplicationException
 	{
-		return getMediaTypeIfSupported(uri, headers)
-				.orElseThrow(() -> new WebApplicationException(Status.UNSUPPORTED_MEDIA_TYPE));
+		return getMediaTypeIfSupported(uri, headers).orElseThrow(() ->
+		{
+			logger.warn("Media type not supported");
+			return new WebApplicationException(Status.UNSUPPORTED_MEDIA_TYPE);
+		});
 	}
 
 	public Optional<MediaType> getMediaTypeIfSupported(UriInfo uri, HttpHeaders headers)
@@ -94,6 +97,7 @@ public class ParameterConverter
 
 		if (format == null || format.isBlank())
 			return getMediaType(accept, pretty);
+		
 		else if (XML_FORMATS.contains(format) || JSON_FORMATS.contains(format) || MediaType.TEXT_HTML.equals(format))
 			return getMediaType(format, pretty);
 		else if (XML_FORMAT.equals(format))
@@ -125,10 +129,7 @@ public class ParameterConverter
 		else if (mediaType.contains(MediaType.TEXT_XML))
 			return Optional.of(mediaType("text", "xml", pretty));
 		else
-		{
-			logger.debug("Media type '{}' not supported", mediaType);
 			return Optional.empty();
-		}
 	}
 
 	private MediaType mediaType(String type, String subtype, boolean pretty)
@@ -136,7 +137,7 @@ public class ParameterConverter
 		return new MediaType(type, subtype,
 				!pretty ? null : Map.of(AbstractFhirAdapter.PRETTY, String.valueOf(pretty)));
 	}
-	
+
 	public PreferReturnType getPrefer(HttpHeaders headers)
 	{
 		String prefer = headers.getHeaderString(Constants.HEADER_PREFER);

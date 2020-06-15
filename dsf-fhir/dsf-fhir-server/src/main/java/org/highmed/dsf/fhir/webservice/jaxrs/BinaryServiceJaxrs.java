@@ -3,6 +3,7 @@ package org.highmed.dsf.fhir.webservice.jaxrs;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -39,6 +40,8 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 
 	private static final Logger logger = LoggerFactory.getLogger(BinaryServiceJaxrs.class);
 
+	private final String[] FHIR_MEDIA_TYPES = { Constants.CT_FHIR_XML_NEW, Constants.CT_FHIR_JSON_NEW,
+			Constants.CT_FHIR_XML, Constants.CT_FHIR_JSON };
 	private final ParameterConverter parameterConverter;
 
 	public BinaryServiceJaxrs(BinaryService delegate, ParameterConverter parameterConverter)
@@ -127,9 +130,13 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 	{
 		List<String> accept = headers.getRequestHeader(HttpHeaders.ACCEPT);
 		if (accept.size() == 1)
-			return accept.get(0);
-		else
-			throw new WebApplicationException(Status.BAD_REQUEST);
+		{
+			String accept0 = accept.get(0);
+			if (accept0 != null && !accept0.isBlank())
+				return accept0;
+		}
+
+		throw new WebApplicationException(Status.BAD_REQUEST);
 	}
 
 	@GET
@@ -155,7 +162,10 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 	private boolean mediaTypeMatches(HttpHeaders headers, Binary binary)
 	{
 		String accept = getAccept(headers);
-		return Objects.equals(accept, binary.getContentType());
+		MediaType acceptMediaType = MediaType.valueOf(accept);
+		MediaType binaryMediaType = MediaType.valueOf(binary.getContentType());
+		boolean compatible = acceptMediaType.isCompatible(binaryMediaType);
+		return compatible;
 	}
 
 	private Response toStream(Binary binary)
@@ -205,7 +215,9 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 
 	private boolean isFhirRequest(UriInfo uri, HttpHeaders headers)
 	{
-		return parameterConverter.getMediaTypeIfSupported(uri, headers).isPresent();
+		String accept = headers.getHeaderString(HttpHeaders.ACCEPT);
+		return Arrays.stream(FHIR_MEDIA_TYPES).anyMatch(f -> f.equals(accept)) || parameterConverter
+				.getMediaTypeIfSupported(uri, headers).map(m -> !m.equals(MediaType.valueOf(accept))).orElse(false);
 	}
 
 	@PUT

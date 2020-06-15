@@ -114,7 +114,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 
 			OperationOutcome outcome = new OperationOutcome();
 			validationResult.populateOperationOutcome(outcome);
-			return responseGenerator.response(Status.FORBIDDEN, outcome, parameterConverter.getMediaType(uri, headers))
+			return responseGenerator.response(Status.FORBIDDEN, outcome, parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers))
 					.build();
 		}
 		else

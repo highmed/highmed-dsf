@@ -157,7 +157,7 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 	@Override
 	public Response getMetadata(String mode, UriInfo uri, HttpHeaders headers)
 	{
-		return Response.ok(capabilityStatement, parameterConverter.getMediaType(uri, headers)).build();
+		return Response.ok(capabilityStatement, parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
 	}
 
 	private String getVersion(BuildInfoReader buildInfoReader)
