@@ -80,7 +80,6 @@ public class DownloadResultSets extends AbstractServiceDelegate
 		{
 			logger.info("Reading binary from {} with id {}", client.getBaseUrl(), id);
 			return client.readBinary(id, MediaType.valueOf(Constants.OPENEHR_MIMETYPE_JSON));
-			// return client.read(Binary.class, id);
 		}
 		catch (Exception e)
 		{
