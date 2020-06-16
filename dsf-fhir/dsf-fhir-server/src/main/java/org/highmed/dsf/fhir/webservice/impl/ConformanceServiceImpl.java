@@ -3,9 +3,9 @@ package org.highmed.dsf.fhir.webservice.impl;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -82,6 +82,7 @@ import org.highmed.dsf.tools.build.BuildInfoReader;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementImplementationComponent;
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementKind;
@@ -119,6 +120,7 @@ import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionKind;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.UrlType;
@@ -128,22 +130,28 @@ import org.springframework.beans.factory.InitializingBean;
 
 import com.google.common.collect.Streams;
 
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.rest.api.Constants;
 
 public class ConformanceServiceImpl extends AbstractBasicService implements ConformanceService, InitializingBean
 {
-	private final CapabilityStatement capabilityStatement;
+	private final String serverBase;
+	private final int defaultPageCount;
+	private final BuildInfoReader buildInfoReader;
 	private final ParameterConverter parameterConverter;
+	private final IValidationSupport validationSupport;
 
 	public ConformanceServiceImpl(String path, String serverBase, int defaultPageCount, BuildInfoReader buildInfoReader,
-			ParameterConverter parameterConverter)
+			ParameterConverter parameterConverter, IValidationSupport validationSupport)
 	{
 		super(path);
 
-		capabilityStatement = createCapabilityStatement(serverBase, defaultPageCount,
-				buildInfoReader.getBuildDateAsDate(), getVersion(buildInfoReader));
+		this.serverBase = serverBase;
+		this.defaultPageCount = defaultPageCount;
+		this.buildInfoReader = buildInfoReader;
 		this.parameterConverter = parameterConverter;
+		this.validationSupport = validationSupport;
 	}
 
 	@Override
@@ -151,13 +159,16 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 	{
 		super.afterPropertiesSet();
 
+		Objects.requireNonNull(serverBase, "serverBase");
+		Objects.requireNonNull(buildInfoReader, "buildInfoReader");
 		Objects.requireNonNull(parameterConverter, "parameterConverter");
+		Objects.requireNonNull(validationSupport, "validationSupport");
 	}
 
 	@Override
 	public Response getMetadata(String mode, UriInfo uri, HttpHeaders headers)
 	{
-		return Response.ok(capabilityStatement, parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
+		return Response.ok(createCapabilityStatement(), parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
 	}
 
 	private String getVersion(BuildInfoReader buildInfoReader)
@@ -170,17 +181,16 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 		return version + " (" + branch + "/" + number + ")";
 	}
 
-	private CapabilityStatement createCapabilityStatement(String serverBase, int defaultPageCount, Date date,
-			String version)
+	private CapabilityStatement createCapabilityStatement()
 	{
 		CapabilityStatement statement = new CapabilityStatement();
 		statement.setStatus(PublicationStatus.ACTIVE);
-		statement.setDate(date);
+		statement.setDate(buildInfoReader.getBuildDateAsDate());
 		statement.setPublisher("HiGHmed");
 		statement.setKind(CapabilityStatementKind.INSTANCE);
 		statement.setSoftware(new CapabilityStatementSoftwareComponent());
 		statement.getSoftware().setName("HiGHmed DataSharing Framework");
-		statement.getSoftware().setVersion(version);
+		statement.getSoftware().setVersion(getVersion(buildInfoReader));
 		statement.setImplementation(new CapabilityStatementImplementationComponent());
 		// statement.getImplementation().setDescription("Implementation Description - TODO"); // TODO
 		statement.getImplementation().setUrl(serverBase);
@@ -266,6 +276,13 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 		var standardSortableSearchParameters = Arrays.asList(ResourceId.class, ResourceLastUpdated.class);
 		var standardOperations = Arrays.asList(createValidateOperation());
 
+		Map<String, List<CanonicalType>> profileUrlsByResource = validationSupport.fetchAllStructureDefinitions()
+				.stream().filter(r -> r instanceof StructureDefinition).map(r -> (StructureDefinition) r)
+				.filter(s -> StructureDefinitionKind.RESOURCE.equals(s.getKind()) && !s.getAbstract()
+						&& !s.getUrl().contains("hl7.org"))
+				.collect(Collectors.groupingBy(StructureDefinition::getType,
+						Collectors.mapping(s -> new CanonicalType(s.getUrl()), Collectors.toList())));
+
 		for (Class<? extends Resource> resource : resources)
 		{
 			CapabilityStatementRestResourceComponent r = rest.addResource();
@@ -324,7 +341,11 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 
 			operations.getOrDefault(resource, Collections.emptyList()).forEach(r::addOperation);
 			standardOperations.forEach(r::addOperation);
+
+			r.setSupportedProfile(
+					profileUrlsByResource.getOrDefault(resourceDefAnnotation.name(), Collections.emptyList()));
 		}
+
 		return statement;
 	}
 
