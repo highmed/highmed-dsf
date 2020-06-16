@@ -12,7 +12,7 @@
   <date value="2020-05-25" />
   <fhirVersion value="4.0.1" />
   <kind value="resource" />
-  <abstract value="false" />
+  <abstract value="true" />
   <type value="Task" />
   <baseDefinition value="http://hl7.org/fhir/StructureDefinition/Task" />
   <derivation value="constraint" />
