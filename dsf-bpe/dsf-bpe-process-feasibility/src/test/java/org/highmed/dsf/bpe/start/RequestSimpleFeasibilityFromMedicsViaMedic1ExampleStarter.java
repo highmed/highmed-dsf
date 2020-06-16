@@ -74,7 +74,7 @@ public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter
 			bundle.addEntry().setResource(task).setFullUrl(task.getIdElement().getIdPart()).getRequest()
 					.setMethod(HTTPVerb.POST).setUrl("Task");
 
-			client.postBundle(bundle);
+			client.withMinimalReturn().postBundle(bundle);
 		}
 		catch (WebApplicationException e)
 		{
@@ -112,7 +112,8 @@ public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter
 		ResearchStudy researchStudy = new ResearchStudy();
 		researchStudy.setIdElement(new IdType("urn:uuid:" + UUID.randomUUID().toString()));
 
-		researchStudy.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-research-study-feasibility");
+		researchStudy.getMeta()
+				.addProfile("http://highmed.org/fhir/StructureDefinition/highmed-research-study-feasibility");
 		researchStudy.addIdentifier().setSystem("http://highmed.org/fhir/NamingSystem/research-study-identifier")
 				.setValue(UUID.randomUUID().toString());
 		researchStudy.setStatus(ResearchStudyStatus.ACTIVE);
@@ -120,17 +121,25 @@ public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter
 		researchStudy.addEnrollment().setReference(group2.getIdElement().getIdPart());
 
 		researchStudy.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/participating-medic")
-				.setValue(new Reference().setType("Organization").setIdentifier(new Identifier()
-						.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_MeDIC_1")));
+				.setValue(new Reference().setType("Organization")
+						.setIdentifier(new Identifier()
+								.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
+								.setValue("Test_MeDIC_1")));
 		researchStudy.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/participating-medic")
-				.setValue(new Reference().setType("Organization").setIdentifier(new Identifier()
-						.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_MeDIC_2")));
+				.setValue(new Reference().setType("Organization")
+						.setIdentifier(new Identifier()
+								.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
+								.setValue("Test_MeDIC_2")));
 		researchStudy.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/participating-medic")
-				.setValue(new Reference().setType("Organization").setIdentifier(new Identifier()
-						.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_MeDIC_3")));
+				.setValue(new Reference().setType("Organization")
+						.setIdentifier(new Identifier()
+								.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
+								.setValue("Test_MeDIC_3")));
 		researchStudy.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/participating-ttp")
-				.setValue(new Reference().setType("Organization").setIdentifier(new Identifier()
-						.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_TTP")));
+				.setValue(new Reference().setType("Organization")
+						.setIdentifier(new Identifier()
+								.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
+								.setValue("Test_TTP")));
 
 		return researchStudy;
 	}

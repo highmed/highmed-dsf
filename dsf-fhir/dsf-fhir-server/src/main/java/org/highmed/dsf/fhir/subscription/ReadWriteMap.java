@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.event;
+package org.highmed.dsf.fhir.subscription;
 
 import java.util.HashMap;
 import java.util.Iterator;

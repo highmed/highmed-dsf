@@ -7,6 +7,8 @@ import java.util.Optional;
 
 import javax.ws.rs.WebApplicationException;
 
+import org.highmed.dsf.fhir.event.EventHandler;
+import org.highmed.dsf.fhir.service.SnapshotGenerator;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.IdType;
 
@@ -18,10 +20,17 @@ public interface Command
 
 	int getTransactionPriority();
 
-	void preExecute(Map<String, IdType> idTranslationTable, Connection connection);
+	default void preExecute(Map<String, IdType> idTranslationTable, Connection connection,
+			ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator)
 
-	void execute(Map<String, IdType> idTranslationTable, Connection connection)
-			throws SQLException, WebApplicationException;
+	{
+	}
 
-	Optional<BundleEntryComponent> postExecute(Connection connection);
+	void execute(Map<String, IdType> idTranslationTable, Connection connection, ValidationHelper validationHelper,
+			SnapshotGenerator snapshotGenerator) throws SQLException, WebApplicationException;
+
+	default Optional<BundleEntryComponent> postExecute(Connection connection, EventHandler eventHandler)
+	{
+		return Optional.empty();
+	}
 }

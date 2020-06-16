@@ -15,15 +15,15 @@ public class WebsocketConfig
 	private EventConfig eventConfig;
 
 	@Bean
-	public ServerEndpoint eventEndpoint()
+	public ServerEndpoint subscriptionEndpoint()
 	{
-		return new ServerEndpoint(eventConfig.eventManager());
+		return new ServerEndpoint(eventConfig.webSocketSubscriptionManager());
 	}
 
 	@Bean
-	public ServerEndpointRegistration eventEndpointRegistration()
+	public ServerEndpointRegistration subscriptionEndpointRegistration()
 	{
-		return new ServerEndpointRegistrationForAuthentication(ServerEndpoint.PATH, eventEndpoint());
+		return new ServerEndpointRegistrationForAuthentication(ServerEndpoint.PATH, subscriptionEndpoint());
 	}
 
 	@Bean

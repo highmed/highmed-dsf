@@ -20,6 +20,7 @@ import org.highmed.dsf.fhir.dao.ResourceDao;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
+import org.highmed.dsf.fhir.prefer.PreferReturnType;
 import org.highmed.dsf.fhir.search.PartialResult;
 import org.highmed.dsf.fhir.search.SearchQuery;
 import org.highmed.dsf.fhir.search.SearchQueryParameterError;
@@ -113,7 +114,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 
 			OperationOutcome outcome = new OperationOutcome();
 			validationResult.populateOperationOutcome(outcome);
-			return responseGenerator.response(Status.FORBIDDEN, outcome, parameterConverter.getMediaType(uri, headers))
+			return responseGenerator.response(Status.FORBIDDEN, outcome, parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers))
 					.build();
 		}
 		else
@@ -151,8 +152,9 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 				if (created.hasEntity() && !resourceType.isInstance(created.getEntity())
 						&& !(created.getEntity() instanceof OperationOutcome))
 					logger.warn("Update returned with entity of type {}", created.getEntity().getClass().getName());
-				else if (!created.hasEntity())
-					logger.info("Update returned with status {}, but no entity", created.getStatus());
+				else if (!created.hasEntity()
+						&& !PreferReturnType.MINIMAL.equals(parameterConverter.getPrefer(headers)))
+					logger.warn("Update returned with status {}, but no entity", created.getStatus());
 
 				return created;
 			});
@@ -308,8 +310,9 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 				if (updated.hasEntity() && !resourceType.isInstance(updated.getEntity())
 						&& !(updated.getEntity() instanceof OperationOutcome))
 					logger.warn("Update returned with entity of type {}", updated.getEntity().getClass().getName());
-				else if (!updated.hasEntity())
-					logger.info("Update returned with status {}, but no entity", updated.getStatus());
+				else if (!updated.hasEntity()
+						&& !PreferReturnType.MINIMAL.equals(parameterConverter.getPrefer(headers)))
+					logger.warn("Update returned with status {}, but no entity", updated.getStatus());
 
 				return updated;
 			});

@@ -1,7 +1,10 @@
 package org.highmed.fhir.client;
 
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+
+import javax.ws.rs.core.MediaType;
 
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
@@ -9,17 +12,13 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StructureDefinition;
 
-public interface FhirWebserviceClient
+public interface FhirWebserviceClient extends PreferReturnResource
 {
 	String getBaseUrl();
 
-	<R extends Resource> R create(R resource);
+	PreferReturnMinimal withMinimalReturn();
 
-	<R extends Resource> R createConditionaly(R resource, String ifNoneExistCriteria);
-
-	<R extends Resource> R update(R resource);
-
-	<R extends Resource> R updateConditionaly(R resource, Map<String, List<String>> criteria);
+	PreferReturnOutcome withOperationOutcomeReturn();
 
 	void delete(Class<? extends Resource> resourceClass, String id);
 
@@ -31,22 +30,41 @@ public interface FhirWebserviceClient
 
 	<R extends Resource> boolean exists(Class<R> resourceType, String id);
 
+	InputStream readBinary(String id, MediaType mediaType);
+
+	/**
+	 * @param resourceTypeName
+	 *            not <code>null</code>
+	 * @param id
+	 *            not <code>null</code>
+	 * @param version
+	 *            not <code>null</code>
+	 * @return {@link InputStream} needs to be closed
+	 */
 	Resource read(String resourceTypeName, String id, String version);
 
 	<R extends Resource> R read(Class<R> resourceType, String id, String version);
 
 	<R extends Resource> boolean exists(Class<R> resourceType, String id, String version);
 
+	/**
+	 * @param id
+	 *            not <code>null</code>
+	 * @param version
+	 *            not <code>null</code>
+	 * @param mediaType
+	 *            not <code>null</code>
+	 * @return {@link InputStream} needs to be closed
+	 */
+	InputStream readBinary(String id, String version, MediaType mediaType);
+
 	boolean exists(IdType resourceTypeIdVersion);
 
-	<R extends Resource> Bundle search(Class<R> resourceType, Map<String, List<String>> parameters);
+	Bundle search(Class<? extends Resource> resourceType, Map<String, List<String>> parameters);
 
 	CapabilityStatement getConformance();
 
 	StructureDefinition generateSnapshot(String url);
 
 	StructureDefinition generateSnapshot(StructureDefinition differential);
-
-	Bundle postBundle(Bundle bundle);
-
 }

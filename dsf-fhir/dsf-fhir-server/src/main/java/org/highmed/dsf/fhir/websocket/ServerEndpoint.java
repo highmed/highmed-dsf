@@ -22,7 +22,7 @@ import org.apache.commons.codec.binary.Hex;
 import org.highmed.dsf.fhir.authentication.NeedsAuthentication;
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.authentication.UserRole;
-import org.highmed.dsf.fhir.event.EventManager;
+import org.highmed.dsf.fhir.subscription.WebSocketSubscriptionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -39,17 +39,17 @@ public class ServerEndpoint extends Endpoint implements InitializingBean, NeedsA
 
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
 
-	private final EventManager eventManager;
+	private final WebSocketSubscriptionManager subscriptionManager;
 
-	public ServerEndpoint(EventManager eventManager)
+	public ServerEndpoint(WebSocketSubscriptionManager subscriptionManager)
 	{
-		this.eventManager = eventManager;
+		this.subscriptionManager = subscriptionManager;
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
-		Objects.requireNonNull(eventManager, "eventManager");
+		Objects.requireNonNull(subscriptionManager, "subscriptionManager");
 	}
 
 	@Override
@@ -90,7 +90,7 @@ public class ServerEndpoint extends Endpoint implements InitializingBean, NeedsA
 				if (message != null && !message.isBlank() && message.startsWith(BIND_MESSAGE_START))
 				{
 					logger.debug("Websocket bind message received: {}", message);
-					eventManager.bind(user, session.getId(), session.getAsyncRemote(),
+					subscriptionManager.bind(user, session.getId(), session.getAsyncRemote(),
 							message.substring(BIND_MESSAGE_START.length()));
 				}
 			}
@@ -149,7 +149,7 @@ public class ServerEndpoint extends Endpoint implements InitializingBean, NeedsA
 	public void onClose(Session session, CloseReason closeReason)
 	{
 		logger.debug("onClose " + session.getId());
-		eventManager.close(session.getId());
+		subscriptionManager.close(session.getId());
 
 		ScheduledFuture<?> pinger = (ScheduledFuture<?>) session.getUserProperties().get(PINGER_PROPERTY);
 		if (pinger != null)

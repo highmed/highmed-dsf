@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.function.Function;
 
 import javax.sql.DataSource;
 import javax.ws.rs.WebApplicationException;
@@ -16,6 +17,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.highmed.dsf.fhir.help.ExceptionHandler;
+import org.highmed.dsf.fhir.service.SnapshotGenerator;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
@@ -29,24 +31,22 @@ public class TransactionCommandList implements CommandList
 
 	private final DataSource dataSource;
 	private final ExceptionHandler exceptionHandler;
-	private final TransactionEventManager eventManager;
+	private final Function<Connection, TransactionResources> transactionResourceFactory;
 
 	private final List<Command> commands = new ArrayList<>();
 	private final boolean hasModifyingCommand;
 
-	public TransactionCommandList(DataSource dataSource, ExceptionHandler exceptionHandler, List<Command> commands,
-			TransactionEventManager eventManager)
+	public TransactionCommandList(DataSource dataSource, ExceptionHandler exceptionHandler,
+			Function<Connection, TransactionResources> transactionResourceFactory, List<Command> commands)
 	{
 		this.dataSource = dataSource;
 		this.exceptionHandler = exceptionHandler;
-		this.eventManager = eventManager;
+		this.transactionResourceFactory = transactionResourceFactory;
 
 		if (commands != null)
 			this.commands.addAll(commands);
-
 		Collections.sort(this.commands,
 				Comparator.comparing(Command::getTransactionPriority).thenComparing(Command::getIndex));
-
 		hasModifyingCommand = commands.stream()
 				.anyMatch(c -> c instanceof CreateCommand || c instanceof UpdateCommand || c instanceof DeleteCommand);
 	}
@@ -57,6 +57,7 @@ public class TransactionCommandList implements CommandList
 		Map<Integer, BundleEntryComponent> results = new HashMap<>((int) ((commands.size() / 0.75) + 1));
 		try
 		{
+			TransactionEventHandler transactionEventHandler;
 			try (Connection connection = dataSource.getConnection())
 			{
 				if (hasModifyingCommand)
@@ -66,6 +67,11 @@ public class TransactionCommandList implements CommandList
 					connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
 				}
 
+				TransactionResources transactionResources = transactionResourceFactory.apply(connection);
+				transactionEventHandler = transactionResources.getTransactionEventHandler();
+				ValidationHelper validationHelper = transactionResources.getValidationHelper();
+				SnapshotGenerator snapshotGenerator = transactionResources.getSnapshotGenerator();
+
 				Map<String, IdType> idTranslationTable = new HashMap<>();
 				for (Command c : commands)
 				{
@@ -73,7 +79,7 @@ public class TransactionCommandList implements CommandList
 					{
 						logger.debug("Running pre-execute of command {} for entry at index {}", c.getClass().getName(),
 								c.getIndex());
-						c.preExecute(idTranslationTable, connection);
+						c.preExecute(idTranslationTable, connection, validationHelper, snapshotGenerator);
 					}
 					catch (Exception e)
 					{
@@ -90,7 +96,7 @@ public class TransactionCommandList implements CommandList
 					{
 						logger.debug("Running execute of command {} for entry at index {}", c.getClass().getName(),
 								c.getIndex());
-						c.execute(idTranslationTable, connection);
+						c.execute(idTranslationTable, connection, validationHelper, snapshotGenerator);
 					}
 					catch (Exception e)
 					{
@@ -113,7 +119,7 @@ public class TransactionCommandList implements CommandList
 					{
 						logger.debug("Running post-execute of command {} for entry at index {}", c.getClass().getName(),
 								c.getIndex());
-						Optional<BundleEntryComponent> optResult = c.postExecute(connection);
+						Optional<BundleEntryComponent> optResult = c.postExecute(connection, transactionEventHandler);
 						optResult.ifPresent(result -> results.putIfAbsent(c.getIndex(), result));
 					}
 					catch (Exception e)
@@ -141,7 +147,7 @@ public class TransactionCommandList implements CommandList
 			try
 			{
 				logger.debug("Commiting events");
-				eventManager.commitEvents();
+				transactionEventHandler.commitEvents();
 			}
 			catch (Exception e)
 			{

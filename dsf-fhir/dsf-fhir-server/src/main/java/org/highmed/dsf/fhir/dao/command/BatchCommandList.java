@@ -15,7 +15,9 @@ import javax.sql.DataSource;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
+import org.highmed.dsf.fhir.event.EventHandler;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
+import org.highmed.dsf.fhir.service.SnapshotGenerator;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
@@ -30,13 +32,20 @@ public class BatchCommandList implements CommandList
 
 	private final DataSource dataSource;
 	private final ExceptionHandler exceptionHandler;
+	private final ValidationHelper validationHelper;
+	private final SnapshotGenerator snapshotGenerator;
+	private final EventHandler eventHandler;
 
 	private final List<Command> commands = new ArrayList<>();
 
-	public BatchCommandList(DataSource dataSource, ExceptionHandler exceptionHandler, List<Command> commands)
+	public BatchCommandList(DataSource dataSource, ExceptionHandler exceptionHandler, ValidationHelper validationHelper,
+			SnapshotGenerator snapshotGenerator, EventHandler eventHandler, List<Command> commands)
 	{
 		this.dataSource = dataSource;
 		this.exceptionHandler = exceptionHandler;
+		this.validationHelper = validationHelper;
+		this.snapshotGenerator = snapshotGenerator;
+		this.eventHandler = eventHandler;
 
 		if (commands != null)
 			this.commands.addAll(commands);
@@ -161,7 +170,7 @@ public class BatchCommandList implements CommandList
 				{
 					logger.debug("Running pre-execute of command {} for entry at index {}",
 							command.getClass().getName(), command.getIndex());
-					command.preExecute(idTranslationTable, connection);
+					command.preExecute(idTranslationTable, connection, validationHelper, snapshotGenerator);
 				}
 				else
 				{
@@ -191,7 +200,7 @@ public class BatchCommandList implements CommandList
 				{
 					logger.debug("Running execute of command {} for entry at index {}", command.getClass().getName(),
 							command.getIndex());
-					command.execute(idTranslationTable, connection);
+					command.execute(idTranslationTable, connection, validationHelper, snapshotGenerator);
 				}
 				else
 				{
@@ -239,7 +248,7 @@ public class BatchCommandList implements CommandList
 					logger.debug("Running post-execute of command {} for entry at index {}",
 							command.getClass().getName(), command.getIndex());
 
-					Optional<BundleEntryComponent> optResult = command.postExecute(connection);
+					Optional<BundleEntryComponent> optResult = command.postExecute(connection, eventHandler);
 					optResult.ifPresent(result -> results.put(command.getIndex(), result));
 				}
 				else
