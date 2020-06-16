@@ -52,6 +52,6 @@ public class UpdateWhitelist3MedicTtpExampleStarter
 		task.addInput().setValue(new StringType("updateWhitelistMessage")).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("message-name");
 
-		client.create(task);
+		client.withMinimalReturn().create(task);
 	}
 }

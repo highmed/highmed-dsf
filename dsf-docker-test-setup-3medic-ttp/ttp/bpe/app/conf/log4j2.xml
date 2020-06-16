@@ -34,15 +34,8 @@
 	</Appenders>
 
 	<Loggers>
-		<Logger name="org.highmed" level="TRACE"/>
-		<logger name="de.rwh" level="DEBUG"/>
-		<Logger name="org.apache" level="WARN"/>
-		<Logger name="org.springframework" level="WARN"/>
-		<Logger name="jndi" level="WARN"/>
+		<Logger name="org.highmed" level="DEBUG"/>
 		<Logger name="org.eclipse.jetty" level="INFO"/>
-		<Logger name="com.sun.jersey" level="WARN"/>
-		<Logger name="liquibase" level="WARN"/>
-		<Logger name="ca.uhn.hl7v2" level="WARN"/>
 
 		<!-- <Logger name="certificate-warning-logger" level="INFO">
 			<AppenderRef ref="MAIL_CERTIFICATE" />
@@ -50,7 +43,7 @@
 
 		<Root level="WARN">
 			<AppenderRef ref="CONSOLE" level="INFO"/>
-			<AppenderRef ref="FILE" level="TRACE"/>
+			<AppenderRef ref="FILE" level="DEBUG"/>
 			<!-- <AppenderRef ref="MAIL" /> -->
 		</Root>
 	</Loggers>

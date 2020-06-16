@@ -171,7 +171,7 @@ public class WebserviceConfig
 	@Bean
 	public BinaryService binaryService()
 	{
-		return new BinaryServiceJaxrs(binaryServiceSecure());
+		return new BinaryServiceJaxrs(binaryServiceSecure(), helperConfig.parameterConverter());
 	}
 
 	private BinaryServiceSecure binaryServiceSecure()

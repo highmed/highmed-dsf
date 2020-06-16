@@ -3,7 +3,7 @@ package org.highmed.dsf.fhir.webservice.impl;
 import org.highmed.dsf.fhir.authorization.AuthorizationRuleProvider;
 import org.highmed.dsf.fhir.dao.ActivityDefinitionDao;
 import org.highmed.dsf.fhir.event.EventGenerator;
-import org.highmed.dsf.fhir.event.EventManager;
+import org.highmed.dsf.fhir.event.EventHandler;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
@@ -18,13 +18,13 @@ public class ActivityDefinitionServiceImpl extends
 		AbstractResourceServiceImpl<ActivityDefinitionDao, ActivityDefinition> implements ActivityDefinitionService
 {
 	public ActivityDefinitionServiceImpl(String path, String serverBase, int defaultPageCount,
-			ActivityDefinitionDao dao, ResourceValidator validator, EventManager eventManager,
+			ActivityDefinitionDao dao, ResourceValidator validator, EventHandler eventHandler,
 			ExceptionHandler exceptionHandler, EventGenerator eventGenerator, ResponseGenerator responseGenerator,
 			ParameterConverter parameterConverter, ReferenceExtractor referenceExtractor,
 			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
 			AuthorizationRuleProvider authorizationRuleProvider)
 	{
-		super(path, ActivityDefinition.class, serverBase, defaultPageCount, dao, validator, eventManager,
+		super(path, ActivityDefinition.class, serverBase, defaultPageCount, dao, validator, eventHandler,
 				exceptionHandler, eventGenerator, responseGenerator, parameterConverter, referenceExtractor,
 				referenceResolver, referenceCleaner, authorizationRuleProvider);
 	}

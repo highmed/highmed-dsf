@@ -436,6 +436,37 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	}
 
 	@Override
+	public List<R> readAll() throws SQLException
+	{
+		try (Connection connection = getDataSource().getConnection())
+		{
+			return readAllWithTransaction(connection);
+		}
+	}
+
+	@Override
+	public List<R> readAllWithTransaction(Connection connection) throws SQLException
+	{
+		Objects.requireNonNull(connection, "connection");
+
+		try (PreparedStatement statement = connection
+				.prepareStatement("SELECT DISTINCT ON(" + getResourceIdColumn() + ") " + getResourceColumn() + " FROM "
+						+ getResourceTable() + " WHERE NOT deleted ORDER BY " + getResourceIdColumn() + ", version"))
+		{
+			logger.trace("Executing query '{}'", statement);
+			try (ResultSet result = statement.executeQuery())
+			{
+				List<R> all = new ArrayList<>();
+
+				while (result.next())
+					all.add(getResource(result, 1));
+
+				return all;
+			}
+		}
+	}
+
+	@Override
 	public boolean existsNotDeleted(String idString, String versionString) throws SQLException
 	{
 		return existsNotDeletedWithTransaction(dataSource.getConnection(), idString, versionString);

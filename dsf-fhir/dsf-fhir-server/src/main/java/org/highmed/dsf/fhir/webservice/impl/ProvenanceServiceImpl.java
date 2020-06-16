@@ -3,7 +3,7 @@ package org.highmed.dsf.fhir.webservice.impl;
 import org.highmed.dsf.fhir.authorization.AuthorizationRuleProvider;
 import org.highmed.dsf.fhir.dao.ProvenanceDao;
 import org.highmed.dsf.fhir.event.EventGenerator;
-import org.highmed.dsf.fhir.event.EventManager;
+import org.highmed.dsf.fhir.event.EventHandler;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
@@ -18,12 +18,12 @@ public class ProvenanceServiceImpl extends AbstractResourceServiceImpl<Provenanc
 		implements ProvenanceService
 {
 	public ProvenanceServiceImpl(String path, String serverBase, int defaultPageCount, ProvenanceDao dao,
-			ResourceValidator validator, EventManager eventManager, ExceptionHandler exceptionHandler,
+			ResourceValidator validator, EventHandler eventHandler, ExceptionHandler exceptionHandler,
 			EventGenerator eventGenerator, ResponseGenerator responseGenerator, ParameterConverter parameterConverter,
 			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver,
 			ReferenceCleaner referenceCleaner, AuthorizationRuleProvider authorizationRuleProvider)
 	{
-		super(path, Provenance.class, serverBase, defaultPageCount, dao, validator, eventManager, exceptionHandler,
+		super(path, Provenance.class, serverBase, defaultPageCount, dao, validator, eventHandler, exceptionHandler,
 				eventGenerator, responseGenerator, parameterConverter, referenceExtractor, referenceResolver,
 				referenceCleaner, authorizationRuleProvider);
 	}

@@ -17,13 +17,15 @@ import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.ResourceDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.event.EventGenerator;
-import org.highmed.dsf.fhir.event.EventManager;
+import org.highmed.dsf.fhir.event.EventHandler;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
+import org.highmed.dsf.fhir.prefer.PreferReturnType;
 import org.highmed.dsf.fhir.search.PartialResult;
 import org.highmed.dsf.fhir.search.SearchQuery;
 import org.highmed.dsf.fhir.search.SearchQueryParameterError;
+import org.highmed.dsf.fhir.service.SnapshotGenerator;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent;
@@ -43,7 +45,6 @@ public class DeleteCommand extends AbstractCommand implements Command
 	private final DaoProvider daoProvider;
 	private final ExceptionHandler exceptionHandler;
 	private final ParameterConverter parameterConverter;
-	private final EventManager eventManager;
 	private final EventGenerator eventGenerator;
 
 	private boolean deleted;
@@ -51,28 +52,29 @@ public class DeleteCommand extends AbstractCommand implements Command
 	private Class<? extends Resource> resourceType;
 	private String id;
 
-	public DeleteCommand(int index, User user, Bundle bundle, BundleEntryComponent entry, String serverBase,
-			AuthorizationHelper authorizationHelper, ResponseGenerator responseGenerator, DaoProvider daoProvider,
-			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter, EventManager eventManager,
+	public DeleteCommand(int index, User user, PreferReturnType returnType, Bundle bundle, BundleEntryComponent entry,
+			String serverBase, AuthorizationHelper authorizationHelper, ResponseGenerator responseGenerator,
+			DaoProvider daoProvider, ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
 			EventGenerator eventGenerator)
 	{
-		super(1, index, user, bundle, entry, serverBase, authorizationHelper);
+		super(1, index, user, returnType, bundle, entry, serverBase, authorizationHelper);
 
 		this.responseGenerator = responseGenerator;
 		this.daoProvider = daoProvider;
 		this.exceptionHandler = exceptionHandler;
 		this.parameterConverter = parameterConverter;
-		this.eventManager = eventManager;
 		this.eventGenerator = eventGenerator;
 	}
 
 	@Override
-	public void preExecute(Map<String, IdType> idTranslationTable, Connection connection)
+	public void preExecute(Map<String, IdType> idTranslationTable, Connection connection,
+			ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator)
 	{
 	}
 
 	@Override
-	public void execute(Map<String, IdType> idTranslationTable, Connection connection)
+	public void execute(Map<String, IdType> idTranslationTable, Connection connection,
+			ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator)
 			throws SQLException, WebApplicationException
 	{
 		UriComponents componentes = UriComponentsBuilder.fromUriString(entry.getRequest().getUrl()).build();
@@ -187,12 +189,12 @@ public class DeleteCommand extends AbstractCommand implements Command
 	}
 
 	@Override
-	public Optional<BundleEntryComponent> postExecute(Connection connection)
+	public Optional<BundleEntryComponent> postExecute(Connection connection, EventHandler eventHandler)
 	{
 		try
 		{
 			if (deleted)
-				eventManager.handleEvent(eventGenerator.newResourceDeletedEvent(resourceType, id));
+				eventHandler.handleEvent(eventGenerator.newResourceDeletedEvent(resourceType, id));
 		}
 		catch (Exception e)
 		{

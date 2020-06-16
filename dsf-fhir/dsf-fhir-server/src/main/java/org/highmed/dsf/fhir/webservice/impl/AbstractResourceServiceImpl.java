@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -32,7 +33,7 @@ import org.highmed.dsf.fhir.authorization.AuthorizationRule;
 import org.highmed.dsf.fhir.authorization.AuthorizationRuleProvider;
 import org.highmed.dsf.fhir.dao.ResourceDao;
 import org.highmed.dsf.fhir.event.EventGenerator;
-import org.highmed.dsf.fhir.event.EventManager;
+import org.highmed.dsf.fhir.event.EventHandler;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
@@ -85,7 +86,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	protected final int defaultPageCount;
 	protected final D dao;
 	protected final ResourceValidator validator;
-	protected final EventManager eventManager;
+	protected final EventHandler eventHandler;
 	protected final ExceptionHandler exceptionHandler;
 	protected final EventGenerator eventGenerator;
 	protected final ResponseGenerator responseGenerator;
@@ -96,7 +97,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	protected final AuthorizationRuleProvider authorizationRuleProvider;
 
 	public AbstractResourceServiceImpl(String path, Class<R> resourceType, String serverBase, int defaultPageCount,
-			D dao, ResourceValidator validator, EventManager eventManager, ExceptionHandler exceptionHandler,
+			D dao, ResourceValidator validator, EventHandler eventHandler, ExceptionHandler exceptionHandler,
 			EventGenerator eventGenerator, ResponseGenerator responseGenerator, ParameterConverter parameterConverter,
 			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver,
 			ReferenceCleaner referenceCleaner, AuthorizationRuleProvider authorizationRuleProvider)
@@ -109,7 +110,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		this.defaultPageCount = defaultPageCount;
 		this.dao = dao;
 		this.validator = validator;
-		this.eventManager = eventManager;
+		this.eventHandler = eventHandler;
 		this.exceptionHandler = exceptionHandler;
 		this.eventGenerator = eventGenerator;
 		this.responseGenerator = responseGenerator;
@@ -130,7 +131,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		Objects.requireNonNull(defaultPageCount, "defaultPageCount");
 		Objects.requireNonNull(dao, "dao");
 		Objects.requireNonNull(validator, "validator");
-		Objects.requireNonNull(eventManager, "eventManager");
+		Objects.requireNonNull(eventHandler, "eventHandler");
 		Objects.requireNonNull(exceptionHandler, "exceptionHandler");
 		Objects.requireNonNull(eventGenerator, "eventGenerator");
 		Objects.requireNonNull(responseGenerator, "responseGenerator");
@@ -155,7 +156,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 				try
 				{
 					resolveLogicalReferences(resource, connection);
-					
+
 					R created = dao.createWithTransactionAndId(connection, resource, UUID.randomUUID());
 
 					connection.commit();
@@ -172,18 +173,26 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 		referenceCleaner.cleanLiteralReferences(createdResource);
 
-		eventManager.handleEvent(eventGenerator.newResourceCreatedEvent(createdResource));
+		eventHandler.handleEvent(eventGenerator.newResourceCreatedEvent(createdResource));
 
 		if (afterCreate != null)
 			afterCreate.accept(createdResource);
 
-		URI location = uri.getAbsolutePathBuilder().path("/{id}/" + Constants.PARAM_HISTORY + "/{vid}")
-				.build(createdResource.getIdElement().getIdPart(), createdResource.getIdElement().getVersionIdPart());
+		URI location = toLocation(uri, createdResource);
 
 		return responseGenerator
-				.response(Status.CREATED, createdResource, parameterConverter.getMediaType(uri, headers))
+				.response(Status.CREATED, createdResource, parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers),
+						parameterConverter.getPrefer(headers),
+						() -> responseGenerator.created(location, createdResource))
 				.location(location).lastModified(createdResource.getMeta().getLastUpdated())
 				.tag(new EntityTag(createdResource.getMeta().getVersionId(), true)).build();
+	}
+
+	private URI toLocation(UriInfo uri, R resource)
+	{
+		return uri.getBaseUriBuilder().path(resource.getResourceType().name())
+				.path("/{id}/" + Constants.PARAM_HISTORY + "/{vid}")
+				.build(resource.getIdElement().getIdPart(), resource.getIdElement().getVersionIdPart());
 	}
 
 	private void resolveLogicalReferences(Resource resource, Connection connection) throws WebApplicationException
@@ -312,9 +321,13 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 			else if (ifModifiedSince.map(d -> resource.getMeta().getLastUpdated().after(d)).orElse(false))
 				return Response.notModified(resourceTag).lastModified(resource.getMeta().getLastUpdated()).build();
 			else
-				return responseGenerator.response(Status.OK, resource, parameterConverter.getMediaType(uri, headers))
-						.build();
+				return responseGenerator.response(Status.OK, resource, getMediaTypeForRead(uri, headers)).build();
 		}).orElseGet(() -> Response.status(Status.NOT_FOUND).build()); // TODO return OperationOutcome
+	}
+
+	protected MediaType getMediaTypeForRead(UriInfo uri, HttpHeaders headers)
+	{
+		return parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers);
 	}
 
 	/**
@@ -362,9 +375,13 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 			else if (ifModifiedSince.map(d -> resource.getMeta().getLastUpdated().after(d)).orElse(false))
 				return Response.notModified(resourceTag).lastModified(resource.getMeta().getLastUpdated()).build();
 			else
-				return responseGenerator.response(Status.OK, resource, parameterConverter.getMediaType(uri, headers))
-						.build();
+				return responseGenerator.response(Status.OK, resource, getMediaTypeForVRead(uri, headers)).build();
 		}).orElseGet(() -> Response.status(Status.NOT_FOUND).build()); // TODO return OperationOutcome
+	}
+
+	protected MediaType getMediaTypeForVRead(UriInfo uri, HttpHeaders headers)
+	{
+		return parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers);
 	}
 
 	@Override
@@ -390,10 +407,10 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 						try
 						{
 							resolveLogicalReferences(resource, connection);
-							
+
 							R updated = dao.update(resource, ifMatch.orElse(null));
 
-//							updated = resolveReferences(connection, updated);
+							// updated = resolveReferences(connection, updated);
 
 							connection.commit();
 
@@ -409,13 +426,17 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 		referenceCleaner.cleanLiteralReferences(updatedResource);
 
-		eventManager.handleEvent(eventGenerator.newResourceUpdatedEvent(updatedResource));
+		eventHandler.handleEvent(eventGenerator.newResourceUpdatedEvent(updatedResource));
 
 		if (afterUpdate != null)
 			afterUpdate.accept(updatedResource);
 
-		return responseGenerator.response(Status.OK, updatedResource, parameterConverter.getMediaType(uri, headers))
-				.build();
+		URI location = toLocation(uri, updatedResource);
+
+		return responseGenerator.response(Status.OK, updatedResource, parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers),
+				parameterConverter.getPrefer(headers), () -> responseGenerator.updated(location, updatedResource))
+				.location(location).lastModified(updatedResource.getMeta().getLastUpdated())
+				.tag(new EntityTag(updatedResource.getMeta().getVersionId(), true)).build();
 	}
 
 	/**
@@ -450,13 +471,13 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 				() -> dao.delete(parameterConverter.toUuid(resourceTypeName, id)));
 
 		if (deleted)
-			eventManager.handleEvent(eventGenerator.newResourceDeletedEvent(resourceType, id));
+			eventHandler.handleEvent(eventGenerator.newResourceDeletedEvent(resourceType, id));
 
 		if (afterDelete != null)
 			afterDelete.accept(id);
 
 		return responseGenerator.response(Status.OK, responseGenerator.resourceDeleted(resourceTypeName, id),
-				parameterConverter.getMediaType(uri, headers)).build();
+				parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
 	}
 
 	/**
@@ -509,7 +530,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		Bundle searchSet = responseGenerator.createSearchSet(result, errors, bundleUri, format, pretty);
 
 		return responseGenerator.response(Status.OK, referenceCleaner.cleanLiteralReferences(searchSet),
-				parameterConverter.getMediaType(uri, headers)).build();
+				parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
 	}
 
 	private PartialResult<R> filterIncludeResources(PartialResult<R> result)
@@ -666,10 +687,10 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		if (result.isSuccessful())
 			return responseGenerator.response(Status.OK,
 					createValidationOutcomeOk(result.getMessages(), Collections.singletonList(profileUri.getValue())),
-					parameterConverter.getMediaType(uri, headers)).build();
+					parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
 		else
 			return responseGenerator.response(Status.OK, createValidationOutcomeError(result.getMessages()),
-					parameterConverter.getMediaType(uri, headers)).build();
+					parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
 	}
 
 	@Override
@@ -698,10 +719,10 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 						createValidationOutcomeOk(result.getMessages(),
 								resource.getMeta().getProfile().stream().map(t -> t.getValue())
 										.collect(Collectors.toList())),
-						parameterConverter.getMediaType(uri, headers)).build();
+						parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
 			else
 				return responseGenerator.response(Status.OK, createValidationOutcomeError(result.getMessages()),
-						parameterConverter.getMediaType(uri, headers)).build();
+						parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
 		}
 		else if ("delete".equals(mode))
 			return Response.status(Status.METHOD_NOT_ALLOWED).build(); // TODO mode = delete

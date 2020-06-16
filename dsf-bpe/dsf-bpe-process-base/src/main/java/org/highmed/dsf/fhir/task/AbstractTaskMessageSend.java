@@ -171,7 +171,7 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 				client.getBaseUrl());
 		logger.trace("Task resource to send: {}", fhirContext.newJsonParser().encodeResourceToString(task));
 
-		client.create(task);
+		client.withMinimalReturn().create(task);
 	}
 
 	private FhirWebserviceClient getFhirClient(Task task, String targetOrganizationIdentifierValue)

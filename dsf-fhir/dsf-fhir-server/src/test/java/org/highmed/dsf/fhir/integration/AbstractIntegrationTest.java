@@ -93,7 +93,7 @@ public abstract class AbstractIntegrationTest
 
 	private static final Logger logger = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
-	protected static final String BASE_URL = "https://localhost:8001/fhir/";
+	protected static final String BASE_URL = "https://localhost:8001/fhir";
 	protected static final String WEBSOCKET_URL = "wss://localhost:8001/fhir/ws";
 
 	private static final Path FHIR_BUNDLE_FILE = Paths.get("target", UUID.randomUUID().toString() + ".xml");
@@ -134,8 +134,8 @@ public abstract class AbstractIntegrationTest
 	private static FhirWebserviceClient createWebserviceClient(KeyStore trustStore, KeyStore keyStore,
 			char[] keyStorePassword, FhirContext fhirContext, ReferenceCleaner referenceCleaner)
 	{
-		return new FhirWebserviceClientJersey(BASE_URL, trustStore, keyStore, keyStorePassword, null, null, null, 0,
-				0, null, fhirContext, referenceCleaner);
+		return new FhirWebserviceClientJersey(BASE_URL, trustStore, keyStore, keyStorePassword, null, null, null, 0, 0,
+				null, fhirContext, referenceCleaner);
 	}
 
 	private static WebsocketClient createWebsocketClient(KeyStore trustStore, KeyStore keyStore,
