@@ -66,6 +66,7 @@ import org.highmed.dsf.fhir.adapter.TaskJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.TaskXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.ValueSetJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.ValueSetXmlFhirAdapter;
+import org.highmed.dsf.fhir.prefer.PreferHandlingType;
 import org.highmed.dsf.fhir.prefer.PreferReturnType;
 import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.hl7.fhir.r4.model.Binary;
@@ -746,6 +747,30 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		}
 
 		Response response = target.request().accept(Constants.CT_FHIR_JSON_NEW).get();
+
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		if (Status.OK.getStatusCode() == response.getStatus())
+			// TODO remove workaround if HAPI bug fixed
+			return referenceCleaner.cleanReferenceResourcesIfBundle(response.readEntity(Bundle.class));
+		else
+			throw handleError(response);
+	}
+
+	@Override
+	public Bundle searchWithStrictHandling(Class<? extends Resource> resourceType, Map<String, List<String>> parameters)
+	{
+		Objects.requireNonNull(resourceType, "resourceType");
+
+		WebTarget target = getResource().path(resourceType.getAnnotation(ResourceDef.class).name());
+		if (parameters != null)
+		{
+			for (Entry<String, List<String>> entry : parameters.entrySet())
+				target = target.queryParam(entry.getKey(), entry.getValue().toArray());
+		}
+
+		Response response = target.request().header(Constants.HEADER_PREFER, PreferHandlingType.STRICT.getHeaderValue())
+				.accept(Constants.CT_FHIR_JSON_NEW).get();
 
 		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
 				response.getStatusInfo().getReasonPhrase());

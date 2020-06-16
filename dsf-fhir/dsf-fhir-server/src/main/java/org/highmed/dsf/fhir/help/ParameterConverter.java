@@ -20,6 +20,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import org.highmed.dsf.fhir.adapter.AbstractFhirAdapter;
+import org.highmed.dsf.fhir.prefer.PreferHandlingType;
 import org.highmed.dsf.fhir.prefer.PreferReturnType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,7 +98,7 @@ public class ParameterConverter
 
 		if (format == null || format.isBlank())
 			return getMediaType(accept, pretty);
-		
+
 		else if (XML_FORMATS.contains(format) || JSON_FORMATS.contains(format) || MediaType.TEXT_HTML.equals(format))
 			return getMediaType(format, pretty);
 		else if (XML_FORMAT.equals(format))
@@ -138,10 +139,26 @@ public class ParameterConverter
 				!pretty ? null : Map.of(AbstractFhirAdapter.PRETTY, String.valueOf(pretty)));
 	}
 
-	public PreferReturnType getPrefer(HttpHeaders headers)
+	public PreferReturnType getPreferReturn(HttpHeaders headers)
 	{
-		String prefer = headers.getHeaderString(Constants.HEADER_PREFER);
-		return PreferReturnType.fromString(prefer);
+		List<String> preferHeaders = headers.getRequestHeader(Constants.HEADER_PREFER);
+
+		if (preferHeaders == null)
+			return PreferReturnType.REPRESENTATION;
+		else
+			return preferHeaders.stream().map(PreferReturnType::fromString).findFirst()
+					.orElse(PreferReturnType.REPRESENTATION);
+	}
+
+	public PreferHandlingType getPreferHandling(HttpHeaders headers)
+	{
+		List<String> preferHeaders = headers.getRequestHeader(Constants.HEADER_PREFER);
+
+		if (preferHeaders == null)
+			return PreferHandlingType.LENIENT;
+		else
+			return preferHeaders.stream().map(PreferHandlingType::fromString).findFirst()
+					.orElse(PreferHandlingType.LENIENT);
 	}
 
 	public Integer getFirstInt(Map<String, List<String>> queryParameters, String key)

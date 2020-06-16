@@ -37,6 +37,7 @@ import org.highmed.dsf.fhir.event.EventHandler;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
+import org.highmed.dsf.fhir.prefer.PreferHandlingType;
 import org.highmed.dsf.fhir.search.PartialResult;
 import org.highmed.dsf.fhir.search.SearchQuery;
 import org.highmed.dsf.fhir.search.SearchQueryParameterError;
@@ -180,10 +181,9 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 		URI location = toLocation(uri, createdResource);
 
-		return responseGenerator
-				.response(Status.CREATED, createdResource, parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers),
-						parameterConverter.getPrefer(headers),
-						() -> responseGenerator.created(location, createdResource))
+		return responseGenerator.response(Status.CREATED, createdResource,
+				parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers),
+				parameterConverter.getPreferReturn(headers), () -> responseGenerator.created(location, createdResource))
 				.location(location).lastModified(createdResource.getMeta().getLastUpdated())
 				.tag(new EntityTag(createdResource.getMeta().getVersionId(), true)).build();
 	}
@@ -433,8 +433,10 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 		URI location = toLocation(uri, updatedResource);
 
-		return responseGenerator.response(Status.OK, updatedResource, parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers),
-				parameterConverter.getPrefer(headers), () -> responseGenerator.updated(location, updatedResource))
+		return responseGenerator
+				.response(Status.OK, updatedResource, parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers),
+						parameterConverter.getPreferReturn(headers),
+						() -> responseGenerator.updated(location, updatedResource))
 				.location(location).lastModified(updatedResource.getMeta().getLastUpdated())
 				.tag(new EntityTag(updatedResource.getMeta().getVersionId(), true)).build();
 	}
@@ -517,7 +519,11 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		SearchQuery<R> query = dao.createSearchQuery(getCurrentUser(), effectivePage, effectiveCount);
 		query.configureParameters(queryParameters);
 		List<SearchQueryParameterError> errors = query.getUnsupportedQueryParameters(queryParameters);
-		// TODO throw error if strict param handling is configured, include warning else
+
+		// if query parameter errors and client requests strict handling -> bad request outcome
+		if (!errors.isEmpty() && PreferHandlingType.STRICT.equals(parameterConverter.getPreferHandling(headers)))
+			return responseGenerator.response(Status.BAD_REQUEST, responseGenerator.toOperationOutcomeError(errors),
+					parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
 
 		PartialResult<R> result = exceptionHandler.handleSqlException(() -> dao.search(query));
 
