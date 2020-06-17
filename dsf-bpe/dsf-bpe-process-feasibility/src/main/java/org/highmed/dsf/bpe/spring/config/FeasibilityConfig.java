@@ -1,5 +1,7 @@
 package org.highmed.dsf.bpe.spring.config;
 
+import java.util.Iterator;
+
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
 import org.highmed.dsf.bpe.message.SendMedicRequest;
@@ -33,6 +35,7 @@ import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.openehr.client.OpenEhrWebserviceClientProvider;
 import org.highmed.mpi.client.MasterPatientIndexClient;
 import org.highmed.mpi.client.stub.MasterPatientIndexClientStub;
+import org.highmed.mpi.client.stub.MasterPatientIndexClientStubFactory;
 import org.highmed.pseudonymization.translation.ResultSetTranslatorFromMedicRbfOnly;
 import org.highmed.pseudonymization.translation.ResultSetTranslatorFromMedicRbfOnlyImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -158,7 +161,8 @@ public class FeasibilityConfig
 	public MasterPatientIndexClient masterPatientIndexClient()
 	{
 		// TODO IHE PDQ implementation
-		return new MasterPatientIndexClientStub();
+
+		return new MasterPatientIndexClientStubFactory().build(null);
 	}
 
 	@Bean
