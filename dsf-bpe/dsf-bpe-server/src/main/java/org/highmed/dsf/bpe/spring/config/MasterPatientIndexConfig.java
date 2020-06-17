@@ -1,16 +1,27 @@
 package org.highmed.dsf.bpe.spring.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.highmed.mpi.client.MasterPatientIndexClientFactory;
+import org.highmed.mpi.client.MasterPatientIndexClientServiceLoader;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 
 @Configuration
 public class MasterPatientIndexConfig
 {
-	@Value("${org.highmed.dsf.bpe.mpi.client.factory.class}")
+	@Value("${org.highmed.dsf.bpe.mpi.webservice.factory.class}")
 	private String masterPatientIndexClientFactoryClass;
 
-	@Autowired
-	private Environment environment;
+	@Bean
+	public MasterPatientIndexClientServiceLoader masterPatientIndexClientServiceLoader()
+	{
+		return new MasterPatientIndexClientServiceLoader();
+	}
+
+	@Bean
+	public MasterPatientIndexClientFactory masterPatientIndexClientFactory()
+	{
+		return masterPatientIndexClientServiceLoader()
+				.getMasterPatientIndexClientFactory(masterPatientIndexClientFactoryClass);
+	}
 }

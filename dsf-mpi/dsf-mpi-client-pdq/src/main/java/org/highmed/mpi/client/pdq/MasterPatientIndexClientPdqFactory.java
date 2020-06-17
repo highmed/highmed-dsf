@@ -14,9 +14,9 @@ import ca.uhn.hl7v2.util.SocketFactory;
 public class MasterPatientIndexClientPdqFactory implements MasterPatientIndexClientFactory
 {
 	@Override
-	public MasterPatientIndexClient build(Environment environment)
+	public MasterPatientIndexClient getWebserviceClient(Environment environment)
 	{
-		// TODO: read values from environment
+		// TODO: read values from environment with environment.getProperty()
 		String host = "161.42.236.185";
 		int port = 3750;
 

@@ -4,5 +4,5 @@ import org.springframework.core.env.Environment;
 
 public interface MasterPatientIndexClientFactory
 {
-	MasterPatientIndexClient build(Environment environment);
+	MasterPatientIndexClient getWebserviceClient(Environment environment);
 }

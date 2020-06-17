@@ -51,6 +51,18 @@
 		</dependency>
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
+			<artifactId>dsf-mpi-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.highmed.dsf</groupId>
+			<artifactId>dsf-mpi-client-pdq</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.highmed.dsf</groupId>
+			<artifactId>dsf-mpi-client-stub</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-tools-build-info-reader</artifactId>
 		</dependency>
 		<dependency>

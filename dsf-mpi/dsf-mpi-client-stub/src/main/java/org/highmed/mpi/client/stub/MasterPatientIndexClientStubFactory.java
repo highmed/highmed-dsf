@@ -7,7 +7,7 @@ import org.springframework.core.env.Environment;
 public class MasterPatientIndexClientStubFactory implements MasterPatientIndexClientFactory
 {
 	@Override
-	public MasterPatientIndexClient build(Environment environment)
+	public MasterPatientIndexClient getWebserviceClient(Environment environment)
 	{
 		return new MasterPatientIndexClientStub();
 	}
