@@ -60,7 +60,7 @@ public class UpdateWhitelist extends AbstractServiceDelegate implements Initiali
 	{
 		FhirWebserviceClient client = getFhirWebserviceClientProvider().getLocalWebserviceClient();
 
-		Bundle searchSet = client.search(Organization.class,
+		Bundle searchSet = client.searchWithStrictHandling(Organization.class,
 				Map.of("active", Collections.singletonList("true"), "identifier",
 						Collections.singletonList(organizationProvider.getDefaultIdentifierSystem() + "|"), "_include",
 						Collections.singletonList("Organization:endpoint")));

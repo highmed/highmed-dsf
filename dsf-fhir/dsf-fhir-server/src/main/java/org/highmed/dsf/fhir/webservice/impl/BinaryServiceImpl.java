@@ -1,6 +1,7 @@
 package org.highmed.dsf.fhir.webservice.impl;
 
 import java.io.InputStream;
+import java.util.List;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -20,6 +21,8 @@ import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.highmed.dsf.fhir.service.ResourceValidator;
 import org.highmed.dsf.fhir.webservice.specification.BinaryService;
 import org.hl7.fhir.r4.model.Binary;
+
+import ca.uhn.fhir.rest.api.Constants;
 
 public class BinaryServiceImpl extends AbstractResourceServiceImpl<BinaryDao, Binary> implements BinaryService
 {
@@ -49,18 +52,24 @@ public class BinaryServiceImpl extends AbstractResourceServiceImpl<BinaryDao, Bi
 	@Override
 	protected MediaType getMediaTypeForRead(UriInfo uri, HttpHeaders headers)
 	{
-		return getMediaType(uri, headers);
+		if (uri.getQueryParameters().containsKey(Constants.PARAM_FORMAT))
+			return super.getMediaTypeForRead(uri, headers);
+		else
+			return getMediaType(uri, headers);
 	}
 
 	@Override
 	protected MediaType getMediaTypeForVRead(UriInfo uri, HttpHeaders headers)
 	{
-		return getMediaType(uri, headers);
+		if (uri.getQueryParameters().containsKey(Constants.PARAM_FORMAT))
+			return super.getMediaTypeForVRead(uri, headers);
+		else
+			return getMediaType(uri, headers);
 	}
 
 	private MediaType getMediaType(UriInfo uri, HttpHeaders headers)
 	{
-		String accept = headers.getHeaderString(HttpHeaders.ACCEPT);
-		return parameterConverter.getMediaTypeIfSupported(uri, headers).orElse(MediaType.valueOf(accept));
+		List<MediaType> types = headers.getAcceptableMediaTypes();
+		return types == null ? null : types.get(0);
 	}
 }

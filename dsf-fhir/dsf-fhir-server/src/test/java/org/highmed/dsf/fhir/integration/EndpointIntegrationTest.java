@@ -10,6 +10,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response.Status;
+
 import org.highmed.dsf.fhir.dao.EndpointDao;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -18,6 +21,7 @@ import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Endpoint.EndpointStatus;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.Test;
@@ -37,7 +41,62 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 		Bundle searchBundle = getWebserviceClient().search(Endpoint.class, Collections.emptyMap());
 		assertNotNull(searchBundle);
 		assertEquals(2, searchBundle.getTotal());
-		assertTrue(searchBundle.getEntryFirstRep().getResource() instanceof Endpoint);
+
+		assertNotNull(searchBundle.getEntry());
+		assertEquals(2, searchBundle.getEntry().size());
+		assertNotNull(searchBundle.getEntry().get(0));
+		assertNotNull(searchBundle.getEntry().get(0).getResource());
+		assertTrue(searchBundle.getEntry().get(0).getResource() instanceof Endpoint);
+		assertNotNull(searchBundle.getEntry().get(0).getSearch());
+		assertEquals(SearchEntryMode.MATCH, searchBundle.getEntry().get(0).getSearch().getMode());
+
+		assertNotNull(searchBundle.getEntry().get(1));
+		assertNotNull(searchBundle.getEntry().get(1).getResource());
+		assertTrue(searchBundle.getEntry().get(1).getResource() instanceof Endpoint);
+		assertNotNull(searchBundle.getEntry().get(1).getSearch());
+		assertEquals(SearchEntryMode.MATCH, searchBundle.getEntry().get(1).getSearch().getMode());
+	}
+
+	@Test(expected = WebApplicationException.class)
+	public void testSearchWithUnsupportedQueryParameterStrictHandling() throws Exception
+	{
+		try
+		{
+			getWebserviceClient().searchWithStrictHandling(Endpoint.class,
+					Map.of("not-supported-parameter", Collections.singletonList("not-supported-parameter-value")));
+		}
+		catch (WebApplicationException e)
+		{
+			assertEquals(Status.BAD_REQUEST.getStatusCode(), e.getResponse().getStatus());
+			throw e;
+		}
+	}
+
+	@Test
+	public void testSearchWithUnsupportedQueryParameterLenientHandling() throws Exception
+	{
+		Bundle searchBundle = getWebserviceClient().search(Endpoint.class,
+				Map.of("not-supported-parameter", Collections.singletonList("not-supported-parameter-value")));
+
+		assertNotNull(searchBundle.getEntry());
+		assertEquals(3, searchBundle.getEntry().size());
+		assertNotNull(searchBundle.getEntry().get(0));
+		assertNotNull(searchBundle.getEntry().get(0).getResource());
+		assertTrue(searchBundle.getEntry().get(0).getResource() instanceof Endpoint);
+		assertNotNull(searchBundle.getEntry().get(0).getSearch());
+		assertEquals(SearchEntryMode.MATCH, searchBundle.getEntry().get(0).getSearch().getMode());
+
+		assertNotNull(searchBundle.getEntry().get(1));
+		assertNotNull(searchBundle.getEntry().get(1).getResource());
+		assertTrue(searchBundle.getEntry().get(1).getResource() instanceof Endpoint);
+		assertNotNull(searchBundle.getEntry().get(1).getSearch());
+		assertEquals(SearchEntryMode.MATCH, searchBundle.getEntry().get(1).getSearch().getMode());
+
+		assertNotNull(searchBundle.getEntry().get(2));
+		assertNotNull(searchBundle.getEntry().get(2).getResource());
+		assertTrue(searchBundle.getEntry().get(2).getResource() instanceof OperationOutcome);
+		assertNotNull(searchBundle.getEntry().get(2).getSearch());
+		assertEquals(SearchEntryMode.OUTCOME, searchBundle.getEntry().get(2).getSearch().getMode());
 	}
 
 	@Test

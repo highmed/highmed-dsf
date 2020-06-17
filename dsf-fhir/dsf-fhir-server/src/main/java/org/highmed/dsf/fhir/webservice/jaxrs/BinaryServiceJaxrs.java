@@ -94,48 +94,53 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 
 	private String getSecurityContext(HttpHeaders headers)
 	{
-		List<String> securityContexts = headers.getRequestHeader(Constants.HEADER_X_SECURITY_CONTEXT);
-		if (securityContexts.size() == 1)
-			return securityContexts.get(0);
-		else if (securityContexts.size() > 1)
-			throw new WebApplicationException(Status.BAD_REQUEST);
-
-		securityContexts = headers.getRequestHeader(Constants.HEADER_X_SECURITY_CONTEXT.toLowerCase());
-		if (securityContexts.size() == 1)
-			return securityContexts.get(0);
-		else if (securityContexts.size() > 1)
-			throw new WebApplicationException(Status.BAD_REQUEST);
-
-		throw new WebApplicationException(Status.BAD_REQUEST);
+		return getHeaderValueOrThrowBadRequest(headers, Constants.HEADER_X_SECURITY_CONTEXT);
 	}
 
 	private String getContentType(HttpHeaders headers)
 	{
-		List<String> contentType = headers.getRequestHeader(HttpHeaders.CONTENT_TYPE);
-		if (contentType.size() == 1)
-			return contentType.get(0);
-		else if (contentType.size() > 1)
-			throw new WebApplicationException(Status.BAD_REQUEST);
-
-		contentType = headers.getRequestHeader(HttpHeaders.CONTENT_TYPE.toLowerCase());
-		if (contentType.size() == 1)
-			return contentType.get(0);
-		else if (contentType.size() > 1)
-			throw new WebApplicationException(Status.BAD_REQUEST);
-
-		throw new WebApplicationException(Status.BAD_REQUEST);
+		return getHeaderValueOrThrowBadRequest(headers, HttpHeaders.CONTENT_TYPE);
 	}
 
-	private String getAccept(HttpHeaders headers)
+	private String getHeaderValueOrThrowBadRequest(HttpHeaders headers, String header)
 	{
-		List<String> accept = headers.getRequestHeader(HttpHeaders.ACCEPT);
-		if (accept.size() == 1)
+		List<String> headerValue = headers.getRequestHeader(header);
+		if (headerValue != null && headerValue.size() == 1)
 		{
-			String accept0 = accept.get(0);
-			if (accept0 != null && !accept0.isBlank())
-				return accept0;
+			String hV0 = headerValue.get(0);
+			if (hV0 != null && !hV0.isBlank())
+				return hV0;
+			else
+			{
+				logger.warn("{} header found, no value, sending {}", header, Status.BAD_REQUEST);
+				throw new WebApplicationException(Status.BAD_REQUEST);
+			}
+		}
+		else if (headerValue != null && headerValue.size() > 1)
+		{
+			logger.warn("{} header found, more than one value, sending {}", header, Status.BAD_REQUEST);
+			throw new WebApplicationException(Status.BAD_REQUEST);
 		}
 
+		headerValue = headers.getRequestHeader(header.toLowerCase());
+		if (headerValue != null && headerValue.size() == 1)
+		{
+			String hV0 = headerValue.get(0);
+			if (hV0 != null && !hV0.isBlank())
+				return hV0;
+			else
+			{
+				logger.warn("{} header found, no value, sending {}", header, Status.BAD_REQUEST);
+				throw new WebApplicationException(Status.BAD_REQUEST);
+			}
+		}
+		else if (headerValue != null && headerValue.size() > 1)
+		{
+			logger.warn("{} header found, more than one value, sending {}", header, Status.BAD_REQUEST);
+			throw new WebApplicationException(Status.BAD_REQUEST);
+		}
+
+		logger.warn("{} header not found, sending {}", header, Status.BAD_REQUEST);
 		throw new WebApplicationException(Status.BAD_REQUEST);
 	}
 
@@ -147,7 +152,7 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 	{
 		Response read = super.read(id, uri, headers);
 
-		if (read.getEntity() instanceof Binary && !isFhirRequest(uri, headers))
+		if (read.getEntity() instanceof Binary && !isValidFhirRequest(uri, headers))
 		{
 			Binary binary = (Binary) read.getEntity();
 			if (mediaTypeMatches(headers, binary))
@@ -161,11 +166,9 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 
 	private boolean mediaTypeMatches(HttpHeaders headers, Binary binary)
 	{
-		String accept = getAccept(headers);
-		MediaType acceptMediaType = MediaType.valueOf(accept);
 		MediaType binaryMediaType = MediaType.valueOf(binary.getContentType());
-		boolean compatible = acceptMediaType.isCompatible(binaryMediaType);
-		return compatible;
+		return headers.getAcceptableMediaTypes() != null && headers.getAcceptableMediaTypes().stream()
+				.anyMatch(acceptType -> acceptType.isCompatible(binaryMediaType));
 	}
 
 	private Response toStream(Binary binary)
@@ -201,7 +204,7 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 	{
 		Response read = super.vread(id, version, uri, headers);
 
-		if (read.getEntity() instanceof Binary && !isFhirRequest(uri, headers))
+		if (read.getEntity() instanceof Binary && !isValidFhirRequest(uri, headers))
 		{
 			Binary binary = (Binary) read.getEntity();
 			if (mediaTypeMatches(headers, binary))
@@ -213,11 +216,22 @@ public class BinaryServiceJaxrs extends AbstractResourceServiceJaxrs<Binary, Bin
 			return read;
 	}
 
-	private boolean isFhirRequest(UriInfo uri, HttpHeaders headers)
+	private boolean isValidFhirRequest(UriInfo uri, HttpHeaders headers)
 	{
-		String accept = headers.getHeaderString(HttpHeaders.ACCEPT);
-		return Arrays.stream(FHIR_MEDIA_TYPES).anyMatch(f -> f.equals(accept)) || parameterConverter
-				.getMediaTypeIfSupported(uri, headers).map(m -> !m.equals(MediaType.valueOf(accept))).orElse(false);
+		// _format parameter override present and valid
+		if (uri.getQueryParameters().containsKey(Constants.PARAM_FORMAT))
+		{
+			parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers);
+			return true;
+		}
+		else
+		{
+			List<MediaType> types = headers.getAcceptableMediaTypes();
+			MediaType accept = types == null ? null : types.get(0);
+
+			// accept header is FHIR mime-type
+			return Arrays.stream(FHIR_MEDIA_TYPES).anyMatch(f -> f.equals(accept.toString()));
+		}
 	}
 
 	@PUT

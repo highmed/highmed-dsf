@@ -161,7 +161,7 @@ public class ResponseGenerator
 		result.getIncludes().stream().map(r -> toBundleEntryComponent(r, SearchEntryMode.INCLUDE))
 				.forEach(bundle::addEntry);
 		if (!errors.isEmpty())
-			bundle.addEntry(toBundleEntryComponent(toOperationOutcome(errors), SearchEntryMode.OUTCOME));
+			bundle.addEntry(toBundleEntryComponent(toOperationOutcomeWarning(errors), SearchEntryMode.OUTCOME));
 
 		bundle.setTotal(result.getOverallCount());
 
@@ -208,10 +208,20 @@ public class ResponseGenerator
 		return bundle;
 	}
 
-	public OperationOutcome toOperationOutcome(List<SearchQueryParameterError> errors)
+	public OperationOutcome toOperationOutcomeWarning(List<SearchQueryParameterError> errors)
+	{
+		return toOperationOutcome(errors, IssueSeverity.WARNING);
+	}
+
+	public OperationOutcome toOperationOutcomeError(List<SearchQueryParameterError> errors)
+	{
+		return toOperationOutcome(errors, IssueSeverity.ERROR);
+	}
+
+	private OperationOutcome toOperationOutcome(List<SearchQueryParameterError> errors, IssueSeverity severity)
 	{
 		String diagnostics = errors.stream().map(SearchQueryParameterError::toString).collect(Collectors.joining("; "));
-		return createOutcome(IssueSeverity.WARNING, IssueType.PROCESSING, diagnostics);
+		return createOutcome(severity, IssueType.PROCESSING, diagnostics);
 	}
 
 	public Response pathVsElementId(String resourceTypeName, String id, IdType resourceId)

@@ -62,6 +62,8 @@ public interface FhirWebserviceClient extends PreferReturnResource
 
 	Bundle search(Class<? extends Resource> resourceType, Map<String, List<String>> parameters);
 
+	Bundle searchWithStrictHandling(Class<? extends Resource> resourceType, Map<String, List<String>> parameters);
+
 	CapabilityStatement getConformance();
 
 	StructureDefinition generateSnapshot(String url);

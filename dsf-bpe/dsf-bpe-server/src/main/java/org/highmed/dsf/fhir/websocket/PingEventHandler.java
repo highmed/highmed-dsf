@@ -74,7 +74,7 @@ public class PingEventHandler implements InitializingBean
 		queryParams.put(PARAM_PAGE, Arrays.asList("1"));
 		queryParams.put(PARAM_SORT, Arrays.asList(PARAM_LAST_UPDATE));
 
-		Bundle bundle = webserviceClient.search(Task.class, queryParams);
+		Bundle bundle = webserviceClient.searchWithStrictHandling(Task.class, queryParams);
 		lastEventTimeIo.writeLastEventTime(LocalDateTime.now());
 
 		if (bundle.getTotal() <= 0)

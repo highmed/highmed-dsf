@@ -153,7 +153,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 						&& !(created.getEntity() instanceof OperationOutcome))
 					logger.warn("Update returned with entity of type {}", created.getEntity().getClass().getName());
 				else if (!created.hasEntity()
-						&& !PreferReturnType.MINIMAL.equals(parameterConverter.getPrefer(headers)))
+						&& !PreferReturnType.MINIMAL.equals(parameterConverter.getPreferReturn(headers)))
 					logger.warn("Update returned with status {}, but no entity", created.getStatus());
 
 				return created;
@@ -311,7 +311,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 						&& !(updated.getEntity() instanceof OperationOutcome))
 					logger.warn("Update returned with entity of type {}", updated.getEntity().getClass().getName());
 				else if (!updated.hasEntity()
-						&& !PreferReturnType.MINIMAL.equals(parameterConverter.getPrefer(headers)))
+						&& !PreferReturnType.MINIMAL.equals(parameterConverter.getPreferReturn(headers)))
 					logger.warn("Update returned with status {}, but no entity", updated.getStatus());
 
 				return updated;

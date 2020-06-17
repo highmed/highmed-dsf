@@ -68,7 +68,7 @@ public class RootServiceImpl extends AbstractBasicService implements RootService
 		referenceCleaner.cleanReferenceResourcesIfBundle(bundle);
 
 		CommandList commands = exceptionHandler.handleBadBundleException(
-				() -> commandFactory.createCommands(bundle, getCurrentUser(), parameterConverter.getPrefer(headers)));
+				() -> commandFactory.createCommands(bundle, getCurrentUser(), parameterConverter.getPreferReturn(headers)));
 
 		Bundle result = commands.execute(); // throws WebApplicationException
 

@@ -365,7 +365,7 @@ public abstract class AbstractIntegrationTest
 
 	protected static WebsocketClient getWebsocketClient()
 	{
-		Bundle bundle = getWebserviceClient().search(Subscription.class,
+		Bundle bundle = getWebserviceClient().searchWithStrictHandling(Subscription.class,
 				Map.of("criteria", Collections.singletonList("Task?status=requested"), "status",
 						Collections.singletonList("active"), "type", Collections.singletonList("websocket"), "payload",
 						Collections.singletonList("application/fhir+json")));
