@@ -24,6 +24,7 @@
 			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-pseudonymization-ttp</artifactId>
 		</dependency>
+
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-mpi-client</artifactId>
@@ -31,6 +32,10 @@
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-mpi-client-pdq</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.highmed.dsf</groupId>
+			<artifactId>dsf-mpi-client-stub</artifactId>
 		</dependency>
 
 		<dependency>

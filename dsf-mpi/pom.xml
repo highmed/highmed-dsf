@@ -15,6 +15,7 @@
 
 	<modules>
 		<module>dsf-mpi-client</module>
+		<module>dsf-mpi-client-stub</module>
 		<module>dsf-mpi-client-pdq</module>
 	</modules>
 
