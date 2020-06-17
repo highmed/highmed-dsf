@@ -75,7 +75,7 @@ public class OrganizationProviderImpl implements OrganizationProvider, Initializ
 
 	private Stream<Organization> searchForOrganizations(String identifierValue)
 	{
-		Bundle resultSet = clientProvider.getLocalWebserviceClient().search(Organization.class,
+		Bundle resultSet = clientProvider.getLocalWebserviceClient().searchWithStrictHandling(Organization.class,
 				Map.of("active", Collections.singletonList("true"), "identifier",
 						Collections.singletonList(identifierValue)));
 
@@ -112,7 +112,7 @@ public class OrganizationProviderImpl implements OrganizationProvider, Initializ
 	@Override
 	public Stream<Organization> getOrganizationsByType(String type)
 	{
-		Bundle resultSet = clientProvider.getLocalWebserviceClient().search(Organization.class,
+		Bundle resultSet = clientProvider.getLocalWebserviceClient().searchWithStrictHandling(Organization.class,
 				Map.of("active", Collections.singletonList("true"), "type",
 						Collections.singletonList(getDefaultTypeSystem() + "|" + type)));
 

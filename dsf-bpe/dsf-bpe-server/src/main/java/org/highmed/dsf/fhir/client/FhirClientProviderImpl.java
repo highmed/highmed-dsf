@@ -172,7 +172,7 @@ public class FhirClientProviderImpl
 
 	private Endpoint searchForEndpoint(String searchParameter, String searchParameterValue)
 	{
-		Bundle resultSet = getLocalWebserviceClient().search(Organization.class,
+		Bundle resultSet = getLocalWebserviceClient().searchWithStrictHandling(Organization.class,
 				Map.of(searchParameter, Collections.singletonList(searchParameterValue), "_include",
 						Collections.singletonList("Organization:endpoint")));
 
