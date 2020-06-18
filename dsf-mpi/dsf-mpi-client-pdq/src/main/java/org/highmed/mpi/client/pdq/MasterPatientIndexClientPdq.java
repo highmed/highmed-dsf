@@ -32,7 +32,7 @@ public class MasterPatientIndexClientPdq extends AbstractHl7v2Client implements 
 
 	private final MessageHelper messageHelper;
 
-	public MasterPatientIndexClientPdq(String host, int port, String senderApplication, String senderFacility,
+	protected MasterPatientIndexClientPdq(String host, int port, String senderApplication, String senderFacility,
 			String receiverApplication, String receiverFacility, String pidAssigningAuthorityNamespaceId,
 			String pidAssigningAuthorityUniversalId, MessageHelper messageHelper, HapiContext context,
 			SocketFactory socketFactory)

@@ -11,17 +11,20 @@ public class MasterPatientIndexClientServiceLoader
 
 	public MasterPatientIndexClientFactory getMasterPatientIndexClientFactory(String factoryClassName)
 	{
-		ServiceLoader<MasterPatientIndexClientFactory> factories = ServiceLoader.load(MasterPatientIndexClientFactory.class);
-		
-		factories.forEach(f -> System.out.println("factory loaded: " + f.getClass().getName()));
+		ServiceLoader<MasterPatientIndexClientFactory> factories = ServiceLoader
+				.load(MasterPatientIndexClientFactory.class);
 
-		for(MasterPatientIndexClientFactory factory : factories)
+		factories.forEach(f -> logger.debug("Found master patient index client factory with classname='{}'",
+				f.getClass().getName()));
+
+		for (MasterPatientIndexClientFactory factory : factories)
 		{
 			if (factory.getClass().getName().equals(factoryClassName))
-				return factory;
+				logger.debug("Using master patient index client factory with classname='{}'", factoryClassName);
+			return factory;
 		}
 
-		logger.warn("Could not load master patient index client factory with classname='{}'", factoryClassName);
+		logger.warn("Did not find any master patient index client factory with classname='{}'", factoryClassName);
 		return null;
 	}
 }

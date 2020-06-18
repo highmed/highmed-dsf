@@ -107,7 +107,7 @@ public class MasterPatientIndexClientStub implements MasterPatientIndexClient
 
 	private final Map<String, Idat> patients = new HashMap<>();
 
-	public MasterPatientIndexClientStub()
+	protected MasterPatientIndexClientStub()
 	{
 		patients.put("0",
 				new IdatImpl("medicId-0", "Bodomar", "Backer", "12.03.1910", "M", "Mühlenbergstraße 121", "25840",
