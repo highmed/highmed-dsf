@@ -2,8 +2,6 @@ package org.highmed.mpi.client;
 
 import java.util.Properties;
 
-import org.highmed.mpi.client.pdq.MasterPatientIndexClientPdqFactory;
-
 public class MpiRunner
 {
 	public static void main(String[] args)
@@ -23,7 +21,9 @@ public class MpiRunner
 		properties.put("org.highmed.dsf.bpe.mpi.pdq.assigningAuthority.namespaceId", "SAP-ISH");
 		properties.put("org.highmed.dsf.bpe.mpi.pdq.assigningAuthority.universalId", "1.2.276.0.76.3.1.78.1.0.10.1.101.1");
 
-		MasterPatientIndexClient mpiClient = new MasterPatientIndexClientPdqFactory().getWebserviceClient(properties);
+		MasterPatientIndexClientFactory masterPatientIndexClientFactory = new MasterPatientIndexClientServiceLoader()
+				.getMasterPatientIndexClientFactory("org.highmed.mpi.client.pdq.MasterPatientIndexClientPdqFactory");
+		MasterPatientIndexClient mpiClient = masterPatientIndexClientFactory.getWebserviceClient(properties);
 
 		Idat idat = mpiClient.fetchIdat("0002036518");
 		System.out.println(idat.toString());
