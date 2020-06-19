@@ -15,7 +15,7 @@ import ca.uhn.hl7v2.util.SocketFactory;
 public class MasterPatientIndexClientPdqFactory implements MasterPatientIndexClientFactory
 {
 	@Override
-	public MasterPatientIndexClient getWebserviceClient(Function<String, String> propertyResolver)
+	public MasterPatientIndexClient createWebserviceClient(Function<String, String> propertyResolver)
 	{
 		String host = propertyResolver.apply("org.highmed.dsf.bpe.mpi.pdq.webservice.host");
 		int port = Integer.parseInt(propertyResolver.apply("org.highmed.dsf.bpe.mpi.pdq.webservice.port"));

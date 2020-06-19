@@ -8,7 +8,7 @@ import org.highmed.mpi.client.MasterPatientIndexClientFactory;
 public class MasterPatientIndexClientStubFactory implements MasterPatientIndexClientFactory
 {
 	@Override
-	public MasterPatientIndexClient getWebserviceClient(Function<String, String> propertyResolver)
+	public MasterPatientIndexClient createWebserviceClient(Function<String, String> propertyResolver)
 	{
 		return new MasterPatientIndexClientStub();
 	}
