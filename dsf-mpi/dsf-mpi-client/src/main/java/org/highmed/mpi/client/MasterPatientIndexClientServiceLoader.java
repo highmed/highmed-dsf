@@ -20,8 +20,10 @@ public class MasterPatientIndexClientServiceLoader
 		for (MasterPatientIndexClientFactory factory : factories)
 		{
 			if (factory.getClass().getName().equals(factoryClassName))
+			{
 				logger.debug("Using master patient index client factory with classname='{}'", factoryClassName);
-			return factory;
+				return factory;
+			}
 		}
 
 		logger.warn("Did not find any master patient index client factory with classname='{}'", factoryClassName);

@@ -45,7 +45,7 @@ public class TaskProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			Arrays.asList("highmed-task-base-0.2.0.xml", "highmed-task-start-process-0.2.0.xml",
+			Arrays.asList("highmed-task-base-0.2.0.xml", "highmed-task-start-ping-process-0.2.0.xml",
 					"highmed-task-ping-0.2.0.xml", "highmed-task-pong-0.2.0.xml",
 					"highmed-task-update-whitelist-0.2.0.xml", "highmed-task-request-update-resources-0.2.0.xml",
 					"highmed-task-execute-update-resources-0.2.0.xml", "highmed-group-0.2.0.xml",
@@ -138,7 +138,7 @@ public class TaskProfileTest
 	private Task createValidTaskStartProcess()
 	{
 		Task task = new Task();
-		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-process");
+		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-ping-process");
 		task.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.2.0");
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
@@ -148,7 +148,7 @@ public class TaskProfileTest
 		task.getRestriction().addRecipient().setType("Organization").getIdentifier()
 				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_TTP");
 
-		task.addInput().setValue(new StringType("startProcessMessage")).getType().addCoding()
+		task.addInput().setValue(new StringType("startPingProcessMessage")).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("message-name");
 
 		return task;

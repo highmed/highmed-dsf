@@ -19,10 +19,11 @@ import org.hl7.fhir.r4.model.Task.TaskIntent;
 import org.hl7.fhir.r4.model.Task.TaskStatus;
 
 import ca.uhn.fhir.context.FhirContext;
+
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.CertificateReader;
 
-public class Ping3MedicFromTtpExampleStarter
+public class PluginSubprocessExampleStarter
 {
 	public static void main(String[] args)
 			throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException
@@ -35,21 +36,21 @@ public class Ping3MedicFromTtpExampleStarter
 
 		FhirContext context = FhirContext.forR4();
 		ReferenceCleaner referenceCleaner = new ReferenceCleanerImpl(new ReferenceExtractorImpl());
-		FhirWebserviceClient client = new FhirWebserviceClientJersey("https://ttp/fhir/", trustStore, keyStore,
+		FhirWebserviceClient client = new FhirWebserviceClientJersey("https://medic1/fhir/", trustStore, keyStore,
 				keyStorePassword, null, null, null, 0, 0, null, context, referenceCleaner);
 
 		Task task = new Task();
-		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-ping-process");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.2.0");
+		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-parent-plugin");
+		task.setInstantiatesUri("http://highmed.org/bpe/Process/parentPlugin/0.2.0");
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
 		task.getRequester().setType("Organization").getIdentifier()
 				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_TTP");
 		task.getRestriction().addRecipient().setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_TTP");
+				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_MeDIC_1");
 
-		task.addInput().setValue(new StringType("startPingProcessMessage")).getType().addCoding()
+		task.addInput().setValue(new StringType("parentPluginMessage")).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("message-name");
 
 		client.create(task);
