@@ -9,9 +9,6 @@ import org.highmed.mpi.client.MasterPatientIndexClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Replace with IHE PDQ client implementation
- */
 public class MasterPatientIndexClientStub implements MasterPatientIndexClient
 {
 	private static final Logger logger = LoggerFactory.getLogger(MasterPatientIndexClientStub.IdatImpl.class);

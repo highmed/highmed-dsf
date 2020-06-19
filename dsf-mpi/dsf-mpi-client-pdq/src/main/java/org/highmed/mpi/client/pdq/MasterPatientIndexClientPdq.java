@@ -10,7 +10,6 @@ import org.highmed.mpi.client.message.QueryParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.hl7v2.HL7Exception;
 import ca.uhn.hl7v2.HapiContext;
 import ca.uhn.hl7v2.model.v25.message.QBP_Q21;
 import ca.uhn.hl7v2.model.v25.message.RSP_K21;
@@ -60,7 +59,7 @@ public class MasterPatientIndexClientPdq extends AbstractHl7v2Client implements 
 
 		try
 		{
-			QBP_Q21 request = messageHelper.getPatientDemographicsQuery(senderApplication, senderFacility,
+			QBP_Q21 request = messageHelper.createPatientDemographicsQuery(senderApplication, senderFacility,
 					receiverApplication, receiverFacility, searchParameters);
 
 			RSP_K21 response = (RSP_K21) send(port, request);

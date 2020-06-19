@@ -1,12 +1,8 @@
 package org.highmed.mpi.client;
 
-import java.util.Properties;
-
-import org.springframework.core.env.Environment;
+import java.util.function.Function;
 
 public interface MasterPatientIndexClientFactory
 {
-	MasterPatientIndexClient getWebserviceClient(Environment environment);
-
-	MasterPatientIndexClient getWebserviceClient(Properties properties);
+	MasterPatientIndexClient getWebserviceClient(Function<String, String> propertyResolver);
 }

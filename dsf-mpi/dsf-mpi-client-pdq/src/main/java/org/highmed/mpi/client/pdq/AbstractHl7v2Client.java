@@ -45,9 +45,18 @@ public abstract class AbstractHl7v2Client
 		String destination = host + ":" + port;
 		logger.debug("Sending message of type {} to {}", messageType, destination);
 
-		Connection connection = context.newClient(host, port, useTLS);
-		Message response = connection.getInitiator().sendAndReceive(request);
-		connection.close();
+		Connection connection = null;
+		Message response = null;
+		try
+		{
+			connection = context.newClient(host, port, useTLS);
+			response = connection.getInitiator().sendAndReceive(request);
+		}
+		finally
+		{
+			if(connection != null)
+				connection.close();
+		}
 
 		return response;
 	}

@@ -1,5 +1,7 @@
 package org.highmed.dsf.bpe.spring.config;
 
+import java.util.NoSuchElementException;
+
 import org.highmed.mpi.client.MasterPatientIndexClientFactory;
 import org.highmed.mpi.client.MasterPatientIndexClientServiceLoader;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +24,8 @@ public class MasterPatientIndexConfig
 	public MasterPatientIndexClientFactory masterPatientIndexClientFactory()
 	{
 		return masterPatientIndexClientServiceLoader()
-				.getMasterPatientIndexClientFactory(masterPatientIndexClientFactoryClass);
+				.getMasterPatientIndexClientFactory(masterPatientIndexClientFactoryClass)
+				.orElseThrow(() -> new NoSuchElementException("Master patient index client factory with classname='"
+						+ masterPatientIndexClientFactoryClass+ "' not found"));
 	}
 }

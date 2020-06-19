@@ -31,7 +31,7 @@ public class MessageHelper
 {
 	private static final Logger logger = LoggerFactory.getLogger(MessageHelper.class);
 
-	public QBP_Q21 getPatientDemographicsQuery(String senderApplication, String senderFacility,
+	public QBP_Q21 createPatientDemographicsQuery(String senderApplication, String senderFacility,
 		String receiverApplication, String receiverFacility, List<QueryParameter> searchParameters) throws HL7Exception
 	{
 		QBP_Q21 qbp_q21 = new QBP_Q21();
