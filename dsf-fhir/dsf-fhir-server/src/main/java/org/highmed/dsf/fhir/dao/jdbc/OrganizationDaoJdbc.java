@@ -157,5 +157,4 @@ public class OrganizationDaoJdbc extends AbstractResourceDaoJdbc<Organization> i
 			}
 		}
 	}
-
 }

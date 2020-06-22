@@ -27,7 +27,7 @@ public class CodeSystemDaoJdbc extends AbstractResourceDaoJdbc<CodeSystem> imple
 				with());
 
 		readByUrl = new ReadByUrlDaoJdbc<>(this::getDataSource, this::getResource, getResourceTable(),
-				getResourceColumn(), getResourceIdColumn());
+				getResourceColumn());
 	}
 
 	@Override

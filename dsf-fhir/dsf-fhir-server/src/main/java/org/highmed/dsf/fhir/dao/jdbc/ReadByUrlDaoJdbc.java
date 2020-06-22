@@ -24,17 +24,15 @@ class ReadByUrlDaoJdbc<R extends DomainResource>
 
 	private final String resourceTable;
 	private final String resourceColumn;
-	private final String resourceIdColumn;
 
 	ReadByUrlDaoJdbc(Supplier<DataSource> dataSourceSupplier,
 			BiFunctionWithSqlException<ResultSet, Integer, R> resourceExtractor, String resourceTable,
-			String resourceColumn, String resourceIdColumn)
+			String resourceColumn)
 	{
 		this.dataSourceSupplier = dataSourceSupplier;
 		this.resourceExtractor = resourceExtractor;
 		this.resourceTable = resourceTable;
 		this.resourceColumn = resourceColumn;
-		this.resourceIdColumn = resourceIdColumn;
 	}
 
 	/**
@@ -107,9 +105,8 @@ class ReadByUrlDaoJdbc<R extends DomainResource>
 			return Optional.empty();
 
 		String versionSql = version != null && !version.isBlank() ? "AND " + resourceColumn + "->>'version' = ? " : "";
-		String sql = "SELECT DISTINCT ON(" + resourceIdColumn + ") " + resourceColumn + " FROM " + resourceTable
-				+ " WHERE NOT deleted AND " + resourceColumn + "->>'url' = ? " + versionSql + "ORDER BY "
-				+ resourceIdColumn + ", version LIMIT 1";
+		String sql = "SELECT " + resourceColumn + " FROM current_" + resourceTable + " WHERE " + resourceColumn
+				+ "->>'url' = ? " + versionSql;
 
 		try (PreparedStatement statement = connection.prepareStatement(sql))
 		{

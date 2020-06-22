@@ -34,7 +34,7 @@ abstract class AbstractStructureDefinitionDaoJdbc extends AbstractResourceDaoJdb
 				with());
 
 		readByUrl = new ReadByUrlDaoJdbc<StructureDefinition>(this::getDataSource, this::getResource, resourceTable,
-				resourceColumn, resourceIdColumn);
+				resourceColumn);
 	}
 
 	@Override

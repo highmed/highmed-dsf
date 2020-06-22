@@ -1,12 +1,10 @@
 package org.highmed.dsf.fhir.dao;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -52,6 +50,11 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 
 	protected abstract C createDao(BasicDataSource dataSource, FhirContext fhirContext);
 
+	protected C getDao()
+	{
+		return dao;
+	}
+	
 	@Test
 	public void testEmpty() throws Exception
 	{
@@ -108,16 +111,27 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 
 		D createdResource = dao.create(newResource);
 		assertNotNull(createdResource);
-		assertNotNull(createdResource.getId());
+		assertNotNull(createdResource.getIdElement());
+		assertNotNull(createdResource.getIdElement().getIdPart());
+		assertNotNull(createdResource.getIdElement().getVersionIdPart());
+		assertEquals(ResourceDao.FIRST_VERSION_STRING, createdResource.getIdElement().getVersionIdPart());
+		assertNotNull(createdResource.getMeta());
 		assertNotNull(createdResource.getMeta().getVersionId());
+		assertEquals(ResourceDao.FIRST_VERSION_STRING, createdResource.getMeta().getVersionId());
 
 		newResource.setIdElement(createdResource.getIdElement().copy());
 		newResource.setMeta(createdResource.getMeta().copy());
-
 		assertTrue(newResource.equalsDeep(createdResource));
 
-		D updatedResource = dao.update(updateResource(createdResource), null);
+		D updatedResource = dao.update(updateResource(createdResource), (long) ResourceDao.FIRST_VERSION);
 		assertNotNull(updatedResource);
+		assertNotNull(updatedResource.getIdElement());
+		assertNotNull(updatedResource.getIdElement().getIdPart());
+		assertNotNull(updatedResource.getIdElement().getVersionIdPart());
+		assertEquals(String.valueOf(ResourceDao.FIRST_VERSION + 1), updatedResource.getIdElement().getVersionIdPart());
+		assertNotNull(updatedResource.getMeta());
+		assertNotNull(updatedResource.getMeta().getVersionId());
+		assertEquals(String.valueOf(ResourceDao.FIRST_VERSION + 1), updatedResource.getMeta().getVersionId());
 
 		checkUpdates(updatedResource);
 	}
@@ -173,6 +187,43 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 		assertNotNull(updatedResource);
 	}
 
+	@Test
+	public void testUpdateDeleted() throws Exception
+	{
+		D newResource = createResource();
+		assertNull(newResource.getId());
+		assertNull(newResource.getMeta().getVersionId());
+
+		D createdResource = dao.create(newResource);
+		assertNotNull(createdResource);
+		assertNotNull(createdResource.getIdElement());
+		assertNotNull(createdResource.getIdElement().getIdPart());
+		assertNotNull(createdResource.getIdElement().getVersionIdPart());
+		assertEquals(ResourceDao.FIRST_VERSION_STRING, createdResource.getIdElement().getVersionIdPart());
+		assertNotNull(createdResource.getMeta());
+		assertNotNull(createdResource.getMeta().getVersionId());
+		assertEquals(ResourceDao.FIRST_VERSION_STRING, createdResource.getMeta().getVersionId());
+
+		newResource.setIdElement(createdResource.getIdElement().copy());
+		newResource.setMeta(createdResource.getMeta().copy());
+		assertTrue(newResource.equalsDeep(createdResource));
+
+		boolean deleted = dao.delete(UUID.fromString(createdResource.getIdElement().getIdPart()));
+		assertTrue(deleted);
+
+		D updatedResource = dao.update(updateResource(createdResource), (long) ResourceDao.FIRST_VERSION + 1L);
+		assertNotNull(updatedResource);
+		assertNotNull(updatedResource.getIdElement());
+		assertNotNull(updatedResource.getIdElement().getIdPart());
+		assertNotNull(updatedResource.getIdElement().getVersionIdPart());
+		assertEquals(String.valueOf(ResourceDao.FIRST_VERSION + 2), updatedResource.getIdElement().getVersionIdPart());
+		assertNotNull(updatedResource.getMeta());
+		assertNotNull(updatedResource.getMeta().getVersionId());
+		assertEquals(String.valueOf(ResourceDao.FIRST_VERSION + 2), updatedResource.getMeta().getVersionId());
+
+		checkUpdates(updatedResource);
+	}
+
 	protected abstract void checkUpdates(D resource);
 
 	@Test(expected = ResourceDeletedException.class)
@@ -198,6 +249,33 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 		dao.delete(UUID.fromString(createdResource.getIdElement().getIdPart()));
 
 		dao.read(UUID.fromString(createdResource.getIdElement().getIdPart()));
+	}
+
+	@Test
+	public void testReadIncludingDeleted() throws Exception
+	{
+		D newResource = createResource();
+		assertNull(newResource.getId());
+		assertNull(newResource.getMeta().getVersionId());
+
+		D createdResource = dao.create(newResource);
+		assertNotNull(createdResource);
+		assertNotNull(createdResource.getId());
+		assertNotNull(createdResource.getMeta().getVersionId());
+
+		newResource.setIdElement(createdResource.getIdElement().copy());
+		newResource.setMeta(createdResource.getMeta().copy());
+
+		assertTrue(newResource.equalsDeep(createdResource));
+
+		Optional<D> read = dao.read(UUID.fromString(createdResource.getIdElement().getIdPart()));
+		assertTrue(read.isPresent());
+
+		boolean d = dao.delete(UUID.fromString(createdResource.getIdElement().getIdPart()));
+		assertTrue(d);
+
+		Optional<D> deleted = dao.readIncludingDeleted(UUID.fromString(createdResource.getIdElement().getIdPart()));
+		assertTrue(deleted.isPresent());
 	}
 
 	@Test
@@ -247,6 +325,52 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 		String s1 = fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(newResource);
 		String s2 = fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(read.get());
 		assertTrue(s1 + "\nvs\n" + s2, newResource.equalsDeep(read.get()));
+	}
+
+	@Test
+	public void testReadAll() throws Exception
+	{
+		D newResource = createResource();
+		assertNull(newResource.getId());
+		assertNull(newResource.getMeta().getVersionId());
+
+		D createdResource = dao.create(newResource);
+		assertNotNull(createdResource);
+		assertNotNull(createdResource.getIdElement());
+		assertNotNull(createdResource.getIdElement().getIdPart());
+		assertNotNull(createdResource.getIdElement().getVersionIdPart());
+		assertEquals(ResourceDao.FIRST_VERSION_STRING, createdResource.getIdElement().getVersionIdPart());
+		assertNotNull(createdResource.getMeta());
+		assertNotNull(createdResource.getMeta().getVersionId());
+		assertEquals(ResourceDao.FIRST_VERSION_STRING, createdResource.getMeta().getVersionId());
+
+		newResource.setIdElement(createdResource.getIdElement().copy());
+		newResource.setMeta(createdResource.getMeta().copy());
+		assertTrue(newResource.equalsDeep(createdResource));
+
+		D updatedResource = dao.update(updateResource(createdResource), (long) ResourceDao.FIRST_VERSION);
+		assertNotNull(updatedResource);
+		assertNotNull(updatedResource.getIdElement());
+		assertNotNull(updatedResource.getIdElement().getIdPart());
+		assertNotNull(updatedResource.getIdElement().getVersionIdPart());
+		assertEquals(String.valueOf(ResourceDao.FIRST_VERSION + 1), updatedResource.getIdElement().getVersionIdPart());
+		assertNotNull(updatedResource.getMeta());
+		assertNotNull(updatedResource.getMeta().getVersionId());
+		assertEquals(String.valueOf(ResourceDao.FIRST_VERSION + 1), updatedResource.getMeta().getVersionId());
+
+		checkUpdates(updatedResource);
+
+		List<D> all = dao.readAll();
+		assertNotNull(all);
+		assertEquals(1, all.size());
+		assertNotNull(all.get(0));
+		assertNotNull(all.get(0).getIdElement());
+		assertNotNull(all.get(0).getIdElement().getIdPart());
+		assertNotNull(all.get(0).getIdElement().getVersionIdPart());
+		assertEquals(String.valueOf(ResourceDao.FIRST_VERSION + 1), all.get(0).getIdElement().getVersionIdPart());
+		assertNotNull(all.get(0).getMeta());
+		assertNotNull(all.get(0).getMeta().getVersionId());
+		assertEquals(String.valueOf(ResourceDao.FIRST_VERSION + 1), all.get(0).getMeta().getVersionId());
 	}
 
 	@Test
@@ -339,5 +463,41 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 		connection.setAutoCommit(false);
 
 		return connection;
+	}
+
+	@Test
+	public void testExistsNotDeletedNotExisting() throws Exception
+	{
+		boolean existsNotDeleted = dao.existsNotDeleted(UUID.randomUUID().toString(), "1");
+		assertFalse(existsNotDeleted);
+	}
+
+	@Test
+	public void testExistsNotDeletedExisting() throws Exception
+	{
+		D newResource = createResource();
+		D createdResource = dao.create(newResource);
+
+		boolean existsNotDeleted1 = dao.existsNotDeleted(createdResource.getIdElement().getIdPart(), null);
+		assertTrue(existsNotDeleted1);
+
+		boolean existsNotDeleted2 = dao.existsNotDeleted(createdResource.getIdElement().getIdPart(),
+				createdResource.getIdElement().getVersionIdPart());
+		assertTrue(existsNotDeleted2);
+	}
+
+	@Test
+	public void testExistsNotDeletedDeleted() throws Exception
+	{
+		D newResource = createResource();
+		D createdResource = dao.create(newResource);
+		dao.delete(UUID.fromString(createdResource.getIdElement().getIdPart()));
+
+		boolean existsNotDeleted1 = dao.existsNotDeleted(createdResource.getIdElement().getIdPart(), null);
+		assertFalse(existsNotDeleted1);
+
+		boolean existsNotDeleted2 = dao.existsNotDeleted(createdResource.getIdElement().getIdPart(),
+				createdResource.getIdElement().getVersionIdPart());
+		assertFalse(existsNotDeleted2);
 	}
 }

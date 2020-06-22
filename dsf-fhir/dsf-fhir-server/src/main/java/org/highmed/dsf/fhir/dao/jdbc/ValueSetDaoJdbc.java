@@ -26,7 +26,7 @@ public class ValueSetDaoJdbc extends AbstractResourceDaoJdbc<ValueSet> implement
 				with(ValueSetIdentifier::new, ValueSetStatus::new, ValueSetUrl::new, ValueSetVersion::new), with());
 
 		readByUrl = new ReadByUrlDaoJdbc<>(this::getDataSource, this::getResource, getResourceTable(),
-				getResourceColumn(), getResourceIdColumn());
+				getResourceColumn());
 	}
 
 	@Override
