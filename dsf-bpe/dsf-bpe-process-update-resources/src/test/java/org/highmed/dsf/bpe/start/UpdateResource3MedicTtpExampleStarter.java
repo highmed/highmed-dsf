@@ -43,7 +43,7 @@ public class UpdateResource3MedicTtpExampleStarter
 		FhirWebserviceClient client = new FhirWebserviceClientJersey("https://ttp/fhir/", trustStore, keyStore,
 				keyStorePassword, null, null, null, 0, 0, null, context, referenceCleaner);
 
-		Bundle searchResult = client.search(Bundle.class, Map.of("identifier",
+		Bundle searchResult = client.searchWithStrictHandling(Bundle.class, Map.of("identifier",
 				Collections.singletonList("http://highmed.org/fhir/CodeSystem/update-whitelist|highmed_whitelist")));
 		if (searchResult.getTotal() != 1 && searchResult.getEntryFirstRep().getResource() instanceof Bundle)
 			throw new IllegalStateException("Expected a single White-List Bundle");
@@ -75,6 +75,6 @@ public class UpdateResource3MedicTtpExampleStarter
 				.getType().addCoding().setSystem("http://highmed.org/fhir/CodeSystem/update-resources")
 				.setCode("organization-identifier-search-parameter");
 
-		client.create(task);
+		client.withMinimalReturn().create(task);
 	}
 }

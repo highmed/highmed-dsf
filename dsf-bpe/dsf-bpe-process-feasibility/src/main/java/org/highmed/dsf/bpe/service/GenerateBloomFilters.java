@@ -137,9 +137,9 @@ public class GenerateBloomFilters extends AbstractServiceDelegate
 		Binary binary = new Binary().setContentType(Constants.OPENEHR_MIMETYPE_JSON).setSecurityContext(securityContext)
 				.setData(content);
 
-		Binary created = createBinaryResource(binary);
-		return new IdType(getFhirWebserviceClientProvider().getLocalBaseUrl(), "Binary",
-				created.getIdElement().getIdPart(), created.getIdElement().getVersionIdPart()).getValue();
+		IdType created = createBinaryResource(binary);
+		return new IdType(getFhirWebserviceClientProvider().getLocalBaseUrl(), "Binary", created.getIdPart(),
+				created.getVersionIdPart()).getValue();
 	}
 
 	private byte[] serializeResultSet(ResultSet resultSet)
@@ -155,11 +155,11 @@ public class GenerateBloomFilters extends AbstractServiceDelegate
 		}
 	}
 
-	private Binary createBinaryResource(Binary binary)
+	private IdType createBinaryResource(Binary binary)
 	{
 		try
 		{
-			return getFhirWebserviceClientProvider().getLocalWebserviceClient().create(binary);
+			return getFhirWebserviceClientProvider().getLocalWebserviceClient().withMinimalReturn().create(binary);
 		}
 		catch (Exception e)
 		{

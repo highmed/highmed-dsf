@@ -15,15 +15,8 @@
 			<AppenderRef ref="AUDIT"/>
 		</Logger>
 		
-		<Logger name="de.rwh" level="TRACE"/>
 		<Logger name="org.highmed" level="TRACE"/>
-		<Logger name="org.apache" level="WARN"/>
-		<Logger name="org.springframework" level="WARN"/>
-		<Logger name="jndi" level="WARN"/>
 		<Logger name="org.eclipse.jetty" level="INFO"/>
-		<Logger name="com.sun.jersey" level="WARN"/>
-		<Logger name="liquibase" level="WARN"/>
-		<Logger name="ca.uhn.hl7v2" level="WARN"/>
 		
 		<Root level="WARN">
 			<AppenderRef ref="CONSOLE"/>

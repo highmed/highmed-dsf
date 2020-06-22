@@ -58,7 +58,7 @@ public class RootServiceImpl extends AbstractBasicService implements RootService
 		OperationOutcome outcome = responseGenerator.createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"This is the base URL of the FHIR server. GET method not allowed");
 		return responseGenerator
-				.response(Status.METHOD_NOT_ALLOWED, outcome, parameterConverter.getMediaType(uri, headers)).build();
+				.response(Status.METHOD_NOT_ALLOWED, outcome, parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
 	}
 
 	@Override
@@ -67,11 +67,11 @@ public class RootServiceImpl extends AbstractBasicService implements RootService
 		// FIXME hapi parser bug workaround
 		referenceCleaner.cleanReferenceResourcesIfBundle(bundle);
 
-		CommandList commands = exceptionHandler
-				.handleBadBundleException(() -> commandFactory.createCommands(bundle, getCurrentUser()));
+		CommandList commands = exceptionHandler.handleBadBundleException(
+				() -> commandFactory.createCommands(bundle, getCurrentUser(), parameterConverter.getPreferReturn(headers)));
 
 		Bundle result = commands.execute(); // throws WebApplicationException
 
-		return responseGenerator.response(Status.OK, result, parameterConverter.getMediaType(uri, headers)).build();
+		return responseGenerator.response(Status.OK, result, parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
 	}
 }

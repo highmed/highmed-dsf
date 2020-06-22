@@ -28,18 +28,18 @@ public class ValidationHelperImpl implements ValidationHelper
 	}
 
 	@Override
-	public void checkResourceValidForCreate(User user, Resource resource)
+	public ValidationResult checkResourceValidForCreate(User user, Resource resource)
 	{
-		checkResourceValid(user, resource, "Create");
+		return checkResourceValid(user, resource, "Create");
 	}
 
 	@Override
-	public void checkResourceValidForUpdate(User user, Resource resource)
+	public ValidationResult checkResourceValidForUpdate(User user, Resource resource)
 	{
-		checkResourceValid(user, resource, "Update");
+		return checkResourceValid(user, resource, "Update");
 	}
 
-	private void checkResourceValid(User user, Resource resource, String method)
+	private ValidationResult checkResourceValid(User user, Resource resource, String method)
 	{
 		ValidationResult validationResult = resourceValidator.validate(resource);
 
@@ -55,6 +55,8 @@ public class ValidationHelperImpl implements ValidationHelper
 		else if (!validationResult.getMessages().isEmpty())
 			logger.info("Resource {} validated with messages: {}", resource.fhirType(),
 					toValidationLogMessage(validationResult));
+		
+		return validationResult;
 	}
 
 	private String toValidationLogMessage(ValidationResult validationResult)

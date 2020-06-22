@@ -107,7 +107,7 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 	{
 		try
 		{
-			Bundle bundle = client.search(ResearchStudy.class,
+			Bundle bundle = client.searchWithStrictHandling(ResearchStudy.class,
 					Map.of("_id", Collections.singletonList(researchStudyId.getIdPart()), "_include",
 							Collections.singletonList("ResearchStudy:enrollment")));
 

@@ -106,7 +106,7 @@ public class FhirConnector implements InitializingBean
 	{
 		try
 		{
-			Bundle bundle = clientProvider.getLocalWebserviceClient().search(Subscription.class,
+			Bundle bundle = clientProvider.getLocalWebserviceClient().searchWithStrictHandling(Subscription.class,
 					subscriptionSearchParameter);
 
 			if (!BundleType.SEARCHSET.equals(bundle.getType()))

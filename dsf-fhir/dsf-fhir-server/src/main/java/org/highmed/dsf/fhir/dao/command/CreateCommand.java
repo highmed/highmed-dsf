@@ -17,22 +17,26 @@ import javax.ws.rs.core.Response.Status;
 
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.ResourceDao;
+import org.highmed.dsf.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.dsf.fhir.dao.exception.ResourceNotFoundException;
 import org.highmed.dsf.fhir.event.EventGenerator;
-import org.highmed.dsf.fhir.event.EventManager;
+import org.highmed.dsf.fhir.event.EventHandler;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
+import org.highmed.dsf.fhir.prefer.PreferReturnType;
 import org.highmed.dsf.fhir.search.PartialResult;
 import org.highmed.dsf.fhir.search.SearchQuery;
 import org.highmed.dsf.fhir.search.SearchQueryParameterError;
 import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.highmed.dsf.fhir.service.ReferenceExtractor;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
+import org.highmed.dsf.fhir.service.SnapshotGenerator;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.slf4j.Logger;
@@ -41,6 +45,7 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.validation.ValidationResult;
 
 public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends AbstractCommandWithResource<R, D>
 		implements Command
@@ -49,31 +54,30 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 
 	protected final ResponseGenerator responseGenerator;
 	protected final ReferenceCleaner referenceCleaner;
-	protected final EventManager eventManager;
 	protected final EventGenerator eventGenerator;
 
 	protected R createdResource;
 	protected Response responseResult;
+	protected ValidationResult validationResult;
 
-	public CreateCommand(int index, User user, Bundle bundle, BundleEntryComponent entry, String serverBase,
-			AuthorizationHelper authorizationHelper, ValidationHelper validationHelper, R resource, D dao,
+	public CreateCommand(int index, User user, PreferReturnType returnType, Bundle bundle, BundleEntryComponent entry,
+			String serverBase, AuthorizationHelper authorizationHelper, R resource, D dao,
 			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
 			ResponseGenerator responseGenerator, ReferenceExtractor referenceExtractor,
-			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner, EventManager eventManager,
-			EventGenerator eventGenerator)
+			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner, EventGenerator eventGenerator)
 	{
-		super(2, index, user, bundle, entry, serverBase, authorizationHelper, validationHelper, resource, dao,
+		super(2, index, user, returnType, bundle, entry, serverBase, authorizationHelper, resource, dao,
 				exceptionHandler, parameterConverter, responseGenerator, referenceExtractor, referenceResolver);
 
 		this.responseGenerator = responseGenerator;
 		this.referenceCleaner = referenceCleaner;
 
-		this.eventManager = eventManager;
 		this.eventGenerator = eventGenerator;
 	}
 
 	@Override
-	public void preExecute(Map<String, IdType> idTranslationTable, Connection connection)
+	public void preExecute(Map<String, IdType> idTranslationTable, Connection connection,
+			ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator)
 	{
 		UriComponents eruComponentes = UriComponentsBuilder.fromUriString(entry.getRequest().getUrl()).build();
 
@@ -120,7 +124,8 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	}
 
 	@Override
-	public void execute(Map<String, IdType> idTranslationTable, Connection connection)
+	public void execute(Map<String, IdType> idTranslationTable, Connection connection,
+			ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator)
 			throws SQLException, WebApplicationException
 	{
 		// always resolve temp and conditional references, necessary if conditional create and resource exists
@@ -129,7 +134,7 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 
 		if (responseResult == null)
 		{
-			validationHelper.checkResourceValidForCreate(user, resource);
+			validationResult = validationHelper.checkResourceValidForCreate(user, resource);
 
 			referencesHelper.resolveLogicalReferences(connection);
 
@@ -207,32 +212,45 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	}
 
 	@Override
-	public Optional<BundleEntryComponent> postExecute(Connection connection)
+	public Optional<BundleEntryComponent> postExecute(Connection connection, EventHandler eventHandler)
 	{
 		if (responseResult == null)
 		{
+			// retrieving the latest resource from db to include updated references
+			Resource createdResourceWithResolvedReferences = latestOrErrorIfDeletedOrNotFound(connection,
+					createdResource);
 			try
 			{
-				// retrieving the latest resource from db to include updated references
-				Resource createdResourceWithResolvedReferences = latestOrErrorIfDeletedOrNotFound(connection,
-						createdResource);
 				referenceCleaner.cleanLiteralReferences(createdResourceWithResolvedReferences);
-				eventManager.handleEvent(eventGenerator.newResourceCreatedEvent(createdResourceWithResolvedReferences));
+				eventHandler.handleEvent(eventGenerator.newResourceCreatedEvent(createdResourceWithResolvedReferences));
 			}
 			catch (Exception e)
 			{
 				logger.warn("Error while handling resource created event", e);
 			}
 
+			IdType location = createdResourceWithResolvedReferences.getIdElement().withServerBase(serverBase,
+					createdResourceWithResolvedReferences.getResourceType().name());
+
 			BundleEntryComponent resultEntry = new BundleEntryComponent();
-			resultEntry.setFullUrl(new IdType(serverBase, createdResource.getResourceType().name(),
-					createdResource.getIdElement().getIdPart(), null).getValue());
+			resultEntry.setFullUrl(location.toVersionless().toString());
+
+			if (PreferReturnType.REPRESENTATION.equals(returnType))
+				resultEntry.setResource(createdResourceWithResolvedReferences);
+			else if (PreferReturnType.OPERATION_OUTCOME.equals(returnType))
+			{
+				OperationOutcome outcome = responseGenerator.created(location.toString(),
+						createdResourceWithResolvedReferences);
+				validationResult.populateOperationOutcome(outcome);
+				resultEntry.getResponse().setOutcome(outcome);
+			}
+
 			BundleEntryResponseComponent response = resultEntry.getResponse();
 			response.setStatus(Status.CREATED.getStatusCode() + " " + Status.CREATED.getReasonPhrase());
-			response.setLocation(createdResource.getIdElement()
-					.withServerBase(serverBase, createdResource.getResourceType().name()).getValue());
-			response.setEtag(new EntityTag(createdResource.getMeta().getVersionId(), true).toString());
-			response.setLastModified(createdResource.getMeta().getLastUpdated());
+			response.setLocation(location.getValue());
+			response.setEtag(
+					new EntityTag(createdResourceWithResolvedReferences.getMeta().getVersionId(), true).toString());
+			response.setLastModified(createdResourceWithResolvedReferences.getMeta().getLastUpdated());
 
 			return Optional.of(resultEntry);
 		}
@@ -254,12 +272,20 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		}
 	}
 
-	private R latestOrErrorIfDeletedOrNotFound(Connection connection, Resource resource) throws Exception
+	private R latestOrErrorIfDeletedOrNotFound(Connection connection, Resource resource)
 	{
-		return dao
-				.readWithTransaction(connection,
-						parameterConverter.toUuid(resource.getResourceType().name(),
-								resource.getIdElement().getIdPart()))
-				.orElseThrow(() -> new ResourceNotFoundException(resource.getIdElement().getIdPart()));
+		try
+		{
+			return dao
+					.readWithTransaction(connection,
+							parameterConverter.toUuid(resource.getResourceType().name(),
+									resource.getIdElement().getIdPart()))
+					.orElseThrow(() -> new ResourceNotFoundException(resource.getIdElement().getIdPart()));
+		}
+		catch (ResourceNotFoundException | SQLException | ResourceDeletedException e)
+		{
+			logger.warn("Error while reading resource from db", e);
+			throw new RuntimeException(e);
+		}
 	}
 }

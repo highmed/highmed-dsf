@@ -17,13 +17,16 @@ import javax.ws.rs.core.UriBuilder;
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.ResourceDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
+import org.highmed.dsf.fhir.event.EventHandler;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
+import org.highmed.dsf.fhir.prefer.PreferReturnType;
 import org.highmed.dsf.fhir.search.PartialResult;
 import org.highmed.dsf.fhir.search.SearchQuery;
 import org.highmed.dsf.fhir.search.SearchQueryParameterError;
 import org.highmed.dsf.fhir.service.ReferenceCleaner;
+import org.highmed.dsf.fhir.service.SnapshotGenerator;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent;
@@ -55,12 +58,12 @@ public class ReadCommand extends AbstractCommand implements Command
 	private OperationOutcome singleResultSearchWarning;
 	private Response responseResult;
 
-	public ReadCommand(int index, User user, Bundle bundle, BundleEntryComponent entry, String serverBase,
-			AuthorizationHelper authorizationHelper, int defaultPageCount, DaoProvider daoProvider,
+	public ReadCommand(int index, User user, PreferReturnType returnType, Bundle bundle, BundleEntryComponent entry,
+			String serverBase, AuthorizationHelper authorizationHelper, int defaultPageCount, DaoProvider daoProvider,
 			ParameterConverter parameterConverter, ResponseGenerator responseGenerator,
 			ExceptionHandler exceptionHandler, ReferenceCleaner referenceCleaner)
 	{
-		super(5, index, user, bundle, entry, serverBase, authorizationHelper);
+		super(5, index, user, returnType, bundle, entry, serverBase, authorizationHelper);
 
 		this.defaultPageCount = defaultPageCount;
 
@@ -72,12 +75,14 @@ public class ReadCommand extends AbstractCommand implements Command
 	}
 
 	@Override
-	public void preExecute(Map<String, IdType> idTranslationTable, Connection connection)
+	public void preExecute(Map<String, IdType> idTranslationTable, Connection connection,
+			ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator)
 	{
 	}
 
 	@Override
-	public void execute(Map<String, IdType> idTranslationTable, Connection connection)
+	public void execute(Map<String, IdType> idTranslationTable, Connection connection,
+			ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator)
 			throws SQLException, WebApplicationException
 	{
 		String requestUrl = entry.getRequest().getUrl();
@@ -222,7 +227,7 @@ public class ReadCommand extends AbstractCommand implements Command
 	}
 
 	@Override
-	public Optional<BundleEntryComponent> postExecute(Connection connection)
+	public Optional<BundleEntryComponent> postExecute(Connection connection, EventHandler eventHandler)
 	{
 		if (singleResult != null)
 		{

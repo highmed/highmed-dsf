@@ -3,7 +3,7 @@ package org.highmed.dsf.fhir.webservice.impl;
 import org.highmed.dsf.fhir.authorization.AuthorizationRuleProvider;
 import org.highmed.dsf.fhir.dao.HealthcareServiceDao;
 import org.highmed.dsf.fhir.event.EventGenerator;
-import org.highmed.dsf.fhir.event.EventManager;
+import org.highmed.dsf.fhir.event.EventHandler;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
@@ -18,12 +18,12 @@ public class HealthcareServiceServiceImpl extends AbstractResourceServiceImpl<He
 		implements HealthcareServiceService
 {
 	public HealthcareServiceServiceImpl(String path, String serverBase, int defaultPageCount, HealthcareServiceDao dao,
-			ResourceValidator validator, EventManager eventManager, ExceptionHandler exceptionHandler,
+			ResourceValidator validator, EventHandler eventHandler, ExceptionHandler exceptionHandler,
 			EventGenerator eventGenerator, ResponseGenerator responseGenerator, ParameterConverter parameterConverter,
 			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver,
 			ReferenceCleaner referenceCleaner, AuthorizationRuleProvider authorizationRuleProvider)
 	{
-		super(path, HealthcareService.class, serverBase, defaultPageCount, dao, validator, eventManager,
+		super(path, HealthcareService.class, serverBase, defaultPageCount, dao, validator, eventHandler,
 				exceptionHandler, eventGenerator, responseGenerator, parameterConverter, referenceExtractor,
 				referenceResolver, referenceCleaner, authorizationRuleProvider);
 	}

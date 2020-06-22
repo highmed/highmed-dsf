@@ -1,15 +1,25 @@
 package org.highmed.dsf.fhir.spring.config;
 
-import org.highmed.dsf.fhir.dao.command.AuthorizationHelper;
-import org.highmed.dsf.fhir.dao.command.AuthorizationHelperImpl;
+import java.sql.Connection;
+
 import org.highmed.dsf.fhir.dao.command.CommandFactory;
 import org.highmed.dsf.fhir.dao.command.CommandFactoryImpl;
+import org.highmed.dsf.fhir.dao.command.TransactionEventHandler;
+import org.highmed.dsf.fhir.dao.command.TransactionResources;
 import org.highmed.dsf.fhir.dao.command.ValidationHelper;
 import org.highmed.dsf.fhir.dao.command.ValidationHelperImpl;
+import org.highmed.dsf.fhir.event.EventHandler;
+import org.highmed.dsf.fhir.service.ResourceValidatorImpl;
+import org.highmed.dsf.fhir.service.SnapshotGenerator;
+import org.highmed.dsf.fhir.service.SnapshotGeneratorImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
+
+import ca.uhn.fhir.context.support.IValidationSupport;
 
 @Configuration
 public class CommandConfig
@@ -27,13 +37,13 @@ public class CommandConfig
 	private HelperConfig helperConfig;
 
 	@Autowired
-	private SnapshotConfig snapshotConfig;
-
-	@Autowired
 	private EventConfig eventConfig;
 
 	@Autowired
 	private ReferenceConfig referenceConfig;
+
+	@Autowired
+	private SnapshotConfig snapshotConfig;
 
 	@Autowired
 	private AuthorizationConfig authorizationConfig;
@@ -41,27 +51,35 @@ public class CommandConfig
 	@Autowired
 	private ValidationConfig validationConfig;
 
+	@Autowired
+	private FhirConfig fhirConfig;
+
 	@Bean
 	public CommandFactory commandFactory()
 	{
 		return new CommandFactoryImpl(serverBase, defaultPageCount, daoConfig.dataSource(), daoConfig.daoProvider(),
 				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver(),
 				referenceConfig.referenceCleaner(), helperConfig.responseGenerator(), helperConfig.exceptionHandler(),
-				eventConfig.eventManager(), eventConfig.eventGenerator(),
-				snapshotConfig::snapshotGeneratorWithTransaction, helperConfig.parameterConverter(),
-				authorizationHelper(), validationHelper());
+				helperConfig.parameterConverter(), eventConfig.eventManager(), eventConfig.eventGenerator(),
+				authorizationConfig.authorizationHelper(), validationConfig.validationHelper(),
+				snapshotConfig.snapshotGenerator(), this::transactionResourceFactory);
 	}
 
 	@Bean
-	public AuthorizationHelper authorizationHelper()
+	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+	public TransactionResources transactionResourceFactory(Connection connection)
 	{
-		return new AuthorizationHelperImpl(authorizationConfig.authorizationRuleProvider(),
+		IValidationSupport validationSupport = validationConfig.validationSupportWithTransaction(connection);
+
+		ValidationHelper validationHelper = new ValidationHelperImpl(
+				new ResourceValidatorImpl(fhirConfig.fhirContext(), validationSupport),
 				helperConfig.responseGenerator());
-	}
 
-	@Bean
-	public ValidationHelper validationHelper()
-	{
-		return new ValidationHelperImpl(validationConfig.resourceValidator(), helperConfig.responseGenerator());
+		SnapshotGenerator snapshotGenerator = new SnapshotGeneratorImpl(fhirConfig.fhirContext(), validationSupport);
+
+		TransactionEventHandler transactionEventHandler = new TransactionEventHandler(eventConfig.eventManager(),
+				validationSupport instanceof EventHandler ? (EventHandler) validationSupport : null);
+
+		return new TransactionResources(validationHelper, snapshotGenerator, transactionEventHandler);
 	}
 }

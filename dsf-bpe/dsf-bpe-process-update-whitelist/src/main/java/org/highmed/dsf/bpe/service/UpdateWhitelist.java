@@ -60,7 +60,7 @@ public class UpdateWhitelist extends AbstractServiceDelegate implements Initiali
 	{
 		FhirWebserviceClient client = getFhirWebserviceClientProvider().getLocalWebserviceClient();
 
-		Bundle searchSet = client.search(Organization.class,
+		Bundle searchSet = client.searchWithStrictHandling(Organization.class,
 				Map.of("active", Collections.singletonList("true"), "identifier",
 						Collections.singletonList(organizationProvider.getDefaultIdentifierSystem() + "|"), "_include",
 						Collections.singletonList("Organization:endpoint")));
@@ -78,14 +78,12 @@ public class UpdateWhitelist extends AbstractServiceDelegate implements Initiali
 		logger.debug("Uploading new white-list transaction bundle: {}",
 				FhirContext.forR4().newJsonParser().encodeResourceToString(transaction));
 
-		Bundle result = client.updateConditionaly(transaction,
+		IdType result = client.withMinimalReturn().updateConditionaly(transaction,
 				Map.of("identifier", Collections.singletonList(Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST + "|"
 						+ Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST)));
 
 		Task task = (Task) execution.getVariable(Constants.VARIABLE_LEADING_TASK);
-		task.addOutput()
-				.setValue(new Reference(new IdType("Bundle", result.getIdElement().getIdPart(),
-						result.getIdElement().getVersionIdPart())))
+		task.addOutput().setValue(new Reference(new IdType("Bundle", result.getIdPart(), result.getVersionIdPart())))
 				.getType().addCoding().setSystem(Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST)
 				.setCode(Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST);
 	}

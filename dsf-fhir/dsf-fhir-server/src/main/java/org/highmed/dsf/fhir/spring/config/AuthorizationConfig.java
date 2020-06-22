@@ -29,6 +29,8 @@ import org.highmed.dsf.fhir.authorization.StructureDefinitionAuthorizationRule;
 import org.highmed.dsf.fhir.authorization.SubscriptionAuthorizationRule;
 import org.highmed.dsf.fhir.authorization.TaskAuthorizationRule;
 import org.highmed.dsf.fhir.authorization.ValueSetAuthorizationRule;
+import org.highmed.dsf.fhir.dao.command.AuthorizationHelper;
+import org.highmed.dsf.fhir.dao.command.AuthorizationHelperImpl;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
@@ -239,5 +241,11 @@ public class AuthorizationConfig
 				practitionerAuthorizationRule(), practitionerRoleAuthorizationRule(), provenanceAuthorizationRule(),
 				researchStudyAuthorizationRule(), structureDefinitionAuthorizationRule(),
 				subscriptionAuthorizationRule(), taskAuthorizationRule(), valueSetAuthorizationRule());
+	}
+
+	@Bean
+	public AuthorizationHelper authorizationHelper()
+	{
+		return new AuthorizationHelperImpl(authorizationRuleProvider(), helperConfig.responseGenerator());
 	}
 }

@@ -171,7 +171,7 @@ public class WebserviceConfig
 	@Bean
 	public BinaryService binaryService()
 	{
-		return new BinaryServiceJaxrs(binaryServiceSecure());
+		return new BinaryServiceJaxrs(binaryServiceSecure(), helperConfig.parameterConverter());
 	}
 
 	private BinaryServiceSecure binaryServiceSecure()
@@ -630,7 +630,8 @@ public class WebserviceConfig
 	private ConformanceServiceImpl conformanceServiceImpl()
 	{
 		return new ConformanceServiceImpl(ConformanceServiceJaxrs.PATH, serverBase, defaultPageCount,
-				buildInfoReaderConfig.buildInfoReader(), helperConfig.parameterConverter());
+				buildInfoReaderConfig.buildInfoReader(), helperConfig.parameterConverter(),
+				validationConfig.validationSupport());
 	}
 
 	@Bean

@@ -5,7 +5,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -46,6 +49,15 @@ public class ValidationSupportWithCustomResources implements IValidationSupport
 		return context;
 	}
 
+	@Override
+	public List<IBaseResource> fetchAllConformanceResources()
+	{
+		return Stream
+				.concat(codeSystemsByUrl.values().stream(),
+						Stream.concat(fetchAllStructureDefinitions().stream(), valueSetsByUrl.values().stream()))
+				.collect(Collectors.toList());
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<StructureDefinition> fetchAllStructureDefinitions()
@@ -70,6 +82,12 @@ public class ValidationSupportWithCustomResources implements IValidationSupport
 		return codeSystemsByUrl.getOrDefault(url, null);
 	}
 
+	@Override
+	public boolean isCodeSystemSupported(IValidationSupport theRootValidationSupport, String url)
+	{
+		return codeSystemsByUrl.containsKey(url);
+	}
+
 	public void addOrReplace(CodeSystem s)
 	{
 		codeSystemsByUrl.put(s.getUrl(), s);
@@ -79,6 +97,12 @@ public class ValidationSupportWithCustomResources implements IValidationSupport
 	public ValueSet fetchValueSet(String url)
 	{
 		return valueSetsByUrl.getOrDefault(url, null);
+	}
+
+	@Override
+	public boolean isValueSetSupported(IValidationSupport theRootValidationSupport, String url)
+	{
+		return valueSetsByUrl.containsKey(url);
 	}
 
 	public void addOrReplace(ValueSet s)
