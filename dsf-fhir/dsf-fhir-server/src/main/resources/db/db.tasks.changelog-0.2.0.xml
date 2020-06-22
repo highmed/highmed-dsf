@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<property name="json" value="JSONB" dbms="postgresql" />
+	<property name="json" value="varchar(5000)" dbms="h2" />
+
+	<changeSet author="hhund" id="db.tasks.changelog-0.2.0">
+		<dropView viewName="current_tasks"/>
+	
+		<renameColumn tableName="tasks" oldColumnName="deleted" newColumnName="deleted_old"/>
+		
+		<addColumn tableName="tasks">
+			<column name="deleted" type="TIMESTAMP"/>
+		</addColumn>
+	
+		<sql dbms="postgresql">
+			UPDATE tasks SET deleted = current_t.deleted_new
+			FROM (
+				SELECT task_id, deleted_old, ((task->'meta'->>'lastUpdated')::timestamp + interval '1' second) AS deleted_new
+			 	FROM (
+			 		SELECT DISTINCT ON (task_id) task_id, version, deleted_old, task
+					FROM tasks ORDER BY task_id, version DESC
+				) AS current_t
+				WHERE deleted_old
+			) AS current_t
+			WHERE tasks.task_id = current_t.task_id
+		</sql>
+		
+		<dropColumn tableName="tasks" columnName="deleted_old"/>
+	
+		<createView viewName="current_tasks" replaceIfExists="true">
+			SELECT task_id, version, task
+			FROM (
+				SELECT DISTINCT ON (task_id) task_id, version, deleted, task
+				FROM tasks ORDER BY task_id, version DESC
+			) AS current_t
+			WHERE deleted IS NULL
+		</createView>
+
+		<sql dbms="postgresql">
+			ALTER TABLE current_tasks OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_tasks TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_tasks TO ${db.server_users_group};
+		</sql>
+	</changeSet>
+</databaseChangeLog>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<property name="json" value="JSONB" dbms="postgresql" />
+	<property name="json" value="varchar(5000)" dbms="h2" />
+
+	<changeSet author="hhund" id="db.research_studies.changelog-0.2.0">
+		<dropView viewName="current_research_studies"/>
+	
+		<renameColumn tableName="research_studies" oldColumnName="deleted" newColumnName="deleted_old"/>
+		
+		<addColumn tableName="research_studies">
+			<column name="deleted" type="TIMESTAMP"/>
+		</addColumn>
+	
+		<sql dbms="postgresql">
+			UPDATE research_studies SET deleted = current_rs.deleted_new
+			FROM (
+				SELECT research_study_id, deleted_old, ((research_study->'meta'->>'lastUpdated')::timestamp + interval '1' second) AS deleted_new
+			 	FROM (
+			 		SELECT DISTINCT ON (research_study_id) research_study_id, version, deleted_old, research_study
+					FROM research_studies ORDER BY research_study_id, version DESC
+				) AS current_rs
+				WHERE deleted_old
+			) AS current_rs
+			WHERE research_studies.research_study_id = current_rs.research_study_id
+		</sql>
+		
+		<dropColumn tableName="research_studies" columnName="deleted_old"/>
+	
+		<createView viewName="current_research_studies" replaceIfExists="true">
+			SELECT research_study_id, version, research_study
+			FROM (
+				SELECT DISTINCT ON (research_study_id) research_study_id, version, deleted, research_study
+				FROM research_studies ORDER BY research_study_id, version DESC
+			) AS current_rs
+			WHERE deleted IS NULL
+		</createView>
+
+		<sql dbms="postgresql">
+			ALTER TABLE current_research_studies OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_research_studies TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_research_studies TO ${db.server_users_group};
+		</sql>
+	</changeSet>
+</databaseChangeLog>

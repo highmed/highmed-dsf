@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<property name="json" value="JSONB" dbms="postgresql" />
+	<property name="json" value="varchar(5000)" dbms="h2" />
+
+	<changeSet author="hhund" id="db.provenances.changelog-0.2.0">
+		<dropView viewName="current_provenances"/>
+	
+		<renameColumn tableName="provenances" oldColumnName="deleted" newColumnName="deleted_old"/>
+		
+		<addColumn tableName="provenances">
+			<column name="deleted" type="TIMESTAMP"/>
+		</addColumn>
+	
+		<sql dbms="postgresql">
+			UPDATE provenances SET deleted = current_p.deleted_new
+			FROM (
+				SELECT provenance_id, deleted_old, ((provenance->'meta'->>'lastUpdated')::timestamp + interval '1' second) AS deleted_new
+			 	FROM (
+			 		SELECT DISTINCT ON (provenance_id) provenance_id, version, deleted_old, provenance
+					FROM provenances ORDER BY provenance_id, version DESC
+				) AS current_p
+				WHERE deleted_old
+			) AS current_p
+			WHERE provenances.provenance_id = current_p.provenance_id
+		</sql>
+		
+		<dropColumn tableName="provenances" columnName="deleted_old"/>
+	
+		<createView viewName="current_provenances" replaceIfExists="true">
+			SELECT provenance_id, version, provenance
+			FROM (
+				SELECT DISTINCT ON (provenance_id) provenance_id, version, deleted, provenance
+				FROM provenances ORDER BY provenance_id, version DESC
+			) AS current_p
+			WHERE deleted IS NULL
+		</createView>
+
+		<sql dbms="postgresql">
+			ALTER TABLE current_provenances OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_provenances TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_provenances TO ${db.server_users_group};
+		</sql>
+	</changeSet>
+</databaseChangeLog>

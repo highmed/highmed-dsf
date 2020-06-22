@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<property name="json" value="JSONB" dbms="postgresql" />
+	<property name="json" value="varchar(5000)" dbms="h2" />
+
+	<changeSet author="hhund" id="db.healthcare_services.changelog-0.2.0">
+		<dropView viewName="current_healthcare_services"/>
+	
+		<renameColumn tableName="healthcare_services" oldColumnName="deleted" newColumnName="deleted_old"/>
+		
+		<addColumn tableName="healthcare_services">
+			<column name="deleted" type="TIMESTAMP"/>
+		</addColumn>
+	
+		<sql dbms="postgresql">
+			UPDATE healthcare_services SET deleted = current_hs.deleted_new
+			FROM (
+				SELECT healthcare_service_id, deleted_old, ((healthcare_service->'meta'->>'lastUpdated')::timestamp + interval '1' second) AS deleted_new
+			 	FROM (
+			 		SELECT DISTINCT ON (healthcare_service_id) healthcare_service_id, version, deleted_old, healthcare_service
+					FROM healthcare_services ORDER BY healthcare_service_id, version DESC
+				) AS current_hs
+				WHERE deleted_old
+			) AS current_hs
+			WHERE healthcare_services.healthcare_service_id = current_hs.healthcare_service_id
+		</sql>
+		
+		<dropColumn tableName="healthcare_services" columnName="deleted_old"/>
+	
+		<createView viewName="current_healthcare_services" replaceIfExists="true">
+			SELECT healthcare_service_id, version, healthcare_service
+			FROM (
+				SELECT DISTINCT ON (healthcare_service_id) healthcare_service_id, version, deleted, healthcare_service
+				FROM healthcare_services ORDER BY healthcare_service_id, version DESC
+			) AS current_hs
+			WHERE deleted IS NULL
+		</createView>
+
+		<sql dbms="postgresql">
+			ALTER TABLE current_healthcare_services OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_healthcare_services TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_healthcare_services TO ${db.server_users_group};
+		</sql>
+	</changeSet>
+</databaseChangeLog>
