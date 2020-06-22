@@ -17,7 +17,7 @@ public class MpiRunner
 
 		MasterPatientIndexClient mpiClient = masterPatientIndexClientFactory
 				.orElseThrow(() -> new NoSuchElementException("Master patient index client factory not found"))
-				.createWebserviceClient(properties::getProperty);
+				.createClient(properties::getProperty);
 
 		Idat idat = mpiClient.fetchIdat("0002036518");
 		System.out.println(idat.toString());

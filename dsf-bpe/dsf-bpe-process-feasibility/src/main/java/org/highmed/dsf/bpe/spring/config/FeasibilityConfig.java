@@ -164,7 +164,7 @@ public class FeasibilityConfig
 	@Bean
 	public MasterPatientIndexClient masterPatientIndexClient()
 	{
-		return masterPatientIndexClientFactory.createWebserviceClient(environment::getProperty);
+		return masterPatientIndexClientFactory.createClient(environment::getProperty);
 	}
 
 	@Bean

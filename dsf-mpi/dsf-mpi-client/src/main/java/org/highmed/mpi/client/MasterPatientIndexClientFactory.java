@@ -4,5 +4,5 @@ import java.util.function.Function;
 
 public interface MasterPatientIndexClientFactory
 {
-	MasterPatientIndexClient createWebserviceClient(Function<String, String> propertyResolver);
+	MasterPatientIndexClient createClient(Function<String, String> propertyResolver);
 }
