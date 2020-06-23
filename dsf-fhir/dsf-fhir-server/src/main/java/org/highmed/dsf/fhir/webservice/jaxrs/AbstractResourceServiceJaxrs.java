@@ -71,6 +71,30 @@ public abstract class AbstractResourceServiceJaxrs<R extends Resource, S extends
 		return delegate.vread(id, version, uri, headers);
 	}
 
+	@GET
+	@Path("/_history")
+	@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
+			Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Override
+	public Response history(@Context UriInfo uri, @Context HttpHeaders headers)
+	{
+		logger.trace("GET {}", uri.getRequestUri().toString());
+
+		return delegate.history(uri, headers);
+	}
+
+	@GET
+	@Path("/{id}/_history")
+	@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
+			Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Override
+	public Response history(@PathParam("id") String id, @Context UriInfo uri, @Context HttpHeaders headers)
+	{
+		logger.trace("GET {}", uri.getRequestUri().toString());
+
+		return delegate.history(id, uri, headers);
+	}
+
 	@PUT
 	@Path("/{id}")
 	@Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,

@@ -383,6 +383,20 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	{
 		return parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers);
 	}
+	
+	@Override
+	public Response history(UriInfo uri, HttpHeaders headers)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public Response history(String id, UriInfo uri, HttpHeaders headers)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 	@Override
 	public Response update(String id, R resource, UriInfo uri, HttpHeaders headers)

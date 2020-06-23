@@ -74,4 +74,11 @@ public class RootServiceImpl extends AbstractBasicService implements RootService
 
 		return responseGenerator.response(Status.OK, result, parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
 	}
+	
+	@Override
+	public Response history(UriInfo uri, HttpHeaders headers)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

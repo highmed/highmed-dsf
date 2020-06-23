@@ -70,4 +70,11 @@ public class RootServiceSecure extends AbstractServiceSecure<RootService> implem
 			return Optional.empty();
 		}
 	}
+	
+	@Override
+	public Response history(UriInfo uri, HttpHeaders headers)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

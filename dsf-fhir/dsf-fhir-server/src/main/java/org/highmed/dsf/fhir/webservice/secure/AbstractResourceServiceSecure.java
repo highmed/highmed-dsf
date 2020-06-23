@@ -264,6 +264,20 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 			return read;
 		}
 	}
+	
+	@Override
+	public Response history(UriInfo uri, HttpHeaders headers)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public Response history(String id, UriInfo uri, HttpHeaders headers)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 	@Override
 	public Response update(String id, R resource, UriInfo uri, HttpHeaders headers)
