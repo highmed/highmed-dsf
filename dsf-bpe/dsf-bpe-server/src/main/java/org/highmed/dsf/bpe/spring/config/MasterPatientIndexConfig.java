@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class MasterPatientIndexConfig
 {
-	@Value("${org.highmed.dsf.bpe.mpi.webservice.factory.class}")
+	@Value("${org.highmed.dsf.bpe.mpi.webservice.factory.class:org.highmed.mpi.client.stub.MasterPatientIndexClientStubFactory}")
 	private String masterPatientIndexClientFactoryClass;
 
 	@Bean

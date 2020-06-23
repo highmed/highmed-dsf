@@ -107,7 +107,6 @@ public class MessageHelper
 		for (CX identifier : pid.getPatientIdentifierList())
 		{
 			HD assigningAuthority = identifier.getAssigningAuthority();
-			System.out.println();
 
 			if (assigningAuthority.getNamespaceID().getValue().equals(pidAssigningAuthorityNamespaceId)
 				&& assigningAuthority.getUniversalID().getValue().equals(pidAssigningAuthorityUniversalId))

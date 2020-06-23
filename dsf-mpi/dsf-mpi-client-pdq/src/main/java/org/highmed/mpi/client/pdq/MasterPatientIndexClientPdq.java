@@ -67,6 +67,7 @@ public class MasterPatientIndexClientPdq extends AbstractHl7v2Client implements 
 			Idat idat = messageHelper.extractPatientDemographics(response, pidAssigningAuthorityNamespaceId,
 					pidAssigningAuthorityUniversalId);
 
+			logger.debug("Found IDAT of EHR-ID='{}", ehrId);
 			return idat;
 		}
 		catch (Exception exception)
