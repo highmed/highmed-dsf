@@ -132,6 +132,7 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 		assertNotNull(updatedResource.getMeta());
 		assertNotNull(updatedResource.getMeta().getVersionId());
 		assertEquals(String.valueOf(ResourceDao.FIRST_VERSION + 1), updatedResource.getMeta().getVersionId());
+		assertTrue(updatedResource.getMeta().getLastUpdated().after(createdResource.getMeta().getLastUpdated()));
 
 		checkUpdates(updatedResource);
 	}

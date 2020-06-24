@@ -39,7 +39,7 @@ public class Ping3MedicFromTtpExampleStarter
 				keyStorePassword, null, null, null, 0, 0, null, context, referenceCleaner);
 
 		Task task = new Task();
-		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-process");
+		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-ping-process");
 		task.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.2.0");
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
@@ -49,7 +49,7 @@ public class Ping3MedicFromTtpExampleStarter
 		task.getRestriction().addRecipient().setType("Organization").getIdentifier()
 				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_TTP");
 
-		task.addInput().setValue(new StringType("startProcessMessage")).getType().addCoding()
+		task.addInput().setValue(new StringType("startPingProcessMessage")).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("message-name");
 
 		client.withMinimalReturn().create(task);

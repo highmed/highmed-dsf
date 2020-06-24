@@ -1,4 +1,4 @@
-package org.highmed.pseudonymization.mpi;
+package org.highmed.mpi.client;
 
 /**
  * Client interface for fetching a subject's IDAT from a Master Patient Index.

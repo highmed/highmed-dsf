@@ -8,6 +8,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.highmed.mpi.client.Idat;
+import org.highmed.mpi.client.MasterPatientIndexClient;
 import org.highmed.openehr.model.datatypes.StringRowElement;
 import org.highmed.openehr.model.structure.Column;
 import org.highmed.openehr.model.structure.Meta;
@@ -15,8 +17,7 @@ import org.highmed.openehr.model.structure.ResultSet;
 import org.highmed.openehr.model.structure.RowElement;
 import org.highmed.pseudonymization.bloomfilter.RecordBloomFilter;
 import org.highmed.pseudonymization.bloomfilter.RecordBloomFilterGenerator;
-import org.highmed.pseudonymization.mpi.Idat;
-import org.highmed.pseudonymization.mpi.MasterPatientIndexClient;
+
 import org.highmed.pseudonymization.openehr.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
