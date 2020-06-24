@@ -120,6 +120,7 @@
 				<artifactId>dsf-fhir-webservice-client</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
 				<artifactId>dsf-openehr-model</artifactId>
@@ -150,6 +151,22 @@
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
 				<artifactId>dsf-pseudonymization-ttp</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-mpi-client</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-mpi-client-pdq</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-mpi-client-stub</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 

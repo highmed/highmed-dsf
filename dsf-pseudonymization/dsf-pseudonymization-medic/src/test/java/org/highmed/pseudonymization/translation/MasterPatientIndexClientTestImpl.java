@@ -3,8 +3,8 @@ package org.highmed.pseudonymization.translation;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.highmed.pseudonymization.mpi.Idat;
-import org.highmed.pseudonymization.mpi.MasterPatientIndexClient;
+import org.highmed.mpi.client.Idat;
+import org.highmed.mpi.client.MasterPatientIndexClient;
 
 class MasterPatientIndexClientTestImpl implements MasterPatientIndexClient
 {

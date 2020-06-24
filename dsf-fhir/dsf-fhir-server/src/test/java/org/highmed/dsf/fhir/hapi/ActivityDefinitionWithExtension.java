@@ -42,7 +42,7 @@ public class ActivityDefinitionWithExtension
 
 		Extension e1 = a.addExtension();
 		e1.setUrl("http://highmed.org/fhir/StructureDefinition/process-authorization");
-		e1.addExtension("message-name", new StringType("startProcessMessage"));
+		e1.addExtension("message-name", new StringType("startPingProcessMessage"));
 		e1.addExtension("authorization-role",
 				new Coding("http://highmed.org/fhir/CodeSystem/authorization-role", "LOCAL", null));
 		Extension ot12 = e1.addExtension();
@@ -52,7 +52,7 @@ public class ActivityDefinitionWithExtension
 		ot12.addExtension("organization-type",
 				new Coding("http://highmed.org/fhir/CodeSystem/authorization-role", "MeDIC", null));
 		e1.addExtension("task-profile",
-				new CanonicalType("http://highmed.org/fhir/StructureDefinition/highmed-task-start-process"));
+				new CanonicalType("http://highmed.org/fhir/StructureDefinition/highmed-task-start-ping-process"));
 
 		Extension e2 = a.addExtension();
 		e2.setUrl("http://highmed.org/fhir/StructureDefinition/process-authorization");

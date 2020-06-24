@@ -58,6 +58,12 @@
 
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-mpi-client</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
 				<artifactId>dsf-openehr-model</artifactId>
 				<version>${project.version}</version>
 			</dependency>
