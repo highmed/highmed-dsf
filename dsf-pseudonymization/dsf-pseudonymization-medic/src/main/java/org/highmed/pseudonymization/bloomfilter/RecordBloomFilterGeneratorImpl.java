@@ -4,8 +4,8 @@ import java.math.BigInteger;
 import java.util.Objects;
 import java.util.function.Supplier;
 
+import org.highmed.mpi.client.Idat;
 import org.highmed.pseudonymization.bloomfilter.BloomFilterGenerator.BiGramHasher;
-import org.highmed.pseudonymization.mpi.Idat;
 
 public class RecordBloomFilterGeneratorImpl implements RecordBloomFilterGenerator
 {

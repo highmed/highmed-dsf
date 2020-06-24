@@ -7,7 +7,7 @@
 	</meta>
 	<extension url="http://highmed.org/fhir/StructureDefinition/process-authorization">
 		<extension url="message-name">
-			<valueString value="startProcessMessage" />
+			<valueString value="startPingProcessMessage" />
 		</extension>
 		<extension url="authorization-roles">
 			<extension url="authorization-role">
@@ -46,7 +46,7 @@
 			</extension>
 		</extension>
 		<extension url="task-profile">
-			<valueCanonical value="http://highmed.org/fhir/StructureDefinition/highmed-task-start-process" />
+			<valueCanonical value="http://highmed.org/fhir/StructureDefinition/highmed-task-start-ping-process" />
 		</extension>
 	</extension>
 	<extension url="http://highmed.org/fhir/StructureDefinition/process-authorization">

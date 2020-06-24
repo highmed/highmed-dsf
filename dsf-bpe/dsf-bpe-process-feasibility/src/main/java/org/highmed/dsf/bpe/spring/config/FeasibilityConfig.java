@@ -20,7 +20,6 @@ import org.highmed.dsf.bpe.service.ExecuteRecordLink;
 import org.highmed.dsf.bpe.service.FilterQueryResultsByConsent;
 import org.highmed.dsf.bpe.service.GenerateBloomFilters;
 import org.highmed.dsf.bpe.service.GenerateCountFromIds;
-import org.highmed.dsf.bpe.service.MasterPatientIndexClientStub;
 import org.highmed.dsf.bpe.service.ModifyQueries;
 import org.highmed.dsf.bpe.service.SelectRequestTargets;
 import org.highmed.dsf.bpe.service.SelectResponseTargetMedic;
@@ -32,12 +31,14 @@ import org.highmed.dsf.fhir.group.GroupHelper;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.openehr.client.OpenEhrWebserviceClientProvider;
-import org.highmed.pseudonymization.mpi.MasterPatientIndexClient;
+import org.highmed.mpi.client.MasterPatientIndexClient;
+import org.highmed.mpi.client.MasterPatientIndexClientFactory;
 import org.highmed.pseudonymization.translation.ResultSetTranslatorFromMedicRbfOnly;
 import org.highmed.pseudonymization.translation.ResultSetTranslatorFromMedicRbfOnlyImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -53,6 +54,9 @@ public class FeasibilityConfig
 	private OpenEhrWebserviceClientProvider openehrClientProvider;
 
 	@Autowired
+	private MasterPatientIndexClientFactory masterPatientIndexClientFactory;
+
+	@Autowired
 	private OrganizationProvider organizationProvider;
 
 	@Autowired
@@ -66,6 +70,9 @@ public class FeasibilityConfig
 
 	@Autowired
 	private ObjectMapper objectMapper;
+
+	@Autowired
+	private Environment environment;
 
 	@Bean
 	public ProcessEnginePlugin feasibilityPlugin()
@@ -157,8 +164,7 @@ public class FeasibilityConfig
 	@Bean
 	public MasterPatientIndexClient masterPatientIndexClient()
 	{
-		// TODO IHE PDQ implementation
-		return new MasterPatientIndexClientStub();
+		return masterPatientIndexClientFactory.createClient(environment::getProperty);
 	}
 
 	@Bean

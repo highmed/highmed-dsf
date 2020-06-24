@@ -10,6 +10,8 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.highmed.mpi.client.Idat;
+import org.highmed.mpi.client.MasterPatientIndexClient;
 import org.highmed.openehr.json.OpenEhrObjectMapperFactory;
 import org.highmed.openehr.model.datatypes.StringRowElement;
 import org.highmed.openehr.model.structure.Column;
@@ -20,8 +22,6 @@ import org.highmed.pseudonymization.bloomfilter.RecordBloomFilterGenerator;
 import org.highmed.pseudonymization.bloomfilter.RecordBloomFilterGeneratorImpl;
 import org.highmed.pseudonymization.bloomfilter.RecordBloomFilterGeneratorImpl.FieldBloomFilterLengths;
 import org.highmed.pseudonymization.bloomfilter.RecordBloomFilterGeneratorImpl.FieldWeights;
-import org.highmed.pseudonymization.mpi.Idat;
-import org.highmed.pseudonymization.mpi.MasterPatientIndexClient;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
