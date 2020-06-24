@@ -23,6 +23,7 @@ import javax.ws.rs.ext.MessageBodyWriter;
 
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -239,8 +240,19 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 	private Optional<String> getResourceName(T t, String uuid)
 	{
 		if (t instanceof Bundle)
-			return ((Bundle) t).getEntry().stream().filter(c -> uuid.equals(c.getResource().getIdElement().getIdPart()))
-					.map(c -> c.getResource().getClass().getAnnotation(ResourceDef.class).name()).findFirst();
+			return ((Bundle) t).getEntry().stream().filter(c ->
+			{
+				if (c.hasResource())
+					return uuid.equals(c.getResource().getIdElement().getIdPart());
+				else
+					return uuid.equals(new IdType(c.getResponse().getLocation()).getIdPart());
+			}).map(c ->
+			{
+				if (c.hasResource())
+					return c.getResource().getClass().getAnnotation(ResourceDef.class).name();
+				else
+					return new IdType(c.getResponse().getLocation()).getResourceType();
+			}).findFirst();
 		else if (t instanceof Resource)
 			return Optional.of(t.getClass().getAnnotation(ResourceDef.class).name());
 		else

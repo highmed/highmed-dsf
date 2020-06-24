@@ -2,6 +2,7 @@ package org.highmed.dsf.fhir.help;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -16,13 +17,18 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
 import org.highmed.dsf.fhir.authentication.User;
+import org.highmed.dsf.fhir.history.History;
+import org.highmed.dsf.fhir.history.HistoryEntry;
 import org.highmed.dsf.fhir.prefer.PreferReturnType;
+import org.highmed.dsf.fhir.search.PageAndCount;
 import org.highmed.dsf.fhir.search.PartialResult;
 import org.highmed.dsf.fhir.search.SearchQueryParameterError;
 import org.highmed.dsf.fhir.service.ResourceReference;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
+import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -127,16 +133,6 @@ public class ResponseGenerator
 		return createOutcome(IssueSeverity.INFORMATION, IssueType.INFORMATIONAL, message);
 	}
 
-	public BundleEntryComponent toBundleEntryComponent(Resource resource, SearchEntryMode mode)
-	{
-		BundleEntryComponent entry = new BundleEntryComponent();
-		entry.getSearch().setMode(mode);
-		entry.setResource(resource);
-		entry.setFullUrlElement(new IdType(serverBase, resource.getIdElement().getResourceType(),
-				resource.getIdElement().getIdPart(), null));
-		return entry;
-	}
-
 	/**
 	 * @param result
 	 *            not <code>null</code>
@@ -163,49 +159,123 @@ public class ResponseGenerator
 		if (!errors.isEmpty())
 			bundle.addEntry(toBundleEntryComponent(toOperationOutcomeWarning(errors), SearchEntryMode.OUTCOME));
 
-		bundle.setTotal(result.getOverallCount());
+		bundle.setTotal(result.getTotal());
 
+		setLinks(result.getPageAndCount(), bundleUri, format, pretty, bundle, result.getPartialResult().isEmpty(),
+				result.getTotal());
+
+		return bundle;
+	}
+
+	public BundleEntryComponent toBundleEntryComponent(Resource resource, SearchEntryMode mode)
+	{
+		BundleEntryComponent entry = new BundleEntryComponent();
+		entry.getSearch().setMode(mode);
+		entry.setResource(resource);
+		entry.setFullUrlElement(new IdType(serverBase, resource.getIdElement().getResourceType(),
+				resource.getIdElement().getIdPart(), null));
+		return entry;
+	}
+
+	public Bundle createHistoryBundle(History history, List<SearchQueryParameterError> errors, UriBuilder bundleUri,
+			String format, String pretty)
+	{
+		Bundle bundle = new Bundle();
+		bundle.setTimestamp(new Date());
+		bundle.setType(BundleType.HISTORY);
+		history.getEntries().stream().map(e -> toBundleEntryComponent(e)).forEach(bundle::addEntry);
+
+		if (!errors.isEmpty())
+			bundle.addEntry(toBundleEntryComponent(toOperationOutcomeWarning(errors), SearchEntryMode.OUTCOME));
+
+		bundle.setTotal(history.getTotal());
+
+		setLinks(history.getPageAndCount(), bundleUri, format, pretty, bundle, history.getEntries().isEmpty(),
+				history.getTotal());
+
+		return bundle;
+	}
+
+	public BundleEntryComponent toBundleEntryComponent(HistoryEntry historyEntry)
+	{
+		BundleEntryComponent entry = new BundleEntryComponent();
+		entry.getRequest().setMethod(HTTPVerb.fromCode(historyEntry.getMethod()))
+				.setUrl(historyEntry.getResourceType() + (historyEntry.getResource() == null
+						? "/" + historyEntry.getId().toString() + "/_history/" + historyEntry.getVersion()
+						: ""));
+		entry.setResource(historyEntry.getResource());
+		BundleEntryResponseComponent response = entry.getResponse();
+
+		response.setStatus(toStatus(historyEntry.getMethod()));
+		response.setLocation(
+				toLocation(historyEntry.getResourceType(), historyEntry.getId().toString(), historyEntry.getVersion()));
+		response.setEtag(new EntityTag(historyEntry.getVersion(), true).toString());
+		response.setLastModified(Date.from(historyEntry.getLastUpdated().atZone(ZoneId.systemDefault()).toInstant()));
+
+		return entry;
+	}
+
+	private String toStatus(String method)
+	{
+		switch (method)
+		{
+			case "POST":
+				return "201 Created";
+			case "PUT":
+				return "200 OK";
+			case "DELETE":
+				return "200 OK";
+			default:
+				throw new RuntimeException("Method " + method + " not supported");
+		}
+	}
+
+	private String toLocation(String resourceType, String id, String version)
+	{
+		return new IdType(serverBase, resourceType, id, version).getValue();
+	}
+
+	private void setLinks(PageAndCount pageAndCount, UriBuilder bundleUri, String format, String pretty, Bundle bundle,
+			boolean isEmpty, int total)
+	{
 		if (format != null)
 			bundleUri = bundleUri.replaceQueryParam("_format", format);
 		if (pretty != null)
 			bundleUri = bundleUri.replaceQueryParam("_pretty", pretty);
 
-		if (result.getPageAndCount().getCount() > 0)
+		if (pageAndCount.getCount() > 0)
 		{
-			bundleUri = bundleUri.replaceQueryParam("_count", result.getPageAndCount().getCount());
-			bundleUri = bundleUri.replaceQueryParam("_page",
-					result.getPartialResult().isEmpty() ? 1 : result.getPageAndCount().getPage());
+			bundleUri = bundleUri.replaceQueryParam("_count", pageAndCount.getCount());
+			bundleUri = bundleUri.replaceQueryParam("_page", isEmpty ? 1 : pageAndCount.getPage());
 		}
 		else
 			bundleUri = bundleUri.replaceQueryParam("_count", "0");
 
 		bundle.addLink().setRelation("self").setUrlElement(new UriType(bundleUri.build()));
 
-		if (result.getPageAndCount().getCount() > 0 && !result.getPartialResult().isEmpty())
+		if (pageAndCount.getCount() > 0 && !isEmpty)
 		{
 			bundleUri = bundleUri.replaceQueryParam("_page", 1);
-			bundleUri = bundleUri.replaceQueryParam("_count", result.getPageAndCount().getCount());
+			bundleUri = bundleUri.replaceQueryParam("_count", pageAndCount.getCount());
 			bundle.addLink().setRelation("first").setUrlElement(new UriType(bundleUri.build()));
 
-			if (result.getPageAndCount().getPage() > 1)
+			if (pageAndCount.getPage() > 1)
 			{
-				bundleUri = bundleUri.replaceQueryParam("_page", result.getPageAndCount().getPage() - 1);
-				bundleUri = bundleUri.replaceQueryParam("_count", result.getPageAndCount().getCount());
+				bundleUri = bundleUri.replaceQueryParam("_page", pageAndCount.getPage() - 1);
+				bundleUri = bundleUri.replaceQueryParam("_count", pageAndCount.getCount());
 				bundle.addLink().setRelation("previous").setUrlElement(new UriType(bundleUri.build()));
 			}
-			if (!result.isLastPage())
+			if (!pageAndCount.isLastPage(total))
 			{
-				bundleUri = bundleUri.replaceQueryParam("_page", result.getPageAndCount().getPage() + 1);
-				bundleUri = bundleUri.replaceQueryParam("_count", result.getPageAndCount().getCount());
+				bundleUri = bundleUri.replaceQueryParam("_page", pageAndCount.getPage() + 1);
+				bundleUri = bundleUri.replaceQueryParam("_count", pageAndCount.getCount());
 				bundle.addLink().setRelation("next").setUrlElement(new UriType(bundleUri.build()));
 			}
 
-			bundleUri = bundleUri.replaceQueryParam("_page", result.getLastPage());
-			bundleUri = bundleUri.replaceQueryParam("_count", result.getPageAndCount().getCount());
+			bundleUri = bundleUri.replaceQueryParam("_page", pageAndCount.getLastPage(total));
+			bundleUri = bundleUri.replaceQueryParam("_count", pageAndCount.getCount());
 			bundle.addLink().setRelation("last").setUrlElement(new UriType(bundleUri.build()));
 		}
-
-		return bundle;
 	}
 
 	public OperationOutcome toOperationOutcomeWarning(List<SearchQueryParameterError> errors)

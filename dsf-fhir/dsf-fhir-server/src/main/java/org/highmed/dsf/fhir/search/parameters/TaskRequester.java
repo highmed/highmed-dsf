@@ -148,21 +148,17 @@ public class TaskRequester extends AbstractReferenceParameter<Task>
 
 	private void setResource(Reference reference, IIdType idType, ResourceDao<?> dao) throws SQLException
 	{
-		if (idType.hasVersionIdPart())
+		try
 		{
-			dao.readVersion(UUID.fromString(idType.getIdPart()), idType.getVersionIdPartAsLong())
-					.ifPresent(reference::setResource);
-		}
-		else
-		{
-			try
-			{
+			if (idType.hasVersionIdPart())
+				dao.readVersion(UUID.fromString(idType.getIdPart()), idType.getVersionIdPartAsLong())
+						.ifPresent(reference::setResource);
+			else
 				dao.read(UUID.fromString(idType.getIdPart())).ifPresent(reference::setResource);
-			}
-			catch (ResourceDeletedException e)
-			{
-				// ignore while matching, will result in a non match if this would have been the matching resource
-			}
+		}
+		catch (ResourceDeletedException e)
+		{
+			// ignore while matching, will result in a non match if this would have been the matching resource
 		}
 	}
 

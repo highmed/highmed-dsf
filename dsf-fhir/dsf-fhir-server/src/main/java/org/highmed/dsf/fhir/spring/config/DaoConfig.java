@@ -8,6 +8,7 @@ import org.highmed.dsf.fhir.dao.CodeSystemDao;
 import org.highmed.dsf.fhir.dao.EndpointDao;
 import org.highmed.dsf.fhir.dao.GroupDao;
 import org.highmed.dsf.fhir.dao.HealthcareServiceDao;
+import org.highmed.dsf.fhir.dao.HistoryDao;
 import org.highmed.dsf.fhir.dao.LocationDao;
 import org.highmed.dsf.fhir.dao.NamingSystemDao;
 import org.highmed.dsf.fhir.dao.OrganizationDao;
@@ -27,6 +28,7 @@ import org.highmed.dsf.fhir.dao.jdbc.CodeSystemDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.EndpointDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.GroupDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.HealthcareServiceDaoJdbc;
+import org.highmed.dsf.fhir.dao.jdbc.HistroyDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.LocationDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.NamingSystemDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.OrganizationDaoJdbc;
@@ -206,5 +208,11 @@ public class DaoConfig
 				patientDao(), practitionerDao(), practitionerRoleDao(), provenanceDao(), researchStudyDao(),
 				structureDefinitionDao(), structureDefinitionSnapshotDao(), subscriptionDao(), taskDao(),
 				valueSetDao());
+	}
+
+	@Bean
+	public HistoryDao historyDao()
+	{
+		return new HistroyDaoJdbc(dataSource(), fhirConfig.fhirContext(), (BinaryDaoJdbc) binaryDao());
 	}
 }

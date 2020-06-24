@@ -12,9 +12,9 @@ import org.highmed.dsf.fhir.authorization.AuthorizationRule;
 import org.highmed.dsf.fhir.authorization.AuthorizationRuleProvider;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
+import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -120,10 +120,10 @@ public class AuthorizationHelperImpl implements AuthorizationHelper
 	}
 
 	@Override
-	public void checkSearchAllowed(Connection connection, User user, String resourceTypeName)
+	public void checkSearchAllowed(User user, String resourceTypeName)
 	{
 		Optional<AuthorizationRule<Resource>> optRule = getAuthorizationRule(resourceTypeName);
-		optRule.flatMap(rule -> rule.reasonSearchAllowed(connection, user)).ifPresentOrElse(reason ->
+		optRule.flatMap(rule -> rule.reasonSearchAllowed(user)).ifPresentOrElse(reason ->
 		{
 			audit.info("Search of resource {} allowed for user '{}', reason: {}", resourceTypeName, user.getName(),
 					reason);

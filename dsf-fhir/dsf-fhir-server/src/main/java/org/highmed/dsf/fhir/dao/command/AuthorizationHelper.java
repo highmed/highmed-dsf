@@ -16,7 +16,7 @@ public interface AuthorizationHelper
 
 	void checkDeleteAllowed(Connection connection, User user, Resource oldResource);
 
-	void checkSearchAllowed(Connection connection, User user, String resourceTypeName);
+	void checkSearchAllowed(User user, String resourceTypeName);
 
 	void filterIncludeResults(Connection connection, User user, Bundle multipleResult);
 }

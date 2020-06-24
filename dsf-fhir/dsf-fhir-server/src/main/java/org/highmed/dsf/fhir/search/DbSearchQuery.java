@@ -10,8 +10,6 @@ import org.hl7.fhir.r4.model.Resource;
 
 public interface DbSearchQuery
 {
-	boolean isCountOnly(int overallCount);
-
 	String getCountSql();
 
 	String getSearchSql();

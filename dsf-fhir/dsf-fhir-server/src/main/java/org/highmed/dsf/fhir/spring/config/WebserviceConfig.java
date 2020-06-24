@@ -131,6 +131,9 @@ public class WebserviceConfig
 	@Autowired
 	private ReferenceConfig referenceConfig;
 
+	@Autowired
+	private HistoryConfig historyConfig;
+
 	@Bean
 	public ServerBaseProvider serverBaseProvider()
 	{
@@ -165,7 +168,7 @@ public class WebserviceConfig
 				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
 				helperConfig.parameterConverter(), referenceConfig.referenceExtractor(),
 				referenceConfig.referenceResolver(), referenceConfig.referenceCleaner(),
-				authorizationConfig.authorizationRuleProvider());
+				authorizationConfig.authorizationRuleProvider(), historyConfig.historyService());
 	}
 
 	@Bean
@@ -188,7 +191,8 @@ public class WebserviceConfig
 				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
 				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter(),
 				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver(),
-				referenceConfig.referenceCleaner(), authorizationConfig.authorizationRuleProvider());
+				referenceConfig.referenceCleaner(), authorizationConfig.authorizationRuleProvider(),
+				historyConfig.historyService());
 	}
 
 	@Bean
@@ -211,7 +215,8 @@ public class WebserviceConfig
 				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
 				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter(),
 				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver(),
-				referenceConfig.referenceCleaner(), authorizationConfig.authorizationRuleProvider());
+				referenceConfig.referenceCleaner(), authorizationConfig.authorizationRuleProvider(),
+				historyConfig.historyService());
 	}
 
 	@Bean
@@ -235,7 +240,7 @@ public class WebserviceConfig
 				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
 				helperConfig.parameterConverter(), referenceConfig.referenceExtractor(),
 				referenceConfig.referenceResolver(), referenceConfig.referenceCleaner(),
-				authorizationConfig.authorizationRuleProvider());
+				authorizationConfig.authorizationRuleProvider(), historyConfig.historyService());
 	}
 
 	@Bean
@@ -258,7 +263,8 @@ public class WebserviceConfig
 				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
 				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter(),
 				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver(),
-				referenceConfig.referenceCleaner(), authorizationConfig.authorizationRuleProvider());
+				referenceConfig.referenceCleaner(), authorizationConfig.authorizationRuleProvider(),
+				historyConfig.historyService());
 	}
 
 	@Bean
@@ -281,7 +287,8 @@ public class WebserviceConfig
 				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
 				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter(),
 				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver(),
-				referenceConfig.referenceCleaner(), authorizationConfig.authorizationRuleProvider());
+				referenceConfig.referenceCleaner(), authorizationConfig.authorizationRuleProvider(),
+				historyConfig.historyService());
 	}
 
 	@Bean
@@ -306,7 +313,7 @@ public class WebserviceConfig
 				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
 				helperConfig.parameterConverter(), referenceConfig.referenceExtractor(),
 				referenceConfig.referenceResolver(), referenceConfig.referenceCleaner(),
-				authorizationConfig.authorizationRuleProvider());
+				authorizationConfig.authorizationRuleProvider(), historyConfig.historyService());
 	}
 
 	@Bean
@@ -329,7 +336,8 @@ public class WebserviceConfig
 				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
 				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter(),
 				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver(),
-				referenceConfig.referenceCleaner(), authorizationConfig.authorizationRuleProvider());
+				referenceConfig.referenceCleaner(), authorizationConfig.authorizationRuleProvider(),
+				historyConfig.historyService());
 	}
 
 	@Bean
@@ -353,7 +361,7 @@ public class WebserviceConfig
 				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
 				helperConfig.parameterConverter(), referenceConfig.referenceExtractor(),
 				referenceConfig.referenceResolver(), referenceConfig.referenceCleaner(),
-				authorizationConfig.authorizationRuleProvider());
+				authorizationConfig.authorizationRuleProvider(), historyConfig.historyService());
 	}
 
 	@Bean
@@ -377,7 +385,7 @@ public class WebserviceConfig
 				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
 				helperConfig.parameterConverter(), referenceConfig.referenceExtractor(),
 				referenceConfig.referenceResolver(), referenceConfig.referenceCleaner(),
-				authorizationConfig.authorizationRuleProvider());
+				authorizationConfig.authorizationRuleProvider(), historyConfig.historyService());
 	}
 
 	@Bean
@@ -400,7 +408,8 @@ public class WebserviceConfig
 				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
 				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter(),
 				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver(),
-				referenceConfig.referenceCleaner(), authorizationConfig.authorizationRuleProvider());
+				referenceConfig.referenceCleaner(), authorizationConfig.authorizationRuleProvider(),
+				historyConfig.historyService());
 	}
 
 	@Bean
@@ -425,7 +434,7 @@ public class WebserviceConfig
 				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
 				helperConfig.parameterConverter(), referenceConfig.referenceExtractor(),
 				referenceConfig.referenceResolver(), referenceConfig.referenceCleaner(),
-				authorizationConfig.authorizationRuleProvider());
+				authorizationConfig.authorizationRuleProvider(), historyConfig.historyService());
 	}
 
 	@Bean
@@ -449,7 +458,7 @@ public class WebserviceConfig
 				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
 				helperConfig.parameterConverter(), referenceConfig.referenceExtractor(),
 				referenceConfig.referenceResolver(), referenceConfig.referenceCleaner(),
-				authorizationConfig.authorizationRuleProvider());
+				authorizationConfig.authorizationRuleProvider(), historyConfig.historyService());
 	}
 
 	@Bean
@@ -473,7 +482,7 @@ public class WebserviceConfig
 				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
 				helperConfig.parameterConverter(), referenceConfig.referenceExtractor(),
 				referenceConfig.referenceResolver(), referenceConfig.referenceCleaner(),
-				authorizationConfig.authorizationRuleProvider());
+				authorizationConfig.authorizationRuleProvider(), historyConfig.historyService());
 	}
 
 	@Bean
@@ -497,7 +506,7 @@ public class WebserviceConfig
 				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
 				helperConfig.parameterConverter(), referenceConfig.referenceExtractor(),
 				referenceConfig.referenceResolver(), referenceConfig.referenceCleaner(),
-				authorizationConfig.authorizationRuleProvider());
+				authorizationConfig.authorizationRuleProvider(), historyConfig.historyService());
 	}
 
 	@Bean
@@ -523,7 +532,7 @@ public class WebserviceConfig
 				helperConfig.parameterConverter(), referenceConfig.referenceExtractor(),
 				referenceConfig.referenceResolver(), referenceConfig.referenceCleaner(),
 				authorizationConfig.authorizationRuleProvider(), daoConfig.structureDefinitionSnapshotDao(),
-				snapshotConfig.snapshotGenerator());
+				snapshotConfig.snapshotGenerator(), historyConfig.historyService());
 	}
 
 	@Bean
@@ -547,7 +556,7 @@ public class WebserviceConfig
 				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
 				helperConfig.parameterConverter(), referenceConfig.referenceExtractor(),
 				referenceConfig.referenceResolver(), referenceConfig.referenceCleaner(),
-				authorizationConfig.authorizationRuleProvider());
+				authorizationConfig.authorizationRuleProvider(), historyConfig.historyService());
 	}
 
 	@Bean
@@ -570,7 +579,8 @@ public class WebserviceConfig
 				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
 				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter(),
 				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver(),
-				referenceConfig.referenceCleaner(), authorizationConfig.authorizationRuleProvider());
+				referenceConfig.referenceCleaner(), authorizationConfig.authorizationRuleProvider(),
+				historyConfig.historyService());
 	}
 
 	@Bean
@@ -593,7 +603,8 @@ public class WebserviceConfig
 				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
 				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter(),
 				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver(),
-				referenceConfig.referenceCleaner(), authorizationConfig.authorizationRuleProvider());
+				referenceConfig.referenceCleaner(), authorizationConfig.authorizationRuleProvider(),
+				historyConfig.historyService());
 	}
 
 	@Bean
@@ -605,14 +616,14 @@ public class WebserviceConfig
 	private RootServiceSecure rootServiceSecure()
 	{
 		return new RootServiceSecure(rootServiceImpl(), serverBase, helperConfig.responseGenerator(),
-				referenceConfig.referenceResolver());
+				referenceConfig.referenceResolver(), authorizationConfig.rootAuthorizationRule());
 	}
 
 	private RootServiceImpl rootServiceImpl()
 	{
 		return new RootServiceImpl(RootServiceJaxrs.PATH, commandConfig.commandFactory(),
 				helperConfig.responseGenerator(), helperConfig.parameterConverter(), helperConfig.exceptionHandler(),
-				referenceConfig.referenceCleaner());
+				referenceConfig.referenceCleaner(), historyConfig.historyService());
 	}
 
 	@Bean

@@ -203,9 +203,9 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 
 		PartialResult<R> result = exceptionHandler
 				.handleSqlException(() -> dao.searchWithTransaction(connection, query));
-		if (result.getOverallCount() == 1)
+		if (result.getTotal() == 1)
 			return Optional.of(result.getPartialResult().get(0));
-		else if (result.getOverallCount() > 1)
+		else if (result.getTotal() > 1)
 			throw new WebApplicationException(responseGenerator.multipleExists(resourceType.name(), ifNoneExist));
 
 		return Optional.empty();

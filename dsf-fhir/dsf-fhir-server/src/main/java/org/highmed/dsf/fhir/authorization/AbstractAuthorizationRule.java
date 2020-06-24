@@ -118,20 +118,6 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		}
 	}
 
-	@Override
-	public final Optional<String> reasonSearchAllowed(User user)
-	{
-		try (Connection connection = daoProvider.newReadOnlyAutoCommitTransaction())
-		{
-			return reasonSearchAllowed(connection, user);
-		}
-		catch (SQLException e)
-		{
-			logger.warn("Error while accessing database", e);
-			throw new RuntimeException(e);
-		}
-	}
-
 	protected final boolean isLocalUser(User user)
 	{
 		return user != null && UserRole.LOCAL.equals(user.getRole());

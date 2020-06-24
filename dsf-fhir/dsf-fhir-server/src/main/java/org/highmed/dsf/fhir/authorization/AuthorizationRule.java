@@ -124,5 +124,5 @@ public interface AuthorizationRule<R extends Resource>
 	 *            not <code>null</code>
 	 * @return Reason as String in {@link Optional#of(Object)} if delete allowed
 	 */
-	Optional<String> reasonSearchAllowed(Connection connection, User user);
+	Optional<String> reasonHistoryAllowed(User user);
 }

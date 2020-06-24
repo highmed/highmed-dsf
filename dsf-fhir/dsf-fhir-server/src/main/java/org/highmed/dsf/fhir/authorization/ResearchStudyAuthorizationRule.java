@@ -219,7 +219,7 @@ public class ResearchStudyAuthorizationRule extends AbstractAuthorizationRule<Re
 
 		try
 		{
-			return dao.searchWithTransaction(connection, query).getOverallCount() == 1;
+			return dao.searchWithTransaction(connection, query).getTotal() == 1;
 		}
 		catch (SQLException e)
 		{
@@ -251,7 +251,7 @@ public class ResearchStudyAuthorizationRule extends AbstractAuthorizationRule<Re
 		try
 		{
 			PartialResult<ResearchStudy> result = dao.searchWithTransaction(connection, query);
-			return result.getOverallCount() >= 1;
+			return result.getTotal() >= 1;
 		}
 		catch (SQLException e)
 		{
@@ -398,9 +398,17 @@ public class ResearchStudyAuthorizationRule extends AbstractAuthorizationRule<Re
 	}
 
 	@Override
-	public Optional<String> reasonSearchAllowed(Connection connection, User user)
+	public Optional<String> reasonSearchAllowed(User user)
 	{
 		logger.info("Search of ResearchStudy authorized for {} user '{}', will be fitered by users organization {}",
+				user.getRole(), user.getName(), user.getOrganization().getIdElement().getValueAsString());
+		return Optional.of("Allowed for all, filtered by users organization");
+	}
+
+	@Override
+	public Optional<String> reasonHistoryAllowed(User user)
+	{
+		logger.info("History of ResearchStudy authorized for {} user '{}', will be fitered by users organization {}",
 				user.getRole(), user.getName(), user.getOrganization().getIdElement().getValueAsString());
 		return Optional.of("Allowed for all, filtered by users organization");
 	}

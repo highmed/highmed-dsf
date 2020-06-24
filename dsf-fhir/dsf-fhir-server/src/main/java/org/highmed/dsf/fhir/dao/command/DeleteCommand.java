@@ -172,11 +172,11 @@ public class DeleteCommand extends AbstractCommand implements Command
 		PartialResult<?> result = exceptionHandler
 				.handleSqlException(() -> dao.searchWithTransaction(connection, query));
 
-		if (result.getOverallCount() <= 0)
+		if (result.getTotal() <= 0)
 		{
 			return Optional.empty();
 		}
-		else if (result.getOverallCount() == 1)
+		else if (result.getTotal() == 1)
 		{
 			return Optional.of(result.getPartialResult().get(0));
 		}

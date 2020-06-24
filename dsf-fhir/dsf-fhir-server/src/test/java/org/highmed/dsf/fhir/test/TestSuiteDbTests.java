@@ -7,6 +7,7 @@ import org.highmed.dsf.fhir.dao.CodeSystemDaoTest;
 import org.highmed.dsf.fhir.dao.EndpointDaoTest;
 import org.highmed.dsf.fhir.dao.GroupDaoTest;
 import org.highmed.dsf.fhir.dao.HealthcareServiceDaoTest;
+import org.highmed.dsf.fhir.dao.HistoryDaoTest;
 import org.highmed.dsf.fhir.dao.LocationDaoTest;
 import org.highmed.dsf.fhir.dao.NamingSystemDaoTest;
 import org.highmed.dsf.fhir.dao.OrganizationDaoTest;
@@ -32,7 +33,8 @@ import org.junit.runners.Suite.SuiteClasses;
 		NamingSystemDaoTest.class, OrganizationDaoTest.class, PatientDaoTest.class, PractitionerDaoTest.class,
 		PractitionerRoleDaoTest.class, ProvenanceDaoTest.class, ResearchStudyDaoTest.class,
 		StructureDefinitionDaoTest.class, StructureDefinitionSnapshotDaoTest.class, SubscriptionDaoTest.class,
-		TaskDaoTest.class, ValueSetDaoTest.class, TestSuiteIntegrationTests.class, TransactionLearningTest.class })
+		TaskDaoTest.class, ValueSetDaoTest.class, HistoryDaoTest.class, TestSuiteIntegrationTests.class,
+		TransactionLearningTest.class })
 public class TestSuiteDbTests
 {
 	@ClassRule

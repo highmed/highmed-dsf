@@ -145,9 +145,17 @@ public class CodeSystemAuthorizationRule extends AbstractAuthorizationRule<CodeS
 	}
 
 	@Override
-	public Optional<String> reasonSearchAllowed(Connection connection, User user)
+	public Optional<String> reasonSearchAllowed(User user)
 	{
 		logger.info("Search of CodeSystem authorized for {} user '{}', will be fitered by user role", user.getRole(),
+				user.getName());
+		return Optional.of("Allowed for all, filtered by user role");
+	}
+
+	@Override
+	public Optional<String> reasonHistoryAllowed(User user)
+	{
+		logger.info("History of CodeSystem authorized for {} user '{}', will be fitered by user role", user.getRole(),
 				user.getName());
 		return Optional.of("Allowed for all, filtered by user role");
 	}

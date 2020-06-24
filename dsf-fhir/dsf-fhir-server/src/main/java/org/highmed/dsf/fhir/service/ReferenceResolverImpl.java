@@ -286,7 +286,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 				return referenceTargetDao.searchWithTransaction(connection, query);
 		});
 
-		if (result.getOverallCount() <= 0)
+		if (result.getTotal() <= 0)
 		{
 			if (logicalNotConditional)
 				logger.warn("Reference target by identifier '{}|{}' of reference at {} in resource",
@@ -300,13 +300,13 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 						resourceReference.getReferenceLocation());
 			return Optional.empty();
 		}
-		else if (result.getOverallCount() == 1)
+		else if (result.getTotal() == 1)
 		{
 			return Optional.of(result.getPartialResult().get(0));
 		}
 		else // if (result.getOverallCount() > 1)
 		{
-			int overallCount = result.getOverallCount();
+			int overallCount = result.getTotal();
 
 			if (logicalNotConditional)
 				logger.warn(
@@ -536,7 +536,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 		PartialResult<?> result = exceptionHandler
 				.handleSqlException(() -> referenceTargetDao.searchWithTransaction(connection, query));
 
-		if (result.getOverallCount() <= 0)
+		if (result.getTotal() <= 0)
 		{
 			if (logicalNotConditional)
 				return Optional.of(responseGenerator.referenceTargetNotFoundLocallyByIdentifier(bundleIndex, resource,
@@ -545,7 +545,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 				return Optional.of(responseGenerator.referenceTargetNotFoundLocallyByCondition(bundleIndex, resource,
 						resourceReference));
 		}
-		else if (result.getOverallCount() == 1)
+		else if (result.getTotal() == 1)
 		{
 			// return result.getPartialResult().get(0);
 			return Optional.empty();
@@ -554,10 +554,10 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 		{
 			if (logicalNotConditional)
 				return Optional.of(responseGenerator.referenceTargetMultipleMatchesLocallyByIdentifier(bundleIndex,
-						resource, resourceReference, result.getOverallCount()));
+						resource, resourceReference, result.getTotal()));
 			else
 				return Optional.of(responseGenerator.referenceTargetMultipleMatchesLocallyByCondition(bundleIndex,
-						resource, resourceReference, result.getOverallCount()));
+						resource, resourceReference, result.getTotal()));
 		}
 	}
 }

@@ -22,6 +22,7 @@ import org.highmed.dsf.fhir.event.EventHandler;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
+import org.highmed.dsf.fhir.history.HistoryService;
 import org.highmed.dsf.fhir.search.PartialResult;
 import org.highmed.dsf.fhir.search.SearchQuery;
 import org.highmed.dsf.fhir.search.parameters.ResourceLastUpdated;
@@ -61,11 +62,11 @@ public class StructureDefinitionServiceImpl extends
 			ParameterConverter parameterConverter, ReferenceExtractor referenceExtractor,
 			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
 			AuthorizationRuleProvider authorizationRuleProvider, StructureDefinitionDao structureDefinitionSnapshotDao,
-			SnapshotGenerator sanapshotGenerator)
+			SnapshotGenerator sanapshotGenerator, HistoryService historyService)
 	{
 		super(path, StructureDefinition.class, serverBase, defaultPageCount, dao, validator, eventHandler,
 				exceptionHandler, eventGenerator, responseGenerator, parameterConverter, referenceExtractor,
-				referenceResolver, referenceCleaner, authorizationRuleProvider);
+				referenceResolver, referenceCleaner, authorizationRuleProvider, historyService);
 
 		this.snapshotDao = structureDefinitionSnapshotDao;
 		this.snapshotGenerator = sanapshotGenerator;
@@ -204,11 +205,12 @@ public class StructureDefinitionServiceImpl extends
 				return Response.status(Status.BAD_REQUEST).build(); // TODO OperationOutcome
 
 			if (sd.hasSnapshot())
-				return responseGenerator.response(Status.OK, sd, parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
-			else
 				return responseGenerator
-						.response(Status.OK, generateSnapshot(sd), parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers))
+						.response(Status.OK, sd, parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers))
 						.build();
+			else
+				return responseGenerator.response(Status.OK, generateSnapshot(sd),
+						parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
 		}
 		else
 		{
@@ -233,7 +235,8 @@ public class StructureDefinitionServiceImpl extends
 				.ofNullable(result.getPartialResult().isEmpty() ? null : result.getPartialResult().get(0));
 
 		return snapshot
-				.map(d -> responseGenerator.response(Status.OK, d, parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)))
+				.map(d -> responseGenerator.response(Status.OK, d,
+						parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)))
 				.orElse(Response.status(Status.NOT_FOUND)).build();
 	}
 
@@ -257,15 +260,15 @@ public class StructureDefinitionServiceImpl extends
 				Optional::empty);
 
 		if (snapshot.isPresent())
-			return snapshot
-					.map(d -> responseGenerator.response(Status.OK, d, parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)))
-					.get().build();
+			return snapshot.map(d -> responseGenerator.response(Status.OK, d,
+					parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers))).get().build();
 
-		Optional<StructureDefinition> differential = exceptionHandler.handleSqlAndResourceDeletedException(
+		Optional<StructureDefinition> differential = exceptionHandler.handleSqlAndResourceDeletedException(serverBase,
 				resourceTypeName, () -> dao.read(parameterConverter.toUuid(resourceTypeName, id)));
 
 		return differential.map(this::generateSnapshot)
-				.map(d -> responseGenerator.response(Status.OK, d, parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)))
+				.map(d -> responseGenerator.response(Status.OK, d,
+						parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)))
 				.orElse(Response.status(Status.NOT_FOUND)).build();
 	}
 

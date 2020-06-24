@@ -8,13 +8,9 @@ import org.highmed.dsf.fhir.authentication.UserRole;
 
 abstract class AbstractMetaTagAuthorizationRoleUserFilter extends AbstractUserFilter
 {
-	private final String resourceColumn;
-
 	public AbstractMetaTagAuthorizationRoleUserFilter(User user, String resourceColumn)
 	{
-		super(user);
-
-		this.resourceColumn = resourceColumn;
+		super(user, resourceColumn);
 	}
 
 	@Override
@@ -53,12 +49,13 @@ abstract class AbstractMetaTagAuthorizationRoleUserFilter extends AbstractUserFi
 	}
 
 	@Override
-	public void modifyStatement(int parameterIndex, PreparedStatement statement) throws SQLException
+	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement)
+			throws SQLException
 	{
-		if (parameterIndex == 1)
+		if (subqueryParameterIndex == 1)
 			statement.setString(parameterIndex, "[{\"code\": \"" + AUTHORIZATION_ROLE_VALUE_REMOTE
 					+ "\", \"system\": \"" + AUTHORIZATION_ROLE_SYSTEM + "\"}]");
-		else if (parameterIndex == 2)
+		else if (subqueryParameterIndex == 2)
 			statement.setString(parameterIndex, "[{\"code\": \"" + AUTHORIZATION_ROLE_VALUE_LOCAL + "\", \"system\": \""
 					+ AUTHORIZATION_ROLE_SYSTEM + "\"}]");
 		else
