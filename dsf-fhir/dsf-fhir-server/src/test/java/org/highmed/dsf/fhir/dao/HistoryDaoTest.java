@@ -10,7 +10,9 @@ import org.highmed.dsf.fhir.authentication.UserRole;
 import org.highmed.dsf.fhir.dao.jdbc.BinaryDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.HistroyDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.OrganizationDaoJdbc;
+import org.highmed.dsf.fhir.history.AtParameter;
 import org.highmed.dsf.fhir.history.History;
+import org.highmed.dsf.fhir.history.SinceParameter;
 import org.highmed.dsf.fhir.history.user.HistoryUserFilterFactory;
 import org.highmed.dsf.fhir.history.user.HistoryUserFilterFactoryImpl;
 import org.highmed.dsf.fhir.search.PageAndCount;
@@ -48,7 +50,7 @@ public class HistoryDaoTest
 		Organization createdOrganization = orgDao.create(organization);
 
 		History history = dao.readHistory(filterFactory.getUserFilters(new User(createdOrganization, UserRole.LOCAL)),
-				new PageAndCount(1, 1000));
+				new PageAndCount(1, 1000), new AtParameter(), new SinceParameter());
 		assertNotNull(history);
 		assertEquals(1, history.getTotal());
 		assertNotNull(history.getEntries());
@@ -65,7 +67,7 @@ public class HistoryDaoTest
 
 		History history = dao.readHistory(
 				filterFactory.getUserFilter(new User(createdOrganization, UserRole.LOCAL), Organization.class),
-				new PageAndCount(1, 1000), Organization.class);
+				new PageAndCount(1, 1000), new AtParameter(), new SinceParameter(), Organization.class);
 		assertNotNull(history);
 		assertEquals(1, history.getTotal());
 		assertNotNull(history.getEntries());
@@ -82,7 +84,7 @@ public class HistoryDaoTest
 
 		History history = dao.readHistory(
 				filterFactory.getUserFilter(new User(createdOrganization, UserRole.LOCAL), Organization.class),
-				new PageAndCount(1, 1000), Organization.class,
+				new PageAndCount(1, 1000), new AtParameter(), new SinceParameter(), Organization.class,
 				UUID.fromString(createdOrganization.getIdElement().getIdPart()));
 
 		assertNotNull(history);

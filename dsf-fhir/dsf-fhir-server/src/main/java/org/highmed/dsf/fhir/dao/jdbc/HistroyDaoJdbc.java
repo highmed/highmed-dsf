@@ -16,10 +16,13 @@ import java.util.stream.Stream;
 import javax.sql.DataSource;
 
 import org.highmed.dsf.fhir.dao.HistoryDao;
+import org.highmed.dsf.fhir.history.AtParameter;
 import org.highmed.dsf.fhir.history.History;
 import org.highmed.dsf.fhir.history.HistoryEntry;
+import org.highmed.dsf.fhir.history.SinceParameter;
 import org.highmed.dsf.fhir.history.user.HistoryUserFilter;
 import org.highmed.dsf.fhir.search.PageAndCount;
+import org.highmed.dsf.fhir.search.SearchQueryParameter;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
@@ -58,47 +61,55 @@ public class HistroyDaoJdbc implements HistoryDao, InitializingBean
 	}
 
 	@Override
-	public History readHistory(List<HistoryUserFilter> filters, PageAndCount pageAndCount) throws SQLException
+	public History readHistory(List<HistoryUserFilter> filters, PageAndCount pageAndCount, AtParameter atParameter,
+			SinceParameter sinceParameter) throws SQLException
 	{
 		Objects.requireNonNull(filters, "filters");
 		Objects.requireNonNull(pageAndCount, "pageAndCount");
+		Objects.requireNonNull(atParameter, "atParameter");
+		Objects.requireNonNull(sinceParameter, "sinceParameter");
 
-		return readHistory(filters, pageAndCount, null, null);
+		return readHistory(filters, pageAndCount, atParameter, sinceParameter, null, null);
 	}
 
 	@Override
-	public History readHistory(HistoryUserFilter filter, PageAndCount pageAndCount, Class<? extends Resource> resource)
-			throws SQLException
+	public History readHistory(HistoryUserFilter filter, PageAndCount pageAndCount, AtParameter atParameter,
+			SinceParameter sinceParameter, Class<? extends Resource> resource) throws SQLException
 	{
 		Objects.requireNonNull(filter, "filter");
 		Objects.requireNonNull(pageAndCount, "pageAndCount");
+		Objects.requireNonNull(atParameter, "atParameter");
+		Objects.requireNonNull(sinceParameter, "sinceParameter");
 		Objects.requireNonNull(resource, "resource");
 
-		return readHistory(Collections.singletonList(filter), pageAndCount, resource, null);
+		return readHistory(Collections.singletonList(filter), pageAndCount, atParameter, sinceParameter, resource,
+				null);
 	}
 
 	@Override
-	public History readHistory(HistoryUserFilter filter, PageAndCount pageAndCount, Class<? extends Resource> resource,
-			UUID id) throws SQLException
+	public History readHistory(HistoryUserFilter filter, PageAndCount pageAndCount, AtParameter atParameter,
+			SinceParameter sinceParameter, Class<? extends Resource> resource, UUID id) throws SQLException
 	{
 		Objects.requireNonNull(filter, "filter");
 		Objects.requireNonNull(pageAndCount, "pageAndCount");
+		Objects.requireNonNull(atParameter, "atParameter");
+		Objects.requireNonNull(sinceParameter, "sinceParameter");
 		Objects.requireNonNull(resource, "resource");
 		Objects.requireNonNull(id, "id");
 
-		return readHistory(Collections.singletonList(filter), pageAndCount, resource, id);
+		return readHistory(Collections.singletonList(filter), pageAndCount, atParameter, sinceParameter, resource, id);
 	}
 
-	private History readHistory(List<HistoryUserFilter> filter, PageAndCount pageAndCount,
-			Class<? extends Resource> resource, UUID id) throws SQLException
+	private History readHistory(List<HistoryUserFilter> filter, PageAndCount pageAndCount, AtParameter atParameter,
+			SinceParameter sinceParameter, Class<? extends Resource> resource, UUID id) throws SQLException
 	{
 		try (Connection connection = dataSource.getConnection())
 		{
 			int total = 0;
-			try (PreparedStatement statement = connection
-					.prepareStatement(createCountSql(id != null, resource != null, filter)))
+			try (PreparedStatement statement = connection.prepareStatement(
+					createCountSql(id != null, resource != null, filter, atParameter, sinceParameter)))
 			{
-				configureStatement(statement, id, resource, filter);
+				configureStatement(statement, id, resource, filter, atParameter, sinceParameter);
 
 				logger.trace("Executing count query '{}'", statement);
 				try (ResultSet result = statement.executeQuery())
@@ -111,10 +122,10 @@ public class HistroyDaoJdbc implements HistoryDao, InitializingBean
 			List<HistoryEntry> entries = new ArrayList<>();
 			if (!pageAndCount.isCountOnly(total))
 			{
-				try (PreparedStatement statement = connection
-						.prepareStatement(createReadSql(id != null, resource != null, filter, pageAndCount)))
+				try (PreparedStatement statement = connection.prepareStatement(
+						createReadSql(id != null, resource != null, filter, atParameter, sinceParameter, pageAndCount)))
 				{
-					configureStatement(statement, id, resource, filter);
+					configureStatement(statement, id, resource, filter, atParameter, sinceParameter);
 
 					logger.trace("Executing read query '{}'", statement);
 					try (ResultSet result = statement.executeQuery())
@@ -195,23 +206,24 @@ public class HistroyDaoJdbc implements HistoryDao, InitializingBean
 		return resource;
 	}
 
-	private String createCountSql(boolean forId, boolean forResource, List<HistoryUserFilter> filter)
+	private String createCountSql(boolean forId, boolean forResource, List<HistoryUserFilter> filter,
+			AtParameter atParameter, SinceParameter sinceParameter)
 	{
 		String selectSql = "SELECT count(*) FROM history WHERE ";
 
-		return createSql(forId, forResource, filter, selectSql, "");
+		return createSql(forId, forResource, filter, atParameter, sinceParameter, selectSql, "");
 	}
 
 	private String createReadSql(boolean forId, boolean forResource, List<HistoryUserFilter> filter,
-			PageAndCount pageAndCount)
+			AtParameter atParameter, SinceParameter sinceParameter, PageAndCount pageAndCount)
 	{
 		String selectSql = "SELECT id, version, type, method, last_updated, resource FROM history WHERE ";
 
-		return createSql(forId, forResource, filter, selectSql, pageAndCount.getSql());
+		return createSql(forId, forResource, filter, atParameter, sinceParameter, selectSql, pageAndCount.getSql());
 	}
 
-	private String createSql(boolean forId, boolean forResource, List<HistoryUserFilter> filter, String selectSql,
-			String limitOffsetSql)
+	private String createSql(boolean forId, boolean forResource, List<HistoryUserFilter> filter,
+			AtParameter atParameter, SinceParameter sinceParameter, String selectSql, String limitOffsetSql)
 	{
 		String idSql = forId ? "id = ?" : null;
 		String typeSql = forResource ? "type = ?" : null;
@@ -219,12 +231,15 @@ public class HistroyDaoJdbc implements HistoryDao, InitializingBean
 				.collect(Collectors.joining(" OR ", "(", ")"));
 		filterSql = "()".equals(filterSql) ? null : filterSql;
 
-		return Stream.of(idSql, typeSql, filterSql).filter(s -> s != null)
+		Stream<String> params = Stream.of(atParameter, sinceParameter).filter(SearchQueryParameter::isDefined)
+				.map(SearchQueryParameter::getFilterQuery);
+
+		return Stream.concat(Stream.of(idSql, typeSql, filterSql).filter(s -> s != null), params)
 				.collect(Collectors.joining(" AND ", selectSql, limitOffsetSql));
 	}
 
 	private void configureStatement(PreparedStatement statement, UUID id, Class<? extends Resource> resource,
-			List<HistoryUserFilter> filter) throws SQLException
+			List<HistoryUserFilter> filter, AtParameter atParameter, SinceParameter sinceParameter) throws SQLException
 	{
 		int parameterIndex = 1;
 		if (id != null)
@@ -239,6 +254,18 @@ public class HistroyDaoJdbc implements HistoryDao, InitializingBean
 				for (int i = 1; i <= f.getSqlParameterCount(); i++)
 					f.modifyStatement(parameterIndex++, i, statement);
 			}
+		}
+
+		if (atParameter.isDefined())
+		{
+			for (int i = 1; i <= atParameter.getSqlParameterCount(); i++)
+				atParameter.modifyStatement(parameterIndex++, i, statement, null);
+		}
+
+		if (sinceParameter.isDefined())
+		{
+			for (int i = 1; i <= sinceParameter.getSqlParameterCount(); i++)
+				sinceParameter.modifyStatement(parameterIndex++, i, statement, null);
 		}
 	}
 }

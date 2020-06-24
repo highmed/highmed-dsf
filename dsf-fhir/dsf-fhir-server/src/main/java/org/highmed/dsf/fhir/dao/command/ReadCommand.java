@@ -10,6 +10,7 @@ import java.util.UUID;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.EntityTag;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
@@ -21,6 +22,7 @@ import org.highmed.dsf.fhir.event.EventHandler;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
+import org.highmed.dsf.fhir.prefer.PreferHandlingType;
 import org.highmed.dsf.fhir.prefer.PreferReturnType;
 import org.highmed.dsf.fhir.search.PartialResult;
 import org.highmed.dsf.fhir.search.SearchQuery;
@@ -52,6 +54,7 @@ public class ReadCommand extends AbstractCommand implements Command
 	private final ResponseGenerator responseGenerator;
 	private final ExceptionHandler exceptionHandler;
 	private final ReferenceCleaner referenceCleaner;
+	private final PreferHandlingType handlingType;
 
 	private Bundle multipleResult;
 	private Resource singleResult;
@@ -61,7 +64,7 @@ public class ReadCommand extends AbstractCommand implements Command
 	public ReadCommand(int index, User user, PreferReturnType returnType, Bundle bundle, BundleEntryComponent entry,
 			String serverBase, AuthorizationHelper authorizationHelper, int defaultPageCount, DaoProvider daoProvider,
 			ParameterConverter parameterConverter, ResponseGenerator responseGenerator,
-			ExceptionHandler exceptionHandler, ReferenceCleaner referenceCleaner)
+			ExceptionHandler exceptionHandler, ReferenceCleaner referenceCleaner, PreferHandlingType handlingType)
 	{
 		super(5, index, user, returnType, bundle, entry, serverBase, authorizationHelper);
 
@@ -72,6 +75,7 @@ public class ReadCommand extends AbstractCommand implements Command
 		this.responseGenerator = responseGenerator;
 		this.exceptionHandler = exceptionHandler;
 		this.referenceCleaner = referenceCleaner;
+		this.handlingType = handlingType;
 	}
 
 	@Override
@@ -183,11 +187,9 @@ public class ReadCommand extends AbstractCommand implements Command
 		query.configureParameters(cleanQueryParameters);
 		List<SearchQueryParameterError> errors = query.getUnsupportedQueryParameters(cleanQueryParameters);
 
-		// TODO throw error if strict param handling is configured, include warning else
-		// if query parameter errors and client requests strict handling -> bad request outcome
-		// if (!errors.isEmpty() && PreferHandlingType.STRICT.equals(parameterConverter.getPreferHandling(headers)))
-		// return responseGenerator.response(Status.BAD_REQUEST, responseGenerator.toOperationOutcomeError(errors),
-		// parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
+		if (!errors.isEmpty() && PreferHandlingType.STRICT.equals(handlingType))
+			throw new WebApplicationException(responseGenerator.response(Status.BAD_REQUEST,
+					responseGenerator.toOperationOutcomeError(errors), MediaType.APPLICATION_XML_TYPE).build());
 
 		PartialResult<? extends Resource> result = exceptionHandler
 				.handleSqlException(() -> optDao.get().searchWithTransaction(connection, query));
