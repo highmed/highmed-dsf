@@ -14,7 +14,7 @@ import ca.uhn.fhir.context.FhirContext;
 class PreparedStatementFactoryBinary extends AbstractPreparedStatementFactory<Binary>
 {
 	private static final String createSql = "INSERT INTO binaries (binary_id, binary_json, binary_data) VALUES (?, ?, ?)";
-	private static final String readByIdSql = "SELECT deleted, binary_json, binary_data FROM binaries WHERE binary_id = ? ORDER BY version DESC LIMIT 1";
+	private static final String readByIdSql = "SELECT deleted IS NOT NULL, binary_json, binary_data FROM binaries WHERE binary_id = ? ORDER BY version DESC LIMIT 1";
 	private static final String readByIdAndVersionSql = "SELECT binary_json, binary_data FROM binaries WHERE binary_id = ? AND version = ?";
 	private static final String updateNewRowSql = "INSERT INTO binaries (binary_id, version, binary_json, binary_data) VALUES (?, ?, ?, ?)";
 	private static final String updateSameRowSql = "UPDATE binaries SET binary_json = ?, binary_data = ? WHERE binary_id = ? AND version = ?";

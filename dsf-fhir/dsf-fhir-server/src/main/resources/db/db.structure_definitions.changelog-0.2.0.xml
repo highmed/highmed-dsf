@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<property name="json" value="JSONB" dbms="postgresql" />
+	<property name="json" value="varchar(5000)" dbms="h2" />
+
+	<changeSet author="hhund" id="db.structure_definitions.changelog-0.2.0">
+		<dropView viewName="current_structure_definitions"/>
+	
+		<renameColumn tableName="structure_definitions" oldColumnName="deleted" newColumnName="deleted_old"/>
+		
+		<addColumn tableName="structure_definitions">
+			<column name="deleted" type="TIMESTAMP"/>
+		</addColumn>
+	
+		<sql dbms="postgresql">
+			UPDATE structure_definitions SET deleted = current_sd.deleted_new
+			FROM (
+				SELECT structure_definition_id, deleted_old, ((structure_definition->'meta'->>'lastUpdated')::timestamp + interval '1' second) AS deleted_new
+			 	FROM (
+			 		SELECT DISTINCT ON (structure_definition_id) structure_definition_id, version, deleted_old, structure_definition
+					FROM structure_definitions ORDER BY structure_definition_id, version DESC
+				) AS current_sd
+				WHERE deleted_old
+			) AS current_sd
+			WHERE structure_definitions.structure_definition_id = current_sd.structure_definition_id
+		</sql>
+		
+		<dropColumn tableName="structure_definitions" columnName="deleted_old"/>
+	
+		<createView viewName="current_structure_definitions" replaceIfExists="true">
+			SELECT structure_definition_id, version, structure_definition
+			FROM (
+				SELECT DISTINCT ON (structure_definition_id) structure_definition_id, version, deleted, structure_definition
+				FROM structure_definitions ORDER BY structure_definition_id, version DESC
+			) AS current_sd
+			WHERE deleted IS NULL
+		</createView>
+
+		<sql dbms="postgresql">
+			ALTER TABLE current_structure_definitions OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_structure_definitions TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_structure_definitions TO ${db.server_users_group};
+		</sql>
+	</changeSet>
+</databaseChangeLog>

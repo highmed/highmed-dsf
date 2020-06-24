@@ -45,9 +45,8 @@ public class EndpointDaoJdbc extends AbstractResourceDaoJdbc<Endpoint> implement
 			return false;
 
 		try (Connection connection = getDataSource().getConnection();
-				PreparedStatement statement = connection.prepareStatement("SELECT count(*) FROM " + getResourceTable()
-						+ " WHERE " + getResourceColumn() + "->>'address' = ? AND " + getResourceColumn()
-						+ "->>'status' = 'active' AND NOT deleted"))
+				PreparedStatement statement = connection.prepareStatement(
+						"SELECT count(*) FROM current_endpoints WHERE endpoint->>'address' = ? AND endpoint->>'status' = 'active'"))
 		{
 			statement.setString(1, address);
 

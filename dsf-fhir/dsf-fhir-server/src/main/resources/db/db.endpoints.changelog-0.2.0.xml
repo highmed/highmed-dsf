@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<property name="json" value="JSONB" dbms="postgresql" />
+	<property name="json" value="varchar(5000)" dbms="h2" />
+
+	<changeSet author="hhund" id="db.endpoints.changelog-0.2.0">
+		<dropView viewName="current_endpoints"/>
+	
+		<renameColumn tableName="endpoints" oldColumnName="deleted" newColumnName="deleted_old"/>
+		
+		<addColumn tableName="endpoints">
+			<column name="deleted" type="TIMESTAMP"/>
+		</addColumn>
+	
+		<sql dbms="postgresql">
+			UPDATE endpoints SET deleted = current_e.deleted_new
+			FROM (
+				SELECT endpoint_id, deleted_old, ((endpoint->'meta'->>'lastUpdated')::timestamp + interval '1' second) AS deleted_new
+			 	FROM (
+			 		SELECT DISTINCT ON (endpoint_id) endpoint_id, version, deleted_old, endpoint
+					FROM endpoints ORDER BY endpoint_id, version DESC
+				) AS current_e
+				WHERE deleted_old
+			) AS current_e
+			WHERE endpoints.endpoint_id = current_e.endpoint_id
+		</sql>
+		
+		<dropColumn tableName="endpoints" columnName="deleted_old"/>
+	
+		<createView viewName="current_endpoints" replaceIfExists="true">
+			SELECT endpoint_id, version, endpoint
+			FROM (
+				SELECT DISTINCT ON (endpoint_id) endpoint_id, version, deleted, endpoint
+				FROM endpoints ORDER BY endpoint_id, version DESC
+			) AS current_e
+			WHERE deleted IS NULL
+		</createView>
+
+		<sql dbms="postgresql">
+			ALTER TABLE current_endpoints OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_endpoints TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_endpoints TO ${db.server_users_group};
+		</sql>
+	</changeSet>
+</databaseChangeLog>

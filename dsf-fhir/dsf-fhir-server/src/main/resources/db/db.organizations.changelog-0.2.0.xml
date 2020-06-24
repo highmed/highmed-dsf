@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<property name="json" value="JSONB" dbms="postgresql" />
+	<property name="json" value="varchar(5000)" dbms="h2" />
+
+	<changeSet author="hhund" id="db.organizations.changelog-0.2.0">
+		<dropView viewName="current_organizations"/>
+	
+		<renameColumn tableName="organizations" oldColumnName="deleted" newColumnName="deleted_old"/>
+		
+		<addColumn tableName="organizations">
+			<column name="deleted" type="TIMESTAMP"/>
+		</addColumn>
+	
+		<sql dbms="postgresql">
+			UPDATE organizations SET deleted = current_o.deleted_new
+			FROM (
+				SELECT organization_id, deleted_old, ((organization->'meta'->>'lastUpdated')::timestamp + interval '1' second) AS deleted_new
+			 	FROM (
+			 		SELECT DISTINCT ON (organization_id) organization_id, version, deleted_old, organization
+					FROM organizations ORDER BY organization_id, version DESC
+				) AS current_o
+				WHERE deleted_old
+			) AS current_o
+			WHERE organizations.organization_id = current_o.organization_id
+		</sql>
+		
+		<dropColumn tableName="organizations" columnName="deleted_old"/>
+	
+		<createView viewName="current_organizations" replaceIfExists="true">
+			SELECT organization_id, version, organization
+			FROM (
+				SELECT DISTINCT ON (organization_id) organization_id, version, deleted, organization
+				FROM organizations ORDER BY organization_id, version DESC
+			) AS current_o
+			WHERE deleted IS NULL
+		</createView>
+
+		<sql dbms="postgresql">
+			ALTER TABLE current_organizations OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_organizations TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_organizations TO ${db.server_users_group};
+		</sql>
+	</changeSet>
+</databaseChangeLog>

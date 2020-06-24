@@ -13,4 +13,44 @@
 			DROP INDEX IF EXISTS structure_definition_snapshot_info_index;
 		</sql>
 	</changeSet>
+	
+	<changeSet author="hhund" id="db.structure_definition_snapshots.changelog-0.2.0_2">
+		<dropView viewName="current_structure_definition_snapshots"/>
+	
+		<renameColumn tableName="structure_definition_snapshots" oldColumnName="deleted" newColumnName="deleted_old"/>
+		
+		<addColumn tableName="structure_definition_snapshots">
+			<column name="deleted" type="TIMESTAMP"/>
+		</addColumn>
+	
+		<sql dbms="postgresql">
+			UPDATE structure_definition_snapshots SET deleted = current_sds.deleted_new
+			FROM (
+				SELECT structure_definition_snapshot_id, deleted_old, ((structure_definition_snapshot->'meta'->>'lastUpdated')::timestamp + interval '1' second) AS deleted_new
+			 	FROM (
+			 		SELECT DISTINCT ON (structure_definition_snapshot_id) structure_definition_snapshot_id, version, deleted_old, structure_definition_snapshot
+					FROM structure_definition_snapshots ORDER BY structure_definition_snapshot_id, version DESC
+				) AS current_sds
+				WHERE deleted_old
+			) AS current_sds
+			WHERE structure_definition_snapshots.structure_definition_snapshot_id = current_sds.structure_definition_snapshot_id
+		</sql>
+		
+		<dropColumn tableName="structure_definition_snapshots" columnName="deleted_old"/>
+	
+		<createView viewName="current_structure_definition_snapshots" replaceIfExists="true">
+			SELECT structure_definition_snapshot_id, version, structure_definition_snapshot
+			FROM (
+				SELECT DISTINCT ON (structure_definition_snapshot_id) structure_definition_snapshot_id, version, deleted, structure_definition_snapshot
+				FROM structure_definition_snapshots ORDER BY structure_definition_snapshot_id, version DESC
+			) AS current_sds
+			WHERE deleted IS NULL
+		</createView>
+
+		<sql dbms="postgresql">
+			ALTER TABLE current_structure_definition_snapshots OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_structure_definition_snapshots TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_structure_definition_snapshots TO ${db.server_users_group};
+		</sql>
+	</changeSet>
 </databaseChangeLog>

@@ -28,7 +28,7 @@ class PreparedStatementFactoryDefault<R extends Resource> extends AbstractPrepar
 
 	private static String readByIdSql(String resourceTable, String resourceIdColumn, String resourceColumn)
 	{
-		return "SELECT deleted, " + resourceColumn + " FROM " + resourceTable + " WHERE " + resourceIdColumn
+		return "SELECT deleted IS NOT NULL, " + resourceColumn + " FROM " + resourceTable + " WHERE " + resourceIdColumn
 				+ " = ? ORDER BY version DESC LIMIT 1";
 	}
 

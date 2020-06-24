@@ -1,10 +1,13 @@
 package org.highmed.dsf.fhir.dao;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
+
+import java.util.Optional;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.dsf.fhir.dao.jdbc.NamingSystemDaoJdbc;
 import org.hl7.fhir.r4.model.NamingSystem;
+import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -49,5 +52,15 @@ public class NamingSystemDaoTest extends AbstractResourceDaoTest<NamingSystem, N
 	protected void checkUpdates(NamingSystem resource)
 	{
 		assertEquals(description, resource.getDescription());
+	}
+
+	@Test
+	public void testReadByName() throws Exception
+	{
+		NamingSystem newResource = createResource();
+		dao.create(newResource);
+
+		Optional<NamingSystem> readByName = dao.readByName(name);
+		assertTrue(readByName.isPresent());
 	}
 }

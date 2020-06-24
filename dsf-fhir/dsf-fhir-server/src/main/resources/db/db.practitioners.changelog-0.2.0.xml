@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<property name="json" value="JSONB" dbms="postgresql" />
+	<property name="json" value="varchar(5000)" dbms="h2" />
+
+	<changeSet author="hhund" id="db.practitioners.changelog-0.2.0">
+		<dropView viewName="current_practitioners"/>
+	
+		<renameColumn tableName="practitioners" oldColumnName="deleted" newColumnName="deleted_old"/>
+		
+		<addColumn tableName="practitioners">
+			<column name="deleted" type="TIMESTAMP"/>
+		</addColumn>
+	
+		<sql dbms="postgresql">
+			UPDATE practitioners SET deleted = current_p.deleted_new
+			FROM (
+				SELECT practitioner_id, deleted_old, ((practitioner->'meta'->>'lastUpdated')::timestamp + interval '1' second) AS deleted_new
+			 	FROM (
+			 		SELECT DISTINCT ON (practitioner_id) practitioner_id, version, deleted_old, practitioner
+					FROM practitioners ORDER BY practitioner_id, version DESC
+				) AS current_p
+				WHERE deleted_old
+			) AS current_p
+			WHERE practitioners.practitioner_id = current_p.practitioner_id
+		</sql>
+		
+		<dropColumn tableName="practitioners" columnName="deleted_old"/>
+	
+		<createView viewName="current_practitioners" replaceIfExists="true">
+			SELECT practitioner_id, version, practitioner
+			FROM (
+				SELECT DISTINCT ON (practitioner_id) practitioner_id, version, deleted, practitioner
+				FROM practitioners ORDER BY practitioner_id, version DESC
+			) AS current_p
+			WHERE deleted IS NULL
+		</createView>
+
+		<sql dbms="postgresql">
+			ALTER TABLE current_practitioners OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_practitioners TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_practitioners TO ${db.server_users_group};
+		</sql>
+	</changeSet>
+</databaseChangeLog>

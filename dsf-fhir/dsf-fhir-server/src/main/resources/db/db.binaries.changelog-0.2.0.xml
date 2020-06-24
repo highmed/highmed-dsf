@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<property name="json" value="JSONB" dbms="postgresql" />
+	<property name="json" value="varchar(5000)" dbms="h2" />
+
+	<changeSet author="hhund" id="db.binaries.changelog-0.2.0">
+		<dropView viewName="current_binaries"/>
+	
+		<renameColumn tableName="binaries" oldColumnName="deleted" newColumnName="deleted_old"/>
+		
+		<addColumn tableName="binaries">
+			<column name="deleted" type="TIMESTAMP"/>
+		</addColumn>
+	
+		<sql dbms="postgresql">
+			UPDATE binaries SET deleted = current_b.deleted_new
+			FROM (
+				SELECT binary_id, deleted_old, ((binary_json->'meta'->>'lastUpdated')::timestamp + interval '1' second) AS deleted_new
+			 	FROM (
+			 		SELECT DISTINCT ON (binary_id) binary_id, version, deleted_old, binary_json
+					FROM binaries ORDER BY binary_id, version DESC
+				) AS current_b
+				WHERE deleted_old
+			) AS current_b
+			WHERE binaries.binary_id = current_b.binary_id
+		</sql>
+		
+		<dropColumn tableName="binaries" columnName="deleted_old"/>
+	
+		<createView viewName="current_binaries" replaceIfExists="true">
+			SELECT binary_id, version, binary_json, binary_data
+			FROM (
+				SELECT DISTINCT ON (binary_id) binary_id, version, deleted, binary_json, binary_data
+				FROM binaries ORDER BY binary_id, version DESC
+			) AS current_b
+			WHERE deleted IS NULL
+		</createView>
+
+		<sql dbms="postgresql">
+			ALTER TABLE current_binaries OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_binaries TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_binaries TO ${db.server_users_group};
+		</sql>
+	</changeSet>
+</databaseChangeLog>

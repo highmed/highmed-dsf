@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<property name="json" value="JSONB" dbms="postgresql" />
+	<property name="json" value="varchar(5000)" dbms="h2" />
+
+	<changeSet author="hhund" id="db.patients.changelog-0.2.0">
+		<dropView viewName="current_patients"/>
+	
+		<renameColumn tableName="patients" oldColumnName="deleted" newColumnName="deleted_old"/>
+		
+		<addColumn tableName="patients">
+			<column name="deleted" type="TIMESTAMP"/>
+		</addColumn>
+	
+		<sql dbms="postgresql">
+			UPDATE patients SET deleted = current_p.deleted_new
+			FROM (
+				SELECT patient_id, deleted_old, ((patient->'meta'->>'lastUpdated')::timestamp + interval '1' second) AS deleted_new
+			 	FROM (
+			 		SELECT DISTINCT ON (patient_id) patient_id, version, deleted_old, patient
+					FROM patients ORDER BY patient_id, version DESC
+				) AS current_p
+				WHERE deleted_old
+			) AS current_p
+			WHERE patients.patient_id = current_p.patient_id
+		</sql>
+		
+		<dropColumn tableName="patients" columnName="deleted_old"/>
+	
+		<createView viewName="current_patients" replaceIfExists="true">
+			SELECT patient_id, version, patient
+			FROM (
+				SELECT DISTINCT ON (patient_id) patient_id, version, deleted, patient
+				FROM patients ORDER BY patient_id, version DESC
+			) AS current_p
+			WHERE deleted IS NULL
+		</createView>
+
+		<sql dbms="postgresql">
+			ALTER TABLE current_patients OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_patients TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_patients TO ${db.server_users_group};
+		</sql>
+	</changeSet>
+</databaseChangeLog>
