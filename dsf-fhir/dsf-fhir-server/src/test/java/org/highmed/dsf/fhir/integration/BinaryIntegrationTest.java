@@ -48,7 +48,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		PartialResult<Organization> result = orgDao.search(orgDao.createSearchQueryWithoutUserFilter(1, 1)
 				.configureParameters(Map.of("name", Arrays.asList("Test Organization"))));
 		assertNotNull(result);
-		assertEquals(1, result.getOverallCount());
+		assertEquals(1, result.getTotal());
 		assertNotNull(result.getPartialResult());
 		assertEquals(1, result.getPartialResult().size());
 		assertNotNull(result.getPartialResult().get(0));
@@ -76,7 +76,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		PartialResult<Organization> result = orgDao.search(orgDao.createSearchQueryWithoutUserFilter(1, 1)
 				.configureParameters(Map.of("name", Arrays.asList("Test Organization"))));
 		assertNotNull(result);
-		assertEquals(1, result.getOverallCount());
+		assertEquals(1, result.getTotal());
 		assertNotNull(result.getPartialResult());
 		assertEquals(1, result.getPartialResult().size());
 		assertNotNull(result.getPartialResult().get(0));
@@ -108,7 +108,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		PartialResult<Organization> result = orgDao.search(orgDao.createSearchQueryWithoutUserFilter(1, 1)
 				.configureParameters(Map.of("name", Arrays.asList("Test Organization"))));
 		assertNotNull(result);
-		assertEquals(1, result.getOverallCount());
+		assertEquals(1, result.getTotal());
 		assertNotNull(result.getPartialResult());
 		assertEquals(1, result.getPartialResult().size());
 		assertNotNull(result.getPartialResult().get(0));
@@ -140,7 +140,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		PartialResult<Organization> result = orgDao.search(orgDao.createSearchQueryWithoutUserFilter(1, 1)
 				.configureParameters(Map.of("name", Arrays.asList("Test Organization"))));
 		assertNotNull(result);
-		assertEquals(1, result.getOverallCount());
+		assertEquals(1, result.getTotal());
 		assertNotNull(result.getPartialResult());
 		assertEquals(1, result.getPartialResult().size());
 		assertNotNull(result.getPartialResult().get(0));
@@ -172,7 +172,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		PartialResult<Organization> result = orgDao.search(orgDao.createSearchQueryWithoutUserFilter(1, 1)
 				.configureParameters(Map.of("name", Arrays.asList("Test Organization"))));
 		assertNotNull(result);
-		assertEquals(1, result.getOverallCount());
+		assertEquals(1, result.getTotal());
 		assertNotNull(result.getPartialResult());
 		assertEquals(1, result.getPartialResult().size());
 		assertNotNull(result.getPartialResult().get(0));
@@ -212,7 +212,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		PartialResult<Organization> result = orgDao.search(orgDao.createSearchQueryWithoutUserFilter(1, 1)
 				.configureParameters(Map.of("name", Arrays.asList("External Test Organization"))));
 		assertNotNull(result);
-		assertEquals(1, result.getOverallCount());
+		assertEquals(1, result.getTotal());
 		assertNotNull(result.getPartialResult());
 		assertEquals(1, result.getPartialResult().size());
 		assertNotNull(result.getPartialResult().get(0));
@@ -240,7 +240,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		PartialResult<Organization> result = orgDao.search(orgDao.createSearchQueryWithoutUserFilter(1, 1)
 				.configureParameters(Map.of("name", Arrays.asList("Test Organization"))));
 		assertNotNull(result);
-		assertEquals(1, result.getOverallCount());
+		assertEquals(1, result.getTotal());
 		assertNotNull(result.getPartialResult());
 		assertEquals(1, result.getPartialResult().size());
 		assertNotNull(result.getPartialResult().get(0));
@@ -276,7 +276,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		PartialResult<Organization> result = orgDao.search(orgDao.createSearchQueryWithoutUserFilter(1, 1)
 				.configureParameters(Map.of("name", Arrays.asList("Test Organization"))));
 		assertNotNull(result);
-		assertEquals(1, result.getOverallCount());
+		assertEquals(1, result.getTotal());
 		assertNotNull(result.getPartialResult());
 		assertEquals(1, result.getPartialResult().size());
 		assertNotNull(result.getPartialResult().get(0));
@@ -316,7 +316,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		PartialResult<Organization> result = orgDao.search(orgDao.createSearchQueryWithoutUserFilter(1, 1)
 				.configureParameters(Map.of("name", Arrays.asList("External Test Organization"))));
 		assertNotNull(result);
-		assertEquals(1, result.getOverallCount());
+		assertEquals(1, result.getTotal());
 		assertNotNull(result.getPartialResult());
 		assertEquals(1, result.getPartialResult().size());
 		assertNotNull(result.getPartialResult().get(0));
@@ -356,7 +356,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		PartialResult<Organization> result = orgDao.search(orgDao.createSearchQueryWithoutUserFilter(1, 1)
 				.configureParameters(Map.of("name", Arrays.asList("Test Organization"))));
 		assertNotNull(result);
-		assertEquals(1, result.getOverallCount());
+		assertEquals(1, result.getTotal());
 		assertNotNull(result.getPartialResult());
 		assertEquals(1, result.getPartialResult().size());
 		assertNotNull(result.getPartialResult().get(0));
@@ -396,7 +396,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		PartialResult<Organization> result = orgDao.search(orgDao.createSearchQueryWithoutUserFilter(1, 1)
 				.configureParameters(Map.of("name", Arrays.asList("Test Organization"))));
 		assertNotNull(result);
-		assertEquals(1, result.getOverallCount());
+		assertEquals(1, result.getTotal());
 		assertNotNull(result.getPartialResult());
 		assertEquals(1, result.getPartialResult().size());
 		assertNotNull(result.getPartialResult().get(0));
@@ -436,7 +436,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		PartialResult<Organization> result = orgDao.search(orgDao.createSearchQueryWithoutUserFilter(1, 1)
 				.configureParameters(Map.of("name", Arrays.asList("External Test Organization"))));
 		assertNotNull(result);
-		assertEquals(1, result.getOverallCount());
+		assertEquals(1, result.getTotal());
 		assertNotNull(result.getPartialResult());
 		assertEquals(1, result.getPartialResult().size());
 		assertNotNull(result.getPartialResult().get(0));
@@ -476,7 +476,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		PartialResult<Organization> result = orgDao.search(orgDao.createSearchQueryWithoutUserFilter(1, 1)
 				.configureParameters(Map.of("name", Arrays.asList("Test Organization"))));
 		assertNotNull(result);
-		assertEquals(1, result.getOverallCount());
+		assertEquals(1, result.getTotal());
 		assertNotNull(result.getPartialResult());
 		assertEquals(1, result.getPartialResult().size());
 		assertNotNull(result.getPartialResult().get(0));
@@ -1472,7 +1472,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		PartialResult<Organization> result = orgDao
 				.search(orgDao.createSearchQueryWithoutUserFilter(1, 2).configureParameters(Collections.emptyMap()));
 		assertNotNull(result);
-		assertEquals(2, result.getOverallCount());
+		assertEquals(2, result.getTotal());
 		assertNotNull(result.getPartialResult());
 		assertEquals(2, result.getPartialResult().size());
 		assertNotNull(result.getPartialResult().get(0));
@@ -1528,7 +1528,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		PartialResult<Organization> result = orgDao
 				.search(orgDao.createSearchQueryWithoutUserFilter(1, 2).configureParameters(Collections.emptyMap()));
 		assertNotNull(result);
-		assertEquals(2, result.getOverallCount());
+		assertEquals(2, result.getTotal());
 		assertNotNull(result.getPartialResult());
 		assertEquals(2, result.getPartialResult().size());
 		assertNotNull(result.getPartialResult().get(0));

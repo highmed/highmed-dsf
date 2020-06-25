@@ -12,8 +12,8 @@ import java.util.stream.Collectors;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 
 import org.highmed.dsf.fhir.authorization.AuthorizationRule;
 import org.highmed.dsf.fhir.dao.ResourceDao;
@@ -114,8 +114,8 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 
 			OperationOutcome outcome = new OperationOutcome();
 			validationResult.populateOperationOutcome(outcome);
-			return responseGenerator.response(Status.FORBIDDEN, outcome, parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers))
-					.build();
+			return responseGenerator.response(Status.FORBIDDEN, outcome,
+					parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
 		}
 		else
 		{
@@ -266,12 +266,53 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	}
 
 	@Override
+	public Response history(UriInfo uri, HttpHeaders headers)
+	{
+		logger.debug("Current user '{}', role '{}'", userProvider.getCurrentUser().getName(),
+				userProvider.getCurrentUser().getRole());
+
+		Optional<String> reasonHistoryAllowed = authorizationRule.reasonHistoryAllowed(getCurrentUser());
+		if (reasonHistoryAllowed.isEmpty())
+		{
+			audit.info("History of resource {} denied for user '{}'", resourceTypeName, getCurrentUser().getName());
+			return forbidden("search");
+		}
+		else
+		{
+			audit.info("History of resource {} allowed for user '{}': {}", resourceTypeName, getCurrentUser().getName(),
+					reasonHistoryAllowed.get());
+			return delegate.history(uri, headers);
+		}
+	}
+
+	@Override
+	public Response history(String id, UriInfo uri, HttpHeaders headers)
+	{
+		logger.debug("Current user '{}', role '{}'", userProvider.getCurrentUser().getName(),
+				userProvider.getCurrentUser().getRole());
+
+		Optional<String> reasonHistoryAllowed = authorizationRule.reasonHistoryAllowed(getCurrentUser());
+		if (reasonHistoryAllowed.isEmpty())
+		{
+			audit.info("History of resource {}/{} denied for user '{}'", resourceTypeName, id,
+					getCurrentUser().getName());
+			return forbidden("search");
+		}
+		else
+		{
+			audit.info("History of resource {}/{} allowed for user '{}': {}", resourceTypeName, id,
+					getCurrentUser().getName(), reasonHistoryAllowed.get());
+			return delegate.history(id, uri, headers);
+		}
+	}
+
+	@Override
 	public Response update(String id, R resource, UriInfo uri, HttpHeaders headers)
 	{
 		logger.debug("Current user '{}', role '{}'", userProvider.getCurrentUser().getName(),
 				userProvider.getCurrentUser().getRole());
 
-		Optional<R> dbResource = exceptionHandler.handleSqlAndResourceDeletedException(resourceTypeName,
+		Optional<R> dbResource = exceptionHandler.handleSqlAndResourceDeletedException(serverBase, resourceTypeName,
 				() -> dao.read(parameterConverter.toUuid(resourceTypeName, id)));
 
 		if (dbResource.isEmpty())
@@ -329,7 +370,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		PartialResult<R> result = getExisting(queryParameters);
 
 		// No matches, no id provided: The server creates the resource.
-		if (result.getOverallCount() <= 0 && !resource.hasId())
+		if (result.getTotal() <= 0 && !resource.hasId())
 		{
 			// more security checks and audit log in create method
 			return create(resource, uri, headers);
@@ -337,7 +378,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 
 		// No matches, id provided: The server treats the interaction as an Update as Create interaction (or rejects it,
 		// if it does not support Update as Create) -> reject
-		else if (result.getOverallCount() <= 0 && resource.hasId())
+		else if (result.getTotal() <= 0 && resource.hasId())
 		{
 			audit.info("Create as Update of non existing resource {} denied for user '{}'",
 					resource.getIdElement().getValue(), getCurrentUser().getName());
@@ -346,7 +387,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 
 		// One Match, no resource id provided OR (resource id provided and it matches the found resource):
 		// The server performs the update against the matching resource
-		else if (result.getOverallCount() == 1)
+		else if (result.getTotal() == 1)
 		{
 			R dbResource = result.getPartialResult().get(0);
 			IdType dbResourceId = dbResource.getIdElement();
@@ -497,14 +538,14 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		PartialResult<R> result = exceptionHandler.handleSqlException(() -> dao.search(query));
 
 		// No matches
-		if (result.getOverallCount() <= 0)
+		if (result.getTotal() <= 0)
 		{
 			// TODO audit log
 			return Response.noContent().build(); // TODO return OperationOutcome
 		}
 
 		// One Match: The server performs an ordinary delete on the matching resource
-		else if (result.getOverallCount() == 1)
+		else if (result.getTotal() == 1)
 		{
 			R resource = result.getPartialResult().get(0);
 

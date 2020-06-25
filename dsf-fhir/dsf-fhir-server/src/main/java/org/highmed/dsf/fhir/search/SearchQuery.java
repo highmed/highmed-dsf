@@ -307,7 +307,7 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 				+ resourceTable;
 
 		return searchQueryMain + (!filterQuery.isEmpty() ? (" WHERE " + filterQuery) : "") + sortSql
-				+ pageAndCount.sql();
+				+ pageAndCount.getSql();
 	}
 
 	@Override
@@ -321,8 +321,13 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 
 			int index = 0;
 			if (userFilter != null)
+			{
 				while (index < userFilter.getSqlParameterCount())
-					userFilter.modifyStatement(++index, statement);
+				{
+					int i = ++index;
+					userFilter.modifyStatement(i, i, statement);
+				}
+			}
 
 			for (SearchQueryParameter<?> q : filtered)
 				for (int i = 0; i < q.getSqlParameterCount(); i++)
@@ -339,12 +344,6 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 	public PageAndCount getPageAndCount()
 	{
 		return pageAndCount;
-	}
-
-	@Override
-	public boolean isCountOnly(int overallCount)
-	{
-		return pageAndCount.getPage() < 1 || pageAndCount.getCount() < 1 || pageAndCount.getPageStart() > overallCount;
 	}
 
 	public UriBuilder configureBundleUri(UriBuilder bundleUri)

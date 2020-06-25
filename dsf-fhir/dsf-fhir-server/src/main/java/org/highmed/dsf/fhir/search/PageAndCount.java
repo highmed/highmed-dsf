@@ -11,9 +11,14 @@ public class PageAndCount
 		this.count = count;
 	}
 
-	protected String sql()
+	public String getSql()
 	{
 		return " LIMIT " + count + (page > 1 ? (" OFFSET " + ((page - 1) * count)) : "");
+	}
+
+	public boolean isCountOnly(int total)
+	{
+		return page < 1 || count < 1 || getPageStart() > total;
 	}
 
 	public int getPage()
@@ -40,5 +45,15 @@ public class PageAndCount
 			return 0;
 
 		return getPageStart() - 1 + count;
+	}
+
+	public boolean isLastPage(int total)
+	{
+		return page >= getLastPage(total);
+	}
+
+	public int getLastPage(int total)
+	{
+		return (int) Math.ceil((double) total / count);
 	}
 }

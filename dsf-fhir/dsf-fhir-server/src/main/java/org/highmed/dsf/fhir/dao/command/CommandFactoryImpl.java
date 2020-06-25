@@ -21,6 +21,7 @@ import org.highmed.dsf.fhir.event.EventHandler;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
+import org.highmed.dsf.fhir.prefer.PreferHandlingType;
 import org.highmed.dsf.fhir.prefer.PreferReturnType;
 import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.highmed.dsf.fhir.service.ReferenceExtractor;
@@ -97,11 +98,12 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 	}
 
 	// read, vread
-	private Command get(int index, User user, PreferReturnType returnType, Bundle bundle, BundleEntryComponent entry)
+	private Command get(int index, User user, PreferReturnType returnType, Bundle bundle, BundleEntryComponent entry,
+			PreferHandlingType handlingType)
 	{
 		return new ReadCommand(index, user, returnType, bundle, entry, serverBase, authorizationHelper,
 				defaultPageCount, daoProvider, parameterConverter, responseGenerator, exceptionHandler,
-				referenceCleaner);
+				referenceCleaner, handlingType);
 	}
 
 	// create, conditional create
@@ -171,16 +173,18 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 	}
 
 	@Override
-	public CommandList createCommands(Bundle bundle, User user, PreferReturnType returnType) throws BadBundleException
+	public CommandList createCommands(Bundle bundle, User user, PreferReturnType returnType,
+			PreferHandlingType handlingType) throws BadBundleException
 	{
 		Objects.requireNonNull(bundle, "bundle");
 		Objects.requireNonNull(user, "user");
 		Objects.requireNonNull(returnType, "returnType");
+		Objects.requireNonNull(handlingType, "handlingType");
 
 		if (bundle.getType() != null)
 		{
-			List<Command> commands = IntStream.range(0, bundle.getEntry().size())
-					.mapToObj(index -> createCommand(index, user, returnType, bundle, bundle.getEntry().get(index)))
+			List<Command> commands = IntStream.range(0, bundle.getEntry().size()).mapToObj(
+					index -> createCommand(index, user, returnType, handlingType, bundle, bundle.getEntry().get(index)))
 					.flatMap(Function.identity()).collect(Collectors.toList());
 
 			switch (bundle.getType())
@@ -199,8 +203,8 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 			throw new BadBundleException("Missing bundle type");
 	}
 
-	protected Stream<Command> createCommand(int index, User user, PreferReturnType returnType, Bundle bundle,
-			BundleEntryComponent entry)
+	protected Stream<Command> createCommand(int index, User user, PreferReturnType returnType,
+			PreferHandlingType handlingType, Bundle bundle, BundleEntryComponent entry)
 	{
 		if (entry.hasRequest() && entry.getRequest().hasMethod())
 		{
@@ -209,7 +213,7 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 				switch (entry.getRequest().getMethod())
 				{
 					case GET: // read
-						return Stream.of(get(index, user, returnType, bundle, entry));
+						return Stream.of(get(index, user, returnType, bundle, entry, handlingType));
 					case DELETE: // delete
 						return Stream.of(delete(index, user, returnType, bundle, entry));
 					default:

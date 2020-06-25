@@ -37,6 +37,7 @@ import org.highmed.dsf.fhir.event.EventHandler;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
+import org.highmed.dsf.fhir.history.HistoryService;
 import org.highmed.dsf.fhir.prefer.PreferHandlingType;
 import org.highmed.dsf.fhir.search.PartialResult;
 import org.highmed.dsf.fhir.search.SearchQuery;
@@ -96,12 +97,14 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	protected final ReferenceResolver referenceResolver;
 	protected final ReferenceCleaner referenceCleaner;
 	protected final AuthorizationRuleProvider authorizationRuleProvider;
+	protected final HistoryService historyService;
 
 	public AbstractResourceServiceImpl(String path, Class<R> resourceType, String serverBase, int defaultPageCount,
 			D dao, ResourceValidator validator, EventHandler eventHandler, ExceptionHandler exceptionHandler,
 			EventGenerator eventGenerator, ResponseGenerator responseGenerator, ParameterConverter parameterConverter,
 			ReferenceExtractor referenceExtractor, ReferenceResolver referenceResolver,
-			ReferenceCleaner referenceCleaner, AuthorizationRuleProvider authorizationRuleProvider)
+			ReferenceCleaner referenceCleaner, AuthorizationRuleProvider authorizationRuleProvider,
+			HistoryService historyService)
 	{
 		super(path);
 
@@ -120,6 +123,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		this.referenceResolver = referenceResolver;
 		this.referenceCleaner = referenceCleaner;
 		this.authorizationRuleProvider = authorizationRuleProvider;
+		this.historyService = historyService;
 	}
 
 	public void afterPropertiesSet() throws Exception
@@ -141,6 +145,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		Objects.requireNonNull(referenceResolver, "referenceResolver");
 		Objects.requireNonNull(referenceCleaner, "referenceCleaner");
 		Objects.requireNonNull(authorizationRuleProvider, "authorizationRuleProvider");
+		Objects.requireNonNull(historyService, "historyService");
 	}
 
 	@Override
@@ -270,10 +275,10 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 					responseGenerator.badIfNoneExistHeaderValue(ifNoneExistHeader.get(), unsupportedQueryParameters));
 
 		PartialResult<R> result = exceptionHandler.handleSqlException(() -> dao.search(query));
-		if (result.getOverallCount() == 1)
+		if (result.getTotal() == 1)
 			throw new WebApplicationException(
 					responseGenerator.oneExists(result.getPartialResult().get(0), ifNoneExistHeader.get()));
-		else if (result.getOverallCount() > 1)
+		else if (result.getTotal() > 1)
 			throw new WebApplicationException(
 					responseGenerator.multipleExists(resourceTypeName, ifNoneExistHeader.get()));
 	}
@@ -303,7 +308,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	@Override
 	public Response read(String id, UriInfo uri, HttpHeaders headers)
 	{
-		Optional<R> read = exceptionHandler.handleSqlAndResourceDeletedException(resourceTypeName,
+		Optional<R> read = exceptionHandler.handleSqlAndResourceDeletedException(serverBase, resourceTypeName,
 				() -> dao.read(parameterConverter.toUuid(resourceTypeName, id)));
 
 		Optional<Date> ifModifiedSince = getHeaderString(headers, Constants.HEADER_IF_MODIFIED_SINCE,
@@ -357,8 +362,8 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	@Override
 	public Response vread(String id, long version, UriInfo uri, HttpHeaders headers)
 	{
-		Optional<R> read = exceptionHandler
-				.handleSqlException(() -> dao.readVersion(parameterConverter.toUuid(resourceTypeName, id), version));
+		Optional<R> read = exceptionHandler.handleSqlAndResourceDeletedException(serverBase, id,
+				() -> dao.readVersion(parameterConverter.toUuid(resourceTypeName, id), version));
 
 		Optional<Date> ifModifiedSince = getHeaderString(headers, Constants.HEADER_IF_MODIFIED_SINCE,
 				Constants.HEADER_IF_MODIFIED_SINCE_LC).flatMap(this::toDate);
@@ -382,6 +387,24 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	protected MediaType getMediaTypeForVRead(UriInfo uri, HttpHeaders headers)
 	{
 		return parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers);
+	}
+
+	@Override
+	public Response history(UriInfo uri, HttpHeaders headers)
+	{
+		Bundle history = historyService.getHistory(getCurrentUser(), uri, headers, resourceType);
+
+		return responseGenerator.response(Status.OK, referenceCleaner.cleanLiteralReferences(history),
+				parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
+	}
+
+	@Override
+	public Response history(String id, UriInfo uri, HttpHeaders headers)
+	{
+		Bundle history = historyService.getHistory(getCurrentUser(), uri, headers, resourceType, id);
+
+		return responseGenerator.response(Status.OK, referenceCleaner.cleanLiteralReferences(history),
+				parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
 	}
 
 	@Override
@@ -542,8 +565,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	private PartialResult<R> filterIncludeResources(PartialResult<R> result)
 	{
 		List<Resource> includes = filterIncludeResources(result.getIncludes());
-		return new PartialResult<R>(result.getOverallCount(), result.getPageAndCount(), result.getPartialResult(),
-				includes, result.isCountOnly());
+		return new PartialResult<R>(result.getTotal(), result.getPageAndCount(), result.getPartialResult(), includes);
 	}
 
 	private List<Resource> filterIncludeResources(List<Resource> includes)
@@ -682,7 +704,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 		UriType profileUri = (UriType) profile;
 
-		Optional<R> read = exceptionHandler.handleSqlAndResourceDeletedException(resourceTypeName,
+		Optional<R> read = exceptionHandler.handleSqlAndResourceDeletedException(serverBase, resourceTypeName,
 				() -> dao.read(parameterConverter.toUuid(resourceTypeName, id)));
 
 		R resource = read.get();
@@ -711,7 +733,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 		if ("profile".equals(mode))
 		{
-			Optional<R> read = exceptionHandler.handleSqlAndResourceDeletedException(resourceTypeName,
+			Optional<R> read = exceptionHandler.handleSqlAndResourceDeletedException(serverBase, resourceTypeName,
 					() -> dao.read(parameterConverter.toUuid(resourceTypeName, id)));
 
 			R resource = read.get();

@@ -3,6 +3,7 @@ package org.highmed.dsf.fhir.dao.jdbc;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.hl7.fhir.r4.model.Resource;
@@ -26,13 +27,19 @@ interface PreparedStatementFactory<R extends Resource>
 
 	void configureReadByIdStatement(PreparedStatement statement, UUID uuid) throws SQLException;
 
-	boolean isReadByIdDeleted(ResultSet result) throws SQLException;
+	LocalDateTime getReadByIdDeleted(ResultSet result) throws SQLException;
+
+	long getReadByIdVersion(ResultSet result) throws SQLException;
 
 	R getReadByIdResource(ResultSet result) throws SQLException;
 
 	String getReadByIdAndVersionSql();
 
 	void configureReadByIdAndVersionStatement(PreparedStatement statement, UUID uuid, long version) throws SQLException;
+
+	LocalDateTime getReadByIdVersionDeleted(ResultSet result) throws SQLException;
+
+	long getReadByIdVersionVersion(ResultSet result) throws SQLException;
 
 	R getReadByIdAndVersionResource(ResultSet result) throws SQLException;
 

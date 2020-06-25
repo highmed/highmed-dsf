@@ -162,7 +162,7 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 				.handleSqlException(() -> dao.searchWithTransaction(connection, query));
 
 		// No matches and no id provided or temp id: The server creates the resource.
-		if (result.getOverallCount() <= 0
+		if (result.getTotal() <= 0
 				&& (!resource.hasId() || resource.getIdElement().getValue().startsWith(URL_UUID_PREFIX)))
 		{
 			UUID id = UUID.randomUUID();
@@ -174,14 +174,14 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 
 		// No matches, id provided: The server treats the interaction as an Update as Create interaction (or rejects it,
 		// if it does not support Update as Create) -> reject
-		else if (result.getOverallCount() <= 0 && resource.hasId())
+		else if (result.getTotal() <= 0 && resource.hasId())
 			// TODO bundle specific error
 			throw new WebApplicationException(
 					responseGenerator.updateAsCreateNotAllowed(resourceTypeName, resource.getId()));
 
 		// One Match, no resource id provided OR (resource id provided and it matches the found resource):
 		// The server performs the update against the matching resource
-		else if (result.getOverallCount() == 1)
+		else if (result.getTotal() == 1)
 		{
 			R dbResource = result.getPartialResult().get(0);
 			IdType dbResourceId = dbResource.getIdElement();
@@ -279,7 +279,7 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		String resourceTypeName = newResource.getResourceType().name();
 		String id = newResource.getIdElement().getIdPart();
 
-		Optional<R> dbResource = exceptionHandler.handleSqlAndResourceDeletedException(resourceTypeName,
+		Optional<R> dbResource = exceptionHandler.handleSqlAndResourceDeletedException(serverBase, resourceTypeName,
 				() -> dao.readWithTransaction(connection, parameterConverter.toUuid(resourceTypeName, id)));
 
 		if (dbResource.isEmpty())

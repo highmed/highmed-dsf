@@ -85,9 +85,17 @@ public class ProvenanceAuthorizationRule extends AbstractAuthorizationRule<Prove
 	}
 
 	@Override
-	public Optional<String> reasonSearchAllowed(Connection connection, User user)
+	public Optional<String> reasonSearchAllowed(User user)
 	{
 		logger.info("Search of Provenance authorized for {} user '{}', will be fitered by users organization {}",
+				user.getRole(), user.getName(), user.getOrganization().getIdElement().getValueAsString());
+		return Optional.of("Allowed for all, filtered by users organization");
+	}
+
+	@Override
+	public Optional<String> reasonHistoryAllowed(User user)
+	{
+		logger.info("History of Provenance authorized for {} user '{}', will be fitered by users organization {}",
 				user.getRole(), user.getName(), user.getOrganization().getIdElement().getValueAsString());
 		return Optional.of("Allowed for all, filtered by users organization");
 	}

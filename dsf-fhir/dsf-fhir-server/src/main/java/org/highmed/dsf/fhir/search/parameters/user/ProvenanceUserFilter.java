@@ -8,9 +8,16 @@ import org.highmed.dsf.fhir.authentication.UserRole;
 
 public class ProvenanceUserFilter extends AbstractUserFilter
 {
+	private static final String RESOURCE_COLUMN = "provenance";
+
 	public ProvenanceUserFilter(User user)
 	{
-		super(user);
+		super(user, RESOURCE_COLUMN);
+	}
+
+	public ProvenanceUserFilter(User user, String resourceColumn)
+	{
+		super(user, resourceColumn);
 	}
 
 	@Override
@@ -29,7 +36,8 @@ public class ProvenanceUserFilter extends AbstractUserFilter
 	}
 
 	@Override
-	public void modifyStatement(int parameterIndex, PreparedStatement statement) throws SQLException
+	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement)
+			throws SQLException
 	{
 		// nothing to do
 	}

@@ -3,6 +3,8 @@ package org.highmed.dsf.fhir.dao.jdbc;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.hl7.fhir.r4.model.Resource;
@@ -28,14 +30,14 @@ class PreparedStatementFactoryDefault<R extends Resource> extends AbstractPrepar
 
 	private static String readByIdSql(String resourceTable, String resourceIdColumn, String resourceColumn)
 	{
-		return "SELECT deleted IS NOT NULL, " + resourceColumn + " FROM " + resourceTable + " WHERE " + resourceIdColumn
+		return "SELECT deleted, version, " + resourceColumn + " FROM " + resourceTable + " WHERE " + resourceIdColumn
 				+ " = ? ORDER BY version DESC LIMIT 1";
 	}
 
 	private static String readByIdAndVersionSql(String resourceTable, String resourceIdColumn, String resourceColumn)
 	{
-		return "SELECT " + resourceColumn + " FROM " + resourceTable + " WHERE " + resourceIdColumn
-				+ " = ? AND version = ?";
+		return "SELECT deleted, version," + resourceColumn + " FROM " + resourceTable + " WHERE " + resourceIdColumn
+				+ " = ? AND (version = ? OR version = ?) ORDER BY version DESC LIMIT 1";
 	}
 
 	private static String updateNewRowSql(String resourceTable, String resourceIdColumn, String resourceColumn)
@@ -64,15 +66,22 @@ class PreparedStatementFactoryDefault<R extends Resource> extends AbstractPrepar
 	}
 
 	@Override
-	public boolean isReadByIdDeleted(ResultSet result) throws SQLException
+	public LocalDateTime getReadByIdDeleted(ResultSet result) throws SQLException
 	{
-		return result.getBoolean(1);
+		Timestamp deleted = result.getTimestamp(1);
+		return deleted == null ? null : deleted.toLocalDateTime();
+	}
+
+	@Override
+	public long getReadByIdVersion(ResultSet result) throws SQLException
+	{
+		return result.getLong(2);
 	}
 
 	@Override
 	public R getReadByIdResource(ResultSet result) throws SQLException
 	{
-		String json = result.getString(2);
+		String json = result.getString(3);
 
 		return jsonToResource(json);
 	}
@@ -83,12 +92,26 @@ class PreparedStatementFactoryDefault<R extends Resource> extends AbstractPrepar
 	{
 		statement.setObject(1, uuidToPgObject(uuid));
 		statement.setLong(2, version);
+		statement.setLong(3, version - 1);
+	}
+
+	@Override
+	public LocalDateTime getReadByIdVersionDeleted(ResultSet result) throws SQLException
+	{
+		Timestamp deleted = result.getTimestamp(1);
+		return deleted == null ? null : deleted.toLocalDateTime();
+	}
+
+	@Override
+	public long getReadByIdVersionVersion(ResultSet result) throws SQLException
+	{
+		return result.getLong(2);
 	}
 
 	@Override
 	public R getReadByIdAndVersionResource(ResultSet result) throws SQLException
 	{
-		String json = result.getString(1);
+		String json = result.getString(3);
 
 		return jsonToResource(json);
 	}

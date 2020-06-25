@@ -24,7 +24,7 @@ public interface ResourceDao<R extends Resource>
 	String getResourceTypeName();
 
 	Class<R> getResourceType();
-	
+
 	Connection newReadWriteTransaction() throws SQLException;
 
 	/**
@@ -91,8 +91,10 @@ public interface ResourceDao<R extends Resource>
 	 * @return {@link Optional#empty()} if the given uuid is <code>null</code>, the given version is less then
 	 *         {@value #FIRST_VERSION} or no resource could be found for the given uuid and version
 	 * @throws SQLException
+	 * @throws ResourceDeletedException
+	 *             if a resource with the given uuid and version could be found, but is the delete history entry
 	 */
-	Optional<R> readVersion(UUID uuid, long version) throws SQLException;
+	Optional<R> readVersion(UUID uuid, long version) throws SQLException, ResourceDeletedException;
 
 	/**
 	 * @param connection
@@ -104,8 +106,11 @@ public interface ResourceDao<R extends Resource>
 	 * @return {@link Optional#empty()} if the given uuid is <code>null</code>, the given version is less then
 	 *         {@value #FIRST_VERSION} or no resource could be found for the given uuid and version
 	 * @throws SQLException
+	 * @throws ResourceDeletedException
+	 *             if a resource with the given uuid and version could be found, but is the delete history entry
 	 */
-	Optional<R> readVersionWithTransaction(Connection connection, UUID uuid, long version) throws SQLException;
+	Optional<R> readVersionWithTransaction(Connection connection, UUID uuid, long version)
+			throws SQLException, ResourceDeletedException;
 
 	/**
 	 * @param uuid

@@ -8,9 +8,16 @@ import org.highmed.dsf.fhir.authentication.UserRole;
 
 public class ResearchStudyUserFilter extends AbstractUserFilter
 {
+	private static final String RESOURCE_COLUMN = "research_study";
+
 	public ResearchStudyUserFilter(User user)
 	{
-		super(user);
+		super(user, RESOURCE_COLUMN);
+	}
+
+	public ResearchStudyUserFilter(User user, String resourceColumn)
+	{
+		super(user, resourceColumn);
 	}
 
 	@Override
@@ -19,7 +26,8 @@ public class ResearchStudyUserFilter extends AbstractUserFilter
 		if (UserRole.LOCAL.equals(user.getRole()))
 			return "";
 		else
-			return "(research_study->'extension' @> ?::jsonb OR research_study->'extension' @> ?::jsonb)";
+			return "(" + resourceColumn + "->'extension' @> ?::jsonb OR " + resourceColumn
+					+ "->'extension' @> ?::jsonb)";
 	}
 
 	@Override
@@ -29,29 +37,30 @@ public class ResearchStudyUserFilter extends AbstractUserFilter
 	}
 
 	@Override
-	public void modifyStatement(int parameterIndex, PreparedStatement statement) throws SQLException
+	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement)
+			throws SQLException
 	{
 		if (!UserRole.LOCAL.equals(user.getRole()))
 		{
 			switch (user.getOrganizationType())
 			{
 				case MeDIC:
-					if (parameterIndex == 1)
+					if (subqueryParameterIndex == 1)
 						statement.setString(parameterIndex,
 								"[{\"url\":\"http://highmed.org/fhir/StructureDefinition/participating-medic\",\"valueReference\":{\"reference\":\""
 										+ user.getOrganization().getIdElement().getValue() + "\"}}]");
-					else if (parameterIndex == 2)
+					else if (subqueryParameterIndex == 2)
 						statement.setString(parameterIndex,
 								"[{\"url\":\"http://highmed.org/fhir/StructureDefinition/participating-medic\",\"valueReference\":{\"reference\":\""
 										+ user.getOrganization().getIdElement().toVersionless().getValue() + "\"}}]");
 					break;
-					
+
 				case TTP:
-					if (parameterIndex == 1)
+					if (subqueryParameterIndex == 1)
 						statement.setString(parameterIndex,
 								"[{\"url\":\"http://highmed.org/fhir/StructureDefinition/participating-ttp\",\"valueReference\":{\"reference\":\""
 										+ user.getOrganization().getIdElement().getValue() + "\"}}]");
-					else if (parameterIndex == 2)
+					else if (subqueryParameterIndex == 2)
 						statement.setString(parameterIndex,
 								"[{\"url\":\"http://highmed.org/fhir/StructureDefinition/participating-ttp\",\"valueReference\":{\"reference\":\""
 										+ user.getOrganization().getIdElement().toVersionless().getValue() + "\"}}]");

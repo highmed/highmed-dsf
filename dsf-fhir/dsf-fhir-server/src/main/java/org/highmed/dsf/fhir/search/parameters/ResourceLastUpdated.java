@@ -42,6 +42,8 @@ public class ResourceLastUpdated<R extends DomainResource> extends AbstractDateT
 	@Override
 	public String getFilterQuery()
 	{
+		values.clear();
+		
 		return getValuesAndTypes().stream().map(this::getSubquery).collect(Collectors.joining(" AND "));
 	}
 

@@ -8,9 +8,16 @@ import org.highmed.dsf.fhir.authentication.UserRole;
 
 public class BinaryUserFilter extends AbstractUserFilter
 {
+	private static final String RESOURCE_COLUMN = "binary_json";
+
 	public BinaryUserFilter(User user)
 	{
-		super(user);
+		super(user, RESOURCE_COLUMN);
+	}
+
+	public BinaryUserFilter(User user, String resourceColumn)
+	{
+		super(user, resourceColumn);
 	}
 
 	@Override
@@ -19,7 +26,8 @@ public class BinaryUserFilter extends AbstractUserFilter
 		if (UserRole.LOCAL.equals(user.getRole()))
 			return "";
 		else
-			return "(binary_json->'securityContext'->>'reference' = ? OR binary_json->'securityContext'->>'reference' = ?)";
+			return "(" + resourceColumn + "->'securityContext'->>'reference' = ? OR " + resourceColumn
+					+ "->'securityContext'->>'reference' = ?)";
 	}
 
 	@Override
@@ -29,13 +37,14 @@ public class BinaryUserFilter extends AbstractUserFilter
 	}
 
 	@Override
-	public void modifyStatement(int parameterIndex, PreparedStatement statement) throws SQLException
+	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement)
+			throws SQLException
 	{
 		if (!UserRole.LOCAL.equals(user.getRole()))
 		{
-			if (parameterIndex == 1)
+			if (subqueryParameterIndex == 1)
 				statement.setString(parameterIndex, user.getOrganization().getIdElement().getValue());
-			else if (parameterIndex == 2)
+			else if (subqueryParameterIndex == 2)
 				statement.setString(parameterIndex, user.getOrganization().getIdElement().toVersionless().getValue());
 		}
 	}

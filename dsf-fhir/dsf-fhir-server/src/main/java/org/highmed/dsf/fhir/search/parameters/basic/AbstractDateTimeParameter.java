@@ -48,7 +48,7 @@ public abstract class AbstractDateTimeParameter<R extends DomainResource> extend
 		public final DateTimeType type;
 		public final DateTimeSearchType searchType;
 
-		private DateTimeValueAndTypeAndSearchType(Object value, DateTimeType type, DateTimeSearchType searchType)
+		public DateTimeValueAndTypeAndSearchType(Object value, DateTimeType type, DateTimeSearchType searchType)
 		{
 			this.value = value;
 			this.type = type;
@@ -124,6 +124,18 @@ public abstract class AbstractDateTimeParameter<R extends DomainResource> extend
 			valuesAndTypes.clear();
 			valuesAndTypes.add(first);
 		}
+
+		checkParameters(parameters);
+	}
+
+	/**
+	 * Override to perform additional parameter checks
+	 * 
+	 * @param parameters
+	 * @see #addError(SearchQueryParameterError)
+	 */
+	protected void checkParameters(List<String> parameters)
+	{
 	}
 
 	private DateTimeValueAndTypeAndSearchType parse(String parameterValue, List<String> parameterValues)

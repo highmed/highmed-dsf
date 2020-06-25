@@ -19,5 +19,6 @@ public interface SearchQueryUserFilter
 	 */
 	int getSqlParameterCount();
 
-	void modifyStatement(int parameterIndex, PreparedStatement statement) throws SQLException;
+	void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement)
+			throws SQLException;
 }

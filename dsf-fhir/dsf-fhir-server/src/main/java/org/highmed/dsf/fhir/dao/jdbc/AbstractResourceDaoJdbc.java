@@ -313,10 +313,12 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 			{
 				if (result.next())
 				{
-					if (preparedStatementFactory.isReadByIdDeleted(result))
+					LocalDateTime deleted = preparedStatementFactory.getReadByIdDeleted(result);
+					if (deleted != null)
 					{
+						long version = preparedStatementFactory.getReadByIdVersion(result);
 						logger.debug("{} with IdPart {} found, but marked as deleted", resourceTypeName, uuid);
-						throw new ResourceDeletedException(new IdType(resourceTypeName, uuid.toString()));
+						throw newResourceDeletedException(uuid, deleted, version);
 					}
 					else
 					{
@@ -333,8 +335,14 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		}
 	}
 
+	private ResourceDeletedException newResourceDeletedException(UUID uuid, LocalDateTime deleted, long version)
+	{
+		return new ResourceDeletedException(new IdType(resourceTypeName, uuid.toString(), String.valueOf(version + 1)),
+				deleted);
+	}
+
 	@Override
-	public final Optional<R> readVersion(UUID uuid, long version) throws SQLException
+	public final Optional<R> readVersion(UUID uuid, long version) throws SQLException, ResourceDeletedException
 	{
 		if (uuid == null || version < FIRST_VERSION)
 			return Optional.empty();
@@ -346,7 +354,8 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	}
 
 	@Override
-	public Optional<R> readVersionWithTransaction(Connection connection, UUID uuid, long version) throws SQLException
+	public Optional<R> readVersionWithTransaction(Connection connection, UUID uuid, long version)
+			throws SQLException, ResourceDeletedException
 	{
 		Objects.requireNonNull(connection, "connection");
 		if (uuid == null || version < FIRST_VERSION)
@@ -362,6 +371,16 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 			{
 				if (result.next())
 				{
+					LocalDateTime deleted = preparedStatementFactory.getReadByIdVersionDeleted(result);
+					long lastVersion = preparedStatementFactory.getReadByIdVersionVersion(result);
+					if (lastVersion + 1 == version)
+					{
+						logger.debug(
+								"{} with IdPart {} and Version {} found, but marked as deleted (delete history entry)",
+								resourceTypeName, uuid, version);
+						throw newResourceDeletedException(uuid, deleted, lastVersion);
+					}
+
 					logger.debug("{} with IdPart {} and Version {} found", resourceTypeName, uuid, version);
 					return Optional.of(preparedStatementFactory.getReadByIdAndVersionResource(result));
 				}
@@ -402,7 +421,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 			{
 				if (result.next())
 				{
-					if (preparedStatementFactory.isReadByIdDeleted(result))
+					if (preparedStatementFactory.getReadByIdDeleted(result) != null)
 						logger.warn("{} with IdPart {} found, but marked as deleted", resourceTypeName, uuid);
 					else
 						logger.debug("{} with IdPart {} found", resourceTypeName, uuid);
@@ -803,7 +822,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		Objects.requireNonNull(connection, "connection");
 		Objects.requireNonNull(query, "query");
 
-		int overallCount = 0;
+		int total = 0;
 		try (PreparedStatement statement = connection.prepareStatement(query.getCountSql()))
 		{
 			query.modifyStatement(statement, connection::createArrayOf);
@@ -812,14 +831,14 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 			try (ResultSet result = statement.executeQuery())
 			{
 				if (result.next())
-					overallCount = result.getInt(1);
+					total = result.getInt(1);
 			}
 		}
 
 		List<R> partialResult = new ArrayList<>();
 		List<Resource> includes = new ArrayList<>();
 
-		if (!query.isCountOnly(overallCount)) // TODO ask db if count 0
+		if (!query.getPageAndCount().isCountOnly(total))
 		{
 			try (PreparedStatement statement = connection.prepareStatement(query.getSearchSql()))
 			{
@@ -846,8 +865,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		includes = includes.stream().map(r -> new ResourceDistinctById(r.getIdElement(), r)).distinct()
 				.map(ResourceDistinctById::getResource).collect(Collectors.toList());
 
-		return new PartialResult<>(overallCount, query.getPageAndCount(), partialResult, includes,
-				query.isCountOnly(overallCount));
+		return new PartialResult<>(total, query.getPageAndCount(), partialResult, includes);
 	}
 
 	/**

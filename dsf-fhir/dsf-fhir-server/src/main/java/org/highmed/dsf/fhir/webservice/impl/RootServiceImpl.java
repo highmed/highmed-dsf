@@ -12,6 +12,7 @@ import org.highmed.dsf.fhir.dao.command.CommandList;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
+import org.highmed.dsf.fhir.history.HistoryService;
 import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.highmed.dsf.fhir.webservice.base.AbstractBasicService;
 import org.highmed.dsf.fhir.webservice.specification.RootService;
@@ -28,9 +29,11 @@ public class RootServiceImpl extends AbstractBasicService implements RootService
 	private final ParameterConverter parameterConverter;
 	private final ExceptionHandler exceptionHandler;
 	private final ReferenceCleaner referenceCleaner;
+	private final HistoryService historyService;
 
 	public RootServiceImpl(String path, CommandFactory commandFactory, ResponseGenerator responseGenerator,
-			ParameterConverter parameterConverter, ExceptionHandler exceptionHandler, ReferenceCleaner referenceCleaner)
+			ParameterConverter parameterConverter, ExceptionHandler exceptionHandler, ReferenceCleaner referenceCleaner,
+			HistoryService historyService)
 	{
 		super(path);
 
@@ -39,6 +42,7 @@ public class RootServiceImpl extends AbstractBasicService implements RootService
 		this.parameterConverter = parameterConverter;
 		this.exceptionHandler = exceptionHandler;
 		this.referenceCleaner = referenceCleaner;
+		this.historyService = historyService;
 	}
 
 	@Override
@@ -50,6 +54,8 @@ public class RootServiceImpl extends AbstractBasicService implements RootService
 		Objects.requireNonNull(responseGenerator, "responseGenerator");
 		Objects.requireNonNull(parameterConverter, "parameterConverter");
 		Objects.requireNonNull(exceptionHandler, "exceptionHandler");
+		Objects.requireNonNull(referenceCleaner, "referenceCleaner");
+		Objects.requireNonNull(historyService, "historyService");
 	}
 
 	@Override
@@ -57,8 +63,8 @@ public class RootServiceImpl extends AbstractBasicService implements RootService
 	{
 		OperationOutcome outcome = responseGenerator.createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"This is the base URL of the FHIR server. GET method not allowed");
-		return responseGenerator
-				.response(Status.METHOD_NOT_ALLOWED, outcome, parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
+		return responseGenerator.response(Status.METHOD_NOT_ALLOWED, outcome,
+				parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
 	}
 
 	@Override
@@ -67,11 +73,22 @@ public class RootServiceImpl extends AbstractBasicService implements RootService
 		// FIXME hapi parser bug workaround
 		referenceCleaner.cleanReferenceResourcesIfBundle(bundle);
 
-		CommandList commands = exceptionHandler.handleBadBundleException(
-				() -> commandFactory.createCommands(bundle, getCurrentUser(), parameterConverter.getPreferReturn(headers)));
+		CommandList commands = exceptionHandler
+				.handleBadBundleException(() -> commandFactory.createCommands(bundle, getCurrentUser(),
+						parameterConverter.getPreferReturn(headers), parameterConverter.getPreferHandling(headers)));
 
 		Bundle result = commands.execute(); // throws WebApplicationException
 
-		return responseGenerator.response(Status.OK, result, parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
+		return responseGenerator
+				.response(Status.OK, result, parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
+	}
+
+	@Override
+	public Response history(UriInfo uri, HttpHeaders headers)
+	{
+		Bundle history = historyService.getHistory(getCurrentUser(), uri, headers);
+
+		return responseGenerator.response(Status.OK, referenceCleaner.cleanLiteralReferences(history),
+				parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
 	}
 }

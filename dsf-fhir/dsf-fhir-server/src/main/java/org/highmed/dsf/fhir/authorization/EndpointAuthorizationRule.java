@@ -132,7 +132,7 @@ public class EndpointAuthorizationRule extends AbstractAuthorizationRule<Endpoin
 		try
 		{
 			PartialResult<Endpoint> result = dao.searchWithTransaction(connection, query);
-			return result.getOverallCount() >= 1;
+			return result.getTotal() >= 1;
 		}
 		catch (SQLException e)
 		{
@@ -154,7 +154,7 @@ public class EndpointAuthorizationRule extends AbstractAuthorizationRule<Endpoin
 		try
 		{
 			PartialResult<Endpoint> result = dao.searchWithTransaction(connection, query);
-			return result.getOverallCount() >= 1;
+			return result.getTotal() >= 1;
 		}
 		catch (SQLException e)
 		{
@@ -257,9 +257,17 @@ public class EndpointAuthorizationRule extends AbstractAuthorizationRule<Endpoin
 	}
 
 	@Override
-	public Optional<String> reasonSearchAllowed(Connection connection, User user)
+	public Optional<String> reasonSearchAllowed(User user)
 	{
 		logger.info("Search of Endpoint authorized for {} user '{}', will be fitered by user role", user.getRole(),
+				user.getName());
+		return Optional.of("Allowed for all, filtered by user role");
+	}
+
+	@Override
+	public Optional<String> reasonHistoryAllowed(User user)
+	{
+		logger.info("History of Endpoint authorized for {} user '{}', will be fitered by user role", user.getRole(),
 				user.getName());
 		return Optional.of("Allowed for all, filtered by user role");
 	}

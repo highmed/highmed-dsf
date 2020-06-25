@@ -43,6 +43,16 @@ public class RootServiceJaxrs extends AbstractServiceJaxrs<RootService> implemen
 		return delegate.root(uri, headers);
 	}
 
+	@GET
+	@Path("/_history")
+	@Override
+	public Response history(@Context UriInfo uri, @Context HttpHeaders headers)
+	{
+		logger.trace("GET {}", uri.getRequestUri().toString());
+
+		return delegate.history(uri, headers);
+	}
+
 	@POST
 	@Override
 	public Response handleBundle(Bundle bundle, @Context UriInfo uri, @Context HttpHeaders headers)

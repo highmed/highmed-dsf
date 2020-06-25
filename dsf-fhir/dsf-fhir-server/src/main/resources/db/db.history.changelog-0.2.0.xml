@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<property name="json" value="JSONB" dbms="postgresql" />
+	<property name="json" value="varchar(5000)" dbms="h2" />
+
+	<changeSet author="hhund" id="db.history.changelog-0.2.0">
+		<createView viewName="history" replaceIfExists="true">
+			SELECT id, version, type, method, last_updated, resource
+			FROM (
+			
+				SELECT activity_definition_id AS id, version, 'ActivityDefinition' AS type,
+				CASE WHEN version = 1 THEN 'POST' ELSE 'PUT' END AS method,
+				(activity_definition->'meta'->>'lastUpdated')::TIMESTAMP AS last_updated,
+				activity_definition AS resource
+				FROM activity_definitions
+			
+				UNION
+			
+				SELECT activity_definition_id AS id, version + 1, 'ActivityDefinition' AS type, 'DELETE' AS method, deleted AS last_updated, NULL AS resource
+				FROM activity_definitions
+				WHERE deleted IS NOT NULL
+			
+				UNION
+			
+				SELECT binary_id AS id, version, 'Binary' AS type,
+				CASE WHEN version = 1 THEN 'POST' ELSE 'PUT' END AS method,
+				(binary_json->'meta'->>'lastUpdated')::TIMESTAMP AS last_updated,
+				binary_json AS resource
+				FROM binaries
+			
+				UNION
+			
+				SELECT binary_id AS id, version + 1, 'Binary' AS type, 'DELETE' AS method, deleted AS last_updated, NULL AS resource
+				FROM binaries
+				WHERE deleted IS NOT NULL
+			
+				UNION
+			
+				SELECT bundle_id AS id, version, 'Bundle' AS type,
+				CASE WHEN version = 1 THEN 'POST' ELSE 'PUT' END AS method,
+				(bundle->'meta'->>'lastUpdated')::TIMESTAMP AS last_updated,
+				bundle AS resource
+				FROM bundles
+			
+				UNION
+			
+				SELECT bundle_id AS id, version + 1, 'Bundle' AS type, 'DELETE' AS method, deleted AS last_updated, NULL AS resource
+				FROM bundles
+				WHERE deleted IS NOT NULL
+			
+				UNION
+			
+				SELECT code_system_id AS id, version, 'CodeSystem' AS type,
+				CASE WHEN version = 1 THEN 'POST' ELSE 'PUT' END AS method,
+				(code_system->'meta'->>'lastUpdated')::TIMESTAMP AS last_updated,
+				code_system AS resource
+				FROM code_systems
+			
+				UNION
+			
+				SELECT code_system_id AS id, version + 1, 'CodeSystem' AS type, 'DELETE' AS method, deleted AS last_updated, NULL AS resource
+				FROM code_systems
+				WHERE deleted IS NOT NULL
+			
+				UNION
+			
+				SELECT endpoint_id AS id, version, 'Endpoint' AS type,
+				CASE WHEN version = 1 THEN 'POST' ELSE 'PUT' END AS method,
+				(endpoint->'meta'->>'lastUpdated')::TIMESTAMP AS last_updated,
+				endpoint AS resource
+				FROM endpoints
+			
+				UNION
+			
+				SELECT endpoint_id AS id, version + 1, 'Endpoint' AS type, 'DELETE' AS method, deleted AS last_updated, NULL AS resource
+				FROM endpoints
+				WHERE deleted IS NOT NULL
+			
+				UNION
+			
+				SELECT group_id AS id, version, 'Group' AS type,
+				CASE WHEN version = 1 THEN 'POST' ELSE 'PUT' END AS method,
+				(group_json->'meta'->>'lastUpdated')::TIMESTAMP AS last_updated,
+				group_json AS resource
+				FROM groups
+			
+				UNION
+			
+				SELECT group_id AS id, version + 1, 'Group' AS type, 'DELETE' AS method, deleted AS last_updated, NULL AS resource
+				FROM groups
+				WHERE deleted IS NOT NULL
+			
+				UNION
+			
+				SELECT healthcare_service_id AS id, version, 'HealthcareService' AS type,
+				CASE WHEN version = 1 THEN 'POST' ELSE 'PUT' END AS method,
+				(healthcare_service->'meta'->>'lastUpdated')::TIMESTAMP AS last_updated,
+				healthcare_service AS resource
+				FROM healthcare_services
+			
+				UNION
+			
+				SELECT healthcare_service_id AS id, version + 1, 'HealthcareService' AS type, 'DELETE' AS method, deleted AS last_updated, NULL AS resource
+				FROM healthcare_services
+				WHERE deleted IS NOT NULL
+			
+				UNION
+			
+				SELECT location_id AS id, version, 'Location' AS type,
+				CASE WHEN version = 1 THEN 'POST' ELSE 'PUT' END AS method,
+				(location->'meta'->>'lastUpdated')::TIMESTAMP AS last_updated,
+				location AS resource
+				FROM locations
+			
+				UNION
+			
+				SELECT location_id AS id, version + 1, 'Location' AS type, 'DELETE' AS method, deleted AS last_updated, NULL AS resource
+				FROM locations
+				WHERE deleted IS NOT NULL
+			
+				UNION
+			
+				SELECT naming_system_id AS id, version, 'NamingSystem' AS type,
+				CASE WHEN version = 1 THEN 'POST' ELSE 'PUT' END AS method,
+				(naming_system->'meta'->>'lastUpdated')::TIMESTAMP AS last_updated,
+				naming_system AS resource
+				FROM naming_systems
+			
+				UNION
+			
+				SELECT naming_system_id AS id, version + 1, 'NamingSystem' AS type, 'DELETE' AS method, deleted AS last_updated, NULL AS resource
+				FROM naming_systems
+				WHERE deleted IS NOT NULL
+			
+				UNION
+			
+				SELECT organization_id AS id, version, 'Organization' AS type,
+				CASE WHEN version = 1 THEN 'POST' ELSE 'PUT' END AS method,
+				(organization->'meta'->>'lastUpdated')::TIMESTAMP AS last_updated,
+				organization AS resource
+				FROM organizations
+			
+				UNION
+			
+				SELECT organization_id AS id, version + 1, 'Organization' AS type, 'DELETE' AS method, deleted AS last_updated, NULL AS resource
+				FROM organizations
+				WHERE deleted IS NOT NULL
+			
+				UNION
+			
+				SELECT patient_id AS id, version, 'Patient' AS type,
+				CASE WHEN version = 1 THEN 'POST' ELSE 'PUT' END AS method,
+				(patient->'meta'->>'lastUpdated')::TIMESTAMP AS last_updated,
+				patient AS resource
+				FROM patients
+			
+				UNION
+			
+				SELECT patient_id AS id, version + 1, 'Patient' AS type, 'DELETE' AS method, deleted AS last_updated, NULL AS resource
+				FROM patients
+				WHERE deleted IS NOT NULL
+			
+				UNION
+			
+				SELECT practitioner_role_id AS id, version, 'PractitionerRole' AS type,
+				CASE WHEN version = 1 THEN 'POST' ELSE 'PUT' END AS method,
+				(practitioner_role->'meta'->>'lastUpdated')::TIMESTAMP AS last_updated,
+				practitioner_role AS resource
+				FROM practitioner_roles
+			
+				UNION
+			
+				SELECT practitioner_role_id AS id, version + 1, 'PractitionerRole' AS type, 'DELETE' AS method, deleted AS last_updated, NULL AS resource
+				FROM practitioner_roles
+				WHERE deleted IS NOT NULL
+			
+				UNION
+			
+				SELECT practitioner_id AS id, version, 'Practitioner' AS type,
+				CASE WHEN version = 1 THEN 'POST' ELSE 'PUT' END AS method,
+				(practitioner->'meta'->>'lastUpdated')::TIMESTAMP AS last_updated,
+				practitioner AS resource
+				FROM practitioners
+			
+				UNION
+			
+				SELECT practitioner_id AS id, version + 1, 'Practitioner' AS type, 'DELETE' AS method, deleted AS last_updated, NULL AS resource
+				FROM practitioners
+				WHERE deleted IS NOT NULL
+			
+				UNION
+			
+				SELECT provenance_id AS id, version, 'Provenance' AS type,
+				CASE WHEN version = 1 THEN 'POST' ELSE 'PUT' END AS method,
+				(provenance->'meta'->>'lastUpdated')::TIMESTAMP AS last_updated,
+				provenance AS resource
+				FROM provenances
+			
+				UNION
+			
+				SELECT provenance_id AS id, version + 1, 'Provenance' AS type, 'DELETE' AS method, deleted AS last_updated, NULL AS resource
+				FROM provenances
+				WHERE deleted IS NOT NULL
+			
+				UNION
+			
+				SELECT research_study_id AS id, version, 'ResearchStudy' AS type,
+				CASE WHEN version = 1 THEN 'POST' ELSE 'PUT' END AS method,
+				(research_study->'meta'->>'lastUpdated')::TIMESTAMP AS last_updated,
+				research_study AS resource
+				FROM research_studies
+			
+				UNION
+			
+				SELECT research_study_id AS id, version + 1, 'ResearchStudy' AS type, 'DELETE' AS method, deleted AS last_updated, NULL AS resource
+				FROM research_studies
+				WHERE deleted IS NOT NULL
+			
+				UNION
+			
+				SELECT structure_definition_id AS id, version, 'StructureDefinition' AS type,
+				CASE WHEN version = 1 THEN 'POST' ELSE 'PUT' END AS method,
+				(structure_definition->'meta'->>'lastUpdated')::TIMESTAMP AS last_updated,
+				structure_definition AS resource
+				FROM structure_definitions
+			
+				UNION
+			
+				SELECT structure_definition_id AS id, version + 1, 'StructureDefinition' AS type, 'DELETE' AS method, deleted AS last_updated, NULL AS resource
+				FROM structure_definitions
+				WHERE deleted IS NOT NULL
+			
+				UNION
+			
+				SELECT subscription_id AS id, version, 'Subscription' AS type,
+				CASE WHEN version = 1 THEN 'POST' ELSE 'PUT' END AS method,
+				(subscription->'meta'->>'lastUpdated')::TIMESTAMP AS last_updated,
+				subscription AS resource
+				FROM subscriptions
+			
+				UNION
+			
+				SELECT subscription_id AS id, version + 1, 'Subscription' AS type, 'DELETE' AS method, deleted AS last_updated, NULL AS resource
+				FROM subscriptions
+				WHERE deleted IS NOT NULL
+			
+				UNION
+			
+				SELECT task_id AS id, version, 'Task' AS type,
+				CASE WHEN version = 1 THEN 'POST' ELSE 'PUT' END AS method,
+				(task->'meta'->>'lastUpdated')::TIMESTAMP AS last_updated,
+				task AS resource
+				FROM tasks
+			
+				UNION
+			
+				SELECT task_id AS id, version + 1, 'Task' AS type, 'DELETE' AS method, deleted AS last_updated, NULL AS resource
+				FROM tasks
+				WHERE deleted IS NOT NULL
+			
+				UNION
+			
+				SELECT value_set_id AS id, version, 'ValueSet' AS type,
+				CASE WHEN version = 1 THEN 'POST' ELSE 'PUT' END AS method,
+				(value_set->'meta'->>'lastUpdated')::TIMESTAMP AS last_updated,
+				value_set AS resource
+				FROM value_sets
+			
+				UNION
+			
+				SELECT value_set_id AS id, version + 1, 'ValueSet' AS type, 'DELETE' AS method, deleted AS last_updated, NULL AS resource
+				FROM value_sets
+				WHERE deleted IS NOT NULL
+			
+			) AS history
+			ORDER BY last_updated, id, version
+		</createView>
+
+		<sql dbms="postgresql">
+			ALTER TABLE history OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE history TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE history TO ${db.server_users_group};
+		</sql>
+	</changeSet>
+</databaseChangeLog>
