@@ -51,7 +51,7 @@ public class OutputSerializer extends PrimitiveValueSerializer<OutputValue> impl
 	}
 
 	@Override
-	public OutputValue readValue(ValueFields valueFields)
+	public OutputValue readValue(ValueFields valueFields, boolean asTransientValue)
 	{
 		byte[] bytes = valueFields.getByteArrayValue();
 

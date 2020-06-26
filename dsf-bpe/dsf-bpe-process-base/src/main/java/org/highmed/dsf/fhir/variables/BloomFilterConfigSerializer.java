@@ -52,7 +52,7 @@ public class BloomFilterConfigSerializer extends PrimitiveValueSerializer<BloomF
 	}
 
 	@Override
-	public BloomFilterConfigValue readValue(ValueFields valueFields)
+	public BloomFilterConfigValue readValue(ValueFields valueFields, boolean asTransientValue)
 	{
 		byte[] bytes = valueFields.getByteArrayValue();
 
