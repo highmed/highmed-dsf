@@ -106,7 +106,7 @@
 			<dependency>
 				<groupId>org.liquibase</groupId>
 				<artifactId>liquibase-core</artifactId>
-				<version>3.8.7</version>
+				<version>3.10.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.postgresql</groupId>
@@ -118,22 +118,22 @@
 			<dependency>
 				<groupId>de.hs-heilbronn.mi</groupId>
 				<artifactId>jetty-utils</artifactId>
-				<version>0.7.0</version>
+				<version>0.8.0</version>
 			</dependency>
 			<dependency>
 				<groupId>de.hs-heilbronn.mi</groupId>
 				<artifactId>crypto-utils</artifactId>
-				<version>2.5.0</version>
+				<version>2.6.0</version>
 			</dependency>
 			<dependency>
 				<groupId>de.hs-heilbronn.mi</groupId>
 				<artifactId>log4j2-utils</artifactId>
-				<version>0.6.0</version>
+				<version>0.7.0</version>
 			</dependency>
 			<dependency>
 				<groupId>de.hs-heilbronn.mi</groupId>
 				<artifactId>db-test-utils</artifactId>
-				<version>0.7.0</version>
+				<version>0.8.0</version>
 			</dependency>
 
 			<dependency>
