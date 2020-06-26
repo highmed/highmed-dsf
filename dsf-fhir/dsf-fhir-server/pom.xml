@@ -159,11 +159,11 @@
 			<artifactId>log4j2-utils</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-
+		
+		<!-- For async logging with log4j2 -->
 		<dependency>
 			<groupId>com.lmax</groupId>
 			<artifactId>disruptor</artifactId>
-			<version>3.4.2</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

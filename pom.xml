@@ -84,6 +84,18 @@
 				<artifactId>log4j-core</artifactId>
 				<version>${log4j.version}</version>
 			</dependency>
+			<!-- async logging -->
+			<dependency>
+				<groupId>com.lmax</groupId>
+				<artifactId>disruptor</artifactId>
+				<version>3.4.2</version>
+			</dependency>
+			<!-- smtp appender -->
+			<dependency>
+				<groupId>javax.mail</groupId>
+				<artifactId>mail</artifactId>
+				<version>1.4.7</version>
+			</dependency>
 
 			<!-- testing -->
 			<dependency>
@@ -182,6 +194,11 @@
 				<groupId>org.glassfish.jersey.media</groupId>
 				<artifactId>jersey-media-json-jackson</artifactId>
 				<version>${jersey.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+				<version>2.11.1</version>
 			</dependency>
 
 			<!-- tyrus -->
@@ -294,6 +311,12 @@
 				<groupId>ca.uhn.hapi</groupId>
 				<artifactId>hapi-structures-v25</artifactId>
 				<version>${hapi.hl7v2.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-csv</artifactId>
+				<version>1.8</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
