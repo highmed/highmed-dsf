@@ -52,7 +52,7 @@ public class FinalFeasibilityQueryResultsSerializer extends PrimitiveValueSerial
 	}
 
 	@Override
-	public FinalFeasibilityQueryResultsValue readValue(ValueFields valueFields)
+	public FinalFeasibilityQueryResultsValue readValue(ValueFields valueFields, boolean asTransientValue)
 	{
 		byte[] bytes = valueFields.getByteArrayValue();
 

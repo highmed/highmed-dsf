@@ -58,7 +58,7 @@ public class FhirResourcesListSerializer extends PrimitiveValueSerializer<FhirRe
 	}
 
 	@Override
-	public FhirResourcesListValue readValue(ValueFields valueFields)
+	public FhirResourcesListValue readValue(ValueFields valueFields, boolean asTransientValue)
 	{
 		String className = valueFields.getTextValue();
 		byte[] bytes = valueFields.getByteArrayValue();

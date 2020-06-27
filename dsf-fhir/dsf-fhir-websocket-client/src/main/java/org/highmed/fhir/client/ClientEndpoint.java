@@ -3,17 +3,17 @@ package org.highmed.fhir.client;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import javax.websocket.CloseReason;
-import javax.websocket.Endpoint;
-import javax.websocket.EndpointConfig;
-import javax.websocket.MessageHandler.Whole;
-import javax.websocket.Session;
-
 import org.hl7.fhir.r4.model.DomainResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.parser.IParser;
+
+import javax.websocket.CloseReason;
+import javax.websocket.Endpoint;
+import javax.websocket.EndpointConfig;
+import javax.websocket.MessageHandler;
+import javax.websocket.Session;
 
 public class ClientEndpoint extends Endpoint
 {
@@ -35,7 +35,7 @@ public class ClientEndpoint extends Endpoint
 	{
 		logger.debug("Websocket onOpen");
 
-		session.addMessageHandler(new Whole<String>() // don't use lambda
+		session.addMessageHandler(new MessageHandler.Whole<String>() // don't use lambda
 		{
 			private boolean boundReceived;
 
