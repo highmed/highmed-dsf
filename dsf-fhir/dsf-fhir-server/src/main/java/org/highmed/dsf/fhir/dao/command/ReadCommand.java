@@ -258,7 +258,9 @@ public class ReadCommand extends AbstractCommand implements Command
 		}
 		else if (multipleResult != null)
 		{
-			referenceCleaner.cleanLiteralReferences(multipleResult);
+			// clean literal references from bundle entries
+			multipleResult.getEntry().stream().filter(BundleEntryComponent::hasResource)
+					.map(BundleEntryComponent::getResource).forEach(referenceCleaner::cleanLiteralReferences);
 
 			BundleEntryComponent resultEntry = new BundleEntryComponent();
 			resultEntry.setFullUrl(URL_UUID_PREFIX + UUID.randomUUID().toString());

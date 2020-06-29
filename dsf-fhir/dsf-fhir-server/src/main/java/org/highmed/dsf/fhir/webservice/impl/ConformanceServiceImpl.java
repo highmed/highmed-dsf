@@ -63,7 +63,9 @@ import org.highmed.dsf.fhir.search.parameters.SubscriptionCriteria;
 import org.highmed.dsf.fhir.search.parameters.SubscriptionPayload;
 import org.highmed.dsf.fhir.search.parameters.SubscriptionStatus;
 import org.highmed.dsf.fhir.search.parameters.SubscriptionType;
+import org.highmed.dsf.fhir.search.parameters.TaskAuthoredOn;
 import org.highmed.dsf.fhir.search.parameters.TaskIdentifier;
+import org.highmed.dsf.fhir.search.parameters.TaskModified;
 import org.highmed.dsf.fhir.search.parameters.TaskRequester;
 import org.highmed.dsf.fhir.search.parameters.TaskStatus;
 import org.highmed.dsf.fhir.search.parameters.ValueSetIdentifier;
@@ -168,7 +170,9 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 	@Override
 	public Response getMetadata(String mode, UriInfo uri, HttpHeaders headers)
 	{
-		return Response.ok(createCapabilityStatement(), parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
+		return Response
+				.ok(createCapabilityStatement(), parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers))
+				.build();
 	}
 
 	private String getVersion(BuildInfoReader buildInfoReader)
@@ -261,7 +265,8 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 		searchParameters.put(Subscription.class, Arrays.asList(SubscriptionCriteria.class, SubscriptionPayload.class,
 				SubscriptionStatus.class, SubscriptionType.class));
 
-		searchParameters.put(Task.class, Arrays.asList(TaskIdentifier.class, TaskRequester.class, TaskStatus.class));
+		searchParameters.put(Task.class, Arrays.asList(TaskAuthoredOn.class, TaskIdentifier.class, TaskModified.class,
+				TaskRequester.class, TaskStatus.class));
 
 		searchParameters.put(ValueSet.class, Arrays.asList(ValueSetIdentifier.class, ValueSetUrl.class,
 				ValueSetVersion.class, ValueSetStatus.class));

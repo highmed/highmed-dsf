@@ -210,18 +210,23 @@ public class FhirClientProviderImpl
 	}
 
 	@Override
-	public WebsocketClient getLocalWebsocketClient(String subscriptionId)
+	public WebsocketClient getLocalWebsocketClient(Runnable reconnector, String subscriptionId)
 	{
 		if (!websocketClientsBySubscriptionId.containsKey(subscriptionId))
 		{
-			WebsocketClientTyrus client = new WebsocketClientTyrus(URI.create(localWebsocketUrl),
-					localWebsocketTrustStore, localWebsocketKeyStore, localWebsocketKeyStorePassword, subscriptionId);
+			WebsocketClientTyrus client = createWebsocketClient(reconnector, subscriptionId);
 			websocketClientsBySubscriptionId.put(subscriptionId, client);
 			return client;
 
 		}
 
 		return websocketClientsBySubscriptionId.get(subscriptionId);
+	}
+
+	protected WebsocketClientTyrus createWebsocketClient(Runnable reconnector, String subscriptionId)
+	{
+		return new WebsocketClientTyrus(reconnector, URI.create(localWebsocketUrl), localWebsocketTrustStore,
+				localWebsocketKeyStore, localWebsocketKeyStorePassword, subscriptionId);
 	}
 
 	@Override

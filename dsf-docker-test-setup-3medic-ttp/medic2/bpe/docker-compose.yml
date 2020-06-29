@@ -35,6 +35,9 @@ services:
       -  type: bind
          source: ./app/log
          target: /opt/bpe/log
+      -  type: bind
+         source: ./app/last_event
+         target: /opt/bpe/last_event
       environment:
          TZ: Europe/Berlin
       networks:

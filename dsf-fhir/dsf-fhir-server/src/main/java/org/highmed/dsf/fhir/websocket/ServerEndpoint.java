@@ -90,8 +90,7 @@ public class ServerEndpoint extends Endpoint implements InitializingBean, NeedsA
 				if (message != null && !message.isBlank() && message.startsWith(BIND_MESSAGE_START))
 				{
 					logger.debug("Websocket bind message received: {}", message);
-					subscriptionManager.bind(user, session.getId(), session.getAsyncRemote(),
-							message.substring(BIND_MESSAGE_START.length()));
+					subscriptionManager.bind(user, session, message.substring(BIND_MESSAGE_START.length()));
 				}
 			}
 		});

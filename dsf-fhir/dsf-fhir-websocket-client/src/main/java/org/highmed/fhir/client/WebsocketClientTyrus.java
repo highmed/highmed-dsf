@@ -7,7 +7,9 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import javax.net.ssl.SSLContext;
-
+import javax.websocket.CloseReason;
+import javax.websocket.DeploymentException;
+import javax.websocket.Session;
 
 import org.glassfish.jersey.SslConfigurator;
 import org.glassfish.tyrus.client.ClientManager;
@@ -19,10 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.parser.IParser;
-
-import javax.websocket.CloseReason;
-import javax.websocket.DeploymentException;
-import javax.websocket.Session;
 
 public class WebsocketClientTyrus implements WebsocketClient
 {
@@ -54,8 +52,8 @@ public class WebsocketClientTyrus implements WebsocketClient
 	private Session connection;
 	private volatile boolean closed;
 
-	public WebsocketClientTyrus(URI wsUri, KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword,
-			String subscriptionIdPart)
+	public WebsocketClientTyrus(Runnable reconnector, URI wsUri, KeyStore trustStore, KeyStore keyStore,
+			char[] keyStorePassword, String subscriptionIdPart)
 	{
 		this.wsUri = wsUri;
 
@@ -67,7 +65,16 @@ public class WebsocketClientTyrus implements WebsocketClient
 		else
 			sslContext = SslConfigurator.getDefaultContext();
 
-		this.endpoint = new ClientEndpoint(subscriptionIdPart);
+		this.endpoint = createClientEndpoint(reconnector, subscriptionIdPart);
+	}
+
+	private ClientEndpoint createClientEndpoint(Runnable reconnector, String subscriptionIdPart)
+	{
+		return new ClientEndpoint(() ->
+		{
+			disconnect();
+			reconnector.run();
+		}, subscriptionIdPart);
 	}
 
 	@Override
