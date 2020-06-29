@@ -7,9 +7,9 @@ import java.util.Objects;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
-import javax.ws.rs.core.Response.Status;
 
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.HistoryDao;
@@ -21,7 +21,9 @@ import org.highmed.dsf.fhir.prefer.PreferHandlingType;
 import org.highmed.dsf.fhir.search.PageAndCount;
 import org.highmed.dsf.fhir.search.SearchQuery;
 import org.highmed.dsf.fhir.search.SearchQueryParameterError;
+import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Resource;
 import org.springframework.beans.factory.InitializingBean;
 
@@ -34,18 +36,20 @@ public class HistoryServiceImpl implements HistoryService, InitializingBean
 	private final ParameterConverter parameterConverter;
 	private final ExceptionHandler exceptionHandler;
 	private final ResponseGenerator responseGenerator;
+	private final ReferenceCleaner referenceCleaner;
 	private final HistoryDao historyDao;
 	private final HistoryUserFilterFactory historyUserFilterFactory;
 
 	public HistoryServiceImpl(String serverBase, int defaultPageCount, ParameterConverter parameterConverter,
-			ExceptionHandler exceptionHandler, ResponseGenerator responseGenerator, HistoryDao historyDao,
-			HistoryUserFilterFactory historyUserFilterFactory)
+			ExceptionHandler exceptionHandler, ResponseGenerator responseGenerator, ReferenceCleaner referenceCleaner,
+			HistoryDao historyDao, HistoryUserFilterFactory historyUserFilterFactory)
 	{
 		this.serverBase = serverBase;
 		this.defaultPageCount = defaultPageCount;
 		this.parameterConverter = parameterConverter;
 		this.exceptionHandler = exceptionHandler;
 		this.responseGenerator = responseGenerator;
+		this.referenceCleaner = referenceCleaner;
 		this.historyDao = historyDao;
 		this.historyUserFilterFactory = historyUserFilterFactory;
 	}
@@ -57,6 +61,7 @@ public class HistoryServiceImpl implements HistoryService, InitializingBean
 		Objects.requireNonNull(parameterConverter, "parameterConverter");
 		Objects.requireNonNull(exceptionHandler, "exceptionHandler");
 		Objects.requireNonNull(responseGenerator, "responseGenerator");
+		Objects.requireNonNull(referenceCleaner, "referenceCleaner");
 		Objects.requireNonNull(historyDao, "historyDao");
 		Objects.requireNonNull(historyUserFilterFactory, "historyUserFilterFactory");
 	}
@@ -136,7 +141,11 @@ public class HistoryServiceImpl implements HistoryService, InitializingBean
 		atParameter.modifyBundleUri(bundleUri);
 		sinceParameter.modifyBundleUri(bundleUri);
 
-		return responseGenerator.createHistoryBundle(history, errors, bundleUri, format, pretty);
+		Bundle bundle = responseGenerator.createHistoryBundle(history, errors, bundleUri, format, pretty);
+		// clean literal references from bundle entries
+		bundle.getEntry().stream().filter(BundleEntryComponent::hasResource).map(BundleEntryComponent::getResource)
+				.forEach(referenceCleaner::cleanLiteralReferences);
+		return bundle;
 	}
 
 	private String getResourceTypeName(Class<? extends Resource> resource)
