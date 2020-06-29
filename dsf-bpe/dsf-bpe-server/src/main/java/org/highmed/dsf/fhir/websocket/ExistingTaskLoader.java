@@ -42,6 +42,13 @@ public class ExistingTaskLoader
 
 	public void readExistingTasks(Map<String, List<String>> searchCriteriaQueryParameters)
 	{
+		// executing search until call results in no more found tasks
+		while (doReadExistingTasks(searchCriteriaQueryParameters))
+			;
+	}
+
+	private boolean doReadExistingTasks(Map<String, List<String>> searchCriteriaQueryParameters)
+	{
 		Map<String, List<String>> queryParams = new HashMap<>(searchCriteriaQueryParameters);
 		Optional<LocalDateTime> readLastEventTime = lastEventTimeIo.readLastEventTime();
 
@@ -61,7 +68,7 @@ public class ExistingTaskLoader
 		if (bundle.getTotal() <= 0)
 		{
 			logger.debug("Result bundle.total <= 0");
-			return;
+			return false;
 		}
 
 		for (BundleEntryComponent entry : bundle.getEntry())
@@ -76,10 +83,6 @@ public class ExistingTaskLoader
 				logger.warn("Ignoring resource of type {}");
 		}
 
-		if (bundle.getTotal() > RESULT_PAGE_COUNT)
-		{
-			logger.warn("Result bundle.total > {}, calling readExistingTasks again", RESULT_PAGE_COUNT);
-			readExistingTasks(searchCriteriaQueryParameters);
-		}
+		return true;
 	}
 }
