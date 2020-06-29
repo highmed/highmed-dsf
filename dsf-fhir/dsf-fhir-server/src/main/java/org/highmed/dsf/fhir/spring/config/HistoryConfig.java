@@ -12,6 +12,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class HistoryConfig
 {
+	@Value("${org.highmed.dsf.fhir.serverBase}")
+	private String serverBase;
+
 	@Value("${org.highmed.dsf.fhir.defaultPageCount}")
 	private int defaultPageCount;
 
@@ -30,7 +33,7 @@ public class HistoryConfig
 	@Bean
 	public HistoryService historyService()
 	{
-		return new HistoryServiceImpl(defaultPageCount, helperConfig.parameterConverter(),
+		return new HistoryServiceImpl(serverBase, defaultPageCount, helperConfig.parameterConverter(),
 				helperConfig.exceptionHandler(), helperConfig.responseGenerator(), daoConfig.historyDao(),
 				historyUserFilterFactory());
 	}

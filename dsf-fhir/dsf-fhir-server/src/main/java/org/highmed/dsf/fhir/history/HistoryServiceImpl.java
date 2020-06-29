@@ -29,6 +29,7 @@ import ca.uhn.fhir.model.api.annotation.ResourceDef;
 
 public class HistoryServiceImpl implements HistoryService, InitializingBean
 {
+	private final String serverBase;
 	private final int defaultPageCount;
 	private final ParameterConverter parameterConverter;
 	private final ExceptionHandler exceptionHandler;
@@ -36,10 +37,11 @@ public class HistoryServiceImpl implements HistoryService, InitializingBean
 	private final HistoryDao historyDao;
 	private final HistoryUserFilterFactory historyUserFilterFactory;
 
-	public HistoryServiceImpl(int defaultPageCount, ParameterConverter parameterConverter,
+	public HistoryServiceImpl(String serverBase, int defaultPageCount, ParameterConverter parameterConverter,
 			ExceptionHandler exceptionHandler, ResponseGenerator responseGenerator, HistoryDao historyDao,
 			HistoryUserFilterFactory historyUserFilterFactory)
 	{
+		this.serverBase = serverBase;
 		this.defaultPageCount = defaultPageCount;
 		this.parameterConverter = parameterConverter;
 		this.exceptionHandler = exceptionHandler;
@@ -51,6 +53,7 @@ public class HistoryServiceImpl implements HistoryService, InitializingBean
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
+		Objects.requireNonNull(serverBase, "serverBase");
 		Objects.requireNonNull(parameterConverter, "parameterConverter");
 		Objects.requireNonNull(exceptionHandler, "exceptionHandler");
 		Objects.requireNonNull(responseGenerator, "responseGenerator");
@@ -88,19 +91,26 @@ public class HistoryServiceImpl implements HistoryService, InitializingBean
 		SinceParameter sinceParameter = new SinceParameter();
 		sinceParameter.configure(queryParameters);
 
+		String path = null;
 		History history;
 		if (resource == null && id == null)
 			history = exceptionHandler
 					.handleSqlException(() -> historyDao.readHistory(historyUserFilterFactory.getUserFilters(user),
 							pageAndCount, atParameter, sinceParameter));
 		else if (resource != null && id != null)
+		{
 			history = exceptionHandler.handleSqlException(() -> historyDao.readHistory(
 					historyUserFilterFactory.getUserFilter(user, resource), pageAndCount, atParameter, sinceParameter,
 					resource, parameterConverter.toUuid(getResourceTypeName(resource), id)));
+			path = resource.getAnnotation(ResourceDef.class).name();
+		}
 		else if (resource != null)
+		{
 			history = exceptionHandler.handleSqlException(
 					() -> historyDao.readHistory(historyUserFilterFactory.getUserFilter(user, resource), pageAndCount,
 							atParameter, sinceParameter, resource));
+			path = resource.getAnnotation(ResourceDef.class).name();
+		}
 		else
 			throw new WebApplicationException();
 
@@ -116,7 +126,13 @@ public class HistoryServiceImpl implements HistoryService, InitializingBean
 		String format = queryParameters.getFirst(SearchQuery.PARAMETER_FORMAT);
 		String pretty = queryParameters.getFirst(SearchQuery.PARAMETER_PRETTY);
 
-		UriBuilder bundleUri = uri.getAbsolutePathBuilder();
+		UriBuilder bundleUri = UriBuilder.fromPath(serverBase);
+		if (path != null)
+			bundleUri = bundleUri.path(path);
+		if (path != null && id != null)
+			bundleUri = bundleUri.path(id);
+
+		bundleUri = bundleUri.path("_history");
 		atParameter.modifyBundleUri(bundleUri);
 		sinceParameter.modifyBundleUri(bundleUri);
 
