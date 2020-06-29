@@ -25,12 +25,17 @@ services:
       -  type: bind
          source: ./app/conf
          target: /opt/bpe/conf
+         read_only: true
       -  type: bind
          source: ./app/plugin
          target: /opt/bpe/plugin
+         read_only: true
       -  type: bind
          source: ./app/log
          target: /opt/bpe/log
+      -  type: bind
+         source: ./app/last_event
+         target: /opt/bpe/last_event
       environment:
          TZ: Europe/Berlin
       networks:

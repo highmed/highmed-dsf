@@ -30,6 +30,13 @@
          group: '2202'
          mode: '2775'
       become: true
+   -  name: Set bpe/app/last_event permissions
+      file:
+         path: /opt/highmed/bpe/app/last_event
+         owner: '{{ user }}'
+         group: '2202'
+         mode: '2775'
+      become: true
    -  name: Set fhir/app/log permissions
       file:
          path: /opt/highmed/fhir/app/log

@@ -1,15 +1,14 @@
 package org.highmed.dsf.fhir.integration;
 
 import static junit.framework.TestCase.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -320,7 +319,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		t.setStatus(TaskStatus.INPROGRESS);
 		t.setIntent(TaskIntent.ORDER);
 		t.setAuthoredOn(new Date());
-		
+
 		Reference localOrg = new Reference();
 		localOrg.setType("Organization").getIdentifier()
 				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
@@ -838,5 +837,56 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		t.getOutputFirstRep().getType().getCodingFirstRep().setSystem("system").setCode("code");
 		t.getOutputFirstRep().setValue(new StringType("value"));
 		testCreateExpectForbidden(getExternalWebserviceClient(), t);
+	}
+
+	@Test
+	public void testSearchByStatusRequested() throws Exception
+	{
+		Task t = new Task();
+		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-ping-process");
+		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.2.0");
+		t.setStatus(TaskStatus.REQUESTED);
+		t.setIntent(TaskIntent.ORDER);
+		t.setAuthoredOn(new Date());
+		Reference localOrg = new Reference();
+		localOrg.setType("Organization").getIdentifier()
+				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
+				.setValue("Test_Organization");
+		t.setRequester(localOrg);
+		t.getRestriction().addRecipient(localOrg);
+		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+				.setCode("message-name");
+		t.getInputFirstRep().setValue(new StringType("startPingProcessMessage"));
+
+		getWebserviceClient().create(t);
+
+		Bundle searchResult = getWebserviceClient().searchWithStrictHandling(Task.class, Map.of("status",
+				Collections.singletonList("requested"), "_sort", Collections.singletonList("_lastUpdated")));
+		assertNotNull(searchResult);
+		assertEquals(1, searchResult.getTotal());
+		assertTrue(searchResult.hasEntry());
+		assertNotNull(searchResult.getEntry());
+		assertEquals(1, searchResult.getEntry().size());
+		assertTrue(searchResult.getEntryFirstRep().hasResource());
+		assertNotNull(searchResult.getEntryFirstRep().getResource());
+		assertTrue(searchResult.getEntryFirstRep().getResource() instanceof Task);
+
+		Task result = (Task) searchResult.getEntryFirstRep().getResource();
+		assertTrue(result.hasRequester());
+		assertTrue(result.hasRestriction());
+		assertTrue(result.getRestriction().hasRecipient());
+		assertNotNull(result.getRestriction().getRecipient());
+		assertEquals(1, result.getRestriction().getRecipient().size());
+		assertNotNull(result.getRestriction().getRecipientFirstRep());
+
+		Reference ref = result.getRestriction().getRecipientFirstRep();
+		assertFalse(ref.hasReference());
+		assertNull(ref.getReference());
+		assertTrue(ref.hasIdentifier());
+		assertNotNull(ref.getIdentifier());
+		assertTrue(ref.getIdentifier().hasSystem());
+		assertNotNull(ref.getIdentifier().getSystem());
+		assertTrue(ref.getIdentifier().hasValue());
+		assertNotNull(ref.getIdentifier().getValue());
 	}
 }

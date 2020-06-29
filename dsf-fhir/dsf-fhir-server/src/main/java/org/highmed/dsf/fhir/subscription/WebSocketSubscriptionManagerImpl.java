@@ -1,5 +1,6 @@
 package org.highmed.dsf.fhir.subscription;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,7 +16,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import javax.websocket.CloseReason;
+import javax.websocket.CloseReason.CloseCodes;
 import javax.websocket.RemoteEndpoint.Async;
+import javax.websocket.Session;
 
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.authorization.AuthorizationRule;
@@ -352,36 +356,51 @@ public class WebSocketSubscriptionManagerImpl
 	}
 
 	@Override
-	public void bind(User user, String sessionId, Async asyncRemote, String subscriptionIdPart)
+	public void bind(User user, Session session, String subscriptionIdPart)
 	{
 		if (firstCall.get())
 			refreshMatchers();
 
 		if (subscriptionsByIdPart.containsKey(subscriptionIdPart))
 		{
-			logger.debug("Binding websocket session {} to subscription {}", sessionId, subscriptionIdPart);
+			logger.debug("Binding websocket session {} to subscription {}", session.getId(), subscriptionIdPart);
 			asyncRemotesBySubscriptionIdPart.replace(subscriptionIdPart, list ->
 			{
 				if (list == null)
 				{
 					List<SessionIdAndRemoteAsync> newList = new ArrayList<>();
-					newList.add(new SessionIdAndRemoteAsync(user, sessionId, asyncRemote));
+					newList.add(new SessionIdAndRemoteAsync(user, session.getId(), session.getAsyncRemote()));
 					return newList;
 				}
 				else
 				{
-					list.add(new SessionIdAndRemoteAsync(user, sessionId, asyncRemote));
+					list.add(new SessionIdAndRemoteAsync(user, session.getId(), session.getAsyncRemote()));
 					return list;
 				}
 			});
-			asyncRemote.sendText("bound " + subscriptionIdPart);
+			session.getAsyncRemote().sendText("bound " + subscriptionIdPart);
 		}
 		else
 		{
-			logger.warn("Could not bind websocket session {} to subscription {}, subscription not found", sessionId,
-					subscriptionIdPart);
+			logger.warn("Could not bind websocket session {} to subscription {}, subscription not found",
+					session.getId(), subscriptionIdPart);
 			logger.debug("Current active subscription-ids: {}", subscriptionsByIdPart.getAllKeys());
-			asyncRemote.sendText("not-found " + subscriptionIdPart); // TODO not part of FHIR specification
+			closeNotFound(user, session, subscriptionIdPart);
+		}
+	}
+
+	private void closeNotFound(User user, Session session, String subscriptionIdPart)
+	{
+		try
+		{
+			session.close(new CloseReason(CloseCodes.CANNOT_ACCEPT,
+					"Subscription with " + subscriptionIdPart + " not found"));
+		}
+		catch (IOException e)
+		{
+			logger.warn("Error while closing websocket with user {}, session {}, {}", user.getName(), session.getId(),
+					e.getMessage());
+			logger.debug("Error while closing websocket", e);
 		}
 	}
 

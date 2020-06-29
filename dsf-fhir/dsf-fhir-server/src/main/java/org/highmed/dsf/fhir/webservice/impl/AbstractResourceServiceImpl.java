@@ -51,6 +51,7 @@ import org.highmed.dsf.fhir.service.ResourceValidator;
 import org.highmed.dsf.fhir.webservice.base.AbstractBasicService;
 import org.highmed.dsf.fhir.webservice.specification.BasicResourceService;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.IdType;
@@ -558,8 +559,13 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		String pretty = queryParameters.getFirst(SearchQuery.PARAMETER_PRETTY);
 		Bundle searchSet = responseGenerator.createSearchSet(result, errors, bundleUri, format, pretty);
 
-		return responseGenerator.response(Status.OK, referenceCleaner.cleanLiteralReferences(searchSet),
-				parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
+		// clean literal references from bundle entries
+		searchSet.getEntry().stream().filter(BundleEntryComponent::hasResource).map(BundleEntryComponent::getResource)
+				.forEach(referenceCleaner::cleanLiteralReferences);
+
+		return responseGenerator
+				.response(Status.OK, searchSet, parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers))
+				.build();
 	}
 
 	private PartialResult<R> filterIncludeResources(PartialResult<R> result)

@@ -4,7 +4,7 @@ import org.highmed.fhir.client.WebsocketClient;
 
 public interface FhirWebsocketClientProvider extends FhirWebserviceClientProvider
 {
-	WebsocketClient getLocalWebsocketClient(String subscriptionId);
+	WebsocketClient getLocalWebsocketClient(Runnable reconnector, String subscriptionId);
 
 	void disconnectAll();
 }
