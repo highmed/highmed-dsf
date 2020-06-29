@@ -178,8 +178,13 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		else if (t instanceof Resource && t.getIdElement().getResourceType() != null
 				&& t.getIdElement().getIdPart() != null)
 		{
-			return Optional.of(String.format("%s/%s/%s", serverBaseProvider.getServerBase(),
-					t.getIdElement().getResourceType(), t.getIdElement().getIdPart()));
+			if (!uriInfo.getPath().contains("_history"))
+				return Optional.of(String.format("%s/%s/%s", serverBaseProvider.getServerBase(),
+						t.getIdElement().getResourceType(), t.getIdElement().getIdPart()));
+			else
+				return Optional.of(String.format("%s/%s/%s/_history/%s", serverBaseProvider.getServerBase(),
+						t.getIdElement().getResourceType(), t.getIdElement().getIdPart(),
+						t.getIdElement().getVersionIdPart()));
 		}
 		else
 			return Optional.empty();
