@@ -26,7 +26,7 @@ public class ValueSetDaoJdbc extends AbstractResourceDaoJdbc<ValueSet> implement
 				with(ValueSetIdentifier::new, ValueSetStatus::new, ValueSetUrl::new, ValueSetVersion::new), with());
 
 		readByUrl = new ReadByUrlDaoJdbc<>(this::getDataSource, this::getResource, getResourceTable(),
-				getResourceColumn(), getResourceIdColumn());
+				getResourceColumn());
 	}
 
 	@Override
@@ -39,6 +39,13 @@ public class ValueSetDaoJdbc extends AbstractResourceDaoJdbc<ValueSet> implement
 	public Optional<ValueSet> readByUrlAndVersion(String urlAndVersion) throws SQLException
 	{
 		return readByUrl.readByUrlAndVersion(urlAndVersion);
+	}
+
+	@Override
+	public Optional<ValueSet> readByUrlAndVersionWithTransaction(Connection connection, String urlAndVersion)
+			throws SQLException
+	{
+		return readByUrl.readByUrlAndVersionWithTransaction(connection, urlAndVersion);
 	}
 
 	@Override

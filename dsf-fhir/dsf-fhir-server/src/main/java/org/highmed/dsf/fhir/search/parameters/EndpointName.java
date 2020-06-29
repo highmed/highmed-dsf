@@ -88,15 +88,6 @@ public class EndpointName extends AbstractStringParameter<Endpoint>
 	@Override
 	protected String getSortSql(String sortDirectionWithSpacePrefix)
 	{
-		switch (valueAndType.type)
-		{
-			case STARTS_WITH:
-			case CONTAINS:
-				return "lower(endpoint->>'name')" + sortDirectionWithSpacePrefix;
-			case EXACT:
-				return "endpoint->>'name'" + sortDirectionWithSpacePrefix;
-			default:
-				return "";
-		}
+		return "endpoint->>'name'" + sortDirectionWithSpacePrefix;
 	}
 }

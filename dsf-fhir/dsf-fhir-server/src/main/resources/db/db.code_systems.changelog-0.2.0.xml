@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<property name="json" value="JSONB" dbms="postgresql" />
+	<property name="json" value="varchar(5000)" dbms="h2" />
+
+	<changeSet author="hhund" id="db.code_systems.changelog-0.2.0">
+		<dropView viewName="current_code_systems"/>
+	
+		<renameColumn tableName="code_systems" oldColumnName="deleted" newColumnName="deleted_old"/>
+		
+		<addColumn tableName="code_systems">
+			<column name="deleted" type="TIMESTAMP"/>
+		</addColumn>
+	
+		<sql dbms="postgresql">
+			UPDATE code_systems SET deleted = current_cs.deleted_new
+			FROM (
+				SELECT code_system_id, deleted_old, ((code_system->'meta'->>'lastUpdated')::timestamp + interval '1' second) AS deleted_new
+			 	FROM (
+			 		SELECT DISTINCT ON (code_system_id) code_system_id, version, deleted_old, code_system
+					FROM code_systems ORDER BY code_system_id, version DESC
+				) AS current_cs
+				WHERE deleted_old
+			) AS current_cs
+			WHERE code_systems.code_system_id = current_cs.code_system_id
+		</sql>
+		
+		<dropColumn tableName="code_systems" columnName="deleted_old"/>
+	
+		<createView viewName="current_code_systems" replaceIfExists="true">
+			SELECT code_system_id, version, code_system
+			FROM (
+				SELECT DISTINCT ON (code_system_id) code_system_id, version, deleted, code_system
+				FROM code_systems ORDER BY code_system_id, version DESC
+			) AS current_cs
+			WHERE deleted IS NULL
+		</createView>
+
+		<sql dbms="postgresql">
+			ALTER TABLE current_code_systems OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_code_systems TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_code_systems TO ${db.server_users_group};
+		</sql>
+	</changeSet>
+</databaseChangeLog>

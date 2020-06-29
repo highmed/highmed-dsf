@@ -3,23 +3,16 @@
 
 	<Appenders>
 		<Console name="CONSOLE" target="SYSTEM_OUT">
-			<PatternLayout pattern="%p\t%t - %C{1}.%M(%L) | %m%n"/>
+			<PatternLayout pattern="%p\t%t | %m%n"/>
 		</Console>
 	</Appenders>
 
 	<Loggers>
-		<Logger name="de.rwh" level="INFO"/>
-		<Logger name="org.highmed" level="INFO"/>
-		<Logger name="org.apache" level="WARN"/>
-		<Logger name="org.springframework" level="WARN"/>
-		<Logger name="jndi" level="WARN"/>
-		<Logger name="org.eclipse.jetty" level="INFO"/>
-		<Logger name="com.sun.jersey" level="WARN"/>
-		<Logger name="liquibase" level="WARN"/>
-		<Logger name="ca.uhn.hl7v2" level="WARN"/>
+		<AsyncLogger name="org.highmed" level="INFO"/>
+		<AsyncLogger name="org.eclipse.jetty" level="INFO"/>
 
-		<Root level="WARN">
+		<AsyncRoot level="WARN">
 			<AppenderRef ref="CONSOLE"/>
-		</Root>
+		</AsyncRoot>
 	</Loggers>
 </Configuration>

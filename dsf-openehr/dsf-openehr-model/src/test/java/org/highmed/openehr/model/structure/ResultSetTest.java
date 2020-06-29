@@ -13,7 +13,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
-import org.highmed.openehr.OpenEhrObjectMapperFactory;
+import org.highmed.openehr.json.OpenEhrObjectMapperFactory;
 import org.highmed.openehr.model.datatypes.IntegerRowElement;
 import org.highmed.openehr.model.datatypes.StringRowElement;
 import org.junit.BeforeClass;

@@ -3,13 +3,12 @@ package org.highmed.dsf.fhir.search.parameters.rev.include;
 import java.sql.Connection;
 
 import org.highmed.dsf.fhir.search.IncludeParts;
-import org.highmed.dsf.fhir.search.SearchQueryRevIncludeParameterFactory.RevIncludeDefinition;
+import org.highmed.dsf.fhir.search.IncludeParameterDefinition;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.Resource;
 
-@RevIncludeDefinition(resourceType = ResearchStudy.class, parameterName = "enrollment", targetResourceTypes = {
-		Group.class })
+@IncludeParameterDefinition(resourceType = ResearchStudy.class, parameterName = "enrollment", targetResourceTypes = Group.class)
 public class ResearchStudyEnrollmentRevInclude extends AbstractRevIncludeParameterFactory
 {
 	public ResearchStudyEnrollmentRevInclude()

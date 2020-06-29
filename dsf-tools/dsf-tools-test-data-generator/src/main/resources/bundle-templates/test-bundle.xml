@@ -8,7 +8,8 @@
 					<tag>
 						<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
 						<code value="REMOTE"/>
-					</tag>		
+					</tag>
+					<profile value="http://highmed.org/fhir/StructureDefinition/highmed-organization"/>
 				</meta>
 				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
 					<valueString value="TODO"/>
@@ -26,14 +27,15 @@
 				</type>
 				<name value="Test Organization"/>
 				<endpoint>
-					<type value="Endpoint"/>
 					<reference value="urn:uuid:b879e904-d666-45de-a995-accdd4429b79"/>
+					<type value="Endpoint"/>
 				</endpoint>
 			</Organization>
 		</resource>
 		<request>
-			<method value="PUT"/>
-			<url value="Organization?identifier=http://highmed.org/fhir/NamingSystem/organization-identifier|Test_Organization"/>
+			<method value="POST"/>
+			<url value="Organization"/>
+			<ifNoneExist value="identifier=http://highmed.org/fhir/NamingSystem/organization-identifier|Test_Organization"/>
 		</request>
 	</entry>
 	<entry>
@@ -44,7 +46,8 @@
 					<tag>
 						<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
 						<code value="REMOTE"/>
-					</tag>		
+					</tag>
+					<profile value="http://highmed.org/fhir/StructureDefinition/highmed-endpoint"/>
 				</meta>
 				<identifier>
 					<system value="http://highmed.org/fhir/NamingSystem/endpoint-identifier"/>
@@ -57,8 +60,8 @@
 				</connectionType>
 				<name value="Test Endpoint"/>
 				<managingOrganization>
-					<type value="Organization"/>
 					<reference value="urn:uuid:bb73165c-c7b9-4342-8e28-531f07fa7735"/>
+					<type value="Organization"/>
 				</managingOrganization>
 				<payloadType>
 					<coding>
@@ -72,8 +75,9 @@
 			</Endpoint>
 		</resource>
 		<request>
-			<method value="PUT"/>
-			<url value="Endpoint?identifier=http://highmed.org/fhir/NamingSystem/endpoint-identifier|Test_Endpoint"/>
+			<method value="POST"/>
+			<url value="Endpoint"/>
+			<ifNoneExist value="identifier=http://highmed.org/fhir/NamingSystem/endpoint-identifier|Test_Endpoint"/>
 		</request>
 	</entry>
 </Bundle>

@@ -2,6 +2,7 @@ package org.highmed.dsf.fhir.hapi;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.UUID;
@@ -11,6 +12,7 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Organization;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -28,7 +30,6 @@ public class BundleTest
 		IParser p = FhirContext.forR4().newXmlParser();
 		p.setStripVersionsFromReferences(false);
 		p.setOverrideResourceIdWithBundleEntryFullUrl(false);
-		p.setPrettyPrint(true);
 		return p;
 	}
 
@@ -37,7 +38,6 @@ public class BundleTest
 		IParser p = FhirContext.forR4().newJsonParser();
 		p.setStripVersionsFromReferences(false);
 		p.setOverrideResourceIdWithBundleEntryFullUrl(false);
-		p.setPrettyPrint(true);
 		return p;
 	}
 
@@ -66,10 +66,12 @@ public class BundleTest
 		String eptTempId = "urn:uuid:" + UUID.randomUUID().toString();
 
 		Organization org = new Organization();
-		org.addIdentifier().setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_Organization");
+		org.addIdentifier().setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
+				.setValue("Test_Organization");
 
 		Endpoint ept = new Endpoint();
-		ept.addIdentifier().setSystem("http://highmed.org/fhir/NamingSystem/endpoint-identifier").setValue("Test_Endpoint");
+		ept.addIdentifier().setSystem("http://highmed.org/fhir/NamingSystem/endpoint-identifier")
+				.setValue("Test_Endpoint");
 
 		org.getEndpointFirstRep().setType("Endpoint").setReference(eptTempId);
 		ept.getManagingOrganization().setType("Organization").setReference(orgTempId);
@@ -77,8 +79,8 @@ public class BundleTest
 		BundleEntryComponent orgEntry = bundle1.addEntry();
 		orgEntry.setFullUrl(orgTempId);
 		orgEntry.setResource(org);
-		orgEntry.getRequest().setMethod(HTTPVerb.PUT)
-				.setUrl("Organization?identifier=http://highmed.org/fhir/NamingSystem/organization-identifier|Test_Organization");
+		orgEntry.getRequest().setMethod(HTTPVerb.PUT).setUrl(
+				"Organization?identifier=http://highmed.org/fhir/NamingSystem/organization-identifier|Test_Organization");
 
 		BundleEntryComponent eptEntry = bundle1.addEntry();
 		eptEntry.setFullUrl(eptTempId);
@@ -107,5 +109,26 @@ public class BundleTest
 		logger.debug("Bundle2: {}", bundle2String);
 
 		assertEquals(bundle1String, bundle2String);
+	}
+
+	@Test
+	public void testBundleVersionTag() throws Exception
+	{
+		IdType i = new IdType(null, "id", "version");
+		System.out.println(i.withResourceType("Bundle").getValueAsString());
+
+		Bundle b = new Bundle();
+		b.setIdElement(new IdType("Bundle", UUID.randomUUID().toString(), "123"));
+
+		String bundleTxt = newXmlParser().encodeResourceToString(b);
+		logger.debug(bundleTxt);
+
+		Bundle bRead = newXmlParser().parseResource(Bundle.class, bundleTxt);
+		assertEquals("123", bRead.getMeta().getVersionId());
+		assertNull(bRead.getIdElement().getVersionIdPart());
+
+		// FIXME workaround hapi parser bug
+		bRead.setIdElement(bRead.getIdElement().withVersion(bRead.getMeta().getVersionId()));
+		assertEquals("123", bRead.getIdElement().getVersionIdPart());
 	}
 }

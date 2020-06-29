@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<property name="json" value="JSONB" dbms="postgresql" />
+	<property name="json" value="varchar(5000)" dbms="h2" />
+
+	<changeSet author="hhund" id="db.groups.changelog-0.2.0">
+		<dropView viewName="current_groups"/>
+	
+		<renameColumn tableName="groups" oldColumnName="deleted" newColumnName="deleted_old"/>
+		
+		<addColumn tableName="groups">
+			<column name="deleted" type="TIMESTAMP"/>
+		</addColumn>
+	
+		<sql dbms="postgresql">
+			UPDATE groups SET deleted = current_g.deleted_new
+			FROM (
+				SELECT group_id, deleted_old, ((group_json->'meta'->>'lastUpdated')::timestamp + interval '1' second) AS deleted_new
+			 	FROM (
+			 		SELECT DISTINCT ON (group_id) group_id, version, deleted_old, group_json
+					FROM groups ORDER BY group_id, version DESC
+				) AS current_g
+				WHERE deleted_old
+			) AS current_g
+			WHERE groups.group_id = current_g.group_id
+		</sql>
+		
+		<dropColumn tableName="groups" columnName="deleted_old"/>
+	
+		<createView viewName="current_groups" replaceIfExists="true">
+			SELECT group_id, version, group_json
+			FROM (
+				SELECT DISTINCT ON (group_id) group_id, version, deleted, group_json
+				FROM groups ORDER BY group_id, version DESC
+			) AS current_g
+			WHERE deleted IS NULL
+		</createView>
+
+		<sql dbms="postgresql">
+			ALTER TABLE current_groups OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_groups TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_groups TO ${db.server_users_group};
+		</sql>
+	</changeSet>
+</databaseChangeLog>

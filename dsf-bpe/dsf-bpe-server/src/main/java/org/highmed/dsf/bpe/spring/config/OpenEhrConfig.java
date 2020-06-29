@@ -2,18 +2,12 @@ package org.highmed.dsf.bpe.spring.config;
 
 import org.highmed.dsf.openehr.client.OpenEhrClientProviderImpl;
 import org.highmed.dsf.openehr.client.OpenEhrWebserviceClientProvider;
-
-import org.highmed.openehr.deserializer.RowElementDeserializer;
-import org.highmed.openehr.model.structure.RowElement;
+import org.highmed.openehr.json.OpenEhrObjectMapperFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 
 @Configuration
 public class OpenEhrConfig
@@ -36,25 +30,7 @@ public class OpenEhrConfig
 	@Bean
 	public ObjectMapper openEhrObjectMapper()
 	{
-		ObjectMapper mapper = new ObjectMapper();
-
-		mapper.getFactory().disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
-		mapper.disable(MapperFeature.DEFAULT_VIEW_INCLUSION);
-		mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-		mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-
-		SimpleModule module = new SimpleModule();
-		module.addDeserializer(RowElement.class, rowElementDeserializer());
-
-		mapper.registerModule(module);
-
-		return mapper;
-	}
-
-	@Bean
-	public RowElementDeserializer rowElementDeserializer()
-	{
-		return new RowElementDeserializer();
+		return OpenEhrObjectMapperFactory.createObjectMapper();
 	}
 
 	@Bean

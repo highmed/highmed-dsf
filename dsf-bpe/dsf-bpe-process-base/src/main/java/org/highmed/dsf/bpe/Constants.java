@@ -12,11 +12,14 @@ public interface Constants
 	// String VARIABLE_CORRELATION_KEY = "correlationKey";
 	String VARIABLE_MULTI_INSTANCE_TARGET = "multiInstanceTarget";
 	String VARIABLE_MULTI_INSTANCE_TARGETS = "multiInstanceTargets";
+	String VARIABLE_BLOOM_FILTER_CONFIG = "bloomFilterConfig";
 	String VARIABLE_QUERY_RESULTS = "queryResults";
+	String VARIABLE_FINAL_QUERY_RESULTS = "finalQueryResults";
 	String VARIABLE_TASK = "task";
 	String VARIABLE_LEADING_TASK = "leadingTask";
 	String VARIABLE_RESEARCH_STUDY = "researchStudy";
 	String VARIABLE_COHORTS = "cohorts";
+	String VARIABLE_TTP_IDENTIFIER = "ttp";
 	String VARIABLE_QUERIES = "queries";
 	String VARIABLE_QUERY_PARAMETERS = "queryParameters";
 	String VARIABLE_BUNDLE_ID = "bundleId";
@@ -24,14 +27,8 @@ public interface Constants
 	String VARIABLE_NEEDS_RECORD_LINKAGE = "needsRecordLinkage";
 
 	/**
-	 * Stores a List<{@link org.highmed.dsf.bpe.variables.FinalSimpleFeasibilityResult}> of the final results of
-	 * a multi medic simple cohort size query. Do not override, only add new entries to the list.
-	 */
-	String VARIABLE_SIMPLE_COHORT_SIZE_QUERY_FINAL_RESULT = "simpleCohortSizeQueryFinalResult";
-
-	/**
-	 * Stores a List<{@link org.highmed.dsf.fhir.variables.Outputs}> </>of outputs that have to be written to a
-	 * task resource after the process terminates. Do not override, only add new entries to the list.
+	 * Stores a List<{@link org.highmed.dsf.fhir.variables.Outputs}> </>of outputs that have to be written to a task
+	 * resource after the process terminates. Do not override, only add new entries to the list.
 	 */
 	String VARIABLE_PROCESS_OUTPUTS = "outputs";
 
@@ -54,13 +51,16 @@ public interface Constants
 	String CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDIC_CORRELATION_KEY = "medic-correlation-key";
 	String CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_CONSENT_CHECK = "needs-consent-check";
 	String CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_RECORD_LINKAGE = "needs-record-linkage";
+	String CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_BLOOM_FILTER_CONFIG = "bloom-filter-configuration";
 	String CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_SINGLE_MEDIC_RESULT = "single-medic-result";
+	String CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_SINGLE_MEDIC_RESULT_REFERENCE = "single-medic-result-reference";
 	String CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS_COUNT = "participating-medics";
+	String CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NOT_ENOUGH_PARTICIPATION = "not-enough-participation";
 	String CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT = "multi-medic-result";
 	String CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_RESEARCH_STUDY_REFERENCE = "research-study-reference";
 
 	String CODESYSTEM_HIGHMED_UPDATE_WHITELIST = "http://highmed.org/fhir/CodeSystem/update-whitelist";
-	String CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST = "HiGHmed_white_list";
+	String CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST = "highmed_whitelist";
 
 	String PROCESS_URI_BASE = "http://highmed.org/bpe/Process/";
 
@@ -69,6 +69,7 @@ public interface Constants
 	String ENDPOINT_IDENTIFIER_SYSTEM = "http://highmed.org/fhir/NamingSystem/endpoint-identifier";
 
 	String EXTENSION_PARTICIPATING_MEDIC_URI = "http://highmed.org/fhir/StructureDefinition/participating-medic";
+	String EXTENSION_PARTICIPATING_TTP_URI = "http://highmed.org/fhir/StructureDefinition/participating-ttp";
 	String EXTENSION_QUERY_URI = "http://highmed.org/fhir/StructureDefinition/query";
 	String EXTENSION_GROUP_ID_URI = "http://highmed.org/fhir/StructureDefinition/group-id";
 
@@ -81,4 +82,6 @@ public interface Constants
 
 	CodeType AQL_QUERY_TYPE = new CodeType("application/x-aql-query")
 			.setSystem("http://highmed.org/fhir/CodeSystem/query-type");
+
+	String OPENEHR_MIMETYPE_JSON = "application/json";
 }

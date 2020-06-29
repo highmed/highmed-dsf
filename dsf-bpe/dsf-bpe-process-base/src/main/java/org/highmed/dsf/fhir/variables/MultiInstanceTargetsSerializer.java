@@ -52,7 +52,7 @@ public class MultiInstanceTargetsSerializer extends PrimitiveValueSerializer<Mul
 	}
 
 	@Override
-	public MultiInstanceTargetsValue readValue(ValueFields valueFields)
+	public MultiInstanceTargetsValue readValue(ValueFields valueFields, boolean asTransientValue)
 	{
 		byte[] bytes = valueFields.getByteArrayValue();
 

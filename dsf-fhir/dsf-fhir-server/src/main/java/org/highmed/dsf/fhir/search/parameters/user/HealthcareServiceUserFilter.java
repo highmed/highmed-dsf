@@ -4,8 +4,15 @@ import org.highmed.dsf.fhir.authentication.User;
 
 public class HealthcareServiceUserFilter extends AbstractMetaTagAuthorizationRoleUserFilter
 {
+	private static final String RESOURCE_COLUMN = "healthcare_service";
+
 	public HealthcareServiceUserFilter(User user)
 	{
-		super(user, "healthcare_service");
+		super(user, RESOURCE_COLUMN);
+	}
+
+	public HealthcareServiceUserFilter(User user, String resourceColumn)
+	{
+		super(user, resourceColumn);
 	}
 }

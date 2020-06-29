@@ -5,6 +5,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -282,25 +284,6 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		return preparedStatementFactory.getJsonParser().parseResource(resourceType, json);
 	}
 
-	/* caution: only works because we set all versions as deleted or not deleted in method markDeleted */
-	public final boolean hasNonDeletedResource(Connection connection, UUID uuid) throws SQLException
-	{
-		if (uuid == null)
-			return false;
-
-		try (PreparedStatement statement = connection.prepareStatement(
-				"SELECT count(*) FROM " + resourceTable + " WHERE " + resourceIdColumn + " = ? AND NOT deleted"))
-		{
-			statement.setObject(1, preparedStatementFactory.uuidToPgObject(uuid));
-
-			logger.trace("Executing query '{}'", statement);
-			try (ResultSet result = statement.executeQuery())
-			{
-				return result.next() && result.getInt(1) > 0;
-			}
-		}
-	}
-
 	@Override
 	public final Optional<R> read(UUID uuid) throws SQLException, ResourceDeletedException
 	{
@@ -330,10 +313,12 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 			{
 				if (result.next())
 				{
-					if (preparedStatementFactory.isReadByIdDeleted(result))
+					LocalDateTime deleted = preparedStatementFactory.getReadByIdDeleted(result);
+					if (deleted != null)
 					{
+						long version = preparedStatementFactory.getReadByIdVersion(result);
 						logger.debug("{} with IdPart {} found, but marked as deleted", resourceTypeName, uuid);
-						throw new ResourceDeletedException(new IdType(resourceTypeName, uuid.toString()));
+						throw newResourceDeletedException(uuid, deleted, version);
 					}
 					else
 					{
@@ -350,8 +335,14 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		}
 	}
 
+	private ResourceDeletedException newResourceDeletedException(UUID uuid, LocalDateTime deleted, long version)
+	{
+		return new ResourceDeletedException(new IdType(resourceTypeName, uuid.toString(), String.valueOf(version + 1)),
+				deleted);
+	}
+
 	@Override
-	public final Optional<R> readVersion(UUID uuid, long version) throws SQLException
+	public final Optional<R> readVersion(UUID uuid, long version) throws SQLException, ResourceDeletedException
 	{
 		if (uuid == null || version < FIRST_VERSION)
 			return Optional.empty();
@@ -363,7 +354,8 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	}
 
 	@Override
-	public Optional<R> readVersionWithTransaction(Connection connection, UUID uuid, long version) throws SQLException
+	public Optional<R> readVersionWithTransaction(Connection connection, UUID uuid, long version)
+			throws SQLException, ResourceDeletedException
 	{
 		Objects.requireNonNull(connection, "connection");
 		if (uuid == null || version < FIRST_VERSION)
@@ -379,6 +371,16 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 			{
 				if (result.next())
 				{
+					LocalDateTime deleted = preparedStatementFactory.getReadByIdVersionDeleted(result);
+					long lastVersion = preparedStatementFactory.getReadByIdVersionVersion(result);
+					if (lastVersion + 1 == version)
+					{
+						logger.debug(
+								"{} with IdPart {} and Version {} found, but marked as deleted (delete history entry)",
+								resourceTypeName, uuid, version);
+						throw newResourceDeletedException(uuid, deleted, lastVersion);
+					}
+
 					logger.debug("{} with IdPart {} and Version {} found", resourceTypeName, uuid, version);
 					return Optional.of(preparedStatementFactory.getReadByIdAndVersionResource(result));
 				}
@@ -419,7 +421,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 			{
 				if (result.next())
 				{
-					if (preparedStatementFactory.isReadByIdDeleted(result))
+					if (preparedStatementFactory.getReadByIdDeleted(result) != null)
 						logger.warn("{} with IdPart {} found, but marked as deleted", resourceTypeName, uuid);
 					else
 						logger.debug("{} with IdPart {} found", resourceTypeName, uuid);
@@ -431,6 +433,36 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 					logger.debug("{} with IdPart {} not found", resourceTypeName, uuid);
 					return Optional.empty();
 				}
+			}
+		}
+	}
+
+	@Override
+	public List<R> readAll() throws SQLException
+	{
+		try (Connection connection = getDataSource().getConnection())
+		{
+			return readAllWithTransaction(connection);
+		}
+	}
+
+	@Override
+	public List<R> readAllWithTransaction(Connection connection) throws SQLException
+	{
+		Objects.requireNonNull(connection, "connection");
+
+		try (PreparedStatement statement = connection
+				.prepareStatement("SELECT " + getResourceColumn() + " FROM current_" + getResourceTable()))
+		{
+			logger.trace("Executing query '{}'", statement);
+			try (ResultSet result = statement.executeQuery())
+			{
+				List<R> all = new ArrayList<>();
+
+				while (result.next())
+					all.add(getResource(result, 1));
+
+				return all;
 			}
 		}
 	}
@@ -453,15 +485,27 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 			return false;
 
 		if (versionString == null || versionString.isBlank())
-			return hasNonDeletedResource(connection, uuid);
+		{
+			try (PreparedStatement statement = connection.prepareStatement("SELECT deleted IS NOT NULL FROM "
+					+ resourceTable + " WHERE " + resourceIdColumn + " = ? ORDER BY version DESC LIMIT 1"))
+			{
+				statement.setObject(1, preparedStatementFactory.uuidToPgObject(uuid));
+
+				logger.trace("Executing query '{}'", statement);
+				try (ResultSet result = statement.executeQuery())
+				{
+					return result.next() && !result.getBoolean(1);
+				}
+			}
+		}
 		else
 		{
 			Long version = toLong(versionString);
 			if (version == null || version < FIRST_VERSION)
 				return false;
 
-			try (PreparedStatement statement = connection.prepareStatement("SELECT count(*) FROM " + resourceTable
-					+ " WHERE " + resourceIdColumn + " = ? AND version = ? AND NOT deleted"))
+			try (PreparedStatement statement = connection.prepareStatement("SELECT deleted IS NOT NULL FROM "
+					+ resourceTable + " WHERE " + resourceIdColumn + " = ? AND version = ?"))
 			{
 				statement.setObject(1, preparedStatementFactory.uuidToPgObject(uuid));
 				statement.setLong(2, version);
@@ -469,7 +513,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 				logger.trace("Executing query '{}'", statement);
 				try (ResultSet result = statement.executeQuery())
 				{
-					return result.next() && result.getInt(1) > 0;
+					return result.next() && !result.getBoolean(1);
 				}
 			}
 		}
@@ -530,11 +574,10 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 					latestVersion.version);
 		}
 
+		// latestVersion gives stored latest version +1 if resource is deleted
 		long newVersion = latestVersion.version + 1;
 
 		R updated = update(connection, resource, newVersion);
-		if (latestVersion.deleted) // TODO check if resurrection needs undelete for old versions
-			markDeleted(connection, toUuid(updated.getIdElement().getIdPart()), false);
 
 		logger.debug("{} with IdPart {} updated, new version {}", resourceTypeName, updated.getIdElement().getIdPart(),
 				newVersion);
@@ -652,7 +695,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 
 		LatestVersion(long version, boolean deleted)
 		{
-			this.version = version;
+			this.version = version + (deleted ? 1 : 0);
 			this.deleted = deleted;
 		}
 	}
@@ -665,16 +708,6 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 			throw new ResourceNotFoundException(resource.getId() != null ? resource.getId() : "'null'");
 
 		return getLatestVersion(uuid, connection);
-	}
-
-	protected final Optional<LatestVersion> getLatestVersionIfExists(R resource, Connection connection)
-			throws SQLException, ResourceNotFoundException
-	{
-		UUID uuid = toUuid(resource.getIdElement().getIdPart());
-		if (uuid == null)
-			throw new ResourceNotFoundException(resource.getId() != null ? resource.getId() : "'null'");
-
-		return getLatestVersionIfExists(uuid, connection);
 	}
 
 	protected final LatestVersion getLatestVersion(UUID uuid, Connection connection)
@@ -693,8 +726,8 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		if (uuid == null)
 			return Optional.empty();
 
-		try (PreparedStatement statement = connection.prepareStatement("SELECT version, deleted FROM " + resourceTable
-				+ " WHERE " + resourceIdColumn + " = ? ORDER BY version DESC LIMIT 1"))
+		try (PreparedStatement statement = connection.prepareStatement("SELECT version, deleted IS NOT NULL FROM "
+				+ resourceTable + " WHERE " + resourceIdColumn + " = ? ORDER BY version DESC LIMIT 1"))
 		{
 			statement.setObject(1, preparedStatementFactory.uuidToPgObject(uuid));
 
@@ -743,15 +776,10 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		if (connection.isReadOnly())
 			throw new IllegalStateException("Connection is read-only");
 
-		return markDeleted(connection, uuid, true);
+		return markDeleted(connection, uuid);
 	}
 
-	/*
-	 * caution: implementation of method hasNonDeletedResource only works because we set all versions as deleted or not
-	 * deleted here
-	 */
-	protected final boolean markDeleted(Connection connection, UUID uuid, boolean deleted)
-			throws SQLException, ResourceNotFoundException
+	protected final boolean markDeleted(Connection connection, UUID uuid) throws SQLException, ResourceNotFoundException
 	{
 		if (uuid == null)
 			throw new ResourceNotFoundException("'null'");
@@ -761,11 +789,13 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		if (latestVersion.deleted)
 			return false;
 
-		try (PreparedStatement statement = connection
-				.prepareStatement("UPDATE " + resourceTable + " SET deleted = ? WHERE " + resourceIdColumn + " = ?"))
+		try (PreparedStatement statement = connection.prepareStatement("UPDATE " + resourceTable
+				+ " SET deleted = ? WHERE " + resourceIdColumn + " = ? AND version = (SELECT MAX(version) FROM "
+				+ resourceTable + " WHERE " + resourceIdColumn + " = ?)"))
 		{
-			statement.setBoolean(1, deleted);
+			statement.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
 			statement.setObject(2, preparedStatementFactory.uuidToPgObject(uuid));
+			statement.setObject(3, preparedStatementFactory.uuidToPgObject(uuid));
 
 			logger.trace("Executing query '{}'", statement);
 			statement.execute();
@@ -792,7 +822,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		Objects.requireNonNull(connection, "connection");
 		Objects.requireNonNull(query, "query");
 
-		int overallCount = 0;
+		int total = 0;
 		try (PreparedStatement statement = connection.prepareStatement(query.getCountSql()))
 		{
 			query.modifyStatement(statement, connection::createArrayOf);
@@ -801,14 +831,14 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 			try (ResultSet result = statement.executeQuery())
 			{
 				if (result.next())
-					overallCount = result.getInt(1);
+					total = result.getInt(1);
 			}
 		}
 
 		List<R> partialResult = new ArrayList<>();
 		List<Resource> includes = new ArrayList<>();
 
-		if (!query.isCountOnly(overallCount)) // TODO ask db if count 0
+		if (!query.getPageAndCount().isCountOnly(total))
 		{
 			try (PreparedStatement statement = connection.prepareStatement(query.getSearchSql()))
 			{
@@ -835,8 +865,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		includes = includes.stream().map(r -> new ResourceDistinctById(r.getIdElement(), r)).distinct()
 				.map(ResourceDistinctById::getResource).collect(Collectors.toList());
 
-		return new PartialResult<>(overallCount, query.getPageAndCount(), partialResult, includes,
-				query.isCountOnly(overallCount));
+		return new PartialResult<>(total, query.getPageAndCount(), partialResult, includes);
 	}
 
 	/**

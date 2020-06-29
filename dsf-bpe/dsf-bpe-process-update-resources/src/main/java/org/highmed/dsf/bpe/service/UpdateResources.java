@@ -58,14 +58,17 @@ public class UpdateResources extends AbstractServiceDelegate implements Initiali
 		Bundle bundle;
 		try
 		{
-			bundle = requesterClient.read(Bundle.class, bundleId.getIdPart());
+			if (bundleId.hasVersionIdPart())
+				bundle = requesterClient.read(Bundle.class, bundleId.getIdPart(), bundleId.getVersionIdPart());
+			else
+				bundle = requesterClient.read(Bundle.class, bundleId.getIdPart());
 		}
 		catch (WebApplicationException e)
 		{
-			logger.error("Error while reading Bundle with id {} from organization {}", bundleId.getValue(),
-					task.getRequester().getReference());
+			logger.error("Error while reading Bundle with id {} from organization {}: {}", bundleId.getValue(),
+					task.getRequester().getReference(), e.getMessage());
 			throw new RuntimeException("Error while reading Bundle with id " + bundleId.getValue()
-					+ " from organization " + task.getRequester().getReference(), e);
+					+ " from organization " + task.getRequester().getReference() + ", " + e.getMessage(), e);
 		}
 
 		if (!EnumSet.of(BundleType.TRANSACTION, BundleType.BATCH).contains(bundle.getType()))
@@ -77,14 +80,14 @@ public class UpdateResources extends AbstractServiceDelegate implements Initiali
 		try
 		{
 			logger.debug("Posting bundle to local endpoint: {}", context.newXmlParser().encodeResourceToString(bundle));
-			getFhirWebserviceClientProvider().getLocalWebserviceClient().postBundle(bundle);
+			getFhirWebserviceClientProvider().getLocalWebserviceClient().withMinimalReturn().postBundle(bundle);
 		}
 		catch (Exception e)
 		{
-			logger.error("Error while executing read Bundle with id {} from organization {} locally",
-					bundleId.getValue(), task.getRequester().getReference());
-			throw new RuntimeException("Error while executing read Bundle with id " + bundleId.getValue()
-					+ " from organization " + task.getRequester().getReference() + " locally", e);
+			logger.error("Error while executing Bundle with id {} from organization {} locally: {}",
+					bundleId.getValue(), task.getRequester().getReference(), e.getMessage());
+			throw new RuntimeException("Error while executing Bundle with id " + bundleId.getValue()
+					+ " from organization " + task.getRequester().getReference() + " locally, " + e.getMessage(), e);
 		}
 	}
 

@@ -1,14 +1,14 @@
 package org.highmed.dsf.fhir.integration;
 
 import static junit.framework.TestCase.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -24,8 +24,10 @@ import org.highmed.fhir.client.WebsocketClient;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.ParameterComponent;
@@ -33,9 +35,15 @@ import org.hl7.fhir.r4.model.Task.TaskIntent;
 import org.hl7.fhir.r4.model.Task.TaskRestrictionComponent;
 import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.context.FhirContext;
 
 public class TaskIntegrationTest extends AbstractIntegrationTest
 {
+	private static final Logger logger = LoggerFactory.getLogger(TaskIntegrationTest.class);
+
 	private List<Bundle.BundleEntryComponent> createTaskBundle()
 	{
 		Bundle bundle = readBundle(Paths.get("src/test/resources/integration/task-bundle.json"), newJsonParser());
@@ -56,8 +64,9 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		try
 		{
 			List<Bundle.BundleEntryComponent> resultBundleEntries = createTaskBundle();
+			assertEquals(4, resultBundleEntries.size());
 
-			String taskId = new IdType(resultBundleEntries.get(5).getFullUrl()).getIdPart();
+			String taskId = new IdType(resultBundleEntries.get(3).getFullUrl()).getIdPart();
 			Task task = getWebserviceClient().read(Task.class, taskId);
 
 			Task.ParameterComponent input = task.getInput().stream()
@@ -65,7 +74,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 					.findFirst().orElse(new Task.ParameterComponent());
 
 			IdType taskInputResearchStudyId = new IdType(((Reference) input.getValue()).getReference());
-			IdType researchStudyId = new IdType(resultBundleEntries.get(4).getFullUrl());
+			IdType researchStudyId = new IdType(resultBundleEntries.get(2).getFullUrl());
 
 			assertEquals(researchStudyId.getResourceType(), taskInputResearchStudyId.getResourceType());
 			assertEquals(researchStudyId.getIdPart(), taskInputResearchStudyId.getIdPart());
@@ -85,6 +94,32 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 			assertEquals(researchStudyId.getResourceType(), taskInputResearchStudyIdViaWebsocket.getResourceType());
 			assertEquals(researchStudyId.getIdPart(), taskInputResearchStudyIdViaWebsocket.getIdPart());
 			assertEquals(researchStudyId.getVersionIdPart(), taskInputResearchStudyIdViaWebsocket.getVersionIdPart());
+
+			ResearchStudy researchStudy = getWebserviceClient().read(ResearchStudy.class, researchStudyId.getIdPart());
+			logger.debug("ResearchStudy: {}",
+					FhirContext.forR4().newXmlParser().setPrettyPrint(true).encodeResourceToString(researchStudy));
+
+			List<Extension> medics = researchStudy
+					.getExtensionsByUrl("http://highmed.org/fhir/StructureDefinition/participating-medic");
+			assertNotNull(medics);
+			assertEquals(1, medics.size());
+			Extension medicExt = medics.get(0);
+			assertTrue(medicExt.hasValue());
+			assertTrue(medicExt.getValue() instanceof Reference);
+			Reference medicRef = (Reference) medicExt.getValue();
+			assertTrue(medicRef.hasIdentifier());
+			assertFalse(medicRef.hasReference());
+
+			List<Extension> ttps = researchStudy
+					.getExtensionsByUrl("http://highmed.org/fhir/StructureDefinition/participating-ttp");
+			assertNotNull(ttps);
+			assertEquals(1, ttps.size());
+			Extension ttpExt = medics.get(0);
+			assertTrue(ttpExt.hasValue());
+			assertTrue(ttpExt.getValue() instanceof Reference);
+			Reference ttpRef = (Reference) ttpExt.getValue();
+			assertTrue(ttpRef.hasIdentifier());
+			assertFalse(ttpRef.hasReference());
 		}
 		finally
 		{
@@ -101,17 +136,20 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(organizationProvider);
 
 		Task t = new Task();
-		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-process");
-		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.1.0");
+		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-ping-process");
+		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.2.0");
 		t.setStatus(TaskStatus.REQUESTED);
 		t.setIntent(TaskIntent.ORDER);
 		t.setAuthoredOn(new Date());
-		Reference localOrg = new Reference(organizationProvider.getLocalOrganization().get());
+		Reference localOrg = new Reference();
+		localOrg.setType("Organization").getIdentifier()
+				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
+				.setValue("Test_Organization");
 		t.setRequester(localOrg);
 		t.getRestriction().addRecipient(localOrg);
 		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
-		t.getInputFirstRep().setValue(new StringType("startProcessMessage"));
+		t.getInputFirstRep().setValue(new StringType("startPingProcessMessage"));
 
 		getWebserviceClient().create(t);
 	}
@@ -124,8 +162,8 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(organizationProvider);
 
 		Task t = new Task();
-		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-process");
-		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.1.0");
+		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-ping-process");
+		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.2.0");
 		t.setStatus(TaskStatus.REQUESTED);
 		t.setIntent(TaskIntent.ORDER);
 		t.setAuthoredOn(new Date());
@@ -138,7 +176,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		t.getRestriction().addRecipient(new Reference(organizationProvider.getLocalOrganization().get()));
 		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
-		t.getInputFirstRep().setValue(new StringType("startProcessMessage"));
+		t.getInputFirstRep().setValue(new StringType("startPingProcessMessage"));
 
 		try
 		{
@@ -160,7 +198,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 
 		Task t = new Task();
 		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-ping");
-		t.setInstantiatesUri("http://highmed.org/bpe/Process/pong/0.1.0");
+		t.setInstantiatesUri("http://highmed.org/bpe/Process/pong/0.2.0");
 		t.setStatus(TaskStatus.REQUESTED);
 		t.setIntent(TaskIntent.ORDER);
 		t.setAuthoredOn(new Date());
@@ -170,10 +208,26 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 				.setValue("External_Test_Organization");
 		t.setRequester(requester);
 
-		t.getRestriction().addRecipient(new Reference(organizationProvider.getLocalOrganization().get()));
-		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+		Reference localOrg = new Reference();
+		localOrg.setType("Organization").getIdentifier()
+				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
+				.setValue("Test_Organization");
+		t.getRestriction().addRecipient(localOrg);
+
+		ParameterComponent in1 = t.addInput();
+		in1.getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
-		t.getInputFirstRep().setValue(new StringType("pingMessage"));
+		in1.setValue(new StringType("pingMessage"));
+
+		ParameterComponent in2 = t.addInput();
+		in2.getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+				.setCode("business-key");
+		in2.setValue(new StringType(UUID.randomUUID().toString()));
+
+		ParameterComponent in3 = t.addInput();
+		in3.getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+				.setCode("correlation-key");
+		in3.setValue(new StringType(UUID.randomUUID().toString()));
 
 		getExternalWebserviceClient().create(t);
 	}
@@ -187,7 +241,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 
 		Task t = new Task();
 		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-pong");
-		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.1.0");
+		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.2.0");
 		t.setStatus(TaskStatus.REQUESTED);
 		t.setIntent(TaskIntent.ORDER);
 		t.setAuthoredOn(new Date());
@@ -197,10 +251,26 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 				.setValue("External_Test_Organization");
 		t.setRequester(requester);
 
-		t.getRestriction().addRecipient(new Reference(organizationProvider.getLocalOrganization().get()));
-		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+		Reference localOrg = new Reference();
+		localOrg.setType("Organization").getIdentifier()
+				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
+				.setValue("Test_Organization");
+		t.getRestriction().addRecipient(localOrg);
+
+		ParameterComponent in1 = t.addInput();
+		in1.getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
-		t.getInputFirstRep().setValue(new StringType("pongMessage"));
+		in1.setValue(new StringType("pongMessage"));
+
+		ParameterComponent in2 = t.addInput();
+		in2.getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+				.setCode("business-key");
+		in2.setValue(new StringType(UUID.randomUUID().toString()));
+
+		ParameterComponent in3 = t.addInput();
+		in3.getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+				.setCode("correlation-key");
+		in3.setValue(new StringType(UUID.randomUUID().toString()));
 
 		getExternalWebserviceClient().create(t);
 	}
@@ -213,18 +283,20 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(organizationProvider);
 
 		Task t = new Task();
-		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-process");
-		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.1.0");
+		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-ping-process");
+		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.2.0");
 		t.setStatus(TaskStatus.REQUESTED);
 		t.setIntent(TaskIntent.ORDER);
 		t.setAuthoredOn(new Date());
-		Reference localOrg = new Reference()
-				.setReferenceElement(organizationProvider.getLocalOrganization().get().getIdElement().toVersionless());
+		Reference localOrg = new Reference();
+		localOrg.setType("Organization").getIdentifier()
+				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
+				.setValue("Test_Organization");
 		t.setRequester(localOrg);
 		t.getRestriction().addRecipient(localOrg);
 		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
-		t.getInputFirstRep().setValue(new StringType("startProcessMessage"));
+		t.getInputFirstRep().setValue(new StringType("startPingProcessMessage"));
 
 		TaskDao dao = getSpringWebApplicationContext().getBean(TaskDao.class);
 		Task created = dao.create(t);
@@ -242,18 +314,22 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(organizationProvider);
 
 		Task t = new Task();
-		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-process");
-		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.1.0");
+		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-ping-process");
+		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.2.0");
 		t.setStatus(TaskStatus.INPROGRESS);
 		t.setIntent(TaskIntent.ORDER);
 		t.setAuthoredOn(new Date());
-		Reference localOrg = new Reference()
-				.setReferenceElement(organizationProvider.getLocalOrganization().get().getIdElement().toVersionless());
+
+		Reference localOrg = new Reference();
+		localOrg.setType("Organization").getIdentifier()
+				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
+				.setValue("Test_Organization");
 		t.setRequester(localOrg);
 		t.getRestriction().addRecipient(localOrg);
+
 		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
-		t.getInputFirstRep().setValue(new StringType("startProcessMessage"));
+		t.getInputFirstRep().setValue(new StringType("startPingProcessMessage"));
 
 		TaskDao dao = getSpringWebApplicationContext().getBean(TaskDao.class);
 		Task created = dao.create(t);
@@ -275,8 +351,8 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 				TaskStatus.FAILED, TaskStatus.COMPLETED, TaskStatus.ENTEREDINERROR, TaskStatus.NULL);
 
 		Task t = new Task();
-		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-process");
-		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.1.0");
+		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-ping-process");
+		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.2.0");
 		t.setIntent(TaskIntent.ORDER);
 		t.setAuthoredOn(new Date());
 		Reference localOrg = new Reference(organizationProvider.getLocalOrganization().get());
@@ -284,7 +360,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		t.getRestriction().addRecipient(localOrg);
 		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
-		t.getInputFirstRep().setValue(new StringType("startProcessMessage"));
+		t.getInputFirstRep().setValue(new StringType("startPingProcessMessage"));
 
 		t.setStatus(null);
 		testCreateExpectForbidden(getWebserviceClient(), t);
@@ -309,7 +385,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 
 		Task t = new Task();
 		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-ping");
-		t.setInstantiatesUri("http://highmed.org/bpe/Process/pong/0.1.0");
+		t.setInstantiatesUri("http://highmed.org/bpe/Process/pong/0.2.0");
 		t.setIntent(TaskIntent.ORDER);
 		t.setAuthoredOn(new Date());
 		Reference requester = new Reference().setType("Organization");
@@ -352,8 +428,8 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(organizationProvider);
 
 		Task t = new Task();
-		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-process");
-		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.1.0");
+		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-ping-process");
+		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.2.0");
 		t.setIntent(TaskIntent.ORDER);
 		t.setStatus(TaskStatus.DRAFT);
 		t.setAuthoredOn(new Date());
@@ -361,7 +437,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		t.getRestriction().addRecipient(localOrg);
 		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
-		t.getInputFirstRep().setValue(new StringType("startProcessMessage"));
+		t.getInputFirstRep().setValue(new StringType("startPingProcessMessage"));
 
 		t.setRequester(null);
 		testCreateExpectForbidden(getWebserviceClient(), t);
@@ -390,7 +466,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 
 		Task t = new Task();
 		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-ping");
-		t.setInstantiatesUri("http://highmed.org/bpe/Process/pong/0.1.0");
+		t.setInstantiatesUri("http://highmed.org/bpe/Process/pong/0.2.0");
 		t.setIntent(TaskIntent.ORDER);
 		t.setStatus(TaskStatus.DRAFT);
 		t.setAuthoredOn(new Date());
@@ -424,8 +500,8 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(organizationProvider);
 
 		Task t = new Task();
-		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-process");
-		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.1.0");
+		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-ping-process");
+		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.2.0");
 		t.setIntent(TaskIntent.ORDER);
 		t.setStatus(TaskStatus.DRAFT);
 		t.setAuthoredOn(new Date());
@@ -433,7 +509,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		t.setRequester(localOrg);
 		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
-		t.getInputFirstRep().setValue(new StringType("startProcessMessage"));
+		t.getInputFirstRep().setValue(new StringType("startPingProcessMessage"));
 
 		t.setRestriction(null);
 		testCreateExpectForbidden(getWebserviceClient(), t);
@@ -478,7 +554,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 
 		Task t = new Task();
 		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-ping");
-		t.setInstantiatesUri("http://highmed.org/bpe/Process/pong/0.1.0");
+		t.setInstantiatesUri("http://highmed.org/bpe/Process/pong/0.2.0");
 		t.setIntent(TaskIntent.ORDER);
 		t.setStatus(TaskStatus.DRAFT);
 		t.setAuthoredOn(new Date());
@@ -532,8 +608,8 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(organizationProvider);
 
 		Task t = new Task();
-		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-process");
-		// t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.1.0");
+		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-ping-process");
+		// t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.2.0");
 		t.setIntent(TaskIntent.ORDER);
 		t.setStatus(TaskStatus.DRAFT);
 		t.setAuthoredOn(new Date());
@@ -542,7 +618,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		t.getRestriction().addRecipient(localOrg);
 		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
-		t.getInputFirstRep().setValue(new StringType("startProcessMessage"));
+		t.getInputFirstRep().setValue(new StringType("startPingProcessMessage"));
 
 		t.setInstantiatesUri(null);
 		testCreateExpectForbidden(getWebserviceClient(), t);
@@ -560,7 +636,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 
 		Task t = new Task();
 		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-ping");
-		// t.setInstantiatesUri("http://highmed.org/bpe/Process/pong/0.1.0");
+		// t.setInstantiatesUri("http://highmed.org/bpe/Process/pong/0.2.0");
 		t.setIntent(TaskIntent.ORDER);
 		t.setStatus(TaskStatus.DRAFT);
 		t.setAuthoredOn(new Date());
@@ -589,8 +665,8 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(organizationProvider);
 
 		Task t = new Task();
-		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-process");
-		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.1.0");
+		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-ping-process");
+		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.2.0");
 		t.setIntent(TaskIntent.ORDER);
 		t.setStatus(TaskStatus.DRAFT);
 		t.setAuthoredOn(new Date());
@@ -599,7 +675,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		t.getRestriction().addRecipient(localOrg);
 		// t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
 		// .setCode("message-name");
-		// t.getInputFirstRep().setValue(new StringType("startProcessMessage"));
+		// t.getInputFirstRep().setValue(new StringType("startPingProcessMessage"));
 
 		t.setInput(null);
 		testCreateExpectForbidden(getWebserviceClient(), t);
@@ -613,11 +689,11 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		ParameterComponent in1 = t.addInput();
 		in1.getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
-		in1.setValue(new StringType("startProcessMessage"));
+		in1.setValue(new StringType("startPingProcessMessage"));
 		ParameterComponent in2 = t.addInput();
 		in2.getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
-		in2.setValue(new StringType("startProcessMessage"));
+		in2.setValue(new StringType("startPingProcessMessage"));
 		testCreateExpectForbidden(getWebserviceClient(), t);
 
 		t.setInput(null);
@@ -628,7 +704,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		t.setInput(null);
 		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
 				.setCode("");
-		t.getInputFirstRep().setValue(new StringType("startProcessMessage"));
+		t.getInputFirstRep().setValue(new StringType("startPingProcessMessage"));
 		testCreateExpectForbidden(getWebserviceClient(), t);
 
 		t.setInput(null);
@@ -653,7 +729,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 
 		Task t = new Task();
 		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-ping");
-		t.setInstantiatesUri("http://highmed.org/bpe/Process/pong/0.1.0");
+		t.setInstantiatesUri("http://highmed.org/bpe/Process/pong/0.2.0");
 		t.setIntent(TaskIntent.ORDER);
 		t.setStatus(TaskStatus.DRAFT);
 		t.setAuthoredOn(new Date());
@@ -679,11 +755,11 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		ParameterComponent in1 = t.addInput();
 		in1.getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
-		in1.setValue(new StringType("startProcessMessage"));
+		in1.setValue(new StringType("startPingProcessMessage"));
 		ParameterComponent in2 = t.addInput();
 		in2.getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
-		in2.setValue(new StringType("startProcessMessage"));
+		in2.setValue(new StringType("startPingProcessMessage"));
 		testCreateExpectForbidden(getExternalWebserviceClient(), t);
 
 		t.setInput(null);
@@ -718,8 +794,8 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(organizationProvider);
 
 		Task t = new Task();
-		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-process");
-		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.1.0");
+		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-ping-process");
+		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.2.0");
 		t.setIntent(TaskIntent.ORDER);
 		t.setStatus(TaskStatus.DRAFT);
 		t.setAuthoredOn(new Date());
@@ -728,7 +804,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		t.getRestriction().addRecipient(localOrg);
 		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
 				.setCode("message-name");
-		t.getInputFirstRep().setValue(new StringType("startProcessMessage"));
+		t.getInputFirstRep().setValue(new StringType("startPingProcessMessage"));
 
 		t.getOutputFirstRep().getType().getCodingFirstRep().setSystem("system").setCode("code");
 		t.getOutputFirstRep().setValue(new StringType("value"));
@@ -744,7 +820,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 
 		Task t = new Task();
 		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-ping");
-		t.setInstantiatesUri("http://highmed.org/bpe/Process/pong/0.1.0");
+		t.setInstantiatesUri("http://highmed.org/bpe/Process/pong/0.2.0");
 		t.setIntent(TaskIntent.ORDER);
 		t.setStatus(TaskStatus.DRAFT);
 		t.setAuthoredOn(new Date());
@@ -761,5 +837,56 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		t.getOutputFirstRep().getType().getCodingFirstRep().setSystem("system").setCode("code");
 		t.getOutputFirstRep().setValue(new StringType("value"));
 		testCreateExpectForbidden(getExternalWebserviceClient(), t);
+	}
+
+	@Test
+	public void testSearchByStatusRequested() throws Exception
+	{
+		Task t = new Task();
+		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-ping-process");
+		t.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.2.0");
+		t.setStatus(TaskStatus.REQUESTED);
+		t.setIntent(TaskIntent.ORDER);
+		t.setAuthoredOn(new Date());
+		Reference localOrg = new Reference();
+		localOrg.setType("Organization").getIdentifier()
+				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
+				.setValue("Test_Organization");
+		t.setRequester(localOrg);
+		t.getRestriction().addRecipient(localOrg);
+		t.getInputFirstRep().getType().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message")
+				.setCode("message-name");
+		t.getInputFirstRep().setValue(new StringType("startPingProcessMessage"));
+
+		getWebserviceClient().create(t);
+
+		Bundle searchResult = getWebserviceClient().searchWithStrictHandling(Task.class, Map.of("status",
+				Collections.singletonList("requested"), "_sort", Collections.singletonList("_lastUpdated")));
+		assertNotNull(searchResult);
+		assertEquals(1, searchResult.getTotal());
+		assertTrue(searchResult.hasEntry());
+		assertNotNull(searchResult.getEntry());
+		assertEquals(1, searchResult.getEntry().size());
+		assertTrue(searchResult.getEntryFirstRep().hasResource());
+		assertNotNull(searchResult.getEntryFirstRep().getResource());
+		assertTrue(searchResult.getEntryFirstRep().getResource() instanceof Task);
+
+		Task result = (Task) searchResult.getEntryFirstRep().getResource();
+		assertTrue(result.hasRequester());
+		assertTrue(result.hasRestriction());
+		assertTrue(result.getRestriction().hasRecipient());
+		assertNotNull(result.getRestriction().getRecipient());
+		assertEquals(1, result.getRestriction().getRecipient().size());
+		assertNotNull(result.getRestriction().getRecipientFirstRep());
+
+		Reference ref = result.getRestriction().getRecipientFirstRep();
+		assertFalse(ref.hasReference());
+		assertNull(ref.getReference());
+		assertTrue(ref.hasIdentifier());
+		assertNotNull(ref.getIdentifier());
+		assertTrue(ref.getIdentifier().hasSystem());
+		assertNotNull(ref.getIdentifier().getSystem());
+		assertTrue(ref.getIdentifier().hasValue());
+		assertNotNull(ref.getIdentifier().getValue());
 	}
 }

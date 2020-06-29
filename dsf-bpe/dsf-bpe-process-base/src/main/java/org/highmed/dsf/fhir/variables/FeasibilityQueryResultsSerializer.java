@@ -33,11 +33,11 @@ public class FeasibilityQueryResultsSerializer extends PrimitiveValueSerializer<
 	@Override
 	public void writeValue(FeasibilityQueryResultsValue value, ValueFields valueFields)
 	{
-		FeasibilityQueryResults targets = value.getValue();
+		FeasibilityQueryResults results = value.getValue();
 		try
 		{
-			if (targets != null)
-				valueFields.setByteArrayValue(objectMapper.writeValueAsBytes(targets));
+			if (results != null)
+				valueFields.setByteArrayValue(objectMapper.writeValueAsBytes(results));
 		}
 		catch (JsonProcessingException e)
 		{
@@ -52,15 +52,15 @@ public class FeasibilityQueryResultsSerializer extends PrimitiveValueSerializer<
 	}
 
 	@Override
-	public FeasibilityQueryResultsValue readValue(ValueFields valueFields)
+	public FeasibilityQueryResultsValue readValue(ValueFields valueFields, boolean asTransientValue)
 	{
 		byte[] bytes = valueFields.getByteArrayValue();
 
 		try
 		{
-			FeasibilityQueryResults targets = (bytes == null || bytes.length <= 0) ? null
+			FeasibilityQueryResults results = (bytes == null || bytes.length <= 0) ? null
 					: objectMapper.readValue(bytes, FeasibilityQueryResults.class);
-			return FeasibilityQueryResultsValues.create(targets);
+			return FeasibilityQueryResultsValues.create(results);
 		}
 		catch (IOException e)
 		{

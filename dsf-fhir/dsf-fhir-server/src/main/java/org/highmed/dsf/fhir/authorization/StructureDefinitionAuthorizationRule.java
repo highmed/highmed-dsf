@@ -153,14 +153,15 @@ public class StructureDefinitionAuthorizationRule
 				if (isSame(oldResource, newResource) && statusOk(oldResource, newResource))
 				{
 					logger.info(
-							"Update of StructureDefinition authorized for local user '{}', criteria, type and payload same as existing StructureDefinition",
-							user.getName());
-					return Optional.of("local user; criteria, type and payload same as existing StructureDefinition");
+							"Update of StructureDefinition authorized for local user '{}', url and version same as existing StructureDefinition, status change {} -> {} ok",
+							user.getName(), oldResource.getStatus(), newResource.getStatus());
+					return Optional.of("local user; url and version same as existing StructureDefinition");
 				}
 				else
 				{
 					logger.warn(
-							"Update of StructureDefinition unauthorized, other StructureDefinition with criteria, type and payload already exists");
+							"Update of StructureDefinition unauthorized, other StructureDefinition with same url and version exists, illegal status change {} -> {}",
+							oldResource.getStatus(), newResource.getStatus());
 					return Optional.empty();
 				}
 			}
@@ -212,9 +213,17 @@ public class StructureDefinitionAuthorizationRule
 	}
 
 	@Override
-	public Optional<String> reasonSearchAllowed(Connection connection, User user)
+	public Optional<String> reasonSearchAllowed(User user)
 	{
 		logger.info("Search of StructureDefinition authorized for {} user '{}', will be fitered by user role",
+				user.getRole(), user.getName());
+		return Optional.of("Allowed for all, filtered by user role");
+	}
+
+	@Override
+	public Optional<String> reasonHistoryAllowed(User user)
+	{
+		logger.info("History of StructureDefinition authorized for {} user '{}', will be fitered by user role",
 				user.getRole(), user.getName());
 		return Optional.of("Allowed for all, filtered by user role");
 	}

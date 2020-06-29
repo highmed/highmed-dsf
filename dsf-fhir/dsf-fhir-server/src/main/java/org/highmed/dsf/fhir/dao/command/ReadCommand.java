@@ -10,6 +10,7 @@ import java.util.UUID;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.EntityTag;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
@@ -17,12 +18,17 @@ import javax.ws.rs.core.UriBuilder;
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.ResourceDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
+import org.highmed.dsf.fhir.event.EventHandler;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
+import org.highmed.dsf.fhir.prefer.PreferHandlingType;
+import org.highmed.dsf.fhir.prefer.PreferReturnType;
 import org.highmed.dsf.fhir.search.PartialResult;
 import org.highmed.dsf.fhir.search.SearchQuery;
 import org.highmed.dsf.fhir.search.SearchQueryParameterError;
+import org.highmed.dsf.fhir.service.ReferenceCleaner;
+import org.highmed.dsf.fhir.service.SnapshotGenerator;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent;
@@ -47,18 +53,20 @@ public class ReadCommand extends AbstractCommand implements Command
 	private final ParameterConverter parameterConverter;
 	private final ResponseGenerator responseGenerator;
 	private final ExceptionHandler exceptionHandler;
+	private final ReferenceCleaner referenceCleaner;
+	private final PreferHandlingType handlingType;
 
 	private Bundle multipleResult;
 	private Resource singleResult;
 	private OperationOutcome singleResultSearchWarning;
 	private Response responseResult;
 
-	public ReadCommand(int index, User user, Bundle bundle, BundleEntryComponent entry, String serverBase,
-			AuthorizationHelper authorizationHelper, int defaultPageCount, DaoProvider daoProvider,
+	public ReadCommand(int index, User user, PreferReturnType returnType, Bundle bundle, BundleEntryComponent entry,
+			String serverBase, AuthorizationHelper authorizationHelper, int defaultPageCount, DaoProvider daoProvider,
 			ParameterConverter parameterConverter, ResponseGenerator responseGenerator,
-			ExceptionHandler exceptionHandler)
+			ExceptionHandler exceptionHandler, ReferenceCleaner referenceCleaner, PreferHandlingType handlingType)
 	{
-		super(5, index, user, bundle, entry, serverBase, authorizationHelper);
+		super(5, index, user, returnType, bundle, entry, serverBase, authorizationHelper);
 
 		this.defaultPageCount = defaultPageCount;
 
@@ -66,15 +74,19 @@ public class ReadCommand extends AbstractCommand implements Command
 		this.parameterConverter = parameterConverter;
 		this.responseGenerator = responseGenerator;
 		this.exceptionHandler = exceptionHandler;
+		this.referenceCleaner = referenceCleaner;
+		this.handlingType = handlingType;
 	}
 
 	@Override
-	public void preExecute(Map<String, IdType> idTranslationTable)
+	public void preExecute(Map<String, IdType> idTranslationTable, Connection connection,
+			ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator)
 	{
 	}
 
 	@Override
-	public void execute(Map<String, IdType> idTranslationTable, Connection connection)
+	public void execute(Map<String, IdType> idTranslationTable, Connection connection,
+			ValidationHelper validationHelper, SnapshotGenerator snapshotGenerator)
 			throws SQLException, WebApplicationException
 	{
 		String requestUrl = entry.getRequest().getUrl();
@@ -107,7 +119,7 @@ public class ReadCommand extends AbstractCommand implements Command
 			responseResult = Response.status(Status.NOT_FOUND).build();
 
 		ResourceDao<? extends Resource> dao = optDao.get();
-		Optional<?> read = exceptionHandler.handleSqlAndResourceDeletedException(resourceTypeName,
+		Optional<?> read = exceptionHandler.handleSqlAndResourceDeletedException(serverBase, resourceTypeName,
 				() -> dao.readWithTransaction(connection, parameterConverter.toUuid(resourceTypeName, id)));
 		if (read.isEmpty())
 			responseResult = Response.status(Status.NOT_FOUND).build();
@@ -136,7 +148,7 @@ public class ReadCommand extends AbstractCommand implements Command
 			responseResult = Response.status(Status.NOT_FOUND).build();
 
 		ResourceDao<? extends Resource> dao = optDao.get();
-		Optional<?> read = exceptionHandler.handleSqlAndResourceDeletedException(resourceTypeName,
+		Optional<?> read = exceptionHandler.handleSqlAndResourceDeletedException(serverBase, resourceTypeName,
 				() -> dao.readVersionWithTransaction(connection, parameterConverter.toUuid(resourceTypeName, id),
 						longVersion.get()));
 		if (read.isEmpty())
@@ -174,7 +186,10 @@ public class ReadCommand extends AbstractCommand implements Command
 		SearchQuery<? extends Resource> query = optDao.get().createSearchQuery(user, effectivePage, effectiveCount);
 		query.configureParameters(cleanQueryParameters);
 		List<SearchQueryParameterError> errors = query.getUnsupportedQueryParameters(cleanQueryParameters);
-		// TODO throw error if strict param handling is configured, include warning else
+
+		if (!errors.isEmpty() && PreferHandlingType.STRICT.equals(handlingType))
+			throw new WebApplicationException(responseGenerator.response(Status.BAD_REQUEST,
+					responseGenerator.toOperationOutcomeError(errors), MediaType.APPLICATION_XML_TYPE).build());
 
 		PartialResult<? extends Resource> result = exceptionHandler
 				.handleSqlException(() -> optDao.get().searchWithTransaction(connection, query));
@@ -213,16 +228,18 @@ public class ReadCommand extends AbstractCommand implements Command
 		}
 		else
 		{
-			authorizationHelper.checkSearchAllowed(connection, user, resourceTypeName);
+			authorizationHelper.checkSearchAllowed(user, resourceTypeName);
 			authorizationHelper.filterIncludeResults(connection, user, multipleResult);
 		}
 	}
 
 	@Override
-	public Optional<BundleEntryComponent> postExecute(Connection connection)
+	public Optional<BundleEntryComponent> postExecute(Connection connection, EventHandler eventHandler)
 	{
 		if (singleResult != null)
 		{
+			referenceCleaner.cleanLiteralReferences(singleResult);
+
 			BundleEntryComponent resultEntry = new BundleEntryComponent();
 			resultEntry.setFullUrl(new IdType(serverBase, singleResult.getResourceType().name(),
 					singleResult.getIdElement().getIdPart(), null).getValue());
@@ -241,6 +258,10 @@ public class ReadCommand extends AbstractCommand implements Command
 		}
 		else if (multipleResult != null)
 		{
+			// clean literal references from bundle entries
+			multipleResult.getEntry().stream().filter(BundleEntryComponent::hasResource)
+					.map(BundleEntryComponent::getResource).forEach(referenceCleaner::cleanLiteralReferences);
+
 			BundleEntryComponent resultEntry = new BundleEntryComponent();
 			resultEntry.setFullUrl(URL_UUID_PREFIX + UUID.randomUUID().toString());
 			BundleEntryResponseComponent response = resultEntry.getResponse();

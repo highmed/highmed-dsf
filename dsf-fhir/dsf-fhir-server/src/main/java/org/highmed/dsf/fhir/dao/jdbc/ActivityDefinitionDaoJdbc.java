@@ -39,7 +39,7 @@ public class ActivityDefinitionDaoJdbc extends AbstractResourceDaoJdbc<ActivityD
 				with());
 
 		readByUrl = new ReadByUrlDaoJdbc<ActivityDefinition>(this::getDataSource, this::getResource, getResourceTable(),
-				getResourceColumn(), getResourceIdColumn());
+				getResourceColumn());
 	}
 
 	@Override
@@ -52,6 +52,13 @@ public class ActivityDefinitionDaoJdbc extends AbstractResourceDaoJdbc<ActivityD
 	public Optional<ActivityDefinition> readByUrlAndVersion(String urlAndVersion) throws SQLException
 	{
 		return readByUrl.readByUrlAndVersion(urlAndVersion);
+	}
+
+	@Override
+	public Optional<ActivityDefinition> readByUrlAndVersionWithTransaction(Connection connection, String urlAndVersion)
+			throws SQLException
+	{
+		return readByUrl.readByUrlAndVersionWithTransaction(connection, urlAndVersion);
 	}
 
 	@Override

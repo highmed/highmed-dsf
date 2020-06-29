@@ -1,5 +1,7 @@
 package org.highmed.dsf.fhir.dao;
 
-public interface StructureDefinitionDao extends StructureDefinitionDaoBase
+import org.hl7.fhir.r4.model.StructureDefinition;
+
+public interface StructureDefinitionDao extends ResourceDao<StructureDefinition>, ReadByUrlDao<StructureDefinition>
 {
 }

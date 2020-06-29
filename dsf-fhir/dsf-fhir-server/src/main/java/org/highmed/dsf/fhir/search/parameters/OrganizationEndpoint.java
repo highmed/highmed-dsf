@@ -10,6 +10,7 @@ import org.highmed.dsf.fhir.dao.EndpointDao;
 import org.highmed.dsf.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.function.BiFunctionWithSqlException;
+import org.highmed.dsf.fhir.search.IncludeParameterDefinition;
 import org.highmed.dsf.fhir.search.IncludeParts;
 import org.highmed.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.dsf.fhir.search.parameters.basic.AbstractIdentifierParameter;
@@ -21,6 +22,7 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 
+@IncludeParameterDefinition(resourceType = Organization.class, parameterName = OrganizationEndpoint.PARAMETER_NAME, targetResourceTypes = Endpoint.class)
 @SearchParameterDefinition(name = OrganizationEndpoint.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Organization-endpoint", type = SearchParamType.REFERENCE, documentation = "Technical endpoints providing access to services operated for the organization")
 public class OrganizationEndpoint extends AbstractReferenceParameter<Organization>
 {
@@ -116,21 +118,17 @@ public class OrganizationEndpoint extends AbstractReferenceParameter<Organizatio
 		{
 			IIdType idType = reference.getReferenceElement();
 
-			if (idType.hasVersionIdPart())
+			try
 			{
-				dao.readVersion(UUID.fromString(idType.getIdPart()), idType.getVersionIdPartAsLong())
-						.ifPresent(reference::setResource);
-			}
-			else
-			{
-				try
-				{
+				if (idType.hasVersionIdPart())
+					dao.readVersion(UUID.fromString(idType.getIdPart()), idType.getVersionIdPartAsLong())
+							.ifPresent(reference::setResource);
+				else
 					dao.read(UUID.fromString(idType.getIdPart())).ifPresent(reference::setResource);
-				}
-				catch (ResourceDeletedException e)
-				{
-					// ignore while matching, will result in a non match if this would have been the matching resource
-				}
+			}
+			catch (ResourceDeletedException e)
+			{
+				// ignore while matching, will result in a non match if this would have been the matching resource
 			}
 		}
 	}
@@ -148,7 +146,7 @@ public class OrganizationEndpoint extends AbstractReferenceParameter<Organizatio
 
 		if (ReferenceSearchType.IDENTIFIER.equals(valueAndType.type))
 		{
-			return o.getEndpoint().stream().map(e -> e.getResource()).filter(r -> r instanceof Endpoint)
+			return o.getEndpoint().stream().map(Reference::getResource).filter(r -> r instanceof Endpoint)
 					.flatMap(r -> ((Endpoint) r).getIdentifier().stream())
 					.anyMatch(i -> AbstractIdentifierParameter.identifierMatches(valueAndType.identifier, i));
 		}

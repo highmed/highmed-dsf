@@ -158,7 +158,7 @@ public class SubscriptionAuthorizationRule extends AbstractAuthorizationRule<Sub
 		try
 		{
 			PartialResult<Subscription> result = dao.searchWithTransaction(connection, query);
-			return result.getOverallCount() >= 1;
+			return result.getTotal() >= 1;
 		}
 		catch (SQLException e)
 		{
@@ -261,9 +261,17 @@ public class SubscriptionAuthorizationRule extends AbstractAuthorizationRule<Sub
 	}
 
 	@Override
-	public Optional<String> reasonSearchAllowed(Connection connection, User user)
+	public Optional<String> reasonSearchAllowed(User user)
 	{
 		logger.info("Search of Subscription authorized for {} user '{}', will be fitered by user role", user.getRole(),
+				user.getName());
+		return Optional.of("Allowed for all, filtered by user role");
+	}
+
+	@Override
+	public Optional<String> reasonHistoryAllowed(User user)
+	{
+		logger.info("History of Subscription authorized for {} user '{}', will be fitered by user role", user.getRole(),
 				user.getName());
 		return Optional.of("Allowed for all, filtered by user role");
 	}

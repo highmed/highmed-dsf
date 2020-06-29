@@ -27,7 +27,7 @@ public class CodeSystemDaoJdbc extends AbstractResourceDaoJdbc<CodeSystem> imple
 				with());
 
 		readByUrl = new ReadByUrlDaoJdbc<>(this::getDataSource, this::getResource, getResourceTable(),
-				getResourceColumn(), getResourceIdColumn());
+				getResourceColumn());
 	}
 
 	@Override
@@ -40,6 +40,13 @@ public class CodeSystemDaoJdbc extends AbstractResourceDaoJdbc<CodeSystem> imple
 	public Optional<CodeSystem> readByUrlAndVersion(String urlAndVersion) throws SQLException
 	{
 		return readByUrl.readByUrlAndVersion(urlAndVersion);
+	}
+
+	@Override
+	public Optional<CodeSystem> readByUrlAndVersionWithTransaction(Connection connection, String urlAndVersion)
+			throws SQLException
+	{
+		return readByUrl.readByUrlAndVersionWithTransaction(connection, urlAndVersion);
 	}
 
 	@Override

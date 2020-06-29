@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<property name="json" value="JSONB" dbms="postgresql" />
+	<property name="json" value="varchar(5000)" dbms="h2" />
+
+	<changeSet author="hhund" id="db.subscriptions.changelog-0.2.0">
+		<dropView viewName="current_subscriptions"/>
+	
+		<renameColumn tableName="subscriptions" oldColumnName="deleted" newColumnName="deleted_old"/>
+		
+		<addColumn tableName="subscriptions">
+			<column name="deleted" type="TIMESTAMP"/>
+		</addColumn>
+	
+		<sql dbms="postgresql">
+			UPDATE subscriptions SET deleted = current_s.deleted_new
+			FROM (
+				SELECT subscription_id, deleted_old, ((subscription->'meta'->>'lastUpdated')::timestamp + interval '1' second) AS deleted_new
+			 	FROM (
+			 		SELECT DISTINCT ON (subscription_id) subscription_id, version, deleted_old, subscription
+					FROM subscriptions ORDER BY subscription_id, version DESC
+				) AS current_s
+				WHERE deleted_old
+			) AS current_s
+			WHERE subscriptions.subscription_id = current_s.subscription_id
+		</sql>
+		
+		<dropColumn tableName="subscriptions" columnName="deleted_old"/>
+	
+		<createView viewName="current_subscriptions" replaceIfExists="true">
+			SELECT subscription_id, version, subscription
+			FROM (
+				SELECT DISTINCT ON (subscription_id) subscription_id, version, deleted, subscription
+				FROM subscriptions ORDER BY subscription_id, version DESC
+			) AS current_s
+			WHERE deleted IS NULL
+		</createView>
+
+		<sql dbms="postgresql">
+			ALTER TABLE current_subscriptions OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_subscriptions TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_subscriptions TO ${db.server_users_group};
+		</sql>
+	</changeSet>
+</databaseChangeLog>

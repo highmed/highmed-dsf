@@ -4,7 +4,9 @@ import java.io.ByteArrayInputStream;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.sql.Types;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.hl7.fhir.r4.model.Binary;
@@ -14,8 +16,8 @@ import ca.uhn.fhir.context.FhirContext;
 class PreparedStatementFactoryBinary extends AbstractPreparedStatementFactory<Binary>
 {
 	private static final String createSql = "INSERT INTO binaries (binary_id, binary_json, binary_data) VALUES (?, ?, ?)";
-	private static final String readByIdSql = "SELECT deleted, binary_json, binary_data FROM binaries WHERE binary_id = ? ORDER BY version DESC LIMIT 1";
-	private static final String readByIdAndVersionSql = "SELECT binary_json, binary_data FROM binaries WHERE binary_id = ? AND version = ?";
+	private static final String readByIdSql = "SELECT deleted, version, binary_json, binary_data FROM binaries WHERE binary_id = ? ORDER BY version DESC LIMIT 1";
+	private static final String readByIdAndVersionSql = "SELECT deleted, version, binary_json, binary_data FROM binaries WHERE binary_id = ? AND (version = ? OR version = ?) ORDER BY version DESC LIMIT 1";
 	private static final String updateNewRowSql = "INSERT INTO binaries (binary_id, version, binary_json, binary_data) VALUES (?, ?, ?, ?)";
 	private static final String updateSameRowSql = "UPDATE binaries SET binary_json = ?, binary_data = ? WHERE binary_id = ? AND version = ?";
 
@@ -49,16 +51,23 @@ class PreparedStatementFactoryBinary extends AbstractPreparedStatementFactory<Bi
 	}
 
 	@Override
-	public boolean isReadByIdDeleted(ResultSet result) throws SQLException
+	public LocalDateTime getReadByIdDeleted(ResultSet result) throws SQLException
 	{
-		return result.getBoolean(1);
+		Timestamp deleted = result.getTimestamp(1);
+		return deleted == null ? null : deleted.toLocalDateTime();
+	}
+
+	@Override
+	public long getReadByIdVersion(ResultSet result) throws SQLException
+	{
+		return result.getLong(2);
 	}
 
 	@Override
 	public Binary getReadByIdResource(ResultSet result) throws SQLException
 	{
-		String json = result.getString(2);
-		byte[] data = result.getBytes(3);
+		String json = result.getString(3);
+		byte[] data = result.getBytes(4);
 
 		return jsonToResource(json).setData(data);
 	}
@@ -69,13 +78,27 @@ class PreparedStatementFactoryBinary extends AbstractPreparedStatementFactory<Bi
 	{
 		statement.setObject(1, uuidToPgObject(uuid));
 		statement.setLong(2, version);
+		statement.setLong(3, version - 1);
+	}
+
+	@Override
+	public LocalDateTime getReadByIdVersionDeleted(ResultSet result) throws SQLException
+	{
+		Timestamp deleted = result.getTimestamp(1);
+		return deleted == null ? null : deleted.toLocalDateTime();
+	}
+
+	@Override
+	public long getReadByIdVersionVersion(ResultSet result) throws SQLException
+	{
+		return result.getLong(2);
 	}
 
 	@Override
 	public Binary getReadByIdAndVersionResource(ResultSet result) throws SQLException
 	{
-		String json = result.getString(1);
-		byte[] data = result.getBytes(2);
+		String json = result.getString(3);
+		byte[] data = result.getBytes(4);
 
 		return jsonToResource(json).setData(data);
 	}

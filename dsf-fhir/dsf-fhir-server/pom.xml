@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.highmed.dsf</groupId>
 		<artifactId>dsf-fhir-pom</artifactId>
-		<version>0.1.0</version>
+		<version>0.2.0</version>
 	</parent>
 
 	<dependencies>
@@ -81,6 +81,10 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-r5</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation</artifactId>
 		</dependency>
 		<dependency>
@@ -88,18 +92,8 @@
 			<artifactId>hapi-fhir-validation-resources-r4</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.helger</groupId>
-			<artifactId>ph-schematron</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.glassfish.jaxb</groupId>
-					<artifactId>jaxb-core</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.helger</groupId>
-					<artifactId>ph-jaxb-pom</artifactId>
-				</exclusion>
-			</exclusions>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-validation-resources-r5</artifactId>
 		</dependency>
 
 		<dependency>
@@ -141,11 +135,12 @@
 			<artifactId>javax-websocket-server-impl</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
+		<!-- See workaround exec plugin below-->
+		<!-- <dependency>
 			<groupId>de.hs-heilbronn.mi</groupId>
 			<artifactId>log4j2-utils</artifactId>
 			<scope>test</scope>
-		</dependency>
+		</dependency>-->
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
@@ -157,6 +152,19 @@
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-tools-bundle-generator</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>de.hs-heilbronn.mi</groupId>
+			<artifactId>log4j2-utils</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		
+		<!-- For async logging with log4j2 -->
+		<dependency>
+			<groupId>com.lmax</groupId>
+			<artifactId>disruptor</artifactId>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
@@ -209,6 +217,7 @@
 						<argument>${project.basedir}/src/main/resources/fhir</argument>
 					</arguments>
 					<workingDirectory>${project.basedir}</workingDirectory>
+					<cleanupDaemonThreads>false</cleanupDaemonThreads>
 					<!-- Workaround for exec maven plugin issue -->
 					<!-- https://github.com/mojohaus/exec-maven-plugin/issues/76 -->
 					<!-- <includePluginDependencies>true</includePluginDependencies> <includeProjectDependencies>false</includeProjectDependencies> -->
@@ -216,7 +225,7 @@
 				</configuration>
 				<!-- Workaround for exec maven plugin issue -->
 				<!-- https://github.com/mojohaus/exec-maven-plugin/issues/76 -->
-				<!-- <dependencies> <dependency> <groupId>org.highmed.dsf</groupId> <artifactId>dsf-tools-bundle-generator</artifactId> <version>0.1.0</version> </dependency> 
+				<!-- <dependencies> <dependency> <groupId>org.highmed.dsf</groupId> <artifactId>dsf-tools-bundle-generator</artifactId> <version>0.2.0</version> </dependency> 
 					</dependencies> -->
 			</plugin>
 			<plugin>

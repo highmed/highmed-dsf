@@ -24,17 +24,15 @@ class ReadByUrlDaoJdbc<R extends DomainResource>
 
 	private final String resourceTable;
 	private final String resourceColumn;
-	private final String resourceIdColumn;
 
 	ReadByUrlDaoJdbc(Supplier<DataSource> dataSourceSupplier,
 			BiFunctionWithSqlException<ResultSet, Integer, R> resourceExtractor, String resourceTable,
-			String resourceColumn, String resourceIdColumn)
+			String resourceColumn)
 	{
 		this.dataSourceSupplier = dataSourceSupplier;
 		this.resourceExtractor = resourceExtractor;
 		this.resourceTable = resourceTable;
 		this.resourceColumn = resourceColumn;
-		this.resourceIdColumn = resourceIdColumn;
 	}
 
 	/**
@@ -45,6 +43,24 @@ class ReadByUrlDaoJdbc<R extends DomainResource>
 	 */
 	Optional<R> readByUrlAndVersion(String urlAndVersion) throws SQLException
 	{
+		try (Connection connection = dataSourceSupplier.get().getConnection())
+		{
+			return readByUrlAndVersionWithTransaction(connection, urlAndVersion);
+		}
+	}
+
+	/**
+	 * @param connection
+	 *            not <code>null</code>
+	 * @param urlAndVersion
+	 *            not <code>null</code>, url|version
+	 * @return {@link Optional#empty()} if param <code>urlAndVersion</code> is null or {@link String#isBlank()}
+	 * @throws SQLException
+	 */
+	public Optional<R> readByUrlAndVersionWithTransaction(Connection connection, String urlAndVersion)
+			throws SQLException
+	{
+		Objects.requireNonNull(connection, "connection");
 		if (urlAndVersion == null || urlAndVersion.isBlank())
 			return Optional.empty();
 
@@ -52,7 +68,7 @@ class ReadByUrlDaoJdbc<R extends DomainResource>
 		if (split.length < 1 || split.length > 2)
 			return Optional.empty();
 
-		return readByUrlAndVersion(split[0], split.length == 2 ? split[1] : null);
+		return readByUrlAndVersionWithTransaction(connection, split[0], split.length == 2 ? split[1] : null);
 	}
 
 	/**
@@ -88,15 +104,14 @@ class ReadByUrlDaoJdbc<R extends DomainResource>
 		if (url == null || url.isBlank())
 			return Optional.empty();
 
-		String versionSql = version == null || version.isBlank() ? ("AND " + resourceColumn + "->>'version' = ? ") : "";
-		String sql = "SELECT DISTINCT ON(" + resourceIdColumn + ") " + resourceColumn + " FROM " + resourceTable
-				+ " WHERE NOT deleted AND " + resourceColumn + "->>'url' = ? " + versionSql + "ORDER BY "
-				+ resourceIdColumn + ", version LIMIT 1";
+		String versionSql = version != null && !version.isBlank() ? "AND " + resourceColumn + "->>'version' = ? " : "";
+		String sql = "SELECT " + resourceColumn + " FROM current_" + resourceTable + " WHERE " + resourceColumn
+				+ "->>'url' = ? " + versionSql;
 
 		try (PreparedStatement statement = connection.prepareStatement(sql))
 		{
 			statement.setString(1, url);
-			if (version == null || version.isBlank())
+			if (version != null && !version.isBlank())
 				statement.setString(2, version);
 
 			logger.trace("Executing query '{}'", statement);

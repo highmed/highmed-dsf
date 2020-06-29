@@ -17,25 +17,22 @@ import javax.ws.rs.core.UriInfo;
 
 import org.highmed.dsf.fhir.authorization.AuthorizationRuleProvider;
 import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
-import org.highmed.dsf.fhir.dao.StructureDefinitionSnapshotDao;
 import org.highmed.dsf.fhir.event.EventGenerator;
-import org.highmed.dsf.fhir.event.EventManager;
-import org.highmed.dsf.fhir.function.ConsumerWithSqlAndResourceNotFoundException;
+import org.highmed.dsf.fhir.event.EventHandler;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
+import org.highmed.dsf.fhir.history.HistoryService;
 import org.highmed.dsf.fhir.search.PartialResult;
 import org.highmed.dsf.fhir.search.SearchQuery;
 import org.highmed.dsf.fhir.search.parameters.ResourceLastUpdated;
 import org.highmed.dsf.fhir.search.parameters.StructureDefinitionUrl;
+import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.highmed.dsf.fhir.service.ReferenceExtractor;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.highmed.dsf.fhir.service.ResourceValidator;
-import org.highmed.dsf.fhir.service.SnapshotDependencies;
-import org.highmed.dsf.fhir.service.SnapshotDependencyAnalyzer;
 import org.highmed.dsf.fhir.service.SnapshotGenerator;
 import org.highmed.dsf.fhir.service.SnapshotGenerator.SnapshotWithValidationMessages;
-import org.highmed.dsf.fhir.service.SnapshotInfo;
 import org.highmed.dsf.fhir.webservice.specification.StructureDefinitionService;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
@@ -56,25 +53,23 @@ public class StructureDefinitionServiceImpl extends
 {
 	private static final Logger logger = LoggerFactory.getLogger(StructureDefinitionServiceImpl.class);
 
-	private final StructureDefinitionSnapshotDao snapshotDao;
+	private final StructureDefinitionDao snapshotDao;
 	private final SnapshotGenerator snapshotGenerator;
-	private final SnapshotDependencyAnalyzer snapshotDependencyAnalyzer;
 
 	public StructureDefinitionServiceImpl(String path, String serverBase, int defaultPageCount,
-			StructureDefinitionDao dao, ResourceValidator validator, EventManager eventManager,
+			StructureDefinitionDao dao, ResourceValidator validator, EventHandler eventHandler,
 			ExceptionHandler exceptionHandler, EventGenerator eventGenerator, ResponseGenerator responseGenerator,
 			ParameterConverter parameterConverter, ReferenceExtractor referenceExtractor,
-			ReferenceResolver referenceResolver, AuthorizationRuleProvider authorizationRuleProvider,
-			StructureDefinitionSnapshotDao structureDefinitionSnapshotDao, SnapshotGenerator sanapshotGenerator,
-			SnapshotDependencyAnalyzer snapshotDependencyAnalyzer)
+			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
+			AuthorizationRuleProvider authorizationRuleProvider, StructureDefinitionDao structureDefinitionSnapshotDao,
+			SnapshotGenerator sanapshotGenerator, HistoryService historyService)
 	{
-		super(path, StructureDefinition.class, serverBase, defaultPageCount, dao, validator, eventManager,
+		super(path, StructureDefinition.class, serverBase, defaultPageCount, dao, validator, eventHandler,
 				exceptionHandler, eventGenerator, responseGenerator, parameterConverter, referenceExtractor,
-				referenceResolver, authorizationRuleProvider);
+				referenceResolver, referenceCleaner, authorizationRuleProvider, historyService);
 
 		this.snapshotDao = structureDefinitionSnapshotDao;
 		this.snapshotGenerator = sanapshotGenerator;
-		this.snapshotDependencyAnalyzer = snapshotDependencyAnalyzer;
 	}
 
 	@Override
@@ -111,10 +106,9 @@ public class StructureDefinitionServiceImpl extends
 		{
 			if (preResource != null && preResource.hasSnapshot())
 			{
-				handleSnapshot(preResource,
-						info -> snapshotDao.create(
-								parameterConverter.toUuid(resourceTypeName, postResource.getIdElement().getIdPart()),
-								preResource, info));
+				exceptionHandler.catchAndLogSqlAndResourceNotFoundException(resourceTypeName,
+						() -> snapshotDao.createWithId(preResource,
+								parameterConverter.toUuid(resourceTypeName, postResource.getIdElement().getIdPart())));
 			}
 			else if (postResource != null)
 			{
@@ -123,9 +117,9 @@ public class StructureDefinitionServiceImpl extends
 					SnapshotWithValidationMessages s = snapshotGenerator.generateSnapshot(postResource);
 
 					if (s != null && s.getSnapshot() != null && s.getMessages().isEmpty())
-						handleSnapshot(s.getSnapshot(), info -> snapshotDao.create(
-								parameterConverter.toUuid(resourceTypeName, postResource.getIdElement().getIdPart()),
-								postResource, info));
+						exceptionHandler.catchAndLogSqlAndResourceNotFoundException(resourceTypeName,
+								() -> snapshotDao.createWithId(postResource, parameterConverter.toUuid(resourceTypeName,
+										postResource.getIdElement().getIdPart())));
 				}
 				catch (Exception e)
 				{
@@ -142,7 +136,11 @@ public class StructureDefinitionServiceImpl extends
 		{
 			if (preResource != null && preResource.hasSnapshot())
 			{
-				handleSnapshot(preResource, info -> snapshotDao.update(preResource, info));
+				if (postResource != null)
+					preResource.setIdElement(postResource.getIdElement().copy());
+
+				exceptionHandler.catchAndLogSqlAndResourceNotFoundException(resourceTypeName,
+						() -> snapshotDao.update(preResource));
 			}
 			else if (postResource != null)
 			{
@@ -151,7 +149,8 @@ public class StructureDefinitionServiceImpl extends
 					SnapshotWithValidationMessages s = snapshotGenerator.generateSnapshot(postResource);
 
 					if (s != null && s.getSnapshot() != null && s.getMessages().isEmpty())
-						handleSnapshot(s.getSnapshot(), info -> snapshotDao.update(s.getSnapshot(), info));
+						exceptionHandler.catchAndLogSqlAndResourceNotFoundException(resourceTypeName,
+								() -> snapshotDao.update(s.getSnapshot()));
 				}
 				catch (Exception e)
 				{
@@ -160,17 +159,6 @@ public class StructureDefinitionServiceImpl extends
 				}
 			}
 		};
-	}
-
-	private void handleSnapshot(StructureDefinition snapshot,
-			ConsumerWithSqlAndResourceNotFoundException<SnapshotInfo> dbOp)
-	{
-		SnapshotDependencies dependencies = snapshotDependencyAnalyzer.analyzeSnapshotDependencies(snapshot);
-
-		exceptionHandler.catchAndLogSqlException(() -> snapshotDao.deleteAllByDependency(snapshot.getUrl()));
-
-		exceptionHandler.catchAndLogSqlAndResourceNotFoundException(resourceTypeName,
-				() -> dbOp.accept(new SnapshotInfo(dependencies)));
 	}
 
 	@Override
@@ -217,11 +205,12 @@ public class StructureDefinitionServiceImpl extends
 				return Response.status(Status.BAD_REQUEST).build(); // TODO OperationOutcome
 
 			if (sd.hasSnapshot())
-				return responseGenerator.response(Status.OK, sd, parameterConverter.getMediaType(uri, headers)).build();
-			else
 				return responseGenerator
-						.response(Status.OK, generateSnapshot(sd), parameterConverter.getMediaType(uri, headers))
+						.response(Status.OK, sd, parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers))
 						.build();
+			else
+				return responseGenerator.response(Status.OK, generateSnapshot(sd),
+						parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
 		}
 		else
 		{
@@ -246,7 +235,8 @@ public class StructureDefinitionServiceImpl extends
 				.ofNullable(result.getPartialResult().isEmpty() ? null : result.getPartialResult().get(0));
 
 		return snapshot
-				.map(d -> responseGenerator.response(Status.OK, d, parameterConverter.getMediaType(uri, headers)))
+				.map(d -> responseGenerator.response(Status.OK, d,
+						parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)))
 				.orElse(Response.status(Status.NOT_FOUND)).build();
 	}
 
@@ -270,15 +260,15 @@ public class StructureDefinitionServiceImpl extends
 				Optional::empty);
 
 		if (snapshot.isPresent())
-			return snapshot
-					.map(d -> responseGenerator.response(Status.OK, d, parameterConverter.getMediaType(uri, headers)))
-					.get().build();
+			return snapshot.map(d -> responseGenerator.response(Status.OK, d,
+					parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers))).get().build();
 
-		Optional<StructureDefinition> differential = exceptionHandler.handleSqlAndResourceDeletedException(
+		Optional<StructureDefinition> differential = exceptionHandler.handleSqlAndResourceDeletedException(serverBase,
 				resourceTypeName, () -> dao.read(parameterConverter.toUuid(resourceTypeName, id)));
 
 		return differential.map(this::generateSnapshot)
-				.map(d -> responseGenerator.response(Status.OK, d, parameterConverter.getMediaType(uri, headers)))
+				.map(d -> responseGenerator.response(Status.OK, d,
+						parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)))
 				.orElse(Response.status(Status.NOT_FOUND)).build();
 	}
 

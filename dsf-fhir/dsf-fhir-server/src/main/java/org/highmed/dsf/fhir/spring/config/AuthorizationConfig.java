@@ -8,6 +8,7 @@ import org.highmed.dsf.fhir.authentication.OrganizationProviderWithDbBackend;
 import org.highmed.dsf.fhir.authorization.ActivityDefinitionAuthorizationRule;
 import org.highmed.dsf.fhir.authorization.ActivityDefinitionProvider;
 import org.highmed.dsf.fhir.authorization.ActivityDefinitionProviderImpl;
+import org.highmed.dsf.fhir.authorization.AuthorizationRule;
 import org.highmed.dsf.fhir.authorization.AuthorizationRuleProvider;
 import org.highmed.dsf.fhir.authorization.AuthorizationRuleProviderImpl;
 import org.highmed.dsf.fhir.authorization.BinaryAuthorizationRule;
@@ -24,10 +25,33 @@ import org.highmed.dsf.fhir.authorization.PractitionerAuthorizationRule;
 import org.highmed.dsf.fhir.authorization.PractitionerRoleAuthorizationRule;
 import org.highmed.dsf.fhir.authorization.ProvenanceAuthorizationRule;
 import org.highmed.dsf.fhir.authorization.ResearchStudyAuthorizationRule;
+import org.highmed.dsf.fhir.authorization.RootAuthorizationRule;
 import org.highmed.dsf.fhir.authorization.StructureDefinitionAuthorizationRule;
 import org.highmed.dsf.fhir.authorization.SubscriptionAuthorizationRule;
 import org.highmed.dsf.fhir.authorization.TaskAuthorizationRule;
 import org.highmed.dsf.fhir.authorization.ValueSetAuthorizationRule;
+import org.highmed.dsf.fhir.dao.command.AuthorizationHelper;
+import org.highmed.dsf.fhir.dao.command.AuthorizationHelperImpl;
+import org.hl7.fhir.r4.model.ActivityDefinition;
+import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.r4.model.HealthcareService;
+import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.NamingSystem;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.PractitionerRole;
+import org.hl7.fhir.r4.model.Provenance;
+import org.hl7.fhir.r4.model.ResearchStudy;
+import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.Subscription;
+import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -77,133 +101,133 @@ public class AuthorizationConfig
 	}
 
 	@Bean
-	public ActivityDefinitionAuthorizationRule activityDefinitionAuthorizationRule()
+	public AuthorizationRule<ActivityDefinition> activityDefinitionAuthorizationRule()
 	{
 		return new ActivityDefinitionAuthorizationRule(daoConfig.daoProvider(), serverBase,
 				referenceConfig.referenceResolver(), organizationProvider());
 	}
 
 	@Bean
-	public BinaryAuthorizationRule binaryAuthorizationRule()
+	public AuthorizationRule<Binary> binaryAuthorizationRule()
 	{
 		return new BinaryAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver(),
 				organizationProvider());
 	}
 
 	@Bean
-	public BundleAuthorizationRule bundleAuthorizationRule()
+	public AuthorizationRule<Bundle> bundleAuthorizationRule()
 	{
 		return new BundleAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver(),
 				organizationProvider());
 	}
 
 	@Bean
-	public CodeSystemAuthorizationRule codeSystemAuthorizationRule()
+	public AuthorizationRule<CodeSystem> codeSystemAuthorizationRule()
 	{
 		return new CodeSystemAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver(),
 				organizationProvider());
 	}
 
 	@Bean
-	public EndpointAuthorizationRule endpointAuthorizationRule()
+	public AuthorizationRule<Endpoint> endpointAuthorizationRule()
 	{
 		return new EndpointAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver(),
 				organizationProvider());
 	}
 
 	@Bean
-	public GroupAuthorizationRule groupAuthorizationRule()
+	public AuthorizationRule<Group> groupAuthorizationRule()
 	{
 		return new GroupAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver(),
 				organizationProvider());
 	}
 
 	@Bean
-	public HealthcareServiceAuthorizationRule healthcareServiceAuthorizationRule()
+	public AuthorizationRule<HealthcareService> healthcareServiceAuthorizationRule()
 	{
 		return new HealthcareServiceAuthorizationRule(daoConfig.daoProvider(), serverBase,
 				referenceConfig.referenceResolver(), organizationProvider());
 	}
 
 	@Bean
-	public LocationAuthorizationRule locationAuthorizationRule()
+	public AuthorizationRule<Location> locationAuthorizationRule()
 	{
 		return new LocationAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver(),
 				organizationProvider());
 	}
 
 	@Bean
-	public NamingSystemAuthorizationRule namingSystemAuthorizationRule()
+	public AuthorizationRule<NamingSystem> namingSystemAuthorizationRule()
 	{
 		return new NamingSystemAuthorizationRule(daoConfig.daoProvider(), serverBase,
 				referenceConfig.referenceResolver(), organizationProvider());
 	}
 
 	@Bean
-	public OrganizationAuthorizationRule organizationAuthorizationRule()
+	public AuthorizationRule<Organization> organizationAuthorizationRule()
 	{
 		return new OrganizationAuthorizationRule(daoConfig.daoProvider(), serverBase,
 				referenceConfig.referenceResolver(), organizationProvider());
 	}
 
 	@Bean
-	public PatientAuthorizationRule patientAuthorizationRule()
+	public AuthorizationRule<Patient> patientAuthorizationRule()
 	{
 		return new PatientAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver(),
 				organizationProvider());
 	}
 
 	@Bean
-	public PractitionerAuthorizationRule practitionerAuthorizationRule()
+	public AuthorizationRule<Practitioner> practitionerAuthorizationRule()
 	{
 		return new PractitionerAuthorizationRule(daoConfig.daoProvider(), serverBase,
 				referenceConfig.referenceResolver(), organizationProvider());
 	}
 
 	@Bean
-	public PractitionerRoleAuthorizationRule practitionerRoleAuthorizationRule()
+	public AuthorizationRule<PractitionerRole> practitionerRoleAuthorizationRule()
 	{
 		return new PractitionerRoleAuthorizationRule(daoConfig.daoProvider(), serverBase,
 				referenceConfig.referenceResolver(), organizationProvider());
 	}
 
 	@Bean
-	public ProvenanceAuthorizationRule provenanceAuthorizationRule()
+	public AuthorizationRule<Provenance> provenanceAuthorizationRule()
 	{
 		return new ProvenanceAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver(),
 				organizationProvider());
 	}
 
 	@Bean
-	public ResearchStudyAuthorizationRule researchStudyAuthorizationRule()
+	public AuthorizationRule<ResearchStudy> researchStudyAuthorizationRule()
 	{
 		return new ResearchStudyAuthorizationRule(daoConfig.daoProvider(), serverBase,
 				referenceConfig.referenceResolver(), organizationProvider());
 	}
 
 	@Bean
-	public StructureDefinitionAuthorizationRule structureDefinitionAuthorizationRule()
+	public AuthorizationRule<StructureDefinition> structureDefinitionAuthorizationRule()
 	{
 		return new StructureDefinitionAuthorizationRule(daoConfig.daoProvider(), serverBase,
 				referenceConfig.referenceResolver(), organizationProvider());
 	}
 
 	@Bean
-	public SubscriptionAuthorizationRule subscriptionAuthorizationRule()
+	public AuthorizationRule<Subscription> subscriptionAuthorizationRule()
 	{
 		return new SubscriptionAuthorizationRule(daoConfig.daoProvider(), serverBase,
 				referenceConfig.referenceResolver(), organizationProvider());
 	}
 
 	@Bean
-	public TaskAuthorizationRule taskAuthorizationRule()
+	public AuthorizationRule<Task> taskAuthorizationRule()
 	{
 		return new TaskAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver(),
 				organizationProvider(), activityDefinitionProvider());
 	}
 
 	@Bean
-	public ValueSetAuthorizationRule valueSetAuthorizationRule()
+	public AuthorizationRule<ValueSet> valueSetAuthorizationRule()
 	{
 		return new ValueSetAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver(),
 				organizationProvider());
@@ -219,5 +243,17 @@ public class AuthorizationConfig
 				practitionerAuthorizationRule(), practitionerRoleAuthorizationRule(), provenanceAuthorizationRule(),
 				researchStudyAuthorizationRule(), structureDefinitionAuthorizationRule(),
 				subscriptionAuthorizationRule(), taskAuthorizationRule(), valueSetAuthorizationRule());
+	}
+
+	@Bean
+	public AuthorizationHelper authorizationHelper()
+	{
+		return new AuthorizationHelperImpl(authorizationRuleProvider(), helperConfig.responseGenerator());
+	}
+
+	@Bean
+	public AuthorizationRule<Resource> rootAuthorizationRule()
+	{
+		return new RootAuthorizationRule();
 	}
 }

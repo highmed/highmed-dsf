@@ -89,15 +89,6 @@ public class NamingSystemName extends AbstractStringParameter<NamingSystem>
 	@Override
 	protected String getSortSql(String sortDirectionWithSpacePrefix)
 	{
-		switch (valueAndType.type)
-		{
-			case STARTS_WITH:
-			case CONTAINS:
-				return "lower(naming_system->>'name')" + sortDirectionWithSpacePrefix;
-			case EXACT:
-				return "naming_system->>'name'" + sortDirectionWithSpacePrefix;
-			default:
-				return "";
-		}
+		return "naming_system->>'name'" + sortDirectionWithSpacePrefix;
 	}
 }

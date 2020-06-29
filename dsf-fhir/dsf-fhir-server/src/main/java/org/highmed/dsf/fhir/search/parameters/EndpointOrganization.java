@@ -10,6 +10,7 @@ import org.highmed.dsf.fhir.dao.OrganizationDao;
 import org.highmed.dsf.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.function.BiFunctionWithSqlException;
+import org.highmed.dsf.fhir.search.IncludeParameterDefinition;
 import org.highmed.dsf.fhir.search.IncludeParts;
 import org.highmed.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.dsf.fhir.search.parameters.basic.AbstractIdentifierParameter;
@@ -21,6 +22,7 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 
+@IncludeParameterDefinition(resourceType = Endpoint.class, parameterName = EndpointOrganization.PARAMETER_NAME, targetResourceTypes = Organization.class)
 @SearchParameterDefinition(name = EndpointOrganization.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Endpoint-organization", type = SearchParamType.REFERENCE, documentation = "The organization that is managing the endpoint")
 public class EndpointOrganization extends AbstractReferenceParameter<Endpoint>
 {
@@ -115,21 +117,17 @@ public class EndpointOrganization extends AbstractReferenceParameter<Endpoint>
 		Reference reference = resource.getManagingOrganization();
 		IIdType idType = reference.getReferenceElement();
 
-		if (idType.hasVersionIdPart())
+		try
 		{
-			dao.readVersion(UUID.fromString(idType.getIdPart()), idType.getVersionIdPartAsLong())
-					.ifPresent(reference::setResource);
-		}
-		else
-		{
-			try
-			{
+			if (idType.hasVersionIdPart())
+				dao.readVersion(UUID.fromString(idType.getIdPart()), idType.getVersionIdPartAsLong())
+						.ifPresent(reference::setResource);
+			else
 				dao.read(UUID.fromString(idType.getIdPart())).ifPresent(reference::setResource);
-			}
-			catch (ResourceDeletedException e)
-			{
-				// ignore while matching, will result in a non match if this would have been the matching resource
-			}
+		}
+		catch (ResourceDeletedException e)
+		{
+			// ignore while matching, will result in a non match if this would have been the matching resource
 		}
 	}
 

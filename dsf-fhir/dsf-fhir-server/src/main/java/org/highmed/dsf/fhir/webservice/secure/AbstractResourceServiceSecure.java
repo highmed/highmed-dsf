@@ -6,11 +6,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import org.highmed.dsf.fhir.authorization.AuthorizationRule;
@@ -18,10 +20,13 @@ import org.highmed.dsf.fhir.dao.ResourceDao;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
+import org.highmed.dsf.fhir.prefer.PreferReturnType;
 import org.highmed.dsf.fhir.search.PartialResult;
 import org.highmed.dsf.fhir.search.SearchQuery;
 import org.highmed.dsf.fhir.search.SearchQueryParameterError;
+import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
+import org.highmed.dsf.fhir.service.ResourceValidator;
 import org.highmed.dsf.fhir.webservice.specification.BasicResourceService;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -34,12 +39,15 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.validation.ResultSeverityEnum;
+import ca.uhn.fhir.validation.ValidationResult;
 
 public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R extends Resource, S extends BasicResourceService<R>>
 		extends AbstractServiceSecure<S> implements BasicResourceService<R>, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractResourceServiceSecure.class);
 
+	protected final ReferenceCleaner referenceCleaner;
 	protected final Class<R> resourceType;
 	protected final String resourceTypeName;
 	protected final String serverBase;
@@ -47,13 +55,16 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	protected final ExceptionHandler exceptionHandler;
 	protected final ParameterConverter parameterConverter;
 	protected final AuthorizationRule<R> authorizationRule;
+	protected final ResourceValidator resourceValidator;
 
 	public AbstractResourceServiceSecure(S delegate, String serverBase, ResponseGenerator responseGenerator,
-			ReferenceResolver referenceResolver, Class<R> resourceType, D dao, ExceptionHandler exceptionHandler,
-			ParameterConverter parameterConverter, AuthorizationRule<R> authorizationRule)
+			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner, Class<R> resourceType, D dao,
+			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
+			AuthorizationRule<R> authorizationRule, ResourceValidator resourceValidator)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver);
 
+		this.referenceCleaner = referenceCleaner;
 		this.resourceType = resourceType;
 		this.resourceTypeName = resourceType.getAnnotation(ResourceDef.class).name();
 		this.serverBase = serverBase;
@@ -61,6 +72,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		this.exceptionHandler = exceptionHandler;
 		this.parameterConverter = parameterConverter;
 		this.authorizationRule = authorizationRule;
+		this.resourceValidator = resourceValidator;
 	}
 
 	@Override
@@ -75,6 +87,44 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		Objects.requireNonNull(exceptionHandler, "exceptionHandler");
 		Objects.requireNonNull(parameterConverter, "parameterConverter");
 		Objects.requireNonNull(authorizationRule, "authorizationRule");
+		Objects.requireNonNull(resourceValidator, "resourceValidator");
+	}
+
+	private String toValidationLogMessage(ValidationResult validationResult)
+	{
+		return validationResult
+				.getMessages().stream().map(m -> m.getLocationString() + " " + m.getLocationLine() + ":"
+						+ m.getLocationCol() + " - " + m.getSeverity() + ": " + m.getMessage())
+				.collect(Collectors.joining(", ", "[", "]"));
+	}
+
+	private Response withResourceValidation(R resource, UriInfo uri, HttpHeaders headers, String method,
+			Supplier<Response> delegate)
+	{
+		// FIXME hapi parser bug workaround
+		referenceCleaner.cleanReferenceResourcesIfBundle(resource);
+
+		ValidationResult validationResult = resourceValidator.validate(resource);
+
+		if (validationResult.getMessages().stream().anyMatch(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())))
+		{
+			logger.warn("{} of {} unauthorized, resource not valid: {}", method, resource.fhirType(),
+					toValidationLogMessage(validationResult));
+
+			OperationOutcome outcome = new OperationOutcome();
+			validationResult.populateOperationOutcome(outcome);
+			return responseGenerator.response(Status.FORBIDDEN, outcome,
+					parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
+		}
+		else
+		{
+			if (!validationResult.getMessages().isEmpty())
+				logger.warn("Resource {} validated with messages: {}", resource.fhirType(),
+						toValidationLogMessage(validationResult));
+
+			return delegate.get();
+		}
 	}
 
 	@Override
@@ -92,18 +142,22 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		}
 		else
 		{
-			audit.info("Create of resource {} allowed for user '{}': {}", resourceTypeName, getCurrentUser().getName(),
-					reasonCreateAllowed.get());
+			return withResourceValidation(resource, uri, headers, "Create", () ->
+			{
+				audit.info("Create of resource {} allowed for user '{}': {}", resourceTypeName,
+						getCurrentUser().getName(), reasonCreateAllowed.get());
 
-			Response created = delegate.create(resource, uri, headers);
+				Response created = delegate.create(resource, uri, headers);
 
-			if (created.hasEntity() && !resourceType.isInstance(created.getEntity())
-					&& !(created.getEntity() instanceof OperationOutcome))
-				logger.warn("Update returned with entity of type {}", created.getEntity().getClass().getName());
-			else if (!created.hasEntity())
-				logger.info("Update returned with status {}, but no entity", created.getStatus());
+				if (created.hasEntity() && !resourceType.isInstance(created.getEntity())
+						&& !(created.getEntity() instanceof OperationOutcome))
+					logger.warn("Update returned with entity of type {}", created.getEntity().getClass().getName());
+				else if (!created.hasEntity()
+						&& !PreferReturnType.MINIMAL.equals(parameterConverter.getPreferReturn(headers)))
+					logger.warn("Update returned with status {}, but no entity", created.getStatus());
 
-			return created;
+				return created;
+			});
 		}
 	}
 
@@ -212,12 +266,53 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	}
 
 	@Override
+	public Response history(UriInfo uri, HttpHeaders headers)
+	{
+		logger.debug("Current user '{}', role '{}'", userProvider.getCurrentUser().getName(),
+				userProvider.getCurrentUser().getRole());
+
+		Optional<String> reasonHistoryAllowed = authorizationRule.reasonHistoryAllowed(getCurrentUser());
+		if (reasonHistoryAllowed.isEmpty())
+		{
+			audit.info("History of resource {} denied for user '{}'", resourceTypeName, getCurrentUser().getName());
+			return forbidden("search");
+		}
+		else
+		{
+			audit.info("History of resource {} allowed for user '{}': {}", resourceTypeName, getCurrentUser().getName(),
+					reasonHistoryAllowed.get());
+			return delegate.history(uri, headers);
+		}
+	}
+
+	@Override
+	public Response history(String id, UriInfo uri, HttpHeaders headers)
+	{
+		logger.debug("Current user '{}', role '{}'", userProvider.getCurrentUser().getName(),
+				userProvider.getCurrentUser().getRole());
+
+		Optional<String> reasonHistoryAllowed = authorizationRule.reasonHistoryAllowed(getCurrentUser());
+		if (reasonHistoryAllowed.isEmpty())
+		{
+			audit.info("History of resource {}/{} denied for user '{}'", resourceTypeName, id,
+					getCurrentUser().getName());
+			return forbidden("search");
+		}
+		else
+		{
+			audit.info("History of resource {}/{} allowed for user '{}': {}", resourceTypeName, id,
+					getCurrentUser().getName(), reasonHistoryAllowed.get());
+			return delegate.history(id, uri, headers);
+		}
+	}
+
+	@Override
 	public Response update(String id, R resource, UriInfo uri, HttpHeaders headers)
 	{
 		logger.debug("Current user '{}', role '{}'", userProvider.getCurrentUser().getName(),
 				userProvider.getCurrentUser().getRole());
 
-		Optional<R> dbResource = exceptionHandler.handleSqlAndResourceDeletedException(resourceTypeName,
+		Optional<R> dbResource = exceptionHandler.handleSqlAndResourceDeletedException(serverBase, resourceTypeName,
 				() -> dao.read(parameterConverter.toUuid(resourceTypeName, id)));
 
 		if (dbResource.isEmpty())
@@ -227,7 +322,10 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 			return responseGenerator.updateAsCreateNotAllowed(resourceTypeName, resourceTypeName + "/" + id);
 		}
 		else
-			return update(id, resource, uri, headers, dbResource.get());
+		{
+			R cleanedResource = referenceCleaner.cleanLiteralReferences(dbResource.get());
+			return update(id, resource, uri, headers, cleanedResource);
+		}
 	}
 
 	private Response update(String id, R newResource, UriInfo uri, HttpHeaders headers, R oldResource)
@@ -243,18 +341,22 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		}
 		else
 		{
-			audit.info("Update of resource {} allowed for user '{}': {}", oldResource.getIdElement().getValue(),
-					getCurrentUser().getName(), reasonUpdateAllowed.get());
+			return withResourceValidation(newResource, uri, headers, "Update", () ->
+			{
+				audit.info("Update of resource {} allowed for user '{}': {}", oldResource.getIdElement().getValue(),
+						getCurrentUser().getName(), reasonUpdateAllowed.get());
 
-			Response updated = delegate.update(id, newResource, uri, headers);
+				Response updated = delegate.update(id, newResource, uri, headers);
 
-			if (updated.hasEntity() && !resourceType.isInstance(updated.getEntity())
-					&& !(updated.getEntity() instanceof OperationOutcome))
-				logger.warn("Update returned with entity of type {}", updated.getEntity().getClass().getName());
-			else if (!updated.hasEntity())
-				logger.info("Update returned with status {}, but no entity", updated.getStatus());
+				if (updated.hasEntity() && !resourceType.isInstance(updated.getEntity())
+						&& !(updated.getEntity() instanceof OperationOutcome))
+					logger.warn("Update returned with entity of type {}", updated.getEntity().getClass().getName());
+				else if (!updated.hasEntity()
+						&& !PreferReturnType.MINIMAL.equals(parameterConverter.getPreferReturn(headers)))
+					logger.warn("Update returned with status {}, but no entity", updated.getStatus());
 
-			return updated;
+				return updated;
+			});
 		}
 	}
 
@@ -268,7 +370,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		PartialResult<R> result = getExisting(queryParameters);
 
 		// No matches, no id provided: The server creates the resource.
-		if (result.getOverallCount() <= 0 && !resource.hasId())
+		if (result.getTotal() <= 0 && !resource.hasId())
 		{
 			// more security checks and audit log in create method
 			return create(resource, uri, headers);
@@ -276,7 +378,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 
 		// No matches, id provided: The server treats the interaction as an Update as Create interaction (or rejects it,
 		// if it does not support Update as Create) -> reject
-		else if (result.getOverallCount() <= 0 && resource.hasId())
+		else if (result.getTotal() <= 0 && resource.hasId())
 		{
 			audit.info("Create as Update of non existing resource {} denied for user '{}'",
 					resource.getIdElement().getValue(), getCurrentUser().getName());
@@ -285,7 +387,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 
 		// One Match, no resource id provided OR (resource id provided and it matches the found resource):
 		// The server performs the update against the matching resource
-		else if (result.getOverallCount() == 1)
+		else if (result.getTotal() == 1)
 		{
 			R dbResource = result.getPartialResult().get(0);
 			IdType dbResourceId = dbResource.getIdElement();
@@ -436,14 +538,14 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		PartialResult<R> result = exceptionHandler.handleSqlException(() -> dao.search(query));
 
 		// No matches
-		if (result.getOverallCount() <= 0)
+		if (result.getTotal() <= 0)
 		{
 			// TODO audit log
 			return Response.noContent().build(); // TODO return OperationOutcome
 		}
 
 		// One Match: The server performs an ordinary delete on the matching resource
-		else if (result.getOverallCount() == 1)
+		else if (result.getTotal() == 1)
 		{
 			R resource = result.getPartialResult().get(0);
 

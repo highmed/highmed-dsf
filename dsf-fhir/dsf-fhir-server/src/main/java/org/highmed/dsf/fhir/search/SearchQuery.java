@@ -196,9 +196,15 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 		searchParameters.stream().flatMap(p -> p.getErrors().stream()).forEach(errors::add);
 		revIncludeParameterFactories.stream().flatMap(p -> p.getErrors().stream()).forEach(errors::add);
 
+		List<String> includeParameterValues = queryParameters.getOrDefault(PARAMETER_INCLUDE, Collections.emptyList());
+		includeParameters.stream().map(SearchQueryIncludeParameter::getBundleUriQueryParameterValues)
+				.forEach(v -> includeParameterValues.remove(v));
+		if (!includeParameterValues.isEmpty())
+			errors.add(new SearchQueryParameterError(SearchQueryParameterErrorType.UNSUPPORTED_PARAMETER,
+					PARAMETER_INCLUDE, includeParameterValues));
+
 		List<String> revIncludeParameterValues = new ArrayList<>(
 				queryParameters.getOrDefault(PARAMETER_REVINCLUDE, Collections.emptyList()));
-
 		revIncludeParameters.stream().map(SearchQueryIncludeParameter::getBundleUriQueryParameterValues)
 				.forEach(v -> revIncludeParameterValues.remove(v));
 		if (!revIncludeParameterValues.isEmpty())
@@ -301,7 +307,7 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 				+ resourceTable;
 
 		return searchQueryMain + (!filterQuery.isEmpty() ? (" WHERE " + filterQuery) : "") + sortSql
-				+ pageAndCount.sql();
+				+ pageAndCount.getSql();
 	}
 
 	@Override
@@ -315,8 +321,13 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 
 			int index = 0;
 			if (userFilter != null)
+			{
 				while (index < userFilter.getSqlParameterCount())
-					userFilter.modifyStatement(++index, statement);
+				{
+					int i = ++index;
+					userFilter.modifyStatement(i, i, statement);
+				}
+			}
 
 			for (SearchQueryParameter<?> q : filtered)
 				for (int i = 0; i < q.getSqlParameterCount(); i++)
@@ -333,12 +344,6 @@ public class SearchQuery<R extends Resource> implements DbSearchQuery, Matcher
 	public PageAndCount getPageAndCount()
 	{
 		return pageAndCount;
-	}
-
-	@Override
-	public boolean isCountOnly(int overallCount)
-	{
-		return pageAndCount.getPage() < 1 || pageAndCount.getCount() < 1 || pageAndCount.getPageStart() > overallCount;
 	}
 
 	public UriBuilder configureBundleUri(UriBuilder bundleUri)

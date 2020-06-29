@@ -1,5 +1,10 @@
 package org.highmed.dsf.fhir.search.parameters.basic;
 
+import java.sql.Array;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -17,9 +22,11 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.core.UriBuilder;
 
+import org.highmed.dsf.fhir.function.BiFunctionWithSqlException;
 import org.highmed.dsf.fhir.search.SearchQueryParameterError;
 import org.highmed.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Resource;
 
 public abstract class AbstractDateTimeParameter<R extends DomainResource> extends AbstractSearchParameter<R>
 {
@@ -48,7 +55,7 @@ public abstract class AbstractDateTimeParameter<R extends DomainResource> extend
 		public final DateTimeType type;
 		public final DateTimeSearchType searchType;
 
-		private DateTimeValueAndTypeAndSearchType(Object value, DateTimeType type, DateTimeSearchType searchType)
+		public DateTimeValueAndTypeAndSearchType(Object value, DateTimeType type, DateTimeSearchType searchType)
 		{
 			this.value = value;
 			this.type = type;
@@ -84,9 +91,14 @@ public abstract class AbstractDateTimeParameter<R extends DomainResource> extend
 
 	private List<DateTimeValueAndTypeAndSearchType> valuesAndTypes = new ArrayList<>();
 
-	public AbstractDateTimeParameter(String parameterName)
+	private final String timestampColumn;
+	private final List<Object> values = new ArrayList<>();
+
+	public AbstractDateTimeParameter(String parameterName, String timestampColumn)
 	{
 		super(parameterName);
+
+		this.timestampColumn = timestampColumn;
 	}
 
 	@Override
@@ -124,6 +136,18 @@ public abstract class AbstractDateTimeParameter<R extends DomainResource> extend
 			valuesAndTypes.clear();
 			valuesAndTypes.add(first);
 		}
+
+		checkParameters(parameters);
+	}
+
+	/**
+	 * Override to perform additional parameter checks
+	 * 
+	 * @param parameters
+	 * @see #addError(SearchQueryParameterError)
+	 */
+	protected void checkParameters(List<String> parameters)
+	{
 	}
 
 	private DateTimeValueAndTypeAndSearchType parse(String parameterValue, List<String> parameterValues)
@@ -243,5 +267,156 @@ public abstract class AbstractDateTimeParameter<R extends DomainResource> extend
 			default:
 				return "";
 		}
+	}
+
+	@Override
+	public String getFilterQuery()
+	{
+		values.clear();
+
+		return getValuesAndTypes().stream().map(this::getSubquery).collect(Collectors.joining(" AND "));
+	}
+
+	private String getSubquery(DateTimeValueAndTypeAndSearchType value)
+	{
+		switch (value.type)
+		{
+			case ZONED_DATE_TIME:
+				return getSubquery((ZonedDateTime) value.value, value.searchType);
+			case LOCAL_DATE:
+				return getSubquery((LocalDate) value.value, value.searchType);
+			case YEAR_MONTH_PERIOD:
+			case YEAR_PERIOD:
+				return getSubquery((LocalDatePair) value.value);
+			default:
+				return "";
+		}
+	}
+
+	private String getSubquery(ZonedDateTime value, DateTimeSearchType searchType)
+	{
+		values.add(value);
+
+		return timestampColumn + "::timestamp " + searchType.operator + " ?";
+	}
+
+	private String getSubquery(LocalDate value, DateTimeSearchType searchType)
+	{
+		values.add(value);
+
+		return timestampColumn + "::date " + searchType.operator + " ?";
+	}
+
+	private String getSubquery(LocalDatePair value)
+	{
+		return getSubquery(value.startInclusive, DateTimeSearchType.GE) + " AND "
+				+ getSubquery(value.endExclusive, DateTimeSearchType.LT);
+	}
+
+	@Override
+	public int getSqlParameterCount()
+	{
+		return values.size();
+	}
+
+	@Override
+	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement,
+			BiFunctionWithSqlException<String, Object[], Array> arrayCreator) throws SQLException
+	{
+		Object value = values.get(subqueryParameterIndex - 1);
+
+		if (value instanceof ZonedDateTime)
+			statement.setTimestamp(parameterIndex, Timestamp
+					.valueOf(((ZonedDateTime) value).withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime()));
+		else if (value instanceof LocalDate)
+			statement.setDate(parameterIndex, Date.valueOf((LocalDate) value));
+	}
+
+	@Override
+	public boolean matches(Resource resource)
+	{
+		if (!isDefined())
+			throw notDefined();
+
+		ZonedDateTime lastUpdated = toZonedDateTime(resource.getMeta().getLastUpdated());
+		return lastUpdated != null && getValuesAndTypes().stream().allMatch(value -> matches(lastUpdated, value));
+	}
+
+	private ZonedDateTime toZonedDateTime(java.util.Date date)
+	{
+		if (date == null)
+			return null;
+
+		return ZonedDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+	}
+
+	private boolean matches(ZonedDateTime lastUpdated, DateTimeValueAndTypeAndSearchType value)
+	{
+		switch (value.type)
+		{
+			case ZONED_DATE_TIME:
+				return matches(lastUpdated, (ZonedDateTime) value.value, value.searchType);
+			case LOCAL_DATE:
+				return matches(lastUpdated.toLocalDate(), (LocalDate) value.value, value.searchType);
+			case YEAR_MONTH_PERIOD:
+			case YEAR_PERIOD:
+				return matches(lastUpdated.toLocalDate(), (LocalDatePair) value.value);
+			default:
+				throw notDefined();
+		}
+	}
+
+	private boolean matches(ZonedDateTime lastUpdated, ZonedDateTime value, DateTimeSearchType type)
+	{
+		switch (type)
+		{
+			case EQ:
+				return lastUpdated.equals(value);
+			case GT:
+				return lastUpdated.isAfter(value);
+			case GE:
+				return lastUpdated.isAfter(value) || lastUpdated.equals(value);
+			case LT:
+				return lastUpdated.isBefore(value);
+			case LE:
+				return lastUpdated.isBefore(value) || lastUpdated.equals(value);
+			case NE:
+				return !lastUpdated.isEqual(value);
+			default:
+				throw notDefined();
+		}
+	}
+
+	private boolean matches(LocalDate lastUpdated, LocalDate value, DateTimeSearchType type)
+	{
+		switch (type)
+		{
+			case EQ:
+				return lastUpdated.equals(value);
+			case GT:
+				return lastUpdated.isAfter(value);
+			case GE:
+				return lastUpdated.isAfter(value) || lastUpdated.equals(value);
+			case LT:
+				return lastUpdated.isBefore(value);
+			case LE:
+				return lastUpdated.isBefore(value) || lastUpdated.equals(value);
+			case NE:
+				return !lastUpdated.isEqual(value);
+			default:
+				throw notDefined();
+		}
+	}
+
+	private boolean matches(LocalDate lastUpdated, LocalDatePair value)
+	{
+		return (lastUpdated.isAfter(value.startInclusive) || lastUpdated.isEqual(value.startInclusive))
+				&& lastUpdated.isBefore(value.endExclusive);
+	}
+
+	@Override
+	protected String getSortSql(String sortDirectionWithSpacePrefix)
+	{
+		return timestampColumn + "::timestamp" + sortDirectionWithSpacePrefix;
 	}
 }

@@ -29,45 +29,45 @@ import ca.uhn.fhir.model.api.annotation.ResourceDef;
 
 public class AuthorizationRuleProviderImpl implements AuthorizationRuleProvider
 {
-	private final ActivityDefinitionAuthorizationRule activityDefinitionAuthorizationRule;
-	private final BinaryAuthorizationRule binaryAuthorizationRule;
-	private final BundleAuthorizationRule bundleAuthorizationRule;
-	private final CodeSystemAuthorizationRule codeSystemAuthorizationRule;
-	private final EndpointAuthorizationRule endpointAuthorizationRule;
-	private final GroupAuthorizationRule groupAuthorizationRule;
-	private final HealthcareServiceAuthorizationRule healthcareServiceAuthorizationRule;
-	private final LocationAuthorizationRule locationAuthorizationRule;
-	private final NamingSystemAuthorizationRule namingSystemAuthorizationRule;
-	private final OrganizationAuthorizationRule organizationAuthorizationRule;
-	private final PatientAuthorizationRule patientAuthorizationRule;
-	private final PractitionerAuthorizationRule practitionerAuthorizationRule;
-	private final PractitionerRoleAuthorizationRule practitionerRoleAuthorizationRule;
-	private final ProvenanceAuthorizationRule provenanceAuthorizationRule;
-	private final ResearchStudyAuthorizationRule researchStudyAuthorizationRule;
-	private final StructureDefinitionAuthorizationRule structureDefinitionAuthorizationRule;
-	private final SubscriptionAuthorizationRule subscriptionAuthorizationRule;
-	private final TaskAuthorizationRule taskAuthorizationRule;
-	private final ValueSetAuthorizationRule valueSetAuthorizationRule;
+	private final AuthorizationRule<ActivityDefinition> activityDefinitionAuthorizationRule;
+	private final AuthorizationRule<Binary> binaryAuthorizationRule;
+	private final AuthorizationRule<Bundle> bundleAuthorizationRule;
+	private final AuthorizationRule<CodeSystem> codeSystemAuthorizationRule;
+	private final AuthorizationRule<Endpoint> endpointAuthorizationRule;
+	private final AuthorizationRule<Group> groupAuthorizationRule;
+	private final AuthorizationRule<HealthcareService> healthcareServiceAuthorizationRule;
+	private final AuthorizationRule<Location> locationAuthorizationRule;
+	private final AuthorizationRule<NamingSystem> namingSystemAuthorizationRule;
+	private final AuthorizationRule<Organization> organizationAuthorizationRule;
+	private final AuthorizationRule<Patient> patientAuthorizationRule;
+	private final AuthorizationRule<Practitioner> practitionerAuthorizationRule;
+	private final AuthorizationRule<PractitionerRole> practitionerRoleAuthorizationRule;
+	private final AuthorizationRule<Provenance> provenanceAuthorizationRule;
+	private final AuthorizationRule<ResearchStudy> researchStudyAuthorizationRule;
+	private final AuthorizationRule<StructureDefinition> structureDefinitionAuthorizationRule;
+	private final AuthorizationRule<Subscription> subscriptionAuthorizationRule;
+	private final AuthorizationRule<Task> taskAuthorizationRule;
+	private final AuthorizationRule<ValueSet> valueSetAuthorizationRule;
 
 	private final Map<Class<? extends Resource>, AuthorizationRule<?>> authorizationRulesByResourecClass = new HashMap<>();
 	private final Map<String, AuthorizationRule<?>> authorizationRulesByResourceTypeName = new HashMap<>();
 
-	public AuthorizationRuleProviderImpl(ActivityDefinitionAuthorizationRule activityDefinitionAuthorizationRule,
-			BinaryAuthorizationRule binaryAuthorizationRule, BundleAuthorizationRule bundleAuthorizationRule,
-			CodeSystemAuthorizationRule codeSystemAuthorizationRule,
-			EndpointAuthorizationRule endpointAuthorizationRule, GroupAuthorizationRule groupAuthorizationRule,
-			HealthcareServiceAuthorizationRule healthcareServiceAuthorizationRule,
-			LocationAuthorizationRule locationAuthorizationRule,
-			NamingSystemAuthorizationRule namingSystemAuthorizationRule,
-			OrganizationAuthorizationRule organizationAuthorizationRule,
-			PatientAuthorizationRule patientAuthorizationRule,
-			PractitionerAuthorizationRule practitionerAuthorizationRule,
-			PractitionerRoleAuthorizationRule practitionerRoleAuthorizationRule,
-			ProvenanceAuthorizationRule provenanceAuthorizationRule,
-			ResearchStudyAuthorizationRule researchStudyAuthorizationRule,
-			StructureDefinitionAuthorizationRule structureDefinitionAuthorizationRule,
-			SubscriptionAuthorizationRule subscriptionAuthorizationRule, TaskAuthorizationRule taskAuthorizationRule,
-			ValueSetAuthorizationRule valueSetAuthorizationRule)
+	public AuthorizationRuleProviderImpl(AuthorizationRule<ActivityDefinition> activityDefinitionAuthorizationRule,
+			AuthorizationRule<Binary> binaryAuthorizationRule, AuthorizationRule<Bundle> bundleAuthorizationRule,
+			AuthorizationRule<CodeSystem> codeSystemAuthorizationRule,
+			AuthorizationRule<Endpoint> endpointAuthorizationRule, AuthorizationRule<Group> groupAuthorizationRule,
+			AuthorizationRule<HealthcareService> healthcareServiceAuthorizationRule,
+			AuthorizationRule<Location> locationAuthorizationRule,
+			AuthorizationRule<NamingSystem> namingSystemAuthorizationRule,
+			AuthorizationRule<Organization> organizationAuthorizationRule,
+			AuthorizationRule<Patient> patientAuthorizationRule,
+			AuthorizationRule<Practitioner> practitionerAuthorizationRule,
+			AuthorizationRule<PractitionerRole> practitionerRoleAuthorizationRule,
+			AuthorizationRule<Provenance> provenanceAuthorizationRule,
+			AuthorizationRule<ResearchStudy> researchStudyAuthorizationRule,
+			AuthorizationRule<StructureDefinition> structureDefinitionAuthorizationRule,
+			AuthorizationRule<Subscription> subscriptionAuthorizationRule,
+			AuthorizationRule<Task> taskAuthorizationRule, AuthorizationRule<ValueSet> valueSetAuthorizationRule)
 	{
 		this.activityDefinitionAuthorizationRule = activityDefinitionAuthorizationRule;
 		this.binaryAuthorizationRule = binaryAuthorizationRule;
@@ -114,115 +114,115 @@ public class AuthorizationRuleProviderImpl implements AuthorizationRuleProvider
 	}
 
 	@Override
-	public ActivityDefinitionAuthorizationRule getActivityDefinitionAuthorizationRule()
+	public AuthorizationRule<ActivityDefinition> getActivityDefinitionAuthorizationRule()
 	{
 		return activityDefinitionAuthorizationRule;
 	}
 
 	@Override
-	public BinaryAuthorizationRule getBinaryAuthorizationRule()
+	public AuthorizationRule<Binary> getBinaryAuthorizationRule()
 	{
 		return binaryAuthorizationRule;
 	}
 
 	@Override
-	public BundleAuthorizationRule getBundleAuthorizationRule()
+	public AuthorizationRule<Bundle> getBundleAuthorizationRule()
 	{
 		return bundleAuthorizationRule;
 	}
 
 	@Override
-	public CodeSystemAuthorizationRule getCodeSystemAuthorizationRule()
+	public AuthorizationRule<CodeSystem> getCodeSystemAuthorizationRule()
 	{
 		return codeSystemAuthorizationRule;
 	}
 
 	@Override
-	public EndpointAuthorizationRule getEndpointAuthorizationRule()
+	public AuthorizationRule<Endpoint> getEndpointAuthorizationRule()
 	{
 		return endpointAuthorizationRule;
 	}
 
 	@Override
-	public GroupAuthorizationRule getGroupAuthorizationRule()
+	public AuthorizationRule<Group> getGroupAuthorizationRule()
 	{
 		return groupAuthorizationRule;
 	}
 
 	@Override
-	public HealthcareServiceAuthorizationRule getHealthcareServiceAuthorizationRule()
+	public AuthorizationRule<HealthcareService> getHealthcareServiceAuthorizationRule()
 	{
 		return healthcareServiceAuthorizationRule;
 	}
 
 	@Override
-	public LocationAuthorizationRule getLocationAuthorizationRule()
+	public AuthorizationRule<Location> getLocationAuthorizationRule()
 	{
 		return locationAuthorizationRule;
 	}
 
 	@Override
-	public NamingSystemAuthorizationRule getNamingSystemAuthorizationRule()
+	public AuthorizationRule<NamingSystem> getNamingSystemAuthorizationRule()
 	{
 		return namingSystemAuthorizationRule;
 	}
 
 	@Override
-	public OrganizationAuthorizationRule getOrganizationAuthorizationRule()
+	public AuthorizationRule<Organization> getOrganizationAuthorizationRule()
 	{
 		return organizationAuthorizationRule;
 	}
 
 	@Override
-	public PatientAuthorizationRule getPatientAuthorizationRule()
+	public AuthorizationRule<Patient> getPatientAuthorizationRule()
 	{
 		return patientAuthorizationRule;
 	}
 
 	@Override
-	public PractitionerAuthorizationRule getPractitionerAuthorizationRule()
+	public AuthorizationRule<Practitioner> getPractitionerAuthorizationRule()
 	{
 		return practitionerAuthorizationRule;
 	}
 
 	@Override
-	public PractitionerRoleAuthorizationRule getPractitionerRoleAuthorizationRule()
+	public AuthorizationRule<PractitionerRole> getPractitionerRoleAuthorizationRule()
 	{
 		return practitionerRoleAuthorizationRule;
 	}
 
 	@Override
-	public ProvenanceAuthorizationRule getProvenanceAuthorizationRule()
+	public AuthorizationRule<Provenance> getProvenanceAuthorizationRule()
 	{
 		return provenanceAuthorizationRule;
 	}
 
 	@Override
-	public ResearchStudyAuthorizationRule getResearchStudyAuthorizationRule()
+	public AuthorizationRule<ResearchStudy> getResearchStudyAuthorizationRule()
 	{
 		return researchStudyAuthorizationRule;
 	}
 
 	@Override
-	public StructureDefinitionAuthorizationRule getStructureDefinitionAuthorizationRule()
+	public AuthorizationRule<StructureDefinition> getStructureDefinitionAuthorizationRule()
 	{
 		return structureDefinitionAuthorizationRule;
 	}
 
 	@Override
-	public SubscriptionAuthorizationRule getSubscriptionAuthorizationRule()
+	public AuthorizationRule<Subscription> getSubscriptionAuthorizationRule()
 	{
 		return subscriptionAuthorizationRule;
 	}
 
 	@Override
-	public TaskAuthorizationRule getTaskAuthorizationRule()
+	public AuthorizationRule<Task> getTaskAuthorizationRule()
 	{
 		return taskAuthorizationRule;
 	}
 
 	@Override
-	public ValueSetAuthorizationRule getValueSetAuthorizationRule()
+	public AuthorizationRule<ValueSet> getValueSetAuthorizationRule()
 	{
 		return valueSetAuthorizationRule;
 	}

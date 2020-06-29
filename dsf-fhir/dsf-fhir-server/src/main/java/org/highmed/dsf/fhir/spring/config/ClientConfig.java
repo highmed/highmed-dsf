@@ -70,7 +70,7 @@ public class ClientConfig
 
 			return new ClientProviderImpl(webserviceTrustStore, webserviceKeyStore, webserviceKeyStorePassword,
 					remoteReadTimeout, remoteConnectTimeout, remoteProxyPassword, remoteProxyUsername,
-					remoteProxySchemeHostPort, fhirConfig.fhirContext(), referenceConfig.referenceExtractor(),
+					remoteProxySchemeHostPort, fhirConfig.fhirContext(), referenceConfig.referenceCleaner(),
 					daoConfig.endpointDao(), helperConfig.exceptionHandler());
 		}
 		catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e)

@@ -119,10 +119,11 @@ public class BinaryAuthorizationRule extends AbstractAuthorizationRule<Binary, B
 						oldResource.getSecurityContext(), Organization.class);
 				ResourceReference newReference = new ResourceReference("Binary.SecurityContext",
 						newResource.getSecurityContext(), Organization.class);
-				if (EnumSet.of(ReferenceType.LITERAL_INTERNAL, ReferenceType.LOGICAL)
-						.contains(oldReference.getType(serverBase))
-						&& EnumSet.of(ReferenceType.LITERAL_INTERNAL, ReferenceType.LOGICAL)
-								.contains(newReference.getType(serverBase)))
+				ReferenceType oldType = oldReference.getType(serverBase);
+				ReferenceType newType = newReference.getType(serverBase);
+
+				if (EnumSet.of(ReferenceType.LITERAL_INTERNAL, ReferenceType.LOGICAL).contains(oldType)
+						&& EnumSet.of(ReferenceType.LITERAL_INTERNAL, ReferenceType.LOGICAL).contains(newType))
 				{
 					Optional<Resource> oldSecurityContext = referenceResolver.resolveReference(user, oldReference,
 							connection);
@@ -188,9 +189,17 @@ public class BinaryAuthorizationRule extends AbstractAuthorizationRule<Binary, B
 	}
 
 	@Override
-	public Optional<String> reasonSearchAllowed(Connection connection, User user)
+	public Optional<String> reasonSearchAllowed(User user)
 	{
 		logger.info("Search of Binary authorized for {} user '{}', will be fitered by users organization {}",
+				user.getRole(), user.getName(), user.getOrganization().getIdElement().getValueAsString());
+		return Optional.of("Allowed for all, filtered by users organization");
+	}
+
+	@Override
+	public Optional<String> reasonHistoryAllowed(User user)
+	{
+		logger.info("History of Binary authorized for {} user '{}', will be fitered by users organization {}",
 				user.getRole(), user.getName(), user.getOrganization().getIdElement().getValueAsString());
 		return Optional.of("Allowed for all, filtered by users organization");
 	}

@@ -1,9 +1,14 @@
 package org.highmed.dsf.fhir.help;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.SQLException;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.function.Supplier;
 
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -18,6 +23,7 @@ import org.highmed.dsf.fhir.function.SupplierWithSqlAndResourceDeletedException;
 import org.highmed.dsf.fhir.function.SupplierWithSqlAndResourceNotFoundAndResouceVersionNoMatchException;
 import org.highmed.dsf.fhir.function.SupplierWithSqlAndResourceNotFoundException;
 import org.highmed.dsf.fhir.function.SupplierWithSqlException;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
@@ -154,7 +160,7 @@ public class ExceptionHandler
 		return new WebApplicationException(Response.status(Status.NOT_FOUND).entity(outcome).build());
 	}
 
-	public <T> T handleSqlAndResourceDeletedException(String resourceTypeName,
+	public <T> T handleSqlAndResourceDeletedException(String serverBase, String resourceTypeName,
 			SupplierWithSqlAndResourceDeletedException<T> s)
 	{
 		try
@@ -163,7 +169,7 @@ public class ExceptionHandler
 		}
 		catch (ResourceDeletedException e)
 		{
-			throw gone(resourceTypeName, e);
+			throw gone(serverBase, resourceTypeName, e);
 		}
 		catch (SQLException e)
 		{
@@ -188,13 +194,29 @@ public class ExceptionHandler
 		}
 	}
 
-	public WebApplicationException gone(String resourceTypeName, ResourceDeletedException e)
+	public WebApplicationException gone(String serverBase, String resourceTypeName, ResourceDeletedException e)
 	{
 		logger.error("{} with id {} is marked as deleted", resourceTypeName, e.getId());
 
 		OperationOutcome outcome = responseGenerator.createOutcome(IssueSeverity.ERROR, IssueType.DELETED,
 				"Resource with id " + e.getId() + " is marked as deleted.");
-		return new WebApplicationException(Response.status(Status.GONE).entity(outcome).build());
+		EntityTag tag = new EntityTag(e.getId().getVersionIdPart(), true);
+		URI location = toUri(serverBase, resourceTypeName, e.getId());
+		Date lastModified = Date.from(e.getDeleted().atZone(ZoneId.systemDefault()).toInstant());
+		return new WebApplicationException(Response.status(Status.GONE).tag(tag).location(location)
+				.lastModified(lastModified).entity(outcome).build());
+	}
+
+	private URI toUri(String serverBase, String resourceTypeName, IdType id)
+	{
+		try
+		{
+			return new URI(id.withServerBase(serverBase, resourceTypeName).getValue());
+		}
+		catch (URISyntaxException e)
+		{
+			throw new RuntimeException(e);
+		}
 	}
 
 	public <T> T catchAndLogSqlExceptionAndIfReturn(SupplierWithSqlException<T> s, Supplier<T> onSqlException)

@@ -52,8 +52,8 @@ public class WebsocketClientTyrus implements WebsocketClient
 	private Session connection;
 	private volatile boolean closed;
 
-	public WebsocketClientTyrus(URI wsUri, KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword,
-			String subscriptionIdPart)
+	public WebsocketClientTyrus(Runnable reconnector, URI wsUri, KeyStore trustStore, KeyStore keyStore,
+			char[] keyStorePassword, String subscriptionIdPart)
 	{
 		this.wsUri = wsUri;
 
@@ -65,7 +65,16 @@ public class WebsocketClientTyrus implements WebsocketClient
 		else
 			sslContext = SslConfigurator.getDefaultContext();
 
-		this.endpoint = new ClientEndpoint(subscriptionIdPart);
+		this.endpoint = createClientEndpoint(reconnector, subscriptionIdPart);
+	}
+
+	private ClientEndpoint createClientEndpoint(Runnable reconnector, String subscriptionIdPart)
+	{
+		return new ClientEndpoint(() ->
+		{
+			disconnect();
+			reconnector.run();
+		}, subscriptionIdPart);
 	}
 
 	@Override

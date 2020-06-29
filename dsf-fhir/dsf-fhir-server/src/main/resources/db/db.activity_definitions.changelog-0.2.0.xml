@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<property name="json" value="JSONB" dbms="postgresql" />
+	<property name="json" value="varchar(5000)" dbms="h2" />
+
+	<changeSet author="hhund" id="db.activity_definitions.changelog-0.2.0">
+		<dropView viewName="current_activity_definitions"/>
+	
+		<renameColumn tableName="activity_definitions" oldColumnName="deleted" newColumnName="deleted_old"/>
+		
+		<addColumn tableName="activity_definitions">
+			<column name="deleted" type="TIMESTAMP"/>
+		</addColumn>
+	
+		<sql dbms="postgresql">
+			UPDATE activity_definitions SET deleted = current_ad.deleted_new
+			FROM (
+				SELECT activity_definition_id, deleted_old, ((activity_definition->'meta'->>'lastUpdated')::timestamp + interval '1' second) AS deleted_new
+			 	FROM (
+			 		SELECT DISTINCT ON (activity_definition_id) activity_definition_id, version, deleted_old, activity_definition
+					FROM activity_definitions ORDER BY activity_definition_id, version DESC
+				) AS current_ad
+				WHERE deleted_old
+			) AS current_ad
+			WHERE activity_definitions.activity_definition_id = current_ad.activity_definition_id
+		</sql>
+		
+		<dropColumn tableName="activity_definitions" columnName="deleted_old"/>
+	
+		<createView viewName="current_activity_definitions" replaceIfExists="true">
+			SELECT activity_definition_id, version, activity_definition
+			FROM (
+				SELECT DISTINCT ON (activity_definition_id) activity_definition_id, version, deleted, activity_definition
+				FROM activity_definitions ORDER BY activity_definition_id, version DESC
+			) AS current_ad
+			WHERE deleted IS NULL
+		</createView>
+
+		<sql dbms="postgresql">
+			ALTER TABLE current_activity_definitions OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_activity_definitions TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_activity_definitions TO ${db.server_users_group};
+		</sql>
+	</changeSet>
+</databaseChangeLog>

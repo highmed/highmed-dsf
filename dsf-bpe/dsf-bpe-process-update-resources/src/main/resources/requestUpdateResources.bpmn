@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_0os0n0z" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.5.0">
-  <bpmn:process id="requestUpdateResources" isExecutable="true" camunda:versionTag="0.1.0">
+  <bpmn:process id="requestUpdateResources" isExecutable="true" camunda:versionTag="0.2.0">
     <bpmn:sequenceFlow id="SequenceFlow_1ryplwc" sourceRef="StartEvent_1" targetRef="selectResourceAndTargets" />
     <bpmn:sequenceFlow id="SequenceFlow_1u4zxix" sourceRef="selectResourceAndTargets" targetRef="sendRequest" />
     <bpmn:endEvent id="EndEvent_1f9cjs7">
@@ -11,7 +11,7 @@
       <bpmn:extensionElements>
         <camunda:inputOutput>
           <camunda:inputParameter name="processDefinitionKey">executeUpdateResources</camunda:inputParameter>
-          <camunda:inputParameter name="versionTag">0.1.0</camunda:inputParameter>
+          <camunda:inputParameter name="versionTag">0.2.0</camunda:inputParameter>
           <camunda:inputParameter name="messageName">executeUpdateResourcesMessage</camunda:inputParameter>
           <camunda:inputParameter name="profile">http://highmed.org/fhir/StructureDefinition/highmed-task-execute-update-resources</camunda:inputParameter>
         </camunda:inputOutput>

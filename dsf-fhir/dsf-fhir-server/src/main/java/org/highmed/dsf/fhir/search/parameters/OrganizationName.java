@@ -93,17 +93,7 @@ public class OrganizationName extends AbstractStringParameter<Organization>
 	@Override
 	protected String getSortSql(String sortDirectionWithSpacePrefix)
 	{
-		switch (valueAndType.type)
-		{
-			case STARTS_WITH:
-			case CONTAINS:
-				return "lower(organization->>'name')" + sortDirectionWithSpacePrefix + ", lower(organization->>'alias')"
-						+ sortDirectionWithSpacePrefix;
-			case EXACT:
-				return "organization->>'name'" + sortDirectionWithSpacePrefix + ", organization->>'alias'"
-						+ sortDirectionWithSpacePrefix;
-			default:
-				return "";
-		}
+		return "organization->>'name'" + sortDirectionWithSpacePrefix + ", organization->>'alias'"
+				+ sortDirectionWithSpacePrefix;
 	}
 }

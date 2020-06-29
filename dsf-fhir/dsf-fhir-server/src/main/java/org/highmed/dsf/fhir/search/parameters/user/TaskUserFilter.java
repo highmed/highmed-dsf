@@ -7,16 +7,26 @@ import org.highmed.dsf.fhir.authentication.User;
 
 public class TaskUserFilter extends AbstractUserFilter
 {
+	private static final String RESOURCE_COLUMN = "task";
+
 	public TaskUserFilter(User user)
 	{
-		super(user);
+		super(user, RESOURCE_COLUMN);
+	}
+
+	public TaskUserFilter(User user, String resourceColumn)
+	{
+		super(user, resourceColumn);
 	}
 
 	@Override
 	public String getFilterQuery()
 	{
-		return "(task->'requester'->>'reference' = ? OR task->'requester'->>'reference' = ? OR"
-				+ " task->'restriction'->'recipient' @> ?::jsonb OR task->'restriction'->'recipient' @> ?::jsonb)";
+		// TODO modify for requester = Practitioner or PractitionerRole
+		return "(" + resourceColumn + "->'requester'->>'reference' = ? OR " + resourceColumn
+				+ "->'requester'->>'reference' = ? OR " + resourceColumn
+				+ "->'restriction'->'recipient' @> ?::jsonb OR " + resourceColumn
+				+ "->'restriction'->'recipient' @> ?::jsonb)";
 	}
 
 	@Override
@@ -26,16 +36,17 @@ public class TaskUserFilter extends AbstractUserFilter
 	}
 
 	@Override
-	public void modifyStatement(int parameterIndex, PreparedStatement statement) throws SQLException
+	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement)
+			throws SQLException
 	{
-		if (parameterIndex == 1)
+		if (subqueryParameterIndex == 1)
 			statement.setString(parameterIndex, user.getOrganization().getIdElement().getValue());
-		else if (parameterIndex == 2)
+		else if (subqueryParameterIndex == 2)
 			statement.setString(parameterIndex, user.getOrganization().getIdElement().toVersionless().getValue());
-		else if (parameterIndex == 3)
+		else if (subqueryParameterIndex == 3)
 			statement.setString(parameterIndex,
 					"[{\"reference\": \"" + user.getOrganization().getIdElement().getValue() + "\"}]");
-		else if (parameterIndex == 4)
+		else if (subqueryParameterIndex == 4)
 			statement.setString(parameterIndex,
 					"[{\"reference\": \"" + user.getOrganization().getIdElement().toVersionless().getValue() + "\"}]");
 	}

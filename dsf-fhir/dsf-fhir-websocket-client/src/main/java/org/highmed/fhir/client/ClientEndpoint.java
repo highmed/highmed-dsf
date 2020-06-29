@@ -6,7 +6,7 @@ import java.util.function.Supplier;
 import javax.websocket.CloseReason;
 import javax.websocket.Endpoint;
 import javax.websocket.EndpointConfig;
-import javax.websocket.MessageHandler.Whole;
+import javax.websocket.MessageHandler;
 import javax.websocket.Session;
 
 import org.hl7.fhir.r4.model.DomainResource;
@@ -19,10 +19,12 @@ public class ClientEndpoint extends Endpoint
 {
 	private static final Logger logger = LoggerFactory.getLogger(ClientEndpoint.class);
 
+	private final Runnable reconnector;
 	private final String subscriptionIdPart;
 
-	public ClientEndpoint(String subscriptionIdPart)
+	public ClientEndpoint(Runnable reconnector, String subscriptionIdPart)
 	{
+		this.reconnector = reconnector;
 		this.subscriptionIdPart = subscriptionIdPart;
 	}
 
@@ -35,7 +37,7 @@ public class ClientEndpoint extends Endpoint
 	{
 		logger.debug("Websocket onOpen");
 
-		session.addMessageHandler(new Whole<String>() // don't use lambda
+		session.addMessageHandler(new MessageHandler.Whole<String>() // don't use lambda
 		{
 			private boolean boundReceived;
 
@@ -68,7 +70,7 @@ public class ClientEndpoint extends Endpoint
 				}
 			}
 		});
-		
+
 		session.getAsyncRemote().sendText("bind " + subscriptionIdPart);
 	}
 
@@ -76,6 +78,12 @@ public class ClientEndpoint extends Endpoint
 	public void onClose(Session session, CloseReason closeReason)
 	{
 		logger.info("Websocket onClose {}", closeReason.getReasonPhrase());
+
+		if (CloseReason.CloseCodes.CANNOT_ACCEPT.equals(closeReason.getCloseCode()))
+		{
+			logger.info("Trying to reconnect websocket");
+			reconnector.run();
+		}
 	}
 
 	@Override

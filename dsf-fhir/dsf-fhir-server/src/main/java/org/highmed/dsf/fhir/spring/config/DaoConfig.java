@@ -8,6 +8,7 @@ import org.highmed.dsf.fhir.dao.CodeSystemDao;
 import org.highmed.dsf.fhir.dao.EndpointDao;
 import org.highmed.dsf.fhir.dao.GroupDao;
 import org.highmed.dsf.fhir.dao.HealthcareServiceDao;
+import org.highmed.dsf.fhir.dao.HistoryDao;
 import org.highmed.dsf.fhir.dao.LocationDao;
 import org.highmed.dsf.fhir.dao.NamingSystemDao;
 import org.highmed.dsf.fhir.dao.OrganizationDao;
@@ -17,11 +18,9 @@ import org.highmed.dsf.fhir.dao.PractitionerRoleDao;
 import org.highmed.dsf.fhir.dao.ProvenanceDao;
 import org.highmed.dsf.fhir.dao.ResearchStudyDao;
 import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
-import org.highmed.dsf.fhir.dao.StructureDefinitionSnapshotDao;
 import org.highmed.dsf.fhir.dao.SubscriptionDao;
 import org.highmed.dsf.fhir.dao.TaskDao;
 import org.highmed.dsf.fhir.dao.ValueSetDao;
-import org.highmed.dsf.fhir.dao.converter.SnapshotInfoConverter;
 import org.highmed.dsf.fhir.dao.jdbc.ActivityDefinitionDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.BinaryDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.BundleDaoJdbc;
@@ -29,6 +28,7 @@ import org.highmed.dsf.fhir.dao.jdbc.CodeSystemDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.EndpointDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.GroupDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.HealthcareServiceDaoJdbc;
+import org.highmed.dsf.fhir.dao.jdbc.HistroyDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.LocationDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.NamingSystemDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.OrganizationDaoJdbc;
@@ -64,9 +64,6 @@ public class DaoConfig
 
 	@Autowired
 	private FhirConfig fhirConfig;
-
-	@Autowired
-	private JsonConfig jsonConfig;
 
 	@Bean
 	public BasicDataSource dataSource()
@@ -180,15 +177,9 @@ public class DaoConfig
 	}
 
 	@Bean
-	public SnapshotInfoConverter snapshotInfoConverter()
+	public StructureDefinitionDao structureDefinitionSnapshotDao()
 	{
-		return new SnapshotInfoConverter(jsonConfig.objectMapper());
-	}
-
-	@Bean
-	public StructureDefinitionSnapshotDao structureDefinitionSnapshotDao()
-	{
-		return new StructureDefinitionSnapshotDaoJdbc(dataSource(), fhirConfig.fhirContext(), snapshotInfoConverter());
+		return new StructureDefinitionSnapshotDaoJdbc(dataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
@@ -217,5 +208,11 @@ public class DaoConfig
 				patientDao(), practitionerDao(), practitionerRoleDao(), provenanceDao(), researchStudyDao(),
 				structureDefinitionDao(), structureDefinitionSnapshotDao(), subscriptionDao(), taskDao(),
 				valueSetDao());
+	}
+
+	@Bean
+	public HistoryDao historyDao()
+	{
+		return new HistroyDaoJdbc(dataSource(), fhirConfig.fhirContext(), (BinaryDaoJdbc) binaryDao());
 	}
 }

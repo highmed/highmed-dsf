@@ -1,8 +1,6 @@
 package org.highmed.dsf.fhir.dao;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
@@ -155,5 +153,18 @@ public class OrganizationDaoTest extends AbstractResourceDaoTest<Organization, O
 		Optional<Organization> read = dao.readActiveNotDeletedByThumbprint("  ");
 		assertNotNull(read);
 		assertTrue(read.isEmpty());
+	}
+
+	@Test
+	public void testReadActiveNotDeletedByIdentifier() throws Exception
+	{
+		final String identifierValue = "foo";
+
+		Organization createResource = createResource();
+		createResource.getIdentifierFirstRep().setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
+				.setValue(identifierValue);
+		dao.create(createResource);
+
+		dao.readActiveNotDeletedByIdentifier(identifierValue);
 	}
 }

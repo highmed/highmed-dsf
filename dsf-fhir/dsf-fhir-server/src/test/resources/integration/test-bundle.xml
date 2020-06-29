@@ -8,7 +8,8 @@
 					<tag>
 						<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
 						<code value="REMOTE"/>
-					</tag>		
+					</tag>
+					<profile value="http://highmed.org/fhir/StructureDefinition/highmed-organization"/>
 				</meta>
 				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
 					<valueString value="TODO"/>
@@ -26,8 +27,8 @@
 				</type>
 				<name value="Test Organization"/>
 				<endpoint>
-					<type value="Endpoint"/>
 					<reference value="urn:uuid:b879e904-d666-45de-a995-accdd4429b79"/>
+					<type value="Endpoint"/>
 				</endpoint>
 			</Organization>
 		</resource>
@@ -44,7 +45,8 @@
 					<tag>
 						<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
 						<code value="REMOTE"/>
-					</tag>		
+					</tag>
+					<profile value="http://highmed.org/fhir/StructureDefinition/highmed-endpoint"/>
 				</meta>
 				<identifier>
 					<system value="http://highmed.org/fhir/NamingSystem/endpoint-identifier"/>
@@ -57,8 +59,8 @@
 				</connectionType>
 				<name value="Test Endpoint"/>
 				<managingOrganization>
-					<type value="Organization"/>
 					<reference value="urn:uuid:bb73165c-c7b9-4342-8e28-531f07fa7735"/>
+					<type value="Organization"/>
 				</managingOrganization>
 				<payloadType>
 					<coding>
@@ -84,7 +86,8 @@
 					<tag>
 						<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
 						<code value="REMOTE"/>
-					</tag>		
+					</tag>
+					<profile value="http://highmed.org/fhir/StructureDefinition/highmed-organization"/>
 				</meta>
 				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
 					<valueString value="TODO"/>
@@ -101,11 +104,56 @@
 					</coding>
 				</type>
 				<name value="External Test Organization"/>
+				<endpoint>
+					<reference value="urn:uuid:3944afe5-c65d-4101-b373-811f97fa8d41"/>
+					<type value="Endpoint"/>
+				</endpoint>
 			</Organization>
 		</resource>
 		<request>
 			<method value="PUT"/>
 			<url value="Organization?identifier=http://highmed.org/fhir/NamingSystem/organization-identifier|External_Test_Organization"/>
+		</request>
+	</entry>
+	<entry>
+		<fullUrl value="urn:uuid:3944afe5-c65d-4101-b373-811f97fa8d41"/>
+		<resource>
+			<Endpoint xmlns="http://hl7.org/fhir">
+				<meta>
+					<tag>
+						<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
+						<code value="REMOTE"/>
+					</tag>
+					<profile value="http://highmed.org/fhir/StructureDefinition/highmed-endpoint"/>
+				</meta>
+				<identifier>
+					<system value="http://highmed.org/fhir/NamingSystem/endpoint-identifier"/>
+					<value value="External_Test_Endpoint"/>
+				</identifier>
+				<status value="active"/>
+				<connectionType>
+					<system value="http://terminology.hl7.org/CodeSystem/endpoint-connection-type"/>
+					<code value="hl7-fhir-rest"/>
+				</connectionType>
+				<name value="External Test Endpoint"/>
+				<managingOrganization>
+					<reference value="urn:uuid:ddd4e309-e41b-4427-9657-8a58a89f01a9"/>
+					<type value="Organization"/>
+				</managingOrganization>
+				<payloadType>
+					<coding>
+						<system value="http://hl7.org/fhir/resource-types"/>
+						<code value="Task"/>
+					</coding>
+				</payloadType>
+				<payloadMimeType value="application/fhir+json"/>
+				<payloadMimeType value="application/fhir+xml"/>
+				<address value="https://localhost:80010/fhir"/>
+			</Endpoint>
+		</resource>
+		<request>
+			<method value="PUT"/>
+			<url value="Endpoint?identifier=http://highmed.org/fhir/NamingSystem/endpoint-identifier|External_Test_Endpoint"/>
 		</request>
 	</entry>
 </Bundle>

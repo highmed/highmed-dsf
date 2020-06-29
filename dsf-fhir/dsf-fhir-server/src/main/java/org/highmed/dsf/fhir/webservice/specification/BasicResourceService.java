@@ -41,6 +41,10 @@ public interface BasicResourceService<R extends Resource> extends BasicService
 	 */
 	Response vread(String id, long version, UriInfo uri, HttpHeaders headers);
 
+	Response history(UriInfo uri, HttpHeaders headers);
+
+	Response history(String id, UriInfo uri, HttpHeaders headers);
+
 	/**
 	 * standard update
 	 * 

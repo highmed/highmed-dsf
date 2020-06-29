@@ -4,8 +4,15 @@ import org.highmed.dsf.fhir.authentication.User;
 
 public class StructureDefinitionUserFilter extends AbstractMetaTagAuthorizationRoleUserFilter
 {
+	private static final String RESOURCE_COLUMN = "structure_definition";
+
 	public StructureDefinitionUserFilter(User user)
 	{
-		super(user, "structure_definition");
+		super(user, RESOURCE_COLUMN);
+	}
+
+	public StructureDefinitionUserFilter(User user, String resourceColumn)
+	{
+		super(user, resourceColumn);
 	}
 }

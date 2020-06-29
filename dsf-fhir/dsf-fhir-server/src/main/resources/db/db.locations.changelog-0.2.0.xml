@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<property name="json" value="JSONB" dbms="postgresql" />
+	<property name="json" value="varchar(5000)" dbms="h2" />
+
+	<changeSet author="hhund" id="db.locations.changelog-0.2.0">
+		<dropView viewName="current_locations"/>
+	
+		<renameColumn tableName="locations" oldColumnName="deleted" newColumnName="deleted_old"/>
+		
+		<addColumn tableName="locations">
+			<column name="deleted" type="TIMESTAMP"/>
+		</addColumn>
+	
+		<sql dbms="postgresql">
+			UPDATE locations SET deleted = current_l.deleted_new
+			FROM (
+				SELECT location_id, deleted_old, ((location->'meta'->>'lastUpdated')::timestamp + interval '1' second) AS deleted_new
+			 	FROM (
+			 		SELECT DISTINCT ON (location_id) location_id, version, deleted_old, location
+					FROM locations ORDER BY location_id, version DESC
+				) AS current_l
+				WHERE deleted_old
+			) AS current_l
+			WHERE locations.location_id = current_l.location_id
+		</sql>
+		
+		<dropColumn tableName="locations" columnName="deleted_old"/>
+	
+		<createView viewName="current_locations" replaceIfExists="true">
+			SELECT location_id, version, location
+			FROM (
+				SELECT DISTINCT ON (location_id) location_id, version, deleted, location
+				FROM locations ORDER BY location_id, version DESC
+			) AS current_l
+			WHERE deleted IS NULL
+		</createView>
+
+		<sql dbms="postgresql">
+			ALTER TABLE current_locations OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_locations TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_locations TO ${db.server_users_group};
+		</sql>
+	</changeSet>
+</databaseChangeLog>

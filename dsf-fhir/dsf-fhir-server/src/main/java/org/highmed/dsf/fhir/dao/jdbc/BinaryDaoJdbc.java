@@ -33,7 +33,7 @@ public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements Bi
 	@Override
 	protected Binary getResource(ResultSet result, int index) throws SQLException
 	{
-		// TODO Bugfix HAPI is removing version information from bundle.id
+		// TODO Bugfix HAPI is removing version information from binary.id
 		Binary binary = super.getResource(result, index);
 		IdType fixedId = new IdType(binary.getResourceType().name(), binary.getIdElement().getIdPart(),
 				binary.getMeta().getVersionId());

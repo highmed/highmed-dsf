@@ -1,43 +1,55 @@
 package org.highmed.dsf.bpe.service;
 
-import javax.ws.rs.WebApplicationException;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
+import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.Task;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
-
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 public class DownloadResearchStudyResource extends AbstractServiceDelegate implements InitializingBean
 {
-	public DownloadResearchStudyResource(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
+	private static final Logger logger = LoggerFactory.getLogger(DownloadResearchStudyResource.class);
+
+	private final OrganizationProvider organizationProvider;
+
+	public DownloadResearchStudyResource(OrganizationProvider organizationProvider,
+			FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
 	{
 		super(clientProvider, taskHelper);
+		
+		this.organizationProvider = organizationProvider;
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
 		super.afterPropertiesSet();
+		
+		Objects.requireNonNull(organizationProvider, "organizationProvider");
 	}
 
 	@Override
-	public void doExecute(DelegateExecution execution) throws Exception
+	protected void doExecute(DelegateExecution execution) throws Exception
 	{
 		Task task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
 
 		IdType researchStudyId = getResearchStudyId(task);
 		FhirWebserviceClient client = getFhirWebserviceClientProvider().getLocalWebserviceClient();
 		ResearchStudy researchStudy = getResearchStudy(researchStudyId, client);
-
+		researchStudy = addMissingOrganizations(researchStudy, client);
 		execution.setVariable(Constants.VARIABLE_RESEARCH_STUDY, researchStudy);
 
 		boolean needsConsentCheck = getNeedsConsentCheck(task);
@@ -45,12 +57,6 @@ public class DownloadResearchStudyResource extends AbstractServiceDelegate imple
 
 		boolean needsRecordLinkage = getNeedsRecordLinkageCheck(task);
 		execution.setVariable(Constants.VARIABLE_NEEDS_RECORD_LINKAGE, needsRecordLinkage);
-
-		// TODO: remove when implemented
-		if (needsConsentCheck || needsRecordLinkage)
-		{
-			throw new UnsupportedOperationException("Consent Check and Record Linkage not yet supported.");
-		}
 	}
 
 	private IdType getResearchStudyId(Task task)
@@ -71,10 +77,50 @@ public class DownloadResearchStudyResource extends AbstractServiceDelegate imple
 		{
 			return client.read(ResearchStudy.class, researchStudyid.getIdPart());
 		}
-		catch (WebApplicationException e)
+		catch (Exception e)
 		{
-			throw new ResourceNotFoundException("Error while reading ResearchStudy with id "
-					+ researchStudyid.getIdPart() + " from " + client.getBaseUrl());
+			logger.warn("Error while reading ResearchStudy with id {} from {}", researchStudyid.getIdPart(),
+					client.getBaseUrl());
+			throw e;
+		}
+	}
+
+	private ResearchStudy addMissingOrganizations(ResearchStudy researchStudy, FhirWebserviceClient client)
+	{
+		List<String> identifiers = organizationProvider.getOrganizationsByType("MeDIC")
+				.flatMap(o -> o.getIdentifier().stream())
+				.filter(i -> "http://highmed.org/fhir/NamingSystem/organization-identifier".equals(i.getSystem()))
+				.map(i -> i.getValue()).collect(Collectors.toList());
+
+		List<String> existingIdentifiers = researchStudy.getExtensionsByUrl(Constants.EXTENSION_PARTICIPATING_MEDIC_URI)
+				.stream().filter(e -> e.getValue() instanceof Reference).map(e -> (Reference) e.getValue())
+				.map(r -> r.getIdentifier().getValue()).collect(Collectors.toList());
+
+		identifiers.removeAll(existingIdentifiers);
+
+		if (!identifiers.isEmpty())
+		{
+			identifiers.forEach(identifier -> researchStudy.addExtension(Constants.EXTENSION_PARTICIPATING_MEDIC_URI,
+					new Reference().getIdentifier()
+							.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
+							.setValue(identifier)));
+
+			return update(researchStudy, client);
+		}
+		else
+			return researchStudy;
+	}
+
+	private ResearchStudy update(ResearchStudy researchStudy, FhirWebserviceClient client)
+	{
+		try
+		{
+			return client.update(researchStudy);
+		}
+		catch (Exception e)
+		{
+			logger.warn("Error while updating ResearchStudy resoruce: " + e.getMessage(), e);
+			throw e;
 		}
 	}
 

@@ -47,11 +47,8 @@ public class SubscriptionDaoJdbc extends AbstractResourceDaoJdbc<Subscription> i
 			return Collections.emptyList();
 
 		try (Connection connection = getDataSource().getConnection();
-				PreparedStatement statement = connection
-						.prepareStatement("SELECT " + getResourceColumn() + " FROM (SELECT DISTINCT ON ("
-								+ getResourceIdColumn() + ") " + getResourceColumn() + " FROM " + getResourceTable()
-								+ " WHERE NOT deleted ORDER BY " + getResourceIdColumn() + ", version DESC) AS current_"
-								+ getResourceTable() + " WHERE " + getResourceColumn() + "->>'status' = ?"))
+				PreparedStatement statement = connection.prepareStatement(
+						"SELECT subscription FROM current_subscriptions WHERE subscription->>'status' = ?"))
 		{
 			statement.setString(1, status.toCode());
 

@@ -3,9 +3,9 @@ package org.highmed.dsf.fhir.webservice.impl;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -15,8 +15,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.highmed.dsf.fhir.help.ParameterConverter;
+import org.highmed.dsf.fhir.search.IncludeParameterDefinition;
 import org.highmed.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
-import org.highmed.dsf.fhir.search.SearchQueryRevIncludeParameterFactory.RevIncludeDefinition;
 import org.highmed.dsf.fhir.search.parameters.ActivityDefinitionIdentifier;
 import org.highmed.dsf.fhir.search.parameters.ActivityDefinitionName;
 import org.highmed.dsf.fhir.search.parameters.ActivityDefinitionStatus;
@@ -63,13 +63,16 @@ import org.highmed.dsf.fhir.search.parameters.SubscriptionCriteria;
 import org.highmed.dsf.fhir.search.parameters.SubscriptionPayload;
 import org.highmed.dsf.fhir.search.parameters.SubscriptionStatus;
 import org.highmed.dsf.fhir.search.parameters.SubscriptionType;
+import org.highmed.dsf.fhir.search.parameters.TaskAuthoredOn;
 import org.highmed.dsf.fhir.search.parameters.TaskIdentifier;
+import org.highmed.dsf.fhir.search.parameters.TaskModified;
 import org.highmed.dsf.fhir.search.parameters.TaskRequester;
 import org.highmed.dsf.fhir.search.parameters.TaskStatus;
 import org.highmed.dsf.fhir.search.parameters.ValueSetIdentifier;
 import org.highmed.dsf.fhir.search.parameters.ValueSetStatus;
 import org.highmed.dsf.fhir.search.parameters.ValueSetUrl;
 import org.highmed.dsf.fhir.search.parameters.ValueSetVersion;
+import org.highmed.dsf.fhir.search.parameters.basic.AbstractSearchParameter;
 import org.highmed.dsf.fhir.search.parameters.rev.include.AbstractRevIncludeParameterFactory;
 import org.highmed.dsf.fhir.search.parameters.rev.include.EndpointOrganizationRevInclude;
 import org.highmed.dsf.fhir.search.parameters.rev.include.OrganizationEndpointRevInclude;
@@ -81,6 +84,7 @@ import org.highmed.dsf.tools.build.BuildInfoReader;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementImplementationComponent;
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementKind;
@@ -118,6 +122,7 @@ import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionKind;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.UrlType;
@@ -127,22 +132,28 @@ import org.springframework.beans.factory.InitializingBean;
 
 import com.google.common.collect.Streams;
 
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.rest.api.Constants;
 
 public class ConformanceServiceImpl extends AbstractBasicService implements ConformanceService, InitializingBean
 {
-	private final CapabilityStatement capabilityStatement;
+	private final String serverBase;
+	private final int defaultPageCount;
+	private final BuildInfoReader buildInfoReader;
 	private final ParameterConverter parameterConverter;
+	private final IValidationSupport validationSupport;
 
 	public ConformanceServiceImpl(String path, String serverBase, int defaultPageCount, BuildInfoReader buildInfoReader,
-			ParameterConverter parameterConverter)
+			ParameterConverter parameterConverter, IValidationSupport validationSupport)
 	{
 		super(path);
 
-		capabilityStatement = createCapabilityStatement(serverBase, defaultPageCount,
-				buildInfoReader.getBuildDateAsDate(), getVersion(buildInfoReader));
+		this.serverBase = serverBase;
+		this.defaultPageCount = defaultPageCount;
+		this.buildInfoReader = buildInfoReader;
 		this.parameterConverter = parameterConverter;
+		this.validationSupport = validationSupport;
 	}
 
 	@Override
@@ -150,13 +161,18 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 	{
 		super.afterPropertiesSet();
 
+		Objects.requireNonNull(serverBase, "serverBase");
+		Objects.requireNonNull(buildInfoReader, "buildInfoReader");
 		Objects.requireNonNull(parameterConverter, "parameterConverter");
+		Objects.requireNonNull(validationSupport, "validationSupport");
 	}
 
 	@Override
 	public Response getMetadata(String mode, UriInfo uri, HttpHeaders headers)
 	{
-		return Response.ok(capabilityStatement, parameterConverter.getMediaType(uri, headers)).build();
+		return Response
+				.ok(createCapabilityStatement(), parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers))
+				.build();
 	}
 
 	private String getVersion(BuildInfoReader buildInfoReader)
@@ -169,21 +185,20 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 		return version + " (" + branch + "/" + number + ")";
 	}
 
-	private CapabilityStatement createCapabilityStatement(String serverBase, int defaultPageCount, Date date,
-			String version)
+	private CapabilityStatement createCapabilityStatement()
 	{
 		CapabilityStatement statement = new CapabilityStatement();
 		statement.setStatus(PublicationStatus.ACTIVE);
-		statement.setDate(date);
+		statement.setDate(buildInfoReader.getBuildDateAsDate());
 		statement.setPublisher("HiGHmed");
 		statement.setKind(CapabilityStatementKind.INSTANCE);
 		statement.setSoftware(new CapabilityStatementSoftwareComponent());
 		statement.getSoftware().setName("HiGHmed DataSharing Framework");
-		statement.getSoftware().setVersion(version);
+		statement.getSoftware().setVersion(getVersion(buildInfoReader));
 		statement.setImplementation(new CapabilityStatementImplementationComponent());
 		// statement.getImplementation().setDescription("Implementation Description - TODO"); // TODO
 		statement.getImplementation().setUrl(serverBase);
-		statement.setFhirVersion(FHIRVersion._4_0_0);
+		statement.setFhirVersion(FHIRVersion._4_0_1);
 		statement.setFormat(
 				Arrays.asList(new CodeType(Constants.CT_FHIR_JSON_NEW), new CodeType(Constants.CT_FHIR_XML_NEW)));
 		CapabilityStatementRestComponent rest = statement.addRest();
@@ -201,109 +216,60 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 				Organization.class, Patient.class, PractitionerRole.class, Practitioner.class, Provenance.class,
 				ResearchStudy.class, StructureDefinition.class, Subscription.class, Task.class, ValueSet.class);
 
-		var searchParameters = new HashMap<Class<? extends Resource>, List<CapabilityStatementRestResourceSearchParamComponent>>();
+		var searchParameters = new HashMap<Class<? extends Resource>, List<Class<? extends AbstractSearchParameter<?>>>>();
 		var revIncludeParameters = new HashMap<Class<? extends Resource>, List<Class<? extends AbstractRevIncludeParameterFactory>>>();
 
-		var activityDefinitionUrl = createSearchParameter(ActivityDefinitionUrl.class);
-		var activityDefinitionIdentifier = createSearchParameter(ActivityDefinitionIdentifier.class);
-		var activityDefinitionVersion = createSearchParameter(ActivityDefinitionVersion.class);
-		var activityDefinitionName = createSearchParameter(ActivityDefinitionName.class);
-		var activityDefinitionStatus = createSearchParameter(ActivityDefinitionStatus.class);
 		searchParameters.put(ActivityDefinition.class,
-				Arrays.asList(activityDefinitionUrl, activityDefinitionIdentifier, activityDefinitionVersion,
-						activityDefinitionName, activityDefinitionStatus));
+				Arrays.asList(ActivityDefinitionUrl.class, ActivityDefinitionIdentifier.class,
+						ActivityDefinitionVersion.class, ActivityDefinitionName.class, ActivityDefinitionStatus.class));
 
-		var binaryContentType = createSearchParameter(BinaryContentType.class);
-		searchParameters.put(Binary.class, Arrays.asList(binaryContentType));
+		searchParameters.put(Binary.class, Arrays.asList(BinaryContentType.class));
 
-		var bundleIdentifier = createSearchParameter(BundleIdentifier.class);
-		searchParameters.put(Bundle.class, Arrays.asList(bundleIdentifier));
+		searchParameters.put(Bundle.class, Arrays.asList(BundleIdentifier.class));
 
-		var codeSystemIdentifier = createSearchParameter(CodeSystemIdentifier.class);
-		var codeSystemUrl = createSearchParameter(CodeSystemUrl.class);
-		var codeSystemVersion = createSearchParameter(CodeSystemVersion.class);
-		var codeSystemStatus = createSearchParameter(CodeSystemStatus.class);
-		searchParameters.put(CodeSystem.class,
-				Arrays.asList(codeSystemIdentifier, codeSystemUrl, codeSystemVersion, codeSystemStatus));
+		searchParameters.put(CodeSystem.class, Arrays.asList(CodeSystemIdentifier.class, CodeSystemUrl.class,
+				CodeSystemVersion.class, CodeSystemStatus.class));
 
-		var endpointAddress = createSearchParameter(EndpointAddress.class);
-		var endpointIdentifier = createSearchParameter(EndpointIdentifier.class);
-		var endpointName = createSearchParameter(EndpointName.class);
-		var endpointOrganization = createSearchParameter(EndpointOrganization.class);
-		var endpointStatus = createSearchParameter(EndpointStatus.class);
-		searchParameters.put(Endpoint.class,
-				Arrays.asList(endpointAddress, endpointIdentifier, endpointName, endpointOrganization, endpointStatus));
-		revIncludeParameters.put(Endpoint.class, Collections.singletonList(OrganizationEndpointRevInclude.class));
+		searchParameters.put(Endpoint.class, Arrays.asList(EndpointAddress.class, EndpointIdentifier.class,
+				EndpointName.class, EndpointOrganization.class, EndpointStatus.class));
+		revIncludeParameters.put(Endpoint.class, Arrays.asList(OrganizationEndpointRevInclude.class));
 
-		// Group
-		revIncludeParameters.put(Group.class, Collections.singletonList(ResearchStudyEnrollmentRevInclude.class));
+		// no Group search parameters
+		revIncludeParameters.put(Group.class, Arrays.asList(ResearchStudyEnrollmentRevInclude.class));
 
-		var healthcareServiceActive = createSearchParameter(HealthcareServiceActive.class);
-		var healthcareServiceIdentifier = createSearchParameter(HealthcareServiceIdentifier.class);
 		searchParameters.put(HealthcareService.class,
-				Arrays.asList(healthcareServiceActive, healthcareServiceIdentifier));
+				Arrays.asList(HealthcareServiceActive.class, HealthcareServiceIdentifier.class));
 
-		var locationIdentifier = createSearchParameter(LocationIdentifier.class);
-		searchParameters.put(Location.class, Arrays.asList(locationIdentifier));
+		searchParameters.put(Location.class, Arrays.asList(LocationIdentifier.class));
 
-		var namingSystemName = createSearchParameter(NamingSystemName.class);
-		searchParameters.put(NamingSystem.class, Arrays.asList(namingSystemName));
+		searchParameters.put(NamingSystem.class, Arrays.asList(NamingSystemName.class));
 
-		var organizationActive = createSearchParameter(OrganizationActive.class);
-		var organizationEndpoint = createSearchParameter(OrganizationEndpoint.class);
-		var organizationIdentifier = createSearchParameter(OrganizationIdentifier.class);
-		var organizationNameOrAlias = createSearchParameter(OrganizationName.class);
-		var organizationType = createSearchParameter(OrganizationType.class);
-		searchParameters.put(Organization.class, Arrays.asList(organizationActive, organizationEndpoint,
-				organizationIdentifier, organizationNameOrAlias, organizationType));
+		searchParameters.put(Organization.class, Arrays.asList(OrganizationActive.class, OrganizationEndpoint.class,
+				OrganizationIdentifier.class, OrganizationName.class, OrganizationType.class));
 		revIncludeParameters.put(Organization.class, Collections.singletonList(EndpointOrganizationRevInclude.class));
 
-		var patientActive = createSearchParameter(PatientActive.class);
-		var patientIdentifier = createSearchParameter(PatientIdentifier.class);
-		searchParameters.put(Patient.class, Arrays.asList(patientActive, patientIdentifier));
+		searchParameters.put(Patient.class, Arrays.asList(PatientActive.class, PatientIdentifier.class));
 
-		var practitionerActive = createSearchParameter(PractitionerActive.class);
-		var practitionerIdentifier = createSearchParameter(PractitionerIdentifier.class);
-		searchParameters.put(Practitioner.class, Arrays.asList(practitionerActive, practitionerIdentifier));
+		searchParameters.put(Practitioner.class, Arrays.asList(PractitionerActive.class, PractitionerIdentifier.class));
 
-		var practitionerRoleActive = createSearchParameter(PractitionerRoleActive.class);
-		var practitionerRoleIdentifier = createSearchParameter(PractitionerRoleIdentifier.class);
-		var practitionerRoleOrganization = createSearchParameter(PractitionerRoleOrganization.class);
-		var practitionerRolePractitioner = createSearchParameter(PractitionerRolePractitioner.class);
-		searchParameters.put(PractitionerRole.class, Arrays.asList(practitionerRoleActive, practitionerRoleIdentifier,
-				practitionerRoleOrganization, practitionerRolePractitioner));
+		searchParameters.put(PractitionerRole.class,
+				Arrays.asList(PractitionerRoleActive.class, PractitionerRoleIdentifier.class,
+						PractitionerRoleOrganization.class, PractitionerRolePractitioner.class));
 
-		var researchStudyIdentifier = createSearchParameter(ResearchStudyIdentifier.class);
-		var researchStudyEnrollment = createSearchParameter(ResearchStudyEnrollment.class);
-		var researchStudyPrincipalInvestigator = createSearchParameter(ResearchStudyPrincipalInvestigator.class);
-		searchParameters.put(ResearchStudy.class,
-				Arrays.asList(researchStudyIdentifier, researchStudyEnrollment, researchStudyPrincipalInvestigator));
+		searchParameters.put(ResearchStudy.class, Arrays.asList(ResearchStudyIdentifier.class,
+				ResearchStudyEnrollment.class, ResearchStudyPrincipalInvestigator.class));
 
-		var structureDefinitionIdentifier = createSearchParameter(StructureDefinitionIdentifier.class);
-		var structureDefinitionStatus = createSearchParameter(StructureDefinitionStatus.class);
-		var structureDefinitionUrl = createSearchParameter(StructureDefinitionUrl.class);
-		var structureDefinitionVersion = createSearchParameter(StructureDefinitionVersion.class);
-		searchParameters.put(StructureDefinition.class, Arrays.asList(structureDefinitionIdentifier,
-				structureDefinitionStatus, structureDefinitionUrl, structureDefinitionVersion));
+		searchParameters.put(StructureDefinition.class, Arrays.asList(StructureDefinitionIdentifier.class,
+				StructureDefinitionStatus.class, StructureDefinitionUrl.class, StructureDefinitionVersion.class));
 
-		var subscriptionCriteria = createSearchParameter(SubscriptionCriteria.class);
-		var subscriptionPayload = createSearchParameter(SubscriptionPayload.class);
-		var subscriptionStatus = createSearchParameter(SubscriptionStatus.class);
-		var subscriptionType = createSearchParameter(SubscriptionType.class);
-		searchParameters.put(Subscription.class,
-				Arrays.asList(subscriptionCriteria, subscriptionPayload, subscriptionStatus, subscriptionType));
+		searchParameters.put(Subscription.class, Arrays.asList(SubscriptionCriteria.class, SubscriptionPayload.class,
+				SubscriptionStatus.class, SubscriptionType.class));
 
-		var taskIdentifier = createSearchParameter(TaskIdentifier.class);
-		var taskRequester = createSearchParameter(TaskRequester.class);
-		var taskStatus = createSearchParameter(TaskStatus.class);
-		searchParameters.put(Task.class, Arrays.asList(taskIdentifier, taskRequester, taskStatus));
+		searchParameters.put(Task.class, Arrays.asList(TaskAuthoredOn.class, TaskIdentifier.class, TaskModified.class,
+				TaskRequester.class, TaskStatus.class));
 
-		var valueSetIdentifier = createSearchParameter(ValueSetIdentifier.class);
-		var valueSetUrl = createSearchParameter(ValueSetUrl.class);
-		var valueSetVersion = createSearchParameter(ValueSetVersion.class);
-		var valueSetStatus = createSearchParameter(ValueSetStatus.class);
-		searchParameters.put(ValueSet.class,
-				Arrays.asList(valueSetIdentifier, valueSetUrl, valueSetVersion, valueSetStatus));
+		searchParameters.put(ValueSet.class, Arrays.asList(ValueSetIdentifier.class, ValueSetUrl.class,
+				ValueSetVersion.class, ValueSetStatus.class));
 
 		var operations = new HashMap<Class<? extends DomainResource>, List<CapabilityStatementRestResourceOperationComponent>>();
 
@@ -312,9 +278,15 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 				"Generates a StructureDefinition instance with a snapshot, based on a differential in a specified StructureDefinition");
 		operations.put(StructureDefinition.class, Arrays.asList(snapshotOperation));
 
-		var standardSortableSearchParameters = Arrays.asList(createSearchParameter(ResourceId.class),
-				createSearchParameter(ResourceLastUpdated.class));
+		var standardSortableSearchParameters = Arrays.asList(ResourceId.class, ResourceLastUpdated.class);
 		var standardOperations = Arrays.asList(createValidateOperation());
+
+		Map<String, List<CanonicalType>> profileUrlsByResource = validationSupport.fetchAllStructureDefinitions()
+				.stream().filter(r -> r instanceof StructureDefinition).map(r -> (StructureDefinition) r)
+				.filter(s -> StructureDefinitionKind.RESOURCE.equals(s.getKind()) && !s.getAbstract()
+						&& !s.getUrl().contains("hl7.org"))
+				.collect(Collectors.groupingBy(StructureDefinition::getType,
+						Collectors.mapping(s -> new CanonicalType(s.getUrl()), Collectors.toList())));
 
 		for (Class<? extends Resource> resource : resources)
 		{
@@ -326,10 +298,12 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 			r.setConditionalRead(ConditionalReadStatus.FULLSUPPORT);
 			r.setConditionalUpdate(true);
 			r.setConditionalDelete(ConditionalDeleteStatus.SINGLE);
-			r.addReferencePolicy(ReferenceHandlingPolicy.ENFORCED);
+			r.addReferencePolicy(ReferenceHandlingPolicy.LITERAL);
+			r.addReferencePolicy(ReferenceHandlingPolicy.LOGICAL);
 
-			r.setType(resource.getAnnotation(ResourceDef.class).name());
-			r.setProfile(resource.getAnnotation(ResourceDef.class).profile());
+			ResourceDef resourceDefAnnotation = resource.getAnnotation(ResourceDef.class);
+			r.setType(resourceDefAnnotation.name());
+			r.setProfile(resourceDefAnnotation.profile());
 			r.addInteraction().setCode(TypeRestfulInteraction.CREATE);
 			r.addInteraction().setCode(TypeRestfulInteraction.READ);
 			r.addInteraction().setCode(TypeRestfulInteraction.VREAD);
@@ -337,60 +311,75 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 			r.addInteraction().setCode(TypeRestfulInteraction.DELETE);
 			r.addInteraction().setCode(TypeRestfulInteraction.SEARCHTYPE);
 
-			standardSortableSearchParameters.stream().forEach(r::addSearchParam);
-
 			var resourceSearchParameters = searchParameters.getOrDefault(resource, Collections.emptyList());
-			resourceSearchParameters.stream()
+			var resourceRevIncludeParameters = revIncludeParameters.getOrDefault(resource, Collections.emptyList());
+
+			resourceSearchParameters.stream().map(this::createSearchParameter)
 					.sorted(Comparator.comparing(CapabilityStatementRestResourceSearchParamComponent::getName))
 					.forEach(r::addSearchParam);
 
-			if (resourceSearchParameters.stream().anyMatch(s -> SearchParamType.REFERENCE.equals(s.getType())))
-				r.addSearchParam(createIncludeParameter(resource, resourceSearchParameters));
+			var includes = resourceSearchParameters.stream().map(p -> p.getAnnotation(IncludeParameterDefinition.class))
+					.filter(def -> def != null).collect(Collectors.toList());
+			if (!includes.isEmpty())
+			{
+				r.addSearchParam(createIncludeParameter(includes));
+				r.setSearchInclude(includes.stream().flatMap(this::toIncludeParameterNames).sorted()
+						.map(StringType::new).collect(Collectors.toList()));
+			}
 
-			r.setSearchInclude(resourceSearchParameters.stream()
-					.filter(s -> SearchParamType.REFERENCE.equals(s.getType()))
-					.map(s -> new StringType(resource.getAnnotation(ResourceDef.class).name() + ":" + s.getName()))
-					.collect(Collectors.toList()));
-
-			r.setSearchRevInclude(
-					revIncludeParameters.getOrDefault(resource, Collections.emptyList()).stream().flatMap(c ->
-					{
-						RevIncludeDefinition def = c.getAnnotation(RevIncludeDefinition.class);
-						if (def == null)
-							return Stream.empty();
-						else
-						{
-							String resourceTypeName = def.resourceType().getAnnotation(ResourceDef.class).name();
-							String parameterName = def.parameterName();
-							return Arrays.stream(def.targetResourceTypes())
-									.map(t -> t.getAnnotation(ResourceDef.class).name())
-									.map(targetResourceTypeName -> new StringType(
-											resourceTypeName + ":" + parameterName + ":" + targetResourceTypeName));
-						}
-					}).collect(Collectors.toList()));
+			var revIncludes = resourceRevIncludeParameters.stream()
+					.map(p -> p.getAnnotation(IncludeParameterDefinition.class)).filter(def -> def != null)
+					.collect(Collectors.toList());
+			if (!revIncludes.isEmpty())
+			{
+				r.addSearchParam(createRevIncludeParameter(revIncludes));
+				r.setSearchRevInclude(revIncludes.stream().flatMap(this::toIncludeParameterNames).sorted()
+						.map(StringType::new).collect(Collectors.toList()));
+			}
 
 			r.addSearchParam(createFormatParameter());
 			r.addSearchParam(createPrettyParameter());
 			r.addSearchParam(createCountParameter(defaultPageCount));
 			r.addSearchParam(createPageParameter());
-			r.addSearchParam(createSortParameter(standardSortableSearchParameters, resourceSearchParameters));
+			r.addSearchParam(createSortParameter(
+					Stream.concat(standardSortableSearchParameters.stream(), resourceSearchParameters.stream())));
 
 			operations.getOrDefault(resource, Collections.emptyList()).forEach(r::addOperation);
 			standardOperations.forEach(r::addOperation);
+
+			r.setSupportedProfile(
+					profileUrlsByResource.getOrDefault(resourceDefAnnotation.name(), Collections.emptyList()));
 		}
+
 		return statement;
 	}
 
 	private CapabilityStatementRestResourceSearchParamComponent createIncludeParameter(
-			Class<? extends Resource> resource,
-			List<CapabilityStatementRestResourceSearchParamComponent> resourceSearchParameters)
+			List<IncludeParameterDefinition> includes)
 	{
+		String values = includes.stream().flatMap(this::toIncludeParameterNames).sorted()
+				.collect(Collectors.joining(", ", "[", "]"));
 		return createSearchParameter("_include", "", SearchParamType.SPECIAL,
-				"Additional resources to return, allowed values: "
-						+ resourceSearchParameters.stream().filter(s -> SearchParamType.REFERENCE.equals(s.getType()))
-								.map(s -> resource.getAnnotation(ResourceDef.class).name() + ":" + s.getName())
-								.collect(Collectors.joining(", ", "[", "]"))
+				"Additional resources to return, allowed values: " + values
 						+ " (use one _include parameter for every resource to include)");
+	}
+
+	private CapabilityStatementRestResourceSearchParamComponent createRevIncludeParameter(
+			List<IncludeParameterDefinition> revIncludes)
+	{
+		String values = revIncludes.stream().flatMap(this::toIncludeParameterNames).sorted()
+				.collect(Collectors.joining(", ", "[", "]"));
+
+		return createSearchParameter("_revinclude", "", SearchParamType.SPECIAL,
+				"Additional resources to return, allowed values: " + values
+						+ " (use one _revinclude parameter for every resource to include)");
+	}
+
+	private Stream<String> toIncludeParameterNames(IncludeParameterDefinition def)
+	{
+		return Arrays.stream(def.targetResourceTypes()).map(target -> target.getAnnotation(ResourceDef.class).name())
+				.map(target -> def.resourceType().getAnnotation(ResourceDef.class).name() + ":" + def.parameterName()
+						+ ":" + target);
 	}
 
 	private CapabilityStatementRestResourceOperationComponent createValidateOperation()
@@ -400,13 +389,13 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 	}
 
 	private CapabilityStatementRestResourceSearchParamComponent createSortParameter(
-			List<CapabilityStatementRestResourceSearchParamComponent> standardSearchParameters,
-			List<CapabilityStatementRestResourceSearchParamComponent> resourceSearchParameters)
+			@SuppressWarnings("rawtypes") Stream<Class<? extends AbstractSearchParameter>> parameters)
 	{
+		String values = parameters.map(p -> p.getAnnotation(SearchParameterDefinition.class)).map(def -> def.name())
+				.sorted().collect(Collectors.joining(", ", "[", "]"));
+
 		return createSearchParameter("_sort", "", SearchParamType.SPECIAL,
-				"Specify the returned order, allowed values: "
-						+ Streams.concat(standardSearchParameters.stream(), resourceSearchParameters.stream())
-								.map(s -> s.getName()).collect(Collectors.joining(", ", "[", "]"))
+				"Specify the returned order, allowed values: " + values
 						+ " (one or multiple as comma separated string), prefix with '-' for reversed order");
 	}
 

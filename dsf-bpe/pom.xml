@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>org.highmed.dsf</groupId>
 		<artifactId>dsf-pom</artifactId>
-		<version>0.1.0</version>
+		<version>0.2.0</version>
 	</parent>
 
 	<modules>
@@ -25,7 +25,7 @@
 
 	<properties>
 		<!-- if upgrading, copy version specific camunda sql scripts to dsf-bpe-server/src/main/resource/db/camunda and create a corresponding liquibase migration script -->
-		<camunda.version>7.12.0</camunda.version>
+		<camunda.version>7.13.0</camunda.version>
 	</properties>
 
 	<repositories>
@@ -120,6 +120,7 @@
 				<artifactId>dsf-fhir-webservice-client</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
 				<artifactId>dsf-openehr-model</artifactId>
@@ -143,16 +144,38 @@
 			</dependency>
 
 			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-pseudonymization-medic</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-pseudonymization-ttp</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-mpi-client</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-mpi-client-pdq</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-mpi-client-stub</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
 				<groupId>org.camunda.bpm</groupId>
 				<artifactId>camunda-bom</artifactId>
 				<version>${camunda.version}</version>
 				<scope>import</scope>
 				<type>pom</type>
-			</dependency>
-			<dependency>
-				<groupId>org.mybatis</groupId>
-				<artifactId>mybatis</artifactId>
-				<version>3.5.3</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

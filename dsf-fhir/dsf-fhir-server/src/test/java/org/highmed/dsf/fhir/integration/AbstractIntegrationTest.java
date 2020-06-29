@@ -47,7 +47,8 @@ import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainer
 import org.glassfish.jersey.servlet.init.JerseyServletContainerInitializer;
 import org.highmed.dsf.fhir.FhirContextLoaderListener;
 import org.highmed.dsf.fhir.authentication.AuthenticationFilter;
-import org.highmed.dsf.fhir.service.ReferenceExtractor;
+import org.highmed.dsf.fhir.service.ReferenceCleaner;
+import org.highmed.dsf.fhir.service.ReferenceCleanerImpl;
 import org.highmed.dsf.fhir.service.ReferenceExtractorImpl;
 import org.highmed.dsf.fhir.spring.config.InitialDataLoaderConfig;
 import org.highmed.dsf.fhir.test.FhirEmbeddedPostgresWithLiquibase;
@@ -92,14 +93,15 @@ public abstract class AbstractIntegrationTest
 
 	private static final Logger logger = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
-	protected static final String BASE_URL = "https://localhost:8001/fhir/";
+	protected static final String BASE_URL = "https://localhost:8001/fhir";
 	protected static final String WEBSOCKET_URL = "wss://localhost:8001/fhir/ws";
 
 	private static final Path FHIR_BUNDLE_FILE = Paths.get("target", UUID.randomUUID().toString() + ".xml");
 	private static final List<Path> FILES_TO_DELETE = Arrays.asList(FHIR_BUNDLE_FILE);
 
-	private static final FhirContext fhirContext = FhirContext.forR4();
-	private static final ReferenceExtractor extractor = new ReferenceExtractorImpl();
+	protected static final FhirContext fhirContext = FhirContext.forR4();
+
+	private static final ReferenceCleaner referenceCleaner = new ReferenceCleanerImpl(new ReferenceExtractorImpl());
 
 	private static JettyServer fhirServer;
 	private static FhirWebserviceClient webserviceClient;
@@ -118,29 +120,28 @@ public abstract class AbstractIntegrationTest
 		logger.info("Creating webservice client ...");
 		webserviceClient = createWebserviceClient(certificates.getClientCertificate().getTrustStore(),
 				certificates.getClientCertificate().getKeyStore(),
-				certificates.getClientCertificate().getKeyStorePassword(), fhirContext, extractor);
+				certificates.getClientCertificate().getKeyStorePassword(), fhirContext, referenceCleaner);
 
 		logger.info("Creating external webservice client ...");
 		externalWebserviceClient = createWebserviceClient(certificates.getExternalClientCertificate().getTrustStore(),
 				certificates.getExternalClientCertificate().getKeyStore(),
-				certificates.getExternalClientCertificate().getKeyStorePassword(), fhirContext, extractor);
+				certificates.getExternalClientCertificate().getKeyStorePassword(), fhirContext, referenceCleaner);
 
 		logger.info("Starting FHIR Server ...");
 		fhirServer = startFhirServer();
 	}
 
 	private static FhirWebserviceClient createWebserviceClient(KeyStore trustStore, KeyStore keyStore,
-			char[] keyStorePassword, FhirContext fhirContext, ReferenceExtractor referenceExtractor)
+			char[] keyStorePassword, FhirContext fhirContext, ReferenceCleaner referenceCleaner)
 	{
-		return new FhirWebserviceClientJersey(BASE_URL, trustStore, keyStore, keyStorePassword, null, null, null, 500,
-				5000, null, fhirContext, referenceExtractor);
+		return new FhirWebserviceClientJersey(BASE_URL, trustStore, keyStore, keyStorePassword, null, null, null, 0, 0,
+				null, fhirContext, referenceCleaner);
 	}
 
 	private static WebsocketClient createWebsocketClient(KeyStore trustStore, KeyStore keyStore,
 			char[] keyStorePassword, String subscriptionIdPart)
 	{
-		return new WebsocketClientTyrus(URI.create(WEBSOCKET_URL), trustStore, keyStore, keyStorePassword,
-				subscriptionIdPart);
+		return new WebsocketClientTyrus(() -> {}, URI.create(WEBSOCKET_URL), trustStore, keyStore, keyStorePassword, subscriptionIdPart);
 	}
 
 	private static JettyServer startFhirServer() throws Exception
@@ -213,7 +214,8 @@ public abstract class AbstractIntegrationTest
 	{
 		try (InputStream in = Files.newInputStream(bundleTemplateFile))
 		{
-			return parser.parseResource(Bundle.class, in);
+			Bundle bundle = parser.parseResource(Bundle.class, in);
+			return referenceCleaner.cleanReferenceResourcesIfBundle(bundle);
 		}
 		catch (IOException e)
 		{
@@ -274,23 +276,10 @@ public abstract class AbstractIntegrationTest
 		String externalClientCertHashHex = calculateSha512CertificateThumbprintHex(externalCertificate);
 		externalThumbprintExtension.setValue(new StringType(externalClientCertHashHex));
 
-		removeReferenceEmbeddedResources(testBundle);
+		// FIXME hapi parser can't handle embedded resources and creates them while parsing bundles
+		new ReferenceCleanerImpl(new ReferenceExtractorImpl()).cleanReferenceResourcesIfBundle(testBundle);
 
 		writeBundle(FHIR_BUNDLE_FILE, testBundle);
-	}
-
-	// FIXME hapi parser can't handle embedded resources and creates them while parsing bundles
-	private static void removeReferenceEmbeddedResources(Bundle bundle)
-	{
-		bundle.getEntry().stream().map(e -> e.getResource()).forEach(res ->
-		{
-			logger.debug("Extracting references from {} resource", res.getResourceType());
-			extractor.getReferences(res).forEach(ref ->
-			{
-				logger.debug("Setting reference embedded resource to null at {}", ref.getReferenceLocation());
-				ref.getReference().setResource(null);
-			});
-		});
 	}
 
 	@AfterClass
@@ -375,7 +364,7 @@ public abstract class AbstractIntegrationTest
 
 	protected static WebsocketClient getWebsocketClient()
 	{
-		Bundle bundle = getWebserviceClient().search(Subscription.class,
+		Bundle bundle = getWebserviceClient().searchWithStrictHandling(Subscription.class,
 				Map.of("criteria", Collections.singletonList("Task?status=requested"), "status",
 						Collections.singletonList("active"), "type", Collections.singletonList("websocket"), "payload",
 						Collections.singletonList("application/fhir+json")));

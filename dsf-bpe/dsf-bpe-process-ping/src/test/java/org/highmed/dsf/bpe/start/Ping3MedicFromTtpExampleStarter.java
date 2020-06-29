@@ -8,7 +8,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.Date;
 
-import org.highmed.dsf.fhir.service.ReferenceExtractor;
+import org.highmed.dsf.fhir.service.ReferenceCleaner;
+import org.highmed.dsf.fhir.service.ReferenceCleanerImpl;
 import org.highmed.dsf.fhir.service.ReferenceExtractorImpl;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.highmed.fhir.client.FhirWebserviceClientJersey;
@@ -33,13 +34,13 @@ public class Ping3MedicFromTtpExampleStarter
 		KeyStore trustStore = CertificateHelper.extractTrust(keyStore);
 
 		FhirContext context = FhirContext.forR4();
-		ReferenceExtractor referenceExtractor = new ReferenceExtractorImpl();
+		ReferenceCleaner referenceCleaner = new ReferenceCleanerImpl(new ReferenceExtractorImpl());
 		FhirWebserviceClient client = new FhirWebserviceClientJersey("https://ttp/fhir/", trustStore, keyStore,
-				keyStorePassword, null, null, null, 0, 0, null, context, referenceExtractor);
+				keyStorePassword, null, null, null, 0, 0, null, context, referenceCleaner);
 
 		Task task = new Task();
-		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-process");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.1.0");
+		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-ping-process");
+		task.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.2.0");
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
@@ -48,9 +49,9 @@ public class Ping3MedicFromTtpExampleStarter
 		task.getRestriction().addRecipient().setType("Organization").getIdentifier()
 				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_TTP");
 
-		task.addInput().setValue(new StringType("startProcessMessage")).getType().addCoding()
+		task.addInput().setValue(new StringType("startPingProcessMessage")).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("message-name");
 
-		client.create(task);
+		client.withMinimalReturn().create(task);
 	}
 }

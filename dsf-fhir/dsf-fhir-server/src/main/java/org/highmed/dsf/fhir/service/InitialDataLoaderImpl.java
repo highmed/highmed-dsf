@@ -6,6 +6,8 @@ import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.authentication.UserRole;
 import org.highmed.dsf.fhir.dao.command.CommandFactory;
 import org.highmed.dsf.fhir.dao.command.CommandList;
+import org.highmed.dsf.fhir.prefer.PreferHandlingType;
+import org.highmed.dsf.fhir.prefer.PreferReturnType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Organization;
@@ -45,7 +47,8 @@ public class InitialDataLoaderImpl implements InitialDataLoader, InitializingBea
 		}
 
 		CommandList commands = commandFactory.createCommands(bundle,
-				new User(new Organization().setName("Initial Data Loader"), UserRole.LOCAL));
+				new User(new Organization().setName("Initial Data Loader"), UserRole.LOCAL), PreferReturnType.MINIMAL,
+				PreferHandlingType.STRICT);
 		logger.debug("Executing command list for bundle with {} entries", bundle.getEntry().size());
 		Bundle result = commands.execute();
 		result.getEntry().forEach(this::logResult);

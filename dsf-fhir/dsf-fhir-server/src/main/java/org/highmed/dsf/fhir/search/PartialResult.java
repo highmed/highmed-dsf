@@ -7,25 +7,22 @@ import org.hl7.fhir.r4.model.Resource;
 
 public class PartialResult<R extends Resource>
 {
-	private final int overallCount;
+	private final int total;
 	private final PageAndCount pageAndCount;
 	private final List<R> partialResult;
 	private final List<Resource> includes;
-	private final boolean countOnly;
 
-	public PartialResult(int overallCount, PageAndCount pageAndCount, List<R> partialResult, List<Resource> includes,
-			boolean countOnly)
+	public PartialResult(int total, PageAndCount pageAndCount, List<R> partialResult, List<Resource> includes)
 	{
-		this.overallCount = overallCount;
+		this.total = total;
 		this.pageAndCount = pageAndCount;
 		this.partialResult = partialResult;
 		this.includes = includes;
-		this.countOnly = countOnly;
 	}
 
-	public int getOverallCount()
+	public int getTotal()
 	{
-		return overallCount;
+		return total;
 	}
 
 	public PageAndCount getPageAndCount()
@@ -41,20 +38,5 @@ public class PartialResult<R extends Resource>
 	public List<Resource> getIncludes()
 	{
 		return Collections.unmodifiableList(includes);
-	}
-
-	public boolean isLastPage()
-	{
-		return pageAndCount.getPage() >= getLastPage();
-	}
-
-	public int getLastPage()
-	{
-		return (int) Math.ceil((double) overallCount / pageAndCount.getCount());
-	}
-
-	public boolean isCountOnly()
-	{
-		return countOnly;
 	}
 }

@@ -9,7 +9,6 @@
 	<include file="db/db.binaries.changelog-0.1.0.xml" />
 	<include file="db/db.bundles.changelog-0.1.0.xml" />
 	<include file="db/db.code_systems.changelog-0.1.0.xml" />
-	<include file="db/db.code_systems.changelog-0.1.0.xml" />
 	<include file="db/db.endpoints.changelog-0.1.0.xml" />
 	<include file="db/db.groups.changelog-0.1.0.xml" />
 	<include file="db/db.healthcare_services.changelog-0.1.0.xml" />
@@ -26,5 +25,28 @@
 	<include file="db/db.subscriptions.changelog-0.1.0.xml" />
 	<include file="db/db.tasks.changelog-0.1.0.xml" />
 	<include file="db/db.value_sets.changelog-0.1.0.xml" />
+
+	<include file="db/db.activity_definitions.changelog-0.2.0.xml" />
+	<include file="db/db.binaries.changelog-0.2.0.xml" />
+	<include file="db/db.bundles.changelog-0.2.0.xml" />
+	<include file="db/db.code_systems.changelog-0.2.0.xml" />
+	<include file="db/db.endpoints.changelog-0.2.0.xml" />
+	<include file="db/db.groups.changelog-0.2.0.xml" />
+	<include file="db/db.healthcare_services.changelog-0.2.0.xml" />
+	<include file="db/db.locations.changelog-0.2.0.xml" />
+	<include file="db/db.naming_systems.changelog-0.2.0.xml" />
+	<include file="db/db.organizations.changelog-0.2.0.xml" />
+	<include file="db/db.patients.changelog-0.2.0.xml" />
+	<include file="db/db.practitioner_roles.changelog-0.2.0.xml" />
+	<include file="db/db.practitioners.changelog-0.2.0.xml" />
+	<include file="db/db.provenances.changelog-0.2.0.xml" />
+	<include file="db/db.research_studies.changelog-0.2.0.xml" />
+	<include file="db/db.structure_definitions.changelog-0.2.0.xml" />
+	<include file="db/db.structure_definition_snapshots.changelog-0.2.0.xml" />
+	<include file="db/db.subscriptions.changelog-0.2.0.xml" />
+	<include file="db/db.tasks.changelog-0.2.0.xml" />
+	<include file="db/db.value_sets.changelog-0.2.0.xml" />
+
+	<include file="db/db.history.changelog-0.2.0.xml" />
 
 </databaseChangeLog>

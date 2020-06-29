@@ -32,8 +32,9 @@
 			</Organization>
 		</resource>
 		<request>
-			<method value="PUT"/>
-			<url value="Organization?identifier=http://highmed.org/fhir/NamingSystem/organization-identifier|Test_TTP"/>
+			<method value="POST"/>
+			<url value="Organization"/>
+			<ifNoneExist value="identifier=http://highmed.org/fhir/NamingSystem/organization-identifier|Test_TTP"/>
 		</request>
 	</entry>
 	<entry>
@@ -64,8 +65,9 @@
 			</Organization>
 		</resource>
 		<request>
-			<method value="PUT"/>
-			<url value="Organization?identifier=http://highmed.org/fhir/NamingSystem/organization-identifier|Test_MeDIC_2"/>
+			<method value="POST"/>
+			<url value="Organization"/>
+			<ifNoneExist value="identifier=http://highmed.org/fhir/NamingSystem/organization-identifier|Test_MeDIC_2"/>
 		</request>
 	</entry>
 	<entry>
@@ -87,13 +89,9 @@
 					<system value="http://terminology.hl7.org/CodeSystem/endpoint-connection-type"/>
 					<code value="hl7-fhir-rest"/>
 				</connectionType>
-				<name value="Test TTP Endpoint"/>
 				<managingOrganization>
+					<reference value="urn:uuid:bb73165c-c7b9-4342-8e28-531f07fa7735"/>
 					<type value="Organization"/>
-					<identifier>
-						<system value="http://highmed.org/fhir/NamingSystem/organization-identifier"/>
-						<value value="Test_TTP"/>
-					</identifier>
 				</managingOrganization>
 				<payloadType>
 					<coding>
@@ -101,14 +99,13 @@
 						<code value="Task"/>
 					</coding>
 				</payloadType>
-				<payloadMimeType value="application/fhir+json"/>
-				<payloadMimeType value="application/fhir+xml"/>
 				<address value="https://ttp/fhir"/>
 			</Endpoint>
 		</resource>
 		<request>
-			<method value="PUT"/>
-			<url value="Endpoint?identifier=http://highmed.org/fhir/NamingSystem/endpoint-identifier|Test_TTP_Endpoint"/>
+			<method value="POST"/>
+			<url value="Endpoint"/>
+			<ifNoneExist value="identifier=http://highmed.org/fhir/NamingSystem/endpoint-identifier|Test_TTP_Endpoint"/>
 		</request>
 	</entry>
 </Bundle>

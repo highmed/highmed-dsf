@@ -53,13 +53,13 @@ public class PingConfig
 	@Bean
 	public LogPing logPing()
 	{
-		return new LogPing(clientProvider, taskHelper, organizationProvider);
+		return new LogPing(clientProvider, taskHelper);
 	}
 
 	@Bean
 	public LogPong logPong()
 	{
-		return new LogPong(clientProvider, taskHelper, organizationProvider);
+		return new LogPong(clientProvider, taskHelper);
 	}
 
 	@Bean
@@ -71,6 +71,6 @@ public class PingConfig
 	@Bean
 	public SelectPongTarget selectPongTarget()
 	{
-		return new SelectPongTarget(clientProvider, taskHelper, organizationProvider);
+		return new SelectPongTarget(clientProvider, taskHelper);
 	}
 }

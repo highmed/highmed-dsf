@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<property name="json" value="JSONB" dbms="postgresql" />
+	<property name="json" value="varchar(5000)" dbms="h2" />
+
+	<changeSet author="hhund" id="db.value_sets.changelog-0.2.0">
+		<dropView viewName="current_value_sets"/>
+	
+		<renameColumn tableName="value_sets" oldColumnName="deleted" newColumnName="deleted_old"/>
+		
+		<addColumn tableName="value_sets">
+			<column name="deleted" type="TIMESTAMP"/>
+		</addColumn>
+	
+		<sql dbms="postgresql">
+			UPDATE value_sets SET deleted = current_vs.deleted_new
+			FROM (
+				SELECT value_set_id, deleted_old, ((value_set->'meta'->>'lastUpdated')::timestamp + interval '1' second) AS deleted_new
+			 	FROM (
+			 		SELECT DISTINCT ON (value_set_id) value_set_id, version, deleted_old, value_set
+					FROM value_sets ORDER BY value_set_id, version DESC
+				) AS current_vs
+				WHERE deleted_old
+			) AS current_vs
+			WHERE value_sets.value_set_id = current_vs.value_set_id
+		</sql>
+		
+		<dropColumn tableName="value_sets" columnName="deleted_old"/>
+	
+		<createView viewName="current_value_sets" replaceIfExists="true">
+			SELECT value_set_id, version, value_set
+			FROM (
+				SELECT DISTINCT ON (value_set_id) value_set_id, version, deleted, value_set
+				FROM value_sets ORDER BY value_set_id, version DESC
+			) AS current_vs
+			WHERE deleted IS NULL
+		</createView>
+
+		<sql dbms="postgresql">
+			ALTER TABLE current_value_sets OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_value_sets TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_value_sets TO ${db.server_users_group};
+		</sql>
+	</changeSet>
+</databaseChangeLog>

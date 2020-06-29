@@ -6,7 +6,7 @@ import java.util.Optional;
 
 import org.highmed.dsf.fhir.dao.EndpointDao;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
-import org.highmed.dsf.fhir.service.ReferenceExtractor;
+import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.highmed.fhir.client.FhirWebserviceClientJersey;
 import org.slf4j.Logger;
@@ -29,14 +29,14 @@ public class ClientProviderImpl implements ClientProvider, InitializingBean
 	private final String remoteProxyUsername;
 	private final String remoteProxySchemeHostPort;
 	private final FhirContext fhirContext;
-	private final ReferenceExtractor referenceExtractor;
+	private final ReferenceCleaner referenceCleaner;
 	private final EndpointDao endpointDao;
 	private final ExceptionHandler exceptionHandler;
 
 	public ClientProviderImpl(KeyStore webserviceTrustStore, KeyStore webserviceKeyStore,
 			char[] webserviceKeyStorePassword, int remoteReadTimeout, int remoteConnectTimeout,
 			char[] remoteProxyPassword, String remoteProxyUsername, String remoteProxySchemeHostPort,
-			FhirContext fhirContext, ReferenceExtractor referenceExtractor, EndpointDao endpointDao,
+			FhirContext fhirContext, ReferenceCleaner referenceCleaner, EndpointDao endpointDao,
 			ExceptionHandler exceptionHandler)
 	{
 		this.webserviceTrustStore = webserviceTrustStore;
@@ -48,7 +48,7 @@ public class ClientProviderImpl implements ClientProvider, InitializingBean
 		this.remoteProxyUsername = remoteProxyUsername;
 		this.remoteProxySchemeHostPort = remoteProxySchemeHostPort;
 		this.fhirContext = fhirContext;
-		this.referenceExtractor = referenceExtractor;
+		this.referenceCleaner = referenceCleaner;
 		this.endpointDao = endpointDao;
 		this.exceptionHandler = exceptionHandler;
 	}
@@ -61,7 +61,7 @@ public class ClientProviderImpl implements ClientProvider, InitializingBean
 		Objects.requireNonNull(webserviceKeyStorePassword, "webserviceKeyStorePassword");
 
 		Objects.requireNonNull(fhirContext, "fhirContext");
-		Objects.requireNonNull(referenceExtractor, "referenceExtractor");
+		Objects.requireNonNull(referenceCleaner, "referenceCleaner");
 		Objects.requireNonNull(endpointDao, "endpointDao");
 		Objects.requireNonNull(exceptionHandler, "exceptionHandler");
 	}
@@ -76,8 +76,7 @@ public class ClientProviderImpl implements ClientProvider, InitializingBean
 		{
 			FhirWebserviceClient client = new FhirWebserviceClientJersey(serverBase, webserviceTrustStore,
 					webserviceKeyStore, webserviceKeyStorePassword, remoteProxySchemeHostPort, remoteProxyUsername,
-					remoteProxyPassword, remoteConnectTimeout, remoteReadTimeout, null, fhirContext,
-					referenceExtractor);
+					remoteProxyPassword, remoteConnectTimeout, remoteReadTimeout, null, fhirContext, referenceCleaner);
 
 			return Optional.of(client);
 		}
