@@ -8,7 +8,7 @@ The HiGHmed Data Sharing Framework (HiGHmed DSF) implements a distributed proces
 Branching follows the git-flow model, for the latest development version see branch [develop](https://github.com/highmed/highmed-dsf/tree/develop).
 
 ## License
-All code from the HiGHmed Data Sharing Framework published under the [Apache-2.0 License](LICENSE).
+All code from the HiGHmed Data Sharing Framework is published under the [Apache-2.0 License](LICENSE).
 
 ## Wiki
 A full documentation can be found in the [Wiki](https://github.com/highmed/highmed-dsf/wiki).
