@@ -21,6 +21,10 @@ services:
    app:
       image: highmed/bpe
       restart: on-failure
+# Ports for jmx debug connections
+#      ports:
+#      - 9020:9020
+#      - 9021:9021
       volumes:
       -  type: bind
          source: ./app/conf
@@ -38,6 +42,8 @@ services:
          target: /opt/bpe/last_event
       environment:
          TZ: Europe/Berlin
+# Use EXTRA_JVM_ARGS to specify special jvm parameters, e.g. jmx connection config below
+#         EXTRA_JVM_ARGS: -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=9020 -Dcom.sun.management.jmxremote.rmi.port=9021 -Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote.local.only=false
       networks:
          frontend:
             ipv4_address: 172.28.3.3
