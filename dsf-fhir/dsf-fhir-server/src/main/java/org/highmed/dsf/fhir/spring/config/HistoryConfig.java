@@ -22,6 +22,9 @@ public class HistoryConfig
 	private HelperConfig helperConfig;
 
 	@Autowired
+	private ReferenceConfig referenceConfig;
+
+	@Autowired
 	private DaoConfig daoConfig;
 
 	@Bean
@@ -34,7 +37,7 @@ public class HistoryConfig
 	public HistoryService historyService()
 	{
 		return new HistoryServiceImpl(serverBase, defaultPageCount, helperConfig.parameterConverter(),
-				helperConfig.exceptionHandler(), helperConfig.responseGenerator(), daoConfig.historyDao(),
-				historyUserFilterFactory());
+				helperConfig.exceptionHandler(), helperConfig.responseGenerator(), referenceConfig.referenceCleaner(),
+				daoConfig.historyDao(), historyUserFilterFactory());
 	}
 }
