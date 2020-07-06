@@ -4,7 +4,7 @@ echo "Executing DSF FHIR with"
 java --version
 
 trap 'kill -TERM $PID' TERM INT
-java -cp lib/*:dsf_fhir.jar org.highmed.dsf.fhir.FhirJettyServer &
+java $EXTRA_JVM_ARGS -Djdk.tls.acknowledgeCloseNotify=true -cp lib/*:dsf_fhir.jar org.highmed.dsf.fhir.FhirJettyServer &
 PID=$!
 wait $PID
 trap - TERM INT
