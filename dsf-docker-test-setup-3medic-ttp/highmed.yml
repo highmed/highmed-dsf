@@ -67,9 +67,9 @@
          append: true
    -  name: Download docker-compose
       get_url:
-         url: https://github.com/docker/compose/releases/download/1.26.0/docker-compose-Linux-x86_64
+         url: https://github.com/docker/compose/releases/download/1.26.2/docker-compose-Linux-x86_64
          dest: /usr/local/bin/docker-compose
-         checksum: sha256:ff6816932a57eab448798105926adbe4363b82f217802b105ade2edad95706cb
+         checksum: sha256:13e50875393decdb047993c3c0192b0a3825613e6dfc0fa271efed4f5dbdd6eb
          mode: '777'
    -  name: update /etc/hosts file
       blockinfile:
