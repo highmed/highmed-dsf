@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
+import org.highmed.dsf.bpe.variables.ConstantsUpdateWhitelist;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
@@ -68,30 +69,29 @@ public class UpdateWhitelist extends AbstractServiceDelegate implements Initiali
 		Bundle transaction = new Bundle().setType(BundleType.TRANSACTION);
 		transaction.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/authorization-role")
 				.setCode("REMOTE");
-		transaction.getIdentifier().setSystem(ConstantsBase.CODESYSTEM_HIGHMED_UPDATE_WHITELIST)
-				.setValue(ConstantsBase.CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST);
+		transaction.getIdentifier().setSystem(ConstantsUpdateWhitelist.CODESYSTEM_HIGHMED_UPDATE_WHITELIST)
+				.setValue(ConstantsUpdateWhitelist.CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST);
 		searchSet.getEntry().stream()
 				.filter(e -> e.hasSearch() && SearchEntryMode.MATCH.equals(e.getSearch().getMode()) && e.hasResource()
-						&& e.getResource() instanceof Organization)
-				.map(e -> (Organization) e.getResource()).forEach(addWhiteListEntry(transaction, searchSet));
+						&& e.getResource() instanceof Organization).map(e -> (Organization) e.getResource())
+				.forEach(addWhiteListEntry(transaction, searchSet));
 
 		logger.debug("Uploading new white-list transaction bundle: {}",
 				FhirContext.forR4().newJsonParser().encodeResourceToString(transaction));
 
-		IdType result = client.withMinimalReturn().updateConditionaly(transaction,
-				Map.of("identifier", Collections.singletonList(ConstantsBase.CODESYSTEM_HIGHMED_UPDATE_WHITELIST + "|"
-						+ ConstantsBase.CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST)));
+		IdType result = client.withMinimalReturn().updateConditionaly(transaction, Map.of("identifier", Collections
+				.singletonList(ConstantsUpdateWhitelist.CODESYSTEM_HIGHMED_UPDATE_WHITELIST + "|"
+						+ ConstantsUpdateWhitelist.CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST)));
 
 		Task task = (Task) execution.getVariable(ConstantsBase.VARIABLE_LEADING_TASK);
 		task.addOutput().setValue(new Reference(new IdType("Bundle", result.getIdPart(), result.getVersionIdPart())))
-				.getType().addCoding().setSystem(ConstantsBase.CODESYSTEM_HIGHMED_UPDATE_WHITELIST)
-				.setCode(ConstantsBase.CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST);
+				.getType().addCoding().setSystem(ConstantsUpdateWhitelist.CODESYSTEM_HIGHMED_UPDATE_WHITELIST)
+				.setCode(ConstantsUpdateWhitelist.CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST);
 	}
 
 	private Consumer<? super Organization> addWhiteListEntry(Bundle transaction, Bundle searchSet)
 	{
-		return organization ->
-		{
+		return organization -> {
 			Identifier identifier = getDefaultIdentifier(organization).get();
 
 			BundleEntryComponent organizationEntry = transaction.addEntry();
@@ -113,8 +113,7 @@ public class UpdateWhitelist extends AbstractServiceDelegate implements Initiali
 	private Function<Reference, Optional<Reference>> addWhiteListEntryReturnReference(Bundle transaction,
 			String organizationId, Bundle searchSet)
 	{
-		return endpointRef -> getEndpoint(endpointRef, searchSet).map(endpoint ->
-		{
+		return endpointRef -> getEndpoint(endpointRef, searchSet).map(endpoint -> {
 			Identifier identifier = getDefaultIdentifier(endpoint).get();
 
 			BundleEntryComponent endpointEntry = transaction.addEntry();
@@ -147,8 +146,7 @@ public class UpdateWhitelist extends AbstractServiceDelegate implements Initiali
 	private Optional<Endpoint> getEndpoint(Reference endpoint, Bundle searchSet)
 	{
 		return searchSet.getEntry().stream()
-				.filter(e -> e.hasResource() && e.getResource() instanceof Endpoint
-						&& e.getFullUrl().endsWith(endpoint.getReference()))
-				.map(e -> (Endpoint) e.getResource()).findFirst();
+				.filter(e -> e.hasResource() && e.getResource() instanceof Endpoint && e.getFullUrl()
+						.endsWith(endpoint.getReference())).map(e -> (Endpoint) e.getResource()).findFirst();
 	}
 }

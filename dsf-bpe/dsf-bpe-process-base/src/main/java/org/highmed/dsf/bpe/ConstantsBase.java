@@ -39,9 +39,6 @@ public interface ConstantsBase
 	String CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE = "bundle-reference";
 	String CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_ORGANIZATION_IDENTIFIER_SEARCH_PARAMETER = "organization-identifier-search-parameter";
 
-	String CODESYSTEM_HIGHMED_UPDATE_WHITELIST = "http://highmed.org/fhir/CodeSystem/update-whitelist";
-	String CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST = "highmed_whitelist";
-
 	String EXTENSION_QUERY_URI = "http://highmed.org/fhir/StructureDefinition/query";
 
 	String PROCESS_URI_BASE = "http://highmed.org/bpe/Process/";
