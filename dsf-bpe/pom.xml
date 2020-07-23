@@ -21,6 +21,7 @@
 		<module>dsf-bpe-server</module>
 		<module>dsf-bpe-server-jetty</module>
 		<module>dsf-bpe-webservice-client</module>
+		<module>dsf-bpe-process-local-services</module>
 	</modules>
 
 	<properties>
@@ -76,6 +77,11 @@
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
 				<artifactId>dsf-bpe-process-feasibility</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-bpe-process-local-services</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<!-- provided as jar and injected on startup as plugin

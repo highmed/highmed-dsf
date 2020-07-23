@@ -62,6 +62,11 @@ public interface Constants
 	String CODESYSTEM_HIGHMED_UPDATE_WHITELIST = "http://highmed.org/fhir/CodeSystem/update-whitelist";
 	String CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST = "highmed_whitelist";
 
+	String CODESYSTEM_QUERY_TYPE = "http://highmed.org/fhir/CodeSystem/query-type";
+	String CODESYSTEM_QUERY_TYPE_AQL = "application/x-aql-query";
+	CodeType AQL_QUERY_TYPE = new CodeType(CODESYSTEM_QUERY_TYPE_AQL)
+			.setSystem(CODESYSTEM_QUERY_TYPE);
+
 	String PROCESS_URI_BASE = "http://highmed.org/bpe/Process/";
 
 	String ORGANIZATION_IDENTIFIER_SYSTEM = "http://highmed.org/fhir/NamingSystem/organization-identifier";
@@ -79,9 +84,6 @@ public interface Constants
 	int MIN_COHORT_DEFINITIONS = 1;
 
 	String SIMPLE_FEASIBILITY_QUERY_PREFIX = "select count";
-
-	CodeType AQL_QUERY_TYPE = new CodeType("application/x-aql-query")
-			.setSystem("http://highmed.org/fhir/CodeSystem/query-type");
 
 	String OPENEHR_MIMETYPE_JSON = "application/json";
 }

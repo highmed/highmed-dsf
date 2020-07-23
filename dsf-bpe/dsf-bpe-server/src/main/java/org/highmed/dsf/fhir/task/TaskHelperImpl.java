@@ -142,6 +142,12 @@ public class TaskHelperImpl implements TaskHelper
 	}
 
 	@Override
+	public TaskOutputComponent createOutput(String system, String code, Reference reference)
+	{
+		return new TaskOutputComponent(new CodeableConcept(new Coding(system, code, null)), reference);
+	}
+
+	@Override
 	public Task addOutputs(Task task, Outputs outputs)
 	{
 		outputs.getOutputs().forEach(output ->

@@ -28,7 +28,6 @@ public class CheckMultiMedicResults extends AbstractServiceDelegate
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
 		Task task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
-		// Outputs outputs = (Outputs) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
 
 		FinalFeasibilityQueryResults results = readFinalFeasibilityQueryResults(task);
 		results = checkResults(results);
