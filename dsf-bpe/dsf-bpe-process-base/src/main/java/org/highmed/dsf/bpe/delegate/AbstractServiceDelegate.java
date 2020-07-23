@@ -4,7 +4,7 @@ import java.util.Objects;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
-import org.highmed.dsf.bpe.Constants;
+import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.Outputs;
@@ -52,9 +52,9 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 		{
 			Task task;
 			if (execution.getParentId() == null || execution.getParentId().equals(execution.getProcessInstanceId()))
-				task = (Task) execution.getVariable(Constants.VARIABLE_LEADING_TASK);
+				task = (Task) execution.getVariable(ConstantsBase.VARIABLE_LEADING_TASK);
 			else
-				task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
+				task = (Task) execution.getVariable(ConstantsBase.VARIABLE_TASK);
 
 			logger.debug("Error while executing service delegate " + getClass().getName(), exception);
 			logger.error("Process {} has fatal error in step {} for task with id {}, reason: {}",
@@ -65,11 +65,11 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 					"Process " + execution.getProcessDefinitionId() + " has fatal error in step " + execution
 							.getActivityInstanceId() + ", reason: " + exception.getMessage();
 
-			Task.TaskOutputComponent errorOutput = taskHelper.createOutput(Constants.CODESYSTEM_HIGHMED_BPMN,
-					Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, errorMessage);
+			Task.TaskOutputComponent errorOutput = taskHelper.createOutput(ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
+					ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, errorMessage);
 			task.addOutput(errorOutput);
 
-			Outputs outputs = (Outputs) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
+			Outputs outputs = (Outputs) execution.getVariable(ConstantsBase.VARIABLE_PROCESS_OUTPUTS);
 			task = taskHelper.addOutputs(task, outputs);
 
 			task.setStatus(Task.TaskStatus.FAILED);

@@ -1,6 +1,6 @@
 package org.highmed.dsf.bpe.service;
 
-import static org.highmed.dsf.bpe.Constants.SIMPLE_FEASIBILITY_QUERY_PREFIX;
+import static org.highmed.dsf.bpe.ConstantsBase.SIMPLE_FEASIBILITY_QUERY_PREFIX;
 
 import java.util.HashMap;
 import java.util.List;
@@ -9,7 +9,7 @@ import java.util.Objects;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
-import org.highmed.dsf.bpe.Constants;
+import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.group.GroupHelper;
@@ -44,8 +44,8 @@ public class CheckQueries extends AbstractServiceDelegate implements Initializin
 	@Override
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
-		Outputs outputs = (Outputs) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
-		List<Group> cohorts = ((FhirResourcesList) execution.getVariable(Constants.VARIABLE_COHORTS))
+		Outputs outputs = (Outputs) execution.getVariable(ConstantsBase.VARIABLE_PROCESS_OUTPUTS);
+		List<Group> cohorts = ((FhirResourcesList) execution.getVariable(ConstantsBase.VARIABLE_COHORTS))
 				.getResourcesAndCast();
 
 		Map<String, String> queries = new HashMap<>();
@@ -71,7 +71,7 @@ public class CheckQueries extends AbstractServiceDelegate implements Initializin
 			}
 		});
 
-		execution.setVariable(Constants.VARIABLE_QUERIES, queries);
-		execution.setVariable(Constants.VARIABLE_PROCESS_OUTPUTS, OutputsValues.create(outputs));
+		execution.setVariable(ConstantsBase.VARIABLE_QUERIES, queries);
+		execution.setVariable(ConstantsBase.VARIABLE_PROCESS_OUTPUTS, OutputsValues.create(outputs));
 	}
 }

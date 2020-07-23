@@ -14,7 +14,8 @@ import javax.crypto.KeyGenerator;
 import javax.ws.rs.WebApplicationException;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.highmed.dsf.bpe.Constants;
+import org.highmed.dsf.bpe.ConstantsBase;
+import org.highmed.dsf.bpe.variables.ConstantsFeasibility;
 import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.highmed.dsf.fhir.service.ReferenceCleanerImpl;
 import org.highmed.dsf.fhir.service.ReferenceExtractorImpl;
@@ -89,7 +90,7 @@ public class RequestLocalServicesIntegrationTestExampleStarter
 				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("message-name");
 
 		task.addInput().setValue(new StringType("SELECT COUNT(e) FROM EHR e;")).getType().addCoding()
-				.setSystem(Constants.CODESYSTEM_QUERY_TYPE).setCode(Constants.CODESYSTEM_QUERY_TYPE_AQL);
+				.setSystem(ConstantsBase.CODESYSTEM_QUERY_TYPE).setCode(ConstantsBase.CODESYSTEM_QUERY_TYPE_AQL);
 		task.addInput().setValue(new BooleanType(needsConsentCheck)).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("needs-consent-check");
 		task.addInput().setValue(new BooleanType(needsRecordLinkage)).getType().addCoding()
@@ -103,8 +104,8 @@ public class RequestLocalServicesIntegrationTestExampleStarter
 					KeyGenerator.getInstance("HmacSHA3-256", bouncyCastleProvider).generateKey());
 
 			task.addInput().setValue(new Base64BinaryType(bloomFilterConfig.toBytes())).getType().addCoding()
-					.setSystem(Constants.CODESYSTEM_HIGHMED_FEASIBILITY)
-					.setCode(Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_BLOOM_FILTER_CONFIG);
+					.setSystem(ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY)
+					.setCode(ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_BLOOM_FILTER_CONFIG);
 		}
 
 		return task;

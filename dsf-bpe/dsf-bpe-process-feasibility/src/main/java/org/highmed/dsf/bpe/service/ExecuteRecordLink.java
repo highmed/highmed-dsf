@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.Constants;
+import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
@@ -50,7 +50,7 @@ public class ExecuteRecordLink extends AbstractServiceDelegate
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
 		FeasibilityQueryResults results = (FeasibilityQueryResults) execution
-				.getVariable(Constants.VARIABLE_QUERY_RESULTS);
+				.getVariable(ConstantsBase.VARIABLE_QUERY_RESULTS);
 
 		Map<String, List<FeasibilityQueryResult>> byCohortId = results.getResults().stream()
 				.collect(Collectors.groupingBy(FeasibilityQueryResult::getCohortId));
@@ -60,7 +60,7 @@ public class ExecuteRecordLink extends AbstractServiceDelegate
 		List<FinalFeasibilityQueryResult> matchedResults = byCohortId.entrySet().stream()
 				.map(e -> match(matcher, e.getKey(), e.getValue())).collect(Collectors.toList());
 
-		execution.setVariable(Constants.VARIABLE_FINAL_QUERY_RESULTS,
+		execution.setVariable(ConstantsBase.VARIABLE_FINAL_QUERY_RESULTS,
 				FinalFeasibilityQueryResultsValues.create(new FinalFeasibilityQueryResults(matchedResults)));
 	}
 

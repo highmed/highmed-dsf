@@ -10,7 +10,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.Constants;
+import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
@@ -68,8 +68,8 @@ public class UpdateWhitelist extends AbstractServiceDelegate implements Initiali
 		Bundle transaction = new Bundle().setType(BundleType.TRANSACTION);
 		transaction.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/authorization-role")
 				.setCode("REMOTE");
-		transaction.getIdentifier().setSystem(Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST)
-				.setValue(Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST);
+		transaction.getIdentifier().setSystem(ConstantsBase.CODESYSTEM_HIGHMED_UPDATE_WHITELIST)
+				.setValue(ConstantsBase.CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST);
 		searchSet.getEntry().stream()
 				.filter(e -> e.hasSearch() && SearchEntryMode.MATCH.equals(e.getSearch().getMode()) && e.hasResource()
 						&& e.getResource() instanceof Organization)
@@ -79,13 +79,13 @@ public class UpdateWhitelist extends AbstractServiceDelegate implements Initiali
 				FhirContext.forR4().newJsonParser().encodeResourceToString(transaction));
 
 		IdType result = client.withMinimalReturn().updateConditionaly(transaction,
-				Map.of("identifier", Collections.singletonList(Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST + "|"
-						+ Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST)));
+				Map.of("identifier", Collections.singletonList(ConstantsBase.CODESYSTEM_HIGHMED_UPDATE_WHITELIST + "|"
+						+ ConstantsBase.CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST)));
 
-		Task task = (Task) execution.getVariable(Constants.VARIABLE_LEADING_TASK);
+		Task task = (Task) execution.getVariable(ConstantsBase.VARIABLE_LEADING_TASK);
 		task.addOutput().setValue(new Reference(new IdType("Bundle", result.getIdPart(), result.getVersionIdPart())))
-				.getType().addCoding().setSystem(Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST)
-				.setCode(Constants.CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST);
+				.getType().addCoding().setSystem(ConstantsBase.CODESYSTEM_HIGHMED_UPDATE_WHITELIST)
+				.setCode(ConstantsBase.CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST);
 	}
 
 	private Consumer<? super Organization> addWhiteListEntry(Bundle transaction, Bundle searchSet)
@@ -140,7 +140,7 @@ public class UpdateWhitelist extends AbstractServiceDelegate implements Initiali
 
 	private Optional<Identifier> getDefaultIdentifier(Endpoint ept)
 	{
-		return ept.getIdentifier().stream().filter(i -> Constants.ENDPOINT_IDENTIFIER_SYSTEM.equals(i.getSystem()))
+		return ept.getIdentifier().stream().filter(i -> ConstantsBase.ENDPOINT_IDENTIFIER_SYSTEM.equals(i.getSystem()))
 				.findFirst();
 	}
 

@@ -7,8 +7,9 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.Constants;
+import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
+import org.highmed.dsf.bpe.variables.ConstantsFeasibility;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
@@ -51,31 +52,31 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 	@Override
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
-		Task task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
+		Task task = (Task) execution.getVariable(ConstantsBase.VARIABLE_TASK);
 
 		IdType researchStudyId = getResearchStudyId(task);
 		FhirWebserviceClient client = getWebserviceClient(researchStudyId);
 		Bundle bundle = getResearchStudyAndCohortDefinitions(researchStudyId, client);
 
 		ResearchStudy researchStudy = (ResearchStudy) bundle.getEntryFirstRep().getResource();
-		execution.setVariable(Constants.VARIABLE_RESEARCH_STUDY, FhirResourceValues.create(researchStudy));
+		execution.setVariable(ConstantsBase.VARIABLE_RESEARCH_STUDY, FhirResourceValues.create(researchStudy));
 
 		List<Group> cohortDefinitions = getCohortDefinitions(bundle, client.getBaseUrl());
-		execution.setVariable(Constants.VARIABLE_COHORTS, FhirResourcesListValues.create(cohortDefinitions));
+		execution.setVariable(ConstantsBase.VARIABLE_COHORTS, FhirResourcesListValues.create(cohortDefinitions));
 
 		String ttpIdentifier = getTtpIdentifier(researchStudy, client);
-		execution.setVariable(Constants.VARIABLE_TTP_IDENTIFIER, ttpIdentifier);
+		execution.setVariable(ConstantsBase.VARIABLE_TTP_IDENTIFIER, ttpIdentifier);
 
 		boolean needsConsentCheck = getNeedsConsentCheck(task);
-		execution.setVariable(Constants.VARIABLE_NEEDS_CONSENT_CHECK, needsConsentCheck);
+		execution.setVariable(ConstantsBase.VARIABLE_NEEDS_CONSENT_CHECK, needsConsentCheck);
 
 		boolean needsRecordLinkage = getNeedsRecordLinkageCheck(task);
-		execution.setVariable(Constants.VARIABLE_NEEDS_RECORD_LINKAGE, needsRecordLinkage);
+		execution.setVariable(ConstantsBase.VARIABLE_NEEDS_RECORD_LINKAGE, needsRecordLinkage);
 
 		if (needsRecordLinkage)
 		{
 			BloomFilterConfig bloomFilterConfig = getBloomFilterConfig(task);
-			execution.setVariable(Constants.VARIABLE_BLOOM_FILTER_CONFIG,
+			execution.setVariable(ConstantsBase.VARIABLE_BLOOM_FILTER_CONFIG,
 					BloomFilterConfigValues.create(bloomFilterConfig));
 		}
 	}
@@ -83,17 +84,17 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 	private IdType getResearchStudyId(Task task)
 	{
 		Reference researchStudyReference = getTaskHelper()
-				.getInputParameterReferenceValues(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
-						Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_RESEARCH_STUDY_REFERENCE)
-				.findFirst().get();
+				.getInputParameterReferenceValues(task, ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
+						ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_RESEARCH_STUDY_REFERENCE).findFirst()
+				.get();
 
 		return new IdType(researchStudyReference.getReference());
 	}
 
 	private FhirWebserviceClient getWebserviceClient(IdType researchStudyId)
 	{
-		if (researchStudyId.getBaseUrl() == null
-				|| researchStudyId.getBaseUrl().equals(getFhirWebserviceClientProvider().getLocalBaseUrl()))
+		if (researchStudyId.getBaseUrl() == null || researchStudyId.getBaseUrl()
+				.equals(getFhirWebserviceClientProvider().getLocalBaseUrl()))
 		{
 			return getFhirWebserviceClientProvider().getLocalWebserviceClient();
 		}
@@ -115,8 +116,8 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 			{
 				throw new RuntimeException("Returned search-set contained less then two entries");
 			}
-			else if (!bundle.getEntryFirstRep().hasResource()
-					|| !(bundle.getEntryFirstRep().getResource() instanceof ResearchStudy))
+			else if (!bundle.getEntryFirstRep().hasResource() || !(bundle.getEntryFirstRep()
+					.getResource() instanceof ResearchStudy))
 			{
 				throw new RuntimeException("Returned search-set did not contain ResearchStudy at index == 0");
 			}
@@ -138,8 +139,7 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 
 	private List<Group> getCohortDefinitions(Bundle bundle, String baseUrl)
 	{
-		return bundle.getEntry().stream().skip(1).map(e ->
-		{
+		return bundle.getEntry().stream().skip(1).map(e -> {
 			Group group = (Group) e.getResource();
 			IdType oldId = group.getIdElement();
 			group.setIdElement(
@@ -159,28 +159,30 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 	private boolean getNeedsConsentCheck(Task task)
 	{
 		return getTaskHelper()
-				.getFirstInputParameterBooleanValue(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
-						Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_CONSENT_CHECK)
-				.orElseThrow(() -> new IllegalArgumentException("NeedsConsentCheck boolean is not set in task with id='"
-						+ task.getId() + "', this error should " + "have been caught by resource validation"));
+				.getFirstInputParameterBooleanValue(task, ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
+						ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_CONSENT_CHECK).orElseThrow(
+						() -> new IllegalArgumentException(
+								"NeedsConsentCheck boolean is not set in task with id='" + task.getId()
+										+ "', this error should " + "have been caught by resource validation"));
 	}
 
 	private boolean getNeedsRecordLinkageCheck(Task task)
 	{
 		return getTaskHelper()
-				.getFirstInputParameterBooleanValue(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
-						Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_RECORD_LINKAGE)
-				.orElseThrow(
-						() -> new IllegalArgumentException("NeedsRecordLinkage boolean is not set in task with id='"
-								+ task.getId() + "', this error should " + "have been caught by resource validation"));
+				.getFirstInputParameterBooleanValue(task, ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
+						ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_RECORD_LINKAGE).orElseThrow(
+						() -> new IllegalArgumentException(
+								"NeedsRecordLinkage boolean is not set in task with id='" + task.getId()
+										+ "', this error should " + "have been caught by resource validation"));
 	}
 
 	private BloomFilterConfig getBloomFilterConfig(Task task)
 	{
 		return BloomFilterConfig.fromBytes(getTaskHelper()
-				.getFirstInputParameterByteValue(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
-						Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_BLOOM_FILTER_CONFIG)
-				.orElseThrow(() -> new IllegalArgumentException("BloomFilterConfig byte[] is not set in task with id='"
-						+ task.getId() + "', this error should " + "have been caught by resource validation")));
+				.getFirstInputParameterByteValue(task, ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
+						ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_BLOOM_FILTER_CONFIG).orElseThrow(
+						() -> new IllegalArgumentException(
+								"BloomFilterConfig byte[] is not set in task with id='" + task.getId()
+										+ "', this error should " + "have been caught by resource validation")));
 	}
 }

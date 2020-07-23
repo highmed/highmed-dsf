@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.Constants;
+import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
@@ -23,11 +23,11 @@ public class GenerateCountFromIds extends AbstractServiceDelegate
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
 		FeasibilityQueryResults results = (FeasibilityQueryResults) execution
-				.getVariable(Constants.VARIABLE_QUERY_RESULTS);
+				.getVariable(ConstantsBase.VARIABLE_QUERY_RESULTS);
 
 		List<FeasibilityQueryResult> filteredResults = count(results.getResults());
 
-		execution.setVariable(Constants.VARIABLE_QUERY_RESULTS,
+		execution.setVariable(ConstantsBase.VARIABLE_QUERY_RESULTS,
 				FeasibilityQueryResultsValues.create(new FeasibilityQueryResults(filteredResults)));
 	}
 

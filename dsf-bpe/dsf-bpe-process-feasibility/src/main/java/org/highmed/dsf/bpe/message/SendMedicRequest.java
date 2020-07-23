@@ -3,7 +3,8 @@ package org.highmed.dsf.bpe.message;
 import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.Constants;
+import org.highmed.dsf.bpe.ConstantsBase;
+import org.highmed.dsf.bpe.variables.ConstantsFeasibility;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.AbstractTaskMessageSend;
@@ -27,32 +28,32 @@ public class SendMedicRequest extends AbstractTaskMessageSend
 	@Override
 	protected Stream<ParameterComponent> getAdditionalInputParameters(DelegateExecution execution)
 	{
-		ResearchStudy researchStudy = (ResearchStudy) execution.getVariable(Constants.VARIABLE_RESEARCH_STUDY);
+		ResearchStudy researchStudy = (ResearchStudy) execution.getVariable(ConstantsBase.VARIABLE_RESEARCH_STUDY);
 		IdType researchStudyId = new IdType(
 				getFhirWebserviceClientProvider().getLocalBaseUrl() + "/" + researchStudy.getId());
 
 		ParameterComponent inputResearchStudyReference = getTaskHelper().createInput(
-				Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
-				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_RESEARCH_STUDY_REFERENCE,
+				ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
+				ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_RESEARCH_STUDY_REFERENCE,
 				new Reference().setReference(researchStudyId.toVersionless().getValueAsString()));
 
-		boolean needsConsentCheck = (boolean) execution.getVariable(Constants.VARIABLE_NEEDS_CONSENT_CHECK);
+		boolean needsConsentCheck = (boolean) execution.getVariable(ConstantsBase.VARIABLE_NEEDS_CONSENT_CHECK);
 		ParameterComponent inputNeedsConsentCheck = getTaskHelper().createInput(
-				Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
-				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_CONSENT_CHECK, needsConsentCheck);
+				ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
+				ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_CONSENT_CHECK, needsConsentCheck);
 
-		boolean needsRecordLinkage = (boolean) execution.getVariable(Constants.VARIABLE_NEEDS_RECORD_LINKAGE);
+		boolean needsRecordLinkage = (boolean) execution.getVariable(ConstantsBase.VARIABLE_NEEDS_RECORD_LINKAGE);
 		ParameterComponent inputNeedsRecordLinkage = getTaskHelper().createInput(
-				Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
-				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_RECORD_LINKAGE, needsRecordLinkage);
+				ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
+				ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_RECORD_LINKAGE, needsRecordLinkage);
 
 		if (needsRecordLinkage)
 		{
 			BloomFilterConfig bloomFilterConfig = (BloomFilterConfig) execution
-					.getVariable(Constants.VARIABLE_BLOOM_FILTER_CONFIG);
+					.getVariable(ConstantsBase.VARIABLE_BLOOM_FILTER_CONFIG);
 			ParameterComponent inputBloomFilterConfig = getTaskHelper().createInput(
-					Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
-					Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_BLOOM_FILTER_CONFIG, bloomFilterConfig.toBytes());
+					ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
+					ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_BLOOM_FILTER_CONFIG, bloomFilterConfig.toBytes());
 
 			return Stream.of(inputResearchStudyReference, inputNeedsConsentCheck, inputNeedsRecordLinkage,
 					inputBloomFilterConfig);

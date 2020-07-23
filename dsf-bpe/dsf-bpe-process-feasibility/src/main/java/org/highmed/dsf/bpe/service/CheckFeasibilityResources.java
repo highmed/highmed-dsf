@@ -1,12 +1,12 @@
 package org.highmed.dsf.bpe.service;
 
-import static org.highmed.dsf.bpe.Constants.MIN_COHORT_DEFINITIONS;
-import static org.highmed.dsf.bpe.Constants.MIN_PARTICIPATING_MEDICS;
+import static org.highmed.dsf.bpe.ConstantsBase.MIN_COHORT_DEFINITIONS;
+import static org.highmed.dsf.bpe.ConstantsBase.MIN_PARTICIPATING_MEDICS;
 
 import java.util.List;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.Constants;
+import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
@@ -25,9 +25,9 @@ public class CheckFeasibilityResources extends AbstractServiceDelegate
 	@Override
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
-		ResearchStudy researchStudy = (ResearchStudy) execution.getVariable(Constants.VARIABLE_RESEARCH_STUDY);
+		ResearchStudy researchStudy = (ResearchStudy) execution.getVariable(ConstantsBase.VARIABLE_RESEARCH_STUDY);
 
-		List<Group> cohorts = ((FhirResourcesList) execution.getVariable(Constants.VARIABLE_COHORTS))
+		List<Group> cohorts = ((FhirResourcesList) execution.getVariable(ConstantsBase.VARIABLE_COHORTS))
 				.getResourcesAndCast();
 
 		checkNumberOfParticipatingMedics(researchStudy);
@@ -37,7 +37,7 @@ public class CheckFeasibilityResources extends AbstractServiceDelegate
 
 	private void checkNumberOfParticipatingMedics(ResearchStudy researchStudy)
 	{
-		long medics = researchStudy.getExtensionsByUrl(Constants.EXTENSION_PARTICIPATING_MEDIC_URI).stream()
+		long medics = researchStudy.getExtensionsByUrl(ConstantsBase.EXTENSION_PARTICIPATING_MEDIC_URI).stream()
 				.filter(e -> e.getValue() instanceof Reference).map(e -> (Reference) e.getValue())
 				.map(r -> r.getIdentifier())
 				.filter(i -> "http://highmed.org/fhir/NamingSystem/organization-identifier".equals(i.getSystem()))

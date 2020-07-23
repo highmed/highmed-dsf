@@ -9,7 +9,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.highmed.dsf.bpe.Constants;
+import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
@@ -47,13 +47,13 @@ public class OrganizationProviderImpl implements OrganizationProvider, Initializ
 	@Override
 	public String getDefaultTypeSystem()
 	{
-		return Constants.ORGANIZATION_TYPE_SYSTEM;
+		return ConstantsBase.ORGANIZATION_TYPE_SYSTEM;
 	}
 
 	@Override
 	public String getDefaultIdentifierSystem()
 	{
-		return Constants.ORGANIZATION_IDENTIFIER_SYSTEM;
+		return ConstantsBase.ORGANIZATION_IDENTIFIER_SYSTEM;
 	}
 
 	@Override

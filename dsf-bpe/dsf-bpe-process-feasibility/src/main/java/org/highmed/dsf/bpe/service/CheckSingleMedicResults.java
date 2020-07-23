@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.Constants;
+import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
@@ -28,14 +28,14 @@ public class CheckSingleMedicResults extends AbstractServiceDelegate
 	@Override
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
-		Outputs outputs = (Outputs) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
+		Outputs outputs = (Outputs) execution.getVariable(ConstantsBase.VARIABLE_PROCESS_OUTPUTS);
 
 		FeasibilityQueryResults results = (FeasibilityQueryResults) execution
-				.getVariable(Constants.VARIABLE_QUERY_RESULTS);
+				.getVariable(ConstantsBase.VARIABLE_QUERY_RESULTS);
 
 		List<FeasibilityQueryResult> filteredResults = filterErronesResultsAndAddErrorsToOutput(results, outputs);
 
-		execution.setVariable(Constants.VARIABLE_QUERY_RESULTS,
+		execution.setVariable(ConstantsBase.VARIABLE_QUERY_RESULTS,
 				FeasibilityQueryResultsValues.create(new FeasibilityQueryResults(filteredResults)));
 	}
 

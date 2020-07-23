@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.Constants;
+import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
@@ -73,12 +73,12 @@ public class GenerateBloomFilters extends AbstractServiceDelegate
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
 		FeasibilityQueryResults results = (FeasibilityQueryResults) execution
-				.getVariable(Constants.VARIABLE_QUERY_RESULTS);
+				.getVariable(ConstantsBase.VARIABLE_QUERY_RESULTS);
 
-		String ttpIdentifier = (String) execution.getVariable(Constants.VARIABLE_TTP_IDENTIFIER);
+		String ttpIdentifier = (String) execution.getVariable(ConstantsBase.VARIABLE_TTP_IDENTIFIER);
 
 		BloomFilterConfig bloomFilterConfig = (BloomFilterConfig) execution
-				.getVariable(Constants.VARIABLE_BLOOM_FILTER_CONFIG);
+				.getVariable(ConstantsBase.VARIABLE_BLOOM_FILTER_CONFIG);
 
 		ResultSetTranslatorToTtpRbfOnly resultSetTranslator = createResultSetTranslator(bloomFilterConfig);
 
@@ -86,7 +86,7 @@ public class GenerateBloomFilters extends AbstractServiceDelegate
 				.map(result -> translateAndCreateBinary(resultSetTranslator, result, ttpIdentifier))
 				.collect(Collectors.toList());
 
-		execution.setVariable(Constants.VARIABLE_QUERY_RESULTS,
+		execution.setVariable(ConstantsBase.VARIABLE_QUERY_RESULTS,
 				FeasibilityQueryResultsValues.create(new FeasibilityQueryResults(translatedResults)));
 	}
 
@@ -134,7 +134,7 @@ public class GenerateBloomFilters extends AbstractServiceDelegate
 		Reference securityContext = new Reference();
 		securityContext.setType("Organization").getIdentifier()
 				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue(ttpIdentifier);
-		Binary binary = new Binary().setContentType(Constants.OPENEHR_MIMETYPE_JSON).setSecurityContext(securityContext)
+		Binary binary = new Binary().setContentType(ConstantsBase.OPENEHR_MIMETYPE_JSON).setSecurityContext(securityContext)
 				.setData(content);
 
 		IdType created = createBinaryResource(binary);

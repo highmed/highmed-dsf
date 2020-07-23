@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.Constants;
+import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
@@ -20,17 +20,17 @@ public class ModifyQueries extends AbstractServiceDelegate
 	@Override
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
-		Boolean needsConsentCheck = (Boolean) execution.getVariable(Constants.VARIABLE_NEEDS_CONSENT_CHECK);
-		Boolean needsRecordLinkage = (Boolean) execution.getVariable(Constants.VARIABLE_NEEDS_RECORD_LINKAGE);
+		Boolean needsConsentCheck = (Boolean) execution.getVariable(ConstantsBase.VARIABLE_NEEDS_CONSENT_CHECK);
+		Boolean needsRecordLinkage = (Boolean) execution.getVariable(ConstantsBase.VARIABLE_NEEDS_RECORD_LINKAGE);
 		boolean idQuery = Boolean.TRUE.equals(needsConsentCheck) || Boolean.TRUE.equals(needsRecordLinkage);
 
 		if (idQuery)
 		{
 			// <groupId, query>
 			@SuppressWarnings("unchecked")
-			Map<String, String> queries = (Map<String, String>) execution.getVariable(Constants.VARIABLE_QUERIES);
+			Map<String, String> queries = (Map<String, String>) execution.getVariable(ConstantsBase.VARIABLE_QUERIES);
 			Map<String, String> modifiedQueries = modifyQueries(queries);
-			execution.setVariable(Constants.VARIABLE_QUERIES, modifiedQueries);
+			execution.setVariable(ConstantsBase.VARIABLE_QUERIES, modifiedQueries);
 		}
 	}
 

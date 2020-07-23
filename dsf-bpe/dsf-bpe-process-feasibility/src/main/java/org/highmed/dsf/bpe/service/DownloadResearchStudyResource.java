@@ -5,8 +5,9 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.Constants;
+import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
+import org.highmed.dsf.bpe.variables.ConstantsFeasibility;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
@@ -29,7 +30,7 @@ public class DownloadResearchStudyResource extends AbstractServiceDelegate imple
 			FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
 	{
 		super(clientProvider, taskHelper);
-		
+
 		this.organizationProvider = organizationProvider;
 	}
 
@@ -37,36 +38,36 @@ public class DownloadResearchStudyResource extends AbstractServiceDelegate imple
 	public void afterPropertiesSet() throws Exception
 	{
 		super.afterPropertiesSet();
-		
+
 		Objects.requireNonNull(organizationProvider, "organizationProvider");
 	}
 
 	@Override
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
-		Task task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
+		Task task = (Task) execution.getVariable(ConstantsBase.VARIABLE_TASK);
 
 		IdType researchStudyId = getResearchStudyId(task);
 		FhirWebserviceClient client = getFhirWebserviceClientProvider().getLocalWebserviceClient();
 		ResearchStudy researchStudy = getResearchStudy(researchStudyId, client);
 		researchStudy = addMissingOrganizations(researchStudy, client);
-		execution.setVariable(Constants.VARIABLE_RESEARCH_STUDY, researchStudy);
+		execution.setVariable(ConstantsBase.VARIABLE_RESEARCH_STUDY, researchStudy);
 
 		boolean needsConsentCheck = getNeedsConsentCheck(task);
-		execution.setVariable(Constants.VARIABLE_NEEDS_CONSENT_CHECK, needsConsentCheck);
+		execution.setVariable(ConstantsBase.VARIABLE_NEEDS_CONSENT_CHECK, needsConsentCheck);
 
 		boolean needsRecordLinkage = getNeedsRecordLinkageCheck(task);
-		execution.setVariable(Constants.VARIABLE_NEEDS_RECORD_LINKAGE, needsRecordLinkage);
+		execution.setVariable(ConstantsBase.VARIABLE_NEEDS_RECORD_LINKAGE, needsRecordLinkage);
 	}
 
 	private IdType getResearchStudyId(Task task)
 	{
 		Reference researchStudyReference = getTaskHelper()
-				.getInputParameterReferenceValues(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
-						Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_RESEARCH_STUDY_REFERENCE)
-				.findFirst()
-				.orElseThrow(() -> new IllegalArgumentException("ResearchStudy reference is not set in task with id='"
-						+ task.getId() + "', this error should " + "have been caught by resource validation"));
+				.getInputParameterReferenceValues(task, ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
+						ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_RESEARCH_STUDY_REFERENCE).findFirst()
+				.orElseThrow(() -> new IllegalArgumentException(
+						"ResearchStudy reference is not set in task with id='" + task.getId() + "', this error should "
+								+ "have been caught by resource validation"));
 
 		return new IdType(researchStudyReference.getReference());
 	}
@@ -92,16 +93,17 @@ public class DownloadResearchStudyResource extends AbstractServiceDelegate imple
 				.filter(i -> "http://highmed.org/fhir/NamingSystem/organization-identifier".equals(i.getSystem()))
 				.map(i -> i.getValue()).collect(Collectors.toList());
 
-		List<String> existingIdentifiers = researchStudy.getExtensionsByUrl(Constants.EXTENSION_PARTICIPATING_MEDIC_URI)
-				.stream().filter(e -> e.getValue() instanceof Reference).map(e -> (Reference) e.getValue())
+		List<String> existingIdentifiers = researchStudy
+				.getExtensionsByUrl(ConstantsBase.EXTENSION_PARTICIPATING_MEDIC_URI).stream()
+				.filter(e -> e.getValue() instanceof Reference).map(e -> (Reference) e.getValue())
 				.map(r -> r.getIdentifier().getValue()).collect(Collectors.toList());
 
 		identifiers.removeAll(existingIdentifiers);
 
 		if (!identifiers.isEmpty())
 		{
-			identifiers.forEach(identifier -> researchStudy.addExtension(Constants.EXTENSION_PARTICIPATING_MEDIC_URI,
-					new Reference().getIdentifier()
+			identifiers.forEach(identifier -> researchStudy
+					.addExtension(ConstantsBase.EXTENSION_PARTICIPATING_MEDIC_URI, new Reference().getIdentifier()
 							.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
 							.setValue(identifier)));
 
@@ -127,19 +129,20 @@ public class DownloadResearchStudyResource extends AbstractServiceDelegate imple
 	private boolean getNeedsConsentCheck(Task task)
 	{
 		return getTaskHelper()
-				.getFirstInputParameterBooleanValue(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
-						Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_CONSENT_CHECK)
-				.orElseThrow(() -> new IllegalArgumentException("NeedsConsentCheck boolean is not set in task with id='"
-						+ task.getId() + "', this error should " + "have been caught by resource validation"));
+				.getFirstInputParameterBooleanValue(task, ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
+						ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_CONSENT_CHECK).orElseThrow(
+						() -> new IllegalArgumentException(
+								"NeedsConsentCheck boolean is not set in task with id='" + task.getId()
+										+ "', this error should " + "have been caught by resource validation"));
 	}
 
 	private boolean getNeedsRecordLinkageCheck(Task task)
 	{
 		return getTaskHelper()
-				.getFirstInputParameterBooleanValue(task, Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
-						Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_RECORD_LINKAGE)
-				.orElseThrow(
-						() -> new IllegalArgumentException("NeedsRecordLinkage boolean is not set in task with id='"
-								+ task.getId() + "', this error should " + "have been caught by resource validation"));
+				.getFirstInputParameterBooleanValue(task, ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
+						ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_RECORD_LINKAGE).orElseThrow(
+						() -> new IllegalArgumentException(
+								"NeedsRecordLinkage boolean is not set in task with id='" + task.getId()
+										+ "', this error should " + "have been caught by resource validation"));
 	}
 }

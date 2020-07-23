@@ -11,7 +11,7 @@ import java.util.UUID;
 
 import javax.ws.rs.WebApplicationException;
 
-import org.highmed.dsf.bpe.Constants;
+import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.highmed.dsf.fhir.service.ReferenceCleanerImpl;
 import org.highmed.dsf.fhir.service.ReferenceExtractorImpl;
@@ -101,7 +101,7 @@ public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter
 		group.setActual(false);
 		group.setActive(true);
 		group.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/query").setValue(new Expression()
-				.setLanguageElement(Constants.AQL_QUERY_TYPE).setExpression("SELECT COUNT(e) FROM EHR e"));
+				.setLanguageElement(ConstantsBase.AQL_QUERY_TYPE).setExpression("SELECT COUNT(e) FROM EHR e"));
 		group.setName(name);
 
 		return group;

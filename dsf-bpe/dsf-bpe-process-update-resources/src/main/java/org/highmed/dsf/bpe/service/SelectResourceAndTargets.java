@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.Constants;
+import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
@@ -53,10 +53,10 @@ public class SelectResourceAndTargets extends AbstractServiceDelegate implements
 				getClass().getName(), execution.getProcessInstanceId(), execution.getBusinessKey(),
 				execution.getVariables(), execution.getVariablesLocal());
 
-		Task task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
+		Task task = (Task) execution.getVariable(ConstantsBase.VARIABLE_TASK);
 		List<Reference> references = getTaskHelper()
-				.getInputParameterReferenceValues(task, Constants.CODESYSTEM_HIGHMED_UPDATE_RESOURCE,
-						Constants.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE)
+				.getInputParameterReferenceValues(task, ConstantsBase.CODESYSTEM_HIGHMED_UPDATE_RESOURCE,
+						ConstantsBase.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE)
 				.collect(Collectors.toList());
 
 		if (references.size() != 1)
@@ -72,11 +72,11 @@ public class SelectResourceAndTargets extends AbstractServiceDelegate implements
 		}
 
 		String bundleId = references.get(0).getReference();
-		execution.setVariable(Constants.VARIABLE_BUNDLE_ID, bundleId);
+		execution.setVariable(ConstantsBase.VARIABLE_BUNDLE_ID, bundleId);
 
 		List<String> targetIdentifierSearchParameters = getTaskHelper()
-				.getInputParameterStringValues(task, Constants.CODESYSTEM_HIGHMED_UPDATE_RESOURCE,
-						Constants.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_ORGANIZATION_IDENTIFIER_SEARCH_PARAMETER)
+				.getInputParameterStringValues(task, ConstantsBase.CODESYSTEM_HIGHMED_UPDATE_RESOURCE,
+						ConstantsBase.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_ORGANIZATION_IDENTIFIER_SEARCH_PARAMETER)
 				.collect(Collectors.toList());
 
 		List<MultiInstanceTarget> targets = targetIdentifierSearchParameters.stream()
