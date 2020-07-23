@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
+import org.highmed.dsf.bpe.variables.ConstantsUpdateResources;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
@@ -55,8 +56,8 @@ public class SelectResourceAndTargets extends AbstractServiceDelegate implements
 
 		Task task = (Task) execution.getVariable(ConstantsBase.VARIABLE_TASK);
 		List<Reference> references = getTaskHelper()
-				.getInputParameterReferenceValues(task, ConstantsBase.CODESYSTEM_HIGHMED_UPDATE_RESOURCE,
-						ConstantsBase.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE)
+				.getInputParameterReferenceValues(task, ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE,
+						ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE)
 				.collect(Collectors.toList());
 
 		if (references.size() != 1)
@@ -75,8 +76,8 @@ public class SelectResourceAndTargets extends AbstractServiceDelegate implements
 		execution.setVariable(ConstantsBase.VARIABLE_BUNDLE_ID, bundleId);
 
 		List<String> targetIdentifierSearchParameters = getTaskHelper()
-				.getInputParameterStringValues(task, ConstantsBase.CODESYSTEM_HIGHMED_UPDATE_RESOURCE,
-						ConstantsBase.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_ORGANIZATION_IDENTIFIER_SEARCH_PARAMETER)
+				.getInputParameterStringValues(task, ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE,
+						ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_ORGANIZATION_IDENTIFIER_SEARCH_PARAMETER)
 				.collect(Collectors.toList());
 
 		List<MultiInstanceTarget> targets = targetIdentifierSearchParameters.stream()

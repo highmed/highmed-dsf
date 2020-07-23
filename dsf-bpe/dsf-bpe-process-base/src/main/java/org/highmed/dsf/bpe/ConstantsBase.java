@@ -13,9 +13,9 @@ public interface ConstantsBase
 	String VARIABLE_MULTI_INSTANCE_TARGET = "multiInstanceTarget";
 	String VARIABLE_MULTI_INSTANCE_TARGETS = "multiInstanceTargets";
 	String VARIABLE_TASK = "task";
+	String VARIABLE_LEADING_TASK = "leadingTask";
 	String VARIABLE_BUNDLE_ID = "bundleId";
 	String VARIABLE_QUERY_PARAMETERS = "queryParameters";
-	String VARIABLE_LEADING_TASK = "leadingTask";
 	String VARIABLE_TTP_IDENTIFIER = "ttp";
 
 	/**
@@ -35,21 +35,16 @@ public interface ConstantsBase
 	String CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY = "correlation-key";
 	String CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE = "error";
 
-	String CODESYSTEM_HIGHMED_UPDATE_RESOURCE = "http://highmed.org/fhir/CodeSystem/update-resources";
-	String CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE = "bundle-reference";
-	String CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_ORGANIZATION_IDENTIFIER_SEARCH_PARAMETER = "organization-identifier-search-parameter";
-
-	String EXTENSION_QUERY_URI = "http://highmed.org/fhir/StructureDefinition/query";
-
 	String PROCESS_URI_BASE = "http://highmed.org/bpe/Process/";
 
 	String ORGANIZATION_IDENTIFIER_SYSTEM = "http://highmed.org/fhir/NamingSystem/organization-identifier";
 	String ORGANIZATION_TYPE_SYSTEM = "http://highmed.org/fhir/CodeSystem/organization-type";
 	String ENDPOINT_IDENTIFIER_SYSTEM = "http://highmed.org/fhir/NamingSystem/endpoint-identifier";
 
-	String OPENEHR_MIMETYPE_JSON = "application/json";
-
+	String EXTENSION_QUERY_URI = "http://highmed.org/fhir/StructureDefinition/query";
 	String CODESYSTEM_QUERY_TYPE = "http://highmed.org/fhir/CodeSystem/query-type";
 	String CODESYSTEM_QUERY_TYPE_AQL = "application/x-aql-query";
 	CodeType AQL_QUERY_TYPE = new CodeType(CODESYSTEM_QUERY_TYPE_AQL).setSystem(CODESYSTEM_QUERY_TYPE);
+
+	String OPENEHR_MIMETYPE_JSON = "application/json";
 }
