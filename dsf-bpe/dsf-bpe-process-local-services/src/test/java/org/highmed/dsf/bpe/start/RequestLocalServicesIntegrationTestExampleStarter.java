@@ -90,7 +90,8 @@ public class RequestLocalServicesIntegrationTestExampleStarter
 				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("message-name");
 
 		task.addInput().setValue(new StringType("SELECT COUNT(e) FROM EHR e;")).getType().addCoding()
-				.setSystem(ConstantsBase.CODESYSTEM_QUERY_TYPE).setCode(ConstantsBase.CODESYSTEM_QUERY_TYPE_AQL);
+				.setSystem(ConstantsBase.CODESYSTEM_QUERY_TYPE)
+				.setCode(ConstantsBase.CODESYSTEM_QUERY_TYPE_AQL);
 		task.addInput().setValue(new BooleanType(needsConsentCheck)).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("needs-consent-check");
 		task.addInput().setValue(new BooleanType(needsRecordLinkage)).getType().addCoding()

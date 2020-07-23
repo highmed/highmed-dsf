@@ -34,18 +34,18 @@ public class ExtractInputValues extends AbstractServiceDelegate implements Initi
 
 		Stream<String> queries = getQueries(task);
 		List<Group> cohortDefinitions = getCohortDefinitions(queries);
-		execution.setVariable(ConstantsBase.VARIABLE_COHORTS, FhirResourcesListValues.create(cohortDefinitions));
+		execution.setVariable(ConstantsFeasibility.VARIABLE_COHORTS, FhirResourcesListValues.create(cohortDefinitions));
 
 		boolean needsConsentCheck = getNeedsConsentCheck(task);
-		execution.setVariable(ConstantsBase.VARIABLE_NEEDS_CONSENT_CHECK, needsConsentCheck);
+		execution.setVariable(ConstantsFeasibility.VARIABLE_NEEDS_CONSENT_CHECK, needsConsentCheck);
 
 		boolean needsRecordLinkage = getNeedsRecordLinkageCheck(task);
-		execution.setVariable(ConstantsBase.VARIABLE_NEEDS_RECORD_LINKAGE, needsRecordLinkage);
+		execution.setVariable(ConstantsFeasibility.VARIABLE_NEEDS_RECORD_LINKAGE, needsRecordLinkage);
 
 		if (needsRecordLinkage)
 		{
 			BloomFilterConfig bloomFilterConfig = getBloomFilterConfig(task);
-			execution.setVariable(ConstantsBase.VARIABLE_BLOOM_FILTER_CONFIG,
+			execution.setVariable(ConstantsFeasibility.VARIABLE_BLOOM_FILTER_CONFIG,
 					BloomFilterConfigValues.create(bloomFilterConfig));
 		}
 	}
@@ -61,8 +61,8 @@ public class ExtractInputValues extends AbstractServiceDelegate implements Initi
 		return queries.map(q -> {
 			Group group = new Group();
 			group.setIdElement(new IdType(UUID.randomUUID().toString()));
-			group.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/query")
-					.setValue(new Expression().setLanguageElement(ConstantsBase.AQL_QUERY_TYPE).setExpression(q));
+			group.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/query").setValue(
+					new Expression().setLanguageElement(ConstantsBase.AQL_QUERY_TYPE).setExpression(q));
 			return group;
 		}).collect(Collectors.toList());
 	}

@@ -3,7 +3,6 @@ package org.highmed.dsf.bpe.message;
 import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.bpe.variables.ConstantsFeasibility;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
@@ -29,20 +28,23 @@ public class SendMultiMedicResults extends AbstractTaskMessageSend
 	protected Stream<ParameterComponent> getAdditionalInputParameters(DelegateExecution execution)
 	{
 		FinalFeasibilityQueryResults results = (FinalFeasibilityQueryResults) execution
-				.getVariable(ConstantsBase.VARIABLE_FINAL_QUERY_RESULTS);
+				.getVariable(ConstantsFeasibility.VARIABLE_FINAL_QUERY_RESULTS);
 
 		return results.getResults().stream().flatMap(this::toInputs);
 	}
 
 	private Stream<ParameterComponent> toInputs(FinalFeasibilityQueryResult result)
 	{
-		ParameterComponent input1 = getTaskHelper().createInputUnsignedInt(ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
-				ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT, result.getCohortSize());
+		ParameterComponent input1 = getTaskHelper()
+				.createInputUnsignedInt(ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
+						ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT,
+						result.getCohortSize());
 		input1.addExtension(createCohortIdExtension(result.getCohortId()));
 
-		ParameterComponent input2 = getTaskHelper().createInputUnsignedInt(ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
-				ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS_COUNT,
-				result.getParticipatingMedics());
+		ParameterComponent input2 = getTaskHelper()
+				.createInputUnsignedInt(ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
+						ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS_COUNT,
+						result.getParticipatingMedics());
 		input2.addExtension(createCohortIdExtension(result.getCohortId()));
 
 		return Stream.of(input1, input2);
@@ -50,6 +52,6 @@ public class SendMultiMedicResults extends AbstractTaskMessageSend
 
 	private Extension createCohortIdExtension(String cohortId)
 	{
-		return new Extension(ConstantsBase.EXTENSION_GROUP_ID_URI, new Reference(cohortId));
+		return new Extension(ConstantsFeasibility.EXTENSION_GROUP_ID_URI, new Reference(cohortId));
 	}
 }

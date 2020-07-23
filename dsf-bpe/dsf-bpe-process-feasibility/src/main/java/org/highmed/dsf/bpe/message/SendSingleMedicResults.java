@@ -3,7 +3,6 @@ package org.highmed.dsf.bpe.message;
 import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.bpe.variables.ConstantsFeasibility;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
@@ -34,7 +33,7 @@ public class SendSingleMedicResults extends AbstractTaskMessageSend
 	protected Stream<Task.ParameterComponent> getAdditionalInputParameters(DelegateExecution execution)
 	{
 		FeasibilityQueryResults results = (FeasibilityQueryResults) execution
-				.getVariable(ConstantsBase.VARIABLE_QUERY_RESULTS);
+				.getVariable(ConstantsFeasibility.VARIABLE_QUERY_RESULTS);
 
 		return results.getResults().stream().map(result -> toInput(result));
 	}
@@ -43,8 +42,10 @@ public class SendSingleMedicResults extends AbstractTaskMessageSend
 	{
 		if (result.isCohortSizeResult())
 		{
-			ParameterComponent input = getTaskHelper().createInputUnsignedInt(ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
-					ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_SINGLE_MEDIC_RESULT, result.getCohortSize());
+			ParameterComponent input = getTaskHelper()
+					.createInputUnsignedInt(ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
+							ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_SINGLE_MEDIC_RESULT,
+							result.getCohortSize());
 			input.addExtension(createCohortIdExtension(result.getCohortId()));
 			return input;
 		}
@@ -58,16 +59,16 @@ public class SendSingleMedicResults extends AbstractTaskMessageSend
 		}
 		else
 		{
-			logger.warn("Unexpected result (not a cohort-size or ResultSet URL result) for cohort with ID "
-					+ result.getCohortId());
+			logger.warn("Unexpected result (not a cohort-size or ResultSet URL result) for cohort with ID " + result
+					.getCohortId());
 			throw new RuntimeException(
-					"Unexpected result (not a cohort-size or ResultSet URL result) for cohort with ID "
-							+ result.getCohortId());
+					"Unexpected result (not a cohort-size or ResultSet URL result) for cohort with ID " + result
+							.getCohortId());
 		}
 	}
 
 	private Extension createCohortIdExtension(String cohortId)
 	{
-		return new Extension(ConstantsBase.EXTENSION_GROUP_ID_URI, new Reference(cohortId));
+		return new Extension(ConstantsFeasibility.EXTENSION_GROUP_ID_URI, new Reference(cohortId));
 	}
 }

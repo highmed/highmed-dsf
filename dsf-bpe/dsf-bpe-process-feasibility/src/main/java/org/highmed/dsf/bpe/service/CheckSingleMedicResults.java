@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
+import org.highmed.dsf.bpe.variables.ConstantsFeasibility;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.FeasibilityQueryResult;
@@ -31,11 +32,11 @@ public class CheckSingleMedicResults extends AbstractServiceDelegate
 		Outputs outputs = (Outputs) execution.getVariable(ConstantsBase.VARIABLE_PROCESS_OUTPUTS);
 
 		FeasibilityQueryResults results = (FeasibilityQueryResults) execution
-				.getVariable(ConstantsBase.VARIABLE_QUERY_RESULTS);
+				.getVariable(ConstantsFeasibility.VARIABLE_QUERY_RESULTS);
 
 		List<FeasibilityQueryResult> filteredResults = filterErronesResultsAndAddErrorsToOutput(results, outputs);
 
-		execution.setVariable(ConstantsBase.VARIABLE_QUERY_RESULTS,
+		execution.setVariable(ConstantsFeasibility.VARIABLE_QUERY_RESULTS,
 				FeasibilityQueryResultsValues.create(new FeasibilityQueryResults(filteredResults)));
 	}
 

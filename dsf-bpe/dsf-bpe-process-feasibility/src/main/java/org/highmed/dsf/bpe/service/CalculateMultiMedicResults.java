@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
+import org.highmed.dsf.bpe.variables.ConstantsFeasibility;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.FeasibilityQueryResult;
@@ -26,12 +27,12 @@ public class CalculateMultiMedicResults extends AbstractServiceDelegate
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
 		List<FeasibilityQueryResult> results = ((FeasibilityQueryResults) execution
-				.getVariable(ConstantsBase.VARIABLE_QUERY_RESULTS)).getResults();
+				.getVariable(ConstantsFeasibility.VARIABLE_QUERY_RESULTS)).getResults();
 
 		// TODO: add percentage filter over result
 		List<FinalFeasibilityQueryResult> finalResults = calculateResults(results);
 
-		execution.setVariable(ConstantsBase.VARIABLE_FINAL_QUERY_RESULTS,
+		execution.setVariable(ConstantsFeasibility.VARIABLE_FINAL_QUERY_RESULTS,
 				FinalFeasibilityQueryResultsValues.create(new FinalFeasibilityQueryResults(finalResults)));
 	}
 

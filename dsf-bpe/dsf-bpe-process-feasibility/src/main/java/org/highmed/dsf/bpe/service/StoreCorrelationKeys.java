@@ -37,9 +37,9 @@ public class StoreCorrelationKeys extends AbstractServiceDelegate
 				MultiInstanceTargetsValues.create(new MultiInstanceTargets(targets)));
 
 		boolean needsRecordLinkage = getNeedsRecordLinkageCheck(task);
-		execution.setVariable(ConstantsBase.VARIABLE_NEEDS_RECORD_LINKAGE, needsRecordLinkage);
+		execution.setVariable(ConstantsFeasibility.VARIABLE_NEEDS_RECORD_LINKAGE, needsRecordLinkage);
 
-		execution.setVariable(ConstantsBase.VARIABLE_QUERY_RESULTS,
+		execution.setVariable(ConstantsFeasibility.VARIABLE_QUERY_RESULTS,
 				FeasibilityQueryResultsValues.create(new FeasibilityQueryResults(null)));
 	}
 

@@ -59,24 +59,24 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 		Bundle bundle = getResearchStudyAndCohortDefinitions(researchStudyId, client);
 
 		ResearchStudy researchStudy = (ResearchStudy) bundle.getEntryFirstRep().getResource();
-		execution.setVariable(ConstantsBase.VARIABLE_RESEARCH_STUDY, FhirResourceValues.create(researchStudy));
+		execution.setVariable(ConstantsFeasibility.VARIABLE_RESEARCH_STUDY, FhirResourceValues.create(researchStudy));
 
 		List<Group> cohortDefinitions = getCohortDefinitions(bundle, client.getBaseUrl());
-		execution.setVariable(ConstantsBase.VARIABLE_COHORTS, FhirResourcesListValues.create(cohortDefinitions));
+		execution.setVariable(ConstantsFeasibility.VARIABLE_COHORTS, FhirResourcesListValues.create(cohortDefinitions));
 
 		String ttpIdentifier = getTtpIdentifier(researchStudy, client);
 		execution.setVariable(ConstantsBase.VARIABLE_TTP_IDENTIFIER, ttpIdentifier);
 
 		boolean needsConsentCheck = getNeedsConsentCheck(task);
-		execution.setVariable(ConstantsBase.VARIABLE_NEEDS_CONSENT_CHECK, needsConsentCheck);
+		execution.setVariable(ConstantsFeasibility.VARIABLE_NEEDS_CONSENT_CHECK, needsConsentCheck);
 
 		boolean needsRecordLinkage = getNeedsRecordLinkageCheck(task);
-		execution.setVariable(ConstantsBase.VARIABLE_NEEDS_RECORD_LINKAGE, needsRecordLinkage);
+		execution.setVariable(ConstantsFeasibility.VARIABLE_NEEDS_RECORD_LINKAGE, needsRecordLinkage);
 
 		if (needsRecordLinkage)
 		{
 			BloomFilterConfig bloomFilterConfig = getBloomFilterConfig(task);
-			execution.setVariable(ConstantsBase.VARIABLE_BLOOM_FILTER_CONFIG,
+			execution.setVariable(ConstantsFeasibility.VARIABLE_BLOOM_FILTER_CONFIG,
 					BloomFilterConfigValues.create(bloomFilterConfig));
 		}
 	}

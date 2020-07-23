@@ -38,17 +38,17 @@ public class SelectResponseTargetTtp extends AbstractServiceDelegate implements 
 		String correlationKey = getCorrelationKey(execution);
 
 		MultiInstanceTarget ttpTarget = new MultiInstanceTarget(ttpIdentifier, correlationKey);
-		execution.setVariable(ConstantsBase.VARIABLE_MULTI_INSTANCE_TARGET, MultiInstanceTargetValues.create(ttpTarget));
+		execution
+				.setVariable(ConstantsBase.VARIABLE_MULTI_INSTANCE_TARGET, MultiInstanceTargetValues.create(ttpTarget));
 	}
 
 	private String getCorrelationKey(DelegateExecution execution)
 	{
 		Task task = (Task) execution.getVariable(ConstantsBase.VARIABLE_TASK);
 
-		return getTaskHelper()
-				.getFirstInputParameterStringValue(task, ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
-						ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY)
-				.orElseThrow(() -> new IllegalStateException(
+		return getTaskHelper().getFirstInputParameterStringValue(task, ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
+				ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY).orElseThrow(
+				() -> new IllegalStateException(
 						"No correlation key found, this error should have been caught by resource validation"));
 	}
 }

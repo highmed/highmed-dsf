@@ -44,10 +44,10 @@ public class StoreResults extends AbstractServiceDelegate implements Initializin
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
 		FeasibilityQueryResults results = (FeasibilityQueryResults) execution
-				.getVariable(ConstantsBase.VARIABLE_QUERY_RESULTS);
+				.getVariable(ConstantsFeasibility.VARIABLE_QUERY_RESULTS);
 
 		boolean needsRecordLinkage = Boolean.TRUE
-				.equals((Boolean) execution.getVariable(ConstantsBase.VARIABLE_NEEDS_RECORD_LINKAGE));
+				.equals((Boolean) execution.getVariable(ConstantsFeasibility.VARIABLE_NEEDS_RECORD_LINKAGE));
 
 		Task task = (Task) execution.getVariable(ConstantsBase.VARIABLE_TASK);
 
@@ -55,7 +55,7 @@ public class StoreResults extends AbstractServiceDelegate implements Initializin
 		extendedResults.addAll(results.getResults());
 		extendedResults.addAll(getResults(task, needsRecordLinkage));
 
-		execution.setVariable(ConstantsBase.VARIABLE_QUERY_RESULTS,
+		execution.setVariable(ConstantsFeasibility.VARIABLE_QUERY_RESULTS,
 				FeasibilityQueryResultsValues.create(new FeasibilityQueryResults(extendedResults)));
 	}
 
@@ -68,7 +68,7 @@ public class StoreResults extends AbstractServiceDelegate implements Initializin
 		{
 			return taskHelper.getInputParameterWithExtension(task, ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
 					ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_SINGLE_MEDIC_RESULT_REFERENCE,
-					ConstantsBase.EXTENSION_GROUP_ID_URI).map(input -> {
+					ConstantsFeasibility.EXTENSION_GROUP_ID_URI).map(input -> {
 				String cohortId = ((Reference) input.getExtension().get(0).getValue()).getReference();
 				String resultSetUrl = ((Reference) input.getValue()).getReference();
 
@@ -79,7 +79,7 @@ public class StoreResults extends AbstractServiceDelegate implements Initializin
 		{
 			return taskHelper.getInputParameterWithExtension(task, ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
 					ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_SINGLE_MEDIC_RESULT,
-					ConstantsBase.EXTENSION_GROUP_ID_URI).map(input -> {
+					ConstantsFeasibility.EXTENSION_GROUP_ID_URI).map(input -> {
 				String cohortId = ((Reference) input.getExtension().get(0).getValue()).getReference();
 				int cohortSize = ((UnsignedIntType) input.getValue()).getValue();
 

@@ -40,12 +40,13 @@ public class SelectResponseTargetMedic extends AbstractServiceDelegate implement
 
 		String correlationKey = getTaskHelper()
 				.getFirstInputParameterStringValue(task, ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
-						ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY)
-				.orElseThrow(() -> new IllegalStateException(
-						"No correlation key found, this error should have been caught by resource validation"));
+						ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY).orElseThrow(
+						() -> new IllegalStateException(
+								"No correlation key found, this error should have been caught by resource validation"));
 
 		MultiInstanceTarget medicTarget = new MultiInstanceTarget(task.getRequester().getIdentifier().getValue(),
 				correlationKey);
-		execution.setVariable(ConstantsBase.VARIABLE_MULTI_INSTANCE_TARGET, MultiInstanceTargetValues.create(medicTarget));
+		execution.setVariable(ConstantsBase.VARIABLE_MULTI_INSTANCE_TARGET,
+				MultiInstanceTargetValues.create(medicTarget));
 	}
 }

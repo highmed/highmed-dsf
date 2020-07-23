@@ -13,6 +13,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
+import org.highmed.dsf.bpe.variables.ConstantsFeasibility;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
@@ -63,7 +64,8 @@ public class SelectRequestTargets extends AbstractServiceDelegate
 	@Override
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
-		ResearchStudy researchStudy = (ResearchStudy) execution.getVariable(ConstantsBase.VARIABLE_RESEARCH_STUDY);
+		ResearchStudy researchStudy = (ResearchStudy) execution
+				.getVariable(ConstantsFeasibility.VARIABLE_RESEARCH_STUDY);
 
 		execution.setVariable(ConstantsBase.VARIABLE_MULTI_INSTANCE_TARGETS,
 				MultiInstanceTargetsValues.create(getMedicTargets(researchStudy)));
@@ -71,10 +73,11 @@ public class SelectRequestTargets extends AbstractServiceDelegate
 		execution.setVariable(ConstantsBase.VARIABLE_MULTI_INSTANCE_TARGET,
 				MultiInstanceTargetValues.create(getTtpTarget(researchStudy)));
 
-		Boolean needsRecordLinkage = (Boolean) execution.getVariable(ConstantsBase.VARIABLE_NEEDS_RECORD_LINKAGE);
+		Boolean needsRecordLinkage = (Boolean) execution
+				.getVariable(ConstantsFeasibility.VARIABLE_NEEDS_RECORD_LINKAGE);
 		if (Boolean.TRUE.equals(needsRecordLinkage))
 		{
-			execution.setVariable(ConstantsBase.VARIABLE_BLOOM_FILTER_CONFIG,
+			execution.setVariable(ConstantsFeasibility.VARIABLE_BLOOM_FILTER_CONFIG,
 					BloomFilterConfigValues.create(createBloomFilterConfig()));
 		}
 	}
@@ -88,7 +91,7 @@ public class SelectRequestTargets extends AbstractServiceDelegate
 	private MultiInstanceTargets getMedicTargets(ResearchStudy researchStudy)
 	{
 		List<MultiInstanceTarget> targets = researchStudy
-				.getExtensionsByUrl(ConstantsBase.EXTENSION_PARTICIPATING_MEDIC_URI).stream()
+				.getExtensionsByUrl(ConstantsFeasibility.EXTENSION_PARTICIPATING_MEDIC_URI).stream()
 				.filter(e -> e.getValue() instanceof Reference).map(e -> (Reference) e.getValue())
 				.map(r -> new MultiInstanceTarget(r.getIdentifier().getValue(), UUID.randomUUID().toString()))
 				.collect(Collectors.toList());
@@ -98,7 +101,7 @@ public class SelectRequestTargets extends AbstractServiceDelegate
 
 	private MultiInstanceTarget getTtpTarget(ResearchStudy researchStudy)
 	{
-		return researchStudy.getExtensionsByUrl(ConstantsBase.EXTENSION_PARTICIPATING_TTP_URI).stream()
+		return researchStudy.getExtensionsByUrl(ConstantsFeasibility.EXTENSION_PARTICIPATING_TTP_URI).stream()
 				.filter(e -> e.getValue() instanceof Reference).map(e -> (Reference) e.getValue())
 				.map(r -> new MultiInstanceTarget(r.getIdentifier().getValue(), UUID.randomUUID().toString()))
 				.findFirst().get();

@@ -51,13 +51,13 @@ public class DownloadResearchStudyResource extends AbstractServiceDelegate imple
 		FhirWebserviceClient client = getFhirWebserviceClientProvider().getLocalWebserviceClient();
 		ResearchStudy researchStudy = getResearchStudy(researchStudyId, client);
 		researchStudy = addMissingOrganizations(researchStudy, client);
-		execution.setVariable(ConstantsBase.VARIABLE_RESEARCH_STUDY, researchStudy);
+		execution.setVariable(ConstantsFeasibility.VARIABLE_RESEARCH_STUDY, researchStudy);
 
 		boolean needsConsentCheck = getNeedsConsentCheck(task);
-		execution.setVariable(ConstantsBase.VARIABLE_NEEDS_CONSENT_CHECK, needsConsentCheck);
+		execution.setVariable(ConstantsFeasibility.VARIABLE_NEEDS_CONSENT_CHECK, needsConsentCheck);
 
 		boolean needsRecordLinkage = getNeedsRecordLinkageCheck(task);
-		execution.setVariable(ConstantsBase.VARIABLE_NEEDS_RECORD_LINKAGE, needsRecordLinkage);
+		execution.setVariable(ConstantsFeasibility.VARIABLE_NEEDS_RECORD_LINKAGE, needsRecordLinkage);
 	}
 
 	private IdType getResearchStudyId(Task task)
@@ -94,7 +94,7 @@ public class DownloadResearchStudyResource extends AbstractServiceDelegate imple
 				.map(i -> i.getValue()).collect(Collectors.toList());
 
 		List<String> existingIdentifiers = researchStudy
-				.getExtensionsByUrl(ConstantsBase.EXTENSION_PARTICIPATING_MEDIC_URI).stream()
+				.getExtensionsByUrl(ConstantsFeasibility.EXTENSION_PARTICIPATING_MEDIC_URI).stream()
 				.filter(e -> e.getValue() instanceof Reference).map(e -> (Reference) e.getValue())
 				.map(r -> r.getIdentifier().getValue()).collect(Collectors.toList());
 
@@ -103,9 +103,10 @@ public class DownloadResearchStudyResource extends AbstractServiceDelegate imple
 		if (!identifiers.isEmpty())
 		{
 			identifiers.forEach(identifier -> researchStudy
-					.addExtension(ConstantsBase.EXTENSION_PARTICIPATING_MEDIC_URI, new Reference().getIdentifier()
-							.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
-							.setValue(identifier)));
+					.addExtension(ConstantsFeasibility.EXTENSION_PARTICIPATING_MEDIC_URI,
+							new Reference().getIdentifier()
+									.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
+									.setValue(identifier)));
 
 			return update(researchStudy, client);
 		}

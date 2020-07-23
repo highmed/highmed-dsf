@@ -29,7 +29,7 @@ public class StoreResult extends AbstractServiceDelegate implements Initializing
 	{
 		Task task = (Task) execution.getVariable(ConstantsBase.VARIABLE_TASK);
 		FeasibilityQueryResults results = (FeasibilityQueryResults) execution
-				.getVariable(ConstantsBase.VARIABLE_QUERY_RESULTS);
+				.getVariable(ConstantsFeasibility.VARIABLE_QUERY_RESULTS);
 
 		addOutputs(task, results);
 		execution.setVariable(ConstantsBase.VARIABLE_TASK, task);
@@ -72,6 +72,6 @@ public class StoreResult extends AbstractServiceDelegate implements Initializing
 
 	private Extension createCohortIdExtension(String cohortId)
 	{
-		return new Extension(ConstantsBase.EXTENSION_GROUP_ID_URI, new Reference(cohortId));
+		return new Extension(ConstantsFeasibility.EXTENSION_GROUP_ID_URI, new Reference(cohortId));
 	}
 }

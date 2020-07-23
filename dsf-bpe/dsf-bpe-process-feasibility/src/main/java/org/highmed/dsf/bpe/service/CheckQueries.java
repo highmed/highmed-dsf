@@ -1,7 +1,5 @@
 package org.highmed.dsf.bpe.service;
 
-import static org.highmed.dsf.bpe.ConstantsBase.SIMPLE_FEASIBILITY_QUERY_PREFIX;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +9,7 @@ import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
+import org.highmed.dsf.bpe.variables.ConstantsFeasibility;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.group.GroupHelper;
 import org.highmed.dsf.fhir.task.TaskHelper;
@@ -45,7 +44,7 @@ public class CheckQueries extends AbstractServiceDelegate implements Initializin
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
 		Outputs outputs = (Outputs) execution.getVariable(ConstantsBase.VARIABLE_PROCESS_OUTPUTS);
-		List<Group> cohorts = ((FhirResourcesList) execution.getVariable(ConstantsBase.VARIABLE_COHORTS))
+		List<Group> cohorts = ((FhirResourcesList) execution.getVariable(ConstantsFeasibility.VARIABLE_COHORTS))
 				.getResourcesAndCast();
 
 		Map<String, String> queries = new HashMap<>();
@@ -55,12 +54,12 @@ public class CheckQueries extends AbstractServiceDelegate implements Initializin
 
 			String groupId = group.getId();
 
-			if (!aqlQuery.startsWith(SIMPLE_FEASIBILITY_QUERY_PREFIX))
+			if (!aqlQuery.startsWith(ConstantsFeasibility.SIMPLE_FEASIBILITY_QUERY_PREFIX))
 			{
 				String errorMessage =
 						"Initial single medic feasibility query check failed, wrong format for query of group with id '"
-								+ groupId + "', expected query to start with '" + SIMPLE_FEASIBILITY_QUERY_PREFIX
-								+ "' but got '" + aqlQuery + "'";
+								+ groupId + "', expected query to start with '"
+								+ ConstantsFeasibility.SIMPLE_FEASIBILITY_QUERY_PREFIX + "' but got '" + aqlQuery + "'";
 
 				logger.info(errorMessage);
 				outputs.addErrorOutput(errorMessage);
@@ -71,7 +70,7 @@ public class CheckQueries extends AbstractServiceDelegate implements Initializin
 			}
 		});
 
-		execution.setVariable(ConstantsBase.VARIABLE_QUERIES, queries);
+		execution.setVariable(ConstantsFeasibility.VARIABLE_QUERIES, queries);
 		execution.setVariable(ConstantsBase.VARIABLE_PROCESS_OUTPUTS, OutputsValues.create(outputs));
 	}
 }

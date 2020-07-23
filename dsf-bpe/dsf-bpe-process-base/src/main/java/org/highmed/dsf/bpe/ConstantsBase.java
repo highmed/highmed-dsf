@@ -12,19 +12,11 @@ public interface ConstantsBase
 	// String VARIABLE_CORRELATION_KEY = "correlationKey";
 	String VARIABLE_MULTI_INSTANCE_TARGET = "multiInstanceTarget";
 	String VARIABLE_MULTI_INSTANCE_TARGETS = "multiInstanceTargets";
-	String VARIABLE_BLOOM_FILTER_CONFIG = "bloomFilterConfig";
-	String VARIABLE_QUERY_RESULTS = "queryResults";
-	String VARIABLE_FINAL_QUERY_RESULTS = "finalQueryResults";
 	String VARIABLE_TASK = "task";
-	String VARIABLE_LEADING_TASK = "leadingTask";
-	String VARIABLE_RESEARCH_STUDY = "researchStudy";
-	String VARIABLE_COHORTS = "cohorts";
-	String VARIABLE_TTP_IDENTIFIER = "ttp";
-	String VARIABLE_QUERIES = "queries";
-	String VARIABLE_QUERY_PARAMETERS = "queryParameters";
 	String VARIABLE_BUNDLE_ID = "bundleId";
-	String VARIABLE_NEEDS_CONSENT_CHECK = "needsConsentCheck";
-	String VARIABLE_NEEDS_RECORD_LINKAGE = "needsRecordLinkage";
+	String VARIABLE_QUERY_PARAMETERS = "queryParameters";
+	String VARIABLE_LEADING_TASK = "leadingTask";
+	String VARIABLE_TTP_IDENTIFIER = "ttp";
 
 	/**
 	 * Stores a List<{@link org.highmed.dsf.fhir.variables.Outputs}> </>of outputs that have to be written to a task
@@ -50,10 +42,7 @@ public interface ConstantsBase
 	String CODESYSTEM_HIGHMED_UPDATE_WHITELIST = "http://highmed.org/fhir/CodeSystem/update-whitelist";
 	String CODESYSTEM_HIGHMED_UPDATE_WHITELIST_VALUE_WHITE_LIST = "highmed_whitelist";
 
-	String CODESYSTEM_QUERY_TYPE = "http://highmed.org/fhir/CodeSystem/query-type";
-	String CODESYSTEM_QUERY_TYPE_AQL = "application/x-aql-query";
-	CodeType AQL_QUERY_TYPE = new CodeType(CODESYSTEM_QUERY_TYPE_AQL)
-			.setSystem(CODESYSTEM_QUERY_TYPE);
+	String EXTENSION_QUERY_URI = "http://highmed.org/fhir/StructureDefinition/query";
 
 	String PROCESS_URI_BASE = "http://highmed.org/bpe/Process/";
 
@@ -61,17 +50,9 @@ public interface ConstantsBase
 	String ORGANIZATION_TYPE_SYSTEM = "http://highmed.org/fhir/CodeSystem/organization-type";
 	String ENDPOINT_IDENTIFIER_SYSTEM = "http://highmed.org/fhir/NamingSystem/endpoint-identifier";
 
-	String EXTENSION_PARTICIPATING_MEDIC_URI = "http://highmed.org/fhir/StructureDefinition/participating-medic";
-	String EXTENSION_PARTICIPATING_TTP_URI = "http://highmed.org/fhir/StructureDefinition/participating-ttp";
-	String EXTENSION_QUERY_URI = "http://highmed.org/fhir/StructureDefinition/query";
-	String EXTENSION_GROUP_ID_URI = "http://highmed.org/fhir/StructureDefinition/group-id";
-
-	// Must be 3 or larger, as otherwise it is possible to draw conclusions about the individual MeDICs
-	// (if I already know the cohort size in my MeDIC)
-	int MIN_PARTICIPATING_MEDICS = 3;
-	int MIN_COHORT_DEFINITIONS = 1;
-
-	String SIMPLE_FEASIBILITY_QUERY_PREFIX = "select count";
-
 	String OPENEHR_MIMETYPE_JSON = "application/json";
+
+	String CODESYSTEM_QUERY_TYPE = "http://highmed.org/fhir/CodeSystem/query-type";
+	String CODESYSTEM_QUERY_TYPE_AQL = "application/x-aql-query";
+	CodeType AQL_QUERY_TYPE = new CodeType(CODESYSTEM_QUERY_TYPE_AQL).setSystem(CODESYSTEM_QUERY_TYPE);
 }

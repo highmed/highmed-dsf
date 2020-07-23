@@ -51,7 +51,7 @@ public class CheckMultiMedicResults extends AbstractServiceDelegate
 
 	private FinalFeasibilityQueryResult toResult(Task task, ParameterComponent in)
 	{
-		String cohortId = ((Reference) in.getExtensionByUrl(ConstantsBase.EXTENSION_GROUP_ID_URI).getValue())
+		String cohortId = ((Reference) in.getExtensionByUrl(ConstantsFeasibility.EXTENSION_GROUP_ID_URI).getValue())
 				.getReference();
 		int participatingMedics = getParticipatingMedicsCountByCohortId(task, cohortId);
 		int cohortSize = ((UnsignedIntType) in.getValue()).getValue();
@@ -65,7 +65,7 @@ public class CheckMultiMedicResults extends AbstractServiceDelegate
 				.equals(in.getType().getCodingFirstRep().getSystem())
 				&& ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS_COUNT
 				.equals(in.getType().getCodingFirstRep().getCode()) && cohortId
-				.equals(((Reference) in.getExtensionByUrl(ConstantsBase.EXTENSION_GROUP_ID_URI).getValue())
+				.equals(((Reference) in.getExtensionByUrl(ConstantsFeasibility.EXTENSION_GROUP_ID_URI).getValue())
 						.getReference())).mapToInt(in -> ((UnsignedIntType) in.getValue()).getValue()).findFirst()
 				.getAsInt();
 	}
@@ -101,6 +101,6 @@ public class CheckMultiMedicResults extends AbstractServiceDelegate
 
 	private Extension createCohortIdExtension(String cohortId)
 	{
-		return new Extension(ConstantsBase.EXTENSION_GROUP_ID_URI, new Reference(cohortId));
+		return new Extension(ConstantsFeasibility.EXTENSION_GROUP_ID_URI, new Reference(cohortId));
 	}
 }

@@ -33,10 +33,12 @@ public class SendTtpRequest extends AbstractTaskMessageSend
 						ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDIC_CORRELATION_KEY,
 						target.getCorrelationKey()));
 
-		boolean needsRecordLinkage = (boolean) execution.getVariable(ConstantsBase.VARIABLE_NEEDS_RECORD_LINKAGE);
+		boolean needsRecordLinkage = (boolean) execution
+				.getVariable(ConstantsFeasibility.VARIABLE_NEEDS_RECORD_LINKAGE);
 		Task.ParameterComponent inputNeedsRecordLinkage = getTaskHelper()
 				.createInput(ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
-						ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_RECORD_LINKAGE	, needsRecordLinkage);
+						ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_RECORD_LINKAGE,
+						needsRecordLinkage);
 
 		return Stream.concat(inputTargets, Stream.of(inputNeedsRecordLinkage));
 	}
