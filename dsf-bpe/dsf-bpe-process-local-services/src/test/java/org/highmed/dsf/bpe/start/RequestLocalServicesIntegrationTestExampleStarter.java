@@ -19,7 +19,7 @@ import org.highmed.dsf.bpe.variables.ConstantsFeasibility;
 import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.highmed.dsf.fhir.service.ReferenceCleanerImpl;
 import org.highmed.dsf.fhir.service.ReferenceExtractorImpl;
-import org.highmed.dsf.fhir.variables.BloomFilterConfig;
+import org.highmed.dsf.bpe.variables.BloomFilterConfig;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.highmed.fhir.client.FhirWebserviceClientJersey;
 import org.hl7.fhir.r4.model.Base64BinaryType;
@@ -41,7 +41,7 @@ public class RequestLocalServicesIntegrationTestExampleStarter
 	{
 		char[] keyStorePassword = "password".toCharArray();
 		KeyStore keyStore = CertificateReader.fromPkcs12(Paths.get(
-				"dsf-tools/dsf-tools-test-data-generator/cert/Webbrowser_Test_User/Webbrowser_Test_User_certificate.p12"),
+				"../../dsf-tools/dsf-tools-test-data-generator/cert/Webbrowser_Test_User/Webbrowser_Test_User_certificate.p12"),
 				keyStorePassword);
 		KeyStore trustStore = CertificateHelper.extractTrust(keyStore);
 

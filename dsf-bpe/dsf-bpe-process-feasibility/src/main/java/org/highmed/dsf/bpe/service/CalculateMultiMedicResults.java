@@ -5,16 +5,15 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.bpe.variables.ConstantsFeasibility;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.fhir.variables.FeasibilityQueryResult;
-import org.highmed.dsf.fhir.variables.FeasibilityQueryResults;
-import org.highmed.dsf.fhir.variables.FinalFeasibilityQueryResult;
-import org.highmed.dsf.fhir.variables.FinalFeasibilityQueryResults;
-import org.highmed.dsf.fhir.variables.FinalFeasibilityQueryResultsValues;
+import org.highmed.dsf.bpe.variables.FeasibilityQueryResult;
+import org.highmed.dsf.bpe.variables.FeasibilityQueryResults;
+import org.highmed.dsf.bpe.variables.FinalFeasibilityQueryResult;
+import org.highmed.dsf.bpe.variables.FinalFeasibilityQueryResults;
+import org.highmed.dsf.bpe.variables.FinalFeasibilityQueryResultsValues;
 
 public class CalculateMultiMedicResults extends AbstractServiceDelegate
 {

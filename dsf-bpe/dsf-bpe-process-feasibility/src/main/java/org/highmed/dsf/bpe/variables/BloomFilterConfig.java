@@ -1,8 +1,11 @@
-package org.highmed.dsf.fhir.variables;
+package org.highmed.dsf.bpe.variables;
 
 import java.security.Key;
 
 import javax.crypto.spec.SecretKeySpec;
+
+import org.highmed.dsf.fhir.variables.KeyDeserializer;
+import org.highmed.dsf.fhir.variables.KeySerializer;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;

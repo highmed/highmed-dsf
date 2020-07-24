@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.variables;
+package org.highmed.dsf.bpe.variables;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -6,7 +6,7 @@ import java.util.Objects;
 import org.camunda.bpm.engine.impl.variable.serializer.PrimitiveValueSerializer;
 import org.camunda.bpm.engine.impl.variable.serializer.ValueFields;
 import org.camunda.bpm.engine.variable.impl.value.UntypedValueImpl;
-import org.highmed.dsf.fhir.variables.BloomFilterConfigValues.BloomFilterConfigValue;
+import org.highmed.dsf.bpe.variables.BloomFilterConfigValues.BloomFilterConfigValue;
 import org.springframework.beans.factory.InitializingBean;
 
 import com.fasterxml.jackson.core.JsonProcessingException;

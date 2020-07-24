@@ -8,15 +8,14 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.bpe.variables.ConstantsFeasibility;
+import org.highmed.dsf.bpe.variables.FeasibilityQueryResult;
+import org.highmed.dsf.bpe.variables.FeasibilityQueryResults;
+import org.highmed.dsf.bpe.variables.FeasibilityQueryResultsValues;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.fhir.variables.FeasibilityQueryResult;
-import org.highmed.dsf.fhir.variables.FeasibilityQueryResults;
-import org.highmed.dsf.fhir.variables.FeasibilityQueryResultsValues;
 import org.highmed.openehr.client.OpenEhrWebserviceClient;
 import org.highmed.openehr.model.datatypes.StringRowElement;
 import org.highmed.openehr.model.structure.Column;
