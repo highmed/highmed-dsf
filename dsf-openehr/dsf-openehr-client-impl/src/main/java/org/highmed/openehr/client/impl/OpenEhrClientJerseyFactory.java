@@ -16,7 +16,7 @@ public class OpenEhrClientJerseyFactory implements OpenEhrClientFactory
 		ObjectMapper objectMapper = OpenEhrObjectMapperFactory.createObjectMapper();
 
 		String baseUrl = propertyResolver.apply("org.highmed.dsf.bpe.openehr.jersey.webservice.baseUrl");
-		String basicAuthUsername = propertyResolver.apply("org.highmed.dsf.bpe.openehr.jersey..webservice.basicAuthUsername");
+		String basicAuthUsername = propertyResolver.apply("org.highmed.dsf.bpe.openehr.jersey.webservice.basicAuthUsername");
 		String basicAuthPassword = propertyResolver.apply("org.highmed.dsf.bpe.openehr.jersey.webservice.basicAuthPassword");
 
 		int connectTimeout = Integer.parseInt(propertyResolver.apply("org.highmed.dsf.bpe.openehr.jersey.webservice.connectionTimeout"));
