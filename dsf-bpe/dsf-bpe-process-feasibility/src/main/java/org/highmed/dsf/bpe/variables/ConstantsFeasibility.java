@@ -1,7 +1,5 @@
 package org.highmed.dsf.bpe.variables;
 
-import org.hl7.fhir.r4.model.CodeType;
-
 public interface ConstantsFeasibility
 {
 	String VARIABLE_BLOOM_FILTER_CONFIG = "bloomFilterConfig";
