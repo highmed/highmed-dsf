@@ -30,9 +30,11 @@ import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.group.GroupHelper;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.openehr.client.OpenEhrWebserviceClientProvider;
 import org.highmed.mpi.client.MasterPatientIndexClient;
 import org.highmed.mpi.client.MasterPatientIndexClientFactory;
+import org.highmed.openehr.client.OpenEhrClient;
+import org.highmed.openehr.client.OpenEhrClientFactory;
+import org.highmed.openehr.json.OpenEhrObjectMapperFactory;
 import org.highmed.pseudonymization.translation.ResultSetTranslatorFromMedicRbfOnly;
 import org.highmed.pseudonymization.translation.ResultSetTranslatorFromMedicRbfOnlyImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,10 +53,10 @@ public class FeasibilityConfig
 	private FhirWebserviceClientProvider fhirClientProvider;
 
 	@Autowired
-	private OpenEhrWebserviceClientProvider openehrClientProvider;
+	private MasterPatientIndexClientFactory masterPatientIndexClientFactory;
 
 	@Autowired
-	private MasterPatientIndexClientFactory masterPatientIndexClientFactory;
+	private OpenEhrClientFactory openEhrClientFactory;
 
 	@Autowired
 	private OrganizationProvider organizationProvider;
@@ -145,7 +147,7 @@ public class FeasibilityConfig
 	@Bean
 	public ExecuteQueries executeQueries()
 	{
-		return new ExecuteQueries(fhirClientProvider, openehrClientProvider.getWebserviceClient(), taskHelper,
+		return new ExecuteQueries(fhirClientProvider, openEhrClient(), taskHelper,
 				organizationProvider);
 	}
 
@@ -165,6 +167,12 @@ public class FeasibilityConfig
 	public MasterPatientIndexClient masterPatientIndexClient()
 	{
 		return masterPatientIndexClientFactory.createClient(environment::getProperty);
+	}
+
+	@Bean
+	public OpenEhrClient openEhrClient()
+	{
+		return openEhrClientFactory.createClient(environment::getProperty);
 	}
 
 	@Bean
