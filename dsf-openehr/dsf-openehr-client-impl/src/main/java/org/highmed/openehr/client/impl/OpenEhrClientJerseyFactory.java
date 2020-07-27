@@ -16,12 +16,28 @@ public class OpenEhrClientJerseyFactory implements OpenEhrClientFactory
 		ObjectMapper objectMapper = OpenEhrObjectMapperFactory.createObjectMapper();
 
 		String baseUrl = propertyResolver.apply("org.highmed.dsf.bpe.openehr.jersey.webservice.baseUrl");
-		String basicAuthUsername = propertyResolver.apply("org.highmed.dsf.bpe.openehr.jersey.webservice.basicAuthUsername");
-		String basicAuthPassword = propertyResolver.apply("org.highmed.dsf.bpe.openehr.jersey.webservice.basicAuthPassword");
+		String basicAuthUsername = propertyResolver
+				.apply("org.highmed.dsf.bpe.openehr.jersey.webservice.basicauth.username");
+		String basicAuthPassword = propertyResolver
+				.apply("org.highmed.dsf.bpe.open ehr.jersey.webservice.basicauth.password");
 
-		int connectTimeout = Integer.parseInt(propertyResolver.apply("org.highmed.dsf.bpe.openehr.jersey.webservice.connectionTimeout"));
-		int readTimeout = Integer.parseInt(propertyResolver.apply("org.highmed.dsf.bpe.openehr.jersey.webservice.readTimeout"));
+		String truststorePath = propertyResolver.apply("org.highmed.dsf.bpe.openehr.jersey.webservice.truststore.path");
+		String truststorePassword = propertyResolver
+				.apply("org.highmed.dsf.bpe.openehr.jersey.webservice.truststore.password");
 
-		return new OpenEhrClientJersey(baseUrl, basicAuthUsername, basicAuthPassword, connectTimeout, readTimeout, objectMapper);
+		int connectTimeout = Integer
+				.parseInt(propertyResolver.apply("org.highmed.dsf.bpe.openehr.jersey.webservice.connectionTimeout"));
+		int readTimeout = Integer
+				.parseInt(propertyResolver.apply("org.highmed.dsf.bpe.openehr.jersey.webservice.readTimeout"));
+
+		try
+		{
+			return new OpenEhrClientJersey(baseUrl, basicAuthUsername, basicAuthPassword, truststorePath,
+					truststorePassword, connectTimeout, readTimeout, objectMapper);
+		}
+		catch (Exception exception)
+		{
+			return null;
+		}
 	}
 }

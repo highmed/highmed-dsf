@@ -1,5 +1,10 @@
 package org.highmed.openehr.client.impl;
 
+import java.io.IOException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.HttpHeaders;
@@ -22,9 +27,12 @@ public class OpenEhrClientJersey extends AbstractJerseyClient implements OpenEhr
 	public static final String OPENEHR_QUERY_PATH = "query/aql";
 
 	public OpenEhrClientJersey(String baseUrl, String basicAuthUsername, String basicAuthPassword,
-			int connectTimeout, int readTimeout, ObjectMapper objectMapper)
+			String truststorePath, String trustorePassword, int connectTimeout, int readTimeout,
+			ObjectMapper objectMapper)
+			throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException
 	{
-		super(baseUrl, basicAuthUsername, basicAuthPassword, connectTimeout, readTimeout, objectMapper);
+		super(baseUrl, basicAuthUsername, basicAuthPassword, truststorePath, trustorePassword, connectTimeout,
+				readTimeout, objectMapper);
 	}
 
 	@Override
