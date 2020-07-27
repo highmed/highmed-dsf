@@ -19,12 +19,10 @@ public class OpenEhrClientStub implements OpenEhrClient
 	@Override
 	public ResultSet query(String query, MultivaluedMap<String, Object> headers)
 	{
+		// TODO Implement correct check for default id query
 		if (!query.startsWith("select count"))
 		{
-			int start = 0;
-			int end = 15;
-
-			List<List<RowElement>> rows = IntStream.range(start, end)
+			List<List<RowElement>> rows = IntStream.range(0, 15)
 					.mapToObj(id -> Collections.<RowElement>singletonList(new StringRowElement(String.valueOf(id))))
 					.collect(Collectors.toList());
 

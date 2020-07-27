@@ -72,11 +72,8 @@ public class ExecuteQueries extends AbstractServiceDelegate implements Initializ
 
 		ResultSet resultSet = openehrClient.query(cohortQuery, null);
 
-		// TODO: remove dummy result
-
 		if (idQuery)
 		{
-			// returns ResultSet with EHRIDs 0, 1, ..., 14
 			return FeasibilityQueryResult.idResult(organizationProvider.getLocalIdentifierValue(), cohortId, resultSet);
 		}
 		else

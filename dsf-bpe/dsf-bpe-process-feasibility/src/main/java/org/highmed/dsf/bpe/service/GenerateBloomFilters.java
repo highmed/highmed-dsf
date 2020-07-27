@@ -9,13 +9,13 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
-import org.highmed.dsf.bpe.variables.ConstantsFeasibility;
-import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
-import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.bpe.variables.BloomFilterConfig;
+import org.highmed.dsf.bpe.variables.ConstantsFeasibility;
 import org.highmed.dsf.bpe.variables.FeasibilityQueryResult;
 import org.highmed.dsf.bpe.variables.FeasibilityQueryResults;
 import org.highmed.dsf.bpe.variables.FeasibilityQueryResultsValues;
+import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
+import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.mpi.client.MasterPatientIndexClient;
 import org.highmed.openehr.model.structure.ResultSet;
 import org.highmed.pseudonymization.bloomfilter.BloomFilterGenerator;
@@ -28,6 +28,7 @@ import org.highmed.pseudonymization.translation.ResultSetTranslatorToTtpRbfOnlyI
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,7 +77,7 @@ public class GenerateBloomFilters extends AbstractServiceDelegate
 		FeasibilityQueryResults results = (FeasibilityQueryResults) execution
 				.getVariable(ConstantsFeasibility.VARIABLE_QUERY_RESULTS);
 
-		String ttpIdentifier = (String) execution.getVariable(ConstantsBase.VARIABLE_TTP_IDENTIFIER);
+		String securityIdentifier = getSecurityIdentifier(execution);
 
 		BloomFilterConfig bloomFilterConfig = (BloomFilterConfig) execution
 				.getVariable(ConstantsFeasibility.VARIABLE_BLOOM_FILTER_CONFIG);
@@ -84,11 +85,21 @@ public class GenerateBloomFilters extends AbstractServiceDelegate
 		ResultSetTranslatorToTtpRbfOnly resultSetTranslator = createResultSetTranslator(bloomFilterConfig);
 
 		List<FeasibilityQueryResult> translatedResults = results.getResults().stream()
-				.map(result -> translateAndCreateBinary(resultSetTranslator, result, ttpIdentifier))
+				.map(result -> translateAndCreateBinary(resultSetTranslator, result, securityIdentifier))
 				.collect(Collectors.toList());
 
 		execution.setVariable(ConstantsFeasibility.VARIABLE_QUERY_RESULTS,
 				FeasibilityQueryResultsValues.create(new FeasibilityQueryResults(translatedResults)));
+	}
+
+	private String getSecurityIdentifier(DelegateExecution execution)
+	{
+		Task task = (Task) execution.getVariable(ConstantsBase.VARIABLE_TASK);
+
+		if (task.getInstantiatesUri().startsWith(ConstantsFeasibility.LOCAL_SERVICES_INTEGRATION_PROCESS_URI))
+			return task.getRequester().getIdentifier().getValue();
+		else
+			return (String) execution.getVariable(ConstantsBase.VARIABLE_TTP_IDENTIFIER);
 	}
 
 	protected ResultSetTranslatorToTtpRbfOnly createResultSetTranslator(BloomFilterConfig bloomFilterConfig)
@@ -129,12 +140,12 @@ public class GenerateBloomFilters extends AbstractServiceDelegate
 		}
 	}
 
-	protected String saveResultSetAsBinaryForTtp(ResultSet resultSet, String ttpIdentifier)
+	protected String saveResultSetAsBinaryForTtp(ResultSet resultSet, String securityIdentifier)
 	{
 		byte[] content = serializeResultSet(resultSet);
 		Reference securityContext = new Reference();
 		securityContext.setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue(ttpIdentifier);
+				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue(securityIdentifier);
 		Binary binary = new Binary().setContentType(ConstantsBase.OPENEHR_MIMETYPE_JSON)
 				.setSecurityContext(securityContext).setData(content);
 

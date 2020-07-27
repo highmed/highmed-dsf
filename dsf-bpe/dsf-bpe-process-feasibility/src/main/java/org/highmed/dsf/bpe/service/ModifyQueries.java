@@ -31,7 +31,9 @@ public class ModifyQueries extends AbstractServiceDelegate
 			@SuppressWarnings("unchecked")
 			Map<String, String> queries = (Map<String, String>) execution
 					.getVariable(ConstantsFeasibility.VARIABLE_QUERIES);
+
 			Map<String, String> modifiedQueries = modifyQueries(queries);
+
 			execution.setVariable(ConstantsFeasibility.VARIABLE_QUERIES, modifiedQueries);
 		}
 	}
@@ -49,6 +51,6 @@ public class ModifyQueries extends AbstractServiceDelegate
 	protected String replaceSelectCountWithSelectMpiId(String value)
 	{
 		// TODO Implement correct replacement for default id query
-		return value.replace("SELECT COUNT(e)", "SELECT e/ehr_id/value as EHRID");
+		return value.replace("select count(e)", "select e/ehr_id/value as EHRID");
 	}
 }

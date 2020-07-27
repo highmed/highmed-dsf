@@ -33,4 +33,6 @@ public interface ConstantsFeasibility
 	String EXTENSION_PARTICIPATING_MEDIC_URI = "http://highmed.org/fhir/StructureDefinition/participating-medic";
 	String EXTENSION_PARTICIPATING_TTP_URI = "http://highmed.org/fhir/StructureDefinition/participating-ttp";
 	String EXTENSION_GROUP_ID_URI = "http://highmed.org/fhir/StructureDefinition/group-id";
+
+	String LOCAL_SERVICES_INTEGRATION_PROCESS_URI = "http://highmed.org/bpe/Process/localServicesIntegration";
 }
