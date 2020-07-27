@@ -37,7 +37,7 @@ public class StartListener implements ExecutionListener
 		{
 			Task task = (Task) execution.getVariable(ConstantsBase.VARIABLE_TASK);
 
-			// sets initial task variable a second time i a different variable. subprocesses which start
+			// sets initial task variable a second time in a different variable. subprocesses which start
 			// with a task resource override the initially set task variable
 			execution.setVariable(ConstantsBase.VARIABLE_LEADING_TASK, task);
 

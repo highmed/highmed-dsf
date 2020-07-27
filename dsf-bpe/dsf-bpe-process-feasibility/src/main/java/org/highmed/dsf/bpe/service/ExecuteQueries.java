@@ -68,7 +68,7 @@ public class ExecuteQueries extends AbstractServiceDelegate implements Initializ
 	private FeasibilityQueryResult executeQuery(String cohortId, String cohortQuery, boolean idQuery)
 	{
 		// TODO We might want to introduce a more complex result type to represent a count,
-		// errors and possible meta-data.
+		//      errors and possible meta-data.
 
 		ResultSet resultSet = openehrClient.query(cohortQuery, null);
 

@@ -8,6 +8,7 @@ import java.util.stream.IntStream;
 import javax.ws.rs.core.MultivaluedMap;
 
 import org.highmed.openehr.client.OpenEhrClient;
+import org.highmed.openehr.model.datatypes.IntegerRowElement;
 import org.highmed.openehr.model.datatypes.StringRowElement;
 import org.highmed.openehr.model.structure.Column;
 import org.highmed.openehr.model.structure.ResultSet;
@@ -18,19 +19,23 @@ public class OpenEhrClientStub implements OpenEhrClient
 	@Override
 	public ResultSet query(String query, MultivaluedMap<String, Object> headers)
 	{
-		int start = 0;
-		int end = 15;
-
-		if(query.startsWith("SELECT COUNT(e)"))
+		if (!query.startsWith("select count"))
 		{
-			start = 15;
+			int start = 0;
+			int end = 15;
+
+			List<List<RowElement>> rows = IntStream.range(start, end)
+					.mapToObj(id -> Collections.<RowElement>singletonList(new StringRowElement(String.valueOf(id))))
+					.collect(Collectors.toList());
+
+			return new ResultSet(null, null, query, Collections.singleton(new Column("EHRID", "/ehr_id/value")), rows);
 		}
+		else
+		{
+			List<List<RowElement>> rows = Collections
+					.singletonList(Collections.singletonList(new IntegerRowElement(15)));
 
-		List<List<RowElement>> rows = IntStream.range(start, end)
-				.mapToObj(id -> Collections.<RowElement> singletonList(new StringRowElement(String.valueOf(id))))
-				.collect(Collectors.toList());
-
-		return new ResultSet(null, null, query,
-				Collections.singleton(new Column("EHRID", "/ehr_id/value")), rows);
+			return new ResultSet(null, null, query, Collections.singleton(new Column("COUNT", "/count")), rows);
+		}
 	}
 }
