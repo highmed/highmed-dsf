@@ -19,7 +19,7 @@ public class OpenEhrClientJerseyFactory implements OpenEhrClientFactory
 		String basicAuthUsername = propertyResolver
 				.apply("org.highmed.dsf.bpe.openehr.jersey.webservice.basicauth.username");
 		String basicAuthPassword = propertyResolver
-				.apply("org.highmed.dsf.bpe.open ehr.jersey.webservice.basicauth.password");
+				.apply("org.highmed.dsf.bpe.openehr.jersey.webservice.basicauth.password");
 
 		String truststorePath = propertyResolver.apply("org.highmed.dsf.bpe.openehr.jersey.webservice.truststore.path");
 		String truststorePassword = propertyResolver
