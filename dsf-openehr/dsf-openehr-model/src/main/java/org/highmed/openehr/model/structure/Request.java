@@ -11,11 +11,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class Request
 {
+	@JsonProperty("q")
 	private final String query;
 
+	@JsonProperty("offset")
 	private final String offset;
+	@JsonProperty("fetch")
 	private final String fetch;
 
+	@JsonProperty("query-parameters")
 	private final Map<String, Object> queryParameters = new HashMap<>();
 
 	@JsonCreator
