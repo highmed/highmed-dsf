@@ -51,6 +51,6 @@ public class ModifyQueries extends AbstractServiceDelegate
 	protected String replaceSelectCountWithSelectMpiId(String value)
 	{
 		// TODO Implement correct replacement for default id query
-		return value.replace("select count(e)", "select e/ehr_id/value as EHRID");
+		return value.replace("select count(e)", "select e/ehr_status/subject/external_ref/id/value as EHRID");
 	}
 }

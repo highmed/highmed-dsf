@@ -26,7 +26,7 @@ public class OpenEhrClientStub implements OpenEhrClient
 					.mapToObj(id -> Collections.<RowElement>singletonList(new StringRowElement(String.valueOf(id))))
 					.collect(Collectors.toList());
 
-			return new ResultSet(null, null, query, Collections.singleton(new Column("EHRID", "/ehr_id/value")), rows);
+			return new ResultSet(null, null, query, Collections.singleton(new Column("EHRID", "/ehr_status/subject/external_ref/id/value")), rows);
 		}
 		else
 		{

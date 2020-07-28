@@ -72,8 +72,8 @@ public class ResultSetTranslatorToTtpTestRbfOnly
 		List<List<RowElement>> rows = IntStream.range(0, 15)
 				.mapToObj(id -> Collections.<RowElement> singletonList(new StringRowElement(String.valueOf(id))))
 				.collect(Collectors.toList());
-		ResultSet resultSet = new ResultSet(null, null, "SELECT e/ehr_id/value as EHRID FROM EHR e",
-				Collections.singleton(new Column("EHRID", "/ehr_id/value")), rows);
+		ResultSet resultSet = new ResultSet(null, null, "SELECT e/ehr_status/subject/external_ref/id/value as EHRID FROM EHR e",
+				Collections.singleton(new Column("EHRID", "/ehr_status/subject/external_ref/id/value")), rows);
 
 		logger.debug("ResultSet {}", openEhrObjectMapper.writer(prettyPrinter).writeValueAsString(resultSet));
 		ResultSet translated = translator.translate(resultSet);
