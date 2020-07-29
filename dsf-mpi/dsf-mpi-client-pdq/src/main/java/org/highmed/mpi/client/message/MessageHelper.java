@@ -79,12 +79,12 @@ public class MessageHelper
 		String pidAssigningAuthorityNamespaceId, String pidAssigningAuthorityUniversalId) throws Exception
 	{
 		ERR error = patientDemographicsQueryResult.getERR();
+		String errorCode = error.getHL7ErrorCode().getIdentifier().getValue();
 
-		if (error.getHL7ErrorCode().getIdentifier().getValue() != null)
+		if (errorCode!= null)
 		{
-			String errorMessage = error.getUserMessage().getValueOrEmpty();
-			logger.warn("Could not retrieve IDAT, error in Patient Demographics Query result='{}'", errorMessage);
-			throw new RuntimeException("Could not retrieve IDAT, error in Patient Demographics Query result:" + errorMessage);
+			logger.warn("Could not retrieve IDAT, error in Patient Demographics Query result, error-code='{}'", errorCode);
+			throw new RuntimeException("Could not retrieve IDAT, error in Patient Demographics Query result, error-code: " + errorCode);
 		}
 
 		List<RSP_K21_QUERY_RESPONSE> idats = patientDemographicsQueryResult.getQUERY_RESPONSEAll();

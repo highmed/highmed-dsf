@@ -68,7 +68,8 @@ public class CustomSocketFactory extends StandardSocketFactory
 		{
 			KeyStore keystore = customSslFactory.getKeystoreFromP12File(keystorePath, keystorePassword);
 			KeyManagerFactory keyManagerFactory = customSslFactory.getKeyManagerFactory(keystore, keystorePassword);
-			TrustManagerFactory trustManagerFactory = customSslFactory.getTrustManagerFactory(null);
+			KeyStore truststore = customSslFactory.extractTruststore(keystore);
+			TrustManagerFactory trustManagerFactory = customSslFactory.getTrustManagerFactory(truststore);
 
 			return customSslFactory.getTLSContext(keyManagerFactory, trustManagerFactory);
 		}
