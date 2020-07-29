@@ -74,21 +74,21 @@ public class CustomSslFactory
 		return truststore;
 	}
 
-	private List<X509Certificate> getCaCertificates(KeyStore s) throws KeyStoreException
+	private List<X509Certificate> getCaCertificates(KeyStore keyStore) throws KeyStoreException
 	{
 		List<X509Certificate> caCertificates = new ArrayList<>();
-		for (Enumeration<String> e = s.aliases(); e.hasMoreElements(); )
+		for (Enumeration<String> aliases = keyStore.aliases(); aliases.hasMoreElements(); )
 		{
-			String alias = e.nextElement();
-			Certificate[] chain = s.getCertificateChain(alias);
+			String alias = aliases.nextElement();
+			Certificate[] chain = keyStore.getCertificateChain(alias);
 			if (chain == null)
-				chain = new Certificate[] { s.getCertificate(alias) };
+				chain = new Certificate[] { keyStore.getCertificate(alias) };
 
-			for (Certificate c : chain)
+			for (Certificate certificate : chain)
 			{
-				if (c instanceof X509Certificate)
+				if (certificate instanceof X509Certificate)
 				{
-					X509Certificate x = (X509Certificate) c;
+					X509Certificate x = (X509Certificate) certificate;
 					if (x.getBasicConstraints() >= 0)
 						caCertificates.add(x);
 				}
