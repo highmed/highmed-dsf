@@ -12,7 +12,7 @@
    "columns":[
       {
          "name":"#0",
-         "path":"/ehr_status/subject/external_ref/id/value"
+         "path":"e/ehr_status/subject/external_ref/id/value"
       },
       {
          "name":"startTime",

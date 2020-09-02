@@ -24,7 +24,7 @@
     },
     {
       "name": "EHRID",
-      "path": "/ehr_status/subject/external_ref/id/value"
+      "path": "e/ehr_status/subject/external_ref/id/value"
     }
   ],
   "rows": [

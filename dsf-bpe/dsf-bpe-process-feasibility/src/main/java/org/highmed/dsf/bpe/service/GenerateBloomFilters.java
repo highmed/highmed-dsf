@@ -46,16 +46,18 @@ public class GenerateBloomFilters extends AbstractServiceDelegate
 	private static final FieldBloomFilterLengths FBF_LENGTHS = new FieldBloomFilterLengths(500, 500, 250, 50, 500, 250,
 			500, 500, 500);
 
+	private final String ehrIdColumnPath;
 	private final MasterPatientIndexClient masterPatientIndexClient;
 	private final ObjectMapper openEhrObjectMapper;
 	private final BouncyCastleProvider bouncyCastleProvider;
 
 	public GenerateBloomFilters(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
-			MasterPatientIndexClient masterPatientIndexClient, ObjectMapper openEhrObjectMapper,
+			String ehrIdColumnPath, MasterPatientIndexClient masterPatientIndexClient, ObjectMapper openEhrObjectMapper,
 			BouncyCastleProvider bouncyCastleProvider)
 	{
 		super(clientProvider, taskHelper);
 
+		this.ehrIdColumnPath = ehrIdColumnPath;
 		this.masterPatientIndexClient = masterPatientIndexClient;
 		this.openEhrObjectMapper = openEhrObjectMapper;
 		this.bouncyCastleProvider = bouncyCastleProvider;
@@ -66,6 +68,7 @@ public class GenerateBloomFilters extends AbstractServiceDelegate
 	{
 		super.afterPropertiesSet();
 
+		Objects.requireNonNull(ehrIdColumnPath, "ehrIdColumnPath");
 		Objects.requireNonNull(masterPatientIndexClient, "masterPatientIndexClient");
 		Objects.requireNonNull(openEhrObjectMapper, "openEhrObjectMapper");
 		Objects.requireNonNull(bouncyCastleProvider, "bouncyCastleProvider");
@@ -104,7 +107,7 @@ public class GenerateBloomFilters extends AbstractServiceDelegate
 
 	protected ResultSetTranslatorToTtpRbfOnly createResultSetTranslator(BloomFilterConfig bloomFilterConfig)
 	{
-		return new ResultSetTranslatorToTtpRbfOnlyImpl(
+		return new ResultSetTranslatorToTtpRbfOnlyImpl(ehrIdColumnPath,
 				createRecordBloomFilterGenerator(bloomFilterConfig.getPermutationSeed(),
 						bloomFilterConfig.getHmacSha2Key(), bloomFilterConfig.getHmacSha3Key()),
 				masterPatientIndexClient);

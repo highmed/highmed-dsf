@@ -34,10 +34,10 @@ import org.highmed.mpi.client.MasterPatientIndexClient;
 import org.highmed.mpi.client.MasterPatientIndexClientFactory;
 import org.highmed.openehr.client.OpenEhrClient;
 import org.highmed.openehr.client.OpenEhrClientFactory;
-import org.highmed.openehr.json.OpenEhrObjectMapperFactory;
 import org.highmed.pseudonymization.translation.ResultSetTranslatorFromMedicRbfOnly;
 import org.highmed.pseudonymization.translation.ResultSetTranslatorFromMedicRbfOnlyImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -75,6 +75,9 @@ public class FeasibilityConfig
 
 	@Autowired
 	private Environment environment;
+
+	@Value("${org.highmed.dsf.bpe.openehr.subject_external_id.path:e/ehr_status/subject/external_ref/id/value}")
+	private String ehrIdColumnPath;
 
 	@Bean
 	public ProcessEnginePlugin feasibilityPlugin()
@@ -141,14 +144,13 @@ public class FeasibilityConfig
 	@Bean
 	public ModifyQueries modifyQueries()
 	{
-		return new ModifyQueries(fhirClientProvider, taskHelper);
+		return new ModifyQueries(ehrIdColumnPath, fhirClientProvider, taskHelper);
 	}
 
 	@Bean
 	public ExecuteQueries executeQueries()
 	{
-		return new ExecuteQueries(fhirClientProvider, openEhrClient(), taskHelper,
-				organizationProvider);
+		return new ExecuteQueries(fhirClientProvider, openEhrClient(), taskHelper, organizationProvider);
 	}
 
 	@Bean
@@ -178,8 +180,8 @@ public class FeasibilityConfig
 	@Bean
 	public GenerateBloomFilters generateBloomFilters()
 	{
-		return new GenerateBloomFilters(fhirClientProvider, taskHelper, masterPatientIndexClient(), objectMapper,
-				bouncyCastleProvider());
+		return new GenerateBloomFilters(fhirClientProvider, taskHelper, ehrIdColumnPath,
+				masterPatientIndexClient(), objectMapper, bouncyCastleProvider());
 	}
 
 	@Bean

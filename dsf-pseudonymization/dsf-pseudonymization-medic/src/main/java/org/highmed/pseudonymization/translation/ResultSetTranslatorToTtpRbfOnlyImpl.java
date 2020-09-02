@@ -27,13 +27,16 @@ public class ResultSetTranslatorToTtpRbfOnlyImpl extends AbstractResultSetTransl
 {
 	private static final Logger logger = LoggerFactory.getLogger(ResultSetTranslatorToTtpRbfOnlyImpl.class);
 
+	private final String ehrIdColumnPath;
+
 	private final RecordBloomFilterGenerator recordBloomFilterGenerator;
 	private final MasterPatientIndexClient masterPatientIndexClient;
 
-	public ResultSetTranslatorToTtpRbfOnlyImpl(
+	public ResultSetTranslatorToTtpRbfOnlyImpl(String ehrIdColumnPath,
 			RecordBloomFilterGenerator recordBloomFilterGenerator,
 			MasterPatientIndexClient masterPatientIndexClient)
 	{
+		this.ehrIdColumnPath = Objects.requireNonNull(ehrIdColumnPath, "ehrIdColumnPath");
 		this.masterPatientIndexClient = Objects.requireNonNull(masterPatientIndexClient, "masterPatientIndexClient");
 		this.recordBloomFilterGenerator = Objects.requireNonNull(recordBloomFilterGenerator,
 				"recordBloomFilterGenerator");
@@ -46,7 +49,7 @@ public class ResultSetTranslatorToTtpRbfOnlyImpl extends AbstractResultSetTransl
 
 		if (ehrIdColumnIndex < 0)
 			throw new IllegalArgumentException("Missing ehr id column with name '" + Constants.EHRID_COLUMN_NAME
-					+ "' and path '" + Constants.EHRID_COLUMN_PATH + "'");
+					+ "' and path '" + ehrIdColumnPath + "'");
 
 		Meta meta = copyMeta(resultSet.getMeta());
 		List<Column> columns = translageColumns(resultSet.getColumns());
@@ -67,7 +70,7 @@ public class ResultSetTranslatorToTtpRbfOnlyImpl extends AbstractResultSetTransl
 	private Predicate<? super Column> isEhrIdColumn()
 	{
 		return column -> Constants.EHRID_COLUMN_NAME.equals(column.getName())
-				&& Constants.EHRID_COLUMN_PATH.equals(column.getPath());
+				&& ehrIdColumnPath.equals(column.getPath());
 	}
 
 	private List<Column> translageColumns(List<Column> columns)

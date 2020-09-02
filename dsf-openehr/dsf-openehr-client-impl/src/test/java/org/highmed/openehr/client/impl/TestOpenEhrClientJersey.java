@@ -22,7 +22,6 @@ public class TestOpenEhrClientJersey
 
 		String query = "SELECT e FROM EHR e";
 		ResultSet resultSet = client.query(query, null);
-		// DvCount result = (DvCount) resultSet.getRow(0).get(0);
 		JsonNodeRowElement result = (JsonNodeRowElement) resultSet.getRow(0).get(0);
 		System.out.println(result.getValue());
 	}

@@ -3,6 +3,7 @@ package org.highmed.dsf.bpe.service;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
@@ -12,9 +13,12 @@ import org.highmed.dsf.fhir.task.TaskHelper;
 
 public class ModifyQueries extends AbstractServiceDelegate
 {
-	public ModifyQueries(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
+	private final String ehrIdColumnPath;
+
+	public ModifyQueries(String ehrIdColumnPath, FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
 	{
 		super(clientProvider, taskHelper);
+		this.ehrIdColumnPath = Objects.requireNonNull(ehrIdColumnPath);
 	}
 
 	@Override
@@ -51,6 +55,6 @@ public class ModifyQueries extends AbstractServiceDelegate
 	protected String replaceSelectCountWithSelectMpiId(String value)
 	{
 		// TODO Implement correct replacement for default id query
-		return value.replace("select count(e)", "select e/ehr_status/subject/external_ref/id/value as EHRID");
+		return value.replace("select count(e)", "select "  + ehrIdColumnPath + " as EHRID");
 	}
 }

@@ -52,7 +52,7 @@ public class RequestLocalServicesIntegrationTestExampleStarter
 
 		try
 		{
-			Task task = createTask(true, false);
+			Task task = createTask(true, true);
 			client.withMinimalReturn().create(task);
 		}
 		catch (WebApplicationException e)

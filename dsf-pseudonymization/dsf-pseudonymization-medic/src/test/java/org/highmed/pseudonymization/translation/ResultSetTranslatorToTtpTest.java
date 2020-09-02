@@ -52,16 +52,18 @@ public class ResultSetTranslatorToTtpTest
 				recordBloomFilterLength, permutationSeed, weights, lengths,
 				() -> new BloomFilterGenerator.HmacMd5HmacSha1BiGramHasher(hashKey1, hashKey2));
 
-		Map<String, Idat> idats = Map.of("ehrId1", new IdatTestImpl("medicId1", "firstName1", "lastName1", "birthday1",
-				"sex1", "street1", "zipCode1", "city1", "country1", "insuranceNumber1"));
+		Map<String, Idat> idats = Map.of("ehrId1",
+				new IdatTestImpl("medicId1", "firstName1", "lastName1", "birthday1", "sex1", "street1", "zipCode1",
+						"city1", "country1", "insuranceNumber1"));
 		MasterPatientIndexClient masterPatientIndexClient = new MasterPatientIndexClientTestImpl(idats);
 		String organizationIdentifier = "org1";
 		SecretKey organizationKey = AesGcmUtil.generateAES256Key();
 		String researchStudyIdentifier = "researchStudy1";
 		SecretKey researchStudyKey = AesGcmUtil.generateAES256Key();
 
-		ResultSetTranslatorToTtpImpl translator = new ResultSetTranslatorToTtpImpl(organizationIdentifier, organizationKey,
-				researchStudyIdentifier, researchStudyKey, recordBloomFilterGenerator, masterPatientIndexClient);
+		ResultSetTranslatorToTtpImpl translator = new ResultSetTranslatorToTtpImpl(organizationIdentifier,
+				organizationKey, researchStudyIdentifier, researchStudyKey,
+				"e/ehr_status/subject/external_ref/id/value", recordBloomFilterGenerator, masterPatientIndexClient);
 
 		ObjectMapper openEhrObjectMapper = OpenEhrObjectMapperFactory.createObjectMapper();
 		ResultSet resultSet = openEhrObjectMapper
