@@ -76,7 +76,7 @@ public class FeasibilityConfig
 	@Autowired
 	private Environment environment;
 
-	@Value("${org.highmed.dsf.bpe.openehr.subject_external_id.path:e/ehr_status/subject/external_ref/id/value}")
+	@Value("${org.highmed.dsf.bpe.openehr.subject_external_id.path:/ehr_status/subject/external_ref/id/value}")
 	private String ehrIdColumnPath;
 
 	@Bean

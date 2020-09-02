@@ -62,7 +62,7 @@ public class ResultSetTranslatorToTtpTestRbfOnly
 
 		MasterPatientIndexClient masterPatientIndexClient = new MasterPatientIndexClientTestImpl(idats);
 
-		ResultSetTranslatorToTtpRbfOnlyImpl translator = new ResultSetTranslatorToTtpRbfOnlyImpl("e/ehr_status/subject/external_ref/id/value", recordBloomFilterGenerator,
+		ResultSetTranslatorToTtpRbfOnlyImpl translator = new ResultSetTranslatorToTtpRbfOnlyImpl("/ehr_status/subject/external_ref/id/value", recordBloomFilterGenerator,
 				masterPatientIndexClient);
 
 		ObjectMapper openEhrObjectMapper = OpenEhrObjectMapperFactory.createObjectMapper();
@@ -73,7 +73,7 @@ public class ResultSetTranslatorToTtpTestRbfOnly
 				.mapToObj(id -> Collections.<RowElement> singletonList(new StringRowElement(String.valueOf(id))))
 				.collect(Collectors.toList());
 		ResultSet resultSet = new ResultSet(null, null, "SELECT e/ehr_status/subject/external_ref/id/value as EHRID FROM EHR e",
-				Collections.singleton(new Column("EHRID", "e/ehr_status/subject/external_ref/id/value")), rows);
+				Collections.singleton(new Column("EHRID", "/ehr_status/subject/external_ref/id/value")), rows);
 
 		logger.debug("ResultSet {}", openEhrObjectMapper.writer(prettyPrinter).writeValueAsString(resultSet));
 		ResultSet translated = translator.translate(resultSet);

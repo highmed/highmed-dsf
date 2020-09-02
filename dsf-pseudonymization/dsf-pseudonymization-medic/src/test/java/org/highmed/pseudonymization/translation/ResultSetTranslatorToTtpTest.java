@@ -63,7 +63,7 @@ public class ResultSetTranslatorToTtpTest
 
 		ResultSetTranslatorToTtpImpl translator = new ResultSetTranslatorToTtpImpl(organizationIdentifier,
 				organizationKey, researchStudyIdentifier, researchStudyKey,
-				"e/ehr_status/subject/external_ref/id/value", recordBloomFilterGenerator, masterPatientIndexClient);
+				"/ehr_status/subject/external_ref/id/value", recordBloomFilterGenerator, masterPatientIndexClient);
 
 		ObjectMapper openEhrObjectMapper = OpenEhrObjectMapperFactory.createObjectMapper();
 		ResultSet resultSet = openEhrObjectMapper
