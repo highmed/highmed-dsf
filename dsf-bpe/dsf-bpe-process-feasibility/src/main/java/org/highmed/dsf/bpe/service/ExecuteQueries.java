@@ -1,14 +1,11 @@
 package org.highmed.dsf.bpe.service;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.feel.syntaxtree.In;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.bpe.variables.ConstantsFeasibility;
 import org.highmed.dsf.bpe.variables.FeasibilityQueryResult;
@@ -18,10 +15,7 @@ import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.openehr.client.OpenEhrClient;
-import org.highmed.openehr.model.datatypes.StringRowElement;
-import org.highmed.openehr.model.structure.Column;
 import org.highmed.openehr.model.structure.ResultSet;
-import org.highmed.openehr.model.structure.RowElement;
 import org.springframework.beans.factory.InitializingBean;
 
 public class ExecuteQueries extends AbstractServiceDelegate implements InitializingBean
