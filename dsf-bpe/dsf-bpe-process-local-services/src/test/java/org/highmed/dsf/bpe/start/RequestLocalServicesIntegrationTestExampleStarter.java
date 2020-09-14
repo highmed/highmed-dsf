@@ -14,8 +14,6 @@ import javax.crypto.KeyGenerator;
 import javax.ws.rs.WebApplicationException;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.highmed.dsf.bpe.ConstantsBase;
-import org.highmed.dsf.bpe.variables.ConstantsFeasibility;
 import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.highmed.dsf.fhir.service.ReferenceCleanerImpl;
 import org.highmed.dsf.fhir.service.ReferenceExtractorImpl;
