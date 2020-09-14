@@ -11,16 +11,11 @@ import org.springframework.context.annotation.Configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import ca.uhn.fhir.context.FhirContext;
-
 @Configuration
 public class FeasibilitySerializerConfig
 {
 	@Autowired
-	FhirContext fhirContext;
-
-	@Autowired
-	public ObjectMapper objectMapper;
+	private ObjectMapper objectMapper;
 
 	@Bean
 	public FeasibilityQueryResultSerializer feasibilityQueryResultSerializer()
