@@ -1,6 +1,5 @@
 package org.highmed.dsf.bpe.spring.config;
 
-import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
 import org.highmed.dsf.fhir.variables.FhirResourceJacksonDeserializer;
 import org.highmed.dsf.fhir.variables.FhirResourceJacksonSerializer;
 import org.highmed.dsf.fhir.variables.FhirResourceSerializer;
@@ -9,7 +8,6 @@ import org.highmed.dsf.fhir.variables.MultiInstanceTargetSerializer;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargetsSerializer;
 import org.highmed.dsf.fhir.variables.OutputSerializer;
 import org.highmed.dsf.fhir.variables.OutputsSerializer;
-import org.highmed.dsf.fhir.variables.SerializerPlugin;
 import org.highmed.openehr.json.OpenEhrObjectMapperFactory;
 import org.hl7.fhir.r4.model.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,13 +78,5 @@ public class SerializerConfig
 	public OutputsSerializer outputsSerializer()
 	{
 		return new OutputsSerializer(objectMapper());
-	}
-
-	@Bean
-	public ProcessEnginePlugin serializerPlugin()
-	{
-		return new SerializerPlugin(fhirResourceSerializer(), fhirResourcesListSerializer(),
-				multiInstanceTargetSerializer(), multiInstanceTargetsSerializer(), outputSerializer(),
-				outputsSerializer());
 	}
 }

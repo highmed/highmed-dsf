@@ -1,7 +1,5 @@
 package org.highmed.dsf.bpe.spring.config;
 
-import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
-import org.highmed.dsf.bpe.plugin.FeasibilitySerializerPlugin;
 import org.highmed.dsf.bpe.variables.BloomFilterConfigSerializer;
 import org.highmed.dsf.bpe.variables.FeasibilityQueryResultSerializer;
 import org.highmed.dsf.bpe.variables.FeasibilityQueryResultsSerializer;
@@ -52,13 +50,5 @@ public class FeasibilitySerializerConfig
 	public BloomFilterConfigSerializer bloomFilterConfigSerializer()
 	{
 		return new BloomFilterConfigSerializer(objectMapper);
-	}
-
-	@Bean
-	public ProcessEnginePlugin feasibilitySerializerPlugin()
-	{
-		return new FeasibilitySerializerPlugin(feasibilityQueryResultSerializer(), feasibilityQueryResultsSerializer(),
-				finalFeasibilityQueryResultSerializer(), finalFeasibilityQueryResultsSerializer(),
-				bloomFilterConfigSerializer());
 	}
 }
