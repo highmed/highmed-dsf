@@ -10,15 +10,23 @@ import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.bpe.variables.ConstantsFeasibility;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
+import org.springframework.beans.factory.InitializingBean;
 
-public class ModifyQueries extends AbstractServiceDelegate
+public class ModifyQueries extends AbstractServiceDelegate implements InitializingBean
 {
 	private final String ehrIdColumnPath;
 
-	public ModifyQueries(String ehrIdColumnPath, FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
+	public ModifyQueries(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper, String ehrIdColumnPath)
 	{
 		super(clientProvider, taskHelper);
-		this.ehrIdColumnPath = Objects.requireNonNull(ehrIdColumnPath);
+		this.ehrIdColumnPath = ehrIdColumnPath;
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception
+	{
+		super.afterPropertiesSet();
+		Objects.requireNonNull(ehrIdColumnPath, "ehrIdColumnPath");
 	}
 
 	@Override

@@ -144,7 +144,7 @@ public class FeasibilityConfig
 	@Bean
 	public ModifyQueries modifyQueries()
 	{
-		return new ModifyQueries(ehrIdColumnPath, fhirClientProvider, taskHelper);
+		return new ModifyQueries(fhirClientProvider, taskHelper, ehrIdColumnPath);
 	}
 
 	@Bean

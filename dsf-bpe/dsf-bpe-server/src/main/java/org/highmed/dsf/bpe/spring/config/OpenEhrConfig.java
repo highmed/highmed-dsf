@@ -28,11 +28,11 @@ public class OpenEhrConfig
 	@Bean
 	public OpenEhrClientFactory openEhrClientFactory()
 	{
-		OpenEhrClientFactory factory = openEhrClientServiceLoader()
-				.getOpenEhrClientFactory(openEhrClientFactoryClass).orElseThrow(() -> new NoSuchElementException(
+		OpenEhrClientFactory factory = openEhrClientServiceLoader().getOpenEhrClientFactory(openEhrClientFactoryClass)
+				.orElseThrow(() -> new NoSuchElementException(
 						"openEhr client factory with classname='" + openEhrClientFactoryClass + "' not found"));
 
-		if(factory instanceof OpenEhrClientStubFactory)
+		if (factory instanceof OpenEhrClientStubFactory)
 			logger.warn("Using {} as openEhr client factory", factory.getClass().getName());
 		else
 			logger.info("Using {} as openEhr client factory", factory.getClass().getName());
