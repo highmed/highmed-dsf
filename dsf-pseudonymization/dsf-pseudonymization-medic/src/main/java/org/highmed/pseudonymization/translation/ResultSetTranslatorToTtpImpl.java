@@ -47,9 +47,9 @@ public class ResultSetTranslatorToTtpImpl extends AbstractResultSetTranslator im
 		this.researchStudyKey = Objects.requireNonNull(researchStudyKey, "researchStudyKey");
 		this.ehrIdColumnPath = Objects.requireNonNull(ehrIdColumnPath, "ehrIdColumnPath");
 
-		this.masterPatientIndexClient = Objects.requireNonNull(masterPatientIndexClient, "masterPatientIndexClient");
 		this.recordBloomFilterGenerator = Objects.requireNonNull(recordBloomFilterGenerator,
 				"recordBloomFilterGenerator");
+		this.masterPatientIndexClient = Objects.requireNonNull(masterPatientIndexClient, "masterPatientIndexClient");
 	}
 
 	@Override

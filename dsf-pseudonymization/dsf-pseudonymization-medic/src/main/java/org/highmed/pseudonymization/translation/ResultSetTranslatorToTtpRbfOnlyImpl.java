@@ -37,9 +37,9 @@ public class ResultSetTranslatorToTtpRbfOnlyImpl extends AbstractResultSetTransl
 			MasterPatientIndexClient masterPatientIndexClient)
 	{
 		this.ehrIdColumnPath = Objects.requireNonNull(ehrIdColumnPath, "ehrIdColumnPath");
-		this.masterPatientIndexClient = Objects.requireNonNull(masterPatientIndexClient, "masterPatientIndexClient");
 		this.recordBloomFilterGenerator = Objects.requireNonNull(recordBloomFilterGenerator,
 				"recordBloomFilterGenerator");
+		this.masterPatientIndexClient = Objects.requireNonNull(masterPatientIndexClient, "masterPatientIndexClient");
 	}
 
 	@Override
