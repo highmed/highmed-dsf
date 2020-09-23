@@ -3,16 +3,19 @@ package org.highmed.mpi.client.security;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Path;
 import java.security.KeyStore;
 
-import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.hl7v2.util.StandardSocketFactory;
+
+import de.rwh.utils.crypto.CertificateHelper;
+import de.rwh.utils.crypto.context.SSLContextFactory;
+import de.rwh.utils.crypto.io.CertificateReader;
 
 public class CustomSocketFactory extends StandardSocketFactory
 {
@@ -21,19 +24,14 @@ public class CustomSocketFactory extends StandardSocketFactory
 	private final String keystorePath;
 	private final String keystorePassword;
 
-	private final CustomSslFactory customSslFactory;
-
 	/**
 	 * @param keystorePath     the path to the .p12 file containing the client certificate, not <code>null</code>
 	 * @param keystorePassword the password of the .p12 file containing the client certificate, not <code>null</code>
-	 * @param customSslFactory the {@link CustomSslFactory} to create the {@link SSLContext} containing
-	 *                         the client certificate provided in the .p12 file, not <code>null</code>
 	 */
-	public CustomSocketFactory(String keystorePath, String keystorePassword, CustomSslFactory customSslFactory)
+	public CustomSocketFactory(String keystorePath, String keystorePassword)
 	{
 		this.keystorePath = keystorePath;
 		this.keystorePassword = keystorePassword;
-		this.customSslFactory = customSslFactory;
 	}
 
 	@Override
@@ -66,12 +64,9 @@ public class CustomSocketFactory extends StandardSocketFactory
 	{
 		try
 		{
-			KeyStore keystore = customSslFactory.getKeystoreFromP12File(keystorePath, keystorePassword);
-			KeyManagerFactory keyManagerFactory = customSslFactory.getKeyManagerFactory(keystore, keystorePassword);
-			KeyStore truststore = customSslFactory.extractTruststore(keystore);
-			TrustManagerFactory trustManagerFactory = customSslFactory.getTrustManagerFactory(truststore);
-
-			return customSslFactory.getTLSContext(keyManagerFactory, trustManagerFactory);
+			KeyStore keystore = CertificateReader.fromPkcs12(Path.of(keystorePath), keystorePassword.toCharArray());
+			KeyStore truststore = CertificateHelper.extractTrust(keystore);
+			return new SSLContextFactory().createSSLContext(truststore, keystore, keystorePassword.toCharArray());
 		}
 		catch (Exception exception)
 		{
