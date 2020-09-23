@@ -53,9 +53,10 @@ public class MasterPatientIndexClientPdq extends AbstractHl7v2Client implements 
 	@Override
 	public Idat fetchIdat(String ehrId) throws IdatNotFoundException
 	{
-		List<QueryParameter> searchParameters = List.of(new QueryParameter("@PID.3.1", ehrId),
-						new QueryParameter("@PID.3.4.1", pidAssigningAuthorityNamespaceId),
-						new QueryParameter("@PID.3.4.2", pidAssigningAuthorityUniversalId));
+		List<QueryParameter> searchParameters = List.of(
+				QueryParameter.createQueryParameterForQpd3("@PID.3.1", ehrId),
+				QueryParameter.createQueryParameterForQpd3("@PID.3.4.1", pidAssigningAuthorityNamespaceId),
+				QueryParameter.createQueryParameterForQpd3("@PID.3.4.2", pidAssigningAuthorityUniversalId));
 
 		try
 		{
