@@ -1,6 +1,3 @@
 - .rsync-filter
-- app/conf/.gitignore
 - app/last_event/README.md
 - app/log/README.md
-- app/plugin/.gitignore
-- proxy/ssl/.gitignore

@@ -1,6 +1,4 @@
 .dockerignore
-.gitignore
 Dockerfile
 conf/README.md
-lib/.gitignore
 log/README.md
