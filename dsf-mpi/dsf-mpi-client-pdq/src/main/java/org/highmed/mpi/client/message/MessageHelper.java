@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.hl7v2.HL7Exception;
-
 import ca.uhn.hl7v2.model.v25.datatype.CX;
 import ca.uhn.hl7v2.model.v25.datatype.DTM;
 import ca.uhn.hl7v2.model.v25.datatype.HD;
@@ -32,7 +31,8 @@ public class MessageHelper
 	private static final Logger logger = LoggerFactory.getLogger(MessageHelper.class);
 
 	public QBP_Q21 createPatientDemographicsQuery(String senderApplication, String senderFacility,
-		String receiverApplication, String receiverFacility, List<QueryParameter> searchParameters) throws HL7Exception
+			String receiverApplication, String receiverFacility, List<QueryParameter> searchParameters)
+			throws HL7Exception
 	{
 		QBP_Q21 qbp_q21 = new QBP_Q21();
 
@@ -76,15 +76,17 @@ public class MessageHelper
 	}
 
 	public Idat extractPatientDemographics(RSP_K21 patientDemographicsQueryResult,
-		String pidAssigningAuthorityNamespaceId, String pidAssigningAuthorityUniversalId) throws Exception
+			String pidAssigningAuthorityNamespaceId, String pidAssigningAuthorityUniversalId) throws Exception
 	{
 		ERR error = patientDemographicsQueryResult.getERR();
+		String errorCode = error.getHL7ErrorCode().getIdentifier().getValue();
 
-		if (error.getHL7ErrorCode().getIdentifier().getValue() != null)
+		if (errorCode != null)
 		{
-			String errorMessage = error.getUserMessage().getValueOrEmpty();
-			logger.warn("Could not retrieve IDAT, error in Patient Demographics Query result='{}'", errorMessage);
-			throw new RuntimeException("Could not retrieve IDAT, error in Patient Demographics Query result:" + errorMessage);
+			logger.warn("Could not retrieve IDAT, error in Patient Demographics Query result, error-code='{}'",
+					errorCode);
+			throw new RuntimeException(
+					"Could not retrieve IDAT, error in Patient Demographics Query result, error-code: " + errorCode);
 		}
 
 		List<RSP_K21_QUERY_RESPONSE> idats = patientDemographicsQueryResult.getQUERY_RESPONSEAll();
@@ -109,7 +111,7 @@ public class MessageHelper
 			HD assigningAuthority = identifier.getAssigningAuthority();
 
 			if (assigningAuthority.getNamespaceID().getValue().equals(pidAssigningAuthorityNamespaceId)
-				&& assigningAuthority.getUniversalID().getValue().equals(pidAssigningAuthorityUniversalId))
+					&& assigningAuthority.getUniversalID().getValue().equals(pidAssigningAuthorityUniversalId))
 			{
 				patientId = identifier.getIDNumber().getValue();
 			}
@@ -151,6 +153,6 @@ public class MessageHelper
 		String insuranceNumber = pid.getSSNNumberPatient().getValue();
 
 		return new IdatImpl(patientId, firstname, lastname, birthdate, sex, street, zipCode, city, country,
-			insuranceNumber);
+				insuranceNumber);
 	}
 }

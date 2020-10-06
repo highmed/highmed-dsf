@@ -1,7 +1,7 @@
 package org.highmed.dsf.bpe.service;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.Constants;
+import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
@@ -25,7 +25,7 @@ public class LogPong extends AbstractServiceDelegate
 				getClass().getName(), execution.getProcessInstanceId(), execution.getBusinessKey(),
 				execution.getVariables(), execution.getVariablesLocal());
 
-		Task task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
+		Task task = (Task) execution.getVariable(ConstantsBase.VARIABLE_TASK);
 
 		logger.info("PONG from {}", task.getRequester().getIdentifier().getValue());
 	}

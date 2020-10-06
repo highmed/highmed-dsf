@@ -3,7 +3,8 @@ package org.highmed.dsf.bpe.message;
 import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.Constants;
+import org.highmed.dsf.bpe.ConstantsBase;
+import org.highmed.dsf.bpe.variables.ConstantsUpdateResources;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.AbstractTaskMessageSend;
@@ -26,7 +27,7 @@ public class SendRequest extends AbstractTaskMessageSend
 	@Override
 	protected Stream<ParameterComponent> getAdditionalInputParameters(DelegateExecution execution)
 	{
-		String bundleId = (String) execution.getVariable(Constants.VARIABLE_BUNDLE_ID);
+		String bundleId = (String) execution.getVariable(ConstantsBase.VARIABLE_BUNDLE_ID);
 		return Stream
 				.of(toInputParameterBundleReference(getFhirWebserviceClientProvider().getLocalBaseUrl(), bundleId));
 	}
@@ -37,8 +38,8 @@ public class SendRequest extends AbstractTaskMessageSend
 			throw new IllegalArgumentException("bundleId null or empty");
 
 		return new ParameterComponent(
-				new CodeableConcept(new Coding(Constants.CODESYSTEM_HIGHMED_UPDATE_RESOURCE,
-						Constants.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE, null)),
+				new CodeableConcept(new Coding(ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE,
+						ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE, null)),
 				new Reference().setReference(localBaseUrl + (localBaseUrl.endsWith("/") ? "" : "/") + bundleId));
 	}
 }

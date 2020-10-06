@@ -30,12 +30,14 @@ import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.group.GroupHelper;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.openehr.client.OpenEhrWebserviceClientProvider;
 import org.highmed.mpi.client.MasterPatientIndexClient;
 import org.highmed.mpi.client.MasterPatientIndexClientFactory;
+import org.highmed.openehr.client.OpenEhrClient;
+import org.highmed.openehr.client.OpenEhrClientFactory;
 import org.highmed.pseudonymization.translation.ResultSetTranslatorFromMedicRbfOnly;
 import org.highmed.pseudonymization.translation.ResultSetTranslatorFromMedicRbfOnlyImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -51,10 +53,10 @@ public class FeasibilityConfig
 	private FhirWebserviceClientProvider fhirClientProvider;
 
 	@Autowired
-	private OpenEhrWebserviceClientProvider openehrClientProvider;
+	private MasterPatientIndexClientFactory masterPatientIndexClientFactory;
 
 	@Autowired
-	private MasterPatientIndexClientFactory masterPatientIndexClientFactory;
+	private OpenEhrClientFactory openEhrClientFactory;
 
 	@Autowired
 	private OrganizationProvider organizationProvider;
@@ -73,6 +75,9 @@ public class FeasibilityConfig
 
 	@Autowired
 	private Environment environment;
+
+	@Value("${org.highmed.dsf.bpe.openehr.subject_external_id.path:/ehr_status/subject/external_ref/id/value}")
+	private String ehrIdColumnPath;
 
 	@Bean
 	public ProcessEnginePlugin feasibilityPlugin()
@@ -139,14 +144,13 @@ public class FeasibilityConfig
 	@Bean
 	public ModifyQueries modifyQueries()
 	{
-		return new ModifyQueries(fhirClientProvider, taskHelper);
+		return new ModifyQueries(fhirClientProvider, taskHelper, ehrIdColumnPath);
 	}
 
 	@Bean
 	public ExecuteQueries executeQueries()
 	{
-		return new ExecuteQueries(fhirClientProvider, openehrClientProvider.getWebserviceClient(), taskHelper,
-				organizationProvider);
+		return new ExecuteQueries(fhirClientProvider, openEhrClient(), taskHelper, organizationProvider);
 	}
 
 	@Bean
@@ -168,10 +172,16 @@ public class FeasibilityConfig
 	}
 
 	@Bean
+	public OpenEhrClient openEhrClient()
+	{
+		return openEhrClientFactory.createClient(environment::getProperty);
+	}
+
+	@Bean
 	public GenerateBloomFilters generateBloomFilters()
 	{
-		return new GenerateBloomFilters(fhirClientProvider, taskHelper, masterPatientIndexClient(), objectMapper,
-				bouncyCastleProvider());
+		return new GenerateBloomFilters(fhirClientProvider, taskHelper, ehrIdColumnPath,
+				masterPatientIndexClient(), objectMapper, bouncyCastleProvider());
 	}
 
 	@Bean

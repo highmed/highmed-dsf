@@ -1,42 +1,42 @@
 package org.highmed.dsf.bpe.spring.config;
 
-import org.highmed.dsf.openehr.client.OpenEhrClientProviderImpl;
-import org.highmed.dsf.openehr.client.OpenEhrWebserviceClientProvider;
-import org.highmed.openehr.json.OpenEhrObjectMapperFactory;
+import java.util.NoSuchElementException;
+
+import org.highmed.openehr.client.OpenEhrClientFactory;
+import org.highmed.openehr.client.OpenEhrClientServiceLoader;
+import org.highmed.openehr.client.stub.OpenEhrClientStubFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 @Configuration
 public class OpenEhrConfig
 {
-	@Value("${org.highmed.dsf.bpe.openehr.webservice.baseUrl}")
-	private String baseUrl;
+	private static final Logger logger = LoggerFactory.getLogger(OpenEhrConfig.class);
 
-	@Value("${org.highmed.dsf.bpe.openehr.webservice.basicAuthUsername}")
-	private String basicAuthUsername;
-
-	@Value("${org.highmed.dsf.bpe.openehr.webservice.basicAuthPassword}")
-	private String basicAuthPassword;
-
-	@Value("${org.highmed.dsf.bpe.openehr.webservice.readTimeout}")
-	private int readTimeout;
-
-	@Value("${org.highmed.dsf.bpe.openehr.webservice.connectionTimeout}")
-	private int connectTimeout;
+	@Value("${org.highmed.dsf.bpe.openehr.webservice.factory.class:org.highmed.openehr.client.stub.OpenEhrClientStubFactory}")
+	private String openEhrClientFactoryClass;
 
 	@Bean
-	public ObjectMapper openEhrObjectMapper()
+	public OpenEhrClientServiceLoader openEhrClientServiceLoader()
 	{
-		return OpenEhrObjectMapperFactory.createObjectMapper();
+		return new OpenEhrClientServiceLoader();
 	}
 
 	@Bean
-	public OpenEhrWebserviceClientProvider webserviceClientProvider()
+	public OpenEhrClientFactory openEhrClientFactory()
 	{
-		return new OpenEhrClientProviderImpl(baseUrl, basicAuthUsername, basicAuthPassword, connectTimeout, readTimeout,
-				openEhrObjectMapper());
+		OpenEhrClientFactory factory = openEhrClientServiceLoader().getOpenEhrClientFactory(openEhrClientFactoryClass)
+				.orElseThrow(() -> new NoSuchElementException(
+						"openEhr client factory with classname='" + openEhrClientFactoryClass + "' not found"));
+
+		if (factory instanceof OpenEhrClientStubFactory)
+			logger.warn("Using {} as openEhr client factory", factory.getClass().getName());
+		else
+			logger.info("Using {} as openEhr client factory", factory.getClass().getName());
+
+		return factory;
 	}
 }

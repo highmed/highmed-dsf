@@ -8,11 +8,11 @@
       "_executed_aql":"SELECT e FROM EHR(e)"
    },
    "name":"<the name/identifier of the stored query that was executed>",
-   "q":"select e/ehr_id/value, c/context/start_time/value as startTime,  c/uid/value as cid, c/name from EHR e contains  Composition c limit 2",
+   "q":"select e/ehr_status/subject/external_ref/id/value, c/context/start_time/value as startTime,  c/uid/value as cid, c/name from EHR e contains  Composition c limit 2",
    "columns":[
       {
          "name":"#0",
-         "path":"/ehr_id/value"
+         "path":"/ehr_status/subject/external_ref/id/value"
       },
       {
          "name":"startTime",
