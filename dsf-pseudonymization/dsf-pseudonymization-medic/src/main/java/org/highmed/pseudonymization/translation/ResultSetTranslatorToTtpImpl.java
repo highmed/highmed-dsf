@@ -32,22 +32,24 @@ public class ResultSetTranslatorToTtpImpl extends AbstractResultSetTranslator im
 	private final SecretKey organizationKey;
 	private final String researchStudyIdentifier;
 	private final SecretKey researchStudyKey;
+	private final String ehrIdColumnPath;
 
 	private final RecordBloomFilterGenerator recordBloomFilterGenerator;
 	private final MasterPatientIndexClient masterPatientIndexClient;
 
 	public ResultSetTranslatorToTtpImpl(String organizationIdentifier, SecretKey organizationKey,
-			String researchStudyIdentifier, SecretKey researchStudyKey,
+			String researchStudyIdentifier, SecretKey researchStudyKey, String ehrIdColumnPath,
 			RecordBloomFilterGenerator recordBloomFilterGenerator, MasterPatientIndexClient masterPatientIndexClient)
 	{
 		this.organizationIdentifier = Objects.requireNonNull(organizationIdentifier, "organizationIdentifier");
 		this.organizationKey = Objects.requireNonNull(organizationKey, "organizationKey");
 		this.researchStudyIdentifier = Objects.requireNonNull(researchStudyIdentifier, "researchStudyIdentifier");
 		this.researchStudyKey = Objects.requireNonNull(researchStudyKey, "researchStudyKey");
+		this.ehrIdColumnPath = Objects.requireNonNull(ehrIdColumnPath, "ehrIdColumnPath");
 
-		this.masterPatientIndexClient = Objects.requireNonNull(masterPatientIndexClient, "masterPatientIndexClient");
 		this.recordBloomFilterGenerator = Objects.requireNonNull(recordBloomFilterGenerator,
 				"recordBloomFilterGenerator");
+		this.masterPatientIndexClient = Objects.requireNonNull(masterPatientIndexClient, "masterPatientIndexClient");
 	}
 
 	@Override
@@ -57,7 +59,7 @@ public class ResultSetTranslatorToTtpImpl extends AbstractResultSetTranslator im
 
 		if (ehrIdColumnIndex < 0)
 			throw new IllegalArgumentException("Missing ehr id column with name '" + Constants.EHRID_COLUMN_NAME
-					+ "' and path '" + Constants.EHRID_COLUMN_PATH + "'");
+					+ "' and path '" + ehrIdColumnPath + "'");
 
 		Meta meta = copyMeta(resultSet.getMeta());
 		List<Column> columns = encodeColumnsWithEhrId(resultSet.getColumns());
@@ -78,7 +80,7 @@ public class ResultSetTranslatorToTtpImpl extends AbstractResultSetTranslator im
 	private Predicate<? super Column> isEhrIdColumn()
 	{
 		return column -> Constants.EHRID_COLUMN_NAME.equals(column.getName())
-				&& Constants.EHRID_COLUMN_PATH.equals(column.getPath());
+				&& ehrIdColumnPath.equals(column.getPath());
 	}
 
 	private List<Column> encodeColumnsWithEhrId(List<Column> columns)

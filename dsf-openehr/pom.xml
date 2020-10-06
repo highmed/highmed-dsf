@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xmlns="http://maven.apache.org/POM/4.0.0"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>dsf-openehr-pom</artifactId>
@@ -14,17 +15,17 @@
 
 	<modules>
 		<module>dsf-openehr-model</module>
-		<module>dsf-openehr-webservice-client</module>
+		<module>dsf-openehr-client</module>
+		<module>dsf-openehr-client-stub</module>
+		<module>dsf-openehr-client-impl</module>
 	</modules>
 
 	<dependencies>
-		<!-- Logging -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 		</dependency>
 
-		<!-- test dependencies -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -41,7 +42,17 @@
 			</dependency>
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
-				<artifactId>dsf-openehr-webservice-client</artifactId>
+				<artifactId>dsf-openehr-client</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-openehr-client-impl</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-openehr-client-stub</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 		</dependencies>

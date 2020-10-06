@@ -3,7 +3,7 @@ package org.highmed.dsf.fhir.group;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.highmed.dsf.bpe.Constants;
+import org.highmed.dsf.bpe.ConstantsBase;
 import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Group;
@@ -18,8 +18,8 @@ public class GroupHelperImpl implements GroupHelper
 	public String extractAqlQuery(Group group)
 	{
 		List<Extension> queries = group.getExtension().stream()
-				.filter(extension -> extension.getUrl().equals(Constants.EXTENSION_QUERY_URI)).filter(extension ->
-						Constants.AQL_QUERY_TYPE.compareTo(((Expression) extension.getValue()).getLanguageElement())
+				.filter(extension -> extension.getUrl().equals(ConstantsBase.EXTENSION_QUERY_URI)).filter(extension ->
+						ConstantsBase.AQL_QUERY_TYPE.compareTo(((Expression) extension.getValue()).getLanguageElement())
 								== 0).collect(Collectors.toList());
 
 		if (queries.size() != 1)

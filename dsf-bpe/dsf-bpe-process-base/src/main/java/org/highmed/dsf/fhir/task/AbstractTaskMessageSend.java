@@ -5,7 +5,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.Constants;
+import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
@@ -55,10 +55,10 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 	@Override
 	public void doExecute(DelegateExecution execution) throws Exception
 	{
-		String processDefinitionKey = (String) execution.getVariable(Constants.VARIABLE_PROCESS_DEFINITION_KEY);
-		String versionTag = (String) execution.getVariable(Constants.VARIABLE_VERSION_TAG);
-		String messageName = (String) execution.getVariable(Constants.VARIABLE_MESSAGE_NAME);
-		String profile = (String) execution.getVariable(Constants.VARIABLE_PROFILE);
+		String processDefinitionKey = (String) execution.getVariable(ConstantsBase.VARIABLE_PROCESS_DEFINITION_KEY);
+		String versionTag = (String) execution.getVariable(ConstantsBase.VARIABLE_VERSION_TAG);
+		String messageName = (String) execution.getVariable(ConstantsBase.VARIABLE_MESSAGE_NAME);
+		String profile = (String) execution.getVariable(ConstantsBase.VARIABLE_PROFILE);
 		String businessKey = execution.getBusinessKey();
 
 		// TODO see Bug https://app.camunda.com/jira/browse/CAM-9444
@@ -81,20 +81,20 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 			logger.warn(errorMessage);
 			logger.debug("Error while sending Task", e);
 
-			Outputs outputs = (Outputs) execution.getVariable(Constants.VARIABLE_PROCESS_OUTPUTS);
+			Outputs outputs = (Outputs) execution.getVariable(ConstantsBase.VARIABLE_PROCESS_OUTPUTS);
 			outputs.addErrorOutput(errorMessage);
 
 			logger.debug("Removing target organization {} with error {} from multi instance target list",
 					target.getTargetOrganizationIdentifierValue(), e.getMessage());
 			MultiInstanceTargets targets = (MultiInstanceTargets) execution
-					.getVariable(Constants.VARIABLE_MULTI_INSTANCE_TARGETS);
+					.getVariable(ConstantsBase.VARIABLE_MULTI_INSTANCE_TARGETS);
 			targets.removeTarget(target);
 		}
 	}
 
 	/**
 	 * Override this method to set a different multiinstance target then the one defined in the process variable
-	 * {@link Constants#VARIABLE_MULTI_INSTANCE_TARGET}
+	 * {@link ConstantsBase#VARIABLE_MULTI_INSTANCE_TARGET}
 	 *
 	 * @param execution
 	 *            the delegate execution of this process instance
@@ -102,7 +102,7 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 	 */
 	protected MultiInstanceTarget getMultiInstanceTarget(DelegateExecution execution)
 	{
-		return (MultiInstanceTarget) execution.getVariable(Constants.VARIABLE_MULTI_INSTANCE_TARGET);
+		return (MultiInstanceTarget) execution.getVariable(ConstantsBase.VARIABLE_MULTI_INSTANCE_TARGET);
 	}
 
 	/**
@@ -137,27 +137,27 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 
 		// http://highmed.org/bpe/Process/processDefinitionKey
 		// http://highmed.org/bpe/Process/processDefinitionKey/versionTag
-		String instantiatesUri = Constants.PROCESS_URI_BASE + processDefinitionKey
+		String instantiatesUri = ConstantsBase.PROCESS_URI_BASE + processDefinitionKey
 				+ (versionTag != null && !versionTag.isEmpty() ? ("/" + versionTag) : "");
 		task.setInstantiatesUri(instantiatesUri);
 
 		ParameterComponent messageNameInput = new ParameterComponent(
-				new CodeableConcept(new Coding(Constants.CODESYSTEM_HIGHMED_BPMN,
-						Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME, null)),
+				new CodeableConcept(new Coding(ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
+						ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME, null)),
 				new StringType(messageName));
 		task.getInput().add(messageNameInput);
 
 		ParameterComponent businessKeyInput = new ParameterComponent(
-				new CodeableConcept(new Coding(Constants.CODESYSTEM_HIGHMED_BPMN,
-						Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY, null)),
+				new CodeableConcept(new Coding(ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
+						ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY, null)),
 				new StringType(businessKey));
 		task.getInput().add(businessKeyInput);
 
 		if (correlationKey != null)
 		{
 			ParameterComponent correlationKeyInput = new ParameterComponent(
-					new CodeableConcept(new Coding(Constants.CODESYSTEM_HIGHMED_BPMN,
-							Constants.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY, null)),
+					new CodeableConcept(new Coding(ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
+							ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY, null)),
 					new StringType(correlationKey));
 			task.getInput().add(correlationKeyInput);
 		}

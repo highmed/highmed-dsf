@@ -48,5 +48,7 @@ public interface TaskHelper
 
 	TaskOutputComponent createOutputUnsignedInt(String system, String code, int value);
 
+	TaskOutputComponent createOutput(String system, String code, Reference reference);
+
 	Task addOutputs(Task task, Outputs outputs);
 }

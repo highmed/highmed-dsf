@@ -3,34 +3,50 @@ package org.highmed.dsf.bpe.service;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
+import org.highmed.dsf.bpe.variables.ConstantsFeasibility;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
+import org.springframework.beans.factory.InitializingBean;
 
-public class ModifyQueries extends AbstractServiceDelegate
+public class ModifyQueries extends AbstractServiceDelegate implements InitializingBean
 {
-	public ModifyQueries(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
+	private final String ehrIdColumnPath;
+
+	public ModifyQueries(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper, String ehrIdColumnPath)
 	{
 		super(clientProvider, taskHelper);
+		this.ehrIdColumnPath = ehrIdColumnPath;
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception
+	{
+		super.afterPropertiesSet();
+		Objects.requireNonNull(ehrIdColumnPath, "ehrIdColumnPath");
 	}
 
 	@Override
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
-		Boolean needsConsentCheck = (Boolean) execution.getVariable(Constants.VARIABLE_NEEDS_CONSENT_CHECK);
-		Boolean needsRecordLinkage = (Boolean) execution.getVariable(Constants.VARIABLE_NEEDS_RECORD_LINKAGE);
+		Boolean needsConsentCheck = (Boolean) execution.getVariable(ConstantsFeasibility.VARIABLE_NEEDS_CONSENT_CHECK);
+		Boolean needsRecordLinkage = (Boolean) execution
+				.getVariable(ConstantsFeasibility.VARIABLE_NEEDS_RECORD_LINKAGE);
 		boolean idQuery = Boolean.TRUE.equals(needsConsentCheck) || Boolean.TRUE.equals(needsRecordLinkage);
 
 		if (idQuery)
 		{
 			// <groupId, query>
 			@SuppressWarnings("unchecked")
-			Map<String, String> queries = (Map<String, String>) execution.getVariable(Constants.VARIABLE_QUERIES);
+			Map<String, String> queries = (Map<String, String>) execution
+					.getVariable(ConstantsFeasibility.VARIABLE_QUERIES);
+
 			Map<String, String> modifiedQueries = modifyQueries(queries);
-			execution.setVariable(Constants.VARIABLE_QUERIES, modifiedQueries);
+
+			execution.setVariable(ConstantsFeasibility.VARIABLE_QUERIES, modifiedQueries);
 		}
 	}
 
@@ -47,6 +63,6 @@ public class ModifyQueries extends AbstractServiceDelegate
 	protected String replaceSelectCountWithSelectMpiId(String value)
 	{
 		// TODO Implement correct replacement for default id query
-		return value.replace("SELECT COUNT(e)", "SELECT e/ehr_id/value as EHRID");
+		return value.replace("select count(e)", "select e"  + ehrIdColumnPath + " as EHRID");
 	}
 }

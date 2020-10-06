@@ -21,6 +21,7 @@
 		<module>dsf-bpe-server</module>
 		<module>dsf-bpe-server-jetty</module>
 		<module>dsf-bpe-webservice-client</module>
+		<module>dsf-bpe-process-local-services</module>
 	</modules>
 
 	<properties>
@@ -78,6 +79,11 @@
 				<artifactId>dsf-bpe-process-feasibility</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-bpe-process-local-services</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 			<!-- provided as jar and injected on startup as plugin
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
@@ -123,17 +129,6 @@
 
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
-				<artifactId>dsf-openehr-model</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.highmed.dsf</groupId>
-				<artifactId>dsf-openehr-webservice-client</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.highmed.dsf</groupId>
 				<artifactId>dsf-tools-db-migration</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -161,12 +156,23 @@
 			</dependency>
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
-				<artifactId>dsf-mpi-client-pdq</artifactId>
+				<artifactId>dsf-mpi-client-stub</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-openehr-model</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
-				<artifactId>dsf-mpi-client-stub</artifactId>
+				<artifactId>dsf-openehr-client</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-openehr-client-stub</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
