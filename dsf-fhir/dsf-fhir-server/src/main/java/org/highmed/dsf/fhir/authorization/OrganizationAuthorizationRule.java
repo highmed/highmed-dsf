@@ -51,8 +51,8 @@ public class OrganizationAuthorizationRule extends AbstractAuthorizationRule<Org
 					logger.info(
 							"Create of Organization authorized for local user '{}', Organization with certificate-thumbprint and identifier does not exist",
 							user.getName());
-					return Optional.of(
-							"local user, Organization with certificate-thumbprint and identifier does not exist yet");
+					return Optional
+							.of("local user, Organization with certificate-thumbprint and identifier does not exist");
 				}
 				else
 				{
@@ -123,16 +123,22 @@ public class OrganizationAuthorizationRule extends AbstractAuthorizationRule<Org
 		String identifierValue = newResource.getIdentifier().stream()
 				.filter(i -> i.hasSystem() && i.hasValue() && IDENTIFIER_SYSTEM.equals(i.getSystem()))
 				.map(i -> i.getValue()).findFirst().orElseThrow();
+
+		return resourceExistsWithThumbprint(connection, newResource)
+				|| organizationWithIdentifierExists(connection, identifierValue);
+	}
+
+	private boolean resourceExistsWithThumbprint(Connection connection, Organization newResource)
+	{
 		String thumbprintValue = newResource.getExtension().stream()
 				.filter(e -> e.hasUrl() && e.hasValue() && (e.getValue() instanceof StringType)
 						&& EXTENSION_THUMBPRINT_URL.equals(e.getUrl()))
 				.map(e -> ((StringType) e.getValue()).getValue()).findFirst().orElseThrow();
 
-		return organizationWithThumbPrintExists(connection, thumbprintValue)
-				|| organizationWithIdentifierExists(connection, identifierValue);
+		return organizationWithThumbprintExists(connection, thumbprintValue);
 	}
 
-	private boolean organizationWithThumbPrintExists(Connection connection, String thumbprintHex)
+	private boolean organizationWithThumbprintExists(Connection connection, String thumbprintHex)
 	{
 		try
 		{
@@ -202,22 +208,22 @@ public class OrganizationAuthorizationRule extends AbstractAuthorizationRule<Org
 			Optional<String> errors = newResourceOk(newResource);
 			if (errors.isEmpty())
 			{
-				if (isSame(oldResource, newResource))
+				if (isIdentifierSame(oldResource, newResource) && (isThumbprintSame(oldResource, newResource)
+						|| !resourceExistsWithThumbprint(connection, newResource)))
 				{
 					logger.info(
-							"Update of Organization authorized for local user '{}', certificate-thumbprint and identifier same as existing Organization",
+							"Update of Organization authorized for local user '{}', identifier same as existing Organization and certificate-thumbprint same as existing or other Organization with thumbprint does not exist",
 							user.getName());
-					return Optional
-							.of("local user; certificate-thumbprint and identifier same as existing Organization");
-
+					return Optional.of(
+							"local user; identifier same as existing Organization and certificate-thumbprint same as existing or other Organization with thumbprint does not exist");
 				}
 				else if (!resourceExists(connection, newResource))
 				{
 					logger.info(
-							"Update of Organization authorized for local user '{}', other Organization with certificate-thumbprint and identifier does not exist",
+							"Update of Organization authorized for local user '{}', other Organization with certificate-thumbprint or identifier does not exist",
 							user.getName());
 					return Optional.of(
-							"local user; other Organization with certificate-thumbprint and identifier does not exist yet");
+							"local user; other Organization with certificate-thumbprint and identifier does not exist");
 				}
 				else
 				{
@@ -239,21 +245,28 @@ public class OrganizationAuthorizationRule extends AbstractAuthorizationRule<Org
 		}
 	}
 
-	private boolean isSame(Organization oldResource, Organization newResource)
+	private boolean isThumbprintSame(Organization oldResource, Organization newResource)
 	{
-		String oldIdentifierValue = oldResource.getIdentifier().stream()
-				.filter(i -> IDENTIFIER_SYSTEM.equals(i.getSystem())).map(i -> i.getValue()).findFirst().orElseThrow();
 		String oldThumbprintValue = oldResource.getExtension().stream()
 				.filter(e -> EXTENSION_THUMBPRINT_URL.equals(e.getUrl()))
 				.map(e -> ((StringType) e.getValue()).getValue()).findFirst().orElseThrow();
 
-		String newIdentifierValue = newResource.getIdentifier().stream()
-				.filter(i -> IDENTIFIER_SYSTEM.equals(i.getSystem())).map(i -> i.getValue()).findFirst().orElseThrow();
 		String newThumbprintValue = newResource.getExtension().stream()
 				.filter(e -> EXTENSION_THUMBPRINT_URL.equals(e.getUrl()))
 				.map(e -> ((StringType) e.getValue()).getValue()).findFirst().orElseThrow();
 
-		return oldIdentifierValue.equals(newIdentifierValue) && oldThumbprintValue.equals(newThumbprintValue);
+		return oldThumbprintValue.equals(newThumbprintValue);
+	}
+
+	private boolean isIdentifierSame(Organization oldResource, Organization newResource)
+	{
+		String oldIdentifierValue = oldResource.getIdentifier().stream()
+				.filter(i -> IDENTIFIER_SYSTEM.equals(i.getSystem())).map(i -> i.getValue()).findFirst().orElseThrow();
+
+		String newIdentifierValue = newResource.getIdentifier().stream()
+				.filter(i -> IDENTIFIER_SYSTEM.equals(i.getSystem())).map(i -> i.getValue()).findFirst().orElseThrow();
+
+		return oldIdentifierValue.equals(newIdentifierValue);
 	}
 
 	@Override

@@ -6,6 +6,7 @@ import static org.junit.Assert.assertFalse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Date;
 import java.util.UUID;
@@ -54,7 +55,8 @@ public class TaskProfileTest
 					"highmed-task-execute-simple-feasibility-0.2.0.xml",
 					"highmed-task-single-medic-result-simple-feasibility-0.2.0.xml",
 					"highmed-task-compute-simple-feasibility-0.2.0.xml",
-					"highmed-task-multi-medic-result-simple-feasibility-0.2.0.xml"),
+					"highmed-task-multi-medic-result-simple-feasibility-0.2.0.xml",
+					"highmed-task-local-services-integration-0.3.0.xml"),
 			Arrays.asList("authorization-role-0.2.0.xml", "bpmn-message-0.2.0.xml", "update-whitelist-0.2.0.xml",
 					"update-resources-0.2.0.xml", "feasibility-0.2.0.xml"),
 			Arrays.asList("authorization-role-0.2.0.xml", "bpmn-message-0.2.0.xml", "update-whitelist-0.2.0.xml",
@@ -697,6 +699,53 @@ public class TaskProfileTest
 				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("multi-medic-result");
 		inMultiMedicResult2.addExtension("http://highmed.org/fhir/StructureDefinition/group-id",
 				new Reference(groupId2));
+
+		return task;
+	}
+
+	@Test
+	public void testTaskLocalServiceIntegrationValid() throws Exception
+	{
+		Task task = createValidTaskLocalServiceIntegration();
+
+		ValidationResult result = resourceValidator.validate(task);
+		ValidationSupportRule.logValidationMessages(logger, result);
+
+		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+	}
+
+	private Task createValidTaskLocalServiceIntegration()
+	{
+		Task task = new Task();
+
+		task.getMeta()
+				.addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-local-services-integration");
+		task.setInstantiatesUri("http://highmed.org/bpe/Process/localServicesIntegration/0.3.0");
+		task.setStatus(Task.TaskStatus.REQUESTED);
+		task.setIntent(Task.TaskIntent.ORDER);
+		task.setAuthoredOn(new Date());
+
+		task.getRequester().setType("Organization").getIdentifier()
+				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_MeDIC_1");
+		task.getRestriction().addRecipient().setType("Organization").getIdentifier()
+				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_MeDIC_1");
+
+		task.addInput().setValue(new StringType("localServicesIntegrationMessage")).getType().addCoding()
+				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("message-name");
+
+		task.addInput().setValue(new StringType("SELECT COUNT(e) FROM EHR e;")).getType().addCoding()
+				.setSystem("http://highmed.org/fhir/CodeSystem/query-type").setCode("application/x-aql-query");
+		task.addInput().setValue(new BooleanType(true)).getType().addCoding()
+				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("needs-consent-check");
+		task.addInput().setValue(new BooleanType(true)).getType().addCoding()
+				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("needs-record-linkage");
+
+		byte[] bloomFilterConfig = Base64.getDecoder().decode(
+				"CIw/x19d3Oj+GLOKgYAX5KrFAl11q6qMi0qkDiyUOCvMXuF2KffVvSnjUjkTvqh4z8Xs+MuQdK6FqTedM5FY9t4qm+k92A+P");
+
+		task.addInput().setValue(new Base64BinaryType(bloomFilterConfig)).getType().addCoding()
+				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("bloom-filter-configuration");
 
 		return task;
 	}
