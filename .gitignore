@@ -13,8 +13,8 @@
 # dsf-bpe ignores
 ###
 dsf-bpe/dsf-bpe-server-jetty/docker/dsf_bpe.jar
-dsf-bpe/dsf-bpe-server-jetty/docker/plugin/mpi_client_stub.jar
-dsf-bpe/dsf-bpe-server-jetty/docker/plugin/openehr_client_stub.jar
+dsf-bpe/dsf-bpe-server-jetty/docker/lib/*.jar
+dsf-bpe/dsf-bpe-server-jetty/docker/plugin/*.jar
 
 ###
 # dsf-fhir ignores
@@ -22,6 +22,7 @@ dsf-bpe/dsf-bpe-server-jetty/docker/plugin/openehr_client_stub.jar
 dsf-fhir/dsf-fhir-server-jetty/conf/bundle.xml
 dsf-fhir/dsf-fhir-server-jetty/conf/config.properties
 dsf-fhir/dsf-fhir-server-jetty/docker/dsf_fhir.jar
+dsf-fhir/dsf-fhir-server-jetty/docker/lib/*.jar
 
 ###
 # dsf-docker-test-setup ignores
@@ -39,26 +40,27 @@ dsf-docker-test-setup/fhir/app/conf/bundle.xml
 dsf-docker-test-setup/fhir/app/conf/config.properties
 dsf-docker-test-setup/fhir/app/log/*.log
 dsf-docker-test-setup/fhir/app/log/*.log.gz
-dsf-docker-test-setup/bpe/fhir/postgres-data/
+dsf-docker-test-setup/fhir/db/postgres-data/
 dsf-docker-test-setup/fhir/proxy/ssl/*.pem
 
 ###
 # dsf-docker-test-setup-3medic-ttp ignores
 ###
 dsf-docker-test-setup-3medic-ttp/**/bpe/app/conf/*.p12
-dsf-docker-test-setup-3medic-ttp/**/bpe/app/last_event/time.file
-dsf-docker-test-setup-3medic-ttp/**/bpe/app/log/*.log
-dsf-docker-test-setup-3medic-ttp/**/bpe/app/log/*.log.gz
+dsf-docker-test-setup-3medic-ttp/**/bpe/app/conf/config.properties
+#dsf-docker-test-setup-3medic-ttp/**/bpe/app/last_event/time.file
+#dsf-docker-test-setup-3medic-ttp/**/bpe/app/log/*.log
+#dsf-docker-test-setup-3medic-ttp/**/bpe/app/log/*.log.gz
+#dsf-docker-test-setup-3medic-ttp/**/bpe/db/postgres-data/
 dsf-docker-test-setup-3medic-ttp/**/bpe/app/plugin/*.jar
-dsf-docker-test-setup-3medic-ttp/**/bpe/db/postgres-data/
 dsf-docker-test-setup-3medic-ttp/**/bpe/proxy/ssl/*.pem
 
 dsf-docker-test-setup-3medic-ttp/**/fhir/app/conf/*.p12
 dsf-docker-test-setup-3medic-ttp/**/fhir/app/conf/bundle.xml
 dsf-docker-test-setup-3medic-ttp/**/fhir/app/conf/config.properties
-dsf-docker-test-setup-3medic-ttp/**/fhir/app/log/*.log
-dsf-docker-test-setup-3medic-ttp/**/fhir/app/log/*.log.gz
-dsf-docker-test-setup-3medic-ttp/**/bpe/fhir/postgres-data/
+#dsf-docker-test-setup-3medic-ttp/**/fhir/app/log/*.log
+#dsf-docker-test-setup-3medic-ttp/**/fhir/app/log/*.log.gz
+#dsf-docker-test-setup-3medic-ttp/**/fhir/db/postgres-data/
 dsf-docker-test-setup-3medic-ttp/**/fhir/proxy/ssl/*.pem
 
 ###

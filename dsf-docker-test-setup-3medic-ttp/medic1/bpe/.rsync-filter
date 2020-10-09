@@ -1,3 +1,5 @@
 - .rsync-filter
 - app/last_event/README.md
 - app/log/README.md
+- app/plugin/README.md
+- proxy/ssl/README.md

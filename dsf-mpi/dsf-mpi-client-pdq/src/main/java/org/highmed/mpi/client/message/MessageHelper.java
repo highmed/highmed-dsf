@@ -66,9 +66,10 @@ public class MessageHelper
 
 		Terser terser = new Terser(qbp_q21);
 
-		int qpd3counter = 0;
-		for (QueryParameter searchParameter : searchParameters)
+		for (int qpd3counter = 0; qpd3counter < searchParameters.size(); qpd3counter++)
 		{
+			QueryParameter searchParameter = searchParameters.get(qpd3counter);
+
 			if (searchParameter.hasLocation())
 			{
 				terser.set(searchParameter.getLocation(), searchParameter.getValue());
@@ -77,7 +78,6 @@ public class MessageHelper
 			{
 				terser.set("/QPD-3(" + qpd3counter + ")-1", searchParameter.getField());
 				terser.set("/QPD-3(" + qpd3counter + ")-2", searchParameter.getValue());
-				qpd3counter++;
 			}
 		}
 
