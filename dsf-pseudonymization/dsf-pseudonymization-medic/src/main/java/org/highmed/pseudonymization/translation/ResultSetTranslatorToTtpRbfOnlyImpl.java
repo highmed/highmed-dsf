@@ -52,7 +52,7 @@ public class ResultSetTranslatorToTtpRbfOnlyImpl extends AbstractResultSetTransl
 					+ "' and path '" + ehrIdColumnPath + "'");
 
 		Meta meta = copyMeta(resultSet.getMeta());
-		List<Column> columns = translageColumns(resultSet.getColumns());
+		List<Column> columns = translateColumns(resultSet.getColumns());
 		List<List<RowElement>> rows = encodeRowsWithEhrId(ehrIdColumnIndex, resultSet.getRows());
 
 		return new ResultSet(meta, resultSet.getName(), resultSet.getQuery(), columns, rows);
@@ -73,7 +73,7 @@ public class ResultSetTranslatorToTtpRbfOnlyImpl extends AbstractResultSetTransl
 				&& ehrIdColumnPath.equals(column.getPath());
 	}
 
-	private List<Column> translageColumns(List<Column> columns)
+	private List<Column> translateColumns(List<Column> columns)
 	{
 		return Collections.singletonList(new Column(Constants.RBF_COLUMN_NAME, Constants.RBF_COLUMN_PATH));
 	}
