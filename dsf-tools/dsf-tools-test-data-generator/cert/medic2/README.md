@@ -1,0 +1,1 @@
+Will contain the medic2 certificate files generated in the build process

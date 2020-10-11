@@ -6,7 +6,6 @@ import org.highmed.mpi.client.MasterPatientIndexClient;
 import org.highmed.mpi.client.MasterPatientIndexClientFactory;
 import org.highmed.mpi.client.message.MessageHelper;
 import org.highmed.mpi.client.security.CustomSocketFactory;
-import org.highmed.mpi.client.security.CustomSslFactory;
 
 import ca.uhn.hl7v2.DefaultHapiContext;
 import ca.uhn.hl7v2.HapiContext;
@@ -33,8 +32,7 @@ public class MasterPatientIndexClientPdqFactory implements MasterPatientIndexCli
 		MessageHelper messageHelper = new MessageHelper();
 		HapiContext context = new DefaultHapiContext();
 
-		CustomSslFactory sslFactory = new CustomSslFactory();
-		SocketFactory socketFactory = new CustomSocketFactory(keystorePath, keystorePassword, sslFactory);
+		SocketFactory socketFactory = new CustomSocketFactory(keystorePath, keystorePassword);
 
 		return new MasterPatientIndexClientPdq(host, port, senderApplication,
 				senderFacility, receiverApplication, receiverFacility, pidAssigningAuthorityNamespaceId,

@@ -66,10 +66,19 @@ public class MessageHelper
 
 		Terser terser = new Terser(qbp_q21);
 
-		for (int i = 0; i < searchParameters.size(); i++)
+		for (int qpd3counter = 0; qpd3counter < searchParameters.size(); qpd3counter++)
 		{
-			terser.set("/QPD-3(" + i + ")-1", searchParameters.get(i).getField());
-			terser.set("/QPD-3(" + i + ")-2", searchParameters.get(i).getValue());
+			QueryParameter searchParameter = searchParameters.get(qpd3counter);
+
+			if (searchParameter.hasLocation())
+			{
+				terser.set(searchParameter.getLocation(), searchParameter.getValue());
+			}
+			else
+			{
+				terser.set("/QPD-3(" + qpd3counter + ")-1", searchParameter.getField());
+				terser.set("/QPD-3(" + qpd3counter + ")-2", searchParameter.getValue());
+			}
 		}
 
 		return qbp_q21;
