@@ -2,6 +2,6 @@
 Dockerfile
 conf/README.md
 last_event/README.md
-log/README.md
 lib/README.md
+log/README.md
 plugin/README.md
