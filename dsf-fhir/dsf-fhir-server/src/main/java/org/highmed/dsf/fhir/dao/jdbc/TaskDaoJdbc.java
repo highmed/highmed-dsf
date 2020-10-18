@@ -1,6 +1,7 @@
 package org.highmed.dsf.fhir.dao.jdbc;
 
-import org.apache.commons.dbcp2.BasicDataSource;
+import javax.sql.DataSource;
+
 import org.highmed.dsf.fhir.dao.TaskDao;
 import org.highmed.dsf.fhir.search.parameters.TaskAuthoredOn;
 import org.highmed.dsf.fhir.search.parameters.TaskIdentifier;
@@ -14,7 +15,7 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class TaskDaoJdbc extends AbstractResourceDaoJdbc<Task> implements TaskDao
 {
-	public TaskDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
+	public TaskDaoJdbc(DataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, Task.class, "tasks", "task", "task_id", TaskUserFilter::new,
 				with(TaskAuthoredOn::new, TaskIdentifier::new, TaskModified::new, TaskRequester::new, TaskStatus::new),

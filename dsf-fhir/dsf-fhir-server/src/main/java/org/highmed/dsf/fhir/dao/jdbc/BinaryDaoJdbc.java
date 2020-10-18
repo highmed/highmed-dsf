@@ -5,7 +5,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.apache.commons.dbcp2.BasicDataSource;
+import javax.sql.DataSource;
+
 import org.highmed.dsf.fhir.dao.BinaryDao;
 import org.highmed.dsf.fhir.search.parameters.BinaryContentType;
 import org.highmed.dsf.fhir.search.parameters.user.BinaryUserFilter;
@@ -17,7 +18,7 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements BinaryDao
 {
-	public BinaryDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
+	public BinaryDaoJdbc(DataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, Binary.class, "binaries", "binary_json", "binary_id",
 				new PreparedStatementFactoryBinary(fhirContext), BinaryUserFilter::new, with(BinaryContentType::new),

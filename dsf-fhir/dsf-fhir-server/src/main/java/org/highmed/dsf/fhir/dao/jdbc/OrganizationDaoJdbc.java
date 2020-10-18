@@ -6,7 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Optional;
 
-import org.apache.commons.dbcp2.BasicDataSource;
+import javax.sql.DataSource;
+
 import org.highmed.dsf.fhir.dao.OrganizationDao;
 import org.highmed.dsf.fhir.search.parameters.OrganizationActive;
 import org.highmed.dsf.fhir.search.parameters.OrganizationEndpoint;
@@ -25,7 +26,7 @@ public class OrganizationDaoJdbc extends AbstractResourceDaoJdbc<Organization> i
 {
 	private static final Logger logger = LoggerFactory.getLogger(OrganizationDaoJdbc.class);
 
-	public OrganizationDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
+	public OrganizationDaoJdbc(DataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, Organization.class, "organizations", "organization", "organization_id",
 				OrganizationUserFilter::new, with(OrganizationActive::new, OrganizationEndpoint::new,

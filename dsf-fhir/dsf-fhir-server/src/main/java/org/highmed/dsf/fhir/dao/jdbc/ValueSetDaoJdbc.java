@@ -4,7 +4,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Optional;
 
-import org.apache.commons.dbcp2.BasicDataSource;
+import javax.sql.DataSource;
+
 import org.highmed.dsf.fhir.dao.ValueSetDao;
 import org.highmed.dsf.fhir.search.parameters.ValueSetIdentifier;
 import org.highmed.dsf.fhir.search.parameters.ValueSetStatus;
@@ -19,7 +20,7 @@ public class ValueSetDaoJdbc extends AbstractResourceDaoJdbc<ValueSet> implement
 {
 	private final ReadByUrlDaoJdbc<ValueSet> readByUrl;
 
-	public ValueSetDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
+	public ValueSetDaoJdbc(DataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, ValueSet.class, "value_sets", "value_set", "value_set_id",
 				ValueSetUserFilter::new,
