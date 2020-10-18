@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 
 public class ValidationSupportWithCache implements IValidationSupport, EventHandler
@@ -237,7 +238,7 @@ public class ValidationSupportWithCache implements IValidationSupport, EventHand
 	}
 
 	@Override
-	public boolean isCodeSystemSupported(IValidationSupport theRootValidationSupport, String url)
+	public boolean isCodeSystemSupported(ValidationSupportContext theRootValidationSupport, String url)
 	{
 		return fetchCodeSystem(url) != null;
 	}
@@ -254,7 +255,7 @@ public class ValidationSupportWithCache implements IValidationSupport, EventHand
 	}
 
 	@Override
-	public boolean isValueSetSupported(IValidationSupport theRootValidationSupport, String url)
+	public boolean isValueSetSupported(ValidationSupportContext theRootValidationSupport, String url)
 	{
 		return fetchValueSet(url) != null;
 	}
@@ -284,18 +285,21 @@ public class ValidationSupportWithCache implements IValidationSupport, EventHand
 		return resource;
 	}
 
-	public ValueSetExpansionOutcome expandValueSet(IValidationSupport theRootValidationSupport,
+	@Override
+	public ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theRootValidationSupport,
 			ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand)
 	{
 		return delegate.expandValueSet(theRootValidationSupport, theExpansionOptions, theValueSetToExpand);
 	}
 
+	@Override
 	public <T extends IBaseResource> T fetchResource(Class<T> theClass, String theUri)
 	{
 		return delegate.fetchResource(theClass, theUri);
 	}
 
-	public CodeValidationResult validateCode(IValidationSupport theRootValidationSupport,
+	@Override
+	public CodeValidationResult validateCode(ValidationSupportContext theRootValidationSupport,
 			ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay,
 			String theValueSetUrl)
 	{
@@ -303,7 +307,8 @@ public class ValidationSupportWithCache implements IValidationSupport, EventHand
 				theValueSetUrl);
 	}
 
-	public CodeValidationResult validateCodeInValueSet(IValidationSupport theRootValidationSupport,
+	@Override
+	public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theRootValidationSupport,
 			ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay,
 			IBaseResource theValueSet)
 	{
@@ -311,17 +316,21 @@ public class ValidationSupportWithCache implements IValidationSupport, EventHand
 				theValueSet);
 	}
 
-	public LookupCodeResult lookupCode(IValidationSupport theRootValidationSupport, String theSystem, String theCode)
+	@Override
+	public LookupCodeResult lookupCode(ValidationSupportContext theRootValidationSupport, String theSystem,
+			String theCode)
 	{
 		return delegate.lookupCode(theRootValidationSupport, theSystem, theCode);
 	}
 
-	public IBaseResource generateSnapshot(IValidationSupport theRootValidationSupport, IBaseResource theInput,
+	@Override
+	public IBaseResource generateSnapshot(ValidationSupportContext theRootValidationSupport, IBaseResource theInput,
 			String theUrl, String theWebUrl, String theProfileName)
 	{
 		return delegate.generateSnapshot(theRootValidationSupport, theInput, theUrl, theWebUrl, theProfileName);
 	}
 
+	@Override
 	public void invalidateCaches()
 	{
 		codeSystems.clear();
