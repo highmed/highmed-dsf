@@ -197,7 +197,6 @@
 					<excludes>
 						<exclude>**/*DaoTest</exclude>
 						<exclude>**/*IntegrationTest</exclude>
-						<exclude>**/*</exclude>
 					</excludes>
 				</configuration>
 			</plugin>
