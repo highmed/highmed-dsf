@@ -7,13 +7,10 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.dsf.fhir.dao.jdbc.SubscriptionDaoJdbc;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
 import org.junit.Test;
-
-import ca.uhn.fhir.context.FhirContext;
 
 public class SubscriptionDaoTest extends AbstractResourceDaoTest<Subscription, SubscriptionDao>
 {
@@ -22,13 +19,7 @@ public class SubscriptionDaoTest extends AbstractResourceDaoTest<Subscription, S
 
 	public SubscriptionDaoTest()
 	{
-		super(Subscription.class);
-	}
-
-	@Override
-	protected SubscriptionDao createDao(BasicDataSource dataSource, FhirContext fhirContext)
-	{
-		return new SubscriptionDaoJdbc(dataSource, fhirContext);
+		super(Subscription.class, SubscriptionDaoJdbc::new);
 	}
 
 	@Override

@@ -5,12 +5,9 @@ import static org.junit.Assert.assertEquals;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
-import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.dsf.fhir.dao.jdbc.PatientDaoJdbc;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.Patient;
-
-import ca.uhn.fhir.context.FhirContext;
 
 public class PatientDaoTest extends AbstractResourceDaoTest<Patient, PatientDao>
 {
@@ -19,13 +16,7 @@ public class PatientDaoTest extends AbstractResourceDaoTest<Patient, PatientDao>
 
 	public PatientDaoTest()
 	{
-		super(Patient.class);
-	}
-
-	@Override
-	protected PatientDao createDao(BasicDataSource dataSource, FhirContext fhirContext)
-	{
-		return new PatientDaoJdbc(dataSource, fhirContext);
+		super(Patient.class, PatientDaoJdbc::new);
 	}
 
 	@Override

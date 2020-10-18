@@ -145,7 +145,7 @@
 			<dependency>
 				<groupId>de.hs-heilbronn.mi</groupId>
 				<artifactId>db-test-utils</artifactId>
-				<version>0.9.0</version>
+				<version>0.9.1</version>
 			</dependency>
 
 			<dependency>

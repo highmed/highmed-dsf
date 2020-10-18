@@ -8,7 +8,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.UUID;
 
-import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.dsf.fhir.OrganizationType;
 import org.highmed.dsf.fhir.dao.jdbc.ResearchStudyDaoJdbc;
 import org.hl7.fhir.r4.model.IdType;
@@ -18,8 +17,6 @@ import org.hl7.fhir.r4.model.ResearchStudy;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import ca.uhn.fhir.context.FhirContext;
 
 public class ResearchStudyDaoTest extends AbstractResourceDaoTest<ResearchStudy, ResearchStudyDao>
 {
@@ -31,13 +28,7 @@ public class ResearchStudyDaoTest extends AbstractResourceDaoTest<ResearchStudy,
 
 	public ResearchStudyDaoTest()
 	{
-		super(ResearchStudy.class);
-	}
-
-	@Override
-	protected ResearchStudyDao createDao(BasicDataSource dataSource, FhirContext fhirContext)
-	{
-		return new ResearchStudyDaoJdbc(dataSource, fhirContext);
+		super(ResearchStudy.class, ResearchStudyDaoJdbc::new);
 	}
 
 	@Override

@@ -15,6 +15,7 @@
 			<AppenderRef ref="AUDIT"/>
 		</Logger>
 		
+		<Logger name="de.rwh" level="INFO"/>
 		<Logger name="org.highmed" level="TRACE"/>
 		<Logger name="org.eclipse.jetty" level="INFO"/>
 		

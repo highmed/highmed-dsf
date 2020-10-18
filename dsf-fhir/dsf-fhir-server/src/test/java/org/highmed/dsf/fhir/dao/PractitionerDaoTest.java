@@ -5,12 +5,9 @@ import static org.junit.Assert.assertEquals;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
-import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.dsf.fhir.dao.jdbc.PractitionerDaoJdbc;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.Practitioner;
-
-import ca.uhn.fhir.context.FhirContext;
 
 public class PractitionerDaoTest extends AbstractResourceDaoTest<Practitioner, PractitionerDao>
 {
@@ -19,13 +16,7 @@ public class PractitionerDaoTest extends AbstractResourceDaoTest<Practitioner, P
 
 	public PractitionerDaoTest()
 	{
-		super(Practitioner.class);
-	}
-
-	@Override
-	protected PractitionerDao createDao(BasicDataSource dataSource, FhirContext fhirContext)
-	{
-		return new PractitionerDaoJdbc(dataSource, fhirContext);
+		super(Practitioner.class, PractitionerDaoJdbc::new);
 	}
 
 	@Override

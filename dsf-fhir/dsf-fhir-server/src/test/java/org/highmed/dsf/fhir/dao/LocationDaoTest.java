@@ -2,11 +2,8 @@ package org.highmed.dsf.fhir.dao;
 
 import static org.junit.Assert.assertEquals;
 
-import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.dsf.fhir.dao.jdbc.LocationDaoJdbc;
 import org.hl7.fhir.r4.model.Location;
-
-import ca.uhn.fhir.context.FhirContext;
 
 public class LocationDaoTest extends AbstractResourceDaoTest<Location, LocationDao>
 {
@@ -15,13 +12,7 @@ public class LocationDaoTest extends AbstractResourceDaoTest<Location, LocationD
 
 	public LocationDaoTest()
 	{
-		super(Location.class);
-	}
-
-	@Override
-	protected LocationDao createDao(BasicDataSource dataSource, FhirContext fhirContext)
-	{
-		return new LocationDaoJdbc(dataSource, fhirContext);
+		super(Location.class, LocationDaoJdbc::new);
 	}
 
 	@Override

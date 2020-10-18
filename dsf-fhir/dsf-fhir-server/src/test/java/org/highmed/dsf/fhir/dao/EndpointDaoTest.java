@@ -7,13 +7,10 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.UUID;
 
-import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.dsf.fhir.dao.jdbc.EndpointDaoJdbc;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Endpoint.EndpointStatus;
 import org.junit.Test;
-
-import ca.uhn.fhir.context.FhirContext;
 
 public class EndpointDaoTest extends AbstractResourceDaoTest<Endpoint, EndpointDao>
 {
@@ -22,13 +19,7 @@ public class EndpointDaoTest extends AbstractResourceDaoTest<Endpoint, EndpointD
 
 	public EndpointDaoTest()
 	{
-		super(Endpoint.class);
-	}
-
-	@Override
-	protected EndpointDao createDao(BasicDataSource dataSource, FhirContext fhirContext)
-	{
-		return new EndpointDaoJdbc(dataSource, fhirContext);
+		super(Endpoint.class, EndpointDaoJdbc::new);
 	}
 
 	@Override

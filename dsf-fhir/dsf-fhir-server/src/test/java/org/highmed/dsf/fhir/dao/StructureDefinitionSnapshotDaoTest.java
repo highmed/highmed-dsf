@@ -2,12 +2,9 @@ package org.highmed.dsf.fhir.dao;
 
 import static org.junit.Assert.assertEquals;
 
-import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.dsf.fhir.dao.jdbc.StructureDefinitionSnapshotDaoJdbc;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.junit.Test;
-
-import ca.uhn.fhir.context.FhirContext;
 
 public class StructureDefinitionSnapshotDaoTest
 		extends AbstractResourceDaoTest<StructureDefinition, StructureDefinitionDao>
@@ -18,13 +15,7 @@ public class StructureDefinitionSnapshotDaoTest
 
 	public StructureDefinitionSnapshotDaoTest()
 	{
-		super(StructureDefinition.class);
-	}
-
-	@Override
-	protected StructureDefinitionDao createDao(BasicDataSource dataSource, FhirContext fhirContext)
-	{
-		return new StructureDefinitionSnapshotDaoJdbc(dataSource, fhirContext);
+		super(StructureDefinition.class, StructureDefinitionSnapshotDaoJdbc::new);
 	}
 
 	@Override

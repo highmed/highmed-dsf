@@ -11,12 +11,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Arrays;
 
-import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.dsf.fhir.dao.jdbc.BinaryDaoJdbc;
 import org.hl7.fhir.r4.model.Binary;
 import org.junit.Test;
-
-import ca.uhn.fhir.context.FhirContext;
 
 public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao>
 {
@@ -27,13 +24,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao>
 
 	public BinaryDaoTest()
 	{
-		super(Binary.class);
-	}
-
-	@Override
-	protected BinaryDao createDao(BasicDataSource dataSource, FhirContext fhirContext)
-	{
-		return new BinaryDaoJdbc(dataSource, fhirContext);
+		super(Binary.class, BinaryDaoJdbc::new);
 	}
 
 	@Override
@@ -82,7 +73,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao>
 		assertEquals("1", createdResource.getIdElement().getVersionIdPart());
 		assertEquals("1", createdResource.getMeta().getVersionId());
 
-		try (Connection connection = database.getDataSource().getConnection();
+		try (Connection connection = defaultDataSource.getConnection();
 				PreparedStatement statement = connection
 						.prepareStatement("SELECT binary_json, binary_data FROM binaries");
 				ResultSet result = statement.executeQuery())
