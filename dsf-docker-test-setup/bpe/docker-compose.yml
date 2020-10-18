@@ -54,7 +54,7 @@ services:
       depends_on:
       - db
    db:
-      image: postgres
+      image: postgres:13
       restart: on-failure
       healthcheck:
          test: ["CMD-SHELL", "pg_isready -U liquibase_user -d bpe"]
