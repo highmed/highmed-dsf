@@ -123,9 +123,6 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		liquibaseDataSource.start();
 		adminDataSource.start();
 
-		// logger.info("Creating DB schema pre server startup ...");
-		// template.createSchema();
-
 		logger.info("Creating Bundle ...");
 		createTestBundle(certificates.getClientCertificate().getCertificate(),
 				certificates.getExternalClientCertificate().getCertificate());
@@ -143,6 +140,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		logger.info("Starting FHIR Server ...");
 		fhirServer = startFhirServer();
 
+		logger.info("Creating template database ...");
 		liquibaseRule.createTemplateDatabase();
 	}
 
@@ -156,9 +154,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	private static WebsocketClient createWebsocketClient(KeyStore trustStore, KeyStore keyStore,
 			char[] keyStorePassword, String subscriptionIdPart)
 	{
-		return new WebsocketClientTyrus(() ->
-		{
-		}, URI.create(WEBSOCKET_URL), trustStore, keyStore, keyStorePassword, subscriptionIdPart);
+		return new WebsocketClientTyrus(() -> {}, URI.create(WEBSOCKET_URL), trustStore, keyStore, keyStorePassword, subscriptionIdPart);
 	}
 
 	private static JettyServer startFhirServer() throws Exception
