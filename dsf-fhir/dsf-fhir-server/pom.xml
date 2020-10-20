@@ -226,7 +226,6 @@
 				<artifactId>docker-maven-plugin</artifactId>
 				<version>0.34.1</version>
 				<extensions>true</extensions>
-
 				<executions>
 					<execution>
 						<id>start-postgres</id>
@@ -266,7 +265,6 @@
 					</execution>
 				</executions>
 			</plugin>
-
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
