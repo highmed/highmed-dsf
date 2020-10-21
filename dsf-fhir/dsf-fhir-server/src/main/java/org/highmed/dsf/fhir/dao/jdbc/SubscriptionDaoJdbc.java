@@ -8,7 +8,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.dbcp2.BasicDataSource;
+import javax.sql.DataSource;
+
 import org.highmed.dsf.fhir.dao.SubscriptionDao;
 import org.highmed.dsf.fhir.search.parameters.SubscriptionCriteria;
 import org.highmed.dsf.fhir.search.parameters.SubscriptionPayload;
@@ -25,7 +26,7 @@ public class SubscriptionDaoJdbc extends AbstractResourceDaoJdbc<Subscription> i
 {
 	private static final Logger logger = LoggerFactory.getLogger(SubscriptionDaoJdbc.class);
 
-	public SubscriptionDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
+	public SubscriptionDaoJdbc(DataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, Subscription.class, "subscriptions", "subscription", "subscription_id",
 				SubscriptionUserFilter::new, with(SubscriptionCriteria::new, SubscriptionPayload::new,

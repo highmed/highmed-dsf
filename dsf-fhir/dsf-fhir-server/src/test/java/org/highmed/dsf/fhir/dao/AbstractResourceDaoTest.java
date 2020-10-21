@@ -1,60 +1,92 @@
 package org.highmed.dsf.fhir.dao;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.BiFunction;
+
+import javax.sql.DataSource;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.dsf.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.dsf.fhir.dao.exception.ResourceNotFoundException;
 import org.highmed.dsf.fhir.dao.exception.ResourceVersionNoMatchException;
-import org.highmed.dsf.fhir.test.FhirEmbeddedPostgresWithLiquibase;
-import org.highmed.dsf.fhir.test.TestSuiteDbTests;
 import org.hl7.fhir.r4.model.Resource;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
-import de.rwh.utils.test.Database;
+import de.rwh.utils.test.LiquibaseTemplateTestClassRule;
+import de.rwh.utils.test.LiquibaseTemplateTestRule;
 
-public abstract class AbstractResourceDaoTest<D extends Resource, C extends ResourceDao<D>>
+public abstract class AbstractResourceDaoTest<D extends Resource, C extends ResourceDao<D>> extends AbstractDbTest
 {
+	public static final String DAO_DB_TEMPLATE_NAME = "dao_template";
+
+	protected static final BasicDataSource adminDataSource = createAdminBasicDataSource();
+	protected static final BasicDataSource liquibaseDataSource = createLiquibaseDataSource();
+	protected static final BasicDataSource defaultDataSource = createDefaultDataSource();
+
 	@ClassRule
-	public static final FhirEmbeddedPostgresWithLiquibase template = new FhirEmbeddedPostgresWithLiquibase(
-			TestSuiteDbTests.template);
+	public static final LiquibaseTemplateTestClassRule liquibaseRule = new LiquibaseTemplateTestClassRule(
+			adminDataSource, LiquibaseTemplateTestClassRule.DEFAULT_TEST_DB_NAME, DAO_DB_TEMPLATE_NAME,
+			liquibaseDataSource, CHANGE_LOG_FILE, CHANGE_LOG_PARAMETERS, true);
+
+	@BeforeClass
+	public static void beforeClass() throws Exception
+	{
+		defaultDataSource.start();
+		liquibaseDataSource.start();
+		adminDataSource.start();
+	}
+
+	@AfterClass
+	public static void afterClass() throws Exception
+	{
+		defaultDataSource.close();
+		liquibaseDataSource.close();
+		adminDataSource.close();
+	}
 
 	@Rule
-	public final Database database = new Database(template);
+	public final LiquibaseTemplateTestRule templateRule = new LiquibaseTemplateTestRule(adminDataSource,
+			LiquibaseTemplateTestClassRule.DEFAULT_TEST_DB_NAME, DAO_DB_TEMPLATE_NAME);
 
 	protected final Class<D> resouceClass;
+	protected final BiFunction<DataSource, FhirContext, C> daoCreator;
 
 	protected final FhirContext fhirContext = FhirContext.forR4();
 	protected C dao;
 
-	protected AbstractResourceDaoTest(Class<D> resouceClass)
+	protected AbstractResourceDaoTest(Class<D> resouceClass, BiFunction<DataSource, FhirContext, C> daoCreator)
 	{
 		this.resouceClass = resouceClass;
+		this.daoCreator = daoCreator;
 	}
 
 	@Before
 	public void before() throws Exception
 	{
-		dao = createDao(database.getDataSource(), fhirContext);
+		dao = daoCreator.apply(liquibaseDataSource, fhirContext);
 	}
-
-	protected abstract C createDao(BasicDataSource dataSource, FhirContext fhirContext);
 
 	protected C getDao()
 	{
 		return dao;
 	}
-	
+
 	@Test
 	public void testEmpty() throws Exception
 	{
@@ -458,7 +490,7 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 
 	private Connection getNewTransaction() throws SQLException
 	{
-		Connection connection = database.getDataSource().getConnection();
+		Connection connection = defaultDataSource.getConnection();
 		connection.setReadOnly(false);
 		connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
 		connection.setAutoCommit(false);

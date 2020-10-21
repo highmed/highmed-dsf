@@ -4,7 +4,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Optional;
 
-import org.apache.commons.dbcp2.BasicDataSource;
+import javax.sql.DataSource;
+
 import org.highmed.dsf.fhir.dao.CodeSystemDao;
 import org.highmed.dsf.fhir.search.parameters.CodeSystemIdentifier;
 import org.highmed.dsf.fhir.search.parameters.CodeSystemStatus;
@@ -19,7 +20,7 @@ public class CodeSystemDaoJdbc extends AbstractResourceDaoJdbc<CodeSystem> imple
 {
 	private final ReadByUrlDaoJdbc<CodeSystem> readByUrl;
 
-	public CodeSystemDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
+	public CodeSystemDaoJdbc(DataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, CodeSystem.class, "code_systems", "code_system", "code_system_id",
 				CodeSystemUserFilter::new,

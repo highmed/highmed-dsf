@@ -15,6 +15,7 @@ import org.hl7.fhir.r4.model.ValueSet;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 
 public class ValidationSupportWithCustomResources implements IValidationSupport
 {
@@ -83,7 +84,7 @@ public class ValidationSupportWithCustomResources implements IValidationSupport
 	}
 
 	@Override
-	public boolean isCodeSystemSupported(IValidationSupport theRootValidationSupport, String url)
+	public boolean isCodeSystemSupported(ValidationSupportContext theRootValidationSupport, String url)
 	{
 		return codeSystemsByUrl.containsKey(url);
 	}
@@ -100,7 +101,7 @@ public class ValidationSupportWithCustomResources implements IValidationSupport
 	}
 
 	@Override
-	public boolean isValueSetSupported(IValidationSupport theRootValidationSupport, String url)
+	public boolean isValueSetSupported(ValidationSupportContext theRootValidationSupport, String url)
 	{
 		return valueSetsByUrl.containsKey(url);
 	}

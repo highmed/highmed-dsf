@@ -7,7 +7,8 @@ import java.sql.SQLException;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.apache.commons.dbcp2.BasicDataSource;
+import javax.sql.DataSource;
+
 import org.highmed.dsf.fhir.OrganizationType;
 import org.highmed.dsf.fhir.authentication.UserRole;
 import org.highmed.dsf.fhir.dao.ActivityDefinitionDao;
@@ -30,7 +31,7 @@ public class ActivityDefinitionDaoJdbc extends AbstractResourceDaoJdbc<ActivityD
 
 	private final ReadByUrlDaoJdbc<ActivityDefinition> readByUrl;
 
-	public ActivityDefinitionDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
+	public ActivityDefinitionDaoJdbc(DataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, ActivityDefinition.class, "activity_definitions", "activity_definition",
 				"activity_definition_id", ActivityDefinitionUserFilter::new,
