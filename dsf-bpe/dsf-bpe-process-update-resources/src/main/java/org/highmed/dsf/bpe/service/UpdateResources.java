@@ -47,10 +47,6 @@ public class UpdateResources extends AbstractServiceDelegate implements Initiali
 	@Override
 	public void doExecute(DelegateExecution execution) throws Exception
 	{
-		logger.debug("{}: Process-instance-id {}, business-key {}, variables {}, local-variables {}",
-				getClass().getName(), execution.getProcessInstanceId(), execution.getBusinessKey(),
-				execution.getVariables(), execution.getVariablesLocal());
-
 		Task task = (Task) execution.getVariable(ConstantsBase.VARIABLE_TASK);
 		IdType bundleId = getBundleId(task);
 		FhirWebserviceClient requesterClient = getFhirWebserviceClientProvider()
