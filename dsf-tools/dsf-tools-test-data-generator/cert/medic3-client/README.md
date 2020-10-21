@@ -1,1 +1,0 @@
-Will contain the medic3 client certificate files generated in the build process
