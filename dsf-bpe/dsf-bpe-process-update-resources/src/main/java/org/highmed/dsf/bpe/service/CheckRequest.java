@@ -12,14 +12,10 @@ import org.highmed.dsf.fhir.task.TaskHelper;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Task;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 public class CheckRequest extends AbstractServiceDelegate implements InitializingBean
 {
-	private static final Logger logger = LoggerFactory.getLogger(CheckRequest.class);
-
 	private final OrganizationProvider organizationProvider;
 
 	public CheckRequest(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,

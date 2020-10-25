@@ -13,14 +13,10 @@ import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.MultiInstanceTarget;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargets;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargetsValues;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 public class SelectPingTargets extends AbstractServiceDelegate implements InitializingBean
 {
-	private static final Logger logger = LoggerFactory.getLogger(SelectPingTargets.class);
-
 	private final OrganizationProvider organizationProvider;
 
 	public SelectPingTargets(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
