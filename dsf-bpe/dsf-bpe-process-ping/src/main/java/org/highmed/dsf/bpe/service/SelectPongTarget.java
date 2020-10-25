@@ -9,14 +9,10 @@ import org.highmed.dsf.fhir.variables.MultiInstanceTarget;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargetValues;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Task;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 public class SelectPongTarget extends AbstractServiceDelegate implements InitializingBean
 {
-	private static final Logger logger = LoggerFactory.getLogger(SelectPingTargets.class);
-
 	public SelectPongTarget(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
 	{
 		super(clientProvider, taskHelper);
@@ -25,10 +21,6 @@ public class SelectPongTarget extends AbstractServiceDelegate implements Initial
 	@Override
 	public void doExecute(DelegateExecution execution) throws Exception
 	{
-		logger.debug("{}: Process-instance-id {}, business-key {}, variables {}, local-variables {}",
-				getClass().getName(), execution.getProcessInstanceId(), execution.getBusinessKey(),
-				execution.getVariables(), execution.getVariablesLocal());
-
 		Task task = (Task) execution.getVariable(ConstantsBase.VARIABLE_TASK);
 
 		String correlationKey = getTaskHelper().getFirstInputParameterStringValue(task,

@@ -57,6 +57,6 @@ public class UpdateResourcesConfig
 	@Bean
 	public CheckRequest checkRequest()
 	{
-		return new CheckRequest(clientProvider, taskHelper);
+		return new CheckRequest(clientProvider, taskHelper, organizationProvider);
 	}
 }

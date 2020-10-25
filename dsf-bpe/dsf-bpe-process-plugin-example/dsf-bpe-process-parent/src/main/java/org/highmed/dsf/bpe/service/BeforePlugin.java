@@ -19,10 +19,6 @@ public class BeforePlugin extends AbstractServiceDelegate
 	@Override
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
-		logger.debug("{}: Process-instance-id {}, business-key {}, variables {}, local-variables {}",
-				getClass().getName(), execution.getProcessInstanceId(), execution.getBusinessKey(),
-				execution.getVariables(), execution.getVariablesLocal());
-
 		logger.info("Before plugin was called");
 	}
 }

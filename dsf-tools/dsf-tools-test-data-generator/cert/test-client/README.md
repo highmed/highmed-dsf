@@ -1,1 +1,0 @@
-Will contain the test-client certificate files generated in the build process
