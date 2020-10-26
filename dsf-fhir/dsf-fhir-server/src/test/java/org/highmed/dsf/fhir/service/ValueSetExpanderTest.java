@@ -61,7 +61,7 @@ public class ValueSetExpanderTest
 		return Stream
 				.of("authorization-role-0.2.0.xml", "bpmn-message-0.2.0.xml", "feasibility-0.2.0.xml",
 						"organization-type-0.2.0.xml", "query-type-0.2.0.xml", "update-resources-0.2.0.xml",
-						"update-allowlist-0.3.0.xml")
+						"update-allow-list-0.3.0.xml")
 				.map(f -> Paths.get(CODE_SYSTEM_FOLDER, f)).map(this::readCodeSystem).collect(Collectors.toList());
 	}
 

@@ -26,7 +26,7 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 		logger.debug(fhirContext.newJsonParser().encodeResourceToString(allowList));
 
 		Bundle updatedBundle = getWebserviceClient().updateConditionaly(allowList, Map.of("identifier",
-				Collections.singletonList("http://highmed.org/fhir/CodeSystem/update-allowlist|highmed_allowlist")));
+				Collections.singletonList("http://highmed.org/fhir/CodeSystem/update-allow-list|highmed_allow_list")));
 
 		assertNotNull(updatedBundle);
 	}
@@ -40,7 +40,7 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 		logger.debug(fhirContext.newJsonParser().encodeResourceToString(allowList));
 
 		IdType id = getWebserviceClient().withMinimalReturn().updateConditionaly(allowList, Map.of("identifier",
-				Collections.singletonList("http://highmed.org/fhir/CodeSystem/update-allowlist|highmed_allowlist")));
+				Collections.singletonList("http://highmed.org/fhir/CodeSystem/update-allow-list|highmed_allow_list")));
 
 		assertNotNull(id);
 	}
@@ -55,7 +55,7 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 
 		OperationOutcome outcome = getWebserviceClient().withOperationOutcomeReturn().updateConditionaly(allowList,
 				Map.of("identifier", Collections
-						.singletonList("http://highmed.org/fhir/CodeSystem/update-allowlist|highmed_allowlist")));
+						.singletonList("http://highmed.org/fhir/CodeSystem/update-allow-list|highmed_allow_list")));
 
 		assertNotNull(outcome);
 	}

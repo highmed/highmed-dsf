@@ -35,7 +35,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
-			<artifactId>dsf-bpe-process-update-allowlist</artifactId>
+			<artifactId>dsf-bpe-process-update-allow-list</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
