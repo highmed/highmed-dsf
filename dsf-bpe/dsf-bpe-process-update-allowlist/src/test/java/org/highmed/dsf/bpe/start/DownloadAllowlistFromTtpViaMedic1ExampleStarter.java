@@ -24,10 +24,11 @@ import org.hl7.fhir.r4.model.Task.TaskIntent;
 import org.hl7.fhir.r4.model.Task.TaskStatus;
 
 import ca.uhn.fhir.context.FhirContext;
+
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.CertificateReader;
 
-public class UpdateResource3MedicTtpExampleStarter
+public class DownloadAllowlistFromTtpViaMedic1ExampleStarter
 {
 	public static void main(String[] args)
 			throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException
@@ -40,10 +41,11 @@ public class UpdateResource3MedicTtpExampleStarter
 
 		FhirContext context = FhirContext.forR4();
 		ReferenceCleaner referenceCleaner = new ReferenceCleanerImpl(new ReferenceExtractorImpl());
-		FhirWebserviceClient client = new FhirWebserviceClientJersey("https://ttp/fhir/", trustStore, keyStore,
+
+		FhirWebserviceClient ttpClient = new FhirWebserviceClientJersey("https://ttp/fhir/", trustStore, keyStore,
 				keyStorePassword, null, null, null, 0, 0, null, context, referenceCleaner);
 
-		Bundle searchResult = client.searchWithStrictHandling(Bundle.class, Map.of("identifier",
+		Bundle searchResult = ttpClient.searchWithStrictHandling(Bundle.class, Map.of("identifier",
 				Collections.singletonList("http://highmed.org/fhir/CodeSystem/update-allowlist|highmed_allowlist")));
 		if (searchResult.getTotal() != 1 && searchResult.getEntryFirstRep().getResource() instanceof Bundle)
 			throw new IllegalStateException("Expected a single Allow-List Bundle");
@@ -51,29 +53,27 @@ public class UpdateResource3MedicTtpExampleStarter
 
 		System.out.println(context.newXmlParser().encodeResourceToString(allowList));
 
+		FhirWebserviceClient client = new FhirWebserviceClientJersey("https://medic1/fhir/", trustStore, keyStore,
+				keyStorePassword, null, null, null, 0, 0, null, context, referenceCleaner);
+
 		Task task = new Task();
-		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-request-update-resources");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/requestUpdateResources/0.2.0");
+		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-download-allowlist");
+		task.setInstantiatesUri("http://highmed.org/bpe/Process/downloadAllowlist/0.3.0");
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
 		task.getRequester().setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_TTP");
+				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_MeDIC_1");
 		task.getRestriction().addRecipient().setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_TTP");
+				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_MeDIC_1");
 
-		task.addInput().setValue(new StringType("requestUpdateResourcesMessage")).getType().addCoding()
+		task.addInput().setValue(new StringType("downloadAllowlistMessage")).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("message-name");
-
 		task.addInput()
-				.setValue(new Reference(new IdType("Bundle", allowList.getIdElement().getIdPart(),
+				.setValue(new Reference(new IdType("https://ttp/fhir", "Bundle", allowList.getIdElement().getIdPart(),
 						allowList.getIdElement().getVersionIdPart())))
-				.getType().addCoding().setSystem("http://highmed.org/fhir/CodeSystem/update-resources")
-				.setCode("bundle-reference");
-
-		task.addInput().setValue(new StringType("http://highmed.org/fhir/NamingSystem/organization-identifier|"))
-				.getType().addCoding().setSystem("http://highmed.org/fhir/CodeSystem/update-resources")
-				.setCode("organization-identifier-search-parameter");
+				.getType().addCoding().setSystem("http://highmed.org/fhir/CodeSystem/update-allowlist")
+				.setCode("highmed_allowlist");
 
 		client.withMinimalReturn().create(task);
 	}

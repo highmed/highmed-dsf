@@ -17,7 +17,7 @@
 		<module>dsf-bpe-process-ping</module>
 		<module>dsf-bpe-process-plugin-example</module>
 		<module>dsf-bpe-process-update-resources</module>
-		<module>dsf-bpe-process-update-whitelist</module>
+		<module>dsf-bpe-process-update-allowlist</module>
 		<module>dsf-bpe-server</module>
 		<module>dsf-bpe-server-jetty</module>
 		<module>dsf-bpe-webservice-client</module>
@@ -108,7 +108,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
-				<artifactId>dsf-bpe-process-update-whitelist</artifactId>
+				<artifactId>dsf-bpe-process-update-allowlist</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

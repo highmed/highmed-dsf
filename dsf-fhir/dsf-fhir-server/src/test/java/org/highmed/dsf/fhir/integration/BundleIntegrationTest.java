@@ -20,13 +20,13 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testCreateBundle() throws Exception
 	{
-		Bundle whiteList = readBundle(Paths.get("src/test/resources/integration/white-list.json"),
+		Bundle allowList = readBundle(Paths.get("src/test/resources/integration/allow-list.json"),
 				fhirContext.newJsonParser());
 
-		logger.debug(fhirContext.newJsonParser().encodeResourceToString(whiteList));
+		logger.debug(fhirContext.newJsonParser().encodeResourceToString(allowList));
 
-		Bundle updatedBundle = getWebserviceClient().updateConditionaly(whiteList, Map.of("identifier",
-				Collections.singletonList("http://highmed.org/fhir/CodeSystem/update-whitelist|highmed_whitelist")));
+		Bundle updatedBundle = getWebserviceClient().updateConditionaly(allowList, Map.of("identifier",
+				Collections.singletonList("http://highmed.org/fhir/CodeSystem/update-allowlist|highmed_allowlist")));
 
 		assertNotNull(updatedBundle);
 	}
@@ -34,13 +34,13 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testCreateBundleReturnMinimal() throws Exception
 	{
-		Bundle whiteList = readBundle(Paths.get("src/test/resources/integration/white-list.json"),
+		Bundle allowList = readBundle(Paths.get("src/test/resources/integration/allow-list.json"),
 				fhirContext.newJsonParser());
 
-		logger.debug(fhirContext.newJsonParser().encodeResourceToString(whiteList));
+		logger.debug(fhirContext.newJsonParser().encodeResourceToString(allowList));
 
-		IdType id = getWebserviceClient().withMinimalReturn().updateConditionaly(whiteList, Map.of("identifier",
-				Collections.singletonList("http://highmed.org/fhir/CodeSystem/update-whitelist|highmed_whitelist")));
+		IdType id = getWebserviceClient().withMinimalReturn().updateConditionaly(allowList, Map.of("identifier",
+				Collections.singletonList("http://highmed.org/fhir/CodeSystem/update-allowlist|highmed_allowlist")));
 
 		assertNotNull(id);
 	}
@@ -48,14 +48,14 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testCreateBundleReturnOperationOutcome() throws Exception
 	{
-		Bundle whiteList = readBundle(Paths.get("src/test/resources/integration/white-list.json"),
+		Bundle allowList = readBundle(Paths.get("src/test/resources/integration/allow-list.json"),
 				fhirContext.newJsonParser());
 
-		logger.debug(fhirContext.newJsonParser().encodeResourceToString(whiteList));
+		logger.debug(fhirContext.newJsonParser().encodeResourceToString(allowList));
 
-		OperationOutcome outcome = getWebserviceClient().withOperationOutcomeReturn().updateConditionaly(whiteList,
+		OperationOutcome outcome = getWebserviceClient().withOperationOutcomeReturn().updateConditionaly(allowList,
 				Map.of("identifier", Collections
-						.singletonList("http://highmed.org/fhir/CodeSystem/update-whitelist|highmed_whitelist")));
+						.singletonList("http://highmed.org/fhir/CodeSystem/update-allowlist|highmed_allowlist")));
 
 		assertNotNull(outcome);
 	}
