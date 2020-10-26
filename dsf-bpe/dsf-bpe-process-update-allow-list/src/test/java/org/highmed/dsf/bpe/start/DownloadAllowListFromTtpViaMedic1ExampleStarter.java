@@ -24,7 +24,6 @@ import org.hl7.fhir.r4.model.Task.TaskIntent;
 import org.hl7.fhir.r4.model.Task.TaskStatus;
 
 import ca.uhn.fhir.context.FhirContext;
-
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.CertificateReader;
 
@@ -75,7 +74,6 @@ public class DownloadAllowListFromTtpViaMedic1ExampleStarter
 				.getType().addCoding().setSystem("http://highmed.org/fhir/CodeSystem/update-allow-list")
 				.setCode("highmed_allow_list");
 
-		System.out.println(FhirContext.forR4().newXmlParser().setPrettyPrint(true).setStripVersionsFromReferences(false).encodeResourceToString(task));
 		client.withMinimalReturn().create(task);
 	}
 }
