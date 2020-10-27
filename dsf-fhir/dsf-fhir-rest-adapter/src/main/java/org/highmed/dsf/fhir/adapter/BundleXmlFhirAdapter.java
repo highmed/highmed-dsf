@@ -28,6 +28,10 @@ public class BundleXmlFhirAdapter extends XmlFhirAdapter<Bundle>
 			resource.setIdElement(fixedId);
 		}
 
+		// TODO Bugfix HAPI is removing version information from bundle.id
+		resource.getEntry().stream().filter(e -> e.hasResource() && e.getResource() instanceof Bundle)
+				.map(e -> (Bundle) e.getResource()).forEach(this::fixResource);
+
 		return resource;
 	}
 }
