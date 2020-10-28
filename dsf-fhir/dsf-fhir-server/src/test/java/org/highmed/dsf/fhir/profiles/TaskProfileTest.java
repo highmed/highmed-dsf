@@ -628,8 +628,6 @@ public class TaskProfileTest
 				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("message-name");
 		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("business-key");
-		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
-				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("correlation-key");
 
 		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("medic-correlation-key");
@@ -672,8 +670,6 @@ public class TaskProfileTest
 				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("message-name");
 		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("business-key");
-		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
-				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("correlation-key");
 
 		String groupId1 = "Group/" + UUID.randomUUID().toString();
 		String groupId2 = "Group/" + UUID.randomUUID().toString();
