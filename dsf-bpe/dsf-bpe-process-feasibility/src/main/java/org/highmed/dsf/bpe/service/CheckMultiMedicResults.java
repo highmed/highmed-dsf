@@ -7,10 +7,11 @@ import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.bpe.variables.ConstantsFeasibility;
-import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
-import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.bpe.variables.FinalFeasibilityQueryResult;
 import org.highmed.dsf.bpe.variables.FinalFeasibilityQueryResults;
+import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
+import org.highmed.dsf.fhir.task.TaskHelper;
+import org.highmed.dsf.fhir.variables.Output;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
@@ -30,11 +31,30 @@ public class CheckMultiMedicResults extends AbstractServiceDelegate
 	{
 		Task task = (Task) execution.getVariable(ConstantsBase.VARIABLE_TASK);
 
+		List<Output> errors = readFinalFeasibilityQueryErrors(task);
 		FinalFeasibilityQueryResults results = readFinalFeasibilityQueryResults(task);
 		results = checkResults(results);
 
 		Task leadingTask = (Task) execution.getVariable(ConstantsBase.VARIABLE_LEADING_TASK);
-		addOutputs(leadingTask, results);
+		addResultOutputs(leadingTask, results);
+		addErrorOutputs(leadingTask, errors);
+
+		// This task is not automatically set to completed because it is an additional task
+		// during the execution of the main process
+		task.setStatus(Task.TaskStatus.COMPLETED);
+		getFhirWebserviceClientProvider().getLocalWebserviceClient().withMinimalReturn().update(task);
+	}
+
+	private List<Output> readFinalFeasibilityQueryErrors(Task task)
+	{
+		return task.getInput().stream()
+				.filter(in -> in.hasType() && in.getType().hasCoding() && ConstantsBase.CODESYSTEM_HIGHMED_BPMN
+						.equals(in.getType().getCodingFirstRep().getSystem())
+						&& ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE
+						.equals(in.getType().getCodingFirstRep().getCode()))
+				.map(in -> new Output(ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
+						ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, in.getValue().primitiveValue()))
+				.collect(Collectors.toList());
 	}
 
 	private FinalFeasibilityQueryResults readFinalFeasibilityQueryResults(Task task)
@@ -77,12 +97,18 @@ public class CheckMultiMedicResults extends AbstractServiceDelegate
 		return results;
 	}
 
-	private void addOutputs(Task leadingTask, FinalFeasibilityQueryResults results)
+	private void addErrorOutputs(Task leadingTask, List<Output> errors)
 	{
-		results.getResults().forEach(result -> addOutput(leadingTask, result));
+		errors.forEach(error -> leadingTask
+				.addOutput(getTaskHelper().createOutput(error.getSystem(), error.getCode(), error.getValue())));
 	}
 
-	private void addOutput(Task leadingTask, FinalFeasibilityQueryResult result)
+	private void addResultOutputs(Task leadingTask, FinalFeasibilityQueryResults results)
+	{
+		results.getResults().forEach(result -> addResultOutput(leadingTask, result));
+	}
+
+	private void addResultOutput(Task leadingTask, FinalFeasibilityQueryResult result)
 	{
 		TaskOutputComponent output1 = getTaskHelper()
 				.createOutputUnsignedInt(ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,

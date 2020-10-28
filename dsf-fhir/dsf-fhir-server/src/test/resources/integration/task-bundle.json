@@ -108,7 +108,7 @@
 			"fullUrl": "urn:uuid:bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
 			"resource": {
 				"resourceType": "Task",
-				"instantiatesUri": "http://highmed.org/bpe/Process/requestSimpleFeasibility/0.2.0",
+				"instantiatesUri": "http://highmed.org/bpe/Process/requestSimpleFeasibility/0.3.0",
 				"status": "requested",
 				"intent": "order",
 				"requester": {

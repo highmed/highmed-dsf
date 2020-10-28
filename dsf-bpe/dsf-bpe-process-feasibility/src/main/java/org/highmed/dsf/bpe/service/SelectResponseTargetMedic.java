@@ -38,14 +38,11 @@ public class SelectResponseTargetMedic extends AbstractServiceDelegate implement
 	{
 		Task task = (Task) execution.getVariable(ConstantsBase.VARIABLE_LEADING_TASK);
 
-		String correlationKey = getTaskHelper()
-				.getFirstInputParameterStringValue(task, ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
-						ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY).orElseThrow(
-						() -> new IllegalStateException(
-								"No correlation key found, this error should have been caught by resource validation"));
-
+		// correlation key is null because only one recipient and therefore message-name based correlation
+		// is sufficient --> see https://github.com/highmed/highmed-dsf/issues/144
+		// TODO: replace MultiInstanceTarget with SingleInstanceTarget
 		MultiInstanceTarget medicTarget = new MultiInstanceTarget(task.getRequester().getIdentifier().getValue(),
-				correlationKey);
+				null);
 		execution.setVariable(ConstantsBase.VARIABLE_MULTI_INSTANCE_TARGET,
 				MultiInstanceTargetValues.create(medicTarget));
 	}

@@ -24,8 +24,8 @@ public class ResearchStudyProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			Arrays.asList("highmed-extension-participating-medic-0.2.0.xml",
-					"highmed-extension-participating-ttp-0.2.0.xml", "highmed-research-study-feasibility-0.2.0.xml"),
+			Arrays.asList("highmed-extension-participating-medic-0.3.0.xml",
+					"highmed-extension-participating-ttp-0.3.0.xml", "highmed-research-study-feasibility-0.3.0.xml"),
 			Arrays.asList("authorization-role-0.2.0.xml", "organization-type-0.2.0.xml"),
 			Arrays.asList("authorization-role-0.2.0.xml", "organization-type-0.2.0.xml"));
 

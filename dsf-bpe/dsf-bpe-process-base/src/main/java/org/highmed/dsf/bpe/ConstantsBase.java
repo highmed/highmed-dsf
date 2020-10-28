@@ -17,6 +17,7 @@ public interface ConstantsBase
 	String VARIABLE_BUNDLE_ID = "bundleId";
 	String VARIABLE_QUERY_PARAMETERS = "queryParameters";
 	String VARIABLE_TTP_IDENTIFIER = "ttp";
+	String VARIABLE_HAS_ERROR = "hasError";
 
 	/**
 	 * Stores a List<{@link org.highmed.dsf.fhir.variables.Outputs}> </>of outputs that have to be written to a task

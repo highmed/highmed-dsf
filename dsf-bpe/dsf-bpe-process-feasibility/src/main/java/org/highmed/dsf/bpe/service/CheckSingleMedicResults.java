@@ -36,6 +36,8 @@ public class CheckSingleMedicResults extends AbstractServiceDelegate
 
 		List<FeasibilityQueryResult> filteredResults = filterErronesResultsAndAddErrorsToOutput(results, outputs);
 
+		// TODO: add percentage filter over results
+
 		execution.setVariable(ConstantsFeasibility.VARIABLE_QUERY_RESULTS,
 				FeasibilityQueryResultsValues.create(new FeasibilityQueryResults(filteredResults)));
 	}

@@ -37,6 +37,7 @@ public class EndListener implements ExecutionListener
 		if (!inCalledProcess)
 		{
 			Task task;
+			boolean hasError = false;
 			if (execution.getParentId() == null || execution.getParentId().equals(execution.getProcessInstanceId()))
 			{
 				// not in a subprocess --> end of main process, write process outputs to task
@@ -44,6 +45,10 @@ public class EndListener implements ExecutionListener
 
 				Outputs outputs = (Outputs) execution.getVariable(ConstantsBase.VARIABLE_PROCESS_OUTPUTS);
 				task = taskHelper.addOutputs(task, outputs);
+
+				hasError = outputs.getOutputs().stream().anyMatch(
+						output -> output.getSystem().equals(ConstantsBase.CODESYSTEM_HIGHMED_BPMN) && output.getCode()
+								.equals(ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE));
 
 				log(execution, task);
 			}
@@ -53,7 +58,11 @@ public class EndListener implements ExecutionListener
 				task = (Task) execution.getVariable(ConstantsBase.VARIABLE_TASK);
 			}
 
-			task.setStatus(Task.TaskStatus.COMPLETED);
+			if (hasError)
+				task.setStatus(Task.TaskStatus.FAILED);
+			else
+				task.setStatus(Task.TaskStatus.COMPLETED);
+
 			webserviceClient.withMinimalReturn().update(task);
 		}
 		else
@@ -71,8 +80,9 @@ public class EndListener implements ExecutionListener
 				ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME).orElse(null);
 		String businessKey = taskHelper.getFirstInputParameterStringValue(task, ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
 				ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY).orElse(null);
-		String correlationKey = taskHelper.getFirstInputParameterStringValue(task, ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
-				ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY).orElse(null);
+		String correlationKey = taskHelper
+				.getFirstInputParameterStringValue(task, ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
+						ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY).orElse(null);
 		String taskId = task.getIdElement().getIdPart();
 
 		logger.info("Process {} finished [message: {}, businessKey: {}, correlationKey: {}, taskId: {}]", processUrl,

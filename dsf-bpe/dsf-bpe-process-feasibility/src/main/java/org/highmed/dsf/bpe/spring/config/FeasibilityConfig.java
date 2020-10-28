@@ -3,6 +3,7 @@ package org.highmed.dsf.bpe.spring.config;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
 import org.highmed.dsf.bpe.message.SendMedicRequest;
+import org.highmed.dsf.bpe.message.SendMultiMedicErrors;
 import org.highmed.dsf.bpe.message.SendMultiMedicResults;
 import org.highmed.dsf.bpe.message.SendSingleMedicResults;
 import org.highmed.dsf.bpe.message.SendTtpRequest;
@@ -12,6 +13,7 @@ import org.highmed.dsf.bpe.service.CheckFeasibilityResources;
 import org.highmed.dsf.bpe.service.CheckMultiMedicResults;
 import org.highmed.dsf.bpe.service.CheckQueries;
 import org.highmed.dsf.bpe.service.CheckSingleMedicResults;
+import org.highmed.dsf.bpe.service.CheckTtpComputedMultiMedicResults;
 import org.highmed.dsf.bpe.service.DownloadFeasibilityResources;
 import org.highmed.dsf.bpe.service.DownloadResearchStudyResource;
 import org.highmed.dsf.bpe.service.DownloadResultSets;
@@ -20,6 +22,7 @@ import org.highmed.dsf.bpe.service.ExecuteRecordLink;
 import org.highmed.dsf.bpe.service.FilterQueryResultsByConsent;
 import org.highmed.dsf.bpe.service.GenerateBloomFilters;
 import org.highmed.dsf.bpe.service.GenerateCountFromIds;
+import org.highmed.dsf.bpe.service.HandleErrorMultiMedicResults;
 import org.highmed.dsf.bpe.service.ModifyQueries;
 import org.highmed.dsf.bpe.service.SelectRequestTargets;
 import org.highmed.dsf.bpe.service.SelectResponseTargetMedic;
@@ -119,6 +122,12 @@ public class FeasibilityConfig
 		return new CheckMultiMedicResults(fhirClientProvider, taskHelper);
 	}
 
+	@Bean
+	public HandleErrorMultiMedicResults handleErrorMultiMedicResults()
+	{
+		return new HandleErrorMultiMedicResults(fhirClientProvider, taskHelper);
+	}
+
 	//
 	// process executeSimpleFeasibility implementations
 	//
@@ -180,8 +189,8 @@ public class FeasibilityConfig
 	@Bean
 	public GenerateBloomFilters generateBloomFilters()
 	{
-		return new GenerateBloomFilters(fhirClientProvider, taskHelper, ehrIdColumnPath,
-				masterPatientIndexClient(), objectMapper, bouncyCastleProvider());
+		return new GenerateBloomFilters(fhirClientProvider, taskHelper, ehrIdColumnPath, masterPatientIndexClient(),
+				objectMapper, bouncyCastleProvider());
 	}
 
 	@Bean
@@ -249,6 +258,12 @@ public class FeasibilityConfig
 	}
 
 	@Bean
+	public CheckTtpComputedMultiMedicResults checkTtpComputedMultiMedicResults()
+	{
+		return new CheckTtpComputedMultiMedicResults(fhirClientProvider, taskHelper);
+	}
+
+	@Bean
 	public SelectResponseTargetMedic selectResponseTargetMedic()
 	{
 		return new SelectResponseTargetMedic(fhirClientProvider, taskHelper, organizationProvider);
@@ -258,5 +273,11 @@ public class FeasibilityConfig
 	public SendMultiMedicResults sendMultiMedicResults()
 	{
 		return new SendMultiMedicResults(fhirClientProvider, taskHelper, organizationProvider, fhirContext);
+	}
+
+	@Bean
+	public SendMultiMedicErrors sendMultiMedicErrors()
+	{
+		return new SendMultiMedicErrors(fhirClientProvider, taskHelper, organizationProvider, fhirContext);
 	}
 }
