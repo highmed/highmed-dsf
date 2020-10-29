@@ -56,6 +56,7 @@ public class TaskProfileTest
 					"highmed-task-single-medic-result-simple-feasibility-0.3.0.xml",
 					"highmed-task-compute-simple-feasibility-0.3.0.xml",
 					"highmed-task-multi-medic-result-simple-feasibility-0.3.0.xml",
+					"highmed-task-error-simple-feasibility-0.3.0.xml",
 					"highmed-task-local-services-integration-0.3.0.xml", "highmed-task-download-allow-list-0.3.0.xml"),
 			Arrays.asList("authorization-role-0.2.0.xml", "bpmn-message-0.2.0.xml", "update-allow-list-0.3.0.xml",
 					"update-resources-0.2.0.xml", "feasibility-0.3.0.xml"),
