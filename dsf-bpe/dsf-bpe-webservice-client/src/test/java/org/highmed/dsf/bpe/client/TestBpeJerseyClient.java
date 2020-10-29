@@ -33,7 +33,7 @@ public class TestBpeJerseyClient
 
 //		client.startProcessWithVersion("ping", "1.0.0");
 
-//		client.startProcessWithVersion("updateWhiteList", "1.0.0");
+//		client.startProcessWithVersion("updateAllowList", "1.0.0");
 
 		client.startProcessWithVersion("requestUpdateResources", "1.0.0", Map.of("target-identifier",
 				Collections.singletonList("http://highmed.org/fhir/NamingSystem/organization-identifier|"), "bundle-id",
