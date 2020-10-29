@@ -26,8 +26,8 @@
         <valueString value="Parameter" />
       </extension>
       <path value="Task.input" />
-      <min value="4" />
-      <max value="4" />
+      <min value="3" />
+      <max value="3" />
     </element>
     <element id="Task.input:message-name">
       <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
@@ -54,7 +54,8 @@
       </extension>
       <path value="Task.input" />
       <sliceName value="correlation-key" />
-      <min value="1" />
+      <min value="0" />
+      <max value="0" />
     </element>
     <element id="Task.input:bundle-reference">
       <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">

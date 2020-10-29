@@ -76,9 +76,12 @@ public class SelectResourceAndTargets extends AbstractServiceDelegate implements
 						ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_ORGANIZATION_IDENTIFIER_SEARCH_PARAMETER)
 				.collect(Collectors.toList());
 
+		// correlation key is null because no backwards communication is needed
+		// --> see https://github.com/highmed/highmed-dsf/issues/144
+		// TODO: replace MultiInstanceTarget with SingleInstanceTarget
 		List<MultiInstanceTarget> targets = targetIdentifierSearchParameters.stream()
 				.flatMap(organizationProvider::searchRemoteOrganizationsIdentifiers)
-				.map(identifier -> new MultiInstanceTarget(identifier.getValue(), UUID.randomUUID().toString()))
+				.map(identifier -> new MultiInstanceTarget(identifier.getValue(), null))
 				.collect(Collectors.toList());
 		execution.setVariable("multiInstanceTargets",
 				MultiInstanceTargetsValues.create(new MultiInstanceTargets(targets)));
