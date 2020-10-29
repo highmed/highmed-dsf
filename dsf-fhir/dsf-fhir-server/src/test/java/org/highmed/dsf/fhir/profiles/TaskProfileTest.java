@@ -56,6 +56,7 @@ public class TaskProfileTest
 					"highmed-task-single-medic-result-simple-feasibility-0.3.0.xml",
 					"highmed-task-compute-simple-feasibility-0.3.0.xml",
 					"highmed-task-multi-medic-result-simple-feasibility-0.3.0.xml",
+					"highmed-task-error-simple-feasibility-0.3.0.xml",
 					"highmed-task-local-services-integration-0.3.0.xml"),
 			Arrays.asList("authorization-role-0.2.0.xml", "bpmn-message-0.2.0.xml", "update-whitelist-0.2.0.xml",
 					"update-resources-0.2.0.xml", "feasibility-0.3.0.xml"),
@@ -72,8 +73,8 @@ public class TaskProfileTest
 
 		StructureDefinition base = reader
 				.readXml(Paths.get("src/main/resources/fhir/StructureDefinition/highmed-task-base-0.3.0.xml"));
-		StructureDefinition differential = reader.readXml(Paths
-				.get("src/main/resources/fhir/StructureDefinition/highmed-task-execute-update-resources-0.2.0.xml"));
+		StructureDefinition differential = reader.readXml(Paths.get(
+				"src/main/resources/fhir/StructureDefinition/highmed-task-execute-update-resources-0.2.0.xml"));
 
 		var validationSupport = new ValidationSupportChain(
 				new InMemoryTerminologyServerValidationSupport(validationRule.getFhirContext()),
@@ -87,57 +88,61 @@ public class TaskProfileTest
 	}
 
 	@Test
-	public void testTaskStartProcessProfileValid() throws Exception
+	public void testTaskStartPingProcessProfileValid() throws Exception
 	{
-		Task task = createValidTaskStartProcess();
+		Task task = createValidTaskStartPingProcess();
 
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
 
-		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
-				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream()
+				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
+						.equals(m.getSeverity())).count());
 	}
 
 	@Test
-	public void testTaskStartProcessProfileNotValid1() throws Exception
+	public void testTaskStartPingProcessProfileNotValid1() throws Exception
 	{
-		Task task = createValidTaskStartProcess();
+		Task task = createValidTaskStartPingProcess();
 		task.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.1.0");
 
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
 
-		assertEquals(1, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
-				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+		assertEquals(1, result.getMessages().stream()
+				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
+						.equals(m.getSeverity())).count());
 	}
 
 	@Test
-	public void testTaskStartProcessProfileNotValid2() throws Exception
+	public void testTaskStartPingProcessProfileNotValid2() throws Exception
 	{
-		Task task = createValidTaskStartProcess();
+		Task task = createValidTaskStartPingProcess();
 		task.setIntent(TaskIntent.FILLERORDER);
 
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
 
-		assertEquals(1, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
-				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+		assertEquals(1, result.getMessages().stream()
+				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
+						.equals(m.getSeverity())).count());
 	}
 
 	@Test
 	public void testTaskStartProcessProfileNotValid3() throws Exception
 	{
-		Task task = createValidTaskStartProcess();
+		Task task = createValidTaskStartPingProcess();
 		task.setAuthoredOn(null);
 
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
 
-		assertEquals(1, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
-				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+		assertEquals(1, result.getMessages().stream()
+				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
+						.equals(m.getSeverity())).count());
 	}
 
-	private Task createValidTaskStartProcess()
+	private Task createValidTaskStartPingProcess()
 	{
 		Task task = new Task();
 		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-ping-process");
@@ -164,8 +169,9 @@ public class TaskProfileTest
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
 
-		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
-				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream()
+				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
+						.equals(m.getSeverity())).count());
 	}
 
 	private Task createValidTaskPing()
@@ -199,8 +205,9 @@ public class TaskProfileTest
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
 
-		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
-				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream()
+				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
+						.equals(m.getSeverity())).count());
 	}
 
 	private Task createValidTaskPong()
@@ -234,8 +241,9 @@ public class TaskProfileTest
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
 
-		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
-				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream()
+				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
+						.equals(m.getSeverity())).count());
 	}
 
 	@Test
@@ -249,8 +257,9 @@ public class TaskProfileTest
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
 
-		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
-				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream()
+				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
+						.equals(m.getSeverity())).count());
 	}
 
 	private Task createValidTaskUpdateWhitelist()
@@ -280,8 +289,9 @@ public class TaskProfileTest
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
 
-		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
-				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream()
+				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
+						.equals(m.getSeverity())).count());
 	}
 
 	private Task createValidTaskRequestUpdateWhitelistResources()
@@ -311,8 +321,9 @@ public class TaskProfileTest
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
 
-		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
-				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream()
+				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
+						.equals(m.getSeverity())).count());
 	}
 
 	private Task createValidTaskRequestUpdateResources()
@@ -347,8 +358,9 @@ public class TaskProfileTest
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
 
-		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
-				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream()
+				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
+						.equals(m.getSeverity())).count());
 	}
 
 	private Task createValidTaskExecuteUpdateResources()
@@ -384,8 +396,9 @@ public class TaskProfileTest
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
 
-		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
-				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream()
+				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
+						.equals(m.getSeverity())).count());
 	}
 
 	@Test
@@ -399,30 +412,31 @@ public class TaskProfileTest
 		TaskOutputComponent outParticipatingMedics1 = task.addOutput();
 		outParticipatingMedics1.setValue(new UnsignedIntType(5)).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("participating-medics");
-		outParticipatingMedics1.addExtension("http://highmed.org/fhir/StructureDefinition/group-id",
-				new Reference(groupId1));
+		outParticipatingMedics1
+				.addExtension("http://highmed.org/fhir/StructureDefinition/group-id", new Reference(groupId1));
 		TaskOutputComponent outMultiMedicResult1 = task.addOutput();
 		outMultiMedicResult1.setValue(new UnsignedIntType(25)).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("multi-medic-result");
-		outMultiMedicResult1.addExtension("http://highmed.org/fhir/StructureDefinition/group-id",
-				new Reference(groupId1));
+		outMultiMedicResult1
+				.addExtension("http://highmed.org/fhir/StructureDefinition/group-id", new Reference(groupId1));
 
 		TaskOutputComponent outParticipatingMedics2 = task.addOutput();
 		outParticipatingMedics2.setValue(new UnsignedIntType(5)).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("participating-medics");
-		outParticipatingMedics2.addExtension("http://highmed.org/fhir/StructureDefinition/group-id",
-				new Reference(groupId2));
+		outParticipatingMedics2
+				.addExtension("http://highmed.org/fhir/StructureDefinition/group-id", new Reference(groupId2));
 		TaskOutputComponent outMultiMedicResult2 = task.addOutput();
 		outMultiMedicResult2.setValue(new UnsignedIntType(25)).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("multi-medic-result");
-		outMultiMedicResult2.addExtension("http://highmed.org/fhir/StructureDefinition/group-id",
-				new Reference(groupId2));
+		outMultiMedicResult2
+				.addExtension("http://highmed.org/fhir/StructureDefinition/group-id", new Reference(groupId2));
 
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
 
-		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
-				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream()
+				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
+						.equals(m.getSeverity())).count());
 	}
 
 	private Task createValidTaskRequestSimpleFeasibility()
@@ -459,8 +473,9 @@ public class TaskProfileTest
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
 
-		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
-				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream()
+				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
+						.equals(m.getSeverity())).count());
 	}
 
 	@Test
@@ -473,8 +488,9 @@ public class TaskProfileTest
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
 
-		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
-				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream()
+				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
+						.equals(m.getSeverity())).count());
 	}
 
 	private Task createValidTaskExecuteSimpleFeasibility()
@@ -516,8 +532,9 @@ public class TaskProfileTest
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
 
-		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
-				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream()
+				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
+						.equals(m.getSeverity())).count());
 	}
 
 	@Test
@@ -528,8 +545,9 @@ public class TaskProfileTest
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
 
-		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
-				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream()
+				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
+						.equals(m.getSeverity())).count());
 	}
 
 	private Task createValidTaskSingleMedicResultSimpleFeasibility()
@@ -566,13 +584,13 @@ public class TaskProfileTest
 		ParameterComponent inSingleMedicResult1 = task.addInput();
 		inSingleMedicResult1.setValue(new UnsignedIntType(5)).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("single-medic-result");
-		inSingleMedicResult1.addExtension("http://highmed.org/fhir/StructureDefinition/group-id",
-				new Reference(groupId1));
+		inSingleMedicResult1
+				.addExtension("http://highmed.org/fhir/StructureDefinition/group-id", new Reference(groupId1));
 		ParameterComponent inSingleMedicResult2 = task.addInput();
 		inSingleMedicResult2.setValue(new UnsignedIntType(10)).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("single-medic-result");
-		inSingleMedicResult2.addExtension("http://highmed.org/fhir/StructureDefinition/group-id",
-				new Reference(groupId2));
+		inSingleMedicResult2
+				.addExtension("http://highmed.org/fhir/StructureDefinition/group-id", new Reference(groupId2));
 
 		return task;
 	}
@@ -587,13 +605,13 @@ public class TaskProfileTest
 		ParameterComponent inSingleMedicResult1 = task.addInput();
 		inSingleMedicResult1.setValue(new Reference("Binary/" + UUID.randomUUID().toString())).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("single-medic-result-reference");
-		inSingleMedicResult1.addExtension("http://highmed.org/fhir/StructureDefinition/group-id",
-				new Reference(groupId1));
+		inSingleMedicResult1
+				.addExtension("http://highmed.org/fhir/StructureDefinition/group-id", new Reference(groupId1));
 		ParameterComponent inSingleMedicResult2 = task.addInput();
 		inSingleMedicResult2.setValue(new Reference("Binary/" + UUID.randomUUID().toString())).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("single-medic-result-reference");
-		inSingleMedicResult2.addExtension("http://highmed.org/fhir/StructureDefinition/group-id",
-				new Reference(groupId2));
+		inSingleMedicResult2
+				.addExtension("http://highmed.org/fhir/StructureDefinition/group-id", new Reference(groupId2));
 
 		return task;
 	}
@@ -606,8 +624,9 @@ public class TaskProfileTest
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
 
-		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
-				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream()
+				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
+						.equals(m.getSeverity())).count());
 	}
 
 	private Task createValidTaskComputeSimpleFeasibility()
@@ -648,8 +667,9 @@ public class TaskProfileTest
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
 
-		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
-				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream()
+				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
+						.equals(m.getSeverity())).count());
 	}
 
 	private Task createValidTaskMultiMedicResultSimpleFeasibility()
@@ -677,24 +697,63 @@ public class TaskProfileTest
 		ParameterComponent inParticipatingMedics1 = task.addInput();
 		inParticipatingMedics1.setValue(new UnsignedIntType(5)).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("participating-medics");
-		inParticipatingMedics1.addExtension("http://highmed.org/fhir/StructureDefinition/group-id",
-				new Reference(groupId1));
+		inParticipatingMedics1
+				.addExtension("http://highmed.org/fhir/StructureDefinition/group-id", new Reference(groupId1));
 		ParameterComponent inMultiMedicResult1 = task.addInput();
 		inMultiMedicResult1.setValue(new UnsignedIntType(25)).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("multi-medic-result");
-		inMultiMedicResult1.addExtension("http://highmed.org/fhir/StructureDefinition/group-id",
-				new Reference(groupId1));
+		inMultiMedicResult1
+				.addExtension("http://highmed.org/fhir/StructureDefinition/group-id", new Reference(groupId1));
 
 		ParameterComponent inParticipatingMedics2 = task.addInput();
 		inParticipatingMedics2.setValue(new UnsignedIntType(5)).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("participating-medics");
-		inParticipatingMedics2.addExtension("http://highmed.org/fhir/StructureDefinition/group-id",
-				new Reference(groupId2));
+		inParticipatingMedics2
+				.addExtension("http://highmed.org/fhir/StructureDefinition/group-id", new Reference(groupId2));
 		ParameterComponent inMultiMedicResult2 = task.addInput();
 		inMultiMedicResult2.setValue(new UnsignedIntType(25)).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("multi-medic-result");
-		inMultiMedicResult2.addExtension("http://highmed.org/fhir/StructureDefinition/group-id",
-				new Reference(groupId2));
+		inMultiMedicResult2
+				.addExtension("http://highmed.org/fhir/StructureDefinition/group-id", new Reference(groupId2));
+
+		return task;
+	}
+
+	@Test
+	public void testTaskErrorSimpleFeasibilityValid() throws Exception
+	{
+		Task task = createValidTaskErrorSimpleFeasibility();
+
+		ValidationResult result = resourceValidator.validate(task);
+		ValidationSupportRule.logValidationMessages(logger, result);
+
+		assertEquals(0, result.getMessages().stream()
+				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
+						.equals(m.getSeverity())).count());
+	}
+
+	private Task createValidTaskErrorSimpleFeasibility()
+	{
+		Task task = new Task();
+		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-error-simple-feasibility");
+		task.setInstantiatesUri("http://highmed.org/bpe/Process/requestSimpleFeasibility/0.3.0");
+		task.setStatus(TaskStatus.REQUESTED);
+		task.setIntent(TaskIntent.ORDER);
+		task.setAuthoredOn(new Date());
+		task.getRequester().setType("Organization").getIdentifier()
+				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_TTP");
+		task.getRestriction().addRecipient().setType("Organization").getIdentifier()
+				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_MeDIC_1");
+
+		task.addInput().setValue(new StringType("errorSimpleFeasibilityMessage")).getType().addCoding()
+				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("message-name");
+		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
+				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("business-key");
+
+		ParameterComponent error = task.addInput();
+		error.setValue(new StringType(
+				"A fatal error occurred while calculating the multi medic feasibility result for all defined cohorts"))
+				.getType().addCoding().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("error");
 
 		return task;
 	}
@@ -707,8 +766,9 @@ public class TaskProfileTest
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
 
-		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
-				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream()
+				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
+						.equals(m.getSeverity())).count());
 	}
 
 	private Task createValidTaskLocalServiceIntegration()
@@ -737,8 +797,8 @@ public class TaskProfileTest
 		task.addInput().setValue(new BooleanType(true)).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("needs-record-linkage");
 
-		byte[] bloomFilterConfig = Base64.getDecoder().decode(
-				"CIw/x19d3Oj+GLOKgYAX5KrFAl11q6qMi0qkDiyUOCvMXuF2KffVvSnjUjkTvqh4z8Xs+MuQdK6FqTedM5FY9t4qm+k92A+P");
+		byte[] bloomFilterConfig = Base64.getDecoder()
+				.decode("CIw/x19d3Oj+GLOKgYAX5KrFAl11q6qMi0qkDiyUOCvMXuF2KffVvSnjUjkTvqh4z8Xs+MuQdK6FqTedM5FY9t4qm+k92A+P");
 
 		task.addInput().setValue(new Base64BinaryType(bloomFilterConfig)).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("bloom-filter-configuration");
