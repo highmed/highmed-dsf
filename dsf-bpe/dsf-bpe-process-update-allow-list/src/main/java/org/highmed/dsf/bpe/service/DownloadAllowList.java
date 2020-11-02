@@ -46,7 +46,7 @@ public class DownloadAllowList extends AbstractServiceDelegate
 	@Override
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
-		Task task = (Task) execution.getVariable(ConstantsBase.VARIABLE_TASK);
+		Task task = getCurrentTaskFromExecutionVariables();
 		IdType bundleId = getBundleId(task);
 		FhirWebserviceClient requesterClient = getFhirWebserviceClientProvider()
 				.getRemoteWebserviceClient(bundleId.getBaseUrl());

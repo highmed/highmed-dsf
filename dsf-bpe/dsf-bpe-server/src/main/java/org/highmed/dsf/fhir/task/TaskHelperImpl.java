@@ -3,7 +3,6 @@ package org.highmed.dsf.fhir.task;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import org.highmed.dsf.fhir.variables.Outputs;
 import org.hl7.fhir.r4.model.Base64BinaryType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -145,22 +144,5 @@ public class TaskHelperImpl implements TaskHelper
 	public TaskOutputComponent createOutput(String system, String code, Reference reference)
 	{
 		return new TaskOutputComponent(new CodeableConcept(new Coding(system, code, null)), reference);
-	}
-
-	@Override
-	public Task addOutputs(Task task, Outputs outputs)
-	{
-		outputs.getOutputs().forEach(output ->
-		{
-			TaskOutputComponent component = createOutput(output.getSystem(), output.getCode(), output.getValue());
-
-			if (output.hasExtension())
-				component.addExtension(
-						new Extension(output.getExtensionUrl(), new Reference(output.getExtensionValue())));
-
-			task.addOutput(component);
-		});
-
-		return task;
 	}
 }

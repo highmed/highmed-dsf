@@ -49,7 +49,7 @@ public class StoreResults extends AbstractServiceDelegate implements Initializin
 		boolean needsRecordLinkage = Boolean.TRUE
 				.equals((Boolean) execution.getVariable(ConstantsFeasibility.VARIABLE_NEEDS_RECORD_LINKAGE));
 
-		Task task = (Task) execution.getVariable(ConstantsBase.VARIABLE_TASK);
+		Task task = getCurrentTaskFromExecutionVariables();
 
 		List<FeasibilityQueryResult> extendedResults = new ArrayList<>();
 		extendedResults.addAll(results.getResults());

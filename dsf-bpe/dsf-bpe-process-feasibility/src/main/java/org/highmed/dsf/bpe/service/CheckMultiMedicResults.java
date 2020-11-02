@@ -11,7 +11,6 @@ import org.highmed.dsf.bpe.variables.FinalFeasibilityQueryResult;
 import org.highmed.dsf.bpe.variables.FinalFeasibilityQueryResults;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.fhir.variables.Output;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
@@ -29,35 +28,35 @@ public class CheckMultiMedicResults extends AbstractServiceDelegate
 	@Override
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
-		Task task = (Task) execution.getVariable(ConstantsBase.VARIABLE_TASK);
+		Task currentTask = getCurrentTaskFromExecutionVariables();
+		Task leadingTask = getLeadingTaskFromExecutionVariables();
 
-		List<Output> errors = readFinalFeasibilityQueryErrors(task);
-		FinalFeasibilityQueryResults results = readFinalFeasibilityQueryResults(task);
-		results = checkResults(results);
+		addFinalFeasibilityQueryErrorsToLeadingTask(currentTask, leadingTask);
 
-		Task leadingTask = (Task) execution.getVariable(ConstantsBase.VARIABLE_LEADING_TASK);
-		addResultOutputs(leadingTask, results);
-		addErrorOutputs(leadingTask, errors);
+		FinalFeasibilityQueryResults results = readFinalFeasibilityQueryResultsFromCurrentTask(currentTask);
+		FinalFeasibilityQueryResults checkedResults = checkResults(results);
 
-		// This task is not automatically set to completed because it is an additional task
-		// during the execution of the main process
-		task.setStatus(Task.TaskStatus.COMPLETED);
-		getFhirWebserviceClientProvider().getLocalWebserviceClient().withMinimalReturn().update(task);
+		addFinalFeasibilityQueryResultsToLeadingTask(checkedResults, leadingTask);
+		setLeadingTaskToExecutionVariables(leadingTask);
+
+		// The current task finishes here but is not automatically set to completed
+		// because it is an additional task during the execution of the main process
+		currentTask.setStatus(Task.TaskStatus.COMPLETED);
+		getFhirWebserviceClientProvider().getLocalWebserviceClient().withMinimalReturn().update(currentTask);
 	}
 
-	private List<Output> readFinalFeasibilityQueryErrors(Task task)
+	private void addFinalFeasibilityQueryErrorsToLeadingTask(Task toRead, Task toWrite)
 	{
-		return task.getInput().stream()
+		toRead.getInput().stream()
 				.filter(in -> in.hasType() && in.getType().hasCoding() && ConstantsBase.CODESYSTEM_HIGHMED_BPMN
 						.equals(in.getType().getCodingFirstRep().getSystem())
 						&& ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE
-						.equals(in.getType().getCodingFirstRep().getCode()))
-				.map(in -> new Output(ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
-						ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, in.getValue().primitiveValue()))
-				.collect(Collectors.toList());
+						.equals(in.getType().getCodingFirstRep().getCode())).forEach(in -> toWrite.getOutput()
+				.add(getTaskHelper().createOutput(ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
+						ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, in.getValue().primitiveValue())));
 	}
 
-	private FinalFeasibilityQueryResults readFinalFeasibilityQueryResults(Task task)
+	private FinalFeasibilityQueryResults readFinalFeasibilityQueryResultsFromCurrentTask(Task task)
 	{
 		List<FinalFeasibilityQueryResult> results = task.getInput().stream()
 				.filter(in -> in.hasType() && in.getType().hasCoding()
@@ -97,32 +96,26 @@ public class CheckMultiMedicResults extends AbstractServiceDelegate
 		return results;
 	}
 
-	private void addErrorOutputs(Task leadingTask, List<Output> errors)
+	private void addFinalFeasibilityQueryResultsToLeadingTask(FinalFeasibilityQueryResults results, Task toWrite)
 	{
-		errors.forEach(error -> leadingTask
-				.addOutput(getTaskHelper().createOutput(error.getSystem(), error.getCode(), error.getValue())));
+		results.getResults().forEach(result -> addResultOutput(result, toWrite));
 	}
 
-	private void addResultOutputs(Task leadingTask, FinalFeasibilityQueryResults results)
-	{
-		results.getResults().forEach(result -> addResultOutput(leadingTask, result));
-	}
-
-	private void addResultOutput(Task leadingTask, FinalFeasibilityQueryResult result)
+	private void addResultOutput(FinalFeasibilityQueryResult result, Task toWrite)
 	{
 		TaskOutputComponent output1 = getTaskHelper()
 				.createOutputUnsignedInt(ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
 						ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT,
 						result.getCohortSize());
 		output1.addExtension(createCohortIdExtension(result.getCohortId()));
-		leadingTask.addOutput(output1);
+		toWrite.addOutput(output1);
 
 		TaskOutputComponent output2 = getTaskHelper()
 				.createOutputUnsignedInt(ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
 						ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS_COUNT,
 						result.getParticipatingMedics());
 		output2.addExtension(createCohortIdExtension(result.getCohortId()));
-		leadingTask.addOutput(output2);
+		toWrite.addOutput(output2);
 	}
 
 	private Extension createCohortIdExtension(String cohortId)

@@ -27,12 +27,12 @@ public class StoreResult extends AbstractServiceDelegate implements Initializing
 	@Override
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
-		Task task = (Task) execution.getVariable(ConstantsBase.VARIABLE_TASK);
+		Task task = getCurrentTaskFromExecutionVariables();
 		FeasibilityQueryResults results = (FeasibilityQueryResults) execution
 				.getVariable(ConstantsFeasibility.VARIABLE_QUERY_RESULTS);
 
 		addOutputs(task, results);
-		execution.setVariable(ConstantsBase.VARIABLE_TASK, task);
+		setCurrentTaskToExecutionVariables(task);
 	}
 
 	private void addOutputs(Task task, FeasibilityQueryResults results)

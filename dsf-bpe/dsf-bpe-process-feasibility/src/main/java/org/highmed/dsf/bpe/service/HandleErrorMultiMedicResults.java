@@ -5,8 +5,6 @@ import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.fhir.variables.Output;
-import org.highmed.dsf.fhir.variables.Outputs;
 import org.hl7.fhir.r4.model.Task;
 
 public class HandleErrorMultiMedicResults extends AbstractServiceDelegate
@@ -20,26 +18,24 @@ public class HandleErrorMultiMedicResults extends AbstractServiceDelegate
 	@Override
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
-		Task task = (Task) execution.getVariable(ConstantsBase.VARIABLE_TASK);
-		Outputs outputs = (Outputs) execution.getVariable(ConstantsBase.VARIABLE_PROCESS_OUTPUTS);
+		Task currentTask = getCurrentTaskFromExecutionVariables();
+		Task leadingTask = getLeadingTaskFromExecutionVariables();
 
-		task.getInput().forEach(input -> {
+		currentTask.getInput().forEach(input -> {
 			boolean isErrorInput = input.getType().getCoding().stream().anyMatch(
 					code -> code.getSystem().equals(ConstantsBase.CODESYSTEM_HIGHMED_BPMN) && code.getCode()
 							.equals(ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE));
 
 			if (isErrorInput)
 			{
-				outputs.add(new Output(ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
+				leadingTask.getOutput().add(getTaskHelper().createOutput(ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
 						ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, input.getValue().primitiveValue()));
 			}
 		});
 
-		// This task is not automatically set to completed because it is an additional task
-		// during the execution of the main process
-		task.setStatus(Task.TaskStatus.COMPLETED);
-		getFhirWebserviceClientProvider().getLocalWebserviceClient().withMinimalReturn().update(task);
-
-		execution.setVariable(ConstantsBase.VARIABLE_PROCESS_OUTPUTS, outputs);
+		// The current task finishes here but is not automatically set to completed
+		// because it is an additional task during the execution of the main process
+		currentTask.setStatus(Task.TaskStatus.COMPLETED);
+		getFhirWebserviceClientProvider().getLocalWebserviceClient().withMinimalReturn().update(currentTask);
 	}
 }

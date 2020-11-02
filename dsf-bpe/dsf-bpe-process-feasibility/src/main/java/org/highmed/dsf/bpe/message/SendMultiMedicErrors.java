@@ -29,7 +29,7 @@ public class SendMultiMedicErrors extends AbstractTaskMessageSend
 	@Override
 	protected Stream<ParameterComponent> getAdditionalInputParameters(DelegateExecution execution)
 	{
-		Task task = (Task) execution.getVariable(ConstantsBase.VARIABLE_LEADING_TASK);
+		Task task = getLeadingTaskFromExecutionVariables();
 
 		String taskUrl = new Reference(new IdType(getFhirWebserviceClientProvider().getLocalBaseUrl() + "/Task" ,  task.getIdElement().getIdPart()))
 				.getReference();

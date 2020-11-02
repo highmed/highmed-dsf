@@ -36,7 +36,7 @@ public class SelectResponseTargetMedic extends AbstractServiceDelegate implement
 	@Override
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
-		Task task = (Task) execution.getVariable(ConstantsBase.VARIABLE_LEADING_TASK);
+		Task task = getLeadingTaskFromExecutionVariables();
 
 		// correlation key is null because only one recipient and therefore message-name based correlation
 		// is sufficient --> see https://github.com/highmed/highmed-dsf/issues/144

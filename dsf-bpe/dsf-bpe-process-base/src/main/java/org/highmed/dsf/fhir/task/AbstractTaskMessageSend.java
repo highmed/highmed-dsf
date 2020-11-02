@@ -11,7 +11,6 @@ import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.variables.MultiInstanceTarget;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargets;
-import org.highmed.dsf.fhir.variables.Outputs;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -81,14 +80,15 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 			logger.warn(errorMessage);
 			logger.debug("Error while sending Task", e);
 
-			Outputs outputs = (Outputs) execution.getVariable(ConstantsBase.VARIABLE_PROCESS_OUTPUTS);
-			outputs.addErrorOutput(errorMessage);
-
 			logger.debug("Removing target organization {} with error {} from multi instance target list",
 					target.getTargetOrganizationIdentifierValue(), e.getMessage());
 			MultiInstanceTargets targets = (MultiInstanceTargets) execution
 					.getVariable(ConstantsBase.VARIABLE_MULTI_INSTANCE_TARGETS);
 			targets.removeTarget(target);
+
+			Task task = getLeadingTaskFromExecutionVariables().addOutput(getTaskHelper().createOutput(ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
+					ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, errorMessage));
+			execution.setVariable(ConstantsBase.VARIABLE_LEADING_TASK, task);
 		}
 	}
 
@@ -96,8 +96,7 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 	 * Override this method to set a different multiinstance target then the one defined in the process variable
 	 * {@link ConstantsBase#VARIABLE_MULTI_INSTANCE_TARGET}
 	 *
-	 * @param execution
-	 *            the delegate execution of this process instance
+	 * @param execution the delegate execution of this process instance
 	 * @return {@link MultiInstanceTarget} that should receive the message
 	 */
 	protected MultiInstanceTarget getMultiInstanceTarget(DelegateExecution execution)
@@ -137,26 +136,24 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 
 		// http://highmed.org/bpe/Process/processDefinitionKey
 		// http://highmed.org/bpe/Process/processDefinitionKey/versionTag
-		String instantiatesUri = ConstantsBase.PROCESS_URI_BASE + processDefinitionKey
-				+ (versionTag != null && !versionTag.isEmpty() ? ("/" + versionTag) : "");
+		String instantiatesUri = ConstantsBase.PROCESS_URI_BASE + processDefinitionKey + (versionTag != null
+				&& !versionTag.isEmpty() ? ("/" + versionTag) : "");
 		task.setInstantiatesUri(instantiatesUri);
 
-		ParameterComponent messageNameInput = new ParameterComponent(
-				new CodeableConcept(new Coding(ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
-						ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME, null)),
-				new StringType(messageName));
+		ParameterComponent messageNameInput = new ParameterComponent(new CodeableConcept(
+				new Coding(ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
+						ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME, null)), new StringType(messageName));
 		task.getInput().add(messageNameInput);
 
-		ParameterComponent businessKeyInput = new ParameterComponent(
-				new CodeableConcept(new Coding(ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
-						ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY, null)),
-				new StringType(businessKey));
+		ParameterComponent businessKeyInput = new ParameterComponent(new CodeableConcept(
+				new Coding(ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
+						ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY, null)), new StringType(businessKey));
 		task.getInput().add(businessKeyInput);
 
 		if (correlationKey != null)
 		{
-			ParameterComponent correlationKeyInput = new ParameterComponent(
-					new CodeableConcept(new Coding(ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
+			ParameterComponent correlationKeyInput = new ParameterComponent(new CodeableConcept(
+					new Coding(ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
 							ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY, null)),
 					new StringType(correlationKey));
 			task.getInput().add(correlationKeyInput);
@@ -184,8 +181,9 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 		else
 		{
 			logger.trace("Using remote webservice client");
-			return getFhirWebserviceClientProvider().getRemoteWebserviceClient(
-					organizationProvider.getDefaultIdentifierSystem(), targetOrganizationIdentifierValue);
+			return getFhirWebserviceClientProvider()
+					.getRemoteWebserviceClient(organizationProvider.getDefaultIdentifierSystem(),
+							targetOrganizationIdentifierValue);
 		}
 	}
 

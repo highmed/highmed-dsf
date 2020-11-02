@@ -21,7 +21,7 @@ public class LogPong extends AbstractServiceDelegate
 	@Override
 	public void doExecute(DelegateExecution execution) throws Exception
 	{
-		Task task = (Task) execution.getVariable(ConstantsBase.VARIABLE_TASK);
+		Task task = getCurrentTaskFromExecutionVariables();
 
 		logger.info("PONG from {}", task.getRequester().getIdentifier().getValue());
 	}

@@ -3,7 +3,6 @@ package org.highmed.dsf.fhir.task;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import org.highmed.dsf.fhir.variables.Outputs;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.ParameterComponent;
@@ -49,6 +48,4 @@ public interface TaskHelper
 	TaskOutputComponent createOutputUnsignedInt(String system, String code, int value);
 
 	TaskOutputComponent createOutput(String system, String code, Reference reference);
-
-	Task addOutputs(Task task, Outputs outputs);
 }

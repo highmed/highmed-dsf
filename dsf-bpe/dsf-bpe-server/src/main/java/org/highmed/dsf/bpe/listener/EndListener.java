@@ -4,7 +4,6 @@ import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.ExecutionListener;
 import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.fhir.variables.Outputs;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
@@ -41,10 +40,6 @@ public class EndListener implements ExecutionListener
 			{
 				// not in a subprocess --> end of main process, write process outputs to task
 				task = (Task) execution.getVariable(ConstantsBase.VARIABLE_LEADING_TASK);
-
-				Outputs outputs = (Outputs) execution.getVariable(ConstantsBase.VARIABLE_PROCESS_OUTPUTS);
-				task = taskHelper.addOutputs(task, outputs);
-
 				log(execution, task);
 			}
 			else

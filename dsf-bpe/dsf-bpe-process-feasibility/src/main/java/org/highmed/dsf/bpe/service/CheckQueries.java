@@ -14,9 +14,8 @@ import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.group.GroupHelper;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.FhirResourcesList;
-import org.highmed.dsf.fhir.variables.Outputs;
-import org.highmed.dsf.fhir.variables.OutputsValues;
 import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -43,17 +42,16 @@ public class CheckQueries extends AbstractServiceDelegate implements Initializin
 	@Override
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
-		Outputs outputs = (Outputs) execution.getVariable(ConstantsBase.VARIABLE_PROCESS_OUTPUTS);
 		List<Group> cohorts = ((FhirResourcesList) execution.getVariable(ConstantsFeasibility.VARIABLE_COHORTS))
 				.getResourcesAndCast();
 
 		Map<String, String> queries = new HashMap<>();
 
+		Task leadingTask = getLeadingTaskFromExecutionVariables();
 		cohorts.forEach(group -> {
 			String aqlQuery = groupHelper.extractAqlQuery(group).toLowerCase();
 
 			String groupId = group.getId();
-
 			if (!aqlQuery.startsWith(ConstantsFeasibility.SIMPLE_FEASIBILITY_QUERY_PREFIX))
 			{
 				String errorMessage =
@@ -62,15 +60,16 @@ public class CheckQueries extends AbstractServiceDelegate implements Initializin
 								+ ConstantsFeasibility.SIMPLE_FEASIBILITY_QUERY_PREFIX + "' but got '" + aqlQuery + "'";
 
 				logger.info(errorMessage);
-				outputs.addErrorOutput(errorMessage);
+				leadingTask.getOutput().add(getTaskHelper().createOutput(ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
+						ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, errorMessage));
 			}
 			else
 			{
 				queries.put(groupId, aqlQuery);
 			}
 		});
+		setLeadingTaskToExecutionVariables(leadingTask);
 
 		execution.setVariable(ConstantsFeasibility.VARIABLE_QUERIES, queries);
-		execution.setVariable(ConstantsBase.VARIABLE_PROCESS_OUTPUTS, OutputsValues.create(outputs));
 	}
 }

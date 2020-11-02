@@ -8,12 +8,12 @@ import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.bpe.variables.ConstantsFeasibility;
-import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
-import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.bpe.variables.FeasibilityQueryResult;
 import org.highmed.dsf.bpe.variables.FeasibilityQueryResults;
 import org.highmed.dsf.bpe.variables.FeasibilityQueryResultsValues;
-import org.highmed.dsf.fhir.variables.Outputs;
+import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
+import org.highmed.dsf.fhir.task.TaskHelper;
+import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,28 +29,29 @@ public class CheckSingleMedicResults extends AbstractServiceDelegate
 	@Override
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
-		Outputs outputs = (Outputs) execution.getVariable(ConstantsBase.VARIABLE_PROCESS_OUTPUTS);
-
 		FeasibilityQueryResults results = (FeasibilityQueryResults) execution
 				.getVariable(ConstantsFeasibility.VARIABLE_QUERY_RESULTS);
 
-		List<FeasibilityQueryResult> filteredResults = filterErronesResultsAndAddErrorsToOutput(results, outputs);
+		Task currentTask = getCurrentTaskFromExecutionVariables();
+		List<FeasibilityQueryResult> filteredResults = filterErroneousResultsAndAddErrorsToCurrentTaskOutputs(results, currentTask);
 
 		// TODO: add percentage filter over results
 
 		execution.setVariable(ConstantsFeasibility.VARIABLE_QUERY_RESULTS,
 				FeasibilityQueryResultsValues.create(new FeasibilityQueryResults(filteredResults)));
+
+		setCurrentTaskToExecutionVariables(currentTask);
 	}
 
-	private List<FeasibilityQueryResult> filterErronesResultsAndAddErrorsToOutput(FeasibilityQueryResults results,
-			Outputs outputs)
+	private List<FeasibilityQueryResult> filterErroneousResultsAndAddErrorsToCurrentTaskOutputs(
+			FeasibilityQueryResults results, Task task)
 	{
 		List<FeasibilityQueryResult> filteredResults = new ArrayList<>();
 		for (FeasibilityQueryResult result : results.getResults())
 		{
 			Optional<String> errorReason = testResultAndReturnErrorReason(result);
 			if (errorReason.isPresent())
-				addError(outputs, result.getCohortId(), errorReason.get());
+				addError(task, result.getCohortId(), errorReason.get());
 			else
 				filteredResults.add(result);
 		}
@@ -66,11 +67,12 @@ public class CheckSingleMedicResults extends AbstractServiceDelegate
 		return Optional.empty();
 	}
 
-	private void addError(Outputs outputs, String cohortId, String error)
+	private void addError(Task task, String cohortId, String error)
 	{
 		String errorMessage = "Feasibility query result check failed for group with id '" + cohortId + "': " + error;
-
 		logger.info(errorMessage);
-		outputs.addErrorOutput(errorMessage);
+
+		task.getOutput().add(getTaskHelper().createOutput(ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
+				ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, errorMessage));
 	}
 }
