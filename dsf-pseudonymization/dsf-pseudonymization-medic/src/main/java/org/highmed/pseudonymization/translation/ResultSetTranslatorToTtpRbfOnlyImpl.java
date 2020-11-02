@@ -6,9 +6,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.highmed.mpi.client.Idat;
+import org.highmed.mpi.client.IdatNotFoundException;
 import org.highmed.mpi.client.MasterPatientIndexClient;
 import org.highmed.openehr.model.datatypes.StringRowElement;
 import org.highmed.openehr.model.structure.Column;
@@ -17,7 +19,6 @@ import org.highmed.openehr.model.structure.ResultSet;
 import org.highmed.openehr.model.structure.RowElement;
 import org.highmed.pseudonymization.bloomfilter.RecordBloomFilter;
 import org.highmed.pseudonymization.bloomfilter.RecordBloomFilterGenerator;
-
 import org.highmed.pseudonymization.openehr.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,19 +28,55 @@ public class ResultSetTranslatorToTtpRbfOnlyImpl extends AbstractResultSetTransl
 {
 	private static final Logger logger = LoggerFactory.getLogger(ResultSetTranslatorToTtpRbfOnlyImpl.class);
 
+	public static final Function<Supplier<Idat>, Idat> FILTER_ON_IDAT_NOT_FOUND_EXCEPTION = supplier ->
+	{
+		try
+		{
+			return supplier.get();
+		}
+		catch (IdatNotFoundException e)
+		{
+			logger.warn("Error while retrieving IDAT, filtering entry: {}", e.getMessage());
+			return null;
+		}
+	};
+
+	public static final Function<Supplier<Idat>, Idat> THROW_ON_IDAT_NOT_FOUND_EXCEPTION = supplier ->
+	{
+		try
+		{
+			return supplier.get();
+		}
+		catch (IdatNotFoundException e)
+		{
+			logger.warn("Error while retrieving IDAT, throwing exception: {}", e.getMessage());
+			throw e;
+		}
+	};
+
 	private final String ehrIdColumnPath;
 
 	private final RecordBloomFilterGenerator recordBloomFilterGenerator;
 	private final MasterPatientIndexClient masterPatientIndexClient;
 
+	private final Function<Supplier<Idat>, Idat> retrieveIdatErrorHandler;
+
 	public ResultSetTranslatorToTtpRbfOnlyImpl(String ehrIdColumnPath,
-			RecordBloomFilterGenerator recordBloomFilterGenerator,
-			MasterPatientIndexClient masterPatientIndexClient)
+			RecordBloomFilterGenerator recordBloomFilterGenerator, MasterPatientIndexClient masterPatientIndexClient)
+	{
+		this(ehrIdColumnPath, recordBloomFilterGenerator, masterPatientIndexClient,
+				THROW_ON_IDAT_NOT_FOUND_EXCEPTION);
+	}
+
+	public ResultSetTranslatorToTtpRbfOnlyImpl(String ehrIdColumnPath,
+			RecordBloomFilterGenerator recordBloomFilterGenerator, MasterPatientIndexClient masterPatientIndexClient,
+			Function<Supplier<Idat>, Idat> retrieveIdatErrorHandler)
 	{
 		this.ehrIdColumnPath = Objects.requireNonNull(ehrIdColumnPath, "ehrIdColumnPath");
 		this.recordBloomFilterGenerator = Objects.requireNonNull(recordBloomFilterGenerator,
 				"recordBloomFilterGenerator");
 		this.masterPatientIndexClient = Objects.requireNonNull(masterPatientIndexClient, "masterPatientIndexClient");
+		this.retrieveIdatErrorHandler = retrieveIdatErrorHandler;
 	}
 
 	@Override
@@ -80,7 +117,8 @@ public class ResultSetTranslatorToTtpRbfOnlyImpl extends AbstractResultSetTransl
 
 	private List<List<RowElement>> encodeRowsWithEhrId(int ehrIdColumnIndex, List<List<RowElement>> rows)
 	{
-		return rows.parallelStream().map(encodeRowWithEhrId(ehrIdColumnIndex)).collect(Collectors.toList());
+		return rows.parallelStream().map(encodeRowWithEhrId(ehrIdColumnIndex)).filter(e -> e != null)
+				.collect(Collectors.toList());
 	}
 
 	private Function<List<RowElement>, List<RowElement>> encodeRowWithEhrId(int ehrIdColumnIndex)
@@ -88,7 +126,10 @@ public class ResultSetTranslatorToTtpRbfOnlyImpl extends AbstractResultSetTransl
 		return rowElements ->
 		{
 			RowElement ehrId = rowElements.get(ehrIdColumnIndex);
-			Idat idat = retrieveIdat(ehrId);
+			Idat idat = retrieveIdatErrorHandler.apply(() -> retrieveIdat(ehrId));
+
+			if (idat == null)
+				return null;
 
 			RowElement rbf = encodeAsRbf(idat);
 			return Collections.singletonList(rbf);
