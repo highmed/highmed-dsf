@@ -2,11 +2,12 @@ package org.highmed.dsf.bpe.service;
 
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE;
-import static org.highmed.dsf.bpe.ConstantsBase.VARIABLE_HAS_ERROR;
+import static org.highmed.dsf.bpe.variables.ConstantsFeasibility.ERROR_CODE_MULTI_MEDIC_RESULT;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
@@ -37,15 +38,20 @@ public class CheckTtpComputedMultiMedicResults extends AbstractServiceDelegate
 		Task task = (Task) execution.getVariable(ConstantsBase.VARIABLE_LEADING_TASK);
 		FinalFeasibilityQueryResults results = (FinalFeasibilityQueryResults) execution
 				.getVariable(ConstantsFeasibility.VARIABLE_FINAL_QUERY_RESULTS);
+
 		Outputs outputs = (Outputs) execution.getVariable(ConstantsBase.VARIABLE_PROCESS_OUTPUTS);
 
 		List<FinalFeasibilityQueryResult> filteredResults = filterResults(task, results, outputs);
-		boolean hasBlockingError = checkResultsSize(task, filteredResults);
 
-		execution.setVariable(VARIABLE_HAS_ERROR, hasBlockingError);
 		execution.setVariable(ConstantsFeasibility.VARIABLE_FINAL_QUERY_RESULTS,
 				FinalFeasibilityQueryResultsValues.create(new FinalFeasibilityQueryResults(filteredResults)));
+
+		boolean hasEnoughParticipatingMeDICs = checkNumberOfParticipatingMedics(task, filteredResults, outputs);
+
 		execution.setVariable(ConstantsBase.VARIABLE_PROCESS_OUTPUTS, outputs);
+
+		if (!hasEnoughParticipatingMeDICs)
+			throw new BpmnError(ERROR_CODE_MULTI_MEDIC_RESULT);
 	}
 
 	private List<FinalFeasibilityQueryResult> filterResults(Task task, FinalFeasibilityQueryResults results,
@@ -75,7 +81,8 @@ public class CheckTtpComputedMultiMedicResults extends AbstractServiceDelegate
 		}).collect(Collectors.toList());
 	}
 
-	private boolean checkResultsSize(Task task, List<FinalFeasibilityQueryResult> results)
+	private boolean checkNumberOfParticipatingMedics(Task task, List<FinalFeasibilityQueryResult> results,
+			Outputs outputs)
 	{
 		String taskId = task.getId();
 		String businessKey = getTaskHelper().getFirstInputParameterStringValue(task, CODESYSTEM_HIGHMED_BPMN,
@@ -89,9 +96,12 @@ public class CheckTtpComputedMultiMedicResults extends AbstractServiceDelegate
 							+ "feasibility request with task-id='{}', business-key='{}' " + "and correlation-key='{}'", taskId,
 					businessKey, correlationKey);
 
-			return true;
+			outputs.add(new Output(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE,
+					"Did not receive enough results from participating MeDICs for any cohort definition"));
+
+			return false;
 		}
 
-		return false;
+		return true;
 	}
 }

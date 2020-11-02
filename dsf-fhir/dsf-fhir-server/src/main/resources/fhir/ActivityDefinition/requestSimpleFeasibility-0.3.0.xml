@@ -71,7 +71,7 @@
 	</extension>
 	<extension url="http://highmed.org/fhir/StructureDefinition/process-authorization">
 		<extension url="message-name">
-			<valueString value="errorSimpleFeasibilityMessage" />
+			<valueString value="errorMultiMedicSimpleFeasibilityMessage" />
 		</extension>
 		<extension url="authorization-roles">
 			<extension url="authorization-role">

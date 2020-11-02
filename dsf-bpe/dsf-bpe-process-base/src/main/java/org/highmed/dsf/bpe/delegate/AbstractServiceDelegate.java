@@ -2,6 +2,7 @@ package org.highmed.dsf.bpe.delegate;
 
 import java.util.Objects;
 
+import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.highmed.dsf.bpe.ConstantsBase;
@@ -51,33 +52,48 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 		catch (Exception exception)
 		{
 			Task task;
+			boolean isLeadingTask = false;
 			if (execution.getParentId() == null || execution.getParentId().equals(execution.getProcessInstanceId()))
+			{
 				task = (Task) execution.getVariable(ConstantsBase.VARIABLE_LEADING_TASK);
+				isLeadingTask = true;
+			}
 			else
+			{
 				task = (Task) execution.getVariable(ConstantsBase.VARIABLE_TASK);
-
-			logger.debug("Error while executing service delegate " + getClass().getName(), exception);
-			logger.error("Process {} has fatal error in step {} for task with id {}, reason: {}",
-					execution.getProcessDefinitionId(), execution.getActivityInstanceId(), task.getId(),
-					exception.getMessage());
-
-			String errorMessage =
-					"Process " + execution.getProcessDefinitionId() + " has fatal error in step " + execution
-							.getActivityInstanceId() + ", reason: " + exception.getMessage();
-
-			Task.TaskOutputComponent errorOutput = taskHelper.createOutput(ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
-					ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, errorMessage);
-			task.addOutput(errorOutput);
-
-			Outputs outputs = (Outputs) execution.getVariable(ConstantsBase.VARIABLE_PROCESS_OUTPUTS);
-			task = taskHelper.addOutputs(task, outputs);
+			}
 
 			task.setStatus(Task.TaskStatus.FAILED);
-			webserviceClient.withMinimalReturn().update(task);
 
-			execution.getProcessEngine().getRuntimeService()
-					.deleteProcessInstance(execution.getProcessInstanceId(), exception.getMessage());
+			if (exception instanceof BpmnError)
+			{
+				// Error boundary event, do not stop process execution
+				execution.setVariable(isLeadingTask ? ConstantsBase.VARIABLE_LEADING_TASK : ConstantsBase.VARIABLE_TASK, task);
+				throw exception;
+			}
+			else
+			{
+				logger.debug("Error while executing service delegate " + getClass().getName(), exception);
+				logger.error("Process {} has fatal error in step {} for task with id {}, reason: {}",
+						execution.getProcessDefinitionId(), execution.getActivityInstanceId(), task.getId(),
+						exception.getMessage());
 
+				String errorMessage =
+						"Process " + execution.getProcessDefinitionId() + " has fatal error in step " + execution
+								.getActivityInstanceId() + ", reason: " + exception.getMessage();
+
+				Task.TaskOutputComponent errorOutput = taskHelper.createOutput(ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
+						ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, errorMessage);
+				task.addOutput(errorOutput);
+
+				Outputs outputs = (Outputs) execution.getVariable(ConstantsBase.VARIABLE_PROCESS_OUTPUTS);
+				task = taskHelper.addOutputs(task, outputs);
+
+				webserviceClient.withMinimalReturn().update(task);
+
+				execution.getProcessEngine().getRuntimeService()
+						.deleteProcessInstance(execution.getProcessInstanceId(), exception.getMessage());
+			}
 		}
 	}
 

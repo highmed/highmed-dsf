@@ -45,10 +45,10 @@
       <bpmn:outgoing>SequenceFlow_0yqpkri</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="SequenceFlow_0zlq6j4" name="else" sourceRef="ExclusiveGateway_1dln3in" targetRef="ExclusiveGateway_1r4c9fx">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${needsRecordLinkage == false &amp;&amp; needsConsentCheck == false}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!needsRecordLinkage &amp;&amp; !needsConsentCheck}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="SequenceFlow_0yqpkri" name="needs consent check and/or record linkage" sourceRef="ExclusiveGateway_1dln3in" targetRef="replaceCountpartWithIdSelection">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${needsRecordLinkage == true || needsConsentCheck == true}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${needsRecordLinkage || needsConsentCheck}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:serviceTask id="replaceCountpartWithIdSelection" name="replace countpart with id selection" camunda:class="org.highmed.dsf.bpe.service.ModifyQueries">
       <bpmn:incoming>SequenceFlow_0yqpkri</bpmn:incoming>
@@ -67,10 +67,10 @@
       <bpmn:outgoing>SequenceFlow_0isxkuy</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="SequenceFlow_05r9whd" name="else" sourceRef="ExclusiveGateway_0bq7zdz" targetRef="ExclusiveGateway_0lecmy5">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${needsConsentCheck == false}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!needsConsentCheck}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="SequenceFlow_0isxkuy" name="needs consent check" sourceRef="ExclusiveGateway_0bq7zdz" targetRef="filterByConsent">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${needsConsentCheck == true}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${needsConsentCheck}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:serviceTask id="filterByConsent" name="filter by consent" camunda:class="org.highmed.dsf.bpe.service.FilterQueryResultsByConsent">
       <bpmn:incoming>SequenceFlow_0isxkuy</bpmn:incoming>
@@ -90,10 +90,10 @@
       <bpmn:outgoing>SequenceFlow_0kfeekm</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="SequenceFlow_17otl7p" name="else" sourceRef="ExclusiveGateway_0sff9xb" targetRef="ExclusiveGateway_002t87f">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${needsRecordLinkage == false &amp;&amp; needsConsentCheck == false}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!needsRecordLinkage &amp;&amp; !needsConsentCheck}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="SequenceFlow_1futlo2" name="needs record linkage" sourceRef="ExclusiveGateway_0sff9xb" targetRef="generateBloomFilters">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${needsRecordLinkage == true}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${needsRecordLinkage}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:serviceTask id="generateBloomFilters" name="generate bloom filters" camunda:class="org.highmed.dsf.bpe.service.GenerateBloomFilters">
       <bpmn:incoming>SequenceFlow_1futlo2</bpmn:incoming>
@@ -108,7 +108,7 @@
     <bpmn:sequenceFlow id="SequenceFlow_0q803rh" sourceRef="ExclusiveGateway_002t87f" targetRef="checkResults" />
     <bpmn:sequenceFlow id="SequenceFlow_1ug2kru" sourceRef="generateBloomFilters" targetRef="ExclusiveGateway_002t87f" />
     <bpmn:sequenceFlow id="SequenceFlow_0kfeekm" name="needs consent check and no record linkage" sourceRef="ExclusiveGateway_0sff9xb" targetRef="countIds">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${needsConsentCheck == true &amp;&amp; needsRecordLinkage == false}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${needsConsentCheck &amp;&amp; !needsRecordLinkage}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="SequenceFlow_1kpvsx9" sourceRef="countIds" targetRef="ExclusiveGateway_002t87f" />
     <bpmn:serviceTask id="countIds" name="count id&#39;s" camunda:class="org.highmed.dsf.bpe.service.GenerateCountFromIds">
