@@ -9,9 +9,9 @@
 	<version value="4.0.1"/>
 	<name value="IANA_Media_Types" />
 	<title value="IANA Media Types" />
-	<status value="active" />
+	<status value="draft" />
 	<experimental value="false" />
-	<date value="2020-05-29" />
+	<date value="2020-11-03" />
 	<publisher value="IANA" />
 	<description value="Multipurpose Internet Mail Extensions (MIME) and Media Types as published by IANA at https://www.iana.org/assignments/media-types/media-types.xml" />
 	<caseSensitive value="true" />

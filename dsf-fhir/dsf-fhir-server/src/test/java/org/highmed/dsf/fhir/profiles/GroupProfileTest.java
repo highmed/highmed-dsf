@@ -25,8 +25,8 @@ public class GroupProfileTest
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
 			Arrays.asList("highmed-extension-query-0.3.0.xml", "highmed-group-0.3.0.xml"),
-			Arrays.asList("authorization-role-0.2.0.xml", "query-type-0.3.0.xml"),
-			Arrays.asList("authorization-role-0.2.0.xml", "query-type-0.3.0.xml"));
+			Arrays.asList("authorization-role-0.3.0.xml", "query-type-0.3.0.xml"),
+			Arrays.asList("authorization-role-0.3.0.xml", "query-type-0.3.0.xml"));
 
 	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());

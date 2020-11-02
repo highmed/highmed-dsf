@@ -46,10 +46,10 @@ public class TaskProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			Arrays.asList("highmed-task-base-0.3.0.xml", "highmed-task-start-ping-process-0.2.0.xml",
-					"highmed-task-ping-0.2.0.xml", "highmed-task-pong-0.2.0.xml",
-					"highmed-task-update-allow-list-0.3.0.xml", "highmed-task-request-update-resources-0.2.0.xml",
-					"highmed-task-execute-update-resources-0.2.0.xml", "highmed-group-0.3.0.xml",
+			Arrays.asList("highmed-task-base-0.3.0.xml", "highmed-task-start-ping-process-0.3.0.xml",
+					"highmed-task-ping-0.3.0.xml", "highmed-task-pong-0.3.0.xml",
+					"highmed-task-update-allow-list-0.3.0.xml", "highmed-task-request-update-resources-0.3.0.xml",
+					"highmed-task-execute-update-resources-0.3.0.xml", "highmed-group-0.3.0.xml",
 					"highmed-extension-group-id-0.3.0.xml", "highmed-research-study-feasibility-0.3.0.xml",
 					"highmed-task-request-simple-feasibility-0.3.0.xml",
 					"highmed-task-execute-simple-feasibility-0.3.0.xml",
@@ -58,10 +58,10 @@ public class TaskProfileTest
 					"highmed-task-multi-medic-result-simple-feasibility-0.3.0.xml",
 					"highmed-task-error-simple-feasibility-0.3.0.xml",
 					"highmed-task-local-services-integration-0.3.0.xml", "highmed-task-download-allow-list-0.3.0.xml"),
-			Arrays.asList("authorization-role-0.2.0.xml", "bpmn-message-0.2.0.xml", "update-allow-list-0.3.0.xml",
-					"update-resources-0.2.0.xml", "feasibility-0.3.0.xml"),
-			Arrays.asList("authorization-role-0.2.0.xml", "bpmn-message-0.2.0.xml", "update-allow-list-0.3.0.xml",
-					"update-resources-0.2.0.xml", "feasibility-0.3.0.xml"));
+			Arrays.asList("authorization-role-0.3.0.xml", "bpmn-message-0.3.0.xml", "update-allow-list-0.3.0.xml",
+					"update-resources-0.3.0.xml", "feasibility-0.3.0.xml"),
+			Arrays.asList("authorization-role-0.3.0.xml", "bpmn-message-0.3.0.xml", "update-allow-list-0.3.0.xml",
+					"update-resources-0.3.0.xml", "feasibility-0.3.0.xml"));
 
 	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
@@ -74,7 +74,7 @@ public class TaskProfileTest
 		StructureDefinition base = reader
 				.readXml(Paths.get("src/main/resources/fhir/StructureDefinition/highmed-task-base-0.3.0.xml"));
 		StructureDefinition differential = reader.readXml(Paths.get(
-				"src/main/resources/fhir/StructureDefinition/highmed-task-execute-update-resources-0.2.0.xml"));
+				"src/main/resources/fhir/StructureDefinition/highmed-task-execute-update-resources-0.3.0.xml"));
 
 		var validationSupport = new ValidationSupportChain(
 				new InMemoryTerminologyServerValidationSupport(validationRule.getFhirContext()),
@@ -146,7 +146,7 @@ public class TaskProfileTest
 	{
 		Task task = new Task();
 		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-ping-process");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.2.0");
+		task.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.3.0");
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
@@ -178,7 +178,7 @@ public class TaskProfileTest
 	{
 		Task task = new Task();
 		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-ping");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/pong/0.2.0");
+		task.setInstantiatesUri("http://highmed.org/bpe/Process/pong/0.3.0");
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
@@ -214,7 +214,7 @@ public class TaskProfileTest
 	{
 		Task task = new Task();
 		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-pong");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.2.0");
+		task.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.3.0");
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
@@ -330,7 +330,7 @@ public class TaskProfileTest
 	{
 		Task task = new Task();
 		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-request-update-resources");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/requestUpdateResources/0.2.0");
+		task.setInstantiatesUri("http://highmed.org/bpe/Process/requestUpdateResources/0.3.0");
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
@@ -367,7 +367,7 @@ public class TaskProfileTest
 	{
 		Task task = new Task();
 		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-execute-update-resources");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/executeUpdateResources/0.2.0");
+		task.setInstantiatesUri("http://highmed.org/bpe/Process/executeUpdateResources/0.3.0");
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());

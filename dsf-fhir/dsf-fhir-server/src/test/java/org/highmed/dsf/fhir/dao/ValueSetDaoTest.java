@@ -62,7 +62,7 @@ public class ValueSetDaoTest extends AbstractResourceDaoTest<ValueSet, ValueSetD
 	@Override
 	public String getVersion()
 	{
-		return "0.2.0";
+		return "0.3.0";
 	}
 
 	@Override

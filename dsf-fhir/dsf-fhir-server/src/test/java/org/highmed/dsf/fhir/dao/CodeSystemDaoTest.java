@@ -62,7 +62,7 @@ public class CodeSystemDaoTest extends AbstractResourceDaoTest<CodeSystem, CodeS
 	@Override
 	public String getVersion()
 	{
-		return "0.2.0";
+		return "0.3.0";
 	}
 
 	@Override
