@@ -36,7 +36,7 @@ public class SendMultiMedicErrors extends AbstractTaskMessageSend
 
 		Task.ParameterComponent input = getTaskHelper()
 				.createInput(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE,
-						"A fatal error occurred while calculating the multi medic feasibility result for "
+						"An error occurred while calculating the multi medic feasibility result for "
 								+ "all defined cohorts, see task with url='" + taskUrl + "'");
 		return Stream.of(input);
 	}

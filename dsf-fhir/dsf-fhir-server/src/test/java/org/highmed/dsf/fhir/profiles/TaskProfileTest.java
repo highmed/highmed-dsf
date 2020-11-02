@@ -743,14 +743,14 @@ public class TaskProfileTest
 		task.getRestriction().addRecipient().setType("Organization").getIdentifier()
 				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_MeDIC_1");
 
-		task.addInput().setValue(new StringType("errorSimpleFeasibilityMessage")).getType().addCoding()
+		task.addInput().setValue(new StringType("errorMultiMedicSimpleFeasibilityMessage")).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("message-name");
 		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("business-key");
 
 		ParameterComponent error = task.addInput();
 		error.setValue(new StringType(
-				"A fatal error occurred while calculating the multi medic feasibility result for all defined cohorts"))
+				"An error occurred while calculating the multi medic feasibility result for all defined cohorts"))
 				.getType().addCoding().setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("error");
 
 		return task;
