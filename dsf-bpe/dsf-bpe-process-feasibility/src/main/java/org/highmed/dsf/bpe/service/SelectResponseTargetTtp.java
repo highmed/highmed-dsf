@@ -44,7 +44,7 @@ public class SelectResponseTargetTtp extends AbstractServiceDelegate implements 
 
 	private String getCorrelationKey(DelegateExecution execution)
 	{
-		Task task = (Task) execution.getVariable(ConstantsBase.VARIABLE_TASK);
+		Task task = getCurrentTaskFromExecutionVariables();
 
 		return getTaskHelper().getFirstInputParameterStringValue(task, ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
 				ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY).orElseThrow(

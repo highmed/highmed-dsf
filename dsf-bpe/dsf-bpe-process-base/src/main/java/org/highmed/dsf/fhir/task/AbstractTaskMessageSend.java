@@ -11,7 +11,6 @@ import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.variables.MultiInstanceTarget;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargets;
-import org.highmed.dsf.fhir.variables.Outputs;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -81,14 +80,15 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 			logger.warn(errorMessage);
 			logger.debug("Error while sending Task", e);
 
-			Outputs outputs = (Outputs) execution.getVariable(ConstantsBase.VARIABLE_PROCESS_OUTPUTS);
-			outputs.addErrorOutput(errorMessage);
-
 			logger.debug("Removing target organization {} with error {} from multi instance target list",
 					target.getTargetOrganizationIdentifierValue(), e.getMessage());
 			MultiInstanceTargets targets = (MultiInstanceTargets) execution
 					.getVariable(ConstantsBase.VARIABLE_MULTI_INSTANCE_TARGETS);
 			targets.removeTarget(target);
+
+			Task task = getLeadingTaskFromExecutionVariables();
+			task.addOutput(getTaskHelper().createOutput(ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
+					ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, errorMessage));
 		}
 	}
 

@@ -101,9 +101,12 @@ public class SelectRequestTargets extends AbstractServiceDelegate
 
 	private MultiInstanceTarget getTtpTarget(ResearchStudy researchStudy)
 	{
+		// correlation key is null because only one recipient and therefore message-name based correlation
+		// is sufficient --> see https://github.com/highmed/highmed-dsf/issues/144
+		// TODO: replace MultiInstanceTarget with SingleInstanceTarget
 		return researchStudy.getExtensionsByUrl(ConstantsFeasibility.EXTENSION_PARTICIPATING_TTP_URI).stream()
 				.filter(e -> e.getValue() instanceof Reference).map(e -> (Reference) e.getValue())
-				.map(r -> new MultiInstanceTarget(r.getIdentifier().getValue(), UUID.randomUUID().toString()))
+				.map(r -> new MultiInstanceTarget(r.getIdentifier().getValue(), null))
 				.findFirst().get();
 	}
 }

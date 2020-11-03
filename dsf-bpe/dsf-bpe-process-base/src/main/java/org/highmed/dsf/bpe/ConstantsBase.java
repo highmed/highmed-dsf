@@ -19,12 +19,6 @@ public interface ConstantsBase
 	String VARIABLE_TTP_IDENTIFIER = "ttp";
 
 	/**
-	 * Stores a List<{@link org.highmed.dsf.fhir.variables.Outputs}> </>of outputs that have to be written to a task
-	 * resource after the process terminates. Do not override, only add new entries to the list.
-	 */
-	String VARIABLE_PROCESS_OUTPUTS = "outputs";
-
-	/**
 	 * Used to distinguish if I am at the moment in a process called by another process by a CallActivity or not
 	 */
 	String VARIABLE_IN_CALLED_PROCESS = "inCalledProcess";

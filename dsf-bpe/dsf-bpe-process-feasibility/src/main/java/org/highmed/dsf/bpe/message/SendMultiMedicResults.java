@@ -1,17 +1,23 @@
 package org.highmed.dsf.bpe.message;
 
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN;
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE;
+
+import java.util.List;
 import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.variables.ConstantsFeasibility;
+import org.highmed.dsf.bpe.variables.FinalFeasibilityQueryResult;
+import org.highmed.dsf.bpe.variables.FinalFeasibilityQueryResults;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.AbstractTaskMessageSend;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.bpe.variables.FinalFeasibilityQueryResult;
-import org.highmed.dsf.bpe.variables.FinalFeasibilityQueryResults;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.ParameterComponent;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -30,7 +36,10 @@ public class SendMultiMedicResults extends AbstractTaskMessageSend
 		FinalFeasibilityQueryResults results = (FinalFeasibilityQueryResults) execution
 				.getVariable(ConstantsFeasibility.VARIABLE_FINAL_QUERY_RESULTS);
 
-		return results.getResults().stream().flatMap(this::toInputs);
+		Stream<ParameterComponent> resultInputs = results.getResults().stream().flatMap(this::toInputs);
+		Stream<ParameterComponent> errorInput = getErrorInput(execution);
+
+		return Stream.concat(resultInputs, errorInput);
 	}
 
 	private Stream<ParameterComponent> toInputs(FinalFeasibilityQueryResult result)
@@ -53,5 +62,33 @@ public class SendMultiMedicResults extends AbstractTaskMessageSend
 	private Extension createCohortIdExtension(String cohortId)
 	{
 		return new Extension(ConstantsFeasibility.EXTENSION_GROUP_ID_URI, new Reference(cohortId));
+	}
+
+	private Stream<ParameterComponent> getErrorInput(DelegateExecution execution)
+	{
+		List<Task.TaskOutputComponent> outputs = getLeadingTaskFromExecutionVariables().getOutput();
+
+		if (hasErrorOutput(outputs))
+		{
+			Task task = getLeadingTaskFromExecutionVariables();
+
+			String taskUrl = new Reference(new IdType(getFhirWebserviceClientProvider().getLocalBaseUrl() + "/Task",
+					task.getIdElement().getIdPart())).getReference();
+
+			Task.ParameterComponent input = getTaskHelper()
+					.createInput(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE,
+							"Errors occurred for missing cohorts while calculating their multi medic feasibility "
+									+ "result, see task with url='" + taskUrl + "'");
+			return Stream.of(input);
+		}
+
+		return Stream.empty();
+	}
+
+	private boolean hasErrorOutput(List<Task.TaskOutputComponent> outputs)
+	{
+		return outputs.stream().anyMatch(output -> output.getType().getCoding().stream().anyMatch(
+				coding -> coding.getSystem().equals(CODESYSTEM_HIGHMED_BPMN) && coding.getCode()
+						.equals(CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE)));
 	}
 }

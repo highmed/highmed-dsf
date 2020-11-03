@@ -149,7 +149,7 @@ public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter
 
 		task.getMeta()
 				.addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-request-simple-feasibility");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/requestSimpleFeasibility/0.2.0");
+		task.setInstantiatesUri("http://highmed.org/bpe/Process/requestSimpleFeasibility/0.3.0");
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());

@@ -28,7 +28,6 @@ public class CalculateMultiMedicResults extends AbstractServiceDelegate
 		List<FeasibilityQueryResult> results = ((FeasibilityQueryResults) execution
 				.getVariable(ConstantsFeasibility.VARIABLE_QUERY_RESULTS)).getResults();
 
-		// TODO: add percentage filter over result
 		List<FinalFeasibilityQueryResult> finalResults = calculateResults(results);
 
 		execution.setVariable(ConstantsFeasibility.VARIABLE_FINAL_QUERY_RESULTS,

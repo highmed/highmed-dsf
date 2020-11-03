@@ -84,7 +84,7 @@ public class UpdateAllowList extends AbstractServiceDelegate implements Initiali
 						Collections.singletonList(ConstantsUpdateAllowList.CODESYSTEM_HIGHMED_UPDATE_ALLOW_LIST + "|"
 								+ ConstantsUpdateAllowList.CODESYSTEM_HIGHMED_UPDATE_ALLOW_LIST_VALUE_ALLOW_LIST)));
 
-		Task task = (Task) execution.getVariable(ConstantsBase.VARIABLE_LEADING_TASK);
+		Task task = getLeadingTaskFromExecutionVariables();
 		task.addOutput().setValue(new Reference(new IdType("Bundle", result.getIdPart(), result.getVersionIdPart())))
 				.getType().addCoding().setSystem(ConstantsUpdateAllowList.CODESYSTEM_HIGHMED_UPDATE_ALLOW_LIST)
 				.setCode(ConstantsUpdateAllowList.CODESYSTEM_HIGHMED_UPDATE_ALLOW_LIST_VALUE_ALLOW_LIST);

@@ -2,7 +2,6 @@ package org.highmed.dsf.bpe.service;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -50,7 +49,7 @@ public class SelectResourceAndTargets extends AbstractServiceDelegate implements
 	@Override
 	public void doExecute(DelegateExecution execution) throws Exception
 	{
-		Task task = (Task) execution.getVariable(ConstantsBase.VARIABLE_TASK);
+		Task task = getCurrentTaskFromExecutionVariables();
 		List<Reference> references = getTaskHelper()
 				.getInputParameterReferenceValues(task, ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE,
 						ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE)
@@ -76,9 +75,12 @@ public class SelectResourceAndTargets extends AbstractServiceDelegate implements
 						ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_ORGANIZATION_IDENTIFIER_SEARCH_PARAMETER)
 				.collect(Collectors.toList());
 
+		// correlation key is null because no backwards communication is needed
+		// --> see https://github.com/highmed/highmed-dsf/issues/144
+		// TODO: replace MultiInstanceTarget with SingleInstanceTarget
 		List<MultiInstanceTarget> targets = targetIdentifierSearchParameters.stream()
 				.flatMap(organizationProvider::searchRemoteOrganizationsIdentifiers)
-				.map(identifier -> new MultiInstanceTarget(identifier.getValue(), UUID.randomUUID().toString()))
+				.map(identifier -> new MultiInstanceTarget(identifier.getValue(), null))
 				.collect(Collectors.toList());
 		execution.setVariable("multiInstanceTargets",
 				MultiInstanceTargetsValues.create(new MultiInstanceTargets(targets)));

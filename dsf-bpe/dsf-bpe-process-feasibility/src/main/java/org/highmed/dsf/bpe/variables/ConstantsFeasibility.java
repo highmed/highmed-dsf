@@ -11,6 +11,8 @@ public interface ConstantsFeasibility
 	String VARIABLE_NEEDS_CONSENT_CHECK = "needsConsentCheck";
 	String VARIABLE_NEEDS_RECORD_LINKAGE = "needsRecordLinkage";
 
+	String ERROR_CODE_MULTI_MEDIC_RESULT = "errorMultiMedicSimpleFeasibilityResult";
+
 	String CODESYSTEM_HIGHMED_FEASIBILITY = "http://highmed.org/fhir/CodeSystem/feasibility";
 	String CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDIC_CORRELATION_KEY = "medic-correlation-key";
 	String CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_CONSENT_CHECK = "needs-consent-check";

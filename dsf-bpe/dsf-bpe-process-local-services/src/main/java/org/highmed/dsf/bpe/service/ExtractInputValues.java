@@ -30,7 +30,7 @@ public class ExtractInputValues extends AbstractServiceDelegate implements Initi
 	@Override
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
-		Task task = (Task) execution.getVariable(ConstantsBase.VARIABLE_TASK);
+		Task task = getCurrentTaskFromExecutionVariables();
 
 		Stream<String> queries = getQueries(task);
 		List<Group> cohortDefinitions = getCohortDefinitions(queries);

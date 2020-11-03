@@ -6,8 +6,6 @@ import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.ExecutionListener;
 import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.fhir.variables.Outputs;
-import org.highmed.dsf.fhir.variables.OutputsValues;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,9 +38,6 @@ public class StartListener implements ExecutionListener
 			// sets initial task variable a second time in a different variable. subprocesses which start
 			// with a task resource override the initially set task variable
 			execution.setVariable(ConstantsBase.VARIABLE_LEADING_TASK, task);
-
-			// initialized process outputs variable, used in the EndListener
-			execution.setVariable(ConstantsBase.VARIABLE_PROCESS_OUTPUTS, OutputsValues.create(new Outputs()));
 
 			log(execution, task);
 		}

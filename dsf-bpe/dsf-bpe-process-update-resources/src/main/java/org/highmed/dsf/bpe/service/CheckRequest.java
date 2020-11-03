@@ -37,7 +37,7 @@ public class CheckRequest extends AbstractServiceDelegate implements Initializin
 	@Override
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
-		Task task = (Task) execution.getVariable(ConstantsBase.VARIABLE_TASK);
+		Task task = getCurrentTaskFromExecutionVariables();
 
 		if (requesterIsNotOfTypeTtp(task.getRequester().getIdentifier()))
 		{
