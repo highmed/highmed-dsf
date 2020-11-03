@@ -48,7 +48,7 @@
 	<name value="ExecuteUpdateResources" />
 	<title value="Execute Update of Resources" />
 	<subtitle value="Process to Download and Execute FHIR Bundle" />
-	<status value="draft" />
+	<status value="active" />
 	<experimental value="false" />
 	<date value="2020-11-03" />
 	<publisher value="HiGHmed" />
