@@ -31,7 +31,6 @@ public class StoreResult extends AbstractServiceDelegate implements Initializing
 				.getVariable(ConstantsFeasibility.VARIABLE_QUERY_RESULTS);
 
 		addOutputs(task, results);
-		setCurrentTaskToExecutionVariables(task);
 	}
 
 	private void addOutputs(Task task, FeasibilityQueryResults results)

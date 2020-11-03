@@ -39,8 +39,6 @@ public class CheckSingleMedicResults extends AbstractServiceDelegate
 
 		execution.setVariable(ConstantsFeasibility.VARIABLE_QUERY_RESULTS,
 				FeasibilityQueryResultsValues.create(new FeasibilityQueryResults(filteredResults)));
-
-		setCurrentTaskToExecutionVariables(currentTask);
 	}
 
 	private List<FeasibilityQueryResult> filterErroneousResultsAndAddErrorsToCurrentTaskOutputs(

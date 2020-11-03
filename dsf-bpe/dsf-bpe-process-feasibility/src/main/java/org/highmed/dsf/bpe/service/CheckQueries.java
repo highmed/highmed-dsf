@@ -68,7 +68,6 @@ public class CheckQueries extends AbstractServiceDelegate implements Initializin
 				queries.put(groupId, aqlQuery);
 			}
 		});
-		setLeadingTaskToExecutionVariables(leadingTask);
 
 		execution.setVariable(ConstantsFeasibility.VARIABLE_QUERIES, queries);
 	}

@@ -37,7 +37,6 @@ public class CheckMultiMedicResults extends AbstractServiceDelegate
 		FinalFeasibilityQueryResults checkedResults = checkResults(results);
 
 		addFinalFeasibilityQueryResultsToLeadingTask(checkedResults, leadingTask);
-		setLeadingTaskToExecutionVariables(leadingTask);
 
 		// The current task finishes here but is not automatically set to completed
 		// because it is an additional task during the execution of the main process
