@@ -11,7 +11,7 @@ import java.util.UUID;
 
 import javax.ws.rs.WebApplicationException;
 
-import org.highmed.dsf.bpe.Constants;
+import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.highmed.dsf.fhir.service.ReferenceCleanerImpl;
 import org.highmed.dsf.fhir.service.ReferenceExtractorImpl;
@@ -37,6 +37,7 @@ import org.hl7.fhir.r4.model.Task.TaskIntent;
 import org.hl7.fhir.r4.model.Task.TaskStatus;
 
 import ca.uhn.fhir.context.FhirContext;
+
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.CertificateReader;
 
@@ -100,8 +101,9 @@ public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter
 		group.setType(GroupType.PERSON);
 		group.setActual(false);
 		group.setActive(true);
-		group.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/query").setValue(new Expression()
-				.setLanguageElement(Constants.AQL_QUERY_TYPE).setExpression("SELECT COUNT(e) FROM EHR e"));
+		group.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/query").setValue(
+				new Expression().setLanguageElement(ConstantsBase.AQL_QUERY_TYPE)
+						.setExpression("SELECT COUNT(e) FROM EHR e"));
 		group.setName(name);
 
 		return group;
@@ -120,25 +122,21 @@ public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter
 		researchStudy.addEnrollment().setReference(group1.getIdElement().getIdPart());
 		researchStudy.addEnrollment().setReference(group2.getIdElement().getIdPart());
 
-		researchStudy.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/participating-medic")
-				.setValue(new Reference().setType("Organization")
-						.setIdentifier(new Identifier()
-								.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
+		researchStudy.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/participating-medic").setValue(
+				new Reference().setType("Organization").setIdentifier(
+						new Identifier().setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
 								.setValue("Test_MeDIC_1")));
-		researchStudy.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/participating-medic")
-				.setValue(new Reference().setType("Organization")
-						.setIdentifier(new Identifier()
-								.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
+		researchStudy.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/participating-medic").setValue(
+				new Reference().setType("Organization").setIdentifier(
+						new Identifier().setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
 								.setValue("Test_MeDIC_2")));
-		researchStudy.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/participating-medic")
-				.setValue(new Reference().setType("Organization")
-						.setIdentifier(new Identifier()
-								.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
+		researchStudy.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/participating-medic").setValue(
+				new Reference().setType("Organization").setIdentifier(
+						new Identifier().setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
 								.setValue("Test_MeDIC_3")));
-		researchStudy.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/participating-ttp")
-				.setValue(new Reference().setType("Organization")
-						.setIdentifier(new Identifier()
-								.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
+		researchStudy.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/participating-ttp").setValue(
+				new Reference().setType("Organization").setIdentifier(
+						new Identifier().setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
 								.setValue("Test_TTP")));
 
 		return researchStudy;
@@ -151,7 +149,7 @@ public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter
 
 		task.getMeta()
 				.addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-request-simple-feasibility");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/requestSimpleFeasibility/0.2.0");
+		task.setInstantiatesUri("http://highmed.org/bpe/Process/requestSimpleFeasibility/0.3.0");
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
@@ -162,9 +160,8 @@ public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter
 
 		task.addInput().setValue(new StringType("requestSimpleFeasibilityMessage")).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("message-name");
-		task.addInput()
-				.setValue(
-						new Reference().setReference(researchStudy.getIdElement().getIdPart()).setType("ResearchStudy"))
+		task.addInput().setValue(
+				new Reference().setReference(researchStudy.getIdElement().getIdPart()).setType("ResearchStudy"))
 				.getType().addCoding().setSystem("http://highmed.org/fhir/CodeSystem/feasibility")
 				.setCode("research-study-reference");
 		task.addInput().setValue(new BooleanType(true)).getType().addCoding()

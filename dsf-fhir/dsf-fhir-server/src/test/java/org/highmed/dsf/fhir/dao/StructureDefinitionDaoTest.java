@@ -2,12 +2,9 @@ package org.highmed.dsf.fhir.dao;
 
 import static org.junit.Assert.assertEquals;
 
-import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.dsf.fhir.dao.jdbc.StructureDefinitionDaoJdbc;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.junit.Test;
-
-import ca.uhn.fhir.context.FhirContext;
 
 public class StructureDefinitionDaoTest extends AbstractResourceDaoTest<StructureDefinition, StructureDefinitionDao>
 		implements ReadByUrlDaoTest<StructureDefinition>
@@ -17,13 +14,7 @@ public class StructureDefinitionDaoTest extends AbstractResourceDaoTest<Structur
 
 	public StructureDefinitionDaoTest()
 	{
-		super(StructureDefinition.class);
-	}
-
-	@Override
-	protected StructureDefinitionDao createDao(BasicDataSource dataSource, FhirContext fhirContext)
-	{
-		return new StructureDefinitionDaoJdbc(dataSource, fhirContext);
+		super(StructureDefinition.class, StructureDefinitionDaoJdbc::new);
 	}
 
 	@Override
@@ -71,7 +62,7 @@ public class StructureDefinitionDaoTest extends AbstractResourceDaoTest<Structur
 	@Override
 	public String getVersion()
 	{
-		return "0.2.0";
+		return "0.3.0";
 	}
 
 	@Override

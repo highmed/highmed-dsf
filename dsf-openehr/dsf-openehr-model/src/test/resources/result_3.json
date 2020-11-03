@@ -2,17 +2,17 @@
   "meta": {
     "_type": "RESULTSET",
     "_created": "2019-10-07T19:11:52.892Z",
-    "_executed_aql": "select a_a as Full_Composition,    e/ehr_id/value as EHR_ID from EHR e contains COMPOSITION a contains OBSERVATION a_a[openEHR-EHR-OBSERVATION.body_temperature.v1] offset 0 limit 100 "
+    "_executed_aql": "select a_a as Full_Composition,    e/ehr_status/subject/external_ref/id/value as EHRID from EHR e contains COMPOSITION a contains OBSERVATION a_a[openEHR-EHR-OBSERVATION.body_temperature.v1] offset 0 limit 100 "
   },
-  "q": "select a_a as Full_Composition,    e/ehr_id/value as EHR_ID from EHR e contains COMPOSITION a contains OBSERVATION a_a[openEHR-EHR-OBSERVATION.body_temperature.v1] offset 0 limit 100 ",
+  "q": "select a_a as Full_Composition,    e/ehr_status/subject/external_ref/id/value as EHRID from EHR e contains COMPOSITION a contains OBSERVATION a_a[openEHR-EHR-OBSERVATION.body_temperature.v1] offset 0 limit 100 ",
   "columns": [
     {
       "name": "Full_Composition",
       "path": "/"
     },
     {
-      "name": "EHR_ID",
-      "path": "/ehr_id/value"
+      "name": "EHRID",
+      "path": "/ehr_status/subject/external_ref/id/value"
     }
   ],
   "rows": [

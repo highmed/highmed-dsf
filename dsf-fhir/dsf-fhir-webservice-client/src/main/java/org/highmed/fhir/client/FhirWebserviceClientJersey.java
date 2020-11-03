@@ -95,8 +95,8 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 	private final ReferenceCleaner referenceCleaner;
 	private final Map<String, Class<?>> resourceTypeByNames = new HashMap<>();
 
-	private final PreferReturnMinimal preferReturnMinimal;
-	private final PreferReturnOutcome preferReturnOutcome;
+	private final PreferReturnMinimalWithRetry preferReturnMinimal;
+	private final PreferReturnOutcomeWithRetry preferReturnOutcome;
 
 	public FhirWebserviceClientJersey(String baseUrl, KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword,
 			String proxySchemeHostPort, String proxyUserName, char[] proxyPassword, int connectTimeout, int readTimeout,
@@ -110,8 +110,8 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		registeredComponents.stream().filter(e -> e instanceof AbstractFhirAdapter).map(e -> (AbstractFhirAdapter<?>) e)
 				.forEach(a -> resourceTypeByNames.put(a.getResourceTypeName(), a.getResourceType()));
 
-		preferReturnMinimal = createPreferReturnMinimal();
-		preferReturnOutcome = createPreferReturnOutcome();
+		preferReturnMinimal = new PreferReturnMinimalWithRetryImpl(this);
+		preferReturnOutcome = new PreferReturnOutcomeWithRetryImpl(this);
 	}
 
 	public static List<AbstractFhirAdapter<?>> components(FhirContext fhirContext)
@@ -139,117 +139,6 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 				new SubscriptionXmlFhirAdapter(fhirContext), new TaskJsonFhirAdapter(fhirContext),
 				new TaskXmlFhirAdapter(fhirContext), new ValueSetJsonFhirAdapter(fhirContext),
 				new ValueSetXmlFhirAdapter(fhirContext));
-	}
-
-	private PreferReturnMinimal createPreferReturnMinimal()
-	{
-		return new PreferReturnMinimal()
-		{
-			@Override
-			public IdType create(Resource resource)
-			{
-				return FhirWebserviceClientJersey.this.create(PreferReturnType.MINIMAL, resource).getId();
-			}
-
-			@Override
-			public IdType createConditionaly(Resource resource, String ifNoneExistCriteria)
-			{
-				return FhirWebserviceClientJersey.this
-						.createConditionaly(PreferReturnType.MINIMAL, resource, ifNoneExistCriteria).getId();
-			}
-
-			@Override
-			public IdType createBinary(InputStream in, MediaType mediaType, String securityContextReference)
-			{
-				return FhirWebserviceClientJersey.this
-						.createBinary(PreferReturnType.MINIMAL, in, mediaType, securityContextReference).getId();
-			}
-
-			@Override
-			public IdType update(Resource resource)
-			{
-				return FhirWebserviceClientJersey.this.update(PreferReturnType.MINIMAL, resource).getId();
-			}
-
-			@Override
-			public IdType updateConditionaly(Resource resource, Map<String, List<String>> criteria)
-			{
-				return FhirWebserviceClientJersey.this.updateConditionaly(PreferReturnType.MINIMAL, resource, criteria)
-						.getId();
-			}
-
-			@Override
-			public IdType updateBinary(String id, InputStream in, MediaType mediaType, String securityContextReference)
-			{
-				return FhirWebserviceClientJersey.this
-						.updateBinary(PreferReturnType.MINIMAL, id, in, mediaType, securityContextReference).getId();
-			}
-
-			@Override
-			public Bundle postBundle(Bundle bundle)
-			{
-				return FhirWebserviceClientJersey.this.postBundle(PreferReturnType.MINIMAL, bundle);
-			}
-		};
-	}
-
-	private PreferReturnOutcome createPreferReturnOutcome()
-	{
-		return new PreferReturnOutcome()
-		{
-			@Override
-			public OperationOutcome create(Resource resource)
-			{
-				return FhirWebserviceClientJersey.this.create(PreferReturnType.OPERATION_OUTCOME, resource)
-						.getOperationOutcome();
-			}
-
-			@Override
-			public OperationOutcome createConditionaly(Resource resource, String ifNoneExistCriteria)
-			{
-				return FhirWebserviceClientJersey.this
-						.createConditionaly(PreferReturnType.OPERATION_OUTCOME, resource, ifNoneExistCriteria)
-						.getOperationOutcome();
-			}
-
-			@Override
-			public OperationOutcome createBinary(InputStream in, MediaType mediaType, String securityContextReference)
-			{
-				return FhirWebserviceClientJersey.this
-						.createBinary(PreferReturnType.OPERATION_OUTCOME, in, mediaType, securityContextReference)
-						.getOperationOutcome();
-			}
-
-			@Override
-			public OperationOutcome update(Resource resource)
-			{
-				return FhirWebserviceClientJersey.this.update(PreferReturnType.OPERATION_OUTCOME, resource)
-						.getOperationOutcome();
-			}
-
-			@Override
-			public OperationOutcome updateConditionaly(Resource resource, Map<String, List<String>> criteria)
-			{
-				return FhirWebserviceClientJersey.this
-						.updateConditionaly(PreferReturnType.OPERATION_OUTCOME, resource, criteria)
-						.getOperationOutcome();
-			}
-
-			@Override
-			public OperationOutcome updateBinary(String id, InputStream in, MediaType mediaType,
-					String securityContextReference)
-			{
-				return FhirWebserviceClientJersey.this
-						.updateBinary(PreferReturnType.OPERATION_OUTCOME, id, in, mediaType, securityContextReference)
-						.getOperationOutcome();
-			}
-
-			@Override
-			public Bundle postBundle(Bundle bundle)
-			{
-				return FhirWebserviceClientJersey.this.postBundle(PreferReturnType.OPERATION_OUTCOME, bundle);
-			}
-		};
 	}
 
 	private WebApplicationException handleError(Response response)
@@ -309,18 +198,18 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 	}
 
 	@Override
-	public PreferReturnMinimal withMinimalReturn()
+	public PreferReturnMinimalWithRetry withMinimalReturn()
 	{
 		return preferReturnMinimal;
 	}
 
 	@Override
-	public PreferReturnOutcome withOperationOutcomeReturn()
+	public PreferReturnOutcomeWithRetry withOperationOutcomeReturn()
 	{
 		return preferReturnOutcome;
 	}
 
-	private PreferReturn create(PreferReturnType returnType, Resource resource)
+	PreferReturn create(PreferReturnType returnType, Resource resource)
 	{
 		Objects.requireNonNull(returnType, "returnType");
 		Objects.requireNonNull(resource, "resource");
@@ -337,7 +226,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 			throw handleError(response);
 	}
 
-	private PreferReturn createConditionaly(PreferReturnType returnType, Resource resource, String ifNoneExistCriteria)
+	PreferReturn createConditionaly(PreferReturnType returnType, Resource resource, String ifNoneExistCriteria)
 	{
 		Objects.requireNonNull(returnType, "returnType");
 		Objects.requireNonNull(resource, "resource");
@@ -356,7 +245,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 			throw handleError(response);
 	}
 
-	private PreferReturn createBinary(PreferReturnType returnType, InputStream in, MediaType mediaType,
+	PreferReturn createBinary(PreferReturnType returnType, InputStream in, MediaType mediaType,
 			String securityContextReference)
 	{
 		Objects.requireNonNull(returnType, "returnType");
@@ -378,7 +267,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 			throw handleError(response);
 	}
 
-	private PreferReturn update(PreferReturnType returnType, Resource resource)
+	PreferReturn update(PreferReturnType returnType, Resource resource)
 	{
 		Objects.requireNonNull(returnType, "returnType");
 		Objects.requireNonNull(resource, "resource");
@@ -400,8 +289,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 			throw handleError(response);
 	}
 
-	private PreferReturn updateConditionaly(PreferReturnType returnType, Resource resource,
-			Map<String, List<String>> criteria)
+	PreferReturn updateConditionaly(PreferReturnType returnType, Resource resource, Map<String, List<String>> criteria)
 	{
 		Objects.requireNonNull(returnType, "returnType");
 		Objects.requireNonNull(resource, "resource");
@@ -430,7 +318,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 			throw handleError(response);
 	}
 
-	private PreferReturn updateBinary(PreferReturnType returnType, String id, InputStream in, MediaType mediaType,
+	PreferReturn updateBinary(PreferReturnType returnType, String id, InputStream in, MediaType mediaType,
 			String securityContextReference)
 	{
 		Objects.requireNonNull(returnType, "returnType");
@@ -453,7 +341,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 			throw handleError(response);
 	}
 
-	private Bundle postBundle(PreferReturnType returnType, Bundle bundle)
+	Bundle postBundle(PreferReturnType returnType, Bundle bundle)
 	{
 		Objects.requireNonNull(bundle, "bundle");
 
@@ -834,5 +722,11 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 			return response.readEntity(StructureDefinition.class);
 		else
 			throw handleError(response);
+	}
+
+	@Override
+	public BasicFhirWebserviceClient withRetry(int nTimes, long delayMillis)
+	{
+		return new BasicFhirWebserviceCientWithRetryImpl(this, nTimes, delayMillis);
 	}
 }

@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>org.highmed.dsf</groupId>
 		<artifactId>dsf-pom</artifactId>
-		<version>0.2.1</version>
+		<version>0.3.0</version>
 	</parent>
 
 	<modules>
@@ -17,15 +17,16 @@
 		<module>dsf-bpe-process-ping</module>
 		<module>dsf-bpe-process-plugin-example</module>
 		<module>dsf-bpe-process-update-resources</module>
-		<module>dsf-bpe-process-update-whitelist</module>
+		<module>dsf-bpe-process-update-allow-list</module>
 		<module>dsf-bpe-server</module>
 		<module>dsf-bpe-server-jetty</module>
 		<module>dsf-bpe-webservice-client</module>
+		<module>dsf-bpe-process-local-services</module>
 	</modules>
 
 	<properties>
 		<!-- if upgrading, copy version specific camunda sql scripts to dsf-bpe-server/src/main/resource/db/camunda and create a corresponding liquibase migration script -->
-		<camunda.version>7.13.0</camunda.version>
+		<camunda.version>7.14.0</camunda.version>
 	</properties>
 
 	<repositories>
@@ -78,6 +79,11 @@
 				<artifactId>dsf-bpe-process-feasibility</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-bpe-process-local-services</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 			<!-- provided as jar and injected on startup as plugin
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
@@ -102,7 +108,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
-				<artifactId>dsf-bpe-process-update-whitelist</artifactId>
+				<artifactId>dsf-bpe-process-update-allow-list</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -118,17 +124,6 @@
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
 				<artifactId>dsf-fhir-webservice-client</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.highmed.dsf</groupId>
-				<artifactId>dsf-openehr-model</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.highmed.dsf</groupId>
-				<artifactId>dsf-openehr-webservice-client</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
@@ -161,12 +156,23 @@
 			</dependency>
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
-				<artifactId>dsf-mpi-client-pdq</artifactId>
+				<artifactId>dsf-mpi-client-stub</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-openehr-model</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
-				<artifactId>dsf-mpi-client-stub</artifactId>
+				<artifactId>dsf-openehr-client</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-openehr-client-stub</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 

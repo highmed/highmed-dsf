@@ -2,17 +2,17 @@
   "meta": {
     "_type": "RESULTSET",
     "_created": "2019-10-07T19:11:52.892Z",
-    "_executed_aql": "select a_a as Full_Composition,    e/ehr_id/value as EHR_ID from EHR e contains COMPOSITION a contains OBSERVATION a_a[openEHR-EHR-OBSERVATION.body_temperature.v1] offset 0 limit 100 "
+    "_executed_aql": "select a_a as Full_Composition,    e/ehr_status/subject/external_ref/id/value as EHRID from EHR e contains COMPOSITION a contains OBSERVATION a_a[openEHR-EHR-OBSERVATION.body_temperature.v1] offset 0 limit 100 "
   },
-  "q": "select a_a as Full_Composition,    e/ehr_id/value as EHR_ID from EHR e contains COMPOSITION a contains OBSERVATION a_a[openEHR-EHR-OBSERVATION.body_temperature.v1] offset 0 limit 100 ",
+  "q": "select a_a as Full_Composition,    e/ehr_status/subject/external_ref/id/value as EHRID from EHR e contains COMPOSITION a contains OBSERVATION a_a[openEHR-EHR-OBSERVATION.body_temperature.v1] offset 0 limit 100 ",
   "columns": [
     {
       "name": "Full_Composition",
       "path": "/"
     },
     {
-      "name": "EHR_ID",
-      "path": "/ehr_id/value"
+      "name": "EHRID",
+      "path": "/ehr_status/subject/external_ref/id/value"
     }
   ],
   "rows": [
@@ -92,7 +92,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 1000,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -210,7 +210,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 18,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -426,7 +426,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.3,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -556,7 +556,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.3,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -644,7 +644,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.3,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -732,7 +732,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.3,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -820,7 +820,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.3,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -908,7 +908,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.3,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -996,7 +996,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.3,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -1084,7 +1084,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.3,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -1172,7 +1172,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.3,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -1290,7 +1290,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 38.4,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -1408,7 +1408,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 36.2,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -1496,7 +1496,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 36,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -1584,7 +1584,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.7,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -1672,7 +1672,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 36.7,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -1760,7 +1760,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.5,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -1878,7 +1878,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.6,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -1996,7 +1996,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.4,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -2114,7 +2114,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 38.2,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -2232,7 +2232,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 39.7,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -2350,7 +2350,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 39.2,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -2468,7 +2468,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 36,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -2586,7 +2586,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 38.1,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -2674,7 +2674,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 39.9,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -2762,7 +2762,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 39.5,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -2880,7 +2880,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 39.2,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -2998,7 +2998,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 36.2,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -3116,7 +3116,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 36.8,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -3234,7 +3234,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.9,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -3352,7 +3352,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 39.9,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -3440,7 +3440,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.4,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -3528,7 +3528,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 39.4,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -3616,7 +3616,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 39.1,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -3704,7 +3704,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 38.8,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -3822,7 +3822,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 38.3,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -3940,7 +3940,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 38.5,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -4058,7 +4058,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.1,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -4146,7 +4146,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.3,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -4234,7 +4234,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 36.5,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -4322,7 +4322,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 38.7,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -4410,7 +4410,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 38.5,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -4498,7 +4498,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 39.3,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -4586,7 +4586,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.9,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -4704,7 +4704,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 39,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -4822,7 +4822,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 36,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -4940,7 +4940,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.1,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -5058,7 +5058,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 36.3,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -5146,7 +5146,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 36.6,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -5234,7 +5234,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.4,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -5322,7 +5322,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.2,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -5410,7 +5410,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 39.7,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -5498,7 +5498,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 38,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -5616,7 +5616,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 38.9,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -5734,7 +5734,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 36.6,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -5852,7 +5852,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 36.4,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -5940,7 +5940,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.2,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -6028,7 +6028,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 39,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -6116,7 +6116,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 39.4,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -6204,7 +6204,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 36.6,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -6292,7 +6292,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 36.7,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -6380,7 +6380,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 36.3,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -6498,7 +6498,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 39.3,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -6616,7 +6616,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.8,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -6734,7 +6734,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.3,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -6822,7 +6822,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 39,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -6839,7 +6839,7 @@
         "_type": "OBSERVATION",
         "name": {
           "_type": "DV_TEXT",
-          "value": "Körpertemperatur"
+          "value": "Kï¿½rpertemperatur"
         },
         "archetype_details": {
           "_type": "ARCHETYPED",
@@ -6940,7 +6940,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 38,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -6958,7 +6958,7 @@
                     "_type": "ELEMENT",
                     "name": {
                       "_type": "DV_TEXT",
-                      "value": "Körperexposition"
+                      "value": "Kï¿½rperexposition"
                     },
                     "archetype_node_id": "at0030",
                     "value": {
@@ -6987,7 +6987,7 @@
         "_type": "OBSERVATION",
         "name": {
           "_type": "DV_TEXT",
-          "value": "Körpertemperatur"
+          "value": "Kï¿½rpertemperatur"
         },
         "archetype_details": {
           "_type": "ARCHETYPED",
@@ -7058,7 +7058,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 38,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -7076,7 +7076,7 @@
                     "_type": "ELEMENT",
                     "name": {
                       "_type": "DV_TEXT",
-                      "value": "Körperexposition"
+                      "value": "Kï¿½rperexposition"
                     },
                     "archetype_node_id": "at0030",
                     "value": {
@@ -7105,7 +7105,7 @@
         "_type": "OBSERVATION",
         "name": {
           "_type": "DV_TEXT",
-          "value": "Körpertemperatur"
+          "value": "Kï¿½rpertemperatur"
         },
         "archetype_details": {
           "_type": "ARCHETYPED",
@@ -7176,7 +7176,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.5,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -7194,7 +7194,7 @@
                     "_type": "ELEMENT",
                     "name": {
                       "_type": "DV_TEXT",
-                      "value": "Körperexposition"
+                      "value": "Kï¿½rperexposition"
                     },
                     "archetype_node_id": "at0030",
                     "value": {
@@ -7223,7 +7223,7 @@
         "_type": "OBSERVATION",
         "name": {
           "_type": "DV_TEXT",
-          "value": "Körpertemperatur"
+          "value": "Kï¿½rpertemperatur"
         },
         "archetype_details": {
           "_type": "ARCHETYPED",
@@ -7294,7 +7294,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": -5,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -7312,7 +7312,7 @@
                     "_type": "ELEMENT",
                     "name": {
                       "_type": "DV_TEXT",
-                      "value": "Körperexposition"
+                      "value": "Kï¿½rperexposition"
                     },
                     "archetype_node_id": "at0030",
                     "value": {
@@ -7341,7 +7341,7 @@
         "_type": "OBSERVATION",
         "name": {
           "_type": "DV_TEXT",
-          "value": "Körpertemperatur"
+          "value": "Kï¿½rpertemperatur"
         },
         "archetype_details": {
           "_type": "ARCHETYPED",
@@ -7412,7 +7412,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": -500,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -7430,7 +7430,7 @@
                     "_type": "ELEMENT",
                     "name": {
                       "_type": "DV_TEXT",
-                      "value": "Körperexposition"
+                      "value": "Kï¿½rperexposition"
                     },
                     "archetype_node_id": "at0030",
                     "value": {
@@ -7530,7 +7530,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.1,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -7618,7 +7618,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.1,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -7706,7 +7706,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.1,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -7794,7 +7794,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.1,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -7882,7 +7882,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.1,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -7970,7 +7970,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.1,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -8058,7 +8058,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.4,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -8146,7 +8146,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.4,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -8234,7 +8234,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.4,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -8322,7 +8322,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.4,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -8410,7 +8410,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.4,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -8498,7 +8498,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.3,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -8586,7 +8586,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.3,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -8674,7 +8674,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -8762,7 +8762,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.3,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -8850,7 +8850,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.3,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -8938,7 +8938,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.5,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -9026,7 +9026,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.5,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -9114,7 +9114,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.5,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -9202,7 +9202,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.5,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -9290,7 +9290,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.5,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -9378,7 +9378,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.2,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -9466,7 +9466,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.2,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -9554,7 +9554,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.2,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -9642,7 +9642,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.2,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }
@@ -9730,7 +9730,7 @@
                     "value": {
                       "_type": "DV_QUANTITY",
                       "magnitude": 37.2,
-                      "units": "°C",
+                      "units": "ï¿½C",
                       "precision": 1
                     }
                   }

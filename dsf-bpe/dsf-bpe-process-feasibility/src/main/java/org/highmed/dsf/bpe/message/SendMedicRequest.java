@@ -3,12 +3,12 @@ package org.highmed.dsf.bpe.message;
 import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.Constants;
+import org.highmed.dsf.bpe.variables.ConstantsFeasibility;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.AbstractTaskMessageSend;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.fhir.variables.BloomFilterConfig;
+import org.highmed.dsf.bpe.variables.BloomFilterConfig;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
@@ -27,32 +27,37 @@ public class SendMedicRequest extends AbstractTaskMessageSend
 	@Override
 	protected Stream<ParameterComponent> getAdditionalInputParameters(DelegateExecution execution)
 	{
-		ResearchStudy researchStudy = (ResearchStudy) execution.getVariable(Constants.VARIABLE_RESEARCH_STUDY);
+		ResearchStudy researchStudy = (ResearchStudy) execution
+				.getVariable(ConstantsFeasibility.VARIABLE_RESEARCH_STUDY);
 		IdType researchStudyId = new IdType(
 				getFhirWebserviceClientProvider().getLocalBaseUrl() + "/" + researchStudy.getId());
 
-		ParameterComponent inputResearchStudyReference = getTaskHelper().createInput(
-				Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
-				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_RESEARCH_STUDY_REFERENCE,
-				new Reference().setReference(researchStudyId.toVersionless().getValueAsString()));
+		ParameterComponent inputResearchStudyReference = getTaskHelper()
+				.createInput(ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
+						ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_RESEARCH_STUDY_REFERENCE,
+						new Reference().setReference(researchStudyId.toVersionless().getValueAsString()));
 
-		boolean needsConsentCheck = (boolean) execution.getVariable(Constants.VARIABLE_NEEDS_CONSENT_CHECK);
-		ParameterComponent inputNeedsConsentCheck = getTaskHelper().createInput(
-				Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
-				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_CONSENT_CHECK, needsConsentCheck);
+		boolean needsConsentCheck = (boolean) execution.getVariable(ConstantsFeasibility.VARIABLE_NEEDS_CONSENT_CHECK);
+		ParameterComponent inputNeedsConsentCheck = getTaskHelper()
+				.createInput(ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
+						ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_CONSENT_CHECK,
+						needsConsentCheck);
 
-		boolean needsRecordLinkage = (boolean) execution.getVariable(Constants.VARIABLE_NEEDS_RECORD_LINKAGE);
-		ParameterComponent inputNeedsRecordLinkage = getTaskHelper().createInput(
-				Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
-				Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_RECORD_LINKAGE, needsRecordLinkage);
+		boolean needsRecordLinkage = (boolean) execution
+				.getVariable(ConstantsFeasibility.VARIABLE_NEEDS_RECORD_LINKAGE);
+		ParameterComponent inputNeedsRecordLinkage = getTaskHelper()
+				.createInput(ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
+						ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_RECORD_LINKAGE,
+						needsRecordLinkage);
 
 		if (needsRecordLinkage)
 		{
 			BloomFilterConfig bloomFilterConfig = (BloomFilterConfig) execution
-					.getVariable(Constants.VARIABLE_BLOOM_FILTER_CONFIG);
-			ParameterComponent inputBloomFilterConfig = getTaskHelper().createInput(
-					Constants.CODESYSTEM_HIGHMED_FEASIBILITY,
-					Constants.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_BLOOM_FILTER_CONFIG, bloomFilterConfig.toBytes());
+					.getVariable(ConstantsFeasibility.VARIABLE_BLOOM_FILTER_CONFIG);
+			ParameterComponent inputBloomFilterConfig = getTaskHelper()
+					.createInput(ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
+							ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_BLOOM_FILTER_CONFIG,
+							bloomFilterConfig.toBytes());
 
 			return Stream.of(inputResearchStudyReference, inputNeedsConsentCheck, inputNeedsRecordLinkage,
 					inputBloomFilterConfig);

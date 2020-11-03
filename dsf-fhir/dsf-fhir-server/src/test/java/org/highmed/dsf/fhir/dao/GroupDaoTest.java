@@ -2,11 +2,8 @@ package org.highmed.dsf.fhir.dao;
 
 import static org.junit.Assert.assertEquals;
 
-import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.dsf.fhir.dao.jdbc.GroupDaoJdbc;
 import org.hl7.fhir.r4.model.Group;
-
-import ca.uhn.fhir.context.FhirContext;
 
 public class GroupDaoTest extends AbstractResourceDaoTest<Group, GroupDao>
 {
@@ -16,13 +13,7 @@ public class GroupDaoTest extends AbstractResourceDaoTest<Group, GroupDao>
 
 	public GroupDaoTest()
 	{
-		super(Group.class);
-	}
-
-	@Override
-	protected GroupDao createDao(BasicDataSource dataSource, FhirContext fhirContext)
-	{
-		return new GroupDaoJdbc(dataSource, fhirContext);
+		super(Group.class, GroupDaoJdbc::new);
 	}
 
 	@Override

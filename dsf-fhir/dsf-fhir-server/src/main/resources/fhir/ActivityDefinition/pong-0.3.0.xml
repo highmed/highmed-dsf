@@ -1,0 +1,70 @@
+<ActivityDefinition xmlns="http://hl7.org/fhir">
+	<meta>
+		<tag>
+			<system value="http://highmed.org/fhir/CodeSystem/authorization-role" />
+			<code value="REMOTE" />
+		</tag>
+	</meta>
+	<extension url="http://highmed.org/fhir/StructureDefinition/process-authorization">
+		<extension url="message-name">
+			<valueString value="pingMessage" />
+		</extension>
+		<extension url="authorization-roles">
+			<extension url="authorization-role">
+				<valueCoding>
+					<system value="http://highmed.org/fhir/CodeSystem/authorization-role" />
+					<code value="REMOTE" />
+				</valueCoding>
+			</extension>
+		</extension>
+		<extension url="requester-organization-types">
+			<extension url="requester-organization-type">
+				<valueCoding>
+					<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
+					<code value="TTP" />
+				</valueCoding>
+			</extension>
+			<extension url="requester-organization-type">
+				<valueCoding>
+					<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
+					<code value="MeDIC" />
+				</valueCoding>
+			</extension>
+		</extension>
+		<extension url="recipient-organization-types">
+			<extension url="recipient-organization-type">
+				<valueCoding>
+					<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
+					<code value="TTP" />
+				</valueCoding>
+			</extension>
+			<extension url="recipient-organization-type">
+				<valueCoding>
+					<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
+					<code value="MeDIC" />
+				</valueCoding>
+			</extension>
+		</extension>
+		<extension url="task-profile">
+			<valueCanonical value="http://highmed.org/fhir/StructureDefinition/highmed-task-ping" />
+		</extension>
+	</extension>
+	<url value="http://highmed.org/bpe/Process/pong" />
+	<version value="0.3.0" />
+	<name value="PongProcess" />
+	<title value="PONG process" />
+	<subtitle value="Communication Testing Process" />
+	<status value="active" />
+	<experimental value="false" />
+	<date value="2020-11-03" />
+	<publisher value="HiGHmed" />
+	<contact>
+		<name value="HiGHmed" />
+		<telecom>
+			<system value="email" />
+			<value value="pmo@highmed.org" />
+		</telecom>
+	</contact>
+	<description value="Process startet by PING messages and to send corresponding PONG messages back remote Organizations" />
+	<kind value="Task" />
+</ActivityDefinition>

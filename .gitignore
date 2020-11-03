@@ -1,5 +1,69 @@
-/.project
-/.settings/
-/.idea
-/*.ipr
-/*.iws
+###
+# dsf common ignores
+###
+**/.classpath
+**/.project
+**/.idea/
+**/.settings/
+**/target/
+
+**/*.iml
+
+###
+# dsf-bpe ignores
+###
+dsf-bpe/dsf-bpe-server-jetty/docker/dsf_bpe.jar
+dsf-bpe/dsf-bpe-server-jetty/docker/lib/*.jar
+dsf-bpe/dsf-bpe-server-jetty/docker/plugin/*.jar
+
+###
+# dsf-fhir ignores
+###
+dsf-fhir/dsf-fhir-server-jetty/conf/bundle.xml
+dsf-fhir/dsf-fhir-server-jetty/conf/config.properties
+dsf-fhir/dsf-fhir-server-jetty/docker/dsf_fhir.jar
+dsf-fhir/dsf-fhir-server-jetty/docker/lib/*.jar
+
+###
+# dsf-docker-test-setup ignores
+###
+dsf-docker-test-setup/bpe/app/conf/*.p12
+dsf-docker-test-setup/bpe/app/last_event/time.file
+dsf-docker-test-setup/bpe/app/log/*.log
+dsf-docker-test-setup/bpe/app/log/*.log.gz
+dsf-docker-test-setup/bpe/app/plugin/*.jar
+dsf-docker-test-setup/bpe/db/postgres-data/
+dsf-docker-test-setup/bpe/proxy/ssl/*.pem
+
+dsf-docker-test-setup/fhir/app/conf/*.p12
+dsf-docker-test-setup/fhir/app/conf/bundle.xml
+dsf-docker-test-setup/fhir/app/conf/config.properties
+dsf-docker-test-setup/fhir/app/log/*.log
+dsf-docker-test-setup/fhir/app/log/*.log.gz
+dsf-docker-test-setup/fhir/db/postgres-data/
+dsf-docker-test-setup/fhir/proxy/ssl/*.pem
+
+###
+# dsf-docker-test-setup-3medic-ttp ignores
+###
+dsf-docker-test-setup-3medic-ttp/**/bpe/app/conf/*.p12
+dsf-docker-test-setup-3medic-ttp/**/bpe/app/conf/config.properties
+dsf-docker-test-setup-3medic-ttp/**/bpe/app/plugin/*.jar
+dsf-docker-test-setup-3medic-ttp/**/bpe/proxy/ssl/*.pem
+
+dsf-docker-test-setup-3medic-ttp/**/fhir/app/conf/*.p12
+dsf-docker-test-setup-3medic-ttp/**/fhir/app/conf/bundle.xml
+dsf-docker-test-setup-3medic-ttp/**/fhir/app/conf/config.properties
+dsf-docker-test-setup-3medic-ttp/**/fhir/proxy/ssl/*.pem
+
+###
+# dsf-tools ignores
+###
+dsf-tools/dsf-tools-test-data-generator/bundle/*.xml
+
+dsf-tools/dsf-tools-test-data-generator/cert/**/*.pem
+dsf-tools/dsf-tools-test-data-generator/cert/**/*.csr
+dsf-tools/dsf-tools-test-data-generator/cert/**/*.p12
+dsf-tools/dsf-tools-test-data-generator/cert/thumbprints.txt
+
+dsf-tools/dsf-tools-test-data-generator/config/*.properties

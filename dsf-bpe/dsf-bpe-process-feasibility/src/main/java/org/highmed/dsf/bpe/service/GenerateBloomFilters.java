@@ -7,14 +7,15 @@ import java.util.stream.Collectors;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.Constants;
+import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
+import org.highmed.dsf.bpe.variables.BloomFilterConfig;
+import org.highmed.dsf.bpe.variables.ConstantsFeasibility;
+import org.highmed.dsf.bpe.variables.FeasibilityQueryResult;
+import org.highmed.dsf.bpe.variables.FeasibilityQueryResults;
+import org.highmed.dsf.bpe.variables.FeasibilityQueryResultsValues;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.fhir.variables.BloomFilterConfig;
-import org.highmed.dsf.fhir.variables.FeasibilityQueryResult;
-import org.highmed.dsf.fhir.variables.FeasibilityQueryResults;
-import org.highmed.dsf.fhir.variables.FeasibilityQueryResultsValues;
 import org.highmed.mpi.client.MasterPatientIndexClient;
 import org.highmed.openehr.model.structure.ResultSet;
 import org.highmed.pseudonymization.bloomfilter.BloomFilterGenerator;
@@ -27,6 +28,7 @@ import org.highmed.pseudonymization.translation.ResultSetTranslatorToTtpRbfOnlyI
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,16 +46,18 @@ public class GenerateBloomFilters extends AbstractServiceDelegate
 	private static final FieldBloomFilterLengths FBF_LENGTHS = new FieldBloomFilterLengths(500, 500, 250, 50, 500, 250,
 			500, 500, 500);
 
+	private final String ehrIdColumnPath;
 	private final MasterPatientIndexClient masterPatientIndexClient;
 	private final ObjectMapper openEhrObjectMapper;
 	private final BouncyCastleProvider bouncyCastleProvider;
 
 	public GenerateBloomFilters(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
-			MasterPatientIndexClient masterPatientIndexClient, ObjectMapper openEhrObjectMapper,
+			String ehrIdColumnPath, MasterPatientIndexClient masterPatientIndexClient, ObjectMapper openEhrObjectMapper,
 			BouncyCastleProvider bouncyCastleProvider)
 	{
 		super(clientProvider, taskHelper);
 
+		this.ehrIdColumnPath = ehrIdColumnPath;
 		this.masterPatientIndexClient = masterPatientIndexClient;
 		this.openEhrObjectMapper = openEhrObjectMapper;
 		this.bouncyCastleProvider = bouncyCastleProvider;
@@ -64,6 +68,7 @@ public class GenerateBloomFilters extends AbstractServiceDelegate
 	{
 		super.afterPropertiesSet();
 
+		Objects.requireNonNull(ehrIdColumnPath, "ehrIdColumnPath");
 		Objects.requireNonNull(masterPatientIndexClient, "masterPatientIndexClient");
 		Objects.requireNonNull(openEhrObjectMapper, "openEhrObjectMapper");
 		Objects.requireNonNull(bouncyCastleProvider, "bouncyCastleProvider");
@@ -73,29 +78,39 @@ public class GenerateBloomFilters extends AbstractServiceDelegate
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
 		FeasibilityQueryResults results = (FeasibilityQueryResults) execution
-				.getVariable(Constants.VARIABLE_QUERY_RESULTS);
+				.getVariable(ConstantsFeasibility.VARIABLE_QUERY_RESULTS);
 
-		String ttpIdentifier = (String) execution.getVariable(Constants.VARIABLE_TTP_IDENTIFIER);
+		String securityIdentifier = getSecurityIdentifier(execution);
 
 		BloomFilterConfig bloomFilterConfig = (BloomFilterConfig) execution
-				.getVariable(Constants.VARIABLE_BLOOM_FILTER_CONFIG);
+				.getVariable(ConstantsFeasibility.VARIABLE_BLOOM_FILTER_CONFIG);
 
 		ResultSetTranslatorToTtpRbfOnly resultSetTranslator = createResultSetTranslator(bloomFilterConfig);
 
 		List<FeasibilityQueryResult> translatedResults = results.getResults().stream()
-				.map(result -> translateAndCreateBinary(resultSetTranslator, result, ttpIdentifier))
+				.map(result -> translateAndCreateBinary(resultSetTranslator, result, securityIdentifier))
 				.collect(Collectors.toList());
 
-		execution.setVariable(Constants.VARIABLE_QUERY_RESULTS,
+		execution.setVariable(ConstantsFeasibility.VARIABLE_QUERY_RESULTS,
 				FeasibilityQueryResultsValues.create(new FeasibilityQueryResults(translatedResults)));
+	}
+
+	private String getSecurityIdentifier(DelegateExecution execution)
+	{
+		Task task = getCurrentTaskFromExecutionVariables();
+
+		if (task.getInstantiatesUri().startsWith(ConstantsFeasibility.LOCAL_SERVICES_INTEGRATION_PROCESS_URI))
+			return task.getRequester().getIdentifier().getValue();
+		else
+			return (String) execution.getVariable(ConstantsBase.VARIABLE_TTP_IDENTIFIER);
 	}
 
 	protected ResultSetTranslatorToTtpRbfOnly createResultSetTranslator(BloomFilterConfig bloomFilterConfig)
 	{
-		return new ResultSetTranslatorToTtpRbfOnlyImpl(
+		return new ResultSetTranslatorToTtpRbfOnlyImpl(ehrIdColumnPath,
 				createRecordBloomFilterGenerator(bloomFilterConfig.getPermutationSeed(),
 						bloomFilterConfig.getHmacSha2Key(), bloomFilterConfig.getHmacSha3Key()),
-				masterPatientIndexClient);
+				masterPatientIndexClient, ResultSetTranslatorToTtpRbfOnlyImpl.FILTER_ON_IDAT_NOT_FOUND_EXCEPTION);
 	}
 
 	protected RecordBloomFilterGenerator createRecordBloomFilterGenerator(long permutationSeed, Key hmacSha2Key,
@@ -128,14 +143,14 @@ public class GenerateBloomFilters extends AbstractServiceDelegate
 		}
 	}
 
-	protected String saveResultSetAsBinaryForTtp(ResultSet resultSet, String ttpIdentifier)
+	protected String saveResultSetAsBinaryForTtp(ResultSet resultSet, String securityIdentifier)
 	{
 		byte[] content = serializeResultSet(resultSet);
 		Reference securityContext = new Reference();
 		securityContext.setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue(ttpIdentifier);
-		Binary binary = new Binary().setContentType(Constants.OPENEHR_MIMETYPE_JSON).setSecurityContext(securityContext)
-				.setData(content);
+				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue(securityIdentifier);
+		Binary binary = new Binary().setContentType(ConstantsBase.OPENEHR_MIMETYPE_JSON)
+				.setSecurityContext(securityContext).setData(content);
 
 		IdType created = createBinaryResource(binary);
 		return new IdType(getFhirWebserviceClientProvider().getLocalBaseUrl(), "Binary", created.getIdPart(),

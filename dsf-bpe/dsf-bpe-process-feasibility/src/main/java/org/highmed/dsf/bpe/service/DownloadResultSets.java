@@ -9,13 +9,14 @@ import java.util.stream.Collectors;
 import javax.ws.rs.core.MediaType;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.Constants;
+import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
+import org.highmed.dsf.bpe.variables.ConstantsFeasibility;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.fhir.variables.FeasibilityQueryResult;
-import org.highmed.dsf.fhir.variables.FeasibilityQueryResults;
-import org.highmed.dsf.fhir.variables.FeasibilityQueryResultsValues;
+import org.highmed.dsf.bpe.variables.FeasibilityQueryResult;
+import org.highmed.dsf.bpe.variables.FeasibilityQueryResults;
+import org.highmed.dsf.bpe.variables.FeasibilityQueryResultsValues;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.highmed.openehr.model.structure.ResultSet;
 import org.hl7.fhir.r4.model.IdType;
@@ -50,11 +51,11 @@ public class DownloadResultSets extends AbstractServiceDelegate
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
 		FeasibilityQueryResults results = (FeasibilityQueryResults) execution
-				.getVariable(Constants.VARIABLE_QUERY_RESULTS);
+				.getVariable(ConstantsFeasibility.VARIABLE_QUERY_RESULTS);
 
 		List<FeasibilityQueryResult> resultsWithResultSets = download(results);
 
-		execution.setVariable(Constants.VARIABLE_QUERY_RESULTS,
+		execution.setVariable(ConstantsFeasibility.VARIABLE_QUERY_RESULTS,
 				FeasibilityQueryResultsValues.create(new FeasibilityQueryResults(resultsWithResultSets)));
 	}
 
@@ -79,7 +80,7 @@ public class DownloadResultSets extends AbstractServiceDelegate
 		try
 		{
 			logger.info("Reading binary from {} with id {}", client.getBaseUrl(), id);
-			return client.readBinary(id, MediaType.valueOf(Constants.OPENEHR_MIMETYPE_JSON));
+			return client.readBinary(id, MediaType.valueOf(ConstantsBase.OPENEHR_MIMETYPE_JSON));
 		}
 		catch (Exception e)
 		{

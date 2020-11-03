@@ -1,9 +1,11 @@
 package org.highmed.dsf.bpe.spring.config;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
+import org.camunda.bpm.engine.impl.variable.serializer.TypedValueSerializer;
 import org.camunda.bpm.engine.spring.ProcessEngineFactoryBean;
 import org.camunda.bpm.engine.spring.SpringProcessEngineConfiguration;
 import org.highmed.dsf.bpe.listener.CallActivityListener;
@@ -93,7 +95,8 @@ public class CamundaConfig
 	}
 
 	@Bean
-	public SpringProcessEngineConfiguration processEngineConfiguration(List<ProcessEnginePlugin> processEnginePlugins)
+	public SpringProcessEngineConfiguration processEngineConfiguration(
+			@SuppressWarnings("rawtypes") List<TypedValueSerializer> serializers, List<ProcessEnginePlugin> plugins)
 	{
 		var c = new SpringProcessEngineConfiguration();
 		c.setProcessEngineName("highmed");
@@ -103,18 +106,25 @@ public class CamundaConfig
 		c.setJobExecutorActivate(true);
 		c.setCustomPreBPMNParseListeners(List.of(defaultBpmnParseListener()));
 
-		logger.info("{} process engine plugin{} configured", processEnginePlugins.size(),
-				processEnginePlugins.size() != 1 ? "s" : "");
+		logger.info("{} variable serializer{} configured", serializers.size(), serializers.size() != 1 ? "s" : "");
+		logger.debug("Variable serializer{}: {}", serializers.size() != 1 ? "s" : "",
+				serializers.stream().map(p -> p.getClass().getName()).collect(Collectors.joining(", ", "[", "]")));
+		c.setCustomPreVariableSerializers(serializers);
 
-		c.setProcessEnginePlugins(processEnginePlugins);
+		logger.info("{} process engine plugin{} configured", plugins.size(), plugins.size() != 1 ? "s" : "");
+		logger.debug("Process engine plugin{}: {}", plugins.size() != 1 ? "s" : "",
+				plugins.stream().map(p -> p.getClass().getName()).collect(Collectors.joining(", ", "[", "]")));
+		c.setProcessEnginePlugins(plugins);
+
 		return c;
 	}
 
 	@Bean
-	public ProcessEngineFactoryBean processEngineFactory(List<ProcessEnginePlugin> processEnginePlugins)
+	public ProcessEngineFactoryBean processEngineFactory(
+			@SuppressWarnings("rawtypes") List<TypedValueSerializer> serializers, List<ProcessEnginePlugin> plugins)
 	{
 		var f = new ProcessEngineFactoryBean();
-		f.setProcessEngineConfiguration(processEngineConfiguration(processEnginePlugins));
+		f.setProcessEngineConfiguration(processEngineConfiguration(serializers, plugins));
 		return f;
 	}
 }

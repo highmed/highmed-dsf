@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.highmed.dsf</groupId>
 		<artifactId>dsf-fhir-pom</artifactId>
-		<version>0.2.1</version>
+		<version>0.3.0</version>
 	</parent>
 
 	<dependencies>
@@ -191,15 +191,80 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-					<includes>
-						<include>org.highmed.dsf.fhir.test.TestSuiteAll</include>
-					</includes>
 					<systemPropertyVariables>
 						<log4j.configurationFile>log4j2-maven-surefire-config.xml</log4j.configurationFile>
 					</systemPropertyVariables>
+					<excludes>
+						<exclude>**/*DaoTest</exclude>
+						<exclude>**/*IntegrationTest</exclude>
+					</excludes>
 				</configuration>
 			</plugin>
-
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<configuration>
+					<systemPropertyVariables>
+						<log4j.configurationFile>log4j2-maven-surefire-config.xml</log4j.configurationFile>
+					</systemPropertyVariables>
+					<includes>
+						<include>**/*DaoTest</include>
+						<include>**/*IntegrationTest</include>
+					</includes>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>io.fabric8</groupId>
+				<artifactId>docker-maven-plugin</artifactId>
+				<version>0.34.1</version>
+				<extensions>true</extensions>
+				<executions>
+					<execution>
+						<id>start-postgres</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>start</goal>
+						</goals>
+						<configuration>
+							<images>
+								<image>
+									<name>postgres:13</name>
+									<run>
+										<ports>
+											<port>127.0.0.1:54321:5432</port>
+										</ports>
+										<env>
+											<TZ>Europe/Berlin</TZ>
+											<POSTGRES_USER>postgres</POSTGRES_USER>
+											<POSTGRES_PASSWORD>password</POSTGRES_PASSWORD>
+											<POSTGRES_DB>db</POSTGRES_DB>
+										</env>
+										<wait>
+											<!-- <log>(?s)database system is ready to accept connections.*database system is ready to accept connections</log> -->
+											<time>2500</time>
+										</wait>
+									</run>
+								</image>
+							</images>
+						</configuration>
+					</execution>
+					<execution>
+						<id>stop-postgres</id>
+						<phase>post-integration-test</phase>
+						<goals>
+							<goal>stop</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
@@ -225,7 +290,7 @@
 				</configuration>
 				<!-- Workaround for exec maven plugin issue -->
 				<!-- https://github.com/mojohaus/exec-maven-plugin/issues/76 -->
-				<!-- <dependencies> <dependency> <groupId>org.highmed.dsf</groupId> <artifactId>dsf-tools-bundle-generator</artifactId> <version>0.2.1</version> </dependency> 
+				<!-- <dependencies> <dependency> <groupId>org.highmed.dsf</groupId> <artifactId>dsf-tools-bundle-generator</artifactId> <version>0.3.0</version> </dependency> 
 					</dependencies> -->
 			</plugin>
 			<plugin>

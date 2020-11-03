@@ -3,7 +3,8 @@ package org.highmed.dsf.fhir.dao.jdbc;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.apache.commons.dbcp2.BasicDataSource;
+import javax.sql.DataSource;
+
 import org.highmed.dsf.fhir.dao.BundleDao;
 import org.highmed.dsf.fhir.search.parameters.BundleIdentifier;
 import org.highmed.dsf.fhir.search.parameters.user.BundleUserFilter;
@@ -14,7 +15,7 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class BundleDaoJdbc extends AbstractResourceDaoJdbc<Bundle> implements BundleDao
 {
-	public BundleDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
+	public BundleDaoJdbc(DataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, Bundle.class, "bundles", "bundle", "bundle_id", BundleUserFilter::new,
 				with(BundleIdentifier::new), with());

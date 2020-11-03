@@ -8,8 +8,8 @@ import java.util.stream.Collectors;
 import javax.ws.rs.WebApplicationException;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.Constants;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
+import org.highmed.dsf.bpe.variables.ConstantsUpdateResources;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.fhir.client.FhirWebserviceClient;
@@ -46,11 +46,7 @@ public class UpdateResources extends AbstractServiceDelegate implements Initiali
 	@Override
 	public void doExecute(DelegateExecution execution) throws Exception
 	{
-		logger.debug("{}: Process-instance-id {}, business-key {}, variables {}, local-variables {}",
-				getClass().getName(), execution.getProcessInstanceId(), execution.getBusinessKey(),
-				execution.getVariables(), execution.getVariablesLocal());
-
-		Task task = (Task) execution.getVariable(Constants.VARIABLE_TASK);
+		Task task = getCurrentTaskFromExecutionVariables();
 		IdType bundleId = getBundleId(task);
 		FhirWebserviceClient requesterClient = getFhirWebserviceClientProvider()
 				.getRemoteWebserviceClient(bundleId.getBaseUrl());
@@ -67,8 +63,9 @@ public class UpdateResources extends AbstractServiceDelegate implements Initiali
 		{
 			logger.error("Error while reading Bundle with id {} from organization {}: {}", bundleId.getValue(),
 					task.getRequester().getReference(), e.getMessage());
-			throw new RuntimeException("Error while reading Bundle with id " + bundleId.getValue()
-					+ " from organization " + task.getRequester().getReference() + ", " + e.getMessage(), e);
+			throw new RuntimeException(
+					"Error while reading Bundle with id " + bundleId.getValue() + " from organization " + task
+							.getRequester().getReference() + ", " + e.getMessage(), e);
 		}
 
 		if (!EnumSet.of(BundleType.TRANSACTION, BundleType.BATCH).contains(bundle.getType()))
@@ -86,33 +83,36 @@ public class UpdateResources extends AbstractServiceDelegate implements Initiali
 		{
 			logger.error("Error while executing Bundle with id {} from organization {} locally: {}",
 					bundleId.getValue(), task.getRequester().getReference(), e.getMessage());
-			throw new RuntimeException("Error while executing Bundle with id " + bundleId.getValue()
-					+ " from organization " + task.getRequester().getReference() + " locally, " + e.getMessage(), e);
+			throw new RuntimeException(
+					"Error while executing Bundle with id " + bundleId.getValue() + " from organization " + task
+							.getRequester().getReference() + " locally, " + e.getMessage(), e);
 		}
 	}
 
 	private IdType getBundleId(Task task)
 	{
 		List<Reference> bundleReferences = getTaskHelper()
-				.getInputParameterReferenceValues(task, Constants.CODESYSTEM_HIGHMED_UPDATE_RESOURCE,
-						Constants.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE)
+				.getInputParameterReferenceValues(task, ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE,
+						ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE)
 				.collect(Collectors.toList());
 
 		if (bundleReferences.size() != 1)
 		{
 			logger.error("Task input parameter {} contains unexpected number of Bundle IDs, expected 1, got {}",
-					Constants.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE, bundleReferences.size());
-			throw new RuntimeException(
-					"Task input parameter " + Constants.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE
-							+ " contains unexpected number of Bundle IDs, expected 1, got " + bundleReferences.size());
+					ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE,
+					bundleReferences.size());
+			throw new RuntimeException("Task input parameter "
+					+ ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE
+					+ " contains unexpected number of Bundle IDs, expected 1, got " + bundleReferences.size());
 		}
-		else if (!bundleReferences.get(0).hasReference()
-				|| !bundleReferences.get(0).getReference().contains("/Bundle/"))
+		else if (!bundleReferences.get(0).hasReference() || !bundleReferences.get(0).getReference()
+				.contains("/Bundle/"))
 		{
 			logger.error("Task input parameter {} has no Bundle reference",
-					Constants.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE);
+					ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE);
 			throw new RuntimeException("Task input parameter "
-					+ Constants.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE + " has no Bundle reference");
+					+ ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE
+					+ " has no Bundle reference");
 		}
 
 		return new IdType(bundleReferences.get(0).getReference());

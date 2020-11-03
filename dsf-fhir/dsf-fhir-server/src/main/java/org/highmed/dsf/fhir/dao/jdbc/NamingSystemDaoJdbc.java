@@ -7,7 +7,8 @@ import java.sql.SQLException;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.apache.commons.dbcp2.BasicDataSource;
+import javax.sql.DataSource;
+
 import org.highmed.dsf.fhir.dao.NamingSystemDao;
 import org.highmed.dsf.fhir.search.parameters.NamingSystemName;
 import org.highmed.dsf.fhir.search.parameters.user.NamingSystemUserFilter;
@@ -21,7 +22,7 @@ public class NamingSystemDaoJdbc extends AbstractResourceDaoJdbc<NamingSystem> i
 {
 	private static final Logger logger = LoggerFactory.getLogger(NamingSystemDaoJdbc.class);
 
-	public NamingSystemDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
+	public NamingSystemDaoJdbc(DataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, NamingSystem.class, "naming_systems", "naming_system", "naming_system_id",
 				NamingSystemUserFilter::new, with(NamingSystemName::new), with());

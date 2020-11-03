@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.highmed.dsf</groupId>
 		<artifactId>dsf-bpe-pom</artifactId>
-		<version>0.2.1</version>
+		<version>0.3.0</version>
 	</parent>
 
 	<dependencies>
@@ -18,6 +18,10 @@
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-bpe-process-feasibility</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.highmed.dsf</groupId>
+			<artifactId>dsf-bpe-process-local-services</artifactId>
 		</dependency>
 		<!-- provided as jar and injected on startup as plugin <dependency> <groupId>org.highmed.dsf</groupId> <artifactId>dsf-bpe-process-parent</artifactId> </dependency> 
 			<dependency> <groupId>org.highmed.dsf</groupId> <artifactId>dsf-bpe-process-child</artifactId> </dependency> -->
@@ -31,7 +35,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
-			<artifactId>dsf-bpe-process-update-whitelist</artifactId>
+			<artifactId>dsf-bpe-process-update-allow-list</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
@@ -43,7 +47,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
-			<artifactId>dsf-openehr-webservice-client</artifactId>
+			<artifactId>dsf-openehr-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.highmed.dsf</groupId>
+			<artifactId>dsf-openehr-client-stub</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>

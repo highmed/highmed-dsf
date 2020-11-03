@@ -3,6 +3,7 @@ package org.highmed.dsf.bpe.spring.config;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
 import org.highmed.dsf.bpe.message.SendMedicRequest;
+import org.highmed.dsf.bpe.message.SendMultiMedicErrors;
 import org.highmed.dsf.bpe.message.SendMultiMedicResults;
 import org.highmed.dsf.bpe.message.SendSingleMedicResults;
 import org.highmed.dsf.bpe.message.SendTtpRequest;
@@ -12,6 +13,7 @@ import org.highmed.dsf.bpe.service.CheckFeasibilityResources;
 import org.highmed.dsf.bpe.service.CheckMultiMedicResults;
 import org.highmed.dsf.bpe.service.CheckQueries;
 import org.highmed.dsf.bpe.service.CheckSingleMedicResults;
+import org.highmed.dsf.bpe.service.CheckTtpComputedMultiMedicResults;
 import org.highmed.dsf.bpe.service.DownloadFeasibilityResources;
 import org.highmed.dsf.bpe.service.DownloadResearchStudyResource;
 import org.highmed.dsf.bpe.service.DownloadResultSets;
@@ -20,6 +22,7 @@ import org.highmed.dsf.bpe.service.ExecuteRecordLink;
 import org.highmed.dsf.bpe.service.FilterQueryResultsByConsent;
 import org.highmed.dsf.bpe.service.GenerateBloomFilters;
 import org.highmed.dsf.bpe.service.GenerateCountFromIds;
+import org.highmed.dsf.bpe.service.HandleErrorMultiMedicResults;
 import org.highmed.dsf.bpe.service.ModifyQueries;
 import org.highmed.dsf.bpe.service.SelectRequestTargets;
 import org.highmed.dsf.bpe.service.SelectResponseTargetMedic;
@@ -30,12 +33,14 @@ import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.group.GroupHelper;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.openehr.client.OpenEhrWebserviceClientProvider;
 import org.highmed.mpi.client.MasterPatientIndexClient;
 import org.highmed.mpi.client.MasterPatientIndexClientFactory;
+import org.highmed.openehr.client.OpenEhrClient;
+import org.highmed.openehr.client.OpenEhrClientFactory;
 import org.highmed.pseudonymization.translation.ResultSetTranslatorFromMedicRbfOnly;
 import org.highmed.pseudonymization.translation.ResultSetTranslatorFromMedicRbfOnlyImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -51,10 +56,10 @@ public class FeasibilityConfig
 	private FhirWebserviceClientProvider fhirClientProvider;
 
 	@Autowired
-	private OpenEhrWebserviceClientProvider openehrClientProvider;
+	private MasterPatientIndexClientFactory masterPatientIndexClientFactory;
 
 	@Autowired
-	private MasterPatientIndexClientFactory masterPatientIndexClientFactory;
+	private OpenEhrClientFactory openEhrClientFactory;
 
 	@Autowired
 	private OrganizationProvider organizationProvider;
@@ -73,6 +78,9 @@ public class FeasibilityConfig
 
 	@Autowired
 	private Environment environment;
+
+	@Value("${org.highmed.dsf.bpe.openehr.subject_external_id.path:/ehr_status/subject/external_ref/id/value}")
+	private String ehrIdColumnPath;
 
 	@Bean
 	public ProcessEnginePlugin feasibilityPlugin()
@@ -114,6 +122,12 @@ public class FeasibilityConfig
 		return new CheckMultiMedicResults(fhirClientProvider, taskHelper);
 	}
 
+	@Bean
+	public HandleErrorMultiMedicResults handleErrorMultiMedicResults()
+	{
+		return new HandleErrorMultiMedicResults(fhirClientProvider, taskHelper);
+	}
+
 	//
 	// process executeSimpleFeasibility implementations
 	//
@@ -139,14 +153,13 @@ public class FeasibilityConfig
 	@Bean
 	public ModifyQueries modifyQueries()
 	{
-		return new ModifyQueries(fhirClientProvider, taskHelper);
+		return new ModifyQueries(fhirClientProvider, taskHelper, ehrIdColumnPath);
 	}
 
 	@Bean
 	public ExecuteQueries executeQueries()
 	{
-		return new ExecuteQueries(fhirClientProvider, openehrClientProvider.getWebserviceClient(), taskHelper,
-				organizationProvider);
+		return new ExecuteQueries(fhirClientProvider, openEhrClient(), taskHelper, organizationProvider);
 	}
 
 	@Bean
@@ -168,10 +181,16 @@ public class FeasibilityConfig
 	}
 
 	@Bean
+	public OpenEhrClient openEhrClient()
+	{
+		return openEhrClientFactory.createClient(environment::getProperty);
+	}
+
+	@Bean
 	public GenerateBloomFilters generateBloomFilters()
 	{
-		return new GenerateBloomFilters(fhirClientProvider, taskHelper, masterPatientIndexClient(), objectMapper,
-				bouncyCastleProvider());
+		return new GenerateBloomFilters(fhirClientProvider, taskHelper, ehrIdColumnPath, masterPatientIndexClient(),
+				objectMapper, bouncyCastleProvider());
 	}
 
 	@Bean
@@ -239,6 +258,12 @@ public class FeasibilityConfig
 	}
 
 	@Bean
+	public CheckTtpComputedMultiMedicResults checkTtpComputedMultiMedicResults()
+	{
+		return new CheckTtpComputedMultiMedicResults(fhirClientProvider, taskHelper);
+	}
+
+	@Bean
 	public SelectResponseTargetMedic selectResponseTargetMedic()
 	{
 		return new SelectResponseTargetMedic(fhirClientProvider, taskHelper, organizationProvider);
@@ -248,5 +273,11 @@ public class FeasibilityConfig
 	public SendMultiMedicResults sendMultiMedicResults()
 	{
 		return new SendMultiMedicResults(fhirClientProvider, taskHelper, organizationProvider, fhirContext);
+	}
+
+	@Bean
+	public SendMultiMedicErrors sendMultiMedicErrors()
+	{
+		return new SendMultiMedicErrors(fhirClientProvider, taskHelper, organizationProvider, fhirContext);
 	}
 }

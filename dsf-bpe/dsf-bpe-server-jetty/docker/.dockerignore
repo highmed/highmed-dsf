@@ -1,7 +1,7 @@
 .dockerignore
-.gitignore
 Dockerfile
 conf/README.md
 last_event/README.md
-lib/.gitignore
+lib/README.md
 log/README.md
+plugin/README.md

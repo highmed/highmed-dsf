@@ -6,7 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Objects;
 
-import org.apache.commons.dbcp2.BasicDataSource;
+import javax.sql.DataSource;
+
 import org.highmed.dsf.fhir.OrganizationType;
 import org.highmed.dsf.fhir.dao.ResearchStudyDao;
 import org.highmed.dsf.fhir.search.parameters.ResearchStudyEnrollment;
@@ -24,7 +25,7 @@ public class ResearchStudyDaoJdbc extends AbstractResourceDaoJdbc<ResearchStudy>
 {
 	private static final Logger logger = LoggerFactory.getLogger(ResearchStudyDaoJdbc.class);
 
-	public ResearchStudyDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext)
+	public ResearchStudyDaoJdbc(DataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, ResearchStudy.class, "research_studies", "research_study", "research_study_id",
 				ResearchStudyUserFilter::new, with(ResearchStudyEnrollment::new, ResearchStudyIdentifier::new,

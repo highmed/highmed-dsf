@@ -6,12 +6,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.crypto.SecretKey;
 
 import org.highmed.mpi.client.Idat;
+import org.highmed.mpi.client.IdatNotFoundException;
 import org.highmed.mpi.client.MasterPatientIndexClient;
 import org.highmed.openehr.model.datatypes.StringRowElement;
 import org.highmed.openehr.model.structure.Column;
@@ -28,26 +30,66 @@ public class ResultSetTranslatorToTtpImpl extends AbstractResultSetTranslator im
 {
 	private static final Logger logger = LoggerFactory.getLogger(ResultSetTranslatorToTtpImpl.class);
 
+	public static final Function<Supplier<Idat>, Idat> FILTER_ON_IDAT_NOT_FOUND_EXCEPTION = supplier ->
+	{
+		try
+		{
+			return supplier.get();
+		}
+		catch (IdatNotFoundException e)
+		{
+			logger.warn("Error while retrieving IDAT, filtering entry: {}", e.getMessage());
+			return null;
+		}
+	};
+
+	public static final Function<Supplier<Idat>, Idat> THROW_ON_IDAT_NOT_FOUND_EXCEPTION = supplier ->
+	{
+		try
+		{
+			return supplier.get();
+		}
+		catch (IdatNotFoundException e)
+		{
+			logger.warn("Error while retrieving IDAT, throwing exception: {}", e.getMessage());
+			throw e;
+		}
+	};
+
 	private final String organizationIdentifier;
 	private final SecretKey organizationKey;
 	private final String researchStudyIdentifier;
 	private final SecretKey researchStudyKey;
+	private final String ehrIdColumnPath;
 
 	private final RecordBloomFilterGenerator recordBloomFilterGenerator;
 	private final MasterPatientIndexClient masterPatientIndexClient;
 
+	private final Function<Supplier<Idat>, Idat> retrieveIdatErrorHandler;
+
 	public ResultSetTranslatorToTtpImpl(String organizationIdentifier, SecretKey organizationKey,
-			String researchStudyIdentifier, SecretKey researchStudyKey,
+			String researchStudyIdentifier, SecretKey researchStudyKey, String ehrIdColumnPath,
 			RecordBloomFilterGenerator recordBloomFilterGenerator, MasterPatientIndexClient masterPatientIndexClient)
+	{
+		this(organizationIdentifier, organizationKey, researchStudyIdentifier, researchStudyKey, ehrIdColumnPath,
+				recordBloomFilterGenerator, masterPatientIndexClient, THROW_ON_IDAT_NOT_FOUND_EXCEPTION);
+	}
+
+	public ResultSetTranslatorToTtpImpl(String organizationIdentifier, SecretKey organizationKey,
+			String researchStudyIdentifier, SecretKey researchStudyKey, String ehrIdColumnPath,
+			RecordBloomFilterGenerator recordBloomFilterGenerator, MasterPatientIndexClient masterPatientIndexClient,
+			Function<Supplier<Idat>, Idat> retrieveIdatErrorHandler)
 	{
 		this.organizationIdentifier = Objects.requireNonNull(organizationIdentifier, "organizationIdentifier");
 		this.organizationKey = Objects.requireNonNull(organizationKey, "organizationKey");
 		this.researchStudyIdentifier = Objects.requireNonNull(researchStudyIdentifier, "researchStudyIdentifier");
 		this.researchStudyKey = Objects.requireNonNull(researchStudyKey, "researchStudyKey");
+		this.ehrIdColumnPath = Objects.requireNonNull(ehrIdColumnPath, "ehrIdColumnPath");
 
-		this.masterPatientIndexClient = Objects.requireNonNull(masterPatientIndexClient, "masterPatientIndexClient");
 		this.recordBloomFilterGenerator = Objects.requireNonNull(recordBloomFilterGenerator,
 				"recordBloomFilterGenerator");
+		this.masterPatientIndexClient = Objects.requireNonNull(masterPatientIndexClient, "masterPatientIndexClient");
+		this.retrieveIdatErrorHandler = retrieveIdatErrorHandler;
 	}
 
 	@Override
@@ -57,7 +99,7 @@ public class ResultSetTranslatorToTtpImpl extends AbstractResultSetTranslator im
 
 		if (ehrIdColumnIndex < 0)
 			throw new IllegalArgumentException("Missing ehr id column with name '" + Constants.EHRID_COLUMN_NAME
-					+ "' and path '" + Constants.EHRID_COLUMN_PATH + "'");
+					+ "' and path '" + ehrIdColumnPath + "'");
 
 		Meta meta = copyMeta(resultSet.getMeta());
 		List<Column> columns = encodeColumnsWithEhrId(resultSet.getColumns());
@@ -78,7 +120,7 @@ public class ResultSetTranslatorToTtpImpl extends AbstractResultSetTranslator im
 	private Predicate<? super Column> isEhrIdColumn()
 	{
 		return column -> Constants.EHRID_COLUMN_NAME.equals(column.getName())
-				&& Constants.EHRID_COLUMN_PATH.equals(column.getPath());
+				&& ehrIdColumnPath.equals(column.getPath());
 	}
 
 	private List<Column> encodeColumnsWithEhrId(List<Column> columns)
@@ -96,7 +138,8 @@ public class ResultSetTranslatorToTtpImpl extends AbstractResultSetTranslator im
 
 	private List<List<RowElement>> encodeRowsWithEhrId(int ehrIdColumnIndex, List<List<RowElement>> rows)
 	{
-		return rows.parallelStream().map(encodeRowWithEhrId(ehrIdColumnIndex)).collect(Collectors.toList());
+		return rows.parallelStream().map(encodeRowWithEhrId(ehrIdColumnIndex)).filter(e -> e != null)
+				.collect(Collectors.toList());
 	}
 
 	private Function<List<RowElement>, List<RowElement>> encodeRowWithEhrId(int ehrIdColumnIndex)
@@ -111,7 +154,10 @@ public class ResultSetTranslatorToTtpImpl extends AbstractResultSetTranslator im
 					newRowElements.add(
 							toEncryptedMdatRowElement(rowElements.get(i), researchStudyKey, researchStudyIdentifier));
 
-			Idat idat = retrieveIdat(ehrId);
+			Idat idat = retrieveIdatErrorHandler.apply(() -> retrieveIdat(ehrId));
+
+			if (idat == null)
+				return null;
 
 			newRowElements.add(encodeAsEncrypedMedicId(idat));
 			newRowElements.add(encodeAsRbf(idat));

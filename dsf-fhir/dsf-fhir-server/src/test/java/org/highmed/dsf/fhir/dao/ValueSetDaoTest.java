@@ -2,12 +2,9 @@ package org.highmed.dsf.fhir.dao;
 
 import static org.junit.Assert.assertEquals;
 
-import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.dsf.fhir.dao.jdbc.ValueSetDaoJdbc;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.Test;
-
-import ca.uhn.fhir.context.FhirContext;
 
 public class ValueSetDaoTest extends AbstractResourceDaoTest<ValueSet, ValueSetDao>
 		implements ReadByUrlDaoTest<ValueSet>
@@ -17,13 +14,7 @@ public class ValueSetDaoTest extends AbstractResourceDaoTest<ValueSet, ValueSetD
 
 	public ValueSetDaoTest()
 	{
-		super(ValueSet.class);
-	}
-
-	@Override
-	protected ValueSetDao createDao(BasicDataSource dataSource, FhirContext fhirContext)
-	{
-		return new ValueSetDaoJdbc(dataSource, fhirContext);
+		super(ValueSet.class, ValueSetDaoJdbc::new);
 	}
 
 	@Override
@@ -71,7 +62,7 @@ public class ValueSetDaoTest extends AbstractResourceDaoTest<ValueSet, ValueSetD
 	@Override
 	public String getVersion()
 	{
-		return "0.2.0";
+		return "0.3.0";
 	}
 
 	@Override

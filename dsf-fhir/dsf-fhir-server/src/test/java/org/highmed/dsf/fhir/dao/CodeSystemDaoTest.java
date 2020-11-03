@@ -2,12 +2,9 @@ package org.highmed.dsf.fhir.dao;
 
 import static org.junit.Assert.assertEquals;
 
-import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.dsf.fhir.dao.jdbc.CodeSystemDaoJdbc;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.junit.Test;
-
-import ca.uhn.fhir.context.FhirContext;
 
 public class CodeSystemDaoTest extends AbstractResourceDaoTest<CodeSystem, CodeSystemDao>
 		implements ReadByUrlDaoTest<CodeSystem>
@@ -17,13 +14,7 @@ public class CodeSystemDaoTest extends AbstractResourceDaoTest<CodeSystem, CodeS
 
 	public CodeSystemDaoTest()
 	{
-		super(CodeSystem.class);
-	}
-
-	@Override
-	protected CodeSystemDao createDao(BasicDataSource dataSource, FhirContext fhirContext)
-	{
-		return new CodeSystemDaoJdbc(dataSource, fhirContext);
+		super(CodeSystem.class, CodeSystemDaoJdbc::new);
 	}
 
 	@Override
@@ -71,7 +62,7 @@ public class CodeSystemDaoTest extends AbstractResourceDaoTest<CodeSystem, CodeS
 	@Override
 	public String getVersion()
 	{
-		return "0.2.0";
+		return "0.3.0";
 	}
 
 	@Override

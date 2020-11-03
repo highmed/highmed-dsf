@@ -1,20 +1,11 @@
 package org.highmed.dsf.bpe.spring.config;
 
-import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
-import org.highmed.dsf.fhir.variables.BloomFilterConfigSerializer;
-import org.highmed.dsf.fhir.variables.FeasibilityQueryResultSerializer;
-import org.highmed.dsf.fhir.variables.FeasibilityQueryResultsSerializer;
 import org.highmed.dsf.fhir.variables.FhirResourceJacksonDeserializer;
 import org.highmed.dsf.fhir.variables.FhirResourceJacksonSerializer;
 import org.highmed.dsf.fhir.variables.FhirResourceSerializer;
 import org.highmed.dsf.fhir.variables.FhirResourcesListSerializer;
-import org.highmed.dsf.fhir.variables.FinalFeasibilityQueryResultSerializer;
-import org.highmed.dsf.fhir.variables.FinalFeasibilityQueryResultsSerializer;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargetSerializer;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargetsSerializer;
-import org.highmed.dsf.fhir.variables.OutputSerializer;
-import org.highmed.dsf.fhir.variables.OutputsSerializer;
-import org.highmed.dsf.fhir.variables.SerializerPlugin;
 import org.highmed.openehr.json.OpenEhrObjectMapperFactory;
 import org.hl7.fhir.r4.model.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,57 +64,5 @@ public class SerializerConfig
 	public MultiInstanceTargetsSerializer multiInstanceTargetsSerializer()
 	{
 		return new MultiInstanceTargetsSerializer(objectMapper());
-	}
-
-	@Bean
-	public OutputSerializer outputSerializer()
-	{
-		return new OutputSerializer(objectMapper());
-	}
-
-	@Bean
-	public OutputsSerializer outputsSerializer()
-	{
-		return new OutputsSerializer(objectMapper());
-	}
-
-	@Bean
-	public FeasibilityQueryResultSerializer feasibilityQueryResultSerializer()
-	{
-		return new FeasibilityQueryResultSerializer(objectMapper());
-	}
-
-	@Bean
-	public FeasibilityQueryResultsSerializer feasibilityQueryResultsSerializer()
-	{
-		return new FeasibilityQueryResultsSerializer(objectMapper());
-	}
-
-	@Bean
-	public FinalFeasibilityQueryResultSerializer finalFeasibilityQueryResultSerializer()
-	{
-		return new FinalFeasibilityQueryResultSerializer(objectMapper());
-	}
-
-	@Bean
-	public FinalFeasibilityQueryResultsSerializer finalFeasibilityQueryResultsSerializer()
-	{
-		return new FinalFeasibilityQueryResultsSerializer(objectMapper());
-	}
-
-	@Bean
-	public BloomFilterConfigSerializer bloomFilterConfigSerializer()
-	{
-		return new BloomFilterConfigSerializer(objectMapper());
-	}
-
-	@Bean
-	public ProcessEnginePlugin serializerPlugin()
-	{
-		return new SerializerPlugin(fhirResourceSerializer(), fhirResourcesListSerializer(),
-				multiInstanceTargetSerializer(), multiInstanceTargetsSerializer(), feasibilityQueryResultSerializer(),
-				feasibilityQueryResultsSerializer(), finalFeasibilityQueryResultSerializer(),
-				finalFeasibilityQueryResultsSerializer(), bloomFilterConfigSerializer(), outputSerializer(),
-				outputsSerializer());
 	}
 }

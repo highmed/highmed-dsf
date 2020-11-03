@@ -24,9 +24,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -38,6 +35,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
@@ -47,12 +45,10 @@ import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainer
 import org.glassfish.jersey.servlet.init.JerseyServletContainerInitializer;
 import org.highmed.dsf.fhir.FhirContextLoaderListener;
 import org.highmed.dsf.fhir.authentication.AuthenticationFilter;
+import org.highmed.dsf.fhir.dao.AbstractDbTest;
 import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.highmed.dsf.fhir.service.ReferenceCleanerImpl;
 import org.highmed.dsf.fhir.service.ReferenceExtractorImpl;
-import org.highmed.dsf.fhir.spring.config.InitialDataLoaderConfig;
-import org.highmed.dsf.fhir.test.FhirEmbeddedPostgresWithLiquibase;
-import org.highmed.dsf.fhir.test.TestSuiteIntegrationTests;
 import org.highmed.dsf.fhir.test.X509Certificates;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.highmed.fhir.client.FhirWebserviceClientJersey;
@@ -64,7 +60,6 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -77,21 +72,35 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import de.rwh.utils.jetty.JettyServer;
 import de.rwh.utils.jetty.PropertiesReader;
-import de.rwh.utils.test.Database;
+import de.rwh.utils.test.LiquibaseTemplateTestClassRule;
+import de.rwh.utils.test.LiquibaseTemplateTestRule;
 
-public abstract class AbstractIntegrationTest
+public abstract class AbstractIntegrationTest extends AbstractDbTest
 {
 	@ClassRule
-	public static final X509Certificates certificates = new X509Certificates(TestSuiteIntegrationTests.certificates);
+	public static final X509Certificates certificates = new X509Certificates();
+
+	public static final String INTEGRATION_TEST_DB_TEMPLATE_NAME = "integration_test_template";
+
+	protected static final BasicDataSource adminDataSource = createAdminBasicDataSource();
+	protected static final BasicDataSource liquibaseDataSource = createLiquibaseDataSource();
+	protected static final BasicDataSource defaultDataSource = createDefaultDataSource();
 
 	@ClassRule
-	public static final FhirEmbeddedPostgresWithLiquibase template = new FhirEmbeddedPostgresWithLiquibase(
-			TestSuiteIntegrationTests.template);
+	public static final LiquibaseTemplateTestClassRule liquibaseRule = new LiquibaseTemplateTestClassRule(
+			adminDataSource, LiquibaseTemplateTestClassRule.DEFAULT_TEST_DB_NAME, INTEGRATION_TEST_DB_TEMPLATE_NAME,
+			liquibaseDataSource, CHANGE_LOG_FILE, CHANGE_LOG_PARAMETERS, false);
 
 	@Rule
-	public final Database database = new Database(template);
+	public final LiquibaseTemplateTestRule templateRule = new LiquibaseTemplateTestRule(adminDataSource,
+			LiquibaseTemplateTestClassRule.DEFAULT_TEST_DB_NAME, INTEGRATION_TEST_DB_TEMPLATE_NAME);
 
 	private static final Logger logger = LoggerFactory.getLogger(AbstractIntegrationTest.class);
+
+	protected static final String[] ALL_TABLES = { "activity_definitions", "binaries", "bundles", "code_systems",
+			"endpoints", "groups", "healthcare_services", "locations", "naming_systems", "organizations", "patients",
+			"practitioner_roles", "practitioners", "provenances", "research_studies", "structure_definition_snapshots",
+			"structure_definitions", "subscriptions", "tasks", "value_sets" };
 
 	protected static final String BASE_URL = "https://localhost:8001/fhir";
 	protected static final String WEBSOCKET_URL = "wss://localhost:8001/fhir/ws";
@@ -110,8 +119,9 @@ public abstract class AbstractIntegrationTest
 	@BeforeClass
 	public static void beforeClass() throws Exception
 	{
-		logger.info("Creating DB schema pre server startup ...");
-		template.createSchema();
+		defaultDataSource.start();
+		liquibaseDataSource.start();
+		adminDataSource.start();
 
 		logger.info("Creating Bundle ...");
 		createTestBundle(certificates.getClientCertificate().getCertificate(),
@@ -129,6 +139,9 @@ public abstract class AbstractIntegrationTest
 
 		logger.info("Starting FHIR Server ...");
 		fhirServer = startFhirServer();
+
+		logger.info("Creating template database ...");
+		liquibaseRule.createTemplateDatabase();
 	}
 
 	private static FhirWebserviceClient createWebserviceClient(KeyStore trustStore, KeyStore keyStore,
@@ -184,9 +197,9 @@ public abstract class AbstractIntegrationTest
 
 	private static void overrideConfigPropertiesForTesting(Properties properties)
 	{
-		properties.put("org.highmed.dsf.fhir.db.url", template.getJdbcUrl());
-		properties.put("org.highmed.dsf.fhir.db.server_user", template.getDbUsername());
-		properties.put("org.highmed.dsf.fhir.db.server_user_password", template.getDbPassword());
+		properties.put("org.highmed.dsf.fhir.db.url", DATABASE_URL);
+		properties.put("org.highmed.dsf.fhir.db.server_user", DATABASE_USER);
+		properties.put("org.highmed.dsf.fhir.db.server_user_password", DATABASE_PASSWORD);
 
 		String clientCertHashHex = calculateSha512CertificateThumbprintHex(
 				certificates.getClientCertificate().getCertificate());
@@ -285,6 +298,10 @@ public abstract class AbstractIntegrationTest
 	@AfterClass
 	public static void afterClass() throws Exception
 	{
+		defaultDataSource.close();
+		liquibaseDataSource.close();
+		adminDataSource.close();
+
 		try
 		{
 			if (fhirServer != null)
@@ -329,27 +346,6 @@ public abstract class AbstractIntegrationTest
 		assertNotNull(contex);
 
 		return contex;
-	}
-
-	@Before
-	public void before() throws Exception
-	{
-		try (Connection connection = database.getDataSource().getConnection();
-				PreparedStatement statement = connection.prepareStatement("SELECT count(*) FROM current_organizations");
-				ResultSet result = statement.executeQuery())
-		{
-			assertTrue(result.next());
-			if (result.getInt(1) <= 0)
-			{
-				logger.info("Loading initial FHIR data bundles for next test case ...");
-				InitialDataLoaderConfig initialDataLoadConfig = getSpringWebApplicationContext()
-						.getBean(InitialDataLoaderConfig.class);
-				assertNotNull(initialDataLoadConfig);
-				initialDataLoadConfig.onContextRefreshedEvent(null);
-			}
-			else
-				logger.info("Not loading initial FHIR data bundles for first test case");
-		}
 	}
 
 	protected static FhirWebserviceClient getWebserviceClient()

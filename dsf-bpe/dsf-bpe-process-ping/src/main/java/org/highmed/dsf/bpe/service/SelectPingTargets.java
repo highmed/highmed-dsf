@@ -13,14 +13,10 @@ import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.MultiInstanceTarget;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargets;
 import org.highmed.dsf.fhir.variables.MultiInstanceTargetsValues;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 public class SelectPingTargets extends AbstractServiceDelegate implements InitializingBean
 {
-	private static final Logger logger = LoggerFactory.getLogger(SelectPingTargets.class);
-
 	private final OrganizationProvider organizationProvider;
 
 	public SelectPingTargets(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
@@ -41,10 +37,6 @@ public class SelectPingTargets extends AbstractServiceDelegate implements Initia
 	@Override
 	public void doExecute(DelegateExecution execution) throws Exception
 	{
-		logger.debug("{}: Process-instance-id {}, business-key {}, variables {}, local-variables {}",
-				getClass().getName(), execution.getProcessInstanceId(), execution.getBusinessKey(),
-				execution.getVariables(), execution.getVariablesLocal());
-
 		List<MultiInstanceTarget> targets = organizationProvider.getRemoteIdentifiers().stream()
 				.map(identifier -> new MultiInstanceTarget(identifier.getValue(), UUID.randomUUID().toString()))
 				.collect(Collectors.toList());

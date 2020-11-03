@@ -3,7 +3,7 @@
 	<url value="http://highmed.org/fhir/StructureDefinition/highmed-task"/>
 	<version value="0.5.0"/>
 	<name value="Task"/>
-	<status value="active"/>
+	<status value="draft"/>
 	<date value="2019-05-21"/>
 	<fhirVersion value="4.0.0"/>
 	<kind value="resource"/>

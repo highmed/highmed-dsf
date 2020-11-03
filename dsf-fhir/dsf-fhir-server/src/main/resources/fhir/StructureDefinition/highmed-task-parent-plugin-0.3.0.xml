@@ -1,0 +1,53 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+  <meta>
+    <tag>
+      <system value="http://highmed.org/fhir/CodeSystem/authorization-role" />
+      <code value="REMOTE" />
+    </tag>
+  </meta>
+  <url value="http://highmed.org/fhir/StructureDefinition/highmed-task-parent-plugin" />
+  <version value="0.3.0" />
+  <name value="ParentPlugin" />
+  <status value="active" />
+  <experimental value="false" />
+  <date value="2020-11-03" />
+  <fhirVersion value="4.0.1" />
+  <kind value="resource" />
+  <abstract value="false" />
+  <type value="Task" />
+  <baseDefinition value="http://highmed.org/fhir/StructureDefinition/highmed-task-base" />
+  <derivation value="constraint" />
+  <differential>
+    <element id="Task.instantiatesUri">
+      <path value="Task.instantiatesUri" />
+      <fixedUri value="http://highmed.org/bpe/Process/parentPlugin/0.3.0" />
+    </element>
+    <element id="Task.input:message-name">
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="Parameter" />
+      </extension>
+      <path value="Task.input" />
+      <sliceName value="message-name" />
+    </element>
+    <element id="Task.input:message-name.value[x]">
+      <path value="Task.input.value[x]" />
+      <fixedString value="parentPluginMessage" />
+    </element>
+    <element id="Task.input:business-key">
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="Parameter" />
+      </extension>
+      <path value="Task.input" />
+      <sliceName value="business-key" />
+      <max value="0" />
+    </element>
+    <element id="Task.input:correlation-key">
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="Parameter" />
+      </extension>
+      <path value="Task.input" />
+      <sliceName value="correlation-key" />
+      <max value="0" />
+    </element>
+  </differential>
+</StructureDefinition>

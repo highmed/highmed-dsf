@@ -23,10 +23,10 @@ public class OrganizationProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			Arrays.asList("highmed-organization-0.2.0.xml", "highmed-extension-certificate-thumbprint-0.2.0.xml",
-					"highmed-endpoint-0.2.0.xml"),
-			Arrays.asList("authorization-role-0.2.0.xml", "organization-type-0.2.0.xml"),
-			Arrays.asList("authorization-role-0.2.0.xml", "organization-type-0.2.0.xml"));
+			Arrays.asList("highmed-organization-0.3.0.xml", "highmed-extension-certificate-thumbprint-0.3.0.xml",
+					"highmed-endpoint-0.3.0.xml"),
+			Arrays.asList("authorization-role-0.3.0.xml", "organization-type-0.3.0.xml"),
+			Arrays.asList("authorization-role-0.3.0.xml", "organization-type-0.3.0.xml"));
 
 	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
@@ -89,7 +89,7 @@ public class OrganizationProfileTest
 		result.getMessages().stream().map(m -> m.getLocationString() + " " + m.getLocationLine() + ":"
 				+ m.getLocationCol() + " - " + m.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
 
-		assertEquals(1, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+		assertEquals(2, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
 				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
 	}
 

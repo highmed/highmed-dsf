@@ -5,7 +5,8 @@ import java.sql.SQLException;
 import java.util.Optional;
 import java.util.function.Function;
 
-import org.apache.commons.dbcp2.BasicDataSource;
+import javax.sql.DataSource;
+
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
 import org.highmed.dsf.fhir.search.SearchQueryUserFilter;
@@ -22,7 +23,7 @@ abstract class AbstractStructureDefinitionDaoJdbc extends AbstractResourceDaoJdb
 {
 	private final ReadByUrlDaoJdbc<StructureDefinition> readByUrl;
 
-	public AbstractStructureDefinitionDaoJdbc(BasicDataSource dataSource, FhirContext fhirContext, String resourceTable,
+	public AbstractStructureDefinitionDaoJdbc(DataSource dataSource, FhirContext fhirContext, String resourceTable,
 			String resourceColumn, String resourceIdColumn, Function<User, SearchQueryUserFilter> userFilter)
 	{
 		super(dataSource, fhirContext, StructureDefinition.class, resourceTable, resourceColumn, resourceIdColumn,

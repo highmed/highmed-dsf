@@ -44,16 +44,16 @@ public class UpdateResource3MedicTtpExampleStarter
 				keyStorePassword, null, null, null, 0, 0, null, context, referenceCleaner);
 
 		Bundle searchResult = client.searchWithStrictHandling(Bundle.class, Map.of("identifier",
-				Collections.singletonList("http://highmed.org/fhir/CodeSystem/update-whitelist|highmed_whitelist")));
+				Collections.singletonList("http://highmed.org/fhir/CodeSystem/update-allow-list|highmed_allow_list")));
 		if (searchResult.getTotal() != 1 && searchResult.getEntryFirstRep().getResource() instanceof Bundle)
-			throw new IllegalStateException("Expected a single White-List Bundle");
-		Bundle whiteList = (Bundle) searchResult.getEntryFirstRep().getResource();
+			throw new IllegalStateException("Expected a single allow list Bundle");
+		Bundle allowList = (Bundle) searchResult.getEntryFirstRep().getResource();
 
-		System.out.println(context.newXmlParser().encodeResourceToString(whiteList));
+		System.out.println(context.newXmlParser().encodeResourceToString(allowList));
 
 		Task task = new Task();
 		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-request-update-resources");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/requestUpdateResources/0.2.0");
+		task.setInstantiatesUri("http://highmed.org/bpe/Process/requestUpdateResources/0.3.0");
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
@@ -66,8 +66,8 @@ public class UpdateResource3MedicTtpExampleStarter
 				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("message-name");
 
 		task.addInput()
-				.setValue(new Reference(new IdType("Bundle", whiteList.getIdElement().getIdPart(),
-						whiteList.getIdElement().getVersionIdPart())))
+				.setValue(new Reference(new IdType("Bundle", allowList.getIdElement().getIdPart(),
+						allowList.getIdElement().getVersionIdPart())))
 				.getType().addCoding().setSystem("http://highmed.org/fhir/CodeSystem/update-resources")
 				.setCode("bundle-reference");
 

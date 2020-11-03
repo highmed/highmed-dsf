@@ -9,13 +9,18 @@
 	<parent>
 		<artifactId>dsf-mpi-pom</artifactId>
 		<groupId>org.highmed.dsf</groupId>
-		<version>0.2.1</version>
+		<version>0.3.0</version>
 	</parent>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-mpi-client</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>de.hs-heilbronn.mi</groupId>
+			<artifactId>crypto-utils</artifactId>
 		</dependency>
 
 		<dependency>

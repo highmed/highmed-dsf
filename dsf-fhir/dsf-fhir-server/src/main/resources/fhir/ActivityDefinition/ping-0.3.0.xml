@@ -1,0 +1,114 @@
+<ActivityDefinition xmlns="http://hl7.org/fhir">
+	<meta>
+		<tag>
+			<system value="http://highmed.org/fhir/CodeSystem/authorization-role" />
+			<code value="REMOTE" />
+		</tag>
+	</meta>
+	<extension url="http://highmed.org/fhir/StructureDefinition/process-authorization">
+		<extension url="message-name">
+			<valueString value="startPingProcessMessage" />
+		</extension>
+		<extension url="authorization-roles">
+			<extension url="authorization-role">
+				<valueCoding>
+					<system value="http://highmed.org/fhir/CodeSystem/authorization-role" />
+					<code value="LOCAL" />
+				</valueCoding>
+			</extension>
+		</extension>
+		<extension url="requester-organization-types">
+			<extension url="requester-organization-type">
+				<valueCoding>
+					<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
+					<code value="TTP" />
+				</valueCoding>
+			</extension>
+			<extension url="requester-organization-type">
+				<valueCoding>
+					<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
+					<code value="MeDIC" />
+				</valueCoding>
+			</extension>
+		</extension>
+		<extension url="recipient-organization-types">
+			<extension url="recipient-organization-type">
+				<valueCoding>
+					<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
+					<code value="TTP" />
+				</valueCoding>
+			</extension>
+			<extension url="recipient-organization-type">
+				<valueCoding>
+					<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
+					<code value="MeDIC" />
+				</valueCoding>
+			</extension>
+		</extension>
+		<extension url="task-profile">
+			<valueCanonical value="http://highmed.org/fhir/StructureDefinition/highmed-task-start-ping-process" />
+		</extension>
+	</extension>
+	<extension url="http://highmed.org/fhir/StructureDefinition/process-authorization">
+		<extension url="message-name">
+			<valueString value="pongMessage" />
+		</extension>
+		<extension url="authorization-roles">
+			<extension url="authorization-role">
+				<valueCoding>
+					<system value="http://highmed.org/fhir/CodeSystem/authorization-role" />
+					<code value="REMOTE" />
+				</valueCoding>
+			</extension>
+		</extension>
+		<extension url="requester-organization-types">
+			<extension url="requester-organization-type">
+				<valueCoding>
+					<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
+					<code value="TTP" />
+				</valueCoding>
+			</extension>
+			<extension url="requester-organization-type">
+				<valueCoding>
+					<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
+					<code value="MeDIC" />
+				</valueCoding>
+			</extension>
+		</extension>
+		<extension url="recipient-organization-types">
+			<extension url="recipient-organization-type">
+				<valueCoding>
+					<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
+					<code value="TTP" />
+				</valueCoding>
+			</extension>
+			<extension url="recipient-organization-type">
+				<valueCoding>
+					<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
+					<code value="MeDIC" />
+				</valueCoding>
+			</extension>
+		</extension>
+		<extension url="task-profile">
+			<valueCanonical value="http://highmed.org/fhir/StructureDefinition/highmed-task-pong" />
+		</extension>
+	</extension>
+	<url value="http://highmed.org/bpe/Process/ping" />
+	<version value="0.3.0" />
+	<name value="PingProcess" />
+	<title value="PING process" />
+	<subtitle value="Communication Testing Process" />
+	<status value="active" />
+	<experimental value="false" />
+	<date value="2020-11-03" />
+	<publisher value="HiGHmed" />
+	<contact>
+		<name value="HiGHmed" />
+		<telecom>
+			<system value="email" />
+			<value value="pmo@highmed.org" />
+		</telecom>
+	</contact>
+	<description value="Process to send PING messages to remote Organizations and to receive corresponding PONG message" />
+	<kind value="Task" />
+</ActivityDefinition>
