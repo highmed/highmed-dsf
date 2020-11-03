@@ -37,9 +37,6 @@ public class SendMultiMedicResults extends AbstractTaskMessageSend
 				.getVariable(ConstantsFeasibility.VARIABLE_FINAL_QUERY_RESULTS);
 
 		Stream<ParameterComponent> resultInputs = results.getResults().stream().flatMap(this::toInputs);
-
-
-
 		Stream<ParameterComponent> errorInput = getErrorInput(execution);
 
 		return Stream.concat(resultInputs, errorInput);

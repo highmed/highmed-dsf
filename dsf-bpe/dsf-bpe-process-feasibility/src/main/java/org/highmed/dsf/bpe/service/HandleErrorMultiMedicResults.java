@@ -9,7 +9,6 @@ import org.hl7.fhir.r4.model.Task;
 
 public class HandleErrorMultiMedicResults extends AbstractServiceDelegate
 {
-
 	public HandleErrorMultiMedicResults(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
 	{
 		super(clientProvider, taskHelper);
