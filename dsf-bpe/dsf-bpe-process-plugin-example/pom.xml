@@ -7,7 +7,7 @@
 	<parent>
 		<artifactId>dsf-bpe-pom</artifactId>
 		<groupId>org.highmed.dsf</groupId>
-		<version>0.3.0</version>
+		<version>0.4.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>dsf-bpe-process-plugin-example</artifactId>
