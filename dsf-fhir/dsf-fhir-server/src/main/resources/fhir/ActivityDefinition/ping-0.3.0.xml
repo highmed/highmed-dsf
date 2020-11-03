@@ -98,7 +98,7 @@
 	<name value="PingProcess" />
 	<title value="PING process" />
 	<subtitle value="Communication Testing Process" />
-	<status value="draft" />
+	<status value="active" />
 	<experimental value="false" />
 	<date value="2020-11-03" />
 	<publisher value="HiGHmed" />

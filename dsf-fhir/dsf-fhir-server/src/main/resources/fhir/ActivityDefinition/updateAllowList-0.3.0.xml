@@ -42,7 +42,7 @@
 	<name value="UpdateAllowList" />
 	<title value="Update Allow List" />
 	<subtitle value="Update Allow List Bundle Process" />
-	<status value="draft" />
+	<status value="active" />
 	<experimental value="false" />
 	<date value="2020-11-03" />
 	<publisher value="HiGHmed" />
