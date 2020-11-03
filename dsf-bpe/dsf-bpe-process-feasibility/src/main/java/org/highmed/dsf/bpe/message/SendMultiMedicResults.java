@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.bpe.variables.ConstantsFeasibility;
 import org.highmed.dsf.bpe.variables.FinalFeasibilityQueryResult;
 import org.highmed.dsf.bpe.variables.FinalFeasibilityQueryResults;
