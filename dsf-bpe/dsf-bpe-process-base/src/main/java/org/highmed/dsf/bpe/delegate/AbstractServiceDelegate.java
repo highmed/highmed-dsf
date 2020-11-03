@@ -97,7 +97,7 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 	 * @param execution
 	 *            Process instance information and variables
 	 * @throws BpmnError
-	 *             Thrown when a error boundary event should be called
+	 *             Thrown when an error boundary event should be called
 	 * @throws Exception
 	 *             Uncaught exceptions will result in task status failed, the exception message will be written as an
 	 *             error output
