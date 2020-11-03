@@ -43,7 +43,7 @@
 	<title value="Request Update of Resources" />
 	<subtitle value="Process to Request a Bundle Download" />
 	<status value="draft" />
-	<experimental value="true" />
+	<experimental value="false" />
 	<date value="2020-11-03" />
 	<publisher value="HiGHmed" />
 	<contact>
