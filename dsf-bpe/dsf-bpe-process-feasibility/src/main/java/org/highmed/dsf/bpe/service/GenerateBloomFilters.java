@@ -110,7 +110,7 @@ public class GenerateBloomFilters extends AbstractServiceDelegate
 		return new ResultSetTranslatorToTtpRbfOnlyImpl(ehrIdColumnPath,
 				createRecordBloomFilterGenerator(bloomFilterConfig.getPermutationSeed(),
 						bloomFilterConfig.getHmacSha2Key(), bloomFilterConfig.getHmacSha3Key()),
-				masterPatientIndexClient);
+				masterPatientIndexClient, ResultSetTranslatorToTtpRbfOnlyImpl.FILTER_ON_IDAT_NOT_FOUND_EXCEPTION);
 	}
 
 	protected RecordBloomFilterGenerator createRecordBloomFilterGenerator(long permutationSeed, Key hmacSha2Key,
