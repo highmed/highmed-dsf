@@ -17,28 +17,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
-			<artifactId>dsf-bpe-process-feasibility</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.highmed.dsf</groupId>
-			<artifactId>dsf-bpe-process-local-services</artifactId>
-		</dependency>
-		<!-- provided as jar and injected on startup as plugin <dependency> <groupId>org.highmed.dsf</groupId> <artifactId>dsf-bpe-process-parent</artifactId> </dependency> 
-			<dependency> <groupId>org.highmed.dsf</groupId> <artifactId>dsf-bpe-process-child</artifactId> </dependency> -->
-		<dependency>
-			<groupId>org.highmed.dsf</groupId>
-			<artifactId>dsf-bpe-process-ping</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.highmed.dsf</groupId>
-			<artifactId>dsf-bpe-process-update-resources</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.highmed.dsf</groupId>
-			<artifactId>dsf-bpe-process-update-allow-list</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-fhir-websocket-client</artifactId>
 		</dependency>
 		<dependency>
@@ -51,19 +29,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
-			<artifactId>dsf-openehr-client-stub</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-openehr-model</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-mpi-client</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.highmed.dsf</groupId>
-			<artifactId>dsf-mpi-client-stub</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>

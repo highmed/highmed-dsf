@@ -1,9 +1,7 @@
 package org.highmed.dsf.bpe.spring.config;
 
-import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
 import org.highmed.dsf.bpe.message.SendPing;
 import org.highmed.dsf.bpe.message.SendPong;
-import org.highmed.dsf.bpe.plugin.PingPlugin;
 import org.highmed.dsf.bpe.service.LogPing;
 import org.highmed.dsf.bpe.service.LogPong;
 import org.highmed.dsf.bpe.service.SelectPingTargets;
@@ -31,12 +29,6 @@ public class PingConfig
 
 	@Autowired
 	private FhirContext fhirContext;
-
-	@Bean
-	public ProcessEnginePlugin pingPlugin()
-	{
-		return new PingPlugin();
-	}
 
 	@Bean
 	public SendPing sendPing()

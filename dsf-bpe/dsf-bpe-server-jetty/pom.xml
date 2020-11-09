@@ -1,5 +1,5 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>dsf-bpe-server-jetty</artifactId>
@@ -35,6 +35,15 @@
 			<groupId>javax.mail</groupId>
 			<artifactId>mail</artifactId>
 		</dependency>
+
+		<dependency>
+			<groupId>org.highmed.dsf</groupId>
+			<artifactId>dsf-openehr-client-stub</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.highmed.dsf</groupId>
+			<artifactId>dsf-mpi-client-stub</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -54,7 +63,7 @@
 				</includes>
 			</resource>
 		</resources>
-	
+
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -74,7 +83,7 @@
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>copy-dependencies</id>
+						<id>copy-dependencies-to-docker</id>
 						<phase>package</phase>
 						<goals>
 							<goal>copy-dependencies</goal>
@@ -85,7 +94,7 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>copy</id>
+						<id>copy-server-jar-to-docker</id>
 						<phase>package</phase>
 						<goals>
 							<goal>copy</goal>
@@ -102,6 +111,43 @@
 							<outputDirectory>docker</outputDirectory>
 						</configuration>
 					</execution>
+					<execution>
+						<id>copy-process-plugins-for-testing</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>${project.groupId}</groupId>
+									<artifactId>dsf-bpe-process-ping</artifactId>
+									<version>${project.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>${project.groupId}</groupId>
+									<artifactId>dsf-bpe-process-update-allow-list</artifactId>
+									<version>${project.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>${project.groupId}</groupId>
+									<artifactId>dsf-bpe-process-update-resources</artifactId>
+									<version>${project.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>${project.groupId}</groupId>
+									<artifactId>dsf-bpe-process-feasibility</artifactId>
+									<version>${project.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>${project.groupId}</groupId>
+									<artifactId>dsf-bpe-process-local-services</artifactId>
+									<version>${project.version}</version>
+								</artifactItem>
+							</artifactItems>
+							<outputDirectory>process</outputDirectory>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 			<plugin>
@@ -114,6 +160,13 @@
 							<includes>
 								<include>dsf_bpe.jar</include>
 								<include>lib/*.jar</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+						<fileset>
+							<directory>process</directory>
+							<includes>
+								<include>*.jar</include>
 							</includes>
 							<followSymlinks>false</followSymlinks>
 						</fileset>

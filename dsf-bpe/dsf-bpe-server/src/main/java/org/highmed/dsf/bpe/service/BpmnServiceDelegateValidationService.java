@@ -1,6 +1,5 @@
 package org.highmed.dsf.bpe.service;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -11,12 +10,12 @@ import org.camunda.bpm.engine.repository.ProcessDefinition;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.Process;
 import org.camunda.bpm.model.bpmn.instance.ServiceTask;
-import org.camunda.bpm.model.xml.instance.ModelElementInstance;
-import org.camunda.bpm.model.xml.type.ModelElementType;
-import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
+import org.highmed.dsf.bpe.delegate.DelegateProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 
@@ -25,26 +24,26 @@ public class BpmnServiceDelegateValidationService implements InitializingBean
 	private static final Logger logger = LoggerFactory.getLogger(BpmnServiceDelegateValidationService.class);
 
 	private final ProcessEngine processEngine;
-	private final List<String> serviceDelegateClassNames;
+	private final DelegateProvider delegateProvider;
 
-	public BpmnServiceDelegateValidationService(ProcessEngine processEngine, List<AbstractServiceDelegate> serviceBeans)
+	public BpmnServiceDelegateValidationService(ProcessEngine processEngine, DelegateProvider delegateProvider)
 	{
 		this.processEngine = processEngine;
-
-		Objects.requireNonNull(serviceBeans, "serviceBeans");
-		this.serviceDelegateClassNames = serviceBeans.stream().map(b -> b.getClass().getCanonicalName())
-				.collect(Collectors.toList());
+		this.delegateProvider = delegateProvider;
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
 		Objects.requireNonNull(processEngine, "processEngine");
+		Objects.requireNonNull(delegateProvider, "delegateProvider");
 	}
 
 	@EventListener({ ContextRefreshedEvent.class })
 	public void onContextRefreshedEvent(ContextRefreshedEvent event)
 	{
+		logger.debug("Validating bpmn models, checking service delegate availability");
+
 		RepositoryService repositoryService = processEngine.getRepositoryService();
 
 		List<ProcessDefinition> deployedProcesses = repositoryService.createProcessDefinitionQuery().active()
@@ -57,28 +56,51 @@ public class BpmnServiceDelegateValidationService implements InitializingBean
 
 	private void validateBeanAvailabilityForModel(BpmnModelInstance model)
 	{
-		ModelElementType processType = model.getModel().getType(Process.class);
-		String processId = model.getModelElementsByType(processType).stream().findFirst()
-				.orElseThrow(() -> new RuntimeException("Process id is not set")).getAttributeValue("id");
-
-		ModelElementType serviceType = model.getModel().getType(ServiceTask.class);
-		Collection<ModelElementInstance> serviceTasks = model.getModelElementsByType(serviceType);
-
-		serviceTasks.stream().filter(t -> t instanceof ServiceTask).map(t -> (ServiceTask) t)
-				.forEach(t -> isBeanAvailableForServiceTask(t, processId));
-
-		logger.info("Process {} passed all validations", processId);
+		model.getModelElementsByType(Process.class).stream().forEach(this::validateBeanAvailabilityForProcess);
 	}
 
-	private void isBeanAvailableForServiceTask(ServiceTask serviceTask, String processId)
+	private void validateBeanAvailabilityForProcess(Process process)
 	{
-		String referencedClassName = serviceTask.getCamundaClass();
+		process.getChildElementsByType(ServiceTask.class).stream()
+				.forEach(task -> validateBeanAvailabilityForTask(process.getId(), process.getCamundaVersionTag(),
+						task.getCamundaClass()));
+	}
 
-		if (!serviceDelegateClassNames.contains(referencedClassName))
+	private void validateBeanAvailabilityForTask(String processDefinitionKey, String processDefinitionVersion,
+			String className)
+	{
+		Class<?> serviceClass = loadClass(processDefinitionKey, processDefinitionVersion, className);
+		loadBean(processDefinitionKey, processDefinitionVersion, serviceClass);
+	}
+
+	private void loadBean(String processDefinitionKey, String processDefinitionVersion, Class<?> serviceClass)
+	{
+		try
 		{
-			logger.error("Could not find bean for service task {} in process {}", referencedClassName, processId);
-			throw new RuntimeException(
-					"Could not find bean for service task " + referencedClassName + " in process " + processId);
+			ApplicationContext applicationContext = delegateProvider.getApplicationContext(processDefinitionKey,
+					processDefinitionVersion);
+			applicationContext.getBean(serviceClass);
+		}
+		catch (BeansException e)
+		{
+			logger.warn("Error while getting service delegate bean of type {} defined in process {}/{} not found",
+					serviceClass.getName(), processDefinitionKey, processDefinitionVersion);
+			throw new RuntimeException(e);
+		}
+	}
+
+	private Class<?> loadClass(String processDefinitionKey, String processDefinitionVersion, String className)
+	{
+		try
+		{
+			ClassLoader classLoader = delegateProvider.getClassLoader(processDefinitionKey, processDefinitionVersion);
+			return classLoader.loadClass(className);
+		}
+		catch (ClassNotFoundException e)
+		{
+			logger.warn("Service delegate class {} defined in process {}/{} not found", className, processDefinitionKey,
+					processDefinitionVersion);
+			throw new RuntimeException(e);
 		}
 	}
 }

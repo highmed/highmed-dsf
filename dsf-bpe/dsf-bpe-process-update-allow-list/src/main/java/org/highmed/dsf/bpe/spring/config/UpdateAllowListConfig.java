@@ -1,7 +1,5 @@
 package org.highmed.dsf.bpe.spring.config;
 
-import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
-import org.highmed.dsf.bpe.plugin.UpdateAllowListPlugin;
 import org.highmed.dsf.bpe.service.DownloadAllowList;
 import org.highmed.dsf.bpe.service.UpdateAllowList;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
@@ -27,12 +25,6 @@ public class UpdateAllowListConfig
 
 	@Autowired
 	private FhirContext fhirContext;
-
-	@Bean
-	public ProcessEnginePlugin updateAllowListPlugin()
-	{
-		return new UpdateAllowListPlugin();
-	}
 
 	@Bean
 	public UpdateAllowList updateAllowList()

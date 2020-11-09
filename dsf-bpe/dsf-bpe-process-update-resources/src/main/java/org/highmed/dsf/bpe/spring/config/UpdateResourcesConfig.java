@@ -1,8 +1,6 @@
 package org.highmed.dsf.bpe.spring.config;
 
-import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
 import org.highmed.dsf.bpe.message.SendRequest;
-import org.highmed.dsf.bpe.plugin.UpdateResourcesPlugin;
 import org.highmed.dsf.bpe.service.CheckRequest;
 import org.highmed.dsf.bpe.service.SelectResourceAndTargets;
 import org.highmed.dsf.bpe.service.UpdateResources;
@@ -29,12 +27,6 @@ public class UpdateResourcesConfig
 
 	@Autowired
 	private FhirContext fhirContext;
-
-	@Bean
-	public ProcessEnginePlugin updateResourcesPlugin()
-	{
-		return new UpdateResourcesPlugin();
-	}
 
 	@Bean
 	public SendRequest sendRequest()

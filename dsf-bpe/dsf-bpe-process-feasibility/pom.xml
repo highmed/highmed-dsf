@@ -15,31 +15,8 @@
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-bpe-process-base</artifactId>
+			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.highmed.dsf</groupId>
-			<artifactId>dsf-pseudonymization-medic</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.highmed.dsf</groupId>
-			<artifactId>dsf-pseudonymization-ttp</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.highmed.dsf</groupId>
-			<artifactId>dsf-mpi-client</artifactId>
-		</dependency>
-
-
-		<dependency>
-			<groupId>org.highmed.dsf</groupId>
-			<artifactId>dsf-openehr-model</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.highmed.dsf</groupId>
-			<artifactId>dsf-openehr-client</artifactId>
-		</dependency>
-
 
 		<dependency>
 			<groupId>de.hs-heilbronn.mi</groupId>

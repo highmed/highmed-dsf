@@ -15,6 +15,7 @@
 dsf-bpe/dsf-bpe-server-jetty/docker/dsf_bpe.jar
 dsf-bpe/dsf-bpe-server-jetty/docker/lib/*.jar
 dsf-bpe/dsf-bpe-server-jetty/docker/plugin/*.jar
+dsf-bpe/dsf-bpe-server-jetty/process/*.jar
 
 ###
 # dsf-fhir ignores
