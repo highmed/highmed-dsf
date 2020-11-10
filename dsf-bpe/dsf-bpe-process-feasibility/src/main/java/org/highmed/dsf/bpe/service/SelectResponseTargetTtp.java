@@ -8,8 +8,8 @@ import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.fhir.variables.MultiInstanceTarget;
-import org.highmed.dsf.fhir.variables.MultiInstanceTargetValues;
+import org.highmed.dsf.fhir.variables.Target;
+import org.highmed.dsf.fhir.variables.TargetValues;
 import org.hl7.fhir.r4.model.Task;
 import org.springframework.beans.factory.InitializingBean;
 
@@ -37,9 +37,8 @@ public class SelectResponseTargetTtp extends AbstractServiceDelegate implements 
 		String ttpIdentifier = (String) execution.getVariable(ConstantsBase.VARIABLE_TTP_IDENTIFIER);
 		String correlationKey = getCorrelationKey(execution);
 
-		MultiInstanceTarget ttpTarget = new MultiInstanceTarget(ttpIdentifier, correlationKey);
-		execution
-				.setVariable(ConstantsBase.VARIABLE_MULTI_INSTANCE_TARGET, MultiInstanceTargetValues.create(ttpTarget));
+		Target ttpTarget = Target.createMultiInstanceTarget(ttpIdentifier, correlationKey);
+		execution.setVariable(ConstantsBase.VARIABLE_TARGET, TargetValues.create(ttpTarget));
 	}
 
 	private String getCorrelationKey(DelegateExecution execution)

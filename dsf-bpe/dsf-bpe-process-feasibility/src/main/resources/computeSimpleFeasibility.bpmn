@@ -4,7 +4,7 @@
     <bpmn:subProcess id="SubProcess_1gopxt4">
       <bpmn:incoming>SequenceFlow_1lfe4wr</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0xxpamp</bpmn:outgoing>
-      <bpmn:multiInstanceLoopCharacteristics camunda:collection="${multiInstanceTargets.targets}" camunda:elementVariable="multiInstanceTarget" />
+      <bpmn:multiInstanceLoopCharacteristics camunda:collection="${targets.entries}" camunda:elementVariable="target" />
       <bpmn:endEvent id="SubEndEvent">
         <bpmn:incoming>SequenceFlow_0mj024w</bpmn:incoming>
       </bpmn:endEvent>
@@ -15,7 +15,7 @@
       <bpmn:receiveTask id="receiveQueryResultsFromMeDIC" name="receive query results from MeDIC" messageRef="Message_0a1qxd8">
         <bpmn:extensionElements>
           <camunda:inputOutput>
-            <camunda:inputParameter name="correlationKey">${multiInstanceTarget.correlationKey}</camunda:inputParameter>
+            <camunda:inputParameter name="correlationKey">${target.correlationKey}</camunda:inputParameter>
           </camunda:inputOutput>
         </bpmn:extensionElements>
         <bpmn:incoming>SequenceFlow_0qjt33w</bpmn:incoming>
@@ -126,6 +126,23 @@
   <bpmn:error id="Error_0qub4jc" name="errorMultiMedicSimpleFeasibilityResult" errorCode="errorMultiMedicSimpleFeasibilityResult" camunda:errorMessage="errorMultiMedicSimpleFeasibilityResult" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="computeSimpleFeasibility">
+      <bpmndi:BPMNEdge id="Flow_1tmnvhl_di" bpmnElement="Flow_1tmnvhl">
+        <di:waypoint x="1820" y="300" />
+        <di:waypoint x="1820" y="350" />
+        <di:waypoint x="1922" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1r6dq8y_di" bpmnElement="Flow_1r6dq8y">
+        <di:waypoint x="1820" y="242" />
+        <di:waypoint x="1922" y="242" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1k0sqwo_di" bpmnElement="Flow_1k0sqwo">
+        <di:waypoint x="1640" y="242" />
+        <di:waypoint x="1720" y="242" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1ixeke2_di" bpmnElement="Flow_1ixeke2">
+        <di:waypoint x="1475" y="242" />
+        <di:waypoint x="1540" y="242" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_155t66x_di" bpmnElement="SequenceFlow_155t66x">
         <di:waypoint x="1330" y="242" />
         <di:waypoint x="1425" y="242" />
@@ -170,41 +187,6 @@
         <di:waypoint x="195" y="242" />
         <di:waypoint x="279" y="242" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1ixeke2_di" bpmnElement="Flow_1ixeke2">
-        <di:waypoint x="1475" y="242" />
-        <di:waypoint x="1540" y="242" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1k0sqwo_di" bpmnElement="Flow_1k0sqwo">
-        <di:waypoint x="1640" y="242" />
-        <di:waypoint x="1720" y="242" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1r6dq8y_di" bpmnElement="Flow_1r6dq8y">
-        <di:waypoint x="1820" y="242" />
-        <di:waypoint x="1922" y="242" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1tmnvhl_di" bpmnElement="Flow_1tmnvhl">
-        <di:waypoint x="1820" y="300" />
-        <di:waypoint x="1820" y="350" />
-        <di:waypoint x="1922" y="350" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="EndEvent_0xh5o35_di" bpmnElement="EndEventSuccess">
-        <dc:Bounds x="1922" y="224" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="1898" y="267" width="85" height="27" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="ServiceTask_0uk3eyz_di" bpmnElement="selectResponseTargetMedic">
-        <dc:Bounds x="1540" y="202" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_13j8ce9_di" bpmnElement="checkComputedResults">
-        <dc:Bounds x="1720" y="202" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1hmug5i_di" bpmnElement="EndEventError">
-        <dc:Bounds x="1922" y="332" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="1904" y="375" width="73" height="27" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="SubProcess_1gopxt4_di" bpmnElement="SubProcess_1gopxt4" isExpanded="true">
         <dc:Bounds x="469" y="175" width="498" height="134" />
       </bpmndi:BPMNShape>
@@ -244,6 +226,12 @@
           <dc:Bounds x="166" y="267" width="23" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_0xh5o35_di" bpmnElement="EndEventSuccess">
+        <dc:Bounds x="1922" y="224" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1898" y="267" width="85" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ExclusiveGateway_07e71aa_di" bpmnElement="ExclusiveGateway_07e71aa" isMarkerVisible="true">
         <dc:Bounds x="1073" y="217" width="50" height="50" />
       </bpmndi:BPMNShape>
@@ -256,14 +244,26 @@
       <bpmndi:BPMNShape id="ServiceTask_0bw310g_di" bpmnElement="storeCorrelationKeys">
         <dc:Bounds x="279" y="202" width="100" height="80" />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_0uk3eyz_di" bpmnElement="selectResponseTargetMedic">
+        <dc:Bounds x="1540" y="202" width="100" height="80" />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ServiceTask_09wyp6g_di" bpmnElement="downloadResultSets">
         <dc:Bounds x="1230" y="86" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BoundaryEvent_1g0rcyp_di" bpmnElement="BoundaryEvent_1g0rcyp">
-        <dc:Bounds x="949" y="291" width="36" height="36" />
+      <bpmndi:BPMNShape id="Event_1hmug5i_di" bpmnElement="EndEventError">
+        <dc:Bounds x="1922" y="332" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1904" y="375" width="73" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_13j8ce9_di" bpmnElement="checkComputedResults">
+        <dc:Bounds x="1720" y="202" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_155cxa9_di" bpmnElement="Event_1vp5qzs">
         <dc:Bounds x="1802" y="264" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent_1g0rcyp_di" bpmnElement="BoundaryEvent_1g0rcyp">
+        <dc:Bounds x="949" y="291" width="36" height="36" />
       </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

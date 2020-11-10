@@ -19,10 +19,10 @@ import org.highmed.dsf.bpe.variables.ConstantsFeasibility;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.fhir.variables.MultiInstanceTarget;
-import org.highmed.dsf.fhir.variables.MultiInstanceTargetValues;
-import org.highmed.dsf.fhir.variables.MultiInstanceTargets;
-import org.highmed.dsf.fhir.variables.MultiInstanceTargetsValues;
+import org.highmed.dsf.fhir.variables.Target;
+import org.highmed.dsf.fhir.variables.TargetValues;
+import org.highmed.dsf.fhir.variables.Targets;
+import org.highmed.dsf.fhir.variables.TargetsValues;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
 
@@ -67,11 +67,9 @@ public class SelectRequestTargets extends AbstractServiceDelegate
 		ResearchStudy researchStudy = (ResearchStudy) execution
 				.getVariable(ConstantsFeasibility.VARIABLE_RESEARCH_STUDY);
 
-		execution.setVariable(ConstantsBase.VARIABLE_MULTI_INSTANCE_TARGETS,
-				MultiInstanceTargetsValues.create(getMedicTargets(researchStudy)));
+		execution.setVariable(ConstantsBase.VARIABLE_TARGETS, TargetsValues.create(getMedicTargets(researchStudy)));
 
-		execution.setVariable(ConstantsBase.VARIABLE_MULTI_INSTANCE_TARGET,
-				MultiInstanceTargetValues.create(getTtpTarget(researchStudy)));
+		execution.setVariable(ConstantsBase.VARIABLE_TARGET, TargetValues.create(getTtpTarget(researchStudy)));
 
 		Boolean needsRecordLinkage = (Boolean) execution
 				.getVariable(ConstantsFeasibility.VARIABLE_NEEDS_RECORD_LINKAGE);
@@ -88,25 +86,20 @@ public class SelectRequestTargets extends AbstractServiceDelegate
 				hmacSha3Generator.generateKey());
 	}
 
-	private MultiInstanceTargets getMedicTargets(ResearchStudy researchStudy)
+	private Targets getMedicTargets(ResearchStudy researchStudy)
 	{
-		List<MultiInstanceTarget> targets = researchStudy
-				.getExtensionsByUrl(ConstantsFeasibility.EXTENSION_PARTICIPATING_MEDIC_URI).stream()
-				.filter(e -> e.getValue() instanceof Reference).map(e -> (Reference) e.getValue())
-				.map(r -> new MultiInstanceTarget(r.getIdentifier().getValue(), UUID.randomUUID().toString()))
+		List<Target> targets = researchStudy.getExtensionsByUrl(ConstantsFeasibility.EXTENSION_PARTICIPATING_MEDIC_URI)
+				.stream().filter(e -> e.getValue() instanceof Reference).map(e -> (Reference) e.getValue())
+				.map(r -> Target.createMultiInstanceTarget(r.getIdentifier().getValue(), UUID.randomUUID().toString()))
 				.collect(Collectors.toList());
 
-		return new MultiInstanceTargets(targets);
+		return new Targets(targets);
 	}
 
-	private MultiInstanceTarget getTtpTarget(ResearchStudy researchStudy)
+	private Target getTtpTarget(ResearchStudy researchStudy)
 	{
-		// correlation key is null because only one recipient and therefore message-name based correlation
-		// is sufficient --> see https://github.com/highmed/highmed-dsf/issues/144
-		// TODO: replace MultiInstanceTarget with SingleInstanceTarget
 		return researchStudy.getExtensionsByUrl(ConstantsFeasibility.EXTENSION_PARTICIPATING_TTP_URI).stream()
 				.filter(e -> e.getValue() instanceof Reference).map(e -> (Reference) e.getValue())
-				.map(r -> new MultiInstanceTarget(r.getIdentifier().getValue(), null))
-				.findFirst().get();
+				.map(r -> Target.createSingleInstanceTarget(r.getIdentifier().getValue())).findFirst().get();
 	}
 }
