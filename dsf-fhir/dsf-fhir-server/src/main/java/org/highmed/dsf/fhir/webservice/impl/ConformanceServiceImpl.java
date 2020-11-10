@@ -3,6 +3,7 @@ package org.highmed.dsf.fhir.webservice.impl;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -138,6 +139,58 @@ import ca.uhn.fhir.rest.api.Constants;
 
 public class ConformanceServiceImpl extends AbstractBasicService implements ConformanceService, InitializingBean
 {
+	private static final class StructureDefinitionDistinctByUrl implements Comparable<StructureDefinitionDistinctByUrl>
+	{
+		final StructureDefinition structureDefinition;
+		final String url;
+
+		public StructureDefinitionDistinctByUrl(StructureDefinition structureDefinition)
+		{
+			this.structureDefinition = structureDefinition;
+			this.url = structureDefinition.getUrl();
+		}
+
+		public StructureDefinition get()
+		{
+			return structureDefinition;
+		}
+
+		@Override
+		public int hashCode()
+		{
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((url == null) ? 0 : url.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			StructureDefinitionDistinctByUrl other = (StructureDefinitionDistinctByUrl) obj;
+			if (url == null)
+			{
+				if (other.url != null)
+					return false;
+			}
+			else if (!url.equals(other.url))
+				return false;
+			return true;
+		}
+
+		@Override
+		public int compareTo(StructureDefinitionDistinctByUrl o)
+		{
+			return url.compareTo(o.url);
+		}
+	}
+
 	private final String serverBase;
 	private final int defaultPageCount;
 	private final BuildInfoReader buildInfoReader;
@@ -284,8 +337,10 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 		Map<String, List<CanonicalType>> profileUrlsByResource = validationSupport.fetchAllStructureDefinitions()
 				.stream().filter(r -> r instanceof StructureDefinition).map(r -> (StructureDefinition) r)
 				.filter(s -> StructureDefinitionKind.RESOURCE.equals(s.getKind()) && !s.getAbstract()
+						&& EnumSet.of(PublicationStatus.ACTIVE, PublicationStatus.DRAFT).contains(s.getStatus())
 						&& !s.getUrl().contains("hl7.org"))
-				.collect(Collectors.groupingBy(StructureDefinition::getType,
+				.map(StructureDefinitionDistinctByUrl::new).distinct().sorted()
+				.map(StructureDefinitionDistinctByUrl::get).collect(Collectors.groupingBy(StructureDefinition::getType,
 						Collectors.mapping(s -> new CanonicalType(s.getUrl()), Collectors.toList())));
 
 		for (Class<? extends Resource> resource : resources)
