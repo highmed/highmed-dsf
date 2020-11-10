@@ -149,7 +149,7 @@ public class CamundaConfig
 	}
 
 	@Bean
-	public DelegateProvider delegateProvider() throws IOException
+	public DelegateProvider delegateProvider()
 	{
 		return new DelegateProviderImpl(processPluginProvider().getClassLoadersByProcessDefinitionKeyAndVersion(),
 				ClassLoader.getSystemClassLoader(),
@@ -166,12 +166,13 @@ public class CamundaConfig
 	}
 
 	@Bean
-	public ProcessPluginProvider processPluginProvider() throws IOException
+	public ProcessPluginProvider processPluginProvider()
 	{
 		Path pluginDirectoryPath = Paths.get(pluginDirectory);
 
 		if (!Files.isDirectory(pluginDirectoryPath))
-			throw new IOException("Process plug in directory '" + pluginDirectoryPath.toString() + "' not readable");
+			throw new RuntimeException(
+					"Process plug in directory '" + pluginDirectoryPath.toString() + "' not readable");
 
 		return new ProcessPluginProviderImpl(pluginDirectoryPath, applicationContext);
 	}

@@ -42,33 +42,6 @@
 			<groupId>javax.mail</groupId>
 			<artifactId>mail</artifactId>
 		</dependency>
-
-		<!-- hint to maven build order -->
-		<dependency>
-			<groupId>org.highmed.dsf</groupId>
-			<artifactId>dsf-bpe-process-ping</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>dsf-bpe-process-update-allow-list</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>dsf-bpe-process-update-resources</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>dsf-bpe-process-feasibility</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>dsf-bpe-process-local-services</artifactId>
-			<scope>runtime</scope>
-		</dependency>
 	</dependencies>
 
 	<build>
@@ -174,6 +147,34 @@
 						</configuration>
 					</execution>
 				</executions>
+				<!-- Making sure process definition plugins are build before we copy them -->
+				<dependencies>
+					<dependency>
+						<groupId>org.highmed.dsf</groupId>
+						<artifactId>dsf-bpe-process-ping</artifactId>
+						<version>${project.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.highmed.dsf</groupId>
+						<artifactId>dsf-bpe-process-update-allow-list</artifactId>
+						<version>${project.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.highmed.dsf</groupId>
+						<artifactId>dsf-bpe-process-update-resources</artifactId>
+						<version>${project.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.highmed.dsf</groupId>
+						<artifactId>dsf-bpe-process-feasibility</artifactId>
+						<version>${project.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.highmed.dsf</groupId>
+						<artifactId>dsf-bpe-process-local-services</artifactId>
+						<version>${project.version}</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
