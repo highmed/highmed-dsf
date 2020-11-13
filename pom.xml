@@ -43,6 +43,19 @@
 		<url>https://github.com/highmed/highmed-dsf</url>
 	</scm>
 
+	<distributionManagement>
+		<repository>
+			<id>github-release</id>
+			<name>GitHub Packages</name>
+			<url>https://maven.pkg.github.com/highmed/highmed-dsf</url>
+		</repository>
+		<snapshotRepository>
+			<id>github-snapshot</id>
+			<name>GitHub Packages</name>
+			<url>https://maven.pkg.github.com/highmed/highmed-dsf</url>
+		</snapshotRepository>
+	</distributionManagement>
+
 	<licenses>
 		<license>
 			<name>Apache License, Version 2.0</name>
