@@ -6,15 +6,15 @@ name: Java CI Publish with Maven
 on:
   push:
     branches: [issues/151_workflow_package_registry]
-  pull_request:
-    types: [closed]
-    branches: [master, develop]
+  #pull_request:
+    #types: [closed]
+    #branches: [master, develop]
 
 jobs:
   publish:
 
     # Only run if pull requests are merged, omit running if pull requests are closed without merging
-    if: github.event.pull_request.merged
+    # if: github.event.pull_request.merged
 
     runs-on: ubuntu-latest
 
