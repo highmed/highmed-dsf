@@ -27,7 +27,7 @@ jobs:
     # Test have already successfully run if a pull request will be closed, so no need to do it here again
     - name: Build with Maven
       run: mvn -B clean package -DskipTests --file pom.xml
-    - name: Publish package
-      run: mvn -B deploy --file pom.xml
+    - name: Publish with Maven
+      run: mvn -B deploy --settings settings.xml --file pom.xml
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
