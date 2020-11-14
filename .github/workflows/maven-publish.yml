@@ -28,7 +28,7 @@ jobs:
     - name: Build with Maven
       run: mvn -B clean package -DskipTests --file pom.xml
     - name: Publish with Maven
-      run: mvn -B deploy --settings settings.xml --file pom.xml
       env:
         GITHUB_USERNAME: ${{ secrets.GITHUB_USERNAME }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: mvn deploy --settings settings.xml --file pom.xml

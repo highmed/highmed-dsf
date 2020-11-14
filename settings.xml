@@ -14,7 +14,7 @@
 				<repository>
 					<id>github</id>
 					<name>HiGHmed DSF GitHub Maven Packages</name>
-					<url>https://maven.pkg.github.com/highmed/highmed-dsf</url>
+					<url>https://maven.pkg.github.com/highmed</url>
 				</repository>
 			</repositories>
 		</profile>
