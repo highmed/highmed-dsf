@@ -30,4 +30,5 @@ jobs:
     - name: Publish with Maven
       run: mvn -B deploy --settings settings.xml --file pom.xml
       env:
+        GITHUB_USERNAME: ${{ secrets.GITHUB_USERNAME }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
