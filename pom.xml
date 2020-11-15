@@ -467,6 +467,7 @@
 	</build>
 
 	<distributionManagement>
+		<!-- do not change id's: must be 'github', if not it results in a 401 error -->
 		<repository>
 			<id>github</id>
 			<name>GitHub Packages</name>

@@ -28,4 +28,4 @@ jobs:
         env:
           GITHUB_ACTOR: ${{ secrets.GITHUB_ACTOR }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: mvn -B deploy --settings settings.xml --file pom.xml
+        run: mvn -B deploy --file pom.xml
