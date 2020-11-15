@@ -466,6 +466,21 @@
 		</plugins>
 	</build>
 
+	<distributionManagement>
+		<!-- for deployment to GitHub Packages the id must be 'github',
+		if not the deployment fails with a 401 error -->
+		<repository>
+			<id>github</id>
+			<name>GitHub Packages</name>
+			<url>https://maven.pkg.github.com/highmed/highmed-dsf</url>
+		</repository>
+		<snapshotRepository>
+			<id>github</id>
+			<name>GitHub Packages</name>
+			<url>https://maven.pkg.github.com/highmed/highmed-dsf</url>
+		</snapshotRepository>
+	</distributionManagement>
+
 	<repositories>
 		<repository>
 			<id>sonatype-snapshot</id>
