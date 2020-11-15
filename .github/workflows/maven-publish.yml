@@ -8,7 +8,7 @@ on:
     branches: [issues/151_workflow_package_registry]
   #pull_request:
     #types: [closed]
-    #branches: [master, develop]
+    #branches: [master, develop, issues/151_workflow_package_registry]
 
 jobs:
   publish:
@@ -26,6 +26,5 @@ jobs:
           java-version: 11
       - name: Publish with Maven
         env:
-          GITHUB_ACTOR: ${{ secrets.GITHUB_ACTOR }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: mvn -B deploy --file pom.xml
