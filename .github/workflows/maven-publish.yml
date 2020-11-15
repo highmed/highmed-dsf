@@ -43,6 +43,6 @@ jobs:
           java-version: 11
       - name: Publish with Maven
         env:
-          GITHUB_USERNAME: ${{ secrets.GITHUB_USERNAME }}
+          GITHUB_ACTOR: ${{ secrets.GITHUB_ACTOR }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: mvn -B deploy --settings settings.xml --file pom.xml

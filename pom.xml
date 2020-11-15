@@ -468,12 +468,12 @@
 
 	<distributionManagement>
 		<repository>
-			<id>github-release</id>
+			<id>githubRelease</id>
 			<name>GitHub Packages</name>
 			<url>https://maven.pkg.github.com/highmed/highmed-dsf</url>
 		</repository>
 		<snapshotRepository>
-			<id>github-snapshot</id>
+			<id>github</id>
 			<name>GitHub Packages</name>
 			<url>https://maven.pkg.github.com/highmed/highmed-dsf</url>
 		</snapshotRepository>
