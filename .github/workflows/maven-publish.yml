@@ -11,6 +11,8 @@ on:
 jobs:
   publish:
 
+    # comment for test
+
     # Only run if pull requests are merged,
     # omit running if pull requests are closed without merging
     if: github.event.pull_request.merged
