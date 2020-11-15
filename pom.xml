@@ -473,7 +473,7 @@
 			<url>https://maven.pkg.github.com/highmed/highmed-dsf</url>
 		</repository>
 		<snapshotRepository>
-			<id>github</id>
+			<id>githubSnapshot</id>
 			<name>GitHub Packages</name>
 			<url>https://maven.pkg.github.com/highmed/highmed-dsf</url>
 		</snapshotRepository>
