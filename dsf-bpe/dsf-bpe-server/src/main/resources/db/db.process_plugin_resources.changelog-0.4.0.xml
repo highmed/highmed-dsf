@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<changeSet author="hhund" id="db.process_plugin_resources.changelog-0.4.0">
+		<createTable tableName="process_plugin_resources">
+			<column name="process_key_and_version" type="TEXT">
+				<constraints nullable="false"/>
+			</column>
+			<column name="resource_type" type="TEXT">
+				<constraints nullable="false"/>
+			</column>
+			<column name="resource_id" type="UUID"/>
+			<column name="url" type="TEXT"/>
+			<column name="version" type="TEXT"/>
+			<column name="name" type="TEXT"/>
+		</createTable>
+		
+		<sql dbms="postgresql">
+			ALTER TABLE process_plugin_resources ADD CONSTRAINT url_check CHECK ((resource_type = 'NamingSystem' and url IS NULL) OR (resource_type &lt;&gt; 'NamingSystem' AND url IS NOT NULL));
+			ALTER TABLE process_plugin_resources ADD CONSTRAINT version_check CHECK ((resource_type = 'NamingSystem' and version IS NULL) OR (resource_type &lt;&gt; 'NamingSystem' AND version IS NOT NULL));
+			ALTER TABLE process_plugin_resources ADD CONSTRAINT name_check CHECK ((resource_type = 'NamingSystem' and name IS NOT NULL) OR (resource_type &lt;&gt; 'NamingSystem' AND name IS NULL));
+			CREATE UNIQUE INDEX process_plugin_resources_unique_not_naming_system ON process_plugin_resources (process_key_and_version, resource_type, url, version) WHERE resource_type &lt;&gt; 'NamingSystem';
+			CREATE UNIQUE INDEX process_plugin_resources_unique_naming_system ON process_plugin_resources (process_key_and_version, resource_type, name) WHERE resource_type = 'NamingSystem';
+			ALTER TABLE process_plugin_resources OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE process_plugin_resources TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE ON TABLE process_plugin_resources TO ${db.server_users_group};
+		</sql>
+	</changeSet>
+
+</databaseChangeLog>

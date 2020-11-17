@@ -13,6 +13,7 @@ import org.camunda.bpm.engine.impl.pvm.delegate.ActivityBehavior;
 import org.camunda.bpm.engine.impl.pvm.delegate.ActivityExecution;
 import org.camunda.bpm.engine.impl.util.ClassDelegateUtil;
 import org.highmed.dsf.bpe.delegate.DelegateProvider;
+import org.highmed.dsf.bpe.process.ProcessKeyAndVersion;
 
 public class MultiVersionClassDelegateActivityBehavior extends ClassDelegateActivityBehavior
 {
@@ -30,11 +31,10 @@ public class MultiVersionClassDelegateActivityBehavior extends ClassDelegateActi
 	protected ActivityBehavior getActivityBehaviorInstance(ActivityExecution execution)
 	{
 		ExecutionEntity e = (ExecutionEntity) execution;
-		String processDefinitionKey = e.getProcessDefinition().getKey();
-		String processDefinitionVersionTag = e.getProcessDefinition().getVersionTag();
+		ProcessKeyAndVersion processKeyAndVersion = new ProcessKeyAndVersion(e.getProcessDefinition().getKey(),
+				e.getProcessDefinition().getVersionTag());
 
-		Object delegateInstance = instantiateDelegate(processDefinitionKey, processDefinitionVersionTag, className,
-				fieldDeclarations);
+		Object delegateInstance = instantiateDelegate(processKeyAndVersion, className, fieldDeclarations);
 
 		if (delegateInstance instanceof ActivityBehavior)
 		{
@@ -51,18 +51,16 @@ public class MultiVersionClassDelegateActivityBehavior extends ClassDelegateActi
 		}
 	};
 
-	private Object instantiateDelegate(String processDefinitionKey, String processDefinitionVersionTag,
-			String className, List<FieldDeclaration> fieldDeclarations)
+	private Object instantiateDelegate(ProcessKeyAndVersion processKeyAndVersion, String className,
+			List<FieldDeclaration> fieldDeclarations)
 	{
 		try
 		{
-			Class<?> clazz = delegateProvider.getClassLoader(processDefinitionKey, processDefinitionVersionTag)
-					.loadClass(className);
-			Object object = delegateProvider.getApplicationContext(processDefinitionKey, processDefinitionVersionTag)
-					.getBean(clazz);
+			Class<?> clazz = delegateProvider.getClassLoader(processKeyAndVersion).loadClass(className);
+			Object bean = delegateProvider.getApplicationContext(processKeyAndVersion).getBean(clazz);
 
-			ClassDelegateUtil.applyFieldDeclaration(fieldDeclarations, object);
-			return object;
+			ClassDelegateUtil.applyFieldDeclaration(fieldDeclarations, bean);
+			return bean;
 		}
 		catch (Exception e)
 		{

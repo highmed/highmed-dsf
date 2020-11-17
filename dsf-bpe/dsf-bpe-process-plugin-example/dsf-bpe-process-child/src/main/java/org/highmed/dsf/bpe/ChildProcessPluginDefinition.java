@@ -8,6 +8,12 @@ import org.highmed.dsf.bpe.spring.config.ChildConfig;
 public class ChildProcessPluginDefinition implements ProcessPluginDefinition
 {
 	@Override
+	public String getJarName()
+	{
+		return "dsf-bpe-process-child-0.4.0";
+	}
+
+	@Override
 	public Stream<String> getBpmnFiles()
 	{
 		return Stream.of("child.bpmn");

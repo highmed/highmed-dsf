@@ -5,19 +5,20 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.impl.variable.serializer.TypedValueSerializer;
+import org.highmed.dsf.bpe.process.ProcessKeyAndVersion;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 
 public class DelegateProviderImpl implements DelegateProvider, InitializingBean
 {
-	private final Map<String, ClassLoader> classLoaderByProcessDefinitionKeyAndVersion;
+	private final Map<ProcessKeyAndVersion, ClassLoader> classLoaderByProcessDefinitionKeyAndVersion;
 	private final ClassLoader defaultClassLoader;
-	private final Map<String, ApplicationContext> applicationContextByProcessDefinitionKeyAndVersion;
+	private final Map<ProcessKeyAndVersion, ApplicationContext> applicationContextByProcessDefinitionKeyAndVersion;
 	private final ApplicationContext defaultApplicationContext;
 
-	public DelegateProviderImpl(Map<String, ClassLoader> classLoaderByProcessDefinitionKeyAndVersion,
+	public DelegateProviderImpl(Map<ProcessKeyAndVersion, ClassLoader> classLoaderByProcessDefinitionKeyAndVersion,
 			ClassLoader defaultClassLoader,
-			Map<String, ApplicationContext> applicationContextByProcessDefinitionKeyAndVersion,
+			Map<ProcessKeyAndVersion, ApplicationContext> applicationContextByProcessDefinitionKeyAndVersion,
 			ApplicationContext defaultApplicationContext)
 	{
 		this.classLoaderByProcessDefinitionKeyAndVersion = classLoaderByProcessDefinitionKeyAndVersion;
@@ -38,29 +39,20 @@ public class DelegateProviderImpl implements DelegateProvider, InitializingBean
 	}
 
 	@Override
-	public ClassLoader getClassLoader(String processDefinitionKey, String processDefinitionVersion)
+	public ClassLoader getClassLoader(ProcessKeyAndVersion processKeyAndVersion)
 	{
-		Objects.requireNonNull(processDefinitionKey, "processDefinitionKey");
-		Objects.requireNonNull(processDefinitionVersion, "processDefinitionVersion");
+		Objects.requireNonNull(processKeyAndVersion, "processKeyAndVersion");
 
-		return classLoaderByProcessDefinitionKeyAndVersion.getOrDefault(
-				toProcessDefinitionKeyAndVersion(processDefinitionKey, processDefinitionVersion), defaultClassLoader);
+		return classLoaderByProcessDefinitionKeyAndVersion.getOrDefault(processKeyAndVersion, defaultClassLoader);
 	}
 
 	@Override
-	public ApplicationContext getApplicationContext(String processDefinitionKey, String processDefinitionVersion)
+	public ApplicationContext getApplicationContext(ProcessKeyAndVersion processKeyAndVersion)
 	{
-		Objects.requireNonNull(processDefinitionKey, "processDefinitionKey");
-		Objects.requireNonNull(processDefinitionVersion, "processDefinitionVersion");
+		Objects.requireNonNull(processKeyAndVersion, "processKeyAndVersion");
 
-		return applicationContextByProcessDefinitionKeyAndVersion.getOrDefault(
-				toProcessDefinitionKeyAndVersion(processDefinitionKey, processDefinitionVersion),
+		return applicationContextByProcessDefinitionKeyAndVersion.getOrDefault(processKeyAndVersion,
 				defaultApplicationContext);
-	}
-
-	private String toProcessDefinitionKeyAndVersion(String processDefinitionKey, String processDefinitionVersion)
-	{
-		return processDefinitionKey + "/" + processDefinitionVersion;
 	}
 
 	@SuppressWarnings("rawtypes")

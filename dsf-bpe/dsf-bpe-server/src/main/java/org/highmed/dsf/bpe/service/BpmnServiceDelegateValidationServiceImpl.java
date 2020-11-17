@@ -11,6 +11,7 @@ import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.Process;
 import org.camunda.bpm.model.bpmn.instance.ServiceTask;
 import org.highmed.dsf.bpe.delegate.DelegateProvider;
+import org.highmed.dsf.bpe.process.ProcessKeyAndVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -60,44 +61,42 @@ public class BpmnServiceDelegateValidationServiceImpl implements BpmnServiceDele
 	private void validateBeanAvailabilityForProcess(Process process)
 	{
 		process.getChildElementsByType(ServiceTask.class).stream()
-				.forEach(task -> validateBeanAvailabilityForTask(process.getId(), process.getCamundaVersionTag(),
+				.forEach(task -> validateBeanAvailabilityForTask(
+						new ProcessKeyAndVersion(process.getId(), process.getCamundaVersionTag()),
 						task.getCamundaClass()));
 	}
 
-	private void validateBeanAvailabilityForTask(String processDefinitionKey, String processDefinitionVersion,
-			String className)
+	private void validateBeanAvailabilityForTask(ProcessKeyAndVersion processKeyAndVersion, String className)
 	{
-		Class<?> serviceClass = loadClass(processDefinitionKey, processDefinitionVersion, className);
-		loadBean(processDefinitionKey, processDefinitionVersion, serviceClass);
+		Class<?> serviceClass = loadClass(processKeyAndVersion, className);
+		loadBean(processKeyAndVersion, serviceClass);
 	}
 
-	private void loadBean(String processDefinitionKey, String processDefinitionVersion, Class<?> serviceClass)
+	private void loadBean(ProcessKeyAndVersion processKeyAndVersion, Class<?> serviceClass)
 	{
 		try
 		{
-			ApplicationContext applicationContext = delegateProvider.getApplicationContext(processDefinitionKey,
-					processDefinitionVersion);
+			ApplicationContext applicationContext = delegateProvider.getApplicationContext(processKeyAndVersion);
 			applicationContext.getBean(serviceClass);
 		}
 		catch (BeansException e)
 		{
-			logger.warn("Error while getting service delegate bean of type {} defined in process {}/{} not found",
-					serviceClass.getName(), processDefinitionKey, processDefinitionVersion);
+			logger.warn("Error while getting service delegate bean of type {} defined in process {} not found",
+					serviceClass.getName(), processKeyAndVersion);
 			throw new RuntimeException(e);
 		}
 	}
 
-	private Class<?> loadClass(String processDefinitionKey, String processDefinitionVersion, String className)
+	private Class<?> loadClass(ProcessKeyAndVersion processKeyAndVersion, String className)
 	{
 		try
 		{
-			ClassLoader classLoader = delegateProvider.getClassLoader(processDefinitionKey, processDefinitionVersion);
+			ClassLoader classLoader = delegateProvider.getClassLoader(processKeyAndVersion);
 			return classLoader.loadClass(className);
 		}
 		catch (ClassNotFoundException e)
 		{
-			logger.warn("Service delegate class {} defined in process {}/{} not found", className, processDefinitionKey,
-					processDefinitionVersion);
+			logger.warn("Service delegate class {} defined in process {} not found", className, processKeyAndVersion);
 			throw new RuntimeException(e);
 		}
 	}

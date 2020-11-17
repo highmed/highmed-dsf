@@ -20,10 +20,14 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.highmed.dsf.ProcessPluginDefinition;
+import org.highmed.dsf.bpe.process.ProcessKeyAndVersion;
+import org.highmed.dsf.fhir.resources.ResourceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
+
+import ca.uhn.fhir.context.FhirContext;
 
 public class ProcessPluginProviderImpl implements ProcessPluginProvider, InitializingBean
 {
@@ -39,15 +43,21 @@ public class ProcessPluginProviderImpl implements ProcessPluginProvider, Initial
 		}
 	}
 
+	public static final String FILE_DRAFT_SUFIX = "-SNAPSHOT.jar";
+	public static final String FOLDER_DRAFT_SUFIX = "-SNAPSHOT";
+
 	private static final Logger logger = LoggerFactory.getLogger(ProcessPluginProviderImpl.class);
 
+	private final FhirContext fhirContext;
 	private final Path pluginDirectory;
 	private final ApplicationContext mainApplicationContext;
 
 	private List<ProcessPluginDefinitionAndClassLoader> definitions;
 
-	public ProcessPluginProviderImpl(Path pluginDirectory, ApplicationContext mainApplicationContext)
+	public ProcessPluginProviderImpl(FhirContext fhirContext, Path pluginDirectory,
+			ApplicationContext mainApplicationContext)
 	{
+		this.fhirContext = fhirContext;
 		this.pluginDirectory = pluginDirectory;
 		this.mainApplicationContext = mainApplicationContext;
 	}
@@ -55,6 +65,7 @@ public class ProcessPluginProviderImpl implements ProcessPluginProvider, Initial
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
+		Objects.requireNonNull(fhirContext, "fhirContext");
 		Objects.requireNonNull(pluginDirectory, "pluginDirectory");
 		Objects.requireNonNull(mainApplicationContext, "mainApplicationContext");
 	}
@@ -95,7 +106,7 @@ public class ProcessPluginProviderImpl implements ProcessPluginProvider, Initial
 						definitions.add(def);
 				}
 				else
-					logger.warn("Ignoring folder/file {}", p.toAbsolutePath().toString());
+					logger.warn("Ignoring file/folder {}", p.toAbsolutePath().toString());
 			});
 
 			return definitions;
@@ -142,7 +153,11 @@ public class ProcessPluginProviderImpl implements ProcessPluginProvider, Initial
 			return null;
 		}
 
-		return new ProcessPluginDefinitionAndClassLoader(jars, definitions.get(0).get(), classLoader);
+		boolean draft = jars.size() == 1 ? jars.get(0).getFileName().toString().endsWith(FILE_DRAFT_SUFIX)
+				: folder.toString().endsWith(FOLDER_DRAFT_SUFIX);
+
+		return new ProcessPluginDefinitionAndClassLoader(fhirContext, jars, definitions.get(0).get(), classLoader,
+				draft);
 	}
 
 	private List<Path> getJars(Path folder)
@@ -267,13 +282,17 @@ public class ProcessPluginProviderImpl implements ProcessPluginProvider, Initial
 				.filter(def -> def.getClass().getName().equals(definitionClassName)).findFirst().orElseThrow(
 						() -> new RuntimeException("ProcessPluginDefinition " + definitionClassName + " not found"));
 
-		return new ProcessPluginDefinitionAndClassLoader(jars, definition, classLoader);
+		boolean draft = jars.size() == 1 ? jars.get(0).getFileName().toString().endsWith(FILE_DRAFT_SUFIX)
+				: folder.toString().endsWith(FOLDER_DRAFT_SUFIX);
+
+		return new ProcessPluginDefinitionAndClassLoader(fhirContext, jars, definition, classLoader, draft);
 	}
 
-	public Map<String, ClassLoader> getClassLoadersByProcessDefinitionKeyAndVersion()
+	@Override
+	public Map<ProcessKeyAndVersion, ClassLoader> getClassLoadersByProcessDefinitionKeyAndVersion()
 	{
 		return getDefinitions().stream()
-				.flatMap(def -> def.getProcessPlugin().getProcessKeysAndVersions().stream()
+				.flatMap(def -> def.getProcessKeysAndVersions().stream()
 						.map(keyAndVersion -> new Pair<>(keyAndVersion, def.getClassLoader())))
 				.collect(Collectors.toMap(p -> p.k, p -> p.v, dupplicatedProcessKeyVersion()));
 	}
@@ -287,10 +306,39 @@ public class ProcessPluginProviderImpl implements ProcessPluginProvider, Initial
 	}
 
 	@Override
-	public Map<String, ApplicationContext> getApplicationContextsByProcessDefinitionKeyAndVersion()
+	public Map<ProcessKeyAndVersion, ApplicationContext> getApplicationContextsByProcessDefinitionKeyAndVersion()
 	{
-		return getDefinitions().stream().flatMap(def -> def.getProcessPlugin().getProcessKeysAndVersions().stream().map(
+		return getDefinitions().stream().flatMap(def -> def.getProcessKeysAndVersions().stream().map(
 				keyAndVersion -> new Pair<>(keyAndVersion, def.createPluginApplicationContext(mainApplicationContext))))
 				.collect(Collectors.toMap(p -> p.k, p -> p.v, dupplicatedProcessKeyVersion()));
+	}
+
+	@Override
+	public Map<ProcessKeyAndVersion, ProcessPluginDefinitionAndClassLoader> getDefinitionByProcessKeyAndVersion()
+	{
+		return getDefinitions().stream().flatMap(
+				def -> def.getProcessKeysAndVersions().stream().map(keyAndVersion -> new Pair<>(keyAndVersion, def)))
+				.collect(Collectors.toMap(p -> p.k, p -> p.v, dupplicatedProcessKeyVersion()));
+	}
+
+	@Override
+	public Map<String, ResourceProvider> getResouceProvidersByDpendencyJarName()
+	{
+		return getDefinitions().stream()
+				.collect(Collectors.toMap(def -> def.getDefinition().getJarName(), def -> def.getResourceProvider()));
+	}
+
+	@Override
+	public List<ProcessKeyAndVersion> getProcessKeyAndVersions()
+	{
+		return getDefinitions().stream().flatMap(def -> def.getProcessKeysAndVersions().stream())
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public List<ProcessKeyAndVersion> getDraftProcessKeyAndVersions()
+	{
+		return getDefinitions().stream().filter(ProcessPluginDefinitionAndClassLoader::isDraft)
+				.flatMap(def -> def.getProcessKeysAndVersions().stream()).collect(Collectors.toList());
 	}
 }

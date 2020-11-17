@@ -2,29 +2,46 @@ package org.highmed.dsf.bpe.plugin;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.camunda.bpm.model.bpmn.Bpmn;
+import org.camunda.bpm.model.bpmn.BpmnModelInstance;
+import org.camunda.bpm.model.bpmn.instance.Process;
 import org.highmed.dsf.ProcessPluginDefinition;
+import org.highmed.dsf.bpe.process.BpmnFileAndModel;
+import org.highmed.dsf.bpe.process.ProcessKeyAndVersion;
+import org.highmed.dsf.fhir.resources.ResourceProvider;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import ca.uhn.fhir.context.FhirContext;
+
 public class ProcessPluginDefinitionAndClassLoader
 {
+	private final FhirContext fhirContext;
 	private final List<Path> jars = new ArrayList<>();
 	private final ProcessPluginDefinition definition;
 	private final ClassLoader classLoader;
+	private final boolean draft;
 
-	private ProcessPlugin processPlugin;
+	private List<BpmnFileAndModel> models;
+	private ResourceProvider resourceProvider;
 
-	public ProcessPluginDefinitionAndClassLoader(List<Path> jars, ProcessPluginDefinition definition,
-			ClassLoader classLoader)
+	public ProcessPluginDefinitionAndClassLoader(FhirContext fhirContext, List<Path> jars,
+			ProcessPluginDefinition definition, ClassLoader classLoader, boolean draft)
 	{
+		this.fhirContext = fhirContext;
+
 		if (jars != null)
 			this.jars.addAll(jars);
 
 		this.definition = definition;
 		this.classLoader = classLoader;
+		this.draft = draft;
 	}
 
 	public List<Path> getJars()
@@ -52,16 +69,46 @@ public class ProcessPluginDefinitionAndClassLoader
 		return context;
 	}
 
-	public ProcessPlugin getProcessPlugin()
+	public List<ProcessKeyAndVersion> getProcessKeysAndVersions()
 	{
-		if (processPlugin == null)
-			processPlugin = ProcessPlugin.loadAndValidateModels(jars, getDefinition().getBpmnFiles(), getClassLoader());
-
-		return processPlugin;
+		return getAndValidateModels().stream().flatMap(fileAndModel ->
+		{
+			Collection<Process> processes = fileAndModel.getModel().getModelElementsByType(Process.class);
+			return processes.stream().map(p -> new ProcessKeyAndVersion(p.getId(), p.getCamundaVersionTag()));
+		}).collect(Collectors.toList());
 	}
 
-	public List<String> getProcessKeysAndVersions()
+	public List<BpmnFileAndModel> getAndValidateModels()
 	{
-		return getProcessPlugin().getProcessKeysAndVersions();
+		return getAndValidateModels(jars, getDefinition().getBpmnFiles(), getClassLoader());
+	}
+
+	private List<BpmnFileAndModel> getAndValidateModels(List<Path> jars, Stream<String> bpmnFiles,
+			ClassLoader classLoader)
+	{
+		if (models == null)
+			models = bpmnFiles.map(file -> loadAndValidateModel(file, classLoader, jars)).collect(Collectors.toList());
+
+		return models;
+	}
+
+	private BpmnFileAndModel loadAndValidateModel(String bpmnFile, ClassLoader classLoader, List<Path> jars)
+	{
+		BpmnModelInstance model = Bpmn.readModelFromStream(classLoader.getResourceAsStream(bpmnFile));
+		Bpmn.validateModel(model);
+		return new BpmnFileAndModel(bpmnFile, model, jars);
+	}
+
+	public ResourceProvider getResourceProvider()
+	{
+		if (resourceProvider == null)
+			resourceProvider = getDefinition().getResourceProvider(fhirContext, getClassLoader());
+
+		return resourceProvider;
+	}
+
+	public boolean isDraft()
+	{
+		return draft;
 	}
 }

@@ -15,6 +15,7 @@ import org.camunda.bpm.engine.repository.Deployment;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.Process;
+import org.highmed.dsf.bpe.process.ProcessKeyAndVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,18 +77,13 @@ public class ProcessPlugin implements ProcessEnginePlugin
 		models.forEach(fileAndModel -> deploy(processEngine, fileAndModel));
 	}
 
-	public List<String> getProcessKeysAndVersions()
+	public List<ProcessKeyAndVersion> getProcessKeysAndVersions()
 	{
 		return models.stream().flatMap(fileAndModel ->
 		{
 			Collection<Process> processes = fileAndModel.model.getModelElementsByType(Process.class);
-			return processes.stream().map(p -> toProcessDefinitionKeyAndVersion(p.getId(), p.getCamundaVersionTag()));
+			return processes.stream().map(p -> new ProcessKeyAndVersion(p.getId(), p.getCamundaVersionTag()));
 		}).collect(Collectors.toList());
-	}
-
-	private String toProcessDefinitionKeyAndVersion(String processDefinitionKey, String processDefinitionVersion)
-	{
-		return processDefinitionKey + "/" + processDefinitionVersion;
 	}
 
 	private void deploy(ProcessEngine processEngine, BpmnFileAndModel fileAndModel)

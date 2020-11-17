@@ -3,6 +3,8 @@ package org.highmed.dsf.bpe.plugin;
 import java.util.List;
 import java.util.Map;
 
+import org.highmed.dsf.bpe.process.ProcessKeyAndVersion;
+import org.highmed.dsf.fhir.resources.ResourceProvider;
 import org.springframework.context.ApplicationContext;
 
 public interface ProcessPluginProvider
@@ -29,14 +31,26 @@ public interface ProcessPluginProvider
 	List<ProcessPluginDefinitionAndClassLoader> getDefinitions();
 
 	/**
+	 * @return definitions by {@link ProcessKeyAndVersion}
+	 * @see #getDefinitions()
+	 */
+	Map<ProcessKeyAndVersion, ProcessPluginDefinitionAndClassLoader> getDefinitionByProcessKeyAndVersion();
+
+	/**
 	 * @return class loaders for process plugin jars by process definition key / version
 	 * @see #getDefinitions()
 	 */
-	Map<String, ClassLoader> getClassLoadersByProcessDefinitionKeyAndVersion();
+	Map<ProcessKeyAndVersion, ClassLoader> getClassLoadersByProcessDefinitionKeyAndVersion();
 
 	/**
 	 * @return application contexts for process plugin jars by process definition key / version
 	 * @see #getDefinitions()
 	 */
-	Map<String, ApplicationContext> getApplicationContextsByProcessDefinitionKeyAndVersion();
+	Map<ProcessKeyAndVersion, ApplicationContext> getApplicationContextsByProcessDefinitionKeyAndVersion();
+
+	Map<String, ResourceProvider> getResouceProvidersByDpendencyJarName();
+
+	List<ProcessKeyAndVersion> getProcessKeyAndVersions();
+
+	List<ProcessKeyAndVersion> getDraftProcessKeyAndVersions();
 }
