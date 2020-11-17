@@ -39,7 +39,7 @@ public class SelectPingTargets extends AbstractServiceDelegate implements Initia
 	public void doExecute(DelegateExecution execution) throws Exception
 	{
 		List<Target> targets = organizationProvider.getRemoteIdentifiers().stream().map(identifier -> Target
-				.createMultiInstanceTarget(identifier.getValue(), UUID.randomUUID().toString()))
+				.createBiDirectionalTarget(identifier.getValue(), UUID.randomUUID().toString()))
 				.collect(Collectors.toList());
 
 		execution.setVariable(ConstantsBase.VARIABLE_TARGETS, TargetsValues.create(new Targets(targets)));

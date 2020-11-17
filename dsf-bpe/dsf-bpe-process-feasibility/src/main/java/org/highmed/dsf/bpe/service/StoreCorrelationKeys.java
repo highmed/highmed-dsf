@@ -31,7 +31,7 @@ public class StoreCorrelationKeys extends AbstractServiceDelegate
 		List<Target> targets = getTaskHelper()
 				.getInputParameterStringValues(task, ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
 						ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDIC_CORRELATION_KEY)
-				.map(correlationKey -> Target.createMultiInstanceTarget("", correlationKey))
+				.map(correlationKey -> Target.createBiDirectionalTarget("", correlationKey))
 				.collect(Collectors.toList());
 
 		execution.setVariable(ConstantsBase.VARIABLE_TARGETS, TargetsValues.create(new Targets(targets)));

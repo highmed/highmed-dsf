@@ -77,7 +77,7 @@ public class SelectResourceAndTargets extends AbstractServiceDelegate implements
 
 		List<Target> targets = targetIdentifierSearchParameters.stream()
 				.flatMap(organizationProvider::searchRemoteOrganizationsIdentifiers)
-				.map(identifier -> Target.createSingleInstanceTarget(identifier.getValue()))
+				.map(identifier -> Target.createUniDirectionalTarget(identifier.getValue()))
 				.collect(Collectors.toList());
 		execution.setVariable(ConstantsBase.VARIABLE_TARGETS, TargetsValues.create(new Targets(targets)));
 	}

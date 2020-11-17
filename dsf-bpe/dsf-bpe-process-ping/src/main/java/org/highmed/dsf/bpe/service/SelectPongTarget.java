@@ -29,6 +29,6 @@ public class SelectPongTarget extends AbstractServiceDelegate implements Initial
 		Identifier targetOrganizationIdentifier = task.getRequester().getIdentifier();
 
 		execution.setVariable(ConstantsBase.VARIABLE_TARGET, TargetValues
-				.create(Target.createMultiInstanceTarget(targetOrganizationIdentifier.getValue(), correlationKey)));
+				.create(Target.createBiDirectionalTarget(targetOrganizationIdentifier.getValue(), correlationKey)));
 	}
 }

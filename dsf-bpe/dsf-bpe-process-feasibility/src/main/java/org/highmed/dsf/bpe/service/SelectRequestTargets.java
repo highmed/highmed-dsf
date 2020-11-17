@@ -90,7 +90,7 @@ public class SelectRequestTargets extends AbstractServiceDelegate
 	{
 		List<Target> targets = researchStudy.getExtensionsByUrl(ConstantsFeasibility.EXTENSION_PARTICIPATING_MEDIC_URI)
 				.stream().filter(e -> e.getValue() instanceof Reference).map(e -> (Reference) e.getValue())
-				.map(r -> Target.createMultiInstanceTarget(r.getIdentifier().getValue(), UUID.randomUUID().toString()))
+				.map(r -> Target.createBiDirectionalTarget(r.getIdentifier().getValue(), UUID.randomUUID().toString()))
 				.collect(Collectors.toList());
 
 		return new Targets(targets);
@@ -100,6 +100,6 @@ public class SelectRequestTargets extends AbstractServiceDelegate
 	{
 		return researchStudy.getExtensionsByUrl(ConstantsFeasibility.EXTENSION_PARTICIPATING_TTP_URI).stream()
 				.filter(e -> e.getValue() instanceof Reference).map(e -> (Reference) e.getValue())
-				.map(r -> Target.createSingleInstanceTarget(r.getIdentifier().getValue())).findFirst().get();
+				.map(r -> Target.createUniDirectionalTarget(r.getIdentifier().getValue())).findFirst().get();
 	}
 }

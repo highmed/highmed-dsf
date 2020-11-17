@@ -37,7 +37,7 @@ public class SelectResponseTargetTtp extends AbstractServiceDelegate implements 
 		String ttpIdentifier = (String) execution.getVariable(ConstantsBase.VARIABLE_TTP_IDENTIFIER);
 		String correlationKey = getCorrelationKey(execution);
 
-		Target ttpTarget = Target.createMultiInstanceTarget(ttpIdentifier, correlationKey);
+		Target ttpTarget = Target.createBiDirectionalTarget(ttpIdentifier, correlationKey);
 		execution.setVariable(ConstantsBase.VARIABLE_TARGET, TargetValues.create(ttpTarget));
 	}
 

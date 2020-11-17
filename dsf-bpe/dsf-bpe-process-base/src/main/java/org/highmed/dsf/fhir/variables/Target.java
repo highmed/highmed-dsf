@@ -24,12 +24,12 @@ public class Target
 		this.correlationKey = correlationKey;
 	}
 
-	public static Target createSingleInstanceTarget(String targetOrganizationIdentifierValue)
+	public static Target createUniDirectionalTarget(String targetOrganizationIdentifierValue)
 	{
 		return new Target(targetOrganizationIdentifierValue, null);
 	}
 
-	public static Target createMultiInstanceTarget(String targetOrganizationIdentifierValue, String correlationKey)
+	public static Target createBiDirectionalTarget(String targetOrganizationIdentifierValue, String correlationKey)
 	{
 		return new Target(targetOrganizationIdentifierValue, correlationKey);
 	}
