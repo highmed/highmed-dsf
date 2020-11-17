@@ -1,0 +1,24 @@
+<ValueSet xmlns="http://hl7.org/fhir">
+	<meta>
+		<tag>
+			<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
+			<code value="REMOTE"/>
+		</tag>		
+	</meta>
+	<url value="http://highmed.org/fhir/ValueSet/update-resources"/>
+	<version value="0.3.0"/>
+	<name value="HiGHmed_Update_Resources"/>
+	<title value="HiGHmed Update Resources"/>
+	<!-- status managed by bpe -->
+	<experimental value="false"/>
+	<date value="2020-11-03"/>
+	<publisher value="HiGHmed"/>
+	<description
+			value="ValueSet with standard values for the process update resources"/>
+	<immutable value="true"/>
+	<compose>
+		<include>
+			<system value="http://highmed.org/fhir/CodeSystem/update-resources"/>
+		</include>
+	</compose>
+</ValueSet> 

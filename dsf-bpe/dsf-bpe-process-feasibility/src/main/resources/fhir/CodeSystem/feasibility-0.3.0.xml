@@ -1,0 +1,66 @@
+<CodeSystem xmlns="http://hl7.org/fhir">
+	<meta>
+		<tag>
+			<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
+			<code value="REMOTE"/>
+		</tag>		
+	</meta>
+	<url value="http://highmed.org/fhir/CodeSystem/feasibility"/>
+	<version value="0.3.0"/>
+	<name value="HiGHmed_Feasibility"/>
+	<title value="HiGHmed Feasibility"/>
+	<!-- status managed by bpe -->
+	<experimental value="false"/>
+	<date value="2020-11-03"/>
+	<publisher value="HiGHmed"/>
+	<description value="CodeSystem with standard values for feasibility processes"/>
+	<caseSensitive value="true"/>
+	<hierarchyMeaning value="grouped-by"/>
+	<versionNeeded value="false"/>
+	<content value="complete"/>
+	<concept>	
+		<code value="research-study-reference"/>
+		<display value="Research Study Reference"/>
+		<definition value="HiGHmed Research Study Reference to define what data is requested from which MeDICs and for what purpose"/>
+	</concept>
+	<concept>
+		<code value="needs-record-linkage"/>
+		<display value="Needs Record Linkage"/>
+		<definition value="Boolean indicating if a data analysis needs record linkage"/>
+	</concept>
+	<concept>
+		<code value="needs-consent-check"/>
+		<display value="Needs Consent Check"/>
+		<definition value="Boolean indicating if a data analysis needs consent check"/>
+	</concept>
+	<concept>
+		<code value="bloom-filter-configuration"/>
+		<display value="Bloom Filter Cconfiguration"/>
+		<definition value="Base64 binary encoded bloom filter configuration"/>
+	</concept>
+	<concept>
+		<code value="medic-correlation-key"/>
+		<display value="MeDIC Correlation Key"/>
+		<definition value="MeDIC Correlation Key transfered to TTP for correlating incoming medic results"/>
+	</concept>
+	<concept>
+		<code value="single-medic-result"/>
+		<display value="Single MeDIC Result"/>
+		<definition value="Result of a single feasibility query execution"/>
+	</concept>
+	<concept>
+		<code value="single-medic-result-reference"/>
+		<display value="Single MeDIC Result Reference"/>
+		<definition value="Reference to an openEHR ResultSet as a result of a single feasibility query execution"/>
+	</concept>
+	<concept>
+		<code value="participating-medics"/>
+		<display value="Participating MeDICs"/>
+		<definition value="Count of all MeDICs who participated in a feasibility query"/>
+	</concept>
+	<concept>
+		<code value="multi-medic-result"/>
+		<display value="Multi MeDIC Result"/>
+		<definition value="Aggregated result of all single medic results"/>
+	</concept>
+</CodeSystem> 

@@ -1,0 +1,93 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+  <meta>
+    <tag>
+      <system value="http://highmed.org/fhir/CodeSystem/authorization-role" />
+      <code value="REMOTE" />
+    </tag>
+  </meta>
+  <url value="http://highmed.org/fhir/StructureDefinition/highmed-research-study-feasibility" />
+  <version value="0.3.0" />
+  <name value="ResearchStudyFeasibility" />
+  <!-- status managed by bpe -->
+  <experimental value="false" />
+  <date value="2020-11-03" />
+  <fhirVersion value="4.0.1" />
+  <kind value="resource" />
+  <abstract value="false" />
+  <type value="ResearchStudy" />
+  <baseDefinition value="http://hl7.org/fhir/StructureDefinition/ResearchStudy" />
+  <derivation value="constraint" />
+  <differential>
+    <element id="ResearchStudy.extension">
+      <path value="ResearchStudy.extension" />
+      <slicing>
+        <discriminator>
+          <type value="value" />
+          <path value="url" />
+        </discriminator>
+        <rules value="open" />
+      </slicing>
+    </element>
+    <element id="ResearchStudy.extension:participating-ttp">
+      <path value="ResearchStudy.extension" />
+      <sliceName value="participating-ttp" />
+      <min value="1" />
+      <max value="1" />
+      <type>
+        <code value="Extension" />
+        <profile value="http://highmed.org/fhir/StructureDefinition/participating-ttp" />
+      </type>
+    </element>
+    <element id="ResearchStudy.extension:participating-medic">
+      <path value="ResearchStudy.extension" />
+      <sliceName value="participating-medic" />
+      <min value="1" />
+      <type>
+        <code value="Extension" />
+        <profile value="http://highmed.org/fhir/StructureDefinition/participating-medic" />
+      </type>
+    </element>
+    <element id="ResearchStudy.identifier">
+      <path value="ResearchStudy.identifier" />
+      <slicing>
+        <discriminator>
+          <type value="value" />
+          <path value="system" />
+        </discriminator>
+        <rules value="open" />
+      </slicing>
+      <min value="1" />
+    </element>
+    <element id="ResearchStudy.identifier:highmedIdentifier">
+      <path value="ResearchStudy.identifier" />
+      <sliceName value="highmedIdentifier" />
+      <min value="1" />
+      <max value="1" />
+    </element>
+    <element id="ResearchStudy.identifier:highmedIdentifier.system">
+      <path value="ResearchStudy.identifier.system" />
+      <min value="1" />
+      <fixedUri value="http://highmed.org/fhir/NamingSystem/research-study-identifier" />
+    </element>
+    <element id="ResearchStudy.identifier:highmedIdentifier.value">
+      <path value="ResearchStudy.identifier.value" />
+      <min value="1" />
+    </element>
+    <element id="ResearchStudy.enrollment">
+      <path value="ResearchStudy.enrollment" />
+      <min value="1" />
+      <type>
+        <code value="Reference" />
+        <targetProfile value="http://highmed.org/fhir/StructureDefinition/highmed-group" />
+      </type>
+    </element>
+    <element id="ResearchStudy.enrollment.reference">
+      <path value="ResearchStudy.enrollment.reference" />
+      <min value="1" />
+    </element>
+    <element id="ResearchStudy.enrollment.identifier">
+      <path value="ResearchStudy.enrollment.identifier" />
+      <max value="0" />
+    </element>
+  </differential>
+</StructureDefinition>

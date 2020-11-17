@@ -1,0 +1,26 @@
+<CodeSystem xmlns="http://hl7.org/fhir">
+	<meta>
+		<tag>
+			<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
+			<code value="REMOTE"/>
+		</tag>		
+	</meta>
+	<url value="http://highmed.org/fhir/CodeSystem/update-allow-list"/>
+	<version value="0.3.0"/>
+	<name value="HiGHmed_Update_Allow_List"/>
+	<title value="HiGHmed Update Allow List"/>
+	<!-- status managed by bpe -->
+	<experimental value="false"/>
+	<date value="2020-11-03"/>
+	<publisher value="HiGHmed"/>
+	<description value="CodeSystem with standard values for the processes update and download allow list"/>
+	<caseSensitive value="true"/>
+	<hierarchyMeaning value="grouped-by"/>
+	<versionNeeded value="false"/>
+	<content value="complete"/>
+	<concept>
+		<code value="highmed_allow_list"/>
+		<display value="HiGHmed Allow List"/>
+		<definition value="Allow list identifying organizations as part of HiGHmed"/>
+	</concept>
+</CodeSystem> 

@@ -1,0 +1,23 @@
+<ValueSet xmlns="http://hl7.org/fhir">
+	<meta>
+		<tag>
+			<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
+			<code value="REMOTE"/>
+		</tag>		
+	</meta>
+	<url value="http://highmed.org/fhir/ValueSet/feasibility"/>
+	<version value="0.3.0"/>
+	<name value="HiGHmed_Feasibility"/>
+	<title value="HiGHmed Feasibility"/>
+	<!-- status managed by bpe -->
+	<experimental value="false"/>
+	<date value="2020-11-03"/>
+	<publisher value="HiGHmed"/>
+	<description value="ValueSet with standard values for feasibility processes"/>
+	<immutable value="true"/>
+	<compose>
+		<include>
+			<system value="http://highmed.org/fhir/CodeSystem/feasibility"/>
+		</include>
+	</compose>
+</ValueSet> 

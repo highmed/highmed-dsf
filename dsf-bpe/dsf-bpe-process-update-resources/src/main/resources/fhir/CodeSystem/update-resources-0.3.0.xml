@@ -1,0 +1,31 @@
+<CodeSystem xmlns="http://hl7.org/fhir">
+	<meta>
+		<tag>
+			<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
+			<code value="REMOTE"/>
+		</tag>		
+	</meta>
+	<url value="http://highmed.org/fhir/CodeSystem/update-resources"/>
+	<version value="0.3.0"/>
+	<name value="HiGHmed_Update_Resources"/>
+	<title value="HiGHmed Update Resources"/>
+	<!-- status managed by bpe -->
+	<experimental value="false"/>
+	<date value="2020-11-03"/>
+	<publisher value="HiGHmed"/>
+	<description value="CodeSystem with standard values for the process update resources"/>
+	<caseSensitive value="true"/>
+	<hierarchyMeaning value="grouped-by"/>
+	<versionNeeded value="false"/>
+	<content value="complete"/>
+	<concept>
+		<code value="bundle-reference"/>
+		<display value="Bundle Reference"/>
+		<definition value="Bundle reference to be downloaded to update local resources"/>
+	</concept>
+	<concept>
+		<code value="organization-identifier-search-parameter"/>
+		<display value="Organization Identifier Search Parameter"/>
+		<definition value="Organization system identifier as search parameter to define which organization are targets"/>
+	</concept>
+</CodeSystem> 
