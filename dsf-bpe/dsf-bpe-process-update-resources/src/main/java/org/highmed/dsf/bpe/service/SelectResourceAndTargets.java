@@ -12,9 +12,9 @@ import org.highmed.dsf.bpe.variables.ConstantsUpdateResources;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.fhir.variables.MultiInstanceTarget;
-import org.highmed.dsf.fhir.variables.MultiInstanceTargets;
-import org.highmed.dsf.fhir.variables.MultiInstanceTargetsValues;
+import org.highmed.dsf.fhir.variables.Target;
+import org.highmed.dsf.fhir.variables.Targets;
+import org.highmed.dsf.fhir.variables.TargetsValues;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
@@ -75,14 +75,10 @@ public class SelectResourceAndTargets extends AbstractServiceDelegate implements
 						ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_ORGANIZATION_IDENTIFIER_SEARCH_PARAMETER)
 				.collect(Collectors.toList());
 
-		// correlation key is null because no backwards communication is needed
-		// --> see https://github.com/highmed/highmed-dsf/issues/144
-		// TODO: replace MultiInstanceTarget with SingleInstanceTarget
-		List<MultiInstanceTarget> targets = targetIdentifierSearchParameters.stream()
+		List<Target> targets = targetIdentifierSearchParameters.stream()
 				.flatMap(organizationProvider::searchRemoteOrganizationsIdentifiers)
-				.map(identifier -> new MultiInstanceTarget(identifier.getValue(), null))
+				.map(identifier -> Target.createUniDirectionalTarget(identifier.getValue()))
 				.collect(Collectors.toList());
-		execution.setVariable("multiInstanceTargets",
-				MultiInstanceTargetsValues.create(new MultiInstanceTargets(targets)));
+		execution.setVariable(ConstantsBase.VARIABLE_TARGETS, TargetsValues.create(new Targets(targets)));
 	}
 }

@@ -11,9 +11,9 @@ import org.highmed.dsf.bpe.variables.FeasibilityQueryResults;
 import org.highmed.dsf.bpe.variables.FeasibilityQueryResultsValues;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.fhir.variables.MultiInstanceTarget;
-import org.highmed.dsf.fhir.variables.MultiInstanceTargets;
-import org.highmed.dsf.fhir.variables.MultiInstanceTargetsValues;
+import org.highmed.dsf.fhir.variables.Target;
+import org.highmed.dsf.fhir.variables.Targets;
+import org.highmed.dsf.fhir.variables.TargetsValues;
 import org.hl7.fhir.r4.model.Task;
 
 public class StoreCorrelationKeys extends AbstractServiceDelegate
@@ -28,13 +28,13 @@ public class StoreCorrelationKeys extends AbstractServiceDelegate
 	{
 		Task task = getCurrentTaskFromExecutionVariables();
 
-		List<MultiInstanceTarget> targets = getTaskHelper()
+		List<Target> targets = getTaskHelper()
 				.getInputParameterStringValues(task, ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
 						ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDIC_CORRELATION_KEY)
-				.map(correlationKey -> new MultiInstanceTarget("", correlationKey)).collect(Collectors.toList());
+				.map(correlationKey -> Target.createBiDirectionalTarget("", correlationKey))
+				.collect(Collectors.toList());
 
-		execution.setVariable(ConstantsBase.VARIABLE_MULTI_INSTANCE_TARGETS,
-				MultiInstanceTargetsValues.create(new MultiInstanceTargets(targets)));
+		execution.setVariable(ConstantsBase.VARIABLE_TARGETS, TargetsValues.create(new Targets(targets)));
 
 		boolean needsRecordLinkage = getNeedsRecordLinkageCheck(task);
 		execution.setVariable(ConstantsFeasibility.VARIABLE_NEEDS_RECORD_LINKAGE, needsRecordLinkage);
