@@ -20,7 +20,7 @@
       </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_035oihl</bpmn:incoming>
       <bpmn:outgoing>Flow_0c15t3c</bpmn:outgoing>
-      <bpmn:multiInstanceLoopCharacteristics camunda:collection="${multiInstanceTargets.targets}" camunda:elementVariable="multiInstanceTarget" />
+      <bpmn:multiInstanceLoopCharacteristics camunda:collection="${targets.entries}" camunda:elementVariable="target" />
     </bpmn:sendTask>
     <bpmn:sequenceFlow id="SequenceFlow_11k77gx" sourceRef="StartEvent" targetRef="downloadResearchStudyResource" />
     <bpmn:sequenceFlow id="SequenceFlow_0b5s4ef" sourceRef="selectRequestTargetsAndGenerateKeys" targetRef="sendCorreltationKeysToTTP" />

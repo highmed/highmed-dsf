@@ -8,8 +8,8 @@ import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.fhir.variables.MultiInstanceTarget;
-import org.highmed.dsf.fhir.variables.MultiInstanceTargetValues;
+import org.highmed.dsf.fhir.variables.Target;
+import org.highmed.dsf.fhir.variables.TargetValues;
 import org.hl7.fhir.r4.model.Task;
 import org.springframework.beans.factory.InitializingBean;
 
@@ -38,12 +38,7 @@ public class SelectResponseTargetMedic extends AbstractServiceDelegate implement
 	{
 		Task task = getLeadingTaskFromExecutionVariables();
 
-		// correlation key is null because only one recipient and therefore message-name based correlation
-		// is sufficient --> see https://github.com/highmed/highmed-dsf/issues/144
-		// TODO: replace MultiInstanceTarget with SingleInstanceTarget
-		MultiInstanceTarget medicTarget = new MultiInstanceTarget(task.getRequester().getIdentifier().getValue(),
-				null);
-		execution.setVariable(ConstantsBase.VARIABLE_MULTI_INSTANCE_TARGET,
-				MultiInstanceTargetValues.create(medicTarget));
+		Target medicTarget = Target.createUniDirectionalTarget(task.getRequester().getIdentifier().getValue());
+		execution.setVariable(ConstantsBase.VARIABLE_TARGET, TargetValues.create(medicTarget));
 	}
 }

@@ -6,20 +6,19 @@ import java.util.Objects;
 import org.camunda.bpm.engine.impl.variable.serializer.PrimitiveValueSerializer;
 import org.camunda.bpm.engine.impl.variable.serializer.ValueFields;
 import org.camunda.bpm.engine.variable.impl.value.UntypedValueImpl;
-import org.highmed.dsf.fhir.variables.MultiInstanceTargetsValues.MultiInstanceTargetsValue;
+import org.highmed.dsf.fhir.variables.TargetsValues.TargetsValue;
 import org.springframework.beans.factory.InitializingBean;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class MultiInstanceTargetsSerializer extends PrimitiveValueSerializer<MultiInstanceTargetsValue>
-		implements InitializingBean
+public class TargetsSerializer extends PrimitiveValueSerializer<TargetsValue> implements InitializingBean
 {
 	private final ObjectMapper objectMapper;
 
-	public MultiInstanceTargetsSerializer(ObjectMapper objectMapper)
+	public TargetsSerializer(ObjectMapper objectMapper)
 	{
-		super(MultiInstanceTargetsValues.VALUE_TYPE);
+		super(TargetsValues.VALUE_TYPE);
 
 		this.objectMapper = objectMapper;
 	}
@@ -31,9 +30,9 @@ public class MultiInstanceTargetsSerializer extends PrimitiveValueSerializer<Mul
 	}
 
 	@Override
-	public void writeValue(MultiInstanceTargetsValue value, ValueFields valueFields)
+	public void writeValue(TargetsValue value, ValueFields valueFields)
 	{
-		MultiInstanceTargets targets = value.getValue();
+		Targets targets = value.getValue();
 		try
 		{
 			if (targets != null)
@@ -46,21 +45,22 @@ public class MultiInstanceTargetsSerializer extends PrimitiveValueSerializer<Mul
 	}
 
 	@Override
-	public MultiInstanceTargetsValue convertToTypedValue(UntypedValueImpl untypedValue)
+	public TargetsValue convertToTypedValue(UntypedValueImpl untypedValue)
 	{
-		return MultiInstanceTargetsValues.create((MultiInstanceTargets) untypedValue.getValue());
+		return TargetsValues.create((Targets) untypedValue.getValue());
 	}
 
 	@Override
-	public MultiInstanceTargetsValue readValue(ValueFields valueFields, boolean asTransientValue)
+	public TargetsValue readValue(ValueFields valueFields, boolean asTransientValue)
 	{
 		byte[] bytes = valueFields.getByteArrayValue();
 
 		try
 		{
-			MultiInstanceTargets targets = (bytes == null || bytes.length <= 0) ? null
-					: objectMapper.readValue(bytes, MultiInstanceTargets.class);
-			return MultiInstanceTargetsValues.create(targets);
+			Targets targets = (bytes == null || bytes.length <= 0) ?
+					null :
+					objectMapper.readValue(bytes, Targets.class);
+			return TargetsValues.create(targets);
 		}
 		catch (IOException e)
 		{

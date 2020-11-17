@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_0azvmx1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.5.0">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_0azvmx1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.7.1">
   <bpmn:process id="ping" isExecutable="true" camunda:versionTag="0.3.0">
     <bpmn:sequenceFlow id="SequenceFlow_0k1j79c" sourceRef="StartEvent_1" targetRef="selectTargets" />
     <bpmn:sequenceFlow id="SequenceFlow_05ia6lz" sourceRef="selectTargets" targetRef="sendPing" />
@@ -18,12 +18,12 @@
       </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_05ia6lz</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1vng5zz</bpmn:outgoing>
-      <bpmn:multiInstanceLoopCharacteristics camunda:collection="${multiInstanceTargets.targets}" camunda:elementVariable="multiInstanceTarget" />
+      <bpmn:multiInstanceLoopCharacteristics camunda:collection="${targets.entries}" camunda:elementVariable="target" />
     </bpmn:sendTask>
     <bpmn:subProcess id="SubProcess_0szmntn">
       <bpmn:incoming>SequenceFlow_1vng5zz</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_10d3jfk</bpmn:outgoing>
-      <bpmn:multiInstanceLoopCharacteristics camunda:collection="${multiInstanceTargets.targets}" camunda:elementVariable="multiInstanceTarget" />
+      <bpmn:multiInstanceLoopCharacteristics camunda:collection="${targets.entries}" camunda:elementVariable="target" />
       <bpmn:startEvent id="StartEvent_18et3pb">
         <bpmn:outgoing>SequenceFlow_1jv4kfm</bpmn:outgoing>
       </bpmn:startEvent>
@@ -39,7 +39,7 @@
       <bpmn:receiveTask id="receivePong" name="receivePong" messageRef="Message_10o3b8y">
         <bpmn:extensionElements>
           <camunda:inputOutput>
-            <camunda:inputParameter name="correlationKey">${multiInstanceTarget.correlationKey}</camunda:inputParameter>
+            <camunda:inputParameter name="correlationKey">${target.correlationKey}</camunda:inputParameter>
           </camunda:inputOutput>
         </bpmn:extensionElements>
         <bpmn:incoming>SequenceFlow_1jv4kfm</bpmn:incoming>

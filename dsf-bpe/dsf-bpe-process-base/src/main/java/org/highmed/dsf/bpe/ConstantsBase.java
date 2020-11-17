@@ -10,8 +10,8 @@ public interface ConstantsBase
 	String VARIABLE_PROFILE = "profile";
 	// String VARIABLE_TARGET_ORGANIZATION_ID = "targetOrganizationId";
 	// String VARIABLE_CORRELATION_KEY = "correlationKey";
-	String VARIABLE_MULTI_INSTANCE_TARGET = "multiInstanceTarget";
-	String VARIABLE_MULTI_INSTANCE_TARGETS = "multiInstanceTargets";
+	String VARIABLE_TARGET = "target";
+	String VARIABLE_TARGETS = "targets";
 	String VARIABLE_TASK = "task";
 	String VARIABLE_LEADING_TASK = "leadingTask";
 	String VARIABLE_BUNDLE_ID = "bundleId";

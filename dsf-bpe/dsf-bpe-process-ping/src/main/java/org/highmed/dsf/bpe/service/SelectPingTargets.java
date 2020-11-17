@@ -6,13 +6,14 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.fhir.variables.MultiInstanceTarget;
-import org.highmed.dsf.fhir.variables.MultiInstanceTargets;
-import org.highmed.dsf.fhir.variables.MultiInstanceTargetsValues;
+import org.highmed.dsf.fhir.variables.Target;
+import org.highmed.dsf.fhir.variables.Targets;
+import org.highmed.dsf.fhir.variables.TargetsValues;
 import org.springframework.beans.factory.InitializingBean;
 
 public class SelectPingTargets extends AbstractServiceDelegate implements InitializingBean
@@ -37,11 +38,10 @@ public class SelectPingTargets extends AbstractServiceDelegate implements Initia
 	@Override
 	public void doExecute(DelegateExecution execution) throws Exception
 	{
-		List<MultiInstanceTarget> targets = organizationProvider.getRemoteIdentifiers().stream()
-				.map(identifier -> new MultiInstanceTarget(identifier.getValue(), UUID.randomUUID().toString()))
+		List<Target> targets = organizationProvider.getRemoteIdentifiers().stream().map(identifier -> Target
+				.createBiDirectionalTarget(identifier.getValue(), UUID.randomUUID().toString()))
 				.collect(Collectors.toList());
 
-		execution.setVariable("multiInstanceTargets",
-				MultiInstanceTargetsValues.create(new MultiInstanceTargets(targets)));
+		execution.setVariable(ConstantsBase.VARIABLE_TARGETS, TargetsValues.create(new Targets(targets)));
 	}
 }
