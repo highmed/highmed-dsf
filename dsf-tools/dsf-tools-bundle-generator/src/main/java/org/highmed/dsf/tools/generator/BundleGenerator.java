@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -114,7 +115,7 @@ public class BundleGenerator
 	private void saveBundle(Bundle bundle) throws IOException
 	{
 		try (OutputStream out = Files.newOutputStream(getBundleFilename());
-				OutputStreamWriter writer = new OutputStreamWriter(out))
+				OutputStreamWriter writer = new OutputStreamWriter(out, StandardCharsets.UTF_8))
 		{
 			newXmlParser().encodeResourceToWriter(bundle, writer);
 		}
