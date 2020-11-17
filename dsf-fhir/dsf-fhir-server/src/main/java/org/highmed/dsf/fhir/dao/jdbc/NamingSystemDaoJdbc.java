@@ -11,6 +11,7 @@ import javax.sql.DataSource;
 
 import org.highmed.dsf.fhir.dao.NamingSystemDao;
 import org.highmed.dsf.fhir.search.parameters.NamingSystemName;
+import org.highmed.dsf.fhir.search.parameters.NamingSystemStatus;
 import org.highmed.dsf.fhir.search.parameters.user.NamingSystemUserFilter;
 import org.hl7.fhir.r4.model.NamingSystem;
 import org.slf4j.Logger;
@@ -25,7 +26,7 @@ public class NamingSystemDaoJdbc extends AbstractResourceDaoJdbc<NamingSystem> i
 	public NamingSystemDaoJdbc(DataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, NamingSystem.class, "naming_systems", "naming_system", "naming_system_id",
-				NamingSystemUserFilter::new, with(NamingSystemName::new), with());
+				NamingSystemUserFilter::new, with(NamingSystemName::new, NamingSystemStatus::new), with());
 	}
 
 	@Override

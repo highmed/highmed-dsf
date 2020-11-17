@@ -55,7 +55,7 @@ public class BinaryContentType extends AbstractTokenParameter<Binary>
 	@Override
 	public String getFilterQuery()
 	{
-		return "binary_json->>'contentType' = ?";
+		return "binary_json->>'contentType' " + (valueAndType.negated ? "<>" : "=") + " ?";
 	}
 
 	@Override
@@ -74,7 +74,7 @@ public class BinaryContentType extends AbstractTokenParameter<Binary>
 	@Override
 	public void modifyBundleUri(UriBuilder bundleUri)
 	{
-		bundleUri.replaceQueryParam(PARAMETER_NAME, contentType.getValue());
+		bundleUri.replaceQueryParam(PARAMETER_NAME + (valueAndType.negated ? ":not" : ""), contentType.getValue());
 	}
 
 	@Override
@@ -86,7 +86,10 @@ public class BinaryContentType extends AbstractTokenParameter<Binary>
 		if (!(resource instanceof Binary))
 			return false;
 
-		return ((Binary) resource).getContentType().equals(contentType.getValue());
+		if (valueAndType.negated)
+			return !((Binary) resource).getContentType().equals(contentType.getValue());
+		else
+			return ((Binary) resource).getContentType().equals(contentType.getValue());
 	}
 
 	@Override

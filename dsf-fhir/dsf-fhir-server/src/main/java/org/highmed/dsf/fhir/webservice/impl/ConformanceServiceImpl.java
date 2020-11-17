@@ -38,6 +38,7 @@ import org.highmed.dsf.fhir.search.parameters.HealthcareServiceActive;
 import org.highmed.dsf.fhir.search.parameters.HealthcareServiceIdentifier;
 import org.highmed.dsf.fhir.search.parameters.LocationIdentifier;
 import org.highmed.dsf.fhir.search.parameters.NamingSystemName;
+import org.highmed.dsf.fhir.search.parameters.NamingSystemStatus;
 import org.highmed.dsf.fhir.search.parameters.OrganizationActive;
 import org.highmed.dsf.fhir.search.parameters.OrganizationEndpoint;
 import org.highmed.dsf.fhir.search.parameters.OrganizationIdentifier;
@@ -295,7 +296,7 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 
 		searchParameters.put(Location.class, Arrays.asList(LocationIdentifier.class));
 
-		searchParameters.put(NamingSystem.class, Arrays.asList(NamingSystemName.class));
+		searchParameters.put(NamingSystem.class, Arrays.asList(NamingSystemName.class, NamingSystemStatus.class));
 
 		searchParameters.put(Organization.class, Arrays.asList(OrganizationActive.class, OrganizationEndpoint.class,
 				OrganizationIdentifier.class, OrganizationName.class, OrganizationType.class));

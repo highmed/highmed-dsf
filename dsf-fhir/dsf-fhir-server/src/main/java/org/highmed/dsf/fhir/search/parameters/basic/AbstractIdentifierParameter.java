@@ -31,10 +31,17 @@ public abstract class AbstractIdentifierParameter<R extends Resource> extends Ab
 			case CODE:
 			case CODE_AND_SYSTEM:
 			case SYSTEM:
-				return resourceColumn + "->'identifier' @> ?::jsonb";
+				if (valueAndType.negated)
+					return "NOT (" + resourceColumn + "->'identifier' @> ?::jsonb)";
+				else
+					return resourceColumn + "->'identifier' @> ?::jsonb";
 			case CODE_AND_NO_SYSTEM_PROPERTY:
-				return "(SELECT count(*) FROM jsonb_array_elements(" + resourceColumn
-						+ "->'identifier') identifier WHERE identifier->>'value' = ? AND NOT (identifier ?? 'system')) > 0";
+				if (valueAndType.negated)
+					return "(SELECT count(*) FROM jsonb_array_elements(" + resourceColumn
+							+ "->'identifier') identifier WHERE identifier->>'value' <> ? OR (identifier ?? 'system')) > 0";
+				else
+					return "(SELECT count(*) FROM jsonb_array_elements(" + resourceColumn
+							+ "->'identifier') identifier WHERE identifier->>'value' = ? AND NOT (identifier ?? 'system')) > 0";
 			default:
 				return "";
 		}
@@ -70,7 +77,8 @@ public abstract class AbstractIdentifierParameter<R extends Resource> extends Ab
 
 	protected boolean identifierMatches(List<Identifier> identifiers)
 	{
-		return identifiers.stream().anyMatch(i -> identifierMatches(valueAndType, i));
+		return identifiers.stream().anyMatch(
+				i -> valueAndType.negated ? !identifierMatches(valueAndType, i) : identifierMatches(valueAndType, i));
 	}
 
 	public static boolean identifierMatches(TokenValueAndSearchType valueAndType, Identifier identifier)

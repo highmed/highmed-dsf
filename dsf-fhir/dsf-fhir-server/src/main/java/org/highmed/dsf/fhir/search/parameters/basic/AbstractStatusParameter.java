@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.search.parameters;
+package org.highmed.dsf.fhir.search.parameters.basic;
 
 import java.sql.Array;
 import java.sql.PreparedStatement;
@@ -10,26 +10,28 @@ import java.util.Objects;
 import javax.ws.rs.core.UriBuilder;
 
 import org.highmed.dsf.fhir.function.BiFunctionWithSqlException;
-import org.highmed.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.dsf.fhir.search.SearchQueryParameterError;
 import org.highmed.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
-import org.highmed.dsf.fhir.search.parameters.basic.AbstractTokenParameter;
-import org.highmed.dsf.fhir.search.parameters.basic.TokenSearchType;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
+import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.Task;
 
-@SearchParameterDefinition(name = TaskStatus.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Task-status", type = SearchParamType.TOKEN, documentation = "Search by task status")
-public class TaskStatus extends AbstractTokenParameter<Task>
+public class AbstractStatusParameter<R extends MetadataResource> extends AbstractTokenParameter<R>
 {
 	public static final String PARAMETER_NAME = "status";
 
-	private org.hl7.fhir.r4.model.Task.TaskStatus status;
+	private final String resourceColumn;
+	private final Class<R> resourceType;
 
-	public TaskStatus()
+	private PublicationStatus status;
+
+	public AbstractStatusParameter(String resourceColumn, Class<R> resourceType)
 	{
 		super(PARAMETER_NAME);
+
+		this.resourceColumn = resourceColumn;
+		this.resourceType = resourceType;
 	}
 
 	@Override
@@ -41,14 +43,14 @@ public class TaskStatus extends AbstractTokenParameter<Task>
 			status = toStatus(valueAndType.codeValue, queryParameters.get(parameterName));
 	}
 
-	private org.hl7.fhir.r4.model.Task.TaskStatus toStatus(String status, List<String> parameterValues)
+	private PublicationStatus toStatus(String status, List<String> parameterValues)
 	{
 		if (status == null || status.isBlank())
 			return null;
 
 		try
 		{
-			return org.hl7.fhir.r4.model.Task.TaskStatus.fromCode(status);
+			return PublicationStatus.fromCode(status);
 		}
 		catch (FHIRException e)
 		{
@@ -67,7 +69,7 @@ public class TaskStatus extends AbstractTokenParameter<Task>
 	@Override
 	public String getFilterQuery()
 	{
-		return "task->>'status' " + (valueAndType.negated ? "<>" : "=") + " ?";
+		return resourceColumn + "->>'status' " + (valueAndType.negated ? "<>" : "=") + " ?";
 	}
 
 	@Override
@@ -95,18 +97,18 @@ public class TaskStatus extends AbstractTokenParameter<Task>
 		if (!isDefined())
 			throw notDefined();
 
-		if (!(resource instanceof Task))
+		if (!resourceType.isInstance(resource))
 			return false;
 
 		if (valueAndType.negated)
-			return !Objects.equals(((Task) resource).getStatus(), status);
+			return !Objects.equals(((MetadataResource) resource).getStatus(), status);
 		else
-			return Objects.equals(((Task) resource).getStatus(), status);
+			return Objects.equals(((MetadataResource) resource).getStatus(), status);
 	}
 
 	@Override
 	protected String getSortSql(String sortDirectionWithSpacePrefix)
 	{
-		return "task->>'status'" + sortDirectionWithSpacePrefix;
+		return resourceColumn + "->>'status'" + sortDirectionWithSpacePrefix;
 	}
 }
