@@ -24,6 +24,7 @@ dsf-fhir/dsf-fhir-server-jetty/conf/bundle.xml
 dsf-fhir/dsf-fhir-server-jetty/conf/config.properties
 dsf-fhir/dsf-fhir-server-jetty/docker/dsf_fhir.jar
 dsf-fhir/dsf-fhir-server-jetty/docker/lib/*.jar
+dsf-fhir/dsf-fhir-validation/src/main/resources/fhir/bundle.xml
 
 ###
 # dsf-docker-test-setup ignores

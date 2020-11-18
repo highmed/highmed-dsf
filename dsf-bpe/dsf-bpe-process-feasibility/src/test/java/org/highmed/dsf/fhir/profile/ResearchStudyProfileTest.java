@@ -1,12 +1,13 @@
-package org.highmed.dsf.fhir.profiles;
+package org.highmed.dsf.fhir.profile;
 
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.UUID;
 
-import org.highmed.dsf.fhir.service.ResourceValidator;
-import org.highmed.dsf.fhir.service.ResourceValidatorImpl;
+import org.highmed.dsf.fhir.validation.ResourceValidator;
+import org.highmed.dsf.fhir.validation.ResourceValidatorImpl;
+import org.highmed.dsf.fhir.validation.ValidationSupportRule;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.ResearchStudy.ResearchStudyStatus;
@@ -20,7 +21,7 @@ import ca.uhn.fhir.validation.ValidationResult;
 
 public class ResearchStudyProfileTest
 {
-	private static final Logger logger = LoggerFactory.getLogger(OrganizationProfileTest.class);
+	private static final Logger logger = LoggerFactory.getLogger(ResearchStudyProfileTest.class);
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(

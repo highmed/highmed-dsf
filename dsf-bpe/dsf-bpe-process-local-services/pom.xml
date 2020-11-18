@@ -29,5 +29,10 @@
 			<artifactId>log4j2-utils</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.highmed.dsf</groupId>
+			<artifactId>dsf-fhir-validation</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 </project>

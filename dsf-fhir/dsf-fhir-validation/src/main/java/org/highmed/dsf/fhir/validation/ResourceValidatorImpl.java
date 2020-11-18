@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.service;
+package org.highmed.dsf.fhir.validation;
 
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.Resource;

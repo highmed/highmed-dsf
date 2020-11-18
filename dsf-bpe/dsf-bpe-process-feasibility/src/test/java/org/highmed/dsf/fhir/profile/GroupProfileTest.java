@@ -1,11 +1,12 @@
-package org.highmed.dsf.fhir.profiles;
+package org.highmed.dsf.fhir.profile;
 
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 
-import org.highmed.dsf.fhir.service.ResourceValidator;
-import org.highmed.dsf.fhir.service.ResourceValidatorImpl;
+import org.highmed.dsf.fhir.validation.ResourceValidator;
+import org.highmed.dsf.fhir.validation.ResourceValidatorImpl;
+import org.highmed.dsf.fhir.validation.ValidationSupportRule;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.Group;

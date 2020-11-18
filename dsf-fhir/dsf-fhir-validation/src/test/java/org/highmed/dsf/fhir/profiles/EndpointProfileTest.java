@@ -5,8 +5,9 @@ import static org.junit.Assert.assertEquals;
 import java.util.Arrays;
 import java.util.UUID;
 
-import org.highmed.dsf.fhir.service.ResourceValidator;
-import org.highmed.dsf.fhir.service.ResourceValidatorImpl;
+import org.highmed.dsf.fhir.validation.ResourceValidator;
+import org.highmed.dsf.fhir.validation.ResourceValidatorImpl;
+import org.highmed.dsf.fhir.validation.ValidationSupportRule;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Endpoint.EndpointStatus;
 import org.junit.ClassRule;

@@ -1,22 +1,15 @@
-package org.highmed.dsf.fhir.profiles;
+package org.highmed.dsf.fhir.validation;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Stream;
 
-import org.highmed.dsf.fhir.service.ValidationSupportWithCustomResources;
-import org.highmed.dsf.fhir.service.SnapshotGenerator;
-import org.highmed.dsf.fhir.service.SnapshotGenerator.SnapshotWithValidationMessages;
-import org.highmed.dsf.fhir.service.SnapshotGeneratorImpl;
-import org.highmed.dsf.fhir.service.StructureDefinitionReader;
+import org.highmed.dsf.fhir.validation.SnapshotGenerator.SnapshotWithValidationMessages;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
@@ -33,11 +26,6 @@ import ca.uhn.fhir.validation.ValidationResult;
 
 public class ValidationSupportRule extends ExternalResource
 {
-	private static final String BASE_FOLDER = "src/main/resources/fhir/";
-	private static final String STUCTURE_DEFINITIONS_FOLDER = BASE_FOLDER + "StructureDefinition";
-	private static final String CODE_SYSTEMS_FOLDER = BASE_FOLDER + "CodeSystem";
-	private static final String VALUE_SETS_FOLDER = BASE_FOLDER + "ValueSet";
-
 	private final FhirContext context;
 	private final IValidationSupport validationSupport;
 
@@ -61,46 +49,42 @@ public class ValidationSupportRule extends ExternalResource
 				new CommonCodeSystemsTerminologyService(context));
 
 		readProfilesAndGenerateSnapshots(context, customValidationSupport,
-				new SnapshotGeneratorImpl(context, validationSupport),
-				toPaths(STUCTURE_DEFINITIONS_FOLDER, structureDefinitions));
+				new SnapshotGeneratorImpl(context, validationSupport), structureDefinitions.stream());
 
-		readCodeSystems(context, customValidationSupport, toPaths(CODE_SYSTEMS_FOLDER, codeSystems));
-		readValueSets(context, customValidationSupport, toPaths(VALUE_SETS_FOLDER, valueSets));
-	}
-
-	private static Stream<Path> toPaths(String folder, List<String> files)
-	{
-		return files.stream().map(file -> Paths.get(folder, file));
+		readCodeSystems(context, customValidationSupport, codeSystems.stream());
+		readValueSets(context, customValidationSupport, valueSets.stream());
 	}
 
 	private static void readProfilesAndGenerateSnapshots(FhirContext context,
 			ValidationSupportWithCustomResources vSupport, SnapshotGenerator snapshotGenerator,
-			Stream<Path> structureDefinitions)
+			Stream<String> structureDefinitions)
 	{
 		StructureDefinitionReader reader = new StructureDefinitionReader(context);
-		reader.readXml(structureDefinitions).forEach(diff ->
-		{
-			SnapshotWithValidationMessages snapshotWithValidationMessages = snapshotGenerator.generateSnapshot(diff);
-			assertTrue(snapshotWithValidationMessages.getMessages().isEmpty());
-			assertNotNull(snapshotWithValidationMessages.getSnapshot());
+		reader.readXmlFromClassPath(structureDefinitions.map(file -> "/fhir/StructureDefinition/" + file))
+				.forEach(diff ->
+				{
+					SnapshotWithValidationMessages snapshotWithValidationMessages = snapshotGenerator
+							.generateSnapshot(diff);
+					assertTrue(snapshotWithValidationMessages.getMessages().isEmpty());
+					assertNotNull(snapshotWithValidationMessages.getSnapshot());
 
-			vSupport.addOrReplace(snapshotWithValidationMessages.getSnapshot());
-		});
+					vSupport.addOrReplace(snapshotWithValidationMessages.getSnapshot());
+				});
 	}
 
 	private static void readCodeSystems(FhirContext context, ValidationSupportWithCustomResources vSupport,
-			Stream<Path> codeSystems)
+			Stream<String> codeSystems)
 	{
-		codeSystems.forEach(path ->
+		codeSystems.map(file -> "/fhir/CodeSystem/" + file).forEach(file ->
 		{
-			var cS = readCodeSystem(context, path);
+			var cS = readCodeSystem(context, file);
 			vSupport.addOrReplace(cS);
 		});
 	}
 
-	private static CodeSystem readCodeSystem(FhirContext context, Path path)
+	private static CodeSystem readCodeSystem(FhirContext context, String file)
 	{
-		try (InputStream in = Files.newInputStream(path))
+		try (InputStream in = ValidationSupportRule.class.getResourceAsStream(file))
 		{
 			return context.newXmlParser().parseResource(CodeSystem.class, in);
 		}
@@ -111,18 +95,18 @@ public class ValidationSupportRule extends ExternalResource
 	}
 
 	private static void readValueSets(FhirContext context, ValidationSupportWithCustomResources vSupport,
-			Stream<Path> valueSets)
+			Stream<String> valueSets)
 	{
-		valueSets.forEach(p ->
+		valueSets.map(file -> "/fhir/ValueSet/" + file).forEach(file ->
 		{
-			var vS = readValueSet(context, p);
+			var vS = readValueSet(context, file);
 			vSupport.addOrReplace(vS);
 		});
 	}
 
-	private static ValueSet readValueSet(FhirContext context, Path path)
+	private static ValueSet readValueSet(FhirContext context, String file)
 	{
-		try (InputStream in = Files.newInputStream(path))
+		try (InputStream in = ValidationSupportRule.class.getResourceAsStream(file))
 		{
 			return context.newXmlParser().parseResource(ValueSet.class, in);
 		}

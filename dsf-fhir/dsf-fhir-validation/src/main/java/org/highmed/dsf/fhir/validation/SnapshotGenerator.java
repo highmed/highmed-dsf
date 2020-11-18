@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.service;
+package org.highmed.dsf.fhir.validation;
 
 import java.util.List;
 

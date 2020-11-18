@@ -31,7 +31,7 @@ public class BundleIdentifier extends AbstractTokenParameter<Bundle>
 			case CODE:
 			case CODE_AND_SYSTEM:
 			case SYSTEM:
-				return "bundle->'identifier' " + (valueAndType.negated ? "<>" : "=") + " ?";
+				return "bundle->'identifier' " + (valueAndType.negated ? "<>" : "=") + " ?::jsonb";
 			case CODE_AND_NO_SYSTEM_PROPERTY:
 				if (valueAndType.negated)
 					return "bundle->'identifier'->>'value' <> ? OR (bundle->'identifier' ?? 'system')";

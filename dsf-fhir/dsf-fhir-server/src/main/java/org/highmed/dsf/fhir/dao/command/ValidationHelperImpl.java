@@ -6,7 +6,7 @@ import javax.ws.rs.WebApplicationException;
 
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
-import org.highmed.dsf.fhir.service.ResourceValidator;
+import org.highmed.dsf.fhir.validation.ResourceValidator;
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
