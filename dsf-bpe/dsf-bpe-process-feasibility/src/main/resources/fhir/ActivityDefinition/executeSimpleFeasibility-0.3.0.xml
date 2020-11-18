@@ -45,7 +45,7 @@
 	</extension>
 	<url value="http://highmed.org/bpe/Process/executeSimpleFeasibility" />
 	<version value="0.3.0" />
-	<name value="ExecuteSimpleFeasibility" />
+	<name value="executeSimpleFeasibility" />
 	<title value="Execute a Simple Feasibility" />
 	<subtitle value="Process to execute a simple feasibility query" />
 	<!-- status managed by bpe -->

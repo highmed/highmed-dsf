@@ -95,7 +95,7 @@
 	</extension>
 	<url value="http://highmed.org/bpe/Process/ping" />
 	<version value="0.3.0" />
-	<name value="PingProcess" />
+	<name value="ping" />
 	<title value="PING process" />
 	<subtitle value="Communication Testing Process" />
 	<status value="active" />

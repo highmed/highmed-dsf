@@ -39,7 +39,7 @@
 	</extension>
 	<url value="http://highmed.org/bpe/Process/requestUpdateResources" />
 	<version value="0.3.0" />
-	<name value="RequestUpdateResources" />
+	<name value="requestUpdateResources" />
 	<title value="Request Update of Resources" />
 	<subtitle value="Process to Request a Bundle Download" />
 	<!-- status managed by bpe -->

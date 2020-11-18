@@ -51,7 +51,7 @@
 	</extension>
 	<url value="http://highmed.org/bpe/Process/downloadAllowList" />
 	<version value="0.3.0" />
-	<name value="DownloadAllowList" />
+	<name value="downloadAllowList" />
 	<title value="Download Allow List" />
 	<subtitle value="Download Allow List Bundle Process" />
 	<!-- status managed by bpe -->

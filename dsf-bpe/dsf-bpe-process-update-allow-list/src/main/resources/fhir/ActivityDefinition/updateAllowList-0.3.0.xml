@@ -39,7 +39,7 @@
 	</extension>
 	<url value="http://highmed.org/bpe/Process/updateAllowList" />
 	<version value="0.3.0" />
-	<name value="UpdateAllowList" />
+	<name value="updateAllowList" />
 	<title value="Update Allow List" />
 	<subtitle value="Update Allow List Bundle Process" />
 	<!-- status managed by bpe -->

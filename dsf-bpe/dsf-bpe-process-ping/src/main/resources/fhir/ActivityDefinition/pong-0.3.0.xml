@@ -51,7 +51,7 @@
 	</extension>
 	<url value="http://highmed.org/bpe/Process/pong" />
 	<version value="0.3.0" />
-	<name value="PongProcess" />
+	<name value="pong" />
 	<title value="PONG process" />
 	<subtitle value="Communication Testing Process" />
 	<status value="active" />
