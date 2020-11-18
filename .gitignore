@@ -34,6 +34,7 @@ dsf-docker-test-setup/bpe/app/last_event/time.file
 dsf-docker-test-setup/bpe/app/log/*.log
 dsf-docker-test-setup/bpe/app/log/*.log.gz
 dsf-docker-test-setup/bpe/app/plugin/*.jar
+dsf-docker-test-setup/bpe/app/process/*.jar
 dsf-docker-test-setup/bpe/db/postgres-data/
 dsf-docker-test-setup/bpe/proxy/ssl/*.pem
 
@@ -51,6 +52,7 @@ dsf-docker-test-setup/fhir/proxy/ssl/*.pem
 dsf-docker-test-setup-3medic-ttp/**/bpe/app/conf/*.p12
 dsf-docker-test-setup-3medic-ttp/**/bpe/app/conf/config.properties
 dsf-docker-test-setup-3medic-ttp/**/bpe/app/plugin/*.jar
+dsf-docker-test-setup-3medic-ttp/**/bpe/app/process/*.jar
 dsf-docker-test-setup-3medic-ttp/**/bpe/proxy/ssl/*.pem
 
 dsf-docker-test-setup-3medic-ttp/**/fhir/app/conf/*.p12
