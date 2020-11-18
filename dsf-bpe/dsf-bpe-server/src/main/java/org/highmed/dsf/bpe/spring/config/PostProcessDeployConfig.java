@@ -40,10 +40,10 @@ public class PostProcessDeployConfig
 	@Autowired
 	private DaoConfig daoConfig;
 
-	@Value("#{'${org.highmed.dsf.bpe.process.excluded}'.split(',')}")
+	@Value("#{'${org.highmed.dsf.bpe.process.excluded:}'.split(',')}")
 	private List<String> excluded;
 
-	@Value("#{'${org.highmed.dsf.bpe.process.retired}'.split(',')}")
+	@Value("#{'${org.highmed.dsf.bpe.process.retired:}'.split(',')}")
 	private List<String> retired;
 
 	@EventListener({ ContextRefreshedEvent.class })

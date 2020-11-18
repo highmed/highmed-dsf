@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class CorsConfig
 {
-	@Value("#{'${org.highmed.dsf.fhir.cors.origins}'.split(',')}")
+	@Value("#{'${org.highmed.dsf.fhir.cors.origins:}'.split(',')}")
 	private List<String> allowedOrigins;
 
 	@Bean
