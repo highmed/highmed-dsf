@@ -15,6 +15,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.ResourceDao;
+import org.highmed.dsf.fhir.dao.exception.ResourceNotFoundException;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.event.EventGenerator;
 import org.highmed.dsf.fhir.event.EventHandler;
@@ -109,7 +110,7 @@ public class DeleteCommand extends AbstractCommand implements Command
 			dbResource.ifPresent(oldResource -> authorizationHelper.checkDeleteAllowed(connection, user, oldResource));
 
 			deleted = exceptionHandler.handleSqlAndResourceNotFoundException(resourceTypeName,
-					() -> dao.deleteWithTransaction(connection, uuid));
+					() -> deleteWithTransaction(dao, connection, uuid));
 
 			this.resourceType = dao.getResourceType();
 			this.id = id;
@@ -133,13 +134,19 @@ public class DeleteCommand extends AbstractCommand implements Command
 				authorizationHelper.checkDeleteAllowed(connection, user, resourceToDelete.get());
 
 				deleted = exceptionHandler.handleSqlAndResourceNotFoundException(resourceTypeName,
-						() -> dao.get().deleteWithTransaction(connection, parameterConverter.toUuid(resourceTypeName,
+						() -> deleteWithTransaction(dao.get(), connection, parameterConverter.toUuid(resourceTypeName,
 								resourceToDelete.get().getIdElement().getIdPart())));
 
 				this.resourceType = dao.get().getResourceType();
 				this.id = resourceToDelete.get().getIdElement().getIdPart();
 			}
 		}
+	}
+
+	protected boolean deleteWithTransaction(ResourceDao<?> dao, Connection connection, UUID uuid)
+			throws SQLException, ResourceNotFoundException
+	{
+		return dao.deleteWithTransaction(connection, uuid);
 	}
 
 	private Optional<Resource> search(Connection connection, ResourceDao<?> dao,

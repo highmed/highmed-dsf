@@ -165,8 +165,15 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 	private Command delete(int index, User user, PreferReturnType returnType, Bundle bundle, BundleEntryComponent entry)
 	{
 		if (entry.getRequest().getUrl() != null && !entry.getRequest().getUrl().isBlank())
-			return new DeleteCommand(index, user, returnType, bundle, entry, serverBase, authorizationHelper,
-					responseGenerator, daoProvider, exceptionHandler, parameterConverter, eventGenerator);
+		{
+			if (entry.getRequest().getUrl().startsWith("StructureDefinition"))
+				return new DeleteStructureDefinitionCommand(index, user, returnType, bundle, entry, serverBase,
+						authorizationHelper, responseGenerator, daoProvider, exceptionHandler, parameterConverter,
+						eventGenerator);
+			else
+				return new DeleteCommand(index, user, returnType, bundle, entry, serverBase, authorizationHelper,
+						responseGenerator, daoProvider, exceptionHandler, parameterConverter, eventGenerator);
+		}
 		else
 			throw new BadBundleException(
 					"Request url " + entry.getRequest().getUrl() + " for method DELETE not supported");
