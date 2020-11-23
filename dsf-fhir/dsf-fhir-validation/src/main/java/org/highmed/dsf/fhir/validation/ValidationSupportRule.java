@@ -108,6 +108,9 @@ public class ValidationSupportRule extends ExternalResource
 	{
 		try (InputStream in = ValidationSupportRule.class.getResourceAsStream(file))
 		{
+			if (in == null)
+				throw new IOException("File " + file + " not found");
+
 			return context.newXmlParser().parseResource(ValueSet.class, in);
 		}
 		catch (IOException e)
