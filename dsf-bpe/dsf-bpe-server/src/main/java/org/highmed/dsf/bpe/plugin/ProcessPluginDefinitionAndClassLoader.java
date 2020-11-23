@@ -107,7 +107,7 @@ public class ProcessPluginDefinitionAndClassLoader
 		{
 			if (!definition.getVersion().equals(p.getCamundaVersionTag()))
 				throw new RuntimeException("Camunda version tag in process '" + p.getId()
-						+ "' does not match process plugin version (tag: " + p.getCamundaVersionTag() + " vs. plugin:"
+						+ "' does not match process plugin version (tag: " + p.getCamundaVersionTag() + " vs. plugin: "
 						+ definition.getVersion() + ")");
 		});
 	}
