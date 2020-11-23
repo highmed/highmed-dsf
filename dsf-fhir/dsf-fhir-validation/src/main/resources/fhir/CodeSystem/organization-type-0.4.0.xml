@@ -6,12 +6,12 @@
 		</tag>		
 	</meta>
 	<url value="http://highmed.org/fhir/CodeSystem/organization-type"/>
-	<version value="0.3.0"/>
+	<version value="0.4.0"/>
 	<name value="HiGHmed_Organization_Type"/>
 	<title value="HiGHmed Organization Type"/>
 	<status value="active"/>
 	<experimental value="false"/>
-	<date value="2020-11-03"/>
+	<date value="2020-11-23"/>
 	<publisher value="HiGHmed"/>
 	<description value="CodeSystem with HiGHmed organization roles used in Organization resources"/>
 	<caseSensitive value="true"/>

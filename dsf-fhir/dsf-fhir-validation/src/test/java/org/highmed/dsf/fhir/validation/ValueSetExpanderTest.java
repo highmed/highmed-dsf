@@ -52,7 +52,7 @@ public class ValueSetExpanderTest
 
 	private List<CodeSystem> readCodeSystems()
 	{
-		return Stream.of("authorization-role-0.3.0.xml", "bpmn-message-0.3.0.xml")
+		return Stream.of("authorization-role-0.4.0.xml", "bpmn-message-0.4.0.xml")
 				.map(file -> "/fhir/CodeSystem/" + file).map(this::readCodeSystem).collect(Collectors.toList());
 	}
 
@@ -72,7 +72,7 @@ public class ValueSetExpanderTest
 	public void testExpandFeasibility() throws Exception
 	{
 		ValueSetExpansionOutcome out = valueSetExpander
-				.expand(readValueSet("/fhir/ValueSet/authorization-role-0.3.0.xml"));
+				.expand(readValueSet("/fhir/ValueSet/authorization-role-0.4.0.xml"));
 
 		assertNotNull(out);
 		assertNull(out.getError());

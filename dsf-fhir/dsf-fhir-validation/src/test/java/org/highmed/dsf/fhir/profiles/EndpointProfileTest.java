@@ -25,15 +25,15 @@ public class EndpointProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			Arrays.asList("highmed-endpoint-0.3.0.xml"),
-			Arrays.asList("authorization-role-0.3.0.xml", "urn_ietf_bcp_13.xml"),
-			Arrays.asList("authorization-role-0.3.0.xml", "valueset-mimetypes.xml"));
+			Arrays.asList("highmed-endpoint-0.4.0.xml"),
+			Arrays.asList("authorization-role-0.4.0.xml", "urn_ietf_bcp_13.xml"),
+			Arrays.asList("authorization-role-0.4.0.xml", "valueset-mimetypes.xml"));
 
 	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
 
 	@Test
-	public void testOrganizationProfileValid() throws Exception
+	public void testEndpointProfileValid() throws Exception
 	{
 		Endpoint endpoint = new Endpoint();
 		endpoint.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-endpoint");
