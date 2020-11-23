@@ -80,6 +80,6 @@ public class PostProcessDeployConfig
 	{
 		return new FhirResourceHandlerImpl(fhirConfig.clientProvider().getLocalWebserviceClient(),
 				daoConfig.processPluginResourcesDao(), fhirConfig.fhirContext(),
-				processPluginProvider.getResouceProvidersByDpendencyJarName());
+				processPluginProvider.getResouceProvidersByDpendencyNameAndVersion());
 	}
 }

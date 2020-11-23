@@ -6,18 +6,18 @@ public abstract class AbstractResource
 {
 	private final Class<? extends MetadataResource> type;
 
-	private final String dependecyJarName;
+	private final String dependencyNameAndVersion;
 	private final String url;
 	private final String version;
 	private final String name;
 
 	private final String fileName;
 
-	AbstractResource(Class<? extends MetadataResource> type, String dependecyJarName, String url, String version,
+	AbstractResource(Class<? extends MetadataResource> type, String dependencyNameAndVersion, String url, String version,
 			String name, String fileName)
 	{
 		this.type = type;
-		this.dependecyJarName = dependecyJarName;
+		this.dependencyNameAndVersion = dependencyNameAndVersion;
 		this.url = url;
 		this.version = version;
 		this.name = name;
@@ -29,9 +29,9 @@ public abstract class AbstractResource
 		return type;
 	}
 
-	public String getDependecyJarName()
+	public String getDependencyNameAndVersion()
 	{
-		return dependecyJarName;
+		return dependencyNameAndVersion;
 	}
 
 	public String getUrl()
@@ -56,6 +56,6 @@ public abstract class AbstractResource
 
 	public boolean isDependencyResource()
 	{
-		return dependecyJarName != null;
+		return dependencyNameAndVersion != null;
 	}
 }

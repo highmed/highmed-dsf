@@ -7,22 +7,21 @@ import org.hl7.fhir.r4.model.NamingSystem;
 
 public class NamingSystemResource extends AbstractResource
 {
-	private NamingSystemResource(Class<? extends MetadataResource> type, String dependecyJarName, String url,
-			String version, String name, String fileName)
+	private NamingSystemResource(Class<? extends MetadataResource> type, String dependencyNameAndVersion,
+			String namingSystemName, String namingSystemFileName)
 	{
-		super(type, dependecyJarName, url, version, name, fileName);
+		super(type, dependencyNameAndVersion, null, null, namingSystemName, namingSystemFileName);
 	}
 
-	public static NamingSystemResource file(String fileName)
+	public static NamingSystemResource file(String namingSystemFileName)
 	{
-		return new NamingSystemResource(NamingSystem.class, null, null, null, null,
-				Objects.requireNonNull(fileName, "fileName"));
+		return new NamingSystemResource(NamingSystem.class, null, null, Objects.requireNonNull(namingSystemFileName, "namingSystemFileName"));
 	}
 
-	public static NamingSystemResource dependency(String dependecyJarName, String name)
+	public static NamingSystemResource dependency(String dependencyNameAndVersion, String namingSystemName)
 	{
 		return new NamingSystemResource(NamingSystem.class,
-				Objects.requireNonNull(dependecyJarName, "dependecyJarName"), null, null,
-				Objects.requireNonNull(name, "name"), null);
+				Objects.requireNonNull(dependencyNameAndVersion, "dependencyNameAndVersion"),
+				Objects.requireNonNull(namingSystemName, "namingSystemName"), null);
 	}
 }

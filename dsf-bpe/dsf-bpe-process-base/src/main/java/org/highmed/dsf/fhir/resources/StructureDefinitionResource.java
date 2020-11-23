@@ -7,22 +7,25 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 
 public class StructureDefinitionResource extends AbstractResource
 {
-	private StructureDefinitionResource(Class<? extends MetadataResource> type, String dependecyJarName, String url,
-			String version, String name, String fileName)
+	private StructureDefinitionResource(Class<? extends MetadataResource> type, String dependecyNameAndVersion,
+			String structureDefinitionUrl, String structureDefinitionVersion, String structureDefinitionFileName)
 	{
-		super(type, dependecyJarName, url, version, name, fileName);
+		super(type, dependecyNameAndVersion, structureDefinitionUrl, structureDefinitionVersion, null,
+				structureDefinitionFileName);
 	}
 
-	public static StructureDefinitionResource file(String fileName)
+	public static StructureDefinitionResource file(String structureDefinitionFileName)
 	{
-		return new StructureDefinitionResource(StructureDefinition.class, null, null, null, null,
-				Objects.requireNonNull(fileName, "fileName"));
+		return new StructureDefinitionResource(StructureDefinition.class, null, null, null,
+				Objects.requireNonNull(structureDefinitionFileName, "structureDefinitionFileName"));
 	}
 
-	public static StructureDefinitionResource dependency(String dependecyJarName, String url, String version)
+	public static StructureDefinitionResource dependency(String dependencyNameAndVersion, String structureDefinitionUrl,
+			String structureDefinitionVersion)
 	{
 		return new StructureDefinitionResource(StructureDefinition.class,
-				Objects.requireNonNull(dependecyJarName, "dependecyJarName"), Objects.requireNonNull(url, "url"),
-				Objects.requireNonNull(version, "version"), null, null);
+				Objects.requireNonNull(dependencyNameAndVersion, "dependencyNameAndVersion"),
+				Objects.requireNonNull(structureDefinitionUrl, "structureDefinitionUrl"),
+				Objects.requireNonNull(structureDefinitionVersion, "structureDefinitionVersion"), null);
 	}
 }

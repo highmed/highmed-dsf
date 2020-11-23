@@ -44,17 +44,17 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 	private final ProcessPluginResourcesDao dao;
 	private final FhirContext fhirContext;
 
-	private final Map<String, ResourceProvider> resouceProvidersByDpendencyJarName = new HashMap<>();
+	private final Map<String, ResourceProvider> resouceProvidersByDpendencyNameAndVersion = new HashMap<>();
 
 	public FhirResourceHandlerImpl(FhirWebserviceClient localWebserviceClient, ProcessPluginResourcesDao dao,
-			FhirContext fhirContext, Map<String, ResourceProvider> resouceProvidersByDpendencyJarName)
+			FhirContext fhirContext, Map<String, ResourceProvider> resouceProvidersByDpendencyNameAndVersion)
 	{
 		this.localWebserviceClient = localWebserviceClient;
 		this.dao = dao;
 		this.fhirContext = fhirContext;
 
-		if (resouceProvidersByDpendencyJarName != null)
-			this.resouceProvidersByDpendencyJarName.putAll(resouceProvidersByDpendencyJarName);
+		if (resouceProvidersByDpendencyNameAndVersion != null)
+			this.resouceProvidersByDpendencyNameAndVersion.putAll(resouceProvidersByDpendencyNameAndVersion);
 	}
 
 	@Override
@@ -213,21 +213,21 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 	private Stream<MetadataResource> getResources(ProcessKeyAndVersion process,
 			ProcessPluginDefinitionAndClassLoader definition)
 	{
-		Function<String, ResourceProvider> providerByJarName = name ->
+		Function<String, ResourceProvider> providerByNameAndVersion = nameAndVersion ->
 		{
-			if (resouceProvidersByDpendencyJarName.containsKey(name))
+			if (resouceProvidersByDpendencyNameAndVersion.containsKey(nameAndVersion))
 			{
-				logger.trace("Resource provider for dependency {} found", name);
-				return resouceProvidersByDpendencyJarName.get(name);
+				logger.trace("Resource provider for dependency {} found", nameAndVersion);
+				return resouceProvidersByDpendencyNameAndVersion.get(nameAndVersion);
 			}
 			else
 			{
-				logger.warn("Resource provider for dependency {} not found", name);
+				logger.warn("Resource provider for dependency {} not found", nameAndVersion);
 				return ResourceProvider.empty();
 			}
 		};
 
-		return definition.getResourceProvider().getResources(process.toString(), providerByJarName);
+		return definition.getResourceProvider().getResources(process.toString(), providerByNameAndVersion);
 	}
 
 	private Optional<UUID> getResourceId(Map<ProcessKeyAndVersion, List<ResourceInfo>> dbResourcesByProcess,

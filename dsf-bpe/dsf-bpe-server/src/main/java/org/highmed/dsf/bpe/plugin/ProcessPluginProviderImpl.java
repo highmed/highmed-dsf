@@ -207,7 +207,7 @@ public class ProcessPluginProviderImpl implements ProcessPluginProvider, Initial
 	private ProcessPluginDefinitionAndClassLoader withDependencies(ProcessPluginDefinitionAndClassLoader definition,
 			Map<String, ProcessPluginDefinitionAndClassLoader> definitionsByJar)
 	{
-		if (definition.getDefinition().getDependencyJarNames().isEmpty())
+		if (definition.getDefinition().getDependencyNamesAndVersions().isEmpty())
 			return definition;
 		else
 		{
@@ -225,7 +225,7 @@ public class ProcessPluginProviderImpl implements ProcessPluginProvider, Initial
 			}
 
 			String definitionClassName = definition.getDefinition().getClass().getName();
-			List<Path> dependencyJars = definition.getDefinition().getDependencyJarNames().stream()
+			List<Path> dependencyJars = definition.getDefinition().getDependencyNamesAndVersions().stream()
 					.flatMap(dependency -> findDefinition(definitionsByJar, dependency)).collect(Collectors.toList());
 
 			if (definition.getJars().size() == 1)
@@ -322,10 +322,10 @@ public class ProcessPluginProviderImpl implements ProcessPluginProvider, Initial
 	}
 
 	@Override
-	public Map<String, ResourceProvider> getResouceProvidersByDpendencyJarName()
+	public Map<String, ResourceProvider> getResouceProvidersByDpendencyNameAndVersion()
 	{
-		return getDefinitions().stream()
-				.collect(Collectors.toMap(def -> def.getDefinition().getJarName(), def -> def.getResourceProvider()));
+		return getDefinitions().stream().collect(
+				Collectors.toMap(def -> def.getDefinition().getNameAndVersion(), def -> def.getResourceProvider()));
 	}
 
 	@Override

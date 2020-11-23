@@ -7,21 +7,24 @@ import org.hl7.fhir.r4.model.MetadataResource;
 
 public class CodeSystemResource extends AbstractResource
 {
-	private CodeSystemResource(Class<? extends MetadataResource> type, String dependecyJarName, String url,
-			String version, String name, String fileName)
+	private CodeSystemResource(Class<? extends MetadataResource> type, String dependencyNameAndVersion,
+			String codeSystemUrl, String codeSystemVersion, String codeSystemFileName)
 	{
-		super(type, dependecyJarName, url, version, name, fileName);
+		super(type, dependencyNameAndVersion, codeSystemUrl, codeSystemVersion, null, codeSystemFileName);
 	}
 
-	public static CodeSystemResource file(String fileName)
+	public static CodeSystemResource file(String codeSystemFileName)
 	{
-		return new CodeSystemResource(CodeSystem.class, null, null, null, null,
-				Objects.requireNonNull(fileName, "fileName"));
+		return new CodeSystemResource(CodeSystem.class, null, null, null,
+				Objects.requireNonNull(codeSystemFileName, "codeSystemFileName"));
 	}
 
-	public static CodeSystemResource dependency(String dependecyJarName, String url, String version)
+	public static CodeSystemResource dependency(String dependencyNameAndVersion, String codeSystemUrl,
+			String codeSystemVersion)
 	{
-		return new CodeSystemResource(CodeSystem.class, Objects.requireNonNull(dependecyJarName, "dependecyJarName"),
-				Objects.requireNonNull(url, "url"), Objects.requireNonNull(version, "version"), null, null);
+		return new CodeSystemResource(CodeSystem.class,
+				Objects.requireNonNull(dependencyNameAndVersion, "dependencyNameAndVersion"),
+				Objects.requireNonNull(codeSystemUrl, "codeSystemUrl"),
+				Objects.requireNonNull(codeSystemVersion, "codeSystemVersion"), null);
 	}
 }

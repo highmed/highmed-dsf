@@ -48,7 +48,7 @@ public interface ProcessPluginProvider
 	 */
 	Map<ProcessKeyAndVersion, ApplicationContext> getApplicationContextsByProcessDefinitionKeyAndVersion();
 
-	Map<String, ResourceProvider> getResouceProvidersByDpendencyJarName();
+	Map<String, ResourceProvider> getResouceProvidersByDpendencyNameAndVersion();
 
 	List<ProcessKeyAndVersion> getProcessKeyAndVersions();
 

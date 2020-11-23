@@ -101,9 +101,10 @@ public interface ResourceProvider
 		return ResourceProviderImpl.of(resourcesByProcessKeyAndVersion, dependencyResourcesByProcessKeyAndVersion);
 	}
 
-	static ResourceProvider read(Supplier<IParser> parserSupplier, ClassLoader classLoader,
+	static ResourceProvider read(String processPluginVersion, Supplier<IParser> parserSupplier, ClassLoader classLoader,
 			Map<String, List<AbstractResource>> resourcesByProcessKeyAndVersion)
 	{
-		return ResourceProviderImpl.read(parserSupplier, classLoader, resourcesByProcessKeyAndVersion);
+		return ResourceProviderImpl.read(processPluginVersion, parserSupplier, classLoader,
+				resourcesByProcessKeyAndVersion);
 	}
 }

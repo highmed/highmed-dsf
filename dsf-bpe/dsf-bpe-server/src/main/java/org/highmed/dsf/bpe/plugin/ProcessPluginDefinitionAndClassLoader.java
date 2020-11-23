@@ -96,7 +96,20 @@ public class ProcessPluginDefinitionAndClassLoader
 	{
 		BpmnModelInstance model = Bpmn.readModelFromStream(classLoader.getResourceAsStream(bpmnFile));
 		Bpmn.validateModel(model);
+		validateModelVersionTags(model);
 		return new BpmnFileAndModel(bpmnFile, model, jars);
+	}
+
+	private void validateModelVersionTags(BpmnModelInstance model)
+	{
+		Collection<Process> processes = model.getModelElementsByType(Process.class);
+		processes.forEach(p ->
+		{
+			if (!definition.getVersion().equals(p.getCamundaVersionTag()))
+				throw new RuntimeException("Camunda version tag in process '" + p.getId()
+						+ "' does not match process plugin version (tag: " + p.getCamundaVersionTag() + " vs. plugin:"
+						+ definition.getVersion() + ")");
+		});
 	}
 
 	public ResourceProvider getResourceProvider()

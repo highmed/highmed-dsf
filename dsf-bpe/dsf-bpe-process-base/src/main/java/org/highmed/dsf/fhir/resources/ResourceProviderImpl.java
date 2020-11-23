@@ -119,10 +119,10 @@ class ResourceProviderImpl implements ResourceProvider
 	{
 		if (NamingSystem.class.equals(resource.getType()))
 			logger.debug("Get {} resource dependency {}, file {}, name {}", resource.getType().getSimpleName(),
-					resource.getDependecyJarName(), resource.getFileName(), resource.getName());
+					resource.getDependencyNameAndVersion(), resource.getFileName(), resource.getName());
 		else
 			logger.debug("Get {} resource dependency {}, file {}, url {}, version {}",
-					resource.getType().getSimpleName(), resource.getDependecyJarName(), resource.getFileName(),
+					resource.getType().getSimpleName(), resource.getDependencyNameAndVersion(), resource.getFileName(),
 					resource.getUrl(), resource.getVersion());
 
 		if (ActivityDefinition.class.equals(resource.getType()))
@@ -144,13 +144,13 @@ class ResourceProviderImpl implements ResourceProvider
 
 	@Override
 	public Stream<MetadataResource> getResources(String processKeyAndVersion,
-			Function<String, ResourceProvider> providerByJarName)
+			Function<String, ResourceProvider> providerByNameAndVersion)
 	{
 		List<AbstractResource> list = dependencyResourcesByProcessKeyAndVersion.getOrDefault(processKeyAndVersion,
 				Collections.emptyList());
 
 		Stream<MetadataResource> dependencyResources = list.stream()
-				.map(r -> providerByJarName.apply(r.getDependecyJarName()).getMetadataResouce(r))
+				.map(r -> providerByNameAndVersion.apply(r.getDependencyNameAndVersion()).getMetadataResouce(r))
 				.filter(Optional::isPresent).map(Optional::get);
 
 		Stream<MetadataResource> resources = Arrays
@@ -226,7 +226,7 @@ class ResourceProviderImpl implements ResourceProvider
 		}
 	}
 
-	static ResourceProvider read(Supplier<IParser> parserSupplier, ClassLoader classLoader,
+	static ResourceProvider read(String processPluginVersion, Supplier<IParser> parserSupplier, ClassLoader classLoader,
 			Map<String, List<AbstractResource>> resourcesByProcessKeyAndVersion)
 	{
 		Map<String, List<AbstractResource>> dependencyResourcesByProcessKeyAndVersion = new HashMap<>();
@@ -242,15 +242,15 @@ class ResourceProviderImpl implements ResourceProvider
 		{
 			resources.put(entry.getKey(),
 					entry.getValue().stream().filter(Predicate.not(AbstractResource::isDependencyResource))
-							.map(r -> read(parserSupplier, classLoader, resourcesByFileName, r))
+							.map(r -> read(processPluginVersion, parserSupplier, classLoader, resourcesByFileName, r))
 							.collect(Collectors.toList()));
 		}
 
 		return of(resources, dependencyResourcesByProcessKeyAndVersion);
 	}
 
-	private static MetadataResource read(Supplier<IParser> parserSupplier, ClassLoader classLoader,
-			Map<String, MetadataResource> resourcesByFileName, AbstractResource resources)
+	private static MetadataResource read(String processPluginVersion, Supplier<IParser> parserSupplier,
+			ClassLoader classLoader, Map<String, MetadataResource> resourcesByFileName, AbstractResource resources)
 	{
 		final String fileName = resources.getFileName();
 		final Class<? extends MetadataResource> type = resources.getType();
@@ -266,21 +266,28 @@ class ResourceProviderImpl implements ResourceProvider
 		}
 		else
 		{
-			MetadataResource m = parseResource(parserSupplier, classLoader, fileName, type);
+			MetadataResource m = parseResourceAndSetVersion(processPluginVersion, parserSupplier, classLoader, fileName,
+					type);
+
 			resourcesByFileName.put(fileName, m);
 
 			return m;
 		}
 	}
 
-	private static <T extends MetadataResource> T parseResource(Supplier<IParser> parserSupplier,
-			ClassLoader classLoader, String fileName, Class<T> type)
+	private static <T extends MetadataResource> T parseResourceAndSetVersion(String processPluginVersion,
+			Supplier<IParser> parserSupplier, ClassLoader classLoader, String fileName, Class<T> type)
 	{
 		logger.debug("Reading {} from {}", type.getSimpleName(), fileName);
 
 		try (InputStream in = classLoader.getResourceAsStream(fileName))
 		{
-			return parserSupplier.get().parseResource(type, in);
+			T r = parserSupplier.get().parseResource(type, in);
+
+			if (!(r instanceof NamingSystem))
+				r.setVersion(processPluginVersion);
+
+			return r;
 		}
 		catch (IOException e)
 		{

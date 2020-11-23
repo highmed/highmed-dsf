@@ -23,9 +23,25 @@ import ca.uhn.fhir.context.FhirContext;
 public interface ProcessPluginDefinition
 {
 	/**
-	 * @return jar name used by other processes when defining dependencies
+	 * @return process plugin name, same as jar name excluding suffix <code>-&lt;version&gt;.jar</code> used by other
+	 *         processes when defining dependencies, e.g. <code>foo-1.2.3</code> for a jar called
+	 *         <code>foo-1.2.3.jar</code> or <code>foo-1.2.3-SNAPSHOT.jar</code> with processPluginName <code>foo</code>
+	 *         and version <code>1.2.3</code>
 	 */
-	String getJarName();
+	String getName();
+
+	/**
+	 * @return version of the process plugin, processes and fhir resources, e.g. <code>1.2.3</code>
+	 */
+	String getVersion();
+
+	/**
+	 * @return <code>name-version</code>
+	 */
+	default String getNameAndVersion()
+	{
+		return getName() + "-" + getVersion();
+	}
 
 	/**
 	 * Return <code>Stream.of("foo.bpmn");</code> for a foo.bpmn file located in the root folder of the process plugin
@@ -56,9 +72,9 @@ public interface ProcessPluginDefinition
 
 	/**
 	 * @return dependencies to other processes by jar name (excluding '.jar'). The system will add ".jar" and
-	 *         "-SNAPSHOT.jar" while searching for jars
+	 *         "-SNAPSHOT.jar" while searching for jars, e.g. "bar-1.2.3"
 	 */
-	default List<String> getDependencyJarNames()
+	default List<String> getDependencyNamesAndVersions()
 	{
 		return Collections.emptyList();
 	}
