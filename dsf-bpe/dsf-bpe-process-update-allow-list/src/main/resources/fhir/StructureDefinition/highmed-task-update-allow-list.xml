@@ -6,11 +6,13 @@
     </tag>
   </meta>
   <url value="http://highmed.org/fhir/StructureDefinition/highmed-task-update-allow-list" />
-  <version value="0.3.0" />
+  <!-- version managed by bpe -->
+  <version value="bpe-managed" />
   <name value="TaskUpdateAllowList" />
   <!-- status managed by bpe -->
+  <status value="unknown" />
   <experimental value="false" />
-  <date value="2020-11-03" />
+  <date value="2020-11-23" />
   <fhirVersion value="4.0.1" />
   <kind value="resource" />
   <abstract value="false" />
@@ -20,7 +22,7 @@
   <differential>
     <element id="Task.instantiatesUri">
       <path value="Task.instantiatesUri" />
-      <fixedUri value="http://highmed.org/bpe/Process/updateAllowList/0.3.0" />
+      <fixedUri value="http://highmed.org/bpe/Process/updateAllowList/0.4.0" />
     </element>
     <element id="Task.input">
       <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">

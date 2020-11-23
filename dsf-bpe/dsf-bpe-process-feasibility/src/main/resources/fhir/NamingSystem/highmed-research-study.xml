@@ -7,8 +7,9 @@
 	</meta>
 	<name value="HiGHmed_ResearchStudy_Identifier"/>
 	<!-- status managed by bpe -->
+	<status value="unknown" />
 	<kind value="identifier"/>
-	<date value="2020-11-03"/>
+	<date value="2020-11-23"/>
 	<publisher value="HiGHmed"/>
 	<responsible value="HiGHmed"/>
 	<description

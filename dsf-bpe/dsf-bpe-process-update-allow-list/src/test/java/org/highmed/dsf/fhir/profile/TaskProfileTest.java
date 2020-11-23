@@ -29,10 +29,10 @@ public class TaskProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			Arrays.asList("highmed-task-base-0.3.0.xml", "highmed-task-update-allow-list-0.3.0.xml",
-					"highmed-task-download-allow-list-0.3.0.xml"),
-			Arrays.asList("authorization-role-0.3.0.xml", "bpmn-message-0.3.0.xml", "update-allow-list-0.3.0.xml"),
-			Arrays.asList("authorization-role-0.3.0.xml", "bpmn-message-0.3.0.xml", "update-allow-list-0.3.0.xml"));
+			Arrays.asList("highmed-task-base-0.4.0.xml", "highmed-task-update-allow-list.xml",
+					"highmed-task-download-allow-list.xml"),
+			Arrays.asList("authorization-role-0.4.0.xml", "bpmn-message-0.4.0.xml", "update-allow-list.xml"),
+			Arrays.asList("authorization-role-0.4.0.xml", "bpmn-message-0.4.0.xml", "update-allow-list.xml"));
 
 	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
@@ -68,7 +68,7 @@ public class TaskProfileTest
 	{
 		Task task = new Task();
 		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-update-allow-list");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/updateAllowList/0.3.0");
+		task.setInstantiatesUri("http://highmed.org/bpe/Process/updateAllowList/0.4.0");
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
@@ -99,7 +99,7 @@ public class TaskProfileTest
 	{
 		Task task = new Task();
 		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-update-allow-list");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/updateAllowList/0.3.0");
+		task.setInstantiatesUri("http://highmed.org/bpe/Process/updateAllowList/0.4.0");
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
@@ -130,7 +130,7 @@ public class TaskProfileTest
 	{
 		Task task = new Task();
 		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-download-allow-list");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/downloadAllowList/0.3.0");
+		task.setInstantiatesUri("http://highmed.org/bpe/Process/downloadAllowList/0.4.0");
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());

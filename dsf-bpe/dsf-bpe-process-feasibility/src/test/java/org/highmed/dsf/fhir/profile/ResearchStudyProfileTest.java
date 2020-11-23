@@ -25,10 +25,10 @@ public class ResearchStudyProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			Arrays.asList("highmed-extension-participating-medic-0.3.0.xml",
-					"highmed-extension-participating-ttp-0.3.0.xml", "highmed-research-study-feasibility-0.3.0.xml"),
-			Arrays.asList("authorization-role-0.3.0.xml", "organization-type-0.3.0.xml"),
-			Arrays.asList("authorization-role-0.3.0.xml", "organization-type-0.3.0.xml"));
+			Arrays.asList("highmed-extension-participating-medic.xml", "highmed-extension-participating-ttp.xml",
+					"highmed-research-study-feasibility.xml"),
+			Arrays.asList("authorization-role-0.4.0.xml", "organization-type-0.4.0.xml"),
+			Arrays.asList("authorization-role-0.4.0.xml", "organization-type-0.4.0.xml"));
 
 	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());

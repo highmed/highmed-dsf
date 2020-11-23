@@ -15,16 +15,24 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class ParentProcessPluginDefinition implements ProcessPluginDefinition
 {
+	public static final String VERSION = "0.4.0";
+
 	@Override
-	public String getJarName()
+	public String getVersion()
 	{
-		return "bpe/dsf-bpe-process-parent-0.4.0";
+		return VERSION;
+	}
+
+	@Override
+	public String getName()
+	{
+		return "dsf-bpe-process-parent";
 	}
 
 	@Override
 	public Stream<String> getBpmnFiles()
 	{
-		return Stream.of("parent.bpmn");
+		return Stream.of("bpe/parent.bpmn");
 	}
 
 	@Override
@@ -36,12 +44,12 @@ public class ParentProcessPluginDefinition implements ProcessPluginDefinition
 	@Override
 	public ResourceProvider getResourceProvider(FhirContext fhirContext, ClassLoader classLoader)
 	{
-		var sT = StructureDefinitionResource.file("fhir/StructureDefinition/highmed-task-parent-plugin-0.3.0.xml");
+		var sT = StructureDefinitionResource.file("fhir/StructureDefinition/highmed-task-parent-plugin.xml");
 
-		Map<String, List<AbstractResource>> resourcesByProcessKeyAndVersion = Map.of("parentPlugin/1.0.0",
+		Map<String, List<AbstractResource>> resourcesByProcessKeyAndVersion = Map.of("parentPlugin/" + VERSION,
 				Arrays.asList(sT));
 
-		return ResourceProvider.read(() -> fhirContext.newXmlParser().setStripVersionsFromReferences(false),
+		return ResourceProvider.read(VERSION, () -> fhirContext.newXmlParser().setStripVersionsFromReferences(false),
 				classLoader, resourcesByProcessKeyAndVersion);
 	}
 }

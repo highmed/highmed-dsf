@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1yb5vw3" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.5.0">
-  <bpmn:process id="updateAllowList" isExecutable="true" camunda:versionTag="0.3.0">
+  <bpmn:process id="updateAllowList" isExecutable="true" camunda:versionTag="0.4.0">
     <bpmn:sequenceFlow id="SequenceFlow_0bbhq2r" sourceRef="StartEvent_1" targetRef="updateAllowListTask" />
     <bpmn:endEvent id="EndEvent_0xd0x8k">
       <bpmn:incoming>SequenceFlow_0oyvmcd</bpmn:incoming>

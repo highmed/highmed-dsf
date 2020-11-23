@@ -18,12 +18,21 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class LocalServicesProcessPluginDefinition implements ProcessPluginDefinition
 {
-	private static final String DEP_FEASIBILITY = "dsf-bpe-process-feasibility-0.4.0";
+	public static final String VERSION = "0.4.0";
+
+	private static final String DEPENDENCY_FEASIBILITY_VERSION = "0.4.0";
+	private static final String DEPENDENCY_FEASIBILITY_NAME_AND_VERSION = "dsf-bpe-process-feasibility-0.4.0";
 
 	@Override
-	public String getJarName()
+	public String getName()
 	{
-		return "dsf-bpe-process-local-services-0.4.0";
+		return "dsf-bpe-process-local-services";
+	}
+
+	@Override
+	public String getVersion()
+	{
+		return VERSION;
 	}
 
 	@Override
@@ -39,33 +48,36 @@ public class LocalServicesProcessPluginDefinition implements ProcessPluginDefini
 	}
 
 	@Override
-	public List<String> getDependencyJarNames()
+	public List<String> getDependencyNamesAndVersions()
 	{
-		return Arrays.asList(DEP_FEASIBILITY);
+		return Arrays.asList(DEPENDENCY_FEASIBILITY_NAME_AND_VERSION);
 	}
 
 	@Override
 	public ResourceProvider getResourceProvider(FhirContext fhirContext, ClassLoader classLoader)
 	{
-		var aL = ActivityDefinitionResource.file("fhir/ActivityDefinition/localServicesIntegration-0.3.0.xml");
+		var aL = ActivityDefinitionResource.file("fhir/ActivityDefinition/localServicesIntegration.xml");
 		var sTL = StructureDefinitionResource
-				.file("fhir/StructureDefinition/highmed-task-local-services-integration-0.3.0.xml");
-		var sExtG = StructureDefinitionResource.dependency(DEP_FEASIBILITY,
-				"http://highmed.org/fhir/StructureDefinition/group-id", "0.3.0");
-		var sExtQ = StructureDefinitionResource.dependency(DEP_FEASIBILITY,
-				"http://highmed.org/fhir/StructureDefinition/query", "0.3.0");
+				.file("fhir/StructureDefinition/highmed-task-local-services-integration.xml");
+		var sExtG = StructureDefinitionResource.dependency(DEPENDENCY_FEASIBILITY_NAME_AND_VERSION,
+				"http://highmed.org/fhir/StructureDefinition/group-id", DEPENDENCY_FEASIBILITY_VERSION);
+		var sExtQ = StructureDefinitionResource.dependency(DEPENDENCY_FEASIBILITY_NAME_AND_VERSION,
+				"http://highmed.org/fhir/StructureDefinition/query", DEPENDENCY_FEASIBILITY_VERSION);
 
-		var vF = ValueSetResource.dependency(DEP_FEASIBILITY, "http://highmed.org/fhir/ValueSet/feasibility", "0.3.0");
-		var vQt = ValueSetResource.dependency(DEP_FEASIBILITY, "http://highmed.org/fhir/ValueSet/query-type", "0.3.0");
-		var cF = CodeSystemResource.dependency(DEP_FEASIBILITY, "http://highmed.org/fhir/CodeSystem/feasibility",
-				"0.3.0");
-		var cQt = CodeSystemResource.dependency(DEP_FEASIBILITY, "http://highmed.org/fhir/CodeSystem/query-type",
-				"0.3.0");
+		var vF = ValueSetResource.dependency(DEPENDENCY_FEASIBILITY_NAME_AND_VERSION,
+				"http://highmed.org/fhir/ValueSet/feasibility", DEPENDENCY_FEASIBILITY_VERSION);
+		var vQt = ValueSetResource.dependency(DEPENDENCY_FEASIBILITY_NAME_AND_VERSION,
+				"http://highmed.org/fhir/ValueSet/query-type", DEPENDENCY_FEASIBILITY_VERSION);
+		var cF = CodeSystemResource.dependency(DEPENDENCY_FEASIBILITY_NAME_AND_VERSION,
+				"http://highmed.org/fhir/CodeSystem/feasibility", DEPENDENCY_FEASIBILITY_VERSION);
+		var cQt = CodeSystemResource.dependency(DEPENDENCY_FEASIBILITY_NAME_AND_VERSION,
+				"http://highmed.org/fhir/CodeSystem/query-type", DEPENDENCY_FEASIBILITY_VERSION);
 
-		Map<String, List<AbstractResource>> resourcesByProcessKeyAndVersion = Map.of("localServicesIntegration/0.3.0",
-				Arrays.asList(aL, sTL, vF, cF, vQt, cQt, sExtG, sExtQ));
+		Map<String, List<AbstractResource>> resourcesByProcessKeyAndVersion = Map
+				.of("localServicesIntegration/" + VERSION, Arrays.asList(aL, sTL, vF, cF, vQt, cQt, sExtG, sExtQ));
 
-		return ResourceProvider.read(() -> fhirContext.newXmlParser().setStripVersionsFromReferences(false),
+		return ResourceProvider.read(VERSION,
+				() -> fhirContext.newXmlParser().setStripVersionsFromReferences(false),
 				classLoader, resourcesByProcessKeyAndVersion);
 	}
 }

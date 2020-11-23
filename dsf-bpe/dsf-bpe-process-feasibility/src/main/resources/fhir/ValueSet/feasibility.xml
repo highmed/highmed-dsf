@@ -6,12 +6,14 @@
 		</tag>		
 	</meta>
 	<url value="http://highmed.org/fhir/ValueSet/feasibility"/>
-	<version value="0.3.0"/>
+	<!-- version managed by bpe -->
+	<version value="bpe-managed" />
 	<name value="HiGHmed_Feasibility"/>
 	<title value="HiGHmed Feasibility"/>
 	<!-- status managed by bpe -->
+	<status value="unknown" />
 	<experimental value="false"/>
-	<date value="2020-11-03"/>
+	<date value="2020-11-23"/>
 	<publisher value="HiGHmed"/>
 	<description value="ValueSet with standard values for feasibility processes"/>
 	<immutable value="true"/>

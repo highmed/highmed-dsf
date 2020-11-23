@@ -27,13 +27,12 @@ public class TaskProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			Arrays.asList("highmed-task-base-0.3.0.xml", "highmed-group-0.3.0.xml",
-					"highmed-extension-group-id-0.3.0.xml", "highmed-extension-query-0.3.0.xml",
-					"highmed-task-local-services-integration-0.3.0.xml"),
-			Arrays.asList("authorization-role-0.3.0.xml", "bpmn-message-0.3.0.xml", "feasibility-0.3.0.xml",
-					"query-type-0.3.0.xml"),
-			Arrays.asList("authorization-role-0.3.0.xml", "bpmn-message-0.3.0.xml", "feasibility-0.3.0.xml",
-					"query-type-0.3.0.xml"));
+			Arrays.asList("highmed-task-base-0.4.0.xml", "highmed-group.xml", "highmed-extension-group-id.xml",
+					"highmed-extension-query.xml", "highmed-task-local-services-integration.xml"),
+			Arrays.asList("authorization-role-0.4.0.xml", "bpmn-message-0.4.0.xml", "feasibility.xml",
+					"query-type.xml"),
+			Arrays.asList("authorization-role-0.4.0.xml", "bpmn-message-0.4.0.xml", "feasibility.xml",
+					"query-type.xml"));
 
 	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
@@ -56,7 +55,7 @@ public class TaskProfileTest
 
 		task.getMeta()
 				.addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-local-services-integration");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/localServicesIntegration/0.3.0");
+		task.setInstantiatesUri("http://highmed.org/bpe/Process/localServicesIntegration/0.4.0");
 		task.setStatus(Task.TaskStatus.REQUESTED);
 		task.setIntent(Task.TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());

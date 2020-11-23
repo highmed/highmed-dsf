@@ -71,7 +71,7 @@ public class RequestLocalServicesIntegrationTestExampleStarter
 
 		task.getMeta()
 				.addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-local-services-integration");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/localServicesIntegration/0.3.0");
+		task.setInstantiatesUri("http://highmed.org/bpe/Process/localServicesIntegration/0.4.0");
 		task.setStatus(Task.TaskStatus.REQUESTED);
 		task.setIntent(Task.TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());

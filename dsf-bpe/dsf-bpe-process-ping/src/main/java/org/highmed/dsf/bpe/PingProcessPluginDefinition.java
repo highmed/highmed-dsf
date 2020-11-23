@@ -16,10 +16,18 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class PingProcessPluginDefinition implements ProcessPluginDefinition
 {
+	public static final String VERSION = "0.4.0";
+
 	@Override
-	public String getJarName()
+	public String getName()
 	{
-		return "dsf-bpe-process-ping-0.4.0";
+		return "dsf-bpe-process-ping";
+	}
+
+	@Override
+	public String getVersion()
+	{
+		return VERSION;
 	}
 
 	@Override
@@ -37,17 +45,17 @@ public class PingProcessPluginDefinition implements ProcessPluginDefinition
 	@Override
 	public ResourceProvider getResourceProvider(FhirContext fhirContext, ClassLoader classLoader)
 	{
-		var aPing = ActivityDefinitionResource.file("fhir/ActivityDefinition/ping-0.3.0.xml");
-		var aPong = ActivityDefinitionResource.file("fhir/ActivityDefinition/pong-0.3.0.xml");
-		var tPing = StructureDefinitionResource.file("fhir/StructureDefinition/highmed-task-pong-0.3.0.xml");
+		var aPing = ActivityDefinitionResource.file("fhir/ActivityDefinition/ping.xml");
+		var aPong = ActivityDefinitionResource.file("fhir/ActivityDefinition/pong.xml");
+		var tPing = StructureDefinitionResource.file("fhir/StructureDefinition/highmed-task-pong.xml");
 		var tStartPing = StructureDefinitionResource
-				.file("fhir/StructureDefinition/highmed-task-start-ping-process-0.3.0.xml");
-		var tPong = StructureDefinitionResource.file("fhir/StructureDefinition/highmed-task-ping-0.3.0.xml");
+				.file("fhir/StructureDefinition/highmed-task-start-ping-process.xml");
+		var tPong = StructureDefinitionResource.file("fhir/StructureDefinition/highmed-task-ping.xml");
 
-		Map<String, List<AbstractResource>> resourcesByProcessKeyAndVersion = Map.of("ping/0.3.0",
-				Arrays.asList(aPing, tPong, tStartPing), "pong/0.3.0", Arrays.asList(aPong, tPing));
+		Map<String, List<AbstractResource>> resourcesByProcessKeyAndVersion = Map.of("ping/" + VERSION,
+				Arrays.asList(aPing, tPong, tStartPing), "pong/" + VERSION, Arrays.asList(aPong, tPing));
 
-		return ResourceProvider.read(() -> fhirContext.newXmlParser().setStripVersionsFromReferences(false),
+		return ResourceProvider.read(VERSION, () -> fhirContext.newXmlParser().setStripVersionsFromReferences(false),
 				classLoader, resourcesByProcessKeyAndVersion);
 	}
 }

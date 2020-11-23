@@ -33,17 +33,14 @@ public class TaskProfileTest
 	private static final Logger logger = LoggerFactory.getLogger(TaskProfileTest.class);
 
 	@ClassRule
-	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			Arrays.asList("highmed-task-base-0.3.0.xml", "highmed-group-0.3.0.xml",
-					"highmed-extension-group-id-0.3.0.xml", "highmed-research-study-feasibility-0.3.0.xml",
-					"highmed-task-request-simple-feasibility-0.3.0.xml",
-					"highmed-task-execute-simple-feasibility-0.3.0.xml",
-					"highmed-task-single-medic-result-simple-feasibility-0.3.0.xml",
-					"highmed-task-compute-simple-feasibility-0.3.0.xml",
-					"highmed-task-multi-medic-result-simple-feasibility-0.3.0.xml",
-					"highmed-task-error-simple-feasibility-0.3.0.xml"),
-			Arrays.asList("authorization-role-0.3.0.xml", "bpmn-message-0.3.0.xml", "feasibility-0.3.0.xml"),
-			Arrays.asList("authorization-role-0.3.0.xml", "bpmn-message-0.3.0.xml", "feasibility-0.3.0.xml"));
+	public static final ValidationSupportRule validationRule = new ValidationSupportRule(Arrays.asList(
+			"highmed-task-base-0.4.0.xml", "highmed-group.xml", "highmed-extension-group-id.xml",
+			"highmed-research-study-feasibility.xml", "highmed-task-request-simple-feasibility.xml",
+			"highmed-task-execute-simple-feasibility.xml", "highmed-task-single-medic-result-simple-feasibility.xml",
+			"highmed-task-compute-simple-feasibility.xml", "highmed-task-multi-medic-result-simple-feasibility.xml",
+			"highmed-task-error-simple-feasibility.xml"),
+			Arrays.asList("authorization-role-0.4.0.xml", "bpmn-message-0.4.0.xml", "feasibility.xml"),
+			Arrays.asList("authorization-role-0.4.0.xml", "bpmn-message-0.4.0.xml", "feasibility.xml"));
 
 	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
@@ -56,9 +53,8 @@ public class TaskProfileTest
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
 
-		assertEquals(0, result.getMessages().stream()
-				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
-						.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
 	}
 
 	@Test
@@ -72,31 +68,30 @@ public class TaskProfileTest
 		TaskOutputComponent outParticipatingMedics1 = task.addOutput();
 		outParticipatingMedics1.setValue(new UnsignedIntType(5)).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("participating-medics");
-		outParticipatingMedics1
-				.addExtension("http://highmed.org/fhir/StructureDefinition/group-id", new Reference(groupId1));
+		outParticipatingMedics1.addExtension("http://highmed.org/fhir/StructureDefinition/group-id",
+				new Reference(groupId1));
 		TaskOutputComponent outMultiMedicResult1 = task.addOutput();
 		outMultiMedicResult1.setValue(new UnsignedIntType(25)).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("multi-medic-result");
-		outMultiMedicResult1
-				.addExtension("http://highmed.org/fhir/StructureDefinition/group-id", new Reference(groupId1));
+		outMultiMedicResult1.addExtension("http://highmed.org/fhir/StructureDefinition/group-id",
+				new Reference(groupId1));
 
 		TaskOutputComponent outParticipatingMedics2 = task.addOutput();
 		outParticipatingMedics2.setValue(new UnsignedIntType(5)).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("participating-medics");
-		outParticipatingMedics2
-				.addExtension("http://highmed.org/fhir/StructureDefinition/group-id", new Reference(groupId2));
+		outParticipatingMedics2.addExtension("http://highmed.org/fhir/StructureDefinition/group-id",
+				new Reference(groupId2));
 		TaskOutputComponent outMultiMedicResult2 = task.addOutput();
 		outMultiMedicResult2.setValue(new UnsignedIntType(25)).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("multi-medic-result");
-		outMultiMedicResult2
-				.addExtension("http://highmed.org/fhir/StructureDefinition/group-id", new Reference(groupId2));
+		outMultiMedicResult2.addExtension("http://highmed.org/fhir/StructureDefinition/group-id",
+				new Reference(groupId2));
 
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
 
-		assertEquals(0, result.getMessages().stream()
-				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
-						.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
 	}
 
 	private Task createValidTaskRequestSimpleFeasibility()
@@ -104,7 +99,7 @@ public class TaskProfileTest
 		Task task = new Task();
 		task.getMeta()
 				.addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-request-simple-feasibility");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/requestSimpleFeasibility/0.3.0");
+		task.setInstantiatesUri("http://highmed.org/bpe/Process/requestSimpleFeasibility/0.4.0");
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
@@ -133,9 +128,8 @@ public class TaskProfileTest
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
 
-		assertEquals(0, result.getMessages().stream()
-				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
-						.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
 	}
 
 	@Test
@@ -148,9 +142,8 @@ public class TaskProfileTest
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
 
-		assertEquals(0, result.getMessages().stream()
-				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
-						.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
 	}
 
 	private Task createValidTaskExecuteSimpleFeasibility()
@@ -158,7 +151,7 @@ public class TaskProfileTest
 		Task task = new Task();
 		task.getMeta()
 				.addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-execute-simple-feasibility");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/executeSimpleFeasibility/0.3.0");
+		task.setInstantiatesUri("http://highmed.org/bpe/Process/executeSimpleFeasibility/0.4.0");
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
@@ -192,9 +185,8 @@ public class TaskProfileTest
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
 
-		assertEquals(0, result.getMessages().stream()
-				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
-						.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
 	}
 
 	@Test
@@ -205,9 +197,8 @@ public class TaskProfileTest
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
 
-		assertEquals(0, result.getMessages().stream()
-				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
-						.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
 	}
 
 	private Task createValidTaskSingleMedicResultSimpleFeasibility()
@@ -215,7 +206,7 @@ public class TaskProfileTest
 		Task task = new Task();
 		task.getMeta().addProfile(
 				"http://highmed.org/fhir/StructureDefinition/highmed-task-single-medic-result-simple-feasibility");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/computeSimpleFeasibility/0.3.0");
+		task.setInstantiatesUri("http://highmed.org/bpe/Process/computeSimpleFeasibility/0.4.0");
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
@@ -244,13 +235,13 @@ public class TaskProfileTest
 		ParameterComponent inSingleMedicResult1 = task.addInput();
 		inSingleMedicResult1.setValue(new UnsignedIntType(5)).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("single-medic-result");
-		inSingleMedicResult1
-				.addExtension("http://highmed.org/fhir/StructureDefinition/group-id", new Reference(groupId1));
+		inSingleMedicResult1.addExtension("http://highmed.org/fhir/StructureDefinition/group-id",
+				new Reference(groupId1));
 		ParameterComponent inSingleMedicResult2 = task.addInput();
 		inSingleMedicResult2.setValue(new UnsignedIntType(10)).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("single-medic-result");
-		inSingleMedicResult2
-				.addExtension("http://highmed.org/fhir/StructureDefinition/group-id", new Reference(groupId2));
+		inSingleMedicResult2.addExtension("http://highmed.org/fhir/StructureDefinition/group-id",
+				new Reference(groupId2));
 
 		return task;
 	}
@@ -265,13 +256,13 @@ public class TaskProfileTest
 		ParameterComponent inSingleMedicResult1 = task.addInput();
 		inSingleMedicResult1.setValue(new Reference("Binary/" + UUID.randomUUID().toString())).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("single-medic-result-reference");
-		inSingleMedicResult1
-				.addExtension("http://highmed.org/fhir/StructureDefinition/group-id", new Reference(groupId1));
+		inSingleMedicResult1.addExtension("http://highmed.org/fhir/StructureDefinition/group-id",
+				new Reference(groupId1));
 		ParameterComponent inSingleMedicResult2 = task.addInput();
 		inSingleMedicResult2.setValue(new Reference("Binary/" + UUID.randomUUID().toString())).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("single-medic-result-reference");
-		inSingleMedicResult2
-				.addExtension("http://highmed.org/fhir/StructureDefinition/group-id", new Reference(groupId2));
+		inSingleMedicResult2.addExtension("http://highmed.org/fhir/StructureDefinition/group-id",
+				new Reference(groupId2));
 
 		return task;
 	}
@@ -284,9 +275,8 @@ public class TaskProfileTest
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
 
-		assertEquals(0, result.getMessages().stream()
-				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
-						.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
 	}
 
 	private Task createValidTaskComputeSimpleFeasibility()
@@ -294,7 +284,7 @@ public class TaskProfileTest
 		Task task = new Task();
 		task.getMeta()
 				.addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-compute-simple-feasibility");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/computeSimpleFeasibility/0.3.0");
+		task.setInstantiatesUri("http://highmed.org/bpe/Process/computeSimpleFeasibility/0.4.0");
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
@@ -327,9 +317,8 @@ public class TaskProfileTest
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
 
-		assertEquals(0, result.getMessages().stream()
-				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
-						.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
 	}
 
 	private Task createValidTaskMultiMedicResultSimpleFeasibility()
@@ -337,7 +326,7 @@ public class TaskProfileTest
 		Task task = new Task();
 		task.getMeta().addProfile(
 				"http://highmed.org/fhir/StructureDefinition/highmed-task-multi-medic-result-simple-feasibility");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/requestSimpleFeasibility/0.3.0");
+		task.setInstantiatesUri("http://highmed.org/bpe/Process/requestSimpleFeasibility/0.4.0");
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
@@ -357,24 +346,24 @@ public class TaskProfileTest
 		ParameterComponent inParticipatingMedics1 = task.addInput();
 		inParticipatingMedics1.setValue(new UnsignedIntType(5)).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("participating-medics");
-		inParticipatingMedics1
-				.addExtension("http://highmed.org/fhir/StructureDefinition/group-id", new Reference(groupId1));
+		inParticipatingMedics1.addExtension("http://highmed.org/fhir/StructureDefinition/group-id",
+				new Reference(groupId1));
 		ParameterComponent inMultiMedicResult1 = task.addInput();
 		inMultiMedicResult1.setValue(new UnsignedIntType(25)).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("multi-medic-result");
-		inMultiMedicResult1
-				.addExtension("http://highmed.org/fhir/StructureDefinition/group-id", new Reference(groupId1));
+		inMultiMedicResult1.addExtension("http://highmed.org/fhir/StructureDefinition/group-id",
+				new Reference(groupId1));
 
 		ParameterComponent inParticipatingMedics2 = task.addInput();
 		inParticipatingMedics2.setValue(new UnsignedIntType(5)).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("participating-medics");
-		inParticipatingMedics2
-				.addExtension("http://highmed.org/fhir/StructureDefinition/group-id", new Reference(groupId2));
+		inParticipatingMedics2.addExtension("http://highmed.org/fhir/StructureDefinition/group-id",
+				new Reference(groupId2));
 		ParameterComponent inMultiMedicResult2 = task.addInput();
 		inMultiMedicResult2.setValue(new UnsignedIntType(25)).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("multi-medic-result");
-		inMultiMedicResult2
-				.addExtension("http://highmed.org/fhir/StructureDefinition/group-id", new Reference(groupId2));
+		inMultiMedicResult2.addExtension("http://highmed.org/fhir/StructureDefinition/group-id",
+				new Reference(groupId2));
 
 		return task;
 	}
@@ -387,16 +376,15 @@ public class TaskProfileTest
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
 
-		assertEquals(0, result.getMessages().stream()
-				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
-						.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
 	}
 
 	private Task createValidTaskErrorSimpleFeasibility()
 	{
 		Task task = new Task();
 		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-error-simple-feasibility");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/requestSimpleFeasibility/0.3.0");
+		task.setInstantiatesUri("http://highmed.org/bpe/Process/requestSimpleFeasibility/0.4.0");
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());

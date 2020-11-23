@@ -18,10 +18,18 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class UpdateResourcesPluginDefinition implements ProcessPluginDefinition
 {
+	public static final String VERSION = "0.4.0";
+
 	@Override
-	public String getJarName()
+	public String getName()
 	{
-		return "dsf-bpe-process-update-resources-0.4.0";
+		return "dsf-bpe-process-update-resources";
+	}
+
+	@Override
+	public String getVersion()
+	{
+		return VERSION;
 	}
 
 	@Override
@@ -39,19 +47,20 @@ public class UpdateResourcesPluginDefinition implements ProcessPluginDefinition
 	@Override
 	public ResourceProvider getResourceProvider(FhirContext fhirContext, ClassLoader classLoader)
 	{
-		var aExec = ActivityDefinitionResource.file("fhir/ActivityDefinition/executeUpdateResources-0.3.0.xml");
-		var aReq = ActivityDefinitionResource.file("fhir/ActivityDefinition/requestUpdateResources-0.3.0.xml");
-		var c = CodeSystemResource.file("fhir/CodeSystem/update-resources-0.3.0.xml");
+		var aExec = ActivityDefinitionResource.file("fhir/ActivityDefinition/executeUpdateResources.xml");
+		var aReq = ActivityDefinitionResource.file("fhir/ActivityDefinition/requestUpdateResources.xml");
+		var c = CodeSystemResource.file("fhir/CodeSystem/update-resources.xml");
 		var sExec = StructureDefinitionResource
-				.file("fhir/StructureDefinition/highmed-task-execute-update-resources-0.3.0.xml");
+				.file("fhir/StructureDefinition/highmed-task-execute-update-resources.xml");
 		var sReq = StructureDefinitionResource
-				.file("fhir/StructureDefinition/highmed-task-request-update-resources-0.3.0.xml");
-		var v = ValueSetResource.file("fhir/ValueSet/update-resources-0.3.0.xml");
+				.file("fhir/StructureDefinition/highmed-task-request-update-resources.xml");
+		var v = ValueSetResource.file("fhir/ValueSet/update-resources.xml");
 
-		Map<String, List<AbstractResource>> resourcesByProcessKeyAndVersion = Map.of("executeUpdateResources/0.3.0",
-				Arrays.asList(aExec, c, sExec, v), "requestUpdateResources/0.3.0", Arrays.asList(aReq, c, sReq, v));
+		Map<String, List<AbstractResource>> resourcesByProcessKeyAndVersion = Map.of(
+				"executeUpdateResources/" + VERSION, Arrays.asList(aExec, c, sExec, v),
+				"requestUpdateResources/" + VERSION, Arrays.asList(aReq, c, sReq, v));
 
-		return ResourceProvider.read(() -> fhirContext.newXmlParser().setStripVersionsFromReferences(false),
+		return ResourceProvider.read(VERSION, () -> fhirContext.newXmlParser().setStripVersionsFromReferences(false),
 				classLoader, resourcesByProcessKeyAndVersion);
 	}
 }

@@ -27,10 +27,10 @@ public class TaskProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			Arrays.asList("highmed-task-base-0.3.0.xml", "highmed-task-start-ping-process-0.3.0.xml",
-					"highmed-task-ping-0.3.0.xml", "highmed-task-pong-0.3.0.xml"),
-			Arrays.asList("authorization-role-0.3.0.xml", "bpmn-message-0.3.0.xml"),
-			Arrays.asList("authorization-role-0.3.0.xml", "bpmn-message-0.3.0.xml"));
+			Arrays.asList("highmed-task-base-0.4.0.xml", "highmed-task-start-ping-process.xml", "highmed-task-ping.xml",
+					"highmed-task-pong.xml"),
+			Arrays.asList("authorization-role-0.4.0.xml", "bpmn-message-0.4.0.xml"),
+			Arrays.asList("authorization-role-0.4.0.xml", "bpmn-message-0.4.0.xml"));
 
 	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
@@ -51,7 +51,7 @@ public class TaskProfileTest
 	public void testTaskStartPingProcessProfileNotValid1() throws Exception
 	{
 		Task task = createValidTaskStartPingProcess();
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.1.0");
+		task.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.1.0"); // not valid
 
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
@@ -90,7 +90,7 @@ public class TaskProfileTest
 	{
 		Task task = new Task();
 		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-ping-process");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.3.0");
+		task.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.4.0");
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
@@ -121,7 +121,7 @@ public class TaskProfileTest
 	{
 		Task task = new Task();
 		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-ping");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/pong/0.3.0");
+		task.setInstantiatesUri("http://highmed.org/bpe/Process/pong/0.4.0");
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
@@ -156,7 +156,7 @@ public class TaskProfileTest
 	{
 		Task task = new Task();
 		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-pong");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.3.0");
+		task.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.4.0");
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());

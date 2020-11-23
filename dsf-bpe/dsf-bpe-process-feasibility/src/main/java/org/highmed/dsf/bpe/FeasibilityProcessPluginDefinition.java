@@ -20,12 +20,20 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class FeasibilityProcessPluginDefinition implements ProcessPluginDefinition
 {
+	public static final String VERSION = "0.4.0";
+
 	@Override
-	public String getJarName()
+	public String getName()
 	{
-		return "dsf-bpe-process-feasibility-0.4.0";
+		return "dsf-bpe-process-feasibility";
 	}
-	
+
+	@Override
+	public String getVersion()
+	{
+		return VERSION;
+	}
+
 	@Override
 	public Stream<String> getBpmnFiles()
 	{
@@ -42,47 +50,48 @@ public class FeasibilityProcessPluginDefinition implements ProcessPluginDefiniti
 	@Override
 	public ResourceProvider getResourceProvider(FhirContext fhirContext, ClassLoader classLoader)
 	{
-		var aCom = ActivityDefinitionResource.file("fhir/ActivityDefinition/computeSimpleFeasibility-0.3.0.xml");
-		var aExe = ActivityDefinitionResource.file("fhir/ActivityDefinition/executeSimpleFeasibility-0.3.0.xml");
-		var aReq = ActivityDefinitionResource.file("fhir/ActivityDefinition/requestSimpleFeasibility-0.3.0.xml");
+		var aCom = ActivityDefinitionResource.file("fhir/ActivityDefinition/computeSimpleFeasibility.xml");
+		var aExe = ActivityDefinitionResource.file("fhir/ActivityDefinition/executeSimpleFeasibility.xml");
+		var aReq = ActivityDefinitionResource.file("fhir/ActivityDefinition/requestSimpleFeasibility.xml");
 
-		var cF = CodeSystemResource.file("fhir/CodeSystem/feasibility-0.3.0.xml");
-		var cQT = CodeSystemResource.file("fhir/CodeSystem/query-type-0.3.0.xml");
+		var cF = CodeSystemResource.file("fhir/CodeSystem/feasibility.xml");
+		var cQT = CodeSystemResource.file("fhir/CodeSystem/query-type.xml");
 
 		var n = NamingSystemResource.file("fhir/NamingSystem/highmed-research-study.xml");
 
-		var sExtG = StructureDefinitionResource.file("fhir/StructureDefinition/highmed-extension-group-id-0.3.0.xml");
+		var sExtG = StructureDefinitionResource.file("fhir/StructureDefinition/highmed-extension-group-id.xml");
 		var sExtPartMeDic = StructureDefinitionResource
-				.file("fhir/StructureDefinition/highmed-extension-participating-medic-0.3.0.xml");
+				.file("fhir/StructureDefinition/highmed-extension-participating-medic.xml");
 		var sExtPartTtp = StructureDefinitionResource
-				.file("fhir/StructureDefinition/highmed-extension-participating-ttp-0.3.0.xml");
-		var sExtQ = StructureDefinitionResource.file("fhir/StructureDefinition/highmed-extension-query-0.3.0.xml");
-		var sG = StructureDefinitionResource.file("fhir/StructureDefinition/highmed-group-0.3.0.xml");
-		var sR = StructureDefinitionResource
-				.file("fhir/StructureDefinition/highmed-research-study-feasibility-0.3.0.xml");
+				.file("fhir/StructureDefinition/highmed-extension-participating-ttp.xml");
+		var sExtQ = StructureDefinitionResource.file("fhir/StructureDefinition/highmed-extension-query.xml");
+		var sG = StructureDefinitionResource.file("fhir/StructureDefinition/highmed-group.xml");
+		var sR = StructureDefinitionResource.file("fhir/StructureDefinition/highmed-research-study-feasibility.xml");
 		var sTCom = StructureDefinitionResource
-				.file("fhir/StructureDefinition/highmed-task-compute-simple-feasibility-0.3.0.xml");
+				.file("fhir/StructureDefinition/highmed-task-compute-simple-feasibility.xml");
 		var sTErr = StructureDefinitionResource
-				.file("fhir/StructureDefinition/highmed-task-error-simple-feasibility-0.3.0.xml");
+				.file("fhir/StructureDefinition/highmed-task-error-simple-feasibility.xml");
 		var sTExe = StructureDefinitionResource
-				.file("fhir/StructureDefinition/highmed-task-execute-simple-feasibility-0.3.0.xml");
+				.file("fhir/StructureDefinition/highmed-task-execute-simple-feasibility.xml");
 		var sTResM = StructureDefinitionResource
-				.file("fhir/StructureDefinition/highmed-task-multi-medic-result-simple-feasibility-0.3.0.xml");
+				.file("fhir/StructureDefinition/highmed-task-multi-medic-result-simple-feasibility.xml");
 		var sTReq = StructureDefinitionResource
-				.file("fhir/StructureDefinition/highmed-task-request-simple-feasibility-0.3.0.xml");
+				.file("fhir/StructureDefinition/highmed-task-request-simple-feasibility.xml");
 		var sTResS = StructureDefinitionResource
-				.file("fhir/StructureDefinition/highmed-task-single-medic-result-simple-feasibility-0.3.0.xml");
+				.file("fhir/StructureDefinition/highmed-task-single-medic-result-simple-feasibility.xml");
 
-		var vF = ValueSetResource.file("fhir/ValueSet/feasibility-0.3.0.xml");
-		var vQT = ValueSetResource.file("fhir/ValueSet/query-type-0.3.0.xml");
+		var vF = ValueSetResource.file("fhir/ValueSet/feasibility.xml");
+		var vQT = ValueSetResource.file("fhir/ValueSet/query-type.xml");
 
-		Map<String, List<AbstractResource>> resourcesByProcessKeyAndVersion = Map.of("computeSimpleFeasibility/0.3.0",
-				Arrays.asList(aCom, sTCom, vF, cF, sTResS, sExtG, sG), "executeSimpleFeasibility/0.3.0",
+		Map<String, List<AbstractResource>> resourcesByProcessKeyAndVersion = Map.of(
+				"computeSimpleFeasibility/" + VERSION, Arrays.asList(aCom, sTCom, vF, cF, sTResS, sExtG, sG),
+				"executeSimpleFeasibility/" + VERSION,
 				Arrays.asList(aExe, sTExe, vF, cF, sR, sExtPartTtp, sExtPartMeDic, n, sG, sExtQ, vQT, cQT),
-				"requestSimpleFeasibility/0.3.0", Arrays.asList(aReq, sTReq, vF, cF, sR, sExtPartTtp, sExtPartMeDic, n,
-						sG, sExtQ, vQT, cQT, sTResM, sExtG, sTErr));
+				"requestSimpleFeasibility/" + VERSION, Arrays.asList(aReq, sTReq, vF, cF, sR, sExtPartTtp,
+						sExtPartMeDic, n, sG, sExtQ, vQT, cQT, sTResM, sExtG, sTErr));
 
-		return ResourceProvider.read(() -> fhirContext.newXmlParser().setStripVersionsFromReferences(false),
+		return ResourceProvider.read(VERSION,
+				() -> fhirContext.newXmlParser().setStripVersionsFromReferences(false),
 				classLoader, resourcesByProcessKeyAndVersion);
 	}
 }

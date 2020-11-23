@@ -18,10 +18,18 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class UpdateAllowListPluginDefinition implements ProcessPluginDefinition
 {
+	public static final String VERSION = "0.4.0";
+
 	@Override
-	public String getJarName()
+	public String getName()
 	{
-		return "dsf-bpe-process-update-allow-list-0.4.0";
+		return "dsf-bpe-process-update-allow-list";
+	}
+
+	@Override
+	public String getVersion()
+	{
+		return VERSION;
 	}
 
 	@Override
@@ -39,18 +47,17 @@ public class UpdateAllowListPluginDefinition implements ProcessPluginDefinition
 	@Override
 	public ResourceProvider getResourceProvider(FhirContext fhirContext, ClassLoader classLoader)
 	{
-		var aDown = ActivityDefinitionResource.file("fhir/ActivityDefinition/downloadAllowList-0.3.0.xml");
-		var aUp = ActivityDefinitionResource.file("fhir/ActivityDefinition/updateAllowList-0.3.0.xml");
-		var c = CodeSystemResource.file("fhir/CodeSystem/update-allow-list-0.3.0.xml");
-		var sDown = StructureDefinitionResource
-				.file("fhir/StructureDefinition/highmed-task-download-allow-list-0.3.0.xml");
-		var sUp = StructureDefinitionResource.file("fhir/StructureDefinition/highmed-task-update-allow-list-0.3.0.xml");
-		var v = ValueSetResource.file("fhir/ValueSet/update-allow-list-0.3.0.xml");
+		var aDown = ActivityDefinitionResource.file("fhir/ActivityDefinition/downloadAllowList.xml");
+		var aUp = ActivityDefinitionResource.file("fhir/ActivityDefinition/updateAllowList.xml");
+		var c = CodeSystemResource.file("fhir/CodeSystem/update-allow-list.xml");
+		var sDown = StructureDefinitionResource.file("fhir/StructureDefinition/highmed-task-download-allow-list.xml");
+		var sUp = StructureDefinitionResource.file("fhir/StructureDefinition/highmed-task-update-allow-list.xml");
+		var v = ValueSetResource.file("fhir/ValueSet/update-allow-list.xml");
 
-		Map<String, List<AbstractResource>> resourcesByProcessKeyAndVersion = Map.of("downloadAllowList/0.3.0",
-				Arrays.asList(aDown, c, sDown, v), "updateAllowList/0.3.0", Arrays.asList(aUp, c, sUp, v));
+		Map<String, List<AbstractResource>> resourcesByProcessKeyAndVersion = Map.of("downloadAllowList/" + VERSION,
+				Arrays.asList(aDown, c, sDown, v), "updateAllowList/" + VERSION, Arrays.asList(aUp, c, sUp, v));
 
-		return ResourceProvider.read(() -> fhirContext.newXmlParser().setStripVersionsFromReferences(false),
+		return ResourceProvider.read(VERSION, () -> fhirContext.newXmlParser().setStripVersionsFromReferences(false),
 				classLoader, resourcesByProcessKeyAndVersion);
 	}
 }

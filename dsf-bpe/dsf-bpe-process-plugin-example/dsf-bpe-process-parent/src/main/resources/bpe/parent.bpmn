@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_1ij9ts4" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="2.2.4">
-  <bpmn:process id="parentPlugin" isExecutable="true" camunda:versionTag="1.0.0">
+  <bpmn:process id="parentPlugin" isExecutable="true" camunda:versionTag="0.4.0">
     <bpmn:sequenceFlow id="SequenceFlow_1ogejv7" sourceRef="StartEvent" targetRef="beforePlugin" />
     <bpmn:endEvent id="EndEvent" name="success">
       <bpmn:incoming>SequenceFlow_1uvl6af</bpmn:incoming>
@@ -20,7 +20,7 @@
       <bpmn:outgoing>SequenceFlow_1uvl6af</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="SequenceFlow_00k7wb9" sourceRef="executeSubprocess" targetRef="afterPlugin" />
-    <bpmn:callActivity id="executeSubprocess" name="execute subprocess" calledElement="childPlugin" camunda:calledElementBinding="versionTag" camunda:calledElementVersionTag="1.0.0">
+    <bpmn:callActivity id="executeSubprocess" name="execute subprocess" calledElement="childPlugin" camunda:calledElementBinding="versionTag" camunda:calledElementVersionTag="0.4.0">
       <bpmn:extensionElements>
         <camunda:in variables="all" />
         <camunda:out variables="all" />

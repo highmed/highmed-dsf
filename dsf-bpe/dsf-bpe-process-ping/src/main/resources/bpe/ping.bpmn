@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_0azvmx1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.7.1">
-  <bpmn:process id="ping" isExecutable="true" camunda:versionTag="0.3.0">
+  <bpmn:process id="ping" isExecutable="true" camunda:versionTag="0.4.0">
     <bpmn:sequenceFlow id="SequenceFlow_0k1j79c" sourceRef="StartEvent_1" targetRef="selectTargets" />
     <bpmn:sequenceFlow id="SequenceFlow_05ia6lz" sourceRef="selectTargets" targetRef="sendPing" />
     <bpmn:serviceTask id="selectTargets" name="selectTargets" camunda:class="org.highmed.dsf.bpe.service.SelectPingTargets">
@@ -11,7 +11,7 @@
       <bpmn:extensionElements>
         <camunda:inputOutput>
           <camunda:inputParameter name="processDefinitionKey">pong</camunda:inputParameter>
-          <camunda:inputParameter name="versionTag">0.3.0</camunda:inputParameter>
+          <camunda:inputParameter name="versionTag">0.4.0</camunda:inputParameter>
           <camunda:inputParameter name="messageName">pingMessage</camunda:inputParameter>
           <camunda:inputParameter name="profile">http://highmed.org/fhir/StructureDefinition/highmed-task-ping</camunda:inputParameter>
         </camunda:inputOutput>

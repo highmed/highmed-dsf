@@ -38,10 +38,10 @@ public class TaskProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			Arrays.asList("highmed-task-base-0.3.0.xml", "highmed-task-request-update-resources-0.3.0.xml",
-					"highmed-task-execute-update-resources-0.3.0.xml"),
-			Arrays.asList("authorization-role-0.3.0.xml", "bpmn-message-0.3.0.xml", "update-resources-0.3.0.xml"),
-			Arrays.asList("authorization-role-0.3.0.xml", "bpmn-message-0.3.0.xml", "update-resources-0.3.0.xml"));
+			Arrays.asList("highmed-task-base-0.4.0.xml", "highmed-task-request-update-resources.xml",
+					"highmed-task-execute-update-resources.xml"),
+			Arrays.asList("authorization-role-0.4.0.xml", "bpmn-message-0.4.0.xml", "update-resources.xml"),
+			Arrays.asList("authorization-role-0.4.0.xml", "bpmn-message-0.4.0.xml", "update-resources.xml"));
 
 	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
@@ -51,9 +51,9 @@ public class TaskProfileTest
 	{
 		var reader = new StructureDefinitionReader(validationRule.getFhirContext());
 
-		StructureDefinition base = reader.readXml("/fhir/StructureDefinition/highmed-task-base-0.3.0.xml");
+		StructureDefinition base = reader.readXml("/fhir/StructureDefinition/highmed-task-base-0.4.0.xml");
 		StructureDefinition differential = reader
-				.readXml("/fhir/StructureDefinition/highmed-task-execute-update-resources-0.3.0.xml");
+				.readXml("/fhir/StructureDefinition/highmed-task-execute-update-resources.xml");
 
 		var validationSupport = new ValidationSupportChain(
 				new InMemoryTerminologyServerValidationSupport(validationRule.getFhirContext()),
@@ -82,7 +82,7 @@ public class TaskProfileTest
 	{
 		Task task = new Task();
 		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-request-update-resources");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/requestUpdateResources/0.3.0");
+		task.setInstantiatesUri("http://highmed.org/bpe/Process/requestUpdateResources/0.4.0");
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
@@ -118,7 +118,7 @@ public class TaskProfileTest
 	{
 		Task task = new Task();
 		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-execute-update-resources");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/executeUpdateResources/0.3.0");
+		task.setInstantiatesUri("http://highmed.org/bpe/Process/executeUpdateResources/0.4.0");
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
