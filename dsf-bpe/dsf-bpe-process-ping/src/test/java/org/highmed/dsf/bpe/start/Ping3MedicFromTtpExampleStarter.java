@@ -35,7 +35,7 @@ public class Ping3MedicFromTtpExampleStarter
 
 		FhirContext context = FhirContext.forR4();
 		ReferenceCleaner referenceCleaner = new ReferenceCleanerImpl(new ReferenceExtractorImpl());
-		FhirWebserviceClient client = new FhirWebserviceClientJersey("https://localhost:8001/fhir/", trustStore, keyStore,
+		FhirWebserviceClient client = new FhirWebserviceClientJersey("https://ttp/fhir/", trustStore, keyStore,
 				keyStorePassword, null, null, null, 0, 0, null, context, referenceCleaner);
 
 		Task task = new Task();
@@ -45,9 +45,9 @@ public class Ping3MedicFromTtpExampleStarter
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
 		task.getRequester().setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_Organization");
+				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_TTP");
 		task.getRestriction().addRecipient().setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_Organization");
+				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_TTP");
 
 		task.addInput().setValue(new StringType("startPingProcessMessage")).getType().addCoding()
 				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("message-name");
