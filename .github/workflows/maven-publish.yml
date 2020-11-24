@@ -6,14 +6,16 @@ name: Java CI Publish with Maven
 on:
   pull_request:
     types: [closed]
-    branches: [master, develop]
+    branches: [develop]
+  release:
+    types: [published]
 
 jobs:
   publish:
 
-    # Only run if pull requests are merged,
+    # Only run if releases are published or pull requests are merged,
     # omit running if pull requests are closed without merging
-    if: github.event.pull_request.merged
+    if: github.event.pull_request.merged || github.event.action == 'published'
 
     runs-on: ubuntu-latest
 
