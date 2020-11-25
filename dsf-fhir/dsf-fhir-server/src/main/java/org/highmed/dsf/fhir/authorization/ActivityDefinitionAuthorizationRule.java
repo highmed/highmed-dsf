@@ -3,9 +3,9 @@ package org.highmed.dsf.fhir.authorization;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.highmed.dsf.fhir.authentication.OrganizationProvider;
@@ -14,6 +14,7 @@ import org.highmed.dsf.fhir.dao.ActivityDefinitionDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.ActivityDefinition;
+import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,11 +22,6 @@ public class ActivityDefinitionAuthorizationRule
 		extends AbstractAuthorizationRule<ActivityDefinition, ActivityDefinitionDao>
 {
 	private static final Logger logger = LoggerFactory.getLogger(ActivityDefinitionAuthorizationRule.class);
-
-	private static final String VERSION_PATTERN_STRING = "\\d+\\.\\d+\\.\\d+";
-	private static final Pattern VERSION_PATTERN = Pattern.compile(VERSION_PATTERN_STRING);
-	private static final String URL_PATTERN_STRING = "http://highmed.org/bpe/Process/[-\\w]+";
-	private static final Pattern URL_PATTERN = Pattern.compile(URL_PATTERN_STRING);
 
 	public ActivityDefinitionAuthorizationRule(DaoProvider daoProvider, String serverBase,
 			ReferenceResolver referenceResolver, OrganizationProvider organizationProvider)
@@ -51,7 +47,7 @@ public class ActivityDefinitionAuthorizationRule
 				else
 				{
 					logger.warn(
-							"Create of ActivityDefinition unauthorized, ActivityDefinition with version and url already exists");
+							"Create of ActivityDefinition unauthorized, ActivityDefinition with url and version already exists");
 					return Optional.empty();
 				}
 			}
@@ -72,37 +68,35 @@ public class ActivityDefinitionAuthorizationRule
 	{
 		List<String> errors = new ArrayList<String>();
 
-		if (newResource.hasUrl())
-		{
-			if (!URL_PATTERN.matcher(newResource.getUrl()).matches())
-			{
-				errors.add("activitydefinition.url not matching " + URL_PATTERN_STRING + " pattern");
-			}
-		}
-		else
-		{
-			errors.add("activitydefinition.url missing");
-		}
-
-		if (newResource.hasVersion())
-		{
-			if (!VERSION_PATTERN.matcher(newResource.getVersion()).matches())
-			{
-				errors.add("activitydefinition.version not matching " + VERSION_PATTERN_STRING + " pattern");
-			}
-		}
-		else
-		{
-			errors.add("activitydefinition.version missing");
-		}
-
 		ActivityDefinitionProcessAuthorizationExtensions extensions = new ActivityDefinitionProcessAuthorizationExtensions(
 				newResource);
 		if (!extensions.isValid())
 		{
-			errors.add("activitydefinition.extension with url "
+			errors.add("ActivityDefinition.extension with url "
 					+ ActivityDefinitionProcessAuthorizationExtensions.PROCESS_AUTHORIZATION_EXTENSION_URL
 					+ " not valid or missing, at least one expected");
+		}
+
+		if (newResource.hasStatus())
+		{
+			if (!EnumSet.of(PublicationStatus.DRAFT, PublicationStatus.ACTIVE, PublicationStatus.RETIRED)
+					.contains(newResource.getStatus()))
+			{
+				errors.add("ActivityDefinition.status not one of DRAFT, ACTIVE or RETIRED");
+			}
+		}
+		else
+		{
+			errors.add("ActivityDefinition.status not defined");
+		}
+
+		if (!newResource.hasUrl())
+		{
+			errors.add("ActivityDefinition.url not defined");
+		}
+		if (!newResource.hasVersion())
+		{
+			errors.add("ActivityDefinition.version not defined");
 		}
 
 		if (!hasLocalOrRemoteAuthorizationRole(newResource))
@@ -126,9 +120,7 @@ public class ActivityDefinitionAuthorizationRule
 		}
 		catch (SQLException e)
 		{
-			logger.warn(
-					"Create of ActivityDefinition unauthorized, error while checking for existing ActivityDefinition with version and url",
-					e);
+			logger.warn("Error while searching for ActivityDefinition", e);
 			return false;
 		}
 	}
@@ -173,19 +165,13 @@ public class ActivityDefinitionAuthorizationRule
 							"Update of ActivityDefinition authorized for local user '{}', url and version same as existing ActivityDefinition",
 							user.getName());
 					return Optional.of("local user; url and version same as existing ActivityDefinition");
-
-				}
-				else if (!resourceExists(connection, newResource))
-				{
-					logger.info(
-							"Update of ActivityDefinition authorized for local user '{}', other ActivityDefinition with url and version does not exist",
-							user.getName());
-					return Optional.of("local user; other ActivityDefinition with url and version does not exist yet");
 				}
 				else
 				{
 					logger.warn(
-							"Update of ActivityDefinition unauthorized, other ActivityDefinition with url and version already exists");
+							"Update of ActivityDefinition unauthorized, url or version changed ({} -> {}, {} -> {})",
+							oldResource.getUrl(), newResource.getUrl(), oldResource.getVersion(),
+							newResource.getVersion());
 					return Optional.empty();
 				}
 			}

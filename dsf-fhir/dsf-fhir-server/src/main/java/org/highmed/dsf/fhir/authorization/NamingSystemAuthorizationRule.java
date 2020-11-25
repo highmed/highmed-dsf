@@ -2,13 +2,18 @@ package org.highmed.dsf.fhir.authorization;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.highmed.dsf.fhir.authentication.OrganizationProvider;
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.NamingSystemDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
+import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.NamingSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,37 +33,25 @@ public class NamingSystemAuthorizationRule extends AbstractAuthorizationRule<Nam
 	{
 		if (isLocalUser(user))
 		{
-			// TODO move check for name and authorization tag to validation layer
-			if (newResource.hasName() && hasLocalOrRemoteAuthorizationRole(newResource))
+			Optional<String> errors = newResourceOk(newResource);
+			if (errors.isEmpty())
 			{
-				try
+				if (!resourceExists(connection, newResource))
 				{
-					Optional<NamingSystem> existing = getDao().readByNameWithTransaction(connection,
-							newResource.getName());
-					if (existing.isEmpty())
-					{
-						logger.info(
-								"Create of NamingSystem authorized for local user '{}', NamingSystem with name does not exist",
-								user.getName());
-						return Optional.of("local user, NamingSystem with name does not exist yet");
-					}
-					else
-					{
-						logger.warn("Create of NamingSystem unauthorized, NamingSystem with name already exists");
-						return Optional.empty();
-					}
+					logger.info(
+							"Create of NamingSystem authorized for local user '{}', NamingSystem with name does not exist",
+							user.getName());
+					return Optional.of("local user, NamingSystem with name does not exist yet");
 				}
-				catch (SQLException e)
+				else
 				{
-					logger.warn(
-							"Create of NamingSystem unauthorized, error while checking for existing NamingSystem with name",
-							e);
+					logger.warn("Create of NamingSystem unauthorized, NamingSystem with name already exists");
 					return Optional.empty();
 				}
 			}
 			else
 			{
-				logger.warn("Create of NamingSystem unauthorized, missing name or authorization tag");
+				logger.warn("Create of NamingSystem unauthorized, " + errors.get());
 				return Optional.empty();
 			}
 		}
@@ -66,6 +59,52 @@ public class NamingSystemAuthorizationRule extends AbstractAuthorizationRule<Nam
 		{
 			logger.warn("Create of NamingSystem unauthorized, not a local user");
 			return Optional.empty();
+		}
+	}
+
+	private Optional<String> newResourceOk(NamingSystem newResource)
+	{
+		List<String> errors = new ArrayList<String>();
+
+		if (newResource.hasStatus())
+		{
+			if (!EnumSet.of(PublicationStatus.DRAFT, PublicationStatus.ACTIVE, PublicationStatus.RETIRED)
+					.contains(newResource.getStatus()))
+			{
+				errors.add("NamingSystem.status not one of DRAFT, ACTIVE or RETIRED");
+			}
+		}
+		else
+		{
+			errors.add("NamingSystem.status not defined");
+		}
+
+		if (!newResource.hasName())
+		{
+			errors.add("NamingSystem.name not defined");
+		}
+
+		if (!hasLocalOrRemoteAuthorizationRole(newResource))
+		{
+			errors.add("missing authorization tag");
+		}
+
+		if (errors.isEmpty())
+			return Optional.empty();
+		else
+			return Optional.of(errors.stream().collect(Collectors.joining(", ")));
+	}
+
+	private boolean resourceExists(Connection connection, NamingSystem newResource)
+	{
+		try
+		{
+			return getDao().readByNameWithTransaction(connection, newResource.getName()).isPresent();
+		}
+		catch (SQLException e)
+		{
+			logger.warn("Error while searching for NamingSystem", e);
+			return false;
 		}
 	}
 
@@ -99,24 +138,26 @@ public class NamingSystemAuthorizationRule extends AbstractAuthorizationRule<Nam
 	{
 		if (isLocalUser(user))
 		{
-			// TODO move check for name and authorization tag to validation layer
-			if (newResource.hasName() && hasLocalOrRemoteAuthorizationRole(newResource))
+			Optional<String> errors = newResourceOk(newResource);
+			if (errors.isEmpty())
 			{
-				if (oldResource.getName().equals(newResource.getName()))
+				if (isSame(oldResource, newResource))
 				{
-					logger.info("Update of NamingSystem authorized for local user '{}', NamingSystem with name exist",
+					logger.info(
+							"Update of NamingSystem authorized for local user '{}', name same as existing NamingSystem",
 							user.getName());
-					return Optional.of("local user, NamingSystem with name exist");
+					return Optional.of("local user; name same as existing NamingSystem");
 				}
 				else
 				{
-					logger.warn("Update of NamingSystem unauthorized, new name not equal to existing resource");
+					logger.warn("Update of NamingSystem unauthorized, name changed ({} -> {})", oldResource.getName(),
+							newResource.getName());
 					return Optional.empty();
 				}
 			}
 			else
 			{
-				logger.warn("Update of NamingSystem unauthorized, missing name or authorization tag");
+				logger.warn("Update of NamingSystem unauthorized, " + errors.get());
 				return Optional.empty();
 			}
 		}
@@ -125,6 +166,11 @@ public class NamingSystemAuthorizationRule extends AbstractAuthorizationRule<Nam
 			logger.warn("Update of NamingSystem unauthorized, not a local user");
 			return Optional.empty();
 		}
+	}
+
+	private boolean isSame(NamingSystem oldResource, NamingSystem newResource)
+	{
+		return oldResource.getName().equals(newResource.getName());
 	}
 
 	@Override
