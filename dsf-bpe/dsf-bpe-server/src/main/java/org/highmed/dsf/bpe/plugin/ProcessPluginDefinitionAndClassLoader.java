@@ -29,6 +29,7 @@ public class ProcessPluginDefinitionAndClassLoader
 	private final boolean draft;
 
 	private List<BpmnFileAndModel> models;
+	private AnnotationConfigApplicationContext context;
 	private ResourceProvider resourceProvider;
 
 	public ProcessPluginDefinitionAndClassLoader(FhirContext fhirContext, List<Path> jars,
@@ -61,11 +62,15 @@ public class ProcessPluginDefinitionAndClassLoader
 
 	public ApplicationContext createPluginApplicationContext(ApplicationContext mainContext)
 	{
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		context.setParent(mainContext);
-		context.setClassLoader(getClassLoader());
-		context.register(getDefinition().getSpringConfigClasses().toArray(Class<?>[]::new));
-		context.refresh();
+		if (context == null)
+		{
+			context = new AnnotationConfigApplicationContext();
+			context.setParent(mainContext);
+			context.setClassLoader(getClassLoader());
+			context.register(getDefinition().getSpringConfigClasses().toArray(Class<?>[]::new));
+			context.refresh();
+		}
+		
 		return context;
 	}
 

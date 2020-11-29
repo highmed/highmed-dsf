@@ -60,6 +60,7 @@ public class DelegateProviderImpl implements DelegateProvider, InitializingBean
 	public Stream<TypedValueSerializer> getAdditionalTypedValueSerializers()
 	{
 		return applicationContextByProcessDefinitionKeyAndVersion.values().stream()
-				.map(ctx -> ctx.getBeansOfType(TypedValueSerializer.class)).flatMap(m -> m.values().stream());
+				.map(ctx -> ctx.getBeansOfType(TypedValueSerializer.class)).distinct()
+				.flatMap(m -> m.values().stream());
 	}
 }
