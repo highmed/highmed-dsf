@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import org.highmed.dsf.ProcessPluginDefinition;
+import org.highmed.dsf.bpe.spring.config.FeasibilitySerializerConfig;
 import org.highmed.dsf.bpe.spring.config.LocalServicesConfig;
 import org.highmed.dsf.fhir.resources.AbstractResource;
 import org.highmed.dsf.fhir.resources.ActivityDefinitionResource;
@@ -44,7 +45,7 @@ public class LocalServicesProcessPluginDefinition implements ProcessPluginDefini
 	@Override
 	public Stream<Class<?>> getSpringConfigClasses()
 	{
-		return Stream.of(LocalServicesConfig.class);
+		return Stream.of(LocalServicesConfig.class, FeasibilitySerializerConfig.class);
 	}
 
 	@Override
