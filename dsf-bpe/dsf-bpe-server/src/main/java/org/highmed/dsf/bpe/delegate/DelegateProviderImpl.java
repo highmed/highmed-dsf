@@ -1,8 +1,9 @@
 package org.highmed.dsf.bpe.delegate;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.impl.variable.serializer.TypedValueSerializer;
 import org.highmed.dsf.bpe.process.ProcessKeyAndVersion;
@@ -57,10 +58,10 @@ public class DelegateProviderImpl implements DelegateProvider, InitializingBean
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	public Stream<TypedValueSerializer> getAdditionalTypedValueSerializers()
+	public List<TypedValueSerializer> getTypedValueSerializers()
 	{
 		return applicationContextByProcessDefinitionKeyAndVersion.values().stream()
-				.map(ctx -> ctx.getBeansOfType(TypedValueSerializer.class)).distinct()
-				.flatMap(m -> m.values().stream());
+				.map(ctx -> ctx.getBeansOfType(TypedValueSerializer.class)).distinct().flatMap(m -> m.values().stream())
+				.collect(Collectors.toList());
 	}
 }

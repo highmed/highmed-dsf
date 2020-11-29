@@ -1,6 +1,6 @@
 package org.highmed.dsf.bpe.delegate;
 
-import java.util.stream.Stream;
+import java.util.List;
 
 import org.camunda.bpm.engine.impl.variable.serializer.TypedValueSerializer;
 import org.highmed.dsf.bpe.process.ProcessKeyAndVersion;
@@ -28,5 +28,5 @@ public interface DelegateProvider
 	 * @return additional {@link TypedValueSerializer}s from the plugin to deploy into the process engine
 	 */
 	@SuppressWarnings("rawtypes")
-	Stream<TypedValueSerializer> getAdditionalTypedValueSerializers();
+	List<TypedValueSerializer> getTypedValueSerializers();
 }

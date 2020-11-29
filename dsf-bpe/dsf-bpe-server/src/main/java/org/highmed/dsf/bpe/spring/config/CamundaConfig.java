@@ -5,13 +5,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.camunda.bpm.engine.impl.variable.serializer.TypedValueSerializer;
+import org.camunda.bpm.engine.impl.variable.serializer.VariableSerializerFactory;
 import org.camunda.bpm.engine.spring.ProcessEngineFactoryBean;
 import org.camunda.bpm.engine.spring.SpringProcessEngineConfiguration;
+import org.highmed.dsf.bpe.camunda.FallbackSerializerFactory;
 import org.highmed.dsf.bpe.camunda.MultiVersionSpringProcessEngineConfiguration;
 import org.highmed.dsf.bpe.delegate.DelegateProvider;
 import org.highmed.dsf.bpe.delegate.DelegateProviderImpl;
@@ -23,8 +23,6 @@ import org.highmed.dsf.bpe.plugin.ProcessPluginProvider;
 import org.highmed.dsf.bpe.plugin.ProcessPluginProviderImpl;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.postgresql.Driver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -37,8 +35,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 @Configuration
 public class CamundaConfig
 {
-	private static final Logger logger = LoggerFactory.getLogger(CamundaConfig.class);
-
 	@Value("${org.highmed.dsf.bpe.db.url}")
 	private String dbUrl;
 
@@ -114,11 +110,6 @@ public class CamundaConfig
 	public SpringProcessEngineConfiguration processEngineConfiguration(
 			@SuppressWarnings("rawtypes") List<TypedValueSerializer> baseSerializers) throws IOException
 	{
-		@SuppressWarnings("rawtypes")
-		List<TypedValueSerializer> serializers = Stream
-				.concat(baseSerializers.stream(), delegateProvider().getAdditionalTypedValueSerializers())
-				.collect(Collectors.toList());
-
 		var c = new MultiVersionSpringProcessEngineConfiguration(delegateProvider());
 		c.setProcessEngineName("highmed");
 		c.setDataSource(transactionAwareDataSource());
@@ -126,13 +117,16 @@ public class CamundaConfig
 		c.setDatabaseSchemaUpdate("false");
 		c.setJobExecutorActivate(true);
 		c.setCustomPreBPMNParseListeners(List.of(defaultBpmnParseListener()));
-
-		logger.info("{} variable serializer{} configured", serializers.size(), serializers.size() != 1 ? "s" : "");
-		logger.debug("Variable serializer{}: {}", serializers.size() != 1 ? "s" : "",
-				serializers.stream().map(p -> p.getClass().getName()).collect(Collectors.joining(", ", "[", "]")));
-		c.setCustomPreVariableSerializers(serializers);
+		c.setCustomPreVariableSerializers(baseSerializers);
+		c.setFallbackSerializerFactory(getFallbackSerializerFactory());
 
 		return c;
+	}
+
+	@Bean
+	public VariableSerializerFactory getFallbackSerializerFactory()
+	{
+		return new FallbackSerializerFactory(delegateProvider().getTypedValueSerializers());
 	}
 
 	@Bean
