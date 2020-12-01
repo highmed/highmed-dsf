@@ -4,11 +4,11 @@ import java.sql.Connection;
 
 import org.highmed.dsf.fhir.dao.command.ValidationHelper;
 import org.highmed.dsf.fhir.dao.command.ValidationHelperImpl;
-import org.highmed.dsf.fhir.service.ResourceValidator;
-import org.highmed.dsf.fhir.service.ResourceValidatorImpl;
 import org.highmed.dsf.fhir.service.ValidationSupportWithCache;
 import org.highmed.dsf.fhir.service.ValidationSupportWithFetchFromDb;
 import org.highmed.dsf.fhir.service.ValidationSupportWithFetchFromDbWithTransaction;
+import org.highmed.dsf.fhir.validation.ResourceValidator;
+import org.highmed.dsf.fhir.validation.ResourceValidatorImpl;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;

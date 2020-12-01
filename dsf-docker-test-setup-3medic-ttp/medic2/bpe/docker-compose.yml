@@ -33,6 +33,10 @@ services:
          target: /opt/bpe/plugin
          read_only: true
       -  type: bind
+         source: ./app/process
+         target: /opt/bpe/process
+         read_only: true
+      -  type: bind
          source: ./app/log
          target: /opt/bpe/log
       -  type: bind

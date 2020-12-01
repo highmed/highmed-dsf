@@ -2,13 +2,18 @@ package org.highmed.dsf.fhir.authorization;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.highmed.dsf.fhir.authentication.OrganizationProvider;
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.ValueSetDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
+import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,37 +33,25 @@ public class ValueSetAuthorizationRule extends AbstractAuthorizationRule<ValueSe
 	{
 		if (isLocalUser(user))
 		{
-			// TODO move check for url, version and authorization tag to validation layer
-			if (newResource.hasUrl() && newResource.hasVersion() && hasLocalOrRemoteAuthorizationRole(newResource))
+			Optional<String> errors = newResourceOk(newResource);
+			if (errors.isEmpty())
 			{
-				try
+				if (!resourceExists(connection, newResource))
 				{
-					Optional<ValueSet> existing = getDao().readByUrlAndVersionWithTransaction(connection,
-							newResource.getUrl(), newResource.getVersion());
-					if (existing.isEmpty())
-					{
-						logger.info(
-								"Create of ValueSet authorized for local user '{}', ValueSet with version and url does not exist",
-								user.getName());
-						return Optional.of("local user, ValueSet with version and url does not exist yet");
-					}
-					else
-					{
-						logger.warn("Create of ValueSet unauthorized, ValueSet with url and version already exists");
-						return Optional.empty();
-					}
+					logger.info(
+							"Create of ValueSet authorized for local user '{}', ValueSet with version and url does not exist",
+							user.getName());
+					return Optional.of("local user, ValueSet with version and url does not exist yet");
 				}
-				catch (SQLException e)
+				else
 				{
-					logger.warn(
-							"Create of ValueSet unauthorized, error while checking for existing ValueSet with version and url",
-							e);
+					logger.warn("Create of ValueSet unauthorized, ValueSet with url and version already exists");
 					return Optional.empty();
 				}
 			}
 			else
 			{
-				logger.warn("Create of ValueSet unauthorized, missing url or version or authorization tag");
+				logger.warn("Create of ValueSet unauthorized, " + errors.get());
 				return Optional.empty();
 			}
 		}
@@ -66,6 +59,58 @@ public class ValueSetAuthorizationRule extends AbstractAuthorizationRule<ValueSe
 		{
 			logger.warn("Create of ValueSet unauthorized, not a local user");
 			return Optional.empty();
+		}
+	}
+
+	private Optional<String> newResourceOk(ValueSet newResource)
+	{
+		List<String> errors = new ArrayList<String>();
+
+		if (newResource.hasStatus())
+		{
+			if (!EnumSet.of(PublicationStatus.DRAFT, PublicationStatus.ACTIVE, PublicationStatus.RETIRED)
+					.contains(newResource.getStatus()))
+			{
+				errors.add("ValueSet.status not one of DRAFT, ACTIVE or RETIRED");
+			}
+		}
+		else
+		{
+			errors.add("ValueSet.status not defined");
+		}
+
+		if (!newResource.hasUrl())
+		{
+			errors.add("ValueSet.url not defined");
+		}
+		if (!newResource.hasVersion())
+		{
+			errors.add("ValueSet.version not defined");
+		}
+
+		if (!hasLocalOrRemoteAuthorizationRole(newResource))
+		{
+			errors.add("missing authorization tag");
+		}
+
+		if (errors.isEmpty())
+			return Optional.empty();
+		else
+			return Optional.of(errors.stream().collect(Collectors.joining(", ")));
+	}
+
+	private boolean resourceExists(Connection connection, ValueSet newResource)
+	{
+		try
+		{
+			return getDao()
+					.readByUrlAndVersionWithTransaction(connection, newResource.getUrl(), newResource.getVersion())
+					.isPresent();
+		}
+		catch (SQLException e)
+		{
+			logger.warn("Error while searching for ValueSet", e);
+			return false;
 		}
 	}
 
@@ -98,26 +143,27 @@ public class ValueSetAuthorizationRule extends AbstractAuthorizationRule<ValueSe
 	{
 		if (isLocalUser(user))
 		{
-			// TODO move check for url, version and authorization tag to validation layer
-			if (newResource.hasUrl() && newResource.hasVersion() && hasLocalOrRemoteAuthorizationRole(newResource))
+			Optional<String> errors = newResourceOk(newResource);
+			if (errors.isEmpty())
 			{
-				if (oldResource.getUrl().equals(newResource.getUrl())
-						&& oldResource.getVersion().equals(newResource.getVersion()))
+				if (isSame(oldResource, newResource))
 				{
 					logger.info(
-							"Update of ValueSet authorized for local user '{}', ValueSet with version and url exists",
+							"Update of ValueSet authorized for local user '{}', url and version same as existing ValueSet",
 							user.getName());
-					return Optional.of("local user, ValueSet with version and url exists");
+					return Optional.of("local user; url and version same as existing ValueSet");
 				}
 				else
 				{
-					logger.warn("Update of ValueSet unauthorized, new url or version not equal to existing resource");
+					logger.warn("Update of ValueSet unauthorized, url or version changed ({} -> {}, {} -> {})",
+							oldResource.getUrl(), newResource.getUrl(), oldResource.getVersion(),
+							newResource.getVersion());
 					return Optional.empty();
 				}
 			}
 			else
 			{
-				logger.warn("Update of ValueSet unauthorized, missing url or version or authorization tag");
+				logger.warn("Update of ValueSet unauthorized, " + errors.get());
 				return Optional.empty();
 			}
 		}
@@ -126,6 +172,12 @@ public class ValueSetAuthorizationRule extends AbstractAuthorizationRule<ValueSe
 			logger.warn("Update of ValueSet unauthorized, not a local user");
 			return Optional.empty();
 		}
+	}
+
+	private boolean isSame(ValueSet oldResource, ValueSet newResource)
+	{
+		return oldResource.getUrl().equals(newResource.getUrl())
+				&& oldResource.getVersion().equals(newResource.getVersion());
 	}
 
 	@Override

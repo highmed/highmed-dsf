@@ -34,6 +34,7 @@ import org.glassfish.jersey.servlet.init.JerseyServletContainerInitializer;
 import org.highmed.dsf.fhir.authentication.AuthenticationFilter;
 import org.highmed.dsf.fhir.cors.CorsFilter;
 import org.highmed.dsf.tools.db.DbMigrator;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 import org.springframework.web.SpringServletContainerInitializer;
 
 import de.rwh.utils.jetty.JettyServer;
@@ -41,6 +42,12 @@ import de.rwh.utils.jetty.Log4jInitializer;
 
 public final class FhirServer
 {
+	static
+	{
+		SLF4JBridgeHandler.removeHandlersForRootLogger();
+		SLF4JBridgeHandler.install();
+	}
+	
 	public static void startHttpServer()
 	{
 		startServer(JettyServer::forwardedSecureRequestCustomizer, JettyServer::httpConnector);

@@ -31,9 +31,12 @@ public class BundleIdentifier extends AbstractTokenParameter<Bundle>
 			case CODE:
 			case CODE_AND_SYSTEM:
 			case SYSTEM:
-				return "bundle->'identifier' = ?::jsonb";
+				return "bundle->'identifier' " + (valueAndType.negated ? "<>" : "=") + " ?::jsonb";
 			case CODE_AND_NO_SYSTEM_PROPERTY:
-				return "bundle->'identifier'->>'value' = ? AND NOT (bundle->'identifier' ?? 'system')";
+				if (valueAndType.negated)
+					return "bundle->'identifier'->>'value' <> ? OR (bundle->'identifier' ?? 'system')";
+				else
+					return "bundle->'identifier'->>'value' = ? AND NOT (bundle->'identifier' ?? 'system')";
 			default:
 				return "";
 		}
@@ -69,7 +72,10 @@ public class BundleIdentifier extends AbstractTokenParameter<Bundle>
 
 	private boolean identifierMatches(Identifier identifier)
 	{
-		return AbstractIdentifierParameter.identifierMatches(valueAndType, identifier);
+		if (valueAndType.negated)
+			return !AbstractIdentifierParameter.identifierMatches(valueAndType, identifier);
+		else
+			return AbstractIdentifierParameter.identifierMatches(valueAndType, identifier);
 	}
 
 	@Override

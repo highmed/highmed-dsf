@@ -15,6 +15,25 @@
 			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-fhir-webservice-client</artifactId>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.highmed.dsf</groupId>
+			<artifactId>dsf-pseudonymization-medic</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.highmed.dsf</groupId>
+			<artifactId>dsf-pseudonymization-ttp</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.highmed.dsf</groupId>
+			<artifactId>dsf-mpi-client</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.highmed.dsf</groupId>
+			<artifactId>dsf-openehr-model</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-openehr-client</artifactId>

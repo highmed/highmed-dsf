@@ -57,7 +57,7 @@ public class DownloadAllowListFromTtpViaMedic1ExampleStarter
 
 		Task task = new Task();
 		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-download-allow-list");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/downloadAllowList/0.3.0");
+		task.setInstantiatesUri("http://highmed.org/bpe/Process/downloadAllowList/0.4.0");
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());

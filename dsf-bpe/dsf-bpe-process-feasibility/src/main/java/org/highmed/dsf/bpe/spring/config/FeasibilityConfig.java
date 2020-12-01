@@ -1,13 +1,11 @@
 package org.highmed.dsf.bpe.spring.config;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
 import org.highmed.dsf.bpe.message.SendMedicRequest;
 import org.highmed.dsf.bpe.message.SendMultiMedicErrors;
 import org.highmed.dsf.bpe.message.SendMultiMedicResults;
 import org.highmed.dsf.bpe.message.SendSingleMedicResults;
 import org.highmed.dsf.bpe.message.SendTtpRequest;
-import org.highmed.dsf.bpe.plugin.FeasibilityPlugin;
 import org.highmed.dsf.bpe.service.CalculateMultiMedicResults;
 import org.highmed.dsf.bpe.service.CheckFeasibilityResources;
 import org.highmed.dsf.bpe.service.CheckMultiMedicResults;
@@ -81,12 +79,6 @@ public class FeasibilityConfig
 
 	@Value("${org.highmed.dsf.bpe.openehr.subject_external_id.path:/ehr_status/subject/external_ref/id/value}")
 	private String ehrIdColumnPath;
-
-	@Bean
-	public ProcessEnginePlugin feasibilityPlugin()
-	{
-		return new FeasibilityPlugin();
-	}
 
 	//
 	// process requestSimpleFeasibility implementations

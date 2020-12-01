@@ -1,6 +1,5 @@
 package org.highmed.dsf.bpe.spring.config;
 
-import org.highmed.dsf.bpe.plugin.ParentPlugin;
 import org.highmed.dsf.bpe.service.AfterPlugin;
 import org.highmed.dsf.bpe.service.BeforePlugin;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
@@ -17,12 +16,6 @@ public class ParentConfig
 
 	@Autowired
 	private TaskHelper taskHelper;
-
-	@Bean
-	public ParentPlugin parentPlugin()
-	{
-		return new ParentPlugin();
-	}
 
 	@Bean
 	public BeforePlugin beforePlugin()

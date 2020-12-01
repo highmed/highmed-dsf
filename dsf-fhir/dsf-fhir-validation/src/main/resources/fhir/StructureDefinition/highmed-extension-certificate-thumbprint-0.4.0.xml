@@ -1,0 +1,40 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+  <meta>
+    <tag>
+      <system value="http://highmed.org/fhir/CodeSystem/authorization-role" />
+      <code value="REMOTE" />
+    </tag>
+  </meta>
+  <url value="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint" />
+  <version value="0.4.0" />
+  <name value="CertificateThumbprint" />
+  <status value="active" />
+  <experimental value="false" />
+  <date value="2020-11-23" />
+  <fhirVersion value="4.0.1" />
+  <kind value="complex-type" />
+  <abstract value="false" />
+  <context>
+    <type value="element" />
+    <expression value="Organization" />
+  </context>
+  <type value="Extension" />
+  <baseDefinition value="http://hl7.org/fhir/StructureDefinition/Extension" />
+  <derivation value="constraint" />
+  <differential>
+    <element id="Extension.url">
+      <path value="Extension.url" />
+      <type>
+        <code value="uri" />
+      </type>
+      <fixedUri value="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint" />
+    </element>
+    <element id="Extension.value[x]">
+      <path value="Extension.value[x]" />
+      <min value="1" />
+      <type>
+        <code value="string" />
+      </type>
+    </element>
+  </differential>
+</StructureDefinition>
