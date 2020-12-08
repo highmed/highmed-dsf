@@ -12,6 +12,7 @@ import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.Task;
@@ -101,11 +102,11 @@ public class DownloadResearchStudyResource extends AbstractServiceDelegate imple
 
 		if (!identifiers.isEmpty())
 		{
-			identifiers.forEach(identifier -> researchStudy
-					.addExtension(ConstantsFeasibility.EXTENSION_PARTICIPATING_MEDIC_URI,
-							new Reference().getIdentifier()
+			identifiers.forEach(identifier -> researchStudy.addExtension()
+					.setUrl(ConstantsFeasibility.EXTENSION_PARTICIPATING_MEDIC_URI).setValue(
+							new Reference().setType("Organization").setIdentifier(new Identifier()
 									.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
-									.setValue(identifier)));
+									.setValue(identifier))));
 
 			return update(researchStudy, client);
 		}
