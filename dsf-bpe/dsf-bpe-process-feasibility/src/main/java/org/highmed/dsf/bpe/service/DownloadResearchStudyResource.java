@@ -102,11 +102,17 @@ public class DownloadResearchStudyResource extends AbstractServiceDelegate imple
 
 		if (!identifiers.isEmpty())
 		{
-			identifiers.forEach(identifier -> researchStudy.addExtension()
-					.setUrl(ConstantsFeasibility.EXTENSION_PARTICIPATING_MEDIC_URI).setValue(
-							new Reference().setType("Organization").setIdentifier(new Identifier()
-									.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
-									.setValue(identifier))));
+			identifiers.forEach(identifier -> {
+				logger.warn(
+						"Adding missing organization with identifier='{}' to feasibility research study with id='{}'",
+						identifier, researchStudy.getId());
+
+				researchStudy.addExtension().setUrl(ConstantsFeasibility.EXTENSION_PARTICIPATING_MEDIC_URI).setValue(
+						new Reference().setType("Organization").setIdentifier(new Identifier()
+								.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
+								.setValue(identifier)));
+
+			});
 
 			return update(researchStudy, client);
 		}
