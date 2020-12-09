@@ -16,7 +16,8 @@
 			<artifactId>dsf-bpe-process-base</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		
+
+
 		<dependency>
 			<groupId>de.hs-heilbronn.mi</groupId>
 			<artifactId>log4j2-utils</artifactId>
@@ -26,6 +27,12 @@
 			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-fhir-validation</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.highmed.dsf</groupId>
+			<artifactId>dsf-bpe-process-base</artifactId>
+			<scope>test</scope>
+			<type>test-jar</type>
 		</dependency>
 	</dependencies>
 	
