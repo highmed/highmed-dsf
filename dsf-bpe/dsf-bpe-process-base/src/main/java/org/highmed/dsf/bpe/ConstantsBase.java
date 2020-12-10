@@ -34,6 +34,7 @@ public interface ConstantsBase
 	String ORGANIZATION_IDENTIFIER_SYSTEM = "http://highmed.org/fhir/NamingSystem/organization-identifier";
 	String ORGANIZATION_TYPE_SYSTEM = "http://highmed.org/fhir/CodeSystem/organization-type";
 	String ORGANIZATION_TYPE_TTP = "TTP";
+	String ORGANIZATION_TYPE_MEDIC = "MeDIC";
 	String ENDPOINT_IDENTIFIER_SYSTEM = "http://highmed.org/fhir/NamingSystem/endpoint-identifier";
 
 	String EXTENSION_QUERY_URI = "http://highmed.org/fhir/StructureDefinition/query";

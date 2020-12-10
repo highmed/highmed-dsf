@@ -1,5 +1,7 @@
 package org.highmed.dsf.bpe.service;
 
+import static org.highmed.dsf.bpe.variables.ConstantsFeasibility.EXTENSION_PARTICIPATING_TTP_URI;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -150,8 +152,7 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 
 	private String getTtpIdentifier(ResearchStudy researchStudy, FhirWebserviceClient client)
 	{
-		Extension ext = researchStudy
-				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/participating-ttp");
+		Extension ext = researchStudy.getExtensionByUrl(EXTENSION_PARTICIPATING_TTP_URI);
 		Reference ref = (Reference) ext.getValue();
 		return ref.getIdentifier().getValue();
 	}

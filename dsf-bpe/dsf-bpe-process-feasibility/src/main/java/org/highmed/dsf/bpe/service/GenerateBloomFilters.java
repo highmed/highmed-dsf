@@ -1,5 +1,7 @@
 package org.highmed.dsf.bpe.service;
 
+import static org.highmed.dsf.bpe.ConstantsBase.ORGANIZATION_IDENTIFIER_SYSTEM;
+
 import java.security.Key;
 import java.util.List;
 import java.util.Objects;
@@ -28,6 +30,7 @@ import org.highmed.pseudonymization.translation.ResultSetTranslatorToTtpRbfOnlyI
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -147,13 +150,13 @@ public class GenerateBloomFilters extends AbstractServiceDelegate
 	{
 		byte[] content = serializeResultSet(resultSet);
 		Reference securityContext = new Reference();
-		securityContext.setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue(securityIdentifier);
+		securityContext.setType(ResourceType.Organization.name()).getIdentifier()
+				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue(securityIdentifier);
 		Binary binary = new Binary().setContentType(ConstantsBase.OPENEHR_MIMETYPE_JSON)
 				.setSecurityContext(securityContext).setData(content);
 
 		IdType created = createBinaryResource(binary);
-		return new IdType(getFhirWebserviceClientProvider().getLocalBaseUrl(), "Binary", created.getIdPart(),
+		return new IdType(getFhirWebserviceClientProvider().getLocalBaseUrl(), ResourceType.Binary.name(), created.getIdPart(),
 				created.getVersionIdPart()).getValue();
 	}
 

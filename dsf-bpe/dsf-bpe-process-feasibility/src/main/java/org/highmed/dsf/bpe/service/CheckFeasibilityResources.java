@@ -1,5 +1,7 @@
 package org.highmed.dsf.bpe.service;
 
+import static org.highmed.dsf.bpe.ConstantsBase.ORGANIZATION_IDENTIFIER_SYSTEM;
+
 import java.util.List;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
@@ -38,7 +40,7 @@ public class CheckFeasibilityResources extends AbstractServiceDelegate
 		long medics = researchStudy.getExtensionsByUrl(ConstantsFeasibility.EXTENSION_PARTICIPATING_MEDIC_URI).stream()
 				.filter(e -> e.getValue() instanceof Reference).map(e -> (Reference) e.getValue())
 				.map(r -> r.getIdentifier())
-				.filter(i -> "http://highmed.org/fhir/NamingSystem/organization-identifier".equals(i.getSystem()))
+				.filter(i -> ORGANIZATION_IDENTIFIER_SYSTEM.equals(i.getSystem()))
 				.map(i -> i.getValue()).distinct().count();
 
 		if (medics < ConstantsFeasibility.MIN_PARTICIPATING_MEDICS)

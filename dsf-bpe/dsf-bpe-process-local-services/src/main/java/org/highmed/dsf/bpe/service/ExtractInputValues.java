@@ -1,5 +1,7 @@
 package org.highmed.dsf.bpe.service;
 
+import static org.highmed.dsf.bpe.ConstantsBase.EXTENSION_QUERY_URI;
+
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -61,7 +63,7 @@ public class ExtractInputValues extends AbstractServiceDelegate implements Initi
 		return queries.map(q -> {
 			Group group = new Group();
 			group.setIdElement(new IdType(UUID.randomUUID().toString()));
-			group.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/query").setValue(
+			group.addExtension().setUrl(EXTENSION_QUERY_URI).setValue(
 					new Expression().setLanguageElement(ConstantsBase.AQL_QUERY_TYPE).setExpression(q));
 			return group;
 		}).collect(Collectors.toList());
