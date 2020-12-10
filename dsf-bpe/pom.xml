@@ -15,7 +15,6 @@
 		<module>dsf-bpe-process-base</module>
 		<module>dsf-bpe-process-feasibility</module>
 		<module>dsf-bpe-process-ping</module>
-		<module>dsf-bpe-process-plugin-example</module>
 		<module>dsf-bpe-process-update-resources</module>
 		<module>dsf-bpe-process-update-allow-list</module>
 		<module>dsf-bpe-server</module>
@@ -84,18 +83,6 @@
 				<artifactId>dsf-bpe-process-local-services</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-			<!-- provided as jar and injected on startup as plugin
-			<dependency>
-				<groupId>org.highmed.dsf</groupId>
-				<artifactId>dsf-bpe-process-parent</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.highmed.dsf</groupId>
-				<artifactId>dsf-bpe-process-child</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			-->
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
 				<artifactId>dsf-bpe-process-ping</artifactId>
