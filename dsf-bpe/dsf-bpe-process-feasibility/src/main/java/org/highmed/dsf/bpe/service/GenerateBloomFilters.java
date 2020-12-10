@@ -99,7 +99,7 @@ public class GenerateBloomFilters extends AbstractServiceDelegate
 	{
 		Task task = getCurrentTaskFromExecutionVariables();
 
-		if (task.getInstantiatesUri().startsWith(ConstantsFeasibility.LOCAL_SERVICES_INTEGRATION_PROCESS_URI))
+		if (task.getInstantiatesUri().startsWith(ConstantsFeasibility.LOCAL_SERVICES_PROCESS_URI))
 			return task.getRequester().getIdentifier().getValue();
 		else
 			return (String) execution.getVariable(ConstantsBase.VARIABLE_TTP_IDENTIFIER);

@@ -16,7 +16,7 @@ import org.highmed.dsf.fhir.resources.ValueSetResource;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class UpdateResourcesPluginDefinition implements ProcessPluginDefinition
+public class UpdateResourcesProcessPluginDefinition implements ProcessPluginDefinition
 {
 	public static final String VERSION = "0.4.0";
 

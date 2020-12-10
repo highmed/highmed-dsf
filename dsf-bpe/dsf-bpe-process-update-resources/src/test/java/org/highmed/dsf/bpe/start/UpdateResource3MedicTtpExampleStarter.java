@@ -11,8 +11,7 @@ import static org.highmed.dsf.bpe.variables.ConstantsUpdateResources.CODESYSTEM_
 import static org.highmed.dsf.bpe.variables.ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE;
 import static org.highmed.dsf.bpe.variables.ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_ORGANIZATION_IDENTIFIER_SEARCH_PARAMETER;
 import static org.highmed.dsf.bpe.variables.ConstantsUpdateResources.REQUEST_UPDATE_RESOURCES_MESSAGE_NAME;
-import static org.highmed.dsf.bpe.variables.ConstantsUpdateResources.REQUEST_UPDATE_RESOURCES_PROCESS_LATEST_VERSION;
-import static org.highmed.dsf.bpe.variables.ConstantsUpdateResources.REQUEST_UPDATE_RESOURCES_PROCESS_URI;
+import static org.highmed.dsf.bpe.variables.ConstantsUpdateResources.REQUEST_UPDATE_RESOURCES_PROCESS_URI_AND_LATEST_VERSION;
 import static org.highmed.dsf.bpe.variables.ConstantsUpdateResources.REQUEST_UPDATE_RESOURCES_TASK_PROFILE;
 
 import java.io.IOException;
@@ -68,8 +67,7 @@ public class UpdateResource3MedicTtpExampleStarter
 
 		Task task = new Task();
 		task.getMeta().addProfile(REQUEST_UPDATE_RESOURCES_TASK_PROFILE);
-		task.setInstantiatesUri(
-				REQUEST_UPDATE_RESOURCES_PROCESS_URI + "/" + REQUEST_UPDATE_RESOURCES_PROCESS_LATEST_VERSION);
+		task.setInstantiatesUri(REQUEST_UPDATE_RESOURCES_PROCESS_URI_AND_LATEST_VERSION);
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());

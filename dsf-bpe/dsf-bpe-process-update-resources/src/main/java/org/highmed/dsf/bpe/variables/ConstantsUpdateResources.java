@@ -9,5 +9,8 @@ public interface ConstantsUpdateResources
 	String REQUEST_UPDATE_RESOURCES_TASK_PROFILE = "http://highmed.org/fhir/StructureDefinition/highmed-task-request-update-resources";
 	String REQUEST_UPDATE_RESOURCES_PROCESS_URI = "http://highmed.org/bpe/Process/requestUpdateResources";
 	String REQUEST_UPDATE_RESOURCES_PROCESS_LATEST_VERSION = "0.4.0";
+	String REQUEST_UPDATE_RESOURCES_PROCESS_URI_AND_LATEST_VERSION =
+			REQUEST_UPDATE_RESOURCES_PROCESS_URI + "/" + REQUEST_UPDATE_RESOURCES_PROCESS_LATEST_VERSION;
+
 	String REQUEST_UPDATE_RESOURCES_MESSAGE_NAME = "requestUpdateResourcesMessage";
 }

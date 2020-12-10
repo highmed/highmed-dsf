@@ -10,10 +10,6 @@ public interface ConstantsExampleStarters
 
 	String MEDIC_1_FHIR_BASE_URL = "https://medic1/fhir/";
 	String ORGANIZATION_IDENTIFIER_VALUE_MEDIC_1 = "Test_MeDIC_1";
-
-	String MEDIC_2_FHIR_BASE_URL = "https://medic2/fhir/";
 	String ORGANIZATION_IDENTIFIER_VALUE_MEDIC_2 = "Test_MeDIC_2";
-
-	String MEDIC_3_FHIR_BASE_URL = "https://medic3/fhir/";
 	String ORGANIZATION_IDENTIFIER_VALUE_MEDIC_3 = "Test_MeDIC_3";
 }

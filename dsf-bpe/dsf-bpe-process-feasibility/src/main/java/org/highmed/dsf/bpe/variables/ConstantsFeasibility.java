@@ -36,5 +36,16 @@ public interface ConstantsFeasibility
 	String EXTENSION_PARTICIPATING_TTP_URI = "http://highmed.org/fhir/StructureDefinition/participating-ttp";
 	String EXTENSION_GROUP_ID_URI = "http://highmed.org/fhir/StructureDefinition/group-id";
 
-	String LOCAL_SERVICES_INTEGRATION_PROCESS_URI = "http://highmed.org/bpe/Process/localServicesIntegration";
+	String FEASIBILITY_RESEARCH_STUDY_PROFILE = "http://highmed.org/fhir/StructureDefinition/highmed-research-study-feasibility";
+	String GROUP_PROFILE = "http://highmed.org/fhir/StructureDefinition/highmed-group";
+	String RESEARCH_STUDY_IDENTIFIER_SYSTEM = "http://highmed.org/fhir/NamingSystem/research-study-identifier";
+
+	String REQUEST_FEASIBILITY_TASK_PROFILE = "http://highmed.org/fhir/StructureDefinition/highmed-task-request-simple-feasibility";
+	String LOCAL_SERVICES_PROCESS_URI = "http://highmed.org/bpe/Process/localServicesIntegration";
+	String REQUEST_FEASIBILITY_PROCESS_URI = "http://highmed.org/bpe/Process/requestSimpleFeasibility";
+	String REQUEST_FEASIBILITY_PROCESS_LATEST_VERSION = "0.4.0";
+	String REQUEST_FEASIBILITY_PROCESS_URI_AND_LATEST_VERSION =
+			REQUEST_FEASIBILITY_PROCESS_URI + "/" + REQUEST_FEASIBILITY_PROCESS_LATEST_VERSION;
+
+	String REQUEST_FEASIBILITY_MESSAGE_NAME = "requestSimpleFeasibilityMessage";
 }
