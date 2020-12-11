@@ -5,8 +5,6 @@ import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ME
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_QUERY_TYPE;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_QUERY_TYPE_AQL;
 import static org.highmed.dsf.bpe.ConstantsBase.ORGANIZATION_IDENTIFIER_SYSTEM;
-import static org.highmed.dsf.bpe.start.ConstantsExampleStarters.CERTIFICATE_PASSWORD;
-import static org.highmed.dsf.bpe.start.ConstantsExampleStarters.CERTIFICATE_PATH;
 import static org.highmed.dsf.bpe.start.ConstantsExampleStarters.MEDIC_1_FHIR_BASE_URL;
 import static org.highmed.dsf.bpe.start.ConstantsExampleStarters.ORGANIZATION_IDENTIFIER_VALUE_MEDIC_1;
 import static org.highmed.dsf.bpe.variables.ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY;
@@ -17,70 +15,32 @@ import static org.highmed.dsf.bpe.variables.ConstantsLocalServices.LOCAL_SERVICE
 import static org.highmed.dsf.bpe.variables.ConstantsLocalServices.LOCAL_SERVICES_PROCESS_URI_AND_LATEST_VERSION;
 import static org.highmed.dsf.bpe.variables.ConstantsLocalServices.LOCAL_SERVICES_TASK_PROFILE;
 
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.util.Date;
 import java.util.Random;
 
 import javax.crypto.KeyGenerator;
-import javax.ws.rs.WebApplicationException;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.highmed.dsf.bpe.variables.BloomFilterConfig;
-import org.highmed.dsf.fhir.service.ReferenceCleaner;
-import org.highmed.dsf.fhir.service.ReferenceCleanerImpl;
-import org.highmed.dsf.fhir.service.ReferenceExtractorImpl;
-import org.highmed.fhir.client.FhirWebserviceClient;
-import org.highmed.fhir.client.FhirWebserviceClientJersey;
 import org.hl7.fhir.r4.model.Base64BinaryType;
 import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 
-import ca.uhn.fhir.context.FhirContext;
-
-import de.rwh.utils.crypto.CertificateHelper;
-import de.rwh.utils.crypto.io.CertificateReader;
-
-public class LocalServicesMedic1ExampleStarter
+public class LocalServicesMedic1ExampleStarter extends AbstractExampleStarter
 {
-	public static void main(String[] args)
-			throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException
+	private static boolean NEEDS_CONSENT_CHECK = true;
+	private static boolean NEEDS_RECORD_LINKAGE = true;
+
+	public static void main(String[] args) throws Exception
 	{
-		KeyStore keyStore = CertificateReader.fromPkcs12(Paths.get(CERTIFICATE_PATH), CERTIFICATE_PASSWORD);
-		KeyStore trustStore = CertificateHelper.extractTrust(keyStore);
-
-		FhirContext context = FhirContext.forR4();
-		ReferenceCleaner referenceCleaner = new ReferenceCleanerImpl(new ReferenceExtractorImpl());
-		FhirWebserviceClient client = new FhirWebserviceClientJersey(MEDIC_1_FHIR_BASE_URL, trustStore, keyStore,
-				CERTIFICATE_PASSWORD, null, null, null, 0, 0, null, context, referenceCleaner);
-
-		try
-		{
-			Task task = createTask(true, true);
-			client.withMinimalReturn().create(task);
-		}
-		catch (WebApplicationException e)
-		{
-			if (e.getResponse() != null && e.getResponse().hasEntity())
-			{
-				OperationOutcome outcome = e.getResponse().readEntity(OperationOutcome.class);
-				String xml = context.newXmlParser().setPrettyPrint(true).encodeResourceToString(outcome);
-				System.out.println(xml);
-			}
-			else
-				e.printStackTrace();
-		}
+		new LocalServicesMedic1ExampleStarter().startAt(MEDIC_1_FHIR_BASE_URL);
 	}
 
-	private static Task createTask(boolean needsConsentCheck, boolean needsRecordLinkage)
-			throws NoSuchAlgorithmException
+	@Override
+	public Resource createStartResource()
 	{
 		Task task = new Task();
 
@@ -100,23 +60,30 @@ public class LocalServicesMedic1ExampleStarter
 
 		task.addInput().setValue(new StringType("SELECT COUNT(e) FROM EHR e;")).getType().addCoding()
 				.setSystem(CODESYSTEM_QUERY_TYPE).setCode(CODESYSTEM_QUERY_TYPE_AQL);
-		task.addInput().setValue(new BooleanType(needsConsentCheck)).getType().addCoding()
+		task.addInput().setValue(new BooleanType(NEEDS_CONSENT_CHECK)).getType().addCoding()
 				.setSystem(CODESYSTEM_HIGHMED_FEASIBILITY)
 				.setCode(CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_CONSENT_CHECK);
-		task.addInput().setValue(new BooleanType(needsRecordLinkage)).getType().addCoding()
+		task.addInput().setValue(new BooleanType(NEEDS_RECORD_LINKAGE)).getType().addCoding()
 				.setSystem(CODESYSTEM_HIGHMED_FEASIBILITY)
 				.setCode(CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_RECORD_LINKAGE);
 
-		if (needsRecordLinkage)
+		if (NEEDS_RECORD_LINKAGE)
 		{
-			BouncyCastleProvider bouncyCastleProvider = new BouncyCastleProvider();
-			BloomFilterConfig bloomFilterConfig = new BloomFilterConfig(new Random().nextLong(),
-					KeyGenerator.getInstance("HmacSHA256", bouncyCastleProvider).generateKey(),
-					KeyGenerator.getInstance("HmacSHA3-256", bouncyCastleProvider).generateKey());
+			try
+			{
+				BouncyCastleProvider bouncyCastleProvider = new BouncyCastleProvider();
+				BloomFilterConfig bloomFilterConfig = new BloomFilterConfig(new Random().nextLong(),
+						KeyGenerator.getInstance("HmacSHA256", bouncyCastleProvider).generateKey(),
+						KeyGenerator.getInstance("HmacSHA3-256", bouncyCastleProvider).generateKey());
 
-			task.addInput().setValue(new Base64BinaryType(bloomFilterConfig.toBytes())).getType().addCoding()
-					.setSystem(CODESYSTEM_HIGHMED_FEASIBILITY)
-					.setCode(CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_BLOOM_FILTER_CONFIG);
+				task.addInput().setValue(new Base64BinaryType(bloomFilterConfig.toBytes())).getType().addCoding()
+						.setSystem(CODESYSTEM_HIGHMED_FEASIBILITY)
+						.setCode(CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_BLOOM_FILTER_CONFIG);
+			}
+			catch (Exception exception)
+			{
+				throw new RuntimeException("Could not create BloomFilterConfig", exception);
+			}
 		}
 
 		return task;

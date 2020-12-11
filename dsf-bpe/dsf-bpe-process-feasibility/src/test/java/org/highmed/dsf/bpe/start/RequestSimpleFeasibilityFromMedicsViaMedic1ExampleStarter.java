@@ -5,8 +5,6 @@ import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME;
 import static org.highmed.dsf.bpe.ConstantsBase.EXTENSION_QUERY_URI;
 import static org.highmed.dsf.bpe.ConstantsBase.ORGANIZATION_IDENTIFIER_SYSTEM;
-import static org.highmed.dsf.bpe.start.ConstantsExampleStarters.CERTIFICATE_PASSWORD;
-import static org.highmed.dsf.bpe.start.ConstantsExampleStarters.CERTIFICATE_PATH;
 import static org.highmed.dsf.bpe.start.ConstantsExampleStarters.MEDIC_1_FHIR_BASE_URL;
 import static org.highmed.dsf.bpe.start.ConstantsExampleStarters.ORGANIZATION_IDENTIFIER_VALUE_MEDIC_1;
 import static org.highmed.dsf.bpe.start.ConstantsExampleStarters.ORGANIZATION_IDENTIFIER_VALUE_MEDIC_2;
@@ -25,22 +23,9 @@ import static org.highmed.dsf.bpe.variables.ConstantsFeasibility.REQUEST_FEASIBI
 import static org.highmed.dsf.bpe.variables.ConstantsFeasibility.REQUEST_FEASIBILITY_TASK_PROFILE;
 import static org.highmed.dsf.bpe.variables.ConstantsFeasibility.RESEARCH_STUDY_IDENTIFIER_SYSTEM;
 
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.util.Date;
 import java.util.UUID;
 
-import javax.ws.rs.WebApplicationException;
-
-import org.highmed.dsf.fhir.service.ReferenceCleaner;
-import org.highmed.dsf.fhir.service.ReferenceCleanerImpl;
-import org.highmed.dsf.fhir.service.ReferenceExtractorImpl;
-import org.highmed.fhir.client.FhirWebserviceClient;
-import org.highmed.fhir.client.FhirWebserviceClientJersey;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
@@ -51,68 +36,46 @@ import org.hl7.fhir.r4.model.Group.GroupType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Narrative;
-import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.ResearchStudy.ResearchStudyStatus;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.TaskIntent;
 import org.hl7.fhir.r4.model.Task.TaskStatus;
 
-import ca.uhn.fhir.context.FhirContext;
-
-import de.rwh.utils.crypto.CertificateHelper;
-import de.rwh.utils.crypto.io.CertificateReader;
-
-public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter
+public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter extends AbstractExampleStarter
 {
-	public static void main(String[] args)
-			throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException
+	public static void main(String[] args) throws Exception
 	{
-		KeyStore keyStore = CertificateReader.fromPkcs12(Paths.get(CERTIFICATE_PATH), CERTIFICATE_PASSWORD);
-		KeyStore trustStore = CertificateHelper.extractTrust(keyStore);
-
-		FhirContext context = FhirContext.forR4();
-		ReferenceCleaner referenceCleaner = new ReferenceCleanerImpl(new ReferenceExtractorImpl());
-		FhirWebserviceClient client = new FhirWebserviceClientJersey(MEDIC_1_FHIR_BASE_URL, trustStore, keyStore,
-				CERTIFICATE_PASSWORD, null, null, null, 0, 0, null, context, referenceCleaner);
-
-		try
-		{
-			Group group1 = createGroup("Group 1");
-			Group group2 = createGroup("Group 2");
-			ResearchStudy researchStudy = createResearchStudy(group1, group2);
-			Task task = createTask(researchStudy);
-
-			Bundle bundle = new Bundle();
-			bundle.setType(BundleType.TRANSACTION);
-			bundle.addEntry().setResource(group1).setFullUrl(group1.getIdElement().getIdPart()).getRequest()
-					.setMethod(HTTPVerb.POST).setUrl(ResourceType.Group.name());
-			bundle.addEntry().setResource(group2).setFullUrl(group2.getIdElement().getIdPart()).getRequest()
-					.setMethod(HTTPVerb.POST).setUrl(ResourceType.Group.name());
-			bundle.addEntry().setResource(researchStudy).setFullUrl(researchStudy.getIdElement().getIdPart())
-					.getRequest().setMethod(HTTPVerb.POST).setUrl(ResourceType.ResearchStudy.name());
-			bundle.addEntry().setResource(task).setFullUrl(task.getIdElement().getIdPart()).getRequest()
-					.setMethod(HTTPVerb.POST).setUrl(ResourceType.Task.name());
-
-			client.withMinimalReturn().postBundle(bundle);
-		}
-		catch (WebApplicationException e)
-		{
-			if (e.getResponse() != null && e.getResponse().hasEntity())
-			{
-				OperationOutcome outcome = e.getResponse().readEntity(OperationOutcome.class);
-				String xml = context.newXmlParser().setPrettyPrint(true).encodeResourceToString(outcome);
-				System.out.println(xml);
-			}
-			else
-				e.printStackTrace();
-		}
+		new RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter().startAt(MEDIC_1_FHIR_BASE_URL);
 	}
 
-	private static Group createGroup(String name)
+	@Override
+	public Resource createStartResource()
+	{
+		Group group1 = createGroup("Group 1");
+		Group group2 = createGroup("Group 2");
+		ResearchStudy researchStudy = createResearchStudy(group1, group2);
+		Task task = createTask(researchStudy);
+
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		bundle.addEntry().setResource(group1).setFullUrl(group1.getIdElement().getIdPart()).getRequest()
+				.setMethod(HTTPVerb.POST).setUrl(ResourceType.Group.name());
+		bundle.addEntry().setResource(group2).setFullUrl(group2.getIdElement().getIdPart()).getRequest()
+				.setMethod(HTTPVerb.POST).setUrl(ResourceType.Group.name());
+		bundle.addEntry().setResource(researchStudy).setFullUrl(researchStudy.getIdElement().getIdPart()).getRequest()
+				.setMethod(HTTPVerb.POST).setUrl(ResourceType.ResearchStudy.name());
+		bundle.addEntry().setResource(task).setFullUrl(task.getIdElement().getIdPart()).getRequest()
+				.setMethod(HTTPVerb.POST).setUrl(ResourceType.Task.name());
+
+		return bundle;
+	}
+
+	private Group createGroup(String name)
 	{
 		Group group = new Group();
 		group.setIdElement(new IdType("urn:uuid:" + UUID.randomUUID().toString()));
@@ -130,7 +93,7 @@ public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter
 		return group;
 	}
 
-	private static ResearchStudy createResearchStudy(Group group1, Group group2)
+	private ResearchStudy createResearchStudy(Group group1, Group group2)
 	{
 		ResearchStudy researchStudy = new ResearchStudy();
 		researchStudy.setIdElement(new IdType("urn:uuid:" + UUID.randomUUID().toString()));
@@ -162,7 +125,7 @@ public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter
 		return researchStudy;
 	}
 
-	private static Task createTask(ResearchStudy researchStudy)
+	private Task createTask(ResearchStudy researchStudy)
 	{
 		Task task = new Task();
 		task.setIdElement(new IdType("urn:uuid:" + UUID.randomUUID().toString()));
