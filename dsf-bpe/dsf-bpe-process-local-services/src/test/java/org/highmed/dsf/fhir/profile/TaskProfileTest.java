@@ -1,5 +1,17 @@
 package org.highmed.dsf.fhir.profile;
 
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN;
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME;
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_QUERY_TYPE;
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_QUERY_TYPE_AQL;
+import static org.highmed.dsf.bpe.ConstantsBase.ORGANIZATION_IDENTIFIER_SYSTEM;
+import static org.highmed.dsf.bpe.variables.ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY;
+import static org.highmed.dsf.bpe.variables.ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_BLOOM_FILTER_CONFIG;
+import static org.highmed.dsf.bpe.variables.ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_CONSENT_CHECK;
+import static org.highmed.dsf.bpe.variables.ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_RECORD_LINKAGE;
+import static org.highmed.dsf.bpe.variables.ConstantsLocalServices.LOCAL_SERVICES_MESSAGE_NAME;
+import static org.highmed.dsf.bpe.variables.ConstantsLocalServices.LOCAL_SERVICES_PROCESS_URI_AND_LATEST_VERSION;
+import static org.highmed.dsf.bpe.variables.ConstantsLocalServices.LOCAL_SERVICES_TASK_PROFILE;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
@@ -11,6 +23,7 @@ import org.highmed.dsf.fhir.validation.ResourceValidatorImpl;
 import org.highmed.dsf.fhir.validation.ValidationSupportRule;
 import org.hl7.fhir.r4.model.Base64BinaryType;
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.junit.ClassRule;
@@ -45,41 +58,42 @@ public class TaskProfileTest
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
 
-		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
-				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream()
+				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
+						.equals(m.getSeverity())).count());
 	}
 
 	private Task createValidTaskLocalServiceIntegration()
 	{
 		Task task = new Task();
 
-		task.getMeta()
-				.addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-local-services-integration");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/localServicesIntegration/0.4.0");
+		task.getMeta().addProfile(LOCAL_SERVICES_TASK_PROFILE);
+		task.setInstantiatesUri(LOCAL_SERVICES_PROCESS_URI_AND_LATEST_VERSION);
 		task.setStatus(Task.TaskStatus.REQUESTED);
 		task.setIntent(Task.TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
 
-		task.getRequester().setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_MeDIC_1");
-		task.getRestriction().addRecipient().setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_MeDIC_1");
+		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
+				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("MeDIC");
+		task.getRestriction().addRecipient().setType(ResourceType.Organization.name()).getIdentifier()
+				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("MeDIC");
 
-		task.addInput().setValue(new StringType("localServicesIntegrationMessage")).getType().addCoding()
-				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("message-name");
+		task.addInput().setValue(new StringType(LOCAL_SERVICES_MESSAGE_NAME)).getType().addCoding()
+				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
 
 		task.addInput().setValue(new StringType("SELECT COUNT(e) FROM EHR e;")).getType().addCoding()
-				.setSystem("http://highmed.org/fhir/CodeSystem/query-type").setCode("application/x-aql-query");
-		task.addInput().setValue(new BooleanType(true)).getType().addCoding()
-				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("needs-consent-check");
-		task.addInput().setValue(new BooleanType(true)).getType().addCoding()
-				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("needs-record-linkage");
+				.setSystem(CODESYSTEM_QUERY_TYPE).setCode(CODESYSTEM_QUERY_TYPE_AQL);
+		task.addInput().setValue(new BooleanType(true)).getType().addCoding().setSystem(CODESYSTEM_HIGHMED_FEASIBILITY)
+				.setCode(CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_CONSENT_CHECK);
+		task.addInput().setValue(new BooleanType(true)).getType().addCoding().setSystem(CODESYSTEM_HIGHMED_FEASIBILITY)
+				.setCode(CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_RECORD_LINKAGE);
 
-		byte[] bloomFilterConfig = Base64.getDecoder().decode(
-				"CIw/x19d3Oj+GLOKgYAX5KrFAl11q6qMi0qkDiyUOCvMXuF2KffVvSnjUjkTvqh4z8Xs+MuQdK6FqTedM5FY9t4qm+k92A+P");
+		byte[] bloomFilterConfig = Base64.getDecoder()
+				.decode("CIw/x19d3Oj+GLOKgYAX5KrFAl11q6qMi0qkDiyUOCvMXuF2KffVvSnjUjkTvqh4z8Xs+MuQdK6FqTedM5FY9t4qm+k92A+P");
 
 		task.addInput().setValue(new Base64BinaryType(bloomFilterConfig)).getType().addCoding()
-				.setSystem("http://highmed.org/fhir/CodeSystem/feasibility").setCode("bloom-filter-configuration");
+				.setSystem(CODESYSTEM_HIGHMED_FEASIBILITY)
+				.setCode(CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_BLOOM_FILTER_CONFIG);
 
 		return task;
 	}

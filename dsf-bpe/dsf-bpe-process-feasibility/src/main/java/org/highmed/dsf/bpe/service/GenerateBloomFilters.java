@@ -1,5 +1,6 @@
 package org.highmed.dsf.bpe.service;
 
+import static org.highmed.dsf.bpe.ConstantsBase.OPENEHR_MIMETYPE_JSON;
 import static org.highmed.dsf.bpe.ConstantsBase.ORGANIZATION_IDENTIFIER_SYSTEM;
 
 import java.security.Key;
@@ -152,12 +153,12 @@ public class GenerateBloomFilters extends AbstractServiceDelegate
 		Reference securityContext = new Reference();
 		securityContext.setType(ResourceType.Organization.name()).getIdentifier()
 				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue(securityIdentifier);
-		Binary binary = new Binary().setContentType(ConstantsBase.OPENEHR_MIMETYPE_JSON)
-				.setSecurityContext(securityContext).setData(content);
+		Binary binary = new Binary().setContentType(OPENEHR_MIMETYPE_JSON).setSecurityContext(securityContext)
+				.setData(content);
 
 		IdType created = createBinaryResource(binary);
-		return new IdType(getFhirWebserviceClientProvider().getLocalBaseUrl(), ResourceType.Binary.name(), created.getIdPart(),
-				created.getVersionIdPart()).getValue();
+		return new IdType(getFhirWebserviceClientProvider().getLocalBaseUrl(), ResourceType.Binary.name(),
+				created.getIdPart(), created.getVersionIdPart()).getValue();
 	}
 
 	private byte[] serializeResultSet(ResultSet resultSet)

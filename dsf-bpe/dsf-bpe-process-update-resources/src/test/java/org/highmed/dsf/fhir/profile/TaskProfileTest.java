@@ -1,5 +1,18 @@
 package org.highmed.dsf.fhir.profile;
 
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN;
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY;
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME;
+import static org.highmed.dsf.bpe.ConstantsBase.ORGANIZATION_IDENTIFIER_SYSTEM;
+import static org.highmed.dsf.bpe.variables.ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE;
+import static org.highmed.dsf.bpe.variables.ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE;
+import static org.highmed.dsf.bpe.variables.ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_ORGANIZATION_IDENTIFIER_SEARCH_PARAMETER;
+import static org.highmed.dsf.bpe.variables.ConstantsUpdateResources.EXECUTE_UPDATE_RESOURCES_MESSAGE_NAME;
+import static org.highmed.dsf.bpe.variables.ConstantsUpdateResources.EXECUTE_UPDATE_RESOURCES_PROCESS_URI_AND_LATEST_VERSION;
+import static org.highmed.dsf.bpe.variables.ConstantsUpdateResources.EXECUTE_UPDATE_RESOURCES_TASK_PROFILE;
+import static org.highmed.dsf.bpe.variables.ConstantsUpdateResources.REQUEST_UPDATE_RESOURCES_MESSAGE_NAME;
+import static org.highmed.dsf.bpe.variables.ConstantsUpdateResources.REQUEST_UPDATE_RESOURCES_PROCESS_URI_AND_LATEST_VERSION;
+import static org.highmed.dsf.bpe.variables.ConstantsUpdateResources.REQUEST_UPDATE_RESOURCES_TASK_PROFILE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
@@ -18,6 +31,7 @@ import org.highmed.dsf.fhir.validation.ValidationSupportWithCustomResources;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Task;
@@ -81,23 +95,24 @@ public class TaskProfileTest
 	private Task createValidTaskRequestUpdateResources()
 	{
 		Task task = new Task();
-		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-request-update-resources");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/requestUpdateResources/0.4.0");
+		task.getMeta().addProfile(REQUEST_UPDATE_RESOURCES_TASK_PROFILE);
+		task.setInstantiatesUri(REQUEST_UPDATE_RESOURCES_PROCESS_URI_AND_LATEST_VERSION);
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
-		task.getRequester().setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_TTP");
-		task.getRestriction().addRecipient().setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_MeDIC_1");
+		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
+				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("TTP");
+		task.getRestriction().addRecipient().setType(ResourceType.Organization.name()).getIdentifier()
+				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("MeDIC 1");
 
-		task.addInput().setValue(new StringType("requestUpdateResourcesMessage")).getType().addCoding()
-				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("message-name");
+		task.addInput().setValue(new StringType(REQUEST_UPDATE_RESOURCES_MESSAGE_NAME )).getType().addCoding()
+				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
+
 		task.addInput().setValue(new Reference("Bundle/" + UUID.randomUUID().toString())).getType().addCoding()
-				.setSystem("http://highmed.org/fhir/CodeSystem/update-resources").setCode("bundle-reference");
+				.setSystem(CODESYSTEM_HIGHMED_UPDATE_RESOURCE).setCode(CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE);
 		task.addInput().setValue(new StringType("http://highmed.org/fhir/NamingSystem/organization-identifier|"))
-				.getType().addCoding().setSystem("http://highmed.org/fhir/CodeSystem/update-resources")
-				.setCode("organization-identifier-search-parameter");
+				.getType().addCoding().setSystem(CODESYSTEM_HIGHMED_UPDATE_RESOURCE)
+				.setCode(CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_ORGANIZATION_IDENTIFIER_SEARCH_PARAMETER);
 
 		return task;
 	}
@@ -117,22 +132,22 @@ public class TaskProfileTest
 	private Task createValidTaskExecuteUpdateResources()
 	{
 		Task task = new Task();
-		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-execute-update-resources");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/executeUpdateResources/0.4.0");
+		task.getMeta().addProfile(EXECUTE_UPDATE_RESOURCES_TASK_PROFILE);
+		task.setInstantiatesUri(EXECUTE_UPDATE_RESOURCES_PROCESS_URI_AND_LATEST_VERSION);
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
-		task.getRequester().setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_MeDIC_1");
-		task.getRestriction().addRecipient().setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_MeDIC_1");
+		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
+				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("MeDIC 1");
+		task.getRestriction().addRecipient().setType(ResourceType.Organization.name()).getIdentifier()
+				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("MeDIC 1");
 
-		task.addInput().setValue(new StringType("executeUpdateResourcesMessage")).getType().addCoding()
-				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("message-name");
+		task.addInput().setValue(new StringType(EXECUTE_UPDATE_RESOURCES_MESSAGE_NAME)).getType().addCoding()
+				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
 		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
-				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("business-key");
+				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY);
 		task.addInput().setValue(new Reference("Bundle/" + UUID.randomUUID().toString())).getType().addCoding()
-				.setSystem("http://highmed.org/fhir/CodeSystem/update-resources").setCode("bundle-reference");
+				.setSystem(CODESYSTEM_HIGHMED_UPDATE_RESOURCE).setCode(CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE);
 
 		return task;
 	}

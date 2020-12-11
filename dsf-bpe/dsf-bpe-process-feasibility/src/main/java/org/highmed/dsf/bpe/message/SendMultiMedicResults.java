@@ -1,7 +1,7 @@
 package org.highmed.dsf.bpe.message;
 
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN;
-import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE;
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -76,7 +76,7 @@ public class SendMultiMedicResults extends AbstractTaskMessageSend
 					task.getIdElement().getIdPart())).getReference();
 
 			Task.ParameterComponent input = getTaskHelper()
-					.createInput(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE,
+					.createInput(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR,
 							"Errors occurred for missing cohorts while calculating their multi medic feasibility "
 									+ "result, see task with url='" + taskUrl + "'");
 			return Stream.of(input);
@@ -89,6 +89,6 @@ public class SendMultiMedicResults extends AbstractTaskMessageSend
 	{
 		return outputs.stream().anyMatch(output -> output.getType().getCoding().stream().anyMatch(
 				coding -> coding.getSystem().equals(CODESYSTEM_HIGHMED_BPMN) && coding.getCode()
-						.equals(CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE)));
+						.equals(CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR)));
 	}
 }

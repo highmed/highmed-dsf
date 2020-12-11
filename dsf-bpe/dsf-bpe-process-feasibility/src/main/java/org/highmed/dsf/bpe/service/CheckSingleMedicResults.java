@@ -71,6 +71,6 @@ public class CheckSingleMedicResults extends AbstractServiceDelegate
 		logger.info(errorMessage);
 
 		task.getOutput().add(getTaskHelper().createOutput(ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
-				ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, errorMessage));
+				ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR, errorMessage));
 	}
 }

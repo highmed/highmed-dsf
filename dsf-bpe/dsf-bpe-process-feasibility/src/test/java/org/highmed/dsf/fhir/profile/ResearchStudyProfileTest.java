@@ -1,5 +1,10 @@
 package org.highmed.dsf.fhir.profile;
 
+import static org.highmed.dsf.bpe.ConstantsBase.ORGANIZATION_IDENTIFIER_SYSTEM;
+import static org.highmed.dsf.bpe.variables.ConstantsFeasibility.EXTENSION_PARTICIPATING_MEDIC_URI;
+import static org.highmed.dsf.bpe.variables.ConstantsFeasibility.EXTENSION_PARTICIPATING_TTP_URI;
+import static org.highmed.dsf.bpe.variables.ConstantsFeasibility.FEASIBILITY_RESEARCH_STUDY_PROFILE;
+import static org.highmed.dsf.bpe.variables.ConstantsFeasibility.RESEARCH_STUDY_IDENTIFIER_SYSTEM;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
@@ -11,6 +16,7 @@ import org.highmed.dsf.fhir.validation.ValidationSupportRule;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.ResearchStudy.ResearchStudyStatus;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -37,23 +43,23 @@ public class ResearchStudyProfileTest
 	public void testResearchStudyProfileValid() throws Exception
 	{
 		ResearchStudy res = new ResearchStudy();
-		res.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-research-study-feasibility");
-		res.getIdentifierFirstRep().setSystem("http://highmed.org/fhir/NamingSystem/research-study-identifier")
+		res.getMeta().addProfile(FEASIBILITY_RESEARCH_STUDY_PROFILE);
+		res.getIdentifierFirstRep().setSystem(RESEARCH_STUDY_IDENTIFIER_SYSTEM )
 				.setValue(UUID.randomUUID().toString());
 		res.setStatus(ResearchStudyStatus.ACTIVE);
 		res.addEnrollment().setReference("Group/" + UUID.randomUUID().toString());
-		Reference medicRef1 = new Reference().setType("Organization");
-		medicRef1.getIdentifier().setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
+		Reference medicRef1 = new Reference().setType(ResourceType.Organization.name());
+		medicRef1.getIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM)
 				.setValue("MeDIC 1");
-		res.addExtension("http://highmed.org/fhir/StructureDefinition/participating-medic", medicRef1);
-		Reference medicRef2 = new Reference().setType("Organization");
-		medicRef2.getIdentifier().setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
+		res.addExtension(EXTENSION_PARTICIPATING_MEDIC_URI, medicRef1);
+		Reference medicRef2 = new Reference().setType(ResourceType.Organization.name());
+		medicRef2.getIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM)
 				.setValue("MeDIC 2");
-		res.addExtension("http://highmed.org/fhir/StructureDefinition/participating-medic", medicRef2);
-		Reference ttpRef = new Reference().setType("Organization");
-		ttpRef.getIdentifier().setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
+		res.addExtension(EXTENSION_PARTICIPATING_MEDIC_URI, medicRef2);
+		Reference ttpRef = new Reference().setType(ResourceType.Organization.name());
+		ttpRef.getIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM)
 				.setValue("TTP");
-		res.addExtension("http://highmed.org/fhir/StructureDefinition/participating-ttp", ttpRef);
+		res.addExtension(EXTENSION_PARTICIPATING_TTP_URI, ttpRef);
 
 		ValidationResult result = resourceValidator.validate(res);
 		result.getMessages().stream().map(m -> m.getLocationString() + " " + m.getLocationLine() + ":"

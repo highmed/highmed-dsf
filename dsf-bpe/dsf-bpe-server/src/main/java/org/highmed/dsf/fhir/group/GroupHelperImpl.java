@@ -1,9 +1,11 @@
 package org.highmed.dsf.fhir.group;
 
+import static org.highmed.dsf.bpe.ConstantsBase.AQL_QUERY_TYPE;
+import static org.highmed.dsf.bpe.ConstantsBase.EXTENSION_QUERY_URI;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.highmed.dsf.bpe.ConstantsBase;
 import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Group;
@@ -18,13 +20,13 @@ public class GroupHelperImpl implements GroupHelper
 	public String extractAqlQuery(Group group)
 	{
 		List<Extension> queries = group.getExtension().stream()
-				.filter(extension -> extension.getUrl().equals(ConstantsBase.EXTENSION_QUERY_URI)).filter(extension ->
-						ConstantsBase.AQL_QUERY_TYPE.compareTo(((Expression) extension.getValue()).getLanguageElement())
-								== 0).collect(Collectors.toList());
+				.filter(extension -> extension.getUrl().equals(EXTENSION_QUERY_URI))
+				.filter(extension -> AQL_QUERY_TYPE.compareTo(((Expression) extension.getValue()).getLanguageElement())
+						== 0).collect(Collectors.toList());
 
 		if (queries.size() != 1)
 		{
-			logger.error("Number of aql queries is not =1, got {}", queries.size());
+			logger.error("Number of aql queries is not 1, got {}", queries.size());
 			throw new IllegalArgumentException("Number of aql queries is not =1, got " + queries.size());
 		}
 

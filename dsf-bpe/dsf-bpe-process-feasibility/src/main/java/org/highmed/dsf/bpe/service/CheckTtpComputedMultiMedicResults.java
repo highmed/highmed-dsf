@@ -1,7 +1,7 @@
 package org.highmed.dsf.bpe.service;
 
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN;
-import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE;
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR;
 import static org.highmed.dsf.bpe.variables.ConstantsFeasibility.ERROR_CODE_MULTI_MEDIC_RESULT;
 
 import java.util.List;
@@ -67,7 +67,7 @@ public class CheckTtpComputedMultiMedicResults extends AbstractServiceDelegate
 						result.getCohortId(), taskId, businessKey, correlationKey);
 
 				leadingTask.getOutput().add(getTaskHelper()
-						.createOutput(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE,
+						.createOutput(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR,
 								"Removed result with cohort id='" + result.getCohortId()
 										+ "' from feasibility request because of not enough participating MeDICs"));
 
@@ -93,7 +93,7 @@ public class CheckTtpComputedMultiMedicResults extends AbstractServiceDelegate
 					businessKey, correlationKey);
 
 			leadingTask.getOutput().add(getTaskHelper()
-					.createOutput(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE,
+					.createOutput(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR,
 							"Did not receive enough results from participating MeDICs for any cohort definition"));
 
 			return false;

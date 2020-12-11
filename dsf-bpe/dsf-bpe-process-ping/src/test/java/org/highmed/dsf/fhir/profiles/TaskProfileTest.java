@@ -1,5 +1,18 @@
 package org.highmed.dsf.fhir.profiles;
 
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN;
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY;
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY;
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME;
+import static org.highmed.dsf.bpe.ConstantsBase.ORGANIZATION_IDENTIFIER_SYSTEM;
+import static org.highmed.dsf.bpe.variables.ConstantsPing.PING_MESSAGE_NAME;
+import static org.highmed.dsf.bpe.variables.ConstantsPing.PING_PROCESS_URI_AND_LATEST_VERSION;
+import static org.highmed.dsf.bpe.variables.ConstantsPing.PING_TASK_PROFILE;
+import static org.highmed.dsf.bpe.variables.ConstantsPing.PONG_MESSAGE_NAME;
+import static org.highmed.dsf.bpe.variables.ConstantsPing.PONG_PROCESS_URI_AND_LATEST_VERSION;
+import static org.highmed.dsf.bpe.variables.ConstantsPing.PONG_TASK_PROFILE;
+import static org.highmed.dsf.bpe.variables.ConstantsPing.START_PING_MESSAGE_NAME;
+import static org.highmed.dsf.bpe.variables.ConstantsPing.START_PING_TASK_PROFILE;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
@@ -9,6 +22,7 @@ import java.util.UUID;
 import org.highmed.dsf.fhir.validation.ResourceValidator;
 import org.highmed.dsf.fhir.validation.ResourceValidatorImpl;
 import org.highmed.dsf.fhir.validation.ValidationSupportRule;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.TaskIntent;
@@ -28,8 +42,7 @@ public class TaskProfileTest
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
 			Arrays.asList("highmed-task-base-0.4.0.xml", "highmed-task-start-ping-process.xml", "highmed-task-ping.xml",
-					"highmed-task-pong.xml"),
-			Arrays.asList("authorization-role-0.4.0.xml", "bpmn-message-0.4.0.xml"),
+					"highmed-task-pong.xml"), Arrays.asList("authorization-role-0.4.0.xml", "bpmn-message-0.4.0.xml"),
 			Arrays.asList("authorization-role-0.4.0.xml", "bpmn-message-0.4.0.xml"));
 
 	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
@@ -43,8 +56,9 @@ public class TaskProfileTest
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
 
-		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
-				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream()
+				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
+						.equals(m.getSeverity())).count());
 	}
 
 	@Test
@@ -56,8 +70,9 @@ public class TaskProfileTest
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
 
-		assertEquals(1, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
-				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+		assertEquals(1, result.getMessages().stream()
+				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
+						.equals(m.getSeverity())).count());
 	}
 
 	@Test
@@ -69,8 +84,9 @@ public class TaskProfileTest
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
 
-		assertEquals(1, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
-				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+		assertEquals(1, result.getMessages().stream()
+				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
+						.equals(m.getSeverity())).count());
 	}
 
 	@Test
@@ -82,25 +98,26 @@ public class TaskProfileTest
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
 
-		assertEquals(1, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
-				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+		assertEquals(1, result.getMessages().stream()
+				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
+						.equals(m.getSeverity())).count());
 	}
 
 	private Task createValidTaskStartPingProcess()
 	{
 		Task task = new Task();
-		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-ping-process");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.4.0");
+		task.getMeta().addProfile(START_PING_TASK_PROFILE);
+		task.setInstantiatesUri(PING_PROCESS_URI_AND_LATEST_VERSION);
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
-		task.getRequester().setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_TTP");
-		task.getRestriction().addRecipient().setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_TTP");
+		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
+				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("TTP");
+		task.getRestriction().addRecipient().setType(ResourceType.Organization.name()).getIdentifier()
+				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("TTP");
 
-		task.addInput().setValue(new StringType("startPingProcessMessage")).getType().addCoding()
-				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("message-name");
+		task.addInput().setValue(new StringType(START_PING_MESSAGE_NAME)).getType().addCoding()
+				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
 
 		return task;
 	}
@@ -113,29 +130,30 @@ public class TaskProfileTest
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
 
-		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
-				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream()
+				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
+						.equals(m.getSeverity())).count());
 	}
 
 	private Task createValidTaskPing()
 	{
 		Task task = new Task();
-		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-ping");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/pong/0.4.0");
+		task.getMeta().addProfile(PING_TASK_PROFILE);
+		task.setInstantiatesUri(PONG_PROCESS_URI_AND_LATEST_VERSION);
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
-		task.getRequester().setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_TTP");
-		task.getRestriction().addRecipient().setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_MeDIC_1");
+		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
+				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("TTP");
+		task.getRestriction().addRecipient().setType(ResourceType.Organization.name()).getIdentifier()
+				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("MeDIC 1");
 
-		task.addInput().setValue(new StringType("pingMessage")).getType().addCoding()
-				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("message-name");
+		task.addInput().setValue(new StringType(PING_MESSAGE_NAME)).getType().addCoding()
+				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
 		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
-				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("business-key");
+				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY);
 		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
-				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("correlation-key");
+				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY);
 
 		return task;
 	}
@@ -148,29 +166,30 @@ public class TaskProfileTest
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
 
-		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
-				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream()
+				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
+						.equals(m.getSeverity())).count());
 	}
 
 	private Task createValidTaskPong()
 	{
 		Task task = new Task();
-		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-pong");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.4.0");
+		task.getMeta().addProfile(PONG_TASK_PROFILE);
+		task.setInstantiatesUri(PING_PROCESS_URI_AND_LATEST_VERSION);
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
-		task.getRequester().setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_MeDIC_1");
-		task.getRestriction().addRecipient().setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_TTP");
+		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
+				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("MeDIC 1");
+		task.getRestriction().addRecipient().setType(ResourceType.Organization.name()).getIdentifier()
+				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("TTP");
 
-		task.addInput().setValue(new StringType("pongMessage")).getType().addCoding()
-				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("message-name");
+		task.addInput().setValue(new StringType(PONG_MESSAGE_NAME)).getType().addCoding()
+				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
 		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
-				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("business-key");
+				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY);
 		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
-				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("correlation-key");
+				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY);
 
 		return task;
 	}

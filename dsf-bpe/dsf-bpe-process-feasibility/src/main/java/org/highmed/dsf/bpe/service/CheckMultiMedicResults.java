@@ -49,10 +49,10 @@ public class CheckMultiMedicResults extends AbstractServiceDelegate
 		toRead.getInput().stream()
 				.filter(in -> in.hasType() && in.getType().hasCoding() && ConstantsBase.CODESYSTEM_HIGHMED_BPMN
 						.equals(in.getType().getCodingFirstRep().getSystem())
-						&& ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE
+						&& ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR
 						.equals(in.getType().getCodingFirstRep().getCode())).forEach(in -> toWrite.getOutput()
 				.add(getTaskHelper().createOutput(ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
-						ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, in.getValue().primitiveValue())));
+						ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR, in.getValue().primitiveValue())));
 	}
 
 	private FinalFeasibilityQueryResults readFinalFeasibilityQueryResultsFromCurrentTask(Task task)

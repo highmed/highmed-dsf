@@ -1,5 +1,16 @@
 package org.highmed.dsf.fhir.profile;
 
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN;
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME;
+import static org.highmed.dsf.bpe.ConstantsBase.ORGANIZATION_IDENTIFIER_SYSTEM;
+import static org.highmed.dsf.bpe.variables.ConstantsUpdateAllowList.CODESYSTEM_HIGHMED_UPDATE_ALLOW_LIST;
+import static org.highmed.dsf.bpe.variables.ConstantsUpdateAllowList.CODESYSTEM_HIGHMED_UPDATE_ALLOW_LIST_VALUE_ALLOW_LIST;
+import static org.highmed.dsf.bpe.variables.ConstantsUpdateAllowList.DOWNLOAD_ALLOW_LIST_MESSAGE_NAME;
+import static org.highmed.dsf.bpe.variables.ConstantsUpdateAllowList.DOWNLOAD_ALLOW_LIST_PROCESS_URI_AND_LATEST_VERSION;
+import static org.highmed.dsf.bpe.variables.ConstantsUpdateAllowList.DOWNLOAD_ALLOW_LIST_TASK_PROFILE;
+import static org.highmed.dsf.bpe.variables.ConstantsUpdateAllowList.UPDATE_ALLOW_LIST_MESSAGE_NAME;
+import static org.highmed.dsf.bpe.variables.ConstantsUpdateAllowList.UPDATE_ALLOW_LIST_PROCESS_URI_AND_LATEST_VERSION;
+import static org.highmed.dsf.bpe.variables.ConstantsUpdateAllowList.UPDATE_ALLOW_LIST_TASK_PROFILE;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
@@ -11,6 +22,7 @@ import org.highmed.dsf.fhir.validation.ResourceValidatorImpl;
 import org.highmed.dsf.fhir.validation.ValidationSupportRule;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.TaskIntent;
@@ -54,8 +66,8 @@ public class TaskProfileTest
 	{
 		Task task = createValidTaskUpdateAllowList();
 		task.addOutput().setValue(new Reference(new IdType("Bundle", UUID.randomUUID().toString(), "1"))).getType()
-				.addCoding().setSystem("http://highmed.org/fhir/CodeSystem/update-allow-list")
-				.setCode("highmed_allow_list");
+				.addCoding().setSystem(CODESYSTEM_HIGHMED_UPDATE_ALLOW_LIST)
+				.setCode(CODESYSTEM_HIGHMED_UPDATE_ALLOW_LIST_VALUE_ALLOW_LIST);
 
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
@@ -67,49 +79,18 @@ public class TaskProfileTest
 	private Task createValidTaskUpdateAllowList()
 	{
 		Task task = new Task();
-		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-update-allow-list");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/updateAllowList/0.4.0");
+		task.getMeta().addProfile(UPDATE_ALLOW_LIST_TASK_PROFILE);
+		task.setInstantiatesUri(UPDATE_ALLOW_LIST_PROCESS_URI_AND_LATEST_VERSION);
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
-		task.getRequester().setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_TTP");
-		task.getRestriction().addRecipient().setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_TTP");
+		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
+				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("TTP");
+		task.getRestriction().addRecipient().setType(ResourceType.Organization.name()).getIdentifier()
+				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("TTP");
 
-		task.addInput().setValue(new StringType("updateAllowListMessage")).getType().addCoding()
-				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("message-name");
-
-		return task;
-	}
-
-	@Test
-	public void testTaskRequestUpdateResourcesAllowListValid() throws Exception
-	{
-		Task task = createValidTaskRequestUpdateAllowListResources();
-
-		ValidationResult result = resourceValidator.validate(task);
-		ValidationSupportRule.logValidationMessages(logger, result);
-
-		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
-				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
-	}
-
-	private Task createValidTaskRequestUpdateAllowListResources()
-	{
-		Task task = new Task();
-		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-update-allow-list");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/updateAllowList/0.4.0");
-		task.setStatus(TaskStatus.REQUESTED);
-		task.setIntent(TaskIntent.ORDER);
-		task.setAuthoredOn(new Date());
-		task.getRequester().setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_TTP");
-		task.getRestriction().addRecipient().setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_TTP");
-
-		task.addInput().setValue(new StringType("updateAllowListMessage")).getType().addCoding()
-				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("message-name");
+		task.addInput().setValue(new StringType(UPDATE_ALLOW_LIST_MESSAGE_NAME)).getType().addCoding()
+				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
 
 		return task;
 	}
@@ -129,23 +110,23 @@ public class TaskProfileTest
 	private Task createValidTaskDownloadAllowList()
 	{
 		Task task = new Task();
-		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-download-allow-list");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/downloadAllowList/0.4.0");
+		task.getMeta().addProfile(DOWNLOAD_ALLOW_LIST_TASK_PROFILE);
+		task.setInstantiatesUri(DOWNLOAD_ALLOW_LIST_PROCESS_URI_AND_LATEST_VERSION);
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
-		task.getRequester().setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_MeDIC_1");
-		task.getRestriction().addRecipient().setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_MeDIC_1");
+		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
+				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("MeDIC 1");
+		task.getRestriction().addRecipient().setType(ResourceType.Organization.name()).getIdentifier()
+				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM ).setValue("MeDIC 1");
 
-		task.addInput().setValue(new StringType("downloadAllowListMessage")).getType().addCoding()
-				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("message-name");
+		task.addInput().setValue(new StringType(DOWNLOAD_ALLOW_LIST_MESSAGE_NAME)).getType().addCoding()
+				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
 		task.addInput()
 				.setValue(
 						new Reference(new IdType("https://foo.bar/fhir", "Bundle", UUID.randomUUID().toString(), "1")))
-				.getType().addCoding().setSystem("http://highmed.org/fhir/CodeSystem/update-allow-list")
-				.setCode("highmed_allow_list");
+				.getType().addCoding().setSystem(CODESYSTEM_HIGHMED_UPDATE_ALLOW_LIST)
+				.setCode(CODESYSTEM_HIGHMED_UPDATE_ALLOW_LIST_VALUE_ALLOW_LIST);
 
 		return task;
 	}

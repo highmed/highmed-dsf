@@ -1,5 +1,9 @@
 package org.highmed.dsf.fhir.profile;
 
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_QUERY_TYPE;
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_QUERY_TYPE_AQL;
+import static org.highmed.dsf.bpe.ConstantsBase.EXTENSION_QUERY_URI;
+import static org.highmed.dsf.bpe.variables.ConstantsFeasibility.GROUP_PROFILE;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
@@ -36,20 +40,20 @@ public class GroupProfileTest
 	public void testGroupProfileValid() throws Exception
 	{
 		Group group = new Group();
-		group.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-group");
+		group.getMeta().addProfile(GROUP_PROFILE);
 		group.setType(GroupType.PERSON);
 		group.setActual(false);
-		group.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/query")
-				.setValue(new Expression()
-						.setLanguageElement(new CodeType("application/x-aql-query")
-								.setSystem("http://highmed.org/fhir/CodeSystem/query-type"))
-						.setExpression("SELECT COUNT(e) FROM EHR e"));
+		group.addExtension().setUrl(EXTENSION_QUERY_URI).setValue(new Expression()
+				.setLanguageElement(new CodeType(CODESYSTEM_QUERY_TYPE_AQL).setSystem(CODESYSTEM_QUERY_TYPE))
+				.setExpression("SELECT COUNT(e) FROM EHR e"));
 
 		ValidationResult result = resourceValidator.validate(group);
-		result.getMessages().stream().map(m -> m.getLocationString() + " " + m.getLocationLine() + ":"
-				+ m.getLocationCol() + " - " + m.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
+		result.getMessages().stream()
+				.map(m -> m.getLocationString() + " " + m.getLocationLine() + ":" + m.getLocationCol() + " - " + m
+						.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
 
-		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
-				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream()
+				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
+						.equals(m.getSeverity())).count());
 	}
 }

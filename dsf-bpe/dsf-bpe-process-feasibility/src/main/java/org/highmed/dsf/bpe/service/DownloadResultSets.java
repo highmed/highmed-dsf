@@ -1,5 +1,7 @@
 package org.highmed.dsf.bpe.service;
 
+import static org.highmed.dsf.bpe.ConstantsBase.OPENEHR_MIMETYPE_JSON;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -9,14 +11,13 @@ import java.util.stream.Collectors;
 import javax.ws.rs.core.MediaType;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.bpe.variables.ConstantsFeasibility;
-import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
-import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.bpe.variables.FeasibilityQueryResult;
 import org.highmed.dsf.bpe.variables.FeasibilityQueryResults;
 import org.highmed.dsf.bpe.variables.FeasibilityQueryResultsValues;
+import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
+import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.highmed.openehr.model.structure.ResultSet;
 import org.hl7.fhir.r4.model.IdType;
@@ -80,7 +81,7 @@ public class DownloadResultSets extends AbstractServiceDelegate
 		try
 		{
 			logger.info("Reading binary from {} with id {}", client.getBaseUrl(), id);
-			return client.readBinary(id, MediaType.valueOf(ConstantsBase.OPENEHR_MIMETYPE_JSON));
+			return client.readBinary(id, MediaType.valueOf(OPENEHR_MIMETYPE_JSON));
 		}
 		catch (Exception e)
 		{

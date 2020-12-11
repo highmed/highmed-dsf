@@ -75,7 +75,7 @@ public class TaskHandler implements InitializingBean
 		catch (Exception exception)
 		{
 			Task.TaskOutputComponent errorOutput = taskHelper.createOutput(ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
-					ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, exception.getMessage());
+					ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR, exception.getMessage());
 			task.addOutput(errorOutput);
 			task.setStatus(Task.TaskStatus.FAILED);
 			webserviceClient.update(task);

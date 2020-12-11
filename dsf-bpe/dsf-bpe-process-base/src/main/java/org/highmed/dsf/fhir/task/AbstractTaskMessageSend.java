@@ -88,7 +88,7 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 
 			Task task = getLeadingTaskFromExecutionVariables();
 			task.addOutput(getTaskHelper().createOutput(ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
-					ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, errorMessage));
+					ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR, errorMessage));
 		}
 	}
 
