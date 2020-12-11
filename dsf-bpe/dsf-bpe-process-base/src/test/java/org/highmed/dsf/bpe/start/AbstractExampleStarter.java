@@ -23,17 +23,17 @@ public abstract class AbstractExampleStarter
 	private final String certificatePath;
 	private final char[] certificatePassword;
 
-	public AbstractExampleStarter()
+	protected AbstractExampleStarter()
 	{
 		this("../../dsf-tools/dsf-tools-test-data-generator/cert/Webbrowser_Test_User/Webbrowser_Test_User_certificate.p12");
 	}
 
-	public AbstractExampleStarter(String certificatePath)
+	protected AbstractExampleStarter(String certificatePath)
 	{
 		this(certificatePath, "password");
 	}
 
-	public AbstractExampleStarter(String certificatePath, String certificatePassword)
+	protected AbstractExampleStarter(String certificatePath, String certificatePassword)
 	{
 		this.certificatePath = certificatePath;
 		this.certificatePassword = certificatePassword.toCharArray();
@@ -94,5 +94,5 @@ public abstract class AbstractExampleStarter
 	 *
 	 * @return the resource that should be used to start a process
 	 */
-	public abstract Resource createStartResource() throws Exception;
+	protected abstract Resource createStartResource() throws Exception;
 }

@@ -40,7 +40,7 @@ public class LocalServicesMedic1ExampleStarter extends AbstractExampleStarter
 	}
 
 	@Override
-	public Resource createStartResource()
+	protected Resource createStartResource()
 	{
 		Task task = new Task();
 

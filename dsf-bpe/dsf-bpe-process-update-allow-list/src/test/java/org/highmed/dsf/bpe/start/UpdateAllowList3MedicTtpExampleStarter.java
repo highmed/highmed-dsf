@@ -26,7 +26,7 @@ public class UpdateAllowList3MedicTtpExampleStarter extends AbstractExampleStart
 	}
 
 	@Override
-	public Resource createStartResource()
+	protected Resource createStartResource()
 	{
 		Task task = new Task();
 		task.getMeta().addProfile(UPDATE_ALLOW_LIST_TASK_PROFILE);

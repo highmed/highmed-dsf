@@ -35,7 +35,7 @@ public class DownloadAllowListFromTtpViaMedic1ExampleStarter extends AbstractExa
 	}
 
 	@Override
-	public Resource createStartResource() throws Exception
+	protected Resource createStartResource() throws Exception
 	{
 		Bundle allowList = getAllowList();
 

@@ -54,7 +54,7 @@ public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter extends A
 	}
 
 	@Override
-	public Resource createStartResource()
+	protected Resource createStartResource()
 	{
 		Group group1 = createGroup("Group 1");
 		Group group2 = createGroup("Group 2");

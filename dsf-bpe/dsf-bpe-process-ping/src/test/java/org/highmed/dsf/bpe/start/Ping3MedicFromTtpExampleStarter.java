@@ -26,7 +26,7 @@ public class Ping3MedicFromTtpExampleStarter extends AbstractExampleStarter
 	}
 
 	@Override
-	public Resource createStartResource()
+	protected Resource createStartResource()
 	{
 		Task task = new Task();
 		task.getMeta().addProfile(START_PING_TASK_PROFILE);

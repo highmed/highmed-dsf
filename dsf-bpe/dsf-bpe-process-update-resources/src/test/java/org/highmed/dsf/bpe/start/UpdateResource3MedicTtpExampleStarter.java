@@ -35,7 +35,7 @@ public class UpdateResource3MedicTtpExampleStarter extends AbstractExampleStarte
 	}
 
 	@Override
-	public Resource createStartResource() throws Exception
+	protected Resource createStartResource() throws Exception
 	{
 		Bundle allowList = getAllowList();
 
