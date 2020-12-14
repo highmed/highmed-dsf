@@ -11,22 +11,25 @@ import static org.highmed.dsf.bpe.variables.ConstantsUpdateAllowList.UPDATE_ALLO
 
 import java.util.Date;
 
-import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.TaskIntent;
 import org.hl7.fhir.r4.model.Task.TaskStatus;
 
-public class UpdateAllowList3MedicTtpExampleStarter extends AbstractExampleStarter
+public class UpdateAllowList3MedicTtpExampleStarter
 {
+	// args[0] the path to the client-certificate
+	//    highmed-dsf/dsf-tools/dsf-tools-test-data-generator/cert/Webbrowser_Test_User/Webbrowser_Test_User_certificate.p12
+	// args[1] the password of the client-certificate
+	//    password
 	public static void main(String[] args) throws Exception
 	{
-		new UpdateAllowList3MedicTtpExampleStarter().startAt(TTP_FHIR_BASE_URL);
+		Task task = createStartResource();
+		ExampleStarter.forServer(args, TTP_FHIR_BASE_URL).startWith(task);
 	}
 
-	@Override
-	protected Resource createStartResource()
+	private static Task createStartResource()
 	{
 		Task task = new Task();
 		task.getMeta().addProfile(UPDATE_ALLOW_LIST_TASK_PROFILE);

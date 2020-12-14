@@ -20,24 +20,28 @@ import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.TaskIntent;
 import org.hl7.fhir.r4.model.Task.TaskStatus;
 
-public class DownloadAllowListFromTtpViaMedic1ExampleStarter extends AbstractExampleStarter
+public class DownloadAllowListFromTtpViaMedic1ExampleStarter
 {
+	// args[0] the path to the client-certificate
+	//    highmed-dsf/dsf-tools/dsf-tools-test-data-generator/cert/Webbrowser_Test_User/Webbrowser_Test_User_certificate.p12
+	// args[1] the password of the client-certificate
+	//    password
 	public static void main(String[] args) throws Exception
 	{
-		new DownloadAllowListFromTtpViaMedic1ExampleStarter().startAt(MEDIC_1_FHIR_BASE_URL);
+		ExampleStarter starter = ExampleStarter.forServer(args, MEDIC_1_FHIR_BASE_URL);
+		Task task = createStartResource(starter);
+		starter.startWith(task);
 	}
 
-	@Override
-	protected Resource createStartResource() throws Exception
+	private static Task createStartResource(ExampleStarter starter) throws Exception
 	{
-		Bundle allowList = getAllowList();
+		Bundle allowList = getAllowList(starter);
 
 		Task task = new Task();
 		task.getMeta().addProfile(DOWNLOAD_ALLOW_LIST_TASK_PROFILE);
@@ -61,9 +65,9 @@ public class DownloadAllowListFromTtpViaMedic1ExampleStarter extends AbstractExa
 		return task;
 	}
 
-	private Bundle getAllowList() throws Exception
+	private static Bundle getAllowList(ExampleStarter starter) throws Exception
 	{
-		FhirWebserviceClient client = createClient(TTP_FHIR_BASE_URL);
+		FhirWebserviceClient client = starter.createClient(TTP_FHIR_BASE_URL);
 		Bundle searchResult = client.searchWithStrictHandling(Bundle.class, Map.of("identifier",
 				Collections.singletonList("http://highmed.org/fhir/CodeSystem/update-allow-list|highmed_allow_list")));
 

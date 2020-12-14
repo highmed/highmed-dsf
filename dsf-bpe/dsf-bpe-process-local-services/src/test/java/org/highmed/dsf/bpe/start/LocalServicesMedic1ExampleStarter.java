@@ -24,23 +24,26 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.highmed.dsf.bpe.variables.BloomFilterConfig;
 import org.hl7.fhir.r4.model.Base64BinaryType;
 import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 
-public class LocalServicesMedic1ExampleStarter extends AbstractExampleStarter
+public class LocalServicesMedic1ExampleStarter
 {
 	private static boolean NEEDS_CONSENT_CHECK = true;
 	private static boolean NEEDS_RECORD_LINKAGE = true;
 
+	// args[0] the path to the client-certificate
+	//    highmed-dsf/dsf-tools/dsf-tools-test-data-generator/cert/Webbrowser_Test_User/Webbrowser_Test_User_certificate.p12
+	// args[1] the password of the client-certificate
+	//    password
 	public static void main(String[] args) throws Exception
 	{
-		new LocalServicesMedic1ExampleStarter().startAt(MEDIC_1_FHIR_BASE_URL);
+		Task task = createStartResource();
+		ExampleStarter.forServer(args, MEDIC_1_FHIR_BASE_URL).startWith(task);
 	}
 
-	@Override
-	protected Resource createStartResource()
+	private static Task createStartResource()
 	{
 		Task task = new Task();
 

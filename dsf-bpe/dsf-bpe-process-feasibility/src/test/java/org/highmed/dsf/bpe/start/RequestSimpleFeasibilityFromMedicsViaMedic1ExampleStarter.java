@@ -39,22 +39,25 @@ import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.ResearchStudy.ResearchStudyStatus;
-import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.TaskIntent;
 import org.hl7.fhir.r4.model.Task.TaskStatus;
 
-public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter extends AbstractExampleStarter
+public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter
 {
+	// args[0] the path to the client-certificate
+	//    highmed-dsf/dsf-tools/dsf-tools-test-data-generator/cert/Webbrowser_Test_User/Webbrowser_Test_User_certificate.p12
+	// args[1] the password of the client-certificate
+	//    password
 	public static void main(String[] args) throws Exception
 	{
-		new RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter().startAt(MEDIC_1_FHIR_BASE_URL);
+		Bundle bundle = createStartResource();
+		ExampleStarter.forServer(args, MEDIC_1_FHIR_BASE_URL).startWith(bundle);
 	}
 
-	@Override
-	protected Resource createStartResource()
+	private static Bundle createStartResource()
 	{
 		Group group1 = createGroup("Group 1");
 		Group group2 = createGroup("Group 2");
@@ -75,7 +78,7 @@ public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter extends A
 		return bundle;
 	}
 
-	private Group createGroup(String name)
+	private static Group createGroup(String name)
 	{
 		Group group = new Group();
 		group.setIdElement(new IdType("urn:uuid:" + UUID.randomUUID().toString()));
@@ -93,7 +96,7 @@ public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter extends A
 		return group;
 	}
 
-	private ResearchStudy createResearchStudy(Group group1, Group group2)
+	private static ResearchStudy createResearchStudy(Group group1, Group group2)
 	{
 		ResearchStudy researchStudy = new ResearchStudy();
 		researchStudy.setIdElement(new IdType("urn:uuid:" + UUID.randomUUID().toString()));
@@ -125,7 +128,7 @@ public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter extends A
 		return researchStudy;
 	}
 
-	private Task createTask(ResearchStudy researchStudy)
+	private static Task createTask(ResearchStudy researchStudy)
 	{
 		Task task = new Task();
 		task.setIdElement(new IdType("urn:uuid:" + UUID.randomUUID().toString()));
