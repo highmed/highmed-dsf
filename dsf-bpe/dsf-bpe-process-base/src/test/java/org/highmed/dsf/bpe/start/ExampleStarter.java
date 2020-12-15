@@ -1,5 +1,8 @@
 package org.highmed.dsf.bpe.start;
 
+import static org.highmed.dsf.bpe.start.ConstantsExampleStarters.ENV_DSF_CLIENT_CERTIFICATE_PASSWORD;
+import static org.highmed.dsf.bpe.start.ConstantsExampleStarters.ENV_DSF_CLIENT_CERTIFICATE_PATH;
+
 import java.nio.file.Paths;
 import java.security.KeyStore;
 
@@ -20,17 +23,58 @@ import de.rwh.utils.crypto.io.CertificateReader;
 
 public class ExampleStarter
 {
+	/**
+	 * Creates an object to send start-process-messages to a given FHIR-Endpoint baseUrl based on the
+	 * provided client-certificate path and client-certificate password.
+	 *
+	 * The client-certificate path is first read from the environment variable
+	 * {@link ConstantsExampleStarters#ENV_DSF_CLIENT_CERTIFICATE_PATH}.
+	 * If args[0] is set, the environment variable is overwritten by args[0].
+	 *
+	 * The client-certificate password is first read from the environment variable
+	 * {@link ConstantsExampleStarters#ENV_DSF_CLIENT_CERTIFICATE_PASSWORD}.
+	 * If args[1] is set, the environment variable is overwritten by args[1].
+	 *
+	 * @param args client-certificate arguments:
+	 *                args[0] can be the path of the client-certificate
+	 *                args[1] can be the password of the client-certificate
+	 * @param baseUrl the baseUrl of the organization's FHIR-Endpoint
+	 * @return initialized ExampleStarter instance
+	 */
 	public static ExampleStarter forServer(String[] args, String baseUrl)
 	{
-		if (args.length != 2)
-			throw new IllegalArgumentException(
-					"Expects 2 args: 1. certificate path, 2. certificate password, found " + args.length);
+		String certificatePath = System.getenv(ENV_DSF_CLIENT_CERTIFICATE_PATH);
+		String certificatePassword = System.getenv(ENV_DSF_CLIENT_CERTIFICATE_PASSWORD);
 
-		return ExampleStarter.forServer(args[0], args[1], baseUrl);
+		if (args.length > 0 && !args[0].isBlank())
+			certificatePath = args[0];
+
+		if (args.length > 1 && !args[1].isBlank())
+			certificatePassword = args[1];
+
+		return ExampleStarter.forServer(certificatePath, certificatePassword, baseUrl);
 	}
 
+	/**
+	 * Creates an object to send start-process-messages to a given FHIR-Endpoint baseUrl based on the
+	 * provided client-certificate path and client-certificate password.
+	 *
+	 * @param certificatePath     the path of the client-certificate
+	 * @param certificatePassword the password of the client-certificate
+	 * @param baseUrl             the baseUrl of the organization's FHIR-Endpoint
+	 * @return initialized ExampleStarter instance
+	 */
 	public static ExampleStarter forServer(String certificatePath, String certificatePassword, String baseUrl)
 	{
+		if (certificatePath.isBlank())
+			throw new IllegalArgumentException("certificatePath is blank");
+
+		if (certificatePassword.isBlank())
+			throw new IllegalArgumentException("certificatePassword is blank");
+
+		if (baseUrl.isBlank())
+			throw new IllegalArgumentException("baseUrl is blank");
+
 		return new ExampleStarter(certificatePath, certificatePassword, baseUrl);
 	}
 

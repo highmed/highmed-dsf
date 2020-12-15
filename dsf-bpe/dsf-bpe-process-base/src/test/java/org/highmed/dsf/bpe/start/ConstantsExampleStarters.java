@@ -2,6 +2,9 @@ package org.highmed.dsf.bpe.start;
 
 public interface ConstantsExampleStarters
 {
+	String ENV_DSF_CLIENT_CERTIFICATE_PATH = "DSF_CLIENT_CERTIFICATE_PATH";
+	String ENV_DSF_CLIENT_CERTIFICATE_PASSWORD = "DSF_CLIENT_CERTIFICATE_PASSWORD";
+
 	String TTP_FHIR_BASE_URL = "https://ttp/fhir/";
 	String ORGANIZATION_IDENTIFIER_VALUE_TTP = "Test_TTP";
 
