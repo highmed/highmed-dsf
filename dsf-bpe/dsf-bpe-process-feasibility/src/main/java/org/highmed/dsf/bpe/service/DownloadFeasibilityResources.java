@@ -1,6 +1,6 @@
 package org.highmed.dsf.bpe.service;
 
-import static org.highmed.dsf.bpe.variables.ConstantsFeasibility.EXTENSION_PARTICIPATING_TTP_URI;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.EXTENSION_PARTICIPATING_TTP_URI;
 
 import java.util.Collections;
 import java.util.List;
@@ -10,10 +10,10 @@ import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.ConstantsBase;
+import org.highmed.dsf.bpe.ConstantsFeasibility;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.bpe.variables.BloomFilterConfig;
 import org.highmed.dsf.bpe.variables.BloomFilterConfigValues;
-import org.highmed.dsf.bpe.variables.ConstantsFeasibility;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;

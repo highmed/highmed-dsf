@@ -2,7 +2,7 @@ package org.highmed.dsf.bpe.service;
 
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR;
-import static org.highmed.dsf.bpe.variables.ConstantsFeasibility.ERROR_CODE_MULTI_MEDIC_RESULT;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.ERROR_CODE_MULTI_MEDIC_RESULT;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -10,8 +10,8 @@ import java.util.stream.Collectors;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.ConstantsBase;
+import org.highmed.dsf.bpe.ConstantsFeasibility;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
-import org.highmed.dsf.bpe.variables.ConstantsFeasibility;
 import org.highmed.dsf.bpe.variables.FinalFeasibilityQueryResult;
 import org.highmed.dsf.bpe.variables.FinalFeasibilityQueryResults;
 import org.highmed.dsf.bpe.variables.FinalFeasibilityQueryResultsValues;

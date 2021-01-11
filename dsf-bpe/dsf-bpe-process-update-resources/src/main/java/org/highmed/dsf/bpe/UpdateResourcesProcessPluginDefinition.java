@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import org.highmed.dsf.ProcessPluginDefinition;
 import org.highmed.dsf.bpe.spring.config.UpdateResourcesConfig;
 import org.highmed.dsf.fhir.resources.AbstractResource;
 import org.highmed.dsf.fhir.resources.ActivityDefinitionResource;

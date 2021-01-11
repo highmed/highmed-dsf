@@ -1,6 +1,7 @@
-package org.highmed.dsf.bpe.variables;
+package org.highmed.dsf.bpe;
 
 import static org.highmed.dsf.bpe.ConstantsBase.PROCESS_URI_BASE;
+import static org.highmed.dsf.bpe.UpdateResourcesProcessPluginDefinition.VERSION;
 
 public interface ConstantsUpdateResources
 {
@@ -10,15 +11,11 @@ public interface ConstantsUpdateResources
 
 	String REQUEST_UPDATE_RESOURCES_TASK_PROFILE = "http://highmed.org/fhir/StructureDefinition/highmed-task-request-update-resources";
 	String REQUEST_UPDATE_RESOURCES_PROCESS_URI = PROCESS_URI_BASE + "requestUpdateResources/";
-	String REQUEST_UPDATE_RESOURCES_PROCESS_LATEST_VERSION = "0.4.0";
-	String REQUEST_UPDATE_RESOURCES_PROCESS_URI_AND_LATEST_VERSION =
-			REQUEST_UPDATE_RESOURCES_PROCESS_URI + REQUEST_UPDATE_RESOURCES_PROCESS_LATEST_VERSION;
+	String REQUEST_UPDATE_RESOURCES_PROCESS_URI_AND_LATEST_VERSION = REQUEST_UPDATE_RESOURCES_PROCESS_URI + VERSION;
 	String REQUEST_UPDATE_RESOURCES_MESSAGE_NAME = "requestUpdateResourcesMessage";
 
 	String EXECUTE_UPDATE_RESOURCES_TASK_PROFILE = "http://highmed.org/fhir/StructureDefinition/highmed-task-execute-update-resources";
 	String EXECUTE_UPDATE_RESOURCES_PROCESS_URI = PROCESS_URI_BASE + "executeUpdateResources/";
-	String EXECUTE_UPDATE_RESOURCES_PROCESS_LATEST_VERSION = "0.4.0";
-	String EXECUTE_UPDATE_RESOURCES_PROCESS_URI_AND_LATEST_VERSION =
-			EXECUTE_UPDATE_RESOURCES_PROCESS_URI + EXECUTE_UPDATE_RESOURCES_PROCESS_LATEST_VERSION;
+	String EXECUTE_UPDATE_RESOURCES_PROCESS_URI_AND_LATEST_VERSION = EXECUTE_UPDATE_RESOURCES_PROCESS_URI + VERSION;
 	String EXECUTE_UPDATE_RESOURCES_MESSAGE_NAME = "executeUpdateResourcesMessage";
 }

@@ -3,11 +3,11 @@ package org.highmed.dsf.bpe.start;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME;
 import static org.highmed.dsf.bpe.ConstantsBase.ORGANIZATION_IDENTIFIER_SYSTEM;
+import static org.highmed.dsf.bpe.ConstantsPing.PING_PROCESS_URI_AND_LATEST_VERSION;
+import static org.highmed.dsf.bpe.ConstantsPing.START_PING_MESSAGE_NAME;
+import static org.highmed.dsf.bpe.ConstantsPing.START_PING_TASK_PROFILE;
 import static org.highmed.dsf.bpe.start.ConstantsExampleStarters.ORGANIZATION_IDENTIFIER_VALUE_TTP;
 import static org.highmed.dsf.bpe.start.ConstantsExampleStarters.TTP_FHIR_BASE_URL;
-import static org.highmed.dsf.bpe.variables.ConstantsPing.PING_PROCESS_URI_AND_LATEST_VERSION;
-import static org.highmed.dsf.bpe.variables.ConstantsPing.START_PING_MESSAGE_NAME;
-import static org.highmed.dsf.bpe.variables.ConstantsPing.START_PING_TASK_PROFILE;
 
 import java.util.Date;
 

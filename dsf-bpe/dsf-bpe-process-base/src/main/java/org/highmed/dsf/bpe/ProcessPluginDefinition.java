@@ -1,4 +1,4 @@
-package org.highmed.dsf;
+package org.highmed.dsf.bpe;
 
 import java.util.Collections;
 import java.util.List;

@@ -1,6 +1,7 @@
-package org.highmed.dsf.bpe.variables;
+package org.highmed.dsf.bpe;
 
 import static org.highmed.dsf.bpe.ConstantsBase.PROCESS_URI_BASE;
+import static org.highmed.dsf.bpe.FeasibilityProcessPluginDefinition.VERSION;
 
 public interface ConstantsFeasibility
 {
@@ -43,23 +44,17 @@ public interface ConstantsFeasibility
 
 	String REQUEST_FEASIBILITY_TASK_PROFILE = "http://highmed.org/fhir/StructureDefinition/highmed-task-request-simple-feasibility";
 	String REQUEST_FEASIBILITY_PROCESS_URI = PROCESS_URI_BASE + "requestSimpleFeasibility/";
-	String REQUEST_FEASIBILITY_PROCESS_LATEST_VERSION = "0.4.0";
-	String REQUEST_FEASIBILITY_PROCESS_URI_AND_LATEST_VERSION =
-			REQUEST_FEASIBILITY_PROCESS_URI + REQUEST_FEASIBILITY_PROCESS_LATEST_VERSION;
+	String REQUEST_FEASIBILITY_PROCESS_URI_AND_LATEST_VERSION = REQUEST_FEASIBILITY_PROCESS_URI + VERSION;
 	String REQUEST_FEASIBILITY_MESSAGE_NAME = "requestSimpleFeasibilityMessage";
 
 	String EXECUTE_FEASIBILITY_TASK_PROFILE = "http://highmed.org/fhir/StructureDefinition/highmed-task-execute-simple-feasibility";
 	String EXECUTE_FEASIBILITY_PROCESS_URI = PROCESS_URI_BASE + "executeSimpleFeasibility/";
-	String EXECUTE_FEASIBILITY_PROCESS_LATEST_VERSION = "0.4.0";
-	String EXECUTE_FEASIBILITY_PROCESS_URI_AND_LATEST_VERSION =
-			EXECUTE_FEASIBILITY_PROCESS_URI + EXECUTE_FEASIBILITY_PROCESS_LATEST_VERSION;
+	String EXECUTE_FEASIBILITY_PROCESS_URI_AND_LATEST_VERSION = EXECUTE_FEASIBILITY_PROCESS_URI + VERSION;
 	String EXECUTE_FEASIBILITY_MESSAGE_NAME = "executeSimpleFeasibilityMessage";
 
 	String COMPUTE_FEASIBILITY_TASK_PROFILE = "http://highmed.org/fhir/StructureDefinition/highmed-task-compute-simple-feasibility";
 	String COMPUTE_FEASIBILITY_PROCESS_URI = PROCESS_URI_BASE + "computeSimpleFeasibility/";
-	String COMPUTE_FEASIBILITY_PROCESS_LATEST_VERSION = "0.4.0";
-	String COMPUTE_FEASIBILITY_PROCESS_URI_AND_LATEST_VERSION =
-			COMPUTE_FEASIBILITY_PROCESS_URI + COMPUTE_FEASIBILITY_PROCESS_LATEST_VERSION;
+	String COMPUTE_FEASIBILITY_PROCESS_URI_AND_LATEST_VERSION = COMPUTE_FEASIBILITY_PROCESS_URI + VERSION;
 	String COMPUTE_FEASIBILITY_MESSAGE_NAME = "computeSimpleFeasibilityMessage";
 
 	String SINGLE_MEDIC_RESULT_FEASIBILITY_TASK_PROFILE = "http://highmed.org/fhir/StructureDefinition/highmed-task-single-medic-result-simple-feasibility";

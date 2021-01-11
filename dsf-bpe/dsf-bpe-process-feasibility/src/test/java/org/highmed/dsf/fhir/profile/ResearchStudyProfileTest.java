@@ -1,10 +1,10 @@
 package org.highmed.dsf.fhir.profile;
 
 import static org.highmed.dsf.bpe.ConstantsBase.ORGANIZATION_IDENTIFIER_SYSTEM;
-import static org.highmed.dsf.bpe.variables.ConstantsFeasibility.EXTENSION_PARTICIPATING_MEDIC_URI;
-import static org.highmed.dsf.bpe.variables.ConstantsFeasibility.EXTENSION_PARTICIPATING_TTP_URI;
-import static org.highmed.dsf.bpe.variables.ConstantsFeasibility.FEASIBILITY_RESEARCH_STUDY_PROFILE;
-import static org.highmed.dsf.bpe.variables.ConstantsFeasibility.RESEARCH_STUDY_IDENTIFIER_SYSTEM;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.EXTENSION_PARTICIPATING_MEDIC_URI;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.EXTENSION_PARTICIPATING_TTP_URI;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.FEASIBILITY_RESEARCH_STUDY_PROFILE;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.RESEARCH_STUDY_IDENTIFIER_SYSTEM;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;

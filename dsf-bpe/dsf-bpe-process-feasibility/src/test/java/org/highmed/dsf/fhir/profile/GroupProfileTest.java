@@ -3,7 +3,7 @@ package org.highmed.dsf.fhir.profile;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_QUERY_TYPE;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_QUERY_TYPE_AQL;
 import static org.highmed.dsf.bpe.ConstantsBase.EXTENSION_QUERY_URI;
-import static org.highmed.dsf.bpe.variables.ConstantsFeasibility.GROUP_PROFILE;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.GROUP_PROFILE;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;

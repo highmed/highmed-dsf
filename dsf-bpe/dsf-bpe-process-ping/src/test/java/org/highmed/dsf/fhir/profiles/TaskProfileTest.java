@@ -5,14 +5,14 @@ import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_BU
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME;
 import static org.highmed.dsf.bpe.ConstantsBase.ORGANIZATION_IDENTIFIER_SYSTEM;
-import static org.highmed.dsf.bpe.variables.ConstantsPing.PING_MESSAGE_NAME;
-import static org.highmed.dsf.bpe.variables.ConstantsPing.PING_PROCESS_URI_AND_LATEST_VERSION;
-import static org.highmed.dsf.bpe.variables.ConstantsPing.PING_TASK_PROFILE;
-import static org.highmed.dsf.bpe.variables.ConstantsPing.PONG_MESSAGE_NAME;
-import static org.highmed.dsf.bpe.variables.ConstantsPing.PONG_PROCESS_URI_AND_LATEST_VERSION;
-import static org.highmed.dsf.bpe.variables.ConstantsPing.PONG_TASK_PROFILE;
-import static org.highmed.dsf.bpe.variables.ConstantsPing.START_PING_MESSAGE_NAME;
-import static org.highmed.dsf.bpe.variables.ConstantsPing.START_PING_TASK_PROFILE;
+import static org.highmed.dsf.bpe.ConstantsPing.PING_MESSAGE_NAME;
+import static org.highmed.dsf.bpe.ConstantsPing.PING_PROCESS_URI_AND_LATEST_VERSION;
+import static org.highmed.dsf.bpe.ConstantsPing.PING_TASK_PROFILE;
+import static org.highmed.dsf.bpe.ConstantsPing.PONG_MESSAGE_NAME;
+import static org.highmed.dsf.bpe.ConstantsPing.PONG_PROCESS_URI_AND_LATEST_VERSION;
+import static org.highmed.dsf.bpe.ConstantsPing.PONG_TASK_PROFILE;
+import static org.highmed.dsf.bpe.ConstantsPing.START_PING_MESSAGE_NAME;
+import static org.highmed.dsf.bpe.ConstantsPing.START_PING_TASK_PROFILE;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
