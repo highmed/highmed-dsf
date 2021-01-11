@@ -66,14 +66,14 @@ public class ExampleStarter
 	 */
 	public static ExampleStarter forServer(String certificatePath, String certificatePassword, String baseUrl)
 	{
-		if (certificatePath.isBlank())
-			throw new IllegalArgumentException("certificatePath is blank");
+		if (certificatePath == null || certificatePath.isBlank())
+			throw new IllegalArgumentException("certificatePath null or blank");
 
-		if (certificatePassword.isBlank())
-			throw new IllegalArgumentException("certificatePassword is blank");
+		if (certificatePassword == null || certificatePassword.isBlank())
+			throw new IllegalArgumentException("certificatePassword null or blank");
 
-		if (baseUrl.isBlank())
-			throw new IllegalArgumentException("baseUrl is blank");
+		if (baseUrl == null || baseUrl.isBlank())
+			throw new IllegalArgumentException("baseUrl null or blank");
 
 		return new ExampleStarter(certificatePath, certificatePassword, baseUrl);
 	}
