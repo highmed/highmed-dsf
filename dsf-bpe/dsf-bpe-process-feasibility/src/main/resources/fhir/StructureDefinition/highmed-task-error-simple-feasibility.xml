@@ -6,7 +6,7 @@
       <code value="REMOTE" />
     </tag>
   </meta>
-  <url value="http://highmed.org/fhir/StructureDefinition/highmed-task-error-simple-feasibility" />
+  <url value="http://highmed.org/fhir/StructureDefinition/highmed-task-multi-medic-error-simple-feasibility" />
   <!-- version managed by bpe -->
   <version value="bpe-managed" />
   <name value="TaskErrorSimpleFeasibility" />

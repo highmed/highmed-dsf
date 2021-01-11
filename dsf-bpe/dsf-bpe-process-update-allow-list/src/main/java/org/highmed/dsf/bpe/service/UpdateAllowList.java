@@ -11,8 +11,8 @@ import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.ConstantsBase;
+import org.highmed.dsf.bpe.ConstantsUpdateAllowList;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
-import org.highmed.dsf.bpe.variables.ConstantsUpdateAllowList;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;

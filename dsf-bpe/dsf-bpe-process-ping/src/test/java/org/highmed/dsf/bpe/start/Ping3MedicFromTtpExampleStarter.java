@@ -1,57 +1,50 @@
 package org.highmed.dsf.bpe.start;
 
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN;
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME;
+import static org.highmed.dsf.bpe.ConstantsBase.ORGANIZATION_IDENTIFIER_SYSTEM;
+import static org.highmed.dsf.bpe.ConstantsPing.PING_PROCESS_URI_AND_LATEST_VERSION;
+import static org.highmed.dsf.bpe.ConstantsPing.START_PING_MESSAGE_NAME;
+import static org.highmed.dsf.bpe.ConstantsPing.START_PING_TASK_PROFILE;
+import static org.highmed.dsf.bpe.start.ConstantsExampleStarters.ORGANIZATION_IDENTIFIER_VALUE_TTP;
+import static org.highmed.dsf.bpe.start.ConstantsExampleStarters.TTP_FHIR_BASE_URL;
+
 import java.util.Date;
 
-import org.highmed.dsf.fhir.service.ReferenceCleaner;
-import org.highmed.dsf.fhir.service.ReferenceCleanerImpl;
-import org.highmed.dsf.fhir.service.ReferenceExtractorImpl;
-import org.highmed.fhir.client.FhirWebserviceClient;
-import org.highmed.fhir.client.FhirWebserviceClientJersey;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.TaskIntent;
 import org.hl7.fhir.r4.model.Task.TaskStatus;
 
-import ca.uhn.fhir.context.FhirContext;
-import de.rwh.utils.crypto.CertificateHelper;
-import de.rwh.utils.crypto.io.CertificateReader;
-
 public class Ping3MedicFromTtpExampleStarter
 {
-	public static void main(String[] args)
-			throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException
+	// Environment variable "DSF_CLIENT_CERTIFICATE_PATH" or args[0]: the path to the client-certificate
+	//    highmed-dsf/dsf-tools/dsf-tools-test-data-generator/cert/Webbrowser_Test_User/Webbrowser_Test_User_certificate.p12
+	// Environment variable "DSF_CLIENT_CERTIFICATE_PASSWORD" or args[1]: the password of the client-certificate
+	//    password
+	public static void main(String[] args) throws Exception
 	{
-		char[] keyStorePassword = "password".toCharArray();
-		KeyStore keyStore = CertificateReader.fromPkcs12(Paths.get(
-				"../../dsf-tools/dsf-tools-test-data-generator/cert/Webbrowser_Test_User/Webbrowser_Test_User_certificate.p12"),
-				keyStorePassword);
-		KeyStore trustStore = CertificateHelper.extractTrust(keyStore);
+		Task task = createStartResource();
+		ExampleStarter.forServer(args, TTP_FHIR_BASE_URL).startWith(task);
+	}
 
-		FhirContext context = FhirContext.forR4();
-		ReferenceCleaner referenceCleaner = new ReferenceCleanerImpl(new ReferenceExtractorImpl());
-		FhirWebserviceClient client = new FhirWebserviceClientJersey("https://ttp/fhir/", trustStore, keyStore,
-				keyStorePassword, null, null, null, 0, 0, null, context, referenceCleaner);
-
+	private static Task createStartResource()
+	{
 		Task task = new Task();
-		task.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-task-start-ping-process");
-		task.setInstantiatesUri("http://highmed.org/bpe/Process/ping/0.4.0");
+		task.getMeta().addProfile(START_PING_TASK_PROFILE);
+		task.setInstantiatesUri(PING_PROCESS_URI_AND_LATEST_VERSION);
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
-		task.getRequester().setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_TTP");
-		task.getRestriction().addRecipient().setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("Test_TTP");
+		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
+				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue(ORGANIZATION_IDENTIFIER_VALUE_TTP);
+		task.getRestriction().addRecipient().setType(ResourceType.Organization.name()).getIdentifier()
+				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue(ORGANIZATION_IDENTIFIER_VALUE_TTP);
 
-		task.addInput().setValue(new StringType("startPingProcessMessage")).getType().addCoding()
-				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("message-name");
+		task.addInput().setValue(new StringType(START_PING_MESSAGE_NAME)).getType().addCoding()
+				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
 
-		client.withMinimalReturn().create(task);
+		return task;
 	}
 }

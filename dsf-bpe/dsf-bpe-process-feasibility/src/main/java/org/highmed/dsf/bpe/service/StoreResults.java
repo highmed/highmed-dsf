@@ -6,8 +6,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.highmed.dsf.bpe.ConstantsFeasibility;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
-import org.highmed.dsf.bpe.variables.ConstantsFeasibility;
 import org.highmed.dsf.bpe.variables.FeasibilityQueryResult;
 import org.highmed.dsf.bpe.variables.FeasibilityQueryResults;
 import org.highmed.dsf.bpe.variables.FeasibilityQueryResultsValues;

@@ -73,7 +73,7 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 					+ execution.getActivityInstanceId() + ", reason: " + exception.getMessage();
 
 			task.addOutput(taskHelper.createOutput(ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
-					ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, errorMessage));
+					ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR, errorMessage));
 			task.setStatus(Task.TaskStatus.FAILED);
 
 			clientProvider.getLocalWebserviceClient().withMinimalReturn().update(task);

@@ -5,8 +5,8 @@ import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.ConstantsBase;
+import org.highmed.dsf.bpe.ConstantsFeasibility;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
-import org.highmed.dsf.bpe.variables.ConstantsFeasibility;
 import org.highmed.dsf.bpe.variables.FinalFeasibilityQueryResult;
 import org.highmed.dsf.bpe.variables.FinalFeasibilityQueryResults;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
@@ -49,10 +49,10 @@ public class CheckMultiMedicResults extends AbstractServiceDelegate
 		toRead.getInput().stream()
 				.filter(in -> in.hasType() && in.getType().hasCoding() && ConstantsBase.CODESYSTEM_HIGHMED_BPMN
 						.equals(in.getType().getCodingFirstRep().getSystem())
-						&& ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE
+						&& ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR
 						.equals(in.getType().getCodingFirstRep().getCode())).forEach(in -> toWrite.getOutput()
 				.add(getTaskHelper().createOutput(ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
-						ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, in.getValue().primitiveValue())));
+						ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR, in.getValue().primitiveValue())));
 	}
 
 	private FinalFeasibilityQueryResults readFinalFeasibilityQueryResultsFromCurrentTask(Task task)

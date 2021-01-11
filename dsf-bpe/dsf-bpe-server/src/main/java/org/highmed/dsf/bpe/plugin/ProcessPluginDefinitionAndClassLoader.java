@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.Process;
-import org.highmed.dsf.ProcessPluginDefinition;
+import org.highmed.dsf.bpe.ProcessPluginDefinition;
 import org.highmed.dsf.bpe.process.BpmnFileAndModel;
 import org.highmed.dsf.bpe.process.ProcessKeyAndVersion;
 import org.highmed.dsf.fhir.resources.ResourceProvider;

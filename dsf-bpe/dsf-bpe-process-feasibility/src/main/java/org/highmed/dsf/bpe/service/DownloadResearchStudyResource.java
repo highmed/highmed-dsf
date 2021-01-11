@@ -1,19 +1,24 @@
 package org.highmed.dsf.bpe.service;
 
+import static org.highmed.dsf.bpe.ConstantsBase.ORGANIZATION_IDENTIFIER_SYSTEM;
+import static org.highmed.dsf.bpe.ConstantsBase.ORGANIZATION_TYPE_MEDIC;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.highmed.dsf.bpe.ConstantsFeasibility;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
-import org.highmed.dsf.bpe.variables.ConstantsFeasibility;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,9 +92,9 @@ public class DownloadResearchStudyResource extends AbstractServiceDelegate imple
 
 	private ResearchStudy addMissingOrganizations(ResearchStudy researchStudy, FhirWebserviceClient client)
 	{
-		List<String> identifiers = organizationProvider.getOrganizationsByType("MeDIC")
+		List<String> identifiers = organizationProvider.getOrganizationsByType(ORGANIZATION_TYPE_MEDIC)
 				.flatMap(o -> o.getIdentifier().stream())
-				.filter(i -> "http://highmed.org/fhir/NamingSystem/organization-identifier".equals(i.getSystem()))
+				.filter(i -> ORGANIZATION_IDENTIFIER_SYSTEM.equals(i.getSystem()))
 				.map(i -> i.getValue()).collect(Collectors.toList());
 
 		List<String> existingIdentifiers = researchStudy
@@ -101,11 +106,17 @@ public class DownloadResearchStudyResource extends AbstractServiceDelegate imple
 
 		if (!identifiers.isEmpty())
 		{
-			identifiers.forEach(identifier -> researchStudy
-					.addExtension(ConstantsFeasibility.EXTENSION_PARTICIPATING_MEDIC_URI,
-							new Reference().getIdentifier()
-									.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
-									.setValue(identifier)));
+			identifiers.forEach(identifier -> {
+				logger.warn(
+						"Adding missing organization with identifier='{}' to feasibility research study with id='{}'",
+						identifier, researchStudy.getId());
+
+				researchStudy.addExtension().setUrl(ConstantsFeasibility.EXTENSION_PARTICIPATING_MEDIC_URI).setValue(
+						new Reference().setType(ResourceType.Organization.name()).setIdentifier(new Identifier()
+								.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM)
+								.setValue(identifier)));
+
+			});
 
 			return update(researchStudy, client);
 		}

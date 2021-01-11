@@ -4,7 +4,7 @@ import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.ConstantsBase;
-import org.highmed.dsf.bpe.variables.ConstantsUpdateResources;
+import org.highmed.dsf.bpe.ConstantsUpdateResources;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.AbstractTaskMessageSend;

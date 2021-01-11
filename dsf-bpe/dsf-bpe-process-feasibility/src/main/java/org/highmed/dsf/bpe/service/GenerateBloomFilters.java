@@ -1,5 +1,8 @@
 package org.highmed.dsf.bpe.service;
 
+import static org.highmed.dsf.bpe.ConstantsBase.OPENEHR_MIMETYPE_JSON;
+import static org.highmed.dsf.bpe.ConstantsBase.ORGANIZATION_IDENTIFIER_SYSTEM;
+
 import java.security.Key;
 import java.util.List;
 import java.util.Objects;
@@ -8,9 +11,9 @@ import java.util.stream.Collectors;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.ConstantsBase;
+import org.highmed.dsf.bpe.ConstantsFeasibility;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.bpe.variables.BloomFilterConfig;
-import org.highmed.dsf.bpe.variables.ConstantsFeasibility;
 import org.highmed.dsf.bpe.variables.FeasibilityQueryResult;
 import org.highmed.dsf.bpe.variables.FeasibilityQueryResults;
 import org.highmed.dsf.bpe.variables.FeasibilityQueryResultsValues;
@@ -28,6 +31,7 @@ import org.highmed.pseudonymization.translation.ResultSetTranslatorToTtpRbfOnlyI
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,7 +103,7 @@ public class GenerateBloomFilters extends AbstractServiceDelegate
 	{
 		Task task = getCurrentTaskFromExecutionVariables();
 
-		if (task.getInstantiatesUri().startsWith(ConstantsFeasibility.LOCAL_SERVICES_INTEGRATION_PROCESS_URI))
+		if (task.getInstantiatesUri().startsWith(ConstantsFeasibility.LOCAL_SERVICES_PROCESS_URI))
 			return task.getRequester().getIdentifier().getValue();
 		else
 			return (String) execution.getVariable(ConstantsBase.VARIABLE_TTP_IDENTIFIER);
@@ -147,14 +151,14 @@ public class GenerateBloomFilters extends AbstractServiceDelegate
 	{
 		byte[] content = serializeResultSet(resultSet);
 		Reference securityContext = new Reference();
-		securityContext.setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue(securityIdentifier);
-		Binary binary = new Binary().setContentType(ConstantsBase.OPENEHR_MIMETYPE_JSON)
-				.setSecurityContext(securityContext).setData(content);
+		securityContext.setType(ResourceType.Organization.name()).getIdentifier()
+				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue(securityIdentifier);
+		Binary binary = new Binary().setContentType(OPENEHR_MIMETYPE_JSON).setSecurityContext(securityContext)
+				.setData(content);
 
 		IdType created = createBinaryResource(binary);
-		return new IdType(getFhirWebserviceClientProvider().getLocalBaseUrl(), "Binary", created.getIdPart(),
-				created.getVersionIdPart()).getValue();
+		return new IdType(getFhirWebserviceClientProvider().getLocalBaseUrl(), ResourceType.Binary.name(),
+				created.getIdPart(), created.getVersionIdPart()).getValue();
 	}
 
 	private byte[] serializeResultSet(ResultSet resultSet)
