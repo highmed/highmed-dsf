@@ -2,8 +2,6 @@ package org.highmed.dsf.bpe.variables;
 
 import static org.highmed.dsf.bpe.ConstantsBase.PROCESS_URI_BASE;
 
-import org.hl7.fhir.r4.model.CodeType;
-
 public interface ConstantsFeasibility
 {
 	String VARIABLE_BLOOM_FILTER_CONFIG = "bloomFilterConfig";
