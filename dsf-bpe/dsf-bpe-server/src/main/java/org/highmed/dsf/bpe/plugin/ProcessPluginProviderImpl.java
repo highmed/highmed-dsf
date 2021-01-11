@@ -19,7 +19,7 @@ import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.highmed.dsf.ProcessPluginDefinition;
+import org.highmed.dsf.bpe.ProcessPluginDefinition;
 import org.highmed.dsf.bpe.process.ProcessKeyAndVersion;
 import org.highmed.dsf.fhir.resources.ResourceProvider;
 import org.slf4j.Logger;

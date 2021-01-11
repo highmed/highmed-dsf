@@ -1,7 +1,7 @@
 package org.highmed.dsf.bpe.message;
 
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN;
-import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE;
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR;
 
 import java.util.stream.Stream;
 
@@ -34,7 +34,7 @@ public class SendMultiMedicErrors extends AbstractTaskMessageSend
 				.getReference();
 
 		Task.ParameterComponent input = getTaskHelper()
-				.createInput(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE,
+				.createInput(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR,
 						"An error occurred while calculating the multi medic feasibility result for "
 								+ "all defined cohorts, see task with url='" + taskUrl + "'");
 		return Stream.of(input);

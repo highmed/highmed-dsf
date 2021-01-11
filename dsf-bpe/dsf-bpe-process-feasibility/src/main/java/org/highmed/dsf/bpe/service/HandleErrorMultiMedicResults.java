@@ -23,12 +23,12 @@ public class HandleErrorMultiMedicResults extends AbstractServiceDelegate
 		currentTask.getInput().forEach(input -> {
 			boolean isErrorInput = input.getType().getCoding().stream().anyMatch(
 					code -> code.getSystem().equals(ConstantsBase.CODESYSTEM_HIGHMED_BPMN) && code.getCode()
-							.equals(ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE));
+							.equals(ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR));
 
 			if (isErrorInput)
 			{
 				leadingTask.getOutput().add(getTaskHelper().createOutput(ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
-						ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, input.getValue().primitiveValue()));
+						ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR, input.getValue().primitiveValue()));
 			}
 		});
 

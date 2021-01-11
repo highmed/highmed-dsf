@@ -98,7 +98,7 @@
 			</extension>
 		</extension>
 		<extension url="task-profile">
-			<valueCanonical value="http://highmed.org/fhir/StructureDefinition/highmed-task-error-simple-feasibility" />
+			<valueCanonical value="http://highmed.org/fhir/StructureDefinition/highmed-task-multi-medic-error-simple-feasibility" />
 		</extension>
 	</extension>
 	<url value="http://highmed.org/bpe/Process/requestSimpleFeasibility" />
