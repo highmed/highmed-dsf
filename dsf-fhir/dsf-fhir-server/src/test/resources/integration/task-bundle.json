@@ -7,7 +7,7 @@
 			"resource": {
 				"resourceType": "Group",
 				"meta": {
-					"profile": "http://highmed.org/fhir/StructureDefinition/highmed-group"
+					"profile": "http://highmed.org/fhir/StructureDefinition/group"
 				},
 				"text": {
 					"div": "This is the description",
@@ -17,7 +17,7 @@
 				"actual": false,
 				"extension": [
 					{
-						"url": "http://highmed.org/fhir/StructureDefinition/query",
+						"url": "http://highmed.org/fhir/StructureDefinition/extension-query",
 						"valueExpression": [
 							{
 								"language": "application/x-aql-query",
@@ -37,7 +37,7 @@
 			"resource": {
 				"resourceType": "Group",
 				"meta": {
-					"profile": "http://highmed.org/fhir/StructureDefinition/highmed-group"
+					"profile": "http://highmed.org/fhir/StructureDefinition/group"
 				},
 				"text": {
 					"div": "This is the description",
@@ -47,7 +47,7 @@
 				"actual": false,
 				"extension": [
 					{
-						"url": "http://highmed.org/fhir/StructureDefinition/query",
+						"url": "http://highmed.org/fhir/StructureDefinition/extension-query",
 						"valueExpression": [
 							{
 								"language": "application/x-aql-query",
@@ -67,10 +67,10 @@
 			"resource": {
 				"resourceType": "ResearchStudy",
 				"meta": {
-					"profile": [ "http://highmed.org/fhir/StructureDefinition/highmed-research-study-feasibility" ]
+					"profile": [ "http://highmed.org/fhir/StructureDefinition/research-study-feasibility" ]
 				},
 				"extension": [ {
-					"url": "http://highmed.org/fhir/StructureDefinition/participating-medic",
+					"url": "http://highmed.org/fhir/StructureDefinition/extension-participating-medic",
 					"valueReference": {
 						"type": "Organization",
 						"identifier": {
@@ -79,7 +79,7 @@
 						}
 					}
 				}, {
-					"url": "http://highmed.org/fhir/StructureDefinition/participating-ttp",
+					"url": "http://highmed.org/fhir/StructureDefinition/extension-participating-ttp",
 					"valueReference": {
 						"type": "Organization",
 						"identifier": {
@@ -108,7 +108,7 @@
 			"fullUrl": "urn:uuid:bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
 			"resource": {
 				"resourceType": "Task",
-				"instantiatesUri": "http://highmed.org/bpe/Process/requestSimpleFeasibility/0.3.0",
+				"instantiatesUri": "http://highmed.org/bpe/Process/requestFeasibility/0.3.0",
 				"status": "requested",
 				"intent": "order",
 				"requester": {
@@ -139,7 +139,7 @@
 								}
 							]
 						},
-						"valueString": "requestSimpleFeasibilityMessage"
+						"valueString": "requestFeasibilityMessage"
 					},
 					{
 						"type": {

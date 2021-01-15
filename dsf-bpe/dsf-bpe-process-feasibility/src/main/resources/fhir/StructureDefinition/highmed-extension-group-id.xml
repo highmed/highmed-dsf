@@ -5,7 +5,7 @@
       <code value="REMOTE" />
     </tag>
   </meta>
-  <url value="http://highmed.org/fhir/StructureDefinition/group-id" />
+  <url value="http://highmed.org/fhir/StructureDefinition/extension-group-id" />
   <!-- version managed by bpe -->
   <version value="bpe-managed" />
   <name value="GroupId" />
@@ -35,14 +35,14 @@
     </element>
     <element id="Extension.url">
       <path value="Extension.url" />
-      <fixedUri value="http://highmed.org/fhir/StructureDefinition/group-id" />
+      <fixedUri value="http://highmed.org/fhir/StructureDefinition/extension-group-id" />
     </element>
     <element id="Extension.value[x]">
       <path value="Extension.value[x]" />
       <min value="1" />
       <type>
         <code value="Reference" />
-        <targetProfile value="http://highmed.org/fhir/StructureDefinition/highmed-group" />
+        <targetProfile value="http://highmed.org/fhir/StructureDefinition/group" />
       </type>
     </element>
     <element id="Extension.value[x].reference">

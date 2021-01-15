@@ -5,7 +5,7 @@
       <code value="REMOTE" />
     </tag>
   </meta>
-  <url value="http://highmed.org/fhir/StructureDefinition/highmed-group" />
+  <url value="http://highmed.org/fhir/StructureDefinition/group" />
   <!-- version managed by bpe -->
   <version value="bpe-managed" />
   <name value="Group" />
@@ -37,7 +37,7 @@
       <max value="1" />
       <type>
         <code value="Extension" />
-        <profile value="http://highmed.org/fhir/StructureDefinition/query" />
+        <profile value="http://highmed.org/fhir/StructureDefinition/extension-query" />
       </type>
     </element>
     <element id="Group.type">

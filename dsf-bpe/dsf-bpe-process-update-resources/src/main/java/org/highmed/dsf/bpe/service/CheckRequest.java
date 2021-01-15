@@ -43,7 +43,7 @@ public class CheckRequest extends AbstractServiceDelegate implements Initializin
 		{
 			throw new RuntimeException(
 					"Request check failed: process can only be started by requesting organization of type='"
-							+ ConstantsBase.ORGANIZATION_TYPE_TTP + "'");
+							+ ConstantsBase.CODESYSTEM_HIGHMED_ORGANIZATION_TYPE_VALUE_TTP + "'");
 		}
 	}
 
@@ -53,7 +53,8 @@ public class CheckRequest extends AbstractServiceDelegate implements Initializin
 				.getOrganization(requester.getSystem(), requester.getValue());
 
 		return !organization.map(value -> value.getType().stream().anyMatch(type -> type.getCoding().stream().anyMatch(
-				coding -> coding.getSystem().equals(ConstantsBase.ORGANIZATION_TYPE_SYSTEM) && coding.getCode()
-						.equals(ConstantsBase.ORGANIZATION_TYPE_TTP)))).orElse(false);
+				coding -> coding.getSystem().equals(ConstantsBase.CODESYSTEM_HIGHMED_ORGANIZATION_TYPE) && coding
+						.getCode().equals(ConstantsBase.CODESYSTEM_HIGHMED_ORGANIZATION_TYPE_VALUE_TTP))))
+				.orElse(false);
 	}
 }

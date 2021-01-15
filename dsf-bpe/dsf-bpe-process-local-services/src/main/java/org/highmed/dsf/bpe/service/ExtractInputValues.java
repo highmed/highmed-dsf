@@ -1,6 +1,6 @@
 package org.highmed.dsf.bpe.service;
 
-import static org.highmed.dsf.bpe.ConstantsBase.EXTENSION_QUERY_URI;
+import static org.highmed.dsf.bpe.ConstantsBase.EXTENSION_HIGHMED_QUERY;
 
 import java.util.List;
 import java.util.UUID;
@@ -36,26 +36,27 @@ public class ExtractInputValues extends AbstractServiceDelegate implements Initi
 
 		Stream<String> queries = getQueries(task);
 		List<Group> cohortDefinitions = getCohortDefinitions(queries);
-		execution.setVariable(ConstantsFeasibility.VARIABLE_COHORTS, FhirResourcesListValues.create(cohortDefinitions));
+		execution.setVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_COHORTS,
+				FhirResourcesListValues.create(cohortDefinitions));
 
 		boolean needsConsentCheck = getNeedsConsentCheck(task);
-		execution.setVariable(ConstantsFeasibility.VARIABLE_NEEDS_CONSENT_CHECK, needsConsentCheck);
+		execution.setVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_NEEDS_CONSENT_CHECK, needsConsentCheck);
 
 		boolean needsRecordLinkage = getNeedsRecordLinkageCheck(task);
-		execution.setVariable(ConstantsFeasibility.VARIABLE_NEEDS_RECORD_LINKAGE, needsRecordLinkage);
+		execution.setVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_NEEDS_RECORD_LINKAGE, needsRecordLinkage);
 
 		if (needsRecordLinkage)
 		{
 			BloomFilterConfig bloomFilterConfig = getBloomFilterConfig(task);
-			execution.setVariable(ConstantsFeasibility.VARIABLE_BLOOM_FILTER_CONFIG,
+			execution.setVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_BLOOM_FILTER_CONFIG,
 					BloomFilterConfigValues.create(bloomFilterConfig));
 		}
 	}
 
 	private Stream<String> getQueries(Task task)
 	{
-		return getTaskHelper().getInputParameterStringValues(task, ConstantsBase.CODESYSTEM_QUERY_TYPE,
-				ConstantsBase.CODESYSTEM_QUERY_TYPE_AQL);
+		return getTaskHelper().getInputParameterStringValues(task, ConstantsBase.CODESYSTEM_HIGHMED_QUERY_TYPE,
+				ConstantsBase.CODESYSTEM_HIGMED_QUERY_TYPE_VALUE_AQL);
 	}
 
 	private List<Group> getCohortDefinitions(Stream<String> queries)
@@ -63,8 +64,8 @@ public class ExtractInputValues extends AbstractServiceDelegate implements Initi
 		return queries.map(q -> {
 			Group group = new Group();
 			group.setIdElement(new IdType(UUID.randomUUID().toString()));
-			group.addExtension().setUrl(EXTENSION_QUERY_URI).setValue(
-					new Expression().setLanguageElement(ConstantsBase.AQL_QUERY_TYPE).setExpression(q));
+			group.addExtension().setUrl(EXTENSION_HIGHMED_QUERY)
+					.setValue(new Expression().setLanguageElement(ConstantsBase.CODE_TYPE_AQL_QUERY).setExpression(q));
 			return group;
 		}).collect(Collectors.toList());
 	}

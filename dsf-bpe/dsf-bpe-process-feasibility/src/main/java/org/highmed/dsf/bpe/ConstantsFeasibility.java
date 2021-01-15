@@ -1,26 +1,26 @@
 package org.highmed.dsf.bpe;
 
-import static org.highmed.dsf.bpe.ConstantsBase.PROCESS_URI_BASE;
+import static org.highmed.dsf.bpe.ConstantsBase.PROCESS_HIGHMED_URI_BASE;
 import static org.highmed.dsf.bpe.FeasibilityProcessPluginDefinition.VERSION;
 
 public interface ConstantsFeasibility
 {
-	String VARIABLE_BLOOM_FILTER_CONFIG = "bloomFilterConfig";
-	String VARIABLE_QUERY_RESULTS = "queryResults";
-	String VARIABLE_FINAL_QUERY_RESULTS = "finalQueryResults";
-	String VARIABLE_RESEARCH_STUDY = "researchStudy";
-	String VARIABLE_COHORTS = "cohorts";
-	String VARIABLE_QUERIES = "queries";
-	String VARIABLE_NEEDS_CONSENT_CHECK = "needsConsentCheck";
-	String VARIABLE_NEEDS_RECORD_LINKAGE = "needsRecordLinkage";
+	String BPMN_EXECUTION_VARIABLE_RESEARCH_STUDY = "researchStudy";
+	String BPMN_EXECUTION_VARIABLE_NEEDS_CONSENT_CHECK = "needsConsentCheck";
+	String BPMN_EXECUTION_VARIABLE_NEEDS_RECORD_LINKAGE = "needsRecordLinkage";
+	String BPMN_EXECUTION_VARIABLE_BLOOM_FILTER_CONFIG = "bloomFilterConfig";
+	String BPMN_EXECUTION_VARIABLE_COHORTS = "cohorts";
+	String BPMN_EXECUTION_VARIABLE_QUERIES = "queries";
+	String BPMN_EXECUTION_VARIABLE_QUERY_RESULTS = "queryResults";
+	String BPMN_EXECUTION_VARIABLE_FINAL_QUERY_RESULTS = "finalQueryResults";
 
-	String ERROR_CODE_MULTI_MEDIC_RESULT = "errorMultiMedicSimpleFeasibilityResult";
+	String BPMN_EXECUTION_ERROR_CODE_MULTI_MEDIC_RESULT = "errorMultiMedicFeasibilityResult";
 
 	// Must be 3 or larger, as otherwise it is possible to draw conclusions about the individual MeDICs
 	// (if I already know the cohort size in my MeDIC)
 	int MIN_PARTICIPATING_MEDICS = 3;
 	int MIN_COHORT_DEFINITIONS = 1;
-	String SIMPLE_FEASIBILITY_QUERY_PREFIX = "select count";
+	String FEASIBILITY_QUERY_PREFIX = "select count";
 
 	String CODESYSTEM_HIGHMED_FEASIBILITY = "http://highmed.org/fhir/CodeSystem/feasibility";
 	String CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDIC_CORRELATION_KEY = "medic-correlation-key";
@@ -34,37 +34,41 @@ public interface ConstantsFeasibility
 	String CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT = "multi-medic-result";
 	String CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_RESEARCH_STUDY_REFERENCE = "research-study-reference";
 
-	String EXTENSION_PARTICIPATING_MEDIC_URI = "http://highmed.org/fhir/StructureDefinition/participating-medic";
-	String EXTENSION_PARTICIPATING_TTP_URI = "http://highmed.org/fhir/StructureDefinition/participating-ttp";
-	String EXTENSION_GROUP_ID_URI = "http://highmed.org/fhir/StructureDefinition/group-id";
+	String EXTENSION_HIGHMED_PARTICIPATING_MEDIC = "http://highmed.org/fhir/StructureDefinition/extension-participating-medic";
+	String EXTENSION_HIGHMED_PARTICIPATING_TTP = "http://highmed.org/fhir/StructureDefinition/extension-participating-ttp";
+	String EXTENSION_HIGHMED_GROUP_ID = "http://highmed.org/fhir/StructureDefinition/extension-group-id";
 
-	String GROUP_PROFILE = "http://highmed.org/fhir/StructureDefinition/highmed-group";
-	String FEASIBILITY_RESEARCH_STUDY_PROFILE = "http://highmed.org/fhir/StructureDefinition/highmed-research-study-feasibility";
-	String RESEARCH_STUDY_IDENTIFIER_SYSTEM = "http://highmed.org/fhir/NamingSystem/research-study-identifier";
+	String PROFILE_HIGHMED_GROUP = "http://highmed.org/fhir/StructureDefinition/group";
+	String PROFILE_HIGHEMD_RESEARCH_STUDY_FEASIBILITY = "http://highmed.org/fhir/StructureDefinition/research-study-feasibility";
 
-	String REQUEST_FEASIBILITY_TASK_PROFILE = "http://highmed.org/fhir/StructureDefinition/highmed-task-request-simple-feasibility";
-	String REQUEST_FEASIBILITY_PROCESS_URI = PROCESS_URI_BASE + "requestSimpleFeasibility/";
-	String REQUEST_FEASIBILITY_PROCESS_URI_AND_LATEST_VERSION = REQUEST_FEASIBILITY_PROCESS_URI + VERSION;
-	String REQUEST_FEASIBILITY_MESSAGE_NAME = "requestSimpleFeasibilityMessage";
+	String PROFILE_HIGHMED_TASK_REQUEST_FEASIBILITY = "http://highmed.org/fhir/StructureDefinition/task-request-feasibility";
+	String PROFILE_HIGHMED_TASK_REQUEST_FEASIBILITY_PROCESS_URI = PROCESS_HIGHMED_URI_BASE + "requestFeasibility/";
+	String PROFILE_HIGHMED_TASK_REQUEST_FEASIBILITY_PROCESS_URI_AND_LATEST_VERSION =
+			PROFILE_HIGHMED_TASK_REQUEST_FEASIBILITY_PROCESS_URI + VERSION;
+	String PROFILE_HIGHMED_TASK_REQUEST_FEASIBILITY_MESSAGE_NAME = "requestFeasibilityMessage";
 
-	String EXECUTE_FEASIBILITY_TASK_PROFILE = "http://highmed.org/fhir/StructureDefinition/highmed-task-execute-simple-feasibility";
-	String EXECUTE_FEASIBILITY_PROCESS_URI = PROCESS_URI_BASE + "executeSimpleFeasibility/";
-	String EXECUTE_FEASIBILITY_PROCESS_URI_AND_LATEST_VERSION = EXECUTE_FEASIBILITY_PROCESS_URI + VERSION;
-	String EXECUTE_FEASIBILITY_MESSAGE_NAME = "executeSimpleFeasibilityMessage";
+	String PROFILE_HIGHMED_TASK_LOCAL_SERVICES_PROCESS_URI = PROCESS_HIGHMED_URI_BASE + "localServicesIntegration/";
 
-	String COMPUTE_FEASIBILITY_TASK_PROFILE = "http://highmed.org/fhir/StructureDefinition/highmed-task-compute-simple-feasibility";
-	String COMPUTE_FEASIBILITY_PROCESS_URI = PROCESS_URI_BASE + "computeSimpleFeasibility/";
-	String COMPUTE_FEASIBILITY_PROCESS_URI_AND_LATEST_VERSION = COMPUTE_FEASIBILITY_PROCESS_URI + VERSION;
-	String COMPUTE_FEASIBILITY_MESSAGE_NAME = "computeSimpleFeasibilityMessage";
+	String PROFILE_HIGHMED_TASK_EXECUTE_FEASIBILITY = "http://highmed.org/fhir/StructureDefinition/task-execute-feasibility";
+	String PROFILE_HIGHMED_TASK_EXECUTE_FEASIBILITY_PROCESS_URI = PROCESS_HIGHMED_URI_BASE + "executeFeasibility/";
+	String PROFILE_HIGHMED_TASK_EXECUTE_FEASIBILITY_PROCESS_URI_AND_LATEST_VERSION =
+			PROFILE_HIGHMED_TASK_EXECUTE_FEASIBILITY_PROCESS_URI + VERSION;
+	String PROFILE_HIGHMED_TASK_EXECUTE_FEASIBILITY_MESSAGE_NAME = "executeFeasibilityMessage";
 
-	String SINGLE_MEDIC_RESULT_FEASIBILITY_TASK_PROFILE = "http://highmed.org/fhir/StructureDefinition/highmed-task-single-medic-result-simple-feasibility";
-	String SINGLE_MEDIC_RESULT_FEASIBILITY_MESSAGE_NAME = "resultSingleMedicSimpleFeasibilityMessage";
+	String PROFILE_HIGHMED_TASK_COMPUTE_FEASIBILITY = "http://highmed.org/fhir/StructureDefinition/task-compute-feasibility";
+	String PROFILE_HIGHMED_TASK_COMPUTE_FEASIBILITY_PROCESS_URI = PROCESS_HIGHMED_URI_BASE + "computeFeasibility/";
+	String PROFILE_HIGHMED_TASK_COMPUTE_FEASIBILITY_PROCESS_URI_AND_LATEST_VERSION =
+			PROFILE_HIGHMED_TASK_COMPUTE_FEASIBILITY_PROCESS_URI + VERSION;
+	String PROFILE_HIGHMED_TASK_COMPUTE_FEASIBILITY_MESSAGE_NAME = "computeFeasibilityMessage";
 
-	String MULTI_MEDIC_RESULT_FEASIBILITY_TASK_PROFILE = "http://highmed.org/fhir/StructureDefinition/highmed-task-multi-medic-result-simple-feasibility";
-	String MULTI_MEDIC_RESULT_FEASIBILITY_MESSAGE_NAME = "resultMultiMedicSimpleFeasibilityMessage";
+	String PROFILE_HIGHMED_TASK_SINGLE_MEDIC_RESULT_FEASIBILITY = "http://highmed.org/fhir/StructureDefinition/task-single-medic-result-feasibility";
+	String PROFILE_HIGHMED_TASK_SINGLE_MEDIC_RESULT_FEASIBILITY_MESSAGE_NAME = "resultSingleMedicFeasibilityMessage";
 
-	String ERROR_FEASIBILITY_TASK_PROFILE = "http://highmed.org/fhir/StructureDefinition/highmed-task-multi-medic-error-simple-feasibility";
-	String ERROR_FEASIBILITY_MESSAGE_NAME = "errorMultiMedicSimpleFeasibilityMessage";
+	String PROFILE_HIGHMED_TASK_MULTI_MEDIC_RESULT_FEASIBILITY = "http://highmed.org/fhir/StructureDefinition/task-multi-medic-result-feasibility";
+	String PROFILE_HIGHMED_TASK_MULTI_MEDIC_RESULT_FEASIBILITY_MESSAGE_NAME = "resultMultiMedicFeasibilityMessage";
 
-	String LOCAL_SERVICES_PROCESS_URI = PROCESS_URI_BASE + "localServicesIntegration/";
+	String PROFILE_HIGHMED_TASK_ERROR_FEASIBILITY = "http://highmed.org/fhir/StructureDefinition/task-multi-medic-error-feasibility";
+	String PROFILE_HIGHMED_TASK_ERROR_FEASIBILITY_MESSAGE_NAME = "errorMultiMedicFeasibilityMessage";
+
+	String NAMINGSYSTEM_HIGHMED_RESEARCH_STUDY_IDENTIFIER = "http://highmed.org/fhir/NamingSystem/research-study-identifier";
 }

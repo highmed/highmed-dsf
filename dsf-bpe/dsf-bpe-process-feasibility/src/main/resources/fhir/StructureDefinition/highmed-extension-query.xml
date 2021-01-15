@@ -5,7 +5,7 @@
       <code value="REMOTE" />
     </tag>
   </meta>
-  <url value="http://highmed.org/fhir/StructureDefinition/query" />
+  <url value="http://highmed.org/fhir/StructureDefinition/extension-query" />
   <!-- version managed by bpe -->
   <version value="bpe-managed" />
   <name value="Query" />
@@ -26,7 +26,7 @@
   <differential>
     <element id="Extension.url">
       <path value="Extension.url" />
-      <fixedUri value="http://highmed.org/fhir/StructureDefinition/query" />
+      <fixedUri value="http://highmed.org/fhir/StructureDefinition/extension-query" />
     </element>
     <element id="Extension.value[x]">
       <path value="Extension.value[x]" />

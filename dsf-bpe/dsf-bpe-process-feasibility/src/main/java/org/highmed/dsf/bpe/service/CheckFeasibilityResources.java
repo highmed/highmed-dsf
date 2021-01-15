@@ -1,6 +1,6 @@
 package org.highmed.dsf.bpe.service;
 
-import static org.highmed.dsf.bpe.ConstantsBase.ORGANIZATION_IDENTIFIER_SYSTEM;
+import static org.highmed.dsf.bpe.ConstantsBase.NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER;
 
 import java.util.List;
 
@@ -25,10 +25,10 @@ public class CheckFeasibilityResources extends AbstractServiceDelegate
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
 		ResearchStudy researchStudy = (ResearchStudy) execution
-				.getVariable(ConstantsFeasibility.VARIABLE_RESEARCH_STUDY);
+				.getVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_RESEARCH_STUDY);
 
-		List<Group> cohorts = ((FhirResourcesList) execution.getVariable(ConstantsFeasibility.VARIABLE_COHORTS))
-				.getResourcesAndCast();
+		List<Group> cohorts = ((FhirResourcesList) execution
+				.getVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_COHORTS)).getResourcesAndCast();
 
 		checkNumberOfParticipatingMedics(researchStudy);
 		checkFullyQualifiedCohortIds(cohorts);
@@ -37,11 +37,11 @@ public class CheckFeasibilityResources extends AbstractServiceDelegate
 
 	private void checkNumberOfParticipatingMedics(ResearchStudy researchStudy)
 	{
-		long medics = researchStudy.getExtensionsByUrl(ConstantsFeasibility.EXTENSION_PARTICIPATING_MEDIC_URI).stream()
-				.filter(e -> e.getValue() instanceof Reference).map(e -> (Reference) e.getValue())
+		long medics = researchStudy.getExtensionsByUrl(ConstantsFeasibility.EXTENSION_HIGHMED_PARTICIPATING_MEDIC)
+				.stream().filter(e -> e.getValue() instanceof Reference).map(e -> (Reference) e.getValue())
 				.map(r -> r.getIdentifier())
-				.filter(i -> ORGANIZATION_IDENTIFIER_SYSTEM.equals(i.getSystem()))
-				.map(i -> i.getValue()).distinct().count();
+				.filter(i -> NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER.equals(i.getSystem())).map(i -> i.getValue())
+				.distinct().count();
 
 		if (medics < ConstantsFeasibility.MIN_PARTICIPATING_MEDICS)
 		{

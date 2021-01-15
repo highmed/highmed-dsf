@@ -2,7 +2,7 @@ package org.highmed.dsf.bpe.service;
 
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR;
-import static org.highmed.dsf.bpe.ConstantsFeasibility.ERROR_CODE_MULTI_MEDIC_RESULT;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.BPMN_EXECUTION_ERROR_CODE_MULTI_MEDIC_RESULT;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,19 +35,20 @@ public class CheckTtpComputedMultiMedicResults extends AbstractServiceDelegate
 	{
 		Task leadingTask = getLeadingTaskFromExecutionVariables();
 		FinalFeasibilityQueryResults results = (FinalFeasibilityQueryResults) execution
-				.getVariable(ConstantsFeasibility.VARIABLE_FINAL_QUERY_RESULTS);
+				.getVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_FINAL_QUERY_RESULTS);
 
 		List<FinalFeasibilityQueryResult> resultsWithEnoughParticipatingMedics = filterResultsByParticipatingMedics(
 				leadingTask, results);
 
-		execution.setVariable(ConstantsFeasibility.VARIABLE_FINAL_QUERY_RESULTS, FinalFeasibilityQueryResultsValues
-				.create(new FinalFeasibilityQueryResults(resultsWithEnoughParticipatingMedics)));
+		execution.setVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_FINAL_QUERY_RESULTS,
+				FinalFeasibilityQueryResultsValues
+						.create(new FinalFeasibilityQueryResults(resultsWithEnoughParticipatingMedics)));
 
 		boolean existsAtLeastOneResult = checkIfAtLeastOneResultExists(leadingTask,
 				resultsWithEnoughParticipatingMedics);
 
 		if (!existsAtLeastOneResult)
-			throw new BpmnError(ERROR_CODE_MULTI_MEDIC_RESULT);
+			throw new BpmnError(BPMN_EXECUTION_ERROR_CODE_MULTI_MEDIC_RESULT);
 	}
 
 	private List<FinalFeasibilityQueryResult> filterResultsByParticipatingMedics(Task leadingTask,

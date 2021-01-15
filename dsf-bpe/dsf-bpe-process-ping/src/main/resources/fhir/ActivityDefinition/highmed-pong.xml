@@ -5,9 +5,9 @@
 			<code value="REMOTE" />
 		</tag>
 	</meta>
-	<extension url="http://highmed.org/fhir/StructureDefinition/process-authorization">
+	<extension url="http://highmed.org/fhir/StructureDefinition/extension-process-authorization">
 		<extension url="message-name">
-			<valueString value="computeSimpleFeasibilityMessage" />
+			<valueString value="pingMessage" />
 		</extension>
 		<extension url="authorization-roles">
 			<extension url="authorization-role">
@@ -18,6 +18,12 @@
 			</extension>
 		</extension>
 		<extension url="requester-organization-types">
+			<extension url="requester-organization-type">
+				<valueCoding>
+					<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
+					<code value="TTP" />
+				</valueCoding>
+			</extension>
 			<extension url="requester-organization-type">
 				<valueCoding>
 					<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
@@ -32,49 +38,23 @@
 					<code value="TTP" />
 				</valueCoding>
 			</extension>
-		</extension>
-		<extension url="task-profile">
-			<valueCanonical value="http://highmed.org/fhir/StructureDefinition/highmed-task-compute-simple-feasibility" />
-		</extension>
-	</extension>
-	<extension url="http://highmed.org/fhir/StructureDefinition/process-authorization">
-		<extension url="message-name">
-			<valueString value="resultSingleMedicSimpleFeasibilityMessage" />
-		</extension>
-		<extension url="authorization-roles">
-			<extension url="authorization-role">
-				<valueCoding>
-					<system value="http://highmed.org/fhir/CodeSystem/authorization-role" />
-					<code value="REMOTE" />
-				</valueCoding>
-			</extension>
-		</extension>
-		<extension url="requester-organization-types">
-			<extension url="requester-organization-type">
+			<extension url="recipient-organization-type">
 				<valueCoding>
 					<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
 					<code value="MeDIC" />
 				</valueCoding>
 			</extension>
 		</extension>
-		<extension url="recipient-organization-types">
-			<extension url="recipient-organization-type">
-				<valueCoding>
-					<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
-					<code value="TTP" />
-				</valueCoding>
-			</extension>
-		</extension>
 		<extension url="task-profile">
-			<valueCanonical value="http://highmed.org/fhir/StructureDefinition/highmed-task-single-medic-result-simple-feasibility" />
+			<valueCanonical value="http://highmed.org/fhir/StructureDefinition/task-ping" />
 		</extension>
 	</extension>
-	<url value="http://highmed.org/bpe/Process/computeSimpleFeasibility" />
+	<url value="http://highmed.org/bpe/Process/pong" />
 	<!-- version managed by bpe -->
 	<version value="bpe-managed" />
-	<name value="computeSimpleFeasibility" />
-	<title value="Compute Simple Feasibility" />
-	<subtitle value="Process to compute simple feasibility result" />
+	<name value="pong" />
+	<title value="PONG process" />
+	<subtitle value="Communication Testing Process" />
 	<!-- status managed by bpe -->
 	<status value="unknown" />
 	<experimental value="false" />
@@ -87,6 +67,6 @@
 			<value value="pmo@highmed.org" />
 		</telecom>
 	</contact>
-	<description value="Process to compute a simple fesibility result and to send the result back to the requesting organization" />
+	<description value="Process startet by PING messages and to send corresponding PONG messages back remote Organizations" />
 	<kind value="Task" />
 </ActivityDefinition>

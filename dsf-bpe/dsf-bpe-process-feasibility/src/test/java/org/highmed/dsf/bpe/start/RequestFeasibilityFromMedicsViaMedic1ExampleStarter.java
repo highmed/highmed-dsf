@@ -1,27 +1,27 @@
 package org.highmed.dsf.bpe.start;
 
-import static org.highmed.dsf.bpe.ConstantsBase.AQL_QUERY_TYPE;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME;
-import static org.highmed.dsf.bpe.ConstantsBase.EXTENSION_QUERY_URI;
-import static org.highmed.dsf.bpe.ConstantsBase.ORGANIZATION_IDENTIFIER_SYSTEM;
+import static org.highmed.dsf.bpe.ConstantsBase.CODE_TYPE_AQL_QUERY;
+import static org.highmed.dsf.bpe.ConstantsBase.EXTENSION_HIGHMED_QUERY;
+import static org.highmed.dsf.bpe.ConstantsBase.NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER;
 import static org.highmed.dsf.bpe.ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY;
 import static org.highmed.dsf.bpe.ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_CONSENT_CHECK;
 import static org.highmed.dsf.bpe.ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_RECORD_LINKAGE;
 import static org.highmed.dsf.bpe.ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_RESEARCH_STUDY_REFERENCE;
-import static org.highmed.dsf.bpe.ConstantsFeasibility.EXTENSION_PARTICIPATING_MEDIC_URI;
-import static org.highmed.dsf.bpe.ConstantsFeasibility.EXTENSION_PARTICIPATING_TTP_URI;
-import static org.highmed.dsf.bpe.ConstantsFeasibility.FEASIBILITY_RESEARCH_STUDY_PROFILE;
-import static org.highmed.dsf.bpe.ConstantsFeasibility.GROUP_PROFILE;
-import static org.highmed.dsf.bpe.ConstantsFeasibility.REQUEST_FEASIBILITY_MESSAGE_NAME;
-import static org.highmed.dsf.bpe.ConstantsFeasibility.REQUEST_FEASIBILITY_PROCESS_URI_AND_LATEST_VERSION;
-import static org.highmed.dsf.bpe.ConstantsFeasibility.REQUEST_FEASIBILITY_TASK_PROFILE;
-import static org.highmed.dsf.bpe.ConstantsFeasibility.RESEARCH_STUDY_IDENTIFIER_SYSTEM;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.EXTENSION_HIGHMED_PARTICIPATING_MEDIC;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.EXTENSION_HIGHMED_PARTICIPATING_TTP;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.NAMINGSYSTEM_HIGHMED_RESEARCH_STUDY_IDENTIFIER;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.PROFILE_HIGHEMD_RESEARCH_STUDY_FEASIBILITY;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.PROFILE_HIGHMED_GROUP;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.PROFILE_HIGHMED_TASK_REQUEST_FEASIBILITY;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.PROFILE_HIGHMED_TASK_REQUEST_FEASIBILITY_MESSAGE_NAME;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.PROFILE_HIGHMED_TASK_REQUEST_FEASIBILITY_PROCESS_URI_AND_LATEST_VERSION;
 import static org.highmed.dsf.bpe.start.ConstantsExampleStarters.MEDIC_1_FHIR_BASE_URL;
-import static org.highmed.dsf.bpe.start.ConstantsExampleStarters.ORGANIZATION_IDENTIFIER_VALUE_MEDIC_1;
-import static org.highmed.dsf.bpe.start.ConstantsExampleStarters.ORGANIZATION_IDENTIFIER_VALUE_MEDIC_2;
-import static org.highmed.dsf.bpe.start.ConstantsExampleStarters.ORGANIZATION_IDENTIFIER_VALUE_MEDIC_3;
-import static org.highmed.dsf.bpe.start.ConstantsExampleStarters.ORGANIZATION_IDENTIFIER_VALUE_TTP;
+import static org.highmed.dsf.bpe.start.ConstantsExampleStarters.NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER_VALUE_MEDIC_1;
+import static org.highmed.dsf.bpe.start.ConstantsExampleStarters.NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER_VALUE_MEDIC_2;
+import static org.highmed.dsf.bpe.start.ConstantsExampleStarters.NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER_VALUE_MEDIC_3;
+import static org.highmed.dsf.bpe.start.ConstantsExampleStarters.NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER_VALUE_TTP;
 
 import java.util.Date;
 import java.util.UUID;
@@ -45,7 +45,7 @@ import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.TaskIntent;
 import org.hl7.fhir.r4.model.Task.TaskStatus;
 
-public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter
+public class RequestFeasibilityFromMedicsViaMedic1ExampleStarter
 {
 	// Environment variable "DSF_CLIENT_CERTIFICATE_PATH" or args[0]: the path to the client-certificate
 	//    highmed-dsf/dsf-tools/dsf-tools-test-data-generator/cert/Webbrowser_Test_User/Webbrowser_Test_User_certificate.p12
@@ -83,14 +83,14 @@ public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter
 		Group group = new Group();
 		group.setIdElement(new IdType("urn:uuid:" + UUID.randomUUID().toString()));
 
-		group.getMeta().addProfile(GROUP_PROFILE);
+		group.getMeta().addProfile(PROFILE_HIGHMED_GROUP);
 		group.getText().getDiv().addText("This is the description");
 		group.getText().setStatus(Narrative.NarrativeStatus.ADDITIONAL);
 		group.setType(GroupType.PERSON);
 		group.setActual(false);
 		group.setActive(true);
-		group.addExtension().setUrl(EXTENSION_QUERY_URI).setValue(
-				new Expression().setLanguageElement(AQL_QUERY_TYPE).setExpression("SELECT COUNT(e) FROM EHR e"));
+		group.addExtension().setUrl(EXTENSION_HIGHMED_QUERY).setValue(
+				new Expression().setLanguageElement(CODE_TYPE_AQL_QUERY).setExpression("SELECT COUNT(e) FROM EHR e"));
 		group.setName(name);
 
 		return group;
@@ -101,29 +101,29 @@ public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter
 		ResearchStudy researchStudy = new ResearchStudy();
 		researchStudy.setIdElement(new IdType("urn:uuid:" + UUID.randomUUID().toString()));
 
-		researchStudy.getMeta().addProfile(FEASIBILITY_RESEARCH_STUDY_PROFILE);
-		researchStudy.addIdentifier().setSystem(RESEARCH_STUDY_IDENTIFIER_SYSTEM)
+		researchStudy.getMeta().addProfile(PROFILE_HIGHEMD_RESEARCH_STUDY_FEASIBILITY);
+		researchStudy.addIdentifier().setSystem(NAMINGSYSTEM_HIGHMED_RESEARCH_STUDY_IDENTIFIER)
 				.setValue(UUID.randomUUID().toString());
 		researchStudy.setStatus(ResearchStudyStatus.ACTIVE);
 		researchStudy.addEnrollment().setReference(group1.getIdElement().getIdPart());
 		researchStudy.addEnrollment().setReference(group2.getIdElement().getIdPart());
 
-		researchStudy.addExtension().setUrl(EXTENSION_PARTICIPATING_MEDIC_URI).setValue(
+		researchStudy.addExtension().setUrl(EXTENSION_HIGHMED_PARTICIPATING_MEDIC).setValue(
 				new Reference().setType(ResourceType.Organization.name()).setIdentifier(
-						new Identifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM)
-								.setValue(ORGANIZATION_IDENTIFIER_VALUE_MEDIC_1)));
-		researchStudy.addExtension().setUrl(EXTENSION_PARTICIPATING_MEDIC_URI).setValue(
+						new Identifier().setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER)
+								.setValue(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER_VALUE_MEDIC_1)));
+		researchStudy.addExtension().setUrl(EXTENSION_HIGHMED_PARTICIPATING_MEDIC).setValue(
 				new Reference().setType(ResourceType.Organization.name()).setIdentifier(
-						new Identifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM)
-								.setValue(ORGANIZATION_IDENTIFIER_VALUE_MEDIC_2)));
-		researchStudy.addExtension().setUrl(EXTENSION_PARTICIPATING_MEDIC_URI).setValue(
+						new Identifier().setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER)
+								.setValue(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER_VALUE_MEDIC_2)));
+		researchStudy.addExtension().setUrl(EXTENSION_HIGHMED_PARTICIPATING_MEDIC).setValue(
 				new Reference().setType(ResourceType.Organization.name()).setIdentifier(
-						new Identifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM)
-								.setValue(ORGANIZATION_IDENTIFIER_VALUE_MEDIC_3)));
-		researchStudy.addExtension().setUrl(EXTENSION_PARTICIPATING_TTP_URI).setValue(
+						new Identifier().setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER)
+								.setValue(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER_VALUE_MEDIC_3)));
+		researchStudy.addExtension().setUrl(EXTENSION_HIGHMED_PARTICIPATING_TTP).setValue(
 				new Reference().setType(ResourceType.Organization.name()).setIdentifier(
-						new Identifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM)
-								.setValue(ORGANIZATION_IDENTIFIER_VALUE_TTP)));
+						new Identifier().setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER)
+								.setValue(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER_VALUE_TTP)));
 
 		return researchStudy;
 	}
@@ -133,18 +133,20 @@ public class RequestSimpleFeasibilityFromMedicsViaMedic1ExampleStarter
 		Task task = new Task();
 		task.setIdElement(new IdType("urn:uuid:" + UUID.randomUUID().toString()));
 
-		task.getMeta().addProfile(REQUEST_FEASIBILITY_TASK_PROFILE);
-		task.setInstantiatesUri(REQUEST_FEASIBILITY_PROCESS_URI_AND_LATEST_VERSION);
+		task.getMeta().addProfile(PROFILE_HIGHMED_TASK_REQUEST_FEASIBILITY);
+		task.setInstantiatesUri(PROFILE_HIGHMED_TASK_REQUEST_FEASIBILITY_PROCESS_URI_AND_LATEST_VERSION);
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
 		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue(ORGANIZATION_IDENTIFIER_VALUE_MEDIC_1);
+				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER)
+				.setValue(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER_VALUE_MEDIC_1);
 		task.getRestriction().addRecipient().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue(ORGANIZATION_IDENTIFIER_VALUE_MEDIC_1);
+				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER)
+				.setValue(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER_VALUE_MEDIC_1);
 
-		task.addInput().setValue(new StringType(REQUEST_FEASIBILITY_MESSAGE_NAME)).getType().addCoding()
-				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
+		task.addInput().setValue(new StringType(PROFILE_HIGHMED_TASK_REQUEST_FEASIBILITY_MESSAGE_NAME)).getType()
+				.addCoding().setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
 		task.addInput().setValue(new Reference().setReference(researchStudy.getIdElement().getIdPart())
 				.setType(ResourceType.ResearchStudy.name())).getType().addCoding()
 				.setSystem(CODESYSTEM_HIGHMED_FEASIBILITY)

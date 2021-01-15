@@ -47,13 +47,13 @@ public class OrganizationProviderImpl implements OrganizationProvider, Initializ
 	@Override
 	public String getDefaultTypeSystem()
 	{
-		return ConstantsBase.ORGANIZATION_TYPE_SYSTEM;
+		return ConstantsBase.CODESYSTEM_HIGHMED_ORGANIZATION_TYPE;
 	}
 
 	@Override
 	public String getDefaultIdentifierSystem()
 	{
-		return ConstantsBase.ORGANIZATION_IDENTIFIER_SYSTEM;
+		return ConstantsBase.NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER;
 	}
 
 	@Override

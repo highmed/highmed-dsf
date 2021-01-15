@@ -5,9 +5,9 @@
 			<code value="REMOTE" />
 		</tag>
 	</meta>
-	<extension url="http://highmed.org/fhir/StructureDefinition/process-authorization">
+	<extension url="http://highmed.org/fhir/StructureDefinition/extension-process-authorization">
 		<extension url="message-name">
-			<valueString value="updateAllowListMessage" />
+			<valueString value="requestUpdateResourcesMessage" />
 		</extension>
 		<extension url="authorization-roles">
 			<extension url="authorization-role">
@@ -34,15 +34,15 @@
 			</extension>
 		</extension>
 		<extension url="task-profile">
-			<valueCanonical value="http://highmed.org/fhir/StructureDefinition/highmed-task-update-allow-list" />
+			<valueCanonical value="http://highmed.org/fhir/StructureDefinition/task-request-update-resources" />
 		</extension>
 	</extension>
-	<url value="http://highmed.org/bpe/Process/updateAllowList" />
+	<url value="http://highmed.org/bpe/Process/requestUpdateResources" />
 	<!-- version managed by bpe -->
 	<version value="bpe-managed" />
-	<name value="updateAllowList" />
-	<title value="Update Allow List" />
-	<subtitle value="Update Allow List Bundle Process" />
+	<name value="requestUpdateResources" />
+	<title value="Request Update of Resources" />
+	<subtitle value="Process to Request a Bundle Download" />
 	<!-- status managed by bpe -->
 	<status value="unknown" />
 	<experimental value="false" />
@@ -55,6 +55,6 @@
 			<value value="pmo@highmed.org" />
 		</telecom>
 	</contact>
-	<description value="Process to update the allow list FHIR bundle" />
+	<description value="Process to request the download of a bundle to update FHIR resources" />
 	<kind value="Task" />
 </ActivityDefinition>

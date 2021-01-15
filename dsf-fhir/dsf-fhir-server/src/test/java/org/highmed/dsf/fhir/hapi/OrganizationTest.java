@@ -27,10 +27,10 @@ public class OrganizationTest
 	{
 		Organization organization = new Organization();
 		Extension thumbprint1 = organization.addExtension();
-		thumbprint1.setUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
+		thumbprint1.setUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint");
 		thumbprint1.setValue(new StringType(Hex.encodeHexString("foo bar baz".getBytes())));
 		Extension thumbprint2 = organization.addExtension();
-		thumbprint2.setUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
+		thumbprint2.setUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint");
 		thumbprint2.setValue(new StringType(Hex.encodeHexString("Blub Blub Blub".getBytes())));
 		organization.addEndpoint(new Reference(new IdType("Endpoint", UUID.randomUUID().toString())));
 

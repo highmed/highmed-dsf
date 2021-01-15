@@ -52,11 +52,11 @@ public class DownloadResultSets extends AbstractServiceDelegate
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
 		FeasibilityQueryResults results = (FeasibilityQueryResults) execution
-				.getVariable(ConstantsFeasibility.VARIABLE_QUERY_RESULTS);
+				.getVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_QUERY_RESULTS);
 
 		List<FeasibilityQueryResult> resultsWithResultSets = download(results);
 
-		execution.setVariable(ConstantsFeasibility.VARIABLE_QUERY_RESULTS,
+		execution.setVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_QUERY_RESULTS,
 				FeasibilityQueryResultsValues.create(new FeasibilityQueryResults(resultsWithResultSets)));
 	}
 

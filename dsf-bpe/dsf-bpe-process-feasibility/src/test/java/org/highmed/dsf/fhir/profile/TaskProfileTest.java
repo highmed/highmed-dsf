@@ -5,7 +5,7 @@ import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_BU
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME;
-import static org.highmed.dsf.bpe.ConstantsBase.ORGANIZATION_IDENTIFIER_SYSTEM;
+import static org.highmed.dsf.bpe.ConstantsBase.NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER;
 import static org.highmed.dsf.bpe.ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY;
 import static org.highmed.dsf.bpe.ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_BLOOM_FILTER_CONFIG;
 import static org.highmed.dsf.bpe.ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT;
@@ -16,22 +16,22 @@ import static org.highmed.dsf.bpe.ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIB
 import static org.highmed.dsf.bpe.ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_RESEARCH_STUDY_REFERENCE;
 import static org.highmed.dsf.bpe.ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_SINGLE_MEDIC_RESULT;
 import static org.highmed.dsf.bpe.ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_SINGLE_MEDIC_RESULT_REFERENCE;
-import static org.highmed.dsf.bpe.ConstantsFeasibility.COMPUTE_FEASIBILITY_MESSAGE_NAME;
-import static org.highmed.dsf.bpe.ConstantsFeasibility.COMPUTE_FEASIBILITY_PROCESS_URI_AND_LATEST_VERSION;
-import static org.highmed.dsf.bpe.ConstantsFeasibility.COMPUTE_FEASIBILITY_TASK_PROFILE;
-import static org.highmed.dsf.bpe.ConstantsFeasibility.ERROR_FEASIBILITY_MESSAGE_NAME;
-import static org.highmed.dsf.bpe.ConstantsFeasibility.ERROR_FEASIBILITY_TASK_PROFILE;
-import static org.highmed.dsf.bpe.ConstantsFeasibility.EXECUTE_FEASIBILITY_MESSAGE_NAME;
-import static org.highmed.dsf.bpe.ConstantsFeasibility.EXECUTE_FEASIBILITY_PROCESS_URI_AND_LATEST_VERSION;
-import static org.highmed.dsf.bpe.ConstantsFeasibility.EXECUTE_FEASIBILITY_TASK_PROFILE;
-import static org.highmed.dsf.bpe.ConstantsFeasibility.EXTENSION_GROUP_ID_URI;
-import static org.highmed.dsf.bpe.ConstantsFeasibility.MULTI_MEDIC_RESULT_FEASIBILITY_MESSAGE_NAME;
-import static org.highmed.dsf.bpe.ConstantsFeasibility.MULTI_MEDIC_RESULT_FEASIBILITY_TASK_PROFILE;
-import static org.highmed.dsf.bpe.ConstantsFeasibility.REQUEST_FEASIBILITY_MESSAGE_NAME;
-import static org.highmed.dsf.bpe.ConstantsFeasibility.REQUEST_FEASIBILITY_PROCESS_URI_AND_LATEST_VERSION;
-import static org.highmed.dsf.bpe.ConstantsFeasibility.REQUEST_FEASIBILITY_TASK_PROFILE;
-import static org.highmed.dsf.bpe.ConstantsFeasibility.SINGLE_MEDIC_RESULT_FEASIBILITY_MESSAGE_NAME;
-import static org.highmed.dsf.bpe.ConstantsFeasibility.SINGLE_MEDIC_RESULT_FEASIBILITY_TASK_PROFILE;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.EXTENSION_HIGHMED_GROUP_ID;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.PROFILE_HIGHMED_TASK_COMPUTE_FEASIBILITY;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.PROFILE_HIGHMED_TASK_COMPUTE_FEASIBILITY_MESSAGE_NAME;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.PROFILE_HIGHMED_TASK_COMPUTE_FEASIBILITY_PROCESS_URI_AND_LATEST_VERSION;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.PROFILE_HIGHMED_TASK_ERROR_FEASIBILITY;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.PROFILE_HIGHMED_TASK_ERROR_FEASIBILITY_MESSAGE_NAME;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.PROFILE_HIGHMED_TASK_EXECUTE_FEASIBILITY;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.PROFILE_HIGHMED_TASK_EXECUTE_FEASIBILITY_MESSAGE_NAME;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.PROFILE_HIGHMED_TASK_EXECUTE_FEASIBILITY_PROCESS_URI_AND_LATEST_VERSION;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.PROFILE_HIGHMED_TASK_MULTI_MEDIC_RESULT_FEASIBILITY;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.PROFILE_HIGHMED_TASK_MULTI_MEDIC_RESULT_FEASIBILITY_MESSAGE_NAME;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.PROFILE_HIGHMED_TASK_REQUEST_FEASIBILITY;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.PROFILE_HIGHMED_TASK_REQUEST_FEASIBILITY_MESSAGE_NAME;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.PROFILE_HIGHMED_TASK_REQUEST_FEASIBILITY_PROCESS_URI_AND_LATEST_VERSION;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.PROFILE_HIGHMED_TASK_SINGLE_MEDIC_RESULT_FEASIBILITY;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.PROFILE_HIGHMED_TASK_SINGLE_MEDIC_RESULT_FEASIBILITY_MESSAGE_NAME;
 import static org.junit.Assert.assertEquals;
 
 import java.nio.charset.StandardCharsets;
@@ -68,22 +68,22 @@ public class TaskProfileTest
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
 			Arrays.asList("highmed-task-base-0.4.0.xml", "highmed-group.xml", "highmed-extension-group-id.xml",
-					"highmed-research-study-feasibility.xml", "highmed-task-request-simple-feasibility.xml",
-					"highmed-task-execute-simple-feasibility.xml",
-					"highmed-task-single-medic-result-simple-feasibility.xml",
-					"highmed-task-compute-simple-feasibility.xml",
-					"highmed-task-multi-medic-result-simple-feasibility.xml",
-					"highmed-task-error-simple-feasibility.xml"),
-			Arrays.asList("authorization-role-0.4.0.xml", "bpmn-message-0.4.0.xml", "feasibility.xml"),
-			Arrays.asList("authorization-role-0.4.0.xml", "bpmn-message-0.4.0.xml", "feasibility.xml"));
+					"highmed-research-study-feasibility.xml", "highmed-task-request-feasibility.xml",
+					"highmed-task-execute-feasibility.xml", "highmed-task-single-medic-result-feasibility.xml",
+					"highmed-task-compute-feasibility.xml", "highmed-task-multi-medic-result-feasibility.xml",
+					"highmed-task-error-feasibility.xml"),
+			Arrays.asList("highmed-authorization-role-0.4.0.xml", "highmed-bpmn-message-0.4.0.xml",
+					"highmed-feasibility.xml"),
+			Arrays.asList("highmed-authorization-role-0.4.0.xml", "highmed-bpmn-message-0.4.0.xml",
+					"highmed-feasibility.xml"));
 
 	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
 
 	@Test
-	public void testTaskRequestSimpleFeasibilityValid() throws Exception
+	public void testTaskRequestFeasibilityValid() throws Exception
 	{
-		Task task = createValidTaskRequestSimpleFeasibility();
+		Task task = createValidTaskRequestFeasibility();
 
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
@@ -94,34 +94,34 @@ public class TaskProfileTest
 	}
 
 	@Test
-	public void testTaskRequestSimpleFeasibilityValidWithOutput() throws Exception
+	public void testTaskRequestFeasibilityValidWithOutput() throws Exception
 	{
 		String groupId1 = "Group/" + UUID.randomUUID().toString();
 		String groupId2 = "Group/" + UUID.randomUUID().toString();
 
-		Task task = createValidTaskRequestSimpleFeasibility();
+		Task task = createValidTaskRequestFeasibility();
 
 		TaskOutputComponent outParticipatingMedics1 = task.addOutput();
 		outParticipatingMedics1.setValue(new UnsignedIntType(5)).getType().addCoding()
 				.setSystem(CODESYSTEM_HIGHMED_FEASIBILITY)
 				.setCode(CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS_COUNT);
-		outParticipatingMedics1.addExtension(EXTENSION_GROUP_ID_URI, new Reference(groupId1));
+		outParticipatingMedics1.addExtension(EXTENSION_HIGHMED_GROUP_ID, new Reference(groupId1));
 		TaskOutputComponent outMultiMedicResult1 = task.addOutput();
 		outMultiMedicResult1.setValue(new UnsignedIntType(25)).getType().addCoding()
 				.setSystem(CODESYSTEM_HIGHMED_FEASIBILITY).setCode("multi-medic-result");
-		outMultiMedicResult1
-				.addExtension("http://highmed.org/fhir/StructureDefinition/group-id", new Reference(groupId1));
+		outMultiMedicResult1.addExtension("http://highmed.org/fhir/StructureDefinition/extension-group-id",
+				new Reference(groupId1));
 
 		TaskOutputComponent outParticipatingMedics2 = task.addOutput();
 		outParticipatingMedics2.setValue(new UnsignedIntType(5)).getType().addCoding()
 				.setSystem(CODESYSTEM_HIGHMED_FEASIBILITY)
 				.setCode(CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS_COUNT);
-		outParticipatingMedics2.addExtension(EXTENSION_GROUP_ID_URI, new Reference(groupId2));
+		outParticipatingMedics2.addExtension(EXTENSION_HIGHMED_GROUP_ID, new Reference(groupId2));
 		TaskOutputComponent outMultiMedicResult2 = task.addOutput();
 		outMultiMedicResult2.setValue(new UnsignedIntType(25)).getType().addCoding()
 				.setSystem(CODESYSTEM_HIGHMED_FEASIBILITY)
 				.setCode(CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT);
-		outMultiMedicResult2.addExtension(EXTENSION_GROUP_ID_URI, new Reference(groupId2));
+		outMultiMedicResult2.addExtension(EXTENSION_HIGHMED_GROUP_ID, new Reference(groupId2));
 
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
@@ -131,21 +131,21 @@ public class TaskProfileTest
 						.equals(m.getSeverity())).count());
 	}
 
-	private Task createValidTaskRequestSimpleFeasibility()
+	private Task createValidTaskRequestFeasibility()
 	{
 		Task task = new Task();
-		task.getMeta().addProfile(REQUEST_FEASIBILITY_TASK_PROFILE);
-		task.setInstantiatesUri(REQUEST_FEASIBILITY_PROCESS_URI_AND_LATEST_VERSION);
+		task.getMeta().addProfile(PROFILE_HIGHMED_TASK_REQUEST_FEASIBILITY);
+		task.setInstantiatesUri(PROFILE_HIGHMED_TASK_REQUEST_FEASIBILITY_PROCESS_URI_AND_LATEST_VERSION);
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
 		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("MeDIC 1");
+				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("MeDIC 1");
 		task.getRestriction().addRecipient().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("MeDIC 1");
+				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("MeDIC 1");
 
-		task.addInput().setValue(new StringType(REQUEST_FEASIBILITY_MESSAGE_NAME)).getType().addCoding()
-				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
+		task.addInput().setValue(new StringType(PROFILE_HIGHMED_TASK_REQUEST_FEASIBILITY_MESSAGE_NAME)).getType()
+				.addCoding().setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
 		task.addInput().setValue(new Reference("ResearchStudy/" + UUID.randomUUID().toString())).getType().addCoding()
 				.setSystem(CODESYSTEM_HIGHMED_FEASIBILITY)
 				.setCode(CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_RESEARCH_STUDY_REFERENCE);
@@ -158,9 +158,9 @@ public class TaskProfileTest
 	}
 
 	@Test
-	public void testTaskExecuteSimpleFeasibilityValid() throws Exception
+	public void testTaskExecuteFeasibilityValid() throws Exception
 	{
-		Task task = createValidTaskExecuteSimpleFeasibility();
+		Task task = createValidTaskExecuteFeasibility();
 
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
@@ -171,9 +171,9 @@ public class TaskProfileTest
 	}
 
 	@Test
-	public void testTaskExecuteSimpleFeasibilityValidWithBloomFilterConfig() throws Exception
+	public void testTaskExecuteFeasibilityValidWithBloomFilterConfig() throws Exception
 	{
-		Task task = createValidTaskExecuteSimpleFeasibility();
+		Task task = createValidTaskExecuteFeasibility();
 		task.addInput().setValue(new Base64BinaryType("TEST".getBytes(StandardCharsets.UTF_8))).getType().addCoding()
 				.setSystem(CODESYSTEM_HIGHMED_FEASIBILITY)
 				.setCode(CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_BLOOM_FILTER_CONFIG);
@@ -186,21 +186,21 @@ public class TaskProfileTest
 						.equals(m.getSeverity())).count());
 	}
 
-	private Task createValidTaskExecuteSimpleFeasibility()
+	private Task createValidTaskExecuteFeasibility()
 	{
 		Task task = new Task();
-		task.getMeta().addProfile(EXECUTE_FEASIBILITY_TASK_PROFILE);
-		task.setInstantiatesUri(EXECUTE_FEASIBILITY_PROCESS_URI_AND_LATEST_VERSION);
+		task.getMeta().addProfile(PROFILE_HIGHMED_TASK_EXECUTE_FEASIBILITY);
+		task.setInstantiatesUri(PROFILE_HIGHMED_TASK_EXECUTE_FEASIBILITY_PROCESS_URI_AND_LATEST_VERSION);
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
 		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("MeDIC 1");
+				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("MeDIC 1");
 		task.getRestriction().addRecipient().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("MeDIC 2");
+				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("MeDIC 2");
 
-		task.addInput().setValue(new StringType(EXECUTE_FEASIBILITY_MESSAGE_NAME)).getType().addCoding()
-				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
+		task.addInput().setValue(new StringType(PROFILE_HIGHMED_TASK_EXECUTE_FEASIBILITY_MESSAGE_NAME)).getType()
+				.addCoding().setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
 		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
 				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY);
 		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
@@ -218,9 +218,9 @@ public class TaskProfileTest
 	}
 
 	@Test
-	public void testTaskSingleMedicResultSimpleFeasibilityUnsignedIntResultValid() throws Exception
+	public void testTaskSingleMedicResultFeasibilityUnsignedIntResultValid() throws Exception
 	{
-		Task task = createValidTaskSingleMedicResultSimpleFeasibilityUnsignedIntResult();
+		Task task = createValidTaskSingleMedicResultFeasibilityUnsignedIntResult();
 
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
@@ -231,9 +231,9 @@ public class TaskProfileTest
 	}
 
 	@Test
-	public void testTaskSingleMedicResultSimpleFeasibilityReferenceResultValid() throws Exception
+	public void testTaskSingleMedicResultFeasibilityReferenceResultValid() throws Exception
 	{
-		Task task = createValidTaskSingleMedicResultSimpleFeasibilityReferenceResult();
+		Task task = createValidTaskSingleMedicResultFeasibilityReferenceResult();
 
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
@@ -243,21 +243,22 @@ public class TaskProfileTest
 						.equals(m.getSeverity())).count());
 	}
 
-	private Task createValidTaskSingleMedicResultSimpleFeasibility()
+	private Task createValidTaskSingleMedicResultFeasibility()
 	{
 		Task task = new Task();
-		task.getMeta().addProfile(SINGLE_MEDIC_RESULT_FEASIBILITY_TASK_PROFILE);
-		task.setInstantiatesUri(COMPUTE_FEASIBILITY_PROCESS_URI_AND_LATEST_VERSION);
+		task.getMeta().addProfile(PROFILE_HIGHMED_TASK_SINGLE_MEDIC_RESULT_FEASIBILITY);
+		task.setInstantiatesUri(PROFILE_HIGHMED_TASK_COMPUTE_FEASIBILITY_PROCESS_URI_AND_LATEST_VERSION);
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
 		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("MeDIC 2");
+				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("MeDIC 2");
 		task.getRestriction().addRecipient().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("TTP");
+				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("TTP");
 
-		task.addInput().setValue(new StringType(SINGLE_MEDIC_RESULT_FEASIBILITY_MESSAGE_NAME)).getType().addCoding()
-				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
+		task.addInput().setValue(new StringType(PROFILE_HIGHMED_TASK_SINGLE_MEDIC_RESULT_FEASIBILITY_MESSAGE_NAME))
+				.getType().addCoding().setSystem(CODESYSTEM_HIGHMED_BPMN)
+				.setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
 		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
 				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY);
 		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
@@ -266,9 +267,9 @@ public class TaskProfileTest
 		return task;
 	}
 
-	private Task createValidTaskSingleMedicResultSimpleFeasibilityUnsignedIntResult()
+	private Task createValidTaskSingleMedicResultFeasibilityUnsignedIntResult()
 	{
-		Task task = createValidTaskSingleMedicResultSimpleFeasibility();
+		Task task = createValidTaskSingleMedicResultFeasibility();
 
 		String groupId1 = "Group/" + UUID.randomUUID().toString();
 		String groupId2 = "Group/" + UUID.randomUUID().toString();
@@ -277,19 +278,19 @@ public class TaskProfileTest
 		inSingleMedicResult1.setValue(new UnsignedIntType(5)).getType().addCoding()
 				.setSystem(CODESYSTEM_HIGHMED_FEASIBILITY)
 				.setCode(CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_SINGLE_MEDIC_RESULT);
-		inSingleMedicResult1.addExtension(EXTENSION_GROUP_ID_URI, new Reference(groupId1));
+		inSingleMedicResult1.addExtension(EXTENSION_HIGHMED_GROUP_ID, new Reference(groupId1));
 		ParameterComponent inSingleMedicResult2 = task.addInput();
 		inSingleMedicResult2.setValue(new UnsignedIntType(10)).getType().addCoding()
 				.setSystem(CODESYSTEM_HIGHMED_FEASIBILITY)
 				.setCode(CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_SINGLE_MEDIC_RESULT);
-		inSingleMedicResult2.addExtension(EXTENSION_GROUP_ID_URI, new Reference(groupId2));
+		inSingleMedicResult2.addExtension(EXTENSION_HIGHMED_GROUP_ID, new Reference(groupId2));
 
 		return task;
 	}
 
-	private Task createValidTaskSingleMedicResultSimpleFeasibilityReferenceResult()
+	private Task createValidTaskSingleMedicResultFeasibilityReferenceResult()
 	{
-		Task task = createValidTaskSingleMedicResultSimpleFeasibility();
+		Task task = createValidTaskSingleMedicResultFeasibility();
 
 		String groupId1 = "Group/" + UUID.randomUUID().toString();
 		String groupId2 = "Group/" + UUID.randomUUID().toString();
@@ -298,20 +299,20 @@ public class TaskProfileTest
 		inSingleMedicResult1.setValue(new Reference("Binary/" + UUID.randomUUID().toString())).getType().addCoding()
 				.setSystem(CODESYSTEM_HIGHMED_FEASIBILITY)
 				.setCode(CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_SINGLE_MEDIC_RESULT_REFERENCE);
-		inSingleMedicResult1.addExtension(EXTENSION_GROUP_ID_URI, new Reference(groupId1));
+		inSingleMedicResult1.addExtension(EXTENSION_HIGHMED_GROUP_ID, new Reference(groupId1));
 		ParameterComponent inSingleMedicResult2 = task.addInput();
 		inSingleMedicResult2.setValue(new Reference("Binary/" + UUID.randomUUID().toString())).getType().addCoding()
 				.setSystem(CODESYSTEM_HIGHMED_FEASIBILITY)
 				.setCode(CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_SINGLE_MEDIC_RESULT_REFERENCE);
-		inSingleMedicResult2.addExtension(EXTENSION_GROUP_ID_URI, new Reference(groupId2));
+		inSingleMedicResult2.addExtension(EXTENSION_HIGHMED_GROUP_ID, new Reference(groupId2));
 
 		return task;
 	}
 
 	@Test
-	public void testTaskComputeSimpleFeasibilityValid() throws Exception
+	public void testTaskComputeFeasibilityValid() throws Exception
 	{
-		Task task = createValidTaskComputeSimpleFeasibility();
+		Task task = createValidTaskComputeFeasibility();
 
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
@@ -321,21 +322,21 @@ public class TaskProfileTest
 						.equals(m.getSeverity())).count());
 	}
 
-	private Task createValidTaskComputeSimpleFeasibility()
+	private Task createValidTaskComputeFeasibility()
 	{
 		Task task = new Task();
-		task.getMeta().addProfile(COMPUTE_FEASIBILITY_TASK_PROFILE);
-		task.setInstantiatesUri(COMPUTE_FEASIBILITY_PROCESS_URI_AND_LATEST_VERSION);
+		task.getMeta().addProfile(PROFILE_HIGHMED_TASK_COMPUTE_FEASIBILITY);
+		task.setInstantiatesUri(PROFILE_HIGHMED_TASK_COMPUTE_FEASIBILITY_PROCESS_URI_AND_LATEST_VERSION);
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
 		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("MeDIC 1");
+				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("MeDIC 1");
 		task.getRestriction().addRecipient().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("TTP");
+				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("TTP");
 
-		task.addInput().setValue(new StringType(COMPUTE_FEASIBILITY_MESSAGE_NAME)).getType().addCoding()
-				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
+		task.addInput().setValue(new StringType(PROFILE_HIGHMED_TASK_COMPUTE_FEASIBILITY_MESSAGE_NAME)).getType()
+				.addCoding().setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
 		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
 				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY);
 
@@ -353,9 +354,9 @@ public class TaskProfileTest
 	}
 
 	@Test
-	public void testTaskMultiMedicResultSimpleFeasibilityValid() throws Exception
+	public void testTaskMultiMedicResultFeasibilityValid() throws Exception
 	{
-		Task task = createValidTaskMultiMedicResultSimpleFeasibility();
+		Task task = createValidTaskMultiMedicResultFeasibility();
 
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
@@ -365,21 +366,22 @@ public class TaskProfileTest
 						.equals(m.getSeverity())).count());
 	}
 
-	private Task createValidTaskMultiMedicResultSimpleFeasibility()
+	private Task createValidTaskMultiMedicResultFeasibility()
 	{
 		Task task = new Task();
-		task.getMeta().addProfile(MULTI_MEDIC_RESULT_FEASIBILITY_TASK_PROFILE);
-		task.setInstantiatesUri(REQUEST_FEASIBILITY_PROCESS_URI_AND_LATEST_VERSION);
+		task.getMeta().addProfile(PROFILE_HIGHMED_TASK_MULTI_MEDIC_RESULT_FEASIBILITY);
+		task.setInstantiatesUri(PROFILE_HIGHMED_TASK_REQUEST_FEASIBILITY_PROCESS_URI_AND_LATEST_VERSION);
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
 		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("TTP");
+				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("TTP");
 		task.getRestriction().addRecipient().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("MeDIC 1");
+				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("MeDIC 1");
 
-		task.addInput().setValue(new StringType(MULTI_MEDIC_RESULT_FEASIBILITY_MESSAGE_NAME)).getType().addCoding()
-				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
+		task.addInput().setValue(new StringType(PROFILE_HIGHMED_TASK_MULTI_MEDIC_RESULT_FEASIBILITY_MESSAGE_NAME))
+				.getType().addCoding().setSystem(CODESYSTEM_HIGHMED_BPMN)
+				.setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
 		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
 				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY);
 
@@ -390,31 +392,31 @@ public class TaskProfileTest
 		inParticipatingMedics1.setValue(new UnsignedIntType(5)).getType().addCoding()
 				.setSystem(CODESYSTEM_HIGHMED_FEASIBILITY)
 				.setCode(CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS_COUNT);
-		inParticipatingMedics1.addExtension(EXTENSION_GROUP_ID_URI, new Reference(groupId1));
+		inParticipatingMedics1.addExtension(EXTENSION_HIGHMED_GROUP_ID, new Reference(groupId1));
 		ParameterComponent inMultiMedicResult1 = task.addInput();
 		inMultiMedicResult1.setValue(new UnsignedIntType(25)).getType().addCoding()
 				.setSystem(CODESYSTEM_HIGHMED_FEASIBILITY)
 				.setCode(CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT);
-		inMultiMedicResult1.addExtension(EXTENSION_GROUP_ID_URI, new Reference(groupId1));
+		inMultiMedicResult1.addExtension(EXTENSION_HIGHMED_GROUP_ID, new Reference(groupId1));
 
 		ParameterComponent inParticipatingMedics2 = task.addInput();
 		inParticipatingMedics2.setValue(new UnsignedIntType(5)).getType().addCoding()
 				.setSystem(CODESYSTEM_HIGHMED_FEASIBILITY)
 				.setCode(CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS_COUNT);
-		inParticipatingMedics2.addExtension(EXTENSION_GROUP_ID_URI, new Reference(groupId2));
+		inParticipatingMedics2.addExtension(EXTENSION_HIGHMED_GROUP_ID, new Reference(groupId2));
 		ParameterComponent inMultiMedicResult2 = task.addInput();
 		inMultiMedicResult2.setValue(new UnsignedIntType(25)).getType().addCoding()
 				.setSystem(CODESYSTEM_HIGHMED_FEASIBILITY)
 				.setCode(CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT);
-		inMultiMedicResult2.addExtension(EXTENSION_GROUP_ID_URI, new Reference(groupId2));
+		inMultiMedicResult2.addExtension(EXTENSION_HIGHMED_GROUP_ID, new Reference(groupId2));
 
 		return task;
 	}
 
 	@Test
-	public void testTaskErrorSimpleFeasibilityValid() throws Exception
+	public void testTaskErrorFeasibilityValid() throws Exception
 	{
-		Task task = createValidTaskErrorSimpleFeasibility();
+		Task task = createValidTaskErrorFeasibility();
 
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
@@ -424,21 +426,21 @@ public class TaskProfileTest
 						.equals(m.getSeverity())).count());
 	}
 
-	private Task createValidTaskErrorSimpleFeasibility()
+	private Task createValidTaskErrorFeasibility()
 	{
 		Task task = new Task();
-		task.getMeta().addProfile(ERROR_FEASIBILITY_TASK_PROFILE);
-		task.setInstantiatesUri(REQUEST_FEASIBILITY_PROCESS_URI_AND_LATEST_VERSION);
+		task.getMeta().addProfile(PROFILE_HIGHMED_TASK_ERROR_FEASIBILITY);
+		task.setInstantiatesUri(PROFILE_HIGHMED_TASK_REQUEST_FEASIBILITY_PROCESS_URI_AND_LATEST_VERSION);
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
 		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("TTP");
+				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("TTP");
 		task.getRestriction().addRecipient().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("MeDIC 1");
+				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("MeDIC 1");
 
-		task.addInput().setValue(new StringType(ERROR_FEASIBILITY_MESSAGE_NAME)).getType().addCoding()
-				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
+		task.addInput().setValue(new StringType(PROFILE_HIGHMED_TASK_ERROR_FEASIBILITY_MESSAGE_NAME)).getType()
+				.addCoding().setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
 		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
 				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY);
 

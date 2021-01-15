@@ -3,13 +3,13 @@ package org.highmed.dsf.bpe.message;
 import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.highmed.dsf.bpe.ConstantsFeasibility;
+import org.highmed.dsf.bpe.variables.FeasibilityQueryResult;
+import org.highmed.dsf.bpe.variables.FeasibilityQueryResults;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.AbstractTaskMessageSend;
 import org.highmed.dsf.fhir.task.TaskHelper;
-import org.highmed.dsf.bpe.ConstantsFeasibility;
-import org.highmed.dsf.bpe.variables.FeasibilityQueryResult;
-import org.highmed.dsf.bpe.variables.FeasibilityQueryResults;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
@@ -33,7 +33,7 @@ public class SendSingleMedicResults extends AbstractTaskMessageSend
 	protected Stream<Task.ParameterComponent> getAdditionalInputParameters(DelegateExecution execution)
 	{
 		FeasibilityQueryResults results = (FeasibilityQueryResults) execution
-				.getVariable(ConstantsFeasibility.VARIABLE_QUERY_RESULTS);
+				.getVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_QUERY_RESULTS);
 
 		return results.getResults().stream().map(result -> toInput(result));
 	}
@@ -69,6 +69,6 @@ public class SendSingleMedicResults extends AbstractTaskMessageSend
 
 	private Extension createCohortIdExtension(String cohortId)
 	{
-		return new Extension(ConstantsFeasibility.EXTENSION_GROUP_ID_URI, new Reference(cohortId));
+		return new Extension(ConstantsFeasibility.EXTENSION_HIGHMED_GROUP_ID, new Reference(cohortId));
 	}
 }

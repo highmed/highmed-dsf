@@ -1,6 +1,6 @@
 package org.highmed.dsf.bpe.service;
 
-import static org.highmed.dsf.bpe.ConstantsFeasibility.EXTENSION_PARTICIPATING_TTP_URI;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.EXTENSION_HIGHMED_PARTICIPATING_TTP;
 
 import java.util.Collections;
 import java.util.List;
@@ -61,24 +61,26 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 		Bundle bundle = getResearchStudyAndCohortDefinitions(researchStudyId, client);
 
 		ResearchStudy researchStudy = (ResearchStudy) bundle.getEntryFirstRep().getResource();
-		execution.setVariable(ConstantsFeasibility.VARIABLE_RESEARCH_STUDY, FhirResourceValues.create(researchStudy));
+		execution.setVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_RESEARCH_STUDY,
+				FhirResourceValues.create(researchStudy));
 
 		List<Group> cohortDefinitions = getCohortDefinitions(bundle, client.getBaseUrl());
-		execution.setVariable(ConstantsFeasibility.VARIABLE_COHORTS, FhirResourcesListValues.create(cohortDefinitions));
+		execution.setVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_COHORTS,
+				FhirResourcesListValues.create(cohortDefinitions));
 
 		String ttpIdentifier = getTtpIdentifier(researchStudy, client);
-		execution.setVariable(ConstantsBase.VARIABLE_TTP_IDENTIFIER, ttpIdentifier);
+		execution.setVariable(ConstantsBase.BPMN_EXECUTION_VARIABLE_TTP_IDENTIFIER, ttpIdentifier);
 
 		boolean needsConsentCheck = getNeedsConsentCheck(task);
-		execution.setVariable(ConstantsFeasibility.VARIABLE_NEEDS_CONSENT_CHECK, needsConsentCheck);
+		execution.setVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_NEEDS_CONSENT_CHECK, needsConsentCheck);
 
 		boolean needsRecordLinkage = getNeedsRecordLinkageCheck(task);
-		execution.setVariable(ConstantsFeasibility.VARIABLE_NEEDS_RECORD_LINKAGE, needsRecordLinkage);
+		execution.setVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_NEEDS_RECORD_LINKAGE, needsRecordLinkage);
 
 		if (needsRecordLinkage)
 		{
 			BloomFilterConfig bloomFilterConfig = getBloomFilterConfig(task);
-			execution.setVariable(ConstantsFeasibility.VARIABLE_BLOOM_FILTER_CONFIG,
+			execution.setVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_BLOOM_FILTER_CONFIG,
 					BloomFilterConfigValues.create(bloomFilterConfig));
 		}
 	}
@@ -152,7 +154,7 @@ public class DownloadFeasibilityResources extends AbstractServiceDelegate implem
 
 	private String getTtpIdentifier(ResearchStudy researchStudy, FhirWebserviceClient client)
 	{
-		Extension ext = researchStudy.getExtensionByUrl(EXTENSION_PARTICIPATING_TTP_URI);
+		Extension ext = researchStudy.getExtensionByUrl(EXTENSION_HIGHMED_PARTICIPATING_TTP);
 		Reference ref = (Reference) ext.getValue();
 		return ref.getIdentifier().getValue();
 	}

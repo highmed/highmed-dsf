@@ -13,7 +13,7 @@
           <camunda:inputParameter name="processDefinitionKey">pong</camunda:inputParameter>
           <camunda:inputParameter name="versionTag">0.4.0</camunda:inputParameter>
           <camunda:inputParameter name="messageName">pingMessage</camunda:inputParameter>
-          <camunda:inputParameter name="profile">http://highmed.org/fhir/StructureDefinition/highmed-task-ping</camunda:inputParameter>
+          <camunda:inputParameter name="profile">http://highmed.org/fhir/StructureDefinition/task-ping</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_05ia6lz</bpmn:incoming>

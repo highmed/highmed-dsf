@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <StructureDefinition xmlns="http://hl7.org/fhir">
-	<url value="http://highmed.org/fhir/StructureDefinition/highmed-organization"/>
+	<url value="http://highmed.org/fhir/StructureDefinition/organization"/>
 	<version value="0.5.0"/>
 	<name value="Organization"/>
 	<status value="active"/>
@@ -28,7 +28,7 @@
 			<min value="1"/>
 			<type>
 				<code value="Extension"/>
-				<profile value="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint"/>
+				<profile value="http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint"/>
 			</type>
 		</element>
 		<element id="Organization.identifier">
@@ -56,7 +56,7 @@
 			<path value="Organization.identifier.value"/>
 			<binding>
 				<strength value="required"/>
-				<valueSet value="http://highmed.org/fhir/ValueSet/highmed-organization"/>
+				<valueSet value="http://highmed.org/fhir/ValueSet/organization"/>
 			</binding>
 		</element>
 		<element id="Organization.endpoint">
@@ -64,7 +64,7 @@
 			<min value="1"/>
 			<type>
 				<code value="Reference"/>
-				<targetProfile value="http://highmed.org/fhir/StructureDefinition/highmed-endpoint"/>
+				<targetProfile value="http://highmed.org/fhir/StructureDefinition/endpoint"/>
 			</type>
 		</element>
 	</differential>

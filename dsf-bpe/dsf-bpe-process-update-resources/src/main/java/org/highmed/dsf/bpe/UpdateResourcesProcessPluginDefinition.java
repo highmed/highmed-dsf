@@ -46,20 +46,21 @@ public class UpdateResourcesProcessPluginDefinition implements ProcessPluginDefi
 	@Override
 	public ResourceProvider getResourceProvider(FhirContext fhirContext, ClassLoader classLoader)
 	{
-		var aExec = ActivityDefinitionResource.file("fhir/ActivityDefinition/executeUpdateResources.xml");
-		var aReq = ActivityDefinitionResource.file("fhir/ActivityDefinition/requestUpdateResources.xml");
-		var c = CodeSystemResource.file("fhir/CodeSystem/update-resources.xml");
+		var aExec = ActivityDefinitionResource.file("fhir/ActivityDefinition/highmed-executeUpdateResources.xml");
+		var aReq = ActivityDefinitionResource.file("fhir/ActivityDefinition/highmed-requestUpdateResources.xml");
+		var c = CodeSystemResource.file("fhir/CodeSystem/highmed-update-resources.xml");
 		var sExec = StructureDefinitionResource
 				.file("fhir/StructureDefinition/highmed-task-execute-update-resources.xml");
 		var sReq = StructureDefinitionResource
 				.file("fhir/StructureDefinition/highmed-task-request-update-resources.xml");
-		var v = ValueSetResource.file("fhir/ValueSet/update-resources.xml");
+		var v = ValueSetResource.file("fhir/ValueSet/highmed-update-resources.xml");
 
-		Map<String, List<AbstractResource>> resourcesByProcessKeyAndVersion = Map.of(
-				"executeUpdateResources/" + VERSION, Arrays.asList(aExec, c, sExec, v),
-				"requestUpdateResources/" + VERSION, Arrays.asList(aReq, c, sReq, v));
+		Map<String, List<AbstractResource>> resourcesByProcessKeyAndVersion = Map
+				.of("executeUpdateResources/" + VERSION, Arrays.asList(aExec, c, sExec, v),
+						"requestUpdateResources/" + VERSION, Arrays.asList(aReq, c, sReq, v));
 
-		return ResourceProvider.read(VERSION, () -> fhirContext.newXmlParser().setStripVersionsFromReferences(false),
-				classLoader, resourcesByProcessKeyAndVersion);
+		return ResourceProvider
+				.read(VERSION, () -> fhirContext.newXmlParser().setStripVersionsFromReferences(false), classLoader,
+						resourcesByProcessKeyAndVersion);
 	}
 }

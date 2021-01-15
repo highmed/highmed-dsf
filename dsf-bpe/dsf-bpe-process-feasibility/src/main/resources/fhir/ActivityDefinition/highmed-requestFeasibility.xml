@@ -5,9 +5,9 @@
 			<code value="REMOTE" />
 		</tag>
 	</meta>
-	<extension url="http://highmed.org/fhir/StructureDefinition/process-authorization">
+	<extension url="http://highmed.org/fhir/StructureDefinition/extension-process-authorization">
 		<extension url="message-name">
-			<valueString value="requestSimpleFeasibilityMessage" />
+			<valueString value="requestFeasibilityMessage" />
 		</extension>
 		<extension url="authorization-roles">
 			<extension url="authorization-role">
@@ -34,12 +34,12 @@
 			</extension>
 		</extension>
 		<extension url="task-profile">
-			<valueCanonical value="http://highmed.org/fhir/StructureDefinition/highmed-task-request-simple-feasibility" />
+			<valueCanonical value="http://highmed.org/fhir/StructureDefinition/highmed-task-request-feasibility" />
 		</extension>
 	</extension>
-	<extension url="http://highmed.org/fhir/StructureDefinition/process-authorization">
+	<extension url="http://highmed.org/fhir/StructureDefinition/extension-process-authorization">
 		<extension url="message-name">
-			<valueString value="resultMultiMedicSimpleFeasibilityMessage" />
+			<valueString value="resultMultiMedicFeasibilityMessage" />
 		</extension>
 		<extension url="authorization-roles">
 			<extension url="authorization-role">
@@ -66,12 +66,12 @@
 			</extension>
 		</extension>
 		<extension url="task-profile">
-			<valueCanonical value="http://highmed.org/fhir/StructureDefinition/highmed-task-multi-medic-result-simple-feasibility" />
+			<valueCanonical value="http://highmed.org/fhir/StructureDefinition/task-multi-medic-result-feasibility" />
 		</extension>
 	</extension>
-	<extension url="http://highmed.org/fhir/StructureDefinition/process-authorization">
+	<extension url="http://highmed.org/fhir/StructureDefinition/extension-process-authorization">
 		<extension url="message-name">
-			<valueString value="errorMultiMedicSimpleFeasibilityMessage" />
+			<valueString value="errorMultiMedicFeasibilityMessage" />
 		</extension>
 		<extension url="authorization-roles">
 			<extension url="authorization-role">
@@ -98,14 +98,14 @@
 			</extension>
 		</extension>
 		<extension url="task-profile">
-			<valueCanonical value="http://highmed.org/fhir/StructureDefinition/highmed-task-multi-medic-error-simple-feasibility" />
+			<valueCanonical value="http://highmed.org/fhir/StructureDefinition/task-multi-medic-error-feasibility" />
 		</extension>
 	</extension>
-	<url value="http://highmed.org/bpe/Process/requestSimpleFeasibility" />
+	<url value="http://highmed.org/bpe/Process/requestFeasibility" />
 	<!-- version managed by bpe -->
 	<version value="bpe-managed" />
-	<name value="requestSimpleFeasibility" />
-	<title value="Request simple feasibility" />
+	<name value="requestFeasibility" />
+	<title value="Request feasibility" />
 	<subtitle value="Feasibility Request Process" />
 	<!-- status managed by bpe -->
 	<status value="unknown" />
@@ -119,6 +119,6 @@
 			<value value="pmo@highmed.org" />
 		</telecom>
 	</contact>
-	<description value="Process to start a simple feasibility, process sends messages to all MeDICs and a TTP, receives result from TTP" />
+	<description value="Process to start a feasibility, process sends messages to all MeDICs and a TTP, receives result from TTP" />
 	<kind value="Task" />
 </ActivityDefinition>

@@ -5,7 +5,7 @@
 			<code value="REMOTE" />
 		</tag>
 	</meta>
-	<extension url="http://highmed.org/fhir/StructureDefinition/process-authorization">
+	<extension url="http://highmed.org/fhir/StructureDefinition/extension-process-authorization">
 		<extension url="message-name">
 			<valueString value="startPingProcessMessage" />
 		</extension>
@@ -46,10 +46,10 @@
 			</extension>
 		</extension>
 		<extension url="task-profile">
-			<valueCanonical value="http://highmed.org/fhir/StructureDefinition/highmed-task-start-ping-process" />
+			<valueCanonical value="http://highmed.org/fhir/StructureDefinition/task-start-ping-process" />
 		</extension>
 	</extension>
-	<extension url="http://highmed.org/fhir/StructureDefinition/process-authorization">
+	<extension url="http://highmed.org/fhir/StructureDefinition/extension-process-authorization">
 		<extension url="message-name">
 			<valueString value="pongMessage" />
 		</extension>
@@ -90,7 +90,7 @@
 			</extension>
 		</extension>
 		<extension url="task-profile">
-			<valueCanonical value="http://highmed.org/fhir/StructureDefinition/highmed-task-pong" />
+			<valueCanonical value="http://highmed.org/fhir/StructureDefinition/task-pong" />
 		</extension>
 	</extension>
 	<url value="http://highmed.org/bpe/Process/ping" />

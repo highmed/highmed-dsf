@@ -43,10 +43,10 @@ public class StoreResults extends AbstractServiceDelegate implements Initializin
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
 		FeasibilityQueryResults results = (FeasibilityQueryResults) execution
-				.getVariable(ConstantsFeasibility.VARIABLE_QUERY_RESULTS);
+				.getVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_QUERY_RESULTS);
 
-		boolean needsRecordLinkage = Boolean.TRUE
-				.equals((Boolean) execution.getVariable(ConstantsFeasibility.VARIABLE_NEEDS_RECORD_LINKAGE));
+		boolean needsRecordLinkage = Boolean.TRUE.equals((Boolean) execution
+				.getVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_NEEDS_RECORD_LINKAGE));
 
 		Task task = getCurrentTaskFromExecutionVariables();
 
@@ -54,7 +54,7 @@ public class StoreResults extends AbstractServiceDelegate implements Initializin
 		extendedResults.addAll(results.getResults());
 		extendedResults.addAll(getResults(task, needsRecordLinkage));
 
-		execution.setVariable(ConstantsFeasibility.VARIABLE_QUERY_RESULTS,
+		execution.setVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_QUERY_RESULTS,
 				FeasibilityQueryResultsValues.create(new FeasibilityQueryResults(extendedResults)));
 	}
 
@@ -67,7 +67,7 @@ public class StoreResults extends AbstractServiceDelegate implements Initializin
 		{
 			return taskHelper.getInputParameterWithExtension(task, ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
 					ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_SINGLE_MEDIC_RESULT_REFERENCE,
-					ConstantsFeasibility.EXTENSION_GROUP_ID_URI).map(input -> {
+					ConstantsFeasibility.EXTENSION_HIGHMED_GROUP_ID).map(input -> {
 				String cohortId = ((Reference) input.getExtension().get(0).getValue()).getReference();
 				String resultSetUrl = ((Reference) input.getValue()).getReference();
 
@@ -78,7 +78,7 @@ public class StoreResults extends AbstractServiceDelegate implements Initializin
 		{
 			return taskHelper.getInputParameterWithExtension(task, ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
 					ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_SINGLE_MEDIC_RESULT,
-					ConstantsFeasibility.EXTENSION_GROUP_ID_URI).map(input -> {
+					ConstantsFeasibility.EXTENSION_HIGHMED_GROUP_ID).map(input -> {
 				String cohortId = ((Reference) input.getExtension().get(0).getValue()).getReference();
 				int cohortSize = ((UnsignedIntType) input.getValue()).getValue();
 

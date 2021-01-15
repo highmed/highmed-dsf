@@ -1,7 +1,7 @@
 package org.highmed.dsf.bpe.service;
 
+import static org.highmed.dsf.bpe.ConstantsBase.NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER;
 import static org.highmed.dsf.bpe.ConstantsBase.OPENEHR_MIMETYPE_JSON;
-import static org.highmed.dsf.bpe.ConstantsBase.ORGANIZATION_IDENTIFIER_SYSTEM;
 
 import java.security.Key;
 import java.util.List;
@@ -82,12 +82,12 @@ public class GenerateBloomFilters extends AbstractServiceDelegate
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
 		FeasibilityQueryResults results = (FeasibilityQueryResults) execution
-				.getVariable(ConstantsFeasibility.VARIABLE_QUERY_RESULTS);
+				.getVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_QUERY_RESULTS);
 
 		String securityIdentifier = getSecurityIdentifier(execution);
 
 		BloomFilterConfig bloomFilterConfig = (BloomFilterConfig) execution
-				.getVariable(ConstantsFeasibility.VARIABLE_BLOOM_FILTER_CONFIG);
+				.getVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_BLOOM_FILTER_CONFIG);
 
 		ResultSetTranslatorToTtpRbfOnly resultSetTranslator = createResultSetTranslator(bloomFilterConfig);
 
@@ -95,7 +95,7 @@ public class GenerateBloomFilters extends AbstractServiceDelegate
 				.map(result -> translateAndCreateBinary(resultSetTranslator, result, securityIdentifier))
 				.collect(Collectors.toList());
 
-		execution.setVariable(ConstantsFeasibility.VARIABLE_QUERY_RESULTS,
+		execution.setVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_QUERY_RESULTS,
 				FeasibilityQueryResultsValues.create(new FeasibilityQueryResults(translatedResults)));
 	}
 
@@ -103,10 +103,10 @@ public class GenerateBloomFilters extends AbstractServiceDelegate
 	{
 		Task task = getCurrentTaskFromExecutionVariables();
 
-		if (task.getInstantiatesUri().startsWith(ConstantsFeasibility.LOCAL_SERVICES_PROCESS_URI))
+		if (task.getInstantiatesUri().startsWith(ConstantsFeasibility.PROFILE_HIGHMED_TASK_LOCAL_SERVICES_PROCESS_URI))
 			return task.getRequester().getIdentifier().getValue();
 		else
-			return (String) execution.getVariable(ConstantsBase.VARIABLE_TTP_IDENTIFIER);
+			return (String) execution.getVariable(ConstantsBase.BPMN_EXECUTION_VARIABLE_TTP_IDENTIFIER);
 	}
 
 	protected ResultSetTranslatorToTtpRbfOnly createResultSetTranslator(BloomFilterConfig bloomFilterConfig)
@@ -152,7 +152,7 @@ public class GenerateBloomFilters extends AbstractServiceDelegate
 		byte[] content = serializeResultSet(resultSet);
 		Reference securityContext = new Reference();
 		securityContext.setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue(securityIdentifier);
+				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue(securityIdentifier);
 		Binary binary = new Binary().setContentType(OPENEHR_MIMETYPE_JSON).setSecurityContext(securityContext)
 				.setData(content);
 

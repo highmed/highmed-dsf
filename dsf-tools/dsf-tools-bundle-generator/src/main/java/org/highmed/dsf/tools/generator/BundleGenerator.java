@@ -63,8 +63,7 @@ public class BundleGenerator
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
 
-		BundleEntryPutReader putReader = (resource, resourceFile, putFile) ->
-		{
+		BundleEntryPutReader putReader = (resource, resourceFile, putFile) -> {
 			logger.debug("Reading {} at {} with put file {}", resource.getSimpleName(), resourceFile.toString(),
 					putFile.toString());
 
@@ -84,8 +83,7 @@ public class BundleGenerator
 			}
 		};
 
-		BundleEntryPostReader postReader = (resource, resourceFile, postFile) ->
-		{
+		BundleEntryPostReader postReader = (resource, resourceFile, postFile) -> {
 			logger.info("Reading {} at {} with post file {}", resource.getSimpleName(), resourceFile.toString(),
 					postFile.toString());
 
@@ -127,8 +125,7 @@ public class BundleGenerator
 
 		bundle.getEntry().stream().map(e -> e.getResource()).filter(r -> r instanceof StructureDefinition)
 				.map(r -> (StructureDefinition) r).sorted(Comparator.comparing(StructureDefinition::getUrl).reversed())
-				.forEach(s ->
-				{
+				.forEach(s -> {
 					if (!s.hasSnapshot())
 						generator.generateSnapshot(s);
 				});
@@ -139,8 +136,7 @@ public class BundleGenerator
 		ValueSetExpander valueSetExpander = new ValueSetExpander(fhirContext, validationSupport);
 
 		bundle.getEntry().stream().map(e -> e.getResource()).filter(r -> r instanceof ValueSet).map(r -> (ValueSet) r)
-				.forEach(v ->
-				{
+				.forEach(v -> {
 					if (!v.hasExpansion())
 						valueSetExpander.expand(v);
 				});

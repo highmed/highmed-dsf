@@ -4,31 +4,29 @@ import org.hl7.fhir.r4.model.CodeType;
 
 public interface ConstantsBase
 {
-	String VARIABLE_MESSAGE_NAME = "messageName";
-	String VARIABLE_PROCESS_DEFINITION_KEY = "processDefinitionKey";
-	String VARIABLE_VERSION_TAG = "versionTag";
-	String VARIABLE_PROFILE = "profile";
-	// String VARIABLE_TARGET_ORGANIZATION_ID = "targetOrganizationId";
-	// String VARIABLE_CORRELATION_KEY = "correlationKey";
-	String VARIABLE_TARGET = "target";
-	String VARIABLE_TARGETS = "targets";
-	String VARIABLE_TASK = "task";
-	String VARIABLE_LEADING_TASK = "leadingTask";
-	String VARIABLE_BUNDLE_ID = "bundleId";
-	String VARIABLE_QUERY_PARAMETERS = "queryParameters";
-	String VARIABLE_TTP_IDENTIFIER = "ttp";
+	String BPMN_EXECUTION_VARIABLE_MESSAGE_NAME = "messageName";
+	String BPMN_EXECUTION_VARIABLE_PROCESS_DEFINITION_KEY = "processDefinitionKey";
+	String BPMN_EXECUTION_VARIABLE_VERSION_TAG = "versionTag";
+	String BPMN_EXECUTION_VARIABLE_PROFILE = "profile";
+	// String BPMN_EXECUTION_VARIABLE_TARGET_ORGANIZATION_ID = "targetOrganizationId";
+	// String BPMN_EXECUTION_VARIABLE_CORRELATION_KEY = "correlationKey";
+	String BPMN_EXECUTION_VARIABLE_TARGET = "target";
+	String BPMN_EXECUTION_VARIABLE_TARGETS = "targets";
+	String BPMN_EXECUTION_VARIABLE_TASK = "task";
+	String BPMN_EXECUTION_VARIABLE_LEADING_TASK = "leadingTask";
+	String BPMN_EXECUTION_VARIABLE_BUNDLE_ID = "bundleId";
+	String BPMN_EXECUTION_VARIABLE_QUERY_PARAMETERS = "queryParameters";
+	String BPMN_EXECUTION_VARIABLE_TTP_IDENTIFIER = "ttp";
 
 	/**
 	 * Used to distinguish if I am at the moment in a process called
 	 * by another process by a CallActivity or not
 	 */
-	String VARIABLE_IN_CALLED_PROCESS = "inCalledProcess";
+	String BPMN_EXECUTION_VARIABLE_IN_CALLED_PROCESS = "inCalledProcess";
 
-	String EXTENSION_QUERY_URI = "http://highmed.org/fhir/StructureDefinition/query";
-	String CODESYSTEM_QUERY_TYPE = "http://highmed.org/fhir/CodeSystem/query-type";
-	String CODESYSTEM_QUERY_TYPE_AQL = "application/x-aql-query";
-	CodeType AQL_QUERY_TYPE = new CodeType(CODESYSTEM_QUERY_TYPE_AQL).setSystem(CODESYSTEM_QUERY_TYPE);
-	String OPENEHR_MIMETYPE_JSON = "application/json";
+	String PROCESS_HIGHMED_URI_BASE = "http://highmed.org/bpe/Process/";
+
+	String EXTENSION_HIGHMED_QUERY = "http://highmed.org/fhir/StructureDefinition/extension-query";
 
 	String CODESYSTEM_HIGHMED_BPMN = "http://highmed.org/fhir/CodeSystem/bpmn-message";
 	String CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME = "message-name";
@@ -36,11 +34,17 @@ public interface ConstantsBase
 	String CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY = "correlation-key";
 	String CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR = "error";
 
-	String PROCESS_URI_BASE = "http://highmed.org/bpe/Process/";
+	String CODESYSTEM_HIGHMED_ORGANIZATION_TYPE = "http://highmed.org/fhir/CodeSystem/organization-type";
+	String CODESYSTEM_HIGHMED_ORGANIZATION_TYPE_VALUE_TTP = "TTP";
+	String CODESYSTEM_HIGHMED_ORGANIZATION_TYPE_VALUE_MEDIC = "MeDIC";
 
-	String ORGANIZATION_IDENTIFIER_SYSTEM = "http://highmed.org/fhir/NamingSystem/organization-identifier";
-	String ORGANIZATION_TYPE_SYSTEM = "http://highmed.org/fhir/CodeSystem/organization-type";
-	String ORGANIZATION_TYPE_TTP = "TTP";
-	String ORGANIZATION_TYPE_MEDIC = "MeDIC";
-	String ENDPOINT_IDENTIFIER_SYSTEM = "http://highmed.org/fhir/NamingSystem/endpoint-identifier";
+	String CODESYSTEM_HIGHMED_QUERY_TYPE = "http://highmed.org/fhir/CodeSystem/query-type";
+	String CODESYSTEM_HIGMED_QUERY_TYPE_VALUE_AQL = "application/x-aql-query";
+
+	String NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER = "http://highmed.org/fhir/NamingSystem/organization-identifier";
+	String NAMINGSYSTEM_HIGHMED_ENDPOINT_IDENTIFIER = "http://highmed.org/fhir/NamingSystem/endpoint-identifier";
+
+	CodeType CODE_TYPE_AQL_QUERY = new CodeType(CODESYSTEM_HIGMED_QUERY_TYPE_VALUE_AQL)
+			.setSystem(CODESYSTEM_HIGHMED_QUERY_TYPE);
+	String OPENEHR_MIMETYPE_JSON = "application/json";
 }

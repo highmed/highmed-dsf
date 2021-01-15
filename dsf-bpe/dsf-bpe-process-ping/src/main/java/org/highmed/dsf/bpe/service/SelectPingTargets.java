@@ -42,6 +42,7 @@ public class SelectPingTargets extends AbstractServiceDelegate implements Initia
 				.createBiDirectionalTarget(identifier.getValue(), UUID.randomUUID().toString()))
 				.collect(Collectors.toList());
 
-		execution.setVariable(ConstantsBase.VARIABLE_TARGETS, TargetsValues.create(new Targets(targets)));
+		execution
+				.setVariable(ConstantsBase.BPMN_EXECUTION_VARIABLE_TARGETS, TargetsValues.create(new Targets(targets)));
 	}
 }

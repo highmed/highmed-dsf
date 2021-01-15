@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1yff9tp" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.7.1">
-  <bpmn:process id="computeSimpleFeasibility" isExecutable="true" camunda:versionTag="0.4.0">
+  <bpmn:process id="computeFeasibility" isExecutable="true" camunda:versionTag="0.4.0">
     <bpmn:subProcess id="SubProcess_1gopxt4">
       <bpmn:incoming>SequenceFlow_1lfe4wr</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0xxpamp</bpmn:outgoing>
@@ -45,10 +45,10 @@
     <bpmn:endEvent id="EndEventSuccess" name="send final result to leading MeDIC">
       <bpmn:extensionElements>
         <camunda:inputOutput>
-          <camunda:inputParameter name="processDefinitionKey">requestSimpleFeasibility</camunda:inputParameter>
-          <camunda:inputParameter name="profile">http://highmed.org/fhir/StructureDefinition/highmed-task-multi-medic-result-simple-feasibility</camunda:inputParameter>
+          <camunda:inputParameter name="processDefinitionKey">requestFeasibility</camunda:inputParameter>
+          <camunda:inputParameter name="profile">http://highmed.org/fhir/StructureDefinition/task-multi-medic-result-feasibility</camunda:inputParameter>
           <camunda:inputParameter name="versionTag">0.4.0</camunda:inputParameter>
-          <camunda:inputParameter name="messageName">resultMultiMedicSimpleFeasibilityMessage</camunda:inputParameter>
+          <camunda:inputParameter name="messageName">resultMultiMedicFeasibilityMessage</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1r6dq8y</bpmn:incoming>
@@ -97,10 +97,10 @@
     <bpmn:endEvent id="EndEventError" name="send error to leading MeDIC">
       <bpmn:extensionElements>
         <camunda:inputOutput>
-          <camunda:inputParameter name="processDefinitionKey">requestSimpleFeasibility</camunda:inputParameter>
-          <camunda:inputParameter name="profile">http://highmed.org/fhir/StructureDefinition/highmed-task-multi-medic-error-simple-feasibility</camunda:inputParameter>
+          <camunda:inputParameter name="processDefinitionKey">requestFeasibility</camunda:inputParameter>
+          <camunda:inputParameter name="profile">http://highmed.org/fhir/StructureDefinition/task-multi-medic-error-feasibility</camunda:inputParameter>
           <camunda:inputParameter name="versionTag">0.4.0</camunda:inputParameter>
-          <camunda:inputParameter name="messageName">errorMultiMedicSimpleFeasibilityMessage</camunda:inputParameter>
+          <camunda:inputParameter name="messageName">errorMultiMedicFeasibilityMessage</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1tmnvhl</bpmn:incoming>
@@ -119,13 +119,13 @@
     </bpmn:boundaryEvent>
     <bpmn:sequenceFlow id="Flow_1tmnvhl" sourceRef="Event_1vp5qzs" targetRef="EndEventError" />
   </bpmn:process>
-  <bpmn:message id="Message_0a1qxd8" name="resultSingleMedicSimpleFeasibilityMessage" />
-  <bpmn:message id="Message_0ue93sz" name="resultMultiMedicSimpleFeasibilityMessage" />
-  <bpmn:message id="Message_08676wn" name="computeSimpleFeasibilityMessage" />
-  <bpmn:message id="Message_0kix95m" name="errorMultiMedicSimpleFeasibilityMessage" />
-  <bpmn:error id="Error_0qub4jc" name="errorMultiMedicSimpleFeasibilityResult" errorCode="errorMultiMedicSimpleFeasibilityResult" camunda:errorMessage="errorMultiMedicSimpleFeasibilityResult" />
+  <bpmn:message id="Message_0a1qxd8" name="resultSingleMedicFeasibilityMessage" />
+  <bpmn:message id="Message_0ue93sz" name="resultMultiMedicFeasibilityMessage" />
+  <bpmn:message id="Message_08676wn" name="computeFeasibilityMessage" />
+  <bpmn:message id="Message_0kix95m" name="errorMultiMedicFeasibilityMessage" />
+  <bpmn:error id="Error_0qub4jc" name="errorMultiMedicFeasibilityResult" errorCode="errorMultiMedicFeasibilityResult" camunda:errorMessage="errorMultiMedicFeasibilityResult" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
-    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="computeSimpleFeasibility">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="computeFeasibility">
       <bpmndi:BPMNEdge id="Flow_1tmnvhl_di" bpmnElement="Flow_1tmnvhl">
         <di:waypoint x="1820" y="300" />
         <di:waypoint x="1820" y="350" />

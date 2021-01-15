@@ -25,7 +25,7 @@ public class SendTtpRequest extends AbstractTaskMessageSend
 	@Override
 	protected Stream<Task.ParameterComponent> getAdditionalInputParameters(DelegateExecution execution)
 	{
-		Targets multiInstanceTargets = (Targets) execution.getVariable(ConstantsBase.VARIABLE_TARGETS);
+		Targets multiInstanceTargets = (Targets) execution.getVariable(ConstantsBase.BPMN_EXECUTION_VARIABLE_TARGETS);
 
 		Stream<Task.ParameterComponent> inputTargets = multiInstanceTargets.getEntries().stream()
 				.map(target -> getTaskHelper().createInput(ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
@@ -33,7 +33,7 @@ public class SendTtpRequest extends AbstractTaskMessageSend
 						target.getCorrelationKey()));
 
 		boolean needsRecordLinkage = (boolean) execution
-				.getVariable(ConstantsFeasibility.VARIABLE_NEEDS_RECORD_LINKAGE);
+				.getVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_NEEDS_RECORD_LINKAGE);
 		Task.ParameterComponent inputNeedsRecordLinkage = getTaskHelper()
 				.createInput(ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
 						ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_RECORD_LINKAGE,

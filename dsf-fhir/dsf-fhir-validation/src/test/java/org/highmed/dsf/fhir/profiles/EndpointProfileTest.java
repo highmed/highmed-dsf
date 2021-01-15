@@ -26,8 +26,8 @@ public class EndpointProfileTest
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
 			Arrays.asList("highmed-endpoint-0.4.0.xml"),
-			Arrays.asList("authorization-role-0.4.0.xml", "urn_ietf_bcp_13.xml"),
-			Arrays.asList("authorization-role-0.4.0.xml", "valueset-mimetypes.xml"));
+			Arrays.asList("highmed-authorization-role-0.4.0.xml", "urn_ietf_bcp_13.xml"),
+			Arrays.asList("highmed-authorization-role-0.4.0.xml", "valueset-mimetypes.xml"));
 
 	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
@@ -36,7 +36,7 @@ public class EndpointProfileTest
 	public void testEndpointProfileValid() throws Exception
 	{
 		Endpoint endpoint = new Endpoint();
-		endpoint.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-endpoint");
+		endpoint.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/endpoint");
 		endpoint.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/authorization-role")
 				.setCode("REMOTE");
 		endpoint.getIdentifierFirstRep().setSystem("http://highmed.org/fhir/NamingSystem/endpoint-identifier")
@@ -52,10 +52,12 @@ public class EndpointProfileTest
 		endpoint.setAddress("https://fhir.test.com/fhir");
 
 		ValidationResult result = resourceValidator.validate(endpoint);
-		result.getMessages().stream().map(m -> m.getLocationString() + " " + m.getLocationLine() + ":"
-				+ m.getLocationCol() + " - " + m.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
+		result.getMessages().stream()
+				.map(m -> m.getLocationString() + " " + m.getLocationLine() + ":" + m.getLocationCol() + " - " + m
+						.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
 
-		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
-				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream()
+				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
+						.equals(m.getSeverity())).count());
 	}
 }

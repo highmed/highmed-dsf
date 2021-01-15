@@ -6,10 +6,10 @@
       <code value="REMOTE" />
     </tag>
   </meta>
-  <url value="http://highmed.org/fhir/StructureDefinition/highmed-task-multi-medic-error-simple-feasibility" />
+  <url value="http://highmed.org/fhir/StructureDefinition/task-multi-medic-error-feasibility" />
   <!-- version managed by bpe -->
   <version value="bpe-managed" />
-  <name value="TaskErrorSimpleFeasibility" />
+  <name value="TaskErrorFeasibility" />
   <!-- status managed by bpe -->
   <status value="unknown" />
   <experimental value="false" />
@@ -18,12 +18,12 @@
   <kind value="resource" />
   <abstract value="false" />
   <type value="Task" />
-  <baseDefinition value="http://highmed.org/fhir/StructureDefinition/highmed-task-base" />
+  <baseDefinition value="http://highmed.org/fhir/StructureDefinition/task-base" />
   <derivation value="constraint" />
   <differential>
     <element id="Task.instantiatesUri">
       <path value="Task.instantiatesUri" />
-      <fixedUri value="http://highmed.org/bpe/Process/requestSimpleFeasibility/0.4.0" />
+      <fixedUri value="http://highmed.org/bpe/Process/requestFeasibility/0.4.0" />
     </element>
     <element id="Task.input">
       <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
@@ -41,7 +41,7 @@
     </element>
     <element id="Task.input:message-name.value[x]">
       <path value="Task.input.value[x]" />
-      <fixedString value="errorMultiMedicSimpleFeasibilityMessage" />
+      <fixedString value="errorMultiMedicFeasibilityMessage" />
     </element>
     <element id="Task.input:business-key">
       <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">

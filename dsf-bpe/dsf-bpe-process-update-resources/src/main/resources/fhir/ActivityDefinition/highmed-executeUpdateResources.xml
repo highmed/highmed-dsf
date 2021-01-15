@@ -5,15 +5,15 @@
 			<code value="REMOTE" />
 		</tag>
 	</meta>
-	<extension url="http://highmed.org/fhir/StructureDefinition/process-authorization">
+	<extension url="http://highmed.org/fhir/StructureDefinition/extension-process-authorization">
 		<extension url="message-name">
-			<valueString value="requestUpdateResourcesMessage" />
+			<valueString value="executeUpdateResourcesMessage" />
 		</extension>
 		<extension url="authorization-roles">
 			<extension url="authorization-role">
 				<valueCoding>
 					<system value="http://highmed.org/fhir/CodeSystem/authorization-role" />
-					<code value="LOCAL" />
+					<code value="REMOTE" />
 				</valueCoding>
 			</extension>
 		</extension>
@@ -32,17 +32,23 @@
 					<code value="TTP" />
 				</valueCoding>
 			</extension>
+			<extension url="recipient-organization-type">
+				<valueCoding>
+					<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
+					<code value="MeDIC" />
+				</valueCoding>
+			</extension>
 		</extension>
 		<extension url="task-profile">
-			<valueCanonical value="http://highmed.org/fhir/StructureDefinition/highmed-task-request-update-resources" />
+			<valueCanonical value="http://highmed.org/fhir/StructureDefinition/task-execute-update-resources" />
 		</extension>
 	</extension>
-	<url value="http://highmed.org/bpe/Process/requestUpdateResources" />
+	<url value="http://highmed.org/bpe/Process/executeUpdateResources" />
 	<!-- version managed by bpe -->
 	<version value="bpe-managed" />
-	<name value="requestUpdateResources" />
-	<title value="Request Update of Resources" />
-	<subtitle value="Process to Request a Bundle Download" />
+	<name value="executeUpdateResources" />
+	<title value="Execute Update of Resources" />
+	<subtitle value="Process to Download and Execute FHIR Bundle" />
 	<!-- status managed by bpe -->
 	<status value="unknown" />
 	<experimental value="false" />
@@ -55,6 +61,6 @@
 			<value value="pmo@highmed.org" />
 		</telecom>
 	</contact>
-	<description value="Process to request the download of a bundle to update FHIR resources" />
+	<description value="Process to download and execute a FHIR bundle" />
 	<kind value="Task" />
 </ActivityDefinition>

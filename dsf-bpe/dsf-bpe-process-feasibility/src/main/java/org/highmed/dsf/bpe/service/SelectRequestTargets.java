@@ -65,17 +65,19 @@ public class SelectRequestTargets extends AbstractServiceDelegate
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
 		ResearchStudy researchStudy = (ResearchStudy) execution
-				.getVariable(ConstantsFeasibility.VARIABLE_RESEARCH_STUDY);
+				.getVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_RESEARCH_STUDY);
 
-		execution.setVariable(ConstantsBase.VARIABLE_TARGETS, TargetsValues.create(getMedicTargets(researchStudy)));
+		execution.setVariable(ConstantsBase.BPMN_EXECUTION_VARIABLE_TARGETS,
+				TargetsValues.create(getMedicTargets(researchStudy)));
 
-		execution.setVariable(ConstantsBase.VARIABLE_TARGET, TargetValues.create(getTtpTarget(researchStudy)));
+		execution.setVariable(ConstantsBase.BPMN_EXECUTION_VARIABLE_TARGET,
+				TargetValues.create(getTtpTarget(researchStudy)));
 
 		Boolean needsRecordLinkage = (Boolean) execution
-				.getVariable(ConstantsFeasibility.VARIABLE_NEEDS_RECORD_LINKAGE);
+				.getVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_NEEDS_RECORD_LINKAGE);
 		if (Boolean.TRUE.equals(needsRecordLinkage))
 		{
-			execution.setVariable(ConstantsFeasibility.VARIABLE_BLOOM_FILTER_CONFIG,
+			execution.setVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_BLOOM_FILTER_CONFIG,
 					BloomFilterConfigValues.create(createBloomFilterConfig()));
 		}
 	}
@@ -88,8 +90,9 @@ public class SelectRequestTargets extends AbstractServiceDelegate
 
 	private Targets getMedicTargets(ResearchStudy researchStudy)
 	{
-		List<Target> targets = researchStudy.getExtensionsByUrl(ConstantsFeasibility.EXTENSION_PARTICIPATING_MEDIC_URI)
-				.stream().filter(e -> e.getValue() instanceof Reference).map(e -> (Reference) e.getValue())
+		List<Target> targets = researchStudy
+				.getExtensionsByUrl(ConstantsFeasibility.EXTENSION_HIGHMED_PARTICIPATING_MEDIC).stream()
+				.filter(e -> e.getValue() instanceof Reference).map(e -> (Reference) e.getValue())
 				.map(r -> Target.createBiDirectionalTarget(r.getIdentifier().getValue(), UUID.randomUUID().toString()))
 				.collect(Collectors.toList());
 
@@ -98,7 +101,7 @@ public class SelectRequestTargets extends AbstractServiceDelegate
 
 	private Target getTtpTarget(ResearchStudy researchStudy)
 	{
-		return researchStudy.getExtensionsByUrl(ConstantsFeasibility.EXTENSION_PARTICIPATING_TTP_URI).stream()
+		return researchStudy.getExtensionsByUrl(ConstantsFeasibility.EXTENSION_HIGHMED_PARTICIPATING_TTP).stream()
 				.filter(e -> e.getValue() instanceof Reference).map(e -> (Reference) e.getValue())
 				.map(r -> Target.createUniDirectionalTarget(r.getIdentifier().getValue())).findFirst().get();
 	}

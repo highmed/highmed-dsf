@@ -5,7 +5,7 @@
       <code value="REMOTE" />
     </tag>
   </meta>
-  <url value="http://highmed.org/fhir/StructureDefinition/participating-medic" />
+  <url value="http://highmed.org/fhir/StructureDefinition/extension-participating-medic" />
   <!-- version managed by bpe -->
   <version value="bpe-managed" />
   <name value="ParticipatingMedic" />
@@ -31,7 +31,7 @@
     </element>
     <element id="Extension.url">
       <path value="Extension.url" />
-      <fixedUri value="http://highmed.org/fhir/StructureDefinition/participating-medic" />
+      <fixedUri value="http://highmed.org/fhir/StructureDefinition/extension-participating-medic" />
     </element>
     <element id="Extension.value[x]">
       <path value="Extension.value[x]" />
@@ -40,7 +40,7 @@
       <min value="1" />
       <type>
         <code value="Reference" />
-        <targetProfile value="http://highmed.org/fhir/StructureDefinition/highmed-organization" />
+        <targetProfile value="http://highmed.org/fhir/StructureDefinition/organization" />
       </type>
     </element>
     <element id="Extension.value[x].reference">

@@ -44,15 +44,14 @@ public class ValueSetExpanderTest
 
 		var validationSupport = new ValidationSupportChain(new InMemoryTerminologyServerValidationSupport(fhirContext),
 				new ValidationSupportWithCustomResources(fhirContext, Collections.emptyList(), readCodeSystems(),
-						Collections.emptyList()),
-				new DefaultProfileValidationSupport(fhirContext));
+						Collections.emptyList()), new DefaultProfileValidationSupport(fhirContext));
 
 		valueSetExpander = new ValueSetExpanderImpl(fhirContext, validationSupport);
 	}
 
 	private List<CodeSystem> readCodeSystems()
 	{
-		return Stream.of("authorization-role-0.4.0.xml", "bpmn-message-0.4.0.xml")
+		return Stream.of("highmed-authorization-role-0.4.0.xml", "highmed-bpmn-message-0.4.0.xml")
 				.map(file -> "/fhir/CodeSystem/" + file).map(this::readCodeSystem).collect(Collectors.toList());
 	}
 
@@ -72,7 +71,7 @@ public class ValueSetExpanderTest
 	public void testExpandFeasibility() throws Exception
 	{
 		ValueSetExpansionOutcome out = valueSetExpander
-				.expand(readValueSet("/fhir/ValueSet/authorization-role-0.4.0.xml"));
+				.expand(readValueSet("/fhir/ValueSet/highmed-authorization-role-0.4.0.xml"));
 
 		assertNotNull(out);
 		assertNull(out.getError());

@@ -5,7 +5,7 @@
 			<code value="REMOTE" />
 		</tag>
 	</meta>
-	<extension url="http://highmed.org/fhir/StructureDefinition/process-authorization">
+	<extension url="http://highmed.org/fhir/StructureDefinition/extension-process-authorization">
 		<extension url="message-name">
 			<valueString value="downloadAllowListMessage" />
 		</extension>
@@ -46,7 +46,7 @@
 			</extension>
 		</extension>
 		<extension url="task-profile">
-			<valueCanonical value="http://highmed.org/fhir/StructureDefinition/highmed-task-download-allow-list" />
+			<valueCanonical value="http://highmed.org/fhir/StructureDefinition/task-download-allow-list" />
 		</extension>
 	</extension>
 	<url value="http://highmed.org/bpe/Process/downloadAllowList" />

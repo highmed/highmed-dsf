@@ -20,12 +20,12 @@ public class ResearchStudyTest
 	public void testReferenceExtension() throws Exception
 	{
 		ResearchStudy r = new ResearchStudy();
-		r.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/participating-medic")
+		r.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/extension-participating-medic")
 				.setValue(new Reference().setReference("Organization/" + UUID.randomUUID().toString()));
 
 		logger.debug(FhirContext.forR4().newXmlParser().setPrettyPrint(true).encodeResourceToString(r));
 
-		assertTrue(r.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/participating-medic")
+		assertTrue(r.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/extension-participating-medic")
 				.getValue() instanceof Reference);
 	}
 }

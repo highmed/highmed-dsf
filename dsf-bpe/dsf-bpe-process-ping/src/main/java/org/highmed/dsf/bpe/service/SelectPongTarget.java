@@ -28,7 +28,7 @@ public class SelectPongTarget extends AbstractServiceDelegate implements Initial
 						ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY).get();
 		Identifier targetOrganizationIdentifier = task.getRequester().getIdentifier();
 
-		execution.setVariable(ConstantsBase.VARIABLE_TARGET, TargetValues
+		execution.setVariable(ConstantsBase.BPMN_EXECUTION_VARIABLE_TARGET, TargetValues
 				.create(Target.createBiDirectionalTarget(targetOrganizationIdentifier.getValue(), correlationKey)));
 	}
 }

@@ -7,13 +7,13 @@ import java.util.stream.Collectors;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.ConstantsFeasibility;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
-import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
-import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.bpe.variables.FeasibilityQueryResult;
 import org.highmed.dsf.bpe.variables.FeasibilityQueryResults;
 import org.highmed.dsf.bpe.variables.FinalFeasibilityQueryResult;
 import org.highmed.dsf.bpe.variables.FinalFeasibilityQueryResults;
 import org.highmed.dsf.bpe.variables.FinalFeasibilityQueryResultsValues;
+import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
+import org.highmed.dsf.fhir.task.TaskHelper;
 
 public class CalculateMultiMedicResults extends AbstractServiceDelegate
 {
@@ -26,11 +26,11 @@ public class CalculateMultiMedicResults extends AbstractServiceDelegate
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
 		List<FeasibilityQueryResult> results = ((FeasibilityQueryResults) execution
-				.getVariable(ConstantsFeasibility.VARIABLE_QUERY_RESULTS)).getResults();
+				.getVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_QUERY_RESULTS)).getResults();
 
 		List<FinalFeasibilityQueryResult> finalResults = calculateResults(results);
 
-		execution.setVariable(ConstantsFeasibility.VARIABLE_FINAL_QUERY_RESULTS,
+		execution.setVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_FINAL_QUERY_RESULTS,
 				FinalFeasibilityQueryResultsValues.create(new FinalFeasibilityQueryResults(finalResults)));
 	}
 
@@ -39,10 +39,9 @@ public class CalculateMultiMedicResults extends AbstractServiceDelegate
 		Map<String, List<FeasibilityQueryResult>> byCohortId = results.stream()
 				.collect(Collectors.groupingBy(FeasibilityQueryResult::getCohortId));
 
-		return byCohortId.entrySet().stream()
-				.map(e -> new FinalFeasibilityQueryResult(e.getKey(),
-						toInt(e.getValue().stream().filter(r -> r.getCohortSize() > 0).count()),
-						toInt(e.getValue().stream().mapToLong(FeasibilityQueryResult::getCohortSize).sum())))
+		return byCohortId.entrySet().stream().map(e -> new FinalFeasibilityQueryResult(e.getKey(),
+				toInt(e.getValue().stream().filter(r -> r.getCohortSize() > 0).count()),
+				toInt(e.getValue().stream().mapToLong(FeasibilityQueryResult::getCohortSize).sum())))
 				.collect(Collectors.toList());
 	}
 

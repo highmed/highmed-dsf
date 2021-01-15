@@ -68,7 +68,7 @@ public class SelectResourceAndTargets extends AbstractServiceDelegate implements
 		}
 
 		String bundleId = references.get(0).getReference();
-		execution.setVariable(ConstantsBase.VARIABLE_BUNDLE_ID, bundleId);
+		execution.setVariable(ConstantsBase.BPMN_EXECUTION_VARIABLE_BUNDLE_ID, bundleId);
 
 		List<String> targetIdentifierSearchParameters = getTaskHelper()
 				.getInputParameterStringValues(task, ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE,
@@ -79,6 +79,7 @@ public class SelectResourceAndTargets extends AbstractServiceDelegate implements
 				.flatMap(organizationProvider::searchRemoteOrganizationsIdentifiers)
 				.map(identifier -> Target.createUniDirectionalTarget(identifier.getValue()))
 				.collect(Collectors.toList());
-		execution.setVariable(ConstantsBase.VARIABLE_TARGETS, TargetsValues.create(new Targets(targets)));
+		execution
+				.setVariable(ConstantsBase.BPMN_EXECUTION_VARIABLE_TARGETS, TargetsValues.create(new Targets(targets)));
 	}
 }

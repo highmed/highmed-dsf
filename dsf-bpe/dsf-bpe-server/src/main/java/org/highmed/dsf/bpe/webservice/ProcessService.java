@@ -84,7 +84,7 @@ public class ProcessService implements InitializingBean
 		}
 
 		runtimeService.startProcessInstanceById(processDefinition.getId(), UUID.randomUUID().toString(),
-				Map.of(ConstantsBase.VARIABLE_QUERY_PARAMETERS, queryParameters));
+				Map.of(ConstantsBase.BPMN_EXECUTION_VARIABLE_QUERY_PARAMETERS, queryParameters));
 
 		return Response.status(Status.CREATED).build();
 	}

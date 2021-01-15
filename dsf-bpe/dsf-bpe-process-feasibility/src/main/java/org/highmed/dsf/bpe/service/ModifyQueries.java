@@ -32,9 +32,10 @@ public class ModifyQueries extends AbstractServiceDelegate implements Initializi
 	@Override
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
-		Boolean needsConsentCheck = (Boolean) execution.getVariable(ConstantsFeasibility.VARIABLE_NEEDS_CONSENT_CHECK);
+		Boolean needsConsentCheck = (Boolean) execution
+				.getVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_NEEDS_CONSENT_CHECK);
 		Boolean needsRecordLinkage = (Boolean) execution
-				.getVariable(ConstantsFeasibility.VARIABLE_NEEDS_RECORD_LINKAGE);
+				.getVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_NEEDS_RECORD_LINKAGE);
 		boolean idQuery = Boolean.TRUE.equals(needsConsentCheck) || Boolean.TRUE.equals(needsRecordLinkage);
 
 		if (idQuery)
@@ -42,11 +43,11 @@ public class ModifyQueries extends AbstractServiceDelegate implements Initializi
 			// <groupId, query>
 			@SuppressWarnings("unchecked")
 			Map<String, String> queries = (Map<String, String>) execution
-					.getVariable(ConstantsFeasibility.VARIABLE_QUERIES);
+					.getVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_QUERIES);
 
 			Map<String, String> modifiedQueries = modifyQueries(queries);
 
-			execution.setVariable(ConstantsFeasibility.VARIABLE_QUERIES, modifiedQueries);
+			execution.setVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_QUERIES, modifiedQueries);
 		}
 	}
 
@@ -63,6 +64,6 @@ public class ModifyQueries extends AbstractServiceDelegate implements Initializi
 	protected String replaceSelectCountWithSelectMpiId(String value)
 	{
 		// TODO Implement correct replacement for default id query
-		return value.replace("select count(e)", "select e"  + ehrIdColumnPath + " as EHRID");
+		return value.replace("select count(e)", "select e" + ehrIdColumnPath + " as EHRID");
 	}
 }

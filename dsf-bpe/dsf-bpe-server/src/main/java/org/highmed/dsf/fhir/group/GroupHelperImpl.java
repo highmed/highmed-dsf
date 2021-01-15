@@ -1,7 +1,7 @@
 package org.highmed.dsf.fhir.group;
 
-import static org.highmed.dsf.bpe.ConstantsBase.AQL_QUERY_TYPE;
-import static org.highmed.dsf.bpe.ConstantsBase.EXTENSION_QUERY_URI;
+import static org.highmed.dsf.bpe.ConstantsBase.CODE_TYPE_AQL_QUERY;
+import static org.highmed.dsf.bpe.ConstantsBase.EXTENSION_HIGHMED_QUERY;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,9 +20,9 @@ public class GroupHelperImpl implements GroupHelper
 	public String extractAqlQuery(Group group)
 	{
 		List<Extension> queries = group.getExtension().stream()
-				.filter(extension -> extension.getUrl().equals(EXTENSION_QUERY_URI))
-				.filter(extension -> AQL_QUERY_TYPE.compareTo(((Expression) extension.getValue()).getLanguageElement())
-						== 0).collect(Collectors.toList());
+				.filter(extension -> extension.getUrl().equals(EXTENSION_HIGHMED_QUERY)).filter(extension ->
+						CODE_TYPE_AQL_QUERY.compareTo(((Expression) extension.getValue()).getLanguageElement()) == 0)
+				.collect(Collectors.toList());
 
 		if (queries.size() != 1)
 		{

@@ -34,7 +34,7 @@ public class SendMultiMedicResults extends AbstractTaskMessageSend
 	protected Stream<ParameterComponent> getAdditionalInputParameters(DelegateExecution execution)
 	{
 		FinalFeasibilityQueryResults results = (FinalFeasibilityQueryResults) execution
-				.getVariable(ConstantsFeasibility.VARIABLE_FINAL_QUERY_RESULTS);
+				.getVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_FINAL_QUERY_RESULTS);
 
 		Stream<ParameterComponent> resultInputs = results.getResults().stream().flatMap(this::toInputs);
 		Stream<ParameterComponent> errorInput = getErrorInput(execution);
@@ -61,7 +61,7 @@ public class SendMultiMedicResults extends AbstractTaskMessageSend
 
 	private Extension createCohortIdExtension(String cohortId)
 	{
-		return new Extension(ConstantsFeasibility.EXTENSION_GROUP_ID_URI, new Reference(cohortId));
+		return new Extension(ConstantsFeasibility.EXTENSION_HIGHMED_GROUP_ID, new Reference(cohortId));
 	}
 
 	private Stream<ParameterComponent> getErrorInput(DelegateExecution execution)

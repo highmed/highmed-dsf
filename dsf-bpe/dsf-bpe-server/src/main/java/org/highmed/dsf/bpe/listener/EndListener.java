@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Added to each BPMN EndEvent by the {@link DefaultBpmnParseListener}. Is used to set the FHIR {@link Task} status as
  * {@link Task.TaskStatus#COMPLETED} if the process ends successfully and sets {@link Task}.output values. Sets the
- * {@link ConstantsBase#VARIABLE_IN_CALLED_PROCESS} back to <code>false</code> if a called sub process ends.
+ * {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_IN_CALLED_PROCESS} back to <code>false</code> if a called sub process ends.
  */
 public class EndListener implements ExecutionListener
 {
@@ -30,7 +30,8 @@ public class EndListener implements ExecutionListener
 	@Override
 	public void notify(DelegateExecution execution) throws Exception
 	{
-		boolean inCalledProcess = (boolean) execution.getVariable(ConstantsBase.VARIABLE_IN_CALLED_PROCESS);
+		boolean inCalledProcess = (boolean) execution
+				.getVariable(ConstantsBase.BPMN_EXECUTION_VARIABLE_IN_CALLED_PROCESS);
 
 		// not in a called process --> process end if it is not a subprocess
 		if (!inCalledProcess)
@@ -39,13 +40,13 @@ public class EndListener implements ExecutionListener
 			if (execution.getParentId() == null || execution.getParentId().equals(execution.getProcessInstanceId()))
 			{
 				// not in a subprocess --> end of main process, write process outputs to task
-				task = (Task) execution.getVariable(ConstantsBase.VARIABLE_LEADING_TASK);
+				task = (Task) execution.getVariable(ConstantsBase.BPMN_EXECUTION_VARIABLE_LEADING_TASK);
 				log(execution, task);
 			}
 			else
 			{
 				// in a subprocess --> process does not end here, outputs do not have to be written
-				task = (Task) execution.getVariable(ConstantsBase.VARIABLE_TASK);
+				task = (Task) execution.getVariable(ConstantsBase.BPMN_EXECUTION_VARIABLE_TASK);
 			}
 
 			if (task.getStatus().equals(Task.TaskStatus.INPROGRESS))
@@ -59,7 +60,7 @@ public class EndListener implements ExecutionListener
 		{
 			// in a called process --> process does not end here, don't change the task variable
 			// reset VARIABLE_IS_CALL_ACTIVITY to false, since we leave the called process
-			execution.setVariable(ConstantsBase.VARIABLE_IN_CALLED_PROCESS, false);
+			execution.setVariable(ConstantsBase.BPMN_EXECUTION_VARIABLE_IN_CALLED_PROCESS, false);
 		}
 	}
 

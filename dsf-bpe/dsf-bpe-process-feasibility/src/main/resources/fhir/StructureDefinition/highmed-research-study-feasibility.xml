@@ -5,7 +5,7 @@
       <code value="REMOTE" />
     </tag>
   </meta>
-  <url value="http://highmed.org/fhir/StructureDefinition/highmed-research-study-feasibility" />
+  <url value="http://highmed.org/fhir/StructureDefinition/research-study-feasibility" />
   <!-- version managed by bpe -->
   <version value="bpe-managed" />
   <name value="ResearchStudyFeasibility" />
@@ -37,7 +37,7 @@
       <max value="1" />
       <type>
         <code value="Extension" />
-        <profile value="http://highmed.org/fhir/StructureDefinition/participating-ttp" />
+        <profile value="http://highmed.org/fhir/StructureDefinition/extension-participating-ttp" />
       </type>
     </element>
     <element id="ResearchStudy.extension:participating-medic">
@@ -46,7 +46,7 @@
       <min value="1" />
       <type>
         <code value="Extension" />
-        <profile value="http://highmed.org/fhir/StructureDefinition/participating-medic" />
+        <profile value="http://highmed.org/fhir/StructureDefinition/extension-participating-medic" />
       </type>
     </element>
     <element id="ResearchStudy.identifier">
@@ -80,7 +80,7 @@
       <min value="1" />
       <type>
         <code value="Reference" />
-        <targetProfile value="http://highmed.org/fhir/StructureDefinition/highmed-group" />
+        <targetProfile value="http://highmed.org/fhir/StructureDefinition/group" />
       </type>
     </element>
     <element id="ResearchStudy.enrollment.reference">

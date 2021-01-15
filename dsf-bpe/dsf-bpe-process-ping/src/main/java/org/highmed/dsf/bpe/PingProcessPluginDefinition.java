@@ -44,17 +44,19 @@ public class PingProcessPluginDefinition implements ProcessPluginDefinition
 	@Override
 	public ResourceProvider getResourceProvider(FhirContext fhirContext, ClassLoader classLoader)
 	{
-		var aPing = ActivityDefinitionResource.file("fhir/ActivityDefinition/ping.xml");
-		var aPong = ActivityDefinitionResource.file("fhir/ActivityDefinition/pong.xml");
+		var aPing = ActivityDefinitionResource.file("fhir/ActivityDefinition/highmed-ping.xml");
+		var aPong = ActivityDefinitionResource.file("fhir/ActivityDefinition/highmed-pong.xml");
 		var tPing = StructureDefinitionResource.file("fhir/StructureDefinition/highmed-task-pong.xml");
 		var tStartPing = StructureDefinitionResource
 				.file("fhir/StructureDefinition/highmed-task-start-ping-process.xml");
 		var tPong = StructureDefinitionResource.file("fhir/StructureDefinition/highmed-task-ping.xml");
 
-		Map<String, List<AbstractResource>> resourcesByProcessKeyAndVersion = Map.of("ping/" + VERSION,
-				Arrays.asList(aPing, tPong, tStartPing), "pong/" + VERSION, Arrays.asList(aPong, tPing));
+		Map<String, List<AbstractResource>> resourcesByProcessKeyAndVersion = Map
+				.of("ping/" + VERSION, Arrays.asList(aPing, tPong, tStartPing), "pong/" + VERSION,
+						Arrays.asList(aPong, tPing));
 
-		return ResourceProvider.read(VERSION, () -> fhirContext.newXmlParser().setStripVersionsFromReferences(false),
-				classLoader, resourcesByProcessKeyAndVersion);
+		return ResourceProvider
+				.read(VERSION, () -> fhirContext.newXmlParser().setStripVersionsFromReferences(false), classLoader,
+						resourcesByProcessKeyAndVersion);
 	}
 }

@@ -5,7 +5,7 @@
       <code value="REMOTE" />
     </tag>
   </meta>
-  <url value="http://highmed.org/fhir/StructureDefinition/highmed-task-request-update-resources" />
+  <url value="http://highmed.org/fhir/StructureDefinition/task-request-update-resources" />
   <!-- version managed by bpe -->
   <version value="bpe-managed" />
   <name value="TaskRequestUpdateResources" />
@@ -17,7 +17,7 @@
   <kind value="resource" />
   <abstract value="false" />
   <type value="Task" />
-  <baseDefinition value="http://highmed.org/fhir/StructureDefinition/highmed-task-base" />
+  <baseDefinition value="http://highmed.org/fhir/StructureDefinition/task-base" />
   <derivation value="constraint" />
   <differential>
     <element id="Task.instantiatesUri">

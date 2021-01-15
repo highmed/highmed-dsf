@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_0inb4ax" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.7.1">
-  <bpmn:process id="requestSimpleFeasibility" isExecutable="true" camunda:versionTag="0.4.0">
+  <bpmn:process id="requestFeasibility" isExecutable="true" camunda:versionTag="0.4.0">
     <bpmn:startEvent id="StartEvent" name="start">
       <bpmn:outgoing>SequenceFlow_11k77gx</bpmn:outgoing>
       <bpmn:messageEventDefinition id="MessageEventDefinition_10c2suu" messageRef="Message_1pq9qxp" />
@@ -12,10 +12,10 @@
     <bpmn:sendTask id="sendRequestToMedics" name="send request to medics" camunda:class="org.highmed.dsf.bpe.message.SendMedicRequest">
       <bpmn:extensionElements>
         <camunda:inputOutput>
-          <camunda:inputParameter name="processDefinitionKey">executeSimpleFeasibility</camunda:inputParameter>
+          <camunda:inputParameter name="processDefinitionKey">executeFeasibility</camunda:inputParameter>
           <camunda:inputParameter name="versionTag">0.4.0</camunda:inputParameter>
-          <camunda:inputParameter name="messageName">executeSimpleFeasibilityMessage</camunda:inputParameter>
-          <camunda:inputParameter name="profile">http://highmed.org/fhir/StructureDefinition/highmed-task-execute-simple-feasibility</camunda:inputParameter>
+          <camunda:inputParameter name="messageName">executeFeasibilityMessage</camunda:inputParameter>
+          <camunda:inputParameter name="profile">http://highmed.org/fhir/StructureDefinition/task-execute-feasibility</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_035oihl</bpmn:incoming>
@@ -33,10 +33,10 @@
     <bpmn:intermediateThrowEvent id="sendCorreltationKeysToTTP" name="send correlation keys to TTP">
       <bpmn:extensionElements>
         <camunda:inputOutput>
-          <camunda:inputParameter name="processDefinitionKey">computeSimpleFeasibility</camunda:inputParameter>
+          <camunda:inputParameter name="processDefinitionKey">computeFeasibility</camunda:inputParameter>
           <camunda:inputParameter name="versionTag">0.4.0</camunda:inputParameter>
-          <camunda:inputParameter name="messageName">computeSimpleFeasibilityMessage</camunda:inputParameter>
-          <camunda:inputParameter name="profile">http://highmed.org/fhir/StructureDefinition/highmed-task-compute-simple-feasibility</camunda:inputParameter>
+          <camunda:inputParameter name="messageName">computeFeasibilityMessage</camunda:inputParameter>
+          <camunda:inputParameter name="profile">http://highmed.org/fhir/StructureDefinition/task-compute-feasibility</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_0b5s4ef</bpmn:incoming>
@@ -83,21 +83,21 @@
     <bpmn:sequenceFlow id="Flow_0rkdr4f" sourceRef="handelError" targetRef="Gateway_12ly33g" />
     <bpmn:sequenceFlow id="Flow_15k4oa2" sourceRef="Gateway_12ly33g" targetRef="EndEvent" />
   </bpmn:process>
-  <bpmn:message id="Message_1pq9qxp" name="requestSimpleFeasibilityMessage" />
-  <bpmn:message id="Message_07ayhv1" name="resultSimpleFeasibilityMessage" />
-  <bpmn:message id="Message_0gifb86" name="computeSimpleFeasibilityMessage" />
+  <bpmn:message id="Message_1pq9qxp" name="requestFeasibilityMessage" />
+  <bpmn:message id="Message_07ayhv1" name="resultFeasibilityMessage" />
+  <bpmn:message id="Message_0gifb86" name="computeFeasibilityMessage" />
   <bpmn:error id="Error_0dl03kn" />
   <bpmn:error id="Error_07exqe7" />
   <bpmn:error id="Error_1jhmarr" />
   <bpmn:message id="Message_0qfng3q" name="receiveMultiMedicCohortSizeResultMessage" />
-  <bpmn:message id="Message_0srg3vv" name="resultMultiMedicSimpleFeasibilityMessage" />
-  <bpmn:message id="Message_0nmxozg" name="errorSimpleFeasibilityMessage" />
-  <bpmn:message id="Message_1y0yxv0" name="resultMultiMedicSimpleFeasibilityMessage" />
-  <bpmn:message id="Message_0v1bo0o" name="errorSimpleFeasibilityMessage" />
-  <bpmn:message id="Message_10vqhu0" name="errorMultiMedicSimpleFeasibilityMessage" />
-  <bpmn:message id="Message_1vrxfsk" name="resultMultiMedicSimpleFeasibilityMessage" />
+  <bpmn:message id="Message_0srg3vv" name="resultMultiMedicFeasibilityMessage" />
+  <bpmn:message id="Message_0nmxozg" name="errorFeasibilityMessage" />
+  <bpmn:message id="Message_1y0yxv0" name="resultMultiMedicFeasibilityMessage" />
+  <bpmn:message id="Message_0v1bo0o" name="errorFeasibilityMessage" />
+  <bpmn:message id="Message_10vqhu0" name="errorMultiMedicFeasibilityMessage" />
+  <bpmn:message id="Message_1vrxfsk" name="resultMultiMedicFeasibilityMessage" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
-    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="requestSimpleFeasibility">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="requestFeasibility">
       <bpmndi:BPMNEdge id="Flow_15k4oa2_di" bpmnElement="Flow_15k4oa2">
         <di:waypoint x="1385" y="220" />
         <di:waypoint x="1452" y="220" />

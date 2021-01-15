@@ -5,7 +5,7 @@
       <code value="REMOTE" />
     </tag>
   </meta>
-  <url value="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint" />
+  <url value="http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint" />
   <version value="0.4.0" />
   <name value="CertificateThumbprint" />
   <status value="active" />
@@ -27,7 +27,7 @@
       <type>
         <code value="uri" />
       </type>
-      <fixedUri value="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint" />
+      <fixedUri value="http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint" />
     </element>
     <element id="Extension.value[x]">
       <path value="Extension.value[x]" />

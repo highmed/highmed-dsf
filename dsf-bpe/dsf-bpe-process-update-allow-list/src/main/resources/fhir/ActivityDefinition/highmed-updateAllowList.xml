@@ -5,15 +5,15 @@
 			<code value="REMOTE" />
 		</tag>
 	</meta>
-	<extension url="http://highmed.org/fhir/StructureDefinition/process-authorization">
+	<extension url="http://highmed.org/fhir/StructureDefinition/extension-process-authorization">
 		<extension url="message-name">
-			<valueString value="pingMessage" />
+			<valueString value="updateAllowListMessage" />
 		</extension>
 		<extension url="authorization-roles">
 			<extension url="authorization-role">
 				<valueCoding>
 					<system value="http://highmed.org/fhir/CodeSystem/authorization-role" />
-					<code value="REMOTE" />
+					<code value="LOCAL" />
 				</valueCoding>
 			</extension>
 		</extension>
@@ -24,12 +24,6 @@
 					<code value="TTP" />
 				</valueCoding>
 			</extension>
-			<extension url="requester-organization-type">
-				<valueCoding>
-					<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
-					<code value="MeDIC" />
-				</valueCoding>
-			</extension>
 		</extension>
 		<extension url="recipient-organization-types">
 			<extension url="recipient-organization-type">
@@ -38,23 +32,17 @@
 					<code value="TTP" />
 				</valueCoding>
 			</extension>
-			<extension url="recipient-organization-type">
-				<valueCoding>
-					<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
-					<code value="MeDIC" />
-				</valueCoding>
-			</extension>
 		</extension>
 		<extension url="task-profile">
-			<valueCanonical value="http://highmed.org/fhir/StructureDefinition/highmed-task-ping" />
+			<valueCanonical value="http://highmed.org/fhir/StructureDefinition/task-update-allow-list" />
 		</extension>
 	</extension>
-	<url value="http://highmed.org/bpe/Process/pong" />
+	<url value="http://highmed.org/bpe/Process/updateAllowList" />
 	<!-- version managed by bpe -->
 	<version value="bpe-managed" />
-	<name value="pong" />
-	<title value="PONG process" />
-	<subtitle value="Communication Testing Process" />
+	<name value="updateAllowList" />
+	<title value="Update Allow List" />
+	<subtitle value="Update Allow List Bundle Process" />
 	<!-- status managed by bpe -->
 	<status value="unknown" />
 	<experimental value="false" />
@@ -67,6 +55,6 @@
 			<value value="pmo@highmed.org" />
 		</telecom>
 	</contact>
-	<description value="Process startet by PING messages and to send corresponding PONG messages back remote Organizations" />
+	<description value="Process to update the allow list FHIR bundle" />
 	<kind value="Task" />
 </ActivityDefinition>
