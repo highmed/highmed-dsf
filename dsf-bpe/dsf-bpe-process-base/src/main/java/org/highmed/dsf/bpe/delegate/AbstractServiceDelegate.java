@@ -1,5 +1,10 @@
 package org.highmed.dsf.bpe.delegate;
 
+import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_LEADING_TASK;
+import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_TASK;
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN;
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR;
+
 import java.util.Objects;
 
 import org.camunda.bpm.engine.delegate.BpmnError;
@@ -73,8 +78,8 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 					"Process " + execution.getProcessDefinitionId() + " has fatal error in step " + execution
 							.getActivityInstanceId() + ", reason: " + exception.getMessage();
 
-			task.addOutput(taskHelper.createOutput(ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
-					ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR, errorMessage));
+			task.addOutput(taskHelper
+					.createOutput(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR, errorMessage));
 			task.setStatus(Task.TaskStatus.FAILED);
 
 			clientProvider.getLocalWebserviceClient().withMinimalReturn().update(task);
@@ -123,7 +128,7 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 		if (execution == null)
 			throw new IllegalStateException("execution not started");
 
-		return (Task) execution.getVariable(ConstantsBase.BPMN_EXECUTION_VARIABLE_TASK);
+		return (Task) execution.getVariable(BPMN_EXECUTION_VARIABLE_TASK);
 	}
 
 	/**
@@ -136,7 +141,7 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 		if (execution == null)
 			throw new IllegalStateException("execution not started");
 
-		Task leadingTask = (Task) execution.getVariable(ConstantsBase.BPMN_EXECUTION_VARIABLE_LEADING_TASK);
+		Task leadingTask = (Task) execution.getVariable(BPMN_EXECUTION_VARIABLE_LEADING_TASK);
 		return leadingTask != null ? leadingTask : getCurrentTaskFromExecutionVariables();
 	}
 }

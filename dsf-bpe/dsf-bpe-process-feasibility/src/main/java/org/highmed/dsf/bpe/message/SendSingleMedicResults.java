@@ -1,9 +1,14 @@
 package org.highmed.dsf.bpe.message;
 
+import static org.highmed.dsf.bpe.ConstantsBase.EXTENSION_HIGHMED_GROUP_ID;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_QUERY_RESULTS;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_SINGLE_MEDIC_RESULT;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_SINGLE_MEDIC_RESULT_REFERENCE;
+
 import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.ConstantsFeasibility;
 import org.highmed.dsf.bpe.variables.FeasibilityQueryResult;
 import org.highmed.dsf.bpe.variables.FeasibilityQueryResults;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
@@ -33,7 +38,7 @@ public class SendSingleMedicResults extends AbstractTaskMessageSend
 	protected Stream<Task.ParameterComponent> getAdditionalInputParameters(DelegateExecution execution)
 	{
 		FeasibilityQueryResults results = (FeasibilityQueryResults) execution
-				.getVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_QUERY_RESULTS);
+				.getVariable(BPMN_EXECUTION_VARIABLE_QUERY_RESULTS);
 
 		return results.getResults().stream().map(result -> toInput(result));
 	}
@@ -42,17 +47,15 @@ public class SendSingleMedicResults extends AbstractTaskMessageSend
 	{
 		if (result.isCohortSizeResult())
 		{
-			ParameterComponent input = getTaskHelper()
-					.createInputUnsignedInt(ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
-							ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_SINGLE_MEDIC_RESULT,
-							result.getCohortSize());
+			ParameterComponent input = getTaskHelper().createInputUnsignedInt(CODESYSTEM_HIGHMED_FEASIBILITY,
+					CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_SINGLE_MEDIC_RESULT, result.getCohortSize());
 			input.addExtension(createCohortIdExtension(result.getCohortId()));
 			return input;
 		}
 		else if (result.isIdResultSetUrlResult())
 		{
-			ParameterComponent input = getTaskHelper().createInput(ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
-					ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_SINGLE_MEDIC_RESULT_REFERENCE,
+			ParameterComponent input = getTaskHelper().createInput(CODESYSTEM_HIGHMED_FEASIBILITY,
+					CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_SINGLE_MEDIC_RESULT_REFERENCE,
 					new Reference(result.getResultSetUrl()));
 			input.addExtension(createCohortIdExtension(result.getCohortId()));
 			return input;
@@ -69,6 +72,6 @@ public class SendSingleMedicResults extends AbstractTaskMessageSend
 
 	private Extension createCohortIdExtension(String cohortId)
 	{
-		return new Extension(ConstantsFeasibility.EXTENSION_HIGHMED_GROUP_ID, new Reference(cohortId));
+		return new Extension(EXTENSION_HIGHMED_GROUP_ID, new Reference(cohortId));
 	}
 }

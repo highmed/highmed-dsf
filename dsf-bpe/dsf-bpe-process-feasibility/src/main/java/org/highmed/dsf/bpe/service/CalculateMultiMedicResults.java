@@ -1,11 +1,13 @@
 package org.highmed.dsf.bpe.service;
 
+import static org.highmed.dsf.bpe.ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_FINAL_QUERY_RESULTS;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_QUERY_RESULTS;
+
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.ConstantsFeasibility;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.bpe.variables.FeasibilityQueryResult;
 import org.highmed.dsf.bpe.variables.FeasibilityQueryResults;
@@ -26,11 +28,11 @@ public class CalculateMultiMedicResults extends AbstractServiceDelegate
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
 		List<FeasibilityQueryResult> results = ((FeasibilityQueryResults) execution
-				.getVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_QUERY_RESULTS)).getResults();
+				.getVariable(BPMN_EXECUTION_VARIABLE_QUERY_RESULTS)).getResults();
 
 		List<FinalFeasibilityQueryResult> finalResults = calculateResults(results);
 
-		execution.setVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_FINAL_QUERY_RESULTS,
+		execution.setVariable(BPMN_EXECUTION_VARIABLE_FINAL_QUERY_RESULTS,
 				FinalFeasibilityQueryResultsValues.create(new FinalFeasibilityQueryResults(finalResults)));
 	}
 

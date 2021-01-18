@@ -1,16 +1,18 @@
 package org.highmed.dsf.bpe.service;
 
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN;
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY;
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR;
 import static org.highmed.dsf.bpe.ConstantsFeasibility.BPMN_EXECUTION_ERROR_CODE_MULTI_MEDIC_RESULT;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_FINAL_QUERY_RESULTS;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.MIN_PARTICIPATING_MEDICS;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.ConstantsBase;
-import org.highmed.dsf.bpe.ConstantsFeasibility;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.bpe.variables.FinalFeasibilityQueryResult;
 import org.highmed.dsf.bpe.variables.FinalFeasibilityQueryResults;
@@ -35,14 +37,13 @@ public class CheckTtpComputedMultiMedicResults extends AbstractServiceDelegate
 	{
 		Task leadingTask = getLeadingTaskFromExecutionVariables();
 		FinalFeasibilityQueryResults results = (FinalFeasibilityQueryResults) execution
-				.getVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_FINAL_QUERY_RESULTS);
+				.getVariable(BPMN_EXECUTION_VARIABLE_FINAL_QUERY_RESULTS);
 
 		List<FinalFeasibilityQueryResult> resultsWithEnoughParticipatingMedics = filterResultsByParticipatingMedics(
 				leadingTask, results);
 
-		execution.setVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_FINAL_QUERY_RESULTS,
-				FinalFeasibilityQueryResultsValues
-						.create(new FinalFeasibilityQueryResults(resultsWithEnoughParticipatingMedics)));
+		execution.setVariable(BPMN_EXECUTION_VARIABLE_FINAL_QUERY_RESULTS, FinalFeasibilityQueryResultsValues
+				.create(new FinalFeasibilityQueryResults(resultsWithEnoughParticipatingMedics)));
 
 		boolean existsAtLeastOneResult = checkIfAtLeastOneResultExists(leadingTask,
 				resultsWithEnoughParticipatingMedics);
@@ -56,12 +57,12 @@ public class CheckTtpComputedMultiMedicResults extends AbstractServiceDelegate
 	{
 		String taskId = leadingTask.getId();
 		String businessKey = getTaskHelper().getFirstInputParameterStringValue(leadingTask, CODESYSTEM_HIGHMED_BPMN,
-				ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY).orElse(null);
+				CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY).orElse(null);
 		String correlationKey = getTaskHelper().getFirstInputParameterStringValue(leadingTask, CODESYSTEM_HIGHMED_BPMN,
-				ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY).orElse(null);
+				CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY).orElse(null);
 
 		return results.getResults().stream().filter(result -> {
-			if (result.getParticipatingMedics() < ConstantsFeasibility.MIN_PARTICIPATING_MEDICS)
+			if (result.getParticipatingMedics() < MIN_PARTICIPATING_MEDICS)
 			{
 				logger.warn("Removed result with cohort id='{}' from feasibility request with task-id='{}', "
 								+ "business-key='{}' and correlation-key='{}' because of not enough participating MeDICs",
@@ -83,9 +84,9 @@ public class CheckTtpComputedMultiMedicResults extends AbstractServiceDelegate
 	{
 		String taskId = leadingTask.getId();
 		String businessKey = getTaskHelper().getFirstInputParameterStringValue(leadingTask, CODESYSTEM_HIGHMED_BPMN,
-				ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY).orElse(null);
+				CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY).orElse(null);
 		String correlationKey = getTaskHelper().getFirstInputParameterStringValue(leadingTask, CODESYSTEM_HIGHMED_BPMN,
-				ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY).orElse(null);
+				CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY).orElse(null);
 
 		if (results.size() < 1)
 		{

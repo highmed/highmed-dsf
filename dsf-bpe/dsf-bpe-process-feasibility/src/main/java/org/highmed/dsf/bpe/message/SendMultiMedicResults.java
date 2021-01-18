@@ -2,6 +2,11 @@ package org.highmed.dsf.bpe.message;
 
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR;
+import static org.highmed.dsf.bpe.ConstantsBase.EXTENSION_HIGHMED_GROUP_ID;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_FINAL_QUERY_RESULTS;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS_COUNT;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -34,7 +39,7 @@ public class SendMultiMedicResults extends AbstractTaskMessageSend
 	protected Stream<ParameterComponent> getAdditionalInputParameters(DelegateExecution execution)
 	{
 		FinalFeasibilityQueryResults results = (FinalFeasibilityQueryResults) execution
-				.getVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_FINAL_QUERY_RESULTS);
+				.getVariable(BPMN_EXECUTION_VARIABLE_FINAL_QUERY_RESULTS);
 
 		Stream<ParameterComponent> resultInputs = results.getResults().stream().flatMap(this::toInputs);
 		Stream<ParameterComponent> errorInput = getErrorInput(execution);
@@ -45,14 +50,14 @@ public class SendMultiMedicResults extends AbstractTaskMessageSend
 	private Stream<ParameterComponent> toInputs(FinalFeasibilityQueryResult result)
 	{
 		ParameterComponent input1 = getTaskHelper()
-				.createInputUnsignedInt(ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
-						ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT,
+				.createInputUnsignedInt(CODESYSTEM_HIGHMED_FEASIBILITY,
+						CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT,
 						result.getCohortSize());
 		input1.addExtension(createCohortIdExtension(result.getCohortId()));
 
 		ParameterComponent input2 = getTaskHelper()
-				.createInputUnsignedInt(ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
-						ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS_COUNT,
+				.createInputUnsignedInt(CODESYSTEM_HIGHMED_FEASIBILITY,
+						CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS_COUNT,
 						result.getParticipatingMedics());
 		input2.addExtension(createCohortIdExtension(result.getCohortId()));
 
@@ -61,7 +66,7 @@ public class SendMultiMedicResults extends AbstractTaskMessageSend
 
 	private Extension createCohortIdExtension(String cohortId)
 	{
-		return new Extension(ConstantsFeasibility.EXTENSION_HIGHMED_GROUP_ID, new Reference(cohortId));
+		return new Extension(EXTENSION_HIGHMED_GROUP_ID, new Reference(cohortId));
 	}
 
 	private Stream<ParameterComponent> getErrorInput(DelegateExecution execution)

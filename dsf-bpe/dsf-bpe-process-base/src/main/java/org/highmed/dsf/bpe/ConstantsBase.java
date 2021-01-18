@@ -26,7 +26,13 @@ public interface ConstantsBase
 
 	String PROCESS_HIGHMED_URI_BASE = "http://highmed.org/bpe/Process/";
 
+	String EXTENSION_HIGHMED_PARTICIPATING_MEDIC = "http://highmed.org/fhir/StructureDefinition/extension-participating-medic";
+	String EXTENSION_HIGHMED_PARTICIPATING_TTP = "http://highmed.org/fhir/StructureDefinition/extension-participating-ttp";
+	String EXTENSION_HIGHMED_GROUP_ID = "http://highmed.org/fhir/StructureDefinition/extension-group-id";
 	String EXTENSION_HIGHMED_QUERY = "http://highmed.org/fhir/StructureDefinition/extension-query";
+
+	String PROFILE_HIGHMED_GROUP = "http://highmed.org/fhir/StructureDefinition/group";
+	String PROFILE_HIGHEMD_RESEARCH_STUDY = "http://highmed.org/fhir/StructureDefinition/research-study";
 
 	String CODESYSTEM_HIGHMED_BPMN = "http://highmed.org/fhir/CodeSystem/bpmn-message";
 	String CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME = "message-name";
@@ -43,6 +49,7 @@ public interface ConstantsBase
 
 	String NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER = "http://highmed.org/fhir/NamingSystem/organization-identifier";
 	String NAMINGSYSTEM_HIGHMED_ENDPOINT_IDENTIFIER = "http://highmed.org/fhir/NamingSystem/endpoint-identifier";
+	String NAMINGSYSTEM_HIGHMED_RESEARCH_STUDY_IDENTIFIER = "http://highmed.org/fhir/NamingSystem/research-study-identifier";
 
 	CodeType CODE_TYPE_AQL_QUERY = new CodeType(CODESYSTEM_HIGMED_QUERY_TYPE_VALUE_AQL)
 			.setSystem(CODESYSTEM_HIGHMED_QUERY_TYPE);

@@ -67,7 +67,7 @@
 			"resource": {
 				"resourceType": "ResearchStudy",
 				"meta": {
-					"profile": [ "http://highmed.org/fhir/StructureDefinition/research-study-feasibility" ]
+					"profile": [ "http://highmed.org/fhir/StructureDefinition/research-study" ]
 				},
 				"extension": [ {
 					"url": "http://highmed.org/fhir/StructureDefinition/extension-participating-medic",

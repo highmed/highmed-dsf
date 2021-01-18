@@ -1,5 +1,8 @@
 package org.highmed.dsf.bpe.service;
 
+import static org.highmed.dsf.bpe.ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE;
+import static org.highmed.dsf.bpe.ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE;
+
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
@@ -8,7 +11,6 @@ import java.util.stream.Collectors;
 import javax.ws.rs.WebApplicationException;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.ConstantsUpdateResources;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
@@ -92,27 +94,25 @@ public class UpdateResources extends AbstractServiceDelegate implements Initiali
 	private IdType getBundleId(Task task)
 	{
 		List<Reference> bundleReferences = getTaskHelper()
-				.getInputParameterReferenceValues(task, ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE,
-						ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE)
-				.collect(Collectors.toList());
+				.getInputParameterReferenceValues(task, CODESYSTEM_HIGHMED_UPDATE_RESOURCE,
+						CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE).collect(Collectors.toList());
 
 		if (bundleReferences.size() != 1)
 		{
 			logger.error("Task input parameter {} contains unexpected number of Bundle IDs, expected 1, got {}",
-					ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE,
-					bundleReferences.size());
-			throw new RuntimeException("Task input parameter "
-					+ ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE
-					+ " contains unexpected number of Bundle IDs, expected 1, got " + bundleReferences.size());
+					CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE, bundleReferences.size());
+			throw new RuntimeException(
+					"Task input parameter " + CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE
+							+ " contains unexpected number of Bundle IDs, expected 1, got " + bundleReferences.size());
 		}
 		else if (!bundleReferences.get(0).hasReference() || !bundleReferences.get(0).getReference()
 				.contains("/Bundle/"))
 		{
 			logger.error("Task input parameter {} has no Bundle reference",
-					ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE);
-			throw new RuntimeException("Task input parameter "
-					+ ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE
-					+ " has no Bundle reference");
+					CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE);
+			throw new RuntimeException(
+					"Task input parameter " + CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE
+							+ " has no Bundle reference");
 		}
 
 		return new IdType(bundleReferences.get(0).getReference());

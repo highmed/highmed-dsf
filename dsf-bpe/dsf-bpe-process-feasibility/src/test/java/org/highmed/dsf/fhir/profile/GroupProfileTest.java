@@ -3,7 +3,7 @@ package org.highmed.dsf.fhir.profile;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_QUERY_TYPE;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGMED_QUERY_TYPE_VALUE_AQL;
 import static org.highmed.dsf.bpe.ConstantsBase.EXTENSION_HIGHMED_QUERY;
-import static org.highmed.dsf.bpe.ConstantsFeasibility.PROFILE_HIGHMED_GROUP;
+import static org.highmed.dsf.bpe.ConstantsBase.PROFILE_HIGHMED_GROUP;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
@@ -29,9 +29,9 @@ public class GroupProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			Arrays.asList("highmed-extension-query.xml", "highmed-group.xml"),
-			Arrays.asList("highmed-authorization-role-0.4.0.xml", "highmed-query-type.xml"),
-			Arrays.asList("highmed-authorization-role-0.4.0.xml", "highmed-query-type.xml"));
+			Arrays.asList("highmed-extension-query-0.4.0.xml", "highmed-group-0.4.0.xml"),
+			Arrays.asList("highmed-authorization-role-0.4.0.xml", "highmed-query-type-0.4.0.xml"),
+			Arrays.asList("highmed-authorization-role-0.4.0.xml", "highmed-query-type-0.4.0.xml"));
 
 	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());

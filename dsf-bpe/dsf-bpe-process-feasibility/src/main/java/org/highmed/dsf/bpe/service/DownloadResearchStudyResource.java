@@ -1,14 +1,21 @@
 package org.highmed.dsf.bpe.service;
 
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_ORGANIZATION_TYPE_VALUE_MEDIC;
+import static org.highmed.dsf.bpe.ConstantsBase.EXTENSION_HIGHMED_PARTICIPATING_MEDIC;
 import static org.highmed.dsf.bpe.ConstantsBase.NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_NEEDS_CONSENT_CHECK;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_NEEDS_RECORD_LINKAGE;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_RESEARCH_STUDY;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_CONSENT_CHECK;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_RECORD_LINKAGE;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_RESEARCH_STUDY_REFERENCE;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.ConstantsFeasibility;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
@@ -55,23 +62,23 @@ public class DownloadResearchStudyResource extends AbstractServiceDelegate imple
 		FhirWebserviceClient client = getFhirWebserviceClientProvider().getLocalWebserviceClient();
 		ResearchStudy researchStudy = getResearchStudy(researchStudyId, client);
 		researchStudy = addMissingOrganizations(researchStudy, client);
-		execution.setVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_RESEARCH_STUDY, researchStudy);
+		execution.setVariable(BPMN_EXECUTION_VARIABLE_RESEARCH_STUDY, researchStudy);
 
 		boolean needsConsentCheck = getNeedsConsentCheck(task);
-		execution.setVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_NEEDS_CONSENT_CHECK, needsConsentCheck);
+		execution.setVariable(BPMN_EXECUTION_VARIABLE_NEEDS_CONSENT_CHECK, needsConsentCheck);
 
 		boolean needsRecordLinkage = getNeedsRecordLinkageCheck(task);
-		execution.setVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_NEEDS_RECORD_LINKAGE, needsRecordLinkage);
+		execution.setVariable(BPMN_EXECUTION_VARIABLE_NEEDS_RECORD_LINKAGE, needsRecordLinkage);
 	}
 
 	private IdType getResearchStudyId(Task task)
 	{
 		Reference researchStudyReference = getTaskHelper()
-				.getInputParameterReferenceValues(task, ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
-						ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_RESEARCH_STUDY_REFERENCE).findFirst()
-				.orElseThrow(() -> new IllegalArgumentException(
-						"ResearchStudy reference is not set in task with id='" + task.getId() + "', this error should "
-								+ "have been caught by resource validation"));
+				.getInputParameterReferenceValues(task, CODESYSTEM_HIGHMED_FEASIBILITY,
+						CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_RESEARCH_STUDY_REFERENCE).findFirst().orElseThrow(
+						() -> new IllegalArgumentException(
+								"ResearchStudy reference is not set in task with id='" + task.getId()
+										+ "', this error should " + "have been caught by resource validation"));
 
 		return new IdType(researchStudyReference.getReference());
 	}
@@ -98,9 +105,8 @@ public class DownloadResearchStudyResource extends AbstractServiceDelegate imple
 				.filter(i -> NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER.equals(i.getSystem())).map(i -> i.getValue())
 				.collect(Collectors.toList());
 
-		List<String> existingIdentifiers = researchStudy
-				.getExtensionsByUrl(ConstantsFeasibility.EXTENSION_HIGHMED_PARTICIPATING_MEDIC).stream()
-				.filter(e -> e.getValue() instanceof Reference).map(e -> (Reference) e.getValue())
+		List<String> existingIdentifiers = researchStudy.getExtensionsByUrl(EXTENSION_HIGHMED_PARTICIPATING_MEDIC)
+				.stream().filter(e -> e.getValue() instanceof Reference).map(e -> (Reference) e.getValue())
 				.map(r -> r.getIdentifier().getValue()).collect(Collectors.toList());
 
 		identifiers.removeAll(existingIdentifiers);
@@ -112,8 +118,8 @@ public class DownloadResearchStudyResource extends AbstractServiceDelegate imple
 						"Adding missing organization with identifier='{}' to feasibility research study with id='{}'",
 						identifier, researchStudy.getId());
 
-				researchStudy.addExtension().setUrl(ConstantsFeasibility.EXTENSION_HIGHMED_PARTICIPATING_MEDIC)
-						.setValue(new Reference().setType(ResourceType.Organization.name()).setIdentifier(
+				researchStudy.addExtension().setUrl(EXTENSION_HIGHMED_PARTICIPATING_MEDIC).setValue(
+						new Reference().setType(ResourceType.Organization.name()).setIdentifier(
 								new Identifier().setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER)
 										.setValue(identifier)));
 
@@ -140,21 +146,19 @@ public class DownloadResearchStudyResource extends AbstractServiceDelegate imple
 
 	private boolean getNeedsConsentCheck(Task task)
 	{
-		return getTaskHelper()
-				.getFirstInputParameterBooleanValue(task, ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
-						ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_CONSENT_CHECK).orElseThrow(
-						() -> new IllegalArgumentException(
-								"NeedsConsentCheck boolean is not set in task with id='" + task.getId()
-										+ "', this error should " + "have been caught by resource validation"));
+		return getTaskHelper().getFirstInputParameterBooleanValue(task, CODESYSTEM_HIGHMED_FEASIBILITY,
+				CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_CONSENT_CHECK).orElseThrow(
+				() -> new IllegalArgumentException(
+						"NeedsConsentCheck boolean is not set in task with id='" + task.getId()
+								+ "', this error should " + "have been caught by resource validation"));
 	}
 
 	private boolean getNeedsRecordLinkageCheck(Task task)
 	{
-		return getTaskHelper()
-				.getFirstInputParameterBooleanValue(task, ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
-						ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_RECORD_LINKAGE).orElseThrow(
-						() -> new IllegalArgumentException(
-								"NeedsRecordLinkage boolean is not set in task with id='" + task.getId()
-										+ "', this error should " + "have been caught by resource validation"));
+		return getTaskHelper().getFirstInputParameterBooleanValue(task, CODESYSTEM_HIGHMED_FEASIBILITY,
+				CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_RECORD_LINKAGE).orElseThrow(
+				() -> new IllegalArgumentException(
+						"NeedsRecordLinkage boolean is not set in task with id='" + task.getId()
+								+ "', this error should " + "have been caught by resource validation"));
 	}
 }

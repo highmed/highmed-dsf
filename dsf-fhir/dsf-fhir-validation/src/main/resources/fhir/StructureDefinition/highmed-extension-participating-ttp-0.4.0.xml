@@ -5,12 +5,10 @@
       <code value="REMOTE" />
     </tag>
   </meta>
-  <url value="http://highmed.org/fhir/StructureDefinition/extension-participating-medic" />
-  <!-- version managed by bpe -->
-  <version value="bpe-managed" />
-  <name value="ParticipatingMedic" />
-  <!-- status managed by bpe -->
-  <status value="unknown" />
+  <url value="http://highmed.org/fhir/StructureDefinition/extension-participating-ttp" />
+  <version value="0.4.0" />
+  <name value="ParticipatingTtp" />
+  <status value="active" />
   <experimental value="false" />
   <date value="2020-11-23" />
   <fhirVersion value="4.0.1" />
@@ -26,17 +24,17 @@
   <differential>
     <element id="Extension">
       <path value="Extension" />
-      <short value="ParticipatingMedic" />
-      <definition value="Used to denote the medic organizations that are requested to supply data for the study at hand." />
+      <short value="ParticipatingTtp" />
+      <definition value="Used to denote the TTP organization that is used to record link and pseudonymize data." />
     </element>
     <element id="Extension.url">
       <path value="Extension.url" />
-      <fixedUri value="http://highmed.org/fhir/StructureDefinition/extension-participating-medic" />
+      <fixedUri value="http://highmed.org/fhir/StructureDefinition/extension-participating-ttp" />
     </element>
     <element id="Extension.value[x]">
       <path value="Extension.value[x]" />
       <short value="ParticipatingMedic" />
-      <definition value="Organization reference used to denote the medic organizations that are requested to supply data for the study at hand." />
+      <definition value="Organization reference used to denote the TTP organization that is used to record link and pseudonymize data." />
       <min value="1" />
       <type>
         <code value="Reference" />

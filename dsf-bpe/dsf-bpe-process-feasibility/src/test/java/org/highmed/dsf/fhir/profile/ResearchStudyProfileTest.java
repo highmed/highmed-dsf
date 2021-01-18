@@ -1,10 +1,10 @@
 package org.highmed.dsf.fhir.profile;
 
 import static org.highmed.dsf.bpe.ConstantsBase.NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER;
-import static org.highmed.dsf.bpe.ConstantsFeasibility.EXTENSION_HIGHMED_PARTICIPATING_MEDIC;
-import static org.highmed.dsf.bpe.ConstantsFeasibility.EXTENSION_HIGHMED_PARTICIPATING_TTP;
-import static org.highmed.dsf.bpe.ConstantsFeasibility.NAMINGSYSTEM_HIGHMED_RESEARCH_STUDY_IDENTIFIER;
-import static org.highmed.dsf.bpe.ConstantsFeasibility.PROFILE_HIGHEMD_RESEARCH_STUDY_FEASIBILITY;
+import static org.highmed.dsf.bpe.ConstantsBase.EXTENSION_HIGHMED_PARTICIPATING_MEDIC;
+import static org.highmed.dsf.bpe.ConstantsBase.EXTENSION_HIGHMED_PARTICIPATING_TTP;
+import static org.highmed.dsf.bpe.ConstantsBase.NAMINGSYSTEM_HIGHMED_RESEARCH_STUDY_IDENTIFIER;
+import static org.highmed.dsf.bpe.ConstantsBase.PROFILE_HIGHEMD_RESEARCH_STUDY;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
@@ -31,8 +31,8 @@ public class ResearchStudyProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			Arrays.asList("highmed-extension-participating-medic.xml", "highmed-extension-participating-ttp.xml",
-					"highmed-research-study-feasibility.xml"),
+			Arrays.asList("highmed-extension-participating-medic-0.4.0.xml", "highmed-extension-participating-ttp-0.4.0.xml",
+					"highmed-research-study-0.4.0.xml"),
 			Arrays.asList("highmed-authorization-role-0.4.0.xml", "highmed-organization-type-0.4.0.xml"),
 			Arrays.asList("highmed-authorization-role-0.4.0.xml", "highmed-organization-type-0.4.0.xml"));
 
@@ -43,7 +43,7 @@ public class ResearchStudyProfileTest
 	public void testResearchStudyProfileValid() throws Exception
 	{
 		ResearchStudy res = new ResearchStudy();
-		res.getMeta().addProfile(PROFILE_HIGHEMD_RESEARCH_STUDY_FEASIBILITY);
+		res.getMeta().addProfile(PROFILE_HIGHEMD_RESEARCH_STUDY);
 		res.getIdentifierFirstRep().setSystem(NAMINGSYSTEM_HIGHMED_RESEARCH_STUDY_IDENTIFIER)
 				.setValue(UUID.randomUUID().toString());
 		res.setStatus(ResearchStudyStatus.ACTIVE);

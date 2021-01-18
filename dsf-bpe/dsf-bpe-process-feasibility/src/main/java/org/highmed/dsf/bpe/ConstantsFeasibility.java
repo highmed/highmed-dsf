@@ -34,13 +34,6 @@ public interface ConstantsFeasibility
 	String CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT = "multi-medic-result";
 	String CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_RESEARCH_STUDY_REFERENCE = "research-study-reference";
 
-	String EXTENSION_HIGHMED_PARTICIPATING_MEDIC = "http://highmed.org/fhir/StructureDefinition/extension-participating-medic";
-	String EXTENSION_HIGHMED_PARTICIPATING_TTP = "http://highmed.org/fhir/StructureDefinition/extension-participating-ttp";
-	String EXTENSION_HIGHMED_GROUP_ID = "http://highmed.org/fhir/StructureDefinition/extension-group-id";
-
-	String PROFILE_HIGHMED_GROUP = "http://highmed.org/fhir/StructureDefinition/group";
-	String PROFILE_HIGHEMD_RESEARCH_STUDY_FEASIBILITY = "http://highmed.org/fhir/StructureDefinition/research-study-feasibility";
-
 	String PROFILE_HIGHMED_TASK_REQUEST_FEASIBILITY = "http://highmed.org/fhir/StructureDefinition/task-request-feasibility";
 	String PROFILE_HIGHMED_TASK_REQUEST_FEASIBILITY_PROCESS_URI = PROCESS_HIGHMED_URI_BASE + "requestFeasibility/";
 	String PROFILE_HIGHMED_TASK_REQUEST_FEASIBILITY_PROCESS_URI_AND_LATEST_VERSION =
@@ -69,6 +62,4 @@ public interface ConstantsFeasibility
 
 	String PROFILE_HIGHMED_TASK_ERROR_FEASIBILITY = "http://highmed.org/fhir/StructureDefinition/task-multi-medic-error-feasibility";
 	String PROFILE_HIGHMED_TASK_ERROR_FEASIBILITY_MESSAGE_NAME = "errorMultiMedicFeasibilityMessage";
-
-	String NAMINGSYSTEM_HIGHMED_RESEARCH_STUDY_IDENTIFIER = "http://highmed.org/fhir/NamingSystem/research-study-identifier";
 }

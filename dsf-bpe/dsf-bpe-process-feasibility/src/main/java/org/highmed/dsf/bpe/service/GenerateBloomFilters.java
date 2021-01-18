@@ -1,7 +1,11 @@
 package org.highmed.dsf.bpe.service;
 
+import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_TTP_IDENTIFIER;
 import static org.highmed.dsf.bpe.ConstantsBase.NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER;
 import static org.highmed.dsf.bpe.ConstantsBase.OPENEHR_MIMETYPE_JSON;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_BLOOM_FILTER_CONFIG;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_QUERY_RESULTS;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.PROFILE_HIGHMED_TASK_LOCAL_SERVICES_PROCESS_URI;
 
 import java.security.Key;
 import java.util.List;
@@ -10,8 +14,6 @@ import java.util.stream.Collectors;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.ConstantsBase;
-import org.highmed.dsf.bpe.ConstantsFeasibility;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.bpe.variables.BloomFilterConfig;
 import org.highmed.dsf.bpe.variables.FeasibilityQueryResult;
@@ -82,12 +84,12 @@ public class GenerateBloomFilters extends AbstractServiceDelegate
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
 		FeasibilityQueryResults results = (FeasibilityQueryResults) execution
-				.getVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_QUERY_RESULTS);
+				.getVariable(BPMN_EXECUTION_VARIABLE_QUERY_RESULTS);
 
 		String securityIdentifier = getSecurityIdentifier(execution);
 
 		BloomFilterConfig bloomFilterConfig = (BloomFilterConfig) execution
-				.getVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_BLOOM_FILTER_CONFIG);
+				.getVariable(BPMN_EXECUTION_VARIABLE_BLOOM_FILTER_CONFIG);
 
 		ResultSetTranslatorToTtpRbfOnly resultSetTranslator = createResultSetTranslator(bloomFilterConfig);
 
@@ -95,7 +97,7 @@ public class GenerateBloomFilters extends AbstractServiceDelegate
 				.map(result -> translateAndCreateBinary(resultSetTranslator, result, securityIdentifier))
 				.collect(Collectors.toList());
 
-		execution.setVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_QUERY_RESULTS,
+		execution.setVariable(BPMN_EXECUTION_VARIABLE_QUERY_RESULTS,
 				FeasibilityQueryResultsValues.create(new FeasibilityQueryResults(translatedResults)));
 	}
 
@@ -103,10 +105,10 @@ public class GenerateBloomFilters extends AbstractServiceDelegate
 	{
 		Task task = getCurrentTaskFromExecutionVariables();
 
-		if (task.getInstantiatesUri().startsWith(ConstantsFeasibility.PROFILE_HIGHMED_TASK_LOCAL_SERVICES_PROCESS_URI))
+		if (task.getInstantiatesUri().startsWith(PROFILE_HIGHMED_TASK_LOCAL_SERVICES_PROCESS_URI))
 			return task.getRequester().getIdentifier().getValue();
 		else
-			return (String) execution.getVariable(ConstantsBase.BPMN_EXECUTION_VARIABLE_TTP_IDENTIFIER);
+			return (String) execution.getVariable(BPMN_EXECUTION_VARIABLE_TTP_IDENTIFIER);
 	}
 
 	protected ResultSetTranslatorToTtpRbfOnly createResultSetTranslator(BloomFilterConfig bloomFilterConfig)

@@ -1,10 +1,12 @@
 package org.highmed.dsf.bpe.service;
 
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_ORGANIZATION_TYPE;
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_ORGANIZATION_TYPE_VALUE_TTP;
+
 import java.util.Objects;
 import java.util.Optional;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
@@ -43,7 +45,7 @@ public class CheckRequest extends AbstractServiceDelegate implements Initializin
 		{
 			throw new RuntimeException(
 					"Request check failed: process can only be started by requesting organization of type='"
-							+ ConstantsBase.CODESYSTEM_HIGHMED_ORGANIZATION_TYPE_VALUE_TTP + "'");
+							+ CODESYSTEM_HIGHMED_ORGANIZATION_TYPE_VALUE_TTP + "'");
 		}
 	}
 
@@ -53,8 +55,7 @@ public class CheckRequest extends AbstractServiceDelegate implements Initializin
 				.getOrganization(requester.getSystem(), requester.getValue());
 
 		return !organization.map(value -> value.getType().stream().anyMatch(type -> type.getCoding().stream().anyMatch(
-				coding -> coding.getSystem().equals(ConstantsBase.CODESYSTEM_HIGHMED_ORGANIZATION_TYPE) && coding
-						.getCode().equals(ConstantsBase.CODESYSTEM_HIGHMED_ORGANIZATION_TYPE_VALUE_TTP))))
-				.orElse(false);
+				coding -> coding.getSystem().equals(CODESYSTEM_HIGHMED_ORGANIZATION_TYPE) && coding.getCode()
+						.equals(CODESYSTEM_HIGHMED_ORGANIZATION_TYPE_VALUE_TTP)))).orElse(false);
 	}
 }

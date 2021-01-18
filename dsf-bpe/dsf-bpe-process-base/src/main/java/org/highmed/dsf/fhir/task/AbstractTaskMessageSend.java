@@ -1,5 +1,18 @@
 package org.highmed.dsf.fhir.task;
 
+import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_MESSAGE_NAME;
+import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_PROCESS_DEFINITION_KEY;
+import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_PROFILE;
+import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_TARGET;
+import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_TARGETS;
+import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_VERSION_TAG;
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN;
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY;
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY;
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR;
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME;
+import static org.highmed.dsf.bpe.ConstantsBase.PROCESS_HIGHMED_URI_BASE;
+
 import java.util.Date;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -54,11 +67,10 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 	@Override
 	public void doExecute(DelegateExecution execution) throws Exception
 	{
-		String processDefinitionKey = (String) execution
-				.getVariable(ConstantsBase.BPMN_EXECUTION_VARIABLE_PROCESS_DEFINITION_KEY);
-		String versionTag = (String) execution.getVariable(ConstantsBase.BPMN_EXECUTION_VARIABLE_VERSION_TAG);
-		String messageName = (String) execution.getVariable(ConstantsBase.BPMN_EXECUTION_VARIABLE_MESSAGE_NAME);
-		String profile = (String) execution.getVariable(ConstantsBase.BPMN_EXECUTION_VARIABLE_PROFILE);
+		String processDefinitionKey = (String) execution.getVariable(BPMN_EXECUTION_VARIABLE_PROCESS_DEFINITION_KEY);
+		String versionTag = (String) execution.getVariable(BPMN_EXECUTION_VARIABLE_VERSION_TAG);
+		String messageName = (String) execution.getVariable(BPMN_EXECUTION_VARIABLE_MESSAGE_NAME);
+		String profile = (String) execution.getVariable(BPMN_EXECUTION_VARIABLE_PROFILE);
 		String businessKey = execution.getBusinessKey();
 
 		// TODO see Bug https://app.camunda.com/jira/browse/CAM-9444
@@ -84,12 +96,12 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 
 			logger.debug("Removing target organization {} with error {} from target list",
 					target.getTargetOrganizationIdentifierValue(), e.getMessage());
-			Targets targets = (Targets) execution.getVariable(ConstantsBase.BPMN_EXECUTION_VARIABLE_TARGETS);
+			Targets targets = (Targets) execution.getVariable(BPMN_EXECUTION_VARIABLE_TARGETS);
 			targets.removeTarget(target);
 
 			Task task = getLeadingTaskFromExecutionVariables();
-			task.addOutput(getTaskHelper().createOutput(ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
-					ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR, errorMessage));
+			task.addOutput(getTaskHelper()
+					.createOutput(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR, errorMessage));
 		}
 	}
 
@@ -102,7 +114,7 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 	 */
 	protected Target getTarget(DelegateExecution execution)
 	{
-		return (Target) execution.getVariable(ConstantsBase.BPMN_EXECUTION_VARIABLE_TARGET);
+		return (Target) execution.getVariable(BPMN_EXECUTION_VARIABLE_TARGET);
 	}
 
 	/**
@@ -137,25 +149,26 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 
 		// http://highmed.org/bpe/Process/processDefinitionKey
 		// http://highmed.org/bpe/Process/processDefinitionKey/versionTag
-		String instantiatesUri = ConstantsBase.PROCESS_HIGHMED_URI_BASE + processDefinitionKey + (
-				versionTag != null && !versionTag.isEmpty() ? ("/" + versionTag) : "");
+		String instantiatesUri =
+				PROCESS_HIGHMED_URI_BASE + processDefinitionKey + (versionTag != null && !versionTag.isEmpty() ?
+						("/" + versionTag) :
+						"");
 		task.setInstantiatesUri(instantiatesUri);
 
 		ParameterComponent messageNameInput = new ParameterComponent(new CodeableConcept(
-				new Coding(ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
-						ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME, null)), new StringType(messageName));
+				new Coding(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME, null)),
+				new StringType(messageName));
 		task.getInput().add(messageNameInput);
 
 		ParameterComponent businessKeyInput = new ParameterComponent(new CodeableConcept(
-				new Coding(ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
-						ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY, null)), new StringType(businessKey));
+				new Coding(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY, null)),
+				new StringType(businessKey));
 		task.getInput().add(businessKeyInput);
 
 		if (correlationKey != null)
 		{
 			ParameterComponent correlationKeyInput = new ParameterComponent(new CodeableConcept(
-					new Coding(ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
-							ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY, null)),
+					new Coding(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY, null)),
 					new StringType(correlationKey));
 			task.getInput().add(correlationKeyInput);
 		}

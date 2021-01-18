@@ -6,12 +6,10 @@
 		</tag>		
 	</meta>
 	<url value="http://highmed.org/fhir/ValueSet/query-type"/>
-	<!-- version managed by bpe -->
-	<version value="bpe-managed" />
+	<version value="0.4.0" />
 	<name value="HiGHmed_Query_Type"/>
 	<title value="HiGHmed Query Type"/>
-	<!-- status managed by bpe -->
-	<status value="unknown" />
+	<status value="active" />
 	<experimental value="false"/>
 	<date value="2020-11-23"/>
 	<publisher value="HiGHmed"/>

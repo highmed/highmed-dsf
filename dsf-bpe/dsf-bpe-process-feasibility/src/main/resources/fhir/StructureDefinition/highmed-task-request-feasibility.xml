@@ -97,7 +97,7 @@
       <path value="Task.input.value[x]" />
       <type>
         <code value="Reference" />
-        <targetProfile value="http://highmed.org/fhir/StructureDefinition/research-study-feasibility" />
+        <targetProfile value="http://highmed.org/fhir/StructureDefinition/research-study" />
       </type>
     </element>
     <element id="Task.input:research-study-reference.value[x].reference">
