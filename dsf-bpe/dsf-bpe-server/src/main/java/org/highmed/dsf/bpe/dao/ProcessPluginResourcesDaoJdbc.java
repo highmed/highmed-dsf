@@ -104,9 +104,11 @@ public class ProcessPluginResourcesDaoJdbc extends AbstractDaoJdbc implements Pr
 	}
 
 	@Override
-	public void addResources(Collection<? extends ProcessesResource> newResources) throws SQLException
+	public void addOrRemoveResources(Collection<? extends ProcessesResource> newResources,
+			List<UUID> deletedResourcesIds) throws SQLException
 	{
 		Objects.requireNonNull(newResources, "newResources");
+		Objects.requireNonNull(deletedResourcesIds, "deletedResourcesIds");
 
 		if (newResources.isEmpty())
 			return;
@@ -174,6 +176,25 @@ public class ProcessPluginResourcesDaoJdbc extends AbstractDaoJdbc implements Pr
 						statement.addBatch();
 						logger.trace("Executing query '{}'", statement);
 					}
+				}
+
+				statement.executeBatch();
+			}
+			catch (SQLException e)
+			{
+				connection.rollback();
+				throw e;
+			}
+
+			try (PreparedStatement statement = connection
+					.prepareStatement("DELETE FROM process_plugin_resources WHERE resource_id = ?"))
+			{
+				for (UUID deletedId : deletedResourcesIds)
+				{
+					statement.setObject(1, uuidToPgObject(deletedId));
+
+					statement.addBatch();
+					logger.trace("Executing query '{}'", statement);
 				}
 
 				statement.executeBatch();
