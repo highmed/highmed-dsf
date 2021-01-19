@@ -1,9 +1,5 @@
-package org.highmed.dsf.fhir.profile;
+package org.highmed.dsf.fhir.profiles;
 
-import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_QUERY_TYPE;
-import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGMED_QUERY_TYPE_VALUE_AQL;
-import static org.highmed.dsf.bpe.ConstantsBase.EXTENSION_HIGHMED_QUERY;
-import static org.highmed.dsf.bpe.ConstantsBase.PROFILE_HIGHMED_GROUP;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
@@ -40,20 +36,20 @@ public class GroupProfileTest
 	public void testGroupProfileValid() throws Exception
 	{
 		Group group = new Group();
-		group.getMeta().addProfile(PROFILE_HIGHMED_GROUP);
+		group.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/group");
 		group.setType(GroupType.PERSON);
 		group.setActual(false);
-		group.addExtension().setUrl(EXTENSION_HIGHMED_QUERY).setValue(new Expression().setLanguageElement(
-				new CodeType(CODESYSTEM_HIGMED_QUERY_TYPE_VALUE_AQL).setSystem(CODESYSTEM_HIGHMED_QUERY_TYPE))
-				.setExpression("SELECT COUNT(e) FROM EHR e"));
+		group.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/extension-query")
+				.setValue(new Expression()
+						.setLanguageElement(new CodeType("application/x-aql-query")
+								.setSystem("http://highmed.org/fhir/CodeSystem/query-type"))
+						.setExpression("SELECT COUNT(e) FROM EHR e"));
 
 		ValidationResult result = resourceValidator.validate(group);
-		result.getMessages().stream()
-				.map(m -> m.getLocationString() + " " + m.getLocationLine() + ":" + m.getLocationCol() + " - " + m
-						.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
+		result.getMessages().stream().map(m -> m.getLocationString() + " " + m.getLocationLine() + ":"
+				+ m.getLocationCol() + " - " + m.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
 
-		assertEquals(0, result.getMessages().stream()
-				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
-						.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
 	}
 }
