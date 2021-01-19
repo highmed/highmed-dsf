@@ -71,7 +71,7 @@
 	</extension>
 	<url value="http://highmed.org/bpe/Process/computeFeasibility" />
 	<!-- version managed by bpe -->
-	<version value="bpe-managed" />
+	<version value="${version}" />
 	<name value="computeFeasibility" />
 	<title value="Compute Feasibility" />
 	<subtitle value="Process to compute feasibility result" />

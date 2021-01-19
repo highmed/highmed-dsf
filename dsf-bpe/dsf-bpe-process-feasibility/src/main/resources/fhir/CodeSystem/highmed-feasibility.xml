@@ -7,7 +7,7 @@
 	</meta>
 	<url value="http://highmed.org/fhir/CodeSystem/feasibility"/>
 	<!-- version managed by bpe -->
-	<version value="bpe-managed" />
+	<version value="${version}" />
 	<name value="HiGHmed_Feasibility"/>
 	<title value="HiGHmed Feasibility"/>
 	<!-- status managed by bpe -->

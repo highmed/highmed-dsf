@@ -40,7 +40,7 @@
 	</extension>
 	<url value="http://highmed.org/bpe/Process/localServicesIntegration"/>
 	<!-- version managed by bpe -->
-	<version value="bpe-managed" />
+	<version value="${version}" />
 	<name value="localServicesIntegration"/>
 	<title value="Local services integration"/>
 	<subtitle value="Service integration process"/>

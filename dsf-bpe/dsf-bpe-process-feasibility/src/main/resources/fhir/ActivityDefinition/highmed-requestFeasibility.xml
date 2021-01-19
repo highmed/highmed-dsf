@@ -103,7 +103,7 @@
 	</extension>
 	<url value="http://highmed.org/bpe/Process/requestFeasibility" />
 	<!-- version managed by bpe -->
-	<version value="bpe-managed" />
+	<version value="${version}" />
 	<name value="requestFeasibility" />
 	<title value="Request feasibility" />
 	<subtitle value="Feasibility Request Process" />

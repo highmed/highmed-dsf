@@ -7,7 +7,7 @@
 	</meta>
 	<url value="http://highmed.org/fhir/ValueSet/update-resources"/>
 	<!-- version managed by bpe -->
-	<version value="bpe-managed" />
+	<version value="${version}" />
 	<name value="HiGHmed_Update_Resources"/>
 	<title value="HiGHmed Update Resources"/>
 	<!-- status managed by bpe -->

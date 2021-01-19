@@ -7,7 +7,7 @@
   </meta>
   <url value="http://highmed.org/fhir/StructureDefinition/task-single-medic-result-feasibility" />
   <!-- version managed by bpe -->
-  <version value="bpe-managed" />
+  <version value="${version}" />
   <name value="TaskSingleMedicResultFeasibility" />
   <!-- status managed by bpe -->
   <status value="unknown" />
@@ -22,7 +22,7 @@
   <differential>
     <element id="Task.instantiatesUri">
       <path value="Task.instantiatesUri" />
-      <fixedUri value="http://highmed.org/bpe/Process/computeFeasibility/0.4.0" />
+      <fixedUri value="http://highmed.org/bpe/Process/computeFeasibility/${version}" />
     </element>
     <element id="Task.input">
       <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">

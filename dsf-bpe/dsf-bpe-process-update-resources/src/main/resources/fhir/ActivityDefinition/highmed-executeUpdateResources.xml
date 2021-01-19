@@ -45,7 +45,7 @@
 	</extension>
 	<url value="http://highmed.org/bpe/Process/executeUpdateResources" />
 	<!-- version managed by bpe -->
-	<version value="bpe-managed" />
+	<version value="${version}" />
 	<name value="executeUpdateResources" />
 	<title value="Execute Update of Resources" />
 	<subtitle value="Process to Download and Execute FHIR Bundle" />

@@ -7,7 +7,7 @@
 	</meta>
 	<url value="http://highmed.org/fhir/CodeSystem/update-allow-list"/>
 	<!-- version managed by bpe -->
-	<version value="bpe-managed" />
+	<version value="${version}" />
 	<name value="HiGHmed_Update_Allow_List"/>
 	<title value="HiGHmed Update Allow List"/>
 	<!-- status managed by bpe -->
