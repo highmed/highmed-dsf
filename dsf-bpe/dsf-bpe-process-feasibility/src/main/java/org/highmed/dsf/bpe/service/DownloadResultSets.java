@@ -1,6 +1,7 @@
 package org.highmed.dsf.bpe.service;
 
 import static org.highmed.dsf.bpe.ConstantsBase.OPENEHR_MIMETYPE_JSON;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_QUERY_RESULTS;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,7 +12,6 @@ import java.util.stream.Collectors;
 import javax.ws.rs.core.MediaType;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.ConstantsFeasibility;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.bpe.variables.FeasibilityQueryResult;
 import org.highmed.dsf.bpe.variables.FeasibilityQueryResults;
@@ -52,11 +52,11 @@ public class DownloadResultSets extends AbstractServiceDelegate
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
 		FeasibilityQueryResults results = (FeasibilityQueryResults) execution
-				.getVariable(ConstantsFeasibility.VARIABLE_QUERY_RESULTS);
+				.getVariable(BPMN_EXECUTION_VARIABLE_QUERY_RESULTS);
 
 		List<FeasibilityQueryResult> resultsWithResultSets = download(results);
 
-		execution.setVariable(ConstantsFeasibility.VARIABLE_QUERY_RESULTS,
+		execution.setVariable(BPMN_EXECUTION_VARIABLE_QUERY_RESULTS,
 				FeasibilityQueryResultsValues.create(new FeasibilityQueryResults(resultsWithResultSets)));
 	}
 

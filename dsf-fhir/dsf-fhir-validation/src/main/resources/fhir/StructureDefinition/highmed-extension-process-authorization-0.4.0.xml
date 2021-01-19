@@ -5,7 +5,7 @@
       <code value="REMOTE" />
     </tag>
   </meta>
-  <url value="http://highmed.org/fhir/StructureDefinition/process-authorization" />
+  <url value="http://highmed.org/fhir/StructureDefinition/extension-process-authorization" />
   <version value="0.4.0" />
   <name value="ProcessAuthorization" />
   <status value="active" />
@@ -216,7 +216,7 @@
     </element>
     <element id="Extension.url">
       <path value="Extension.url" />
-      <fixedUri value="http://highmed.org/fhir/StructureDefinition/process-authorization" />
+      <fixedUri value="http://highmed.org/fhir/StructureDefinition/extension-process-authorization" />
     </element>
     <element id="Extension.value[x]">
       <path value="Extension.value[x]" />

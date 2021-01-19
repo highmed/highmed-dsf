@@ -13,7 +13,7 @@
           <camunda:inputParameter name="processDefinitionKey">executeUpdateResources</camunda:inputParameter>
           <camunda:inputParameter name="versionTag">0.4.0</camunda:inputParameter>
           <camunda:inputParameter name="messageName">executeUpdateResourcesMessage</camunda:inputParameter>
-          <camunda:inputParameter name="profile">http://highmed.org/fhir/StructureDefinition/highmed-task-execute-update-resources</camunda:inputParameter>
+          <camunda:inputParameter name="profile">http://highmed.org/fhir/StructureDefinition/task-execute-update-resources</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_1u4zxix</bpmn:incoming>

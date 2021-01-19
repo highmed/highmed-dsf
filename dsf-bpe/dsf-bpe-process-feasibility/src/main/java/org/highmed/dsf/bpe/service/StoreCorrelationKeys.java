@@ -1,11 +1,16 @@
 package org.highmed.dsf.bpe.service;
 
+import static org.highmed.dsf.bpe.ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_NEEDS_RECORD_LINKAGE;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_QUERY_RESULTS;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_RECORD_LINKAGE;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDIC_CORRELATION_KEY;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.ConstantsBase;
-import org.highmed.dsf.bpe.ConstantsFeasibility;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.bpe.variables.FeasibilityQueryResults;
 import org.highmed.dsf.bpe.variables.FeasibilityQueryResultsValues;
@@ -28,28 +33,27 @@ public class StoreCorrelationKeys extends AbstractServiceDelegate
 	{
 		Task task = getCurrentTaskFromExecutionVariables();
 
-		List<Target> targets = getTaskHelper()
-				.getInputParameterStringValues(task, ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
-						ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDIC_CORRELATION_KEY)
+		List<Target> targets = getTaskHelper().getInputParameterStringValues(task, CODESYSTEM_HIGHMED_FEASIBILITY,
+				CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDIC_CORRELATION_KEY)
 				.map(correlationKey -> Target.createBiDirectionalTarget("", correlationKey))
 				.collect(Collectors.toList());
 
-		execution.setVariable(ConstantsBase.VARIABLE_TARGETS, TargetsValues.create(new Targets(targets)));
+		execution
+				.setVariable(ConstantsBase.BPMN_EXECUTION_VARIABLE_TARGETS, TargetsValues.create(new Targets(targets)));
 
 		boolean needsRecordLinkage = getNeedsRecordLinkageCheck(task);
-		execution.setVariable(ConstantsFeasibility.VARIABLE_NEEDS_RECORD_LINKAGE, needsRecordLinkage);
+		execution.setVariable(BPMN_EXECUTION_VARIABLE_NEEDS_RECORD_LINKAGE, needsRecordLinkage);
 
-		execution.setVariable(ConstantsFeasibility.VARIABLE_QUERY_RESULTS,
+		execution.setVariable(BPMN_EXECUTION_VARIABLE_QUERY_RESULTS,
 				FeasibilityQueryResultsValues.create(new FeasibilityQueryResults(null)));
 	}
 
 	private boolean getNeedsRecordLinkageCheck(Task task)
 	{
-		return getTaskHelper()
-				.getFirstInputParameterBooleanValue(task, ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
-						ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_RECORD_LINKAGE).orElseThrow(
-						() -> new IllegalArgumentException(
-								"NeedsRecordLinkage boolean is not set in task with id='" + task.getId()
-										+ "', this error should " + "have been caught by resource validation"));
+		return getTaskHelper().getFirstInputParameterBooleanValue(task, CODESYSTEM_HIGHMED_FEASIBILITY,
+				CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_RECORD_LINKAGE).orElseThrow(
+				() -> new IllegalArgumentException(
+						"NeedsRecordLinkage boolean is not set in task with id='" + task.getId()
+								+ "', this error should " + "have been caught by resource validation"));
 	}
 }

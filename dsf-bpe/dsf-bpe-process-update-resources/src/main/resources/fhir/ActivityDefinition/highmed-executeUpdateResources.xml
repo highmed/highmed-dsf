@@ -1,0 +1,66 @@
+<ActivityDefinition xmlns="http://hl7.org/fhir">
+	<meta>
+		<tag>
+			<system value="http://highmed.org/fhir/CodeSystem/authorization-role" />
+			<code value="REMOTE" />
+		</tag>
+	</meta>
+	<extension url="http://highmed.org/fhir/StructureDefinition/extension-process-authorization">
+		<extension url="message-name">
+			<valueString value="executeUpdateResourcesMessage" />
+		</extension>
+		<extension url="authorization-roles">
+			<extension url="authorization-role">
+				<valueCoding>
+					<system value="http://highmed.org/fhir/CodeSystem/authorization-role" />
+					<code value="REMOTE" />
+				</valueCoding>
+			</extension>
+		</extension>
+		<extension url="requester-organization-types">
+			<extension url="requester-organization-type">
+				<valueCoding>
+					<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
+					<code value="TTP" />
+				</valueCoding>
+			</extension>
+		</extension>
+		<extension url="recipient-organization-types">
+			<extension url="recipient-organization-type">
+				<valueCoding>
+					<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
+					<code value="TTP" />
+				</valueCoding>
+			</extension>
+			<extension url="recipient-organization-type">
+				<valueCoding>
+					<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
+					<code value="MeDIC" />
+				</valueCoding>
+			</extension>
+		</extension>
+		<extension url="task-profile">
+			<valueCanonical value="http://highmed.org/fhir/StructureDefinition/task-execute-update-resources" />
+		</extension>
+	</extension>
+	<url value="http://highmed.org/bpe/Process/executeUpdateResources" />
+	<!-- version managed by bpe -->
+	<version value="${version}" />
+	<name value="executeUpdateResources" />
+	<title value="Execute Update of Resources" />
+	<subtitle value="Process to Download and Execute FHIR Bundle" />
+	<!-- status managed by bpe -->
+	<status value="unknown" />
+	<experimental value="false" />
+	<date value="2020-11-23" />
+	<publisher value="HiGHmed" />
+	<contact>
+		<name value="HiGHmed" />
+		<telecom>
+			<system value="email" />
+			<value value="pmo@highmed.org" />
+		</telecom>
+	</contact>
+	<description value="Process to download and execute a FHIR bundle" />
+	<kind value="Task" />
+</ActivityDefinition>

@@ -1,12 +1,13 @@
 package org.highmed.dsf.bpe.service;
 
+import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_TARGETS;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
@@ -42,6 +43,6 @@ public class SelectPingTargets extends AbstractServiceDelegate implements Initia
 				.createBiDirectionalTarget(identifier.getValue(), UUID.randomUUID().toString()))
 				.collect(Collectors.toList());
 
-		execution.setVariable(ConstantsBase.VARIABLE_TARGETS, TargetsValues.create(new Targets(targets)));
+		execution.setVariable(BPMN_EXECUTION_VARIABLE_TARGETS, TargetsValues.create(new Targets(targets)));
 	}
 }

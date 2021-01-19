@@ -1,7 +1,10 @@
 package org.highmed.dsf.bpe.service;
 
+import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_TARGET;
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN;
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY;
+
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
@@ -23,12 +26,11 @@ public class SelectPongTarget extends AbstractServiceDelegate implements Initial
 	{
 		Task task = getCurrentTaskFromExecutionVariables();
 
-		String correlationKey = getTaskHelper()
-				.getFirstInputParameterStringValue(task, ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
-						ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY).get();
+		String correlationKey = getTaskHelper().getFirstInputParameterStringValue(task, CODESYSTEM_HIGHMED_BPMN,
+				CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY).get();
 		Identifier targetOrganizationIdentifier = task.getRequester().getIdentifier();
 
-		execution.setVariable(ConstantsBase.VARIABLE_TARGET, TargetValues
+		execution.setVariable(BPMN_EXECUTION_VARIABLE_TARGET, TargetValues
 				.create(Target.createBiDirectionalTarget(targetOrganizationIdentifier.getValue(), correlationKey)));
 	}
 }

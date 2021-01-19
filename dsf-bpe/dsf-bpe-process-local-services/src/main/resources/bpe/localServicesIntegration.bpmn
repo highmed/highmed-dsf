@@ -94,10 +94,10 @@
     <bpmn:endEvent id="EndEvent">
       <bpmn:extensionElements>
         <camunda:inputOutput>
-          <camunda:inputParameter name="messageName">resultSingleMedicSimpleFeasibilityMessage</camunda:inputParameter>
+          <camunda:inputParameter name="messageName">resultSingleMedicFeasibilityMessage</camunda:inputParameter>
           <camunda:inputParameter name="versionTag">0.4.0</camunda:inputParameter>
-          <camunda:inputParameter name="processDefinitionKey">computeSimpleFeasibility</camunda:inputParameter>
-          <camunda:inputParameter name="profile">http://highmed.org/fhir/StructureDefinition/highmed-task-single-medic-result-simple-feasibility</camunda:inputParameter>
+          <camunda:inputParameter name="processDefinitionKey">computeFeasibility</camunda:inputParameter>
+          <camunda:inputParameter name="profile">http://highmed.org/fhir/StructureDefinition/task-single-medic-result-feasibility</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0m4rhl9</bpmn:incoming>
@@ -120,7 +120,7 @@
     <bpmn:sequenceFlow id="SequenceFlow_07wtgee" sourceRef="checkQueries" targetRef="ExclusiveGateway_1dln3in" />
   </bpmn:process>
   <bpmn:message id="Message_1yz2a31" name="localServicesIntegrationMessage" />
-  <bpmn:message id="Message_1dr71re" name="resultSingleMedicSimpleFeasibilityMessage" />
+  <bpmn:message id="Message_1dr71re" name="resultSingleMedicFeasibilityMessage" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="localServicesIntegration">
       <bpmndi:BPMNEdge id="Flow_125i149_di" bpmnElement="Flow_125i149">

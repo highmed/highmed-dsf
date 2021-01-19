@@ -57,22 +57,22 @@ public class PractitionerRoleUserFilter extends AbstractUserFilter
 				case MeDIC:
 					if (subqueryParameterIndex == 3)
 						statement.setString(parameterIndex,
-								"[{\"url\":\"http://highmed.org/fhir/StructureDefinition/participating-medic\",\"valueReference\":{\"reference\":\""
+								"[{\"url\":\"http://highmed.org/fhir/StructureDefinition/extension-participating-medic\",\"valueReference\":{\"reference\":\""
 										+ user.getOrganization().getIdElement().getValue() + "\"}}]");
 					else if (subqueryParameterIndex == 4)
 						statement.setString(parameterIndex,
-								"[{\"url\":\"http://highmed.org/fhir/StructureDefinition/participating-medic\",\"valueReference\":{\"reference\":\""
+								"[{\"url\":\"http://highmed.org/fhir/StructureDefinition/extension-participating-medic\",\"valueReference\":{\"reference\":\""
 										+ user.getOrganization().getIdElement().toVersionless().getValue() + "\"}}]");
 					break;
 
 				case TTP:
 					if (subqueryParameterIndex == 3)
 						statement.setString(parameterIndex,
-								"[{\"url\":\"http://highmed.org/fhir/StructureDefinition/participating-ttp\",\"valueReference\":{\"reference\":\""
+								"[{\"url\":\"http://highmed.org/fhir/StructureDefinition/extension-participating-ttp\",\"valueReference\":{\"reference\":\""
 										+ user.getOrganization().getIdElement().getValue() + "\"}}]");
 					else if (subqueryParameterIndex == 4)
 						statement.setString(parameterIndex,
-								"[{\"url\":\"http://highmed.org/fhir/StructureDefinition/participating-ttp\",\"valueReference\":{\"reference\":\""
+								"[{\"url\":\"http://highmed.org/fhir/StructureDefinition/extension-participating-ttp\",\"valueReference\":{\"reference\":\""
 										+ user.getOrganization().getIdElement().toVersionless().getValue() + "\"}}]");
 					break;
 			}

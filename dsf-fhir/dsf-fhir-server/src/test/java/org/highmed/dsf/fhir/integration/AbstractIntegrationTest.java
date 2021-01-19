@@ -70,6 +70,7 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+
 import de.rwh.utils.jetty.JettyServer;
 import de.rwh.utils.jetty.PropertiesReader;
 import de.rwh.utils.test.LiquibaseTemplateTestClassRule;
@@ -154,28 +155,29 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	private static WebsocketClient createWebsocketClient(KeyStore trustStore, KeyStore keyStore,
 			char[] keyStorePassword, String subscriptionIdPart)
 	{
-		return new WebsocketClientTyrus(() -> {}, URI.create(WEBSOCKET_URL), trustStore, keyStore, keyStorePassword, subscriptionIdPart);
+		return new WebsocketClientTyrus(() -> {
+		}, URI.create(WEBSOCKET_URL), trustStore, keyStore, keyStorePassword, subscriptionIdPart);
 	}
 
 	private static JettyServer startFhirServer() throws Exception
 	{
-		Properties properties = PropertiesReader.read(Paths.get("src/test/resources/integration/jetty.properties"),
-				StandardCharsets.UTF_8);
+		Properties properties = PropertiesReader
+				.read(Paths.get("src/test/resources/integration/jetty.properties"), StandardCharsets.UTF_8);
 		overrideJettyPropertiesForTesting(properties);
 
 		HttpConfiguration httpConfiguration = httpConfiguration(secureRequestCustomizer());
 		Function<Server, ServerConnector> connector = httpsConnector(httpConfiguration, properties);
 
-		Properties initParameter = PropertiesReader.read(Paths.get("src/test/resources/integration/config.properties"),
-				StandardCharsets.UTF_8);
+		Properties initParameter = PropertiesReader
+				.read(Paths.get("src/test/resources/integration/config.properties"), StandardCharsets.UTF_8);
 		overrideConfigPropertiesForTesting(initParameter);
 
 		Predicate<String> filter = s -> s.contains("fhir-server");
 		Stream<String> webInfClassesDirs = webInfClassesDirs(filter);
 		Stream<String> webInfJars = webInfJars(filter);
 
-		List<Class<?>> initializers = Arrays.asList(SpringServletContainerInitializer.class,
-				JerseyServletContainerInitializer.class);
+		List<Class<?>> initializers = Arrays
+				.asList(SpringServletContainerInitializer.class, JerseyServletContainerInitializer.class);
 
 		ErrorHandler errorHandler = statusCodeOnlyErrorHandler();
 
@@ -277,14 +279,14 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 
 		Organization organization = (Organization) testBundle.getEntry().get(0).getResource();
 		Extension thumbprintExtension = organization
-				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
+				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint");
 
 		String clientCertHashHex = calculateSha512CertificateThumbprintHex(certificate);
 		thumbprintExtension.setValue(new StringType(clientCertHashHex));
 
 		Organization externalOrganization = (Organization) testBundle.getEntry().get(2).getResource();
 		Extension externalThumbprintExtension = externalOrganization
-				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
+				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint");
 
 		String externalClientCertHashHex = calculateSha512CertificateThumbprintHex(externalCertificate);
 		externalThumbprintExtension.setValue(new StringType(externalClientCertHashHex));

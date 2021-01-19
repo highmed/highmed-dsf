@@ -1,5 +1,11 @@
 package org.highmed.dsf.bpe.service;
 
+import static org.highmed.dsf.bpe.ConstantsBase.EXTENSION_HIGHMED_PARTICIPATING_MEDIC;
+import static org.highmed.dsf.bpe.ConstantsBase.EXTENSION_HIGHMED_PARTICIPATING_TTP;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_BLOOM_FILTER_CONFIG;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_NEEDS_RECORD_LINKAGE;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_RESEARCH_STUDY;
+
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Objects;
@@ -12,7 +18,6 @@ import javax.crypto.KeyGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.ConstantsBase;
-import org.highmed.dsf.bpe.ConstantsFeasibility;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.bpe.variables.BloomFilterConfig;
 import org.highmed.dsf.bpe.variables.BloomFilterConfigValues;
@@ -64,18 +69,18 @@ public class SelectRequestTargets extends AbstractServiceDelegate
 	@Override
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
-		ResearchStudy researchStudy = (ResearchStudy) execution
-				.getVariable(ConstantsFeasibility.VARIABLE_RESEARCH_STUDY);
+		ResearchStudy researchStudy = (ResearchStudy) execution.getVariable(BPMN_EXECUTION_VARIABLE_RESEARCH_STUDY);
 
-		execution.setVariable(ConstantsBase.VARIABLE_TARGETS, TargetsValues.create(getMedicTargets(researchStudy)));
+		execution.setVariable(ConstantsBase.BPMN_EXECUTION_VARIABLE_TARGETS,
+				TargetsValues.create(getMedicTargets(researchStudy)));
 
-		execution.setVariable(ConstantsBase.VARIABLE_TARGET, TargetValues.create(getTtpTarget(researchStudy)));
+		execution.setVariable(ConstantsBase.BPMN_EXECUTION_VARIABLE_TARGET,
+				TargetValues.create(getTtpTarget(researchStudy)));
 
-		Boolean needsRecordLinkage = (Boolean) execution
-				.getVariable(ConstantsFeasibility.VARIABLE_NEEDS_RECORD_LINKAGE);
+		Boolean needsRecordLinkage = (Boolean) execution.getVariable(BPMN_EXECUTION_VARIABLE_NEEDS_RECORD_LINKAGE);
 		if (Boolean.TRUE.equals(needsRecordLinkage))
 		{
-			execution.setVariable(ConstantsFeasibility.VARIABLE_BLOOM_FILTER_CONFIG,
+			execution.setVariable(BPMN_EXECUTION_VARIABLE_BLOOM_FILTER_CONFIG,
 					BloomFilterConfigValues.create(createBloomFilterConfig()));
 		}
 	}
@@ -88,8 +93,8 @@ public class SelectRequestTargets extends AbstractServiceDelegate
 
 	private Targets getMedicTargets(ResearchStudy researchStudy)
 	{
-		List<Target> targets = researchStudy.getExtensionsByUrl(ConstantsFeasibility.EXTENSION_PARTICIPATING_MEDIC_URI)
-				.stream().filter(e -> e.getValue() instanceof Reference).map(e -> (Reference) e.getValue())
+		List<Target> targets = researchStudy.getExtensionsByUrl(EXTENSION_HIGHMED_PARTICIPATING_MEDIC).stream()
+				.filter(e -> e.getValue() instanceof Reference).map(e -> (Reference) e.getValue())
 				.map(r -> Target.createBiDirectionalTarget(r.getIdentifier().getValue(), UUID.randomUUID().toString()))
 				.collect(Collectors.toList());
 
@@ -98,7 +103,7 @@ public class SelectRequestTargets extends AbstractServiceDelegate
 
 	private Target getTtpTarget(ResearchStudy researchStudy)
 	{
-		return researchStudy.getExtensionsByUrl(ConstantsFeasibility.EXTENSION_PARTICIPATING_TTP_URI).stream()
+		return researchStudy.getExtensionsByUrl(EXTENSION_HIGHMED_PARTICIPATING_TTP).stream()
 				.filter(e -> e.getValue() instanceof Reference).map(e -> (Reference) e.getValue())
 				.map(r -> Target.createUniDirectionalTarget(r.getIdentifier().getValue())).findFirst().get();
 	}

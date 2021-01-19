@@ -85,7 +85,7 @@ public class BundleGenerator
 
 		Organization organization = (Organization) testBundle.getEntry().get(0).getResource();
 		Extension thumbprintExtension = organization
-				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
+				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint");
 		thumbprintExtension.setValue(new StringType(
 				clientCertificateFilesByCommonName.get("test-client").getCertificateSha512ThumbprintHex()));
 
@@ -122,13 +122,13 @@ public class BundleGenerator
 
 		Organization organizationTtp = (Organization) medic1Bundle.getEntry().get(0).getResource();
 		Extension organizationTtpThumbprintExtension = organizationTtp
-				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
+				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint");
 		organizationTtpThumbprintExtension.setValue(new StringType(
 				clientCertificateFilesByCommonName.get("ttp-client").getCertificateSha512ThumbprintHex()));
 
 		Organization organizationMedic1 = (Organization) medic1Bundle.getEntry().get(1).getResource();
 		Extension organizationMedic1thumbprintExtension = organizationMedic1
-				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
+				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint");
 		organizationMedic1thumbprintExtension.setValue(new StringType(
 				clientCertificateFilesByCommonName.get("medic1-client").getCertificateSha512ThumbprintHex()));
 
@@ -143,13 +143,13 @@ public class BundleGenerator
 
 		Organization organizationTtp = (Organization) medic2Bundle.getEntry().get(0).getResource();
 		Extension organizationTtpThumbprintExtension = organizationTtp
-				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
+				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint");
 		organizationTtpThumbprintExtension.setValue(new StringType(
 				clientCertificateFilesByCommonName.get("ttp-client").getCertificateSha512ThumbprintHex()));
 
 		Organization organizationMedic2 = (Organization) medic2Bundle.getEntry().get(1).getResource();
 		Extension organizationMedic2thumbprintExtension = organizationMedic2
-				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
+				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint");
 		organizationMedic2thumbprintExtension.setValue(new StringType(
 				clientCertificateFilesByCommonName.get("medic2-client").getCertificateSha512ThumbprintHex()));
 
@@ -164,13 +164,13 @@ public class BundleGenerator
 
 		Organization organizationTtp = (Organization) medic3Bundle.getEntry().get(0).getResource();
 		Extension organizationTtpThumbprintExtension = organizationTtp
-				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
+				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint");
 		organizationTtpThumbprintExtension.setValue(new StringType(
 				clientCertificateFilesByCommonName.get("ttp-client").getCertificateSha512ThumbprintHex()));
 
 		Organization organizationMedic3 = (Organization) medic3Bundle.getEntry().get(1).getResource();
 		Extension organizationMedic3thumbprintExtension = organizationMedic3
-				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
+				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint");
 		organizationMedic3thumbprintExtension.setValue(new StringType(
 				clientCertificateFilesByCommonName.get("medic3-client").getCertificateSha512ThumbprintHex()));
 
@@ -185,25 +185,25 @@ public class BundleGenerator
 
 		Organization organizationTtp = (Organization) ttpBundle.getEntry().get(0).getResource();
 		Extension organizationTtpThumbprintExtension = organizationTtp
-				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
+				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint");
 		organizationTtpThumbprintExtension.setValue(new StringType(
 				clientCertificateFilesByCommonName.get("ttp-client").getCertificateSha512ThumbprintHex()));
 
 		Organization organizationMedic1 = (Organization) ttpBundle.getEntry().get(1).getResource();
 		Extension organizationMedic1thumbprintExtension = organizationMedic1
-				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
+				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint");
 		organizationMedic1thumbprintExtension.setValue(new StringType(
 				clientCertificateFilesByCommonName.get("medic1-client").getCertificateSha512ThumbprintHex()));
 
 		Organization organizationMedic2 = (Organization) ttpBundle.getEntry().get(2).getResource();
 		Extension organizationMedic2thumbprintExtension = organizationMedic2
-				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
+				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint");
 		organizationMedic2thumbprintExtension.setValue(new StringType(
 				clientCertificateFilesByCommonName.get("medic2-client").getCertificateSha512ThumbprintHex()));
 
 		Organization organizationMedic3 = (Organization) ttpBundle.getEntry().get(3).getResource();
 		Extension organizationMedic3thumbprintExtension = organizationMedic3
-				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
+				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint");
 		organizationMedic3thumbprintExtension.setValue(new StringType(
 				clientCertificateFilesByCommonName.get("medic3-client").getCertificateSha512ThumbprintHex()));
 

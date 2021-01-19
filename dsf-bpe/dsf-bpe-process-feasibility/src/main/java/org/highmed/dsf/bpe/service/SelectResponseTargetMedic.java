@@ -39,6 +39,6 @@ public class SelectResponseTargetMedic extends AbstractServiceDelegate implement
 		Task task = getLeadingTaskFromExecutionVariables();
 
 		Target medicTarget = Target.createUniDirectionalTarget(task.getRequester().getIdentifier().getValue());
-		execution.setVariable(ConstantsBase.VARIABLE_TARGET, TargetValues.create(medicTarget));
+		execution.setVariable(ConstantsBase.BPMN_EXECUTION_VARIABLE_TARGET, TargetValues.create(medicTarget));
 	}
 }

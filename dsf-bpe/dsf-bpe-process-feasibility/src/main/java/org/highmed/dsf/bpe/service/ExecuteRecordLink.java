@@ -9,13 +9,13 @@ import java.util.stream.Collectors;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.highmed.dsf.bpe.ConstantsFeasibility;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
-import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
-import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.bpe.variables.FeasibilityQueryResult;
 import org.highmed.dsf.bpe.variables.FeasibilityQueryResults;
 import org.highmed.dsf.bpe.variables.FinalFeasibilityQueryResult;
 import org.highmed.dsf.bpe.variables.FinalFeasibilityQueryResults;
 import org.highmed.dsf.bpe.variables.FinalFeasibilityQueryResultsValues;
+import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
+import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.pseudonymization.domain.PersonWithMdat;
 import org.highmed.pseudonymization.domain.impl.MatchedPersonImpl;
 import org.highmed.pseudonymization.recordlinkage.FederatedMatcherImpl;
@@ -50,7 +50,7 @@ public class ExecuteRecordLink extends AbstractServiceDelegate
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
 		FeasibilityQueryResults results = (FeasibilityQueryResults) execution
-				.getVariable(ConstantsFeasibility.VARIABLE_QUERY_RESULTS);
+				.getVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_QUERY_RESULTS);
 
 		Map<String, List<FeasibilityQueryResult>> byCohortId = results.getResults().stream()
 				.collect(Collectors.groupingBy(FeasibilityQueryResult::getCohortId));
@@ -60,7 +60,7 @@ public class ExecuteRecordLink extends AbstractServiceDelegate
 		List<FinalFeasibilityQueryResult> matchedResults = byCohortId.entrySet().stream()
 				.map(e -> match(matcher, e.getKey(), e.getValue())).collect(Collectors.toList());
 
-		execution.setVariable(ConstantsFeasibility.VARIABLE_FINAL_QUERY_RESULTS,
+		execution.setVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_FINAL_QUERY_RESULTS,
 				FinalFeasibilityQueryResultsValues.create(new FinalFeasibilityQueryResults(matchedResults)));
 	}
 

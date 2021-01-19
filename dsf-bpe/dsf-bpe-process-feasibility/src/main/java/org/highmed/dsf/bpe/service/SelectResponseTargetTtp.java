@@ -34,11 +34,11 @@ public class SelectResponseTargetTtp extends AbstractServiceDelegate implements 
 	@Override
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
-		String ttpIdentifier = (String) execution.getVariable(ConstantsBase.VARIABLE_TTP_IDENTIFIER);
+		String ttpIdentifier = (String) execution.getVariable(ConstantsBase.BPMN_EXECUTION_VARIABLE_TTP_IDENTIFIER);
 		String correlationKey = getCorrelationKey(execution);
 
 		Target ttpTarget = Target.createBiDirectionalTarget(ttpIdentifier, correlationKey);
-		execution.setVariable(ConstantsBase.VARIABLE_TARGET, TargetValues.create(ttpTarget));
+		execution.setVariable(ConstantsBase.BPMN_EXECUTION_VARIABLE_TARGET, TargetValues.create(ttpTarget));
 	}
 
 	private String getCorrelationKey(DelegateExecution execution)

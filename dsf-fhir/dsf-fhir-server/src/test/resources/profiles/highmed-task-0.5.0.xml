@@ -44,7 +44,7 @@
 			<min value="1"/>
 			<type>
 				<code value="Reference"/>
-				<targetProfile value="http://highmed.org/fhir/StructureDefinition/highmed-organization"/>
+				<targetProfile value="http://highmed.org/fhir/StructureDefinition/organization"/>
 			</type>
 		</element>
 		<element id="Task.restriction">
@@ -57,7 +57,7 @@
 			<max value="1"/>
 			<type>
 				<code value="Reference"/>
-				<targetProfile value="http://highmed.org/fhir/StructureDefinition/highmed-organization"/>
+				<targetProfile value="http://highmed.org/fhir/StructureDefinition/organization"/>
 			</type>
 		</element>
 		<element id="Task.input">

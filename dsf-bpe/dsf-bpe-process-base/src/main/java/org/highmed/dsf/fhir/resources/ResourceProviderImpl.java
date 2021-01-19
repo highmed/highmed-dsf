@@ -2,6 +2,7 @@ package org.highmed.dsf.fhir.resources;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -13,9 +14,11 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.MetadataResource;
@@ -30,6 +33,9 @@ import ca.uhn.fhir.parser.IParser;
 class ResourceProviderImpl implements ResourceProvider
 {
 	private static final Logger logger = LoggerFactory.getLogger(ResourceProviderImpl.class);
+
+	private static final String VERSION_PATTERN_STRING = "${version}";
+	private static final Pattern VERSION_PATTERN = Pattern.compile(Pattern.quote(VERSION_PATTERN_STRING));
 
 	private final Map<String, List<ActivityDefinition>> activityDefinitionsByProcessKeyAndVersion = new HashMap<>();
 	private final Map<String, List<CodeSystem>> codeSystemsByProcessKeyAndVersion = new HashMap<>();
@@ -278,16 +284,15 @@ class ResourceProviderImpl implements ResourceProvider
 	private static <T extends MetadataResource> T parseResourceAndSetVersion(String processPluginVersion,
 			Supplier<IParser> parserSupplier, ClassLoader classLoader, String fileName, Class<T> type)
 	{
-		logger.debug("Reading {} from {}", type.getSimpleName(), fileName);
+		logger.debug("Reading {} from {} and replacing all occurrence of {} with {}", type.getSimpleName(), fileName,
+				VERSION_PATTERN_STRING, processPluginVersion);
 
 		try (InputStream in = classLoader.getResourceAsStream(fileName))
 		{
-			T r = parserSupplier.get().parseResource(type, in);
+			String read = IOUtils.toString(in, StandardCharsets.UTF_8);
+			read = VERSION_PATTERN.matcher(read).replaceAll(processPluginVersion);
 
-			if (!(r instanceof NamingSystem))
-				r.setVersion(processPluginVersion);
-
-			return r;
+			return parserSupplier.get().parseResource(type, read);
 		}
 		catch (IOException e)
 		{

@@ -102,8 +102,8 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testSearchEndpointIncludeOrganization() throws Exception
 	{
-		Bundle searchBundle = getWebserviceClient().search(Endpoint.class,
-				Map.of("_include", Collections.singletonList("Endpoint:organization")));
+		Bundle searchBundle = getWebserviceClient()
+				.search(Endpoint.class, Map.of("_include", Collections.singletonList("Endpoint:organization")));
 		assertNotNull(searchBundle);
 		assertEquals(2, searchBundle.getTotal());
 		assertEquals(4, searchBundle.getEntry().size());
@@ -136,8 +136,8 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testSearchEndpointRevIncludeOrganization() throws Exception
 	{
-		Bundle searchBundle = getWebserviceClient().search(Endpoint.class,
-				Map.of("_revinclude", Collections.singletonList("Organization:endpoint")));
+		Bundle searchBundle = getWebserviceClient()
+				.search(Endpoint.class, Map.of("_revinclude", Collections.singletonList("Organization:endpoint")));
 		assertNotNull(searchBundle);
 		assertEquals(2, searchBundle.getTotal());
 		assertEquals(4, searchBundle.getEntry().size());
@@ -201,8 +201,9 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 				.setCode("REMOTE");
 		organization.addIdentifier().setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
 				.setValue("bla-bla.de");
-		organization.addExtension("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint", new StringType(
-				"6b83a92506d67265697c74f50a9cac0ec7182adcc5302e5ed487ae1a782fe278f5ca79808c971e061fadded2c303a2223140ef3450d1d27717dd704a823f95e9"));
+		organization.addExtension("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint",
+				new StringType(
+						"6b83a92506d67265697c74f50a9cac0ec7182adcc5302e5ed487ae1a782fe278f5ca79808c971e061fadded2c303a2223140ef3450d1d27717dd704a823f95e9"));
 
 		Organization createdOrg = getWebserviceClient().create(organization);
 		logger.debug("Organization: {}",
@@ -278,12 +279,13 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 				.setCode("REMOTE");
 		organization.addIdentifier().setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
 				.setValue("bla-bla.de");
-		organization.addExtension("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint", new StringType(
-				"6b83a92506d67265697c74f50a9cac0ec7182adcc5302e5ed487ae1a782fe278f5ca79808c971e061fadded2c303a2223140ef3450d1d27717dd704a823f95e9"));
+		organization.addExtension("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint",
+				new StringType(
+						"6b83a92506d67265697c74f50a9cac0ec7182adcc5302e5ed487ae1a782fe278f5ca79808c971e061fadded2c303a2223140ef3450d1d27717dd704a823f95e9"));
 		organization.addEndpoint().setReference(endTempId);
 
 		Endpoint endpoint = new Endpoint();
-		endpoint.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/highmed-endpoint");
+		endpoint.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/endpoint");
 		endpoint.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/authorization-role")
 				.setCode("REMOTE");
 		endpoint.addIdentifier().setSystem("http://highmed.org/fhir/NamingSystem/endpoint-identifier")
@@ -304,8 +306,8 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 				.setUrl("Organization");
 		bundle.addEntry().setFullUrl(endTempId).setResource(endpoint).getRequest().setMethod(HTTPVerb.POST)
 				.setUrl("Endpoint");
-		bundle.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(
-				"Endpoint?identifier=http://highmed.org/fhir/NamingSystem/endpoint-identifier|foo-bar-baz.test.bla-bla.de");
+		bundle.addEntry().getRequest().setMethod(HTTPVerb.GET)
+				.setUrl("Endpoint?identifier=http://highmed.org/fhir/NamingSystem/endpoint-identifier|foo-bar-baz.test.bla-bla.de");
 
 		logger.debug("bundle: {}", context.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		Bundle postBundle = getWebserviceClient().postBundle(bundle);

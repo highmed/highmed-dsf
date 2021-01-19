@@ -5,7 +5,7 @@
       <code value="REMOTE" />
     </tag>
   </meta>
-  <url value="http://highmed.org/fhir/StructureDefinition/highmed-task-base" />
+  <url value="http://highmed.org/fhir/StructureDefinition/task-base" />
   <version value="0.4.0" />
   <name value="TaskBase" />
   <status value="active" />
@@ -35,7 +35,7 @@
       <min value="1" />
       <type>
         <code value="Reference" />
-        <targetProfile value="http://highmed.org/fhir/StructureDefinition/highmed-organization" />
+        <targetProfile value="http://highmed.org/fhir/StructureDefinition/organization" />
       </type>
     </element>
     <element id="Task.requester.reference">
@@ -65,7 +65,7 @@
       <max value="1" />
       <type>
         <code value="Reference" />
-        <targetProfile value="http://highmed.org/fhir/StructureDefinition/highmed-organization" />
+        <targetProfile value="http://highmed.org/fhir/StructureDefinition/organization" />
       </type>
     </element>
     <element id="Task.restriction.recipient.reference">

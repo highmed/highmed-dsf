@@ -41,7 +41,7 @@ public class ActivityDefinitionWithExtension
 		a.setKind(ActivityDefinitionKind.TASK);
 
 		Extension e1 = a.addExtension();
-		e1.setUrl("http://highmed.org/fhir/StructureDefinition/process-authorization");
+		e1.setUrl("http://highmed.org/fhir/StructureDefinition/extension-process-authorization");
 		e1.addExtension("message-name", new StringType("startPingProcessMessage"));
 		e1.addExtension("authorization-role",
 				new Coding("http://highmed.org/fhir/CodeSystem/authorization-role", "LOCAL", null));
@@ -52,10 +52,10 @@ public class ActivityDefinitionWithExtension
 		ot12.addExtension("organization-type",
 				new Coding("http://highmed.org/fhir/CodeSystem/authorization-role", "MeDIC", null));
 		e1.addExtension("task-profile",
-				new CanonicalType("http://highmed.org/fhir/StructureDefinition/highmed-task-start-ping-process"));
+				new CanonicalType("http://highmed.org/fhir/StructureDefinition/task-start-ping-process"));
 
 		Extension e2 = a.addExtension();
-		e2.setUrl("http://highmed.org/fhir/StructureDefinition/process-authorization");
+		e2.setUrl("http://highmed.org/fhir/StructureDefinition/extension-process-authorization");
 		e2.addExtension("message-name", new StringType("pongMessage"));
 		e2.addExtension("authorization-role",
 				new Coding("http://highmed.org/fhir/CodeSystem/authorization-role", "REMOTE", null));
@@ -65,8 +65,7 @@ public class ActivityDefinitionWithExtension
 				new Coding("http://highmed.org/fhir/CodeSystem/authorization-role", "TTP", null));
 		ot22.addExtension("organization-type",
 				new Coding("http://highmed.org/fhir/CodeSystem/authorization-role", "MeDIC", null));
-		e2.addExtension("task-profile",
-				new CanonicalType("http://highmed.org/fhir/StructureDefinition/highmed-task-pong"));
+		e2.addExtension("task-profile", new CanonicalType("http://highmed.org/fhir/StructureDefinition/task-pong"));
 
 		String xml = FhirContext.forR4().newXmlParser().setPrettyPrint(true).encodeResourceToString(a);
 		logger.debug(xml);

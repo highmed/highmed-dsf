@@ -1,13 +1,17 @@
 package org.highmed.dsf.bpe.service;
 
+import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_BUNDLE_ID;
+import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_TARGETS;
+import static org.highmed.dsf.bpe.ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE;
+import static org.highmed.dsf.bpe.ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE;
+import static org.highmed.dsf.bpe.ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_ORGANIZATION_IDENTIFIER_SEARCH_PARAMETER;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.ConstantsBase;
-import org.highmed.dsf.bpe.ConstantsUpdateResources;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
@@ -51,9 +55,8 @@ public class SelectResourceAndTargets extends AbstractServiceDelegate implements
 	{
 		Task task = getCurrentTaskFromExecutionVariables();
 		List<Reference> references = getTaskHelper()
-				.getInputParameterReferenceValues(task, ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE,
-						ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE)
-				.collect(Collectors.toList());
+				.getInputParameterReferenceValues(task, CODESYSTEM_HIGHMED_UPDATE_RESOURCE,
+						CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE).collect(Collectors.toList());
 
 		if (references.size() != 1)
 		{
@@ -68,17 +71,17 @@ public class SelectResourceAndTargets extends AbstractServiceDelegate implements
 		}
 
 		String bundleId = references.get(0).getReference();
-		execution.setVariable(ConstantsBase.VARIABLE_BUNDLE_ID, bundleId);
+		execution.setVariable(BPMN_EXECUTION_VARIABLE_BUNDLE_ID, bundleId);
 
 		List<String> targetIdentifierSearchParameters = getTaskHelper()
-				.getInputParameterStringValues(task, ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE,
-						ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_ORGANIZATION_IDENTIFIER_SEARCH_PARAMETER)
+				.getInputParameterStringValues(task, CODESYSTEM_HIGHMED_UPDATE_RESOURCE,
+						CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_ORGANIZATION_IDENTIFIER_SEARCH_PARAMETER)
 				.collect(Collectors.toList());
 
 		List<Target> targets = targetIdentifierSearchParameters.stream()
 				.flatMap(organizationProvider::searchRemoteOrganizationsIdentifiers)
 				.map(identifier -> Target.createUniDirectionalTarget(identifier.getValue()))
 				.collect(Collectors.toList());
-		execution.setVariable(ConstantsBase.VARIABLE_TARGETS, TargetsValues.create(new Targets(targets)));
+		execution.setVariable(BPMN_EXECUTION_VARIABLE_TARGETS, TargetsValues.create(new Targets(targets)));
 	}
 }

@@ -1,11 +1,16 @@
 package org.highmed.dsf.bpe.service;
 
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN;
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR;
+import static org.highmed.dsf.bpe.ConstantsBase.EXTENSION_HIGHMED_GROUP_ID;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT;
+import static org.highmed.dsf.bpe.ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS_COUNT;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.ConstantsBase;
-import org.highmed.dsf.bpe.ConstantsFeasibility;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.bpe.variables.FinalFeasibilityQueryResult;
 import org.highmed.dsf.bpe.variables.FinalFeasibilityQueryResults;
@@ -46,22 +51,19 @@ public class CheckMultiMedicResults extends AbstractServiceDelegate
 
 	private void addFinalFeasibilityQueryErrorsToLeadingTask(Task toRead, Task toWrite)
 	{
-		toRead.getInput().stream()
-				.filter(in -> in.hasType() && in.getType().hasCoding() && ConstantsBase.CODESYSTEM_HIGHMED_BPMN
-						.equals(in.getType().getCodingFirstRep().getSystem())
-						&& ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR
-						.equals(in.getType().getCodingFirstRep().getCode())).forEach(in -> toWrite.getOutput()
-				.add(getTaskHelper().createOutput(ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
-						ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR, in.getValue().primitiveValue())));
+		toRead.getInput().stream().filter(in -> in.hasType() && in.getType().hasCoding() && CODESYSTEM_HIGHMED_BPMN
+				.equals(in.getType().getCodingFirstRep().getSystem()) && CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR
+				.equals(in.getType().getCodingFirstRep().getCode())).forEach(in -> toWrite.getOutput()
+				.add(getTaskHelper().createOutput(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR,
+						in.getValue().primitiveValue())));
 	}
 
 	private FinalFeasibilityQueryResults readFinalFeasibilityQueryResultsFromCurrentTask(Task task)
 	{
 		List<FinalFeasibilityQueryResult> results = task.getInput().stream()
-				.filter(in -> in.hasType() && in.getType().hasCoding()
-						&& ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY
+				.filter(in -> in.hasType() && in.getType().hasCoding() && CODESYSTEM_HIGHMED_FEASIBILITY
 						.equals(in.getType().getCodingFirstRep().getSystem())
-						&& ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT
+						&& CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT
 						.equals(in.getType().getCodingFirstRep().getCode())).map(in -> toResult(task, in))
 				.collect(Collectors.toList());
 		return new FinalFeasibilityQueryResults(results);
@@ -69,8 +71,7 @@ public class CheckMultiMedicResults extends AbstractServiceDelegate
 
 	private FinalFeasibilityQueryResult toResult(Task task, ParameterComponent in)
 	{
-		String cohortId = ((Reference) in.getExtensionByUrl(ConstantsFeasibility.EXTENSION_GROUP_ID_URI).getValue())
-				.getReference();
+		String cohortId = ((Reference) in.getExtensionByUrl(EXTENSION_HIGHMED_GROUP_ID).getValue()).getReference();
 		int participatingMedics = getParticipatingMedicsCountByCohortId(task, cohortId);
 		int cohortSize = ((UnsignedIntType) in.getValue()).getValue();
 		return new FinalFeasibilityQueryResult(cohortId, participatingMedics, cohortSize);
@@ -78,14 +79,14 @@ public class CheckMultiMedicResults extends AbstractServiceDelegate
 
 	private int getParticipatingMedicsCountByCohortId(Task task, String cohortId)
 	{
-		return task.getInput().stream().filter(in -> in.hasType() && in.getType().hasCoding()
-				&& ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY
-				.equals(in.getType().getCodingFirstRep().getSystem())
-				&& ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS_COUNT
-				.equals(in.getType().getCodingFirstRep().getCode()) && cohortId
-				.equals(((Reference) in.getExtensionByUrl(ConstantsFeasibility.EXTENSION_GROUP_ID_URI).getValue())
-						.getReference())).mapToInt(in -> ((UnsignedIntType) in.getValue()).getValue()).findFirst()
-				.getAsInt();
+		return task.getInput().stream()
+				.filter(in -> in.hasType() && in.getType().hasCoding() && CODESYSTEM_HIGHMED_FEASIBILITY
+						.equals(in.getType().getCodingFirstRep().getSystem())
+						&& CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS_COUNT
+						.equals(in.getType().getCodingFirstRep().getCode()) && cohortId
+						.equals(((Reference) in.getExtensionByUrl(EXTENSION_HIGHMED_GROUP_ID).getValue())
+								.getReference())).mapToInt(in -> ((UnsignedIntType) in.getValue()).getValue())
+				.findFirst().getAsInt();
 	}
 
 	protected FinalFeasibilityQueryResults checkResults(FinalFeasibilityQueryResults results)
@@ -102,23 +103,19 @@ public class CheckMultiMedicResults extends AbstractServiceDelegate
 
 	private void addResultOutput(FinalFeasibilityQueryResult result, Task toWrite)
 	{
-		TaskOutputComponent output1 = getTaskHelper()
-				.createOutputUnsignedInt(ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
-						ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT,
-						result.getCohortSize());
+		TaskOutputComponent output1 = getTaskHelper().createOutputUnsignedInt(CODESYSTEM_HIGHMED_FEASIBILITY,
+				CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_MULTI_MEDIC_RESULT, result.getCohortSize());
 		output1.addExtension(createCohortIdExtension(result.getCohortId()));
 		toWrite.addOutput(output1);
 
-		TaskOutputComponent output2 = getTaskHelper()
-				.createOutputUnsignedInt(ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY,
-						ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS_COUNT,
-						result.getParticipatingMedics());
+		TaskOutputComponent output2 = getTaskHelper().createOutputUnsignedInt(CODESYSTEM_HIGHMED_FEASIBILITY,
+				CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_PARTICIPATING_MEDICS_COUNT, result.getParticipatingMedics());
 		output2.addExtension(createCohortIdExtension(result.getCohortId()));
 		toWrite.addOutput(output2);
 	}
 
 	private Extension createCohortIdExtension(String cohortId)
 	{
-		return new Extension(ConstantsFeasibility.EXTENSION_GROUP_ID_URI, new Reference(cohortId));
+		return new Extension(EXTENSION_HIGHMED_GROUP_ID, new Reference(cohortId));
 	}
 }

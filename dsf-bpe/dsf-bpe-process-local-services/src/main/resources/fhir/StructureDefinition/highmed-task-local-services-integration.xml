@@ -6,9 +6,9 @@
       <code value="LOCAL" />
     </tag>
   </meta>
-  <url value="http://highmed.org/fhir/StructureDefinition/highmed-task-local-services-integration" />
+  <url value="http://highmed.org/fhir/StructureDefinition/task-local-services-integration" />
   <!-- version managed by bpe -->
-  <version value="bpe-managed" />
+  <version value="${version}" />
   <name value="TaskLocalServicesIntegration" />
   <!-- status managed by bpe -->
   <status value="unknown" />
@@ -18,12 +18,12 @@
   <kind value="resource" />
   <abstract value="false" />
   <type value="Task" />
-  <baseDefinition value="http://highmed.org/fhir/StructureDefinition/highmed-task-base" />
+  <baseDefinition value="http://highmed.org/fhir/StructureDefinition/task-base" />
   <derivation value="constraint" />
   <differential>
     <element id="Task.instantiatesUri">
       <path value="Task.instantiatesUri" />
-      <fixedUri value="http://highmed.org/bpe/Process/localServicesIntegration/0.4.0" />
+      <fixedUri value="http://highmed.org/bpe/Process/localServicesIntegration/${version}" />
     </element>
     <element id="Task.input">
       <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
@@ -235,7 +235,7 @@
       <min value="1" />
       <type>
         <code value="Extension" />
-        <profile value="http://highmed.org/fhir/StructureDefinition/group-id" />
+        <profile value="http://highmed.org/fhir/StructureDefinition/extension-group-id" />
       </type>
     </element>
     <element id="Task.output:single-medic-result.type">
@@ -292,7 +292,7 @@
       <min value="1" />
       <type>
         <code value="Extension" />
-        <profile value="http://highmed.org/fhir/StructureDefinition/group-id" />
+        <profile value="http://highmed.org/fhir/StructureDefinition/extension-group-id" />
       </type>
     </element>
     <element id="Task.output:single-medic-result-reference.type">

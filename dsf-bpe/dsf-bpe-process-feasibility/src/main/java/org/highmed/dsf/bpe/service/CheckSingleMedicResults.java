@@ -30,14 +30,15 @@ public class CheckSingleMedicResults extends AbstractServiceDelegate
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
 		FeasibilityQueryResults results = (FeasibilityQueryResults) execution
-				.getVariable(ConstantsFeasibility.VARIABLE_QUERY_RESULTS);
+				.getVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_QUERY_RESULTS);
 
 		Task currentTask = getCurrentTaskFromExecutionVariables();
-		List<FeasibilityQueryResult> filteredResults = filterErroneousResultsAndAddErrorsToCurrentTaskOutputs(results, currentTask);
+		List<FeasibilityQueryResult> filteredResults = filterErroneousResultsAndAddErrorsToCurrentTaskOutputs(results,
+				currentTask);
 
 		// TODO: add percentage filter over results
 
-		execution.setVariable(ConstantsFeasibility.VARIABLE_QUERY_RESULTS,
+		execution.setVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_QUERY_RESULTS,
 				FeasibilityQueryResultsValues.create(new FeasibilityQueryResults(filteredResults)));
 	}
 
@@ -70,7 +71,8 @@ public class CheckSingleMedicResults extends AbstractServiceDelegate
 		String errorMessage = "Feasibility query result check failed for group with id '" + cohortId + "': " + error;
 		logger.info(errorMessage);
 
-		task.getOutput().add(getTaskHelper().createOutput(ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
-				ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR, errorMessage));
+		task.getOutput().add(getTaskHelper()
+				.createOutput(ConstantsBase.CODESYSTEM_HIGHMED_BPMN, ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR,
+						errorMessage));
 	}
 }

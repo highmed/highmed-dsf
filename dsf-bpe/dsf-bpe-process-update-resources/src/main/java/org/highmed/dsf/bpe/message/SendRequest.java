@@ -1,10 +1,12 @@
 package org.highmed.dsf.bpe.message;
 
+import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_BUNDLE_ID;
+import static org.highmed.dsf.bpe.ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE;
+import static org.highmed.dsf.bpe.ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE;
+
 import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.ConstantsBase;
-import org.highmed.dsf.bpe.ConstantsUpdateResources;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.task.AbstractTaskMessageSend;
@@ -27,7 +29,7 @@ public class SendRequest extends AbstractTaskMessageSend
 	@Override
 	protected Stream<ParameterComponent> getAdditionalInputParameters(DelegateExecution execution)
 	{
-		String bundleId = (String) execution.getVariable(ConstantsBase.VARIABLE_BUNDLE_ID);
+		String bundleId = (String) execution.getVariable(BPMN_EXECUTION_VARIABLE_BUNDLE_ID);
 		return Stream
 				.of(toInputParameterBundleReference(getFhirWebserviceClientProvider().getLocalBaseUrl(), bundleId));
 	}
@@ -37,9 +39,8 @@ public class SendRequest extends AbstractTaskMessageSend
 		if (bundleId == null || bundleId.isEmpty())
 			throw new IllegalArgumentException("bundleId null or empty");
 
-		return new ParameterComponent(
-				new CodeableConcept(new Coding(ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE,
-						ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE, null)),
+		return new ParameterComponent(new CodeableConcept(new Coding(CODESYSTEM_HIGHMED_UPDATE_RESOURCE,
+				CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE, null)),
 				new Reference().setReference(localBaseUrl + (localBaseUrl.endsWith("/") ? "" : "/") + bundleId));
 	}
 }
