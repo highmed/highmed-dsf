@@ -12,6 +12,7 @@ import static org.highmed.dsf.bpe.ConstantsFeasibility.CODESYSTEM_HIGHMED_FEASIB
 import static org.highmed.dsf.bpe.ConstantsLocalServices.PROFILE_HIGHMED_TASK_LOCAL_SERVICES;
 import static org.highmed.dsf.bpe.ConstantsLocalServices.PROFILE_HIGHMED_TASK_LOCAL_SERVICES_MESSAGE_NAME;
 import static org.highmed.dsf.bpe.ConstantsLocalServices.PROFILE_HIGHMED_TASK_LOCAL_SERVICES_PROCESS_URI_AND_LATEST_VERSION;
+import static org.highmed.dsf.bpe.LocalServicesProcessPluginDefinition.VERSION;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
@@ -39,9 +40,10 @@ public class TaskProfileTest
 	private static final Logger logger = LoggerFactory.getLogger(TaskProfileTest.class);
 
 	@ClassRule
-	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			Arrays.asList("highmed-task-base-0.4.0.xml", "highmed-group-0.4.0.xml", "highmed-extension-group-id-0.4.0.xml",
-					"highmed-extension-query-0.4.0.xml", "highmed-task-local-services-integration.xml"),
+	public static final ValidationSupportRule validationRule = new ValidationSupportRule(VERSION,
+			Arrays.asList("highmed-task-base-0.4.0.xml", "highmed-group-0.4.0.xml",
+					"highmed-extension-group-id-0.4.0.xml", "highmed-extension-query-0.4.0.xml",
+					"highmed-task-local-services-integration.xml"),
 			Arrays.asList("highmed-authorization-role-0.4.0.xml", "highmed-bpmn-message-0.4.0.xml",
 					"highmed-feasibility.xml", "highmed-query-type-0.4.0.xml"),
 			Arrays.asList("highmed-authorization-role-0.4.0.xml", "highmed-bpmn-message-0.4.0.xml",
@@ -58,9 +60,8 @@ public class TaskProfileTest
 		ValidationResult result = resourceValidator.validate(task);
 		ValidationSupportRule.logValidationMessages(logger, result);
 
-		assertEquals(0, result.getMessages().stream()
-				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
-						.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
 	}
 
 	private Task createValidTaskLocalServiceIntegration()
@@ -88,8 +89,8 @@ public class TaskProfileTest
 		task.addInput().setValue(new BooleanType(true)).getType().addCoding().setSystem(CODESYSTEM_HIGHMED_FEASIBILITY)
 				.setCode(CODESYSTEM_HIGHMED_FEASIBILITY_VALUE_NEEDS_RECORD_LINKAGE);
 
-		byte[] bloomFilterConfig = Base64.getDecoder()
-				.decode("CIw/x19d3Oj+GLOKgYAX5KrFAl11q6qMi0qkDiyUOCvMXuF2KffVvSnjUjkTvqh4z8Xs+MuQdK6FqTedM5FY9t4qm+k92A+P");
+		byte[] bloomFilterConfig = Base64.getDecoder().decode(
+				"CIw/x19d3Oj+GLOKgYAX5KrFAl11q6qMi0qkDiyUOCvMXuF2KffVvSnjUjkTvqh4z8Xs+MuQdK6FqTedM5FY9t4qm+k92A+P");
 
 		task.addInput().setValue(new Base64BinaryType(bloomFilterConfig)).getType().addCoding()
 				.setSystem(CODESYSTEM_HIGHMED_FEASIBILITY)

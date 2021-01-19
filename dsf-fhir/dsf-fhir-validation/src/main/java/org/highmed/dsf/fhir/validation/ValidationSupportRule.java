@@ -5,10 +5,13 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import org.apache.commons.io.IOUtils;
 import org.highmed.dsf.fhir.validation.SnapshotGenerator.SnapshotWithValidationMessages;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
@@ -26,10 +29,19 @@ import ca.uhn.fhir.validation.ValidationResult;
 
 public class ValidationSupportRule extends ExternalResource
 {
+	private static final String VERSION_PATTERN_STRING = "${version}";
+	private static final Pattern VERSION_PATTERN = Pattern.compile(Pattern.quote(VERSION_PATTERN_STRING));
+
 	private final FhirContext context;
 	private final IValidationSupport validationSupport;
 
 	public ValidationSupportRule(List<String> structureDefinitions, List<String> codeSystems, List<String> valueSets)
+	{
+		this(null, structureDefinitions, codeSystems, valueSets);
+	}
+
+	public ValidationSupportRule(String version, List<String> structureDefinitions, List<String> codeSystems,
+			List<String> valueSets)
 	{
 		context = FhirContext.forR4();
 		HapiLocalizer localizer = new HapiLocalizer()
@@ -48,18 +60,18 @@ public class ValidationSupportRule extends ExternalResource
 				customValidationSupport, new DefaultProfileValidationSupport(context),
 				new CommonCodeSystemsTerminologyService(context));
 
-		readProfilesAndGenerateSnapshots(context, customValidationSupport,
+		readProfilesAndGenerateSnapshots(context, version, customValidationSupport,
 				new SnapshotGeneratorImpl(context, validationSupport), structureDefinitions.stream());
 
-		readCodeSystems(context, customValidationSupport, codeSystems.stream());
-		readValueSets(context, customValidationSupport, valueSets.stream());
+		readCodeSystems(context, version, customValidationSupport, codeSystems.stream());
+		readValueSets(context, version, customValidationSupport, valueSets.stream());
 	}
 
-	private static void readProfilesAndGenerateSnapshots(FhirContext context,
+	private static void readProfilesAndGenerateSnapshots(FhirContext context, String version,
 			ValidationSupportWithCustomResources vSupport, SnapshotGenerator snapshotGenerator,
 			Stream<String> structureDefinitions)
 	{
-		StructureDefinitionReader reader = new StructureDefinitionReader(context);
+		StructureDefinitionReader reader = new StructureDefinitionReader(context, version);
 		reader.readXmlFromClassPath(structureDefinitions.map(file -> "/fhir/StructureDefinition/" + file))
 				.forEach(diff ->
 				{
@@ -72,21 +84,27 @@ public class ValidationSupportRule extends ExternalResource
 				});
 	}
 
-	private static void readCodeSystems(FhirContext context, ValidationSupportWithCustomResources vSupport,
-			Stream<String> codeSystems)
+	private static void readCodeSystems(FhirContext context, String version,
+			ValidationSupportWithCustomResources vSupport, Stream<String> codeSystems)
 	{
 		codeSystems.map(file -> "/fhir/CodeSystem/" + file).forEach(file ->
 		{
-			var cS = readCodeSystem(context, file);
+			var cS = readCodeSystem(context, version, file);
 			vSupport.addOrReplace(cS);
 		});
 	}
 
-	private static CodeSystem readCodeSystem(FhirContext context, String file)
+	private static CodeSystem readCodeSystem(FhirContext context, String version, String file)
 	{
 		try (InputStream in = ValidationSupportRule.class.getResourceAsStream(file))
 		{
-			return context.newXmlParser().parseResource(CodeSystem.class, in);
+			if (in == null)
+				throw new IOException("File " + file + " not found");
+
+			String read = IOUtils.toString(in, StandardCharsets.UTF_8);
+			read = VERSION_PATTERN.matcher(read).replaceAll(version);
+
+			return context.newXmlParser().parseResource(CodeSystem.class, read);
 		}
 		catch (IOException e)
 		{
@@ -94,24 +112,27 @@ public class ValidationSupportRule extends ExternalResource
 		}
 	}
 
-	private static void readValueSets(FhirContext context, ValidationSupportWithCustomResources vSupport,
-			Stream<String> valueSets)
+	private static void readValueSets(FhirContext context, String version,
+			ValidationSupportWithCustomResources vSupport, Stream<String> valueSets)
 	{
 		valueSets.map(file -> "/fhir/ValueSet/" + file).forEach(file ->
 		{
-			var vS = readValueSet(context, file);
+			var vS = readValueSet(context, version, file);
 			vSupport.addOrReplace(vS);
 		});
 	}
 
-	private static ValueSet readValueSet(FhirContext context, String file)
+	private static ValueSet readValueSet(FhirContext context, String version, String file)
 	{
 		try (InputStream in = ValidationSupportRule.class.getResourceAsStream(file))
 		{
 			if (in == null)
 				throw new IOException("File " + file + " not found");
 
-			return context.newXmlParser().parseResource(ValueSet.class, in);
+			String read = IOUtils.toString(in, StandardCharsets.UTF_8);
+			read = VERSION_PATTERN.matcher(read).replaceAll(version);
+
+			return context.newXmlParser().parseResource(ValueSet.class, read);
 		}
 		catch (IOException e)
 		{
