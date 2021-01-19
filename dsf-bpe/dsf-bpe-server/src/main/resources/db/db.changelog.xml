@@ -14,6 +14,7 @@
 	<include file="db/db.camunda_engine.changelog-0.3.0.xml" />
 
 	<include file="db/db.process_plugin_resources.changelog-0.4.0.xml" />
+	<include file="db/db.process_plugin_resources.changelog-0.4.0.1.xml" />
 	<include file="db/db.process_states.changelog-0.4.0.xml" />
 
 </databaseChangeLog>

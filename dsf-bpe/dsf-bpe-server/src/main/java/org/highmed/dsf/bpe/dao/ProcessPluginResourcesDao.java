@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.highmed.dsf.bpe.process.ProcessKeyAndVersion;
 import org.highmed.dsf.bpe.process.ProcessesResource;
@@ -15,5 +16,6 @@ public interface ProcessPluginResourcesDao
 
 	Map<ProcessKeyAndVersion, List<ResourceInfo>> getResources() throws SQLException;
 
-	void addResources(Collection<? extends ProcessesResource> newResources) throws SQLException;
+	void addOrRemoveResources(Collection<? extends ProcessesResource> newResources, List<UUID> deletedResourcesIds)
+			throws SQLException;
 }

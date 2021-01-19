@@ -81,24 +81,43 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 			Stream<ProcessesResource> proccessResources = getResources(definitionByProcessKeyAndVersion,
 					dbResourcesByProcess, change.getProcessKeyAndVersion());
 
-			proccessResources.forEach(r ->
+			proccessResources.forEach(res ->
 			{
-				resources.computeIfPresent(r.getResourceInfo(), (k, v) ->
+				resources.computeIfPresent(res.getResourceInfo(), (k, v) ->
 				{
-					v.addAll(r.getProcesses());
+					v.addAll(res.getProcesses());
 
 					if (change.getNewProcessState().isHigherPriority(v.getNewProcessState()))
 						v.setNewProcessState(change.getNewProcessState());
-					if (change.getOldProcessState().isHigherPriority(v.getOldProcessState()))
+
+					// only override resource state if not special case for previously unknown resource (no resource id)
+					if (v.getResourceInfo().hasResourceId()
+							&& change.getOldProcessState().isHigherPriority(v.getOldProcessState()))
 						v.setOldProcessState(change.getOldProcessState());
 
 					return v;
 				});
 
-				resources.putIfAbsent(r.getResourceInfo(), r.setNewProcessState(change.getNewProcessState())
-						.setOldProcessState(change.getOldProcessState()));
+				ProcessesResource nullIfNotNeededByOther = resources.putIfAbsent(res.getResourceInfo(),
+						res.setNewProcessState(change.getNewProcessState())
+								.setOldProcessState(change.getOldProcessState()));
+
+				if (nullIfNotNeededByOther == null)
+				{
+					// special case for previously unknown resource (no resource id)
+					if (ProcessState.DRAFT.equals(change.getOldProcessState())
+							&& ProcessState.DRAFT.equals(change.getNewProcessState())
+							&& !res.getResourceInfo().hasResourceId())
+					{
+						logger.info("Adding new resource {}?{}", res.getResourceInfo().getResourceType(),
+								res.getResourceInfo().toConditionalCreateUrl());
+						res.setOldProcessState(ProcessState.NEW);
+					}
+				}
 			});
 		}
+
+		addRemovedResources(changes, dbResourcesByProcess, resources);
 
 		List<ProcessesResource> resourceValues = new ArrayList<>(
 				resources.values().stream().filter(ProcessesResource::hasStateChangeOrDraft)
@@ -119,14 +138,14 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 				logger.debug("Executing process plugin resources bundle");
 				logger.trace("Bundle: {}", fhirContext.newJsonParser().encodeResourceToString(batchBundle));
 
-				// // TODO retries
+				// TODO retries
 				Bundle returnBundle = localWebserviceClient.withMinimalReturn().withRetry(1).postBundle(batchBundle);
 
-				addIds(resourceValues, returnBundle);
+				List<UUID> deletedResourcesIds = addIdsAndReturnDeleted(resourceValues, returnBundle);
 
 				try
 				{
-					dao.addResources(resources.values());
+					dao.addOrRemoveResources(resources.values(), deletedResourcesIds);
 				}
 				catch (SQLException e)
 				{
@@ -145,12 +164,41 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 		}
 	}
 
-	private void addIds(List<ProcessesResource> resourceValues, Bundle returnBundle)
+	private void addRemovedResources(List<ProcessStateChangeOutcome> changes,
+			Map<ProcessKeyAndVersion, List<ResourceInfo>> dbResourcesByProcess,
+			Map<ResourceInfo, ProcessesResource> resources)
+	{
+		for (ProcessStateChangeOutcome change : changes)
+		{
+			if (ProcessState.DRAFT.equals(change.getOldProcessState())
+					&& ProcessState.DRAFT.equals(change.getNewProcessState()))
+			{
+				List<ResourceInfo> dbResources = dbResourcesByProcess.getOrDefault(change.getProcessKeyAndVersion(),
+						Collections.emptyList());
+
+				dbResources.forEach(dbRes ->
+				{
+					ProcessesResource processRes = ProcessesResource.from(dbRes);
+					processRes.setOldProcessState(ProcessState.DRAFT);
+					processRes.setNewProcessState(ProcessState.EXCLUDED);
+
+					ProcessesResource nullIfNotNeededByOther = resources.putIfAbsent(dbRes, processRes);
+
+					if (nullIfNotNeededByOther == null)
+						logger.info("Deleting resource {}?{} with id {} if exists", dbRes.getResourceType(),
+								dbRes.toConditionalCreateUrl(), dbRes.getResourceId());
+				});
+			}
+		}
+	}
+
+	private List<UUID> addIdsAndReturnDeleted(List<ProcessesResource> resourceValues, Bundle returnBundle)
 	{
 		if (resourceValues.size() != returnBundle.getEntry().size())
 			throw new RuntimeException("Return bundle size unexpeced, expected " + resourceValues.size() + " got "
 					+ returnBundle.getEntry().size());
 
+		List<UUID> deletedIds = new ArrayList<>();
 		for (int i = 0; i < resourceValues.size(); i++)
 		{
 			ProcessesResource resource = resourceValues.get(i);
@@ -181,8 +229,14 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 				resource.getResourceInfo().setResourceId(toUuid(id.getIdPart()));
 			}
 			else
+			{
+				deletedIds.add(resource.getResourceInfo().getResourceId());
+
 				resource.getResourceInfo().setResourceId(null);
+			}
 		}
+
+		return deletedIds;
 	}
 
 	private Stream<ProcessesResource> getResources(
@@ -200,6 +254,7 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 
 				Optional<UUID> resourceId = getResourceId(dbResourcesByProcess, process, resource.getResourceInfo());
 				resourceId.ifPresent(id -> resource.getResourceInfo().setResourceId(id));
+				// not present: new resource, unknown to bpe db
 
 				return resource;
 			});
@@ -421,7 +476,7 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 
 		BundleEntryRequestComponent request = entry.getRequest();
 		request.setMethod(HTTPVerb.DELETE);
-		request.setUrl(resource.getResourceInfo().getResourceType() + "/"
+		request.setUrl(resource.getResourceInfo().getResourceType() + "?_id="
 				+ resource.getResourceInfo().getResourceId().toString());
 
 		return entry;

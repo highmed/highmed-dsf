@@ -419,6 +419,8 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		if (Status.OK.getStatusCode() != response.getStatus()
 				&& Status.NO_CONTENT.getStatusCode() != response.getStatus())
 			throw handleError(response);
+		else
+			response.close();
 	}
 
 	@Override
@@ -441,6 +443,8 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		if (Status.OK.getStatusCode() != response.getStatus()
 				&& Status.NO_CONTENT.getStatusCode() != response.getStatus())
 			throw handleError(response);
+		else
+			response.close();
 	}
 
 	@Override

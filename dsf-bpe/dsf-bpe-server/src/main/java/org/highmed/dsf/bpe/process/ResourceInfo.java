@@ -157,4 +157,9 @@ public class ResourceInfo implements Comparable<ResourceInfo>
 
 		return this;
 	}
+
+	public boolean hasResourceId()
+	{
+		return resourceId != null;
+	}
 }
