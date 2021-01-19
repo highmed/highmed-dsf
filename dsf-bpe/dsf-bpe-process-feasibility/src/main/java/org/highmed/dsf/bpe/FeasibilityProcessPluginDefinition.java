@@ -10,7 +10,6 @@ import org.highmed.dsf.bpe.spring.config.FeasibilitySerializerConfig;
 import org.highmed.dsf.fhir.resources.AbstractResource;
 import org.highmed.dsf.fhir.resources.ActivityDefinitionResource;
 import org.highmed.dsf.fhir.resources.CodeSystemResource;
-import org.highmed.dsf.fhir.resources.NamingSystemResource;
 import org.highmed.dsf.fhir.resources.ResourceProvider;
 import org.highmed.dsf.fhir.resources.StructureDefinitionResource;
 import org.highmed.dsf.fhir.resources.ValueSetResource;
