@@ -5,7 +5,7 @@
       <code value="REMOTE" />
     </tag>
   </meta>
-  <url value="http://highmed.org/fhir/StructureDefinition/highmed-endpoint" />
+  <url value="http://highmed.org/fhir/StructureDefinition/endpoint" />
   <version value="0.4.0" />
   <name value="Endpoint" />
   <status value="active" />
@@ -63,7 +63,7 @@
       <min value="1" />
       <type>
         <code value="Reference" />
-        <targetProfile value="http://highmed.org/fhir/StructureDefinition/highmed-organization" />
+        <targetProfile value="http://highmed.org/fhir/StructureDefinition/organization" />
       </type>
     </element>
     <element id="Endpoint.managingOrganization.reference">

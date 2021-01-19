@@ -42,8 +42,8 @@ public class CheckQueries extends AbstractServiceDelegate implements Initializin
 	@Override
 	protected void doExecute(DelegateExecution execution) throws Exception
 	{
-		List<Group> cohorts = ((FhirResourcesList) execution.getVariable(ConstantsFeasibility.VARIABLE_COHORTS))
-				.getResourcesAndCast();
+		List<Group> cohorts = ((FhirResourcesList) execution
+				.getVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_COHORTS)).getResourcesAndCast();
 
 		Map<String, String> queries = new HashMap<>();
 
@@ -52,12 +52,12 @@ public class CheckQueries extends AbstractServiceDelegate implements Initializin
 			String aqlQuery = groupHelper.extractAqlQuery(group).toLowerCase();
 
 			String groupId = group.getId();
-			if (!aqlQuery.startsWith(ConstantsFeasibility.SIMPLE_FEASIBILITY_QUERY_PREFIX))
+			if (!aqlQuery.startsWith(ConstantsFeasibility.FEASIBILITY_QUERY_PREFIX))
 			{
 				String errorMessage =
 						"Initial single medic feasibility query check failed, wrong format for query of group with id '"
 								+ groupId + "', expected query to start with '"
-								+ ConstantsFeasibility.SIMPLE_FEASIBILITY_QUERY_PREFIX + "' but got '" + aqlQuery + "'";
+								+ ConstantsFeasibility.FEASIBILITY_QUERY_PREFIX + "' but got '" + aqlQuery + "'";
 
 				logger.info(errorMessage);
 				leadingTask.getOutput().add(getTaskHelper().createOutput(ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
@@ -69,6 +69,6 @@ public class CheckQueries extends AbstractServiceDelegate implements Initializin
 			}
 		});
 
-		execution.setVariable(ConstantsFeasibility.VARIABLE_QUERIES, queries);
+		execution.setVariable(ConstantsFeasibility.BPMN_EXECUTION_VARIABLE_QUERIES, queries);
 	}
 }

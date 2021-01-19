@@ -56,28 +56,22 @@ public class LocalServicesProcessPluginDefinition implements ProcessPluginDefini
 	@Override
 	public ResourceProvider getResourceProvider(FhirContext fhirContext, ClassLoader classLoader)
 	{
-		var aL = ActivityDefinitionResource.file("fhir/ActivityDefinition/localServicesIntegration.xml");
+		var aL = ActivityDefinitionResource.file("fhir/ActivityDefinition/highmed-localServicesIntegration.xml");
 		var sTL = StructureDefinitionResource
 				.file("fhir/StructureDefinition/highmed-task-local-services-integration.xml");
-		var sExtG = StructureDefinitionResource.dependency(DEPENDENCY_FEASIBILITY_NAME_AND_VERSION,
-				"http://highmed.org/fhir/StructureDefinition/group-id", DEPENDENCY_FEASIBILITY_VERSION);
-		var sExtQ = StructureDefinitionResource.dependency(DEPENDENCY_FEASIBILITY_NAME_AND_VERSION,
-				"http://highmed.org/fhir/StructureDefinition/query", DEPENDENCY_FEASIBILITY_VERSION);
 
-		var vF = ValueSetResource.dependency(DEPENDENCY_FEASIBILITY_NAME_AND_VERSION,
-				"http://highmed.org/fhir/ValueSet/feasibility", DEPENDENCY_FEASIBILITY_VERSION);
-		var vQt = ValueSetResource.dependency(DEPENDENCY_FEASIBILITY_NAME_AND_VERSION,
-				"http://highmed.org/fhir/ValueSet/query-type", DEPENDENCY_FEASIBILITY_VERSION);
-		var cF = CodeSystemResource.dependency(DEPENDENCY_FEASIBILITY_NAME_AND_VERSION,
-				"http://highmed.org/fhir/CodeSystem/feasibility", DEPENDENCY_FEASIBILITY_VERSION);
-		var cQt = CodeSystemResource.dependency(DEPENDENCY_FEASIBILITY_NAME_AND_VERSION,
-				"http://highmed.org/fhir/CodeSystem/query-type", DEPENDENCY_FEASIBILITY_VERSION);
+		var vF = ValueSetResource
+				.dependency(DEPENDENCY_FEASIBILITY_NAME_AND_VERSION, "http://highmed.org/fhir/ValueSet/feasibility",
+						DEPENDENCY_FEASIBILITY_VERSION);
+		var cF = CodeSystemResource
+				.dependency(DEPENDENCY_FEASIBILITY_NAME_AND_VERSION, "http://highmed.org/fhir/CodeSystem/feasibility",
+						DEPENDENCY_FEASIBILITY_VERSION);
 
 		Map<String, List<AbstractResource>> resourcesByProcessKeyAndVersion = Map
-				.of("localServicesIntegration/" + VERSION, Arrays.asList(aL, sTL, vF, cF, vQt, cQt, sExtG, sExtQ));
+				.of("localServicesIntegration/" + VERSION, Arrays.asList(aL, sTL, vF, cF));
 
-		return ResourceProvider.read(VERSION,
-				() -> fhirContext.newXmlParser().setStripVersionsFromReferences(false),
-				classLoader, resourcesByProcessKeyAndVersion);
+		return ResourceProvider
+				.read(VERSION, () -> fhirContext.newXmlParser().setStripVersionsFromReferences(false), classLoader,
+						resourcesByProcessKeyAndVersion);
 	}
 }

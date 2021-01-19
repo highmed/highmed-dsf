@@ -1,5 +1,9 @@
 package org.highmed.dsf.bpe.service;
 
+import static org.highmed.dsf.bpe.ConstantsBase.NAMINGSYSTEM_HIGHMED_ENDPOINT_IDENTIFIER;
+import static org.highmed.dsf.bpe.ConstantsUpdateAllowList.CODESYSTEM_HIGHMED_UPDATE_ALLOW_LIST;
+import static org.highmed.dsf.bpe.ConstantsUpdateAllowList.CODESYSTEM_HIGHMED_UPDATE_ALLOW_LIST_VALUE_ALLOW_LIST;
+
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
@@ -10,8 +14,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.highmed.dsf.bpe.ConstantsBase;
-import org.highmed.dsf.bpe.ConstantsUpdateAllowList;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
@@ -69,31 +71,29 @@ public class UpdateAllowList extends AbstractServiceDelegate implements Initiali
 		Bundle transaction = new Bundle().setType(BundleType.TRANSACTION);
 		transaction.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/authorization-role")
 				.setCode("REMOTE");
-		transaction.getIdentifier().setSystem(ConstantsUpdateAllowList.CODESYSTEM_HIGHMED_UPDATE_ALLOW_LIST)
-				.setValue(ConstantsUpdateAllowList.CODESYSTEM_HIGHMED_UPDATE_ALLOW_LIST_VALUE_ALLOW_LIST);
+		transaction.getIdentifier().setSystem(CODESYSTEM_HIGHMED_UPDATE_ALLOW_LIST)
+				.setValue(CODESYSTEM_HIGHMED_UPDATE_ALLOW_LIST_VALUE_ALLOW_LIST);
 		searchSet.getEntry().stream()
 				.filter(e -> e.hasSearch() && SearchEntryMode.MATCH.equals(e.getSearch().getMode()) && e.hasResource()
-						&& e.getResource() instanceof Organization)
-				.map(e -> (Organization) e.getResource()).forEach(addAllowListEntry(transaction, searchSet));
+						&& e.getResource() instanceof Organization).map(e -> (Organization) e.getResource())
+				.forEach(addAllowListEntry(transaction, searchSet));
 
 		logger.debug("Uploading new allow list transaction bundle: {}",
 				FhirContext.forR4().newJsonParser().encodeResourceToString(transaction));
 
-		IdType result = client.withMinimalReturn().updateConditionaly(transaction,
-				Map.of("identifier",
-						Collections.singletonList(ConstantsUpdateAllowList.CODESYSTEM_HIGHMED_UPDATE_ALLOW_LIST + "|"
-								+ ConstantsUpdateAllowList.CODESYSTEM_HIGHMED_UPDATE_ALLOW_LIST_VALUE_ALLOW_LIST)));
+		IdType result = client.withMinimalReturn().updateConditionaly(transaction, Map.of("identifier", Collections
+				.singletonList(CODESYSTEM_HIGHMED_UPDATE_ALLOW_LIST + "|"
+						+ CODESYSTEM_HIGHMED_UPDATE_ALLOW_LIST_VALUE_ALLOW_LIST)));
 
 		Task task = getLeadingTaskFromExecutionVariables();
 		task.addOutput().setValue(new Reference(new IdType("Bundle", result.getIdPart(), result.getVersionIdPart())))
-				.getType().addCoding().setSystem(ConstantsUpdateAllowList.CODESYSTEM_HIGHMED_UPDATE_ALLOW_LIST)
-				.setCode(ConstantsUpdateAllowList.CODESYSTEM_HIGHMED_UPDATE_ALLOW_LIST_VALUE_ALLOW_LIST);
+				.getType().addCoding().setSystem(CODESYSTEM_HIGHMED_UPDATE_ALLOW_LIST)
+				.setCode(CODESYSTEM_HIGHMED_UPDATE_ALLOW_LIST_VALUE_ALLOW_LIST);
 	}
 
 	private Consumer<? super Organization> addAllowListEntry(Bundle transaction, Bundle searchSet)
 	{
-		return organization ->
-		{
+		return organization -> {
 			Identifier identifier = getDefaultIdentifier(organization).get();
 
 			BundleEntryComponent organizationEntry = transaction.addEntry();
@@ -115,8 +115,7 @@ public class UpdateAllowList extends AbstractServiceDelegate implements Initiali
 	private Function<Reference, Optional<Reference>> addAllowListEntryReturnReference(Bundle transaction,
 			String organizationId, Bundle searchSet)
 	{
-		return endpointRef -> getEndpoint(endpointRef, searchSet).map(endpoint ->
-		{
+		return endpointRef -> getEndpoint(endpointRef, searchSet).map(endpoint -> {
 			Identifier identifier = getDefaultIdentifier(endpoint).get();
 
 			BundleEntryComponent endpointEntry = transaction.addEntry();
@@ -142,15 +141,14 @@ public class UpdateAllowList extends AbstractServiceDelegate implements Initiali
 
 	private Optional<Identifier> getDefaultIdentifier(Endpoint ept)
 	{
-		return ept.getIdentifier().stream().filter(i -> ConstantsBase.ENDPOINT_IDENTIFIER_SYSTEM.equals(i.getSystem()))
+		return ept.getIdentifier().stream().filter(i -> NAMINGSYSTEM_HIGHMED_ENDPOINT_IDENTIFIER.equals(i.getSystem()))
 				.findFirst();
 	}
 
 	private Optional<Endpoint> getEndpoint(Reference endpoint, Bundle searchSet)
 	{
 		return searchSet.getEntry().stream()
-				.filter(e -> e.hasResource() && e.getResource() instanceof Endpoint
-						&& e.getFullUrl().endsWith(endpoint.getReference()))
-				.map(e -> (Endpoint) e.getResource()).findFirst();
+				.filter(e -> e.hasResource() && e.getResource() instanceof Endpoint && e.getFullUrl()
+						.endsWith(endpoint.getReference())).map(e -> (Endpoint) e.getResource()).findFirst();
 	}
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <StructureDefinition xmlns="http://hl7.org/fhir">
-	<url value="http://highmed.org/fhir/StructureDefinition/highmed-endpoint"/>
+	<url value="http://highmed.org/fhir/StructureDefinition/endpoint"/>
 	<version value="0.5.0"/>
 	<name value="Endpoint"/>
 	<status value="draft"/>
@@ -43,7 +43,7 @@
 			<min value="1"/>
 			<type>
 				<code value="Reference"/>
-				<targetProfile value="http://highmed.org/fhir/StructureDefinition/highmed-organization"/>
+				<targetProfile value="http://highmed.org/fhir/StructureDefinition/organization"/>
 			</type>
 		</element>
 	</differential>

@@ -1,5 +1,7 @@
 package org.highmed.dsf.bpe.webservice;
 
+import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_QUERY_PARAMETERS;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +25,6 @@ import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.repository.Deployment;
 import org.camunda.bpm.engine.repository.ProcessDefinition;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.highmed.dsf.bpe.ConstantsBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -84,7 +85,7 @@ public class ProcessService implements InitializingBean
 		}
 
 		runtimeService.startProcessInstanceById(processDefinition.getId(), UUID.randomUUID().toString(),
-				Map.of(ConstantsBase.VARIABLE_QUERY_PARAMETERS, queryParameters));
+				Map.of(BPMN_EXECUTION_VARIABLE_QUERY_PARAMETERS, queryParameters));
 
 		return Response.status(Status.CREATED).build();
 	}

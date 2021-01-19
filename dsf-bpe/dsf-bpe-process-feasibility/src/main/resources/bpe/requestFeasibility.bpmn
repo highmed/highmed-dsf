@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_0inb4ax" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.7.1">
+  <bpmn:process id="requestFeasibility" isExecutable="true" camunda:versionTag="0.4.0">
+    <bpmn:startEvent id="StartEvent" name="start">
+      <bpmn:outgoing>SequenceFlow_11k77gx</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_10c2suu" messageRef="Message_1pq9qxp" />
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="selectRequestTargetsAndGenerateKeys" name="select request targets and generate keys" camunda:class="org.highmed.dsf.bpe.service.SelectRequestTargets">
+      <bpmn:incoming>SequenceFlow_18ajfnh</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0b5s4ef</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="sendRequestToMedics" name="send request to medics" camunda:class="org.highmed.dsf.bpe.message.SendMedicRequest">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="processDefinitionKey">executeFeasibility</camunda:inputParameter>
+          <camunda:inputParameter name="versionTag">0.4.0</camunda:inputParameter>
+          <camunda:inputParameter name="messageName">executeFeasibilityMessage</camunda:inputParameter>
+          <camunda:inputParameter name="profile">http://highmed.org/fhir/StructureDefinition/task-execute-feasibility</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_035oihl</bpmn:incoming>
+      <bpmn:outgoing>Flow_0c15t3c</bpmn:outgoing>
+      <bpmn:multiInstanceLoopCharacteristics camunda:collection="${targets.entries}" camunda:elementVariable="target" />
+    </bpmn:sendTask>
+    <bpmn:sequenceFlow id="SequenceFlow_11k77gx" sourceRef="StartEvent" targetRef="downloadResearchStudyResource" />
+    <bpmn:sequenceFlow id="SequenceFlow_0b5s4ef" sourceRef="selectRequestTargetsAndGenerateKeys" targetRef="sendCorreltationKeysToTTP" />
+    <bpmn:serviceTask id="downloadResearchStudyResource" name="download research study resource" camunda:class="org.highmed.dsf.bpe.service.DownloadResearchStudyResource">
+      <bpmn:incoming>SequenceFlow_11k77gx</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_18ajfnh</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="SequenceFlow_18ajfnh" sourceRef="downloadResearchStudyResource" targetRef="selectRequestTargetsAndGenerateKeys" />
+    <bpmn:sequenceFlow id="SequenceFlow_035oihl" sourceRef="sendCorreltationKeysToTTP" targetRef="sendRequestToMedics" />
+    <bpmn:intermediateThrowEvent id="sendCorreltationKeysToTTP" name="send correlation keys to TTP">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="processDefinitionKey">computeFeasibility</camunda:inputParameter>
+          <camunda:inputParameter name="versionTag">0.4.0</camunda:inputParameter>
+          <camunda:inputParameter name="messageName">computeFeasibilityMessage</camunda:inputParameter>
+          <camunda:inputParameter name="profile">http://highmed.org/fhir/StructureDefinition/task-compute-feasibility</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_0b5s4ef</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_035oihl</bpmn:outgoing>
+      <bpmn:messageEventDefinition messageRef="Message_0gifb86" camunda:class="org.highmed.dsf.bpe.message.SendTtpRequest" />
+    </bpmn:intermediateThrowEvent>
+    <bpmn:endEvent id="EndEvent" name="success">
+      <bpmn:incoming>Flow_15k4oa2</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="checkFinalResult" name="check final result" camunda:class="org.highmed.dsf.bpe.service.CheckMultiMedicResults">
+      <bpmn:incoming>Flow_0fd2zcr</bpmn:incoming>
+      <bpmn:outgoing>Flow_0pn3dsm</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="handelError" name="handle error" camunda:class="org.highmed.dsf.bpe.service.HandleErrorMultiMedicResults">
+      <bpmn:incoming>Flow_0xgrywb</bpmn:incoming>
+      <bpmn:outgoing>Flow_0rkdr4f</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0c15t3c" sourceRef="sendRequestToMedics" targetRef="Gateway_1elix41" />
+    <bpmn:eventBasedGateway id="Gateway_1elix41">
+      <bpmn:incoming>Flow_0c15t3c</bpmn:incoming>
+      <bpmn:outgoing>Flow_05n1ipx</bpmn:outgoing>
+      <bpmn:outgoing>Flow_113qgvb</bpmn:outgoing>
+    </bpmn:eventBasedGateway>
+    <bpmn:intermediateCatchEvent id="receiveErrorFromTTP" name="receive error from TTP">
+      <bpmn:incoming>Flow_05n1ipx</bpmn:incoming>
+      <bpmn:outgoing>Flow_0xgrywb</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_0c47pf9" messageRef="Message_10vqhu0" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="Flow_05n1ipx" sourceRef="Gateway_1elix41" targetRef="receiveErrorFromTTP" />
+    <bpmn:intermediateCatchEvent id="receiveFinalResultFromTTP" name="receive final result from TTP">
+      <bpmn:incoming>Flow_113qgvb</bpmn:incoming>
+      <bpmn:outgoing>Flow_0fd2zcr</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_07z0ktw" messageRef="Message_1vrxfsk" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="Flow_113qgvb" sourceRef="Gateway_1elix41" targetRef="receiveFinalResultFromTTP" />
+    <bpmn:sequenceFlow id="Flow_0fd2zcr" sourceRef="receiveFinalResultFromTTP" targetRef="checkFinalResult" />
+    <bpmn:sequenceFlow id="Flow_0xgrywb" sourceRef="receiveErrorFromTTP" targetRef="handelError" />
+    <bpmn:exclusiveGateway id="Gateway_12ly33g">
+      <bpmn:incoming>Flow_0pn3dsm</bpmn:incoming>
+      <bpmn:incoming>Flow_0rkdr4f</bpmn:incoming>
+      <bpmn:outgoing>Flow_15k4oa2</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_0pn3dsm" sourceRef="checkFinalResult" targetRef="Gateway_12ly33g" />
+    <bpmn:sequenceFlow id="Flow_0rkdr4f" sourceRef="handelError" targetRef="Gateway_12ly33g" />
+    <bpmn:sequenceFlow id="Flow_15k4oa2" sourceRef="Gateway_12ly33g" targetRef="EndEvent" />
+  </bpmn:process>
+  <bpmn:message id="Message_1pq9qxp" name="requestFeasibilityMessage" />
+  <bpmn:message id="Message_07ayhv1" name="resultFeasibilityMessage" />
+  <bpmn:message id="Message_0gifb86" name="computeFeasibilityMessage" />
+  <bpmn:error id="Error_0dl03kn" />
+  <bpmn:error id="Error_07exqe7" />
+  <bpmn:error id="Error_1jhmarr" />
+  <bpmn:message id="Message_0qfng3q" name="receiveMultiMedicCohortSizeResultMessage" />
+  <bpmn:message id="Message_0srg3vv" name="resultMultiMedicFeasibilityMessage" />
+  <bpmn:message id="Message_0nmxozg" name="errorFeasibilityMessage" />
+  <bpmn:message id="Message_1y0yxv0" name="resultMultiMedicFeasibilityMessage" />
+  <bpmn:message id="Message_0v1bo0o" name="errorFeasibilityMessage" />
+  <bpmn:message id="Message_10vqhu0" name="errorMultiMedicFeasibilityMessage" />
+  <bpmn:message id="Message_1vrxfsk" name="resultMultiMedicFeasibilityMessage" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="requestFeasibility">
+      <bpmndi:BPMNEdge id="Flow_15k4oa2_di" bpmnElement="Flow_15k4oa2">
+        <di:waypoint x="1385" y="220" />
+        <di:waypoint x="1452" y="220" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0rkdr4f_di" bpmnElement="Flow_0rkdr4f">
+        <di:waypoint x="1290" y="300" />
+        <di:waypoint x="1360" y="300" />
+        <di:waypoint x="1360" y="245" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0pn3dsm_di" bpmnElement="Flow_0pn3dsm">
+        <di:waypoint x="1290" y="140" />
+        <di:waypoint x="1360" y="140" />
+        <di:waypoint x="1360" y="195" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0xgrywb_di" bpmnElement="Flow_0xgrywb">
+        <di:waypoint x="1098" y="300" />
+        <di:waypoint x="1190" y="300" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0fd2zcr_di" bpmnElement="Flow_0fd2zcr">
+        <di:waypoint x="1098" y="140" />
+        <di:waypoint x="1190" y="140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_113qgvb_di" bpmnElement="Flow_113qgvb">
+        <di:waypoint x="1000" y="200" />
+        <di:waypoint x="1000" y="140" />
+        <di:waypoint x="1062" y="140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_05n1ipx_di" bpmnElement="Flow_05n1ipx">
+        <di:waypoint x="1000" y="250" />
+        <di:waypoint x="1000" y="300" />
+        <di:waypoint x="1062" y="300" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0c15t3c_di" bpmnElement="Flow_0c15t3c">
+        <di:waypoint x="895" y="225" />
+        <di:waypoint x="975" y="225" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_035oihl_di" bpmnElement="SequenceFlow_035oihl">
+        <di:waypoint x="701" y="225" />
+        <di:waypoint x="795" y="225" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_18ajfnh_di" bpmnElement="SequenceFlow_18ajfnh">
+        <di:waypoint x="391" y="225" />
+        <di:waypoint x="481" y="225" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0b5s4ef_di" bpmnElement="SequenceFlow_0b5s4ef">
+        <di:waypoint x="581" y="225" />
+        <di:waypoint x="665" y="225" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_11k77gx_di" bpmnElement="SequenceFlow_11k77gx">
+        <di:waypoint x="188" y="225" />
+        <di:waypoint x="291" y="225" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="StartEvent_1ozsjmr_di" bpmnElement="StartEvent">
+        <dc:Bounds x="152" y="207" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="160" y="250" width="22" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_0vfud44_di" bpmnElement="selectRequestTargetsAndGenerateKeys">
+        <dc:Bounds x="481" y="185" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask_1pu8i9n_di" bpmnElement="sendRequestToMedics">
+        <dc:Bounds x="795" y="185" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_052xqjx_di" bpmnElement="downloadResearchStudyResource">
+        <dc:Bounds x="291" y="185" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateThrowEvent_1yqfh9l_di" bpmnElement="sendCorreltationKeysToTTP">
+        <dc:Bounds x="665" y="207" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="644" y="250" width="79" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_18syky8_di" bpmnElement="EndEvent">
+        <dc:Bounds x="1452" y="202" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1450" y="245" width="40" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_00phx5l_di" bpmnElement="checkFinalResult">
+        <dc:Bounds x="1190" y="100" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0g5gqtl_di" bpmnElement="handelError">
+        <dc:Bounds x="1190" y="260" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_14rekv0_di" bpmnElement="Gateway_1elix41">
+        <dc:Bounds x="975" y="200" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0lw0zl5_di" bpmnElement="receiveErrorFromTTP">
+        <dc:Bounds x="1062" y="282" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1049" y="325" width="62" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0xm470l_di" bpmnElement="receiveFinalResultFromTTP">
+        <dc:Bounds x="1062" y="122" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1042" y="86" width="76" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_12ly33g_di" bpmnElement="Gateway_12ly33g" isMarkerVisible="true">
+        <dc:Bounds x="1335" y="195" width="50" height="50" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

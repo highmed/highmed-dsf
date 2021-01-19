@@ -81,7 +81,7 @@ public class FeasibilityConfig
 	private String ehrIdColumnPath;
 
 	//
-	// process requestSimpleFeasibility implementations
+	// process requestFeasibility implementations
 	//
 
 	@Bean
@@ -121,7 +121,7 @@ public class FeasibilityConfig
 	}
 
 	//
-	// process executeSimpleFeasibility implementations
+	// process executeFeasibility implementations
 	//
 
 	@Bean
@@ -210,7 +210,7 @@ public class FeasibilityConfig
 	}
 
 	//
-	// process computeSimpleFeasibility implementations
+	// process computeFeasibility implementations
 	//
 
 	@Bean

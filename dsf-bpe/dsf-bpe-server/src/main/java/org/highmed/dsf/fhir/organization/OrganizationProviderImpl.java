@@ -1,5 +1,7 @@
 package org.highmed.dsf.fhir.organization;
 
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_ORGANIZATION_TYPE;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -47,13 +49,13 @@ public class OrganizationProviderImpl implements OrganizationProvider, Initializ
 	@Override
 	public String getDefaultTypeSystem()
 	{
-		return ConstantsBase.ORGANIZATION_TYPE_SYSTEM;
+		return CODESYSTEM_HIGHMED_ORGANIZATION_TYPE;
 	}
 
 	@Override
 	public String getDefaultIdentifierSystem()
 	{
-		return ConstantsBase.ORGANIZATION_IDENTIFIER_SYSTEM;
+		return ConstantsBase.NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER;
 	}
 
 	@Override

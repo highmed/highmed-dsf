@@ -5,7 +5,7 @@
       <code value="REMOTE" />
     </tag>
   </meta>
-  <url value="http://highmed.org/fhir/StructureDefinition/highmed-organization" />
+  <url value="http://highmed.org/fhir/StructureDefinition/organization" />
   <version value="0.4.0" />
   <name value="Organization" />
   <status value="active" />
@@ -34,7 +34,7 @@
       <min value="1" />
       <type>
         <code value="Extension" />
-        <profile value="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint" />
+        <profile value="http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint" />
       </type>
     </element>
     <element id="Organization.identifier">
@@ -125,7 +125,7 @@
       <max value="1" />
       <type>
         <code value="Reference" />
-        <targetProfile value="http://highmed.org/fhir/StructureDefinition/highmed-endpoint" />
+        <targetProfile value="http://highmed.org/fhir/StructureDefinition/endpoint" />
       </type>
     </element>
     <element id="Organization.endpoint.reference">

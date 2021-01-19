@@ -3,16 +3,17 @@ package org.highmed.dsf.fhir.profile;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME;
-import static org.highmed.dsf.bpe.ConstantsBase.ORGANIZATION_IDENTIFIER_SYSTEM;
+import static org.highmed.dsf.bpe.ConstantsBase.NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER;
 import static org.highmed.dsf.bpe.ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE;
 import static org.highmed.dsf.bpe.ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE;
 import static org.highmed.dsf.bpe.ConstantsUpdateResources.CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_ORGANIZATION_IDENTIFIER_SEARCH_PARAMETER;
-import static org.highmed.dsf.bpe.ConstantsUpdateResources.EXECUTE_UPDATE_RESOURCES_MESSAGE_NAME;
-import static org.highmed.dsf.bpe.ConstantsUpdateResources.EXECUTE_UPDATE_RESOURCES_PROCESS_URI_AND_LATEST_VERSION;
-import static org.highmed.dsf.bpe.ConstantsUpdateResources.EXECUTE_UPDATE_RESOURCES_TASK_PROFILE;
-import static org.highmed.dsf.bpe.ConstantsUpdateResources.REQUEST_UPDATE_RESOURCES_MESSAGE_NAME;
-import static org.highmed.dsf.bpe.ConstantsUpdateResources.REQUEST_UPDATE_RESOURCES_PROCESS_URI_AND_LATEST_VERSION;
-import static org.highmed.dsf.bpe.ConstantsUpdateResources.REQUEST_UPDATE_RESOURCES_TASK_PROFILE;
+import static org.highmed.dsf.bpe.ConstantsUpdateResources.PROFILE_HIGHMED_TASK_EXECUTE_UPDATE_RESOURCES;
+import static org.highmed.dsf.bpe.ConstantsUpdateResources.PROFILE_HIGHMED_TASK_EXECUTE_UPDATE_RESOURCES_MESSAGE_NAME;
+import static org.highmed.dsf.bpe.ConstantsUpdateResources.PROFILE_HIGHMED_TASK_EXECUTE_UPDATE_RESOURCES_PROCESS_URI_AND_LATEST_VERSION;
+import static org.highmed.dsf.bpe.ConstantsUpdateResources.PROFILE_HIGHMED_TASK_REQUEST_UPDATE_RESOURCES;
+import static org.highmed.dsf.bpe.ConstantsUpdateResources.PROFILE_HIGHMED_TASK_REQUEST_UPDATE_RESOURCES_MESSAGE_NAME;
+import static org.highmed.dsf.bpe.ConstantsUpdateResources.PROFILE_HIGHMED_TASK_REQUEST_UPDATE_RESOURCES_PROCESS_URI_AND_LATEST_VERSION;
+import static org.highmed.dsf.bpe.UpdateResourcesProcessPluginDefinition.VERSION;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
@@ -51,11 +52,13 @@ public class TaskProfileTest
 	private static final Logger logger = LoggerFactory.getLogger(TaskProfileTest.class);
 
 	@ClassRule
-	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
+	public static final ValidationSupportRule validationRule = new ValidationSupportRule(VERSION,
 			Arrays.asList("highmed-task-base-0.4.0.xml", "highmed-task-request-update-resources.xml",
 					"highmed-task-execute-update-resources.xml"),
-			Arrays.asList("authorization-role-0.4.0.xml", "bpmn-message-0.4.0.xml", "update-resources.xml"),
-			Arrays.asList("authorization-role-0.4.0.xml", "bpmn-message-0.4.0.xml", "update-resources.xml"));
+			Arrays.asList("highmed-authorization-role-0.4.0.xml", "highmed-bpmn-message-0.4.0.xml",
+					"highmed-update-resources.xml"),
+			Arrays.asList("highmed-authorization-role-0.4.0.xml", "highmed-bpmn-message-0.4.0.xml",
+					"highmed-update-resources.xml"));
 
 	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
@@ -95,21 +98,22 @@ public class TaskProfileTest
 	private Task createValidTaskRequestUpdateResources()
 	{
 		Task task = new Task();
-		task.getMeta().addProfile(REQUEST_UPDATE_RESOURCES_TASK_PROFILE);
-		task.setInstantiatesUri(REQUEST_UPDATE_RESOURCES_PROCESS_URI_AND_LATEST_VERSION);
+		task.getMeta().addProfile(PROFILE_HIGHMED_TASK_REQUEST_UPDATE_RESOURCES);
+		task.setInstantiatesUri(PROFILE_HIGHMED_TASK_REQUEST_UPDATE_RESOURCES_PROCESS_URI_AND_LATEST_VERSION);
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
 		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("TTP");
+				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("TTP");
 		task.getRestriction().addRecipient().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("MeDIC 1");
+				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("MeDIC 1");
 
-		task.addInput().setValue(new StringType(REQUEST_UPDATE_RESOURCES_MESSAGE_NAME )).getType().addCoding()
-				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
+		task.addInput().setValue(new StringType(PROFILE_HIGHMED_TASK_REQUEST_UPDATE_RESOURCES_MESSAGE_NAME)).getType()
+				.addCoding().setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
 
 		task.addInput().setValue(new Reference("Bundle/" + UUID.randomUUID().toString())).getType().addCoding()
-				.setSystem(CODESYSTEM_HIGHMED_UPDATE_RESOURCE).setCode(CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE);
+				.setSystem(CODESYSTEM_HIGHMED_UPDATE_RESOURCE)
+				.setCode(CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE);
 		task.addInput().setValue(new StringType("http://highmed.org/fhir/NamingSystem/organization-identifier|"))
 				.getType().addCoding().setSystem(CODESYSTEM_HIGHMED_UPDATE_RESOURCE)
 				.setCode(CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_ORGANIZATION_IDENTIFIER_SEARCH_PARAMETER);
@@ -132,22 +136,23 @@ public class TaskProfileTest
 	private Task createValidTaskExecuteUpdateResources()
 	{
 		Task task = new Task();
-		task.getMeta().addProfile(EXECUTE_UPDATE_RESOURCES_TASK_PROFILE);
-		task.setInstantiatesUri(EXECUTE_UPDATE_RESOURCES_PROCESS_URI_AND_LATEST_VERSION);
+		task.getMeta().addProfile(PROFILE_HIGHMED_TASK_EXECUTE_UPDATE_RESOURCES);
+		task.setInstantiatesUri(PROFILE_HIGHMED_TASK_EXECUTE_UPDATE_RESOURCES_PROCESS_URI_AND_LATEST_VERSION);
 		task.setStatus(TaskStatus.REQUESTED);
 		task.setIntent(TaskIntent.ORDER);
 		task.setAuthoredOn(new Date());
 		task.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("MeDIC 1");
+				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("MeDIC 1");
 		task.getRestriction().addRecipient().setType(ResourceType.Organization.name()).getIdentifier()
-				.setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("MeDIC 1");
+				.setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER).setValue("MeDIC 1");
 
-		task.addInput().setValue(new StringType(EXECUTE_UPDATE_RESOURCES_MESSAGE_NAME)).getType().addCoding()
-				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
+		task.addInput().setValue(new StringType(PROFILE_HIGHMED_TASK_EXECUTE_UPDATE_RESOURCES_MESSAGE_NAME)).getType()
+				.addCoding().setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME);
 		task.addInput().setValue(new StringType(UUID.randomUUID().toString())).getType().addCoding()
 				.setSystem(CODESYSTEM_HIGHMED_BPMN).setCode(CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY);
 		task.addInput().setValue(new Reference("Bundle/" + UUID.randomUUID().toString())).getType().addCoding()
-				.setSystem(CODESYSTEM_HIGHMED_UPDATE_RESOURCE).setCode(CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE);
+				.setSystem(CODESYSTEM_HIGHMED_UPDATE_RESOURCE)
+				.setCode(CODESYSTEM_HIGHMED_UPDATE_RESOURCE_VALUE_BUNDLE_REFERENCE);
 
 		return task;
 	}

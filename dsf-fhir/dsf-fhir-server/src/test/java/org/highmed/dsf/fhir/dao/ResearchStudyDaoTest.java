@@ -67,11 +67,11 @@ public class ResearchStudyDaoTest extends AbstractResourceDaoTest<ResearchStudy,
 
 		ResearchStudy r = new ResearchStudy();
 		r.setPrincipalInvestigator(new Reference(piReference));
-		r.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/participating-ttp")
+		r.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/extension-participating-ttp")
 				.setValue(new Reference(orgReference));
-		r.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/participating-medic")
+		r.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/extension-participating-medic")
 				.setValue(new Reference("Organization/" + UUID.randomUUID().toString()));
-		r.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/participating-medic")
+		r.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/extension-participating-medic")
 				.setValue(new Reference("Organization/" + UUID.randomUUID().toString()));
 
 		logger.debug(fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(r));
@@ -80,8 +80,9 @@ public class ResearchStudyDaoTest extends AbstractResourceDaoTest<ResearchStudy,
 
 		try (Connection connection = dao.newReadWriteTransaction())
 		{
-			boolean exists = dao.existsByPrincipalInvestigatorIdAndOrganizationTypeAndOrganizationIdWithTransaction(
-					connection, new IdType(piReference), OrganizationType.TTP, new IdType(orgReference));
+			boolean exists = dao
+					.existsByPrincipalInvestigatorIdAndOrganizationTypeAndOrganizationIdWithTransaction(connection,
+							new IdType(piReference), OrganizationType.TTP, new IdType(orgReference));
 			assertTrue(exists);
 		}
 	}
@@ -96,11 +97,11 @@ public class ResearchStudyDaoTest extends AbstractResourceDaoTest<ResearchStudy,
 		ResearchStudy r = new ResearchStudy();
 		r.addEnrollment(new Reference(enrollmentReference1));
 		r.addEnrollment(new Reference(enrollmentReference2));
-		r.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/participating-ttp")
+		r.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/extension-participating-ttp")
 				.setValue(new Reference("Organization/" + UUID.randomUUID().toString()));
-		r.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/participating-medic")
+		r.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/extension-participating-medic")
 				.setValue(new Reference(orgReference));
-		r.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/participating-medic")
+		r.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/extension-participating-medic")
 				.setValue(new Reference("Organization/" + UUID.randomUUID().toString()));
 
 		logger.debug(fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(r));

@@ -99,7 +99,7 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 		newS.setKind(StructureDefinitionKind.RESOURCE);
 		newS.setAbstract(false);
 		newS.setType("Task");
-		newS.setBaseDefinition("http://highmed.org/fhir/StructureDefinition/highmed-task-base");
+		newS.setBaseDefinition("http://highmed.org/fhir/StructureDefinition/task-base");
 		newS.setDerivation(TypeDerivationRule.CONSTRAINT);
 		ElementDefinition diff = newS.getDifferential().addElement();
 		diff.setId("Task.instantiatesUri");
@@ -125,10 +125,10 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 		getWebserviceClient().withMinimalReturn().postBundle(deleteBundle);
 
 		assertFalse(testProfileSupported(taskProfileUrl));
-		StructureDefinitionDao sDdao = getSpringWebApplicationContext().getBean("structureDefinitionDao",
-				StructureDefinitionDao.class);
-		StructureDefinitionDao sDsDao = getSpringWebApplicationContext().getBean("structureDefinitionSnapshotDao",
-				StructureDefinitionDao.class);
+		StructureDefinitionDao sDdao = getSpringWebApplicationContext()
+				.getBean("structureDefinitionDao", StructureDefinitionDao.class);
+		StructureDefinitionDao sDsDao = getSpringWebApplicationContext()
+				.getBean("structureDefinitionSnapshotDao", StructureDefinitionDao.class);
 
 		assertTrue(sDdao.readByUrlAndVersion(taskProfileUrl, taskProfileVersion).isEmpty());
 		assertTrue(sDsDao.readByUrlAndVersion(taskProfileUrl, taskProfileVersion).isEmpty());
