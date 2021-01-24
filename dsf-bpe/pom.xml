@@ -13,14 +13,9 @@
 
 	<modules>
 		<module>dsf-bpe-process-base</module>
-		<module>dsf-bpe-process-feasibility</module>
-		<module>dsf-bpe-process-ping</module>
-		<module>dsf-bpe-process-update-resources</module>
-		<module>dsf-bpe-process-update-allow-list</module>
 		<module>dsf-bpe-server</module>
 		<module>dsf-bpe-server-jetty</module>
 		<module>dsf-bpe-webservice-client</module>
-		<module>dsf-bpe-process-local-services</module>
 	</modules>
 
 	<properties>
