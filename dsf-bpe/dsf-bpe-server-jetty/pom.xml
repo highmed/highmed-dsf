@@ -42,7 +42,7 @@
 			<groupId>javax.mail</groupId>
 			<artifactId>mail</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>jul-to-slf4j</artifactId>
@@ -114,72 +114,7 @@
 							<outputDirectory>docker</outputDirectory>
 						</configuration>
 					</execution>
-					<execution>
-						<id>copy-process-plugins-for-testing</id>
-						<phase>package</phase>
-						<goals>
-							<goal>copy</goal>
-						</goals>
-						<configuration>
-							<artifactItems>
-								<artifactItem>
-									<groupId>org.highmed.dsf</groupId>
-									<artifactId>dsf-bpe-process-ping</artifactId>
-									<version>${project.version}</version>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.highmed.dsf</groupId>
-									<artifactId>dsf-bpe-process-update-allow-list</artifactId>
-									<version>${project.version}</version>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.highmed.dsf</groupId>
-									<artifactId>dsf-bpe-process-update-resources</artifactId>
-									<version>${project.version}</version>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.highmed.dsf</groupId>
-									<artifactId>dsf-bpe-process-feasibility</artifactId>
-									<version>${project.version}</version>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.highmed.dsf</groupId>
-									<artifactId>dsf-bpe-process-local-services</artifactId>
-									<version>${project.version}</version>
-								</artifactItem>
-							</artifactItems>
-							<outputDirectory>process</outputDirectory>
-						</configuration>
-					</execution>
 				</executions>
-				<!-- Making sure process definition plugins are build before we copy them -->
-				<dependencies>
-					<dependency>
-						<groupId>org.highmed.dsf</groupId>
-						<artifactId>dsf-bpe-process-ping</artifactId>
-						<version>${project.version}</version>
-					</dependency>
-					<dependency>
-						<groupId>org.highmed.dsf</groupId>
-						<artifactId>dsf-bpe-process-update-allow-list</artifactId>
-						<version>${project.version}</version>
-					</dependency>
-					<dependency>
-						<groupId>org.highmed.dsf</groupId>
-						<artifactId>dsf-bpe-process-update-resources</artifactId>
-						<version>${project.version}</version>
-					</dependency>
-					<dependency>
-						<groupId>org.highmed.dsf</groupId>
-						<artifactId>dsf-bpe-process-feasibility</artifactId>
-						<version>${project.version}</version>
-					</dependency>
-					<dependency>
-						<groupId>org.highmed.dsf</groupId>
-						<artifactId>dsf-bpe-process-local-services</artifactId>
-						<version>${project.version}</version>
-					</dependency>
-				</dependencies>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -206,4 +141,57 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<profiles>
+		<profile>
+			<id>copy-highmed-processes</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-dependency-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>copy-process-plugins-for-testing</id>
+								<phase>package</phase>
+								<goals>
+									<goal>copy</goal>
+								</goals>
+								<configuration>
+									<artifactItems>
+										<artifactItem>
+											<groupId>org.highmed.dsf</groupId>
+											<artifactId>dsf-bpe-process-ping</artifactId>
+											<version>${project.version}</version>
+										</artifactItem>
+										<artifactItem>
+											<groupId>org.highmed.dsf</groupId>
+											<artifactId>dsf-bpe-process-update-allow-list</artifactId>
+											<version>${project.version}</version>
+										</artifactItem>
+										<artifactItem>
+											<groupId>org.highmed.dsf</groupId>
+											<artifactId>dsf-bpe-process-update-resources</artifactId>
+											<version>${project.version}</version>
+										</artifactItem>
+										<artifactItem>
+											<groupId>org.highmed.dsf</groupId>
+											<artifactId>dsf-bpe-process-feasibility</artifactId>
+											<version>${project.version}</version>
+										</artifactItem>
+										<artifactItem>
+											<groupId>org.highmed.dsf</groupId>
+											<artifactId>dsf-bpe-process-local-services</artifactId>
+											<version>${project.version}</version>
+										</artifactItem>
+									</artifactItems>
+									<outputDirectory>process</outputDirectory>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>
