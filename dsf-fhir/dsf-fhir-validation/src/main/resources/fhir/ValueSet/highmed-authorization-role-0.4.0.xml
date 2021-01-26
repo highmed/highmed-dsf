@@ -6,7 +6,7 @@
 		</tag>		
 	</meta>
 	<url value="http://highmed.org/fhir/ValueSet/authorization-role"/>
-	<version value="0.4.0"/>
+	<version value="0.5.0"/>
 	<name value="HiGHmed_Authorization_Role"/>
 	<title value="HiGHmed Authorization Role"/>
 	<status value="active"/>

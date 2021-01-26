@@ -6,7 +6,7 @@
     </tag>
   </meta>
   <url value="http://highmed.org/fhir/StructureDefinition/extension-query" />
-  <version value="0.4.0" />
+  <version value="0.5.0" />
   <name value="Query" />
   <status value="active" />
   <experimental value="false" />
