@@ -25,9 +25,9 @@ public class EndpointProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			Arrays.asList("highmed-endpoint-0.4.0.xml"),
-			Arrays.asList("highmed-authorization-role-0.4.0.xml", "urn_ietf_bcp_13.xml"),
-			Arrays.asList("highmed-authorization-role-0.4.0.xml", "valueset-mimetypes.xml"));
+			Arrays.asList("highmed-endpoint-0.5.0.xml"),
+			Arrays.asList("highmed-authorization-role-0.5.0.xml", "urn_ietf_bcp_13.xml"),
+			Arrays.asList("highmed-authorization-role-0.5.0.xml", "valueset-mimetypes.xml"));
 
 	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
