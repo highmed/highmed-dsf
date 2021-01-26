@@ -10,7 +10,7 @@
   <name value="Query" />
   <status value="active" />
   <experimental value="false" />
-  <date value="2020-11-23" />
+  <date value="2021-01-26" />
   <fhirVersion value="4.0.1" />
   <kind value="complex-type" />
   <abstract value="false" />

@@ -11,7 +11,7 @@
 	<title value="HiGHmed Query Type"/>
 	<status value="active" />
 	<experimental value="false"/>
-	<date value="2020-11-23"/>
+	<date value="2021-01-26"/>
 	<publisher value="HiGHmed"/>
 	<description
 			value="ValueSet with HiGHmed query types used in Group resources query extension of the expression datatype"/>
