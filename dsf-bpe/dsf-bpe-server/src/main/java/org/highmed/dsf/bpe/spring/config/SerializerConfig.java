@@ -4,8 +4,8 @@ import org.highmed.dsf.fhir.variables.FhirResourceJacksonDeserializer;
 import org.highmed.dsf.fhir.variables.FhirResourceJacksonSerializer;
 import org.highmed.dsf.fhir.variables.FhirResourceSerializer;
 import org.highmed.dsf.fhir.variables.FhirResourcesListSerializer;
-import org.highmed.dsf.fhir.variables.MultiInstanceTargetSerializer;
-import org.highmed.dsf.fhir.variables.MultiInstanceTargetsSerializer;
+import org.highmed.dsf.fhir.variables.TargetSerializer;
+import org.highmed.dsf.fhir.variables.TargetsSerializer;
 import org.highmed.openehr.json.OpenEhrObjectMapperFactory;
 import org.hl7.fhir.r4.model.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,14 +55,14 @@ public class SerializerConfig
 	}
 
 	@Bean
-	public MultiInstanceTargetSerializer multiInstanceTargetSerializer()
+	public TargetSerializer targetSerializer()
 	{
-		return new MultiInstanceTargetSerializer(objectMapper());
+		return new TargetSerializer(objectMapper());
 	}
 
 	@Bean
-	public MultiInstanceTargetsSerializer multiInstanceTargetsSerializer()
+	public TargetsSerializer targetsSerializer()
 	{
-		return new MultiInstanceTargetsSerializer(objectMapper());
+		return new TargetsSerializer(objectMapper());
 	}
 }

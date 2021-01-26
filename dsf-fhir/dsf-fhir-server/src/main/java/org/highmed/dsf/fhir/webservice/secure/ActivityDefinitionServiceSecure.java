@@ -7,7 +7,7 @@ import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
-import org.highmed.dsf.fhir.service.ResourceValidator;
+import org.highmed.dsf.fhir.validation.ResourceValidator;
 import org.highmed.dsf.fhir.webservice.specification.ActivityDefinitionService;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 

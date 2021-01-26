@@ -4,7 +4,6 @@ import java.util.NoSuchElementException;
 
 import org.highmed.openehr.client.OpenEhrClientFactory;
 import org.highmed.openehr.client.OpenEhrClientServiceLoader;
-import org.highmed.openehr.client.stub.OpenEhrClientStubFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,10 +31,10 @@ public class OpenEhrConfig
 				.orElseThrow(() -> new NoSuchElementException(
 						"openEhr client factory with classname='" + openEhrClientFactoryClass + "' not found"));
 
-		if (factory instanceof OpenEhrClientStubFactory)
-			logger.warn("Using {} as openEhr client factory", factory.getClass().getName());
+		if ("org.highmed.openehr.client.stub.OpenEhrClientStubFactory".equals(factory.getClass().getName()))
+			logger.warn("Using {} as openEHR client factory", factory.getClass().getName());
 		else
-			logger.info("Using {} as openEhr client factory", factory.getClass().getName());
+			logger.info("Using {} as openEHR client factory", factory.getClass().getName());
 
 		return factory;
 	}

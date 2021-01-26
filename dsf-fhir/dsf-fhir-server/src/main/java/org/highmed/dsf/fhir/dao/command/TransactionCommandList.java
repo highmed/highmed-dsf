@@ -17,7 +17,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.highmed.dsf.fhir.help.ExceptionHandler;
-import org.highmed.dsf.fhir.service.SnapshotGenerator;
+import org.highmed.dsf.fhir.validation.SnapshotGenerator;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;

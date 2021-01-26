@@ -101,7 +101,7 @@ public class ActivityDefinitionDaoJdbc extends AbstractResourceDaoJdbc<ActivityD
 						+ "activity_definition->'extension' @> ?::jsonb AND "
 						+ "lower(activity_definition->>'status') <> 'retired'"))
 		{
-			String extension = "[{\"url\":\"http://highmed.org/fhir/StructureDefinition/process-authorization\",\"extension\":["
+			String extension = "[{\"url\":\"http://highmed.org/fhir/StructureDefinition/extension-process-authorization\",\"extension\":["
 					+ "{\"url\":\"message-name\",\"valueString\":\"" + messageName + "\"},"
 					+ "{\"url\":\"authorization-roles\",\"extension\":[{\"url\":\"authorization-role\",\"valueCoding\":{\"code\":\""
 					+ userRole.toString()

@@ -67,7 +67,7 @@ public class TaskStatus extends AbstractTokenParameter<Task>
 	@Override
 	public String getFilterQuery()
 	{
-		return "task->>'status' = ?";
+		return "task->>'status' " + (valueAndType.negated ? "<>" : "=") + " ?";
 	}
 
 	@Override
@@ -86,7 +86,7 @@ public class TaskStatus extends AbstractTokenParameter<Task>
 	@Override
 	public void modifyBundleUri(UriBuilder bundleUri)
 	{
-		bundleUri.replaceQueryParam(PARAMETER_NAME, status.toCode());
+		bundleUri.replaceQueryParam(PARAMETER_NAME + (valueAndType.negated ? ":not" : ""), status.toCode());
 	}
 
 	@Override
@@ -98,7 +98,10 @@ public class TaskStatus extends AbstractTokenParameter<Task>
 		if (!(resource instanceof Task))
 			return false;
 
-		return Objects.equals(((Task) resource).getStatus(), status);
+		if (valueAndType.negated)
+			return !Objects.equals(((Task) resource).getStatus(), status);
+		else
+			return Objects.equals(((Task) resource).getStatus(), status);
 	}
 
 	@Override

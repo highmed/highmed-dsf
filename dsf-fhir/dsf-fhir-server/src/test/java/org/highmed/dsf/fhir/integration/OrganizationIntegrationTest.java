@@ -34,8 +34,8 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testSearchOrganizationIncludeEndpoint() throws Exception
 	{
-		Bundle searchBundle = getWebserviceClient().search(Organization.class,
-				Map.of("_include", Collections.singletonList("Organization:endpoint")));
+		Bundle searchBundle = getWebserviceClient()
+				.search(Organization.class, Map.of("_include", Collections.singletonList("Organization:endpoint")));
 		assertNotNull(searchBundle);
 		assertEquals(2, searchBundle.getTotal());
 		assertEquals(4, searchBundle.getEntry().size());
@@ -68,8 +68,8 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testSearchOrganizationRevIncludeEndpoint() throws Exception
 	{
-		Bundle searchBundle = getWebserviceClient().search(Organization.class,
-				Map.of("_revinclude", Collections.singletonList("Endpoint:organization")));
+		Bundle searchBundle = getWebserviceClient()
+				.search(Organization.class, Map.of("_revinclude", Collections.singletonList("Endpoint:organization")));
 		assertNotNull(searchBundle);
 		assertEquals(2, searchBundle.getTotal());
 		assertEquals(4, searchBundle.getEntry().size());
@@ -116,7 +116,7 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 
 		Organization org = (Organization) bundle.getEntryFirstRep().getResource();
 		List<Extension> thumbprints = org
-				.getExtensionsByUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
+				.getExtensionsByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint");
 		assertNotNull(thumbprints);
 		assertEquals(1, thumbprints.size());
 
@@ -142,14 +142,14 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 
 		Organization org1 = (Organization) bundle1.getEntryFirstRep().getResource();
 		List<Extension> thumbprints1 = org1
-				.getExtensionsByUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
+				.getExtensionsByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint");
 		assertNotNull(thumbprints1);
 		assertEquals(1, thumbprints1.size());
 
 		String existingThumbprint = ((StringType) thumbprints1.get(0).getValue()).getValue();
 
-		Bundle bundle2 = getWebserviceClient().search(Organization.class,
-				Map.of("identifier", Collections.singletonList(
+		Bundle bundle2 = getWebserviceClient().search(Organization.class, Map.of("identifier", Collections
+				.singletonList(
 						"http://highmed.org/fhir/NamingSystem/organization-identifier|External_Test_Organization")));
 		assertNotNull(bundle2);
 		assertEquals(1, bundle2.getTotal());
@@ -163,7 +163,7 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 
 		Organization org2 = (Organization) bundle2.getEntryFirstRep().getResource();
 		List<Extension> thumbprints2 = org2
-				.getExtensionsByUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
+				.getExtensionsByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint");
 		assertNotNull(thumbprints2);
 		assertEquals(1, thumbprints2.size());
 
@@ -226,14 +226,14 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 
 		Organization org = (Organization) bundle.getEntryFirstRep().getResource();
 		List<Extension> thumbprints = org
-				.getExtensionsByUrl("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint");
+				.getExtensionsByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint");
 		assertNotNull(thumbprints);
 		assertEquals(1, thumbprints.size());
 
 		Extension oldThumbprint = thumbprints.get(0);
-		Extension newThumbprint = new Extension("http://highmed.org/fhir/StructureDefinition/certificate-thumbprint",
-				new StringType(
-						"00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"));
+		Extension newThumbprint = new Extension(
+				"http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint", new StringType(
+				"00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"));
 
 		org.setExtension(List.of(newThumbprint, oldThumbprint));
 		getWebserviceClient().update(org);

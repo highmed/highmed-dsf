@@ -63,7 +63,7 @@ public class SubscriptionStatus extends AbstractTokenParameter<Subscription>
 	@Override
 	public String getFilterQuery()
 	{
-		return "subscription->>'status' = ?";
+		return "subscription->>'status' " + (valueAndType.negated ? "<>" : "=") + " ?";
 	}
 
 	@Override
@@ -82,7 +82,7 @@ public class SubscriptionStatus extends AbstractTokenParameter<Subscription>
 	@Override
 	public void modifyBundleUri(UriBuilder bundleUri)
 	{
-		bundleUri.replaceQueryParam(PARAMETER_NAME, status.toCode());
+		bundleUri.replaceQueryParam(PARAMETER_NAME + (valueAndType.negated ? ":not" : ""), status.toCode());
 	}
 
 	@Override
@@ -94,7 +94,10 @@ public class SubscriptionStatus extends AbstractTokenParameter<Subscription>
 		if (!(resource instanceof Subscription))
 			return false;
 
-		return Objects.equals(((Subscription) resource).getStatus(), status);
+		if (valueAndType.negated)
+			return !Objects.equals(((Subscription) resource).getStatus(), status);
+		else
+			return Objects.equals(((Subscription) resource).getStatus(), status);
 	}
 
 	@Override

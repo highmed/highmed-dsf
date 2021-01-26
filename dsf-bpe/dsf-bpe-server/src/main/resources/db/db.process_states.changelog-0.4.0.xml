@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<changeSet author="hhund" id="db.process_states.changelog-0.4.0">
+		<createTable tableName="process_states">
+			<column name="process_key_and_version" type="TEXT">
+				<constraints nullable="false"/>
+			</column>
+			<column name="state" type="TEXT">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+		
+		<addPrimaryKey tableName="process_states" columnNames="process_key_and_version"/>
+		
+		<sql dbms="postgresql">
+			ALTER TABLE process_states OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE process_states TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE ON TABLE process_states TO ${db.server_users_group};
+		</sql>
+	</changeSet>
+
+</databaseChangeLog>

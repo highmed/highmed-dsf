@@ -49,7 +49,7 @@ public abstract class AbstractVersionParameter<R extends MetadataResource> exten
 	@Override
 	public String getFilterQuery()
 	{
-		return resourceColumn + "->>'version' = ?";
+		return resourceColumn + "->>'version' " + (valueAndType.negated ? "<>" : "=") + " ?";
 	}
 
 	@Override
@@ -78,7 +78,10 @@ public abstract class AbstractVersionParameter<R extends MetadataResource> exten
 
 		MetadataResource mRes = (MetadataResource) resource;
 
-		return Objects.equals(mRes.getVersion(), version);
+		if (valueAndType.negated)
+			return !Objects.equals(mRes.getVersion(), version);
+		else
+			return Objects.equals(mRes.getVersion(), version);
 	}
 
 	@Override

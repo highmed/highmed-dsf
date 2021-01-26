@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -60,6 +61,9 @@ public class ValidationSupportWithCache implements IValidationSupport, EventHand
 		}
 	}
 
+	private static final Pattern UUID_PATTERN = Pattern
+			.compile("[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}");
+
 	private final FhirContext context;
 	private final IValidationSupport delegate;
 
@@ -69,6 +73,8 @@ public class ValidationSupportWithCache implements IValidationSupport, EventHand
 	private final ConcurrentMap<String, CacheEntry<StructureDefinition>> structureDefinitions = new ConcurrentHashMap<>();
 	private final ConcurrentMap<String, CacheEntry<CodeSystem>> codeSystems = new ConcurrentHashMap<>();
 	private final ConcurrentMap<String, CacheEntry<ValueSet>> valueSets = new ConcurrentHashMap<>();
+
+	private final ConcurrentMap<String, String> urlAndVersionsById = new ConcurrentHashMap<>();
 
 	public ValidationSupportWithCache(FhirContext context, IValidationSupport delegate)
 	{
@@ -104,8 +110,8 @@ public class ValidationSupportWithCache implements IValidationSupport, EventHand
 
 		if (event instanceof ResourceCreatedEvent && resourceSupported(event.getResource()))
 			add(event.getResource());
-		else if (event instanceof ResourceDeletedEvent && resourceSupported(event.getResource()))
-			remove(event.getResource());
+		else if (event instanceof ResourceDeletedEvent && resourceSupported(event.getResourceType(), event.getId()))
+			remove(event.getResourceType(), event.getId());
 		else if (event instanceof ResourceUpdatedEvent && resourceSupported(event.getResource()))
 			update(event.getResource());
 	}
@@ -114,6 +120,12 @@ public class ValidationSupportWithCache implements IValidationSupport, EventHand
 	{
 		return resource != null && (resource instanceof CodeSystem || resource instanceof StructureDefinition
 				|| resource instanceof ValueSet);
+	}
+
+	private boolean resourceSupported(Class<? extends Resource> type, String resourceId)
+	{
+		return urlAndVersionsById.containsKey(resourceId) && (CodeSystem.class.equals(type)
+				|| StructureDefinition.class.equals(type) || ValueSet.class.equals(type));
 	}
 
 	private void add(Resource resource)
@@ -143,6 +155,10 @@ public class ValidationSupportWithCache implements IValidationSupport, EventHand
 			String urlAndVersion = url + "|" + version;
 			cache.put(urlAndVersion, new CacheEntry<>(resource, () -> fetch.apply(urlAndVersion)));
 		}
+
+		if (resource.hasIdElement() && resource.getIdElement().hasIdPart()
+				&& UUID_PATTERN.matcher(resource.getIdElement().getIdPart()).matches())
+			urlAndVersionsById.put(resource.getIdElement().getIdPart(), url + "|" + version);
 	}
 
 	private void update(Resource resource)
@@ -170,6 +186,31 @@ public class ValidationSupportWithCache implements IValidationSupport, EventHand
 
 		cache.remove(url);
 		cache.remove(url + "|" + version);
+	}
+
+	private void remove(Class<? extends Resource> type, String id)
+	{
+		if (CodeSystem.class.equals(type))
+			doRemove(id, codeSystems);
+		else if (StructureDefinition.class.equals(type))
+			doRemove(id, structureDefinitions);
+		else if (ValueSet.class.equals(type))
+			doRemove(id, valueSets);
+	}
+
+	private <R extends Resource> void doRemove(String id, ConcurrentMap<String, CacheEntry<R>> cache)
+	{
+		String urlAndVersion = urlAndVersionsById.get(id);
+
+		if (urlAndVersion != null)
+		{
+			String[] split = urlAndVersion.split("\\|");
+			String url = split.length > 0 ? split[0] : "";
+			String version = split.length > 1 ? split[1] : "";
+
+			cache.remove(url);
+			cache.remove(url + "|" + version);
+		}
 	}
 
 	public List<IBaseResource> fetchAllConformanceResources()

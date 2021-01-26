@@ -47,7 +47,7 @@ public class SubscriptionPayload extends AbstractTokenParameter<Subscription>
 	@Override
 	public String getFilterQuery()
 	{
-		return "subscription->'channel'->>'payload' = ?";
+		return "subscription->'channel'->>'payload' " + (valueAndType.negated ? "<>" : "=") + " ?";
 	}
 
 	@Override
@@ -66,7 +66,7 @@ public class SubscriptionPayload extends AbstractTokenParameter<Subscription>
 	@Override
 	public void modifyBundleUri(UriBuilder bundleUri)
 	{
-		bundleUri.replaceQueryParam(PARAMETER_NAME, payloadMimeType);
+		bundleUri.replaceQueryParam(PARAMETER_NAME + (valueAndType.negated ? ":not" : ""), payloadMimeType);
 	}
 
 	@Override
@@ -78,7 +78,10 @@ public class SubscriptionPayload extends AbstractTokenParameter<Subscription>
 		if (!(resource instanceof Subscription))
 			return false;
 
-		return Objects.equals(((Subscription) resource).getChannel().getPayload(), payloadMimeType);
+		if (valueAndType.negated)
+			return !Objects.equals(((Subscription) resource).getChannel().getPayload(), payloadMimeType);
+		else
+			return Objects.equals(((Subscription) resource).getChannel().getPayload(), payloadMimeType);
 	}
 
 	@Override

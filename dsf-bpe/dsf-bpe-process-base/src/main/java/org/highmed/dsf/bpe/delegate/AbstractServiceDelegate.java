@@ -1,5 +1,10 @@
 package org.highmed.dsf.bpe.delegate;
 
+import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_LEADING_TASK;
+import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_TASK;
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN;
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR;
+
 import java.util.Objects;
 
 import org.camunda.bpm.engine.delegate.BpmnError;
@@ -69,38 +74,36 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 					execution.getProcessDefinitionId(), execution.getActivityInstanceId(), task.getId(),
 					exception.getMessage());
 
-			String errorMessage = "Process " + execution.getProcessDefinitionId() + " has fatal error in step "
-					+ execution.getActivityInstanceId() + ", reason: " + exception.getMessage();
+			String errorMessage =
+					"Process " + execution.getProcessDefinitionId() + " has fatal error in step " + execution
+							.getActivityInstanceId() + ", reason: " + exception.getMessage();
 
-			task.addOutput(taskHelper.createOutput(ConstantsBase.CODESYSTEM_HIGHMED_BPMN,
-					ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR_MESSAGE, errorMessage));
+			task.addOutput(taskHelper
+					.createOutput(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR, errorMessage));
 			task.setStatus(Task.TaskStatus.FAILED);
 
 			clientProvider.getLocalWebserviceClient().withMinimalReturn().update(task);
 
 			// TODO evaluate throwing exception as alternative to stopping the process instance
-			execution.getProcessEngine().getRuntimeService().deleteProcessInstance(execution.getProcessInstanceId(),
-					exception.getMessage());
+			execution.getProcessEngine().getRuntimeService()
+					.deleteProcessInstance(execution.getProcessInstanceId(), exception.getMessage());
 		}
 	}
 
 	private Task getTask(DelegateExecution execution)
 	{
-		return execution.getParentId() == null || execution.getParentId().equals(execution.getProcessInstanceId())
-				? getLeadingTaskFromExecutionVariables()
-				: getCurrentTaskFromExecutionVariables();
+		return execution.getParentId() == null || execution.getParentId().equals(execution.getProcessInstanceId()) ?
+				getLeadingTaskFromExecutionVariables() :
+				getCurrentTaskFromExecutionVariables();
 	}
 
 	/**
 	 * Method called by a BPMN service task
 	 *
-	 * @param execution
-	 *            Process instance information and variables
-	 * @throws BpmnError
-	 *             Thrown when an error boundary event should be called
-	 * @throws Exception
-	 *             Uncaught exceptions will result in task status failed, the exception message will be written as an
-	 *             error output
+	 * @param execution Process instance information and variables
+	 * @throws BpmnError Thrown when an error boundary event should be called
+	 * @throws Exception Uncaught exceptions will result in task status failed, the exception message will be written as an
+	 *                   error output
 	 */
 	protected abstract void doExecute(DelegateExecution execution) throws BpmnError, Exception;
 
@@ -116,31 +119,29 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 
 	/**
 	 * @return the current task from execution variables, the task resource that started the current process or
-	 *         subprocess
-	 * @throws IllegalStateException
-	 *             if execution of this service delegate has not been started
-	 * @see ConstantsBase#VARIABLE_TASK
+	 * subprocess
+	 * @throws IllegalStateException if execution of this service delegate has not been started
+	 * @see ConstantsBase#BPMN_EXECUTION_VARIABLE_TASK
 	 */
 	protected final Task getCurrentTaskFromExecutionVariables()
 	{
 		if (execution == null)
 			throw new IllegalStateException("execution not started");
 
-		return (Task) execution.getVariable(ConstantsBase.VARIABLE_TASK);
+		return (Task) execution.getVariable(BPMN_EXECUTION_VARIABLE_TASK);
 	}
 
 	/**
 	 * @return the leading task from execution variables, same as current task if not in a subprocess
-	 * @throws IllegalStateException
-	 *             if execution of this service delegate has not been started
-	 * @see ConstantsBase#VARIABLE_LEADING_TASK
+	 * @throws IllegalStateException if execution of this service delegate has not been started
+	 * @see ConstantsBase#BPMN_EXECUTION_VARIABLE_LEADING_TASK
 	 */
 	protected final Task getLeadingTaskFromExecutionVariables()
 	{
 		if (execution == null)
 			throw new IllegalStateException("execution not started");
 
-		Task leadingTask = (Task) execution.getVariable(ConstantsBase.VARIABLE_LEADING_TASK);
+		Task leadingTask = (Task) execution.getVariable(BPMN_EXECUTION_VARIABLE_LEADING_TASK);
 		return leadingTask != null ? leadingTask : getCurrentTaskFromExecutionVariables();
 	}
 }

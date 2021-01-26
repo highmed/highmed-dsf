@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <StructureDefinition xmlns="http://hl7.org/fhir">
-	<url value="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint"/>
+	<url value="http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint"/>
 	<version value="0.5.0"/>
 	<name value="CertificateThumbprint"/>
 	<status value="draft"/>
@@ -21,7 +21,7 @@
 			<type>
 				<code value="uri"/>
 			</type>
-			<fixedUri value="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint"/>
+			<fixedUri value="http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint"/>
 		</element>
 		<element id="Extension.value[x]">
 			<path value="Extension.value[x]"/>

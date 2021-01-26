@@ -36,12 +36,21 @@ public class OrganizationType extends AbstractTokenParameter<Organization>
 			case CODE:
 			case CODE_AND_SYSTEM:
 			case SYSTEM:
-				return "(SELECT jsonb_agg(coding) FROM jsonb_array_elements(" + RESOURCE_COLUMN
-						+ "->'type') AS type, jsonb_array_elements(type->'coding') AS coding) @> ?::jsonb";
+				if (valueAndType.negated)
+					return "NOT ((SELECT jsonb_agg(coding) FROM jsonb_array_elements(" + RESOURCE_COLUMN
+							+ "->'type') AS type, jsonb_array_elements(type->'coding') AS coding) @> ?::jsonb)";
+				else
+					return "(SELECT jsonb_agg(coding) FROM jsonb_array_elements(" + RESOURCE_COLUMN
+							+ "->'type') AS type, jsonb_array_elements(type->'coding') AS coding) @> ?::jsonb";
 			case CODE_AND_NO_SYSTEM_PROPERTY:
-				return "(SELECT COUNT(*) FROM jsonb_array_elements(" + RESOURCE_COLUMN
-						+ "->'type') AS type, jsonb_array_elements(type->'coding') AS coding "
-						+ "WHERE coding->>'code' = ? AND NOT (coding ?? 'system')) > 0";
+				if (valueAndType.negated)
+					return "(SELECT COUNT(*) FROM jsonb_array_elements(" + RESOURCE_COLUMN
+							+ "->'type') AS type, jsonb_array_elements(type->'coding') AS coding "
+							+ "WHERE coding->>'code' <> ? OR (coding ?? 'system')) > 0";
+				else
+					return "(SELECT COUNT(*) FROM jsonb_array_elements(" + RESOURCE_COLUMN
+							+ "->'type') AS type, jsonb_array_elements(type->'coding') AS coding "
+							+ "WHERE coding->>'code' = ? AND NOT (coding ?? 'system')) > 0";
 			default:
 				return "";
 		}
@@ -77,7 +86,8 @@ public class OrganizationType extends AbstractTokenParameter<Organization>
 
 	protected boolean codingMatches(List<Identifier> identifiers)
 	{
-		return identifiers.stream().anyMatch(i -> codingMatches(valueAndType, i));
+		return identifiers.stream()
+				.anyMatch(i -> valueAndType.negated ? !codingMatches(valueAndType, i) : codingMatches(valueAndType, i));
 	}
 
 	public static boolean codingMatches(TokenValueAndSearchType valueAndType, Identifier identifier)

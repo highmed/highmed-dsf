@@ -8,7 +8,7 @@ import org.hl7.fhir.r4.model.ActivityDefinition;
 
 public class ActivityDefinitionProcessAuthorizationExtensions
 {
-	public static final String PROCESS_AUTHORIZATION_EXTENSION_URL = "http://highmed.org/fhir/StructureDefinition/process-authorization";
+	public static final String PROCESS_AUTHORIZATION_EXTENSION_URL = "http://highmed.org/fhir/StructureDefinition/extension-process-authorization";
 
 	private final ActivityDefinition activityDefinition;
 

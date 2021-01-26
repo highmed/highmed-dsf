@@ -17,7 +17,7 @@
             "resource": {
                 "resourceType": "Organization",
                 "meta": {
-                    "profile": ["http://highmed.org/fhir/StructureDefinition/highmed-organization"],
+                    "profile": ["http://highmed.org/fhir/StructureDefinition/organization"],
                     "tag": [{
                             "system": "http://highmed.org/fhir/CodeSystem/authorization-role",
                             "code": "REMOTE"
@@ -25,7 +25,7 @@
                     ]
                 },
                 "extension": [{
-                        "url": "http://highmed.org/fhir/StructureDefinition/certificate-thumbprint",
+                        "url": "http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint",
                         "valueString": "b72203e163acc1bfd9c2db24c248b36cea282b5986b70e5c40ee33599c34e1b00d2bdea1598663a61a8441024f40b4924a453ed75108eeb2a7f7b9a2027871bc"
                     }
                 ],
@@ -59,7 +59,7 @@
             "resource": {
                 "resourceType": "Endpoint",
                 "meta": {
-                    "profile": ["http://highmed.org/fhir/StructureDefinition/highmed-endpoint"],
+                    "profile": ["http://highmed.org/fhir/StructureDefinition/endpoint"],
                     "tag": [{
                             "system": "http://highmed.org/fhir/CodeSystem/authorization-role",
                             "code": "REMOTE"
@@ -101,7 +101,7 @@
             "resource": {
                 "resourceType": "Organization",
                 "meta": {
-                    "profile": ["http://highmed.org/fhir/StructureDefinition/highmed-organization"],
+                    "profile": ["http://highmed.org/fhir/StructureDefinition/organization"],
                     "tag": [{
                             "system": "http://highmed.org/fhir/CodeSystem/authorization-role",
                             "code": "REMOTE"
@@ -109,7 +109,7 @@
                     ]
                 },
                 "extension": [{
-                        "url": "http://highmed.org/fhir/StructureDefinition/certificate-thumbprint",
+                        "url": "http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint",
                         "valueString": "fe9b49ccf259929485e55f8a03c1d74c147bd374debdc0c4ef48f75e74cdfd03e19cc2f79da1f53acd433734acae017c8d01c30f448675a1e77f0b80adf7023b"
                     }
                 ],
@@ -143,7 +143,7 @@
             "resource": {
                 "resourceType": "Endpoint",
                 "meta": {
-                    "profile": ["http://highmed.org/fhir/StructureDefinition/highmed-endpoint"],
+                    "profile": ["http://highmed.org/fhir/StructureDefinition/endpoint"],
                     "tag": [{
                             "system": "http://highmed.org/fhir/CodeSystem/authorization-role",
                             "code": "REMOTE"
@@ -185,7 +185,7 @@
             "resource": {
                 "resourceType": "Organization",
                 "meta": {
-                    "profile": ["http://highmed.org/fhir/StructureDefinition/highmed-organization"],
+                    "profile": ["http://highmed.org/fhir/StructureDefinition/organization"],
                     "tag": [{
                             "system": "http://highmed.org/fhir/CodeSystem/authorization-role",
                             "code": "REMOTE"
@@ -193,7 +193,7 @@
                     ]
                 },
                 "extension": [{
-                        "url": "http://highmed.org/fhir/StructureDefinition/certificate-thumbprint",
+                        "url": "http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint",
                         "valueString": "dc737f1a58605847002d422dc36127e6418c8b9cb295517ff4d8684af64aed49290729e8f9315ef5189b80dcaa9ccd3fdc4aa0210e425218de98c85145f3e88d"
                     }
                 ],
@@ -227,7 +227,7 @@
             "resource": {
                 "resourceType": "Endpoint",
                 "meta": {
-                    "profile": ["http://highmed.org/fhir/StructureDefinition/highmed-endpoint"],
+                    "profile": ["http://highmed.org/fhir/StructureDefinition/endpoint"],
                     "tag": [{
                             "system": "http://highmed.org/fhir/CodeSystem/authorization-role",
                             "code": "REMOTE"
@@ -269,7 +269,7 @@
             "resource": {
                 "resourceType": "Organization",
                 "meta": {
-                    "profile": ["http://highmed.org/fhir/StructureDefinition/highmed-organization"],
+                    "profile": ["http://highmed.org/fhir/StructureDefinition/organization"],
                     "tag": [{
                             "system": "http://highmed.org/fhir/CodeSystem/authorization-role",
                             "code": "REMOTE"
@@ -277,7 +277,7 @@
                     ]
                 },
                 "extension": [{
-                        "url": "http://highmed.org/fhir/StructureDefinition/certificate-thumbprint",
+                        "url": "http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint",
                         "valueString": "c1fdddaeff1cb9937a3ee7be7edcb43bd21d907c7f8060602d276b7c51662e8d023c0991262c7d89dfc8060b2a6f9f4b03258676ee6d9676569fb3d207cf828a"
                     }
                 ],
@@ -311,7 +311,7 @@
             "resource": {
                 "resourceType": "Endpoint",
                 "meta": {
-                    "profile": ["http://highmed.org/fhir/StructureDefinition/highmed-endpoint"],
+                    "profile": ["http://highmed.org/fhir/StructureDefinition/endpoint"],
                     "tag": [{
                             "system": "http://highmed.org/fhir/CodeSystem/authorization-role",
                             "code": "REMOTE"

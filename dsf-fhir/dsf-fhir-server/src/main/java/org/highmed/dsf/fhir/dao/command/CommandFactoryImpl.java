@@ -26,7 +26,7 @@ import org.highmed.dsf.fhir.prefer.PreferReturnType;
 import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.highmed.dsf.fhir.service.ReferenceExtractor;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
-import org.highmed.dsf.fhir.service.SnapshotGenerator;
+import org.highmed.dsf.fhir.validation.SnapshotGenerator;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Resource;
@@ -165,8 +165,15 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 	private Command delete(int index, User user, PreferReturnType returnType, Bundle bundle, BundleEntryComponent entry)
 	{
 		if (entry.getRequest().getUrl() != null && !entry.getRequest().getUrl().isBlank())
-			return new DeleteCommand(index, user, returnType, bundle, entry, serverBase, authorizationHelper,
-					responseGenerator, daoProvider, exceptionHandler, parameterConverter, eventGenerator);
+		{
+			if (entry.getRequest().getUrl().startsWith("StructureDefinition"))
+				return new DeleteStructureDefinitionCommand(index, user, returnType, bundle, entry, serverBase,
+						authorizationHelper, responseGenerator, daoProvider, exceptionHandler, parameterConverter,
+						eventGenerator);
+			else
+				return new DeleteCommand(index, user, returnType, bundle, entry, serverBase, authorizationHelper,
+						responseGenerator, daoProvider, exceptionHandler, parameterConverter, eventGenerator);
+		}
 		else
 			throw new BadBundleException(
 					"Request url " + entry.getRequest().getUrl() + " for method DELETE not supported");

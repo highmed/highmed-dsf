@@ -1,7 +1,9 @@
 package org.highmed.dsf.fhir.search.parameters.basic;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import javax.ws.rs.core.UriBuilder;
 
@@ -19,12 +21,22 @@ public abstract class AbstractTokenParameter<R extends Resource> extends Abstrac
 	}
 
 	@Override
+	protected Stream<String> getModifiedParameterNames()
+	{
+		return Stream.of(parameterName + TokenValueAndSearchType.NOT);
+	}
+
+	@Override
 	protected void configureSearchParameter(Map<String, List<String>> queryParameters)
 	{
 		valueAndType = TokenValueAndSearchType.fromParamValue(parameterName, queryParameters, this::addError)
 				.orElse(null);
 
-		if (queryParameters.get(parameterName) != null && queryParameters.get(parameterName).size() > 1)
+		if ((queryParameters.get(parameterName) != null
+				|| queryParameters.get(parameterName + TokenValueAndSearchType.NOT) != null)
+				&& ((queryParameters.getOrDefault(parameterName, Collections.emptyList())).size()
+						+ (queryParameters.getOrDefault(parameterName + TokenValueAndSearchType.NOT,
+								Collections.emptyList())).size()) > 1)
 			addError(new SearchQueryParameterError(SearchQueryParameterErrorType.UNSUPPORTED_NUMBER_OF_VALUES,
 					parameterName, queryParameters.get(parameterName)));
 	}
@@ -41,19 +53,27 @@ public abstract class AbstractTokenParameter<R extends Resource> extends Abstrac
 		switch (valueAndType.type)
 		{
 			case CODE:
-				bundleUri.replaceQueryParam(parameterName, valueAndType.codeValue);
+				bundleUri.replaceQueryParam(
+						valueAndType.negated ? parameterName + TokenValueAndSearchType.NOT : parameterName,
+						valueAndType.codeValue);
 				break;
 
 			case CODE_AND_SYSTEM:
-				bundleUri.replaceQueryParam(parameterName, valueAndType.systemValue + "|" + valueAndType.codeValue);
+				bundleUri.replaceQueryParam(
+						valueAndType.negated ? parameterName + TokenValueAndSearchType.NOT : parameterName,
+						valueAndType.systemValue + "|" + valueAndType.codeValue);
 				break;
 
 			case CODE_AND_NO_SYSTEM_PROPERTY:
-				bundleUri.replaceQueryParam(parameterName, "|" + valueAndType.codeValue);
+				bundleUri.replaceQueryParam(
+						valueAndType.negated ? parameterName + TokenValueAndSearchType.NOT : parameterName,
+						"|" + valueAndType.codeValue);
 				break;
 
 			case SYSTEM:
-				bundleUri.replaceQueryParam(parameterName, valueAndType.systemValue + "|");
+				bundleUri.replaceQueryParam(
+						valueAndType.negated ? parameterName + TokenValueAndSearchType.NOT : parameterName,
+						valueAndType.systemValue + "|");
 				break;
 		}
 	}

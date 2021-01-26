@@ -8,8 +8,8 @@ import org.hl7.fhir.r4.model.ResearchStudy;
 
 final class ResearchStudyHelper
 {
-	public static final String PARTICIPATING_MEDIC_EXTENSION_URL = "http://highmed.org/fhir/StructureDefinition/participating-medic";
-	public static final String PARTICIPATING_TTP_EXTENSION_URL = "http://highmed.org/fhir/StructureDefinition/participating-ttp";
+	public static final String PARTICIPATING_MEDIC_EXTENSION_URL = "http://highmed.org/fhir/StructureDefinition/extension-participating-medic";
+	public static final String PARTICIPATING_TTP_EXTENSION_URL = "http://highmed.org/fhir/StructureDefinition/extension-participating-ttp";
 
 	private ResearchStudyHelper()
 	{

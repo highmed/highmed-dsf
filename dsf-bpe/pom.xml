@@ -8,20 +8,14 @@
 	<parent>
 		<groupId>org.highmed.dsf</groupId>
 		<artifactId>dsf-pom</artifactId>
-		<version>0.3.0</version>
+		<version>0.4.0</version>
 	</parent>
 
 	<modules>
 		<module>dsf-bpe-process-base</module>
-		<module>dsf-bpe-process-feasibility</module>
-		<module>dsf-bpe-process-ping</module>
-		<module>dsf-bpe-process-plugin-example</module>
-		<module>dsf-bpe-process-update-resources</module>
-		<module>dsf-bpe-process-update-allow-list</module>
 		<module>dsf-bpe-server</module>
 		<module>dsf-bpe-server-jetty</module>
 		<module>dsf-bpe-webservice-client</module>
-		<module>dsf-bpe-process-local-services</module>
 	</modules>
 
 	<properties>
@@ -84,18 +78,6 @@
 				<artifactId>dsf-bpe-process-local-services</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-			<!-- provided as jar and injected on startup as plugin
-			<dependency>
-				<groupId>org.highmed.dsf</groupId>
-				<artifactId>dsf-bpe-process-parent</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.highmed.dsf</groupId>
-				<artifactId>dsf-bpe-process-child</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			-->
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
 				<artifactId>dsf-bpe-process-ping</artifactId>
@@ -124,6 +106,23 @@
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
 				<artifactId>dsf-fhir-webservice-client</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-fhir-server</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-fhir-validation</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-fhir-validation</artifactId>
+				<classifier>tests</classifier>
+				<type>test-jar</type>
 				<version>${project.version}</version>
 			</dependency>
 
@@ -182,6 +181,14 @@
 				<version>${camunda.version}</version>
 				<scope>import</scope>
 				<type>pom</type>
+			</dependency>
+
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-bpe-process-base</artifactId>
+				<version>${project.version}</version>
+				<scope>test</scope>
+				<type>test-jar</type>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

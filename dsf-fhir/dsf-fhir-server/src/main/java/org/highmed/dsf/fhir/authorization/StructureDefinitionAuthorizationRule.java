@@ -150,18 +150,19 @@ public class StructureDefinitionAuthorizationRule
 			Optional<String> errors = newResourceOk(newResource);
 			if (errors.isEmpty())
 			{
-				if (isSame(oldResource, newResource) && statusOk(oldResource, newResource))
+				if (isSame(oldResource, newResource))
 				{
 					logger.info(
-							"Update of StructureDefinition authorized for local user '{}', url and version same as existing StructureDefinition, status change {} -> {} ok",
-							user.getName(), oldResource.getStatus(), newResource.getStatus());
+							"Update of StructureDefinition authorized for local user '{}', url and version same as existing StructureDefinition",
+							user.getName());
 					return Optional.of("local user; url and version same as existing StructureDefinition");
 				}
 				else
 				{
 					logger.warn(
-							"Update of StructureDefinition unauthorized, other StructureDefinition with same url and version exists, illegal status change {} -> {}",
-							oldResource.getStatus(), newResource.getStatus());
+							"Update of StructureDefinition unauthorized, url or version changed ({} -> {}, {} -> {})",
+							oldResource.getUrl(), newResource.getUrl(), oldResource.getVersion(),
+							newResource.getVersion());
 					return Optional.empty();
 				}
 			}
@@ -182,19 +183,6 @@ public class StructureDefinitionAuthorizationRule
 	{
 		return oldResource.getUrl().equals(newResource.getUrl())
 				&& oldResource.getVersion().equals(newResource.getVersion());
-	}
-
-	private boolean statusOk(StructureDefinition oldResource, StructureDefinition newResource)
-	{
-		// draft -> draft/active/retired OK
-		if (PublicationStatus.DRAFT.equals(oldResource.getStatus()))
-			return true;
-		// active -> retired OK
-		else if (PublicationStatus.ACTIVE.equals(oldResource.getStatus())
-				&& PublicationStatus.RETIRED.equals(newResource.getStatus()))
-			return true;
-		else
-			return false;
 	}
 
 	@Override

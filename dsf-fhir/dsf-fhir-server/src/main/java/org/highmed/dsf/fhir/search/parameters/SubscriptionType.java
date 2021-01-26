@@ -63,7 +63,7 @@ public class SubscriptionType extends AbstractTokenParameter<Subscription>
 	@Override
 	public String getFilterQuery()
 	{
-		return "subscription->'channel'->>'type' = ?";
+		return "subscription->'channel'->>'type' " + (valueAndType.negated ? "<>" : "=") + " ?";
 	}
 
 	@Override
@@ -82,7 +82,7 @@ public class SubscriptionType extends AbstractTokenParameter<Subscription>
 	@Override
 	public void modifyBundleUri(UriBuilder bundleUri)
 	{
-		bundleUri.replaceQueryParam(PARAMETER_NAME, channelType.toCode());
+		bundleUri.replaceQueryParam(PARAMETER_NAME + (valueAndType.negated ? ":not" : ""), channelType.toCode());
 	}
 
 	@Override
@@ -94,7 +94,10 @@ public class SubscriptionType extends AbstractTokenParameter<Subscription>
 		if (!(resource instanceof Subscription))
 			return false;
 
-		return Objects.equals(((Subscription) resource).getChannel().getType(), channelType);
+		if (valueAndType.negated)
+			return !Objects.equals(((Subscription) resource).getChannel().getType(), channelType);
+		else
+			return Objects.equals(((Subscription) resource).getChannel().getType(), channelType);
 	}
 
 	@Override

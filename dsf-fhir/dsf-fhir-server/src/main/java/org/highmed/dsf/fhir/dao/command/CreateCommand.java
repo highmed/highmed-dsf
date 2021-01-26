@@ -31,7 +31,7 @@ import org.highmed.dsf.fhir.search.SearchQueryParameterError;
 import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.highmed.dsf.fhir.service.ReferenceExtractor;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
-import org.highmed.dsf.fhir.service.SnapshotGenerator;
+import org.highmed.dsf.fhir.validation.SnapshotGenerator;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent;

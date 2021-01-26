@@ -9,9 +9,9 @@
 						<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
 						<code value="REMOTE"/>
 					</tag>
-					<profile value="http://highmed.org/fhir/StructureDefinition/highmed-organization"/>
+					<profile value="http://highmed.org/fhir/StructureDefinition/organization"/>
 				</meta>
-				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
+				<extension url="http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint">
 					<valueString value="TODO"/>
 				</extension>
 				<identifier>
@@ -46,9 +46,9 @@
 						<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
 						<code value="REMOTE"/>
 					</tag>
-					<profile value="http://highmed.org/fhir/StructureDefinition/highmed-organization"/>
+					<profile value="http://highmed.org/fhir/StructureDefinition/organization"/>
 				</meta>
-				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
+				<extension url="http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint">
 					<valueString value="TODO"/>
 				</extension>
 				<identifier>
@@ -83,9 +83,9 @@
 						<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
 						<code value="REMOTE"/>
 					</tag>
-					<profile value="http://highmed.org/fhir/StructureDefinition/highmed-organization"/>
+					<profile value="http://highmed.org/fhir/StructureDefinition/organization"/>
 				</meta>
-				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
+				<extension url="http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint">
 					<valueString value="TODO"/>
 				</extension>
 				<identifier>
@@ -120,9 +120,9 @@
 						<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
 						<code value="REMOTE"/>
 					</tag>
-					<profile value="http://highmed.org/fhir/StructureDefinition/highmed-organization"/>
+					<profile value="http://highmed.org/fhir/StructureDefinition/organization"/>
 				</meta>
-				<extension url="http://highmed.org/fhir/StructureDefinition/certificate-thumbprint">
+				<extension url="http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint">
 					<valueString value="TODO"/>
 				</extension>
 				<identifier>
@@ -157,7 +157,7 @@
 						<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
 						<code value="REMOTE"/>
 					</tag>
-					<profile value="http://highmed.org/fhir/StructureDefinition/highmed-endpoint"/>
+					<profile value="http://highmed.org/fhir/StructureDefinition/endpoint"/>
 				</meta>
 				<identifier>
 					<system value="http://highmed.org/fhir/NamingSystem/endpoint-identifier"/>
@@ -198,7 +198,7 @@
 						<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
 						<code value="REMOTE"/>
 					</tag>
-					<profile value="http://highmed.org/fhir/StructureDefinition/highmed-endpoint"/>
+					<profile value="http://highmed.org/fhir/StructureDefinition/endpoint"/>
 				</meta>
 				<identifier>
 					<system value="http://highmed.org/fhir/NamingSystem/endpoint-identifier"/>
@@ -239,7 +239,7 @@
 						<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
 						<code value="REMOTE"/>
 					</tag>
-					<profile value="http://highmed.org/fhir/StructureDefinition/highmed-endpoint"/>
+					<profile value="http://highmed.org/fhir/StructureDefinition/endpoint"/>
 				</meta>
 				<identifier>
 					<system value="http://highmed.org/fhir/NamingSystem/endpoint-identifier"/>
@@ -280,7 +280,7 @@
 						<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
 						<code value="REMOTE"/>
 					</tag>
-					<profile value="http://highmed.org/fhir/StructureDefinition/highmed-endpoint"/>
+					<profile value="http://highmed.org/fhir/StructureDefinition/endpoint"/>
 				</meta>
 				<identifier>
 					<system value="http://highmed.org/fhir/NamingSystem/endpoint-identifier"/>

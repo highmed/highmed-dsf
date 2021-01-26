@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>org.highmed.dsf</groupId>
 		<artifactId>dsf-pom</artifactId>
-		<version>0.3.0</version>
+		<version>0.4.0</version>
 	</parent>
 
 	<modules>
@@ -17,6 +17,7 @@
 		<module>dsf-fhir-server-jetty</module>
 		<module>dsf-fhir-webservice-client</module>
 		<module>dsf-fhir-websocket-client</module>
+		<module>dsf-fhir-validation</module>
 	</modules>
 
 	<dependencies>
@@ -64,6 +65,11 @@
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
 				<artifactId>dsf-fhir-websocket-client</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-fhir-validation</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
