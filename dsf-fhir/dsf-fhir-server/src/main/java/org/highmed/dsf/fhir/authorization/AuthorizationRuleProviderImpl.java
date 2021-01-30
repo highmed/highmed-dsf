@@ -11,7 +11,10 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.HealthcareService;
+import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.Measure;
+import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.NamingSystem;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
@@ -36,7 +39,10 @@ public class AuthorizationRuleProviderImpl implements AuthorizationRuleProvider
 	private final AuthorizationRule<Endpoint> endpointAuthorizationRule;
 	private final AuthorizationRule<Group> groupAuthorizationRule;
 	private final AuthorizationRule<HealthcareService> healthcareServiceAuthorizationRule;
+	private final AuthorizationRule<Library> libraryAuthorizationRule;
 	private final AuthorizationRule<Location> locationAuthorizationRule;
+	private final AuthorizationRule<Measure> measureAuthorizationRule;
+	private final AuthorizationRule<MeasureReport> measureReportAuthorizationRule;
 	private final AuthorizationRule<NamingSystem> namingSystemAuthorizationRule;
 	private final AuthorizationRule<Organization> organizationAuthorizationRule;
 	private final AuthorizationRule<Patient> patientAuthorizationRule;
@@ -57,7 +63,9 @@ public class AuthorizationRuleProviderImpl implements AuthorizationRuleProvider
 			AuthorizationRule<CodeSystem> codeSystemAuthorizationRule,
 			AuthorizationRule<Endpoint> endpointAuthorizationRule, AuthorizationRule<Group> groupAuthorizationRule,
 			AuthorizationRule<HealthcareService> healthcareServiceAuthorizationRule,
-			AuthorizationRule<Location> locationAuthorizationRule,
+			AuthorizationRule<Library> libraryAuthorizationRule, AuthorizationRule<Location> locationAuthorizationRule,
+			AuthorizationRule<Measure> measureAuthorizationRule,
+			AuthorizationRule<MeasureReport> measureReportAuthorizationRule,
 			AuthorizationRule<NamingSystem> namingSystemAuthorizationRule,
 			AuthorizationRule<Organization> organizationAuthorizationRule,
 			AuthorizationRule<Patient> patientAuthorizationRule,
@@ -76,7 +84,10 @@ public class AuthorizationRuleProviderImpl implements AuthorizationRuleProvider
 		this.endpointAuthorizationRule = endpointAuthorizationRule;
 		this.groupAuthorizationRule = groupAuthorizationRule;
 		this.healthcareServiceAuthorizationRule = healthcareServiceAuthorizationRule;
+		this.libraryAuthorizationRule = libraryAuthorizationRule;
 		this.locationAuthorizationRule = locationAuthorizationRule;
+		this.measureAuthorizationRule = measureAuthorizationRule;
+		this.measureReportAuthorizationRule = measureReportAuthorizationRule;
 		this.namingSystemAuthorizationRule = namingSystemAuthorizationRule;
 		this.organizationAuthorizationRule = organizationAuthorizationRule;
 		this.patientAuthorizationRule = patientAuthorizationRule;
@@ -96,7 +107,10 @@ public class AuthorizationRuleProviderImpl implements AuthorizationRuleProvider
 		authorizationRulesByResourecClass.put(Endpoint.class, endpointAuthorizationRule);
 		authorizationRulesByResourecClass.put(Group.class, groupAuthorizationRule);
 		authorizationRulesByResourecClass.put(HealthcareService.class, healthcareServiceAuthorizationRule);
+		authorizationRulesByResourecClass.put(Library.class, libraryAuthorizationRule);
 		authorizationRulesByResourecClass.put(Location.class, locationAuthorizationRule);
+		authorizationRulesByResourecClass.put(Measure.class, measureAuthorizationRule);
+		authorizationRulesByResourecClass.put(MeasureReport.class, measureReportAuthorizationRule);
 		authorizationRulesByResourecClass.put(NamingSystem.class, namingSystemAuthorizationRule);
 		authorizationRulesByResourecClass.put(Organization.class, organizationAuthorizationRule);
 		authorizationRulesByResourecClass.put(Patient.class, patientAuthorizationRule);
@@ -156,9 +170,27 @@ public class AuthorizationRuleProviderImpl implements AuthorizationRuleProvider
 	}
 
 	@Override
+	public AuthorizationRule<Library> getLibraryAuthorizationRule()
+	{
+		return libraryAuthorizationRule;
+	}
+
+	@Override
 	public AuthorizationRule<Location> getLocationAuthorizationRule()
 	{
 		return locationAuthorizationRule;
+	}
+
+	@Override
+	public AuthorizationRule<Measure> getMeasureAuthorizationRule()
+	{
+		return measureAuthorizationRule;
+	}
+
+	@Override
+	public AuthorizationRule<MeasureReport> getMeasureReportAuthorizationRule()
+	{
+		return measureReportAuthorizationRule;
 	}
 
 	@Override

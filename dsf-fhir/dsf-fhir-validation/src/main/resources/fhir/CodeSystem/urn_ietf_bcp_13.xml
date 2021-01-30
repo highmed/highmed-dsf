@@ -8469,26 +8469,31 @@
 		<definition value="As defined by rfc6015"/>
 	</concept>
 	<concept>
-		<code value="text/cache-manifest" />
-		<display value="cache-manifest" />
-		<definition value="As defined by W3C, and Robin Berjon"/>
-	</concept>
-	<concept>
-		<code value="text/calendar" />
-		<display value="calendar" />
-		<definition value="As defined by rfc5545"/>
-	</concept>
-	<concept>
-		<code value="text/css" />
-		<display value="css" />
-		<definition value="As defined by rfc2318"/>
-	</concept>
-	<concept>
-		<code value="text/csv" />
-		<display value="csv" />
-		<definition value="As defined by rfc4180, and rfc7111"/>
-	</concept>
-	<concept>
+        <code value="text/cache-manifest"/>
+        <display value="cache-manifest"/>
+        <definition value="As defined by W3C, and Robin Berjon"/>
+    </concept>
+    <concept>
+        <code value="text/calendar"/>
+        <display value="calendar"/>
+        <definition value="As defined by rfc5545"/>
+    </concept>
+    <concept>
+        <code value="text/cql"/>
+        <display value="cql"/>
+        <definition value="Clinical Quality Language"/>
+    </concept>
+    <concept>
+        <code value="text/css"/>
+        <display value="css"/>
+        <definition value="As defined by rfc2318"/>
+    </concept>
+    <concept>
+        <code value="text/csv"/>
+        <display value="csv"/>
+        <definition value="As defined by rfc4180, and rfc7111"/>
+    </concept>
+    <concept>
 		<code value="text/csv-schema" />
 		<display value="csv-schema" />
 		<definition value="As defined by National Archives UK, and David Underdown"/>

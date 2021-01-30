@@ -9,7 +9,10 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.HealthcareService;
+import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.Measure;
+import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.NamingSystem;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
@@ -38,7 +41,13 @@ public interface AuthorizationRuleProvider
 
 	AuthorizationRule<HealthcareService> getHealthcareServiceAuthorizationRule();
 
+	AuthorizationRule<Library> getLibraryAuthorizationRule();
+
 	AuthorizationRule<Location> getLocationAuthorizationRule();
+
+	AuthorizationRule<Measure> getMeasureAuthorizationRule();
+
+	AuthorizationRule<MeasureReport> getMeasureReportAuthorizationRule();
 
 	AuthorizationRule<NamingSystem> getNamingSystemAuthorizationRule();
 

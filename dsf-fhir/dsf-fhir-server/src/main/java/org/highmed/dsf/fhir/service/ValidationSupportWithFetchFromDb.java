@@ -11,11 +11,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.highmed.dsf.fhir.dao.CodeSystemDao;
+import org.highmed.dsf.fhir.dao.MeasureDao;
 import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
 import org.highmed.dsf.fhir.dao.ValueSetDao;
 import org.highmed.dsf.fhir.function.SupplierWithSqlException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
@@ -35,9 +37,11 @@ public class ValidationSupportWithFetchFromDb implements IValidationSupport, Ini
 	private final StructureDefinitionDao structureDefinitionSnapshotDao;
 	private final CodeSystemDao codeSystemDao;
 	private final ValueSetDao valueSetDao;
+	private final MeasureDao measureDao;
 
 	public ValidationSupportWithFetchFromDb(FhirContext context, StructureDefinitionDao structureDefinitionDao,
-			StructureDefinitionDao structureDefinitionSnapshotDao, CodeSystemDao codeSystemDao, ValueSetDao valueSetDao)
+			StructureDefinitionDao structureDefinitionSnapshotDao, CodeSystemDao codeSystemDao, ValueSetDao valueSetDao,
+			MeasureDao measureDao)
 	{
 		this.context = context;
 
@@ -45,6 +49,7 @@ public class ValidationSupportWithFetchFromDb implements IValidationSupport, Ini
 		this.structureDefinitionSnapshotDao = structureDefinitionSnapshotDao;
 		this.codeSystemDao = codeSystemDao;
 		this.valueSetDao = valueSetDao;
+		this.measureDao = measureDao;
 	}
 
 	@Override
@@ -81,6 +86,23 @@ public class ValidationSupportWithFetchFromDb implements IValidationSupport, Ini
 		throwRuntimeException(() -> structureDefinitionDao.readAll()).forEach(s -> byUrl.putIfAbsent(s.getUrl(), s));
 
 		return new ArrayList<>(byUrl.values());
+	}
+
+	@Override
+	public <T extends IBaseResource> T fetchResource(Class<T> theClass, String theUri)
+	{
+		T resource = IValidationSupport.super.fetchResource(theClass, theUri);
+		if (resource != null)
+		{
+			return resource;
+		}
+
+		if ("Measure".equals(getFhirContext().getResourceType(theClass)))
+		{
+			return theClass.cast(fetchMeasure(theUri));
+		}
+
+		return null;
 	}
 
 	@Override
@@ -127,6 +149,15 @@ public class ValidationSupportWithFetchFromDb implements IValidationSupport, Ini
 		Optional<ValueSet> valueSet = throwRuntimeException(() -> valueSetDao.readByUrlAndVersion(url));
 		if (valueSet.isPresent())
 			return valueSet.get();
+		else
+			return null;
+	}
+
+	public Measure fetchMeasure(String url)
+	{
+		Optional<Measure> measure = throwRuntimeException(() -> measureDao.readByUrlAndVersion(url));
+		if (measure.isPresent())
+			return measure.get();
 		else
 			return null;
 	}

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+    <property name="json" value="JSONB" dbms="postgresql"/>
+    <property name="json" value="varchar(5000)" dbms="h2"/>
+
+    <changeSet author="akiel" id="db.measure_reports.changelog-0.1.0">
+        <createTable tableName="measure_reports">
+            <column name="measure_report_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="BIGINT" defaultValueNumeric="1">
+                <constraints nullable="false"/>
+            </column>
+            <column name="deleted" type="TIMESTAMP"/>
+            <column name="measure_report" type="${json}">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey tableName="measure_reports" columnNames="measure_report_id, version"/>
+
+        <sql dbms="postgresql">
+            ALTER TABLE measure_reports OWNER TO ${db.liquibase_user};
+            GRANT ALL ON TABLE measure_reports TO ${db.liquibase_user};
+            GRANT SELECT, INSERT, UPDATE ON TABLE measure_reports TO ${db.server_users_group};
+            CREATE INDEX measure_report_id_index ON measure_reports USING btree (measure_report_id);
+            CREATE INDEX measure_report_index ON measure_reports USING gin (measure_report);
+            CREATE INDEX measure_report_id_version_index ON measure_reports USING btree (measure_report_id, version);
+        </sql>
+
+        <createView viewName="current_measure_reports" replaceIfExists="true">
+            SELECT measure_report_id, version, measure_report
+            FROM (
+            SELECT DISTINCT ON (measure_report_id) measure_report_id, version, deleted, measure_report
+            FROM measure_reports ORDER BY measure_report_id, version DESC
+            ) AS current_l
+            WHERE deleted IS NULL
+        </createView>
+
+        <sql dbms="postgresql">
+            ALTER TABLE current_measure_reports OWNER TO ${db.liquibase_user};
+            GRANT ALL ON TABLE current_measure_reports TO ${db.liquibase_user};
+            GRANT SELECT ON TABLE current_measure_reports TO ${db.server_users_group};
+        </sql>
+    </changeSet>
+</databaseChangeLog>
