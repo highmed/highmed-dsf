@@ -18,6 +18,10 @@
 		<module>dsf-mpi-client-stub</module>
 		<module>dsf-mpi-client-pdq</module>
 	</modules>
+	
+	<properties>
+		<main.basedir>${project.basedir}/..</main.basedir>
+	</properties>
 
 	<dependencies>
 		<dependency>
