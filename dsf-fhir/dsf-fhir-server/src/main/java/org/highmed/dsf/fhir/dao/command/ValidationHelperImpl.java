@@ -55,7 +55,7 @@ public class ValidationHelperImpl implements ValidationHelper
 		else if (!validationResult.getMessages().isEmpty())
 			logger.info("Resource {} validated with messages: {}", resource.fhirType(),
 					toValidationLogMessage(validationResult));
-		
+
 		return validationResult;
 	}
 

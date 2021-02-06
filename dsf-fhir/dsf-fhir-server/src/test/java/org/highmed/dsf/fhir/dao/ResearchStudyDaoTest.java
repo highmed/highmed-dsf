@@ -80,9 +80,8 @@ public class ResearchStudyDaoTest extends AbstractResourceDaoTest<ResearchStudy,
 
 		try (Connection connection = dao.newReadWriteTransaction())
 		{
-			boolean exists = dao
-					.existsByPrincipalInvestigatorIdAndOrganizationTypeAndOrganizationIdWithTransaction(connection,
-							new IdType(piReference), OrganizationType.TTP, new IdType(orgReference));
+			boolean exists = dao.existsByPrincipalInvestigatorIdAndOrganizationTypeAndOrganizationIdWithTransaction(
+					connection, new IdType(piReference), OrganizationType.TTP, new IdType(orgReference));
 			assertTrue(exists);
 		}
 	}

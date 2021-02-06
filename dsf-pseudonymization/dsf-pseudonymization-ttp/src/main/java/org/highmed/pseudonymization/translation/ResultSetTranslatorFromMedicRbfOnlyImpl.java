@@ -29,12 +29,11 @@ public class ResultSetTranslatorFromMedicRbfOnlyImpl implements ResultSetTransla
 			throw new IllegalArgumentException("Missing RBF column with name '" + Constants.RBF_COLUMN_NAME
 					+ "' and path '" + Constants.RBF_COLUMN_PATH + "'");
 
-		return resultSet.getRows().parallelStream()
-				.map(toPersonWithMdat(organization, rbfColumnIndex)).collect(Collectors.toList());
+		return resultSet.getRows().parallelStream().map(toPersonWithMdat(organization, rbfColumnIndex))
+				.collect(Collectors.toList());
 	}
 
-	private Function<List<RowElement>, PersonWithMdat> toPersonWithMdat(String organization,
-			int rbfColumnIndex)
+	private Function<List<RowElement>, PersonWithMdat> toPersonWithMdat(String organization, int rbfColumnIndex)
 	{
 		return rowElements ->
 		{

@@ -19,8 +19,7 @@ public interface ConstantsBase
 	String BPMN_EXECUTION_VARIABLE_TTP_IDENTIFIER = "ttp";
 
 	/**
-	 * Used to distinguish if I am at the moment in a process called
-	 * by another process by a CallActivity or not
+	 * Used to distinguish if I am at the moment in a process called by another process by a CallActivity or not
 	 */
 	String BPMN_EXECUTION_VARIABLE_IN_CALLED_PROCESS = "inCalledProcess";
 

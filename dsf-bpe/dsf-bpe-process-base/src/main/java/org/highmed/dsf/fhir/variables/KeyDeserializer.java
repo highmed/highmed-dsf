@@ -18,7 +18,7 @@ public class KeyDeserializer extends JsonDeserializer<Key>
 	public Key deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException
 	{
 		TreeNode node = p.getCodec().readTree(p);
-		
+
 		String algorithm = ((TextNode) node.get("algorithm")).textValue();
 		byte[] value = ((TextNode) node.get("value")).binaryValue();
 

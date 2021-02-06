@@ -11,7 +11,8 @@ public interface FhirWebserviceClientProvider
 
 	FhirWebserviceClient getRemoteWebserviceClient(IdType organizationReference);
 
-	FhirWebserviceClient getRemoteWebserviceClient(String organizationIdentifierSystem, String organizationIdentifierValue);
+	FhirWebserviceClient getRemoteWebserviceClient(String organizationIdentifierSystem,
+			String organizationIdentifierValue);
 
 	FhirWebserviceClient getRemoteWebserviceClient(String webserviceUrl);
 }

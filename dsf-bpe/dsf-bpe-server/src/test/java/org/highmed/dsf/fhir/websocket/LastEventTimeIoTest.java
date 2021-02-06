@@ -49,9 +49,9 @@ public class LastEventTimeIoTest
 	{
 		Path lastEventTimeFile = Paths.get("target", UUID.randomUUID().toString());
 		Files.createFile(lastEventTimeFile);
-		
+
 		LastEventTimeIo io = new LastEventTimeIo(lastEventTimeFile);
-		
+
 		assertFalse(io.readLastEventTime().isPresent());
 	}
 }

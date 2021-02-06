@@ -102,8 +102,8 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testSearchEndpointIncludeOrganization() throws Exception
 	{
-		Bundle searchBundle = getWebserviceClient()
-				.search(Endpoint.class, Map.of("_include", Collections.singletonList("Endpoint:organization")));
+		Bundle searchBundle = getWebserviceClient().search(Endpoint.class,
+				Map.of("_include", Collections.singletonList("Endpoint:organization")));
 		assertNotNull(searchBundle);
 		assertEquals(2, searchBundle.getTotal());
 		assertEquals(4, searchBundle.getEntry().size());
@@ -136,8 +136,8 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testSearchEndpointRevIncludeOrganization() throws Exception
 	{
-		Bundle searchBundle = getWebserviceClient()
-				.search(Endpoint.class, Map.of("_revinclude", Collections.singletonList("Organization:endpoint")));
+		Bundle searchBundle = getWebserviceClient().search(Endpoint.class,
+				Map.of("_revinclude", Collections.singletonList("Organization:endpoint")));
 		assertNotNull(searchBundle);
 		assertEquals(2, searchBundle.getTotal());
 		assertEquals(4, searchBundle.getEntry().size());
@@ -306,8 +306,8 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 				.setUrl("Organization");
 		bundle.addEntry().setFullUrl(endTempId).setResource(endpoint).getRequest().setMethod(HTTPVerb.POST)
 				.setUrl("Endpoint");
-		bundle.addEntry().getRequest().setMethod(HTTPVerb.GET)
-				.setUrl("Endpoint?identifier=http://highmed.org/fhir/NamingSystem/endpoint-identifier|foo-bar-baz.test.bla-bla.de");
+		bundle.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(
+				"Endpoint?identifier=http://highmed.org/fhir/NamingSystem/endpoint-identifier|foo-bar-baz.test.bla-bla.de");
 
 		logger.debug("bundle: {}", context.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		Bundle postBundle = getWebserviceClient().postBundle(bundle);

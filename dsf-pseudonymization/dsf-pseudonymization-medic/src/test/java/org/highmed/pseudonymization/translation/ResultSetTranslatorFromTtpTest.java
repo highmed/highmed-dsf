@@ -29,7 +29,7 @@ public class ResultSetTranslatorFromTtpTest
 	{
 		String researchStudyIdentifier = "researchStudy1";
 		byte[] decodedKey = Base64.getDecoder().decode("Loy75q55b/L3yxk3BoRgNUSAJJLan643alkrWHathBk=");
-		SecretKey researchStudyKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES"); 
+		SecretKey researchStudyKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
 		ObjectMapper openEhrObjectMapper = OpenEhrObjectMapperFactory.createObjectMapper();
 
 		ResultSetTranslatorFromTtpImpl translator = new ResultSetTranslatorFromTtpImpl(researchStudyIdentifier,

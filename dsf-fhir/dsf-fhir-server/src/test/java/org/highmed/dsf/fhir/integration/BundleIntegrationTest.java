@@ -125,10 +125,10 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 		getWebserviceClient().withMinimalReturn().postBundle(deleteBundle);
 
 		assertFalse(testProfileSupported(taskProfileUrl));
-		StructureDefinitionDao sDdao = getSpringWebApplicationContext()
-				.getBean("structureDefinitionDao", StructureDefinitionDao.class);
-		StructureDefinitionDao sDsDao = getSpringWebApplicationContext()
-				.getBean("structureDefinitionSnapshotDao", StructureDefinitionDao.class);
+		StructureDefinitionDao sDdao = getSpringWebApplicationContext().getBean("structureDefinitionDao",
+				StructureDefinitionDao.class);
+		StructureDefinitionDao sDsDao = getSpringWebApplicationContext().getBean("structureDefinitionSnapshotDao",
+				StructureDefinitionDao.class);
 
 		assertTrue(sDdao.readByUrlAndVersion(taskProfileUrl, taskProfileVersion).isEmpty());
 		assertTrue(sDsDao.readByUrlAndVersion(taskProfileUrl, taskProfileVersion).isEmpty());

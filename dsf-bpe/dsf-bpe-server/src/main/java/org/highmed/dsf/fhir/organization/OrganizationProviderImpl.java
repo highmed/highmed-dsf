@@ -125,8 +125,9 @@ public class OrganizationProviderImpl implements OrganizationProvider, Initializ
 	@Override
 	public List<Identifier> getRemoteIdentifiers()
 	{
-		return getRemoteOrganizations().stream().map(organization -> organization.getIdentifier().stream()
-				.filter(identifierWithSystem(getDefaultIdentifierSystem())).findFirst().orElse(null))
+		return getRemoteOrganizations().stream()
+				.map(organization -> organization.getIdentifier().stream()
+						.filter(identifierWithSystem(getDefaultIdentifierSystem())).findFirst().orElse(null))
 				.filter(identifier -> identifier != null).collect(Collectors.toList());
 	}
 

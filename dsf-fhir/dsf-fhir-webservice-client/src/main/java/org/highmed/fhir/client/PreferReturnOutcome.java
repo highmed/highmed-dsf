@@ -18,13 +18,13 @@ public interface PreferReturnOutcome
 
 	OperationOutcome createBinary(InputStream in, MediaType mediaType, String securityContextReference);
 
-	
+
 	OperationOutcome update(Resource resource);
 
 	OperationOutcome updateConditionaly(Resource resource, Map<String, List<String>> criteria);
 
 	OperationOutcome updateBinary(String id, InputStream in, MediaType mediaType, String securityContextReference);
 
-	
+
 	Bundle postBundle(Bundle bundle);
 }

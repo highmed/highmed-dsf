@@ -24,8 +24,8 @@ public interface OrganizationProvider
 	/**
 	 * @return the local organization
 	 * @throws NoSuchElementException
-	 *             if no {@link Organization} with {@link #getDefaultIdentifierSystem()} and {@link #getLocalIdentifierValue()}
-	 *             could be found
+	 *             if no {@link Organization} with {@link #getDefaultIdentifierSystem()} and
+	 *             {@link #getLocalIdentifierValue()} could be found
 	 */
 	Organization getLocalOrganization();
 
@@ -43,8 +43,8 @@ public interface OrganizationProvider
 	Identifier getLocalIdentifier();
 
 	/**
-	 * @return {@link Organization}s {@link Identifier} with {@link #getDefaultIdentifierSystem()} and identifier other than
-	 *         {@link #getLocalIdentifierValue()}
+	 * @return {@link Organization}s {@link Identifier} with {@link #getDefaultIdentifierSystem()} and identifier other
+	 *         than {@link #getLocalIdentifierValue()}
 	 */
 	List<Identifier> getRemoteIdentifiers();
 

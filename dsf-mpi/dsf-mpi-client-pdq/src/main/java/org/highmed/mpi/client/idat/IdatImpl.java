@@ -16,7 +16,7 @@ public class IdatImpl implements Idat
 	private final String insuranceNumber;
 
 	public IdatImpl(String medicId, String firstName, String lastName, String birthday, String sex, String street,
-		String zipCode, String city, String country, String insuranceNumber)
+			String zipCode, String city, String country, String insuranceNumber)
 	{
 		this.medicId = medicId;
 		this.firstName = firstName;
@@ -93,8 +93,8 @@ public class IdatImpl implements Idat
 	@Override
 	public String toString()
 	{
-		return "IDAT[medicId=" + medicId + ", firstname=" + firstName + ", lastname=" + lastName + ", birthdate=" +
-		birthday + ", sex=" + sex + ", street=" + street + ", zip=" + zipCode + ", city=" + city + ", country=" +
-			country + ", ssn=" + insuranceNumber + "]";
+		return "IDAT[medicId=" + medicId + ", firstname=" + firstName + ", lastname=" + lastName + ", birthdate="
+				+ birthday + ", sex=" + sex + ", street=" + street + ", zip=" + zipCode + ", city=" + city
+				+ ", country=" + country + ", ssn=" + insuranceNumber + "]";
 	}
 }

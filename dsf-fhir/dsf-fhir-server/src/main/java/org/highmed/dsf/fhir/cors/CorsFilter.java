@@ -48,8 +48,8 @@ public class CorsFilter implements Filter
 		{
 			httpServletResponse.addHeader("Access-Control-Allow-Credentials", "true");
 			httpServletResponse.addHeader("Access-Control-Allow-Origin", origin);
-			httpServletResponse
-					.addHeader("Access-Control-Allow-Headers", "authorization, content-type, x-http-method-override");
+			httpServletResponse.addHeader("Access-Control-Allow-Headers",
+					"authorization, content-type, x-http-method-override");
 			httpServletResponse.addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
 		}
 

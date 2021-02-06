@@ -183,13 +183,13 @@ public class ReferenceTypTest
 	@Test
 	public void testType() throws Exception
 	{
-//		Reference ref = new Reference();
-//		ref.setType("Organization");
-//		ref.setReferenceElement(new IdType().setParts(null, "Organization", UUID.randomUUID().toString(), null));
+		// Reference ref = new Reference();
+		// ref.setType("Organization");
+		// ref.setReferenceElement(new IdType().setParts(null, "Organization", UUID.randomUUID().toString(), null));
 
 		Organization org = new Organization();
 		org.setIdElement(new IdType(UUID.randomUUID().toString()));
-		
+
 		Binary b = new Binary();
 		Reference ref = new Reference(org);
 		b.setSecurityContext(ref);
