@@ -31,8 +31,7 @@ public class TestFhirWebsocketClient
 		FhirContext fhirContext = FhirContext.forR4();
 
 		WebsocketClientTyrus client = new WebsocketClientTyrus(() ->
-		{
-		}, URI.create("wss://localhost:8443/fhir/ws"), trustStore, keyStore, keyStorePassword,
+		{}, URI.create("wss://localhost:8443/fhir/ws"), trustStore, keyStore, keyStorePassword,
 				"f4243759-47c7-4344-a030-94ef039bbd4f");
 		// WebsocketClientTyrus client = new WebsocketClientTyrus(fhirContext,
 		// URI.create("wss://localhost:8001/fhir/ws"),
