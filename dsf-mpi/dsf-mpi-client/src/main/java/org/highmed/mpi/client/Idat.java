@@ -27,11 +27,11 @@ public interface Idat
 	String getBirthday();
 
 	/**
-	 * D - diverse (http://fhir.de/CodeSystem/gender-amtlich-de divers)
-	 * F - female (http://hl7.org/fhir/administrative-gender female)
-	 * M - male (http://hl7.org/fhir/administrative-gender male)
-	 * O - other (http://hl7.org/fhir/administrative-gender other)
-	 * U - unknown (http://hl7.org/fhir/administrative-gender unknown)
+	 * D - diverse (http://fhir.de/CodeSystem/gender-amtlich-de divers)<br>
+	 * F - female (http://hl7.org/fhir/administrative-gender female)<br>
+	 * M - male (http://hl7.org/fhir/administrative-gender male)<br>
+	 * O - other (http://hl7.org/fhir/administrative-gender other)<br>
+	 * U - unknown (http://hl7.org/fhir/administrative-gender unknown)<br>
 	 * X - undefined (http://fhir.de/CodeSystem/gender-amtlich-de unbestimmt)
 	 * 
 	 * @return {D, F, M, O, U, X}
