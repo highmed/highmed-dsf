@@ -56,12 +56,14 @@ public class OpenEhrClientStub implements OpenEhrClient
 
 	private List<RowElement> getRow(int id)
 	{
-		return Arrays.asList(StringRowElement.fromString(String.valueOf(id)), JsonNodeRowElement.fromString(
-				"{\"_type\":\"DV_CODED_TEXT\",\"value\":\"Natrium\",\"mappings\":[{\"_type\":\"TERM_MAPPING\","
-						+ "\"match\":\"?\",\"target\":{\"_type\":\"CODE_PHRASE\",\"terminology_id\":{\"_type\":"
-						+ "\"TERMINOLOGY_ID\",\"value\":\"http://loinc.org\"},\"code_string\":\"2951-2\"}}],"
-						+ "\"defining_code\":{\"_type\":\"CODE_PHRASE\",\"terminology_id\":{\"_type\":"
-						+ "\"TERMINOLOGY_ID\",\"value\":\"SWL\"},\"code_string\":\"NA\"}}", openEhrObjectMapper),
+		return Arrays.asList(StringRowElement.fromString(String.valueOf(id)),
+				JsonNodeRowElement.fromString(
+						"{\"_type\":\"DV_CODED_TEXT\",\"value\":\"Natrium\",\"mappings\":[{\"_type\":\"TERM_MAPPING\","
+								+ "\"match\":\"?\",\"target\":{\"_type\":\"CODE_PHRASE\",\"terminology_id\":{\"_type\":"
+								+ "\"TERMINOLOGY_ID\",\"value\":\"http://loinc.org\"},\"code_string\":\"2951-2\"}}],"
+								+ "\"defining_code\":{\"_type\":\"CODE_PHRASE\",\"terminology_id\":{\"_type\":"
+								+ "\"TERMINOLOGY_ID\",\"value\":\"SWL\"},\"code_string\":\"NA\"}}",
+						openEhrObjectMapper),
 				JsonNodeRowElement.fromString("{\"_type\":\"ELEMENT\",\"name\":{\"_type\":\"DV_TEXT\","
 						+ "\"value\":\"Messwert\"},\"uid\":{\"_type\":\"OBJECT_VERSION_ID\",\"value\":"
 						+ "\"3880f8fa-428c-4cd4-adee-1f8f39c03b94\"},\"archetype_node_id\":\"at0001\","
@@ -72,8 +74,6 @@ public class OpenEhrClientStub implements OpenEhrClient
 						+ "\"upper_unbounded\":false},\"magnitude_status\":\"=\",\"magnitude\":144.0,"
 						+ "\"units\":\"mmol/L\"}}", openEhrObjectMapper),
 				JsonNodeRowElement.fromString("{\"_type\":\"DV_DATE_TIME\",\"value\":\"2019-08-08T14:21:00\"}",
-								openEhrObjectMapper));
+						openEhrObjectMapper));
 	}
 }
-
-
