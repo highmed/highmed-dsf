@@ -15,15 +15,15 @@ import ca.uhn.fhir.context.FhirContext;
 public class TaskTest
 {
 	private static final Logger logger = LoggerFactory.getLogger(TaskTest.class);
-	
+
 	@Test
 	public void testRequester() throws Exception
 	{
 		Task t = new Task();
 		t.setRequester(new Reference("Organization/" + UUID.randomUUID().toString()));
-		
+
 		FhirContext context = FhirContext.forR4();
-		
+
 		String txt = context.newJsonParser().setPrettyPrint(true).encodeResourceToString(t);
 		assertNotNull(txt);
 		logger.debug(txt);
@@ -34,9 +34,9 @@ public class TaskTest
 	{
 		Task t = new Task();
 		t.getRestriction().addRecipient(new Reference("Organization/" + UUID.randomUUID().toString()));
-		
+
 		FhirContext context = FhirContext.forR4();
-		
+
 		String txt = context.newJsonParser().setPrettyPrint(true).encodeResourceToString(t);
 		assertNotNull(txt);
 		logger.debug(txt);

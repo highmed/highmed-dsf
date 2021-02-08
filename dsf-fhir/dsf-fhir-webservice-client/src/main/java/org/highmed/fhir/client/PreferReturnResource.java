@@ -18,13 +18,13 @@ public interface PreferReturnResource
 
 	Binary createBinary(InputStream in, MediaType mediaType, String securityContextReference);
 
-	
+
 	<R extends Resource> R update(R resource);
 
 	<R extends Resource> R updateConditionaly(R resource, Map<String, List<String>> criteria);
 
 	Binary updateBinary(String id, InputStream in, MediaType mediaType, String securityContextReference);
-	
-	
+
+
 	Bundle postBundle(Bundle bundle);
 }

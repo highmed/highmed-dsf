@@ -16,8 +16,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Path(StructureDefinitionServiceJaxrs.PATH)
-public class StructureDefinitionServiceJaxrs extends
-		AbstractResourceServiceJaxrs<StructureDefinition, StructureDefinitionService> implements StructureDefinitionService
+public class StructureDefinitionServiceJaxrs
+		extends AbstractResourceServiceJaxrs<StructureDefinition, StructureDefinitionService>
+		implements StructureDefinitionService
 {
 	public static final String PATH = "StructureDefinition";
 

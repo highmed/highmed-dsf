@@ -17,8 +17,10 @@
 		<module>dsf-bpe-server-jetty</module>
 		<module>dsf-bpe-webservice-client</module>
 	</modules>
-
+	
 	<properties>
+		<main.basedir>${project.basedir}/../..</main.basedir>
+
 		<!-- if upgrading, copy version specific camunda sql scripts to dsf-bpe-server/src/main/resource/db/camunda and create a corresponding liquibase migration script -->
 		<camunda.version>7.14.0</camunda.version>
 	</properties>

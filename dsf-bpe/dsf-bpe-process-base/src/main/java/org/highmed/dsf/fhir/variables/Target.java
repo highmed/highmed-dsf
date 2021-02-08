@@ -14,11 +14,8 @@ public class Target
 	private final String correlationKey;
 
 	@JsonCreator
-	private Target(
-			@JsonProperty("targetOrganizationIdentifierValue")
-					String targetOrganizationIdentifierValue,
-			@JsonProperty("correlationKey")
-					String correlationKey)
+	private Target(@JsonProperty("targetOrganizationIdentifierValue") String targetOrganizationIdentifierValue,
+			@JsonProperty("correlationKey") String correlationKey)
 	{
 		this.targetOrganizationIdentifierValue = targetOrganizationIdentifierValue;
 		this.correlationKey = correlationKey;

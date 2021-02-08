@@ -13,8 +13,8 @@ public abstract class AbstractResource
 
 	private final String fileName;
 
-	AbstractResource(Class<? extends MetadataResource> type, String dependencyNameAndVersion, String url, String version,
-			String name, String fileName)
+	AbstractResource(Class<? extends MetadataResource> type, String dependencyNameAndVersion, String url,
+			String version, String name, String fileName)
 	{
 		this.type = type;
 		this.dependencyNameAndVersion = dependencyNameAndVersion;

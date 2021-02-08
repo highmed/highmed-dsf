@@ -25,8 +25,9 @@ public class Request
 	private final Map<String, Object> queryParameters = new HashMap<>();
 
 	@JsonCreator
-	public Request(@JsonProperty("q") String query, @JsonProperty("ehr_id") String ehrId, @JsonProperty("offset") String offset,
-			@JsonProperty("fetch") String fetch, @JsonProperty("query_parameters") Map<String, Object> queryParameters)
+	public Request(@JsonProperty("q") String query, @JsonProperty("ehr_id") String ehrId,
+			@JsonProperty("offset") String offset, @JsonProperty("fetch") String fetch,
+			@JsonProperty("query_parameters") Map<String, Object> queryParameters)
 	{
 		this.query = query;
 		this.ehrId = ehrId;

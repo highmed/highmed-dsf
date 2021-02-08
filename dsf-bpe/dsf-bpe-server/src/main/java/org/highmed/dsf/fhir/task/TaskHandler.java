@@ -80,8 +80,8 @@ public class TaskHandler implements InitializingBean
 		}
 		catch (Exception exception)
 		{
-			Task.TaskOutputComponent errorOutput = taskHelper
-					.createOutput(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR, exception.getMessage());
+			Task.TaskOutputComponent errorOutput = taskHelper.createOutput(CODESYSTEM_HIGHMED_BPMN,
+					CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR, exception.getMessage());
 			task.addOutput(errorOutput);
 			task.setStatus(Task.TaskStatus.FAILED);
 			webserviceClient.update(task);
@@ -104,12 +104,18 @@ public class TaskHandler implements InitializingBean
 	}
 
 	/**
-	 * @param businessKey          may be <code>null</code>
-	 * @param correlationKey       may be <code>null</code>
-	 * @param processDefinitionKey not <code>null</code>
-	 * @param versionTag           not <code>null</code>
-	 * @param messageName          not <code>null</code>
-	 * @param variables            may be <code>null</code>
+	 * @param businessKey
+	 *            may be <code>null</code>
+	 * @param correlationKey
+	 *            may be <code>null</code>
+	 * @param processDefinitionKey
+	 *            not <code>null</code>
+	 * @param versionTag
+	 *            not <code>null</code>
+	 * @param messageName
+	 *            not <code>null</code>
+	 * @param variables
+	 *            may be <code>null</code>
 	 */
 	protected void onMessage(String businessKey, String correlationKey, String processDefinitionKey, String versionTag,
 			String messageName, Map<String, Object> variables)

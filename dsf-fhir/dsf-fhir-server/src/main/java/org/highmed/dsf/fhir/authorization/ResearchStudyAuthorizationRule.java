@@ -87,7 +87,8 @@ public class ResearchStudyAuthorizationRule extends AbstractAuthorizationRule<Re
 		{
 			if (newResource.getIdentifier().stream()
 					.filter(i -> i.hasSystem() && i.hasValue() && RESEARCH_STUDY_IDENTIFIER.equals(i.getSystem())
-							&& RESEARCH_STUDY_IDENTIFIER_PATTERN.matcher(i.getValue()).matches()).count() != 1)
+							&& RESEARCH_STUDY_IDENTIFIER_PATTERN.matcher(i.getValue()).matches())
+					.count() != 1)
 			{
 				errors.add("ResearchStudy.identifier one with system '" + RESEARCH_STUDY_IDENTIFIER
 						+ "' and non empty value matching " + RESEARCH_STUDY_IDENTIFIER_PATTERN_STRING + " expected");
@@ -150,8 +151,8 @@ public class ResearchStudyAuthorizationRule extends AbstractAuthorizationRule<Re
 		{
 			Optional<Resource> practitioner = resolvePractitioner(connection, user,
 					"ResearchStudy.principalInvestigator", newResource.getPrincipalInvestigator());
-			if (practitioner.isPresent() && practitioner.get() instanceof Practitioner && ((Practitioner) practitioner
-					.get()).getActive())
+			if (practitioner.isPresent() && practitioner.get() instanceof Practitioner
+					&& ((Practitioner) practitioner.get()).getActive())
 			{
 				if (!practitionerRoleExists(connection, user, practitioner.get().getIdElement()))
 				{
@@ -207,9 +208,9 @@ public class ResearchStudyAuthorizationRule extends AbstractAuthorizationRule<Re
 
 	private boolean practitionerRoleExists(Connection connection, User user, IdType practitionerId)
 	{
-		Map<String, List<String>> queryParameters = Map
-				.of("practitioner", Collections.singletonList("Practitioner/" + practitionerId.getIdPart()), "active",
-						Collections.singletonList("true"));
+		Map<String, List<String>> queryParameters = Map.of("practitioner",
+				Collections.singletonList("Practitioner/" + practitionerId.getIdPart()), "active",
+				Collections.singletonList("true"));
 		PractitionerRoleDao dao = daoProvider.getPractitionerRoleDao();
 		SearchQuery<PractitionerRole> query = dao.createSearchQuery(user, 0, 0).configureParameters(queryParameters);
 
@@ -238,8 +239,8 @@ public class ResearchStudyAuthorizationRule extends AbstractAuthorizationRule<Re
 
 	private boolean researchStudyWithIdentifierExists(Connection connection, String identifierValue)
 	{
-		Map<String, List<String>> queryParameters = Map
-				.of("identifier", Collections.singletonList(RESEARCH_STUDY_IDENTIFIER + "|" + identifierValue));
+		Map<String, List<String>> queryParameters = Map.of("identifier",
+				Collections.singletonList(RESEARCH_STUDY_IDENTIFIER + "|" + identifierValue));
 		ResearchStudyDao dao = getDao();
 		SearchQuery<ResearchStudy> query = dao.createSearchQueryWithoutUserFilter(0, 0)
 				.configureParameters(queryParameters);
@@ -276,8 +277,8 @@ public class ResearchStudyAuthorizationRule extends AbstractAuthorizationRule<Re
 						ResearchStudyHelper.getParticipatingMedicReferences(existingResource)))
 				{
 					logger.info("Read of ResearchStudy authorized, ResearchStudy.extension(url:"
-									+ ResearchStudyHelper.PARTICIPATING_MEDIC_EXTENSION_URL
-									+ ") reference could be resolved and remote user '{}' part of referenced MeDIC organization",
+							+ ResearchStudyHelper.PARTICIPATING_MEDIC_EXTENSION_URL
+							+ ") reference could be resolved and remote user '{}' part of referenced MeDIC organization",
 							user.getName());
 					return Optional.of("remote user, ResearchStudy.extension(url:"
 							+ ResearchStudyHelper.PARTICIPATING_MEDIC_EXTENSION_URL
@@ -297,8 +298,8 @@ public class ResearchStudyAuthorizationRule extends AbstractAuthorizationRule<Re
 						ResearchStudyHelper.getParticipatingTtpReference(existingResource).orElse(null)))
 				{
 					logger.info("Read of ResearchStudy authorized, ResearchStudy.extension(url:"
-									+ ResearchStudyHelper.PARTICIPATING_TTP_EXTENSION_URL
-									+ ") reference could be resolved and remote user '{}' part of referenced TTP organization",
+							+ ResearchStudyHelper.PARTICIPATING_TTP_EXTENSION_URL
+							+ ") reference could be resolved and remote user '{}' part of referenced TTP organization",
 							user.getName());
 					return Optional.of("remote user, ResearchStudy.extension(url:"
 							+ ResearchStudyHelper.PARTICIPATING_TTP_EXTENSION_URL

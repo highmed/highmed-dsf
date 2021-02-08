@@ -36,8 +36,8 @@ public class AbstractJerseyClient
 	{
 		ClientBuilder builder = ClientBuilder.newBuilder();
 
-		builder = builder.readTimeout(readTimeout, TimeUnit.MILLISECONDS)
-				.connectTimeout(connectionTimeout, TimeUnit.MILLISECONDS);
+		builder = builder.readTimeout(readTimeout, TimeUnit.MILLISECONDS).connectTimeout(connectionTimeout,
+				TimeUnit.MILLISECONDS);
 
 		if (objectMapper != null)
 		{
@@ -46,12 +46,12 @@ public class AbstractJerseyClient
 			builder.register(p);
 		}
 
-		if (truststorePath != null && !truststorePath.isBlank() &&
-		    truststorePassword != null && !truststorePassword.isBlank())
+		if (truststorePath != null && !truststorePath.isBlank() && truststorePassword != null
+				&& !truststorePassword.isBlank())
 		{
 			logger.debug("Using custom truststore in openEHR client from file {}", truststorePath);
-			KeyStore truststore = CertificateReader
-					.fromPkcs12(Paths.get(truststorePath), truststorePassword.toCharArray());
+			KeyStore truststore = CertificateReader.fromPkcs12(Paths.get(truststorePath),
+					truststorePassword.toCharArray());
 			builder.trustStore(truststore);
 		}
 

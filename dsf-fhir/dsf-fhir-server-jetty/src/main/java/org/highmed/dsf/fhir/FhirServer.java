@@ -47,7 +47,7 @@ public final class FhirServer
 		SLF4JBridgeHandler.removeHandlersForRootLogger();
 		SLF4JBridgeHandler.install();
 	}
-	
+
 	public static void startHttpServer()
 	{
 		startServer(JettyServer::forwardedSecureRequestCustomizer, JettyServer::httpConnector);
@@ -92,7 +92,8 @@ public final class FhirServer
 				webInfClassesDirs, webInfJars, filters.toArray(new Class[filters.size()]));
 
 		server.getWebAppContext().addEventListener(new SessionInvalidator());
-		server.getWebAppContext().getSessionHandler().setSessionTrackingModes(Collections.singleton(SessionTrackingMode.SSL));
+		server.getWebAppContext().getSessionHandler()
+				.setSessionTrackingModes(Collections.singleton(SessionTrackingMode.SSL));
 
 		initializeWebSocketServerContainer(server);
 

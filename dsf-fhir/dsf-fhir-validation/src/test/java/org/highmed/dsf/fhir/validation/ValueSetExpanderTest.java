@@ -44,7 +44,8 @@ public class ValueSetExpanderTest
 
 		var validationSupport = new ValidationSupportChain(new InMemoryTerminologyServerValidationSupport(fhirContext),
 				new ValidationSupportWithCustomResources(fhirContext, Collections.emptyList(), readCodeSystems(),
-						Collections.emptyList()), new DefaultProfileValidationSupport(fhirContext));
+						Collections.emptyList()),
+				new DefaultProfileValidationSupport(fhirContext));
 
 		valueSetExpander = new ValueSetExpanderImpl(fhirContext, validationSupport);
 	}

@@ -86,11 +86,10 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 		}
 		catch (Exception e)
 		{
-			String errorMessage =
-					"Error while sending Task (process: " + processDefinitionKey + ", version: " + versionTag
-							+ ", message-name: " + messageName + ", business-key: " + businessKey
-							+ ", correlation-key: " + target.getCorrelationKey() + ") to organization with identifier "
-							+ target.getTargetOrganizationIdentifierValue() + ": " + e.getMessage();
+			String errorMessage = "Error while sending Task (process: " + processDefinitionKey + ", version: "
+					+ versionTag + ", message-name: " + messageName + ", business-key: " + businessKey
+					+ ", correlation-key: " + target.getCorrelationKey() + ") to organization with identifier "
+					+ target.getTargetOrganizationIdentifierValue() + ": " + e.getMessage();
 			logger.warn(errorMessage);
 			logger.debug("Error while sending Task", e);
 
@@ -100,8 +99,8 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 			targets.removeTarget(target);
 
 			Task task = getLeadingTaskFromExecutionVariables();
-			task.addOutput(getTaskHelper()
-					.createOutput(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR, errorMessage));
+			task.addOutput(getTaskHelper().createOutput(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR,
+					errorMessage));
 		}
 	}
 
@@ -109,7 +108,8 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 	 * Override this method to set a different target then the one defined in the process variable
 	 * {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_TARGET}
 	 *
-	 * @param execution the delegate execution of this process instance
+	 * @param execution
+	 *            the delegate execution of this process instance
 	 * @return {@link Target} that should receive the message
 	 */
 	protected Target getTarget(DelegateExecution execution)
@@ -149,26 +149,27 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 
 		// http://highmed.org/bpe/Process/processDefinitionKey
 		// http://highmed.org/bpe/Process/processDefinitionKey/versionTag
-		String instantiatesUri =
-				PROCESS_HIGHMED_URI_BASE + processDefinitionKey + (versionTag != null && !versionTag.isEmpty() ?
-						("/" + versionTag) :
-						"");
+		String instantiatesUri = PROCESS_HIGHMED_URI_BASE + processDefinitionKey
+				+ (versionTag != null && !versionTag.isEmpty() ? ("/" + versionTag) : "");
 		task.setInstantiatesUri(instantiatesUri);
 
-		ParameterComponent messageNameInput = new ParameterComponent(new CodeableConcept(
-				new Coding(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME, null)),
+		ParameterComponent messageNameInput = new ParameterComponent(
+				new CodeableConcept(
+						new Coding(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME, null)),
 				new StringType(messageName));
 		task.getInput().add(messageNameInput);
 
-		ParameterComponent businessKeyInput = new ParameterComponent(new CodeableConcept(
-				new Coding(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY, null)),
+		ParameterComponent businessKeyInput = new ParameterComponent(
+				new CodeableConcept(
+						new Coding(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY, null)),
 				new StringType(businessKey));
 		task.getInput().add(businessKeyInput);
 
 		if (correlationKey != null)
 		{
-			ParameterComponent correlationKeyInput = new ParameterComponent(new CodeableConcept(
-					new Coding(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY, null)),
+			ParameterComponent correlationKeyInput = new ParameterComponent(
+					new CodeableConcept(
+							new Coding(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY, null)),
 					new StringType(correlationKey));
 			task.getInput().add(correlationKeyInput);
 		}
@@ -195,9 +196,8 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 		else
 		{
 			logger.trace("Using remote webservice client");
-			return getFhirWebserviceClientProvider()
-					.getRemoteWebserviceClient(organizationProvider.getDefaultIdentifierSystem(),
-							targetOrganizationIdentifierValue);
+			return getFhirWebserviceClientProvider().getRemoteWebserviceClient(
+					organizationProvider.getDefaultIdentifierSystem(), targetOrganizationIdentifierValue);
 		}
 	}
 

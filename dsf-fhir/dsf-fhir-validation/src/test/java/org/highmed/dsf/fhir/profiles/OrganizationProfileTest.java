@@ -46,13 +46,11 @@ public class OrganizationProfileTest
 				.setValue(new StringType("A2BF39FF2A7E3D218A32AADE3B2AAA1F"));
 
 		ValidationResult result = resourceValidator.validate(org);
-		result.getMessages().stream()
-				.map(m -> m.getLocationString() + " " + m.getLocationLine() + ":" + m.getLocationCol() + " - " + m
-						.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
+		result.getMessages().stream().map(m -> m.getLocationString() + " " + m.getLocationLine() + ":"
+				+ m.getLocationCol() + " - " + m.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
 
-		assertEquals(0, result.getMessages().stream()
-				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
-						.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
 	}
 
 	@Test
@@ -69,13 +67,11 @@ public class OrganizationProfileTest
 				.setValue(new StringType("A2BF39FF2A7E3D218A32AADE3B2AAA1F"));
 
 		ValidationResult result = resourceValidator.validate(org);
-		result.getMessages().stream()
-				.map(m -> m.getLocationString() + " " + m.getLocationLine() + ":" + m.getLocationCol() + " - " + m
-						.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
+		result.getMessages().stream().map(m -> m.getLocationString() + " " + m.getLocationLine() + ":"
+				+ m.getLocationCol() + " - " + m.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
 
-		assertEquals(2, result.getMessages().stream()
-				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
-						.equals(m.getSeverity())).count());
+		assertEquals(2, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
 	}
 
 	@Test
@@ -91,13 +87,11 @@ public class OrganizationProfileTest
 				.setValue(new StringType("A2BF39FF2A7E3D218A32AADE3B2AAA1F"));
 
 		ValidationResult result = resourceValidator.validate(org);
-		result.getMessages().stream()
-				.map(m -> m.getLocationString() + " " + m.getLocationLine() + ":" + m.getLocationCol() + " - " + m
-						.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
+		result.getMessages().stream().map(m -> m.getLocationString() + " " + m.getLocationLine() + ":"
+				+ m.getLocationCol() + " - " + m.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
 
-		assertEquals(2, result.getMessages().stream()
-				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
-						.equals(m.getSeverity())).count());
+		assertEquals(2, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
 	}
 
 	@Test
@@ -112,12 +106,10 @@ public class OrganizationProfileTest
 				.setValue(new StringType("A2BF39FF2A7E3D218A32AADE3B2AAA1F"));
 
 		ValidationResult result = resourceValidator.validate(org);
-		result.getMessages().stream()
-				.map(m -> m.getLocationString() + " " + m.getLocationLine() + ":" + m.getLocationCol() + " - " + m
-						.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
+		result.getMessages().stream().map(m -> m.getLocationString() + " " + m.getLocationLine() + ":"
+				+ m.getLocationCol() + " - " + m.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
 
-		assertEquals(2, result.getMessages().stream()
-				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
-						.equals(m.getSeverity())).count());
+		assertEquals(2, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
 	}
 }

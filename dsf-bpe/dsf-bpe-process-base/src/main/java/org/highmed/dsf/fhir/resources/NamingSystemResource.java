@@ -15,7 +15,8 @@ public class NamingSystemResource extends AbstractResource
 
 	public static NamingSystemResource file(String namingSystemFileName)
 	{
-		return new NamingSystemResource(NamingSystem.class, null, null, Objects.requireNonNull(namingSystemFileName, "namingSystemFileName"));
+		return new NamingSystemResource(NamingSystem.class, null, null,
+				Objects.requireNonNull(namingSystemFileName, "namingSystemFileName"));
 	}
 
 	public static NamingSystemResource dependency(String dependencyNameAndVersion, String namingSystemName)

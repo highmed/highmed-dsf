@@ -34,8 +34,8 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testSearchOrganizationIncludeEndpoint() throws Exception
 	{
-		Bundle searchBundle = getWebserviceClient()
-				.search(Organization.class, Map.of("_include", Collections.singletonList("Organization:endpoint")));
+		Bundle searchBundle = getWebserviceClient().search(Organization.class,
+				Map.of("_include", Collections.singletonList("Organization:endpoint")));
 		assertNotNull(searchBundle);
 		assertEquals(2, searchBundle.getTotal());
 		assertEquals(4, searchBundle.getEntry().size());
@@ -68,8 +68,8 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testSearchOrganizationRevIncludeEndpoint() throws Exception
 	{
-		Bundle searchBundle = getWebserviceClient()
-				.search(Organization.class, Map.of("_revinclude", Collections.singletonList("Endpoint:organization")));
+		Bundle searchBundle = getWebserviceClient().search(Organization.class,
+				Map.of("_revinclude", Collections.singletonList("Endpoint:organization")));
 		assertNotNull(searchBundle);
 		assertEquals(2, searchBundle.getTotal());
 		assertEquals(4, searchBundle.getEntry().size());
@@ -148,8 +148,8 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 
 		String existingThumbprint = ((StringType) thumbprints1.get(0).getValue()).getValue();
 
-		Bundle bundle2 = getWebserviceClient().search(Organization.class, Map.of("identifier", Collections
-				.singletonList(
+		Bundle bundle2 = getWebserviceClient().search(Organization.class,
+				Map.of("identifier", Collections.singletonList(
 						"http://highmed.org/fhir/NamingSystem/organization-identifier|External_Test_Organization")));
 		assertNotNull(bundle2);
 		assertEquals(1, bundle2.getTotal());
@@ -233,7 +233,7 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 		Extension oldThumbprint = thumbprints.get(0);
 		Extension newThumbprint = new Extension(
 				"http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint", new StringType(
-				"00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"));
+						"00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"));
 
 		org.setExtension(List.of(newThumbprint, oldThumbprint));
 		getWebserviceClient().update(org);

@@ -52,12 +52,10 @@ public class EndpointProfileTest
 		endpoint.setAddress("https://fhir.test.com/fhir");
 
 		ValidationResult result = resourceValidator.validate(endpoint);
-		result.getMessages().stream()
-				.map(m -> m.getLocationString() + " " + m.getLocationLine() + ":" + m.getLocationCol() + " - " + m
-						.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
+		result.getMessages().stream().map(m -> m.getLocationString() + " " + m.getLocationLine() + ":"
+				+ m.getLocationCol() + " - " + m.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
 
-		assertEquals(0, result.getMessages().stream()
-				.filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity()) || ResultSeverityEnum.FATAL
-						.equals(m.getSeverity())).count());
+		assertEquals(0, result.getMessages().stream().filter(m -> ResultSeverityEnum.ERROR.equals(m.getSeverity())
+				|| ResultSeverityEnum.FATAL.equals(m.getSeverity())).count());
 	}
 }

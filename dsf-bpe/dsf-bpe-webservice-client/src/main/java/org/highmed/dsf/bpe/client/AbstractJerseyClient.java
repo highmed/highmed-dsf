@@ -1,6 +1,5 @@
 package org.highmed.dsf.bpe.client;
 
-
 import java.security.KeyStore;
 import java.util.List;
 import java.util.concurrent.TimeUnit;

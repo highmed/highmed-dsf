@@ -94,10 +94,9 @@ public class OrganizationAuthorizationRule extends AbstractAuthorizationRule<Org
 
 		if (newResource.hasExtension())
 		{
-			if (!newResource.getExtension().stream().anyMatch(
-					e -> e.hasUrl() && e.hasValue() && (e.getValue() instanceof StringType) && EXTENSION_THUMBPRINT_URL
-							.equals(e.getUrl()) && EXTENSION_THUMBPRINT_VALUE_PATTERN
-							.matcher(((StringType) e.getValue()).getValue()).matches()))
+			if (!newResource.getExtension().stream().anyMatch(e -> e.hasUrl() && e.hasValue()
+					&& (e.getValue() instanceof StringType) && EXTENSION_THUMBPRINT_URL.equals(e.getUrl())
+					&& EXTENSION_THUMBPRINT_VALUE_PATTERN.matcher(((StringType) e.getValue()).getValue()).matches()))
 			{
 				errors.add("Organization.extension missing extension with url '" + EXTENSION_THUMBPRINT_URL
 						+ "' and value matching " + EXTENSION_THUMBPRINT_VALUE_PATTERN_STRING + " pattern");
@@ -125,16 +124,16 @@ public class OrganizationAuthorizationRule extends AbstractAuthorizationRule<Org
 				.filter(i -> i.hasSystem() && i.hasValue() && IDENTIFIER_SYSTEM.equals(i.getSystem()))
 				.map(i -> i.getValue()).findFirst().orElseThrow();
 
-		return resourceExistsWithThumbprint(connection, newResource) || organizationWithIdentifierExists(connection,
-				identifierValue);
+		return resourceExistsWithThumbprint(connection, newResource)
+				|| organizationWithIdentifierExists(connection, identifierValue);
 	}
 
 	private boolean resourceExistsWithThumbprint(Connection connection, Organization newResource)
 	{
 		String thumbprintValue = newResource.getExtension().stream()
 				.filter(e -> e.hasUrl() && e.hasValue() && (e.getValue() instanceof StringType)
-						&& EXTENSION_THUMBPRINT_URL.equals(e.getUrl())).map(e -> ((StringType) e.getValue()).getValue())
-				.findFirst().orElseThrow();
+						&& EXTENSION_THUMBPRINT_URL.equals(e.getUrl()))
+				.map(e -> ((StringType) e.getValue()).getValue()).findFirst().orElseThrow();
 
 		return organizationWithThumbprintExists(connection, thumbprintValue);
 	}
@@ -155,8 +154,8 @@ public class OrganizationAuthorizationRule extends AbstractAuthorizationRule<Org
 
 	private boolean organizationWithIdentifierExists(Connection connection, String identifierValue)
 	{
-		Map<String, List<String>> queryParameters = Map
-				.of("identifier", Collections.singletonList(IDENTIFIER_SYSTEM + "|" + identifierValue));
+		Map<String, List<String>> queryParameters = Map.of("identifier",
+				Collections.singletonList(IDENTIFIER_SYSTEM + "|" + identifierValue));
 		OrganizationDao dao = getDao();
 		SearchQuery<Organization> query = dao.createSearchQueryWithoutUserFilter(0, 0)
 				.configureParameters(queryParameters);
@@ -215,16 +214,16 @@ public class OrganizationAuthorizationRule extends AbstractAuthorizationRule<Org
 					logger.info(
 							"Update of Organization authorized for local user '{}', identifier same as existing Organization and certificate-thumbprint same as existing or other Organization with thumbprint does not exist",
 							user.getName());
-					return Optional
-							.of("local user; identifier same as existing Organization and certificate-thumbprint same as existing or other Organization with thumbprint does not exist");
+					return Optional.of(
+							"local user; identifier same as existing Organization and certificate-thumbprint same as existing or other Organization with thumbprint does not exist");
 				}
 				else if (!resourceExists(connection, newResource))
 				{
 					logger.info(
 							"Update of Organization authorized for local user '{}', other Organization with certificate-thumbprint or identifier does not exist",
 							user.getName());
-					return Optional
-							.of("local user; other Organization with certificate-thumbprint and identifier does not exist");
+					return Optional.of(
+							"local user; other Organization with certificate-thumbprint and identifier does not exist");
 				}
 				else
 				{

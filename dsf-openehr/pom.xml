@@ -19,6 +19,10 @@
 		<module>dsf-openehr-client-stub</module>
 		<module>dsf-openehr-client-impl</module>
 	</modules>
+	
+	<properties>
+		<main.basedir>${project.basedir}/..</main.basedir>
+	</properties>
 
 	<dependencies>
 		<dependency>

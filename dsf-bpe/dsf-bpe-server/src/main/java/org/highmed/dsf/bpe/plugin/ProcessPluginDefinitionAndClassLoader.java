@@ -70,7 +70,7 @@ public class ProcessPluginDefinitionAndClassLoader
 			context.register(getDefinition().getSpringConfigClasses().toArray(Class<?>[]::new));
 			context.refresh();
 		}
-		
+
 		return context;
 	}
 
