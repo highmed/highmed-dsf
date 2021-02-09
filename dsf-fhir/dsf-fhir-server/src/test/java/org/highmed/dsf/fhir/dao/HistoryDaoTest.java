@@ -36,8 +36,8 @@ public class HistoryDaoTest extends AbstractDbTest
 	@ClassRule
 	public static final LiquibaseTemplateTestClassRule liquibaseRule = new LiquibaseTemplateTestClassRule(
 			adminDataSource, LiquibaseTemplateTestClassRule.DEFAULT_TEST_DB_NAME,
-			AbstractResourceDaoTest.DAO_DB_TEMPLATE_NAME, liquibaseDataSource, CHANGE_LOG_FILE,
-			CHANGE_LOG_PARAMETERS, true);
+			AbstractResourceDaoTest.DAO_DB_TEMPLATE_NAME, liquibaseDataSource, CHANGE_LOG_FILE, CHANGE_LOG_PARAMETERS,
+			true);
 
 	@AfterClass
 	public static void afterClass() throws Exception

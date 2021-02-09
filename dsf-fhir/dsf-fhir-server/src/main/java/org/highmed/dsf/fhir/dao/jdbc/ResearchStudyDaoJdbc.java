@@ -29,7 +29,8 @@ public class ResearchStudyDaoJdbc extends AbstractResourceDaoJdbc<ResearchStudy>
 	{
 		super(dataSource, fhirContext, ResearchStudy.class, "research_studies", "research_study", "research_study_id",
 				ResearchStudyUserFilter::new, with(ResearchStudyEnrollment::new, ResearchStudyIdentifier::new,
-						ResearchStudyPrincipalInvestigator::new), with());
+						ResearchStudyPrincipalInvestigator::new),
+				with());
 	}
 
 	@Override
@@ -48,8 +49,8 @@ public class ResearchStudyDaoJdbc extends AbstractResourceDaoJdbc<ResearchStudy>
 		Objects.requireNonNull(organizationType, "organizationType");
 		Objects.requireNonNull(organizationId, "organizationId");
 
-		try (PreparedStatement statement = connection.prepareStatement(
-				"SELECT COUNT(*) FROM current_research_studies WHERE "
+		try (PreparedStatement statement = connection
+				.prepareStatement("SELECT COUNT(*) FROM current_research_studies WHERE "
 						+ "(research_study->'principalInvestigator'->>'reference' = ? OR research_study->'principalInvestigator'->>'reference' = ?) AND "
 						+ "(research_study->'extension' @> ?::jsonb OR research_study->'extension' @> ?::jsonb)"))
 		{
@@ -78,8 +79,8 @@ public class ResearchStudyDaoJdbc extends AbstractResourceDaoJdbc<ResearchStudy>
 		Objects.requireNonNull(organizationType, "organizationType");
 		Objects.requireNonNull(organizationId, "organizationId");
 
-		try (PreparedStatement statement = connection.prepareStatement(
-				"SELECT COUNT(*) FROM current_research_studies WHERE "
+		try (PreparedStatement statement = connection
+				.prepareStatement("SELECT COUNT(*) FROM current_research_studies WHERE "
 						+ "(? IN (SELECT enrollment->>'reference' FROM jsonb_array_elements(research_study->'enrollment') AS enrollment) OR "
 						+ "? IN (SELECT enrollment->>'reference' FROM jsonb_array_elements(research_study->'enrollment') AS enrollment)) AND "
 						+ "(research_study->'extension' @> ?::jsonb OR research_study->'extension' @> ?::jsonb)"))

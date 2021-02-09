@@ -20,8 +20,9 @@ public class GroupHelperImpl implements GroupHelper
 	public String extractAqlQuery(Group group)
 	{
 		List<Extension> queries = group.getExtension().stream()
-				.filter(extension -> extension.getUrl().equals(EXTENSION_HIGHMED_QUERY)).filter(extension ->
-						CODE_TYPE_AQL_QUERY.compareTo(((Expression) extension.getValue()).getLanguageElement()) == 0)
+				.filter(extension -> extension.getUrl().equals(EXTENSION_HIGHMED_QUERY))
+				.filter(extension -> CODE_TYPE_AQL_QUERY
+						.compareTo(((Expression) extension.getValue()).getLanguageElement()) == 0)
 				.collect(Collectors.toList());
 
 		if (queries.size() != 1)

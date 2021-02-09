@@ -16,6 +16,10 @@
 		<module>dsf-pseudonymization-medic</module>
 		<module>dsf-pseudonymization-ttp</module>
 	</modules>
+	
+	<properties>
+		<main.basedir>${project.basedir}/..</main.basedir>
+	</properties>
 
 	<dependencies>
 		<dependency>

@@ -74,36 +74,38 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 					execution.getProcessDefinitionId(), execution.getActivityInstanceId(), task.getId(),
 					exception.getMessage());
 
-			String errorMessage =
-					"Process " + execution.getProcessDefinitionId() + " has fatal error in step " + execution
-							.getActivityInstanceId() + ", reason: " + exception.getMessage();
+			String errorMessage = "Process " + execution.getProcessDefinitionId() + " has fatal error in step "
+					+ execution.getActivityInstanceId() + ", reason: " + exception.getMessage();
 
-			task.addOutput(taskHelper
-					.createOutput(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR, errorMessage));
+			task.addOutput(taskHelper.createOutput(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR,
+					errorMessage));
 			task.setStatus(Task.TaskStatus.FAILED);
 
 			clientProvider.getLocalWebserviceClient().withMinimalReturn().update(task);
 
 			// TODO evaluate throwing exception as alternative to stopping the process instance
-			execution.getProcessEngine().getRuntimeService()
-					.deleteProcessInstance(execution.getProcessInstanceId(), exception.getMessage());
+			execution.getProcessEngine().getRuntimeService().deleteProcessInstance(execution.getProcessInstanceId(),
+					exception.getMessage());
 		}
 	}
 
 	private Task getTask(DelegateExecution execution)
 	{
-		return execution.getParentId() == null || execution.getParentId().equals(execution.getProcessInstanceId()) ?
-				getLeadingTaskFromExecutionVariables() :
-				getCurrentTaskFromExecutionVariables();
+		return execution.getParentId() == null || execution.getParentId().equals(execution.getProcessInstanceId())
+				? getLeadingTaskFromExecutionVariables()
+				: getCurrentTaskFromExecutionVariables();
 	}
 
 	/**
 	 * Method called by a BPMN service task
 	 *
-	 * @param execution Process instance information and variables
-	 * @throws BpmnError Thrown when an error boundary event should be called
-	 * @throws Exception Uncaught exceptions will result in task status failed, the exception message will be written as an
-	 *                   error output
+	 * @param execution
+	 *            Process instance information and variables
+	 * @throws BpmnError
+	 *             Thrown when an error boundary event should be called
+	 * @throws Exception
+	 *             Uncaught exceptions will result in task status failed, the exception message will be written as an
+	 *             error output
 	 */
 	protected abstract void doExecute(DelegateExecution execution) throws BpmnError, Exception;
 
@@ -119,8 +121,9 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 
 	/**
 	 * @return the current task from execution variables, the task resource that started the current process or
-	 * subprocess
-	 * @throws IllegalStateException if execution of this service delegate has not been started
+	 *         subprocess
+	 * @throws IllegalStateException
+	 *             if execution of this service delegate has not been started
 	 * @see ConstantsBase#BPMN_EXECUTION_VARIABLE_TASK
 	 */
 	protected final Task getCurrentTaskFromExecutionVariables()
@@ -133,7 +136,8 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 
 	/**
 	 * @return the leading task from execution variables, same as current task if not in a subprocess
-	 * @throws IllegalStateException if execution of this service delegate has not been started
+	 * @throws IllegalStateException
+	 *             if execution of this service delegate has not been started
 	 * @see ConstantsBase#BPMN_EXECUTION_VARIABLE_LEADING_TASK
 	 */
 	protected final Task getLeadingTaskFromExecutionVariables()

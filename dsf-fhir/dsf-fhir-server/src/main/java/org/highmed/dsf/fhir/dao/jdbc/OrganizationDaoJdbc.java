@@ -29,9 +29,9 @@ public class OrganizationDaoJdbc extends AbstractResourceDaoJdbc<Organization> i
 	public OrganizationDaoJdbc(DataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, Organization.class, "organizations", "organization", "organization_id",
-				OrganizationUserFilter::new,
-				with(OrganizationActive::new, OrganizationEndpoint::new, OrganizationIdentifier::new,
-						OrganizationName::new, OrganizationType::new), with(EndpointOrganizationRevInclude::new));
+				OrganizationUserFilter::new, with(OrganizationActive::new, OrganizationEndpoint::new,
+						OrganizationIdentifier::new, OrganizationName::new, OrganizationType::new),
+				with(EndpointOrganizationRevInclude::new));
 	}
 
 	@Override
@@ -51,9 +51,8 @@ public class OrganizationDaoJdbc extends AbstractResourceDaoJdbc<Organization> i
 						"SELECT organization FROM current_organizations WHERE organization->'extension' @> ?::jsonb AND organization->>'active' = 'true'"))
 		{
 
-			String search =
-					"[{\"url\": \"http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint\", \"valueString\": \""
-							+ thumbprintHex + "\"}]";
+			String search = "[{\"url\": \"http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint\", \"valueString\": \""
+					+ thumbprintHex + "\"}]";
 			statement.setString(1, search);
 
 			logger.trace("Executing query '{}'", statement);
@@ -95,9 +94,8 @@ public class OrganizationDaoJdbc extends AbstractResourceDaoJdbc<Organization> i
 						"SELECT organization FROM current_organizations WHERE organization->'identifier' @> ?::jsonb AND organization->>'active' = 'true'"))
 		{
 
-			String search =
-					"[{\"system\": \"http://highmed.org/fhir/NamingSystem/organization-identifier\", \"value\": \""
-							+ identifierValue + "\"}]";
+			String search = "[{\"system\": \"http://highmed.org/fhir/NamingSystem/organization-identifier\", \"value\": \""
+					+ identifierValue + "\"}]";
 			statement.setString(1, search);
 
 			logger.trace("Executing query '{}'", statement);
@@ -138,9 +136,8 @@ public class OrganizationDaoJdbc extends AbstractResourceDaoJdbc<Organization> i
 		try (PreparedStatement statement = connection.prepareStatement(
 				"SELECT organization FROM current_organizations WHERE organization->'extension' @> ?::jsonb"))
 		{
-			String search =
-					"[{\"url\": \"http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint\", \"valueString\": \""
-							+ thumbprintHex + "\"}]";
+			String search = "[{\"url\": \"http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint\", \"valueString\": \""
+					+ thumbprintHex + "\"}]";
 			statement.setString(1, search);
 
 			logger.trace("Executing query '{}'", statement);

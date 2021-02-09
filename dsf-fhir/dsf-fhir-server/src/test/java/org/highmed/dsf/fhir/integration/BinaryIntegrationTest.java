@@ -1618,35 +1618,35 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	{
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
 		Organization createdOrg = orgDao.create(new Organization());
-		
+
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data1 = "Hello World".getBytes(StandardCharsets.UTF_8);
-		
+
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data1);
 		binary.setSecurityContext(new Reference(createdOrg.getIdElement().toVersionless()));
-		
+
 		BinaryDao binaryDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
 		Binary created = binaryDao.create(binary);
-		
+
 		assertNotNull(created);
 		assertNotNull(created.getIdElement().toString());
 		assertEquals("1", created.getMeta().getVersionId());
 		assertNotNull(created.getMeta().getLastUpdated());
-		
+
 		assertNotNull(created.getContentType());
 		assertEquals(contentType, created.getContentType());
 		assertTrue(Arrays.equals(data1, created.getData()));
-		
+
 		assertNotNull(created.getSecurityContext());
 		assertEquals(createdOrg.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
-		
+
 		boolean deleted = binaryDao.delete(UUID.fromString(created.getIdElement().getIdPart()));
 		assertTrue(deleted);
 
 		getWebserviceClient().delete(Binary.class, created.getIdElement().getIdPart());
-		
+
 		binaryDao.read(UUID.fromString(created.getIdElement().getIdPart()));
 	}
 

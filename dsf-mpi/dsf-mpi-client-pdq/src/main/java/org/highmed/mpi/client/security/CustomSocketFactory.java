@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.hl7v2.util.StandardSocketFactory;
-
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.context.SSLContextFactory;
 import de.rwh.utils.crypto.io.CertificateReader;
@@ -25,8 +24,10 @@ public class CustomSocketFactory extends StandardSocketFactory
 	private final String keystorePassword;
 
 	/**
-	 * @param keystorePath     the path to the .p12 file containing the client certificate, not <code>null</code>
-	 * @param keystorePassword the password of the .p12 file containing the client certificate, not <code>null</code>
+	 * @param keystorePath
+	 *            the path to the .p12 file containing the client certificate, not <code>null</code>
+	 * @param keystorePassword
+	 *            the password of the .p12 file containing the client certificate, not <code>null</code>
 	 */
 	public CustomSocketFactory(String keystorePath, String keystorePassword)
 	{

@@ -16,8 +16,8 @@ public interface BuildInfoReader
 	ZonedDateTime getBuildDate();
 
 	Date getBuildDateAsDate();
-	
+
 	void logSystemDefaultTimezone();
-	
+
 	void logBuildInfo();
 }

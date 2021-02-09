@@ -43,7 +43,7 @@ public class BundleGenerator
 		try (InputStream in = Files.newInputStream(bundleTemplateFile))
 		{
 			Bundle bundle = newXmlParser().parseResource(Bundle.class, in);
-			
+
 			// FIXME hapi parser can't handle embedded resources and creates them while parsing bundles
 			return cleaner.cleanReferenceResourcesIfBundle(bundle);
 		}

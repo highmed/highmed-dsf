@@ -73,9 +73,11 @@ public class OrganizationDaoTest extends AbstractResourceDaoTest<Organization, O
 		assertEquals(StringType.class, read.get()
 				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint")
 				.getValue().getClass());
-		assertEquals(certHex, ((StringType) read.get()
-				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint")
-				.getValue()).asStringValue());
+		assertEquals(certHex,
+				((StringType) read.get()
+						.getExtensionByUrl(
+								"http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint")
+						.getValue()).asStringValue());
 	}
 
 	@Test

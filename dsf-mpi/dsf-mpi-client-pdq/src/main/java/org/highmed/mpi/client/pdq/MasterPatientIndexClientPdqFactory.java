@@ -23,19 +23,21 @@ public class MasterPatientIndexClientPdqFactory implements MasterPatientIndexCli
 
 		String senderApplication = propertyResolver.apply("org.highmed.dsf.bpe.mpi.pdq.sender.application");
 		String senderFacility = propertyResolver.apply("org.highmed.dsf.bpe.mpi.pdq.sender.facility");
-		String receiverApplication =  propertyResolver.apply("org.highmed.dsf.bpe.mpi.pdq.receiver.application");
+		String receiverApplication = propertyResolver.apply("org.highmed.dsf.bpe.mpi.pdq.receiver.application");
 		String receiverFacility = propertyResolver.apply("org.highmed.dsf.bpe.mpi.pdq.receiver.facility");
 
-		String pidAssigningAuthorityNamespaceId = propertyResolver.apply("org.highmed.dsf.bpe.mpi.pdq.assigningAuthority.namespaceId");
-		String pidAssigningAuthorityUniversalId = propertyResolver.apply("org.highmed.dsf.bpe.mpi.pdq.assigningAuthority.universalId");
+		String pidAssigningAuthorityNamespaceId = propertyResolver
+				.apply("org.highmed.dsf.bpe.mpi.pdq.assigningAuthority.namespaceId");
+		String pidAssigningAuthorityUniversalId = propertyResolver
+				.apply("org.highmed.dsf.bpe.mpi.pdq.assigningAuthority.universalId");
 
 		MessageHelper messageHelper = new MessageHelper();
 		HapiContext context = new DefaultHapiContext();
 
 		SocketFactory socketFactory = new CustomSocketFactory(keystorePath, keystorePassword);
 
-		return new MasterPatientIndexClientPdq(host, port, senderApplication,
-				senderFacility, receiverApplication, receiverFacility, pidAssigningAuthorityNamespaceId,
-				pidAssigningAuthorityUniversalId, messageHelper, context, socketFactory);
+		return new MasterPatientIndexClientPdq(host, port, senderApplication, senderFacility, receiverApplication,
+				receiverFacility, pidAssigningAuthorityNamespaceId, pidAssigningAuthorityUniversalId, messageHelper,
+				context, socketFactory);
 	}
 }

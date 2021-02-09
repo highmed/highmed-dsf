@@ -17,28 +17,28 @@ import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.Task;
 
 import ca.uhn.fhir.context.FhirContext;
-
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.CertificateReader;
 
 public class ExampleStarter
 {
 	/**
-	 * Creates an object to send start-process-messages to a given FHIR-Endpoint baseUrl based on the
-	 * provided client-certificate path and client-certificate password.
+	 * Creates an object to send start-process-messages to a given FHIR-Endpoint baseUrl based on the provided
+	 * client-certificate path and client-certificate password.
 	 *
 	 * The client-certificate path is first read from the environment variable
-	 * {@link ConstantsExampleStarters#ENV_DSF_CLIENT_CERTIFICATE_PATH}.
-	 * If args[0] is set, the environment variable is overwritten by args[0].
+	 * {@link ConstantsExampleStarters#ENV_DSF_CLIENT_CERTIFICATE_PATH}. If args[0] is set, the environment variable is
+	 * overwritten by args[0].
 	 *
 	 * The client-certificate password is first read from the environment variable
-	 * {@link ConstantsExampleStarters#ENV_DSF_CLIENT_CERTIFICATE_PASSWORD}.
-	 * If args[1] is set, the environment variable is overwritten by args[1].
+	 * {@link ConstantsExampleStarters#ENV_DSF_CLIENT_CERTIFICATE_PASSWORD}. If args[1] is set, the environment variable
+	 * is overwritten by args[1].
 	 *
-	 * @param args client-certificate arguments:
-	 *                args[0] can be the path of the client-certificate
-	 *                args[1] can be the password of the client-certificate
-	 * @param baseUrl the baseUrl of the organization's FHIR-Endpoint
+	 * @param args
+	 *            client-certificate arguments: args[0] can be the path of the client-certificate args[1] can be the
+	 *            password of the client-certificate
+	 * @param baseUrl
+	 *            the baseUrl of the organization's FHIR-Endpoint
 	 * @return initialized ExampleStarter instance
 	 */
 	public static ExampleStarter forServer(String[] args, String baseUrl)
@@ -56,12 +56,15 @@ public class ExampleStarter
 	}
 
 	/**
-	 * Creates an object to send start-process-messages to a given FHIR-Endpoint baseUrl based on the
-	 * provided client-certificate path and client-certificate password.
+	 * Creates an object to send start-process-messages to a given FHIR-Endpoint baseUrl based on the provided
+	 * client-certificate path and client-certificate password.
 	 *
-	 * @param certificatePath     the path of the client-certificate
-	 * @param certificatePassword the password of the client-certificate
-	 * @param baseUrl             the baseUrl of the organization's FHIR-Endpoint
+	 * @param certificatePath
+	 *            the path of the client-certificate
+	 * @param certificatePassword
+	 *            the password of the client-certificate
+	 * @param baseUrl
+	 *            the baseUrl of the organization's FHIR-Endpoint
 	 * @return initialized ExampleStarter instance
 	 */
 	public static ExampleStarter forServer(String certificatePath, String certificatePassword, String baseUrl)

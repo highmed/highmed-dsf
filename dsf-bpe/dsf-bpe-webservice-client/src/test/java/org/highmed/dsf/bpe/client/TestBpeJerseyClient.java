@@ -26,22 +26,23 @@ public class TestBpeJerseyClient
 
 		WebserviceClient client = new WebserviceClientJersey("https://localhost:8002/bpe", trustStore, keyStore,
 				keyStorePassword, null, null, null, 0, 0, null);
-		//		WebserviceClient client = new WebserviceClientJersey("https://localhost:8443/bpe", trustStore, keyStore,
-		//				keyStorePassword, null, null, null, 0, 0, null);
+		// WebserviceClient client = new WebserviceClientJersey("https://localhost:8443/bpe", trustStore, keyStore,
+		// keyStorePassword, null, null, null, 0, 0, null);
 
-		//		client.startProcessWithVersion("ping", "1.0.0");
+		// client.startProcessWithVersion("ping", "1.0.0");
 
-		//		client.startProcessWithVersion("updateAllowList", "1.0.0");
+		// client.startProcessWithVersion("updateAllowList", "1.0.0");
 
-		client.startProcessWithVersion("requestUpdateResources", "1.0.0", Map.of("target-identifier",
-				Collections.singletonList("http://highmed.org/fhir/NamingSystem/organization-identifier|"), "bundle-id",
-				Arrays.asList("Bundle/2548395d-83d3-488a-859e-a844e62ce3fd")));
+		client.startProcessWithVersion("requestUpdateResources", "1.0.0",
+				Map.of("target-identifier",
+						Collections.singletonList("http://highmed.org/fhir/NamingSystem/organization-identifier|"),
+						"bundle-id", Arrays.asList("Bundle/2548395d-83d3-488a-859e-a844e62ce3fd")));
 
-		//		client.startProcessWithVersion("requestUpdateResources", "1.0.0", Map.of("target-identifier",
-		//				Collections.singletonList("http://highmed.org/fhir/NamingSystem/organization-identifier|"), "bundle-id",
-		//				Arrays.asList("Bundle/30a376fa-f3ba-4f68-8e04-c5b9c0c4f5c9")));
+		// client.startProcessWithVersion("requestUpdateResources", "1.0.0", Map.of("target-identifier",
+		// Collections.singletonList("http://highmed.org/fhir/NamingSystem/organization-identifier|"), "bundle-id",
+		// Arrays.asList("Bundle/30a376fa-f3ba-4f68-8e04-c5b9c0c4f5c9")));
 
-		//		client.startProcessWithVersion("requestCohortSizeQuery", "1.0.0");
-		//		client.startProcessWithVersion("executeCohortSizeQuery", "1.0.0");
+		// client.startProcessWithVersion("requestCohortSizeQuery", "1.0.0");
+		// client.startProcessWithVersion("executeCohortSizeQuery", "1.0.0");
 	}
 }

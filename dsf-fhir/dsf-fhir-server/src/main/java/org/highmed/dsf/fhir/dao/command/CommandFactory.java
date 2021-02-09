@@ -17,7 +17,7 @@ public interface CommandFactory
 	 *            not <code>null</code>
 	 * @param handlingType
 	 *            not <code>null</code>
-	 *            
+	 * 
 	 * @return
 	 * @throws BadBundleException
 	 */

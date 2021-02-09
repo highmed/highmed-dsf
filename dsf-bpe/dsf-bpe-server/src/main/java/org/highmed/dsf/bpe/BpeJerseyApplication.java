@@ -21,7 +21,7 @@ public final class BpeJerseyApplication extends ResourceConfig
 	public BpeJerseyApplication(ServletContext servletContext)
 	{
 		WebApplicationContext context = WebApplicationContextUtils.getWebApplicationContext(servletContext);
-		
+
 		context.getBeansWithAnnotation(Path.class).forEach((n, b) ->
 		{
 			logger.debug("Registering bean '{}' as singleton resource with path '{}'", n,

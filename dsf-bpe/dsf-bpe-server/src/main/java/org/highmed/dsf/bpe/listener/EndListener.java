@@ -20,7 +20,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Added to each BPMN EndEvent by the {@link DefaultBpmnParseListener}. Is used to set the FHIR {@link Task} status as
  * {@link Task.TaskStatus#COMPLETED} if the process ends successfully and sets {@link Task}.output values. Sets the
- * {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_IN_CALLED_PROCESS} back to <code>false</code> if a called sub process ends.
+ * {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_IN_CALLED_PROCESS} back to <code>false</code> if a called sub process
+ * ends.
  */
 public class EndListener implements ExecutionListener
 {
@@ -38,8 +39,7 @@ public class EndListener implements ExecutionListener
 	@Override
 	public void notify(DelegateExecution execution) throws Exception
 	{
-		boolean inCalledProcess = (boolean) execution
-				.getVariable(BPMN_EXECUTION_VARIABLE_IN_CALLED_PROCESS);
+		boolean inCalledProcess = (boolean) execution.getVariable(BPMN_EXECUTION_VARIABLE_IN_CALLED_PROCESS);
 
 		// not in a called process --> process end if it is not a subprocess
 		if (!inCalledProcess)
@@ -79,9 +79,8 @@ public class EndListener implements ExecutionListener
 				CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME).orElse(null);
 		String businessKey = taskHelper.getFirstInputParameterStringValue(task, CODESYSTEM_HIGHMED_BPMN,
 				CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY).orElse(null);
-		String correlationKey = taskHelper
-				.getFirstInputParameterStringValue(task, CODESYSTEM_HIGHMED_BPMN,
-						CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY).orElse(null);
+		String correlationKey = taskHelper.getFirstInputParameterStringValue(task, CODESYSTEM_HIGHMED_BPMN,
+				CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY).orElse(null);
 		String taskId = task.getIdElement().getIdPart();
 
 		logger.info("Process {} finished [message: {}, businessKey: {}, correlationKey: {}, taskId: {}]", processUrl,

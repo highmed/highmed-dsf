@@ -64,8 +64,7 @@ public class ResultSetTranslatorToTtpRbfOnlyImpl extends AbstractResultSetTransl
 	public ResultSetTranslatorToTtpRbfOnlyImpl(String ehrIdColumnPath,
 			RecordBloomFilterGenerator recordBloomFilterGenerator, MasterPatientIndexClient masterPatientIndexClient)
 	{
-		this(ehrIdColumnPath, recordBloomFilterGenerator, masterPatientIndexClient,
-				THROW_ON_IDAT_NOT_FOUND_EXCEPTION);
+		this(ehrIdColumnPath, recordBloomFilterGenerator, masterPatientIndexClient, THROW_ON_IDAT_NOT_FOUND_EXCEPTION);
 	}
 
 	public ResultSetTranslatorToTtpRbfOnlyImpl(String ehrIdColumnPath,

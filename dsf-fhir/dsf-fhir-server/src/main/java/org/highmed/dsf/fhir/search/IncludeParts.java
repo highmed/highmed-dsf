@@ -56,9 +56,8 @@ public class IncludeParts
 
 	public boolean matches(String resourceTypeName, String parameterName, String targetResourceTypeName)
 	{
-		return resourceTypeName.equals(getSourceResourceTypeName())
-				&& parameterName.equals(getSearchParameterName()) && (getTargetResourceTypeName() == null
-						|| targetResourceTypeName.equals(getTargetResourceTypeName()));
+		return resourceTypeName.equals(getSourceResourceTypeName()) && parameterName.equals(getSearchParameterName())
+				&& (getTargetResourceTypeName() == null || targetResourceTypeName.equals(getTargetResourceTypeName()));
 	}
 
 	@Override

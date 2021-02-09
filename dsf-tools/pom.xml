@@ -18,6 +18,10 @@
 		<module>dsf-tools-bundle-generator</module>
 		<module>dsf-tools-build-info-reader</module>
 	</modules>
+	
+	<properties>
+		<main.basedir>${project.basedir}/..</main.basedir>
+	</properties>
 
 	<dependencyManagement>
 		<dependencies>

@@ -54,7 +54,7 @@ public final class FhirResourcesListValues
 	private FhirResourcesListValues()
 	{
 	}
-	
+
 	public static FhirResourcesListValue create(Resource... resources)
 	{
 		return new FhirResourcesListValueImpl(new FhirResourcesList(resources), VALUE_TYPE);

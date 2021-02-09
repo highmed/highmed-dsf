@@ -70,7 +70,6 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-
 import de.rwh.utils.jetty.JettyServer;
 import de.rwh.utils.jetty.PropertiesReader;
 import de.rwh.utils.test.LiquibaseTemplateTestClassRule;
@@ -155,29 +154,29 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	private static WebsocketClient createWebsocketClient(KeyStore trustStore, KeyStore keyStore,
 			char[] keyStorePassword, String subscriptionIdPart)
 	{
-		return new WebsocketClientTyrus(() -> {
-		}, URI.create(WEBSOCKET_URL), trustStore, keyStore, keyStorePassword, subscriptionIdPart);
+		return new WebsocketClientTyrus(() ->
+		{}, URI.create(WEBSOCKET_URL), trustStore, keyStore, keyStorePassword, subscriptionIdPart);
 	}
 
 	private static JettyServer startFhirServer() throws Exception
 	{
-		Properties properties = PropertiesReader
-				.read(Paths.get("src/test/resources/integration/jetty.properties"), StandardCharsets.UTF_8);
+		Properties properties = PropertiesReader.read(Paths.get("src/test/resources/integration/jetty.properties"),
+				StandardCharsets.UTF_8);
 		overrideJettyPropertiesForTesting(properties);
 
 		HttpConfiguration httpConfiguration = httpConfiguration(secureRequestCustomizer());
 		Function<Server, ServerConnector> connector = httpsConnector(httpConfiguration, properties);
 
-		Properties initParameter = PropertiesReader
-				.read(Paths.get("src/test/resources/integration/config.properties"), StandardCharsets.UTF_8);
+		Properties initParameter = PropertiesReader.read(Paths.get("src/test/resources/integration/config.properties"),
+				StandardCharsets.UTF_8);
 		overrideConfigPropertiesForTesting(initParameter);
 
 		Predicate<String> filter = s -> s.contains("fhir-server");
 		Stream<String> webInfClassesDirs = webInfClassesDirs(filter);
 		Stream<String> webInfJars = webInfJars(filter);
 
-		List<Class<?>> initializers = Arrays
-				.asList(SpringServletContainerInitializer.class, JerseyServletContainerInitializer.class);
+		List<Class<?>> initializers = Arrays.asList(SpringServletContainerInitializer.class,
+				JerseyServletContainerInitializer.class);
 
 		ErrorHandler errorHandler = statusCodeOnlyErrorHandler();
 
