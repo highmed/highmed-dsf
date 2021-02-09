@@ -16,11 +16,8 @@ import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Resource;
 
-@IncludeParameterDefinition(resourceType = Measure.class, parameterName = MeasureDependsOn.PARAMETER_NAME,
-		targetResourceTypes = Library.class)
-@SearchParameterDefinition(name = MeasureDependsOn.PARAMETER_NAME,
-		definition = "http://hl7.org/fhir/SearchParameter/Measure-depends-on", type = SearchParamType.REFERENCE,
-		documentation = "TODO")
+@IncludeParameterDefinition(resourceType = Measure.class, parameterName = MeasureDependsOn.PARAMETER_NAME, targetResourceTypes = Library.class)
+@SearchParameterDefinition(name = MeasureDependsOn.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Measure-depends-on", type = SearchParamType.REFERENCE, documentation = "TODO")
 public class MeasureDependsOn extends AbstractReferenceParameter<Measure>
 {
 	public static final String PARAMETER_NAME = "depends-on";
@@ -77,7 +74,8 @@ public class MeasureDependsOn extends AbstractReferenceParameter<Measure>
 
 		Measure o = (Measure) resource;
 
-		return o.getLibrary().stream().anyMatch(ref -> {
+		return o.getLibrary().stream().anyMatch(ref ->
+		{
 			if (valueAndType.type == ReferenceSearchType.URL)
 			{
 				return ref.equals(valueAndType.url);

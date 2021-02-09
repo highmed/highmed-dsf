@@ -37,10 +37,10 @@ public class ValidationConfig
 	@Bean
 	public IValidationSupport validationSupport()
 	{
-		return new ValidationSupportWithCache(fhirConfig.fhirContext(), validationSupportChain(
-				new ValidationSupportWithFetchFromDb(fhirConfig.fhirContext(), daoConfig.structureDefinitionDao(),
-						daoConfig.structureDefinitionSnapshotDao(), daoConfig.codeSystemDao(), daoConfig.valueSetDao(),
-						daoConfig.measureDao())));
+		return new ValidationSupportWithCache(fhirConfig.fhirContext(),
+				validationSupportChain(new ValidationSupportWithFetchFromDb(fhirConfig.fhirContext(),
+						daoConfig.structureDefinitionDao(), daoConfig.structureDefinitionSnapshotDao(),
+						daoConfig.codeSystemDao(), daoConfig.valueSetDao(), daoConfig.measureDao())));
 	}
 
 	private ValidationSupportChain validationSupportChain(IValidationSupport dbSupport)

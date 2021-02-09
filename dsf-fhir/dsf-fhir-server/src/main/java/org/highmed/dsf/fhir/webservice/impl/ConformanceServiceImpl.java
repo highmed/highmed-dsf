@@ -269,12 +269,11 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 		websocketExtension.setUrl("http://hl7.org/fhir/StructureDefinition/capabilitystatement-websocket");
 		websocketExtension.setValue(new UrlType(serverBase.replace("http", "ws") + ServerEndpoint.PATH));
 
-		var resources = Arrays
-				.asList(ActivityDefinition.class, Binary.class, Bundle.class, CodeSystem.class, Endpoint.class,
-						Group.class, HealthcareService.class, Library.class, Location.class, Measure.class,
-						MeasureReport.class, NamingSystem.class, Organization.class, Patient.class,
-						PractitionerRole.class, Practitioner.class, Provenance.class, ResearchStudy.class,
-						StructureDefinition.class, Subscription.class, Task.class, ValueSet.class);
+		var resources = Arrays.asList(ActivityDefinition.class, Binary.class, Bundle.class, CodeSystem.class,
+				Endpoint.class, Group.class, HealthcareService.class, Library.class, Location.class, Measure.class,
+				MeasureReport.class, NamingSystem.class, Organization.class, Patient.class, PractitionerRole.class,
+				Practitioner.class, Provenance.class, ResearchStudy.class, StructureDefinition.class,
+				Subscription.class, Task.class, ValueSet.class);
 
 		var searchParameters = new HashMap<Class<? extends Resource>, List<Class<? extends AbstractSearchParameter<?>>>>();
 		var revIncludeParameters = new HashMap<Class<? extends Resource>, List<Class<? extends AbstractRevIncludeParameterFactory>>>();
@@ -306,9 +305,8 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 
 		searchParameters.put(NamingSystem.class, Arrays.asList(NamingSystemName.class, NamingSystemStatus.class));
 
-		searchParameters.put(Organization.class,
-				Arrays.asList(OrganizationActive.class, OrganizationEndpoint.class, OrganizationIdentifier.class,
-						OrganizationName.class, OrganizationType.class));
+		searchParameters.put(Organization.class, Arrays.asList(OrganizationActive.class, OrganizationEndpoint.class,
+				OrganizationIdentifier.class, OrganizationName.class, OrganizationType.class));
 		revIncludeParameters.put(Organization.class, Collections.singletonList(EndpointOrganizationRevInclude.class));
 
 		searchParameters.put(Patient.class, Arrays.asList(PatientActive.class, PatientIdentifier.class));
