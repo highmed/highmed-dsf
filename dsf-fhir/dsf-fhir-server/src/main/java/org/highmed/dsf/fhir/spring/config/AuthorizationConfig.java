@@ -17,7 +17,10 @@ import org.highmed.dsf.fhir.authorization.CodeSystemAuthorizationRule;
 import org.highmed.dsf.fhir.authorization.EndpointAuthorizationRule;
 import org.highmed.dsf.fhir.authorization.GroupAuthorizationRule;
 import org.highmed.dsf.fhir.authorization.HealthcareServiceAuthorizationRule;
+import org.highmed.dsf.fhir.authorization.LibraryAuthorizationRule;
 import org.highmed.dsf.fhir.authorization.LocationAuthorizationRule;
+import org.highmed.dsf.fhir.authorization.MeasureAuthorizationRule;
+import org.highmed.dsf.fhir.authorization.MeasureReportAuthorizationRule;
 import org.highmed.dsf.fhir.authorization.NamingSystemAuthorizationRule;
 import org.highmed.dsf.fhir.authorization.OrganizationAuthorizationRule;
 import org.highmed.dsf.fhir.authorization.PatientAuthorizationRule;
@@ -39,7 +42,10 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.HealthcareService;
+import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.Measure;
+import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.NamingSystem;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
@@ -150,10 +156,31 @@ public class AuthorizationConfig
 	}
 
 	@Bean
+	public AuthorizationRule<Library> libraryAuthorizationRule()
+	{
+		return new LibraryAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver(),
+				organizationProvider());
+	}
+
+	@Bean
 	public AuthorizationRule<Location> locationAuthorizationRule()
 	{
 		return new LocationAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver(),
 				organizationProvider());
+	}
+
+	@Bean
+	public AuthorizationRule<Measure> measureAuthorizationRule()
+	{
+		return new MeasureAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver(),
+				organizationProvider());
+	}
+
+	@Bean
+	public AuthorizationRule<MeasureReport> measureReportAuthorizationRule()
+	{
+		return new MeasureReportAuthorizationRule(daoConfig.daoProvider(), serverBase,
+				referenceConfig.referenceResolver(), organizationProvider());
 	}
 
 	@Bean
@@ -238,7 +265,8 @@ public class AuthorizationConfig
 	{
 		return new AuthorizationRuleProviderImpl(activityDefinitionAuthorizationRule(), binaryAuthorizationRule(),
 				bundleAuthorizationRule(), codeSystemAuthorizationRule(), endpointAuthorizationRule(),
-				groupAuthorizationRule(), healthcareServiceAuthorizationRule(), locationAuthorizationRule(),
+				groupAuthorizationRule(), healthcareServiceAuthorizationRule(), libraryAuthorizationRule(),
+				locationAuthorizationRule(), measureAuthorizationRule(), measureReportAuthorizationRule(),
 				namingSystemAuthorizationRule(), organizationAuthorizationRule(), patientAuthorizationRule(),
 				practitionerAuthorizationRule(), practitionerRoleAuthorizationRule(), provenanceAuthorizationRule(),
 				researchStudyAuthorizationRule(), structureDefinitionAuthorizationRule(),

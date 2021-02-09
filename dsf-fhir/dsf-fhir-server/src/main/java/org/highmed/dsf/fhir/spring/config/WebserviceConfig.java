@@ -10,7 +10,10 @@ import org.highmed.dsf.fhir.webservice.impl.ConformanceServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.EndpointServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.GroupServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.HealthcareServiceServiceImpl;
+import org.highmed.dsf.fhir.webservice.impl.LibraryServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.LocationServiceImpl;
+import org.highmed.dsf.fhir.webservice.impl.MeasureReportServiceImpl;
+import org.highmed.dsf.fhir.webservice.impl.MeasureServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.NamingSystemServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.OrganizationServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.PatientServiceImpl;
@@ -32,7 +35,10 @@ import org.highmed.dsf.fhir.webservice.jaxrs.ConformanceServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.EndpointServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.GroupServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.HealthcareServiceServiceJaxrs;
+import org.highmed.dsf.fhir.webservice.jaxrs.LibraryServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.LocationServiceJaxrs;
+import org.highmed.dsf.fhir.webservice.jaxrs.MeasureReportServiceJaxrs;
+import org.highmed.dsf.fhir.webservice.jaxrs.MeasureServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.NamingSystemServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.OrganizationServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.PatientServiceJaxrs;
@@ -54,7 +60,10 @@ import org.highmed.dsf.fhir.webservice.secure.ConformanceServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.EndpointServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.GroupServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.HealthcareServiceServiceSecure;
+import org.highmed.dsf.fhir.webservice.secure.LibraryServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.LocationServiceSecure;
+import org.highmed.dsf.fhir.webservice.secure.MeasureReportServiceSecure;
+import org.highmed.dsf.fhir.webservice.secure.MeasureServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.NamingSystemServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.OrganizationServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.PatientServiceSecure;
@@ -76,7 +85,10 @@ import org.highmed.dsf.fhir.webservice.specification.ConformanceService;
 import org.highmed.dsf.fhir.webservice.specification.EndpointService;
 import org.highmed.dsf.fhir.webservice.specification.GroupService;
 import org.highmed.dsf.fhir.webservice.specification.HealthcareServiceService;
+import org.highmed.dsf.fhir.webservice.specification.LibraryService;
 import org.highmed.dsf.fhir.webservice.specification.LocationService;
+import org.highmed.dsf.fhir.webservice.specification.MeasureReportService;
+import org.highmed.dsf.fhir.webservice.specification.MeasureService;
 import org.highmed.dsf.fhir.webservice.specification.NamingSystemService;
 import org.highmed.dsf.fhir.webservice.specification.OrganizationService;
 import org.highmed.dsf.fhir.webservice.specification.PatientService;
@@ -317,6 +329,30 @@ public class WebserviceConfig
 	}
 
 	@Bean
+	public LibraryService libraryService()
+	{
+		return new LibraryServiceJaxrs(libraryServiceSecure());
+	}
+
+	private LibraryServiceSecure libraryServiceSecure()
+	{
+		return new LibraryServiceSecure(libraryServiceImpl(), serverBase, helperConfig.responseGenerator(),
+				referenceConfig.referenceResolver(), referenceConfig.referenceCleaner(), daoConfig.libraryDao(),
+				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
+				authorizationConfig.libraryAuthorizationRule(), validationConfig.resourceValidator());
+	}
+
+	private LibraryServiceImpl libraryServiceImpl()
+	{
+		return new LibraryServiceImpl(LibraryServiceJaxrs.PATH, serverBase, defaultPageCount, daoConfig.libraryDao(),
+				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
+				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter(),
+				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver(),
+				referenceConfig.referenceCleaner(), authorizationConfig.authorizationRuleProvider(),
+				historyConfig.historyService());
+	}
+
+	@Bean
 	public LocationService locationService()
 	{
 		return new LocationServiceJaxrs(locationServiceSecure());
@@ -338,6 +374,54 @@ public class WebserviceConfig
 				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver(),
 				referenceConfig.referenceCleaner(), authorizationConfig.authorizationRuleProvider(),
 				historyConfig.historyService());
+	}
+
+	@Bean
+	public MeasureService measureService()
+	{
+		return new MeasureServiceJaxrs(measureServiceSecure());
+	}
+
+	private MeasureServiceSecure measureServiceSecure()
+	{
+		return new MeasureServiceSecure(measureServiceImpl(), serverBase, helperConfig.responseGenerator(),
+				referenceConfig.referenceResolver(), referenceConfig.referenceCleaner(), daoConfig.measureDao(),
+				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
+				authorizationConfig.measureAuthorizationRule(), validationConfig.resourceValidator());
+	}
+
+	private MeasureServiceImpl measureServiceImpl()
+	{
+		return new MeasureServiceImpl(MeasureServiceJaxrs.PATH, serverBase, defaultPageCount, daoConfig.measureDao(),
+				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
+				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter(),
+				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver(),
+				referenceConfig.referenceCleaner(), authorizationConfig.authorizationRuleProvider(),
+				historyConfig.historyService());
+	}
+
+	@Bean
+	public MeasureReportService measureReportService()
+	{
+		return new MeasureReportServiceJaxrs(measureReportServiceSecure());
+	}
+
+	private MeasureReportServiceSecure measureReportServiceSecure()
+	{
+		return new MeasureReportServiceSecure(measureReportServiceImpl(), serverBase, helperConfig.responseGenerator(),
+				referenceConfig.referenceResolver(), referenceConfig.referenceCleaner(), daoConfig.measureReportDao(),
+				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
+				authorizationConfig.measureReportAuthorizationRule(), validationConfig.resourceValidator());
+	}
+
+	private MeasureReportServiceImpl measureReportServiceImpl()
+	{
+		return new MeasureReportServiceImpl(MeasureReportServiceJaxrs.PATH, serverBase, defaultPageCount,
+				daoConfig.measureReportDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
+				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
+				helperConfig.parameterConverter(), referenceConfig.referenceExtractor(),
+				referenceConfig.referenceResolver(), referenceConfig.referenceCleaner(),
+				authorizationConfig.authorizationRuleProvider(), historyConfig.historyService());
 	}
 
 	@Bean

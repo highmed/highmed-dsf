@@ -37,6 +37,7 @@ import org.highmed.dsf.fhir.search.parameters.EndpointStatus;
 import org.highmed.dsf.fhir.search.parameters.HealthcareServiceActive;
 import org.highmed.dsf.fhir.search.parameters.HealthcareServiceIdentifier;
 import org.highmed.dsf.fhir.search.parameters.LocationIdentifier;
+import org.highmed.dsf.fhir.search.parameters.MeasureDependsOn;
 import org.highmed.dsf.fhir.search.parameters.NamingSystemName;
 import org.highmed.dsf.fhir.search.parameters.NamingSystemStatus;
 import org.highmed.dsf.fhir.search.parameters.OrganizationActive;
@@ -113,7 +114,10 @@ import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.HealthcareService;
+import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.Measure;
+import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.NamingSystem;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
@@ -265,10 +269,12 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 		websocketExtension.setUrl("http://hl7.org/fhir/StructureDefinition/capabilitystatement-websocket");
 		websocketExtension.setValue(new UrlType(serverBase.replace("http", "ws") + ServerEndpoint.PATH));
 
-		var resources = Arrays.asList(ActivityDefinition.class, Binary.class, Bundle.class, CodeSystem.class,
-				Endpoint.class, Group.class, HealthcareService.class, Location.class, NamingSystem.class,
-				Organization.class, Patient.class, PractitionerRole.class, Practitioner.class, Provenance.class,
-				ResearchStudy.class, StructureDefinition.class, Subscription.class, Task.class, ValueSet.class);
+		var resources = Arrays
+				.asList(ActivityDefinition.class, Binary.class, Bundle.class, CodeSystem.class, Endpoint.class,
+						Group.class, HealthcareService.class, Library.class, Location.class, Measure.class,
+						MeasureReport.class, NamingSystem.class, Organization.class, Patient.class,
+						PractitionerRole.class, Practitioner.class, Provenance.class, ResearchStudy.class,
+						StructureDefinition.class, Subscription.class, Task.class, ValueSet.class);
 
 		var searchParameters = new HashMap<Class<? extends Resource>, List<Class<? extends AbstractSearchParameter<?>>>>();
 		var revIncludeParameters = new HashMap<Class<? extends Resource>, List<Class<? extends AbstractRevIncludeParameterFactory>>>();
@@ -296,10 +302,13 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 
 		searchParameters.put(Location.class, Arrays.asList(LocationIdentifier.class));
 
+		searchParameters.put(Measure.class, Arrays.asList(MeasureDependsOn.class));
+
 		searchParameters.put(NamingSystem.class, Arrays.asList(NamingSystemName.class, NamingSystemStatus.class));
 
-		searchParameters.put(Organization.class, Arrays.asList(OrganizationActive.class, OrganizationEndpoint.class,
-				OrganizationIdentifier.class, OrganizationName.class, OrganizationType.class));
+		searchParameters.put(Organization.class,
+				Arrays.asList(OrganizationActive.class, OrganizationEndpoint.class, OrganizationIdentifier.class,
+						OrganizationName.class, OrganizationType.class));
 		revIncludeParameters.put(Organization.class, Collections.singletonList(EndpointOrganizationRevInclude.class));
 
 		searchParameters.put(Patient.class, Arrays.asList(PatientActive.class, PatientIdentifier.class));
