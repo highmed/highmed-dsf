@@ -1,50 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
 
-    <property name="json" value="JSONB" dbms="postgresql"/>
-    <property name="json" value="varchar(5000)" dbms="h2"/>
+	<property name="json" value="JSONB" dbms="postgresql" />
+	<property name="json" value="varchar(5000)" dbms="h2" />
 
-    <changeSet author="akiel" id="db.libraries.changelog-0.1.0">
-        <createTable tableName="libraries">
-            <column name="library_id" type="UUID">
-                <constraints nullable="false"/>
-            </column>
-            <column name="version" type="BIGINT" defaultValueNumeric="1">
-                <constraints nullable="false"/>
-            </column>
-            <column name="deleted" type="TIMESTAMP"/>
-            <column name="library" type="${json}">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
+	<changeSet author="akiel" id="db.libraries.changelog-0.5.0">
+		<createTable tableName="libraries">
+			<column name="library_id" type="UUID">
+				<constraints nullable="false" />
+			</column>
+			<column name="version" type="BIGINT" defaultValueNumeric="1">
+				<constraints nullable="false" />
+			</column>
+			<column name="deleted" type="TIMESTAMP" />
+			<column name="library" type="${json}">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
 
-        <addPrimaryKey tableName="libraries" columnNames="library_id, version"/>
+		<addPrimaryKey tableName="libraries" columnNames="library_id, version" />
 
-        <sql dbms="postgresql">
-            ALTER TABLE libraries OWNER TO ${db.liquibase_user};
-            GRANT ALL ON TABLE libraries TO ${db.liquibase_user};
-            GRANT SELECT, INSERT, UPDATE ON TABLE libraries TO ${db.server_users_group};
-            CREATE INDEX library_id_index ON libraries USING btree (library_id);
-            CREATE INDEX library_index ON libraries USING gin (library);
-            CREATE INDEX library_id_version_index ON libraries USING btree (library_id, version);
-        </sql>
+		<sql dbms="postgresql">
+			ALTER TABLE libraries OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE libraries TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE ON TABLE libraries TO ${db.server_users_group};
+			CREATE INDEX library_id_index ON libraries USING btree (library_id);
+			CREATE INDEX library_index ON libraries USING gin (library);
+			CREATE INDEX library_id_version_index ON libraries USING btree (library_id, version);
+		</sql>
 
-        <createView viewName="current_libraries" replaceIfExists="true">
-            SELECT library_id, version, library
-            FROM (
-            SELECT DISTINCT ON (library_id) library_id, version, deleted, library
-            FROM libraries ORDER BY library_id, version DESC
-            ) AS current_l
-            WHERE deleted IS NULL
-        </createView>
+		<createView viewName="current_libraries" replaceIfExists="true">
+			SELECT library_id, version, library
+			FROM (
+				SELECT DISTINCT ON (library_id) library_id, version, deleted, library
+				FROM libraries ORDER BY library_id, version DESC
+			) AS current_l
+		WHERE deleted IS NULL
+		</createView>
 
-        <sql dbms="postgresql">
-            ALTER TABLE current_libraries OWNER TO ${db.liquibase_user};
-            GRANT ALL ON TABLE current_libraries TO ${db.liquibase_user};
-            GRANT SELECT ON TABLE current_libraries TO ${db.server_users_group};
-        </sql>
-    </changeSet>
+		<sql dbms="postgresql">
+			ALTER TABLE current_libraries OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_libraries TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_libraries TO ${db.server_users_group};
+		</sql>
+	</changeSet>
 </databaseChangeLog>
