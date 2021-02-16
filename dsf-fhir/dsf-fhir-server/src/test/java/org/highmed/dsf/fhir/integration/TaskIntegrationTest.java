@@ -1,19 +1,24 @@
 package org.highmed.dsf.fhir.integration;
 
 import static junit.framework.TestCase.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
 import org.highmed.dsf.fhir.authentication.OrganizationProvider;
+import org.highmed.dsf.fhir.dao.OrganizationDao;
+import org.highmed.dsf.fhir.dao.TaskDao;
 import org.highmed.fhir.client.FhirWebserviceClient;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
@@ -880,4 +885,35 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 	// assertTrue(ref.getIdentifier().hasValue());
 	// assertNotNull(ref.getIdentifier().getValue());
 	// }
+
+	@Test
+	public void testSearchTaskByRequesterId() throws Exception
+	{
+		OrganizationProvider organizationProvider = getSpringWebApplicationContext()
+				.getBean(OrganizationProvider.class);
+		assertNotNull(organizationProvider);
+
+		Organization o = new Organization();
+		o.setName("Test Organization");
+
+		OrganizationDao organizationDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
+		String orgId = organizationDao.create(o).getIdElement().getIdPart();
+
+		Task t = new Task();
+		t.getRestriction().getRecipientFirstRep().setReference(
+				"Organization/" + organizationProvider.getLocalOrganization().get().getIdElement().getIdPart());
+		t.getRequester().setReference("Organization/" + orgId);
+
+		TaskDao taskDao = getSpringWebApplicationContext().getBean(TaskDao.class);
+		String taskId = taskDao.create(t).getIdElement().getIdPart();
+
+		Bundle resultBundle = getWebserviceClient().searchWithStrictHandling(Task.class,
+				Map.of("requester", Collections.singletonList(orgId)));
+
+		assertNotNull(resultBundle);
+		assertEquals(1, resultBundle.getTotal());
+		assertNotNull(resultBundle.getEntryFirstRep());
+		assertNotNull(resultBundle.getEntryFirstRep().getResource());
+		assertEquals(taskId, resultBundle.getEntryFirstRep().getResource().getIdElement().getIdPart());
+	}
 }

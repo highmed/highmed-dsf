@@ -3,6 +3,7 @@ package org.highmed.dsf.fhir.dao.jdbc;
 import javax.sql.DataSource;
 
 import org.highmed.dsf.fhir.dao.MeasureReportDao;
+import org.highmed.dsf.fhir.search.parameters.MeasureReportIdentifier;
 import org.highmed.dsf.fhir.search.parameters.user.MeasureReportUserFilter;
 import org.hl7.fhir.r4.model.MeasureReport;
 
@@ -13,7 +14,7 @@ public class MeasureReportDaoJdbc extends AbstractResourceDaoJdbc<MeasureReport>
 	public MeasureReportDaoJdbc(DataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, MeasureReport.class, "measure_reports", "measure_report", "measure_report_id",
-				MeasureReportUserFilter::new, with(), with());
+				MeasureReportUserFilter::new, with(MeasureReportIdentifier::new), with());
 	}
 
 	@Override

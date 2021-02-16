@@ -8,6 +8,10 @@ import javax.sql.DataSource;
 
 import org.highmed.dsf.fhir.dao.MeasureDao;
 import org.highmed.dsf.fhir.search.parameters.MeasureDependsOn;
+import org.highmed.dsf.fhir.search.parameters.MeasureIdentifier;
+import org.highmed.dsf.fhir.search.parameters.MeasureStatus;
+import org.highmed.dsf.fhir.search.parameters.MeasureUrl;
+import org.highmed.dsf.fhir.search.parameters.MeasureVersion;
 import org.highmed.dsf.fhir.search.parameters.user.MeasureUserFilter;
 import org.hl7.fhir.r4.model.Measure;
 
@@ -20,7 +24,9 @@ public class MeasureDaoJdbc extends AbstractResourceDaoJdbc<Measure> implements 
 	public MeasureDaoJdbc(DataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, Measure.class, "measures", "measure", "measure_id", MeasureUserFilter::new,
-				with(MeasureDependsOn::new), with());
+				with(MeasureDependsOn::new, MeasureIdentifier::new, MeasureStatus::new, MeasureUrl::new,
+						MeasureVersion::new),
+				with());
 
 		readByUrl = new ReadByUrlDaoJdbc<>(this::getDataSource, this::getResource, getResourceTable(),
 				getResourceColumn());

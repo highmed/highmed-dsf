@@ -1,12 +1,14 @@
 package org.highmed.dsf.fhir.integration;
 
-import static org.junit.Assert.assertEquals;
+import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
+
+import javax.ws.rs.WebApplicationException;
 
 import org.highmed.dsf.fhir.dao.LibraryDao;
 import org.highmed.dsf.fhir.dao.MeasureDao;
@@ -15,6 +17,8 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
+import org.hl7.fhir.r4.model.RelatedArtifact;
+import org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType;
 import org.junit.Test;
 
 public class MeasureIntegrationTest extends AbstractIntegrationTest
@@ -87,5 +91,62 @@ public class MeasureIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(created);
 		assertNotNull(created.getIdElement().getIdPart());
 		assertNotNull(created.getIdElement().getVersionIdPart());
+	}
+
+	@Test
+	public void testSearchMeasureDependingOnLibrary() throws Exception
+	{
+		MeasureDao measureDao = getSpringWebApplicationContext().getBean(MeasureDao.class);
+		String measureId = measureDao.create(createMeasure()).getIdElement().getIdPart();
+
+		Bundle resultBundle = getWebserviceClient().searchWithStrictHandling(Measure.class, Map.of("depends-on",
+				Collections.singletonList("https://foo.bar/fhir/Library/0a887526-2b9f-413a-8842-5e9252e2d7f7")));
+
+		assertNotNull(resultBundle);
+		assertEquals(1, resultBundle.getTotal());
+		assertNotNull(resultBundle.getEntryFirstRep());
+		assertNotNull(resultBundle.getEntryFirstRep().getResource());
+		assertEquals(measureId, resultBundle.getEntryFirstRep().getResource().getIdElement().getIdPart());
+	}
+
+	@Test(expected = WebApplicationException.class)
+	public void testSearchMeasureDependingOnLibraryNotSupportedById() throws Exception
+	{
+		MeasureDao measureDao = getSpringWebApplicationContext().getBean(MeasureDao.class);
+		measureDao.create(createMeasure()).getIdElement().getIdPart();
+
+		try
+		{
+			getWebserviceClient().searchWithStrictHandling(Measure.class,
+					Map.of("depends-on", Collections.singletonList("0a887526-2b9f-413a-8842-5e9252e2d7f7")));
+		}
+		catch (WebApplicationException e)
+		{
+			assertEquals(400, e.getResponse().getStatus());
+			throw e;
+		}
+	}
+
+	@Test
+	public void testSearchMeasureDependingOnRelatedArtifactLibrary() throws Exception
+	{
+		Measure measure = new Measure();
+		measure.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/authorization-role").setCode("REMOTE");
+
+		RelatedArtifact art = measure.getRelatedArtifactFirstRep();
+		art.setType(RelatedArtifactType.DEPENDSON);
+		art.getResourceElement().setValueAsString("https://foo.bar/fhir/Library/0a887526-2b9f-413a-8842-5e9252e2d7f7");
+
+		MeasureDao measureDao = getSpringWebApplicationContext().getBean(MeasureDao.class);
+		String measureId = measureDao.create(measure).getIdElement().getIdPart();
+
+		Bundle resultBundle = getWebserviceClient().searchWithStrictHandling(Measure.class, Map.of("depends-on",
+				Collections.singletonList("https://foo.bar/fhir/Library/0a887526-2b9f-413a-8842-5e9252e2d7f7")));
+
+		assertNotNull(resultBundle);
+		assertEquals(1, resultBundle.getTotal());
+		assertNotNull(resultBundle.getEntryFirstRep());
+		assertNotNull(resultBundle.getEntryFirstRep().getResource());
+		assertEquals(measureId, resultBundle.getEntryFirstRep().getResource().getIdElement().getIdPart());
 	}
 }

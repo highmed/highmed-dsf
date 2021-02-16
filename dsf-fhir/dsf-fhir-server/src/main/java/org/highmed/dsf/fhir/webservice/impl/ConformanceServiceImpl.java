@@ -36,8 +36,17 @@ import org.highmed.dsf.fhir.search.parameters.EndpointOrganization;
 import org.highmed.dsf.fhir.search.parameters.EndpointStatus;
 import org.highmed.dsf.fhir.search.parameters.HealthcareServiceActive;
 import org.highmed.dsf.fhir.search.parameters.HealthcareServiceIdentifier;
+import org.highmed.dsf.fhir.search.parameters.LibraryIdentifier;
+import org.highmed.dsf.fhir.search.parameters.LibraryStatus;
+import org.highmed.dsf.fhir.search.parameters.LibraryUrl;
+import org.highmed.dsf.fhir.search.parameters.LibraryVersion;
 import org.highmed.dsf.fhir.search.parameters.LocationIdentifier;
 import org.highmed.dsf.fhir.search.parameters.MeasureDependsOn;
+import org.highmed.dsf.fhir.search.parameters.MeasureIdentifier;
+import org.highmed.dsf.fhir.search.parameters.MeasureReportIdentifier;
+import org.highmed.dsf.fhir.search.parameters.MeasureStatus;
+import org.highmed.dsf.fhir.search.parameters.MeasureUrl;
+import org.highmed.dsf.fhir.search.parameters.MeasureVersion;
 import org.highmed.dsf.fhir.search.parameters.NamingSystemName;
 import org.highmed.dsf.fhir.search.parameters.NamingSystemStatus;
 import org.highmed.dsf.fhir.search.parameters.OrganizationActive;
@@ -299,9 +308,15 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 		searchParameters.put(HealthcareService.class,
 				Arrays.asList(HealthcareServiceActive.class, HealthcareServiceIdentifier.class));
 
+		searchParameters.put(Library.class,
+				Arrays.asList(LibraryIdentifier.class, LibraryStatus.class, LibraryUrl.class, LibraryVersion.class));
+
 		searchParameters.put(Location.class, Arrays.asList(LocationIdentifier.class));
 
-		searchParameters.put(Measure.class, Arrays.asList(MeasureDependsOn.class));
+		searchParameters.put(Measure.class, Arrays.asList(MeasureDependsOn.class, MeasureIdentifier.class,
+				MeasureStatus.class, MeasureUrl.class, MeasureVersion.class));
+
+		searchParameters.put(MeasureReport.class, Arrays.asList(MeasureReportIdentifier.class));
 
 		searchParameters.put(NamingSystem.class, Arrays.asList(NamingSystemName.class, NamingSystemStatus.class));
 
