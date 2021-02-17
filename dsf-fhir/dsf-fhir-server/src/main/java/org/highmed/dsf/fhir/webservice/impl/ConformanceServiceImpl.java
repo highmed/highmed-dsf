@@ -18,6 +18,7 @@ import javax.ws.rs.core.UriInfo;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.search.IncludeParameterDefinition;
 import org.highmed.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
+import org.highmed.dsf.fhir.search.parameters.ActivityDefinitionDate;
 import org.highmed.dsf.fhir.search.parameters.ActivityDefinitionIdentifier;
 import org.highmed.dsf.fhir.search.parameters.ActivityDefinitionName;
 import org.highmed.dsf.fhir.search.parameters.ActivityDefinitionStatus;
@@ -25,6 +26,7 @@ import org.highmed.dsf.fhir.search.parameters.ActivityDefinitionUrl;
 import org.highmed.dsf.fhir.search.parameters.ActivityDefinitionVersion;
 import org.highmed.dsf.fhir.search.parameters.BinaryContentType;
 import org.highmed.dsf.fhir.search.parameters.BundleIdentifier;
+import org.highmed.dsf.fhir.search.parameters.CodeSystemDate;
 import org.highmed.dsf.fhir.search.parameters.CodeSystemIdentifier;
 import org.highmed.dsf.fhir.search.parameters.CodeSystemStatus;
 import org.highmed.dsf.fhir.search.parameters.CodeSystemUrl;
@@ -36,17 +38,20 @@ import org.highmed.dsf.fhir.search.parameters.EndpointOrganization;
 import org.highmed.dsf.fhir.search.parameters.EndpointStatus;
 import org.highmed.dsf.fhir.search.parameters.HealthcareServiceActive;
 import org.highmed.dsf.fhir.search.parameters.HealthcareServiceIdentifier;
+import org.highmed.dsf.fhir.search.parameters.LibraryDate;
 import org.highmed.dsf.fhir.search.parameters.LibraryIdentifier;
 import org.highmed.dsf.fhir.search.parameters.LibraryStatus;
 import org.highmed.dsf.fhir.search.parameters.LibraryUrl;
 import org.highmed.dsf.fhir.search.parameters.LibraryVersion;
 import org.highmed.dsf.fhir.search.parameters.LocationIdentifier;
+import org.highmed.dsf.fhir.search.parameters.MeasureDate;
 import org.highmed.dsf.fhir.search.parameters.MeasureDependsOn;
 import org.highmed.dsf.fhir.search.parameters.MeasureIdentifier;
 import org.highmed.dsf.fhir.search.parameters.MeasureReportIdentifier;
 import org.highmed.dsf.fhir.search.parameters.MeasureStatus;
 import org.highmed.dsf.fhir.search.parameters.MeasureUrl;
 import org.highmed.dsf.fhir.search.parameters.MeasureVersion;
+import org.highmed.dsf.fhir.search.parameters.NamingSystemDate;
 import org.highmed.dsf.fhir.search.parameters.NamingSystemName;
 import org.highmed.dsf.fhir.search.parameters.NamingSystemStatus;
 import org.highmed.dsf.fhir.search.parameters.OrganizationActive;
@@ -67,6 +72,7 @@ import org.highmed.dsf.fhir.search.parameters.ResearchStudyIdentifier;
 import org.highmed.dsf.fhir.search.parameters.ResearchStudyPrincipalInvestigator;
 import org.highmed.dsf.fhir.search.parameters.ResourceId;
 import org.highmed.dsf.fhir.search.parameters.ResourceLastUpdated;
+import org.highmed.dsf.fhir.search.parameters.StructureDefinitionDate;
 import org.highmed.dsf.fhir.search.parameters.StructureDefinitionIdentifier;
 import org.highmed.dsf.fhir.search.parameters.StructureDefinitionStatus;
 import org.highmed.dsf.fhir.search.parameters.StructureDefinitionUrl;
@@ -80,6 +86,7 @@ import org.highmed.dsf.fhir.search.parameters.TaskIdentifier;
 import org.highmed.dsf.fhir.search.parameters.TaskModified;
 import org.highmed.dsf.fhir.search.parameters.TaskRequester;
 import org.highmed.dsf.fhir.search.parameters.TaskStatus;
+import org.highmed.dsf.fhir.search.parameters.ValueSetDate;
 import org.highmed.dsf.fhir.search.parameters.ValueSetIdentifier;
 import org.highmed.dsf.fhir.search.parameters.ValueSetStatus;
 import org.highmed.dsf.fhir.search.parameters.ValueSetUrl;
@@ -288,15 +295,16 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 		var revIncludeParameters = new HashMap<Class<? extends Resource>, List<Class<? extends AbstractRevIncludeParameterFactory>>>();
 
 		searchParameters.put(ActivityDefinition.class,
-				Arrays.asList(ActivityDefinitionUrl.class, ActivityDefinitionIdentifier.class,
-						ActivityDefinitionVersion.class, ActivityDefinitionName.class, ActivityDefinitionStatus.class));
+				Arrays.asList(ActivityDefinitionDate.class, ActivityDefinitionUrl.class,
+						ActivityDefinitionIdentifier.class, ActivityDefinitionVersion.class,
+						ActivityDefinitionName.class, ActivityDefinitionStatus.class));
 
 		searchParameters.put(Binary.class, Arrays.asList(BinaryContentType.class));
 
 		searchParameters.put(Bundle.class, Arrays.asList(BundleIdentifier.class));
 
-		searchParameters.put(CodeSystem.class, Arrays.asList(CodeSystemIdentifier.class, CodeSystemUrl.class,
-				CodeSystemVersion.class, CodeSystemStatus.class));
+		searchParameters.put(CodeSystem.class, Arrays.asList(CodeSystemDate.class, CodeSystemIdentifier.class,
+				CodeSystemUrl.class, CodeSystemVersion.class, CodeSystemStatus.class));
 
 		searchParameters.put(Endpoint.class, Arrays.asList(EndpointAddress.class, EndpointIdentifier.class,
 				EndpointName.class, EndpointOrganization.class, EndpointStatus.class));
@@ -308,17 +316,18 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 		searchParameters.put(HealthcareService.class,
 				Arrays.asList(HealthcareServiceActive.class, HealthcareServiceIdentifier.class));
 
-		searchParameters.put(Library.class,
-				Arrays.asList(LibraryIdentifier.class, LibraryStatus.class, LibraryUrl.class, LibraryVersion.class));
+		searchParameters.put(Library.class, Arrays.asList(LibraryDate.class, LibraryIdentifier.class,
+				LibraryStatus.class, LibraryUrl.class, LibraryVersion.class));
 
 		searchParameters.put(Location.class, Arrays.asList(LocationIdentifier.class));
 
-		searchParameters.put(Measure.class, Arrays.asList(MeasureDependsOn.class, MeasureIdentifier.class,
-				MeasureStatus.class, MeasureUrl.class, MeasureVersion.class));
+		searchParameters.put(Measure.class, Arrays.asList(MeasureDate.class, MeasureDependsOn.class,
+				MeasureIdentifier.class, MeasureStatus.class, MeasureUrl.class, MeasureVersion.class));
 
 		searchParameters.put(MeasureReport.class, Arrays.asList(MeasureReportIdentifier.class));
 
-		searchParameters.put(NamingSystem.class, Arrays.asList(NamingSystemName.class, NamingSystemStatus.class));
+		searchParameters.put(NamingSystem.class,
+				Arrays.asList(NamingSystemDate.class, NamingSystemName.class, NamingSystemStatus.class));
 
 		searchParameters.put(Organization.class, Arrays.asList(OrganizationActive.class, OrganizationEndpoint.class,
 				OrganizationIdentifier.class, OrganizationName.class, OrganizationType.class));
@@ -335,8 +344,10 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 		searchParameters.put(ResearchStudy.class, Arrays.asList(ResearchStudyIdentifier.class,
 				ResearchStudyEnrollment.class, ResearchStudyPrincipalInvestigator.class));
 
-		searchParameters.put(StructureDefinition.class, Arrays.asList(StructureDefinitionIdentifier.class,
-				StructureDefinitionStatus.class, StructureDefinitionUrl.class, StructureDefinitionVersion.class));
+		searchParameters.put(StructureDefinition.class,
+				Arrays.asList(StructureDefinitionDate.class, StructureDefinitionIdentifier.class,
+						StructureDefinitionStatus.class, StructureDefinitionUrl.class,
+						StructureDefinitionVersion.class));
 
 		searchParameters.put(Subscription.class, Arrays.asList(SubscriptionCriteria.class, SubscriptionPayload.class,
 				SubscriptionStatus.class, SubscriptionType.class));
@@ -344,8 +355,8 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 		searchParameters.put(Task.class, Arrays.asList(TaskAuthoredOn.class, TaskIdentifier.class, TaskModified.class,
 				TaskRequester.class, TaskStatus.class));
 
-		searchParameters.put(ValueSet.class, Arrays.asList(ValueSetIdentifier.class, ValueSetUrl.class,
-				ValueSetVersion.class, ValueSetStatus.class));
+		searchParameters.put(ValueSet.class, Arrays.asList(ValueSetDate.class, ValueSetIdentifier.class,
+				ValueSetUrl.class, ValueSetVersion.class, ValueSetStatus.class));
 
 		var operations = new HashMap<Class<? extends DomainResource>, List<CapabilityStatementRestResourceOperationComponent>>();
 

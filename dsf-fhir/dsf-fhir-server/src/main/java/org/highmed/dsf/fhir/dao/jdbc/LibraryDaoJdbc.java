@@ -7,6 +7,7 @@ import java.util.Optional;
 import javax.sql.DataSource;
 
 import org.highmed.dsf.fhir.dao.LibraryDao;
+import org.highmed.dsf.fhir.search.parameters.LibraryDate;
 import org.highmed.dsf.fhir.search.parameters.LibraryIdentifier;
 import org.highmed.dsf.fhir.search.parameters.LibraryStatus;
 import org.highmed.dsf.fhir.search.parameters.LibraryUrl;
@@ -23,7 +24,9 @@ public class LibraryDaoJdbc extends AbstractResourceDaoJdbc<Library> implements 
 	public LibraryDaoJdbc(DataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, Library.class, "libraries", "library", "library_id", LibraryUserFilter::new,
-				with(LibraryIdentifier::new, LibraryStatus::new, LibraryUrl::new, LibraryVersion::new), with());
+				with(LibraryDate::new, LibraryIdentifier::new, LibraryStatus::new, LibraryUrl::new,
+						LibraryVersion::new),
+				with());
 
 		readByUrl = new ReadByUrlDaoJdbc<>(this::getDataSource, this::getResource, getResourceTable(),
 				getResourceColumn());

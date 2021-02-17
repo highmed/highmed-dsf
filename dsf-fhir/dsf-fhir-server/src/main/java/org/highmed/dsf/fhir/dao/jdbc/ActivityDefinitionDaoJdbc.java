@@ -12,6 +12,7 @@ import javax.sql.DataSource;
 import org.highmed.dsf.fhir.OrganizationType;
 import org.highmed.dsf.fhir.authentication.UserRole;
 import org.highmed.dsf.fhir.dao.ActivityDefinitionDao;
+import org.highmed.dsf.fhir.search.parameters.ActivityDefinitionDate;
 import org.highmed.dsf.fhir.search.parameters.ActivityDefinitionIdentifier;
 import org.highmed.dsf.fhir.search.parameters.ActivityDefinitionName;
 import org.highmed.dsf.fhir.search.parameters.ActivityDefinitionStatus;
@@ -35,8 +36,8 @@ public class ActivityDefinitionDaoJdbc extends AbstractResourceDaoJdbc<ActivityD
 	{
 		super(dataSource, fhirContext, ActivityDefinition.class, "activity_definitions", "activity_definition",
 				"activity_definition_id", ActivityDefinitionUserFilter::new,
-				with(ActivityDefinitionIdentifier::new, ActivityDefinitionName::new, ActivityDefinitionStatus::new,
-						ActivityDefinitionUrl::new, ActivityDefinitionVersion::new),
+				with(ActivityDefinitionDate::new, ActivityDefinitionIdentifier::new, ActivityDefinitionName::new,
+						ActivityDefinitionStatus::new, ActivityDefinitionUrl::new, ActivityDefinitionVersion::new),
 				with());
 
 		readByUrl = new ReadByUrlDaoJdbc<ActivityDefinition>(this::getDataSource, this::getResource, getResourceTable(),

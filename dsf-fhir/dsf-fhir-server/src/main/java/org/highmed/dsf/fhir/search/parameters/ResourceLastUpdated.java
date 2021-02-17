@@ -10,13 +10,8 @@ public class ResourceLastUpdated<R extends DomainResource> extends AbstractDateT
 {
 	public static final String PARAMETER_NAME = "_lastUpdated";
 
-	private static String toColumn(String resourceColumn)
-	{
-		return "(" + resourceColumn + "->'meta'->>'lastUpdated')";
-	}
-
 	public ResourceLastUpdated(String resourceColumn)
 	{
-		super(PARAMETER_NAME, toColumn(resourceColumn));
+		super(PARAMETER_NAME, resourceColumn + "->'meta'->>'lastUpdated'");
 	}
 }

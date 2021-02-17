@@ -9,10 +9,9 @@ import org.hl7.fhir.r4.model.Task;
 public class TaskModified extends AbstractDateTimeParameter<Task>
 {
 	public static final String PARAMETER_NAME = "modified";
-	private static final String PROPERTY = "(task->>'lastModified')";;
 
 	public TaskModified()
 	{
-		super(PARAMETER_NAME, PROPERTY);
+		super(PARAMETER_NAME, "task->>'lastModified'");
 	}
 }

@@ -10,6 +10,7 @@ import java.util.Optional;
 import javax.sql.DataSource;
 
 import org.highmed.dsf.fhir.dao.NamingSystemDao;
+import org.highmed.dsf.fhir.search.parameters.NamingSystemDate;
 import org.highmed.dsf.fhir.search.parameters.NamingSystemName;
 import org.highmed.dsf.fhir.search.parameters.NamingSystemStatus;
 import org.highmed.dsf.fhir.search.parameters.user.NamingSystemUserFilter;
@@ -26,7 +27,8 @@ public class NamingSystemDaoJdbc extends AbstractResourceDaoJdbc<NamingSystem> i
 	public NamingSystemDaoJdbc(DataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, NamingSystem.class, "naming_systems", "naming_system", "naming_system_id",
-				NamingSystemUserFilter::new, with(NamingSystemName::new, NamingSystemStatus::new), with());
+				NamingSystemUserFilter::new,
+				with(NamingSystemDate::new, NamingSystemName::new, NamingSystemStatus::new), with());
 	}
 
 	@Override

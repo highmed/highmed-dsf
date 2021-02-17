@@ -10,6 +10,7 @@ import javax.sql.DataSource;
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
 import org.highmed.dsf.fhir.search.SearchQueryUserFilter;
+import org.highmed.dsf.fhir.search.parameters.StructureDefinitionDate;
 import org.highmed.dsf.fhir.search.parameters.StructureDefinitionIdentifier;
 import org.highmed.dsf.fhir.search.parameters.StructureDefinitionStatus;
 import org.highmed.dsf.fhir.search.parameters.StructureDefinitionUrl;
@@ -28,7 +29,8 @@ abstract class AbstractStructureDefinitionDaoJdbc extends AbstractResourceDaoJdb
 	{
 		super(dataSource, fhirContext, StructureDefinition.class, resourceTable, resourceColumn, resourceIdColumn,
 				userFilter,
-				with(() -> new StructureDefinitionIdentifier(resourceColumn),
+				with(() -> new StructureDefinitionDate(resourceColumn),
+						() -> new StructureDefinitionIdentifier(resourceColumn),
 						() -> new StructureDefinitionStatus(resourceColumn),
 						() -> new StructureDefinitionUrl(resourceColumn),
 						() -> new StructureDefinitionVersion(resourceColumn)),
