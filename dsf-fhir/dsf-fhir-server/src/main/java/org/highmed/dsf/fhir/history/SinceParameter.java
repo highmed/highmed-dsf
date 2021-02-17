@@ -11,12 +11,9 @@ import org.hl7.fhir.r4.model.Resource;
 
 public class SinceParameter extends AbstractDateTimeParameter<DomainResource>
 {
-	private static final String PARAMETER_NAME = "_since";
-	private static final String COLUMN_NAME = "last_updated";
-
 	public SinceParameter()
 	{
-		super(PARAMETER_NAME, COLUMN_NAME);
+		super("_since", "last_updated");
 	}
 
 	@Override
