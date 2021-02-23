@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<property name="json" value="JSONB" dbms="postgresql" />
+	<property name="json" value="varchar(5000)" dbms="h2" />
+
+	<changeSet author="hhund" id="db.organization_affiliations.changelog-0.5.0">
+		<createTable tableName="organization_affiliations">
+			<column name="organization_affiliation_id" type="UUID">
+				<constraints nullable="false" />
+			</column>
+			<column name="version" type="BIGINT" defaultValueNumeric="1">
+				<constraints nullable="false" />
+			</column>
+			<column name="deleted" type="TIMESTAMP" />
+			<column name="organization_affiliation" type="${json}">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addPrimaryKey tableName="organization_affiliations" columnNames="organization_affiliation_id, version" />
+
+		<sql dbms="postgresql">
+			ALTER TABLE organization_affiliations OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE organization_affiliations TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE ON TABLE organization_affiliations TO ${db.server_users_group};
+			CREATE INDEX organization_affiliation_id_index ON organization_affiliations USING btree (organization_affiliation_id);
+			CREATE INDEX organization_affiliation_index ON organization_affiliations USING gin (organization_affiliation);
+			CREATE INDEX organization_affiliation_id_version_index ON organization_affiliations USING btree (organization_affiliation_id, version);
+		</sql>
+
+		<createView viewName="current_organization_affiliations" replaceIfExists="true">
+			SELECT organization_affiliation_id, version, organization_affiliation
+			FROM (
+				SELECT DISTINCT ON (organization_affiliation_id) organization_affiliation_id, version, deleted, organization_affiliation
+				FROM organization_affiliations ORDER BY organization_affiliation_id, version DESC
+			) AS current_l
+			WHERE deleted IS NULL
+		</createView>
+
+		<sql dbms="postgresql">
+			ALTER TABLE current_organization_affiliations OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_organization_affiliations TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_organization_affiliations TO ${db.server_users_group};
+		</sql>
+	</changeSet>
+</databaseChangeLog>

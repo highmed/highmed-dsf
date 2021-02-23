@@ -17,6 +17,7 @@ import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.NamingSystem;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
@@ -45,6 +46,7 @@ public class AuthorizationRuleProviderImpl implements AuthorizationRuleProvider
 	private final AuthorizationRule<MeasureReport> measureReportAuthorizationRule;
 	private final AuthorizationRule<NamingSystem> namingSystemAuthorizationRule;
 	private final AuthorizationRule<Organization> organizationAuthorizationRule;
+	private final AuthorizationRule<OrganizationAffiliation> organizationAffiliationAuthorizationRule;
 	private final AuthorizationRule<Patient> patientAuthorizationRule;
 	private final AuthorizationRule<Practitioner> practitionerAuthorizationRule;
 	private final AuthorizationRule<PractitionerRole> practitionerRoleAuthorizationRule;
@@ -68,6 +70,7 @@ public class AuthorizationRuleProviderImpl implements AuthorizationRuleProvider
 			AuthorizationRule<MeasureReport> measureReportAuthorizationRule,
 			AuthorizationRule<NamingSystem> namingSystemAuthorizationRule,
 			AuthorizationRule<Organization> organizationAuthorizationRule,
+			AuthorizationRule<OrganizationAffiliation> organizationAffiliationAuthorizationRule,
 			AuthorizationRule<Patient> patientAuthorizationRule,
 			AuthorizationRule<Practitioner> practitionerAuthorizationRule,
 			AuthorizationRule<PractitionerRole> practitionerRoleAuthorizationRule,
@@ -90,6 +93,7 @@ public class AuthorizationRuleProviderImpl implements AuthorizationRuleProvider
 		this.measureReportAuthorizationRule = measureReportAuthorizationRule;
 		this.namingSystemAuthorizationRule = namingSystemAuthorizationRule;
 		this.organizationAuthorizationRule = organizationAuthorizationRule;
+		this.organizationAffiliationAuthorizationRule = organizationAffiliationAuthorizationRule;
 		this.patientAuthorizationRule = patientAuthorizationRule;
 		this.practitionerAuthorizationRule = practitionerAuthorizationRule;
 		this.practitionerRoleAuthorizationRule = practitionerRoleAuthorizationRule;
@@ -113,6 +117,7 @@ public class AuthorizationRuleProviderImpl implements AuthorizationRuleProvider
 		authorizationRulesByResourecClass.put(MeasureReport.class, measureReportAuthorizationRule);
 		authorizationRulesByResourecClass.put(NamingSystem.class, namingSystemAuthorizationRule);
 		authorizationRulesByResourecClass.put(Organization.class, organizationAuthorizationRule);
+		authorizationRulesByResourecClass.put(OrganizationAffiliation.class, organizationAffiliationAuthorizationRule);
 		authorizationRulesByResourecClass.put(Patient.class, patientAuthorizationRule);
 		authorizationRulesByResourecClass.put(Practitioner.class, practitionerAuthorizationRule);
 		authorizationRulesByResourecClass.put(PractitionerRole.class, practitionerRoleAuthorizationRule);
@@ -203,6 +208,12 @@ public class AuthorizationRuleProviderImpl implements AuthorizationRuleProvider
 	public AuthorizationRule<Organization> getOrganizationAuthorizationRule()
 	{
 		return organizationAuthorizationRule;
+	}
+
+	@Override
+	public AuthorizationRule<OrganizationAffiliation> getOrganizationAffiliationAuthorizationRule()
+	{
+		return organizationAffiliationAuthorizationRule;
 	}
 
 	@Override

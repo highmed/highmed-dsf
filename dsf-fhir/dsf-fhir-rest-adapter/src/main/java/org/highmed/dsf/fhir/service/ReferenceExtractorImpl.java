@@ -35,6 +35,7 @@ import org.hl7.fhir.r4.model.NamingSystem;
 import org.hl7.fhir.r4.model.ObservationDefinition;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Patient.ContactComponent;
 import org.hl7.fhir.r4.model.Patient.PatientLinkComponent;
@@ -532,6 +533,33 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 		var extensionReferences = getExtensionReferences(resource);
 
 		return concat(partOf, endpoints, extensionReferences);
+	}
+
+	@Override
+	public Stream<ResourceReference> getReferences(OrganizationAffiliation resource)
+	{
+		if (resource == null)
+			return Stream.empty();
+
+		var organization = getReference(resource, OrganizationAffiliation::hasOrganization,
+				OrganizationAffiliation::getOrganization, "OrganizationAffiliation.organization", Organization.class);
+		var participatingOrganization = getReference(resource, OrganizationAffiliation::hasParticipatingOrganization,
+				OrganizationAffiliation::getParticipatingOrganization,
+				"OrganizationAffiliation.participatingOrganization", Organization.class);
+		var network = getReferences(resource, OrganizationAffiliation::hasNetwork, OrganizationAffiliation::getNetwork,
+				"OrganizationAffiliation.network", Organization.class);
+		var location = getReferences(resource, OrganizationAffiliation::hasLocation,
+				OrganizationAffiliation::getLocation, "OrganizationAffiliation.location", Location.class);
+		var healthcareService = getReferences(resource, OrganizationAffiliation::hasHealthcareService,
+				OrganizationAffiliation::getHealthcareService, "OrganizationAffiliation.healthcareService",
+				HealthcareService.class);
+		var endpoint = getReferences(resource, OrganizationAffiliation::hasEndpoint,
+				OrganizationAffiliation::getEndpoint, "OrganizationAffiliation.endpoint", Endpoint.class);
+
+		var extensionReferences = getExtensionReferences(resource);
+
+		return concat(organization, participatingOrganization, network, location, healthcareService, endpoint,
+				extensionReferences);
 	}
 
 	@Override

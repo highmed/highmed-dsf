@@ -16,6 +16,7 @@ import org.highmed.dsf.fhir.dao.LocationDao;
 import org.highmed.dsf.fhir.dao.MeasureDao;
 import org.highmed.dsf.fhir.dao.MeasureReportDao;
 import org.highmed.dsf.fhir.dao.NamingSystemDao;
+import org.highmed.dsf.fhir.dao.OrganizationAffiliationDao;
 import org.highmed.dsf.fhir.dao.OrganizationDao;
 import org.highmed.dsf.fhir.dao.PatientDao;
 import org.highmed.dsf.fhir.dao.PractitionerDao;
@@ -60,6 +61,8 @@ public interface DaoProvider
 	NamingSystemDao getNamingSystemDao();
 
 	OrganizationDao getOrganizationDao();
+
+	OrganizationAffiliationDao getOrganizationAffiliationDao();
 
 	PatientDao getPatientDao();
 

@@ -21,6 +21,7 @@ import org.highmed.dsf.fhir.dao.LocationDao;
 import org.highmed.dsf.fhir.dao.MeasureDao;
 import org.highmed.dsf.fhir.dao.MeasureReportDao;
 import org.highmed.dsf.fhir.dao.NamingSystemDao;
+import org.highmed.dsf.fhir.dao.OrganizationAffiliationDao;
 import org.highmed.dsf.fhir.dao.OrganizationDao;
 import org.highmed.dsf.fhir.dao.PatientDao;
 import org.highmed.dsf.fhir.dao.PractitionerDao;
@@ -45,6 +46,7 @@ import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.NamingSystem;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
@@ -75,6 +77,7 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	private final MeasureReportDao measureReportDao;
 	private final NamingSystemDao namingSystemDao;
 	private final OrganizationDao organizationDao;
+	private final OrganizationAffiliationDao organizationAffiliationDao;
 	private final PatientDao patientDao;
 	private final PractitionerDao practitionerDao;
 	private final PractitionerRoleDao practitionerRoleDao;
@@ -93,8 +96,9 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 			BundleDao bundleDao, CodeSystemDao codeSystemDao, EndpointDao endpointDao, GroupDao groupDao,
 			HealthcareServiceDao healthcareServiceDao, LibraryDao libraryDao, LocationDao locationDao,
 			MeasureDao measureDao, MeasureReportDao measureReportDao, NamingSystemDao namingSystemDao,
-			OrganizationDao organizationDao, PatientDao patientDao, PractitionerDao practitionerDao,
-			PractitionerRoleDao practitionerRoleDao, ProvenanceDao provenanceDao, ResearchStudyDao researchStudyDao,
+			OrganizationDao organizationDao, OrganizationAffiliationDao organizationAffiliationDao,
+			PatientDao patientDao, PractitionerDao practitionerDao, PractitionerRoleDao practitionerRoleDao,
+			ProvenanceDao provenanceDao, ResearchStudyDao researchStudyDao,
 			StructureDefinitionDao structureDefinitionDao, StructureDefinitionDao structureDefinitionSnapshotDao,
 			SubscriptionDao subscriptionDao, TaskDao taskDao, ValueSetDao valueSetDao)
 	{
@@ -112,6 +116,7 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 		this.measureReportDao = measureReportDao;
 		this.namingSystemDao = namingSystemDao;
 		this.organizationDao = organizationDao;
+		this.organizationAffiliationDao = organizationAffiliationDao;
 		this.patientDao = patientDao;
 		this.practitionerDao = practitionerDao;
 		this.practitionerRoleDao = practitionerRoleDao;
@@ -136,6 +141,7 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 		daosByResourecClass.put(MeasureReport.class, measureReportDao);
 		daosByResourecClass.put(NamingSystem.class, namingSystemDao);
 		daosByResourecClass.put(Organization.class, organizationDao);
+		daosByResourecClass.put(OrganizationAffiliation.class, organizationAffiliationDao);
 		daosByResourecClass.put(Patient.class, patientDao);
 		daosByResourecClass.put(Practitioner.class, practitionerDao);
 		daosByResourecClass.put(PractitionerRole.class, practitionerRoleDao);
@@ -165,6 +171,7 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 		Objects.requireNonNull(measureReportDao, "measureReportDao");
 		Objects.requireNonNull(namingSystemDao, "namingSystemDao");
 		Objects.requireNonNull(organizationDao, "organizationDao");
+		Objects.requireNonNull(organizationAffiliationDao, "organizationAffiliationDao");
 		Objects.requireNonNull(patientDao, "patientDao");
 		Objects.requireNonNull(practitionerDao, "practitionerDao");
 		Objects.requireNonNull(practitionerRoleDao, "practitionerRoleDao");
@@ -275,6 +282,12 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	public OrganizationDao getOrganizationDao()
 	{
 		return organizationDao;
+	}
+
+	@Override
+	public OrganizationAffiliationDao getOrganizationAffiliationDao()
+	{
+		return organizationAffiliationDao;
 	}
 
 	@Override

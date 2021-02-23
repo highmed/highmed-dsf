@@ -22,6 +22,7 @@ import org.highmed.dsf.fhir.authorization.LocationAuthorizationRule;
 import org.highmed.dsf.fhir.authorization.MeasureAuthorizationRule;
 import org.highmed.dsf.fhir.authorization.MeasureReportAuthorizationRule;
 import org.highmed.dsf.fhir.authorization.NamingSystemAuthorizationRule;
+import org.highmed.dsf.fhir.authorization.OrganizationAffiliationAuthorizationRule;
 import org.highmed.dsf.fhir.authorization.OrganizationAuthorizationRule;
 import org.highmed.dsf.fhir.authorization.PatientAuthorizationRule;
 import org.highmed.dsf.fhir.authorization.PractitionerAuthorizationRule;
@@ -48,6 +49,7 @@ import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.NamingSystem;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
@@ -198,6 +200,13 @@ public class AuthorizationConfig
 	}
 
 	@Bean
+	public AuthorizationRule<OrganizationAffiliation> organizationAffiliationAuthorizationRule()
+	{
+		return new OrganizationAffiliationAuthorizationRule(daoConfig.daoProvider(), serverBase,
+				referenceConfig.referenceResolver(), organizationProvider());
+	}
+
+	@Bean
 	public AuthorizationRule<Patient> patientAuthorizationRule()
 	{
 		return new PatientAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver(),
@@ -267,10 +276,11 @@ public class AuthorizationConfig
 				bundleAuthorizationRule(), codeSystemAuthorizationRule(), endpointAuthorizationRule(),
 				groupAuthorizationRule(), healthcareServiceAuthorizationRule(), libraryAuthorizationRule(),
 				locationAuthorizationRule(), measureAuthorizationRule(), measureReportAuthorizationRule(),
-				namingSystemAuthorizationRule(), organizationAuthorizationRule(), patientAuthorizationRule(),
-				practitionerAuthorizationRule(), practitionerRoleAuthorizationRule(), provenanceAuthorizationRule(),
-				researchStudyAuthorizationRule(), structureDefinitionAuthorizationRule(),
-				subscriptionAuthorizationRule(), taskAuthorizationRule(), valueSetAuthorizationRule());
+				namingSystemAuthorizationRule(), organizationAuthorizationRule(),
+				organizationAffiliationAuthorizationRule(), patientAuthorizationRule(), practitionerAuthorizationRule(),
+				practitionerRoleAuthorizationRule(), provenanceAuthorizationRule(), researchStudyAuthorizationRule(),
+				structureDefinitionAuthorizationRule(), subscriptionAuthorizationRule(), taskAuthorizationRule(),
+				valueSetAuthorizationRule());
 	}
 
 	@Bean

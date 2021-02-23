@@ -15,6 +15,7 @@ import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.NamingSystem;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
@@ -52,6 +53,8 @@ public interface AuthorizationRuleProvider
 	AuthorizationRule<NamingSystem> getNamingSystemAuthorizationRule();
 
 	AuthorizationRule<Organization> getOrganizationAuthorizationRule();
+
+	AuthorizationRule<OrganizationAffiliation> getOrganizationAffiliationAuthorizationRule();
 
 	AuthorizationRule<Patient> getPatientAuthorizationRule();
 

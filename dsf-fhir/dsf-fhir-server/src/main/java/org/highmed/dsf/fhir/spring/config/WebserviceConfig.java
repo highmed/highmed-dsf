@@ -15,6 +15,7 @@ import org.highmed.dsf.fhir.webservice.impl.LocationServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.MeasureReportServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.MeasureServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.NamingSystemServiceImpl;
+import org.highmed.dsf.fhir.webservice.impl.OrganizationAffiliationServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.OrganizationServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.PatientServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.PractitionerRoleServiceImpl;
@@ -40,6 +41,7 @@ import org.highmed.dsf.fhir.webservice.jaxrs.LocationServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.MeasureReportServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.MeasureServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.NamingSystemServiceJaxrs;
+import org.highmed.dsf.fhir.webservice.jaxrs.OrganizationAffiliationServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.OrganizationServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.PatientServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.PractitionerRoleServiceJaxrs;
@@ -65,6 +67,7 @@ import org.highmed.dsf.fhir.webservice.secure.LocationServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.MeasureReportServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.MeasureServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.NamingSystemServiceSecure;
+import org.highmed.dsf.fhir.webservice.secure.OrganizationAffiliationServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.OrganizationServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.PatientServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.PractitionerRoleServiceSecure;
@@ -90,6 +93,7 @@ import org.highmed.dsf.fhir.webservice.specification.LocationService;
 import org.highmed.dsf.fhir.webservice.specification.MeasureReportService;
 import org.highmed.dsf.fhir.webservice.specification.MeasureService;
 import org.highmed.dsf.fhir.webservice.specification.NamingSystemService;
+import org.highmed.dsf.fhir.webservice.specification.OrganizationAffiliationService;
 import org.highmed.dsf.fhir.webservice.specification.OrganizationService;
 import org.highmed.dsf.fhir.webservice.specification.PatientService;
 import org.highmed.dsf.fhir.webservice.specification.PractitionerRoleService;
@@ -470,6 +474,32 @@ public class WebserviceConfig
 				helperConfig.parameterConverter(), referenceConfig.referenceExtractor(),
 				referenceConfig.referenceResolver(), referenceConfig.referenceCleaner(),
 				authorizationConfig.authorizationRuleProvider(), historyConfig.historyService());
+	}
+
+	@Bean
+	public OrganizationAffiliationService organizationAffiliationService()
+	{
+		return new OrganizationAffiliationServiceJaxrs(organizationAffiliationServiceSecure());
+	}
+
+	private OrganizationAffiliationServiceSecure organizationAffiliationServiceSecure()
+	{
+		return new OrganizationAffiliationServiceSecure(organizationAffiliationServiceImpl(), serverBase,
+				helperConfig.responseGenerator(), referenceConfig.referenceResolver(),
+				referenceConfig.referenceCleaner(), daoConfig.organizationAffiliationDao(),
+				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
+				authorizationConfig.organizationAffiliationAuthorizationRule(), validationConfig.resourceValidator());
+	}
+
+	private OrganizationAffiliationServiceImpl organizationAffiliationServiceImpl()
+	{
+		return new OrganizationAffiliationServiceImpl(OrganizationServiceJaxrs.PATH, serverBase, defaultPageCount,
+				daoConfig.organizationAffiliationDao(), validationConfig.resourceValidator(),
+				eventConfig.eventManager(), helperConfig.exceptionHandler(), eventConfig.eventGenerator(),
+				helperConfig.responseGenerator(), helperConfig.parameterConverter(),
+				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver(),
+				referenceConfig.referenceCleaner(), authorizationConfig.authorizationRuleProvider(),
+				historyConfig.historyService());
 	}
 
 	@Bean

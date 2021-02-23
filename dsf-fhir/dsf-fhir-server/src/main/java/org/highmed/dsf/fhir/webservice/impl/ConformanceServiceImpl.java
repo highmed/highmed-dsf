@@ -55,6 +55,8 @@ import org.highmed.dsf.fhir.search.parameters.NamingSystemDate;
 import org.highmed.dsf.fhir.search.parameters.NamingSystemName;
 import org.highmed.dsf.fhir.search.parameters.NamingSystemStatus;
 import org.highmed.dsf.fhir.search.parameters.OrganizationActive;
+import org.highmed.dsf.fhir.search.parameters.OrganizationAffiliationActive;
+import org.highmed.dsf.fhir.search.parameters.OrganizationAffiliationIdentifier;
 import org.highmed.dsf.fhir.search.parameters.OrganizationEndpoint;
 import org.highmed.dsf.fhir.search.parameters.OrganizationIdentifier;
 import org.highmed.dsf.fhir.search.parameters.OrganizationName;
@@ -136,6 +138,7 @@ import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.NamingSystem;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
@@ -287,9 +290,9 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 
 		var resources = Arrays.asList(ActivityDefinition.class, Binary.class, Bundle.class, CodeSystem.class,
 				Endpoint.class, Group.class, HealthcareService.class, Library.class, Location.class, Measure.class,
-				MeasureReport.class, NamingSystem.class, Organization.class, Patient.class, PractitionerRole.class,
-				Practitioner.class, Provenance.class, ResearchStudy.class, StructureDefinition.class,
-				Subscription.class, Task.class, ValueSet.class);
+				MeasureReport.class, NamingSystem.class, Organization.class, OrganizationAffiliation.class,
+				Patient.class, PractitionerRole.class, Practitioner.class, Provenance.class, ResearchStudy.class,
+				StructureDefinition.class, Subscription.class, Task.class, ValueSet.class);
 
 		var searchParameters = new HashMap<Class<? extends Resource>, List<Class<? extends AbstractSearchParameter<?>>>>();
 		var revIncludeParameters = new HashMap<Class<? extends Resource>, List<Class<? extends AbstractRevIncludeParameterFactory>>>();
@@ -332,6 +335,9 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 		searchParameters.put(Organization.class, Arrays.asList(OrganizationActive.class, OrganizationEndpoint.class,
 				OrganizationIdentifier.class, OrganizationName.class, OrganizationType.class));
 		revIncludeParameters.put(Organization.class, Collections.singletonList(EndpointOrganizationRevInclude.class));
+
+		searchParameters.put(OrganizationAffiliation.class,
+				Arrays.asList(OrganizationAffiliationActive.class, OrganizationAffiliationIdentifier.class));
 
 		searchParameters.put(Patient.class, Arrays.asList(PatientActive.class, PatientIdentifier.class));
 

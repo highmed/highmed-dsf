@@ -50,6 +50,8 @@ import org.highmed.dsf.fhir.adapter.NamingSystemJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.NamingSystemXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.OperationOutcomeJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.OperationOutcomeXmlFhirAdapter;
+import org.highmed.dsf.fhir.adapter.OrganizationAffiliationJsonFhirAdapter;
+import org.highmed.dsf.fhir.adapter.OrganizationAffiliationXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.OrganizationJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.OrganizationXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.ParametersJsonFhirAdapter;
@@ -137,7 +139,8 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 				new MeasureReportXmlFhirAdapter(fhirContext), new NamingSystemJsonFhirAdapter(fhirContext),
 				new NamingSystemXmlFhirAdapter(fhirContext), new OperationOutcomeJsonFhirAdapter(fhirContext),
 				new OperationOutcomeXmlFhirAdapter(fhirContext), new OrganizationJsonFhirAdapter(fhirContext),
-				new OrganizationXmlFhirAdapter(fhirContext), new ParametersJsonFhirAdapter(fhirContext),
+				new OrganizationXmlFhirAdapter(fhirContext), new OrganizationAffiliationJsonFhirAdapter(fhirContext),
+				new OrganizationAffiliationXmlFhirAdapter(fhirContext), new ParametersJsonFhirAdapter(fhirContext),
 				new ParametersXmlFhirAdapter(fhirContext), new PatientJsonFhirAdapter(fhirContext),
 				new PatientXmlFhirAdapter(fhirContext), new PractitionerJsonFhirAdapter(fhirContext),
 				new PractitionerXmlFhirAdapter(fhirContext), new PractitionerRoleJsonFhirAdapter(fhirContext),
