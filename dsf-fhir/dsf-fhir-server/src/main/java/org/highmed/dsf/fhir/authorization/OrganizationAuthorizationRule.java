@@ -28,7 +28,7 @@ public class OrganizationAuthorizationRule extends AbstractAuthorizationRule<Org
 
 	private static final String IDENTIFIER_SYSTEM = "http://highmed.org/fhir/NamingSystem/organization-identifier";
 	private static final String EXTENSION_THUMBPRINT_URL = "http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint";
-	private static final String EXTENSION_THUMBPRINT_VALUE_PATTERN_STRING = "[a-z0-9]{128}";
+	private static final String EXTENSION_THUMBPRINT_VALUE_PATTERN_STRING = "[a-f0-9]{128}";
 	private static final Pattern EXTENSION_THUMBPRINT_VALUE_PATTERN = Pattern
 			.compile(EXTENSION_THUMBPRINT_VALUE_PATTERN_STRING);
 
