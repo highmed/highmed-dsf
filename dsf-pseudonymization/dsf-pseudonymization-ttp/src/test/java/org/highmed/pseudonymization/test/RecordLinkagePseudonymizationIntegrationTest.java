@@ -23,7 +23,7 @@ import org.highmed.pseudonymization.recordlinkage.FederatedMatcher;
 import org.highmed.pseudonymization.recordlinkage.FederatedMatcherImpl;
 import org.highmed.pseudonymization.recordlinkage.MatchedPerson;
 import org.highmed.pseudonymization.translation.ResultSetTranslatorFromMedic;
-import org.highmed.pseudonymization.translation.ResultSetTranslatorFromMedicImpl;
+import org.highmed.pseudonymization.translation.ResultSetTranslatorFromMedicWithRbfImpl;
 import org.highmed.pseudonymization.translation.ResultSetTranslatorToMedic;
 import org.highmed.pseudonymization.translation.ResultSetTranslatorToMedicImpl;
 import org.junit.Before;
@@ -48,7 +48,7 @@ public class RecordLinkagePseudonymizationIntegrationTest
 	@Before
 	public void before() throws Exception
 	{
-		fromMedic = new ResultSetTranslatorFromMedicImpl();
+		fromMedic = new ResultSetTranslatorFromMedicWithRbfImpl();
 		matcher = new FederatedMatcherImpl<>(MatchedPersonImpl::new);
 		generator = new PseudonymGeneratorImpl<>("researchStudyIdentifier", AesGcmUtil.generateAES256Key(),
 				new ObjectMapper(), PseudonymizedPersonImpl::new);
