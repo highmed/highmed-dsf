@@ -30,7 +30,7 @@ public abstract class AbstractReferenceParameter<R extends DomainResource> exten
 
 	protected static enum ReferenceSearchType
 	{
-		ID, RESOURCE_NAME_AND_ID, URL, IDENTIFIER
+		ID, TYPE_AND_ID, RESOURCE_NAME_AND_ID, TYPE_AND_RESOURCE_NAME_AND_ID, URL, IDENTIFIER
 	}
 
 	protected static class ReferenceValueAndSearchType
@@ -52,6 +52,14 @@ public abstract class AbstractReferenceParameter<R extends DomainResource> exten
 			this.identifier = identifier;
 		}
 
+		// [parameter]=[uuid] -> local id
+		//
+		// [parameter]=[Type]/[uuid] -> local type+id
+		//
+		// [parameter]=[url] -> absolute id or canonical
+		//
+		// [parameter]:[Type]=[uuid] -> local type+id
+		// [parameter]:identifier=[identifier] -> identifier (not supported for canonical references)
 		public static Optional<ReferenceValueAndSearchType> fromParamValue(List<String> targetResourceTypeNames,
 				String parameterName, Map<String, List<String>> queryParameters,
 				Consumer<SearchQueryParameterError> errors)
@@ -60,24 +68,35 @@ public abstract class AbstractReferenceParameter<R extends DomainResource> exten
 			allValues.addAll(queryParameters.getOrDefault(parameterName, Collections.emptyList()));
 			allValues.addAll(queryParameters.getOrDefault(parameterName + PARAMETER_NAME_IDENTIFIER_MODIFIER,
 					Collections.emptyList()));
+			allValues.addAll(targetResourceTypeNames.stream().flatMap(
+					type -> queryParameters.getOrDefault(parameterName + ":" + type, Collections.emptyList()).stream())
+					.collect(Collectors.toList()));
+
 			if (allValues.size() > 1)
 				errors.accept(new SearchQueryParameterError(SearchQueryParameterErrorType.UNSUPPORTED_NUMBER_OF_VALUES,
 						parameterName, allValues));
+			else if (allValues.isEmpty())
+				return Optional.empty();
 
-			final String param = getFirst(queryParameters, parameterName);
-			final String identifierParam = getFirst(queryParameters,
-					parameterName + PARAMETER_NAME_IDENTIFIER_MODIFIER);
+			final String value = allValues.get(0);
 
-			if (param != null && !param.isBlank())
+			// simple case
+			if (queryParameters.containsKey(parameterName))
 			{
-				if (param.indexOf('/') == -1 && targetResourceTypeNames.size() == 1)
+				if (value.indexOf('/') == -1 && targetResourceTypeNames.size() == 1)
+					return Optional.of(new ReferenceValueAndSearchType(targetResourceTypeNames.get(0), value, null,
+							null, ReferenceSearchType.ID));
+				else if (value.indexOf('/') == -1 && targetResourceTypeNames.size() > 1)
 					return Optional
-							.of(new ReferenceValueAndSearchType(null, param, null, null, ReferenceSearchType.ID));
-				else if (param.indexOf('/') >= 0)
+							.of(new ReferenceValueAndSearchType(null, value, null, null, ReferenceSearchType.ID));
+				else if (value.startsWith("http"))
+					return Optional
+							.of(new ReferenceValueAndSearchType(null, null, value, null, ReferenceSearchType.URL));
+				else if (value.indexOf('/') >= 0)
 				{
-					String[] splitAtSlash = param.split("/");
-					if (splitAtSlash.length == 2 && targetResourceTypeNames.stream()
-							.map(name -> name.equals(splitAtSlash[0])).anyMatch(b -> b))
+					String[] splitAtSlash = value.split("/");
+					if (splitAtSlash.length == 2
+							&& targetResourceTypeNames.stream().anyMatch(name -> name.equals(splitAtSlash[0])))
 						return Optional.of(new ReferenceValueAndSearchType(splitAtSlash[0], splitAtSlash[1], null, null,
 								ReferenceSearchType.RESOURCE_NAME_AND_ID));
 					else
@@ -86,35 +105,66 @@ public abstract class AbstractReferenceParameter<R extends DomainResource> exten
 								"Unsupported target resource type name " + splitAtSlash[0] + ", not one of "
 										+ targetResourceTypeNames));
 				}
-				else if (param.startsWith("http") && targetResourceTypeNames.stream()
-						.map(name -> param.contains("/" + name + "/")).anyMatch(b -> b))
-					return Optional
-							.of(new ReferenceValueAndSearchType(null, null, param, null, ReferenceSearchType.URL));
+
 				else
 					errors.accept(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE,
 							parameterName, queryParameters.get(parameterName)));
 			}
-			else if (param != null && param.isBlank())
+			// typed parameter
+			else if (targetResourceTypeNames.stream()
+					.anyMatch(type -> queryParameters.containsKey(parameterName + ":" + type)))
 			{
-				errors.accept(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE,
-						parameterName, queryParameters.get(parameterName), "Value empty"));
-			}
-			else if (identifierParam != null && !identifierParam.isBlank())
-			{
-				return TokenValueAndSearchType
-						.fromParamValue(parameterName + PARAMETER_NAME_IDENTIFIER_MODIFIER, queryParameters, errors)
-						.map(identifier -> new ReferenceValueAndSearchType(null, null, null, identifier,
-								ReferenceSearchType.IDENTIFIER));
-			}
-			else if (identifierParam != null && identifierParam.isBlank())
-			{
-				errors.accept(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE,
-						parameterName, queryParameters.get(parameterName), "Value empty"));
-			}
+				final String paramType = targetResourceTypeNames.stream()
+						.filter(type -> queryParameters.containsKey(parameterName + ":" + type)).findFirst().get();
 
-			if (queryParameters.get(parameterName) != null && queryParameters.get(parameterName).size() > 1)
-				errors.accept(new SearchQueryParameterError(SearchQueryParameterErrorType.UNSUPPORTED_NUMBER_OF_VALUES,
-						parameterName, queryParameters.get(parameterName)));
+				if (value.indexOf('/') == -1 && targetResourceTypeNames.size() == 1)
+				{
+					if (paramType.equals(targetResourceTypeNames.get(0)))
+						return Optional.of(new ReferenceValueAndSearchType(paramType, value, null, null,
+								ReferenceSearchType.TYPE_AND_ID));
+					else
+						errors.accept(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE,
+								parameterName, queryParameters.get(parameterName),
+								"Unsupported target resource type name " + paramType + ", not equal to "
+										+ targetResourceTypeNames.get(0)));
+				}
+				else if (value.indexOf('/') >= 0)
+				{
+					String[] splitAtSlash = value.split("/");
+					if (splitAtSlash.length == 2
+							&& targetResourceTypeNames.stream().anyMatch(name -> name.equals(splitAtSlash[0])))
+					{
+						if (paramType.equals(splitAtSlash[0]))
+							return Optional.of(new ReferenceValueAndSearchType(splitAtSlash[0], splitAtSlash[1], null,
+									null, ReferenceSearchType.TYPE_AND_RESOURCE_NAME_AND_ID));
+						else
+							errors.accept(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE,
+									parameterName, queryParameters.get(parameterName),
+									"Inconsistent target resource type name " + paramType + " vs. " + splitAtSlash[0]));
+					}
+					else
+						errors.accept(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE,
+								parameterName, queryParameters.get(parameterName),
+								"Unsupported target resource type name " + splitAtSlash[0] + ", not one of "
+										+ targetResourceTypeNames));
+				}
+			}
+			// identifier
+			else if (queryParameters.containsKey(parameterName + PARAMETER_NAME_IDENTIFIER_MODIFIER))
+			{
+				if (value != null && !value.isBlank())
+				{
+					return TokenValueAndSearchType
+							.fromParamValue(parameterName + PARAMETER_NAME_IDENTIFIER_MODIFIER, queryParameters, errors)
+							.map(identifier -> new ReferenceValueAndSearchType(null, null, null, identifier,
+									ReferenceSearchType.IDENTIFIER));
+				}
+				else if (value == null || value.isBlank())
+				{
+					errors.accept(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE,
+							parameterName, queryParameters.get(parameterName), "Value empty"));
+				}
+			}
 
 			return Optional.empty();
 		}
@@ -192,12 +242,21 @@ public abstract class AbstractReferenceParameter<R extends DomainResource> exten
 		switch (valueAndType.type)
 		{
 			case ID:
-			case URL:
 				bundleUri.replaceQueryParam(parameterName, valueAndType.id);
 				break;
-
+			case URL:
+				bundleUri.replaceQueryParam(parameterName, valueAndType.url);
+				break;
 			case RESOURCE_NAME_AND_ID:
 				bundleUri.replaceQueryParam(parameterName, valueAndType.resourceName + "/" + valueAndType.id);
+				break;
+
+			case TYPE_AND_ID:
+				bundleUri.replaceQueryParam(parameterName + ":" + valueAndType.resourceName, valueAndType.id);
+				break;
+			case TYPE_AND_RESOURCE_NAME_AND_ID:
+				bundleUri.replaceQueryParam(parameterName + ":" + valueAndType.resourceName,
+						valueAndType.resourceName + "/" + valueAndType.id);
 				break;
 
 			case IDENTIFIER:

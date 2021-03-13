@@ -8,8 +8,12 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.HealthcareService;
+import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.Measure;
+import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.NamingSystem;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
@@ -41,9 +45,17 @@ public interface ReferenceExtractor
 
 	Stream<ResourceReference> getReferences(HealthcareService resource);
 
+	Stream<ResourceReference> getReferences(Library resource);
+
 	Stream<ResourceReference> getReferences(Location resource);
 
+	Stream<ResourceReference> getReferences(Measure resource);
+
+	Stream<ResourceReference> getReferences(MeasureReport resource);
+
 	Stream<ResourceReference> getReferences(NamingSystem resource);
+
+	Stream<ResourceReference> getReferences(OperationOutcome resource);
 
 	Stream<ResourceReference> getReferences(Organization resource);
 

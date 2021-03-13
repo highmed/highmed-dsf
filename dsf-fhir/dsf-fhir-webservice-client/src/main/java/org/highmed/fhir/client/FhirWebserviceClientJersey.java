@@ -38,8 +38,14 @@ import org.highmed.dsf.fhir.adapter.GroupJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.GroupXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.HealthcareServiceJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.HealthcareServiceXmlFhirAdapter;
+import org.highmed.dsf.fhir.adapter.LibraryJsonFhirAdapter;
+import org.highmed.dsf.fhir.adapter.LibraryXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.LocationJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.LocationXmlFhirAdapter;
+import org.highmed.dsf.fhir.adapter.MeasureJsonFhirAdapter;
+import org.highmed.dsf.fhir.adapter.MeasureReportJsonFhirAdapter;
+import org.highmed.dsf.fhir.adapter.MeasureReportXmlFhirAdapter;
+import org.highmed.dsf.fhir.adapter.MeasureXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.NamingSystemJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.NamingSystemXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.OperationOutcomeJsonFhirAdapter;
@@ -124,8 +130,11 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 				new CodeSystemXmlFhirAdapter(fhirContext), new GroupJsonFhirAdapter(fhirContext),
 				new GroupXmlFhirAdapter(fhirContext), new EndpointJsonFhirAdapter(fhirContext),
 				new EndpointXmlFhirAdapter(fhirContext), new HealthcareServiceJsonFhirAdapter(fhirContext),
-				new HealthcareServiceXmlFhirAdapter(fhirContext), new LocationJsonFhirAdapter(fhirContext),
-				new LocationXmlFhirAdapter(fhirContext), new NamingSystemJsonFhirAdapter(fhirContext),
+				new HealthcareServiceXmlFhirAdapter(fhirContext), new LibraryJsonFhirAdapter(fhirContext),
+				new LibraryXmlFhirAdapter(fhirContext), new LocationJsonFhirAdapter(fhirContext),
+				new LocationXmlFhirAdapter(fhirContext), new MeasureJsonFhirAdapter(fhirContext),
+				new MeasureXmlFhirAdapter(fhirContext), new MeasureReportJsonFhirAdapter(fhirContext),
+				new MeasureReportXmlFhirAdapter(fhirContext), new NamingSystemJsonFhirAdapter(fhirContext),
 				new NamingSystemXmlFhirAdapter(fhirContext), new OperationOutcomeJsonFhirAdapter(fhirContext),
 				new OperationOutcomeXmlFhirAdapter(fhirContext), new OrganizationJsonFhirAdapter(fhirContext),
 				new OrganizationXmlFhirAdapter(fhirContext), new ParametersJsonFhirAdapter(fhirContext),

@@ -82,16 +82,18 @@ public class DeleteCommand extends AbstractCommand implements Command
 		resourceTypeName = componentes.getPathSegments().get(0);
 
 		if (componentes.getPathSegments().size() == 2 && componentes.getQueryParams().isEmpty())
-			deleteById(connection, componentes.getPathSegments().get(0), componentes.getPathSegments().get(1));
+			deleteById(idTranslationTable, connection, componentes.getPathSegments().get(0),
+					componentes.getPathSegments().get(1));
 		else if (componentes.getPathSegments().size() == 1 && !componentes.getQueryParams().isEmpty())
-			deleteByCondition(connection, componentes.getPathSegments().get(0),
+			deleteByCondition(idTranslationTable, connection, componentes.getPathSegments().get(0),
 					parameterConverter.urlDecodeQueryParameters(componentes.getQueryParams()));
 		else
 			throw new WebApplicationException(
 					responseGenerator.badDeleteRequestUrl(index, entry.getRequest().getUrl()));
 	}
 
-	private void deleteById(Connection connection, String resourceTypeName, String id)
+	private void deleteById(Map<String, IdType> idTranslationTable, Connection connection, String resourceTypeName,
+			String id)
 	{
 		Optional<ResourceDao<?>> optDao = daoProvider.getDao(resourceTypeName);
 
@@ -115,11 +117,12 @@ public class DeleteCommand extends AbstractCommand implements Command
 			this.resourceType = dao.getResourceType();
 			this.id = id;
 
+			setNewIdIfResourceExistsInTranslationTable(idTranslationTable, id);
 		}
 	}
 
-	private void deleteByCondition(Connection connection, String resourceTypeName,
-			Map<String, List<String>> queryParameters)
+	private void deleteByCondition(Map<String, IdType> idTranslationTable, Connection connection,
+			String resourceTypeName, Map<String, List<String>> queryParameters)
 	{
 		Optional<ResourceDao<?>> dao = daoProvider.getDao(resourceTypeName);
 
@@ -139,8 +142,17 @@ public class DeleteCommand extends AbstractCommand implements Command
 
 				this.resourceType = dao.get().getResourceType();
 				this.id = resourceToDelete.get().getIdElement().getIdPart();
+
+				setNewIdIfResourceExistsInTranslationTable(idTranslationTable, id);
 			}
 		}
+	}
+
+	private void setNewIdIfResourceExistsInTranslationTable(Map<String, IdType> idTranslationTable, String id)
+	{
+		idTranslationTable.entrySet().stream().filter(e -> e.getValue().equals(new IdType(resourceTypeName, id)))
+				.findFirst().ifPresent(entry -> idTranslationTable.put(entry.getKey(),
+						new IdType(resourceTypeName, UUID.randomUUID().toString())));
 	}
 
 	protected boolean deleteWithTransaction(ResourceDao<?> dao, Connection connection, UUID uuid)

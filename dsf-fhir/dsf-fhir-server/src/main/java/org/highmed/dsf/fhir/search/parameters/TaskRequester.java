@@ -58,9 +58,12 @@ public class TaskRequester extends AbstractReferenceParameter<Task>
 		switch (valueAndType.type)
 		{
 			case ID:
-				return "task->'requester'->>'reference' IN ?";
+				// testing all TargetResourceTypeName/ID combinations
+				return "task->'requester'->>'reference' = ANY (?)";
 			case RESOURCE_NAME_AND_ID:
 			case URL:
+			case TYPE_AND_ID:
+			case TYPE_AND_RESOURCE_NAME_AND_ID:
 				return "task->'requester'->>'reference' = ?";
 			case IDENTIFIER:
 			{
@@ -98,6 +101,8 @@ public class TaskRequester extends AbstractReferenceParameter<Task>
 				statement.setArray(parameterIndex, array);
 				break;
 			case RESOURCE_NAME_AND_ID:
+			case TYPE_AND_ID:
+			case TYPE_AND_RESOURCE_NAME_AND_ID:
 				statement.setString(parameterIndex, valueAndType.resourceName + "/" + valueAndType.id);
 				break;
 			case URL:

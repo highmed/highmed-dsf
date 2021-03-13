@@ -40,7 +40,7 @@ public class ValidationConfig
 		return new ValidationSupportWithCache(fhirConfig.fhirContext(),
 				validationSupportChain(new ValidationSupportWithFetchFromDb(fhirConfig.fhirContext(),
 						daoConfig.structureDefinitionDao(), daoConfig.structureDefinitionSnapshotDao(),
-						daoConfig.codeSystemDao(), daoConfig.valueSetDao())));
+						daoConfig.codeSystemDao(), daoConfig.valueSetDao(), daoConfig.measureDao())));
 	}
 
 	private ValidationSupportChain validationSupportChain(IValidationSupport dbSupport)

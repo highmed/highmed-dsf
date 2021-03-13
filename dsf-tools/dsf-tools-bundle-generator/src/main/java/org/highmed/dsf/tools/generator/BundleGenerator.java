@@ -35,6 +35,7 @@ public class BundleGenerator
 	private static final Logger logger = LoggerFactory.getLogger(BundleGenerator.class);
 
 	private static final String BUNDLE_FILENAME = "bundle.xml";
+	private static final String DELETE_RESOURCES_FILENAME = "resources.delete";
 
 	private final FhirContext fhirContext = FhirContext.forR4();
 	private final Path baseFolder;
@@ -62,6 +63,15 @@ public class BundleGenerator
 	{
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
+
+		Path deleteFile = baseFolder.resolve(DELETE_RESOURCES_FILENAME);
+		logger.debug("Reading URLs from {} file", deleteFile.toString());
+
+		Files.readAllLines(deleteFile).forEach(url ->
+		{
+			BundleEntryComponent entry = bundle.addEntry();
+			entry.getRequest().setMethod(HTTPVerb.DELETE).setUrl(url);
+		});
 
 		BundleEntryPutReader putReader = (resource, resourceFile, putFile) ->
 		{
