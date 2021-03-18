@@ -16,6 +16,8 @@
          perms: no
          recursive: yes
          delete: yes
+         rsync_opts:
+            - "--exclude=app/psn/*"
    -  name: Synchronize fhir folder
       synchronize:
          src: fhir
