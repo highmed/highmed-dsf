@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<property name="json" value="JSONB" dbms="postgresql" />
+	<property name="json" value="varchar(5000)" dbms="h2" />
+
+	<changeSet author="nlangh" id="db.value_sets.changelog-0.3.0">
+		<sql dbms="postgresql">
+			GRANT DELETE ON TABLE activity_definitions TO ${db.server_users_group};
+			GRANT DELETE ON TABLE binaries TO ${db.server_users_group};
+			GRANT DELETE ON TABLE bundles TO ${db.server_users_group};
+			GRANT DELETE ON TABLE code_systems TO ${db.server_users_group};
+			GRANT DELETE ON TABLE endpoints TO ${db.server_users_group};
+			GRANT DELETE ON TABLE groups TO ${db.server_users_group};
+			GRANT DELETE ON TABLE healthcare_services TO ${db.server_users_group};
+			GRANT DELETE ON TABLE locations TO ${db.server_users_group};
+			GRANT DELETE ON TABLE naming_systems TO ${db.server_users_group};
+			GRANT DELETE ON TABLE organizations TO ${db.server_users_group};
+			GRANT DELETE ON TABLE patients TO ${db.server_users_group};
+			GRANT DELETE ON TABLE practitioner_roles TO ${db.server_users_group};
+			GRANT DELETE ON TABLE practitioners TO ${db.server_users_group};
+			GRANT DELETE ON TABLE provenances TO ${db.server_users_group};
+			GRANT DELETE ON TABLE research_studies TO ${db.server_users_group};
+			GRANT DELETE ON TABLE structure_definition_snapshots TO ${db.server_users_group};
+			GRANT DELETE ON TABLE structure_definitions TO ${db.server_users_group};
+			GRANT DELETE ON TABLE subscriptions TO ${db.server_users_group};
+			GRANT DELETE ON TABLE tasks TO ${db.server_users_group};
+			GRANT DELETE ON TABLE value_sets TO ${db.server_users_group};
+		</sql>
+	</changeSet>
+</databaseChangeLog>
