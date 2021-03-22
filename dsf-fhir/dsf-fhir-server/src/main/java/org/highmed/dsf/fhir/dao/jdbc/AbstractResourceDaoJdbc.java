@@ -839,8 +839,8 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
             return false;
         }
 
-        try (PreparedStatement statement = connection.prepareStatement("DELETE FROM" + resourceTable
-                + "WHERE " + resourceIdColumn + "= ?")) {
+        try (PreparedStatement statement = connection.prepareStatement("DELETE FROM " + resourceTable
+                + " WHERE " + resourceIdColumn + "= ?")) {
             statement.setObject(1, preparedStatementFactory.uuidToPgObject(uuid));
 
             logger.trace("Executing query '{}'", statement);
