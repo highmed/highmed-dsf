@@ -102,4 +102,13 @@ public interface BasicResourceService<R extends Resource> extends BasicService
 			HttpHeaders headers);
 
 	Response getValidateExisting(String validatePath, String id, UriInfo uri, HttpHeaders headers);
+
+	/**
+	 *
+	 * @param expungePath
+	 * @param uri
+	 * @param headers
+	 * @return
+	 */
+	Response expunge(String expungePath, Parameters parameters, String id, UriInfo uri, HttpHeaders headers);
 }
