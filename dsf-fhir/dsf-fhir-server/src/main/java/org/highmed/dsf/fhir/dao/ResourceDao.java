@@ -356,4 +356,24 @@ public interface ResourceDao<R extends Resource>
 	SearchQuery<R> createSearchQuery(User user, int page, int count);
 
 	SearchQuery<R> createSearchQueryWithoutUserFilter(int page, int count);
+
+	/**
+	 *
+	 * @param uuid
+	 * @return
+	 * @throws SQLException
+	 * @throws ResourceNotFoundException
+	 */
+	boolean expunge(UUID uuid) throws SQLException, ResourceNotFoundException;
+
+
+	/**
+	 *
+	 * @param connection
+	 * @param uuid
+	 * @return
+	 * @throws SQLException
+	 * @throws ResourceNotFoundException
+	 */
+	boolean expungeWithTransaction(Connection connection, UUID uuid) throws SQLException, ResourceNotFoundException;
 }
