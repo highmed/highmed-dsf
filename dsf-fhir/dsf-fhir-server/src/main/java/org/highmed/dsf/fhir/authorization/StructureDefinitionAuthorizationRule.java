@@ -15,6 +15,7 @@ import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -214,5 +215,19 @@ public class StructureDefinitionAuthorizationRule
 		logger.info("History of StructureDefinition authorized for {} user '{}', will be fitered by user role",
 				user.getRole(), user.getName());
 		return Optional.of("Allowed for all, filtered by user role");
+	}
+
+	@Override
+	public Optional<String> reasonExpungeAllowed(Connection connection, User user, StructureDefinition oldResource) {
+		if (isLocalUser(user))
+		{
+			logger.info("Expunge of ValueSet authorized for local user '{}'", user.getName());
+			return Optional.of("local user");
+		}
+		else
+		{
+			logger.warn("Expunge of ValueSet unauthorized, not a local user");
+			return Optional.empty();
+		}
 	}
 }

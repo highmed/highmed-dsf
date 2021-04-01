@@ -99,4 +99,18 @@ public class ProvenanceAuthorizationRule extends AbstractAuthorizationRule<Prove
 				user.getRole(), user.getName(), user.getOrganization().getIdElement().getValueAsString());
 		return Optional.of("Allowed for all, filtered by users organization");
 	}
+
+	@Override
+	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Provenance oldResource) {
+		if (isLocalUser(user))
+		{
+			logger.info("Expunge of ValueSet authorized for local user '{}'", user.getName());
+			return Optional.of("local user");
+		}
+		else
+		{
+			logger.warn("Expunge of ValueSet unauthorized, not a local user");
+			return Optional.empty();
+		}
+	}
 }

@@ -16,10 +16,7 @@ import org.highmed.dsf.fhir.dao.TaskDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.highmed.dsf.fhir.service.ResourceReference;
-import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -407,5 +404,19 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 		logger.info("History of Task authorized for {} user '{}', will be fitered by users organization {}",
 				user.getRole(), user.getName(), user.getOrganization().getIdElement().getValueAsString());
 		return Optional.of("Allowed for all, filtered by users organization");
+	}
+
+	@Override
+	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Task oldResource) {
+		if (isLocalUser(user))
+		{
+			logger.info("Expunge of ValueSet authorized for local user '{}'", user.getName());
+			return Optional.of("local user");
+		}
+		else
+		{
+			logger.warn("Expunge of ValueSet unauthorized, not a local user");
+			return Optional.empty();
+		}
 	}
 }

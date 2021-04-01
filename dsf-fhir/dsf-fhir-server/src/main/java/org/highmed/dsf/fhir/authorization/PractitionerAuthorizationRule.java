@@ -176,4 +176,18 @@ public class PractitionerAuthorizationRule extends AbstractAuthorizationRule<Pra
 				user.getName());
 		return Optional.of("Allowed for all, filtered by user role");
 	}
+
+	@Override
+	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Practitioner oldResource) {
+		if (isLocalUser(user))
+		{
+			logger.info("Expunge of ValueSet authorized for local user '{}'", user.getName());
+			return Optional.of("local user");
+		}
+		else
+		{
+			logger.warn("Expunge of ValueSet unauthorized, not a local user");
+			return Optional.empty();
+		}
+	}
 }

@@ -706,16 +706,11 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
     @Override
     public Response expunge(String expungePath, Parameters parameters, String id, UriInfo uri, HttpHeaders headers) {
-        Consumer<String> afterDelete = preDelete(id);
-
-        boolean deleted = exceptionHandler.handleSqlAndResourceNotFoundException(resourceTypeName,
+        boolean expunge = exceptionHandler.handleSqlAndResourceNotFoundException(resourceTypeName,
                 () -> dao.expunge(parameterConverter.toUuid(resourceTypeName, id)));
 
-        if (deleted)
-            eventHandler.handleEvent(eventGenerator.newResourceDeletedEvent(resourceType, id));
-
-        if (afterDelete != null)
-            afterDelete.accept(id);
+        if (expunge)
+            eventHandler.handleEvent(eventGenerator.newResourceExpungeEvent(resourceType, id));
 
         return responseGenerator.response(Status.OK, responseGenerator.resourceDeleted(resourceTypeName, id),
                 parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();

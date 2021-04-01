@@ -245,4 +245,18 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 	{
 		return reference.flatMap(ref -> referenceResolver.resolveReference(user, ref, connection));
 	}
+
+
+	@Override
+	public Optional<String> reasonExpungeAllowed(User user, R oldResource) {
+		try (Connection connection = daoProvider.newReadOnlyAutoCommitTransaction())
+		{
+			return reasonExpungeAllowed(connection, user, oldResource);
+		}
+		catch (SQLException e)
+		{
+			logger.warn("Error while accessing database", e);
+			throw new RuntimeException(e);
+		}
+	}
 }

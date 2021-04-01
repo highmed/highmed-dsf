@@ -544,6 +544,26 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
         logger.debug("Current user '{}', role '{}'", userProvider.getCurrentUser().getName(),
                 userProvider.getCurrentUser().getRole());
 
-        return delegate.expunge(expungePath, parameters, id, uri, headers);
+        Optional<R> dbResource = exceptionHandler
+                .handleSqlException(() -> dao.readIncludingDeleted(parameterConverter.toUuid(resourceTypeName, id)));
+
+        if (dbResource.isPresent()) {
+            R oldResource = dbResource.get();
+
+            Optional<String> reasonDeleteAllowed = authorizationRule.reasonExpungeAllowed(getCurrentUser(), oldResource);
+            if (reasonDeleteAllowed.isEmpty()) {
+                audit.info("Expunge of resource {} denied for user '{}'", oldResource.getIdElement().getValue(),
+                        getCurrentUser().getName());
+                return forbidden("delete");
+            } else {
+                audit.info("Expunge of resource {} allowed for user '{}': {}", oldResource.getIdElement().getValue(),
+                        getCurrentUser().getName(), reasonDeleteAllowed.get());
+                return delegate.expunge(expungePath, parameters, id, uri, headers);
+            }
+        } else {
+            audit.info("Resource to expunge {} not found for user '{}'", resourceTypeName + "/" + id,
+                    getCurrentUser().getName());
+            return responseGenerator.notFound(id, resourceTypeName);
+        }
     }
 }

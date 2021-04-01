@@ -20,6 +20,7 @@ import org.highmed.dsf.fhir.search.SearchQueryParameterError;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.util.UriComponents;
@@ -274,5 +275,19 @@ public class SubscriptionAuthorizationRule extends AbstractAuthorizationRule<Sub
 		logger.info("History of Subscription authorized for {} user '{}', will be fitered by user role", user.getRole(),
 				user.getName());
 		return Optional.of("Allowed for all, filtered by user role");
+	}
+
+	@Override
+	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Subscription oldResource) {
+		if (isLocalUser(user))
+		{
+			logger.info("Expunge of ValueSet authorized for local user '{}'", user.getName());
+			return Optional.of("local user");
+		}
+		else
+		{
+			logger.warn("Expunge of ValueSet unauthorized, not a local user");
+			return Optional.empty();
+		}
 	}
 }

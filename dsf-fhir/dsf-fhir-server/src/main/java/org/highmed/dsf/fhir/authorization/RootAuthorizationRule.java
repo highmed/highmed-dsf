@@ -74,4 +74,14 @@ public class RootAuthorizationRule implements AuthorizationRule<Resource>
 				user.getRole(), user.getName(), user.getOrganization().getIdElement().getValueAsString());
 		return Optional.of("Allowed for all, filtered by user role or users organization");
 	}
+
+	@Override
+	public Optional<String> reasonExpungeAllowed(User user, Resource oldResource) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Resource oldResource) {
+		throw new UnsupportedOperationException();
+	}
 }
