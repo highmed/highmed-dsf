@@ -17,7 +17,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class AesGcmUtil
 {
-	public static final String AES = "AES";
+	private static final String AES = "AES";
 	private static final String AES_MODE_PADDING = "AES/GCM/NoPadding";
 	private static final int AES_KEY_SIZE = 256;
 	private static final int GCM_IV_LENGTH = 12;
