@@ -29,9 +29,9 @@ import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class ResultSetTranslatorToTtpTest
+public class ResultSetTranslatorToTtpWithRbfTest
 {
-	private static final Logger logger = LoggerFactory.getLogger(ResultSetTranslatorToTtpTest.class);
+	private static final Logger logger = LoggerFactory.getLogger(ResultSetTranslatorToTtpWithRbfTest.class);
 
 	@Test
 	public void testTranslateForTtp() throws Exception
@@ -61,7 +61,7 @@ public class ResultSetTranslatorToTtpTest
 		String researchStudyIdentifier = "researchStudy1";
 		SecretKey researchStudyKey = AesGcmUtil.generateAES256Key();
 
-		ResultSetTranslatorToTtpImpl translator = new ResultSetTranslatorToTtpImpl(organizationIdentifier,
+		ResultSetTranslatorToTtpWithRbfImpl translator = new ResultSetTranslatorToTtpWithRbfImpl(organizationIdentifier,
 				organizationKey, researchStudyIdentifier, researchStudyKey, "/ehr_status/subject/external_ref/id/value",
 				recordBloomFilterGenerator, masterPatientIndexClient);
 
@@ -122,7 +122,7 @@ public class ResultSetTranslatorToTtpTest
 		String researchStudyIdentifier = "researchStudy1";
 		SecretKey researchStudyKey = AesGcmUtil.generateAES256Key();
 
-		ResultSetTranslatorToTtpImpl translator = new ResultSetTranslatorToTtpImpl(organizationIdentifier,
+		ResultSetTranslatorToTtpWithRbfImpl translator = new ResultSetTranslatorToTtpWithRbfImpl(organizationIdentifier,
 				organizationKey, researchStudyIdentifier, researchStudyKey, "/ehr_status/subject/external_ref/id/value",
 				recordBloomFilterGenerator, masterPatientIndexClient);
 
@@ -170,10 +170,10 @@ public class ResultSetTranslatorToTtpTest
 		String researchStudyIdentifier = "researchStudy1";
 		SecretKey researchStudyKey = AesGcmUtil.generateAES256Key();
 
-		ResultSetTranslatorToTtpImpl translator = new ResultSetTranslatorToTtpImpl(organizationIdentifier,
+		ResultSetTranslatorToTtpWithRbfImpl translator = new ResultSetTranslatorToTtpWithRbfImpl(organizationIdentifier,
 				organizationKey, researchStudyIdentifier, researchStudyKey, "/ehr_status/subject/external_ref/id/value",
 				recordBloomFilterGenerator, masterPatientIndexClient,
-				ResultSetTranslatorToTtpImpl.FILTER_ON_IDAT_NOT_FOUND_EXCEPTION);
+				ResultSetTranslatorToTtpWithRbfImpl.FILTER_ON_IDAT_NOT_FOUND_EXCEPTION);
 
 		ObjectMapper openEhrObjectMapper = OpenEhrObjectMapperFactory.createObjectMapper();
 		ResultSet resultSet = openEhrObjectMapper

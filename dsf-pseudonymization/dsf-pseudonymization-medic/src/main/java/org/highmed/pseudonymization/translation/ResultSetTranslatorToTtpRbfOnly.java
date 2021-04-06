@@ -1,5 +1,5 @@
 package org.highmed.pseudonymization.translation;
 
-public interface ResultSetTranslatorToTtpRbfOnly extends ResultSetTranslator
+public interface ResultSetTranslatorToTtpRbfOnly extends ResultSetTranslatorToTtp
 {
 }

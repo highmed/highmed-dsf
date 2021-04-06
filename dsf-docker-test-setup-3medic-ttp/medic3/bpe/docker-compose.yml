@@ -42,6 +42,9 @@ services:
       -  type: bind
          source: ./app/last_event
          target: /opt/bpe/last_event
+      -  type: bind
+         source: ./app/psn
+         target: /opt/bpe/psn
       environment:
          TZ: Europe/Berlin
       networks:
