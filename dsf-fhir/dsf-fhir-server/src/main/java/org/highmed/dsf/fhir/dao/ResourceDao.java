@@ -9,6 +9,7 @@ import java.util.UUID;
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.dsf.fhir.dao.exception.ResourceNotFoundException;
+import org.highmed.dsf.fhir.dao.exception.ResourceNotMarkedDeletedException;
 import org.highmed.dsf.fhir.dao.exception.ResourceVersionNoMatchException;
 import org.highmed.dsf.fhir.search.DbSearchQuery;
 import org.highmed.dsf.fhir.search.PartialResult;
@@ -364,7 +365,9 @@ public interface ResourceDao<R extends Resource>
 	 * @throws SQLException
 	 * @throws ResourceNotFoundException
 	 */
-	boolean expunge(UUID uuid) throws SQLException, ResourceNotFoundException;
+	// ResourceNotMarkedDeletedException has been added by Taha Alhersh
+	// To handle not marked deleted exception
+	boolean expunge(UUID uuid) throws SQLException, ResourceNotFoundException, ResourceNotMarkedDeletedException;
 
 
 	/**
@@ -375,5 +378,7 @@ public interface ResourceDao<R extends Resource>
 	 * @throws SQLException
 	 * @throws ResourceNotFoundException
 	 */
-	boolean expungeWithTransaction(Connection connection, UUID uuid) throws SQLException, ResourceNotFoundException;
+	// ResourceNotMarkedDeletedException has been added by Taha Alhersh
+	// To handle not marked deleted exception
+	boolean expungeWithTransaction(Connection connection, UUID uuid) throws SQLException, ResourceNotFoundException, ResourceNotMarkedDeletedException;
 }

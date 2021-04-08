@@ -18,6 +18,7 @@ import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.ResourceDao;
 import org.highmed.dsf.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.dsf.fhir.dao.exception.ResourceNotFoundException;
+import org.highmed.dsf.fhir.dao.exception.ResourceNotMarkedDeletedException;
 import org.highmed.dsf.fhir.dao.exception.ResourceVersionNoMatchException;
 import org.highmed.dsf.fhir.search.DbSearchQuery;
 import org.highmed.dsf.fhir.search.PartialResult;
@@ -804,8 +805,11 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
                 .build();
     }
 
+    // ResourceNotMarkedDeletedException has been added by Taha Alhersh
+    // This exception is to verify that the resource has been marked "deleted" before
+    // expunging it
     @Override
-    public boolean expunge(UUID uuid) throws SQLException, ResourceNotFoundException {
+    public boolean expunge(UUID uuid) throws SQLException, ResourceNotFoundException, ResourceNotMarkedDeletedException {
         if (uuid == null)
             throw new ResourceNotFoundException("'null'");
 
@@ -818,7 +822,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 
     @Override
     public boolean expungeWithTransaction(Connection connection, UUID uuid)
-            throws SQLException, ResourceNotFoundException {
+            throws SQLException, ResourceNotFoundException, ResourceNotMarkedDeletedException {
         if (uuid == null)
             throw new ResourceNotFoundException("'null'");
         Objects.requireNonNull(connection, "connection");
@@ -828,7 +832,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
     }
 
     protected final boolean deletePermanently(Connection connection, UUID uuid)
-            throws SQLException, ResourceNotFoundException {
+            throws SQLException, ResourceNotFoundException, ResourceNotMarkedDeletedException{
         if (uuid == null) {
             throw new ResourceNotFoundException("'null'");
         }
@@ -836,7 +840,9 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
         LatestVersion latestVersion = getLatestVersion(uuid, connection);
 
         if (!latestVersion.deleted) {
-            return false;
+            // Updated by Taha Alhersh to verify that resource has marked deleted before expunge it.
+            throw new ResourceNotMarkedDeletedException(uuid.toString());
+            //return false;
         }
 
         try (PreparedStatement statement = connection.prepareStatement("DELETE FROM " + resourceTable

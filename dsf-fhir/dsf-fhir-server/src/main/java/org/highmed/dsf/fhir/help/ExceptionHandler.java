@@ -13,16 +13,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.highmed.dsf.fhir.dao.command.CommandList;
-import org.highmed.dsf.fhir.dao.exception.BadBundleException;
-import org.highmed.dsf.fhir.dao.exception.ResourceDeletedException;
-import org.highmed.dsf.fhir.dao.exception.ResourceNotFoundException;
-import org.highmed.dsf.fhir.dao.exception.ResourceVersionNoMatchException;
-import org.highmed.dsf.fhir.function.RunnableWithSqlAndResourceNotFoundException;
-import org.highmed.dsf.fhir.function.RunnableWithSqlException;
-import org.highmed.dsf.fhir.function.SupplierWithSqlAndResourceDeletedException;
-import org.highmed.dsf.fhir.function.SupplierWithSqlAndResourceNotFoundAndResouceVersionNoMatchException;
-import org.highmed.dsf.fhir.function.SupplierWithSqlAndResourceNotFoundException;
-import org.highmed.dsf.fhir.function.SupplierWithSqlException;
+import org.highmed.dsf.fhir.dao.exception.*;
+import org.highmed.dsf.fhir.function.*;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
@@ -192,6 +184,38 @@ public class ExceptionHandler
 		{
 			throw internalServerError(e);
 		}
+	}
+
+	// This handle function has been added by Taha Alhersh
+	// handling SQL exception, resource not found and resource not marked deleted before expunging it
+	public <T> T handleSqlAndResourceNotMarkedDeletedException(String resourceTypeName,
+													   SupplierWithSqlAndResourceNotMarkedDeletedException<T> s)
+	{
+		try
+		{
+			return s.get();
+		}
+		catch (ResourceNotMarkedDeletedException e)
+		{
+			throw notMarkedDeleted(resourceTypeName, e);
+		}
+		catch (SQLException e)
+		{
+			throw internalServerError(e);
+		}
+		catch (ResourceNotFoundException e) {
+			throw notFound(resourceTypeName, e);
+		}
+	}
+
+	// This function has been added ny Taha Alhersh
+	// logging and generate response when expunging a resource that is not marked deleted
+	// I have assigned a BAD_REQUEST but this can be changed to other type.
+	public WebApplicationException notMarkedDeleted(String resourceTypeName, ResourceNotMarkedDeletedException e) {
+		logger.error("{} with id {} is not marked as deleted", resourceTypeName, e.getId());
+		OperationOutcome outcome = responseGenerator.createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+				resourceTypeName + " with id " + e.getId() + " not marked deleted");
+		return new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(outcome).build());
 	}
 
 	public WebApplicationException gone(String serverBase, String resourceTypeName, ResourceDeletedException e)

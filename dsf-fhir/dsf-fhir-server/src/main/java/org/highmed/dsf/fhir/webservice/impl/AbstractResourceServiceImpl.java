@@ -706,7 +706,9 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
     @Override
     public Response expunge(String expungePath, Parameters parameters, String id, UriInfo uri, HttpHeaders headers) {
-        boolean expunge = exceptionHandler.handleSqlAndResourceNotFoundException(resourceTypeName,
+        // handleSqlAndResourceNotMarkedDeletedException has been added by Taha Alhersh
+        // make sure that the resource is marked deleted before expunging it.
+        boolean expunge = exceptionHandler.handleSqlAndResourceNotMarkedDeletedException(resourceTypeName,
                 () -> dao.expunge(parameterConverter.toUuid(resourceTypeName, id)));
 
         if (expunge)
