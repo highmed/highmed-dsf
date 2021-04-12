@@ -93,14 +93,27 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 			logger.warn(errorMessage);
 			logger.debug("Error while sending Task", e);
 
-			logger.debug("Removing target organization {} with error {} from target list",
-					target.getTargetOrganizationIdentifierValue(), e.getMessage());
-			Targets targets = (Targets) execution.getVariable(BPMN_EXECUTION_VARIABLE_TARGETS);
-			targets.removeTarget(target);
-
 			Task task = getLeadingTaskFromExecutionVariables();
-			task.addOutput(getTaskHelper().createOutput(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR,
-					errorMessage));
+			if (task != null)
+				task.addOutput(getTaskHelper().createOutput(CODESYSTEM_HIGHMED_BPMN,
+						CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR, errorMessage));
+			else
+				logger.warn("Leading Task null, unable to add error output");
+
+			Targets targets = (Targets) execution.getVariable(BPMN_EXECUTION_VARIABLE_TARGETS);
+			if (targets != null)
+			{
+				logger.debug("Removing target organization {} with error {} from target list",
+						target.getTargetOrganizationIdentifierValue(), e.getMessage());
+				targets.removeTarget(target);
+			}
+			else
+			{
+				logger.debug(
+						"Target list (variable {} with type {}) not defined, ignoring target organization {} with error {}",
+						BPMN_EXECUTION_VARIABLE_TARGETS, Targets.class.getCanonicalName(),
+						target.getTargetOrganizationIdentifierValue(), e.getMessage());
+			}
 		}
 	}
 
