@@ -852,7 +852,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
             logger.trace("Executing query '{}'", statement);
             statement.execute();
 
-            logger.debug("{} with ID {} marked as deleted", resourceTypeName, uuid);
+            logger.debug("{} with ID {} has been permanently deleted", resourceTypeName, uuid);
             return true;
         }
     }

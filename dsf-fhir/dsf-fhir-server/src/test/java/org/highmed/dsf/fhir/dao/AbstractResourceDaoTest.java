@@ -284,6 +284,26 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 		dao.read(UUID.fromString(createdResource.getIdElement().getIdPart()));
 	}
 
+	//Added by Taha Alhersh
+	//Testing Expunge
+
+	@Test()
+	public void testExpunge() throws Exception
+	{
+		D newResource = createResource();
+		assertNull(newResource.getId());
+		assertNull(newResource.getMeta().getVersionId());
+
+		D createdResource = dao.create(newResource);
+		assertNotNull(createdResource);
+		assertNotNull(createdResource.getId());
+		assertNotNull(createdResource.getMeta().getVersionId());
+
+		dao.delete(UUID.fromString(createdResource.getIdElement().getIdPart()));
+
+		dao.expunge(UUID.fromString(createdResource.getIdElement().getIdPart()));
+	}
+
 	@Test
 	public void testReadIncludingDeleted() throws Exception
 	{

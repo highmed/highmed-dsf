@@ -212,9 +212,9 @@ public class ExceptionHandler
 	// logging and generate response when expunging a resource that is not marked deleted
 	// I have assigned a BAD_REQUEST but this can be changed to other type.
 	public WebApplicationException notMarkedDeleted(String resourceTypeName, ResourceNotMarkedDeletedException e) {
-		logger.error("{} with id {} is not marked as deleted", resourceTypeName, e.getId());
+		logger.warn("{} with id {} is not marked as deleted", resourceTypeName, e.getId());
 		OperationOutcome outcome = responseGenerator.createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
-				resourceTypeName + " with id " + e.getId() + " not marked deleted");
+				resourceTypeName + " with id " + e.getId() + " is not marked deleted");
 		return new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(outcome).build());
 	}
 
