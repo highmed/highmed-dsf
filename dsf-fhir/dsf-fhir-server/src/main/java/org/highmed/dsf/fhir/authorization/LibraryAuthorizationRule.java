@@ -107,4 +107,18 @@ public class LibraryAuthorizationRule extends AbstractAuthorizationRule<Library,
 				user.getName());
 		return Optional.of("Allowed for all, filtered by user role");
 	}
+
+	@Override
+	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Library oldResource) {
+		if (isLocalUser(user))
+		{
+			logger.info("Expunge of Library authorized for local user '{}'", user.getName());
+			return Optional.of("local user");
+		}
+		else
+		{
+			logger.warn("Expunge of Library unauthorized, not a local user");
+			return Optional.empty();
+		}
+	}
 }

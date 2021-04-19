@@ -107,4 +107,18 @@ public class MeasureAuthorizationRule extends AbstractAuthorizationRule<Measure,
 				user.getName());
 		return Optional.of("Allowed for all, filtered by user role");
 	}
+
+	@Override
+	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Measure oldResource) {
+		if (isLocalUser(user))
+		{
+			logger.info("Expunge of Measure authorized for local user '{}'", user.getName());
+			return Optional.of("local user");
+		}
+		else
+		{
+			logger.warn("Expunge of Measure unauthorized, not a local user");
+			return Optional.empty();
+		}
+	}
 }
