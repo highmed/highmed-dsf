@@ -146,12 +146,12 @@ public class BundleAuthorizationRule extends AbstractAuthorizationRule<Bundle, B
 	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Bundle oldResource) {
 		if (isLocalUser(user))
 		{
-			logger.info("Expunge of ValueSet authorized for local user '{}'", user.getName());
+			logger.info("Expunge of Bundle authorized for local user '{}'", user.getName());
 			return Optional.of("local user");
 		}
 		else
 		{
-			logger.warn("Expunge of ValueSet unauthorized, not a local user");
+			logger.warn("Expunge of Bundle unauthorized, not a local user");
 			return Optional.empty();
 		}
 	}

@@ -104,12 +104,12 @@ public class PatientAuthorizationRule extends AbstractAuthorizationRule<Patient,
 	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Patient oldResource) {
 		if (isLocalUser(user))
 		{
-			logger.info("Expunge of ValueSet authorized for local user '{}'", user.getName());
+			logger.info("Expunge of Patient authorized for local user '{}'", user.getName());
 			return Optional.of("local user");
 		}
 		else
 		{
-			logger.warn("Expunge of ValueSet unauthorized, not a local user");
+			logger.warn("Expunge of Patient unauthorized, not a local user");
 			return Optional.empty();
 		}
 	}

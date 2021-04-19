@@ -410,12 +410,12 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Task oldResource) {
 		if (isLocalUser(user))
 		{
-			logger.info("Expunge of ValueSet authorized for local user '{}'", user.getName());
+			logger.info("Expunge of Task authorized for local user '{}'", user.getName());
 			return Optional.of("local user");
 		}
 		else
 		{
-			logger.warn("Expunge of ValueSet unauthorized, not a local user");
+			logger.warn("Expunge of Task unauthorized, not a local user");
 			return Optional.empty();
 		}
 	}

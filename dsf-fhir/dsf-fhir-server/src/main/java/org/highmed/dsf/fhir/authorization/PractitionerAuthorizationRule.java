@@ -181,12 +181,12 @@ public class PractitionerAuthorizationRule extends AbstractAuthorizationRule<Pra
 	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Practitioner oldResource) {
 		if (isLocalUser(user))
 		{
-			logger.info("Expunge of ValueSet authorized for local user '{}'", user.getName());
+			logger.info("Expunge of Practitioner authorized for local user '{}'", user.getName());
 			return Optional.of("local user");
 		}
 		else
 		{
-			logger.warn("Expunge of ValueSet unauthorized, not a local user");
+			logger.warn("Expunge of Practitioner unauthorized, not a local user");
 			return Optional.empty();
 		}
 	}

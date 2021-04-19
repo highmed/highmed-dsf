@@ -208,12 +208,12 @@ public class BinaryAuthorizationRule extends AbstractAuthorizationRule<Binary, B
 	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Binary oldResource) {
 		if (isLocalUser(user))
 		{
-			logger.info("Expunge of ValueSet authorized for local user '{}'", user.getName());
+			logger.info("Expunge of Binary authorized for local user '{}'", user.getName());
 			return Optional.of("local user");
 		}
 		else
 		{
-			logger.warn("Expunge of ValueSet unauthorized, not a local user");
+			logger.warn("Expunge of Binary unauthorized, not a local user");
 			return Optional.empty();
 		}
 	}

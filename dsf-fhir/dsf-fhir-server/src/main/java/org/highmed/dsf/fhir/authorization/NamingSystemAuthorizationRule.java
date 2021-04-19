@@ -208,12 +208,12 @@ public class NamingSystemAuthorizationRule extends AbstractAuthorizationRule<Nam
 	public Optional<String> reasonExpungeAllowed(Connection connection, User user, NamingSystem oldResource) {
 		if (isLocalUser(user))
 		{
-			logger.info("Expunge of ValueSet authorized for local user '{}'", user.getName());
+			logger.info("Expunge of NamingSystem authorized for local user '{}'", user.getName());
 			return Optional.of("local user");
 		}
 		else
 		{
-			logger.warn("Expunge of ValueSet unauthorized, not a local user");
+			logger.warn("Expunge of NamingSystem unauthorized, not a local user");
 			return Optional.empty();
 		}
 	}

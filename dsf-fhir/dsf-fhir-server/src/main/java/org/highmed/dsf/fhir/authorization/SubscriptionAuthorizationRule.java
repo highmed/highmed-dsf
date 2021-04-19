@@ -281,12 +281,12 @@ public class SubscriptionAuthorizationRule extends AbstractAuthorizationRule<Sub
 	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Subscription oldResource) {
 		if (isLocalUser(user))
 		{
-			logger.info("Expunge of ValueSet authorized for local user '{}'", user.getName());
+			logger.info("Expunge of Subscription authorized for local user '{}'", user.getName());
 			return Optional.of("local user");
 		}
 		else
 		{
-			logger.warn("Expunge of ValueSet unauthorized, not a local user");
+			logger.warn("Expunge of Subscription unauthorized, not a local user");
 			return Optional.empty();
 		}
 	}
