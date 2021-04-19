@@ -18,6 +18,7 @@ import javax.sql.DataSource;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.dsf.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.dsf.fhir.dao.exception.ResourceNotFoundException;
+import org.highmed.dsf.fhir.dao.exception.ResourceNotMarkedDeletedException;
 import org.highmed.dsf.fhir.dao.exception.ResourceVersionNoMatchException;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.AfterClass;
@@ -287,7 +288,22 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 	//Added by Taha Alhersh
 	//Testing Expunge
 
-	@Test()
+	@Test(expected = ResourceNotMarkedDeletedException.class)
+	public void testExpungeNotMarkedAsDeleted() throws Exception
+	{
+		D newResource = createResource();
+		assertNull(newResource.getId());
+		assertNull(newResource.getMeta().getVersionId());
+
+		D createdResource = dao.create(newResource);
+		assertNotNull(createdResource);
+		assertNotNull(createdResource.getId());
+		assertNotNull(createdResource.getMeta().getVersionId());
+
+		dao.expunge(UUID.fromString(createdResource.getIdElement().getIdPart()));
+	}
+
+	@Test
 	public void testExpunge() throws Exception
 	{
 		D newResource = createResource();
@@ -302,6 +318,14 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 		dao.delete(UUID.fromString(createdResource.getIdElement().getIdPart()));
 
 		dao.expunge(UUID.fromString(createdResource.getIdElement().getIdPart()));
+
+		assertFalse(dao.read(UUID.fromString(createdResource.getIdElement().getIdPart())).isPresent());
+	}
+
+	@Test(expected = ResourceNotFoundException.class)
+	public void testExpungeNotFound() throws Exception
+	{
+		dao.expunge(UUID.randomUUID());
 	}
 
 	@Test
