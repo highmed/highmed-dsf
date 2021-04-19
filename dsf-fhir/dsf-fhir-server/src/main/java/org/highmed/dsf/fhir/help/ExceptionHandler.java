@@ -186,10 +186,8 @@ public class ExceptionHandler
 		}
 	}
 
-	// This handle function has been added by Taha Alhersh
-	// handling SQL exception, resource not found and resource not marked deleted before expunging it
 	public <T> T handleSqlAndResourceNotMarkedDeletedException(String resourceTypeName,
-													   SupplierWithSqlAndResourceNotMarkedDeletedException<T> s)
+			SupplierWithSqlAndResourceNotMarkedDeletedException<T> s)
 	{
 		try
 		{
@@ -208,9 +206,6 @@ public class ExceptionHandler
 		}
 	}
 
-	// This function has been added ny Taha Alhersh
-	// logging and generate response when expunging a resource that is not marked deleted
-	// I have assigned a BAD_REQUEST but this can be changed to other type.
 	public WebApplicationException notMarkedDeleted(String resourceTypeName, ResourceNotMarkedDeletedException e) {
 		logger.warn("{} with id {} is not marked as deleted", resourceTypeName, e.getId());
 		OperationOutcome outcome = responseGenerator.createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,

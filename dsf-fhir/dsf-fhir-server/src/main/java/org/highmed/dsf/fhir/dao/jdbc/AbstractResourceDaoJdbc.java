@@ -1,13 +1,9 @@
 package org.highmed.dsf.fhir.dao.jdbc;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.Date;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -20,13 +16,8 @@ import org.highmed.dsf.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.dsf.fhir.dao.exception.ResourceNotFoundException;
 import org.highmed.dsf.fhir.dao.exception.ResourceNotMarkedDeletedException;
 import org.highmed.dsf.fhir.dao.exception.ResourceVersionNoMatchException;
-import org.highmed.dsf.fhir.search.DbSearchQuery;
-import org.highmed.dsf.fhir.search.PartialResult;
-import org.highmed.dsf.fhir.search.SearchQuery;
+import org.highmed.dsf.fhir.search.*;
 import org.highmed.dsf.fhir.search.SearchQuery.SearchQueryBuilder;
-import org.highmed.dsf.fhir.search.SearchQueryParameter;
-import org.highmed.dsf.fhir.search.SearchQueryRevIncludeParameterFactory;
-import org.highmed.dsf.fhir.search.SearchQueryUserFilter;
 import org.highmed.dsf.fhir.search.parameters.ResourceId;
 import org.highmed.dsf.fhir.search.parameters.ResourceLastUpdated;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -805,9 +796,6 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
                 .build();
     }
 
-    // ResourceNotMarkedDeletedException has been added by Taha Alhersh
-    // This exception is to verify that the resource has been marked "deleted" before
-    // expunging it
     @Override
     public boolean expunge(UUID uuid) throws SQLException, ResourceNotFoundException, ResourceNotMarkedDeletedException {
         if (uuid == null)
@@ -840,9 +828,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
         LatestVersion latestVersion = getLatestVersion(uuid, connection);
 
         if (!latestVersion.deleted) {
-            // Updated by Taha Alhersh to verify that resource has marked deleted before expunge it.
             throw new ResourceNotMarkedDeletedException(uuid.toString());
-            //return false;
         }
 
         try (PreparedStatement statement = connection.prepareStatement("DELETE FROM " + resourceTable
@@ -852,7 +838,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
             logger.trace("Executing query '{}'", statement);
             statement.execute();
 
-            logger.debug("{} with ID {} has been permanently deleted", resourceTypeName, uuid);
+            logger.debug("{} with ID {} deleted permanently", resourceTypeName, uuid);
             return true;
         }
     }

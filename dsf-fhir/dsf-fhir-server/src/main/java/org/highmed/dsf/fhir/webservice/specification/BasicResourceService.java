@@ -104,6 +104,7 @@ public interface BasicResourceService<R extends Resource> extends BasicService
 	Response getValidateExisting(String validatePath, String id, UriInfo uri, HttpHeaders headers);
 
 	/**
+	 * expunge resources which is marked as deleted
 	 *
 	 * @param expungePath
 	 * @param uri

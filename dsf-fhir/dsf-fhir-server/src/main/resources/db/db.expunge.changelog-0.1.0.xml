@@ -28,6 +28,9 @@
 			GRANT DELETE ON TABLE subscriptions TO ${db.server_users_group};
 			GRANT DELETE ON TABLE tasks TO ${db.server_users_group};
 			GRANT DELETE ON TABLE value_sets TO ${db.server_users_group};
+			GRANT DELETE ON TABLE measures TO ${db.server_users_group};
+			GRANT DELETE ON TABLE measure_reports TO ${db.server_users_group};
+			GRANT DELETE ON TABLE libraries TO ${db.server_users_group};
 		</sql>
 	</changeSet>
 </databaseChangeLog>

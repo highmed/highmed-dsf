@@ -359,26 +359,35 @@ public interface ResourceDao<R extends Resource>
 	SearchQuery<R> createSearchQueryWithoutUserFilter(int page, int count);
 
 	/**
+	 * Permanently delete a resource that was previously marked as deleted.
 	 *
 	 * @param uuid
-	 * @return
+	 *            may be <code>null</code>
+	 * @return <code>true</code> if a resource with the given uuid could be found, marked as deleted and expunged,
+	 *         <code>false</code> if a resource with the given uuid was not marked as deleted or not found
 	 * @throws SQLException
 	 * @throws ResourceNotFoundException
+	 *             if the given uuid is <code>null</code> or no resource could be found with the given uuid
+	 * @throws ResourceNotMarkedDeletedException
+	 *             if the resource was not marked as deleted
 	 */
-	// ResourceNotMarkedDeletedException has been added by Taha Alhersh
-	// To handle not marked deleted exception
 	boolean expunge(UUID uuid) throws SQLException, ResourceNotFoundException, ResourceNotMarkedDeletedException;
 
-
 	/**
+	 * Permanently delete a resource that was previously marked as deleted.
 	 *
 	 * @param connection
+	 *            not <code>null</code>, not {@link Connection#isReadOnly()}
 	 * @param uuid
-	 * @return
+	 *            may be <code>null</code>
+	 * @return <code>true</code> if a resource with the given uuid could be found, marked as deleted and expunged,
+	 *         <code>false</code> if a resource with the given uuid was not marked as deleted or not found
 	 * @throws SQLException
 	 * @throws ResourceNotFoundException
+	 *             if the given uuid is <code>null</code> or no resource could be found with the given uuid
+	 * @throws ResourceNotMarkedDeletedException
+	 *             if the resource was not marked as deleted
 	 */
-	// ResourceNotMarkedDeletedException has been added by Taha Alhersh
-	// To handle not marked deleted exception
-	boolean expungeWithTransaction(Connection connection, UUID uuid) throws SQLException, ResourceNotFoundException, ResourceNotMarkedDeletedException;
+	boolean expungeWithTransaction(Connection connection, UUID uuid)
+			throws SQLException, ResourceNotFoundException, ResourceNotMarkedDeletedException;
 }

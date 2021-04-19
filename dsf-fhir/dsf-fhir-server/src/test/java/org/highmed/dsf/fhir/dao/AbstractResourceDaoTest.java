@@ -285,9 +285,6 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 		dao.read(UUID.fromString(createdResource.getIdElement().getIdPart()));
 	}
 
-	//Added by Taha Alhersh
-	//Testing Expunge
-
 	@Test(expected = ResourceNotMarkedDeletedException.class)
 	public void testExpungeNotMarkedAsDeleted() throws Exception
 	{
