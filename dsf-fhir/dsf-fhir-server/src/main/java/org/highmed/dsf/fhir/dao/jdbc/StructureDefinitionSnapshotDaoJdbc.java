@@ -9,9 +9,9 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class StructureDefinitionSnapshotDaoJdbc extends AbstractStructureDefinitionDaoJdbc
 {
-	public StructureDefinitionSnapshotDaoJdbc(DataSource dataSource, FhirContext fhirContext)
+	public StructureDefinitionSnapshotDaoJdbc(DataSource dataSource, DataSource deletionDataSource, FhirContext fhirContext)
 	{
-		super(dataSource, fhirContext, "structure_definition_snapshots", "structure_definition_snapshot",
+		super(dataSource, deletionDataSource, fhirContext, "structure_definition_snapshots", "structure_definition_snapshot",
 				"structure_definition_snapshot_id", StructureDefinitionSnapshotUserFilter::new);
 	}
 

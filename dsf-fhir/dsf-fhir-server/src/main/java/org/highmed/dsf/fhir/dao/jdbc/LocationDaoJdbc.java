@@ -11,9 +11,9 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class LocationDaoJdbc extends AbstractResourceDaoJdbc<Location> implements LocationDao
 {
-	public LocationDaoJdbc(DataSource dataSource, FhirContext fhirContext)
+	public LocationDaoJdbc(DataSource dataSource, DataSource deletionDataSource, FhirContext fhirContext)
 	{
-		super(dataSource, fhirContext, Location.class, "locations", "location", "location_id", LocationUserFilter::new,
+		super(dataSource, deletionDataSource, fhirContext, Location.class, "locations", "location", "location_id", LocationUserFilter::new,
 				with(LocationIdentifier::new), with());
 	}
 

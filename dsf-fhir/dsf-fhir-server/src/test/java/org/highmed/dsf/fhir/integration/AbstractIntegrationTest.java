@@ -201,6 +201,8 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		properties.put("org.highmed.dsf.fhir.db.url", DATABASE_URL);
 		properties.put("org.highmed.dsf.fhir.db.server_user", DATABASE_USER);
 		properties.put("org.highmed.dsf.fhir.db.server_user_password", DATABASE_PASSWORD);
+		properties.put("org.highmed.dsf.fhir.db.server_deletion_user", DATABASE_DELETION_USER);
+		properties.put("org.highmed.dsf.fhir.db.server_deletion_user_password", DATABASE_DELETION_PASSWORD);
 
 		String clientCertHashHex = calculateSha512CertificateThumbprintHex(
 				certificates.getClientCertificate().getCertificate());

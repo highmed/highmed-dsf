@@ -11,9 +11,9 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class GroupDaoJdbc extends AbstractResourceDaoJdbc<Group> implements GroupDao
 {
-	public GroupDaoJdbc(DataSource dataSource, FhirContext fhirContext)
+	public GroupDaoJdbc(DataSource dataSource, DataSource deletionDataSource, FhirContext fhirContext)
 	{
-		super(dataSource, fhirContext, Group.class, "groups", "group_json", "group_id", GroupUserFilter::new, with(),
+		super(dataSource, deletionDataSource, fhirContext, Group.class, "groups", "group_json", "group_id", GroupUserFilter::new, with(),
 				with(ResearchStudyEnrollmentRevInclude::new));
 	}
 

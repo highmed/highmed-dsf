@@ -12,9 +12,9 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class HealthcareServiceDaoJdbc extends AbstractResourceDaoJdbc<HealthcareService> implements HealthcareServiceDao
 {
-	public HealthcareServiceDaoJdbc(DataSource dataSource, FhirContext fhirContext)
+	public HealthcareServiceDaoJdbc(DataSource dataSource, DataSource deletionDataSource, FhirContext fhirContext)
 	{
-		super(dataSource, fhirContext, HealthcareService.class, "healthcare_services", "healthcare_service",
+		super(dataSource, deletionDataSource, fhirContext, HealthcareService.class, "healthcare_services", "healthcare_service",
 				"healthcare_service_id", HealthcareServiceUserFilter::new,
 				with(HealthcareServiceActive::new, HealthcareServiceIdentifier::new), with());
 	}

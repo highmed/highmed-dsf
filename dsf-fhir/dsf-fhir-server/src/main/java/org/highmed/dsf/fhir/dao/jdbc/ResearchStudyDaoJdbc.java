@@ -25,9 +25,9 @@ public class ResearchStudyDaoJdbc extends AbstractResourceDaoJdbc<ResearchStudy>
 {
 	private static final Logger logger = LoggerFactory.getLogger(ResearchStudyDaoJdbc.class);
 
-	public ResearchStudyDaoJdbc(DataSource dataSource, FhirContext fhirContext)
+	public ResearchStudyDaoJdbc(DataSource dataSource, DataSource deletionDataSource, FhirContext fhirContext)
 	{
-		super(dataSource, fhirContext, ResearchStudy.class, "research_studies", "research_study", "research_study_id",
+		super(dataSource, deletionDataSource, fhirContext, ResearchStudy.class, "research_studies", "research_study", "research_study_id",
 				ResearchStudyUserFilter::new, with(ResearchStudyEnrollment::new, ResearchStudyIdentifier::new,
 						ResearchStudyPrincipalInvestigator::new),
 				with());

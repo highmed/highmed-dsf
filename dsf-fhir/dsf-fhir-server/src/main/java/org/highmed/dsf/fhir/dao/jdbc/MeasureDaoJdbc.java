@@ -22,9 +22,9 @@ public class MeasureDaoJdbc extends AbstractResourceDaoJdbc<Measure> implements 
 {
 	private final ReadByUrlDaoJdbc<Measure> readByUrl;
 
-	public MeasureDaoJdbc(DataSource dataSource, FhirContext fhirContext)
+	public MeasureDaoJdbc(DataSource dataSource, DataSource deletionDataSource, FhirContext fhirContext)
 	{
-		super(dataSource, fhirContext, Measure.class, "measures", "measure", "measure_id", MeasureUserFilter::new,
+		super(dataSource, deletionDataSource, fhirContext, Measure.class, "measures", "measure", "measure_id", MeasureUserFilter::new,
 				with(MeasureDate::new, MeasureDependsOn::new, MeasureIdentifier::new, MeasureStatus::new,
 						MeasureUrl::new, MeasureVersion::new),
 				with());
