@@ -412,4 +412,19 @@ public class ResearchStudyAuthorizationRule extends AbstractAuthorizationRule<Re
 				user.getRole(), user.getName(), user.getOrganization().getIdElement().getValueAsString());
 		return Optional.of("Allowed for all, filtered by users organization");
 	}
+
+	@Override
+	public Optional<String> reasonExpungeAllowed(Connection connection, User user, ResearchStudy oldResource)
+	{
+		if (isLocalUser(user))
+		{
+			logger.info("Expunge of ResearchStudy authorized for local user '{}'", user.getName());
+			return Optional.of("local user");
+		}
+		else
+		{
+			logger.warn("Expunge of ResearchStudy unauthorized, not a local user");
+			return Optional.empty();
+		}
+	}
 }

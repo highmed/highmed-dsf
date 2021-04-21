@@ -1,18 +1,7 @@
 package org.highmed.dsf.fhir.webservice.jaxrs;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
 
 import org.highmed.dsf.fhir.webservice.specification.BasicResourceService;
 import org.hl7.fhir.r4.model.Parameters;
@@ -218,5 +207,20 @@ public abstract class AbstractResourceServiceJaxrs<R extends Resource, S extends
 		logger.trace("GET {}", uri.getRequestUri().toString());
 
 		return delegate.getValidateExisting(validatePath, id, uri, headers);
+	}
+
+	@POST
+	@Path("/{id}/{expunge : [$]expunge(/)?}")
+	@Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
+			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
+			Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Override
+	public Response expunge(@PathParam("expunge") String expungePath, Parameters parameters, @PathParam("id") String id,
+			@Context UriInfo uri, @Context HttpHeaders headers)
+	{
+		logger.trace("POST {}", uri.getRequestUri().toString());
+
+		return delegate.expunge(expungePath, parameters, id, uri, headers);
 	}
 }

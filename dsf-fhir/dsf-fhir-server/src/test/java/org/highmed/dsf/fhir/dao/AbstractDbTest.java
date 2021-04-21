@@ -19,11 +19,14 @@ public abstract class AbstractDbTest
 
 	protected static final String DATABASE_USER = "server_user";
 	protected static final String DATABASE_PASSWORD = "server_user_password";
+	protected static final String DATABASE_DELETION_USER = "server_deletion_user";
+	protected static final String DATABASE_DELETION_PASSWORD = "server_deletion_user_password";
 	protected static final String DATABASE_URL = "jdbc:postgresql://localhost:54321/db";
 
 	protected static final Map<String, String> CHANGE_LOG_PARAMETERS = Map.of("db.liquibase_user", "postgres",
 			"db.server_users_group", DATABASE_USER_GROUP, "db.server_user", DATABASE_USER, "db.server_user_password",
-			DATABASE_PASSWORD);
+			DATABASE_PASSWORD, "db.server_deletion_user", DATABASE_DELETION_USER, "db.server_deletion_user_password",
+			DATABASE_DELETION_PASSWORD);
 
 	public static BasicDataSource createDefaultDataSource()
 	{
@@ -62,6 +65,21 @@ public abstract class AbstractDbTest
 		dataSource.setUrl("jdbc:postgresql://localhost:54321/postgres");
 		dataSource.setUsername("postgres");
 		dataSource.setPassword("password");
+
+		dataSource.setTestOnBorrow(true);
+		dataSource.setValidationQuery("SELECT 1");
+
+		return dataSource;
+	}
+
+	public static BasicDataSource createDeletionBasicDataSource()
+	{
+		BasicDataSource dataSource = new BasicDataSource();
+		dataSource.setDriverClassName(Driver.class.getName());
+		dataSource.setUrl(DATABASE_URL);
+		dataSource.setUsername(DATABASE_DELETION_USER);
+		dataSource.setPassword(DATABASE_DELETION_PASSWORD);
+		dataSource.setDefaultReadOnly(true);
 
 		dataSource.setTestOnBorrow(true);
 		dataSource.setValidationQuery("SELECT 1");

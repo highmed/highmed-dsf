@@ -32,6 +32,7 @@ public class HistoryDaoTest extends AbstractDbTest
 	private static final BasicDataSource adminDataSource = createAdminBasicDataSource();
 	private static final BasicDataSource liquibaseDataSource = createLiquibaseDataSource();
 	private static final BasicDataSource defaultDataSource = createDefaultDataSource();
+	private static final BasicDataSource deletionDataSource = createDeletionBasicDataSource();
 
 	@ClassRule
 	public static final LiquibaseTemplateTestClassRule liquibaseRule = new LiquibaseTemplateTestClassRule(
@@ -45,6 +46,7 @@ public class HistoryDaoTest extends AbstractDbTest
 		defaultDataSource.close();
 		liquibaseDataSource.close();
 		adminDataSource.close();
+		deletionDataSource.close();
 	}
 
 	@Rule
@@ -52,9 +54,9 @@ public class HistoryDaoTest extends AbstractDbTest
 			LiquibaseTemplateTestClassRule.DEFAULT_TEST_DB_NAME, AbstractResourceDaoTest.DAO_DB_TEMPLATE_NAME);
 
 	private final FhirContext fhirContext = FhirContext.forR4();
-	private final OrganizationDao orgDao = new OrganizationDaoJdbc(defaultDataSource, fhirContext);
+	private final OrganizationDao orgDao = new OrganizationDaoJdbc(defaultDataSource, deletionDataSource, fhirContext);
 	private final HistoryDao dao = new HistroyDaoJdbc(defaultDataSource, fhirContext,
-			new BinaryDaoJdbc(defaultDataSource, fhirContext));
+			new BinaryDaoJdbc(defaultDataSource, deletionDataSource, fhirContext));
 	private final HistoryUserFilterFactory filterFactory = new HistoryUserFilterFactoryImpl();
 
 	@Test

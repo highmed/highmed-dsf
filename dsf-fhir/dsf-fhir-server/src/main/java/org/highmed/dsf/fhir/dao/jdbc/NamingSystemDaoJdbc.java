@@ -24,10 +24,10 @@ public class NamingSystemDaoJdbc extends AbstractResourceDaoJdbc<NamingSystem> i
 {
 	private static final Logger logger = LoggerFactory.getLogger(NamingSystemDaoJdbc.class);
 
-	public NamingSystemDaoJdbc(DataSource dataSource, FhirContext fhirContext)
+	public NamingSystemDaoJdbc(DataSource dataSource, DataSource deletionDataSource, FhirContext fhirContext)
 	{
-		super(dataSource, fhirContext, NamingSystem.class, "naming_systems", "naming_system", "naming_system_id",
-				NamingSystemUserFilter::new,
+		super(dataSource, deletionDataSource, fhirContext, NamingSystem.class, "naming_systems", "naming_system",
+				"naming_system_id", NamingSystemUserFilter::new,
 				with(NamingSystemDate::new, NamingSystemName::new, NamingSystemStatus::new), with());
 	}
 

@@ -125,4 +125,29 @@ public interface AuthorizationRule<R extends Resource>
 	 * @return Reason as String in {@link Optional#of(Object)} if delete allowed
 	 */
 	Optional<String> reasonHistoryAllowed(User user);
+
+	/**
+	 * Override this method for non default behavior. Default: Not allowed.
+	 *
+	 * @param user
+	 *            not <code>null</code>
+	 * @param oldResource
+	 *            not <code>null</code>
+	 * @return Reason as String in {@link Optional#of(Object)} if expunge allowed
+	 */
+	Optional<String> reasonExpungeAllowed(User user, R oldResource);
+
+	/**
+	 * Override this method for non default behavior. Default: Not allowed.
+	 *
+	 * @param connection
+	 *            not <code>null</code>
+	 * @param user
+	 *            not <code>null</code>
+	 * @param oldResource
+	 *            not <code>null</code>
+	 * @return Reason as String in {@link Optional#of(Object)} if expunge allowed
+	 */
+	Optional<String> reasonExpungeAllowed(Connection connection, User user, R oldResource);
+
 }

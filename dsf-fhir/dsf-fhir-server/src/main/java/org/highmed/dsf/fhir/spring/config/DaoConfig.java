@@ -68,6 +68,12 @@ public class DaoConfig
 	@Value("${org.highmed.dsf.fhir.db.server_user_password}")
 	private String dbPassword;
 
+	@Value("${org.highmed.dsf.fhir.db.server_deletion_user}")
+	private String dbDeletionUsername;
+
+	@Value("${org.highmed.dsf.fhir.db.server_deletion_user_password}")
+	private String dbDeletionPassword;
+
 	@Autowired
 	private FhirConfig fhirConfig;
 
@@ -87,141 +93,156 @@ public class DaoConfig
 	}
 
 	@Bean
+	public BasicDataSource deletionDataSource()
+	{
+		BasicDataSource dataSource = new BasicDataSource();
+		dataSource.setDriverClassName(Driver.class.getName());
+		dataSource.setUrl(dbUrl);
+		dataSource.setUsername(dbDeletionUsername);
+		dataSource.setPassword(dbDeletionPassword);
+		dataSource.setDefaultReadOnly(true);
+
+		dataSource.setTestOnBorrow(true);
+		dataSource.setValidationQuery("SELECT 1");
+		return dataSource;
+	}
+
+	@Bean
 	public ActivityDefinitionDao activityDefinitionDao()
 	{
-		return new ActivityDefinitionDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new ActivityDefinitionDaoJdbc(dataSource(), deletionDataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public BinaryDao binaryDao()
 	{
-		return new BinaryDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new BinaryDaoJdbc(dataSource(), deletionDataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public BundleDao bundleDao()
 	{
-		return new BundleDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new BundleDaoJdbc(dataSource(), deletionDataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public CodeSystemDao codeSystemDao()
 	{
-		return new CodeSystemDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new CodeSystemDaoJdbc(dataSource(), deletionDataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public EndpointDao endpointDao()
 	{
-		return new EndpointDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new EndpointDaoJdbc(dataSource(), deletionDataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public GroupDao groupDao()
 	{
-		return new GroupDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new GroupDaoJdbc(dataSource(), deletionDataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public HealthcareServiceDao healthcareServiceDao()
 	{
-		return new HealthcareServiceDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new HealthcareServiceDaoJdbc(dataSource(), deletionDataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public LibraryDao libraryDao()
 	{
-		return new LibraryDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new LibraryDaoJdbc(dataSource(), deletionDataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public LocationDao locationDao()
 	{
-		return new LocationDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new LocationDaoJdbc(dataSource(), deletionDataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public MeasureDao measureDao()
 	{
-		return new MeasureDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new MeasureDaoJdbc(dataSource(), deletionDataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public MeasureReportDao measureReportDao()
 	{
-		return new MeasureReportDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new MeasureReportDaoJdbc(dataSource(), deletionDataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public NamingSystemDao namingSystemDao()
 	{
-		return new NamingSystemDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new NamingSystemDaoJdbc(dataSource(), deletionDataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public OrganizationDao organizationDao()
 	{
-		return new OrganizationDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new OrganizationDaoJdbc(dataSource(), deletionDataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public PatientDao patientDao()
 	{
-		return new PatientDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new PatientDaoJdbc(dataSource(), deletionDataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public PractitionerDao practitionerDao()
 	{
-		return new PractitionerDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new PractitionerDaoJdbc(dataSource(), deletionDataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public PractitionerRoleDao practitionerRoleDao()
 	{
-		return new PractitionerRoleDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new PractitionerRoleDaoJdbc(dataSource(), deletionDataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public ProvenanceDao provenanceDao()
 	{
-		return new ProvenanceDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new ProvenanceDaoJdbc(dataSource(), deletionDataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public ResearchStudyDao researchStudyDao()
 	{
-		return new ResearchStudyDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new ResearchStudyDaoJdbc(dataSource(), deletionDataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public StructureDefinitionDao structureDefinitionDao()
 	{
-		return new StructureDefinitionDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new StructureDefinitionDaoJdbc(dataSource(), deletionDataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public StructureDefinitionDao structureDefinitionSnapshotDao()
 	{
-		return new StructureDefinitionSnapshotDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new StructureDefinitionSnapshotDaoJdbc(dataSource(), deletionDataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public SubscriptionDao subscriptionDao()
 	{
-		return new SubscriptionDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new SubscriptionDaoJdbc(dataSource(), deletionDataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public TaskDao taskDao()
 	{
-		return new TaskDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new TaskDaoJdbc(dataSource(), deletionDataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
 	public ValueSetDao valueSetDao()
 	{
-		return new ValueSetDaoJdbc(dataSource(), fhirConfig.fhirContext());
+		return new ValueSetDaoJdbc(dataSource(), deletionDataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean

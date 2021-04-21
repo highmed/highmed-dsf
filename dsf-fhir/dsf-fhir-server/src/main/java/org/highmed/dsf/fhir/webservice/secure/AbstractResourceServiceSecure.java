@@ -1,11 +1,7 @@
 package org.highmed.dsf.fhir.webservice.secure;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -618,5 +614,41 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 				userProvider.getCurrentUser().getRole());
 
 		return delegate.getValidateExisting(validate, id, uri, headers);
+	}
+
+	@Override
+	public Response expunge(String expungePath, Parameters parameters, String id, UriInfo uri, HttpHeaders headers)
+	{
+		logger.debug("Current user '{}', role '{}'", userProvider.getCurrentUser().getName(),
+				userProvider.getCurrentUser().getRole());
+
+		Optional<R> dbResource = exceptionHandler
+				.handleSqlException(() -> dao.readIncludingDeleted(parameterConverter.toUuid(resourceTypeName, id)));
+
+		if (dbResource.isPresent())
+		{
+			R oldResource = dbResource.get();
+
+			Optional<String> reasonDeleteAllowed = authorizationRule.reasonExpungeAllowed(getCurrentUser(),
+					oldResource);
+			if (reasonDeleteAllowed.isEmpty())
+			{
+				audit.info("Expunge of resource {} denied for user '{}'", oldResource.getIdElement().getValue(),
+						getCurrentUser().getName());
+				return forbidden("delete");
+			}
+			else
+			{
+				audit.info("Expunge of resource {} allowed for user '{}': {}", oldResource.getIdElement().getValue(),
+						getCurrentUser().getName(), reasonDeleteAllowed.get());
+				return delegate.expunge(expungePath, parameters, id, uri, headers);
+			}
+		}
+		else
+		{
+			audit.info("Resource to expunge {} not found for user '{}'", resourceTypeName + "/" + id,
+					getCurrentUser().getName());
+			return responseGenerator.notFound(id, resourceTypeName);
+		}
 	}
 }

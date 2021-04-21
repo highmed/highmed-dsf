@@ -1,20 +1,9 @@
 package org.highmed.dsf.fhir.dao.jdbc;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -25,14 +14,10 @@ import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.ResourceDao;
 import org.highmed.dsf.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.dsf.fhir.dao.exception.ResourceNotFoundException;
+import org.highmed.dsf.fhir.dao.exception.ResourceNotMarkedDeletedException;
 import org.highmed.dsf.fhir.dao.exception.ResourceVersionNoMatchException;
-import org.highmed.dsf.fhir.search.DbSearchQuery;
-import org.highmed.dsf.fhir.search.PartialResult;
-import org.highmed.dsf.fhir.search.SearchQuery;
+import org.highmed.dsf.fhir.search.*;
 import org.highmed.dsf.fhir.search.SearchQuery.SearchQueryBuilder;
-import org.highmed.dsf.fhir.search.SearchQueryParameter;
-import org.highmed.dsf.fhir.search.SearchQueryRevIncludeParameterFactory;
-import org.highmed.dsf.fhir.search.SearchQueryUserFilter;
 import org.highmed.dsf.fhir.search.parameters.ResourceId;
 import org.highmed.dsf.fhir.search.parameters.ResourceLastUpdated;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -101,6 +86,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	}
 
 	private final DataSource dataSource;
+	private final DataSource deletionDataSource;
 	private final Class<R> resourceType;
 	private final String resourceTypeName;
 
@@ -123,12 +109,13 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	 * Using a suppliers for SearchParameters, implementations are not thread safe and because of that they need to be
 	 * created on a request basis
 	 */
-	AbstractResourceDaoJdbc(DataSource dataSource, FhirContext fhirContext, Class<R> resourceType, String resourceTable,
-			String resourceColumn, String resourceIdColumn, Function<User, SearchQueryUserFilter> userFilter,
+	AbstractResourceDaoJdbc(DataSource dataSource, DataSource deletionDataSource, FhirContext fhirContext,
+			Class<R> resourceType, String resourceTable, String resourceColumn, String resourceIdColumn,
+			Function<User, SearchQueryUserFilter> userFilter,
 			List<Supplier<SearchQueryParameter<R>>> searchParameterFactories,
 			List<Supplier<SearchQueryRevIncludeParameterFactory>> searchRevIncludeParameterFactories)
 	{
-		this(dataSource, fhirContext, resourceType, resourceTable, resourceColumn, resourceIdColumn,
+		this(dataSource, deletionDataSource, fhirContext, resourceType, resourceTable, resourceColumn, resourceIdColumn,
 				new PreparedStatementFactoryDefault<>(fhirContext, resourceType, resourceTable, resourceIdColumn,
 						resourceColumn),
 				userFilter, searchParameterFactories, searchRevIncludeParameterFactories);
@@ -138,13 +125,14 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	 * Using a suppliers for SearchParameters, implementations are not thread safe and because of that they need to be
 	 * created on a request basis
 	 */
-	AbstractResourceDaoJdbc(DataSource dataSource, FhirContext fhirContext, Class<R> resourceType, String resourceTable,
-			String resourceColumn, String resourceIdColumn, PreparedStatementFactory<R> preparedStatementFactory,
-			Function<User, SearchQueryUserFilter> userFilter,
+	AbstractResourceDaoJdbc(DataSource dataSource, DataSource deletionDataSource, FhirContext fhirContext,
+			Class<R> resourceType, String resourceTable, String resourceColumn, String resourceIdColumn,
+			PreparedStatementFactory<R> preparedStatementFactory, Function<User, SearchQueryUserFilter> userFilter,
 			List<Supplier<SearchQueryParameter<R>>> searchParameterFactories,
 			List<Supplier<SearchQueryRevIncludeParameterFactory>> searchRevIncludeParameterFactories)
 	{
 		this.dataSource = dataSource;
+		this.deletionDataSource = deletionDataSource;
 		this.resourceType = resourceType;
 		resourceTypeName = Objects.requireNonNull(resourceType, "resourceType").getAnnotation(ResourceDef.class).name();
 
@@ -872,7 +860,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	 * Override this method to modify resources retrieved by search queries before returning to the user. This method
 	 * can be used, if the resource returned by the search is not complete and additional content needs to be retrieved.
 	 * For example the content of a {@link Binary} resource might not be stored in the json column.
-	 * 
+	 *
 	 * @param resource
 	 *            not <code>null</code>
 	 * @param connection
@@ -932,5 +920,59 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 				.withRevInclude(searchRevIncludeParameterFactories.stream().map(Supplier::get)
 						.toArray(SearchQueryRevIncludeParameterFactory[]::new))
 				.build();
+	}
+
+	@Override
+	public boolean expunge(UUID uuid) throws SQLException, ResourceNotFoundException, ResourceNotMarkedDeletedException
+	{
+		if (uuid == null)
+			throw new ResourceNotFoundException("'null'");
+
+		try (Connection connection = deletionDataSource.getConnection())
+		{
+			connection.setReadOnly(false);
+
+			return expungeWithTransaction(connection, uuid);
+		}
+	}
+
+	@Override
+	public boolean expungeWithTransaction(Connection connection, UUID uuid)
+			throws SQLException, ResourceNotFoundException, ResourceNotMarkedDeletedException
+	{
+		if (uuid == null)
+			throw new ResourceNotFoundException("'null'");
+		Objects.requireNonNull(connection, "connection");
+		if (connection.isReadOnly())
+			throw new IllegalStateException("Connection is read-only");
+		return deletePermanently(connection, uuid);
+	}
+
+	protected final boolean deletePermanently(Connection connection, UUID uuid)
+			throws SQLException, ResourceNotFoundException, ResourceNotMarkedDeletedException
+	{
+		if (uuid == null)
+		{
+			throw new ResourceNotFoundException("'null'");
+		}
+
+		LatestVersion latestVersion = getLatestVersion(uuid, connection);
+
+		if (!latestVersion.deleted)
+		{
+			throw new ResourceNotMarkedDeletedException(uuid.toString());
+		}
+
+		try (PreparedStatement statement = connection
+				.prepareStatement("DELETE FROM " + resourceTable + " WHERE " + resourceIdColumn + "= ?"))
+		{
+			statement.setObject(1, preparedStatementFactory.uuidToPgObject(uuid));
+
+			logger.trace("Executing query '{}'", statement);
+			statement.execute();
+
+			logger.debug("{} with ID {} deleted permanently", resourceTypeName, uuid);
+			return true;
+		}
 	}
 }

@@ -9,10 +9,10 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class StructureDefinitionDaoJdbc extends AbstractStructureDefinitionDaoJdbc
 {
-	public StructureDefinitionDaoJdbc(DataSource dataSource, FhirContext fhirContext)
+	public StructureDefinitionDaoJdbc(DataSource dataSource, DataSource deletionDataSource, FhirContext fhirContext)
 	{
-		super(dataSource, fhirContext, "structure_definitions", "structure_definition", "structure_definition_id",
-				StructureDefinitionUserFilter::new);
+		super(dataSource, deletionDataSource, fhirContext, "structure_definitions", "structure_definition",
+				"structure_definition_id", StructureDefinitionUserFilter::new);
 	}
 
 	@Override

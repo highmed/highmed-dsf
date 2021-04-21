@@ -18,4 +18,9 @@ public class EventGenerator
 	{
 		return new ResourceDeletedEvent(resourceType, id);
 	}
+
+	public ResourceExpungeEvent newResourceExpungeEvent(Class<? extends Resource> resourceType, String id)
+	{
+		return new ResourceExpungeEvent(resourceType, id);
+	}
 }
