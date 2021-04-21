@@ -125,9 +125,9 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	 * Using a suppliers for SearchParameters, implementations are not thread safe and because of that they need to be
 	 * created on a request basis
 	 */
-	AbstractResourceDaoJdbc(DataSource dataSource, DataSource deletionDataSource, FhirContext fhirContext, Class<R> resourceType, String resourceTable,
-			String resourceColumn, String resourceIdColumn, PreparedStatementFactory<R> preparedStatementFactory,
-			Function<User, SearchQueryUserFilter> userFilter,
+	AbstractResourceDaoJdbc(DataSource dataSource, DataSource deletionDataSource, FhirContext fhirContext,
+			Class<R> resourceType, String resourceTable, String resourceColumn, String resourceIdColumn,
+			PreparedStatementFactory<R> preparedStatementFactory, Function<User, SearchQueryUserFilter> userFilter,
 			List<Supplier<SearchQueryParameter<R>>> searchParameterFactories,
 			List<Supplier<SearchQueryRevIncludeParameterFactory>> searchRevIncludeParameterFactories)
 	{

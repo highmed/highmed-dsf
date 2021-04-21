@@ -26,8 +26,8 @@ public class NamingSystemDaoJdbc extends AbstractResourceDaoJdbc<NamingSystem> i
 
 	public NamingSystemDaoJdbc(DataSource dataSource, DataSource deletionDataSource, FhirContext fhirContext)
 	{
-		super(dataSource, deletionDataSource, fhirContext, NamingSystem.class, "naming_systems", "naming_system", "naming_system_id",
-				NamingSystemUserFilter::new,
+		super(dataSource, deletionDataSource, fhirContext, NamingSystem.class, "naming_systems", "naming_system",
+				"naming_system_id", NamingSystemUserFilter::new,
 				with(NamingSystemDate::new, NamingSystemName::new, NamingSystemStatus::new), with());
 	}
 

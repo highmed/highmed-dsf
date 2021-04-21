@@ -301,7 +301,8 @@ public class OrganizationAuthorizationRule extends AbstractAuthorizationRule<Org
 	}
 
 	@Override
-	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Organization oldResource) {
+	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Organization oldResource)
+	{
 		if (isLocalUser(user))
 		{
 			logger.info("Expunge of Organization authorized for local user '{}'", user.getName());

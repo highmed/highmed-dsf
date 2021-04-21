@@ -101,7 +101,8 @@ public class ProvenanceAuthorizationRule extends AbstractAuthorizationRule<Prove
 	}
 
 	@Override
-	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Provenance oldResource) {
+	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Provenance oldResource)
+	{
 		if (isLocalUser(user))
 		{
 			logger.info("Expunge of Provenance authorized for local user '{}'", user.getName());

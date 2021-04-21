@@ -212,7 +212,8 @@ public class CodeSystemAuthorizationRule extends AbstractAuthorizationRule<CodeS
 	}
 
 	@Override
-	public Optional<String> reasonExpungeAllowed(Connection connection, User user, CodeSystem oldResource) {
+	public Optional<String> reasonExpungeAllowed(Connection connection, User user, CodeSystem oldResource)
+	{
 		if (isLocalUser(user))
 		{
 			logger.info("Expunge of CodeSystem authorized for local user '{}'", user.getName());

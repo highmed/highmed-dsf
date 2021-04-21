@@ -277,7 +277,8 @@ public class SubscriptionAuthorizationRule extends AbstractAuthorizationRule<Sub
 	}
 
 	@Override
-	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Subscription oldResource) {
+	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Subscription oldResource)
+	{
 		if (isLocalUser(user))
 		{
 			logger.info("Expunge of Subscription authorized for local user '{}'", user.getName());

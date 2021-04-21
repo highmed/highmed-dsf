@@ -178,7 +178,8 @@ public class PractitionerAuthorizationRule extends AbstractAuthorizationRule<Pra
 	}
 
 	@Override
-	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Practitioner oldResource) {
+	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Practitioner oldResource)
+	{
 		if (isLocalUser(user))
 		{
 			logger.info("Expunge of Practitioner authorized for local user '{}'", user.getName());

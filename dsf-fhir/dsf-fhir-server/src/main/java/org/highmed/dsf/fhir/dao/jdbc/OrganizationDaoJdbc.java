@@ -28,8 +28,8 @@ public class OrganizationDaoJdbc extends AbstractResourceDaoJdbc<Organization> i
 
 	public OrganizationDaoJdbc(DataSource dataSource, DataSource deletionDataSource, FhirContext fhirContext)
 	{
-		super(dataSource, deletionDataSource, fhirContext, Organization.class, "organizations", "organization", "organization_id",
-				OrganizationUserFilter::new, with(OrganizationActive::new, OrganizationEndpoint::new,
+		super(dataSource, deletionDataSource, fhirContext, Organization.class, "organizations", "organization",
+				"organization_id", OrganizationUserFilter::new, with(OrganizationActive::new, OrganizationEndpoint::new,
 						OrganizationIdentifier::new, OrganizationName::new, OrganizationType::new),
 				with(EndpointOrganizationRevInclude::new));
 	}

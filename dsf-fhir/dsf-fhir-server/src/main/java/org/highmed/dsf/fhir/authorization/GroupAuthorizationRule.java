@@ -134,7 +134,8 @@ public class GroupAuthorizationRule extends AbstractAuthorizationRule<Group, Gro
 	}
 
 	@Override
-	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Group oldResource) {
+	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Group oldResource)
+	{
 		if (isLocalUser(user))
 		{
 			logger.info("Expunge of Group authorized for local user '{}'", user.getName());

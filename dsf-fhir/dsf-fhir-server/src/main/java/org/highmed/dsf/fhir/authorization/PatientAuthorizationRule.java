@@ -101,7 +101,8 @@ public class PatientAuthorizationRule extends AbstractAuthorizationRule<Patient,
 	}
 
 	@Override
-	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Patient oldResource) {
+	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Patient oldResource)
+	{
 		if (isLocalUser(user))
 		{
 			logger.info("Expunge of Patient authorized for local user '{}'", user.getName());

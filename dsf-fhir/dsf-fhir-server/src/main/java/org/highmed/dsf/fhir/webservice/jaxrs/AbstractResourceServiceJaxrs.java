@@ -13,197 +13,214 @@ import org.springframework.beans.factory.InitializingBean;
 import ca.uhn.fhir.rest.api.Constants;
 
 public abstract class AbstractResourceServiceJaxrs<R extends Resource, S extends BasicResourceService<R>>
-        extends AbstractServiceJaxrs<S> implements BasicResourceService<R>, InitializingBean {
-    private static final Logger logger = LoggerFactory.getLogger(AbstractResourceServiceJaxrs.class);
+		extends AbstractServiceJaxrs<S> implements BasicResourceService<R>, InitializingBean
+{
+	private static final Logger logger = LoggerFactory.getLogger(AbstractResourceServiceJaxrs.class);
 
-    public AbstractResourceServiceJaxrs(S delegate) {
-        super(delegate);
-    }
+	public AbstractResourceServiceJaxrs(S delegate)
+	{
+		super(delegate);
+	}
 
-    @POST
-    @Consumes({Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
-            Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML})
-    @Produces({MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
-            Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML})
-    @Override
-    public Response create(R resource, @Context UriInfo uri, @Context HttpHeaders headers) {
-        logger.trace("POST {}", uri.getRequestUri().toString());
+	@POST
+	@Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
+			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
+			Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Override
+	public Response create(R resource, @Context UriInfo uri, @Context HttpHeaders headers)
+	{
+		logger.trace("POST {}", uri.getRequestUri().toString());
 
-        return delegate.create(resource, uri, headers);
-    }
+		return delegate.create(resource, uri, headers);
+	}
 
-    @GET
-    @Path("/{id}")
-    @Produces({MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
-            Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML})
-    @Override
-    public Response read(@PathParam("id") String id, @Context UriInfo uri, @Context HttpHeaders headers) {
-        logger.trace("GET {}", uri.getRequestUri().toString());
+	@GET
+	@Path("/{id}")
+	@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
+			Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Override
+	public Response read(@PathParam("id") String id, @Context UriInfo uri, @Context HttpHeaders headers)
+	{
+		logger.trace("GET {}", uri.getRequestUri().toString());
 
-        return delegate.read(id, uri, headers);
-    }
+		return delegate.read(id, uri, headers);
+	}
 
-    @GET
-    @Path("/{id}/_history/{version}")
-    @Produces({MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
-            Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML})
-    @Override
-    public Response vread(@PathParam("id") String id, @PathParam("version") long version, @Context UriInfo uri,
-                          @Context HttpHeaders headers) {
-        logger.trace("GET {}", uri.getRequestUri().toString());
+	@GET
+	@Path("/{id}/_history/{version}")
+	@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
+			Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Override
+	public Response vread(@PathParam("id") String id, @PathParam("version") long version, @Context UriInfo uri,
+			@Context HttpHeaders headers)
+	{
+		logger.trace("GET {}", uri.getRequestUri().toString());
 
-        return delegate.vread(id, version, uri, headers);
-    }
+		return delegate.vread(id, version, uri, headers);
+	}
 
-    @GET
-    @Path("/_history")
-    @Produces({MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
-            Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML})
-    @Override
-    public Response history(@Context UriInfo uri, @Context HttpHeaders headers) {
-        logger.trace("GET {}", uri.getRequestUri().toString());
+	@GET
+	@Path("/_history")
+	@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
+			Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Override
+	public Response history(@Context UriInfo uri, @Context HttpHeaders headers)
+	{
+		logger.trace("GET {}", uri.getRequestUri().toString());
 
-        return delegate.history(uri, headers);
-    }
+		return delegate.history(uri, headers);
+	}
 
-    @GET
-    @Path("/{id}/_history")
-    @Produces({MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
-            Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML})
-    @Override
-    public Response history(@PathParam("id") String id, @Context UriInfo uri, @Context HttpHeaders headers) {
-        logger.trace("GET {}", uri.getRequestUri().toString());
+	@GET
+	@Path("/{id}/_history")
+	@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
+			Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Override
+	public Response history(@PathParam("id") String id, @Context UriInfo uri, @Context HttpHeaders headers)
+	{
+		logger.trace("GET {}", uri.getRequestUri().toString());
 
-        return delegate.history(id, uri, headers);
-    }
+		return delegate.history(id, uri, headers);
+	}
 
-    @PUT
-    @Path("/{id}")
-    @Consumes({Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
-            Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML})
-    @Produces({MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
-            Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML})
-    @Override
-    public Response update(@PathParam("id") String id, R resource, @Context UriInfo uri, @Context HttpHeaders headers) {
-        logger.trace("PUT {}", uri.getRequestUri().toString());
+	@PUT
+	@Path("/{id}")
+	@Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
+			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
+			Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Override
+	public Response update(@PathParam("id") String id, R resource, @Context UriInfo uri, @Context HttpHeaders headers)
+	{
+		logger.trace("PUT {}", uri.getRequestUri().toString());
 
-        return delegate.update(id, resource, uri, headers);
-    }
+		return delegate.update(id, resource, uri, headers);
+	}
 
-    @PUT
-    @Consumes({Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
-            Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML})
-    @Produces({MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
-            Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML})
-    @Override
-    public Response update(R resource, @Context UriInfo uri, @Context HttpHeaders headers) {
-        logger.trace("PUT {}", uri.getRequestUri().toString());
+	@PUT
+	@Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
+			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
+			Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Override
+	public Response update(R resource, @Context UriInfo uri, @Context HttpHeaders headers)
+	{
+		logger.trace("PUT {}", uri.getRequestUri().toString());
 
-        return delegate.update(resource, uri, headers);
-    }
+		return delegate.update(resource, uri, headers);
+	}
 
-    @DELETE
-    @Path("/{id}")
-    @Consumes({Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
-            Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML})
-    @Produces({MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
-            Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML})
-    @Override
-    public Response delete(@PathParam("id") String id, @Context UriInfo uri, @Context HttpHeaders headers) {
-        logger.trace("DELETE {}", uri.getRequestUri().toString());
+	@DELETE
+	@Path("/{id}")
+	@Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
+			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
+			Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Override
+	public Response delete(@PathParam("id") String id, @Context UriInfo uri, @Context HttpHeaders headers)
+	{
+		logger.trace("DELETE {}", uri.getRequestUri().toString());
 
-        return delegate.delete(id, uri, headers);
-    }
+		return delegate.delete(id, uri, headers);
+	}
 
-    @DELETE
-    @Consumes({Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
-            Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML})
-    @Produces({MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
-            Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML})
-    @Override
-    public Response delete(@Context UriInfo uri, @Context HttpHeaders headers) {
-        logger.trace("DELETE {}", uri.getRequestUri().toString());
+	@DELETE
+	@Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
+			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
+			Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Override
+	public Response delete(@Context UriInfo uri, @Context HttpHeaders headers)
+	{
+		logger.trace("DELETE {}", uri.getRequestUri().toString());
 
-        return delegate.delete(uri, headers);
-    }
+		return delegate.delete(uri, headers);
+	}
 
-    @GET
-    @Produces({MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
-            Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML})
-    @Override
-    public Response search(@Context UriInfo uri, @Context HttpHeaders headers) {
-        logger.trace("GET {}", uri.getRequestUri().toString());
+	@GET
+	@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
+			Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Override
+	public Response search(@Context UriInfo uri, @Context HttpHeaders headers)
+	{
+		logger.trace("GET {}", uri.getRequestUri().toString());
 
-        return delegate.search(uri, headers);
-    }
+		return delegate.search(uri, headers);
+	}
 
-    @POST
-    @Path("/{validate : [$]validate(/)?}")
-    @Consumes({Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
-            Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML})
-    @Produces({MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
-            Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML})
-    @Override
-    public Response postValidateNew(@PathParam("validate") String validate, Parameters parameters, @Context UriInfo uri,
-                                    @Context HttpHeaders headers) {
-        logger.trace("POST {}", uri.getRequestUri().toString());
+	@POST
+	@Path("/{validate : [$]validate(/)?}")
+	@Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
+			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
+			Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Override
+	public Response postValidateNew(@PathParam("validate") String validate, Parameters parameters, @Context UriInfo uri,
+			@Context HttpHeaders headers)
+	{
+		logger.trace("POST {}", uri.getRequestUri().toString());
 
-        return delegate.postValidateNew(validate, parameters, uri, headers);
-    }
+		return delegate.postValidateNew(validate, parameters, uri, headers);
+	}
 
-    @GET
-    @Path("/{validate : [$]validate(/)?}")
-    @Consumes({Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
-            Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML})
-    @Produces({MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
-            Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML})
-    @Override
-    public Response getValidateNew(@PathParam("validate") String validate, @Context UriInfo uri,
-                                   @Context HttpHeaders headers) {
-        logger.trace("GET {}", uri.getRequestUri().toString());
+	@GET
+	@Path("/{validate : [$]validate(/)?}")
+	@Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
+			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
+			Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Override
+	public Response getValidateNew(@PathParam("validate") String validate, @Context UriInfo uri,
+			@Context HttpHeaders headers)
+	{
+		logger.trace("GET {}", uri.getRequestUri().toString());
 
-        return delegate.getValidateNew(validate, uri, headers);
-    }
+		return delegate.getValidateNew(validate, uri, headers);
+	}
 
-    @POST
-    @Path("/{id}/{validate : [$]validate(/)?}")
-    @Consumes({Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
-            Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML})
-    @Produces({MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
-            Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML})
-    @Override
-    public Response postValidateExisting(@PathParam("validate") String validatePath, @PathParam("id") String id,
-                                         Parameters parameters, @Context UriInfo uri, @Context HttpHeaders headers) {
-        logger.trace("POST {}", uri.getRequestUri().toString());
+	@POST
+	@Path("/{id}/{validate : [$]validate(/)?}")
+	@Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
+			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
+			Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Override
+	public Response postValidateExisting(@PathParam("validate") String validatePath, @PathParam("id") String id,
+			Parameters parameters, @Context UriInfo uri, @Context HttpHeaders headers)
+	{
+		logger.trace("POST {}", uri.getRequestUri().toString());
 
-        return delegate.postValidateExisting(validatePath, id, parameters, uri, headers);
-    }
+		return delegate.postValidateExisting(validatePath, id, parameters, uri, headers);
+	}
 
-    @GET
-    @Path("/{id}/{validate : [$]validate(/)?}")
-    @Consumes({Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
-            Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML})
-    @Produces({MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
-            Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML})
-    @Override
-    public Response getValidateExisting(@PathParam("validate") String validatePath, @PathParam("id") String id,
-                                        @Context UriInfo uri, @Context HttpHeaders headers) {
-        logger.trace("GET {}", uri.getRequestUri().toString());
+	@GET
+	@Path("/{id}/{validate : [$]validate(/)?}")
+	@Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
+			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
+			Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Override
+	public Response getValidateExisting(@PathParam("validate") String validatePath, @PathParam("id") String id,
+			@Context UriInfo uri, @Context HttpHeaders headers)
+	{
+		logger.trace("GET {}", uri.getRequestUri().toString());
 
-        return delegate.getValidateExisting(validatePath, id, uri, headers);
-    }
+		return delegate.getValidateExisting(validatePath, id, uri, headers);
+	}
 
-    @POST
-    @Path("/{id}/{expunge : [$]expunge(/)?}")
-    @Consumes({Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
-            Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML})
-    @Produces({MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
-            Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML})
-    @Override
-    public Response expunge(@PathParam("expunge") String expungePath, Parameters parameters, @PathParam("id") String id,
-                            @Context UriInfo uri, @Context HttpHeaders headers) {
-        logger.trace("POST {}", uri.getRequestUri().toString());
+	@POST
+	@Path("/{id}/{expunge : [$]expunge(/)?}")
+	@Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
+			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
+			Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Override
+	public Response expunge(@PathParam("expunge") String expungePath, Parameters parameters, @PathParam("id") String id,
+			@Context UriInfo uri, @Context HttpHeaders headers)
+	{
+		logger.trace("POST {}", uri.getRequestUri().toString());
 
-        return delegate.expunge(expungePath, parameters, id, uri, headers);
-    }
+		return delegate.expunge(expungePath, parameters, id, uri, headers);
+	}
 }

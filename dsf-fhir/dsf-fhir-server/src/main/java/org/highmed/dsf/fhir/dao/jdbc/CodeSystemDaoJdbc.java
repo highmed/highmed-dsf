@@ -23,9 +23,9 @@ public class CodeSystemDaoJdbc extends AbstractResourceDaoJdbc<CodeSystem> imple
 
 	public CodeSystemDaoJdbc(DataSource dataSource, DataSource deletionDataSource, FhirContext fhirContext)
 	{
-		super(dataSource, deletionDataSource, fhirContext, CodeSystem.class, "code_systems", "code_system", "code_system_id",
-				CodeSystemUserFilter::new, with(CodeSystemDate::new, CodeSystemIdentifier::new, CodeSystemStatus::new,
-						CodeSystemUrl::new, CodeSystemVersion::new),
+		super(dataSource, deletionDataSource, fhirContext, CodeSystem.class, "code_systems", "code_system",
+				"code_system_id", CodeSystemUserFilter::new, with(CodeSystemDate::new, CodeSystemIdentifier::new,
+						CodeSystemStatus::new, CodeSystemUrl::new, CodeSystemVersion::new),
 				with());
 
 		readByUrl = new ReadByUrlDaoJdbc<>(this::getDataSource, this::getResource, getResourceTable(),

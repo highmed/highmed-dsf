@@ -109,7 +109,8 @@ public class LocationAuthorizationRule extends AbstractAuthorizationRule<Locatio
 	}
 
 	@Override
-	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Location oldResource) {
+	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Location oldResource)
+	{
 		if (isLocalUser(user))
 		{
 			logger.info("Expunge of Location authorized for local user '{}'", user.getName());

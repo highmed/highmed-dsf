@@ -109,7 +109,8 @@ public class LibraryAuthorizationRule extends AbstractAuthorizationRule<Library,
 	}
 
 	@Override
-	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Library oldResource) {
+	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Library oldResource)
+	{
 		if (isLocalUser(user))
 		{
 			logger.info("Expunge of Library authorized for local user '{}'", user.getName());

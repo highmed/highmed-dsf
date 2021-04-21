@@ -16,8 +16,8 @@ public class PractitionerRoleDaoJdbc extends AbstractResourceDaoJdbc<Practitione
 {
 	public PractitionerRoleDaoJdbc(DataSource dataSource, DataSource deletionDataSource, FhirContext fhirContext)
 	{
-		super(dataSource, deletionDataSource, fhirContext, PractitionerRole.class, "practitioner_roles", "practitioner_role",
-				"practitioner_role_id", PractitionerRoleUserFilter::new,
+		super(dataSource, deletionDataSource, fhirContext, PractitionerRole.class, "practitioner_roles",
+				"practitioner_role", "practitioner_role_id", PractitionerRoleUserFilter::new,
 				with(PractitionerRoleActive::new, PractitionerRoleIdentifier::new, PractitionerRoleOrganization::new,
 						PractitionerRolePractitioner::new),
 				with());

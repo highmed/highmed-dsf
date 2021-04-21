@@ -70,7 +70,8 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 	protected final FhirContext fhirContext = FhirContext.forR4();
 	protected C dao;
 
-	protected AbstractResourceDaoTest(Class<D> resouceClass, TriFunction<DataSource, DataSource, FhirContext, C> daoCreator)
+	protected AbstractResourceDaoTest(Class<D> resouceClass,
+			TriFunction<DataSource, DataSource, FhirContext, C> daoCreator)
 	{
 		this.resouceClass = resouceClass;
 		this.daoCreator = daoCreator;

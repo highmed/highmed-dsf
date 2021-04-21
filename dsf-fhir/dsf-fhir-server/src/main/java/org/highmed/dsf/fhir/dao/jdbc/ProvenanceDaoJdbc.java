@@ -12,8 +12,8 @@ public class ProvenanceDaoJdbc extends AbstractResourceDaoJdbc<Provenance> imple
 {
 	public ProvenanceDaoJdbc(DataSource dataSource, DataSource deletionDataSource, FhirContext fhirContext)
 	{
-		super(dataSource, deletionDataSource, fhirContext, Provenance.class, "provenances", "provenance", "provenance_id",
-				PatientUserFilter::new, with(), with());
+		super(dataSource, deletionDataSource, fhirContext, Provenance.class, "provenances", "provenance",
+				"provenance_id", PatientUserFilter::new, with(), with());
 	}
 
 	@Override

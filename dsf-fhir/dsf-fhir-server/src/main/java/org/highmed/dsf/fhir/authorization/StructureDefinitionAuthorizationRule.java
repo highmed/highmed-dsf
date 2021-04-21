@@ -217,7 +217,8 @@ public class StructureDefinitionAuthorizationRule
 	}
 
 	@Override
-	public Optional<String> reasonExpungeAllowed(Connection connection, User user, StructureDefinition oldResource) {
+	public Optional<String> reasonExpungeAllowed(Connection connection, User user, StructureDefinition oldResource)
+	{
 		if (isLocalUser(user))
 		{
 			logger.info("Expunge of StructureDefinition authorized for local user '{}'", user.getName());

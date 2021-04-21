@@ -13,8 +13,8 @@ public class MeasureReportDaoJdbc extends AbstractResourceDaoJdbc<MeasureReport>
 {
 	public MeasureReportDaoJdbc(DataSource dataSource, DataSource deletionDataSource, FhirContext fhirContext)
 	{
-		super(dataSource, deletionDataSource, fhirContext, MeasureReport.class, "measure_reports", "measure_report", "measure_report_id",
-				MeasureReportUserFilter::new, with(MeasureReportIdentifier::new), with());
+		super(dataSource, deletionDataSource, fhirContext, MeasureReport.class, "measure_reports", "measure_report",
+				"measure_report_id", MeasureReportUserFilter::new, with(MeasureReportIdentifier::new), with());
 	}
 
 	@Override

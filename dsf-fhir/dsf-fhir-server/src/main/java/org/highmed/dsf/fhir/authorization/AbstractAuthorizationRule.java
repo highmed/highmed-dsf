@@ -248,7 +248,8 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 
 
 	@Override
-	public Optional<String> reasonExpungeAllowed(User user, R oldResource) {
+	public Optional<String> reasonExpungeAllowed(User user, R oldResource)
+	{
 		try (Connection connection = daoProvider.newReadOnlyAutoCommitTransaction())
 		{
 			return reasonExpungeAllowed(connection, user, oldResource);

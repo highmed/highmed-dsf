@@ -27,9 +27,9 @@ public class EndpointDaoJdbc extends AbstractResourceDaoJdbc<Endpoint> implement
 
 	public EndpointDaoJdbc(DataSource dataSource, DataSource deletionDataSource, FhirContext fhirContext)
 	{
-		super(dataSource, deletionDataSource, fhirContext, Endpoint.class, "endpoints", "endpoint", "endpoint_id", EndpointUserFilter::new,
-				with(EndpointAddress::new, EndpointIdentifier::new, EndpointName::new, EndpointOrganization::new,
-						EndpointStatus::new),
+		super(dataSource, deletionDataSource, fhirContext, Endpoint.class, "endpoints", "endpoint", "endpoint_id",
+				EndpointUserFilter::new, with(EndpointAddress::new, EndpointIdentifier::new, EndpointName::new,
+						EndpointOrganization::new, EndpointStatus::new),
 				with(OrganizationEndpointRevInclude::new));
 	}
 

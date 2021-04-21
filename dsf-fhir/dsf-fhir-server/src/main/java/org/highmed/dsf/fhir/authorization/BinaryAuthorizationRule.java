@@ -205,7 +205,8 @@ public class BinaryAuthorizationRule extends AbstractAuthorizationRule<Binary, B
 	}
 
 	@Override
-	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Binary oldResource) {
+	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Binary oldResource)
+	{
 		if (isLocalUser(user))
 		{
 			logger.info("Expunge of Binary authorized for local user '{}'", user.getName());

@@ -201,12 +201,14 @@ public class ExceptionHandler
 		{
 			throw internalServerError(e);
 		}
-		catch (ResourceNotFoundException e) {
+		catch (ResourceNotFoundException e)
+		{
 			throw notFound(resourceTypeName, e);
 		}
 	}
 
-	public WebApplicationException notMarkedDeleted(String resourceTypeName, ResourceNotMarkedDeletedException e) {
+	public WebApplicationException notMarkedDeleted(String resourceTypeName, ResourceNotMarkedDeletedException e)
+	{
 		logger.warn("{} with id {} is not marked as deleted", resourceTypeName, e.getId());
 		OperationOutcome outcome = responseGenerator.createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				resourceTypeName + " with id " + e.getId() + " is not marked deleted");

@@ -14,8 +14,8 @@ public class HealthcareServiceDaoJdbc extends AbstractResourceDaoJdbc<Healthcare
 {
 	public HealthcareServiceDaoJdbc(DataSource dataSource, DataSource deletionDataSource, FhirContext fhirContext)
 	{
-		super(dataSource, deletionDataSource, fhirContext, HealthcareService.class, "healthcare_services", "healthcare_service",
-				"healthcare_service_id", HealthcareServiceUserFilter::new,
+		super(dataSource, deletionDataSource, fhirContext, HealthcareService.class, "healthcare_services",
+				"healthcare_service", "healthcare_service_id", HealthcareServiceUserFilter::new,
 				with(HealthcareServiceActive::new, HealthcareServiceIdentifier::new), with());
 	}
 

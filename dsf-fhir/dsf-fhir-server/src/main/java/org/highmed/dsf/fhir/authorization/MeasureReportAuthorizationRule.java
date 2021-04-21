@@ -110,7 +110,8 @@ public class MeasureReportAuthorizationRule extends AbstractAuthorizationRule<Me
 	}
 
 	@Override
-	public Optional<String> reasonExpungeAllowed(Connection connection, User user, MeasureReport oldResource) {
+	public Optional<String> reasonExpungeAllowed(Connection connection, User user, MeasureReport oldResource)
+	{
 		if (isLocalUser(user))
 		{
 			logger.info("Expunge of MeasureReport authorized for local user '{}'", user.getName());

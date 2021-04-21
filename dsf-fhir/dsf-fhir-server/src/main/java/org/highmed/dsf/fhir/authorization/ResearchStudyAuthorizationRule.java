@@ -414,7 +414,8 @@ public class ResearchStudyAuthorizationRule extends AbstractAuthorizationRule<Re
 	}
 
 	@Override
-	public Optional<String> reasonExpungeAllowed(Connection connection, User user, ResearchStudy oldResource) {
+	public Optional<String> reasonExpungeAllowed(Connection connection, User user, ResearchStudy oldResource)
+	{
 		if (isLocalUser(user))
 		{
 			logger.info("Expunge of ResearchStudy authorized for local user '{}'", user.getName());

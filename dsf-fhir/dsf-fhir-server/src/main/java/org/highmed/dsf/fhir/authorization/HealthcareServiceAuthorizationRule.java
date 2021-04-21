@@ -112,7 +112,8 @@ public class HealthcareServiceAuthorizationRule
 	}
 
 	@Override
-	public Optional<String> reasonExpungeAllowed(Connection connection, User user, HealthcareService oldResource) {
+	public Optional<String> reasonExpungeAllowed(Connection connection, User user, HealthcareService oldResource)
+	{
 		if (isLocalUser(user))
 		{
 			logger.info("Expunge of HealthcareService authorized for local user '{}'", user.getName());

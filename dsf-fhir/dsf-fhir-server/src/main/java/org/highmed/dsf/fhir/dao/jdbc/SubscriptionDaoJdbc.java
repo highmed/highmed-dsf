@@ -28,9 +28,9 @@ public class SubscriptionDaoJdbc extends AbstractResourceDaoJdbc<Subscription> i
 
 	public SubscriptionDaoJdbc(DataSource dataSource, DataSource deletionDataSource, FhirContext fhirContext)
 	{
-		super(dataSource, deletionDataSource, fhirContext, Subscription.class, "subscriptions", "subscription", "subscription_id",
-				SubscriptionUserFilter::new, with(SubscriptionCriteria::new, SubscriptionPayload::new,
-						SubscriptionStatus::new, SubscriptionType::new),
+		super(dataSource, deletionDataSource, fhirContext, Subscription.class, "subscriptions", "subscription",
+				"subscription_id", SubscriptionUserFilter::new, with(SubscriptionCriteria::new,
+						SubscriptionPayload::new, SubscriptionStatus::new, SubscriptionType::new),
 				with());
 	}
 

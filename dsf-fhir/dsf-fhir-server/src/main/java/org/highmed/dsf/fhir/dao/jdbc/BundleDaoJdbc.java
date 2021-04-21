@@ -17,8 +17,8 @@ public class BundleDaoJdbc extends AbstractResourceDaoJdbc<Bundle> implements Bu
 {
 	public BundleDaoJdbc(DataSource dataSource, DataSource deletionDataSource, FhirContext fhirContext)
 	{
-		super(dataSource, deletionDataSource, fhirContext, Bundle.class, "bundles", "bundle", "bundle_id", BundleUserFilter::new,
-				with(BundleIdentifier::new), with());
+		super(dataSource, deletionDataSource, fhirContext, Bundle.class, "bundles", "bundle", "bundle_id",
+				BundleUserFilter::new, with(BundleIdentifier::new), with());
 	}
 
 	@Override

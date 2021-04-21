@@ -212,7 +212,8 @@ public class ValueSetAuthorizationRule extends AbstractAuthorizationRule<ValueSe
 	}
 
 	@Override
-	public Optional<String> reasonExpungeAllowed(Connection connection, User user, ValueSet oldResource) {
+	public Optional<String> reasonExpungeAllowed(Connection connection, User user, ValueSet oldResource)
+	{
 		if (isLocalUser(user))
 		{
 			logger.info("Expunge of ValueSet authorized for local user '{}'", user.getName());

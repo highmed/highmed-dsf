@@ -205,7 +205,8 @@ public class NamingSystemAuthorizationRule extends AbstractAuthorizationRule<Nam
 	}
 
 	@Override
-	public Optional<String> reasonExpungeAllowed(Connection connection, User user, NamingSystem oldResource) {
+	public Optional<String> reasonExpungeAllowed(Connection connection, User user, NamingSystem oldResource)
+	{
 		if (isLocalUser(user))
 		{
 			logger.info("Expunge of NamingSystem authorized for local user '{}'", user.getName());

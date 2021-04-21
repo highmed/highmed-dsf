@@ -76,12 +76,14 @@ public class RootAuthorizationRule implements AuthorizationRule<Resource>
 	}
 
 	@Override
-	public Optional<String> reasonExpungeAllowed(User user, Resource oldResource) {
+	public Optional<String> reasonExpungeAllowed(User user, Resource oldResource)
+	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Resource oldResource) {
+	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Resource oldResource)
+	{
 		throw new UnsupportedOperationException();
 	}
 }

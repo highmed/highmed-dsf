@@ -273,7 +273,8 @@ public class EndpointAuthorizationRule extends AbstractAuthorizationRule<Endpoin
 	}
 
 	@Override
-	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Endpoint oldResource) {
+	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Endpoint oldResource)
+	{
 		if (isLocalUser(user))
 		{
 			logger.info("Expunge of Endpoint authorized for local user '{}'", user.getName());

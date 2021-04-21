@@ -27,9 +27,9 @@ public class ResearchStudyDaoJdbc extends AbstractResourceDaoJdbc<ResearchStudy>
 
 	public ResearchStudyDaoJdbc(DataSource dataSource, DataSource deletionDataSource, FhirContext fhirContext)
 	{
-		super(dataSource, deletionDataSource, fhirContext, ResearchStudy.class, "research_studies", "research_study", "research_study_id",
-				ResearchStudyUserFilter::new, with(ResearchStudyEnrollment::new, ResearchStudyIdentifier::new,
-						ResearchStudyPrincipalInvestigator::new),
+		super(dataSource, deletionDataSource, fhirContext, ResearchStudy.class, "research_studies", "research_study",
+				"research_study_id", ResearchStudyUserFilter::new, with(ResearchStudyEnrollment::new,
+						ResearchStudyIdentifier::new, ResearchStudyPrincipalInvestigator::new),
 				with());
 	}
 

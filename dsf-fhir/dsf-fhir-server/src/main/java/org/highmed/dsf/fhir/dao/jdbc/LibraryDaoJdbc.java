@@ -23,9 +23,9 @@ public class LibraryDaoJdbc extends AbstractResourceDaoJdbc<Library> implements 
 
 	public LibraryDaoJdbc(DataSource dataSource, DataSource deletionDataSource, FhirContext fhirContext)
 	{
-		super(dataSource, deletionDataSource, fhirContext, Library.class, "libraries", "library", "library_id", LibraryUserFilter::new,
-				with(LibraryDate::new, LibraryIdentifier::new, LibraryStatus::new, LibraryUrl::new,
-						LibraryVersion::new),
+		super(dataSource, deletionDataSource, fhirContext, Library.class, "libraries", "library", "library_id",
+				LibraryUserFilter::new, with(LibraryDate::new, LibraryIdentifier::new, LibraryStatus::new,
+						LibraryUrl::new, LibraryVersion::new),
 				with());
 
 		readByUrl = new ReadByUrlDaoJdbc<>(this::getDataSource, this::getResource, getResourceTable(),

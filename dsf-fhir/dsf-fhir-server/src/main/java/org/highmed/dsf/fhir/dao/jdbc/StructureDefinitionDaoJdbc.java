@@ -11,8 +11,8 @@ public class StructureDefinitionDaoJdbc extends AbstractStructureDefinitionDaoJd
 {
 	public StructureDefinitionDaoJdbc(DataSource dataSource, DataSource deletionDataSource, FhirContext fhirContext)
 	{
-		super(dataSource, deletionDataSource, fhirContext, "structure_definitions", "structure_definition", "structure_definition_id",
-				StructureDefinitionUserFilter::new);
+		super(dataSource, deletionDataSource, fhirContext, "structure_definitions", "structure_definition",
+				"structure_definition_id", StructureDefinitionUserFilter::new);
 	}
 
 	@Override

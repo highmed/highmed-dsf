@@ -143,7 +143,8 @@ public class BundleAuthorizationRule extends AbstractAuthorizationRule<Bundle, B
 	}
 
 	@Override
-	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Bundle oldResource) {
+	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Bundle oldResource)
+	{
 		if (isLocalUser(user))
 		{
 			logger.info("Expunge of Bundle authorized for local user '{}'", user.getName());

@@ -226,7 +226,8 @@ public class ActivityDefinitionAuthorizationRule
 	}
 
 	@Override
-	public Optional<String> reasonExpungeAllowed(Connection connection, User user, ActivityDefinition oldResource) {
+	public Optional<String> reasonExpungeAllowed(Connection connection, User user, ActivityDefinition oldResource)
+	{
 		if (isLocalUser(user))
 		{
 			logger.info("Expunge of ActivityDefinition authorized for local user '{}'", user.getName());

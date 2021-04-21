@@ -34,8 +34,8 @@ public class ActivityDefinitionDaoJdbc extends AbstractResourceDaoJdbc<ActivityD
 
 	public ActivityDefinitionDaoJdbc(DataSource dataSource, DataSource deletionDataSource, FhirContext fhirContext)
 	{
-		super(dataSource, deletionDataSource, fhirContext, ActivityDefinition.class, "activity_definitions", "activity_definition",
-				"activity_definition_id", ActivityDefinitionUserFilter::new,
+		super(dataSource, deletionDataSource, fhirContext, ActivityDefinition.class, "activity_definitions",
+				"activity_definition", "activity_definition_id", ActivityDefinitionUserFilter::new,
 				with(ActivityDefinitionDate::new, ActivityDefinitionIdentifier::new, ActivityDefinitionName::new,
 						ActivityDefinitionStatus::new, ActivityDefinitionUrl::new, ActivityDefinitionVersion::new),
 				with());
