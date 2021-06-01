@@ -130,20 +130,44 @@ public class FallbackSerializerFactory implements VariableSerializerFactory, Ini
 		if (value == null)
 			return null;
 
-		logger.debug("Getting serializer for {} from class loader {}", getName(value),
-				value.getType().getClass().getClassLoader().getName());
+		ClassLoader classLoader = getClassLoader(value);
+		if (classLoader != null)
+		{
+			logger.debug("Getting serializer for {} from class loader {}", getName(value), classLoader.getName());
 
-		ClassLoader classLoader = value.getType().getClass().getClassLoader();
-		return serializersByClassLoader.getOrDefault(classLoader, Collections.emptyList()).stream()
-				.filter(s -> s.getType().equals(value.getType())).findFirst().orElse(null);
+			return serializersByClassLoader.getOrDefault(classLoader, Collections.emptyList()).stream()
+					.filter(s -> s.canHandle(value)).findFirst().orElse(null);
+		}
+		else
+			return null;
 	}
 
 	@SuppressWarnings("rawtypes")
 	private String getName(TypedValue value)
 	{
+		if (value == null)
+			return null;
+
 		if (value instanceof PrimitiveValue)
 			return ((PrimitiveValue) value).getType().getJavaType().getName();
-		else
+		else if (value.getValue() != null)
+			return value.getClass().getName();
+		else if (value.getType() != null)
 			return value.getType().getName();
+		else
+			return "?";
+	}
+
+	private ClassLoader getClassLoader(TypedValue value)
+	{
+		if (value == null)
+			return null;
+
+		if (value instanceof PrimitiveValue)
+			return value.getType().getClass().getClassLoader();
+		else if (value.getValue() != null)
+			return value.getValue().getClass().getClassLoader();
+		else
+			return null;
 	}
 }
