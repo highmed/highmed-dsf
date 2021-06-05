@@ -72,6 +72,7 @@ import org.highmed.dsf.fhir.search.parameters.ResearchStudyIdentifier;
 import org.highmed.dsf.fhir.search.parameters.ResearchStudyPrincipalInvestigator;
 import org.highmed.dsf.fhir.search.parameters.ResourceId;
 import org.highmed.dsf.fhir.search.parameters.ResourceLastUpdated;
+import org.highmed.dsf.fhir.search.parameters.ResourceProfile;
 import org.highmed.dsf.fhir.search.parameters.StructureDefinitionDate;
 import org.highmed.dsf.fhir.search.parameters.StructureDefinitionIdentifier;
 import org.highmed.dsf.fhir.search.parameters.StructureDefinitionStatus;
@@ -365,7 +366,8 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 				"Generates a StructureDefinition instance with a snapshot, based on a differential in a specified StructureDefinition");
 		operations.put(StructureDefinition.class, Arrays.asList(snapshotOperation));
 
-		var standardSortableSearchParameters = Arrays.asList(ResourceId.class, ResourceLastUpdated.class);
+		var standardSortableSearchParameters = Arrays.asList(ResourceId.class, ResourceLastUpdated.class,
+				ResourceProfile.class);
 		var standardOperations = Arrays.asList(createValidateOperation());
 
 		Map<String, List<CanonicalType>> profileUrlsByResource = validationSupport.fetchAllStructureDefinitions()
