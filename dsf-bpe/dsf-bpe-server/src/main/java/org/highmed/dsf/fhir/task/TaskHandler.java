@@ -133,7 +133,8 @@ public class TaskHandler implements InitializingBean
 
 		if (businessKey == null)
 		{
-			runtimeService.startProcessInstanceById(processDefinition.getId(), UUID.randomUUID().toString(), variables);
+			runtimeService.startProcessInstanceByMessageAndProcessDefinitionId(messageName, processDefinition.getId(),
+					UUID.randomUUID().toString(), variables);
 		}
 		else
 		{
