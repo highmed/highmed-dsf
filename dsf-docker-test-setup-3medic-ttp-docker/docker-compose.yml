@@ -196,6 +196,9 @@ services:
     - type: bind
       source: ./medic1/bpe/last_event
       target: /opt/bpe/last_event
+    - type: bind
+      source: ./app/psn
+      target: /opt/bpe/psn
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5011
@@ -231,6 +234,9 @@ services:
     - type: bind
       source: ./medic2/bpe/last_event
       target: /opt/bpe/last_event
+    - type: bind
+      source: ./app/psn
+      target: /opt/bpe/psn
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5012
@@ -266,6 +272,9 @@ services:
     - type: bind
       source: ./medic3/bpe/last_event
       target: /opt/bpe/last_event
+    - type: bind
+      source: ./app/psn
+      target: /opt/bpe/psn
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5014
@@ -301,6 +310,9 @@ services:
     - type: bind
       source: ./ttp/bpe/last_event
       target: /opt/bpe/last_event
+    - type: bind
+      source: ./app/psn
+      target: /opt/bpe/psn
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5013
