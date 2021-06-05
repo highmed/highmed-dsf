@@ -35,6 +35,7 @@ import org.highmed.dsf.fhir.search.SearchQueryRevIncludeParameterFactory;
 import org.highmed.dsf.fhir.search.SearchQueryUserFilter;
 import org.highmed.dsf.fhir.search.parameters.ResourceId;
 import org.highmed.dsf.fhir.search.parameters.ResourceLastUpdated;
+import org.highmed.dsf.fhir.search.parameters.ResourceProfile;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.IdType;
@@ -872,7 +873,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	 * Override this method to modify resources retrieved by search queries before returning to the user. This method
 	 * can be used, if the resource returned by the search is not complete and additional content needs to be retrieved.
 	 * For example the content of a {@link Binary} resource might not be stored in the json column.
-	 * 
+	 *
 	 * @param resource
 	 *            not <code>null</code>
 	 * @param connection
@@ -915,7 +916,8 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	{
 		return SearchQueryBuilder.create(resourceType, getResourceTable(), getResourceColumn(), page, count)
 				.with(userFilter.apply(user))
-				.with(new ResourceId(getResourceIdColumn()), new ResourceLastUpdated(getResourceColumn()))
+				.with(new ResourceId(getResourceIdColumn()), new ResourceLastUpdated(getResourceColumn()),
+						new ResourceProfile(getResourceColumn()))
 				.with(searchParameterFactories.stream().map(Supplier::get).toArray(SearchQueryParameter[]::new))
 				.withRevInclude(searchRevIncludeParameterFactories.stream().map(Supplier::get)
 						.toArray(SearchQueryRevIncludeParameterFactory[]::new))
@@ -927,7 +929,8 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	public SearchQuery<R> createSearchQueryWithoutUserFilter(int page, int count)
 	{
 		return SearchQueryBuilder.create(resourceType, getResourceTable(), getResourceColumn(), page, count)
-				.with(new ResourceId(getResourceIdColumn()), new ResourceLastUpdated(getResourceColumn()))
+				.with(new ResourceId(getResourceIdColumn()), new ResourceLastUpdated(getResourceColumn()),
+						new ResourceProfile(getResourceColumn()))
 				.with(searchParameterFactories.stream().map(Supplier::get).toArray(SearchQueryParameter[]::new))
 				.withRevInclude(searchRevIncludeParameterFactories.stream().map(Supplier::get)
 						.toArray(SearchQueryRevIncludeParameterFactory[]::new))
