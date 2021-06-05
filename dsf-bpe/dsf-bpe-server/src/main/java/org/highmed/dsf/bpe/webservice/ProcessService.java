@@ -53,26 +53,28 @@ public class ProcessService implements InitializingBean
 	}
 
 	@POST
-	@Path("{processDefinitionKey}/{start : [$]start(/)?}")
+	@Path("{processDefinitionKey}/{messageName}/{start : [$]start(/)?}")
 	public Response startLatest(@PathParam("processDefinitionKey") String processDefinitionKey,
+			@PathParam("messageName") String messageName, @PathParam("start") String start, @Context UriInfo uri)
+	{
+		logger.trace("POST {}", uri.getRequestUri().toString());
+
+		return start(processDefinitionKey, messageName, null, copy(uri.getQueryParameters()));
+	}
+
+	@POST
+	@Path("{processDefinitionKey}/{messageName}/{versionTag}/{start : [$]start(/)?}")
+	public Response startVersion(@PathParam("processDefinitionKey") String processDefinitionKey,
+			@PathParam("messageName") String messageName, @PathParam("versionTag") String versionTag,
 			@PathParam("start") String start, @Context UriInfo uri)
 	{
 		logger.trace("POST {}", uri.getRequestUri().toString());
 
-		return start(processDefinitionKey, null, copy(uri.getQueryParameters()));
+		return start(processDefinitionKey, messageName, versionTag, copy(uri.getQueryParameters()));
 	}
 
-	@POST
-	@Path("{processDefinitionKey}/{versionTag}/{start : [$]start(/)?}")
-	public Response startVersion(@PathParam("processDefinitionKey") String processDefinitionKey,
-			@PathParam("versionTag") String versionTag, @PathParam("start") String start, @Context UriInfo uri)
-	{
-		logger.trace("POST {}", uri.getRequestUri().toString());
-
-		return start(processDefinitionKey, versionTag, copy(uri.getQueryParameters()));
-	}
-
-	private Response start(String processDefinitionKey, String versionTag, Map<String, List<String>> queryParameters)
+	private Response start(String processDefinitionKey, String messageName, String versionTag,
+			Map<String, List<String>> queryParameters)
 	{
 		ProcessDefinition processDefinition = getProcessDefinition(processDefinitionKey, versionTag);
 
@@ -84,8 +86,8 @@ public class ProcessService implements InitializingBean
 			return Response.status(Status.NOT_FOUND).build();
 		}
 
-		runtimeService.startProcessInstanceById(processDefinition.getId(), UUID.randomUUID().toString(),
-				Map.of(BPMN_EXECUTION_VARIABLE_QUERY_PARAMETERS, queryParameters));
+		runtimeService.startProcessInstanceByMessageAndProcessDefinitionId(messageName, processDefinition.getId(),
+				UUID.randomUUID().toString(), Map.of(BPMN_EXECUTION_VARIABLE_QUERY_PARAMETERS, queryParameters));
 
 		return Response.status(Status.CREATED).build();
 	}
