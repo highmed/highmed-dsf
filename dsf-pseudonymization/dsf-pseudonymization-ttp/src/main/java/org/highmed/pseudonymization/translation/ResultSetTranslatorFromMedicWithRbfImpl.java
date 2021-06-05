@@ -19,7 +19,7 @@ import org.highmed.pseudonymization.domain.impl.PersonImpl;
 import org.highmed.pseudonymization.openehr.Constants;
 import org.highmed.pseudonymization.recordlinkage.MedicId;
 
-public class ResultSetTranslatorFromMedicImpl implements ResultSetTranslatorFromMedic
+public class ResultSetTranslatorFromMedicWithRbfImpl implements ResultSetTranslatorFromMedicWithRbf
 {
 	@Override
 	public List<PersonWithMdat> translate(String organization, ResultSet resultSet)

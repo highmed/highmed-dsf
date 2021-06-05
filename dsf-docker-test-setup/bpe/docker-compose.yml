@@ -44,6 +44,9 @@ services:
       -  type: bind
          source: ./app/last_event
          target: /opt/bpe/last_event
+      -  type: bind
+         source: ./app/psn
+         target: /opt/bpe/psn
       environment:
          TZ: Europe/Berlin
 # Use EXTRA_JVM_ARGS to specify special jvm parameters, e.g. jmx connection config below

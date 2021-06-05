@@ -26,9 +26,10 @@ import org.highmed.pseudonymization.openehr.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ResultSetTranslatorToTtpImpl extends AbstractResultSetTranslator implements ResultSetTranslatorToTtp
+public class ResultSetTranslatorToTtpWithRbfImpl extends AbstractResultSetTranslator
+		implements ResultSetTranslatorToTtpWithRbf
 {
-	private static final Logger logger = LoggerFactory.getLogger(ResultSetTranslatorToTtpImpl.class);
+	private static final Logger logger = LoggerFactory.getLogger(ResultSetTranslatorToTtpWithRbfImpl.class);
 
 	public static final Function<Supplier<Idat>, Idat> FILTER_ON_IDAT_NOT_FOUND_EXCEPTION = supplier ->
 	{
@@ -67,7 +68,7 @@ public class ResultSetTranslatorToTtpImpl extends AbstractResultSetTranslator im
 
 	private final Function<Supplier<Idat>, Idat> retrieveIdatErrorHandler;
 
-	public ResultSetTranslatorToTtpImpl(String organizationIdentifier, SecretKey organizationKey,
+	public ResultSetTranslatorToTtpWithRbfImpl(String organizationIdentifier, SecretKey organizationKey,
 			String researchStudyIdentifier, SecretKey researchStudyKey, String ehrIdColumnPath,
 			RecordBloomFilterGenerator recordBloomFilterGenerator, MasterPatientIndexClient masterPatientIndexClient)
 	{
@@ -75,7 +76,7 @@ public class ResultSetTranslatorToTtpImpl extends AbstractResultSetTranslator im
 				recordBloomFilterGenerator, masterPatientIndexClient, THROW_ON_IDAT_NOT_FOUND_EXCEPTION);
 	}
 
-	public ResultSetTranslatorToTtpImpl(String organizationIdentifier, SecretKey organizationKey,
+	public ResultSetTranslatorToTtpWithRbfImpl(String organizationIdentifier, SecretKey organizationKey,
 			String researchStudyIdentifier, SecretKey researchStudyKey, String ehrIdColumnPath,
 			RecordBloomFilterGenerator recordBloomFilterGenerator, MasterPatientIndexClient masterPatientIndexClient,
 			Function<Supplier<Idat>, Idat> retrieveIdatErrorHandler)

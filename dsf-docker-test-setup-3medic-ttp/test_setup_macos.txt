@@ -2,7 +2,7 @@ MacOS Catalina
 
 Mac Host
    	Install VirtualBox (e.g. https://www.virtualbox.org/wiki/Downloads)
-	Download Ubuntu Server 18.04.3 ISO (e.g. https://ftp-stud.hs-esslingen.de/pub/Mirrors/releases.ubuntu.com/18.04.3/ubuntu-18.04.3-live-server-amd64.iso)
+	Download Ubuntu Server 18.04.5 ISO (e.g. https://ftp-stud.hs-esslingen.de/pub/Mirrors/releases.ubuntu.com/18.04.5/ubuntu-18.04.5-live-server-amd64.iso)
 	Create VMs:
 		adapt the variables {Folder, IsoPath} in vm-setup.sh
 		execute vm-setup.sh in Terminal
