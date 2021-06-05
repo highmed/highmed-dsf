@@ -3,17 +3,12 @@ package org.highmed.dsf.fhir.search.parameters;
 import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Objects;
 
 import org.highmed.dsf.fhir.function.BiFunctionWithSqlException;
 import org.highmed.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.dsf.fhir.search.parameters.basic.AbstractCanonicalUrlParameter;
-import org.highmed.dsf.fhir.search.parameters.basic.AbstractDateTimeParameter;
-import org.highmed.dsf.fhir.search.parameters.basic.AbstractUrlAndVersionParameter;
-import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
-import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.Resource;
 
 @SearchParameterDefinition(name = ResourceProfile.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Resource-profile", type = SearchParamType.URI, documentation = "Profiles this resource claims to conform to")
