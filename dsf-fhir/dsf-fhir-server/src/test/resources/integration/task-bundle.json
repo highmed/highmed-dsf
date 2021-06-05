@@ -74,7 +74,7 @@
 					"valueReference": {
 						"type": "Organization",
 						"identifier": {
-							"system": "http://highmed.org/fhir/NamingSystem/organization-identifier",
+							"system": "http://highmed.org/sid/organization-identifier",
 							"value": "Test_Organization"
 						}
 					}
@@ -83,13 +83,13 @@
 					"valueReference": {
 						"type": "Organization",
 						"identifier": {
-							"system": "http://highmed.org/fhir/NamingSystem/organization-identifier",
+							"system": "http://highmed.org/sid/organization-identifier",
 							"value": "External_Test_Organization"
 						}
 					}
 				} ],
 				"identifier": [ {
-					"system": "http://highmed.org/fhir/NamingSystem/research-study-identifier",
+					"system": "http://highmed.org/sid/research-study-identifier",
 					"value": "886ec806-9bbb-4217-84d0-42f149c6767e"
 				} ],
 				"status": "active",
@@ -113,7 +113,7 @@
 				"intent": "order",
 				"requester": {
 					"identifier": {
-						"system": "http://highmed.org/fhir/NamingSystem/organization-identifier",
+						"system": "http://highmed.org/sid/organization-identifier",
 						"value": "Test_Organization"
 					},
 					"type": "Organization"
@@ -122,7 +122,7 @@
 					"recipient": [
 						{
 							"identifier": {
-								"system": "http://highmed.org/fhir/NamingSystem/organization-identifier",
+								"system": "http://highmed.org/sid/organization-identifier",
 								"value": "Test_Organization"
 							},
 							"type": "Organization"

@@ -79,7 +79,7 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 	@Before
 	public void before() throws Exception
 	{
-		dao = daoCreator.apply(liquibaseDataSource, fhirContext);
+		dao = daoCreator.apply(defaultDataSource, fhirContext);
 	}
 
 	protected C getDao()

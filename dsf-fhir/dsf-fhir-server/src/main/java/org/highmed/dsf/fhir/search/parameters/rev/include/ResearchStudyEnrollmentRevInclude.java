@@ -25,6 +25,6 @@ public class ResearchStudyEnrollmentRevInclude extends AbstractRevIncludeParamet
 	@Override
 	protected void modifyIncludeResource(Resource resource, Connection connection)
 	{
-		// Nothing to do for organizations
+		// Nothing to do for groups
 	}
 }

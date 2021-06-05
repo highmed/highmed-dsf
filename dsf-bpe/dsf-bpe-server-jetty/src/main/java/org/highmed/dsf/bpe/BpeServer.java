@@ -17,7 +17,6 @@ import java.util.Properties;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import javax.servlet.Filter;
@@ -55,7 +54,7 @@ public final class BpeServer
 		startServer(JettyServer::secureRequestCustomizer, JettyServer::httpsConnector);
 	}
 
-	private static void startServer(Supplier<Customizer> customizerBuilder,
+	private static void startServer(Function<Properties, Customizer> customizerBuilder,
 			BiFunction<HttpConfiguration, Properties, Function<Server, ServerConnector>> connectorBuilder)
 	{
 		Properties properties = read(Paths.get("conf/jetty.properties"), StandardCharsets.UTF_8);
@@ -68,7 +67,7 @@ public final class BpeServer
 				"db.camunda_user", "db.camunda_user_password");
 		DbMigrator.retryOnConnectException(3, dbMigrator::migrate);
 
-		HttpConfiguration httpConfiguration = httpConfiguration(customizerBuilder.get());
+		HttpConfiguration httpConfiguration = httpConfiguration(customizerBuilder.apply(properties));
 		Function<Server, ServerConnector> connector = connectorBuilder.apply(httpConfiguration, properties);
 
 		Predicate<String> filter = s -> s.contains("bpe-server");

@@ -26,8 +26,8 @@ public class EndpointProfileTest
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
 			Arrays.asList("highmed-endpoint-0.5.0.xml"),
-			Arrays.asList("highmed-authorization-role-0.5.0.xml", "urn_ietf_bcp_13.xml"),
-			Arrays.asList("highmed-authorization-role-0.5.0.xml", "valueset-mimetypes.xml"));
+			Arrays.asList("highmed-read-access-tag-0.5.0.xml", "urn_ietf_bcp_13.xml"),
+			Arrays.asList("highmed-read-access-tag-0.5.0.xml", "valueset-mimetypes.xml"));
 
 	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
@@ -37,9 +37,8 @@ public class EndpointProfileTest
 	{
 		Endpoint endpoint = new Endpoint();
 		endpoint.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/endpoint");
-		endpoint.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/authorization-role")
-				.setCode("REMOTE");
-		endpoint.getIdentifierFirstRep().setSystem("http://highmed.org/fhir/NamingSystem/endpoint-identifier")
+		endpoint.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag").setCode("ALL");
+		endpoint.getIdentifierFirstRep().setSystem("http://highmed.org/sid/endpoint-identifier")
 				.setValue("fhir.test.com");
 		endpoint.setStatus(EndpointStatus.ACTIVE);
 		endpoint.getConnectionType().setSystem("http://terminology.hl7.org/CodeSystem/endpoint-connection-type")

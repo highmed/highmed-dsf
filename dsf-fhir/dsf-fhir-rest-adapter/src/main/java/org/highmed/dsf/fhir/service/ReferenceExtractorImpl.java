@@ -284,6 +284,8 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 			return getReferences((OperationOutcome) resource);
 		else if (resource instanceof Organization)
 			return getReferences((Organization) resource);
+		else if (resource instanceof OrganizationAffiliation)
+			return getReferences((OrganizationAffiliation) resource);
 		else if (resource instanceof Patient)
 			return getReferences((Patient) resource);
 		else if (resource instanceof Practitioner)

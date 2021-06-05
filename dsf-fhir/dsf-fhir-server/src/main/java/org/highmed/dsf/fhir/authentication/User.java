@@ -1,17 +1,18 @@
 package org.highmed.dsf.fhir.authentication;
 
-import org.highmed.dsf.fhir.OrganizationType;
 import org.hl7.fhir.r4.model.Organization;
 
 public class User
 {
 	private final Organization organization;
 	private final UserRole userRole;
+	private final String subjectDn;
 
-	public User(Organization organization, UserRole userRole)
+	public User(Organization organization, UserRole userRole, String subjectDn)
 	{
 		this.organization = organization;
 		this.userRole = userRole;
+		this.subjectDn = subjectDn;
 	}
 
 	public UserRole getRole()
@@ -24,9 +25,9 @@ public class User
 		return organization;
 	}
 
-	public OrganizationType getOrganizationType()
+	public String getSubjectDn()
 	{
-		return OrganizationType.fromString(organization.getTypeFirstRep().getCodingFirstRep().getCode()).orElseThrow();
+		return subjectDn;
 	}
 
 	public String getName()

@@ -57,6 +57,9 @@ import org.highmed.dsf.fhir.search.parameters.NamingSystemStatus;
 import org.highmed.dsf.fhir.search.parameters.OrganizationActive;
 import org.highmed.dsf.fhir.search.parameters.OrganizationAffiliationActive;
 import org.highmed.dsf.fhir.search.parameters.OrganizationAffiliationIdentifier;
+import org.highmed.dsf.fhir.search.parameters.OrganizationAffiliationParticipatingOrganization;
+import org.highmed.dsf.fhir.search.parameters.OrganizationAffiliationPrimaryOrganization;
+import org.highmed.dsf.fhir.search.parameters.OrganizationAffiliationRole;
 import org.highmed.dsf.fhir.search.parameters.OrganizationEndpoint;
 import org.highmed.dsf.fhir.search.parameters.OrganizationIdentifier;
 import org.highmed.dsf.fhir.search.parameters.OrganizationName;
@@ -96,6 +99,8 @@ import org.highmed.dsf.fhir.search.parameters.ValueSetVersion;
 import org.highmed.dsf.fhir.search.parameters.basic.AbstractSearchParameter;
 import org.highmed.dsf.fhir.search.parameters.rev.include.AbstractRevIncludeParameterFactory;
 import org.highmed.dsf.fhir.search.parameters.rev.include.EndpointOrganizationRevInclude;
+import org.highmed.dsf.fhir.search.parameters.rev.include.OrganizationAffiliationParticipatingOrganizationRevInclude;
+import org.highmed.dsf.fhir.search.parameters.rev.include.OrganizationAffiliationPrimaryOrganizationRevInclude;
 import org.highmed.dsf.fhir.search.parameters.rev.include.OrganizationEndpointRevInclude;
 import org.highmed.dsf.fhir.search.parameters.rev.include.ResearchStudyEnrollmentRevInclude;
 import org.highmed.dsf.fhir.webservice.base.AbstractBasicService;
@@ -334,10 +339,15 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 
 		searchParameters.put(Organization.class, Arrays.asList(OrganizationActive.class, OrganizationEndpoint.class,
 				OrganizationIdentifier.class, OrganizationName.class, OrganizationType.class));
-		revIncludeParameters.put(Organization.class, Collections.singletonList(EndpointOrganizationRevInclude.class));
+		revIncludeParameters.put(Organization.class,
+				Arrays.asList(EndpointOrganizationRevInclude.class,
+						OrganizationAffiliationParticipatingOrganizationRevInclude.class,
+						OrganizationAffiliationPrimaryOrganizationRevInclude.class));
 
 		searchParameters.put(OrganizationAffiliation.class,
-				Arrays.asList(OrganizationAffiliationActive.class, OrganizationAffiliationIdentifier.class));
+				Arrays.asList(OrganizationAffiliationActive.class, OrganizationAffiliationIdentifier.class,
+						OrganizationAffiliationParticipatingOrganization.class,
+						OrganizationAffiliationPrimaryOrganization.class, OrganizationAffiliationRole.class));
 
 		searchParameters.put(Patient.class, Arrays.asList(PatientActive.class, PatientIdentifier.class));
 

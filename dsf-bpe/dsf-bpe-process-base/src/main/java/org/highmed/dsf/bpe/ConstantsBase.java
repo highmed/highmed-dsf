@@ -46,9 +46,9 @@ public interface ConstantsBase
 	String CODESYSTEM_HIGHMED_QUERY_TYPE = "http://highmed.org/fhir/CodeSystem/query-type";
 	String CODESYSTEM_HIGMED_QUERY_TYPE_VALUE_AQL = "application/x-aql-query";
 
-	String NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER = "http://highmed.org/fhir/NamingSystem/organization-identifier";
-	String NAMINGSYSTEM_HIGHMED_ENDPOINT_IDENTIFIER = "http://highmed.org/fhir/NamingSystem/endpoint-identifier";
-	String NAMINGSYSTEM_HIGHMED_RESEARCH_STUDY_IDENTIFIER = "http://highmed.org/fhir/NamingSystem/research-study-identifier";
+	String NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER = "http://highmed.org/sid/organization-identifier";
+	String NAMINGSYSTEM_HIGHMED_ENDPOINT_IDENTIFIER = "http://highmed.org/sid/endpoint-identifier";
+	String NAMINGSYSTEM_HIGHMED_RESEARCH_STUDY_IDENTIFIER = "http://highmed.org/sid/research-study-identifier";
 
 	CodeType CODE_TYPE_AQL_QUERY = new CodeType(CODESYSTEM_HIGMED_QUERY_TYPE_VALUE_AQL)
 			.setSystem(CODESYSTEM_HIGHMED_QUERY_TYPE);

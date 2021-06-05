@@ -1,7 +1,6 @@
 package org.highmed.dsf.fhir.authorization;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -9,73 +8,32 @@ import java.util.stream.Collectors;
 
 import org.highmed.dsf.fhir.authentication.OrganizationProvider;
 import org.highmed.dsf.fhir.authentication.User;
+import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.dao.PractitionerRoleDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
-import org.highmed.dsf.fhir.service.ResourceReference;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
-import org.hl7.fhir.r4.model.Resource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class PractitionerRoleAuthorizationRule extends AbstractAuthorizationRule<PractitionerRole, PractitionerRoleDao>
+public class PractitionerRoleAuthorizationRule
+		extends AbstractMetaTagAuthorizationRule<PractitionerRole, PractitionerRoleDao>
 {
-	private static final Logger logger = LoggerFactory.getLogger(PractitionerRoleAuthorizationRule.class);
-
 	public PractitionerRoleAuthorizationRule(DaoProvider daoProvider, String serverBase,
-			ReferenceResolver referenceResolver, OrganizationProvider organizationProvider)
+			ReferenceResolver referenceResolver, OrganizationProvider organizationProvider,
+			ReadAccessHelper readAccessHelper)
 	{
-		super(PractitionerRole.class, daoProvider, serverBase, referenceResolver, organizationProvider);
+		super(PractitionerRole.class, daoProvider, serverBase, referenceResolver, organizationProvider,
+				readAccessHelper);
 	}
 
-	@Override
-	public Optional<String> reasonCreateAllowed(Connection connection, User user, PractitionerRole newResource)
-	{
-		if (isLocalUser(user))
-		{
-			Optional<String> errors = newResourceOk(connection, user, newResource);
-			if (errors.isEmpty())
-			{
-				logger.info(
-						"Create of PractitionerRole authorized for local user '{}', practitioner and organization references resolved",
-						user.getName());
-				return Optional.of("local user; practitioner and organization resolved");
-			}
-			else
-			{
-				logger.warn("Create of PractitionerRole unauthorized, " + errors.get());
-				return Optional.empty();
-			}
-		}
-		else
-		{
-			logger.warn("Create of PractitionerRole unauthorized, not a local user");
-			return Optional.empty();
-		}
-	}
-
-	private Optional<String> newResourceOk(Connection connection, User user, PractitionerRole newResource)
+	protected Optional<String> newResourceOk(Connection connection, User user, PractitionerRole newResource)
 	{
 		List<String> errors = new ArrayList<String>();
 
 		if (newResource.hasOrganization())
 		{
-			Optional<ResourceReference> organizationReference = createIfLiteralInternalOrLogicalReference(
-					"PractitionerRole.organization", newResource.getOrganization(), Organization.class);
-			if (organizationReference.isPresent())
+			if (!newResource.getOrganization().hasReference())
 			{
-				Optional<Resource> organization = resolveReference(connection, user, organizationReference);
-				if (!organization.isPresent())
-				{
-					errors.add("PractitionerRole.organization could not be resolved");
-				}
-			}
-			else
-			{
-				errors.add("PractitionerRole.organization not a literal internal or logical reference");
+				errors.add("PractitionerRole.organization.reference missing");
 			}
 		}
 		else
@@ -85,24 +43,19 @@ public class PractitionerRoleAuthorizationRule extends AbstractAuthorizationRule
 
 		if (newResource.hasPractitioner())
 		{
-			Optional<ResourceReference> practitionerReference = createIfLiteralInternalOrLogicalReference(
-					"PractitionerRole.practitioner", newResource.getPractitioner(), Practitioner.class);
-			if (practitionerReference.isPresent())
+			if (!newResource.getPractitioner().hasReference())
 			{
-				Optional<Resource> practitioner = resolveReference(connection, user, practitionerReference);
-				if (!practitioner.isPresent())
-				{
-					errors.add("PractitionerRole.practitioner could not be resolved");
-				}
-			}
-			else
-			{
-				errors.add("PractitionerRole.practitioner not a literal internal or logical reference");
+				errors.add("PractitionerRole.practitioner.reference missing");
 			}
 		}
 		else
 		{
 			errors.add("PractitionerRole.practitioner missing");
+		}
+
+		if (!hasValidReadAccessTag(connection, newResource))
+		{
+			errors.add("PractitionerRole is missing authorization tag");
 		}
 
 		if (errors.isEmpty())
@@ -112,129 +65,16 @@ public class PractitionerRoleAuthorizationRule extends AbstractAuthorizationRule
 	}
 
 	@Override
-	public Optional<String> reasonReadAllowed(Connection connection, User user, PractitionerRole existingResource)
+	protected boolean resourceExists(Connection connection, PractitionerRole newResource)
 	{
-		if (isLocalUser(user))
-		{
-			logger.info("Read of PractitionerRole authorized for local user '{}'", user.getName());
-			return Optional.of("local user");
-		}
-		else if (isRemoteUser(user))
-		{
-			if (isCurrentUserPartOfReferencedOrganization(connection, user, "PractitionerRole.organization",
-					existingResource.getOrganization()))
-			{
-				logger.info(
-						"Read of PractitionerRole authorized, PractitionerRole.organization reference could be resolved and user '{}' is part of referenced organization",
-						user.getName());
-				return Optional.of(
-						"remote user, PractitionerRole.organization resolved and user part of referenced organization");
-			}
-			else if (researchStudyWithPrincipalInvestigatorAndUsersOrganizationExists(connection, user,
-					existingResource.getIdElement()))
-			{
-				logger.warn(
-						"Read of PractitionerRole authorized, remote user '{}' part of ResearchStudy with this PractitionerRole as principal investigator",
-						user.getName());
-				return Optional.of(
-						"remote user, users organization part of ResearchStudies principal investigator equal to this PractitionerRole");
-
-			}
-			else if (researchStudyWithPrincipalInvestigatorAndUsersOrganizationExists(connection, user,
-					new IdType(existingResource.getPractitioner().getReference())))
-			{
-				logger.warn(
-						"Read of PractitionerRole authorized, remote user '{}' part of ResearchStudy with this PractitionerRoles Practitioner as principal investigator",
-						user.getName());
-				return Optional.of(
-						"remote user, users organization part of ResearchStudy and principal investigator equal to this PractitionerRoles Practitioner");
-			}
-			else
-			{
-				logger.warn(
-						"Read of PractitionerRole unauthorized, remote user '{}' not part of PractitionerRoles organization or not part of ResearchStudy with this PractitionerRole as principal investigator or not part of ResearchStudy with this PractitionerRoles Practitioner as principal investigator",
-						user.getName());
-				return Optional.empty();
-			}
-		}
-		else
-		{
-			logger.warn("Read of PractitionerRole unauthorized, not a local or remote user");
-			return Optional.empty();
-		}
-	}
-
-	private boolean researchStudyWithPrincipalInvestigatorAndUsersOrganizationExists(Connection connection, User user,
-			IdType principalInvestigatorId)
-	{
-		try
-		{
-			return daoProvider.getResearchStudyDao()
-					.existsByPrincipalInvestigatorIdAndOrganizationTypeAndOrganizationIdWithTransaction(connection,
-							principalInvestigatorId, user.getOrganizationType(), user.getOrganization().getIdElement());
-		}
-		catch (SQLException e)
-		{
-			logger.warn("Error while searching for research studies", e);
-			return false;
-		}
+		// no unique criteria for PractitionerRole
+		return false;
 	}
 
 	@Override
-	public Optional<String> reasonUpdateAllowed(Connection connection, User user, PractitionerRole oldResource,
-			PractitionerRole newResource)
+	protected boolean modificationsOk(Connection connection, PractitionerRole oldResource, PractitionerRole newResource)
 	{
-		if (isLocalUser(user))
-		{
-			Optional<String> errors = newResourceOk(connection, user, newResource);
-			if (errors.isEmpty())
-			{
-				logger.info(
-						"Update of PractitionerRole authorized for local user '{}', practitioner and organization references resolved",
-						user.getName());
-				return Optional.of("local user; practitioner and organization resolved");
-			}
-			else
-			{
-				logger.warn("Update of PractitionerRole unauthorized, " + errors.get());
-				return Optional.empty();
-			}
-		}
-		else
-		{
-			logger.warn("Update of PractitionerRole unauthorized, not a local user");
-			return Optional.empty();
-		}
-	}
-
-	@Override
-	public Optional<String> reasonDeleteAllowed(Connection connection, User user, PractitionerRole oldResource)
-	{
-		if (isLocalUser(user))
-		{
-			logger.info("Delete of PractitionerRole authorized for local user '{}'", user.getName());
-			return Optional.of("local user");
-		}
-		else
-		{
-			logger.warn("Delete of PractitionerRole unauthorized, not a local user");
-			return Optional.empty();
-		}
-	}
-
-	@Override
-	public Optional<String> reasonSearchAllowed(User user)
-	{
-		logger.info("Search of PractitionerRole authorized for {} user '{}', will be fitered by users organization {}",
-				user.getRole(), user.getName(), user.getOrganization().getIdElement().getValueAsString());
-		return Optional.of("Allowed for all, filtered by users organization");
-	}
-
-	@Override
-	public Optional<String> reasonHistoryAllowed(User user)
-	{
-		logger.info("History of PractitionerRole authorized for {} user '{}', will be fitered by users organization {}",
-				user.getRole(), user.getName(), user.getOrganization().getIdElement().getValueAsString());
-		return Optional.of("Allowed for all, filtered by users organization");
+		// no unique criteria for PractitionerRole
+		return true;
 	}
 }

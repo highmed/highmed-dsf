@@ -1,110 +1,53 @@
 package org.highmed.dsf.fhir.authorization;
 
 import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.highmed.dsf.fhir.authentication.OrganizationProvider;
 import org.highmed.dsf.fhir.authentication.User;
+import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.dao.MeasureDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.Measure;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class MeasureAuthorizationRule extends AbstractAuthorizationRule<Measure, MeasureDao>
+public class MeasureAuthorizationRule extends AbstractMetaTagAuthorizationRule<Measure, MeasureDao>
 {
-	private static final Logger logger = LoggerFactory.getLogger(MeasureAuthorizationRule.class);
-
 	public MeasureAuthorizationRule(DaoProvider daoProvider, String serverBase, ReferenceResolver referenceResolver,
-			OrganizationProvider organizationProvider)
+			OrganizationProvider organizationProvider, ReadAccessHelper readAccessHelper)
 	{
-		super(Measure.class, daoProvider, serverBase, referenceResolver, organizationProvider);
+		super(Measure.class, daoProvider, serverBase, referenceResolver, organizationProvider, readAccessHelper);
 	}
 
-	@Override
-	public Optional<String> reasonCreateAllowed(Connection connection, User user, Measure newResource)
+	protected Optional<String> newResourceOk(Connection connection, User user, Measure newResource)
 	{
-		if (isLocalUser(user))
+		List<String> errors = new ArrayList<String>();
+
+		if (!hasValidReadAccessTag(connection, newResource))
 		{
-			logger.info("Create of Measure authorized for local user '{}'", user.getName());
-			return Optional.of("local user");
+			errors.add("Measure is missing valid read access tag");
 		}
-		else
-		{
-			logger.warn("Create of Measure unauthorized, not a local user");
+
+		if (errors.isEmpty())
 			return Optional.empty();
-		}
-	}
-
-	@Override
-	public Optional<String> reasonReadAllowed(Connection connection, User user, Measure existingResource)
-	{
-		if (isLocalUser(user) && hasLocalOrRemoteAuthorizationRole(existingResource))
-		{
-			logger.info(
-					"Read of Measure authorized for local user '{}', Measure has local or remote authorization role",
-					user.getName());
-			return Optional.of("local user, local or remote authorized Measure");
-		}
-		else if (isRemoteUser(user) && hasRemoteAuthorizationRole(existingResource))
-		{
-			logger.info("Read of Measure authorized for remote user '{}', Measure has remote authorization role",
-					user.getName());
-			return Optional.of("remote user, remote authorized Measure");
-		}
 		else
-		{
-			logger.warn("Read of Measure unauthorized, no matching user role resource authorization role found");
-			return Optional.empty();
-		}
+			return Optional.of(errors.stream().collect(Collectors.joining(", ")));
 	}
 
 	@Override
-	public Optional<String> reasonUpdateAllowed(Connection connection, User user, Measure oldResource,
-			Measure newResource)
+	protected boolean resourceExists(Connection connection, Measure newResource)
 	{
-		if (isLocalUser(user))
-		{
-			logger.info("Update of Measure authorized for local user '{}'", user.getName());
-			return Optional.of("local user");
-
-		}
-		else
-		{
-			logger.warn("Update of Measure unauthorized, not a local user");
-			return Optional.empty();
-		}
+		// no unique criteria for Measure
+		return false;
 	}
 
 	@Override
-	public Optional<String> reasonDeleteAllowed(Connection connection, User user, Measure oldResource)
+	protected boolean modificationsOk(Connection connection, Measure oldResource, Measure newResource)
 	{
-		if (isLocalUser(user))
-		{
-			logger.info("Delete of Measure authorized for local user '{}'", user.getName());
-			return Optional.of("local user");
-		}
-		else
-		{
-			logger.warn("Delete of Measure unauthorized, not a local user");
-			return Optional.empty();
-		}
-	}
-
-	@Override
-	public Optional<String> reasonSearchAllowed(User user)
-	{
-		logger.info("Search of Measure authorized for {} user '{}', will be fitered by user role", user.getRole(),
-				user.getName());
-		return Optional.of("Allowed for all, filtered by user role");
-	}
-
-	@Override
-	public Optional<String> reasonHistoryAllowed(User user)
-	{
-		logger.info("History of Measure authorized for {} user '{}', will be fitered by user role", user.getRole(),
-				user.getName());
-		return Optional.of("Allowed for all, filtered by user role");
+		// no unique criteria for Measure
+		return true;
 	}
 }

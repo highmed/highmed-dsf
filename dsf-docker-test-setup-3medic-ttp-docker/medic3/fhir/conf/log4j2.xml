@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO" monitorInterval="30"
+			   verbose="false">
+
+	<Appenders>
+		<Console name="CONSOLE" target="SYSTEM_OUT">
+			<PatternLayout pattern="%highlight{%p %t - %C{1}.%M(%L) | %m%n}{FATAL=red, ERROR=red, WARN=yellow, INFO=white, DEBUG=white, TRACE=white}"/>
+		</Console>
+		<RollingFile name="FILE" fileName="log/fhir.log"
+					 filePattern="log/fhir_%d{MM-dd-yyyy}_%i.log.gz"
+					 ignoreExceptions="false">
+			<PatternLayout>
+				<Pattern>%d [%t] %-5p %c - %m%n</Pattern>
+			</PatternLayout>
+			<Policies>
+				<OnStartupTriggeringPolicy/>
+				<TimeBasedTriggeringPolicy/>
+			</Policies>
+		</RollingFile>
+		<RollingFile name="AUDIT" fileName="log/fhir-audit.log"
+					 filePattern="log/fhir-audit_%d{MM-dd-yyyy}_%i.log.gz"
+					 ignoreExceptions="false">
+			<PatternLayout>
+				<Pattern>%d [%t] %-5p %c - %m%n</Pattern>
+			</PatternLayout>
+			<Policies>
+				<OnStartupTriggeringPolicy/>
+				<TimeBasedTriggeringPolicy/>
+			</Policies>
+		</RollingFile>
+
+		<!-- <SMTP name="MAIL" subject="FHIR Error"
+			to="foo@bar.de, baz@bar.de"
+			from="fhir@bar.de"
+			replyTo="foo@bar.de" smtpHost="smtp.bar.de"
+			smtpPort="25" bufferSize="50">
+		</SMTP>
+		<SMTP name="MAIL_CERTIFICATE" subject="FHIR Certificate Warning"
+			to="foo@bar.de, baz@bar.de"
+			from="fhir@bar.de"
+			replyTo="foo@bar.de" smtpHost="smtp.bar.de"
+			smtpPort="25" bufferSize="1">
+			<ThresholdFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY"/>
+		</SMTP> -->
+	</Appenders>
+
+	<Loggers>
+		<Logger name="dsf-audit-logger" level="INFO">
+			<AppenderRef ref="AUDIT"/>
+		</Logger>
+	
+		<Logger name="org.highmed" level="DEBUG"/>
+		<Logger name="org.eclipse.jetty" level="INFO"/>
+
+		<!-- <Logger name="certificate-warning-logger" level="INFO">
+			<AppenderRef ref="MAIL_CERTIFICATE" />
+		</Logger> -->
+
+		<Root level="WARN">
+			<AppenderRef ref="CONSOLE" level="INFO"/>
+			<AppenderRef ref="FILE" level="DEBUG"/>
+			<!-- <AppenderRef ref="MAIL" /> -->
+		</Root>
+	</Loggers>
+</Configuration>

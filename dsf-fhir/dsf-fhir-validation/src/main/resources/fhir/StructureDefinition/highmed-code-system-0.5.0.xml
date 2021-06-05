@@ -1,0 +1,29 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+  <meta>
+    <tag>
+      <system value="http://highmed.org/fhir/CodeSystem/read-access-tag" />
+      <code value="ALL" />
+    </tag>		
+  </meta>
+  <url value="http://highmed.org/fhir/StructureDefinition/code-system" />
+  <version value="0.5.0" />
+  <name value="CodeSystem" />
+  <status value="active" />
+  <date value="2021-02-28" />
+  <fhirVersion value="4.0.1" />
+  <kind value="resource" />
+  <abstract value="false" />
+  <type value="CodeSystem" />
+  <baseDefinition value="http://hl7.org/fhir/StructureDefinition/CodeSystem" />
+  <derivation value="constraint" />
+  <differential>
+    <element id="CodeSystem.url">
+      <path value="CodeSystem.url" />
+      <min value="1" />
+    </element>
+    <element id="CodeSystem.version">
+      <path value="CodeSystem.version" />
+      <min value="1" />
+    </element>
+  </differential>
+</StructureDefinition>

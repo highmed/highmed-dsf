@@ -26,6 +26,7 @@ public class TestDataGenerator
 		certificateGenerator.copyJavaTestCertificates();
 		certificateGenerator.copyDockerTestCertificates();
 		certificateGenerator.copyDockerTest3MedicTtpCertificates();
+		certificateGenerator.copyDockerTest3MedicTtpDockerCertificates();
 
 		CertificateFiles webbrowserTestUser = certificateGenerator.getClientCertificateFilesByCommonName()
 				.get("Webbrowser Test User");
@@ -33,13 +34,16 @@ public class TestDataGenerator
 				"Install client-certificate and CA certificate from \"{}\" into your browsers certificate store to access fhir and bpe servers with your webbrowser",
 				webbrowserTestUser.getP12KeyStoreFile().toAbsolutePath().toString());
 
+		// fhir bundle.xml
 		bundleGenerator.createTestBundle(certificateGenerator.getClientCertificateFilesByCommonName());
 		bundleGenerator.copyJavaTestBundle();
 		bundleGenerator.copyDockerTestBundle();
 
 		bundleGenerator.createDockerTest3MedicTtpBundles(certificateGenerator.getClientCertificateFilesByCommonName());
 		bundleGenerator.copyDockerTest3MedicTtpBundles();
+		bundleGenerator.copyDockerTest3MedicTtpDockerBundles();
 
+		// fhir config.properties
 		configGenerator
 				.modifyJavaTestFhirConfigProperties(certificateGenerator.getClientCertificateFilesByCommonName());
 		configGenerator.copyJavaTestFhirConfigProperties();
@@ -51,5 +55,9 @@ public class TestDataGenerator
 		configGenerator.modifyDockerTest3MedicTtpFhirConfigProperties(
 				certificateGenerator.getClientCertificateFilesByCommonName());
 		configGenerator.copyDockerTest3MedicTtpFhirConfigProperties();
+
+		configGenerator.modifyDockerTest3MedicTtpDockerFhirConfigProperties(
+				certificateGenerator.getClientCertificateFilesByCommonName());
+		configGenerator.copyDockerTest3MedicTtpDockerFhirConfigProperties();
 	}
 }

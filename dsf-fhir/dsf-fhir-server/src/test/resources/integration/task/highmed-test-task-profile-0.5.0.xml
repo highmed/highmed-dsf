@@ -1,0 +1,34 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+  <meta>
+    <tag>
+      <system value="http://highmed.org/fhir/CodeSystem/read-access-tag" />
+      <code value="ALL" />
+    </tag>
+  </meta>
+  <url value="http://highmed.org/fhir/StructureDefinition/test-task" />
+  <version value="0.5.0" />
+  <name value="TestTask" />
+  <status value="active" />
+  <experimental value="false" />
+  <date value="2021-05-17" />
+  <fhirVersion value="4.0.1" />
+  <kind value="resource" />
+  <abstract value="false" />
+  <type value="Task" />
+  <baseDefinition value="http://highmed.org/fhir/StructureDefinition/task-base" />
+  <derivation value="constraint" />
+  <differential>
+    <element id="Task.instantiatesUri">
+      <path value="Task.instantiatesUri" />
+      <fixedUri value="http://highmed.org/bpe/Process/test/0.5.0" />
+    </element>
+    <element id="Task.input:message-name">
+      <path value="Task.input" />
+      <sliceName value="message-name" />
+    </element>
+    <element id="Task.input:message-name.value[x]">
+      <path value="Task.input.value[x]" />
+      <fixedString value="test-message" />
+    </element>
+  </differential>
+</StructureDefinition>

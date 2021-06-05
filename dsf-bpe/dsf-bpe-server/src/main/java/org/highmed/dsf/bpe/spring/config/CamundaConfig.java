@@ -56,6 +56,10 @@ public class CamundaConfig
 	@Autowired
 	private ApplicationContext applicationContext;
 
+	@Autowired
+	@SuppressWarnings("rawtypes")
+	private List<TypedValueSerializer> baseSerializers;
+
 	@Bean
 	public PlatformTransactionManager transactionManager()
 	{
@@ -107,8 +111,7 @@ public class CamundaConfig
 	}
 
 	@Bean
-	public SpringProcessEngineConfiguration processEngineConfiguration(
-			@SuppressWarnings("rawtypes") List<TypedValueSerializer> baseSerializers) throws IOException
+	public SpringProcessEngineConfiguration processEngineConfiguration() throws IOException
 	{
 		var c = new MultiVersionSpringProcessEngineConfiguration(delegateProvider());
 		c.setProcessEngineName("highmed");
@@ -138,11 +141,10 @@ public class CamundaConfig
 	}
 
 	@Bean
-	public ProcessEngineFactoryBean processEngineFactory(
-			@SuppressWarnings("rawtypes") List<TypedValueSerializer> baseSerializers) throws IOException
+	public ProcessEngineFactoryBean processEngineFactory() throws IOException
 	{
 		var f = new ProcessEngineFactoryBean();
-		f.setProcessEngineConfiguration(processEngineConfiguration(baseSerializers));
+		f.setProcessEngineConfiguration(processEngineConfiguration());
 		return f;
 	}
 

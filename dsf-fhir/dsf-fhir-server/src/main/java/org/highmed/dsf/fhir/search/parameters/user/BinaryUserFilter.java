@@ -4,9 +4,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.authentication.UserRole;
 
-public class BinaryUserFilter extends AbstractUserFilter
+public class BinaryUserFilter extends AbstractMetaTagAuthorizationRoleUserFilter
 {
 	private static final String RESOURCE_COLUMN = "binary_json";
 
@@ -23,29 +22,28 @@ public class BinaryUserFilter extends AbstractUserFilter
 	@Override
 	public String getFilterQuery()
 	{
-		if (UserRole.LOCAL.equals(user.getRole()))
-			return "";
-		else
-			return "(" + resourceColumn + "->'securityContext'->>'reference' = ? OR " + resourceColumn
-					+ "->'securityContext'->>'reference' = ?)";
+		String baseQuery = getFilterQueryBase(resourceColumn);
+
+		String addQuery = " OR (SELECT resource FROM history WHERE resource IS NOT NULL"
+				+ " AND ((type || '/' || id) = " + resourceColumn + "->'securityContext'->>'reference'"
+				+ " OR (type || '/' || id || '/_history/' || version) = " + resourceColumn
+				+ "->'securityContext'->>'reference')" + " AND (" + getFilterQueryBase("resource")
+				+ ") ORDER BY version DESC LIMIT 1) IS NOT NULL";
+
+		return "(" + baseQuery + addQuery + ")";
 	}
 
 	@Override
 	public int getSqlParameterCount()
 	{
-		return UserRole.LOCAL.equals(user.getRole()) ? 0 : 2;
+		return super.getSqlParameterCount() * 2;
 	}
 
 	@Override
 	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement)
 			throws SQLException
 	{
-		if (!UserRole.LOCAL.equals(user.getRole()))
-		{
-			if (subqueryParameterIndex == 1)
-				statement.setString(parameterIndex, user.getOrganization().getIdElement().getValue());
-			else if (subqueryParameterIndex == 2)
-				statement.setString(parameterIndex, user.getOrganization().getIdElement().toVersionless().getValue());
-		}
+		super.modifyStatement(parameterIndex, ((subqueryParameterIndex - 1) % super.getSqlParameterCount()) + 1,
+				statement);
 	}
 }

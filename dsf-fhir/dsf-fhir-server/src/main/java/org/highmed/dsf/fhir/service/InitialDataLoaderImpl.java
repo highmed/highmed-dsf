@@ -4,6 +4,7 @@ import java.util.Objects;
 
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.authentication.UserRole;
+import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.dao.command.CommandFactory;
 import org.highmed.dsf.fhir.dao.command.CommandList;
 import org.highmed.dsf.fhir.prefer.PreferHandlingType;
@@ -19,6 +20,15 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class InitialDataLoaderImpl implements InitialDataLoader, InitializingBean
 {
+	private static final User INITIAL_DATA_LOADER;
+	static
+	{
+		Organization org = new Organization().setName("Initial Data Loader");
+		org.addIdentifier().setSystem(ReadAccessHelper.ORGANIZATION_IDENTIFIER_SYSTEM).setValue("initial.data.loader");
+
+		INITIAL_DATA_LOADER = new User(org, UserRole.LOCAL, "local");
+	}
+
 	private static final Logger logger = LoggerFactory.getLogger(InitialDataLoaderImpl.class);
 
 	private final CommandFactory commandFactory;
@@ -46,8 +56,7 @@ public class InitialDataLoaderImpl implements InitialDataLoader, InitializingBea
 			return;
 		}
 
-		CommandList commands = commandFactory.createCommands(bundle,
-				new User(new Organization().setName("Initial Data Loader"), UserRole.LOCAL), PreferReturnType.MINIMAL,
+		CommandList commands = commandFactory.createCommands(bundle, INITIAL_DATA_LOADER, PreferReturnType.MINIMAL,
 				PreferHandlingType.STRICT);
 		logger.debug("Executing command list for bundle with {} entries", bundle.getEntry().size());
 		Bundle result = commands.execute();

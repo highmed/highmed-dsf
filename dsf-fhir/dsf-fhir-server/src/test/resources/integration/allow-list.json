@@ -2,8 +2,8 @@
     "resourceType": "Bundle",
     "meta": {
         "tag": [{
-                "system": "http://highmed.org/fhir/CodeSystem/authorization-role",
-                "code": "REMOTE"
+                "system": "http://highmed.org/fhir/CodeSystem/read-access-tag",
+                "code": "ALL"
             }
         ]
     },
@@ -19,8 +19,8 @@
                 "meta": {
                     "profile": ["http://highmed.org/fhir/StructureDefinition/organization"],
                     "tag": [{
-                            "system": "http://highmed.org/fhir/CodeSystem/authorization-role",
-                            "code": "REMOTE"
+                            "system": "http://highmed.org/fhir/CodeSystem/read-access-tag",
+                            "code": "ALL"
                         }
                     ]
                 },
@@ -30,7 +30,7 @@
                     }
                 ],
                 "identifier": [{
-                        "system": "http://highmed.org/fhir/NamingSystem/organization-identifier",
+                        "system": "http://highmed.org/sid/organization-identifier",
                         "value": "Test_MeDIC_2"
                     }
                 ],
@@ -52,7 +52,7 @@
             },
             "request": {
                 "method": "PUT",
-                "url": "Organization?identifier=http://highmed.org/fhir/NamingSystem/organization-identifier|Test_MeDIC_2"
+                "url": "Organization?identifier=http://highmed.org/sid/organization-identifier|Test_MeDIC_2"
             }
         }, {
             "fullUrl": "urn:uuid:d2dd5ba3-22f0-4406-bdd6-7a939d9a347e",
@@ -61,13 +61,13 @@
                 "meta": {
                     "profile": ["http://highmed.org/fhir/StructureDefinition/endpoint"],
                     "tag": [{
-                            "system": "http://highmed.org/fhir/CodeSystem/authorization-role",
-                            "code": "REMOTE"
+                            "system": "http://highmed.org/fhir/CodeSystem/read-access-tag",
+                            "code": "ALL"
                         }
                     ]
                 },
                 "identifier": [{
-                        "system": "http://highmed.org/fhir/NamingSystem/endpoint-identifier",
+                        "system": "http://highmed.org/sid/endpoint-identifier",
                         "value": "Test_MeDIC_2_Endpoint"
                     }
                 ],
@@ -94,7 +94,7 @@
             },
             "request": {
                 "method": "PUT",
-                "url": "Endpoint?identifier=http://highmed.org/fhir/NamingSystem/endpoint-identifier|Test_MeDIC_2_Endpoint"
+                "url": "Endpoint?identifier=http://highmed.org/sid/endpoint-identifier|Test_MeDIC_2_Endpoint"
             }
         }, {
             "fullUrl": "urn:uuid:e3c9ee5c-199d-4fc8-869c-d1fd1cf7283e",
@@ -103,8 +103,8 @@
                 "meta": {
                     "profile": ["http://highmed.org/fhir/StructureDefinition/organization"],
                     "tag": [{
-                            "system": "http://highmed.org/fhir/CodeSystem/authorization-role",
-                            "code": "REMOTE"
+                            "system": "http://highmed.org/fhir/CodeSystem/read-access-tag",
+                            "code": "ALL"
                         }
                     ]
                 },
@@ -114,7 +114,7 @@
                     }
                 ],
                 "identifier": [{
-                        "system": "http://highmed.org/fhir/NamingSystem/organization-identifier",
+                        "system": "http://highmed.org/sid/organization-identifier",
                         "value": "Test_TTP"
                     }
                 ],
@@ -136,7 +136,7 @@
             },
             "request": {
                 "method": "PUT",
-                "url": "Organization?identifier=http://highmed.org/fhir/NamingSystem/organization-identifier|Test_TTP"
+                "url": "Organization?identifier=http://highmed.org/sid/organization-identifier|Test_TTP"
             }
         }, {
             "fullUrl": "urn:uuid:a61d80be-0238-41a3-b270-9e8fc356f7e3",
@@ -145,13 +145,13 @@
                 "meta": {
                     "profile": ["http://highmed.org/fhir/StructureDefinition/endpoint"],
                     "tag": [{
-                            "system": "http://highmed.org/fhir/CodeSystem/authorization-role",
-                            "code": "REMOTE"
+                            "system": "http://highmed.org/fhir/CodeSystem/read-access-tag",
+                            "code": "ALL"
                         }
                     ]
                 },
                 "identifier": [{
-                        "system": "http://highmed.org/fhir/NamingSystem/endpoint-identifier",
+                        "system": "http://highmed.org/sid/endpoint-identifier",
                         "value": "Test_TTP_Endpoint"
                     }
                 ],
@@ -178,7 +178,7 @@
             },
             "request": {
                 "method": "PUT",
-                "url": "Endpoint?identifier=http://highmed.org/fhir/NamingSystem/endpoint-identifier|Test_TTP_Endpoint"
+                "url": "Endpoint?identifier=http://highmed.org/sid/endpoint-identifier|Test_TTP_Endpoint"
             }
         }, {
             "fullUrl": "urn:uuid:8d9eb2e7-5940-46d5-9035-90151b6d5f7a",
@@ -187,8 +187,8 @@
                 "meta": {
                     "profile": ["http://highmed.org/fhir/StructureDefinition/organization"],
                     "tag": [{
-                            "system": "http://highmed.org/fhir/CodeSystem/authorization-role",
-                            "code": "REMOTE"
+                            "system": "http://highmed.org/fhir/CodeSystem/read-access-tag",
+                            "code": "ALL"
                         }
                     ]
                 },
@@ -198,7 +198,7 @@
                     }
                 ],
                 "identifier": [{
-                        "system": "http://highmed.org/fhir/NamingSystem/organization-identifier",
+                        "system": "http://highmed.org/sid/organization-identifier",
                         "value": "Test_MeDIC_1"
                     }
                 ],
@@ -220,7 +220,7 @@
             },
             "request": {
                 "method": "PUT",
-                "url": "Organization?identifier=http://highmed.org/fhir/NamingSystem/organization-identifier|Test_MeDIC_1"
+                "url": "Organization?identifier=http://highmed.org/sid/organization-identifier|Test_MeDIC_1"
             }
         }, {
             "fullUrl": "urn:uuid:89dc2b55-fec3-44d5-86c1-8fc35dfeb3b8",
@@ -229,13 +229,13 @@
                 "meta": {
                     "profile": ["http://highmed.org/fhir/StructureDefinition/endpoint"],
                     "tag": [{
-                            "system": "http://highmed.org/fhir/CodeSystem/authorization-role",
-                            "code": "REMOTE"
+                            "system": "http://highmed.org/fhir/CodeSystem/read-access-tag",
+                            "code": "ALL"
                         }
                     ]
                 },
                 "identifier": [{
-                        "system": "http://highmed.org/fhir/NamingSystem/endpoint-identifier",
+                        "system": "http://highmed.org/sid/endpoint-identifier",
                         "value": "Test_MeDIC_1_Endpoint"
                     }
                 ],
@@ -262,7 +262,7 @@
             },
             "request": {
                 "method": "PUT",
-                "url": "Endpoint?identifier=http://highmed.org/fhir/NamingSystem/endpoint-identifier|Test_MeDIC_1_Endpoint"
+                "url": "Endpoint?identifier=http://highmed.org/sid/endpoint-identifier|Test_MeDIC_1_Endpoint"
             }
         }, {
             "fullUrl": "urn:uuid:ede98d88-679f-4e46-8559-f99eb6cb84b8",
@@ -271,8 +271,8 @@
                 "meta": {
                     "profile": ["http://highmed.org/fhir/StructureDefinition/organization"],
                     "tag": [{
-                            "system": "http://highmed.org/fhir/CodeSystem/authorization-role",
-                            "code": "REMOTE"
+                            "system": "http://highmed.org/fhir/CodeSystem/read-access-tag",
+                            "code": "ALL"
                         }
                     ]
                 },
@@ -282,7 +282,7 @@
                     }
                 ],
                 "identifier": [{
-                        "system": "http://highmed.org/fhir/NamingSystem/organization-identifier",
+                        "system": "http://highmed.org/sid/organization-identifier",
                         "value": "Test_MeDIC_3"
                     }
                 ],
@@ -304,7 +304,7 @@
             },
             "request": {
                 "method": "PUT",
-                "url": "Organization?identifier=http://highmed.org/fhir/NamingSystem/organization-identifier|Test_MeDIC_3"
+                "url": "Organization?identifier=http://highmed.org/sid/organization-identifier|Test_MeDIC_3"
             }
         }, {
             "fullUrl": "urn:uuid:7a6dbc0c-d38d-4107-99ae-7a9bdadcc6b3",
@@ -313,13 +313,13 @@
                 "meta": {
                     "profile": ["http://highmed.org/fhir/StructureDefinition/endpoint"],
                     "tag": [{
-                            "system": "http://highmed.org/fhir/CodeSystem/authorization-role",
-                            "code": "REMOTE"
+                            "system": "http://highmed.org/fhir/CodeSystem/read-access-tag",
+                            "code": "ALL"
                         }
                     ]
                 },
                 "identifier": [{
-                        "system": "http://highmed.org/fhir/NamingSystem/endpoint-identifier",
+                        "system": "http://highmed.org/sid/endpoint-identifier",
                         "value": "Test_MeDIC_3_Endpoint"
                     }
                 ],
@@ -346,7 +346,7 @@
             },
             "request": {
                 "method": "PUT",
-                "url": "Endpoint?identifier=http://highmed.org/fhir/NamingSystem/endpoint-identifier|Test_MeDIC_3_Endpoint"
+                "url": "Endpoint?identifier=http://highmed.org/sid/endpoint-identifier|Test_MeDIC_3_Endpoint"
             }
         }
     ]

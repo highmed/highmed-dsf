@@ -228,6 +228,24 @@ public class BundleGenerator
 		Path ttpBundleFile = Paths.get("../../dsf-docker-test-setup-3medic-ttp/ttp/fhir/app/conf/bundle.xml");
 		logger.info("Copying fhir bundle to {}", ttpBundleFile);
 		writeBundle(ttpBundleFile, ttpBundle);
+	}
 
+	public void copyDockerTest3MedicTtpDockerBundles()
+	{
+		Path medic1BundleFile = Paths.get("../../dsf-docker-test-setup-3medic-ttp-docker/medic1/fhir/conf/bundle.xml");
+		logger.info("Copying fhir bundle to {}", medic1BundleFile);
+		writeBundle(medic1BundleFile, medic1Bundle);
+
+		Path medic2BundleFile = Paths.get("../../dsf-docker-test-setup-3medic-ttp-docker/medic2/fhir/conf/bundle.xml");
+		logger.info("Copying fhir bundle to {}", medic2BundleFile);
+		writeBundle(medic2BundleFile, medic2Bundle);
+
+		Path medic3BundleFile = Paths.get("../../dsf-docker-test-setup-3medic-ttp-docker/medic3/fhir/conf/bundle.xml");
+		logger.info("Copying fhir bundle to {}", medic3BundleFile);
+		writeBundle(medic3BundleFile, medic3Bundle);
+
+		Path ttpBundleFile = Paths.get("../../dsf-docker-test-setup-3medic-ttp-docker/ttp/fhir/conf/bundle.xml");
+		logger.info("Copying fhir bundle to {}", ttpBundleFile);
+		writeBundle(ttpBundleFile, ttpBundle);
 	}
 }

@@ -65,8 +65,8 @@ public class OrganizationProviderWithDbBackend implements OrganizationProvider, 
 			return Optional.empty();
 
 		String loginThumbprintHex = Hex.encodeHexString(getThumbprint(certificate));
-		logger.debug("Reading user-role of '{}', thumbprint '{}' (SHA-512)",
-				certificate.getSubjectX500Principal().getName(X500Principal.RFC1779), loginThumbprintHex);
+		String subjectDn = certificate.getSubjectX500Principal().getName(X500Principal.RFC1779);
+		logger.debug("Reading user-role of '{}', thumbprint '{}' (SHA-512)", subjectDn, loginThumbprintHex);
 
 		UserRole userRole = localUserThumbprints.contains(loginThumbprintHex.toLowerCase()) ? UserRole.LOCAL
 				: UserRole.REMOTE;
@@ -74,9 +74,9 @@ public class OrganizationProviderWithDbBackend implements OrganizationProvider, 
 		switch (userRole)
 		{
 			case LOCAL:
-				return getLocalOrganization().map(org -> new User(org, userRole));
+				return getLocalOrganization().map(org -> new User(org, userRole, subjectDn));
 			case REMOTE:
-				return getOrganization(loginThumbprintHex).map(org -> new User(org, userRole));
+				return getOrganization(loginThumbprintHex).map(org -> new User(org, userRole, subjectDn));
 			default:
 				logger.warn("UserRole {} not supported", userRole);
 				return Optional.empty();

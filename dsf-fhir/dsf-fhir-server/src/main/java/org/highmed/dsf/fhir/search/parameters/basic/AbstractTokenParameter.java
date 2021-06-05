@@ -3,12 +3,15 @@ package org.highmed.dsf.fhir.search.parameters.basic;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import javax.ws.rs.core.UriBuilder;
 
 import org.highmed.dsf.fhir.search.SearchQueryParameterError;
 import org.highmed.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Resource;
 
 public abstract class AbstractTokenParameter<R extends Resource> extends AbstractSearchParameter<R>
@@ -75,6 +78,31 @@ public abstract class AbstractTokenParameter<R extends Resource> extends Abstrac
 						valueAndType.negated ? parameterName + TokenValueAndSearchType.NOT : parameterName,
 						valueAndType.systemValue + "|");
 				break;
+		}
+	}
+
+	protected boolean codingMatches(List<CodeableConcept> codes)
+	{
+		return codes.stream().flatMap(c -> c.getCoding().stream())
+				.anyMatch(c -> valueAndType.negated ? !codingMatches(valueAndType, c) : codingMatches(valueAndType, c));
+	}
+
+	public static boolean codingMatches(TokenValueAndSearchType valueAndType, Coding coding)
+	{
+		switch (valueAndType.type)
+		{
+			case CODE:
+				return Objects.equals(valueAndType.codeValue, coding.getCode());
+			case CODE_AND_SYSTEM:
+				return Objects.equals(valueAndType.codeValue, coding.getCode())
+						&& Objects.equals(valueAndType.systemValue, coding.getSystem());
+			case CODE_AND_NO_SYSTEM_PROPERTY:
+				return Objects.equals(valueAndType.codeValue, coding.getCode())
+						&& (coding.getSystem() == null || coding.getSystem().isBlank());
+			case SYSTEM:
+				return Objects.equals(valueAndType.systemValue, coding.getSystem());
+			default:
+				return false;
 		}
 	}
 }

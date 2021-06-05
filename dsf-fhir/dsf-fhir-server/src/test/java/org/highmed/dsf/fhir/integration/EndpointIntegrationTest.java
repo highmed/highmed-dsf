@@ -171,9 +171,8 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 	public void testCreateValidByLocalUser() throws Exception
 	{
 		Endpoint endpoint = new Endpoint();
-		endpoint.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/authorization-role")
-				.setCode("REMOTE");
-		endpoint.addIdentifier().setSystem("http://highmed.org/fhir/NamingSystem/endpoint-identifier")
+		endpoint.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag").setCode("ALL");
+		endpoint.addIdentifier().setSystem("http://highmed.org/sid/endpoint-identifier")
 				.setValue("foo-bar-baz.test.bla-bla.de");
 		endpoint.setStatus(EndpointStatus.ACTIVE);
 		endpoint.getConnectionType().setSystem("http://terminology.hl7.org/CodeSystem/endpoint-connection-type")
@@ -197,10 +196,8 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 		FhirContext context = FhirContext.forR4();
 
 		Organization organization = new Organization();
-		organization.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/authorization-role")
-				.setCode("REMOTE");
-		organization.addIdentifier().setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
-				.setValue("bla-bla.de");
+		organization.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag").setCode("ALL");
+		organization.addIdentifier().setSystem("http://highmed.org/sid/organization-identifier").setValue("bla-bla.de");
 		organization.addExtension("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint",
 				new StringType(
 						"6b83a92506d67265697c74f50a9cac0ec7182adcc5302e5ed487ae1a782fe278f5ca79808c971e061fadded2c303a2223140ef3450d1d27717dd704a823f95e9"));
@@ -210,13 +207,12 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 				context.newXmlParser().setPrettyPrint(true).encodeResourceToString(createdOrg));
 
 		Endpoint endpoint = new Endpoint();
-		endpoint.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/authorization-role")
-				.setCode("REMOTE");
+		endpoint.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag").setCode("ALL");
 		endpoint.setStatus(EndpointStatus.ACTIVE);
-		endpoint.addIdentifier().setSystem("http://highmed.org/fhir/NamingSystem/endpoint-identifier")
+		endpoint.addIdentifier().setSystem("http://highmed.org/sid/endpoint-identifier")
 				.setValue("foo-bar-baz.test.bla-bla.de");
 		endpoint.getManagingOrganization().setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("bla-bla.de");
+				.setSystem("http://highmed.org/sid/organization-identifier").setValue("bla-bla.de");
 		endpoint.getConnectionType().setSystem("http://terminology.hl7.org/CodeSystem/endpoint-connection-type")
 				.setCode("hl7-fhir-rest");
 		endpoint.getPayloadTypeFirstRep().getCodingFirstRep().setSystem("http://hl7.org/fhir/resource-types")
@@ -275,10 +271,8 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 		String endTempId = "urn:uuid:" + UUID.randomUUID().toString();
 
 		Organization organization = new Organization();
-		organization.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/authorization-role")
-				.setCode("REMOTE");
-		organization.addIdentifier().setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
-				.setValue("bla-bla.de");
+		organization.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag").setCode("ALL");
+		organization.addIdentifier().setSystem("http://highmed.org/sid/organization-identifier").setValue("bla-bla.de");
 		organization.addExtension("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint",
 				new StringType(
 						"6b83a92506d67265697c74f50a9cac0ec7182adcc5302e5ed487ae1a782fe278f5ca79808c971e061fadded2c303a2223140ef3450d1d27717dd704a823f95e9"));
@@ -286,9 +280,8 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 
 		Endpoint endpoint = new Endpoint();
 		endpoint.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/endpoint");
-		endpoint.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/authorization-role")
-				.setCode("REMOTE");
-		endpoint.addIdentifier().setSystem("http://highmed.org/fhir/NamingSystem/endpoint-identifier")
+		endpoint.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag").setCode("ALL");
+		endpoint.addIdentifier().setSystem("http://highmed.org/sid/endpoint-identifier")
 				.setValue("foo-bar-baz.test.bla-bla.de");
 		endpoint.setStatus(EndpointStatus.ACTIVE);
 		endpoint.getConnectionType().setSystem("http://terminology.hl7.org/CodeSystem/endpoint-connection-type")
@@ -306,8 +299,8 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 				.setUrl("Organization");
 		bundle.addEntry().setFullUrl(endTempId).setResource(endpoint).getRequest().setMethod(HTTPVerb.POST)
 				.setUrl("Endpoint");
-		bundle.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(
-				"Endpoint?identifier=http://highmed.org/fhir/NamingSystem/endpoint-identifier|foo-bar-baz.test.bla-bla.de");
+		bundle.addEntry().getRequest().setMethod(HTTPVerb.GET)
+				.setUrl("Endpoint?identifier=http://highmed.org/sid/endpoint-identifier|foo-bar-baz.test.bla-bla.de");
 
 		logger.debug("bundle: {}", context.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		Bundle postBundle = getWebserviceClient().postBundle(bundle);

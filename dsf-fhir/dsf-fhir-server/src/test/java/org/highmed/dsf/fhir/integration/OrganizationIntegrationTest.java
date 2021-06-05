@@ -16,6 +16,7 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.Test;
@@ -27,7 +28,7 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 	{
 		Bundle searchBundle = getWebserviceClient().search(Organization.class, Collections.emptyMap());
 		assertNotNull(searchBundle);
-		assertEquals(2, searchBundle.getTotal());
+		assertEquals(3, searchBundle.getTotal());
 		assertTrue(searchBundle.getEntryFirstRep().getResource() instanceof Organization);
 	}
 
@@ -37,8 +38,8 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 		Bundle searchBundle = getWebserviceClient().search(Organization.class,
 				Map.of("_include", Collections.singletonList("Organization:endpoint")));
 		assertNotNull(searchBundle);
-		assertEquals(2, searchBundle.getTotal());
-		assertEquals(4, searchBundle.getEntry().size());
+		assertEquals(3, searchBundle.getTotal());
+		assertEquals(5, searchBundle.getEntry().size());
 
 		BundleEntryComponent orgEntry1 = searchBundle.getEntry().get(0);
 		assertNotNull(orgEntry1);
@@ -52,13 +53,19 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(orgEntry2.getResource());
 		assertTrue(orgEntry2.getResource() instanceof Organization);
 
-		BundleEntryComponent eptEntry1 = searchBundle.getEntry().get(2);
+		BundleEntryComponent orgEntry3 = searchBundle.getEntry().get(2);
+		assertNotNull(orgEntry3);
+		assertEquals(SearchEntryMode.MATCH, orgEntry3.getSearch().getMode());
+		assertNotNull(orgEntry3.getResource());
+		assertTrue(orgEntry3.getResource() instanceof Organization);
+
+		BundleEntryComponent eptEntry1 = searchBundle.getEntry().get(3);
 		assertNotNull(eptEntry1);
 		assertEquals(SearchEntryMode.INCLUDE, eptEntry1.getSearch().getMode());
 		assertNotNull(eptEntry1.getResource());
 		assertTrue(eptEntry1.getResource() instanceof Endpoint);
 
-		BundleEntryComponent eptEntry2 = searchBundle.getEntry().get(3);
+		BundleEntryComponent eptEntry2 = searchBundle.getEntry().get(4);
 		assertNotNull(eptEntry2);
 		assertEquals(SearchEntryMode.INCLUDE, eptEntry2.getSearch().getMode());
 		assertNotNull(eptEntry2.getResource());
@@ -71,8 +78,8 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 		Bundle searchBundle = getWebserviceClient().search(Organization.class,
 				Map.of("_revinclude", Collections.singletonList("Endpoint:organization")));
 		assertNotNull(searchBundle);
-		assertEquals(2, searchBundle.getTotal());
-		assertEquals(4, searchBundle.getEntry().size());
+		assertEquals(3, searchBundle.getTotal());
+		assertEquals(5, searchBundle.getEntry().size());
 
 		BundleEntryComponent orgEntry1 = searchBundle.getEntry().get(0);
 		assertNotNull(orgEntry1);
@@ -86,13 +93,19 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(orgEntry2.getResource());
 		assertTrue(orgEntry2.getResource() instanceof Organization);
 
-		BundleEntryComponent eptEntry1 = searchBundle.getEntry().get(2);
+		BundleEntryComponent orgEntry3 = searchBundle.getEntry().get(2);
+		assertNotNull(orgEntry3);
+		assertEquals(SearchEntryMode.MATCH, orgEntry3.getSearch().getMode());
+		assertNotNull(orgEntry3.getResource());
+		assertTrue(orgEntry3.getResource() instanceof Organization);
+
+		BundleEntryComponent eptEntry1 = searchBundle.getEntry().get(3);
 		assertNotNull(eptEntry1);
 		assertEquals(SearchEntryMode.INCLUDE, eptEntry1.getSearch().getMode());
 		assertNotNull(eptEntry1.getResource());
 		assertTrue(eptEntry1.getResource() instanceof Endpoint);
 
-		BundleEntryComponent eptEntry2 = searchBundle.getEntry().get(3);
+		BundleEntryComponent eptEntry2 = searchBundle.getEntry().get(4);
 		assertNotNull(eptEntry2);
 		assertEquals(SearchEntryMode.INCLUDE, eptEntry2.getSearch().getMode());
 		assertNotNull(eptEntry2.getResource());
@@ -102,8 +115,8 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testUpdateOrganizationWithNewThumbprint() throws Exception
 	{
-		Bundle bundle = getWebserviceClient().search(Organization.class, Map.of("identifier", Collections.singletonList(
-				"http://highmed.org/fhir/NamingSystem/organization-identifier|External_Test_Organization")));
+		Bundle bundle = getWebserviceClient().search(Organization.class, Map.of("identifier", Collections
+				.singletonList("http://highmed.org/sid/organization-identifier|External_Test_Organization")));
 		assertNotNull(bundle);
 		assertEquals(1, bundle.getTotal());
 		assertNotNull(bundle.getEntry());
@@ -128,8 +141,8 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 	@Test(expected = WebApplicationException.class)
 	public void testUpdateOrganizationWithExistingThumbprint() throws Exception
 	{
-		Bundle bundle1 = getWebserviceClient().search(Organization.class, Map.of("identifier", Collections
-				.singletonList("http://highmed.org/fhir/NamingSystem/organization-identifier|Test_Organization")));
+		Bundle bundle1 = getWebserviceClient().search(Organization.class, Map.of("identifier",
+				Collections.singletonList("http://highmed.org/sid/organization-identifier|Test_Organization")));
 		assertNotNull(bundle1);
 		assertEquals(1, bundle1.getTotal());
 		assertNotNull(bundle1.getEntry());
@@ -148,9 +161,8 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 
 		String existingThumbprint = ((StringType) thumbprints1.get(0).getValue()).getValue();
 
-		Bundle bundle2 = getWebserviceClient().search(Organization.class,
-				Map.of("identifier", Collections.singletonList(
-						"http://highmed.org/fhir/NamingSystem/organization-identifier|External_Test_Organization")));
+		Bundle bundle2 = getWebserviceClient().search(Organization.class, Map.of("identifier", Collections
+				.singletonList("http://highmed.org/sid/organization-identifier|External_Test_Organization")));
 		assertNotNull(bundle2);
 		assertEquals(1, bundle2.getTotal());
 		assertNotNull(bundle2.getEntry());
@@ -183,8 +195,8 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 	@Test(expected = WebApplicationException.class)
 	public void testUpdateOrganizationWithExistingIdentifier() throws Exception
 	{
-		Bundle bundle = getWebserviceClient().search(Organization.class, Map.of("identifier", Collections.singletonList(
-				"http://highmed.org/fhir/NamingSystem/organization-identifier|External_Test_Organization")));
+		Bundle bundle = getWebserviceClient().search(Organization.class, Map.of("identifier", Collections
+				.singletonList("http://highmed.org/sid/organization-identifier|External_Test_Organization")));
 		assertNotNull(bundle);
 		assertEquals(1, bundle.getTotal());
 		assertNotNull(bundle.getEntry());
@@ -212,8 +224,8 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testUpdateOrganizationAddNewThumbprint() throws Exception
 	{
-		Bundle bundle = getWebserviceClient().search(Organization.class, Map.of("identifier", Collections.singletonList(
-				"http://highmed.org/fhir/NamingSystem/organization-identifier|External_Test_Organization")));
+		Bundle bundle = getWebserviceClient().search(Organization.class, Map.of("identifier", Collections
+				.singletonList("http://highmed.org/sid/organization-identifier|External_Test_Organization")));
 		assertNotNull(bundle);
 		assertEquals(1, bundle.getTotal());
 		assertNotNull(bundle.getEntry());
@@ -240,5 +252,36 @@ public class OrganizationIntegrationTest extends AbstractIntegrationTest
 
 		// test if authentication still works
 		getExternalWebserviceClient().search(Organization.class, Collections.emptyMap());
+	}
+
+	@Test
+	public void testSearchWithUnsupportedRevIncludeParameter() throws Exception
+	{
+		Bundle searchBundle = getWebserviceClient().search(Organization.class,
+				Map.of("_revinclude", Collections.singletonList("Endpoint:foo")));
+		assertNotNull(searchBundle);
+		assertEquals(3, searchBundle.getTotal());
+		assertEquals(4, searchBundle.getEntry().size());
+
+		BundleEntryComponent outcomeEntry = searchBundle.getEntry().get(3);
+		assertNotNull(outcomeEntry);
+		assertEquals(SearchEntryMode.OUTCOME, outcomeEntry.getSearch().getMode());
+		assertNotNull(outcomeEntry.getResource());
+		assertTrue(outcomeEntry.getResource() instanceof OperationOutcome);
+	}
+
+	@Test(expected = WebApplicationException.class)
+	public void testStrictSearchWithUnsupportedRevIncludeParameter() throws Exception
+	{
+		try
+		{
+			getWebserviceClient().searchWithStrictHandling(Organization.class,
+					Map.of("_revinclude", Collections.singletonList("Endpoint:foo")));
+		}
+		catch (WebApplicationException e)
+		{
+			assertEquals(Status.BAD_REQUEST.getStatusCode(), e.getResponse().getStatus());
+			throw e;
+		}
 	}
 }

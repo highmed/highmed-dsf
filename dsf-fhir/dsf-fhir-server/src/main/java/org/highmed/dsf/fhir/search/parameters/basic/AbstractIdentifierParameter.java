@@ -75,7 +75,7 @@ public abstract class AbstractIdentifierParameter<R extends Resource> extends Ab
 		}
 	}
 
-	protected boolean identifierMatches(List<Identifier> identifiers)
+	protected final boolean identifierMatches(List<Identifier> identifiers)
 	{
 		return identifiers.stream().anyMatch(
 				i -> valueAndType.negated ? !identifierMatches(valueAndType, i) : identifierMatches(valueAndType, i));

@@ -90,7 +90,7 @@ public class BundleIntegrationTest extends AbstractIntegrationTest
 		final String taskProfileVersion = "1.2.3";
 
 		StructureDefinition newS = new StructureDefinition();
-		newS.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/authorization-role").setCode("REMOTE");
+		newS.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag").setCode("ALL");
 		newS.setUrl(taskProfileUrl);
 		newS.setVersion(taskProfileVersion);
 		newS.setName("TaskTest");

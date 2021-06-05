@@ -26,7 +26,7 @@ public class MeasureIntegrationTest extends AbstractIntegrationTest
 	private static Library createLibrary()
 	{
 		Library library = new Library();
-		library.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/authorization-role").setCode("REMOTE");
+		library.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag").setCode("ALL");
 		library.setUrl("https://foo.bar/fhir/Library/0a887526-2b9f-413a-8842-5e9252e2d7f7");
 		library.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		library.getType().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/library-type")
@@ -39,7 +39,7 @@ public class MeasureIntegrationTest extends AbstractIntegrationTest
 	private static Measure createMeasure()
 	{
 		Measure measure = new Measure();
-		measure.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/authorization-role").setCode("REMOTE");
+		measure.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag").setCode("ALL");
 		measure.getLibrary()
 				.add(new CanonicalType("https://foo.bar/fhir/Library/0a887526-2b9f-413a-8842-5e9252e2d7f7"));
 		measure.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -131,7 +131,7 @@ public class MeasureIntegrationTest extends AbstractIntegrationTest
 	public void testSearchMeasureDependingOnRelatedArtifactLibrary() throws Exception
 	{
 		Measure measure = new Measure();
-		measure.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/authorization-role").setCode("REMOTE");
+		measure.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag").setCode("ALL");
 
 		RelatedArtifact art = measure.getRelatedArtifactFirstRep();
 		art.setType(RelatedArtifactType.DEPENDSON);

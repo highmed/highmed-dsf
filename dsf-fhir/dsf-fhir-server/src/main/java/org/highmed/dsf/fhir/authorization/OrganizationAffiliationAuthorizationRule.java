@@ -1,114 +1,124 @@
 package org.highmed.dsf.fhir.authorization;
 
 import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.highmed.dsf.fhir.authentication.OrganizationProvider;
 import org.highmed.dsf.fhir.authentication.User;
+import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.dao.OrganizationAffiliationDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
+import org.highmed.dsf.fhir.search.PartialResult;
+import org.highmed.dsf.fhir.search.SearchQuery;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class OrganizationAffiliationAuthorizationRule
-		extends AbstractAuthorizationRule<OrganizationAffiliation, OrganizationAffiliationDao>
+		extends AbstractMetaTagAuthorizationRule<OrganizationAffiliation, OrganizationAffiliationDao>
 {
 	private static final Logger logger = LoggerFactory.getLogger(OrganizationAffiliationAuthorizationRule.class);
 
 	public OrganizationAffiliationAuthorizationRule(DaoProvider daoProvider, String serverBase,
-			ReferenceResolver referenceResolver, OrganizationProvider organizationProvider)
+			ReferenceResolver referenceResolver, OrganizationProvider organizationProvider,
+			ReadAccessHelper readAccessHelper)
 	{
-		super(OrganizationAffiliation.class, daoProvider, serverBase, referenceResolver, organizationProvider);
+		super(OrganizationAffiliation.class, daoProvider, serverBase, referenceResolver, organizationProvider,
+				readAccessHelper);
 	}
 
-	@Override
-	public Optional<String> reasonCreateAllowed(Connection connection, User user, OrganizationAffiliation newResource)
+	protected Optional<String> newResourceOk(Connection connection, User user, OrganizationAffiliation newResource)
 	{
-		if (isLocalUser(user))
+		List<String> errors = new ArrayList<String>();
+
+		if (newResource.hasOrganization())
 		{
-			logger.info("Create of OrganizationAffiliation authorized for local user '{}'", user.getName());
-			return Optional.of("local user");
+			if (!newResource.getOrganization().hasReference())
+			{
+				errors.add("OrganizationAffiliation.organization.reference missing");
+			}
 		}
 		else
 		{
-			logger.warn("Create of OrganizationAffiliation unauthorized, not a local user");
-			return Optional.empty();
+			errors.add("OrganizationAffiliation.organization missing");
 		}
-	}
 
-	@Override
-	public Optional<String> reasonReadAllowed(Connection connection, User user,
-			OrganizationAffiliation existingResource)
-	{
-		if (isLocalUser(user) && hasLocalOrRemoteAuthorizationRole(existingResource))
+		if (newResource.hasParticipatingOrganization())
 		{
-			logger.info(
-					"Read of OrganizationAffiliation authorized for local user '{}', OrganizationAffiliation has local or remote authorization role",
-					user.getName());
-			return Optional.of("local user, local or remote authorized OrganizationAffiliation");
-		}
-		else if (isRemoteUser(user) && hasRemoteAuthorizationRole(existingResource))
-		{
-			logger.info(
-					"Read of OrganizationAffiliation authorized for remote user '{}', OrganizationAffiliation has remote authorization role",
-					user.getName());
-			return Optional.of("remote user, remote authorized OrganizationAffiliation");
+			if (!newResource.getParticipatingOrganization().hasReference())
+			{
+				errors.add("OrganizationAffiliation.participatingOrganization.reference missing");
+			}
 		}
 		else
 		{
-			logger.warn(
-					"Read of OrganizationAffiliation unauthorized, no matching user role resource authorization role found");
-			return Optional.empty();
+			errors.add("OrganizationAffiliation.participatingOrganization missing");
 		}
+
+		if (!hasValidReadAccessTag(connection, newResource))
+		{
+			errors.add("OrganizationAffiliation is missing valid read access tag");
+		}
+
+		if (errors.isEmpty())
+			return Optional.empty();
+		else
+			return Optional.of(errors.stream().collect(Collectors.joining(", ")));
 	}
 
 	@Override
-	public Optional<String> reasonUpdateAllowed(Connection connection, User user, OrganizationAffiliation oldResource,
+	protected boolean resourceExists(Connection connection, OrganizationAffiliation newResource)
+	{
+		return organizationAffiliationWithParentAndMemberExists(connection, newResource);
+	}
+
+	private boolean organizationAffiliationWithParentAndMemberExists(Connection connection,
 			OrganizationAffiliation newResource)
 	{
-		if (isLocalUser(user))
-		{
-			logger.info("Update of OrganizationAffiliation authorized for local user '{}'", user.getName());
-			return Optional.of("local user");
+		Map<String, List<String>> queryParameters = Map.of("primary-organization",
+				Collections.singletonList(newResource.getOrganization().getReference()), "participating-organization",
+				Collections.singletonList(newResource.getParticipatingOrganization().getReference()));
+		OrganizationAffiliationDao dao = getDao();
+		SearchQuery<OrganizationAffiliation> query = dao.createSearchQueryWithoutUserFilter(0, 0)
+				.configureParameters(queryParameters);
 
-		}
-		else
-		{
-			logger.warn("Update of OrganizationAffiliation unauthorized, not a local user");
-			return Optional.empty();
-		}
-	}
+		if (!query.getUnsupportedQueryParameters(queryParameters).isEmpty())
+			return false;
 
-	@Override
-	public Optional<String> reasonDeleteAllowed(Connection connection, User user, OrganizationAffiliation oldResource)
-	{
-		if (isLocalUser(user))
+		try
 		{
-			logger.info("Delete of OrganizationAffiliation authorized for local user '{}'", user.getName());
-			return Optional.of("local user");
+			PartialResult<OrganizationAffiliation> result = dao.searchWithTransaction(connection, query);
+			return result.getTotal() >= 1;
 		}
-		else
+		catch (SQLException e)
 		{
-			logger.warn("Delete of OrganizationAffiliation unauthorized, not a local user");
-			return Optional.empty();
+			logger.warn("Error while searching for Endpoint with address", e);
+			return false;
 		}
 	}
 
 	@Override
-	public Optional<String> reasonSearchAllowed(User user)
+	protected boolean modificationsOk(Connection connection, OrganizationAffiliation oldResource,
+			OrganizationAffiliation newResource)
 	{
-		logger.info("Search of OrganizationAffiliation authorized for {} user '{}', will be fitered by user role",
-				user.getRole(), user.getName());
-		return Optional.of("Allowed for all, filtered by user role");
+		return isParentSame(oldResource, newResource) && isMemberSame(oldResource, newResource);
 	}
 
-	@Override
-	public Optional<String> reasonHistoryAllowed(User user)
+	private boolean isParentSame(OrganizationAffiliation oldResource, OrganizationAffiliation newResource)
 	{
-		logger.info("History of OrganizationAffiliation authorized for {} user '{}', will be fitered by user role",
-				user.getRole(), user.getName());
-		return Optional.of("Allowed for all, filtered by user role");
+		return oldResource.getOrganization().getReference().equals(newResource.getOrganization().getReference());
+	}
+
+	private boolean isMemberSame(OrganizationAffiliation oldResource, OrganizationAffiliation newResource)
+	{
+		return oldResource.getParticipatingOrganization().getReference()
+				.equals(newResource.getParticipatingOrganization().getReference());
 	}
 }

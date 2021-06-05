@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<StructureDefinition xmlns="http://hl7.org/fhir">
+  <meta>
+    <tag>
+      <system value="http://highmed.org/fhir/CodeSystem/read-access-tag" />
+      <code value="ALL" />
+    </tag>
+  </meta>
+  <url value="http://highmed.org/fhir/StructureDefinition/extension-read-access-organization" />
+  <version value="0.5.0" />
+  <name value="ReadAccessOrganization" />
+  <status value="active" />
+  <experimental value="false" />
+  <date value="2021-02-28" />
+  <fhirVersion value="4.0.1" />
+  <kind value="complex-type" />
+  <abstract value="false" />
+  <context>
+    <type value="element" />
+    <expression value="Coding" />
+  </context>
+  <type value="Extension" />
+  <baseDefinition value="http://hl7.org/fhir/StructureDefinition/Extension" />
+  <derivation value="constraint" />
+  <differential>
+    <element id="Extension.url">
+      <path value="Extension.url" />
+      <fixedUri value="http://highmed.org/fhir/StructureDefinition/extension-read-access-organization" />
+    </element>
+    <element id="Extension.value[x]">
+      <path value="Extension.value[x]" />
+      <min value="1" />
+      <type>
+        <code value="Identifier" />
+      </type>
+    </element>
+    <element id="Extension.value[x].system">
+      <path value="Extension.value[x].system" />
+      <min value="1" />
+      <fixedUri value="http://highmed.org/sid/organization-identifier" />
+    </element>
+    <element id="Extension.value[x].value">
+      <path value="Extension.value[x].value" />
+      <min value="1" />
+    </element>
+  </differential>
+</StructureDefinition>

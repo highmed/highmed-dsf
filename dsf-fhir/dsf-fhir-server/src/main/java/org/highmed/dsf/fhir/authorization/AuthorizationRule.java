@@ -8,6 +8,8 @@ import org.hl7.fhir.r4.model.Resource;
 
 public interface AuthorizationRule<R extends Resource>
 {
+	Class<R> getResourceType();
+
 	/**
 	 * Override this method for non default behavior. Default: Not allowed.
 	 * 

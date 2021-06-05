@@ -1,0 +1,362 @@
+version: '3.7'
+
+services:
+  proxy:
+    image: nginx:1.21
+    restart: on-failure
+    ports:
+      - 127.0.0.1:443:443
+    secrets:
+      - proxy_privatekey.pem
+    volumes:
+      - type: bind
+        source: ./proxy/ssl/certificate_and_ca.pem
+        target: /etc/nginx/ssl/certificate_and_ca.pem
+        read_only: true
+      - type: bind
+        source: ./proxy/ssl/client_ca.pem
+        target: /etc/nginx/ssl/client_ca.pem
+        read_only: true
+      - type: bind
+        source: ./proxy/conf.d
+        target: /etc/nginx/conf.d
+        read_only: true
+      - type: bind
+        source: ./proxy/nginx.conf
+        target: /etc/nginx/nginx.conf
+        read_only: true
+    networks:
+      medic1-fhir-frontend:
+        ipv4_address: 172.20.0.2
+      medic2-fhir-frontend:
+        ipv4_address: 172.20.0.18
+      medic3-fhir-frontend:
+        ipv4_address: 172.20.0.34
+      ttp-fhir-frontend:
+        ipv4_address: 172.20.0.50
+      internet:
+        aliases:
+          - medic1-docker
+          - medic2-docker
+          - medic3-docker
+          - ttp-docker
+    environment:
+      TZ: Europe/Berlin
+
+  db:
+    image: postgres:13
+    restart: on-failure
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    environment:
+      TZ: Europe/Berlin
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      POSTGRES_USER: liquibase_user
+      POSTGRES_DB: postgres
+    networks:
+      - medic1-fhir-backend
+      - medic2-fhir-backend
+      - medic3-fhir-backend
+      - ttp-fhir-backend
+      - medic1-bpe-backend
+      - medic2-bpe-backend
+      - medic3-bpe-backend
+      - ttp-bpe-backend
+    secrets:
+      - postgres_password
+    volumes:
+      - type: volume
+        source: db-data
+        target: /var/lib/postgresql/data
+      - type: bind
+        source: ./db/init-db.sh
+        target: /docker-entrypoint-initdb.d/init-db.sh
+        read_only: true
+
+  medic1-fhir:
+    image: highmed/fhir
+    restart: on-failure
+    ports:
+     - 127.0.0.1:5001:5001
+    volumes:
+      - type: bind
+        source: ./medic1/fhir/conf
+        target: /opt/fhir/conf
+        read_only: true
+      - type: bind
+        source: ./medic1/fhir/log
+        target: /opt/fhir/log
+    environment:
+      TZ: Europe/Berlin
+      EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5001
+    networks:
+      medic1-fhir-frontend:
+        ipv4_address: 172.20.0.3
+      medic1-fhir-backend:
+    depends_on:
+      - db
+      - proxy
+
+  medic2-fhir:
+    image: highmed/fhir
+    restart: on-failure
+    ports:
+     - 127.0.0.1:5002:5002
+    volumes:
+      - type: bind
+        source: ./medic2/fhir/conf
+        target: /opt/fhir/conf
+        read_only: true
+      - type: bind
+        source: ./medic2/fhir/log
+        target: /opt/fhir/log
+    environment:
+      TZ: Europe/Berlin
+      EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5002
+    networks:
+      medic2-fhir-frontend:
+        ipv4_address: 172.20.0.19
+      medic2-fhir-backend:
+    depends_on:
+      - db
+      - proxy
+
+  medic3-fhir:
+    image: highmed/fhir
+    restart: on-failure
+    ports:
+     - 127.0.0.1:5003:5003
+    volumes:
+      - type: bind
+        source: ./medic3/fhir/conf
+        target: /opt/fhir/conf
+        read_only: true
+      - type: bind
+        source: ./medic3/fhir/log
+        target: /opt/fhir/log
+    environment:
+      TZ: Europe/Berlin
+      EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5003
+    networks:
+      medic3-fhir-frontend:
+        ipv4_address: 172.20.0.35
+      medic3-fhir-backend:
+    depends_on:
+      - db
+      - proxy
+
+  ttp-fhir:
+    image: highmed/fhir
+    restart: on-failure
+    ports:
+     - 127.0.0.1:5004:5004
+    volumes:
+      - type: bind
+        source: ./ttp/fhir/conf
+        target: /opt/fhir/conf
+        read_only: true
+      - type: bind
+        source: ./ttp/fhir/log
+        target: /opt/fhir/log
+    environment:
+      TZ: Europe/Berlin
+      EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5004
+    networks:
+      ttp-fhir-frontend:
+        ipv4_address: 172.20.0.51
+      ttp-fhir-backend:
+    depends_on:
+      - db
+      - proxy
+
+  medic1-bpe:
+    image: highmed/bpe
+    restart: on-failure
+    ports:
+     - 127.0.0.1:5011:5011
+    volumes:
+    - type: bind
+      source: ./medic1/bpe/conf
+      target: /opt/bpe/conf
+      read_only: true
+    - type: bind
+      source: ./medic1/bpe/plugin
+      target: /opt/bpe/plugin
+      read_only: true
+    - type: bind
+      source: ./medic1/bpe/process
+      target: /opt/bpe/process
+      read_only: true
+    - type: bind
+      source: ./medic1/bpe/log
+      target: /opt/bpe/log
+    - type: bind
+      source: ./medic1/bpe/last_event
+      target: /opt/bpe/last_event
+    environment:
+      TZ: Europe/Berlin
+      EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5011
+    networks:
+      medic1-bpe-frontend:
+      medic1-bpe-backend:
+      internet:
+    depends_on:
+      - db
+      - medic1-fhir
+
+  medic2-bpe:
+    image: highmed/bpe
+    restart: on-failure
+    ports:
+     - 127.0.0.1:5012:5012
+    volumes:
+    - type: bind
+      source: ./medic2/bpe/conf
+      target: /opt/bpe/conf
+      read_only: true
+    - type: bind
+      source: ./medic2/bpe/plugin
+      target: /opt/bpe/plugin
+      read_only: true
+    - type: bind
+      source: ./medic2/bpe/process
+      target: /opt/bpe/process
+      read_only: true
+    - type: bind
+      source: ./medic2/bpe/log
+      target: /opt/bpe/log
+    - type: bind
+      source: ./medic2/bpe/last_event
+      target: /opt/bpe/last_event
+    environment:
+      TZ: Europe/Berlin
+      EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5012
+    networks:
+      medic2-bpe-frontend:
+      medic2-bpe-backend:
+      internet:
+    depends_on:
+      - db
+      - medic2-fhir
+
+  medic3-bpe:
+    image: highmed/bpe
+    restart: on-failure
+    ports:
+     - 127.0.0.1:5014:5014
+    volumes:
+    - type: bind
+      source: ./medic3/bpe/conf
+      target: /opt/bpe/conf
+      read_only: true
+    - type: bind
+      source: ./medic3/bpe/plugin
+      target: /opt/bpe/plugin
+      read_only: true
+    - type: bind
+      source: ./medic3/bpe/process
+      target: /opt/bpe/process
+      read_only: true
+    - type: bind
+      source: ./medic3/bpe/log
+      target: /opt/bpe/log
+    - type: bind
+      source: ./medic3/bpe/last_event
+      target: /opt/bpe/last_event
+    environment:
+      TZ: Europe/Berlin
+      EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5014
+    networks:
+      medic3-bpe-frontend:
+      medic3-bpe-backend:
+      internet:
+    depends_on:
+      - db
+      - medic3-fhir
+
+  ttp-bpe:
+    image: highmed/bpe
+    restart: on-failure
+    ports:
+     - 127.0.0.1:5013:5013
+    volumes:
+    - type: bind
+      source: ./ttp/bpe/conf
+      target: /opt/bpe/conf
+      read_only: true
+    - type: bind
+      source: ./ttp/bpe/plugin
+      target: /opt/bpe/plugin
+      read_only: true
+    - type: bind
+      source: ./ttp/bpe/process
+      target: /opt/bpe/process
+      read_only: true
+    - type: bind
+      source: ./ttp/bpe/log
+      target: /opt/bpe/log
+    - type: bind
+      source: ./ttp/bpe/last_event
+      target: /opt/bpe/last_event
+    environment:
+      TZ: Europe/Berlin
+      EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5013
+    networks:
+      ttp-bpe-frontend:
+      ttp-bpe-backend:
+      internet:
+    depends_on:
+      - db
+      - ttp-fhir
+
+secrets:
+  postgres_password:
+    file: ./db/postgres_password
+  proxy_privatekey.pem:
+    file: ./proxy/ssl/certificate_private-key.pem
+    
+networks:
+  medic1-fhir-frontend:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.20.0.0/28
+  medic1-fhir-backend:
+  medic2-fhir-frontend:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.20.0.16/28
+  medic2-fhir-backend:
+  medic3-fhir-frontend:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.20.0.32/28
+  medic3-fhir-backend:
+  ttp-fhir-frontend:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.20.0.48/28
+  ttp-fhir-backend:
+  medic1-bpe-frontend:
+  medic1-bpe-backend:
+  medic2-bpe-frontend:
+  medic2-bpe-backend:
+  medic3-bpe-frontend:
+  medic3-bpe-backend:
+  ttp-bpe-frontend:
+  ttp-bpe-backend:
+  internet:
+
+volumes:
+  db-data:
+    name: db-data

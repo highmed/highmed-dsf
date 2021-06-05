@@ -177,7 +177,7 @@ public class DeleteCommand extends AbstractCommand implements Command
 					.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 		}
 
-		SearchQuery<?> query = dao.createSearchQuery(user, 1, 1);
+		SearchQuery<?> query = dao.createSearchQueryWithoutUserFilter(1, 1);
 		query.configureParameters(queryParameters);
 
 		List<SearchQueryParameterError> unsupportedQueryParameters = query
