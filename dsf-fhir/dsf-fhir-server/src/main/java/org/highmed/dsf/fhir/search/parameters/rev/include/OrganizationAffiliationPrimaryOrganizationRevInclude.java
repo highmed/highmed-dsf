@@ -19,7 +19,7 @@ public class OrganizationAffiliationPrimaryOrganizationRevInclude extends Abstra
 	@Override
 	protected String getRevIncludeSql(IncludeParts includeParts)
 	{
-		return "(SELECT jsonb_agg(organization_affiliation) FROM current_organization_affiliations WHERE organization_affiliation->'organization' @> concat('[{\"reference\": \"Organization/', organization->>'id', '\"}]')::jsonb) AS organization_affiliations";
+		return "(SELECT jsonb_agg(organization_affiliation) FROM current_organization_affiliations WHERE organization_affiliation->'organization' @> concat('{\"reference\": \"Organization/', organization->>'id', '\"}')::jsonb) AS organization_affiliations";
 	}
 
 	@Override
