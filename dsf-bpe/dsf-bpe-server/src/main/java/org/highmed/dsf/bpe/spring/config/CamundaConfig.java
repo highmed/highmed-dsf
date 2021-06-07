@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -59,6 +60,9 @@ public class CamundaConfig
 	@Autowired
 	@SuppressWarnings("rawtypes")
 	private List<TypedValueSerializer> baseSerializers;
+
+	@Autowired
+	private Environment environment;
 
 	@Bean
 	public PlatformTransactionManager transactionManager()
@@ -157,6 +161,7 @@ public class CamundaConfig
 			throw new RuntimeException(
 					"Process plug in directory '" + pluginDirectoryPath.toString() + "' not readable");
 
-		return new ProcessPluginProviderImpl(fhirConfig.fhirContext(), pluginDirectoryPath, applicationContext);
+		return new ProcessPluginProviderImpl(fhirConfig.fhirContext(), pluginDirectoryPath, applicationContext,
+				environment);
 	}
 }

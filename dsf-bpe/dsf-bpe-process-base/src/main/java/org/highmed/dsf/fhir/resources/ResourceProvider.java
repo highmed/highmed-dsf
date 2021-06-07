@@ -13,6 +13,7 @@ import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.NamingSystem;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.springframework.core.env.PropertyResolver;
 
 import ca.uhn.fhir.parser.IParser;
 
@@ -102,9 +103,9 @@ public interface ResourceProvider
 	}
 
 	static ResourceProvider read(String processPluginVersion, Supplier<IParser> parserSupplier, ClassLoader classLoader,
-			Map<String, List<AbstractResource>> resourcesByProcessKeyAndVersion)
+			PropertyResolver resolver, Map<String, List<AbstractResource>> resourcesByProcessKeyAndVersion)
 	{
-		return ResourceProviderImpl.read(processPluginVersion, parserSupplier, classLoader,
+		return ResourceProviderImpl.read(processPluginVersion, parserSupplier, classLoader, resolver,
 				resourcesByProcessKeyAndVersion);
 	}
 }
