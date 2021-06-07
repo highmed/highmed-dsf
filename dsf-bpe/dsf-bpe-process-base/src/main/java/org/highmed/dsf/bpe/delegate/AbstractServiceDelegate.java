@@ -11,6 +11,7 @@ import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.highmed.dsf.bpe.ConstantsBase;
+import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.hl7.fhir.r4.model.Task;
@@ -24,13 +25,16 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 
 	private final FhirWebserviceClientProvider clientProvider;
 	private final TaskHelper taskHelper;
+	private final ReadAccessHelper readAccessHelper;
 
 	private DelegateExecution execution;
 
-	public AbstractServiceDelegate(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
+	public AbstractServiceDelegate(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
+			ReadAccessHelper readAccessHelper)
 	{
 		this.clientProvider = clientProvider;
 		this.taskHelper = taskHelper;
+		this.readAccessHelper = readAccessHelper;
 	}
 
 	@Override
@@ -38,6 +42,7 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 	{
 		Objects.requireNonNull(clientProvider, "clientProvider");
 		Objects.requireNonNull(taskHelper, "taskHelper");
+		Objects.requireNonNull(readAccessHelper, "readAccessHelper");
 	}
 
 	@Override
@@ -117,6 +122,11 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 	protected final FhirWebserviceClientProvider getFhirWebserviceClientProvider()
 	{
 		return clientProvider;
+	}
+
+	protected final ReadAccessHelper getReadAccessHelper()
+	{
+		return readAccessHelper;
 	}
 
 	/**

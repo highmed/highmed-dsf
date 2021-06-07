@@ -10,6 +10,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 
 import org.camunda.bpm.engine.ProcessEngine;
+import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
+import org.highmed.dsf.fhir.authorization.read.ReadAccessHelperImpl;
 import org.highmed.dsf.fhir.client.FhirClientProviderImpl;
 import org.highmed.dsf.fhir.client.FhirWebsocketClientProvider;
 import org.highmed.dsf.fhir.group.GroupHelper;
@@ -195,5 +197,11 @@ public class FhirConfig
 	public GroupHelper groupHelper()
 	{
 		return new GroupHelperImpl();
+	}
+
+	@Bean
+	public ReadAccessHelper readAccessHelper()
+	{
+		return new ReadAccessHelperImpl();
 	}
 }
