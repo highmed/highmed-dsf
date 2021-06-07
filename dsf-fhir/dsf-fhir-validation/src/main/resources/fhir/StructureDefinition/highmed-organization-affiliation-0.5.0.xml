@@ -28,7 +28,7 @@
       <min value="1" />
       <type>
         <code value="Reference" />
-        <targetProfile value="http://highmed.org/fhir/StructureDefinition/organization" />
+        <targetProfile value="http://highmed.org/fhir/StructureDefinition/organization-parent" />
       </type>
     </element>
     <element id="OrganizationAffiliation.organization.reference">
