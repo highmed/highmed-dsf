@@ -23,7 +23,8 @@ public class OrganizationAffiliationProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			Arrays.asList("highmed-organization-affiliation-0.5.0.xml", "highmed-organization-0.5.0.xml"),
+			Arrays.asList("highmed-organization-affiliation-0.5.0.xml", "highmed-organization-0.5.0.xml",
+					"highmed-organization-parent-0.5.0.xml"),
 			Arrays.asList("highmed-read-access-tag-0.5.0.xml", "highmed-organization-type-0.5.0.xml"),
 			Arrays.asList("highmed-read-access-tag-0.5.0.xml", "highmed-organization-type-0.5.0.xml"));
 
