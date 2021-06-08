@@ -13,6 +13,7 @@ import javax.sql.DataSource;
 
 import org.highmed.dsf.fhir.dao.OrganizationAffiliationDao;
 import org.highmed.dsf.fhir.search.parameters.OrganizationAffiliationActive;
+import org.highmed.dsf.fhir.search.parameters.OrganizationAffiliationEndpoint;
 import org.highmed.dsf.fhir.search.parameters.OrganizationAffiliationIdentifier;
 import org.highmed.dsf.fhir.search.parameters.OrganizationAffiliationParticipatingOrganization;
 import org.highmed.dsf.fhir.search.parameters.OrganizationAffiliationPrimaryOrganization;
@@ -33,8 +34,8 @@ public class OrganizationAffiliationDaoJdbc extends AbstractResourceDaoJdbc<Orga
 	{
 		super(dataSource, fhirContext, OrganizationAffiliation.class, "organization_affiliations",
 				"organization_affiliation", "organization_affiliation_id", OrganizationAffiliationUserFilter::new,
-				with(OrganizationAffiliationActive::new, OrganizationAffiliationIdentifier::new,
-						OrganizationAffiliationParticipatingOrganization::new,
+				with(OrganizationAffiliationActive::new, OrganizationAffiliationEndpoint::new,
+						OrganizationAffiliationIdentifier::new, OrganizationAffiliationParticipatingOrganization::new,
 						OrganizationAffiliationPrimaryOrganization::new, OrganizationAffiliationRole::new),
 				with());
 	}

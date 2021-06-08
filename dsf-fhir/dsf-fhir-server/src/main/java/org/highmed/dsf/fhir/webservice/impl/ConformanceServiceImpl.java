@@ -56,6 +56,7 @@ import org.highmed.dsf.fhir.search.parameters.NamingSystemName;
 import org.highmed.dsf.fhir.search.parameters.NamingSystemStatus;
 import org.highmed.dsf.fhir.search.parameters.OrganizationActive;
 import org.highmed.dsf.fhir.search.parameters.OrganizationAffiliationActive;
+import org.highmed.dsf.fhir.search.parameters.OrganizationAffiliationEndpoint;
 import org.highmed.dsf.fhir.search.parameters.OrganizationAffiliationIdentifier;
 import org.highmed.dsf.fhir.search.parameters.OrganizationAffiliationParticipatingOrganization;
 import org.highmed.dsf.fhir.search.parameters.OrganizationAffiliationPrimaryOrganization;
@@ -346,8 +347,8 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 						OrganizationAffiliationPrimaryOrganizationRevInclude.class));
 
 		searchParameters.put(OrganizationAffiliation.class,
-				Arrays.asList(OrganizationAffiliationActive.class, OrganizationAffiliationIdentifier.class,
-						OrganizationAffiliationParticipatingOrganization.class,
+				Arrays.asList(OrganizationAffiliationActive.class, OrganizationAffiliationEndpoint.class,
+						OrganizationAffiliationIdentifier.class, OrganizationAffiliationParticipatingOrganization.class,
 						OrganizationAffiliationPrimaryOrganization.class, OrganizationAffiliationRole.class));
 
 		searchParameters.put(Patient.class, Arrays.asList(PatientActive.class, PatientIdentifier.class));
