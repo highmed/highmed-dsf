@@ -11,29 +11,38 @@ public class Target
 	private static final Logger logger = LoggerFactory.getLogger(Target.class);
 
 	private final String targetOrganizationIdentifierValue;
+	private final String targetEndpointUrl;
 	private final String correlationKey;
 
 	@JsonCreator
 	private Target(@JsonProperty("targetOrganizationIdentifierValue") String targetOrganizationIdentifierValue,
+			@JsonProperty("targetEndpointUrl") String targetEndpointUrl,
 			@JsonProperty("correlationKey") String correlationKey)
 	{
 		this.targetOrganizationIdentifierValue = targetOrganizationIdentifierValue;
+		this.targetEndpointUrl = targetEndpointUrl;
 		this.correlationKey = correlationKey;
 	}
 
-	public static Target createUniDirectionalTarget(String targetOrganizationIdentifierValue)
+	public static Target createUniDirectionalTarget(String targetOrganizationIdentifierValue, String targetEndpointUrl)
 	{
-		return new Target(targetOrganizationIdentifierValue, null);
+		return new Target(targetOrganizationIdentifierValue, targetEndpointUrl, null);
 	}
 
-	public static Target createBiDirectionalTarget(String targetOrganizationIdentifierValue, String correlationKey)
+	public static Target createBiDirectionalTarget(String targetOrganizationIdentifierValue, String targetEndpointUrl,
+			String correlationKey)
 	{
-		return new Target(targetOrganizationIdentifierValue, correlationKey);
+		return new Target(targetOrganizationIdentifierValue, targetEndpointUrl, correlationKey);
 	}
 
 	public String getTargetOrganizationIdentifierValue()
 	{
 		return targetOrganizationIdentifierValue;
+	}
+
+	public String getTargetEndpointUrl()
+	{
+		return targetEndpointUrl;
 	}
 
 	public String getCorrelationKey()

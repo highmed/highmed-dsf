@@ -158,7 +158,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 			char[] keyStorePassword, String subscriptionIdPart)
 	{
 		return new WebsocketClientTyrus(() ->
-		{}, URI.create(WEBSOCKET_URL), trustStore, keyStore, keyStorePassword, subscriptionIdPart);
+		{}, URI.create(WEBSOCKET_URL), trustStore, keyStore, keyStorePassword, null, null, null, subscriptionIdPart);
 	}
 
 	private static JettyServer startFhirServer() throws Exception

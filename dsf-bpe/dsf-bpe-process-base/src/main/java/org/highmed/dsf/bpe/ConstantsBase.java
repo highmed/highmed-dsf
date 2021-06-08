@@ -4,12 +4,9 @@ import org.hl7.fhir.r4.model.CodeType;
 
 public interface ConstantsBase
 {
+	String BPMN_EXECUTION_VARIABLE_INSTANTIATES_URI = "instantiatesUri";
 	String BPMN_EXECUTION_VARIABLE_MESSAGE_NAME = "messageName";
-	String BPMN_EXECUTION_VARIABLE_PROCESS_DEFINITION_KEY = "processDefinitionKey";
-	String BPMN_EXECUTION_VARIABLE_VERSION_TAG = "versionTag";
 	String BPMN_EXECUTION_VARIABLE_PROFILE = "profile";
-	// String BPMN_EXECUTION_VARIABLE_TARGET_ORGANIZATION_ID = "targetOrganizationId";
-	// String BPMN_EXECUTION_VARIABLE_CORRELATION_KEY = "correlationKey";
 	String BPMN_EXECUTION_VARIABLE_TARGET = "target";
 	String BPMN_EXECUTION_VARIABLE_TARGETS = "targets";
 	String BPMN_EXECUTION_VARIABLE_TASK = "task";
