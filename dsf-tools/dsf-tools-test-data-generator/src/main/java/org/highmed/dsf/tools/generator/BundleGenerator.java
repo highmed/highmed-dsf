@@ -37,6 +37,10 @@ public class BundleGenerator
 	private Bundle medic2Bundle;
 	private Bundle medic3Bundle;
 	private Bundle ttpBundle;
+	private Bundle medic1DockerBundle;
+	private Bundle medic2DockerBundle;
+	private Bundle medic3DockerBundle;
+	private Bundle ttpDockerBundle;
 
 	private Bundle readAndCleanBundle(Path bundleTemplateFile)
 	{
@@ -108,17 +112,26 @@ public class BundleGenerator
 
 	public void createDockerTest3MedicTtpBundles(Map<String, CertificateFiles> clientCertificateFilesByCommonName)
 	{
-		createDockerTestMedic1Bundle(clientCertificateFilesByCommonName);
-		createDockerTestMedic2Bundle(clientCertificateFilesByCommonName);
-		createDockerTestMedic3Bundle(clientCertificateFilesByCommonName);
-		createDockerTestTtpBundle(clientCertificateFilesByCommonName);
+		medic1Bundle = createDockerTestMedic1Bundle(clientCertificateFilesByCommonName, "medic1-bundle.xml");
+		medic2Bundle = createDockerTestMedic2Bundle(clientCertificateFilesByCommonName, "medic2-bundle.xml");
+		medic3Bundle = createDockerTestMedic3Bundle(clientCertificateFilesByCommonName, "medic3-bundle.xml");
+		ttpBundle = createDockerTestTtpBundle(clientCertificateFilesByCommonName, "ttp-bundle.xml");
+
+		medic1DockerBundle = createDockerTestMedic1Bundle(clientCertificateFilesByCommonName,
+				"medic1-docker-bundle.xml");
+		medic2DockerBundle = createDockerTestMedic2Bundle(clientCertificateFilesByCommonName,
+				"medic2-docker-bundle.xml");
+		medic3DockerBundle = createDockerTestMedic3Bundle(clientCertificateFilesByCommonName,
+				"medic3-docker-bundle.xml");
+		ttpDockerBundle = createDockerTestTtpBundle(clientCertificateFilesByCommonName, "ttp-docker-bundle.xml");
 	}
 
-	private void createDockerTestMedic1Bundle(Map<String, CertificateFiles> clientCertificateFilesByCommonName)
+	private Bundle createDockerTestMedic1Bundle(Map<String, CertificateFiles> clientCertificateFilesByCommonName,
+			String sourceBundleFileName)
 	{
-		Path medic1BundleTemplateFile = Paths.get("src/main/resources/bundle-templates/medic1-bundle.xml");
+		Path medic1BundleTemplateFile = Paths.get("src/main/resources/bundle-templates", sourceBundleFileName);
 
-		medic1Bundle = readAndCleanBundle(medic1BundleTemplateFile);
+		Bundle medic1Bundle = readAndCleanBundle(medic1BundleTemplateFile);
 
 		Organization organizationTtp = (Organization) medic1Bundle.getEntry().get(0).getResource();
 		Extension organizationTtpThumbprintExtension = organizationTtp
@@ -132,14 +145,17 @@ public class BundleGenerator
 		organizationMedic1thumbprintExtension.setValue(new StringType(
 				clientCertificateFilesByCommonName.get("medic1-client").getCertificateSha512ThumbprintHex()));
 
-		writeBundle(Paths.get("bundle/medic1-bundle.xml"), medic1Bundle);
+		writeBundle(Paths.get("bundle", sourceBundleFileName), medic1Bundle);
+
+		return medic1Bundle;
 	}
 
-	private void createDockerTestMedic2Bundle(Map<String, CertificateFiles> clientCertificateFilesByCommonName)
+	private Bundle createDockerTestMedic2Bundle(Map<String, CertificateFiles> clientCertificateFilesByCommonName,
+			String sourceBundleFileName)
 	{
-		Path medic2BundleTemplateFile = Paths.get("src/main/resources/bundle-templates/medic2-bundle.xml");
+		Path medic2BundleTemplateFile = Paths.get("src/main/resources/bundle-templates", sourceBundleFileName);
 
-		medic2Bundle = readAndCleanBundle(medic2BundleTemplateFile);
+		Bundle medic2Bundle = readAndCleanBundle(medic2BundleTemplateFile);
 
 		Organization organizationTtp = (Organization) medic2Bundle.getEntry().get(0).getResource();
 		Extension organizationTtpThumbprintExtension = organizationTtp
@@ -153,14 +169,17 @@ public class BundleGenerator
 		organizationMedic2thumbprintExtension.setValue(new StringType(
 				clientCertificateFilesByCommonName.get("medic2-client").getCertificateSha512ThumbprintHex()));
 
-		writeBundle(Paths.get("bundle/medic2-bundle.xml"), medic2Bundle);
+		writeBundle(Paths.get("bundle", sourceBundleFileName), medic2Bundle);
+
+		return medic2Bundle;
 	}
 
-	private void createDockerTestMedic3Bundle(Map<String, CertificateFiles> clientCertificateFilesByCommonName)
+	private Bundle createDockerTestMedic3Bundle(Map<String, CertificateFiles> clientCertificateFilesByCommonName,
+			String sourceBundleFileName)
 	{
-		Path medic3BundleTemplateFile = Paths.get("src/main/resources/bundle-templates/medic3-bundle.xml");
+		Path medic3BundleTemplateFile = Paths.get("src/main/resources/bundle-templates", sourceBundleFileName);
 
-		medic3Bundle = readAndCleanBundle(medic3BundleTemplateFile);
+		Bundle medic3Bundle = readAndCleanBundle(medic3BundleTemplateFile);
 
 		Organization organizationTtp = (Organization) medic3Bundle.getEntry().get(0).getResource();
 		Extension organizationTtpThumbprintExtension = organizationTtp
@@ -174,14 +193,17 @@ public class BundleGenerator
 		organizationMedic3thumbprintExtension.setValue(new StringType(
 				clientCertificateFilesByCommonName.get("medic3-client").getCertificateSha512ThumbprintHex()));
 
-		writeBundle(Paths.get("bundle/medic3-bundle.xml"), medic3Bundle);
+		writeBundle(Paths.get("bundle", sourceBundleFileName), medic3Bundle);
+
+		return medic3Bundle;
 	}
 
-	private void createDockerTestTtpBundle(Map<String, CertificateFiles> clientCertificateFilesByCommonName)
+	private Bundle createDockerTestTtpBundle(Map<String, CertificateFiles> clientCertificateFilesByCommonName,
+			String sourceBundleFileName)
 	{
-		Path medic3BundleTemplateFile = Paths.get("src/main/resources/bundle-templates/ttp-bundle.xml");
+		Path medic3BundleTemplateFile = Paths.get("src/main/resources/bundle-templates", sourceBundleFileName);
 
-		ttpBundle = readAndCleanBundle(medic3BundleTemplateFile);
+		Bundle ttpBundle = readAndCleanBundle(medic3BundleTemplateFile);
 
 		Organization organizationTtp = (Organization) ttpBundle.getEntry().get(0).getResource();
 		Extension organizationTtpThumbprintExtension = organizationTtp
@@ -207,8 +229,9 @@ public class BundleGenerator
 		organizationMedic3thumbprintExtension.setValue(new StringType(
 				clientCertificateFilesByCommonName.get("medic3-client").getCertificateSha512ThumbprintHex()));
 
-		writeBundle(Paths.get("bundle/ttp-bundle.xml"), ttpBundle);
+		writeBundle(Paths.get("bundle", sourceBundleFileName), ttpBundle);
 
+		return ttpBundle;
 	}
 
 	public void copyDockerTest3MedicTtpBundles()
@@ -234,18 +257,18 @@ public class BundleGenerator
 	{
 		Path medic1BundleFile = Paths.get("../../dsf-docker-test-setup-3medic-ttp-docker/medic1/fhir/conf/bundle.xml");
 		logger.info("Copying fhir bundle to {}", medic1BundleFile);
-		writeBundle(medic1BundleFile, medic1Bundle);
+		writeBundle(medic1BundleFile, medic1DockerBundle);
 
 		Path medic2BundleFile = Paths.get("../../dsf-docker-test-setup-3medic-ttp-docker/medic2/fhir/conf/bundle.xml");
 		logger.info("Copying fhir bundle to {}", medic2BundleFile);
-		writeBundle(medic2BundleFile, medic2Bundle);
+		writeBundle(medic2BundleFile, medic2DockerBundle);
 
 		Path medic3BundleFile = Paths.get("../../dsf-docker-test-setup-3medic-ttp-docker/medic3/fhir/conf/bundle.xml");
 		logger.info("Copying fhir bundle to {}", medic3BundleFile);
-		writeBundle(medic3BundleFile, medic3Bundle);
+		writeBundle(medic3BundleFile, medic3DockerBundle);
 
 		Path ttpBundleFile = Paths.get("../../dsf-docker-test-setup-3medic-ttp-docker/ttp/fhir/conf/bundle.xml");
 		logger.info("Copying fhir bundle to {}", ttpBundleFile);
-		writeBundle(ttpBundleFile, ttpBundle);
+		writeBundle(ttpBundleFile, ttpDockerBundle);
 	}
 }
