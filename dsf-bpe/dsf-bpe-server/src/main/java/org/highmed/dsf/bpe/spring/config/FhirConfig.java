@@ -54,7 +54,7 @@ public class FhirConfig
 	@Value("${org.highmed.dsf.bpe.fhir.webservice.keystore.password}")
 	private char[] webserviceKeyStorePassword;
 
-	@Value("${org.highmed.dsf.bpe.fhir.remote.webservice.readTimeout:20000}")
+	@Value("${org.highmed.dsf.bpe.fhir.remote.webservice.readTimeout:60000}")
 	private int remoteWebserviceReadTimeout;
 
 	@Value("${org.highmed.dsf.bpe.fhir.remote.webservice.connectTimeout:5000}")
@@ -72,7 +72,7 @@ public class FhirConfig
 	@Value("${org.highmed.dsf.bpe.fhir.local.webservice.baseUrl}")
 	private String localWebserviceBaseUrl;
 
-	@Value("${org.highmed.dsf.bpe.fhir.local.webservice.readTimeout:20000}")
+	@Value("${org.highmed.dsf.bpe.fhir.local.webservice.readTimeout:60000}")
 	private int localWebserviceReadTimeout;
 
 	@Value("${org.highmed.dsf.bpe.fhir.local.webservice.connectTimeout:2000}")
