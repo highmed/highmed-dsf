@@ -9,6 +9,9 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.hl7.fhir.r4.model.Resource;
 
+/**
+ * Helper with methods to configure read access to FHIR resources.
+ */
 public interface ReadAccessHelper
 {
 	String READ_ACCESS_TAG_SYSTEM = "http://highmed.org/fhir/CodeSystem/read-access-tag";
@@ -25,19 +28,34 @@ public interface ReadAccessHelper
 	String EXTENSION_READ_ACCESS_CONSORTIUM_ROLE_CONSORTIUM = "consortium";
 	String EXTENSION_READ_ACCESS_CONSORTIUM_ROLE_ROLE = "role";
 
+	/**
+	 * Removes ALL tag if present.
+	 * 
+	 * @param <R>
+	 * @param resource
+	 *            may be <code>null</code>
+	 * @return <code>null</code> if given <b>resource</b> is <code>null</code>
+	 * @see #addAll(Resource)
+	 */
 	<R extends Resource> R addLocal(R resource);
 
 	/**
+	 * Adds LOCAL tag if not present, removes ALL tag if present.
+	 * 
 	 * @param <R>
 	 * @param resource
 	 *            may be <code>null</code>
 	 * @param organizationIdentifier
 	 *            not <code>null</code>
 	 * @return <code>null</code> if given <b>resource</b> is <code>null</code>
+	 * @see #addLocal(Resource)
+	 * @see #addOrganization(Resource, Organization)
 	 */
 	<R extends Resource> R addOrganization(R resource, String organizationIdentifier);
 
 	/**
+	 * Adds LOCAL tag if not present, removes ALL tag if present.
+	 * 
 	 * @param <R>
 	 * @param resource
 	 *            may be <code>null</code>
@@ -48,10 +66,14 @@ public interface ReadAccessHelper
 	 *             if given <b>organization</b> is <code>null</code>
 	 * @throws IllegalArgumentException
 	 *             if given <b>organization</b> does not have valid identifier
+	 * @see #addLocal(Resource)
+	 * @see #addOrganization(Resource, String)
 	 */
 	<R extends Resource> R addOrganization(R resource, Organization organization);
 
 	/**
+	 * Adds LOCAL tag if not present, removes ALL tag if present.
+	 * 
 	 * @param <R>
 	 * @param resource
 	 *            may be <code>null</code>
@@ -62,10 +84,14 @@ public interface ReadAccessHelper
 	 * @param roleCode
 	 *            not <code>null</code>
 	 * @return <code>null</code> if given <b>resource</b> is <code>null</code>
+	 * @see #addLocal(Resource)
+	 * @see #addRole(Resource, OrganizationAffiliation)
 	 */
 	<R extends Resource> R addRole(R resource, String consortiumIdentifier, String roleSystem, String roleCode);
 
 	/**
+	 * Adds LOCAL tag if not present, removes ALL tag if present.
+	 * 
 	 * @param <R>
 	 * @param resource
 	 *            may be <code>null</code>
@@ -77,9 +103,22 @@ public interface ReadAccessHelper
 	 * @throws IllegalArgumentException
 	 *             if given <b>affiliation</b> does not have valid consortium identifier or organization role (only one
 	 *             role supported)
+	 * @see #addLocal(Resource)
+	 * @see #addRole(Resource, String, String, String)
 	 */
 	<R extends Resource> R addRole(R resource, OrganizationAffiliation affiliation);
 
+	/**
+	 * Removes LOCAL, ORGANIZATION and ROLE tags if present.
+	 * 
+	 * @param <R>
+	 * @param resource
+	 *            may be <code>null</code>
+	 * @return <code>null</code> if given <b>resource</b> is <code>null</code>
+	 * @see #addLocal(Resource)
+	 * @see #addOrganization(Resource, String)
+	 * @see #addRole(Resource, String, String, String)
+	 */
 	<R extends Resource> R addAll(R resource);
 
 	boolean hasLocal(Resource resource);

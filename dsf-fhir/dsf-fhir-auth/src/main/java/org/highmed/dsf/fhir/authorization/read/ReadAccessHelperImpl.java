@@ -22,13 +22,21 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 	private static final List<String> READ_ACCESS_TAG_VALUES = Arrays.asList(READ_ACCESS_TAG_VALUE_LOCAL,
 			READ_ACCESS_TAG_VALUE_ORGANIZATION, READ_ACCESS_TAG_VALUE_ROLE, READ_ACCESS_TAG_VALUE_ALL);
 
+	private Predicate<Coding> matchesTagValue(String value)
+	{
+		return c -> c != null && READ_ACCESS_TAG_SYSTEM.equals(c.getSystem()) && c.hasCode()
+				&& c.getCode().equals(value);
+	}
+
 	@Override
 	public <R extends Resource> R addLocal(R resource)
 	{
 		if (resource == null)
 			return null;
 
+		resource.getMeta().getTag().removeIf(matchesTagValue(READ_ACCESS_TAG_VALUE_ALL));
 		resource.getMeta().addTag().setSystem(READ_ACCESS_TAG_SYSTEM).setCode(READ_ACCESS_TAG_VALUE_LOCAL);
+
 		return resource;
 	}
 
@@ -40,9 +48,13 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 
 		Objects.requireNonNull(organizationIdentifier, "organizationIdentifier");
 
+		if (resource.getMeta().getTag().stream().noneMatch(matchesTagValue(READ_ACCESS_TAG_VALUE_LOCAL)))
+			addLocal(resource);
+
 		resource.getMeta().addTag().setSystem(READ_ACCESS_TAG_SYSTEM).setCode(READ_ACCESS_TAG_VALUE_ORGANIZATION)
 				.addExtension().setUrl(EXTENSION_READ_ACCESS_ORGANIZATION)
 				.setValue(new Identifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue(organizationIdentifier));
+
 		return resource;
 	}
 
@@ -53,6 +65,7 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 			return null;
 
 		Objects.requireNonNull(organization, "organization");
+
 		if (!organization.hasIdentifier())
 			throw new IllegalArgumentException("organization has no identifier");
 
@@ -73,6 +86,9 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 		Objects.requireNonNull(consortiumIdentifier, "consortiumIdentifier");
 		Objects.requireNonNull(roleSystem, "roleSystem");
 		Objects.requireNonNull(roleCode, "roleCode");
+
+		if (resource.getMeta().getTag().stream().noneMatch(matchesTagValue(READ_ACCESS_TAG_VALUE_LOCAL)))
+			addLocal(resource);
 
 		Extension ex = resource.getMeta().addTag().setSystem(READ_ACCESS_TAG_SYSTEM).setCode(READ_ACCESS_TAG_VALUE_ROLE)
 				.addExtension().setUrl(EXTENSION_READ_ACCESS_CONSORTIUM_ROLE);
@@ -122,6 +138,11 @@ public class ReadAccessHelperImpl implements ReadAccessHelper
 	{
 		if (resource == null)
 			return null;
+
+		resource.getMeta().getTag()
+				.removeIf(matchesTagValue(READ_ACCESS_TAG_VALUE_LOCAL)
+						.or(matchesTagValue(READ_ACCESS_TAG_VALUE_ORGANIZATION))
+						.or(matchesTagValue(READ_ACCESS_TAG_VALUE_ROLE)));
 
 		resource.getMeta().addTag().setSystem(READ_ACCESS_TAG_SYSTEM).setCode(READ_ACCESS_TAG_VALUE_ALL);
 		return resource;

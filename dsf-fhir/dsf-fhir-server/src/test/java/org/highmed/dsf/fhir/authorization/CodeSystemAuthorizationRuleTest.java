@@ -158,25 +158,6 @@ public class CodeSystemAuthorizationRuleTest
 	}
 
 	@Test
-	public void testReasonReadNotAllowedForLocalUserByOrganizationTag() throws Exception
-	{
-		String organizationIdentifier = "test.org";
-
-		Organization organization = new Organization();
-		organization.setName("Local Org");
-		organization.addIdentifier().setSystem(AbstractAuthorizationRule.ORGANIZATION_IDENTIFIER_SYSTEM)
-				.setValue(organizationIdentifier);
-		User user = new User(organization, UserRole.LOCAL, "local");
-
-		CodeSystem codeSystem = new CodeSystem();
-		readAccessHelper.addOrganization(codeSystem, "not-allowed." + organizationIdentifier);
-
-		Optional<String> reason = rule.reasonReadAllowed(user, codeSystem);
-
-		assertFalse(reason.isPresent());
-	}
-
-	@Test
 	public void testReasonReadAllowedForRemoteUserByRoleTag() throws Exception
 	{
 		String organizationIdentifier = "test.org";
@@ -219,7 +200,7 @@ public class CodeSystemAuthorizationRuleTest
 	}
 
 	@Test
-	public void testReasonReadAllowedForLocalUserByRoleTag() throws Exception
+	public void testReasonReadAllowedForLocalUserWithRoleTag() throws Exception
 	{
 		String organizationIdentifier = "test.org";
 		String consortiumIdentifier = "consortium.org";
@@ -244,20 +225,10 @@ public class CodeSystemAuthorizationRuleTest
 		CodeSystem codeSystem = new CodeSystem();
 		readAccessHelper.addRole(codeSystem, consortiumIdentifier, roleSystem, roleCode);
 
-		when(daoProvider.newReadOnlyAutoCommitTransaction()).thenReturn(mock(Connection.class));
-		OrganizationAffiliationDao dao = mock(OrganizationAffiliationDao.class);
-		when(daoProvider.getOrganizationAffiliationDao()).thenReturn(dao);
-		when(dao.readActiveNotDeletedByMemberOrganizationIdentifierIncludingOrganizationIdentifiersWithTransaction(
-				isNotNull(), eq(organizationIdentifier))).thenReturn(Collections.singletonList(affiliation));
-
 		Optional<String> reason = rule.reasonReadAllowed(user, codeSystem);
 
 		assertTrue(reason.isPresent());
 		assertFalse(reason.get().isBlank());
-
-		verify(dao).readActiveNotDeletedByMemberOrganizationIdentifierIncludingOrganizationIdentifiersWithTransaction(
-				isNotNull(), eq(organizationIdentifier));
-		verify(daoProvider).getOrganizationAffiliationDao();
 	}
 
 	@Test
@@ -274,39 +245,6 @@ public class CodeSystemAuthorizationRuleTest
 		organization.addIdentifier().setSystem(AbstractAuthorizationRule.ORGANIZATION_IDENTIFIER_SYSTEM)
 				.setValue(organizationIdentifier);
 		User user = new User(organization, UserRole.REMOTE, "remote");
-
-		CodeSystem codeSystem = new CodeSystem();
-		readAccessHelper.addRole(codeSystem, consortiumIdentifier, roleSystem, roleCode);
-
-		when(daoProvider.newReadOnlyAutoCommitTransaction()).thenReturn(mock(Connection.class));
-		OrganizationAffiliationDao dao = mock(OrganizationAffiliationDao.class);
-		when(daoProvider.getOrganizationAffiliationDao()).thenReturn(dao);
-		when(dao.readActiveNotDeletedByMemberOrganizationIdentifierIncludingOrganizationIdentifiersWithTransaction(
-				isNotNull(), eq(organizationIdentifier))).thenReturn(Collections.emptyList());
-
-		Optional<String> reason = rule.reasonReadAllowed(user, codeSystem);
-
-		assertFalse(reason.isPresent());
-
-		verify(dao).readActiveNotDeletedByMemberOrganizationIdentifierIncludingOrganizationIdentifiersWithTransaction(
-				isNotNull(), eq(organizationIdentifier));
-		verify(daoProvider).getOrganizationAffiliationDao();
-	}
-
-	@Test
-	public void testReasonReadNotAllowedForLocalUserByRoleTag() throws Exception
-	{
-		String organizationIdentifier = "test.org";
-		String consortiumIdentifier = "consortium.org";
-		String roleSystem = "http://server.base/fhir/CodeSystem/test";
-		String roleCode = "foo";
-
-		Organization organization = new Organization();
-		organization.setActive(true);
-		organization.setName("Remote Org");
-		organization.addIdentifier().setSystem(AbstractAuthorizationRule.ORGANIZATION_IDENTIFIER_SYSTEM)
-				.setValue(organizationIdentifier);
-		User user = new User(organization, UserRole.LOCAL, "local");
 
 		CodeSystem codeSystem = new CodeSystem();
 		readAccessHelper.addRole(codeSystem, consortiumIdentifier, roleSystem, roleCode);

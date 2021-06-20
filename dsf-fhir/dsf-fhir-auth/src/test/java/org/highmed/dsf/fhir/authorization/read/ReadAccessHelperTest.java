@@ -23,9 +23,24 @@ public class ReadAccessHelperTest
 	{
 		var r = new CodeSystem();
 		assertFalse(helper.hasLocal(r));
+		assertFalse(helper.hasAll(r));
 
 		helper.addLocal(r);
 		assertTrue(helper.hasLocal(r));
+		assertFalse(helper.hasAll(r));
+	}
+
+	@Test
+	public void testSetLocal() throws Exception
+	{
+		var r = new CodeSystem();
+		helper.addAll(r);
+		assertFalse(helper.hasLocal(r));
+		assertTrue(helper.hasAll(r));
+
+		helper.addLocal(r);
+		assertTrue(helper.hasLocal(r));
+		assertFalse(helper.hasAll(r));
 	}
 
 	@Test
@@ -38,7 +53,9 @@ public class ReadAccessHelperTest
 
 			assertTrue(helper.isValid(r));
 			assertTrue(helper.isValid(r, org -> false, role -> false));
+
 			assertTrue(helper.hasLocal(r));
+			assertFalse(helper.hasAll(r));
 		}
 	}
 
@@ -46,10 +63,32 @@ public class ReadAccessHelperTest
 	public void testHasOrganization() throws Exception
 	{
 		var r = new CodeSystem();
+		assertFalse(helper.hasLocal(r));
 		assertFalse(helper.hasOrganization(r, "organization.com"));
+		assertFalse(helper.hasAll(r));
 
 		helper.addOrganization(r, "organization.com");
+		assertTrue(helper.hasLocal(r));
 		assertTrue(helper.hasOrganization(r, "organization.com"));
+		assertFalse(helper.hasAll(r));
+	}
+
+	@Test
+	public void testHasOrganization2() throws Exception
+	{
+		var r = new CodeSystem();
+		helper.addOrganization(r, "organization.com");
+		assertTrue(helper.hasLocal(r));
+		assertTrue(helper.hasOrganization(r, "organization.com"));
+		assertFalse(helper.hasOrganization(r, "organization2.com"));
+		assertFalse(helper.hasAll(r));
+
+		helper.addOrganization(r, "organization2.com");
+
+		assertTrue(helper.hasLocal(r));
+		assertTrue(helper.hasOrganization(r, "organization.com"));
+		assertTrue(helper.hasOrganization(r, "organization2.com"));
+		assertFalse(helper.hasAll(r));
 	}
 
 	@Test
@@ -64,7 +103,10 @@ public class ReadAccessHelperTest
 
 			assertTrue(helper.isValid(r));
 			assertTrue(helper.isValid(r, org -> organizationIdentifier.equals(org.getValue()), role -> false));
+
+			assertTrue(helper.hasLocal(r));
 			assertTrue(helper.hasOrganization(r, organizationIdentifier));
+			assertFalse(helper.hasAll(r));
 		}
 	}
 
@@ -75,10 +117,14 @@ public class ReadAccessHelperTest
 		org.addIdentifier().setSystem("http://highmed.org/sid/organization-identifier").setValue("organization.com");
 
 		var r = new CodeSystem();
+		assertFalse(helper.hasLocal(r));
 		assertFalse(helper.hasOrganization(r, org));
+		assertFalse(helper.hasAll(r));
 
 		helper.addOrganization(r, org);
+		assertTrue(helper.hasLocal(r));
 		assertTrue(helper.hasOrganization(r, org));
+		assertFalse(helper.hasAll(r));
 	}
 
 	@Test
@@ -89,10 +135,14 @@ public class ReadAccessHelperTest
 		final String roleCode = "role-code";
 
 		var r = new CodeSystem();
+		assertFalse(helper.hasLocal(r));
 		assertFalse(helper.hasRole(r, consortiumIdentifier, roleSystem, roleCode));
+		assertFalse(helper.hasAll(r));
 
 		helper.addRole(r, consortiumIdentifier, roleSystem, roleCode);
+		assertTrue(helper.hasLocal(r));
 		assertTrue(helper.hasRole(r, consortiumIdentifier, roleSystem, roleCode));
+		assertFalse(helper.hasAll(r));
 	}
 
 	@Test
@@ -104,10 +154,14 @@ public class ReadAccessHelperTest
 		affiliation.addCode().addCoding().setSystem("role-system").setCode("role-code");
 
 		var r = new CodeSystem();
+		assertFalse(helper.hasLocal(r));
 		assertFalse(helper.hasRole(r, affiliation));
+		assertFalse(helper.hasAll(r));
 
 		helper.addRole(r, affiliation);
+		assertTrue(helper.hasLocal(r));
 		assertTrue(helper.hasRole(r, affiliation));
+		assertFalse(helper.hasAll(r));
 	}
 
 	@Test
