@@ -266,7 +266,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 					.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 		}
 
-		SearchQuery<R> query = dao.createSearchQuery(getCurrentUser(), 1, 1);
+		SearchQuery<R> query = dao.createSearchQueryWithoutUserFilter(1, 1);
 		query.configureParameters(queryParameters);
 
 		List<SearchQueryParameterError> unsupportedQueryParameters = query

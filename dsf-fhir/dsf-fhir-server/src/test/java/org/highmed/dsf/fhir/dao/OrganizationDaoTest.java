@@ -155,7 +155,7 @@ public class OrganizationDaoTest extends AbstractResourceDaoTest<Organization, O
 		final String identifierValue = "foo";
 
 		Organization createResource = createResource();
-		createResource.getIdentifierFirstRep().setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
+		createResource.getIdentifierFirstRep().setSystem("http://highmed.org/sid/organization-identifier")
 				.setValue(identifierValue);
 		dao.create(createResource);
 

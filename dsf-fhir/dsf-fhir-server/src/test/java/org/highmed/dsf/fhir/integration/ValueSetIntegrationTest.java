@@ -26,7 +26,7 @@ public class ValueSetIntegrationTest extends AbstractIntegrationTest
 	public void testDeleteAndCreateInOneTransactionBundle() throws Exception
 	{
 		ValueSet v = new ValueSet();
-		v.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/authorization-role").setCode("REMOTE");
+		v.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag").setCode("ALL");
 		v.setUrl("http://foo.bar/fhir/baz");
 		v.setVersion("1.0.0");
 		v.setDate(DF.parse("1010-01-01"));

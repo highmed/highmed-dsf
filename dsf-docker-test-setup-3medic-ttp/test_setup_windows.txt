@@ -1,7 +1,7 @@
 Windows 10
 
 Windows Host
-	Install WSL with Ubuntu 18.05
+	Install WSL with Ubuntu 18.04
 	Download Ubuntu Server 18.04.5 ISO (e.g. https://ftp-stud.hs-esslingen.de/pub/Mirrors/releases.ubuntu.com/18.04.5/ubuntu-18.04.5-live-server-amd64.iso) to your $HOME/Downloads folder
 	Create VirtualSwitch and VMs:
 		execute vm-setup.ps1 in PowerShell with administrator privileges

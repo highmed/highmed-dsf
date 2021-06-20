@@ -21,7 +21,7 @@ public class ReferenceTest
 	{
 		Endpoint endpoint = new Endpoint();
 		endpoint.getManagingOrganization().setReference("Organization/" + UUID.randomUUID().toString()).getIdentifier()
-				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier").setValue("hs-heilbronn.de");
+				.setSystem("http://highmed.org/sid/organization-identifier").setValue("hs-heilbronn.de");
 
 		FhirContext context = FhirContext.forR4();
 		String endpointString = context.newXmlParser().setPrettyPrint(true).encodeResourceToString(endpoint);

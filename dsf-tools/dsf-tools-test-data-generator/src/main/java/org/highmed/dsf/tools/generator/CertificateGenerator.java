@@ -51,12 +51,14 @@ public class CertificateGenerator
 {
 	private static final Logger logger = LoggerFactory.getLogger(CertificateGenerator.class);
 
-	private static final String SERVER_DNS_ALTERNATIVE_NAME = "fhir";
 	private static final char[] CERT_PASSWORD = "password".toCharArray();
 
 	private static final String[] SERVER_COMMON_NAMES = { "ttp", "medic1", "medic2", "medic3", "localhost" };
 	private static final String[] CLIENT_COMMON_NAMES = { "ttp-client", "medic1-client", "medic2-client",
 			"medic3-client", "test-client", "Webbrowser Test User" };
+
+	private static final Map<String, List<String>> DNS_NAMES = Map.of("localhost",
+			Arrays.asList("localhost", "ttp-docker", "medic1-docker", "medic2-docker", "medic3-docker"));
 
 	private static enum CertificateType
 	{
@@ -191,9 +193,12 @@ public class CertificateGenerator
 	{
 		ca = initCA();
 
-		serverCertificateFilesByCommonName = Arrays.stream(SERVER_COMMON_NAMES).map(createCert(CertificateType.SERVER))
+		serverCertificateFilesByCommonName = Arrays.stream(SERVER_COMMON_NAMES)
+				.map(commonName -> createCert(CertificateType.SERVER, commonName,
+						DNS_NAMES.getOrDefault(commonName, Collections.singletonList(commonName))))
 				.collect(Collectors.toMap(CertificateFiles::getCommonName, Function.identity()));
-		clientCertificateFilesByCommonName = Arrays.stream(CLIENT_COMMON_NAMES).map(createCert(CertificateType.CLIENT))
+		clientCertificateFilesByCommonName = Arrays.stream(CLIENT_COMMON_NAMES)
+				.map(commonName -> createCert(CertificateType.CLIENT, commonName, Collections.emptyList()))
 				.collect(Collectors.toMap(CertificateFiles::getCommonName, Function.identity()));
 
 		writeThumbprints();
@@ -317,28 +322,25 @@ public class CertificateGenerator
 		}
 	}
 
-	public Function<String, CertificateFiles> createCert(CertificateType certificateType)
+	public CertificateFiles createCert(CertificateType certificateType, String commonName, List<String> dnsNames)
 	{
-		return commonName ->
-		{
-			Path privateKeyFile = createFolderIfNotExists(getPrivateKeyPath(commonName));
-			Path publicKeyFile = createFolderIfNotExists(getPublicKeyPath(commonName));
-			KeyPair keyPair = createOrReadKeyPair(privateKeyFile, publicKeyFile, commonName);
+		Path privateKeyFile = createFolderIfNotExists(getPrivateKeyPath(commonName));
+		Path publicKeyFile = createFolderIfNotExists(getPublicKeyPath(commonName));
+		KeyPair keyPair = createOrReadKeyPair(privateKeyFile, publicKeyFile, commonName);
 
-			Path certificateRequestFile = createFolderIfNotExists(getCertReqPath(commonName));
-			JcaPKCS10CertificationRequest certificateRequest = createOrReadCertificateRequest(certificateRequestFile,
-					keyPair, commonName, certificateType);
+		Path certificateRequestFile = createFolderIfNotExists(getCertReqPath(commonName));
+		JcaPKCS10CertificationRequest certificateRequest = createOrReadCertificateRequest(certificateRequestFile,
+				certificateType, keyPair, commonName, dnsNames);
 
-			Path certificateP12File = createFolderIfNotExists(getCertP12Path(commonName));
-			Path certificatePemFile = createFolderIfNotExists(getCertPemPath(commonName));
-			CertificateAndP12File certificateAndP12File = signOrReadCertificate(certificatePemFile, certificateP12File,
-					certificateRequest, keyPair.getPrivate(), commonName, certificateType);
+		Path certificateP12File = createFolderIfNotExists(getCertP12Path(commonName));
+		Path certificatePemFile = createFolderIfNotExists(getCertPemPath(commonName));
+		CertificateAndP12File certificateAndP12File = signOrReadCertificate(certificatePemFile, certificateP12File,
+				certificateRequest, keyPair.getPrivate(), commonName, certificateType);
 
-			return new CertificateFiles(commonName, certificateType, certificateRequest, certificateRequestFile,
-					certificateAndP12File.p12KeyStore, certificateAndP12File.p12KeyStoreFile, keyPair, privateKeyFile,
-					publicKeyFile, certificateAndP12File.certificate, certificateAndP12File.certificateFile,
-					calculateSha512CertificateThumbprint(certificateAndP12File.certificate));
-		};
+		return new CertificateFiles(commonName, certificateType, certificateRequest, certificateRequestFile,
+				certificateAndP12File.p12KeyStore, certificateAndP12File.p12KeyStoreFile, keyPair, privateKeyFile,
+				publicKeyFile, certificateAndP12File.certificate, certificateAndP12File.certificateFile,
+				calculateSha512CertificateThumbprint(certificateAndP12File.certificate));
 	}
 
 	private CertificateAndP12File signOrReadCertificate(Path certificateFile, Path p12KeyStoreFile,
@@ -354,7 +356,7 @@ public class CertificateGenerator
 			if (!Files.isReadable(p12KeyStoreFile))
 			{
 				logger.info("Saving certificate (p21) to {}, password '{}' [{}]", p12KeyStoreFile.toString(),
-						CERT_PASSWORD, commonName);
+						String.valueOf(CERT_PASSWORD), commonName);
 				p12KeyStore = createP12KeyStore(privateKey, commonName, certificate);
 				writeP12File(p12KeyStoreFile, p12KeyStore);
 			}
@@ -371,8 +373,8 @@ public class CertificateGenerator
 			logger.info("Saving certificate (pem) to {} [{}]", certificateFile.toString(), commonName);
 			writeCertificate(certificateFile, certificate);
 
-			logger.info("Saving certificate (p21) to {}, password '{}' [{}]", p12KeyStoreFile.toString(), CERT_PASSWORD,
-					commonName);
+			logger.info("Saving certificate (p21) to {}, password '{}' [{}]", p12KeyStoreFile.toString(),
+					String.valueOf(CERT_PASSWORD), commonName);
 			KeyStore p12KeyStore = createP12KeyStore(privateKey, commonName, certificate);
 			writeP12File(p12KeyStoreFile, p12KeyStore);
 
@@ -444,9 +446,12 @@ public class CertificateGenerator
 		}
 	}
 
-	private JcaPKCS10CertificationRequest createOrReadCertificateRequest(Path certificateRequestFile, KeyPair keyPair,
-			String commonName, CertificateType certificateType)
+	private JcaPKCS10CertificationRequest createOrReadCertificateRequest(Path certificateRequestFile,
+			CertificateType certificateType, KeyPair keyPair, String commonName, List<String> dnsNames)
 	{
+		if (!dnsNames.contains(commonName) && CertificateType.SERVER.equals(certificateType))
+			throw new IllegalArgumentException("dnsNames must contain commonName if certificateType is SERVER");
+
 		if (Files.isReadable(certificateRequestFile))
 		{
 			logger.info("Reading certificate request (csr) from {} [{}]", certificateRequestFile.toString(),
@@ -456,8 +461,8 @@ public class CertificateGenerator
 		else
 		{
 			X500Name subject = CertificationRequestBuilder.createSubject("DE", null, null, null, null, commonName);
-			JcaPKCS10CertificationRequest certificateRequest = createCertificateRequest(keyPair, commonName,
-					certificateType, subject);
+			JcaPKCS10CertificationRequest certificateRequest = createCertificateRequest(certificateType, subject,
+					keyPair, dnsNames);
 
 			logger.info("Saving certificate request (csr) to {} [{}]", certificateRequestFile.toString(), commonName);
 			writeCertificateRequest(certificateRequestFile, certificateRequest);
@@ -466,8 +471,8 @@ public class CertificateGenerator
 		}
 	}
 
-	private JcaPKCS10CertificationRequest createCertificateRequest(KeyPair keyPair, String commonName,
-			CertificateType certificateType, X500Name subject)
+	private JcaPKCS10CertificationRequest createCertificateRequest(CertificateType certificateType, X500Name subject,
+			KeyPair keyPair, List<String> dnsNames)
 	{
 		try
 		{
@@ -477,7 +482,7 @@ public class CertificateGenerator
 					return CertificationRequestBuilder.createClientCertificationRequest(subject, keyPair);
 				case SERVER:
 					return CertificationRequestBuilder.createServerCertificationRequest(subject, keyPair, null,
-							commonName, SERVER_DNS_ALTERNATIVE_NAME);
+							dnsNames);
 				default:
 					throw new RuntimeException("Unknown certificate type " + certificateType);
 			}
@@ -675,14 +680,16 @@ public class CertificateGenerator
 	public void copyDockerTestCertificates()
 	{
 		copyProxyFiles("dsf-docker-test-setup", "localhost");
-		copyClientCertFiles("dsf-docker-test-setup", "test-client");
+		copyClientCertFiles("../../dsf-docker-test-setup/bpe/app/conf/", "../../dsf-docker-test-setup/fhir/app/conf/",
+				"test-client");
 	}
 
 	public void copyDockerTest3MedicTtpCertificates()
 	{
 		List<String> commonNames = Arrays.asList("medic1", "medic2", "medic3", "ttp");
 		commonNames.forEach(cn -> copyProxyFiles("dsf-docker-test-setup-3medic-ttp/" + cn, cn));
-		commonNames.forEach(cn -> copyClientCertFiles("dsf-docker-test-setup-3medic-ttp/" + cn, cn + "-client"));
+		commonNames.forEach(cn -> copyClientCertFiles("../../dsf-docker-test-setup-3medic-ttp/" + cn + "/bpe/app/conf/",
+				"../../dsf-docker-test-setup-3medic-ttp/" + cn + "/fhir/app/conf/", cn + "-client"));
 	}
 
 	private void copyProxyFiles(String dockerTestFolder, String commonName)
@@ -717,18 +724,71 @@ public class CertificateGenerator
 		writeCertificate(fhirCacertFile, testCaCertificate);
 	}
 
-	private void copyClientCertFiles(String dockerTestFolder, String commonName)
+	private void copyClientCertFiles(String bpeConfFolder, String fhirConfFolder, String commonName)
 	{
 		CertificateFiles clientCertFiles = clientCertificateFilesByCommonName.get(commonName);
 
-		Path baseFolder = Paths.get("../../", dockerTestFolder);
-
-		Path bpeClientP12File = baseFolder.resolve("bpe/app/conf/" + commonName + "_certificate.p12");
+		Path bpeClientP12File = Paths.get(bpeConfFolder, commonName + "_certificate.p12");
 		logger.info("Copying {} certificate p12 file to {}", commonName, bpeClientP12File);
 		writeP12File(bpeClientP12File, clientCertFiles.getP12KeyStore());
 
-		Path fhirClientP12File = baseFolder.resolve("fhir/app/conf/" + commonName + "_certificate.p12");
+		Path fhirClientP12File = Paths.get(fhirConfFolder, commonName + "_certificate.p12");
 		logger.info("Copying {} certificate p12 file to {}", commonName, fhirClientP12File);
 		writeP12File(fhirClientP12File, clientCertFiles.getP12KeyStore());
+	}
+
+	public void copyDockerTest3MedicTtpDockerCertificates()
+	{
+		Path baseFolder = Paths.get("../../dsf-docker-test-setup-3medic-ttp-docker");
+
+		X509Certificate testCaCertificate = ca.getCertificate();
+
+		Path testCaCertificateFile = baseFolder.resolve("proxy/ssl/client_ca.pem");
+		logger.info("Copying Test CA certificate file to {}", testCaCertificateFile.toString());
+		writeCertificate(testCaCertificateFile, testCaCertificate);
+
+		CertificateFiles localhost = serverCertificateFilesByCommonName.get("localhost");
+
+		Path localhostCertificateAndCa = baseFolder.resolve("proxy/ssl/certificate_and_ca.pem");
+		logger.info("Writing localhost certificate and CA certificate to {}", testCaCertificateFile.toString());
+		writeCertificates(localhostCertificateAndCa, localhost.getCertificate(), testCaCertificate);
+
+		Path localhostCertificatePrivateKey = baseFolder.resolve("proxy/ssl/certificate_private-key.pem");
+		logger.info("Copying localhost private-key file to {}", localhostCertificatePrivateKey);
+		writePrivateKey(localhostCertificatePrivateKey, (RSAPrivateCrtKey) localhost.getKeyPair().getPrivate());
+
+		List<String> commonNames = Arrays.asList("medic1", "medic2", "medic3", "ttp");
+		commonNames
+				.forEach(cn -> copyClientCertFiles("../../dsf-docker-test-setup-3medic-ttp-docker/" + cn + "/bpe/conf/",
+						"../../dsf-docker-test-setup-3medic-ttp-docker/" + cn + "/fhir/conf/", cn + "-client"));
+	}
+
+	private void writeCertificates(Path certificateFile, X509Certificate... certificates)
+	{
+		try
+		{
+			StringBuilder b = new StringBuilder();
+
+			for (X509Certificate cert : certificates)
+			{
+				b.append("subject= ");
+				b.append(cert.getSubjectX500Principal().getName());
+				b.append("\n");
+				b.append(PemIo.writeX509Certificate(cert));
+			}
+
+			Files.writeString(certificateFile, b.toString());
+		}
+		catch (CertificateEncodingException | IllegalStateException | IOException e)
+		{
+			logger.error("Error while writing certificate to " + certificateFile.toString(), e);
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static void main(String[] args)
+	{
+		CertificateAuthority.registerBouncyCastleProvider();
+		new CertificateGenerator().generateCertificates();
 	}
 }

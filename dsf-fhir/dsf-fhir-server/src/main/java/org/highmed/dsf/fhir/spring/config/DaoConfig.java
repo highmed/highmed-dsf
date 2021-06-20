@@ -14,6 +14,7 @@ import org.highmed.dsf.fhir.dao.LocationDao;
 import org.highmed.dsf.fhir.dao.MeasureDao;
 import org.highmed.dsf.fhir.dao.MeasureReportDao;
 import org.highmed.dsf.fhir.dao.NamingSystemDao;
+import org.highmed.dsf.fhir.dao.OrganizationAffiliationDao;
 import org.highmed.dsf.fhir.dao.OrganizationDao;
 import org.highmed.dsf.fhir.dao.PatientDao;
 import org.highmed.dsf.fhir.dao.PractitionerDao;
@@ -37,6 +38,7 @@ import org.highmed.dsf.fhir.dao.jdbc.LocationDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.MeasureDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.MeasureReportDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.NamingSystemDaoJdbc;
+import org.highmed.dsf.fhir.dao.jdbc.OrganizationAffiliationDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.OrganizationDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.PatientDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.PractitionerDaoJdbc;
@@ -165,6 +167,12 @@ public class DaoConfig
 	}
 
 	@Bean
+	public OrganizationAffiliationDao organizationAffiliationDao()
+	{
+		return new OrganizationAffiliationDaoJdbc(dataSource(), fhirConfig.fhirContext());
+	}
+
+	@Bean
 	public PatientDao patientDao()
 	{
 		return new PatientDaoJdbc(dataSource(), fhirConfig.fhirContext());
@@ -229,8 +237,8 @@ public class DaoConfig
 	{
 		return new DaoProviderImpl(dataSource(), activityDefinitionDao(), binaryDao(), bundleDao(), codeSystemDao(),
 				endpointDao(), groupDao(), healthcareServiceDao(), libraryDao(), locationDao(), measureDao(),
-				measureReportDao(), namingSystemDao(), organizationDao(), patientDao(), practitionerDao(),
-				practitionerRoleDao(), provenanceDao(), researchStudyDao(), structureDefinitionDao(),
+				measureReportDao(), namingSystemDao(), organizationDao(), organizationAffiliationDao(), patientDao(),
+				practitionerDao(), practitionerRoleDao(), provenanceDao(), researchStudyDao(), structureDefinitionDao(),
 				structureDefinitionSnapshotDao(), subscriptionDao(), taskDao(), valueSetDao());
 	}
 

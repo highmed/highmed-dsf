@@ -4,13 +4,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -21,6 +21,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.highmed.dsf.fhir.dao.BinaryDao;
 import org.highmed.dsf.fhir.dao.OrganizationDao;
+import org.highmed.dsf.fhir.dao.ResearchStudyDao;
 import org.highmed.dsf.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.dsf.fhir.search.PartialResult;
 import org.hl7.fhir.r4.model.Binary;
@@ -31,37 +32,34 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.ResearchStudy;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import ca.uhn.fhir.context.FhirContext;
 
 public class BinaryIntegrationTest extends AbstractIntegrationTest
 {
-	private static final Logger logger = LoggerFactory.getLogger(BinaryIntegrationTest.class);
+	private void expectForbidden(Runnable operation) throws Exception
+	{
+		try
+		{
+			operation.run();
+			fail("WebApplicationException expected");
+		}
+		catch (WebApplicationException e)
+		{
+			assertEquals(403, e.getResponse().getStatus());
+		}
+	}
 
 	@Test
 	public void testReadAllowedLocalUser() throws Exception
 	{
-		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		PartialResult<Organization> result = orgDao.search(orgDao.createSearchQueryWithoutUserFilter(1, 1)
-				.configureParameters(Map.of("name", Arrays.asList("Test Organization"))));
-		assertNotNull(result);
-		assertEquals(1, result.getTotal());
-		assertNotNull(result.getPartialResult());
-		assertEquals(1, result.getPartialResult().size());
-		assertNotNull(result.getPartialResult().get(0));
-
-		Organization org = result.getPartialResult().get(0);
-
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data);
-		binary.setSecurityContext(new Reference(org.getIdElement().toVersionless()));
+		getReadAccessHelper().addLocal(binary);
 
 		BinaryDao binDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
 		Binary created = binDao.create(binary);
@@ -70,26 +68,32 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
-	public void testReadAllowedLocalUserViaStream() throws Exception
+	public void testReadNotAllowedRemoteUser() throws Exception
 	{
-		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		PartialResult<Organization> result = orgDao.search(orgDao.createSearchQueryWithoutUserFilter(1, 1)
-				.configureParameters(Map.of("name", Arrays.asList("Test Organization"))));
-		assertNotNull(result);
-		assertEquals(1, result.getTotal());
-		assertNotNull(result.getPartialResult());
-		assertEquals(1, result.getPartialResult().size());
-		assertNotNull(result.getPartialResult().get(0));
-
-		Organization org = result.getPartialResult().get(0);
-
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data);
-		binary.setSecurityContext(new Reference(org.getIdElement().toVersionless()));
+		getReadAccessHelper().addLocal(binary);
+
+		BinaryDao binDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
+		Binary created = binDao.create(binary);
+
+		expectForbidden(() -> getExternalWebserviceClient().read(Binary.class, created.getIdElement().getIdPart()));
+	}
+
+	@Test
+	public void testReadAllowedLocalUserViaStream() throws Exception
+	{
+		final String contentType = MediaType.TEXT_PLAIN;
+		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
+
+		Binary binary = new Binary();
+		binary.setContentType(contentType);
+		binary.setData(data);
+		getReadAccessHelper().addLocal(binary);
 
 		BinaryDao binDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
 		Binary created = binDao.create(binary);
@@ -104,24 +108,13 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testReadAllowedLocalUserViaStreamWithVersion() throws Exception
 	{
-		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		PartialResult<Organization> result = orgDao.search(orgDao.createSearchQueryWithoutUserFilter(1, 1)
-				.configureParameters(Map.of("name", Arrays.asList("Test Organization"))));
-		assertNotNull(result);
-		assertEquals(1, result.getTotal());
-		assertNotNull(result.getPartialResult());
-		assertEquals(1, result.getPartialResult().size());
-		assertNotNull(result.getPartialResult().get(0));
-
-		Organization org = result.getPartialResult().get(0);
-
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data);
-		binary.setSecurityContext(new Reference(org.getIdElement().toVersionless()));
+		getReadAccessHelper().addLocal(binary);
 
 		BinaryDao binDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
 		Binary created = binDao.create(binary);
@@ -136,24 +129,13 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testReadAllowedLocalUserViaStreamAcceptWildcard() throws Exception
 	{
-		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		PartialResult<Organization> result = orgDao.search(orgDao.createSearchQueryWithoutUserFilter(1, 1)
-				.configureParameters(Map.of("name", Arrays.asList("Test Organization"))));
-		assertNotNull(result);
-		assertEquals(1, result.getTotal());
-		assertNotNull(result.getPartialResult());
-		assertEquals(1, result.getPartialResult().size());
-		assertNotNull(result.getPartialResult().get(0));
-
-		Organization org = result.getPartialResult().get(0);
-
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data);
-		binary.setSecurityContext(new Reference(org.getIdElement().toVersionless()));
+		getReadAccessHelper().addLocal(binary);
 
 		BinaryDao binDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
 		Binary created = binDao.create(binary);
@@ -168,24 +150,13 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	@Test(expected = WebApplicationException.class)
 	public void testReadAllowedLocalUserViaStreamMediaTypeNotSupported() throws Exception
 	{
-		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		PartialResult<Organization> result = orgDao.search(orgDao.createSearchQueryWithoutUserFilter(1, 1)
-				.configureParameters(Map.of("name", Arrays.asList("Test Organization"))));
-		assertNotNull(result);
-		assertEquals(1, result.getTotal());
-		assertNotNull(result.getPartialResult());
-		assertEquals(1, result.getPartialResult().size());
-		assertNotNull(result.getPartialResult().get(0));
-
-		Organization org = result.getPartialResult().get(0);
-
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data);
-		binary.setSecurityContext(new Reference(org.getIdElement().toVersionless()));
+		getReadAccessHelper().addLocal(binary);
 
 		BinaryDao binDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
 		Binary created = binDao.create(binary);
@@ -225,7 +196,8 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data);
-		binary.setSecurityContext(new Reference(org.getIdElement().toVersionless()));
+		getReadAccessHelper().addLocal(binary);
+		getReadAccessHelper().addOrganization(binary, org);
 
 		BinaryDao binDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
 		Binary created = binDao.create(binary);
@@ -233,7 +205,43 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		getExternalWebserviceClient().read(Binary.class, created.getIdElement().getIdPart());
 	}
 
-	@Test(expected = WebApplicationException.class)
+	@Test
+	public void testReadAllowedExternalUserViaSecurityContext() throws Exception
+	{
+		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
+		PartialResult<Organization> result = orgDao.search(orgDao.createSearchQueryWithoutUserFilter(1, 1)
+				.configureParameters(Map.of("name", Arrays.asList("External Test Organization"))));
+		assertNotNull(result);
+		assertEquals(1, result.getTotal());
+		assertNotNull(result.getPartialResult());
+		assertEquals(1, result.getPartialResult().size());
+		assertNotNull(result.getPartialResult().get(0));
+
+		Organization org = result.getPartialResult().get(0);
+
+		ResearchStudy rs = new ResearchStudy();
+		getReadAccessHelper().addLocal(rs);
+		getReadAccessHelper().addOrganization(rs, org);
+
+		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
+		ResearchStudy createdRs = researchStudyDao.create(rs);
+		assertNotNull(createdRs);
+
+		final String contentType = MediaType.TEXT_PLAIN;
+		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
+
+		Binary binary = new Binary();
+		binary.setContentType(contentType);
+		binary.setData(data);
+		binary.setSecurityContext(new Reference(createdRs.getIdElement().toVersionless()));
+
+		BinaryDao binDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
+		Binary created = binDao.create(binary);
+
+		getExternalWebserviceClient().read(Binary.class, created.getIdElement().getIdPart());
+	}
+
+	@Test
 	public void testReadNotAllowedExternalUser() throws Exception
 	{
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
@@ -253,43 +261,25 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data);
-		binary.setSecurityContext(new Reference(org.getIdElement().toVersionless()));
+		getReadAccessHelper().addLocal(binary);
+		getReadAccessHelper().addOrganization(binary, org);
 
 		BinaryDao binDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
 		Binary created = binDao.create(binary);
 
-		try
-		{
-			getExternalWebserviceClient().read(Binary.class, created.getIdElement().getIdPart());
-		}
-		catch (WebApplicationException e)
-		{
-			assertEquals(Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
-			throw e;
-		}
+		expectForbidden(() -> getExternalWebserviceClient().read(Binary.class, created.getIdElement().getIdPart()));
 	}
 
 	@Test
 	public void testReadAllowedLocalUserViaTransactionBundle() throws Exception
 	{
-		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		PartialResult<Organization> result = orgDao.search(orgDao.createSearchQueryWithoutUserFilter(1, 1)
-				.configureParameters(Map.of("name", Arrays.asList("Test Organization"))));
-		assertNotNull(result);
-		assertEquals(1, result.getTotal());
-		assertNotNull(result.getPartialResult());
-		assertEquals(1, result.getPartialResult().size());
-		assertNotNull(result.getPartialResult().get(0));
-
-		Organization org = result.getPartialResult().get(0);
-
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data);
-		binary.setSecurityContext(new Reference(org.getIdElement().toVersionless()));
+		getReadAccessHelper().addLocal(binary);
 
 		BinaryDao binDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
 		Binary created = binDao.create(binary);
@@ -329,7 +319,8 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data);
-		binary.setSecurityContext(new Reference(org.getIdElement().toVersionless()));
+		getReadAccessHelper().addLocal(binary);
+		getReadAccessHelper().addOrganization(binary, org);
 
 		BinaryDao binDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
 		Binary created = binDao.create(binary);
@@ -349,27 +340,16 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 				responseBundle.getEntry().get(0).getResource().getIdElement().getIdPart());
 	}
 
-	@Test(expected = WebApplicationException.class)
+	@Test
 	public void testReadNotAllowedExternalUserViaTransactionBundle() throws Exception
 	{
-		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		PartialResult<Organization> result = orgDao.search(orgDao.createSearchQueryWithoutUserFilter(1, 1)
-				.configureParameters(Map.of("name", Arrays.asList("Test Organization"))));
-		assertNotNull(result);
-		assertEquals(1, result.getTotal());
-		assertNotNull(result.getPartialResult());
-		assertEquals(1, result.getPartialResult().size());
-		assertNotNull(result.getPartialResult().get(0));
-
-		Organization org = result.getPartialResult().get(0);
-
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data);
-		binary.setSecurityContext(new Reference(org.getIdElement().toVersionless()));
+		getReadAccessHelper().addLocal(binary);
 
 		BinaryDao binDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
 		Binary created = binDao.create(binary);
@@ -378,38 +358,19 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		bundle.setType(BundleType.TRANSACTION);
 		bundle.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Binary/" + created.getIdElement().getIdPart());
 
-		try
-		{
-			getExternalWebserviceClient().postBundle(bundle);
-		}
-		catch (WebApplicationException e)
-		{
-			assertEquals(Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
-			throw e;
-		}
+		expectForbidden(() -> getExternalWebserviceClient().postBundle(bundle));
 	}
 
 	@Test
 	public void testReadAllowedLocalUserViaBatchBundle() throws Exception
 	{
-		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		PartialResult<Organization> result = orgDao.search(orgDao.createSearchQueryWithoutUserFilter(1, 1)
-				.configureParameters(Map.of("name", Arrays.asList("Test Organization"))));
-		assertNotNull(result);
-		assertEquals(1, result.getTotal());
-		assertNotNull(result.getPartialResult());
-		assertEquals(1, result.getPartialResult().size());
-		assertNotNull(result.getPartialResult().get(0));
-
-		Organization org = result.getPartialResult().get(0);
-
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data);
-		binary.setSecurityContext(new Reference(org.getIdElement().toVersionless()));
+		getReadAccessHelper().addLocal(binary);
 
 		BinaryDao binDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
 		Binary created = binDao.create(binary);
@@ -449,7 +410,8 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data);
-		binary.setSecurityContext(new Reference(org.getIdElement().toVersionless()));
+		getReadAccessHelper().addLocal(binary);
+		getReadAccessHelper().addOrganization(binary, org);
 
 		BinaryDao binDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
 		Binary created = binDao.create(binary);
@@ -472,24 +434,13 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testReadNotAllowedExternalUserViaBatchBundle() throws Exception
 	{
-		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		PartialResult<Organization> result = orgDao.search(orgDao.createSearchQueryWithoutUserFilter(1, 1)
-				.configureParameters(Map.of("name", Arrays.asList("Test Organization"))));
-		assertNotNull(result);
-		assertEquals(1, result.getTotal());
-		assertNotNull(result.getPartialResult());
-		assertEquals(1, result.getPartialResult().size());
-		assertNotNull(result.getPartialResult().get(0));
-
-		Organization org = result.getPartialResult().get(0);
-
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data);
-		binary.setSecurityContext(new Reference(org.getIdElement().toVersionless()));
+		getReadAccessHelper().addLocal(binary);
 
 		BinaryDao binDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
 		Binary created = binDao.create(binary);
@@ -510,18 +461,28 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
-	public void testCreate() throws Exception
+	public void testCreateNotAllowedNoReadAccessTagOrSecurityContext() throws Exception
 	{
-		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		Organization createdOrg = orgDao.create(new Organization());
-
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data);
-		binary.setSecurityContext(new Reference(createdOrg.getIdElement().toVersionless()));
+
+		expectForbidden(() -> getWebserviceClient().create(binary));
+	}
+
+	@Test
+	public void testCreateAllowedReadAccessTag() throws Exception
+	{
+		final String contentType = MediaType.TEXT_PLAIN;
+		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
+
+		Binary binary = new Binary();
+		binary.setContentType(contentType);
+		binary.setData(data);
+		getReadAccessHelper().addLocal(binary);
 
 		Binary created = getWebserviceClient().create(binary);
 
@@ -533,16 +494,16 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(created.getContentType());
 		assertEquals(contentType, created.getContentType());
 		assertTrue(Arrays.equals(data, created.getData()));
-
-		assertNotNull(created.getSecurityContext());
-		assertEquals(createdOrg.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
 	}
 
 	@Test
-	public void testCreateReturnMinimal() throws Exception
+	public void testCreateAllowedSecurityContext() throws Exception
 	{
-		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		Organization createdOrg = orgDao.create(new Organization());
+		ResearchStudy rs = new ResearchStudy();
+		getReadAccessHelper().addLocal(rs);
+
+		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
+		ResearchStudy createdRs = researchStudyDao.create(rs);
 
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
@@ -550,7 +511,30 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data);
-		binary.setSecurityContext(new Reference(createdOrg.getIdElement().toVersionless()));
+		binary.setSecurityContext(new Reference(createdRs.getIdElement().toVersionless()));
+
+		Binary created = getWebserviceClient().create(binary);
+
+		assertNotNull(created);
+		assertNotNull(created.getIdElement().toString());
+		assertEquals("1", created.getMeta().getVersionId());
+		assertNotNull(created.getMeta().getLastUpdated());
+
+		assertNotNull(created.getContentType());
+		assertEquals(contentType, created.getContentType());
+		assertTrue(Arrays.equals(data, created.getData()));
+	}
+
+	@Test
+	public void testCreateReturnMinimal() throws Exception
+	{
+		final String contentType = MediaType.TEXT_PLAIN;
+		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
+
+		Binary binary = new Binary();
+		binary.setContentType(contentType);
+		binary.setData(data);
+		getReadAccessHelper().addLocal(binary);
 
 		IdType created = getWebserviceClient().withMinimalReturn().create(binary);
 
@@ -568,16 +552,13 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testCreateReturnOperationOutcome() throws Exception
 	{
-		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		Organization createdOrg = orgDao.create(new Organization());
-
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data);
-		binary.setSecurityContext(new Reference(createdOrg.getIdElement().toVersionless()));
+		getReadAccessHelper().addLocal(binary);
 
 		OperationOutcome created = getWebserviceClient().withOperationOutcomeReturn().create(binary);
 
@@ -587,14 +568,17 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testCreateViaInputStream() throws Exception
 	{
-		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		Organization createdOrg = orgDao.create(new Organization());
+		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
+		ResearchStudy rs = new ResearchStudy();
+		getReadAccessHelper().addLocal(rs);
+
+		ResearchStudy createdRs = researchStudyDao.create(rs);
 
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary created = getWebserviceClient().createBinary(new ByteArrayInputStream(data),
-				MediaType.valueOf(contentType), createdOrg.getIdElement().toVersionless().toString());
+				MediaType.valueOf(contentType), createdRs.getIdElement().toVersionless().toString());
 
 		assertNotNull(created);
 		assertNotNull(created.getIdElement().toString());
@@ -606,20 +590,23 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		assertTrue(Arrays.equals(data, created.getData()));
 
 		assertNotNull(created.getSecurityContext());
-		assertEquals(createdOrg.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
+		assertEquals(createdRs.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
 	}
 
 	@Test
 	public void testCreateViaInputStreamReturnMinimal() throws Exception
 	{
-		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		Organization createdOrg = orgDao.create(new Organization());
+		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
+		ResearchStudy rs = new ResearchStudy();
+		getReadAccessHelper().addLocal(rs);
+
+		ResearchStudy createdRs = researchStudyDao.create(rs);
 
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		IdType created = getWebserviceClient().withMinimalReturn().createBinary(new ByteArrayInputStream(data),
-				MediaType.valueOf(contentType), createdOrg.getIdElement().toVersionless().toString());
+				MediaType.valueOf(contentType), createdRs.getIdElement().toVersionless().toString());
 
 		assertNotNull(created);
 		assertNotNull(created.getBaseUrl());
@@ -635,24 +622,30 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testCreateViaInputStreamReturnOperationOutcome() throws Exception
 	{
-		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		Organization createdOrg = orgDao.create(new Organization());
+		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
+		ResearchStudy rs = new ResearchStudy();
+		getReadAccessHelper().addLocal(rs);
+
+		ResearchStudy createdRs = researchStudyDao.create(rs);
 
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		OperationOutcome created = getWebserviceClient().withOperationOutcomeReturn().createBinary(
 				new ByteArrayInputStream(data), MediaType.valueOf(contentType),
-				createdOrg.getIdElement().toVersionless().toString());
+				createdRs.getIdElement().toVersionless().toString());
 
 		assertNotNull(created);
 	}
 
-	@Test(expected = WebApplicationException.class)
+	@Test
 	public void testCreateNotAllowedExternalUser() throws Exception
 	{
-		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		Organization createdOrg = orgDao.create(new Organization());
+		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
+		ResearchStudy rs = new ResearchStudy();
+		getReadAccessHelper().addLocal(rs);
+
+		ResearchStudy createdRs = researchStudyDao.create(rs);
 
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
@@ -660,20 +653,12 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data);
-		binary.setSecurityContext(new Reference(createdOrg.getIdElement().toVersionless()));
+		binary.setSecurityContext(new Reference(createdRs.getIdElement().toVersionless()));
 
-		try
-		{
-			getExternalWebserviceClient().create(binary);
-		}
-		catch (WebApplicationException e)
-		{
-			assertEquals(Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
-			throw e;
-		}
+		expectForbidden(() -> getExternalWebserviceClient().create(binary));
 	}
 
-	@Test(expected = WebApplicationException.class)
+	@Test
 	public void testCreateSecurityContextOrgNotExisting() throws Exception
 	{
 		final String contentType = MediaType.TEXT_PLAIN;
@@ -682,22 +667,22 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data);
-		binary.setSecurityContext(new Reference("Organization/" + UUID.randomUUID().toString()));
+		binary.setSecurityContext(new Reference("Group/" + UUID.randomUUID().toString()));
 
-		try
-		{
-			getWebserviceClient().create(binary);
-		}
-		catch (WebApplicationException e)
-		{
-			assertEquals(Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
-			throw e;
-		}
+		expectForbidden(() -> getWebserviceClient().create(binary));
 	}
 
 	@Test
 	public void testCreateSecurityContextLogicalReference() throws Exception
 	{
+		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
+		ResearchStudy rs = new ResearchStudy();
+		rs.addIdentifier().setSystem("http://highmed.org/sid/research-study-identifier")
+				.setValue(UUID.randomUUID().toString());
+		getReadAccessHelper().addLocal(rs);
+
+		researchStudyDao.create(rs);
+
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
@@ -705,13 +690,10 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		binary.setContentType(contentType);
 		binary.setData(data);
 		Reference securityContext = new Reference();
-		securityContext.setType("Organization").getIdentifier()
-				.setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
-				.setValue("External_Test_Organization");
+		securityContext.setType("ResearchStudy").getIdentifier()
+				.setSystem("http://highmed.org/sid/research-study-identifier")
+				.setValue(rs.getIdentifierFirstRep().getValue());
 		binary.setSecurityContext(securityContext);
-
-		logger.debug("Binary: {}",
-				FhirContext.forR4().newXmlParser().setPrettyPrint(true).encodeResourceToString(binary));
 
 		Binary created = getWebserviceClient().create(binary);
 		assertNotNull(created);
@@ -720,16 +702,13 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testCreateViaTransactionBundle() throws Exception
 	{
-		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		Organization createdOrg = orgDao.create(new Organization());
-
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data);
-		binary.setSecurityContext(new Reference(createdOrg.getIdElement().toVersionless()));
+		getReadAccessHelper().addLocal(binary);
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
@@ -756,16 +735,13 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testCreateViaTransactionBundleWithMinimalReturn() throws Exception
 	{
-		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		Organization createdOrg = orgDao.create(new Organization());
-
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data);
-		binary.setSecurityContext(new Reference(createdOrg.getIdElement().toVersionless()));
+		getReadAccessHelper().addLocal(binary);
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
@@ -791,16 +767,13 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testCreateViaTransactionBundleWithOperationOutcomeReturn() throws Exception
 	{
-		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		Organization createdOrg = orgDao.create(new Organization());
-
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data);
-		binary.setSecurityContext(new Reference(createdOrg.getIdElement().toVersionless()));
+		getReadAccessHelper().addLocal(binary);
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
@@ -824,11 +797,14 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		assertEquals("W/\"1\"", responseBundle.getEntry().get(0).getResponse().getEtag());
 	}
 
-	@Test(expected = WebApplicationException.class)
+	@Test
 	public void testCreateNotAllowedExternalUserViaTransactionBundle() throws Exception
 	{
-		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		Organization createdOrg = orgDao.create(new Organization());
+		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
+		ResearchStudy rs = new ResearchStudy();
+		getReadAccessHelper().addLocal(rs);
+
+		ResearchStudy createdRs = researchStudyDao.create(rs);
 
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
@@ -836,26 +812,18 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data);
-		binary.setSecurityContext(new Reference(createdOrg.getIdElement().toVersionless()));
+		binary.setSecurityContext(new Reference(createdRs.getIdElement().toVersionless()));
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
 		bundle.addEntry().setFullUrl("urn:uuid:" + UUID.randomUUID().toString()).setResource(binary).getRequest()
 				.setMethod(HTTPVerb.POST).setUrl("Binary");
 
-		try
-		{
-			getExternalWebserviceClient().postBundle(bundle);
-		}
-		catch (WebApplicationException e)
-		{
-			assertEquals(Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
-			throw e;
-		}
+		expectForbidden(() -> getExternalWebserviceClient().postBundle(bundle));
 	}
 
-	@Test(expected = WebApplicationException.class)
-	public void testCreateSecurityContextOrgNotExistingViaTransactionBundle() throws Exception
+	@Test
+	public void testCreateSecurityContextNotExistingViaTransactionBundle() throws Exception
 	{
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
@@ -863,37 +831,26 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data);
-		binary.setSecurityContext(new Reference("Organization/" + UUID.randomUUID().toString()));
+		binary.setSecurityContext(new Reference("ResearchStudy/" + UUID.randomUUID().toString()));
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
 		bundle.addEntry().setFullUrl("urn:uuid:" + UUID.randomUUID().toString()).setResource(binary).getRequest()
 				.setMethod(HTTPVerb.POST).setUrl("Binary");
 
-		try
-		{
-			getWebserviceClient().create(binary);
-		}
-		catch (WebApplicationException e)
-		{
-			assertEquals(Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
-			throw e;
-		}
+		expectForbidden(() -> getWebserviceClient().create(binary));
 	}
 
 	@Test
 	public void testCreateViaBatchBundle() throws Exception
 	{
-		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		Organization createdOrg = orgDao.create(new Organization());
-
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data);
-		binary.setSecurityContext(new Reference(createdOrg.getIdElement().toVersionless()));
+		getReadAccessHelper().addLocal(binary);
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.BATCH);
@@ -917,8 +874,11 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testCreateNotAllowedExternalUserViaBatchBundle() throws Exception
 	{
-		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		Organization createdOrg = orgDao.create(new Organization());
+		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
+		ResearchStudy rs = new ResearchStudy();
+		getReadAccessHelper().addLocal(rs);
+
+		ResearchStudy createdRs = researchStudyDao.create(rs);
 
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
@@ -926,7 +886,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data);
-		binary.setSecurityContext(new Reference(createdOrg.getIdElement().toVersionless()));
+		binary.setSecurityContext(new Reference(createdRs.getIdElement().toVersionless()));
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.BATCH);
@@ -945,7 +905,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
-	public void testCreateSecurityContextOrgNotExistingViaBatchBundle() throws Exception
+	public void testCreateSecurityContextNotExistingViaBatchBundle() throws Exception
 	{
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
@@ -953,7 +913,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data);
-		binary.setSecurityContext(new Reference("Organization/" + UUID.randomUUID().toString()));
+		binary.setSecurityContext(new Reference("ResearchStudy/" + UUID.randomUUID().toString()));
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.BATCH);
@@ -974,9 +934,6 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testUpdate() throws Exception
 	{
-		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		Organization createdOrg = orgDao.create(new Organization());
-
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data1 = "Hello World".getBytes(StandardCharsets.UTF_8);
 		final byte[] data2 = "Hello World and goodbye".getBytes(StandardCharsets.UTF_8);
@@ -984,7 +941,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data1);
-		binary.setSecurityContext(new Reference(createdOrg.getIdElement().toVersionless()));
+		getReadAccessHelper().addLocal(binary);
 
 		BinaryDao binaryDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
 		Binary created = binaryDao.create(binary);
@@ -998,13 +955,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		assertEquals(contentType, created.getContentType());
 		assertTrue(Arrays.equals(data1, created.getData()));
 
-		assertNotNull(created.getSecurityContext());
-		assertEquals(createdOrg.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
-
 		created.setData(data2);
-
-		assertNotNull(created.getSecurityContext());
-		assertEquals(createdOrg.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
 
 		Binary updated = getWebserviceClient().update(created);
 
@@ -1021,9 +972,6 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testUpdateReturnMinimal() throws Exception
 	{
-		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		Organization createdOrg = orgDao.create(new Organization());
-
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data1 = "Hello World".getBytes(StandardCharsets.UTF_8);
 		final byte[] data2 = "Hello World and goodbye".getBytes(StandardCharsets.UTF_8);
@@ -1031,7 +979,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data1);
-		binary.setSecurityContext(new Reference(createdOrg.getIdElement().toVersionless()));
+		getReadAccessHelper().addLocal(binary);
 
 		BinaryDao binaryDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
 		Binary created = binaryDao.create(binary);
@@ -1045,13 +993,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		assertEquals(contentType, created.getContentType());
 		assertTrue(Arrays.equals(data1, created.getData()));
 
-		assertNotNull(created.getSecurityContext());
-		assertEquals(createdOrg.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
-
 		created.setData(data2);
-
-		assertNotNull(created.getSecurityContext());
-		assertEquals(createdOrg.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
 
 		IdType updated = getWebserviceClient().withMinimalReturn().update(created);
 
@@ -1069,9 +1011,6 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testUpdateReturnOperationOutcome() throws Exception
 	{
-		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		Organization createdOrg = orgDao.create(new Organization());
-
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data1 = "Hello World".getBytes(StandardCharsets.UTF_8);
 		final byte[] data2 = "Hello World and goodbye".getBytes(StandardCharsets.UTF_8);
@@ -1079,7 +1018,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data1);
-		binary.setSecurityContext(new Reference(createdOrg.getIdElement().toVersionless()));
+		getReadAccessHelper().addLocal(binary);
 
 		BinaryDao binaryDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
 		Binary created = binaryDao.create(binary);
@@ -1093,24 +1032,21 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		assertEquals(contentType, created.getContentType());
 		assertTrue(Arrays.equals(data1, created.getData()));
 
-		assertNotNull(created.getSecurityContext());
-		assertEquals(createdOrg.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
-
 		created.setData(data2);
-
-		assertNotNull(created.getSecurityContext());
-		assertEquals(createdOrg.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
 
 		OperationOutcome updated = getWebserviceClient().withOperationOutcomeReturn().update(created);
 
 		assertNotNull(updated);
 	}
 
-	@Test(expected = WebApplicationException.class)
+	@Test
 	public void testUpdateNotAllowedExternalUser() throws Exception
 	{
-		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		Organization createdOrg = orgDao.create(new Organization());
+		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
+		ResearchStudy rs = new ResearchStudy();
+		getReadAccessHelper().addLocal(rs);
+
+		ResearchStudy createdRs = researchStudyDao.create(rs);
 
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data1 = "Hello World".getBytes(StandardCharsets.UTF_8);
@@ -1119,7 +1055,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data1);
-		binary.setSecurityContext(new Reference(createdOrg.getIdElement().toVersionless()));
+		binary.setSecurityContext(new Reference(createdRs.getIdElement().toVersionless()));
 
 		BinaryDao binaryDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
 		Binary created = binaryDao.create(binary);
@@ -1134,30 +1070,19 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		assertTrue(Arrays.equals(data1, created.getData()));
 
 		assertNotNull(created.getSecurityContext());
-		assertEquals(createdOrg.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
+		assertEquals(createdRs.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
 
 		created.setData(data2);
 
 		assertNotNull(created.getSecurityContext());
-		assertEquals(createdOrg.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
+		assertEquals(createdRs.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
 
-		try
-		{
-			getExternalWebserviceClient().update(created);
-		}
-		catch (WebApplicationException e)
-		{
-			assertEquals(Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
-			throw e;
-		}
+		expectForbidden(() -> getExternalWebserviceClient().update(created));
 	}
 
 	@Test
 	public void testUpdateViaTransactionBundle() throws Exception
 	{
-		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		Organization createdOrg = orgDao.create(new Organization());
-
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data1 = "Hello World".getBytes(StandardCharsets.UTF_8);
 		final byte[] data2 = "Hello World and goodbye".getBytes(StandardCharsets.UTF_8);
@@ -1165,7 +1090,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data1);
-		binary.setSecurityContext(new Reference(createdOrg.getIdElement().toVersionless()));
+		getReadAccessHelper().addLocal(binary);
 
 		BinaryDao binaryDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
 		Binary created = binaryDao.create(binary);
@@ -1179,13 +1104,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		assertEquals(contentType, created.getContentType());
 		assertTrue(Arrays.equals(data1, created.getData()));
 
-		assertNotNull(created.getSecurityContext());
-		assertEquals(createdOrg.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
-
 		created.setData(data2);
-
-		assertNotNull(created.getSecurityContext());
-		assertEquals(createdOrg.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
@@ -1207,11 +1126,14 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		assertEquals("W/\"2\"", responseBundle.getEntry().get(0).getResponse().getEtag());
 	}
 
-	@Test(expected = WebApplicationException.class)
+	@Test
 	public void testUpdateNotAllowedExternalUserViaTransactionBundle() throws Exception
 	{
-		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		Organization createdOrg = orgDao.create(new Organization());
+		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
+		ResearchStudy rs = new ResearchStudy();
+		getReadAccessHelper().addLocal(rs);
+
+		ResearchStudy createdRs = researchStudyDao.create(rs);
 
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data1 = "Hello World".getBytes(StandardCharsets.UTF_8);
@@ -1220,7 +1142,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data1);
-		binary.setSecurityContext(new Reference(createdOrg.getIdElement().toVersionless()));
+		binary.setSecurityContext(new Reference(createdRs.getIdElement().toVersionless()));
 
 		BinaryDao binaryDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
 		Binary created = binaryDao.create(binary);
@@ -1235,34 +1157,29 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		assertTrue(Arrays.equals(data1, created.getData()));
 
 		assertNotNull(created.getSecurityContext());
-		assertEquals(createdOrg.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
+		assertEquals(createdRs.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
 
 		created.setData(data2);
 
 		assertNotNull(created.getSecurityContext());
-		assertEquals(createdOrg.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
+		assertEquals(createdRs.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
 		bundle.addEntry().setFullUrl(BASE_URL + "/Binary/" + created.getIdElement().getIdPart()).setResource(created)
 				.getRequest().setMethod(HTTPVerb.PUT).setUrl("Binary/" + created.getIdElement().getIdPart());
 
-		try
-		{
-			getExternalWebserviceClient().postBundle(bundle);
-		}
-		catch (WebApplicationException e)
-		{
-			assertEquals(Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
-			throw e;
-		}
+		expectForbidden(() -> getExternalWebserviceClient().postBundle(bundle));
 	}
 
-	@Test(expected = WebApplicationException.class)
-	public void testUpdateSecurityContextOrgNotExistingViaTransactionBundle() throws Exception
+	@Test
+	public void testUpdateSecurityContextNotExistingViaTransactionBundle() throws Exception
 	{
-		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		Organization createdOrg = orgDao.create(new Organization());
+		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
+		ResearchStudy rs = new ResearchStudy();
+		getReadAccessHelper().addLocal(rs);
+
+		ResearchStudy createdRs = researchStudyDao.create(rs);
 
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data1 = "Hello World".getBytes(StandardCharsets.UTF_8);
@@ -1271,7 +1188,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data1);
-		binary.setSecurityContext(new Reference(createdOrg.getIdElement().toVersionless()));
+		binary.setSecurityContext(new Reference(createdRs.getIdElement().toVersionless()));
 
 		BinaryDao binaryDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
 		Binary created = binaryDao.create(binary);
@@ -1286,10 +1203,10 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		assertTrue(Arrays.equals(data1, created.getData()));
 
 		assertNotNull(created.getSecurityContext());
-		assertEquals(createdOrg.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
+		assertEquals(createdRs.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
 
 		created.setData(data2);
-		created.setSecurityContext(new Reference("Organization/" + UUID.randomUUID().toString()));
+		created.setSecurityContext(new Reference("ResearchStudy/" + UUID.randomUUID().toString()));
 
 		assertNotNull(created.getSecurityContext());
 
@@ -1298,23 +1215,12 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		bundle.addEntry().setFullUrl(BASE_URL + "/Binary/" + created.getIdElement().getIdPart()).setResource(created)
 				.getRequest().setMethod(HTTPVerb.PUT).setUrl("Binary/" + created.getIdElement().getIdPart());
 
-		try
-		{
-			getWebserviceClient().postBundle(bundle);
-		}
-		catch (WebApplicationException e)
-		{
-			assertEquals(Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
-			throw e;
-		}
+		expectForbidden(() -> getWebserviceClient().postBundle(bundle));
 	}
 
 	@Test
 	public void testUpdateViaBatchBundle() throws Exception
 	{
-		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		Organization createdOrg = orgDao.create(new Organization());
-
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data1 = "Hello World".getBytes(StandardCharsets.UTF_8);
 		final byte[] data2 = "Hello World and goodbye".getBytes(StandardCharsets.UTF_8);
@@ -1322,7 +1228,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data1);
-		binary.setSecurityContext(new Reference(createdOrg.getIdElement().toVersionless()));
+		getReadAccessHelper().addLocal(binary);
 
 		BinaryDao binaryDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
 		Binary created = binaryDao.create(binary);
@@ -1336,13 +1242,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		assertEquals(contentType, created.getContentType());
 		assertTrue(Arrays.equals(data1, created.getData()));
 
-		assertNotNull(created.getSecurityContext());
-		assertEquals(createdOrg.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
-
 		created.setData(data2);
-
-		assertNotNull(created.getSecurityContext());
-		assertEquals(createdOrg.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.BATCH);
@@ -1366,8 +1266,11 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testUpdateNotAllowedExternalUserViaBatchBundle() throws Exception
 	{
-		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		Organization createdOrg = orgDao.create(new Organization());
+		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
+		ResearchStudy rs = new ResearchStudy();
+		getReadAccessHelper().addLocal(rs);
+
+		ResearchStudy createdRs = researchStudyDao.create(rs);
 
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data1 = "Hello World".getBytes(StandardCharsets.UTF_8);
@@ -1376,7 +1279,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data1);
-		binary.setSecurityContext(new Reference(createdOrg.getIdElement().toVersionless()));
+		binary.setSecurityContext(new Reference(createdRs.getIdElement().toVersionless()));
 
 		BinaryDao binaryDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
 		Binary created = binaryDao.create(binary);
@@ -1391,12 +1294,12 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		assertTrue(Arrays.equals(data1, created.getData()));
 
 		assertNotNull(created.getSecurityContext());
-		assertEquals(createdOrg.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
+		assertEquals(createdRs.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
 
 		created.setData(data2);
 
 		assertNotNull(created.getSecurityContext());
-		assertEquals(createdOrg.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
+		assertEquals(createdRs.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.BATCH);
@@ -1417,8 +1320,11 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testUpdateSecurityContextOrgNotExistingViaBatchBundle() throws Exception
 	{
-		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		Organization createdOrg = orgDao.create(new Organization());
+		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
+		ResearchStudy rs = new ResearchStudy();
+		getReadAccessHelper().addLocal(rs);
+
+		ResearchStudy createdRs = researchStudyDao.create(rs);
 
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data1 = "Hello World".getBytes(StandardCharsets.UTF_8);
@@ -1427,7 +1333,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data1);
-		binary.setSecurityContext(new Reference(createdOrg.getIdElement().toVersionless()));
+		binary.setSecurityContext(new Reference(createdRs.getIdElement().toVersionless()));
 
 		BinaryDao binaryDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
 		Binary created = binaryDao.create(binary);
@@ -1442,10 +1348,10 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		assertTrue(Arrays.equals(data1, created.getData()));
 
 		assertNotNull(created.getSecurityContext());
-		assertEquals(createdOrg.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
+		assertEquals(createdRs.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
 
 		created.setData(data2);
-		created.setSecurityContext(new Reference("Organization/" + UUID.randomUUID().toString()));
+		created.setSecurityContext(new Reference("ResearchStudy/" + UUID.randomUUID().toString()));
 
 		assertNotNull(created.getSecurityContext());
 
@@ -1468,18 +1374,16 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testSearchAll() throws Exception
 	{
-		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		PartialResult<Organization> result = orgDao
-				.search(orgDao.createSearchQueryWithoutUserFilter(1, 2).configureParameters(Collections.emptyMap()));
-		assertNotNull(result);
-		assertEquals(2, result.getTotal());
-		assertNotNull(result.getPartialResult());
-		assertEquals(2, result.getPartialResult().size());
-		assertNotNull(result.getPartialResult().get(0));
-		assertNotNull(result.getPartialResult().get(1));
+		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
+		ResearchStudy rs1 = new ResearchStudy();
+		getReadAccessHelper().addLocal(rs1);
+		ResearchStudy rs2 = new ResearchStudy();
+		getReadAccessHelper().addLocal(rs2);
+		getReadAccessHelper().addRole(rs2, "Parent_Organization",
+				"http://highmed.org/fhir/CodeSystem/organization-type", "MeDIC");
 
-		Organization org1 = result.getPartialResult().get(0);
-		Organization org2 = result.getPartialResult().get(1);
+		ResearchStudy createdRs1 = researchStudyDao.create(rs1);
+		ResearchStudy createdRs2 = researchStudyDao.create(rs2);
 
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
@@ -1487,19 +1391,22 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		Binary b1 = new Binary();
 		b1.setContentType(contentType);
 		b1.setData(data);
-		b1.setSecurityContext(new Reference(org1.getIdElement()));
+		b1.setSecurityContext(new Reference(createdRs1.getIdElement().toVersionless()));
+
 		Binary b2 = new Binary();
 		b2.setContentType(contentType);
 		b2.setData(data);
-		b2.setSecurityContext(new Reference(org1.getIdElement().toVersionless()));
+		b2.setSecurityContext(new Reference(createdRs2.getIdElement().toVersionless()));
+
 		Binary b3 = new Binary();
 		b3.setContentType(contentType);
 		b3.setData(data);
-		b3.setSecurityContext(new Reference(org2.getIdElement()));
+		getReadAccessHelper().addLocal(b3);
+
 		Binary b4 = new Binary();
 		b4.setContentType(contentType);
 		b4.setData(data);
-		b4.setSecurityContext(new Reference(org2.getIdElement().toVersionless()));
+		getReadAccessHelper().addAll(b4);
 
 		BinaryDao binaryDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
 		b1 = binaryDao.create(b1);
@@ -1524,18 +1431,22 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testSearchAllExternalUser() throws Exception
 	{
-		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		PartialResult<Organization> result = orgDao
-				.search(orgDao.createSearchQueryWithoutUserFilter(1, 2).configureParameters(Collections.emptyMap()));
-		assertNotNull(result);
-		assertEquals(2, result.getTotal());
-		assertNotNull(result.getPartialResult());
-		assertEquals(2, result.getPartialResult().size());
-		assertNotNull(result.getPartialResult().get(0));
-		assertNotNull(result.getPartialResult().get(1));
+		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
+		ResearchStudy rs1 = new ResearchStudy();
+		getReadAccessHelper().addLocal(rs1);
 
-		Organization org1 = result.getPartialResult().get(0);
-		Organization org2 = result.getPartialResult().get(1);
+		ResearchStudy rs2 = new ResearchStudy();
+		getReadAccessHelper().addLocal(rs2);
+		getReadAccessHelper().addOrganization(rs2, "External_Test_Organization");
+
+		ResearchStudy rs3 = new ResearchStudy();
+		getReadAccessHelper().addLocal(rs3);
+		getReadAccessHelper().addRole(rs3, "Parent_Organization",
+				"http://highmed.org/fhir/CodeSystem/organization-type", "MeDIC");
+
+		ResearchStudy createdRs1 = researchStudyDao.create(rs1);
+		ResearchStudy createdRs2 = researchStudyDao.create(rs2);
+		ResearchStudy createdRs3 = researchStudyDao.create(rs3);
 
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
@@ -1543,38 +1454,45 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		Binary b1 = new Binary();
 		b1.setContentType(contentType);
 		b1.setData(data);
-		b1.setSecurityContext(new Reference(org1.getIdElement()));
+		b1.setSecurityContext(new Reference(createdRs1.getIdElement().toVersionless()));
+
 		Binary b2 = new Binary();
 		b2.setContentType(contentType);
 		b2.setData(data);
-		b2.setSecurityContext(new Reference(org1.getIdElement().toVersionless()));
+		b2.setSecurityContext(new Reference(createdRs2.getIdElement().toVersionless()));
+
 		Binary b3 = new Binary();
 		b3.setContentType(contentType);
 		b3.setData(data);
-		b3.setSecurityContext(new Reference(org2.getIdElement()));
+		b3.setSecurityContext(new Reference(createdRs3.getIdElement().toVersionless()));
+
 		Binary b4 = new Binary();
 		b4.setContentType(contentType);
 		b4.setData(data);
-		b4.setSecurityContext(new Reference(org2.getIdElement().toVersionless()));
+		getReadAccessHelper().addLocal(b4);
+
+		Binary b5 = new Binary();
+		b5.setContentType(contentType);
+		b5.setData(data);
+		getReadAccessHelper().addAll(b5);
 
 		BinaryDao binaryDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
 		b1 = binaryDao.create(b1);
 		b2 = binaryDao.create(b2);
 		b3 = binaryDao.create(b3);
 		b4 = binaryDao.create(b4);
+		b5 = binaryDao.create(b5);
 
 		Bundle searchBundle = getExternalWebserviceClient().search(Binary.class, Collections.emptyMap());
 		assertNotNull(searchBundle);
-		assertEquals(2, searchBundle.getTotal());
+		assertEquals(3, searchBundle.getTotal());
 		assertTrue(searchBundle.getEntry().stream()
 				.allMatch(c -> c.getResource() != null && c.getResource() instanceof Binary));
 
 		String actualIds = searchBundle.getEntry().stream().map(c -> c.getResource())
 				.map(r -> "Binary/" + r.getIdElement().getIdPart() + "/_history/" + r.getMeta().getVersionId()).sorted()
 				.collect(Collectors.joining(", "));
-		List<Binary> binaries = "External Test Organization".equals(org1.getName()) ? Arrays.asList(b1, b2)
-				: Arrays.asList(b3, b4);
-		String expectedIds = binaries.stream().map(b -> b.getIdElement().getValueAsString()).sorted()
+		String expectedIds = Arrays.asList(b2, b3, b5).stream().map(b -> b.getIdElement().getValueAsString()).sorted()
 				.collect(Collectors.joining(", "));
 		assertEquals(expectedIds, actualIds);
 	}
@@ -1582,16 +1500,13 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	@Test(expected = ResourceDeletedException.class)
 	public void testDelete() throws Exception
 	{
-		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		Organization createdOrg = orgDao.create(new Organization());
-
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data1 = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data1);
-		binary.setSecurityContext(new Reference(createdOrg.getIdElement().toVersionless()));
+		getReadAccessHelper().addLocal(binary);
 
 		BinaryDao binaryDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
 		Binary created = binaryDao.create(binary);
@@ -1604,9 +1519,6 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(created.getContentType());
 		assertEquals(contentType, created.getContentType());
 		assertTrue(Arrays.equals(data1, created.getData()));
-
-		assertNotNull(created.getSecurityContext());
-		assertEquals(createdOrg.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
 
 		getWebserviceClient().delete(Binary.class, created.getIdElement().getIdPart());
 
@@ -1616,16 +1528,13 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	@Test(expected = ResourceDeletedException.class)
 	public void testDeleteDeleted() throws Exception
 	{
-		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		Organization createdOrg = orgDao.create(new Organization());
-
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data1 = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data1);
-		binary.setSecurityContext(new Reference(createdOrg.getIdElement().toVersionless()));
+		getReadAccessHelper().addLocal(binary);
 
 		BinaryDao binaryDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
 		Binary created = binaryDao.create(binary);
@@ -1638,9 +1547,6 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(created.getContentType());
 		assertEquals(contentType, created.getContentType());
 		assertTrue(Arrays.equals(data1, created.getData()));
-
-		assertNotNull(created.getSecurityContext());
-		assertEquals(createdOrg.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
 
 		boolean deleted = binaryDao.delete(UUID.fromString(created.getIdElement().getIdPart()));
 		assertTrue(deleted);
@@ -1650,11 +1556,14 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		binaryDao.read(UUID.fromString(created.getIdElement().getIdPart()));
 	}
 
-	@Test(expected = WebApplicationException.class)
+	@Test
 	public void testDeleteNotAllowedExternalUser() throws Exception
 	{
-		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
-		Organization createdOrg = orgDao.create(new Organization());
+		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
+		ResearchStudy rs1 = new ResearchStudy();
+		getReadAccessHelper().addAll(rs1);
+
+		ResearchStudy createdRs1 = researchStudyDao.create(rs1);
 
 		final String contentType = MediaType.TEXT_PLAIN;
 		final byte[] data1 = "Hello World".getBytes(StandardCharsets.UTF_8);
@@ -1662,7 +1571,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		Binary binary = new Binary();
 		binary.setContentType(contentType);
 		binary.setData(data1);
-		binary.setSecurityContext(new Reference(createdOrg.getIdElement().toVersionless()));
+		binary.setSecurityContext(new Reference(createdRs1.getIdElement().toVersionless()));
 
 		BinaryDao binaryDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
 		Binary created = binaryDao.create(binary);
@@ -1677,16 +1586,8 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		assertTrue(Arrays.equals(data1, created.getData()));
 
 		assertNotNull(created.getSecurityContext());
-		assertEquals(createdOrg.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
+		assertEquals(createdRs1.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
 
-		try
-		{
-			getExternalWebserviceClient().delete(Binary.class, created.getIdElement().getIdPart());
-		}
-		catch (WebApplicationException e)
-		{
-			assertEquals(Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
-			throw e;
-		}
+		expectForbidden(() -> getExternalWebserviceClient().delete(Binary.class, created.getIdElement().getIdPart()));
 	}
 }

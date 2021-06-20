@@ -1,0 +1,29 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+  <meta>
+    <tag>
+      <system value="http://highmed.org/fhir/CodeSystem/read-access-tag" />
+      <code value="ALL" />
+    </tag>		
+  </meta>
+  <url value="http://highmed.org/fhir/StructureDefinition/value-set" />
+  <version value="0.5.0" />
+  <name value="ValueSet" />
+  <status value="active" />
+  <date value="2021-02-28" />
+  <fhirVersion value="4.0.1" />
+  <kind value="resource" />
+  <abstract value="false" />
+  <type value="ValueSet" />
+  <baseDefinition value="http://hl7.org/fhir/StructureDefinition/ValueSet" />
+  <derivation value="constraint" />
+  <differential>
+    <element id="ValueSet.url">
+      <path value="ValueSet.url" />
+      <min value="1" />
+    </element>
+    <element id="ValueSet.version">
+      <path value="ValueSet.version" />
+      <min value="1" />
+    </element>
+  </differential>
+</StructureDefinition>

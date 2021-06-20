@@ -15,6 +15,7 @@ import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.NamingSystem;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
@@ -58,6 +59,8 @@ public interface ReferenceExtractor
 	Stream<ResourceReference> getReferences(OperationOutcome resource);
 
 	Stream<ResourceReference> getReferences(Organization resource);
+
+	Stream<ResourceReference> getReferences(OrganizationAffiliation resource);
 
 	Stream<ResourceReference> getReferences(Patient resource);
 

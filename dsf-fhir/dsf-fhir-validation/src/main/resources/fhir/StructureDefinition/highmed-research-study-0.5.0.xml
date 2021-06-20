@@ -1,9 +1,9 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <meta>
     <tag>
-      <system value="http://highmed.org/fhir/CodeSystem/authorization-role" />
-      <code value="REMOTE" />
-    </tag>
+      <system value="http://highmed.org/fhir/CodeSystem/read-access-tag" />
+      <code value="ALL" />
+    </tag>		
   </meta>
   <url value="http://highmed.org/fhir/StructureDefinition/research-study" />
   <version value="0.5.0" />
@@ -67,7 +67,7 @@
     <element id="ResearchStudy.identifier:highmedIdentifier.system">
       <path value="ResearchStudy.identifier.system" />
       <min value="1" />
-      <fixedUri value="http://highmed.org/fhir/NamingSystem/research-study-identifier" />
+      <fixedUri value="http://highmed.org/sid/research-study-identifier" />
     </element>
     <element id="ResearchStudy.identifier:highmedIdentifier.value">
       <path value="ResearchStudy.identifier.value" />

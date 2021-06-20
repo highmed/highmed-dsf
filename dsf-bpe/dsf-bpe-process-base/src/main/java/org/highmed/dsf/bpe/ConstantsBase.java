@@ -4,12 +4,9 @@ import org.hl7.fhir.r4.model.CodeType;
 
 public interface ConstantsBase
 {
+	String BPMN_EXECUTION_VARIABLE_INSTANTIATES_URI = "instantiatesUri";
 	String BPMN_EXECUTION_VARIABLE_MESSAGE_NAME = "messageName";
-	String BPMN_EXECUTION_VARIABLE_PROCESS_DEFINITION_KEY = "processDefinitionKey";
-	String BPMN_EXECUTION_VARIABLE_VERSION_TAG = "versionTag";
 	String BPMN_EXECUTION_VARIABLE_PROFILE = "profile";
-	// String BPMN_EXECUTION_VARIABLE_TARGET_ORGANIZATION_ID = "targetOrganizationId";
-	// String BPMN_EXECUTION_VARIABLE_CORRELATION_KEY = "correlationKey";
 	String BPMN_EXECUTION_VARIABLE_TARGET = "target";
 	String BPMN_EXECUTION_VARIABLE_TARGETS = "targets";
 	String BPMN_EXECUTION_VARIABLE_TASK = "task";
@@ -47,11 +44,13 @@ public interface ConstantsBase
 	String CODESYSTEM_HIGHMED_QUERY_TYPE = "http://highmed.org/fhir/CodeSystem/query-type";
 	String CODESYSTEM_HIGMED_QUERY_TYPE_VALUE_AQL = "application/x-aql-query";
 
-	String NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER = "http://highmed.org/fhir/NamingSystem/organization-identifier";
-	String NAMINGSYSTEM_HIGHMED_ENDPOINT_IDENTIFIER = "http://highmed.org/fhir/NamingSystem/endpoint-identifier";
-	String NAMINGSYSTEM_HIGHMED_RESEARCH_STUDY_IDENTIFIER = "http://highmed.org/fhir/NamingSystem/research-study-identifier";
+	String NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER = "http://highmed.org/sid/organization-identifier";
+	String NAMINGSYSTEM_HIGHMED_ENDPOINT_IDENTIFIER = "http://highmed.org/sid/endpoint-identifier";
+	String NAMINGSYSTEM_HIGHMED_RESEARCH_STUDY_IDENTIFIER = "http://highmed.org/sid/research-study-identifier";
 
 	CodeType CODE_TYPE_AQL_QUERY = new CodeType(CODESYSTEM_HIGMED_QUERY_TYPE_VALUE_AQL)
 			.setSystem(CODESYSTEM_HIGHMED_QUERY_TYPE);
 	String OPENEHR_MIMETYPE_JSON = "application/json";
+
+	String NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER_HIGHMED_CONSORTIUM = "highmed.org";
 }

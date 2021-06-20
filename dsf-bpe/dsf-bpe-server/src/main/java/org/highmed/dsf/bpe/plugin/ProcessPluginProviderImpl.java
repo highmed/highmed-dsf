@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.env.PropertyResolver;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -51,15 +52,17 @@ public class ProcessPluginProviderImpl implements ProcessPluginProvider, Initial
 	private final FhirContext fhirContext;
 	private final Path pluginDirectory;
 	private final ApplicationContext mainApplicationContext;
+	private final PropertyResolver resolver;
 
 	private List<ProcessPluginDefinitionAndClassLoader> definitions;
 
 	public ProcessPluginProviderImpl(FhirContext fhirContext, Path pluginDirectory,
-			ApplicationContext mainApplicationContext)
+			ApplicationContext mainApplicationContext, PropertyResolver resolver)
 	{
 		this.fhirContext = fhirContext;
 		this.pluginDirectory = pluginDirectory;
 		this.mainApplicationContext = mainApplicationContext;
+		this.resolver = resolver;
 	}
 
 	@Override
@@ -157,7 +160,7 @@ public class ProcessPluginProviderImpl implements ProcessPluginProvider, Initial
 				: folder.toString().endsWith(FOLDER_DRAFT_SUFIX);
 
 		return new ProcessPluginDefinitionAndClassLoader(fhirContext, jars, definitions.get(0).get(), classLoader,
-				draft);
+				draft, resolver);
 	}
 
 	private List<Path> getJars(Path folder)
@@ -285,7 +288,7 @@ public class ProcessPluginProviderImpl implements ProcessPluginProvider, Initial
 		boolean draft = jars.size() == 1 ? jars.get(0).getFileName().toString().endsWith(FILE_DRAFT_SUFIX)
 				: folder.toString().endsWith(FOLDER_DRAFT_SUFIX);
 
-		return new ProcessPluginDefinitionAndClassLoader(fhirContext, jars, definition, classLoader, draft);
+		return new ProcessPluginDefinitionAndClassLoader(fhirContext, jars, definition, classLoader, draft, resolver);
 	}
 
 	@Override

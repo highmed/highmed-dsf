@@ -45,6 +45,8 @@ import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainer
 import org.glassfish.jersey.servlet.init.JerseyServletContainerInitializer;
 import org.highmed.dsf.fhir.FhirContextLoaderListener;
 import org.highmed.dsf.fhir.authentication.AuthenticationFilter;
+import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
+import org.highmed.dsf.fhir.authorization.read.ReadAccessHelperImpl;
 import org.highmed.dsf.fhir.dao.AbstractDbTest;
 import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.highmed.dsf.fhir.service.ReferenceCleanerImpl;
@@ -109,6 +111,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	private static final List<Path> FILES_TO_DELETE = Arrays.asList(FHIR_BUNDLE_FILE);
 
 	protected static final FhirContext fhirContext = FhirContext.forR4();
+	protected static final ReadAccessHelperImpl readAccessHelper = new ReadAccessHelperImpl();
 
 	private static final ReferenceCleaner referenceCleaner = new ReferenceCleanerImpl(new ReferenceExtractorImpl());
 
@@ -155,7 +158,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 			char[] keyStorePassword, String subscriptionIdPart)
 	{
 		return new WebsocketClientTyrus(() ->
-		{}, URI.create(WEBSOCKET_URL), trustStore, keyStore, keyStorePassword, subscriptionIdPart);
+		{}, URI.create(WEBSOCKET_URL), trustStore, keyStore, keyStorePassword, null, null, null, subscriptionIdPart);
 	}
 
 	private static JettyServer startFhirServer() throws Exception
@@ -164,7 +167,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 				StandardCharsets.UTF_8);
 		overrideJettyPropertiesForTesting(properties);
 
-		HttpConfiguration httpConfiguration = httpConfiguration(secureRequestCustomizer());
+		HttpConfiguration httpConfiguration = httpConfiguration(secureRequestCustomizer(properties));
 		Function<Server, ServerConnector> connector = httpsConnector(httpConfiguration, properties);
 
 		Properties initParameter = PropertiesReader.read(Paths.get("src/test/resources/integration/config.properties"),
@@ -378,5 +381,10 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		return createWebsocketClient(certificates.getClientCertificate().getTrustStore(),
 				certificates.getClientCertificate().getKeyStore(),
 				certificates.getClientCertificate().getKeyStorePassword(), subscription.getIdElement().getIdPart());
+	}
+
+	protected static final ReadAccessHelper getReadAccessHelper()
+	{
+		return readAccessHelper;
 	}
 }

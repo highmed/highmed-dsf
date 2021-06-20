@@ -18,6 +18,7 @@
 		<module>dsf-fhir-webservice-client</module>
 		<module>dsf-fhir-websocket-client</module>
 		<module>dsf-fhir-validation</module>
+		<module>dsf-fhir-auth</module>
 	</modules>
 	
 	<properties>
@@ -74,6 +75,11 @@
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
 				<artifactId>dsf-fhir-validation</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-fhir-auth</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 

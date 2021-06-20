@@ -60,12 +60,12 @@ public class AuthorizationHelperImpl implements AuthorizationHelper
 		Optional<AuthorizationRule<Resource>> optRule = getAuthorizationRule(newResource.getClass());
 		optRule.flatMap(rule -> rule.reasonCreateAllowed(connection, user, newResource)).ifPresentOrElse(reason ->
 		{
-			audit.info("Create of resource {} allowed for user '{}' via bundle, reason: {}",
-					newResource.getResourceType().name(), user.getName(), reason);
+			audit.info("Create of resource {} allowed for user '{}' ({}) via bundle, reason: {}",
+					newResource.getResourceType().name(), user.getName(), user.getSubjectDn(), reason);
 		}, () ->
 		{
-			audit.info("Create of resource {} denied for user '{}' via bundle", newResource.getResourceType().name(),
-					user.getName());
+			audit.info("Create of resource {} denied for user '{}' ({}) via bundle",
+					newResource.getResourceType().name(), user.getName(), user.getSubjectDn());
 			throw forbidden("create", user);
 		});
 	}
@@ -76,12 +76,12 @@ public class AuthorizationHelperImpl implements AuthorizationHelper
 		Optional<AuthorizationRule<Resource>> optRule = getAuthorizationRule(existingResource.getClass());
 		optRule.flatMap(rule -> rule.reasonReadAllowed(connection, user, existingResource)).ifPresentOrElse(reason ->
 		{
-			audit.info("Read of resource {} allowed for user '{}' via bundle, reason: {}",
-					existingResource.getIdElement().getValue(), user.getName(), reason);
+			audit.info("Read of resource {} allowed for user '{}' ({}) via bundle, reason: {}",
+					existingResource.getIdElement().getValue(), user.getName(), user.getSubjectDn(), reason);
 		}, () ->
 		{
-			audit.info("Read of resource {} denied for user '{}' via bundle",
-					existingResource.getIdElement().getValue(), user.getName());
+			audit.info("Read of resource {} denied for user '{}' ({}) via bundle",
+					existingResource.getIdElement().getValue(), user.getName(), user.getSubjectDn());
 			throw forbidden("read", user);
 		});
 	}
@@ -93,12 +93,12 @@ public class AuthorizationHelperImpl implements AuthorizationHelper
 		optRule.flatMap(rule -> rule.reasonUpdateAllowed(connection, user, oldResource, newResource))
 				.ifPresentOrElse(reason ->
 				{
-					audit.info("Update of resource {} allowed for user '{}', reason: {}",
-							oldResource.getIdElement().getValue(), user.getName(), reason);
+					audit.info("Update of resource {} allowed for user '{}' ({}), reason: {}",
+							oldResource.getIdElement().getValue(), user.getName(), user.getSubjectDn(), reason);
 				}, () ->
 				{
-					audit.info("Update of resource {} denied for user '{}'", oldResource.getIdElement().getValue(),
-							user.getName());
+					audit.info("Update of resource {} denied for user '{}' ({})", oldResource.getIdElement().getValue(),
+							user.getName(), user.getSubjectDn());
 					throw forbidden("update", user);
 				});
 	}
@@ -109,12 +109,12 @@ public class AuthorizationHelperImpl implements AuthorizationHelper
 		Optional<AuthorizationRule<Resource>> optRule = getAuthorizationRule(oldResource.getClass());
 		optRule.flatMap(rule -> rule.reasonDeleteAllowed(user, oldResource)).ifPresentOrElse(reason ->
 		{
-			audit.info("Delete of resource {} allowed for user '{}', reason: {}", oldResource.getIdElement().getValue(),
-					user.getName(), reason);
+			audit.info("Delete of resource {} allowed for user '{}' ({}), reason: {}",
+					oldResource.getIdElement().getValue(), user.getName(), user.getSubjectDn(), reason);
 		}, () ->
 		{
-			audit.info("Delete of resource {} denied for user '{}'", oldResource.getIdElement().getValue(),
-					user.getName());
+			audit.info("Delete of resource {} denied for user '{}' ({})", oldResource.getIdElement().getValue(),
+					user.getName(), user.getSubjectDn());
 			throw forbidden("delete", user);
 		});
 	}
@@ -125,11 +125,12 @@ public class AuthorizationHelperImpl implements AuthorizationHelper
 		Optional<AuthorizationRule<Resource>> optRule = getAuthorizationRule(resourceTypeName);
 		optRule.flatMap(rule -> rule.reasonSearchAllowed(user)).ifPresentOrElse(reason ->
 		{
-			audit.info("Search of resource {} allowed for user '{}', reason: {}", resourceTypeName, user.getName(),
-					reason);
+			audit.info("Search of resource {} allowed for user '{}' ({}), reason: {}", resourceTypeName, user.getName(),
+					user.getSubjectDn(), reason);
 		}, () ->
 		{
-			audit.info("Search of resource {} denied for user '{}'", resourceTypeName, user.getName());
+			audit.info("Search of resource {} denied for user '{}' ({})", resourceTypeName, user.getName(),
+					user.getSubjectDn());
 			throw forbidden("search", user);
 		});
 	}

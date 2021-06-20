@@ -13,6 +13,12 @@ public class RootAuthorizationRule implements AuthorizationRule<Resource>
 	private static final Logger logger = LoggerFactory.getLogger(RootAuthorizationRule.class);
 
 	@Override
+	public Class<Resource> getResourceType()
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public Optional<String> reasonCreateAllowed(User user, Resource newResource)
 	{
 		throw new UnsupportedOperationException();

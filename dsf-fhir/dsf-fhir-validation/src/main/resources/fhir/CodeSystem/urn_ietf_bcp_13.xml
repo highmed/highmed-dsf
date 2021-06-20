@@ -1,9 +1,9 @@
 <CodeSystem xmlns="http://hl7.org/fhir">
 	<meta>
 		<tag>
-			<system value="http://highmed.org/fhir/CodeSystem/authorization-role" />
-			<code value="REMOTE" />
-		</tag>
+			<system value="http://highmed.org/fhir/CodeSystem/read-access-tag"/>
+			<code value="ALL"/>
+		</tag>		
 	</meta>
 	<url value="urn:ietf:bcp:13" />
 	<version value="4.0.1"/>

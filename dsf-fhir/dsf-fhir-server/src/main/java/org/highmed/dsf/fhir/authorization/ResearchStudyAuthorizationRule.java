@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 
 import org.highmed.dsf.fhir.authentication.OrganizationProvider;
 import org.highmed.dsf.fhir.authentication.User;
+import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.dao.PractitionerRoleDao;
 import org.highmed.dsf.fhir.dao.ResearchStudyDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
@@ -30,56 +31,23 @@ import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ResearchStudyAuthorizationRule extends AbstractAuthorizationRule<ResearchStudy, ResearchStudyDao>
+public class ResearchStudyAuthorizationRule extends AbstractMetaTagAuthorizationRule<ResearchStudy, ResearchStudyDao>
 {
 	private static final Logger logger = LoggerFactory.getLogger(ResearchStudyAuthorizationRule.class);
 
-	private static final String RESEARCH_STUDY_IDENTIFIER = "http://highmed.org/fhir/NamingSystem/research-study-identifier";
+	private static final String RESEARCH_STUDY_IDENTIFIER = "http://highmed.org/sid/research-study-identifier";
 	private static final String RESEARCH_STUDY_IDENTIFIER_PATTERN_STRING = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
 	private static final Pattern RESEARCH_STUDY_IDENTIFIER_PATTERN = Pattern
 			.compile(RESEARCH_STUDY_IDENTIFIER_PATTERN_STRING);
 
 	public ResearchStudyAuthorizationRule(DaoProvider daoProvider, String serverBase,
-			ReferenceResolver referenceResolver, OrganizationProvider organizationProvider)
+			ReferenceResolver referenceResolver, OrganizationProvider organizationProvider,
+			ReadAccessHelper readAccessHelper)
 	{
-		super(ResearchStudy.class, daoProvider, serverBase, referenceResolver, organizationProvider);
+		super(ResearchStudy.class, daoProvider, serverBase, referenceResolver, organizationProvider, readAccessHelper);
 	}
 
-	@Override
-	public Optional<String> reasonCreateAllowed(Connection connection, User user, ResearchStudy newResource)
-	{
-		if (isLocalUser(user))
-		{
-			Optional<String> errors = newResourceOk(connection, user, newResource);
-			if (errors.isEmpty())
-			{
-				if (!resourceExists(connection, newResource))
-				{
-					logger.info(
-							"Create of ResearchStudy authorized for local user '{}', ResearchStudy with identifier does not exist",
-							user.getName());
-					return Optional.of("local user, ResearchStudy with identifier not exist yet");
-				}
-				else
-				{
-					logger.warn("Create of ResearchStudy unauthorized, ResearchStudy with identifier already exists");
-					return Optional.empty();
-				}
-			}
-			else
-			{
-				logger.warn("Create of ResearchStudy unauthorized, " + errors.get());
-				return Optional.empty();
-			}
-		}
-		else
-		{
-			logger.warn("Create of ResearchStudy unauthorized, not a local user");
-			return Optional.empty();
-		}
-	}
-
-	private Optional<String> newResourceOk(Connection connection, User user, ResearchStudy newResource)
+	protected Optional<String> newResourceOk(Connection connection, User user, ResearchStudy newResource)
 	{
 		List<String> errors = new ArrayList<String>();
 
@@ -167,6 +135,11 @@ public class ResearchStudyAuthorizationRule extends AbstractAuthorizationRule<Re
 			}
 		}
 
+		if (!hasValidReadAccessTag(connection, newResource))
+		{
+			errors.add("ResearchStudy is missing valid read access tag");
+		}
+
 		if (errors.isEmpty())
 			return Optional.empty();
 		else
@@ -228,7 +201,7 @@ public class ResearchStudyAuthorizationRule extends AbstractAuthorizationRule<Re
 		}
 	}
 
-	private boolean resourceExists(Connection connection, ResearchStudy newResource)
+	protected boolean resourceExists(Connection connection, ResearchStudy newResource)
 	{
 		String identifierValue = newResource.getIdentifier().stream()
 				.filter(i -> i.hasSystem() && i.hasValue() && RESEARCH_STUDY_IDENTIFIER.equals(i.getSystem()))
@@ -261,115 +234,7 @@ public class ResearchStudyAuthorizationRule extends AbstractAuthorizationRule<Re
 	}
 
 	@Override
-	public Optional<String> reasonReadAllowed(Connection connection, User user, ResearchStudy existingResource)
-	{
-		if (isLocalUser(user))
-		{
-			logger.info("Read of ResearchStudy authorized for local user '{}'", user.getName());
-			return Optional.of("local user");
-		}
-		else if (isRemoteUser(user))
-		{
-			if (isUserPartOfMeDic(user))
-			{
-				if (isCurrentUserPartOfReferencedOrganizations(connection, user,
-						"ResearchStudy.extension(url:" + ResearchStudyHelper.PARTICIPATING_MEDIC_EXTENSION_URL + ")",
-						ResearchStudyHelper.getParticipatingMedicReferences(existingResource)))
-				{
-					logger.info("Read of ResearchStudy authorized, ResearchStudy.extension(url:"
-							+ ResearchStudyHelper.PARTICIPATING_MEDIC_EXTENSION_URL
-							+ ") reference could be resolved and remote user '{}' part of referenced MeDIC organization",
-							user.getName());
-					return Optional.of("remote user, ResearchStudy.extension(url:"
-							+ ResearchStudyHelper.PARTICIPATING_MEDIC_EXTENSION_URL
-							+ ") resolved and user part of referenced MeDIC organization");
-				}
-				else
-				{
-					logger.warn(
-							"Read of ResearchStudy unauthorized, user not part of referenced MeDIC or reference in extension could not be resolved");
-					return Optional.empty();
-				}
-			}
-			else if (isUserPartOfTtp(user))
-			{
-				if (isCurrentUserPartOfReferencedOrganization(connection, user,
-						"ResearchStudy.extension(url:" + ResearchStudyHelper.PARTICIPATING_TTP_EXTENSION_URL + ")",
-						ResearchStudyHelper.getParticipatingTtpReference(existingResource).orElse(null)))
-				{
-					logger.info("Read of ResearchStudy authorized, ResearchStudy.extension(url:"
-							+ ResearchStudyHelper.PARTICIPATING_TTP_EXTENSION_URL
-							+ ") reference could be resolved and remote user '{}' part of referenced TTP organization",
-							user.getName());
-					return Optional.of("remote user, ResearchStudy.extension(url:"
-							+ ResearchStudyHelper.PARTICIPATING_TTP_EXTENSION_URL
-							+ ") resolved and user part of referenced TTP organization");
-				}
-				else
-				{
-					logger.warn(
-							"Read of ResearchStudy unauthorized, user not part of referenced TTP or reference in extension could not be resolved");
-					return Optional.empty();
-				}
-			}
-			else
-			{
-				logger.warn("Read of ResearchStudy unauthorized, user not part of MeDIC or TTP");
-				return Optional.empty();
-			}
-		}
-		else
-		{
-			logger.warn("Read of ResearchStudy unauthorized, not a local or remote user");
-			return Optional.empty();
-		}
-	}
-
-	@Override
-	public Optional<String> reasonUpdateAllowed(Connection connection, User user, ResearchStudy oldResource,
-			ResearchStudy newResource)
-	{
-		if (isLocalUser(user))
-		{
-			Optional<String> errors = newResourceOk(connection, user, newResource);
-			if (errors.isEmpty())
-			{
-				if (isSame(oldResource, newResource))
-				{
-					logger.info(
-							"Update of ResearchStudy authorized for local user '{}', identifier same as existing ResearchStudy",
-							user.getName());
-					return Optional.of("local user; identifier same as existing ResearchStudy");
-
-				}
-				else if (!resourceExists(connection, newResource))
-				{
-					logger.info(
-							"Update of ResearchStudy authorized for local user '{}', other ResearchStudy with identifier does not exist",
-							user.getName());
-					return Optional.of("local user; other ResearchStudy with identifier does not exist yet");
-				}
-				else
-				{
-					logger.warn(
-							"Update of ResearchStudy unauthorized, other ResearchStudy with identifier already exists");
-					return Optional.empty();
-				}
-			}
-			else
-			{
-				logger.warn("Update of ResearchStudy unauthorized, " + errors.get());
-				return Optional.empty();
-			}
-		}
-		else
-		{
-			logger.warn("Update of ResearchStudy unauthorized, not a local user");
-			return Optional.empty();
-		}
-	}
-
-	private boolean isSame(ResearchStudy oldResource, ResearchStudy newResource)
+	protected boolean modificationsOk(Connection connection, ResearchStudy oldResource, ResearchStudy newResource)
 	{
 		String oldIdentifierValue = oldResource.getIdentifier().stream()
 				.filter(i -> RESEARCH_STUDY_IDENTIFIER.equals(i.getSystem())).map(i -> i.getValue()).findFirst()
@@ -380,36 +245,5 @@ public class ResearchStudyAuthorizationRule extends AbstractAuthorizationRule<Re
 				.orElseThrow();
 
 		return oldIdentifierValue.equals(newIdentifierValue);
-	}
-
-	@Override
-	public Optional<String> reasonDeleteAllowed(Connection connection, User user, ResearchStudy oldResource)
-	{
-		if (isLocalUser(user))
-		{
-			logger.info("Delete of ResearchStudy authorized for local user '{}'", user.getName());
-			return Optional.of("local user");
-		}
-		else
-		{
-			logger.warn("Delete of ResearchStudy unauthorized, not a local user");
-			return Optional.empty();
-		}
-	}
-
-	@Override
-	public Optional<String> reasonSearchAllowed(User user)
-	{
-		logger.info("Search of ResearchStudy authorized for {} user '{}', will be fitered by users organization {}",
-				user.getRole(), user.getName(), user.getOrganization().getIdElement().getValueAsString());
-		return Optional.of("Allowed for all, filtered by users organization");
-	}
-
-	@Override
-	public Optional<String> reasonHistoryAllowed(User user)
-	{
-		logger.info("History of ResearchStudy authorized for {} user '{}', will be fitered by users organization {}",
-				user.getRole(), user.getName(), user.getOrganization().getIdElement().getValueAsString());
-		return Optional.of("Allowed for all, filtered by users organization");
 	}
 }

@@ -20,6 +20,7 @@ import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.NamingSystem;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
@@ -49,6 +50,7 @@ public class HistoryUserFilterFactoryImpl implements HistoryUserFilterFactory
 		filtersByResource.put(Measure.class, MeasureHistoryUserFilter::new);
 		filtersByResource.put(MeasureReport.class, MeasureReportHistoryUserFilter::new);
 		filtersByResource.put(NamingSystem.class, NamingSystemHistoryUserFilter::new);
+		filtersByResource.put(OrganizationAffiliation.class, OrganizationAffiliationHistoryUserFilter::new);
 		filtersByResource.put(Organization.class, OrganizationHistoryUserFilter::new);
 		filtersByResource.put(Patient.class, PatientHistoryUserFilter::new);
 		filtersByResource.put(Practitioner.class, PractitionerHistoryUserFilter::new);

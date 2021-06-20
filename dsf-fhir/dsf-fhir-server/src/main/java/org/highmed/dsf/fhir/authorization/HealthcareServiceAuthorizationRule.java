@@ -1,113 +1,57 @@
 package org.highmed.dsf.fhir.authorization;
 
 import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.highmed.dsf.fhir.authentication.OrganizationProvider;
 import org.highmed.dsf.fhir.authentication.User;
+import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.dao.HealthcareServiceDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.HealthcareService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class HealthcareServiceAuthorizationRule
-		extends AbstractAuthorizationRule<HealthcareService, HealthcareServiceDao>
+		extends AbstractMetaTagAuthorizationRule<HealthcareService, HealthcareServiceDao>
 {
-	private static final Logger logger = LoggerFactory.getLogger(HealthcareServiceAuthorizationRule.class);
-
 	public HealthcareServiceAuthorizationRule(DaoProvider daoProvider, String serverBase,
-			ReferenceResolver referenceResolver, OrganizationProvider organizationProvider)
+			ReferenceResolver referenceResolver, OrganizationProvider organizationProvider,
+			ReadAccessHelper readAccessHelper)
 	{
-		super(HealthcareService.class, daoProvider, serverBase, referenceResolver, organizationProvider);
+		super(HealthcareService.class, daoProvider, serverBase, referenceResolver, organizationProvider,
+				readAccessHelper);
 	}
 
-	@Override
-	public Optional<String> reasonCreateAllowed(Connection connection, User user, HealthcareService newResource)
+	protected Optional<String> newResourceOk(Connection connection, User user, HealthcareService newResource)
 	{
-		if (isLocalUser(user))
+		List<String> errors = new ArrayList<String>();
+
+		if (!hasValidReadAccessTag(connection, newResource))
 		{
-			logger.info("Create of HealthcareService authorized for local user '{}'", user.getName());
-			return Optional.of("local user");
+			errors.add("HealthcareService is missing valid read access tag");
 		}
-		else
-		{
-			logger.warn("Create of HealthcareService unauthorized, not a local user");
+
+		if (errors.isEmpty())
 			return Optional.empty();
-		}
-	}
-
-	@Override
-	public Optional<String> reasonReadAllowed(Connection connection, User user, HealthcareService existingResource)
-	{
-		if (isLocalUser(user) && hasLocalOrRemoteAuthorizationRole(existingResource))
-		{
-			logger.info(
-					"Read of HealthcareService authorized for local user '{}', HealthcareService has local or remote authorization role",
-					user.getName());
-			return Optional.of("local user, local or remote authorized HealthcareService");
-		}
-		else if (isRemoteUser(user) && hasRemoteAuthorizationRole(existingResource))
-		{
-			logger.info(
-					"Read of HealthcareService authorized for remote user '{}', HealthcareService has remote authorization role",
-					user.getName());
-			return Optional.of("remote user, remote authorized HealthcareService");
-		}
 		else
-		{
-			logger.warn(
-					"Read of HealthcareService unauthorized, no matching user role resource authorization role found");
-			return Optional.empty();
-		}
+			return Optional.of(errors.stream().collect(Collectors.joining(", ")));
 	}
 
 	@Override
-	public Optional<String> reasonUpdateAllowed(Connection connection, User user, HealthcareService oldResource,
+	protected boolean resourceExists(Connection connection, HealthcareService newResource)
+	{
+		// no unique criteria for HealthcareService
+		return false;
+	}
+
+	@Override
+	protected boolean modificationsOk(Connection connection, HealthcareService oldResource,
 			HealthcareService newResource)
 	{
-		if (isLocalUser(user))
-		{
-			logger.info("Update of HealthcareService authorized for local user '{}'", user.getName());
-			return Optional.of("local user");
-
-		}
-		else
-		{
-			logger.warn("Update of HealthcareService unauthorized, not a local user");
-			return Optional.empty();
-		}
-	}
-
-	@Override
-	public Optional<String> reasonDeleteAllowed(Connection connection, User user, HealthcareService oldResource)
-	{
-		if (isLocalUser(user))
-		{
-			logger.info("Delete of HealthcareService authorized for local user '{}'", user.getName());
-			return Optional.of("local user");
-		}
-		else
-		{
-			logger.warn("Delete of HealthcareService unauthorized, not a local user");
-			return Optional.empty();
-		}
-	}
-
-	@Override
-	public Optional<String> reasonSearchAllowed(User user)
-	{
-		logger.info("Search of HealthcareService authorized for {} user '{}', will be fitered by user role",
-				user.getRole(), user.getName());
-		return Optional.of("Allowed for all, filtered by user role");
-	}
-
-	@Override
-	public Optional<String> reasonHistoryAllowed(User user)
-	{
-		logger.info("History of HealthcareService authorized for {} user '{}', will be fitered by user role",
-				user.getRole(), user.getName());
-		return Optional.of("Allowed for all, filtered by user role");
+		// no unique criteria for HealthcareService
+		return true;
 	}
 }

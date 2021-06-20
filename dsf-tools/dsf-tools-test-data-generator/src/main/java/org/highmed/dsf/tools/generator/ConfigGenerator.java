@@ -21,11 +21,18 @@ public class ConfigGenerator
 	private static final Logger logger = LoggerFactory.getLogger(ConfigGenerator.class);
 
 	private Properties javaTestFhirConfigProperties;
+
 	private Properties dockerTestFhirConfigProperties;
+
 	private Properties dockerMedic1FhirConfigProperties;
 	private Properties dockerMedic2FhirConfigProperties;
 	private Properties dockerMedic3FhirConfigProperties;
 	private Properties dockerTtpFhirConfigProperties;
+
+	private Properties dockerMedic1DockerFhirConfigProperties;
+	private Properties dockerMedic2DockerFhirConfigProperties;
+	private Properties dockerMedic3DockerFhirConfigProperties;
+	private Properties dockerTtpDockerFhirConfigProperties;
 
 	private Properties readProperties(Path propertiesFile)
 	{
@@ -198,6 +205,107 @@ public class ConfigGenerator
 				.get("../../dsf-docker-test-setup-3medic-ttp/ttp/fhir/app/conf/config.properties");
 		logger.info("Copying config.properties to {}", dockerTtpFhirConfigPropertiesFile);
 		writeProperties(dockerTtpFhirConfigPropertiesFile, dockerTtpFhirConfigProperties);
+
+	}
+
+	public void modifyDockerTest3MedicTtpDockerFhirConfigProperties(
+			Map<String, CertificateFiles> clientCertificateFilesByCommonName)
+	{
+		modifyDockerMedic1DockerFhirConfigProperties(clientCertificateFilesByCommonName);
+		modifyDockerMedic2DockerFhirConfigProperties(clientCertificateFilesByCommonName);
+		modifyDockerMedic3DockerFhirConfigProperties(clientCertificateFilesByCommonName);
+		modifyDockerTtpDockerFhirConfigProperties(clientCertificateFilesByCommonName);
+	}
+
+	private void modifyDockerMedic1DockerFhirConfigProperties(
+			Map<String, CertificateFiles> clientCertificateFilesByCommonName)
+	{
+		CertificateFiles medic1Client = clientCertificateFilesByCommonName.get("medic1-client");
+		CertificateFiles webbrowserTestUser = clientCertificateFilesByCommonName.get("Webbrowser Test User");
+
+		Path dockerTestFhirConfigTemplateFile = Paths
+				.get("src/main/resources/config-templates/docker-test-medic1-docker-fhir-config.properties");
+		dockerMedic1DockerFhirConfigProperties = readProperties(dockerTestFhirConfigTemplateFile);
+		dockerMedic1DockerFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-user.thumbprints",
+				medic1Client.getCertificateSha512ThumbprintHex() + ","
+						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
+
+		writeProperties(Paths.get("config/docker-test-medic1-docker-fhir-config.properties"),
+				dockerMedic1DockerFhirConfigProperties);
+	}
+
+	private void modifyDockerMedic2DockerFhirConfigProperties(
+			Map<String, CertificateFiles> clientCertificateFilesByCommonName)
+	{
+		CertificateFiles medic2Client = clientCertificateFilesByCommonName.get("medic2-client");
+		CertificateFiles webbrowserTestUser = clientCertificateFilesByCommonName.get("Webbrowser Test User");
+
+		Path dockerTestFhirConfigTemplateFile = Paths
+				.get("src/main/resources/config-templates/docker-test-medic2-docker-fhir-config.properties");
+		dockerMedic2DockerFhirConfigProperties = readProperties(dockerTestFhirConfigTemplateFile);
+		dockerMedic2DockerFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-user.thumbprints",
+				medic2Client.getCertificateSha512ThumbprintHex() + ","
+						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
+
+		writeProperties(Paths.get("config/docker-test-medic2-docker-fhir-config.properties"),
+				dockerMedic2DockerFhirConfigProperties);
+	}
+
+	private void modifyDockerMedic3DockerFhirConfigProperties(
+			Map<String, CertificateFiles> clientCertificateFilesByCommonName)
+	{
+		CertificateFiles medic3Client = clientCertificateFilesByCommonName.get("medic3-client");
+		CertificateFiles webbrowserTestUser = clientCertificateFilesByCommonName.get("Webbrowser Test User");
+
+		Path dockerTestFhirConfigTemplateFile = Paths
+				.get("src/main/resources/config-templates/docker-test-medic3-docker-fhir-config.properties");
+		dockerMedic3DockerFhirConfigProperties = readProperties(dockerTestFhirConfigTemplateFile);
+		dockerMedic3DockerFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-user.thumbprints",
+				medic3Client.getCertificateSha512ThumbprintHex() + ","
+						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
+
+		writeProperties(Paths.get("config/docker-test-medic3-docker-fhir-config.properties"),
+				dockerMedic3DockerFhirConfigProperties);
+	}
+
+	private void modifyDockerTtpDockerFhirConfigProperties(
+			Map<String, CertificateFiles> clientCertificateFilesByCommonName)
+	{
+		CertificateFiles ttpClient = clientCertificateFilesByCommonName.get("ttp-client");
+		CertificateFiles webbrowserTestUser = clientCertificateFilesByCommonName.get("Webbrowser Test User");
+
+		Path dockerTestFhirConfigTemplateFile = Paths
+				.get("src/main/resources/config-templates/docker-test-ttp-docker-fhir-config.properties");
+		dockerTtpDockerFhirConfigProperties = readProperties(dockerTestFhirConfigTemplateFile);
+		dockerTtpDockerFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-user.thumbprints",
+				ttpClient.getCertificateSha512ThumbprintHex() + ","
+						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
+
+		writeProperties(Paths.get("config/docker-test-ttp-docker-fhir-config.properties"),
+				dockerTtpDockerFhirConfigProperties);
+	}
+
+	public void copyDockerTest3MedicTtpDockerFhirConfigProperties()
+	{
+		Path dockerMedic1DockerFhirConfigPropertiesFile = Paths
+				.get("../../dsf-docker-test-setup-3medic-ttp-docker/medic1/fhir/conf/config.properties");
+		logger.info("Copying config.properties to {}", dockerMedic1DockerFhirConfigPropertiesFile);
+		writeProperties(dockerMedic1DockerFhirConfigPropertiesFile, dockerMedic1DockerFhirConfigProperties);
+
+		Path dockerMedic2DockerFhirConfigPropertiesFile = Paths
+				.get("../../dsf-docker-test-setup-3medic-ttp-docker/medic2/fhir/conf/config.properties");
+		logger.info("Copying config.properties to {}", dockerMedic2DockerFhirConfigPropertiesFile);
+		writeProperties(dockerMedic2DockerFhirConfigPropertiesFile, dockerMedic2DockerFhirConfigProperties);
+
+		Path dockerMedic3DockerFhirConfigPropertiesFile = Paths
+				.get("../../dsf-docker-test-setup-3medic-ttp-docker/medic3/fhir/conf/config.properties");
+		logger.info("Copying config.properties to {}", dockerMedic3DockerFhirConfigPropertiesFile);
+		writeProperties(dockerMedic3DockerFhirConfigPropertiesFile, dockerMedic3DockerFhirConfigProperties);
+
+		Path dockerTtpDockerFhirConfigPropertiesFile = Paths
+				.get("../../dsf-docker-test-setup-3medic-ttp-docker/ttp/fhir/conf/config.properties");
+		logger.info("Copying config.properties to {}", dockerTtpDockerFhirConfigPropertiesFile);
+		writeProperties(dockerTtpDockerFhirConfigPropertiesFile, dockerTtpDockerFhirConfigProperties);
 
 	}
 }

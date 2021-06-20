@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.postgresql.Driver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +28,6 @@ public final class DbMigrator
 {
 	private static final Logger logger = LoggerFactory.getLogger(DbMigrator.class);
 
-	private static final String DB_DRIVER = "db.driver";
 	private static final String DB_URL = "db.url";
 	private static final String DB_LIQUIBASE_USER = "db.liquibase_user";
 	private static final String DB_LIQUIBASE_USER_PASSWORD = "db.liquibase_user_password";
@@ -36,8 +36,8 @@ public final class DbMigrator
 	private static final String DB_SERVER_USER = "db.server_user";
 	private static final String DB_SERVER_USER_PASSWORD = "db.server_user_password";
 
-	private static final String[] STANDARD_PROPERTIES = { DB_DRIVER, DB_URL, DB_LIQUIBASE_USER,
-			DB_LIQUIBASE_USER_PASSWORD, DB_SERVER_USERS_GROUP, DB_SERVER_USER, DB_SERVER_USER_PASSWORD };
+	private static final String[] STANDARD_PROPERTIES = { DB_URL, DB_LIQUIBASE_USER, DB_LIQUIBASE_USER_PASSWORD,
+			DB_SERVER_USERS_GROUP, DB_SERVER_USER, DB_SERVER_USER_PASSWORD };
 	private static final String[] STANDARD_CHANGE_LOG_PARAMETER_NAMES = { DB_LIQUIBASE_USER, DB_SERVER_USERS_GROUP,
 			DB_SERVER_USER, DB_SERVER_USER_PASSWORD };
 
@@ -75,19 +75,9 @@ public final class DbMigrator
 
 	public void migrate()
 	{
-		try
-		{
-			Class.forName(properties.getProperty(prefix + DB_DRIVER));
-		}
-		catch (ClassNotFoundException e)
-		{
-			logger.error("Error while loading db driver class", e);
-			throw new RuntimeException(e);
-		}
-
 		try (BasicDataSource dataSource = new BasicDataSource())
 		{
-			dataSource.setDriverClassName(properties.getProperty(prefix + DB_DRIVER));
+			dataSource.setDriverClassName(Driver.class.getName());
 			dataSource.setUrl(properties.getProperty(prefix + DB_URL));
 			dataSource.setUsername(properties.getProperty(prefix + DB_LIQUIBASE_USER));
 			dataSource.setPassword(properties.getProperty(prefix + DB_LIQUIBASE_USER_PASSWORD));
@@ -111,17 +101,17 @@ public final class DbMigrator
 		}
 		catch (SQLException e)
 		{
-			logger.error("Error while accessing db", e);
+			logger.error("Error while accessing db: {}", e.getMessage());
 			throw new RuntimeException(e);
 		}
 		catch (LiquibaseException e)
 		{
-			logger.error("Error while running liquibase", e);
+			logger.error("Error while running liquibase: {}", e.getMessage());
 			throw new RuntimeException(e);
 		}
 		catch (Exception e)
 		{
-			logger.error("Error while running liquibase", e);
+			logger.error("Error while running liquibase: {}", e.getMessage());
 			throw new RuntimeException(e);
 		}
 	}

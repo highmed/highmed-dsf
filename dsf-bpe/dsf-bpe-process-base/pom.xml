@@ -15,6 +15,10 @@
 			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-fhir-webservice-client</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.highmed.dsf</groupId>
+			<artifactId>dsf-fhir-auth</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>

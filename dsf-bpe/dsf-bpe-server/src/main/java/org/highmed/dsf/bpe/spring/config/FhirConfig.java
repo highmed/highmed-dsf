@@ -10,10 +10,14 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 
 import org.camunda.bpm.engine.ProcessEngine;
+import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
+import org.highmed.dsf.fhir.authorization.read.ReadAccessHelperImpl;
 import org.highmed.dsf.fhir.client.FhirClientProviderImpl;
 import org.highmed.dsf.fhir.client.FhirWebsocketClientProvider;
+import org.highmed.dsf.fhir.endpoint.EndpointProviderImpl;
 import org.highmed.dsf.fhir.group.GroupHelper;
 import org.highmed.dsf.fhir.group.GroupHelperImpl;
+import org.highmed.dsf.fhir.organization.EndpointProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProviderImpl;
 import org.highmed.dsf.fhir.service.ReferenceCleaner;
@@ -44,35 +48,44 @@ public class FhirConfig
 	@Value("${org.highmed.dsf.bpe.fhir.organization.identifier.localValue}")
 	private String organizationIdentifierLocalValue;
 
-	@Value("${org.highmed.dsf.bpe.fhir.local.webservice.keystore.p12file}")
+	@Value("${org.highmed.dsf.bpe.fhir.webservice.keystore.p12file}")
 	private String webserviceKeyStoreFile;
 
-	@Value("${org.highmed.dsf.bpe.fhir.local.webservice.keystore.password}")
+	@Value("${org.highmed.dsf.bpe.fhir.webservice.keystore.password}")
 	private char[] webserviceKeyStorePassword;
 
-	@Value("${org.highmed.dsf.bpe.fhir.remote.webservice.readTimeout}")
-	private int remoteReadTimeout;
+	@Value("${org.highmed.dsf.bpe.fhir.remote.webservice.readTimeout:60000}")
+	private int remoteWebserviceReadTimeout;
 
-	@Value("${org.highmed.dsf.bpe.fhir.remote.webservice.connectTimeout}")
-	private int remoteConnectTimeout;
-
-	@Value("${org.highmed.dsf.bpe.fhir.remote.webservice.proxy.password:#{null}}")
-	private char[] remoteProxyPassword;
-
-	@Value("${org.highmed.dsf.bpe.fhir.remote.webservice.proxy.username:#{null}}")
-	private String remoteProxyUsername;
+	@Value("${org.highmed.dsf.bpe.fhir.remote.webservice.connectTimeout:5000}")
+	private int remoteWebserviceConnectTimeout;
 
 	@Value("${org.highmed.dsf.bpe.fhir.remote.webservice.proxy.schemeHostPort:#{null}}")
-	private String remoteProxySchemeHostPort;
+	private String remoteWebserviceProxySchemeHostPort;
+
+	@Value("${org.highmed.dsf.bpe.fhir.remote.webservice.proxy.username:#{null}}")
+	private String remoteWebserviceProxyUsername;
+
+	@Value("${org.highmed.dsf.bpe.fhir.remote.webservice.proxy.password:#{null}}")
+	private char[] remoteWebserviceProxyPassword;
 
 	@Value("${org.highmed.dsf.bpe.fhir.local.webservice.baseUrl}")
 	private String localWebserviceBaseUrl;
 
-	@Value("${org.highmed.dsf.bpe.fhir.local.webservice.readTimeout}")
-	private int localReadTimeout;
+	@Value("${org.highmed.dsf.bpe.fhir.local.webservice.readTimeout:60000}")
+	private int localWebserviceReadTimeout;
 
-	@Value("${org.highmed.dsf.bpe.fhir.local.webservice.connectTimeout}")
-	private int localConnectTimeout;
+	@Value("${org.highmed.dsf.bpe.fhir.local.webservice.connectTimeout:2000}")
+	private int localWebserviceConnectTimeout;
+
+	@Value("${org.highmed.dsf.bpe.fhir.local.webservice.proxy.schemeHostPort:#{null}}")
+	private String localWebserviceProxySchemeHostPort;
+
+	@Value("${org.highmed.dsf.bpe.fhir.local.webservice.proxy.username:#{null}}")
+	private String localWebserviceProxyUsername;
+
+	@Value("${org.highmed.dsf.bpe.fhir.local.webservice.proxy.password:#{null}}")
+	private char[] localWebserviceProxyPassword;
 
 	@Value("${org.highmed.dsf.bpe.fhir.local.websocket.url}")
 	private String localWebsocketUrl;
@@ -83,10 +96,19 @@ public class FhirConfig
 	@Value("${org.highmed.dsf.bpe.fhir.local.websocket.keystore.password}")
 	private char[] localWebsocketKeyStorePassword;
 
-	@Value("${org.highmed.dsf.bpe.fhir.task.subscription.searchParameter}")
+	@Value("${org.highmed.dsf.bpe.fhir.local.websocket.proxy.schemeHostPort:#{null}}")
+	private String localWebsocketProxySchemeHostPort;
+
+	@Value("${org.highmed.dsf.bpe.fhir.local.websocket.proxy.username:#{null}}")
+	private String localWebsocketProxyUsername;
+
+	@Value("${org.highmed.dsf.bpe.fhir.local.websocket.proxy.password:#{null}}")
+	private char[] localWebsocketProxyPassword;
+
+	@Value("${org.highmed.dsf.bpe.fhir.task.subscription.searchParameter:?criteria=Task%3Fstatus%3Drequested&status=active&type=websocket&payload=application/fhir%2Bjson}")
 	private String subscriptionSearchParameter;
 
-	@Value("${org.highmed.dsf.bpe.fhir.task.subscription.lastEventTimeFile}")
+	@Value("${org.highmed.dsf.bpe.fhir.task.subscription.lastEventTimeFile:last_event/time.file}")
 	private String lastEventTimeFile;
 
 	@Value("${org.highmed.dsf.bpe.fhir.task.subscription.retrySleepMillis:5000}")
@@ -135,15 +157,13 @@ public class FhirConfig
 	{
 		try
 		{
-			Path localWebserviceKsFile = Paths.get(webserviceKeyStoreFile);
+			Path webserviceKsFile = Paths.get(webserviceKeyStoreFile);
 
-			if (!Files.isReadable(localWebserviceKsFile))
-				throw new IOException(
-						"Webservice keystore file '" + localWebserviceKsFile.toString() + "' not readable");
+			if (!Files.isReadable(webserviceKsFile))
+				throw new IOException("Webservice keystore file '" + webserviceKsFile.toString() + "' not readable");
 
-			KeyStore localWebserviceKeyStore = CertificateReader.fromPkcs12(localWebserviceKsFile,
-					webserviceKeyStorePassword);
-			KeyStore localWebserviceTrustStore = CertificateHelper.extractTrust(localWebserviceKeyStore);
+			KeyStore webserviceKeyStore = CertificateReader.fromPkcs12(webserviceKsFile, webserviceKeyStorePassword);
+			KeyStore webserviceTrustStore = CertificateHelper.extractTrust(webserviceKeyStore);
 
 			Path localWebsocketKsFile = Paths.get(localWebsocketKeyStoreFile);
 
@@ -155,10 +175,13 @@ public class FhirConfig
 			KeyStore localWebsocketTrustStore = CertificateHelper.extractTrust(localWebsocketKeyStore);
 
 			return new FhirClientProviderImpl(fhirContext(), referenceCleaner(), localWebserviceBaseUrl,
-					localReadTimeout, localConnectTimeout, localWebserviceTrustStore, localWebserviceKeyStore,
-					webserviceKeyStorePassword, remoteReadTimeout, remoteConnectTimeout, remoteProxyPassword,
-					remoteProxyUsername, remoteProxySchemeHostPort, localWebsocketUrl, localWebsocketTrustStore,
-					localWebsocketKeyStore, localWebsocketKeyStorePassword);
+					localWebserviceReadTimeout, localWebserviceConnectTimeout, localWebserviceProxySchemeHostPort,
+					localWebserviceProxyUsername, localWebserviceProxyPassword, webserviceTrustStore,
+					webserviceKeyStore, webserviceKeyStorePassword, remoteWebserviceReadTimeout,
+					remoteWebserviceConnectTimeout, remoteWebserviceProxySchemeHostPort, remoteWebserviceProxyUsername,
+					remoteWebserviceProxyPassword, localWebsocketUrl, localWebsocketTrustStore, localWebsocketKeyStore,
+					localWebsocketKeyStorePassword, localWebsocketProxySchemeHostPort, localWebsocketProxyUsername,
+					localWebsocketProxyPassword);
 		}
 		catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e)
 		{
@@ -170,6 +193,12 @@ public class FhirConfig
 	public OrganizationProvider organizationProvider()
 	{
 		return new OrganizationProviderImpl(clientProvider(), organizationIdentifierLocalValue);
+	}
+
+	@Bean
+	public EndpointProvider endpointProvider()
+	{
+		return new EndpointProviderImpl(clientProvider(), organizationIdentifierLocalValue);
 	}
 
 	@Bean
@@ -195,5 +224,11 @@ public class FhirConfig
 	public GroupHelper groupHelper()
 	{
 		return new GroupHelperImpl();
+	}
+
+	@Bean
+	public ReadAccessHelper readAccessHelper()
+	{
+		return new ReadAccessHelperImpl();
 	}
 }

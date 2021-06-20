@@ -18,16 +18,10 @@
 							value="821be11d134e7070e3bcc402032fdab9d8ee865ef2b98ac70605864572fcd4e13cd55cb9d3841785a497234f1fb8447434cd07ca47e524db36fcfcccdea0d56f"></valueString>
 				</extension>
 				<identifier>
-					<system value="http://highmed.org/fhir/CodeSystem/organization"></system>
+					<system value="http://highmed.org/sid/organization-identifier"></system>
 					<value value="Test_MeDIC_3"></value>
 				</identifier>
 				<active value="true"></active>
-				<type>
-					<coding>
-						<system value="http://highmed.org/fhir/CodeSystem/organization-type"></system>
-						<code value="MeDIC"></code>
-					</coding>
-				</type>
 				<name value="Test MeDIC 3"></name>
 				<endpoint>
 					<reference value="urn:uuid:68907804-c798-4022-8b16-a90e3d48730c"></reference>
@@ -37,7 +31,7 @@
 		</resource>
 		<request>
 			<method value="PUT"></method>
-			<url value="Organization?identifier=http://highmed.org/fhir/NamingSystem/organization-identifier|Test_MeDIC_3"></url>
+			<url value="Organization?identifier=http://highmed.org/sid/organization-identifier|Test_MeDIC_3"></url>
 		</request>
 	</entry>
 	<entry>
@@ -45,7 +39,7 @@
 		<resource>
 			<Endpoint xmlns="http://hl7.org/fhir">
 				<identifier>
-					<system value="http://highmed.org/fhir/NamingSystem/endpoint-identifier"></system>
+					<system value="http://highmed.org/sid/endpoint-identifier"></system>
 					<value value="Test_MeDIC_3_Endpoint"></value>
 				</identifier>
 				<status value="active"></status>
@@ -71,7 +65,7 @@
 		</resource>
 		<request>
 			<method value="PUT"></method>
-			<url value="Endpoint?identifier=http://highmed.org/fhir/NamingSystem/endpoint-identifier|Test_MeDIC_3_Endpoint"></url>
+			<url value="Endpoint?identifier=http://highmed.org/sid/endpoint-identifier|Test_MeDIC_3_Endpoint"></url>
 		</request>
 	</entry>
 	<entry>
@@ -83,16 +77,10 @@
 							value="532a7736fd2187c4895765fa211cd076e70d0e9405c466b650ca3c2e89b9cd796a063f1840f26b6422b08aafdaff677fb53bec14916185355ae1b6ee1b0afc5f"></valueString>
 				</extension>
 				<identifier>
-					<system value="http://highmed.org/fhir/NamingSystem/organization-identifier"></system>
+					<system value="http://highmed.org/sid/organization-identifier"></system>
 					<value value="Test_TTP"></value>
 				</identifier>
 				<active value="true"></active>
-				<type>
-					<coding>
-						<system value="http://highmed.org/fhir/CodeSystem/organization-type"></system>
-						<code value="TTP"></code>
-					</coding>
-				</type>
 				<name value="Test TTP"></name>
 				<endpoint>
 					<reference value="urn:uuid:f75d263a-9345-4f5d-a77b-4ea405874e14"></reference>
@@ -102,7 +90,7 @@
 		</resource>
 		<request>
 			<method value="PUT"></method>
-			<url value="Organization?identifier=http://highmed.org/fhir/NamingSystem/organization-identifier|Test_TTP"></url>
+			<url value="Organization?identifier=http://highmed.org/sid/organization-identifier|Test_TTP"></url>
 		</request>
 	</entry>
 	<entry>
@@ -110,7 +98,7 @@
 		<resource>
 			<Endpoint xmlns="http://hl7.org/fhir">
 				<identifier>
-					<system value="http://highmed.org/fhir/NamingSystem/endpoint-identifier"></system>
+					<system value="http://highmed.org/sid/endpoint-identifier"></system>
 					<value value="Test_TTP_Endpoint"></value>
 				</identifier>
 				<status value="active"></status>
@@ -136,7 +124,7 @@
 		</resource>
 		<request>
 			<method value="PUT"></method>
-			<url value="Endpoint?identifier=http://highmed.org/fhir/NamingSystem/endpoint-identifier|Test_TTP_Endpoint"></url>
+			<url value="Endpoint?identifier=http://highmed.org/sid/endpoint-identifier|Test_TTP_Endpoint"></url>
 		</request>
 	</entry>
 	<entry>
@@ -148,16 +136,10 @@
 							value="f143826e22f1a95830ab32dde7b388c154039ed0633c9b0d1526078a9ee7f403540e3cd3459331a3c2caf72e006daff2f71ab7cd2136272e5e022ef392c32246"></valueString>
 				</extension>
 				<identifier>
-					<system value="http://highmed.org/fhir/NamingSystem/organization-identifier"></system>
+					<system value="http://highmed.org/sid/organization-identifier"></system>
 					<value value="Test_MeDIC_1"></value>
 				</identifier>
 				<active value="true"></active>
-				<type>
-					<coding>
-						<system value="http://highmed.org/fhir/CodeSystem/organization-type"></system>
-						<code value="MeDIC"></code>
-					</coding>
-				</type>
 				<name value="Test MeDIC 1"></name>
 				<endpoint>
 					<reference value="urn:uuid:13ee998b-dd89-4178-aef8-1326115d7bb5"></reference>
@@ -167,7 +149,7 @@
 		</resource>
 		<request>
 			<method value="PUT"></method>
-			<url value="Organization?identifier=http://highmed.org/fhir/NamingSystem/organization-identifier|Test_MeDIC_1"></url>
+			<url value="Organization?identifier=http://highmed.org/sid/organization-identifier|Test_MeDIC_1"></url>
 		</request>
 	</entry>
 	<entry>
@@ -175,7 +157,7 @@
 		<resource>
 			<Endpoint xmlns="http://hl7.org/fhir">
 				<identifier>
-					<system value="http://highmed.org/fhir/NamingSystem/endpoint-identifier"></system>
+					<system value="http://highmed.org/sid/endpoint-identifier"></system>
 					<value value="Test_MeDIC_1_Endpoint"></value>
 				</identifier>
 				<status value="active"></status>
@@ -201,7 +183,7 @@
 		</resource>
 		<request>
 			<method value="PUT"></method>
-			<url value="Endpoint?identifier=http://highmed.org/fhir/NamingSystem/endpoint-identifier|Test_MeDIC_1_Endpoint"></url>
+			<url value="Endpoint?identifier=http://highmed.org/sid/endpoint-identifier|Test_MeDIC_1_Endpoint"></url>
 		</request>
 	</entry>
 	<entry>
@@ -213,16 +195,10 @@
 							value="e4af921e6cbc35032ddb21b8a36f366ff7605bdb20bddddcbca6bcc437239b58e9189dfea3a66c584a9bb0a6006c243031c6c5504a43d059afa629d24f8b55bb"></valueString>
 				</extension>
 				<identifier>
-					<system value="http://highmed.org/fhir/NamingSystem/organization-identifier"></system>
+					<system value="http://highmed.org/sid/organization-identifier"></system>
 					<value value="Test_MeDIC_2"></value>
 				</identifier>
 				<active value="true"></active>
-				<type>
-					<coding>
-						<system value="http://highmed.org/fhir/CodeSystem/organization-type"></system>
-						<code value="MeDIC"></code>
-					</coding>
-				</type>
 				<name value="Test MeDIC 2"></name>
 				<endpoint>
 					<reference value="urn:uuid:71805641-e04e-400d-bb3b-9847292f9d54"></reference>
@@ -232,7 +208,7 @@
 		</resource>
 		<request>
 			<method value="PUT"></method>
-			<url value="Organization?identifier=http://highmed.org/fhir/NamingSystem/organization-identifier|Test_MeDIC_2"></url>
+			<url value="Organization?identifier=http://highmed.org/sid/organization-identifier|Test_MeDIC_2"></url>
 		</request>
 	</entry>
 	<entry>
@@ -240,7 +216,7 @@
 		<resource>
 			<Endpoint xmlns="http://hl7.org/fhir">
 				<identifier>
-					<system value="http://highmed.org/fhir/NamingSystem/endpoint-identifier"></system>
+					<system value="http://highmed.org/sid/endpoint-identifier"></system>
 					<value value="Test_MeDIC_2_Endpoint"></value>
 				</identifier>
 				<status value="active"></status>
@@ -266,7 +242,7 @@
 		</resource>
 		<request>
 			<method value="PUT"></method>
-			<url value="Endpoint?identifier=http://highmed.org/fhir/NamingSystem/endpoint-identifier|Test_MeDIC_2_Endpoint"></url>
+			<url value="Endpoint?identifier=http://highmed.org/sid/endpoint-identifier|Test_MeDIC_2_Endpoint"></url>
 		</request>
 	</entry>
 </Bundle>

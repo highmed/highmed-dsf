@@ -1,0 +1,48 @@
+<ValueSet xmlns="http://hl7.org/fhir">
+	<meta>
+		<tag>
+			<system value="http://highmed.org/fhir/CodeSystem/read-access-tag"/>
+			<code value="ALL"/>
+		</tag>		
+	</meta>
+	<url value="http://highmed.org/fhir/ValueSet/process-authorization-requester"/>
+	<version value="0.5.0"/>
+	<name value="Process_Authorization_Requester"/>
+	<title value="Process Authorization Requester"/>
+	<status value="active"/>
+	<experimental value="false"/>
+	<date value="2021-05-15"/>
+	<publisher value="HiGHmed"/>
+	<description
+			value="ValueSet with proces authorization codes for requesters"/>
+	<immutable value="true"/>
+	<compose>
+		<include> 
+			<system value="http://highmed.org/fhir/CodeSystem/process-authorization"/> 
+			<concept>
+				<code value="LOCAL_ORGANIZATION"/>
+				<display value="LOCAL_ORGANIZATION"/>
+			</concept>
+			<concept>
+				<code value="REMOTE_ORGANIZATION"/>
+				<display value="REMOTE_ORGANIZATION"/>
+			</concept>
+			<concept>
+				<code value="LOCAL_ROLE"/>
+				<display value="LOCAL_ROLE"/>
+			</concept>
+			<concept>
+				<code value="REMOTE_ROLE"/>
+				<display value="REMOTE_ROLE"/>
+			</concept>
+			<concept>
+				<code value="LOCAL_ALL"/>
+				<display value="LOCAL_ALL"/>
+			</concept>
+			<concept>
+				<code value="REMOTE_ALL"/>
+				<display value="REMOTE_ALL"/>
+			</concept>
+		</include> 
+	</compose>
+</ValueSet> 

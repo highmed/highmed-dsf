@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<StructureDefinition xmlns="http://hl7.org/fhir">
+  <meta>
+    <tag>
+      <system value="http://highmed.org/fhir/CodeSystem/read-access-tag" />
+      <code value="ALL" />
+    </tag>
+  </meta>
+  <url value="http://highmed.org/fhir/StructureDefinition/organization-affiliation" />
+  <version value="0.5.0" />
+  <name value="OrganizationAffiliation" />
+  <status value="active" />
+  <experimental value="false" />
+  <date value="2021-03-02" />
+  <fhirVersion value="4.0.1" />
+  <kind value="resource" />
+  <abstract value="false" />
+  <type value="OrganizationAffiliation" />
+  <baseDefinition value="http://hl7.org/fhir/StructureDefinition/OrganizationAffiliation" />
+  <derivation value="constraint" />
+  <differential>
+    <element id="OrganizationAffiliation.active">
+      <path value="OrganizationAffiliation.active" />
+      <min value="1" />
+    </element>
+    <element id="OrganizationAffiliation.organization">
+      <path value="OrganizationAffiliation.organization" />
+      <min value="1" />
+      <type>
+        <code value="Reference" />
+        <targetProfile value="http://highmed.org/fhir/StructureDefinition/organization-parent" />
+      </type>
+    </element>
+    <element id="OrganizationAffiliation.organization.reference">
+      <path value="OrganizationAffiliation.organization.reference" />
+      <min value="1" />
+    </element>
+    <element id="OrganizationAffiliation.participatingOrganization">
+      <path value="OrganizationAffiliation.participatingOrganization" />
+      <min value="1" />
+      <type>
+        <code value="Reference" />
+        <targetProfile value="http://highmed.org/fhir/StructureDefinition/organization" />
+      </type>
+    </element>
+    <element id="OrganizationAffiliation.participatingOrganization.reference">
+      <path value="OrganizationAffiliation.participatingOrganization.reference" />
+      <min value="1" />
+    </element>
+    <element id="OrganizationAffiliation.code">
+      <path value="OrganizationAffiliation.code" />
+      <min value="1" />
+    </element>
+    <element id="OrganizationAffiliation.code.coding">
+      <path value="OrganizationAffiliation.code.coding" />
+      <min value="1" />
+    </element>
+    <element id="OrganizationAffiliation.code.coding.system">
+      <path value="OrganizationAffiliation.code.coding.system" />
+      <min value="1" />
+    </element>
+    <element id="OrganizationAffiliation.code.coding.code">
+      <path value="OrganizationAffiliation.code.coding.code" />
+      <min value="1" />
+    </element>
+    <element id="OrganizationAffiliation.endpoint">
+      <path value="OrganizationAffiliation.endpoint" />
+      <min value="1" />
+      <type>
+        <code value="Reference" />
+        <targetProfile value="http://highmed.org/fhir/StructureDefinition/endpoint" />
+      </type>
+    </element>
+    <element id="OrganizationAffiliation.endpoint.reference">
+      <path value="OrganizationAffiliation.endpoint.reference" />
+      <min value="1" />
+    </element>
+  </differential>
+</StructureDefinition>

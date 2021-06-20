@@ -1,8 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <meta>
     <tag>
-      <system value="http://highmed.org/fhir/CodeSystem/authorization-role" />
-      <code value="REMOTE" />
+      <system value="http://highmed.org/fhir/CodeSystem/read-access-tag" />
+      <code value="ALL" />
     </tag>
   </meta>
   <url value="http://highmed.org/fhir/StructureDefinition/organization" />
@@ -10,7 +11,7 @@
   <name value="Organization" />
   <status value="active" />
   <experimental value="false" />
-  <date value="2021-01-26" />
+  <date value="2021-02-28" />
   <fhirVersion value="4.0.1" />
   <kind value="resource" />
   <abstract value="false" />
@@ -61,7 +62,7 @@
     <element id="Organization.identifier:highmedIdentifier.system">
       <path value="Organization.identifier.system" />
       <min value="1" />
-      <fixedUri value="http://highmed.org/fhir/NamingSystem/organization-identifier" />
+      <fixedUri value="http://highmed.org/sid/organization-identifier" />
     </element>
     <element id="Organization.identifier:highmedIdentifier.value">
       <path value="Organization.identifier.value" />
@@ -71,58 +72,9 @@
       <path value="Organization.active" />
       <min value="1" />
     </element>
-    <element id="Organization.type">
-      <path value="Organization.type" />
-      <slicing>
-        <discriminator>
-          <type value="value" />
-          <path value="coding.system" />
-        </discriminator>
-        <discriminator>
-          <type value="value" />
-          <path value="coding.code" />
-        </discriminator>
-        <rules value="open" />
-      </slicing>
-      <min value="1" />
-    </element>
-    <element id="Organization.type:highmedOrganizationType">
-      <path value="Organization.type" />
-      <sliceName value="highmedOrganizationType" />
-      <min value="1" />
-      <max value="1" />
-      <binding>
-        <extension url="http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName">
-          <valueString value="OrganizationType" />
-        </extension>
-        <strength value="required" />
-        <valueSet value="http://highmed.org/fhir/ValueSet/organization-type" />
-      </binding>
-    </element>
-    <element id="Organization.type:highmedOrganizationType.coding">
-      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status">
-        <valueCode value="normative" />
-      </extension>
-      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-normative-version">
-        <valueCode value="4.0.0" />
-      </extension>
-      <path value="Organization.type.coding" />
-      <min value="1" />
-      <max value="1" />
-    </element>
-    <element id="Organization.type:highmedOrganizationType.coding.system">
-      <path value="Organization.type.coding.system" />
-      <min value="1" />
-      <fixedUri value="http://highmed.org/fhir/CodeSystem/organization-type" />
-    </element>
-    <element id="Organization.type:highmedOrganizationType.coding.code">
-      <path value="Organization.type.coding.code" />
-      <min value="1" />
-    </element>
     <element id="Organization.endpoint">
       <path value="Organization.endpoint" />
       <min value="1" />
-      <max value="1" />
       <type>
         <code value="Reference" />
         <targetProfile value="http://highmed.org/fhir/StructureDefinition/endpoint" />
@@ -131,10 +83,6 @@
     <element id="Organization.endpoint.reference">
       <path value="Organization.endpoint.reference" />
       <min value="1" />
-    </element>
-    <element id="Organization.endpoint.identifier">
-      <path value="Organization.endpoint.identifier" />
-      <max value="0" />
     </element>
   </differential>
 </StructureDefinition>

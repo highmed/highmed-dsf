@@ -15,6 +15,8 @@ import org.highmed.dsf.fhir.search.parameters.OrganizationIdentifier;
 import org.highmed.dsf.fhir.search.parameters.OrganizationName;
 import org.highmed.dsf.fhir.search.parameters.OrganizationType;
 import org.highmed.dsf.fhir.search.parameters.rev.include.EndpointOrganizationRevInclude;
+import org.highmed.dsf.fhir.search.parameters.rev.include.OrganizationAffiliationParticipatingOrganizationRevInclude;
+import org.highmed.dsf.fhir.search.parameters.rev.include.OrganizationAffiliationPrimaryOrganizationRevInclude;
 import org.highmed.dsf.fhir.search.parameters.user.OrganizationUserFilter;
 import org.hl7.fhir.r4.model.Organization;
 import org.slf4j.Logger;
@@ -29,9 +31,11 @@ public class OrganizationDaoJdbc extends AbstractResourceDaoJdbc<Organization> i
 	public OrganizationDaoJdbc(DataSource dataSource, FhirContext fhirContext)
 	{
 		super(dataSource, fhirContext, Organization.class, "organizations", "organization", "organization_id",
-				OrganizationUserFilter::new, with(OrganizationActive::new, OrganizationEndpoint::new,
-						OrganizationIdentifier::new, OrganizationName::new, OrganizationType::new),
-				with(EndpointOrganizationRevInclude::new));
+				OrganizationUserFilter::new,
+				with(OrganizationActive::new, OrganizationEndpoint::new, OrganizationIdentifier::new,
+						OrganizationName::new, OrganizationType::new),
+				with(EndpointOrganizationRevInclude::new, OrganizationAffiliationPrimaryOrganizationRevInclude::new,
+						OrganizationAffiliationParticipatingOrganizationRevInclude::new));
 	}
 
 	@Override
@@ -94,7 +98,7 @@ public class OrganizationDaoJdbc extends AbstractResourceDaoJdbc<Organization> i
 						"SELECT organization FROM current_organizations WHERE organization->'identifier' @> ?::jsonb AND organization->>'active' = 'true'"))
 		{
 
-			String search = "[{\"system\": \"http://highmed.org/fhir/NamingSystem/organization-identifier\", \"value\": \""
+			String search = "[{\"system\": \"http://highmed.org/sid/organization-identifier\", \"value\": \""
 					+ identifierValue + "\"}]";
 			statement.setString(1, search);
 

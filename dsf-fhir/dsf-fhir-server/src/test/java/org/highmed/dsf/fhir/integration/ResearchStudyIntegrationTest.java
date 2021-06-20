@@ -19,10 +19,12 @@ public class ResearchStudyIntegrationTest extends AbstractIntegrationTest
 	public void testSearchResearchStudyByGroupId() throws Exception
 	{
 		Group g = new Group();
+		readAccessHelper.addLocal(g);
 		GroupDao groupDao = getSpringWebApplicationContext().getBean(GroupDao.class);
 		String groupId = groupDao.create(g).getIdElement().getIdPart();
 
 		ResearchStudy rs = new ResearchStudy();
+		readAccessHelper.addLocal(rs);
 		rs.getEnrollmentFirstRep().setReference("Group/" + groupId);
 		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
 		String researchStudyId = researchStudyDao.create(rs).getIdElement().getIdPart();

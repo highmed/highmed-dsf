@@ -1,8 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <meta>
     <tag>
-      <system value="http://highmed.org/fhir/CodeSystem/authorization-role" />
-      <code value="REMOTE" />
+      <system value="http://highmed.org/fhir/CodeSystem/read-access-tag" />
+      <code value="ALL" />
     </tag>
   </meta>
   <url value="http://highmed.org/fhir/StructureDefinition/endpoint" />
@@ -10,7 +11,7 @@
   <name value="Endpoint" />
   <status value="active" />
   <experimental value="false" />
-  <date value="2021-01-26" />
+  <date value="2021-02-28" />
   <fhirVersion value="4.0.1" />
   <kind value="resource" />
   <abstract value="false" />
@@ -42,7 +43,7 @@
     <element id="Endpoint.identifier:highmedIdentifier.system">
       <path value="Endpoint.identifier.system" />
       <min value="1" />
-      <fixedUri value="http://highmed.org/fhir/NamingSystem/endpoint-identifier" />
+      <fixedUri value="http://highmed.org/sid/endpoint-identifier" />
     </element>
     <element id="Endpoint.identifier:highmedIdentifier.value">
       <path value="Endpoint.identifier.value" />
@@ -69,10 +70,6 @@
     <element id="Endpoint.managingOrganization.reference">
       <path value="Endpoint.managingOrganization.reference" />
       <min value="1" />
-    </element>
-    <element id="Endpoint.managingOrganization.identifier">
-      <path value="Endpoint.managingOrganization.identifier" />
-      <max value="0" />
     </element>
     <element id="Endpoint.payloadType">
       <path value="Endpoint.payloadType" />

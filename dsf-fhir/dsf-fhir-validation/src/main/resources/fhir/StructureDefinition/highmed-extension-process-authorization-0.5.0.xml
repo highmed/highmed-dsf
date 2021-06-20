@@ -1,16 +1,16 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <meta>
     <tag>
-      <system value="http://highmed.org/fhir/CodeSystem/authorization-role" />
-      <code value="REMOTE" />
-    </tag>
+      <system value="http://highmed.org/fhir/CodeSystem/read-access-tag" />
+      <code value="ALL" />
+    </tag>		
   </meta>
   <url value="http://highmed.org/fhir/StructureDefinition/extension-process-authorization" />
   <version value="0.5.0" />
   <name value="ProcessAuthorization" />
   <status value="active" />
   <experimental value="false" />
-  <date value="2021-01-26" />
+  <date value="2021-05-15" />
   <fhirVersion value="4.0.1" />
   <kind value="complex-type" />
   <abstract value="false" />
@@ -22,6 +22,10 @@
   <baseDefinition value="http://hl7.org/fhir/StructureDefinition/Extension" />
   <derivation value="constraint" />
   <differential>
+    <element id="Extension">
+      <path value="Extension" />
+      <min value="1" />
+    </element>
     <element id="Extension.extension">
       <path value="Extension.extension" />
       <slicing>
@@ -49,153 +53,6 @@
         <code value="string" />
       </type>
     </element>
-    <element id="Extension.extension:authorization-roles">
-      <path value="Extension.extension" />
-      <sliceName value="authorization-roles" />
-      <min value="1" />
-      <max value="1" />
-    </element>
-    <element id="Extension.extension:authorization-roles.extension">
-      <path value="Extension.extension.extension" />
-      <slicing>
-        <discriminator>
-          <type value="value" />
-          <path value="url" />
-        </discriminator>
-        <rules value="open" />
-      </slicing>
-    </element>
-    <element id="Extension.extension:authorization-roles.extension:authorization-role">
-      <path value="Extension.extension.extension" />
-      <sliceName value="authorization-role" />
-      <min value="1" />
-      <max value="2" />
-    </element>
-    <element id="Extension.extension:authorization-roles.extension:authorization-role.url">
-      <path value="Extension.extension.extension.url" />
-      <fixedUri value="authorization-role" />
-    </element>
-    <element id="Extension.extension:authorization-roles.extension:authorization-role.value[x]">
-      <path value="Extension.extension.extension.value[x]" />
-      <type>
-        <code value="Coding" />
-      </type>
-    </element>
-    <element id="Extension.extension:authorization-roles.extension:authorization-role.value[x].system">
-      <path value="Extension.extension.extension.value[x].system" />
-      <min value="1" />
-      <fixedUri value="http://highmed.org/fhir/CodeSystem/authorization-role" />
-    </element>
-    <element id="Extension.extension:authorization-roles.extension:authorization-role.value[x].code">
-      <path value="Extension.extension.extension.value[x].code" />
-      <min value="1" />
-    </element>
-    <element id="Extension.extension:authorization-roles.url">
-      <path value="Extension.extension.url" />
-      <fixedUri value="authorization-roles" />
-    </element>
-    <element id="Extension.extension:authorization-roles.value[x]">
-      <path value="Extension.extension.value[x]" />
-      <max value="0" />
-    </element>
-    <element id="Extension.extension:requester-organization-types">
-      <path value="Extension.extension" />
-      <sliceName value="requester-organization-types" />
-      <min value="1" />
-      <max value="1" />
-    </element>
-    <element id="Extension.extension:requester-organization-types.extension">
-      <path value="Extension.extension.extension" />
-      <slicing>
-        <discriminator>
-          <type value="value" />
-          <path value="url" />
-        </discriminator>
-        <rules value="open" />
-      </slicing>
-    </element>
-    <element id="Extension.extension:requester-organization-types.extension:requester-organization-type">
-      <path value="Extension.extension.extension" />
-      <sliceName value="requester-organization-type" />
-      <min value="1" />
-      <max value="2" />
-    </element>
-    <element id="Extension.extension:requester-organization-types.extension:requester-organization-type.url">
-      <path value="Extension.extension.extension.url" />
-      <fixedUri value="requester-organization-type" />
-    </element>
-    <element id="Extension.extension:requester-organization-types.extension:requester-organization-type.value[x]">
-      <path value="Extension.extension.extension.value[x]" />
-      <type>
-        <code value="Coding" />
-      </type>
-    </element>
-    <element id="Extension.extension:requester-organization-types.extension:requester-organization-type.value[x].system">
-      <path value="Extension.extension.extension.value[x].system" />
-      <min value="1" />
-      <fixedUri value="http://highmed.org/fhir/CodeSystem/organization-type" />
-    </element>
-    <element id="Extension.extension:requester-organization-types.extension:requester-organization-type.value[x].code">
-      <path value="Extension.extension.extension.value[x].code" />
-      <min value="1" />
-    </element>
-    <element id="Extension.extension:requester-organization-types.url">
-      <path value="Extension.extension.url" />
-      <fixedUri value="requester-organization-types" />
-    </element>
-    <element id="Extension.extension:requester-organization-types.value[x]">
-      <path value="Extension.extension.value[x]" />
-      <max value="0" />
-    </element>
-    <element id="Extension.extension:recipient-organization-types">
-      <path value="Extension.extension" />
-      <sliceName value="recipient-organization-types" />
-      <min value="1" />
-      <max value="1" />
-    </element>
-    <element id="Extension.extension:recipient-organization-types.extension">
-      <path value="Extension.extension.extension" />
-      <slicing>
-        <discriminator>
-          <type value="value" />
-          <path value="url" />
-        </discriminator>
-        <rules value="open" />
-      </slicing>
-    </element>
-    <element id="Extension.extension:recipient-organization-types.extension:recipient-organization-type">
-      <path value="Extension.extension.extension" />
-      <sliceName value="recipient-organization-type" />
-      <min value="1" />
-      <max value="2" />
-    </element>
-    <element id="Extension.extension:recipient-organization-types.extension:recipient-organization-type.url">
-      <path value="Extension.extension.extension.url" />
-      <fixedUri value="recipient-organization-type" />
-    </element>
-    <element id="Extension.extension:recipient-organization-types.extension:recipient-organization-type.value[x]">
-      <path value="Extension.extension.extension.value[x]" />
-      <type>
-        <code value="Coding" />
-      </type>
-    </element>
-    <element id="Extension.extension:recipient-organization-types.extension:recipient-organization-type.value[x].system">
-      <path value="Extension.extension.extension.value[x].system" />
-      <min value="1" />
-      <fixedUri value="http://highmed.org/fhir/CodeSystem/organization-type" />
-    </element>
-    <element id="Extension.extension:recipient-organization-types.extension:recipient-organization-type.value[x].code">
-      <path value="Extension.extension.extension.value[x].code" />
-      <min value="1" />
-    </element>
-    <element id="Extension.extension:recipient-organization-types.url">
-      <path value="Extension.extension.url" />
-      <fixedUri value="recipient-organization-types" />
-    </element>
-    <element id="Extension.extension:recipient-organization-types.value[x]">
-      <path value="Extension.extension.value[x]" />
-      <max value="0" />
-    </element>
     <element id="Extension.extension:task-profile">
       <path value="Extension.extension" />
       <sliceName value="task-profile" />
@@ -211,8 +68,56 @@
       <min value="1" />
       <type>
         <code value="canonical" />
-        <targetProfile value="http://hl7.org/fhir/StructureDefinition/StructureDefinition" />
       </type>
+    </element>
+    <element id="Extension.extension:requester">
+      <path value="Extension.extension" />
+      <sliceName value="requester" />
+      <min value="1" />
+    </element>
+    <element id="Extension.extension:requester.url">
+      <path value="Extension.extension.url" />
+      <fixedUri value="requester" />
+    </element>
+    <element id="Extension.extension:requester.value[x]">
+      <path value="Extension.extension.value[x]" />
+      <min value="1" />
+      <type>
+        <code value="Coding" />
+        <profile value="http://highmed.org/fhir/StructureDefinition/coding-process-authorization-local-all" />
+        <profile value="http://highmed.org/fhir/StructureDefinition/coding-process-authorization-local-consortium-role" />
+        <profile value="http://highmed.org/fhir/StructureDefinition/coding-process-authorization-local-organization" />
+        <profile value="http://highmed.org/fhir/StructureDefinition/coding-process-authorization-remote-all" />
+        <profile value="http://highmed.org/fhir/StructureDefinition/coding-process-authorization-remote-consortium-role" />
+        <profile value="http://highmed.org/fhir/StructureDefinition/coding-process-authorization-remote-organization" />
+      </type>
+      <binding>
+        <strength value="required" />
+        <valueSet value="http://highmed.org/fhir/ValueSet/process-authorization-requester" />
+      </binding>
+    </element>
+    <element id="Extension.extension:recipient">
+      <path value="Extension.extension" />
+      <sliceName value="recipient" />
+      <min value="1" />
+    </element>
+    <element id="Extension.extension:recipient.url">
+      <path value="Extension.extension.url" />
+      <fixedUri value="recipient" />
+    </element>
+    <element id="Extension.extension:recipient.value[x]">
+      <path value="Extension.extension.value[x]" />
+      <min value="1" />
+      <type>
+        <code value="Coding" />
+        <profile value="http://highmed.org/fhir/StructureDefinition/coding-process-authorization-local-all" />
+        <profile value="http://highmed.org/fhir/StructureDefinition/coding-process-authorization-local-consortium-role" />
+        <profile value="http://highmed.org/fhir/StructureDefinition/coding-process-authorization-local-organization" />
+      </type>
+      <binding>
+        <strength value="required" />
+        <valueSet value="http://highmed.org/fhir/ValueSet/process-authorization-recipient" />
+      </binding>
     </element>
     <element id="Extension.url">
       <path value="Extension.url" />

@@ -61,11 +61,13 @@ public class HistoryDaoTest extends AbstractDbTest
 	public void testReadHistory() throws Exception
 	{
 		Organization organization = new Organization();
-		organization.getMeta().addTag("http://highmed.org/fhir/CodeSystem/authorization-role", "REMOTE", null);
+		organization.getMeta().addTag("http://highmed.org/fhir/CodeSystem/read-access-tag", "ALL", null);
 		organization.setName("Test Organization");
+		organization.addIdentifier().setSystem("http://highmed.org/sid/organization-identifier").setValue("test.org");
 		Organization createdOrganization = orgDao.create(organization);
 
-		History history = dao.readHistory(filterFactory.getUserFilters(new User(createdOrganization, UserRole.LOCAL)),
+		History history = dao.readHistory(
+				filterFactory.getUserFilters(new User(createdOrganization, UserRole.LOCAL, "local")),
 				new PageAndCount(1, 1000), new AtParameter(), new SinceParameter());
 		assertNotNull(history);
 		assertEquals(1, history.getTotal());
@@ -77,12 +79,13 @@ public class HistoryDaoTest extends AbstractDbTest
 	public void testReadHistoryOrganization() throws Exception
 	{
 		Organization organization = new Organization();
-		organization.getMeta().addTag("http://highmed.org/fhir/CodeSystem/authorization-role", "REMOTE", null);
+		organization.getMeta().addTag("http://highmed.org/fhir/CodeSystem/read-access-tag", "ALL", null);
 		organization.setName("Test Organization");
+		organization.addIdentifier().setSystem("http://highmed.org/sid/organization-identifier").setValue("test.org");
 		Organization createdOrganization = orgDao.create(organization);
 
 		History history = dao.readHistory(
-				filterFactory.getUserFilter(new User(createdOrganization, UserRole.LOCAL), Organization.class),
+				filterFactory.getUserFilter(new User(createdOrganization, UserRole.LOCAL, "local"), Organization.class),
 				new PageAndCount(1, 1000), new AtParameter(), new SinceParameter(), Organization.class);
 		assertNotNull(history);
 		assertEquals(1, history.getTotal());
@@ -94,12 +97,13 @@ public class HistoryDaoTest extends AbstractDbTest
 	public void testReadHistoryOrganizationWithId() throws Exception
 	{
 		Organization organization = new Organization();
-		organization.getMeta().addTag("http://highmed.org/fhir/CodeSystem/authorization-role", "REMOTE", null);
+		organization.getMeta().addTag("http://highmed.org/fhir/CodeSystem/read-access-tag", "ALL", null);
 		organization.setName("Test Organization");
+		organization.addIdentifier().setSystem("http://highmed.org/sid/organization-identifier").setValue("test.org");
 		Organization createdOrganization = orgDao.create(organization);
 
 		History history = dao.readHistory(
-				filterFactory.getUserFilter(new User(createdOrganization, UserRole.LOCAL), Organization.class),
+				filterFactory.getUserFilter(new User(createdOrganization, UserRole.LOCAL, "local"), Organization.class),
 				new PageAndCount(1, 1000), new AtParameter(), new SinceParameter(), Organization.class,
 				UUID.fromString(createdOrganization.getIdElement().getIdPart()));
 

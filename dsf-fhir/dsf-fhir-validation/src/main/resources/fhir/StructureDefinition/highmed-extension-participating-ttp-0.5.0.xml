@@ -1,9 +1,9 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <meta>
     <tag>
-      <system value="http://highmed.org/fhir/CodeSystem/authorization-role" />
-      <code value="REMOTE" />
-    </tag>
+      <system value="http://highmed.org/fhir/CodeSystem/read-access-tag" />
+      <code value="ALL" />
+    </tag>		
   </meta>
   <url value="http://highmed.org/fhir/StructureDefinition/extension-participating-ttp" />
   <version value="0.5.0" />
@@ -57,7 +57,7 @@
     <element id="Extension.value[x].identifier.system">
       <path value="Extension.value[x].identifier.system" />
       <min value="1" />
-      <fixedUri value="http://highmed.org/fhir/NamingSystem/organization-identifier" />
+      <fixedUri value="http://highmed.org/sid/organization-identifier" />
     </element>
     <element id="Extension.value[x].identifier.value">
       <path value="Extension.value[x].identifier.value" />
