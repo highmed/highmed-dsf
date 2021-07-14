@@ -32,6 +32,7 @@ public interface ReadAccessHelper
 	 * Removes ALL tag if present.
 	 * 
 	 * @param <R>
+	 *            the resource type
 	 * @param resource
 	 *            may be <code>null</code>
 	 * @return <code>null</code> if given <b>resource</b> is <code>null</code>
@@ -43,6 +44,7 @@ public interface ReadAccessHelper
 	 * Adds LOCAL tag if not present, removes ALL tag if present.
 	 * 
 	 * @param <R>
+	 *            the resource type
 	 * @param resource
 	 *            may be <code>null</code>
 	 * @param organizationIdentifier
@@ -57,6 +59,7 @@ public interface ReadAccessHelper
 	 * Adds LOCAL tag if not present, removes ALL tag if present.
 	 * 
 	 * @param <R>
+	 *            the resource type
 	 * @param resource
 	 *            may be <code>null</code>
 	 * @param organization
@@ -75,6 +78,7 @@ public interface ReadAccessHelper
 	 * Adds LOCAL tag if not present, removes ALL tag if present.
 	 * 
 	 * @param <R>
+	 *            the resource type
 	 * @param resource
 	 *            may be <code>null</code>
 	 * @param consortiumIdentifier
@@ -93,6 +97,7 @@ public interface ReadAccessHelper
 	 * Adds LOCAL tag if not present, removes ALL tag if present.
 	 * 
 	 * @param <R>
+	 *            the resource type
 	 * @param resource
 	 *            may be <code>null</code>
 	 * @param affiliation
@@ -112,6 +117,7 @@ public interface ReadAccessHelper
 	 * Removes LOCAL, ORGANIZATION and ROLE tags if present.
 	 * 
 	 * @param <R>
+	 *            the resource type
 	 * @param resource
 	 *            may be <code>null</code>
 	 * @return <code>null</code> if given <b>resource</b> is <code>null</code>

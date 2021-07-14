@@ -21,7 +21,9 @@ public class SearchQueryIncludeParameter
 
 	/**
 	 * @param sql
+	 *            not <code>null</code>
 	 * @param includeParts
+	 *            not <code>null</code>
 	 * @param includeResourceModifier
 	 *            Use this {@link BiConsumerWithSqlException} to modify the include resources. This consumer can be used
 	 *            if the resources returned by the include SQL are not complete and additional content needs to be

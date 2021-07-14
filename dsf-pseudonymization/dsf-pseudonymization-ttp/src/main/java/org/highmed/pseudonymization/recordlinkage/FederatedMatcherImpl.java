@@ -50,6 +50,7 @@ public class FederatedMatcherImpl<P extends Person> extends AbstractMatcher<P> i
 	 * @param matchCalculator
 	 *            not <code>null</code>
 	 * @param positiveMatchThreshold
+	 *            {@code >=0}
 	 */
 	public FederatedMatcherImpl(MatchedPersonFactory<P> matchedPersonFactory, MatchCalculator matchCalculator,
 			double positiveMatchThreshold)

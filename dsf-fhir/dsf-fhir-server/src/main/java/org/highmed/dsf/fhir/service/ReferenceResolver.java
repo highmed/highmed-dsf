@@ -62,7 +62,7 @@ public interface ReferenceResolver
 	 *            not <code>null</code>
 	 * @param resourceReference
 	 *            not <code>null</code>
-	 * @return
+	 * @return {@link Optional#empty()} if the reference check was successful
 	 * @throws IllegalArgumentException
 	 *             if the reference is not of type {@link ResourceReference.ReferenceType#LITERAL_EXTERNAL}
 	 * @see ResourceReference#getType(String)
@@ -77,7 +77,7 @@ public interface ReferenceResolver
 	 *            not <code>null</code>
 	 * @param bundleIndex
 	 *            may be <code>null</code>
-	 * @return
+	 * @return {@link Optional#empty()} if the reference check was successful
 	 * @throws IllegalArgumentException
 	 *             if the reference is not of type {@link ResourceReference.ReferenceType#LITERAL_EXTERNAL}
 	 * @see ResourceReference#getType(String)
@@ -96,7 +96,7 @@ public interface ReferenceResolver
 	 *            not <code>null</code>
 	 * @param bundleIndex
 	 *            may be <code>null</code>
-	 * @return
+	 * @return {@link Optional#empty()} if the reference check was successful
 	 * @throws IllegalArgumentException
 	 *             if the reference is not of type {@link ResourceReference.ReferenceType#CONDITIONAL}
 	 * @see ResourceReference#getType(String)
@@ -114,7 +114,7 @@ public interface ReferenceResolver
 	 *            not <code>null</code>
 	 * @param connection
 	 *            not <code>null</code>
-	 * @return
+	 * @return {@link Optional#empty()} if the reference check was successful
 	 * @throws IllegalArgumentException
 	 *             if the reference is not of type {@link ResourceReference.ReferenceType#LOGICAL}
 	 * @see ResourceReference#getType(String)
@@ -133,7 +133,7 @@ public interface ReferenceResolver
 	 *            not <code>null</code>
 	 * @param bundleIndex
 	 *            may be <code>null</code>
-	 * @return
+	 * @return {@link Optional#empty()} if the reference check was successful
 	 * @throws IllegalArgumentException
 	 *             if the reference is not of type {@link ResourceReference.ReferenceType#LOGICAL}
 	 * @see ResourceReference#getType(String)

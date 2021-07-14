@@ -21,7 +21,9 @@ public interface SearchQueryUserFilter
 	 * @param subqueryParameterIndex
 	 *            [1 ... {@link #getSqlParameterCount()}]
 	 * @param statement
+	 *            not <code>null</code>
 	 * @throws SQLException
+	 *             if errors occur during modification of the statement
 	 */
 	void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement)
 			throws SQLException;
