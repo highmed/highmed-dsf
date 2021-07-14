@@ -140,14 +140,14 @@ public interface ReadAccessHelper
 	boolean hasAll(Resource resource);
 
 	/**
-	 * <b>Resource with access tags valid if:</b><br/>
+	 * <b>Resource with access tags valid if:</b><br>
 	 * 
-	 * 1 LOCAL tag and n {ORGANIZATION, ROLE} tags (n >= 0)<br/>
-	 * or<br/>
-	 * 1 ALL tag<br/>
-	 * <br/>
-	 * All tags {LOCAL, ORGANIZATION, ROLE, ALL} valid<br/>
-	 * <br/>
+	 * 1 LOCAL tag and n {ORGANIZATION, ROLE} tags {@code (n >= 0)}<br>
+	 * or<br>
+	 * 1 ALL tag<br>
+	 * <br>
+	 * All tags {LOCAL, ORGANIZATION, ROLE, ALL} valid<br>
+	 * <br>
 	 * Does not check if referenced organizations or roles exist
 	 * 
 	 * @param resource
@@ -157,12 +157,12 @@ public interface ReadAccessHelper
 	boolean isValid(Resource resource);
 
 	/**
-	 * <b>Resource with access tags valid if:</b><br/>
+	 * <b>Resource with access tags valid if:</b><br>
 	 * 
-	 * 1 LOCAL tag and n {ORGANIZATION, ROLE} tags (n >= 0)<br/>
-	 * or<br/>
-	 * 1 ALL tag<br/>
-	 * <br/>
+	 * 1 LOCAL tag and n {ORGANIZATION, ROLE} tags {@code (n >= 0)}<br>
+	 * or<br>
+	 * 1 ALL tag<br>
+	 * <br>
 	 * All tags {LOCAL, ORGANIZATION, ROLE, ALL} valid
 	 * 
 	 * @param resource

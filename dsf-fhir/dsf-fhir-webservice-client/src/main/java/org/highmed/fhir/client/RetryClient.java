@@ -18,12 +18,11 @@ public interface RetryClient<T>
 	/**
 	 * retries <b>nTimes</b> and waits {@value RetryClient#FIVE_SECONDS} ms between tries
 	 * 
-	 * @param nTimes
-	 *            >= 0
+	 * @param nTimes {@code >= 0}
 	 * @return T
 	 * 
 	 * @throws IllegalArgumentException
-	 *             if param <b>nTimes</b> is &lt; 0
+	 *             if param <b>nTimes</b> is {@code <0}
 	 */
 	default T withRetry(int nTimes)
 	{
@@ -33,11 +32,10 @@ public interface RetryClient<T>
 	/**
 	 * retries once after a delay of <b>delayMillis</b> ms
 	 * 
-	 * @param delayMillis
-	 *            >= 0
+	 * @param delayMillis {@code >= 0}
 	 * @return T
 	 * @throws IllegalArgumentException
-	 *             if param <b>delayMillis</b> is &lt; 0
+	 *             if param <b>delayMillis</b> is {@code <0}
 	 */
 	default T withRetry(long delayMillis)
 	{
@@ -45,14 +43,12 @@ public interface RetryClient<T>
 	}
 
 	/**
-	 * @param nTimes
-	 *            >= 0
-	 * @param delayMillis
-	 *            >= 0
+	 * @param nTimes {@code >= 0}
+	 * @param delayMillis {@code >= 0}
 	 * @return T
 	 * 
 	 * @throws IllegalArgumentException
-	 *             if param <b>nTimes</b> or <b>delayMillis</b> is &lt; 0
+	 *             if param <b>nTimes</b> or <b>delayMillis</b> is {@code <0}
 	 */
 	T withRetry(int nTimes, long delayMillis);
 }
