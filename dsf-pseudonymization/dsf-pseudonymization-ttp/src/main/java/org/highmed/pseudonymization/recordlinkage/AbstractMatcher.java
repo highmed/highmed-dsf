@@ -124,6 +124,7 @@ public abstract class AbstractMatcher<P extends Person>
 		/**
 		 * @param matchedPerson
 		 *            not <code>null</code>
+		 * @param <P>
 		 * @param personToMatch
 		 *            not <code>null</code>
 		 * @return
@@ -134,6 +135,7 @@ public abstract class AbstractMatcher<P extends Person>
 				throws NoSuchElementException;
 
 		/**
+		 * @param <P>
 		 * @param personToMatch
 		 *            not <code>null</code>
 		 * @return Function for {@link #calculateMatch(MatchedPerson, Person)}

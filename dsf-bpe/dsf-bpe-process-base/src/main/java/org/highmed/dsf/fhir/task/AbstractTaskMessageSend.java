@@ -133,6 +133,8 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 	/**
 	 * Override this method to add additional input parameters to the task resource being send
 	 *
+	 * @param execution
+	 *            the delegate execution of this process instance
 	 * @return {@link Stream} of {@link ParameterComponent}s to be added as input parameters
 	 */
 	protected Stream<ParameterComponent> getAdditionalInputParameters(DelegateExecution execution)

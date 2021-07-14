@@ -7,7 +7,8 @@ public interface ReferenceCleaner
 {
 	/**
 	 * Removes literal references, if a conditional reference is also set
-	 * 
+	 *
+	 * @param <R>
 	 * @param resource
 	 * @return null if given resource is null, cleaned up resource (same instance)
 	 */

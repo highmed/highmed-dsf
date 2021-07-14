@@ -36,6 +36,7 @@ public interface OrganizationProvider
 	List<Organization> getRemoteOrganizations();
 
 	/**
+	 * @param type
 	 * @return {@link Organization}s with {@link #getDefaultTypeSystem()} and given type
 	 */
 	Stream<Organization> getOrganizationsByType(String type);
