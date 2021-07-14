@@ -55,7 +55,7 @@ public interface ProcessPluginDefinition
 	Stream<String> getBpmnFiles();
 
 	/**
-	 * @return @{@link Configuration} annotated classes defining @{@link Bean} annotated factory methods
+	 * @return {@link Configuration} annotated classes defining {@link Bean} annotated factory methods
 	 */
 	Stream<Class<?>> getSpringConfigClasses();
 

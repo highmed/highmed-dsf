@@ -20,7 +20,6 @@ public interface FederatedMatcher<P extends Person>
 	 *            not <code>null</code>
 	 * @return matched persons, converted persons from param {@code personLists} if param {@code personLists} has only
 	 *         one entry (aka one organization), empty list if param {@code personLists} has no entries
-	 * @see #matchPersons(List, List...)
 	 */
 	Set<MatchedPerson<P>> matchPersons(List<List<P>> personLists);
 }

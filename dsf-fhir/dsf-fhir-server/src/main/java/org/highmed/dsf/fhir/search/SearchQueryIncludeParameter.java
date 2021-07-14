@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.highmed.dsf.fhir.function.BiConsumerWithSqlException;
+import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Resource;
 
 public class SearchQueryIncludeParameter
@@ -20,7 +21,9 @@ public class SearchQueryIncludeParameter
 
 	/**
 	 * @param sql
+	 *            not <code>null</code>
 	 * @param includeParts
+	 *            not <code>null</code>
 	 * @param includeResourceModifier
 	 *            Use this {@link BiConsumerWithSqlException} to modify the include resources. This consumer can be used
 	 *            if the resources returned by the include SQL are not complete and additional content needs to be

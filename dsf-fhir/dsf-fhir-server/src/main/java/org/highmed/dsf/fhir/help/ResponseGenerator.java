@@ -144,7 +144,7 @@ public class ResponseGenerator
 	 *            may be <code>null</code>
 	 * @param pretty
 	 *            may be <code>null</code>
-	 * @return
+	 * @return {@link Bundle} of type {@link BundleType#SEARCHSET}
 	 */
 	public Bundle createSearchSet(PartialResult<? extends Resource> result, List<SearchQueryParameterError> errors,
 			UriBuilder bundleUri, String format, String pretty)

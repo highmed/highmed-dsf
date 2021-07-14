@@ -51,6 +51,7 @@ public class ParameterConverter
 	 *            not <code>null</code>, will be part of the {@link WebApplicationException} if the given id can't be
 	 *            parsed (aka is not a {@link UUID})
 	 * @param id
+	 *            may be <code>null</code>
 	 * @return <code>null</code> if the given id is <code>null</code>
 	 */
 	public UUID toUuid(String resourceTypeName, String id)
@@ -63,6 +64,7 @@ public class ParameterConverter
 
 	/**
 	 * @param id
+	 *            may be <code>null</code>
 	 * @return {@link Optional#empty()} if the given id is <code>null</code> or is not a {@link UUID}
 	 */
 	public Optional<UUID> toUuid(String id)
@@ -184,7 +186,8 @@ public class ParameterConverter
 	 * URL-decodes all query-parameter values
 	 * 
 	 * @param queryParameters
-	 * @return
+	 *            not <code>null</code>
+	 * @return {@link Map} containing the supplied query-parameters in URL-decoded form
 	 */
 	public Map<String, List<String>> urlDecodeQueryParameters(Map<String, List<String>> queryParameters)
 	{
@@ -231,6 +234,7 @@ public class ParameterConverter
 
 	/**
 	 * @param tag
+	 *            may be <code>null</code>
 	 * @return {@link Optional} long version for the given tag or {@link Optional#empty()} if the given tags value could
 	 *         not be parsed as long or was null/blank
 	 */
@@ -244,6 +248,7 @@ public class ParameterConverter
 
 	/**
 	 * @param version
+	 *            may be <code>null</code>
 	 * @return {@link Optional} long version for the given {@link String} value or {@link Optional#empty()} if the given
 	 *         {@link String} value could not be parsed as long or was null/blank
 	 */

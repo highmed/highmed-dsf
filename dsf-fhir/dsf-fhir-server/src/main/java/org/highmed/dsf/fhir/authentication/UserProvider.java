@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
+import org.hl7.fhir.r4.model.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +30,7 @@ public class UserProvider
 
 	/**
 	 * @param expectedRoles
+	 *            not <code>null</code>
 	 * @throws WebApplicationException
 	 *             with status {@link Status#UNAUTHORIZED} if there is no current user, with status
 	 *             {@link Status#FORBIDDEN} if the current user does not have one of the provided role

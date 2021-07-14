@@ -32,6 +32,7 @@ public interface ResourceDao<R extends Resource>
 	 *            not <code>null</code>
 	 * @return the stored resource, not the same object as the given resource (defensive copy)
 	 * @throws SQLException
+	 *             if database access errors occur
 	 */
 	R create(R resource) throws SQLException;
 
@@ -42,6 +43,7 @@ public interface ResourceDao<R extends Resource>
 	 *            not <code>null</code>
 	 * @return the stored resource, not the same object as the given resource (defensive copy)
 	 * @throws SQLException
+	 *             if database access errors occur
 	 */
 	R createWithId(R resource, UUID uuid) throws SQLException;
 
@@ -54,6 +56,7 @@ public interface ResourceDao<R extends Resource>
 	 *            not <code>null</code>
 	 * @return the stored resource, not the same object as the given resource
 	 * @throws SQLException
+	 *             if database access errors occur
 	 * @throws IllegalArgumentException
 	 *             if the given connection is {@link Connection#isReadOnly()}
 	 */
@@ -65,6 +68,7 @@ public interface ResourceDao<R extends Resource>
 	 * @return {@link Optional#empty()} if the given uuid is <code>null</code> or no resource could be found for the
 	 *         given uuid
 	 * @throws SQLException
+	 *             if database access errors occur
 	 * @throws ResourceDeletedException
 	 *             if a resource with the given uuid could be found, but is marked as delete
 	 */
@@ -78,6 +82,7 @@ public interface ResourceDao<R extends Resource>
 	 * @return {@link Optional#empty()} if the given uuid is <code>null</code> or no resource could be found for the
 	 *         given uuid
 	 * @throws SQLException
+	 *             if database access errors occur
 	 * @throws ResourceDeletedException
 	 *             if a resource with the given uuid could be found, but is marked as delete
 	 */
@@ -91,6 +96,7 @@ public interface ResourceDao<R extends Resource>
 	 * @return {@link Optional#empty()} if the given uuid is <code>null</code>, the given version is less then
 	 *         {@value #FIRST_VERSION} or no resource could be found for the given uuid and version
 	 * @throws SQLException
+	 *             if database access errors occur
 	 * @throws ResourceDeletedException
 	 *             if a resource with the given uuid and version could be found, but is the delete history entry
 	 */
@@ -106,6 +112,7 @@ public interface ResourceDao<R extends Resource>
 	 * @return {@link Optional#empty()} if the given uuid is <code>null</code>, the given version is less then
 	 *         {@value #FIRST_VERSION} or no resource could be found for the given uuid and version
 	 * @throws SQLException
+	 *             if database access errors occur
 	 * @throws ResourceDeletedException
 	 *             if a resource with the given uuid and version could be found, but is the delete history entry
 	 */
@@ -118,6 +125,7 @@ public interface ResourceDao<R extends Resource>
 	 * @return {@link Optional#empty()} if the given uuid is <code>null</code> or no resource could be found for the
 	 *         given uuid
 	 * @throws SQLException
+	 *             if database access errors occur
 	 */
 	Optional<R> readIncludingDeleted(UUID uuid) throws SQLException;
 
@@ -129,6 +137,7 @@ public interface ResourceDao<R extends Resource>
 	 * @return {@link Optional#empty()} if the given uuid is <code>null</code> or no resource could be found for the
 	 *         given uuid
 	 * @throws SQLException
+	 *             if database access errors occur
 	 */
 	Optional<R> readIncludingDeletedWithTransaction(Connection connection, UUID uuid) throws SQLException;
 
@@ -137,8 +146,9 @@ public interface ResourceDao<R extends Resource>
 	/**
 	 * @param connection
 	 *            not <code>null</code>
-	 * @return
+	 * @return {@link List} containing matching resources
 	 * @throws SQLException
+	 *             if database access errors occur
 	 */
 	List<R> readAllWithTransaction(Connection connection) throws SQLException;
 
@@ -150,6 +160,7 @@ public interface ResourceDao<R extends Resource>
 	 * @return <code>true</code> if a resource with the given id and version exists, if the given version is null and a
 	 *         resource with the given id is marked as deleted returns <code>false</code>
 	 * @throws SQLException
+	 *             if database access errors occur
 	 */
 	boolean existsNotDeleted(String id, String version) throws SQLException;
 
@@ -163,6 +174,7 @@ public interface ResourceDao<R extends Resource>
 	 * @return <code>true</code> if a resource with the given id and version exists, if the given version is null and a
 	 *         resource with the given id is marked as deleted returns <code>false</code>
 	 * @throws SQLException
+	 *             if database access errors occur
 	 */
 	boolean existsNotDeletedWithTransaction(Connection connection, String id, String version) throws SQLException;
 
@@ -177,6 +189,7 @@ public interface ResourceDao<R extends Resource>
 	 *            not <code>null</code>
 	 * @return the stored resource, not the same object as the given resource (defensive copy)
 	 * @throws SQLException
+	 *             if database access errors occur
 	 * @throws ResourceNotFoundException
 	 *             if the given resource could not be found
 	 * @see ResourceDao#update(Resource, Long)
@@ -208,6 +221,7 @@ public interface ResourceDao<R extends Resource>
 	 *            may be <code>null</code>
 	 * @return the stored resource, not the same object as the given resource (defensive copy)
 	 * @throws SQLException
+	 *             if database access errors occur
 	 * @throws ResourceNotFoundException
 	 *             if the given resource could not be found
 	 * @throws ResourceVersionNoMatchException
@@ -230,8 +244,9 @@ public interface ResourceDao<R extends Resource>
 	 *            or {@link Connection#TRANSACTION_SERIALIZABLE}
 	 * @param resource
 	 *            not <code>null</code>
-	 * @return
+	 * @return the stored resource, not the same object as the given resource (defensive copy)
 	 * @throws SQLException
+	 *             if database access errors occur
 	 * @throws ResourceNotFoundException
 	 *             if the given resource could not be found
 	 * @throws IllegalArgumentException
@@ -270,6 +285,7 @@ public interface ResourceDao<R extends Resource>
 	 *            may be <code>null</code>
 	 * @return the stored resource, not the same object as the given resource (defensive copy)
 	 * @throws SQLException
+	 *             if database access errors occur
 	 * @throws ResourceNotFoundException
 	 *             if the given resource could not be found
 	 * @throws ResourceVersionNoMatchException
@@ -283,9 +299,9 @@ public interface ResourceDao<R extends Resource>
 			throws SQLException, ResourceNotFoundException, ResourceVersionNoMatchException;
 
 	/**
-	 * Does <b>not</b> not increment the resource version. Set the version of the stored resource to latest version from
-	 * DB. See {@link #updateWithTransaction(Connection, DomainResource, Long)} to increment the version before storing
-	 * the resource.
+	 * Does <b>not</b> increment the resource version. Set the version of the stored resource to latest version from DB.
+	 * See {@link #updateWithTransaction(Connection, Resource, Long)} to increment the version before storing the
+	 * resource.
 	 * 
 	 * Resurrects all old versions (removes deleted flag) if the latest version in DB is marked as deleted.
 	 *
@@ -297,6 +313,7 @@ public interface ResourceDao<R extends Resource>
 	 *            not <code>null</code>
 	 * @return the stored resource, not the same object as the given resource (defensive copy)
 	 * @throws SQLException
+	 *             if database access errors occur
 	 * @throws ResourceNotFoundException
 	 *             if the given resource could not be found
 	 * @throws IllegalArgumentException
@@ -315,6 +332,7 @@ public interface ResourceDao<R extends Resource>
 	 * @return <code>true</code> if a resource with the given uuid could be found and marked as deleted,
 	 *         <code>false</code> if a resource with the given uuid was already marked as deleted
 	 * @throws SQLException
+	 *             if database access errors occur
 	 * @throws ResourceNotFoundException
 	 *             if the given uuid is <code>null</code> or no resource could be found with the given uuid
 	 */
@@ -330,6 +348,7 @@ public interface ResourceDao<R extends Resource>
 	 * @return <code>true</code> if a resource with the given uuid could be found and marked as deleted,
 	 *         <code>false</code> if a resource with the given uuid was already marked as deleted
 	 * @throws SQLException
+	 *             if database access errors occur
 	 * @throws ResourceNotFoundException
 	 *             if the given uuid is <code>null</code> or no resource could be found with the given uuid
 	 */
@@ -338,8 +357,9 @@ public interface ResourceDao<R extends Resource>
 	/**
 	 * @param query
 	 *            not <code>null</code>
-	 * @return
+	 * @return {@link PartialResult} that matched the search query
 	 * @throws SQLException
+	 *             if database access errors occur
 	 */
 	PartialResult<R> search(DbSearchQuery query) throws SQLException;
 
@@ -348,8 +368,9 @@ public interface ResourceDao<R extends Resource>
 	 *            not <code>null</code>
 	 * @param query
 	 *            not <code>null</code>
-	 * @return
+	 * @return {@link PartialResult} that matched the search query
 	 * @throws SQLException
+	 *             if database access errors occur
 	 */
 	PartialResult<R> searchWithTransaction(Connection connection, DbSearchQuery query) throws SQLException;
 

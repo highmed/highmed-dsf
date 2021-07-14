@@ -17,7 +17,7 @@ public interface AuthorizationRule<R extends Resource>
 	 *            not <code>null</code>
 	 * @param newResource
 	 *            not <code>null</code>
-	 * @return Reason as String in {@link Optional#of(Object))} if create allowed
+	 * @return Reason as String in {@link Optional#of(Object)} if create allowed
 	 */
 	Optional<String> reasonCreateAllowed(User user, R newResource);
 
@@ -30,7 +30,7 @@ public interface AuthorizationRule<R extends Resource>
 	 *            not <code>null</code>
 	 * @param newResource
 	 *            not <code>null</code>
-	 * @return Reason as String in {@link Optional#of(Object))} if create allowed
+	 * @return Reason as String in {@link Optional#of(Object)} if create allowed
 	 */
 	Optional<String> reasonCreateAllowed(Connection connection, User user, R newResource);
 
@@ -67,7 +67,7 @@ public interface AuthorizationRule<R extends Resource>
 	 *            not <code>null</code>
 	 * @param newResource
 	 *            not <code>null</code>
-	 * @return Reason as String in {@link Optional#of(Object))} if update allowed
+	 * @return Reason as String in {@link Optional#of(Object)} if update allowed
 	 */
 	Optional<String> reasonUpdateAllowed(User user, R oldResource, R newResource);
 
@@ -82,7 +82,7 @@ public interface AuthorizationRule<R extends Resource>
 	 *            not <code>null</code>
 	 * @param newResource
 	 *            not <code>null</code>
-	 * @return Reason as String in {@link Optional#of(Object))} if update allowed
+	 * @return Reason as String in {@link Optional#of(Object)} if update allowed
 	 */
 	Optional<String> reasonUpdateAllowed(Connection connection, User user, R oldResource, R newResource);
 

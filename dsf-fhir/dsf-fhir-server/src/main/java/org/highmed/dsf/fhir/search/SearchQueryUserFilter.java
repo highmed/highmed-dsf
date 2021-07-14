@@ -11,17 +11,19 @@ public interface SearchQueryUserFilter
 	String getFilterQuery();
 
 	/**
-	 * @return &gt;= 0, 0 if {@link #getFilterQuery()} returns empty {@link String}
+	 * @return {@code >=0}, 0 if {@link #getFilterQuery()} returns empty {@link String}
 	 */
 	int getSqlParameterCount();
 
 	/**
 	 * @param parameterIndex
-	 *            >= 1
+	 *            {@code >= 1}
 	 * @param subqueryParameterIndex
 	 *            [1 ... {@link #getSqlParameterCount()}]
 	 * @param statement
+	 *            not <code>null</code>
 	 * @throws SQLException
+	 *             if errors occur during modification of the statement
 	 */
 	void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement)
 			throws SQLException;
