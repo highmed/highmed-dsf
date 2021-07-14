@@ -16,7 +16,8 @@ public interface SearchQueryUserFilter
 	int getSqlParameterCount();
 
 	/**
-	 * @param parameterIndex {@code >= 1}
+	 * @param parameterIndex
+	 *            {@code >= 1}
 	 * @param subqueryParameterIndex
 	 *            [1 ... {@link #getSqlParameterCount()}]
 	 * @param statement

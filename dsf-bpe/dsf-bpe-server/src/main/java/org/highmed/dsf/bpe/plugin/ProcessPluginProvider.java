@@ -25,8 +25,8 @@ public interface ProcessPluginProvider
 	 * and bar_plugin.jar will be loaded in a separate class loader each. All jar files in the baz_plugin directory will
 	 * be loaded within the same class loader.
 	 * 
-	 * @return Plug in definitions found in jar files within a pluginDirectory or jar files within folders within
-	 *         a pluginDirectory and associated class loaders
+	 * @return Plug in definitions found in jar files within a pluginDirectory or jar files within folders within a
+	 *         pluginDirectory and associated class loaders
 	 */
 	List<ProcessPluginDefinitionAndClassLoader> getDefinitions();
 

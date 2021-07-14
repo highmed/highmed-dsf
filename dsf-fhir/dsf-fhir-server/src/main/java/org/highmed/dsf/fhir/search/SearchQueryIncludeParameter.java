@@ -4,8 +4,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.highmed.dsf.fhir.function.BiConsumerWithSqlException;
-import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.Resource;
 
 public class SearchQueryIncludeParameter
 {

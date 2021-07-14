@@ -283,9 +283,9 @@ public interface ResourceDao<R extends Resource>
 			throws SQLException, ResourceNotFoundException, ResourceVersionNoMatchException;
 
 	/**
-	 * Does <b>not</b> increment the resource version. Set the version of the stored resource to latest version from
-	 * DB. See {@link #updateWithTransaction(Connection, Resource, Long)} to increment the version before storing
-	 * the resource.
+	 * Does <b>not</b> increment the resource version. Set the version of the stored resource to latest version from DB.
+	 * See {@link #updateWithTransaction(Connection, Resource, Long)} to increment the version before storing the
+	 * resource.
 	 * 
 	 * Resurrects all old versions (removes deleted flag) if the latest version in DB is marked as deleted.
 	 *
