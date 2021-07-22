@@ -402,15 +402,14 @@ public class ResponseGenerator
 			Integer bundleIndex)
 	{
 		if (bundleIndex == null)
-			logger.warn("Unknown reference at {} in resource of type {} with id {}",
-					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId());
+			logger.warn("Unknown reference at {} in resource of type {} with id {}", resourceReference.getLocation(),
+					resource.getResourceType().name(), resource.getId());
 		else
 			logger.warn("Unknown reference at {} in resource of type {} with id {} at bundle index {}",
-					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId(),
-					bundleIndex);
+					resourceReference.getLocation(), resource.getResourceType().name(), resource.getId(), bundleIndex);
 
 		return createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
-				"Unknown reference at " + resourceReference.getReferenceLocation() + " in resource of type "
+				"Unknown reference at " + resourceReference.getLocation() + " in resource of type "
 						+ resource.getResourceType().name() + " with id " + resource.getId()
 						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex));
 	}
@@ -421,16 +420,15 @@ public class ResponseGenerator
 		if (bundleIndex == null)
 			logger.warn(
 					"Reference target type of reference at {} in resource of type {} with id {} not supported by this implementation",
-					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId());
+					resourceReference.getLocation(), resource.getResourceType().name(), resource.getId());
 		else
 			logger.warn(
 					"Reference target type of reference at {} in resource of type {} with id {} at bundle index {} not supported by this implementation",
-					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId(),
-					bundleIndex);
+					resourceReference.getLocation(), resource.getResourceType().name(), resource.getId(), bundleIndex);
 
 		return createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
-				"Reference target type of reference at " + resourceReference.getReferenceLocation()
-						+ " in resource of type " + resource.getResourceType().name() + " with id " + resource.getId()
+				"Reference target type of reference at " + resourceReference.getLocation() + " in resource of type "
+						+ resource.getResourceType().name() + " with id " + resource.getId()
 						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex)
 						+ " not supported by this implementation");
 	}
@@ -440,16 +438,15 @@ public class ResponseGenerator
 	{
 		if (bundleIndex == null)
 			logger.warn("Reference target type of reference at {} in resource of type {} with id {} not supported",
-					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId());
+					resourceReference.getLocation(), resource.getResourceType().name(), resource.getId());
 		else
 			logger.warn(
 					"Reference target type of reference at {} in resource of type {} with id {} at bundle index {} not supported",
-					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId(),
-					bundleIndex);
+					resourceReference.getLocation(), resource.getResourceType().name(), resource.getId(), bundleIndex);
 
 		return createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
-				"Reference target type of reference at " + resourceReference.getReferenceLocation()
-						+ " in resource of type " + resource.getResourceType().name() + " with id " + resource.getId()
+				"Reference target type of reference at " + resourceReference.getLocation() + " in resource of type "
+						+ resource.getResourceType().name() + " with id " + resource.getId()
 						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex) + " not supported");
 	}
 
@@ -458,18 +455,18 @@ public class ResponseGenerator
 	{
 		if (bundleIndex == null)
 			logger.warn("Reference target {} of reference at {} in resource of type {} with id {} not found",
-					resourceReference.getReference().getReference(), resourceReference.getReferenceLocation(),
-					resource.getResourceType().name(), resource.getId());
+					resourceReference.getValue(), resourceReference.getLocation(), resource.getResourceType().name(),
+					resource.getId());
 		else
 			logger.warn(
 					"Reference target {} of reference at {} in resource of type {} with id {} at bundle index {} not found",
-					resourceReference.getReference().getReference(), resourceReference.getReferenceLocation(),
-					resource.getResourceType().name(), resource.getId(), bundleIndex);
+					resourceReference.getValue(), resourceReference.getLocation(), resource.getResourceType().name(),
+					resource.getId(), bundleIndex);
 
 		return createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
-				"Reference target " + resourceReference.getReference().getReference() + " of reference at "
-						+ resourceReference.getReferenceLocation() + " in resource of type "
-						+ resource.getResourceType().name() + " with id " + resource.getId()
+				"Reference target " + resourceReference.getValue() + " of reference at "
+						+ resourceReference.getLocation() + " in resource of type " + resource.getResourceType().name()
+						+ " with id " + resource.getId()
 						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex) + " not found");
 	}
 
@@ -479,18 +476,18 @@ public class ResponseGenerator
 		if (bundleIndex == null)
 			logger.warn(
 					"Reference target {} of reference at {} in resource of type {} with id {} not found on server {}",
-					resourceReference.getReference().getReference(), resourceReference.getReferenceLocation(),
-					resource.getResourceType().name(), resource.getId(), serverBase);
+					resourceReference.getValue(), resourceReference.getLocation(), resource.getResourceType().name(),
+					resource.getId(), serverBase);
 		else
 			logger.warn(
 					"Reference target {} of reference at {} in resource of type {} with id {} at bundle index {} not found on server {}",
-					resourceReference.getReference().getReference(), resourceReference.getReferenceLocation(),
-					resource.getResourceType().name(), resource.getId(), bundleIndex, serverBase);
+					resourceReference.getValue(), resourceReference.getLocation(), resource.getResourceType().name(),
+					resource.getId(), bundleIndex, serverBase);
 
 		return createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
-				"Reference target " + resourceReference.getReference().getReference() + " of reference at "
-						+ resourceReference.getReferenceLocation() + " in resource of type "
-						+ resource.getResourceType().name() + " with id " + resource.getId()
+				"Reference target " + resourceReference.getValue() + " of reference at "
+						+ resourceReference.getLocation() + " in resource of type " + resource.getResourceType().name()
+						+ " with id " + resource.getId()
 						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex) + " not found on server "
 						+ serverBase);
 	}
@@ -501,18 +498,18 @@ public class ResponseGenerator
 		if (bundleIndex == null)
 			logger.warn(
 					"No Endpoint found for reference target {} of reference at {} in resource of type {} with id {}",
-					resourceReference.getReference().getReference(), resourceReference.getReferenceLocation(),
-					resource.getResourceType().name(), resource.getId());
+					resourceReference.getValue(), resourceReference.getLocation(), resource.getResourceType().name(),
+					resource.getId());
 		else
 			logger.warn(
 					"No Endpoint found for reference target {} of reference at {} in resource of type {} with id {} at bundle index {} not found",
-					resourceReference.getReference().getReference(), resourceReference.getReferenceLocation(),
-					resource.getResourceType().name(), resource.getId(), bundleIndex);
+					resourceReference.getValue(), resourceReference.getLocation(), resource.getResourceType().name(),
+					resource.getId(), bundleIndex);
 
 		return createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
-				"No Endpoint found for reference target " + resourceReference.getReference().getReference()
-						+ " of reference at " + resourceReference.getReferenceLocation() + " in resource of type "
-						+ resource.getResourceType().name() + " with id " + resource.getId()
+				"No Endpoint found for reference target " + resourceReference.getValue() + " of reference at "
+						+ resourceReference.getLocation() + " in resource of type " + resource.getResourceType().name()
+						+ " with id " + resource.getId()
 						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex) + " not found");
 	}
 
@@ -526,20 +523,20 @@ public class ResponseGenerator
 		if (bundleIndex == null)
 			logger.warn(
 					"{} reference {} at {} in resource of type {} with id {} contains unsupported queryparameter{} {}",
-					logicalNotConditional ? "Logical" : "Conditional", queryParameters,
-					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId(),
+					logicalNotConditional ? "Logical" : "Conditional", queryParameters, resourceReference.getLocation(),
+					resource.getResourceType().name(), resource.getId(),
 					unsupportedQueryParameters.size() != 1 ? "s" : "", unsupportedQueryParametersString);
 		else
 			logger.warn(
 					"{} reference {} at {} in resource of type {} with id {} at bundle index {} contains unsupported queryparameter{} {}",
-					logicalNotConditional ? "Logical" : "Conditional", queryParameters,
-					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId(),
-					bundleIndex, unsupportedQueryParameters.size() != 1 ? "s" : "", unsupportedQueryParametersString);
+					logicalNotConditional ? "Logical" : "Conditional", queryParameters, resourceReference.getLocation(),
+					resource.getResourceType().name(), resource.getId(), bundleIndex,
+					unsupportedQueryParameters.size() != 1 ? "s" : "", unsupportedQueryParametersString);
 
 		return createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				(logicalNotConditional ? "Logical" : "Conditional") + " reference " + queryParameters + " at "
-						+ resourceReference.getReferenceLocation() + " in resource of type "
-						+ resource.getResourceType().name() + " with id " + resource.getId()
+						+ resourceReference.getLocation() + " in resource of type " + resource.getResourceType().name()
+						+ " with id " + resource.getId()
 						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex)
 						+ " contains unsupported queryparameter" + (unsupportedQueryParameters.size() != 1 ? "s" : "")
 						+ " " + unsupportedQueryParametersString);
@@ -558,21 +555,20 @@ public class ResponseGenerator
 			logger.warn(
 					"Reference target by identifier '{}|{}' of reference at {} in resource of type {} with id {} not found",
 					resourceReference.getReference().getIdentifier().getSystem(),
-					resourceReference.getReference().getIdentifier().getValue(),
-					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId());
+					resourceReference.getReference().getIdentifier().getValue(), resourceReference.getLocation(),
+					resource.getResourceType().name(), resource.getId());
 		else
 			logger.warn(
 					"Reference target by identifier '{}|{}' of reference at {} in resource of type {} with id {} at bundle index {} not found",
 					resourceReference.getReference().getIdentifier().getSystem(),
-					resourceReference.getReference().getIdentifier().getValue(),
-					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId(),
-					bundleIndex);
+					resourceReference.getReference().getIdentifier().getValue(), resourceReference.getLocation(),
+					resource.getResourceType().name(), resource.getId(), bundleIndex);
 
 		return createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Reference target by identifier '" + resourceReference.getReference().getIdentifier().getSystem() + "|"
 						+ resourceReference.getReference().getIdentifier().getValue() + "' of reference at "
-						+ resourceReference.getReferenceLocation() + " in resource of type "
-						+ resource.getResourceType().name() + " with id " + resource.getId()
+						+ resourceReference.getLocation() + " in resource of type " + resource.getResourceType().name()
+						+ " with id " + resource.getId()
 						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex) + " not found");
 	}
 
@@ -583,22 +579,21 @@ public class ResponseGenerator
 			logger.warn(
 					"Found {} matches for reference target by identifier '{}|{}' of reference at {} in resource of type {} with id {}",
 					overallCount, resourceReference.getReference().getIdentifier().getSystem(),
-					resourceReference.getReference().getIdentifier().getValue(),
-					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId());
+					resourceReference.getReference().getIdentifier().getValue(), resourceReference.getLocation(),
+					resource.getResourceType().name(), resource.getId());
 		else
 			logger.warn(
 					"Found {} matches for reference target by identifier '{}|{}' of reference at {} in resource of type {} with id {} at bundle index {}",
 					overallCount, resourceReference.getReference().getIdentifier().getSystem(),
-					resourceReference.getReference().getIdentifier().getValue(),
-					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId(),
-					bundleIndex);
+					resourceReference.getReference().getIdentifier().getValue(), resourceReference.getLocation(),
+					resource.getResourceType().name(), resource.getId(), bundleIndex);
 
 		return createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
 				"Found " + overallCount + " matches for reference target by identifier '"
 						+ resourceReference.getReference().getIdentifier().getSystem() + "|"
 						+ resourceReference.getReference().getIdentifier().getValue() + "' of reference at "
-						+ resourceReference.getReferenceLocation() + " in resource of type "
-						+ resource.getResourceType().name() + " with id " + resource.getId()
+						+ resourceReference.getLocation() + " in resource of type " + resource.getResourceType().name()
+						+ " with id " + resource.getId()
 						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex) + " not found");
 	}
 
@@ -608,18 +603,18 @@ public class ResponseGenerator
 		if (bundleIndex == null)
 			logger.warn(
 					"Reference target by condition '{}' of reference at {} in resource of type {} with id {} not found",
-					resourceReference.getReference().getReference(), resourceReference.getReferenceLocation(),
-					resource.getResourceType().name(), resource.getId());
+					resourceReference.getValue(), resourceReference.getLocation(), resource.getResourceType().name(),
+					resource.getId());
 		else
 			logger.warn(
 					"Reference target by condition '{}' of reference at {} in resource of type {} with id {} at bundle index {} not found",
-					resourceReference.getReference().getReference(), resourceReference.getReferenceLocation(),
-					resource.getResourceType().name(), resource.getId(), bundleIndex);
+					resourceReference.getValue(), resourceReference.getLocation(), resource.getResourceType().name(),
+					resource.getId(), bundleIndex);
 
 		return createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
-				"Reference target by condition '" + resourceReference.getReference().getReference()
-						+ "' of reference at " + resourceReference.getReferenceLocation() + " in resource of type "
-						+ resource.getResourceType().name() + " with id " + resource.getId()
+				"Reference target by condition '" + resourceReference.getValue() + "' of reference at "
+						+ resourceReference.getLocation() + " in resource of type " + resource.getResourceType().name()
+						+ " with id " + resource.getId()
 						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex) + " not found");
 	}
 
@@ -629,19 +624,17 @@ public class ResponseGenerator
 		if (bundleIndex == null)
 			logger.warn(
 					"Found {} matches for reference target by condition '{}' of reference at {} in resource of type {} with id {}",
-					overallCount, resourceReference.getReference().getReference(),
-					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId());
+					overallCount, resourceReference.getValue(), resourceReference.getLocation(),
+					resource.getResourceType().name(), resource.getId());
 		else
 			logger.warn(
 					"Found {} matches for reference target by condition '{}' of reference at {} in resource of type {} with id {} at bundle index {}",
-					overallCount, resourceReference.getReference().getReference(),
-					resourceReference.getReferenceLocation(), resource.getResourceType().name(), resource.getId(),
-					bundleIndex);
+					overallCount, resourceReference.getValue(), resourceReference.getLocation(),
+					resource.getResourceType().name(), resource.getId(), bundleIndex);
 
 		return createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
-				"Found " + overallCount + " matches for reference target by condition '"
-						+ resourceReference.getReference().getReference() + "' of reference at "
-						+ resourceReference.getReferenceLocation() + " in resource of type "
+				"Found " + overallCount + " matches for reference target by condition '" + resourceReference.getValue()
+						+ "' of reference at " + resourceReference.getLocation() + " in resource of type "
 						+ resource.getResourceType().name() + " with id " + resource.getId()
 						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex) + " not found");
 	}
@@ -651,18 +644,18 @@ public class ResponseGenerator
 	{
 		if (bundleIndex == null)
 			logger.warn("Bad conditional reference target '{}' of reference at {} in resource of type {} with id {}",
-					resourceReference.getReference().getReference(), resourceReference.getReferenceLocation(),
-					resource.getResourceType().name(), resource.getId());
+					resourceReference.getValue(), resourceReference.getLocation(), resource.getResourceType().name(),
+					resource.getId());
 		else
 			logger.warn(
 					"Bad conditional reference target '{}' of reference at {} in resource of type {} with id {} at bundle index {}",
-					resourceReference.getReference().getReference(), resourceReference.getReferenceLocation(),
-					resource.getResourceType().name(), resource.getId(), bundleIndex);
+					resourceReference.getValue(), resourceReference.getLocation(), resource.getResourceType().name(),
+					resource.getId(), bundleIndex);
 
 		return createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
-				"Bad conditional reference target '" + resourceReference.getReference().getReference()
-						+ "' of reference at " + resourceReference.getReferenceLocation() + " in resource of type "
-						+ resource.getResourceType().name() + " with id " + resource.getId()
+				"Bad conditional reference target '" + resourceReference.getValue() + "' of reference at "
+						+ resourceReference.getLocation() + " in resource of type " + resource.getResourceType().name()
+						+ " with id " + resource.getId()
 						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex) + " not found");
 	}
 

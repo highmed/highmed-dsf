@@ -65,8 +65,14 @@ public final class ReferencesHelperImpl<R extends Resource> implements Reference
 		{
 			case TEMPORARY:
 				return resolveTemporaryReference(reference, idTranslationTable);
+			case RELATED_ARTEFACT_TEMPORARY_URL:
+				return resolveTemporaryRelatedArtifactUrl(reference, idTranslationTable);
 			case CONDITIONAL:
 				return resolveConditionalReference(reference, connection);
+			case RELATED_ARTEFACT_CONDITIONAL_URL:
+				return resolveConditionalRelatedArtifactUrl(reference, connection);
+			case RELATED_ARTEFACT_LITERAL_INTERNAL_URL:
+				return resolveLiteralInternalRelatedArtifactUrl(reference);
 			default:
 				return Optional.empty();
 		}
@@ -79,6 +85,21 @@ public final class ReferencesHelperImpl<R extends Resource> implements Reference
 		if (newId != null)
 		{
 			reference.getReference().setReferenceElement(newId);
+
+			return Optional.empty();
+		}
+		else
+			return Optional.of(responseGenerator.unknownReference(resource, reference, index));
+	}
+
+	private Optional<OperationOutcome> resolveTemporaryRelatedArtifactUrl(ResourceReference reference,
+			Map<String, IdType> idTranslationTable)
+	{
+		IdType newId = idTranslationTable.get(reference.getRelatedArtifact().getUrl());
+		if (newId != null)
+		{
+			String absoluteUrl = newId.withServerBase(serverBase, newId.getResourceType()).getValue();
+			reference.getRelatedArtifact().setUrl(absoluteUrl);
 
 			return Optional.empty();
 		}
@@ -99,6 +120,37 @@ public final class ReferencesHelperImpl<R extends Resource> implements Reference
 		}
 		else
 			return Optional.of(responseGenerator.referenceTargetNotFoundLocallyByCondition(index, resource, reference));
+	}
+
+	private Optional<OperationOutcome> resolveConditionalRelatedArtifactUrl(ResourceReference reference,
+			Connection connection)
+	{
+		Optional<Resource> resolvedResource = referenceResolver.resolveReference(user, reference, connection);
+		if (resolvedResource.isPresent())
+		{
+			Resource target = resolvedResource.get();
+			IdType newId = new IdType(target.getResourceType().name(), target.getIdElement().getIdPart());
+			String absoluteUrl = newId.withServerBase(serverBase, newId.getResourceType()).getValue();
+			reference.getRelatedArtifact().setUrl(absoluteUrl);
+
+			return Optional.empty();
+		}
+		else
+			return Optional.of(responseGenerator.referenceTargetNotFoundLocallyByCondition(index, resource, reference));
+	}
+
+	private Optional<OperationOutcome> resolveLiteralInternalRelatedArtifactUrl(ResourceReference reference)
+	{
+		if (reference.hasRelatedArtifact())
+		{
+			IdType newId = new IdType(reference.getValue());
+			String absoluteUrl = newId.withServerBase(serverBase, newId.getResourceType()).getValue();
+			reference.getRelatedArtifact().setUrl(absoluteUrl);
+
+			return Optional.empty();
+		}
+
+		return Optional.empty();
 	}
 
 	@Override
@@ -153,13 +205,18 @@ public final class ReferencesHelperImpl<R extends Resource> implements Reference
 		ReferenceType type = reference.getType(serverBase);
 		switch (type)
 		{
+			case RELATED_ARTEFACT_LITERAL_INTERNAL_URL:
 			case LITERAL_INTERNAL:
 				return referenceResolver.checkLiteralInternalReference(resource, reference, connection, index);
+			case RELATED_ARTEFACT_LITERAL_EXTERNAL_URL:
 			case LITERAL_EXTERNAL:
 				return referenceResolver.checkLiteralExternalReference(resource, reference, index);
 			case LOGICAL:
 				return referenceResolver.checkLogicalReference(user, resource, reference, connection, index);
 			case UNKNOWN:
+				// unknown urls to external non fhir servers in related artifacts must not be checked
+				if (reference.hasRelatedArtifact())
+					return Optional.empty();
 			default:
 				return Optional.of(responseGenerator.unknownReference(resource, reference, index));
 		}

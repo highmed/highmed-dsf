@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.Resource;
 
 public class ResourceReference
@@ -96,32 +97,80 @@ public class ResourceReference
 		/**
 		 * conditional reference as used in batch transactions
 		 */
-		CONDITIONAL, UNKNOWN
+		CONDITIONAL,
+		/**
+		 * temporary url in RelatedArtifact starting with <code>urn:uuid:</code>
+		 */
+		RELATED_ARTEFACT_TEMPORARY_URL,
+		/**
+		 * conditional url in RelatedArtifact
+		 */
+		RELATED_ARTEFACT_CONDITIONAL_URL,
+		/**
+		 * literal url in RelatedArtifact to a resource on this server
+		 */
+		RELATED_ARTEFACT_LITERAL_INTERNAL_URL,
+		/**
+		 * literal url in RelatedArtifact to a resource on an external server
+		 */
+		RELATED_ARTEFACT_LITERAL_EXTERNAL_URL, UNKNOWN
 	}
 
-	private final String referenceLocation;
+	private final String location;
 	private final Reference reference;
+	private final RelatedArtifact relatedArtifact;
 	private final List<Class<? extends Resource>> referenceTypes = new ArrayList<>();
 
 	@SafeVarargs
-	public ResourceReference(String referenceLocation, Reference reference, Class<? extends Resource>... referenceTypes)
+	public ResourceReference(String location, Reference reference, Class<? extends Resource>... referenceTypes)
 	{
-		this(referenceLocation, reference, Arrays.asList(referenceTypes));
+		this(location, reference, null, Arrays.asList(referenceTypes));
 	}
 
-	public ResourceReference(String referenceLocation, Reference reference,
+	public ResourceReference(String location, RelatedArtifact relatedArtifact)
+	{
+		this(location, null, relatedArtifact, Collections.emptyList());
+	}
+
+	public ResourceReference(String location, Reference reference, RelatedArtifact relatedArtifact,
 			Collection<Class<? extends Resource>> referenceTypes)
 	{
-		this.referenceLocation = referenceLocation;
+		this.location = location;
 		this.reference = reference;
+		this.relatedArtifact = relatedArtifact;
 
 		if (referenceTypes != null)
 			this.referenceTypes.addAll(referenceTypes);
 	}
 
+	public boolean hasReference()
+	{
+		return reference != null;
+	}
+
 	public Reference getReference()
 	{
 		return reference;
+	}
+
+	public boolean hasRelatedArtifact()
+	{
+		return relatedArtifact != null;
+	}
+
+	public RelatedArtifact getRelatedArtifact()
+	{
+		return relatedArtifact;
+	}
+
+	public String getValue()
+	{
+		if (hasReference())
+			return reference.getReference();
+		else if (hasRelatedArtifact())
+			return relatedArtifact.getUrl();
+		else
+			throw new IllegalArgumentException("reference and related artefact not set");
 	}
 
 	public List<Class<? extends Resource>> getReferenceTypes()
@@ -137,7 +186,7 @@ public class ResourceReference
 	/**
 	 * Determines the {@link ReferenceType} based {@link Reference#getReference()} first and then looks at
 	 * {@link Reference#getIdentifier()}
-	 * 
+	 *
 	 * @param localServerBase
 	 *            not <code>null</code>
 	 * @return one of this priority list: {@link ReferenceType#TEMPORARY}, {@link ReferenceType#LITERAL_INTERNAL},
@@ -148,52 +197,81 @@ public class ResourceReference
 	{
 		Objects.requireNonNull(localServerBase, "localServerBase");
 
-		if (reference.hasReference())
+		if (relatedArtifact != null)
 		{
-			Matcher tempIdRefMatcher = TEMP_ID_PATTERN.matcher(reference.getReference());
-			if (tempIdRefMatcher.matches())
-				return ReferenceType.TEMPORARY;
-
-			Matcher idRefMatcher = ID_PATTERN.matcher(reference.getReference());
-			if (idRefMatcher.matches())
+			if (relatedArtifact.hasUrl())
 			{
-				IdType id = new IdType(reference.getReference());
-				if (!id.isAbsolute() || localServerBase.equals(id.getBaseUrl()))
-					return ReferenceType.LITERAL_INTERNAL;
-				else
-					return ReferenceType.LITERAL_EXTERNAL;
-			}
+				Matcher tempIdRefMatcher = TEMP_ID_PATTERN.matcher(relatedArtifact.getUrl());
+				if (tempIdRefMatcher.matches())
+					return ReferenceType.RELATED_ARTEFACT_TEMPORARY_URL;
 
-			Matcher conditionalRefMatcher = CONDITIONAL_REF_PATTERN.matcher(reference.getReference());
-			if (conditionalRefMatcher.matches())
-				return ReferenceType.CONDITIONAL;
+				Matcher idRefMatcher = ID_PATTERN.matcher(relatedArtifact.getUrl());
+				if (idRefMatcher.matches())
+				{
+					IdType id = new IdType(relatedArtifact.getUrl());
+					if (!id.isAbsolute() || localServerBase.equals(id.getBaseUrl()))
+						return ReferenceType.RELATED_ARTEFACT_LITERAL_INTERNAL_URL;
+					else
+						return ReferenceType.RELATED_ARTEFACT_LITERAL_EXTERNAL_URL;
+				}
+
+				Matcher conditionalRefMatcher = CONDITIONAL_REF_PATTERN.matcher(relatedArtifact.getUrl());
+				if (conditionalRefMatcher.matches())
+					return ReferenceType.RELATED_ARTEFACT_CONDITIONAL_URL;
+			}
 		}
-		else if (reference.hasType() && reference.hasIdentifier() && reference.getIdentifier().hasSystem()
-				&& reference.getIdentifier().hasValue())
+		else if (reference != null)
 		{
-			return ReferenceType.LOGICAL;
+			if (reference.hasReference())
+			{
+				Matcher tempIdRefMatcher = TEMP_ID_PATTERN.matcher(reference.getReference());
+				if (tempIdRefMatcher.matches())
+					return ReferenceType.TEMPORARY;
+
+				Matcher idRefMatcher = ID_PATTERN.matcher(reference.getReference());
+				if (idRefMatcher.matches())
+				{
+					IdType id = new IdType(reference.getReference());
+					if (!id.isAbsolute() || localServerBase.equals(id.getBaseUrl()))
+						return ReferenceType.LITERAL_INTERNAL;
+					else
+						return ReferenceType.LITERAL_EXTERNAL;
+				}
+
+				Matcher conditionalRefMatcher = CONDITIONAL_REF_PATTERN.matcher(reference.getReference());
+				if (conditionalRefMatcher.matches())
+					return ReferenceType.CONDITIONAL;
+			}
+			else if (reference.hasType() && reference.hasIdentifier() && reference.getIdentifier().hasSystem()
+					&& reference.getIdentifier().hasValue())
+			{
+				return ReferenceType.LOGICAL;
+			}
 		}
 
 		return ReferenceType.UNKNOWN;
 	}
 
-	public String getReferenceLocation()
+	public String getLocation()
 	{
-		return referenceLocation;
+		return location;
 	}
 
 	/**
-	 * @return empty String if the type of this {@link ResourceReference} is not {@link ReferenceType#LITERAL_EXTERNAL}
 	 * @param localServerBase
 	 *            not <code>null</code>
+	 * @return empty String if the type of this {@link ResourceReference} is not {@link ReferenceType#LITERAL_EXTERNAL}
 	 */
 	public String getServerBase(String localServerBase)
 	{
 		Objects.requireNonNull(localServerBase, "localServerBase");
 
 		if (ReferenceType.LITERAL_EXTERNAL.equals(getType(localServerBase)))
-			return new IdType(reference.getReference()).getBaseUrl();
-		else
-			return "";
+			if (hasReference())
+				return new IdType(reference.getReference()).getBaseUrl();
+			else if (hasRelatedArtifact())
+				return new IdType(relatedArtifact.getUrl()).getBaseUrl();
+
+		return "";
 	}
 }
