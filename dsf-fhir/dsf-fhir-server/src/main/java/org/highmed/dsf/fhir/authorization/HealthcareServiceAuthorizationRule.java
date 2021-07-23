@@ -13,10 +13,14 @@ import org.highmed.dsf.fhir.dao.HealthcareServiceDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.HealthcareService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HealthcareServiceAuthorizationRule
 		extends AbstractMetaTagAuthorizationRule<HealthcareService, HealthcareServiceDao>
 {
+	private static final Logger logger = LoggerFactory.getLogger(HealthcareServiceAuthorizationRule.class);
+
 	public HealthcareServiceAuthorizationRule(DaoProvider daoProvider, String serverBase,
 			ReferenceResolver referenceResolver, OrganizationProvider organizationProvider,
 			ReadAccessHelper readAccessHelper)
@@ -53,5 +57,20 @@ public class HealthcareServiceAuthorizationRule
 	{
 		// no unique criteria for HealthcareService
 		return true;
+	}
+
+	@Override
+	public Optional<String> reasonExpungeAllowed(Connection connection, User user, HealthcareService oldResource)
+	{
+		if (isLocalUser(user))
+		{
+			logger.info("Expunge of HealthcareService authorized for local user '{}'", user.getName());
+			return Optional.of("local user");
+		}
+		else
+		{
+			logger.warn("Expunge of HealthcareService unauthorized, not a local user");
+			return Optional.empty();
+		}
 	}
 }

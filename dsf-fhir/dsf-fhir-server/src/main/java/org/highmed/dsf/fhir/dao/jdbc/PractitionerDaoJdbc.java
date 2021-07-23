@@ -12,10 +12,11 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class PractitionerDaoJdbc extends AbstractResourceDaoJdbc<Practitioner> implements PractitionerDao
 {
-	public PractitionerDaoJdbc(DataSource dataSource, FhirContext fhirContext)
+	public PractitionerDaoJdbc(DataSource dataSource, DataSource deletionDataSource, FhirContext fhirContext)
 	{
-		super(dataSource, fhirContext, Practitioner.class, "practitioners", "practitioner", "practitioner_id",
-				PractitionerUserFilter::new, with(PractitionerActive::new, PractitionerIdentifier::new), with());
+		super(dataSource, deletionDataSource, fhirContext, Practitioner.class, "practitioners", "practitioner",
+				"practitioner_id", PractitionerUserFilter::new,
+				with(PractitionerActive::new, PractitionerIdentifier::new), with());
 	}
 
 	@Override

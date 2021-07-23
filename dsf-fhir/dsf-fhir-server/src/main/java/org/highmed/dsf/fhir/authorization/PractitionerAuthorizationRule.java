@@ -13,9 +13,13 @@ import org.highmed.dsf.fhir.dao.PractitionerDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PractitionerAuthorizationRule extends AbstractMetaTagAuthorizationRule<Practitioner, PractitionerDao>
 {
+	private static final Logger logger = LoggerFactory.getLogger(PractitionerAuthorizationRule.class);
+
 	public PractitionerAuthorizationRule(DaoProvider daoProvider, String serverBase,
 			ReferenceResolver referenceResolver, OrganizationProvider organizationProvider,
 			ReadAccessHelper readAccessHelper)
@@ -50,5 +54,20 @@ public class PractitionerAuthorizationRule extends AbstractMetaTagAuthorizationR
 	{
 		// no unique criteria for Practitioner
 		return true;
+	}
+
+	@Override
+	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Practitioner oldResource)
+	{
+		if (isLocalUser(user))
+		{
+			logger.info("Expunge of Practitioner authorized for local user '{}'", user.getName());
+			return Optional.of("local user");
+		}
+		else
+		{
+			logger.warn("Expunge of Practitioner unauthorized, not a local user");
+			return Optional.empty();
+		}
 	}
 }

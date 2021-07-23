@@ -91,4 +91,19 @@ public class StructureDefinitionAuthorizationRule
 		return oldResource.getUrl().equals(newResource.getUrl())
 				&& oldResource.getVersion().equals(newResource.getVersion());
 	}
+
+	@Override
+	public Optional<String> reasonExpungeAllowed(Connection connection, User user, StructureDefinition oldResource)
+	{
+		if (isLocalUser(user))
+		{
+			logger.info("Expunge of StructureDefinition authorized for local user '{}'", user.getName());
+			return Optional.of("local user");
+		}
+		else
+		{
+			logger.warn("Expunge of StructureDefinition unauthorized, not a local user");
+			return Optional.empty();
+		}
+	}
 }

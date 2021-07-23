@@ -9,6 +9,7 @@ import java.util.UUID;
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.dsf.fhir.dao.exception.ResourceNotFoundException;
+import org.highmed.dsf.fhir.dao.exception.ResourceNotMarkedDeletedException;
 import org.highmed.dsf.fhir.dao.exception.ResourceVersionNoMatchException;
 import org.highmed.dsf.fhir.search.DbSearchQuery;
 import org.highmed.dsf.fhir.search.PartialResult;
@@ -284,8 +285,8 @@ public interface ResourceDao<R extends Resource>
 
 	/**
 	 * Does <b>not</b> not increment the resource version. Set the version of the stored resource to latest version from
-	 * DB. See {@link #updateWithTransaction(Connection, DomainResource, Long)} to increment the version before storing
-	 * the resource.
+	 * DB. See {@link #updateWithTransaction(Connection, Resource, Long)} to increment the version before storing the
+	 * resource.
 	 * 
 	 * Resurrects all old versions (removes deleted flag) if the latest version in DB is marked as deleted.
 	 *
@@ -356,4 +357,37 @@ public interface ResourceDao<R extends Resource>
 	SearchQuery<R> createSearchQuery(User user, int page, int count);
 
 	SearchQuery<R> createSearchQueryWithoutUserFilter(int page, int count);
+
+	/**
+	 * Permanently delete a resource that was previously marked as deleted.
+	 *
+	 * @param uuid
+	 *            may be <code>null</code>
+	 * @return <code>true</code> if a resource with the given uuid could be found, marked as deleted and expunged,
+	 *         <code>false</code> if a resource with the given uuid was not marked as deleted or not found
+	 * @throws SQLException
+	 * @throws ResourceNotFoundException
+	 *             if the given uuid is <code>null</code> or no resource could be found with the given uuid
+	 * @throws ResourceNotMarkedDeletedException
+	 *             if the resource was not marked as deleted
+	 */
+	boolean expunge(UUID uuid) throws SQLException, ResourceNotFoundException, ResourceNotMarkedDeletedException;
+
+	/**
+	 * Permanently delete a resource that was previously marked as deleted.
+	 *
+	 * @param connection
+	 *            not <code>null</code>, not {@link Connection#isReadOnly()}
+	 * @param uuid
+	 *            may be <code>null</code>
+	 * @return <code>true</code> if a resource with the given uuid could be found, marked as deleted and expunged,
+	 *         <code>false</code> if a resource with the given uuid was not marked as deleted or not found
+	 * @throws SQLException
+	 * @throws ResourceNotFoundException
+	 *             if the given uuid is <code>null</code> or no resource could be found with the given uuid
+	 * @throws ResourceNotMarkedDeletedException
+	 *             if the resource was not marked as deleted
+	 */
+	boolean expungeWithTransaction(Connection connection, UUID uuid)
+			throws SQLException, ResourceNotFoundException, ResourceNotMarkedDeletedException;
 }
