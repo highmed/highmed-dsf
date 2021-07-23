@@ -37,10 +37,12 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao>
 	private static final byte[] DATA2 = "VBERi0xLjUNJeLjz9MNCjEwIDAgb2JqDTw8L0xpbmVhcml6ZWQgMS9MIDEzMDA2OC9PIDEyL0UgMTI1NzM1L04gMS9UIDEyOTc2NC9IIFsgNTQ2IDIwNF"
 			.getBytes();
 
-	private final OrganizationDao organizationDao = new OrganizationDaoJdbc(defaultDataSource, fhirContext);
-	private final ResearchStudyDao researchStudyDao = new ResearchStudyDaoJdbc(defaultDataSource, fhirContext);
+	private final OrganizationDao organizationDao = new OrganizationDaoJdbc(defaultDataSource, deletionDataSource,
+			fhirContext);
+	private final ResearchStudyDao researchStudyDao = new ResearchStudyDaoJdbc(defaultDataSource, deletionDataSource,
+			fhirContext);
 	private final OrganizationAffiliationDao organizationAffiliationDao = new OrganizationAffiliationDaoJdbc(
-			defaultDataSource, fhirContext);
+			defaultDataSource, deletionDataSource, fhirContext);
 
 	public BinaryDaoTest()
 	{

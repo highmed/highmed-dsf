@@ -13,9 +13,13 @@ import org.highmed.dsf.fhir.dao.PatientDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.Patient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PatientAuthorizationRule extends AbstractMetaTagAuthorizationRule<Patient, PatientDao>
 {
+	private static final Logger logger = LoggerFactory.getLogger(PatientAuthorizationRule.class);
+
 	public PatientAuthorizationRule(DaoProvider daoProvider, String serverBase, ReferenceResolver referenceResolver,
 			OrganizationProvider organizationProvider, ReadAccessHelper readAccessHelper)
 	{
@@ -49,5 +53,20 @@ public class PatientAuthorizationRule extends AbstractMetaTagAuthorizationRule<P
 	{
 		// no unique criteria for Patient
 		return true;
+	}
+
+	@Override
+	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Patient oldResource)
+	{
+		if (isLocalUser(user))
+		{
+			logger.info("Expunge of Patient authorized for local user '{}'", user.getName());
+			return Optional.of("local user");
+		}
+		else
+		{
+			logger.warn("Expunge of Patient unauthorized, not a local user");
+			return Optional.empty();
+		}
 	}
 }

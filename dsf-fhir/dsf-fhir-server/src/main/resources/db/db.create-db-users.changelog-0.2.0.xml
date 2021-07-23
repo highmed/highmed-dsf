@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<changeSet author="nlangh" id="db.create-db-users.changelog-0.2.0" dbms="postgresql">
+		<preConditions onFail="MARK_RAN">
+			<and>
+				<sqlCheck expectedResult="0">SELECT COUNT(*) FROM pg_roles WHERE rolname='${db.server_deletion_user}'</sqlCheck>
+			</and>
+		</preConditions>
+		<sql>
+			CREATE ROLE ${db.server_deletion_user} LOGIN PASSWORD '${db.server_deletion_user_password}' NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION;
+			GRANT ${db.server_users_group} TO ${db.server_deletion_user};
+		</sql>
+	</changeSet>
+</databaseChangeLog>

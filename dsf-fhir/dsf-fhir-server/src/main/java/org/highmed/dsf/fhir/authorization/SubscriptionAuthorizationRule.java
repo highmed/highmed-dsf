@@ -143,4 +143,19 @@ public class SubscriptionAuthorizationRule extends AbstractMetaTagAuthorizationR
 						|| (oldResource.getChannel().getPayload() == null
 								&& newResource.getChannel().getPayload() == null));
 	}
+
+	@Override
+	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Subscription oldResource)
+	{
+		if (isLocalUser(user))
+		{
+			logger.info("Expunge of Subscription authorized for local user '{}'", user.getName());
+			return Optional.of("local user");
+		}
+		else
+		{
+			logger.warn("Expunge of Subscription unauthorized, not a local user");
+			return Optional.empty();
+		}
+	}
 }

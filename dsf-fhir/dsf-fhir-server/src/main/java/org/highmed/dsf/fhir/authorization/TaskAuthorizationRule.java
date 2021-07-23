@@ -482,4 +482,19 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 				user.getRole(), user.getName(), user.getOrganization().getIdElement().getValueAsString());
 		return Optional.of("Allowed for all, filtered by users organization");
 	}
+
+	@Override
+	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Task oldResource)
+	{
+		if (isLocalUser(user))
+		{
+			logger.info("Expunge of Task authorized for local user '{}'", user.getName());
+			return Optional.of("local user");
+		}
+		else
+		{
+			logger.warn("Expunge of Task unauthorized, not a local user");
+			return Optional.empty();
+		}
+	}
 }

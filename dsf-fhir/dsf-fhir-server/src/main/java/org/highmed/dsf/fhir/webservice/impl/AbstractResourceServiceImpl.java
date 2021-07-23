@@ -7,27 +7,14 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.EntityTag;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.UriInfo;
 
 import org.highmed.dsf.fhir.authorization.AuthorizationRule;
 import org.highmed.dsf.fhir.authorization.AuthorizationRuleProvider;
@@ -50,22 +37,12 @@ import org.highmed.dsf.fhir.service.ResourceReference.ReferenceType;
 import org.highmed.dsf.fhir.validation.ResourceValidator;
 import org.highmed.dsf.fhir.webservice.base.AbstractBasicService;
 import org.highmed.dsf.fhir.webservice.specification.BasicResourceService;
-import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.CodeType;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
 import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
-import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.Type;
-import org.hl7.fhir.r4.model.UriType;
-import org.hl7.fhir.r4.model.UrlType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -292,7 +269,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	/**
 	 * Override to modify the given resource before db insert, throw {@link WebApplicationException} to interrupt the
 	 * normal flow
-	 * 
+	 *
 	 * @param resource
 	 *            not <code>null</code>
 	 * @return if not null, the returned {@link Consumer} will be called after the create operation and before returning
@@ -468,7 +445,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	/**
 	 * Override to modify the given resource before db update, throw {@link WebApplicationException} to interrupt the
 	 * normal flow. Path id vs. resource.id.idPart is checked before this method is called
-	 * 
+	 *
 	 * @param resource
 	 *            not <code>null</code>
 	 * @return if not null, the returned {@link Consumer} will be called after the update operation and before returning
@@ -508,7 +485,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 	/**
 	 * Override to perform actions pre delete, throw {@link WebApplicationException} to interrupt the normal flow.
-	 * 
+	 *
 	 * @param id
 	 *            of the resource to be deleted
 	 * @return if not null, the returned {@link Consumer} will be called after the create operation and before returning
@@ -762,5 +739,18 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 			return Response.status(Status.METHOD_NOT_ALLOWED).build(); // TODO mode = delete
 		else
 			return Response.status(Status.METHOD_NOT_ALLOWED).build(); // TODO return OperationOutcome
+	}
+
+	@Override
+	public Response expunge(String expungePath, Parameters parameters, String id, UriInfo uri, HttpHeaders headers)
+	{
+		boolean expunge = exceptionHandler.handleSqlAndResourceNotMarkedDeletedException(resourceTypeName,
+				() -> dao.expunge(parameterConverter.toUuid(resourceTypeName, id)));
+
+		if (expunge)
+			eventHandler.handleEvent(eventGenerator.newResourceExpungeEvent(resourceType, id));
+
+		return responseGenerator.response(Status.OK, responseGenerator.resourceDeleted(resourceTypeName, id),
+				parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
 	}
 }

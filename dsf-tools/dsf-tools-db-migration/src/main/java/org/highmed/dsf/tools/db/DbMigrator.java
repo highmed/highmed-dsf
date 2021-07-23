@@ -35,11 +35,15 @@ public final class DbMigrator
 	private static final String DB_SERVER_USERS_GROUP = "db.server_users_group";
 	private static final String DB_SERVER_USER = "db.server_user";
 	private static final String DB_SERVER_USER_PASSWORD = "db.server_user_password";
+	private static final String DB_SERVER_DELETION_USER = "db.server_deletion_user";
+	private static final String DB_SERVER_DELETION_USER_PASSWORD = "db.server_deletion_user_password";
 
 	private static final String[] STANDARD_PROPERTIES = { DB_URL, DB_LIQUIBASE_USER, DB_LIQUIBASE_USER_PASSWORD,
-			DB_SERVER_USERS_GROUP, DB_SERVER_USER, DB_SERVER_USER_PASSWORD };
+			DB_SERVER_USERS_GROUP, DB_SERVER_USER, DB_SERVER_USER_PASSWORD, DB_SERVER_DELETION_USER,
+			DB_SERVER_DELETION_USER_PASSWORD };
+
 	private static final String[] STANDARD_CHANGE_LOG_PARAMETER_NAMES = { DB_LIQUIBASE_USER, DB_SERVER_USERS_GROUP,
-			DB_SERVER_USER, DB_SERVER_USER_PASSWORD };
+			DB_SERVER_USER, DB_SERVER_USER_PASSWORD, DB_SERVER_DELETION_USER, DB_SERVER_DELETION_USER_PASSWORD };
 
 	private String prefix;
 	private final Properties properties;

@@ -13,9 +13,13 @@ import org.highmed.dsf.fhir.dao.MeasureReportDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.MeasureReport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MeasureReportAuthorizationRule extends AbstractMetaTagAuthorizationRule<MeasureReport, MeasureReportDao>
 {
+	private static final Logger logger = LoggerFactory.getLogger(MeasureReportAuthorizationRule.class);
+
 	public MeasureReportAuthorizationRule(DaoProvider daoProvider, String serverBase,
 			ReferenceResolver referenceResolver, OrganizationProvider organizationProvider,
 			ReadAccessHelper readAccessHelper)
@@ -50,5 +54,20 @@ public class MeasureReportAuthorizationRule extends AbstractMetaTagAuthorization
 	{
 		// no unique criteria for MeasureReport
 		return true;
+	}
+
+	@Override
+	public Optional<String> reasonExpungeAllowed(Connection connection, User user, MeasureReport oldResource)
+	{
+		if (isLocalUser(user))
+		{
+			logger.info("Expunge of MeasureReport authorized for local user '{}'", user.getName());
+			return Optional.of("local user");
+		}
+		else
+		{
+			logger.warn("Expunge of MeasureReport unauthorized, not a local user");
+			return Optional.empty();
+		}
 	}
 }

@@ -17,6 +17,7 @@ import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.search.PartialResult;
 import org.highmed.dsf.fhir.search.SearchQuery;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
+import org.hl7.fhir.r4.model.NamingSystem;
 import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -120,5 +121,20 @@ public class OrganizationAffiliationAuthorizationRule
 	{
 		return oldResource.getParticipatingOrganization().getReference()
 				.equals(newResource.getParticipatingOrganization().getReference());
+	}
+
+	@Override
+	public Optional<String> reasonExpungeAllowed(Connection connection, User user, OrganizationAffiliation oldResource)
+	{
+		if (isLocalUser(user))
+		{
+			logger.info("Expunge of NamingSystem authorized for local user '{}'", user.getName());
+			return Optional.of("local user");
+		}
+		else
+		{
+			logger.warn("Expunge of NamingSystem unauthorized, not a local user");
+			return Optional.empty();
+		}
 	}
 }

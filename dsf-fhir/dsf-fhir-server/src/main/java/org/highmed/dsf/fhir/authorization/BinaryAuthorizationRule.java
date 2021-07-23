@@ -133,4 +133,19 @@ public class BinaryAuthorizationRule extends AbstractMetaTagAuthorizationRule<Bi
 			return Optional.empty();
 		}
 	}
+
+	@Override
+	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Binary oldResource)
+	{
+		if (isLocalUser(user))
+		{
+			logger.info("Expunge of Binary authorized for local user '{}'", user.getName());
+			return Optional.of("local user");
+		}
+		else
+		{
+			logger.warn("Expunge of Binary unauthorized, not a local user");
+			return Optional.empty();
+		}
+	}
 }
