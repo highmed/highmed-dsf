@@ -54,19 +54,4 @@ public class ProvenanceAuthorizationRule extends AbstractMetaTagAuthorizationRul
 		// no unique criteria for Provenance
 		return true;
 	}
-
-	@Override
-	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Provenance oldResource)
-	{
-		if (isLocalUser(user))
-		{
-			logger.info("Expunge of Provenance authorized for local user '{}'", user.getName());
-			return Optional.of("local user");
-		}
-		else
-		{
-			logger.warn("Expunge of Provenance unauthorized, not a local user");
-			return Optional.empty();
-		}
-	}
 }

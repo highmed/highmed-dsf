@@ -122,19 +122,4 @@ public class OrganizationAffiliationAuthorizationRule
 		return oldResource.getParticipatingOrganization().getReference()
 				.equals(newResource.getParticipatingOrganization().getReference());
 	}
-
-	@Override
-	public Optional<String> reasonExpungeAllowed(Connection connection, User user, OrganizationAffiliation oldResource)
-	{
-		if (isLocalUser(user))
-		{
-			logger.info("Expunge of NamingSystem authorized for local user '{}'", user.getName());
-			return Optional.of("local user");
-		}
-		else
-		{
-			logger.warn("Expunge of NamingSystem unauthorized, not a local user");
-			return Optional.empty();
-		}
-	}
 }

@@ -55,19 +55,4 @@ public class PractitionerAuthorizationRule extends AbstractMetaTagAuthorizationR
 		// no unique criteria for Practitioner
 		return true;
 	}
-
-	@Override
-	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Practitioner oldResource)
-	{
-		if (isLocalUser(user))
-		{
-			logger.info("Expunge of Practitioner authorized for local user '{}'", user.getName());
-			return Optional.of("local user");
-		}
-		else
-		{
-			logger.warn("Expunge of Practitioner unauthorized, not a local user");
-			return Optional.empty();
-		}
-	}
 }

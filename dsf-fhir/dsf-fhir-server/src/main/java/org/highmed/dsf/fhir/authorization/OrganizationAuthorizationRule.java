@@ -145,19 +145,4 @@ public class OrganizationAuthorizationRule extends AbstractMetaTagAuthorizationR
 
 		return oldIdentifierValue.equals(newIdentifierValue);
 	}
-
-	@Override
-	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Organization oldResource)
-	{
-		if (isLocalUser(user))
-		{
-			logger.info("Expunge of Organization authorized for local user '{}'", user.getName());
-			return Optional.of("local user");
-		}
-		else
-		{
-			logger.warn("Expunge of Organization unauthorized, not a local user");
-			return Optional.empty();
-		}
-	}
 }

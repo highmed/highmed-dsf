@@ -55,19 +55,4 @@ public class MeasureReportAuthorizationRule extends AbstractMetaTagAuthorization
 		// no unique criteria for MeasureReport
 		return true;
 	}
-
-	@Override
-	public Optional<String> reasonExpungeAllowed(Connection connection, User user, MeasureReport oldResource)
-	{
-		if (isLocalUser(user))
-		{
-			logger.info("Expunge of MeasureReport authorized for local user '{}'", user.getName());
-			return Optional.of("local user");
-		}
-		else
-		{
-			logger.warn("Expunge of MeasureReport unauthorized, not a local user");
-			return Optional.empty();
-		}
-	}
 }

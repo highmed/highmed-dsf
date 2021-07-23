@@ -144,19 +144,4 @@ public class EndpointAuthorizationRule extends AbstractMetaTagAuthorizationRule<
 		return oldResource.getAddress().equals(newResource.getAddress())
 				&& oldIdentifierValue.equals(newIdentifierValue);
 	}
-
-	@Override
-	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Endpoint oldResource)
-	{
-		if (isLocalUser(user))
-		{
-			logger.info("Expunge of Endpoint authorized for local user '{}'", user.getName());
-			return Optional.of("local user");
-		}
-		else
-		{
-			logger.warn("Expunge of Endpoint unauthorized, not a local user");
-			return Optional.empty();
-		}
-	}
 }

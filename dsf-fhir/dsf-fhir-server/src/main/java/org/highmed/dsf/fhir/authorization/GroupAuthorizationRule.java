@@ -55,19 +55,4 @@ public class GroupAuthorizationRule extends AbstractMetaTagAuthorizationRule<Gro
 		// no unique criteria for Group
 		return true;
 	}
-
-	@Override
-	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Group oldResource)
-	{
-		if (isLocalUser(user))
-		{
-			logger.info("Expunge of Group authorized for local user '{}'", user.getName());
-			return Optional.of("local user");
-		}
-		else
-		{
-			logger.warn("Expunge of Group unauthorized, not a local user");
-			return Optional.empty();
-		}
-	}
 }

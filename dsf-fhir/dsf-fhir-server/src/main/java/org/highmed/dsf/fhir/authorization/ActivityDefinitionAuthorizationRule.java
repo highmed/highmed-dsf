@@ -112,19 +112,4 @@ public class ActivityDefinitionAuthorizationRule
 		return oldResource.getUrl().equals(newResource.getUrl())
 				&& oldResource.getVersion().equals(newResource.getVersion());
 	}
-
-	@Override
-	public Optional<String> reasonExpungeAllowed(Connection connection, User user, ActivityDefinition oldResource)
-	{
-		if (isLocalUser(user))
-		{
-			logger.info("Expunge of ActivityDefinition authorized for local user '{}'", user.getName());
-			return Optional.of("local user");
-		}
-		else
-		{
-			logger.warn("Expunge of ActivityDefinition unauthorized, not a local user");
-			return Optional.empty();
-		}
-	}
 }

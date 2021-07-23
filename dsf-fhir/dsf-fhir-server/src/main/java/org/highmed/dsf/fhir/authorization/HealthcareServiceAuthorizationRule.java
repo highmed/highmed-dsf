@@ -58,19 +58,4 @@ public class HealthcareServiceAuthorizationRule
 		// no unique criteria for HealthcareService
 		return true;
 	}
-
-	@Override
-	public Optional<String> reasonExpungeAllowed(Connection connection, User user, HealthcareService oldResource)
-	{
-		if (isLocalUser(user))
-		{
-			logger.info("Expunge of HealthcareService authorized for local user '{}'", user.getName());
-			return Optional.of("local user");
-		}
-		else
-		{
-			logger.warn("Expunge of HealthcareService unauthorized, not a local user");
-			return Optional.empty();
-		}
-	}
 }

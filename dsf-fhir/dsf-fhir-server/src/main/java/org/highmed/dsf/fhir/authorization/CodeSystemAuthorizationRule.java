@@ -87,19 +87,4 @@ public class CodeSystemAuthorizationRule extends AbstractMetaTagAuthorizationRul
 		return oldResource.getUrl().equals(newResource.getUrl())
 				&& oldResource.getVersion().equals(newResource.getVersion());
 	}
-
-	@Override
-	public Optional<String> reasonExpungeAllowed(Connection connection, User user, CodeSystem oldResource)
-	{
-		if (isLocalUser(user))
-		{
-			logger.info("Expunge of CodeSystem authorized for local user '{}'", user.getName());
-			return Optional.of("local user");
-		}
-		else
-		{
-			logger.warn("Expunge of CodeSystem unauthorized, not a local user");
-			return Optional.empty();
-		}
-	}
 }

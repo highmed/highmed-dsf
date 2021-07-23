@@ -54,19 +54,4 @@ public class PatientAuthorizationRule extends AbstractMetaTagAuthorizationRule<P
 		// no unique criteria for Patient
 		return true;
 	}
-
-	@Override
-	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Patient oldResource)
-	{
-		if (isLocalUser(user))
-		{
-			logger.info("Expunge of Patient authorized for local user '{}'", user.getName());
-			return Optional.of("local user");
-		}
-		else
-		{
-			logger.warn("Expunge of Patient unauthorized, not a local user");
-			return Optional.empty();
-		}
-	}
 }

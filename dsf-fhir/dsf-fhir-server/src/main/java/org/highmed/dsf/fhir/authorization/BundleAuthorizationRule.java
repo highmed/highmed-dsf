@@ -54,19 +54,4 @@ public class BundleAuthorizationRule extends AbstractMetaTagAuthorizationRule<Bu
 		// no unique criteria for Bundle
 		return true;
 	}
-
-	@Override
-	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Bundle oldResource)
-	{
-		if (isLocalUser(user))
-		{
-			logger.info("Expunge of Bundle authorized for local user '{}'", user.getName());
-			return Optional.of("local user");
-		}
-		else
-		{
-			logger.warn("Expunge of Bundle unauthorized, not a local user");
-			return Optional.empty();
-		}
-	}
 }

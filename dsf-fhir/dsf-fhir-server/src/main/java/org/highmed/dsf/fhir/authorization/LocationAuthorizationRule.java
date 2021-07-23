@@ -54,19 +54,4 @@ public class LocationAuthorizationRule extends AbstractMetaTagAuthorizationRule<
 		// no unique criteria for Location
 		return true;
 	}
-
-	@Override
-	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Location oldResource)
-	{
-		if (isLocalUser(user))
-		{
-			logger.info("Expunge of Location authorized for local user '{}'", user.getName());
-			return Optional.of("local user");
-		}
-		else
-		{
-			logger.warn("Expunge of Location unauthorized, not a local user");
-			return Optional.empty();
-		}
-	}
 }

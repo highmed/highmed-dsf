@@ -14,6 +14,7 @@ import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.dao.ResourceDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
+import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -232,5 +233,20 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 		logger.info("History of {} authorized for {} user '{}', will be fitered by users organization and roles",
 				resourceTypeName, user.getRole(), user.getName());
 		return Optional.of("Allowed for all, filtered by user role");
+	}
+
+	@Override
+	public Optional<String> reasonExpungeAllowed(Connection connection, User user, R oldResource)
+	{
+		if (isLocalUser(user))
+		{
+			logger.info("Expunge of {} authorized for local user '{}'", resourceType, user.getName());
+			return Optional.of("local user");
+		}
+		else
+		{
+			logger.warn("Expunge of {} unauthorized, not a local user", resourceTypeName);
+			return Optional.empty();
+		}
 	}
 }
