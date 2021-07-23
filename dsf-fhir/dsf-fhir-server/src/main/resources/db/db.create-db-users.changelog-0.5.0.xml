@@ -12,7 +12,6 @@
 		</preConditions>
 		<sql>
 			CREATE ROLE ${db.server_deletion_user} LOGIN PASSWORD '${db.server_deletion_user_password}' NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION;
-			GRANT ${db.server_users_group} TO ${db.server_deletion_user};
 		</sql>
 	</changeSet>
 </databaseChangeLog>
