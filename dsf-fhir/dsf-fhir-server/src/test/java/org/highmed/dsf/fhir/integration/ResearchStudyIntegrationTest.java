@@ -14,11 +14,9 @@ import javax.ws.rs.core.Response;
 
 import org.highmed.dsf.fhir.dao.GroupDao;
 import org.highmed.dsf.fhir.dao.ResearchStudyDao;
-import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.ResearchStudy;
-import org.junit.Assert;
 import org.junit.Test;
 
 public class ResearchStudyIntegrationTest extends AbstractIntegrationTest

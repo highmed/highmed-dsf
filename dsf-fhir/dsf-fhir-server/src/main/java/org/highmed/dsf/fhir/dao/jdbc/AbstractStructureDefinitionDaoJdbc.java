@@ -10,7 +10,11 @@ import javax.sql.DataSource;
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
 import org.highmed.dsf.fhir.search.SearchQueryUserFilter;
-import org.highmed.dsf.fhir.search.parameters.*;
+import org.highmed.dsf.fhir.search.parameters.StructureDefinitionDate;
+import org.highmed.dsf.fhir.search.parameters.StructureDefinitionIdentifier;
+import org.highmed.dsf.fhir.search.parameters.StructureDefinitionStatus;
+import org.highmed.dsf.fhir.search.parameters.StructureDefinitionUrl;
+import org.highmed.dsf.fhir.search.parameters.StructureDefinitionVersion;
 import org.hl7.fhir.r4.model.StructureDefinition;
 
 import ca.uhn.fhir.context.FhirContext;
