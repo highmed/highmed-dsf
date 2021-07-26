@@ -76,6 +76,10 @@ public class ConfigGenerator
 				testClient.getCertificateSha512ThumbprintHex() + ","
 						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
 
+		javaTestFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-deletion-user.thumbprints",
+				testClient.getCertificateSha512ThumbprintHex() + ","
+						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
+
 		writeProperties(Paths.get("config/java-test-fhir-config.properties"), javaTestFhirConfigProperties);
 	}
 
@@ -88,6 +92,10 @@ public class ConfigGenerator
 				.get("src/main/resources/config-templates/docker-test-fhir-config.properties");
 		dockerTestFhirConfigProperties = readProperties(dockerTestFhirConfigTemplateFile);
 		dockerTestFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-user.thumbprints",
+				testClient.getCertificateSha512ThumbprintHex() + ","
+						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
+
+		dockerTestFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-deletion-user.thumbprints",
 				testClient.getCertificateSha512ThumbprintHex() + ","
 						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
 
@@ -131,6 +139,10 @@ public class ConfigGenerator
 				medic1Client.getCertificateSha512ThumbprintHex() + ","
 						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
 
+		dockerMedic1FhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-deletion-user.thumbprints",
+				medic1Client.getCertificateSha512ThumbprintHex() + ","
+						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
+
 		writeProperties(Paths.get("config/docker-test-medic1-fhir-config.properties"),
 				dockerMedic1FhirConfigProperties);
 	}
@@ -145,6 +157,10 @@ public class ConfigGenerator
 				.get("src/main/resources/config-templates/docker-test-medic2-fhir-config.properties");
 		dockerMedic2FhirConfigProperties = readProperties(dockerTestFhirConfigTemplateFile);
 		dockerMedic2FhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-user.thumbprints",
+				medic2Client.getCertificateSha512ThumbprintHex() + ","
+						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
+
+		dockerMedic2FhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-deletion-user.thumbprints",
 				medic2Client.getCertificateSha512ThumbprintHex() + ","
 						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
 
@@ -165,6 +181,10 @@ public class ConfigGenerator
 				medic3Client.getCertificateSha512ThumbprintHex() + ","
 						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
 
+		dockerMedic3FhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-deletion-user.thumbprints",
+				medic3Client.getCertificateSha512ThumbprintHex() + ","
+						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
+
 		writeProperties(Paths.get("config/docker-test-medic3-fhir-config.properties"),
 				dockerMedic3FhirConfigProperties);
 	}
@@ -178,6 +198,10 @@ public class ConfigGenerator
 				.get("src/main/resources/config-templates/docker-test-ttp-fhir-config.properties");
 		dockerTtpFhirConfigProperties = readProperties(dockerTestFhirConfigTemplateFile);
 		dockerTtpFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-user.thumbprints",
+				ttpClient.getCertificateSha512ThumbprintHex() + ","
+						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
+
+		dockerTtpFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-deletion-user.thumbprints",
 				ttpClient.getCertificateSha512ThumbprintHex() + ","
 						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
 
@@ -230,6 +254,10 @@ public class ConfigGenerator
 				medic1Client.getCertificateSha512ThumbprintHex() + ","
 						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
 
+		dockerMedic1DockerFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-deletion-user.thumbprints",
+				medic1Client.getCertificateSha512ThumbprintHex() + ","
+						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
+
 		writeProperties(Paths.get("config/docker-test-medic1-docker-fhir-config.properties"),
 				dockerMedic1DockerFhirConfigProperties);
 	}
@@ -244,6 +272,10 @@ public class ConfigGenerator
 				.get("src/main/resources/config-templates/docker-test-medic2-docker-fhir-config.properties");
 		dockerMedic2DockerFhirConfigProperties = readProperties(dockerTestFhirConfigTemplateFile);
 		dockerMedic2DockerFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-user.thumbprints",
+				medic2Client.getCertificateSha512ThumbprintHex() + ","
+						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
+
+		dockerMedic2DockerFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-deletion-user.thumbprints",
 				medic2Client.getCertificateSha512ThumbprintHex() + ","
 						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
 
@@ -264,6 +296,10 @@ public class ConfigGenerator
 				medic3Client.getCertificateSha512ThumbprintHex() + ","
 						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
 
+		dockerMedic3DockerFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-deletion-user.thumbprints",
+				medic3Client.getCertificateSha512ThumbprintHex() + ","
+						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
+
 		writeProperties(Paths.get("config/docker-test-medic3-docker-fhir-config.properties"),
 				dockerMedic3DockerFhirConfigProperties);
 	}
@@ -278,6 +314,10 @@ public class ConfigGenerator
 				.get("src/main/resources/config-templates/docker-test-ttp-docker-fhir-config.properties");
 		dockerTtpDockerFhirConfigProperties = readProperties(dockerTestFhirConfigTemplateFile);
 		dockerTtpDockerFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-user.thumbprints",
+				ttpClient.getCertificateSha512ThumbprintHex() + ","
+						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
+
+		dockerTtpDockerFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-deletion-user.thumbprints",
 				ttpClient.getCertificateSha512ThumbprintHex() + ","
 						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
 

@@ -27,16 +27,21 @@ public class OrganizationProviderWithDbBackend implements OrganizationProvider, 
 	private final OrganizationDao dao;
 	private final ExceptionHandler exceptionHandler;
 	private final List<String> localUserThumbprints = new ArrayList<String>();
+	private final List<String> localDeletionUserThumbprints = new ArrayList<String>();
 	private final String localIdentifierValue;
 
 	public OrganizationProviderWithDbBackend(OrganizationDao dao, ExceptionHandler exceptionHandler,
-			List<String> localUserThumbprints, String localIdentifier)
+			List<String> localUserThumbprints, List<String> localDeletionUserThumbprints, String localIdentifier)
 	{
 		this.dao = dao;
 		this.exceptionHandler = exceptionHandler;
 
 		if (localUserThumbprints != null)
 			localUserThumbprints.stream().map(t -> t.toLowerCase()).forEach(this.localUserThumbprints::add);
+		if (localDeletionUserThumbprints != null)
+			localDeletionUserThumbprints.stream().map(t -> t.toLowerCase())
+					.forEach(this.localDeletionUserThumbprints::add);
+
 		this.localIdentifierValue = localIdentifier;
 	}
 
@@ -74,7 +79,10 @@ public class OrganizationProviderWithDbBackend implements OrganizationProvider, 
 		switch (userRole)
 		{
 			case LOCAL:
-				return getLocalOrganization().map(org -> new User(org, userRole, subjectDn));
+				if (localDeletionUserThumbprints.contains(loginThumbprintHex.toLowerCase()))
+					return getLocalOrganization().map(org -> new User(org, userRole, true, subjectDn));
+				else
+					return getLocalOrganization().map(org -> new User(org, userRole, false, subjectDn));
 			case REMOTE:
 				return getOrganization(loginThumbprintHex).map(org -> new User(org, userRole, subjectDn));
 			default:

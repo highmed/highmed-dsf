@@ -486,14 +486,14 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 	@Override
 	public Optional<String> reasonExpungeAllowed(Connection connection, User user, Task oldResource)
 	{
-		if (isLocalUser(user))
+		if (isLocalDeletionUser(user))
 		{
-			logger.info("Expunge of Task authorized for local user '{}'", user.getName());
+			logger.info("Expunge of Task authorized for local deletion user '{}'", user.getName());
 			return Optional.of("local user");
 		}
 		else
 		{
-			logger.warn("Expunge of Task unauthorized, not a local user");
+			logger.warn("Expunge of Task unauthorized, not a local deletion user");
 			return Optional.empty();
 		}
 	}

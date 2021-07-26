@@ -247,6 +247,11 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		return user != null && UserRole.LOCAL.equals(user.getRole());
 	}
 
+	protected final boolean isLocalDeletionUser(User user)
+	{
+		return isLocalUser(user) && user.hasDeletePrivileges();
+	}
+
 	protected final boolean isRemoteUser(User user)
 	{
 		return user != null && UserRole.REMOTE.equals(user.getRole());

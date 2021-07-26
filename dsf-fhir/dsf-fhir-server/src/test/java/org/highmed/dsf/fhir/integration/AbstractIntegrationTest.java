@@ -210,6 +210,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		String clientCertHashHex = calculateSha512CertificateThumbprintHex(
 				certificates.getClientCertificate().getCertificate());
 		properties.put("org.highmed.dsf.fhir.local-user.thumbprints", clientCertHashHex);
+		properties.put("org.highmed.dsf.fhir.local-deletion-user.thumbprints", clientCertHashHex);
 		properties.put("org.highmed.dsf.fhir.webservice.keystore.p12file",
 				certificates.getClientCertificateFile().toString());
 
