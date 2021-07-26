@@ -2,6 +2,7 @@ package org.highmed.dsf.fhir.integration;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
@@ -12,13 +13,16 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.highmed.dsf.fhir.authentication.OrganizationProvider;
 import org.highmed.dsf.fhir.dao.OrganizationDao;
+import org.highmed.dsf.fhir.dao.ResearchStudyDao;
 import org.highmed.dsf.fhir.dao.TaskDao;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.ActivityDefinition;
@@ -29,6 +33,7 @@ import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Task;
@@ -796,6 +801,57 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		catch (WebApplicationException e)
 		{
 			assertEquals(403, e.getResponse().getStatus());
+		}
+	}
+
+	@Test
+	public void testDeletePermanentlyByLocalDeletionUser() throws Exception
+	{
+		Task task = readTestTask("External_Test_Organization", "Test_Organization");
+		readAccessHelper.addLocal(task);
+		TaskDao taskDao = getSpringWebApplicationContext().getBean(TaskDao.class);
+		String taskId = taskDao.create(task).getIdElement().getIdPart();
+		taskDao.delete(UUID.fromString(taskId));
+
+		getWebserviceClient().deletePermanently(Task.class, taskId);
+
+		Optional<Task> result = taskDao.read(UUID.fromString(taskId));
+		assertTrue(result.isEmpty());
+	}
+
+	@Test
+	public void testDeletePermanentlyByLocalDeletionUserNotMarkedAsDeleted() throws Exception
+	{
+		Task task = readTestTask("External_Test_Organization", "Test_Organization");
+		readAccessHelper.addLocal(task);
+		TaskDao taskDao = getSpringWebApplicationContext().getBean(TaskDao.class);
+		String taskId = taskDao.create(task).getIdElement().getIdPart();
+
+		try
+		{
+			getWebserviceClient().deletePermanently(Task.class, taskId);
+		}
+		catch (WebApplicationException e)
+		{
+			assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), e.getResponse().getStatus());
+		}
+	}
+
+	@Test
+	public void testDeletePermanentlyByExternalUser() throws Exception
+	{
+		Task task = readTestTask("External_Test_Organization", "Test_Organization");
+		readAccessHelper.addLocal(task);
+		TaskDao taskDao = getSpringWebApplicationContext().getBean(TaskDao.class);
+		String taskId = taskDao.create(task).getIdElement().getIdPart();
+
+		try
+		{
+			getExternalWebserviceClient().deletePermanently(Task.class, taskId);
+		}
+		catch (WebApplicationException e)
+		{
+			assertEquals(Response.Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
 		}
 	}
 }

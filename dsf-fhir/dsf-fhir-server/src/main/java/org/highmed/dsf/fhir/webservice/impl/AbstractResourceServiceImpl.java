@@ -773,7 +773,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		if (expunge)
 			eventHandler.handleEvent(eventGenerator.newResourceExpungeEvent(resourceType, id));
 
-		return responseGenerator.response(Status.OK, responseGenerator.resourceDeleted(resourceTypeName, id),
+		return responseGenerator.response(Status.OK, responseGenerator.resourceDeletedPermanently(resourceTypeName, id),
 				parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
 	}
 }

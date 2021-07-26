@@ -149,6 +149,16 @@ class BasicFhirWebserviceCientWithRetryImpl extends AbstractFhirWebserviceClient
 	}
 
 	@Override
+	public void deletePermanently(Class<? extends Resource> resourceClass, String id)
+	{
+		retry(nTimes, delayMillis, (Supplier<Void>) () ->
+		{
+			delegate.deletePermanently(resourceClass, id);
+			return null;
+		});
+	}
+
+	@Override
 	public void deleteConditionaly(Class<? extends Resource> resourceClass, Map<String, List<String>> criteria)
 	{
 		retry(nTimes, delayMillis, (Supplier<Void>) () ->

@@ -460,6 +460,24 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 	}
 
 	@Override
+	public void deletePermanently(Class<? extends Resource> resourceClass, String id)
+	{
+		Objects.requireNonNull(resourceClass, "resourceClass");
+		Objects.requireNonNull(id, "id");
+
+		Response response = getResource().path(resourceClass.getAnnotation(ResourceDef.class).name()).path(id)
+				.path("$expunge").request().accept(Constants.CT_FHIR_JSON_NEW).post(null);
+
+		logStatusAndHeaders(response);
+
+		if (Status.OK.getStatusCode() != response.getStatus()
+				&& Status.NO_CONTENT.getStatusCode() != response.getStatus())
+			throw handleError(response);
+		else
+			response.close();
+	}
+
+	@Override
 	public Resource read(String resourceTypeName, String id)
 	{
 		Objects.requireNonNull(resourceTypeName, "resourceTypeName");
