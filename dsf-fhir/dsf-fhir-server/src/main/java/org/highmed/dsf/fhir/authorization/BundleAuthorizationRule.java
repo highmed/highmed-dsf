@@ -13,13 +13,9 @@ import org.highmed.dsf.fhir.dao.BundleDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.Bundle;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class BundleAuthorizationRule extends AbstractMetaTagAuthorizationRule<Bundle, BundleDao>
 {
-	private static final Logger logger = LoggerFactory.getLogger(BundleAuthorizationRule.class);
-
 	public BundleAuthorizationRule(DaoProvider daoProvider, String serverBase, ReferenceResolver referenceResolver,
 			OrganizationProvider organizationProvider, ReadAccessHelper readAccessHelper)
 	{

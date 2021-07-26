@@ -13,13 +13,9 @@ import org.highmed.dsf.fhir.dao.ProvenanceDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.Provenance;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ProvenanceAuthorizationRule extends AbstractMetaTagAuthorizationRule<Provenance, ProvenanceDao>
 {
-	private static final Logger logger = LoggerFactory.getLogger(ProvenanceAuthorizationRule.class);
-
 	public ProvenanceAuthorizationRule(DaoProvider daoProvider, String serverBase, ReferenceResolver referenceResolver,
 			OrganizationProvider organizationProvider, ReadAccessHelper readAccessHelper)
 	{

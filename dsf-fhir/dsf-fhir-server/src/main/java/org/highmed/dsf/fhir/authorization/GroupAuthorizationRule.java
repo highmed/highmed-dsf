@@ -13,13 +13,9 @@ import org.highmed.dsf.fhir.dao.GroupDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.Group;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class GroupAuthorizationRule extends AbstractMetaTagAuthorizationRule<Group, GroupDao>
 {
-	private static final Logger logger = LoggerFactory.getLogger(GroupAuthorizationRule.class);
-
 	public GroupAuthorizationRule(DaoProvider daoProvider, String serverBase, ReferenceResolver referenceResolver,
 			OrganizationProvider organizationProvider, ReadAccessHelper readAccessHelper)
 	{

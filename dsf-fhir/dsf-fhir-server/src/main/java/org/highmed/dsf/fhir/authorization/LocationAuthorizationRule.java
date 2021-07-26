@@ -13,13 +13,9 @@ import org.highmed.dsf.fhir.dao.LocationDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.Location;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class LocationAuthorizationRule extends AbstractMetaTagAuthorizationRule<Location, LocationDao>
 {
-	private static final Logger logger = LoggerFactory.getLogger(LocationAuthorizationRule.class);
-
 	public LocationAuthorizationRule(DaoProvider daoProvider, String serverBase, ReferenceResolver referenceResolver,
 			OrganizationProvider organizationProvider, ReadAccessHelper readAccessHelper)
 	{

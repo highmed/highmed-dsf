@@ -13,13 +13,9 @@ import org.highmed.dsf.fhir.dao.MeasureReportDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.MeasureReport;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class MeasureReportAuthorizationRule extends AbstractMetaTagAuthorizationRule<MeasureReport, MeasureReportDao>
 {
-	private static final Logger logger = LoggerFactory.getLogger(MeasureReportAuthorizationRule.class);
-
 	public MeasureReportAuthorizationRule(DaoProvider daoProvider, String serverBase,
 			ReferenceResolver referenceResolver, OrganizationProvider organizationProvider,
 			ReadAccessHelper readAccessHelper)

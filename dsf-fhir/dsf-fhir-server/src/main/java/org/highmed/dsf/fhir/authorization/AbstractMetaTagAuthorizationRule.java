@@ -222,7 +222,7 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 	@Override
 	public final Optional<String> reasonSearchAllowed(User user)
 	{
-		logger.info("Search of {} authorized for {} user '{}', will be fitered by users organization and roles",
+		logger.info("Search of {} authorized for {} user '{}', will be filtered by users organization and roles",
 				resourceTypeName, user.getRole(), user.getName());
 		return Optional.of("Allowed for all, filtered by user role");
 	}
@@ -230,7 +230,7 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 	@Override
 	public final Optional<String> reasonHistoryAllowed(User user)
 	{
-		logger.info("History of {} authorized for {} user '{}', will be fitered by users organization and roles",
+		logger.info("History of {} authorized for {} user '{}', will be filtered by users organization and roles",
 				resourceTypeName, user.getRole(), user.getName());
 		return Optional.of("Allowed for all, filtered by user role");
 	}
