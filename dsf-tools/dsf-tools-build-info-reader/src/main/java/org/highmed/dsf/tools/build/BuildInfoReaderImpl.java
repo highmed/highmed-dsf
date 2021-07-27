@@ -127,7 +127,8 @@ public class BuildInfoReaderImpl implements BuildInfoReader
 	@Override
 	public void logSystemDefaultTimezone()
 	{
-		logger.info(ZoneOffset.systemDefault().getDisplayName(TextStyle.NARROW, Locale.ENGLISH));
+		logger.info("System default timezone: {}",
+				ZoneOffset.systemDefault().getDisplayName(TextStyle.NARROW, Locale.ENGLISH));
 	}
 
 	@Override
