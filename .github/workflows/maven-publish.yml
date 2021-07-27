@@ -28,4 +28,4 @@ jobs:
       - name: Publish with Maven
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: mvn -B deploy -P generate-source-and-javadoc-jars --file pom.xml
+        run: mvn -B deploy --file pom.xml
