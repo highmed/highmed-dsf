@@ -1,9 +1,21 @@
 package org.highmed.dsf.fhir.service;
 
+import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.CONDITIONAL;
+import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.LITERAL_EXTERNAL;
+import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.LITERAL_INTERNAL;
+import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.LOGICAL;
+import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.RELATED_ARTEFACT_CONDITIONAL_URL;
+import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.RELATED_ARTEFACT_LITERAL_EXTERNAL_URL;
+import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.RELATED_ARTEFACT_LITERAL_INTERNAL_URL;
+import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.RELATED_ARTEFACT_TEMPORARY_URL;
+import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.TEMPORARY;
+import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.UNKNOWN;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -132,7 +144,7 @@ public class ResourceReference
 		this(location, null, relatedArtifact, Collections.emptyList());
 	}
 
-	public ResourceReference(String location, Reference reference, RelatedArtifact relatedArtifact,
+	private ResourceReference(String location, Reference reference, RelatedArtifact relatedArtifact,
 			Collection<Class<? extends Resource>> referenceTypes)
 	{
 		this.location = location;
@@ -184,14 +196,16 @@ public class ResourceReference
 	}
 
 	/**
-	 * Determines the {@link ReferenceType} based {@link Reference#getReference()} first and then looks at
-	 * {@link Reference#getIdentifier()}
+	 * Determines the {@link ReferenceType} based on the actual FHIR reference or related artifact
 	 *
 	 * @param localServerBase
 	 *            not <code>null</code>
-	 * @return one of this priority list: {@link ReferenceType#TEMPORARY}, {@link ReferenceType#LITERAL_INTERNAL},
-	 *         {@link ReferenceType#LITERAL_EXTERNAL}, {@link ReferenceType#CONDITIONAL}, {@link ReferenceType#LOGICAL},
-	 *         {@link ReferenceType#UNKNOWN}
+	 * @return one of this priority list: {@link ReferenceType#RELATED_ARTEFACT_TEMPORARY_URL},
+	 *         {@link ReferenceType#RELATED_ARTEFACT_LITERAL_INTERNAL_URL},
+	 *         {@link ReferenceType#RELATED_ARTEFACT_LITERAL_EXTERNAL_URL},
+	 *         {@link ReferenceType#RELATED_ARTEFACT_CONDITIONAL_URL}, {@link ReferenceType#TEMPORARY},
+	 *         {@link ReferenceType#LITERAL_INTERNAL}, {@link ReferenceType#LITERAL_EXTERNAL},
+	 *         {@link ReferenceType#CONDITIONAL}, {@link ReferenceType#LOGICAL}, {@link ReferenceType#UNKNOWN}
 	 */
 	public ReferenceType getType(String localServerBase)
 	{
@@ -203,21 +217,21 @@ public class ResourceReference
 			{
 				Matcher tempIdRefMatcher = TEMP_ID_PATTERN.matcher(relatedArtifact.getUrl());
 				if (tempIdRefMatcher.matches())
-					return ReferenceType.RELATED_ARTEFACT_TEMPORARY_URL;
+					return RELATED_ARTEFACT_TEMPORARY_URL;
 
 				Matcher idRefMatcher = ID_PATTERN.matcher(relatedArtifact.getUrl());
 				if (idRefMatcher.matches())
 				{
 					IdType id = new IdType(relatedArtifact.getUrl());
 					if (!id.isAbsolute() || localServerBase.equals(id.getBaseUrl()))
-						return ReferenceType.RELATED_ARTEFACT_LITERAL_INTERNAL_URL;
+						return RELATED_ARTEFACT_LITERAL_INTERNAL_URL;
 					else
-						return ReferenceType.RELATED_ARTEFACT_LITERAL_EXTERNAL_URL;
+						return RELATED_ARTEFACT_LITERAL_EXTERNAL_URL;
 				}
 
 				Matcher conditionalRefMatcher = CONDITIONAL_REF_PATTERN.matcher(relatedArtifact.getUrl());
 				if (conditionalRefMatcher.matches())
-					return ReferenceType.RELATED_ARTEFACT_CONDITIONAL_URL;
+					return RELATED_ARTEFACT_CONDITIONAL_URL;
 			}
 		}
 		else if (reference != null)
@@ -226,30 +240,30 @@ public class ResourceReference
 			{
 				Matcher tempIdRefMatcher = TEMP_ID_PATTERN.matcher(reference.getReference());
 				if (tempIdRefMatcher.matches())
-					return ReferenceType.TEMPORARY;
+					return TEMPORARY;
 
 				Matcher idRefMatcher = ID_PATTERN.matcher(reference.getReference());
 				if (idRefMatcher.matches())
 				{
 					IdType id = new IdType(reference.getReference());
 					if (!id.isAbsolute() || localServerBase.equals(id.getBaseUrl()))
-						return ReferenceType.LITERAL_INTERNAL;
+						return LITERAL_INTERNAL;
 					else
-						return ReferenceType.LITERAL_EXTERNAL;
+						return LITERAL_EXTERNAL;
 				}
 
 				Matcher conditionalRefMatcher = CONDITIONAL_REF_PATTERN.matcher(reference.getReference());
 				if (conditionalRefMatcher.matches())
-					return ReferenceType.CONDITIONAL;
+					return CONDITIONAL;
 			}
 			else if (reference.hasType() && reference.hasIdentifier() && reference.getIdentifier().hasSystem()
 					&& reference.getIdentifier().hasValue())
 			{
-				return ReferenceType.LOGICAL;
+				return LOGICAL;
 			}
 		}
 
-		return ReferenceType.UNKNOWN;
+		return UNKNOWN;
 	}
 
 	public String getLocation()
@@ -261,17 +275,15 @@ public class ResourceReference
 	 * @param localServerBase
 	 *            not <code>null</code>
 	 * @return empty String if the type of this {@link ResourceReference} is not {@link ReferenceType#LITERAL_EXTERNAL}
+	 *         or {@link ReferenceType#RELATED_ARTEFACT_LITERAL_EXTERNAL_URL}
 	 */
 	public String getServerBase(String localServerBase)
 	{
 		Objects.requireNonNull(localServerBase, "localServerBase");
 
-		if (ReferenceType.LITERAL_EXTERNAL.equals(getType(localServerBase)))
-			if (hasReference())
-				return new IdType(reference.getReference()).getBaseUrl();
-			else if (hasRelatedArtifact())
-				return new IdType(relatedArtifact.getUrl()).getBaseUrl();
-
-		return "";
+		if (EnumSet.of(LITERAL_EXTERNAL, RELATED_ARTEFACT_LITERAL_EXTERNAL_URL).contains(getType(localServerBase)))
+			return new IdType(getValue()).getBaseUrl();
+		else
+			return "";
 	}
 }
