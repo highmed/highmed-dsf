@@ -4,15 +4,16 @@ import org.highmed.dsf.fhir.authentication.User;
 
 public class PractitionerRoleUserFilter extends AbstractMetaTagAuthorizationRoleUserFilter
 {
-	private static String RESOURCE_COLUMN = "practitioner_role";
+	private static final String RESOURCE_TABLE = "current_practitioner_roles";
+	private static String RESOURCE_ID_COLUMN = "practitioner_role_id";
 
 	public PractitionerRoleUserFilter(User user)
 	{
-		super(user, RESOURCE_COLUMN);
+		super(user, RESOURCE_TABLE, RESOURCE_ID_COLUMN);
 	}
 
-	public PractitionerRoleUserFilter(User user, String resourceColumn)
+	public PractitionerRoleUserFilter(User user, String resourceTable, String resourceIdColumn)
 	{
-		super(user, resourceColumn);
+		super(user, resourceTable, resourceIdColumn);
 	}
 }

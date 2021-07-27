@@ -1,44 +1,19 @@
 package org.highmed.dsf.fhir.search.parameters.user;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-
 import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.authentication.UserRole;
 
-public class PatientUserFilter extends AbstractUserFilter
+public class PatientUserFilter extends AbstractMetaTagAuthorizationRoleUserFilter
 {
-	private static final String RESOURCE_COLUMN = "patient";
+	private static final String RESOURCE_TABLE = "current_patients";
+	private static final String RESOURCE_ID_COLUMN = "patient_id";
 
 	public PatientUserFilter(User user)
 	{
-		super(user, RESOURCE_COLUMN);
+		super(user, RESOURCE_TABLE, RESOURCE_ID_COLUMN);
 	}
 
-	public PatientUserFilter(User user, String resourceColumn)
+	public PatientUserFilter(User user, String resourceTable, String resourceIdColumn)
 	{
-		super(user, resourceColumn);
-	}
-
-	@Override
-	public String getFilterQuery()
-	{
-		if (UserRole.LOCAL.equals(user.getRole()))
-			return ""; // not filtered for local users
-		else
-			return "false";
-	}
-
-	@Override
-	public int getSqlParameterCount()
-	{
-		return 0;
-	}
-
-	@Override
-	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement)
-			throws SQLException
-	{
-		// nothing to do
+		super(user, resourceTable, resourceIdColumn);
 	}
 }

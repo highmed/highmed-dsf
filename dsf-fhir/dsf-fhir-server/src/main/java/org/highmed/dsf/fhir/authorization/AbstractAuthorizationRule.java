@@ -1,10 +1,5 @@
 package org.highmed.dsf.fhir.authorization;
 
-import static org.highmed.dsf.fhir.authorization.read.ReadAccessHelper.READ_ACCESS_TAG_VALUE_ALL;
-import static org.highmed.dsf.fhir.authorization.read.ReadAccessHelper.READ_ACCESS_TAG_VALUE_LOCAL;
-import static org.highmed.dsf.fhir.authorization.read.ReadAccessHelper.READ_ACCESS_TAG_VALUE_ORGANIZATION;
-import static org.highmed.dsf.fhir.authorization.read.ReadAccessHelper.READ_ACCESS_TAG_VALUE_ROLE;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -116,76 +111,6 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		{
 			logger.warn("Error while accessing database", e);
 			throw new RuntimeException(e);
-		}
-	}
-
-	@Deprecated
-	protected Optional<String> reasonReadAllowedByTag(Connection connection, User user, R existingResource)
-	{
-		if (isLocalUser(user) && readAccessHelper.hasLocal(existingResource))
-		{
-			logger.info("Read of {} authorized for local user '{}', {} has '{}' read access tag",
-					existingResource.getResourceType().name(), user.getName(),
-					existingResource.getResourceType().name(), READ_ACCESS_TAG_VALUE_LOCAL);
-			return Optional.of("local user, '" + READ_ACCESS_TAG_VALUE_LOCAL + "' read access tag on "
-					+ existingResource.getResourceType().name());
-		}
-		else if (isLocalUser(user) && readAccessHelper.hasAll(existingResource))
-		{
-			logger.info("Read of {} authorized for local user '{}', {} has '{}' read access tag",
-					existingResource.getResourceType().name(), user.getName(),
-					existingResource.getResourceType().name(), READ_ACCESS_TAG_VALUE_ALL);
-			return Optional.of("local user, '" + READ_ACCESS_TAG_VALUE_ALL + "' read access tag on "
-					+ existingResource.getResourceType().name());
-		}
-		else if (isRemoteUser(user) && readAccessHelper.hasAll(existingResource))
-		{
-			logger.info("Read of {} authorized for remote user '{}', {} has '{}' read access tag",
-					existingResource.getResourceType().name(), user.getName(),
-					existingResource.getResourceType().name(), READ_ACCESS_TAG_VALUE_ALL);
-			return Optional.of("remote user, '" + READ_ACCESS_TAG_VALUE_ALL + "' read access tag on "
-					+ existingResource.getResourceType().name());
-		}
-		else if (isLocalUser(user) && readAccessHelper.hasAnyOrganization(existingResource)
-				&& readAccessHelper.hasOrganization(existingResource, user.getOrganization()))
-		{
-			logger.info("Read of {} authorized for local user '{}', {} has '{}' read access tag",
-					existingResource.getResourceType().name(), user.getName(),
-					existingResource.getResourceType().name(), READ_ACCESS_TAG_VALUE_ORGANIZATION);
-			return Optional.of("remote user, '" + READ_ACCESS_TAG_VALUE_ORGANIZATION + "' read access tag on "
-					+ existingResource.getResourceType().name());
-		}
-		else if (isRemoteUser(user) && readAccessHelper.hasAnyOrganization(existingResource)
-				&& readAccessHelper.hasOrganization(existingResource, user.getOrganization()))
-		{
-			logger.info("Read of {} authorized for remote user '{}', {} has '{}' read access tag",
-					existingResource.getResourceType().name(), user.getName(),
-					existingResource.getResourceType().name(), READ_ACCESS_TAG_VALUE_ORGANIZATION);
-			return Optional.of("remote user, '" + READ_ACCESS_TAG_VALUE_ORGANIZATION + "' read access tag on "
-					+ existingResource.getResourceType().name());
-		}
-		else if (isLocalUser(user) && readAccessHelper.hasAnyRole(existingResource)
-				&& readAccessHelper.hasRole(existingResource, getAffiliations(connection, user)))
-		{
-			logger.info("Read of {} authorized for local user '{}', {} has '{}' read access tag",
-					existingResource.getResourceType().name(), user.getName(),
-					existingResource.getResourceType().name(), READ_ACCESS_TAG_VALUE_ROLE);
-			return Optional.of("remote user, '" + READ_ACCESS_TAG_VALUE_ROLE + "' read access tag on "
-					+ existingResource.getResourceType().name());
-		}
-		else if (isRemoteUser(user) && readAccessHelper.hasAnyRole(existingResource)
-				&& readAccessHelper.hasRole(existingResource, getAffiliations(connection, user)))
-		{
-			logger.info("Read of {} authorized for remote user '{}', {} has '{}' read access tag",
-					existingResource.getResourceType().name(), user.getName(),
-					existingResource.getResourceType().name(), READ_ACCESS_TAG_VALUE_ROLE);
-			return Optional.of("remote user, '" + READ_ACCESS_TAG_VALUE_ROLE + "' read access tag on "
-					+ existingResource.getResourceType().name());
-		}
-		else
-		{
-			logger.warn("Read of {} unauthorized", existingResource.getResourceType().name());
-			return Optional.empty();
 		}
 	}
 

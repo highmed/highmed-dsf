@@ -11,6 +11,7 @@ import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.dao.PractitionerDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
+import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.Practitioner;
 
@@ -18,9 +19,10 @@ public class PractitionerAuthorizationRule extends AbstractMetaTagAuthorizationR
 {
 	public PractitionerAuthorizationRule(DaoProvider daoProvider, String serverBase,
 			ReferenceResolver referenceResolver, OrganizationProvider organizationProvider,
-			ReadAccessHelper readAccessHelper)
+			ReadAccessHelper readAccessHelper, ParameterConverter parameterConverter)
 	{
-		super(Practitioner.class, daoProvider, serverBase, referenceResolver, organizationProvider, readAccessHelper);
+		super(Practitioner.class, daoProvider, serverBase, referenceResolver, organizationProvider, readAccessHelper,
+				parameterConverter);
 	}
 
 	protected Optional<String> newResourceOk(Connection connection, User user, Practitioner newResource)

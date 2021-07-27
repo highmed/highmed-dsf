@@ -1,18 +1,20 @@
 package org.highmed.dsf.fhir.authorization;
 
-import static org.highmed.dsf.fhir.authorization.read.ReadAccessHelper.READ_ACCESS_TAG_VALUE_ALL;
-import static org.highmed.dsf.fhir.authorization.read.ReadAccessHelper.READ_ACCESS_TAG_VALUE_LOCAL;
-import static org.highmed.dsf.fhir.authorization.read.ReadAccessHelper.READ_ACCESS_TAG_VALUE_ORGANIZATION;
-import static org.highmed.dsf.fhir.authorization.read.ReadAccessHelper.READ_ACCESS_TAG_VALUE_ROLE;
-
 import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.highmed.dsf.fhir.authentication.OrganizationProvider;
 import org.highmed.dsf.fhir.authentication.User;
+import org.highmed.dsf.fhir.authentication.UserRole;
 import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
+import org.highmed.dsf.fhir.dao.ReadAccessDao;
 import org.highmed.dsf.fhir.dao.ResourceDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
+import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
@@ -26,15 +28,20 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractMetaTagAuthorizationRule.class);
 
+	private final ParameterConverter parameterConverter;
+	private final ReadAccessDao readAccessDao;
 	private final String resourceTypeName;
 
 	public AbstractMetaTagAuthorizationRule(Class<R> resourceType, DaoProvider daoProvider, String serverBase,
 			ReferenceResolver referenceResolver, OrganizationProvider organizationProvider,
-			ReadAccessHelper readAccessHelper)
+			ReadAccessHelper readAccessHelper, ParameterConverter parameterConverter)
 	{
 		super(resourceType, daoProvider, serverBase, referenceResolver, organizationProvider, readAccessHelper);
 
-		this.resourceTypeName = resourceType.getAnnotation(ResourceDef.class).name();
+		this.parameterConverter = parameterConverter;
+
+		readAccessDao = daoProvider.getReadAccessDao();
+		resourceTypeName = resourceType.getAnnotation(ResourceDef.class).name();
 	}
 
 	protected final boolean hasValidReadAccessTag(Connection connection, Resource resource)
@@ -84,76 +91,34 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 	@Override
 	public final Optional<String> reasonReadAllowed(Connection connection, User user, R existingResource)
 	{
-		if (isLocalUser(user) && readAccessHelper.hasLocal(existingResource))
+		UserRole userRole = user.getRole();
+		UUID resourceId = parameterConverter.toUuid(resourceTypeName, existingResource.getIdElement().getIdPart());
+		UUID organizationId = parameterConverter.toUuid("Organization",
+				user.getOrganization().getIdElement().getIdPart());
+
+		try
 		{
-			logger.info("Read of {} authorized for local user '{}', {} has '{}' read access tag", resourceTypeName,
-					user.getName(), resourceTypeName, READ_ACCESS_TAG_VALUE_LOCAL);
-			return Optional
-					.of("local user, '" + READ_ACCESS_TAG_VALUE_LOCAL + "' read access tag on " + resourceTypeName);
-		}
-		else if (isLocalUser(user) && readAccessHelper.hasAll(existingResource))
-		{
-			logger.info("Read of {} authorized for local user '{}', {} has '{}' read access tag", resourceTypeName,
-					user.getName(), resourceTypeName, READ_ACCESS_TAG_VALUE_ALL);
-			return Optional
-					.of("local user, '" + READ_ACCESS_TAG_VALUE_ALL + "' read access tag on " + resourceTypeName);
-		}
-		else if (isRemoteUser(user) && readAccessHelper.hasAll(existingResource))
-		{
-			logger.info("Read of {} authorized for remote user '{}', {} has '{}' read access tag", resourceTypeName,
-					user.getName(), resourceTypeName, READ_ACCESS_TAG_VALUE_ALL);
-			return Optional
-					.of("remote user, '" + READ_ACCESS_TAG_VALUE_ALL + "' read access tag on " + resourceTypeName);
-		}
-		else if (isLocalUser(user) && readAccessHelper.hasAnyOrganization(existingResource)
-				&& readAccessHelper.hasOrganization(existingResource, user.getOrganization()))
-		{
-			logger.info("Read of {} authorized for local user '{}', {} has '{}' read access tag", resourceTypeName,
-					user.getName(), resourceTypeName, READ_ACCESS_TAG_VALUE_ORGANIZATION);
-			return Optional.of(
-					"remote user, '" + READ_ACCESS_TAG_VALUE_ORGANIZATION + "' read access tag on " + resourceTypeName);
-		}
-		else if (isRemoteUser(user) && readAccessHelper.hasAnyOrganization(existingResource)
-				&& readAccessHelper.hasOrganization(existingResource, user.getOrganization()))
-		{
-			logger.info("Read of {} authorized for remote user '{}', {} has '{}' read access tag", resourceTypeName,
-					user.getName(), resourceTypeName, READ_ACCESS_TAG_VALUE_ORGANIZATION);
-			return Optional.of(
-					"remote user, '" + READ_ACCESS_TAG_VALUE_ORGANIZATION + "' read access tag on " + resourceTypeName);
-		}
-		else if (isLocalUser(user) && readAccessHelper.hasAnyRole(existingResource)
-				&& readAccessHelper.hasRole(existingResource, getAffiliations(connection, user)))
-		{
-			logger.info("Read of {} authorized for local user '{}', {} has '{}' read access tag", resourceTypeName,
-					user.getName(), resourceTypeName, READ_ACCESS_TAG_VALUE_ROLE);
-			return Optional
-					.of("remote user, '" + READ_ACCESS_TAG_VALUE_ROLE + "' read access tag on " + resourceTypeName);
-		}
-		else if (isRemoteUser(user) && readAccessHelper.hasAnyRole(existingResource)
-				&& readAccessHelper.hasRole(existingResource, getAffiliations(connection, user)))
-		{
-			logger.info("Read of {} authorized for remote user '{}', {} has '{}' read access tag", resourceTypeName,
-					user.getName(), resourceTypeName, READ_ACCESS_TAG_VALUE_ROLE);
-			return Optional
-					.of("remote user, '" + READ_ACCESS_TAG_VALUE_ROLE + "' read access tag on " + resourceTypeName);
-		}
-		else
-		{
-			Optional<String> allowed = reasonReadAllowedByAdditionalCriteria(connection, user, existingResource);
-			if (allowed.isPresent())
-				return allowed;
-			else
+			List<String> accessTypes = readAccessDao.getAccessTypes(connection, resourceId, userRole, organizationId);
+
+			if (accessTypes.isEmpty())
 			{
-				logger.warn("Read of {} unauthorized", resourceTypeName);
+				logger.warn("Read of {}/{} unauthorized", resourceTypeName, resourceId.toString());
 				return Optional.empty();
 			}
+			else
+			{
+				logger.info("Read of {}/{} authorized for {} user '{}': {}", resourceTypeName, resourceId, userRole,
+						user.getName(), accessTypes);
+				return Optional.of(userRole + " user, " + (accessTypes.size() > 1 ? "{" : "")
+						+ accessTypes.stream().collect(Collectors.joining(", "))
+						+ (accessTypes.size() > 1 ? "} tags" : " tag") + " on resource");
+			}
 		}
-	}
-
-	protected Optional<String> reasonReadAllowedByAdditionalCriteria(Connection connection, User user,
-			R existingResource)
-	{
-		return Optional.empty();
+		catch (SQLException e)
+		{
+			logger.warn("Error while checking read access", e);
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override

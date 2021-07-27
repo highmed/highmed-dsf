@@ -27,6 +27,7 @@ import org.highmed.dsf.fhir.dao.PatientDao;
 import org.highmed.dsf.fhir.dao.PractitionerDao;
 import org.highmed.dsf.fhir.dao.PractitionerRoleDao;
 import org.highmed.dsf.fhir.dao.ProvenanceDao;
+import org.highmed.dsf.fhir.dao.ReadAccessDao;
 import org.highmed.dsf.fhir.dao.ResearchStudyDao;
 import org.highmed.dsf.fhir.dao.ResourceDao;
 import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
@@ -89,6 +90,8 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	private final TaskDao taskDao;
 	private final ValueSetDao valueSetDao;
 
+	private final ReadAccessDao readAccessDao;
+
 	private final Map<Class<? extends Resource>, ResourceDao<?>> daosByResourecClass = new HashMap<>();
 	private final Map<String, ResourceDao<?>> daosByResourceTypeName = new HashMap<>();
 
@@ -100,7 +103,7 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 			PatientDao patientDao, PractitionerDao practitionerDao, PractitionerRoleDao practitionerRoleDao,
 			ProvenanceDao provenanceDao, ResearchStudyDao researchStudyDao,
 			StructureDefinitionDao structureDefinitionDao, StructureDefinitionDao structureDefinitionSnapshotDao,
-			SubscriptionDao subscriptionDao, TaskDao taskDao, ValueSetDao valueSetDao)
+			SubscriptionDao subscriptionDao, TaskDao taskDao, ValueSetDao valueSetDao, ReadAccessDao readAccessDao)
 	{
 		this.dataSource = dataSource;
 		this.activityDefinitionDao = activityDefinitionDao;
@@ -127,6 +130,8 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 		this.subscriptionDao = subscriptionDao;
 		this.taskDao = taskDao;
 		this.valueSetDao = valueSetDao;
+
+		this.readAccessDao = readAccessDao;
 
 		daosByResourecClass.put(ActivityDefinition.class, activityDefinitionDao);
 		daosByResourecClass.put(Binary.class, binaryDao);
@@ -363,5 +368,11 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	{
 		ResourceDao<?> value = daosByResourceTypeName.get(resourceTypeName);
 		return Optional.ofNullable(value);
+	}
+
+	@Override
+	public ReadAccessDao getReadAccessDao()
+	{
+		return readAccessDao;
 	}
 }

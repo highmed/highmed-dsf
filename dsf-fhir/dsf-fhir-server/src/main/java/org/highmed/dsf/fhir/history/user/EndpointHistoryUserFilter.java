@@ -12,7 +12,7 @@ public class EndpointHistoryUserFilter extends EndpointUserFilter implements His
 
 	public EndpointHistoryUserFilter(User user)
 	{
-		super(user, HistoryUserFilter.RESOURCE_COLUMN);
+		super(user, HistoryUserFilter.RESOURCE_TABLE, HistoryUserFilter.RESOURCE_ID_COLUMN);
 	}
 
 	@Override

@@ -20,6 +20,7 @@ import org.highmed.dsf.fhir.dao.PatientDao;
 import org.highmed.dsf.fhir.dao.PractitionerDao;
 import org.highmed.dsf.fhir.dao.PractitionerRoleDao;
 import org.highmed.dsf.fhir.dao.ProvenanceDao;
+import org.highmed.dsf.fhir.dao.ReadAccessDao;
 import org.highmed.dsf.fhir.dao.ResearchStudyDao;
 import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
 import org.highmed.dsf.fhir.dao.SubscriptionDao;
@@ -44,6 +45,7 @@ import org.highmed.dsf.fhir.dao.jdbc.PatientDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.PractitionerDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.PractitionerRoleDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.ProvenanceDaoJdbc;
+import org.highmed.dsf.fhir.dao.jdbc.ReadAccessDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.ResearchStudyDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.StructureDefinitionDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.StructureDefinitionSnapshotDaoJdbc;
@@ -239,12 +241,18 @@ public class DaoConfig
 				endpointDao(), groupDao(), healthcareServiceDao(), libraryDao(), locationDao(), measureDao(),
 				measureReportDao(), namingSystemDao(), organizationDao(), organizationAffiliationDao(), patientDao(),
 				practitionerDao(), practitionerRoleDao(), provenanceDao(), researchStudyDao(), structureDefinitionDao(),
-				structureDefinitionSnapshotDao(), subscriptionDao(), taskDao(), valueSetDao());
+				structureDefinitionSnapshotDao(), subscriptionDao(), taskDao(), valueSetDao(), readAccessDao());
 	}
 
 	@Bean
 	public HistoryDao historyDao()
 	{
 		return new HistroyDaoJdbc(dataSource(), fhirConfig.fhirContext(), (BinaryDaoJdbc) binaryDao());
+	}
+
+	@Bean
+	public ReadAccessDao readAccessDao()
+	{
+		return new ReadAccessDaoJdbc(dataSource());
 	}
 }

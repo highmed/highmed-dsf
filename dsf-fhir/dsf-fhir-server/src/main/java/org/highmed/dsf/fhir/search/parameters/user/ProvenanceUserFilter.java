@@ -1,44 +1,19 @@
 package org.highmed.dsf.fhir.search.parameters.user;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-
 import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.authentication.UserRole;
 
-public class ProvenanceUserFilter extends AbstractUserFilter
+public class ProvenanceUserFilter extends AbstractMetaTagAuthorizationRoleUserFilter
 {
-	private static final String RESOURCE_COLUMN = "provenance";
+	private static final String RESOURCE_TABLE = "current_provenances";
+	private static final String RESOURCE_ID_COLUMN = "provenance_id";
 
 	public ProvenanceUserFilter(User user)
 	{
-		super(user, RESOURCE_COLUMN);
+		super(user, RESOURCE_TABLE, RESOURCE_ID_COLUMN);
 	}
 
-	public ProvenanceUserFilter(User user, String resourceColumn)
+	public ProvenanceUserFilter(User user, String resourceTable, String resourceIdColumn)
 	{
-		super(user, resourceColumn);
-	}
-
-	@Override
-	public String getFilterQuery()
-	{
-		if (UserRole.LOCAL.equals(user.getRole()))
-			return ""; // not filtered for local users
-		else
-			return "false";
-	}
-
-	@Override
-	public int getSqlParameterCount()
-	{
-		return 0;
-	}
-
-	@Override
-	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement)
-			throws SQLException
-	{
-		// nothing to do
+		super(user, resourceTable, resourceIdColumn);
 	}
 }

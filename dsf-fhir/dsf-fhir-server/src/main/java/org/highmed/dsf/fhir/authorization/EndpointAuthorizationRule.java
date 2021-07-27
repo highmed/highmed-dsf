@@ -15,6 +15,7 @@ import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.dao.EndpointDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
+import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.search.PartialResult;
 import org.highmed.dsf.fhir.search.SearchQuery;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
@@ -31,9 +32,11 @@ public class EndpointAuthorizationRule extends AbstractMetaTagAuthorizationRule<
 	private static final Pattern ENDPOINT_ADDRESS_PATTERN = Pattern.compile(ENDPOINT_ADDRESS_PATTERN_STRING);
 
 	public EndpointAuthorizationRule(DaoProvider daoProvider, String serverBase, ReferenceResolver referenceResolver,
-			OrganizationProvider organizationProvider, ReadAccessHelper readAccessHelper)
+			OrganizationProvider organizationProvider, ReadAccessHelper readAccessHelper,
+			ParameterConverter parameterConverter)
 	{
-		super(Endpoint.class, daoProvider, serverBase, referenceResolver, organizationProvider, readAccessHelper);
+		super(Endpoint.class, daoProvider, serverBase, referenceResolver, organizationProvider, readAccessHelper,
+				parameterConverter);
 	}
 
 	protected Optional<String> newResourceOk(Connection connection, User user, Endpoint newResource)

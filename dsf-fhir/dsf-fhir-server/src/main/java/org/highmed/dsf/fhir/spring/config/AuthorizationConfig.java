@@ -114,14 +114,14 @@ public class AuthorizationConfig
 	{
 		return new ActivityDefinitionAuthorizationRule(daoConfig.daoProvider(), serverBase,
 				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper(),
-				processAuthorizationHelper());
+				helperConfig.parameterConverter(), processAuthorizationHelper());
 	}
 
 	@Bean
 	public AuthorizationRule<Binary> binaryAuthorizationRule()
 	{
 		return new BinaryAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver(),
-				organizationProvider(), readAccessHelper(),
+				organizationProvider(), readAccessHelper(), helperConfig.parameterConverter(),
 
 				// Binary and Task not supported as securityContext rule
 				activityDefinitionAuthorizationRule(), bundleAuthorizationRule(), codeSystemAuthorizationRule(),
@@ -137,133 +137,143 @@ public class AuthorizationConfig
 	public AuthorizationRule<Bundle> bundleAuthorizationRule()
 	{
 		return new BundleAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver(),
-				organizationProvider(), readAccessHelper());
+				organizationProvider(), readAccessHelper(), helperConfig.parameterConverter());
 	}
 
 	@Bean
 	public AuthorizationRule<CodeSystem> codeSystemAuthorizationRule()
 	{
 		return new CodeSystemAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver(),
-				organizationProvider(), readAccessHelper());
+				organizationProvider(), readAccessHelper(), helperConfig.parameterConverter());
 	}
 
 	@Bean
 	public AuthorizationRule<Endpoint> endpointAuthorizationRule()
 	{
 		return new EndpointAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver(),
-				organizationProvider(), readAccessHelper());
+				organizationProvider(), readAccessHelper(), helperConfig.parameterConverter());
 	}
 
 	@Bean
 	public AuthorizationRule<Group> groupAuthorizationRule()
 	{
 		return new GroupAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver(),
-				organizationProvider(), readAccessHelper());
+				organizationProvider(), readAccessHelper(), helperConfig.parameterConverter());
 	}
 
 	@Bean
 	public AuthorizationRule<HealthcareService> healthcareServiceAuthorizationRule()
 	{
 		return new HealthcareServiceAuthorizationRule(daoConfig.daoProvider(), serverBase,
-				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper());
+				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper(),
+				helperConfig.parameterConverter());
 	}
 
 	@Bean
 	public AuthorizationRule<Library> libraryAuthorizationRule()
 	{
 		return new LibraryAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver(),
-				organizationProvider(), readAccessHelper());
+				organizationProvider(), readAccessHelper(), helperConfig.parameterConverter());
 	}
 
 	@Bean
 	public AuthorizationRule<Location> locationAuthorizationRule()
 	{
 		return new LocationAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver(),
-				organizationProvider(), readAccessHelper());
+				organizationProvider(), readAccessHelper(), helperConfig.parameterConverter());
 	}
 
 	@Bean
 	public AuthorizationRule<Measure> measureAuthorizationRule()
 	{
 		return new MeasureAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver(),
-				organizationProvider(), readAccessHelper());
+				organizationProvider(), readAccessHelper(), helperConfig.parameterConverter());
 	}
 
 	@Bean
 	public AuthorizationRule<MeasureReport> measureReportAuthorizationRule()
 	{
 		return new MeasureReportAuthorizationRule(daoConfig.daoProvider(), serverBase,
-				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper());
+				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper(),
+				helperConfig.parameterConverter());
 	}
 
 	@Bean
 	public AuthorizationRule<NamingSystem> namingSystemAuthorizationRule()
 	{
 		return new NamingSystemAuthorizationRule(daoConfig.daoProvider(), serverBase,
-				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper());
+				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper(),
+				helperConfig.parameterConverter());
 	}
 
 	@Bean
 	public AuthorizationRule<Organization> organizationAuthorizationRule()
 	{
 		return new OrganizationAuthorizationRule(daoConfig.daoProvider(), serverBase,
-				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper());
+				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper(),
+				helperConfig.parameterConverter());
 	}
 
 	@Bean
 	public AuthorizationRule<OrganizationAffiliation> organizationAffiliationAuthorizationRule()
 	{
 		return new OrganizationAffiliationAuthorizationRule(daoConfig.daoProvider(), serverBase,
-				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper());
+				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper(),
+				helperConfig.parameterConverter());
 	}
 
 	@Bean
 	public AuthorizationRule<Patient> patientAuthorizationRule()
 	{
 		return new PatientAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver(),
-				organizationProvider(), readAccessHelper());
+				organizationProvider(), readAccessHelper(), helperConfig.parameterConverter());
 	}
 
 	@Bean
 	public AuthorizationRule<Practitioner> practitionerAuthorizationRule()
 	{
 		return new PractitionerAuthorizationRule(daoConfig.daoProvider(), serverBase,
-				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper());
+				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper(),
+				helperConfig.parameterConverter());
 	}
 
 	@Bean
 	public AuthorizationRule<PractitionerRole> practitionerRoleAuthorizationRule()
 	{
 		return new PractitionerRoleAuthorizationRule(daoConfig.daoProvider(), serverBase,
-				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper());
+				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper(),
+				helperConfig.parameterConverter());
 	}
 
 	@Bean
 	public AuthorizationRule<Provenance> provenanceAuthorizationRule()
 	{
 		return new ProvenanceAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver(),
-				organizationProvider(), readAccessHelper());
+				organizationProvider(), readAccessHelper(), helperConfig.parameterConverter());
 	}
 
 	@Bean
 	public AuthorizationRule<ResearchStudy> researchStudyAuthorizationRule()
 	{
 		return new ResearchStudyAuthorizationRule(daoConfig.daoProvider(), serverBase,
-				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper());
+				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper(),
+				helperConfig.parameterConverter());
 	}
 
 	@Bean
 	public AuthorizationRule<StructureDefinition> structureDefinitionAuthorizationRule()
 	{
 		return new StructureDefinitionAuthorizationRule(daoConfig.daoProvider(), serverBase,
-				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper());
+				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper(),
+				helperConfig.parameterConverter());
 	}
 
 	@Bean
 	public AuthorizationRule<Subscription> subscriptionAuthorizationRule()
 	{
 		return new SubscriptionAuthorizationRule(daoConfig.daoProvider(), serverBase,
-				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper());
+				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper(),
+				helperConfig.parameterConverter());
 	}
 
 	@Bean
@@ -277,7 +287,7 @@ public class AuthorizationConfig
 	public AuthorizationRule<ValueSet> valueSetAuthorizationRule()
 	{
 		return new ValueSetAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver(),
-				organizationProvider(), readAccessHelper());
+				organizationProvider(), readAccessHelper(), helperConfig.parameterConverter());
 	}
 
 	@Bean

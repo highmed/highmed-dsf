@@ -12,7 +12,7 @@ public class GroupHistoryUserFilter extends GroupUserFilter implements HistoryUs
 
 	public GroupHistoryUserFilter(User user)
 	{
-		super(user, HistoryUserFilter.RESOURCE_COLUMN);
+		super(user, HistoryUserFilter.RESOURCE_TABLE, HistoryUserFilter.RESOURCE_ID_COLUMN);
 	}
 
 	@Override
