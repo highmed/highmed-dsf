@@ -49,6 +49,7 @@ public class SingleOrganizationMatcherImpl<P extends Person> extends AbstractMat
 	 * @param matchCalculator
 	 *            not <code>null</code>
 	 * @param positiveMatchThreshold
+	 *            {@code >=0}
 	 */
 	public SingleOrganizationMatcherImpl(MatchedPersonFactory<P> matchedPersonFactory, MatchCalculator matchCalculator,
 			double positiveMatchThreshold)
@@ -88,6 +89,7 @@ public class SingleOrganizationMatcherImpl<P extends Person> extends AbstractMat
 	 * Matches {@link Person}s from a single organizations - local matching.
 	 * 
 	 * @param persons
+	 *            not <code>null</code>
 	 * @return matched persons, converted person from param {@code persons} if param {@code persons} has only one entry,
 	 *         empty list if param {@code persons} has no entries
 	 */

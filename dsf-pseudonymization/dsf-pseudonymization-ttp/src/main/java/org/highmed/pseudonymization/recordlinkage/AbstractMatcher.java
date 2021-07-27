@@ -75,6 +75,7 @@ public abstract class AbstractMatcher<P extends Person>
 	 * @param matchCalculator
 	 *            not <code>null</code>
 	 * @param positiveMatchThreshold
+	 *            {@code >=0}
 	 */
 	protected AbstractMatcher(MatchedPersonFactory<P> matchedPersonFactory, MatchCalculator matchCalculator,
 			double positiveMatchThreshold)
@@ -124,9 +125,11 @@ public abstract class AbstractMatcher<P extends Person>
 		/**
 		 * @param matchedPerson
 		 *            not <code>null</code>
+		 * @param <P>
+		 *            the person type
 		 * @param personToMatch
 		 *            not <code>null</code>
-		 * @return
+		 * @return {@link MatchResult} containing the {@link MatchedPerson} and a match classification score
 		 * @throws NoSuchElementException
 		 *             if the list of {@link Person}s inside {@link MatchedPerson} is empty
 		 */
@@ -134,6 +137,8 @@ public abstract class AbstractMatcher<P extends Person>
 				throws NoSuchElementException;
 
 		/**
+		 * @param <P>
+		 *            the person type
 		 * @param personToMatch
 		 *            not <code>null</code>
 		 * @return Function for {@link #calculateMatch(MatchedPerson, Person)}
