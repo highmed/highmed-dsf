@@ -8,7 +8,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
-import org.hl7.fhir.r4.model.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,5 +52,4 @@ public class UserProvider
 			throw new WebApplicationException(Status.FORBIDDEN);
 		}
 	}
-
 }
