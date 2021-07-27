@@ -79,7 +79,7 @@ public class ResourceReference
 	public static enum ReferenceType
 	{
 		/**
-		 * temporary reference starting with {@link Command#URL_UUID_PREFIX}
+		 * temporary reference starting with <code>urn:uuid:</code>
 		 */
 		TEMPORARY,
 		/**

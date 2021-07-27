@@ -18,8 +18,9 @@ public interface CommandFactory
 	 * @param handlingType
 	 *            not <code>null</code>
 	 * 
-	 * @return
+	 * @return {@link CommandList} with individual commands from each entry contained in the bundle
 	 * @throws BadBundleException
+	 *             if the bundle could not be processed because of wrong bundle type or other errors
 	 */
 	CommandList createCommands(Bundle bundle, User user, PreferReturnType returnType, PreferHandlingType handlingType)
 			throws BadBundleException;

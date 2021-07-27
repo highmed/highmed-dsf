@@ -50,6 +50,7 @@ public class FederatedMatcherImpl<P extends Person> extends AbstractMatcher<P> i
 	 * @param matchCalculator
 	 *            not <code>null</code>
 	 * @param positiveMatchThreshold
+	 *            {@code >=0}
 	 */
 	public FederatedMatcherImpl(MatchedPersonFactory<P> matchedPersonFactory, MatchCalculator matchCalculator,
 			double positiveMatchThreshold)
@@ -65,7 +66,6 @@ public class FederatedMatcherImpl<P extends Person> extends AbstractMatcher<P> i
 	 *            not <code>null</code>
 	 * @return matched persons, converted persons from param {@code personLists} if param {@code personLists} has only
 	 *         one entry (aka one organization), empty list if param {@code personLists} has no entries
-	 * @see #matchPersons(List, List...)
 	 */
 	@Override
 	public Set<MatchedPerson<P>> matchPersons(List<List<P>> personLists)

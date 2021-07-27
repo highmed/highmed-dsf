@@ -36,6 +36,8 @@ public interface OrganizationProvider
 	List<Organization> getRemoteOrganizations();
 
 	/**
+	 * @param type
+	 *            not <code>null</code>
 	 * @return {@link Organization}s with {@link #getDefaultTypeSystem()} and given type
 	 */
 	Stream<Organization> getOrganizationsByType(String type);
@@ -50,6 +52,7 @@ public interface OrganizationProvider
 
 	/**
 	 * @param organizationId
+	 *            not <code>null</code>
 	 * @return {@link Organization}s {@link Identifier} with idPart equal to the given organizationId, or
 	 *         {@link Optional#empty()} if not found
 	 */
