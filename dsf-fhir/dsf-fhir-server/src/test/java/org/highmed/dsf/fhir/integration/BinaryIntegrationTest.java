@@ -68,6 +68,29 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
+	public void testReadAllowedLocalUserViaSecurityContext() throws Exception
+	{
+		ResearchStudy rs = new ResearchStudy();
+		getReadAccessHelper().addLocal(rs);
+
+		ResearchStudyDao rsDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
+		ResearchStudy createdRs = rsDao.create(rs);
+
+		final String contentType = MediaType.TEXT_PLAIN;
+		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
+
+		Binary binary = new Binary();
+		binary.setContentType(contentType);
+		binary.setData(data);
+		binary.setSecurityContext(new Reference(createdRs.getIdElement().toVersionless()));
+
+		BinaryDao binDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
+		Binary created = binDao.create(binary);
+
+		getWebserviceClient().read(Binary.class, created.getIdElement().getIdPart());
+	}
+
+	@Test
 	public void testReadNotAllowedRemoteUser() throws Exception
 	{
 		final String contentType = MediaType.TEXT_PLAIN;
@@ -1442,7 +1465,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		ResearchStudy rs3 = new ResearchStudy();
 		getReadAccessHelper().addLocal(rs3);
 		getReadAccessHelper().addRole(rs3, "Parent_Organization",
-				"http://highmed.org/fhir/CodeSystem/organization-type", "MeDIC");
+				"http://highmed.org/fhir/CodeSystem/organization-type", "TTP");
 
 		ResearchStudy createdRs1 = researchStudyDao.create(rs1);
 		ResearchStudy createdRs2 = researchStudyDao.create(rs2);

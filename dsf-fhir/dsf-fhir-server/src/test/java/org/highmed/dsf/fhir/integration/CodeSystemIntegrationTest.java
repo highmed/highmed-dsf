@@ -1,0 +1,155 @@
+package org.highmed.dsf.fhir.integration;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response.Status;
+
+import org.highmed.dsf.fhir.dao.CodeSystemDao;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.junit.Test;
+
+public class CodeSystemIntegrationTest extends AbstractIntegrationTest
+{
+	private void expectForbidden(Runnable runnable)
+	{
+		try
+		{
+			runnable.run();
+			fail("WebApplicationException with FORBIDDEN expected");
+		}
+		catch (WebApplicationException e)
+		{
+			assertNotNull(e.getResponse());
+			assertEquals(Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
+		}
+	}
+
+	@Test
+	public void testReadAllowedForLocalUserByLocalTag() throws Exception
+	{
+		CodeSystem cs = new CodeSystem();
+		readAccessHelper.addLocal(cs);
+
+		CodeSystemDao codeSystemDao = getSpringWebApplicationContext().getBean(CodeSystemDao.class);
+		CodeSystem createdCs = codeSystemDao.create(cs);
+
+		getWebserviceClient().read(CodeSystem.class, createdCs.getIdElement().getIdPart());
+	}
+
+	@Test
+	public void testReadNotAllowedForRemoteUserByLocalTag() throws Exception
+	{
+		CodeSystem cs = new CodeSystem();
+		readAccessHelper.addLocal(cs);
+
+		CodeSystemDao codeSystemDao = getSpringWebApplicationContext().getBean(CodeSystemDao.class);
+		CodeSystem createdCs = codeSystemDao.create(cs);
+
+		expectForbidden(
+				() -> getExternalWebserviceClient().read(CodeSystem.class, createdCs.getIdElement().getIdPart()));
+	}
+
+	@Test
+	public void testReadAllowedForLocalUserByAllTag() throws Exception
+	{
+		CodeSystem cs = new CodeSystem();
+		readAccessHelper.addAll(cs);
+
+		CodeSystemDao codeSystemDao = getSpringWebApplicationContext().getBean(CodeSystemDao.class);
+		CodeSystem createdCs = codeSystemDao.create(cs);
+
+		getWebserviceClient().read(CodeSystem.class, createdCs.getIdElement().getIdPart());
+	}
+
+	@Test
+	public void testReadAllowedForRemoteUserByAllTag() throws Exception
+	{
+		CodeSystem cs = new CodeSystem();
+		readAccessHelper.addAll(cs);
+
+		CodeSystemDao codeSystemDao = getSpringWebApplicationContext().getBean(CodeSystemDao.class);
+		CodeSystem createdCs = codeSystemDao.create(cs);
+
+		getExternalWebserviceClient().read(CodeSystem.class, createdCs.getIdElement().getIdPart());
+	}
+
+	@Test
+	public void testReadAllowedForLocalUserByOrganizationTag() throws Exception
+	{
+		CodeSystem cs = new CodeSystem();
+		readAccessHelper.addOrganization(cs, "Test_Organization");
+
+		CodeSystemDao codeSystemDao = getSpringWebApplicationContext().getBean(CodeSystemDao.class);
+		CodeSystem createdCs = codeSystemDao.create(cs);
+
+		getWebserviceClient().read(CodeSystem.class, createdCs.getIdElement().getIdPart());
+	}
+
+	@Test
+	public void testReadAllowedForRemoteUserByOrganizationTag() throws Exception
+	{
+		CodeSystem cs = new CodeSystem();
+		readAccessHelper.addOrganization(cs, "External_Test_Organization");
+
+		CodeSystemDao codeSystemDao = getSpringWebApplicationContext().getBean(CodeSystemDao.class);
+		CodeSystem createdCs = codeSystemDao.create(cs);
+
+		getExternalWebserviceClient().read(CodeSystem.class, createdCs.getIdElement().getIdPart());
+	}
+
+	@Test
+	public void testReadNotAllowedForRemoteUserByOrganizationTag() throws Exception
+	{
+		CodeSystem cs = new CodeSystem();
+		readAccessHelper.addOrganization(cs, "Test_Organization");
+
+		CodeSystemDao codeSystemDao = getSpringWebApplicationContext().getBean(CodeSystemDao.class);
+		CodeSystem createdCs = codeSystemDao.create(cs);
+
+		expectForbidden(
+				() -> getExternalWebserviceClient().read(CodeSystem.class, createdCs.getIdElement().getIdPart()));
+	}
+
+	@Test
+	public void testReadAllowedForLocalUserWithRoleTag() throws Exception
+	{
+		CodeSystem cs = new CodeSystem();
+		readAccessHelper.addRole(cs, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-type",
+				"MeDIC");
+
+		CodeSystemDao codeSystemDao = getSpringWebApplicationContext().getBean(CodeSystemDao.class);
+		CodeSystem createdCs = codeSystemDao.create(cs);
+
+		getWebserviceClient().read(CodeSystem.class, createdCs.getIdElement().getIdPart());
+	}
+
+	@Test
+	public void testReadAllowedForRemoteUserWithRoleTag() throws Exception
+	{
+		CodeSystem cs = new CodeSystem();
+		readAccessHelper.addRole(cs, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-type",
+				"TTP");
+
+		CodeSystemDao codeSystemDao = getSpringWebApplicationContext().getBean(CodeSystemDao.class);
+		CodeSystem createdCs = codeSystemDao.create(cs);
+
+		getExternalWebserviceClient().read(CodeSystem.class, createdCs.getIdElement().getIdPart());
+	}
+
+	@Test
+	public void testReadNotAllowedForRemoteUserWithRoleTag() throws Exception
+	{
+		CodeSystem cs = new CodeSystem();
+		readAccessHelper.addRole(cs, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-type",
+				"MeDIC");
+
+		CodeSystemDao codeSystemDao = getSpringWebApplicationContext().getBean(CodeSystemDao.class);
+		CodeSystem createdCs = codeSystemDao.create(cs);
+
+		expectForbidden(
+				() -> getExternalWebserviceClient().read(CodeSystem.class, createdCs.getIdElement().getIdPart()));
+	}
+}

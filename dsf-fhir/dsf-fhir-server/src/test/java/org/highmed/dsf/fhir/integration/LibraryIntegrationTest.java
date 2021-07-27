@@ -99,7 +99,7 @@ public class LibraryIntegrationTest extends AbstractIntegrationTest
 		Library library = createValidLibrary();
 		readAccessHelper.addLocal(library);
 		readAccessHelper.addRole(library, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-type",
-				"MeDIC");
+				"TTP");
 
 		LibraryDao dao = getSpringWebApplicationContext().getBean(LibraryDao.class);
 		Library created = dao.create(library);

@@ -5,16 +5,25 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.commons.codec.binary.Hex;
+import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
+import org.highmed.dsf.fhir.authorization.read.ReadAccessHelperImpl;
+import org.highmed.dsf.fhir.dao.jdbc.CodeSystemDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.OrganizationDaoJdbc;
+import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.Test;
+import org.postgresql.util.PGobject;
 
 public class OrganizationDaoTest extends AbstractResourceDaoTest<Organization, OrganizationDao>
+		implements ReadAccessDaoTest<Organization>
 {
 	private static final String name = "Demo Organization";
 	private static final boolean active = true;
@@ -25,7 +34,7 @@ public class OrganizationDaoTest extends AbstractResourceDaoTest<Organization, O
 	}
 
 	@Override
-	protected Organization createResource()
+	public Organization createResource()
 	{
 		Organization organization = new Organization();
 		organization.setName(name);
@@ -160,5 +169,212 @@ public class OrganizationDaoTest extends AbstractResourceDaoTest<Organization, O
 		dao.create(createResource);
 
 		dao.readActiveNotDeletedByIdentifier(identifierValue);
+	}
+
+	@Test
+	public void testOrganizationInsertTrigger() throws Exception
+	{
+		CodeSystem c = new CodeSystem();
+		new ReadAccessHelperImpl().addOrganization(c, "organization.com");
+		CodeSystem createdC = new CodeSystemDaoJdbc(defaultDataSource, fhirContext).create(c);
+
+		try (Connection connection = defaultDataSource.getConnection();
+				PreparedStatement statement = connection
+						.prepareStatement("SELECT count(*) FROM read_access WHERE resource_id = ? AND access_type = ?"))
+		{
+			PGobject resourceId = new PGobject();
+			resourceId.setType("UUID");
+			resourceId.setValue(createdC.getIdElement().getIdPart());
+			statement.setObject(1, resourceId);
+			statement.setString(2, ReadAccessHelper.READ_ACCESS_TAG_VALUE_ORGANIZATION);
+
+			try (ResultSet result = statement.executeQuery())
+			{
+				assertTrue(result.next());
+				assertEquals(0, result.getInt(1));
+			}
+		}
+
+		Organization o = createResource();
+		o.setActive(true);
+		o.getIdentifierFirstRep().setSystem(ReadAccessHelper.ORGANIZATION_IDENTIFIER_SYSTEM)
+				.setValue("organization.com");
+
+		Organization createdO = dao.create(o);
+
+		try (Connection connection = defaultDataSource.getConnection();
+				PreparedStatement statement = connection.prepareStatement(
+						"SELECT count(*) FROM read_access WHERE resource_id = ? AND access_type = ? AND organization_id = ?"))
+		{
+			PGobject resourceId = new PGobject();
+			resourceId.setType("UUID");
+			resourceId.setValue(createdC.getIdElement().getIdPart());
+			statement.setObject(1, resourceId);
+			statement.setString(2, ReadAccessHelper.READ_ACCESS_TAG_VALUE_ORGANIZATION);
+			PGobject organizationId = new PGobject();
+			organizationId.setType("UUID");
+			organizationId.setValue(createdO.getIdElement().getIdPart());
+			statement.setObject(3, organizationId);
+
+			try (ResultSet result = statement.executeQuery())
+			{
+				assertTrue(result.next());
+				assertEquals(1, result.getInt(1));
+			}
+		}
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerAll() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerAll();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerLocal() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerLocal();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerOrganization() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerOrganization();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerOrganizationResourceFirst() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerOrganizationResourceFirst();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerOrganization2Organizations1Matching() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerOrganization2Organizations1Matching();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerOrganization2Organizations2Matching() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerOrganization2Organizations2Matching();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerRole() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerRole();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerRoleResourceFirst() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerRoleResourceFirst();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerRole2Organizations1Matching() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerRole2Organizations1Matching();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerRole2Organizations2Matching() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerRole2Organizations2Matching();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerAllUpdate() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerAllUpdate();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerLocalUpdate() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerLocalUpdate();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerOrganizationUpdate() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerOrganizationUpdate();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerRoleUpdate() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerRoleUpdate();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerRoleUpdateMemberOrganizationNonActive() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerRoleUpdateMemberOrganizationNonActive();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerRoleUpdateParentOrganizationNonActive() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerRoleUpdateParentOrganizationNonActive();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerRoleUpdateMemberAndParentOrganizationNonActive() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerRoleUpdateMemberAndParentOrganizationNonActive();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerAllDelete() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerAllDelete();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerLocalDelete() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerLocalDelete();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerOrganizationDelete() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerOrganizationDelete();
+	}
+
+	@Override
+	@Test
+	public void testSearchWithUserFilterAfterReadAccessTriggerAll() throws Exception
+	{
+		ReadAccessDaoTest.super.testSearchWithUserFilterAfterReadAccessTriggerAll();
+	}
+
+	@Override
+	@Test
+	public void testSearchWithUserFilterAfterReadAccessTriggerLocal() throws Exception
+	{
+		ReadAccessDaoTest.super.testSearchWithUserFilterAfterReadAccessTriggerLocal();
 	}
 }

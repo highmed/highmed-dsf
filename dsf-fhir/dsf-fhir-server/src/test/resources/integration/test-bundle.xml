@@ -228,7 +228,7 @@
 				<code>
 					<coding>
 						<system value="http://highmed.org/fhir/CodeSystem/organization-type"/>
-						<code value="MeDIC"/>
+						<code value="TTP"/>
 					</coding>
 				</code>
 				<endpoint>
