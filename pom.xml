@@ -568,6 +568,9 @@
 		</profile>
 		<profile>
 			<id>generate-source-and-javadoc-jars</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
 
 			<build>
 				<plugins>
