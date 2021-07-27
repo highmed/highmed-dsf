@@ -26,6 +26,7 @@ import org.highmed.dsf.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.dsf.fhir.search.PartialResult;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.IdType;
@@ -33,6 +34,7 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
+import org.hl7.fhir.r4.model.ResearchStudy.ResearchStudyStatus;
 import org.junit.Test;
 
 public class BinaryIntegrationTest extends AbstractIntegrationTest
@@ -743,16 +745,18 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(responseBundle);
 		assertEquals(BundleType.TRANSACTIONRESPONSE, responseBundle.getType());
 		assertEquals(1, responseBundle.getEntry().size());
-		assertNotNull(responseBundle.getEntry().get(0));
 
-		assertNotNull(responseBundle.getEntry().get(0).getResource());
-		assertTrue(responseBundle.getEntry().get(0).getResource() instanceof Binary);
-		assertNull(responseBundle.getEntry().get(0).getResponse().getOutcome());
-		assertNotNull(responseBundle.getEntry().get(0).getResponse().getStatus());
-		assertEquals("201 Created", responseBundle.getEntry().get(0).getResponse().getStatus());
-		assertNotNull(responseBundle.getEntry().get(0).getResponse().getLocation());
-		assertNotNull(responseBundle.getEntry().get(0).getResponse().getEtag());
-		assertEquals("W/\"1\"", responseBundle.getEntry().get(0).getResponse().getEtag());
+		BundleEntryComponent entry0 = responseBundle.getEntry().get(0);
+		assertNotNull(entry0);
+
+		assertNotNull(entry0.getResource());
+		assertTrue(entry0.getResource() instanceof Binary);
+		assertNull(entry0.getResponse().getOutcome());
+		assertNotNull(entry0.getResponse().getStatus());
+		assertEquals("201 Created", entry0.getResponse().getStatus());
+		assertNotNull(entry0.getResponse().getLocation());
+		assertNotNull(entry0.getResponse().getEtag());
+		assertEquals("W/\"1\"", entry0.getResponse().getEtag());
 	}
 
 	@Test
@@ -776,15 +780,17 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(responseBundle);
 		assertEquals(BundleType.TRANSACTIONRESPONSE, responseBundle.getType());
 		assertEquals(1, responseBundle.getEntry().size());
-		assertNotNull(responseBundle.getEntry().get(0));
 
-		assertNull(responseBundle.getEntry().get(0).getResource());
-		assertNull(responseBundle.getEntry().get(0).getResponse().getOutcome());
-		assertNotNull(responseBundle.getEntry().get(0).getResponse().getStatus());
-		assertEquals("201 Created", responseBundle.getEntry().get(0).getResponse().getStatus());
-		assertNotNull(responseBundle.getEntry().get(0).getResponse().getLocation());
-		assertNotNull(responseBundle.getEntry().get(0).getResponse().getEtag());
-		assertEquals("W/\"1\"", responseBundle.getEntry().get(0).getResponse().getEtag());
+		BundleEntryComponent entry0 = responseBundle.getEntry().get(0);
+		assertNotNull(entry0);
+
+		assertNull(entry0.getResource());
+		assertNull(entry0.getResponse().getOutcome());
+		assertNotNull(entry0.getResponse().getStatus());
+		assertEquals("201 Created", entry0.getResponse().getStatus());
+		assertNotNull(entry0.getResponse().getLocation());
+		assertNotNull(entry0.getResponse().getEtag());
+		assertEquals("W/\"1\"", entry0.getResponse().getEtag());
 	}
 
 	@Test
@@ -808,16 +814,94 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(responseBundle);
 		assertEquals(BundleType.TRANSACTIONRESPONSE, responseBundle.getType());
 		assertEquals(1, responseBundle.getEntry().size());
-		assertNotNull(responseBundle.getEntry().get(0));
 
-		assertNull(responseBundle.getEntry().get(0).getResource());
-		assertNotNull(responseBundle.getEntry().get(0).getResponse().getOutcome());
-		assertTrue(responseBundle.getEntry().get(0).getResponse().getOutcome() instanceof OperationOutcome);
-		assertNotNull(responseBundle.getEntry().get(0).getResponse().getStatus());
-		assertEquals("201 Created", responseBundle.getEntry().get(0).getResponse().getStatus());
-		assertNotNull(responseBundle.getEntry().get(0).getResponse().getLocation());
-		assertNotNull(responseBundle.getEntry().get(0).getResponse().getEtag());
-		assertEquals("W/\"1\"", responseBundle.getEntry().get(0).getResponse().getEtag());
+		BundleEntryComponent entry0 = responseBundle.getEntry().get(0);
+		assertNotNull(entry0);
+
+		assertNull(entry0.getResource());
+		assertNotNull(entry0.getResponse().getOutcome());
+		assertTrue(entry0.getResponse().getOutcome() instanceof OperationOutcome);
+		assertNotNull(entry0.getResponse().getStatus());
+		assertEquals("201 Created", entry0.getResponse().getStatus());
+		assertNotNull(entry0.getResponse().getLocation());
+		assertNotNull(entry0.getResponse().getEtag());
+		assertEquals("W/\"1\"", entry0.getResponse().getEtag());
+	}
+
+	@Test
+	public void testCreateViaTransactionBundleSecurityContext() throws Exception
+	{
+		ResearchStudy researchStudy = new ResearchStudy();
+		researchStudy.setStatus(ResearchStudyStatus.ACTIVE);
+		getReadAccessHelper().addLocal(researchStudy);
+
+		String researchStudyTempId = "urn:uuid:" + UUID.randomUUID().toString();
+
+		final String contentType = MediaType.TEXT_PLAIN;
+		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
+
+		Binary binary = new Binary();
+		binary.setContentType(contentType);
+		binary.setData(data);
+		binary.getSecurityContext().setReference(researchStudyTempId);
+
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		bundle.addEntry().setFullUrl(researchStudyTempId).setResource(researchStudy).getRequest()
+				.setMethod(HTTPVerb.POST).setUrl("ResearchStudy");
+		bundle.addEntry().setFullUrl("urn:uuid:" + UUID.randomUUID().toString()).setResource(binary).getRequest()
+				.setMethod(HTTPVerb.POST).setUrl("Binary");
+
+		Bundle responseBundle = getWebserviceClient().postBundle(bundle);
+
+		assertNotNull(responseBundle);
+		assertEquals(BundleType.TRANSACTIONRESPONSE, responseBundle.getType());
+		assertEquals(2, responseBundle.getEntry().size());
+
+		BundleEntryComponent entry0 = responseBundle.getEntry().get(0);
+		assertNotNull(entry0);
+
+		BundleEntryComponent entry1 = responseBundle.getEntry().get(1);
+		assertNotNull(entry1);
+
+		assertNotNull(entry0.getResource());
+		assertTrue(entry0.getResource() instanceof ResearchStudy);
+		assertNull(entry0.getResponse().getOutcome());
+		assertNotNull(entry0.getResponse().getStatus());
+		assertEquals("201 Created", entry0.getResponse().getStatus());
+		assertNotNull(entry0.getResponse().getLocation());
+		assertNotNull(entry0.getResponse().getEtag());
+		assertEquals("W/\"1\"", entry0.getResponse().getEtag());
+
+		assertNotNull(entry1.getResource());
+		assertTrue(entry1.getResource() instanceof Binary);
+		assertNull(entry1.getResponse().getOutcome());
+		assertNotNull(entry1.getResponse().getStatus());
+		assertEquals("201 Created", entry1.getResponse().getStatus());
+		assertNotNull(entry1.getResponse().getLocation());
+		assertNotNull(entry1.getResponse().getEtag());
+		assertEquals("W/\"1\"", entry1.getResponse().getEtag());
+
+		assertEquals(entry0.getResource().getIdElement().getIdPart(),
+				((Binary) entry1.getResource()).getSecurityContext().getReferenceElement().getIdPart());
+	}
+
+	@Test
+	public void testCreateViaTransactionBundleForbiddenNoReadAccessTagOrSecurityContext() throws Exception
+	{
+		final String contentType = MediaType.TEXT_PLAIN;
+		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
+
+		Binary binary = new Binary();
+		binary.setContentType(contentType);
+		binary.setData(data);
+
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		bundle.addEntry().setFullUrl("urn:uuid:" + UUID.randomUUID().toString()).setResource(binary).getRequest()
+				.setMethod(HTTPVerb.POST).setUrl("Binary");
+
+		expectForbidden(() -> getWebserviceClient().postBundle(bundle));
 	}
 
 	@Test

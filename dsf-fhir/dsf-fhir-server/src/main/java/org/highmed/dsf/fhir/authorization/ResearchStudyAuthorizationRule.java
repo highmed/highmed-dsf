@@ -36,10 +36,13 @@ public class ResearchStudyAuthorizationRule extends AbstractMetaTagAuthorization
 {
 	private static final Logger logger = LoggerFactory.getLogger(ResearchStudyAuthorizationRule.class);
 
+	private static final String HIGHMED_RESEARCH_STUDY = "http://highmed.org/fhir/StructureDefinition/research-study";
 	private static final String RESEARCH_STUDY_IDENTIFIER = "http://highmed.org/sid/research-study-identifier";
 	private static final String RESEARCH_STUDY_IDENTIFIER_PATTERN_STRING = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
 	private static final Pattern RESEARCH_STUDY_IDENTIFIER_PATTERN = Pattern
 			.compile(RESEARCH_STUDY_IDENTIFIER_PATTERN_STRING);
+	private static final String PARTICIPATING_MEDIC_EXTENSION_URL = "http://highmed.org/fhir/StructureDefinition/extension-participating-medic";
+	private static final String PARTICIPATING_TTP_EXTENSION_URL = "http://highmed.org/fhir/StructureDefinition/extension-participating-ttp";
 
 	public ResearchStudyAuthorizationRule(DaoProvider daoProvider, String serverBase,
 			ReferenceResolver referenceResolver, OrganizationProvider organizationProvider,
@@ -53,87 +56,91 @@ public class ResearchStudyAuthorizationRule extends AbstractMetaTagAuthorization
 	{
 		List<String> errors = new ArrayList<String>();
 
-		if (newResource.hasIdentifier())
+		if (newResource.getMeta().hasProfile(HIGHMED_RESEARCH_STUDY))
 		{
-			if (newResource.getIdentifier().stream()
-					.filter(i -> i.hasSystem() && i.hasValue() && RESEARCH_STUDY_IDENTIFIER.equals(i.getSystem())
-							&& RESEARCH_STUDY_IDENTIFIER_PATTERN.matcher(i.getValue()).matches())
-					.count() != 1)
+			if (newResource.hasIdentifier())
 			{
-				errors.add("ResearchStudy.identifier one with system '" + RESEARCH_STUDY_IDENTIFIER
-						+ "' and non empty value matching " + RESEARCH_STUDY_IDENTIFIER_PATTERN_STRING + " expected");
+				if (newResource.getIdentifier().stream()
+						.filter(i -> i.hasSystem() && i.hasValue() && RESEARCH_STUDY_IDENTIFIER.equals(i.getSystem())
+								&& RESEARCH_STUDY_IDENTIFIER_PATTERN.matcher(i.getValue()).matches())
+						.count() != 1)
+				{
+					errors.add("ResearchStudy.identifier one with system '" + RESEARCH_STUDY_IDENTIFIER
+							+ "' and non empty value matching " + RESEARCH_STUDY_IDENTIFIER_PATTERN_STRING
+							+ " expected");
+				}
 			}
-		}
-		else
-		{
-			errors.add("ResearchStudy.identifier missing");
-		}
-
-		if (ResearchStudyHelper.getParticipatingMedicReferences(newResource).count() >= 0)
-		{
-			if (!organizationsResolvable(connection, user,
-					"ResearchStudy.extension(url:http://highmed.org/fhir/StructureDefinition/extension-participating-medic)",
-					ResearchStudyHelper.getParticipatingMedicReferences(newResource)).allMatch(t -> t))
+			else
 			{
-				errors.add(
-						"ResearchStudy.extension(url:http://highmed.org/fhir/StructureDefinition/extension-participating-medic) one or more participating-medic Organizations not resolved");
+				errors.add("ResearchStudy.identifier missing");
 			}
-		}
-		else
-		{
-			errors.add(
-					"ResearchStudy.extension(url:http://highmed.org/fhir/StructureDefinition/extension-participating-medic) one or more participating-medic Organization references missing");
-		}
 
-		Optional<Reference> participatingTtpReference = ResearchStudyHelper.getParticipatingTtpReference(newResource);
-		if (participatingTtpReference.isPresent())
-		{
-			if (!organizationResolvable(connection, user,
-					"ResearchStudy.extension(url:http://highmed.org/fhir/StructureDefinition/extension-participating-ttp)",
-					participatingTtpReference.get()))
+			if (getParticipatingMedicReferences(newResource).count() >= 0)
 			{
-				errors.add(
-						"ResearchStudy.extension(url:http://highmed.org/fhir/StructureDefinition/extension-participating-ttp) participating-ttp Organization not resolved");
-			}
-		}
-		else
-		{
-			errors.add(
-					"ResearchStudy.extension(url:http://highmed.org/fhir/StructureDefinition/extension-participating-ttp) participating-ttp Organization reference missing");
-		}
-
-		if (newResource.getEnrollment().size() >= 0)
-		{
-			if (!enrollmentsResolvable(connection, user, "ResearchStudy.enrollment",
-					newResource.getEnrollment().stream()).allMatch(t -> t))
-			{
-				errors.add("ResearchStudy.enrollment one or more Groups not resolved");
-			}
-		}
-		else
-		{
-			errors.add("ResearchStudy.enrollment one or more Group references missing");
-		}
-
-		// TODO: hasPrincipalInvestigator check is only optional for Feasability Requests. For full Data Sharing
-		// processes, the field is mandatory and should lead to a validation error if not supplied.
-		if (newResource.hasPrincipalInvestigator())
-		{
-			Optional<Resource> practitioner = resolvePractitioner(connection, user,
-					"ResearchStudy.principalInvestigator", newResource.getPrincipalInvestigator());
-			if (practitioner.isPresent() && practitioner.get() instanceof Practitioner
-					&& ((Practitioner) practitioner.get()).getActive())
-			{
-				if (!practitionerRoleExists(connection, user, practitioner.get().getIdElement()))
+				if (!organizationsResolvable(connection, user,
+						"ResearchStudy.extension(url:http://highmed.org/fhir/StructureDefinition/extension-participating-medic)",
+						getParticipatingMedicReferences(newResource)).allMatch(t -> t))
 				{
 					errors.add(
-							"ResearchStudy.principalInvestigator corresponding PractitionerRole.practitioner not found");
+							"ResearchStudy.extension(url:http://highmed.org/fhir/StructureDefinition/extension-participating-medic) one or more participating-medic Organizations not resolved");
 				}
 			}
 			else
 			{
 				errors.add(
-						"ResearchStudy.principalInvestigator not resolved or not instance of Practitioner or not active");
+						"ResearchStudy.extension(url:http://highmed.org/fhir/StructureDefinition/extension-participating-medic) one or more participating-medic Organization references missing");
+			}
+
+			Optional<Reference> participatingTtpReference = getParticipatingTtpReference(newResource);
+			if (participatingTtpReference.isPresent())
+			{
+				if (!organizationResolvable(connection, user,
+						"ResearchStudy.extension(url:http://highmed.org/fhir/StructureDefinition/extension-participating-ttp)",
+						participatingTtpReference.get()))
+				{
+					errors.add(
+							"ResearchStudy.extension(url:http://highmed.org/fhir/StructureDefinition/extension-participating-ttp) participating-ttp Organization not resolved");
+				}
+			}
+			else
+			{
+				errors.add(
+						"ResearchStudy.extension(url:http://highmed.org/fhir/StructureDefinition/extension-participating-ttp) participating-ttp Organization reference missing");
+			}
+
+			if (newResource.getEnrollment().size() >= 0)
+			{
+				if (!enrollmentsResolvable(connection, user, "ResearchStudy.enrollment",
+						newResource.getEnrollment().stream()).allMatch(t -> t))
+				{
+					errors.add("ResearchStudy.enrollment one or more Groups not resolved");
+				}
+			}
+			else
+			{
+				errors.add("ResearchStudy.enrollment one or more Group references missing");
+			}
+
+			// TODO: hasPrincipalInvestigator check is only optional for feasibility requests. For full data sharing
+			// processes, the field is mandatory and should lead to a validation error if not supplied.
+			if (newResource.hasPrincipalInvestigator())
+			{
+				Optional<Resource> practitioner = resolvePractitioner(connection, user,
+						"ResearchStudy.principalInvestigator", newResource.getPrincipalInvestigator());
+				if (practitioner.isPresent() && practitioner.get() instanceof Practitioner
+						&& ((Practitioner) practitioner.get()).getActive())
+				{
+					if (!practitionerRoleExists(connection, user, practitioner.get().getIdElement()))
+					{
+						errors.add(
+								"ResearchStudy.principalInvestigator corresponding PractitionerRole.practitioner not found");
+					}
+				}
+				else
+				{
+					errors.add(
+							"ResearchStudy.principalInvestigator not resolved or not instance of Practitioner or not active");
+				}
 			}
 		}
 
@@ -146,6 +153,18 @@ public class ResearchStudyAuthorizationRule extends AbstractMetaTagAuthorization
 			return Optional.empty();
 		else
 			return Optional.of(errors.stream().collect(Collectors.joining(", ")));
+	}
+
+	private Stream<Reference> getParticipatingMedicReferences(ResearchStudy resource)
+	{
+		return resource.getExtensionsByUrl(PARTICIPATING_MEDIC_EXTENSION_URL).stream().map(e -> e.getValue())
+				.filter(t -> t instanceof Reference).map(t -> ((Reference) t));
+	}
+
+	private Optional<Reference> getParticipatingTtpReference(ResearchStudy resource)
+	{
+		return Optional.ofNullable(resource.getExtensionByUrl(PARTICIPATING_TTP_EXTENSION_URL)).map(e -> e.getValue())
+				.filter(t -> t instanceof Reference).map(t -> ((Reference) t));
 	}
 
 	private Stream<Boolean> organizationsResolvable(Connection connection, User user, String referenceLocation,
@@ -205,11 +224,17 @@ public class ResearchStudyAuthorizationRule extends AbstractMetaTagAuthorization
 
 	protected boolean resourceExists(Connection connection, ResearchStudy newResource)
 	{
-		String identifierValue = newResource.getIdentifier().stream()
-				.filter(i -> i.hasSystem() && i.hasValue() && RESEARCH_STUDY_IDENTIFIER.equals(i.getSystem()))
-				.map(i -> i.getValue()).findFirst().orElseThrow();
+		if (newResource.getMeta().hasProfile(HIGHMED_RESEARCH_STUDY))
+		{
+			String identifierValue = newResource.getIdentifier().stream()
+					.filter(i -> i.hasSystem() && i.hasValue() && RESEARCH_STUDY_IDENTIFIER.equals(i.getSystem()))
+					.map(i -> i.getValue()).findFirst().orElseThrow();
 
-		return researchStudyWithIdentifierExists(connection, identifierValue);
+			return researchStudyWithIdentifierExists(connection, identifierValue);
+		}
+		else
+			// no unique criteria if not a HiGHmed ResearchStudy
+			return false;
 	}
 
 	private boolean researchStudyWithIdentifierExists(Connection connection, String identifierValue)
