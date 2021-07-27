@@ -13,7 +13,6 @@ import org.highmed.dsf.fhir.dao.exception.ResourceVersionNoMatchException;
 import org.highmed.dsf.fhir.search.DbSearchQuery;
 import org.highmed.dsf.fhir.search.PartialResult;
 import org.highmed.dsf.fhir.search.SearchQuery;
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Resource;
 
 public interface ResourceDao<R extends Resource>
@@ -281,31 +280,6 @@ public interface ResourceDao<R extends Resource>
 	 */
 	R updateWithTransaction(Connection connection, R resource, Long expectedVersion)
 			throws SQLException, ResourceNotFoundException, ResourceVersionNoMatchException;
-
-	/**
-	 * Does <b>not</b> not increment the resource version. Set the version of the stored resource to latest version from
-	 * DB. See {@link #updateWithTransaction(Connection, DomainResource, Long)} to increment the version before storing
-	 * the resource.
-	 * 
-	 * Resurrects all old versions (removes deleted flag) if the latest version in DB is marked as deleted.
-	 *
-	 * @param connection
-	 *            not <code>null</code>, not {@link Connection#isReadOnly()} and not {@link Connection#getAutoCommit()}
-	 *            and {@link Connection#getTransactionIsolation()} one of {@link Connection#TRANSACTION_REPEATABLE_READ}
-	 *            or {@link Connection#TRANSACTION_SERIALIZABLE}
-	 * @param resource
-	 *            not <code>null</code>
-	 * @return the stored resource, not the same object as the given resource (defensive copy)
-	 * @throws SQLException
-	 * @throws ResourceNotFoundException
-	 *             if the given resource could not be found
-	 * @throws IllegalArgumentException
-	 *             if the given connection is {@link Connection#isReadOnly()} or is {@link Connection#getAutoCommit()}
-	 *             or {@link Connection#getTransactionIsolation()} is not one of
-	 *             {@link Connection#TRANSACTION_REPEATABLE_READ} or {@link Connection#TRANSACTION_SERIALIZABLE}, if the
-	 *             given resource has not id-element, not id-element with id part or no id-element with version part
-	 */
-	R updateSameRowWithTransaction(Connection connection, R resource) throws SQLException, ResourceNotFoundException;
 
 	/**
 	 * Returns <code>false</code> if a matching resource was already marked as deleted
