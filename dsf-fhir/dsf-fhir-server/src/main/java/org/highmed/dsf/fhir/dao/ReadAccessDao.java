@@ -18,8 +18,9 @@ public interface ReadAccessDao
 	 *            not <code>null</code>
 	 * @param organizationId
 	 *            not <code>null</code>
-	 * @return
+	 * @return Distinct list of access types found for the given parameters, empty list means no read access
 	 * @throws SQLException
+	 *             if database access errors occur
 	 */
 	List<String> getAccessTypes(Connection connection, UUID resourceId, UserRole role, UUID organizationId)
 			throws SQLException;
