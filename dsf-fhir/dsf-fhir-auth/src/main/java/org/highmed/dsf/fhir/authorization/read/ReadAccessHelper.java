@@ -29,7 +29,7 @@ public interface ReadAccessHelper
 	String EXTENSION_READ_ACCESS_CONSORTIUM_ROLE_ROLE = "role";
 
 	/**
-	 * Removes ALL tag if present.
+	 * Adds LOCAL tag. Removes ALL tag if present.
 	 * 
 	 * @param <R>
 	 * @param resource
@@ -40,7 +40,7 @@ public interface ReadAccessHelper
 	<R extends Resource> R addLocal(R resource);
 
 	/**
-	 * Adds LOCAL tag if not present, removes ALL tag if present.
+	 * Adds ORGANIZATION tag for the given organization. Adds LOCAL tag if not present, removes ALL tag if present.
 	 * 
 	 * @param <R>
 	 * @param resource
@@ -54,7 +54,7 @@ public interface ReadAccessHelper
 	<R extends Resource> R addOrganization(R resource, String organizationIdentifier);
 
 	/**
-	 * Adds LOCAL tag if not present, removes ALL tag if present.
+	 * Adds ORGANIZATION tag for the given organization. Adds LOCAL tag if not present, removes ALL tag if present.
 	 * 
 	 * @param <R>
 	 * @param resource
@@ -72,7 +72,7 @@ public interface ReadAccessHelper
 	<R extends Resource> R addOrganization(R resource, Organization organization);
 
 	/**
-	 * Adds LOCAL tag if not present, removes ALL tag if present.
+	 * Adds ROLE tag for the given affiliation. Adds LOCAL tag if not present, removes ALL tag if present.
 	 * 
 	 * @param <R>
 	 * @param resource
@@ -90,7 +90,7 @@ public interface ReadAccessHelper
 	<R extends Resource> R addRole(R resource, String consortiumIdentifier, String roleSystem, String roleCode);
 
 	/**
-	 * Adds LOCAL tag if not present, removes ALL tag if present.
+	 * Adds ROLE tag for the given affiliation. Adds LOCAL tag if not present, removes ALL tag if present.
 	 * 
 	 * @param <R>
 	 * @param resource
@@ -109,7 +109,7 @@ public interface ReadAccessHelper
 	<R extends Resource> R addRole(R resource, OrganizationAffiliation affiliation);
 
 	/**
-	 * Removes LOCAL, ORGANIZATION and ROLE tags if present.
+	 * Adds All tag. Removes LOCAL, ORGANIZATION and ROLE tags if present.
 	 * 
 	 * @param <R>
 	 * @param resource
