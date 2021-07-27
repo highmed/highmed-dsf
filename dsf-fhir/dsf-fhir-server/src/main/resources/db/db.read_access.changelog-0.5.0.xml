@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+	<property name="json" value="JSONB" dbms="postgresql" />
+	<property name="json" value="varchar(5000)" dbms="h2" />
+
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0">
+		<createTable tableName="read_access">
+			<column name="resource_id" type="UUID">
+				<constraints nullable="false" />
+			</column>
+			<column name="access_type" type="TEXT">
+				<constraints nullable="false" />
+			</column>
+			<column name="organization_id" type="UUID">
+				<constraints nullable="true" />
+			</column>
+			<column name="organization_affiliation_id" type="UUID">
+				<constraints nullable="true" />
+			</column>
+		</createTable>
+
+		<addUniqueConstraint tableName="read_access" columnNames="resource_id, access_type, organization_id" constraintName="read_access_unique"/>
+
+		<sql dbms="postgresql">
+			ALTER TABLE read_access OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE read_access TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, DELETE ON TABLE read_access TO ${db.server_users_group};
+			CREATE INDEX read_access_id_type_index ON read_access USING btree (resource_id, access_type);
+			CREATE INDEX read_access_id_type_organization_index ON read_access USING btree (resource_id, access_type, organization_id);
+		</sql>
+	</changeSet>
+	
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.current_all">
+		<createView viewName="current_all" replaceIfExists="true">
+			SELECT 
+				id
+				, type
+				, resource
+			FROM (
+				SELECT activity_definition_id AS id, 'ActivityDefinition'::text AS type, activity_definition AS resource FROM current_activity_definitions
+				UNION
+				SELECT binary_id AS id, 'Binary'::text AS type, binary_json AS resource FROM current_binaries
+				UNION
+				SELECT bundle_id AS id, 'Bundle'::text AS type, bundle AS resource FROM current_bundles
+				UNION
+				SELECT code_system_id AS id, 'CodeSystem'::text AS type, code_system AS resource FROM current_code_systems
+				UNION
+				SELECT endpoint_id AS id, 'Endpoint'::text AS type, endpoint AS resource FROM current_endpoints
+				UNION
+				SELECT group_id AS id, 'Group'::text AS type, group_json AS resource FROM current_groups
+				UNION
+				SELECT healthcare_service_id AS id, 'HealthcareService'::text AS type, healthcare_service AS resource FROM current_healthcare_services
+				UNION
+				SELECT library_id AS id, 'Library'::text AS type, library AS resource FROM current_libraries
+				UNION
+				SELECT location_id AS id, 'Location'::text AS type, location AS resource FROM current_locations
+				UNION
+				SELECT measure_report_id AS id, 'MeasureReport'::text AS type, measure_report AS resource FROM current_measure_reports
+				UNION
+				SELECT measure_id AS id, 'Measure'::text AS type, measure AS resource FROM current_measures
+				UNION
+				SELECT naming_system_id AS id, 'NamingSystem'::text AS type, naming_system AS resource FROM current_naming_systems
+				UNION
+				SELECT organization_id AS id, 'Organization'::text AS type, organization AS resource FROM current_organizations
+				UNION
+				SELECT organization_affiliation_id AS id, 'OrganizationAffiliation'::text AS type, organization_affiliation AS resource FROM current_organization_affiliations
+				UNION
+				SELECT patient_id AS id, 'Patient'::text AS type, patient AS resource FROM current_patients
+				UNION
+				SELECT practitioner_role_id AS id, 'PractitionerRole'::text AS type, practitioner_role AS resource FROM current_practitioner_roles
+				UNION
+				SELECT practitioner_id AS id, 'Practitioner'::text AS type, practitioner AS resource FROM current_practitioners
+				UNION
+				SELECT provenance_id AS id, 'Provenance'::text AS type, provenance AS resource FROM current_provenances
+				UNION
+				SELECT research_study_id AS id, 'ResearchStudy'::text AS type, research_study AS resource FROM current_research_studies
+				UNION
+				SELECT structure_definition_id AS id, 'StructureDefinition'::text AS type, structure_definition AS resource FROM current_structure_definitions
+				UNION
+				SELECT subscription_id AS id, 'Subscription'::text AS type, subscription AS resource FROM current_subscriptions
+				UNION
+				SELECT task_id AS id, 'Task'::text AS type, task AS resource FROM current_tasks
+				UNION
+				SELECT value_set_id AS id, 'ValueSet'::text AS type, value_set AS resource FROM current_value_sets
+			) AS current_all
+		</createView>
+		<sql dbms="postgresql">
+			ALTER TABLE current_all OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_all TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_all TO ${db.server_users_group};
+		</sql>
+	</changeSet>
+	
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_resources_insert_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_resources_insert.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_resources_update_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_resources_update.sql" splitStatements="false" />
+	</changeSet>
+
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_activity_definitions_insert_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_activity_definitions_insert.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_activity_definitions_update_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_activity_definitions_update.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_binaries_insert_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_binaries_insert.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_binaries_update_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_binaries_update.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_bundles_insert_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_bundles_insert.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_bundles_update_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_bundles_update.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_code_systems_insert_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_code_systems_insert.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_code_systems_update_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_code_systems_update.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_endpoints_insert_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_endpoints_insert.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_endpoints_update_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_endpoints_update.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_groups_insert_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_groups_insert.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_groups_update_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_groups_update.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_healthcare_services_insert_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_healthcare_services_insert.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_healthcare_services_update_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_healthcare_services_update.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_libraries_insert_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_libraries_insert.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_libraries_update_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_libraries_update.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_locations_insert_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_locations_insert.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_locations_update_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_locations_update.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_measure_reports_insert_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_measure_reports_insert.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_measure_reports_update_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_measure_reports_update.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_measures_insert_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_measures_insert.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_measures_update_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_measures_update.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_naming_systems_insert_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_naming_systems_insert.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_naming_systems_update_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_naming_systems_update.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_organization_affiliations_insert_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_organization_affiliations_insert.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_organization_affiliations_update_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_organization_affiliations_update.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_organizations_insert_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_organizations_insert.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_organizations_update_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_organizations_update.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_patients_insert_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_patients_insert.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_patients_update_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_patients_update.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_practitioners_insert_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_practitioners_insert.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_practitioners_update_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_practitioners_update.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_practitioner_roles_insert_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_practitioner_roles_insert.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_practitioner_roles_update_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_practitioner_roles_update.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_provenances_insert_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_provenances_insert.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_provenances_update_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_provenances_update.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_research_studies_insert_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_research_studies_insert.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_research_studies_update_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_research_studies_update.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_structure_definitions_insert_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_structure_definitions_insert.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_structure_definitions_update_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_structure_definitions_update.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_subscriptions_insert_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_subscriptions_insert.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_subscriptions_update_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_subscriptions_update.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_value_sets_insert_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_value_sets_insert.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_value_sets_update_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_value_sets_update.sql" splitStatements="false" />
+	</changeSet>
+	
+	<changeSet author="hhund" id="db.read_access.changelog-0.5.0.on_insert_triggers">
+		<sql dbms="postgresql">
+			CREATE TRIGGER activity_definitions_insert AFTER INSERT ON activity_definitions FOR EACH ROW EXECUTE PROCEDURE on_activity_definitions_insert();
+			CREATE TRIGGER activity_definitions_update AFTER UPDATE ON activity_definitions FOR EACH ROW EXECUTE PROCEDURE on_activity_definitions_update();
+			CREATE TRIGGER binaries_insert AFTER INSERT ON binaries FOR EACH ROW EXECUTE PROCEDURE on_binaries_insert();
+			CREATE TRIGGER binaries_update AFTER UPDATE ON binaries FOR EACH ROW EXECUTE PROCEDURE on_binaries_update();
+			CREATE TRIGGER bundles_insert AFTER INSERT ON bundles FOR EACH ROW EXECUTE PROCEDURE on_bundles_insert();
+			CREATE TRIGGER bundles_update AFTER UPDATE ON bundles FOR EACH ROW EXECUTE PROCEDURE on_bundles_update();
+			CREATE TRIGGER code_systems_insert AFTER INSERT ON code_systems FOR EACH ROW EXECUTE PROCEDURE on_code_systems_insert();
+			CREATE TRIGGER code_systems_update AFTER UPDATE ON code_systems FOR EACH ROW EXECUTE PROCEDURE on_code_systems_update();
+			CREATE TRIGGER endpoints_insert AFTER INSERT ON endpoints FOR EACH ROW EXECUTE PROCEDURE on_endpoints_insert();
+			CREATE TRIGGER endpoints_update AFTER UPDATE ON endpoints FOR EACH ROW EXECUTE PROCEDURE on_endpoints_update();
+			CREATE TRIGGER groups_insert AFTER INSERT ON groups FOR EACH ROW EXECUTE PROCEDURE on_groups_insert();
+			CREATE TRIGGER groups_update AFTER UPDATE ON groups FOR EACH ROW EXECUTE PROCEDURE on_groups_update();
+			CREATE TRIGGER healthcare_services_insert AFTER INSERT ON healthcare_services FOR EACH ROW EXECUTE PROCEDURE on_healthcare_services_insert();
+			CREATE TRIGGER healthcare_services_update AFTER UPDATE ON healthcare_services FOR EACH ROW EXECUTE PROCEDURE on_healthcare_services_update();
+			CREATE TRIGGER libraries_insert AFTER INSERT ON libraries FOR EACH ROW EXECUTE PROCEDURE on_libraries_insert();
+			CREATE TRIGGER libraries_update AFTER UPDATE ON libraries FOR EACH ROW EXECUTE PROCEDURE on_libraries_update();
+			CREATE TRIGGER locations_insert AFTER INSERT ON locations FOR EACH ROW EXECUTE PROCEDURE on_locations_insert();
+			CREATE TRIGGER locations_update AFTER UPDATE ON locations FOR EACH ROW EXECUTE PROCEDURE on_locations_update();
+			CREATE TRIGGER measure_reports_insert AFTER INSERT ON measure_reports FOR EACH ROW EXECUTE PROCEDURE on_measure_reports_insert();
+			CREATE TRIGGER measure_reports_update AFTER UPDATE ON measure_reports FOR EACH ROW EXECUTE PROCEDURE on_measure_reports_update();
+			CREATE TRIGGER measures_insert AFTER INSERT ON measures FOR EACH ROW EXECUTE PROCEDURE on_measures_insert();
+			CREATE TRIGGER measures_update AFTER UPDATE ON measures FOR EACH ROW EXECUTE PROCEDURE on_measures_update();
+			CREATE TRIGGER naming_systems_insert AFTER INSERT ON naming_systems FOR EACH ROW EXECUTE PROCEDURE on_naming_systems_insert();
+			CREATE TRIGGER naming_systems_update AFTER UPDATE ON naming_systems FOR EACH ROW EXECUTE PROCEDURE on_naming_systems_update();
+			CREATE TRIGGER organization_affiliations_insert AFTER INSERT ON organization_affiliations FOR EACH ROW EXECUTE PROCEDURE on_organization_affiliations_insert();
+			CREATE TRIGGER organization_affiliations_update AFTER UPDATE ON organization_affiliations FOR EACH ROW EXECUTE PROCEDURE on_organization_affiliations_update();
+			CREATE TRIGGER organizations_insert AFTER INSERT ON organizations FOR EACH ROW EXECUTE PROCEDURE on_organizations_insert();
+			CREATE TRIGGER organizations_update AFTER UPDATE ON organizations FOR EACH ROW EXECUTE PROCEDURE on_organizations_update();
+			CREATE TRIGGER patients_insert AFTER INSERT ON patients FOR EACH ROW EXECUTE PROCEDURE on_patients_insert();
+			CREATE TRIGGER patients_update AFTER UPDATE ON patients FOR EACH ROW EXECUTE PROCEDURE on_patients_update();
+			CREATE TRIGGER practitioners_insert AFTER INSERT ON practitioners FOR EACH ROW EXECUTE PROCEDURE on_practitioners_insert();
+			CREATE TRIGGER practitioners_update AFTER UPDATE ON practitioners FOR EACH ROW EXECUTE PROCEDURE on_practitioners_update();
+			CREATE TRIGGER practitioner_roles_insert AFTER INSERT ON practitioner_roles FOR EACH ROW EXECUTE PROCEDURE on_practitioner_roles_insert();
+			CREATE TRIGGER practitioner_roles_update AFTER UPDATE ON practitioner_roles FOR EACH ROW EXECUTE PROCEDURE on_practitioner_roles_update();
+			CREATE TRIGGER provenances_insert AFTER INSERT ON provenances FOR EACH ROW EXECUTE PROCEDURE on_provenances_insert();
+			CREATE TRIGGER provenances_update AFTER UPDATE ON provenances FOR EACH ROW EXECUTE PROCEDURE on_provenances_update();
+			CREATE TRIGGER research_studies_insert AFTER INSERT ON research_studies FOR EACH ROW EXECUTE PROCEDURE on_research_studies_insert();
+			CREATE TRIGGER research_studies_update AFTER UPDATE ON research_studies FOR EACH ROW EXECUTE PROCEDURE on_research_studies_update();
+			CREATE TRIGGER structure_definitions_insert AFTER INSERT ON structure_definitions FOR EACH ROW EXECUTE PROCEDURE on_structure_definitions_insert();
+			CREATE TRIGGER structure_definitions_update AFTER UPDATE ON structure_definitions FOR EACH ROW EXECUTE PROCEDURE on_structure_definitions_update();
+			CREATE TRIGGER subscriptions_insert AFTER INSERT ON subscriptions FOR EACH ROW EXECUTE PROCEDURE on_subscriptions_insert();
+			CREATE TRIGGER subscriptions_update AFTER UPDATE ON subscriptions FOR EACH ROW EXECUTE PROCEDURE on_subscriptions_update();
+			CREATE TRIGGER value_sets_insert AFTER INSERT ON value_sets FOR EACH ROW EXECUTE PROCEDURE on_value_sets_insert();
+			CREATE TRIGGER value_sets_update AFTER UPDATE ON value_sets FOR EACH ROW EXECUTE PROCEDURE on_value_sets_update();
+		</sql>
+	</changeSet>
+</databaseChangeLog>
