@@ -146,8 +146,8 @@ public interface BasicResourceService<R extends Resource> extends BasicService
 	 *            not <code>null</code>
 	 * @param headers
 	 *            not <code>null</code>
-	 * @return {@link Response} containing the status code 200 if the resource could be expunged or
-	 *         status code 400 - 599 if there was en error
+	 * @return {@link Response} containing the status code 200 if the resource could be expunged or status code 400 -
+	 *         599 if there was en error
 	 */
 	Response expunge(String expungePath, String id, Parameters parameters, UriInfo uri, HttpHeaders headers);
 }
