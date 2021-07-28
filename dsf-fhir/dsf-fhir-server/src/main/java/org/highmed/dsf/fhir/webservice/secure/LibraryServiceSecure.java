@@ -6,6 +6,7 @@ import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.highmed.dsf.fhir.service.ReferenceCleaner;
+import org.highmed.dsf.fhir.service.ReferenceExtractor;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.highmed.dsf.fhir.validation.ResourceValidator;
 import org.highmed.dsf.fhir.webservice.specification.LibraryService;
@@ -15,11 +16,12 @@ public class LibraryServiceSecure extends AbstractResourceServiceSecure<LibraryD
 		implements LibraryService
 {
 	public LibraryServiceSecure(LibraryService delegate, String serverBase, ResponseGenerator responseGenerator,
-			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner, LibraryDao libraryDao,
-			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
-			AuthorizationRule<Library> authorizationRule, ResourceValidator resourceValidator)
+			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
+			ReferenceExtractor referenceExtractor, LibraryDao libraryDao, ExceptionHandler exceptionHandler,
+			ParameterConverter parameterConverter, AuthorizationRule<Library> authorizationRule,
+			ResourceValidator resourceValidator)
 	{
-		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, Library.class, libraryDao,
-				exceptionHandler, parameterConverter, authorizationRule, resourceValidator);
+		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, referenceExtractor,
+				Library.class, libraryDao, exceptionHandler, parameterConverter, authorizationRule, resourceValidator);
 	}
 }

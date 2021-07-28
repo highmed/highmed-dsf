@@ -1,6 +1,7 @@
 package org.highmed.dsf.fhir.service;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -42,7 +43,7 @@ public class ReferenceExtractorTest
 
 		List<ResourceReference> refs = referenceExtractor.getReferences(t).collect(Collectors.toList());
 
-		logger.debug("refs: {}", refs.stream().map(r -> r.getReferenceLocation()).collect(Collectors.toList()));
+		logger.debug("refs: {}", refs.stream().map(ResourceReference::getLocation).collect(Collectors.toList()));
 
 		assertNotNull(refs);
 		assertEquals(4, refs.size());
