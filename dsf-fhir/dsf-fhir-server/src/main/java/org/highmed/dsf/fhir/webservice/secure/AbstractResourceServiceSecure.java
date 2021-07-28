@@ -656,7 +656,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	}
 
 	@Override
-	public Response expunge(String expungePath, Parameters parameters, String id, UriInfo uri, HttpHeaders headers)
+	public Response expunge(String expungePath, String id, Parameters parameters, UriInfo uri, HttpHeaders headers)
 	{
 		logCurrentUser();
 
@@ -679,7 +679,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 			{
 				audit.info("Expunge of resource {} allowed for user '{}': {}", oldResource.getIdElement().getValue(),
 						getCurrentUser().getName(), reasonDeleteAllowed.get());
-				return delegate.expunge(expungePath, parameters, id, uri, headers);
+				return delegate.expunge(expungePath, id, parameters, uri, headers);
 			}
 		}
 		else

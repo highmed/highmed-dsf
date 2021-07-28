@@ -12,7 +12,7 @@ public interface BasicResourceService<R extends Resource> extends BasicService
 {
 	/**
 	 * standard and conditional create
-	 * 
+	 *
 	 * @param resource
 	 *            not <code>null</code>
 	 * @param uri
@@ -26,7 +26,7 @@ public interface BasicResourceService<R extends Resource> extends BasicService
 
 	/**
 	 * read by id
-	 * 
+	 *
 	 * @param id
 	 *            not <code>null</code>
 	 * @param uri
@@ -40,7 +40,7 @@ public interface BasicResourceService<R extends Resource> extends BasicService
 
 	/**
 	 * read by id and version
-	 * 
+	 *
 	 * @param id
 	 *            not <code>null</code>
 	 * @param version
@@ -60,7 +60,7 @@ public interface BasicResourceService<R extends Resource> extends BasicService
 
 	/**
 	 * standard update
-	 * 
+	 *
 	 * @param id
 	 *            not <code>null</code>
 	 * @param resource
@@ -76,7 +76,7 @@ public interface BasicResourceService<R extends Resource> extends BasicService
 
 	/**
 	 * conditional update
-	 * 
+	 *
 	 * @param resource
 	 *            not <code>null</code>
 	 * @param uri
@@ -90,7 +90,7 @@ public interface BasicResourceService<R extends Resource> extends BasicService
 
 	/**
 	 * standard delete
-	 * 
+	 *
 	 * @param id
 	 *            not <code>null</code>
 	 * @param uri
@@ -104,20 +104,19 @@ public interface BasicResourceService<R extends Resource> extends BasicService
 
 	/**
 	 * conditional delete
-	 * 
+	 *
 	 * @param uri
 	 *            not <code>null</code>
 	 * @param headers
 	 *            not <code>null</code>
 	 * @return {@link Response} defined in
 	 *         <a href="https://www.hl7.org/fhir/http.html#delete">https://www.hl7.org/fhir/http.html#delete</a>
-	 *
 	 */
 	Response delete(UriInfo uri, HttpHeaders headers);
 
 	/**
 	 * search by request parameter
-	 * 
+	 *
 	 * @param uri
 	 *            not <code>null</code>
 	 * @param headers
@@ -137,12 +136,18 @@ public interface BasicResourceService<R extends Resource> extends BasicService
 	Response getValidateExisting(String validatePath, String id, UriInfo uri, HttpHeaders headers);
 
 	/**
-	 * expunge resources which is marked as deleted
-	 *
 	 * @param expungePath
+	 *            not <code>null</code>
+	 * @param id
+	 *            not <code>null</code>
+	 * @param parameters
+	 *            not <code>null</code>
 	 * @param uri
+	 *            not <code>null</code>
 	 * @param headers
-	 * @return
+	 *            not <code>null</code>
+	 * @return {@link Response} containing the status code 200 if the resource could be expunged or 
+	 *         status code 400 - 599 if there was en error
 	 */
-	Response expunge(String expungePath, Parameters parameters, String id, UriInfo uri, HttpHeaders headers);
+	Response expunge(String expungePath, String id, Parameters parameters, UriInfo uri, HttpHeaders headers);
 }

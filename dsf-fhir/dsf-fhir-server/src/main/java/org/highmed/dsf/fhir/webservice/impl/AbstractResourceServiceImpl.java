@@ -803,7 +803,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	}
 
 	@Override
-	public Response expunge(String expungePath, Parameters parameters, String id, UriInfo uri, HttpHeaders headers)
+	public Response expunge(String expungePath, String id, Parameters parameters, UriInfo uri, HttpHeaders headers)
 	{
 		boolean expunge = exceptionHandler.handleSqlAndResourceNotMarkedDeletedException(resourceTypeName,
 				() -> dao.expunge(parameterConverter.toUuid(resourceTypeName, id)));

@@ -386,6 +386,7 @@ public interface ResourceDao<R extends Resource>
 	 * @return <code>true</code> if a resource with the given uuid could be found, marked as deleted and expunged,
 	 *         <code>false</code> if a resource with the given uuid was not marked as deleted or not found
 	 * @throws SQLException
+	 *             if database access errors occur
 	 * @throws ResourceNotFoundException
 	 *             if the given uuid is <code>null</code> or no resource could be found with the given uuid
 	 * @throws ResourceNotMarkedDeletedException
@@ -403,6 +404,7 @@ public interface ResourceDao<R extends Resource>
 	 * @return <code>true</code> if a resource with the given uuid could be found, marked as deleted and expunged,
 	 *         <code>false</code> if a resource with the given uuid was not marked as deleted or not found
 	 * @throws SQLException
+	 *             if database access errors occur
 	 * @throws ResourceNotFoundException
 	 *             if the given uuid is <code>null</code> or no resource could be found with the given uuid
 	 * @throws ResourceNotMarkedDeletedException

@@ -227,11 +227,11 @@ public abstract class AbstractResourceServiceJaxrs<R extends Resource, S extends
 	@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
 			Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
 	@Override
-	public Response expunge(@PathParam("expunge") String expungePath, Parameters parameters, @PathParam("id") String id,
+	public Response expunge(@PathParam("expunge") String expungePath, @PathParam("id") String id, Parameters parameters,
 			@Context UriInfo uri, @Context HttpHeaders headers)
 	{
 		logger.trace("POST {}", uri.getRequestUri().toString());
 
-		return delegate.expunge(expungePath, parameters, id, uri, headers);
+		return delegate.expunge(expungePath, id, parameters, uri, headers);
 	}
 }

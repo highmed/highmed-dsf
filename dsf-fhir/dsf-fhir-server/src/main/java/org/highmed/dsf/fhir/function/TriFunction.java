@@ -20,11 +20,11 @@ public interface TriFunction<A, B, C, R>
 {
 
 	/**
-	 * @param A
+	 * @param a
 	 *            the first function argument
-	 * @param B
+	 * @param b
 	 *            the second function argument
-	 * @param C
+	 * @param c
 	 *            the third function argument
 	 * @return the function result
 	 */
