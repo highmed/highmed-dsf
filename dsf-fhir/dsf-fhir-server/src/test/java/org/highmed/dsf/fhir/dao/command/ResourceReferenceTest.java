@@ -143,8 +143,8 @@ public class ResourceReferenceTest
 		assertEquals(ReferenceType.RELATED_ARTEFACT_LITERAL_EXTERNAL_URL, r5.getType(serverBase));
 		assertEquals(ReferenceType.RELATED_ARTEFACT_LITERAL_EXTERNAL_URL, r6.getType(serverBase));
 
-		assertEquals(ReferenceType.UNKNOWN, r7.getType(serverBase));
-		assertEquals(ReferenceType.UNKNOWN, r8.getType(serverBase));
-		assertEquals(ReferenceType.UNKNOWN, r9.getType(serverBase));
+		assertEquals(ReferenceType.RELATED_ARTEFACT_UNKNOWN_URL, r7.getType(serverBase));
+		assertEquals(ReferenceType.RELATED_ARTEFACT_UNKNOWN_URL, r8.getType(serverBase));
+		assertEquals(ReferenceType.RELATED_ARTEFACT_UNKNOWN_URL, r9.getType(serverBase));
 	}
 }
