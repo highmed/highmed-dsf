@@ -8,6 +8,7 @@ import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.RELAT
 import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.RELATED_ARTEFACT_LITERAL_EXTERNAL_URL;
 import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.RELATED_ARTEFACT_LITERAL_INTERNAL_URL;
 import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.RELATED_ARTEFACT_TEMPORARY_URL;
+import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.RELATED_ARTEFACT_UNKNOWN_URL;
 import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.TEMPORARY;
 import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.UNKNOWN;
 
@@ -111,6 +112,10 @@ public class ResourceReference
 		 */
 		CONDITIONAL,
 		/**
+		 * unknown reference
+		 */
+		UNKNOWN,
+		/**
 		 * temporary url in RelatedArtifact starting with <code>urn:uuid:</code>
 		 */
 		RELATED_ARTEFACT_TEMPORARY_URL,
@@ -125,7 +130,11 @@ public class ResourceReference
 		/**
 		 * literal url in RelatedArtifact to a resource on an external server
 		 */
-		RELATED_ARTEFACT_LITERAL_EXTERNAL_URL, UNKNOWN
+		RELATED_ARTEFACT_LITERAL_EXTERNAL_URL,
+		/**
+		 * unknown url in RelatedArtifact
+		 */
+		RELATED_ARTEFACT_UNKNOWN_URL
 	}
 
 	private final String location;
@@ -148,6 +157,10 @@ public class ResourceReference
 			Collection<Class<? extends Resource>> referenceTypes)
 	{
 		this.location = location;
+
+		if (reference == null && relatedArtifact == null)
+			throw new IllegalArgumentException("Either reference or relatedArtifact expected");
+
 		this.reference = reference;
 		this.relatedArtifact = relatedArtifact;
 
@@ -203,7 +216,8 @@ public class ResourceReference
 	 * @return one of this priority list: {@link ReferenceType#RELATED_ARTEFACT_TEMPORARY_URL},
 	 *         {@link ReferenceType#RELATED_ARTEFACT_LITERAL_INTERNAL_URL},
 	 *         {@link ReferenceType#RELATED_ARTEFACT_LITERAL_EXTERNAL_URL},
-	 *         {@link ReferenceType#RELATED_ARTEFACT_CONDITIONAL_URL}, {@link ReferenceType#TEMPORARY},
+	 *         {@link ReferenceType#RELATED_ARTEFACT_CONDITIONAL_URL},
+	 *         {@link ReferenceType#RELATED_ARTEFACT_UNKNOWN_URL}, {@link ReferenceType#TEMPORARY},
 	 *         {@link ReferenceType#LITERAL_INTERNAL}, {@link ReferenceType#LITERAL_EXTERNAL},
 	 *         {@link ReferenceType#CONDITIONAL}, {@link ReferenceType#LOGICAL}, {@link ReferenceType#UNKNOWN}
 	 */
@@ -233,6 +247,8 @@ public class ResourceReference
 				if (conditionalRefMatcher.matches())
 					return RELATED_ARTEFACT_CONDITIONAL_URL;
 			}
+
+			return RELATED_ARTEFACT_UNKNOWN_URL;
 		}
 		else if (reference != null)
 		{
@@ -261,9 +277,11 @@ public class ResourceReference
 			{
 				return LOGICAL;
 			}
-		}
 
-		return UNKNOWN;
+			return UNKNOWN;
+		}
+		else
+			throw new IllegalStateException("Either reference or relatedArtifact expected");
 	}
 
 	public String getLocation()
