@@ -12,6 +12,7 @@ import java.util.UUID;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang3.StringUtils;
 import org.highmed.dsf.fhir.dao.GroupDao;
 import org.highmed.dsf.fhir.dao.ResearchStudyDao;
 import org.hl7.fhir.r4.model.Binary;
@@ -313,10 +314,9 @@ public class ResearchStudyIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testSearchResearchStudyDeletePermanentlyByLocalDeletionUser() throws Exception
 	{
-		ResearchStudy rs = new ResearchStudy();
-		readAccessHelper.addLocal(rs);
+		ResearchStudy researchStudy = getResearchStudy(null);
 		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
-		String researchStudyId = researchStudyDao.create(rs).getIdElement().getIdPart();
+		String researchStudyId = researchStudyDao.create(researchStudy).getIdElement().getIdPart();
 		researchStudyDao.delete(UUID.fromString(researchStudyId));
 
 		getWebserviceClient().deletePermanently(ResearchStudy.class, researchStudyId);
@@ -329,38 +329,22 @@ public class ResearchStudyIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testSearchResearchStudyDeletePermanentlyByLocalDeletionUserNotMarkedAsDeleted() throws Exception
 	{
-		ResearchStudy rs = new ResearchStudy();
-		readAccessHelper.addLocal(rs);
+		ResearchStudy researchStudy = getResearchStudy(null);
 		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
-		String researchStudyId = researchStudyDao.create(rs).getIdElement().getIdPart();
+		String researchStudyId = researchStudyDao.create(researchStudy).getIdElement().getIdPart();
 
-		try
-		{
-			getWebserviceClient().deletePermanently(ResearchStudy.class, researchStudyId);
-		}
-		catch (WebApplicationException e)
-		{
-			assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), e.getResponse().getStatus());
-		}
+		expectBadRequest(() -> getWebserviceClient().deletePermanently(ResearchStudy.class, researchStudyId));
 	}
 
 	@Test
 	public void testSearchResearchStudyDeletePermanentlyByExternalUser() throws Exception
 	{
-		ResearchStudy rs = new ResearchStudy();
-		readAccessHelper.addLocal(rs);
+		ResearchStudy researchStudy = getResearchStudy(null);
 		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
-		String researchStudyId = researchStudyDao.create(rs).getIdElement().getIdPart();
+		String researchStudyId = researchStudyDao.create(researchStudy).getIdElement().getIdPart();
 		researchStudyDao.delete(UUID.fromString(researchStudyId));
 
-		try
-		{
-			getExternalWebserviceClient().deletePermanently(ResearchStudy.class, researchStudyId);
-		}
-		catch (WebApplicationException e)
-		{
-			assertEquals(Response.Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
-		}
+		expectForbidden(() -> getExternalWebserviceClient().deletePermanently(ResearchStudy.class, researchStudyId));
 	}
 
 	private Binary getBinary()
@@ -377,10 +361,13 @@ public class ResearchStudyIntegrationTest extends AbstractIntegrationTest
 		researchStudy.setStatus(ResearchStudyStatus.ACTIVE);
 		researchStudy.addIdentifier().setSystem("http://highmed.org/sid/research-study-identifier")
 				.setValue(UUID.randomUUID().toString());
-		researchStudy.addRelatedArtifact().setType(RelatedArtifactType.DOCUMENTATION).setUrl(url);
 		researchStudy.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/extension-participating-ttp")
 				.setValue(new Reference().setType("Organization").setIdentifier(new Identifier()
 						.setSystem("http://highmed.org/sid/organization-identifier").setValue("Test_Organization")));
+
+		if (!StringUtils.isBlank(url))
+			researchStudy.addRelatedArtifact().setType(RelatedArtifactType.DOCUMENTATION).setUrl(url);
+
 		readAccessHelper.addLocal(researchStudy);
 
 		return researchStudy;

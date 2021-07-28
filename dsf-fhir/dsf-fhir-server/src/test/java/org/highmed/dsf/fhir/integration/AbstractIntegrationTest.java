@@ -1,5 +1,7 @@
 package org.highmed.dsf.fhir.integration;
 
+import static javax.ws.rs.core.Response.Status;
+
 import static de.rwh.utils.jetty.JettyServer.httpConfiguration;
 import static de.rwh.utils.jetty.JettyServer.httpsConnector;
 import static de.rwh.utils.jetty.JettyServer.secureRequestCustomizer;
@@ -394,7 +396,17 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		return readAccessHelper;
 	}
 
+	protected static void expectBadRequest(Runnable operation) throws Exception
+	{
+		expectWebApplicationException(operation, Status.BAD_REQUEST);
+	}
+
 	protected static void expectForbidden(Runnable operation) throws Exception
+	{
+		expectWebApplicationException(operation, Status.FORBIDDEN);
+	}
+
+	protected static void expectWebApplicationException(Runnable operation, Status status) throws Exception
 	{
 		try
 		{
@@ -403,7 +415,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		}
 		catch (WebApplicationException e)
 		{
-			assertEquals(403, e.getResponse().getStatus());
+			assertEquals(status.getStatusCode(), e.getResponse().getStatus());
 		}
 	}
 }
