@@ -1,32 +1,11 @@
 package org.highmed.dsf.fhir.integration;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
-
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response.Status;
-
 import org.highmed.dsf.fhir.dao.CodeSystemDao;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.junit.Test;
 
 public class CodeSystemIntegrationTest extends AbstractIntegrationTest
 {
-	private void expectForbidden(Runnable runnable)
-	{
-		try
-		{
-			runnable.run();
-			fail("WebApplicationException with FORBIDDEN expected");
-		}
-		catch (WebApplicationException e)
-		{
-			assertNotNull(e.getResponse());
-			assertEquals(Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
-		}
-	}
-
 	@Test
 	public void testReadAllowedForLocalUserByLocalTag() throws Exception
 	{
