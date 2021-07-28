@@ -363,7 +363,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	private Response update(String id, R newResource, UriInfo uri, HttpHeaders headers, R oldResource)
 	{
 		resolveLiteralInternalRelatedArtifactUrls(newResource);
-		
+
 		Optional<String> reasonUpdateAllowed = authorizationRule.reasonUpdateAllowed(getCurrentUser(), oldResource,
 				newResource);
 
