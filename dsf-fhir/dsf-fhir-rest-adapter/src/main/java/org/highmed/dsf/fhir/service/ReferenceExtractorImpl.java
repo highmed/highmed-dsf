@@ -47,6 +47,7 @@ import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Provenance.ProvenanceAgentComponent;
 import org.hl7.fhir.r4.model.Provenance.ProvenanceEntityComponent;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.RelatedPerson;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.Resource;
@@ -64,10 +65,16 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 	private static final Logger logger = LoggerFactory.getLogger(ReferenceExtractorImpl.class);
 
 	@SafeVarargs
-	private Function<Reference, ResourceReference> toResourceReference(String referenceLocation,
+	private Function<Reference, ResourceReference> toResourceReferenceFromReference(String referenceLocation,
 			Class<? extends Resource>... referenceTypes)
 	{
-		return ref -> new ResourceReference(referenceLocation, ref, Arrays.asList(referenceTypes));
+		return ref -> new ResourceReference(referenceLocation, ref, referenceTypes);
+	}
+
+	private Function<RelatedArtifact, ResourceReference> toResourceReferenceFromRelatedArtifact(
+			String relatedArtifactLocation)
+	{
+		return rel -> new ResourceReference(relatedArtifactLocation, rel);
 	}
 
 	@SafeVarargs
@@ -75,9 +82,8 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 			Function<R, Reference> getReference, String referenceLocation,
 			Class<? extends DomainResource>... referenceTypes)
 	{
-		return hasReference.test(resource)
-				? Stream.of(getReference.apply(resource)).map(toResourceReference(referenceLocation, referenceTypes))
-				: Stream.empty();
+		return hasReference.test(resource) ? Stream.of(getReference.apply(resource))
+				.map(toResourceReferenceFromReference(referenceLocation, referenceTypes)) : Stream.empty();
 	}
 
 	@SafeVarargs
@@ -86,7 +92,7 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 			Class<? extends Resource>... referenceTypes)
 	{
 		return hasReference.test(resource) ? Stream.of(getReference.apply(resource)).flatMap(List::stream)
-				.map(toResourceReference(referenceLocation, referenceTypes)) : Stream.empty();
+				.map(toResourceReferenceFromReference(referenceLocation, referenceTypes)) : Stream.empty();
 	}
 
 	@SafeVarargs
@@ -112,7 +118,7 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 			Class<? extends Resource>... referenceTypes)
 	{
 		return hasReference.test(backboneElement) ? Stream.of(getReference.apply(backboneElement))
-				.map(toResourceReference(referenceLocation, referenceTypes)) : Stream.empty();
+				.map(toResourceReferenceFromReference(referenceLocation, referenceTypes)) : Stream.empty();
 	}
 
 	@SafeVarargs
@@ -197,14 +203,14 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 			Class<? extends DomainResource>... referenceTypes)
 	{
 		return hasReference.test(backboneElement) ? Stream.of(getReference.apply(backboneElement)).flatMap(List::stream)
-				.map(toResourceReference(referenceLocation, referenceTypes)) : Stream.empty();
+				.map(toResourceReferenceFromReference(referenceLocation, referenceTypes)) : Stream.empty();
 	}
 
 	private Stream<ResourceReference> getExtensionReferences(DomainResource resource)
 	{
 		Stream<ResourceReference> extensions = resource.getExtension().stream()
 				.filter(e -> e.getValue() instanceof Reference).map(e -> (Reference) e.getValue())
-				.map(toResourceReference(resource.getResourceType().name() + ".extension"));
+				.map(toResourceReferenceFromReference(resource.getResourceType().name() + ".extension"));
 
 		Stream<ResourceReference> extensionExtensions = resource.getExtension().stream()
 				.flatMap(e -> getExtensionReferences(resource.getResourceType().name() + ".extension", e));
@@ -216,7 +222,7 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 	{
 		Stream<ResourceReference> extensions = resource.getExtension().stream()
 				.filter(e -> e.getValue() instanceof Reference).map(e -> (Reference) e.getValue())
-				.map(toResourceReference(baseElementName + ".extension"));
+				.map(toResourceReferenceFromReference(baseElementName + ".extension"));
 
 		Stream<ResourceReference> extensionExtensions = resource.getExtension().stream()
 				.flatMap(e -> getExtensionReferences(baseElementName + ".extension", e));
@@ -228,12 +234,20 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 	{
 		Stream<ResourceReference> extensions = resource.getExtension().stream()
 				.filter(e -> e.getValue() instanceof Reference).map(e -> (Reference) e.getValue())
-				.map(toResourceReference(baseElementName + ".extension"));
+				.map(toResourceReferenceFromReference(baseElementName + ".extension"));
 
 		Stream<ResourceReference> extensionExtensions = resource.getExtension().stream()
 				.flatMap(e -> getExtensionReferences(baseElementName + ".extension", e));
 
 		return Stream.concat(extensions, extensionExtensions);
+	}
+
+	private <R extends Resource> Stream<ResourceReference> getRelatedArtifact(R resource,
+			Predicate<R> hasRelatedArtifact, Function<R, List<RelatedArtifact>> getRelatedArtifact,
+			String relatedArtifactLocation)
+	{
+		return hasRelatedArtifact.test(resource) ? Stream.of(getRelatedArtifact.apply(resource)).flatMap(List::stream)
+				.map(toResourceReferenceFromRelatedArtifact(relatedArtifactLocation)) : Stream.empty();
 	}
 
 	@SafeVarargs
@@ -339,11 +353,13 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 		var observationResultRequirement = getReferences(resource, ActivityDefinition::hasObservationResultRequirement,
 				ActivityDefinition::getObservationResultRequirement, "ActivityDefinition.observationResultRequirement",
 				ObservationDefinition.class);
+		var relatedArtifacts = getRelatedArtifact(resource, ActivityDefinition::hasRelatedArtifact,
+				ActivityDefinition::getRelatedArtifact, "ActivityDefinition.relatedArtifact");
 
 		var extensionReferences = getExtensionReferences(resource);
 
 		return concat(subjectReference, location, productReference, specimenRequirement, observationRequirement,
-				observationResultRequirement, extensionReferences);
+				observationResultRequirement, relatedArtifacts, extensionReferences);
 	}
 
 	@Override
@@ -431,10 +447,12 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 
 		var subject = getReference(resource, Library::hasSubjectReference, Library::getSubjectReference,
 				"Library.subject", Group.class);
+		var relatedArtifacts = getRelatedArtifact(resource, Library::hasRelatedArtifact, Library::getRelatedArtifact,
+				"Library.relatedArtifact");
 
 		var extensionReferences = getExtensionReferences(resource);
 
-		return concat(subject, extensionReferences);
+		return concat(subject, relatedArtifacts, extensionReferences);
 	}
 
 	@Override
@@ -463,10 +481,12 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 
 		var subject = getReference(resource, Measure::hasSubjectReference, Measure::getSubjectReference,
 				"Measure.subject", Group.class);
+		var relatedArtifacts = getRelatedArtifact(resource, Measure::hasRelatedArtifact, Measure::getRelatedArtifact,
+				"Measure.relatedArtifact");
 
 		var extensionReferences = getExtensionReferences(resource);
 
-		return concat(subject, extensionReferences);
+		return concat(subject, relatedArtifacts, extensionReferences);
 	}
 
 	@Override
@@ -669,10 +689,13 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 				PractitionerRole.class);
 		var sites = getReferences(resource, ResearchStudy::hasSite, ResearchStudy::getSite, "ResearchStudy.site",
 				Location.class);
+		var relatedArtifacts = getRelatedArtifact(resource, ResearchStudy::hasRelatedArtifact,
+				ResearchStudy::getRelatedArtifact, "ResearchStudy.relatedArtifact");
 
 		var extensionReferences = getExtensionReferences(resource);
 
-		return concat(protocols, partOfs, enrollments, sponsor, principalInvestigator, sites, extensionReferences);
+		return concat(protocols, partOfs, enrollments, sponsor, principalInvestigator, sites, relatedArtifacts,
+				extensionReferences);
 	}
 
 	@Override
@@ -742,7 +765,7 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 
 		Stream<ResourceReference> inputReferences = resource.getInput().stream()
 				.filter(in -> in.getValue() instanceof Reference).map(in -> (Reference) in.getValue())
-				.map(toResourceReference(resource.getResourceType().name() + ".input"));
+				.map(toResourceReferenceFromReference(resource.getResourceType().name() + ".input"));
 
 		Stream<ResourceReference> inputExtensionReferences = resource.getInput().stream()
 				.flatMap(in -> getExtensionReferences(resource.getResourceType().name() + ".input", in));
@@ -757,7 +780,7 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 
 		Stream<ResourceReference> outputReferences = resource.getOutput().stream()
 				.filter(out -> out.getValue() instanceof Reference).map(in -> (Reference) in.getValue())
-				.map(toResourceReference(resource.getResourceType().name() + ".output"));
+				.map(toResourceReferenceFromReference(resource.getResourceType().name() + ".output"));
 
 		Stream<ResourceReference> outputExtensionReferences = resource.getOutput().stream()
 				.flatMap(out -> getExtensionReferences(resource.getResourceType().name() + ".output", out));

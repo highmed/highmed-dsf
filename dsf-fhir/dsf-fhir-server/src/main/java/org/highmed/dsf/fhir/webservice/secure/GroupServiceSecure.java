@@ -6,6 +6,7 @@ import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.highmed.dsf.fhir.service.ReferenceCleaner;
+import org.highmed.dsf.fhir.service.ReferenceExtractor;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.highmed.dsf.fhir.validation.ResourceValidator;
 import org.highmed.dsf.fhir.webservice.specification.GroupService;
@@ -15,11 +16,12 @@ public class GroupServiceSecure extends AbstractResourceServiceSecure<GroupDao, 
 		implements GroupService
 {
 	public GroupServiceSecure(GroupService delegate, String serverBase, ResponseGenerator responseGenerator,
-			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner, GroupDao groupDao,
-			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
-			AuthorizationRule<Group> authorizationRule, ResourceValidator resourceValidator)
+			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
+			ReferenceExtractor referenceExtractor, GroupDao groupDao, ExceptionHandler exceptionHandler,
+			ParameterConverter parameterConverter, AuthorizationRule<Group> authorizationRule,
+			ResourceValidator resourceValidator)
 	{
-		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, Group.class, groupDao,
-				exceptionHandler, parameterConverter, authorizationRule, resourceValidator);
+		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, referenceExtractor,
+				Group.class, groupDao, exceptionHandler, parameterConverter, authorizationRule, resourceValidator);
 	}
 }

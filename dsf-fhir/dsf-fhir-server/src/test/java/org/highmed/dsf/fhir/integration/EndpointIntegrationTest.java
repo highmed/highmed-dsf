@@ -14,6 +14,9 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
 import org.highmed.dsf.fhir.dao.EndpointDao;
+import org.highmed.dsf.fhir.dao.OrganizationDao;
+import org.highmed.dsf.fhir.search.PartialResult;
+import org.highmed.dsf.fhir.search.SearchQuery;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
@@ -21,6 +24,7 @@ import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Endpoint.EndpointStatus;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.StringType;
@@ -29,11 +33,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.Constants;
 
 public class EndpointIntegrationTest extends AbstractIntegrationTest
 {
 	private static final Logger logger = LoggerFactory.getLogger(EndpointIntegrationTest.class);
+
+	private Endpoint createEndpoint()
+	{
+		Endpoint endpoint = new Endpoint();
+		endpoint.addIdentifier().setSystem("http://highmed.org/sid/endpoint-identifier")
+				.setValue("foo-bar-baz.test.bla-bla.de");
+		endpoint.setStatus(EndpointStatus.ACTIVE);
+		endpoint.getConnectionType().setSystem("http://terminology.hl7.org/CodeSystem/endpoint-connection-type")
+				.setCode("hl7-fhir-rest");
+		endpoint.setName("Test TTP");
+		endpoint.getPayloadTypeFirstRep().getCodingFirstRep().setSystem("http://hl7.org/fhir/resource-types")
+				.setCode("Task");
+		endpoint.addPayloadMimeType("application/fhir+json");
+		endpoint.addPayloadMimeType("application/fhir+xml");
+		endpoint.setAddress("https://foo-bar-baz.test.bla-bla.de/fhir");
+		return endpoint;
+	}
 
 	@Test
 	public void testSearchAll() throws Exception
@@ -170,19 +190,8 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testCreateValidByLocalUser() throws Exception
 	{
-		Endpoint endpoint = new Endpoint();
-		endpoint.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag").setCode("ALL");
-		endpoint.addIdentifier().setSystem("http://highmed.org/sid/endpoint-identifier")
-				.setValue("foo-bar-baz.test.bla-bla.de");
-		endpoint.setStatus(EndpointStatus.ACTIVE);
-		endpoint.getConnectionType().setSystem("http://terminology.hl7.org/CodeSystem/endpoint-connection-type")
-				.setCode("hl7-fhir-rest");
-		endpoint.setName("Test TTP");
-		endpoint.getPayloadTypeFirstRep().getCodingFirstRep().setSystem("http://hl7.org/fhir/resource-types")
-				.setCode("Task");
-		endpoint.addPayloadMimeType("application/fhir+json");
-		endpoint.addPayloadMimeType("application/fhir+xml");
-		endpoint.setAddress("https://foo-bar-baz.test.bla-bla.de/fhir");
+		Endpoint endpoint = createEndpoint();
+		getReadAccessHelper().addLocal(endpoint);
 
 		Endpoint created = getWebserviceClient().create(endpoint);
 		assertNotNull(created);
@@ -196,7 +205,7 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 		FhirContext context = FhirContext.forR4();
 
 		Organization organization = new Organization();
-		organization.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag").setCode("ALL");
+		getReadAccessHelper().addAll(organization);
 		organization.addIdentifier().setSystem("http://highmed.org/sid/organization-identifier").setValue("bla-bla.de");
 		organization.addExtension("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint",
 				new StringType(
@@ -206,20 +215,10 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 		logger.debug("Organization: {}",
 				context.newXmlParser().setPrettyPrint(true).encodeResourceToString(createdOrg));
 
-		Endpoint endpoint = new Endpoint();
-		endpoint.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag").setCode("ALL");
-		endpoint.setStatus(EndpointStatus.ACTIVE);
-		endpoint.addIdentifier().setSystem("http://highmed.org/sid/endpoint-identifier")
-				.setValue("foo-bar-baz.test.bla-bla.de");
+		Endpoint endpoint = createEndpoint();
+		getReadAccessHelper().addAll(endpoint);
 		endpoint.getManagingOrganization().setType("Organization").getIdentifier()
 				.setSystem("http://highmed.org/sid/organization-identifier").setValue("bla-bla.de");
-		endpoint.getConnectionType().setSystem("http://terminology.hl7.org/CodeSystem/endpoint-connection-type")
-				.setCode("hl7-fhir-rest");
-		endpoint.getPayloadTypeFirstRep().getCodingFirstRep().setSystem("http://hl7.org/fhir/resource-types")
-				.setCode("Task");
-		endpoint.addPayloadMimeTypeElement().setSystem("urn:ietf:bcp:13").setValue(Constants.CT_FHIR_XML_NEW);
-		endpoint.addPayloadMimeTypeElement().setSystem("urn:ietf:bcp:13").setValue(Constants.CT_FHIR_JSON_NEW);
-		endpoint.setAddress("https://foo-bar-baz.test.bla-bla.de/fhir");
 
 		logger.debug("endpoint: {}", context.newXmlParser().setPrettyPrint(true).encodeResourceToString(endpoint));
 
@@ -271,27 +270,17 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 		String endTempId = "urn:uuid:" + UUID.randomUUID().toString();
 
 		Organization organization = new Organization();
-		organization.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag").setCode("ALL");
+		getReadAccessHelper().addAll(organization);
 		organization.addIdentifier().setSystem("http://highmed.org/sid/organization-identifier").setValue("bla-bla.de");
 		organization.addExtension("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint",
 				new StringType(
 						"6b83a92506d67265697c74f50a9cac0ec7182adcc5302e5ed487ae1a782fe278f5ca79808c971e061fadded2c303a2223140ef3450d1d27717dd704a823f95e9"));
 		organization.addEndpoint().setReference(endTempId);
 
-		Endpoint endpoint = new Endpoint();
+		Endpoint endpoint = createEndpoint();
+		getReadAccessHelper().addAll(endpoint);
 		endpoint.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/endpoint");
-		endpoint.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag").setCode("ALL");
-		endpoint.addIdentifier().setSystem("http://highmed.org/sid/endpoint-identifier")
-				.setValue("foo-bar-baz.test.bla-bla.de");
-		endpoint.setStatus(EndpointStatus.ACTIVE);
-		endpoint.getConnectionType().setSystem("http://terminology.hl7.org/CodeSystem/endpoint-connection-type")
-				.setCode("hl7-fhir-rest");
 		endpoint.getManagingOrganization().setReference(orgTempId);
-		endpoint.getPayloadTypeFirstRep().getCodingFirstRep().setSystem("http://hl7.org/fhir/resource-types")
-				.setCode("Task");
-		endpoint.addPayloadMimeTypeElement().setSystem("urn:ietf:bcp:13").setValue(Constants.CT_FHIR_XML_NEW);
-		endpoint.addPayloadMimeTypeElement().setSystem("urn:ietf:bcp:13").setValue(Constants.CT_FHIR_JSON_NEW);
-		endpoint.setAddress("https://foo-bar-baz.test.bla-bla.de/fhir");
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
@@ -317,5 +306,94 @@ public class EndpointIntegrationTest extends AbstractIntegrationTest
 		assertTrue(readEdp.getIdElement().hasIdPart());
 		assertTrue(readEdp.hasManagingOrganization());
 		assertTrue(readEdp.getManagingOrganization().hasReference());
+	}
+
+	@Test
+	public void testCreateWithRelativeLiteralReferenceNotExisting() throws Exception
+	{
+		Endpoint endpoint = createEndpoint();
+		getReadAccessHelper().addLocal(endpoint);
+		endpoint.getManagingOrganization().setReference("Organization/" + UUID.randomUUID());
+
+		expectForbidden(() -> getWebserviceClient().create(endpoint));
+	}
+
+	@Test
+	public void testCreateViaBundleWithRelativeLiteralReferenceNotExisting() throws Exception
+	{
+		Endpoint endpoint = createEndpoint();
+		getReadAccessHelper().addLocal(endpoint);
+		endpoint.getManagingOrganization().setReference("Organization/" + UUID.randomUUID());
+
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		bundle.addEntry().setFullUrl("urn:uuid:" + UUID.randomUUID().toString()).setResource(endpoint).getRequest()
+				.setMethod(HTTPVerb.POST).setUrl("Endpoint");
+
+		expectForbidden(() -> getWebserviceClient().postBundle(bundle));
+	}
+
+	@Test
+	public void testUpdateWithRelativeLiteralReferenceNotExisting() throws Exception
+	{
+		OrganizationDao organizationDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
+		EndpointDao endpointDao = getSpringWebApplicationContext().getBean(EndpointDao.class);
+
+		SearchQuery<Organization> query = organizationDao.createSearchQueryWithoutUserFilter(1, 1)
+				.configureParameters(Map.of("identifier",
+						Collections.singletonList("http://highmed.org/sid/organization-identifier|Test_Organization")));
+		PartialResult<Organization> organizationResult = organizationDao.search(query);
+		assertNotNull(organizationResult);
+		assertEquals(1, organizationResult.getTotal());
+		assertNotNull(organizationResult.getPartialResult());
+		assertEquals(1, organizationResult.getPartialResult().size());
+		assertNotNull(organizationResult.getPartialResult().get(0));
+
+		IdType organizationId = organizationResult.getPartialResult().get(0).getIdElement().toVersionless();
+
+		Endpoint endpoint = createEndpoint();
+		getReadAccessHelper().addLocal(endpoint);
+		endpoint.getManagingOrganization().setReference(organizationId.getValue());
+
+		Endpoint createdEndpoint = endpointDao.create(endpoint);
+		createdEndpoint.getManagingOrganization().setReference("Organization/" + UUID.randomUUID());
+
+		expectForbidden(() -> getWebserviceClient().update(createdEndpoint));
+	}
+
+	@Test
+	public void testUpdateViaBundleWithRelativeLiteralReferenceNotExisting() throws Exception
+	{
+		OrganizationDao organizationDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
+		EndpointDao endpointDao = getSpringWebApplicationContext().getBean(EndpointDao.class);
+
+		SearchQuery<Organization> query = organizationDao.createSearchQueryWithoutUserFilter(1, 1)
+				.configureParameters(Map.of("identifier",
+						Collections.singletonList("http://highmed.org/sid/organization-identifier|Test_Organization")));
+		PartialResult<Organization> organizationResult = organizationDao.search(query);
+		assertNotNull(organizationResult);
+		assertEquals(1, organizationResult.getTotal());
+		assertNotNull(organizationResult.getPartialResult());
+		assertEquals(1, organizationResult.getPartialResult().size());
+		assertNotNull(organizationResult.getPartialResult().get(0));
+
+		IdType organizationId = organizationResult.getPartialResult().get(0).getIdElement().toVersionless();
+
+		Endpoint endpoint = createEndpoint();
+		getReadAccessHelper().addLocal(endpoint);
+		endpoint.getManagingOrganization().setReference(organizationId.getValue());
+
+		Endpoint createdEndpoint = endpointDao.create(endpoint);
+		createdEndpoint.getManagingOrganization().setReference("Organization/" + UUID.randomUUID());
+
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		bundle.addEntry()
+				.setFullUrl(createdEndpoint.getIdElement()
+						.withServerBase(getWebserviceClient().getBaseUrl(), "Endpoint").toVersionless().getValue())
+				.setResource(createdEndpoint).getRequest().setMethod(HTTPVerb.PUT)
+				.setUrl("Endpoint/" + createdEndpoint.getIdElement().getIdPart());
+
+		expectForbidden(() -> getWebserviceClient().postBundle(bundle));
 	}
 }

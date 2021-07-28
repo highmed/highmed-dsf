@@ -166,6 +166,8 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 					R created = dao.createWithTransactionAndId(connection, resource, UUID.randomUUID());
 
+					checkReferences(resource, connection);
+
 					connection.commit();
 
 					return created;
@@ -230,6 +232,42 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		}
 		else
 			return Optional.of(responseGenerator.referenceTargetNotFoundLocallyByIdentifier(resource, reference));
+	}
+
+	private void checkReferences(Resource resource, Connection connection) throws WebApplicationException
+	{
+		referenceExtractor.getReferences(resource).forEach(ref ->
+		{
+			Optional<OperationOutcome> outcome = checkReference(resource, connection, ref);
+			if (outcome.isPresent())
+			{
+				Response response = Response.status(Status.FORBIDDEN).entity(outcome.get()).build();
+				throw new WebApplicationException(response);
+			}
+		});
+	}
+
+	private Optional<OperationOutcome> checkReference(Resource resource, Connection connection,
+			ResourceReference reference) throws WebApplicationException
+	{
+		ReferenceType type = reference.getType(serverBase);
+		switch (type)
+		{
+			case LITERAL_INTERNAL:
+			case RELATED_ARTEFACT_LITERAL_INTERNAL_URL:
+				return referenceResolver.checkLiteralInternalReference(resource, reference, connection);
+			case LITERAL_EXTERNAL:
+			case RELATED_ARTEFACT_LITERAL_EXTERNAL_URL:
+				return referenceResolver.checkLiteralExternalReference(resource, reference);
+			case LOGICAL:
+				return referenceResolver.checkLogicalReference(getCurrentUser(), resource, reference, connection);
+			// unknown urls to non FHIR servers in related artifacts must not be checked
+			case RELATED_ARTEFACT_UNKNOWN_URL:
+				return Optional.empty();
+			case UNKNOWN:
+			default:
+				return Optional.of(responseGenerator.unknownReference(resource, reference));
+		}
 	}
 
 	private void checkAlreadyExists(HttpHeaders headers) throws WebApplicationException
@@ -434,7 +472,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 							R updated = dao.update(resource, ifMatch.orElse(null));
 
-							// updated = resolveReferences(connection, updated);
+							checkReferences(resource, connection);
 
 							connection.commit();
 

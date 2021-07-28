@@ -10,6 +10,7 @@ import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.highmed.dsf.fhir.service.ReferenceCleaner;
+import org.highmed.dsf.fhir.service.ReferenceExtractor;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.highmed.dsf.fhir.validation.ResourceValidator;
 import org.highmed.dsf.fhir.webservice.specification.StructureDefinitionService;
@@ -26,12 +27,13 @@ public class StructureDefinitionServiceSecure
 
 	public StructureDefinitionServiceSecure(StructureDefinitionService delegate, String serverBase,
 			ResponseGenerator responseGenerator, ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
-			StructureDefinitionDao structureDefinitionDao, ExceptionHandler exceptionHandler,
-			ParameterConverter parameterConverter, AuthorizationRule<StructureDefinition> authorizationRule,
-			ResourceValidator resourceValidator)
+			ReferenceExtractor referenceExtractor, StructureDefinitionDao structureDefinitionDao,
+			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
+			AuthorizationRule<StructureDefinition> authorizationRule, ResourceValidator resourceValidator)
 	{
-		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, StructureDefinition.class,
-				structureDefinitionDao, exceptionHandler, parameterConverter, authorizationRule, resourceValidator);
+		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, referenceExtractor,
+				StructureDefinition.class, structureDefinitionDao, exceptionHandler, parameterConverter,
+				authorizationRule, resourceValidator);
 	}
 
 	@Override

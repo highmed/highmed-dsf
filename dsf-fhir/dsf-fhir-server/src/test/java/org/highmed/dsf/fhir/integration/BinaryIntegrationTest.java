@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -37,19 +36,6 @@ import org.junit.Test;
 
 public class BinaryIntegrationTest extends AbstractIntegrationTest
 {
-	private void expectForbidden(Runnable operation) throws Exception
-	{
-		try
-		{
-			operation.run();
-			fail("WebApplicationException expected");
-		}
-		catch (WebApplicationException e)
-		{
-			assertEquals(403, e.getResponse().getStatus());
-		}
-	}
-
 	@Test
 	public void testReadAllowedLocalUser() throws Exception
 	{

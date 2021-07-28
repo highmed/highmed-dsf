@@ -6,6 +6,7 @@ import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.highmed.dsf.fhir.service.ReferenceCleaner;
+import org.highmed.dsf.fhir.service.ReferenceExtractor;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.highmed.dsf.fhir.validation.ResourceValidator;
 import org.highmed.dsf.fhir.webservice.specification.PractitionerService;
@@ -16,10 +17,12 @@ public class PractitionerServiceSecure extends
 {
 	public PractitionerServiceSecure(PractitionerService delegate, String serverBase,
 			ResponseGenerator responseGenerator, ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
-			PractitionerDao practitionerDao, ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
-			AuthorizationRule<Practitioner> authorizationRule, ResourceValidator resourceValidator)
+			ReferenceExtractor referenceExtractor, PractitionerDao practitionerDao, ExceptionHandler exceptionHandler,
+			ParameterConverter parameterConverter, AuthorizationRule<Practitioner> authorizationRule,
+			ResourceValidator resourceValidator)
 	{
-		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, Practitioner.class,
-				practitionerDao, exceptionHandler, parameterConverter, authorizationRule, resourceValidator);
+		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, referenceExtractor,
+				Practitioner.class, practitionerDao, exceptionHandler, parameterConverter, authorizationRule,
+				resourceValidator);
 	}
 }
