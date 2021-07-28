@@ -42,13 +42,13 @@ public final class ReferencesHelperImpl<R extends Resource> implements Reference
 	}
 
 	@Override
-	public void resolveTemporaryAndConditionalReferences(Map<String, IdType> idTranslationTable, Connection connection)
-			throws WebApplicationException
+	public void resolveTemporaryAndConditionalReferencesOrLiteralInternalRelatedArtifactUrls(
+			Map<String, IdType> idTranslationTable, Connection connection) throws WebApplicationException
 	{
 		referenceExtractor.getReferences(resource).forEach(ref ->
 		{
-			Optional<OperationOutcome> outcome = resolveTemporaryOrConditionalReference(ref, idTranslationTable,
-					connection);
+			Optional<OperationOutcome> outcome = resolveTemporaryOrConditionalReferenceOrLiteralInternalRelatedArtifactUrl(
+					ref, idTranslationTable, connection);
 			if (outcome.isPresent())
 			{
 				Response response = Response.status(Status.FORBIDDEN).entity(outcome.get()).build();
@@ -57,8 +57,8 @@ public final class ReferencesHelperImpl<R extends Resource> implements Reference
 		});
 	}
 
-	private Optional<OperationOutcome> resolveTemporaryOrConditionalReference(ResourceReference reference,
-			Map<String, IdType> idTranslationTable, Connection connection)
+	private Optional<OperationOutcome> resolveTemporaryOrConditionalReferenceOrLiteralInternalRelatedArtifactUrl(
+			ResourceReference reference, Map<String, IdType> idTranslationTable, Connection connection)
 	{
 		ReferenceType type = reference.getType(serverBase);
 		switch (type)
@@ -205,18 +205,18 @@ public final class ReferencesHelperImpl<R extends Resource> implements Reference
 		ReferenceType type = reference.getType(serverBase);
 		switch (type)
 		{
-			case RELATED_ARTEFACT_LITERAL_INTERNAL_URL:
 			case LITERAL_INTERNAL:
+			case RELATED_ARTEFACT_LITERAL_INTERNAL_URL:
 				return referenceResolver.checkLiteralInternalReference(resource, reference, connection, index);
-			case RELATED_ARTEFACT_LITERAL_EXTERNAL_URL:
 			case LITERAL_EXTERNAL:
+			case RELATED_ARTEFACT_LITERAL_EXTERNAL_URL:
 				return referenceResolver.checkLiteralExternalReference(resource, reference, index);
 			case LOGICAL:
 				return referenceResolver.checkLogicalReference(user, resource, reference, connection, index);
+			// unknown URLs to non FHIR servers in related artifacts must not be checked
+			case RELATED_ARTEFACT_UNKNOWN_URL:
+				return Optional.empty();
 			case UNKNOWN:
-				// unknown urls to external non fhir servers in related artifacts must not be checked
-				if (reference.hasRelatedArtifact())
-					return Optional.empty();
 			default:
 				return Optional.of(responseGenerator.unknownReference(resource, reference, index));
 		}

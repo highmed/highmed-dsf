@@ -80,9 +80,10 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 			case LITERAL_INTERNAL:
 				return resolveLiteralInternalReference(reference, connection);
 			case LITERAL_EXTERNAL:
+			case RELATED_ARTEFACT_LITERAL_EXTERNAL_URL:
 				return resolveLiteralExternalReference(reference);
-			case RELATED_ARTEFACT_CONDITIONAL_URL:
 			case CONDITIONAL:
+			case RELATED_ARTEFACT_CONDITIONAL_URL:
 				return resolveConditionalReference(user, reference, connection);
 			case LOGICAL:
 				return resolveLogicalReference(user, reference, connection);
@@ -144,8 +145,10 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 		Objects.requireNonNull(reference, "reference");
 
 		ReferenceType type = reference.getType(serverBase);
-		if (!ReferenceType.LITERAL_EXTERNAL.equals(type))
-			throw new IllegalArgumentException("Not a literal external reference");
+		if (!(ReferenceType.LITERAL_EXTERNAL.equals(type)
+				|| ReferenceType.RELATED_ARTEFACT_LITERAL_EXTERNAL_URL.equals(type)))
+			throw new IllegalArgumentException(
+					"Not a literal external reference or related artifact literal external url");
 
 		String remoteServerBase = reference.getServerBase(serverBase);
 		Optional<FhirWebserviceClient> client = clientProvider.getClient(remoteServerBase);
