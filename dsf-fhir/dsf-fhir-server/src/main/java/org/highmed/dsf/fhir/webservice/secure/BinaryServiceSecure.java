@@ -12,6 +12,7 @@ import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.highmed.dsf.fhir.service.ReferenceCleaner;
+import org.highmed.dsf.fhir.service.ReferenceExtractor;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.highmed.dsf.fhir.validation.ResourceValidator;
 import org.highmed.dsf.fhir.webservice.specification.BinaryService;
@@ -21,12 +22,13 @@ public class BinaryServiceSecure extends AbstractResourceServiceSecure<BinaryDao
 		implements BinaryService
 {
 	public BinaryServiceSecure(BinaryService delegate, String serverBase, ResponseGenerator responseGenerator,
-			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner, BinaryDao binaryDao,
-			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
-			AuthorizationRule<Binary> authorizationRule, ResourceValidator resourceValidator)
+			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
+			ReferenceExtractor referenceExtractor, BinaryDao binaryDao, ExceptionHandler exceptionHandler,
+			ParameterConverter parameterConverter, AuthorizationRule<Binary> authorizationRule,
+			ResourceValidator resourceValidator)
 	{
-		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, Binary.class, binaryDao,
-				exceptionHandler, parameterConverter, authorizationRule, resourceValidator);
+		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, referenceExtractor,
+				Binary.class, binaryDao, exceptionHandler, parameterConverter, authorizationRule, resourceValidator);
 	}
 
 	@Override

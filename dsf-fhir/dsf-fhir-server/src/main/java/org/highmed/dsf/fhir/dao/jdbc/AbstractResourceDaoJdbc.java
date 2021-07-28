@@ -883,6 +883,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	 * @param connection
 	 *            not <code>null</code>
 	 * @throws SQLException
+	 *             if database access errors occur
 	 */
 	protected void modifySearchResultResource(R resource, Connection connection) throws SQLException
 	{

@@ -9,6 +9,7 @@ import static de.rwh.utils.jetty.JettyServer.webInfJars;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -391,5 +392,18 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	protected static final ReadAccessHelper getReadAccessHelper()
 	{
 		return readAccessHelper;
+	}
+
+	protected static void expectForbidden(Runnable operation) throws Exception
+	{
+		try
+		{
+			operation.run();
+			fail("WebApplicationException expected");
+		}
+		catch (WebApplicationException e)
+		{
+			assertEquals(403, e.getResponse().getStatus());
+		}
 	}
 }

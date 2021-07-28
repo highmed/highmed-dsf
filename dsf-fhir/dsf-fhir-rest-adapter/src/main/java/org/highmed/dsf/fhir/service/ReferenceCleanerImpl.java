@@ -36,9 +36,12 @@ public class ReferenceCleanerImpl implements ReferenceCleaner
 
 	private void cleanupReference(ResourceReference resourceReference)
 	{
-		Reference ref = resourceReference.getReference();
-		if (ref.hasIdentifier() && ref.hasReference())
-			ref.setReferenceElement((IdType) null);
+		if (resourceReference.hasReference())
+		{
+			Reference ref = resourceReference.getReference();
+			if (ref.hasIdentifier() && ref.hasReference())
+				ref.setReferenceElement((IdType) null);
+		}
 	}
 
 	@Override
@@ -65,7 +68,8 @@ public class ReferenceCleanerImpl implements ReferenceCleaner
 		else
 		{
 			Stream<ResourceReference> references = referenceExtractor.getReferences(resource);
-			references.forEach(r -> r.getReference().setResource(null));
+
+			references.filter(ResourceReference::hasReference).forEach(r -> r.getReference().setResource(null));
 
 			if (resource instanceof DomainResource && ((DomainResource) resource).hasContained())
 			{
