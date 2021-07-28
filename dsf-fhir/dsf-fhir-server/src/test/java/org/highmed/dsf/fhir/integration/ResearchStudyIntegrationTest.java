@@ -272,8 +272,7 @@ public class ResearchStudyIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
-	public void testCreateViaBundleWithRelatedArtefactRelativeLiteralInternalUrlNonExisting()
-			throws Exception
+	public void testCreateViaBundleWithRelatedArtefactRelativeLiteralInternalUrlNonExisting() throws Exception
 	{
 		ResearchStudy researchStudy = getResearchStudy("Binary/" + UUID.randomUUID().toString());
 
