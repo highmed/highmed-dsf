@@ -26,7 +26,10 @@ import org.highmed.dsf.fhir.search.PartialResult;
 import org.highmed.dsf.fhir.search.SearchQuery;
 import org.highmed.dsf.fhir.search.SearchQueryParameterError;
 import org.highmed.dsf.fhir.service.ReferenceCleaner;
+import org.highmed.dsf.fhir.service.ReferenceExtractor;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
+import org.highmed.dsf.fhir.service.ResourceReference;
+import org.highmed.dsf.fhir.service.ResourceReference.ReferenceType;
 import org.highmed.dsf.fhir.validation.ResourceValidator;
 import org.highmed.dsf.fhir.webservice.specification.BasicResourceService;
 import org.hl7.fhir.r4.model.IdType;
@@ -49,6 +52,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	private static final Logger logger = LoggerFactory.getLogger(AbstractResourceServiceSecure.class);
 
 	protected final ReferenceCleaner referenceCleaner;
+	protected final ReferenceExtractor referenceExtractor;
 	protected final Class<R> resourceType;
 	protected final String resourceTypeName;
 	protected final String serverBase;
@@ -59,13 +63,15 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	protected final ResourceValidator resourceValidator;
 
 	public AbstractResourceServiceSecure(S delegate, String serverBase, ResponseGenerator responseGenerator,
-			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner, Class<R> resourceType, D dao,
-			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
-			AuthorizationRule<R> authorizationRule, ResourceValidator resourceValidator)
+			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
+			ReferenceExtractor referenceExtractor, Class<R> resourceType, D dao, ExceptionHandler exceptionHandler,
+			ParameterConverter parameterConverter, AuthorizationRule<R> authorizationRule,
+			ResourceValidator resourceValidator)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver);
 
 		this.referenceCleaner = referenceCleaner;
+		this.referenceExtractor = referenceExtractor;
 		this.resourceType = resourceType;
 		this.resourceTypeName = resourceType.getAnnotation(ResourceDef.class).name();
 		this.serverBase = serverBase;
@@ -81,6 +87,8 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	{
 		super.afterPropertiesSet();
 
+		Objects.requireNonNull(referenceCleaner, "referenceCleaner");
+		Objects.requireNonNull(referenceExtractor, "referenceExtractor");
 		Objects.requireNonNull(resourceType, "resourceType");
 		Objects.requireNonNull(resourceTypeName, "resourceTypeName");
 		Objects.requireNonNull(serverBase, "serverBase");
@@ -133,6 +141,8 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	{
 		logCurrentUser();
 
+		resolveLiteralInternalRelatedArtifactUrls(resource);
+
 		Optional<String> reasonCreateAllowed = authorizationRule.reasonCreateAllowed(getCurrentUser(), resource);
 
 		if (reasonCreateAllowed.isEmpty())
@@ -159,6 +169,26 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 
 				return created;
 			});
+		}
+	}
+
+	private void resolveLiteralInternalRelatedArtifactUrls(R resource)
+	{
+		if (resource == null)
+			return;
+
+		referenceExtractor.getReferences(resource)
+				.filter(ref -> ReferenceType.RELATED_ARTEFACT_LITERAL_INTERNAL_URL.equals(ref.getType(serverBase)))
+				.forEach(this::resolveLiteralInternalRelatedArtifactUrl);
+	}
+
+	private void resolveLiteralInternalRelatedArtifactUrl(ResourceReference reference)
+	{
+		if (reference.hasRelatedArtifact())
+		{
+			IdType newId = new IdType(reference.getValue());
+			String absoluteUrl = newId.withServerBase(serverBase, newId.getResourceType()).getValue();
+			reference.getRelatedArtifact().setUrl(absoluteUrl);
 		}
 	}
 
@@ -332,6 +362,8 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 
 	private Response update(String id, R newResource, UriInfo uri, HttpHeaders headers, R oldResource)
 	{
+		resolveLiteralInternalRelatedArtifactUrls(newResource);
+		
 		Optional<String> reasonUpdateAllowed = authorizationRule.reasonUpdateAllowed(getCurrentUser(), oldResource,
 				newResource);
 

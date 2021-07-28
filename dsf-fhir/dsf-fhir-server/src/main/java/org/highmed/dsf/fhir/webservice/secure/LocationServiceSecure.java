@@ -6,6 +6,7 @@ import org.highmed.dsf.fhir.help.ExceptionHandler;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.highmed.dsf.fhir.service.ReferenceCleaner;
+import org.highmed.dsf.fhir.service.ReferenceExtractor;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.highmed.dsf.fhir.validation.ResourceValidator;
 import org.highmed.dsf.fhir.webservice.specification.LocationService;
@@ -15,11 +16,13 @@ public class LocationServiceSecure extends AbstractResourceServiceSecure<Locatio
 		implements LocationService
 {
 	public LocationServiceSecure(LocationService delegate, String serverBase, ResponseGenerator responseGenerator,
-			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner, LocationDao locationDao,
-			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter,
-			AuthorizationRule<Location> authorizationRule, ResourceValidator resourceValidator)
+			ReferenceResolver referenceResolver, ReferenceCleaner referenceCleaner,
+			ReferenceExtractor referenceExtractor, LocationDao locationDao, ExceptionHandler exceptionHandler,
+			ParameterConverter parameterConverter, AuthorizationRule<Location> authorizationRule,
+			ResourceValidator resourceValidator)
 	{
-		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, Location.class, locationDao,
-				exceptionHandler, parameterConverter, authorizationRule, resourceValidator);
+		super(delegate, serverBase, responseGenerator, referenceResolver, referenceCleaner, referenceExtractor,
+				Location.class, locationDao, exceptionHandler, parameterConverter, authorizationRule,
+				resourceValidator);
 	}
 }
