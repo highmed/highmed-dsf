@@ -9,9 +9,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-
 import org.apache.commons.lang3.StringUtils;
 import org.highmed.dsf.fhir.dao.GroupDao;
 import org.highmed.dsf.fhir.dao.ResearchStudyDao;
@@ -312,7 +309,7 @@ public class ResearchStudyIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
-	public void testSearchResearchStudyDeletePermanentlyByLocalDeletionUser() throws Exception
+	public void testDeletePermanentlyByLocalDeletionUser() throws Exception
 	{
 		ResearchStudy researchStudy = getResearchStudy(null);
 		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
@@ -327,7 +324,7 @@ public class ResearchStudyIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
-	public void testSearchResearchStudyDeletePermanentlyByLocalDeletionUserNotMarkedAsDeleted() throws Exception
+	public void testDeletePermanentlyByLocalDeletionUserNotMarkedAsDeleted() throws Exception
 	{
 		ResearchStudy researchStudy = getResearchStudy(null);
 		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
@@ -337,7 +334,7 @@ public class ResearchStudyIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
-	public void testSearchResearchStudyDeletePermanentlyByExternalUser() throws Exception
+	public void testDeletePermanentlyByExternalUser() throws Exception
 	{
 		ResearchStudy researchStudy = getResearchStudy(null);
 		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
