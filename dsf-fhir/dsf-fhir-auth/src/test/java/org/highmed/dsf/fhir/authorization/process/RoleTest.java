@@ -13,25 +13,47 @@ import org.junit.Test;
 
 public class RoleTest
 {
-	private static final String MEMBER_IDENTIFIER = "member.com";
 	private static final String CONSORTIUM_IDENTIFIER = "consortium.org";
+	private static final String MEMBER_IDENTIFIER = "member.com";
 	private static final String MEMBER_ROLE_SYSTEM = "roleSystem";
 	private static final String MEMBER_ROLE_CODE = "roleCode";
 
-	private Role local = new Role(UserRole.LOCAL, CONSORTIUM_IDENTIFIER, MEMBER_ROLE_SYSTEM, MEMBER_ROLE_CODE);
-	private Role remote = new Role(UserRole.REMOTE, CONSORTIUM_IDENTIFIER, MEMBER_ROLE_SYSTEM, MEMBER_ROLE_CODE);
+	private static final Role local = new Role(UserRole.LOCAL, CONSORTIUM_IDENTIFIER, MEMBER_ROLE_SYSTEM,
+			MEMBER_ROLE_CODE);
+	private static final Role remote = new Role(UserRole.REMOTE, CONSORTIUM_IDENTIFIER, MEMBER_ROLE_SYSTEM,
+			MEMBER_ROLE_CODE);
 
-	private org.hl7.fhir.r4.model.Organization createFhirOrganization(String identifier)
+	private static org.hl7.fhir.r4.model.Organization createFhirOrganization(String identifierValue)
+	{
+		return createFhirOrganization(identifierValue, ProcessAuthorizationHelper.ORGANIZATION_IDENTIFIER_SYSTEM);
+	}
+
+	private static org.hl7.fhir.r4.model.Organization createFhirOrganization(String identifierValue,
+			String identifierSystem)
 	{
 		var o = new org.hl7.fhir.r4.model.Organization();
 		o.setActive(true);
-		o.getIdentifierFirstRep().setSystem(ProcessAuthorizationHelper.ORGANIZATION_IDENTIFIER_SYSTEM)
-				.setValue(identifier);
+		o.getIdentifierFirstRep().setSystem(identifierSystem).setValue(identifierValue);
 		return o;
 	}
 
-	private OrganizationAffiliation createOrganizationAffiliation(String consortiumIdentifier, String memberIdentifier,
-			String memberRoleSystem, String memberRoleCode)
+	private static final User LOCAL_ORG_ACTIVE = User.local(createFhirOrganization(MEMBER_IDENTIFIER));
+	private static final User LOCAL_ORG_NOT_ACTIVE = User
+			.local(createFhirOrganization(MEMBER_IDENTIFIER).setActive(false));
+	private static final User LOCAL_NO_ORG = User.local(null);
+	private static final User LOCAL_ORG_BAD_IDENTIFIER = User.local(createFhirOrganization("wrong.identifier"));
+	private static final User LOCAL_ORG_BAD_IDENTIFIER_SYSTEM = User
+			.local(createFhirOrganization(MEMBER_IDENTIFIER, "bad.system"));
+	private static final User REMOTE_ORG_ACTIVE = User.remote(createFhirOrganization(MEMBER_IDENTIFIER));
+	private static final User REMOTE_ORG_NOT_ACTIVE = User
+			.remote(createFhirOrganization(MEMBER_IDENTIFIER).setActive(false));
+	private static final User REMOTE_NO_ORG = User.remote((Organization) null);
+	private static final User REMOTE_ORG_BAD_IDENTIFIER = User.remote(createFhirOrganization("wrong.identifier"));
+	private static final User REMOTE_ORG_BAD_IDENTIFIER_SYSTEM = User
+			.remote(createFhirOrganization(MEMBER_IDENTIFIER, "bad.system"));
+
+	private static OrganizationAffiliation createOrganizationAffiliation(String consortiumIdentifier,
+			String memberIdentifier, String memberRoleSystem, String memberRoleCode)
 	{
 		var a = new OrganizationAffiliation();
 		a.setActive(true);
@@ -44,31 +66,30 @@ public class RoleTest
 		return a;
 	}
 
-	private Stream<OrganizationAffiliation> okAffiliation()
+	private static final OrganizationAffiliation OK_AFFILIATION = createOrganizationAffiliation(CONSORTIUM_IDENTIFIER,
+			MEMBER_IDENTIFIER, MEMBER_ROLE_SYSTEM, MEMBER_ROLE_CODE);
+
+	private static Stream<OrganizationAffiliation> okAffiliation()
 	{
-		return Stream.of(createOrganizationAffiliation(CONSORTIUM_IDENTIFIER, MEMBER_IDENTIFIER, MEMBER_ROLE_SYSTEM,
-				MEMBER_ROLE_CODE));
+		return Stream.of(OK_AFFILIATION);
 	}
 
 	@Test
 	public void testLocalRoleRecipientOk() throws Exception
 	{
-		assertTrue(local.isRecipientAuthorized(
-				new User(createFhirOrganization(MEMBER_IDENTIFIER), UserRole.LOCAL, "local"), okAffiliation()));
+		assertTrue(local.isRecipientAuthorized(LOCAL_ORG_ACTIVE, okAffiliation()));
 	}
 
 	@Test
 	public void testLocalRoleRecipientNotOkOrganizationNotActive() throws Exception
 	{
-		assertFalse(local.isRecipientAuthorized(
-				new User(createFhirOrganization(MEMBER_IDENTIFIER).setActive(false), UserRole.LOCAL, "local"),
-				okAffiliation()));
+		assertFalse(local.isRecipientAuthorized(LOCAL_ORG_NOT_ACTIVE, okAffiliation()));
 	}
 
 	@Test
 	public void testLocalRoleRecipientNotOkNoOrganization() throws Exception
 	{
-		assertFalse(local.isRecipientAuthorized(new User(null, UserRole.LOCAL, "local"), okAffiliation()));
+		assertFalse(local.isRecipientAuthorized(LOCAL_NO_ORG, okAffiliation()));
 	}
 
 	@Test
@@ -80,38 +101,31 @@ public class RoleTest
 	@Test
 	public void testLocalRoleRecipientNotOkRemoteOrganization() throws Exception
 	{
-		assertFalse(local.isRecipientAuthorized(
-				new User(createFhirOrganization(MEMBER_IDENTIFIER), UserRole.REMOTE, "remote"), okAffiliation()));
+		assertFalse(local.isRecipientAuthorized(REMOTE_ORG_ACTIVE, okAffiliation()));
 	}
 
 	@Test
 	public void testLocalRoleRecipientNotOkNoAffiliations() throws Exception
 	{
-		assertFalse(local.isRecipientAuthorized(
-				new User(createFhirOrganization(MEMBER_IDENTIFIER), UserRole.LOCAL, "local"), Stream.empty()));
+		assertFalse(local.isRecipientAuthorized(LOCAL_ORG_ACTIVE, Stream.empty()));
 	}
 
 	@Test
 	public void testLocalRoleRecipientNotOkAffiliationsNull() throws Exception
 	{
-		assertFalse(local.isRecipientAuthorized(
-				new User(createFhirOrganization(MEMBER_IDENTIFIER), UserRole.LOCAL, "local"),
-				(Stream<OrganizationAffiliation>) null));
+		assertFalse(local.isRecipientAuthorized(LOCAL_ORG_ACTIVE, (Stream<OrganizationAffiliation>) null));
 	}
 
 	@Test
 	public void testLocalRoleRecipientNotOkBadMemberIdentifier() throws Exception
 	{
-		assertFalse(local.isRecipientAuthorized(
-				new User(createFhirOrganization("wrong.identifier"), UserRole.LOCAL, "local"), okAffiliation()));
+		assertFalse(local.isRecipientAuthorized(LOCAL_ORG_BAD_IDENTIFIER, okAffiliation()));
 	}
 
 	@Test
 	public void testLocalRoleRecipientNotOkBadMemberIdentifierSystem() throws Exception
 	{
-		Organization org = createFhirOrganization(MEMBER_IDENTIFIER);
-		org.getIdentifierFirstRep().setSystem("bad.system");
-		assertFalse(local.isRecipientAuthorized(new User(org, UserRole.LOCAL, "local"), okAffiliation()));
+		assertFalse(local.isRecipientAuthorized(LOCAL_ORG_BAD_IDENTIFIER_SYSTEM, okAffiliation()));
 	}
 
 	@Test
@@ -120,8 +134,7 @@ public class RoleTest
 		Stream<OrganizationAffiliation> affiliations = Stream.of(createOrganizationAffiliation(CONSORTIUM_IDENTIFIER,
 				MEMBER_IDENTIFIER, MEMBER_ROLE_SYSTEM, "bad.roleCode"));
 
-		assertFalse(local.isRecipientAuthorized(
-				new User(createFhirOrganization(MEMBER_IDENTIFIER), UserRole.LOCAL, "local"), affiliations));
+		assertFalse(local.isRecipientAuthorized(LOCAL_ORG_ACTIVE, affiliations));
 	}
 
 	@Test
@@ -130,8 +143,7 @@ public class RoleTest
 		Stream<OrganizationAffiliation> affiliations = Stream.of(createOrganizationAffiliation(CONSORTIUM_IDENTIFIER,
 				MEMBER_IDENTIFIER, "bad.roleSystem", MEMBER_ROLE_CODE));
 
-		assertFalse(local.isRecipientAuthorized(
-				new User(createFhirOrganization(MEMBER_IDENTIFIER), UserRole.LOCAL, "local"), affiliations));
+		assertFalse(local.isRecipientAuthorized(LOCAL_ORG_ACTIVE, affiliations));
 	}
 
 	// ---
@@ -139,22 +151,19 @@ public class RoleTest
 	@Test
 	public void testRemoteRoleRecipientOk() throws Exception
 	{
-		assertTrue(remote.isRecipientAuthorized(
-				new User(createFhirOrganization(MEMBER_IDENTIFIER), UserRole.REMOTE, "remote"), okAffiliation()));
+		assertTrue(remote.isRecipientAuthorized(REMOTE_ORG_ACTIVE, okAffiliation()));
 	}
 
 	@Test
 	public void testRemoteRoleRecipientNotOkOrganizationNotActive() throws Exception
 	{
-		assertFalse(remote.isRecipientAuthorized(
-				new User(createFhirOrganization(MEMBER_IDENTIFIER).setActive(false), UserRole.REMOTE, "remote"),
-				okAffiliation()));
+		assertFalse(remote.isRecipientAuthorized(REMOTE_ORG_NOT_ACTIVE, okAffiliation()));
 	}
 
 	@Test
 	public void testRemoteRoleRecipientNotOkNoOrganization() throws Exception
 	{
-		assertFalse(remote.isRecipientAuthorized(new User(null, UserRole.REMOTE, "remote"), okAffiliation()));
+		assertFalse(remote.isRecipientAuthorized(REMOTE_NO_ORG, okAffiliation()));
 	}
 
 	@Test
@@ -166,38 +175,31 @@ public class RoleTest
 	@Test
 	public void testRemoteRoleRecipientNotOkLocalOrganization() throws Exception
 	{
-		assertFalse(remote.isRecipientAuthorized(
-				new User(createFhirOrganization(MEMBER_IDENTIFIER), UserRole.LOCAL, "local"), okAffiliation()));
+		assertFalse(remote.isRecipientAuthorized(LOCAL_ORG_ACTIVE, okAffiliation()));
 	}
 
 	@Test
 	public void testRemoteRoleRecipientNotOkNoAffiliations() throws Exception
 	{
-		assertFalse(remote.isRecipientAuthorized(
-				new User(createFhirOrganization(MEMBER_IDENTIFIER), UserRole.REMOTE, "remote"), Stream.empty()));
+		assertFalse(remote.isRecipientAuthorized(REMOTE_ORG_ACTIVE, Stream.empty()));
 	}
 
 	@Test
 	public void testRemoteRoleRecipientNotOkAffiliationsNull() throws Exception
 	{
-		assertFalse(remote.isRecipientAuthorized(
-				new User(createFhirOrganization(MEMBER_IDENTIFIER), UserRole.REMOTE, "remote"),
-				(Stream<OrganizationAffiliation>) null));
+		assertFalse(remote.isRecipientAuthorized(REMOTE_ORG_ACTIVE, (Stream<OrganizationAffiliation>) null));
 	}
 
 	@Test
 	public void testRemoteRoleRecipientNotOkBadMemberIdentifier() throws Exception
 	{
-		assertFalse(remote.isRecipientAuthorized(
-				new User(createFhirOrganization("wrong.identifier"), UserRole.REMOTE, "remote"), okAffiliation()));
+		assertFalse(remote.isRecipientAuthorized(REMOTE_ORG_BAD_IDENTIFIER, okAffiliation()));
 	}
 
 	@Test
 	public void testRemoteRoleRecipientNotOkBadMemberIdentifierSystem() throws Exception
 	{
-		Organization org = createFhirOrganization(MEMBER_IDENTIFIER);
-		org.getIdentifierFirstRep().setSystem("bad.system");
-		assertFalse(remote.isRecipientAuthorized(new User(org, UserRole.REMOTE, "remote"), okAffiliation()));
+		assertFalse(remote.isRecipientAuthorized(REMOTE_ORG_BAD_IDENTIFIER_SYSTEM, okAffiliation()));
 	}
 
 	@Test
@@ -206,8 +208,7 @@ public class RoleTest
 		Stream<OrganizationAffiliation> affiliations = Stream.of(createOrganizationAffiliation(CONSORTIUM_IDENTIFIER,
 				MEMBER_IDENTIFIER, MEMBER_ROLE_SYSTEM, "bad.roleCode"));
 
-		assertFalse(remote.isRecipientAuthorized(
-				new User(createFhirOrganization(MEMBER_IDENTIFIER), UserRole.REMOTE, "remote"), affiliations));
+		assertFalse(remote.isRecipientAuthorized(REMOTE_ORG_ACTIVE, affiliations));
 	}
 
 	@Test
@@ -216,8 +217,7 @@ public class RoleTest
 		Stream<OrganizationAffiliation> affiliations = Stream.of(createOrganizationAffiliation(CONSORTIUM_IDENTIFIER,
 				MEMBER_IDENTIFIER, "bad.roleSystem", MEMBER_ROLE_CODE));
 
-		assertFalse(remote.isRecipientAuthorized(
-				new User(createFhirOrganization(MEMBER_IDENTIFIER), UserRole.REMOTE, "remote"), affiliations));
+		assertFalse(remote.isRecipientAuthorized(REMOTE_ORG_ACTIVE, affiliations));
 	}
 
 	// --- --- ---
@@ -225,22 +225,19 @@ public class RoleTest
 	@Test
 	public void testLocalRoleRequesterOk() throws Exception
 	{
-		assertTrue(local.isRequesterAuthorized(
-				new User(createFhirOrganization(MEMBER_IDENTIFIER), UserRole.LOCAL, "local"), okAffiliation()));
+		assertTrue(local.isRequesterAuthorized(LOCAL_ORG_ACTIVE, okAffiliation()));
 	}
 
 	@Test
 	public void testLocalRoleRequesterNotOkOrganizationNotActive() throws Exception
 	{
-		assertFalse(local.isRequesterAuthorized(
-				new User(createFhirOrganization(MEMBER_IDENTIFIER).setActive(false), UserRole.LOCAL, "local"),
-				okAffiliation()));
+		assertFalse(local.isRequesterAuthorized(LOCAL_ORG_NOT_ACTIVE, okAffiliation()));
 	}
 
 	@Test
 	public void testLocalRoleRequesterNotOkNoOrganization() throws Exception
 	{
-		assertFalse(local.isRequesterAuthorized(new User(null, UserRole.LOCAL, "local"), okAffiliation()));
+		assertFalse(local.isRequesterAuthorized(LOCAL_NO_ORG, okAffiliation()));
 	}
 
 	@Test
@@ -252,38 +249,31 @@ public class RoleTest
 	@Test
 	public void testLocalRoleRequesterNotOkRemoteOrganization() throws Exception
 	{
-		assertFalse(local.isRequesterAuthorized(
-				new User(createFhirOrganization(MEMBER_IDENTIFIER), UserRole.REMOTE, "remote"), okAffiliation()));
+		assertFalse(local.isRequesterAuthorized(REMOTE_ORG_ACTIVE, okAffiliation()));
 	}
 
 	@Test
 	public void testLocalRoleRequesterNotOkNoAffiliations() throws Exception
 	{
-		assertFalse(local.isRequesterAuthorized(
-				new User(createFhirOrganization(MEMBER_IDENTIFIER), UserRole.LOCAL, "local"), Stream.empty()));
+		assertFalse(local.isRequesterAuthorized(LOCAL_ORG_ACTIVE, Stream.empty()));
 	}
 
 	@Test
 	public void testLocalRoleRequesterNotOkAffiliationsNull() throws Exception
 	{
-		assertFalse(local.isRequesterAuthorized(
-				new User(createFhirOrganization(MEMBER_IDENTIFIER), UserRole.LOCAL, "local"),
-				(Stream<OrganizationAffiliation>) null));
+		assertFalse(local.isRequesterAuthorized(LOCAL_ORG_ACTIVE, (Stream<OrganizationAffiliation>) null));
 	}
 
 	@Test
 	public void testLocalRoleRequesterNotOkBadMemberIdentifier() throws Exception
 	{
-		assertFalse(local.isRequesterAuthorized(
-				new User(createFhirOrganization("wrong.identifier"), UserRole.LOCAL, "local"), okAffiliation()));
+		assertFalse(local.isRequesterAuthorized(LOCAL_ORG_BAD_IDENTIFIER, okAffiliation()));
 	}
 
 	@Test
 	public void testLocalRoleRequesterNotOkBadMemberIdentifierSystem() throws Exception
 	{
-		Organization org = createFhirOrganization(MEMBER_IDENTIFIER);
-		org.getIdentifierFirstRep().setSystem("bad.system");
-		assertFalse(local.isRequesterAuthorized(new User(org, UserRole.LOCAL, "local"), okAffiliation()));
+		assertFalse(local.isRequesterAuthorized(LOCAL_ORG_BAD_IDENTIFIER_SYSTEM, okAffiliation()));
 	}
 
 	@Test
@@ -292,8 +282,7 @@ public class RoleTest
 		Stream<OrganizationAffiliation> affiliations = Stream.of(createOrganizationAffiliation(CONSORTIUM_IDENTIFIER,
 				MEMBER_IDENTIFIER, MEMBER_ROLE_SYSTEM, "bad.roleCode"));
 
-		assertFalse(local.isRequesterAuthorized(
-				new User(createFhirOrganization(MEMBER_IDENTIFIER), UserRole.LOCAL, "local"), affiliations));
+		assertFalse(local.isRequesterAuthorized(LOCAL_ORG_ACTIVE, affiliations));
 	}
 
 	@Test
@@ -302,8 +291,7 @@ public class RoleTest
 		Stream<OrganizationAffiliation> affiliations = Stream.of(createOrganizationAffiliation(CONSORTIUM_IDENTIFIER,
 				MEMBER_IDENTIFIER, "bad.roleSystem", MEMBER_ROLE_CODE));
 
-		assertFalse(local.isRequesterAuthorized(
-				new User(createFhirOrganization(MEMBER_IDENTIFIER), UserRole.LOCAL, "local"), affiliations));
+		assertFalse(local.isRequesterAuthorized(LOCAL_ORG_ACTIVE, affiliations));
 	}
 
 	// ---
@@ -311,22 +299,19 @@ public class RoleTest
 	@Test
 	public void testRemoteRoleRequesterOk() throws Exception
 	{
-		assertTrue(remote.isRequesterAuthorized(
-				new User(createFhirOrganization(MEMBER_IDENTIFIER), UserRole.REMOTE, "remote"), okAffiliation()));
+		assertTrue(remote.isRequesterAuthorized(REMOTE_ORG_ACTIVE, okAffiliation()));
 	}
 
 	@Test
 	public void testRemoteRoleRequesterNotOkOrganizationNotActive() throws Exception
 	{
-		assertFalse(remote.isRequesterAuthorized(
-				new User(createFhirOrganization(MEMBER_IDENTIFIER).setActive(false), UserRole.REMOTE, "remote"),
-				okAffiliation()));
+		assertFalse(remote.isRequesterAuthorized(REMOTE_ORG_NOT_ACTIVE, okAffiliation()));
 	}
 
 	@Test
 	public void testRemoteRoleRequesterNotOkNoOrganization() throws Exception
 	{
-		assertFalse(remote.isRequesterAuthorized(new User(null, UserRole.REMOTE, "remote"), okAffiliation()));
+		assertFalse(remote.isRequesterAuthorized(REMOTE_NO_ORG, okAffiliation()));
 	}
 
 	@Test
@@ -338,38 +323,31 @@ public class RoleTest
 	@Test
 	public void testRemoteRoleRequesterNotOkLocalOrganization() throws Exception
 	{
-		assertFalse(remote.isRequesterAuthorized(
-				new User(createFhirOrganization(MEMBER_IDENTIFIER), UserRole.LOCAL, "local"), okAffiliation()));
+		assertFalse(remote.isRequesterAuthorized(LOCAL_ORG_ACTIVE, okAffiliation()));
 	}
 
 	@Test
 	public void testRemoteRoleRequesterNotOkNoAffiliations() throws Exception
 	{
-		assertFalse(remote.isRequesterAuthorized(
-				new User(createFhirOrganization(MEMBER_IDENTIFIER), UserRole.REMOTE, "remote"), Stream.empty()));
+		assertFalse(remote.isRequesterAuthorized(REMOTE_ORG_ACTIVE, Stream.empty()));
 	}
 
 	@Test
 	public void testRemoteRoleRequesterNotOkAffiliationsNull() throws Exception
 	{
-		assertFalse(remote.isRequesterAuthorized(
-				new User(createFhirOrganization(MEMBER_IDENTIFIER), UserRole.REMOTE, "remote"),
-				(Stream<OrganizationAffiliation>) null));
+		assertFalse(remote.isRequesterAuthorized(REMOTE_ORG_ACTIVE, (Stream<OrganizationAffiliation>) null));
 	}
 
 	@Test
 	public void testRemoteRoleRequesterNotOkBadMemberIdentifier() throws Exception
 	{
-		assertFalse(remote.isRequesterAuthorized(
-				new User(createFhirOrganization("wrong.identifier"), UserRole.REMOTE, "remote"), okAffiliation()));
+		assertFalse(remote.isRequesterAuthorized(REMOTE_ORG_BAD_IDENTIFIER, okAffiliation()));
 	}
 
 	@Test
 	public void testRemoteRoleRequesterNotOkBadMemberIdentifierSystem() throws Exception
 	{
-		Organization org = createFhirOrganization(MEMBER_IDENTIFIER);
-		org.getIdentifierFirstRep().setSystem("bad.system");
-		assertFalse(remote.isRequesterAuthorized(new User(org, UserRole.REMOTE, "remote"), okAffiliation()));
+		assertFalse(remote.isRequesterAuthorized(REMOTE_ORG_BAD_IDENTIFIER_SYSTEM, okAffiliation()));
 	}
 
 	@Test
@@ -378,8 +356,7 @@ public class RoleTest
 		Stream<OrganizationAffiliation> affiliations = Stream.of(createOrganizationAffiliation(CONSORTIUM_IDENTIFIER,
 				MEMBER_IDENTIFIER, MEMBER_ROLE_SYSTEM, "bad.roleCode"));
 
-		assertFalse(remote.isRequesterAuthorized(
-				new User(createFhirOrganization(MEMBER_IDENTIFIER), UserRole.REMOTE, "remote"), affiliations));
+		assertFalse(remote.isRequesterAuthorized(REMOTE_ORG_ACTIVE, affiliations));
 	}
 
 	@Test
@@ -388,7 +365,6 @@ public class RoleTest
 		Stream<OrganizationAffiliation> affiliations = Stream.of(createOrganizationAffiliation(CONSORTIUM_IDENTIFIER,
 				MEMBER_IDENTIFIER, "bad.roleSystem", MEMBER_ROLE_CODE));
 
-		assertFalse(remote.isRequesterAuthorized(
-				new User(createFhirOrganization(MEMBER_IDENTIFIER), UserRole.REMOTE, "remote"), affiliations));
+		assertFalse(remote.isRequesterAuthorized(REMOTE_ORG_ACTIVE, affiliations));
 	}
 }

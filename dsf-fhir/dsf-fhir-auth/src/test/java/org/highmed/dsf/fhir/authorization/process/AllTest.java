@@ -12,27 +12,32 @@ import org.junit.Test;
 
 public class AllTest
 {
-	private All local = new All(UserRole.LOCAL);
-	private All remote = new All(UserRole.REMOTE);
+	private static final User REMOTE_NO_ORG = User.remote((Organization) null);
+	private static final User REMOTE_ORG_NOT_ACTIVE = User.remote(new Organization().setActive(false));
+	private static final User REMOTE_ORG_ACTIVE = User.remote(new Organization().setActive(true));
+	private static final User LOCAL_NO_ORG = User.local(null);
+	private static final User LOCAL_ORG_NOT_ACTIVE = User.local(new Organization().setActive(false));
+	private static final User LOCAL_ORG_ACTIVE = User.local(new Organization().setActive(true));
+
+	private static final All local = new All(UserRole.LOCAL);
+	private static final All remote = new All(UserRole.REMOTE);
 
 	@Test
 	public void testLocalAllRecipientOk() throws Exception
 	{
-		assertTrue(local.isRecipientAuthorized(new User(new Organization().setActive(true), UserRole.LOCAL, "local"),
-				Stream.empty()));
+		assertTrue(local.isRecipientAuthorized(LOCAL_ORG_ACTIVE, Stream.empty()));
 	}
 
 	@Test
 	public void testLocalAllRecipientNotOkOrganizationNotActive() throws Exception
 	{
-		assertFalse(local.isRecipientAuthorized(new User(new Organization().setActive(false), UserRole.LOCAL, "local"),
-				Stream.empty()));
+		assertFalse(local.isRecipientAuthorized(LOCAL_ORG_NOT_ACTIVE, Stream.empty()));
 	}
 
 	@Test
 	public void testLocalAllRecipientNotOkNoOrganization() throws Exception
 	{
-		assertFalse(local.isRecipientAuthorized(new User(null, UserRole.LOCAL, "local"), Stream.empty()));
+		assertFalse(local.isRecipientAuthorized(LOCAL_NO_ORG, Stream.empty()));
 	}
 
 	@Test
@@ -44,28 +49,25 @@ public class AllTest
 	@Test
 	public void testLocalAllRecipientNotOkRemoteOrganization() throws Exception
 	{
-		assertFalse(local.isRecipientAuthorized(new User(new Organization().setActive(true), UserRole.REMOTE, "remote"),
-				Stream.empty()));
+		assertFalse(local.isRecipientAuthorized(REMOTE_ORG_ACTIVE, Stream.empty()));
 	}
 
 	@Test
 	public void testRemoteAllRecipientOk() throws Exception
 	{
-		assertTrue(remote.isRecipientAuthorized(new User(new Organization().setActive(true), UserRole.REMOTE, "remote"),
-				Stream.empty()));
+		assertTrue(remote.isRecipientAuthorized(REMOTE_ORG_ACTIVE, Stream.empty()));
 	}
 
 	@Test
 	public void testRemoteAllRecipientNotOkOrganizationNotActive() throws Exception
 	{
-		assertFalse(remote.isRecipientAuthorized(
-				new User(new Organization().setActive(false), UserRole.REMOTE, "remote"), Stream.empty()));
+		assertFalse(remote.isRecipientAuthorized(REMOTE_ORG_NOT_ACTIVE, Stream.empty()));
 	}
 
 	@Test
 	public void testRemoteAllRecipientNotOkNoOrganization() throws Exception
 	{
-		assertFalse(remote.isRecipientAuthorized(new User(null, UserRole.REMOTE, "remote"), Stream.empty()));
+		assertFalse(remote.isRecipientAuthorized(REMOTE_NO_ORG, Stream.empty()));
 	}
 
 	@Test
@@ -77,28 +79,25 @@ public class AllTest
 	@Test
 	public void testRemoteAllRecipientNotOkLocalOrganization() throws Exception
 	{
-		assertFalse(remote.isRecipientAuthorized(new User(new Organization().setActive(true), UserRole.LOCAL, "local"),
-				Stream.empty()));
+		assertFalse(remote.isRecipientAuthorized(LOCAL_ORG_ACTIVE, Stream.empty()));
 	}
 
 	@Test
 	public void testLocalAllRequesterOk() throws Exception
 	{
-		assertTrue(local.isRequesterAuthorized(new User(new Organization().setActive(true), UserRole.LOCAL, "local"),
-				Stream.empty()));
+		assertTrue(local.isRequesterAuthorized(LOCAL_ORG_ACTIVE, Stream.empty()));
 	}
 
 	@Test
 	public void testLocalAllRequesterNotOkOrganizationNotActive() throws Exception
 	{
-		assertFalse(local.isRequesterAuthorized(new User(new Organization().setActive(false), UserRole.LOCAL, "local"),
-				Stream.empty()));
+		assertFalse(local.isRequesterAuthorized(LOCAL_ORG_NOT_ACTIVE, Stream.empty()));
 	}
 
 	@Test
 	public void testLocalAllRequesterNotOkNoOrganization() throws Exception
 	{
-		assertFalse(local.isRequesterAuthorized(new User(null, UserRole.LOCAL, "local"), Stream.empty()));
+		assertFalse(local.isRequesterAuthorized(LOCAL_NO_ORG, Stream.empty()));
 	}
 
 	@Test
@@ -110,28 +109,25 @@ public class AllTest
 	@Test
 	public void testLocalAllRequesterNotOkRemoteOrganization() throws Exception
 	{
-		assertFalse(local.isRequesterAuthorized(new User(new Organization().setActive(true), UserRole.REMOTE, "remote"),
-				Stream.empty()));
+		assertFalse(local.isRequesterAuthorized(REMOTE_ORG_ACTIVE, Stream.empty()));
 	}
 
 	@Test
 	public void testRemoteAllRequesterOk() throws Exception
 	{
-		assertTrue(remote.isRequesterAuthorized(new User(new Organization().setActive(true), UserRole.REMOTE, "remote"),
-				Stream.empty()));
+		assertTrue(remote.isRequesterAuthorized(REMOTE_ORG_ACTIVE, Stream.empty()));
 	}
 
 	@Test
 	public void testRemoteAllRequesterNotOkOrganizationNotActive() throws Exception
 	{
-		assertFalse(remote.isRequesterAuthorized(
-				new User(new Organization().setActive(false), UserRole.REMOTE, "remote"), Stream.empty()));
+		assertFalse(remote.isRequesterAuthorized(REMOTE_ORG_NOT_ACTIVE, Stream.empty()));
 	}
 
 	@Test
 	public void testRemoteAllRequesterNotOkNoOrganization() throws Exception
 	{
-		assertFalse(remote.isRequesterAuthorized(new User(null, UserRole.REMOTE, "remote"), Stream.empty()));
+		assertFalse(remote.isRequesterAuthorized(REMOTE_NO_ORG, Stream.empty()));
 	}
 
 	@Test
@@ -143,7 +139,6 @@ public class AllTest
 	@Test
 	public void testRemoteAllRequesterNotOkLocalOrganization() throws Exception
 	{
-		assertFalse(remote.isRequesterAuthorized(new User(new Organization().setActive(true), UserRole.LOCAL, "local"),
-				Stream.empty()));
+		assertFalse(remote.isRequesterAuthorized(LOCAL_ORG_ACTIVE, Stream.empty()));
 	}
 }

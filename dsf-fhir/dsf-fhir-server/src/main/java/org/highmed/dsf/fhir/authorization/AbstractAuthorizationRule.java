@@ -249,7 +249,7 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 
 	protected final boolean isLocalDeletionUser(User user)
 	{
-		return isLocalUser(user) && user.hasDeletePrivileges();
+		return isLocalUser(user) && user.isPermanentDeleteAllowed();
 	}
 
 	protected final boolean isRemoteUser(User user)

@@ -13,7 +13,6 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.authentication.UserRole;
 import org.highmed.dsf.fhir.dao.jdbc.BinaryDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.OrganizationAffiliationDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.OrganizationDaoJdbc;
@@ -131,7 +130,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao>
 		Binary createdB = dao.create(b);
 		assertNotNull(createdB);
 
-		SearchQuery<Binary> query = dao.createSearchQuery(new User(org, UserRole.LOCAL, "subjectDn"), 1, 1);
+		SearchQuery<Binary> query = dao.createSearchQuery(User.local(org), 1, 1);
 		query.configureParameters(Collections.emptyMap());
 		assertNotNull(query);
 
@@ -158,7 +157,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao>
 		Binary createdB = dao.create(b);
 		assertNotNull(createdB);
 
-		SearchQuery<Binary> query = dao.createSearchQuery(new User(org, UserRole.LOCAL, "subjectDn"), 1, 1);
+		SearchQuery<Binary> query = dao.createSearchQuery(User.local(org), 1, 1);
 		query.configureParameters(Collections.emptyMap());
 		assertNotNull(query);
 
@@ -196,7 +195,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao>
 		Binary createdB = dao.create(b);
 		assertNotNull(createdB);
 
-		SearchQuery<Binary> query = dao.createSearchQuery(new User(org, UserRole.REMOTE, "subjectDn"), 1, 1);
+		SearchQuery<Binary> query = dao.createSearchQuery(User.local(org), 1, 1);
 		query.configureParameters(Collections.emptyMap());
 		assertNotNull(query);
 
@@ -257,7 +256,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao>
 		Binary createdB = dao.create(b);
 		assertNotNull(createdB);
 
-		SearchQuery<Binary> query = dao.createSearchQuery(new User(memberOrg, UserRole.REMOTE, "subjectDn"), 1, 1);
+		SearchQuery<Binary> query = dao.createSearchQuery(User.local(memberOrg), 1, 1);
 		query.configureParameters(Collections.emptyMap());
 		assertNotNull(query);
 

@@ -71,20 +71,19 @@ public class OrganizationProviderWithDbBackend implements OrganizationProvider, 
 
 		String loginThumbprintHex = Hex.encodeHexString(getThumbprint(certificate));
 		String subjectDn = certificate.getSubjectX500Principal().getName(X500Principal.RFC1779);
-		logger.debug("Reading user-role of '{}', thumbprint '{}' (SHA-512)", subjectDn, loginThumbprintHex);
 
+		logger.debug("Reading user-role and deleteAllowed status of '{}', thumbprint '{}' (SHA-512)", subjectDn,
+				loginThumbprintHex);
 		UserRole userRole = localUserThumbprints.contains(loginThumbprintHex.toLowerCase()) ? UserRole.LOCAL
 				: UserRole.REMOTE;
+		boolean deleteAllowed = localDeletionUserThumbprints.contains(loginThumbprintHex.toLowerCase());
 
 		switch (userRole)
 		{
 			case LOCAL:
-				if (localDeletionUserThumbprints.contains(loginThumbprintHex.toLowerCase()))
-					return getLocalOrganization().map(org -> new User(org, userRole, true, subjectDn));
-				else
-					return getLocalOrganization().map(org -> new User(org, userRole, false, subjectDn));
+				return getLocalOrganization().map(User.local(deleteAllowed, subjectDn));
 			case REMOTE:
-				return getOrganization(loginThumbprintHex).map(org -> new User(org, userRole, subjectDn));
+				return getOrganization(loginThumbprintHex).map(User.remote(subjectDn));
 			default:
 				logger.warn("UserRole {} not supported", userRole);
 				return Optional.empty();

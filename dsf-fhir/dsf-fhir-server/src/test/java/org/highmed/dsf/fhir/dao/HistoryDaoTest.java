@@ -7,7 +7,6 @@ import java.util.UUID;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.authentication.UserRole;
 import org.highmed.dsf.fhir.dao.jdbc.BinaryDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.HistroyDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.OrganizationDaoJdbc;
@@ -68,8 +67,7 @@ public class HistoryDaoTest extends AbstractDbTest
 		organization.addIdentifier().setSystem("http://highmed.org/sid/organization-identifier").setValue("test.org");
 		Organization createdOrganization = orgDao.create(organization);
 
-		History history = dao.readHistory(
-				filterFactory.getUserFilters(new User(createdOrganization, UserRole.LOCAL, "local")),
+		History history = dao.readHistory(filterFactory.getUserFilters(User.local(createdOrganization)),
 				new PageAndCount(1, 1000), new AtParameter(), new SinceParameter());
 		assertNotNull(history);
 		assertEquals(1, history.getTotal());
@@ -87,7 +85,7 @@ public class HistoryDaoTest extends AbstractDbTest
 		Organization createdOrganization = orgDao.create(organization);
 
 		History history = dao.readHistory(
-				filterFactory.getUserFilter(new User(createdOrganization, UserRole.LOCAL, "local"), Organization.class),
+				filterFactory.getUserFilter(User.local(createdOrganization), Organization.class),
 				new PageAndCount(1, 1000), new AtParameter(), new SinceParameter(), Organization.class);
 		assertNotNull(history);
 		assertEquals(1, history.getTotal());
@@ -105,7 +103,7 @@ public class HistoryDaoTest extends AbstractDbTest
 		Organization createdOrganization = orgDao.create(organization);
 
 		History history = dao.readHistory(
-				filterFactory.getUserFilter(new User(createdOrganization, UserRole.LOCAL, "local"), Organization.class),
+				filterFactory.getUserFilter(User.local(createdOrganization), Organization.class),
 				new PageAndCount(1, 1000), new AtParameter(), new SinceParameter(), Organization.class,
 				UUID.fromString(createdOrganization.getIdElement().getIdPart()));
 

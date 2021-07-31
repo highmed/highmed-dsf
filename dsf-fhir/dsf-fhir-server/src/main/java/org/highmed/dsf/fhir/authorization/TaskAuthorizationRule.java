@@ -14,7 +14,6 @@ import java.util.stream.Stream;
 
 import org.highmed.dsf.fhir.authentication.OrganizationProvider;
 import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.authentication.UserRole;
 import org.highmed.dsf.fhir.authorization.process.ProcessAuthorizationHelper;
 import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.dao.TaskDao;
@@ -277,7 +276,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 
 	private Optional<User> getRecipient()
 	{
-		return organizationProvider.getLocalOrganization().map(org -> new User(org, UserRole.LOCAL, "local"));
+		return organizationProvider.getLocalOrganization().map(User.local());
 	}
 
 	@Override
