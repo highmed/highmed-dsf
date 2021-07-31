@@ -19,7 +19,6 @@ import org.highmed.dsf.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.dsf.fhir.dao.exception.ResourceNotFoundException;
 import org.highmed.dsf.fhir.dao.exception.ResourceNotMarkedDeletedException;
 import org.highmed.dsf.fhir.dao.exception.ResourceVersionNoMatchException;
-import org.highmed.dsf.fhir.function.TriFunction;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -34,6 +33,12 @@ import de.rwh.utils.test.LiquibaseTemplateTestRule;
 
 public abstract class AbstractResourceDaoTest<D extends Resource, C extends ResourceDao<D>> extends AbstractDbTest
 {
+	@FunctionalInterface
+	public static interface TriFunction<A, B, C, R>
+	{
+		R apply(A a, B b, C c);
+	}
+
 	public static final String DAO_DB_TEMPLATE_NAME = "dao_template";
 
 	protected static final BasicDataSource adminDataSource = createAdminBasicDataSource();
