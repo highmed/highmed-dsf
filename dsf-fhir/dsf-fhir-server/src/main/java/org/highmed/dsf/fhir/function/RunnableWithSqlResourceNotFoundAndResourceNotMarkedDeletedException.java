@@ -6,7 +6,7 @@ import org.highmed.dsf.fhir.dao.exception.ResourceNotFoundException;
 import org.highmed.dsf.fhir.dao.exception.ResourceNotMarkedDeletedException;
 
 @FunctionalInterface
-public interface SupplierWithSqlAndResourceNotMarkedDeletedException<R>
+public interface RunnableWithSqlResourceNotFoundAndResourceNotMarkedDeletedException
 {
-	R get() throws SQLException, ResourceNotFoundException, ResourceNotMarkedDeletedException;
+	void run() throws SQLException, ResourceNotFoundException, ResourceNotMarkedDeletedException;
 }

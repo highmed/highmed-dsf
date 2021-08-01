@@ -44,7 +44,7 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 	protected static final BasicDataSource adminDataSource = createAdminBasicDataSource();
 	protected static final BasicDataSource liquibaseDataSource = createLiquibaseDataSource();
 	protected static final BasicDataSource defaultDataSource = createDefaultDataSource();
-	protected static final BasicDataSource deletionDataSource = createDeletionDataSource();
+	protected static final BasicDataSource permanentDeleteDataSource = createPermanentDeleteDataSource();
 
 	@ClassRule
 	public static final LiquibaseTemplateTestClassRule liquibaseRule = new LiquibaseTemplateTestClassRule(
@@ -57,7 +57,7 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 		defaultDataSource.start();
 		liquibaseDataSource.start();
 		adminDataSource.start();
-		deletionDataSource.start();
+		permanentDeleteDataSource.start();
 	}
 
 	@AfterClass
@@ -66,7 +66,7 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 		defaultDataSource.close();
 		liquibaseDataSource.close();
 		adminDataSource.close();
-		deletionDataSource.close();
+		permanentDeleteDataSource.close();
 	}
 
 	@Rule
@@ -89,7 +89,7 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 	@Before
 	public void before() throws Exception
 	{
-		dao = daoCreator.apply(defaultDataSource, deletionDataSource, fhirContext);
+		dao = daoCreator.apply(defaultDataSource, permanentDeleteDataSource, fhirContext);
 	}
 
 	protected C getDao()
@@ -295,7 +295,7 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 	}
 
 	@Test(expected = ResourceNotMarkedDeletedException.class)
-	public void testExpungeNotMarkedAsDeleted() throws Exception
+	public void testDeletePermanentlyNotMarkedAsDeleted() throws Exception
 	{
 		D newResource = createResource();
 		assertNull(newResource.getId());
@@ -306,11 +306,11 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 		assertNotNull(createdResource.getId());
 		assertNotNull(createdResource.getMeta().getVersionId());
 
-		dao.expunge(UUID.fromString(createdResource.getIdElement().getIdPart()));
+		dao.deletePermanently(UUID.fromString(createdResource.getIdElement().getIdPart()));
 	}
 
 	@Test
-	public void testExpunge() throws Exception
+	public void testDeletePermanently() throws Exception
 	{
 		D newResource = createResource();
 		assertNull(newResource.getId());
@@ -323,15 +323,15 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 
 		dao.delete(UUID.fromString(createdResource.getIdElement().getIdPart()));
 
-		dao.expunge(UUID.fromString(createdResource.getIdElement().getIdPart()));
+		dao.deletePermanently(UUID.fromString(createdResource.getIdElement().getIdPart()));
 
 		assertFalse(dao.read(UUID.fromString(createdResource.getIdElement().getIdPart())).isPresent());
 	}
 
 	@Test(expected = ResourceNotFoundException.class)
-	public void testExpungeNotFound() throws Exception
+	public void testDeletePermanentlyNotFound() throws Exception
 	{
-		dao.expunge(UUID.randomUUID());
+		dao.deletePermanently(UUID.randomUUID());
 	}
 
 	@Test

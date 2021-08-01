@@ -15,18 +15,22 @@ public abstract class AbstractDbTest
 	}
 
 	protected static final String CHANGE_LOG_FILE = "db/db.changelog.xml";
-	protected static final String DATABASE_USER_GROUP = "server_user_group";
 
+	protected static final String DATABASE_USERS_GROUP = "server_users_group";
 	protected static final String DATABASE_USER = "server_user";
-	protected static final String DATABASE_PASSWORD = "server_user_password";
-	protected static final String DATABASE_DELETION_USER = "server_deletion_user";
-	protected static final String DATABASE_DELETION_PASSWORD = "server_deletion_user_password";
+	protected static final String DATABASE_USER_PASSWORD = "server_user_password";
+
+	protected static final String DATABASE_DELETE_USERS_GROUP = "server_permanent_delete_users_group";
+	protected static final String DATABASE_DELETE_USER = "server_permanent_delete_user";
+	protected static final String DATABASE_DELETE_USER_PASSWORD = "server_permanent_delete_user_password";
+
 	protected static final String DATABASE_URL = "jdbc:postgresql://localhost:54321/db";
 
 	protected static final Map<String, String> CHANGE_LOG_PARAMETERS = Map.of("db.liquibase_user", "postgres",
-			"db.server_users_group", DATABASE_USER_GROUP, "db.server_user", DATABASE_USER, "db.server_user_password",
-			DATABASE_PASSWORD, "db.server_deletion_user", DATABASE_DELETION_USER, "db.server_deletion_user_password",
-			DATABASE_DELETION_PASSWORD);
+			"db.server_users_group", DATABASE_USERS_GROUP, "db.server_user", DATABASE_USER, "db.server_user_password",
+			DATABASE_USER_PASSWORD, "db.server_permanent_delete_users_group", DATABASE_DELETE_USERS_GROUP,
+			"db.server_permanent_delete_user", DATABASE_DELETE_USER, "db.server_permanent_delete_user_password",
+			DATABASE_DELETE_USER_PASSWORD);
 
 	public static BasicDataSource createDefaultDataSource()
 	{
@@ -34,7 +38,7 @@ public abstract class AbstractDbTest
 		dataSource.setDriverClassName(Driver.class.getName());
 		dataSource.setUrl(DATABASE_URL);
 		dataSource.setUsername(DATABASE_USER);
-		dataSource.setPassword(DATABASE_PASSWORD);
+		dataSource.setPassword(DATABASE_USER_PASSWORD);
 		dataSource.setDefaultReadOnly(true);
 
 		dataSource.setTestOnBorrow(true);
@@ -72,13 +76,13 @@ public abstract class AbstractDbTest
 		return dataSource;
 	}
 
-	public static BasicDataSource createDeletionDataSource()
+	public static BasicDataSource createPermanentDeleteDataSource()
 	{
 		BasicDataSource dataSource = new BasicDataSource();
 		dataSource.setDriverClassName(Driver.class.getName());
 		dataSource.setUrl(DATABASE_URL);
-		dataSource.setUsername(DATABASE_DELETION_USER);
-		dataSource.setPassword(DATABASE_DELETION_PASSWORD);
+		dataSource.setUsername(DATABASE_DELETE_USER);
+		dataSource.setPassword(DATABASE_DELETE_USER_PASSWORD);
 		dataSource.setDefaultReadOnly(true);
 
 		dataSource.setTestOnBorrow(true);

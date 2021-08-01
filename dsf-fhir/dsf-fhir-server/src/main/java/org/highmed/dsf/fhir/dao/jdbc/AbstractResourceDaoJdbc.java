@@ -103,7 +103,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	}
 
 	private final DataSource dataSource;
-	private final DataSource deletionDataSource;
+	private final DataSource permanentDeleteDataSource;
 	private final Class<R> resourceType;
 	private final String resourceTypeName;
 
@@ -126,15 +126,15 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	 * Using a suppliers for SearchParameters, implementations are not thread safe and because of that they need to be
 	 * created on a request basis
 	 */
-	AbstractResourceDaoJdbc(DataSource dataSource, DataSource deletionDataSource, FhirContext fhirContext,
+	AbstractResourceDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext,
 			Class<R> resourceType, String resourceTable, String resourceColumn, String resourceIdColumn,
 			Function<User, SearchQueryUserFilter> userFilter,
 			List<Supplier<SearchQueryParameter<R>>> searchParameterFactories,
 			List<Supplier<SearchQueryRevIncludeParameterFactory>> searchRevIncludeParameterFactories)
 	{
-		this(dataSource, deletionDataSource, fhirContext, resourceType, resourceTable, resourceColumn, resourceIdColumn,
-				new PreparedStatementFactoryDefault<>(fhirContext, resourceType, resourceTable, resourceIdColumn,
-						resourceColumn),
+		this(dataSource, permanentDeleteDataSource, fhirContext, resourceType, resourceTable, resourceColumn,
+				resourceIdColumn, new PreparedStatementFactoryDefault<>(fhirContext, resourceType, resourceTable,
+						resourceIdColumn, resourceColumn),
 				userFilter, searchParameterFactories, searchRevIncludeParameterFactories);
 	}
 
@@ -142,14 +142,14 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	 * Using a suppliers for SearchParameters, implementations are not thread safe and because of that they need to be
 	 * created on a request basis
 	 */
-	AbstractResourceDaoJdbc(DataSource dataSource, DataSource deletionDataSource, FhirContext fhirContext,
+	AbstractResourceDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext,
 			Class<R> resourceType, String resourceTable, String resourceColumn, String resourceIdColumn,
 			PreparedStatementFactory<R> preparedStatementFactory, Function<User, SearchQueryUserFilter> userFilter,
 			List<Supplier<SearchQueryParameter<R>>> searchParameterFactories,
 			List<Supplier<SearchQueryRevIncludeParameterFactory>> searchRevIncludeParameterFactories)
 	{
 		this.dataSource = dataSource;
-		this.deletionDataSource = deletionDataSource;
+		this.permanentDeleteDataSource = permanentDeleteDataSource;
 		this.resourceType = resourceType;
 		resourceTypeName = Objects.requireNonNull(resourceType, "resourceType").getAnnotation(ResourceDef.class).name();
 
@@ -171,6 +171,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	public void afterPropertiesSet() throws Exception
 	{
 		Objects.requireNonNull(dataSource, "dataSource");
+		Objects.requireNonNull(permanentDeleteDataSource, "permanentDeleteDataSource");
 		Objects.requireNonNull(resourceType, "resourceType");
 		Objects.requireNonNull(resourceTable, "resourceTable");
 		Objects.requireNonNull(resourceColumn, "resourceColumn");
@@ -760,9 +761,6 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	@Override
 	public final boolean delete(UUID uuid) throws SQLException, ResourceNotFoundException
 	{
-		if (uuid == null)
-			throw new ResourceNotFoundException("'null'");
-
 		try (Connection connection = dataSource.getConnection())
 		{
 			connection.setReadOnly(false);
@@ -775,17 +773,14 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	public boolean deleteWithTransaction(Connection connection, UUID uuid)
 			throws SQLException, ResourceNotFoundException
 	{
-		if (uuid == null)
-			throw new ResourceNotFoundException("'null'");
+		return delete(connection, uuid);
+	}
+
+	protected final boolean delete(Connection connection, UUID uuid) throws SQLException, ResourceNotFoundException
+	{
 		Objects.requireNonNull(connection, "connection");
 		if (connection.isReadOnly())
 			throw new IllegalStateException("Connection is read-only");
-
-		return markDeleted(connection, uuid);
-	}
-
-	protected final boolean markDeleted(Connection connection, UUID uuid) throws SQLException, ResourceNotFoundException
-	{
 		if (uuid == null)
 			throw new ResourceNotFoundException("'null'");
 
@@ -916,24 +911,27 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	}
 
 	@Override
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public final SearchQuery<R> createSearchQuery(User user, int page, int count)
 	{
-		return SearchQueryBuilder.create(resourceType, getResourceTable(), getResourceColumn(), page, count)
-				.with(userFilter.apply(user))
-				.with(new ResourceId(getResourceIdColumn()), new ResourceLastUpdated(getResourceColumn()),
-						new ResourceProfile(getResourceColumn()))
-				.with(searchParameterFactories.stream().map(Supplier::get).toArray(SearchQueryParameter[]::new))
-				.withRevInclude(searchRevIncludeParameterFactories.stream().map(Supplier::get)
-						.toArray(SearchQueryRevIncludeParameterFactory[]::new))
-				.build();
+		Objects.requireNonNull(user, "user");
+		return doCreateSearchQuery(user, page, count);
 	}
 
 	@Override
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public SearchQuery<R> createSearchQueryWithoutUserFilter(int page, int count)
 	{
-		return SearchQueryBuilder.create(resourceType, getResourceTable(), getResourceColumn(), page, count)
+		return doCreateSearchQuery(null, page, count);
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private SearchQuery<R> doCreateSearchQuery(User user, int page, int count)
+	{
+		var builder = SearchQueryBuilder.create(resourceType, getResourceTable(), getResourceColumn(), page, count);
+
+		if (user != null)
+			builder = builder.with(userFilter.apply(user));
+
+		return builder
 				.with(new ResourceId(getResourceIdColumn()), new ResourceLastUpdated(getResourceColumn()),
 						new ResourceProfile(getResourceColumn()))
 				.with(searchParameterFactories.stream().map(Supplier::get).toArray(SearchQueryParameter[]::new))
@@ -943,45 +941,31 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	}
 
 	@Override
-	public boolean expunge(UUID uuid) throws SQLException, ResourceNotFoundException, ResourceNotMarkedDeletedException
+	public void deletePermanently(UUID uuid)
+			throws SQLException, ResourceNotFoundException, ResourceNotMarkedDeletedException
 	{
-		if (uuid == null)
-			throw new ResourceNotFoundException("'null'");
-
-		try (Connection connection = deletionDataSource.getConnection())
+		try (Connection connection = permanentDeleteDataSource.getConnection())
 		{
 			connection.setReadOnly(false);
 
-			return expungeWithTransaction(connection, uuid);
+			deletePermanentlyWithTransaction(connection, uuid);
 		}
 	}
 
 	@Override
-	public boolean expungeWithTransaction(Connection connection, UUID uuid)
+	public void deletePermanentlyWithTransaction(Connection connection, UUID uuid)
 			throws SQLException, ResourceNotFoundException, ResourceNotMarkedDeletedException
 	{
-		if (uuid == null)
-			throw new ResourceNotFoundException("'null'");
 		Objects.requireNonNull(connection, "connection");
 		if (connection.isReadOnly())
 			throw new IllegalStateException("Connection is read-only");
-		return deletePermanently(connection, uuid);
-	}
-
-	protected final boolean deletePermanently(Connection connection, UUID uuid)
-			throws SQLException, ResourceNotFoundException, ResourceNotMarkedDeletedException
-	{
 		if (uuid == null)
-		{
 			throw new ResourceNotFoundException("'null'");
-		}
 
 		LatestVersion latestVersion = getLatestVersion(uuid, connection);
 
 		if (!latestVersion.deleted)
-		{
 			throw new ResourceNotMarkedDeletedException(uuid.toString());
-		}
 
 		try (PreparedStatement statement = connection
 				.prepareStatement("DELETE FROM " + resourceTable + " WHERE " + resourceIdColumn + "= ?"))
@@ -992,7 +976,6 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 			statement.execute();
 
 			logger.debug("{} with ID {} deleted permanently", resourceTypeName, uuid);
-			return true;
 		}
 	}
 }

@@ -78,8 +78,8 @@ public class AuthorizationConfig
 	@Value("#{'${org.highmed.dsf.fhir.local-user.thumbprints}'.split(',')}")
 	private List<String> localUserThumbprints;
 
-	@Value("#{'${org.highmed.dsf.fhir.local-deletion-user.thumbprints}'.split(',')}")
-	private List<String> localDeletionUserThumbprints;
+	@Value("#{'${org.highmed.dsf.fhir.local-permanent-delete-user.thumbprints}'.split(',')}")
+	private List<String> localPermanentDeleteUserThumbprints;
 
 	@Value("${org.highmed.dsf.fhir.local-organization.identifier}")
 	private String localIdentifierValue;
@@ -109,7 +109,7 @@ public class AuthorizationConfig
 	public OrganizationProvider organizationProvider()
 	{
 		return new OrganizationProviderWithDbBackend(daoConfig.organizationDao(), helperConfig.exceptionHandler(),
-				localUserThumbprints, localDeletionUserThumbprints, localIdentifierValue);
+				localUserThumbprints, localPermanentDeleteUserThumbprints, localIdentifierValue);
 	}
 
 	@Bean

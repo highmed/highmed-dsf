@@ -656,7 +656,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	}
 
 	@Override
-	public Response expunge(String expungePath, String id, Parameters parameters, UriInfo uri, HttpHeaders headers)
+	public Response deletePermanently(String deletePath, String id, UriInfo uri, HttpHeaders headers)
 	{
 		logCurrentUser();
 
@@ -667,24 +667,24 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		{
 			R oldResource = dbResource.get();
 
-			Optional<String> reasonDeleteAllowed = authorizationRule.reasonExpungeAllowed(getCurrentUser(),
+			Optional<String> reasonDeleteAllowed = authorizationRule.reasonPermanentDeleteAllowed(getCurrentUser(),
 					oldResource);
 			if (reasonDeleteAllowed.isEmpty())
 			{
-				audit.info("Expunge of resource {} denied for user '{}'", oldResource.getIdElement().getValue(),
-						getCurrentUser().getName());
+				audit.info("Permanent delete of resource {} denied for user '{}'",
+						oldResource.getIdElement().getValue(), getCurrentUser().getName());
 				return forbidden("delete");
 			}
 			else
 			{
-				audit.info("Expunge of resource {} allowed for user '{}': {}", oldResource.getIdElement().getValue(),
-						getCurrentUser().getName(), reasonDeleteAllowed.get());
-				return delegate.expunge(expungePath, id, parameters, uri, headers);
+				audit.info("Permanent delete of resource {} allowed for user '{}': {}",
+						oldResource.getIdElement().getValue(), getCurrentUser().getName(), reasonDeleteAllowed.get());
+				return delegate.deletePermanently(deletePath, id, uri, headers);
 			}
 		}
 		else
 		{
-			audit.info("Resource to expunge {} not found for user '{}'", resourceTypeName + "/" + id,
+			audit.info("Resource to permanently delete {} not found for user '{}'", resourceTypeName + "/" + id,
 					getCurrentUser().getName());
 			return responseGenerator.notFound(id, resourceTypeName);
 		}

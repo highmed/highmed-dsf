@@ -26,9 +26,9 @@ public class SubscriptionDaoJdbc extends AbstractResourceDaoJdbc<Subscription> i
 {
 	private static final Logger logger = LoggerFactory.getLogger(SubscriptionDaoJdbc.class);
 
-	public SubscriptionDaoJdbc(DataSource dataSource, DataSource deletionDataSource, FhirContext fhirContext)
+	public SubscriptionDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
 	{
-		super(dataSource, deletionDataSource, fhirContext, Subscription.class, "subscriptions", "subscription",
+		super(dataSource, permanentDeleteDataSource, fhirContext, Subscription.class, "subscriptions", "subscription",
 				"subscription_id", SubscriptionUserFilter::new, with(SubscriptionCriteria::new,
 						SubscriptionPayload::new, SubscriptionStatus::new, SubscriptionType::new),
 				with());

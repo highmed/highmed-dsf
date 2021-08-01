@@ -9,8 +9,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.highmed.dsf.tools.generator.CertificateGenerator.CertificateFiles;
 import org.slf4j.Logger;
@@ -36,7 +41,18 @@ public class ConfigGenerator
 
 	private Properties readProperties(Path propertiesFile)
 	{
-		Properties properties = new Properties();
+		@SuppressWarnings("serial")
+		Properties properties = new Properties()
+		{
+			// making sure entries are sorted when storing properties
+			@Override
+			public Set<java.util.Map.Entry<Object, Object>> entrySet()
+			{
+				return Collections.synchronizedSet(
+						super.entrySet().stream().sorted(Comparator.comparing(e -> e.getKey().toString()))
+								.collect(Collectors.toCollection(LinkedHashSet::new)));
+			}
+		};
 		try (InputStream in = Files.newInputStream(propertiesFile);
 				InputStreamReader reader = new InputStreamReader(in, StandardCharsets.UTF_8))
 		{
@@ -76,7 +92,7 @@ public class ConfigGenerator
 				testClient.getCertificateSha512ThumbprintHex() + ","
 						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
 
-		javaTestFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-deletion-user.thumbprints",
+		javaTestFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-permanent-delete-user.thumbprints",
 				testClient.getCertificateSha512ThumbprintHex() + ","
 						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
 
@@ -95,7 +111,7 @@ public class ConfigGenerator
 				testClient.getCertificateSha512ThumbprintHex() + ","
 						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
 
-		dockerTestFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-deletion-user.thumbprints",
+		dockerTestFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-permanent-delete-user.thumbprints",
 				testClient.getCertificateSha512ThumbprintHex() + ","
 						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
 
@@ -139,7 +155,7 @@ public class ConfigGenerator
 				medic1Client.getCertificateSha512ThumbprintHex() + ","
 						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
 
-		dockerMedic1FhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-deletion-user.thumbprints",
+		dockerMedic1FhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-permanent-delete-user.thumbprints",
 				medic1Client.getCertificateSha512ThumbprintHex() + ","
 						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
 
@@ -160,7 +176,7 @@ public class ConfigGenerator
 				medic2Client.getCertificateSha512ThumbprintHex() + ","
 						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
 
-		dockerMedic2FhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-deletion-user.thumbprints",
+		dockerMedic2FhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-permanent-delete-user.thumbprints",
 				medic2Client.getCertificateSha512ThumbprintHex() + ","
 						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
 
@@ -181,7 +197,7 @@ public class ConfigGenerator
 				medic3Client.getCertificateSha512ThumbprintHex() + ","
 						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
 
-		dockerMedic3FhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-deletion-user.thumbprints",
+		dockerMedic3FhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-permanent-delete-user.thumbprints",
 				medic3Client.getCertificateSha512ThumbprintHex() + ","
 						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
 
@@ -201,7 +217,7 @@ public class ConfigGenerator
 				ttpClient.getCertificateSha512ThumbprintHex() + ","
 						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
 
-		dockerTtpFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-deletion-user.thumbprints",
+		dockerTtpFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-permanent-delete-user.thumbprints",
 				ttpClient.getCertificateSha512ThumbprintHex() + ","
 						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
 
@@ -254,7 +270,8 @@ public class ConfigGenerator
 				medic1Client.getCertificateSha512ThumbprintHex() + ","
 						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
 
-		dockerMedic1DockerFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-deletion-user.thumbprints",
+		dockerMedic1DockerFhirConfigProperties.setProperty(
+				"org.highmed.dsf.fhir.local-permanent-delete-user.thumbprints",
 				medic1Client.getCertificateSha512ThumbprintHex() + ","
 						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
 
@@ -275,7 +292,8 @@ public class ConfigGenerator
 				medic2Client.getCertificateSha512ThumbprintHex() + ","
 						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
 
-		dockerMedic2DockerFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-deletion-user.thumbprints",
+		dockerMedic2DockerFhirConfigProperties.setProperty(
+				"org.highmed.dsf.fhir.local-permanent-delete-user.thumbprints",
 				medic2Client.getCertificateSha512ThumbprintHex() + ","
 						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
 
@@ -296,7 +314,8 @@ public class ConfigGenerator
 				medic3Client.getCertificateSha512ThumbprintHex() + ","
 						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
 
-		dockerMedic3DockerFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-deletion-user.thumbprints",
+		dockerMedic3DockerFhirConfigProperties.setProperty(
+				"org.highmed.dsf.fhir.local-permanent-delete-user.thumbprints",
 				medic3Client.getCertificateSha512ThumbprintHex() + ","
 						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
 
@@ -317,7 +336,7 @@ public class ConfigGenerator
 				ttpClient.getCertificateSha512ThumbprintHex() + ","
 						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
 
-		dockerTtpDockerFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-deletion-user.thumbprints",
+		dockerTtpDockerFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-permanent-delete-user.thumbprints",
 				ttpClient.getCertificateSha512ThumbprintHex() + ","
 						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
 

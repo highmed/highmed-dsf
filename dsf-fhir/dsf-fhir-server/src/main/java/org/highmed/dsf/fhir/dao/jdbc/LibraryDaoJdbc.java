@@ -21,9 +21,9 @@ public class LibraryDaoJdbc extends AbstractResourceDaoJdbc<Library> implements 
 {
 	private final ReadByUrlDaoJdbc<Library> readByUrl;
 
-	public LibraryDaoJdbc(DataSource dataSource, DataSource deletionDataSource, FhirContext fhirContext)
+	public LibraryDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
 	{
-		super(dataSource, deletionDataSource, fhirContext, Library.class, "libraries", "library", "library_id",
+		super(dataSource, permanentDeleteDataSource, fhirContext, Library.class, "libraries", "library", "library_id",
 				LibraryUserFilter::new, with(LibraryDate::new, LibraryIdentifier::new, LibraryStatus::new,
 						LibraryUrl::new, LibraryVersion::new),
 				with());

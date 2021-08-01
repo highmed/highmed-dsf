@@ -247,7 +247,7 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		return user != null && UserRole.LOCAL.equals(user.getRole());
 	}
 
-	protected final boolean isLocalDeletionUser(User user)
+	protected final boolean isLocalPermanentDeleteUser(User user)
 	{
 		return isLocalUser(user) && user.isPermanentDeleteAllowed();
 	}
@@ -409,11 +409,11 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 	}
 
 	@Override
-	public Optional<String> reasonExpungeAllowed(User user, R oldResource)
+	public Optional<String> reasonPermanentDeleteAllowed(User user, R oldResource)
 	{
 		try (Connection connection = daoProvider.newReadOnlyAutoCommitTransaction())
 		{
-			return reasonExpungeAllowed(connection, user, oldResource);
+			return reasonPermanentDeleteAllowed(connection, user, oldResource);
 		}
 		catch (SQLException e)
 		{

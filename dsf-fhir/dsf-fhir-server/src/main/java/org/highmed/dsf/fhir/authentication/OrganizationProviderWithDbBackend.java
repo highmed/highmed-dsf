@@ -27,20 +27,20 @@ public class OrganizationProviderWithDbBackend implements OrganizationProvider, 
 	private final OrganizationDao dao;
 	private final ExceptionHandler exceptionHandler;
 	private final List<String> localUserThumbprints = new ArrayList<String>();
-	private final List<String> localDeletionUserThumbprints = new ArrayList<String>();
+	private final List<String> localPermanentDeleteUserThumbprints = new ArrayList<String>();
 	private final String localIdentifierValue;
 
 	public OrganizationProviderWithDbBackend(OrganizationDao dao, ExceptionHandler exceptionHandler,
-			List<String> localUserThumbprints, List<String> localDeletionUserThumbprints, String localIdentifier)
+			List<String> localUserThumbprints, List<String> localPermanentDeleteUserThumbprints, String localIdentifier)
 	{
 		this.dao = dao;
 		this.exceptionHandler = exceptionHandler;
 
 		if (localUserThumbprints != null)
 			localUserThumbprints.stream().map(t -> t.toLowerCase()).forEach(this.localUserThumbprints::add);
-		if (localDeletionUserThumbprints != null)
-			localDeletionUserThumbprints.stream().map(t -> t.toLowerCase())
-					.forEach(this.localDeletionUserThumbprints::add);
+		if (localPermanentDeleteUserThumbprints != null)
+			localPermanentDeleteUserThumbprints.stream().map(t -> t.toLowerCase())
+					.forEach(this.localPermanentDeleteUserThumbprints::add);
 
 		this.localIdentifierValue = localIdentifier;
 	}
@@ -61,6 +61,9 @@ public class OrganizationProviderWithDbBackend implements OrganizationProvider, 
 		Objects.requireNonNull(localIdentifierValue, "localIdentifierValue");
 		if (getLocalOrganization().isEmpty())
 			logger.warn("Local organization not found by identifier: {}", localIdentifierValue);
+
+		if (!localUserThumbprints.containsAll(localPermanentDeleteUserThumbprints))
+			logger.warn("At least one local permanent delete user thumbprint not part of local user thumbprints!");
 	}
 
 	@Override
@@ -76,7 +79,7 @@ public class OrganizationProviderWithDbBackend implements OrganizationProvider, 
 				loginThumbprintHex);
 		UserRole userRole = localUserThumbprints.contains(loginThumbprintHex.toLowerCase()) ? UserRole.LOCAL
 				: UserRole.REMOTE;
-		boolean deleteAllowed = localDeletionUserThumbprints.contains(loginThumbprintHex.toLowerCase());
+		boolean deleteAllowed = localPermanentDeleteUserThumbprints.contains(loginThumbprintHex.toLowerCase());
 
 		switch (userRole)
 		{

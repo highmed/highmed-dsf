@@ -221,17 +221,17 @@ public abstract class AbstractResourceServiceJaxrs<R extends Resource, S extends
 	}
 
 	@POST
-	@Path("/{id}/{expunge : [$]expunge(/)?}")
+	@Path("/{id}/{delete : [$]permanent-delete(/)?}")
 	@Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
 			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
 			Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
 	@Override
-	public Response expunge(@PathParam("expunge") String expungePath, @PathParam("id") String id, Parameters parameters,
+	public Response deletePermanently(@PathParam("delete") String deletePath, @PathParam("id") String id,
 			@Context UriInfo uri, @Context HttpHeaders headers)
 	{
 		logger.trace("POST {}", uri.getRequestUri().toString());
 
-		return delegate.expunge(expungePath, id, parameters, uri, headers);
+		return delegate.deletePermanently(deletePath, id, uri, headers);
 	}
 }

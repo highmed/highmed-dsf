@@ -803,13 +803,10 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	}
 
 	@Override
-	public Response expunge(String expungePath, String id, Parameters parameters, UriInfo uri, HttpHeaders headers)
+	public Response deletePermanently(String deletePath, String id, UriInfo uri, HttpHeaders headers)
 	{
-		boolean expunge = exceptionHandler.handleSqlAndResourceNotMarkedDeletedException(resourceTypeName,
-				() -> dao.expunge(parameterConverter.toUuid(resourceTypeName, id)));
-
-		if (expunge)
-			eventHandler.handleEvent(eventGenerator.newResourceExpungeEvent(resourceType, id));
+		exceptionHandler.handleSqlResourceNotFoundAndResourceNotMarkedDeletedException(resourceTypeName,
+				() -> dao.deletePermanently(parameterConverter.toUuid(resourceTypeName, id)));
 
 		return responseGenerator.response(Status.OK, responseGenerator.resourceDeletedPermanently(resourceTypeName, id),
 				parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();

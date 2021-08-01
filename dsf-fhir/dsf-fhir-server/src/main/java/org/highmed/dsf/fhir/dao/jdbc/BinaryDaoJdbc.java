@@ -18,9 +18,9 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements BinaryDao
 {
-	public BinaryDaoJdbc(DataSource dataSource, DataSource deletionDataSource, FhirContext fhirContext)
+	public BinaryDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
 	{
-		super(dataSource, deletionDataSource, fhirContext, Binary.class, "binaries", "binary_json", "binary_id",
+		super(dataSource, permanentDeleteDataSource, fhirContext, Binary.class, "binaries", "binary_json", "binary_id",
 				new PreparedStatementFactoryBinary(fhirContext), BinaryUserFilter::new, with(BinaryContentType::new),
 				with());
 	}

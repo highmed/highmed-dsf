@@ -14,9 +14,9 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class PractitionerRoleDaoJdbc extends AbstractResourceDaoJdbc<PractitionerRole> implements PractitionerRoleDao
 {
-	public PractitionerRoleDaoJdbc(DataSource dataSource, DataSource deletionDataSource, FhirContext fhirContext)
+	public PractitionerRoleDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
 	{
-		super(dataSource, deletionDataSource, fhirContext, PractitionerRole.class, "practitioner_roles",
+		super(dataSource, permanentDeleteDataSource, fhirContext, PractitionerRole.class, "practitioner_roles",
 				"practitioner_role", "practitioner_role_id", PractitionerRoleUserFilter::new,
 				with(PractitionerRoleActive::new, PractitionerRoleIdentifier::new, PractitionerRoleOrganization::new,
 						PractitionerRolePractitioner::new),

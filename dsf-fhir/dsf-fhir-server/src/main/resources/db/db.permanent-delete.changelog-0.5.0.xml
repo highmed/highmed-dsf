@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+	<changeSet author="nlangh" id="db.permanent-delete.changelog-0.5.0">
+		<sql dbms="postgresql">
+			GRANT SELECT, DELETE ON TABLE activity_definitions TO ${db.server_permanent_delete_users_group};
+			GRANT SELECT, DELETE ON TABLE binaries TO ${db.server_permanent_delete_users_group};
+			GRANT SELECT, DELETE ON TABLE bundles TO ${db.server_permanent_delete_users_group};
+			GRANT SELECT, DELETE ON TABLE code_systems TO ${db.server_permanent_delete_users_group};
+			GRANT SELECT, DELETE ON TABLE endpoints TO ${db.server_permanent_delete_users_group};
+			GRANT SELECT, DELETE ON TABLE groups TO ${db.server_permanent_delete_users_group};
+			GRANT SELECT, DELETE ON TABLE healthcare_services TO ${db.server_permanent_delete_users_group};
+			GRANT SELECT, DELETE ON TABLE locations TO ${db.server_permanent_delete_users_group};
+			GRANT SELECT, DELETE ON TABLE naming_systems TO ${db.server_permanent_delete_users_group};
+			GRANT SELECT, DELETE ON TABLE organizations TO ${db.server_permanent_delete_users_group};
+			GRANT SELECT, DELETE ON TABLE organization_affiliations TO ${db.server_permanent_delete_users_group};
+			GRANT SELECT, DELETE ON TABLE patients TO ${db.server_permanent_delete_users_group};
+			GRANT SELECT, DELETE ON TABLE practitioner_roles TO ${db.server_permanent_delete_users_group};
+			GRANT SELECT, DELETE ON TABLE practitioners TO ${db.server_permanent_delete_users_group};
+			GRANT SELECT, DELETE ON TABLE provenances TO ${db.server_permanent_delete_users_group};
+			GRANT SELECT, DELETE ON TABLE research_studies TO ${db.server_permanent_delete_users_group};
+			GRANT SELECT, DELETE ON TABLE structure_definition_snapshots TO ${db.server_permanent_delete_users_group};
+			GRANT SELECT, DELETE ON TABLE structure_definitions TO ${db.server_permanent_delete_users_group};
+			GRANT SELECT, DELETE ON TABLE subscriptions TO ${db.server_permanent_delete_users_group};
+			GRANT SELECT, DELETE ON TABLE tasks TO ${db.server_permanent_delete_users_group};
+			GRANT SELECT, DELETE ON TABLE value_sets TO ${db.server_permanent_delete_users_group};
+			GRANT SELECT, DELETE ON TABLE measures TO ${db.server_permanent_delete_users_group};
+			GRANT SELECT, DELETE ON TABLE measure_reports TO ${db.server_permanent_delete_users_group};
+			GRANT SELECT, DELETE ON TABLE libraries TO ${db.server_permanent_delete_users_group};
+		</sql>
+	</changeSet>
+</databaseChangeLog>

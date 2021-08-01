@@ -20,10 +20,10 @@ import org.highmed.dsf.fhir.dao.exception.ResourceNotMarkedDeletedException;
 import org.highmed.dsf.fhir.dao.exception.ResourceVersionNoMatchException;
 import org.highmed.dsf.fhir.function.RunnableWithSqlAndResourceNotFoundException;
 import org.highmed.dsf.fhir.function.RunnableWithSqlException;
+import org.highmed.dsf.fhir.function.RunnableWithSqlResourceNotFoundAndResourceNotMarkedDeletedException;
 import org.highmed.dsf.fhir.function.SupplierWithSqlAndResourceDeletedException;
 import org.highmed.dsf.fhir.function.SupplierWithSqlAndResourceNotFoundAndResouceVersionNoMatchException;
 import org.highmed.dsf.fhir.function.SupplierWithSqlAndResourceNotFoundException;
-import org.highmed.dsf.fhir.function.SupplierWithSqlAndResourceNotMarkedDeletedException;
 import org.highmed.dsf.fhir.function.SupplierWithSqlException;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -196,16 +196,12 @@ public class ExceptionHandler
 		}
 	}
 
-	public <T> T handleSqlAndResourceNotMarkedDeletedException(String resourceTypeName,
-			SupplierWithSqlAndResourceNotMarkedDeletedException<T> s)
+	public void handleSqlResourceNotFoundAndResourceNotMarkedDeletedException(String resourceTypeName,
+			RunnableWithSqlResourceNotFoundAndResourceNotMarkedDeletedException r)
 	{
 		try
 		{
-			return s.get();
-		}
-		catch (ResourceNotMarkedDeletedException e)
-		{
-			throw notMarkedDeleted(resourceTypeName, e);
+			r.run();
 		}
 		catch (SQLException e)
 		{
@@ -214,6 +210,10 @@ public class ExceptionHandler
 		catch (ResourceNotFoundException e)
 		{
 			throw notFound(resourceTypeName, e);
+		}
+		catch (ResourceNotMarkedDeletedException e)
+		{
+			throw notMarkedDeleted(resourceTypeName, e);
 		}
 	}
 

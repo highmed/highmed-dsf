@@ -235,16 +235,16 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 	}
 
 	@Override
-	public Optional<String> reasonExpungeAllowed(Connection connection, User user, R oldResource)
+	public Optional<String> reasonPermanentDeleteAllowed(Connection connection, User user, R oldResource)
 	{
-		if (isLocalDeletionUser(user))
+		if (isLocalPermanentDeleteUser(user))
 		{
-			logger.info("Expunge of {} authorized for local delete user '{}'", resourceType, user.getName());
-			return Optional.of("local user");
+			logger.info("Permanent delete of {} authorized for local delete user '{}'", resourceType, user.getName());
+			return Optional.of("local delete user");
 		}
 		else
 		{
-			logger.warn("Expunge of {} unauthorized, not a local delete user", resourceTypeName);
+			logger.warn("Permanent delete of {} unauthorized, not a local delete user", resourceTypeName);
 			return Optional.empty();
 		}
 	}

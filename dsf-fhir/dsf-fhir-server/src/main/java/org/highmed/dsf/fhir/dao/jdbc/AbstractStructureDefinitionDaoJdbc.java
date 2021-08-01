@@ -24,12 +24,12 @@ abstract class AbstractStructureDefinitionDaoJdbc extends AbstractResourceDaoJdb
 {
 	private final ReadByUrlDaoJdbc<StructureDefinition> readByUrl;
 
-	public AbstractStructureDefinitionDaoJdbc(DataSource dataSource, DataSource deletionDataSource,
+	public AbstractStructureDefinitionDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource,
 			FhirContext fhirContext, String resourceTable, String resourceColumn, String resourceIdColumn,
 			Function<User, SearchQueryUserFilter> userFilter)
 	{
-		super(dataSource, deletionDataSource, fhirContext, StructureDefinition.class, resourceTable, resourceColumn,
-				resourceIdColumn, userFilter,
+		super(dataSource, permanentDeleteDataSource, fhirContext, StructureDefinition.class, resourceTable,
+				resourceColumn, resourceIdColumn, userFilter,
 				with(() -> new StructureDefinitionDate(resourceColumn),
 						() -> new StructureDefinitionIdentifier(resourceColumn),
 						() -> new StructureDefinitionStatus(resourceColumn),

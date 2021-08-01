@@ -15,9 +15,9 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class BundleDaoJdbc extends AbstractResourceDaoJdbc<Bundle> implements BundleDao
 {
-	public BundleDaoJdbc(DataSource dataSource, DataSource deletionDataSource, FhirContext fhirContext)
+	public BundleDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
 	{
-		super(dataSource, deletionDataSource, fhirContext, Bundle.class, "bundles", "bundle", "bundle_id",
+		super(dataSource, permanentDeleteDataSource, fhirContext, Bundle.class, "bundles", "bundle", "bundle_id",
 				BundleUserFilter::new, with(BundleIdentifier::new), with());
 	}
 

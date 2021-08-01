@@ -135,9 +135,9 @@ public interface AuthorizationRule<R extends Resource>
 	 *            not <code>null</code>
 	 * @param oldResource
 	 *            not <code>null</code>
-	 * @return Reason as String in {@link Optional#of(Object)} if expunge allowed
+	 * @return Reason as String in {@link Optional#of(Object)} if permanent delete allowed
 	 */
-	Optional<String> reasonExpungeAllowed(User user, R oldResource);
+	Optional<String> reasonPermanentDeleteAllowed(User user, R oldResource);
 
 	/**
 	 * Override this method for non default behavior. Default: Not allowed.
@@ -148,7 +148,7 @@ public interface AuthorizationRule<R extends Resource>
 	 *            not <code>null</code>
 	 * @param oldResource
 	 *            not <code>null</code>
-	 * @return Reason as String in {@link Optional#of(Object)} if expunge allowed
+	 * @return Reason as String in {@link Optional#of(Object)} if permanent delete allowed
 	 */
-	Optional<String> reasonExpungeAllowed(Connection connection, User user, R oldResource);
+	Optional<String> reasonPermanentDeleteAllowed(Connection connection, User user, R oldResource);
 }

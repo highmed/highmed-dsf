@@ -12,9 +12,9 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class PatientDaoJdbc extends AbstractResourceDaoJdbc<Patient> implements PatientDao
 {
-	public PatientDaoJdbc(DataSource dataSource, DataSource deletionDataSource, FhirContext fhirContext)
+	public PatientDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
 	{
-		super(dataSource, deletionDataSource, fhirContext, Patient.class, "patients", "patient", "patient_id",
+		super(dataSource, permanentDeleteDataSource, fhirContext, Patient.class, "patients", "patient", "patient_id",
 				PatientUserFilter::new, with(PatientActive::new, PatientIdentifier::new), with());
 	}
 

@@ -329,12 +329,12 @@ public interface ResourceDao<R extends Resource>
 	 * 
 	 * @param uuid
 	 *            may be <code>null</code>
-	 * @return <code>true</code> if a resource with the given uuid could be found and marked as deleted,
-	 *         <code>false</code> if a resource with the given uuid was already marked as deleted
+	 * @return <code>true</code> if a resource with the given <b>uuid</b> could be found and marked as deleted,
+	 *         <code>false</code> if a resource with the given <b>uuid</b> was already marked as deleted
 	 * @throws SQLException
 	 *             if database access errors occur
 	 * @throws ResourceNotFoundException
-	 *             if the given uuid is <code>null</code> or no resource could be found with the given uuid
+	 *             if the given <b>uuid</b> is <code>null</code> or no resource could be found with the given uuid
 	 */
 	boolean delete(UUID uuid) throws SQLException, ResourceNotFoundException;
 
@@ -345,12 +345,12 @@ public interface ResourceDao<R extends Resource>
 	 *            not <code>null</code>, not {@link Connection#isReadOnly()}
 	 * @param uuid
 	 *            may be <code>null</code>
-	 * @return <code>true</code> if a resource with the given uuid could be found and marked as deleted,
-	 *         <code>false</code> if a resource with the given uuid was already marked as deleted
+	 * @return <code>true</code> if a resource with the given <b>uuid</b> could be found and marked as deleted,
+	 *         <code>false</code> if a resource with the given <b>uuid</b> was already marked as deleted
 	 * @throws SQLException
 	 *             if database access errors occur
 	 * @throws ResourceNotFoundException
-	 *             if the given uuid is <code>null</code> or no resource could be found with the given uuid
+	 *             if the given <b>uuid</b> is <code>null</code> or no resource could be found with the given uuid
 	 */
 	boolean deleteWithTransaction(Connection connection, UUID uuid) throws SQLException, ResourceNotFoundException;
 
@@ -383,16 +383,14 @@ public interface ResourceDao<R extends Resource>
 	 *
 	 * @param uuid
 	 *            may be <code>null</code>
-	 * @return <code>true</code> if a resource with the given uuid could be found, marked as deleted and expunged,
-	 *         <code>false</code> if a resource with the given uuid was not marked as deleted or not found
 	 * @throws SQLException
 	 *             if database access errors occur
 	 * @throws ResourceNotFoundException
-	 *             if the given uuid is <code>null</code> or no resource could be found with the given uuid
+	 *             if the given <b>uuid</b> is <code>null</code> or no resource could be found with the given uuid
 	 * @throws ResourceNotMarkedDeletedException
 	 *             if the resource was not marked as deleted
 	 */
-	boolean expunge(UUID uuid) throws SQLException, ResourceNotFoundException, ResourceNotMarkedDeletedException;
+	void deletePermanently(UUID uuid) throws SQLException, ResourceNotFoundException, ResourceNotMarkedDeletedException;
 
 	/**
 	 * Permanently delete a resource that was previously marked as deleted.
@@ -401,15 +399,13 @@ public interface ResourceDao<R extends Resource>
 	 *            not <code>null</code>, not {@link Connection#isReadOnly()}
 	 * @param uuid
 	 *            may be <code>null</code>
-	 * @return <code>true</code> if a resource with the given uuid could be found, marked as deleted and expunged,
-	 *         <code>false</code> if a resource with the given uuid was not marked as deleted or not found
 	 * @throws SQLException
 	 *             if database access errors occur
 	 * @throws ResourceNotFoundException
-	 *             if the given uuid is <code>null</code> or no resource could be found with the given uuid
+	 *             if the given <b>uuid</b> is <code>null</code> or no resource could be found with the given uuid
 	 * @throws ResourceNotMarkedDeletedException
 	 *             if the resource was not marked as deleted
 	 */
-	boolean expungeWithTransaction(Connection connection, UUID uuid)
+	void deletePermanentlyWithTransaction(Connection connection, UUID uuid)
 			throws SQLException, ResourceNotFoundException, ResourceNotMarkedDeletedException;
 }

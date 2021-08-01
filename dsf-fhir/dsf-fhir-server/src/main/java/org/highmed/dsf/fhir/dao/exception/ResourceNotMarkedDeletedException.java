@@ -15,5 +15,4 @@ public class ResourceNotMarkedDeletedException extends Exception
 	{
 		return id;
 	}
-
 }

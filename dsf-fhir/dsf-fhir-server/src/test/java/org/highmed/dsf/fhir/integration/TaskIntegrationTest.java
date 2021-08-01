@@ -1,6 +1,6 @@
 package org.highmed.dsf.fhir.integration;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -17,7 +17,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.highmed.dsf.fhir.authentication.OrganizationProvider;
@@ -825,14 +824,7 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		TaskDao taskDao = getSpringWebApplicationContext().getBean(TaskDao.class);
 		String taskId = taskDao.create(task).getIdElement().getIdPart();
 
-		try
-		{
-			getWebserviceClient().deletePermanently(Task.class, taskId);
-		}
-		catch (WebApplicationException e)
-		{
-			assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), e.getResponse().getStatus());
-		}
+		expectBadRequest(() -> getWebserviceClient().deletePermanently(Task.class, taskId));
 	}
 
 	@Test
@@ -843,13 +835,6 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		TaskDao taskDao = getSpringWebApplicationContext().getBean(TaskDao.class);
 		String taskId = taskDao.create(task).getIdElement().getIdPart();
 
-		try
-		{
-			getExternalWebserviceClient().deletePermanently(Task.class, taskId);
-		}
-		catch (WebApplicationException e)
-		{
-			assertEquals(Response.Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
-		}
+		expectForbidden(() -> getExternalWebserviceClient().deletePermanently(Task.class, taskId));
 	}
 }
