@@ -135,17 +135,5 @@ public interface BasicResourceService<R extends Resource> extends BasicService
 
 	Response getValidateExisting(String validatePath, String id, UriInfo uri, HttpHeaders headers);
 
-	/**
-	 * @param deletePath
-	 *            not <code>null</code>
-	 * @param id
-	 *            not <code>null</code>
-	 * @param uri
-	 *            not <code>null</code>
-	 * @param headers
-	 *            not <code>null</code>
-	 * @return {@link Response} containing the status code 200 if the resource could be permanently deleted or status
-	 *         code 400 - 599 if there was an error
-	 */
 	Response deletePermanently(String deletePath, String id, UriInfo uri, HttpHeaders headers);
 }
