@@ -270,5 +270,4 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao>
 		assertNotNull(foundBinary);
 		assertEquals(createdB.getContentAsBase64(), foundBinary.getContentAsBase64());
 	}
-
 }
