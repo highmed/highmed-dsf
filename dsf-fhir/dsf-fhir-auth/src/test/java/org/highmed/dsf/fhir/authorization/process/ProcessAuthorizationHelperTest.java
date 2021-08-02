@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.authentication.UserRole;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.ActivityDefinition.ActivityDefinitionKind;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -113,8 +112,7 @@ public class ProcessAuthorizationHelperTest
 			assertEquals(ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_REMOTE_ALL,
 					requestersList.get(0).getProcessAuthorizationCode().getCode());
 			assertTrue(requestersList.get(0).isRequesterAuthorized(
-					new User(new org.hl7.fhir.r4.model.Organization().setActive(true), UserRole.REMOTE, "remote"),
-					Collections.emptyList()));
+					User.remote(new org.hl7.fhir.r4.model.Organization().setActive(true)), Collections.emptyList()));
 
 			Stream<Recipient> recipients = helper.getRecipients(ad, "http://highmed.org/bpe/Process/test", "0.5.0",
 					"foo", "http://bar.org/fhir/StructureDefinition/baz");
@@ -125,8 +123,7 @@ public class ProcessAuthorizationHelperTest
 			assertEquals(ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ALL,
 					recipientsList.get(0).getProcessAuthorizationCode().getCode());
 			assertTrue(recipientsList.get(0).isRecipientAuthorized(
-					new User(new org.hl7.fhir.r4.model.Organization().setActive(true), UserRole.LOCAL, "local"),
-					Collections.emptyList()));
+					User.local(new org.hl7.fhir.r4.model.Organization().setActive(true)), Collections.emptyList()));
 		}
 	}
 
@@ -146,10 +143,9 @@ public class ProcessAuthorizationHelperTest
 			assertTrue(requestersList.get(0) instanceof Organization);
 			assertEquals(ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_REMOTE_ORGANIZATION,
 					requestersList.get(0).getProcessAuthorizationCode().getCode());
-			User remoteUser = new User(new org.hl7.fhir.r4.model.Organization().setActive(true)
+			User remoteUser = User.remote(new org.hl7.fhir.r4.model.Organization().setActive(true)
 					.addIdentifier(new Identifier().setSystem(ProcessAuthorizationHelper.ORGANIZATION_IDENTIFIER_SYSTEM)
-							.setValue("organization.com")),
-					UserRole.REMOTE, "remote");
+							.setValue("organization.com")));
 			assertTrue(requestersList.get(0).isRequesterAuthorized(remoteUser, Collections.emptyList()));
 
 			Stream<Recipient> recipients = helper.getRecipients(ad, "http://highmed.org/bpe/Process/test", "0.5.0",
@@ -160,10 +156,9 @@ public class ProcessAuthorizationHelperTest
 			assertTrue(recipientsList.get(0) instanceof Role);
 			assertEquals(ProcessAuthorizationHelper.PROCESS_AUTHORIZATION_VALUE_LOCAL_ROLE,
 					recipientsList.get(0).getProcessAuthorizationCode().getCode());
-			User localUser = new User(new org.hl7.fhir.r4.model.Organization().setActive(true)
+			User localUser = User.local(new org.hl7.fhir.r4.model.Organization().setActive(true)
 					.addIdentifier(new Identifier().setSystem(ProcessAuthorizationHelper.ORGANIZATION_IDENTIFIER_SYSTEM)
-							.setValue("member.com")),
-					UserRole.LOCAL, "local");
+							.setValue("member.com")));
 			OrganizationAffiliation affiliation = new OrganizationAffiliation();
 			affiliation.setActive(true);
 			affiliation.getOrganization().getIdentifier()

@@ -14,7 +14,6 @@ import java.util.stream.Stream;
 
 import org.highmed.dsf.fhir.authentication.OrganizationProvider;
 import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.authentication.UserRole;
 import org.highmed.dsf.fhir.authorization.process.ProcessAuthorizationHelper;
 import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.dao.TaskDao;
@@ -277,7 +276,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 
 	private Optional<User> getRecipient()
 	{
-		return organizationProvider.getLocalOrganization().map(org -> new User(org, UserRole.LOCAL, "local"));
+		return organizationProvider.getLocalOrganization().map(User.local());
 	}
 
 	@Override
@@ -470,7 +469,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 	@Override
 	public Optional<String> reasonSearchAllowed(User user)
 	{
-		logger.info("Search of Task authorized for {} user '{}', will be fitered by users organization {}",
+		logger.info("Search of Task authorized for {} user '{}', will be filtered by users organization {}",
 				user.getRole(), user.getName(), user.getOrganization().getIdElement().getValueAsString());
 		return Optional.of("Allowed for all, filtered by users organization");
 	}
@@ -478,8 +477,23 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 	@Override
 	public Optional<String> reasonHistoryAllowed(User user)
 	{
-		logger.info("History of Task authorized for {} user '{}', will be fitered by users organization {}",
+		logger.info("History of Task authorized for {} user '{}', will be filtered by users organization {}",
 				user.getRole(), user.getName(), user.getOrganization().getIdElement().getValueAsString());
 		return Optional.of("Allowed for all, filtered by users organization");
+	}
+
+	@Override
+	public Optional<String> reasonPermanentDeleteAllowed(Connection connection, User user, Task oldResource)
+	{
+		if (isLocalPermanentDeleteUser(user))
+		{
+			logger.info("Permanent delete of Task authorized for local delete user '{}'", user.getName());
+			return Optional.of("local delete user");
+		}
+		else
+		{
+			logger.warn("Permanent delete of Task unauthorized, not a local delete user");
+			return Optional.empty();
+		}
 	}
 }

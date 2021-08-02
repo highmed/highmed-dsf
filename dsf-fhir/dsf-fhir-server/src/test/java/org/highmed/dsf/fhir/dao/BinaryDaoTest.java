@@ -45,10 +45,12 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 	private static final byte[] DATA2 = "VBERi0xLjUNJeLjz9MNCjEwIDAgb2JqDTw8L0xpbmVhcml6ZWQgMS9MIDEzMDA2OC9PIDEyL0UgMTI1NzM1L04gMS9UIDEyOTc2NC9IIFsgNTQ2IDIwNF"
 			.getBytes();
 
-	private final OrganizationDao organizationDao = new OrganizationDaoJdbc(defaultDataSource, fhirContext);
-	private final ResearchStudyDao researchStudyDao = new ResearchStudyDaoJdbc(defaultDataSource, fhirContext);
+	private final OrganizationDao organizationDao = new OrganizationDaoJdbc(defaultDataSource,
+			permanentDeleteDataSource, fhirContext);
+	private final ResearchStudyDao researchStudyDao = new ResearchStudyDaoJdbc(defaultDataSource,
+			permanentDeleteDataSource, fhirContext);
 	private final OrganizationAffiliationDao organizationAffiliationDao = new OrganizationAffiliationDaoJdbc(
-			defaultDataSource, fhirContext);
+			defaultDataSource, permanentDeleteDataSource, fhirContext);
 
 	public BinaryDaoTest()
 	{
@@ -137,7 +139,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		Binary createdB = dao.create(b);
 		assertNotNull(createdB);
 
-		SearchQuery<Binary> query = dao.createSearchQuery(new User(org, UserRole.LOCAL, "subjectDn"), 1, 1);
+		SearchQuery<Binary> query = dao.createSearchQuery(User.local(org), 1, 1);
 		query.configureParameters(Collections.emptyMap());
 		assertNotNull(query);
 
@@ -164,7 +166,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		Binary createdB = dao.create(b);
 		assertNotNull(createdB);
 
-		SearchQuery<Binary> query = dao.createSearchQuery(new User(org, UserRole.LOCAL, "subjectDn"), 1, 1);
+		SearchQuery<Binary> query = dao.createSearchQuery(User.local(org), 1, 1);
 		query.configureParameters(Collections.emptyMap());
 		assertNotNull(query);
 
@@ -202,7 +204,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		Binary createdB = dao.create(b);
 		assertNotNull(createdB);
 
-		SearchQuery<Binary> query = dao.createSearchQuery(new User(createdOrg, UserRole.REMOTE, "subjectDn"), 1, 1);
+		SearchQuery<Binary> query = dao.createSearchQuery(User.local(createdOrg), 1, 1);
 		query.configureParameters(Collections.emptyMap());
 		assertNotNull(query);
 
@@ -263,8 +265,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		Binary createdB = dao.create(b);
 		assertNotNull(createdB);
 
-		SearchQuery<Binary> query = dao.createSearchQuery(new User(createdMemberOrg, UserRole.REMOTE, "subjectDn"), 1,
-				1);
+		SearchQuery<Binary> query = dao.createSearchQuery(User.local(createdMemberOrg), 1, 1);
 		query.configureParameters(Collections.emptyMap());
 		assertNotNull(query);
 

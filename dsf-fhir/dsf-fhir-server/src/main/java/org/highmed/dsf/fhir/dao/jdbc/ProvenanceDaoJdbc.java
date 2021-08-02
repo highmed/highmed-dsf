@@ -10,10 +10,10 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class ProvenanceDaoJdbc extends AbstractResourceDaoJdbc<Provenance> implements ProvenanceDao
 {
-	public ProvenanceDaoJdbc(DataSource dataSource, FhirContext fhirContext)
+	public ProvenanceDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
 	{
-		super(dataSource, fhirContext, Provenance.class, "provenances", "provenance", "provenance_id",
-				ProvenanceUserFilter::new, with(), with());
+		super(dataSource, permanentDeleteDataSource, fhirContext, Provenance.class, "provenances", "provenance",
+				"provenance_id", ProvenanceUserFilter::new, with(), with());
 	}
 
 	@Override

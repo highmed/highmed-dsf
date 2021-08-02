@@ -38,21 +38,23 @@ public final class DbMigrator
 
 	private static final String[] STANDARD_PROPERTIES = { DB_URL, DB_LIQUIBASE_USER, DB_LIQUIBASE_USER_PASSWORD,
 			DB_SERVER_USERS_GROUP, DB_SERVER_USER, DB_SERVER_USER_PASSWORD };
+
 	private static final String[] STANDARD_CHANGE_LOG_PARAMETER_NAMES = { DB_LIQUIBASE_USER, DB_SERVER_USERS_GROUP,
 			DB_SERVER_USER, DB_SERVER_USER_PASSWORD };
 
-	private String prefix;
+	private final String prefix;
 	private final Properties properties;
 	private final List<String> changeLogParameterNames = new ArrayList<>();
 
-	// "camunda_users_group", "camunda_user", "camunda_user_password"
+	// db.camunda_users_group, db.camunda_user, db.camunda_user_password
+	// db.server_permanent_delete_users_group, db.server_permanent_delete_user, db.server_permanent_delete_user_password
 	public DbMigrator(String prefix, Properties properties, String... additionalChangeLogParameterNames)
 	{
 		this.prefix = prefix;
 		this.properties = properties;
 
-		this.changeLogParameterNames.addAll(Arrays.asList(STANDARD_CHANGE_LOG_PARAMETER_NAMES));
-		this.changeLogParameterNames.addAll(Arrays.asList(additionalChangeLogParameterNames));
+		changeLogParameterNames.addAll(Arrays.asList(STANDARD_CHANGE_LOG_PARAMETER_NAMES));
+		changeLogParameterNames.addAll(Arrays.asList(additionalChangeLogParameterNames));
 
 		checkProperties(STANDARD_PROPERTIES, additionalChangeLogParameterNames);
 	}

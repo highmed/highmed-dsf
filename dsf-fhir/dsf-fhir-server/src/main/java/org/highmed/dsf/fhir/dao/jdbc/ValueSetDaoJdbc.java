@@ -21,11 +21,11 @@ public class ValueSetDaoJdbc extends AbstractResourceDaoJdbc<ValueSet> implement
 {
 	private final ReadByUrlDaoJdbc<ValueSet> readByUrl;
 
-	public ValueSetDaoJdbc(DataSource dataSource, FhirContext fhirContext)
+	public ValueSetDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
 	{
-		super(dataSource, fhirContext, ValueSet.class, "value_sets", "value_set", "value_set_id",
-				ValueSetUserFilter::new, with(ValueSetDate::new, ValueSetIdentifier::new, ValueSetStatus::new,
-						ValueSetUrl::new, ValueSetVersion::new),
+		super(dataSource, permanentDeleteDataSource, fhirContext, ValueSet.class, "value_sets", "value_set",
+				"value_set_id", ValueSetUserFilter::new, with(ValueSetDate::new, ValueSetIdentifier::new,
+						ValueSetStatus::new, ValueSetUrl::new, ValueSetVersion::new),
 				with());
 
 		readByUrl = new ReadByUrlDaoJdbc<>(this::getDataSource, this::getResource, getResourceTable(),

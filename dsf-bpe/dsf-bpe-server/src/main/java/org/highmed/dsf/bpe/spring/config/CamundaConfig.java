@@ -39,7 +39,7 @@ public class CamundaConfig
 	@Value("${org.highmed.dsf.bpe.db.url}")
 	private String dbUrl;
 
-	@Value("${org.highmed.dsf.bpe.db.camunda_user}")
+	@Value("${org.highmed.dsf.bpe.db.camunda_user:camunda_server_user}")
 	private String dbUsernameCamunda;
 
 	@Value("${org.highmed.dsf.bpe.db.camunda_user_password}")

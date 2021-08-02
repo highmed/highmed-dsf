@@ -30,10 +30,12 @@ public class OrganizationAffiliationDaoJdbc extends AbstractResourceDaoJdbc<Orga
 {
 	private static final Logger logger = LoggerFactory.getLogger(OrganizationAffiliationDaoJdbc.class);
 
-	public OrganizationAffiliationDaoJdbc(DataSource dataSource, FhirContext fhirContext)
+	public OrganizationAffiliationDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource,
+			FhirContext fhirContext)
 	{
-		super(dataSource, fhirContext, OrganizationAffiliation.class, "organization_affiliations",
-				"organization_affiliation", "organization_affiliation_id", OrganizationAffiliationUserFilter::new,
+		super(dataSource, permanentDeleteDataSource, fhirContext, OrganizationAffiliation.class,
+				"organization_affiliations", "organization_affiliation", "organization_affiliation_id",
+				OrganizationAffiliationUserFilter::new,
 				with(OrganizationAffiliationActive::new, OrganizationAffiliationEndpoint::new,
 						OrganizationAffiliationIdentifier::new, OrganizationAffiliationParticipatingOrganization::new,
 						OrganizationAffiliationPrimaryOrganization::new, OrganizationAffiliationRole::new),

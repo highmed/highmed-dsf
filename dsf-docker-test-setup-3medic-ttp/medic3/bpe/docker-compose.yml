@@ -4,8 +4,8 @@ services:
       image: registry:5000/highmed/bpe_proxy
       restart: on-failure
       ports:
-      - 8080:80
-      - 8443:443
+      - 127.0.0.1:8080:80
+      - 127.0.0.1:8443:443
       volumes:
       -  type: bind
          source: ./proxy/ssl

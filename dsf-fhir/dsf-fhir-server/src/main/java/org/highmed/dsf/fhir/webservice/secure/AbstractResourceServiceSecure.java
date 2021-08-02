@@ -654,4 +654,39 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		User user = getCurrentUser();
 		logger.debug("Current user '{}' ({}), role '{}'", user.getName(), user.getSubjectDn(), user.getRole());
 	}
+
+	@Override
+	public Response deletePermanently(String deletePath, String id, UriInfo uri, HttpHeaders headers)
+	{
+		logCurrentUser();
+
+		Optional<R> dbResource = exceptionHandler
+				.handleSqlException(() -> dao.readIncludingDeleted(parameterConverter.toUuid(resourceTypeName, id)));
+
+		if (dbResource.isPresent())
+		{
+			R oldResource = dbResource.get();
+
+			Optional<String> reasonDeleteAllowed = authorizationRule.reasonPermanentDeleteAllowed(getCurrentUser(),
+					oldResource);
+			if (reasonDeleteAllowed.isEmpty())
+			{
+				audit.info("Permanent delete of resource {} denied for user '{}'",
+						oldResource.getIdElement().getValue(), getCurrentUser().getName());
+				return forbidden("delete");
+			}
+			else
+			{
+				audit.info("Permanent delete of resource {} allowed for user '{}': {}",
+						oldResource.getIdElement().getValue(), getCurrentUser().getName(), reasonDeleteAllowed.get());
+				return delegate.deletePermanently(deletePath, id, uri, headers);
+			}
+		}
+		else
+		{
+			audit.info("Resource to permanently delete {} not found for user '{}'", resourceTypeName + "/" + id,
+					getCurrentUser().getName());
+			return responseGenerator.notFound(id, resourceTypeName);
+		}
+	}
 }

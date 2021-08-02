@@ -40,6 +40,7 @@ class ReadByUrlDaoJdbc<R extends DomainResource>
 	 *            not <code>null</code>, url|version
 	 * @return {@link Optional#empty()} if param <code>urlAndVersion</code> is null or {@link String#isBlank()}
 	 * @throws SQLException
+	 *             if database access errors occur
 	 */
 	Optional<R> readByUrlAndVersion(String urlAndVersion) throws SQLException
 	{
@@ -56,6 +57,7 @@ class ReadByUrlDaoJdbc<R extends DomainResource>
 	 *            not <code>null</code>, url|version
 	 * @return {@link Optional#empty()} if param <code>urlAndVersion</code> is null or {@link String#isBlank()}
 	 * @throws SQLException
+	 *             if database access errors occur
 	 */
 	public Optional<R> readByUrlAndVersionWithTransaction(Connection connection, String urlAndVersion)
 			throws SQLException
@@ -78,6 +80,7 @@ class ReadByUrlDaoJdbc<R extends DomainResource>
 	 *            may be <code>null</code>
 	 * @return {@link Optional#empty()} if param <code>url</code> is null or {@link String#isBlank()}
 	 * @throws SQLException
+	 *             if database access errors occur
 	 */
 	Optional<R> readByUrlAndVersion(String url, String version) throws SQLException
 	{
@@ -96,6 +99,7 @@ class ReadByUrlDaoJdbc<R extends DomainResource>
 	 *            may be <code>null</code>
 	 * @return {@link Optional#empty()} if param <code>url</code> is null or {@link String#isBlank()}
 	 * @throws SQLException
+	 *             if database access errors occur
 	 */
 	Optional<R> readByUrlAndVersionWithTransaction(Connection connection, String url, String version)
 			throws SQLException

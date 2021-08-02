@@ -22,7 +22,8 @@ public class OrganizationAffiliationDaoTest
 	private static final String identifierValue = "identifier.test";
 	private static final boolean active = true;
 
-	private final OrganizationDao organizationDao = new OrganizationDaoJdbc(defaultDataSource, fhirContext);
+	private final OrganizationDao organizationDao = new OrganizationDaoJdbc(defaultDataSource,
+			permanentDeleteDataSource, fhirContext);
 
 	public OrganizationAffiliationDaoTest()
 	{

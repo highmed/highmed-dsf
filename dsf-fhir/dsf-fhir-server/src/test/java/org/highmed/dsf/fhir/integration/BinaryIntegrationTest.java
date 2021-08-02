@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -1682,5 +1683,42 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		assertEquals(createdRs1.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
 
 		expectForbidden(() -> getExternalWebserviceClient().delete(Binary.class, created.getIdElement().getIdPart()));
+	}
+
+	@Test
+	public void testDeletePermanentlyByLocalDeletionUser() throws Exception
+	{
+		Binary binary = new Binary();
+		readAccessHelper.addLocal(binary);
+		BinaryDao binaryDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
+		String binaryId = binaryDao.create(binary).getIdElement().getIdPart();
+		binaryDao.delete(UUID.fromString(binaryId));
+
+		getWebserviceClient().deletePermanently(Binary.class, binaryId);
+
+		Optional<Binary> result = binaryDao.read(UUID.fromString(binaryId));
+		assertTrue(result.isEmpty());
+	}
+
+	@Test
+	public void testDeletePermanentlyByLocalDeletionUserNotMarkedAsDeleted() throws Exception
+	{
+		Binary binary = new Binary();
+		readAccessHelper.addLocal(binary);
+		BinaryDao binaryDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
+		String binaryId = binaryDao.create(binary).getIdElement().getIdPart();
+
+		expectBadRequest(() -> getWebserviceClient().deletePermanently(Binary.class, binaryId));
+	}
+
+	@Test
+	public void testDeletePermanentlyByExternalUser() throws Exception
+	{
+		Binary binary = new Binary();
+		readAccessHelper.addLocal(binary);
+		BinaryDao binaryDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
+		String binaryId = binaryDao.create(binary).getIdElement().getIdPart();
+
+		expectForbidden(() -> getExternalWebserviceClient().deletePermanently(Binary.class, binaryId));
 	}
 }

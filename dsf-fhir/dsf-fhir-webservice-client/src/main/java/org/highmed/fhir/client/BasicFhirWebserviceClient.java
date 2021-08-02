@@ -18,6 +18,8 @@ public interface BasicFhirWebserviceClient extends PreferReturnResource
 
 	void deleteConditionaly(Class<? extends Resource> resourceClass, Map<String, List<String>> criteria);
 
+	void deletePermanently(Class<? extends Resource> resourceClass, String id);
+
 	Resource read(String resourceTypeName, String id);
 
 	<R extends Resource> R read(Class<R> resourceType, String id);

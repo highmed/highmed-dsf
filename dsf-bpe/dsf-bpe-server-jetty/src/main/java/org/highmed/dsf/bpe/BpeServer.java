@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -54,6 +55,11 @@ public final class BpeServer
 		startServer(JettyServer::secureRequestCustomizer, JettyServer::httpsConnector);
 	}
 
+	private static final Map<String, String> DB_DEFAULT_VALUES = Map.of("org.highmed.dsf.bpe.db.liquibase_user",
+			"liquibase_user", "org.highmed.dsf.bpe.db.server_users_group", "bpe_users",
+			"org.highmed.dsf.bpe.db.server_user", "bpe_server_user", "org.highmed.dsf.bpe.db.camunda_users_group",
+			"camunda_users", "org.highmed.dsf.bpe.db.camunda_user", "camunda_server_user");
+
 	private static void startServer(Function<Properties, Customizer> customizerBuilder,
 			BiFunction<HttpConfiguration, Properties, Function<Server, ServerConnector>> connectorBuilder)
 	{
@@ -62,6 +68,7 @@ public final class BpeServer
 		Log4jInitializer.initializeLog4j(properties);
 
 		Properties configProperties = read(Paths.get("conf/config.properties"), StandardCharsets.UTF_8);
+		DB_DEFAULT_VALUES.forEach(configProperties::putIfAbsent);
 
 		DbMigrator dbMigrator = new DbMigrator("org.highmed.dsf.bpe.", configProperties, "db.camunda_users_group",
 				"db.camunda_user", "db.camunda_user_password");

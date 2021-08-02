@@ -15,9 +15,10 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class TaskDaoJdbc extends AbstractResourceDaoJdbc<Task> implements TaskDao
 {
-	public TaskDaoJdbc(DataSource dataSource, FhirContext fhirContext)
+	public TaskDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
 	{
-		super(dataSource, fhirContext, Task.class, "tasks", "task", "task_id", TaskUserFilter::new,
+		super(dataSource, permanentDeleteDataSource, fhirContext, Task.class, "tasks", "task", "task_id",
+				TaskUserFilter::new,
 				with(TaskAuthoredOn::new, TaskIdentifier::new, TaskModified::new, TaskRequester::new, TaskStatus::new),
 				with());
 	}
