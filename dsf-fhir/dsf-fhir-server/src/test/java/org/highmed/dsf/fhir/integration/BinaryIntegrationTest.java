@@ -1,6 +1,7 @@
 package org.highmed.dsf.fhir.integration;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -435,6 +436,184 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.BATCH);
 		bundle.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Binary/" + created.getIdElement().getIdPart());
+
+		Bundle responseBundle = getExternalWebserviceClient().postBundle(bundle);
+		assertNotNull(responseBundle);
+		assertEquals(BundleType.BATCHRESPONSE, responseBundle.getType());
+		assertEquals(1, responseBundle.getEntry().size());
+		assertNotNull(responseBundle.getEntry().get(0));
+
+		assertNull(responseBundle.getEntry().get(0).getResource());
+		assertNotNull(responseBundle.getEntry().get(0).getResponse().getStatus());
+		assertEquals("403 Forbidden", responseBundle.getEntry().get(0).getResponse().getStatus());
+	}
+
+	@Test
+	public void testHeadAllowedLocalUserViaTransactionBundle() throws Exception
+	{
+		final String contentType = MediaType.TEXT_PLAIN;
+		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
+
+		Binary binary = new Binary();
+		binary.setContentType(contentType);
+		binary.setData(data);
+		getReadAccessHelper().addLocal(binary);
+
+		BinaryDao binDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
+		Binary created = binDao.create(binary);
+
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		bundle.addEntry().getRequest().setMethod(HTTPVerb.HEAD).setUrl("Binary/" + created.getIdElement().getIdPart());
+
+		Bundle responseBundle = getWebserviceClient().postBundle(bundle);
+		assertNotNull(responseBundle);
+		assertEquals(BundleType.TRANSACTIONRESPONSE, responseBundle.getType());
+		assertEquals(1, responseBundle.getEntry().size());
+		assertNotNull(responseBundle.getEntry().get(0));
+		assertFalse(responseBundle.getEntry().get(0).hasResource());
+	}
+
+	@Test
+	public void testHeadAllowedExternalUserViaTransactionBundle() throws Exception
+	{
+		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
+		PartialResult<Organization> result = orgDao.search(orgDao.createSearchQueryWithoutUserFilter(1, 1)
+				.configureParameters(Map.of("name", Arrays.asList("External Test Organization"))));
+		assertNotNull(result);
+		assertEquals(1, result.getTotal());
+		assertNotNull(result.getPartialResult());
+		assertEquals(1, result.getPartialResult().size());
+		assertNotNull(result.getPartialResult().get(0));
+
+		Organization org = result.getPartialResult().get(0);
+
+		final String contentType = MediaType.TEXT_PLAIN;
+		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
+
+		Binary binary = new Binary();
+		binary.setContentType(contentType);
+		binary.setData(data);
+		getReadAccessHelper().addLocal(binary);
+		getReadAccessHelper().addOrganization(binary, org);
+
+		BinaryDao binDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
+		Binary created = binDao.create(binary);
+
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		bundle.addEntry().getRequest().setMethod(HTTPVerb.HEAD).setUrl("Binary/" + created.getIdElement().getIdPart());
+
+		Bundle responseBundle = getExternalWebserviceClient().postBundle(bundle);
+		assertNotNull(responseBundle);
+		assertEquals(BundleType.TRANSACTIONRESPONSE, responseBundle.getType());
+		assertEquals(1, responseBundle.getEntry().size());
+		assertNotNull(responseBundle.getEntry().get(0));
+		assertFalse(responseBundle.getEntry().get(0).hasResource());
+	}
+
+	@Test
+	public void testHeadNotAllowedExternalUserViaTransactionBundle() throws Exception
+	{
+		final String contentType = MediaType.TEXT_PLAIN;
+		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
+
+		Binary binary = new Binary();
+		binary.setContentType(contentType);
+		binary.setData(data);
+		getReadAccessHelper().addLocal(binary);
+
+		BinaryDao binDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
+		Binary created = binDao.create(binary);
+
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		bundle.addEntry().getRequest().setMethod(HTTPVerb.HEAD).setUrl("Binary/" + created.getIdElement().getIdPart());
+
+		expectForbidden(() -> getExternalWebserviceClient().postBundle(bundle));
+	}
+
+	@Test
+	public void testHeadAllowedLocalUserViaBatchBundle() throws Exception
+	{
+		final String contentType = MediaType.TEXT_PLAIN;
+		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
+
+		Binary binary = new Binary();
+		binary.setContentType(contentType);
+		binary.setData(data);
+		getReadAccessHelper().addLocal(binary);
+
+		BinaryDao binDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
+		Binary created = binDao.create(binary);
+
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.BATCH);
+		bundle.addEntry().getRequest().setMethod(HTTPVerb.HEAD).setUrl("Binary/" + created.getIdElement().getIdPart());
+
+		Bundle responseBundle = getWebserviceClient().postBundle(bundle);
+		assertNotNull(responseBundle);
+		assertEquals(BundleType.BATCHRESPONSE, responseBundle.getType());
+		assertEquals(1, responseBundle.getEntry().size());
+		assertNotNull(responseBundle.getEntry().get(0));
+		assertFalse(responseBundle.getEntry().get(0).hasResource());
+	}
+
+	@Test
+	public void testHeadAllowedExternalUserViaBatchBundle() throws Exception
+	{
+		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
+		PartialResult<Organization> result = orgDao.search(orgDao.createSearchQueryWithoutUserFilter(1, 1)
+				.configureParameters(Map.of("name", Arrays.asList("External Test Organization"))));
+		assertNotNull(result);
+		assertEquals(1, result.getTotal());
+		assertNotNull(result.getPartialResult());
+		assertEquals(1, result.getPartialResult().size());
+		assertNotNull(result.getPartialResult().get(0));
+
+		Organization org = result.getPartialResult().get(0);
+
+		final String contentType = MediaType.TEXT_PLAIN;
+		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
+
+		Binary binary = new Binary();
+		binary.setContentType(contentType);
+		binary.setData(data);
+		getReadAccessHelper().addLocal(binary);
+		getReadAccessHelper().addOrganization(binary, org);
+
+		BinaryDao binDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
+		Binary created = binDao.create(binary);
+
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.BATCH);
+		bundle.addEntry().getRequest().setMethod(HTTPVerb.HEAD).setUrl("Binary/" + created.getIdElement().getIdPart());
+
+		Bundle responseBundle = getExternalWebserviceClient().postBundle(bundle);
+		assertNotNull(responseBundle);
+		assertEquals(BundleType.BATCHRESPONSE, responseBundle.getType());
+		assertEquals(1, responseBundle.getEntry().size());
+		assertNotNull(responseBundle.getEntry().get(0));
+		assertFalse(responseBundle.getEntry().get(0).hasResource());
+	}
+
+	@Test
+	public void testHeadNotAllowedExternalUserViaBatchBundle() throws Exception
+	{
+		final String contentType = MediaType.TEXT_PLAIN;
+		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
+
+		Binary binary = new Binary();
+		binary.setContentType(contentType);
+		binary.setData(data);
+		getReadAccessHelper().addLocal(binary);
+
+		BinaryDao binDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
+		Binary created = binDao.create(binary);
+
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.BATCH);
+		bundle.addEntry().getRequest().setMethod(HTTPVerb.HEAD).setUrl("Binary/" + created.getIdElement().getIdPart());
 
 		Bundle responseBundle = getExternalWebserviceClient().postBundle(bundle);
 		assertNotNull(responseBundle);

@@ -249,7 +249,8 @@ public class ReadCommand extends AbstractCommand implements Command
 					.withServerBase(serverBase, singleResult.getResourceType().name()).getValue());
 			response.setEtag(new EntityTag(singleResult.getMeta().getVersionId(), true).toString());
 			response.setLastModified(singleResult.getMeta().getLastUpdated());
-			resultEntry.setResource(singleResult);
+
+			setSingleResult(resultEntry, singleResult);
 
 			if (singleResultSearchWarning != null)
 				response.setOutcome(singleResultSearchWarning);
@@ -266,7 +267,8 @@ public class ReadCommand extends AbstractCommand implements Command
 			resultEntry.setFullUrl(URL_UUID_PREFIX + UUID.randomUUID().toString());
 			BundleEntryResponseComponent response = resultEntry.getResponse();
 			response.setStatus(Status.OK.getStatusCode() + " " + Status.OK.getReasonPhrase());
-			resultEntry.setResource(multipleResult);
+
+			setMultipleResult(resultEntry, multipleResult);
 
 			return Optional.of(resultEntry);
 		}
@@ -284,5 +286,15 @@ public class ReadCommand extends AbstractCommand implements Command
 
 			return Optional.of(resultEntry);
 		}
+	}
+
+	protected void setMultipleResult(BundleEntryComponent resultEntry, Bundle multipleResult)
+	{
+		resultEntry.setResource(multipleResult);
+	}
+
+	protected void setSingleResult(BundleEntryComponent resultEntry, Resource singleResult)
+	{
+		resultEntry.setResource(singleResult);
 	}
 }
