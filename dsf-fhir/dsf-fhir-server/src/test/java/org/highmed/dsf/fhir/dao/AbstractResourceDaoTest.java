@@ -34,7 +34,7 @@ import de.rwh.utils.test.LiquibaseTemplateTestRule;
 public abstract class AbstractResourceDaoTest<D extends Resource, C extends ResourceDao<D>> extends AbstractDbTest
 {
 	@FunctionalInterface
-	public static interface TriFunction<A, B, C, R>
+	public interface TriFunction<A, B, C, R>
 	{
 		R apply(A a, B b, C c);
 	}
