@@ -11,10 +11,11 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class MeasureReportDaoJdbc extends AbstractResourceDaoJdbc<MeasureReport> implements MeasureReportDao
 {
-	public MeasureReportDaoJdbc(DataSource dataSource, FhirContext fhirContext)
+	public MeasureReportDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
 	{
-		super(dataSource, fhirContext, MeasureReport.class, "measure_reports", "measure_report", "measure_report_id",
-				MeasureReportUserFilter::new, with(MeasureReportIdentifier::new), with());
+		super(dataSource, permanentDeleteDataSource, fhirContext, MeasureReport.class, "measure_reports",
+				"measure_report", "measure_report_id", MeasureReportUserFilter::new, with(MeasureReportIdentifier::new),
+				with());
 	}
 
 	@Override

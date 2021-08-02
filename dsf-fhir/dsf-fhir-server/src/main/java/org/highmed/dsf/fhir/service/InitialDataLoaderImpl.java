@@ -3,7 +3,6 @@ package org.highmed.dsf.fhir.service;
 import java.util.Objects;
 
 import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.authentication.UserRole;
 import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.dao.command.CommandFactory;
 import org.highmed.dsf.fhir.dao.command.CommandList;
@@ -26,7 +25,7 @@ public class InitialDataLoaderImpl implements InitialDataLoader, InitializingBea
 		Organization org = new Organization().setName("Initial Data Loader");
 		org.addIdentifier().setSystem(ReadAccessHelper.ORGANIZATION_IDENTIFIER_SYSTEM).setValue("initial.data.loader");
 
-		INITIAL_DATA_LOADER = new User(org, UserRole.LOCAL, "local");
+		INITIAL_DATA_LOADER = User.local(org);
 	}
 
 	private static final Logger logger = LoggerFactory.getLogger(InitialDataLoaderImpl.class);

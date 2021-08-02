@@ -76,8 +76,20 @@ public class RootAuthorizationRule implements AuthorizationRule<Resource>
 	@Override
 	public Optional<String> reasonHistoryAllowed(User user)
 	{
-		logger.info("Root History authorized for {} user '{}', will be fitered by user role or users organization {}",
+		logger.info("Root History authorized for {} user '{}', will be filtered by user role or users organization {}",
 				user.getRole(), user.getName(), user.getOrganization().getIdElement().getValueAsString());
 		return Optional.of("Allowed for all, filtered by user role or users organization");
+	}
+
+	@Override
+	public Optional<String> reasonPermanentDeleteAllowed(User user, Resource oldResource)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Optional<String> reasonPermanentDeleteAllowed(Connection connection, User user, Resource oldResource)
+	{
+		throw new UnsupportedOperationException();
 	}
 }

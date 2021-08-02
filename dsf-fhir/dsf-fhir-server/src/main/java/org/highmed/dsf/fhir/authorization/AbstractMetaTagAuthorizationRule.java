@@ -221,7 +221,7 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 	@Override
 	public final Optional<String> reasonSearchAllowed(User user)
 	{
-		logger.info("Search of {} authorized for {} user '{}', will be fitered by users organization and roles",
+		logger.info("Search of {} authorized for {} user '{}', will be filtered by users organization and roles",
 				resourceTypeName, user.getRole(), user.getName());
 		return Optional.of("Allowed for all, filtered by user role");
 	}
@@ -229,8 +229,23 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 	@Override
 	public final Optional<String> reasonHistoryAllowed(User user)
 	{
-		logger.info("History of {} authorized for {} user '{}', will be fitered by users organization and roles",
+		logger.info("History of {} authorized for {} user '{}', will be filtered by users organization and roles",
 				resourceTypeName, user.getRole(), user.getName());
 		return Optional.of("Allowed for all, filtered by user role");
+	}
+
+	@Override
+	public Optional<String> reasonPermanentDeleteAllowed(Connection connection, User user, R oldResource)
+	{
+		if (isLocalPermanentDeleteUser(user))
+		{
+			logger.info("Permanent delete of {} authorized for local delete user '{}'", resourceType, user.getName());
+			return Optional.of("local delete user");
+		}
+		else
+		{
+			logger.warn("Permanent delete of {} unauthorized, not a local delete user", resourceTypeName);
+			return Optional.empty();
+		}
 	}
 }

@@ -247,6 +247,11 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 		return user != null && UserRole.LOCAL.equals(user.getRole());
 	}
 
+	protected final boolean isLocalPermanentDeleteUser(User user)
+	{
+		return isLocalUser(user) && user.isPermanentDeleteAllowed();
+	}
+
 	protected final boolean isRemoteUser(User user)
 	{
 		return user != null && UserRole.REMOTE.equals(user.getRole());
@@ -401,5 +406,19 @@ public abstract class AbstractAuthorizationRule<R extends Resource, D extends Re
 			Optional<ResourceReference> reference)
 	{
 		return reference.flatMap(ref -> referenceResolver.resolveReference(user, ref, connection));
+	}
+
+	@Override
+	public Optional<String> reasonPermanentDeleteAllowed(User user, R oldResource)
+	{
+		try (Connection connection = daoProvider.newReadOnlyAutoCommitTransaction())
+		{
+			return reasonPermanentDeleteAllowed(connection, user, oldResource);
+		}
+		catch (SQLException e)
+		{
+			logger.warn("Error while accessing database", e);
+			throw new RuntimeException(e);
+		}
 	}
 }

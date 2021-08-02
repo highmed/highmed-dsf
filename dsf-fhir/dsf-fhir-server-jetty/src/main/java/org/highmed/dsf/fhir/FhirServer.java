@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -57,6 +58,12 @@ public final class FhirServer
 		startServer(JettyServer::secureRequestCustomizer, JettyServer::httpsConnector);
 	}
 
+	private static final Map<String, String> DB_DEFAULT_VALUES = Map.of("org.highmed.dsf.fhir.db.liquibase_user",
+			"liquibase_user", "org.highmed.dsf.fhir.db.server_users_group", "fhir_users",
+			"org.highmed.dsf.fhir.db.server_user", "fhir_server_user",
+			"org.highmed.dsf.fhir.db.server_permanent_delete_users_group", "fhir_permanent_delete_users",
+			"org.highmed.dsf.fhir.db.server_permanent_delete_user", "fhir_server_permanent_delete_user");
+
 	private static void startServer(Function<Properties, Customizer> customizerBuilder,
 			BiFunction<HttpConfiguration, Properties, Function<Server, ServerConnector>> connectorBuilder)
 	{
@@ -65,8 +72,11 @@ public final class FhirServer
 		Log4jInitializer.initializeLog4j(properties);
 
 		Properties configProperties = read(Paths.get("conf/config.properties"), StandardCharsets.UTF_8);
+		DB_DEFAULT_VALUES.forEach(configProperties::putIfAbsent);
 
-		DbMigrator dbMigrator = new DbMigrator("org.highmed.dsf.fhir.", configProperties);
+		DbMigrator dbMigrator = new DbMigrator("org.highmed.dsf.fhir.", configProperties,
+				"db.server_permanent_delete_users_group", "db.server_permanent_delete_user",
+				"db.server_permanent_delete_user_password");
 		DbMigrator.retryOnConnectException(3, dbMigrator::migrate);
 
 		HttpConfiguration httpConfiguration = httpConfiguration(customizerBuilder.apply(properties));

@@ -1,7 +1,8 @@
 package org.highmed.dsf.fhir.integration;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
@@ -12,6 +13,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.ws.rs.WebApplicationException;
@@ -797,5 +799,42 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		{
 			assertEquals(403, e.getResponse().getStatus());
 		}
+	}
+
+	@Test
+	public void testDeletePermanentlyByLocalDeletionUser() throws Exception
+	{
+		Task task = readTestTask("External_Test_Organization", "Test_Organization");
+		readAccessHelper.addLocal(task);
+		TaskDao taskDao = getSpringWebApplicationContext().getBean(TaskDao.class);
+		String taskId = taskDao.create(task).getIdElement().getIdPart();
+		taskDao.delete(UUID.fromString(taskId));
+
+		getWebserviceClient().deletePermanently(Task.class, taskId);
+
+		Optional<Task> result = taskDao.read(UUID.fromString(taskId));
+		assertTrue(result.isEmpty());
+	}
+
+	@Test
+	public void testDeletePermanentlyByLocalDeletionUserNotMarkedAsDeleted() throws Exception
+	{
+		Task task = readTestTask("External_Test_Organization", "Test_Organization");
+		readAccessHelper.addLocal(task);
+		TaskDao taskDao = getSpringWebApplicationContext().getBean(TaskDao.class);
+		String taskId = taskDao.create(task).getIdElement().getIdPart();
+
+		expectBadRequest(() -> getWebserviceClient().deletePermanently(Task.class, taskId));
+	}
+
+	@Test
+	public void testDeletePermanentlyByExternalUser() throws Exception
+	{
+		Task task = readTestTask("External_Test_Organization", "Test_Organization");
+		readAccessHelper.addLocal(task);
+		TaskDao taskDao = getSpringWebApplicationContext().getBean(TaskDao.class);
+		String taskId = taskDao.create(task).getIdElement().getIdPart();
+
+		expectForbidden(() -> getExternalWebserviceClient().deletePermanently(Task.class, taskId));
 	}
 }

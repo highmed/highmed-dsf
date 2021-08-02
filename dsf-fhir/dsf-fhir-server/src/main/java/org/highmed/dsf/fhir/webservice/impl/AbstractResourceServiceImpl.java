@@ -330,7 +330,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	/**
 	 * Override to modify the given resource before db insert, throw {@link WebApplicationException} to interrupt the
 	 * normal flow
-	 * 
+	 *
 	 * @param resource
 	 *            not <code>null</code>
 	 * @return if not null, the returned {@link Consumer} will be called after the create operation and before returning
@@ -506,7 +506,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	/**
 	 * Override to modify the given resource before db update, throw {@link WebApplicationException} to interrupt the
 	 * normal flow. Path id vs. resource.id.idPart is checked before this method is called
-	 * 
+	 *
 	 * @param resource
 	 *            not <code>null</code>
 	 * @return if not null, the returned {@link Consumer} will be called after the update operation and before returning
@@ -546,7 +546,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 	/**
 	 * Override to perform actions pre delete, throw {@link WebApplicationException} to interrupt the normal flow.
-	 * 
+	 *
 	 * @param id
 	 *            of the resource to be deleted
 	 * @return if not null, the returned {@link Consumer} will be called after the create operation and before returning
@@ -800,5 +800,15 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 			return Response.status(Status.METHOD_NOT_ALLOWED).build(); // TODO mode = delete
 		else
 			return Response.status(Status.METHOD_NOT_ALLOWED).build(); // TODO return OperationOutcome
+	}
+
+	@Override
+	public Response deletePermanently(String deletePath, String id, UriInfo uri, HttpHeaders headers)
+	{
+		exceptionHandler.handleSqlResourceNotFoundAndResourceNotMarkedDeletedException(resourceTypeName,
+				() -> dao.deletePermanently(parameterConverter.toUuid(resourceTypeName, id)));
+
+		return responseGenerator.response(Status.OK, responseGenerator.resourceDeletedPermanently(resourceTypeName, id),
+				parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
 	}
 }

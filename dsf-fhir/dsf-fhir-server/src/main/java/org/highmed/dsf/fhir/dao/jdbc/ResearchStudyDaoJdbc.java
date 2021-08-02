@@ -13,11 +13,11 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class ResearchStudyDaoJdbc extends AbstractResourceDaoJdbc<ResearchStudy> implements ResearchStudyDao
 {
-	public ResearchStudyDaoJdbc(DataSource dataSource, FhirContext fhirContext)
+	public ResearchStudyDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
 	{
-		super(dataSource, fhirContext, ResearchStudy.class, "research_studies", "research_study", "research_study_id",
-				ResearchStudyUserFilter::new, with(ResearchStudyEnrollment::new, ResearchStudyIdentifier::new,
-						ResearchStudyPrincipalInvestigator::new),
+		super(dataSource, permanentDeleteDataSource, fhirContext, ResearchStudy.class, "research_studies",
+				"research_study", "research_study_id", ResearchStudyUserFilter::new, with(ResearchStudyEnrollment::new,
+						ResearchStudyIdentifier::new, ResearchStudyPrincipalInvestigator::new),
 				with());
 	}
 

@@ -14,7 +14,6 @@ import java.util.Optional;
 
 import org.highmed.dsf.fhir.authentication.OrganizationProvider;
 import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.authentication.UserRole;
 import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.authorization.read.ReadAccessHelperImpl;
 import org.highmed.dsf.fhir.dao.OrganizationAffiliationDao;
@@ -40,7 +39,7 @@ public class CodeSystemAuthorizationRuleTest
 	{
 		Organization organization = new Organization();
 		organization.setName("Local Org");
-		User user = new User(organization, UserRole.LOCAL, "local");
+		User user = User.local(organization);
 
 		CodeSystem codeSystem = new CodeSystem();
 		readAccessHelper.addLocal(codeSystem);
@@ -56,7 +55,7 @@ public class CodeSystemAuthorizationRuleTest
 	{
 		Organization organization = new Organization();
 		organization.setName("Remote Org");
-		User user = new User(organization, UserRole.REMOTE, "remote");
+		User user = User.remote(organization);
 
 		CodeSystem codeSystem = new CodeSystem();
 		readAccessHelper.addLocal(codeSystem);
@@ -71,7 +70,7 @@ public class CodeSystemAuthorizationRuleTest
 	{
 		Organization organization = new Organization();
 		organization.setName("Local Org");
-		User user = new User(organization, UserRole.LOCAL, "local");
+		User user = User.local(organization);
 
 		CodeSystem codeSystem = new CodeSystem();
 		readAccessHelper.addAll(codeSystem);
@@ -87,7 +86,7 @@ public class CodeSystemAuthorizationRuleTest
 	{
 		Organization organization = new Organization();
 		organization.setName("Remote Org");
-		User user = new User(organization, UserRole.REMOTE, "remote");
+		User user = User.remote(organization);
 
 		CodeSystem codeSystem = new CodeSystem();
 		readAccessHelper.addAll(codeSystem);
@@ -107,7 +106,7 @@ public class CodeSystemAuthorizationRuleTest
 		organization.setName("Remote Org");
 		organization.addIdentifier().setSystem(AbstractAuthorizationRule.ORGANIZATION_IDENTIFIER_SYSTEM)
 				.setValue(organizationIdentifier);
-		User user = new User(organization, UserRole.REMOTE, "remote");
+		User user = User.remote(organization);
 
 		CodeSystem codeSystem = new CodeSystem();
 		readAccessHelper.addOrganization(codeSystem, organizationIdentifier);
@@ -127,7 +126,7 @@ public class CodeSystemAuthorizationRuleTest
 		organization.setName("Local Org");
 		organization.addIdentifier().setSystem(AbstractAuthorizationRule.ORGANIZATION_IDENTIFIER_SYSTEM)
 				.setValue(organizationIdentifier);
-		User user = new User(organization, UserRole.LOCAL, "local");
+		User user = User.local(organization);
 
 		CodeSystem codeSystem = new CodeSystem();
 		readAccessHelper.addOrganization(codeSystem, organizationIdentifier);
@@ -147,7 +146,7 @@ public class CodeSystemAuthorizationRuleTest
 		organization.setName("Remote Org");
 		organization.addIdentifier().setSystem(AbstractAuthorizationRule.ORGANIZATION_IDENTIFIER_SYSTEM)
 				.setValue(organizationIdentifier);
-		User user = new User(organization, UserRole.REMOTE, "remote");
+		User user = User.remote(organization);
 
 		CodeSystem codeSystem = new CodeSystem();
 		readAccessHelper.addOrganization(codeSystem, "not-allowed." + organizationIdentifier);
@@ -170,7 +169,7 @@ public class CodeSystemAuthorizationRuleTest
 		organization.setName("Remote Org");
 		organization.addIdentifier().setSystem(AbstractAuthorizationRule.ORGANIZATION_IDENTIFIER_SYSTEM)
 				.setValue(organizationIdentifier);
-		User user = new User(organization, UserRole.REMOTE, "remote");
+		User user = User.remote(organization);
 
 		OrganizationAffiliation affiliation = new OrganizationAffiliation();
 		affiliation.setActive(true);
@@ -212,7 +211,7 @@ public class CodeSystemAuthorizationRuleTest
 		organization.setName("Remote Org");
 		organization.addIdentifier().setSystem(AbstractAuthorizationRule.ORGANIZATION_IDENTIFIER_SYSTEM)
 				.setValue(organizationIdentifier);
-		User user = new User(organization, UserRole.LOCAL, "local");
+		User user = User.local(organization);
 
 		OrganizationAffiliation affiliation = new OrganizationAffiliation();
 		affiliation.setActive(true);
@@ -244,7 +243,7 @@ public class CodeSystemAuthorizationRuleTest
 		organization.setName("Remote Org");
 		organization.addIdentifier().setSystem(AbstractAuthorizationRule.ORGANIZATION_IDENTIFIER_SYSTEM)
 				.setValue(organizationIdentifier);
-		User user = new User(organization, UserRole.REMOTE, "remote");
+		User user = User.remote(organization);
 
 		CodeSystem codeSystem = new CodeSystem();
 		readAccessHelper.addRole(codeSystem, consortiumIdentifier, roleSystem, roleCode);

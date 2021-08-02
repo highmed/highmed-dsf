@@ -1,5 +1,7 @@
 package org.highmed.dsf.fhir.integration;
 
+import static javax.ws.rs.core.Response.Status;
+
 import static de.rwh.utils.jetty.JettyServer.httpConfiguration;
 import static de.rwh.utils.jetty.JettyServer.httpsConnector;
 import static de.rwh.utils.jetty.JettyServer.secureRequestCustomizer;
@@ -206,11 +208,14 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	{
 		properties.put("org.highmed.dsf.fhir.db.url", DATABASE_URL);
 		properties.put("org.highmed.dsf.fhir.db.server_user", DATABASE_USER);
-		properties.put("org.highmed.dsf.fhir.db.server_user_password", DATABASE_PASSWORD);
+		properties.put("org.highmed.dsf.fhir.db.server_user_password", DATABASE_USER_PASSWORD);
+		properties.put("org.highmed.dsf.fhir.db.server_permanent_delete_user", DATABASE_DELETE_USER);
+		properties.put("org.highmed.dsf.fhir.db.server_permanent_delete_user_password", DATABASE_DELETE_USER_PASSWORD);
 
 		String clientCertHashHex = calculateSha512CertificateThumbprintHex(
 				certificates.getClientCertificate().getCertificate());
 		properties.put("org.highmed.dsf.fhir.local-user.thumbprints", clientCertHashHex);
+		properties.put("org.highmed.dsf.fhir.local-permanent-delete-user.thumbprints", clientCertHashHex);
 		properties.put("org.highmed.dsf.fhir.webservice.keystore.p12file",
 				certificates.getClientCertificateFile().toString());
 
@@ -391,7 +396,17 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		return readAccessHelper;
 	}
 
+	protected static void expectBadRequest(Runnable operation) throws Exception
+	{
+		expectWebApplicationException(operation, Status.BAD_REQUEST);
+	}
+
 	protected static void expectForbidden(Runnable operation) throws Exception
+	{
+		expectWebApplicationException(operation, Status.FORBIDDEN);
+	}
+
+	protected static void expectWebApplicationException(Runnable operation, Status status) throws Exception
 	{
 		try
 		{
@@ -400,7 +415,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		}
 		catch (WebApplicationException e)
 		{
-			assertEquals(403, e.getResponse().getStatus());
+			assertEquals(status.getStatusCode(), e.getResponse().getStatus());
 		}
 	}
 }

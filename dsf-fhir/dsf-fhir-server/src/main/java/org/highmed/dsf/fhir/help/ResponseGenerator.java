@@ -70,6 +70,12 @@ public class ResponseGenerator
 				resourceTypeName + " with id " + id + " marked as deleted");
 	}
 
+	public OperationOutcome resourceDeletedPermanently(String resourceTypeName, String id)
+	{
+		return createOutcome(IssueSeverity.INFORMATION, IssueType.INFORMATIONAL,
+				resourceTypeName + " with id " + id + " permanently deleted");
+	}
+
 	public ResponseBuilder response(Status status, Resource resource, MediaType mediaType)
 	{
 		return response(status, resource, mediaType, PreferReturnType.REPRESENTATION, null);

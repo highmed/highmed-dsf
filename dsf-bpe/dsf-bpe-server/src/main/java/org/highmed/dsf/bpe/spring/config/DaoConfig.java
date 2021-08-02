@@ -16,7 +16,7 @@ public class DaoConfig
 	@Value("${org.highmed.dsf.bpe.db.url}")
 	private String dbUrl;
 
-	@Value("${org.highmed.dsf.bpe.db.server_user}")
+	@Value("${org.highmed.dsf.bpe.db.server_user:bpe_server_user}")
 	private String dbUsername;
 
 	@Value("${org.highmed.dsf.bpe.db.server_user_password}")
