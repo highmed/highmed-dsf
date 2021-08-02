@@ -176,7 +176,8 @@ public class OrganizationDaoTest extends AbstractResourceDaoTest<Organization, O
 	{
 		CodeSystem c = new CodeSystem();
 		new ReadAccessHelperImpl().addOrganization(c, "organization.com");
-		CodeSystem createdC = new CodeSystemDaoJdbc(defaultDataSource, fhirContext).create(c);
+		CodeSystem createdC = new CodeSystemDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
+				.create(c);
 
 		try (Connection connection = defaultDataSource.getConnection();
 				PreparedStatement statement = connection

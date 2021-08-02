@@ -105,6 +105,11 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 		return defaultDataSource;
 	}
 
+	public BasicDataSource getPermanentDeleteDataSource()
+	{
+		return permanentDeleteDataSource;
+	}
+
 	@Test
 	public void testEmpty() throws Exception
 	{

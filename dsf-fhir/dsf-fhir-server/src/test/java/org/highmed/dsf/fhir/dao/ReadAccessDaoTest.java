@@ -20,7 +20,6 @@ import java.util.function.Consumer;
 import javax.sql.DataSource;
 
 import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.authentication.UserRole;
 import org.highmed.dsf.fhir.authorization.read.ReadAccessHelperImpl;
 import org.highmed.dsf.fhir.dao.jdbc.OrganizationAffiliationDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.OrganizationDaoJdbc;
@@ -37,6 +36,8 @@ import ca.uhn.fhir.context.FhirContext;
 public interface ReadAccessDaoTest<D extends Resource>
 {
 	DataSource getDefaultDataSource();
+
+	DataSource getPermanentDeleteDataSource();
 
 	D createResource();
 
@@ -134,7 +135,8 @@ public interface ReadAccessDaoTest<D extends Resource>
 		Organization org = new Organization();
 		org.setActive(true);
 		org.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("org.com");
-		Organization createdOrg = new OrganizationDaoJdbc(getDefaultDataSource(), getFhirContext()).create(org);
+		Organization createdOrg = new OrganizationDaoJdbc(getDefaultDataSource(), getPermanentDeleteDataSource(),
+				getFhirContext()).create(org);
 
 		D d = createResource();
 		new ReadAccessHelperImpl().addOrganization(d, createdOrg);
@@ -161,7 +163,8 @@ public interface ReadAccessDaoTest<D extends Resource>
 		Organization org = new Organization();
 		org.setActive(true);
 		org.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue(orgIdentifier);
-		Organization createdOrg = new OrganizationDaoJdbc(getDefaultDataSource(), getFhirContext()).create(org);
+		Organization createdOrg = new OrganizationDaoJdbc(getDefaultDataSource(), getPermanentDeleteDataSource(),
+				getFhirContext()).create(org);
 
 		assertReadAccessEntryCount(2, 1, createdD, READ_ACCESS_TAG_VALUE_LOCAL);
 		assertReadAccessEntryCount(2, 1, createdD, READ_ACCESS_TAG_VALUE_ORGANIZATION, createdOrg);
@@ -170,7 +173,8 @@ public interface ReadAccessDaoTest<D extends Resource>
 	@Test
 	default void testReadAccessTriggerOrganization2Organizations1Matching() throws Exception
 	{
-		OrganizationDaoJdbc organizationDao = new OrganizationDaoJdbc(getDefaultDataSource(), getFhirContext());
+		OrganizationDaoJdbc organizationDao = new OrganizationDaoJdbc(getDefaultDataSource(),
+				getPermanentDeleteDataSource(), getFhirContext());
 
 		Organization org1 = new Organization();
 		org1.setActive(true);
@@ -195,7 +199,8 @@ public interface ReadAccessDaoTest<D extends Resource>
 	@Test
 	default void testReadAccessTriggerOrganization2Organizations2Matching() throws Exception
 	{
-		OrganizationDaoJdbc organizationDao = new OrganizationDaoJdbc(getDefaultDataSource(), getFhirContext());
+		OrganizationDaoJdbc organizationDao = new OrganizationDaoJdbc(getDefaultDataSource(),
+				getPermanentDeleteDataSource(), getFhirContext());
 		ReadAccessHelperImpl readAccessHelper = new ReadAccessHelperImpl();
 
 		Organization org1 = new Organization();
@@ -230,7 +235,8 @@ public interface ReadAccessDaoTest<D extends Resource>
 		memberOrg.setActive(true);
 		memberOrg.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("member.com");
 
-		OrganizationDao orgDao = new OrganizationDaoJdbc(getDefaultDataSource(), getFhirContext());
+		OrganizationDao orgDao = new OrganizationDaoJdbc(getDefaultDataSource(), getPermanentDeleteDataSource(),
+				getFhirContext());
 		Organization createdParentOrg = orgDao.create(parentOrg);
 		Organization createdMemberOrg = orgDao.create(memberOrg);
 
@@ -242,7 +248,7 @@ public interface ReadAccessDaoTest<D extends Resource>
 		aff.getParticipatingOrganization().setReference("Organization/" + createdMemberOrg.getIdElement().getIdPart());
 
 		OrganizationAffiliation createdAff = new OrganizationAffiliationDaoJdbc(getDefaultDataSource(),
-				getFhirContext()).create(aff);
+				getPermanentDeleteDataSource(), getFhirContext()).create(aff);
 
 		D d = createResource();
 		new ReadAccessHelperImpl().addRole(d, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
@@ -274,7 +280,8 @@ public interface ReadAccessDaoTest<D extends Resource>
 		memberOrg.setActive(true);
 		memberOrg.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("member.com");
 
-		OrganizationDao orgDao = new OrganizationDaoJdbc(getDefaultDataSource(), getFhirContext());
+		OrganizationDao orgDao = new OrganizationDaoJdbc(getDefaultDataSource(), getPermanentDeleteDataSource(),
+				getFhirContext());
 		Organization createdParentOrg = orgDao.create(parentOrg);
 		Organization createdMemberOrg = orgDao.create(memberOrg);
 
@@ -286,7 +293,7 @@ public interface ReadAccessDaoTest<D extends Resource>
 		aff.getParticipatingOrganization().setReference("Organization/" + createdMemberOrg.getIdElement().getIdPart());
 
 		OrganizationAffiliation createdAff = new OrganizationAffiliationDaoJdbc(getDefaultDataSource(),
-				getFhirContext()).create(aff);
+				getPermanentDeleteDataSource(), getFhirContext()).create(aff);
 
 		assertReadAccessEntryCount(2, 1, createdD, READ_ACCESS_TAG_VALUE_LOCAL);
 		assertReadAccessEntryCount(2, 1, createdD, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
@@ -307,7 +314,8 @@ public interface ReadAccessDaoTest<D extends Resource>
 		memberOrg2.setActive(true);
 		memberOrg2.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("member2.com");
 
-		OrganizationDao orgDao = new OrganizationDaoJdbc(getDefaultDataSource(), getFhirContext());
+		OrganizationDao orgDao = new OrganizationDaoJdbc(getDefaultDataSource(), getPermanentDeleteDataSource(),
+				getFhirContext());
 		Organization createdParentOrg = orgDao.create(parentOrg);
 		Organization createdMemberOrg1 = orgDao.create(memberOrg1);
 		Organization createdMemberOrg2 = orgDao.create(memberOrg2);
@@ -329,7 +337,7 @@ public interface ReadAccessDaoTest<D extends Resource>
 				.setReference("Organization/" + createdMemberOrg2.getIdElement().getIdPart());
 
 		OrganizationAffiliationDaoJdbc organizationAffiliationDao = new OrganizationAffiliationDaoJdbc(
-				getDefaultDataSource(), getFhirContext());
+				getDefaultDataSource(), getPermanentDeleteDataSource(), getFhirContext());
 		OrganizationAffiliation createdAff1 = organizationAffiliationDao.create(aff1);
 		OrganizationAffiliation createdAff2 = organizationAffiliationDao.create(aff2);
 
@@ -359,7 +367,8 @@ public interface ReadAccessDaoTest<D extends Resource>
 		memberOrg2.setActive(true);
 		memberOrg2.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("member2.com");
 
-		OrganizationDao orgDao = new OrganizationDaoJdbc(getDefaultDataSource(), getFhirContext());
+		OrganizationDao orgDao = new OrganizationDaoJdbc(getDefaultDataSource(), getPermanentDeleteDataSource(),
+				getFhirContext());
 		Organization createdParentOrg = orgDao.create(parentOrg);
 		Organization createdMemberOrg1 = orgDao.create(memberOrg1);
 		Organization createdMemberOrg2 = orgDao.create(memberOrg2);
@@ -381,7 +390,7 @@ public interface ReadAccessDaoTest<D extends Resource>
 				.setReference("Organization/" + createdMemberOrg2.getIdElement().getIdPart());
 
 		OrganizationAffiliationDaoJdbc organizationAffiliationDao = new OrganizationAffiliationDaoJdbc(
-				getDefaultDataSource(), getFhirContext());
+				getDefaultDataSource(), getPermanentDeleteDataSource(), getFhirContext());
 		OrganizationAffiliation createdAff1 = organizationAffiliationDao.create(aff1);
 		OrganizationAffiliation createdAff2 = organizationAffiliationDao.create(aff2);
 
@@ -431,7 +440,8 @@ public interface ReadAccessDaoTest<D extends Resource>
 	@Test
 	default void testReadAccessTriggerOrganizationUpdate() throws Exception
 	{
-		final OrganizationDaoJdbc organizationDao = new OrganizationDaoJdbc(getDefaultDataSource(), getFhirContext());
+		final OrganizationDaoJdbc organizationDao = new OrganizationDaoJdbc(getDefaultDataSource(),
+				getPermanentDeleteDataSource(), getFhirContext());
 
 		Organization org = new Organization();
 		org.setActive(true);
@@ -463,7 +473,7 @@ public interface ReadAccessDaoTest<D extends Resource>
 	default void testReadAccessTriggerRoleUpdate() throws Exception
 	{
 		final OrganizationAffiliationDaoJdbc organizationAffiliationDao = new OrganizationAffiliationDaoJdbc(
-				getDefaultDataSource(), getFhirContext());
+				getDefaultDataSource(), getPermanentDeleteDataSource(), getFhirContext());
 
 		Organization parentOrg = new Organization();
 		parentOrg.setActive(true);
@@ -473,7 +483,8 @@ public interface ReadAccessDaoTest<D extends Resource>
 		memberOrg.setActive(true);
 		memberOrg.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("member.com");
 
-		OrganizationDao orgDao = new OrganizationDaoJdbc(getDefaultDataSource(), getFhirContext());
+		OrganizationDao orgDao = new OrganizationDaoJdbc(getDefaultDataSource(), getPermanentDeleteDataSource(),
+				getFhirContext());
 		Organization createdParentOrg = orgDao.create(parentOrg);
 		Organization createdMemberOrg = orgDao.create(memberOrg);
 
@@ -512,7 +523,7 @@ public interface ReadAccessDaoTest<D extends Resource>
 	default void testReadAccessTriggerRoleUpdateMemberOrganizationNonActive() throws Exception
 	{
 		final OrganizationAffiliationDaoJdbc organizationAffiliationDao = new OrganizationAffiliationDaoJdbc(
-				getDefaultDataSource(), getFhirContext());
+				getDefaultDataSource(), getPermanentDeleteDataSource(), getFhirContext());
 
 		Organization parentOrg = new Organization();
 		parentOrg.setActive(true);
@@ -522,7 +533,8 @@ public interface ReadAccessDaoTest<D extends Resource>
 		memberOrg.setActive(true);
 		memberOrg.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("member.com");
 
-		OrganizationDao orgDao = new OrganizationDaoJdbc(getDefaultDataSource(), getFhirContext());
+		OrganizationDao orgDao = new OrganizationDaoJdbc(getDefaultDataSource(), getPermanentDeleteDataSource(),
+				getFhirContext());
 		Organization createdParentOrg = orgDao.create(parentOrg);
 		Organization createdMemberOrg = orgDao.create(memberOrg);
 
@@ -561,7 +573,7 @@ public interface ReadAccessDaoTest<D extends Resource>
 	default void testReadAccessTriggerRoleUpdateParentOrganizationNonActive() throws Exception
 	{
 		final OrganizationAffiliationDaoJdbc organizationAffiliationDao = new OrganizationAffiliationDaoJdbc(
-				getDefaultDataSource(), getFhirContext());
+				getDefaultDataSource(), getPermanentDeleteDataSource(), getFhirContext());
 
 		Organization parentOrg = new Organization();
 		parentOrg.setActive(true);
@@ -571,7 +583,8 @@ public interface ReadAccessDaoTest<D extends Resource>
 		memberOrg.setActive(true);
 		memberOrg.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("member.com");
 
-		OrganizationDao orgDao = new OrganizationDaoJdbc(getDefaultDataSource(), getFhirContext());
+		OrganizationDao orgDao = new OrganizationDaoJdbc(getDefaultDataSource(), getPermanentDeleteDataSource(),
+				getFhirContext());
 		Organization createdParentOrg = orgDao.create(parentOrg);
 		Organization createdMemberOrg = orgDao.create(memberOrg);
 
@@ -610,7 +623,7 @@ public interface ReadAccessDaoTest<D extends Resource>
 	default void testReadAccessTriggerRoleUpdateMemberAndParentOrganizationNonActive() throws Exception
 	{
 		final OrganizationAffiliationDaoJdbc organizationAffiliationDao = new OrganizationAffiliationDaoJdbc(
-				getDefaultDataSource(), getFhirContext());
+				getDefaultDataSource(), getPermanentDeleteDataSource(), getFhirContext());
 
 		Organization parentOrg = new Organization();
 		parentOrg.setActive(true);
@@ -620,7 +633,8 @@ public interface ReadAccessDaoTest<D extends Resource>
 		memberOrg.setActive(true);
 		memberOrg.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("member.com");
 
-		OrganizationDao orgDao = new OrganizationDaoJdbc(getDefaultDataSource(), getFhirContext());
+		OrganizationDao orgDao = new OrganizationDaoJdbc(getDefaultDataSource(), getPermanentDeleteDataSource(),
+				getFhirContext());
 		Organization createdParentOrg = orgDao.create(parentOrg);
 		Organization createdMemberOrg = orgDao.create(memberOrg);
 
@@ -692,7 +706,8 @@ public interface ReadAccessDaoTest<D extends Resource>
 	@Test
 	default void testReadAccessTriggerOrganizationDelete() throws Exception
 	{
-		final OrganizationDaoJdbc organizationDao = new OrganizationDaoJdbc(getDefaultDataSource(), getFhirContext());
+		final OrganizationDaoJdbc organizationDao = new OrganizationDaoJdbc(getDefaultDataSource(),
+				getPermanentDeleteDataSource(), getFhirContext());
 
 		Organization org = new Organization();
 		org.setActive(true);
@@ -722,7 +737,8 @@ public interface ReadAccessDaoTest<D extends Resource>
 	default void testSearchWithUserFilterAfterReadAccessTrigger(String accessType, Consumer<D> readAccessModifier)
 			throws Exception
 	{
-		OrganizationDao organizationDao = new OrganizationDaoJdbc(getDefaultDataSource(), getFhirContext());
+		OrganizationDao organizationDao = new OrganizationDaoJdbc(getDefaultDataSource(),
+				getPermanentDeleteDataSource(), getFhirContext());
 		Organization org = new Organization();
 		Organization createdOrg = organizationDao.create(org);
 
@@ -732,8 +748,7 @@ public interface ReadAccessDaoTest<D extends Resource>
 		D createdD = getDao().create(d);
 		assertReadAccessEntryCount(1, 1, createdD, accessType);
 
-		User user = new User(createdOrg, UserRole.LOCAL, "test.dn");
-		SearchQuery<D> query = getDao().createSearchQuery(user, 1, 20)
+		SearchQuery<D> query = getDao().createSearchQuery(User.local(createdOrg), 1, 20)
 				.configureParameters(Map.of("id", Collections.singletonList(createdD.getIdElement().getIdPart())));
 		PartialResult<D> searchResult = getDao().search(query);
 		assertNotNull(searchResult);

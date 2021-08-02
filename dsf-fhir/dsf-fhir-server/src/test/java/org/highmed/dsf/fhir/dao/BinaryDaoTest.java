@@ -20,7 +20,6 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.authentication.UserRole;
 import org.highmed.dsf.fhir.authorization.read.ReadAccessHelperImpl;
 import org.highmed.dsf.fhir.dao.jdbc.BinaryDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.OrganizationAffiliationDaoJdbc;
@@ -439,7 +438,8 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 	{
 		ResearchStudy rS = new ResearchStudy();
 		readAccessModifier.accept(rS);
-		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, fhirContext).create(rS);
+		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
+				.create(rS);
 
 		assertReadAccessEntryCount(1, 1, createdRs, accessType);
 
@@ -469,11 +469,13 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		Organization org = new Organization();
 		org.setActive(true);
 		org.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("org.com");
-		Organization createdOrg = new OrganizationDaoJdbc(defaultDataSource, fhirContext).create(org);
+		Organization createdOrg = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
+				.create(org);
 
 		ResearchStudy rS = new ResearchStudy();
 		new ReadAccessHelperImpl().addOrganization(rS, createdOrg);
-		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, fhirContext).create(rS);
+		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
+				.create(rS);
 
 		Binary b = createResource();
 		b.setSecurityContext(new Reference(createdRs.getIdElement().toUnqualifiedVersionless()));
@@ -488,7 +490,8 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 	@Test
 	public void testReadAccessTriggerSecurityContextOrganization2Organizations1Matching() throws Exception
 	{
-		OrganizationDaoJdbc organizationDao = new OrganizationDaoJdbc(defaultDataSource, fhirContext);
+		OrganizationDaoJdbc organizationDao = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource,
+				fhirContext);
 
 		Organization org1 = new Organization();
 		org1.setActive(true);
@@ -502,7 +505,8 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 
 		ResearchStudy rS = new ResearchStudy();
 		new ReadAccessHelperImpl().addOrganization(rS, createdOrg1);
-		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, fhirContext).create(rS);
+		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
+				.create(rS);
 
 		Binary b = createResource();
 		b.setSecurityContext(new Reference(createdRs.getIdElement().toUnqualifiedVersionless()));
@@ -519,7 +523,8 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 	@Test
 	public void testReadAccessTriggerSecurityContextOrganization2Organizations2Matching() throws Exception
 	{
-		OrganizationDaoJdbc organizationDao = new OrganizationDaoJdbc(defaultDataSource, fhirContext);
+		OrganizationDaoJdbc organizationDao = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource,
+				fhirContext);
 
 		Organization org1 = new Organization();
 		org1.setActive(true);
@@ -534,7 +539,8 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		ResearchStudy rS = new ResearchStudy();
 		new ReadAccessHelperImpl().addOrganization(rS, createdOrg1);
 		new ReadAccessHelperImpl().addOrganization(rS, createdOrg2);
-		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, fhirContext).create(rS);
+		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
+				.create(rS);
 
 		Binary b = createResource();
 		b.setSecurityContext(new Reference(createdRs.getIdElement().toUnqualifiedVersionless()));
@@ -559,7 +565,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		memberOrg.setActive(true);
 		memberOrg.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("member.com");
 
-		OrganizationDao orgDao = new OrganizationDaoJdbc(defaultDataSource, fhirContext);
+		OrganizationDao orgDao = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
 		Organization createdParentOrg = orgDao.create(parentOrg);
 		Organization createdMemberOrg = orgDao.create(memberOrg);
 
@@ -570,13 +576,14 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		aff.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
 		aff.getParticipatingOrganization().setReference("Organization/" + createdMemberOrg.getIdElement().getIdPart());
 
-		OrganizationAffiliation createdAff = new OrganizationAffiliationDaoJdbc(defaultDataSource, fhirContext)
-				.create(aff);
+		OrganizationAffiliation createdAff = new OrganizationAffiliationDaoJdbc(defaultDataSource,
+				permanentDeleteDataSource, fhirContext).create(aff);
 
 		ResearchStudy rS = new ResearchStudy();
 		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
 				"MeDIC");
-		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, fhirContext).create(rS);
+		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
+				.create(rS);
 
 		Binary b = createResource();
 		b.setSecurityContext(new Reference(createdRs.getIdElement().toUnqualifiedVersionless()));
@@ -604,7 +611,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		memberOrg2.setActive(true);
 		memberOrg2.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("member2.com");
 
-		OrganizationDao orgDao = new OrganizationDaoJdbc(defaultDataSource, fhirContext);
+		OrganizationDao orgDao = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
 		Organization createdParentOrg = orgDao.create(parentOrg);
 		Organization createdMemberOrg1 = orgDao.create(memberOrg1);
 		Organization createdMemberOrg2 = orgDao.create(memberOrg2);
@@ -617,8 +624,8 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		aff1.getParticipatingOrganization()
 				.setReference("Organization/" + createdMemberOrg1.getIdElement().getIdPart());
 
-		OrganizationAffiliation createdAff1 = new OrganizationAffiliationDaoJdbc(defaultDataSource, fhirContext)
-				.create(aff1);
+		OrganizationAffiliation createdAff1 = new OrganizationAffiliationDaoJdbc(defaultDataSource,
+				permanentDeleteDataSource, fhirContext).create(aff1);
 
 		OrganizationAffiliation aff2 = new OrganizationAffiliation();
 		aff2.setActive(true);
@@ -628,13 +635,14 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		aff2.getParticipatingOrganization()
 				.setReference("Organization/" + createdMemberOrg2.getIdElement().getIdPart());
 
-		OrganizationAffiliation createdAff2 = new OrganizationAffiliationDaoJdbc(defaultDataSource, fhirContext)
-				.create(aff2);
+		OrganizationAffiliation createdAff2 = new OrganizationAffiliationDaoJdbc(defaultDataSource,
+				permanentDeleteDataSource, fhirContext).create(aff2);
 
 		ResearchStudy rS = new ResearchStudy();
 		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
 				"MeDIC");
-		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, fhirContext).create(rS);
+		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
+				.create(rS);
 
 		Binary b = createResource();
 		b.setSecurityContext(new Reference(createdRs.getIdElement().toUnqualifiedVersionless()));
@@ -665,7 +673,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		memberOrg2.setActive(true);
 		memberOrg2.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("member2.com");
 
-		OrganizationDao orgDao = new OrganizationDaoJdbc(defaultDataSource, fhirContext);
+		OrganizationDao orgDao = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
 		Organization createdParentOrg = orgDao.create(parentOrg);
 		Organization createdMemberOrg1 = orgDao.create(memberOrg1);
 		Organization createdMemberOrg2 = orgDao.create(memberOrg2);
@@ -678,8 +686,8 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		aff1.getParticipatingOrganization()
 				.setReference("Organization/" + createdMemberOrg1.getIdElement().getIdPart());
 
-		OrganizationAffiliation createdAff1 = new OrganizationAffiliationDaoJdbc(defaultDataSource, fhirContext)
-				.create(aff1);
+		OrganizationAffiliation createdAff1 = new OrganizationAffiliationDaoJdbc(defaultDataSource,
+				permanentDeleteDataSource, fhirContext).create(aff1);
 
 		OrganizationAffiliation aff2 = new OrganizationAffiliation();
 		aff2.setActive(true);
@@ -689,13 +697,14 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		aff2.getParticipatingOrganization()
 				.setReference("Organization/" + createdMemberOrg2.getIdElement().getIdPart());
 
-		OrganizationAffiliation createdAff2 = new OrganizationAffiliationDaoJdbc(defaultDataSource, fhirContext)
-				.create(aff2);
+		OrganizationAffiliation createdAff2 = new OrganizationAffiliationDaoJdbc(defaultDataSource,
+				permanentDeleteDataSource, fhirContext).create(aff2);
 
 		ResearchStudy rS = new ResearchStudy();
 		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
 				"MeDIC");
-		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, fhirContext).create(rS);
+		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
+				.create(rS);
 
 		Binary b = createResource();
 		b.setSecurityContext(new Reference(createdRs.getIdElement().toUnqualifiedVersionless()));
@@ -714,7 +723,8 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 	private void testReadAccessTriggerSecurityContextUpdate(String accessType,
 			Consumer<ResearchStudy> readAccessModifier) throws Exception
 	{
-		final ResearchStudyDaoJdbc researchStudyDao = new ResearchStudyDaoJdbc(defaultDataSource, fhirContext);
+		final ResearchStudyDaoJdbc researchStudyDao = new ResearchStudyDaoJdbc(defaultDataSource,
+				permanentDeleteDataSource, fhirContext);
 
 		ResearchStudy rS = new ResearchStudy();
 		readAccessModifier.accept(rS);
@@ -757,7 +767,8 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 	@Test
 	public void testReadAccessTriggerSecurityContextOrganizationUpdate() throws Exception
 	{
-		final OrganizationDaoJdbc organizationDao = new OrganizationDaoJdbc(defaultDataSource, fhirContext);
+		final OrganizationDaoJdbc organizationDao = new OrganizationDaoJdbc(defaultDataSource,
+				permanentDeleteDataSource, fhirContext);
 
 		Organization org = new Organization();
 		org.setActive(true);
@@ -766,7 +777,8 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 
 		ResearchStudy rS = new ResearchStudy();
 		new ReadAccessHelperImpl().addOrganization(rS, createdOrg);
-		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, fhirContext).create(rS);
+		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
+				.create(rS);
 
 		assertReadAccessEntryCount(2, 1, createdRs, READ_ACCESS_TAG_VALUE_LOCAL);
 		assertReadAccessEntryCount(2, 1, createdRs, READ_ACCESS_TAG_VALUE_ORGANIZATION, createdOrg);
@@ -801,7 +813,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 	public void testReadAccessTriggerSecurityContextRoleUpdate() throws Exception
 	{
 		final OrganizationAffiliationDaoJdbc organizationAffiliationDao = new OrganizationAffiliationDaoJdbc(
-				defaultDataSource, fhirContext);
+				defaultDataSource, permanentDeleteDataSource, fhirContext);
 
 		Organization parentOrg = new Organization();
 		parentOrg.setActive(true);
@@ -811,7 +823,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		memberOrg.setActive(true);
 		memberOrg.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("member.com");
 
-		OrganizationDao orgDao = new OrganizationDaoJdbc(defaultDataSource, fhirContext);
+		OrganizationDao orgDao = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
 		Organization createdParentOrg = orgDao.create(parentOrg);
 		Organization createdMemberOrg = orgDao.create(memberOrg);
 
@@ -827,7 +839,8 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		ResearchStudy rS = new ResearchStudy();
 		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
 				"MeDIC");
-		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, fhirContext).create(rS);
+		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
+				.create(rS);
 
 		Binary b = createResource();
 		b.setSecurityContext(new Reference(createdRs.getIdElement().toUnqualifiedVersionless()));
@@ -862,7 +875,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 	public void testReadAccessTriggerSecurityContextRoleUpdateMemberOrganizationNonActive() throws Exception
 	{
 		final OrganizationAffiliationDaoJdbc organizationAffiliationDao = new OrganizationAffiliationDaoJdbc(
-				defaultDataSource, fhirContext);
+				defaultDataSource, permanentDeleteDataSource, fhirContext);
 
 		Organization parentOrg = new Organization();
 		parentOrg.setActive(true);
@@ -872,7 +885,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		memberOrg.setActive(true);
 		memberOrg.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("member.com");
 
-		OrganizationDao orgDao = new OrganizationDaoJdbc(defaultDataSource, fhirContext);
+		OrganizationDao orgDao = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
 		Organization createdParentOrg = orgDao.create(parentOrg);
 		Organization createdMemberOrg = orgDao.create(memberOrg);
 
@@ -888,7 +901,8 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		ResearchStudy rS = new ResearchStudy();
 		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
 				"MeDIC");
-		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, fhirContext).create(rS);
+		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
+				.create(rS);
 
 		Binary b = createResource();
 		b.setSecurityContext(new Reference(createdRs.getIdElement().toUnqualifiedVersionless()));
@@ -920,7 +934,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 	public void testReadAccessTriggerSecurityContextRoleUpdateParentOrganizationNonActive() throws Exception
 	{
 		final OrganizationAffiliationDaoJdbc organizationAffiliationDao = new OrganizationAffiliationDaoJdbc(
-				defaultDataSource, fhirContext);
+				defaultDataSource, permanentDeleteDataSource, fhirContext);
 
 		Organization parentOrg = new Organization();
 		parentOrg.setActive(true);
@@ -930,7 +944,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		memberOrg.setActive(true);
 		memberOrg.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("member.com");
 
-		OrganizationDao orgDao = new OrganizationDaoJdbc(defaultDataSource, fhirContext);
+		OrganizationDao orgDao = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
 		Organization createdParentOrg = orgDao.create(parentOrg);
 		Organization createdMemberOrg = orgDao.create(memberOrg);
 
@@ -946,7 +960,8 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		ResearchStudy rS = new ResearchStudy();
 		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
 				"MeDIC");
-		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, fhirContext).create(rS);
+		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
+				.create(rS);
 
 		Binary b = createResource();
 		b.setSecurityContext(new Reference(createdRs.getIdElement().toUnqualifiedVersionless()));
@@ -978,7 +993,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 	public void testReadAccessTriggerSecurityContextRoleUpdateMemberAndParentOrganizationNonActive() throws Exception
 	{
 		final OrganizationAffiliationDaoJdbc organizationAffiliationDao = new OrganizationAffiliationDaoJdbc(
-				defaultDataSource, fhirContext);
+				defaultDataSource, permanentDeleteDataSource, fhirContext);
 
 		Organization parentOrg = new Organization();
 		parentOrg.setActive(true);
@@ -988,7 +1003,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		memberOrg.setActive(true);
 		memberOrg.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("member.com");
 
-		OrganizationDao orgDao = new OrganizationDaoJdbc(defaultDataSource, fhirContext);
+		OrganizationDao orgDao = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
 		Organization createdParentOrg = orgDao.create(parentOrg);
 		Organization createdMemberOrg = orgDao.create(memberOrg);
 
@@ -1004,7 +1019,8 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		ResearchStudy rS = new ResearchStudy();
 		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
 				"MeDIC");
-		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, fhirContext).create(rS);
+		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
+				.create(rS);
 
 		Binary b = createResource();
 		b.setSecurityContext(new Reference(createdRs.getIdElement().toUnqualifiedVersionless()));
@@ -1046,7 +1062,8 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 	private void testReadAccessTriggerSecurityContextDelete(String accessType,
 			Consumer<ResearchStudy> readAccessModifier) throws Exception
 	{
-		final ResearchStudyDaoJdbc researchStudyDao = new ResearchStudyDaoJdbc(defaultDataSource, fhirContext);
+		final ResearchStudyDaoJdbc researchStudyDao = new ResearchStudyDaoJdbc(defaultDataSource,
+				permanentDeleteDataSource, fhirContext);
 
 		ResearchStudy rS = new ResearchStudy();
 		readAccessModifier.accept(rS);
