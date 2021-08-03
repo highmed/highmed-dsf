@@ -35,7 +35,7 @@ public interface BasicFhirWebserviceClient extends PreferReturnResource
 	 *            not <code>null</code>
 	 * @param version
 	 *            not <code>null</code>
-	 * @return {@link InputStream} needs to be closed
+	 * @return {@link Resource}
 	 */
 	Resource read(String resourceTypeName, String id, String version);
 
@@ -65,4 +65,10 @@ public interface BasicFhirWebserviceClient extends PreferReturnResource
 	StructureDefinition generateSnapshot(String url);
 
 	StructureDefinition generateSnapshot(StructureDefinition differential);
+
+	Bundle history();
+
+	Bundle history(Class<? extends Resource> resourceType);
+
+	Bundle history(Class<? extends Resource> resourceType, String id);
 }

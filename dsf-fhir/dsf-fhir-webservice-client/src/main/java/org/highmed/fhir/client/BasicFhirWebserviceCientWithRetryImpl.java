@@ -177,4 +177,22 @@ class BasicFhirWebserviceCientWithRetryImpl extends AbstractFhirWebserviceClient
 			return null;
 		});
 	}
+
+	@Override
+	public Bundle history()
+	{
+		return retry(nTimes, delayMillis, () -> delegate.history());
+	}
+
+	@Override
+	public Bundle history(Class<? extends Resource> resourceType)
+	{
+		return retry(nTimes, delayMillis, () -> delegate.history(resourceType));
+	}
+
+	@Override
+	public Bundle history(Class<? extends Resource> resourceType, String id)
+	{
+		return retry(nTimes, delayMillis, () -> delegate.history(resourceType, id));
+	}
 }

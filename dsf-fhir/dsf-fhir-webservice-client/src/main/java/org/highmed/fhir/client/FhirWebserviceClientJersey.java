@@ -21,6 +21,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.lang3.StringUtils;
 import org.highmed.dsf.fhir.adapter.AbstractFhirAdapter;
 import org.highmed.dsf.fhir.adapter.ActivityDefinitionJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.ActivityDefinitionXmlFhirAdapter;
@@ -761,5 +762,39 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 	public BasicFhirWebserviceClient withRetry(int nTimes, long delayMillis)
 	{
 		return new BasicFhirWebserviceCientWithRetryImpl(this, nTimes, delayMillis);
+	}
+
+	@Override
+	public Bundle history()
+	{
+		return history(null);
+	}
+
+	@Override
+	public Bundle history(Class<? extends Resource> resourceType)
+	{
+		return history(resourceType, null);
+	}
+
+	@Override
+	public Bundle history(Class<? extends Resource> resourceType, String id)
+	{
+
+		WebTarget resource = getResource();
+
+		if (resourceType != null)
+			resource = resource.path(resourceType.getAnnotation(ResourceDef.class).name());
+
+		if (!StringUtils.isBlank(id))
+			resource = resource.path(id);
+
+		Response response = resource.path("_history").request().accept(Constants.CT_FHIR_JSON_NEW).get();
+
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		if (Status.OK.getStatusCode() == response.getStatus())
+			return response.readEntity(Bundle.class);
+		else
+			throw handleError(response);
 	}
 }
