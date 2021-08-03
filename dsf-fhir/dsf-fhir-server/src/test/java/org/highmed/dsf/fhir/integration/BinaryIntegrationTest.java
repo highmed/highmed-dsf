@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -29,6 +30,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
@@ -1720,5 +1722,101 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		String binaryId = binaryDao.create(binary).getIdElement().getIdPart();
 
 		expectForbidden(() -> getExternalWebserviceClient().deletePermanently(Binary.class, binaryId));
+	}
+
+	// @Test
+	// public void testReadAllowedForLocalUserBasedOnVersion() throws Exception
+	// {
+	// String binaryId = prepareDbWith2VersionsOfBinaryWithVersion1AllAccessAndVersion2LocalAccess();
+	//
+	// Binary readCurrent = getWebserviceClient().read(Binary.class, binaryId);
+	//
+	// assertEquals(binaryId, readCurrent.getIdElement().getIdPart());
+	// assertEquals("2", readCurrent.getMeta().getVersionId());
+	//
+	// Binary readV1 = getWebserviceClient().read(Binary.class, binaryId, "1");
+	//
+	// assertEquals(binaryId, readV1.getIdElement().getIdPart());
+	// assertEquals("1", readV1.getMeta().getVersionId());
+	//
+	// Binary readV2 = getWebserviceClient().read(Binary.class, binaryId, "2");
+	//
+	// assertEquals(binaryId, readV2.getIdElement().getIdPart());
+	// assertEquals("2", readV2.getMeta().getVersionId());
+	// }
+	//
+	// @Test
+	// public void testReadAllowedForRemoteUserBasedOnVersion() throws Exception
+	// {
+	// String binaryId = prepareDbWith2VersionsOfBinaryWithVersion1AllAccessAndVersion2LocalAccess();
+	//
+	// expectForbidden(() -> getExternalWebserviceClient().read(Binary.class, binaryId));
+	// expectForbidden(() -> getExternalWebserviceClient().read(Binary.class, binaryId, "2"));
+	//
+	// Binary readV1 = getExternalWebserviceClient().read(Binary.class, binaryId, "1");
+	//
+	// assertEquals(binaryId, readV1.getIdElement().getIdPart());
+	// assertEquals("1", readV1.getMeta().getVersionId());
+	// }
+	//
+	// @Test
+	// public void testReadAllowedForLocalUserBasedOnHistory() throws Exception
+	// {
+	// String binaryId = prepareDbWith2VersionsOfBinaryWithVersion1AllAccessAndVersion2LocalAccess();
+	//
+	// Bundle bundle = getWebserviceClient().history(Binary.class, binaryId);
+	//
+	// assertEquals(2, bundle.getEntry().size());
+	// assertEquals(2, bundle.getEntry().stream().filter(e -> e.getResource() instanceof Binary).count());
+	// assertEquals(binaryId, bundle.getEntry().get(0).getResource().getIdElement().getIdPart());
+	// assertEquals(binaryId, bundle.getEntry().get(1).getResource().getIdElement().getIdPart());
+	// assertEquals("1", bundle.getEntry().get(0).getResource().getMeta().getVersionId());
+	// assertEquals("2", bundle.getEntry().get(1).getResource().getMeta().getVersionId());
+	// }
+	//
+	// @Test
+	// public void testReadAllowedForRemoteUserBasedOnHistory() throws Exception
+	// {
+	// String binaryId = prepareDbWith2VersionsOfBinaryWithVersion1AllAccessAndVersion2LocalAccess();
+	//
+	// Bundle bundle = getExternalWebserviceClient().history(Binary.class, binaryId);
+	//
+	// assertEquals(1, bundle.getEntry().size());
+	// assertEquals(1, bundle.getEntry().stream().filter(e -> e.getResource() instanceof Binary).count());
+	// assertEquals(binaryId, bundle.getEntry().get(0).getResource().getIdElement().getIdPart());
+	// assertEquals("1", bundle.getEntry().get(0).getResource().getMeta().getVersionId());
+	// }
+	//
+	// @Test
+	// public void testSearchAllowedForLocalUserBasedOnVersion() throws Exception
+	// {
+	// String binaryId = prepareDbWith2VersionsOfBinaryWithVersion1AllAccessAndVersion2LocalAccess();
+	// Map<String, List<String>> parameters = Map.of("_id", List.of(binaryId));
+	//
+	// assertEquals(1, getWebserviceClient().search(Binary.class, parameters).getEntry().stream()
+	// .filter(e -> e.getResource() instanceof Binary).count());
+	// }
+	//
+	// @Test
+	// public void testSearchAllowedForRemoteUserBasedOnVersion() throws Exception
+	// {
+	// String binaryId = prepareDbWith2VersionsOfBinaryWithVersion1AllAccessAndVersion2LocalAccess();
+	// Map<String, List<String>> parameters = Map.of("_id", List.of(binaryId));
+	//
+	// assertEquals(0, getExternalWebserviceClient().search(Binary.class, parameters).getEntry().size());
+	// }
+
+	private String prepareDbWith2VersionsOfBinaryWithVersion1AllAccessAndVersion2LocalAccess() throws Exception
+	{
+		Binary binary = new Binary(new CodeType("application/pdf"));
+		readAccessHelper.addLocal(binary);
+
+		BinaryDao binaryDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
+		binary = binaryDao.create(binary);
+
+		readAccessHelper.addLocal(binary);
+		binary = binaryDao.update(binary);
+
+		return binary.getIdElement().getIdPart();
 	}
 }
