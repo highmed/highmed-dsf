@@ -446,7 +446,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	@Override
 	public List<R> readAll() throws SQLException
 	{
-		try (Connection connection = getDataSource().getConnection())
+		try (Connection connection = dataSource.getConnection())
 		{
 			return readAllWithTransaction(connection);
 		}
@@ -476,7 +476,10 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	@Override
 	public boolean existsNotDeleted(String idString, String versionString) throws SQLException
 	{
-		return existsNotDeletedWithTransaction(dataSource.getConnection(), idString, versionString);
+		try (Connection connection = dataSource.getConnection())
+		{
+			return existsNotDeletedWithTransaction(connection, idString, versionString);
+		}
 	}
 
 	@Override
@@ -761,7 +764,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 	{
 		Objects.requireNonNull(query, "query");
 
-		try (Connection connection = getDataSource().getConnection())
+		try (Connection connection = dataSource.getConnection())
 		{
 			return searchWithTransaction(connection, query);
 		}
