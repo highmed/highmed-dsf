@@ -14,6 +14,8 @@ public interface ReadAccessDao
 	 *            not <code>null</code>
 	 * @param resourceId
 	 *            not <code>null</code>
+	 * @param version
+	 *            <code>> 0</code>
 	 * @param role
 	 *            not <code>null</code>
 	 * @param organizationId
@@ -22,6 +24,6 @@ public interface ReadAccessDao
 	 * @throws SQLException
 	 *             if database access errors occur
 	 */
-	List<String> getAccessTypes(Connection connection, UUID resourceId, UserRole role, UUID organizationId)
-			throws SQLException;
+	List<String> getAccessTypes(Connection connection, UUID resourceId, long version, UserRole role,
+			UUID organizationId) throws SQLException;
 }

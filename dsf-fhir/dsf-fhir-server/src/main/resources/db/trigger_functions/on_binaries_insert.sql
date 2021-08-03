@@ -2,11 +2,11 @@ CREATE OR REPLACE FUNCTION on_binaries_insert() RETURNS TRIGGER AS $$
 DECLARE
 	binary_insert_count INT;
 BEGIN
-	PERFORM on_resources_insert(NEW.binary_id, NEW.binary_json);
+	PERFORM on_resources_insert(NEW.binary_id, NEW.version, NEW.binary_json);
 	
 	IF (NEW.binary_json->'securityContext'->>'reference' IS NOT NULL) THEN
 		INSERT INTO read_access
-		SELECT NEW.binary_id, access_type, organization_id, organization_affiliation_id
+		SELECT NEW.binary_id, NEW.version, access_type, organization_id, organization_affiliation_id
 			FROM read_access
 			WHERE resource_id =	(
 					regexp_match(NEW.binary_json->'securityContext'->>'reference',

@@ -38,18 +38,21 @@ public class ReadAccessDaoJdbc implements ReadAccessDao, InitializingBean
 	}
 
 	@Override
-	public List<String> getAccessTypes(Connection connection, UUID resourceId, UserRole role, UUID organizationId)
-			throws SQLException
+	public List<String> getAccessTypes(Connection connection, UUID resourceId, long version, UserRole role,
+			UUID organizationId) throws SQLException
 	{
 		Objects.requireNonNull(connection, "connection");
 		Objects.requireNonNull(resourceId, "resourceId");
+		if (version <= 0)
+			throw new IllegalArgumentException("version <= 0");
 		Objects.requireNonNull(role, "role");
 		Objects.requireNonNull(organizationId, "organizationId");
 
 		try (PreparedStatement statement = connection.prepareStatement(getReadAllowedQuery(role)))
 		{
 			statement.setObject(1, uuidToPgObject(resourceId));
-			statement.setObject(2, uuidToPgObject(organizationId));
+			statement.setLong(2, version);
+			statement.setObject(3, uuidToPgObject(organizationId));
 
 			logger.trace("Executing query '{}'", statement);
 			try (ResultSet result = statement.executeQuery())
@@ -67,9 +70,9 @@ public class ReadAccessDaoJdbc implements ReadAccessDao, InitializingBean
 		switch (role)
 		{
 			case LOCAL:
-				return "SELECT DISTINCT access_type FROM read_access WHERE resource_id = ? AND (access_type = 'ALL' OR access_type = 'LOCAL' OR organization_id = ?) ORDER BY access_type";
+				return "SELECT DISTINCT access_type FROM read_access WHERE resource_id = ? AND resource_version = ? AND (access_type = 'ALL' OR access_type = 'LOCAL' OR organization_id = ?) ORDER BY access_type";
 			case REMOTE:
-				return "SELECT DISTINCT access_type FROM read_access WHERE resource_id = ? AND (access_type = 'ALL' OR organization_id = ?) ORDER BY access_type";
+				return "SELECT DISTINCT access_type FROM read_access WHERE resource_id = ? AND resource_version = ? AND (access_type = 'ALL' OR organization_id = ?) ORDER BY access_type";
 			default:
 				throw new IllegalArgumentException(UserRole.class.getName() + " " + role + " not supported");
 		}

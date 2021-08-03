@@ -19,11 +19,11 @@ abstract class AbstractMetaTagAuthorizationRoleUserFilter extends AbstractUserFi
 	{
 		if (UserRole.LOCAL.equals(user.getRole()))
 			return "(SELECT count(*) FROM read_access WHERE read_access.resource_id = " + resourceTable + "."
-					+ resourceIdColumn
+					+ resourceIdColumn + " AND read_access.resource_version = " + resourceTable + ".version"
 					+ " AND (read_access.organization_id = ? OR read_access.access_type = 'ALL' OR read_access.access_type = 'LOCAL')) > 0";
 		else
 			return "(SELECT count(*) FROM read_access WHERE read_access.resource_id = " + resourceTable + "."
-					+ resourceIdColumn
+					+ resourceIdColumn + " AND read_access.resource_version = " + resourceTable + ".version"
 					+ " AND (read_access.organization_id = ? OR read_access.access_type = 'ALL')) > 0";
 	}
 

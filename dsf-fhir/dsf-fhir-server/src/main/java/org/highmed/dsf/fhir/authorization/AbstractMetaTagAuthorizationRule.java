@@ -93,12 +93,14 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 	{
 		UserRole userRole = user.getRole();
 		UUID resourceId = parameterConverter.toUuid(resourceTypeName, existingResource.getIdElement().getIdPart());
+		long resourceVersion = existingResource.getIdElement().getVersionIdPartAsLong();
 		UUID organizationId = parameterConverter.toUuid("Organization",
 				user.getOrganization().getIdElement().getIdPart());
 
 		try
 		{
-			List<String> accessTypes = readAccessDao.getAccessTypes(connection, resourceId, userRole, organizationId);
+			List<String> accessTypes = readAccessDao.getAccessTypes(connection, resourceId, resourceVersion, userRole,
+					organizationId);
 
 			if (accessTypes.isEmpty())
 			{
