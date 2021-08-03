@@ -1,7 +1,5 @@
 package org.highmed.dsf.fhir.integration;
 
-import static javax.ws.rs.core.Response.Status;
-
 import static de.rwh.utils.jetty.JettyServer.httpConfiguration;
 import static de.rwh.utils.jetty.JettyServer.httpsConnector;
 import static de.rwh.utils.jetty.JettyServer.secureRequestCustomizer;
@@ -38,6 +36,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.dbcp2.BasicDataSource;
@@ -404,6 +403,16 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	protected static void expectForbidden(Runnable operation) throws Exception
 	{
 		expectWebApplicationException(operation, Status.FORBIDDEN);
+	}
+
+	protected static void expectNotFound(Runnable operation) throws Exception
+	{
+		expectWebApplicationException(operation, Status.NOT_FOUND);
+	}
+
+	protected static void expectNotAcceptable(Runnable operation) throws Exception
+	{
+		expectWebApplicationException(operation, Status.NOT_ACCEPTABLE);
 	}
 
 	protected static void expectWebApplicationException(Runnable operation, Status status) throws Exception
