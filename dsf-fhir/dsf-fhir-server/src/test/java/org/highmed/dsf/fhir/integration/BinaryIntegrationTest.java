@@ -7,6 +7,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -16,9 +17,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response.Status;
 
 import org.highmed.dsf.fhir.dao.BinaryDao;
 import org.highmed.dsf.fhir.dao.OrganizationDao;
@@ -135,7 +134,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		}
 	}
 
-	@Test(expected = WebApplicationException.class)
+	@Test
 	public void testReadAllowedLocalUserViaStreamMediaTypeNotSupported() throws Exception
 	{
 		final String contentType = MediaType.TEXT_PLAIN;
@@ -149,19 +148,17 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		BinaryDao binDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
 		Binary created = binDao.create(binary);
 
-		try
+		expectNotAcceptable(() ->
 		{
 			try (InputStream in = getWebserviceClient().readBinary(created.getIdElement().getIdPart(),
 					MediaType.APPLICATION_XML_TYPE))
 			{
-				assertTrue(Arrays.equals(data, in.readAllBytes()));
 			}
-		}
-		catch (WebApplicationException e)
-		{
-			assertEquals(Status.NOT_ACCEPTABLE.getStatusCode(), e.getResponse().getStatus());
-			throw e;
-		}
+			catch (IOException e)
+			{
+				throw new RuntimeException(e);
+			}
+		});
 	}
 
 	@Test
@@ -446,6 +443,350 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		assertNull(responseBundle.getEntry().get(0).getResource());
 		assertNotNull(responseBundle.getEntry().get(0).getResponse().getStatus());
 		assertEquals("403 Forbidden", responseBundle.getEntry().get(0).getResponse().getStatus());
+	}
+
+	@Test
+	public void testReadAllowedLocalUserNotFound() throws Exception
+	{
+		expectNotFound(() -> getWebserviceClient().read(Binary.class, UUID.randomUUID().toString()));
+	}
+
+	@Test
+	public void testReadAllowedLocalUserNotFoundViaTransactionBundle() throws Exception
+	{
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		bundle.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Binary/" + UUID.randomUUID().toString());
+
+		Bundle responseBundle = getWebserviceClient().postBundle(bundle);
+		assertNotNull(responseBundle);
+		assertEquals(BundleType.TRANSACTIONRESPONSE, responseBundle.getType());
+		assertEquals(1, responseBundle.getEntry().size());
+		assertNotNull(responseBundle.getEntry().get(0));
+		assertFalse(responseBundle.getEntry().get(0).hasResource());
+		assertTrue(responseBundle.getEntry().get(0).hasResponse());
+		assertTrue(responseBundle.getEntry().get(0).getResponse().hasStatus());
+		assertTrue(responseBundle.getEntry().get(0).getResponse().getStatus().startsWith("404"));
+	}
+
+	@Test
+	public void testReadAllowedLocalUserNotFoundViaBatchBundle() throws Exception
+	{
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.BATCH);
+		bundle.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Binary/" + UUID.randomUUID().toString());
+
+		Bundle responseBundle = getWebserviceClient().postBundle(bundle);
+		assertNotNull(responseBundle);
+		assertEquals(BundleType.BATCHRESPONSE, responseBundle.getType());
+		assertEquals(1, responseBundle.getEntry().size());
+		assertNotNull(responseBundle.getEntry().get(0));
+		assertFalse(responseBundle.getEntry().get(0).hasResource());
+		assertTrue(responseBundle.getEntry().get(0).hasResponse());
+		assertTrue(responseBundle.getEntry().get(0).getResponse().hasStatus());
+		assertTrue(responseBundle.getEntry().get(0).getResponse().getStatus().startsWith("404"));
+	}
+
+	@Test
+	public void testHeadAllowedLocalUserNotFoundViaTransactionBundle() throws Exception
+	{
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		bundle.addEntry().getRequest().setMethod(HTTPVerb.HEAD).setUrl("Binary/" + UUID.randomUUID().toString());
+
+		Bundle responseBundle = getWebserviceClient().postBundle(bundle);
+		assertNotNull(responseBundle);
+		assertEquals(BundleType.TRANSACTIONRESPONSE, responseBundle.getType());
+		assertEquals(1, responseBundle.getEntry().size());
+		assertNotNull(responseBundle.getEntry().get(0));
+		assertFalse(responseBundle.getEntry().get(0).hasResource());
+		assertTrue(responseBundle.getEntry().get(0).hasResponse());
+		assertTrue(responseBundle.getEntry().get(0).getResponse().hasStatus());
+		assertTrue(responseBundle.getEntry().get(0).getResponse().getStatus().startsWith("404"));
+	}
+
+	@Test
+	public void testHeadAllowedLocalUserNotFoundViaBatchBundle() throws Exception
+	{
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.BATCH);
+		bundle.addEntry().getRequest().setMethod(HTTPVerb.HEAD).setUrl("Binary/" + UUID.randomUUID().toString());
+
+		Bundle responseBundle = getWebserviceClient().postBundle(bundle);
+		assertNotNull(responseBundle);
+		assertEquals(BundleType.BATCHRESPONSE, responseBundle.getType());
+		assertEquals(1, responseBundle.getEntry().size());
+		assertNotNull(responseBundle.getEntry().get(0));
+		assertFalse(responseBundle.getEntry().get(0).hasResource());
+		assertTrue(responseBundle.getEntry().get(0).hasResponse());
+		assertTrue(responseBundle.getEntry().get(0).getResponse().hasStatus());
+		assertTrue(responseBundle.getEntry().get(0).getResponse().getStatus().startsWith("404"));
+	}
+
+	@Test
+	public void testSearchAllowedLocalUserNotFound() throws Exception
+	{
+		Bundle resultBundle = getWebserviceClient().search(Binary.class,
+				Map.of("_id", Collections.singletonList(UUID.randomUUID().toString())));
+
+		assertNotNull(resultBundle);
+		assertEquals(0, resultBundle.getTotal());
+		assertFalse(resultBundle.hasEntry());
+		assertEquals(0, resultBundle.getEntry().size());
+	}
+
+	@Test
+	public void testGetSearchAllowedLocalUserNotFoundViaTransactionBundle() throws Exception
+	{
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		bundle.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Binary?_id=" + UUID.randomUUID().toString());
+
+		Bundle responseBundle = getWebserviceClient().postBundle(bundle);
+		assertNotNull(responseBundle);
+		assertEquals(BundleType.TRANSACTIONRESPONSE, responseBundle.getType());
+		assertTrue(responseBundle.hasEntry());
+		assertNotNull(responseBundle.getEntry());
+		assertEquals(1, responseBundle.getEntry().size());
+		assertNotNull(responseBundle.getEntry().get(0));
+		assertTrue(responseBundle.getEntry().get(0).hasResource());
+		assertNotNull(responseBundle.getEntry().get(0).getResource());
+		assertTrue(responseBundle.getEntry().get(0).getResource() instanceof Bundle);
+
+		Bundle searchResultBundle = (Bundle) responseBundle.getEntry().get(0).getResource();
+		assertEquals(BundleType.SEARCHSET, searchResultBundle.getType());
+		assertEquals(0, searchResultBundle.getTotal());
+		assertFalse(searchResultBundle.hasEntry());
+
+		assertTrue(responseBundle.getEntry().get(0).hasResponse());
+		assertNotNull(responseBundle.getEntry().get(0).getResponse());
+		assertTrue(responseBundle.getEntry().get(0).getResponse().hasStatus());
+		assertNotNull(responseBundle.getEntry().get(0).getResponse().getStatus());
+		assertTrue(responseBundle.getEntry().get(0).getResponse().getStatus().startsWith("200"));
+	}
+
+	@Test
+	public void testGetSearchAllowedLocalUserNotFoundViaBatchBundle() throws Exception
+	{
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.BATCH);
+		bundle.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Binary?_id=" + UUID.randomUUID().toString());
+
+		Bundle responseBundle = getWebserviceClient().postBundle(bundle);
+		assertNotNull(responseBundle);
+		assertEquals(BundleType.BATCHRESPONSE, responseBundle.getType());
+		assertTrue(responseBundle.hasEntry());
+		assertNotNull(responseBundle.getEntry());
+		assertEquals(1, responseBundle.getEntry().size());
+		assertNotNull(responseBundle.getEntry().get(0));
+		assertTrue(responseBundle.getEntry().get(0).hasResource());
+		assertNotNull(responseBundle.getEntry().get(0).getResource());
+		assertTrue(responseBundle.getEntry().get(0).getResource() instanceof Bundle);
+
+		Bundle searchResultBundle = (Bundle) responseBundle.getEntry().get(0).getResource();
+		assertEquals(BundleType.SEARCHSET, searchResultBundle.getType());
+		assertEquals(0, searchResultBundle.getTotal());
+		assertFalse(searchResultBundle.hasEntry());
+
+		assertTrue(responseBundle.getEntry().get(0).hasResponse());
+		assertNotNull(responseBundle.getEntry().get(0).getResponse());
+		assertTrue(responseBundle.getEntry().get(0).getResponse().hasStatus());
+		assertNotNull(responseBundle.getEntry().get(0).getResponse().getStatus());
+		assertTrue(responseBundle.getEntry().get(0).getResponse().getStatus().startsWith("200"));
+	}
+
+	// searching with HEAD is not helpful
+	@Test
+	public void testHeadSearchAllowedLocalUserNotFoundViaTransactionBundle() throws Exception
+	{
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		bundle.addEntry().getRequest().setMethod(HTTPVerb.HEAD).setUrl("Binary?_id=" + UUID.randomUUID().toString());
+
+		Bundle responseBundle = getWebserviceClient().postBundle(bundle);
+		assertNotNull(responseBundle);
+		assertEquals(BundleType.TRANSACTIONRESPONSE, responseBundle.getType());
+		assertTrue(responseBundle.hasEntry());
+		assertNotNull(responseBundle.getEntry());
+		assertEquals(1, responseBundle.getEntry().size());
+		assertNotNull(responseBundle.getEntry().get(0));
+		assertFalse(responseBundle.getEntry().get(0).hasResource());
+
+		assertTrue(responseBundle.getEntry().get(0).hasResponse());
+		assertNotNull(responseBundle.getEntry().get(0).getResponse());
+		assertTrue(responseBundle.getEntry().get(0).getResponse().hasStatus());
+		assertNotNull(responseBundle.getEntry().get(0).getResponse().getStatus());
+		assertTrue(responseBundle.getEntry().get(0).getResponse().getStatus().startsWith("200"));
+	}
+
+	// searching with HEAD is not helpful
+	@Test
+	public void testHeadSearchAllowedLocalUserNotFoundViaBatchBundle() throws Exception
+	{
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.BATCH);
+		bundle.addEntry().getRequest().setMethod(HTTPVerb.HEAD).setUrl("Binary?_id=" + UUID.randomUUID().toString());
+
+		Bundle responseBundle = getWebserviceClient().postBundle(bundle);
+		assertNotNull(responseBundle);
+		assertEquals(BundleType.BATCHRESPONSE, responseBundle.getType());
+		assertTrue(responseBundle.hasEntry());
+		assertNotNull(responseBundle.getEntry());
+		assertEquals(1, responseBundle.getEntry().size());
+		assertNotNull(responseBundle.getEntry().get(0));
+		assertFalse(responseBundle.getEntry().get(0).hasResource());
+
+		assertTrue(responseBundle.getEntry().get(0).hasResponse());
+		assertNotNull(responseBundle.getEntry().get(0).getResponse());
+		assertTrue(responseBundle.getEntry().get(0).getResponse().hasStatus());
+		assertNotNull(responseBundle.getEntry().get(0).getResponse().getStatus());
+		assertTrue(responseBundle.getEntry().get(0).getResponse().getStatus().startsWith("200"));
+	}
+
+	@Test
+	public void testGetSearchCount0AllowedLocalUserNotFoundViaTransactionBundle() throws Exception
+	{
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		bundle.addEntry().getRequest().setMethod(HTTPVerb.GET)
+				.setUrl("Binary?_id=" + UUID.randomUUID().toString() + "&_count=0");
+
+		Bundle responseBundle = getWebserviceClient().postBundle(bundle);
+		assertNotNull(responseBundle);
+		assertEquals(BundleType.TRANSACTIONRESPONSE, responseBundle.getType());
+		assertTrue(responseBundle.hasEntry());
+		assertNotNull(responseBundle.getEntry());
+		assertEquals(1, responseBundle.getEntry().size());
+		assertNotNull(responseBundle.getEntry().get(0));
+		assertTrue(responseBundle.getEntry().get(0).hasResource());
+		assertNotNull(responseBundle.getEntry().get(0).getResource());
+		assertTrue(responseBundle.getEntry().get(0).getResource() instanceof Bundle);
+
+		Bundle searchResultBundle = (Bundle) responseBundle.getEntry().get(0).getResource();
+		assertEquals(BundleType.SEARCHSET, searchResultBundle.getType());
+		assertEquals(0, searchResultBundle.getTotal());
+		assertFalse(searchResultBundle.hasEntry());
+
+		assertTrue(responseBundle.getEntry().get(0).hasResponse());
+		assertNotNull(responseBundle.getEntry().get(0).getResponse());
+		assertTrue(responseBundle.getEntry().get(0).getResponse().hasStatus());
+		assertNotNull(responseBundle.getEntry().get(0).getResponse().getStatus());
+		assertTrue(responseBundle.getEntry().get(0).getResponse().getStatus().startsWith("200"));
+	}
+
+	@Test
+	public void testGetSearchCount0AllowedLocalUserNotFoundViaBatchBundle() throws Exception
+	{
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.BATCH);
+		bundle.addEntry().getRequest().setMethod(HTTPVerb.GET)
+				.setUrl("Binary?_id=" + UUID.randomUUID().toString() + "&_count=0");
+
+		Bundle responseBundle = getWebserviceClient().postBundle(bundle);
+		assertNotNull(responseBundle);
+		assertEquals(BundleType.BATCHRESPONSE, responseBundle.getType());
+		assertTrue(responseBundle.hasEntry());
+		assertNotNull(responseBundle.getEntry());
+		assertEquals(1, responseBundle.getEntry().size());
+		assertNotNull(responseBundle.getEntry().get(0));
+		assertTrue(responseBundle.getEntry().get(0).hasResource());
+		assertNotNull(responseBundle.getEntry().get(0).getResource());
+		assertTrue(responseBundle.getEntry().get(0).getResource() instanceof Bundle);
+
+		Bundle searchResultBundle = (Bundle) responseBundle.getEntry().get(0).getResource();
+		assertEquals(BundleType.SEARCHSET, searchResultBundle.getType());
+		assertEquals(0, searchResultBundle.getTotal());
+		assertFalse(searchResultBundle.hasEntry());
+
+		assertTrue(responseBundle.getEntry().get(0).hasResponse());
+		assertNotNull(responseBundle.getEntry().get(0).getResponse());
+		assertTrue(responseBundle.getEntry().get(0).getResponse().hasStatus());
+		assertNotNull(responseBundle.getEntry().get(0).getResponse().getStatus());
+		assertTrue(responseBundle.getEntry().get(0).getResponse().getStatus().startsWith("200"));
+	}
+
+	@Test
+	public void testGetSearchCount0AllowedLocalUserFoundViaTransactionBundle() throws Exception
+	{
+		final String contentType = MediaType.TEXT_PLAIN;
+		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
+
+		Binary binary = new Binary();
+		binary.setContentType(contentType);
+		binary.setData(data);
+		getReadAccessHelper().addLocal(binary);
+
+		BinaryDao binDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
+		Binary created = binDao.create(binary);
+
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		bundle.addEntry().getRequest().setMethod(HTTPVerb.GET)
+				.setUrl("Binary?_id=" + created.getIdElement().getIdPart() + "&_count=0");
+
+		Bundle responseBundle = getWebserviceClient().postBundle(bundle);
+		assertNotNull(responseBundle);
+		assertEquals(BundleType.TRANSACTIONRESPONSE, responseBundle.getType());
+		assertTrue(responseBundle.hasEntry());
+		assertNotNull(responseBundle.getEntry());
+		assertEquals(1, responseBundle.getEntry().size());
+		assertNotNull(responseBundle.getEntry().get(0));
+		assertTrue(responseBundle.getEntry().get(0).hasResource());
+		assertNotNull(responseBundle.getEntry().get(0).getResource());
+		assertTrue(responseBundle.getEntry().get(0).getResource() instanceof Bundle);
+
+		Bundle searchResultBundle = (Bundle) responseBundle.getEntry().get(0).getResource();
+		assertEquals(BundleType.SEARCHSET, searchResultBundle.getType());
+		assertEquals(1, searchResultBundle.getTotal());
+		assertFalse(searchResultBundle.hasEntry());
+
+		assertTrue(responseBundle.getEntry().get(0).hasResponse());
+		assertNotNull(responseBundle.getEntry().get(0).getResponse());
+		assertTrue(responseBundle.getEntry().get(0).getResponse().hasStatus());
+		assertNotNull(responseBundle.getEntry().get(0).getResponse().getStatus());
+		assertTrue(responseBundle.getEntry().get(0).getResponse().getStatus().startsWith("200"));
+	}
+
+	@Test
+	public void testGetSearchCount0AllowedLocalUserFoundViaBatchBundle() throws Exception
+	{
+		final String contentType = MediaType.TEXT_PLAIN;
+		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
+
+		Binary binary = new Binary();
+		binary.setContentType(contentType);
+		binary.setData(data);
+		getReadAccessHelper().addLocal(binary);
+
+		BinaryDao binDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
+		Binary created = binDao.create(binary);
+
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.BATCH);
+		bundle.addEntry().getRequest().setMethod(HTTPVerb.GET)
+				.setUrl("Binary?_id=" + created.getIdElement().getIdPart() + "&_count=0");
+
+		Bundle responseBundle = getWebserviceClient().postBundle(bundle);
+		assertNotNull(responseBundle);
+		assertEquals(BundleType.BATCHRESPONSE, responseBundle.getType());
+		assertTrue(responseBundle.hasEntry());
+		assertNotNull(responseBundle.getEntry());
+		assertEquals(1, responseBundle.getEntry().size());
+		assertNotNull(responseBundle.getEntry().get(0));
+		assertTrue(responseBundle.getEntry().get(0).hasResource());
+		assertNotNull(responseBundle.getEntry().get(0).getResource());
+		assertTrue(responseBundle.getEntry().get(0).getResource() instanceof Bundle);
+
+		Bundle searchResultBundle = (Bundle) responseBundle.getEntry().get(0).getResource();
+		assertEquals(BundleType.SEARCHSET, searchResultBundle.getType());
+		assertEquals(1, searchResultBundle.getTotal());
+		assertFalse(searchResultBundle.hasEntry());
+
+		assertTrue(responseBundle.getEntry().get(0).hasResponse());
+		assertNotNull(responseBundle.getEntry().get(0).getResponse());
+		assertTrue(responseBundle.getEntry().get(0).getResponse().hasStatus());
+		assertNotNull(responseBundle.getEntry().get(0).getResponse().getStatus());
+		assertTrue(responseBundle.getEntry().get(0).getResponse().getStatus().startsWith("200"));
 	}
 
 	@Test
