@@ -15,7 +15,7 @@ public interface ReadAccessDao
 	 * @param resourceId
 	 *            not <code>null</code>
 	 * @param version
-	 *            <code>> 0</code>
+	 *            <code>&gt; 0</code>
 	 * @param role
 	 *            not <code>null</code>
 	 * @param organizationId
