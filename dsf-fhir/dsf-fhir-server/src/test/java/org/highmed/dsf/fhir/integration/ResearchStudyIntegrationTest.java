@@ -345,88 +345,88 @@ public class ResearchStudyIntegrationTest extends AbstractIntegrationTest
 		expectForbidden(() -> getExternalWebserviceClient().deletePermanently(ResearchStudy.class, researchStudyId));
 	}
 
-	// @Test
-	// public void testReadAllowedForLocalUserBasedOnVersion() throws Exception
-	// {
-	// String researchStudyId = prepareDbWith2VersionsOfResearchStudyWithVersion1AllAccessAndVersion2LocalAccess();
-	//
-	// ResearchStudy readCurrent = getWebserviceClient().read(ResearchStudy.class, researchStudyId);
-	//
-	// assertEquals(researchStudyId, readCurrent.getIdElement().getIdPart());
-	// assertEquals("2", readCurrent.getMeta().getVersionId());
-	//
-	// ResearchStudy readV1 = getWebserviceClient().read(ResearchStudy.class, researchStudyId, "1");
-	//
-	// assertEquals(researchStudyId, readV1.getIdElement().getIdPart());
-	// assertEquals("1", readV1.getMeta().getVersionId());
-	//
-	// ResearchStudy readV2 = getWebserviceClient().read(ResearchStudy.class, researchStudyId, "2");
-	//
-	// assertEquals(researchStudyId, readV2.getIdElement().getIdPart());
-	// assertEquals("2", readV2.getMeta().getVersionId());
-	// }
-	//
-	// @Test
-	// public void testReadAllowedForRemoteUserBasedOnVersion() throws Exception
-	// {
-	// String researchStudyId = prepareDbWith2VersionsOfResearchStudyWithVersion1AllAccessAndVersion2LocalAccess();
-	//
-	// expectForbidden(() -> getExternalWebserviceClient().read(ResearchStudy.class, researchStudyId));
-	// expectForbidden(() -> getExternalWebserviceClient().read(ResearchStudy.class, researchStudyId, "2"));
-	//
-	// ResearchStudy readV1 = getExternalWebserviceClient().read(ResearchStudy.class, researchStudyId, "1");
-	//
-	// assertEquals(researchStudyId, readV1.getIdElement().getIdPart());
-	// assertEquals("1", readV1.getMeta().getVersionId());
-	// }
-	//
-	// @Test
-	// public void testReadAllowedForLocalUserBasedOnHistory() throws Exception
-	// {
-	// String researchStudyId = prepareDbWith2VersionsOfResearchStudyWithVersion1AllAccessAndVersion2LocalAccess();
-	//
-	// Bundle bundle = getWebserviceClient().history(ResearchStudy.class, researchStudyId);
-	//
-	// assertEquals(2, bundle.getEntry().size());
-	// assertEquals(2, bundle.getEntry().stream().filter(e -> e.getResource() instanceof ResearchStudy).count());
-	// assertEquals(researchStudyId, bundle.getEntry().get(0).getResource().getIdElement().getIdPart());
-	// assertEquals(researchStudyId, bundle.getEntry().get(1).getResource().getIdElement().getIdPart());
-	// assertEquals("1", bundle.getEntry().get(0).getResource().getMeta().getVersionId());
-	// assertEquals("2", bundle.getEntry().get(1).getResource().getMeta().getVersionId());
-	// }
-	//
-	// @Test
-	// public void testReadAllowedForRemoteUserBasedOnHistory() throws Exception
-	// {
-	// String researchStudyId = prepareDbWith2VersionsOfResearchStudyWithVersion1AllAccessAndVersion2LocalAccess();
-	//
-	// Bundle bundle = getExternalWebserviceClient().history(ResearchStudy.class, researchStudyId);
-	//
-	// assertEquals(1, bundle.getEntry().size());
-	// assertEquals(1, bundle.getEntry().stream().filter(e -> e.getResource() instanceof ResearchStudy).count());
-	// assertEquals(researchStudyId, bundle.getEntry().get(0).getResource().getIdElement().getIdPart());
-	// assertEquals("1", bundle.getEntry().get(0).getResource().getMeta().getVersionId());
-	// }
-	//
-	// @Test
-	// public void testSearchAllowedForLocalUserBasedOnVersion() throws Exception
-	// {
-	// String researchStudyId = prepareDbWith2VersionsOfResearchStudyWithVersion1AllAccessAndVersion2LocalAccess();
-	// Map<String, List<String>> parameters = Map.of("_id", List.of(researchStudyId));
-	//
-	// assertEquals(1, getWebserviceClient().search(ResearchStudy.class, parameters).getEntry().stream()
-	// .filter(e -> e.getResource() instanceof ResearchStudy).count());
-	// }
-	//
-	// @Test
-	// public void testSearchAllowedForRemoteUserBasedOnVersion() throws Exception
-	// {
-	// String researchStudyId = prepareDbWith2VersionsOfResearchStudyWithVersion1AllAccessAndVersion2LocalAccess();
-	// Map<String, List<String>> parameters = Map.of("_id", List.of(researchStudyId));
-	//
-	// assertEquals(0, getExternalWebserviceClient().search(ResearchStudy.class, parameters).getEntry().stream()
-	// .filter(e -> e.getResource() instanceof ResearchStudy).count());
-	// }
+	@Test
+	public void testReadAllowedForLocalUserBasedOnVersion() throws Exception
+	{
+		String researchStudyId = prepareDbWith2VersionsOfResearchStudyWithVersion1AllAccessAndVersion2LocalAccess();
+
+		ResearchStudy readCurrent = getWebserviceClient().read(ResearchStudy.class, researchStudyId);
+
+		assertEquals(researchStudyId, readCurrent.getIdElement().getIdPart());
+		assertEquals("2", readCurrent.getMeta().getVersionId());
+
+		ResearchStudy readV1 = getWebserviceClient().read(ResearchStudy.class, researchStudyId, "1");
+
+		assertEquals(researchStudyId, readV1.getIdElement().getIdPart());
+		assertEquals("1", readV1.getMeta().getVersionId());
+
+		ResearchStudy readV2 = getWebserviceClient().read(ResearchStudy.class, researchStudyId, "2");
+
+		assertEquals(researchStudyId, readV2.getIdElement().getIdPart());
+		assertEquals("2", readV2.getMeta().getVersionId());
+	}
+
+	@Test
+	public void testReadAllowedForRemoteUserBasedOnVersion() throws Exception
+	{
+		String researchStudyId = prepareDbWith2VersionsOfResearchStudyWithVersion1AllAccessAndVersion2LocalAccess();
+
+		expectForbidden(() -> getExternalWebserviceClient().read(ResearchStudy.class, researchStudyId));
+		expectForbidden(() -> getExternalWebserviceClient().read(ResearchStudy.class, researchStudyId, "2"));
+
+		ResearchStudy readV1 = getExternalWebserviceClient().read(ResearchStudy.class, researchStudyId, "1");
+
+		assertEquals(researchStudyId, readV1.getIdElement().getIdPart());
+		assertEquals("1", readV1.getMeta().getVersionId());
+	}
+
+	@Test
+	public void testReadAllowedForLocalUserBasedOnHistory() throws Exception
+	{
+		String researchStudyId = prepareDbWith2VersionsOfResearchStudyWithVersion1AllAccessAndVersion2LocalAccess();
+
+		Bundle bundle = getWebserviceClient().history(ResearchStudy.class, researchStudyId);
+
+		assertEquals(2, bundle.getEntry().size());
+		assertEquals(2, bundle.getEntry().stream().filter(e -> e.getResource() instanceof ResearchStudy).count());
+		assertEquals(researchStudyId, bundle.getEntry().get(0).getResource().getIdElement().getIdPart());
+		assertEquals(researchStudyId, bundle.getEntry().get(1).getResource().getIdElement().getIdPart());
+		assertEquals("1", bundle.getEntry().get(0).getResource().getMeta().getVersionId());
+		assertEquals("2", bundle.getEntry().get(1).getResource().getMeta().getVersionId());
+	}
+
+	@Test
+	public void testReadAllowedForRemoteUserBasedOnHistory() throws Exception
+	{
+		String researchStudyId = prepareDbWith2VersionsOfResearchStudyWithVersion1AllAccessAndVersion2LocalAccess();
+
+		Bundle bundle = getExternalWebserviceClient().history(ResearchStudy.class, researchStudyId);
+
+		assertEquals(1, bundle.getEntry().size());
+		assertEquals(1, bundle.getEntry().stream().filter(e -> e.getResource() instanceof ResearchStudy).count());
+		assertEquals(researchStudyId, bundle.getEntry().get(0).getResource().getIdElement().getIdPart());
+		assertEquals("1", bundle.getEntry().get(0).getResource().getMeta().getVersionId());
+	}
+
+	@Test
+	public void testSearchAllowedForLocalUserBasedOnVersion() throws Exception
+	{
+		String researchStudyId = prepareDbWith2VersionsOfResearchStudyWithVersion1AllAccessAndVersion2LocalAccess();
+		Map<String, List<String>> parameters = Map.of("_id", List.of(researchStudyId));
+
+		assertEquals(1, getWebserviceClient().search(ResearchStudy.class, parameters).getEntry().stream()
+				.filter(e -> e.getResource() instanceof ResearchStudy).count());
+	}
+
+	@Test
+	public void testSearchAllowedForRemoteUserBasedOnVersion() throws Exception
+	{
+		String researchStudyId = prepareDbWith2VersionsOfResearchStudyWithVersion1AllAccessAndVersion2LocalAccess();
+		Map<String, List<String>> parameters = Map.of("_id", List.of(researchStudyId));
+
+		assertEquals(0, getExternalWebserviceClient().search(ResearchStudy.class, parameters).getEntry().stream()
+				.filter(e -> e.getResource() instanceof ResearchStudy).count());
+	}
 
 	private Binary getBinary()
 	{
