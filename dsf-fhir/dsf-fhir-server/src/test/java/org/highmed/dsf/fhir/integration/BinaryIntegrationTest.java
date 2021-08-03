@@ -191,6 +191,19 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
+	public void testReadAllowedExternalUserNotFound() throws Exception
+	{
+		expectNotFound(() -> getExternalWebserviceClient().read(Binary.class, UUID.randomUUID().toString()));
+	}
+
+	@Test
+	public void testReadAllowedExternalUserNotFoundWithVersion() throws Exception
+	{
+		expectNotFound(
+				() -> getExternalWebserviceClient().read(Binary.class, UUID.randomUUID().toString() + "/_history/12"));
+	}
+
+	@Test
 	public void testReadAllowedExternalUserViaSecurityContext() throws Exception
 	{
 		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
@@ -452,6 +465,12 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
+	public void testReadAllowedLocalUserNotFoundWithVersion() throws Exception
+	{
+		expectNotFound(() -> getWebserviceClient().read(Binary.class, UUID.randomUUID().toString(), "12"));
+	}
+
+	@Test
 	public void testReadAllowedLocalUserNotFoundViaTransactionBundle() throws Exception
 	{
 		Bundle bundle = new Bundle();
@@ -511,6 +530,82 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.BATCH);
 		bundle.addEntry().getRequest().setMethod(HTTPVerb.HEAD).setUrl("Binary/" + UUID.randomUUID().toString());
+
+		Bundle responseBundle = getWebserviceClient().postBundle(bundle);
+		assertNotNull(responseBundle);
+		assertEquals(BundleType.BATCHRESPONSE, responseBundle.getType());
+		assertEquals(1, responseBundle.getEntry().size());
+		assertNotNull(responseBundle.getEntry().get(0));
+		assertFalse(responseBundle.getEntry().get(0).hasResource());
+		assertTrue(responseBundle.getEntry().get(0).hasResponse());
+		assertTrue(responseBundle.getEntry().get(0).getResponse().hasStatus());
+		assertTrue(responseBundle.getEntry().get(0).getResponse().getStatus().startsWith("404"));
+	}
+
+	@Test
+	public void testReadAllowedLocalUserNotFoundViaTransactionBundleWithVersion() throws Exception
+	{
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		bundle.addEntry().getRequest().setMethod(HTTPVerb.GET)
+				.setUrl("Binary/" + UUID.randomUUID().toString() + "/_history/12");
+
+		Bundle responseBundle = getWebserviceClient().postBundle(bundle);
+		assertNotNull(responseBundle);
+		assertEquals(BundleType.TRANSACTIONRESPONSE, responseBundle.getType());
+		assertEquals(1, responseBundle.getEntry().size());
+		assertNotNull(responseBundle.getEntry().get(0));
+		assertFalse(responseBundle.getEntry().get(0).hasResource());
+		assertTrue(responseBundle.getEntry().get(0).hasResponse());
+		assertTrue(responseBundle.getEntry().get(0).getResponse().hasStatus());
+		assertTrue(responseBundle.getEntry().get(0).getResponse().getStatus().startsWith("404"));
+	}
+
+	@Test
+	public void testReadAllowedLocalUserNotFoundViaBatchBundleWithVersion() throws Exception
+	{
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.BATCH);
+		bundle.addEntry().getRequest().setMethod(HTTPVerb.GET)
+				.setUrl("Binary/" + UUID.randomUUID().toString() + "/_history/12");
+
+		Bundle responseBundle = getWebserviceClient().postBundle(bundle);
+		assertNotNull(responseBundle);
+		assertEquals(BundleType.BATCHRESPONSE, responseBundle.getType());
+		assertEquals(1, responseBundle.getEntry().size());
+		assertNotNull(responseBundle.getEntry().get(0));
+		assertFalse(responseBundle.getEntry().get(0).hasResource());
+		assertTrue(responseBundle.getEntry().get(0).hasResponse());
+		assertTrue(responseBundle.getEntry().get(0).getResponse().hasStatus());
+		assertTrue(responseBundle.getEntry().get(0).getResponse().getStatus().startsWith("404"));
+	}
+
+	@Test
+	public void testHeadAllowedLocalUserNotFoundViaTransactionBundleWithVersion() throws Exception
+	{
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		bundle.addEntry().getRequest().setMethod(HTTPVerb.HEAD)
+				.setUrl("Binary/" + UUID.randomUUID().toString() + "/_history/12");
+
+		Bundle responseBundle = getWebserviceClient().postBundle(bundle);
+		assertNotNull(responseBundle);
+		assertEquals(BundleType.TRANSACTIONRESPONSE, responseBundle.getType());
+		assertEquals(1, responseBundle.getEntry().size());
+		assertNotNull(responseBundle.getEntry().get(0));
+		assertFalse(responseBundle.getEntry().get(0).hasResource());
+		assertTrue(responseBundle.getEntry().get(0).hasResponse());
+		assertTrue(responseBundle.getEntry().get(0).getResponse().hasStatus());
+		assertTrue(responseBundle.getEntry().get(0).getResponse().getStatus().startsWith("404"));
+	}
+
+	@Test
+	public void testHeadAllowedLocalUserNotFoundViaBatchBundleWithVersion() throws Exception
+	{
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.BATCH);
+		bundle.addEntry().getRequest().setMethod(HTTPVerb.HEAD)
+				.setUrl("Binary/" + UUID.randomUUID().toString() + "/_history/12");
 
 		Bundle responseBundle = getWebserviceClient().postBundle(bundle);
 		assertNotNull(responseBundle);
