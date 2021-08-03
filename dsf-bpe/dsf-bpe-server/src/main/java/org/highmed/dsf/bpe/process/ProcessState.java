@@ -2,7 +2,7 @@ package org.highmed.dsf.bpe.process;
 
 public enum ProcessState
 {
-	NEW(-1), ACTIVE(3), DRAFT(2), RETIRED(1), EXCLUDED(0);
+	MISSING(-1), NEW(-1), ACTIVE(3), DRAFT(2), RETIRED(1), EXCLUDED(0);
 
 	private final int priority;
 
