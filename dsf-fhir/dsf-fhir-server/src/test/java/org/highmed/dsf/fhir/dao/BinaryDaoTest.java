@@ -14,10 +14,12 @@ import static org.junit.Assert.assertTrue;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.authorization.read.ReadAccessHelperImpl;
@@ -30,6 +32,7 @@ import org.highmed.dsf.fhir.search.SearchQuery;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.OrganizationAffiliation;
@@ -421,20 +424,62 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 
 	@Override
 	@Test
-	public void testSearchWithUserFilterAfterReadAccessTriggerAll() throws Exception
+	public void testReadAccessTriggerRoleDelete() throws Exception
 	{
-		ReadAccessDaoTest.super.testSearchWithUserFilterAfterReadAccessTriggerAll();
+		ReadAccessDaoTest.super.testReadAccessTriggerRoleDelete();
 	}
 
 	@Override
 	@Test
-	public void testSearchWithUserFilterAfterReadAccessTriggerLocal() throws Exception
+	public void testReadAccessTriggerRoleDeleteMember() throws Exception
 	{
-		ReadAccessDaoTest.super.testSearchWithUserFilterAfterReadAccessTriggerLocal();
+		ReadAccessDaoTest.super.testReadAccessTriggerRoleDeleteMember();
 	}
 
-	private void testReadAccessTriggerSecurityContext(String accessType, Consumer<ResearchStudy> readAccessModifier)
-			throws Exception
+	@Override
+	@Test
+	public void testReadAccessTriggerRoleDeleteParent() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerRoleDeleteParent();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerRoleDeleteMemberAndParent() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerRoleDeleteMemberAndParent();
+	}
+
+	@Override
+	@Test
+	public void testSearchWithUserFilterAfterReadAccessTriggerAllWithLocalUser() throws Exception
+	{
+		ReadAccessDaoTest.super.testSearchWithUserFilterAfterReadAccessTriggerAllWithLocalUser();
+	}
+
+	@Override
+	@Test
+	public void testSearchWithUserFilterAfterReadAccessTriggerLocalwithLocalUser() throws Exception
+	{
+		ReadAccessDaoTest.super.testSearchWithUserFilterAfterReadAccessTriggerLocalwithLocalUser();
+	}
+
+	@Override
+	@Test
+	public void testSearchWithUserFilterAfterReadAccessTriggerAllWithRemoteUser() throws Exception
+	{
+		ReadAccessDaoTest.super.testSearchWithUserFilterAfterReadAccessTriggerAllWithRemoteUser();
+	}
+
+	@Override
+	@Test
+	public void testSearchWithUserFilterAfterReadAccessTriggerLocalWithRemoteUser() throws Exception
+	{
+		ReadAccessDaoTest.super.testSearchWithUserFilterAfterReadAccessTriggerLocalWithRemoteUser();
+	}
+
+	private void testReadAccessTriggerSecurityContext(String accessType, Consumer<ResearchStudy> readAccessModifier,
+			Function<ResearchStudy, IdType> securityContext) throws Exception
 	{
 		ResearchStudy rS = new ResearchStudy();
 		readAccessModifier.accept(rS);
@@ -444,7 +489,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		assertReadAccessEntryCount(1, 1, createdRs, accessType);
 
 		Binary b = createResource();
-		b.setSecurityContext(new Reference(createdRs.getIdElement().toUnqualifiedVersionless()));
+		b.setSecurityContext(new Reference(securityContext.apply(createdRs)));
 		Binary createdB = dao.create(b);
 
 		assertReadAccessEntryCount(2, 1, createdRs, accessType);
@@ -454,17 +499,33 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 	@Test
 	public void testReadAccessTriggerSecurityContextAll() throws Exception
 	{
-		testReadAccessTriggerSecurityContext(READ_ACCESS_TAG_VALUE_ALL, new ReadAccessHelperImpl()::addAll);
+		testReadAccessTriggerSecurityContext(READ_ACCESS_TAG_VALUE_ALL, new ReadAccessHelperImpl()::addAll,
+				rs -> rs.getIdElement().toUnqualifiedVersionless());
 	}
 
 	@Test
 	public void testReadAccessTriggerSecurityContextLocal() throws Exception
 	{
-		testReadAccessTriggerSecurityContext(READ_ACCESS_TAG_VALUE_LOCAL, new ReadAccessHelperImpl()::addLocal);
+		testReadAccessTriggerSecurityContext(READ_ACCESS_TAG_VALUE_LOCAL, new ReadAccessHelperImpl()::addLocal,
+				rs -> rs.getIdElement().toUnqualifiedVersionless());
 	}
 
 	@Test
-	public void testReadAccessTriggerSecurityContextOrganization() throws Exception
+	public void testReadAccessTriggerSecurityContextVersionSpecificAll() throws Exception
+	{
+		testReadAccessTriggerSecurityContext(READ_ACCESS_TAG_VALUE_ALL, new ReadAccessHelperImpl()::addAll,
+				rs -> rs.getIdElement());
+	}
+
+	@Test
+	public void testReadAccessTriggerSecurityContextVersionSpecificLocal() throws Exception
+	{
+		testReadAccessTriggerSecurityContext(READ_ACCESS_TAG_VALUE_LOCAL, new ReadAccessHelperImpl()::addLocal,
+				rs -> rs.getIdElement());
+	}
+
+	private void testReadAccessTriggerSecurityContextOrganization(Function<ResearchStudy, IdType> securityContext)
+			throws SQLException, Exception
 	{
 		Organization org = new Organization();
 		org.setActive(true);
@@ -485,6 +546,20 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		assertReadAccessEntryCount(4, 1, createdB, READ_ACCESS_TAG_VALUE_LOCAL);
 		assertReadAccessEntryCount(4, 1, createdRs, READ_ACCESS_TAG_VALUE_ORGANIZATION, createdOrg);
 		assertReadAccessEntryCount(4, 1, createdB, READ_ACCESS_TAG_VALUE_ORGANIZATION, createdOrg);
+	}
+
+
+	@Test
+	public void testReadAccessTriggerSecurityContextOrganization() throws Exception
+	{
+		testReadAccessTriggerSecurityContextOrganization(rs -> rs.getIdElement().toUnqualifiedVersionless());
+	}
+
+
+	@Test
+	public void testReadAccessTriggerSecurityContextVersionSpecificOrganization() throws Exception
+	{
+		testReadAccessTriggerSecurityContextOrganization(rs -> rs.getIdElement());
 	}
 
 	@Test
@@ -554,8 +629,8 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		assertReadAccessEntryCount(6, 1, createdB, READ_ACCESS_TAG_VALUE_ORGANIZATION, createdOrg2);
 	}
 
-	@Test
-	public void testReadAccessTriggerSecurityContextRole() throws Exception
+	private void testReadAccessTriggerSecurityContextRole(Function<ResearchStudy, IdType> securityContext)
+			throws Exception
 	{
 		Organization parentOrg = new Organization();
 		parentOrg.setActive(true);
@@ -586,7 +661,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 				.create(rS);
 
 		Binary b = createResource();
-		b.setSecurityContext(new Reference(createdRs.getIdElement().toUnqualifiedVersionless()));
+		b.setSecurityContext(new Reference(securityContext.apply(createdRs)));
 		Binary createdB = dao.create(b);
 
 		assertReadAccessEntryCount(4, 1, createdRs, READ_ACCESS_TAG_VALUE_LOCAL);
@@ -594,6 +669,18 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 
 		assertReadAccessEntryCount(4, 1, createdRs, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
 		assertReadAccessEntryCount(4, 1, createdB, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
+	}
+
+	@Test
+	public void testReadAccessTriggerSecurityContextRole() throws Exception
+	{
+		testReadAccessTriggerSecurityContextRole(r -> r.getIdElement().toUnqualifiedVersionless());
+	}
+
+	@Test
+	public void testReadAccessTriggerSecurityContextVersionSpecificRole() throws Exception
+	{
+		testReadAccessTriggerSecurityContextRole(r -> r.getIdElement());
 	}
 
 	@Test
@@ -728,28 +815,34 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 
 		ResearchStudy rS = new ResearchStudy();
 		readAccessModifier.accept(rS);
-		ResearchStudy createdRs = researchStudyDao.create(rS);
+		ResearchStudy v1 = researchStudyDao.create(rS);
+		assertEquals(1L, (long) v1.getIdElement().getVersionIdPartAsLong());
 
-		assertReadAccessEntryCount(1, 1, createdRs, accessType);
+		assertReadAccessEntryCount(1, 1, v1, accessType);
 
 		Binary b = createResource();
-		b.setSecurityContext(new Reference(createdRs.getIdElement().toUnqualifiedVersionless()));
+		b.setSecurityContext(new Reference(v1.getIdElement().toUnqualifiedVersionless()));
 		Binary createdB = dao.create(b);
 
-		assertReadAccessEntryCount(2, 1, createdRs, accessType);
+		assertReadAccessEntryCount(2, 1, v1, accessType);
 		assertReadAccessEntryCount(2, 1, createdB, accessType);
 
-		createdRs.getMeta().setTag(Collections.emptyList());
-		ResearchStudy updatedRs = researchStudyDao.update(createdRs);
+		v1.getMeta().setTag(Collections.emptyList());
+		ResearchStudy v2 = researchStudyDao.update(v1);
+		assertEquals(2L, (long) v2.getIdElement().getVersionIdPartAsLong());
 
-		assertReadAccessEntryCount(0, 0, createdRs, accessType);
-		assertReadAccessEntryCount(0, 0, createdB, accessType);
+		assertReadAccessEntryCount(1, 1, v1, accessType);
+		assertReadAccessEntryCount(1, 0, v2, accessType);
+		assertReadAccessEntryCount(1, 0, createdB, accessType);
 
-		readAccessModifier.accept(updatedRs);
-		researchStudyDao.update(updatedRs);
+		readAccessModifier.accept(v2);
+		ResearchStudy v3 = researchStudyDao.update(v2);
+		assertEquals(3L, (long) v3.getIdElement().getVersionIdPartAsLong());
 
-		assertReadAccessEntryCount(2, 1, createdRs, accessType);
-		assertReadAccessEntryCount(2, 1, createdB, accessType);
+		assertReadAccessEntryCount(3, 1, v1, accessType);
+		assertReadAccessEntryCount(3, 0, v2, accessType);
+		assertReadAccessEntryCount(3, 1, v3, accessType);
+		assertReadAccessEntryCount(3, 1, createdB, accessType);
 	}
 
 	@Test
@@ -762,6 +855,58 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 	public void testReadAccessTriggerSecurityContextLocalUpdate() throws Exception
 	{
 		testReadAccessTriggerSecurityContextUpdate(READ_ACCESS_TAG_VALUE_LOCAL, new ReadAccessHelperImpl()::addLocal);
+	}
+
+	private void testReadAccessTriggerSecurityContextVersionSpecificUpdate(String accessType,
+			Consumer<ResearchStudy> readAccessModifier) throws Exception
+	{
+		final ResearchStudyDaoJdbc researchStudyDao = new ResearchStudyDaoJdbc(defaultDataSource,
+				permanentDeleteDataSource, fhirContext);
+
+		ResearchStudy rS = new ResearchStudy();
+		readAccessModifier.accept(rS);
+		ResearchStudy v1 = researchStudyDao.create(rS);
+		assertEquals(1L, (long) v1.getIdElement().getVersionIdPartAsLong());
+
+		assertReadAccessEntryCount(1, 1, v1, accessType);
+
+		Binary b = createResource();
+		b.setSecurityContext(new Reference(v1.getIdElement()));
+		Binary createdB = dao.create(b);
+
+		assertReadAccessEntryCount(2, 1, v1, accessType);
+		assertReadAccessEntryCount(2, 1, createdB, accessType);
+
+		v1.getMeta().setTag(Collections.emptyList());
+		ResearchStudy v2 = researchStudyDao.update(v1);
+		assertEquals(2L, (long) v2.getIdElement().getVersionIdPartAsLong());
+
+		assertReadAccessEntryCount(2, 1, v1, accessType);
+		assertReadAccessEntryCount(2, 0, v2, accessType);
+		assertReadAccessEntryCount(2, 1, createdB, accessType);
+
+		readAccessModifier.accept(v2);
+		ResearchStudy v3 = researchStudyDao.update(v2);
+		assertEquals(3L, (long) v3.getIdElement().getVersionIdPartAsLong());
+
+		assertReadAccessEntryCount(3, 1, v1, accessType);
+		assertReadAccessEntryCount(3, 0, v2, accessType);
+		assertReadAccessEntryCount(3, 1, v3, accessType);
+		assertReadAccessEntryCount(3, 1, createdB, accessType);
+	}
+
+	@Test
+	public void testReadAccessTriggerSecurityContextVersionSpecificAllUpdate() throws Exception
+	{
+		testReadAccessTriggerSecurityContextVersionSpecificUpdate(READ_ACCESS_TAG_VALUE_ALL,
+				new ReadAccessHelperImpl()::addAll);
+	}
+
+	@Test
+	public void testReadAccessTriggerSecurityContextVersionSpecificLocalUpdate() throws Exception
+	{
+		testReadAccessTriggerSecurityContextVersionSpecificUpdate(READ_ACCESS_TAG_VALUE_LOCAL,
+				new ReadAccessHelperImpl()::addLocal);
 	}
 
 	@Test
@@ -1080,8 +1225,8 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 
 		researchStudyDao.delete(UUID.fromString(createdRs.getIdElement().getIdPart()));
 
-		assertReadAccessEntryCount(0, 0, createdRs, accessType);
-		assertReadAccessEntryCount(0, 0, createdB, accessType);
+		assertReadAccessEntryCount(1, 1, createdRs, accessType);
+		assertReadAccessEntryCount(1, 0, createdB, accessType);
 	}
 
 	@Test
@@ -1094,5 +1239,247 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 	public void testReadAccessTriggerSecurityContextLocalDelete() throws Exception
 	{
 		testReadAccessTriggerSecurityContextUpdate(READ_ACCESS_TAG_VALUE_LOCAL, new ReadAccessHelperImpl()::addLocal);
+	}
+
+	@Test
+	public void testReadAccessTriggerSecurityContextOrganizationDelete() throws Exception
+	{
+		final OrganizationDaoJdbc organizationDao = new OrganizationDaoJdbc(getDefaultDataSource(),
+				getPermanentDeleteDataSource(), getFhirContext());
+
+		Organization org = new Organization();
+		org.setActive(true);
+		org.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("org.com");
+		Organization createdOrg = organizationDao.create(org);
+
+		ResearchStudy rS = new ResearchStudy();
+		new ReadAccessHelperImpl().addOrganization(rS, createdOrg);
+		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
+				.create(rS);
+
+		Binary b = createResource();
+		b.setSecurityContext(new Reference(createdRs.getIdElement().toUnqualifiedVersionless()));
+		Binary createdB = dao.create(b);
+
+		assertReadAccessEntryCount(4, 1, createdRs, READ_ACCESS_TAG_VALUE_LOCAL);
+		assertReadAccessEntryCount(4, 1, createdB, READ_ACCESS_TAG_VALUE_LOCAL);
+		assertReadAccessEntryCount(4, 1, createdRs, READ_ACCESS_TAG_VALUE_ORGANIZATION, createdOrg);
+		assertReadAccessEntryCount(4, 1, createdB, READ_ACCESS_TAG_VALUE_ORGANIZATION, createdOrg);
+
+		organizationDao.delete(UUID.fromString(createdOrg.getIdElement().getIdPart()));
+
+		assertReadAccessEntryCount(2, 1, createdRs, READ_ACCESS_TAG_VALUE_LOCAL);
+		assertReadAccessEntryCount(2, 1, createdB, READ_ACCESS_TAG_VALUE_LOCAL);
+		assertReadAccessEntryCount(2, 0, createdRs, READ_ACCESS_TAG_VALUE_ORGANIZATION, createdOrg);
+		assertReadAccessEntryCount(2, 0, createdB, READ_ACCESS_TAG_VALUE_ORGANIZATION, createdOrg);
+	}
+
+	@Test
+	public void testReadAccessTriggerSecurityContextRoleDelete() throws Exception
+	{
+		Organization parentOrg = new Organization();
+		parentOrg.setActive(true);
+		parentOrg.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("parent.com");
+
+		Organization memberOrg = new Organization();
+		memberOrg.setActive(true);
+		memberOrg.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("member.com");
+
+		OrganizationDao orgDao = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
+		Organization createdParentOrg = orgDao.create(parentOrg);
+		Organization createdMemberOrg = orgDao.create(memberOrg);
+
+		OrganizationAffiliation aff = new OrganizationAffiliation();
+		aff.setActive(true);
+		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-type")
+				.setCode("MeDIC");
+		aff.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
+		aff.getParticipatingOrganization().setReference("Organization/" + createdMemberOrg.getIdElement().getIdPart());
+
+		final OrganizationAffiliationDaoJdbc orgAffDao = new OrganizationAffiliationDaoJdbc(defaultDataSource,
+				permanentDeleteDataSource, fhirContext);
+
+		OrganizationAffiliation createdAff = orgAffDao.create(aff);
+
+		ResearchStudy rS = new ResearchStudy();
+		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
+				"MeDIC");
+		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
+				.create(rS);
+
+		Binary b = createResource();
+		b.setSecurityContext(new Reference(createdRs.getIdElement().toUnqualifiedVersionless()));
+		Binary createdB = dao.create(b);
+
+		assertReadAccessEntryCount(4, 1, createdRs, READ_ACCESS_TAG_VALUE_LOCAL);
+		assertReadAccessEntryCount(4, 1, createdB, READ_ACCESS_TAG_VALUE_LOCAL);
+
+		assertReadAccessEntryCount(4, 1, createdRs, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
+		assertReadAccessEntryCount(4, 1, createdB, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
+
+		orgAffDao.delete(UUID.fromString(createdAff.getIdElement().getIdPart()));
+
+		assertReadAccessEntryCount(2, 1, createdRs, READ_ACCESS_TAG_VALUE_LOCAL);
+		assertReadAccessEntryCount(2, 1, createdB, READ_ACCESS_TAG_VALUE_LOCAL);
+
+		assertReadAccessEntryCount(2, 0, createdRs, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
+		assertReadAccessEntryCount(2, 0, createdB, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
+	}
+
+	@Test
+	public void testReadAccessTriggerSecurityContextRoleDeleteMember() throws Exception
+	{
+		Organization parentOrg = new Organization();
+		parentOrg.setActive(true);
+		parentOrg.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("parent.com");
+
+		Organization memberOrg = new Organization();
+		memberOrg.setActive(true);
+		memberOrg.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("member.com");
+
+		OrganizationDao orgDao = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
+		Organization createdParentOrg = orgDao.create(parentOrg);
+		Organization createdMemberOrg = orgDao.create(memberOrg);
+
+		OrganizationAffiliation aff = new OrganizationAffiliation();
+		aff.setActive(true);
+		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-type")
+				.setCode("MeDIC");
+		aff.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
+		aff.getParticipatingOrganization().setReference("Organization/" + createdMemberOrg.getIdElement().getIdPart());
+
+		final OrganizationAffiliationDaoJdbc orgAffDao = new OrganizationAffiliationDaoJdbc(defaultDataSource,
+				permanentDeleteDataSource, fhirContext);
+
+		OrganizationAffiliation createdAff = orgAffDao.create(aff);
+
+		ResearchStudy rS = new ResearchStudy();
+		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
+				"MeDIC");
+		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
+				.create(rS);
+
+		Binary b = createResource();
+		b.setSecurityContext(new Reference(createdRs.getIdElement().toUnqualifiedVersionless()));
+		Binary createdB = dao.create(b);
+
+		assertReadAccessEntryCount(4, 1, createdRs, READ_ACCESS_TAG_VALUE_LOCAL);
+		assertReadAccessEntryCount(4, 1, createdB, READ_ACCESS_TAG_VALUE_LOCAL);
+
+		assertReadAccessEntryCount(4, 1, createdRs, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
+		assertReadAccessEntryCount(4, 1, createdB, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
+
+		orgDao.delete(UUID.fromString(createdMemberOrg.getIdElement().getIdPart()));
+
+		assertReadAccessEntryCount(2, 1, createdRs, READ_ACCESS_TAG_VALUE_LOCAL);
+		assertReadAccessEntryCount(2, 1, createdB, READ_ACCESS_TAG_VALUE_LOCAL);
+
+		assertReadAccessEntryCount(2, 0, createdRs, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
+		assertReadAccessEntryCount(2, 0, createdB, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
+	}
+
+	@Test
+	public void testReadAccessTriggerSecurityContextRoleDeleteParent() throws Exception
+	{
+		Organization parentOrg = new Organization();
+		parentOrg.setActive(true);
+		parentOrg.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("parent.com");
+
+		Organization memberOrg = new Organization();
+		memberOrg.setActive(true);
+		memberOrg.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("member.com");
+
+		OrganizationDao orgDao = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
+		Organization createdParentOrg = orgDao.create(parentOrg);
+		Organization createdMemberOrg = orgDao.create(memberOrg);
+
+		OrganizationAffiliation aff = new OrganizationAffiliation();
+		aff.setActive(true);
+		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-type")
+				.setCode("MeDIC");
+		aff.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
+		aff.getParticipatingOrganization().setReference("Organization/" + createdMemberOrg.getIdElement().getIdPart());
+
+		final OrganizationAffiliationDaoJdbc orgAffDao = new OrganizationAffiliationDaoJdbc(defaultDataSource,
+				permanentDeleteDataSource, fhirContext);
+
+		OrganizationAffiliation createdAff = orgAffDao.create(aff);
+
+		ResearchStudy rS = new ResearchStudy();
+		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
+				"MeDIC");
+		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
+				.create(rS);
+
+		Binary b = createResource();
+		b.setSecurityContext(new Reference(createdRs.getIdElement().toUnqualifiedVersionless()));
+		Binary createdB = dao.create(b);
+
+		assertReadAccessEntryCount(4, 1, createdRs, READ_ACCESS_TAG_VALUE_LOCAL);
+		assertReadAccessEntryCount(4, 1, createdB, READ_ACCESS_TAG_VALUE_LOCAL);
+
+		assertReadAccessEntryCount(4, 1, createdRs, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
+		assertReadAccessEntryCount(4, 1, createdB, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
+
+		orgDao.delete(UUID.fromString(createdParentOrg.getIdElement().getIdPart()));
+
+		assertReadAccessEntryCount(2, 1, createdRs, READ_ACCESS_TAG_VALUE_LOCAL);
+		assertReadAccessEntryCount(2, 1, createdB, READ_ACCESS_TAG_VALUE_LOCAL);
+
+		assertReadAccessEntryCount(2, 0, createdRs, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
+		assertReadAccessEntryCount(2, 0, createdB, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
+	}
+
+	@Test
+	public void testReadAccessTriggerSecurityContextRoleDeleteMemberAndParent() throws Exception
+	{
+		Organization parentOrg = new Organization();
+		parentOrg.setActive(true);
+		parentOrg.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("parent.com");
+
+		Organization memberOrg = new Organization();
+		memberOrg.setActive(true);
+		memberOrg.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("member.com");
+
+		OrganizationDao orgDao = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
+		Organization createdParentOrg = orgDao.create(parentOrg);
+		Organization createdMemberOrg = orgDao.create(memberOrg);
+
+		OrganizationAffiliation aff = new OrganizationAffiliation();
+		aff.setActive(true);
+		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-type")
+				.setCode("MeDIC");
+		aff.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
+		aff.getParticipatingOrganization().setReference("Organization/" + createdMemberOrg.getIdElement().getIdPart());
+
+		final OrganizationAffiliationDaoJdbc orgAffDao = new OrganizationAffiliationDaoJdbc(defaultDataSource,
+				permanentDeleteDataSource, fhirContext);
+
+		OrganizationAffiliation createdAff = orgAffDao.create(aff);
+
+		ResearchStudy rS = new ResearchStudy();
+		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
+				"MeDIC");
+		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
+				.create(rS);
+
+		Binary b = createResource();
+		b.setSecurityContext(new Reference(createdRs.getIdElement().toUnqualifiedVersionless()));
+		Binary createdB = dao.create(b);
+
+		assertReadAccessEntryCount(4, 1, createdRs, READ_ACCESS_TAG_VALUE_LOCAL);
+		assertReadAccessEntryCount(4, 1, createdB, READ_ACCESS_TAG_VALUE_LOCAL);
+
+		assertReadAccessEntryCount(4, 1, createdRs, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
+		assertReadAccessEntryCount(4, 1, createdB, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
+
+		orgDao.delete(UUID.fromString(createdMemberOrg.getIdElement().getIdPart()));
+		orgDao.delete(UUID.fromString(createdParentOrg.getIdElement().getIdPart()));
+
+		assertReadAccessEntryCount(2, 1, createdRs, READ_ACCESS_TAG_VALUE_LOCAL);
+		assertReadAccessEntryCount(2, 1, createdB, READ_ACCESS_TAG_VALUE_LOCAL);
+
+		assertReadAccessEntryCount(2, 0, createdRs, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
+		assertReadAccessEntryCount(2, 0, createdB, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
 	}
 }

@@ -186,15 +186,57 @@ public class BundleDaoTest extends AbstractResourceDaoTest<Bundle, BundleDao> im
 
 	@Override
 	@Test
-	public void testSearchWithUserFilterAfterReadAccessTriggerAll() throws Exception
+	public void testReadAccessTriggerRoleDelete() throws Exception
 	{
-		ReadAccessDaoTest.super.testSearchWithUserFilterAfterReadAccessTriggerAll();
+		ReadAccessDaoTest.super.testReadAccessTriggerRoleDelete();
 	}
 
 	@Override
 	@Test
-	public void testSearchWithUserFilterAfterReadAccessTriggerLocal() throws Exception
+	public void testReadAccessTriggerRoleDeleteMember() throws Exception
 	{
-		ReadAccessDaoTest.super.testSearchWithUserFilterAfterReadAccessTriggerLocal();
+		ReadAccessDaoTest.super.testReadAccessTriggerRoleDeleteMember();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerRoleDeleteParent() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerRoleDeleteParent();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerRoleDeleteMemberAndParent() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerRoleDeleteMemberAndParent();
+	}
+
+	@Override
+	@Test
+	public void testSearchWithUserFilterAfterReadAccessTriggerAllWithLocalUser() throws Exception
+	{
+		ReadAccessDaoTest.super.testSearchWithUserFilterAfterReadAccessTriggerAllWithLocalUser();
+	}
+
+	@Override
+	@Test
+	public void testSearchWithUserFilterAfterReadAccessTriggerLocalwithLocalUser() throws Exception
+	{
+		ReadAccessDaoTest.super.testSearchWithUserFilterAfterReadAccessTriggerLocalwithLocalUser();
+	}
+
+	@Override
+	@Test
+	public void testSearchWithUserFilterAfterReadAccessTriggerAllWithRemoteUser() throws Exception
+	{
+		ReadAccessDaoTest.super.testSearchWithUserFilterAfterReadAccessTriggerAllWithRemoteUser();
+	}
+
+	@Override
+	@Test
+	public void testSearchWithUserFilterAfterReadAccessTriggerLocalWithRemoteUser() throws Exception
+	{
+		ReadAccessDaoTest.super.testSearchWithUserFilterAfterReadAccessTriggerLocalWithRemoteUser();
 	}
 }

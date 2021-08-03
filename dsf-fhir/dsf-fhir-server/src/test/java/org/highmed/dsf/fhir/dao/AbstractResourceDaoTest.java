@@ -24,6 +24,8 @@ import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import de.rwh.utils.test.LiquibaseTemplateTestClassRule;
@@ -31,6 +33,8 @@ import de.rwh.utils.test.LiquibaseTemplateTestRule;
 
 public abstract class AbstractResourceDaoTest<D extends Resource, C extends ResourceDao<D>> extends AbstractDbTest
 {
+	private static final Logger logger = LoggerFactory.getLogger(AbstractResourceDaoTest.class);
+
 	@FunctionalInterface
 	public interface TriFunction<A, B, C, R>
 	{
@@ -108,6 +112,11 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 	public BasicDataSource getPermanentDeleteDataSource()
 	{
 		return permanentDeleteDataSource;
+	}
+
+	public Logger getLogger()
+	{
+		return logger;
 	}
 
 	@Test

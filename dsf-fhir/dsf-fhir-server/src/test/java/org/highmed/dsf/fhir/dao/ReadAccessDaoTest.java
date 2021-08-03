@@ -6,6 +6,7 @@ import static org.highmed.dsf.fhir.authorization.read.ReadAccessHelper.READ_ACCE
 import static org.highmed.dsf.fhir.authorization.read.ReadAccessHelper.READ_ACCESS_TAG_VALUE_ORGANIZATION;
 import static org.highmed.dsf.fhir.authorization.read.ReadAccessHelper.READ_ACCESS_TAG_VALUE_ROLE;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -16,6 +17,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import javax.sql.DataSource;
 
@@ -30,11 +32,14 @@ import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.Test;
 import org.postgresql.util.PGobject;
+import org.slf4j.Logger;
 
 import ca.uhn.fhir.context.FhirContext;
 
 public interface ReadAccessDaoTest<D extends Resource>
 {
+	Logger getLogger();
+
 	DataSource getDefaultDataSource();
 
 	DataSource getPermanentDeleteDataSource();
@@ -72,7 +77,8 @@ public interface ReadAccessDaoTest<D extends Resource>
 		}
 
 		StringBuilder query = new StringBuilder(
-				"SELECT count(*) FROM read_access WHERE resource_id = ? AND access_type = ?");
+				"SELECT count(*) FROM read_access WHERE resource_id = ? AND resource_version = ? AND access_type = ?");
+
 		if (organization != null)
 			query.append(" AND organization_id = ?");
 		if (organizationAffiliation != null)
@@ -82,12 +88,15 @@ public interface ReadAccessDaoTest<D extends Resource>
 				PreparedStatement statement = connection.prepareStatement(query.toString()))
 		{
 			statement.setObject(1, toUuidObject(resource.getIdElement().getIdPart()));
-			statement.setString(2, accessType);
-			if (organization != null)
-				statement.setObject(3, toUuidObject(organization.getIdElement().getIdPart()));
-			if (organizationAffiliation != null)
-				statement.setObject(4, toUuidObject(organizationAffiliation.getIdElement().getIdPart()));
+			statement.setLong(2, resource.getIdElement().getVersionIdPartAsLong());
+			statement.setString(3, accessType);
 
+			if (organization != null)
+				statement.setObject(4, toUuidObject(organization.getIdElement().getIdPart()));
+			if (organizationAffiliation != null)
+				statement.setObject(5, toUuidObject(organizationAffiliation.getIdElement().getIdPart()));
+
+			getLogger().trace("Executing query '{}'", statement);
 			try (ResultSet result = statement.executeQuery())
 			{
 				assertTrue(result.next());
@@ -410,19 +419,25 @@ public interface ReadAccessDaoTest<D extends Resource>
 		D d = createResource();
 		readAccessModifier.accept(d);
 
-		D createdD = getDao().create(d);
+		D v1 = getDao().create(d);
+		assertEquals(1L, (long) v1.getIdElement().getVersionIdPartAsLong());
 
-		assertReadAccessEntryCount(1, 1, createdD, accessType);
+		assertReadAccessEntryCount(1, 1, v1, accessType);
 
-		createdD.getMeta().setTag(Collections.emptyList());
-		D updatedD = getDao().update(createdD);
+		v1.getMeta().setTag(Collections.emptyList());
+		D v2 = getDao().update(v1);
+		assertEquals(2L, (long) v2.getIdElement().getVersionIdPartAsLong());
 
-		assertReadAccessEntryCount(0, 0, updatedD, accessType);
+		assertReadAccessEntryCount(1, 1, v1, accessType);
+		assertReadAccessEntryCount(1, 0, v2, accessType);
 
-		readAccessModifier.accept(updatedD);
-		getDao().update(updatedD);
+		readAccessModifier.accept(v2);
+		D v3 = getDao().update(v2);
+		assertEquals(3L, (long) v3.getIdElement().getVersionIdPartAsLong());
 
-		assertReadAccessEntryCount(1, 1, updatedD, accessType);
+		assertReadAccessEntryCount(2, 1, v1, accessType);
+		assertReadAccessEntryCount(2, 0, v2, accessType);
+		assertReadAccessEntryCount(2, 1, v3, accessType);
 	}
 
 	@Test
@@ -451,22 +466,23 @@ public interface ReadAccessDaoTest<D extends Resource>
 		D d = createResource();
 		new ReadAccessHelperImpl().addOrganization(d, createdOrg);
 
-		D createdD = getDao().create(d);
+		D v1 = getDao().create(d);
+		assertEquals(1L, (long) v1.getIdElement().getVersionIdPartAsLong());
 
-		assertReadAccessEntryCount(2, 1, createdD, READ_ACCESS_TAG_VALUE_LOCAL);
-		assertReadAccessEntryCount(2, 1, createdD, READ_ACCESS_TAG_VALUE_ORGANIZATION, createdOrg);
+		assertReadAccessEntryCount(2, 1, v1, READ_ACCESS_TAG_VALUE_LOCAL);
+		assertReadAccessEntryCount(2, 1, v1, READ_ACCESS_TAG_VALUE_ORGANIZATION, createdOrg);
 
 		createdOrg.setActive(false);
 		Organization updatedOrg = organizationDao.update(createdOrg);
 
-		assertReadAccessEntryCount(1, 1, createdD, READ_ACCESS_TAG_VALUE_LOCAL);
-		assertReadAccessEntryCount(1, 0, createdD, READ_ACCESS_TAG_VALUE_ORGANIZATION, createdOrg);
+		assertReadAccessEntryCount(1, 1, v1, READ_ACCESS_TAG_VALUE_LOCAL);
+		assertReadAccessEntryCount(1, 0, v1, READ_ACCESS_TAG_VALUE_ORGANIZATION, createdOrg);
 
 		updatedOrg.setActive(true);
 		organizationDao.update(updatedOrg);
 
-		assertReadAccessEntryCount(2, 1, createdD, READ_ACCESS_TAG_VALUE_LOCAL);
-		assertReadAccessEntryCount(2, 1, createdD, READ_ACCESS_TAG_VALUE_ORGANIZATION, createdOrg);
+		assertReadAccessEntryCount(2, 1, v1, READ_ACCESS_TAG_VALUE_LOCAL);
+		assertReadAccessEntryCount(2, 1, v1, READ_ACCESS_TAG_VALUE_ORGANIZATION, createdOrg);
 	}
 
 	@Test
@@ -501,22 +517,23 @@ public interface ReadAccessDaoTest<D extends Resource>
 		new ReadAccessHelperImpl().addRole(d, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
 				"MeDIC");
 
-		D createdD = getDao().create(d);
+		D v1 = getDao().create(d);
+		assertEquals(1L, (long) v1.getIdElement().getVersionIdPartAsLong());
 
-		assertReadAccessEntryCount(2, 1, createdD, READ_ACCESS_TAG_VALUE_LOCAL);
-		assertReadAccessEntryCount(2, 1, createdD, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
+		assertReadAccessEntryCount(2, 1, v1, READ_ACCESS_TAG_VALUE_LOCAL);
+		assertReadAccessEntryCount(2, 1, v1, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
 
 		createdAff.setActive(false);
 		OrganizationAffiliation updatedAff = organizationAffiliationDao.update(createdAff);
 
-		assertReadAccessEntryCount(1, 1, createdD, READ_ACCESS_TAG_VALUE_LOCAL);
-		assertReadAccessEntryCount(1, 0, createdD, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, updatedAff);
+		assertReadAccessEntryCount(1, 1, v1, READ_ACCESS_TAG_VALUE_LOCAL);
+		assertReadAccessEntryCount(1, 0, v1, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, updatedAff);
 
 		updatedAff.setActive(true);
 		organizationAffiliationDao.update(updatedAff);
 
-		assertReadAccessEntryCount(2, 1, createdD, READ_ACCESS_TAG_VALUE_LOCAL);
-		assertReadAccessEntryCount(2, 1, createdD, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, updatedAff);
+		assertReadAccessEntryCount(2, 1, v1, READ_ACCESS_TAG_VALUE_LOCAL);
+		assertReadAccessEntryCount(2, 1, v1, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, updatedAff);
 	}
 
 	@Test
@@ -551,22 +568,23 @@ public interface ReadAccessDaoTest<D extends Resource>
 		new ReadAccessHelperImpl().addRole(d, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
 				"MeDIC");
 
-		D createdD = getDao().create(d);
+		D v1 = getDao().create(d);
+		assertEquals(1L, (long) v1.getIdElement().getVersionIdPartAsLong());
 
-		assertReadAccessEntryCount(2, 1, createdD, READ_ACCESS_TAG_VALUE_LOCAL);
-		assertReadAccessEntryCount(2, 1, createdD, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
+		assertReadAccessEntryCount(2, 1, v1, READ_ACCESS_TAG_VALUE_LOCAL);
+		assertReadAccessEntryCount(2, 1, v1, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
 
 		createdMemberOrg.setActive(false);
 		Organization updatedMemberOrg = orgDao.update(createdMemberOrg);
 
-		assertReadAccessEntryCount(1, 1, createdD, READ_ACCESS_TAG_VALUE_LOCAL);
-		assertReadAccessEntryCount(1, 0, createdD, READ_ACCESS_TAG_VALUE_ROLE, updatedMemberOrg, createdAff);
+		assertReadAccessEntryCount(1, 1, v1, READ_ACCESS_TAG_VALUE_LOCAL);
+		assertReadAccessEntryCount(1, 0, v1, READ_ACCESS_TAG_VALUE_ROLE, updatedMemberOrg, createdAff);
 
 		updatedMemberOrg.setActive(true);
 		orgDao.update(updatedMemberOrg);
 
-		assertReadAccessEntryCount(2, 1, createdD, READ_ACCESS_TAG_VALUE_LOCAL);
-		assertReadAccessEntryCount(2, 1, createdD, READ_ACCESS_TAG_VALUE_ROLE, updatedMemberOrg, createdAff);
+		assertReadAccessEntryCount(2, 1, v1, READ_ACCESS_TAG_VALUE_LOCAL);
+		assertReadAccessEntryCount(2, 1, v1, READ_ACCESS_TAG_VALUE_ROLE, updatedMemberOrg, createdAff);
 	}
 
 	@Test
@@ -601,22 +619,23 @@ public interface ReadAccessDaoTest<D extends Resource>
 		new ReadAccessHelperImpl().addRole(d, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
 				"MeDIC");
 
-		D createdD = getDao().create(d);
+		D v1 = getDao().create(d);
+		assertEquals(1L, (long) v1.getIdElement().getVersionIdPartAsLong());
 
-		assertReadAccessEntryCount(2, 1, createdD, READ_ACCESS_TAG_VALUE_LOCAL);
-		assertReadAccessEntryCount(2, 1, createdD, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
+		assertReadAccessEntryCount(2, 1, v1, READ_ACCESS_TAG_VALUE_LOCAL);
+		assertReadAccessEntryCount(2, 1, v1, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
 
 		createdParentOrg.setActive(false);
 		Organization updatedParentOrg = orgDao.update(createdParentOrg);
 
-		assertReadAccessEntryCount(1, 1, createdD, READ_ACCESS_TAG_VALUE_LOCAL);
-		assertReadAccessEntryCount(1, 0, createdD, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
+		assertReadAccessEntryCount(1, 1, v1, READ_ACCESS_TAG_VALUE_LOCAL);
+		assertReadAccessEntryCount(1, 0, v1, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
 
 		updatedParentOrg.setActive(true);
 		orgDao.update(updatedParentOrg);
 
-		assertReadAccessEntryCount(2, 1, createdD, READ_ACCESS_TAG_VALUE_LOCAL);
-		assertReadAccessEntryCount(2, 1, createdD, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
+		assertReadAccessEntryCount(2, 1, v1, READ_ACCESS_TAG_VALUE_LOCAL);
+		assertReadAccessEntryCount(2, 1, v1, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
 	}
 
 	@Test
@@ -651,30 +670,31 @@ public interface ReadAccessDaoTest<D extends Resource>
 		new ReadAccessHelperImpl().addRole(d, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
 				"MeDIC");
 
-		D createdD = getDao().create(d);
+		D v1 = getDao().create(d);
+		assertEquals(1L, (long) v1.getIdElement().getVersionIdPartAsLong());
 
-		assertReadAccessEntryCount(2, 1, createdD, READ_ACCESS_TAG_VALUE_LOCAL);
-		assertReadAccessEntryCount(2, 1, createdD, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
+		assertReadAccessEntryCount(2, 1, v1, READ_ACCESS_TAG_VALUE_LOCAL);
+		assertReadAccessEntryCount(2, 1, v1, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
 
 		createdParentOrg.setActive(false);
 		createdMemberOrg.setActive(false);
 		Organization updatedParentOrg = orgDao.update(createdParentOrg);
 		Organization updatedMemberOrg = orgDao.update(createdMemberOrg);
 
-		assertReadAccessEntryCount(1, 1, createdD, READ_ACCESS_TAG_VALUE_LOCAL);
-		assertReadAccessEntryCount(1, 0, createdD, READ_ACCESS_TAG_VALUE_ROLE, updatedMemberOrg, createdAff);
+		assertReadAccessEntryCount(1, 1, v1, READ_ACCESS_TAG_VALUE_LOCAL);
+		assertReadAccessEntryCount(1, 0, v1, READ_ACCESS_TAG_VALUE_ROLE, updatedMemberOrg, createdAff);
 
 		updatedParentOrg.setActive(true);
 		orgDao.update(updatedParentOrg);
 
-		assertReadAccessEntryCount(1, 1, createdD, READ_ACCESS_TAG_VALUE_LOCAL);
-		assertReadAccessEntryCount(1, 0, createdD, READ_ACCESS_TAG_VALUE_ROLE, updatedMemberOrg, createdAff);
+		assertReadAccessEntryCount(1, 1, v1, READ_ACCESS_TAG_VALUE_LOCAL);
+		assertReadAccessEntryCount(1, 0, v1, READ_ACCESS_TAG_VALUE_ROLE, updatedMemberOrg, createdAff);
 
 		updatedMemberOrg.setActive(true);
 		Organization updatedMemberOrg2 = orgDao.update(updatedMemberOrg);
 
-		assertReadAccessEntryCount(2, 1, createdD, READ_ACCESS_TAG_VALUE_LOCAL);
-		assertReadAccessEntryCount(2, 1, createdD, READ_ACCESS_TAG_VALUE_ROLE, updatedMemberOrg2, createdAff);
+		assertReadAccessEntryCount(2, 1, v1, READ_ACCESS_TAG_VALUE_LOCAL);
+		assertReadAccessEntryCount(2, 1, v1, READ_ACCESS_TAG_VALUE_ROLE, updatedMemberOrg2, createdAff);
 	}
 
 	private void testReadAccessTriggerDelete(String accessType, Consumer<D> readAccessModifier) throws Exception
@@ -682,13 +702,16 @@ public interface ReadAccessDaoTest<D extends Resource>
 		D d = createResource();
 		readAccessModifier.accept(d);
 
-		D createdD = getDao().create(d);
+		D v1 = getDao().create(d);
+		assertEquals(1L, (long) v1.getIdElement().getVersionIdPartAsLong());
 
-		assertReadAccessEntryCount(1, 1, createdD, accessType);
+		assertReadAccessEntryCount(1, 1, v1, accessType);
 
-		getDao().delete(UUID.fromString(createdD.getIdElement().getIdPart()));
+		assertTrue(getDao().existsNotDeleted(v1.getIdElement().getIdPart(), v1.getIdElement().getVersionIdPart()));
+		getDao().delete(UUID.fromString(v1.getIdElement().getIdPart()));
+		assertFalse(getDao().existsNotDeleted(v1.getIdElement().getIdPart(), v1.getIdElement().getVersionIdPart()));
 
-		assertReadAccessEntryCount(0, 0, createdD, accessType);
+		assertReadAccessEntryCount(1, 1, v1, accessType);
 	}
 
 	@Test
@@ -717,15 +740,182 @@ public interface ReadAccessDaoTest<D extends Resource>
 		D d = createResource();
 		new ReadAccessHelperImpl().addOrganization(d, createdOrg);
 
-		D createdD = getDao().create(d);
+		D v1 = getDao().create(d);
+		assertEquals(1L, (long) v1.getIdElement().getVersionIdPartAsLong());
 
-		assertReadAccessEntryCount(2, 1, createdD, READ_ACCESS_TAG_VALUE_LOCAL);
-		assertReadAccessEntryCount(2, 1, createdD, READ_ACCESS_TAG_VALUE_ORGANIZATION, createdOrg);
+		assertReadAccessEntryCount(2, 1, v1, READ_ACCESS_TAG_VALUE_LOCAL);
+		assertReadAccessEntryCount(2, 1, v1, READ_ACCESS_TAG_VALUE_ORGANIZATION, createdOrg);
 
 		organizationDao.delete(UUID.fromString(createdOrg.getIdElement().getIdPart()));
 
+		assertReadAccessEntryCount(1, 1, v1, READ_ACCESS_TAG_VALUE_LOCAL);
+		assertReadAccessEntryCount(1, 0, v1, READ_ACCESS_TAG_VALUE_ORGANIZATION, createdOrg);
+	}
+
+	@Test
+	default void testReadAccessTriggerRoleDelete() throws Exception
+	{
+		Organization parentOrg = new Organization();
+		parentOrg.setActive(true);
+		parentOrg.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("parent.com");
+
+		Organization memberOrg = new Organization();
+		memberOrg.setActive(true);
+		memberOrg.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("member.com");
+
+		OrganizationDao orgDao = new OrganizationDaoJdbc(getDefaultDataSource(), getPermanentDeleteDataSource(),
+				getFhirContext());
+		Organization createdParentOrg = orgDao.create(parentOrg);
+		Organization createdMemberOrg = orgDao.create(memberOrg);
+
+		OrganizationAffiliation aff = new OrganizationAffiliation();
+		aff.setActive(true);
+		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-type")
+				.setCode("MeDIC");
+		aff.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
+		aff.getParticipatingOrganization().setReference("Organization/" + createdMemberOrg.getIdElement().getIdPart());
+
+		OrganizationAffiliationDaoJdbc orgAffDao = new OrganizationAffiliationDaoJdbc(getDefaultDataSource(),
+				getPermanentDeleteDataSource(), getFhirContext());
+		OrganizationAffiliation createdAff = orgAffDao.create(aff);
+
+		D d = createResource();
+		new ReadAccessHelperImpl().addRole(d, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
+				"MeDIC");
+
+		D createdD = getDao().create(d);
+
+		assertReadAccessEntryCount(2, 1, createdD, READ_ACCESS_TAG_VALUE_LOCAL);
+		assertReadAccessEntryCount(2, 1, createdD, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
+
+		orgAffDao.delete(UUID.fromString(createdAff.getIdElement().getIdPart()));
+
 		assertReadAccessEntryCount(1, 1, createdD, READ_ACCESS_TAG_VALUE_LOCAL);
-		assertReadAccessEntryCount(1, 0, createdD, READ_ACCESS_TAG_VALUE_ORGANIZATION, createdOrg);
+		assertReadAccessEntryCount(1, 0, createdD, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
+	}
+
+	@Test
+	default void testReadAccessTriggerRoleDeleteMember() throws Exception
+	{
+		Organization parentOrg = new Organization();
+		parentOrg.setActive(true);
+		parentOrg.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("parent.com");
+
+		Organization memberOrg = new Organization();
+		memberOrg.setActive(true);
+		memberOrg.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("member.com");
+
+		OrganizationDao orgDao = new OrganizationDaoJdbc(getDefaultDataSource(), getPermanentDeleteDataSource(),
+				getFhirContext());
+		Organization createdParentOrg = orgDao.create(parentOrg);
+		Organization createdMemberOrg = orgDao.create(memberOrg);
+
+		OrganizationAffiliation aff = new OrganizationAffiliation();
+		aff.setActive(true);
+		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-type")
+				.setCode("MeDIC");
+		aff.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
+		aff.getParticipatingOrganization().setReference("Organization/" + createdMemberOrg.getIdElement().getIdPart());
+
+		OrganizationAffiliation createdAff = new OrganizationAffiliationDaoJdbc(getDefaultDataSource(),
+				getPermanentDeleteDataSource(), getFhirContext()).create(aff);
+
+		D d = createResource();
+		new ReadAccessHelperImpl().addRole(d, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
+				"MeDIC");
+
+		D createdD = getDao().create(d);
+
+		assertReadAccessEntryCount(2, 1, createdD, READ_ACCESS_TAG_VALUE_LOCAL);
+		assertReadAccessEntryCount(2, 1, createdD, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
+
+		orgDao.delete(UUID.fromString(createdMemberOrg.getIdElement().getIdPart()));
+
+		assertReadAccessEntryCount(1, 1, createdD, READ_ACCESS_TAG_VALUE_LOCAL);
+		assertReadAccessEntryCount(1, 0, createdD, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
+	}
+
+	@Test
+	default void testReadAccessTriggerRoleDeleteParent() throws Exception
+	{
+		Organization parentOrg = new Organization();
+		parentOrg.setActive(true);
+		parentOrg.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("parent.com");
+
+		Organization memberOrg = new Organization();
+		memberOrg.setActive(true);
+		memberOrg.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("member.com");
+
+		OrganizationDao orgDao = new OrganizationDaoJdbc(getDefaultDataSource(), getPermanentDeleteDataSource(),
+				getFhirContext());
+		Organization createdParentOrg = orgDao.create(parentOrg);
+		Organization createdMemberOrg = orgDao.create(memberOrg);
+
+		OrganizationAffiliation aff = new OrganizationAffiliation();
+		aff.setActive(true);
+		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-type")
+				.setCode("MeDIC");
+		aff.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
+		aff.getParticipatingOrganization().setReference("Organization/" + createdMemberOrg.getIdElement().getIdPart());
+
+		OrganizationAffiliation createdAff = new OrganizationAffiliationDaoJdbc(getDefaultDataSource(),
+				getPermanentDeleteDataSource(), getFhirContext()).create(aff);
+
+		D d = createResource();
+		new ReadAccessHelperImpl().addRole(d, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
+				"MeDIC");
+
+		D createdD = getDao().create(d);
+
+		assertReadAccessEntryCount(2, 1, createdD, READ_ACCESS_TAG_VALUE_LOCAL);
+		assertReadAccessEntryCount(2, 1, createdD, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
+
+		orgDao.delete(UUID.fromString(createdParentOrg.getIdElement().getIdPart()));
+
+		assertReadAccessEntryCount(1, 1, createdD, READ_ACCESS_TAG_VALUE_LOCAL);
+		assertReadAccessEntryCount(1, 0, createdD, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
+	}
+
+	@Test
+	default void testReadAccessTriggerRoleDeleteMemberAndParent() throws Exception
+	{
+		Organization parentOrg = new Organization();
+		parentOrg.setActive(true);
+		parentOrg.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("parent.com");
+
+		Organization memberOrg = new Organization();
+		memberOrg.setActive(true);
+		memberOrg.addIdentifier().setSystem(ORGANIZATION_IDENTIFIER_SYSTEM).setValue("member.com");
+
+		OrganizationDao orgDao = new OrganizationDaoJdbc(getDefaultDataSource(), getPermanentDeleteDataSource(),
+				getFhirContext());
+		Organization createdParentOrg = orgDao.create(parentOrg);
+		Organization createdMemberOrg = orgDao.create(memberOrg);
+
+		OrganizationAffiliation aff = new OrganizationAffiliation();
+		aff.setActive(true);
+		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-type")
+				.setCode("MeDIC");
+		aff.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
+		aff.getParticipatingOrganization().setReference("Organization/" + createdMemberOrg.getIdElement().getIdPart());
+
+		OrganizationAffiliation createdAff = new OrganizationAffiliationDaoJdbc(getDefaultDataSource(),
+				getPermanentDeleteDataSource(), getFhirContext()).create(aff);
+
+		D d = createResource();
+		new ReadAccessHelperImpl().addRole(d, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
+				"MeDIC");
+
+		D createdD = getDao().create(d);
+
+		assertReadAccessEntryCount(2, 1, createdD, READ_ACCESS_TAG_VALUE_LOCAL);
+		assertReadAccessEntryCount(2, 1, createdD, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
+
+		orgDao.delete(UUID.fromString(createdMemberOrg.getIdElement().getIdPart()));
+		orgDao.delete(UUID.fromString(createdParentOrg.getIdElement().getIdPart()));
+
+		assertReadAccessEntryCount(1, 1, createdD, READ_ACCESS_TAG_VALUE_LOCAL);
+		assertReadAccessEntryCount(1, 0, createdD, READ_ACCESS_TAG_VALUE_ROLE, createdMemberOrg, createdAff);
 	}
 
 	@Test
@@ -734,8 +924,8 @@ public interface ReadAccessDaoTest<D extends Resource>
 
 	}
 
-	default void testSearchWithUserFilterAfterReadAccessTrigger(String accessType, Consumer<D> readAccessModifier)
-			throws Exception
+	default void testSearchWithUserFilterAfterReadAccessTrigger(String accessType, Consumer<D> readAccessModifier,
+			Function<Organization, User> userCreator, int expectedCount) throws Exception
 	{
 		OrganizationDao organizationDao = new OrganizationDaoJdbc(getDefaultDataSource(),
 				getPermanentDeleteDataSource(), getFhirContext());
@@ -748,25 +938,40 @@ public interface ReadAccessDaoTest<D extends Resource>
 		D createdD = getDao().create(d);
 		assertReadAccessEntryCount(1, 1, createdD, accessType);
 
-		SearchQuery<D> query = getDao().createSearchQuery(User.local(createdOrg), 1, 20)
+		SearchQuery<D> query = getDao().createSearchQuery(userCreator.apply(createdOrg), 1, 20)
 				.configureParameters(Map.of("id", Collections.singletonList(createdD.getIdElement().getIdPart())));
 		PartialResult<D> searchResult = getDao().search(query);
 		assertNotNull(searchResult);
-		assertEquals(1, searchResult.getTotal());
+		assertEquals(expectedCount, searchResult.getTotal());
 		assertNotNull(searchResult.getPartialResult());
-		assertEquals(1, searchResult.getPartialResult().size());
+		assertEquals(expectedCount, searchResult.getPartialResult().size());
 	}
 
 	@Test
-	default void testSearchWithUserFilterAfterReadAccessTriggerAll() throws Exception
+	default void testSearchWithUserFilterAfterReadAccessTriggerAllWithLocalUser() throws Exception
 	{
-		testSearchWithUserFilterAfterReadAccessTrigger(READ_ACCESS_TAG_VALUE_ALL, new ReadAccessHelperImpl()::addAll);
+		testSearchWithUserFilterAfterReadAccessTrigger(READ_ACCESS_TAG_VALUE_ALL, new ReadAccessHelperImpl()::addAll,
+				User::local, 1);
 	}
 
 	@Test
-	default void testSearchWithUserFilterAfterReadAccessTriggerLocal() throws Exception
+	default void testSearchWithUserFilterAfterReadAccessTriggerLocalwithLocalUser() throws Exception
 	{
 		testSearchWithUserFilterAfterReadAccessTrigger(READ_ACCESS_TAG_VALUE_LOCAL,
-				new ReadAccessHelperImpl()::addLocal);
+				new ReadAccessHelperImpl()::addLocal, User::local, 1);
+	}
+
+	@Test
+	default void testSearchWithUserFilterAfterReadAccessTriggerAllWithRemoteUser() throws Exception
+	{
+		testSearchWithUserFilterAfterReadAccessTrigger(READ_ACCESS_TAG_VALUE_ALL, new ReadAccessHelperImpl()::addAll,
+				User::remote, 1);
+	}
+
+	@Test
+	default void testSearchWithUserFilterAfterReadAccessTriggerLocalWithRemoteUser() throws Exception
+	{
+		testSearchWithUserFilterAfterReadAccessTrigger(READ_ACCESS_TAG_VALUE_LOCAL,
+				new ReadAccessHelperImpl()::addLocal, User::remote, 0);
 	}
 }
