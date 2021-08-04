@@ -12,10 +12,8 @@ import org.highmed.dsf.bpe.process.ResourceInfo;
 
 public interface ProcessPluginResourcesDao
 {
-	List<ResourceInfo> getResources(ProcessKeyAndVersion processKeyAndVersion) throws SQLException;
-
 	Map<ProcessKeyAndVersion, List<ResourceInfo>> getResources() throws SQLException;
 
-	void addOrRemoveResources(Collection<? extends ProcessesResource> newResources, List<UUID> deletedResourcesIds)
-			throws SQLException;
+	void addOrRemoveResources(Collection<? extends ProcessesResource> newResources, List<UUID> deletedResourcesIds,
+			List<ProcessKeyAndVersion> excludedProcesses) throws SQLException;
 }

@@ -117,27 +117,33 @@ public class ReadCommand extends AbstractCommand implements Command
 		Optional<ResourceDao<? extends Resource>> optDao = daoProvider.getDao(resourceTypeName);
 		if (optDao.isEmpty())
 			responseResult = Response.status(Status.NOT_FOUND).build();
-
-		ResourceDao<? extends Resource> dao = optDao.get();
-		Optional<?> read = exceptionHandler.handleSqlAndResourceDeletedException(serverBase, resourceTypeName,
-				() -> dao.readWithTransaction(connection, parameterConverter.toUuid(resourceTypeName, id)));
-		if (read.isEmpty())
-			responseResult = Response.status(Status.NOT_FOUND).build();
-
-		Resource r = (Resource) read.get();
-
-		Optional<Date> ifModifiedSince = Optional.ofNullable(entry.getRequest().getIfModifiedSince());
-		Optional<EntityTag> ifNoneMatch = Optional.ofNullable(entry.getRequest().getIfNoneMatch())
-				.flatMap(parameterConverter::toEntityTag);
-
-		EntityTag resourceTag = new EntityTag(r.getMeta().getVersionId(), true);
-		if (ifNoneMatch.map(t -> t.equals(resourceTag)).orElse(false)
-				|| ifModifiedSince.map(d -> r.getMeta().getLastUpdated().after(d)).orElse(false))
-			responseResult = Response.notModified(resourceTag).lastModified(r.getMeta().getLastUpdated()).build();
 		else
-			singleResult = r;
+		{
+			ResourceDao<? extends Resource> dao = optDao.get();
+			Optional<?> read = exceptionHandler.handleSqlAndResourceDeletedException(serverBase, resourceTypeName,
+					() -> dao.readWithTransaction(connection, parameterConverter.toUuid(resourceTypeName, id)));
 
-		authorizationHelper.checkReadAllowed(connection, user, r);
+			if (read.isEmpty())
+				responseResult = Response.status(Status.NOT_FOUND).build();
+			else
+			{
+				Resource r = (Resource) read.get();
+
+				Optional<Date> ifModifiedSince = Optional.ofNullable(entry.getRequest().getIfModifiedSince());
+				Optional<EntityTag> ifNoneMatch = Optional.ofNullable(entry.getRequest().getIfNoneMatch())
+						.flatMap(parameterConverter::toEntityTag);
+
+				EntityTag resourceTag = new EntityTag(r.getMeta().getVersionId(), true);
+				if (ifNoneMatch.map(t -> t.equals(resourceTag)).orElse(false)
+						|| ifModifiedSince.map(d -> r.getMeta().getLastUpdated().after(d)).orElse(false))
+					responseResult = Response.notModified(resourceTag).lastModified(r.getMeta().getLastUpdated())
+							.build();
+				else
+					singleResult = r;
+
+				authorizationHelper.checkReadAllowed(connection, user, r);
+			}
+		}
 	}
 
 	private void readByIdAndVersion(Connection connection, String resourceTypeName, String id, String version)
@@ -146,28 +152,33 @@ public class ReadCommand extends AbstractCommand implements Command
 		Optional<Long> longVersion = parameterConverter.toVersion(version);
 		if (optDao.isEmpty() || longVersion.isEmpty())
 			responseResult = Response.status(Status.NOT_FOUND).build();
-
-		ResourceDao<? extends Resource> dao = optDao.get();
-		Optional<?> read = exceptionHandler.handleSqlAndResourceDeletedException(serverBase, resourceTypeName,
-				() -> dao.readVersionWithTransaction(connection, parameterConverter.toUuid(resourceTypeName, id),
-						longVersion.get()));
-		if (read.isEmpty())
-			responseResult = Response.status(Status.NOT_FOUND).build();
-
-		Resource r = (Resource) read.get();
-
-		Optional<Date> ifModifiedSince = Optional.ofNullable(entry.getRequest().getIfModifiedSince());
-		Optional<EntityTag> ifNoneMatch = Optional.ofNullable(entry.getRequest().getIfNoneMatch())
-				.flatMap(parameterConverter::toEntityTag);
-
-		EntityTag resourceTag = new EntityTag(r.getMeta().getVersionId(), true);
-		if (ifNoneMatch.map(t -> t.equals(resourceTag)).orElse(false)
-				|| ifModifiedSince.map(d -> r.getMeta().getLastUpdated().after(d)).orElse(false))
-			responseResult = Response.notModified(resourceTag).lastModified(r.getMeta().getLastUpdated()).build();
 		else
-			singleResult = r;
+		{
+			ResourceDao<? extends Resource> dao = optDao.get();
+			Optional<?> read = exceptionHandler.handleSqlAndResourceDeletedException(serverBase, resourceTypeName,
+					() -> dao.readVersionWithTransaction(connection, parameterConverter.toUuid(resourceTypeName, id),
+							longVersion.get()));
+			if (read.isEmpty())
+				responseResult = Response.status(Status.NOT_FOUND).build();
+			else
+			{
+				Resource r = (Resource) read.get();
 
-		authorizationHelper.checkReadAllowed(connection, user, r);
+				Optional<Date> ifModifiedSince = Optional.ofNullable(entry.getRequest().getIfModifiedSince());
+				Optional<EntityTag> ifNoneMatch = Optional.ofNullable(entry.getRequest().getIfNoneMatch())
+						.flatMap(parameterConverter::toEntityTag);
+
+				EntityTag resourceTag = new EntityTag(r.getMeta().getVersionId(), true);
+				if (ifNoneMatch.map(t -> t.equals(resourceTag)).orElse(false)
+						|| ifModifiedSince.map(d -> r.getMeta().getLastUpdated().after(d)).orElse(false))
+					responseResult = Response.notModified(resourceTag).lastModified(r.getMeta().getLastUpdated())
+							.build();
+				else
+					singleResult = r;
+
+				authorizationHelper.checkReadAllowed(connection, user, r);
+			}
+		}
 	}
 
 	private void readByCondition(Connection connection, String resourceTypeName,
@@ -176,60 +187,62 @@ public class ReadCommand extends AbstractCommand implements Command
 		Optional<ResourceDao<? extends Resource>> optDao = daoProvider.getDao(resourceTypeName);
 		if (optDao.isEmpty())
 			responseResult = Response.status(Status.NOT_FOUND).build();
-
-		Integer page = parameterConverter.getFirstInt(cleanQueryParameters, SearchQuery.PARAMETER_PAGE);
-		int effectivePage = page == null ? 1 : page;
-
-		Integer count = parameterConverter.getFirstInt(cleanQueryParameters, SearchQuery.PARAMETER_COUNT);
-		int effectiveCount = (count == null || count < 0) ? defaultPageCount : count;
-
-		SearchQuery<? extends Resource> query = optDao.get().createSearchQuery(user, effectivePage, effectiveCount);
-		query.configureParameters(cleanQueryParameters);
-		List<SearchQueryParameterError> errors = query.getUnsupportedQueryParameters(cleanQueryParameters);
-
-		if (!errors.isEmpty() && PreferHandlingType.STRICT.equals(handlingType))
-			throw new WebApplicationException(responseGenerator.response(Status.BAD_REQUEST,
-					responseGenerator.toOperationOutcomeError(errors), MediaType.APPLICATION_XML_TYPE).build());
-
-		PartialResult<? extends Resource> result = exceptionHandler
-				.handleSqlException(() -> optDao.get().searchWithTransaction(connection, query));
-
-		UriBuilder bundleUri = query.configureBundleUri(UriBuilder.fromPath(serverBase + "/" + resourceTypeName));
-
-		multipleResult = responseGenerator.createSearchSet(result, errors, bundleUri, null, null);
-
-		// map single search result from multipleResult field to singleResult field
-		if (multipleResult != null && multipleResult.getEntry().size() == 1)
-		{
-			singleResult = (Resource) multipleResult.getEntry().get(0).getResource();
-			multipleResult = null;
-
-			authorizationHelper.checkReadAllowed(connection, user, singleResult);
-		}
-		else if (multipleResult != null && multipleResult.getEntry().size() == 2
-				&& SearchEntryMode.MATCH.equals(multipleResult.getEntry().get(0).getSearch().getMode())
-				&& SearchEntryMode.OUTCOME.equals(multipleResult.getEntry().get(1).getSearch().getMode()))
-		{
-			singleResult = (Resource) multipleResult.getEntry().get(0).getResource();
-			singleResultSearchWarning = (OperationOutcome) multipleResult.getEntry().get(1).getResource();
-			multipleResult = null;
-
-			authorizationHelper.checkReadAllowed(connection, user, singleResult);
-		}
-		else if (multipleResult != null && multipleResult.getEntry().size() == 2
-				&& SearchEntryMode.MATCH.equals(multipleResult.getEntry().get(1).getSearch().getMode())
-				&& SearchEntryMode.OUTCOME.equals(multipleResult.getEntry().get(0).getSearch().getMode()))
-		{
-			singleResult = (Resource) multipleResult.getEntry().get(1).getResource();
-			singleResultSearchWarning = (OperationOutcome) multipleResult.getEntry().get(0).getResource();
-			multipleResult = null;
-
-			authorizationHelper.checkReadAllowed(connection, user, singleResult);
-		}
 		else
 		{
-			authorizationHelper.checkSearchAllowed(user, resourceTypeName);
-			authorizationHelper.filterIncludeResults(connection, user, multipleResult);
+			Integer page = parameterConverter.getFirstInt(cleanQueryParameters, SearchQuery.PARAMETER_PAGE);
+			int effectivePage = page == null ? 1 : page;
+
+			Integer count = parameterConverter.getFirstInt(cleanQueryParameters, SearchQuery.PARAMETER_COUNT);
+			int effectiveCount = (count == null || count < 0) ? defaultPageCount : count;
+
+			SearchQuery<? extends Resource> query = optDao.get().createSearchQuery(user, effectivePage, effectiveCount);
+			query.configureParameters(cleanQueryParameters);
+			List<SearchQueryParameterError> errors = query.getUnsupportedQueryParameters(cleanQueryParameters);
+
+			if (!errors.isEmpty() && PreferHandlingType.STRICT.equals(handlingType))
+				throw new WebApplicationException(responseGenerator.response(Status.BAD_REQUEST,
+						responseGenerator.toOperationOutcomeError(errors), MediaType.APPLICATION_XML_TYPE).build());
+
+			PartialResult<? extends Resource> result = exceptionHandler
+					.handleSqlException(() -> optDao.get().searchWithTransaction(connection, query));
+
+			UriBuilder bundleUri = query.configureBundleUri(UriBuilder.fromPath(serverBase + "/" + resourceTypeName));
+
+			multipleResult = responseGenerator.createSearchSet(result, errors, bundleUri, null, null);
+
+			// map single search result from multipleResult field to singleResult field
+			if (multipleResult != null && multipleResult.getEntry().size() == 1)
+			{
+				singleResult = (Resource) multipleResult.getEntry().get(0).getResource();
+				multipleResult = null;
+
+				authorizationHelper.checkReadAllowed(connection, user, singleResult);
+			}
+			else if (multipleResult != null && multipleResult.getEntry().size() == 2
+					&& SearchEntryMode.MATCH.equals(multipleResult.getEntry().get(0).getSearch().getMode())
+					&& SearchEntryMode.OUTCOME.equals(multipleResult.getEntry().get(1).getSearch().getMode()))
+			{
+				singleResult = (Resource) multipleResult.getEntry().get(0).getResource();
+				singleResultSearchWarning = (OperationOutcome) multipleResult.getEntry().get(1).getResource();
+				multipleResult = null;
+
+				authorizationHelper.checkReadAllowed(connection, user, singleResult);
+			}
+			else if (multipleResult != null && multipleResult.getEntry().size() == 2
+					&& SearchEntryMode.MATCH.equals(multipleResult.getEntry().get(1).getSearch().getMode())
+					&& SearchEntryMode.OUTCOME.equals(multipleResult.getEntry().get(0).getSearch().getMode()))
+			{
+				singleResult = (Resource) multipleResult.getEntry().get(1).getResource();
+				singleResultSearchWarning = (OperationOutcome) multipleResult.getEntry().get(0).getResource();
+				multipleResult = null;
+
+				authorizationHelper.checkReadAllowed(connection, user, singleResult);
+			}
+			else
+			{
+				authorizationHelper.checkSearchAllowed(user, resourceTypeName);
+				authorizationHelper.filterIncludeResults(connection, user, multipleResult);
+			}
 		}
 	}
 
@@ -249,7 +262,8 @@ public class ReadCommand extends AbstractCommand implements Command
 					.withServerBase(serverBase, singleResult.getResourceType().name()).getValue());
 			response.setEtag(new EntityTag(singleResult.getMeta().getVersionId(), true).toString());
 			response.setLastModified(singleResult.getMeta().getLastUpdated());
-			resultEntry.setResource(singleResult);
+
+			setSingleResult(resultEntry, singleResult);
 
 			if (singleResultSearchWarning != null)
 				response.setOutcome(singleResultSearchWarning);
@@ -266,7 +280,8 @@ public class ReadCommand extends AbstractCommand implements Command
 			resultEntry.setFullUrl(URL_UUID_PREFIX + UUID.randomUUID().toString());
 			BundleEntryResponseComponent response = resultEntry.getResponse();
 			response.setStatus(Status.OK.getStatusCode() + " " + Status.OK.getReasonPhrase());
-			resultEntry.setResource(multipleResult);
+
+			setMultipleResult(resultEntry, multipleResult);
 
 			return Optional.of(resultEntry);
 		}
@@ -284,5 +299,15 @@ public class ReadCommand extends AbstractCommand implements Command
 
 			return Optional.of(resultEntry);
 		}
+	}
+
+	protected void setMultipleResult(BundleEntryComponent resultEntry, Bundle multipleResult)
+	{
+		resultEntry.setResource(multipleResult);
+	}
+
+	protected void setSingleResult(BundleEntryComponent resultEntry, Resource singleResult)
+	{
+		resultEntry.setResource(singleResult);
 	}
 }

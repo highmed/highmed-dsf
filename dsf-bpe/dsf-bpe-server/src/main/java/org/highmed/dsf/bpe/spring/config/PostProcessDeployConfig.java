@@ -46,6 +46,12 @@ public class PostProcessDeployConfig
 	@Value("#{'${org.highmed.dsf.bpe.process.retired:}'.split(',')}")
 	private List<String> retired;
 
+	@Value("${org.highmed.dsf.bpe.process.fhirServerRequestMaxRetries:5}")
+	private int fhirServerRequestMaxRetries;
+
+	@Value("${org.highmed.dsf.bpe.process.fhirServerRetryDelayMillis:5000}")
+	private long fhirServerRetryDelayMillis;
+
 	@EventListener({ ContextRefreshedEvent.class })
 	public void onContextRefreshedEvent(ContextRefreshedEvent event)
 	{
@@ -79,7 +85,7 @@ public class PostProcessDeployConfig
 	public FhirResourceHandler fhirResourceHandler()
 	{
 		return new FhirResourceHandlerImpl(fhirConfig.clientProvider().getLocalWebserviceClient(),
-				daoConfig.processPluginResourcesDao(), fhirConfig.fhirContext(),
-				processPluginProvider.getResouceProvidersByDpendencyNameAndVersion());
+				daoConfig.processPluginResourcesDao(), fhirConfig.fhirContext(), fhirServerRequestMaxRetries,
+				fhirServerRetryDelayMillis, processPluginProvider.getResouceProvidersByDpendencyNameAndVersion());
 	}
 }
