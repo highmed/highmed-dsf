@@ -9,14 +9,20 @@ public class TaskUserFilter extends AbstractUserFilter
 {
 	private static final String RESOURCE_COLUMN = "task";
 
+	private final String resourceColumn;
+
 	public TaskUserFilter(User user)
 	{
-		super(user, RESOURCE_COLUMN);
+		super(user, null, null);
+
+		this.resourceColumn = RESOURCE_COLUMN;
 	}
 
 	public TaskUserFilter(User user, String resourceColumn)
 	{
-		super(user, resourceColumn);
+		super(user, null, null);
+
+		this.resourceColumn = resourceColumn;
 	}
 
 	@Override

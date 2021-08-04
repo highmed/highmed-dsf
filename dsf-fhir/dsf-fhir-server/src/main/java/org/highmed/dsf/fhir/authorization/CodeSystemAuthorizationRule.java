@@ -13,6 +13,7 @@ import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.dao.CodeSystemDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
+import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
@@ -24,9 +25,11 @@ public class CodeSystemAuthorizationRule extends AbstractMetaTagAuthorizationRul
 	private static final Logger logger = LoggerFactory.getLogger(CodeSystemAuthorizationRule.class);
 
 	public CodeSystemAuthorizationRule(DaoProvider daoProvider, String serverBase, ReferenceResolver referenceResolver,
-			OrganizationProvider organizationProvider, ReadAccessHelper readAccessHelper)
+			OrganizationProvider organizationProvider, ReadAccessHelper readAccessHelper,
+			ParameterConverter parameterConverter)
 	{
-		super(CodeSystem.class, daoProvider, serverBase, referenceResolver, organizationProvider, readAccessHelper);
+		super(CodeSystem.class, daoProvider, serverBase, referenceResolver, organizationProvider, readAccessHelper,
+				parameterConverter);
 	}
 
 	protected Optional<String> newResourceOk(Connection connection, User user, CodeSystem newResource)

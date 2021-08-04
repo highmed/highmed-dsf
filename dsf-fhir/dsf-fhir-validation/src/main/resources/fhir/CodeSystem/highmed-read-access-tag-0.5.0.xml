@@ -11,13 +11,14 @@
 	<title value="Read Access Tag"/>
 	<status value="active"/>
 	<experimental value="false"/>
-	<date value="2021-02-28"/>
+	<date value="2021-08-04"/>
 	<publisher value="HiGHmed"/>
 	<description value="CodeSystem with read access tags"/>
 	<caseSensitive value="true"/>
 	<hierarchyMeaning value="grouped-by"/>
 	<versionNeeded value="false"/>
 	<content value="complete"/>
+	<count value="4"/>
 	<concept>
 		<code value="LOCAL"/>
 		<display value="Local"/>

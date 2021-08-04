@@ -11,20 +11,36 @@
 	<title value="HiGHmed Organization Type"/>
 	<status value="active"/>
 	<experimental value="false"/>
-	<date value="2021-01-26"/>
+	<date value="2021-08-04"/>
 	<publisher value="HiGHmed"/>
 	<description value="CodeSystem with HiGHmed organization roles used in Organization resources"/>
 	<caseSensitive value="true"/>
 	<hierarchyMeaning value="grouped-by"/>
 	<versionNeeded value="false"/>
 	<content value="complete"/>
-	<count value="2"/>
+	<count value="6"/>
 	<concept>
 		<code value="TTP"/>
-		<definition value="Trusted Third Party"/>
+		<display value="Trusted Third Party"/>
 	</concept>
 	<concept>
 		<code value="MeDIC"/>
-		<definition value="Medical Data Integration Center"/>
+		<display value="Medical Data Integration Center"/>
+	</concept>
+	<concept>
+		<code value="DTS"/>
+		<display value="Data Transfer Site"/>
+	</concept>
+	<concept>
+		<code value="COS"/>
+		<display value="Coordinating Site"/>
+	</concept>
+	<concept>
+		<code value="CRR"/>
+		<display value="Central Research Repository"/>
+	</concept>
+	<concept>
+		<code value="HRP"/>
+		<display value="Health Research Platform"/>
 	</concept>
 </CodeSystem>

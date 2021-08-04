@@ -4,7 +4,9 @@ import org.highmed.dsf.fhir.search.SearchQueryUserFilter;
 
 public interface HistoryUserFilter extends SearchQueryUserFilter
 {
+	String RESOURCE_ID_COLUMN = "id";
 	String RESOURCE_COLUMN = "resource";
+	String RESOURCE_TABLE = "history";
 
 	static String getFilterQuery(String resourceType, String filterQuery)
 	{

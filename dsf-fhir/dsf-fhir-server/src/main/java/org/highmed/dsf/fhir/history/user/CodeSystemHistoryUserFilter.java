@@ -12,7 +12,7 @@ public class CodeSystemHistoryUserFilter extends CodeSystemUserFilter implements
 
 	public CodeSystemHistoryUserFilter(User user)
 	{
-		super(user, HistoryUserFilter.RESOURCE_COLUMN);
+		super(user, HistoryUserFilter.RESOURCE_TABLE, HistoryUserFilter.RESOURCE_ID_COLUMN);
 	}
 
 	@Override

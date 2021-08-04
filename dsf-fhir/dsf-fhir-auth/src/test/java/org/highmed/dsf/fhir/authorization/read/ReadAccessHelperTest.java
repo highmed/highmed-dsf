@@ -227,7 +227,7 @@ public class ReadAccessHelperTest
 	}
 
 	@Test
-	public void testOrganizationValidWitTest() throws Exception
+	public void testOrganizationValidWithTests() throws Exception
 	{
 		final String organizationIdentifier = "organization.com";
 

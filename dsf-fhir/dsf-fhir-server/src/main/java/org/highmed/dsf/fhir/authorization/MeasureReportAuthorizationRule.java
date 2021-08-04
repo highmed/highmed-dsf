@@ -11,6 +11,7 @@ import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.dao.MeasureReportDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
+import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.MeasureReport;
 
@@ -18,9 +19,10 @@ public class MeasureReportAuthorizationRule extends AbstractMetaTagAuthorization
 {
 	public MeasureReportAuthorizationRule(DaoProvider daoProvider, String serverBase,
 			ReferenceResolver referenceResolver, OrganizationProvider organizationProvider,
-			ReadAccessHelper readAccessHelper)
+			ReadAccessHelper readAccessHelper, ParameterConverter parameterConverter)
 	{
-		super(MeasureReport.class, daoProvider, serverBase, referenceResolver, organizationProvider, readAccessHelper);
+		super(MeasureReport.class, daoProvider, serverBase, referenceResolver, organizationProvider, readAccessHelper,
+				parameterConverter);
 	}
 
 	protected Optional<String> newResourceOk(Connection connection, User user, MeasureReport newResource)

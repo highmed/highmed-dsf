@@ -15,6 +15,7 @@ import org.highmed.dsf.fhir.authorization.process.ProcessAuthorizationHelper;
 import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.dao.ActivityDefinitionDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
+import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
@@ -30,10 +31,11 @@ public class ActivityDefinitionAuthorizationRule
 
 	public ActivityDefinitionAuthorizationRule(DaoProvider daoProvider, String serverBase,
 			ReferenceResolver referenceResolver, OrganizationProvider organizationProvider,
-			ReadAccessHelper readAccessHelper, ProcessAuthorizationHelper processAuthorizationHelper)
+			ReadAccessHelper readAccessHelper, ParameterConverter parameterConverter,
+			ProcessAuthorizationHelper processAuthorizationHelper)
 	{
 		super(ActivityDefinition.class, daoProvider, serverBase, referenceResolver, organizationProvider,
-				readAccessHelper);
+				readAccessHelper, parameterConverter);
 
 		this.processAuthorizationHelper = processAuthorizationHelper;
 	}

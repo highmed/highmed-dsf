@@ -157,10 +157,13 @@ public interface ResourceDao<R extends Resource>
 	 *            not <code>null</code>
 	 * @param version
 	 *            may be <code>null</code>
-	 * @return <code>true</code> if a resource with the given id and version exists, if the given version is null and a
-	 *         resource with the given id is marked as deleted returns <code>false</code>
+	 * @return if the given <b>id</b> is null <code>false</code>; if the given <b>version</b> is <code>null</code> or
+	 *         blank and a resource with the given <b>id</b> exists and is not marked as deleted <code>true</code>; if
+	 *         the given <b>version</b> is not <code>null</code> and not blank and a resource with the given <b>id</b>
+	 *         and <b>version</b> exists and is not marked as deleted <code>true</code>
 	 * @throws SQLException
 	 *             if database access errors occur
+	 * @see String#isBlank()
 	 */
 	boolean existsNotDeleted(String id, String version) throws SQLException;
 
@@ -171,10 +174,13 @@ public interface ResourceDao<R extends Resource>
 	 *            not <code>null</code>
 	 * @param version
 	 *            may be <code>null</code>
-	 * @return <code>true</code> if a resource with the given id and version exists, if the given version is null and a
-	 *         resource with the given id is marked as deleted returns <code>false</code>
+	 * @return if the given <b>id</b> is null <code>false</code>; if the given <b>version</b> is <code>null</code> or
+	 *         blank and a resource with the given <b>id</b> exists and is not marked as deleted <code>true</code>; if
+	 *         the given <b>version</b> is not <code>null</code> and not blank and a resource with the given <b>id</b>
+	 *         and <b>version</b> exists and is not marked as deleted <code>true</code>
 	 * @throws SQLException
 	 *             if database access errors occur
+	 * @see String#isBlank()
 	 */
 	boolean existsNotDeletedWithTransaction(Connection connection, String id, String version) throws SQLException;
 
@@ -297,32 +303,6 @@ public interface ResourceDao<R extends Resource>
 	 */
 	R updateWithTransaction(Connection connection, R resource, Long expectedVersion)
 			throws SQLException, ResourceNotFoundException, ResourceVersionNoMatchException;
-
-	/**
-	 * Does <b>not</b> increment the resource version. Set the version of the stored resource to latest version from DB.
-	 * See {@link #updateWithTransaction(Connection, Resource, Long)} to increment the version before storing the
-	 * resource.
-	 * 
-	 * Resurrects all old versions (removes deleted flag) if the latest version in DB is marked as deleted.
-	 *
-	 * @param connection
-	 *            not <code>null</code>, not {@link Connection#isReadOnly()} and not {@link Connection#getAutoCommit()}
-	 *            and {@link Connection#getTransactionIsolation()} one of {@link Connection#TRANSACTION_REPEATABLE_READ}
-	 *            or {@link Connection#TRANSACTION_SERIALIZABLE}
-	 * @param resource
-	 *            not <code>null</code>
-	 * @return the stored resource, not the same object as the given resource (defensive copy)
-	 * @throws SQLException
-	 *             if database access errors occur
-	 * @throws ResourceNotFoundException
-	 *             if the given resource could not be found
-	 * @throws IllegalArgumentException
-	 *             if the given connection is {@link Connection#isReadOnly()} or is {@link Connection#getAutoCommit()}
-	 *             or {@link Connection#getTransactionIsolation()} is not one of
-	 *             {@link Connection#TRANSACTION_REPEATABLE_READ} or {@link Connection#TRANSACTION_SERIALIZABLE}, if the
-	 *             given resource has not id-element, not id-element with id part or no id-element with version part
-	 */
-	R updateSameRowWithTransaction(Connection connection, R resource) throws SQLException, ResourceNotFoundException;
 
 	/**
 	 * Returns <code>false</code> if a matching resource was already marked as deleted
