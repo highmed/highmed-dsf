@@ -442,8 +442,8 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	{
 		Bundle history = historyService.getHistory(getCurrentUser(), uri, headers, resourceType, id);
 
-		return responseGenerator.response(Status.OK, referenceCleaner.cleanLiteralReferences(history),
-				parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
+		return responseGenerator
+				.response(Status.OK, history, parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
 	}
 
 	@Override

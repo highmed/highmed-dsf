@@ -1,6 +1,7 @@
 package org.highmed.dsf.fhir.integration;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -836,5 +837,67 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		String taskId = taskDao.create(task).getIdElement().getIdPart();
 
 		expectForbidden(() -> getExternalWebserviceClient().deletePermanently(Task.class, taskId));
+	}
+
+	@Test
+	public void testHistoryLiteralReferenceClean() throws Exception
+	{
+		ActivityDefinition ad1 = readActivityDefinition("highmed-test-activity-definition1-0.5.0.xml");
+		ActivityDefinition createdAd1 = getWebserviceClient().create(ad1);
+		assertNotNull(createdAd1);
+		assertNotNull(createdAd1.getIdElement().getIdPart());
+
+		StructureDefinition testTaskProfile = readTestTaskProfile();
+		StructureDefinition createdTestTaskProfile = getWebserviceClient().create(testTaskProfile);
+		assertNotNull(createdTestTaskProfile);
+		assertNotNull(createdTestTaskProfile.getIdElement().getIdPart());
+
+		Task task = readTestTask("Test_Organization", "Test_Organization");
+		assertFalse(task.getRequester().hasReference());
+		assertTrue(task.getRequester().hasType());
+		assertTrue(task.getRequester().hasIdentifier());
+		assertFalse(task.getRestriction().getRecipientFirstRep().hasReference());
+		assertTrue(task.getRestriction().getRecipientFirstRep().hasType());
+		assertTrue(task.getRestriction().getRecipientFirstRep().hasIdentifier());
+
+		Task createdTask = getWebserviceClient().create(task);
+		assertNotNull(createdTask);
+		assertNotNull(createdTask.getIdElement().getIdPart());
+		assertFalse(createdTask.getRequester().hasReference());
+		assertTrue(createdTask.getRequester().hasType());
+		assertTrue(createdTask.getRequester().hasIdentifier());
+		assertFalse(createdTask.getRestriction().getRecipientFirstRep().hasReference());
+		assertTrue(createdTask.getRestriction().getRecipientFirstRep().hasType());
+		assertTrue(createdTask.getRestriction().getRecipientFirstRep().hasIdentifier());
+
+		TaskDao taskDao = getSpringWebApplicationContext().getBean(TaskDao.class);
+		Task readTask = taskDao.read(UUID.fromString(createdTask.getIdElement().getIdPart())).get();
+
+		assertTrue(readTask.getRequester().hasReference());
+		assertTrue(readTask.getRequester().hasType());
+		assertTrue(readTask.getRequester().hasIdentifier());
+		assertTrue(readTask.getRestriction().getRecipientFirstRep().hasReference());
+		assertTrue(readTask.getRestriction().getRecipientFirstRep().hasType());
+		assertTrue(readTask.getRestriction().getRecipientFirstRep().hasIdentifier());
+
+		Bundle historyBundle = getWebserviceClient().history(Task.class, createdTask.getIdElement().getIdPart());
+		assertTrue(historyBundle.hasType());
+		assertEquals(BundleType.HISTORY, historyBundle.getType());
+		assertTrue(historyBundle.hasTotal());
+		assertEquals(1, historyBundle.getTotal());
+		assertTrue(historyBundle.hasEntry());
+		assertNotNull(historyBundle.getEntry());
+		assertEquals(1, historyBundle.getEntry().size());
+		assertTrue(historyBundle.getEntry().get(0).hasResource());
+		assertNotNull(historyBundle.getEntry().get(0).getResource());
+		assertTrue(historyBundle.getEntry().get(0).getResource() instanceof Task);
+
+		Task fromHistory = (Task) historyBundle.getEntry().get(0).getResource();
+		assertFalse(fromHistory.getRequester().hasReference());
+		assertTrue(fromHistory.getRequester().hasType());
+		assertTrue(fromHistory.getRequester().hasIdentifier());
+		assertFalse(fromHistory.getRestriction().getRecipientFirstRep().hasReference());
+		assertTrue(fromHistory.getRestriction().getRecipientFirstRep().hasType());
+		assertTrue(fromHistory.getRestriction().getRecipientFirstRep().hasIdentifier());
 	}
 }
