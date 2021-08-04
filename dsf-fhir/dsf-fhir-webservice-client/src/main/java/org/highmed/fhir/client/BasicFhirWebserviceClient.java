@@ -66,9 +66,30 @@ public interface BasicFhirWebserviceClient extends PreferReturnResource
 
 	StructureDefinition generateSnapshot(StructureDefinition differential);
 
-	Bundle history();
+	default Bundle history()
+	{
+		return history(null);
+	}
 
-	Bundle history(Class<? extends Resource> resourceType);
+	default Bundle history(int page, int count)
+	{
+		return history(null, page, count);
+	}
 
-	Bundle history(Class<? extends Resource> resourceType, String id);
+	default Bundle history(Class<? extends Resource> resourceType)
+	{
+		return history(null, null);
+	}
+
+	default Bundle history(Class<? extends Resource> resourceType, int page, int count)
+	{
+		return history(null, null, page, count);
+	}
+
+	default Bundle history(Class<? extends Resource> resourceType, String id)
+	{
+		return history(resourceType, id, Integer.MIN_VALUE, Integer.MIN_VALUE);
+	}
+
+	Bundle history(Class<? extends Resource> resourceType, String id, int page, int count);
 }

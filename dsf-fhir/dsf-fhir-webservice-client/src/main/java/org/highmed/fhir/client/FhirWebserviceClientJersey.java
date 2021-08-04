@@ -765,30 +765,23 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 	}
 
 	@Override
-	public Bundle history()
+	public Bundle history(Class<? extends Resource> resourceType, String id, int page, int count)
 	{
-		return history(null);
-	}
-
-	@Override
-	public Bundle history(Class<? extends Resource> resourceType)
-	{
-		return history(resourceType, null);
-	}
-
-	@Override
-	public Bundle history(Class<? extends Resource> resourceType, String id)
-	{
-
-		WebTarget resource = getResource();
+		WebTarget target = getResource();
 
 		if (resourceType != null)
-			resource = resource.path(resourceType.getAnnotation(ResourceDef.class).name());
+			target = target.path(resourceType.getAnnotation(ResourceDef.class).name());
 
 		if (!StringUtils.isBlank(id))
-			resource = resource.path(id);
+			target = target.path(id);
 
-		Response response = resource.path("_history").request().accept(Constants.CT_FHIR_JSON_NEW).get();
+		if (page != Integer.MIN_VALUE)
+			target = target.queryParam("_page", page);
+
+		if (count != Integer.MIN_VALUE)
+			target = target.queryParam("_count", count);
+
+		Response response = target.path("_history").request().accept(Constants.CT_FHIR_JSON_NEW).get();
 
 		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
 				response.getStatusInfo().getReasonPhrase());
