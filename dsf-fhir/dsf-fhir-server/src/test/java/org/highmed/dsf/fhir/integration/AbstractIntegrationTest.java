@@ -405,6 +405,16 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		expectWebApplicationException(operation, Status.FORBIDDEN);
 	}
 
+	protected static void expectNotFound(Runnable operation) throws Exception
+	{
+		expectWebApplicationException(operation, Status.NOT_FOUND);
+	}
+
+	protected static void expectNotAcceptable(Runnable operation) throws Exception
+	{
+		expectWebApplicationException(operation, Status.NOT_ACCEPTABLE);
+	}
+
 	protected static void expectWebApplicationException(Runnable operation, Status status) throws Exception
 	{
 		try

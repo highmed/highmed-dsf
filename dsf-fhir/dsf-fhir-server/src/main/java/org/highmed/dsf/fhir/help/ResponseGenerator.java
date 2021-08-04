@@ -391,8 +391,9 @@ public class ResponseGenerator
 				"Resource with criteria '" + ifNoneExistsHeaderValue + "' exists");
 
 		UriBuilder uri = UriBuilder.fromPath(serverBase);
-		URI location = uri.path("/{id}/" + Constants.PARAM_HISTORY + "/{vid}")
-				.build(resource.getIdElement().getIdPart(), resource.getIdElement().getVersionIdPart());
+		URI location = uri.path("/{resourceType}/{id}/" + Constants.PARAM_HISTORY + "/{vid}").build(
+				resource.getResourceType().name(), resource.getIdElement().getIdPart(),
+				resource.getIdElement().getVersionIdPart());
 
 		return Response.status(Status.OK).entity(outcome).location(location)
 				.lastModified(resource.getMeta().getLastUpdated())

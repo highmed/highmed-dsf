@@ -138,7 +138,7 @@ public class ResourceInfo implements Comparable<ResourceInfo>
 				+ "]";
 	}
 
-	public String toConditionalCreateUrl()
+	public String toConditionalUrl()
 	{
 		if ("NamingSystem".equals(getResourceType()))
 			return "name=" + getName();

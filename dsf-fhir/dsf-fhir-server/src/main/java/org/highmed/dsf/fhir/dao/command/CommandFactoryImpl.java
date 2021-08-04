@@ -97,6 +97,15 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 		Objects.requireNonNull(transactionResourcesFactory, "transactionResourcesFactory");
 	}
 
+	// head
+	private Command head(int index, User user, PreferReturnType returnType, Bundle bundle, BundleEntryComponent entry,
+			PreferHandlingType handlingType)
+	{
+		return new HeadCommand(index, user, returnType, bundle, entry, serverBase, authorizationHelper,
+				defaultPageCount, daoProvider, parameterConverter, responseGenerator, exceptionHandler,
+				referenceCleaner, handlingType);
+	}
+
 	// read, vread
 	private Command get(int index, User user, PreferReturnType returnType, Bundle bundle, BundleEntryComponent entry,
 			PreferHandlingType handlingType)
@@ -219,8 +228,10 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 			{
 				switch (entry.getRequest().getMethod())
 				{
-					case GET: // read
+					case GET: // read, vread
 						return Stream.of(get(index, user, returnType, bundle, entry, handlingType));
+					case HEAD: // head -> read, vread
+						return Stream.of(head(index, user, returnType, bundle, entry, handlingType));
 					case DELETE: // delete
 						return Stream.of(delete(index, user, returnType, bundle, entry));
 					default:
