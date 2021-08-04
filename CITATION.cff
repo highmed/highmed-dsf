@@ -1,0 +1,65 @@
+cff-version: 1.1.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: Hund
+    given-names: Hauke
+  - family-names: Wettstein
+    given-names: Reto
+title: "HiGHmed Data Sharing Framework (HiGHmed DSF)"
+version: 0.5.0
+date-released: 2021-04-08
+url: https://github.com/highmed/highmed-dsf/wiki
+repository-code: https://github.com/highmed/highmed-dsf
+repository-artifact: https://github.com/highmed/highmed-dsf/releases
+license: Apache-2.0
+references:
+  - type: proceedings
+    authors:
+      - family-names: Hund
+        given-names: Hauke
+      - family-names: Wettstein
+        given-names: Reto
+      - family-names: Heidt
+        given-names: Christian M.
+      - family-names: Kobylinski
+        given-names: Insa
+      - family-names: Fegeler
+        given-names: Christian
+    title: "Executing Distributed Healthcare and Research Processes – The HiGHmed Data Sharing Framework"
+    journal: Stud Health Technol Inform
+    volume: 278
+    year: 2021
+    pages: 126-133
+    doi: 10.3233/SHTI210060
+  - type: proceedings
+    authors:
+      - family-names: Wettstein
+        given-names: Reto
+      - family-names: Hund
+        given-names: Hauke
+      - family-names: Kobylinski
+        given-names: Insa
+      - family-names: Fegeler
+        given-names: Christian
+      - family-names: Heinze
+        given-names: Oliver
+    title: "Feasibility Queries in Distributed Architectures – Concept and Implementation in HiGHmed"
+    journal: Stud Health Technol Inform
+    volume: 278
+    year: 2021
+    pages: 134-141
+    doi: 10.3233/SHTI210061
+  - type: proceedings
+    authors:
+      - family-names: Heidt
+        given-names: Christian M.
+      - family-names: Hund
+        given-names: Hauke
+      - family-names: Fegeler
+        given-names: Christian
+    title: "A Federated Record Linkage Algorithm for Secure Medical Data Sharing"
+    journal: Stud Health Technol Inform
+    volume: 278
+    year: 2021
+    pages: 142-149
+    doi: 10.3233/SHTI210062
