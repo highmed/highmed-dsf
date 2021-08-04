@@ -39,9 +39,17 @@ public class BinaryAuthorizationRule extends AbstractMetaTagAuthorizationRule<Bi
 	{
 		List<String> errors = new ArrayList<String>();
 
-		if (!hasValidReadAccessTag(connection, newResource) && !hasValidSecurityContext(connection, user, newResource))
+		boolean hasValidReadAccessTag = hasValidReadAccessTag(connection, newResource);
+		boolean hasValidSecurityContext = hasValidSecurityContext(connection, user, newResource);
+
+		if (!hasValidReadAccessTag && !hasValidSecurityContext)
 		{
-			errors.add("Binary is missing valid read access tag or securityContext");
+			errors.add("Binary is missing a valid read access tag or a valid securityContext");
+		}
+
+		if (hasValidReadAccessTag && hasValidSecurityContext)
+		{
+			errors.add("Binary cannot have a valid read access tag and a valid securityContext");
 		}
 
 		if (errors.isEmpty())
