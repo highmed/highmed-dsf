@@ -12,7 +12,7 @@ public class LocationHistoryUserFilter extends LocationUserFilter implements His
 
 	public LocationHistoryUserFilter(User user)
 	{
-		super(user, HistoryUserFilter.RESOURCE_COLUMN);
+		super(user, HistoryUserFilter.RESOURCE_TABLE, HistoryUserFilter.RESOURCE_ID_COLUMN);
 	}
 
 	@Override

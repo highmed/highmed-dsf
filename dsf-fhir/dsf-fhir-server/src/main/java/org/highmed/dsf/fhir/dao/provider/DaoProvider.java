@@ -22,6 +22,7 @@ import org.highmed.dsf.fhir.dao.PatientDao;
 import org.highmed.dsf.fhir.dao.PractitionerDao;
 import org.highmed.dsf.fhir.dao.PractitionerRoleDao;
 import org.highmed.dsf.fhir.dao.ProvenanceDao;
+import org.highmed.dsf.fhir.dao.ReadAccessDao;
 import org.highmed.dsf.fhir.dao.ResearchStudyDao;
 import org.highmed.dsf.fhir.dao.ResourceDao;
 import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
@@ -87,4 +88,6 @@ public interface DaoProvider
 	<R extends Resource> Optional<? extends ResourceDao<R>> getDao(Class<R> resourceClass);
 
 	Optional<ResourceDao<?>> getDao(String resourceTypeName);
+
+	ReadAccessDao getReadAccessDao();
 }

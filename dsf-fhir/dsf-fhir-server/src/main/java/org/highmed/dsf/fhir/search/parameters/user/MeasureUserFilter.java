@@ -4,15 +4,16 @@ import org.highmed.dsf.fhir.authentication.User;
 
 public class MeasureUserFilter extends AbstractMetaTagAuthorizationRoleUserFilter
 {
-	private static final String RESOURCE_COLUMN = "measure";
+	private static final String RESOURCE_TABLE = "current_measures";
+	private static final String RESOURCE_ID_COLUMN = "measure_id";
 
 	public MeasureUserFilter(User user)
 	{
-		super(user, RESOURCE_COLUMN);
+		super(user, RESOURCE_TABLE, RESOURCE_ID_COLUMN);
 	}
 
-	public MeasureUserFilter(User user, String resourceColumn)
+	public MeasureUserFilter(User user, String resourceTable, String resourceIdColumn)
 	{
-		super(user, resourceColumn);
+		super(user, resourceTable, resourceIdColumn);
 	}
 }

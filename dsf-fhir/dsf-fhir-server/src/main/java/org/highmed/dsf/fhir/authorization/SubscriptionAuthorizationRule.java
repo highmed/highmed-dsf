@@ -15,6 +15,7 @@ import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.dao.ResourceDao;
 import org.highmed.dsf.fhir.dao.SubscriptionDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
+import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.search.PartialResult;
 import org.highmed.dsf.fhir.search.SearchQuery;
 import org.highmed.dsf.fhir.search.SearchQueryParameterError;
@@ -34,9 +35,10 @@ public class SubscriptionAuthorizationRule extends AbstractMetaTagAuthorizationR
 
 	public SubscriptionAuthorizationRule(DaoProvider daoProvider, String serverBase,
 			ReferenceResolver referenceResolver, OrganizationProvider organizationProvider,
-			ReadAccessHelper readAccessHelper)
+			ReadAccessHelper readAccessHelper, ParameterConverter parameterConverter)
 	{
-		super(Subscription.class, daoProvider, serverBase, referenceResolver, organizationProvider, readAccessHelper);
+		super(Subscription.class, daoProvider, serverBase, referenceResolver, organizationProvider, readAccessHelper,
+				parameterConverter);
 	}
 
 	protected Optional<String> newResourceOk(Connection connection, User user, Subscription newResource)

@@ -11,15 +11,18 @@ import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.dao.PatientDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
+import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.Patient;
 
 public class PatientAuthorizationRule extends AbstractMetaTagAuthorizationRule<Patient, PatientDao>
 {
 	public PatientAuthorizationRule(DaoProvider daoProvider, String serverBase, ReferenceResolver referenceResolver,
-			OrganizationProvider organizationProvider, ReadAccessHelper readAccessHelper)
+			OrganizationProvider organizationProvider, ReadAccessHelper readAccessHelper,
+			ParameterConverter parameterConverter)
 	{
-		super(Patient.class, daoProvider, serverBase, referenceResolver, organizationProvider, readAccessHelper);
+		super(Patient.class, daoProvider, serverBase, referenceResolver, organizationProvider, readAccessHelper,
+				parameterConverter);
 	}
 
 	protected Optional<String> newResourceOk(Connection connection, User user, Patient newResource)

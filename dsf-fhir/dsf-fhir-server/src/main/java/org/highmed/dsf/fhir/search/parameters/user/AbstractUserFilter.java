@@ -6,11 +6,13 @@ import org.highmed.dsf.fhir.search.SearchQueryUserFilter;
 abstract class AbstractUserFilter implements SearchQueryUserFilter
 {
 	protected final User user;
-	protected final String resourceColumn;
+	protected final String resourceTable;
+	protected final String resourceIdColumn;
 
-	public AbstractUserFilter(User user, String resourceColumn)
+	public AbstractUserFilter(User user, String resourceTable, String resourceIdColumn)
 	{
 		this.user = user;
-		this.resourceColumn = resourceColumn;
+		this.resourceTable = resourceTable;
+		this.resourceIdColumn = resourceIdColumn;
 	}
 }

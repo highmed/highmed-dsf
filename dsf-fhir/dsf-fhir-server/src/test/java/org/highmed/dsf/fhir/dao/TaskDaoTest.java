@@ -17,7 +17,7 @@ public class TaskDaoTest extends AbstractResourceDaoTest<Task, TaskDao>
 	}
 
 	@Override
-	protected Task createResource()
+	public Task createResource()
 	{
 		Task task = new Task();
 		task.setStatus(status);

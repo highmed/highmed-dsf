@@ -4,15 +4,16 @@ import org.highmed.dsf.fhir.authentication.User;
 
 public class LocationUserFilter extends AbstractMetaTagAuthorizationRoleUserFilter
 {
-	private static final String RESOURCE_COLUMN = "location";
+	private static final String RESOURCE_TABLE = "current_locations";
+	private static final String RESOURCE_ID_COLUMN = "location_id";
 
 	public LocationUserFilter(User user)
 	{
-		super(user, RESOURCE_COLUMN);
+		super(user, RESOURCE_TABLE, RESOURCE_ID_COLUMN);
 	}
 
-	public LocationUserFilter(User user, String resourceColumn)
+	public LocationUserFilter(User user, String resourceTable, String resourceIdColumn)
 	{
-		super(user, resourceColumn);
+		super(user, resourceTable, resourceIdColumn);
 	}
 }

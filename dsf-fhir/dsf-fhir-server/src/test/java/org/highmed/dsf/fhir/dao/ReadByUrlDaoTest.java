@@ -17,13 +17,13 @@ public interface ReadByUrlDaoTest<D extends DomainResource>
 
 	ReadByUrlDao<D> readByUrlDao();
 
-	ResourceDao<D> dao();
+	ResourceDao<D> getDao();
 
 	@Test
 	default void testReadByUrlAndVersionWithUrl1() throws Exception
 	{
 		D newResource = createResourceWithUrlAndVersion();
-		dao().create(newResource);
+		getDao().create(newResource);
 
 		Optional<D> readByUrlAndVersion = readByUrlDao().readByUrlAndVersion(getUrl());
 		assertTrue(readByUrlAndVersion.isPresent());
@@ -33,7 +33,7 @@ public interface ReadByUrlDaoTest<D extends DomainResource>
 	default void testReadByUrlAndVersionWithUrlAndVersion1() throws Exception
 	{
 		D newResource = createResourceWithUrlAndVersion();
-		dao().create(newResource);
+		getDao().create(newResource);
 
 		Optional<D> readByUrlAndVersion = readByUrlDao().readByUrlAndVersion(getUrl() + "|" + getVersion());
 		assertTrue(readByUrlAndVersion.isPresent());
@@ -43,7 +43,7 @@ public interface ReadByUrlDaoTest<D extends DomainResource>
 	default void testReadByUrlAndVersionWithUrl2() throws Exception
 	{
 		D newResource = createResourceWithUrlAndVersion();
-		dao().create(newResource);
+		getDao().create(newResource);
 
 		Optional<D> readByUrlAndVersion = readByUrlDao().readByUrlAndVersion(getUrl(), null);
 		assertTrue(readByUrlAndVersion.isPresent());
@@ -53,7 +53,7 @@ public interface ReadByUrlDaoTest<D extends DomainResource>
 	default void testReadByUrlAndVersionWithUrlAndVersion2() throws Exception
 	{
 		D newResource = createResourceWithUrlAndVersion();
-		dao().create(newResource);
+		getDao().create(newResource);
 
 		Optional<D> readByUrlAndVersion = readByUrlDao().readByUrlAndVersion(getUrl(), getVersion());
 		assertTrue(readByUrlAndVersion.isPresent());

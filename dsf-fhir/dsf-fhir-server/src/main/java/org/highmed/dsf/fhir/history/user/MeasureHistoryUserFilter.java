@@ -12,7 +12,7 @@ public class MeasureHistoryUserFilter extends MeasureUserFilter implements Histo
 
 	public MeasureHistoryUserFilter(User user)
 	{
-		super(user, HistoryUserFilter.RESOURCE_COLUMN);
+		super(user, HistoryUserFilter.RESOURCE_TABLE, HistoryUserFilter.RESOURCE_ID_COLUMN);
 	}
 
 	@Override

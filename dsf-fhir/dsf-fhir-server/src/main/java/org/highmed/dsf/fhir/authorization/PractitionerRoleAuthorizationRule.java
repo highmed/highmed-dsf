@@ -11,6 +11,7 @@ import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.dao.PractitionerRoleDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
+import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.PractitionerRole;
 
@@ -19,10 +20,10 @@ public class PractitionerRoleAuthorizationRule
 {
 	public PractitionerRoleAuthorizationRule(DaoProvider daoProvider, String serverBase,
 			ReferenceResolver referenceResolver, OrganizationProvider organizationProvider,
-			ReadAccessHelper readAccessHelper)
+			ReadAccessHelper readAccessHelper, ParameterConverter parameterConverter)
 	{
 		super(PractitionerRole.class, daoProvider, serverBase, referenceResolver, organizationProvider,
-				readAccessHelper);
+				readAccessHelper, parameterConverter);
 	}
 
 	protected Optional<String> newResourceOk(Connection connection, User user, PractitionerRole newResource)
