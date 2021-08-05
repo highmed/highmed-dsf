@@ -58,7 +58,7 @@ public class CertificateGenerator
 			"medic3-client", "test-client", "Webbrowser Test User" };
 
 	private static final Map<String, List<String>> DNS_NAMES = Map.of("localhost",
-			Arrays.asList("localhost", "ttp-docker", "medic1-docker", "medic2-docker", "medic3-docker"));
+			Arrays.asList("localhost", "fhir", "ttp-docker", "medic1-docker", "medic2-docker", "medic3-docker"));
 
 	private static enum CertificateType
 	{
