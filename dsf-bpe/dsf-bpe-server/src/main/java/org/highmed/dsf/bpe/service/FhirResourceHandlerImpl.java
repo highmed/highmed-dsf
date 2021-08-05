@@ -22,7 +22,9 @@ import org.highmed.dsf.bpe.process.ProcessStateChangeOutcome;
 import org.highmed.dsf.bpe.process.ProcessesResource;
 import org.highmed.dsf.bpe.process.ResourceInfo;
 import org.highmed.dsf.fhir.resources.ResourceProvider;
+import org.highmed.fhir.client.BasicFhirWebserviceClient;
 import org.highmed.fhir.client.FhirWebserviceClient;
+import org.highmed.fhir.client.PreferReturnMinimal;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
@@ -66,10 +68,27 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 		Objects.requireNonNull(localWebserviceClient, "localWebserviceClient");
 		Objects.requireNonNull(dao, "dao");
 		Objects.requireNonNull(fhirContext, "fhirContext");
-		if (fhirServerRequestMaxRetries < 0)
-			throw new IllegalArgumentException("fhirServerRequestMaxRetries < 0");
+		if (fhirServerRequestMaxRetries < -1)
+			throw new IllegalArgumentException("fhirServerRequestMaxRetries < -1");
 		if (fhirServerRetryDelayMillis < 0)
 			throw new IllegalArgumentException("fhirServerRetryDelayMillis < 0");
+	}
+
+	private PreferReturnMinimal minimalReturnRetryClient()
+	{
+		if (fhirServerRequestMaxRetries == FhirWebserviceClient.RETRY_FOREVER)
+			return localWebserviceClient.withMinimalReturn().withRetryForever(fhirServerRetryDelayMillis);
+		else
+			return localWebserviceClient.withMinimalReturn().withRetry(fhirServerRequestMaxRetries,
+					fhirServerRetryDelayMillis);
+	}
+
+	private BasicFhirWebserviceClient retryClient()
+	{
+		if (fhirServerRequestMaxRetries == FhirWebserviceClient.RETRY_FOREVER)
+			return localWebserviceClient.withRetryForever(fhirServerRetryDelayMillis);
+		else
+			return localWebserviceClient.withRetry(fhirServerRequestMaxRetries, fhirServerRetryDelayMillis);
 	}
 
 	@Override
@@ -148,8 +167,7 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 				logger.debug("Executing process plugin resources bundle");
 				logger.trace("Bundle: {}", fhirContext.newJsonParser().encodeResourceToString(batchBundle));
 
-				Bundle returnBundle = localWebserviceClient.withMinimalReturn()
-						.withRetry(fhirServerRequestMaxRetries, fhirServerRetryDelayMillis).postBundle(batchBundle);
+				Bundle returnBundle = minimalReturnRetryClient().postBundle(batchBundle);
 
 				List<UUID> deletedResourcesIds = addIdsAndReturnDeleted(resourceValues, returnBundle);
 				List<ProcessKeyAndVersion> excludedProcesses = changes.stream()
@@ -215,7 +233,10 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 		batchBundle.setEntry(
 				resourceValues.stream().map(ProcessesResource::toSearchBundleEntryCount0).collect(Collectors.toList()));
 
-		Bundle returnBundle = localWebserviceClient.postBundle(batchBundle);
+		if (batchBundle.getEntry().isEmpty())
+			return;
+
+		Bundle returnBundle = retryClient().postBundle(batchBundle);
 
 		if (resourceValues.size() != returnBundle.getEntry().size())
 			throw new RuntimeException("Return bundle size unexpeced, expected " + resourceValues.size() + " got "
