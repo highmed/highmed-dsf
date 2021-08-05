@@ -65,6 +65,20 @@ class PreferReturnMinimalWithRetryImpl implements PreferReturnMinimalWithRetry
 	@Override
 	public PreferReturnMinimal withRetry(int nTimes, long delayMillis)
 	{
+		if (nTimes < 0)
+			throw new IllegalArgumentException("nTimes < 0");
+		if (delayMillis < 0)
+			throw new IllegalArgumentException("delayMillis < 0");
+
 		return new PreferReturnMinimalRetryImpl(delegate, nTimes, delayMillis);
+	}
+
+	@Override
+	public PreferReturnMinimal withRetryForever(long delayMillis)
+	{
+		if (delayMillis < 0)
+			throw new IllegalArgumentException("delayMillis < 0");
+
+		return new PreferReturnMinimalRetryImpl(delegate, RETRY_FOREVER, delayMillis);
 	}
 }

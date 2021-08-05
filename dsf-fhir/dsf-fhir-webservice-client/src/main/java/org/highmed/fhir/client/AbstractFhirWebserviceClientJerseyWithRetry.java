@@ -29,19 +29,14 @@ public abstract class AbstractFhirWebserviceClientJerseyWithRetry
 
 	protected final <R> R retry(int nTimes, long delayMillis, Supplier<R> supplier)
 	{
-		if (nTimes < 0)
-			throw new IllegalArgumentException("nTimes < 0");
-		if (delayMillis < 0)
-			throw new IllegalArgumentException("delayMillis < 0");
-
 		RuntimeException caughtException = null;
-		for (int tryNumber = 0; tryNumber <= nTimes; tryNumber++)
+		for (int tryNumber = 0; tryNumber <= nTimes || nTimes == RetryClient.RETRY_FOREVER; tryNumber++)
 		{
 			try
 			{
 				if (tryNumber == 0)
 					logger.debug("First try ...");
-				else
+				else if (nTimes != RetryClient.RETRY_FOREVER)
 					logger.debug("Retry {} of {}", tryNumber, nTimes);
 
 				return supplier.get();
@@ -50,9 +45,10 @@ public abstract class AbstractFhirWebserviceClientJerseyWithRetry
 			{
 				if (shouldRetry(e))
 				{
-					if ((tryNumber) < nTimes)
+					if (tryNumber < nTimes || nTimes == RetryClient.RETRY_FOREVER)
 					{
-						logger.warn("Caught {}: {}; trying again in {} ms", e.getClass(), e.getMessage(), delayMillis);
+						logger.warn("Caught {}: {}; trying again in {} ms{}", e.getClass(), e.getMessage(), delayMillis,
+								nTimes == RetryClient.RETRY_FOREVER ? " (retry " + (tryNumber + 1) + ")" : "");
 
 						try
 						{
