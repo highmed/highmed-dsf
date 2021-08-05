@@ -761,7 +761,21 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 	@Override
 	public BasicFhirWebserviceClient withRetry(int nTimes, long delayMillis)
 	{
+		if (nTimes < 0)
+			throw new IllegalArgumentException("nTimes < 0");
+		if (delayMillis < 0)
+			throw new IllegalArgumentException("delayMillis < 0");
+
 		return new BasicFhirWebserviceCientWithRetryImpl(this, nTimes, delayMillis);
+	}
+
+	@Override
+	public BasicFhirWebserviceClient withRetryForever(long delayMillis)
+	{
+		if (delayMillis < 0)
+			throw new IllegalArgumentException("delayMillis < 0");
+
+		return new BasicFhirWebserviceCientWithRetryImpl(this, RETRY_FOREVER, delayMillis);
 	}
 
 	@Override

@@ -70,6 +70,20 @@ class PreferReturnOutcomeWithRetryImpl implements PreferReturnOutcomeWithRetry
 	@Override
 	public PreferReturnOutcome withRetry(int nTimes, long delayMillis)
 	{
+		if (nTimes < 0)
+			throw new IllegalArgumentException("nTimes < 0");
+		if (delayMillis < 0)
+			throw new IllegalArgumentException("delayMillis < 0");
+
 		return new PreferReturnOutcomeRetryImpl(delegate, nTimes, delayMillis);
+	}
+
+	@Override
+	public PreferReturnOutcome withRetryForever(long delayMillis)
+	{
+		if (delayMillis < 0)
+			throw new IllegalArgumentException("delayMillis < 0");
+
+		return new PreferReturnOutcomeRetryImpl(delegate, RETRY_FOREVER, delayMillis);
 	}
 }

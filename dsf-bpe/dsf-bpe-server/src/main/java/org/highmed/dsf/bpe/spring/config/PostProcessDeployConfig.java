@@ -46,7 +46,7 @@ public class PostProcessDeployConfig
 	@Value("#{'${org.highmed.dsf.bpe.process.retired:}'.split(',')}")
 	private List<String> retired;
 
-	@Value("${org.highmed.dsf.bpe.process.fhirServerRequestMaxRetries:5}")
+	@Value("${org.highmed.dsf.bpe.process.fhirServerRequestMaxRetries:-1}")
 	private int fhirServerRequestMaxRetries;
 
 	@Value("${org.highmed.dsf.bpe.process.fhirServerRetryDelayMillis:5000}")
