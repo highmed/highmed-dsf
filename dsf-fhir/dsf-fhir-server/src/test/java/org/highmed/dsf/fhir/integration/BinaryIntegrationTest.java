@@ -2502,4 +2502,90 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 
 		expectForbidden(() -> getWebserviceClient().create(binary));
 	}
+
+	@Test
+	public void testReadAllowedForRemoteUserWithSecurityContextBasedAccessTagRole1() throws Exception
+	{
+		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
+		ResearchStudy rs1 = new ResearchStudy();
+		readAccessHelper.addRole(rs1, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-type",
+				"TTP");
+		rs1 = researchStudyDao.create(rs1);
+
+		Binary binary = new Binary();
+		binary.setContentType(MediaType.TEXT_PLAIN);
+		binary.setData("Hello World".getBytes(StandardCharsets.UTF_8));
+		binary.setSecurityContext(new Reference(rs1.getIdElement().toVersionless()));
+
+		BinaryDao binaryDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
+		binary = binaryDao.create(binary);
+		String binaryId = binary.getIdElement().getIdPart();
+
+		assertEquals(binaryId, getExternalWebserviceClient().read(Binary.class, binaryId).getIdElement().getIdPart());
+	}
+
+	@Test
+	public void testReadAllowedForRemoteUserWithSecurityContextBasedAccessTagRole2() throws Exception
+	{
+		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
+		ResearchStudy rs1 = new ResearchStudy();
+		readAccessHelper.addRole(rs1, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-type",
+				"DTS");
+		rs1 = researchStudyDao.create(rs1);
+
+		Binary binary = new Binary();
+		binary.setContentType(MediaType.TEXT_PLAIN);
+		binary.setData("Hello World".getBytes(StandardCharsets.UTF_8));
+		binary.setSecurityContext(new Reference(rs1.getIdElement().toVersionless()));
+
+		BinaryDao binaryDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
+		binary = binaryDao.create(binary);
+		String binaryId = binary.getIdElement().getIdPart();
+
+		assertEquals(binaryId, getExternalWebserviceClient().read(Binary.class, binaryId).getIdElement().getIdPart());
+	}
+
+	@Test
+	public void testReadAllowedForRemoteUserWithSecurityContextBasedAccessTagRole3() throws Exception
+	{
+		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
+		ResearchStudy rs1 = new ResearchStudy();
+		readAccessHelper.addRole(rs1, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-type",
+				"TTP");
+		readAccessHelper.addRole(rs1, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-type",
+				"DTS");
+		rs1 = researchStudyDao.create(rs1);
+
+		Binary binary = new Binary();
+		binary.setContentType(MediaType.TEXT_PLAIN);
+		binary.setData("Hello World".getBytes(StandardCharsets.UTF_8));
+		binary.setSecurityContext(new Reference(rs1.getIdElement().toVersionless()));
+
+		BinaryDao binaryDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
+		binary = binaryDao.create(binary);
+		String binaryId = binary.getIdElement().getIdPart();
+
+		assertEquals(binaryId, getExternalWebserviceClient().read(Binary.class, binaryId).getIdElement().getIdPart());
+	}
+
+	@Test
+	public void testReadNotAllowedForRemoteUserWithSecurityContextBasedAccessTagRole() throws Exception
+	{
+		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
+		ResearchStudy rs1 = new ResearchStudy();
+		readAccessHelper.addRole(rs1, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-type",
+				"HRP");
+		rs1 = researchStudyDao.create(rs1);
+
+		Binary binary = new Binary();
+		binary.setContentType(MediaType.TEXT_PLAIN);
+		binary.setData("Hello World".getBytes(StandardCharsets.UTF_8));
+		binary.setSecurityContext(new Reference(rs1.getIdElement().toVersionless()));
+
+		BinaryDao binaryDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
+		binary = binaryDao.create(binary);
+		String binaryId = binary.getIdElement().getIdPart();
+
+		expectForbidden(() -> getExternalWebserviceClient().read(Binary.class, binaryId));
+	}
 }

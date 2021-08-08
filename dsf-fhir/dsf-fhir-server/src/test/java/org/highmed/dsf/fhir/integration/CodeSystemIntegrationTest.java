@@ -119,6 +119,34 @@ public class CodeSystemIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
+	public void testReadAllowedForRemoteUserWithRoleTag2() throws Exception
+	{
+		CodeSystem cs = new CodeSystem();
+		readAccessHelper.addRole(cs, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-type",
+				"DTS");
+
+		CodeSystemDao codeSystemDao = getSpringWebApplicationContext().getBean(CodeSystemDao.class);
+		CodeSystem createdCs = codeSystemDao.create(cs);
+
+		getExternalWebserviceClient().read(CodeSystem.class, createdCs.getIdElement().getIdPart());
+	}
+
+	@Test
+	public void testReadAllowedForRemoteUserWithRoleTag3() throws Exception
+	{
+		CodeSystem cs = new CodeSystem();
+		readAccessHelper.addRole(cs, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-type",
+				"TTP");
+		readAccessHelper.addRole(cs, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-type",
+				"DTS");
+
+		CodeSystemDao codeSystemDao = getSpringWebApplicationContext().getBean(CodeSystemDao.class);
+		CodeSystem createdCs = codeSystemDao.create(cs);
+
+		getExternalWebserviceClient().read(CodeSystem.class, createdCs.getIdElement().getIdPart());
+	}
+
+	@Test
 	public void testReadNotAllowedForRemoteUserWithRoleTag() throws Exception
 	{
 		CodeSystem cs = new CodeSystem();

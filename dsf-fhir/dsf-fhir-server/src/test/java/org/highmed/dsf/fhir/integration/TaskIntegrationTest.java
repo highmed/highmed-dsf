@@ -776,6 +776,25 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
+	public void testCreateTaskAllowedRemoteUser3() throws Exception
+	{
+		ActivityDefinition ad3 = readActivityDefinition("highmed-test-activity-definition4-0.5.0.xml");
+		ActivityDefinition createdAd3 = getWebserviceClient().create(ad3);
+		assertNotNull(createdAd3);
+		assertNotNull(createdAd3.getIdElement().getIdPart());
+
+		StructureDefinition testTaskProfile = readTestTaskProfile();
+		StructureDefinition createdTestTaskProfile = getWebserviceClient().create(testTaskProfile);
+		assertNotNull(createdTestTaskProfile);
+		assertNotNull(createdTestTaskProfile.getIdElement().getIdPart());
+
+		Task task = readTestTask("External_Test_Organization", "Test_Organization");
+		Task createdTask = getExternalWebserviceClient().create(task);
+		assertNotNull(createdTask);
+		assertNotNull(createdTask.getIdElement().getIdPart());
+	}
+
+	@Test
 	public void testCreateViaBundleNotValid() throws Exception
 	{
 		StructureDefinition testTaskProfile = readTestTaskProfile();

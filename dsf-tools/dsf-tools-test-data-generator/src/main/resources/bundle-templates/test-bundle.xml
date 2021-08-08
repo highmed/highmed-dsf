@@ -126,6 +126,10 @@
 						<system value="http://highmed.org/fhir/CodeSystem/organization-type"/>
 						<code value="MeDIC"/>
 					</coding>
+					<coding>
+						<system value="http://highmed.org/fhir/CodeSystem/organization-type"/>
+						<code value="COS"/>
+					</coding>
 				</code>
 				<endpoint>
 					<reference value="urn:uuid:b879e904-d666-45de-a995-accdd4429b79"/>
