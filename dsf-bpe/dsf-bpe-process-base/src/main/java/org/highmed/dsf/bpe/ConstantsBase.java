@@ -57,5 +57,5 @@ public interface ConstantsBase
 	String OPENEHR_MIMETYPE_JSON = "application/json";
 
 	String NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER_HIGHMED_CONSORTIUM = "highmed.org";
-	String NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER_NUM_CODEX_CONSORTIUM = "netzwerk-universitätsmedizin.de";
+	String NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER_NUM_CODEX_CONSORTIUM = "netzwerk-universitaetsmedizin.de";
 }
