@@ -1,7 +1,6 @@
 package org.highmed.dsf.fhir.integration;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -66,15 +65,21 @@ public class ReferenceResolverIntegrationTest extends AbstractIntegrationTest
 	@Test
 	public void testKnownLogicalReferenceBasedOnProfile() throws Exception
 	{
-		// TODO
-		fail();
+		prepareServerWithActivityDefinitionAndTaskProfile();
+
+		Task task = getTaskWithLogicalReferenceInputBasedOnOrganizationProfile("Test_Organization");
+
+		getExternalWebserviceClient().create(task);
 	}
 
 	@Test
 	public void testUnknownLogicalReferenceBasedOnProfile() throws Exception
 	{
-		// TODO
-		fail();
+		prepareServerWithActivityDefinitionAndTaskProfile();
+
+		Task task = getTaskWithLogicalReferenceInputBasedOnOrganizationProfile("Test_Organization_Unknown");
+
+		expectForbidden(() -> getExternalWebserviceClient().create(task));
 	}
 
 	private void prepareServerWithActivityDefinitionAndTaskProfile() throws IOException
@@ -134,6 +139,19 @@ public class ReferenceResolverIntegrationTest extends AbstractIntegrationTest
 		Task task = readTestTask();
 		task.addInput().setValue(new Reference("http://foo.bar/fhir/Patient/" + UUID.randomUUID().toString())).getType()
 				.addCoding().setSystem("http://foo.bar/fhir/CodeSystem/test").setCode("patient");
+
+		return task;
+	}
+
+	private Task getTaskWithLogicalReferenceInputBasedOnOrganizationProfile(String organizationIdentifierValue)
+			throws IOException
+	{
+		Task task = readTestTask();
+		task.addInput()
+				.setValue(new Reference().setType(ResourceType.Organization.name())
+						.setIdentifier(new Identifier().setSystem("http://highmed.org/sid/organization-identifier")
+								.setValue(organizationIdentifierValue)))
+				.getType().addCoding().setSystem("http://highmed.org/fhir/CodeSystem/organization-type").setCode("COS");
 
 		return task;
 	}
