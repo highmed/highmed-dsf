@@ -397,21 +397,18 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 
 		if (client.isEmpty())
 		{
-			logger.error(
-					"Error while resolving literal external reference {}, no remote client found for server base {}",
+			logger.warn("Cannot check literal external reference {}, no remote client found for server base {}",
 					referenceValue, remoteServerBase);
-			return Optional
-					.of(responseGenerator.noEndpointFoundForLiteralExternalReference(bundleIndex, resource, reference));
 		}
 		else
 		{
 			IdType referenceId = new IdType(referenceValue);
-			logger.debug("Trying to resolve literal external reference {}, at remote server {}", referenceValue,
-					remoteServerBase);
+			logger.debug("Trying to resolve literal external reference {}, at known remote server with server base {}",
+					referenceValue, remoteServerBase);
 			if (!client.get().exists(referenceId))
 			{
 				logger.error(
-						"Error while resolving literal external reference {}, resource could not be found on remote server {}",
+						"Error while resolving literal external reference {}, resource could not be found on known remote server {}",
 						referenceValue, remoteServerBase);
 				return Optional.of(responseGenerator.referenceTargetNotFoundRemote(bundleIndex, resource, reference,
 						remoteServerBase));
