@@ -105,7 +105,7 @@ public class BundleGenerator
 
 	public void copyDockerTestBundle()
 	{
-		Path dockerTestBundleFile = Paths.get("../../dsf-docker-test-setup/fhir/app/conf/bundle.xml");
+		Path dockerTestBundleFile = Paths.get("../../dsf-docker-test-setup/fhir/conf/bundle.xml");
 		logger.info("Copying fhir bundle to {}", dockerTestBundleFile);
 		writeBundle(dockerTestBundleFile, testBundle);
 	}
@@ -236,19 +236,19 @@ public class BundleGenerator
 
 	public void copyDockerTest3MedicTtpBundles()
 	{
-		Path medic1BundleFile = Paths.get("../../dsf-docker-test-setup-3medic-ttp/medic1/fhir/app/conf/bundle.xml");
+		Path medic1BundleFile = Paths.get("../../dsf-docker-test-setup-3medic-ttp/medic1/fhir/conf/bundle.xml");
 		logger.info("Copying fhir bundle to {}", medic1BundleFile);
 		writeBundle(medic1BundleFile, medic1Bundle);
 
-		Path medic2BundleFile = Paths.get("../../dsf-docker-test-setup-3medic-ttp/medic2/fhir/app/conf/bundle.xml");
+		Path medic2BundleFile = Paths.get("../../dsf-docker-test-setup-3medic-ttp/medic2/fhir/conf/bundle.xml");
 		logger.info("Copying fhir bundle to {}", medic2BundleFile);
 		writeBundle(medic2BundleFile, medic2Bundle);
 
-		Path medic3BundleFile = Paths.get("../../dsf-docker-test-setup-3medic-ttp/medic3/fhir/app/conf/bundle.xml");
+		Path medic3BundleFile = Paths.get("../../dsf-docker-test-setup-3medic-ttp/medic3/fhir/conf/bundle.xml");
 		logger.info("Copying fhir bundle to {}", medic3BundleFile);
 		writeBundle(medic3BundleFile, medic3Bundle);
 
-		Path ttpBundleFile = Paths.get("../../dsf-docker-test-setup-3medic-ttp/ttp/fhir/app/conf/bundle.xml");
+		Path ttpBundleFile = Paths.get("../../dsf-docker-test-setup-3medic-ttp/ttp/fhir/conf/bundle.xml");
 		logger.info("Copying fhir bundle to {}", ttpBundleFile);
 		writeBundle(ttpBundleFile, ttpBundle);
 	}

@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.InvalidKeyException;
+import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -18,8 +19,8 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateCrtKey;
-import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.RSAPublicKeySpec;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -31,7 +32,9 @@ import java.util.stream.Stream;
 
 import org.apache.commons.codec.binary.Hex;
 import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.pkcs.PKCSException;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +45,6 @@ import de.rwh.utils.crypto.CertificateAuthority;
 import de.rwh.utils.crypto.CertificateAuthority.CertificateAuthorityBuilder;
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.CertificationRequestBuilder;
-import de.rwh.utils.crypto.io.CertificateReader;
 import de.rwh.utils.crypto.io.CertificateWriter;
 import de.rwh.utils.crypto.io.CsrIo;
 import de.rwh.utils.crypto.io.PemIo;
@@ -60,6 +62,8 @@ public class CertificateGenerator
 	private static final Map<String, List<String>> DNS_NAMES = Map.of("localhost",
 			Arrays.asList("localhost", "fhir", "ttp-docker", "medic1-docker", "medic2-docker", "medic3-docker"));
 
+	private static final BouncyCastleProvider PROVIDER = new BouncyCastleProvider();
+
 	private static enum CertificateType
 	{
 		CLIENT, SERVER
@@ -68,37 +72,18 @@ public class CertificateGenerator
 	public static final class CertificateFiles
 	{
 		private final String commonName;
-		private final CertificateType certificateType;
 
-		private final JcaPKCS10CertificationRequest certificateRequest;
-		private final Path certificateRequestFile;
-
-		private final KeyStore p12KeyStore;
-		private final Path p12KeyStoreFile;
 		private final KeyPair keyPair;
-		private final Path keyPairPrivateKeyFile;
-		private final Path keyPairPublicKeyFile;
 		private final X509Certificate certificate;
-		private final Path certificateFile;
 
 		private final byte[] certificateSha512Thumbprint;
 
-		CertificateFiles(String commonName, CertificateType certificateType,
-				JcaPKCS10CertificationRequest certificateRequest, Path certificateRequestFile, KeyStore p12KeyStore,
-				Path p12KeyStoreFile, KeyPair keyPair, Path keyPairPrivateKeyFile, Path keyPairPublicKeyFile,
-				X509Certificate certificate, Path certificateFile, byte[] certificateSha512Thumbprint)
+		CertificateFiles(String commonName, KeyPair keyPair, Path keyPairPrivateKeyFile, X509Certificate certificate,
+				byte[] certificateSha512Thumbprint)
 		{
 			this.commonName = commonName;
-			this.certificateType = certificateType;
-			this.certificateRequest = certificateRequest;
-			this.certificateRequestFile = certificateRequestFile;
-			this.p12KeyStore = p12KeyStore;
-			this.p12KeyStoreFile = p12KeyStoreFile;
 			this.keyPair = keyPair;
-			this.keyPairPrivateKeyFile = keyPairPrivateKeyFile;
-			this.keyPairPublicKeyFile = keyPairPublicKeyFile;
 			this.certificate = certificate;
-			this.certificateFile = certificateFile;
 			this.certificateSha512Thumbprint = certificateSha512Thumbprint;
 		}
 
@@ -107,81 +92,14 @@ public class CertificateGenerator
 			return commonName;
 		}
 
-		public CertificateType getCertificateType()
-		{
-			return certificateType;
-		}
-
-		public JcaPKCS10CertificationRequest getCertificateRequest()
-		{
-			return certificateRequest;
-		}
-
-		public Path getCertificateRequestFile()
-		{
-			return certificateRequestFile;
-		}
-
-		public KeyStore getP12KeyStore()
-		{
-			return p12KeyStore;
-		}
-
-		public Path getP12KeyStoreFile()
-		{
-			return p12KeyStoreFile;
-		}
-
-		public KeyPair getKeyPair()
-		{
-			return keyPair;
-		}
-
-		public Path getKeyPairPrivateKeyFile()
-		{
-			return keyPairPrivateKeyFile;
-		}
-
-		public Path getKeyPairPublicKeyFile()
-		{
-			return keyPairPublicKeyFile;
-		}
-
 		public X509Certificate getCertificate()
 		{
 			return certificate;
 		}
 
-		public Path getCertificateFile()
-		{
-			return certificateFile;
-		}
-
-		public byte[] getCertificateSha512Thumbprint()
-		{
-			return certificateSha512Thumbprint;
-		}
-
 		public String getCertificateSha512ThumbprintHex()
 		{
 			return Hex.encodeHexString(certificateSha512Thumbprint);
-		}
-	}
-
-	private static final class CertificateAndP12File
-	{
-		final KeyStore p12KeyStore;
-		final Path p12KeyStoreFile;
-		final X509Certificate certificate;
-		final Path certificateFile;
-
-		CertificateAndP12File(KeyStore p12KeyStore, Path p12KeyStoreFile, X509Certificate certificate,
-				Path certificateFile)
-		{
-			this.p12KeyStore = p12KeyStore;
-			this.p12KeyStoreFile = p12KeyStoreFile;
-			this.certificate = certificate;
-			this.certificateFile = certificateFile;
 		}
 	}
 
@@ -229,7 +147,7 @@ public class CertificateGenerator
 					caPrivateKeyFile.toString());
 
 			X509Certificate caCertificate = readCertificate(caCertFile);
-			RSAPrivateCrtKey caPrivateKey = readPrivatekey(caPrivateKeyFile);
+			PrivateKey caPrivateKey = readPrivatekey(caPrivateKeyFile);
 
 			return CertificateAuthorityBuilder.create(caCertificate, caPrivateKey).initialize();
 		}
@@ -242,21 +160,34 @@ public class CertificateGenerator
 					.initialize();
 
 			writeCertificate(caCertFile, ca.getCertificate());
-			writePrivateKey(caPrivateKeyFile, (RSAPrivateCrtKey) ca.getCaKeyPair().getPrivate());
+			writePrivateKeyEncrypted(caPrivateKeyFile, ca.getCaKeyPair().getPrivate());
 
 			return ca;
 		}
 	}
 
-	private void writePrivateKey(Path privateKeyFile, RSAPrivateCrtKey privateKey)
+	private void writePrivateKeyEncrypted(Path privateKeyFile, PrivateKey privateKey)
 	{
 		try
 		{
-			PemIo.writePrivateKeyToPem(privateKey, privateKeyFile);
+			PemIo.writeAes128EncryptedPrivateKeyToPkcs8(PROVIDER, privateKeyFile, privateKey, CERT_PASSWORD);
 		}
-		catch (IOException e)
+		catch (IOException | OperatorCreationException e)
 		{
-			logger.error("Error while writing private-key to " + privateKeyFile.toString(), e);
+			logger.error("Error while writing encrypted private-key to " + privateKeyFile.toString(), e);
+			throw new RuntimeException(e);
+		}
+	}
+
+	private void writePrivateKeyNotEncrypted(Path privateKeyFile, PrivateKey privateKey)
+	{
+		try
+		{
+			PemIo.writeNotEncryptedPrivateKeyToPkcs8(PROVIDER, privateKeyFile, privateKey);
+		}
+		catch (IOException | OperatorCreationException e)
+		{
+			logger.error("Error while writing not-encrypted private-key to " + privateKeyFile.toString(), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -274,13 +205,13 @@ public class CertificateGenerator
 		}
 	}
 
-	private RSAPrivateCrtKey readPrivatekey(Path privateKeyFile)
+	private PrivateKey readPrivatekey(Path privateKeyFile)
 	{
 		try
 		{
-			return PemIo.readPrivateKeyFromPem(privateKeyFile);
+			return PemIo.readPrivateKeyFromPem(PROVIDER, privateKeyFile, CERT_PASSWORD);
 		}
-		catch (NoSuchAlgorithmException | InvalidKeySpecException | IOException e)
+		catch (IOException | PKCSException e)
 		{
 			logger.error("Error while reading private-key from " + privateKeyFile.toString(), e);
 			throw new RuntimeException(e);
@@ -308,7 +239,7 @@ public class CertificateGenerator
 				.concat(serverCertificateFilesByCommonName.values().stream(),
 						clientCertificateFilesByCommonName.values().stream())
 				.sorted(Comparator.comparing(CertificateFiles::getCommonName))
-				.map(c -> c.getCommonName() + "\n\t" + c.getCertificateSha512ThumbprintHex() + " (SHA-512)\n");
+				.map(c -> c.commonName + "\n\t" + c.getCertificateSha512ThumbprintHex() + " (SHA-512)\n");
 
 		try
 		{
@@ -325,45 +256,28 @@ public class CertificateGenerator
 	public CertificateFiles createCert(CertificateType certificateType, String commonName, List<String> dnsNames)
 	{
 		Path privateKeyFile = createFolderIfNotExists(getPrivateKeyPath(commonName));
-		Path publicKeyFile = createFolderIfNotExists(getPublicKeyPath(commonName));
-		KeyPair keyPair = createOrReadKeyPair(privateKeyFile, publicKeyFile, commonName);
+		KeyPair keyPair = createOrReadKeyPair(privateKeyFile, commonName);
 
 		Path certificateRequestFile = createFolderIfNotExists(getCertReqPath(commonName));
 		JcaPKCS10CertificationRequest certificateRequest = createOrReadCertificateRequest(certificateRequestFile,
 				certificateType, keyPair, commonName, dnsNames);
 
-		Path certificateP12File = createFolderIfNotExists(getCertP12Path(commonName));
 		Path certificatePemFile = createFolderIfNotExists(getCertPemPath(commonName));
-		CertificateAndP12File certificateAndP12File = signOrReadCertificate(certificatePemFile, certificateP12File,
-				certificateRequest, keyPair.getPrivate(), commonName, certificateType);
+		X509Certificate certificate = signOrReadCertificate(certificatePemFile, certificateRequest,
+				keyPair.getPrivate(), commonName, certificateType);
 
-		return new CertificateFiles(commonName, certificateType, certificateRequest, certificateRequestFile,
-				certificateAndP12File.p12KeyStore, certificateAndP12File.p12KeyStoreFile, keyPair, privateKeyFile,
-				publicKeyFile, certificateAndP12File.certificate, certificateAndP12File.certificateFile,
-				calculateSha512CertificateThumbprint(certificateAndP12File.certificate));
+		return new CertificateFiles(commonName, keyPair, privateKeyFile, certificate,
+				calculateSha512CertificateThumbprint(certificate));
 	}
 
-	private CertificateAndP12File signOrReadCertificate(Path certificateFile, Path p12KeyStoreFile,
+	private X509Certificate signOrReadCertificate(Path certificateFile,
 			JcaPKCS10CertificationRequest certificateRequest, PrivateKey privateKey, String commonName,
 			CertificateType certificateType)
 	{
 		if (Files.isReadable(certificateFile))
 		{
 			logger.info("Reading certificate (pem) from {} [{}]", certificateFile.toString(), commonName);
-			X509Certificate certificate = readCertificate(certificateFile);
-
-			KeyStore p12KeyStore;
-			if (!Files.isReadable(p12KeyStoreFile))
-			{
-				logger.info("Saving certificate (p21) to {}, password '{}' [{}]", p12KeyStoreFile.toString(),
-						String.valueOf(CERT_PASSWORD), commonName);
-				p12KeyStore = createP12KeyStore(privateKey, commonName, certificate);
-				writeP12File(p12KeyStoreFile, p12KeyStore);
-			}
-			else
-				p12KeyStore = readP12File(p12KeyStoreFile);
-
-			return new CertificateAndP12File(p12KeyStore, p12KeyStoreFile, certificate, certificateFile);
+			return readCertificate(certificateFile);
 		}
 		else
 		{
@@ -373,27 +287,7 @@ public class CertificateGenerator
 			logger.info("Saving certificate (pem) to {} [{}]", certificateFile.toString(), commonName);
 			writeCertificate(certificateFile, certificate);
 
-			logger.info("Saving certificate (p21) to {}, password '{}' [{}]", p12KeyStoreFile.toString(),
-					String.valueOf(CERT_PASSWORD), commonName);
-			KeyStore p12KeyStore = createP12KeyStore(privateKey, commonName, certificate);
-			writeP12File(p12KeyStoreFile, p12KeyStore);
-
-			return new CertificateAndP12File(p12KeyStore, p12KeyStoreFile, certificate, certificateFile);
-		}
-	}
-
-	private KeyStore createP12KeyStore(PrivateKey privateKey, String commonName, X509Certificate certificate)
-	{
-		try
-		{
-			return CertificateHelper.toPkcs12KeyStore(privateKey,
-					new Certificate[] { certificate, ca.getCertificate() }, commonName, CERT_PASSWORD);
-		}
-		catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IllegalStateException
-				| IOException e)
-		{
-			logger.error("Error while creating P12 key-store", e);
-			throw new RuntimeException(e);
+			return certificate;
 		}
 	}
 
@@ -416,32 +310,6 @@ public class CertificateGenerator
 				| CertificateException | IllegalStateException | IOException e)
 		{
 			logger.error("Error while signing " + certificateType.toString().toLowerCase() + " certificate", e);
-			throw new RuntimeException(e);
-		}
-	}
-
-	private void writeP12File(Path p12File, KeyStore p12KeyStore)
-	{
-		try
-		{
-			CertificateWriter.toPkcs12(p12File, p12KeyStore, CERT_PASSWORD);
-		}
-		catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e)
-		{
-			logger.error("Error while writing certificate P12 file to " + p12File.toString(), e);
-			throw new RuntimeException(e);
-		}
-	}
-
-	private KeyStore readP12File(Path p12File)
-	{
-		try
-		{
-			return CertificateReader.fromPkcs12(p12File, CERT_PASSWORD);
-		}
-		catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e)
-		{
-			logger.error("Error while reading certificate P12 file from " + p12File.toString(), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -520,15 +388,13 @@ public class CertificateGenerator
 		}
 	}
 
-	private KeyPair createOrReadKeyPair(Path privateKeyFile, Path publicKeyFile, String commonName)
+	private KeyPair createOrReadKeyPair(Path privateKeyFile, String commonName)
 	{
-		if (Files.isReadable(privateKeyFile) && Files.isReadable(publicKeyFile))
+		if (Files.isReadable(privateKeyFile))
 		{
 			logger.info("Reading private-key from {} [{}]", privateKeyFile.toString(), commonName);
 			PrivateKey privateKey = readPrivatekey(privateKeyFile);
-
-			logger.info("Reading public-key from {} [{}]", publicKeyFile.toString(), commonName);
-			PublicKey publicKey = readPublicKey(publicKeyFile);
+			PublicKey publicKey = createPublicKey(privateKey, privateKeyFile, commonName);
 
 			return new KeyPair(publicKey, privateKey);
 		}
@@ -538,26 +404,36 @@ public class CertificateGenerator
 			KeyPair keyPair = createKeyPair();
 
 			logger.info("Saving private-key to {} [{}]", privateKeyFile.toString(), commonName);
-			writePrivateKey(privateKeyFile, (RSAPrivateCrtKey) keyPair.getPrivate());
-
-			logger.info("Saving public-key to {} [{}]", publicKeyFile.toString(), commonName);
-			writePublicKey(publicKeyFile, keyPair);
+			writePrivateKeyEncrypted(privateKeyFile, keyPair.getPrivate());
 
 			return keyPair;
 		}
 	}
 
-	private void writePublicKey(Path publicKeyFile, KeyPair keyPair)
+	private PublicKey createPublicKey(PrivateKey privateKey, Path privateKeyFile, String commonName)
 	{
-		try
+		logger.debug("Generating public-key from private-key [{}]", commonName);
+
+		if ("RSA".equals(privateKey.getAlgorithm()) && privateKey instanceof RSAPrivateCrtKey)
 		{
-			PemIo.writePublicKeyToPem((RSAPublicKey) keyPair.getPublic(), publicKeyFile);
+			RSAPrivateCrtKey rsaPrivateKey = (RSAPrivateCrtKey) privateKey;
+			RSAPublicKeySpec publicKeySpec = new RSAPublicKeySpec(rsaPrivateKey.getModulus(),
+					rsaPrivateKey.getPublicExponent());
+
+			try
+			{
+				KeyFactory factory = KeyFactory.getInstance("RSA");
+				return factory.generatePublic(publicKeySpec);
+			}
+			catch (NoSuchAlgorithmException | InvalidKeySpecException e)
+			{
+				throw new RuntimeException(
+						"Error while generating public key from private key modules and public exponent", e);
+			}
 		}
-		catch (IOException e)
-		{
-			logger.error("Error while writing public-key to " + publicKeyFile.toString(), e);
-			throw new RuntimeException(e);
-		}
+		else
+			throw new RuntimeException("Error while generating public key: private key for " + commonName + " at "
+					+ privateKeyFile + " not a RSA private crt key");
 	}
 
 	private KeyPair createKeyPair()
@@ -569,19 +445,6 @@ public class CertificateGenerator
 		catch (NoSuchAlgorithmException e)
 		{
 			logger.error("Error while creating RSA key pair", e);
-			throw new RuntimeException(e);
-		}
-	}
-
-	private RSAPublicKey readPublicKey(Path publicKeyFile)
-	{
-		try
-		{
-			return PemIo.readPublicKeyFromPem(publicKeyFile);
-		}
-		catch (NoSuchAlgorithmException | InvalidKeySpecException | IOException e)
-		{
-			logger.error("Error while reading public-key from " + publicKeyFile.toString(), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -625,12 +488,6 @@ public class CertificateGenerator
 		return Paths.get("cert", commonName, commonName + "_" + "private-key.pem");
 	}
 
-	private Path getPublicKeyPath(String commonName)
-	{
-		commonName = commonName.replaceAll("\\s+", "_");
-		return Paths.get("cert", commonName, commonName + "_" + "public-key.pem");
-	}
-
 	private byte[] calculateSha512CertificateThumbprint(X509Certificate certificate)
 	{
 		try
@@ -657,30 +514,46 @@ public class CertificateGenerator
 		writeCertificate(fhirCacertFile, testCaCertificate);
 
 		CertificateFiles localhost = serverCertificateFilesByCommonName.get("localhost");
+		KeyStore p12KeyStore = createP12KeyStore(localhost.keyPair.getPrivate(), localhost.commonName,
+				localhost.certificate);
 
 		Path bpeP12File = Paths.get("../../dsf-bpe/dsf-bpe-server-jetty/target/localhost_certificate.p12");
-		logger.info("Copying localhost certificate p12 file to {}", bpeP12File);
-		writeP12File(bpeP12File, localhost.getP12KeyStore());
+		logger.info("Saving localhost certificate p12 file to {}, password '{}' [{}]", bpeP12File.toString(),
+				String.valueOf(CERT_PASSWORD), localhost.commonName);
+		writeP12File(bpeP12File, p12KeyStore);
 
 		Path fhirP12File = Paths.get("../../dsf-fhir/dsf-fhir-server-jetty/target/localhost_certificate.p12");
-		logger.info("Copying localhost certificate p12 file to {}", fhirP12File);
-		writeP12File(fhirP12File, localhost.getP12KeyStore());
+		logger.info("Saving localhost certificate p12 file to {}, password '{}' [{}]", fhirP12File.toString(),
+				String.valueOf(CERT_PASSWORD), localhost.commonName);
+		writeP12File(fhirP12File, p12KeyStore);
 
 		CertificateFiles testClient = clientCertificateFilesByCommonName.get("test-client");
 
-		Path bpeClientP12File = Paths.get("../../dsf-bpe/dsf-bpe-server-jetty/target/test-client_certificate.p12");
-		logger.info("Copying test-client certificate p12 file to {}", bpeClientP12File);
-		writeP12File(bpeClientP12File, testClient.getP12KeyStore());
+		Path bpeClientCertificateFile = Paths
+				.get("../../dsf-bpe/dsf-bpe-server-jetty/target/test-client_certificate.pem");
+		logger.info("Copying test-client certificate file to {}", bpeClientCertificateFile);
+		writeCertificate(bpeClientCertificateFile, testClient.certificate);
 
-		Path fhirClientP12File = Paths.get("../../dsf-fhir/dsf-fhir-server-jetty/target/test-client_certificate.p12");
-		logger.info("Copying test-client certificate p12 file to {}", fhirClientP12File);
-		writeP12File(fhirClientP12File, testClient.getP12KeyStore());
+		Path bpeClientPrivateKeyFile = Paths
+				.get("../../dsf-bpe/dsf-bpe-server-jetty/target/test-client_private-key.pem");
+		logger.info("Copying test-client certificate file to {}", bpeClientPrivateKeyFile);
+		writePrivateKeyEncrypted(bpeClientPrivateKeyFile, testClient.keyPair.getPrivate());
+
+		Path fhirClientCertificateFile = Paths
+				.get("../../dsf-fhir/dsf-fhir-server-jetty/target/test-client_certificate.pem");
+		logger.info("Copying test-client certificate file to {}", fhirClientCertificateFile);
+		writeCertificate(fhirClientCertificateFile, testClient.certificate);
+
+		Path fhirClientPrivateKeyFile = Paths
+				.get("../../dsf-fhir/dsf-fhir-server-jetty/target/test-client_private-key.pem");
+		logger.info("Copying test-client certificate file to {}", fhirClientPrivateKeyFile);
+		writePrivateKeyEncrypted(fhirClientPrivateKeyFile, testClient.keyPair.getPrivate());
 	}
 
 	public void copyDockerTestCertificates()
 	{
 		copyProxyFiles("dsf-docker-test-setup", "localhost");
-		copyClientCertFiles("../../dsf-docker-test-setup/bpe/app/conf/", "../../dsf-docker-test-setup/fhir/app/conf/",
+		copyClientCertFiles("../../dsf-docker-test-setup/bpe/secrets/", "../../dsf-docker-test-setup/fhir/secrets/",
 				"test-client");
 	}
 
@@ -688,8 +561,8 @@ public class CertificateGenerator
 	{
 		List<String> commonNames = Arrays.asList("medic1", "medic2", "medic3", "ttp");
 		commonNames.forEach(cn -> copyProxyFiles("dsf-docker-test-setup-3medic-ttp/" + cn, cn));
-		commonNames.forEach(cn -> copyClientCertFiles("../../dsf-docker-test-setup-3medic-ttp/" + cn + "/bpe/app/conf/",
-				"../../dsf-docker-test-setup-3medic-ttp/" + cn + "/fhir/app/conf/", cn + "-client"));
+		commonNames.forEach(cn -> copyClientCertFiles("../../dsf-docker-test-setup-3medic-ttp/" + cn + "/bpe/secrets/",
+				"../../dsf-docker-test-setup-3medic-ttp/" + cn + "/fhir/secrets/", cn + "-client"));
 	}
 
 	private void copyProxyFiles(String dockerTestFolder, String commonName)
@@ -699,68 +572,102 @@ public class CertificateGenerator
 
 		Path baseFolder = Paths.get("../../", dockerTestFolder);
 
-		Path bpeCertificateFile = baseFolder.resolve("bpe/proxy/ssl/certificate.pem");
+		Path bpeCertificateFile = baseFolder.resolve("bpe/secrets/proxy_certificate_and_int_cas.pem");
 		logger.info("Copying {} certificate pem file to {}", commonName, bpeCertificateFile);
 		writeCertificate(bpeCertificateFile, serverCertFiles.getCertificate());
 
-		Path fhirCertificateFile = baseFolder.resolve("fhir/proxy/ssl/certificate.pem");
-		logger.info("Copying {} certificate pem file to {}", commonName, fhirCertificateFile);
-		writeCertificate(fhirCertificateFile, serverCertFiles.getCertificate());
-
-		Path bpePrivateKeyFile = baseFolder.resolve("bpe/proxy/ssl/private-key.pem");
+		Path bpePrivateKeyFile = baseFolder.resolve("bpe/secrets/proxy_certificate_private_key.pem");
 		logger.info("Copying {} private-key file to {}", commonName, bpePrivateKeyFile);
-		writePrivateKey(bpePrivateKeyFile, (RSAPrivateCrtKey) serverCertFiles.getKeyPair().getPrivate());
+		writePrivateKeyNotEncrypted(bpePrivateKeyFile, serverCertFiles.keyPair.getPrivate());
 
-		Path fhirPrivateKeyFile = baseFolder.resolve("fhir/proxy/ssl/private-key.pem");
-		logger.info("Copying {} private-key file to {}", commonName, fhirPrivateKeyFile);
-		writePrivateKey(fhirPrivateKeyFile, (RSAPrivateCrtKey) serverCertFiles.getKeyPair().getPrivate());
-
-		Path bpeCaCertFile = baseFolder.resolve("bpe/proxy/ssl/ca_certificate.pem");
+		Path bpeCaCertFile = baseFolder.resolve("bpe/secrets/proxy_trusted_client_cas.pem");
 		logger.info("Copying Test CA certificate file to {}", bpeCaCertFile.toString());
 		writeCertificate(bpeCaCertFile, testCaCertificate);
 
-		Path fhirCacertFile = baseFolder.resolve("fhir/proxy/ssl/ca_certificate.pem");
+		Path fhirCertificateFile = baseFolder.resolve("fhir/secrets/proxy_certificate_and_int_cas.pem");
+		logger.info("Copying {} certificate pem file to {}", commonName, fhirCertificateFile);
+		writeCertificate(fhirCertificateFile, serverCertFiles.getCertificate());
+
+		Path fhirPrivateKeyFile = baseFolder.resolve("fhir/secrets/proxy_certificate_private_key.pem");
+		logger.info("Copying {} private-key file to {}", commonName, fhirPrivateKeyFile);
+		writePrivateKeyNotEncrypted(fhirPrivateKeyFile, serverCertFiles.keyPair.getPrivate());
+
+		Path fhirCacertFile = baseFolder.resolve("fhir/secrets/proxy_trusted_client_cas.pem");
 		logger.info("Copying Test CA certificate file to {}", fhirCacertFile.toString());
 		writeCertificate(fhirCacertFile, testCaCertificate);
 	}
 
 	private void copyClientCertFiles(String bpeConfFolder, String fhirConfFolder, String commonName)
 	{
-		CertificateFiles clientCertFiles = clientCertificateFilesByCommonName.get(commonName);
+		final CertificateFiles clientCertFiles = clientCertificateFilesByCommonName.get(commonName);
+		final X509Certificate testCaCertificate = ca.getCertificate();
 
-		Path bpeClientP12File = Paths.get(bpeConfFolder, commonName + "_certificate.p12");
-		logger.info("Copying {} certificate p12 file to {}", commonName, bpeClientP12File);
-		writeP12File(bpeClientP12File, clientCertFiles.getP12KeyStore());
+		Path bpeClientCertificateFile = Paths.get(bpeConfFolder, "app_" + commonName + "_certificate.pem");
+		logger.info("Copying {} certificate certificate file to {}", commonName, bpeClientCertificateFile);
+		writeCertificate(bpeClientCertificateFile, clientCertFiles.certificate);
 
-		Path fhirClientP12File = Paths.get(fhirConfFolder, commonName + "_certificate.p12");
-		logger.info("Copying {} certificate p12 file to {}", commonName, fhirClientP12File);
-		writeP12File(fhirClientP12File, clientCertFiles.getP12KeyStore());
+		Path bpeClientPrivateKeyFile = Paths.get(bpeConfFolder, "app_" + commonName + "_private-key.pem");
+		logger.info("Copying {} certificate private-key file to {}", commonName, bpeClientPrivateKeyFile);
+		writePrivateKeyEncrypted(bpeClientPrivateKeyFile, clientCertFiles.keyPair.getPrivate());
+
+		Path bpeCaCertFile = Paths.get(bpeConfFolder, "app_testca_certificate.pem");
+		logger.info("Copying Test CA certificate file to {}", bpeCaCertFile.toString());
+		writeCertificate(bpeCaCertFile, testCaCertificate);
+
+		Path fhirClientCertificateFile = Paths.get(fhirConfFolder, "app_" + commonName + "_certificate.pem");
+		logger.info("Copying {} certificate certificate file to {}", commonName, fhirClientCertificateFile);
+		writeCertificate(fhirClientCertificateFile, clientCertFiles.certificate);
+
+		Path fhirClientPrivateKeyFile = Paths.get(fhirConfFolder, "app_" + commonName + "_private-key.pem");
+		logger.info("Copying {} certificate private-key file to {}", commonName, fhirClientPrivateKeyFile);
+		writePrivateKeyEncrypted(fhirClientPrivateKeyFile, clientCertFiles.keyPair.getPrivate());
+
+		Path fhirCacertFile = Paths.get(fhirConfFolder, "app_testca_certificate.pem");
+		logger.info("Copying Test CA certificate file to {}", fhirCacertFile.toString());
+		writeCertificate(fhirCacertFile, testCaCertificate);
 	}
 
 	public void copyDockerTest3MedicTtpDockerCertificates()
 	{
 		Path baseFolder = Paths.get("../../dsf-docker-test-setup-3medic-ttp-docker");
 
-		X509Certificate testCaCertificate = ca.getCertificate();
+		final X509Certificate testCaCertificate = ca.getCertificate();
 
-		Path testCaCertificateFile = baseFolder.resolve("proxy/ssl/client_ca.pem");
+		Path testCaCertificateFile = baseFolder.resolve("secrets/proxy_trusted_client_cas.pem");
 		logger.info("Copying Test CA certificate file to {}", testCaCertificateFile.toString());
 		writeCertificate(testCaCertificateFile, testCaCertificate);
 
 		CertificateFiles localhost = serverCertificateFilesByCommonName.get("localhost");
 
-		Path localhostCertificateAndCa = baseFolder.resolve("proxy/ssl/certificate_and_ca.pem");
+		Path localhostCertificateAndCa = baseFolder.resolve("secrets/proxy_certificate_and_int_cas.pem");
 		logger.info("Writing localhost certificate and CA certificate to {}", testCaCertificateFile.toString());
 		writeCertificates(localhostCertificateAndCa, localhost.getCertificate(), testCaCertificate);
 
-		Path localhostCertificatePrivateKey = baseFolder.resolve("proxy/ssl/certificate_private-key.pem");
+		Path localhostCertificatePrivateKey = baseFolder.resolve("secrets/proxy_certificate_private_key.pem");
 		logger.info("Copying localhost private-key file to {}", localhostCertificatePrivateKey);
-		writePrivateKey(localhostCertificatePrivateKey, (RSAPrivateCrtKey) localhost.getKeyPair().getPrivate());
+		writePrivateKeyNotEncrypted(localhostCertificatePrivateKey, localhost.keyPair.getPrivate());
 
 		List<String> commonNames = Arrays.asList("medic1", "medic2", "medic3", "ttp");
-		commonNames
-				.forEach(cn -> copyClientCertFiles("../../dsf-docker-test-setup-3medic-ttp-docker/" + cn + "/bpe/conf/",
-						"../../dsf-docker-test-setup-3medic-ttp-docker/" + cn + "/fhir/conf/", cn + "-client"));
+		commonNames.forEach(cn -> copyDockerTest3MedicTtpDockerClientCertFiles(
+				"../../dsf-docker-test-setup-3medic-ttp-docker/secrets/", cn + "-client"));
+
+		Path fhirCacertFile = Paths
+				.get("../../dsf-docker-test-setup-3medic-ttp-docker/secrets/app_testca_certificate.pem");
+		logger.info("Copying Test CA certificate file to {}", fhirCacertFile.toString());
+		writeCertificate(fhirCacertFile, testCaCertificate);
+	}
+
+	private void copyDockerTest3MedicTtpDockerClientCertFiles(String folder, String commonName)
+	{
+		final CertificateFiles clientCertFiles = clientCertificateFilesByCommonName.get(commonName);
+
+		Path bpeClientCertificateFile = Paths.get(folder, "app_" + commonName + "_certificate.pem");
+		logger.info("Copying {} certificate certificate file to {}", commonName, bpeClientCertificateFile);
+		writeCertificate(bpeClientCertificateFile, clientCertFiles.certificate);
+
+		Path bpeClientPrivateKeyFile = Paths.get(folder, "app_" + commonName + "_private-key.pem");
+		logger.info("Copying {} certificate private-key file to {}", commonName, bpeClientPrivateKeyFile);
+		writePrivateKeyEncrypted(bpeClientPrivateKeyFile, clientCertFiles.keyPair.getPrivate());
 	}
 
 	private void writeCertificates(Path certificateFile, X509Certificate... certificates)
@@ -784,6 +691,46 @@ public class CertificateGenerator
 			logger.error("Error while writing certificate to " + certificateFile.toString(), e);
 			throw new RuntimeException(e);
 		}
+	}
+
+	private KeyStore createP12KeyStore(PrivateKey privateKey, String commonName, X509Certificate certificate)
+	{
+		try
+		{
+			return CertificateHelper.toPkcs12KeyStore(privateKey,
+					new Certificate[] { certificate, ca.getCertificate() }, commonName, CERT_PASSWORD);
+		}
+		catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IllegalStateException
+				| IOException e)
+		{
+			logger.error("Error while creating P12 key-store", e);
+			throw new RuntimeException(e);
+		}
+	}
+
+	private void writeP12File(Path p12File, KeyStore p12KeyStore)
+	{
+		try
+		{
+			CertificateWriter.toPkcs12(p12File, p12KeyStore, CERT_PASSWORD);
+		}
+		catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e)
+		{
+			logger.error("Error while writing certificate P12 file to " + p12File.toString(), e);
+			throw new RuntimeException(e);
+		}
+	}
+
+	public Path createP12(CertificateFiles files)
+	{
+		Path certP12Path = getCertP12Path(files.commonName);
+
+		logger.info("Saving certificate (p21) to {}, password '{}' [{}]", certP12Path.toString(),
+				String.valueOf(CERT_PASSWORD), files.commonName);
+		KeyStore p12KeyStore = createP12KeyStore(files.keyPair.getPrivate(), files.commonName, files.certificate);
+		writeP12File(certP12Path, p12KeyStore);
+
+		return certP12Path;
 	}
 
 	public static void main(String[] args)

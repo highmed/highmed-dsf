@@ -1,53 +1,53 @@
--  hosts: ttp
-   vars:
-      user: '{{ lookup(''env'',''USER'') }}'
-   tasks:
-   -  name: Create /opt/highmed folder
+- hosts: ttp
+  vars:
+    user: '{{ lookup(''env'',''USER'') }}'
+  tasks:
+    - name: Create /opt/highmed folder
       file:
-         path: /opt/highmed
-         owner: '{{ user }}'
-         group: '{{ user }}'
-         state: directory
+        path: /opt/highmed
+        owner: '{{ user }}'
+        group: '{{ user }}'
+        state: directory
       become: true
-   -  name: Synchronize bpe folder
+    - name: Synchronize bpe folder
       synchronize:
-         src: bpe
-         dest: /opt/highmed
-         perms: no
-         recursive: yes
-         delete: yes
-   -  name: Synchronize fhir folder
+        src: bpe
+        dest: /opt/highmed
+        perms: no
+        recursive: yes
+        delete: yes
+    - name: Synchronize fhir folder
       synchronize:
-         src: fhir
-         dest: /opt/highmed
-         perms: no 
-         recursive: yes
-         delete: yes
-   -  name: Set bpe/app/log permissions
+        src: fhir
+        dest: /opt/highmed
+        perms: no 
+        recursive: yes
+        delete: yes
+    - name: Set bpe/log permissions
       file:
-         path: /opt/highmed/bpe/app/log
-         owner: '{{ user }}'
-         group: '2202'
-         mode: '2775'
+        path: /opt/highmed/bpe/log
+        owner: '{{ user }}'
+        group: '2202'
+        mode: '2775'
       become: true
-   -  name: Set bpe/app/last_event permissions
+    - name: Set bpe/last_event permissions
       file:
-         path: /opt/highmed/bpe/app/last_event
-         owner: '{{ user }}'
-         group: '2202'
-         mode: '2775'
+        path: /opt/highmed/bpe/last_event
+        owner: '{{ user }}'
+        group: '2202'
+        mode: '2775'
       become: true
-   -  name: Set bpe/app/psn permissions
+    - name: Set bpe/psn permissions
       file:
-         path: /opt/highmed/bpe/app/psn
-         owner: '{{ user }}'
-         group: '2202'
-         mode: '2775'
+        path: /opt/highmed/bpe/psn
+        owner: '{{ user }}'
+        group: '2202'
+        mode: '2775'
       become: true
-   -  name: Set fhir/app/log permissions
+    - name: Set fhir/log permissions
       file:
-         path: /opt/highmed/fhir/app/log
-         owner: '{{ user }}'
-         group: '2101'
-         mode: '2775'
+        path: /opt/highmed/fhir/log
+        owner: '{{ user }}'
+        group: '2101'
+        mode: '2775'
       become: true

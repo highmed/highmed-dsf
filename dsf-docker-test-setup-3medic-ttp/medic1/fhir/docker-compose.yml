@@ -1,91 +1,138 @@
-version: '3.2'
+version: '3.8'
 services:
-   proxy:
-      image: registry:5000/highmed/fhir_proxy
-      restart: on-failure
-      ports:
+  proxy:
+    image: registry:5000/highmed/fhir_proxy
+    restart: on-failure
+    ports:
       - 80:80
       - 443:443
-      volumes:
-      -  type: bind
-         source: ./proxy/ssl
-         target: /usr/local/apache2/ssl
-         read_only: true
-      environment:
-         TZ: Europe/Berlin
-         HTTPS_SERVER_NAME_PORT: medic1:443
-         APP_SERVER_IP: 172.28.1.3
-      networks:
-         frontend:
-            ipv4_address: 172.28.1.2
-         bpe:
-            ipv4_address: 172.28.2.2
-            aliases:
-            - fhir
-      depends_on:
+    secrets:
+      - proxy_certificate_and_int_cas.pem
+      - proxy_certificate_private_key.pem
+      - proxy_trusted_client_cas.pem
+    environment:
+      TZ: Europe/Berlin
+      HTTPS_SERVER_NAME_PORT: medic1:443
+      APP_SERVER_IP: 172.28.1.3
+      SSL_CERTIFICATE_FILE: /run/secrets/proxy_certificate_and_int_cas.pem
+      SSL_CERTIFICATE_KEY_FILE: /run/secrets/proxy_certificate_private_key.pem
+      SSL_CA_CERTIFICATE_FILE: /run/secrets/proxy_trusted_client_cas.pem
+    networks:
+      frontend:
+        ipv4_address: 172.28.1.2
+      bpe:
+        ipv4_address: 172.28.2.2
+        aliases:
+          - fhir
+    depends_on:
       - app
-   app:
-      image: registry:5000/highmed/fhir
-      restart: on-failure
-      volumes:
-      -  type: bind
-         source: ./app/conf
-         target: /opt/fhir/conf
-         read_only: true
-      -  type: bind
-         source: ./app/log
-         target: /opt/fhir/log
-      environment:
-         TZ: Europe/Berlin
-      networks:
-         frontend:
-            ipv4_address: 172.28.1.3
-         backend:
-            ipv4_address: 172.28.1.130
-      extra_hosts:
+
+  app:
+    image: registry:5000/highmed/fhir
+    restart: on-failure
+    secrets:
+      - db_liquibase.password
+      - db_user.password
+      - db_user_permanent_delete.password
+      - app_client_trust_certificates.pem
+      - app_client_certificate.pem
+      - app_client_certificate_private_key.pem
+      - app_client_certificate_private_key.pem.password
+    volumes:
+      - type: bind
+        source: ./conf/bundle.xml
+        target: /opt/fhir/conf/bundle.xml
+        read_only: true
+
+      - type: bind
+        source: ./log
+        target: /opt/fhir/log
+    environment:
+      TZ: Europe/Berlin
+      ORG_HIGHMED_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
+      ORG_HIGHMED_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_user.password
+      ORG_HIGHMED_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_user_permanent_delete.password
+      ORG_HIGHMED_DSF_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
+      ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_client_certificate.pem
+      ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_client_certificate_private_key.pem
+      ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_client_certificate_private_key.pem.password
+      ORG_HIGHMED_DSF_FHIR_DB_URL: jdbc:postgresql://db/fhir
+      ORG_HIGHMED_DSF_FHIR_SERVER_BASE_URL: https://medic1/fhir
+      ORG_HIGHMED_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_MeDIC_1
+      ORG_HIGHMED_DSF_FHIR_SERVER_USER_THUMBPRINTS: ${USER_THUMBPRINTS}
+      ORG_HIGHMED_DSF_FHIR_SERVER_USER_THUMBPRINTS_PERMANENT_DELETE: ${USER_THUMBPRINTS_PERMANENT_DELETE}
+    networks:
+      frontend:
+        ipv4_address: 172.28.1.3
+      backend:
+        ipv4_address: 172.28.1.130
+    extra_hosts:
       - "ttp:10.42.0.10"
       - "medic1:10.42.0.11"
       - "medic2:10.42.0.12"
       - "medic3:10.42.0.13"
-      depends_on:
+    depends_on:
       - db
-   db:
-      image: postgres:13
-      restart: on-failure
-      healthcheck:
-         test: ["CMD-SHELL", "pg_isready -U liquibase_user -d fhir"]
-         interval: 10s
-         timeout: 5s
-         retries: 5
-      environment:
-         TZ: Europe/Berlin
-         POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
-         POSTGRES_USER: liquibase_user
-         POSTGRES_DB: fhir
-      networks:
-         backend:
-            ipv4_address: 172.28.1.131
-      secrets:
-      - postgres_password
+
+  db:
+    image: postgres:13
+    restart: on-failure
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U liquibase_user -d fhir"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    environment:
+      TZ: Europe/Berlin
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_liquibase.password
+      POSTGRES_USER: liquibase_user
+      POSTGRES_DB: fhir
+    networks:
+      backend:
+        ipv4_address: 172.28.1.131
+    secrets:
+      - db_liquibase.password
+
 secrets:
-   postgres_password:
-      file: ./db/conf/postgres_password
+  proxy_certificate_and_int_cas.pem:
+    file: ./secrets/proxy_certificate_and_int_cas.pem
+  proxy_certificate_private_key.pem:
+    file: ./secrets/proxy_certificate_private_key.pem
+  proxy_trusted_client_cas.pem:
+    file: ./secrets/proxy_trusted_client_cas.pem
+
+  db_liquibase.password:
+    file: ./secrets/db_liquibase.password
+  db_user.password:
+    file: ./secrets/db_user.password
+  db_user_permanent_delete.password:
+    file: ./secrets/db_user_permanent_delete.password
+    
+  app_client_trust_certificates.pem:
+    file: ./secrets/app_testca_certificate.pem
+  app_client_certificate.pem:
+    file: ./secrets/app_medic1-client_certificate.pem
+  app_client_certificate_private_key.pem:
+    file: ./secrets/app_medic1-client_private-key.pem
+  app_client_certificate_private_key.pem.password:
+    file: ./secrets/app_medic1-client_private-key.pem.password
+
 networks:
-   frontend:
-      driver: bridge
-      ipam:
-         driver: default
-         config:
-         -  subnet: 172.28.1.0/25
-   backend:
-      driver: bridge
-      ipam:
-         driver: default
-         config:
-         -  subnet: 172.28.1.128/25
-   bpe:
-      driver: bridge
-      ipam:
-         driver: default
-         config:
-         -  subnet: 172.28.2.0/24
+  frontend:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.1.0/25
+  backend:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.1.128/25
+  bpe:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.2.0/24
