@@ -25,9 +25,9 @@ public class ClientProviderImpl implements ClientProvider, InitializingBean
 
 	private final int remoteReadTimeout;
 	private final int remoteConnectTimeout;
-	private final char[] remoteProxyPassword;
-	private final String remoteProxyUsername;
 	private final String remoteProxySchemeHostPort;
+	private final String remoteProxyUsername;
+	private final char[] remoteProxyPassword;
 	private final FhirContext fhirContext;
 	private final ReferenceCleaner referenceCleaner;
 	private final EndpointDao endpointDao;
@@ -35,7 +35,7 @@ public class ClientProviderImpl implements ClientProvider, InitializingBean
 
 	public ClientProviderImpl(KeyStore webserviceTrustStore, KeyStore webserviceKeyStore,
 			char[] webserviceKeyStorePassword, int remoteReadTimeout, int remoteConnectTimeout,
-			char[] remoteProxyPassword, String remoteProxyUsername, String remoteProxySchemeHostPort,
+			String remoteProxySchemeHostPort, String remoteProxyUsername, char[] remoteProxyPassword,
 			FhirContext fhirContext, ReferenceCleaner referenceCleaner, EndpointDao endpointDao,
 			ExceptionHandler exceptionHandler)
 	{
@@ -44,9 +44,9 @@ public class ClientProviderImpl implements ClientProvider, InitializingBean
 		this.webserviceKeyStorePassword = webserviceKeyStorePassword;
 		this.remoteReadTimeout = remoteReadTimeout;
 		this.remoteConnectTimeout = remoteConnectTimeout;
-		this.remoteProxyPassword = remoteProxyPassword;
-		this.remoteProxyUsername = remoteProxyUsername;
 		this.remoteProxySchemeHostPort = remoteProxySchemeHostPort;
+		this.remoteProxyUsername = remoteProxyUsername;
+		this.remoteProxyPassword = remoteProxyPassword;
 		this.fhirContext = fhirContext;
 		this.referenceCleaner = referenceCleaner;
 		this.endpointDao = endpointDao;

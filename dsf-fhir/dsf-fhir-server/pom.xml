@@ -9,7 +9,7 @@
 		<artifactId>dsf-fhir-pom</artifactId>
 		<version>0.5.0-SNAPSHOT</version>
 	</parent>
-	
+
 	<properties>
 		<main.basedir>${project.basedir}/../..</main.basedir>
 	</properties>
@@ -26,6 +26,10 @@
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-tools-build-info-reader</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.highmed.dsf</groupId>
+			<artifactId>dsf-tools-docker-secrets-reader</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
@@ -184,7 +188,7 @@
 				</includes>
 			</testResource>
 		</testResources>
-		
+
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

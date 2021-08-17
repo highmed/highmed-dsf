@@ -6,7 +6,7 @@ import org.highmed.mpi.client.MasterPatientIndexClientFactory;
 import org.highmed.mpi.client.MasterPatientIndexClientServiceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -15,8 +15,8 @@ public class MasterPatientIndexConfig
 {
 	private static final Logger logger = LoggerFactory.getLogger(MasterPatientIndexConfig.class);
 
-	@Value("${org.highmed.dsf.bpe.mpi.webservice.factory.class:org.highmed.mpi.client.stub.MasterPatientIndexClientStubFactory}")
-	private String masterPatientIndexClientFactoryClass;
+	@Autowired
+	private PropertiesConfig propertiesConfig;
 
 	@Bean
 	public MasterPatientIndexClientServiceLoader masterPatientIndexClientServiceLoader()
@@ -28,9 +28,9 @@ public class MasterPatientIndexConfig
 	public MasterPatientIndexClientFactory masterPatientIndexClientFactory()
 	{
 		MasterPatientIndexClientFactory factory = masterPatientIndexClientServiceLoader()
-				.getMasterPatientIndexClientFactory(masterPatientIndexClientFactoryClass)
+				.getMasterPatientIndexClientFactory(propertiesConfig.getMasterPatientIndexClientFactoryClass())
 				.orElseThrow(() -> new NoSuchElementException("Master patient index client factory with classname='"
-						+ masterPatientIndexClientFactoryClass + "' not found"));
+						+ propertiesConfig.getMasterPatientIndexClientFactoryClass() + "' not found"));
 
 		if ("org.highmed.mpi.client.stub.MasterPatientIndexClientStubFactory".equals(factory.getClass().getName()))
 			logger.warn("Using {} as MPI client factory", factory.getClass().getName());

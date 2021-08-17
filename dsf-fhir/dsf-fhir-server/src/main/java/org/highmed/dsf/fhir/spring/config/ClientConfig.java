@@ -7,41 +7,30 @@ import java.nio.file.Paths;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.pkcs.PKCSException;
 import org.highmed.dsf.fhir.client.ClientProvider;
 import org.highmed.dsf.fhir.client.ClientProviderImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.CertificateReader;
+import de.rwh.utils.crypto.io.PemIo;
 
 @Configuration
 public class ClientConfig
 {
-	@Value("${org.highmed.dsf.fhir.webservice.keystore.p12file}")
-	private String webserviceKeyStoreFile;
+	private static final BouncyCastleProvider provider = new BouncyCastleProvider();
 
-	@Value("${org.highmed.dsf.fhir.webservice.keystore.password}")
-	private char[] webserviceKeyStorePassword;
-
-	@Value("${org.highmed.dsf.fhir.remote.webservice.readTimeout}")
-	private int remoteReadTimeout;
-
-	@Value("${org.highmed.dsf.fhir.remote.webservice.connectTimeout}")
-	private int remoteConnectTimeout;
-
-	@Value("${org.highmed.dsf.fhir.remote.webservice.proxy.password:#{null}}")
-	private char[] remoteProxyPassword;
-
-	@Value("${org.highmed.dsf.fhir.remote.webservice.proxy.username:#{null}}")
-	private String remoteProxyUsername;
-
-	@Value("${org.highmed.dsf.fhir.remote.webservice.proxy.schemeHostPort:#{null}}")
-	private String remoteProxySchemeHostPort;
+	@Autowired
+	private PropertiesConfig propertiesConfig;
 
 	@Autowired
 	private FhirConfig fhirConfig;
@@ -60,22 +49,53 @@ public class ClientConfig
 	{
 		try
 		{
-			Path webserviceKsFile = Paths.get(webserviceKeyStoreFile);
+			KeyStore webserviceKeyStore = createKeyStore(propertiesConfig.getWebserviceClientCertificateFile(),
+					propertiesConfig.getWebserviceClientCertificatePrivateKeyFile(),
+					propertiesConfig.getWebserviceClientCertificatePrivateKeyFilePassword());
+			KeyStore webserviceTrustStore = createTrustStore(
+					propertiesConfig.getWebserviceClientCertificateTrustCertificatesFile());
 
-			if (!Files.isReadable(webserviceKsFile))
-				throw new IOException("Webservice keystore file '" + webserviceKsFile.toString() + "' not readable");
-
-			KeyStore webserviceKeyStore = CertificateReader.fromPkcs12(webserviceKsFile, webserviceKeyStorePassword);
-			KeyStore webserviceTrustStore = CertificateHelper.extractTrust(webserviceKeyStore);
-
-			return new ClientProviderImpl(webserviceTrustStore, webserviceKeyStore, webserviceKeyStorePassword,
-					remoteReadTimeout, remoteConnectTimeout, remoteProxyPassword, remoteProxyUsername,
-					remoteProxySchemeHostPort, fhirConfig.fhirContext(), referenceConfig.referenceCleaner(),
-					daoConfig.endpointDao(), helperConfig.exceptionHandler());
+			return new ClientProviderImpl(webserviceTrustStore, webserviceKeyStore,
+					propertiesConfig.getWebserviceClientCertificatePrivateKeyFilePassword(),
+					propertiesConfig.getWebserviceClientReadTimeout(),
+					propertiesConfig.getWebserviceClientConnectTimeout(),
+					propertiesConfig.getWebserviceClientProxyUrl(), propertiesConfig.getWebserviceClientProxyUsername(),
+					propertiesConfig.getWebserviceClientProxyPassword(), fhirConfig.fhirContext(),
+					referenceConfig.referenceCleaner(), daoConfig.endpointDao(), helperConfig.exceptionHandler());
 		}
-		catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e)
+		catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException | PKCSException e)
 		{
 			throw new RuntimeException(e);
 		}
+	}
+
+	private KeyStore createTrustStore(String trustStoreFile)
+			throws IOException, NoSuchAlgorithmException, CertificateException, KeyStoreException
+	{
+		Path trustStorePath = Paths.get(trustStoreFile);
+
+		if (!Files.isReadable(trustStorePath))
+			throw new IOException("Trust store file '" + trustStorePath.toString() + "' not readable");
+
+		return CertificateReader.allFromCer(trustStorePath);
+	}
+
+	private KeyStore createKeyStore(String certificateFile, String privateKeyFile, char[] privateKeyPassword)
+			throws IOException, PKCSException, CertificateException, KeyStoreException, NoSuchAlgorithmException
+	{
+		Path certificatePath = Paths.get(certificateFile);
+		Path privateKeyPath = Paths.get(privateKeyFile);
+
+		if (!Files.isReadable(certificatePath))
+			throw new IOException("Certificate file '" + certificatePath.toString() + "' not readable");
+		if (!Files.isReadable(certificatePath))
+			throw new IOException("Private key file '" + privateKeyPath.toString() + "' not readable");
+
+		X509Certificate certificate = PemIo.readX509CertificateFromPem(certificatePath);
+		PrivateKey privateKey = PemIo.readPrivateKeyFromPem(provider, privateKeyPath, privateKeyPassword);
+
+		String subjectCommonName = CertificateHelper.getSubjectCommonName(certificate);
+		return CertificateHelper.toJksKeyStore(privateKey, new Certificate[] { certificate }, subjectCommonName,
+				privateKeyPassword);
 	}
 }

@@ -1,7 +1,5 @@
 package org.highmed.dsf.fhir.spring.config;
 
-import java.util.List;
-
 import org.highmed.dsf.fhir.authentication.OrganizationProvider;
 import org.highmed.dsf.fhir.authentication.OrganizationProviderWithDbBackend;
 import org.highmed.dsf.fhir.authorization.ActivityDefinitionAuthorizationRule;
@@ -62,27 +60,14 @@ import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class AuthorizationConfig
 {
-	@Value("${org.highmed.dsf.fhir.serverBase}")
-	private String serverBase;
-
-	@Value("${org.highmed.dsf.fhir.organizationType}")
-	private String organizationType;
-
-	@Value("#{'${org.highmed.dsf.fhir.local-user.thumbprints}'.split(',')}")
-	private List<String> localUserThumbprints;
-
-	@Value("#{'${org.highmed.dsf.fhir.local-permanent-delete-user.thumbprints}'.split(',')}")
-	private List<String> localPermanentDeleteUserThumbprints;
-
-	@Value("${org.highmed.dsf.fhir.local-organization.identifier}")
-	private String localIdentifierValue;
+	@Autowired
+	private PropertiesConfig propertiesConfig;
 
 	@Autowired
 	private DaoConfig daoConfig;
@@ -109,13 +94,14 @@ public class AuthorizationConfig
 	public OrganizationProvider organizationProvider()
 	{
 		return new OrganizationProviderWithDbBackend(daoConfig.organizationDao(), helperConfig.exceptionHandler(),
-				localUserThumbprints, localPermanentDeleteUserThumbprints, localIdentifierValue);
+				propertiesConfig.getUserThumbprints(), propertiesConfig.getUserPermanentDeleteThumbprints(),
+				propertiesConfig.getOrganizationIdentifierValue());
 	}
 
 	@Bean
 	public AuthorizationRule<ActivityDefinition> activityDefinitionAuthorizationRule()
 	{
-		return new ActivityDefinitionAuthorizationRule(daoConfig.daoProvider(), serverBase,
+		return new ActivityDefinitionAuthorizationRule(daoConfig.daoProvider(), propertiesConfig.getServerBaseUrl(),
 				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper(),
 				helperConfig.parameterConverter(), processAuthorizationHelper());
 	}
@@ -123,8 +109,9 @@ public class AuthorizationConfig
 	@Bean
 	public AuthorizationRule<Binary> binaryAuthorizationRule()
 	{
-		return new BinaryAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver(),
-				organizationProvider(), readAccessHelper(), helperConfig.parameterConverter(),
+		return new BinaryAuthorizationRule(daoConfig.daoProvider(), propertiesConfig.getServerBaseUrl(),
+				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper(),
+				helperConfig.parameterConverter(),
 
 				// Binary and Task not supported as securityContext rule
 				activityDefinitionAuthorizationRule(), bundleAuthorizationRule(), codeSystemAuthorizationRule(),
@@ -139,35 +126,39 @@ public class AuthorizationConfig
 	@Bean
 	public AuthorizationRule<Bundle> bundleAuthorizationRule()
 	{
-		return new BundleAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver(),
-				organizationProvider(), readAccessHelper(), helperConfig.parameterConverter());
+		return new BundleAuthorizationRule(daoConfig.daoProvider(), propertiesConfig.getServerBaseUrl(),
+				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper(),
+				helperConfig.parameterConverter());
 	}
 
 	@Bean
 	public AuthorizationRule<CodeSystem> codeSystemAuthorizationRule()
 	{
-		return new CodeSystemAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver(),
-				organizationProvider(), readAccessHelper(), helperConfig.parameterConverter());
+		return new CodeSystemAuthorizationRule(daoConfig.daoProvider(), propertiesConfig.getServerBaseUrl(),
+				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper(),
+				helperConfig.parameterConverter());
 	}
 
 	@Bean
 	public AuthorizationRule<Endpoint> endpointAuthorizationRule()
 	{
-		return new EndpointAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver(),
-				organizationProvider(), readAccessHelper(), helperConfig.parameterConverter());
+		return new EndpointAuthorizationRule(daoConfig.daoProvider(), propertiesConfig.getServerBaseUrl(),
+				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper(),
+				helperConfig.parameterConverter());
 	}
 
 	@Bean
 	public AuthorizationRule<Group> groupAuthorizationRule()
 	{
-		return new GroupAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver(),
-				organizationProvider(), readAccessHelper(), helperConfig.parameterConverter());
+		return new GroupAuthorizationRule(daoConfig.daoProvider(), propertiesConfig.getServerBaseUrl(),
+				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper(),
+				helperConfig.parameterConverter());
 	}
 
 	@Bean
 	public AuthorizationRule<HealthcareService> healthcareServiceAuthorizationRule()
 	{
-		return new HealthcareServiceAuthorizationRule(daoConfig.daoProvider(), serverBase,
+		return new HealthcareServiceAuthorizationRule(daoConfig.daoProvider(), propertiesConfig.getServerBaseUrl(),
 				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper(),
 				helperConfig.parameterConverter());
 	}
@@ -175,28 +166,31 @@ public class AuthorizationConfig
 	@Bean
 	public AuthorizationRule<Library> libraryAuthorizationRule()
 	{
-		return new LibraryAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver(),
-				organizationProvider(), readAccessHelper(), helperConfig.parameterConverter());
+		return new LibraryAuthorizationRule(daoConfig.daoProvider(), propertiesConfig.getServerBaseUrl(),
+				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper(),
+				helperConfig.parameterConverter());
 	}
 
 	@Bean
 	public AuthorizationRule<Location> locationAuthorizationRule()
 	{
-		return new LocationAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver(),
-				organizationProvider(), readAccessHelper(), helperConfig.parameterConverter());
+		return new LocationAuthorizationRule(daoConfig.daoProvider(), propertiesConfig.getServerBaseUrl(),
+				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper(),
+				helperConfig.parameterConverter());
 	}
 
 	@Bean
 	public AuthorizationRule<Measure> measureAuthorizationRule()
 	{
-		return new MeasureAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver(),
-				organizationProvider(), readAccessHelper(), helperConfig.parameterConverter());
+		return new MeasureAuthorizationRule(daoConfig.daoProvider(), propertiesConfig.getServerBaseUrl(),
+				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper(),
+				helperConfig.parameterConverter());
 	}
 
 	@Bean
 	public AuthorizationRule<MeasureReport> measureReportAuthorizationRule()
 	{
-		return new MeasureReportAuthorizationRule(daoConfig.daoProvider(), serverBase,
+		return new MeasureReportAuthorizationRule(daoConfig.daoProvider(), propertiesConfig.getServerBaseUrl(),
 				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper(),
 				helperConfig.parameterConverter());
 	}
@@ -204,7 +198,7 @@ public class AuthorizationConfig
 	@Bean
 	public AuthorizationRule<NamingSystem> namingSystemAuthorizationRule()
 	{
-		return new NamingSystemAuthorizationRule(daoConfig.daoProvider(), serverBase,
+		return new NamingSystemAuthorizationRule(daoConfig.daoProvider(), propertiesConfig.getServerBaseUrl(),
 				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper(),
 				helperConfig.parameterConverter());
 	}
@@ -212,7 +206,7 @@ public class AuthorizationConfig
 	@Bean
 	public AuthorizationRule<Organization> organizationAuthorizationRule()
 	{
-		return new OrganizationAuthorizationRule(daoConfig.daoProvider(), serverBase,
+		return new OrganizationAuthorizationRule(daoConfig.daoProvider(), propertiesConfig.getServerBaseUrl(),
 				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper(),
 				helperConfig.parameterConverter());
 	}
@@ -220,22 +214,23 @@ public class AuthorizationConfig
 	@Bean
 	public AuthorizationRule<OrganizationAffiliation> organizationAffiliationAuthorizationRule()
 	{
-		return new OrganizationAffiliationAuthorizationRule(daoConfig.daoProvider(), serverBase,
-				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper(),
-				helperConfig.parameterConverter());
+		return new OrganizationAffiliationAuthorizationRule(daoConfig.daoProvider(),
+				propertiesConfig.getServerBaseUrl(), referenceConfig.referenceResolver(), organizationProvider(),
+				readAccessHelper(), helperConfig.parameterConverter());
 	}
 
 	@Bean
 	public AuthorizationRule<Patient> patientAuthorizationRule()
 	{
-		return new PatientAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver(),
-				organizationProvider(), readAccessHelper(), helperConfig.parameterConverter());
+		return new PatientAuthorizationRule(daoConfig.daoProvider(), propertiesConfig.getServerBaseUrl(),
+				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper(),
+				helperConfig.parameterConverter());
 	}
 
 	@Bean
 	public AuthorizationRule<Practitioner> practitionerAuthorizationRule()
 	{
-		return new PractitionerAuthorizationRule(daoConfig.daoProvider(), serverBase,
+		return new PractitionerAuthorizationRule(daoConfig.daoProvider(), propertiesConfig.getServerBaseUrl(),
 				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper(),
 				helperConfig.parameterConverter());
 	}
@@ -243,7 +238,7 @@ public class AuthorizationConfig
 	@Bean
 	public AuthorizationRule<PractitionerRole> practitionerRoleAuthorizationRule()
 	{
-		return new PractitionerRoleAuthorizationRule(daoConfig.daoProvider(), serverBase,
+		return new PractitionerRoleAuthorizationRule(daoConfig.daoProvider(), propertiesConfig.getServerBaseUrl(),
 				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper(),
 				helperConfig.parameterConverter());
 	}
@@ -251,14 +246,15 @@ public class AuthorizationConfig
 	@Bean
 	public AuthorizationRule<Provenance> provenanceAuthorizationRule()
 	{
-		return new ProvenanceAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver(),
-				organizationProvider(), readAccessHelper(), helperConfig.parameterConverter());
+		return new ProvenanceAuthorizationRule(daoConfig.daoProvider(), propertiesConfig.getServerBaseUrl(),
+				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper(),
+				helperConfig.parameterConverter());
 	}
 
 	@Bean
 	public AuthorizationRule<ResearchStudy> researchStudyAuthorizationRule()
 	{
-		return new ResearchStudyAuthorizationRule(daoConfig.daoProvider(), serverBase,
+		return new ResearchStudyAuthorizationRule(daoConfig.daoProvider(), propertiesConfig.getServerBaseUrl(),
 				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper(),
 				helperConfig.parameterConverter());
 	}
@@ -266,7 +262,7 @@ public class AuthorizationConfig
 	@Bean
 	public AuthorizationRule<StructureDefinition> structureDefinitionAuthorizationRule()
 	{
-		return new StructureDefinitionAuthorizationRule(daoConfig.daoProvider(), serverBase,
+		return new StructureDefinitionAuthorizationRule(daoConfig.daoProvider(), propertiesConfig.getServerBaseUrl(),
 				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper(),
 				helperConfig.parameterConverter());
 	}
@@ -274,7 +270,7 @@ public class AuthorizationConfig
 	@Bean
 	public AuthorizationRule<Subscription> subscriptionAuthorizationRule()
 	{
-		return new SubscriptionAuthorizationRule(daoConfig.daoProvider(), serverBase,
+		return new SubscriptionAuthorizationRule(daoConfig.daoProvider(), propertiesConfig.getServerBaseUrl(),
 				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper(),
 				helperConfig.parameterConverter());
 	}
@@ -282,15 +278,17 @@ public class AuthorizationConfig
 	@Bean
 	public AuthorizationRule<Task> taskAuthorizationRule()
 	{
-		return new TaskAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver(),
-				organizationProvider(), readAccessHelper(), processAuthorizationHelper());
+		return new TaskAuthorizationRule(daoConfig.daoProvider(), propertiesConfig.getServerBaseUrl(),
+				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper(),
+				processAuthorizationHelper());
 	}
 
 	@Bean
 	public AuthorizationRule<ValueSet> valueSetAuthorizationRule()
 	{
-		return new ValueSetAuthorizationRule(daoConfig.daoProvider(), serverBase, referenceConfig.referenceResolver(),
-				organizationProvider(), readAccessHelper(), helperConfig.parameterConverter());
+		return new ValueSetAuthorizationRule(daoConfig.daoProvider(), propertiesConfig.getServerBaseUrl(),
+				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper(),
+				helperConfig.parameterConverter());
 	}
 
 	@Bean

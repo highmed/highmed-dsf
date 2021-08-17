@@ -16,7 +16,6 @@ import org.highmed.dsf.bpe.service.BpmnServiceDelegateValidationServiceImpl;
 import org.highmed.dsf.bpe.service.FhirResourceHandler;
 import org.highmed.dsf.bpe.service.FhirResourceHandlerImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -25,6 +24,9 @@ import org.springframework.context.event.EventListener;
 @Configuration
 public class PostProcessDeployConfig
 {
+	@Autowired
+	private PropertiesConfig propertiesConfig;
+
 	@Autowired
 	private ProcessEngine processEngine;
 
@@ -39,18 +41,6 @@ public class PostProcessDeployConfig
 
 	@Autowired
 	private DaoConfig daoConfig;
-
-	@Value("#{'${org.highmed.dsf.bpe.process.excluded:}'.split(',')}")
-	private List<String> excluded;
-
-	@Value("#{'${org.highmed.dsf.bpe.process.retired:}'.split(',')}")
-	private List<String> retired;
-
-	@Value("${org.highmed.dsf.bpe.process.fhirServerRequestMaxRetries:-1}")
-	private int fhirServerRequestMaxRetries;
-
-	@Value("${org.highmed.dsf.bpe.process.fhirServerRetryDelayMillis:5000}")
-	private long fhirServerRetryDelayMillis;
 
 	@EventListener({ ContextRefreshedEvent.class })
 	public void onContextRefreshedEvent(ContextRefreshedEvent event)
@@ -77,15 +67,16 @@ public class PostProcessDeployConfig
 	public BpmnProcessStateChangeService bpmnProcessStateChangeService()
 	{
 		return new BpmnProcessStateChangeServiceImpl(processEngine.getRepositoryService(), daoConfig.processStateDao(),
-				processPluginProvider, ProcessKeyAndVersion.fromStrings(excluded),
-				ProcessKeyAndVersion.fromStrings(retired));
+				processPluginProvider, ProcessKeyAndVersion.fromStrings(propertiesConfig.getProcessExcluded()),
+				ProcessKeyAndVersion.fromStrings(propertiesConfig.getProcessRetired()));
 	}
 
 	@Bean
 	public FhirResourceHandler fhirResourceHandler()
 	{
 		return new FhirResourceHandlerImpl(fhirConfig.clientProvider().getLocalWebserviceClient(),
-				daoConfig.processPluginResourcesDao(), fhirConfig.fhirContext(), fhirServerRequestMaxRetries,
-				fhirServerRetryDelayMillis, processPluginProvider.getResouceProvidersByDpendencyNameAndVersion());
+				daoConfig.processPluginResourcesDao(), fhirConfig.fhirContext(),
+				propertiesConfig.getFhirServerRequestMaxRetries(), propertiesConfig.getFhirServerRetryDelayMillis(),
+				processPluginProvider.getResouceProvidersByDpendencyNameAndVersion());
 	}
 }

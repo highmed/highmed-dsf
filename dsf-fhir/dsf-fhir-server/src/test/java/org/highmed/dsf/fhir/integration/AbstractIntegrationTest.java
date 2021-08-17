@@ -206,19 +206,23 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	private static void overrideConfigPropertiesForTesting(Properties properties)
 	{
 		properties.put("org.highmed.dsf.fhir.db.url", DATABASE_URL);
-		properties.put("org.highmed.dsf.fhir.db.server_user", DATABASE_USER);
-		properties.put("org.highmed.dsf.fhir.db.server_user_password", DATABASE_USER_PASSWORD);
-		properties.put("org.highmed.dsf.fhir.db.server_permanent_delete_user", DATABASE_DELETE_USER);
-		properties.put("org.highmed.dsf.fhir.db.server_permanent_delete_user_password", DATABASE_DELETE_USER_PASSWORD);
+		properties.put("org.highmed.dsf.fhir.db.user.username", DATABASE_USER);
+		properties.put("org.highmed.dsf.fhir.db.user.password", DATABASE_USER_PASSWORD);
+		properties.put("org.highmed.dsf.fhir.db.user.permanent.delete.username", DATABASE_DELETE_USER);
+		properties.put("org.highmed.dsf.fhir.db.user.permanent.delete.password", DATABASE_DELETE_USER_PASSWORD);
 
 		String clientCertHashHex = calculateSha512CertificateThumbprintHex(
 				certificates.getClientCertificate().getCertificate());
-		properties.put("org.highmed.dsf.fhir.local-user.thumbprints", clientCertHashHex);
-		properties.put("org.highmed.dsf.fhir.local-permanent-delete-user.thumbprints", clientCertHashHex);
-		properties.put("org.highmed.dsf.fhir.webservice.keystore.p12file",
-				certificates.getClientCertificateFile().toString());
+		properties.put("org.highmed.dsf.fhir.server.user.thumbprints", clientCertHashHex);
+		properties.put("org.highmed.dsf.fhir.server.user.thumbprints.permanent.delete", clientCertHashHex);
 
-		properties.put("org.highmed.dsf.fhir.init.bundle.file", FHIR_BUNDLE_FILE.toString());
+		properties.put("org.highmed.dsf.fhir.server.init.bundle", FHIR_BUNDLE_FILE.toString());
+
+		properties.put("org.highmed.dsf.fhir.client.trust.certificates",
+				certificates.getCaCertificateFile().toString());
+		properties.put("org.highmed.dsf.fhir.client.certificate", certificates.getClientCertificateFile().toString());
+		properties.put("org.highmed.dsf.fhir.client.certificate.private.key",
+				certificates.getClientCertificatePrivateKeyFile().toString());
 	}
 
 	private static String calculateSha512CertificateThumbprintHex(X509Certificate certificate)
