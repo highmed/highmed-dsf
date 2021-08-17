@@ -11,4 +11,6 @@ public interface NamingSystemDao extends ResourceDao<NamingSystem>
 	Optional<NamingSystem> readByName(String name) throws SQLException;
 
 	Optional<NamingSystem> readByNameWithTransaction(Connection connection, String name) throws SQLException;
+
+	boolean exists(String uniqueIdValue, boolean checkLogicalReferences) throws SQLException;
 }

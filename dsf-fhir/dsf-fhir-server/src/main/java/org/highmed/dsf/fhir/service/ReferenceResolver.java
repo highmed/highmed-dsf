@@ -10,6 +10,13 @@ import org.hl7.fhir.r4.model.Resource;
 public interface ReferenceResolver
 {
 	/**
+	 * @param reference
+	 *            not <code>null</code>
+	 * @return <code>true</code> if the {@link ResourceReference} can be resolved
+	 */
+	boolean referenceCanBeResolved(ResourceReference reference);
+
+	/**
 	 * @param user
 	 *            not <code>null</code>
 	 * @param reference
@@ -24,6 +31,13 @@ public interface ReferenceResolver
 	 *             {@link ResourceReference.ReferenceType#LOGICAL}
 	 */
 	Optional<Resource> resolveReference(User user, ResourceReference reference, Connection connection);
+
+	/**
+	 * @param reference
+	 *            not <code>null</code>
+	 * @return <code>true</code> if the {@link ResourceReference} can be checked
+	 */
+	boolean referenceCanBeChecked(ResourceReference reference);
 
 	/**
 	 * @param resource

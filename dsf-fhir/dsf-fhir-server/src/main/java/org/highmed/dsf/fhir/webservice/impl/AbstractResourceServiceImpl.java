@@ -208,11 +208,14 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		referenceExtractor.getReferences(resource).filter(ref -> ReferenceType.LOGICAL.equals(ref.getType(serverBase)))
 				.forEach(ref ->
 				{
-					Optional<OperationOutcome> outcome = resolveLogicalReference(resource, ref, connection);
-					if (outcome.isPresent())
+					if (referenceResolver.referenceCanBeResolved(ref))
 					{
-						Response response = Response.status(Status.FORBIDDEN).entity(outcome.get()).build();
-						throw new WebApplicationException(response);
+						Optional<OperationOutcome> outcome = resolveLogicalReference(resource, ref, connection);
+						if (outcome.isPresent())
+						{
+							Response response = Response.status(Status.FORBIDDEN).entity(outcome.get()).build();
+							throw new WebApplicationException(response);
+						}
 					}
 				});
 	}
@@ -238,11 +241,14 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	{
 		referenceExtractor.getReferences(resource).forEach(ref ->
 		{
-			Optional<OperationOutcome> outcome = checkReference(resource, connection, ref);
-			if (outcome.isPresent())
+			if (referenceResolver.referenceCanBeChecked(ref))
 			{
-				Response response = Response.status(Status.FORBIDDEN).entity(outcome.get()).build();
-				throw new WebApplicationException(response);
+				Optional<OperationOutcome> outcome = checkReference(resource, connection, ref);
+				if (outcome.isPresent())
+				{
+					Response response = Response.status(Status.FORBIDDEN).entity(outcome.get()).build();
+					throw new WebApplicationException(response);
+				}
 			}
 		});
 	}

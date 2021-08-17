@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.client.ClientProvider;
+import org.highmed.dsf.fhir.dao.NamingSystemDao;
 import org.highmed.dsf.fhir.dao.ResourceDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
@@ -65,6 +66,55 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 		Objects.requireNonNull(exceptionHandler, "exceptionHandler");
 		Objects.requireNonNull(clientProvider, "clientProvider");
 		Objects.requireNonNull(parameterConverter, "parameterConverter");
+	}
+
+	@Override
+	public boolean referenceCanBeResolved(ResourceReference reference)
+	{
+		return referenceCanBeChecked(reference);
+	}
+
+	@Override
+	public boolean referenceCanBeChecked(ResourceReference reference)
+	{
+		Objects.requireNonNull(reference, "reference");
+
+		ReferenceType type = reference.getType(serverBase);
+		switch (type)
+		{
+			case LITERAL_EXTERNAL:
+			case RELATED_ARTEFACT_LITERAL_EXTERNAL_URL:
+				return literalExternalReferenceCanBeCheckedAndResolved(reference);
+			case LOGICAL:
+				return logicalReferenceCanBeCheckedAndResolved(reference);
+			default:
+				return true;
+		}
+	}
+
+	private boolean logicalReferenceCanBeCheckedAndResolved(ResourceReference reference)
+	{
+		ReferenceType type = reference.getType(serverBase);
+		if (!ReferenceType.LOGICAL.equals(type))
+			throw new IllegalArgumentException("Not a logical reference");
+
+		NamingSystemDao namingSystemDao = daoProvider.getNamingSystemDao();
+
+		return exceptionHandler.handleSqlException(
+				() -> namingSystemDao.exists(reference.getReference().getIdentifier().getSystem(), true));
+	}
+
+	private boolean literalExternalReferenceCanBeCheckedAndResolved(ResourceReference reference)
+	{
+		ReferenceType type = reference.getType(serverBase);
+		if (!(ReferenceType.LITERAL_EXTERNAL.equals(type)
+				|| ReferenceType.RELATED_ARTEFACT_LITERAL_EXTERNAL_URL.equals(type)))
+			throw new IllegalArgumentException(
+					"Not a literal external reference or related artifact literal external url");
+
+		String remoteServerBase = reference.getServerBase(serverBase);
+
+		return clientProvider.getClient(remoteServerBase).isPresent();
 	}
 
 	@Override
@@ -397,18 +447,21 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 
 		if (client.isEmpty())
 		{
-			logger.warn("Cannot check literal external reference {}, no remote client found for server base {}",
+			logger.error(
+					"Error while resolving literal external reference {}, no remote client found for server base {}",
 					referenceValue, remoteServerBase);
+			return Optional
+					.of(responseGenerator.noEndpointFoundForLiteralExternalReference(bundleIndex, resource, reference));
 		}
 		else
 		{
 			IdType referenceId = new IdType(referenceValue);
-			logger.debug("Trying to resolve literal external reference {}, at known remote server with server base {}",
-					referenceValue, remoteServerBase);
+			logger.debug("Trying to resolve literal external reference {}, at remote server {}", referenceValue,
+					remoteServerBase);
 			if (!client.get().exists(referenceId))
 			{
 				logger.error(
-						"Error while resolving literal external reference {}, resource could not be found on known remote server {}",
+						"Error while resolving literal external reference {}, resource could not be found on remote server {}",
 						referenceValue, remoteServerBase);
 				return Optional.of(responseGenerator.referenceTargetNotFoundRemote(bundleIndex, resource, reference,
 						remoteServerBase));
