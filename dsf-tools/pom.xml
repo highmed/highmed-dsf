@@ -1,5 +1,5 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>dsf-tools-pom</artifactId>
@@ -12,13 +12,14 @@
 	</parent>
 
 	<modules>
-		<module>dsf-tools-db-migration</module>
-		<module>dsf-tools-test-data-generator</module>
-		<module>dsf-tools-proxy-test</module>
-		<module>dsf-tools-bundle-generator</module>
 		<module>dsf-tools-build-info-reader</module>
+		<module>dsf-tools-bundle-generator</module>
+		<module>dsf-tools-db-migration</module>
+		<module>dsf-tools-docker-secrets-reader</module>
+		<module>dsf-tools-proxy-test</module>
+		<module>dsf-tools-test-data-generator</module>
 	</modules>
-	
+
 	<properties>
 		<main.basedir>${project.basedir}/..</main.basedir>
 	</properties>
@@ -27,12 +28,7 @@
 		<dependencies>
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
-				<artifactId>dsf-tools-db-migration</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.highmed.dsf</groupId>
-				<artifactId>dsf-tools-test-data-generator</artifactId>
+				<artifactId>dsf-tools-build-info-reader</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -40,6 +36,27 @@
 				<artifactId>dsf-tools-bundle-generator</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-tools-db-migration</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-tools-docker-secrets-reader</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-tools-proxy-test</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-tools-test-data-generator</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
 				<artifactId>dsf-fhir-rest-adapter</artifactId>
