@@ -1,6 +1,5 @@
 .dockerignore
 Dockerfile
-conf/README.md
 last_event/README.md
 lib/README.md
 log/README.md
