@@ -9,7 +9,6 @@ import java.util.Optional;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.lang3.StringUtils;
 import org.highmed.dsf.fhir.dao.NamingSystemDao;
 import org.highmed.dsf.fhir.search.parameters.NamingSystemDate;
 import org.highmed.dsf.fhir.search.parameters.NamingSystemName;
@@ -71,38 +70,57 @@ public class NamingSystemDaoJdbc extends AbstractResourceDaoJdbc<NamingSystem> i
 	}
 
 	@Override
-	public boolean isResolvable(String uniqueIdValue) throws SQLException
+	public boolean existsWithUniqueIdUriEntry(Connection connection, String uniqueIdValue) throws SQLException
 	{
-		if (StringUtils.isBlank(uniqueIdValue))
+		Objects.requireNonNull(connection, "connection");
+		if (uniqueIdValue == null || uniqueIdValue.isBlank())
 			return false;
 
-		try (Connection connection = getDataSource().getConnection();
-				PreparedStatement statement = connection.prepareStatement(
-						"SELECT naming_system FROM (SELECT naming_system, uniqueId FROM current_naming_systems, jsonb_array_elements(naming_system->'uniqueId') uniqueId WHERE naming_system->>'status' IN ('draft', 'active')) AS uniqueId WHERE uniqueId->>'value' = ? AND uniqueId->'modifierExtension' @> ?::jsonb"))
-		{
-			statement.setString(1, uniqueIdValue);
+		final String namingSystem = "{\"uniqueId\":[{\"type\":\"uri\",\"value\":\"" + uniqueIdValue + "\"}]}";
 
-			String modifierExtension = "[{\"url\":\"http://highmed.org/fhir/StructureDefinition/extension-check-logical-reference\",\"valueBoolean\":true}]";
-			statement.setString(2, modifierExtension);
+		try (PreparedStatement statement = connection.prepareStatement(
+				"SELECT count(*) FROM current_naming_systems WHERE naming_system->>'status' IN ('draft', 'active') AND naming_system @> ?::jsonb"))
+		{
+			statement.setString(1, namingSystem);
 
 			logger.trace("Executing query '{}'", statement);
 			try (ResultSet result = statement.executeQuery())
 			{
-				if (result.next())
-				{
-					NamingSystem namingSystem = getResource(result, 1);
-					logger.debug(
-							"NamingSystem with IdPart {} and check logical reference modifier with value true found",
-							namingSystem.getIdElement().getIdPart());
-					return true;
-				}
-				else
-				{
-					logger.debug(
-							"NamingSystem with uniqueId {} and check logical references modifier with value true not found",
-							uniqueIdValue);
-					return false;
-				}
+				boolean found = result.next() && result.getInt(1) > 0;
+
+				logger.debug("NamingSystem with uniqueId entry (uri/value({})) {}found", uniqueIdValue,
+						found ? "" : "not ");
+
+				return found;
+			}
+		}
+	}
+
+	@Override
+	public boolean existsWithUniqueIdUriEntryResolvable(Connection connection, String uniqueIdValue) throws SQLException
+	{
+		Objects.requireNonNull(connection, "connection");
+		if (uniqueIdValue == null || uniqueIdValue.isBlank())
+			return false;
+
+		final String namingSystem = "{\"uniqueId\":[{\"modifierExtension\":[{\"url\":\"http://highmed.org/fhir/StructureDefinition/extension-check-logical-reference\",\"valueBoolean\":true}],"
+				+ "\"type\":\"uri\",\"value\":\"" + uniqueIdValue + "\"}]}";
+
+		try (PreparedStatement statement = connection.prepareStatement(
+				"SELECT count(*) FROM current_naming_systems WHERE naming_system->>'status' IN ('draft', 'active') AND naming_system @> ?::jsonb"))
+		{
+			statement.setString(1, namingSystem);
+
+			logger.trace("Executing query '{}'", statement);
+			try (ResultSet result = statement.executeQuery())
+			{
+				boolean found = result.next() && result.getInt(1) > 0;
+
+				logger.debug(
+						"NamingSystem with uniqueId entry (uri/value({})) and check-logical-reference true {}found",
+						uniqueIdValue, found ? "" : "not ");
+
+				return found;
 			}
 		}
 	}

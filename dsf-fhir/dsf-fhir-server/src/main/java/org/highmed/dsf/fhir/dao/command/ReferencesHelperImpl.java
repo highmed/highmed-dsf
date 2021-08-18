@@ -45,19 +45,17 @@ public final class ReferencesHelperImpl<R extends Resource> implements Reference
 	public void resolveTemporaryAndConditionalReferencesOrLiteralInternalRelatedArtifactUrls(
 			Map<String, IdType> idTranslationTable, Connection connection) throws WebApplicationException
 	{
-		referenceExtractor.getReferences(resource).forEach(ref ->
-		{
-			if (referenceResolver.referenceCanBeResolved(ref))
-			{
-				Optional<OperationOutcome> outcome = resolveTemporaryOrConditionalReferenceOrLiteralInternalRelatedArtifactUrl(
-						ref, idTranslationTable, connection);
-				if (outcome.isPresent())
+		referenceExtractor.getReferences(resource)
+				.filter(ref -> referenceResolver.referenceCanBeResolved(ref, connection)).forEach(ref ->
 				{
-					Response response = Response.status(Status.FORBIDDEN).entity(outcome.get()).build();
-					throw new WebApplicationException(response);
-				}
-			}
-		});
+					Optional<OperationOutcome> outcome = resolveTemporaryOrConditionalReferenceOrLiteralInternalRelatedArtifactUrl(
+							ref, idTranslationTable, connection);
+					if (outcome.isPresent())
+					{
+						Response response = Response.status(Status.FORBIDDEN).entity(outcome.get()).build();
+						throw new WebApplicationException(response);
+					}
+				});
 	}
 
 	private Optional<OperationOutcome> resolveTemporaryOrConditionalReferenceOrLiteralInternalRelatedArtifactUrl(
@@ -160,16 +158,13 @@ public final class ReferencesHelperImpl<R extends Resource> implements Reference
 	public void resolveLogicalReferences(Connection connection) throws WebApplicationException
 	{
 		referenceExtractor.getReferences(resource).filter(ref -> ReferenceType.LOGICAL.equals(ref.getType(serverBase)))
-				.forEach(ref ->
+				.filter(ref -> referenceResolver.referenceCanBeResolved(ref, connection)).forEach(ref ->
 				{
-					if (referenceResolver.referenceCanBeResolved(ref))
+					Optional<OperationOutcome> outcome = resolveLogicalReference(ref, connection);
+					if (outcome.isPresent())
 					{
-						Optional<OperationOutcome> outcome = resolveLogicalReference(ref, connection);
-						if (outcome.isPresent())
-						{
-							Response response = Response.status(Status.FORBIDDEN).entity(outcome.get()).build();
-							throw new WebApplicationException(response);
-						}
+						Response response = Response.status(Status.FORBIDDEN).entity(outcome.get()).build();
+						throw new WebApplicationException(response);
 					}
 				});
 	}
@@ -194,18 +189,16 @@ public final class ReferencesHelperImpl<R extends Resource> implements Reference
 	public void checkReferences(Map<String, IdType> idTranslationTable, Connection connection)
 			throws WebApplicationException
 	{
-		referenceExtractor.getReferences(resource).forEach(ref ->
-		{
-			if (referenceResolver.referenceCanBeChecked(ref))
-			{
-				Optional<OperationOutcome> outcome = checkReference(idTranslationTable, connection, ref);
-				if (outcome.isPresent())
+		referenceExtractor.getReferences(resource)
+				.filter(ref -> referenceResolver.referenceCanBeChecked(ref, connection)).forEach(ref ->
 				{
-					Response response = Response.status(Status.FORBIDDEN).entity(outcome.get()).build();
-					throw new WebApplicationException(response);
-				}
-			}
-		});
+					Optional<OperationOutcome> outcome = checkReference(idTranslationTable, connection, ref);
+					if (outcome.isPresent())
+					{
+						Response response = Response.status(Status.FORBIDDEN).entity(outcome.get()).build();
+						throw new WebApplicationException(response);
+					}
+				});
 	}
 
 	private Optional<OperationOutcome> checkReference(Map<String, IdType> idTranslationTable, Connection connection,

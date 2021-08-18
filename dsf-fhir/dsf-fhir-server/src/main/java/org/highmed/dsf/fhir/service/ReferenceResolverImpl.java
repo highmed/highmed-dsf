@@ -69,15 +69,16 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 	}
 
 	@Override
-	public boolean referenceCanBeResolved(ResourceReference reference)
+	public boolean referenceCanBeResolved(ResourceReference reference, Connection connection)
 	{
-		return referenceCanBeChecked(reference);
+		return referenceCanBeChecked(reference, connection);
 	}
 
 	@Override
-	public boolean referenceCanBeChecked(ResourceReference reference)
+	public boolean referenceCanBeChecked(ResourceReference reference, Connection connection)
 	{
 		Objects.requireNonNull(reference, "reference");
+		Objects.requireNonNull(connection, "connection");
 
 		ReferenceType type = reference.getType(serverBase);
 		switch (type)
@@ -86,13 +87,13 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 			case RELATED_ARTEFACT_LITERAL_EXTERNAL_URL:
 				return literalExternalReferenceCanBeCheckedAndResolved(reference);
 			case LOGICAL:
-				return logicalReferenceCanBeCheckedAndResolved(reference);
+				return logicalReferenceCanBeCheckedAndResolved(reference, connection);
 			default:
 				return true;
 		}
 	}
 
-	private boolean logicalReferenceCanBeCheckedAndResolved(ResourceReference reference)
+	private boolean logicalReferenceCanBeCheckedAndResolved(ResourceReference reference, Connection connection)
 	{
 		ReferenceType type = reference.getType(serverBase);
 		if (!ReferenceType.LOGICAL.equals(type))
@@ -100,8 +101,9 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 
 		NamingSystemDao namingSystemDao = daoProvider.getNamingSystemDao();
 
-		return exceptionHandler.handleSqlException(
-				() -> namingSystemDao.isResolvable(reference.getReference().getIdentifier().getSystem()));
+		return exceptionHandler
+				.handleSqlException(() -> namingSystemDao.existsWithUniqueIdUriEntryResolvable(connection,
+						reference.getReference().getIdentifier().getSystem()));
 	}
 
 	private boolean literalExternalReferenceCanBeCheckedAndResolved(ResourceReference reference)

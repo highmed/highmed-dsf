@@ -5,11 +5,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.sql.Connection;
 import java.util.Optional;
 
 import org.highmed.dsf.fhir.dao.jdbc.NamingSystemDaoJdbc;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.NamingSystem;
+import org.hl7.fhir.r4.model.NamingSystem.NamingSystemIdentifierType;
 import org.junit.Test;
 
 public class NamingSystemDaoTest extends AbstractResourceDaoTest<NamingSystem, NamingSystemDao>
@@ -62,52 +64,141 @@ public class NamingSystemDaoTest extends AbstractResourceDaoTest<NamingSystem, N
 	}
 
 	@Test
-	public void testIsResolvable() throws Exception
+	public void testExistsWithUniqueIdUriEntry() throws Exception
 	{
 		NamingSystem newResource = createResource();
 		newResource.setStatus(ACTIVE);
-		newResource.addUniqueId().setValue(uniqueIdValue).setType(NamingSystem.NamingSystemIdentifierType.OTHER)
-				.addModifierExtension()
+		newResource.addUniqueId().setValue(uniqueIdValue).setType(NamingSystemIdentifierType.URI).addModifierExtension()
 				.setUrl("http://highmed.org/fhir/StructureDefinition/extension-check-logical-reference")
 				.setValue(new BooleanType(true));
 		dao.create(newResource);
 
-		assertTrue(dao.isResolvable(uniqueIdValue));
+		try (Connection connection = defaultDataSource.getConnection())
+		{
+			assertTrue(dao.existsWithUniqueIdUriEntry(connection, uniqueIdValue));
+		}
 	}
 
 	@Test
-	public void testIsResolvableWithoutUniqueId() throws Exception
+	public void testExistsWithUniqueIdUriEntryTwoEntries() throws Exception
 	{
 		NamingSystem newResource = createResource();
 		newResource.setStatus(ACTIVE);
+		newResource.addUniqueId().setValue(uniqueIdValue).setType(NamingSystemIdentifierType.URI).addModifierExtension()
+				.setUrl("http://highmed.org/fhir/StructureDefinition/extension-check-logical-reference")
+				.setValue(new BooleanType(true));
+		newResource.addUniqueId().setValue(uniqueIdValue + "foo").setType(NamingSystemIdentifierType.URI);
 		dao.create(newResource);
 
-		assertFalse(dao.isResolvable(uniqueIdValue));
+		try (Connection connection = defaultDataSource.getConnection())
+		{
+			assertTrue(dao.existsWithUniqueIdUriEntry(connection, uniqueIdValue));
+		}
 	}
 
 	@Test
-	public void testIsResolvableWithoutModifierExtension() throws Exception
+	public void testExistsWithUniqueIdUriEntryNotExisting() throws Exception
+	{
+		try (Connection connection = defaultDataSource.getConnection())
+		{
+			assertFalse(dao.existsWithUniqueIdUriEntry(connection, uniqueIdValue));
+		}
+	}
+
+	@Test
+	public void testExistsWithUniqueIdUriEntryResolvable() throws Exception
 	{
 		NamingSystem newResource = createResource();
 		newResource.setStatus(ACTIVE);
-		newResource.addUniqueId().setValue(uniqueIdValue).setType(NamingSystem.NamingSystemIdentifierType.OTHER);
+		newResource.addUniqueId().setValue(uniqueIdValue).setType(NamingSystemIdentifierType.URI).addModifierExtension()
+				.setUrl("http://highmed.org/fhir/StructureDefinition/extension-check-logical-reference")
+				.setValue(new BooleanType(true));
 		dao.create(newResource);
 
-		assertFalse(dao.isResolvable(uniqueIdValue));
+		try (Connection connection = defaultDataSource.getConnection())
+		{
+			assertTrue(dao.existsWithUniqueIdUriEntryResolvable(connection, uniqueIdValue));
+		}
 	}
 
 	@Test
-	public void testIsResolvableWithModifierExtensionOfValueFalse() throws Exception
+	public void testExistsWithUniqueIdUriEntryResolvableSecondUniquIdNotResolvable() throws Exception
 	{
 		NamingSystem newResource = createResource();
 		newResource.setStatus(ACTIVE);
-		newResource.addUniqueId().setValue(uniqueIdValue).setType(NamingSystem.NamingSystemIdentifierType.OTHER)
+		newResource.addUniqueId().setValue(uniqueIdValue).setType(NamingSystemIdentifierType.URI).addModifierExtension()
+				.setUrl("http://highmed.org/fhir/StructureDefinition/extension-check-logical-reference")
+				.setValue(new BooleanType(true));
+		newResource.addUniqueId().setValue(uniqueIdValue + "foo").setType(NamingSystemIdentifierType.URI)
 				.addModifierExtension()
 				.setUrl("http://highmed.org/fhir/StructureDefinition/extension-check-logical-reference")
 				.setValue(new BooleanType(false));
 		dao.create(newResource);
 
-		assertFalse(dao.isResolvable(uniqueIdValue));
+		try (Connection connection = defaultDataSource.getConnection())
+		{
+			assertTrue(dao.existsWithUniqueIdUriEntryResolvable(connection, uniqueIdValue));
+		}
+	}
+
+	@Test
+	public void testExistsWithUniqueIdUriEntryResolvableSecondUniquIdNotResolvableNoExtension() throws Exception
+	{
+		NamingSystem newResource = createResource();
+		newResource.setStatus(ACTIVE);
+		newResource.addUniqueId().setValue(uniqueIdValue).setType(NamingSystemIdentifierType.URI).addModifierExtension()
+				.setUrl("http://highmed.org/fhir/StructureDefinition/extension-check-logical-reference")
+				.setValue(new BooleanType(true));
+		newResource.addUniqueId().setValue(uniqueIdValue + "foo").setType(NamingSystemIdentifierType.URI);
+		dao.create(newResource);
+
+		try (Connection connection = defaultDataSource.getConnection())
+		{
+			assertTrue(dao.existsWithUniqueIdUriEntryResolvable(connection, uniqueIdValue));
+		}
+	}
+
+	@Test
+	public void testExistsWithUniqueIdUriEntryResolvableWithoutUniqueId() throws Exception
+	{
+		NamingSystem newResource = createResource();
+		newResource.setStatus(ACTIVE);
+		dao.create(newResource);
+
+		try (Connection connection = defaultDataSource.getConnection())
+		{
+			assertFalse(dao.existsWithUniqueIdUriEntryResolvable(connection, uniqueIdValue));
+		}
+	}
+
+	@Test
+	public void testExistsWithUniqueIdUriEntryResolvableWithoutModifierExtension() throws Exception
+	{
+		NamingSystem newResource = createResource();
+		newResource.setStatus(ACTIVE);
+		newResource.addUniqueId().setValue(uniqueIdValue).setType(NamingSystemIdentifierType.URI);
+		dao.create(newResource);
+
+		try (Connection connection = defaultDataSource.getConnection())
+		{
+			assertFalse(dao.existsWithUniqueIdUriEntryResolvable(connection, uniqueIdValue));
+		}
+	}
+
+	@Test
+	public void testExistsWithUniqueIdUriEntryResolvableWithModifierExtensionOfValueFalse() throws Exception
+	{
+		NamingSystem newResource = createResource();
+		newResource.setStatus(ACTIVE);
+		newResource.addUniqueId().setValue(uniqueIdValue).setType(NamingSystemIdentifierType.URI).addModifierExtension()
+				.setUrl("http://highmed.org/fhir/StructureDefinition/extension-check-logical-reference")
+				.setValue(new BooleanType(false));
+		dao.create(newResource);
+
+		try (Connection connection = defaultDataSource.getConnection())
+		{
+			assertFalse(dao.existsWithUniqueIdUriEntryResolvable(connection, uniqueIdValue));
+		}
 	}
 
 	@Override
