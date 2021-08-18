@@ -68,4 +68,60 @@ public class NamingSystemDaoJdbc extends AbstractResourceDaoJdbc<NamingSystem> i
 			}
 		}
 	}
+
+	@Override
+	public boolean existsWithUniqueIdUriEntry(Connection connection, String uniqueIdValue) throws SQLException
+	{
+		Objects.requireNonNull(connection, "connection");
+		if (uniqueIdValue == null || uniqueIdValue.isBlank())
+			return false;
+
+		final String namingSystem = "{\"uniqueId\":[{\"type\":\"uri\",\"value\":\"" + uniqueIdValue + "\"}]}";
+
+		try (PreparedStatement statement = connection.prepareStatement(
+				"SELECT count(*) FROM current_naming_systems WHERE naming_system->>'status' IN ('draft', 'active') AND naming_system @> ?::jsonb"))
+		{
+			statement.setString(1, namingSystem);
+
+			logger.trace("Executing query '{}'", statement);
+			try (ResultSet result = statement.executeQuery())
+			{
+				boolean found = result.next() && result.getInt(1) > 0;
+
+				logger.debug("NamingSystem with uniqueId entry (uri/value({})) {}found", uniqueIdValue,
+						found ? "" : "not ");
+
+				return found;
+			}
+		}
+	}
+
+	@Override
+	public boolean existsWithUniqueIdUriEntryResolvable(Connection connection, String uniqueIdValue) throws SQLException
+	{
+		Objects.requireNonNull(connection, "connection");
+		if (uniqueIdValue == null || uniqueIdValue.isBlank())
+			return false;
+
+		final String namingSystem = "{\"uniqueId\":[{\"modifierExtension\":[{\"url\":\"http://highmed.org/fhir/StructureDefinition/extension-check-logical-reference\",\"valueBoolean\":true}],"
+				+ "\"type\":\"uri\",\"value\":\"" + uniqueIdValue + "\"}]}";
+
+		try (PreparedStatement statement = connection.prepareStatement(
+				"SELECT count(*) FROM current_naming_systems WHERE naming_system->>'status' IN ('draft', 'active') AND naming_system @> ?::jsonb"))
+		{
+			statement.setString(1, namingSystem);
+
+			logger.trace("Executing query '{}'", statement);
+			try (ResultSet result = statement.executeQuery())
+			{
+				boolean found = result.next() && result.getInt(1) > 0;
+
+				logger.debug(
+						"NamingSystem with uniqueId entry (uri/value({})) and check-logical-reference true {}found",
+						uniqueIdValue, found ? "" : "not ");
+
+				return found;
+			}
+		}
+	}
 }
