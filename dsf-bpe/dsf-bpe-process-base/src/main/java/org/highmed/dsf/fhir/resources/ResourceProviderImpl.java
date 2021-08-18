@@ -173,14 +173,6 @@ class ResourceProviderImpl implements ResourceProvider
 		return Stream.concat(resources, dependencyResources);
 	}
 
-	@Override
-	public boolean isEmpty()
-	{
-		return activityDefinitionsByProcessKeyAndVersion.isEmpty() && codeSystemsByProcessKeyAndVersion.isEmpty()
-				&& namingSystemsByProcessKeyAndVersion.isEmpty() && structureDefinitionsByProcessKeyAndVersion.isEmpty()
-				&& valueSetsByProcessKeyAndVersion.isEmpty();
-	}
-
 	static ResourceProvider of(Map<String, List<MetadataResource>> resourcesByProcessKeyAndVersion)
 	{
 		return of(resourcesByProcessKeyAndVersion, Collections.emptyMap());
