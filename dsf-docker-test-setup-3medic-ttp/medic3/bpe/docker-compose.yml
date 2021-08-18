@@ -66,8 +66,8 @@ services:
       ORG_HIGHMED_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_MeDIC_3
       ORG_HIGHMED_DSF_BPE_FHIR_SERVER_BASE_URL: https://medic3/fhir
       ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: highmedorg_computeFeasibility/0.5.0,highmedorg_computeDataSharing/0.5.0,highmedorg_requestUpdateResources/0.5.0,highmedorg_updateAllowList/0.5.0
-      # property org.highmed.dsf.bpe.allowListOrganization should only be set for testing, do not configure property in production, potential security risk
-      ORG_HIGHMED_DSF_BPE_ALLOWLISTORGANIZATION: Test_TTP
+      # property org.highmed.dsf.bpe.allow.list.organization should only be set for testing, do not configure property in production, potential security risk
+      ORG_HIGHMED_DSF_BPE_ALLOW_LIST_ORGANIZATION: Test_TTP
     networks:
       frontend:
         ipv4_address: 172.28.3.3
