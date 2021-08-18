@@ -77,7 +77,8 @@ public class ReferenceResolverIntegrationTest extends AbstractIntegrationTest
 	{
 		prepareServerWithActivityDefinitionAndTaskProfile();
 
-		Task task = getTaskWithLogicalReferenceInputMissingTypeInformationBasedOnKnownOrganizationNamingSystem("Test_Organization");
+		Task task = getTaskWithLogicalReferenceInputMissingTypeInformationBasedOnKnownOrganizationNamingSystem(
+				"Test_Organization");
 
 		expectForbidden(() -> getExternalWebserviceClient().create(task));
 	}
@@ -145,8 +146,10 @@ public class ReferenceResolverIntegrationTest extends AbstractIntegrationTest
 	private Task getTaskWithLogicalReferenceInput() throws IOException
 	{
 		Task task = readTestTask();
-		task.addInput().setValue(new Reference().setType(ResourceType.Patient.name()).setIdentifier(
-				new Identifier().setSystem("http://foo.bar/sid/pseudonym").setValue(UUID.randomUUID().toString())))
+		task.addInput()
+				.setValue(new Reference().setType(ResourceType.Patient.name())
+						.setIdentifier(new Identifier().setSystem("http://foo.bar/sid/pseudonym")
+								.setValue(UUID.randomUUID().toString())))
 				.getType().addCoding().setSystem("http://foo.bar/fhir/CodeSystem/test").setCode("patient");
 
 		return task;
@@ -165,10 +168,11 @@ public class ReferenceResolverIntegrationTest extends AbstractIntegrationTest
 			String organizationIdentifierValue) throws IOException
 	{
 		Task task = readTestTask();
-		task.addInput().setValue(new Reference().setType(ResourceType.Organization.name()).setIdentifier(
-				new Identifier().setSystem("http://highmed.org/sid/organization-identifier")
-						.setValue(organizationIdentifierValue))).getType().addCoding()
-				.setSystem("http://highmed.org/fhir/CodeSystem/organization-type").setCode("COS");
+		task.addInput()
+				.setValue(new Reference().setType(ResourceType.Organization.name())
+						.setIdentifier(new Identifier().setSystem("http://highmed.org/sid/organization-identifier")
+								.setValue(organizationIdentifierValue)))
+				.getType().addCoding().setSystem("http://highmed.org/fhir/CodeSystem/organization-type").setCode("COS");
 
 		return task;
 	}
@@ -177,10 +181,9 @@ public class ReferenceResolverIntegrationTest extends AbstractIntegrationTest
 			String organizationIdentifierValue) throws IOException
 	{
 		Task task = readTestTask();
-		task.addInput().setValue(new Reference().setIdentifier(
-				new Identifier().setSystem("http://highmed.org/sid/organization-identifier")
-						.setValue(organizationIdentifierValue))).getType().addCoding()
-				.setSystem("http://highmed.org/fhir/CodeSystem/organization-type").setCode("COS");
+		task.addInput().setValue(new Reference().setIdentifier(new Identifier()
+				.setSystem("http://highmed.org/sid/organization-identifier").setValue(organizationIdentifierValue)))
+				.getType().addCoding().setSystem("http://highmed.org/fhir/CodeSystem/organization-type").setCode("COS");
 
 		return task;
 	}
@@ -188,8 +191,9 @@ public class ReferenceResolverIntegrationTest extends AbstractIntegrationTest
 	private Task getTaskWithLogicalReferenceInputBasedOnUnknownNamingSystem() throws IOException
 	{
 		Task task = readTestTask();
-		task.addInput().setValue(new Reference().setType(ResourceType.Patient.name())
-				.setIdentifier(new Identifier().setSystem("http://foo.bar/fhir/sid/test").setValue("source/original")))
+		task.addInput()
+				.setValue(new Reference().setType(ResourceType.Patient.name()).setIdentifier(
+						new Identifier().setSystem("http://foo.bar/fhir/sid/test").setValue("source/original")))
 				.getType().addCoding().setSystem("http://foo.bar/fhir/CodeSystem/test").setCode("patient");
 
 		return task;
