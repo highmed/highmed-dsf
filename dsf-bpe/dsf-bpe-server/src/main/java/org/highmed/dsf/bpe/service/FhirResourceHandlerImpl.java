@@ -1,5 +1,6 @@
 package org.highmed.dsf.bpe.service;
 
+import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -361,7 +362,17 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 			}
 		};
 
-		return definition.getResourceProvider().getResources(process.toString(), providerByNameAndVersion);
+		List<MetadataResource> resources = definition.getResourceProvider()
+				.getResources(process.toString(), providerByNameAndVersion).collect(Collectors.toList());
+		if (resources.isEmpty())
+		{
+			logger.warn("No FHIR resources found in {} for process {}",
+					definition.getJars().stream().map(Path::toString).collect(Collectors.joining(",")),
+					process.toString());
+			return Stream.empty();
+		}
+		else
+			return resources.stream();
 	}
 
 	private Optional<UUID> getResourceId(Map<ProcessKeyAndVersion, List<ResourceInfo>> dbResourcesByProcess,
