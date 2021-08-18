@@ -1,11 +1,14 @@
 package org.highmed.dsf.fhir.dao;
 
+import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Optional;
 
 import org.highmed.dsf.fhir.dao.jdbc.NamingSystemDaoJdbc;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.NamingSystem;
 import org.junit.Test;
 
@@ -14,6 +17,7 @@ public class NamingSystemDaoTest extends AbstractResourceDaoTest<NamingSystem, N
 {
 	private static final String name = "Demo NamingSystem Name";
 	private static final String description = "Demo NamingSystem Description";
+	private static final String uniqueIdValue = "http://foo.bar/sid/test";
 
 	public NamingSystemDaoTest()
 	{
@@ -55,6 +59,55 @@ public class NamingSystemDaoTest extends AbstractResourceDaoTest<NamingSystem, N
 
 		Optional<NamingSystem> readByName = dao.readByName(name);
 		assertTrue(readByName.isPresent());
+	}
+
+	@Test
+	public void testIsResolvable() throws Exception
+	{
+		NamingSystem newResource = createResource();
+		newResource.setStatus(ACTIVE);
+		newResource.addUniqueId().setValue(uniqueIdValue).setType(NamingSystem.NamingSystemIdentifierType.OTHER)
+				.addModifierExtension()
+				.setUrl("http://highmed.org/fhir/StructureDefinition/extension-check-logical-reference")
+				.setValue(new BooleanType(true));
+		dao.create(newResource);
+
+		assertTrue(dao.isResolvable(uniqueIdValue));
+	}
+
+	@Test
+	public void testIsResolvableWithoutUniqueId() throws Exception
+	{
+		NamingSystem newResource = createResource();
+		newResource.setStatus(ACTIVE);
+		dao.create(newResource);
+
+		assertFalse(dao.isResolvable(uniqueIdValue));
+	}
+
+	@Test
+	public void testIsResolvableWithoutModifierExtension() throws Exception
+	{
+		NamingSystem newResource = createResource();
+		newResource.setStatus(ACTIVE);
+		newResource.addUniqueId().setValue(uniqueIdValue).setType(NamingSystem.NamingSystemIdentifierType.OTHER);
+		dao.create(newResource);
+
+		assertFalse(dao.isResolvable(uniqueIdValue));
+	}
+
+	@Test
+	public void testIsResolvableWithModifierExtensionOfValueFalse() throws Exception
+	{
+		NamingSystem newResource = createResource();
+		newResource.setStatus(ACTIVE);
+		newResource.addUniqueId().setValue(uniqueIdValue).setType(NamingSystem.NamingSystemIdentifierType.OTHER)
+				.addModifierExtension()
+				.setUrl("http://highmed.org/fhir/StructureDefinition/extension-check-logical-reference")
+				.setValue(new BooleanType(false));
+		dao.create(newResource);
+
+		assertFalse(dao.isResolvable(uniqueIdValue));
 	}
 
 	@Override

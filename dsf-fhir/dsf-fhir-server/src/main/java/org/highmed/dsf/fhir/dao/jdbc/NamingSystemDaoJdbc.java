@@ -71,7 +71,7 @@ public class NamingSystemDaoJdbc extends AbstractResourceDaoJdbc<NamingSystem> i
 	}
 
 	@Override
-	public boolean exists(String uniqueIdValue, boolean checkLogicalReferences) throws SQLException
+	public boolean isResolvable(String uniqueIdValue) throws SQLException
 	{
 		if (StringUtils.isBlank(uniqueIdValue))
 			return false;
@@ -82,8 +82,7 @@ public class NamingSystemDaoJdbc extends AbstractResourceDaoJdbc<NamingSystem> i
 		{
 			statement.setString(1, uniqueIdValue);
 
-			String modifierExtension = "[{\"url\":\"http://highmed.org/fhir/StructureDefinition/extension-check-logical-reference\",\"valueBoolean\":"
-					+ checkLogicalReferences + "}]";
+			String modifierExtension = "[{\"url\":\"http://highmed.org/fhir/StructureDefinition/extension-check-logical-reference\",\"valueBoolean\":true}]";
 			statement.setString(2, modifierExtension);
 
 			logger.trace("Executing query '{}'", statement);
@@ -92,15 +91,16 @@ public class NamingSystemDaoJdbc extends AbstractResourceDaoJdbc<NamingSystem> i
 				if (result.next())
 				{
 					NamingSystem namingSystem = getResource(result, 1);
-					logger.debug("NamingSystem with IdPart {} and check logical reference modifier with value {} found",
-							namingSystem.getIdElement().getIdPart(), checkLogicalReferences);
+					logger.debug(
+							"NamingSystem with IdPart {} and check logical reference modifier with value true found",
+							namingSystem.getIdElement().getIdPart());
 					return true;
 				}
 				else
 				{
 					logger.debug(
-							"NamingSystem with uniqueId {} and check logical references modifier with value {} not found",
-							uniqueIdValue, checkLogicalReferences);
+							"NamingSystem with uniqueId {} and check logical references modifier with value true not found",
+							uniqueIdValue);
 					return false;
 				}
 			}

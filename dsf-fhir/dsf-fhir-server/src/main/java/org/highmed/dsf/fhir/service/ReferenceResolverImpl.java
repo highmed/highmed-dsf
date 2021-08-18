@@ -101,7 +101,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 		NamingSystemDao namingSystemDao = daoProvider.getNamingSystemDao();
 
 		return exceptionHandler.handleSqlException(
-				() -> namingSystemDao.exists(reference.getReference().getIdentifier().getSystem(), true));
+				() -> namingSystemDao.isResolvable(reference.getReference().getIdentifier().getSystem()));
 	}
 
 	private boolean literalExternalReferenceCanBeCheckedAndResolved(ResourceReference reference)
