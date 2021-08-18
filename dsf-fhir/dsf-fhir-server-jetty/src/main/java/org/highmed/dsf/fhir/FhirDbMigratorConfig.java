@@ -54,9 +54,7 @@ public class FhirDbMigratorConfig implements DbMigratorConfig
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer(
 			ConfigurableEnvironment environment)
 	{
-		new DockerSecretsPropertySourceFactory(environment, "org.highmed.dsf.fhir.db.liquibase.password",
-				"org.highmed.dsf.fhir.db.user.password", "org.highmed.dsf.fhir.db.user.permanent.delete.password")
-						.readDockerSecretsAndAddPropertiesToEnvironment();
+		new DockerSecretsPropertySourceFactory(environment).readDockerSecretsAndAddPropertiesToEnvironment();
 
 		return new PropertySourcesPlaceholderConfigurer();
 	}

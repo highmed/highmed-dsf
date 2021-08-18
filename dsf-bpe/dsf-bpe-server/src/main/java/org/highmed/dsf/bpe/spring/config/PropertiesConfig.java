@@ -126,13 +126,7 @@ public class PropertiesConfig
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer(
 			ConfigurableEnvironment environment)
 	{
-		new DockerSecretsPropertySourceFactory(environment, "org.highmed.dsf.bpe.db.user.password",
-				"org.highmed.dsf.bpe.db.user.camunda.password",
-				"org.highmed.dsf.bpe.fhir.client.certificate.private.key.password",
-				"org.highmed.dsf.bpe.fhir.client.remote.proxy.password",
-				"org.highmed.dsf.bpe.fhir.client.local.proxy.password",
-				"org.highmed.dsf.bpe.fhir.client.local.websocket.proxy.password")
-						.readDockerSecretsAndAddPropertiesToEnvironment();
+		new DockerSecretsPropertySourceFactory(environment).readDockerSecretsAndAddPropertiesToEnvironment();
 
 		return new PropertySourcesPlaceholderConfigurer();
 	}

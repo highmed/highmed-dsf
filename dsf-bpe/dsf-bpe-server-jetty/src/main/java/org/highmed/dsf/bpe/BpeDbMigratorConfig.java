@@ -54,9 +54,7 @@ public class BpeDbMigratorConfig implements DbMigratorConfig
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer(
 			ConfigurableEnvironment environment)
 	{
-		new DockerSecretsPropertySourceFactory(environment, "org.highmed.dsf.bpe.db.liquibase.password",
-				"org.highmed.dsf.bpe.db.user.password", "org.highmed.dsf.bpe.db.user.camunda.password")
-						.readDockerSecretsAndAddPropertiesToEnvironment();
+		new DockerSecretsPropertySourceFactory(environment).readDockerSecretsAndAddPropertiesToEnvironment();
 
 		return new PropertySourcesPlaceholderConfigurer();
 	}

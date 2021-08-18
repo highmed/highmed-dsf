@@ -82,10 +82,7 @@ public class PropertiesConfig
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer(
 			ConfigurableEnvironment environment)
 	{
-		new DockerSecretsPropertySourceFactory(environment, "org.highmed.dsf.fhir.db.user.password",
-				"org.highmed.dsf.fhir.db.user.permanent.delete.password",
-				"org.highmed.dsf.fhir.client.certificate.private.key.password",
-				"org.highmed.dsf.fhir.client.proxy.password").readDockerSecretsAndAddPropertiesToEnvironment();
+		new DockerSecretsPropertySourceFactory(environment).readDockerSecretsAndAddPropertiesToEnvironment();
 
 		return new PropertySourcesPlaceholderConfigurer();
 	}

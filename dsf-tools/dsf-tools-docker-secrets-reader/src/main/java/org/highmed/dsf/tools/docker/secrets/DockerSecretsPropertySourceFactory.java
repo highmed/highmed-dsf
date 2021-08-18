@@ -9,10 +9,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertiesPropertySource;
 
@@ -23,12 +25,19 @@ public class DockerSecretsPropertySourceFactory
 	private final Map<String, String> secretFilesByFinalPropertyName = new HashMap<>();
 	private final ConfigurableEnvironment environment;
 
-	public DockerSecretsPropertySourceFactory(ConfigurableEnvironment environment, String... properties)
+	public DockerSecretsPropertySourceFactory(ConfigurableEnvironment environment)
 	{
-		List.of(properties).forEach(key ->
+		Stream<String> passwordProperties = environment.getPropertySources().stream()
+				.filter(s -> s instanceof EnumerablePropertySource).map(s -> (EnumerablePropertySource<?>) s)
+				.flatMap(s -> List.of(s.getPropertyNames()).stream()).filter(key -> key != null)
+				.filter(key -> key.toLowerCase().endsWith(".password.file")
+						|| key.toLowerCase().endsWith("_password_file"));
+
+		passwordProperties.forEach(key ->
 		{
-			String fileName = environment.getProperty(key + ".file", String.class, null);
-			secretFilesByFinalPropertyName.put(key, fileName);
+			String fileName = environment.getProperty(key, String.class, null);
+			secretFilesByFinalPropertyName.put(key.toLowerCase().replace('_', '.').substring(0, key.length() - 5),
+					fileName);
 		});
 
 		this.environment = environment;
