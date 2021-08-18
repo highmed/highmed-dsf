@@ -14,6 +14,9 @@
 	<description value="Shortest DNS that resolves the endpoint typically the DNS used in endpoint.address"/>
 	<usage value="Used withing HiGHmed to identify endpoints"/>
 	<uniqueId>
+		<modifierExtension url="http://highmed.org/fhir/StructureDefinition/extension-check-logical-reference" >
+			<valueBoolean value="true"/>
+		</modifierExtension>
 		<type value="uri"/>
 		<value value="http://highmed.org/sid/endpoint-identifier"/>
 	</uniqueId>

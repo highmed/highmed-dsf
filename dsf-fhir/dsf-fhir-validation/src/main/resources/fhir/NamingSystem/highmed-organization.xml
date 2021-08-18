@@ -15,6 +15,9 @@
 			value="Shortest DNS that resolves the homepage of the organization, e.g. hs-heilbronn.de, klinikum.uni-heidelberg.de, uksh.de"/>
 	<usage value="Used withing HiGHmed to identify organizations"/>
 	<uniqueId>
+		<modifierExtension url="http://highmed.org/fhir/StructureDefinition/extension-check-logical-reference" >
+			<valueBoolean value="true"/>
+		</modifierExtension>
 		<type value="uri"/>
 		<value value="http://highmed.org/sid/organization-identifier"/>
 	</uniqueId>

@@ -206,7 +206,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	private void resolveLogicalReferences(Resource resource, Connection connection) throws WebApplicationException
 	{
 		referenceExtractor.getReferences(resource).filter(ref -> ReferenceType.LOGICAL.equals(ref.getType(serverBase)))
-				.forEach(ref ->
+				.filter(ref -> referenceResolver.referenceCanBeResolved(ref, connection)).forEach(ref ->
 				{
 					Optional<OperationOutcome> outcome = resolveLogicalReference(resource, ref, connection);
 					if (outcome.isPresent())
@@ -236,15 +236,16 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 	private void checkReferences(Resource resource, Connection connection) throws WebApplicationException
 	{
-		referenceExtractor.getReferences(resource).forEach(ref ->
-		{
-			Optional<OperationOutcome> outcome = checkReference(resource, connection, ref);
-			if (outcome.isPresent())
-			{
-				Response response = Response.status(Status.FORBIDDEN).entity(outcome.get()).build();
-				throw new WebApplicationException(response);
-			}
-		});
+		referenceExtractor.getReferences(resource)
+				.filter(ref -> referenceResolver.referenceCanBeChecked(ref, connection)).forEach(ref ->
+				{
+					Optional<OperationOutcome> outcome = checkReference(resource, connection, ref);
+					if (outcome.isPresent())
+					{
+						Response response = Response.status(Status.FORBIDDEN).entity(outcome.get()).build();
+						throw new WebApplicationException(response);
+					}
+				});
 	}
 
 	private Optional<OperationOutcome> checkReference(Resource resource, Connection connection,

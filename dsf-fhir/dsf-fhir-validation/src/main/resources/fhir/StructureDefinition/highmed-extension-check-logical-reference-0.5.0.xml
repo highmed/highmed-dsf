@@ -1,0 +1,46 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+  <meta>
+    <tag>
+      <system value="http://highmed.org/fhir/CodeSystem/read-access-tag" />
+      <code value="ALL" />
+    </tag>
+  </meta>
+  <url value="http://highmed.org/fhir/StructureDefinition/extension-check-logical-reference" />
+  <version value="0.5.0" />
+  <name value="CheckLogicalReference" />
+  <status value="active" />
+  <experimental value="false" />
+  <date value="2021-08-23" />
+  <fhirVersion value="4.0.1" />
+  <kind value="complex-type" />
+  <abstract value="false" />
+  <context>
+    <type value="element" />
+    <expression value="NamingSystem.uniqueId" />
+  </context>
+  <type value="Extension" />
+  <baseDefinition value="http://hl7.org/fhir/StructureDefinition/Extension" />
+  <derivation value="constraint" />
+  <differential>
+    <element>
+      <path value="Extension"/>
+      <isModifier value="true"/>
+	  <isModifierReason value="Determines if logical references will be checked" />
+    </element>
+    <element id="Extension.url">
+      <path value="Extension.url" />
+      <type>
+        <code value="uri" />
+      </type>
+      <fixedUri value="http://highmed.org/fhir/StructureDefinition/extension-check-logical-reference" />
+    </element>
+    <element id="Extension.value[x]">
+      <path value="Extension.value[x]" />
+      <min value="1" />
+      <max value="1" />
+      <type>
+        <code value="boolean" />
+      </type>
+    </element>
+  </differential>
+</StructureDefinition>

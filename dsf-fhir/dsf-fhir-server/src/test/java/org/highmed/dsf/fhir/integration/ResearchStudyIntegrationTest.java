@@ -53,6 +53,7 @@ public class ResearchStudyIntegrationTest extends AbstractIntegrationTest
 		assertEquals(researchStudyId, resultBundle.getEntryFirstRep().getResource().getIdElement().getIdPart());
 	}
 
+	@Test
 	public void testCreateWithRelatedArtefactUnknownUrl() throws Exception
 	{
 		String url = "https://foo.bar";
@@ -307,6 +308,48 @@ public class ResearchStudyIntegrationTest extends AbstractIntegrationTest
 
 		assertTrue(new IdType(relatedArtifactResultUrl).isAbsolute());
 		assertEquals(binaryResultUrl, relatedArtifactResultUrl);
+	}
+
+	@Test
+	public void testCreateWithRelatedArtefactAbsoluteLiteralExternalUrl() throws Exception
+	{
+		String literalExternalUrl = "https://www.foo.bar/fhir/Binary/" + UUID.randomUUID().toString();
+		ResearchStudy researchStudy = getResearchStudy(literalExternalUrl);
+		ResearchStudy researchStudyResult = getWebserviceClient().create(researchStudy);
+
+		assertNotNull(researchStudyResult);
+		assertEquals(1, researchStudyResult.getRelatedArtifact().size());
+
+		String relatedArtifactResultUrl = researchStudyResult.getRelatedArtifact().get(0).getUrl();
+
+		assertTrue(new IdType(relatedArtifactResultUrl).isAbsolute());
+		assertEquals(literalExternalUrl, relatedArtifactResultUrl);
+	}
+
+	@Test
+	public void testCreateViaBundleWithRelatedArtefactAbsoluteLiteralExternalUrl() throws Exception
+	{
+		String literalExternalUrl = "https://www.foo.bar/fhir/Binary/" + UUID.randomUUID().toString();
+		ResearchStudy researchStudy = getResearchStudy(literalExternalUrl);
+
+		Bundle bundle = new Bundle().setType(BundleType.TRANSACTION);
+		bundle.addEntry().setFullUrl("urn:uuid:" + UUID.randomUUID().toString()).setResource(researchStudy).getRequest()
+				.setUrl("ResearchStudy").setMethod(HTTPVerb.POST);
+
+		Bundle bundleResult = getWebserviceClient().postBundle(bundle);
+
+		assertEquals(1, bundleResult.getEntry().size());
+		assertTrue(bundleResult.getEntry().get(0).getResource() instanceof ResearchStudy);
+
+		ResearchStudy researchStudyResult = (ResearchStudy) bundle.getEntry().get(0).getResource();
+
+		assertNotNull(researchStudyResult);
+		assertEquals(1, researchStudyResult.getRelatedArtifact().size());
+
+		String relatedArtifactResultUrl = researchStudyResult.getRelatedArtifact().get(0).getUrl();
+
+		assertTrue(new IdType(relatedArtifactResultUrl).isAbsolute());
+		assertEquals(literalExternalUrl, relatedArtifactResultUrl);
 	}
 
 	@Test
