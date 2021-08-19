@@ -1,8 +1,6 @@
 package org.highmed.dsf.fhir.dao;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
@@ -14,8 +12,10 @@ import java.util.UUID;
 import org.apache.commons.codec.binary.Hex;
 import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.authorization.read.ReadAccessHelperImpl;
+import org.highmed.dsf.fhir.dao.jdbc.BinaryDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.CodeSystemDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.OrganizationDaoJdbc;
+import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.StringType;
@@ -419,5 +419,28 @@ public class OrganizationDaoTest extends AbstractResourceDaoTest<Organization, O
 	public void testSearchWithUserFilterAfterReadAccessTriggerLocalWithRemoteUser() throws Exception
 	{
 		ReadAccessDaoTest.super.testSearchWithUserFilterAfterReadAccessTriggerLocalWithRemoteUser();
+	}
+
+	@Test
+	public void testUpdateWithExistingBinary() throws Exception
+	{
+		Organization org = new Organization();
+		org.setActive(true);
+		org.getIdentifierFirstRep().setSystem(ReadAccessHelper.ORGANIZATION_IDENTIFIER_SYSTEM)
+				.setValue("organization.com");
+
+		Organization cretedOrg = dao.create(org);
+		assertNotNull(cretedOrg);
+
+		Binary binary = new Binary();
+		binary.setContentType("text/plain");
+		binary.setData("1234567890".getBytes());
+		new ReadAccessHelperImpl().addOrganization(binary, "organization.com");
+
+		BinaryDaoJdbc binaryDao = new BinaryDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
+		Binary createdBinary = binaryDao.create(binary);
+		assertNotNull(createdBinary);
+		
+		dao.update(cretedOrg);
 	}
 }
