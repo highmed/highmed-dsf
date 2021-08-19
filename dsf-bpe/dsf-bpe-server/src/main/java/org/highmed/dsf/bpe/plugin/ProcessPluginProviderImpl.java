@@ -16,6 +16,8 @@ import java.util.Objects;
 import java.util.ServiceLoader;
 import java.util.ServiceLoader.Provider;
 import java.util.function.BinaryOperator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -46,6 +48,9 @@ public class ProcessPluginProviderImpl implements ProcessPluginProvider, Initial
 
 	public static final String FILE_DRAFT_SUFIX = "-SNAPSHOT.jar";
 	public static final String FOLDER_DRAFT_SUFIX = "-SNAPSHOT";
+
+	public static final String RC_AND_M_PATTERN_STRING = "^(.+)((-RC[0-9]+)|(-M[0-9]+))\\.jar$";
+	private static final Pattern RC_AND_M_PATTERN = Pattern.compile(RC_AND_M_PATTERN_STRING);
 
 	private static final Logger logger = LoggerFactory.getLogger(ProcessPluginProviderImpl.class);
 
@@ -247,11 +252,27 @@ public class ProcessPluginProviderImpl implements ProcessPluginProvider, Initial
 		if (byJar != null)
 			return byJar.getJars().stream();
 
+		// -M#.jar or -RC#.jar where # is one or more numeric characters
+		List<String> fileNames = definitionsByJar.keySet().stream()
+				.filter(filename -> matchesReleaseCandidateMilestonePatternAndIsDependency(filename, dependency))
+				.collect(Collectors.toList());
+		if (fileNames.size() == 1)
+			return definitionsByJar.get(fileNames.get(0)).getJars().stream();
+
 		ProcessPluginDefinitionAndClassLoader bySnapshotJar = definitionsByJar.get(dependency + "-SNAPSHOT.jar");
 		if (bySnapshotJar != null)
 			return bySnapshotJar.getJars().stream();
 
 		throw new RuntimeException("Dependency " + dependency + " not found");
+	}
+
+	private boolean matchesReleaseCandidateMilestonePatternAndIsDependency(String filename, String dependency)
+	{
+		Matcher matcher = RC_AND_M_PATTERN.matcher(filename);
+		if (matcher.matches())
+			return matcher.group(1).equals(dependency);
+		else
+			return false;
 	}
 
 	private ProcessPluginDefinitionAndClassLoader toJarDefinitionWithDependencies(String definitionClassName,
