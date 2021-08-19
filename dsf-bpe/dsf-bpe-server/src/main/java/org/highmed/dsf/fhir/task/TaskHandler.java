@@ -135,15 +135,15 @@ public class TaskHandler implements InitializingBean
 			if (processVersion != null && !processVersion.isBlank())
 			{
 				logger.warn(
-						"Process with id: {}_{} version: {} not found, this is likely due to a mismatch between ActivityDefinition.url and Process.id",
+						"Process with id: {}_{} and version: {} not found, this is likely due to a mismatch between ActivityDefinition.url and Process.id (process definition key)",
 						processDomain, processDefinitionKey, processVersion);
 				throw new RuntimeException("Process with id: " + processDomain + "_" + processDefinitionKey
-						+ " version: " + processVersion + " not found");
+						+ " and version: " + processVersion + " not found");
 			}
 			else
 			{
 				logger.warn(
-						"Process with id: {}_{} not found, this is likely due to a mismatch between ActivityDefinition.url and Process.id",
+						"Process with id: {}_{} not found, this is likely due to a mismatch between ActivityDefinition.url and Process.id (process definition key)",
 						processDomain, processDefinitionKey);
 				throw new RuntimeException(
 						"Process with id: " + processDomain + "_" + processDefinitionKey + " not found");
