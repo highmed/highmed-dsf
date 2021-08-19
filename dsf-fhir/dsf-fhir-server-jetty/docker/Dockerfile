@@ -8,7 +8,7 @@ RUN chown root:java ./ && \
 	chmod 1775 ./log
 
 
-FROM openjdk:11-slim
+FROM openjdk:11-jre-slim
 LABEL maintainer="hauke.hund@hs-heilbronn.de"
 
 EXPOSE 8080

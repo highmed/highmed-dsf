@@ -9,6 +9,13 @@ DECLARE
 BEGIN
 	PERFORM on_resources_insert(NEW.organization_affiliation_id, NEW.version, NEW.organization_affiliation);
 	
+	DELETE FROM read_access
+	WHERE access_type = 'ROLE'
+	AND organization_affiliation_id = NEW.organization_affiliation_id;
+
+	GET DIAGNOSTICS delete_count = ROW_COUNT;
+	RAISE NOTICE 'Existing rows deleted from read_access for created/updated organization-affiliation: %', delete_count;
+	
 	RAISE NOTICE 'NEW.organization_affiliation->>''active'' = ''%''', NEW.organization_affiliation->>'active';
 	IF (NEW.organization_affiliation->>'active' = 'true') THEN
 		consortium_identifier := jsonb_path_query(organization, '$.identifier[*] ? (@.system == "http://highmed.org/sid/organization-identifier")')->>'value'
@@ -61,12 +68,7 @@ BEGIN
 		END IF;
 
 	ELSIF (NEW.organization_affiliation->>'active' = 'false') THEN
-		DELETE FROM read_access
-		WHERE access_type = 'ROLE'
-		AND organization_affiliation_id = NEW.organization_affiliation_id;
-
-		GET DIAGNOSTICS delete_count = ROW_COUNT;
-		RAISE NOTICE 'Rows deleted from read_access: %', delete_count;
+		RAISE NOTICE 'Not inserting any entries to read_access, created/updated organization-affiliation is not active';
 	END IF;
 	RETURN NEW;
 END;

@@ -8,8 +8,12 @@ import java.sql.Connection;
 import java.util.List;
 import java.util.UUID;
 
+import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
+import org.highmed.dsf.fhir.authorization.read.ReadAccessHelperImpl;
+import org.highmed.dsf.fhir.dao.jdbc.BinaryDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.OrganizationAffiliationDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.OrganizationDaoJdbc;
+import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.junit.Test;
@@ -312,5 +316,122 @@ public class OrganizationAffiliationDaoTest
 	public void testSearchWithUserFilterAfterReadAccessTriggerLocalWithRemoteUser() throws Exception
 	{
 		ReadAccessDaoTest.super.testSearchWithUserFilterAfterReadAccessTriggerLocalWithRemoteUser();
+	}
+
+	@Test
+	public void testUpdateWithExistingBinary() throws Exception
+	{
+		BinaryDaoJdbc binaryDao = new BinaryDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
+		OrganizationDaoJdbc orgDao = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
+
+		Organization memberOrg = new Organization();
+		memberOrg.setActive(true);
+		memberOrg.getIdentifierFirstRep().setSystem(ReadAccessHelper.ORGANIZATION_IDENTIFIER_SYSTEM)
+				.setValue("member.com");
+
+		Organization parentOrg = new Organization();
+		parentOrg.setActive(true);
+		parentOrg.getIdentifierFirstRep().setSystem(ReadAccessHelper.ORGANIZATION_IDENTIFIER_SYSTEM)
+				.setValue("parent.com");
+
+		Organization createdParentOrg = orgDao.create(parentOrg);
+		Organization createdMemberOrg = orgDao.create(memberOrg);
+
+		OrganizationAffiliation affiliation = new OrganizationAffiliation();
+		affiliation.setActive(true);
+		affiliation.getParticipatingOrganization()
+				.setReference("Organization/" + createdMemberOrg.getIdElement().getIdPart());
+		affiliation.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
+		affiliation.addCode().getCodingFirstRep().setSystem("role-system").setCode("role-code");
+
+		OrganizationAffiliation createdAffiliation = dao.create(affiliation);
+
+		Binary binary = new Binary();
+		binary.setContentType("text/plain");
+		binary.setData("1234567890".getBytes());
+		new ReadAccessHelperImpl().addRole(binary, "parent.com", "role-system", "role-code");
+
+		Binary createdBinary = binaryDao.create(binary);
+		assertNotNull(createdBinary);
+
+		dao.update(createdAffiliation);
+	}
+
+	@Test
+	public void testUpdateWithExistingBinaryUpdateMemberOrg() throws Exception
+	{
+		BinaryDaoJdbc binaryDao = new BinaryDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
+		OrganizationDaoJdbc orgDao = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
+
+		Organization memberOrg = new Organization();
+		memberOrg.setActive(true);
+		memberOrg.getIdentifierFirstRep().setSystem(ReadAccessHelper.ORGANIZATION_IDENTIFIER_SYSTEM)
+				.setValue("member.com");
+
+		Organization parentOrg = new Organization();
+		parentOrg.setActive(true);
+		parentOrg.getIdentifierFirstRep().setSystem(ReadAccessHelper.ORGANIZATION_IDENTIFIER_SYSTEM)
+				.setValue("parent.com");
+
+		Organization createdParentOrg = orgDao.create(parentOrg);
+		Organization createdMemberOrg = orgDao.create(memberOrg);
+
+		OrganizationAffiliation affiliation = new OrganizationAffiliation();
+		affiliation.setActive(true);
+		affiliation.getParticipatingOrganization()
+				.setReference("Organization/" + createdMemberOrg.getIdElement().getIdPart());
+		affiliation.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
+		affiliation.addCode().getCodingFirstRep().setSystem("role-system").setCode("role-code");
+
+		dao.create(affiliation);
+
+		Binary binary = new Binary();
+		binary.setContentType("text/plain");
+		binary.setData("1234567890".getBytes());
+		new ReadAccessHelperImpl().addRole(binary, "parent.com", "role-system", "role-code");
+
+		Binary createdBinary = binaryDao.create(binary);
+		assertNotNull(createdBinary);
+
+		orgDao.update(createdMemberOrg);
+	}
+
+	@Test
+	public void testUpdateWithExistingBinaryUpdateParentOrg() throws Exception
+	{
+		BinaryDaoJdbc binaryDao = new BinaryDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
+		OrganizationDaoJdbc orgDao = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
+
+		Organization memberOrg = new Organization();
+		memberOrg.setActive(true);
+		memberOrg.getIdentifierFirstRep().setSystem(ReadAccessHelper.ORGANIZATION_IDENTIFIER_SYSTEM)
+				.setValue("member.com");
+
+		Organization parentOrg = new Organization();
+		parentOrg.setActive(true);
+		parentOrg.getIdentifierFirstRep().setSystem(ReadAccessHelper.ORGANIZATION_IDENTIFIER_SYSTEM)
+				.setValue("parent.com");
+
+		Organization createdParentOrg = orgDao.create(parentOrg);
+		Organization createdMemberOrg = orgDao.create(memberOrg);
+
+		OrganizationAffiliation affiliation = new OrganizationAffiliation();
+		affiliation.setActive(true);
+		affiliation.getParticipatingOrganization()
+				.setReference("Organization/" + createdMemberOrg.getIdElement().getIdPart());
+		affiliation.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
+		affiliation.addCode().getCodingFirstRep().setSystem("role-system").setCode("role-code");
+
+		dao.create(affiliation);
+
+		Binary binary = new Binary();
+		binary.setContentType("text/plain");
+		binary.setData("1234567890".getBytes());
+		new ReadAccessHelperImpl().addRole(binary, "parent.com", "role-system", "role-code");
+
+		Binary createdBinary = binaryDao.create(binary);
+		assertNotNull(createdBinary);
+
+		orgDao.update(createdParentOrg);
 	}
 }
