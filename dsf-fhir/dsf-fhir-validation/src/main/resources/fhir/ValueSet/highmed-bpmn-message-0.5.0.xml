@@ -11,7 +11,7 @@
 	<title value="HiGHmed BPMN message values"/>
 	<status value="active"/>
 	<experimental value="false"/>
-	<date value="2021-08-04"/>
+	<date value="2021-08-19"/>
 	<publisher value="HiGHmed"/>
 	<description
 			value="ValueSet with standard BPMN message values for Task resources"/>

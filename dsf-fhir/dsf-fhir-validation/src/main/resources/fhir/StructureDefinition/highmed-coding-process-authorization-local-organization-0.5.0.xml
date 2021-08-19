@@ -9,7 +9,7 @@
   <version value="0.5.0" />
   <name value="ProcessAuthorizationLocalOrganization" />
   <status value="active" />
-  <date value="2021-08-04" />
+  <date value="2021-08-19" />
   <fhirVersion value="4.0.1" />
   <kind value="complex-type" />
   <abstract value="false" />
