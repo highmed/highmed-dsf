@@ -56,27 +56,14 @@ import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.dao.provider.DaoProviderImpl;
 import org.postgresql.Driver;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class DaoConfig
 {
-	@Value("${org.highmed.dsf.fhir.db.url}")
-	private String dbUrl;
-
-	@Value("${org.highmed.dsf.fhir.db.server_user:fhir_server_user}")
-	private String dbUsername;
-
-	@Value("${org.highmed.dsf.fhir.db.server_user_password}")
-	private String dbPassword;
-
-	@Value("${org.highmed.dsf.fhir.db.server_permanent_delete_user:fhir_server_permanent_delete_user}")
-	private String dbPermanentDeleteUsername;
-
-	@Value("${org.highmed.dsf.fhir.db.server_permanent_delete_user_password}")
-	private String dbPermanentDeletePassword;
+	@Autowired
+	private PropertiesConfig propertiesConfig;
 
 	@Autowired
 	private FhirConfig fhirConfig;
@@ -86,9 +73,9 @@ public class DaoConfig
 	{
 		BasicDataSource dataSource = new BasicDataSource();
 		dataSource.setDriverClassName(Driver.class.getName());
-		dataSource.setUrl(dbUrl);
-		dataSource.setUsername(dbUsername);
-		dataSource.setPassword(dbPassword);
+		dataSource.setUrl(propertiesConfig.getDbUrl());
+		dataSource.setUsername(propertiesConfig.getDbUsername());
+		dataSource.setPassword(toString(propertiesConfig.getDbPassword()));
 		dataSource.setDefaultReadOnly(true);
 
 		dataSource.setTestOnBorrow(true);
@@ -101,14 +88,19 @@ public class DaoConfig
 	{
 		BasicDataSource dataSource = new BasicDataSource();
 		dataSource.setDriverClassName(Driver.class.getName());
-		dataSource.setUrl(dbUrl);
-		dataSource.setUsername(dbPermanentDeleteUsername);
-		dataSource.setPassword(dbPermanentDeletePassword);
+		dataSource.setUrl(propertiesConfig.getDbUrl());
+		dataSource.setUsername(propertiesConfig.getDbPermanentDeleteUsername());
+		dataSource.setPassword(toString(propertiesConfig.getDbPermanentDeletePassword()));
 		dataSource.setDefaultReadOnly(true);
 
 		dataSource.setTestOnBorrow(true);
 		dataSource.setValidationQuery("SELECT 1");
 		return dataSource;
+	}
+
+	private String toString(char[] password)
+	{
+		return password == null ? null : String.valueOf(password);
 	}
 
 	@Bean

@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -34,7 +33,9 @@ import org.glassfish.jersey.servlet.init.JerseyServletContainerInitializer;
 import org.highmed.dsf.fhir.authentication.AuthenticationFilter;
 import org.highmed.dsf.fhir.cors.CorsFilter;
 import org.highmed.dsf.tools.db.DbMigrator;
+import org.highmed.dsf.tools.db.DbMigratorConfig;
 import org.slf4j.bridge.SLF4JBridgeHandler;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.web.SpringServletContainerInitializer;
 
 import de.rwh.utils.jetty.JettyServer;
@@ -58,12 +59,6 @@ public final class FhirServer
 		startServer(JettyServer::secureRequestCustomizer, JettyServer::httpsConnector);
 	}
 
-	private static final Map<String, String> DB_DEFAULT_VALUES = Map.of("org.highmed.dsf.fhir.db.liquibase_user",
-			"liquibase_user", "org.highmed.dsf.fhir.db.server_users_group", "fhir_users",
-			"org.highmed.dsf.fhir.db.server_user", "fhir_server_user",
-			"org.highmed.dsf.fhir.db.server_permanent_delete_users_group", "fhir_permanent_delete_users",
-			"org.highmed.dsf.fhir.db.server_permanent_delete_user", "fhir_server_permanent_delete_user");
-
 	private static void startServer(Function<Properties, Customizer> customizerBuilder,
 			BiFunction<HttpConfiguration, Properties, Function<Server, ServerConnector>> connectorBuilder)
 	{
@@ -71,13 +66,13 @@ public final class FhirServer
 
 		Log4jInitializer.initializeLog4j(properties);
 
-		Properties configProperties = read(Paths.get("conf/config.properties"), StandardCharsets.UTF_8);
-		DB_DEFAULT_VALUES.forEach(configProperties::putIfAbsent);
-
-		DbMigrator dbMigrator = new DbMigrator("org.highmed.dsf.fhir.", configProperties,
-				"db.server_permanent_delete_users_group", "db.server_permanent_delete_user",
-				"db.server_permanent_delete_user_password");
-		DbMigrator.retryOnConnectException(3, dbMigrator::migrate);
+		try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
+				FhirDbMigratorConfig.class))
+		{
+			DbMigratorConfig config = context.getBean(DbMigratorConfig.class);
+			DbMigrator dbMigrator = new DbMigrator(config);
+			DbMigrator.retryOnConnectException(3, dbMigrator::migrate);
+		}
 
 		HttpConfiguration httpConfiguration = httpConfiguration(customizerBuilder.apply(properties));
 		Function<Server, ServerConnector> connector = connectorBuilder.apply(httpConfiguration, properties);
@@ -97,8 +92,8 @@ public final class FhirServer
 			filters.add(CorsFilter.class);
 
 		@SuppressWarnings("unchecked")
-		JettyServer server = new JettyServer(connector, errorHandler, "/fhir", initializers, configProperties,
-				webInfClassesDirs, webInfJars, filters.toArray(new Class[filters.size()]));
+		JettyServer server = new JettyServer(connector, errorHandler, "/fhir", initializers, null, webInfClassesDirs,
+				webInfJars, filters.toArray(new Class[filters.size()]));
 
 		server.getWebAppContext().addEventListener(new SessionInvalidator());
 		server.getWebAppContext().getSessionHandler()

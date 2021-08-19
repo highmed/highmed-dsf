@@ -13,7 +13,6 @@ import org.highmed.dsf.fhir.validation.ResourceValidatorImpl;
 import org.highmed.dsf.fhir.validation.SnapshotGenerator;
 import org.highmed.dsf.fhir.validation.SnapshotGeneratorImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,11 +23,8 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 @Configuration
 public class CommandConfig
 {
-	@Value("${org.highmed.dsf.fhir.serverBase}")
-	private String serverBase;
-
-	@Value("${org.highmed.dsf.fhir.defaultPageCount}")
-	private int defaultPageCount;
+	@Autowired
+	private PropertiesConfig propertiesConfig;
 
 	@Autowired
 	private DaoConfig daoConfig;
@@ -57,12 +53,13 @@ public class CommandConfig
 	@Bean
 	public CommandFactory commandFactory()
 	{
-		return new CommandFactoryImpl(serverBase, defaultPageCount, daoConfig.dataSource(), daoConfig.daoProvider(),
-				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver(),
-				referenceConfig.referenceCleaner(), helperConfig.responseGenerator(), helperConfig.exceptionHandler(),
-				helperConfig.parameterConverter(), eventConfig.eventManager(), eventConfig.eventGenerator(),
-				authorizationConfig.authorizationHelper(), validationConfig.validationHelper(),
-				snapshotConfig.snapshotGenerator(), this::transactionResourceFactory);
+		return new CommandFactoryImpl(propertiesConfig.getServerBaseUrl(), propertiesConfig.getDefaultPageCount(),
+				daoConfig.dataSource(), daoConfig.daoProvider(), referenceConfig.referenceExtractor(),
+				referenceConfig.referenceResolver(), referenceConfig.referenceCleaner(),
+				helperConfig.responseGenerator(), helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
+				eventConfig.eventManager(), eventConfig.eventGenerator(), authorizationConfig.authorizationHelper(),
+				validationConfig.validationHelper(), snapshotConfig.snapshotGenerator(),
+				this::transactionResourceFactory);
 	}
 
 	@Bean

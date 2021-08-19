@@ -357,10 +357,10 @@ public class WeightDistributionTest
 	{
 		try (Reader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8))
 		{
-			Iterable<CSVRecord> records = CSVFormat.RFC4180
-					.withHeader("rec_id", "given_name", "surname", "street_number", "address_1", "address_2", "suburb",
+			Iterable<CSVRecord> records = CSVFormat.RFC4180.builder()
+					.setHeader("rec_id", "given_name", "surname", "street_number", "address_1", "address_2", "suburb",
 							"postcode", "state", "date_of_birth", "soc_sec_id")
-					.withSkipHeaderRecord().parse(reader);
+					.setSkipHeaderRecord(true).build().parse(reader);
 			ArrayList<IdatImpl> idats = new ArrayList<>();
 			for (CSVRecord r : records)
 			{
@@ -396,10 +396,10 @@ public class WeightDistributionTest
 	{
 		try (Reader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8))
 		{
-			Iterable<CSVRecord> records = CSVFormat.RFC4180
-					.withHeader("rec_id", "given_name", "surname", "street_number", "address_1", "address_2", "suburb",
+			Iterable<CSVRecord> records = CSVFormat.RFC4180.builder()
+					.setHeader("rec_id", "given_name", "surname", "street_number", "address_1", "address_2", "suburb",
 							"postcode", "state", "date_of_birth", "soc_sec_id")
-					.withSkipHeaderRecord().parse(reader);
+					.setSkipHeaderRecord(true).build().parse(reader);
 			ArrayList<IdatImpl> idats = new ArrayList<>();
 			for (CSVRecord r : records)
 			{
@@ -464,7 +464,7 @@ public class WeightDistributionTest
 		{
 			e.printStackTrace();
 		}
-		try (CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT.withHeader(header)))
+		try (CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT.builder().setHeader(header).build()))
 		{
 			results.entrySet().forEach(result ->
 			{

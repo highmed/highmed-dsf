@@ -1,3 +1,3 @@
 - .rsync-filter
-- app/log/README.md
-- proxy/ssl/README.md
+- conf/README.md
+- log/README.md

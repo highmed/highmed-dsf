@@ -29,53 +29,47 @@ dsf-fhir/dsf-fhir-validation/src/main/resources/fhir/bundle.xml
 ###
 # dsf-docker-test-setup ignores
 ###
-dsf-docker-test-setup/bpe/app/conf/*.p12
-dsf-docker-test-setup/bpe/app/last_event/time.file
-dsf-docker-test-setup/bpe/app/log/*.log
-dsf-docker-test-setup/bpe/app/log/*.log.gz
-dsf-docker-test-setup/bpe/app/plugin/*.jar
-dsf-docker-test-setup/bpe/app/process/*.jar
-dsf-docker-test-setup/bpe/db/postgres-data/
-dsf-docker-test-setup/bpe/proxy/ssl/*.pem
+dsf-docker-test-setup/bpe/last_event/time.file
+dsf-docker-test-setup/bpe/log/*.log
+dsf-docker-test-setup/bpe/log/*.log.gz
+dsf-docker-test-setup/bpe/plugin/*.jar
+dsf-docker-test-setup/bpe/process/*.jar
+dsf-docker-test-setup/bpe/psn/*.jceks
+dsf-docker-test-setup/bpe/secrets/*.pem
 
-dsf-docker-test-setup/fhir/app/conf/*.p12
-dsf-docker-test-setup/fhir/app/conf/bundle.xml
-dsf-docker-test-setup/fhir/app/conf/config.properties
-dsf-docker-test-setup/fhir/app/log/*.log
-dsf-docker-test-setup/fhir/app/log/*.log.gz
-dsf-docker-test-setup/fhir/db/postgres-data/
-dsf-docker-test-setup/fhir/proxy/ssl/*.pem
+dsf-docker-test-setup/fhir/conf/bundle.xml
+dsf-docker-test-setup/fhir/log/*.log
+dsf-docker-test-setup/fhir/log/*.log.gz
+dsf-docker-test-setup/fhir/secrets/*.pem
+dsf-docker-test-setup/fhir/.env
 
 ###
 # dsf-docker-test-setup-3medic-ttp ignores
 ###
-dsf-docker-test-setup-3medic-ttp/**/bpe/app/conf/*.p12
-dsf-docker-test-setup-3medic-ttp/**/bpe/app/plugin/*.jar
-dsf-docker-test-setup-3medic-ttp/**/bpe/app/process/*.jar
-dsf-docker-test-setup-3medic-ttp/**/bpe/proxy/ssl/*.pem
+dsf-docker-test-setup-3medic-ttp/**/bpe/plugin/*.jar
+dsf-docker-test-setup-3medic-ttp/**/bpe/process/*.jar
+dsf-docker-test-setup-3medic-ttp/**/bpe/secrets/*.pem
 
-dsf-docker-test-setup-3medic-ttp/**/fhir/app/conf/*.p12
-dsf-docker-test-setup-3medic-ttp/**/fhir/app/conf/bundle.xml
-dsf-docker-test-setup-3medic-ttp/**/fhir/app/conf/config.properties
-dsf-docker-test-setup-3medic-ttp/**/fhir/proxy/ssl/*.pem
+dsf-docker-test-setup-3medic-ttp/**/fhir/conf/bundle.xml
+dsf-docker-test-setup-3medic-ttp/**/fhir/secrets/*.pem
+dsf-docker-test-setup-3medic-ttp/**/fhir/.env
 
 ###
 # dsf-docker-test-setup-3medic-ttp-docker ignores
 ###
-dsf-docker-test-setup-3medic-ttp-docker/**/bpe/conf/*.p12
 dsf-docker-test-setup-3medic-ttp-docker/**/bpe/last_event/time.file
 dsf-docker-test-setup-3medic-ttp-docker/**/bpe/log/*.log
 dsf-docker-test-setup-3medic-ttp-docker/**/bpe/log/*.log.gz
 dsf-docker-test-setup-3medic-ttp-docker/**/bpe/plugin/*.jar
 dsf-docker-test-setup-3medic-ttp-docker/**/bpe/process/*.jar
+dsf-docker-test-setup-3medic-ttp-docker/**/bpe/psn/*.jceks
 
-dsf-docker-test-setup-3medic-ttp-docker/**/fhir/conf/*.p12
 dsf-docker-test-setup-3medic-ttp-docker/**/fhir/conf/bundle.xml
-dsf-docker-test-setup-3medic-ttp-docker/**/fhir/conf/config.properties
 dsf-docker-test-setup-3medic-ttp-docker/**/fhir/log/*.log
 dsf-docker-test-setup-3medic-ttp-docker/**/fhir/log/*.log.gz
 
-dsf-docker-test-setup-3medic-ttp-docker/proxy/ssl/*.pem
+dsf-docker-test-setup-3medic-ttp-docker/secrets/*.pem
+dsf-docker-test-setup-3medic-ttp-docker/.env
 
 ###
 # dsf-tools ignores

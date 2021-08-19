@@ -6,7 +6,7 @@ import org.highmed.openehr.client.OpenEhrClientFactory;
 import org.highmed.openehr.client.OpenEhrClientServiceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -15,8 +15,8 @@ public class OpenEhrConfig
 {
 	private static final Logger logger = LoggerFactory.getLogger(OpenEhrConfig.class);
 
-	@Value("${org.highmed.dsf.bpe.openehr.webservice.factory.class:org.highmed.openehr.client.stub.OpenEhrClientStubFactory}")
-	private String openEhrClientFactoryClass;
+	@Autowired
+	private PropertiesConfig propertiesConfig;
 
 	@Bean
 	public OpenEhrClientServiceLoader openEhrClientServiceLoader()
@@ -27,9 +27,10 @@ public class OpenEhrConfig
 	@Bean
 	public OpenEhrClientFactory openEhrClientFactory()
 	{
-		OpenEhrClientFactory factory = openEhrClientServiceLoader().getOpenEhrClientFactory(openEhrClientFactoryClass)
-				.orElseThrow(() -> new NoSuchElementException(
-						"openEhr client factory with classname='" + openEhrClientFactoryClass + "' not found"));
+		OpenEhrClientFactory factory = openEhrClientServiceLoader()
+				.getOpenEhrClientFactory(propertiesConfig.getOpenEhrClientFactoryClass())
+				.orElseThrow(() -> new NoSuchElementException("openEhr client factory with classname='"
+						+ propertiesConfig.getOpenEhrClientFactoryClass() + "' not found"));
 
 		if ("org.highmed.openehr.client.stub.OpenEhrClientStubFactory".equals(factory.getClass().getName()))
 			logger.warn("Using {} as openEHR client factory", factory.getClass().getName());

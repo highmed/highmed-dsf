@@ -1,8 +1,0 @@
-version: '3.2'
-services:
-  db:
-    volumes:
-      - ./db/postgres-data:/var/lib/postgresql/data
-  app:
-    extra_hosts:
-      - "<hostname:ip-address>"

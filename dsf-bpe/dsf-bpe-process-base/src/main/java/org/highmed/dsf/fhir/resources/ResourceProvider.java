@@ -34,8 +34,6 @@ public interface ResourceProvider
 	Stream<MetadataResource> getResources(String processKeyAndVersion,
 			Function<String, ResourceProvider> providerByJarName);
 
-	boolean isEmpty();
-
 	static ResourceProvider empty()
 	{
 		return new ResourceProvider()
@@ -81,12 +79,6 @@ public interface ResourceProvider
 					Function<String, ResourceProvider> providerByJarName)
 			{
 				return Stream.empty();
-			}
-
-			@Override
-			public boolean isEmpty()
-			{
-				return true;
 			}
 		};
 	}

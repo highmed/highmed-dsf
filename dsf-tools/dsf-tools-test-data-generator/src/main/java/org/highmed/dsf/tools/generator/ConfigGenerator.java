@@ -25,19 +25,10 @@ public class ConfigGenerator
 {
 	private static final Logger logger = LoggerFactory.getLogger(ConfigGenerator.class);
 
+	private static final String P_KEY_SERVER_USER_THUMBPRINTS = "org.highmed.dsf.fhir.server.user.thumbprints";
+	private static final String P_KEY_SERVER_USER_THUMBPRINTS_PERMANENTDELETE = "org.highmed.dsf.fhir.server.user.thumbprints.permanent.delete";
+
 	private Properties javaTestFhirConfigProperties;
-
-	private Properties dockerTestFhirConfigProperties;
-
-	private Properties dockerMedic1FhirConfigProperties;
-	private Properties dockerMedic2FhirConfigProperties;
-	private Properties dockerMedic3FhirConfigProperties;
-	private Properties dockerTtpFhirConfigProperties;
-
-	private Properties dockerMedic1DockerFhirConfigProperties;
-	private Properties dockerMedic2DockerFhirConfigProperties;
-	private Properties dockerMedic3DockerFhirConfigProperties;
-	private Properties dockerTtpDockerFhirConfigProperties;
 
 	private Properties readProperties(Path propertiesFile)
 	{
@@ -88,34 +79,15 @@ public class ConfigGenerator
 		Path javaTestFhirConfigTemplateFile = Paths
 				.get("src/main/resources/config-templates/java-test-fhir-config.properties");
 		javaTestFhirConfigProperties = readProperties(javaTestFhirConfigTemplateFile);
-		javaTestFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-user.thumbprints",
+		javaTestFhirConfigProperties.setProperty(P_KEY_SERVER_USER_THUMBPRINTS,
 				testClient.getCertificateSha512ThumbprintHex() + ","
 						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
 
-		javaTestFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-permanent-delete-user.thumbprints",
+		javaTestFhirConfigProperties.setProperty(P_KEY_SERVER_USER_THUMBPRINTS_PERMANENTDELETE,
 				testClient.getCertificateSha512ThumbprintHex() + ","
 						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
 
 		writeProperties(Paths.get("config/java-test-fhir-config.properties"), javaTestFhirConfigProperties);
-	}
-
-	public void modifyDockerTestFhirConfigProperties(Map<String, CertificateFiles> clientCertificateFilesByCommonName)
-	{
-		CertificateFiles testClient = clientCertificateFilesByCommonName.get("test-client");
-		CertificateFiles webbrowserTestUser = clientCertificateFilesByCommonName.get("Webbrowser Test User");
-
-		Path dockerTestFhirConfigTemplateFile = Paths
-				.get("src/main/resources/config-templates/docker-test-fhir-config.properties");
-		dockerTestFhirConfigProperties = readProperties(dockerTestFhirConfigTemplateFile);
-		dockerTestFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-user.thumbprints",
-				testClient.getCertificateSha512ThumbprintHex() + ","
-						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
-
-		dockerTestFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-permanent-delete-user.thumbprints",
-				testClient.getCertificateSha512ThumbprintHex() + ","
-						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
-
-		writeProperties(Paths.get("config/docker-test-fhir-config.properties"), dockerTestFhirConfigProperties);
 	}
 
 	public void copyJavaTestFhirConfigProperties()
@@ -123,248 +95,5 @@ public class ConfigGenerator
 		Path javaTestConfigPropertiesFile = Paths.get("../../dsf-fhir/dsf-fhir-server-jetty/conf/config.properties");
 		logger.info("Copying config.properties to {}", javaTestConfigPropertiesFile);
 		writeProperties(javaTestConfigPropertiesFile, javaTestFhirConfigProperties);
-	}
-
-	public void copyDockerTestFhirConfigProperties()
-	{
-		Path dockerTestFhirConfigPropertiesFile = Paths
-				.get("../../dsf-docker-test-setup/fhir/app/conf/config.properties");
-		logger.info("Copying config.properties to {}", dockerTestFhirConfigPropertiesFile);
-		writeProperties(dockerTestFhirConfigPropertiesFile, dockerTestFhirConfigProperties);
-	}
-
-	public void modifyDockerTest3MedicTtpFhirConfigProperties(
-			Map<String, CertificateFiles> clientCertificateFilesByCommonName)
-	{
-		modifyDockerMedic1FhirConfigProperties(clientCertificateFilesByCommonName);
-		modifyDockerMedic2FhirConfigProperties(clientCertificateFilesByCommonName);
-		modifyDockerMedic3FhirConfigProperties(clientCertificateFilesByCommonName);
-		modifyDockerTtpFhirConfigProperties(clientCertificateFilesByCommonName);
-	}
-
-	private void modifyDockerMedic1FhirConfigProperties(
-			Map<String, CertificateFiles> clientCertificateFilesByCommonName)
-	{
-		CertificateFiles medic1Client = clientCertificateFilesByCommonName.get("medic1-client");
-		CertificateFiles webbrowserTestUser = clientCertificateFilesByCommonName.get("Webbrowser Test User");
-
-		Path dockerTestFhirConfigTemplateFile = Paths
-				.get("src/main/resources/config-templates/docker-test-medic1-fhir-config.properties");
-		dockerMedic1FhirConfigProperties = readProperties(dockerTestFhirConfigTemplateFile);
-		dockerMedic1FhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-user.thumbprints",
-				medic1Client.getCertificateSha512ThumbprintHex() + ","
-						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
-
-		dockerMedic1FhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-permanent-delete-user.thumbprints",
-				medic1Client.getCertificateSha512ThumbprintHex() + ","
-						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
-
-		writeProperties(Paths.get("config/docker-test-medic1-fhir-config.properties"),
-				dockerMedic1FhirConfigProperties);
-	}
-
-	private void modifyDockerMedic2FhirConfigProperties(
-			Map<String, CertificateFiles> clientCertificateFilesByCommonName)
-	{
-		CertificateFiles medic2Client = clientCertificateFilesByCommonName.get("medic2-client");
-		CertificateFiles webbrowserTestUser = clientCertificateFilesByCommonName.get("Webbrowser Test User");
-
-		Path dockerTestFhirConfigTemplateFile = Paths
-				.get("src/main/resources/config-templates/docker-test-medic2-fhir-config.properties");
-		dockerMedic2FhirConfigProperties = readProperties(dockerTestFhirConfigTemplateFile);
-		dockerMedic2FhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-user.thumbprints",
-				medic2Client.getCertificateSha512ThumbprintHex() + ","
-						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
-
-		dockerMedic2FhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-permanent-delete-user.thumbprints",
-				medic2Client.getCertificateSha512ThumbprintHex() + ","
-						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
-
-		writeProperties(Paths.get("config/docker-test-medic2-fhir-config.properties"),
-				dockerMedic2FhirConfigProperties);
-	}
-
-	private void modifyDockerMedic3FhirConfigProperties(
-			Map<String, CertificateFiles> clientCertificateFilesByCommonName)
-	{
-		CertificateFiles medic3Client = clientCertificateFilesByCommonName.get("medic3-client");
-		CertificateFiles webbrowserTestUser = clientCertificateFilesByCommonName.get("Webbrowser Test User");
-
-		Path dockerTestFhirConfigTemplateFile = Paths
-				.get("src/main/resources/config-templates/docker-test-medic3-fhir-config.properties");
-		dockerMedic3FhirConfigProperties = readProperties(dockerTestFhirConfigTemplateFile);
-		dockerMedic3FhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-user.thumbprints",
-				medic3Client.getCertificateSha512ThumbprintHex() + ","
-						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
-
-		dockerMedic3FhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-permanent-delete-user.thumbprints",
-				medic3Client.getCertificateSha512ThumbprintHex() + ","
-						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
-
-		writeProperties(Paths.get("config/docker-test-medic3-fhir-config.properties"),
-				dockerMedic3FhirConfigProperties);
-	}
-
-	private void modifyDockerTtpFhirConfigProperties(Map<String, CertificateFiles> clientCertificateFilesByCommonName)
-	{
-		CertificateFiles ttpClient = clientCertificateFilesByCommonName.get("ttp-client");
-		CertificateFiles webbrowserTestUser = clientCertificateFilesByCommonName.get("Webbrowser Test User");
-
-		Path dockerTestFhirConfigTemplateFile = Paths
-				.get("src/main/resources/config-templates/docker-test-ttp-fhir-config.properties");
-		dockerTtpFhirConfigProperties = readProperties(dockerTestFhirConfigTemplateFile);
-		dockerTtpFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-user.thumbprints",
-				ttpClient.getCertificateSha512ThumbprintHex() + ","
-						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
-
-		dockerTtpFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-permanent-delete-user.thumbprints",
-				ttpClient.getCertificateSha512ThumbprintHex() + ","
-						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
-
-		writeProperties(Paths.get("config/docker-test-ttp-fhir-config.properties"), dockerTtpFhirConfigProperties);
-	}
-
-	public void copyDockerTest3MedicTtpFhirConfigProperties()
-	{
-		Path dockerMedic1FhirConfigPropertiesFile = Paths
-				.get("../../dsf-docker-test-setup-3medic-ttp/medic1/fhir/app/conf/config.properties");
-		logger.info("Copying config.properties to {}", dockerMedic1FhirConfigPropertiesFile);
-		writeProperties(dockerMedic1FhirConfigPropertiesFile, dockerMedic1FhirConfigProperties);
-
-		Path dockerMedic2FhirConfigPropertiesFile = Paths
-				.get("../../dsf-docker-test-setup-3medic-ttp/medic2/fhir/app/conf/config.properties");
-		logger.info("Copying config.properties to {}", dockerMedic2FhirConfigPropertiesFile);
-		writeProperties(dockerMedic2FhirConfigPropertiesFile, dockerMedic2FhirConfigProperties);
-
-		Path dockerMedic3FhirConfigPropertiesFile = Paths
-				.get("../../dsf-docker-test-setup-3medic-ttp/medic3/fhir/app/conf/config.properties");
-		logger.info("Copying config.properties to {}", dockerMedic3FhirConfigPropertiesFile);
-		writeProperties(dockerMedic3FhirConfigPropertiesFile, dockerMedic3FhirConfigProperties);
-
-		Path dockerTtpFhirConfigPropertiesFile = Paths
-				.get("../../dsf-docker-test-setup-3medic-ttp/ttp/fhir/app/conf/config.properties");
-		logger.info("Copying config.properties to {}", dockerTtpFhirConfigPropertiesFile);
-		writeProperties(dockerTtpFhirConfigPropertiesFile, dockerTtpFhirConfigProperties);
-
-	}
-
-	public void modifyDockerTest3MedicTtpDockerFhirConfigProperties(
-			Map<String, CertificateFiles> clientCertificateFilesByCommonName)
-	{
-		modifyDockerMedic1DockerFhirConfigProperties(clientCertificateFilesByCommonName);
-		modifyDockerMedic2DockerFhirConfigProperties(clientCertificateFilesByCommonName);
-		modifyDockerMedic3DockerFhirConfigProperties(clientCertificateFilesByCommonName);
-		modifyDockerTtpDockerFhirConfigProperties(clientCertificateFilesByCommonName);
-	}
-
-	private void modifyDockerMedic1DockerFhirConfigProperties(
-			Map<String, CertificateFiles> clientCertificateFilesByCommonName)
-	{
-		CertificateFiles medic1Client = clientCertificateFilesByCommonName.get("medic1-client");
-		CertificateFiles webbrowserTestUser = clientCertificateFilesByCommonName.get("Webbrowser Test User");
-
-		Path dockerTestFhirConfigTemplateFile = Paths
-				.get("src/main/resources/config-templates/docker-test-medic1-docker-fhir-config.properties");
-		dockerMedic1DockerFhirConfigProperties = readProperties(dockerTestFhirConfigTemplateFile);
-		dockerMedic1DockerFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-user.thumbprints",
-				medic1Client.getCertificateSha512ThumbprintHex() + ","
-						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
-
-		dockerMedic1DockerFhirConfigProperties.setProperty(
-				"org.highmed.dsf.fhir.local-permanent-delete-user.thumbprints",
-				medic1Client.getCertificateSha512ThumbprintHex() + ","
-						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
-
-		writeProperties(Paths.get("config/docker-test-medic1-docker-fhir-config.properties"),
-				dockerMedic1DockerFhirConfigProperties);
-	}
-
-	private void modifyDockerMedic2DockerFhirConfigProperties(
-			Map<String, CertificateFiles> clientCertificateFilesByCommonName)
-	{
-		CertificateFiles medic2Client = clientCertificateFilesByCommonName.get("medic2-client");
-		CertificateFiles webbrowserTestUser = clientCertificateFilesByCommonName.get("Webbrowser Test User");
-
-		Path dockerTestFhirConfigTemplateFile = Paths
-				.get("src/main/resources/config-templates/docker-test-medic2-docker-fhir-config.properties");
-		dockerMedic2DockerFhirConfigProperties = readProperties(dockerTestFhirConfigTemplateFile);
-		dockerMedic2DockerFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-user.thumbprints",
-				medic2Client.getCertificateSha512ThumbprintHex() + ","
-						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
-
-		dockerMedic2DockerFhirConfigProperties.setProperty(
-				"org.highmed.dsf.fhir.local-permanent-delete-user.thumbprints",
-				medic2Client.getCertificateSha512ThumbprintHex() + ","
-						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
-
-		writeProperties(Paths.get("config/docker-test-medic2-docker-fhir-config.properties"),
-				dockerMedic2DockerFhirConfigProperties);
-	}
-
-	private void modifyDockerMedic3DockerFhirConfigProperties(
-			Map<String, CertificateFiles> clientCertificateFilesByCommonName)
-	{
-		CertificateFiles medic3Client = clientCertificateFilesByCommonName.get("medic3-client");
-		CertificateFiles webbrowserTestUser = clientCertificateFilesByCommonName.get("Webbrowser Test User");
-
-		Path dockerTestFhirConfigTemplateFile = Paths
-				.get("src/main/resources/config-templates/docker-test-medic3-docker-fhir-config.properties");
-		dockerMedic3DockerFhirConfigProperties = readProperties(dockerTestFhirConfigTemplateFile);
-		dockerMedic3DockerFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-user.thumbprints",
-				medic3Client.getCertificateSha512ThumbprintHex() + ","
-						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
-
-		dockerMedic3DockerFhirConfigProperties.setProperty(
-				"org.highmed.dsf.fhir.local-permanent-delete-user.thumbprints",
-				medic3Client.getCertificateSha512ThumbprintHex() + ","
-						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
-
-		writeProperties(Paths.get("config/docker-test-medic3-docker-fhir-config.properties"),
-				dockerMedic3DockerFhirConfigProperties);
-	}
-
-	private void modifyDockerTtpDockerFhirConfigProperties(
-			Map<String, CertificateFiles> clientCertificateFilesByCommonName)
-	{
-		CertificateFiles ttpClient = clientCertificateFilesByCommonName.get("ttp-client");
-		CertificateFiles webbrowserTestUser = clientCertificateFilesByCommonName.get("Webbrowser Test User");
-
-		Path dockerTestFhirConfigTemplateFile = Paths
-				.get("src/main/resources/config-templates/docker-test-ttp-docker-fhir-config.properties");
-		dockerTtpDockerFhirConfigProperties = readProperties(dockerTestFhirConfigTemplateFile);
-		dockerTtpDockerFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-user.thumbprints",
-				ttpClient.getCertificateSha512ThumbprintHex() + ","
-						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
-
-		dockerTtpDockerFhirConfigProperties.setProperty("org.highmed.dsf.fhir.local-permanent-delete-user.thumbprints",
-				ttpClient.getCertificateSha512ThumbprintHex() + ","
-						+ webbrowserTestUser.getCertificateSha512ThumbprintHex());
-
-		writeProperties(Paths.get("config/docker-test-ttp-docker-fhir-config.properties"),
-				dockerTtpDockerFhirConfigProperties);
-	}
-
-	public void copyDockerTest3MedicTtpDockerFhirConfigProperties()
-	{
-		Path dockerMedic1DockerFhirConfigPropertiesFile = Paths
-				.get("../../dsf-docker-test-setup-3medic-ttp-docker/medic1/fhir/conf/config.properties");
-		logger.info("Copying config.properties to {}", dockerMedic1DockerFhirConfigPropertiesFile);
-		writeProperties(dockerMedic1DockerFhirConfigPropertiesFile, dockerMedic1DockerFhirConfigProperties);
-
-		Path dockerMedic2DockerFhirConfigPropertiesFile = Paths
-				.get("../../dsf-docker-test-setup-3medic-ttp-docker/medic2/fhir/conf/config.properties");
-		logger.info("Copying config.properties to {}", dockerMedic2DockerFhirConfigPropertiesFile);
-		writeProperties(dockerMedic2DockerFhirConfigPropertiesFile, dockerMedic2DockerFhirConfigProperties);
-
-		Path dockerMedic3DockerFhirConfigPropertiesFile = Paths
-				.get("../../dsf-docker-test-setup-3medic-ttp-docker/medic3/fhir/conf/config.properties");
-		logger.info("Copying config.properties to {}", dockerMedic3DockerFhirConfigPropertiesFile);
-		writeProperties(dockerMedic3DockerFhirConfigPropertiesFile, dockerMedic3DockerFhirConfigProperties);
-
-		Path dockerTtpDockerFhirConfigPropertiesFile = Paths
-				.get("../../dsf-docker-test-setup-3medic-ttp-docker/ttp/fhir/conf/config.properties");
-		logger.info("Copying config.properties to {}", dockerTtpDockerFhirConfigPropertiesFile);
-		writeProperties(dockerTtpDockerFhirConfigPropertiesFile, dockerTtpDockerFhirConfigProperties);
-
 	}
 }

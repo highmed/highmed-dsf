@@ -1,5 +1,6 @@
 package org.highmed.dsf.bpe.service;
 
+import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,6 +12,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -25,6 +29,7 @@ import org.highmed.dsf.fhir.resources.ResourceProvider;
 import org.highmed.fhir.client.BasicFhirWebserviceClient;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.highmed.fhir.client.PreferReturnMinimal;
+import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
@@ -39,6 +44,13 @@ import ca.uhn.fhir.context.FhirContext;
 public class FhirResourceHandlerImpl implements FhirResourceHandler, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(FhirResourceHandlerImpl.class);
+
+	private static final String ACTIVITY_DEFINITION_URL_PATTERN_STRING = "(?<processUrl>http://(?<processDomain>(?:(?:[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*(?:[A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9]))/bpe/Process/(?<processDefinitionKey>[-\\w]+))";
+	private static final Pattern ACTIVITY_DEFINITION_URL_PATTERN = Pattern
+			.compile(ACTIVITY_DEFINITION_URL_PATTERN_STRING);
+	private static final String ACTIVITY_DEFINITION_VERSION_PATTERN_STRING = "(?<processVersion>\\d+\\.\\d+\\.\\d+)";
+	private static final Pattern ACTIVITY_DEFINITION_VERSION_PATTERN = Pattern
+			.compile(ACTIVITY_DEFINITION_VERSION_PATTERN_STRING);
 
 	private final FhirWebserviceClient localWebserviceClient;
 	private final ProcessPluginResourcesDao dao;
@@ -361,7 +373,65 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 			}
 		};
 
-		return definition.getResourceProvider().getResources(process.toString(), providerByNameAndVersion);
+		List<MetadataResource> resources = definition.getResourceProvider()
+				.getResources(process.toString(), providerByNameAndVersion).collect(Collectors.toList());
+		if (resources.isEmpty())
+		{
+			logger.warn("No FHIR resources found in {} for process {}",
+					definition.getJars().stream().map(Path::toString).collect(Collectors.joining(",")),
+					process.toString());
+			return Stream.empty();
+		}
+		else
+		{
+			if (!hasActivityDefinition(resources, process.getKey(), process.getVersion()))
+			{
+				logger.warn("None or more than one ActivityDefinition found in {} matching process {}",
+						definition.getJars().stream().map(Path::toString).collect(Collectors.joining(",")),
+						process.toString());
+			}
+
+			return resources.stream();
+		}
+	}
+
+	private boolean hasActivityDefinition(List<MetadataResource> resources, String processKey, String processVersion)
+	{
+		return resources.stream().filter(r -> r instanceof ActivityDefinition).map(r -> (ActivityDefinition) r)
+				.filter(matches(processKey, processVersion)).count() == 1;
+	}
+
+	private Predicate<? super ActivityDefinition> matches(String processKey, String processVersion)
+	{
+		return a ->
+		{
+			if (!a.hasUrl() || !a.hasVersion())
+				return false;
+
+			Matcher urlMatcher = ACTIVITY_DEFINITION_URL_PATTERN.matcher(a.getUrl());
+			if (!urlMatcher.matches())
+			{
+				logger.warn("ActivityDefinition.url {} does not match {}", a.getUrl(),
+						ACTIVITY_DEFINITION_URL_PATTERN_STRING);
+				return false;
+			}
+
+			String aDprocessDomain = urlMatcher.group("processDomain").replace(".", "");
+			String aDprocessDefinitionKey = urlMatcher.group("processDefinitionKey");
+			String aDprocessKey = aDprocessDomain + "_" + aDprocessDefinitionKey;
+
+			Matcher versionMatcher = ACTIVITY_DEFINITION_VERSION_PATTERN.matcher(a.getVersion());
+			if (!versionMatcher.matches())
+			{
+				logger.warn("ActivityDefinition.version {} does not match {}", a.getVersion(),
+						ACTIVITY_DEFINITION_VERSION_PATTERN_STRING);
+				return false;
+			}
+
+			String aDprocessVersion = versionMatcher.group("processVersion");
+
+			return aDprocessVersion.equals(processVersion) && aDprocessKey.equals(processKey);
+		};
 	}
 
 	private Optional<UUID> getResourceId(Map<ProcessKeyAndVersion, List<ResourceInfo>> dbResourcesByProcess,

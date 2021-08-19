@@ -1,5 +1,4 @@
-version: '3.7'
-
+version: '3.8'
 services:
   proxy:
     image: nginx:1.21
@@ -7,16 +6,10 @@ services:
     ports:
       - 127.0.0.1:443:443
     secrets:
-      - proxy_privatekey.pem
+      - proxy_certificate_and_int_cas.pem
+      - proxy_certificate_private_key.pem
+      - proxy_trusted_client_cas.pem
     volumes:
-      - type: bind
-        source: ./proxy/ssl/certificate_and_ca.pem
-        target: /etc/nginx/ssl/certificate_and_ca.pem
-        read_only: true
-      - type: bind
-        source: ./proxy/ssl/client_ca.pem
-        target: /etc/nginx/ssl/client_ca.pem
-        read_only: true
       - type: bind
         source: ./proxy/conf.d
         target: /etc/nginx/conf.d
@@ -53,7 +46,7 @@ services:
       retries: 5
     environment:
       TZ: Europe/Berlin
-      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_liquibase.password
       POSTGRES_USER: liquibase_user
       POSTGRES_DB: postgres
     networks:
@@ -66,7 +59,7 @@ services:
       - medic3-bpe-backend
       - ttp-bpe-backend
     secrets:
-      - postgres_password
+      - db_liquibase.password
     volumes:
       - type: volume
         source: db-data
@@ -81,10 +74,18 @@ services:
     restart: on-failure
     ports:
      - 127.0.0.1:5001:5001
+    secrets:
+      - db_liquibase.password
+      - db_medic1_fhir_user.password
+      - db_medic1_fhir_user_permanent_delete.password
+      - app_client_trust_certificates.pem
+      - app_medic1_client_certificate.pem
+      - app_medic1_client_certificate_private_key.pem
+      - app_medic1_client_certificate_private_key.pem.password
     volumes:
       - type: bind
-        source: ./medic1/fhir/conf
-        target: /opt/fhir/conf
+        source: ./medic1/fhir/conf/bundle.xml
+        target: /opt/fhir/conf/bundle.xml
         read_only: true
       - type: bind
         source: ./medic1/fhir/log
@@ -92,6 +93,22 @@ services:
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5001
+      ORG_HIGHMED_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
+      ORG_HIGHMED_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_medic1_fhir_user.password
+      ORG_HIGHMED_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_medic1_fhir_user_permanent_delete.password
+      ORG_HIGHMED_DSF_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
+      ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_medic1_client_certificate.pem
+      ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_medic1_client_certificate_private_key.pem
+      ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_medic1_client_certificate_private_key.pem.password
+      ORG_HIGHMED_DSF_FHIR_DB_URL: jdbc:postgresql://db/medic1_fhir
+      ORG_HIGHMED_DSF_FHIR_DB_USER_GROUP: medic1_fhir_users
+      ORG_HIGHMED_DSF_FHIR_DB_USER_USERNAME: medic1_fhir_server_user
+      ORG_HIGHMED_DSF_FHIR_DB_USER_PERMANENT_DELETE_GROUP: medic1_fhir_permanent_delete_users
+      ORG_HIGHMED_DSF_FHIR_DB_USER_PERMANENT_DELETE_USERNAME: medic1_fhir_server_permanent_delete_user
+      ORG_HIGHMED_DSF_FHIR_SERVER_BASE_URL: https://medic1-docker/fhir
+      ORG_HIGHMED_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_MeDIC_1
+      ORG_HIGHMED_DSF_FHIR_SERVER_USER_THUMBPRINTS: ${MEDIC1_USER_THUMBPRINTS}
+      ORG_HIGHMED_DSF_FHIR_SERVER_USER_THUMBPRINTS_PERMANENT_DELETE: ${MEDIC1_USER_THUMBPRINTS_PERMANENT_DELETE}
     networks:
       medic1-fhir-frontend:
         ipv4_address: 172.20.0.3
@@ -106,10 +123,18 @@ services:
     restart: on-failure
     ports:
      - 127.0.0.1:5002:5002
+    secrets:
+      - db_liquibase.password
+      - db_medic2_fhir_user.password
+      - db_medic2_fhir_user_permanent_delete.password
+      - app_client_trust_certificates.pem
+      - app_medic2_client_certificate.pem
+      - app_medic2_client_certificate_private_key.pem
+      - app_medic2_client_certificate_private_key.pem.password
     volumes:
       - type: bind
-        source: ./medic2/fhir/conf
-        target: /opt/fhir/conf
+        source: ./medic2/fhir/conf/bundle.xml
+        target: /opt/fhir/conf/bundle.xml
         read_only: true
       - type: bind
         source: ./medic2/fhir/log
@@ -117,6 +142,22 @@ services:
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5002
+      ORG_HIGHMED_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
+      ORG_HIGHMED_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_medic2_fhir_user.password
+      ORG_HIGHMED_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_medic2_fhir_user_permanent_delete.password
+      ORG_HIGHMED_DSF_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
+      ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_medic2_client_certificate.pem
+      ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_medic2_client_certificate_private_key.pem
+      ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_medic2_client_certificate_private_key.pem.password
+      ORG_HIGHMED_DSF_FHIR_DB_URL: jdbc:postgresql://db/medic2_fhir
+      ORG_HIGHMED_DSF_FHIR_DB_USER_GROUP: medic2_fhir_users
+      ORG_HIGHMED_DSF_FHIR_DB_USER_USERNAME: medic2_fhir_server_user
+      ORG_HIGHMED_DSF_FHIR_DB_USER_PERMANENT_DELETE_GROUP: medic2_fhir_permanent_delete_users
+      ORG_HIGHMED_DSF_FHIR_DB_USER_PERMANENT_DELETE_USERNAME: medic2_fhir_server_permanent_delete_user
+      ORG_HIGHMED_DSF_FHIR_SERVER_BASE_URL: https://medic2-docker/fhir
+      ORG_HIGHMED_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_MeDIC_2
+      ORG_HIGHMED_DSF_FHIR_SERVER_USER_THUMBPRINTS: ${MEDIC2_USER_THUMBPRINTS}
+      ORG_HIGHMED_DSF_FHIR_SERVER_USER_THUMBPRINTS_PERMANENT_DELETE: ${MEDIC2_USER_THUMBPRINTS_PERMANENT_DELETE}
     networks:
       medic2-fhir-frontend:
         ipv4_address: 172.20.0.19
@@ -131,10 +172,18 @@ services:
     restart: on-failure
     ports:
      - 127.0.0.1:5003:5003
+    secrets:
+      - db_liquibase.password
+      - db_medic3_fhir_user.password
+      - db_medic3_fhir_user_permanent_delete.password
+      - app_client_trust_certificates.pem
+      - app_medic3_client_certificate.pem
+      - app_medic3_client_certificate_private_key.pem
+      - app_medic3_client_certificate_private_key.pem.password
     volumes:
       - type: bind
-        source: ./medic3/fhir/conf
-        target: /opt/fhir/conf
+        source: ./medic3/fhir/conf/bundle.xml
+        target: /opt/fhir/conf/bundle.xml
         read_only: true
       - type: bind
         source: ./medic3/fhir/log
@@ -142,6 +191,22 @@ services:
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5003
+      ORG_HIGHMED_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
+      ORG_HIGHMED_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_medic3_fhir_user.password
+      ORG_HIGHMED_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_medic3_fhir_user_permanent_delete.password
+      ORG_HIGHMED_DSF_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
+      ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_medic3_client_certificate.pem
+      ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_medic3_client_certificate_private_key.pem
+      ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_medic3_client_certificate_private_key.pem.password
+      ORG_HIGHMED_DSF_FHIR_DB_URL: jdbc:postgresql://db/medic3_fhir
+      ORG_HIGHMED_DSF_FHIR_DB_USER_GROUP: medic3_fhir_users
+      ORG_HIGHMED_DSF_FHIR_DB_USER_USERNAME: medic3_fhir_server_user
+      ORG_HIGHMED_DSF_FHIR_DB_USER_PERMANENT_DELETE_GROUP: medic3_fhir_permanent_delete_users
+      ORG_HIGHMED_DSF_FHIR_DB_USER_PERMANENT_DELETE_USERNAME: medic3_fhir_server_permanent_delete_user
+      ORG_HIGHMED_DSF_FHIR_SERVER_BASE_URL: https://medic3-docker/fhir
+      ORG_HIGHMED_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_MeDIC_3
+      ORG_HIGHMED_DSF_FHIR_SERVER_USER_THUMBPRINTS: ${MEDIC3_USER_THUMBPRINTS}
+      ORG_HIGHMED_DSF_FHIR_SERVER_USER_THUMBPRINTS_PERMANENT_DELETE: ${MEDIC3_USER_THUMBPRINTS_PERMANENT_DELETE}
     networks:
       medic3-fhir-frontend:
         ipv4_address: 172.20.0.35
@@ -156,10 +221,18 @@ services:
     restart: on-failure
     ports:
      - 127.0.0.1:5004:5004
+    secrets:
+      - db_liquibase.password
+      - db_ttp_fhir_user.password
+      - db_ttp_fhir_user_permanent_delete.password
+      - app_client_trust_certificates.pem
+      - app_ttp_client_certificate.pem
+      - app_ttp_client_certificate_private_key.pem
+      - app_ttp_client_certificate_private_key.pem.password
     volumes:
       - type: bind
-        source: ./ttp/fhir/conf
-        target: /opt/fhir/conf
+        source: ./ttp/fhir/conf/bundle.xml
+        target: /opt/fhir/conf/bundle.xml
         read_only: true
       - type: bind
         source: ./ttp/fhir/log
@@ -167,6 +240,22 @@ services:
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5004
+      ORG_HIGHMED_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
+      ORG_HIGHMED_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_ttp_fhir_user.password
+      ORG_HIGHMED_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_ttp_fhir_user_permanent_delete.password
+      ORG_HIGHMED_DSF_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
+      ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_ttp_client_certificate.pem
+      ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_ttp_client_certificate_private_key.pem
+      ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_ttp_client_certificate_private_key.pem.password
+      ORG_HIGHMED_DSF_FHIR_DB_URL: jdbc:postgresql://db/ttp_fhir
+      ORG_HIGHMED_DSF_FHIR_DB_USER_GROUP: ttp_fhir_users
+      ORG_HIGHMED_DSF_FHIR_DB_USER_USERNAME: ttp_fhir_server_user
+      ORG_HIGHMED_DSF_FHIR_DB_USER_PERMANENT_DELETE_GROUP: ttp_fhir_permanent_delete_users
+      ORG_HIGHMED_DSF_FHIR_DB_USER_PERMANENT_DELETE_USERNAME: ttp_fhir_server_permanent_delete_user
+      ORG_HIGHMED_DSF_FHIR_SERVER_BASE_URL: https://ttp-docker/fhir
+      ORG_HIGHMED_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_TTP
+      ORG_HIGHMED_DSF_FHIR_SERVER_USER_THUMBPRINTS: ${TTP_USER_THUMBPRINTS}
+      ORG_HIGHMED_DSF_FHIR_SERVER_USER_THUMBPRINTS_PERMANENT_DELETE: ${TTP_USER_THUMBPRINTS_PERMANENT_DELETE}
     networks:
       ttp-fhir-frontend:
         ipv4_address: 172.20.0.51
@@ -181,11 +270,15 @@ services:
     restart: on-failure
     ports:
      - 127.0.0.1:5011:5011
+    secrets:
+      - db_liquibase.password
+      - db_medic1_bpe_user.password
+      - db_medic1_bpe_user_camunda.password
+      - app_client_trust_certificates.pem
+      - app_medic1_client_certificate.pem
+      - app_medic1_client_certificate_private_key.pem
+      - app_medic1_client_certificate_private_key.pem.password
     volumes:
-    - type: bind
-      source: ./medic1/bpe/conf
-      target: /opt/bpe/conf
-      read_only: true
     - type: bind
       source: ./medic1/bpe/plugin
       target: /opt/bpe/plugin
@@ -201,11 +294,28 @@ services:
       source: ./medic1/bpe/last_event
       target: /opt/bpe/last_event
     - type: bind
-      source: ./app/psn
+      source: ./medic1/bpe/psn
       target: /opt/bpe/psn
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5011
+      ORG_HIGHMED_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
+      ORG_HIGHMED_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_medic1_bpe_user.password
+      ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_medic1_bpe_user_camunda.password
+      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
+      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_medic1_client_certificate.pem
+      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_medic1_client_certificate_private_key.pem
+      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_medic1_client_certificate_private_key.pem.password
+      ORG_HIGHMED_DSF_BPE_DB_URL: jdbc:postgresql://db/medic1_bpe
+      ORG_HIGHMED_DSF_BPE_DB_USER_GROUP: medic1_bpe_users
+      ORG_HIGHMED_DSF_BPE_DB_USER_USERNAME: medic1_bpe_server_user
+      ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_GROUP: medic1_camunda_users
+      ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_USERNAME: medic1_camunda_server_user
+      ORG_HIGHMED_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_MeDIC_1
+      ORG_HIGHMED_DSF_BPE_FHIR_SERVER_BASE_URL: https://medic1-docker/fhir
+      ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: highmedorg_computeFeasibility/0.5.0,highmedorg_computeDataSharing/0.5.0,highmedorg_requestUpdateResources/0.5.0,highmedorg_updateAllowList/0.5.0
+      # property org.highmed.dsf.bpe.allow.list.organization should only be set for testing, do not configure property in production, potential security risk
+      ORG_HIGHMED_DSF_BPE_ALLOW_LIST_ORGANIZATION: Test_TTP
     networks:
       medic1-bpe-frontend:
       medic1-bpe-backend:
@@ -219,11 +329,15 @@ services:
     restart: on-failure
     ports:
      - 127.0.0.1:5012:5012
+    secrets:
+      - db_liquibase.password
+      - db_medic2_bpe_user.password
+      - db_medic2_bpe_user_camunda.password
+      - app_client_trust_certificates.pem
+      - app_medic2_client_certificate.pem
+      - app_medic2_client_certificate_private_key.pem
+      - app_medic2_client_certificate_private_key.pem.password
     volumes:
-    - type: bind
-      source: ./medic2/bpe/conf
-      target: /opt/bpe/conf
-      read_only: true
     - type: bind
       source: ./medic2/bpe/plugin
       target: /opt/bpe/plugin
@@ -239,11 +353,28 @@ services:
       source: ./medic2/bpe/last_event
       target: /opt/bpe/last_event
     - type: bind
-      source: ./app/psn
+      source: ./medic2/bpe/psn
       target: /opt/bpe/psn
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5012
+      ORG_HIGHMED_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
+      ORG_HIGHMED_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_medic2_bpe_user.password
+      ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_medic2_bpe_user_camunda.password
+      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
+      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_medic2_client_certificate.pem
+      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_medic2_client_certificate_private_key.pem
+      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_medic2_client_certificate_private_key.pem.password
+      ORG_HIGHMED_DSF_BPE_DB_URL: jdbc:postgresql://db/medic2_bpe
+      ORG_HIGHMED_DSF_BPE_DB_USER_GROUP: medic2_bpe_users
+      ORG_HIGHMED_DSF_BPE_DB_USER_USERNAME: medic2_bpe_server_user
+      ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_GROUP: medic2_camunda_users
+      ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_USERNAME: medic2_camunda_server_user
+      ORG_HIGHMED_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_MeDIC_2
+      ORG_HIGHMED_DSF_BPE_FHIR_SERVER_BASE_URL: https://medic2-docker/fhir
+      ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: highmedorg_computeFeasibility/0.5.0,highmedorg_computeDataSharing/0.5.0,highmedorg_requestUpdateResources/0.5.0,highmedorg_updateAllowList/0.5.0
+      # property org.highmed.dsf.bpe.allow.list.organization should only be set for testing, do not configure property in production, potential security risk
+      ORG_HIGHMED_DSF_BPE_ALLOW_LIST_ORGANIZATION: Test_TTP
     networks:
       medic2-bpe-frontend:
       medic2-bpe-backend:
@@ -257,11 +388,15 @@ services:
     restart: on-failure
     ports:
      - 127.0.0.1:5014:5014
+    secrets:
+      - db_liquibase.password
+      - db_medic3_bpe_user.password
+      - db_medic3_bpe_user_camunda.password
+      - app_client_trust_certificates.pem
+      - app_medic3_client_certificate.pem
+      - app_medic3_client_certificate_private_key.pem
+      - app_medic3_client_certificate_private_key.pem.password
     volumes:
-    - type: bind
-      source: ./medic3/bpe/conf
-      target: /opt/bpe/conf
-      read_only: true
     - type: bind
       source: ./medic3/bpe/plugin
       target: /opt/bpe/plugin
@@ -277,11 +412,28 @@ services:
       source: ./medic3/bpe/last_event
       target: /opt/bpe/last_event
     - type: bind
-      source: ./app/psn
+      source: ./medic3/bpe/psn
       target: /opt/bpe/psn
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5014
+      ORG_HIGHMED_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
+      ORG_HIGHMED_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_medic3_bpe_user.password
+      ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_medic3_bpe_user_camunda.password
+      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
+      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_medic3_client_certificate.pem
+      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_medic3_client_certificate_private_key.pem
+      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_medic3_client_certificate_private_key.pem.password
+      ORG_HIGHMED_DSF_BPE_DB_URL: jdbc:postgresql://db/medic3_bpe
+      ORG_HIGHMED_DSF_BPE_DB_USER_GROUP: medic3_bpe_users
+      ORG_HIGHMED_DSF_BPE_DB_USER_USERNAME: medic3_bpe_server_user
+      ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_GROUP: medic3_camunda_users
+      ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_USERNAME: medic3_camunda_server_user
+      ORG_HIGHMED_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_MeDIC_3
+      ORG_HIGHMED_DSF_BPE_FHIR_SERVER_BASE_URL: https://medic3-docker/fhir
+      ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: highmedorg_computeFeasibility/0.5.0,highmedorg_computeDataSharing/0.5.0,highmedorg_requestUpdateResources/0.5.0,highmedorg_updateAllowList/0.5.0
+      # property org.highmed.dsf.bpe.allow.list.organization should only be set for testing, do not configure property in production, potential security risk
+      ORG_HIGHMED_DSF_BPE_ALLOW_LIST_ORGANIZATION: Test_TTP
     networks:
       medic3-bpe-frontend:
       medic3-bpe-backend:
@@ -295,11 +447,15 @@ services:
     restart: on-failure
     ports:
      - 127.0.0.1:5013:5013
+    secrets:
+      - db_liquibase.password
+      - db_ttp_bpe_user.password
+      - db_ttp_bpe_user_camunda.password
+      - app_client_trust_certificates.pem
+      - app_ttp_client_certificate.pem
+      - app_ttp_client_certificate_private_key.pem
+      - app_ttp_client_certificate_private_key.pem.password
     volumes:
-    - type: bind
-      source: ./ttp/bpe/conf
-      target: /opt/bpe/conf
-      read_only: true
     - type: bind
       source: ./ttp/bpe/plugin
       target: /opt/bpe/plugin
@@ -315,11 +471,28 @@ services:
       source: ./ttp/bpe/last_event
       target: /opt/bpe/last_event
     - type: bind
-      source: ./app/psn
+      source: ./ttp/bpe/psn
       target: /opt/bpe/psn
     environment:
       TZ: Europe/Berlin
       EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5013
+      ORG_HIGHMED_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
+      ORG_HIGHMED_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_ttp_bpe_user.password
+      ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_ttp_bpe_user_camunda.password
+      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
+      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_ttp_client_certificate.pem
+      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_ttp_client_certificate_private_key.pem
+      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_ttp_client_certificate_private_key.pem.password
+      ORG_HIGHMED_DSF_BPE_DB_URL: jdbc:postgresql://db/ttp_bpe
+      ORG_HIGHMED_DSF_BPE_DB_USER_GROUP: ttp_bpe_users
+      ORG_HIGHMED_DSF_BPE_DB_USER_USERNAME: ttp_bpe_server_user
+      ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_GROUP: ttp_camunda_users
+      ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_USERNAME: ttp_camunda_server_user
+      ORG_HIGHMED_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_TTP
+      ORG_HIGHMED_DSF_BPE_FHIR_SERVER_BASE_URL: https://ttp-docker/fhir
+      ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: highmedorg_localServicesIntegration/0.5.0,highmedorg_requestFeasibility/0.5.0,highmedorg_executeFeasibility/0.5.0,highmedorg_requestDataSharing/0.5.0,highmedorg_executeDataSharing/0.5.0
+      # property org.highmed.dsf.bpe.allow.list.organization should only be set for testing, do not configure property in production, potential security risk
+      ORG_HIGHMED_DSF_BPE_ALLOW_LIST_ORGANIZATION: Test_TTP
     networks:
       ttp-bpe-frontend:
       ttp-bpe-backend:
@@ -329,11 +502,83 @@ services:
       - ttp-fhir
 
 secrets:
-  postgres_password:
-    file: ./db/postgres_password
-  proxy_privatekey.pem:
-    file: ./proxy/ssl/certificate_private-key.pem
+  proxy_certificate_and_int_cas.pem:
+    file: ./secrets/proxy_certificate_and_int_cas.pem
+  proxy_certificate_private_key.pem:
+    file: ./secrets/proxy_certificate_private_key.pem
+  proxy_trusted_client_cas.pem:
+    file: ./secrets/proxy_trusted_client_cas.pem
+
+  db_liquibase.password:
+    file: ./secrets/db_liquibase.password
     
+  db_medic1_bpe_user.password:
+    file: ./secrets/db_medic1_bpe_user.password
+  db_medic1_bpe_user_camunda.password:
+    file: ./secrets/db_medic1_bpe_user_camunda.password
+  db_medic1_fhir_user.password:
+    file: ./secrets/db_medic1_fhir_user.password
+  db_medic1_fhir_user_permanent_delete.password:
+    file: ./secrets/db_medic1_fhir_user_permanent_delete.password
+    
+  db_medic2_bpe_user.password:
+    file: ./secrets/db_medic2_bpe_user.password
+  db_medic2_bpe_user_camunda.password:
+    file: ./secrets/db_medic2_bpe_user_camunda.password
+  db_medic2_fhir_user.password:
+    file: ./secrets/db_medic2_fhir_user.password
+  db_medic2_fhir_user_permanent_delete.password:
+    file: ./secrets/db_medic2_fhir_user_permanent_delete.password
+    
+  db_medic3_bpe_user.password:
+    file: ./secrets/db_medic3_bpe_user.password
+  db_medic3_bpe_user_camunda.password:
+    file: ./secrets/db_medic3_bpe_user_camunda.password
+  db_medic3_fhir_user.password:
+    file: ./secrets/db_medic3_fhir_user.password
+  db_medic3_fhir_user_permanent_delete.password:
+    file: ./secrets/db_medic3_fhir_user_permanent_delete.password
+    
+  db_ttp_bpe_user.password:
+    file: ./secrets/db_ttp_bpe_user.password
+  db_ttp_bpe_user_camunda.password:
+    file: ./secrets/db_ttp_bpe_user_camunda.password
+  db_ttp_fhir_user.password:
+    file: ./secrets/db_ttp_fhir_user.password
+  db_ttp_fhir_user_permanent_delete.password:
+    file: ./secrets/db_ttp_fhir_user_permanent_delete.password
+
+  app_client_trust_certificates.pem:
+    file: ./secrets/app_testca_certificate.pem
+
+  app_medic1_client_certificate.pem:
+    file: ./secrets/app_medic1-client_certificate.pem
+  app_medic1_client_certificate_private_key.pem:
+    file: ./secrets/app_medic1-client_private-key.pem
+  app_medic1_client_certificate_private_key.pem.password:
+    file: ./secrets/app_medic1-client_private-key.pem.password
+
+  app_medic2_client_certificate.pem:
+    file: ./secrets/app_medic2-client_certificate.pem
+  app_medic2_client_certificate_private_key.pem:
+    file: ./secrets/app_medic2-client_private-key.pem
+  app_medic2_client_certificate_private_key.pem.password:
+    file: ./secrets/app_medic2-client_private-key.pem.password
+    
+  app_medic3_client_certificate.pem:
+    file: ./secrets/app_medic3-client_certificate.pem
+  app_medic3_client_certificate_private_key.pem:
+    file: ./secrets/app_medic3-client_private-key.pem
+  app_medic3_client_certificate_private_key.pem.password:
+    file: ./secrets/app_medic3-client_private-key.pem.password
+    
+  app_ttp_client_certificate.pem:
+    file: ./secrets/app_ttp-client_certificate.pem
+  app_ttp_client_certificate_private_key.pem:
+    file: ./secrets/app_ttp-client_private-key.pem
+  app_ttp_client_certificate_private_key.pem.password:
+    file: ./secrets/app_ttp-client_private-key.pem.password
+
 networks:
   medic1-fhir-frontend:
     driver: bridge

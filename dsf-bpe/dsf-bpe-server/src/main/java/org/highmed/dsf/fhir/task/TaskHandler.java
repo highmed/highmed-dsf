@@ -88,24 +88,15 @@ public class TaskHandler implements InitializingBean
 		}
 		catch (Exception exception)
 		{
+			logger.error("Error while handling Task", exception);
+
 			Task.TaskOutputComponent errorOutput = taskHelper.createOutput(CODESYSTEM_HIGHMED_BPMN,
-					CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR, exception.getMessage());
+					CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR,
+					exception.getClass().getName() + ": " + exception.getMessage());
 			task.addOutput(errorOutput);
 			task.setStatus(Task.TaskStatus.FAILED);
 			webserviceClient.update(task);
 		}
-	}
-
-	private ProcessDefinition getProcessDefinition(String processDomain, String processDefinitionKey,
-			String processVersion)
-	{
-		if (processVersion != null && !processVersion.isBlank())
-			return repositoryService.createProcessDefinitionQuery()
-					.processDefinitionKey(processDomain + "_" + processDefinitionKey).versionTag(processVersion)
-					.latestVersion().singleResult();
-		else
-			return repositoryService.createProcessDefinitionQuery()
-					.processDefinitionKey(processDomain + "_" + processDefinitionKey).latestVersion().singleResult();
 	}
 
 	/**
@@ -139,6 +130,26 @@ public class TaskHandler implements InitializingBean
 
 		ProcessDefinition processDefinition = getProcessDefinition(processDomain, processDefinitionKey, processVersion);
 
+		if (processDefinition == null)
+		{
+			if (processVersion != null && !processVersion.isBlank())
+			{
+				logger.warn(
+						"Process with id: {}_{} and version: {} not found, this is likely due to a mismatch between ActivityDefinition.url and Process.id (process definition key)",
+						processDomain, processDefinitionKey, processVersion);
+				throw new RuntimeException("Process with id: " + processDomain + "_" + processDefinitionKey
+						+ " and version: " + processVersion + " not found");
+			}
+			else
+			{
+				logger.warn(
+						"Process with id: {}_{} not found, this is likely due to a mismatch between ActivityDefinition.url and Process.id (process definition key)",
+						processDomain, processDefinitionKey);
+				throw new RuntimeException(
+						"Process with id: " + processDomain + "_" + processDefinitionKey + " not found");
+			}
+		}
+
 		if (businessKey == null)
 		{
 			runtimeService.startProcessInstanceByMessageAndProcessDefinitionId(messageName, processDefinition.getId(),
@@ -171,6 +182,18 @@ public class TaskHandler implements InitializingBean
 				correlation.correlate();
 			}
 		}
+	}
+
+	private ProcessDefinition getProcessDefinition(String processDomain, String processDefinitionKey,
+			String processVersion)
+	{
+		if (processVersion != null && !processVersion.isBlank())
+			return repositoryService.createProcessDefinitionQuery()
+					.processDefinitionKey(processDomain + "_" + processDefinitionKey).versionTag(processVersion)
+					.latestVersion().singleResult();
+		else
+			return repositoryService.createProcessDefinitionQuery()
+					.processDefinitionKey(processDomain + "_" + processDefinitionKey).latestVersion().singleResult();
 	}
 
 	private ProcessInstanceQuery getProcessInstanceQuery(ProcessDefinition processDefinition, String businessKey)

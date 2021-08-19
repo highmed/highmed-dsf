@@ -1,99 +1,143 @@
-version: '3.2'
+version: '3.8'
 services:
-   proxy:
-      image: registry:5000/highmed/bpe_proxy
-      restart: on-failure
-      ports:
+  proxy:
+    image: registry:5000/highmed/bpe_proxy
+    restart: on-failure
+    ports:
       - 127.0.0.1:8080:80
       - 127.0.0.1:8443:443
-      volumes:
-      -  type: bind
-         source: ./proxy/ssl
-         target: /usr/local/apache2/ssl
-         read_only: true
-      environment:
-         TZ: Europe/Berlin
-         HTTPS_SERVER_NAME_PORT: ttp:8443
-         APP_SERVER_IP: 172.28.3.3
-      networks:
-         frontend:
-            ipv4_address: 172.28.3.2
-      depends_on:
+    secrets:
+      - proxy_certificate_and_int_cas.pem
+      - proxy_certificate_private_key.pem
+      - proxy_trusted_client_cas.pem
+    environment:
+      TZ: Europe/Berlin
+      HTTPS_SERVER_NAME_PORT: ttp:8443
+      APP_SERVER_IP: 172.28.3.3
+      SSL_CERTIFICATE_FILE: /run/secrets/proxy_certificate_and_int_cas.pem
+      SSL_CERTIFICATE_KEY_FILE: /run/secrets/proxy_certificate_private_key.pem
+      SSL_CA_CERTIFICATE_FILE: /run/secrets/proxy_trusted_client_cas.pem
+    networks:
+      frontend:
+        ipv4_address: 172.28.3.2
+    depends_on:
       - app
-   app:
-      image: registry:5000/highmed/bpe
-      restart: on-failure
-      volumes:
-      -  type: bind
-         source: ./app/conf
-         target: /opt/bpe/conf
-         read_only: true
-      -  type: bind
-         source: ./app/plugin
-         target: /opt/bpe/plugin
-         read_only: true
-      -  type: bind
-         source: ./app/process
-         target: /opt/bpe/process
-         read_only: true
-      -  type: bind
-         source: ./app/log
-         target: /opt/bpe/log
-      -  type: bind
-         source: ./app/last_event
-         target: /opt/bpe/last_event
-      -  type: bind
-         source: ./app/psn
-         target: /opt/bpe/psn
-      environment:
-         TZ: Europe/Berlin
-      networks:
-         frontend:
-            ipv4_address: 172.28.3.3
-         backend:
-            ipv4_address: 172.28.3.130
-         fhir_bpe:
-            ipv4_address: 172.28.2.3
-      extra_hosts:
+
+  app:
+    image: registry:5000/highmed/bpe
+    restart: on-failure
+    secrets:
+      - db_liquibase.password
+      - db_user.password
+      - db_user_camunda.password
+      - app_client_trust_certificates.pem
+      - app_client_certificate.pem
+      - app_client_certificate_private_key.pem
+      - app_client_certificate_private_key.pem.password
+    volumes:
+      - type: bind
+        source: ./plugin
+        target: /opt/bpe/plugin
+        read_only: true
+      - type: bind
+        source: ./process
+        target: /opt/bpe/process
+        read_only: true
+
+      - type: bind
+        source: ./log
+        target: /opt/bpe/log
+      - type: bind
+        source: ./last_event
+        target: /opt/bpe/last_event
+      - type: bind
+        source: ./psn
+        target: /opt/bpe/psn
+    environment:
+      TZ: Europe/Berlin
+      ORG_HIGHMED_DSF_BPE_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
+      ORG_HIGHMED_DSF_BPE_DB_USER_PASSWORD_FILE: /run/secrets/db_user.password
+      ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE: /run/secrets/db_user_camunda.password
+      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
+      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_client_certificate.pem
+      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_client_certificate_private_key.pem
+      ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_client_certificate_private_key.pem.password
+      ORG_HIGHMED_DSF_BPE_DB_URL: jdbc:postgresql://db/bpe
+      ORG_HIGHMED_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_TTP
+      ORG_HIGHMED_DSF_BPE_FHIR_SERVER_BASE_URL: https://ttp/fhir
+      ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: highmedorg_localServicesIntegration/0.5.0,highmedorg_requestFeasibility/0.5.0,highmedorg_executeFeasibility/0.5.0,highmedorg_requestDataSharing/0.5.0,highmedorg_executeDataSharing/0.5.0
+      # property org.highmed.dsf.bpe.allow.list.organization should only be set for testing, do not configure property in production, potential security risk
+      ORG_HIGHMED_DSF_BPE_ALLOW_LIST_ORGANIZATION: Test_TTP
+    networks:
+      frontend:
+        ipv4_address: 172.28.3.3
+      backend:
+        ipv4_address: 172.28.3.130
+      fhir_bpe:
+        ipv4_address: 172.28.2.3
+    extra_hosts:
       - "ttp:10.42.0.10"
       - "medic1:10.42.0.11"
       - "medic2:10.42.0.12"
       - "medic3:10.42.0.13"
-      depends_on:
+    depends_on:
       - db
-   db:
-      image: postgres:13
-      restart: on-failure
-      healthcheck:
-         test: ["CMD-SHELL", "pg_isready -U liquibase_user -d bpe"]
-         interval: 10s
-         timeout: 5s
-         retries: 5
-      environment:
-         TZ: Europe/Berlin
-         POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
-         POSTGRES_USER: liquibase_user
-         POSTGRES_DB: bpe
-      networks:
-         backend:
-            ipv4_address: 172.28.3.131
-      secrets:
-      - postgres_password
+
+  db:
+    image: postgres:13
+    restart: on-failure
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U liquibase_user -d bpe"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    environment:
+      TZ: Europe/Berlin
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_liquibase.password
+      POSTGRES_USER: liquibase_user
+      POSTGRES_DB: bpe
+    networks:
+      backend:
+        ipv4_address: 172.28.3.131
+    secrets:
+      - db_liquibase.password
+
 secrets:
-   postgres_password:
-      file: ./db/conf/postgres_password
+  proxy_certificate_and_int_cas.pem:
+    file: ./secrets/proxy_certificate_and_int_cas.pem
+  proxy_certificate_private_key.pem:
+    file: ./secrets/proxy_certificate_private_key.pem
+  proxy_trusted_client_cas.pem:
+    file: ./secrets/proxy_trusted_client_cas.pem
+
+  db_liquibase.password:
+    file: ./secrets/db_liquibase.password
+  db_user.password:
+    file: ./secrets/db_user.password
+  db_user_camunda.password:
+    file: ./secrets/db_user_camunda.password
+    
+  app_client_trust_certificates.pem:
+    file: ./secrets/app_testca_certificate.pem
+  app_client_certificate.pem:
+    file: ./secrets/app_ttp-client_certificate.pem
+  app_client_certificate_private_key.pem:
+    file: ./secrets/app_ttp-client_private-key.pem
+  app_client_certificate_private_key.pem.password:
+    file: ./secrets/app_ttp-client_private-key.pem.password
+
 networks:
-   frontend:
-      driver: bridge
-      ipam:
-         driver: default
-         config:
-         -  subnet: 172.28.3.0/25
-   backend:
-      driver: bridge
-      ipam:
-         driver: default
-         config:
-         -  subnet: 172.28.3.128/25
-   fhir_bpe:
-      external: true
+  frontend:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.3.0/25
+  backend:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.3.128/25
+  fhir_bpe:
+    external: true
