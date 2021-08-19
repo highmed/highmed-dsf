@@ -11,7 +11,7 @@
 	<title value="Read Access Tag"/>
 	<status value="active"/>
 	<experimental value="false"/>
-	<date value="2021-08-04"/>
+	<date value="2021-08-20"/>
 	<publisher value="HiGHmed"/>
 	<description value="CodeSystem with read access tags"/>
 	<caseSensitive value="true"/>

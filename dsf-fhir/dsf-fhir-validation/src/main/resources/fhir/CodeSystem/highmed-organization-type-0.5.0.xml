@@ -11,7 +11,7 @@
 	<title value="HiGHmed Organization Type"/>
 	<status value="active"/>
 	<experimental value="false"/>
-	<date value="2021-08-04"/>
+	<date value="2021-08-20"/>
 	<publisher value="HiGHmed"/>
 	<description value="CodeSystem with HiGHmed organization roles used in Organization resources"/>
 	<caseSensitive value="true"/>
