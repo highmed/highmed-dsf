@@ -440,7 +440,7 @@ public class OrganizationDaoTest extends AbstractResourceDaoTest<Organization, O
 		BinaryDaoJdbc binaryDao = new BinaryDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext);
 		Binary createdBinary = binaryDao.create(binary);
 		assertNotNull(createdBinary);
-		
+
 		dao.update(cretedOrg);
 	}
 }
