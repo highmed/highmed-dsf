@@ -5,11 +5,15 @@ import java.util.function.Function;
 import org.highmed.openehr.client.OpenEhrClient;
 import org.highmed.openehr.client.OpenEhrClientFactory;
 import org.highmed.openehr.json.OpenEhrObjectMapperFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class OpenEhrClientJerseyFactory implements OpenEhrClientFactory
 {
+	private static final Logger logger = LoggerFactory.getLogger(OpenEhrClientJerseyFactory.class);
+
 	@Override
 	public OpenEhrClient createClient(Function<String, String> propertyResolver)
 	{
@@ -37,7 +41,8 @@ public class OpenEhrClientJerseyFactory implements OpenEhrClientFactory
 		}
 		catch (Exception exception)
 		{
-			return null;
+			logger.warn("Could not create OpenEhrClientJersey: {}", exception.getMessage());
+			throw new RuntimeException(exception);
 		}
 	}
 }
