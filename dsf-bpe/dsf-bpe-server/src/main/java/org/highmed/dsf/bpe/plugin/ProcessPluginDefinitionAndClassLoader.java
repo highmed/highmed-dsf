@@ -17,6 +17,7 @@ import org.highmed.dsf.bpe.process.ProcessKeyAndVersion;
 import org.highmed.dsf.fhir.resources.ResourceProvider;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertyResolver;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -71,6 +72,7 @@ public class ProcessPluginDefinitionAndClassLoader
 			context.setParent(mainContext);
 			context.setClassLoader(getClassLoader());
 			context.register(getDefinition().getSpringConfigClasses().toArray(Class<?>[]::new));
+			context.setEnvironment((ConfigurableEnvironment) mainContext.getEnvironment());
 			context.refresh();
 		}
 
