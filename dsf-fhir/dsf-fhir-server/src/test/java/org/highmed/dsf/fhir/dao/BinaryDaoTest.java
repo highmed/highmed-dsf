@@ -548,13 +548,11 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		assertReadAccessEntryCount(4, 1, createdB, READ_ACCESS_TAG_VALUE_ORGANIZATION, createdOrg);
 	}
 
-
 	@Test
 	public void testReadAccessTriggerSecurityContextOrganization() throws Exception
 	{
 		testReadAccessTriggerSecurityContextOrganization(rs -> rs.getIdElement().toUnqualifiedVersionless());
 	}
-
 
 	@Test
 	public void testReadAccessTriggerSecurityContextVersionSpecificOrganization() throws Exception

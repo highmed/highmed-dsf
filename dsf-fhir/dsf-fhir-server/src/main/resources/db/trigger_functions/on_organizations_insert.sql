@@ -10,6 +10,24 @@ DECLARE
 BEGIN
 	PERFORM on_resources_insert(NEW.organization_id, NEW.version, NEW.organization);
 	
+	DELETE FROM read_access
+	WHERE access_type = 'ORGANIZATION'
+	AND organization_id = NEW.organization_id;
+	
+	GET DIAGNOSTICS delete_count = ROW_COUNT;
+	RAISE NOTICE 'Existing rows deleted from read_access for created/updated organization, ORGANIZATION Tag: %', delete_count;
+	
+	DELETE FROM read_access
+	WHERE access_type = 'ROLE'
+	AND organization_affiliation_id IN (
+		SELECT organization_affiliation_id FROM current_organization_affiliations 
+		WHERE NEW.organization_id = (regexp_match(organization_affiliation->'participatingOrganization'->>'reference', reference_regex))[5]::uuid
+		OR NEW.organization_id = (regexp_match(organization_affiliation->'organization'->>'reference', reference_regex))[5]::uuid
+	); 
+
+	GET DIAGNOSTICS roles_delete_count = ROW_COUNT;
+	RAISE NOTICE 'Existing rows deleted from read_access for created/updated organization, ROLE Tag: %', roles_delete_count;
+	
 	RAISE NOTICE 'NEW.organization->>''active'' = ''%''', NEW.organization->>'active';
 	IF (NEW.organization->>'active' = 'true') THEN
 		INSERT INTO read_access
@@ -66,7 +84,7 @@ BEGIN
 		)
 		SELECT array_agg(resource_id) FROM temp_role_ids INTO role_ids;
 
-		RAISE NOTICE 'Rows inserted into read_access: %', organization_insert_count + array_length(role_ids, 1);
+		RAISE NOTICE 'Rows inserted into read_acces for created/updated active organization: %', organization_insert_count + array_length(role_ids, 1);
 
 		INSERT INTO read_access
 			SELECT binary_id, version, access_type, organization_id, NULL
@@ -85,23 +103,7 @@ BEGIN
 		RAISE NOTICE 'Rows inserted into read_access based on Binary.securityContext: %', binary_insert_count;
 
 	ELSIF (NEW.organization->>'active' = 'false') THEN
-		DELETE FROM read_access
-		WHERE access_type = 'ORGANIZATION'
-		AND organization_id = NEW.organization_id;
-		
-		GET DIAGNOSTICS delete_count = ROW_COUNT;
-		RAISE NOTICE 'Rows deleted from read_access: %', delete_count;
-		
-		DELETE FROM read_access
-		WHERE access_type = 'ROLE'
-		AND organization_affiliation_id IN (
-			SELECT organization_affiliation_id FROM current_organization_affiliations 
-			WHERE NEW.organization_id = (regexp_match(organization_affiliation->'participatingOrganization'->>'reference', reference_regex))[5]::uuid
-			OR NEW.organization_id = (regexp_match(organization_affiliation->'organization'->>'reference', reference_regex))[5]::uuid
-		); 
-
-		GET DIAGNOSTICS roles_delete_count = ROW_COUNT;
-		RAISE NOTICE 'Rows deleted from read_access based on disabled roles: %', roles_delete_count;
+		RAISE NOTICE 'Not inserting any entries to read_access, created/updated organization is not active';
 	END IF;
 	RETURN NEW;
 END;

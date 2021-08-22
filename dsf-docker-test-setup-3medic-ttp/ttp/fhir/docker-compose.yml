@@ -7,16 +7,16 @@ services:
       - 80:80
       - 443:443
     secrets:
-      - proxy_certificate_and_int_cas.pem
-      - proxy_certificate_private_key.pem
-      - proxy_trusted_client_cas.pem
+      - proxy_server_certificate.pem
+      - proxy_server_certificate_private_key.pem
+      - proxy_client_certificate_trusted_cas_full_chains.pem
     environment:
       TZ: Europe/Berlin
       HTTPS_SERVER_NAME_PORT: ttp:443
       APP_SERVER_IP: 172.28.1.3
-      SSL_CERTIFICATE_FILE: /run/secrets/proxy_certificate_and_int_cas.pem
-      SSL_CERTIFICATE_KEY_FILE: /run/secrets/proxy_certificate_private_key.pem
-      SSL_CA_CERTIFICATE_FILE: /run/secrets/proxy_trusted_client_cas.pem
+      SSL_CERTIFICATE_FILE: /run/secrets/proxy_server_certificate.pem
+      SSL_CERTIFICATE_KEY_FILE: /run/secrets/proxy_server_certificate_private_key.pem
+      SSL_CA_CERTIFICATE_FILE: /run/secrets/proxy_client_certificate_trusted_cas_full_chains.pem
     networks:
       frontend:
         ipv4_address: 172.28.1.2
@@ -94,12 +94,12 @@ services:
       - db_liquibase.password
 
 secrets:
-  proxy_certificate_and_int_cas.pem:
-    file: ./secrets/proxy_certificate_and_int_cas.pem
-  proxy_certificate_private_key.pem:
-    file: ./secrets/proxy_certificate_private_key.pem
-  proxy_trusted_client_cas.pem:
-    file: ./secrets/proxy_trusted_client_cas.pem
+  proxy_server_certificate.pem:
+    file: ./secrets/server_certificate.pem
+  proxy_server_certificate_private_key.pem:
+    file: ./secrets/server_certificate_private_key.pem
+  proxy_client_certificate_trusted_cas_full_chains.pem:
+    file: ./secrets/testca_certificate.pem 
 
   db_liquibase.password:
     file: ./secrets/db_liquibase.password
@@ -109,13 +109,13 @@ secrets:
     file: ./secrets/db_user_permanent_delete.password
     
   app_client_trust_certificates.pem:
-    file: ./secrets/app_testca_certificate.pem
+    file: ./secrets/testca_certificate.pem
   app_client_certificate.pem:
-    file: ./secrets/app_ttp-client_certificate.pem
+    file: ./secrets/client_certificate.pem
   app_client_certificate_private_key.pem:
-    file: ./secrets/app_ttp-client_private-key.pem
+    file: ./secrets/client_certificate_private_key.pem
   app_client_certificate_private_key.pem.password:
-    file: ./secrets/app_ttp-client_private-key.pem.password
+    file: ./secrets/client_certificate_private_key.pem.password
 
 networks:
   frontend:

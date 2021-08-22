@@ -572,59 +572,50 @@ public class CertificateGenerator
 
 		Path baseFolder = Paths.get("../../", dockerTestFolder);
 
-		Path bpeCertificateFile = baseFolder.resolve("bpe/secrets/proxy_certificate_and_int_cas.pem");
+		Path bpeCertificateFile = baseFolder.resolve("bpe/secrets/server_certificate.pem");
 		logger.info("Copying {} certificate pem file to {}", commonName, bpeCertificateFile);
 		writeCertificate(bpeCertificateFile, serverCertFiles.getCertificate());
 
-		Path bpePrivateKeyFile = baseFolder.resolve("bpe/secrets/proxy_certificate_private_key.pem");
+		Path bpePrivateKeyFile = baseFolder.resolve("bpe/secrets/server_certificate_private_key.pem");
 		logger.info("Copying {} private-key file to {}", commonName, bpePrivateKeyFile);
 		writePrivateKeyNotEncrypted(bpePrivateKeyFile, serverCertFiles.keyPair.getPrivate());
 
-		Path bpeCaCertFile = baseFolder.resolve("bpe/secrets/proxy_trusted_client_cas.pem");
-		logger.info("Copying Test CA certificate file to {}", bpeCaCertFile.toString());
-		writeCertificate(bpeCaCertFile, testCaCertificate);
+		Path bpeTestCaCertificate = baseFolder.resolve("bpe/secrets/testca_certificate.pem");
+		logger.info("Copying Test CA certificate file to {}", bpeTestCaCertificate.toString());
+		writeCertificate(bpeTestCaCertificate, testCaCertificate);
 
-		Path fhirCertificateFile = baseFolder.resolve("fhir/secrets/proxy_certificate_and_int_cas.pem");
+		Path fhirCertificateFile = baseFolder.resolve("fhir/secrets/server_certificate.pem");
 		logger.info("Copying {} certificate pem file to {}", commonName, fhirCertificateFile);
 		writeCertificate(fhirCertificateFile, serverCertFiles.getCertificate());
 
-		Path fhirPrivateKeyFile = baseFolder.resolve("fhir/secrets/proxy_certificate_private_key.pem");
+		Path fhirPrivateKeyFile = baseFolder.resolve("fhir/secrets/server_certificate_private_key.pem");
 		logger.info("Copying {} private-key file to {}", commonName, fhirPrivateKeyFile);
 		writePrivateKeyNotEncrypted(fhirPrivateKeyFile, serverCertFiles.keyPair.getPrivate());
 
-		Path fhirCacertFile = baseFolder.resolve("fhir/secrets/proxy_trusted_client_cas.pem");
-		logger.info("Copying Test CA certificate file to {}", fhirCacertFile.toString());
-		writeCertificate(fhirCacertFile, testCaCertificate);
+		Path fhirTestCaCertificate = baseFolder.resolve("fhir/secrets/testca_certificate.pem");
+		logger.info("Copying Test CA certificate file to {}", fhirTestCaCertificate.toString());
+		writeCertificate(fhirTestCaCertificate, testCaCertificate);
 	}
 
 	private void copyClientCertFiles(String bpeConfFolder, String fhirConfFolder, String commonName)
 	{
 		final CertificateFiles clientCertFiles = clientCertificateFilesByCommonName.get(commonName);
-		final X509Certificate testCaCertificate = ca.getCertificate();
 
-		Path bpeClientCertificateFile = Paths.get(bpeConfFolder, "app_" + commonName + "_certificate.pem");
+		Path bpeClientCertificateFile = Paths.get(bpeConfFolder, "client_certificate.pem");
 		logger.info("Copying {} certificate certificate file to {}", commonName, bpeClientCertificateFile);
 		writeCertificate(bpeClientCertificateFile, clientCertFiles.certificate);
 
-		Path bpeClientPrivateKeyFile = Paths.get(bpeConfFolder, "app_" + commonName + "_private-key.pem");
+		Path bpeClientPrivateKeyFile = Paths.get(bpeConfFolder, "client_certificate_private_key.pem");
 		logger.info("Copying {} certificate private-key file to {}", commonName, bpeClientPrivateKeyFile);
 		writePrivateKeyEncrypted(bpeClientPrivateKeyFile, clientCertFiles.keyPair.getPrivate());
 
-		Path bpeCaCertFile = Paths.get(bpeConfFolder, "app_testca_certificate.pem");
-		logger.info("Copying Test CA certificate file to {}", bpeCaCertFile.toString());
-		writeCertificate(bpeCaCertFile, testCaCertificate);
-
-		Path fhirClientCertificateFile = Paths.get(fhirConfFolder, "app_" + commonName + "_certificate.pem");
+		Path fhirClientCertificateFile = Paths.get(fhirConfFolder, "client_certificate.pem");
 		logger.info("Copying {} certificate certificate file to {}", commonName, fhirClientCertificateFile);
 		writeCertificate(fhirClientCertificateFile, clientCertFiles.certificate);
 
-		Path fhirClientPrivateKeyFile = Paths.get(fhirConfFolder, "app_" + commonName + "_private-key.pem");
+		Path fhirClientPrivateKeyFile = Paths.get(fhirConfFolder, "client_certificate_private_key.pem");
 		logger.info("Copying {} certificate private-key file to {}", commonName, fhirClientPrivateKeyFile);
 		writePrivateKeyEncrypted(fhirClientPrivateKeyFile, clientCertFiles.keyPair.getPrivate());
-
-		Path fhirCacertFile = Paths.get(fhirConfFolder, "app_testca_certificate.pem");
-		logger.info("Copying Test CA certificate file to {}", fhirCacertFile.toString());
-		writeCertificate(fhirCacertFile, testCaCertificate);
 	}
 
 	public void copyDockerTest3MedicTtpDockerCertificates()

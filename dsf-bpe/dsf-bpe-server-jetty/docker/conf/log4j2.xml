@@ -16,8 +16,8 @@
 	</Appenders>
 	<Loggers>
 		<Logger name="org.highmed" level="DEBUG" />
-		<Logger name="de.netzwerk-universitaetsmedizin" level="DEBUG" />
-		<Logger name="de.medizininformatik-initiative" level="DEBUG" />
+		<Logger name="de.netzwerk_universitaetsmedizin" level="DEBUG" />
+		<Logger name="de.medizininformatik_initiative" level="DEBUG" />
 		<Logger name="org.eclipse.jetty" level="INFO" />
 
 		<Root level="WARN">

@@ -20,7 +20,7 @@ BEGIN
 	GET DIAGNOSTICS binary_delete_count = ROW_COUNT;
 	RAISE NOTICE 'Rows deleted from read_access based on Binary.securityContext: %', binary_delete_count;
 
-	-- add entries for ALL if tag exists
+	-- add entry for ALL if tag exists
 	IF (new_resource->'meta'->'tag' @> '[{"system":"http://highmed.org/fhir/CodeSystem/read-access-tag","code":"ALL"}]'::jsonb) THEN
 		INSERT INTO read_access
 		VALUES(new_resource_id, new_resource_version, 'ALL', NULL, NULL);
@@ -28,7 +28,7 @@ BEGIN
 		GET DIAGNOSTICS all_insert_count = ROW_COUNT;
 	END IF;
 	
-	-- add entries for LOCAL if tag exists
+	-- add entry for LOCAL if tag exists
 	IF (new_resource->'meta'->'tag' @> '[{"system":"http://highmed.org/fhir/CodeSystem/read-access-tag","code":"LOCAL"}]'::jsonb) THEN
 		INSERT INTO read_access
 		VALUES(new_resource_id, new_resource_version, 'LOCAL', NULL, NULL);
@@ -36,7 +36,7 @@ BEGIN
 		GET DIAGNOSTICS local_insert_count = ROW_COUNT;
 	END IF;
 	
-	-- add entries for ORGANIZATION if tag exists
+	-- add entries for ORGANIZATION if tag(s) exists
 	IF (new_resource->'meta'->'tag' @> '[{"system":"http://highmed.org/fhir/CodeSystem/read-access-tag","code":"ORGANIZATION"}]'::jsonb) THEN
 		INSERT INTO read_access 			
 		SELECT new_resource_id, new_resource_version,'ORGANIZATION', organization_id, NULL FROM (
@@ -52,7 +52,7 @@ BEGIN
 		GET DIAGNOSTICS organization_insert_count = ROW_COUNT;
 	END IF;
 	
-	-- add entries for ROLE if tag exists
+	-- add entries for ROLE if tag(s) exists
 	IF (new_resource->'meta'->'tag' @> '[{"system":"http://highmed.org/fhir/CodeSystem/read-access-tag","code":"ROLE"}]'::jsonb) THEN
 		INSERT INTO read_access 			
 		SELECT new_resource_id, new_resource_version, 'ROLE', member_organization_id, organization_affiliation_id FROM (
