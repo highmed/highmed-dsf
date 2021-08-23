@@ -11,7 +11,7 @@
 	<title value="Process Authorization"/>
 	<status value="active"/>
 	<experimental value="false"/>
-	<date value="2021-08-04"/>
+	<date value="2021-08-23"/>
 	<publisher value="HiGHmed"/>
 	<description value="CodeSystem with proces authorization codes"/>
 	<caseSensitive value="true"/>
