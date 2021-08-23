@@ -1,0 +1,57 @@
+<Bundle xmlns="http://hl7.org/fhir">
+   <type value="transaction"/>
+   <entry>
+      <fullUrl value="urn:uuid:bb73165c-c7b9-4342-8e28-531f07fa7735"/>
+      <resource>
+         <Organization xmlns="http://hl7.org/fhir">
+            <meta>
+               <tag>
+                  <system value="http://highmed.org/fhir/CodeSystem/read-access-tag"/>
+                  <code value="ALL"/>
+               </tag>
+            </meta>
+            <extension url="http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint">
+               <valueString value="ce880877ff656c2195c8577a707c532b04e5f3a40f9640cc5264018b213e35630b3747c73d80da408ceb0bffb65af2d4a0ba313d1f55ed439a56a7706501e056"/>
+            </extension>
+            <identifier>
+               <system value="http://highmed.org/sid/organization-identifier"/>
+               <value value="Test_TTP"/>
+            </identifier>
+            <active value="true"/>
+            <name value="Test TTP"/>
+         </Organization>
+      </resource>
+      <request>
+         <method value="POST"/>
+         <url value="Organization"/>
+         <ifNoneExist value="identifier=http://highmed.org/sid/organization-identifier|Test_TTP"/>
+      </request>
+   </entry>
+   <entry>
+      <fullUrl value="urn:uuid:cf62edc2-cc5d-43ed-ac0e-caf09f7326c3"/>
+      <resource>
+         <Organization xmlns="http://hl7.org/fhir">
+            <meta>
+               <tag>
+                  <system value="http://highmed.org/fhir/CodeSystem/read-access-tag"/>
+                  <code value="ALL"/>
+               </tag>
+            </meta>
+            <extension url="http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint">
+               <valueString value="${org.highmed.dsf.fhir.server.organization.thumbprint}"/>
+            </extension>
+            <identifier>
+               <system value="http://highmed.org/sid/organization-identifier"/>
+               <value value="${org.highmed.dsf.fhir.server.organization.identifier.value}"/>
+            </identifier>
+            <active value="true"/>
+            <name value="${org.highmed.dsf.fhir.server.organization.name}"/>
+         </Organization>
+      </resource>
+      <request>
+         <method value="POST"/>
+         <url value="Organization"/>
+         <ifNoneExist value="identifier=http://highmed.org/sid/organization-identifier|${org.highmed.dsf.fhir.server.organization.identifier.value}"/>
+      </request>
+   </entry>
+</Bundle>
