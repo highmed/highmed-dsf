@@ -14,6 +14,7 @@ public class TestDataGenerator
 	private static final Logger logger = LoggerFactory.getLogger(TestDataGenerator.class);
 
 	private static final CertificateGenerator certificateGenerator = new CertificateGenerator();
+	private static final BundleGenerator bundleGenerator = new BundleGenerator();
 	private static final ConfigGenerator configGenerator = new ConfigGenerator();
 	private static final EnvGenerator envGenerator = new EnvGenerator();
 
@@ -39,6 +40,10 @@ public class TestDataGenerator
 		logger.warn(
 				"Install client-certificate and CA certificate from \"{}\" into your browsers certificate store to access fhir and bpe servers with your webbrowser",
 				p12File.toAbsolutePath().toString());
+
+		// fhir bundle.xml
+		bundleGenerator.createTestBundle(clientCertificateFilesByCommonName);
+		bundleGenerator.copyJavaTestBundle();
 
 		// fhir config.properties
 		configGenerator.modifyJavaTestFhirConfigProperties(clientCertificateFilesByCommonName);

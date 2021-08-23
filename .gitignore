@@ -20,6 +20,7 @@ dsf-bpe/dsf-bpe-server-jetty/process/*.jar
 ###
 # dsf-fhir ignores
 ###
+dsf-fhir/dsf-fhir-server-jetty/conf/bundle.xml
 dsf-fhir/dsf-fhir-server-jetty/conf/config.properties
 dsf-fhir/dsf-fhir-server-jetty/docker/dsf_fhir.jar
 dsf-fhir/dsf-fhir-server-jetty/docker/lib/*.jar
@@ -70,6 +71,8 @@ dsf-docker-test-setup-3medic-ttp-docker/.env
 ###
 # dsf-tools ignores
 ###
+dsf-tools/dsf-tools-test-data-generator/bundle/*.xml
+
 dsf-tools/dsf-tools-test-data-generator/cert/**/*.pem
 dsf-tools/dsf-tools-test-data-generator/cert/**/*.csr
 dsf-tools/dsf-tools-test-data-generator/cert/**/*.p12
