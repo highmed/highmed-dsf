@@ -11,6 +11,7 @@ import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.UUID;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.pkcs.PKCSException;
@@ -93,11 +94,13 @@ public class FhirConfig
 	@Bean
 	public FhirWebsocketClientProvider clientProvider()
 	{
+		char[] keyStorePassword = UUID.randomUUID().toString().toCharArray();
+
 		try
 		{
 			KeyStore webserviceKeyStore = createKeyStore(propertiesConfig.getWebserviceClientCertificateFile(),
 					propertiesConfig.getWebserviceClientCertificatePrivateKeyFile(),
-					propertiesConfig.getWebserviceClientCertificatePrivateKeyFilePassword());
+					propertiesConfig.getWebserviceClientCertificatePrivateKeyFilePassword(), keyStorePassword);
 			KeyStore webserviceTrustStore = createTrustStore(
 					propertiesConfig.getWebserviceClientCertificateTrustStoreFile());
 
@@ -107,14 +110,12 @@ public class FhirConfig
 					propertiesConfig.getWebserviceClientLocalProxySchemeHostPort(),
 					propertiesConfig.getWebserviceClientLocalProxyUsername(),
 					propertiesConfig.getWebserviceClientLocalProxyPassword(), webserviceTrustStore, webserviceKeyStore,
-					propertiesConfig.getWebserviceClientCertificatePrivateKeyFilePassword(),
-					propertiesConfig.getWebserviceClientRemoteReadTimeout(),
+					keyStorePassword, propertiesConfig.getWebserviceClientRemoteReadTimeout(),
 					propertiesConfig.getWebserviceClientRemoteConnectTimeout(),
 					propertiesConfig.getWebserviceClientRemoteProxySchemeHostPort(),
 					propertiesConfig.getWebserviceClientRemoteProxyUsername(),
 					propertiesConfig.getWebserviceClientRemoteProxyPassword(), getWebsocketUrl(), webserviceTrustStore,
-					webserviceKeyStore, propertiesConfig.getWebserviceClientCertificatePrivateKeyFilePassword(),
-					propertiesConfig.getWebsocketClientProxySchemeHostPort(),
+					webserviceKeyStore, keyStorePassword, propertiesConfig.getWebsocketClientProxySchemeHostPort(),
 					propertiesConfig.getWebsocketClientProxyUsername(),
 					propertiesConfig.getWebsocketClientProxyPassword());
 		}
@@ -147,7 +148,8 @@ public class FhirConfig
 		return CertificateReader.allFromCer(trustStorePath);
 	}
 
-	private KeyStore createKeyStore(String certificateFile, String privateKeyFile, char[] privateKeyPassword)
+	private KeyStore createKeyStore(String certificateFile, String privateKeyFile, char[] privateKeyPassword,
+			char[] keyStorePassword)
 			throws IOException, PKCSException, CertificateException, KeyStoreException, NoSuchAlgorithmException
 	{
 		Path certificatePath = Paths.get(certificateFile);
@@ -163,7 +165,7 @@ public class FhirConfig
 
 		String subjectCommonName = CertificateHelper.getSubjectCommonName(certificate);
 		return CertificateHelper.toJksKeyStore(privateKey, new Certificate[] { certificate }, subjectCommonName,
-				privateKeyPassword);
+				keyStorePassword);
 	}
 
 	@Bean
