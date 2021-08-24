@@ -11,6 +11,7 @@ import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.highmed.dsf.bpe.ConstantsBase;
+import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.hl7.fhir.r4.model.Task;
@@ -24,13 +25,16 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 
 	private final FhirWebserviceClientProvider clientProvider;
 	private final TaskHelper taskHelper;
+	private final ReadAccessHelper readAccessHelper;
 
 	private DelegateExecution execution;
 
-	public AbstractServiceDelegate(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper)
+	public AbstractServiceDelegate(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
+			ReadAccessHelper readAccessHelper)
 	{
 		this.clientProvider = clientProvider;
 		this.taskHelper = taskHelper;
+		this.readAccessHelper = readAccessHelper;
 	}
 
 	@Override
@@ -38,6 +42,7 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 	{
 		Objects.requireNonNull(clientProvider, "clientProvider");
 		Objects.requireNonNull(taskHelper, "taskHelper");
+		Objects.requireNonNull(readAccessHelper, "readAccessHelper");
 	}
 
 	@Override
@@ -74,36 +79,38 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 					execution.getProcessDefinitionId(), execution.getActivityInstanceId(), task.getId(),
 					exception.getMessage());
 
-			String errorMessage =
-					"Process " + execution.getProcessDefinitionId() + " has fatal error in step " + execution
-							.getActivityInstanceId() + ", reason: " + exception.getMessage();
+			String errorMessage = "Process " + execution.getProcessDefinitionId() + " has fatal error in step "
+					+ execution.getActivityInstanceId() + ", reason: " + exception.getMessage();
 
-			task.addOutput(taskHelper
-					.createOutput(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR, errorMessage));
+			task.addOutput(taskHelper.createOutput(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR,
+					errorMessage));
 			task.setStatus(Task.TaskStatus.FAILED);
 
 			clientProvider.getLocalWebserviceClient().withMinimalReturn().update(task);
 
 			// TODO evaluate throwing exception as alternative to stopping the process instance
-			execution.getProcessEngine().getRuntimeService()
-					.deleteProcessInstance(execution.getProcessInstanceId(), exception.getMessage());
+			execution.getProcessEngine().getRuntimeService().deleteProcessInstance(execution.getProcessInstanceId(),
+					exception.getMessage());
 		}
 	}
 
 	private Task getTask(DelegateExecution execution)
 	{
-		return execution.getParentId() == null || execution.getParentId().equals(execution.getProcessInstanceId()) ?
-				getLeadingTaskFromExecutionVariables() :
-				getCurrentTaskFromExecutionVariables();
+		return execution.getParentId() == null || execution.getParentId().equals(execution.getProcessInstanceId())
+				? getLeadingTaskFromExecutionVariables()
+				: getCurrentTaskFromExecutionVariables();
 	}
 
 	/**
 	 * Method called by a BPMN service task
 	 *
-	 * @param execution Process instance information and variables
-	 * @throws BpmnError Thrown when an error boundary event should be called
-	 * @throws Exception Uncaught exceptions will result in task status failed, the exception message will be written as an
-	 *                   error output
+	 * @param execution
+	 *            Process instance information and variables
+	 * @throws BpmnError
+	 *             Thrown when an error boundary event should be called
+	 * @throws Exception
+	 *             Uncaught exceptions will result in task status failed, the exception message will be written as an
+	 *             error output
 	 */
 	protected abstract void doExecute(DelegateExecution execution) throws BpmnError, Exception;
 
@@ -117,10 +124,16 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 		return clientProvider;
 	}
 
+	protected final ReadAccessHelper getReadAccessHelper()
+	{
+		return readAccessHelper;
+	}
+
 	/**
 	 * @return the current task from execution variables, the task resource that started the current process or
-	 * subprocess
-	 * @throws IllegalStateException if execution of this service delegate has not been started
+	 *         subprocess
+	 * @throws IllegalStateException
+	 *             if execution of this service delegate has not been started
 	 * @see ConstantsBase#BPMN_EXECUTION_VARIABLE_TASK
 	 */
 	protected final Task getCurrentTaskFromExecutionVariables()
@@ -133,7 +146,8 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 
 	/**
 	 * @return the leading task from execution variables, same as current task if not in a subprocess
-	 * @throws IllegalStateException if execution of this service delegate has not been started
+	 * @throws IllegalStateException
+	 *             if execution of this service delegate has not been started
 	 * @see ConstantsBase#BPMN_EXECUTION_VARIABLE_LEADING_TASK
 	 */
 	protected final Task getLeadingTaskFromExecutionVariables()

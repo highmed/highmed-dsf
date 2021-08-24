@@ -7,6 +7,7 @@ import java.util.Optional;
 import javax.sql.DataSource;
 
 import org.highmed.dsf.fhir.dao.ValueSetDao;
+import org.highmed.dsf.fhir.search.parameters.ValueSetDate;
 import org.highmed.dsf.fhir.search.parameters.ValueSetIdentifier;
 import org.highmed.dsf.fhir.search.parameters.ValueSetStatus;
 import org.highmed.dsf.fhir.search.parameters.ValueSetUrl;
@@ -20,11 +21,12 @@ public class ValueSetDaoJdbc extends AbstractResourceDaoJdbc<ValueSet> implement
 {
 	private final ReadByUrlDaoJdbc<ValueSet> readByUrl;
 
-	public ValueSetDaoJdbc(DataSource dataSource, FhirContext fhirContext)
+	public ValueSetDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
 	{
-		super(dataSource, fhirContext, ValueSet.class, "value_sets", "value_set", "value_set_id",
-				ValueSetUserFilter::new,
-				with(ValueSetIdentifier::new, ValueSetStatus::new, ValueSetUrl::new, ValueSetVersion::new), with());
+		super(dataSource, permanentDeleteDataSource, fhirContext, ValueSet.class, "value_sets", "value_set",
+				"value_set_id", ValueSetUserFilter::new, with(ValueSetDate::new, ValueSetIdentifier::new,
+						ValueSetStatus::new, ValueSetUrl::new, ValueSetVersion::new),
+				with());
 
 		readByUrl = new ReadByUrlDaoJdbc<>(this::getDataSource, this::getResource, getResourceTable(),
 				getResourceColumn());

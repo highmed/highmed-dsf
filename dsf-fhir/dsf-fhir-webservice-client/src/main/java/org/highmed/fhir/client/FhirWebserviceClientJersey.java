@@ -21,6 +21,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.lang3.StringUtils;
 import org.highmed.dsf.fhir.adapter.AbstractFhirAdapter;
 import org.highmed.dsf.fhir.adapter.ActivityDefinitionJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.ActivityDefinitionXmlFhirAdapter;
@@ -38,12 +39,20 @@ import org.highmed.dsf.fhir.adapter.GroupJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.GroupXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.HealthcareServiceJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.HealthcareServiceXmlFhirAdapter;
+import org.highmed.dsf.fhir.adapter.LibraryJsonFhirAdapter;
+import org.highmed.dsf.fhir.adapter.LibraryXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.LocationJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.LocationXmlFhirAdapter;
+import org.highmed.dsf.fhir.adapter.MeasureJsonFhirAdapter;
+import org.highmed.dsf.fhir.adapter.MeasureReportJsonFhirAdapter;
+import org.highmed.dsf.fhir.adapter.MeasureReportXmlFhirAdapter;
+import org.highmed.dsf.fhir.adapter.MeasureXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.NamingSystemJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.NamingSystemXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.OperationOutcomeJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.OperationOutcomeXmlFhirAdapter;
+import org.highmed.dsf.fhir.adapter.OrganizationAffiliationJsonFhirAdapter;
+import org.highmed.dsf.fhir.adapter.OrganizationAffiliationXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.OrganizationJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.OrganizationXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.ParametersJsonFhirAdapter;
@@ -124,11 +133,15 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 				new CodeSystemXmlFhirAdapter(fhirContext), new GroupJsonFhirAdapter(fhirContext),
 				new GroupXmlFhirAdapter(fhirContext), new EndpointJsonFhirAdapter(fhirContext),
 				new EndpointXmlFhirAdapter(fhirContext), new HealthcareServiceJsonFhirAdapter(fhirContext),
-				new HealthcareServiceXmlFhirAdapter(fhirContext), new LocationJsonFhirAdapter(fhirContext),
-				new LocationXmlFhirAdapter(fhirContext), new NamingSystemJsonFhirAdapter(fhirContext),
+				new HealthcareServiceXmlFhirAdapter(fhirContext), new LibraryJsonFhirAdapter(fhirContext),
+				new LibraryXmlFhirAdapter(fhirContext), new LocationJsonFhirAdapter(fhirContext),
+				new LocationXmlFhirAdapter(fhirContext), new MeasureJsonFhirAdapter(fhirContext),
+				new MeasureXmlFhirAdapter(fhirContext), new MeasureReportJsonFhirAdapter(fhirContext),
+				new MeasureReportXmlFhirAdapter(fhirContext), new NamingSystemJsonFhirAdapter(fhirContext),
 				new NamingSystemXmlFhirAdapter(fhirContext), new OperationOutcomeJsonFhirAdapter(fhirContext),
 				new OperationOutcomeXmlFhirAdapter(fhirContext), new OrganizationJsonFhirAdapter(fhirContext),
-				new OrganizationXmlFhirAdapter(fhirContext), new ParametersJsonFhirAdapter(fhirContext),
+				new OrganizationXmlFhirAdapter(fhirContext), new OrganizationAffiliationJsonFhirAdapter(fhirContext),
+				new OrganizationAffiliationXmlFhirAdapter(fhirContext), new ParametersJsonFhirAdapter(fhirContext),
 				new ParametersXmlFhirAdapter(fhirContext), new PatientJsonFhirAdapter(fhirContext),
 				new PatientXmlFhirAdapter(fhirContext), new PractitionerJsonFhirAdapter(fhirContext),
 				new PractitionerXmlFhirAdapter(fhirContext), new PractitionerRoleJsonFhirAdapter(fhirContext),
@@ -448,6 +461,23 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 	}
 
 	@Override
+	public void deletePermanently(Class<? extends Resource> resourceClass, String id)
+	{
+		Objects.requireNonNull(resourceClass, "resourceClass");
+		Objects.requireNonNull(id, "id");
+
+		Response response = getResource().path(resourceClass.getAnnotation(ResourceDef.class).name()).path(id)
+				.path("$permanent-delete").request().accept(Constants.CT_FHIR_JSON_NEW).post(null);
+
+		logStatusAndHeaders(response);
+
+		if (Status.OK.getStatusCode() != response.getStatus())
+			throw handleError(response);
+		else
+			response.close();
+	}
+
+	@Override
 	public Resource read(String resourceTypeName, String id)
 	{
 		Objects.requireNonNull(resourceTypeName, "resourceTypeName");
@@ -731,6 +761,47 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 	@Override
 	public BasicFhirWebserviceClient withRetry(int nTimes, long delayMillis)
 	{
+		if (nTimes < 0)
+			throw new IllegalArgumentException("nTimes < 0");
+		if (delayMillis < 0)
+			throw new IllegalArgumentException("delayMillis < 0");
+
 		return new BasicFhirWebserviceCientWithRetryImpl(this, nTimes, delayMillis);
+	}
+
+	@Override
+	public BasicFhirWebserviceClient withRetryForever(long delayMillis)
+	{
+		if (delayMillis < 0)
+			throw new IllegalArgumentException("delayMillis < 0");
+
+		return new BasicFhirWebserviceCientWithRetryImpl(this, RETRY_FOREVER, delayMillis);
+	}
+
+	@Override
+	public Bundle history(Class<? extends Resource> resourceType, String id, int page, int count)
+	{
+		WebTarget target = getResource();
+
+		if (resourceType != null)
+			target = target.path(resourceType.getAnnotation(ResourceDef.class).name());
+
+		if (!StringUtils.isBlank(id))
+			target = target.path(id);
+
+		if (page != Integer.MIN_VALUE)
+			target = target.queryParam("_page", page);
+
+		if (count != Integer.MIN_VALUE)
+			target = target.queryParam("_count", count);
+
+		Response response = target.path("_history").request().accept(Constants.CT_FHIR_JSON_NEW).get();
+
+		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
+				response.getStatusInfo().getReasonPhrase());
+		if (Status.OK.getStatusCode() == response.getStatus())
+			return response.readEntity(Bundle.class);
+		else
+			throw handleError(response);
 	}
 }

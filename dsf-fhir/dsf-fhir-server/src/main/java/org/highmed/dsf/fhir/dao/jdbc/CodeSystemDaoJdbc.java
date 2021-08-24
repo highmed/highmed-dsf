@@ -7,6 +7,7 @@ import java.util.Optional;
 import javax.sql.DataSource;
 
 import org.highmed.dsf.fhir.dao.CodeSystemDao;
+import org.highmed.dsf.fhir.search.parameters.CodeSystemDate;
 import org.highmed.dsf.fhir.search.parameters.CodeSystemIdentifier;
 import org.highmed.dsf.fhir.search.parameters.CodeSystemStatus;
 import org.highmed.dsf.fhir.search.parameters.CodeSystemUrl;
@@ -20,11 +21,11 @@ public class CodeSystemDaoJdbc extends AbstractResourceDaoJdbc<CodeSystem> imple
 {
 	private final ReadByUrlDaoJdbc<CodeSystem> readByUrl;
 
-	public CodeSystemDaoJdbc(DataSource dataSource, FhirContext fhirContext)
+	public CodeSystemDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
 	{
-		super(dataSource, fhirContext, CodeSystem.class, "code_systems", "code_system", "code_system_id",
-				CodeSystemUserFilter::new,
-				with(CodeSystemIdentifier::new, CodeSystemStatus::new, CodeSystemUrl::new, CodeSystemVersion::new),
+		super(dataSource, permanentDeleteDataSource, fhirContext, CodeSystem.class, "code_systems", "code_system",
+				"code_system_id", CodeSystemUserFilter::new, with(CodeSystemDate::new, CodeSystemIdentifier::new,
+						CodeSystemStatus::new, CodeSystemUrl::new, CodeSystemVersion::new),
 				with());
 
 		readByUrl = new ReadByUrlDaoJdbc<>(this::getDataSource, this::getResource, getResourceTable(),

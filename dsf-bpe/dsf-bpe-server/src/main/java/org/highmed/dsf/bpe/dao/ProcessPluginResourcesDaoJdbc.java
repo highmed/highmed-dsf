@@ -32,37 +32,6 @@ public class ProcessPluginResourcesDaoJdbc extends AbstractDaoJdbc implements Pr
 	}
 
 	@Override
-	public List<ResourceInfo> getResources(ProcessKeyAndVersion processKeyAndVersion) throws SQLException
-	{
-		Objects.requireNonNull(processKeyAndVersion, "processKeyAndVersion");
-
-		try (Connection connection = dataSource.getConnection();
-				PreparedStatement statement = connection.prepareStatement(
-						"SELECT resource_type, resource_id, url, version, name FROM process_plugin_resources WHERE process_key_and_version = ?"))
-		{
-			statement.setString(1, processKeyAndVersion.toString());
-
-			logger.trace("Executing query '{}'", statement);
-			try (ResultSet result = statement.executeQuery())
-			{
-				List<ResourceInfo> resources = new ArrayList<>();
-				while (result.next())
-				{
-					String resourceType = result.getString(1);
-					UUID resourceId = result.getObject(2, UUID.class);
-					String url = result.getString(3);
-					String version = result.getString(4);
-					String name = result.getString(5);
-
-					resources.add(new ResourceInfo(resourceType, url, version, name).setResourceId(resourceId));
-				}
-
-				return resources;
-			}
-		}
-	}
-
-	@Override
 	public Map<ProcessKeyAndVersion, List<ResourceInfo>> getResources() throws SQLException
 	{
 		try (Connection connection = dataSource.getConnection();
@@ -105,10 +74,11 @@ public class ProcessPluginResourcesDaoJdbc extends AbstractDaoJdbc implements Pr
 
 	@Override
 	public void addOrRemoveResources(Collection<? extends ProcessesResource> newResources,
-			List<UUID> deletedResourcesIds) throws SQLException
+			List<UUID> deletedResourcesIds, List<ProcessKeyAndVersion> excludedProcesses) throws SQLException
 	{
 		Objects.requireNonNull(newResources, "newResources");
 		Objects.requireNonNull(deletedResourcesIds, "deletedResourcesIds");
+		Objects.requireNonNull(excludedProcesses, "excludedProcesses");
 
 		if (newResources.isEmpty())
 			return;
@@ -118,6 +88,7 @@ public class ProcessPluginResourcesDaoJdbc extends AbstractDaoJdbc implements Pr
 			connection.setReadOnly(false);
 			connection.setAutoCommit(false);
 
+			// non NamingSystem resources
 			try (PreparedStatement statement = connection.prepareStatement(
 					"INSERT INTO process_plugin_resources (process_key_and_version, resource_type, resource_id, url, version) VALUES (?, ?, ?, ?, ?) "
 							+ "ON CONFLICT (process_key_and_version, resource_type, url, version) "
@@ -153,6 +124,7 @@ public class ProcessPluginResourcesDaoJdbc extends AbstractDaoJdbc implements Pr
 				throw e;
 			}
 
+			// NamingSystem resources
 			try (PreparedStatement statement = connection.prepareStatement(
 					"INSERT INTO process_plugin_resources (process_key_and_version, resource_type, resource_id, name) VALUES (?, 'NamingSystem', ?, ?) "
 							+ "ON CONFLICT (process_key_and_version, resource_type, name) "
@@ -192,6 +164,25 @@ public class ProcessPluginResourcesDaoJdbc extends AbstractDaoJdbc implements Pr
 				for (UUID deletedId : deletedResourcesIds)
 				{
 					statement.setObject(1, uuidToPgObject(deletedId));
+
+					statement.addBatch();
+					logger.trace("Executing query '{}'", statement);
+				}
+
+				statement.executeBatch();
+			}
+			catch (SQLException e)
+			{
+				connection.rollback();
+				throw e;
+			}
+
+			try (PreparedStatement statement = connection
+					.prepareStatement("DELETE FROM process_plugin_resources WHERE process_key_and_version = ?"))
+			{
+				for (ProcessKeyAndVersion process : excludedProcesses)
+				{
+					statement.setString(1, process.toString());
 
 					statement.addBatch();
 					logger.trace("Executing query '{}'", statement);

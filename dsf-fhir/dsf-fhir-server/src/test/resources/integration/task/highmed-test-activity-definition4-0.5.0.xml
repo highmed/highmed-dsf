@@ -1,0 +1,61 @@
+<ActivityDefinition xmlns="http://hl7.org/fhir">
+	<meta>
+		<profile value="http://highmed.org/fhir/StructureDefinition/activity-definition" />
+		<tag>
+			<system value="http://highmed.org/fhir/CodeSystem/read-access-tag" />
+			<code value="ALL"></code>
+		</tag>
+	</meta>
+	<extension url="http://highmed.org/fhir/StructureDefinition/extension-process-authorization">
+		<extension url="message-name">
+			<valueString value="test-message" />
+		</extension>
+		<extension url="task-profile">
+			<valueCanonical value="http://highmed.org/fhir/StructureDefinition/test-task|0.5.0" />
+		</extension>
+		<extension url="requester">
+			<valueCoding>
+				<extension url="http://highmed.org/fhir/StructureDefinition/extension-process-authorization-consortium-role">
+					<extension url="consortium">
+						<valueIdentifier>
+							<system value="http://highmed.org/sid/organization-identifier" />
+							<value value="Parent_Organization" />
+						</valueIdentifier>
+					</extension>
+					<extension url="role">
+						<valueCoding>
+							<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
+							<code value="DTS" />
+						</valueCoding>
+					</extension>
+				</extension>
+				<system value="http://highmed.org/fhir/CodeSystem/process-authorization" />
+				<code value="REMOTE_ROLE" />
+			</valueCoding>
+		</extension>
+		<extension url="recipient">
+			<valueCoding>
+				<extension url="http://highmed.org/fhir/StructureDefinition/extension-process-authorization-consortium-role">
+					<extension url="consortium">
+						<valueIdentifier>
+							<system value="http://highmed.org/sid/organization-identifier" />
+							<value value="Parent_Organization" />
+						</valueIdentifier>
+					</extension>
+					<extension url="role">
+						<valueCoding>
+							<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
+							<code value="COS" />
+						</valueCoding>
+					</extension>
+				</extension>
+				<system value="http://highmed.org/fhir/CodeSystem/process-authorization" />
+				<code value="LOCAL_ROLE" />
+			</valueCoding>
+		</extension>
+	</extension>
+	<url value="http://highmed.org/bpe/Process/test" />
+	<version value="0.5.0" />
+	<status value="active" />
+	<kind value="Task" />
+</ActivityDefinition>

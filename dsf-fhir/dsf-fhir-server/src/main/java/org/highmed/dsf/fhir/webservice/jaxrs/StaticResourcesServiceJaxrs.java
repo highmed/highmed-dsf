@@ -19,9 +19,9 @@ import ca.uhn.fhir.rest.api.Constants;
 
 @Path(StaticResourcesServiceJaxrs.PATH)
 @Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
-	Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+		Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
 @Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
-	Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+		Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
 public class StaticResourcesServiceJaxrs extends AbstractServiceJaxrs<StaticResourcesService>
 		implements StaticResourcesService
 {

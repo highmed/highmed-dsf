@@ -182,8 +182,8 @@ public class BatchCommandList implements CommandList
 			}
 			catch (Exception e)
 			{
-				logger.warn("Error while running pre-execute of command " + command.getClass().getName()
-						+ " for entry at index " + command.getIndex(), e);
+				logger.warn("Error while running pre-execute of command {} for entry at index {}: {}",
+						command.getClass().getName(), command.getIndex(), e.getMessage());
 				caughtExceptions.put(command.getIndex(), e);
 			}
 		};
@@ -215,8 +215,8 @@ public class BatchCommandList implements CommandList
 			}
 			catch (Exception e)
 			{
-				logger.warn("Error while executing command " + command.getClass().getName()
-						+ ", rolling back transaction for entry at index " + command.getIndex(), e);
+				logger.warn("Error while executing command {}, rolling back transaction for entry at index {}: {}",
+						command.getClass().getName(), command.getIndex(), e.getMessage());
 				caughtExceptions.put(command.getIndex(), e);
 
 				try
@@ -227,9 +227,8 @@ public class BatchCommandList implements CommandList
 				catch (SQLException e1)
 				{
 					logger.warn(
-							"Error while executing command " + command.getClass().getName()
-									+ ", error while rolling back transaction for entry at index " + command.getIndex(),
-							e1);
+							"Error while executing command {}, error while rolling back transaction for entry at index {}: {}",
+							command.getClass().getName(), command.getIndex(), e1.getMessage());
 					caughtExceptions.put(command.getIndex(), e1);
 				}
 			}
@@ -261,8 +260,8 @@ public class BatchCommandList implements CommandList
 			}
 			catch (Exception e)
 			{
-				logger.warn("Error while running post-execute of command " + command.getClass().getName()
-						+ " for entry at index " + command.getIndex(), e);
+				logger.warn("Error while running post-execute of command {} for entry at index {}: {}",
+						command.getClass().getName(), command.getIndex(), e.getMessage());
 				caughtExceptions.put(command.getIndex(), e);
 			}
 		};

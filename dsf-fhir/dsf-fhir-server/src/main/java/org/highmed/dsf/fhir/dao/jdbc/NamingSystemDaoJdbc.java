@@ -10,6 +10,7 @@ import java.util.Optional;
 import javax.sql.DataSource;
 
 import org.highmed.dsf.fhir.dao.NamingSystemDao;
+import org.highmed.dsf.fhir.search.parameters.NamingSystemDate;
 import org.highmed.dsf.fhir.search.parameters.NamingSystemName;
 import org.highmed.dsf.fhir.search.parameters.NamingSystemStatus;
 import org.highmed.dsf.fhir.search.parameters.user.NamingSystemUserFilter;
@@ -23,10 +24,11 @@ public class NamingSystemDaoJdbc extends AbstractResourceDaoJdbc<NamingSystem> i
 {
 	private static final Logger logger = LoggerFactory.getLogger(NamingSystemDaoJdbc.class);
 
-	public NamingSystemDaoJdbc(DataSource dataSource, FhirContext fhirContext)
+	public NamingSystemDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
 	{
-		super(dataSource, fhirContext, NamingSystem.class, "naming_systems", "naming_system", "naming_system_id",
-				NamingSystemUserFilter::new, with(NamingSystemName::new, NamingSystemStatus::new), with());
+		super(dataSource, permanentDeleteDataSource, fhirContext, NamingSystem.class, "naming_systems", "naming_system",
+				"naming_system_id", NamingSystemUserFilter::new,
+				with(NamingSystemDate::new, NamingSystemName::new, NamingSystemStatus::new), with());
 	}
 
 	@Override
@@ -63,6 +65,62 @@ public class NamingSystemDaoJdbc extends AbstractResourceDaoJdbc<NamingSystem> i
 					return Optional.of(getResource(result, 1));
 				else
 					return Optional.empty();
+			}
+		}
+	}
+
+	@Override
+	public boolean existsWithUniqueIdUriEntry(Connection connection, String uniqueIdValue) throws SQLException
+	{
+		Objects.requireNonNull(connection, "connection");
+		if (uniqueIdValue == null || uniqueIdValue.isBlank())
+			return false;
+
+		final String namingSystem = "{\"uniqueId\":[{\"type\":\"uri\",\"value\":\"" + uniqueIdValue + "\"}]}";
+
+		try (PreparedStatement statement = connection.prepareStatement(
+				"SELECT count(*) FROM current_naming_systems WHERE naming_system->>'status' IN ('draft', 'active') AND naming_system @> ?::jsonb"))
+		{
+			statement.setString(1, namingSystem);
+
+			logger.trace("Executing query '{}'", statement);
+			try (ResultSet result = statement.executeQuery())
+			{
+				boolean found = result.next() && result.getInt(1) > 0;
+
+				logger.debug("NamingSystem with uniqueId entry (uri/value({})) {}found", uniqueIdValue,
+						found ? "" : "not ");
+
+				return found;
+			}
+		}
+	}
+
+	@Override
+	public boolean existsWithUniqueIdUriEntryResolvable(Connection connection, String uniqueIdValue) throws SQLException
+	{
+		Objects.requireNonNull(connection, "connection");
+		if (uniqueIdValue == null || uniqueIdValue.isBlank())
+			return false;
+
+		final String namingSystem = "{\"uniqueId\":[{\"modifierExtension\":[{\"url\":\"http://highmed.org/fhir/StructureDefinition/extension-check-logical-reference\",\"valueBoolean\":true}],"
+				+ "\"type\":\"uri\",\"value\":\"" + uniqueIdValue + "\"}]}";
+
+		try (PreparedStatement statement = connection.prepareStatement(
+				"SELECT count(*) FROM current_naming_systems WHERE naming_system->>'status' IN ('draft', 'active') AND naming_system @> ?::jsonb"))
+		{
+			statement.setString(1, namingSystem);
+
+			logger.trace("Executing query '{}'", statement);
+			try (ResultSet result = statement.executeQuery())
+			{
+				boolean found = result.next() && result.getInt(1) > 0;
+
+				logger.debug(
+						"NamingSystem with uniqueId entry (uri/value({})) and check-logical-reference true {}found",
+						uniqueIdValue, found ? "" : "not ");
+
+				return found;
 			}
 		}
 	}

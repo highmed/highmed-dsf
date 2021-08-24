@@ -8,10 +8,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.highmed.dsf.fhir.search.IncludeParts;
-import org.highmed.dsf.fhir.search.SearchQuery;
 import org.highmed.dsf.fhir.search.SearchQueryIncludeParameter;
 import org.highmed.dsf.fhir.search.SearchQueryParameterError;
-import org.highmed.dsf.fhir.search.SearchQueryParameterError.SearchQueryParameterErrorType;
 import org.highmed.dsf.fhir.search.SearchQueryRevIncludeParameterFactory;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Resource;
@@ -60,19 +58,6 @@ public abstract class AbstractRevIncludeParameterFactory implements SearchQueryR
 
 	private List<IncludeParts> getRevIncludeParts(List<String> revIncludeParameterValues)
 	{
-		List<String> nonMatchingRevIncludeParameters = revIncludeParameterValues.stream().map(IncludeParts::fromString)
-				.filter(p -> !resourceTypeName.equals(p.getSourceResourceTypeName())
-						|| !parameterName.equals(p.getSearchParameterName())
-						|| !((targetResourceTypeNames.size() == 1 && p.getTargetResourceTypeName() == null)
-								|| targetResourceTypeNames.contains(p.getTargetResourceTypeName())))
-				.map(IncludeParts::toString).collect(Collectors.toList());
-
-		if (!nonMatchingRevIncludeParameters.isEmpty())
-			addError(new SearchQueryParameterError(SearchQueryParameterErrorType.UNPARSABLE_VALUE,
-					SearchQuery.PARAMETER_REVINCLUDE, revIncludeParameterValues,
-					"Non matching revinclude parameter" + (nonMatchingRevIncludeParameters.size() != 1 ? "s " : " ")
-							+ nonMatchingRevIncludeParameters));
-
 		List<IncludeParts> includeParts = revIncludeParameterValues.stream().map(IncludeParts::fromString)
 				.filter(p -> resourceTypeName.equals(p.getSourceResourceTypeName())
 						&& parameterName.equals(p.getSearchParameterName())

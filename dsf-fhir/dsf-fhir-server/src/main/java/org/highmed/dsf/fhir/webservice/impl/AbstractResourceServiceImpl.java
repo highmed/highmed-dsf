@@ -166,6 +166,8 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 					R created = dao.createWithTransactionAndId(connection, resource, UUID.randomUUID());
 
+					checkReferences(resource, connection);
+
 					connection.commit();
 
 					return created;
@@ -204,7 +206,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	private void resolveLogicalReferences(Resource resource, Connection connection) throws WebApplicationException
 	{
 		referenceExtractor.getReferences(resource).filter(ref -> ReferenceType.LOGICAL.equals(ref.getType(serverBase)))
-				.forEach(ref ->
+				.filter(ref -> referenceResolver.referenceCanBeResolved(ref, connection)).forEach(ref ->
 				{
 					Optional<OperationOutcome> outcome = resolveLogicalReference(resource, ref, connection);
 					if (outcome.isPresent())
@@ -230,6 +232,43 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		}
 		else
 			return Optional.of(responseGenerator.referenceTargetNotFoundLocallyByIdentifier(resource, reference));
+	}
+
+	private void checkReferences(Resource resource, Connection connection) throws WebApplicationException
+	{
+		referenceExtractor.getReferences(resource)
+				.filter(ref -> referenceResolver.referenceCanBeChecked(ref, connection)).forEach(ref ->
+				{
+					Optional<OperationOutcome> outcome = checkReference(resource, connection, ref);
+					if (outcome.isPresent())
+					{
+						Response response = Response.status(Status.FORBIDDEN).entity(outcome.get()).build();
+						throw new WebApplicationException(response);
+					}
+				});
+	}
+
+	private Optional<OperationOutcome> checkReference(Resource resource, Connection connection,
+			ResourceReference reference) throws WebApplicationException
+	{
+		ReferenceType type = reference.getType(serverBase);
+		switch (type)
+		{
+			case LITERAL_INTERNAL:
+			case RELATED_ARTEFACT_LITERAL_INTERNAL_URL:
+				return referenceResolver.checkLiteralInternalReference(resource, reference, connection);
+			case LITERAL_EXTERNAL:
+			case RELATED_ARTEFACT_LITERAL_EXTERNAL_URL:
+				return referenceResolver.checkLiteralExternalReference(resource, reference);
+			case LOGICAL:
+				return referenceResolver.checkLogicalReference(getCurrentUser(), resource, reference, connection);
+			// unknown urls to non FHIR servers in related artifacts must not be checked
+			case RELATED_ARTEFACT_UNKNOWN_URL:
+				return Optional.empty();
+			case UNKNOWN:
+			default:
+				return Optional.of(responseGenerator.unknownReference(resource, reference));
+		}
 	}
 
 	private void checkAlreadyExists(HttpHeaders headers) throws WebApplicationException
@@ -266,7 +305,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 					.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 		}
 
-		SearchQuery<R> query = dao.createSearchQuery(getCurrentUser(), 1, 1);
+		SearchQuery<R> query = dao.createSearchQueryWithoutUserFilter(1, 1);
 		query.configureParameters(queryParameters);
 
 		List<SearchQueryParameterError> unsupportedQueryParameters = query
@@ -292,7 +331,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	/**
 	 * Override to modify the given resource before db insert, throw {@link WebApplicationException} to interrupt the
 	 * normal flow
-	 * 
+	 *
 	 * @param resource
 	 *            not <code>null</code>
 	 * @return if not null, the returned {@link Consumer} will be called after the create operation and before returning
@@ -404,8 +443,8 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	{
 		Bundle history = historyService.getHistory(getCurrentUser(), uri, headers, resourceType, id);
 
-		return responseGenerator.response(Status.OK, referenceCleaner.cleanLiteralReferences(history),
-				parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
+		return responseGenerator
+				.response(Status.OK, history, parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
 	}
 
 	@Override
@@ -434,7 +473,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 							R updated = dao.update(resource, ifMatch.orElse(null));
 
-							// updated = resolveReferences(connection, updated);
+							checkReferences(resource, connection);
 
 							connection.commit();
 
@@ -468,7 +507,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 	/**
 	 * Override to modify the given resource before db update, throw {@link WebApplicationException} to interrupt the
 	 * normal flow. Path id vs. resource.id.idPart is checked before this method is called
-	 * 
+	 *
 	 * @param resource
 	 *            not <code>null</code>
 	 * @return if not null, the returned {@link Consumer} will be called after the update operation and before returning
@@ -508,7 +547,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 	/**
 	 * Override to perform actions pre delete, throw {@link WebApplicationException} to interrupt the normal flow.
-	 * 
+	 *
 	 * @param id
 	 *            of the resource to be deleted
 	 * @return if not null, the returned {@link Consumer} will be called after the create operation and before returning
@@ -762,5 +801,15 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 			return Response.status(Status.METHOD_NOT_ALLOWED).build(); // TODO mode = delete
 		else
 			return Response.status(Status.METHOD_NOT_ALLOWED).build(); // TODO return OperationOutcome
+	}
+
+	@Override
+	public Response deletePermanently(String deletePath, String id, UriInfo uri, HttpHeaders headers)
+	{
+		exceptionHandler.handleSqlResourceNotFoundAndResourceNotMarkedDeletedException(resourceTypeName,
+				() -> dao.deletePermanently(parameterConverter.toUuid(resourceTypeName, id)));
+
+		return responseGenerator.response(Status.OK, responseGenerator.resourceDeletedPermanently(resourceTypeName, id),
+				parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers)).build();
 	}
 }

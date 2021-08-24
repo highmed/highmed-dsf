@@ -1,88 +1,140 @@
-version: '3.2'
+version: '3.8'
 services:
-   proxy:
-      image: highmed/fhir_proxy
-      restart: on-failure
-      ports:
-      - 80:80
-      - 443:443
-      volumes:
-      -  type: bind
-         source: ./proxy/ssl
-         target: /usr/local/apache2/ssl
-      environment:
-         HTTPS_SERVER_NAME_PORT: localhost:443
-         APP_SERVER_IP: 172.28.1.3
-      networks:
-         frontend:
-            ipv4_address: 172.28.1.2
-         bpe:
-            ipv4_address: 172.28.2.2
-            aliases:
-            - fhir
-      depends_on:
+  proxy:
+    image: highmed/fhir_proxy
+    restart: on-failure
+    ports:
+      - 127.0.0.1:80:80
+      - 127.0.0.1:443:443
+    secrets:
+      - proxy_server_certificate.pem
+      - proxy_server_certificate_private_key.pem
+      - proxy_client_certificate_trusted_cas_full_chains.pem
+    environment:
+      TZ: Europe/Berlin
+      HTTPS_SERVER_NAME_PORT: localhost:443
+      APP_SERVER_IP: 172.28.1.3
+      SSL_CERTIFICATE_FILE: /run/secrets/proxy_server_certificate.pem
+      SSL_CERTIFICATE_KEY_FILE: /run/secrets/proxy_server_certificate_private_key.pem
+      SSL_CA_CERTIFICATE_FILE: /run/secrets/proxy_client_certificate_trusted_cas_full_chains.pem
+    networks:
+      frontend:
+        ipv4_address: 172.28.1.2
+      bpe:
+        ipv4_address: 172.28.2.2
+        aliases:
+          - fhir
+    depends_on:
       - app
-   app:
-      image: highmed/fhir
-      restart: on-failure
- # Ports for jmx debug connections
- #     ports:
- #     - 9010:9010
- #     - 9011:9011
-      volumes:
-      -  type: bind
-         source: ./app/conf
-         target: /opt/fhir/conf
-      -  type: bind
-         source: ./app/log
-         target: /opt/fhir/log
-      environment:
-         TZ: Europe/Berlin
-# Use EXTRA_JVM_ARGS to specify special jvm parameters, e.g. jmx connection config below
-#         EXTRA_JVM_ARGS: -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=9010 -Dcom.sun.management.jmxremote.rmi.port=9011 -Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote.local.only=false
-      networks:
-         frontend:
-            ipv4_address: 172.28.1.3
-         backend:
-            ipv4_address: 172.28.1.130
-      depends_on:
+
+  app:
+    image: highmed/fhir
+    restart: on-failure
+    ports:
+      - 127.0.0.1:5001:5001
+    secrets:
+      - db_liquibase.password
+      - db_user.password
+      - db_user_permanent_delete.password
+      - app_client_trust_certificates.pem
+      - app_client_certificate.pem
+      - app_client_certificate_private_key.pem
+      - app_client_certificate_private_key.pem.password
+    volumes:
+      - type: bind
+        source: ./conf/bundle.xml
+        target: /opt/fhir/conf/bundle.xml
+        read_only: true
+      - type: bind
+        source: ./log
+        target: /opt/fhir/log
+    environment:
+      TZ: Europe/Berlin
+      EXTRA_JVM_ARGS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5001
+      ORG_HIGHMED_DSF_FHIR_DB_LIQUIBASE_PASSWORD_FILE: /run/secrets/db_liquibase.password
+      ORG_HIGHMED_DSF_FHIR_DB_USER_PASSWORD_FILE: /run/secrets/db_user.password
+      ORG_HIGHMED_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE: /run/secrets/db_user_permanent_delete.password
+      ORG_HIGHMED_DSF_FHIR_CLIENT_TRUST_CERTIFICATES: /run/secrets/app_client_trust_certificates.pem
+      ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE: /run/secrets/app_client_certificate.pem
+      ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY: /run/secrets/app_client_certificate_private_key.pem
+      ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE: /run/secrets/app_client_certificate_private_key.pem.password
+      ORG_HIGHMED_DSF_FHIR_DB_URL: jdbc:postgresql://db/fhir
+      ORG_HIGHMED_DSF_FHIR_SERVER_BASE_URL: https://fhir/fhir
+      ORG_HIGHMED_DSF_FHIR_SERVER_CORS_ORIGINS: http://localhost:8080
+      ORG_HIGHMED_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_Organization
+      ORG_HIGHMED_DSF_FHIR_SERVER_ORGANIZATION_NAME: Test Organization
+      ORG_HIGHMED_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT: ${BUNDLE_USER_THUMBPRINT}
+      ORG_HIGHMED_DSF_FHIR_SERVER_USER_THUMBPRINTS: ${CONF_USER_THUMBPRINTS}
+      ORG_HIGHMED_DSF_FHIR_SERVER_USER_THUMBPRINTS_PERMANENT_DELETE: ${CONF_USER_THUMBPRINTS_PERMANENT_DELETE}
+    networks:
+      frontend:
+        ipv4_address: 172.28.1.3
+      backend:
+        ipv4_address: 172.28.1.130
+    depends_on:
       - db
-   db:
-      image: postgres:13
-      restart: on-failure
-      healthcheck:
-         test: ["CMD-SHELL", "pg_isready -U liquibase_user -d fhir"]
-         interval: 10s
-         timeout: 5s
-         retries: 5
-      environment:
-         POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
-         POSTGRES_USER: liquibase_user
-         POSTGRES_DB: fhir
-      networks:
-         backend:
-            ipv4_address: 172.28.1.131
-      secrets:
-      - postgres_password
+
+  db:
+    image: postgres:13
+    restart: on-failure
+#    ports:
+#      - 127.0.0.1:5432:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U liquibase_user -d fhir"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    environment:
+      TZ: Europe/Berlin
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_liquibase.password
+      POSTGRES_USER: liquibase_user
+      POSTGRES_DB: fhir
+    networks:
+      backend:
+        ipv4_address: 172.28.1.131
+    secrets:
+      - db_liquibase.password
+
 secrets:
-   postgres_password:
-      file: ./db/conf/postgres_password
+  proxy_server_certificate.pem:
+    file: ./secrets/server_certificate.pem
+  proxy_server_certificate_private_key.pem:
+    file: ./secrets/server_certificate_private_key.pem
+  proxy_client_certificate_trusted_cas_full_chains.pem:
+    file: ./secrets/testca_certificate.pem 
+
+  db_liquibase.password:
+    file: ./secrets/db_liquibase.password
+  db_user.password:
+    file: ./secrets/db_user.password
+  db_user_permanent_delete.password:
+    file: ./secrets/db_user_permanent_delete.password
+
+  app_client_trust_certificates.pem:
+    file: ./secrets/testca_certificate.pem
+  app_client_certificate.pem:
+    file: ./secrets/client_certificate.pem
+  app_client_certificate_private_key.pem:
+    file: ./secrets/client_certificate_private_key.pem
+  app_client_certificate_private_key.pem.password:
+    file: ./secrets/client_certificate_private_key.pem.password
+
 networks:
-   frontend:
-      driver: bridge
-      ipam:
-         driver: default
-         config:
-         -  subnet: 172.28.1.0/25
-   backend:
-      driver: bridge
-      ipam:
-         driver: default
-         config:
-         -  subnet: 172.28.1.128/25
-   bpe:
-      driver: bridge
-      ipam:
-         driver: default
-         config:
-         -  subnet: 172.28.2.0/24
+  frontend:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.1.0/25
+  backend:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.1.128/25
+  bpe:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.2.0/24

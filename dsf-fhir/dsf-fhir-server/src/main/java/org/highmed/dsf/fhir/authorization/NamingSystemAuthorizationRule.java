@@ -6,63 +6,36 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.highmed.dsf.fhir.authentication.OrganizationProvider;
 import org.highmed.dsf.fhir.authentication.User;
+import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.dao.NamingSystemDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
+import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.NamingSystem;
+import org.hl7.fhir.r4.model.NamingSystem.NamingSystemIdentifierType;
+import org.hl7.fhir.r4.model.NamingSystem.NamingSystemUniqueIdComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NamingSystemAuthorizationRule extends AbstractAuthorizationRule<NamingSystem, NamingSystemDao>
+public class NamingSystemAuthorizationRule extends AbstractMetaTagAuthorizationRule<NamingSystem, NamingSystemDao>
 {
 	private static final Logger logger = LoggerFactory.getLogger(NamingSystemAuthorizationRule.class);
 
 	public NamingSystemAuthorizationRule(DaoProvider daoProvider, String serverBase,
-			ReferenceResolver referenceResolver, OrganizationProvider organizationProvider)
+			ReferenceResolver referenceResolver, OrganizationProvider organizationProvider,
+			ReadAccessHelper readAccessHelper, ParameterConverter parameterConverter)
 	{
-		super(NamingSystem.class, daoProvider, serverBase, referenceResolver, organizationProvider);
+		super(NamingSystem.class, daoProvider, serverBase, referenceResolver, organizationProvider, readAccessHelper,
+				parameterConverter);
 	}
 
-	@Override
-	public Optional<String> reasonCreateAllowed(Connection connection, User user, NamingSystem newResource)
-	{
-		if (isLocalUser(user))
-		{
-			Optional<String> errors = newResourceOk(newResource);
-			if (errors.isEmpty())
-			{
-				if (!resourceExists(connection, newResource))
-				{
-					logger.info(
-							"Create of NamingSystem authorized for local user '{}', NamingSystem with name does not exist",
-							user.getName());
-					return Optional.of("local user, NamingSystem with name does not exist yet");
-				}
-				else
-				{
-					logger.warn("Create of NamingSystem unauthorized, NamingSystem with name already exists");
-					return Optional.empty();
-				}
-			}
-			else
-			{
-				logger.warn("Create of NamingSystem unauthorized, " + errors.get());
-				return Optional.empty();
-			}
-		}
-		else
-		{
-			logger.warn("Create of NamingSystem unauthorized, not a local user");
-			return Optional.empty();
-		}
-	}
-
-	private Optional<String> newResourceOk(NamingSystem newResource)
+	protected Optional<String> newResourceOk(Connection connection, User user, NamingSystem newResource)
 	{
 		List<String> errors = new ArrayList<String>();
 
@@ -84,9 +57,14 @@ public class NamingSystemAuthorizationRule extends AbstractAuthorizationRule<Nam
 			errors.add("NamingSystem.name not defined");
 		}
 
-		if (!hasLocalOrRemoteAuthorizationRole(newResource))
+		if (!hasValidReadAccessTag(connection, newResource))
 		{
-			errors.add("missing authorization tag");
+			errors.add("NamingSystem is missing valid read access tag");
+		}
+
+		if (!hasOnlyUniqueUriUniqueIds(newResource))
+		{
+			errors.add("NamingSystem has non unique ids");
 		}
 
 		if (errors.isEmpty())
@@ -95,11 +73,30 @@ public class NamingSystemAuthorizationRule extends AbstractAuthorizationRule<Nam
 			return Optional.of(errors.stream().collect(Collectors.joining(", ")));
 	}
 
-	private boolean resourceExists(Connection connection, NamingSystem newResource)
+	private boolean hasOnlyUniqueUriUniqueIds(NamingSystem newResource)
+	{
+		final long uriCount = newResource.getUniqueId().stream().filter(NamingSystemUniqueIdComponent::hasType)
+				.filter(id -> NamingSystemIdentifierType.URI.equals(id.getType())).count();
+		final long distinctUriCount = newResource.getUniqueId().stream().filter(NamingSystemUniqueIdComponent::hasType)
+				.filter(id -> NamingSystemIdentifierType.URI.equals(id.getType()))
+				.map(NamingSystemUniqueIdComponent::getValue).distinct().count();
+
+		return uriCount == distinctUriCount;
+	}
+
+	protected boolean resourceExists(Connection connection, NamingSystem newResource)
 	{
 		try
 		{
-			return getDao().readByNameWithTransaction(connection, newResource.getName()).isPresent();
+			boolean withNameExists = getDao().readByNameWithTransaction(connection, newResource.getName()).isPresent();
+
+			boolean withUniqueIdUriExists = newResource.getUniqueId().stream()
+					.filter(NamingSystemUniqueIdComponent::hasType)
+					.filter(id -> NamingSystemIdentifierType.URI.equals(id.getType()))
+					.filter(NamingSystemUniqueIdComponent::hasValue).map(NamingSystemUniqueIdComponent::getValue)
+					.anyMatch(resourceWithUniquIdUriEntryExists(connection));
+
+			return withNameExists || withUniqueIdUriExists;
 		}
 		catch (SQLException e)
 		{
@@ -108,99 +105,25 @@ public class NamingSystemAuthorizationRule extends AbstractAuthorizationRule<Nam
 		}
 	}
 
-	@Override
-	public Optional<String> reasonReadAllowed(Connection connection, User user, NamingSystem existingResource)
+	private Predicate<String> resourceWithUniquIdUriEntryExists(Connection connection)
 	{
-		if (isLocalUser(user) && hasLocalOrRemoteAuthorizationRole(existingResource))
+		return uniqueIdValue ->
 		{
-			logger.info(
-					"Read of NamingSystem authorized for local user '{}', NamingSystem has local or remote authorization role",
-					user.getName());
-			return Optional.of("local user, local or remote authorized NamingSystem");
-		}
-		else if (isRemoteUser(user) && hasRemoteAuthorizationRole(existingResource))
-		{
-			logger.info(
-					"Read of NamingSystem authorized for remote user '{}', NamingSystem has remote authorization role",
-					user.getName());
-			return Optional.of("remote user, remote authorized NamingSystem");
-		}
-		else
-		{
-			logger.warn("Read of NamingSystem unauthorized, no matching user role resource authorization role found");
-			return Optional.empty();
-		}
+			try
+			{
+				return getDao().existsWithUniqueIdUriEntry(connection, uniqueIdValue);
+			}
+			catch (SQLException e)
+			{
+				logger.warn("Error while searching for NamingSystem", e);
+				return false;
+			}
+		};
 	}
 
 	@Override
-	public Optional<String> reasonUpdateAllowed(Connection connection, User user, NamingSystem oldResource,
-			NamingSystem newResource)
-	{
-		if (isLocalUser(user))
-		{
-			Optional<String> errors = newResourceOk(newResource);
-			if (errors.isEmpty())
-			{
-				if (isSame(oldResource, newResource))
-				{
-					logger.info(
-							"Update of NamingSystem authorized for local user '{}', name same as existing NamingSystem",
-							user.getName());
-					return Optional.of("local user; name same as existing NamingSystem");
-				}
-				else
-				{
-					logger.warn("Update of NamingSystem unauthorized, name changed ({} -> {})", oldResource.getName(),
-							newResource.getName());
-					return Optional.empty();
-				}
-			}
-			else
-			{
-				logger.warn("Update of NamingSystem unauthorized, " + errors.get());
-				return Optional.empty();
-			}
-		}
-		else
-		{
-			logger.warn("Update of NamingSystem unauthorized, not a local user");
-			return Optional.empty();
-		}
-	}
-
-	private boolean isSame(NamingSystem oldResource, NamingSystem newResource)
+	protected boolean modificationsOk(Connection connection, NamingSystem oldResource, NamingSystem newResource)
 	{
 		return oldResource.getName().equals(newResource.getName());
-	}
-
-	@Override
-	public Optional<String> reasonDeleteAllowed(Connection connection, User user, NamingSystem oldResource)
-	{
-		if (isLocalUser(user))
-		{
-			logger.info("Delete of NamingSystem authorized for local user '{}'", user.getName());
-			return Optional.of("local user");
-		}
-		else
-		{
-			logger.warn("Delete of NamingSystem unauthorized, not a local user");
-			return Optional.empty();
-		}
-	}
-
-	@Override
-	public Optional<String> reasonSearchAllowed(User user)
-	{
-		logger.info("Search of NamingSystem authorized for {} user '{}', will be fitered by user role", user.getRole(),
-				user.getName());
-		return Optional.of("Allowed for all, filtered by user role");
-	}
-
-	@Override
-	public Optional<String> reasonHistoryAllowed(User user)
-	{
-		logger.info("History of NamingSystem authorized for {} user '{}', will be fitered by user role", user.getRole(),
-				user.getName());
-		return Optional.of("Allowed for all, filtered by user role");
 	}
 }

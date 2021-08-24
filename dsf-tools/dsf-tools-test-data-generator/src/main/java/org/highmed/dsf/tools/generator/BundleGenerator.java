@@ -33,17 +33,13 @@ public class BundleGenerator
 	private final ReferenceCleaner cleaner = new ReferenceCleanerImpl(extractor);
 
 	private Bundle testBundle;
-	private Bundle medic1Bundle;
-	private Bundle medic2Bundle;
-	private Bundle medic3Bundle;
-	private Bundle ttpBundle;
 
 	private Bundle readAndCleanBundle(Path bundleTemplateFile)
 	{
 		try (InputStream in = Files.newInputStream(bundleTemplateFile))
 		{
 			Bundle bundle = newXmlParser().parseResource(Bundle.class, in);
-			
+
 			// FIXME hapi parser can't handle embedded resources and creates them while parsing bundles
 			return cleaner.cleanReferenceResourcesIfBundle(bundle);
 		}
@@ -97,137 +93,5 @@ public class BundleGenerator
 		Path javaTestBundleFile = Paths.get("../../dsf-fhir/dsf-fhir-server-jetty/conf/bundle.xml");
 		logger.info("Copying fhir bundle to {}", javaTestBundleFile);
 		writeBundle(javaTestBundleFile, testBundle);
-	}
-
-	public void copyDockerTestBundle()
-	{
-		Path dockerTestBundleFile = Paths.get("../../dsf-docker-test-setup/fhir/app/conf/bundle.xml");
-		logger.info("Copying fhir bundle to {}", dockerTestBundleFile);
-		writeBundle(dockerTestBundleFile, testBundle);
-	}
-
-	public void createDockerTest3MedicTtpBundles(Map<String, CertificateFiles> clientCertificateFilesByCommonName)
-	{
-		createDockerTestMedic1Bundle(clientCertificateFilesByCommonName);
-		createDockerTestMedic2Bundle(clientCertificateFilesByCommonName);
-		createDockerTestMedic3Bundle(clientCertificateFilesByCommonName);
-		createDockerTestTtpBundle(clientCertificateFilesByCommonName);
-	}
-
-	private void createDockerTestMedic1Bundle(Map<String, CertificateFiles> clientCertificateFilesByCommonName)
-	{
-		Path medic1BundleTemplateFile = Paths.get("src/main/resources/bundle-templates/medic1-bundle.xml");
-
-		medic1Bundle = readAndCleanBundle(medic1BundleTemplateFile);
-
-		Organization organizationTtp = (Organization) medic1Bundle.getEntry().get(0).getResource();
-		Extension organizationTtpThumbprintExtension = organizationTtp
-				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint");
-		organizationTtpThumbprintExtension.setValue(new StringType(
-				clientCertificateFilesByCommonName.get("ttp-client").getCertificateSha512ThumbprintHex()));
-
-		Organization organizationMedic1 = (Organization) medic1Bundle.getEntry().get(1).getResource();
-		Extension organizationMedic1thumbprintExtension = organizationMedic1
-				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint");
-		organizationMedic1thumbprintExtension.setValue(new StringType(
-				clientCertificateFilesByCommonName.get("medic1-client").getCertificateSha512ThumbprintHex()));
-
-		writeBundle(Paths.get("bundle/medic1-bundle.xml"), medic1Bundle);
-	}
-
-	private void createDockerTestMedic2Bundle(Map<String, CertificateFiles> clientCertificateFilesByCommonName)
-	{
-		Path medic2BundleTemplateFile = Paths.get("src/main/resources/bundle-templates/medic2-bundle.xml");
-
-		medic2Bundle = readAndCleanBundle(medic2BundleTemplateFile);
-
-		Organization organizationTtp = (Organization) medic2Bundle.getEntry().get(0).getResource();
-		Extension organizationTtpThumbprintExtension = organizationTtp
-				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint");
-		organizationTtpThumbprintExtension.setValue(new StringType(
-				clientCertificateFilesByCommonName.get("ttp-client").getCertificateSha512ThumbprintHex()));
-
-		Organization organizationMedic2 = (Organization) medic2Bundle.getEntry().get(1).getResource();
-		Extension organizationMedic2thumbprintExtension = organizationMedic2
-				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint");
-		organizationMedic2thumbprintExtension.setValue(new StringType(
-				clientCertificateFilesByCommonName.get("medic2-client").getCertificateSha512ThumbprintHex()));
-
-		writeBundle(Paths.get("bundle/medic2-bundle.xml"), medic2Bundle);
-	}
-
-	private void createDockerTestMedic3Bundle(Map<String, CertificateFiles> clientCertificateFilesByCommonName)
-	{
-		Path medic3BundleTemplateFile = Paths.get("src/main/resources/bundle-templates/medic3-bundle.xml");
-
-		medic3Bundle = readAndCleanBundle(medic3BundleTemplateFile);
-
-		Organization organizationTtp = (Organization) medic3Bundle.getEntry().get(0).getResource();
-		Extension organizationTtpThumbprintExtension = organizationTtp
-				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint");
-		organizationTtpThumbprintExtension.setValue(new StringType(
-				clientCertificateFilesByCommonName.get("ttp-client").getCertificateSha512ThumbprintHex()));
-
-		Organization organizationMedic3 = (Organization) medic3Bundle.getEntry().get(1).getResource();
-		Extension organizationMedic3thumbprintExtension = organizationMedic3
-				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint");
-		organizationMedic3thumbprintExtension.setValue(new StringType(
-				clientCertificateFilesByCommonName.get("medic3-client").getCertificateSha512ThumbprintHex()));
-
-		writeBundle(Paths.get("bundle/medic3-bundle.xml"), medic3Bundle);
-	}
-
-	private void createDockerTestTtpBundle(Map<String, CertificateFiles> clientCertificateFilesByCommonName)
-	{
-		Path medic3BundleTemplateFile = Paths.get("src/main/resources/bundle-templates/ttp-bundle.xml");
-
-		ttpBundle = readAndCleanBundle(medic3BundleTemplateFile);
-
-		Organization organizationTtp = (Organization) ttpBundle.getEntry().get(0).getResource();
-		Extension organizationTtpThumbprintExtension = organizationTtp
-				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint");
-		organizationTtpThumbprintExtension.setValue(new StringType(
-				clientCertificateFilesByCommonName.get("ttp-client").getCertificateSha512ThumbprintHex()));
-
-		Organization organizationMedic1 = (Organization) ttpBundle.getEntry().get(1).getResource();
-		Extension organizationMedic1thumbprintExtension = organizationMedic1
-				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint");
-		organizationMedic1thumbprintExtension.setValue(new StringType(
-				clientCertificateFilesByCommonName.get("medic1-client").getCertificateSha512ThumbprintHex()));
-
-		Organization organizationMedic2 = (Organization) ttpBundle.getEntry().get(2).getResource();
-		Extension organizationMedic2thumbprintExtension = organizationMedic2
-				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint");
-		organizationMedic2thumbprintExtension.setValue(new StringType(
-				clientCertificateFilesByCommonName.get("medic2-client").getCertificateSha512ThumbprintHex()));
-
-		Organization organizationMedic3 = (Organization) ttpBundle.getEntry().get(3).getResource();
-		Extension organizationMedic3thumbprintExtension = organizationMedic3
-				.getExtensionByUrl("http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint");
-		organizationMedic3thumbprintExtension.setValue(new StringType(
-				clientCertificateFilesByCommonName.get("medic3-client").getCertificateSha512ThumbprintHex()));
-
-		writeBundle(Paths.get("bundle/ttp-bundle.xml"), ttpBundle);
-
-	}
-
-	public void copyDockerTest3MedicTtpBundles()
-	{
-		Path medic1BundleFile = Paths.get("../../dsf-docker-test-setup-3medic-ttp/medic1/fhir/app/conf/bundle.xml");
-		logger.info("Copying fhir bundle to {}", medic1BundleFile);
-		writeBundle(medic1BundleFile, medic1Bundle);
-
-		Path medic2BundleFile = Paths.get("../../dsf-docker-test-setup-3medic-ttp/medic2/fhir/app/conf/bundle.xml");
-		logger.info("Copying fhir bundle to {}", medic2BundleFile);
-		writeBundle(medic2BundleFile, medic2Bundle);
-
-		Path medic3BundleFile = Paths.get("../../dsf-docker-test-setup-3medic-ttp/medic3/fhir/app/conf/bundle.xml");
-		logger.info("Copying fhir bundle to {}", medic3BundleFile);
-		writeBundle(medic3BundleFile, medic3Bundle);
-
-		Path ttpBundleFile = Paths.get("../../dsf-docker-test-setup-3medic-ttp/ttp/fhir/app/conf/bundle.xml");
-		logger.info("Copying fhir bundle to {}", ttpBundleFile);
-		writeBundle(ttpBundleFile, ttpBundle);
-
 	}
 }

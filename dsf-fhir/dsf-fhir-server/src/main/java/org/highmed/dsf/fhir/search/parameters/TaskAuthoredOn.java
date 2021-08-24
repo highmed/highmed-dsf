@@ -9,10 +9,9 @@ import org.hl7.fhir.r4.model.Task;
 public class TaskAuthoredOn extends AbstractDateTimeParameter<Task>
 {
 	public static final String PARAMETER_NAME = "authored-on";
-	private static final String PROPERTY = "(task->>'authoredOn')";;
 
 	public TaskAuthoredOn()
 	{
-		super(PARAMETER_NAME, PROPERTY);
+		super(PARAMETER_NAME, "task->>'authoredOn'");
 	}
 }

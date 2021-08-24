@@ -6,18 +6,16 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.BiFunction;
 
 import javax.sql.DataSource;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.dsf.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.dsf.fhir.dao.exception.ResourceNotFoundException;
+import org.highmed.dsf.fhir.dao.exception.ResourceNotMarkedDeletedException;
 import org.highmed.dsf.fhir.dao.exception.ResourceVersionNoMatchException;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.AfterClass;
@@ -26,6 +24,8 @@ import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import de.rwh.utils.test.LiquibaseTemplateTestClassRule;
@@ -33,11 +33,20 @@ import de.rwh.utils.test.LiquibaseTemplateTestRule;
 
 public abstract class AbstractResourceDaoTest<D extends Resource, C extends ResourceDao<D>> extends AbstractDbTest
 {
+	private static final Logger logger = LoggerFactory.getLogger(AbstractResourceDaoTest.class);
+
+	@FunctionalInterface
+	public interface TriFunction<A, B, C, R>
+	{
+		R apply(A a, B b, C c);
+	}
+
 	public static final String DAO_DB_TEMPLATE_NAME = "dao_template";
 
 	protected static final BasicDataSource adminDataSource = createAdminBasicDataSource();
 	protected static final BasicDataSource liquibaseDataSource = createLiquibaseDataSource();
 	protected static final BasicDataSource defaultDataSource = createDefaultDataSource();
+	protected static final BasicDataSource permanentDeleteDataSource = createPermanentDeleteDataSource();
 
 	@ClassRule
 	public static final LiquibaseTemplateTestClassRule liquibaseRule = new LiquibaseTemplateTestClassRule(
@@ -50,6 +59,7 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 		defaultDataSource.start();
 		liquibaseDataSource.start();
 		adminDataSource.start();
+		permanentDeleteDataSource.start();
 	}
 
 	@AfterClass
@@ -58,6 +68,7 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 		defaultDataSource.close();
 		liquibaseDataSource.close();
 		adminDataSource.close();
+		permanentDeleteDataSource.close();
 	}
 
 	@Rule
@@ -65,12 +76,13 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 			LiquibaseTemplateTestClassRule.DEFAULT_TEST_DB_NAME, DAO_DB_TEMPLATE_NAME);
 
 	protected final Class<D> resouceClass;
-	protected final BiFunction<DataSource, FhirContext, C> daoCreator;
+	protected final TriFunction<DataSource, DataSource, FhirContext, C> daoCreator;
 
 	protected final FhirContext fhirContext = FhirContext.forR4();
 	protected C dao;
 
-	protected AbstractResourceDaoTest(Class<D> resouceClass, BiFunction<DataSource, FhirContext, C> daoCreator)
+	protected AbstractResourceDaoTest(Class<D> resouceClass,
+			TriFunction<DataSource, DataSource, FhirContext, C> daoCreator)
 	{
 		this.resouceClass = resouceClass;
 		this.daoCreator = daoCreator;
@@ -79,12 +91,32 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 	@Before
 	public void before() throws Exception
 	{
-		dao = daoCreator.apply(liquibaseDataSource, fhirContext);
+		dao = daoCreator.apply(defaultDataSource, permanentDeleteDataSource, fhirContext);
 	}
 
-	protected C getDao()
+	public C getDao()
 	{
 		return dao;
+	}
+
+	public FhirContext getFhirContext()
+	{
+		return fhirContext;
+	}
+
+	public BasicDataSource getDefaultDataSource()
+	{
+		return defaultDataSource;
+	}
+
+	public BasicDataSource getPermanentDeleteDataSource()
+	{
+		return permanentDeleteDataSource;
+	}
+
+	public Logger getLogger()
+	{
+		return logger;
 	}
 
 	@Test
@@ -101,7 +133,7 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 		assertTrue(read.isEmpty());
 	}
 
-	protected abstract D createResource();
+	public abstract D createResource();
 
 	@Test
 	public void testCreate() throws Exception
@@ -284,6 +316,46 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 		dao.read(UUID.fromString(createdResource.getIdElement().getIdPart()));
 	}
 
+	@Test(expected = ResourceNotMarkedDeletedException.class)
+	public void testDeletePermanentlyNotMarkedAsDeleted() throws Exception
+	{
+		D newResource = createResource();
+		assertNull(newResource.getId());
+		assertNull(newResource.getMeta().getVersionId());
+
+		D createdResource = dao.create(newResource);
+		assertNotNull(createdResource);
+		assertNotNull(createdResource.getId());
+		assertNotNull(createdResource.getMeta().getVersionId());
+
+		dao.deletePermanently(UUID.fromString(createdResource.getIdElement().getIdPart()));
+	}
+
+	@Test
+	public void testDeletePermanently() throws Exception
+	{
+		D newResource = createResource();
+		assertNull(newResource.getId());
+		assertNull(newResource.getMeta().getVersionId());
+
+		D createdResource = dao.create(newResource);
+		assertNotNull(createdResource);
+		assertNotNull(createdResource.getId());
+		assertNotNull(createdResource.getMeta().getVersionId());
+
+		dao.delete(UUID.fromString(createdResource.getIdElement().getIdPart()));
+
+		dao.deletePermanently(UUID.fromString(createdResource.getIdElement().getIdPart()));
+
+		assertFalse(dao.read(UUID.fromString(createdResource.getIdElement().getIdPart())).isPresent());
+	}
+
+	@Test(expected = ResourceNotFoundException.class)
+	public void testDeletePermanentlyNotFound() throws Exception
+	{
+		dao.deletePermanently(UUID.randomUUID());
+	}
+
 	@Test
 	public void testReadIncludingDeleted() throws Exception
 	{
@@ -443,59 +515,6 @@ public abstract class AbstractResourceDaoTest<D extends Resource, C extends Reso
 		String s2 = fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(read.get());
 		assertTrue(s1 + "\nvs\n" + s2, updatedResource2.equalsDeep(read.get()));
 		assertEquals("3", read.get().getIdElement().getVersionIdPart());
-	}
-
-	@Test
-	public void testUpdateSameRow() throws Exception
-	{
-		D newResource = createResource();
-		assertNull(newResource.getId());
-		assertNull(newResource.getMeta().getVersionId());
-
-		D createdResource = dao.create(newResource);
-		assertNotNull(createdResource);
-		assertNotNull(createdResource.getId());
-		assertNotNull(createdResource.getMeta().getVersionId());
-
-		newResource.setIdElement(createdResource.getIdElement().copy());
-		newResource.setMeta(createdResource.getMeta().copy());
-
-		assertTrue(newResource.equalsDeep(createdResource));
-
-		D updateResource = updateResource(createdResource);
-		try (Connection connection = getNewTransaction())
-		{
-			D updatedResource = dao.updateSameRowWithTransaction(connection, updateResource);
-
-			connection.commit();
-
-			assertNotNull(updatedResource);
-			assertNotNull(updatedResource.getId());
-			assertNotNull(updatedResource.getMeta().getVersionId());
-
-			assertEquals(createdResource.getIdElement().getIdPart(), updatedResource.getIdElement().getIdPart());
-			assertEquals(createdResource.getMeta().getVersionId(), updatedResource.getMeta().getVersionId());
-		}
-
-		Optional<D> read = dao.read(UUID.fromString(createdResource.getIdElement().getIdPart()));
-		assertTrue(read.isPresent());
-
-		assertTrue(
-				fhirContext.newXmlParser().encodeResourceToString(read.get()) + "\nvs.\n"
-						+ fhirContext.newXmlParser().encodeResourceToString(updateResource),
-				read.get().equalsDeep(updateResource));
-		assertEquals(createdResource.getIdElement().getIdPart(), read.get().getIdElement().getIdPart());
-		assertEquals(createdResource.getMeta().getVersionId(), read.get().getMeta().getVersionId());
-	}
-
-	private Connection getNewTransaction() throws SQLException
-	{
-		Connection connection = defaultDataSource.getConnection();
-		connection.setReadOnly(false);
-		connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
-		connection.setAutoCommit(false);
-
-		return connection;
 	}
 
 	@Test

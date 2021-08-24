@@ -17,6 +17,8 @@ import org.highmed.dsf.bpe.process.ProcessKeyAndVersion;
 import org.highmed.dsf.fhir.resources.ResourceProvider;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.PropertyResolver;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -27,13 +29,14 @@ public class ProcessPluginDefinitionAndClassLoader
 	private final ProcessPluginDefinition definition;
 	private final ClassLoader classLoader;
 	private final boolean draft;
+	private final PropertyResolver resolver;
 
 	private List<BpmnFileAndModel> models;
 	private AnnotationConfigApplicationContext context;
 	private ResourceProvider resourceProvider;
 
 	public ProcessPluginDefinitionAndClassLoader(FhirContext fhirContext, List<Path> jars,
-			ProcessPluginDefinition definition, ClassLoader classLoader, boolean draft)
+			ProcessPluginDefinition definition, ClassLoader classLoader, boolean draft, PropertyResolver resolver)
 	{
 		this.fhirContext = fhirContext;
 
@@ -43,6 +46,7 @@ public class ProcessPluginDefinitionAndClassLoader
 		this.definition = definition;
 		this.classLoader = classLoader;
 		this.draft = draft;
+		this.resolver = resolver;
 	}
 
 	public List<Path> getJars()
@@ -68,9 +72,10 @@ public class ProcessPluginDefinitionAndClassLoader
 			context.setParent(mainContext);
 			context.setClassLoader(getClassLoader());
 			context.register(getDefinition().getSpringConfigClasses().toArray(Class<?>[]::new));
+			context.setEnvironment((ConfigurableEnvironment) mainContext.getEnvironment());
 			context.refresh();
 		}
-		
+
 		return context;
 	}
 
@@ -120,7 +125,7 @@ public class ProcessPluginDefinitionAndClassLoader
 	public ResourceProvider getResourceProvider()
 	{
 		if (resourceProvider == null)
-			resourceProvider = getDefinition().getResourceProvider(fhirContext, getClassLoader());
+			resourceProvider = getDefinition().getResourceProvider(fhirContext, getClassLoader(), resolver);
 
 		return resourceProvider;
 	}

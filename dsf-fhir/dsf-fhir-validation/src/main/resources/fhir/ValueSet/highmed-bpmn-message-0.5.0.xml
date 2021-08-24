@@ -1,0 +1,24 @@
+<ValueSet xmlns="http://hl7.org/fhir">
+	<meta>
+		<tag>
+			<system value="http://highmed.org/fhir/CodeSystem/read-access-tag"/>
+			<code value="ALL"/>
+		</tag>		
+	</meta>
+	<url value="http://highmed.org/fhir/ValueSet/bpmn-message"/>
+	<version value="0.5.0"/>
+	<name value="HiGHmed_Bpmn_Message_Values"/>
+	<title value="HiGHmed BPMN message values"/>
+	<status value="active"/>
+	<experimental value="false"/>
+	<date value="2021-08-24"/>
+	<publisher value="HiGHmed"/>
+	<description
+			value="ValueSet with standard BPMN message values for Task resources"/>
+	<immutable value="true"/>
+	<compose>
+		<include>
+			<system value="http://highmed.org/fhir/CodeSystem/bpmn-message"/>
+		</include>
+	</compose>
+</ValueSet> 

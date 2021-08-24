@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.highmed.dsf</groupId>
 		<artifactId>dsf-bpe-pom</artifactId>
-		<version>0.4.0</version>
+		<version>0.5.0</version>
 	</parent>
 
 	<dependencies>
@@ -38,6 +38,10 @@
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-tools-build-info-reader</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.highmed.dsf</groupId>
+			<artifactId>dsf-tools-docker-secrets-reader</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>de.hs-heilbronn.mi</groupId>

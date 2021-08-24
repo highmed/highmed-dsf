@@ -26,10 +26,10 @@ public class ResearchStudyProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			Arrays.asList("highmed-extension-participating-medic-0.4.0.xml",
-					"highmed-extension-participating-ttp-0.4.0.xml", "highmed-research-study-0.4.0.xml"),
-			Arrays.asList("highmed-authorization-role-0.4.0.xml", "highmed-organization-type-0.4.0.xml"),
-			Arrays.asList("highmed-authorization-role-0.4.0.xml", "highmed-organization-type-0.4.0.xml"));
+			Arrays.asList("highmed-extension-participating-medic-0.5.0.xml",
+					"highmed-extension-participating-ttp-0.5.0.xml", "highmed-research-study-0.5.0.xml"),
+			Arrays.asList("highmed-read-access-tag-0.5.0.xml", "highmed-organization-type-0.5.0.xml"),
+			Arrays.asList("highmed-read-access-tag-0.5.0.xml", "highmed-organization-type-0.5.0.xml"));
 
 	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
@@ -39,21 +39,18 @@ public class ResearchStudyProfileTest
 	{
 		ResearchStudy res = new ResearchStudy();
 		res.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/research-study");
-		res.getIdentifierFirstRep().setSystem("http://highmed.org/fhir/NamingSystem/research-study-identifier")
+		res.getIdentifierFirstRep().setSystem("http://highmed.org/sid/research-study-identifier")
 				.setValue(UUID.randomUUID().toString());
 		res.setStatus(ResearchStudyStatus.ACTIVE);
 		res.addEnrollment().setReference("Group/" + UUID.randomUUID().toString());
 		Reference medicRef1 = new Reference().setType(ResourceType.Organization.name());
-		medicRef1.getIdentifier().setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
-				.setValue("MeDIC 1");
+		medicRef1.getIdentifier().setSystem("http://highmed.org/sid/organization-identifier").setValue("MeDIC 1");
 		res.addExtension("http://highmed.org/fhir/StructureDefinition/extension-participating-medic", medicRef1);
 		Reference medicRef2 = new Reference().setType(ResourceType.Organization.name());
-		medicRef2.getIdentifier().setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
-				.setValue("MeDIC 2");
+		medicRef2.getIdentifier().setSystem("http://highmed.org/sid/organization-identifier").setValue("MeDIC 2");
 		res.addExtension("http://highmed.org/fhir/StructureDefinition/extension-participating-medic", medicRef2);
 		Reference ttpRef = new Reference().setType(ResourceType.Organization.name());
-		ttpRef.getIdentifier().setSystem("http://highmed.org/fhir/NamingSystem/organization-identifier")
-				.setValue("TTP");
+		ttpRef.getIdentifier().setSystem("http://highmed.org/sid/organization-identifier").setValue("TTP");
 		res.addExtension("http://highmed.org/fhir/StructureDefinition/extension-participating-ttp", ttpRef);
 
 		ValidationResult result = resourceValidator.validate(res);

@@ -2,7 +2,11 @@ package org.highmed.fhir.client;
 
 import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -46,6 +50,9 @@ public class WebsocketClientTyrus implements WebsocketClient
 
 	private final URI wsUri;
 	private final SSLContext sslContext;
+	private final String proxySchemeHostPort;
+	private final String proxyUserName;
+	private final char[] proxyPassword;
 	private final ClientEndpoint endpoint;
 
 	private ClientManager manager;
@@ -53,7 +60,8 @@ public class WebsocketClientTyrus implements WebsocketClient
 	private volatile boolean closed;
 
 	public WebsocketClientTyrus(Runnable reconnector, URI wsUri, KeyStore trustStore, KeyStore keyStore,
-			char[] keyStorePassword, String subscriptionIdPart)
+			char[] keyStorePassword, String proxySchemeHostPort, String proxyUserName, char[] proxyPassword,
+			String subscriptionIdPart)
 	{
 		this.wsUri = wsUri;
 
@@ -64,6 +72,10 @@ public class WebsocketClientTyrus implements WebsocketClient
 					.keyStorePassword(keyStorePassword).createSSLContext();
 		else
 			sslContext = SslConfigurator.getDefaultContext();
+
+		this.proxySchemeHostPort = proxySchemeHostPort;
+		this.proxyUserName = proxyUserName;
+		this.proxyPassword = proxyPassword;
 
 		this.endpoint = createClientEndpoint(reconnector, subscriptionIdPart);
 	}
@@ -86,6 +98,17 @@ public class WebsocketClientTyrus implements WebsocketClient
 		manager = ClientManager.createClient();
 		manager.getProperties().put(ClientProperties.RECONNECT_HANDLER, reconnectHandler);
 		manager.getProperties().put(ClientProperties.SSL_ENGINE_CONFIGURATOR, new SslEngineConfigurator(sslContext));
+
+		if (proxySchemeHostPort != null)
+			manager.getProperties().put(ClientProperties.PROXY_URI, proxySchemeHostPort);
+		if (proxyUserName != null && proxyPassword != null)
+		{
+			Map<String, String> proxyHeaders = new HashMap<>();
+			proxyHeaders.put("Proxy-Authorization", "Basic " + Base64.getEncoder().encodeToString(
+					(proxyUserName + ":" + String.valueOf(proxyPassword)).getBytes(StandardCharsets.UTF_8)));
+
+			manager.getProperties().put(ClientProperties.PROXY_HEADERS, proxyHeaders);
+		}
 
 		try
 		{

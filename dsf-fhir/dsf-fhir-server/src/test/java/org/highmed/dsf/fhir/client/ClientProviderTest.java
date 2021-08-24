@@ -50,8 +50,8 @@ public class ClientProviderTest
 		exceptionHandler = mock(ExceptionHandler.class);
 
 		provider = new ClientProviderImpl(webserviceTrustStore, webserviceKeyStore, webserviceKeyStorePassword,
-				remoteReadTimeout, remoteConnectTimeout, remoteProxyPassword, remoteProxyUsername,
-				remoteProxySchemeHostPort, fhirContext, referenceCleaner, endpointDao, exceptionHandler);
+				remoteReadTimeout, remoteConnectTimeout, remoteProxySchemeHostPort, remoteProxyUsername,
+				remoteProxyPassword, fhirContext, referenceCleaner, endpointDao, exceptionHandler);
 	}
 
 	@Test

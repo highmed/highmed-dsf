@@ -1,51 +1,19 @@
 package org.highmed.dsf.fhir.search.parameters.user;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-
 import org.highmed.dsf.fhir.authentication.User;
-import org.highmed.dsf.fhir.authentication.UserRole;
 
-public class BinaryUserFilter extends AbstractUserFilter
+public class BinaryUserFilter extends AbstractMetaTagAuthorizationRoleUserFilter
 {
-	private static final String RESOURCE_COLUMN = "binary_json";
+	private static final String RESOURCE_TABLE = "current_binaries";
+	private static final String RESOURCE_ID_COLUMN = "binary_id";
 
 	public BinaryUserFilter(User user)
 	{
-		super(user, RESOURCE_COLUMN);
+		super(user, RESOURCE_TABLE, RESOURCE_ID_COLUMN);
 	}
 
-	public BinaryUserFilter(User user, String resourceColumn)
+	public BinaryUserFilter(User user, String resourceTable, String resourceIdColumn)
 	{
-		super(user, resourceColumn);
-	}
-
-	@Override
-	public String getFilterQuery()
-	{
-		if (UserRole.LOCAL.equals(user.getRole()))
-			return "";
-		else
-			return "(" + resourceColumn + "->'securityContext'->>'reference' = ? OR " + resourceColumn
-					+ "->'securityContext'->>'reference' = ?)";
-	}
-
-	@Override
-	public int getSqlParameterCount()
-	{
-		return UserRole.LOCAL.equals(user.getRole()) ? 0 : 2;
-	}
-
-	@Override
-	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement)
-			throws SQLException
-	{
-		if (!UserRole.LOCAL.equals(user.getRole()))
-		{
-			if (subqueryParameterIndex == 1)
-				statement.setString(parameterIndex, user.getOrganization().getIdElement().getValue());
-			else if (subqueryParameterIndex == 2)
-				statement.setString(parameterIndex, user.getOrganization().getIdElement().toVersionless().getValue());
-		}
+		super(user, resourceTable, resourceIdColumn);
 	}
 }

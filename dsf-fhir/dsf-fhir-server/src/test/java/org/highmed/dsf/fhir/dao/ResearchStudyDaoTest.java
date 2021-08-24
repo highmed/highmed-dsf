@@ -1,27 +1,18 @@
 package org.highmed.dsf.fhir.dao;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
-import java.sql.Connection;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.UUID;
 
-import org.highmed.dsf.fhir.OrganizationType;
 import org.highmed.dsf.fhir.dao.jdbc.ResearchStudyDaoJdbc;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Period;
-import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ResearchStudyDaoTest extends AbstractResourceDaoTest<ResearchStudy, ResearchStudyDao>
+		implements ReadAccessDaoTest<ResearchStudy>
 {
-	private static final Logger logger = LoggerFactory.getLogger(ResearchStudyDaoTest.class);
-
 	private static final String title = "Demo Research Study";
 	private final Date periodStart = new GregorianCalendar(2019, 0, 1).getTime();
 	private final Date periodEnd = new GregorianCalendar(2021, 11, 31).getTime();
@@ -32,7 +23,7 @@ public class ResearchStudyDaoTest extends AbstractResourceDaoTest<ResearchStudy,
 	}
 
 	@Override
-	protected ResearchStudy createResource()
+	public ResearchStudy createResource()
 	{
 		ResearchStudy researchStudy = new ResearchStudy();
 		researchStudy.setTitle(title);
@@ -59,60 +50,199 @@ public class ResearchStudyDaoTest extends AbstractResourceDaoTest<ResearchStudy,
 		assertEquals(periodEnd, resource.getPeriod().getEnd());
 	}
 
+	@Override
 	@Test
-	public void testReadByPrincipalInvestigatorIdAndOrganizationTypeAndOrganizationIdWithTransaction() throws Exception
+	public void testReadAccessTriggerAll() throws Exception
 	{
-		String piReference = "Practitioner/" + UUID.randomUUID().toString();
-		String orgReference = "Organization/" + UUID.randomUUID().toString();
-
-		ResearchStudy r = new ResearchStudy();
-		r.setPrincipalInvestigator(new Reference(piReference));
-		r.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/extension-participating-ttp")
-				.setValue(new Reference(orgReference));
-		r.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/extension-participating-medic")
-				.setValue(new Reference("Organization/" + UUID.randomUUID().toString()));
-		r.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/extension-participating-medic")
-				.setValue(new Reference("Organization/" + UUID.randomUUID().toString()));
-
-		logger.debug(fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(r));
-
-		dao.create(r);
-
-		try (Connection connection = dao.newReadWriteTransaction())
-		{
-			boolean exists = dao
-					.existsByPrincipalInvestigatorIdAndOrganizationTypeAndOrganizationIdWithTransaction(connection,
-							new IdType(piReference), OrganizationType.TTP, new IdType(orgReference));
-			assertTrue(exists);
-		}
+		ReadAccessDaoTest.super.testReadAccessTriggerAll();
 	}
 
+	@Override
 	@Test
-	public void testReadByEnrollmentIdAndOrganizationTypeAndOrganizationIdWithTransaction() throws Exception
+	public void testReadAccessTriggerLocal() throws Exception
 	{
-		String enrollmentReference1 = "Group/" + UUID.randomUUID().toString();
-		String enrollmentReference2 = "Group/" + UUID.randomUUID().toString();
-		String orgReference = "Organization/" + UUID.randomUUID().toString();
+		ReadAccessDaoTest.super.testReadAccessTriggerLocal();
+	}
 
-		ResearchStudy r = new ResearchStudy();
-		r.addEnrollment(new Reference(enrollmentReference1));
-		r.addEnrollment(new Reference(enrollmentReference2));
-		r.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/extension-participating-ttp")
-				.setValue(new Reference("Organization/" + UUID.randomUUID().toString()));
-		r.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/extension-participating-medic")
-				.setValue(new Reference(orgReference));
-		r.addExtension().setUrl("http://highmed.org/fhir/StructureDefinition/extension-participating-medic")
-				.setValue(new Reference("Organization/" + UUID.randomUUID().toString()));
+	@Override
+	@Test
+	public void testReadAccessTriggerOrganization() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerOrganization();
+	}
 
-		logger.debug(fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(r));
+	@Override
+	@Test
+	public void testReadAccessTriggerOrganizationResourceFirst() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerOrganizationResourceFirst();
+	}
 
-		dao.create(r);
+	@Override
+	@Test
+	public void testReadAccessTriggerOrganization2Organizations1Matching() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerOrganization2Organizations1Matching();
+	}
 
-		try (Connection connection = dao.newReadWriteTransaction())
-		{
-			boolean exists = dao.existsByEnrollmentIdAndOrganizationTypeAndOrganizationIdWithTransaction(connection,
-					new IdType(enrollmentReference1), OrganizationType.MeDIC, new IdType(orgReference));
-			assertTrue(exists);
-		}
+	@Override
+	@Test
+	public void testReadAccessTriggerOrganization2Organizations2Matching() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerOrganization2Organizations2Matching();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerRole() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerRole();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerRoleResourceFirst() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerRoleResourceFirst();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerRole2Organizations1Matching() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerRole2Organizations1Matching();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerRole2Organizations2Matching() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerRole2Organizations2Matching();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerAllUpdate() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerAllUpdate();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerLocalUpdate() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerLocalUpdate();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerOrganizationUpdate() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerOrganizationUpdate();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerRoleUpdate() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerRoleUpdate();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerRoleUpdateMemberOrganizationNonActive() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerRoleUpdateMemberOrganizationNonActive();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerRoleUpdateParentOrganizationNonActive() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerRoleUpdateParentOrganizationNonActive();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerRoleUpdateMemberAndParentOrganizationNonActive() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerRoleUpdateMemberAndParentOrganizationNonActive();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerAllDelete() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerAllDelete();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerLocalDelete() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerLocalDelete();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerOrganizationDelete() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerOrganizationDelete();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerRoleDelete() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerRoleDelete();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerRoleDeleteMember() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerRoleDeleteMember();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerRoleDeleteParent() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerRoleDeleteParent();
+	}
+
+	@Override
+	@Test
+	public void testReadAccessTriggerRoleDeleteMemberAndParent() throws Exception
+	{
+		ReadAccessDaoTest.super.testReadAccessTriggerRoleDeleteMemberAndParent();
+	}
+
+	@Override
+	@Test
+	public void testSearchWithUserFilterAfterReadAccessTriggerAllWithLocalUser() throws Exception
+	{
+		ReadAccessDaoTest.super.testSearchWithUserFilterAfterReadAccessTriggerAllWithLocalUser();
+	}
+
+	@Override
+	@Test
+	public void testSearchWithUserFilterAfterReadAccessTriggerLocalwithLocalUser() throws Exception
+	{
+		ReadAccessDaoTest.super.testSearchWithUserFilterAfterReadAccessTriggerLocalwithLocalUser();
+	}
+
+	@Override
+	@Test
+	public void testSearchWithUserFilterAfterReadAccessTriggerAllWithRemoteUser() throws Exception
+	{
+		ReadAccessDaoTest.super.testSearchWithUserFilterAfterReadAccessTriggerAllWithRemoteUser();
+	}
+
+	@Override
+	@Test
+	public void testSearchWithUserFilterAfterReadAccessTriggerLocalWithRemoteUser() throws Exception
+	{
+		ReadAccessDaoTest.super.testSearchWithUserFilterAfterReadAccessTriggerLocalWithRemoteUser();
 	}
 }

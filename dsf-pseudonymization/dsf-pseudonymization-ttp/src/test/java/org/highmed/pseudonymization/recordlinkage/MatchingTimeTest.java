@@ -73,12 +73,12 @@ public class MatchingTimeTest
 		rand.nextBytes(key1);
 		rand.nextBytes(key2);
 
-		BloomFilterGenerator generatorLong = BloomFilterGenerator
-				.withHmacMd5HmacSha1BiGramHasher(BIT_SET_LENGTH, key1, key2);
+		BloomFilterGenerator generatorLong = BloomFilterGenerator.withHmacMd5HmacSha1BiGramHasher(BIT_SET_LENGTH, key1,
+				key2);
 		BloomFilterGenerator generatorMedium = BloomFilterGenerator
 				.withHmacMd5HmacSha1BiGramHasher(BIT_SET_LENGTH_MEDIUM, key1, key2);
-		BloomFilterGenerator generatorShort = BloomFilterGenerator
-				.withHmacMd5HmacSha1BiGramHasher(BIT_SET_LENGTH_SHORT, key1, key2);
+		BloomFilterGenerator generatorShort = BloomFilterGenerator.withHmacMd5HmacSha1BiGramHasher(BIT_SET_LENGTH_SHORT,
+				key1, key2);
 
 		for (int i = 0; i < 70; i++)
 		{
@@ -112,8 +112,8 @@ public class MatchingTimeTest
 		rand.nextBytes(key1);
 		rand.nextBytes(key2);
 
-		BloomFilterGenerator generatorLong = BloomFilterGenerator
-				.withHmacSha1HmacSha2BiGramHasher(BIT_SET_LENGTH, key1, key2, bcProvider);
+		BloomFilterGenerator generatorLong = BloomFilterGenerator.withHmacSha1HmacSha2BiGramHasher(BIT_SET_LENGTH, key1,
+				key2, bcProvider);
 		BloomFilterGenerator generatorMedium = BloomFilterGenerator
 				.withHmacSha1HmacSha2BiGramHasher(BIT_SET_LENGTH_MEDIUM, key1, key2, bcProvider);
 		BloomFilterGenerator generatorShort = BloomFilterGenerator
@@ -151,8 +151,8 @@ public class MatchingTimeTest
 		rand.nextBytes(key1);
 		rand.nextBytes(key2);
 
-		BloomFilterGenerator generatorLong = BloomFilterGenerator
-				.withHmacSha2HmacSha3BiGramHasher(BIT_SET_LENGTH, key1, key2, bcProvider);
+		BloomFilterGenerator generatorLong = BloomFilterGenerator.withHmacSha2HmacSha3BiGramHasher(BIT_SET_LENGTH, key1,
+				key2, bcProvider);
 		BloomFilterGenerator generatorMedium = BloomFilterGenerator
 				.withHmacSha2HmacSha3BiGramHasher(BIT_SET_LENGTH_MEDIUM, key1, key2, bcProvider);
 		BloomFilterGenerator generatorShort = BloomFilterGenerator
@@ -168,11 +168,11 @@ public class MatchingTimeTest
 	private void testRuntime(BloomFilterGenerator generatorLong, BloomFilterGenerator generatorMedium,
 			BloomFilterGenerator generatorShort)
 	{
-		List<Double> weightList = Arrays
-				.asList(0.1, 0.1, 0.2, 0.1, 0.1, 0.05, 0.2, 0.1, 0.05); // Best weights for SHA23Hmac, MD5SHA1
+		List<Double> weightList = Arrays.asList(0.1, 0.1, 0.2, 0.1, 0.1, 0.05, 0.2, 0.1, 0.05); // Best weights for
+																								// SHA23Hmac, MD5SHA1
 
-		List<List<TestPerson>> combinedPtRbfs = createPatientsFromRecord(org1, org2, weightList,
-				generatorLong, generatorMedium, generatorShort);
+		List<List<TestPerson>> combinedPtRbfs = createPatientsFromRecord(org1, org2, weightList, generatorLong,
+				generatorMedium, generatorShort);
 		List<TestPerson> org1Pts = combinedPtRbfs.get(0);
 		List<TestPerson> org2Pts = combinedPtRbfs.get(1);
 
@@ -193,10 +193,10 @@ public class MatchingTimeTest
 
 	private void logTimes(String hash1, String hash2)
 	{
-		logger.debug("Average Duration Bloom Filter Generation for combination {} + {}: {} ms. ",
-				hash1, hash2, calculateAvgDuration(rbftimes));
-		logger.debug("Average Duration Record Linkage for combination {} + {}: {} ms.",
-				hash1, hash2, calculateAvgDuration(rltimes));
+		logger.debug("Average Duration Bloom Filter Generation for combination {} + {}: {} ms. ", hash1, hash2,
+				calculateAvgDuration(rbftimes));
+		logger.debug("Average Duration Record Linkage for combination {} + {}: {} ms.", hash1, hash2,
+				calculateAvgDuration(rltimes));
 	}
 
 	private List<FieldBloomFilter> createFbfList(IdatImpl r, List<Double> weightList,
@@ -227,14 +227,13 @@ public class MatchingTimeTest
 		FieldBloomFilter countryInput = toField(country, r.getCountry(), generatorLong);
 		FieldBloomFilter insuranceInput = toField(insurancenr, r.getInsuranceNumber(), generatorLong);
 		FieldBloomFilter streetInput = toField(street, r.getStreet(), generatorLong);
-		List<FieldBloomFilter> fbfList = Arrays
-				.asList(firstNameInput, lastNameInput, sexInput, birthdayInput, zipCodeInput, cityInput, countryInput,
-						insuranceInput, streetInput);
+		List<FieldBloomFilter> fbfList = Arrays.asList(firstNameInput, lastNameInput, sexInput, birthdayInput,
+				zipCodeInput, cityInput, countryInput, insuranceInput, streetInput);
 		return fbfList;
 	}
 
-	private List<List<TestPerson>> createPatientsFromRecord(List<IdatImpl> org1Idat, List<IdatImpl> org2Idat, List<Double> weightList,
-			BloomFilterGenerator generatorLong, BloomFilterGenerator generatorMedium,
+	private List<List<TestPerson>> createPatientsFromRecord(List<IdatImpl> org1Idat, List<IdatImpl> org2Idat,
+			List<Double> weightList, BloomFilterGenerator generatorLong, BloomFilterGenerator generatorMedium,
 			BloomFilterGenerator generatorShort)
 	{
 		List<TestPerson> org1Pts = new ArrayList<>();
@@ -246,10 +245,11 @@ public class MatchingTimeTest
 
 		LocalDateTime rbfStartTime = LocalDateTime.now();
 
-		List<RecordBloomFilter> rbfList = allPts.parallelStream()
-				.map(r -> {return new RecordBloomFilter(3000, 42L,
-						createFbfList(r, weightList, generatorLong, generatorMedium, generatorShort));})
-				.collect(Collectors.toList());
+		List<RecordBloomFilter> rbfList = allPts.parallelStream().map(r ->
+		{
+			return new RecordBloomFilter(3000, 42L,
+					createFbfList(r, weightList, generatorLong, generatorMedium, generatorShort));
+		}).collect(Collectors.toList());
 
 		LocalDateTime rbfEndTime = LocalDateTime.now();
 		Duration duration = Duration.between(rbfStartTime, rbfEndTime);
@@ -262,7 +262,8 @@ public class MatchingTimeTest
 			if (r.getMedicId().contains("org")) // Org 1 IDAT have org (original) id, org 2 idat have dup
 			{
 				org1Pts.add(new TestPerson(new MedicIdImpl("org1", r.getMedicId()), rbfList.get(idx).getBitSet()));
-			} else
+			}
+			else
 			{
 				org2Pts.add(new TestPerson(new MedicIdImpl("org2", r.getMedicId()), rbfList.get(idx).getBitSet()));
 			}
@@ -277,7 +278,8 @@ public class MatchingTimeTest
 		if (durations.size() >= 70)
 		{
 			sum = durations.stream().mapToLong(Duration::toMillis).skip(20).sum();
-		} else
+		}
+		else
 		{
 			logger.warn("Less than 70 test runs have been performed, thus the first 20 runs will not be discarded.");
 			sum = durations.stream().mapToLong(Duration::toMillis).sum();
@@ -289,9 +291,10 @@ public class MatchingTimeTest
 	{
 		try (Reader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8))
 		{
-			Iterable<CSVRecord> records = CSVFormat.RFC4180
-					.withHeader("rec_id", "given_name", "surname", "street_number", "address_1", "address_2", "suburb",
-							"postcode", "state", "date_of_birth", "soc_sec_id").withSkipHeaderRecord().parse(reader);
+			Iterable<CSVRecord> records = CSVFormat.RFC4180.builder()
+					.setHeader("rec_id", "given_name", "surname", "street_number", "address_1", "address_2", "suburb",
+							"postcode", "state", "date_of_birth", "soc_sec_id")
+					.setSkipHeaderRecord(true).build().parse(reader);
 			ArrayList<IdatImpl> idats = new ArrayList<>();
 			for (CSVRecord r : records)
 			{
@@ -327,9 +330,10 @@ public class MatchingTimeTest
 	{
 		try (Reader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8))
 		{
-			Iterable<CSVRecord> records = CSVFormat.RFC4180
-					.withHeader("rec_id", "given_name", "surname", "street_number", "address_1", "address_2", "suburb",
-							"postcode", "state", "date_of_birth", "soc_sec_id").withSkipHeaderRecord().parse(reader);
+			Iterable<CSVRecord> records = CSVFormat.RFC4180.builder()
+					.setHeader("rec_id", "given_name", "surname", "street_number", "address_1", "address_2", "suburb",
+							"postcode", "state", "date_of_birth", "soc_sec_id")
+					.setSkipHeaderRecord(true).build().parse(reader);
 			ArrayList<IdatImpl> idats = new ArrayList<>();
 			for (CSVRecord r : records)
 			{

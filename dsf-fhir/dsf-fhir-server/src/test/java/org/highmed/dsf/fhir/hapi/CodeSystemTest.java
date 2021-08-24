@@ -1,7 +1,6 @@
 package org.highmed.dsf.fhir.hapi;
 
 import java.util.Date;
-import java.util.UUID;
 
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode;
@@ -9,11 +8,15 @@ import org.hl7.fhir.r4.model.CodeSystem.CodeSystemHierarchyMeaning;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 
 public class CodeSystemTest
 {
+	private static final Logger logger = LoggerFactory.getLogger(CodeSystemTest.class);
+
 	private static FhirContext fhirContext = FhirContext.forR4();
 
 	@Test
@@ -40,8 +43,6 @@ public class CodeSystemTest
 		c2.setDefinition("Medical Data Integration Center");
 
 		String s = fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(codeSystem);
-		System.out.println(s);
-		
-		System.out.println(UUID.randomUUID().toString());
+		logger.debug(s);
 	}
 }

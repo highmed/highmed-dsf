@@ -1,0 +1,29 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>dsf-fhir-auth</artifactId>
+
+	<parent>
+		<groupId>org.highmed.dsf</groupId>
+		<artifactId>dsf-fhir-pom</artifactId>
+		<version>0.5.0</version>
+	</parent>
+	
+	<properties>
+		<main.basedir>${project.basedir}/../..</main.basedir>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-r4</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>de.hs-heilbronn.mi</groupId>
+			<artifactId>log4j2-utils</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>

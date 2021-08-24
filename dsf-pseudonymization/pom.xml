@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>org.highmed.dsf</groupId>
 		<artifactId>dsf-pom</artifactId>
-		<version>0.4.0</version>
+		<version>0.5.0</version>
 	</parent>
 
 	<modules>
@@ -16,6 +16,10 @@
 		<module>dsf-pseudonymization-medic</module>
 		<module>dsf-pseudonymization-ttp</module>
 	</modules>
+	
+	<properties>
+		<main.basedir>${project.basedir}/..</main.basedir>
+	</properties>
 
 	<dependencies>
 		<dependency>

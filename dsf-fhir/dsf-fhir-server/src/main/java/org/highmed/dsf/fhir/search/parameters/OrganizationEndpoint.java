@@ -43,6 +43,8 @@ public class OrganizationEndpoint extends AbstractReferenceParameter<Organizatio
 			case ID:
 			case RESOURCE_NAME_AND_ID:
 			case URL:
+			case TYPE_AND_ID:
+			case TYPE_AND_RESOURCE_NAME_AND_ID:
 				return "? IN (SELECT reference->>'reference' FROM jsonb_array_elements(organization->'endpoint') AS reference)";
 
 			case IDENTIFIER:
@@ -78,10 +80,10 @@ public class OrganizationEndpoint extends AbstractReferenceParameter<Organizatio
 		switch (valueAndType.type)
 		{
 			case ID:
-				statement.setString(parameterIndex, TARGET_RESOURCE_TYPE_NAME + "/" + valueAndType.id);
-				break;
 			case RESOURCE_NAME_AND_ID:
-				statement.setString(parameterIndex, valueAndType.resourceName + "/" + valueAndType.id);
+			case TYPE_AND_ID:
+			case TYPE_AND_RESOURCE_NAME_AND_ID:
+				statement.setString(parameterIndex, TARGET_RESOURCE_TYPE_NAME + "/" + valueAndType.id);
 				break;
 			case URL:
 				statement.setString(parameterIndex, valueAndType.url);

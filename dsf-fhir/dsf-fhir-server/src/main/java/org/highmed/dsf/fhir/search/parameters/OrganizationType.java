@@ -5,15 +5,11 @@ import static org.highmed.dsf.fhir.search.parameters.OrganizationType.PARAMETER_
 import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Objects;
 
 import org.highmed.dsf.fhir.function.BiFunctionWithSqlException;
 import org.highmed.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import org.highmed.dsf.fhir.search.parameters.basic.AbstractTokenParameter;
-import org.highmed.dsf.fhir.search.parameters.basic.TokenValueAndSearchType;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
-import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Resource;
 
@@ -84,36 +80,11 @@ public class OrganizationType extends AbstractTokenParameter<Organization>
 		}
 	}
 
-	protected boolean codingMatches(List<Identifier> identifiers)
-	{
-		return identifiers.stream()
-				.anyMatch(i -> valueAndType.negated ? !codingMatches(valueAndType, i) : codingMatches(valueAndType, i));
-	}
-
-	public static boolean codingMatches(TokenValueAndSearchType valueAndType, Identifier identifier)
-	{
-		switch (valueAndType.type)
-		{
-			case CODE:
-				return Objects.equals(valueAndType.codeValue, identifier.getValue());
-			case CODE_AND_SYSTEM:
-				return Objects.equals(valueAndType.codeValue, identifier.getValue())
-						&& Objects.equals(valueAndType.systemValue, identifier.getSystem());
-			case CODE_AND_NO_SYSTEM_PROPERTY:
-				return Objects.equals(valueAndType.codeValue, identifier.getValue())
-						&& (identifier.getSystem() == null || identifier.getSystem().isBlank());
-			case SYSTEM:
-				return Objects.equals(valueAndType.systemValue, identifier.getSystem());
-			default:
-				return false;
-		}
-	}
-
 	@Override
 	protected String getSortSql(String sortDirectionWithSpacePrefix)
 	{
 		return "(SELECT string_agg((coding->>'system')::text || (coding->>'code')::text, ' ') FROM jsonb_array_elements("
-				+ RESOURCE_COLUMN + "->'type'-->'coding') coding)" + sortDirectionWithSpacePrefix;
+				+ RESOURCE_COLUMN + "->'type'->'coding') coding)" + sortDirectionWithSpacePrefix;
 	}
 
 	@Override
@@ -127,6 +98,6 @@ public class OrganizationType extends AbstractTokenParameter<Organization>
 
 		Organization o = (Organization) resource;
 
-		return codingMatches(o.getIdentifier());
+		return codingMatches(o.getType());
 	}
 }

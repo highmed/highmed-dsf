@@ -1,102 +1,56 @@
 package org.highmed.dsf.fhir.authorization;
 
 import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.highmed.dsf.fhir.authentication.OrganizationProvider;
 import org.highmed.dsf.fhir.authentication.User;
+import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.dao.ProvenanceDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
+import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.Provenance;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class ProvenanceAuthorizationRule extends AbstractAuthorizationRule<Provenance, ProvenanceDao>
+public class ProvenanceAuthorizationRule extends AbstractMetaTagAuthorizationRule<Provenance, ProvenanceDao>
 {
-	private static final Logger logger = LoggerFactory.getLogger(ProvenanceAuthorizationRule.class);
-
 	public ProvenanceAuthorizationRule(DaoProvider daoProvider, String serverBase, ReferenceResolver referenceResolver,
-			OrganizationProvider organizationProvider)
+			OrganizationProvider organizationProvider, ReadAccessHelper readAccessHelper,
+			ParameterConverter parameterConverter)
 	{
-		super(Provenance.class, daoProvider, serverBase, referenceResolver, organizationProvider);
+		super(Provenance.class, daoProvider, serverBase, referenceResolver, organizationProvider, readAccessHelper,
+				parameterConverter);
 	}
 
-	@Override
-	public Optional<String> reasonCreateAllowed(Connection connection, User user, Provenance newResource)
+	protected Optional<String> newResourceOk(Connection connection, User user, Provenance newResource)
 	{
-		if (isLocalUser(user))
+		List<String> errors = new ArrayList<String>();
+
+		if (!hasValidReadAccessTag(connection, newResource))
 		{
-			logger.info("Create of Provenance authorized for local user '{}'", user.getName());
-			return Optional.of("local user");
+			errors.add("Provenance is missing valid read access tag");
 		}
-		else
-		{
-			logger.warn("Create of Provenance unauthorized, not a local user");
+
+		if (errors.isEmpty())
 			return Optional.empty();
-		}
-	}
-
-	@Override
-	public Optional<String> reasonReadAllowed(Connection connection, User user, Provenance existingResource)
-	{
-		if (isLocalUser(user))
-		{
-			logger.info("Read of Provenance authorized for local user '{}'", user.getName());
-			return Optional.of("local user");
-		}
 		else
-		{
-			logger.warn("Read of Provenance unauthorized, not a local user");
-			return Optional.empty();
-		}
+			return Optional.of(errors.stream().collect(Collectors.joining(", ")));
 	}
 
 	@Override
-	public Optional<String> reasonUpdateAllowed(Connection connection, User user, Provenance oldResource,
-			Provenance newResource)
+	protected boolean resourceExists(Connection connection, Provenance newResource)
 	{
-		if (isLocalUser(user))
-		{
-			logger.info("Update of Provenance authorized for local user '{}'", user.getName());
-			return Optional.of("local user");
-
-		}
-		else
-		{
-			logger.warn("Update of Provenance unauthorized, not a local user");
-			return Optional.empty();
-		}
+		// no unique criteria for Provenance
+		return false;
 	}
 
 	@Override
-	public Optional<String> reasonDeleteAllowed(Connection connection, User user, Provenance oldResource)
+	protected boolean modificationsOk(Connection connection, Provenance oldResource, Provenance newResource)
 	{
-		if (isLocalUser(user))
-		{
-			logger.info("Delete of Provenance authorized for local user '{}'", user.getName());
-			return Optional.of("local user");
-		}
-		else
-		{
-			logger.warn("Delete of Provenance unauthorized, not a local user");
-			return Optional.empty();
-		}
-	}
-
-	@Override
-	public Optional<String> reasonSearchAllowed(User user)
-	{
-		logger.info("Search of Provenance authorized for {} user '{}', will be fitered by users organization {}",
-				user.getRole(), user.getName(), user.getOrganization().getIdElement().getValueAsString());
-		return Optional.of("Allowed for all, filtered by users organization");
-	}
-
-	@Override
-	public Optional<String> reasonHistoryAllowed(User user)
-	{
-		logger.info("History of Provenance authorized for {} user '{}', will be fitered by users organization {}",
-				user.getRole(), user.getName(), user.getOrganization().getIdElement().getValueAsString());
-		return Optional.of("Allowed for all, filtered by users organization");
+		// no unique criteria for Provenance
+		return true;
 	}
 }

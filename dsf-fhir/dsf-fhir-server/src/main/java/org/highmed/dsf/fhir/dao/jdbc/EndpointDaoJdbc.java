@@ -25,11 +25,11 @@ public class EndpointDaoJdbc extends AbstractResourceDaoJdbc<Endpoint> implement
 {
 	private static final Logger logger = LoggerFactory.getLogger(EndpointDaoJdbc.class);
 
-	public EndpointDaoJdbc(DataSource dataSource, FhirContext fhirContext)
+	public EndpointDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
 	{
-		super(dataSource, fhirContext, Endpoint.class, "endpoints", "endpoint", "endpoint_id", EndpointUserFilter::new,
-				with(EndpointAddress::new, EndpointIdentifier::new, EndpointName::new, EndpointOrganization::new,
-						EndpointStatus::new),
+		super(dataSource, permanentDeleteDataSource, fhirContext, Endpoint.class, "endpoints", "endpoint",
+				"endpoint_id", EndpointUserFilter::new, with(EndpointAddress::new, EndpointIdentifier::new,
+						EndpointName::new, EndpointOrganization::new, EndpointStatus::new),
 				with(OrganizationEndpointRevInclude::new));
 	}
 

@@ -16,7 +16,6 @@ import org.highmed.dsf.bpe.service.BpmnServiceDelegateValidationServiceImpl;
 import org.highmed.dsf.bpe.service.FhirResourceHandler;
 import org.highmed.dsf.bpe.service.FhirResourceHandlerImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -25,6 +24,9 @@ import org.springframework.context.event.EventListener;
 @Configuration
 public class PostProcessDeployConfig
 {
+	@Autowired
+	private PropertiesConfig propertiesConfig;
+
 	@Autowired
 	private ProcessEngine processEngine;
 
@@ -39,12 +41,6 @@ public class PostProcessDeployConfig
 
 	@Autowired
 	private DaoConfig daoConfig;
-
-	@Value("#{'${org.highmed.dsf.bpe.process.excluded:}'.split(',')}")
-	private List<String> excluded;
-
-	@Value("#{'${org.highmed.dsf.bpe.process.retired:}'.split(',')}")
-	private List<String> retired;
 
 	@EventListener({ ContextRefreshedEvent.class })
 	public void onContextRefreshedEvent(ContextRefreshedEvent event)
@@ -71,8 +67,8 @@ public class PostProcessDeployConfig
 	public BpmnProcessStateChangeService bpmnProcessStateChangeService()
 	{
 		return new BpmnProcessStateChangeServiceImpl(processEngine.getRepositoryService(), daoConfig.processStateDao(),
-				processPluginProvider, ProcessKeyAndVersion.fromStrings(excluded),
-				ProcessKeyAndVersion.fromStrings(retired));
+				processPluginProvider, ProcessKeyAndVersion.fromStrings(propertiesConfig.getProcessExcluded()),
+				ProcessKeyAndVersion.fromStrings(propertiesConfig.getProcessRetired()));
 	}
 
 	@Bean
@@ -80,6 +76,7 @@ public class PostProcessDeployConfig
 	{
 		return new FhirResourceHandlerImpl(fhirConfig.clientProvider().getLocalWebserviceClient(),
 				daoConfig.processPluginResourcesDao(), fhirConfig.fhirContext(),
+				propertiesConfig.getFhirServerRequestMaxRetries(), propertiesConfig.getFhirServerRetryDelayMillis(),
 				processPluginProvider.getResouceProvidersByDpendencyNameAndVersion());
 	}
 }

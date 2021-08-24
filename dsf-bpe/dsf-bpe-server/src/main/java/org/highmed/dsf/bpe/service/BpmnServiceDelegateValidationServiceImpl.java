@@ -2,14 +2,17 @@ package org.highmed.dsf.bpe.service;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.ProcessEngine;
 import org.camunda.bpm.engine.RepositoryService;
 import org.camunda.bpm.engine.repository.ProcessDefinition;
-import org.camunda.bpm.model.bpmn.BpmnModelInstance;
+import org.camunda.bpm.model.bpmn.instance.EndEvent;
+import org.camunda.bpm.model.bpmn.instance.IntermediateThrowEvent;
+import org.camunda.bpm.model.bpmn.instance.MessageEventDefinition;
 import org.camunda.bpm.model.bpmn.instance.Process;
+import org.camunda.bpm.model.bpmn.instance.SendTask;
 import org.camunda.bpm.model.bpmn.instance.ServiceTask;
+import org.camunda.bpm.model.bpmn.instance.SubProcess;
 import org.highmed.dsf.bpe.delegate.DelegateProvider;
 import org.highmed.dsf.bpe.process.ProcessKeyAndVersion;
 import org.slf4j.Logger;
@@ -47,44 +50,74 @@ public class BpmnServiceDelegateValidationServiceImpl implements BpmnServiceDele
 
 		List<ProcessDefinition> deployedProcesses = repositoryService.createProcessDefinitionQuery().active()
 				.latestVersion().list();
-		List<BpmnModelInstance> models = deployedProcesses.stream()
-				.map(p -> repositoryService.getBpmnModelInstance(p.getId())).collect(Collectors.toList());
 
-		models.forEach(this::validateBeanAvailabilityForModel);
-	}
-
-	private void validateBeanAvailabilityForModel(BpmnModelInstance model)
-	{
-		model.getModelElementsByType(Process.class).stream().forEach(this::validateBeanAvailabilityForProcess);
+		deployedProcesses.stream().map(p -> repositoryService.getBpmnModelInstance(p.getId())).filter(m -> m != null)
+				.flatMap(m -> m.getModelElementsByType(Process.class).stream()).filter(p -> p != null)
+				.forEach(this::validateBeanAvailabilityForProcess);
 	}
 
 	private void validateBeanAvailabilityForProcess(Process process)
 	{
-		process.getChildElementsByType(ServiceTask.class).stream()
-				.forEach(task -> validateBeanAvailabilityForTask(
-						new ProcessKeyAndVersion(process.getId(), process.getCamundaVersionTag()),
-						task.getCamundaClass()));
+		logger.debug("Checking bean availability for process {}/{}", process.getId(), process.getCamundaVersionTag());
+
+		process.getChildElementsByType(ServiceTask.class).stream().filter(t -> t != null).map(t -> t.getCamundaClass())
+				.forEach(c -> validateBeanAvailability(process, c));
+
+		process.getChildElementsByType(SendTask.class).stream().filter(t -> t != null).map(t -> t.getCamundaClass())
+				.forEach(c -> validateBeanAvailability(process, c));
+
+		process.getChildElementsByType(IntermediateThrowEvent.class).stream().filter(e -> e != null)
+				.flatMap(e -> e.getEventDefinitions().stream()
+						.filter(def -> def != null && def instanceof MessageEventDefinition))
+				.map(def -> (MessageEventDefinition) def).map(def -> def.getCamundaClass())
+				.forEach(c -> validateBeanAvailability(process, c));
+
+		process.getChildElementsByType(EndEvent.class).stream().filter(e -> e != null)
+				.flatMap(e -> e.getEventDefinitions().stream()
+						.filter(def -> def != null && def instanceof MessageEventDefinition))
+				.map(def -> (MessageEventDefinition) def).map(def -> def.getCamundaClass())
+				.forEach(c -> validateBeanAvailability(process, c));
+
+		process.getChildElementsByType(SubProcess.class).stream().filter(s -> s != null)
+				.forEach(sp -> validateBeanAvailabilityForSubProcess(process, sp));
 	}
 
-	private void validateBeanAvailabilityForTask(ProcessKeyAndVersion processKeyAndVersion, String className)
+	private void validateBeanAvailabilityForSubProcess(Process process, SubProcess sProcess)
 	{
+		sProcess.getChildElementsByType(ServiceTask.class).stream().filter(t -> t != null).map(t -> t.getCamundaClass())
+				.forEach(c -> validateBeanAvailability(process, c));
+
+		sProcess.getChildElementsByType(SendTask.class).stream().filter(t -> t != null).map(t -> t.getCamundaClass())
+				.forEach(c -> validateBeanAvailability(process, c));
+
+		sProcess.getChildElementsByType(IntermediateThrowEvent.class).stream().filter(e -> e != null)
+				.flatMap(e -> e.getEventDefinitions().stream()
+						.filter(def -> def != null && def instanceof MessageEventDefinition))
+				.map(def -> (MessageEventDefinition) def).map(def -> def.getCamundaClass())
+				.forEach(c -> validateBeanAvailability(process, c));
+
+		sProcess.getChildElementsByType(EndEvent.class).stream().filter(e -> e != null)
+				.flatMap(e -> e.getEventDefinitions().stream()
+						.filter(def -> def != null && def instanceof MessageEventDefinition))
+				.map(def -> (MessageEventDefinition) def).map(def -> def.getCamundaClass())
+				.forEach(c -> validateBeanAvailability(process, c));
+
+		sProcess.getChildElementsByType(SubProcess.class).stream().filter(s -> s != null)
+				.forEach(sp -> validateBeanAvailabilityForSubProcess(process, sp));
+	}
+
+	private void validateBeanAvailability(Process process, String className)
+	{
+		if (className == null || className.isBlank())
+			return;
+
+		ProcessKeyAndVersion processKeyAndVersion = new ProcessKeyAndVersion(process.getId(),
+				process.getCamundaVersionTag());
+
+		logger.trace("Checking {} available in {}", className, processKeyAndVersion);
+
 		Class<?> serviceClass = loadClass(processKeyAndVersion, className);
 		loadBean(processKeyAndVersion, serviceClass);
-	}
-
-	private void loadBean(ProcessKeyAndVersion processKeyAndVersion, Class<?> serviceClass)
-	{
-		try
-		{
-			ApplicationContext applicationContext = delegateProvider.getApplicationContext(processKeyAndVersion);
-			applicationContext.getBean(serviceClass);
-		}
-		catch (BeansException e)
-		{
-			logger.warn("Error while getting service delegate bean of type {} defined in process {} not found",
-					serviceClass.getName(), processKeyAndVersion);
-			throw new RuntimeException(e);
-		}
 	}
 
 	private Class<?> loadClass(ProcessKeyAndVersion processKeyAndVersion, String className)
@@ -97,6 +130,21 @@ public class BpmnServiceDelegateValidationServiceImpl implements BpmnServiceDele
 		catch (ClassNotFoundException e)
 		{
 			logger.warn("Service delegate class {} defined in process {} not found", className, processKeyAndVersion);
+			throw new RuntimeException(e);
+		}
+	}
+
+	private void loadBean(ProcessKeyAndVersion processKeyAndVersion, Class<?> serviceClass)
+	{
+		try
+		{
+			ApplicationContext applicationContext = delegateProvider.getApplicationContext(processKeyAndVersion);
+			applicationContext.getBean(serviceClass);
+		}
+		catch (BeansException e)
+		{
+			logger.warn("Error while getting service delegate bean of type {} defined in process {}: {}",
+					serviceClass.getName(), processKeyAndVersion, e.getMessage());
 			throw new RuntimeException(e);
 		}
 	}

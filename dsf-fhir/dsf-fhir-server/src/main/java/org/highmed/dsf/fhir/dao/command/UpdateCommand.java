@@ -84,7 +84,7 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		// check standard update request url: e.g. Patient/123
 		if (eruComponentes.getPathSegments().size() == 2 && eruComponentes.getQueryParams().isEmpty())
 		{
-			if (entry.getFullUrl().startsWith(URL_UUID_PREFIX))
+			if (!entry.hasFullUrl() || entry.getFullUrl().startsWith(URL_UUID_PREFIX))
 				throw new WebApplicationException(
 						responseGenerator.badUpdateRequestUrl(index, entry.getRequest().getUrl()));
 			else if (!resource.hasIdElement() || !resource.getIdElement().hasIdPart())
@@ -150,7 +150,7 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 					.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 		}
 
-		SearchQuery<R> query = dao.createSearchQuery(user, 1, 1);
+		SearchQuery<R> query = dao.createSearchQueryWithoutUserFilter(1, 1);
 		query.configureParameters(queryParameters);
 
 		List<SearchQueryParameterError> unsupportedParams = query.getUnsupportedQueryParameters(queryParameters);
@@ -291,7 +291,8 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		}
 		else
 		{
-			referencesHelper.resolveTemporaryAndConditionalReferences(idTranslationTable, connection);
+			referencesHelper.resolveTemporaryAndConditionalReferencesOrLiteralInternalRelatedArtifactUrls(
+					idTranslationTable, connection);
 
 			validationResult = validationHelper.checkResourceValidForUpdate(user, resource);
 
@@ -307,7 +308,8 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	{
 		if (Boolean.FALSE.equals(foundByCondition))
 		{
-			referencesHelper.resolveTemporaryAndConditionalReferences(idTranslationTable, connection);
+			referencesHelper.resolveTemporaryAndConditionalReferencesOrLiteralInternalRelatedArtifactUrls(
+					idTranslationTable, connection);
 
 			validationResult = validationHelper.checkResourceValidForCreate(user, resource);
 

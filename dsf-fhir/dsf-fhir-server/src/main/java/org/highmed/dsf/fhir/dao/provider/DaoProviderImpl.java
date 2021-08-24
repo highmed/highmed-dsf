@@ -16,13 +16,18 @@ import org.highmed.dsf.fhir.dao.CodeSystemDao;
 import org.highmed.dsf.fhir.dao.EndpointDao;
 import org.highmed.dsf.fhir.dao.GroupDao;
 import org.highmed.dsf.fhir.dao.HealthcareServiceDao;
+import org.highmed.dsf.fhir.dao.LibraryDao;
 import org.highmed.dsf.fhir.dao.LocationDao;
+import org.highmed.dsf.fhir.dao.MeasureDao;
+import org.highmed.dsf.fhir.dao.MeasureReportDao;
 import org.highmed.dsf.fhir.dao.NamingSystemDao;
+import org.highmed.dsf.fhir.dao.OrganizationAffiliationDao;
 import org.highmed.dsf.fhir.dao.OrganizationDao;
 import org.highmed.dsf.fhir.dao.PatientDao;
 import org.highmed.dsf.fhir.dao.PractitionerDao;
 import org.highmed.dsf.fhir.dao.PractitionerRoleDao;
 import org.highmed.dsf.fhir.dao.ProvenanceDao;
+import org.highmed.dsf.fhir.dao.ReadAccessDao;
 import org.highmed.dsf.fhir.dao.ResearchStudyDao;
 import org.highmed.dsf.fhir.dao.ResourceDao;
 import org.highmed.dsf.fhir.dao.StructureDefinitionDao;
@@ -36,9 +41,13 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.HealthcareService;
+import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.Measure;
+import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.NamingSystem;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
@@ -63,9 +72,13 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	private final EndpointDao endpointDao;
 	private final GroupDao groupDao;
 	private final HealthcareServiceDao healthcareServiceDao;
+	private final LibraryDao libraryDao;
 	private final LocationDao locationDao;
+	private final MeasureDao measureDao;
+	private final MeasureReportDao measureReportDao;
 	private final NamingSystemDao namingSystemDao;
 	private final OrganizationDao organizationDao;
+	private final OrganizationAffiliationDao organizationAffiliationDao;
 	private final PatientDao patientDao;
 	private final PractitionerDao practitionerDao;
 	private final PractitionerRoleDao practitionerRoleDao;
@@ -77,16 +90,20 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	private final TaskDao taskDao;
 	private final ValueSetDao valueSetDao;
 
+	private final ReadAccessDao readAccessDao;
+
 	private final Map<Class<? extends Resource>, ResourceDao<?>> daosByResourecClass = new HashMap<>();
 	private final Map<String, ResourceDao<?>> daosByResourceTypeName = new HashMap<>();
 
 	public DaoProviderImpl(DataSource dataSource, ActivityDefinitionDao activityDefinitionDao, BinaryDao binaryDao,
 			BundleDao bundleDao, CodeSystemDao codeSystemDao, EndpointDao endpointDao, GroupDao groupDao,
-			HealthcareServiceDao healthcareServiceDao, LocationDao locationDao, NamingSystemDao namingSystemDao,
-			OrganizationDao organizationDao, PatientDao patientDao, PractitionerDao practitionerDao,
-			PractitionerRoleDao practitionerRoleDao, ProvenanceDao provenanceDao, ResearchStudyDao researchStudyDao,
+			HealthcareServiceDao healthcareServiceDao, LibraryDao libraryDao, LocationDao locationDao,
+			MeasureDao measureDao, MeasureReportDao measureReportDao, NamingSystemDao namingSystemDao,
+			OrganizationDao organizationDao, OrganizationAffiliationDao organizationAffiliationDao,
+			PatientDao patientDao, PractitionerDao practitionerDao, PractitionerRoleDao practitionerRoleDao,
+			ProvenanceDao provenanceDao, ResearchStudyDao researchStudyDao,
 			StructureDefinitionDao structureDefinitionDao, StructureDefinitionDao structureDefinitionSnapshotDao,
-			SubscriptionDao subscriptionDao, TaskDao taskDao, ValueSetDao valueSetDao)
+			SubscriptionDao subscriptionDao, TaskDao taskDao, ValueSetDao valueSetDao, ReadAccessDao readAccessDao)
 	{
 		this.dataSource = dataSource;
 		this.activityDefinitionDao = activityDefinitionDao;
@@ -96,9 +113,13 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 		this.endpointDao = endpointDao;
 		this.groupDao = groupDao;
 		this.healthcareServiceDao = healthcareServiceDao;
+		this.libraryDao = libraryDao;
 		this.locationDao = locationDao;
+		this.measureDao = measureDao;
+		this.measureReportDao = measureReportDao;
 		this.namingSystemDao = namingSystemDao;
 		this.organizationDao = organizationDao;
+		this.organizationAffiliationDao = organizationAffiliationDao;
 		this.patientDao = patientDao;
 		this.practitionerDao = practitionerDao;
 		this.practitionerRoleDao = practitionerRoleDao;
@@ -110,6 +131,8 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 		this.taskDao = taskDao;
 		this.valueSetDao = valueSetDao;
 
+		this.readAccessDao = readAccessDao;
+
 		daosByResourecClass.put(ActivityDefinition.class, activityDefinitionDao);
 		daosByResourecClass.put(Binary.class, binaryDao);
 		daosByResourecClass.put(Bundle.class, bundleDao);
@@ -117,9 +140,13 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 		daosByResourecClass.put(Endpoint.class, endpointDao);
 		daosByResourecClass.put(Group.class, groupDao);
 		daosByResourecClass.put(HealthcareService.class, healthcareServiceDao);
+		daosByResourecClass.put(Library.class, libraryDao);
 		daosByResourecClass.put(Location.class, locationDao);
+		daosByResourecClass.put(Measure.class, measureDao);
+		daosByResourecClass.put(MeasureReport.class, measureReportDao);
 		daosByResourecClass.put(NamingSystem.class, namingSystemDao);
 		daosByResourecClass.put(Organization.class, organizationDao);
+		daosByResourecClass.put(OrganizationAffiliation.class, organizationAffiliationDao);
 		daosByResourecClass.put(Patient.class, patientDao);
 		daosByResourecClass.put(Practitioner.class, practitionerDao);
 		daosByResourecClass.put(PractitionerRole.class, practitionerRoleDao);
@@ -143,9 +170,13 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 		Objects.requireNonNull(endpointDao, "endpointDao");
 		Objects.requireNonNull(groupDao, "groupDao");
 		Objects.requireNonNull(healthcareServiceDao, "healthcareServiceDao");
+		Objects.requireNonNull(libraryDao, "libraryDao");
 		Objects.requireNonNull(locationDao, "locationDao");
+		Objects.requireNonNull(measureDao, "measureDao");
+		Objects.requireNonNull(measureReportDao, "measureReportDao");
 		Objects.requireNonNull(namingSystemDao, "namingSystemDao");
 		Objects.requireNonNull(organizationDao, "organizationDao");
+		Objects.requireNonNull(organizationAffiliationDao, "organizationAffiliationDao");
 		Objects.requireNonNull(patientDao, "patientDao");
 		Objects.requireNonNull(practitionerDao, "practitionerDao");
 		Objects.requireNonNull(practitionerRoleDao, "practitionerRoleDao");
@@ -223,9 +254,27 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	}
 
 	@Override
+	public LibraryDao getLibraryDao()
+	{
+		return libraryDao;
+	}
+
+	@Override
 	public LocationDao getLocationDao()
 	{
 		return locationDao;
+	}
+
+	@Override
+	public MeasureDao getMeasureDao()
+	{
+		return measureDao;
+	}
+
+	@Override
+	public MeasureReportDao getMeasureReportDao()
+	{
+		return measureReportDao;
 	}
 
 	@Override
@@ -238,6 +287,12 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	public OrganizationDao getOrganizationDao()
 	{
 		return organizationDao;
+	}
+
+	@Override
+	public OrganizationAffiliationDao getOrganizationAffiliationDao()
+	{
+		return organizationAffiliationDao;
 	}
 
 	@Override
@@ -313,5 +368,11 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	{
 		ResourceDao<?> value = daosByResourceTypeName.get(resourceTypeName);
 		return Optional.ofNullable(value);
+	}
+
+	@Override
+	public ReadAccessDao getReadAccessDao()
+	{
+		return readAccessDao;
 	}
 }

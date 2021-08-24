@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO" monitorInterval="30" verbose="false">
+	<Appenders>
+		<Console name="CONSOLE" target="SYSTEM_OUT">
+			<PatternLayout pattern="%highlight{%p %t - %C{1}.%M(%L) | %m%n}{FATAL=red, ERROR=red, WARN=yellow, INFO=white, DEBUG=white, TRACE=white}" />
+		</Console>
+		<RollingFile name="FILE" fileName="log/bpe.log" filePattern="log/bpe_%d{yyyy-MM-dd}_%i.log.gz" ignoreExceptions="false">
+			<PatternLayout>
+				<Pattern>%d [%t] %-5p %c - %m%n</Pattern>
+			</PatternLayout>
+			<Policies>
+				<OnStartupTriggeringPolicy />
+				<TimeBasedTriggeringPolicy />
+			</Policies>
+		</RollingFile>
+	</Appenders>
+	<Loggers>
+		<Logger name="org.highmed" level="DEBUG" />
+		<Logger name="de.netzwerk_universitaetsmedizin" level="DEBUG" />
+		<Logger name="de.medizininformatik_initiative" level="DEBUG" />
+		<Logger name="org.eclipse.jetty" level="INFO" />
+
+		<Root level="WARN">
+			<AppenderRef ref="CONSOLE" level="INFO" />
+			<AppenderRef ref="FILE" level="DEBUG" />
+		</Root>
+	</Loggers>
+</Configuration>

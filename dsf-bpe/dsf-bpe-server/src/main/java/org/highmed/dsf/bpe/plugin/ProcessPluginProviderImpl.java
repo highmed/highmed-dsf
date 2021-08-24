@@ -16,6 +16,8 @@ import java.util.Objects;
 import java.util.ServiceLoader;
 import java.util.ServiceLoader.Provider;
 import java.util.function.BinaryOperator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -26,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.env.PropertyResolver;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -46,20 +49,25 @@ public class ProcessPluginProviderImpl implements ProcessPluginProvider, Initial
 	public static final String FILE_DRAFT_SUFIX = "-SNAPSHOT.jar";
 	public static final String FOLDER_DRAFT_SUFIX = "-SNAPSHOT";
 
+	public static final String RC_AND_M_PATTERN_STRING = "^(.+)((-RC[0-9]+)|(-M[0-9]+))\\.jar$";
+	private static final Pattern RC_AND_M_PATTERN = Pattern.compile(RC_AND_M_PATTERN_STRING);
+
 	private static final Logger logger = LoggerFactory.getLogger(ProcessPluginProviderImpl.class);
 
 	private final FhirContext fhirContext;
 	private final Path pluginDirectory;
 	private final ApplicationContext mainApplicationContext;
+	private final PropertyResolver resolver;
 
 	private List<ProcessPluginDefinitionAndClassLoader> definitions;
 
 	public ProcessPluginProviderImpl(FhirContext fhirContext, Path pluginDirectory,
-			ApplicationContext mainApplicationContext)
+			ApplicationContext mainApplicationContext, PropertyResolver resolver)
 	{
 		this.fhirContext = fhirContext;
 		this.pluginDirectory = pluginDirectory;
 		this.mainApplicationContext = mainApplicationContext;
+		this.resolver = resolver;
 	}
 
 	@Override
@@ -157,7 +165,7 @@ public class ProcessPluginProviderImpl implements ProcessPluginProvider, Initial
 				: folder.toString().endsWith(FOLDER_DRAFT_SUFIX);
 
 		return new ProcessPluginDefinitionAndClassLoader(fhirContext, jars, definitions.get(0).get(), classLoader,
-				draft);
+				draft, resolver);
 	}
 
 	private List<Path> getJars(Path folder)
@@ -244,11 +252,27 @@ public class ProcessPluginProviderImpl implements ProcessPluginProvider, Initial
 		if (byJar != null)
 			return byJar.getJars().stream();
 
+		// -M#.jar or -RC#.jar where # is one or more numeric characters
+		List<String> fileNames = definitionsByJar.keySet().stream()
+				.filter(filename -> matchesReleaseCandidateMilestonePatternAndIsDependency(filename, dependency))
+				.collect(Collectors.toList());
+		if (fileNames.size() == 1)
+			return definitionsByJar.get(fileNames.get(0)).getJars().stream();
+
 		ProcessPluginDefinitionAndClassLoader bySnapshotJar = definitionsByJar.get(dependency + "-SNAPSHOT.jar");
 		if (bySnapshotJar != null)
 			return bySnapshotJar.getJars().stream();
 
 		throw new RuntimeException("Dependency " + dependency + " not found");
+	}
+
+	private boolean matchesReleaseCandidateMilestonePatternAndIsDependency(String filename, String dependency)
+	{
+		Matcher matcher = RC_AND_M_PATTERN.matcher(filename);
+		if (matcher.matches())
+			return matcher.group(1).equals(dependency);
+		else
+			return false;
 	}
 
 	private ProcessPluginDefinitionAndClassLoader toJarDefinitionWithDependencies(String definitionClassName,
@@ -285,7 +309,7 @@ public class ProcessPluginProviderImpl implements ProcessPluginProvider, Initial
 		boolean draft = jars.size() == 1 ? jars.get(0).getFileName().toString().endsWith(FILE_DRAFT_SUFIX)
 				: folder.toString().endsWith(FOLDER_DRAFT_SUFIX);
 
-		return new ProcessPluginDefinitionAndClassLoader(fhirContext, jars, definition, classLoader, draft);
+		return new ProcessPluginDefinitionAndClassLoader(fhirContext, jars, definition, classLoader, draft, resolver);
 	}
 
 	@Override

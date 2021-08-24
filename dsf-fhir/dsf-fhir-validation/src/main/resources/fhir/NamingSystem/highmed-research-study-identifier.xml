@@ -1,14 +1,14 @@
 <NamingSystem xmlns="http://hl7.org/fhir">
 	<meta>
 		<tag>
-			<system value="http://highmed.org/fhir/CodeSystem/authorization-role"/>
-			<code value="REMOTE"/>
+			<system value="http://highmed.org/fhir/CodeSystem/read-access-tag"/>
+			<code value="ALL"/>
 		</tag>		
 	</meta>
 	<name value="HiGHmed_ResearchStudy_Identifier"/>
 	<status value="active" />
 	<kind value="identifier"/>
-	<date value="2021-01-26"/>
+	<date value="2021-08-24"/>
 	<publisher value="HiGHmed"/>
 	<responsible value="HiGHmed"/>
 	<description
@@ -16,6 +16,6 @@
 	<usage value="Used withing HiGHmed to identify research studies"/>
 	<uniqueId>
 		<type value="uuid"/>
-		<value value="http://highmed.org/fhir/NamingSystem/research-study-identifier"/>
+		<value value="http://highmed.org/sid/research-study-identifier"/>
 	</uniqueId>
 </NamingSystem> 

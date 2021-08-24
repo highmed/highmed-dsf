@@ -29,19 +29,20 @@ public class ResultSetTranslatorResearchResultFromTtpTest
 	{
 		String organizationIdentifier = "org1";
 		byte[] decodedOrganizationKey = Base64.getDecoder().decode("KollbDbopQK1t6hZncLicT7X64H1TfrzjpYdF4jehHo=");
-		SecretKey organizationKey = new SecretKeySpec(decodedOrganizationKey, 0, decodedOrganizationKey.length, "AES"); 
-		
+		SecretKey organizationKey = new SecretKeySpec(decodedOrganizationKey, 0, decodedOrganizationKey.length, "AES");
+
 		String researchStudyIdentifier = "researchStudy1";
 		byte[] decodedKey = Base64.getDecoder().decode("Loy75q55b/L3yxk3BoRgNUSAJJLan643alkrWHathBk=");
-		SecretKey researchStudyKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES"); 
+		SecretKey researchStudyKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
 
 		ObjectMapper openEhrObjectMapper = OpenEhrObjectMapperFactory.createObjectMapper();
 
-		ResultSetTranslatorResearchResultFromTtpImpl translator = new ResultSetTranslatorResearchResultFromTtpImpl(organizationKey,
-				organizationIdentifier, researchStudyIdentifier, researchStudyKey, openEhrObjectMapper);
-		
-		ResultSet resultSet = openEhrObjectMapper
-				.readValue(Files.readAllBytes(Paths.get("src/test/resources/researchresult_from_ttp.json")), ResultSet.class);
+		ResultSetTranslatorResearchResultFromTtpImpl translator = new ResultSetTranslatorResearchResultFromTtpImpl(
+				organizationKey, organizationIdentifier, researchStudyIdentifier, researchStudyKey,
+				openEhrObjectMapper);
+
+		ResultSet resultSet = openEhrObjectMapper.readValue(
+				Files.readAllBytes(Paths.get("src/test/resources/researchresult_from_ttp.json")), ResultSet.class);
 		assertNotNull(resultSet);
 		assertNotNull(resultSet.getColumns());
 		assertEquals(3, resultSet.getColumns().size());

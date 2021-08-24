@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.RepositoryService;
@@ -27,11 +29,13 @@ import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.web.util.UriComponentsBuilder;
 
 public class TaskHandler implements InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(TaskHandler.class);
+
+	private static final String INSTANTIATES_URI_PATTERN_STRING = "(?<processUrl>http://(?<processDomain>(?:(?:[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*(?:[A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9]))/bpe/Process/(?<processDefinitionKey>[-\\w]+))/(?<processVersion>\\d+\\.\\d+\\.\\d+)";
+	private static final Pattern INSTANTIATES_URI_PATTERN = Pattern.compile(INSTANTIATES_URI_PATTERN_STRING);
 
 	private final RuntimeService runtimeService;
 	private final RepositoryService repositoryService;
@@ -59,11 +63,14 @@ public class TaskHandler implements InitializingBean
 		task.setStatus(Task.TaskStatus.INPROGRESS);
 		task = webserviceClient.update(task);
 
-		// http://highmed.org/bpe/Process/processDefinitionKey
-		// http://highmed.org/bpe/Process/processDefinitionKey/versionTag
-		List<String> pathSegments = getPathSegments(task.getInstantiatesUri());
-		String processDefinitionKey = pathSegments.get(2);
-		String versionTag = pathSegments.size() == 4 ? pathSegments.get(3) : null;
+		Matcher matcher = INSTANTIATES_URI_PATTERN.matcher(task.getInstantiatesUri());
+		if (!matcher.matches())
+			throw new IllegalStateException("InstantiatesUri of Task with id " + task.getIdElement().getIdPart()
+					+ " does not match " + INSTANTIATES_URI_PATTERN_STRING);
+
+		String processDomain = matcher.group("processDomain").replace(".", "");
+		String processDefinitionKey = matcher.group("processDefinitionKey");
+		String processVersion = matcher.group("processVersion");
 
 		String messageName = taskHelper.getFirstInputParameterStringValue(task, CODESYSTEM_HIGHMED_BPMN,
 				CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME).orElse(null);
@@ -76,58 +83,77 @@ public class TaskHandler implements InitializingBean
 
 		try
 		{
-			onMessage(businessKey, correlationKey, processDefinitionKey, versionTag, messageName, variables);
+			onMessage(businessKey, correlationKey, processDomain, processDefinitionKey, processVersion, messageName,
+					variables);
 		}
 		catch (Exception exception)
 		{
-			Task.TaskOutputComponent errorOutput = taskHelper
-					.createOutput(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR, exception.getMessage());
+			logger.error("Error while handling Task", exception);
+
+			Task.TaskOutputComponent errorOutput = taskHelper.createOutput(CODESYSTEM_HIGHMED_BPMN,
+					CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR,
+					exception.getClass().getName() + ": " + exception.getMessage());
 			task.addOutput(errorOutput);
 			task.setStatus(Task.TaskStatus.FAILED);
 			webserviceClient.update(task);
 		}
 	}
 
-	private List<String> getPathSegments(String istantiatesUri)
-	{
-		return UriComponentsBuilder.fromUriString(istantiatesUri).build().getPathSegments();
-	}
-
-	private ProcessDefinition getProcessDefinition(String processDefinitionKey, String versionTag)
-	{
-		if (versionTag != null && !versionTag.isBlank())
-			return repositoryService.createProcessDefinitionQuery().processDefinitionKey(processDefinitionKey)
-					.versionTag(versionTag).latestVersion().singleResult();
-		else
-			return repositoryService.createProcessDefinitionQuery().processDefinitionKey(processDefinitionKey)
-					.latestVersion().singleResult();
-	}
-
 	/**
-	 * @param businessKey          may be <code>null</code>
-	 * @param correlationKey       may be <code>null</code>
-	 * @param processDefinitionKey not <code>null</code>
-	 * @param versionTag           not <code>null</code>
-	 * @param messageName          not <code>null</code>
-	 * @param variables            may be <code>null</code>
+	 * @param businessKey
+	 *            may be <code>null</code>
+	 * @param correlationKey
+	 *            may be <code>null</code>
+	 * @param processDomain
+	 *            not <code>null</code>
+	 * @param processDefinitionKey
+	 *            not <code>null</code>
+	 * @param processVersion
+	 *            not <code>null</code>
+	 * @param messageName
+	 *            not <code>null</code>
+	 * @param variables
+	 *            may be <code>null</code>
 	 */
-	protected void onMessage(String businessKey, String correlationKey, String processDefinitionKey, String versionTag,
-			String messageName, Map<String, Object> variables)
+	protected void onMessage(String businessKey, String correlationKey, String processDomain,
+			String processDefinitionKey, String processVersion, String messageName, Map<String, Object> variables)
 	{
 		// businessKey may be null
 		// correlationKey may be null
+		Objects.requireNonNull(processDomain, "processDomain");
 		Objects.requireNonNull(processDefinitionKey, "processDefinitionKey");
-		Objects.requireNonNull(versionTag, "versionTag");
+		Objects.requireNonNull(processVersion, "processVersion");
 		Objects.requireNonNull(messageName, "messageName");
 
 		if (variables == null)
 			variables = Collections.emptyMap();
 
-		ProcessDefinition processDefinition = getProcessDefinition(processDefinitionKey, versionTag);
+		ProcessDefinition processDefinition = getProcessDefinition(processDomain, processDefinitionKey, processVersion);
+
+		if (processDefinition == null)
+		{
+			if (processVersion != null && !processVersion.isBlank())
+			{
+				logger.warn(
+						"Process with id: {}_{} and version: {} not found, this is likely due to a mismatch between ActivityDefinition.url and Process.id (process definition key)",
+						processDomain, processDefinitionKey, processVersion);
+				throw new RuntimeException("Process with id: " + processDomain + "_" + processDefinitionKey
+						+ " and version: " + processVersion + " not found");
+			}
+			else
+			{
+				logger.warn(
+						"Process with id: {}_{} not found, this is likely due to a mismatch between ActivityDefinition.url and Process.id (process definition key)",
+						processDomain, processDefinitionKey);
+				throw new RuntimeException(
+						"Process with id: " + processDomain + "_" + processDefinitionKey + " not found");
+			}
+		}
 
 		if (businessKey == null)
 		{
-			runtimeService.startProcessInstanceById(processDefinition.getId(), UUID.randomUUID().toString(), variables);
+			runtimeService.startProcessInstanceByMessageAndProcessDefinitionId(messageName, processDefinition.getId(),
+					UUID.randomUUID().toString(), variables);
 		}
 		else
 		{
@@ -156,6 +182,18 @@ public class TaskHandler implements InitializingBean
 				correlation.correlate();
 			}
 		}
+	}
+
+	private ProcessDefinition getProcessDefinition(String processDomain, String processDefinitionKey,
+			String processVersion)
+	{
+		if (processVersion != null && !processVersion.isBlank())
+			return repositoryService.createProcessDefinitionQuery()
+					.processDefinitionKey(processDomain + "_" + processDefinitionKey).versionTag(processVersion)
+					.latestVersion().singleResult();
+		else
+			return repositoryService.createProcessDefinitionQuery()
+					.processDefinitionKey(processDomain + "_" + processDefinitionKey).latestVersion().singleResult();
 	}
 
 	private ProcessInstanceQuery getProcessInstanceQuery(ProcessDefinition processDefinition, String businessKey)

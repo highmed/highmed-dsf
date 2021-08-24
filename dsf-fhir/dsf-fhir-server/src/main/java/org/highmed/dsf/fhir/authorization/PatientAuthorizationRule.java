@@ -1,102 +1,56 @@
 package org.highmed.dsf.fhir.authorization;
 
 import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.highmed.dsf.fhir.authentication.OrganizationProvider;
 import org.highmed.dsf.fhir.authentication.User;
+import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.dao.PatientDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
+import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.Patient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class PatientAuthorizationRule extends AbstractAuthorizationRule<Patient, PatientDao>
+public class PatientAuthorizationRule extends AbstractMetaTagAuthorizationRule<Patient, PatientDao>
 {
-	private static final Logger logger = LoggerFactory.getLogger(PatientAuthorizationRule.class);
-
 	public PatientAuthorizationRule(DaoProvider daoProvider, String serverBase, ReferenceResolver referenceResolver,
-			OrganizationProvider organizationProvider)
+			OrganizationProvider organizationProvider, ReadAccessHelper readAccessHelper,
+			ParameterConverter parameterConverter)
 	{
-		super(Patient.class, daoProvider, serverBase, referenceResolver, organizationProvider);
+		super(Patient.class, daoProvider, serverBase, referenceResolver, organizationProvider, readAccessHelper,
+				parameterConverter);
 	}
 
-	@Override
-	public Optional<String> reasonCreateAllowed(Connection connection, User user, Patient newResource)
+	protected Optional<String> newResourceOk(Connection connection, User user, Patient newResource)
 	{
-		if (isLocalUser(user))
+		List<String> errors = new ArrayList<String>();
+
+		if (!hasValidReadAccessTag(connection, newResource))
 		{
-			logger.info("Create of Patient authorized for local user '{}'", user.getName());
-			return Optional.of("local user");
+			errors.add("Patient is missing valid read access tag");
 		}
-		else
-		{
-			logger.warn("Create of Patient unauthorized, not a local user");
+
+		if (errors.isEmpty())
 			return Optional.empty();
-		}
-	}
-
-	@Override
-	public Optional<String> reasonReadAllowed(Connection connection, User user, Patient existingResource)
-	{
-		if (isLocalUser(user))
-		{
-			logger.info("Read of Patient authorized for local user '{}'", user.getName());
-			return Optional.of("local user");
-		}
 		else
-		{
-			logger.warn("Read of Patient unauthorized, not a local user");
-			return Optional.empty();
-		}
+			return Optional.of(errors.stream().collect(Collectors.joining(", ")));
 	}
 
 	@Override
-	public Optional<String> reasonUpdateAllowed(Connection connection, User user, Patient oldResource,
-			Patient newResource)
+	protected boolean resourceExists(Connection connection, Patient newResource)
 	{
-		if (isLocalUser(user))
-		{
-			logger.info("Update of Patient authorized for local user '{}'", user.getName());
-			return Optional.of("local user");
-
-		}
-		else
-		{
-			logger.warn("Update of Patient unauthorized, not a local user");
-			return Optional.empty();
-		}
+		// no unique criteria for Patient
+		return false;
 	}
 
 	@Override
-	public Optional<String> reasonDeleteAllowed(Connection connection, User user, Patient oldResource)
+	protected boolean modificationsOk(Connection connection, Patient oldResource, Patient newResource)
 	{
-		if (isLocalUser(user))
-		{
-			logger.info("Delete of Patient authorized for local user '{}'", user.getName());
-			return Optional.of("local user");
-		}
-		else
-		{
-			logger.warn("Delete of Patient unauthorized, not a local user");
-			return Optional.empty();
-		}
-	}
-
-	@Override
-	public Optional<String> reasonSearchAllowed(User user)
-	{
-		logger.info("Search of Patient authorized for {} user '{}', will be fitered by user role", user.getRole(),
-				user.getName());
-		return Optional.of("Allowed for all, filtered by user role");
-	}
-
-	@Override
-	public Optional<String> reasonHistoryAllowed(User user)
-	{
-		logger.info("History of Patient authorized for {} user '{}', will be fitered by user role", user.getRole(),
-				user.getName());
-		return Optional.of("Allowed for all, filtered by user role");
+		// no unique criteria for Patient
+		return true;
 	}
 }

@@ -4,15 +4,16 @@ import org.highmed.dsf.fhir.authentication.User;
 
 public class BundleUserFilter extends AbstractMetaTagAuthorizationRoleUserFilter
 {
-	private static final String RESOURCE_COLUMN = "bundle";
+	private static final String RESOURCE_TABLE = "current_bundles";
+	private static final String RESOURCE_ID_COLUMN = "bundle_id";
 
 	public BundleUserFilter(User user)
 	{
-		super(user, RESOURCE_COLUMN);
+		super(user, RESOURCE_TABLE, RESOURCE_ID_COLUMN);
 	}
 
-	public BundleUserFilter(User user, String resourceColumn)
+	public BundleUserFilter(User user, String resourceTable, String resourceIdColumn)
 	{
-		super(user, resourceColumn);
+		super(user, resourceTable, resourceIdColumn);
 	}
 }

@@ -6,12 +6,9 @@ import org.hl7.fhir.r4.model.Resource;
 
 public class AtParameter extends AbstractDateTimeParameter<DomainResource>
 {
-	private static final String PARAMETER_NAME = "_at";
-	private static final String COLUMN_NAME = "last_updated";
-
 	public AtParameter()
 	{
-		super(PARAMETER_NAME, COLUMN_NAME);
+		super("_at", "last_updated");
 	}
 
 	@Override

@@ -23,8 +23,7 @@ public class FhirResourceJacksonDeserializer extends JsonDeserializer<Resource>
 	}
 
 	@Override
-	public Resource deserialize(JsonParser p, DeserializationContext ctxt)
-			throws IOException, JsonProcessingException
+	public Resource deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException
 	{
 		String string = p.readValueAsTree().toString();
 		return (Resource) newJsonParser().parseResource(string);

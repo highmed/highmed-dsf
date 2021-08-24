@@ -4,14 +4,15 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 import javax.sql.DataSource;
 
-import org.highmed.dsf.fhir.OrganizationType;
-import org.highmed.dsf.fhir.authentication.UserRole;
 import org.highmed.dsf.fhir.dao.ActivityDefinitionDao;
+import org.highmed.dsf.fhir.search.parameters.ActivityDefinitionDate;
 import org.highmed.dsf.fhir.search.parameters.ActivityDefinitionIdentifier;
 import org.highmed.dsf.fhir.search.parameters.ActivityDefinitionName;
 import org.highmed.dsf.fhir.search.parameters.ActivityDefinitionStatus;
@@ -31,12 +32,13 @@ public class ActivityDefinitionDaoJdbc extends AbstractResourceDaoJdbc<ActivityD
 
 	private final ReadByUrlDaoJdbc<ActivityDefinition> readByUrl;
 
-	public ActivityDefinitionDaoJdbc(DataSource dataSource, FhirContext fhirContext)
+	public ActivityDefinitionDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource,
+			FhirContext fhirContext)
 	{
-		super(dataSource, fhirContext, ActivityDefinition.class, "activity_definitions", "activity_definition",
-				"activity_definition_id", ActivityDefinitionUserFilter::new,
-				with(ActivityDefinitionIdentifier::new, ActivityDefinitionName::new, ActivityDefinitionStatus::new,
-						ActivityDefinitionUrl::new, ActivityDefinitionVersion::new),
+		super(dataSource, permanentDeleteDataSource, fhirContext, ActivityDefinition.class, "activity_definitions",
+				"activity_definition", "activity_definition_id", ActivityDefinitionUserFilter::new,
+				with(ActivityDefinitionDate::new, ActivityDefinitionIdentifier::new, ActivityDefinitionName::new,
+						ActivityDefinitionStatus::new, ActivityDefinitionUrl::new, ActivityDefinitionVersion::new),
 				with());
 
 		readByUrl = new ReadByUrlDaoJdbc<ActivityDefinition>(this::getDataSource, this::getResource, getResourceTable(),
@@ -76,54 +78,41 @@ public class ActivityDefinitionDaoJdbc extends AbstractResourceDaoJdbc<ActivityD
 	}
 
 	@Override
-	public Optional<ActivityDefinition> readByOrganizationTypeUserRoleProcessUrlVersionMessageNameAndNotRetiredWithTransaction(
-			Connection connection, OrganizationType recipientOrganizationType,
-			OrganizationType requesterOrganizationType, UserRole userRole, String processUrl, String processVersion,
-			String messageName) throws SQLException
+	public Optional<ActivityDefinition> readByProcessUrlVersionAndStatusDraftOrActiveWithTransaction(
+			Connection connection, String processUrl, String processVersion) throws SQLException
 	{
 		Objects.requireNonNull(connection, "connection");
-		Objects.requireNonNull(recipientOrganizationType, "recipientOrganizationType");
-		Objects.requireNonNull(requesterOrganizationType, "requesterOrganizationType");
-		Objects.requireNonNull(userRole, "userRole");
 		Objects.requireNonNull(processUrl, "processUrl");
 		if (processUrl.isBlank())
 			throw new IllegalArgumentException("processUrl blank");
 		Objects.requireNonNull(processVersion, "processVersion");
 		if (processVersion.isBlank())
 			throw new IllegalArgumentException("processVersion blank");
-		Objects.requireNonNull(messageName, "messageName");
-		if (messageName.isBlank())
-			throw new IllegalArgumentException("messageName blank");
 
 		try (PreparedStatement statement = connection
 				.prepareStatement("SELECT activity_definition FROM current_activity_definitions WHERE "
 						+ "activity_definition->>'url' = ? AND " + "activity_definition->>'version' = ? AND "
-						+ "activity_definition->'extension' @> ?::jsonb AND "
-						+ "lower(activity_definition->>'status') <> 'retired'"))
+						+ "(lower(activity_definition->>'status') = 'draft' OR lower(activity_definition->>'status') = 'active')"))
 		{
-			String extension = "[{\"url\":\"http://highmed.org/fhir/StructureDefinition/extension-process-authorization\",\"extension\":["
-					+ "{\"url\":\"message-name\",\"valueString\":\"" + messageName + "\"},"
-					+ "{\"url\":\"authorization-roles\",\"extension\":[{\"url\":\"authorization-role\",\"valueCoding\":{\"code\":\""
-					+ userRole.toString()
-					+ "\",\"system\":\"http://highmed.org/fhir/CodeSystem/authorization-role\"}}]},"
-					+ "{\"url\":\"requester-organization-types\",\"extension\":[{\"url\":\"requester-organization-type\",\"valueCoding\":{\"code\":\""
-					+ requesterOrganizationType.toString()
-					+ "\",\"system\":\"http://highmed.org/fhir/CodeSystem/organization-type\"}}]},"
-					+ "{\"url\":\"recipient-organization-types\",\"extension\":[{\"url\":\"recipient-organization-type\",\"valueCoding\":{\"code\":\""
-					+ recipientOrganizationType.toString()
-					+ "\",\"system\":\"http://highmed.org/fhir/CodeSystem/organization-type\"}}]}]}]";
-
 			statement.setString(1, processUrl);
 			statement.setString(2, processVersion);
-			statement.setString(3, extension);
 
 			logger.trace("Executing query '{}'", statement);
 			try (ResultSet result = statement.executeQuery())
 			{
+				List<ActivityDefinition> definitions = new ArrayList<>();
 				if (result.next())
-					return Optional.of(getResource(result, 1));
-				else
+					definitions.add(getResource(result, 1));
+
+				if (definitions.size() != 1)
+				{
+					logger.warn(
+							"ActivityDefinition with process-url '{}' and process-version '{}' not found, or more than one",
+							processUrl, processVersion);
 					return Optional.empty();
+				}
+				else
+					return Optional.of(definitions.get(0));
 			}
 		}
 	}

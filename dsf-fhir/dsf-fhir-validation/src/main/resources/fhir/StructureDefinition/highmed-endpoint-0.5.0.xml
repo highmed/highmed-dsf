@@ -1,0 +1,135 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+  <meta>
+    <tag>
+      <system value="http://highmed.org/fhir/CodeSystem/read-access-tag" />
+      <code value="ALL" />
+    </tag>
+  </meta>
+  <url value="http://highmed.org/fhir/StructureDefinition/endpoint" />
+  <version value="0.5.0" />
+  <name value="Endpoint" />
+  <status value="active" />
+  <experimental value="false" />
+  <date value="2021-08-24" />
+  <fhirVersion value="4.0.1" />
+  <kind value="resource" />
+  <abstract value="false" />
+  <type value="Endpoint" />
+  <baseDefinition value="http://hl7.org/fhir/StructureDefinition/Endpoint" />
+  <derivation value="constraint" />
+  <differential>
+    <element id="Endpoint.identifier">
+      <path value="Endpoint.identifier" />
+      <slicing>
+        <discriminator>
+          <type value="value" />
+          <path value="system" />
+        </discriminator>
+        <discriminator>
+          <type value="value" />
+          <path value="value" />
+        </discriminator>
+        <rules value="open" />
+      </slicing>
+      <min value="1" />
+    </element>
+    <element id="Endpoint.identifier:highmedIdentifier">
+      <path value="Endpoint.identifier" />
+      <sliceName value="highmedIdentifier" />
+      <min value="1" />
+      <max value="1" />
+    </element>
+    <element id="Endpoint.identifier:highmedIdentifier.system">
+      <path value="Endpoint.identifier.system" />
+      <min value="1" />
+      <fixedUri value="http://highmed.org/sid/endpoint-identifier" />
+    </element>
+    <element id="Endpoint.identifier:highmedIdentifier.value">
+      <path value="Endpoint.identifier.value" />
+      <min value="1" />
+    </element>
+    <element id="Endpoint.connectionType.system">
+      <path value="Endpoint.connectionType.system" />
+      <min value="1" />
+      <fixedUri value="http://terminology.hl7.org/CodeSystem/endpoint-connection-type" />
+    </element>
+    <element id="Endpoint.connectionType.code">
+      <path value="Endpoint.connectionType.code" />
+      <min value="1" />
+      <fixedCode value="hl7-fhir-rest" />
+    </element>
+    <element id="Endpoint.managingOrganization">
+      <path value="Endpoint.managingOrganization" />
+      <min value="1" />
+      <type>
+        <code value="Reference" />
+        <targetProfile value="http://highmed.org/fhir/StructureDefinition/organization" />
+      </type>
+    </element>
+    <element id="Endpoint.managingOrganization.reference">
+      <path value="Endpoint.managingOrganization.reference" />
+      <min value="1" />
+    </element>
+    <element id="Endpoint.payloadType">
+      <path value="Endpoint.payloadType" />
+      <slicing>
+        <discriminator>
+          <type value="value" />
+          <path value="coding.system" />
+        </discriminator>
+        <discriminator>
+          <type value="value" />
+          <path value="coding.code" />
+        </discriminator>
+        <rules value="open" />
+      </slicing>
+    </element>
+    <element id="Endpoint.payloadType:slicePayloadType">
+      <path value="Endpoint.payloadType" />
+      <sliceName value="slicePayloadType" />
+      <min value="1" />
+      <max value="1" />
+    </element>
+    <element id="Endpoint.payloadType:slicePayloadType.coding">
+      <path value="Endpoint.payloadType.coding" />
+      <min value="1" />
+      <max value="1" />
+    </element>
+    <element id="Endpoint.payloadType:slicePayloadType.coding.system">
+      <path value="Endpoint.payloadType.coding.system" />
+      <min value="1" />
+      <fixedUri value="http://hl7.org/fhir/resource-types" />
+    </element>
+    <element id="Endpoint.payloadType:slicePayloadType.coding.code">
+      <path value="Endpoint.payloadType.coding.code" />
+      <min value="1" />
+      <fixedCode value="Task" />
+    </element>
+    <element id="Endpoint.payloadMimeType">
+      <path value="Endpoint.payloadMimeType" />
+      <slicing>
+        <discriminator>
+          <type value="value" />
+          <path value="value" />
+        </discriminator>
+        <rules value="open" />
+      </slicing>
+      <min value="2" />
+      <max value="2" />
+    </element>
+    <element id="Endpoint.payloadMimeType:fhirXml">
+      <path value="Endpoint.payloadMimeType" />
+      <sliceName value="fhirXml" />
+      <min value="1" />
+      <max value="1" />
+      <fixedCode value="application/fhir+xml" />
+    </element>
+    <element id="Endpoint.payloadMimeType:fhirJson">
+      <path value="Endpoint.payloadMimeType" />
+      <sliceName value="fhirJson" />
+      <min value="1" />
+      <max value="1" />
+      <fixedCode value="application/fhir+json" />
+    </element>
+  </differential>
+</StructureDefinition>

@@ -16,9 +16,11 @@ import org.highmed.dsf.fhir.dao.command.CommandList;
 import org.highmed.dsf.fhir.dao.exception.BadBundleException;
 import org.highmed.dsf.fhir.dao.exception.ResourceDeletedException;
 import org.highmed.dsf.fhir.dao.exception.ResourceNotFoundException;
+import org.highmed.dsf.fhir.dao.exception.ResourceNotMarkedDeletedException;
 import org.highmed.dsf.fhir.dao.exception.ResourceVersionNoMatchException;
 import org.highmed.dsf.fhir.function.RunnableWithSqlAndResourceNotFoundException;
 import org.highmed.dsf.fhir.function.RunnableWithSqlException;
+import org.highmed.dsf.fhir.function.RunnableWithSqlResourceNotFoundAndResourceNotMarkedDeletedException;
 import org.highmed.dsf.fhir.function.SupplierWithSqlAndResourceDeletedException;
 import org.highmed.dsf.fhir.function.SupplierWithSqlAndResourceNotFoundAndResouceVersionNoMatchException;
 import org.highmed.dsf.fhir.function.SupplierWithSqlAndResourceNotFoundException;
@@ -192,6 +194,35 @@ public class ExceptionHandler
 		{
 			throw internalServerError(e);
 		}
+	}
+
+	public void handleSqlResourceNotFoundAndResourceNotMarkedDeletedException(String resourceTypeName,
+			RunnableWithSqlResourceNotFoundAndResourceNotMarkedDeletedException r)
+	{
+		try
+		{
+			r.run();
+		}
+		catch (SQLException e)
+		{
+			throw internalServerError(e);
+		}
+		catch (ResourceNotFoundException e)
+		{
+			throw notFound(resourceTypeName, e);
+		}
+		catch (ResourceNotMarkedDeletedException e)
+		{
+			throw notMarkedDeleted(resourceTypeName, e);
+		}
+	}
+
+	public WebApplicationException notMarkedDeleted(String resourceTypeName, ResourceNotMarkedDeletedException e)
+	{
+		logger.warn("{} with id {} is not marked as deleted", resourceTypeName, e.getId());
+		OperationOutcome outcome = responseGenerator.createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+				resourceTypeName + " with id " + e.getId() + " is not marked deleted");
+		return new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(outcome).build());
 	}
 
 	public WebApplicationException gone(String serverBase, String resourceTypeName, ResourceDeletedException e)

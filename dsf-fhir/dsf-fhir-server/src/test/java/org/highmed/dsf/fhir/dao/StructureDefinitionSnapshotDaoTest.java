@@ -19,7 +19,7 @@ public class StructureDefinitionSnapshotDaoTest
 	}
 
 	@Override
-	protected StructureDefinition createResource()
+	public StructureDefinition createResource()
 	{
 		StructureDefinition structureDefinition = new StructureDefinition();
 		structureDefinition.setName(name);
@@ -68,12 +68,6 @@ public class StructureDefinitionSnapshotDaoTest
 
 	@Override
 	public ReadByUrlDao<StructureDefinition> readByUrlDao()
-	{
-		return getDao();
-	}
-
-	@Override
-	public ResourceDao<StructureDefinition> dao()
 	{
 		return getDao();
 	}

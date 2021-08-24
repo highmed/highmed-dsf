@@ -17,7 +17,6 @@ import java.util.Properties;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import javax.servlet.Filter;
@@ -30,7 +29,9 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.glassfish.jersey.servlet.init.JerseyServletContainerInitializer;
 import org.highmed.dsf.tools.db.DbMigrator;
+import org.highmed.dsf.tools.db.DbMigratorConfig;
 import org.slf4j.bridge.SLF4JBridgeHandler;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.web.SpringServletContainerInitializer;
 import org.springframework.web.filter.CorsFilter;
 
@@ -44,7 +45,7 @@ public final class BpeServer
 		SLF4JBridgeHandler.removeHandlersForRootLogger();
 		SLF4JBridgeHandler.install();
 	}
-	
+
 	public static void startHttpServer()
 	{
 		startServer(JettyServer::forwardedSecureRequestCustomizer, JettyServer::httpConnector);
@@ -55,20 +56,22 @@ public final class BpeServer
 		startServer(JettyServer::secureRequestCustomizer, JettyServer::httpsConnector);
 	}
 
-	private static void startServer(Supplier<Customizer> customizerBuilder,
+	private static void startServer(Function<Properties, Customizer> customizerBuilder,
 			BiFunction<HttpConfiguration, Properties, Function<Server, ServerConnector>> connectorBuilder)
 	{
 		Properties properties = read(Paths.get("conf/jetty.properties"), StandardCharsets.UTF_8);
 
 		Log4jInitializer.initializeLog4j(properties);
 
-		Properties configProperties = read(Paths.get("conf/config.properties"), StandardCharsets.UTF_8);
+		try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
+				BpeDbMigratorConfig.class))
+		{
+			DbMigratorConfig config = context.getBean(DbMigratorConfig.class);
+			DbMigrator dbMigrator = new DbMigrator(config);
+			DbMigrator.retryOnConnectException(3, dbMigrator::migrate);
+		}
 
-		DbMigrator dbMigrator = new DbMigrator("org.highmed.dsf.bpe.", configProperties, "db.camunda_users_group",
-				"db.camunda_user", "db.camunda_user_password");
-		DbMigrator.retryOnConnectException(3, dbMigrator::migrate);
-
-		HttpConfiguration httpConfiguration = httpConfiguration(customizerBuilder.get());
+		HttpConfiguration httpConfiguration = httpConfiguration(customizerBuilder.apply(properties));
 		Function<Server, ServerConnector> connector = connectorBuilder.apply(httpConfiguration, properties);
 
 		Predicate<String> filter = s -> s.contains("bpe-server");
@@ -86,12 +89,13 @@ public final class BpeServer
 			filters.add(CorsFilter.class);
 
 		@SuppressWarnings("unchecked")
-		JettyServer server = new JettyServer(connector, errorHandler, "/bpe", initializers, configProperties,
-				webInfClassesDirs, webInfJars, filters.toArray(new Class[filters.size()]));
+		JettyServer server = new JettyServer(connector, errorHandler, "/bpe", initializers, null, webInfClassesDirs,
+				webInfJars, filters.toArray(new Class[filters.size()]));
 
 		server.getWebAppContext().addEventListener(new SessionInvalidator());
-		server.getWebAppContext().getSessionHandler().setSessionTrackingModes(Collections.singleton(SessionTrackingMode.SSL));
-		
+		server.getWebAppContext().getSessionHandler()
+				.setSessionTrackingModes(Collections.singleton(SessionTrackingMode.SSL));
+
 		start(server);
 	}
 

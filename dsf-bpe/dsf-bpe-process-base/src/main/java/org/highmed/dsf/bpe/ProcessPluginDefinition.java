@@ -9,6 +9,7 @@ import org.camunda.bpm.engine.impl.variable.serializer.TypedValueSerializer;
 import org.highmed.dsf.fhir.resources.ResourceProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.PropertyResolver;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -54,7 +55,7 @@ public interface ProcessPluginDefinition
 	Stream<String> getBpmnFiles();
 
 	/**
-	 * @return @{@link Configuration} annotated classes defining @{@link Bean} annotated factory methods
+	 * @return {@link Configuration} annotated classes defining {@link Bean} annotated factory methods
 	 */
 	Stream<Class<?>> getSpringConfigClasses();
 
@@ -63,9 +64,13 @@ public interface ProcessPluginDefinition
 	 *            the applications fhir context, never <code>null</code>
 	 * @param classLoader
 	 *            the classLoader that was used to initialize the process plugin, never <code>null</code>
+	 * @param resolver
+	 *            the property resolver used to access config properties and to replace place holders in fhir resources,
+	 *            never <code>null</code>
 	 * @return {@link ResourceProvider} with FHIR resources needed to enable the included processes
 	 */
-	default ResourceProvider getResourceProvider(FhirContext fhirContext, ClassLoader classLoader)
+	default ResourceProvider getResourceProvider(FhirContext fhirContext, ClassLoader classLoader,
+			PropertyResolver resolver)
 	{
 		return ResourceProvider.empty();
 	}

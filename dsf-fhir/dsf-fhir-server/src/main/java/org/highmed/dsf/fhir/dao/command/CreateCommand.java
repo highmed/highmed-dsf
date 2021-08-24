@@ -84,7 +84,7 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		// check standard create request url: e.g. Patient
 		if (eruComponentes.getPathSegments().size() == 1 && eruComponentes.getQueryParams().isEmpty())
 		{
-			if (!entry.getFullUrl().startsWith(URL_UUID_PREFIX))
+			if (!entry.hasFullUrl() || !entry.getFullUrl().startsWith(URL_UUID_PREFIX))
 				throw new WebApplicationException(
 						responseGenerator.badCreateRequestUrl(index, entry.getRequest().getUrl()));
 			else if (resource.hasIdElement() && !resource.getIdElement().getValue().startsWith(URL_UUID_PREFIX))
@@ -129,11 +129,16 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 			throws SQLException, WebApplicationException
 	{
 		// always resolve temp and conditional references, necessary if conditional create and resource exists
-		referencesHelper.resolveTemporaryAndConditionalReferences(idTranslationTable, connection);
-		// TODO maybe check again if resource exists, could be that a previous command created it
+		referencesHelper.resolveTemporaryAndConditionalReferencesOrLiteralInternalRelatedArtifactUrls(
+				idTranslationTable, connection);
 
-		if (responseResult == null)
+		// checking again if resource exists, could be that a previous command created, or deleted it
+		Optional<Resource> exists = checkAlreadyExists(connection, entry.getRequest().getIfNoneExist(),
+				resource.getResourceType());
+		if (exists.isEmpty())
 		{
+			responseResult = null;
+
 			validationResult = validationHelper.checkResourceValidForCreate(user, resource);
 
 			referencesHelper.resolveLogicalReferences(connection);
@@ -192,7 +197,7 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 					.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 		}
 
-		SearchQuery<R> query = dao.createSearchQuery(user, 1, 1);
+		SearchQuery<R> query = dao.createSearchQueryWithoutUserFilter(1, 1);
 		query.configureParameters(queryParameters);
 
 		List<SearchQueryParameterError> unsupportedQueryParameters = query

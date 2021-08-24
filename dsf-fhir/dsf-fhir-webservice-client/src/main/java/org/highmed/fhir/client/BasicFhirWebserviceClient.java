@@ -18,6 +18,8 @@ public interface BasicFhirWebserviceClient extends PreferReturnResource
 
 	void deleteConditionaly(Class<? extends Resource> resourceClass, Map<String, List<String>> criteria);
 
+	void deletePermanently(Class<? extends Resource> resourceClass, String id);
+
 	Resource read(String resourceTypeName, String id);
 
 	<R extends Resource> R read(Class<R> resourceType, String id);
@@ -33,7 +35,7 @@ public interface BasicFhirWebserviceClient extends PreferReturnResource
 	 *            not <code>null</code>
 	 * @param version
 	 *            not <code>null</code>
-	 * @return {@link InputStream} needs to be closed
+	 * @return {@link Resource}
 	 */
 	Resource read(String resourceTypeName, String id, String version);
 
@@ -63,4 +65,31 @@ public interface BasicFhirWebserviceClient extends PreferReturnResource
 	StructureDefinition generateSnapshot(String url);
 
 	StructureDefinition generateSnapshot(StructureDefinition differential);
+
+	default Bundle history()
+	{
+		return history(null);
+	}
+
+	default Bundle history(int page, int count)
+	{
+		return history(null, page, count);
+	}
+
+	default Bundle history(Class<? extends Resource> resourceType)
+	{
+		return history(null, null);
+	}
+
+	default Bundle history(Class<? extends Resource> resourceType, int page, int count)
+	{
+		return history(null, null, page, count);
+	}
+
+	default Bundle history(Class<? extends Resource> resourceType, String id)
+	{
+		return history(resourceType, id, Integer.MIN_VALUE, Integer.MIN_VALUE);
+	}
+
+	Bundle history(Class<? extends Resource> resourceType, String id, int page, int count);
 }

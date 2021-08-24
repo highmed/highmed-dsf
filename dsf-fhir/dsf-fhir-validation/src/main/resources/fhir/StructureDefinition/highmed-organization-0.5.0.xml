@@ -1,0 +1,87 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+  <meta>
+    <tag>
+      <system value="http://highmed.org/fhir/CodeSystem/read-access-tag" />
+      <code value="ALL" />
+    </tag>
+  </meta>
+  <url value="http://highmed.org/fhir/StructureDefinition/organization" />
+  <version value="0.5.0" />
+  <name value="Organization" />
+  <status value="active" />
+  <experimental value="false" />
+  <date value="2021-08-24" />
+  <fhirVersion value="4.0.1" />
+  <kind value="resource" />
+  <abstract value="false" />
+  <type value="Organization" />
+  <baseDefinition value="http://hl7.org/fhir/StructureDefinition/Organization" />
+  <derivation value="constraint" />
+  <differential>
+    <element id="Organization.extension">
+      <path value="Organization.extension" />
+      <slicing>
+        <discriminator>
+          <type value="value" />
+          <path value="url" />
+        </discriminator>
+        <rules value="open" />
+      </slicing>
+    </element>
+    <element id="Organization.extension:certificateThumbprint">
+      <path value="Organization.extension" />
+      <sliceName value="certificateThumbprint" />
+      <min value="1" />
+      <type>
+        <code value="Extension" />
+        <profile value="http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint" />
+      </type>
+    </element>
+    <element id="Organization.identifier">
+      <path value="Organization.identifier" />
+      <slicing>
+        <discriminator>
+          <type value="value" />
+          <path value="system" />
+        </discriminator>
+        <discriminator>
+          <type value="value" />
+          <path value="value" />
+        </discriminator>
+        <rules value="open" />
+      </slicing>
+      <min value="1" />
+    </element>
+    <element id="Organization.identifier:highmedIdentifier">
+      <path value="Organization.identifier" />
+      <sliceName value="highmedIdentifier" />
+      <min value="1" />
+      <max value="1" />
+    </element>
+    <element id="Organization.identifier:highmedIdentifier.system">
+      <path value="Organization.identifier.system" />
+      <min value="1" />
+      <fixedUri value="http://highmed.org/sid/organization-identifier" />
+    </element>
+    <element id="Organization.identifier:highmedIdentifier.value">
+      <path value="Organization.identifier.value" />
+      <min value="1" />
+    </element>
+    <element id="Organization.active">
+      <path value="Organization.active" />
+      <min value="1" />
+    </element>
+    <element id="Organization.endpoint">
+      <path value="Organization.endpoint" />
+      <min value="1" />
+      <type>
+        <code value="Reference" />
+        <targetProfile value="http://highmed.org/fhir/StructureDefinition/endpoint" />
+      </type>
+    </element>
+    <element id="Organization.endpoint.reference">
+      <path value="Organization.endpoint.reference" />
+      <min value="1" />
+    </element>
+  </differential>
+</StructureDefinition>

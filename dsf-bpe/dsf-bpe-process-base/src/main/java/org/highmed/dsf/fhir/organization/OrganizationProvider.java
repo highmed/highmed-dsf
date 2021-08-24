@@ -24,8 +24,8 @@ public interface OrganizationProvider
 	/**
 	 * @return the local organization
 	 * @throws NoSuchElementException
-	 *             if no {@link Organization} with {@link #getDefaultIdentifierSystem()} and {@link #getLocalIdentifierValue()}
-	 *             could be found
+	 *             if no {@link Organization} with {@link #getDefaultIdentifierSystem()} and
+	 *             {@link #getLocalIdentifierValue()} could be found
 	 */
 	Organization getLocalOrganization();
 
@@ -36,6 +36,8 @@ public interface OrganizationProvider
 	List<Organization> getRemoteOrganizations();
 
 	/**
+	 * @param type
+	 *            not <code>null</code>
 	 * @return {@link Organization}s with {@link #getDefaultTypeSystem()} and given type
 	 */
 	Stream<Organization> getOrganizationsByType(String type);
@@ -43,13 +45,14 @@ public interface OrganizationProvider
 	Identifier getLocalIdentifier();
 
 	/**
-	 * @return {@link Organization}s {@link Identifier} with {@link #getDefaultIdentifierSystem()} and identifier other than
-	 *         {@link #getLocalIdentifierValue()}
+	 * @return {@link Organization}s {@link Identifier} with {@link #getDefaultIdentifierSystem()} and identifier other
+	 *         than {@link #getLocalIdentifierValue()}
 	 */
 	List<Identifier> getRemoteIdentifiers();
 
 	/**
 	 * @param organizationId
+	 *            not <code>null</code>
 	 * @return {@link Organization}s {@link Identifier} with idPart equal to the given organizationId, or
 	 *         {@link Optional#empty()} if not found
 	 */

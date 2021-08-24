@@ -29,6 +29,7 @@ public class UserProvider
 
 	/**
 	 * @param expectedRoles
+	 *            not <code>null</code>
 	 * @throws WebApplicationException
 	 *             with status {@link Status#UNAUTHORIZED} if there is no current user, with status
 	 *             {@link Status#FORBIDDEN} if the current user does not have one of the provided role
@@ -51,5 +52,4 @@ public class UserProvider
 			throw new WebApplicationException(Status.FORBIDDEN);
 		}
 	}
-
 }

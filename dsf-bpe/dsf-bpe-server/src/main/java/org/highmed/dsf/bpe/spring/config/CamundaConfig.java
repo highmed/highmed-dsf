@@ -3,7 +3,6 @@ package org.highmed.dsf.bpe.spring.config;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 import org.apache.commons.dbcp2.BasicDataSource;
@@ -24,10 +23,10 @@ import org.highmed.dsf.bpe.plugin.ProcessPluginProviderImpl;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.postgresql.Driver;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -35,17 +34,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 @Configuration
 public class CamundaConfig
 {
-	@Value("${org.highmed.dsf.bpe.db.url}")
-	private String dbUrl;
-
-	@Value("${org.highmed.dsf.bpe.db.camunda_user}")
-	private String dbUsernameCamunda;
-
-	@Value("${org.highmed.dsf.bpe.db.camunda_user_password}")
-	private String dbPasswordCamunda;
-
-	@Value("${org.highmed.dsf.bpe.process_plugin_directroy:process}")
-	private String pluginDirectory;
+	@Autowired
+	private PropertiesConfig propertiesConfig;
 
 	@Autowired
 	private FhirConfig fhirConfig;
@@ -55,6 +45,13 @@ public class CamundaConfig
 
 	@Autowired
 	private ApplicationContext applicationContext;
+
+	@Autowired
+	@SuppressWarnings("rawtypes")
+	private List<TypedValueSerializer> baseSerializers;
+
+	@Autowired
+	private Environment environment;
 
 	@Bean
 	public PlatformTransactionManager transactionManager()
@@ -73,13 +70,18 @@ public class CamundaConfig
 	{
 		BasicDataSource dataSource = new BasicDataSource();
 		dataSource.setDriverClassName(Driver.class.getName());
-		dataSource.setUrl(dbUrl);
-		dataSource.setUsername(dbUsernameCamunda);
-		dataSource.setPassword(dbPasswordCamunda);
+		dataSource.setUrl(propertiesConfig.getDbUrl());
+		dataSource.setUsername(propertiesConfig.getDbCamundaUsername());
+		dataSource.setPassword(toString(propertiesConfig.getDbCamundaPassword()));
 
 		dataSource.setTestOnBorrow(true);
 		dataSource.setValidationQuery("SELECT 1");
 		return dataSource;
+	}
+
+	private String toString(char[] password)
+	{
+		return password == null ? null : String.valueOf(password);
 	}
 
 	@Bean
@@ -107,8 +109,7 @@ public class CamundaConfig
 	}
 
 	@Bean
-	public SpringProcessEngineConfiguration processEngineConfiguration(
-			@SuppressWarnings("rawtypes") List<TypedValueSerializer> baseSerializers) throws IOException
+	public SpringProcessEngineConfiguration processEngineConfiguration() throws IOException
 	{
 		var c = new MultiVersionSpringProcessEngineConfiguration(delegateProvider());
 		c.setProcessEngineName("highmed");
@@ -119,6 +120,10 @@ public class CamundaConfig
 		c.setCustomPreBPMNParseListeners(List.of(defaultBpmnParseListener()));
 		c.setCustomPreVariableSerializers(baseSerializers);
 		c.setFallbackSerializerFactory(getFallbackSerializerFactory());
+
+		// see also MultiVersionSpringProcessEngineConfiguration
+		c.setInitializeTelemetry(false);
+		c.setTelemetryReporterActivate(false);
 
 		return c;
 	}
@@ -138,23 +143,23 @@ public class CamundaConfig
 	}
 
 	@Bean
-	public ProcessEngineFactoryBean processEngineFactory(
-			@SuppressWarnings("rawtypes") List<TypedValueSerializer> baseSerializers) throws IOException
+	public ProcessEngineFactoryBean processEngineFactory() throws IOException
 	{
 		var f = new ProcessEngineFactoryBean();
-		f.setProcessEngineConfiguration(processEngineConfiguration(baseSerializers));
+		f.setProcessEngineConfiguration(processEngineConfiguration());
 		return f;
 	}
 
 	@Bean
 	public ProcessPluginProvider processPluginProvider()
 	{
-		Path pluginDirectoryPath = Paths.get(pluginDirectory);
+		Path processPluginDirectoryPath = propertiesConfig.getProcessPluginDirectory();
 
-		if (!Files.isDirectory(pluginDirectoryPath))
+		if (!Files.isDirectory(processPluginDirectoryPath))
 			throw new RuntimeException(
-					"Process plug in directory '" + pluginDirectoryPath.toString() + "' not readable");
+					"Process plug in directory '" + processPluginDirectoryPath.toString() + "' not readable");
 
-		return new ProcessPluginProviderImpl(fhirConfig.fhirContext(), pluginDirectoryPath, applicationContext);
+		return new ProcessPluginProviderImpl(fhirConfig.fhirContext(), processPluginDirectoryPath, applicationContext,
+				environment);
 	}
 }

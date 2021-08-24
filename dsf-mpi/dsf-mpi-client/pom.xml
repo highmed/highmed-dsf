@@ -9,6 +9,10 @@
 	<parent>
 		<artifactId>dsf-mpi-pom</artifactId>
 		<groupId>org.highmed.dsf</groupId>
-		<version>0.4.0</version>
+		<version>0.5.0</version>
 	</parent>
+	
+	<properties>
+		<main.basedir>${project.basedir}/../..</main.basedir>
+	</properties>
 </project>

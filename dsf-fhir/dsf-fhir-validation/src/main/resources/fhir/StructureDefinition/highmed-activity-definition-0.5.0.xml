@@ -1,0 +1,55 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+  <meta>
+    <tag>
+      <system value="http://highmed.org/fhir/CodeSystem/read-access-tag" />
+      <code value="ALL" />
+    </tag>
+  </meta>
+  <url value="http://highmed.org/fhir/StructureDefinition/activity-definition" />
+  <version value="0.5.0" />
+  <name value="ActivityDefinition" />
+  <status value="active" />
+  <experimental value="false" />
+  <date value="2021-08-24" />
+  <fhirVersion value="4.0.1" />
+  <kind value="resource" />
+  <abstract value="false" />
+  <type value="ActivityDefinition" />
+  <baseDefinition value="http://hl7.org/fhir/StructureDefinition/ActivityDefinition" />
+  <derivation value="constraint" />
+  <differential>
+    <element id="ActivityDefinition.extension">
+      <path value="ActivityDefinition.extension" />
+      <slicing>
+        <discriminator>
+          <type value="value" />
+          <path value="url" />
+        </discriminator>
+        <rules value="open" />
+      </slicing>
+    </element>
+    <element id="ActivityDefinition.extension:process-authorization">
+      <path value="ActivityDefinition.extension" />
+      <sliceName value="process-authorization" />
+      <min value="1" />
+      <max value="*" />
+      <type>
+        <code value="Extension" />
+        <profile value="http://highmed.org/fhir/StructureDefinition/extension-process-authorization" />
+      </type>
+    </element>
+    <element id="ActivityDefinition.url">
+      <path value="ActivityDefinition.url" />
+      <min value="1" />
+    </element>
+    <element id="ActivityDefinition.version">
+      <path value="ActivityDefinition.version" />
+      <min value="1" />
+    </element>
+    <element id="ActivityDefinition.kind">
+      <path value="ActivityDefinition.kind" />
+      <min value="1" />
+      <fixedCode value="Task" />
+    </element>
+  </differential>
+</StructureDefinition>

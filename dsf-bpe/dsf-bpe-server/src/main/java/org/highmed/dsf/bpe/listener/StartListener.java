@@ -20,8 +20,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Added to each BPMN StartEvent by the {@link DefaultBpmnParseListener}. Initializes the
- * {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_IN_CALLED_PROCESS} variable with <code>false</code> for processes started via a
- * {@link Task} resource.
+ * {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_IN_CALLED_PROCESS} variable with <code>false</code> for processes
+ * started via a {@link Task} resource.
  */
 public class StartListener implements ExecutionListener
 {
@@ -65,9 +65,8 @@ public class StartListener implements ExecutionListener
 				CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME).orElse(null);
 		String businessKey = taskHelper.getFirstInputParameterStringValue(task, CODESYSTEM_HIGHMED_BPMN,
 				CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY).orElse(null);
-		String correlationKey = taskHelper
-				.getFirstInputParameterStringValue(task, CODESYSTEM_HIGHMED_BPMN,
-						CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY).orElse(null);
+		String correlationKey = taskHelper.getFirstInputParameterStringValue(task, CODESYSTEM_HIGHMED_BPMN,
+				CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY).orElse(null);
 		String taskId = task.getIdElement().getIdPart();
 
 		logger.info("Starting process {} [message: {}, businessKey: {}, correlationKey: {}, taskId: {}]", processUrl,

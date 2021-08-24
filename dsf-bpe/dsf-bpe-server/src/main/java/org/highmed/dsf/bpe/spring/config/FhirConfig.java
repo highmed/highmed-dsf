@@ -7,13 +7,23 @@ import java.nio.file.Paths;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.UUID;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.pkcs.PKCSException;
 import org.camunda.bpm.engine.ProcessEngine;
+import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
+import org.highmed.dsf.fhir.authorization.read.ReadAccessHelperImpl;
 import org.highmed.dsf.fhir.client.FhirClientProviderImpl;
 import org.highmed.dsf.fhir.client.FhirWebsocketClientProvider;
+import org.highmed.dsf.fhir.endpoint.EndpointProviderImpl;
 import org.highmed.dsf.fhir.group.GroupHelper;
 import org.highmed.dsf.fhir.group.GroupHelperImpl;
+import org.highmed.dsf.fhir.organization.EndpointProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProviderImpl;
 import org.highmed.dsf.fhir.service.ReferenceCleaner;
@@ -27,7 +37,6 @@ import org.highmed.dsf.fhir.websocket.FhirConnector;
 import org.highmed.dsf.fhir.websocket.FhirConnectorImpl;
 import org.highmed.dsf.fhir.websocket.LastEventTimeIo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -37,63 +46,15 @@ import org.springframework.context.event.EventListener;
 import ca.uhn.fhir.context.FhirContext;
 import de.rwh.utils.crypto.CertificateHelper;
 import de.rwh.utils.crypto.io.CertificateReader;
+import de.rwh.utils.crypto.io.PemIo;
 
 @Configuration
 public class FhirConfig
 {
-	@Value("${org.highmed.dsf.bpe.fhir.organization.identifier.localValue}")
-	private String organizationIdentifierLocalValue;
+	private static final BouncyCastleProvider provider = new BouncyCastleProvider();
 
-	@Value("${org.highmed.dsf.bpe.fhir.local.webservice.keystore.p12file}")
-	private String webserviceKeyStoreFile;
-
-	@Value("${org.highmed.dsf.bpe.fhir.local.webservice.keystore.password}")
-	private char[] webserviceKeyStorePassword;
-
-	@Value("${org.highmed.dsf.bpe.fhir.remote.webservice.readTimeout}")
-	private int remoteReadTimeout;
-
-	@Value("${org.highmed.dsf.bpe.fhir.remote.webservice.connectTimeout}")
-	private int remoteConnectTimeout;
-
-	@Value("${org.highmed.dsf.bpe.fhir.remote.webservice.proxy.password:#{null}}")
-	private char[] remoteProxyPassword;
-
-	@Value("${org.highmed.dsf.bpe.fhir.remote.webservice.proxy.username:#{null}}")
-	private String remoteProxyUsername;
-
-	@Value("${org.highmed.dsf.bpe.fhir.remote.webservice.proxy.schemeHostPort:#{null}}")
-	private String remoteProxySchemeHostPort;
-
-	@Value("${org.highmed.dsf.bpe.fhir.local.webservice.baseUrl}")
-	private String localWebserviceBaseUrl;
-
-	@Value("${org.highmed.dsf.bpe.fhir.local.webservice.readTimeout}")
-	private int localReadTimeout;
-
-	@Value("${org.highmed.dsf.bpe.fhir.local.webservice.connectTimeout}")
-	private int localConnectTimeout;
-
-	@Value("${org.highmed.dsf.bpe.fhir.local.websocket.url}")
-	private String localWebsocketUrl;
-
-	@Value("${org.highmed.dsf.bpe.fhir.local.websocket.keystore.p12file}")
-	private String localWebsocketKeyStoreFile;
-
-	@Value("${org.highmed.dsf.bpe.fhir.local.websocket.keystore.password}")
-	private char[] localWebsocketKeyStorePassword;
-
-	@Value("${org.highmed.dsf.bpe.fhir.task.subscription.searchParameter}")
-	private String subscriptionSearchParameter;
-
-	@Value("${org.highmed.dsf.bpe.fhir.task.subscription.lastEventTimeFile}")
-	private String lastEventTimeFile;
-
-	@Value("${org.highmed.dsf.bpe.fhir.task.subscription.retrySleepMillis:5000}")
-	private long websocketRetrySleepMillis;
-
-	@Value("${org.highmed.dsf.bpe.fhir.task.subscription.maxRetries:-1}")
-	private int websocketMaxRetries;
+	@Autowired
+	private PropertiesConfig propertiesConfig;
 
 	@Autowired
 	@Lazy
@@ -120,7 +81,7 @@ public class FhirConfig
 	@Bean
 	public LastEventTimeIo lastEventTimeIo()
 	{
-		return new LastEventTimeIo(Paths.get(lastEventTimeFile));
+		return new LastEventTimeIo(propertiesConfig.getLastEventTimeFile());
 	}
 
 	@Bean
@@ -133,50 +94,98 @@ public class FhirConfig
 	@Bean
 	public FhirWebsocketClientProvider clientProvider()
 	{
+		char[] keyStorePassword = UUID.randomUUID().toString().toCharArray();
+
 		try
 		{
-			Path localWebserviceKsFile = Paths.get(webserviceKeyStoreFile);
+			KeyStore webserviceKeyStore = createKeyStore(propertiesConfig.getWebserviceClientCertificateFile(),
+					propertiesConfig.getWebserviceClientCertificatePrivateKeyFile(),
+					propertiesConfig.getWebserviceClientCertificatePrivateKeyFilePassword(), keyStorePassword);
+			KeyStore webserviceTrustStore = createTrustStore(
+					propertiesConfig.getWebserviceClientCertificateTrustStoreFile());
 
-			if (!Files.isReadable(localWebserviceKsFile))
-				throw new IOException(
-						"Webservice keystore file '" + localWebserviceKsFile.toString() + "' not readable");
-
-			KeyStore localWebserviceKeyStore = CertificateReader.fromPkcs12(localWebserviceKsFile,
-					webserviceKeyStorePassword);
-			KeyStore localWebserviceTrustStore = CertificateHelper.extractTrust(localWebserviceKeyStore);
-
-			Path localWebsocketKsFile = Paths.get(localWebsocketKeyStoreFile);
-
-			if (!Files.isReadable(localWebsocketKsFile))
-				throw new IOException("Websocket keystore file '" + localWebsocketKsFile.toString() + "' not readable");
-
-			KeyStore localWebsocketKeyStore = CertificateReader.fromPkcs12(localWebsocketKsFile,
-					localWebsocketKeyStorePassword);
-			KeyStore localWebsocketTrustStore = CertificateHelper.extractTrust(localWebsocketKeyStore);
-
-			return new FhirClientProviderImpl(fhirContext(), referenceCleaner(), localWebserviceBaseUrl,
-					localReadTimeout, localConnectTimeout, localWebserviceTrustStore, localWebserviceKeyStore,
-					webserviceKeyStorePassword, remoteReadTimeout, remoteConnectTimeout, remoteProxyPassword,
-					remoteProxyUsername, remoteProxySchemeHostPort, localWebsocketUrl, localWebsocketTrustStore,
-					localWebsocketKeyStore, localWebsocketKeyStorePassword);
+			return new FhirClientProviderImpl(fhirContext(), referenceCleaner(), propertiesConfig.getServerBaseUrl(),
+					propertiesConfig.getWebserviceClientLocalReadTimeout(),
+					propertiesConfig.getWebserviceClientLocalConnectTimeout(),
+					propertiesConfig.getWebserviceClientLocalProxySchemeHostPort(),
+					propertiesConfig.getWebserviceClientLocalProxyUsername(),
+					propertiesConfig.getWebserviceClientLocalProxyPassword(), webserviceTrustStore, webserviceKeyStore,
+					keyStorePassword, propertiesConfig.getWebserviceClientRemoteReadTimeout(),
+					propertiesConfig.getWebserviceClientRemoteConnectTimeout(),
+					propertiesConfig.getWebserviceClientRemoteProxySchemeHostPort(),
+					propertiesConfig.getWebserviceClientRemoteProxyUsername(),
+					propertiesConfig.getWebserviceClientRemoteProxyPassword(), getWebsocketUrl(), webserviceTrustStore,
+					webserviceKeyStore, keyStorePassword, propertiesConfig.getWebsocketClientProxySchemeHostPort(),
+					propertiesConfig.getWebsocketClientProxyUsername(),
+					propertiesConfig.getWebsocketClientProxyPassword());
 		}
-		catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e)
+		catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException | PKCSException e)
 		{
 			throw new RuntimeException(e);
 		}
 	}
 
+	private String getWebsocketUrl()
+	{
+		String baseUrl = propertiesConfig.getServerBaseUrl();
+
+		if (baseUrl.startsWith("https://"))
+			return baseUrl.replace("https://", "wss://") + "/ws";
+		else if (baseUrl.startsWith("http://"))
+			return baseUrl.replace("http://", "ws://") + "/ws";
+		else
+			throw new RuntimeException("server base url (" + baseUrl + ") does not start with https:// or http://");
+	}
+
+	private KeyStore createTrustStore(String trustStoreFile)
+			throws IOException, NoSuchAlgorithmException, CertificateException, KeyStoreException
+	{
+		Path trustStorePath = Paths.get(trustStoreFile);
+
+		if (!Files.isReadable(trustStorePath))
+			throw new IOException("Trust store file '" + trustStorePath.toString() + "' not readable");
+
+		return CertificateReader.allFromCer(trustStorePath);
+	}
+
+	private KeyStore createKeyStore(String certificateFile, String privateKeyFile, char[] privateKeyPassword,
+			char[] keyStorePassword)
+			throws IOException, PKCSException, CertificateException, KeyStoreException, NoSuchAlgorithmException
+	{
+		Path certificatePath = Paths.get(certificateFile);
+		Path privateKeyPath = Paths.get(privateKeyFile);
+
+		if (!Files.isReadable(certificatePath))
+			throw new IOException("Certificate file '" + certificatePath.toString() + "' not readable");
+		if (!Files.isReadable(certificatePath))
+			throw new IOException("Private key file '" + privateKeyPath.toString() + "' not readable");
+
+		X509Certificate certificate = PemIo.readX509CertificateFromPem(certificatePath);
+		PrivateKey privateKey = PemIo.readPrivateKeyFromPem(provider, privateKeyPath, privateKeyPassword);
+
+		String subjectCommonName = CertificateHelper.getSubjectCommonName(certificate);
+		return CertificateHelper.toJksKeyStore(privateKey, new Certificate[] { certificate }, subjectCommonName,
+				keyStorePassword);
+	}
+
 	@Bean
 	public OrganizationProvider organizationProvider()
 	{
-		return new OrganizationProviderImpl(clientProvider(), organizationIdentifierLocalValue);
+		return new OrganizationProviderImpl(clientProvider(), propertiesConfig.getOrganizationIdentifierValue());
+	}
+
+	@Bean
+	public EndpointProvider endpointProvider()
+	{
+		return new EndpointProviderImpl(clientProvider(), propertiesConfig.getOrganizationIdentifierValue());
 	}
 
 	@Bean
 	public FhirConnector fhirConnector()
 	{
 		return new FhirConnectorImpl(clientProvider(), taskHandler(), lastEventTimeIo(), fhirContext(),
-				subscriptionSearchParameter, websocketRetrySleepMillis, websocketMaxRetries);
+				propertiesConfig.getSubscriptionSearchParameter(), propertiesConfig.getWebsocketRetrySleepMillis(),
+				propertiesConfig.getWebsocketMaxRetries());
 	}
 
 	@EventListener({ ContextRefreshedEvent.class })
@@ -195,5 +204,11 @@ public class FhirConfig
 	public GroupHelper groupHelper()
 	{
 		return new GroupHelperImpl();
+	}
+
+	@Bean
+	public ReadAccessHelper readAccessHelper()
+	{
+		return new ReadAccessHelperImpl();
 	}
 }

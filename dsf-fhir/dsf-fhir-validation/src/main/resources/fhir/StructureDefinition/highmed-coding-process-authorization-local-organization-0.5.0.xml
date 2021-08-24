@@ -1,0 +1,52 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+  <meta>
+    <tag>
+      <system value="http://highmed.org/fhir/CodeSystem/read-access-tag" />
+      <code value="ALL" />
+    </tag>
+  </meta>
+  <url value="http://highmed.org/fhir/StructureDefinition/coding-process-authorization-local-organization" />
+  <version value="0.5.0" />
+  <name value="ProcessAuthorizationLocalOrganization" />
+  <status value="active" />
+  <experimental value="false" />
+  <date value="2021-08-24" />
+  <fhirVersion value="4.0.1" />
+  <kind value="complex-type" />
+  <abstract value="false" />
+  <type value="Coding" />
+  <baseDefinition value="http://hl7.org/fhir/StructureDefinition/Coding" />
+  <derivation value="constraint" />
+  <differential>
+    <element id="Coding.extension">
+      <path value="Coding.extension" />
+      <slicing>
+        <discriminator>
+          <type value="value" />
+          <path value="url" />
+        </discriminator>
+        <rules value="open" />
+      </slicing>
+    </element>
+    <element id="Coding.extension:organization">
+      <path value="Coding.extension" />
+      <sliceName value="organization" />
+      <min value="1" />
+      <max value="1" />
+      <type>
+        <code value="Extension" />
+        <profile value="http://highmed.org/fhir/StructureDefinition/extension-process-authorization-organization" />
+      </type>
+    </element>
+    <element id="Coding.system">
+      <path value="Coding.system" />
+      <min value="1" />
+      <fixedUri value="http://highmed.org/fhir/CodeSystem/process-authorization" />
+    </element>
+    <element id="Coding.code">
+      <path value="Coding.code" />
+      <min value="1" />
+      <fixedCode value="LOCAL_ORGANIZATION" />
+    </element>
+  </differential>
+</StructureDefinition>

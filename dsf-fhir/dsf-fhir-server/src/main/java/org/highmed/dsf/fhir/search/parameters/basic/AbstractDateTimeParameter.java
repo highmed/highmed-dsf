@@ -144,6 +144,7 @@ public abstract class AbstractDateTimeParameter<R extends DomainResource> extend
 	 * Override to perform additional parameter checks
 	 * 
 	 * @param parameters
+	 *            to be checked, not <code>null</code>
 	 * @see #addError(SearchQueryParameterError)
 	 */
 	protected void checkParameters(List<String> parameters)
@@ -297,14 +298,14 @@ public abstract class AbstractDateTimeParameter<R extends DomainResource> extend
 	{
 		values.add(value);
 
-		return timestampColumn + "::timestamp " + searchType.operator + " ?";
+		return "(" + timestampColumn + ")::timestamp " + searchType.operator + " ?";
 	}
 
 	private String getSubquery(LocalDate value, DateTimeSearchType searchType)
 	{
 		values.add(value);
 
-		return timestampColumn + "::date " + searchType.operator + " ?";
+		return "(" + timestampColumn + ")::date " + searchType.operator + " ?";
 	}
 
 	private String getSubquery(LocalDatePair value)
@@ -417,6 +418,6 @@ public abstract class AbstractDateTimeParameter<R extends DomainResource> extend
 	@Override
 	protected String getSortSql(String sortDirectionWithSpacePrefix)
 	{
-		return timestampColumn + "::timestamp" + sortDirectionWithSpacePrefix;
+		return "(" + timestampColumn + ")::timestamp" + sortDirectionWithSpacePrefix;
 	}
 }

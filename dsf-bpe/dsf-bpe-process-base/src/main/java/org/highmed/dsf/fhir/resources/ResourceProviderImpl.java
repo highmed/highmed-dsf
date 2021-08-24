@@ -27,6 +27,7 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.env.PropertyResolver;
 
 import ca.uhn.fhir.parser.IParser;
 
@@ -172,14 +173,6 @@ class ResourceProviderImpl implements ResourceProvider
 		return Stream.concat(resources, dependencyResources);
 	}
 
-	@Override
-	public boolean isEmpty()
-	{
-		return activityDefinitionsByProcessKeyAndVersion.isEmpty() && codeSystemsByProcessKeyAndVersion.isEmpty()
-				&& namingSystemsByProcessKeyAndVersion.isEmpty() && structureDefinitionsByProcessKeyAndVersion.isEmpty()
-				&& valueSetsByProcessKeyAndVersion.isEmpty();
-	}
-
 	static ResourceProvider of(Map<String, List<MetadataResource>> resourcesByProcessKeyAndVersion)
 	{
 		return of(resourcesByProcessKeyAndVersion, Collections.emptyMap());
@@ -233,7 +226,7 @@ class ResourceProviderImpl implements ResourceProvider
 	}
 
 	static ResourceProvider read(String processPluginVersion, Supplier<IParser> parserSupplier, ClassLoader classLoader,
-			Map<String, List<AbstractResource>> resourcesByProcessKeyAndVersion)
+			PropertyResolver resolver, Map<String, List<AbstractResource>> resourcesByProcessKeyAndVersion)
 	{
 		Map<String, List<AbstractResource>> dependencyResourcesByProcessKeyAndVersion = new HashMap<>();
 		for (Entry<String, List<AbstractResource>> entry : resourcesByProcessKeyAndVersion.entrySet())
@@ -246,17 +239,18 @@ class ResourceProviderImpl implements ResourceProvider
 		Map<String, List<MetadataResource>> resources = new HashMap<>();
 		for (Entry<String, List<AbstractResource>> entry : resourcesByProcessKeyAndVersion.entrySet())
 		{
-			resources.put(entry.getKey(),
-					entry.getValue().stream().filter(Predicate.not(AbstractResource::isDependencyResource))
-							.map(r -> read(processPluginVersion, parserSupplier, classLoader, resourcesByFileName, r))
-							.collect(Collectors.toList()));
+			resources.put(entry.getKey(), entry.getValue().stream()
+					.filter(Predicate.not(AbstractResource::isDependencyResource))
+					.map(r -> read(processPluginVersion, parserSupplier, classLoader, resolver, resourcesByFileName, r))
+					.collect(Collectors.toList()));
 		}
 
 		return of(resources, dependencyResourcesByProcessKeyAndVersion);
 	}
 
 	private static MetadataResource read(String processPluginVersion, Supplier<IParser> parserSupplier,
-			ClassLoader classLoader, Map<String, MetadataResource> resourcesByFileName, AbstractResource resources)
+			ClassLoader classLoader, PropertyResolver resolver, Map<String, MetadataResource> resourcesByFileName,
+			AbstractResource resources)
 	{
 		final String fileName = resources.getFileName();
 		final Class<? extends MetadataResource> type = resources.getType();
@@ -272,8 +266,8 @@ class ResourceProviderImpl implements ResourceProvider
 		}
 		else
 		{
-			MetadataResource m = parseResourceAndSetVersion(processPluginVersion, parserSupplier, classLoader, fileName,
-					type);
+			MetadataResource m = parseResourceAndSetVersion(processPluginVersion, parserSupplier, classLoader, resolver,
+					fileName, type);
 
 			resourcesByFileName.put(fileName, m);
 
@@ -282,7 +276,8 @@ class ResourceProviderImpl implements ResourceProvider
 	}
 
 	private static <T extends MetadataResource> T parseResourceAndSetVersion(String processPluginVersion,
-			Supplier<IParser> parserSupplier, ClassLoader classLoader, String fileName, Class<T> type)
+			Supplier<IParser> parserSupplier, ClassLoader classLoader, PropertyResolver resolver, String fileName,
+			Class<T> type)
 	{
 		logger.debug("Reading {} from {} and replacing all occurrence of {} with {}", type.getSimpleName(), fileName,
 				VERSION_PATTERN_STRING, processPluginVersion);
@@ -291,6 +286,8 @@ class ResourceProviderImpl implements ResourceProvider
 		{
 			String read = IOUtils.toString(in, StandardCharsets.UTF_8);
 			read = VERSION_PATTERN.matcher(read).replaceAll(processPluginVersion);
+
+			read = resolver.resolveRequiredPlaceholders(read);
 
 			return parserSupplier.get().parseResource(type, read);
 		}

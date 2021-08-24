@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>org.highmed.dsf</groupId>
 		<artifactId>dsf-pom</artifactId>
-		<version>0.4.0</version>
+		<version>0.5.0</version>
 	</parent>
 
 	<modules>
@@ -17,10 +17,12 @@
 		<module>dsf-bpe-server-jetty</module>
 		<module>dsf-bpe-webservice-client</module>
 	</modules>
-
+	
 	<properties>
+		<main.basedir>${project.basedir}/../..</main.basedir>
+
 		<!-- if upgrading, copy version specific camunda sql scripts to dsf-bpe-server/src/main/resource/db/camunda and create a corresponding liquibase migration script -->
-		<camunda.version>7.14.0</camunda.version>
+		<camunda.version>7.15.0</camunda.version>
 	</properties>
 
 	<repositories>
@@ -70,31 +72,6 @@
 			</dependency>
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
-				<artifactId>dsf-bpe-process-feasibility</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.highmed.dsf</groupId>
-				<artifactId>dsf-bpe-process-local-services</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.highmed.dsf</groupId>
-				<artifactId>dsf-bpe-process-ping</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.highmed.dsf</groupId>
-				<artifactId>dsf-bpe-process-update-resources</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.highmed.dsf</groupId>
-				<artifactId>dsf-bpe-process-update-allow-list</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.highmed.dsf</groupId>
 				<artifactId>dsf-bpe-webservice-client</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -125,6 +102,11 @@
 				<type>test-jar</type>
 				<version>${project.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-fhir-auth</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
@@ -134,6 +116,11 @@
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
 				<artifactId>dsf-tools-build-info-reader</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-tools-docker-secrets-reader</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 

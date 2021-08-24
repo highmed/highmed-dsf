@@ -4,12 +4,17 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ReferenceCleanerImpl implements ReferenceCleaner
 {
+	private static final Logger logger = LoggerFactory.getLogger(ReferenceCleanerImpl.class);
+
 	private ReferenceExtractor referenceExtractor;
 
 	public ReferenceCleanerImpl(ReferenceExtractor referenceExtractor)
@@ -31,9 +36,12 @@ public class ReferenceCleanerImpl implements ReferenceCleaner
 
 	private void cleanupReference(ResourceReference resourceReference)
 	{
-		Reference ref = resourceReference.getReference();
-		if (ref.hasIdentifier() && ref.hasReference())
-			ref.setReferenceElement((IdType) null);
+		if (resourceReference.hasReference())
+		{
+			Reference ref = resourceReference.getReference();
+			if (ref.hasIdentifier() && ref.hasReference())
+				ref.setReferenceElement((IdType) null);
+		}
 	}
 
 	@Override
@@ -60,7 +68,14 @@ public class ReferenceCleanerImpl implements ReferenceCleaner
 		else
 		{
 			Stream<ResourceReference> references = referenceExtractor.getReferences(resource);
-			references.forEach(r -> r.getReference().setResource(null));
+
+			references.filter(ResourceReference::hasReference).forEach(r -> r.getReference().setResource(null));
+
+			if (resource instanceof DomainResource && ((DomainResource) resource).hasContained())
+			{
+				logger.warn("{} has contained resources, removing resources", resource.getClass().getName());
+				((DomainResource) resource).setContained(null);
+			}
 		}
 	}
 }

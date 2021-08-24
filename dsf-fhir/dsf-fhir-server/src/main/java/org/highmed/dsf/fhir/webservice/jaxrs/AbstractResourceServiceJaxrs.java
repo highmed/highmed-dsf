@@ -219,4 +219,19 @@ public abstract class AbstractResourceServiceJaxrs<R extends Resource, S extends
 
 		return delegate.getValidateExisting(validatePath, id, uri, headers);
 	}
+
+	@POST
+	@Path("/{id}/{delete : [$]permanent-delete(/)?}")
+	@Consumes({ Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON, Constants.CT_FHIR_XML,
+			Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Produces({ MediaType.TEXT_HTML, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, MediaType.APPLICATION_JSON,
+			Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW, MediaType.APPLICATION_XML })
+	@Override
+	public Response deletePermanently(@PathParam("delete") String deletePath, @PathParam("id") String id,
+			@Context UriInfo uri, @Context HttpHeaders headers)
+	{
+		logger.trace("POST {}", uri.getRequestUri().toString());
+
+		return delegate.deletePermanently(deletePath, id, uri, headers);
+	}
 }
