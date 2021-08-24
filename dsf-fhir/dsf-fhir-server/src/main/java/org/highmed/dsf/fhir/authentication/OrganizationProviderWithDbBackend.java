@@ -37,9 +37,9 @@ public class OrganizationProviderWithDbBackend implements OrganizationProvider, 
 		this.exceptionHandler = exceptionHandler;
 
 		if (localUserThumbprints != null)
-			localUserThumbprints.stream().map(t -> t.toLowerCase()).forEach(this.localUserThumbprints::add);
+			localUserThumbprints.stream().map(String::toLowerCase).forEach(this.localUserThumbprints::add);
 		if (localPermanentDeleteUserThumbprints != null)
-			localPermanentDeleteUserThumbprints.stream().map(t -> t.toLowerCase())
+			localPermanentDeleteUserThumbprints.stream().map(String::toLowerCase)
 					.forEach(this.localPermanentDeleteUserThumbprints::add);
 
 		this.localIdentifierValue = localIdentifier;
