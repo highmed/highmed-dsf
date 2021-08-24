@@ -352,7 +352,14 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 		}
 		else
 		{
-			return dbResourcesByProcess.get(process).stream().map(info -> ProcessesResource.from(info).add(process));
+			List<ResourceInfo> resources = dbResourcesByProcess.get(process);
+			if (resources == null)
+			{
+				logger.warn("No resources found in BPE DB for process {}", process);
+				resources = Collections.emptyList();
+			}
+
+			return resources.stream().map(info -> ProcessesResource.from(info).add(process));
 		}
 	}
 
