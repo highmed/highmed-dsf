@@ -29,6 +29,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Reference;
@@ -658,6 +659,47 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		Task createdTask = getWebserviceClient().create(task);
 		assertNotNull(createdTask);
 		assertNotNull(createdTask.getIdElement().getIdPart());
+	}
+
+	@Test
+	public void testCreateTaskAllowedLocalUserVersionSpecificProfile() throws Exception
+	{
+		ActivityDefinition ad1 = readActivityDefinition("highmed-test-activity-definition1-0.5.0.xml");
+		ActivityDefinition createdAd1 = getWebserviceClient().create(ad1);
+		assertNotNull(createdAd1);
+		assertNotNull(createdAd1.getIdElement().getIdPart());
+
+		StructureDefinition testTaskProfile = readTestTaskProfile();
+		StructureDefinition createdTestTaskProfile = getWebserviceClient().create(testTaskProfile);
+		assertNotNull(createdTestTaskProfile);
+		assertNotNull(createdTestTaskProfile.getIdElement().getIdPart());
+
+		Task task = readTestTask("Test_Organization", "Test_Organization");
+		CanonicalType profile = task.getMeta().getProfile().get(0);
+		profile.setValue(profile.getValue() + "|0.5.0");
+		Task createdTask = getWebserviceClient().create(task);
+		assertNotNull(createdTask);
+		assertNotNull(createdTask.getIdElement().getIdPart());
+	}
+
+	@Test
+	public void testCreateTaskAllowedLocalUserVersionSpecificProfileBadVersion() throws Exception
+	{
+		ActivityDefinition ad1 = readActivityDefinition("highmed-test-activity-definition1-0.5.0.xml");
+		ActivityDefinition createdAd1 = getWebserviceClient().create(ad1);
+		assertNotNull(createdAd1);
+		assertNotNull(createdAd1.getIdElement().getIdPart());
+
+		StructureDefinition testTaskProfile = readTestTaskProfile();
+		StructureDefinition createdTestTaskProfile = getWebserviceClient().create(testTaskProfile);
+		assertNotNull(createdTestTaskProfile);
+		assertNotNull(createdTestTaskProfile.getIdElement().getIdPart());
+
+		Task task = readTestTask("Test_Organization", "Test_Organization");
+		CanonicalType profile = task.getMeta().getProfile().get(0);
+		profile.setValue(profile.getValue() + "|0.x.0");
+
+		expectForbidden(() -> getWebserviceClient().create(task));
 	}
 
 	@Test
