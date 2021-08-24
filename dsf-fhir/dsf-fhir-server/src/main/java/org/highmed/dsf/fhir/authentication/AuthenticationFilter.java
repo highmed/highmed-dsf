@@ -5,6 +5,7 @@ import java.security.cert.X509Certificate;
 import java.util.Objects;
 import java.util.Optional;
 
+import javax.security.auth.x500.X500Principal;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -71,7 +72,7 @@ public class AuthenticationFilter implements Filter
 				chain.doFilter(httpServletRequest, httpServletResponse);
 			}
 			else
-				unauthoized(httpServletResponse);
+				unauthoized(httpServletRequest, httpServletResponse);
 		}
 	}
 
@@ -94,10 +95,21 @@ public class AuthenticationFilter implements Filter
 		request.getSession().setAttribute(USER_PROPERTY, user);
 	}
 
-	private void unauthoized(HttpServletResponse response) throws IOException
+	private void unauthoized(HttpServletRequest httpServletRequest, HttpServletResponse response) throws IOException
 	{
-		logger.warn("User not found, sending unauthorized");
+		logger.warn("User '{}' not found, sending unauthorized", getCertificateDn(httpServletRequest).orElse("?"));
 		response.sendError(Status.UNAUTHORIZED.getStatusCode());
+	}
+
+	private Optional<String> getCertificateDn(HttpServletRequest httpServletRequest)
+	{
+		X509Certificate[] certificates = (X509Certificate[]) httpServletRequest
+				.getAttribute("javax.servlet.request.X509Certificate");
+
+		if (certificates == null || certificates.length <= 0)
+			return Optional.empty();
+		else
+			return Optional.of(certificates[0].getSubjectX500Principal().getName(X500Principal.RFC1779));
 	}
 
 	@Override
