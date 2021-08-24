@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.security.auth.x500.X500Principal;
@@ -22,6 +23,9 @@ import org.springframework.beans.factory.InitializingBean;
 
 public class OrganizationProviderWithDbBackend implements OrganizationProvider, InitializingBean
 {
+	private static final String THUMBPRINT_PATTERN_STRING = "[a-f0-9]{128}";
+	private static final Pattern THUMBPRINT_PATTERN = Pattern.compile(THUMBPRINT_PATTERN_STRING);
+
 	private static final Logger logger = LoggerFactory.getLogger(OrganizationProviderWithDbBackend.class);
 
 	private final OrganizationDao dao;
@@ -37,9 +41,10 @@ public class OrganizationProviderWithDbBackend implements OrganizationProvider, 
 		this.exceptionHandler = exceptionHandler;
 
 		if (localUserThumbprints != null)
-			localUserThumbprints.stream().map(String::toLowerCase).forEach(this.localUserThumbprints::add);
+			localUserThumbprints.stream().map(String::toLowerCase).map(s -> s.replace(":", ""))
+					.forEach(this.localUserThumbprints::add);
 		if (localPermanentDeleteUserThumbprints != null)
-			localPermanentDeleteUserThumbprints.stream().map(String::toLowerCase)
+			localPermanentDeleteUserThumbprints.stream().map(String::toLowerCase).map(s -> s.replace(":", ""))
 					.forEach(this.localPermanentDeleteUserThumbprints::add);
 
 		this.localIdentifierValue = localIdentifier;
@@ -64,6 +69,24 @@ public class OrganizationProviderWithDbBackend implements OrganizationProvider, 
 
 		if (!localUserThumbprints.containsAll(localPermanentDeleteUserThumbprints))
 			logger.warn("At least one local permanent delete user thumbprint not part of local user thumbprints!");
+
+		List<String> notMatchingLocalUserThumbprints = localUserThumbprints.stream()
+				.filter(s -> !THUMBPRINT_PATTERN.matcher(s).matches()).collect(Collectors.toList());
+		if (!notMatchingLocalUserThumbprints.isEmpty())
+		{
+			logger.warn("Local user thumbprints contains entr{} not matching {}: {}",
+					notMatchingLocalUserThumbprints.size() == 1 ? "y" : "ies", THUMBPRINT_PATTERN_STRING,
+					notMatchingLocalUserThumbprints);
+		}
+
+		List<String> notMatchingLocalPermanentDeleteUserThumbprints = localPermanentDeleteUserThumbprints.stream()
+				.filter(s -> !THUMBPRINT_PATTERN.matcher(s).matches()).collect(Collectors.toList());
+		if (!notMatchingLocalPermanentDeleteUserThumbprints.isEmpty())
+		{
+			logger.warn("Local permanent delete user thumbprints contains entr{} not matching {}: {}",
+					notMatchingLocalPermanentDeleteUserThumbprints.size() == 1 ? "y" : "ies", THUMBPRINT_PATTERN_STRING,
+					notMatchingLocalPermanentDeleteUserThumbprints);
+		}
 	}
 
 	@Override
