@@ -11,6 +11,7 @@ import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.UUID;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.pkcs.PKCSException;
@@ -47,16 +48,17 @@ public class ClientConfig
 	@Bean
 	public ClientProvider clientProvider()
 	{
+		char[] keyStorePassword = UUID.randomUUID().toString().toCharArray();
+
 		try
 		{
 			KeyStore webserviceKeyStore = createKeyStore(propertiesConfig.getWebserviceClientCertificateFile(),
 					propertiesConfig.getWebserviceClientCertificatePrivateKeyFile(),
-					propertiesConfig.getWebserviceClientCertificatePrivateKeyFilePassword());
+					propertiesConfig.getWebserviceClientCertificatePrivateKeyFilePassword(), keyStorePassword);
 			KeyStore webserviceTrustStore = createTrustStore(
 					propertiesConfig.getWebserviceClientCertificateTrustCertificatesFile());
 
-			return new ClientProviderImpl(webserviceTrustStore, webserviceKeyStore,
-					propertiesConfig.getWebserviceClientCertificatePrivateKeyFilePassword(),
+			return new ClientProviderImpl(webserviceTrustStore, webserviceKeyStore, keyStorePassword,
 					propertiesConfig.getWebserviceClientReadTimeout(),
 					propertiesConfig.getWebserviceClientConnectTimeout(),
 					propertiesConfig.getWebserviceClientProxyUrl(), propertiesConfig.getWebserviceClientProxyUsername(),
@@ -80,7 +82,8 @@ public class ClientConfig
 		return CertificateReader.allFromCer(trustStorePath);
 	}
 
-	private KeyStore createKeyStore(String certificateFile, String privateKeyFile, char[] privateKeyPassword)
+	private KeyStore createKeyStore(String certificateFile, String privateKeyFile, char[] privateKeyPassword,
+			char[] keyStorePassword)
 			throws IOException, PKCSException, CertificateException, KeyStoreException, NoSuchAlgorithmException
 	{
 		Path certificatePath = Paths.get(certificateFile);
@@ -96,6 +99,6 @@ public class ClientConfig
 
 		String subjectCommonName = CertificateHelper.getSubjectCommonName(certificate);
 		return CertificateHelper.toJksKeyStore(privateKey, new Certificate[] { certificate }, subjectCommonName,
-				privateKeyPassword);
+				keyStorePassword);
 	}
 }

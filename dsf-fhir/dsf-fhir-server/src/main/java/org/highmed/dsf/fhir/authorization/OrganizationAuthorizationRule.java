@@ -17,6 +17,7 @@ import org.highmed.dsf.fhir.dao.OrganizationDao;
 import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.StringType;
@@ -60,22 +61,17 @@ public class OrganizationAuthorizationRule extends AbstractMetaTagAuthorizationR
 			errors.add("Organization.identifier missing");
 		}
 
-		if (newResource.getMeta().hasProfile(HIGHMED_ORGANIZATION))
+		if (newResource.hasExtension() && newResource.getExtension().stream().filter(Extension::hasUrl)
+				.map(Extension::getUrl).anyMatch(url -> EXTENSION_THUMBPRINT_URL.equals(url)))
 		{
-			if (newResource.hasExtension())
+			if (!newResource.getExtension().stream().filter(Extension::hasUrl)
+					.filter(e -> EXTENSION_THUMBPRINT_URL.equals(e.getUrl()))
+					.allMatch(e -> e.hasValue() && e.getValue() instanceof StringType
+							&& EXTENSION_THUMBPRINT_VALUE_PATTERN.matcher(((StringType) e.getValue()).getValue())
+									.matches()))
 			{
-				if (!newResource.getExtension().stream()
-						.anyMatch(e -> e.hasUrl() && e.hasValue() && (e.getValue() instanceof StringType)
-								&& EXTENSION_THUMBPRINT_URL.equals(e.getUrl()) && EXTENSION_THUMBPRINT_VALUE_PATTERN
-										.matcher(((StringType) e.getValue()).getValue()).matches()))
-				{
-					errors.add("Organization.extension missing extension with url '" + EXTENSION_THUMBPRINT_URL
-							+ "' and value matching " + EXTENSION_THUMBPRINT_VALUE_PATTERN_STRING + " pattern");
-				}
-			}
-			else
-			{
-				errors.add("Organization.extension missing");
+				errors.add("Organization with '" + EXTENSION_THUMBPRINT_URL + "' has value not matching pattern: "
+						+ EXTENSION_THUMBPRINT_VALUE_PATTERN_STRING);
 			}
 		}
 

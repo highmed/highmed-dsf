@@ -101,7 +101,8 @@ public class TransactionCommandList implements CommandList
 					catch (Exception e)
 					{
 						logger.warn("Error while executing command " + c.getClass().getSimpleName()
-								+ " for entry at index " + c.getIndex() + ", rolling back transaction", e);
+								+ " for entry at index " + c.getIndex() + ", rolling back transaction: {}",
+								e.getMessage());
 
 						if (hasModifyingCommand)
 						{

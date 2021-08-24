@@ -498,7 +498,7 @@ services:
       ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_USERNAME: ttp_camunda_server_user
       ORG_HIGHMED_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_TTP
       ORG_HIGHMED_DSF_BPE_FHIR_SERVER_BASE_URL: https://ttp-docker/fhir
-      ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: highmedorg_localServicesIntegration/0.5.0,highmedorg_requestFeasibility/0.5.0,highmedorg_executeFeasibility/0.5.0,highmedorg_requestDataSharing/0.5.0,highmedorg_executeDataSharing/0.5.0
+      ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: highmedorg_executeUpdateResources/0.5.0,highmedorg_downloadAllowList/0.5.0,highmedorg_localServicesIntegration/0.5.0,highmedorg_requestFeasibility/0.5.0,highmedorg_executeFeasibility/0.5.0,highmedorg_requestDataSharing/0.5.0,highmedorg_executeDataSharing/0.5.0
       # property org.highmed.dsf.bpe.allow.list.organization should only be set for testing, do not configure property in production, potential security risk
       ORG_HIGHMED_DSF_BPE_ALLOW_LIST_ORGANIZATION: Test_TTP
     networks:

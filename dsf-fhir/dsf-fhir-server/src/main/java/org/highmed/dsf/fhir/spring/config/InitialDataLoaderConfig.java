@@ -56,7 +56,7 @@ public class InitialDataLoaderConfig
 		}
 		catch (Exception e)
 		{
-			logger.warn("Error while loading data from JAR bundle", e);
+			logger.warn("Error while loading data from JAR bundle: {}", e.getMessage());
 			throw e;
 		}
 
@@ -75,7 +75,7 @@ public class InitialDataLoaderConfig
 		}
 		catch (Exception e)
 		{
-			logger.warn("Error while loading data from external bundle", e);
+			logger.warn("Error while loading data from external bundle: {}", e.getMessage());
 			throw e;
 		}
 	}

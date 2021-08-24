@@ -461,7 +461,7 @@ public class WebserviceConfig
 
 	private NamingSystemService namingSystemServiceImpl()
 	{
-		return new NamingSystemServiceImpl(LocationServiceJaxrs.PATH, propertiesConfig.getServerBaseUrl(),
+		return new NamingSystemServiceImpl(NamingSystemServiceJaxrs.PATH, propertiesConfig.getServerBaseUrl(),
 				propertiesConfig.getDefaultPageCount(), daoConfig.namingSystemDao(),
 				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
 				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter(),
@@ -514,7 +514,7 @@ public class WebserviceConfig
 
 	private OrganizationAffiliationServiceImpl organizationAffiliationServiceImpl()
 	{
-		return new OrganizationAffiliationServiceImpl(OrganizationServiceJaxrs.PATH,
+		return new OrganizationAffiliationServiceImpl(OrganizationAffiliationServiceJaxrs.PATH,
 				propertiesConfig.getServerBaseUrl(), propertiesConfig.getDefaultPageCount(),
 				daoConfig.organizationAffiliationDao(), validationConfig.resourceValidator(),
 				eventConfig.eventManager(), helperConfig.exceptionHandler(), eventConfig.eventGenerator(),
