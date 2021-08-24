@@ -74,7 +74,7 @@ public class ProcessAuthorizationHelperImpl implements ProcessAuthorizationHelpe
 		return a.getExtension().stream().filter(Extension::hasUrl)
 				.filter(e -> ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION.equals(e.getUrl()))
 				.filter(Extension::hasExtension)
-				.filter(e -> hasMessageName(e, messageName) && hasTaskProfile(e, taskProfile)).findFirst()
+				.filter(e -> hasMessageName(e, messageName) && hasTaskProfileExact(e, taskProfile)).findFirst()
 				.orElseGet(() ->
 				{
 					Extension e = newExtension(messageName, taskProfile);
@@ -91,7 +91,7 @@ public class ProcessAuthorizationHelperImpl implements ProcessAuthorizationHelpe
 				.map(e -> (StringType) e.getValue()).anyMatch(s -> messageName.equals(s.getValueAsString()));
 	}
 
-	private boolean hasTaskProfile(Extension processAuthorization, String taskProfile)
+	private boolean hasTaskProfileExact(Extension processAuthorization, String taskProfile)
 	{
 		return processAuthorization.getExtension().stream().filter(Extension::hasUrl)
 				.filter(e -> ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_TASK_PROFILE.equals(e.getUrl()))
@@ -355,6 +355,33 @@ public class ProcessAuthorizationHelperImpl implements ProcessAuthorizationHelpe
 
 	private boolean hasTaskProfile(Extension processAuthorization, Collection<String> taskProfiles)
 	{
-		return taskProfiles.stream().anyMatch(taskProfile -> hasTaskProfile(processAuthorization, taskProfile));
+		return taskProfiles.stream()
+				.anyMatch(taskProfile -> hasTaskProfileNotVersionSpecific(processAuthorization, taskProfile));
+	}
+
+	private boolean hasTaskProfileNotVersionSpecific(Extension processAuthorization, String taskProfile)
+	{
+		return processAuthorization.getExtension().stream().filter(Extension::hasUrl)
+				.filter(e -> ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_TASK_PROFILE.equals(e.getUrl()))
+				.filter(Extension::hasValue).filter(e -> e.getValue() instanceof CanonicalType)
+				.map(e -> (CanonicalType) e.getValue())
+
+				// match if task profile is equal to value in activity definition
+				// or match if task profile is not version specific but value in activity definition is and non version
+				// specific profiles are same -> client does not care about version of task resource, may result in
+				// validation errors
+				.anyMatch(c -> taskProfile.equals(c.getValueAsString())
+						|| taskProfile.equals(getBase(c.getValueAsString())));
+	}
+
+	private static String getBase(String canonicalUrl)
+	{
+		if (canonicalUrl.contains("|"))
+		{
+			String[] split = canonicalUrl.split("\\|");
+			return split[0];
+		}
+		else
+			return canonicalUrl;
 	}
 }
