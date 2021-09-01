@@ -7,7 +7,7 @@ authors:
     given-names: Reto
 title: "HiGHmed Data Sharing Framework (HiGHmed DSF)"
 version: 0.5.0
-date-released: 2021-04-08
+date-released: 2021-08-24
 url: https://github.com/highmed/highmed-dsf/wiki
 repository-code: https://github.com/highmed/highmed-dsf
 repository-artifact: https://github.com/highmed/highmed-dsf/releases
