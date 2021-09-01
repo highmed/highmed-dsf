@@ -72,7 +72,7 @@ public class OrganizationAffiliationDaoJdbc extends AbstractResourceDaoJdbc<Orga
 			{
 				List<OrganizationAffiliation> affiliations = new ArrayList<>();
 
-				if (result.next())
+				while (result.next())
 				{
 					OrganizationAffiliation oA = getResource(result, 1);
 					String organizationIdentifier = result.getString(2);
