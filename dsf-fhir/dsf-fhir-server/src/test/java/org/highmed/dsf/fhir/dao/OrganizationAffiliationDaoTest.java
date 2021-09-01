@@ -1,10 +1,12 @@
 package org.highmed.dsf.fhir.dao;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
 
@@ -70,38 +72,21 @@ public class OrganizationAffiliationDaoTest
 
 		try (Connection connection = getDao().newReadWriteTransaction())
 		{
-			Organization memberOrg = new Organization();
-			memberOrg.setActive(true);
-			memberOrg.addIdentifier().setSystem(identifierSystem).setValue(identifierValue);
+			Organization memberOrg = createAndStoreOrganizationInDb(identifierValue, connection);
+			Organization parentOrg = createAndStoreOrganizationInDb(parentIdentifier, connection);
 
-			Organization parentOrg = new Organization();
-			parentOrg.setActive(true);
-			parentOrg.addIdentifier().setSystem(identifierSystem).setValue(parentIdentifier);
-
-			Organization createdMemberOrg = organizationDao.createWithTransactionAndId(connection, memberOrg,
-					UUID.randomUUID());
-
-			Organization createdParentOrg = organizationDao.createWithTransactionAndId(connection, parentOrg,
-					UUID.randomUUID());
-
-			OrganizationAffiliation affiliation = new OrganizationAffiliation();
-			affiliation.setActive(true);
-			affiliation.getParticipatingOrganization()
-					.setReference("Organization/" + createdMemberOrg.getIdElement().getIdPart());
-			affiliation.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
-
-			OrganizationAffiliation createdAffiliation = getDao().createWithTransactionAndId(connection, affiliation,
-					UUID.randomUUID());
+			OrganizationAffiliation affiliation = createAndStoreOrganizationAffiliationInDb(parentOrg, memberOrg,
+					connection);
 
 			List<OrganizationAffiliation> affiliations = getDao()
 					.readActiveNotDeletedByMemberOrganizationIdentifierIncludingOrganizationIdentifiersWithTransaction(
 							connection, identifierValue);
 			assertNotNull(affiliations);
 			assertEquals(1, affiliations.size());
-			assertEquals(createdAffiliation.getIdElement().getIdPart(), affiliations.get(0).getIdElement().getIdPart());
+			assertEquals(affiliation.getIdElement().getIdPart(), affiliations.get(0).getIdElement().getIdPart());
 			assertTrue(affiliations.get(0).hasParticipatingOrganization());
 			assertTrue(affiliations.get(0).getParticipatingOrganization().hasReference());
-			assertEquals("Organization/" + createdMemberOrg.getIdElement().getIdPart(),
+			assertEquals("Organization/" + memberOrg.getIdElement().getIdPart(),
 					affiliations.get(0).getParticipatingOrganization().getReference());
 			assertTrue(affiliations.get(0).getParticipatingOrganization().hasIdentifier());
 			assertTrue(affiliations.get(0).getParticipatingOrganization().getIdentifier().hasSystem());
@@ -112,7 +97,7 @@ public class OrganizationAffiliationDaoTest
 					affiliations.get(0).getParticipatingOrganization().getIdentifier().getValue());
 			assertTrue(affiliations.get(0).hasOrganization());
 			assertTrue(affiliations.get(0).getOrganization().hasReference());
-			assertEquals("Organization/" + createdParentOrg.getIdElement().getIdPart(),
+			assertEquals("Organization/" + parentOrg.getIdElement().getIdPart(),
 					affiliations.get(0).getOrganization().getReference());
 			assertTrue(affiliations.get(0).getOrganization().hasIdentifier());
 			assertTrue(affiliations.get(0).getOrganization().getIdentifier().hasSystem());
@@ -120,6 +105,62 @@ public class OrganizationAffiliationDaoTest
 			assertTrue(affiliations.get(0).getOrganization().getIdentifier().hasValue());
 			assertEquals(parentIdentifier, affiliations.get(0).getOrganization().getIdentifier().getValue());
 		}
+	}
+
+	@Test
+	public void testSizeOfReadActiveNotDeletedByMemberOrganizationIdentifier() throws Exception
+	{
+		final String parentFooIdentifier = "parentFoo.org";
+		final String parentBarIdentifier = "parentBar.org";
+
+		try (Connection connection = getDao().newReadWriteTransaction())
+		{
+			Organization memberOrg = createAndStoreOrganizationInDb(identifierValue, connection);
+			Organization parentFooOrg = createAndStoreOrganizationInDb(parentFooIdentifier, connection);
+			Organization parentBarOrg = createAndStoreOrganizationInDb(parentBarIdentifier, connection);
+
+			createAndStoreOrganizationAffiliationInDb(parentFooOrg, memberOrg, connection);
+			createAndStoreOrganizationAffiliationInDb(parentBarOrg, memberOrg, connection);
+
+			List<OrganizationAffiliation> affiliations = getDao()
+					.readActiveNotDeletedByMemberOrganizationIdentifierIncludingOrganizationIdentifiersWithTransaction(
+							connection, identifierValue);
+			assertNotNull(affiliations);
+
+			assertEquals(2, affiliations.size());
+			assertEquals(identifierValue,
+					affiliations.get(0).getParticipatingOrganization().getIdentifier().getValue());
+			assertEquals(identifierValue,
+					affiliations.get(1).getParticipatingOrganization().getIdentifier().getValue());
+			assertNotEquals(affiliations.get(0).getOrganization().getIdentifier().getValue(),
+					affiliations.get(1).getOrganization().getIdentifier().getValue());
+			assertTrue(List.of(parentFooIdentifier, parentBarIdentifier)
+					.contains(affiliations.get(0).getOrganization().getIdentifier().getValue()));
+			assertTrue(List.of(parentFooIdentifier, parentBarIdentifier)
+					.contains(affiliations.get(1).getOrganization().getIdentifier().getValue()));
+		}
+	}
+
+	private Organization createAndStoreOrganizationInDb(String identifierValue, Connection connection)
+			throws SQLException
+	{
+		Organization memberOrg = new Organization();
+		memberOrg.setActive(true);
+		memberOrg.addIdentifier().setSystem(identifierSystem).setValue(identifierValue);
+
+		return organizationDao.createWithTransactionAndId(connection, memberOrg, UUID.randomUUID());
+	}
+
+	private OrganizationAffiliation createAndStoreOrganizationAffiliationInDb(Organization parent, Organization member,
+			Connection connection) throws SQLException
+	{
+		OrganizationAffiliation organizationAffiliation = new OrganizationAffiliation();
+		organizationAffiliation.setActive(true);
+		organizationAffiliation.getParticipatingOrganization()
+				.setReference("Organization/" + member.getIdElement().getIdPart());
+		organizationAffiliation.getOrganization().setReference("Organization/" + parent.getIdElement().getIdPart());
+
+		return getDao().createWithTransactionAndId(connection, organizationAffiliation, UUID.randomUUID());
 	}
 
 	@Override
