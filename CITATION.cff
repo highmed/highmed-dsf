@@ -6,8 +6,8 @@ authors:
   - family-names: Wettstein
     given-names: Reto
 title: "HiGHmed Data Sharing Framework (HiGHmed DSF)"
-version: 0.5.0
-date-released: 2021-08-24
+version: 0.5.1
+date-released: 2021-09-03
 url: https://github.com/highmed/highmed-dsf/wiki
 repository-code: https://github.com/highmed/highmed-dsf
 repository-artifact: https://github.com/highmed/highmed-dsf/releases
