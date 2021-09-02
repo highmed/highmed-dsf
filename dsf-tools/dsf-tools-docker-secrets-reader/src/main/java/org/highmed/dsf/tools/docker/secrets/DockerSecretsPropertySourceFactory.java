@@ -87,12 +87,12 @@ public class DockerSecretsPropertySourceFactory
 
 			if (secretLines.isEmpty())
 			{
-				logger.warn("secrets file for property {} is empty", key);
+				logger.warn("Secrets file for property {} is empty", key);
 				return null;
 			}
 
 			if (secretLines.size() > 1)
-				logger.warn("secrets file for property {} contains multiple lines, using only the first line", key);
+				logger.warn("Secrets file for property {} contains multiple lines, using only the first line", key);
 
 			return secretLines.get(0);
 		}
