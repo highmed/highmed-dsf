@@ -94,7 +94,7 @@ public class DockerSecretsPropertySourceFactory
 			if (secretLines.size() > 1)
 				logger.warn("secrets file for property {} contains multiple lines, using only the first line", key);
 
-			return secretLines.get(0).trim();
+			return secretLines.get(0);
 		}
 		catch (IOException e)
 		{
