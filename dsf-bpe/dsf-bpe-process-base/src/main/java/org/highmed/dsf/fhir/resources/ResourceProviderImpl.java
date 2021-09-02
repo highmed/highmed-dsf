@@ -279,7 +279,7 @@ class ResourceProviderImpl implements ResourceProvider
 			Supplier<IParser> parserSupplier, ClassLoader classLoader, PropertyResolver resolver, String fileName,
 			Class<T> type)
 	{
-		logger.debug("Reading {} from {} and replacing all occurrence of {} with {}", type.getSimpleName(), fileName,
+		logger.debug("Reading {} from {} and replacing all occurrences of {} with {}", type.getSimpleName(), fileName,
 				VERSION_PATTERN_STRING, processPluginVersion);
 
 		try (InputStream in = classLoader.getResourceAsStream(fileName))
