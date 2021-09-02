@@ -83,7 +83,18 @@ public class DockerSecretsPropertySourceFactory
 
 		try
 		{
-			return new String(Files.readAllBytes(secretsFilePath), StandardCharsets.UTF_8);
+			List<String> secretLines = Files.readAllLines(secretsFilePath, StandardCharsets.UTF_8);
+
+			if (secretLines.isEmpty())
+			{
+				logger.warn("secrets file for property {} is empty", key);
+				return null;
+			}
+
+			if (secretLines.size() > 1)
+				logger.warn("secrets file for property {} contains multiple lines, using only the first line", key);
+
+			return secretLines.get(0);
 		}
 		catch (IOException e)
 		{
