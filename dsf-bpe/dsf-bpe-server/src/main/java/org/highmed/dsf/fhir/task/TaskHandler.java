@@ -190,7 +190,7 @@ public class TaskHandler implements InitializingBean
 		if (processVersion != null && !processVersion.isBlank())
 			return repositoryService.createProcessDefinitionQuery()
 					.processDefinitionKey(processDomain + "_" + processDefinitionKey).versionTag(processVersion)
-					.latestVersion().singleResult();
+					.singleResult();
 		else
 			return repositoryService.createProcessDefinitionQuery()
 					.processDefinitionKey(processDomain + "_" + processDefinitionKey).latestVersion().singleResult();
