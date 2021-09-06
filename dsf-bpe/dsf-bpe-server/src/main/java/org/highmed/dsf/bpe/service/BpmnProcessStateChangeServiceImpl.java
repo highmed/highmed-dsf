@@ -3,7 +3,6 @@ package org.highmed.dsf.bpe.service;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +14,6 @@ import org.camunda.bpm.engine.RepositoryService;
 import org.camunda.bpm.engine.repository.Deployment;
 import org.camunda.bpm.engine.repository.DeploymentBuilder;
 import org.camunda.bpm.engine.repository.ProcessDefinition;
-import org.camunda.bpm.model.bpmn.instance.Process;
 import org.highmed.dsf.bpe.dao.ProcessStateDao;
 import org.highmed.dsf.bpe.plugin.ProcessPluginProvider;
 import org.highmed.dsf.bpe.process.BpmnFileAndModel;
@@ -96,7 +94,7 @@ public class BpmnProcessStateChangeServiceImpl implements BpmnProcessStateChange
 		Map<ProcessKeyAndVersion, ProcessState> newProcessStates = new HashMap<>();
 
 		logger.debug("Deploying process models ...");
-		deployModels(models);
+		models.forEach(this::deploy);
 
 		List<ProcessKeyAndVersion> loadedProcesses = processPluginProvider.getProcessKeyAndVersions();
 
@@ -168,29 +166,18 @@ public class BpmnProcessStateChangeServiceImpl implements BpmnProcessStateChange
 				.collect(Collectors.toList());
 	}
 
-	private void deployModels(Stream<BpmnFileAndModel> models)
-	{
-		models.forEach(fileAndModel -> deploy(fileAndModel));
-	}
-
 	private void deploy(BpmnFileAndModel fileAndModel)
 	{
-		DeploymentBuilder builder = repositoryService.createDeployment().name(fileAndModel.getFile())
+		ProcessKeyAndVersion processKeyAndVersion = fileAndModel.getProcessKeyAndVersion();
+
+		DeploymentBuilder builder = repositoryService.createDeployment().name(processKeyAndVersion.toString())
 				.source(fileAndModel.getFile()).addModelInstance(fileAndModel.getFile(), fileAndModel.getModel())
 				.enableDuplicateFiltering(true);
 
 		Deployment deployment = builder.deploy();
 
-		if (logger.isInfoEnabled())
-		{
-			Collection<Process> processes = fileAndModel.getModel().getModelElementsByType(Process.class);
-			String processDefinitionKeysAndVersions = processes.stream()
-					.map(p -> p.getId() + "/" + p.getCamundaVersionTag()).collect(Collectors.joining(", "));
-
-			logger.info("Process{} {} from {}://{} deployed with id {}", processes.size() > 1 ? "es" : "",
-					processDefinitionKeysAndVersions,
-					fileAndModel.getJars().stream().map(Path::toString).collect(Collectors.joining("; ")),
-					fileAndModel.getFile(), deployment.getId());
-		}
+		logger.info("Process {} from {}://{} deployed with id {}", processKeyAndVersion.toString(),
+				fileAndModel.getJars().stream().map(Path::toString).collect(Collectors.joining("; ")),
+				fileAndModel.getFile(), deployment.getId());
 	}
 }

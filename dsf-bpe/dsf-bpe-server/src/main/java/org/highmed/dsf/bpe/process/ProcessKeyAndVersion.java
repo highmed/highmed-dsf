@@ -6,6 +6,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.repository.ProcessDefinition;
+import org.camunda.bpm.model.bpmn.BpmnModelInstance;
+import org.camunda.bpm.model.bpmn.instance.Process;
 
 public class ProcessKeyAndVersion implements Comparable<ProcessKeyAndVersion>
 {
@@ -33,6 +35,14 @@ public class ProcessKeyAndVersion implements Comparable<ProcessKeyAndVersion>
 		Objects.requireNonNull(definition, "definition");
 
 		return new ProcessKeyAndVersion(definition.getKey(), definition.getVersionTag());
+	}
+
+	public static ProcessKeyAndVersion fromModel(BpmnModelInstance model)
+	{
+		Objects.requireNonNull(model, "model");
+
+		Process process = model.getModelElementsByType(Process.class).stream().findFirst().get();
+		return new ProcessKeyAndVersion(process.getId(), process.getCamundaVersionTag());
 	}
 
 	private final String key;
