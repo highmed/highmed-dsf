@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.highmed.dsf</groupId>
 		<artifactId>dsf-fhir-pom</artifactId>
-		<version>0.5.1-SNAPSHOT</version>
+		<version>0.5.2-SNAPSHOT</version>
 	</parent>
 	
 	<properties>
@@ -93,7 +93,7 @@
 				</configuration>
 				<!-- Workaround for exec maven plugin issue -->
 				<!-- https://github.com/mojohaus/exec-maven-plugin/issues/76 -->
-				<!-- <dependencies> <dependency> <groupId>org.highmed.dsf</groupId> <artifactId>dsf-tools-bundle-generator</artifactId> <version>0.5.1-SNAPSHOT</version> </dependency> 
+				<!-- <dependencies> <dependency> <groupId>org.highmed.dsf</groupId> <artifactId>dsf-tools-bundle-generator</artifactId> <version>0.5.2-SNAPSHOT</version> </dependency> 
 					</dependencies> -->
 			</plugin>
 		</plugins>
