@@ -18,7 +18,7 @@ public final class BpmnFileAndModel
 	{
 		this.file = file;
 		this.model = model;
-		
+
 		if (jars != null)
 			this.jars.addAll(jars);
 	}
