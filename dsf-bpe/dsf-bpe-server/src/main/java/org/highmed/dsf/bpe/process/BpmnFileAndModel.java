@@ -18,6 +18,7 @@ public final class BpmnFileAndModel
 	{
 		this.file = file;
 		this.model = model;
+		
 		if (jars != null)
 			this.jars.addAll(jars);
 	}
@@ -35,5 +36,10 @@ public final class BpmnFileAndModel
 	public List<Path> getJars()
 	{
 		return Collections.unmodifiableList(jars);
+	}
+
+	public ProcessKeyAndVersion getProcessKeyAndVersion()
+	{
+		return ProcessKeyAndVersion.fromModel(getModel());
 	}
 }
