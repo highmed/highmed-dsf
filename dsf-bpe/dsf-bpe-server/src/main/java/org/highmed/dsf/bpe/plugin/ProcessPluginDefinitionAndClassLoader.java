@@ -106,13 +106,19 @@ public class ProcessPluginDefinitionAndClassLoader
 	{
 		BpmnModelInstance model = Bpmn.readModelFromStream(classLoader.getResourceAsStream(bpmnFile));
 		Bpmn.validateModel(model);
-		validateModelVersionTags(model);
+		validateModelVersionTagsAndProcessCount(bpmnFile, model);
+
 		return new BpmnFileAndModel(bpmnFile, model, jars);
 	}
 
-	private void validateModelVersionTags(BpmnModelInstance model)
+	private void validateModelVersionTagsAndProcessCount(String bpmnFile, BpmnModelInstance model)
 	{
 		Collection<Process> processes = model.getModelElementsByType(Process.class);
+
+		if (processes.size() != 1)
+			throw new RuntimeException(
+					"BPMN file " + bpmnFile + " contains " + processes.size() + " processes, expected 1");
+
 		processes.forEach(p ->
 		{
 			if (!definition.getVersion().equals(p.getCamundaVersionTag()))
