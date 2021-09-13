@@ -1,11 +1,10 @@
 package org.highmed.openehr.client.impl;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.client.Client;
@@ -30,9 +29,7 @@ public class AbstractJerseyClient
 	private final String baseUrl;
 
 	public AbstractJerseyClient(String baseUrl, String basicAuthUsername, String basicAuthPassword,
-			String truststorePath, String truststorePassword, int connectionTimeout, int readTimeout,
-			ObjectMapper objectMapper)
-			throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException
+			String trustCertificatesFile, int connectionTimeout, int readTimeout, ObjectMapper objectMapper)
 	{
 		ClientBuilder builder = ClientBuilder.newBuilder();
 
@@ -46,21 +43,24 @@ public class AbstractJerseyClient
 			builder.register(p);
 		}
 
-		if (truststorePath != null && !truststorePath.isBlank() && truststorePassword != null
-				&& !truststorePassword.isBlank())
+		if (trustCertificatesFile != null && !trustCertificatesFile.isBlank())
 		{
-			logger.debug("Using custom truststore in openEHR client from file {}", truststorePath);
-			KeyStore truststore = CertificateReader.fromPkcs12(Paths.get(truststorePath),
-					truststorePassword.toCharArray());
+			logger.debug("Using custom truststore in openEHR client from file {}", trustCertificatesFile);
+			KeyStore truststore = createTruststore(trustCertificatesFile);
 			builder.trustStore(truststore);
 		}
 
 		client = builder.build();
 
-		client.register(HttpAuthenticationFeature.basic(basicAuthUsername, basicAuthPassword));
+		if (basicAuthUsername != null && !basicAuthUsername.isBlank() && basicAuthPassword != null
+				&& !basicAuthPassword.isBlank())
+		{
+			logger.debug("Using basic authentication in openEHR client with username {}", basicAuthUsername);
+			client.register(HttpAuthenticationFeature.basic(basicAuthUsername, basicAuthPassword));
+		}
 
-		this.baseUrl = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
 		// making sure the root url works, this might be a workaround for a jersey client bug
+		this.baseUrl = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
 	}
 
 	protected WebTarget getResource()
@@ -71,6 +71,23 @@ public class AbstractJerseyClient
 	public String getBaseUrl()
 	{
 		return baseUrl;
+	}
+
+	private KeyStore createTruststore(String trustCertificatesFile)
+	{
+		try
+		{
+			Path truststorePath = Paths.get(trustCertificatesFile);
+
+			if (!Files.isReadable(truststorePath))
+				throw new IOException("Truststore file '" + truststorePath.toString() + "' not readable");
+			return CertificateReader.allFromCer(truststorePath);
+		}
+		catch (Exception exception)
+		{
+			logger.warn("Could not create truststore, reason: {}", exception.getMessage());
+			throw new RuntimeException(exception);
+		}
 	}
 }
 

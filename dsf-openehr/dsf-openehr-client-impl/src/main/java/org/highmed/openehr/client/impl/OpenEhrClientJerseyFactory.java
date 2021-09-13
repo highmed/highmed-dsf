@@ -1,5 +1,6 @@
 package org.highmed.openehr.client.impl;
 
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import org.highmed.openehr.client.OpenEhrClient;
@@ -15,33 +16,32 @@ public class OpenEhrClientJerseyFactory implements OpenEhrClientFactory
 	private static final Logger logger = LoggerFactory.getLogger(OpenEhrClientJerseyFactory.class);
 
 	@Override
-	public OpenEhrClient createClient(Function<String, String> propertyResolver)
+	public OpenEhrClient createClient(BiFunction<String, String, String> propertyResolver)
 	{
 		ObjectMapper objectMapper = OpenEhrObjectMapperFactory.createObjectMapper();
 
-		String baseUrl = propertyResolver.apply("org.highmed.dsf.bpe.openehr.jersey.webservice.baseUrl");
-		String basicAuthUsername = propertyResolver
-				.apply("org.highmed.dsf.bpe.openehr.jersey.webservice.basicauth.username");
-		String basicAuthPassword = propertyResolver
-				.apply("org.highmed.dsf.bpe.openehr.jersey.webservice.basicauth.password");
+		String baseUrl = propertyResolver.apply("org.highmed.dsf.bpe.openehr.jersey.base.url", null);
+		String basicAuthUsername = propertyResolver.apply("org.highmed.dsf.bpe.openehr.jersey.basicauth.username",
+				null);
+		String basicAuthPassword = propertyResolver.apply("org.highmed.dsf.bpe.openehr.jersey.basicauth.password",
+				null);
 
-		String truststorePath = propertyResolver.apply("org.highmed.dsf.bpe.openehr.jersey.webservice.truststore.path");
-		String truststorePassword = propertyResolver
-				.apply("org.highmed.dsf.bpe.openehr.jersey.webservice.truststore.password");
+		String trustCertificatesFile = propertyResolver.apply("org.highmed.dsf.bpe.openehr.jersey.trust.certificates",
+				null);
 
 		int connectTimeout = Integer
-				.parseInt(propertyResolver.apply("org.highmed.dsf.bpe.openehr.jersey.webservice.connectionTimeout"));
+				.parseInt(propertyResolver.apply("org.highmed.dsf.bpe.openehr.jersey.timeout.connect", "2000"));
 		int readTimeout = Integer
-				.parseInt(propertyResolver.apply("org.highmed.dsf.bpe.openehr.jersey.webservice.readTimeout"));
+				.parseInt(propertyResolver.apply("org.highmed.dsf.bpe.openehr.jersey.timeout.read", "10000"));
 
 		try
 		{
-			return new OpenEhrClientJersey(baseUrl, basicAuthUsername, basicAuthPassword, truststorePath,
-					truststorePassword, connectTimeout, readTimeout, objectMapper);
+			return new OpenEhrClientJersey(baseUrl, basicAuthUsername, basicAuthPassword, trustCertificatesFile,
+					connectTimeout, readTimeout, objectMapper);
 		}
 		catch (Exception exception)
 		{
-			logger.warn("Could not create OpenEhrClientJersey: {}", exception.getMessage());
+			logger.warn("Could not create OpenEhrClientJersey, reason: {}", exception.getMessage());
 			throw new RuntimeException(exception);
 		}
 	}

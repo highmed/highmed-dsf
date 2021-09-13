@@ -1,8 +1,8 @@
 package org.highmed.mpi.client;
 
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 public interface MasterPatientIndexClientFactory
 {
-	MasterPatientIndexClient createClient(Function<String, String> propertyResolver);
+	MasterPatientIndexClient createClient(BiFunction<String, String, String> propertyResolver);
 }

@@ -1,8 +1,8 @@
 package org.highmed.openehr.client;
 
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 public interface OpenEhrClientFactory
 {
-	OpenEhrClient createClient(Function<String, String> propertyResolver);
+	OpenEhrClient createClient(BiFunction<String, String, String> propertyResolver);
 }
