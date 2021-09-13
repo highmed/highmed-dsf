@@ -1,7 +1,6 @@
 package org.highmed.openehr.client.impl;
 
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 import org.highmed.openehr.client.OpenEhrClient;
 import org.highmed.openehr.client.OpenEhrClientFactory;
