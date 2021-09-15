@@ -23,10 +23,11 @@ import org.highmed.pseudonymization.openehr.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ResultSetTranslatorToTtpRbfOnlyImpl extends AbstractResultSetTranslator
-		implements ResultSetTranslatorToTtpRbfOnly
+public class ResultSetTranslatorToTtpCreateRbfOnlyDropOtherColumnsImpl extends AbstractResultSetTranslator
+		implements ResultSetTranslatorToTtpCreateRbfOnlyDropOtherColumns
 {
-	private static final Logger logger = LoggerFactory.getLogger(ResultSetTranslatorToTtpRbfOnlyImpl.class);
+	private static final Logger logger = LoggerFactory
+			.getLogger(ResultSetTranslatorToTtpCreateRbfOnlyDropOtherColumnsImpl.class);
 
 	public static final Function<Supplier<Idat>, Idat> FILTER_ON_IDAT_NOT_FOUND_EXCEPTION = supplier ->
 	{
@@ -61,13 +62,13 @@ public class ResultSetTranslatorToTtpRbfOnlyImpl extends AbstractResultSetTransl
 
 	private final Function<Supplier<Idat>, Idat> retrieveIdatErrorHandler;
 
-	public ResultSetTranslatorToTtpRbfOnlyImpl(String ehrIdColumnPath,
+	public ResultSetTranslatorToTtpCreateRbfOnlyDropOtherColumnsImpl(String ehrIdColumnPath,
 			RecordBloomFilterGenerator recordBloomFilterGenerator, MasterPatientIndexClient masterPatientIndexClient)
 	{
 		this(ehrIdColumnPath, recordBloomFilterGenerator, masterPatientIndexClient, THROW_ON_IDAT_NOT_FOUND_EXCEPTION);
 	}
 
-	public ResultSetTranslatorToTtpRbfOnlyImpl(String ehrIdColumnPath,
+	public ResultSetTranslatorToTtpCreateRbfOnlyDropOtherColumnsImpl(String ehrIdColumnPath,
 			RecordBloomFilterGenerator recordBloomFilterGenerator, MasterPatientIndexClient masterPatientIndexClient,
 			Function<Supplier<Idat>, Idat> retrieveIdatErrorHandler)
 	{
@@ -81,20 +82,20 @@ public class ResultSetTranslatorToTtpRbfOnlyImpl extends AbstractResultSetTransl
 	@Override
 	public ResultSet translate(ResultSet resultSet)
 	{
-		int ehrIdColumnIndex = getEhrColumnIndex(resultSet.getColumns());
+		int ehrIdColumnIndex = getEhrIdColumnIndex(resultSet.getColumns());
 
 		if (ehrIdColumnIndex < 0)
 			throw new IllegalArgumentException("Missing ehr id column with name '" + Constants.EHRID_COLUMN_NAME
 					+ "' and path '" + ehrIdColumnPath + "'");
 
 		Meta meta = copyMeta(resultSet.getMeta());
-		List<Column> columns = translateColumns(resultSet.getColumns());
-		List<List<RowElement>> rows = encodeRowsWithEhrId(ehrIdColumnIndex, resultSet.getRows());
+		List<Column> columns = createRbfColumn();
+		List<List<RowElement>> rows = translateEhrIdsToRbfsDropOtherColumns(ehrIdColumnIndex, resultSet.getRows());
 
 		return new ResultSet(meta, resultSet.getName(), resultSet.getQuery(), columns, rows);
 	}
 
-	private int getEhrColumnIndex(List<Column> columns)
+	private int getEhrIdColumnIndex(List<Column> columns)
 	{
 		for (int i = 0; i < columns.size(); i++)
 			if (isEhrIdColumn().test(columns.get(i)))
@@ -109,18 +110,19 @@ public class ResultSetTranslatorToTtpRbfOnlyImpl extends AbstractResultSetTransl
 				&& ehrIdColumnPath.equals(column.getPath());
 	}
 
-	private List<Column> translateColumns(List<Column> columns)
+	private List<Column> createRbfColumn()
 	{
 		return Collections.singletonList(new Column(Constants.RBF_COLUMN_NAME, Constants.RBF_COLUMN_PATH));
 	}
 
-	private List<List<RowElement>> encodeRowsWithEhrId(int ehrIdColumnIndex, List<List<RowElement>> rows)
+	private List<List<RowElement>> translateEhrIdsToRbfsDropOtherColumns(int ehrIdColumnIndex,
+			List<List<RowElement>> rows)
 	{
-		return rows.parallelStream().map(encodeRowWithEhrId(ehrIdColumnIndex)).filter(e -> e != null)
+		return rows.parallelStream().map(translateEhrIdToRbfDropOtherColumns(ehrIdColumnIndex)).filter(e -> e != null)
 				.collect(Collectors.toList());
 	}
 
-	private Function<List<RowElement>, List<RowElement>> encodeRowWithEhrId(int ehrIdColumnIndex)
+	private Function<List<RowElement>, List<RowElement>> translateEhrIdToRbfDropOtherColumns(int ehrIdColumnIndex)
 	{
 		return rowElements ->
 		{

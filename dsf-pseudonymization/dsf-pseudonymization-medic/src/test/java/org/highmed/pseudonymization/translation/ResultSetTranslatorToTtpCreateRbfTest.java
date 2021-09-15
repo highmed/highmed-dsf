@@ -1,28 +1,26 @@
 package org.highmed.pseudonymization.translation;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Random;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+
+import javax.crypto.SecretKey;
 
 import org.highmed.mpi.client.Idat;
 import org.highmed.mpi.client.IdatNotFoundException;
 import org.highmed.mpi.client.MasterPatientIndexClient;
 import org.highmed.openehr.json.OpenEhrObjectMapperFactory;
-import org.highmed.openehr.model.datatypes.StringRowElement;
-import org.highmed.openehr.model.structure.Column;
 import org.highmed.openehr.model.structure.ResultSet;
-import org.highmed.openehr.model.structure.RowElement;
 import org.highmed.pseudonymization.bloomfilter.BloomFilterGenerator;
 import org.highmed.pseudonymization.bloomfilter.RecordBloomFilterGenerator;
 import org.highmed.pseudonymization.bloomfilter.RecordBloomFilterGeneratorImpl;
 import org.highmed.pseudonymization.bloomfilter.RecordBloomFilterGeneratorImpl.FieldBloomFilterLengths;
 import org.highmed.pseudonymization.bloomfilter.RecordBloomFilterGeneratorImpl.FieldWeights;
+import org.highmed.pseudonymization.crypto.AesGcmUtil;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,12 +29,12 @@ import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class ResultSetTranslatorToTtpTestRbfOnly
+public class ResultSetTranslatorToTtpCreateRbfTest
 {
-	private static final Logger logger = LoggerFactory.getLogger(ResultSetTranslatorToTtpTestRbfOnly.class);
+	private static final Logger logger = LoggerFactory.getLogger(ResultSetTranslatorToTtpCreateRbfTest.class);
 
 	@Test
-	public void testIdsOnly() throws Exception
+	public void testTranslateForTtp() throws Exception
 	{
 		Random random = new Random();
 
@@ -55,42 +53,47 @@ public class ResultSetTranslatorToTtpTestRbfOnly
 				recordBloomFilterLength, permutationSeed, weights, lengths,
 				() -> new BloomFilterGenerator.HmacMd5HmacSha1BiGramHasher(hashKey1, hashKey2));
 
-		Map<String, Idat> idats = new HashMap<>();
-		IntStream.range(0, 15).mapToObj(String::valueOf)
-				.forEach(id -> idats.put(id,
-						new IdatTestImpl("medicId" + id, "firstName" + id, "lastName" + id, "birthday" + id, "sex" + id,
-								"street" + id, "zipCode" + id, "city" + id, "country" + id, "insuranceNumber" + id)));
-
+		Map<String, Idat> idats = Map.of("ehrId1", new IdatTestImpl("medicId1", "firstName1", "lastName1", "birthday1",
+				"sex1", "street1", "zipCode1", "city1", "country1", "insuranceNumber1"));
 		MasterPatientIndexClient masterPatientIndexClient = new MasterPatientIndexClientTestImpl(idats);
+		String organizationIdentifier = "org1";
+		SecretKey organizationKey = AesGcmUtil.generateAES256Key();
+		String researchStudyIdentifier = "researchStudy1";
+		SecretKey researchStudyKey = AesGcmUtil.generateAES256Key();
 
-		ResultSetTranslatorToTtpRbfOnlyImpl translator = new ResultSetTranslatorToTtpRbfOnlyImpl(
+		ResultSetTranslatorToTtpCreateRbfImpl translator = new ResultSetTranslatorToTtpCreateRbfImpl(
+				organizationIdentifier, organizationKey, researchStudyIdentifier, researchStudyKey,
 				"/ehr_status/subject/external_ref/id/value", recordBloomFilterGenerator, masterPatientIndexClient);
 
 		ObjectMapper openEhrObjectMapper = OpenEhrObjectMapperFactory.createObjectMapper();
+		ResultSet resultSet = openEhrObjectMapper
+				.readValue(Files.readAllBytes(Paths.get("src/test/resources/result_5.json")), ResultSet.class);
+		assertNotNull(resultSet);
+		assertNotNull(resultSet.getColumns());
+		assertEquals(4, resultSet.getColumns().size());
+		assertNotNull(resultSet.getRows());
+		assertEquals(1, resultSet.getRows().size());
+		assertNotNull(resultSet.getRow(0));
+		assertEquals(4, resultSet.getRow(0).size());
+
+		ResultSet translatedResultSet = translator.translate(resultSet);
+		assertNotNull(translatedResultSet);
+		assertNotNull(translatedResultSet.getColumns());
+		assertEquals(5, translatedResultSet.getColumns().size());
+		assertNotNull(translatedResultSet.getRows());
+		assertEquals(1, translatedResultSet.getRows().size());
+		assertNotNull(translatedResultSet.getRow(0));
+		assertEquals(5, translatedResultSet.getRow(0).size());
+
 		DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter();
 		prettyPrinter.indentArraysWith(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE);
 
-		List<List<RowElement>> rows = IntStream.range(0, 15)
-				.mapToObj(id -> Collections.<RowElement> singletonList(new StringRowElement(String.valueOf(id))))
-				.collect(Collectors.toList());
-		ResultSet resultSet = new ResultSet(null, null,
-				"SELECT e/ehr_status/subject/external_ref/id/value as EHRID FROM EHR e",
-				Collections.singleton(new Column("EHRID", "/ehr_status/subject/external_ref/id/value")), rows);
-
-		logger.debug("ResultSet {}", openEhrObjectMapper.writer(prettyPrinter).writeValueAsString(resultSet));
-		ResultSet translated = translator.translate(resultSet);
-		assertNotNull(translated);
-		logger.debug("Encoded ResultSet {}", openEhrObjectMapper.writer(prettyPrinter).writeValueAsString(translated));
-
-		assertNotNull(translated.getColumns());
-		assertEquals(1, translated.getColumns().size());
-		assertNotNull(translated.getRows());
-		assertEquals(15, translated.getRows().size());
-		assertEquals(15, translated.getRows().stream().mapToInt(List::size).sum());
+		logger.debug("Encoded ResultSet {}",
+				openEhrObjectMapper.writer(prettyPrinter).writeValueAsString(translatedResultSet));
 	}
 
 	@Test(expected = IdatNotFoundException.class)
-	public void testIdsOnlyFailingMpiClientFails() throws Exception
+	public void testTranslateForTtpFailingMpiClientFails() throws Exception
 	{
 		Random random = new Random();
 
@@ -114,21 +117,31 @@ public class ResultSetTranslatorToTtpTestRbfOnly
 			throw new IdatNotFoundException(id);
 		};
 
-		ResultSetTranslatorToTtpRbfOnlyImpl translator = new ResultSetTranslatorToTtpRbfOnlyImpl(
+		String organizationIdentifier = "org1";
+		SecretKey organizationKey = AesGcmUtil.generateAES256Key();
+		String researchStudyIdentifier = "researchStudy1";
+		SecretKey researchStudyKey = AesGcmUtil.generateAES256Key();
+
+		ResultSetTranslatorToTtpCreateRbfImpl translator = new ResultSetTranslatorToTtpCreateRbfImpl(
+				organizationIdentifier, organizationKey, researchStudyIdentifier, researchStudyKey,
 				"/ehr_status/subject/external_ref/id/value", recordBloomFilterGenerator, masterPatientIndexClient);
 
-		List<List<RowElement>> rows = IntStream.range(0, 15)
-				.mapToObj(id -> Collections.<RowElement> singletonList(new StringRowElement(String.valueOf(id))))
-				.collect(Collectors.toList());
-		ResultSet resultSet = new ResultSet(null, null,
-				"SELECT e/ehr_status/subject/external_ref/id/value as EHRID FROM EHR e",
-				Collections.singleton(new Column("EHRID", "/ehr_status/subject/external_ref/id/value")), rows);
+		ObjectMapper openEhrObjectMapper = OpenEhrObjectMapperFactory.createObjectMapper();
+		ResultSet resultSet = openEhrObjectMapper
+				.readValue(Files.readAllBytes(Paths.get("src/test/resources/result_5.json")), ResultSet.class);
+		assertNotNull(resultSet);
+		assertNotNull(resultSet.getColumns());
+		assertEquals(4, resultSet.getColumns().size());
+		assertNotNull(resultSet.getRows());
+		assertEquals(1, resultSet.getRows().size());
+		assertNotNull(resultSet.getRow(0));
+		assertEquals(4, resultSet.getRow(0).size());
 
 		translator.translate(resultSet);
 	}
 
 	@Test
-	public void testIdsOnlyFailingMpiClientFilters() throws Exception
+	public void testTranslateForTtpFailingMpiClientFilters() throws Exception
 	{
 		Random random = new Random();
 
@@ -152,16 +165,26 @@ public class ResultSetTranslatorToTtpTestRbfOnly
 			throw new IdatNotFoundException(id);
 		};
 
-		ResultSetTranslatorToTtpRbfOnlyImpl translator = new ResultSetTranslatorToTtpRbfOnlyImpl(
-				"/ehr_status/subject/external_ref/id/value", recordBloomFilterGenerator, masterPatientIndexClient,
-				ResultSetTranslatorToTtpRbfOnlyImpl.FILTER_ON_IDAT_NOT_FOUND_EXCEPTION);
+		String organizationIdentifier = "org1";
+		SecretKey organizationKey = AesGcmUtil.generateAES256Key();
+		String researchStudyIdentifier = "researchStudy1";
+		SecretKey researchStudyKey = AesGcmUtil.generateAES256Key();
 
-		List<List<RowElement>> rows = IntStream.range(0, 15)
-				.mapToObj(id -> Collections.<RowElement> singletonList(new StringRowElement(String.valueOf(id))))
-				.collect(Collectors.toList());
-		ResultSet resultSet = new ResultSet(null, null,
-				"SELECT e/ehr_status/subject/external_ref/id/value as EHRID FROM EHR e",
-				Collections.singleton(new Column("EHRID", "/ehr_status/subject/external_ref/id/value")), rows);
+		ResultSetTranslatorToTtpCreateRbfImpl translator = new ResultSetTranslatorToTtpCreateRbfImpl(
+				organizationIdentifier, organizationKey, researchStudyIdentifier, researchStudyKey,
+				"/ehr_status/subject/external_ref/id/value", recordBloomFilterGenerator, masterPatientIndexClient,
+				ResultSetTranslatorToTtpCreateRbfImpl.FILTER_ON_IDAT_NOT_FOUND_EXCEPTION);
+
+		ObjectMapper openEhrObjectMapper = OpenEhrObjectMapperFactory.createObjectMapper();
+		ResultSet resultSet = openEhrObjectMapper
+				.readValue(Files.readAllBytes(Paths.get("src/test/resources/result_5.json")), ResultSet.class);
+		assertNotNull(resultSet);
+		assertNotNull(resultSet.getColumns());
+		assertEquals(4, resultSet.getColumns().size());
+		assertNotNull(resultSet.getRows());
+		assertEquals(1, resultSet.getRows().size());
+		assertNotNull(resultSet.getRow(0));
+		assertEquals(4, resultSet.getRow(0).size());
 
 		ResultSet translate = translator.translate(resultSet);
 		assertNotNull(translate);

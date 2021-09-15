@@ -26,10 +26,10 @@ import org.highmed.pseudonymization.openehr.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ResultSetTranslatorToTtpWithRbfImpl extends AbstractResultSetTranslator
-		implements ResultSetTranslatorToTtpWithRbf
+public class ResultSetTranslatorToTtpCreateRbfImpl extends AbstractResultSetTranslator
+		implements ResultSetTranslatorToTtpCreateRbf
 {
-	private static final Logger logger = LoggerFactory.getLogger(ResultSetTranslatorToTtpWithRbfImpl.class);
+	private static final Logger logger = LoggerFactory.getLogger(ResultSetTranslatorToTtpCreateRbfImpl.class);
 
 	public static final Function<Supplier<Idat>, Idat> FILTER_ON_IDAT_NOT_FOUND_EXCEPTION = supplier ->
 	{
@@ -68,7 +68,7 @@ public class ResultSetTranslatorToTtpWithRbfImpl extends AbstractResultSetTransl
 
 	private final Function<Supplier<Idat>, Idat> retrieveIdatErrorHandler;
 
-	public ResultSetTranslatorToTtpWithRbfImpl(String organizationIdentifier, SecretKey organizationKey,
+	public ResultSetTranslatorToTtpCreateRbfImpl(String organizationIdentifier, SecretKey organizationKey,
 			String researchStudyIdentifier, SecretKey researchStudyKey, String ehrIdColumnPath,
 			RecordBloomFilterGenerator recordBloomFilterGenerator, MasterPatientIndexClient masterPatientIndexClient)
 	{
@@ -76,7 +76,7 @@ public class ResultSetTranslatorToTtpWithRbfImpl extends AbstractResultSetTransl
 				recordBloomFilterGenerator, masterPatientIndexClient, THROW_ON_IDAT_NOT_FOUND_EXCEPTION);
 	}
 
-	public ResultSetTranslatorToTtpWithRbfImpl(String organizationIdentifier, SecretKey organizationKey,
+	public ResultSetTranslatorToTtpCreateRbfImpl(String organizationIdentifier, SecretKey organizationKey,
 			String researchStudyIdentifier, SecretKey researchStudyKey, String ehrIdColumnPath,
 			RecordBloomFilterGenerator recordBloomFilterGenerator, MasterPatientIndexClient masterPatientIndexClient,
 			Function<Supplier<Idat>, Idat> retrieveIdatErrorHandler)
@@ -103,8 +103,8 @@ public class ResultSetTranslatorToTtpWithRbfImpl extends AbstractResultSetTransl
 					+ "' and path '" + ehrIdColumnPath + "'");
 
 		Meta meta = copyMeta(resultSet.getMeta());
-		List<Column> columns = encodeColumnsWithEhrId(resultSet.getColumns());
-		List<List<RowElement>> rows = encodeRowsWithEhrId(ehrIdColumnIndex, resultSet.getRows());
+		List<Column> columns = addRbfColumn(resultSet.getColumns());
+		List<List<RowElement>> rows = translateEhrIdsToRbfs(ehrIdColumnIndex, resultSet.getRows());
 
 		return new ResultSet(meta, resultSet.getName(), resultSet.getQuery(), columns, rows);
 	}
@@ -124,43 +124,35 @@ public class ResultSetTranslatorToTtpWithRbfImpl extends AbstractResultSetTransl
 				&& ehrIdColumnPath.equals(column.getPath());
 	}
 
-	private List<Column> encodeColumnsWithEhrId(List<Column> columns)
+	private List<Column> addRbfColumn(List<Column> columns)
 	{
-		Stream<Column> s1 = columns.stream().filter(isEhrIdColumn().negate()).map(copyColumn());
-		Stream<Column> s2 = newMedicIdAndRbfColumn();
+		Stream<Column> s1 = columns.stream().map(copyColumn());
+		Stream<Column> s2 = newRbfColumn();
 		return Stream.concat(s1, s2).collect(Collectors.toList());
 	}
 
-	private Stream<Column> newMedicIdAndRbfColumn()
+	private Stream<Column> newRbfColumn()
 	{
-		return Stream.of(new Column(Constants.MEDICID_COLUMN_NAME, Constants.MEDICID_COLUMN_PATH),
-				new Column(Constants.RBF_COLUMN_NAME, Constants.RBF_COLUMN_PATH));
+		return Stream.of(new Column(Constants.RBF_COLUMN_NAME, Constants.RBF_COLUMN_PATH));
 	}
 
-	private List<List<RowElement>> encodeRowsWithEhrId(int ehrIdColumnIndex, List<List<RowElement>> rows)
+	private List<List<RowElement>> translateEhrIdsToRbfs(int ehrIdColumnIndex, List<List<RowElement>> rows)
 	{
-		return rows.parallelStream().map(encodeRowWithEhrId(ehrIdColumnIndex)).filter(e -> e != null)
+		return rows.parallelStream().map(translateEhrIdToRbf(ehrIdColumnIndex)).filter(e -> e != null)
 				.collect(Collectors.toList());
 	}
 
-	private Function<List<RowElement>, List<RowElement>> encodeRowWithEhrId(int ehrIdColumnIndex)
+	private Function<List<RowElement>, List<RowElement>> translateEhrIdToRbf(int ehrIdColumnIndex)
 	{
 		return rowElements ->
 		{
 			RowElement ehrId = rowElements.get(ehrIdColumnIndex);
-
-			List<RowElement> newRowElements = new ArrayList<>();
-			for (int i = 0; i < rowElements.size(); i++)
-				if (i != ehrIdColumnIndex)
-					newRowElements.add(
-							toEncryptedMdatRowElement(rowElements.get(i), researchStudyKey, researchStudyIdentifier));
-
 			Idat idat = retrieveIdatErrorHandler.apply(() -> retrieveIdat(ehrId));
 
 			if (idat == null)
 				return null;
 
-			newRowElements.add(encodeAsEncrypedMedicId(idat));
+			List<RowElement> newRowElements = new ArrayList<>(rowElements);
 			newRowElements.add(encodeAsRbf(idat));
 
 			return newRowElements;
