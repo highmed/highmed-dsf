@@ -59,8 +59,6 @@ public class ResultSetTranslatorToTtpCreateRbfImpl extends AbstractResultSetTran
 
 	private final String organizationIdentifier;
 	private final SecretKey organizationKey;
-	private final String researchStudyIdentifier;
-	private final SecretKey researchStudyKey;
 	private final String ehrIdColumnPath;
 
 	private final RecordBloomFilterGenerator recordBloomFilterGenerator;
@@ -69,22 +67,19 @@ public class ResultSetTranslatorToTtpCreateRbfImpl extends AbstractResultSetTran
 	private final Function<Supplier<Idat>, Idat> retrieveIdatErrorHandler;
 
 	public ResultSetTranslatorToTtpCreateRbfImpl(String organizationIdentifier, SecretKey organizationKey,
-			String researchStudyIdentifier, SecretKey researchStudyKey, String ehrIdColumnPath,
-			RecordBloomFilterGenerator recordBloomFilterGenerator, MasterPatientIndexClient masterPatientIndexClient)
+			String ehrIdColumnPath, RecordBloomFilterGenerator recordBloomFilterGenerator,
+			MasterPatientIndexClient masterPatientIndexClient)
 	{
-		this(organizationIdentifier, organizationKey, researchStudyIdentifier, researchStudyKey, ehrIdColumnPath,
-				recordBloomFilterGenerator, masterPatientIndexClient, THROW_ON_IDAT_NOT_FOUND_EXCEPTION);
+		this(organizationIdentifier, organizationKey, ehrIdColumnPath, recordBloomFilterGenerator,
+				masterPatientIndexClient, THROW_ON_IDAT_NOT_FOUND_EXCEPTION);
 	}
 
 	public ResultSetTranslatorToTtpCreateRbfImpl(String organizationIdentifier, SecretKey organizationKey,
-			String researchStudyIdentifier, SecretKey researchStudyKey, String ehrIdColumnPath,
-			RecordBloomFilterGenerator recordBloomFilterGenerator, MasterPatientIndexClient masterPatientIndexClient,
-			Function<Supplier<Idat>, Idat> retrieveIdatErrorHandler)
+			String ehrIdColumnPath, RecordBloomFilterGenerator recordBloomFilterGenerator,
+			MasterPatientIndexClient masterPatientIndexClient, Function<Supplier<Idat>, Idat> retrieveIdatErrorHandler)
 	{
 		this.organizationIdentifier = Objects.requireNonNull(organizationIdentifier, "organizationIdentifier");
 		this.organizationKey = Objects.requireNonNull(organizationKey, "organizationKey");
-		this.researchStudyIdentifier = Objects.requireNonNull(researchStudyIdentifier, "researchStudyIdentifier");
-		this.researchStudyKey = Objects.requireNonNull(researchStudyKey, "researchStudyKey");
 		this.ehrIdColumnPath = Objects.requireNonNull(ehrIdColumnPath, "ehrIdColumnPath");
 
 		this.recordBloomFilterGenerator = Objects.requireNonNull(recordBloomFilterGenerator,

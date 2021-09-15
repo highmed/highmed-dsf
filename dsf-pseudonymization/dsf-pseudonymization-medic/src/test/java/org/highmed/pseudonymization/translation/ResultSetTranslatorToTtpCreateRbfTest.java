@@ -62,8 +62,8 @@ public class ResultSetTranslatorToTtpCreateRbfTest
 		SecretKey researchStudyKey = AesGcmUtil.generateAES256Key();
 
 		ResultSetTranslatorToTtpCreateRbfImpl translator = new ResultSetTranslatorToTtpCreateRbfImpl(
-				organizationIdentifier, organizationKey, researchStudyIdentifier, researchStudyKey,
-				"/ehr_status/subject/external_ref/id/value", recordBloomFilterGenerator, masterPatientIndexClient);
+				organizationIdentifier, organizationKey, "/ehr_status/subject/external_ref/id/value",
+				recordBloomFilterGenerator, masterPatientIndexClient);
 
 		ObjectMapper openEhrObjectMapper = OpenEhrObjectMapperFactory.createObjectMapper();
 		ResultSet resultSet = openEhrObjectMapper
@@ -123,8 +123,8 @@ public class ResultSetTranslatorToTtpCreateRbfTest
 		SecretKey researchStudyKey = AesGcmUtil.generateAES256Key();
 
 		ResultSetTranslatorToTtpCreateRbfImpl translator = new ResultSetTranslatorToTtpCreateRbfImpl(
-				organizationIdentifier, organizationKey, researchStudyIdentifier, researchStudyKey,
-				"/ehr_status/subject/external_ref/id/value", recordBloomFilterGenerator, masterPatientIndexClient);
+				organizationIdentifier, organizationKey, "/ehr_status/subject/external_ref/id/value",
+				recordBloomFilterGenerator, masterPatientIndexClient);
 
 		ObjectMapper openEhrObjectMapper = OpenEhrObjectMapperFactory.createObjectMapper();
 		ResultSet resultSet = openEhrObjectMapper
@@ -171,8 +171,8 @@ public class ResultSetTranslatorToTtpCreateRbfTest
 		SecretKey researchStudyKey = AesGcmUtil.generateAES256Key();
 
 		ResultSetTranslatorToTtpCreateRbfImpl translator = new ResultSetTranslatorToTtpCreateRbfImpl(
-				organizationIdentifier, organizationKey, researchStudyIdentifier, researchStudyKey,
-				"/ehr_status/subject/external_ref/id/value", recordBloomFilterGenerator, masterPatientIndexClient,
+				organizationIdentifier, organizationKey, "/ehr_status/subject/external_ref/id/value",
+				recordBloomFilterGenerator, masterPatientIndexClient,
 				ResultSetTranslatorToTtpCreateRbfImpl.FILTER_ON_IDAT_NOT_FOUND_EXCEPTION);
 
 		ObjectMapper openEhrObjectMapper = OpenEhrObjectMapperFactory.createObjectMapper();
