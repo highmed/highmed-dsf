@@ -126,6 +126,16 @@
 
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-pseudonymization-client</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-pseudonymization-client-stub</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
 				<artifactId>dsf-pseudonymization-medic</artifactId>
 				<version>${project.version}</version>
 			</dependency>

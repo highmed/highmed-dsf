@@ -10,8 +10,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.crypto.SecretKey;
-
 import org.highmed.mpi.client.Idat;
 import org.highmed.mpi.client.IdatNotFoundException;
 import org.highmed.mpi.client.MasterPatientIndexClient;
@@ -57,8 +55,6 @@ public class ResultSetTranslatorToTtpCreateRbfImpl extends AbstractResultSetTran
 		}
 	};
 
-	private final String organizationIdentifier;
-	private final SecretKey organizationKey;
 	private final String ehrIdColumnPath;
 
 	private final RecordBloomFilterGenerator recordBloomFilterGenerator;
@@ -66,20 +62,16 @@ public class ResultSetTranslatorToTtpCreateRbfImpl extends AbstractResultSetTran
 
 	private final Function<Supplier<Idat>, Idat> retrieveIdatErrorHandler;
 
-	public ResultSetTranslatorToTtpCreateRbfImpl(String organizationIdentifier, SecretKey organizationKey,
-			String ehrIdColumnPath, RecordBloomFilterGenerator recordBloomFilterGenerator,
-			MasterPatientIndexClient masterPatientIndexClient)
+	public ResultSetTranslatorToTtpCreateRbfImpl(String ehrIdColumnPath,
+			RecordBloomFilterGenerator recordBloomFilterGenerator, MasterPatientIndexClient masterPatientIndexClient)
 	{
-		this(organizationIdentifier, organizationKey, ehrIdColumnPath, recordBloomFilterGenerator,
-				masterPatientIndexClient, THROW_ON_IDAT_NOT_FOUND_EXCEPTION);
+		this(ehrIdColumnPath, recordBloomFilterGenerator, masterPatientIndexClient, THROW_ON_IDAT_NOT_FOUND_EXCEPTION);
 	}
 
-	public ResultSetTranslatorToTtpCreateRbfImpl(String organizationIdentifier, SecretKey organizationKey,
-			String ehrIdColumnPath, RecordBloomFilterGenerator recordBloomFilterGenerator,
-			MasterPatientIndexClient masterPatientIndexClient, Function<Supplier<Idat>, Idat> retrieveIdatErrorHandler)
+	public ResultSetTranslatorToTtpCreateRbfImpl(String ehrIdColumnPath,
+			RecordBloomFilterGenerator recordBloomFilterGenerator, MasterPatientIndexClient masterPatientIndexClient,
+			Function<Supplier<Idat>, Idat> retrieveIdatErrorHandler)
 	{
-		this.organizationIdentifier = Objects.requireNonNull(organizationIdentifier, "organizationIdentifier");
-		this.organizationKey = Objects.requireNonNull(organizationKey, "organizationKey");
 		this.ehrIdColumnPath = Objects.requireNonNull(ehrIdColumnPath, "ehrIdColumnPath");
 
 		this.recordBloomFilterGenerator = Objects.requireNonNull(recordBloomFilterGenerator,
@@ -175,11 +167,6 @@ public class ResultSetTranslatorToTtpCreateRbfImpl extends AbstractResultSetTran
 			logger.warn("Error while fetching IDAT from MPI for ID " + id, e);
 			throw e;
 		}
-	}
-
-	private RowElement encodeAsEncrypedMedicId(Idat idat)
-	{
-		return new StringRowElement(encrypt(organizationKey, organizationIdentifier, idat.getMedicId()));
 	}
 
 	private RowElement encodeAsRbf(Idat idat)

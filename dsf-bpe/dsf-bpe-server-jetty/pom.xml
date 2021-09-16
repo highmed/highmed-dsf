@@ -21,6 +21,10 @@
 		</dependency>
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
+			<artifactId>dsf-consent-client-stub</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-openehr-client-stub</artifactId>
 		</dependency>
 		<dependency>
@@ -29,7 +33,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
-			<artifactId>dsf-consent-client-stub</artifactId>
+			<artifactId>dsf-pseudonymization-client-stub</artifactId>
 		</dependency>
 
 		<dependency>

@@ -110,6 +110,9 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.bpe.openehr.webservice.factory.class:org.highmed.openehr.client.stub.OpenEhrClientStubFactory}")
 	private String openEhrClientFactoryClass;
 
+	@Value("${org.highmed.dsf.bpe.pseudonymization.webservice.factory.class:org.highmed.pseudonymization.client.stub.PseudonymizationClientStubFactory}")
+	private String pseudonymizationClientFactoryClass;
+
 	@Value("${org.highmed.dsf.bpe.process.plugin.directroy:process}")
 	private String processPluginDirectory;
 
@@ -287,6 +290,11 @@ public class PropertiesConfig
 	public String getOpenEhrClientFactoryClass()
 	{
 		return openEhrClientFactoryClass;
+	}
+
+	public String getPseudonymizationClientFactoryClass()
+	{
+		return pseudonymizationClientFactoryClass;
 	}
 
 	public Path getProcessPluginDirectory()
