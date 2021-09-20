@@ -14,8 +14,6 @@ preferred-citation:
       given-names: Reto
     - family-names: Heidt
       given-names: Christian M.
-    - family-names: Kobylinski
-      given-names: Insa
     - family-names: Fegeler
       given-names: Christian
   title: "Executing Distributed Healthcare and Research Processes – The HiGHmed Data Sharing Framework"
@@ -41,8 +39,6 @@ references:
         given-names: Reto
       - family-names: Heidt
         given-names: Christian M.
-      - family-names: Kobylinski
-        given-names: Insa
       - family-names: Fegeler
         given-names: Christian
     title: "Executing Distributed Healthcare and Research Processes – The HiGHmed Data Sharing Framework"
