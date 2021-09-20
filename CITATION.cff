@@ -1,13 +1,33 @@
-cff-version: 1.1.0
-message: "If you use this software, please cite it as below."
+cff-version: 1.2.0
+message: "If you use this software, please cite both the article from preferred-citation and the software itself."
 authors:
   - family-names: Hund
     given-names: Hauke
   - family-names: Wettstein
     given-names: Reto
+  - name: Contributors of the HiGHmed DSF
+preferred-citation:
+  authors:
+    - family-names: Hund
+      given-names: Hauke
+    - family-names: Wettstein
+      given-names: Reto
+    - family-names: Heidt
+      given-names: Christian M.
+    - family-names: Kobylinski
+      given-names: Insa
+    - family-names: Fegeler
+      given-names: Christian
+  title: "Executing Distributed Healthcare and Research Processes – The HiGHmed Data Sharing Framework"
+  journal: Stud Health Technol Inform
+  volume: 278
+  year: 2021
+  pages: 126-133
+  doi: 10.3233/SHTI210060
+  type: proceedings
 title: "HiGHmed Data Sharing Framework (HiGHmed DSF)"
-version: 0.5.2
-date-released: 2021-09-07
+version: 0.6.0
+date-released: 2021-09-20
 url: https://github.com/highmed/highmed-dsf/wiki
 repository-code: https://github.com/highmed/highmed-dsf
 repository-artifact: https://github.com/highmed/highmed-dsf/releases
