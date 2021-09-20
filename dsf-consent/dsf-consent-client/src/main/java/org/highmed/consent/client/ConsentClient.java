@@ -14,7 +14,7 @@ public interface ConsentClient
 	 * Filters a given {@link ResultSet} based on an openEHR-EHR-ID and positive consent
 	 *
 	 * @param resultSet
-	 *            must have a row containing the openEHR-EHR-ID, not <code>null</code>
+	 *            must have a column containing the openEHR-EHR-ID, not <code>null</code>
 	 * @return a {@link ResultSet} based on an openEHR-EHR-ID and positive consent
 	 */
 	ResultSet checkConsent(ResultSet resultSet);
