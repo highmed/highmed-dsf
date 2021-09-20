@@ -17,5 +17,5 @@ public interface ConsentClient
 	 *            must have a column containing the openEHR-EHR-ID, not <code>null</code>
 	 * @return a {@link ResultSet} based on an openEHR-EHR-ID and positive consent
 	 */
-	ResultSet checkConsent(ResultSet resultSet);
+	ResultSet check(ResultSet resultSet);
 }

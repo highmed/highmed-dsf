@@ -19,7 +19,7 @@ public class ConsentClientStub implements ConsentClient
 	}
 
 	@Override
-	public ResultSet checkConsent(ResultSet resultSet)
+	public ResultSet check(ResultSet resultSet)
 	{
 		if (getEhrColumnIndex(resultSet.getColumns()) < 0)
 			throw new IllegalArgumentException("ResultSet does not contain an openEHR-EHR-ID");

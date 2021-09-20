@@ -22,6 +22,6 @@ public class ConsentClientStubTest
 		ConsentClient consentClient = new ConsentClientStubFactory()
 				.createClient((String key, String defaultValue) -> defaultValue);
 
-		consentClient.checkConsent(resultSet);
+		consentClient.check(resultSet);
 	}
 }
