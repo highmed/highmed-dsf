@@ -11,7 +11,7 @@
                </tag>
             </meta>
             <extension url="http://highmed.org/fhir/StructureDefinition/extension-certificate-thumbprint">
-               <valueString value="ce880877ff656c2195c8577a707c532b04e5f3a40f9640cc5264018b213e35630b3747c73d80da408ceb0bffb65af2d4a0ba313d1f55ed439a56a7706501e056"/>
+               <valueString value="${org.highmed.dsf.fhir.server.organization.thumbprint.ttp}"/>
             </extension>
             <identifier>
                <system value="http://highmed.org/sid/organization-identifier"/>
