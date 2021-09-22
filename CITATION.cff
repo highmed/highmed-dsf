@@ -79,3 +79,19 @@ references:
     year: 2021
     pages: 142-149
     doi: 10.3233/SHTI210062
+  - type: proceedings
+    authors:
+      - family-names: Wettstein
+        given-names: Reto
+      - family-names: Hund
+        given-names: Hauke
+      - family-names: Fegeler
+        given-names: Christian
+      - family-names: Heinze
+        given-names: Oliver
+    title: "Data Sharing in Distributed Architectures – Concept and Implementation in HiGHmed"
+    journal: Stud Health Technol Inform
+    volume: 283
+    year: 2021
+    pages: 111-118
+    doi: 10.3233/SHTI210548
