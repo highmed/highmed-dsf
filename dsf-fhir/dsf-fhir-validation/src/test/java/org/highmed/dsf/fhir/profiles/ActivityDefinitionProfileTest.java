@@ -40,9 +40,9 @@ public class ActivityDefinitionProfileTest
 					"highmed-coding-process-authorization-remote-all-0.5.0.xml",
 					"highmed-coding-process-authorization-remote-consortium-role-0.5.0.xml",
 					"highmed-coding-process-authorization-remote-organization-0.5.0.xml"),
-			Arrays.asList("highmed-read-access-tag-0.5.0.xml", "highmed-organization-type-0.5.0.xml",
+			Arrays.asList("highmed-read-access-tag-0.5.0.xml", "highmed-organization-role-0.6.0.xml",
 					"highmed-process-authorization-0.5.0.xml"),
-			Arrays.asList("highmed-read-access-tag-0.5.0.xml", "highmed-organization-type-0.5.0.xml",
+			Arrays.asList("highmed-read-access-tag-0.5.0.xml", "highmed-organization-role-0.6.0.xml",
 					"highmed-process-authorization-recipient-0.5.0.xml",
 					"highmed-process-authorization-requester-0.5.0.xml"));
 
@@ -125,7 +125,7 @@ public class ActivityDefinitionProfileTest
 		consortiumRole.addExtension("consortium", new Identifier()
 				.setSystem("http://highmed.org/sid/organization-identifier").setValue("consortium.org"));
 		consortiumRole.addExtension("role",
-				new Coding("http://highmed.org/fhir/CodeSystem/organization-type", "MeDIC", null));
+				new Coding("http://highmed.org/fhir/CodeSystem/organization-role", "MeDIC", null));
 		processAuthorization.addExtension("recipient", recipientCoding);
 
 		logResource(ad);
@@ -163,7 +163,7 @@ public class ActivityDefinitionProfileTest
 		consortiumRole.addExtension("consortium", new Identifier()
 				.setSystem("http://highmed.org/sid/organization-identifier").setValue("consortium.org"));
 		consortiumRole.addExtension("role",
-				new Coding("http://highmed.org/fhir/CodeSystem/organization-type", "MeDIC", null));
+				new Coding("http://highmed.org/fhir/CodeSystem/organization-role", "MeDIC", null));
 		processAuthorization.addExtension("recipient", recipientCoding);
 
 		logResource(ad);

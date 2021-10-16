@@ -23,7 +23,7 @@ public class CodeSystemTest
 	public void testCodeSystem() throws Exception
 	{
 		CodeSystem codeSystem = new CodeSystem();
-		codeSystem.setUrl("http://highmed.org/fhir/CodeSystem/organization-type");
+		codeSystem.setUrl("http://highmed.org/fhir/CodeSystem/organization-role");
 		codeSystem.setVersion("0.1.0");
 		codeSystem.setName("HiGHmed_Organization_Type");
 		codeSystem.setTitle("HiGHmed Organization Type");

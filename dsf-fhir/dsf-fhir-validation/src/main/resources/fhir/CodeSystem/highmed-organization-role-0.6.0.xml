@@ -5,15 +5,15 @@
 			<code value="ALL"/>
 		</tag>		
 	</meta>
-	<url value="http://highmed.org/fhir/CodeSystem/organization-type"/>
-	<version value="0.5.0"/>
-	<name value="HiGHmed_Organization_Type"/>
-	<title value="HiGHmed Organization Type"/>
-	<status value="retired"/>
+	<url value="http://highmed.org/fhir/CodeSystem/organization-role"/>
+	<version value="0.6.0"/>
+	<name value="HiGHmed_Organization_Role"/>
+	<title value="HiGHmed Organization Role"/>
+	<status value="active"/>
 	<experimental value="false"/>
 	<date value="2021-08-24"/>
 	<publisher value="HiGHmed"/>
-	<description value="CodeSystem with HiGHmed organization roles used in Organization resources"/>
+	<description value="CodeSystem with HiGHmed organization roles used in OrganizationAffiliation resources"/>
 	<caseSensitive value="true"/>
 	<hierarchyMeaning value="grouped-by"/>
 	<versionNeeded value="false"/>

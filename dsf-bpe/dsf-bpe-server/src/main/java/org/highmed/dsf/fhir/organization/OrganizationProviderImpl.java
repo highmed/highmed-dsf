@@ -1,8 +1,11 @@
 package org.highmed.dsf.fhir.organization;
 
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_ORGANIZATION_ROLE;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_ORGANIZATION_TYPE;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -17,6 +20,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -50,6 +54,12 @@ public class OrganizationProviderImpl implements OrganizationProvider, Initializ
 	public String getDefaultTypeSystem()
 	{
 		return CODESYSTEM_HIGHMED_ORGANIZATION_TYPE;
+	}
+
+	@Override
+	public String getDefaultRoleSystem()
+	{
+		return CODESYSTEM_HIGHMED_ORGANIZATION_ROLE;
 	}
 
 	@Override
@@ -120,6 +130,56 @@ public class OrganizationProviderImpl implements OrganizationProvider, Initializ
 
 		return resultSet.getEntry().stream().map(Bundle.BundleEntryComponent::getResource)
 				.filter(resource -> resource instanceof Organization).map(organization -> (Organization) organization);
+	}
+
+	@Override
+	public Stream<Organization> getOrganizationsByRole(String role)
+	{
+		Map<String, List<String>> searchParameters = Map.of("role",
+				Collections.singletonList(getDefaultRoleSystem() + "|" + role));
+
+		Bundle bundle = searchActiveOrganizationAffiliationsIncludingParticipatingOrganizations(searchParameters);
+		return extractOrganizations(bundle);
+	}
+
+	@Override
+	public Stream<Organization> getOrganizationsByConsortium(String consortiumIdentifier)
+	{
+		Map<String, List<String>> searchParameters = Map.of("primary-organization:identifier",
+				Collections.singletonList(
+						ConstantsBase.NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER + "|" + consortiumIdentifier));
+
+		Bundle bundle = searchActiveOrganizationAffiliationsIncludingParticipatingOrganizations(searchParameters);
+		return extractOrganizations(bundle);
+	}
+
+	@Override
+	public Stream<Organization> getOrganizationsByConsortiumAndRole(String consortiumIdentifier, String role)
+	{
+		Map<String, List<String>> searchParameters = Map.of("primary-organization:identifier",
+				Collections.singletonList(
+						ConstantsBase.NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER + "|" + consortiumIdentifier),
+				"role", Collections.singletonList(getDefaultRoleSystem() + "|" + role));
+
+		Bundle bundle = searchActiveOrganizationAffiliationsIncludingParticipatingOrganizations(searchParameters);
+		return extractOrganizations(bundle);
+	}
+
+	private Bundle searchActiveOrganizationAffiliationsIncludingParticipatingOrganizations(
+			Map<String, List<String>> additionalSearchParameters)
+	{
+		Map<String, List<String>> searchParameters = new HashMap<>(additionalSearchParameters);
+		searchParameters.put("active", Collections.singletonList("true"));
+		searchParameters.put("_include", Arrays.asList("OrganizationAffiliation:participating-organization"));
+
+		return clientProvider.getLocalWebserviceClient().searchWithStrictHandling(OrganizationAffiliation.class,
+				searchParameters);
+	}
+
+	private Stream<Organization> extractOrganizations(Bundle bundle)
+	{
+		return bundle.getEntry().stream().map(Bundle.BundleEntryComponent::getResource)
+				.filter(r -> r instanceof Organization).map(r -> (Organization) r);
 	}
 
 	@Override
