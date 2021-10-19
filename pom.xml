@@ -4,7 +4,7 @@
 
 	<groupId>org.highmed.dsf</groupId>
 	<artifactId>dsf-pom</artifactId>
-	<version>0.6.0-SNAPSHOT</version>
+	<version>0.5.3-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<modules>
@@ -26,11 +26,11 @@
 		<slf4j.version>1.8.0-beta4</slf4j.version>
 		<log4j.version>2.14.1</log4j.version>
 
-		<jetty.version>9.4.43.v20210629</jetty.version>
-		<jersey.version>2.34</jersey.version>
-		<tyrus.version>1.17</tyrus.version>
-		<jackson.version>2.12.4</jackson.version>
-		<spring.version>5.3.9</spring.version>
+		<jetty.version>9.4.44.v20210927</jetty.version>
+		<jersey.version>2.35</jersey.version>
+		<tyrus.version>1.18</tyrus.version>
+		<jackson.version>2.12.5</jackson.version>
+		<spring.version>5.3.11</spring.version>
 
 		<hapi.fhir.version>5.1.0</hapi.fhir.version>
 		<hapi.hl7v2.version>2.3</hapi.hl7v2.version>
@@ -109,7 +109,7 @@
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-core</artifactId>
-				<version>3.11.2</version>
+				<version>3.12.4</version>
 			</dependency>
 
 			<!-- database -->
@@ -121,19 +121,19 @@
 			<dependency>
 				<groupId>org.liquibase</groupId>
 				<artifactId>liquibase-core</artifactId>
-				<version>4.4.3</version>
+				<version>4.5.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.2.23</version>
+				<version>42.2.24</version>
 			</dependency>
 
 			<!-- hhn rwh -->
 			<dependency>
 				<groupId>de.hs-heilbronn.mi</groupId>
 				<artifactId>jetty-utils</artifactId>
-				<version>0.12.0</version>
+				<version>0.13.0</version>
 			</dependency>
 			<dependency>
 				<groupId>de.hs-heilbronn.mi</groupId>
@@ -148,7 +148,7 @@
 			<dependency>
 				<groupId>de.hs-heilbronn.mi</groupId>
 				<artifactId>db-test-utils</artifactId>
-				<version>0.12.0</version>
+				<version>0.13.0</version>
 			</dependency>
 
 			<dependency>
@@ -314,6 +314,23 @@
 				<version>${hapi.fhir.version}</version>
 			</dependency>
 
+			<!-- managing outdated dependencies from hapi fhir -->
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-compress</artifactId>
+  				<version>1.21</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpclient</artifactId>
+				<version>4.5.13</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>30.0-jre</version>
+			</dependency>
+
 			<!-- HL7 V2 -->
 			<dependency>
 				<groupId>ca.uhn.hapi</groupId>
@@ -371,7 +388,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-war-plugin</artifactId>
-					<version>3.3.1</version>
+					<version>3.3.2</version>
 					<configuration>
 						<archive>
 							<manifest>
@@ -393,7 +410,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>3.3.0</version>
+					<version>3.3.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
