@@ -30,13 +30,13 @@ public class EnvGenerator
 		final String userThumbprintVariableName;
 		final String userThumbprint;
 		final String userThumbprintsVariableName;
-		final Stream<String> userThumbprints;
+		final List<String> userThumbprints;
 		final String userThumbprintsPermanentDeleteVariableName;
-		final Stream<String> userThumbprintsPermanentDelete;
+		final List<String> userThumbprintsPermanentDelete;
 
 		EnvEntry(String userThumbprintVariableName, String userThumbprint, String userThumbprintsVariableName,
-				Stream<String> userThumbprints, String userThumbprintsPermanentDeleteVariableName,
-				Stream<String> userThumbprintsPermanentDelete)
+				List<String> userThumbprints, String userThumbprintsPermanentDeleteVariableName,
+				List<String> userThumbprintsPermanentDelete)
 		{
 			this.userThumbprintVariableName = userThumbprintVariableName;
 			this.userThumbprint = userThumbprint;
@@ -51,13 +51,15 @@ public class EnvGenerator
 	{
 		String bundleUserThumbprint = filterAndMapToThumbprint(clientCertificateFilesByCommonName, "test-client")
 				.findFirst().get();
-		Stream<String> confUserThumbprints = filterAndMapToThumbprint(clientCertificateFilesByCommonName, "test-client",
-				"Webbrowser Test User");
-		Stream<String> confUserThumbprintsPermanentDelete = filterAndMapToThumbprint(clientCertificateFilesByCommonName,
-				"test-client", "Webbrowser Test User");
+		List<String> confUserThumbprints = filterAndMapToThumbprint(clientCertificateFilesByCommonName, "test-client",
+				"Webbrowser Test User").collect(Collectors.toList());
+		List<String> confUserThumbprintsPermanentDelete = filterAndMapToThumbprint(clientCertificateFilesByCommonName,
+				"test-client", "Webbrowser Test User").collect(Collectors.toList());
 
-		writeEnvFile(Paths.get("../../dsf-docker-test-setup/fhir/.env"), bundleUserThumbprint, confUserThumbprints,
-				confUserThumbprintsPermanentDelete);
+		writeEnvFile(Paths.get("../../dsf-docker-test-setup/fhir/.env"),
+				Collections.singletonList(new EnvEntry(BUNDLE_USER_THUMBPRINT, bundleUserThumbprint,
+						CONF_USER_THUMBPRINTS, confUserThumbprints, CONF_USER_THUMBPRINTS_PERMANENTDELETE,
+						confUserThumbprintsPermanentDelete)));
 	}
 
 	public void generateAndWriteDockerTest3MedicTtpFhirEnvFiles(
@@ -65,43 +67,80 @@ public class EnvGenerator
 	{
 		String bundleMedic1UserThumbprint = filterAndMapToThumbprint(clientCertificateFilesByCommonName,
 				"medic1-client").findFirst().get();
-		Stream<String> confMedic1UserThumbprints = filterAndMapToThumbprint(clientCertificateFilesByCommonName,
-				"medic1-client", "Webbrowser Test User");
-		Stream<String> confMedic1UserThumbprintsPermanentDelete = filterAndMapToThumbprint(
-				clientCertificateFilesByCommonName, "medic1-client", "Webbrowser Test User");
-
-		writeEnvFile(Paths.get("../../dsf-docker-test-setup-3medic-ttp/medic1/fhir/.env"), bundleMedic1UserThumbprint,
-				confMedic1UserThumbprints, confMedic1UserThumbprintsPermanentDelete);
+		List<String> confMedic1UserThumbprints = filterAndMapToThumbprint(clientCertificateFilesByCommonName,
+				"medic1-client", "Webbrowser Test User").collect(Collectors.toList());
+		List<String> confMedic1UserThumbprintsPermanentDelete = filterAndMapToThumbprint(
+				clientCertificateFilesByCommonName, "medic1-client", "Webbrowser Test User")
+						.collect(Collectors.toList());
 
 		String bundleMedic2UserThumbprint = filterAndMapToThumbprint(clientCertificateFilesByCommonName,
 				"medic2-client").findFirst().get();
-		Stream<String> confMedic2UserThumbprints = filterAndMapToThumbprint(clientCertificateFilesByCommonName,
-				"medic2-client", "Webbrowser Test User");
-		Stream<String> confMedic2UserThumbprintsPermanentDelete = filterAndMapToThumbprint(
-				clientCertificateFilesByCommonName, "medic2-client", "Webbrowser Test User");
-
-		writeEnvFile(Paths.get("../../dsf-docker-test-setup-3medic-ttp/medic2/fhir/.env"), bundleMedic2UserThumbprint,
-				confMedic2UserThumbprints, confMedic2UserThumbprintsPermanentDelete);
+		List<String> confMedic2UserThumbprints = filterAndMapToThumbprint(clientCertificateFilesByCommonName,
+				"medic2-client", "Webbrowser Test User").collect(Collectors.toList());
+		List<String> confMedic2UserThumbprintsPermanentDelete = filterAndMapToThumbprint(
+				clientCertificateFilesByCommonName, "medic2-client", "Webbrowser Test User")
+						.collect(Collectors.toList());
 
 		String bundleMedic3UserThumbprint = filterAndMapToThumbprint(clientCertificateFilesByCommonName,
 				"medic3-client").findFirst().get();
-		Stream<String> confMedic3UserThumbprints = filterAndMapToThumbprint(clientCertificateFilesByCommonName,
-				"medic3-client", "Webbrowser Test User");
-		Stream<String> confMedic3UserThumbprintsPermanentDelete = filterAndMapToThumbprint(
-				clientCertificateFilesByCommonName, "medic3-client", "Webbrowser Test User");
-
-		writeEnvFile(Paths.get("../../dsf-docker-test-setup-3medic-ttp/medic3/fhir/.env"), bundleMedic3UserThumbprint,
-				confMedic3UserThumbprints, confMedic3UserThumbprintsPermanentDelete);
+		List<String> confMedic3UserThumbprints = filterAndMapToThumbprint(clientCertificateFilesByCommonName,
+				"medic3-client", "Webbrowser Test User").collect(Collectors.toList());
+		List<String> confMedic3UserThumbprintsPermanentDelete = filterAndMapToThumbprint(
+				clientCertificateFilesByCommonName, "medic3-client", "Webbrowser Test User")
+						.collect(Collectors.toList());
 
 		String bundleTtpUserThumbprint = filterAndMapToThumbprint(clientCertificateFilesByCommonName, "ttp-client")
 				.findFirst().get();
-		Stream<String> confTtpUserThumbprints = filterAndMapToThumbprint(clientCertificateFilesByCommonName,
-				"ttp-client", "Webbrowser Test User");
-		Stream<String> confTtpUserThumbprintsPermanentDelete = filterAndMapToThumbprint(
-				clientCertificateFilesByCommonName, "ttp-client", "Webbrowser Test User");
+		List<String> confTtpUserThumbprints = filterAndMapToThumbprint(clientCertificateFilesByCommonName, "ttp-client",
+				"Webbrowser Test User").collect(Collectors.toList());
+		List<String> confTtpUserThumbprintsPermanentDelete = filterAndMapToThumbprint(
+				clientCertificateFilesByCommonName, "ttp-client", "Webbrowser Test User").collect(Collectors.toList());
 
-		writeEnvFile(Paths.get("../../dsf-docker-test-setup-3medic-ttp/ttp/fhir/.env"), bundleTtpUserThumbprint,
-				confTtpUserThumbprints, confTtpUserThumbprintsPermanentDelete);
+		List<EnvEntry> medic1Entries = List.of(
+				new EnvEntry("MEDIC1_" + BUNDLE_USER_THUMBPRINT, bundleMedic1UserThumbprint,
+						"MEDIC1_" + CONF_USER_THUMBPRINTS, confMedic1UserThumbprints,
+						"MEDIC1_" + CONF_USER_THUMBPRINTS_PERMANENTDELETE, confMedic1UserThumbprintsPermanentDelete),
+				new EnvEntry("TTP_" + BUNDLE_USER_THUMBPRINT, bundleTtpUserThumbprint, "TTP_" + CONF_USER_THUMBPRINTS,
+						confTtpUserThumbprints, "TTP_" + CONF_USER_THUMBPRINTS_PERMANENTDELETE,
+						confTtpUserThumbprintsPermanentDelete));
+
+		writeEnvFile(Paths.get("../../dsf-docker-test-setup-3medic-ttp/medic1/fhir/.env"), medic1Entries);
+
+		List<EnvEntry> medic2Entries = List.of(
+				new EnvEntry("MEDIC2_" + BUNDLE_USER_THUMBPRINT, bundleMedic2UserThumbprint,
+						"MEDIC2_" + CONF_USER_THUMBPRINTS, confMedic2UserThumbprints,
+						"MEDIC2_" + CONF_USER_THUMBPRINTS_PERMANENTDELETE, confMedic2UserThumbprintsPermanentDelete),
+				new EnvEntry("TTP_" + BUNDLE_USER_THUMBPRINT, bundleTtpUserThumbprint, "TTP_" + CONF_USER_THUMBPRINTS,
+						confTtpUserThumbprints, "TTP_" + CONF_USER_THUMBPRINTS_PERMANENTDELETE,
+						confTtpUserThumbprintsPermanentDelete));
+
+		writeEnvFile(Paths.get("../../dsf-docker-test-setup-3medic-ttp/medic2/fhir/.env"), medic2Entries);
+
+		List<EnvEntry> medic3Entries = List.of(
+				new EnvEntry("MEDIC3_" + BUNDLE_USER_THUMBPRINT, bundleMedic3UserThumbprint,
+						"MEDIC3_" + CONF_USER_THUMBPRINTS, confMedic3UserThumbprints,
+						"MEDIC3_" + CONF_USER_THUMBPRINTS_PERMANENTDELETE, confMedic3UserThumbprintsPermanentDelete),
+				new EnvEntry("TTP_" + BUNDLE_USER_THUMBPRINT, bundleTtpUserThumbprint, "TTP_" + CONF_USER_THUMBPRINTS,
+						confTtpUserThumbprints, "TTP_" + CONF_USER_THUMBPRINTS_PERMANENTDELETE,
+						confTtpUserThumbprintsPermanentDelete));
+
+		writeEnvFile(Paths.get("../../dsf-docker-test-setup-3medic-ttp/medic3/fhir/.env"), medic3Entries);
+
+		List<EnvEntry> ttpEntries = List.of(
+				new EnvEntry("MEDIC1_" + BUNDLE_USER_THUMBPRINT, bundleMedic1UserThumbprint,
+						"MEDIC1_" + CONF_USER_THUMBPRINTS, confMedic1UserThumbprints,
+						"MEDIC1_" + CONF_USER_THUMBPRINTS_PERMANENTDELETE, confMedic1UserThumbprintsPermanentDelete),
+				new EnvEntry("MEDIC2_" + BUNDLE_USER_THUMBPRINT, bundleMedic2UserThumbprint,
+						"MEDIC2_" + CONF_USER_THUMBPRINTS, confMedic2UserThumbprints,
+						"MEDIC2_" + CONF_USER_THUMBPRINTS_PERMANENTDELETE, confMedic2UserThumbprintsPermanentDelete),
+				new EnvEntry("MEDIC3_" + BUNDLE_USER_THUMBPRINT, bundleMedic3UserThumbprint,
+						"MEDIC3_" + CONF_USER_THUMBPRINTS, confMedic3UserThumbprints,
+						"MEDIC3_" + CONF_USER_THUMBPRINTS_PERMANENTDELETE, confMedic3UserThumbprintsPermanentDelete),
+				new EnvEntry("TTP_" + BUNDLE_USER_THUMBPRINT, bundleTtpUserThumbprint, "TTP_" + CONF_USER_THUMBPRINTS,
+						confTtpUserThumbprints, "TTP_" + CONF_USER_THUMBPRINTS_PERMANENTDELETE,
+						confTtpUserThumbprintsPermanentDelete));
+
+		writeEnvFile(Paths.get("../../dsf-docker-test-setup-3medic-ttp/ttp/fhir/.env"), ttpEntries);
 	}
 
 	public void generateAndWriteDockerTest3MedicTtpDockerFhirEnvFiles(
@@ -109,31 +148,34 @@ public class EnvGenerator
 	{
 		String bundleMedic1UserThumbprint = filterAndMapToThumbprint(clientCertificateFilesByCommonName,
 				"medic1-client").findFirst().get();
-		Stream<String> confMedic1UserThumbprints = filterAndMapToThumbprint(clientCertificateFilesByCommonName,
-				"medic1-client", "Webbrowser Test User");
-		Stream<String> confMedic1UserThumbprintsPermanentDelete = filterAndMapToThumbprint(
-				clientCertificateFilesByCommonName, "medic1-client", "Webbrowser Test User");
+		List<String> confMedic1UserThumbprints = filterAndMapToThumbprint(clientCertificateFilesByCommonName,
+				"medic1-client", "Webbrowser Test User").collect(Collectors.toList());
+		List<String> confMedic1UserThumbprintsPermanentDelete = filterAndMapToThumbprint(
+				clientCertificateFilesByCommonName, "medic1-client", "Webbrowser Test User")
+						.collect(Collectors.toList());
 
 		String bundleMedic2UserThumbprint = filterAndMapToThumbprint(clientCertificateFilesByCommonName,
 				"medic2-client").findFirst().get();
-		Stream<String> confMedic2UserThumbprints = filterAndMapToThumbprint(clientCertificateFilesByCommonName,
-				"medic2-client", "Webbrowser Test User");
-		Stream<String> confMedic2UserThumbprintsPermanentDelete = filterAndMapToThumbprint(
-				clientCertificateFilesByCommonName, "medic2-client", "Webbrowser Test User");
+		List<String> confMedic2UserThumbprints = filterAndMapToThumbprint(clientCertificateFilesByCommonName,
+				"medic2-client", "Webbrowser Test User").collect(Collectors.toList());
+		List<String> confMedic2UserThumbprintsPermanentDelete = filterAndMapToThumbprint(
+				clientCertificateFilesByCommonName, "medic2-client", "Webbrowser Test User")
+						.collect(Collectors.toList());
 
 		String bundleMedic3UserThumbprint = filterAndMapToThumbprint(clientCertificateFilesByCommonName,
 				"medic3-client").findFirst().get();
-		Stream<String> confMedic3UserThumbprints = filterAndMapToThumbprint(clientCertificateFilesByCommonName,
-				"medic3-client", "Webbrowser Test User");
-		Stream<String> confMedic3UserThumbprintsPermanentDelete = filterAndMapToThumbprint(
-				clientCertificateFilesByCommonName, "medic3-client", "Webbrowser Test User");
+		List<String> confMedic3UserThumbprints = filterAndMapToThumbprint(clientCertificateFilesByCommonName,
+				"medic3-client", "Webbrowser Test User").collect(Collectors.toList());
+		List<String> confMedic3UserThumbprintsPermanentDelete = filterAndMapToThumbprint(
+				clientCertificateFilesByCommonName, "medic3-client", "Webbrowser Test User")
+						.collect(Collectors.toList());
 
 		String bundleTtpUserThumbprint = filterAndMapToThumbprint(clientCertificateFilesByCommonName, "ttp-client")
 				.findFirst().get();
-		Stream<String> confTtpUserThumbprints = filterAndMapToThumbprint(clientCertificateFilesByCommonName,
-				"ttp-client", "Webbrowser Test User");
-		Stream<String> confTtpUserThumbprintsPermanentDelete = filterAndMapToThumbprint(
-				clientCertificateFilesByCommonName, "ttp-client", "Webbrowser Test User");
+		List<String> confTtpUserThumbprints = filterAndMapToThumbprint(clientCertificateFilesByCommonName, "ttp-client",
+				"Webbrowser Test User").collect(Collectors.toList());
+		List<String> confTtpUserThumbprintsPermanentDelete = filterAndMapToThumbprint(
+				clientCertificateFilesByCommonName, "ttp-client", "Webbrowser Test User").collect(Collectors.toList());
 
 		List<EnvEntry> entries = List.of(
 				new EnvEntry("MEDIC1_" + BUNDLE_USER_THUMBPRINT, bundleMedic1UserThumbprint,
@@ -161,15 +203,6 @@ public class EnvGenerator
 				.map(CertificateFiles::getCertificateSha512ThumbprintHex);
 	}
 
-	private void writeEnvFile(Path traget, String bundleUserThumbprint, Stream<String> confUserThumbprints,
-			Stream<String> confUserThumbprintsPermanentDelete)
-	{
-		writeEnvFile(traget,
-				Collections.singletonList(new EnvEntry(BUNDLE_USER_THUMBPRINT, bundleUserThumbprint,
-						CONF_USER_THUMBPRINTS, confUserThumbprints, CONF_USER_THUMBPRINTS_PERMANENTDELETE,
-						confUserThumbprintsPermanentDelete)));
-	}
-
 	private void writeEnvFile(Path target, List<? extends EnvEntry> entries)
 	{
 		StringBuilder builder = new StringBuilder();
@@ -184,11 +217,11 @@ public class EnvGenerator
 			builder.append('\n');
 			builder.append(entry.userThumbprintsVariableName);
 			builder.append('=');
-			builder.append(entry.userThumbprints.collect(Collectors.joining(",")));
+			builder.append(entry.userThumbprints.stream().collect(Collectors.joining(",")));
 			builder.append('\n');
 			builder.append(entry.userThumbprintsPermanentDeleteVariableName);
 			builder.append('=');
-			builder.append(entry.userThumbprintsPermanentDelete.collect(Collectors.joining(",")));
+			builder.append(entry.userThumbprintsPermanentDelete.stream().collect(Collectors.joining(",")));
 
 			if ((i + 1) < entries.size())
 				builder.append("\n\n");

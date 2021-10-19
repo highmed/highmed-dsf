@@ -97,7 +97,7 @@ public class ValidationSupportWithFetchFromDb implements IValidationSupport, Ini
 			return resource;
 		}
 
-		if ("Measure".equals(getFhirContext().getResourceType(theClass)))
+		if (Measure.class.equals(theClass))
 		{
 			return theClass.cast(fetchMeasure(theUri));
 		}

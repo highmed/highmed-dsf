@@ -109,6 +109,7 @@ services:
       ORG_HIGHMED_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_MeDIC_1
       ORG_HIGHMED_DSF_FHIR_SERVER_ORGANIZATION_NAME: Test MeDIC 1
       ORG_HIGHMED_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT: ${MEDIC1_BUNDLE_USER_THUMBPRINT}
+      ORG_HIGHMED_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT_TTP: ${TTP_BUNDLE_USER_THUMBPRINT}
       ORG_HIGHMED_DSF_FHIR_SERVER_USER_THUMBPRINTS: ${MEDIC1_CONF_USER_THUMBPRINTS}
       ORG_HIGHMED_DSF_FHIR_SERVER_USER_THUMBPRINTS_PERMANENT_DELETE: ${MEDIC1_CONF_USER_THUMBPRINTS_PERMANENT_DELETE}
     networks:
@@ -160,6 +161,7 @@ services:
       ORG_HIGHMED_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_MeDIC_2
       ORG_HIGHMED_DSF_FHIR_SERVER_ORGANIZATION_NAME: Test MeDIC 2
       ORG_HIGHMED_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT: ${MEDIC2_BUNDLE_USER_THUMBPRINT}
+      ORG_HIGHMED_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT_TTP: ${TTP_BUNDLE_USER_THUMBPRINT}
       ORG_HIGHMED_DSF_FHIR_SERVER_USER_THUMBPRINTS: ${MEDIC2_CONF_USER_THUMBPRINTS}
       ORG_HIGHMED_DSF_FHIR_SERVER_USER_THUMBPRINTS_PERMANENT_DELETE: ${MEDIC2_CONF_USER_THUMBPRINTS_PERMANENT_DELETE}
     networks:
@@ -211,6 +213,7 @@ services:
       ORG_HIGHMED_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_MeDIC_3
       ORG_HIGHMED_DSF_FHIR_SERVER_ORGANIZATION_NAME: Test MeDIC 3
       ORG_HIGHMED_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT: ${MEDIC3_BUNDLE_USER_THUMBPRINT}
+      ORG_HIGHMED_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT_TTP: ${TTP_BUNDLE_USER_THUMBPRINT}
       ORG_HIGHMED_DSF_FHIR_SERVER_USER_THUMBPRINTS: ${MEDIC3_CONF_USER_THUMBPRINTS}
       ORG_HIGHMED_DSF_FHIR_SERVER_USER_THUMBPRINTS_PERMANENT_DELETE: ${MEDIC3_CONF_USER_THUMBPRINTS_PERMANENT_DELETE}
     networks:
@@ -262,6 +265,9 @@ services:
       ORG_HIGHMED_DSF_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_TTP
       ORG_HIGHMED_DSF_FHIR_SERVER_ORGANIZATION_NAME: Test TTP
       ORG_HIGHMED_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT: ${TTP_BUNDLE_USER_THUMBPRINT}
+      ORG_HIGHMED_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT_MEDIC1: ${MEDIC1_BUNDLE_USER_THUMBPRINT}
+      ORG_HIGHMED_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT_MEDIC2: ${MEDIC2_BUNDLE_USER_THUMBPRINT}
+      ORG_HIGHMED_DSF_FHIR_SERVER_ORGANIZATION_THUMBPRINT_MEDIC3: ${MEDIC3_BUNDLE_USER_THUMBPRINT}
       ORG_HIGHMED_DSF_FHIR_SERVER_USER_THUMBPRINTS: ${TTP_CONF_USER_THUMBPRINTS}
       ORG_HIGHMED_DSF_FHIR_SERVER_USER_THUMBPRINTS_PERMANENT_DELETE: ${TTP_CONF_USER_THUMBPRINTS_PERMANENT_DELETE}
     networks:
@@ -380,7 +386,7 @@ services:
       ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_USERNAME: medic2_camunda_server_user
       ORG_HIGHMED_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_MeDIC_2
       ORG_HIGHMED_DSF_BPE_FHIR_SERVER_BASE_URL: https://medic2-docker/fhir
-      ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: highmedorg_computeFeasibility/0.5.0,highmedorg_computeDataSharing/0.5.0,highmedorg_requestUpdateResources/0.5.0,highmedorg_updateAllowList/0.5.0
+      ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: highmedorg_computeFeasibility/0.5.0, highmedorg_computeDataSharing/0.5.0, highmedorg_requestUpdateResources/0.5.0, highmedorg_updateAllowList/0.5.0
       # property org.highmed.dsf.bpe.allow.list.organization should only be set for testing, do not configure property in production, potential security risk
       ORG_HIGHMED_DSF_BPE_ALLOW_LIST_ORGANIZATION: Test_TTP
     networks:
@@ -439,7 +445,11 @@ services:
       ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_USERNAME: medic3_camunda_server_user
       ORG_HIGHMED_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_MeDIC_3
       ORG_HIGHMED_DSF_BPE_FHIR_SERVER_BASE_URL: https://medic3-docker/fhir
-      ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: highmedorg_computeFeasibility/0.5.0,highmedorg_computeDataSharing/0.5.0,highmedorg_requestUpdateResources/0.5.0,highmedorg_updateAllowList/0.5.0
+      ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: >
+        highmedorg_computeFeasibility/0.5.0,
+        highmedorg_computeDataSharing/0.5.0,
+        highmedorg_requestUpdateResources/0.5.0,
+        highmedorg_updateAllowList/0.5.0
       # property org.highmed.dsf.bpe.allow.list.organization should only be set for testing, do not configure property in production, potential security risk
       ORG_HIGHMED_DSF_BPE_ALLOW_LIST_ORGANIZATION: Test_TTP
     networks:
@@ -498,7 +508,14 @@ services:
       ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_USERNAME: ttp_camunda_server_user
       ORG_HIGHMED_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_TTP
       ORG_HIGHMED_DSF_BPE_FHIR_SERVER_BASE_URL: https://ttp-docker/fhir
-      ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: highmedorg_executeUpdateResources/0.5.0,highmedorg_downloadAllowList/0.5.0,highmedorg_localServicesIntegration/0.5.0,highmedorg_requestFeasibility/0.5.0,highmedorg_executeFeasibility/0.5.0,highmedorg_requestDataSharing/0.5.0,highmedorg_executeDataSharing/0.5.0
+      ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: |
+        highmedorg_executeUpdateResources/0.5.0
+        highmedorg_downloadAllowList/0.5.0
+        highmedorg_localServicesIntegration/0.5.0
+        highmedorg_requestFeasibility/0.5.0
+        highmedorg_executeFeasibility/0.5.0
+        highmedorg_requestDataSharing/0.5.0
+        highmedorg_executeDataSharing/0.5.0
       # property org.highmed.dsf.bpe.allow.list.organization should only be set for testing, do not configure property in production, potential security risk
       ORG_HIGHMED_DSF_BPE_ALLOW_LIST_ORGANIZATION: Test_TTP
     networks:
