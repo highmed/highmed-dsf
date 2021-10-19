@@ -1,6 +1,7 @@
 package org.highmed.dsf.tools.db;
 
 import java.net.ConnectException;
+import java.net.UnknownHostException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -97,6 +98,18 @@ public final class DbMigrator
 				try
 				{
 					Thread.sleep(1000);
+				}
+				catch (InterruptedException e1)
+				{
+				}
+				retryOnConnectException(--times, run);
+			}
+			else if (cause instanceof UnknownHostException && times > 1)
+			{
+				logger.warn("UnknownHostException: trying again in 10s");
+				try
+				{
+					Thread.sleep(10_000);
 				}
 				catch (InterruptedException e1)
 				{
