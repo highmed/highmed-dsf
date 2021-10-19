@@ -110,10 +110,10 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.bpe.process.plugin.directroy:process}")
 	private String processPluginDirectory;
 
-	@Value("#{'${org.highmed.dsf.bpe.process.excluded:}'.split(',')}")
+	@Value("#{'${org.highmed.dsf.bpe.process.excluded:}'.trim().split('(,[ ]?)|(\\n)')}")
 	private List<String> processExcluded;
 
-	@Value("#{'${org.highmed.dsf.bpe.process.retired:}'.split(',')}")
+	@Value("#{'${org.highmed.dsf.bpe.process.retired:}'.trim().split('(,[ ]?)|(\\n)')}")
 	private List<String> processRetired;
 
 	@Value("${org.highmed.dsf.bpe.process.fhir.server.retry.max:-1}")

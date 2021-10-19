@@ -36,10 +36,10 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.fhir.server.page.count:20}")
 	private int defaultPageCount;
 
-	@Value("#{'${org.highmed.dsf.fhir.server.user.thumbprints}'.split(',')}")
+	@Value("#{'${org.highmed.dsf.fhir.server.user.thumbprints}'.trim().split('(,[ ]?)|(\\n)')}")
 	private List<String> userThumbprints;
 
-	@Value("#{'${org.highmed.dsf.fhir.server.user.thumbprints.permanent.delete}'.split(',')}")
+	@Value("#{'${org.highmed.dsf.fhir.server.user.thumbprints.permanent.delete}'.trim().split('(,[ ]?)|(\\n)')}")
 	private List<String> userPermanentDeleteThumbprints;
 
 	@Value("${org.highmed.dsf.fhir.server.organization.identifier.value}")
