@@ -246,6 +246,19 @@ public abstract class AbstractMatcher<P extends Person>
 
 				return new MatchResult<P>(median, matchedPerson);
 			}
+		},
+		/**
+		 * Execute no matching
+		 *
+		 * @see MatchedPerson#getMatches()
+		 */
+		NONE
+		{
+			@Override
+			public <P extends Person> MatchResult<P> calculateMatch(MatchedPerson<P> matchedPerson, P personToMatch)
+			{
+				return new MatchResult<P>(0.0, matchedPerson);
+			}
 		}
 	}
 }
