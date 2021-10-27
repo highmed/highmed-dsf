@@ -64,7 +64,7 @@ public class ProcessPluginDefinitionAndClassLoader
 		return classLoader;
 	}
 
-	public ApplicationContext createPluginApplicationContext(ApplicationContext mainContext)
+	public ApplicationContext getPluginApplicationContext(ApplicationContext mainContext)
 	{
 		if (context == null)
 		{
