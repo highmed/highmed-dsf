@@ -57,7 +57,6 @@ public class OpenEhrClientJersey extends AbstractJerseyClient implements OpenEhr
 		if (Response.Status.OK.getStatusCode() == response.getStatus())
 		{
 			ResultSet resultSet = response.readEntity(ResultSet.class);
-			response.close();
 
 			logResponse(resultSet);
 			return resultSet;

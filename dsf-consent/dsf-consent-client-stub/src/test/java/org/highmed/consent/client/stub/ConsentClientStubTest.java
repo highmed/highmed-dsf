@@ -1,5 +1,8 @@
 package org.highmed.consent.client.stub;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -22,6 +25,15 @@ public class ConsentClientStubTest
 		ConsentClient consentClient = new ConsentClientStubFactory()
 				.createClient((String key, String defaultValue) -> defaultValue);
 
-		consentClient.check(resultSet);
+		assertNotNull(consentClient);
+
+		int initialColumnsSize = resultSet.getColumns().size();
+		int initialRowsSize = resultSet.getRows().size();
+
+		ResultSet filteredResultSet = consentClient.removeRowsWithoutConsent(resultSet);
+
+		assertNotNull(filteredResultSet);
+		assertEquals(initialColumnsSize, filteredResultSet.getColumns().size());
+		assertEquals(initialRowsSize, filteredResultSet.getRows().size());
 	}
 }

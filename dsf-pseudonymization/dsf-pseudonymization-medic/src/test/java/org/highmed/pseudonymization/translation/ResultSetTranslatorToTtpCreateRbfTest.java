@@ -8,8 +8,6 @@ import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Random;
 
-import javax.crypto.SecretKey;
-
 import org.highmed.mpi.client.Idat;
 import org.highmed.mpi.client.IdatNotFoundException;
 import org.highmed.mpi.client.MasterPatientIndexClient;
@@ -20,7 +18,6 @@ import org.highmed.pseudonymization.bloomfilter.RecordBloomFilterGenerator;
 import org.highmed.pseudonymization.bloomfilter.RecordBloomFilterGeneratorImpl;
 import org.highmed.pseudonymization.bloomfilter.RecordBloomFilterGeneratorImpl.FieldBloomFilterLengths;
 import org.highmed.pseudonymization.bloomfilter.RecordBloomFilterGeneratorImpl.FieldWeights;
-import org.highmed.pseudonymization.crypto.AesGcmUtil;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

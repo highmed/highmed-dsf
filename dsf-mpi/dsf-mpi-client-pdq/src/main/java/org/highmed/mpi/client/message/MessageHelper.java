@@ -2,7 +2,6 @@ package org.highmed.mpi.client.message;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.highmed.mpi.client.Idat;
@@ -12,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.hl7v2.HL7Exception;
-import ca.uhn.hl7v2.model.v25.datatype.CWE;
 import ca.uhn.hl7v2.model.v25.datatype.CX;
 import ca.uhn.hl7v2.model.v25.datatype.DTM;
 import ca.uhn.hl7v2.model.v25.datatype.HD;
@@ -92,7 +90,8 @@ public class MessageHelper
 	{
 		ERR error = patientDemographicsQueryResult.getERR();
 
-		if (error.getHL7ErrorCode().getIdentifier().getValue() != null)
+		if (error != null && error.getHL7ErrorCode() != null && error.getHL7ErrorCode().getIdentifier() != null
+				&& error.getHL7ErrorCode().getIdentifier().getValue() != null)
 		{
 			String errorMessage = error.encode().replace("\r", "\n");
 			logger.warn("Error in patient demographics query result, error: {}", errorMessage);
@@ -153,7 +152,8 @@ public class MessageHelper
 		DTM birthDtm = pid.getDateTimeOfBirth().getTime();
 		String birthdate = birthDtm.getDay() + "." + birthDtm.getMonth() + "." + birthDtm.getYear();
 
-		String sex = Optional.ofNullable(pid.getAdministrativeSex().getValue()).orElse("").toUpperCase();
+		String sex = pid.getAdministrativeSex().getValue() == null ? ""
+				: pid.getAdministrativeSex().getValue().toUpperCase();
 
 		XAD[] patientAddresses = pid.getPatientAddress();
 		String street = "", zipCode = "", city = "", country = "";

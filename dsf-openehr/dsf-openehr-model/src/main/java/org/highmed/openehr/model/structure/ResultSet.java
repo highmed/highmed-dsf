@@ -59,7 +59,7 @@ public class ResultSet
 
 	public List<Column> getColumns()
 	{
-		return columns;
+		return Collections.unmodifiableList(columns);
 	}
 
 	public List<List<RowElement>> getRows()
