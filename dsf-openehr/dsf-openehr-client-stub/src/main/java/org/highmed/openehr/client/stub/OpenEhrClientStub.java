@@ -31,7 +31,7 @@ public class OpenEhrClientStub implements OpenEhrClient
 	public ResultSet query(String query, MultivaluedMap<String, Object> headers)
 	{
 		// TODO Implement correct check for default id query
-		if (query.startsWith("select count"))
+		if (query.toLowerCase().startsWith("select count"))
 		{
 			List<List<RowElement>> rows = Collections
 					.singletonList(Collections.singletonList(new IntegerRowElement(15)));

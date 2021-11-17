@@ -1,0 +1,5 @@
+package org.highmed.pseudonymization.translation;
+
+public interface ResultSetTranslatorToTtpCreateRbfOnlyDropOtherColumns extends ResultSetTranslatorToTtp
+{
+}

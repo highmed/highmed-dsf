@@ -166,7 +166,7 @@ public class ProcessAuthorizationHelperTest
 			affiliation.getParticipatingOrganization().getIdentifier()
 					.setSystem(ProcessAuthorizationHelper.ORGANIZATION_IDENTIFIER_SYSTEM).setValue("member.com");
 			affiliation.getCodeFirstRep().getCodingFirstRep()
-					.setSystem("http://highmed.org/fhir/CodeSystem/organization-type").setCode("MeDIC");
+					.setSystem("http://highmed.org/fhir/CodeSystem/organization-role").setCode("MeDIC");
 			assertTrue(recipientsList.get(0).isRecipientAuthorized(localUser, Collections.singleton(affiliation)));
 		}
 	}

@@ -21,11 +21,19 @@
 		</dependency>
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
+			<artifactId>dsf-consent-client-stub</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-openehr-client-stub</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-mpi-client-stub</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.highmed.dsf</groupId>
+			<artifactId>dsf-pseudonymization-client-stub</artifactId>
 		</dependency>
 
 		<dependency>
@@ -141,57 +149,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
-	<profiles>
-		<profile>
-			<id>copy-highmed-processes</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-dependency-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>copy-process-plugins-for-testing</id>
-								<phase>package</phase>
-								<goals>
-									<goal>copy</goal>
-								</goals>
-								<configuration>
-									<artifactItems>
-										<artifactItem>
-											<groupId>org.highmed.dsf</groupId>
-											<artifactId>dsf-bpe-process-ping</artifactId>
-											<version>${project.version}</version>
-										</artifactItem>
-										<artifactItem>
-											<groupId>org.highmed.dsf</groupId>
-											<artifactId>dsf-bpe-process-update-allow-list</artifactId>
-											<version>${project.version}</version>
-										</artifactItem>
-										<artifactItem>
-											<groupId>org.highmed.dsf</groupId>
-											<artifactId>dsf-bpe-process-update-resources</artifactId>
-											<version>${project.version}</version>
-										</artifactItem>
-										<artifactItem>
-											<groupId>org.highmed.dsf</groupId>
-											<artifactId>dsf-bpe-process-feasibility</artifactId>
-											<version>${project.version}</version>
-										</artifactItem>
-										<artifactItem>
-											<groupId>org.highmed.dsf</groupId>
-											<artifactId>dsf-bpe-process-local-services</artifactId>
-											<version>${project.version}</version>
-										</artifactItem>
-									</artifactItems>
-									<outputDirectory>process</outputDirectory>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
 </project>

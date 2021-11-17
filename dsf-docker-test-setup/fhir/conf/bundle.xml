@@ -121,11 +121,11 @@
             </participatingOrganization>
             <code>
                <coding>
-                  <system value="http://highmed.org/fhir/CodeSystem/organization-type"/>
+                  <system value="http://highmed.org/fhir/CodeSystem/organization-role"/>
                   <code value="MeDIC"/>
                </coding>
                <coding>
-                  <system value="http://highmed.org/fhir/CodeSystem/organization-type"/>
+                  <system value="http://highmed.org/fhir/CodeSystem/organization-role"/>
                   <code value="COS"/>
                </coding>
             </code>

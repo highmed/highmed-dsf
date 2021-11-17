@@ -24,7 +24,7 @@
 					</extension>
 					<extension url="role">
 						<valueCoding>
-							<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
+							<system value="http://highmed.org/fhir/CodeSystem/organization-role" />
 							<code value="DTS" />
 						</valueCoding>
 					</extension>
@@ -44,7 +44,7 @@
 					</extension>
 					<extension url="role">
 						<valueCoding>
-							<system value="http://highmed.org/fhir/CodeSystem/organization-type" />
+							<system value="http://highmed.org/fhir/CodeSystem/organization-role" />
 							<code value="COS" />
 						</valueCoding>
 					</extension>

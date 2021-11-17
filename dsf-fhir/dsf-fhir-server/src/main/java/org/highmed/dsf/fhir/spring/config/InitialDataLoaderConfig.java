@@ -1,5 +1,7 @@
 package org.highmed.dsf.fhir.spring.config;
 
+import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -19,6 +21,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.annotation.Order;
 
 import ca.uhn.fhir.parser.IParser;
 
@@ -45,6 +48,7 @@ public class InitialDataLoaderConfig
 		return new InitialDataLoaderImpl(commandConfig.commandFactory(), fhirConfig.fhirContext());
 	}
 
+	@Order(HIGHEST_PRECEDENCE)
 	@EventListener({ ContextRefreshedEvent.class })
 	public void onContextRefreshedEvent(ContextRefreshedEvent event) throws IOException
 	{

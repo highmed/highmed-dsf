@@ -31,12 +31,13 @@ import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class ResultSetTranslatorToTtpTestRbfOnly
+public class ResultSetTranslatorToTtpTestCreateRbfOnlyDropOthers
 {
-	private static final Logger logger = LoggerFactory.getLogger(ResultSetTranslatorToTtpTestRbfOnly.class);
+	private static final Logger logger = LoggerFactory
+			.getLogger(ResultSetTranslatorToTtpTestCreateRbfOnlyDropOthers.class);
 
 	@Test
-	public void testIdsOnly() throws Exception
+	public void testTranslateToTtp() throws Exception
 	{
 		Random random = new Random();
 
@@ -63,7 +64,7 @@ public class ResultSetTranslatorToTtpTestRbfOnly
 
 		MasterPatientIndexClient masterPatientIndexClient = new MasterPatientIndexClientTestImpl(idats);
 
-		ResultSetTranslatorToTtpRbfOnlyImpl translator = new ResultSetTranslatorToTtpRbfOnlyImpl(
+		ResultSetTranslatorToTtpCreateRbfOnlyDropOtherColumnsImpl translator = new ResultSetTranslatorToTtpCreateRbfOnlyDropOtherColumnsImpl(
 				"/ehr_status/subject/external_ref/id/value", recordBloomFilterGenerator, masterPatientIndexClient);
 
 		ObjectMapper openEhrObjectMapper = OpenEhrObjectMapperFactory.createObjectMapper();
@@ -114,7 +115,7 @@ public class ResultSetTranslatorToTtpTestRbfOnly
 			throw new IdatNotFoundException(id);
 		};
 
-		ResultSetTranslatorToTtpRbfOnlyImpl translator = new ResultSetTranslatorToTtpRbfOnlyImpl(
+		ResultSetTranslatorToTtpCreateRbfOnlyDropOtherColumnsImpl translator = new ResultSetTranslatorToTtpCreateRbfOnlyDropOtherColumnsImpl(
 				"/ehr_status/subject/external_ref/id/value", recordBloomFilterGenerator, masterPatientIndexClient);
 
 		List<List<RowElement>> rows = IntStream.range(0, 15)
@@ -152,9 +153,9 @@ public class ResultSetTranslatorToTtpTestRbfOnly
 			throw new IdatNotFoundException(id);
 		};
 
-		ResultSetTranslatorToTtpRbfOnlyImpl translator = new ResultSetTranslatorToTtpRbfOnlyImpl(
+		ResultSetTranslatorToTtpCreateRbfOnlyDropOtherColumnsImpl translator = new ResultSetTranslatorToTtpCreateRbfOnlyDropOtherColumnsImpl(
 				"/ehr_status/subject/external_ref/id/value", recordBloomFilterGenerator, masterPatientIndexClient,
-				ResultSetTranslatorToTtpRbfOnlyImpl.FILTER_ON_IDAT_NOT_FOUND_EXCEPTION);
+				ResultSetTranslatorToTtpCreateRbfOnlyDropOtherColumnsImpl.FILTER_ON_IDAT_NOT_FOUND_EXCEPTION);
 
 		List<List<RowElement>> rows = IntStream.range(0, 15)
 				.mapToObj(id -> Collections.<RowElement> singletonList(new StringRowElement(String.valueOf(id))))

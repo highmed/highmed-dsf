@@ -37,13 +37,49 @@ public interface ConstantsBase
 	String CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY = "correlation-key";
 	String CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR = "error";
 
+	/**
+	 * @deprecated as of release 0.6.0, use {@link #CODESYSTEM_HIGHMED_ORGANIZATION_ROLE} instead
+	 */
+	@Deprecated
 	String CODESYSTEM_HIGHMED_ORGANIZATION_TYPE = "http://highmed.org/fhir/CodeSystem/organization-type";
+	/**
+	 * @deprecated as of release 0.6.0, use {@link #CODESYSTEM_HIGHMED_ORGANIZATION_ROLE_VALUE_TTP} instead
+	 */
+	@Deprecated
 	String CODESYSTEM_HIGHMED_ORGANIZATION_TYPE_VALUE_TTP = "TTP";
+	/**
+	 * @deprecated as of release 0.6.0, use {@link #CODESYSTEM_HIGHMED_ORGANIZATION_ROLE_VALUE_MEDIC} instead
+	 */
+	@Deprecated
 	String CODESYSTEM_HIGHMED_ORGANIZATION_TYPE_VALUE_MEDIC = "MeDIC";
+	/**
+	 * @deprecated as of release 0.6.0, use {@link #CODESYSTEM_HIGHMED_ORGANIZATION_ROLE_VALUE_DTS} instead
+	 */
+	@Deprecated
 	String CODESYSTEM_HIGHMED_ORGANIZATION_TYPE_VALUE_DTS = "DTS";
+	/**
+	 * @deprecated as of release 0.6.0, use {@link #CODESYSTEM_HIGHMED_ORGANIZATION_ROLE_VALUE_COS} instead
+	 */
+	@Deprecated
 	String CODESYSTEM_HIGHMED_ORGANIZATION_TYPE_VALUE_COS = "COS";
+	/**
+	 * @deprecated as of release 0.6.0, use {@link #CODESYSTEM_HIGHMED_ORGANIZATION_ROLE_VALUE_CRR} instead
+	 */
+	@Deprecated
 	String CODESYSTEM_HIGHMED_ORGANIZATION_TYPE_VALUE_CRR = "CRR";
+	/**
+	 * @deprecated as of release 0.6.0, use {@link #CODESYSTEM_HIGHMED_ORGANIZATION_ROLE_VALUE_HRP} instead
+	 */
+	@Deprecated
 	String CODESYSTEM_HIGHMED_ORGANIZATION_TYPE_VALUE_HRP = "HRP";
+
+	String CODESYSTEM_HIGHMED_ORGANIZATION_ROLE = "http://highmed.org/fhir/CodeSystem/organization-role";
+	String CODESYSTEM_HIGHMED_ORGANIZATION_ROLE_VALUE_TTP = "TTP";
+	String CODESYSTEM_HIGHMED_ORGANIZATION_ROLE_VALUE_MEDIC = "MeDIC";
+	String CODESYSTEM_HIGHMED_ORGANIZATION_ROLE_VALUE_DTS = "DTS";
+	String CODESYSTEM_HIGHMED_ORGANIZATION_ROLE_VALUE_COS = "COS";
+	String CODESYSTEM_HIGHMED_ORGANIZATION_ROLE_VALUE_CRR = "CRR";
+	String CODESYSTEM_HIGHMED_ORGANIZATION_ROLE_VALUE_HRP = "HRP";
 
 	String CODESYSTEM_HIGHMED_QUERY_TYPE = "http://highmed.org/fhir/CodeSystem/query-type";
 	String CODESYSTEM_HIGMED_QUERY_TYPE_VALUE_AQL = "application/x-aql-query";

@@ -1,5 +1,7 @@
 package org.highmed.pseudonymization.translation;
 
+import static org.highmed.pseudonymization.openehr.Constants.RBF_COLUMN_PATH;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -17,8 +19,8 @@ import org.highmed.openehr.model.structure.ResultSet;
 import org.highmed.openehr.model.structure.RowElement;
 import org.highmed.pseudonymization.openehr.Constants;
 
-public class ResultSetTranslatorToTtpNoRbfImpl extends AbstractResultSetTranslator
-		implements ResultSetTranslatorToTtpNoRbf
+public class ResultSetTranslatorToTtpEncryptImpl extends AbstractResultSetTranslator
+		implements ResultSetTranslatorToTtpEncrypt
 {
 	private final String organizationIdentifier;
 	private final SecretKey organizationKey;
@@ -26,7 +28,7 @@ public class ResultSetTranslatorToTtpNoRbfImpl extends AbstractResultSetTranslat
 	private final SecretKey researchStudyKey;
 	private final String ehrIdColumnPath;
 
-	public ResultSetTranslatorToTtpNoRbfImpl(String organizationIdentifier, SecretKey organizationKey,
+	public ResultSetTranslatorToTtpEncryptImpl(String organizationIdentifier, SecretKey organizationKey,
 			String researchStudyIdentifier, SecretKey researchStudyKey, String ehrIdColumnPath)
 	{
 		this.organizationIdentifier = Objects.requireNonNull(organizationIdentifier, "organizationIdentifier");
@@ -40,14 +42,18 @@ public class ResultSetTranslatorToTtpNoRbfImpl extends AbstractResultSetTranslat
 	public ResultSet translate(ResultSet resultSet)
 	{
 		int ehrIdColumnIndex = getEhrColumnIndex(resultSet.getColumns());
+		int rbfColumnIndex = getRbfColumnIndex(resultSet.getColumns());
 
 		if (ehrIdColumnIndex < 0)
 			throw new IllegalArgumentException("Missing ehr id column with name '" + Constants.EHRID_COLUMN_NAME
 					+ "' and path '" + ehrIdColumnPath + "'");
 
+		if (ehrIdColumnIndex == rbfColumnIndex)
+			throw new IllegalArgumentException("Ehr id column index should not be equal to rbf column index");
+
 		Meta meta = copyMeta(resultSet.getMeta());
-		List<Column> columns = encodeColumnsWithEhrId(resultSet.getColumns());
-		List<List<RowElement>> rows = encodeRowsWithEhrId(ehrIdColumnIndex, resultSet.getRows());
+		List<Column> columns = replaceEhrIdWithMedicIdColumn(resultSet.getColumns());
+		List<List<RowElement>> rows = encryptNonRbfValues(ehrIdColumnIndex, rbfColumnIndex, resultSet.getRows());
 
 		return new ResultSet(meta, resultSet.getName(), resultSet.getQuery(), columns, rows);
 	}
@@ -61,13 +67,27 @@ public class ResultSetTranslatorToTtpNoRbfImpl extends AbstractResultSetTranslat
 		return -1;
 	}
 
+	private int getRbfColumnIndex(List<Column> columns)
+	{
+		for (int i = 0; i < columns.size(); i++)
+			if (isRbfColumn().test(columns.get(i)))
+				return i;
+
+		return -1;
+	}
+
 	private Predicate<? super Column> isEhrIdColumn()
 	{
 		return column -> Constants.EHRID_COLUMN_NAME.equals(column.getName())
 				&& ehrIdColumnPath.equals(column.getPath());
 	}
 
-	private List<Column> encodeColumnsWithEhrId(List<Column> columns)
+	private Predicate<? super Column> isRbfColumn()
+	{
+		return column -> Constants.RBF_COLUMN_NAME.equals(column.getName()) && RBF_COLUMN_PATH.equals(column.getPath());
+	}
+
+	private List<Column> replaceEhrIdWithMedicIdColumn(List<Column> columns)
 	{
 		Stream<Column> s1 = columns.stream().filter(isEhrIdColumn().negate()).map(copyColumn());
 		Stream<Column> s2 = newMedicIdColumn();
@@ -79,21 +99,24 @@ public class ResultSetTranslatorToTtpNoRbfImpl extends AbstractResultSetTranslat
 		return Stream.of(new Column(Constants.MEDICID_COLUMN_NAME, Constants.MEDICID_COLUMN_PATH));
 	}
 
-	private List<List<RowElement>> encodeRowsWithEhrId(int ehrIdColumnIndex, List<List<RowElement>> rows)
+	private List<List<RowElement>> encryptNonRbfValues(int ehrIdColumnIndex, int rbfColumnIndex,
+			List<List<RowElement>> rows)
 	{
-		return rows.parallelStream().map(encodeRowWithEhrId(ehrIdColumnIndex)).filter(e -> e != null)
+		return rows.parallelStream().map(encryptNonRbfValue(ehrIdColumnIndex, rbfColumnIndex)).filter(e -> e != null)
 				.collect(Collectors.toList());
 	}
 
-	private Function<List<RowElement>, List<RowElement>> encodeRowWithEhrId(int ehrIdColumnIndex)
+	private Function<List<RowElement>, List<RowElement>> encryptNonRbfValue(int ehrIdColumnIndex, int rbfColumnIndex)
 	{
 		return rowElements ->
 		{
 			List<RowElement> newRowElements = new ArrayList<>();
 			for (int i = 0; i < rowElements.size(); i++)
-				if (i != ehrIdColumnIndex)
+				if (i != ehrIdColumnIndex && i != rbfColumnIndex)
 					newRowElements.add(
 							toEncryptedMdatRowElement(rowElements.get(i), researchStudyKey, researchStudyIdentifier));
+				else if (i == rbfColumnIndex)
+					newRowElements.add(rowElements.get(i));
 
 			RowElement ehrId = rowElements.get(ehrIdColumnIndex);
 			newRowElements.add(encodeAsEncrypedMedicId(ehrId));

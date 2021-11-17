@@ -2091,7 +2091,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		ResearchStudy rs2 = new ResearchStudy();
 		getReadAccessHelper().addLocal(rs2);
 		getReadAccessHelper().addRole(rs2, "Parent_Organization",
-				"http://highmed.org/fhir/CodeSystem/organization-type", "MeDIC");
+				"http://highmed.org/fhir/CodeSystem/organization-role", "MeDIC");
 
 		ResearchStudy createdRs1 = researchStudyDao.create(rs1);
 		ResearchStudy createdRs2 = researchStudyDao.create(rs2);
@@ -2153,7 +2153,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		ResearchStudy rs3 = new ResearchStudy();
 		getReadAccessHelper().addLocal(rs3);
 		getReadAccessHelper().addRole(rs3, "Parent_Organization",
-				"http://highmed.org/fhir/CodeSystem/organization-type", "TTP");
+				"http://highmed.org/fhir/CodeSystem/organization-role", "TTP");
 
 		ResearchStudy createdRs1 = researchStudyDao.create(rs1);
 		ResearchStudy createdRs2 = researchStudyDao.create(rs2);
@@ -2508,7 +2508,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	{
 		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
 		ResearchStudy rs1 = new ResearchStudy();
-		readAccessHelper.addRole(rs1, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-type",
+		readAccessHelper.addRole(rs1, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-role",
 				"TTP");
 		rs1 = researchStudyDao.create(rs1);
 
@@ -2529,7 +2529,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	{
 		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
 		ResearchStudy rs1 = new ResearchStudy();
-		readAccessHelper.addRole(rs1, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-type",
+		readAccessHelper.addRole(rs1, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-role",
 				"DTS");
 		rs1 = researchStudyDao.create(rs1);
 
@@ -2550,9 +2550,9 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	{
 		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
 		ResearchStudy rs1 = new ResearchStudy();
-		readAccessHelper.addRole(rs1, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-type",
+		readAccessHelper.addRole(rs1, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-role",
 				"TTP");
-		readAccessHelper.addRole(rs1, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-type",
+		readAccessHelper.addRole(rs1, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-role",
 				"DTS");
 		rs1 = researchStudyDao.create(rs1);
 
@@ -2573,7 +2573,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	{
 		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
 		ResearchStudy rs1 = new ResearchStudy();
-		readAccessHelper.addRole(rs1, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-type",
+		readAccessHelper.addRole(rs1, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-role",
 				"HRP");
 		rs1 = researchStudyDao.create(rs1);
 

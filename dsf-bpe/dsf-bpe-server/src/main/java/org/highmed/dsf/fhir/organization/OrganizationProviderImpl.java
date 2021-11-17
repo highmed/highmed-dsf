@@ -1,8 +1,12 @@
 package org.highmed.dsf.fhir.organization;
 
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_ORGANIZATION_ROLE;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_ORGANIZATION_TYPE;
+import static org.highmed.dsf.bpe.ConstantsBase.NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -11,12 +15,12 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -47,15 +51,22 @@ public class OrganizationProviderImpl implements OrganizationProvider, Initializ
 	}
 
 	@Override
+	@Deprecated
 	public String getDefaultTypeSystem()
 	{
 		return CODESYSTEM_HIGHMED_ORGANIZATION_TYPE;
 	}
 
 	@Override
+	public String getDefaultRoleSystem()
+	{
+		return CODESYSTEM_HIGHMED_ORGANIZATION_ROLE;
+	}
+
+	@Override
 	public String getDefaultIdentifierSystem()
 	{
-		return ConstantsBase.NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER;
+		return NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER;
 	}
 
 	@Override
@@ -120,6 +131,57 @@ public class OrganizationProviderImpl implements OrganizationProvider, Initializ
 
 		return resultSet.getEntry().stream().map(Bundle.BundleEntryComponent::getResource)
 				.filter(resource -> resource instanceof Organization).map(organization -> (Organization) organization);
+	}
+
+	@Override
+	public Stream<Organization> getOrganizationsByRole(String roleSystem, String roleValue)
+	{
+		Map<String, List<String>> searchParameters = Map.of("role",
+				Collections.singletonList(roleSystem + "|" + roleValue));
+
+		Bundle bundle = searchActiveOrganizationAffiliationsIncludingParticipatingOrganizations(searchParameters);
+		return extractActiveOrganizations(bundle);
+	}
+
+	@Override
+	public Stream<Organization> getOrganizationsByConsortium(String consortiumIdentifierSystem,
+			String consortiumIdentifierValue)
+	{
+		Map<String, List<String>> searchParameters = Map.of("primary-organization:identifier",
+				Collections.singletonList(consortiumIdentifierSystem + "|" + consortiumIdentifierValue));
+
+		Bundle bundle = searchActiveOrganizationAffiliationsIncludingParticipatingOrganizations(searchParameters);
+		return extractActiveOrganizations(bundle);
+	}
+
+	@Override
+	public Stream<Organization> getOrganizationsByConsortiumAndRole(String consortiumIdentifierSystem,
+			String consortiumIdentifierValue, String roleSystem, String roleValue)
+	{
+		Map<String, List<String>> searchParameters = Map.of("primary-organization:identifier",
+				Collections.singletonList(consortiumIdentifierSystem + "|" + consortiumIdentifierValue), "role",
+				Collections.singletonList(roleSystem + "|" + roleValue));
+
+		Bundle bundle = searchActiveOrganizationAffiliationsIncludingParticipatingOrganizations(searchParameters);
+		return extractActiveOrganizations(bundle);
+	}
+
+	private Bundle searchActiveOrganizationAffiliationsIncludingParticipatingOrganizations(
+			Map<String, List<String>> additionalSearchParameters)
+	{
+		Map<String, List<String>> searchParameters = new HashMap<>(additionalSearchParameters);
+		searchParameters.put("active", Collections.singletonList("true"));
+		searchParameters.put("_include", Arrays.asList("OrganizationAffiliation:participating-organization"));
+
+		return clientProvider.getLocalWebserviceClient().searchWithStrictHandling(OrganizationAffiliation.class,
+				searchParameters);
+	}
+
+	private Stream<Organization> extractActiveOrganizations(Bundle bundle)
+	{
+		return bundle.getEntry().stream().map(Bundle.BundleEntryComponent::getResource)
+				.filter(r -> r instanceof Organization).map(r -> (Organization) r)
+				.filter(o -> o.hasActive() && Boolean.TRUE.equals(o.getActive()));
 	}
 
 	@Override
