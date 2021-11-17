@@ -51,6 +51,7 @@ public class OrganizationProviderImpl implements OrganizationProvider, Initializ
 	}
 
 	@Override
+	@Deprecated
 	public String getDefaultTypeSystem()
 	{
 		return CODESYSTEM_HIGHMED_ORGANIZATION_TYPE;
