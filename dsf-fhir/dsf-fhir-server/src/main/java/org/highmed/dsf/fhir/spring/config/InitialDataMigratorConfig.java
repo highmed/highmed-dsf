@@ -2,13 +2,12 @@ package org.highmed.dsf.fhir.spring.config;
 
 import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
 
-import java.io.IOException;
 import java.util.List;
 
 import org.highmed.dsf.fhir.service.InitialDataMigrator;
 import org.highmed.dsf.fhir.service.InitialDataMigratorImpl;
-import org.highmed.dsf.fhir.service.migration.CodeSystemOrganizationTypeToRoleMigrationEvent;
-import org.highmed.dsf.fhir.service.migration.MigrationEvent;
+import org.highmed.dsf.fhir.service.migration.CodeSystemOrganizationTypeToRoleMigrationJob;
+import org.highmed.dsf.fhir.service.migration.MigrationJob;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,27 +22,27 @@ public class InitialDataMigratorConfig
 	public DaoConfig daoConfig;
 
 	@Bean
-	public List<MigrationEvent> migrationEvents()
+	public CodeSystemOrganizationTypeToRoleMigrationJob codeSystemOrganizationTypeToRoleMigrationJob()
 	{
-		return List.of(codeSystemOrganizationTypeToRoleMigrationEvent());
+		return new CodeSystemOrganizationTypeToRoleMigrationJob(daoConfig.organizationAffiliationDao());
 	}
 
 	@Bean
-	public CodeSystemOrganizationTypeToRoleMigrationEvent codeSystemOrganizationTypeToRoleMigrationEvent()
+	public List<MigrationJob> migrationJobs()
 	{
-		return new CodeSystemOrganizationTypeToRoleMigrationEvent(daoConfig.organizationAffiliationDao());
+		return List.of(codeSystemOrganizationTypeToRoleMigrationJob());
 	}
 
 	@Bean
 	public InitialDataMigrator initialDataMigrator()
 	{
-		return new InitialDataMigratorImpl();
+		return new InitialDataMigratorImpl(migrationJobs());
 	}
 
 	@Order(HIGHEST_PRECEDENCE + 1)
 	@EventListener({ ContextRefreshedEvent.class })
-	public void onContextRefreshedEvent(ContextRefreshedEvent event) throws IOException
+	public void onContextRefreshedEvent(ContextRefreshedEvent event) throws Exception
 	{
-		initialDataMigrator().migrate(migrationEvents());
+		initialDataMigrator().execute();
 	}
 }

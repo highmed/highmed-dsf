@@ -12,16 +12,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-public class CodeSystemOrganizationTypeToRoleMigrationEvent implements MigrationEvent, InitializingBean
+public class CodeSystemOrganizationTypeToRoleMigrationJob implements MigrationJob, InitializingBean
 {
-	private static final Logger logger = LoggerFactory.getLogger(CodeSystemOrganizationTypeToRoleMigrationEvent.class);
+	private static final Logger logger = LoggerFactory.getLogger(CodeSystemOrganizationTypeToRoleMigrationJob.class);
 
 	private static final String CODESYSTEM_ORGANIZATION_TYPE_URL = "http://highmed.org/fhir/CodeSystem/organization-type";
 	private static final String CODESYSTEM_ORGANIZATION_ROLE_URL = "http://highmed.org/fhir/CodeSystem/organization-role";
 
 	private final OrganizationAffiliationDao affiliationDao;
 
-	public CodeSystemOrganizationTypeToRoleMigrationEvent(OrganizationAffiliationDao affiliationDao)
+	public CodeSystemOrganizationTypeToRoleMigrationJob(OrganizationAffiliationDao affiliationDao)
 	{
 		this.affiliationDao = affiliationDao;
 	}
