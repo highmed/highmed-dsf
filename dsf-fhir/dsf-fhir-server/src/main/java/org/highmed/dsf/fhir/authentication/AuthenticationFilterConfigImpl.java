@@ -1,47 +1,52 @@
 package org.highmed.dsf.fhir.authentication;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class AuthenticationFilterConfigImpl implements AuthenticationFilterConfig
 {
-	public static AuthenticationFilterConfig createConfigForPathsRequiringAuthentication(String servletPath,
-			NeedsAuthentication... services)
+	public static AuthenticationFilterConfig createConfigForPathsRequiringAuthentication(
+			List<NeedsAuthentication> servicesRequiringAuthentication,
+			List<DoesNotNeedAuthentication> servicesNotRequiringAuthentication)
 	{
-		return createConfigForPathsRequiringAuthentication("", Arrays.asList(services));
-	}
-
-	public static AuthenticationFilterConfig createConfigForPathsRequiringAuthentication(String servletPath,
-			List<NeedsAuthentication> services)
-	{
-		Objects.requireNonNull(servletPath, "servletPath");
-
-		List<String> pathFromServices = services.stream().map(s ->
+		List<String> pathsRequiringAuthentication = servicesRequiringAuthentication.stream().map(s ->
 		{
 			String path = s.getPath();
-			return servletPath + (path.startsWith("/") ? path : "/" + path);
+			return path.startsWith("/") ? path : "/" + path;
 
 		}).collect(Collectors.toList());
 
-		return new AuthenticationFilterConfigImpl(pathFromServices);
+		List<String> pathsNotRequiringAuthentication = servicesNotRequiringAuthentication.stream().map(s ->
+		{
+			String path = s.getPath();
+			return path.startsWith("/") ? path : "/" + path;
+
+		}).collect(Collectors.toList());
+
+		return new AuthenticationFilterConfigImpl(pathsRequiringAuthentication, pathsNotRequiringAuthentication);
 	}
 
 	private static final Logger logger = LoggerFactory.getLogger(AuthenticationFilterConfigImpl.class);
 
 	private final List<String> pathsRequiringAuthentication;
+	private final List<String> pathsNotRequiringAuthentication;
 
-	private AuthenticationFilterConfigImpl(List<String> pathsRequiringAuthentication)
+	private AuthenticationFilterConfigImpl(List<String> pathsRequiringAuthentication,
+			List<String> pathsNotRequiringAuthentication)
 	{
 		this.pathsRequiringAuthentication = pathsRequiringAuthentication;
+		this.pathsNotRequiringAuthentication = pathsNotRequiringAuthentication;
 
 		logger.info("Paths requiring authentication: '{}'", pathsRequiringAuthentication);
+		logger.info("Paths not requiring authentication: '{}'", pathsNotRequiringAuthentication);
 	}
 
 	public boolean needsAuthentication(HttpServletRequest request)
@@ -50,12 +55,20 @@ public class AuthenticationFilterConfigImpl implements AuthenticationFilterConfi
 
 		String path = request.getServletPath() + request.getPathInfo();
 
-		boolean needsAuthentication = pathsRequiringAuthentication.stream().map(p -> path.startsWith(p)).filter(b -> b)
-				.findAny().orElse(false);
-
-		if (needsAuthentication)
-			logger.debug("Request path: '{}{}' needs authentication", request.getServletPath(), request.getPathInfo());
-
-		return needsAuthentication;
+		if (pathsRequiringAuthentication.contains(path))
+		{
+			logger.debug("Request path: '{}' needs authentication", path);
+			return true;
+		}
+		else if (pathsNotRequiringAuthentication.contains(path))
+		{
+			logger.debug("Request path: '{}' does not need authentication", path);
+			return false;
+		}
+		else
+		{
+			logger.warn("Request path: '{}' not configured, sending 401 Unauthorized", path);
+			throw new WebApplicationException(Status.UNAUTHORIZED);
+		}
 	}
 }

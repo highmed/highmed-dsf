@@ -24,6 +24,7 @@ import org.highmed.dsf.fhir.webservice.impl.ProvenanceServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.ResearchStudyServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.RootServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.StaticResourcesServiceImpl;
+import org.highmed.dsf.fhir.webservice.impl.StatusServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.StructureDefinitionServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.SubscriptionServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.TaskServiceImpl;
@@ -50,6 +51,7 @@ import org.highmed.dsf.fhir.webservice.jaxrs.ProvenanceServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.ResearchStudyServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.RootServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.StaticResourcesServiceJaxrs;
+import org.highmed.dsf.fhir.webservice.jaxrs.StatusServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.StructureDefinitionServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.SubscriptionServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.TaskServiceJaxrs;
@@ -76,6 +78,7 @@ import org.highmed.dsf.fhir.webservice.secure.ProvenanceServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.ResearchStudyServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.RootServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.StaticResourcesServiceSecure;
+import org.highmed.dsf.fhir.webservice.secure.StatusServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.StructureDefinitionServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.SubscriptionServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.TaskServiceSecure;
@@ -102,6 +105,7 @@ import org.highmed.dsf.fhir.webservice.specification.ProvenanceService;
 import org.highmed.dsf.fhir.webservice.specification.ResearchStudyService;
 import org.highmed.dsf.fhir.webservice.specification.RootService;
 import org.highmed.dsf.fhir.webservice.specification.StaticResourcesService;
+import org.highmed.dsf.fhir.webservice.specification.StatusService;
 import org.highmed.dsf.fhir.webservice.specification.StructureDefinitionService;
 import org.highmed.dsf.fhir.webservice.specification.SubscriptionService;
 import org.highmed.dsf.fhir.webservice.specification.TaskService;
@@ -814,5 +818,21 @@ public class WebserviceConfig
 	private StaticResourcesServiceImpl staticResourcesServiceImpl()
 	{
 		return new StaticResourcesServiceImpl(StaticResourcesServiceJaxrs.PATH);
+	}
+
+	@Bean
+	public StatusService statusService()
+	{
+		return new StatusServiceJaxrs(statusServiceSecure());
+	}
+
+	private StatusService statusServiceSecure()
+	{
+		return new StatusServiceSecure(statusServiceImpl());
+	}
+
+	private StatusService statusServiceImpl()
+	{
+		return new StatusServiceImpl(StatusServiceJaxrs.PATH, daoConfig.dataSource());
 	}
 }

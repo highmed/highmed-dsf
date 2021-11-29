@@ -76,6 +76,9 @@ public final class FhirServer
 
 		HttpConfiguration httpConfiguration = httpConfiguration(customizerBuilder.apply(properties));
 		Function<Server, ServerConnector> connector = connectorBuilder.apply(httpConfiguration, properties);
+		Function<Server, ServerConnector> statusConnector = JettyServer.httpConnector(httpConfiguration(), "localhost",
+				8888);
+		List<Function<Server, ServerConnector>> connectors = Arrays.asList(connector, statusConnector);
 
 		Predicate<String> filter = s -> s.contains("fhir-server");
 		Stream<String> webInfClassesDirs = webInfClassesDirs(filter);
@@ -92,7 +95,7 @@ public final class FhirServer
 			filters.add(CorsFilter.class);
 
 		@SuppressWarnings("unchecked")
-		JettyServer server = new JettyServer(connector, errorHandler, "/fhir", initializers, null, webInfClassesDirs,
+		JettyServer server = new JettyServer(connectors, errorHandler, "/fhir", initializers, null, webInfClassesDirs,
 				webInfJars, filters.toArray(new Class[filters.size()]));
 
 		server.getWebAppContext().addEventListener(new SessionInvalidator());
