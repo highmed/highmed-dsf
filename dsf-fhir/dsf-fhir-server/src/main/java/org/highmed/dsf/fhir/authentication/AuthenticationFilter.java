@@ -67,12 +67,16 @@ public class AuthenticationFilter implements Filter
 			if (user.isPresent())
 			{
 				logger.debug("User '{}' with role '{}' authenticated", user.get().getName(), user.get().getRole());
-				setUserAttribute(httpServletRequest, user.get());
+				httpServletRequest.getSession().setAttribute(USER_PROPERTY, user.get());
 
 				chain.doFilter(httpServletRequest, httpServletResponse);
 			}
 			else
-				unauthoized(httpServletRequest, httpServletResponse);
+			{
+				logger.warn("User '{}' not found, sending unauthorized",
+						getCertificateDn(httpServletRequest).orElse("?"));
+				httpServletResponse.sendError(Status.UNAUTHORIZED.getStatusCode());
+			}
 		}
 	}
 
@@ -88,17 +92,6 @@ public class AuthenticationFilter implements Filter
 		}
 		else
 			return organizationProvider.getOrganization(certificates[0]);
-	}
-
-	private void setUserAttribute(HttpServletRequest request, User user)
-	{
-		request.getSession().setAttribute(USER_PROPERTY, user);
-	}
-
-	private void unauthoized(HttpServletRequest httpServletRequest, HttpServletResponse response) throws IOException
-	{
-		logger.warn("User '{}' not found, sending unauthorized", getCertificateDn(httpServletRequest).orElse("?"));
-		response.sendError(Status.UNAUTHORIZED.getStatusCode());
 	}
 
 	private Optional<String> getCertificateDn(HttpServletRequest httpServletRequest)

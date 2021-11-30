@@ -228,11 +228,9 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 	private final ParameterConverter parameterConverter;
 	private final IValidationSupport validationSupport;
 
-	public ConformanceServiceImpl(String path, String serverBase, int defaultPageCount, BuildInfoReader buildInfoReader,
+	public ConformanceServiceImpl(String serverBase, int defaultPageCount, BuildInfoReader buildInfoReader,
 			ParameterConverter parameterConverter, IValidationSupport validationSupport)
 	{
-		super(path);
-
 		this.serverBase = serverBase;
 		this.defaultPageCount = defaultPageCount;
 		this.buildInfoReader = buildInfoReader;
@@ -243,8 +241,6 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
-		super.afterPropertiesSet();
-
 		Objects.requireNonNull(serverBase, "serverBase");
 		Objects.requireNonNull(buildInfoReader, "buildInfoReader");
 		Objects.requireNonNull(parameterConverter, "parameterConverter");

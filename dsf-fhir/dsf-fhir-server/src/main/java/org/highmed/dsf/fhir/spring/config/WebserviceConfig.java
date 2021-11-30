@@ -779,9 +779,9 @@ public class WebserviceConfig
 
 	private RootServiceImpl rootServiceImpl()
 	{
-		return new RootServiceImpl(RootServiceJaxrs.PATH, commandConfig.commandFactory(),
-				helperConfig.responseGenerator(), helperConfig.parameterConverter(), helperConfig.exceptionHandler(),
-				referenceConfig.referenceCleaner(), historyConfig.historyService());
+		return new RootServiceImpl(commandConfig.commandFactory(), helperConfig.responseGenerator(),
+				helperConfig.parameterConverter(), helperConfig.exceptionHandler(), referenceConfig.referenceCleaner(),
+				historyConfig.historyService());
 	}
 
 	@Bean
@@ -798,9 +798,9 @@ public class WebserviceConfig
 
 	private ConformanceServiceImpl conformanceServiceImpl()
 	{
-		return new ConformanceServiceImpl(ConformanceServiceJaxrs.PATH, propertiesConfig.getServerBaseUrl(),
-				propertiesConfig.getDefaultPageCount(), buildInfoReaderConfig.buildInfoReader(),
-				helperConfig.parameterConverter(), validationConfig.validationSupport());
+		return new ConformanceServiceImpl(propertiesConfig.getServerBaseUrl(), propertiesConfig.getDefaultPageCount(),
+				buildInfoReaderConfig.buildInfoReader(), helperConfig.parameterConverter(),
+				validationConfig.validationSupport());
 	}
 
 	@Bean
@@ -817,7 +817,7 @@ public class WebserviceConfig
 
 	private StaticResourcesServiceImpl staticResourcesServiceImpl()
 	{
-		return new StaticResourcesServiceImpl(StaticResourcesServiceJaxrs.PATH);
+		return new StaticResourcesServiceImpl();
 	}
 
 	@Bean

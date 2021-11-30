@@ -37,16 +37,14 @@ public class StatusServiceSecure implements StatusService, InitializingBean
 	}
 
 	@Override
-	public Response status(UriInfo uri, HttpHeaders headers, HttpServletRequest httpServletRequest)
+	public Response status(UriInfo uri, HttpHeaders headers, HttpServletRequest request)
 	{
-		logger.debug("Local port {}", httpServletRequest.getLocalPort());
-
-		if (httpServletRequest.getLocalPort() != 8888)
+		if (request.getLocalPort() != PORT)
 		{
-			logger.warn("Sending '401 Unauthorized' request not on status port 8888");
+			logger.warn("Sending '401 Unauthorized' request not on status port {}", PORT);
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		else
-			return delegate.status(uri, headers, httpServletRequest);
+			return delegate.status(uri, headers, request);
 	}
 }

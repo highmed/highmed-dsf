@@ -9,5 +9,7 @@ import org.highmed.dsf.fhir.authentication.DoesNotNeedAuthentication;
 
 public interface StatusService extends DoesNotNeedAuthentication
 {
+	int PORT = 10001;
+
 	Response status(UriInfo uri, HttpHeaders headers, HttpServletRequest httpServletRequest);
 }
