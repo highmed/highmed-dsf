@@ -74,6 +74,11 @@ services:
     restart: on-failure
     ports:
      - 127.0.0.1:5001:5001
+    healthcheck:
+      test: ["CMD", "java", "-cp", "dsf_fhir.jar", "org.highmed.dsf.fhir.StatusClient"]
+      interval: 10s
+      timeout: 15s
+      retries: 5
     secrets:
       - db_liquibase.password
       - db_medic1_fhir_user.password
@@ -126,6 +131,11 @@ services:
     restart: on-failure
     ports:
      - 127.0.0.1:5002:5002
+    healthcheck:
+      test: ["CMD", "java", "-cp", "dsf_fhir.jar", "org.highmed.dsf.fhir.StatusClient"]
+      interval: 10s
+      timeout: 15s
+      retries: 5
     secrets:
       - db_liquibase.password
       - db_medic2_fhir_user.password
@@ -178,6 +188,11 @@ services:
     restart: on-failure
     ports:
      - 127.0.0.1:5003:5003
+    healthcheck:
+      test: ["CMD", "java", "-cp", "dsf_fhir.jar", "org.highmed.dsf.fhir.StatusClient"]
+      interval: 10s
+      timeout: 15s
+      retries: 5
     secrets:
       - db_liquibase.password
       - db_medic3_fhir_user.password
@@ -230,6 +245,11 @@ services:
     restart: on-failure
     ports:
      - 127.0.0.1:5004:5004
+    healthcheck:
+      test: ["CMD", "java", "-cp", "dsf_fhir.jar", "org.highmed.dsf.fhir.StatusClient"]
+      interval: 10s
+      timeout: 15s
+      retries: 5
     secrets:
       - db_liquibase.password
       - db_ttp_fhir_user.password
@@ -284,6 +304,11 @@ services:
     restart: on-failure
     ports:
      - 127.0.0.1:5011:5011
+    healthcheck:
+      test: ["CMD", "java", "-cp", "dsf_bpe.jar", "org.highmed.dsf.bpe.StatusClient"]
+      interval: 10s
+      timeout: 15s
+      retries: 5
     secrets:
       - db_liquibase.password
       - db_medic1_bpe_user.password
@@ -343,6 +368,11 @@ services:
     restart: on-failure
     ports:
      - 127.0.0.1:5012:5012
+    healthcheck:
+      test: ["CMD", "java", "-cp", "dsf_bpe.jar", "org.highmed.dsf.bpe.StatusClient"]
+      interval: 10s
+      timeout: 15s
+      retries: 5
     secrets:
       - db_liquibase.password
       - db_medic2_bpe_user.password
@@ -402,6 +432,11 @@ services:
     restart: on-failure
     ports:
      - 127.0.0.1:5014:5014
+    healthcheck:
+      test: ["CMD", "java", "-cp", "dsf_bpe.jar", "org.highmed.dsf.bpe.StatusClient"]
+      interval: 10s
+      timeout: 15s
+      retries: 5
     secrets:
       - db_liquibase.password
       - db_medic3_bpe_user.password
@@ -465,6 +500,11 @@ services:
     restart: on-failure
     ports:
      - 127.0.0.1:5013:5013
+    healthcheck:
+      test: ["CMD", "java", "-cp", "dsf_bpe.jar", "org.highmed.dsf.bpe.StatusClient"]
+      interval: 10s
+      timeout: 15s
+      retries: 5
     secrets:
       - db_liquibase.password
       - db_ttp_bpe_user.password
