@@ -31,12 +31,10 @@ public class RootServiceImpl extends AbstractBasicService implements RootService
 	private final ReferenceCleaner referenceCleaner;
 	private final HistoryService historyService;
 
-	public RootServiceImpl(String path, CommandFactory commandFactory, ResponseGenerator responseGenerator,
+	public RootServiceImpl(CommandFactory commandFactory, ResponseGenerator responseGenerator,
 			ParameterConverter parameterConverter, ExceptionHandler exceptionHandler, ReferenceCleaner referenceCleaner,
 			HistoryService historyService)
 	{
-		super(path);
-
 		this.commandFactory = commandFactory;
 		this.responseGenerator = responseGenerator;
 		this.parameterConverter = parameterConverter;
@@ -48,8 +46,6 @@ public class RootServiceImpl extends AbstractBasicService implements RootService
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
-		super.afterPropertiesSet();
-
 		Objects.requireNonNull(commandFactory, "commandFactory");
 		Objects.requireNonNull(responseGenerator, "responseGenerator");
 		Objects.requireNonNull(parameterConverter, "parameterConverter");

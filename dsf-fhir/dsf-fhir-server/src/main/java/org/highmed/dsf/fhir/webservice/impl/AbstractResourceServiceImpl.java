@@ -83,6 +83,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractResourceServiceImpl.class);
 
+	private final String path;
 	protected final Class<R> resourceType;
 	protected final String resourceTypeName;
 	protected final String serverBase;
@@ -107,8 +108,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 			ReferenceCleaner referenceCleaner, AuthorizationRuleProvider authorizationRuleProvider,
 			HistoryService historyService)
 	{
-		super(path);
-
+		this.path = path;
 		this.resourceType = resourceType;
 		this.resourceTypeName = resourceType.getAnnotation(ResourceDef.class).name();
 		this.serverBase = serverBase;
@@ -129,8 +129,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 	public void afterPropertiesSet() throws Exception
 	{
-		super.afterPropertiesSet();
-
+		Objects.requireNonNull(path, "path");
 		Objects.requireNonNull(resourceType, "resourceType");
 		Objects.requireNonNull(resourceTypeName, "resourceTypeName");
 		Objects.requireNonNull(serverBase, "serverBase");
@@ -592,7 +591,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 		result = filterIncludeResources(result);
 
-		UriBuilder bundleUri = query.configureBundleUri(UriBuilder.fromPath(serverBase).path(getPath()));
+		UriBuilder bundleUri = query.configureBundleUri(UriBuilder.fromPath(serverBase).path(path));
 
 		String format = queryParameters.getFirst(SearchQuery.PARAMETER_FORMAT);
 		String pretty = queryParameters.getFirst(SearchQuery.PARAMETER_PRETTY);

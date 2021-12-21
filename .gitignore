@@ -35,6 +35,7 @@ dsf-docker-test-setup/bpe/log/*.log.gz
 dsf-docker-test-setup/bpe/plugin/*.jar
 dsf-docker-test-setup/bpe/process/*.jar
 dsf-docker-test-setup/bpe/psn/*.jceks
+dsf-docker-test-setup/bpe/psn/*.p12
 dsf-docker-test-setup/bpe/secrets/*.pem
 
 dsf-docker-test-setup/fhir/log/*.log
@@ -61,6 +62,7 @@ dsf-docker-test-setup-3medic-ttp-docker/**/bpe/log/*.log.gz
 dsf-docker-test-setup-3medic-ttp-docker/**/bpe/plugin/*.jar
 dsf-docker-test-setup-3medic-ttp-docker/**/bpe/process/*.jar
 dsf-docker-test-setup-3medic-ttp-docker/**/bpe/psn/*.jceks
+dsf-docker-test-setup-3medic-ttp-docker/**/bpe/psn/*.p12
 
 dsf-docker-test-setup-3medic-ttp-docker/**/fhir/log/*.log
 dsf-docker-test-setup-3medic-ttp-docker/**/fhir/log/*.log.gz

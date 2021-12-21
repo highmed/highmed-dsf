@@ -30,6 +30,11 @@ services:
   app:
     image: registry:5000/highmed/fhir
     restart: on-failure
+    healthcheck:
+      test: ["CMD", "java", "-cp", "dsf_fhir.jar", "org.highmed.dsf.fhir.StatusClient"]
+      interval: 10s
+      timeout: 15s
+      retries: 5
     secrets:
       - db_liquibase.password
       - db_user.password

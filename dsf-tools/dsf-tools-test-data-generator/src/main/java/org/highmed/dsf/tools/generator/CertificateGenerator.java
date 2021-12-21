@@ -572,14 +572,6 @@ public class CertificateGenerator
 
 		Path baseFolder = Paths.get("../../", dockerTestFolder);
 
-		Path bpeCertificateFile = baseFolder.resolve("bpe/secrets/server_certificate.pem");
-		logger.info("Copying {} certificate pem file to {}", commonName, bpeCertificateFile);
-		writeCertificate(bpeCertificateFile, serverCertFiles.getCertificate());
-
-		Path bpePrivateKeyFile = baseFolder.resolve("bpe/secrets/server_certificate_private_key.pem");
-		logger.info("Copying {} private-key file to {}", commonName, bpePrivateKeyFile);
-		writePrivateKeyNotEncrypted(bpePrivateKeyFile, serverCertFiles.keyPair.getPrivate());
-
 		Path bpeTestCaCertificate = baseFolder.resolve("bpe/secrets/testca_certificate.pem");
 		logger.info("Copying Test CA certificate file to {}", bpeTestCaCertificate.toString());
 		writeCertificate(bpeTestCaCertificate, testCaCertificate);

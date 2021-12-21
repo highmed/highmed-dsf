@@ -3,9 +3,6 @@
 echo highmed/bpe ...
 docker build --pull -t highmed/bpe ..\dsf-bpe\dsf-bpe-server-jetty\docker
 
-echo highmed/bpe_proxy ...
-docker build --pull -t highmed/bpe_proxy ..\dsf-docker\bpe_proxy
-
 echo highmed/fhir ...
 docker build --pull -t highmed/fhir ..\dsf-fhir\dsf-fhir-server-jetty\docker
 

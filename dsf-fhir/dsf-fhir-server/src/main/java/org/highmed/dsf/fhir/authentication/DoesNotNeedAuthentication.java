@@ -1,7 +1,7 @@
 package org.highmed.dsf.fhir.authentication;
 
 /* marker interface */
-public interface NeedsAuthentication
+public interface DoesNotNeedAuthentication
 {
 	String getPath();
 }

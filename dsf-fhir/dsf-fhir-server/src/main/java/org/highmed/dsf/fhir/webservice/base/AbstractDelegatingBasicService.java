@@ -31,12 +31,6 @@ public class AbstractDelegatingBasicService<S extends BasicService> implements B
 		this.userProvider = userProvider;
 	}
 
-	@Override
-	public final String getPath()
-	{
-		return delegate.getPath();
-	}
-
 	protected final User getCurrentUser()
 	{
 		return userProvider.getCurrentUser();

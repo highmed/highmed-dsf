@@ -1,31 +1,13 @@
 version: '3.8'
 services:
-  proxy:
-    image: registry:5000/highmed/bpe_proxy
-    restart: on-failure
-    ports:
-      - 127.0.0.1:8080:80
-      - 127.0.0.1:8443:443
-    secrets:
-      - proxy_server_certificate.pem
-      - proxy_server_certificate_private_key.pem
-      - proxy_client_certificate_trusted_cas_full_chains.pem
-    environment:
-      TZ: Europe/Berlin
-      HTTPS_SERVER_NAME_PORT: ttp:8443
-      APP_SERVER_IP: 172.28.3.3
-      SSL_CERTIFICATE_FILE: /run/secrets/proxy_server_certificate.pem
-      SSL_CERTIFICATE_KEY_FILE: /run/secrets/proxy_server_certificate_private_key.pem
-      SSL_CA_CERTIFICATE_FILE: /run/secrets/proxy_client_certificate_trusted_cas_full_chains.pem
-    networks:
-      frontend:
-        ipv4_address: 172.28.3.2
-    depends_on:
-      - app
-
   app:
     image: registry:5000/highmed/bpe
     restart: on-failure
+    healthcheck:
+      test: ["CMD", "java", "-cp", "dsf_bpe.jar", "org.highmed.dsf.bpe.StatusClient"]
+      interval: 10s
+      timeout: 15s
+      retries: 5
     secrets:
       - db_liquibase.password
       - db_user.password
@@ -69,8 +51,6 @@ services:
       # property org.highmed.dsf.bpe.allow.list.organization should only be set for testing, do not configure property in production, potential security risk
       ORG_HIGHMED_DSF_BPE_ALLOW_LIST_ORGANIZATION: Test_TTP
     networks:
-      frontend:
-        ipv4_address: 172.28.3.3
       backend:
         ipv4_address: 172.28.3.130
       fhir_bpe:
@@ -103,13 +83,6 @@ services:
       - db_liquibase.password
 
 secrets:
-  proxy_server_certificate.pem:
-    file: ./secrets/server_certificate.pem
-  proxy_server_certificate_private_key.pem:
-    file: ./secrets/server_certificate_private_key.pem
-  proxy_client_certificate_trusted_cas_full_chains.pem:
-    file: ./secrets/testca_certificate.pem 
-
   db_liquibase.password:
     file: ./secrets/db_liquibase.password
   db_user.password:
@@ -127,12 +100,6 @@ secrets:
     file: ./secrets/client_certificate_private_key.pem.password
 
 networks:
-  frontend:
-    driver: bridge
-    ipam:
-      driver: default
-      config:
-        - subnet: 172.28.3.0/25
   backend:
     driver: bridge
     ipam:

@@ -119,11 +119,6 @@ public class StaticResourcesServiceImpl extends AbstractBasicService implements 
 
 	private final Cache cache = new Cache();
 
-	public StaticResourcesServiceImpl(String path)
-	{
-		super(path);
-	}
-
 	@Override
 	public Response getFile(String fileName, UriInfo uri, HttpHeaders headers)
 	{

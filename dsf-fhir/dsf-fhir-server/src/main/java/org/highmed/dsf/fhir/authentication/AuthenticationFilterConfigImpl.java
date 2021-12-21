@@ -1,6 +1,5 @@
 package org.highmed.dsf.fhir.authentication;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -12,36 +11,28 @@ import org.slf4j.LoggerFactory;
 
 public class AuthenticationFilterConfigImpl implements AuthenticationFilterConfig
 {
-	public static AuthenticationFilterConfig createConfigForPathsRequiringAuthentication(String servletPath,
-			NeedsAuthentication... services)
+	public static AuthenticationFilterConfig createConfigForPathsRequiringAuthentication(
+			List<DoesNotNeedAuthentication> servicesNotRequiringAuthentication)
 	{
-		return createConfigForPathsRequiringAuthentication("", Arrays.asList(services));
-	}
-
-	public static AuthenticationFilterConfig createConfigForPathsRequiringAuthentication(String servletPath,
-			List<NeedsAuthentication> services)
-	{
-		Objects.requireNonNull(servletPath, "servletPath");
-
-		List<String> pathFromServices = services.stream().map(s ->
+		List<String> pathsNotRequiringAuthentication = servicesNotRequiringAuthentication.stream().map(s ->
 		{
 			String path = s.getPath();
-			return servletPath + (path.startsWith("/") ? path : "/" + path);
+			return path.startsWith("/") ? path : "/" + path;
 
 		}).collect(Collectors.toList());
 
-		return new AuthenticationFilterConfigImpl(pathFromServices);
+		return new AuthenticationFilterConfigImpl(pathsNotRequiringAuthentication);
 	}
 
 	private static final Logger logger = LoggerFactory.getLogger(AuthenticationFilterConfigImpl.class);
 
-	private final List<String> pathsRequiringAuthentication;
+	private final List<String> pathsNotRequiringAuthentication;
 
-	private AuthenticationFilterConfigImpl(List<String> pathsRequiringAuthentication)
+	private AuthenticationFilterConfigImpl(List<String> pathsNotRequiringAuthentication)
 	{
-		this.pathsRequiringAuthentication = pathsRequiringAuthentication;
+		this.pathsNotRequiringAuthentication = pathsNotRequiringAuthentication;
 
-		logger.info("Paths requiring authentication: '{}'", pathsRequiringAuthentication);
+		logger.info("Paths not requiring authentication: '{}'", pathsNotRequiringAuthentication);
 	}
 
 	public boolean needsAuthentication(HttpServletRequest request)
@@ -50,12 +41,15 @@ public class AuthenticationFilterConfigImpl implements AuthenticationFilterConfi
 
 		String path = request.getServletPath() + request.getPathInfo();
 
-		boolean needsAuthentication = pathsRequiringAuthentication.stream().map(p -> path.startsWith(p)).filter(b -> b)
-				.findAny().orElse(false);
-
-		if (needsAuthentication)
-			logger.debug("Request path: '{}{}' needs authentication", request.getServletPath(), request.getPathInfo());
-
-		return needsAuthentication;
+		if (pathsNotRequiringAuthentication.contains(path))
+		{
+			logger.debug("Request path: '{}' does not need authentication", path);
+			return false;
+		}
+		else
+		{
+			logger.debug("Request path: '{}' needs authentication", path);
+			return true;
+		}
 	}
 }

@@ -32,6 +32,7 @@ import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainer
 import org.glassfish.jersey.servlet.init.JerseyServletContainerInitializer;
 import org.highmed.dsf.fhir.authentication.AuthenticationFilter;
 import org.highmed.dsf.fhir.cors.CorsFilter;
+import org.highmed.dsf.fhir.webservice.specification.StatusService;
 import org.highmed.dsf.tools.db.DbMigrator;
 import org.highmed.dsf.tools.db.DbMigratorConfig;
 import org.slf4j.bridge.SLF4JBridgeHandler;
@@ -76,6 +77,9 @@ public final class FhirServer
 
 		HttpConfiguration httpConfiguration = httpConfiguration(customizerBuilder.apply(properties));
 		Function<Server, ServerConnector> connector = connectorBuilder.apply(httpConfiguration, properties);
+		Function<Server, ServerConnector> statusConnector = JettyServer.httpConnector(httpConfiguration(), "localhost",
+				StatusService.PORT);
+		List<Function<Server, ServerConnector>> connectors = Arrays.asList(connector, statusConnector);
 
 		Predicate<String> filter = s -> s.contains("fhir-server");
 		Stream<String> webInfClassesDirs = webInfClassesDirs(filter);
@@ -92,7 +96,7 @@ public final class FhirServer
 			filters.add(CorsFilter.class);
 
 		@SuppressWarnings("unchecked")
-		JettyServer server = new JettyServer(connector, errorHandler, "/fhir", initializers, null, webInfClassesDirs,
+		JettyServer server = new JettyServer(connectors, errorHandler, "/fhir", initializers, null, webInfClassesDirs,
 				webInfJars, filters.toArray(new Class[filters.size()]));
 
 		server.getWebAppContext().addEventListener(new SessionInvalidator());
