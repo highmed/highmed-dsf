@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.impl.variable.serializer.TypedValueSerializer;
 import org.highmed.dsf.fhir.resources.ResourceProvider;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.PropertyResolver;
@@ -82,5 +83,18 @@ public interface ProcessPluginDefinition
 	default List<String> getDependencyNamesAndVersions()
 	{
 		return Collections.emptyList();
+	}
+
+	/**
+	 * Override this method to implement custom logic after a process has been deployed and is active, e.g. test the
+	 * connection to an external server needed by a process.
+	 * 
+	 * @param pluginApplicationContext
+	 *            the process plugin spring application context, never <code>null</code>
+	 * @param activeProcesses
+	 *            active processes from this plugin by process key
+	 */
+	default void onProcessesDeployed(ApplicationContext pluginApplicationContext, List<String> activeProcesses)
+	{
 	}
 }

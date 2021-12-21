@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.highmed.dsf.bpe.process.ProcessKeyAndVersion;
+import org.highmed.dsf.bpe.process.ProcessStateChangeOutcome;
 import org.highmed.dsf.fhir.resources.ResourceProvider;
 import org.springframework.context.ApplicationContext;
 
@@ -53,4 +54,6 @@ public interface ProcessPluginProvider
 	List<ProcessKeyAndVersion> getProcessKeyAndVersions();
 
 	List<ProcessKeyAndVersion> getDraftProcessKeyAndVersions();
+
+	void onProcessesDeployed(List<ProcessStateChangeOutcome> changes);
 }
