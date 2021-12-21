@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.highmed.mpi.client.Idat;
+import org.highmed.mpi.client.IdatNotFoundException;
 import org.highmed.mpi.client.idat.IdatImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +51,7 @@ public class MessageHelper
 		messageType.getMsg2_TriggerEvent().setValue("Q22");
 		messageType.getMsg3_MessageStructure().setValue("QBP_Q21");
 
-		msh.getMsh10_MessageControlID().setValue("607@1.3.6.1.4.1.21367.2009.1.2.136.1.13.1.1.7.2.696777");
+		msh.getMsh10_MessageControlID().setValue(UUID.randomUUID().toString());
 
 		msh.getMsh11_ProcessingID().getPt1_ProcessingID().setValue("P");
 		msh.getMsh11_ProcessingID().getPt2_ProcessingMode().setValue("T");
@@ -88,38 +89,39 @@ public class MessageHelper
 			String pidAssigningAuthorityNamespaceId, String pidAssigningAuthorityUniversalId) throws Exception
 	{
 		ERR error = patientDemographicsQueryResult.getERR();
-		String errorCode = error.getHL7ErrorCode().getIdentifier().getValue();
 
-		if (errorCode != null)
+		if (error != null && error.getHL7ErrorCode() != null && error.getHL7ErrorCode().getIdentifier() != null
+				&& error.getHL7ErrorCode().getIdentifier().getValue() != null)
 		{
-			logger.warn("Could not retrieve IDAT, error in Patient Demographics Query result, error-code='{}'",
-					errorCode);
-			throw new RuntimeException(
-					"Could not retrieve IDAT, error in Patient Demographics Query result, error-code: " + errorCode);
+			String errorMessage = error.encode().replace("\r", "\n");
+			logger.warn("Error in patient demographics query result, error: {}", errorMessage);
+			throw new IdatNotFoundException("Error in patient demographics query result, error: " + errorMessage);
 		}
 
-		List<RSP_K21_QUERY_RESPONSE> idats = patientDemographicsQueryResult.getQUERY_RESPONSEAll();
+		List<RSP_K21_QUERY_RESPONSE> responses = patientDemographicsQueryResult.getQUERY_RESPONSEAll();
 		String query = patientDemographicsQueryResult.getQPD().getUserParametersInsuccessivefields().encode();
 
-		if (idats.size() == 0)
+		if (responses.size() == 0)
 		{
-			logger.warn("Did not find any demographic data for query='{}'", query);
-			throw new RuntimeException("Did not find any demographic data for query='" + query + "'");
+			logger.warn("Result of query='{}' was empty", query);
+			throw new IdatNotFoundException("Result of query='" + query + "' was empty");
 		}
 
-		if (idats.size() > 1)
+		if (responses.size() > 1)
 		{
 			logger.warn("Found more than 1 demographic data result, using the first of query='{}'", query);
 		}
 
-		PID pid = idats.get(0).getPID();
+		PID pid = responses.get(0).getPID();
 
 		String patientId = null;
 		for (CX identifier : pid.getPatientIdentifierList())
 		{
 			HD assigningAuthority = identifier.getAssigningAuthority();
 
-			if (assigningAuthority.getNamespaceID().getValue().equals(pidAssigningAuthorityNamespaceId)
+			if (assigningAuthority.getNamespaceID().getValue() != null
+					&& assigningAuthority.getNamespaceID().getValue().equals(pidAssigningAuthorityNamespaceId)
+					&& assigningAuthority.getUniversalID().getValue() != null
 					&& assigningAuthority.getUniversalID().getValue().equals(pidAssigningAuthorityUniversalId))
 			{
 				patientId = identifier.getIDNumber().getValue();
@@ -128,8 +130,12 @@ public class MessageHelper
 
 		if (patientId == null)
 		{
-			logger.warn("Could not find patient id from response of query='{}'", query);
-			throw new RuntimeException("Could not find patient id from response of query='" + query + "'");
+			logger.warn(
+					"Could not find patient-id with namespace-id='{}' and universal-id='{}' in PID segment of response of query='{}'",
+					pidAssigningAuthorityNamespaceId, pidAssigningAuthorityUniversalId, query);
+			throw new IdatNotFoundException("Could not find patient-id with namespace-id='"
+					+ pidAssigningAuthorityNamespaceId + "' and universal-id='" + pidAssigningAuthorityUniversalId
+					+ "' in PID segment of response of query='" + query + "'");
 		}
 
 		XPN[] patientNames = pid.getPatientName();
@@ -138,6 +144,7 @@ public class MessageHelper
 		if (patientNames.length > 0)
 		{
 			XPN patientName = patientNames[0];
+
 			firstname = patientName.getGivenName().getValue();
 			lastname = patientName.getFamilyName().getSurname().getValue();
 		}
@@ -145,13 +152,17 @@ public class MessageHelper
 		DTM birthDtm = pid.getDateTimeOfBirth().getTime();
 		String birthdate = birthDtm.getDay() + "." + birthDtm.getMonth() + "." + birthDtm.getYear();
 
-		String sex = pid.getAdministrativeSex().getValue();
+		String sex = pid.getAdministrativeSex().getValue() == null ? ""
+				: pid.getAdministrativeSex().getValue().toUpperCase();
 
 		XAD[] patientAddresses = pid.getPatientAddress();
 		String street = "", zipCode = "", city = "", country = "";
 
 		if (patientAddresses.length > 0)
 		{
+			if (patientAddresses.length > 1)
+				logger.warn("Found more than 1 address, using the first of query='{}'", query);
+
 			XAD patientAddress = patientAddresses[0];
 			street = patientAddress.getStreetAddress().getStreetOrMailingAddress().getValue();
 			zipCode = patientAddress.getZipOrPostalCode().getValue();

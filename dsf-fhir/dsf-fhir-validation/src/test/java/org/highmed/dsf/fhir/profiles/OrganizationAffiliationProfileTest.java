@@ -25,8 +25,8 @@ public class OrganizationAffiliationProfileTest
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
 			Arrays.asList("highmed-organization-affiliation-0.5.0.xml", "highmed-organization-0.5.0.xml",
 					"highmed-organization-parent-0.5.0.xml"),
-			Arrays.asList("highmed-read-access-tag-0.5.0.xml", "highmed-organization-type-0.5.0.xml"),
-			Arrays.asList("highmed-read-access-tag-0.5.0.xml", "highmed-organization-type-0.5.0.xml"));
+			Arrays.asList("highmed-read-access-tag-0.5.0.xml", "highmed-organization-role-0.6.0.xml"),
+			Arrays.asList("highmed-read-access-tag-0.5.0.xml", "highmed-organization-role-0.6.0.xml"));
 
 	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
@@ -39,7 +39,7 @@ public class OrganizationAffiliationProfileTest
 		a.setActive(true);
 		a.getOrganization().setReference("Organization/" + UUID.randomUUID().toString());
 		a.getParticipatingOrganization().setReference("Organization/" + UUID.randomUUID().toString());
-		a.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-type")
+		a.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-role")
 				.setCode("MeDIC");
 		a.getEndpointFirstRep().setReference("Endpoint/" + UUID.randomUUID().toString());
 

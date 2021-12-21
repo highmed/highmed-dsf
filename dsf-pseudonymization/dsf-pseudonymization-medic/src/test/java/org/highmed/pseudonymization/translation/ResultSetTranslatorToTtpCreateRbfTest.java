@@ -8,8 +8,6 @@ import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Random;
 
-import javax.crypto.SecretKey;
-
 import org.highmed.mpi.client.Idat;
 import org.highmed.mpi.client.IdatNotFoundException;
 import org.highmed.mpi.client.MasterPatientIndexClient;
@@ -20,7 +18,6 @@ import org.highmed.pseudonymization.bloomfilter.RecordBloomFilterGenerator;
 import org.highmed.pseudonymization.bloomfilter.RecordBloomFilterGeneratorImpl;
 import org.highmed.pseudonymization.bloomfilter.RecordBloomFilterGeneratorImpl.FieldBloomFilterLengths;
 import org.highmed.pseudonymization.bloomfilter.RecordBloomFilterGeneratorImpl.FieldWeights;
-import org.highmed.pseudonymization.crypto.AesGcmUtil;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,9 +26,9 @@ import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class ResultSetTranslatorToTtpWithRbfTest
+public class ResultSetTranslatorToTtpCreateRbfTest
 {
-	private static final Logger logger = LoggerFactory.getLogger(ResultSetTranslatorToTtpWithRbfTest.class);
+	private static final Logger logger = LoggerFactory.getLogger(ResultSetTranslatorToTtpCreateRbfTest.class);
 
 	@Test
 	public void testTranslateForTtp() throws Exception
@@ -56,14 +53,9 @@ public class ResultSetTranslatorToTtpWithRbfTest
 		Map<String, Idat> idats = Map.of("ehrId1", new IdatTestImpl("medicId1", "firstName1", "lastName1", "birthday1",
 				"sex1", "street1", "zipCode1", "city1", "country1", "insuranceNumber1"));
 		MasterPatientIndexClient masterPatientIndexClient = new MasterPatientIndexClientTestImpl(idats);
-		String organizationIdentifier = "org1";
-		SecretKey organizationKey = AesGcmUtil.generateAES256Key();
-		String researchStudyIdentifier = "researchStudy1";
-		SecretKey researchStudyKey = AesGcmUtil.generateAES256Key();
 
-		ResultSetTranslatorToTtpWithRbfImpl translator = new ResultSetTranslatorToTtpWithRbfImpl(organizationIdentifier,
-				organizationKey, researchStudyIdentifier, researchStudyKey, "/ehr_status/subject/external_ref/id/value",
-				recordBloomFilterGenerator, masterPatientIndexClient);
+		ResultSetTranslatorToTtpCreateRbfImpl translator = new ResultSetTranslatorToTtpCreateRbfImpl(
+				"/ehr_status/subject/external_ref/id/value", recordBloomFilterGenerator, masterPatientIndexClient);
 
 		ObjectMapper openEhrObjectMapper = OpenEhrObjectMapperFactory.createObjectMapper();
 		ResultSet resultSet = openEhrObjectMapper
@@ -117,14 +109,8 @@ public class ResultSetTranslatorToTtpWithRbfTest
 			throw new IdatNotFoundException(id);
 		};
 
-		String organizationIdentifier = "org1";
-		SecretKey organizationKey = AesGcmUtil.generateAES256Key();
-		String researchStudyIdentifier = "researchStudy1";
-		SecretKey researchStudyKey = AesGcmUtil.generateAES256Key();
-
-		ResultSetTranslatorToTtpWithRbfImpl translator = new ResultSetTranslatorToTtpWithRbfImpl(organizationIdentifier,
-				organizationKey, researchStudyIdentifier, researchStudyKey, "/ehr_status/subject/external_ref/id/value",
-				recordBloomFilterGenerator, masterPatientIndexClient);
+		ResultSetTranslatorToTtpCreateRbfImpl translator = new ResultSetTranslatorToTtpCreateRbfImpl(
+				"/ehr_status/subject/external_ref/id/value", recordBloomFilterGenerator, masterPatientIndexClient);
 
 		ObjectMapper openEhrObjectMapper = OpenEhrObjectMapperFactory.createObjectMapper();
 		ResultSet resultSet = openEhrObjectMapper
@@ -165,15 +151,9 @@ public class ResultSetTranslatorToTtpWithRbfTest
 			throw new IdatNotFoundException(id);
 		};
 
-		String organizationIdentifier = "org1";
-		SecretKey organizationKey = AesGcmUtil.generateAES256Key();
-		String researchStudyIdentifier = "researchStudy1";
-		SecretKey researchStudyKey = AesGcmUtil.generateAES256Key();
-
-		ResultSetTranslatorToTtpWithRbfImpl translator = new ResultSetTranslatorToTtpWithRbfImpl(organizationIdentifier,
-				organizationKey, researchStudyIdentifier, researchStudyKey, "/ehr_status/subject/external_ref/id/value",
-				recordBloomFilterGenerator, masterPatientIndexClient,
-				ResultSetTranslatorToTtpWithRbfImpl.FILTER_ON_IDAT_NOT_FOUND_EXCEPTION);
+		ResultSetTranslatorToTtpCreateRbfImpl translator = new ResultSetTranslatorToTtpCreateRbfImpl(
+				"/ehr_status/subject/external_ref/id/value", recordBloomFilterGenerator, masterPatientIndexClient,
+				ResultSetTranslatorToTtpCreateRbfImpl.FILTER_ON_IDAT_NOT_FOUND_EXCEPTION);
 
 		ObjectMapper openEhrObjectMapper = OpenEhrObjectMapperFactory.createObjectMapper();
 		ResultSet resultSet = openEhrObjectMapper

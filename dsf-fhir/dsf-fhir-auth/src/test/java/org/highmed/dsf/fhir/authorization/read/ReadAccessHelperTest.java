@@ -168,7 +168,7 @@ public class ReadAccessHelperTest
 	public void testHasRoleViaFile() throws Exception
 	{
 		final String consortiumIdentifier = "consortium.com";
-		final String roleSystem = "http://highmed.org/fhir/CodeSystem/organization-type";
+		final String roleSystem = "http://highmed.org/fhir/CodeSystem/organization-role";
 		final String roleCode = "MeDIC";
 
 		try (InputStream in = Files

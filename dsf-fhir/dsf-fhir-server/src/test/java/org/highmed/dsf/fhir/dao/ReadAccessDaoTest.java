@@ -251,7 +251,7 @@ public interface ReadAccessDaoTest<D extends Resource>
 
 		OrganizationAffiliation aff = new OrganizationAffiliation();
 		aff.setActive(true);
-		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-type")
+		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-role")
 				.setCode("MeDIC");
 		aff.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
 		aff.getParticipatingOrganization().setReference("Organization/" + createdMemberOrg.getIdElement().getIdPart());
@@ -260,7 +260,7 @@ public interface ReadAccessDaoTest<D extends Resource>
 				getPermanentDeleteDataSource(), getFhirContext()).create(aff);
 
 		D d = createResource();
-		new ReadAccessHelperImpl().addRole(d, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
+		new ReadAccessHelperImpl().addRole(d, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-role",
 				"MeDIC");
 
 		D createdD = getDao().create(d);
@@ -273,7 +273,7 @@ public interface ReadAccessDaoTest<D extends Resource>
 	default void testReadAccessTriggerRoleResourceFirst() throws Exception
 	{
 		D d = createResource();
-		new ReadAccessHelperImpl().addRole(d, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
+		new ReadAccessHelperImpl().addRole(d, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-role",
 				"MeDIC");
 
 		D createdD = getDao().create(d);
@@ -296,7 +296,7 @@ public interface ReadAccessDaoTest<D extends Resource>
 
 		OrganizationAffiliation aff = new OrganizationAffiliation();
 		aff.setActive(true);
-		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-type")
+		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-role")
 				.setCode("MeDIC");
 		aff.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
 		aff.getParticipatingOrganization().setReference("Organization/" + createdMemberOrg.getIdElement().getIdPart());
@@ -331,7 +331,7 @@ public interface ReadAccessDaoTest<D extends Resource>
 
 		OrganizationAffiliation aff1 = new OrganizationAffiliation();
 		aff1.setActive(true);
-		aff1.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-type")
+		aff1.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-role")
 				.setCode("MeDIC");
 		aff1.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
 		aff1.getParticipatingOrganization()
@@ -339,7 +339,7 @@ public interface ReadAccessDaoTest<D extends Resource>
 
 		OrganizationAffiliation aff2 = new OrganizationAffiliation();
 		aff2.setActive(true);
-		aff2.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-type")
+		aff2.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-role")
 				.setCode("TTP");
 		aff2.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
 		aff2.getParticipatingOrganization()
@@ -351,7 +351,7 @@ public interface ReadAccessDaoTest<D extends Resource>
 		OrganizationAffiliation createdAff2 = organizationAffiliationDao.create(aff2);
 
 		D d = createResource();
-		new ReadAccessHelperImpl().addRole(d, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
+		new ReadAccessHelperImpl().addRole(d, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-role",
 				"MeDIC");
 
 		D createdD = getDao().create(d);
@@ -384,7 +384,7 @@ public interface ReadAccessDaoTest<D extends Resource>
 
 		OrganizationAffiliation aff1 = new OrganizationAffiliation();
 		aff1.setActive(true);
-		aff1.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-type")
+		aff1.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-role")
 				.setCode("MeDIC");
 		aff1.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
 		aff1.getParticipatingOrganization()
@@ -392,7 +392,7 @@ public interface ReadAccessDaoTest<D extends Resource>
 
 		OrganizationAffiliation aff2 = new OrganizationAffiliation();
 		aff2.setActive(true);
-		aff2.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-type")
+		aff2.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-role")
 				.setCode("MeDIC");
 		aff2.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
 		aff2.getParticipatingOrganization()
@@ -404,7 +404,7 @@ public interface ReadAccessDaoTest<D extends Resource>
 		OrganizationAffiliation createdAff2 = organizationAffiliationDao.create(aff2);
 
 		D d = createResource();
-		new ReadAccessHelperImpl().addRole(d, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
+		new ReadAccessHelperImpl().addRole(d, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-role",
 				"MeDIC");
 
 		D createdD = getDao().create(d);
@@ -506,7 +506,7 @@ public interface ReadAccessDaoTest<D extends Resource>
 
 		OrganizationAffiliation aff = new OrganizationAffiliation();
 		aff.setActive(true);
-		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-type")
+		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-role")
 				.setCode("MeDIC");
 		aff.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
 		aff.getParticipatingOrganization().setReference("Organization/" + createdMemberOrg.getIdElement().getIdPart());
@@ -514,7 +514,7 @@ public interface ReadAccessDaoTest<D extends Resource>
 		OrganizationAffiliation createdAff = organizationAffiliationDao.create(aff);
 
 		D d = createResource();
-		new ReadAccessHelperImpl().addRole(d, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
+		new ReadAccessHelperImpl().addRole(d, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-role",
 				"MeDIC");
 
 		D v1 = getDao().create(d);
@@ -557,7 +557,7 @@ public interface ReadAccessDaoTest<D extends Resource>
 
 		OrganizationAffiliation aff = new OrganizationAffiliation();
 		aff.setActive(true);
-		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-type")
+		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-role")
 				.setCode("MeDIC");
 		aff.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
 		aff.getParticipatingOrganization().setReference("Organization/" + createdMemberOrg.getIdElement().getIdPart());
@@ -565,7 +565,7 @@ public interface ReadAccessDaoTest<D extends Resource>
 		OrganizationAffiliation createdAff = organizationAffiliationDao.create(aff);
 
 		D d = createResource();
-		new ReadAccessHelperImpl().addRole(d, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
+		new ReadAccessHelperImpl().addRole(d, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-role",
 				"MeDIC");
 
 		D v1 = getDao().create(d);
@@ -608,7 +608,7 @@ public interface ReadAccessDaoTest<D extends Resource>
 
 		OrganizationAffiliation aff = new OrganizationAffiliation();
 		aff.setActive(true);
-		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-type")
+		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-role")
 				.setCode("MeDIC");
 		aff.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
 		aff.getParticipatingOrganization().setReference("Organization/" + createdMemberOrg.getIdElement().getIdPart());
@@ -616,7 +616,7 @@ public interface ReadAccessDaoTest<D extends Resource>
 		OrganizationAffiliation createdAff = organizationAffiliationDao.create(aff);
 
 		D d = createResource();
-		new ReadAccessHelperImpl().addRole(d, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
+		new ReadAccessHelperImpl().addRole(d, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-role",
 				"MeDIC");
 
 		D v1 = getDao().create(d);
@@ -659,7 +659,7 @@ public interface ReadAccessDaoTest<D extends Resource>
 
 		OrganizationAffiliation aff = new OrganizationAffiliation();
 		aff.setActive(true);
-		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-type")
+		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-role")
 				.setCode("MeDIC");
 		aff.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
 		aff.getParticipatingOrganization().setReference("Organization/" + createdMemberOrg.getIdElement().getIdPart());
@@ -667,7 +667,7 @@ public interface ReadAccessDaoTest<D extends Resource>
 		OrganizationAffiliation createdAff = organizationAffiliationDao.create(aff);
 
 		D d = createResource();
-		new ReadAccessHelperImpl().addRole(d, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
+		new ReadAccessHelperImpl().addRole(d, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-role",
 				"MeDIC");
 
 		D v1 = getDao().create(d);
@@ -770,7 +770,7 @@ public interface ReadAccessDaoTest<D extends Resource>
 
 		OrganizationAffiliation aff = new OrganizationAffiliation();
 		aff.setActive(true);
-		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-type")
+		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-role")
 				.setCode("MeDIC");
 		aff.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
 		aff.getParticipatingOrganization().setReference("Organization/" + createdMemberOrg.getIdElement().getIdPart());
@@ -780,7 +780,7 @@ public interface ReadAccessDaoTest<D extends Resource>
 		OrganizationAffiliation createdAff = orgAffDao.create(aff);
 
 		D d = createResource();
-		new ReadAccessHelperImpl().addRole(d, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
+		new ReadAccessHelperImpl().addRole(d, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-role",
 				"MeDIC");
 
 		D createdD = getDao().create(d);
@@ -812,7 +812,7 @@ public interface ReadAccessDaoTest<D extends Resource>
 
 		OrganizationAffiliation aff = new OrganizationAffiliation();
 		aff.setActive(true);
-		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-type")
+		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-role")
 				.setCode("MeDIC");
 		aff.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
 		aff.getParticipatingOrganization().setReference("Organization/" + createdMemberOrg.getIdElement().getIdPart());
@@ -821,7 +821,7 @@ public interface ReadAccessDaoTest<D extends Resource>
 				getPermanentDeleteDataSource(), getFhirContext()).create(aff);
 
 		D d = createResource();
-		new ReadAccessHelperImpl().addRole(d, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
+		new ReadAccessHelperImpl().addRole(d, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-role",
 				"MeDIC");
 
 		D createdD = getDao().create(d);
@@ -853,7 +853,7 @@ public interface ReadAccessDaoTest<D extends Resource>
 
 		OrganizationAffiliation aff = new OrganizationAffiliation();
 		aff.setActive(true);
-		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-type")
+		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-role")
 				.setCode("MeDIC");
 		aff.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
 		aff.getParticipatingOrganization().setReference("Organization/" + createdMemberOrg.getIdElement().getIdPart());
@@ -862,7 +862,7 @@ public interface ReadAccessDaoTest<D extends Resource>
 				getPermanentDeleteDataSource(), getFhirContext()).create(aff);
 
 		D d = createResource();
-		new ReadAccessHelperImpl().addRole(d, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
+		new ReadAccessHelperImpl().addRole(d, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-role",
 				"MeDIC");
 
 		D createdD = getDao().create(d);
@@ -894,7 +894,7 @@ public interface ReadAccessDaoTest<D extends Resource>
 
 		OrganizationAffiliation aff = new OrganizationAffiliation();
 		aff.setActive(true);
-		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-type")
+		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-role")
 				.setCode("MeDIC");
 		aff.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
 		aff.getParticipatingOrganization().setReference("Organization/" + createdMemberOrg.getIdElement().getIdPart());
@@ -903,7 +903,7 @@ public interface ReadAccessDaoTest<D extends Resource>
 				getPermanentDeleteDataSource(), getFhirContext()).create(aff);
 
 		D d = createResource();
-		new ReadAccessHelperImpl().addRole(d, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
+		new ReadAccessHelperImpl().addRole(d, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-role",
 				"MeDIC");
 
 		D createdD = getDao().create(d);

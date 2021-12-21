@@ -1,0 +1,46 @@
+<CodeSystem xmlns="http://hl7.org/fhir">
+	<meta>
+		<tag>
+			<system value="http://highmed.org/fhir/CodeSystem/read-access-tag"/>
+			<code value="ALL"/>
+		</tag>		
+	</meta>
+	<url value="http://highmed.org/fhir/CodeSystem/organization-role"/>
+	<version value="0.6.0"/>
+	<name value="HiGHmed_Organization_Role"/>
+	<title value="HiGHmed Organization Role"/>
+	<status value="active"/>
+	<experimental value="false"/>
+	<date value="2021-08-24"/>
+	<publisher value="HiGHmed"/>
+	<description value="CodeSystem with HiGHmed organization roles used in OrganizationAffiliation resources"/>
+	<caseSensitive value="true"/>
+	<hierarchyMeaning value="grouped-by"/>
+	<versionNeeded value="false"/>
+	<content value="complete"/>
+	<count value="6"/>
+	<concept>
+		<code value="TTP"/>
+		<display value="Trusted Third Party"/>
+	</concept>
+	<concept>
+		<code value="MeDIC"/>
+		<display value="Medical Data Integration Center"/>
+	</concept>
+	<concept>
+		<code value="DTS"/>
+		<display value="Data Transfer Site"/>
+	</concept>
+	<concept>
+		<code value="COS"/>
+		<display value="Coordinating Site"/>
+	</concept>
+	<concept>
+		<code value="CRR"/>
+		<display value="Central Research Repository"/>
+	</concept>
+	<concept>
+		<code value="HRP"/>
+		<display value="Health Research Platform"/>
+	</concept>
+</CodeSystem>

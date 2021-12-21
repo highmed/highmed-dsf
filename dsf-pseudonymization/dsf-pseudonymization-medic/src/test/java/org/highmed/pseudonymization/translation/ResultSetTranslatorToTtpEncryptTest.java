@@ -19,9 +19,9 @@ import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class ResultSetTranslatorToTtpNoRbfTest
+public class ResultSetTranslatorToTtpEncryptTest
 {
-	private static final Logger logger = LoggerFactory.getLogger(ResultSetTranslatorToTtpNoRbfTest.class);
+	private static final Logger logger = LoggerFactory.getLogger(ResultSetTranslatorToTtpEncryptTest.class);
 
 	@Test
 	public void testTranslateForTtp() throws Exception
@@ -31,29 +31,29 @@ public class ResultSetTranslatorToTtpNoRbfTest
 		String researchStudyIdentifier = "researchStudy1";
 		SecretKey researchStudyKey = AesGcmUtil.generateAES256Key();
 
-		ResultSetTranslatorToTtpNoRbfImpl translator = new ResultSetTranslatorToTtpNoRbfImpl(organizationIdentifier,
+		ResultSetTranslatorToTtpEncryptImpl translator = new ResultSetTranslatorToTtpEncryptImpl(organizationIdentifier,
 				organizationKey, researchStudyIdentifier, researchStudyKey,
 				"/ehr_status/subject/external_ref/id/value");
 
 		ObjectMapper openEhrObjectMapper = OpenEhrObjectMapperFactory.createObjectMapper();
 		ResultSet resultSet = openEhrObjectMapper
-				.readValue(Files.readAllBytes(Paths.get("src/test/resources/result_5.json")), ResultSet.class);
+				.readValue(Files.readAllBytes(Paths.get("src/test/resources/result_6.json")), ResultSet.class);
 		assertNotNull(resultSet);
 		assertNotNull(resultSet.getColumns());
-		assertEquals(4, resultSet.getColumns().size());
+		assertEquals(5, resultSet.getColumns().size());
 		assertNotNull(resultSet.getRows());
 		assertEquals(1, resultSet.getRows().size());
 		assertNotNull(resultSet.getRow(0));
-		assertEquals(4, resultSet.getRow(0).size());
+		assertEquals(5, resultSet.getRow(0).size());
 
 		ResultSet translatedResultSet = translator.translate(resultSet);
 		assertNotNull(translatedResultSet);
 		assertNotNull(translatedResultSet.getColumns());
-		assertEquals(4, translatedResultSet.getColumns().size());
+		assertEquals(5, translatedResultSet.getColumns().size());
 		assertNotNull(translatedResultSet.getRows());
 		assertEquals(1, translatedResultSet.getRows().size());
 		assertNotNull(translatedResultSet.getRow(0));
-		assertEquals(4, translatedResultSet.getRow(0).size());
+		assertEquals(5, translatedResultSet.getRow(0).size());
 
 		DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter();
 		prettyPrinter.indentArraysWith(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE);

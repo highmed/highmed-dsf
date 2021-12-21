@@ -172,7 +172,7 @@ public class ReferenceResolverIntegrationTest extends AbstractIntegrationTest
 				.setValue(new Reference().setType(ResourceType.Organization.name())
 						.setIdentifier(new Identifier().setSystem("http://highmed.org/sid/organization-identifier")
 								.setValue(organizationIdentifierValue)))
-				.getType().addCoding().setSystem("http://highmed.org/fhir/CodeSystem/organization-type").setCode("COS");
+				.getType().addCoding().setSystem("http://highmed.org/fhir/CodeSystem/organization-role").setCode("COS");
 
 		return task;
 	}
@@ -183,7 +183,7 @@ public class ReferenceResolverIntegrationTest extends AbstractIntegrationTest
 		Task task = readTestTask();
 		task.addInput().setValue(new Reference().setIdentifier(new Identifier()
 				.setSystem("http://highmed.org/sid/organization-identifier").setValue(organizationIdentifierValue)))
-				.getType().addCoding().setSystem("http://highmed.org/fhir/CodeSystem/organization-type").setCode("COS");
+				.getType().addCoding().setSystem("http://highmed.org/fhir/CodeSystem/organization-role").setCode("COS");
 
 		return task;
 	}

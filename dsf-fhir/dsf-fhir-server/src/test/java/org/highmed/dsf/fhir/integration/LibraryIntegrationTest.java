@@ -84,7 +84,7 @@ public class LibraryIntegrationTest extends AbstractIntegrationTest
 	{
 		Library library = createValidLibrary();
 		readAccessHelper.addLocal(library);
-		readAccessHelper.addRole(library, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-type",
+		readAccessHelper.addRole(library, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-role",
 				"MeDIC");
 
 		Library created = getWebserviceClient().create(library);
@@ -98,7 +98,7 @@ public class LibraryIntegrationTest extends AbstractIntegrationTest
 	{
 		Library library = createValidLibrary();
 		readAccessHelper.addLocal(library);
-		readAccessHelper.addRole(library, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-type",
+		readAccessHelper.addRole(library, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-role",
 				"TTP");
 
 		LibraryDao dao = getSpringWebApplicationContext().getBean(LibraryDao.class);

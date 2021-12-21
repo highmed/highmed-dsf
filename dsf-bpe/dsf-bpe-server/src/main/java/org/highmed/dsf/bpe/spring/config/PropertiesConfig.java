@@ -104,8 +104,14 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.bpe.mpi.webservice.factory.class:org.highmed.mpi.client.stub.MasterPatientIndexClientStubFactory}")
 	private String masterPatientIndexClientFactoryClass;
 
+	@Value("${org.highmed.dsf.bpe.consent.webservice.factory.class:org.highmed.consent.client.stub.ConsentClientStubFactory}")
+	private String consentClientFactoryClass;
+
 	@Value("${org.highmed.dsf.bpe.openehr.webservice.factory.class:org.highmed.openehr.client.stub.OpenEhrClientStubFactory}")
 	private String openEhrClientFactoryClass;
+
+	@Value("${org.highmed.dsf.bpe.pseudonymization.webservice.factory.class:org.highmed.pseudonymization.client.stub.PseudonymizationClientStubFactory}")
+	private String pseudonymizationClientFactoryClass;
 
 	@Value("${org.highmed.dsf.bpe.process.plugin.directroy:process}")
 	private String processPluginDirectory;
@@ -276,9 +282,19 @@ public class PropertiesConfig
 		return masterPatientIndexClientFactoryClass;
 	}
 
+	public String getConsentClientFactoryClass()
+	{
+		return consentClientFactoryClass;
+	}
+
 	public String getOpenEhrClientFactoryClass()
 	{
 		return openEhrClientFactoryClass;
+	}
+
+	public String getPseudonymizationClientFactoryClass()
+	{
+		return pseudonymizationClientFactoryClass;
 	}
 
 	public Path getProcessPluginDirectory()
