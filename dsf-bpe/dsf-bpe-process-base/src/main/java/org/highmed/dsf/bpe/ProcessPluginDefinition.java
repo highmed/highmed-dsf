@@ -1,12 +1,18 @@
 package org.highmed.dsf.bpe;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.impl.variable.serializer.TypedValueSerializer;
+import org.highmed.dsf.fhir.resources.ActivityDefinitionResource;
+import org.highmed.dsf.fhir.resources.CodeSystemResource;
+import org.highmed.dsf.fhir.resources.NamingSystemResource;
 import org.highmed.dsf.fhir.resources.ResourceProvider;
+import org.highmed.dsf.fhir.resources.StructureDefinitionResource;
+import org.highmed.dsf.fhir.resources.ValueSetResource;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,6 +52,17 @@ public interface ProcessPluginDefinition
 	}
 
 	/**
+	 * @implNote Override this method to replace <code>#{date}</code> in FHIR and BPMN files with the returned value.
+	 * @return the release date of the process plugin, if not overridden {@link LocalDate#MIN}
+	 * @see ResourceProvider#read(String, LocalDate, java.util.function.Supplier, ClassLoader, PropertyResolver,
+	 *      java.util.Map)
+	 */
+	default LocalDate getReleaseDate()
+	{
+		return LocalDate.MIN;
+	}
+
+	/**
 	 * Return <code>Stream.of("foo.bpmn");</code> for a foo.bpmn file located in the root folder of the process plugin
 	 * jar. The returned files will be read via {@link ClassLoader#getResourceAsStream(String)}.
 	 * 
@@ -61,14 +78,31 @@ public interface ProcessPluginDefinition
 	Stream<Class<?>> getSpringConfigClasses();
 
 	/**
+	 * @implNote Override this method to return a {@link ResourceProvider} with fhir metadata resources
+	 *           (ActivityDefinition, CodeSystem, NamingSystem, StructureDefinition, ValueSet) needed by this process
+	 *           plugin.
 	 * @param fhirContext
-	 *            the applications fhir context, never <code>null</code>
+	 *            applications fhir context, never <code>null</code>
 	 * @param classLoader
-	 *            the classLoader that was used to initialize the process plugin, never <code>null</code>
+	 *            class loader that was used to initialize the process plugin, never <code>null</code>
 	 * @param resolver
-	 *            the property resolver used to access config properties and to replace place holders in fhir resources,
+	 *            property resolver used to access config properties and to replace place holders in fhir resources,
 	 *            never <code>null</code>
-	 * @return {@link ResourceProvider} with FHIR resources needed to enable the included processes
+	 * @return {@link ResourceProvider} with FHIR resources needed to enable the included processes, if not overridden
+	 *         {@link ResourceProvider#empty()}
+	 * 
+	 * @see ActivityDefinitionResource#file(String)
+	 * @see CodeSystemResource#file(String)
+	 * @see NamingSystemResource#file(String)
+	 * @see StructureDefinitionResource#file(String)
+	 * @see ValueSetResource#file(String)
+	 * 
+	 * @see FhirContext#newJsonParser()
+	 * @see FhirContext#newXmlParser()
+	 * 
+	 * @see ResourceProvider#read(String, java.util.function.Supplier, ClassLoader, PropertyResolver, java.util.Map)
+	 * @see ResourceProvider#read(String, LocalDate, java.util.function.Supplier, ClassLoader, PropertyResolver,
+	 *      java.util.Map)
 	 */
 	default ResourceProvider getResourceProvider(FhirContext fhirContext, ClassLoader classLoader,
 			PropertyResolver resolver)
@@ -86,9 +120,8 @@ public interface ProcessPluginDefinition
 	}
 
 	/**
-	 * Override this method to implement custom logic after a process has been deployed and is active, e.g. test the
-	 * connection to an external server needed by a process.
-	 * 
+	 * @implNote Override this method to implement custom logic after a process has been deployed and is active, e.g.
+	 *           test the connection to an external server needed by a process.
 	 * @param pluginApplicationContext
 	 *            the process plugin spring application context, never <code>null</code>
 	 * @param activeProcesses
