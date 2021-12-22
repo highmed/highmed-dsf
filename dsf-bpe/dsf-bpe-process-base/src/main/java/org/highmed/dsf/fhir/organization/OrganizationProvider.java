@@ -16,10 +16,14 @@ public interface OrganizationProvider
 
 	/**
 	 * @deprecated as of release 0.6.0, use {@link #getDefaultRoleSystem()} instead
+	 * @return url of the default organization type CodeSystem
 	 */
 	@Deprecated
 	String getDefaultTypeSystem();
 
+	/**
+	 * @return url of the default organization role CodeSystem
+	 */
 	String getDefaultRoleSystem();
 
 	String getLocalIdentifierValue();

@@ -52,7 +52,8 @@ public interface ProcessPluginDefinition
 	}
 
 	/**
-	 * @implNote Override this method to replace <code>#{date}</code> in FHIR and BPMN files with the returned value.
+	 * <i>Override this method to replace <code>#{date}</code> in FHIR and BPMN files with the returned value.</i>
+	 * 
 	 * @return the release date of the process plugin, if not overridden {@link LocalDate#MIN}
 	 * @see ResourceProvider#read(String, LocalDate, java.util.function.Supplier, ClassLoader, PropertyResolver,
 	 *      java.util.Map)
@@ -78,9 +79,9 @@ public interface ProcessPluginDefinition
 	Stream<Class<?>> getSpringConfigClasses();
 
 	/**
-	 * @implNote Override this method to return a {@link ResourceProvider} with fhir metadata resources
-	 *           (ActivityDefinition, CodeSystem, NamingSystem, StructureDefinition, ValueSet) needed by this process
-	 *           plugin.
+	 * <i>Override this method to return a {@link ResourceProvider} with fhir metadata resources (ActivityDefinition,
+	 * CodeSystem, NamingSystem, StructureDefinition, ValueSet) needed by this process plugin.</i>
+	 * 
 	 * @param fhirContext
 	 *            applications fhir context, never <code>null</code>
 	 * @param classLoader
@@ -120,8 +121,9 @@ public interface ProcessPluginDefinition
 	}
 
 	/**
-	 * @implNote Override this method to implement custom logic after a process has been deployed and is active, e.g.
-	 *           test the connection to an external server needed by a process.
+	 * <i>Override this method to implement custom logic after a process has been deployed and is active, e.g. test the
+	 * connection to an external server needed by a process.</i>
+	 * 
 	 * @param pluginApplicationContext
 	 *            the process plugin spring application context, never <code>null</code>
 	 * @param activeProcesses
