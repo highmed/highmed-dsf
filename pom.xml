@@ -30,7 +30,7 @@
 		<jersey.version>2.35</jersey.version>
 		<tyrus.version>1.18</tyrus.version>
 		<jackson.version>2.12.5</jackson.version>
-		<spring.version>5.3.11</spring.version>
+		<spring.version>5.3.14</spring.version>
 
 		<hapi.fhir.version>5.1.0</hapi.fhir.version>
 		<hapi.hl7v2.version>2.3</hapi.hl7v2.version>
