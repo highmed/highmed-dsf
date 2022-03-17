@@ -12,12 +12,14 @@ import org.slf4j.LoggerFactory;
 
 import liquibase.Contexts;
 import liquibase.Liquibase;
+import liquibase.Scope;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.ui.LoggerUIService;
 
 public final class DbMigrator
 {
@@ -32,38 +34,49 @@ public final class DbMigrator
 
 	public void migrate()
 	{
-		try (BasicDataSource dataSource = new BasicDataSource())
+		try
 		{
-			dataSource.setDriverClassName(Driver.class.getName());
-			dataSource.setUrl(config.getDbUrl());
-			dataSource.setUsername(config.getDbLiquibaseUsername());
-			dataSource.setPassword(toString(config.getDbLiquibasePassword()));
-
-			try (Connection connection = dataSource.getConnection())
+			Scope.child(Scope.Attr.ui, new LoggerUIService(), () ->
 			{
-				Database database = DatabaseFactory.getInstance()
-						.findCorrectDatabaseImplementation(new JdbcConnection(connection));
-				try (Liquibase liquibase = new Liquibase("db/db.changelog.xml", new ClassLoaderResourceAccessor(),
-						database))
+				try (BasicDataSource dataSource = new BasicDataSource())
 				{
-					ChangeLogParameters changeLogParameters = liquibase.getChangeLogParameters();
-					config.getChangeLogParameters().forEach(changeLogParameters::set);
+					dataSource.setDriverClassName(Driver.class.getName());
+					dataSource.setUrl(config.getDbUrl());
+					dataSource.setUsername(config.getDbLiquibaseUsername());
+					dataSource.setPassword(toString(config.getDbLiquibasePassword()));
 
-					logger.info("Executing DB migration ...");
-					liquibase.update(new Contexts());
-					logger.info("Executing DB migration [Done]");
+					try (Connection connection = dataSource.getConnection())
+					{
+						Database database = DatabaseFactory.getInstance()
+								.findCorrectDatabaseImplementation(new JdbcConnection(connection));
+						try (Liquibase liquibase = new Liquibase("db/db.changelog.xml",
+								new ClassLoaderResourceAccessor(), database))
+						{
+							ChangeLogParameters changeLogParameters = liquibase.getChangeLogParameters();
+							config.getChangeLogParameters().forEach(changeLogParameters::set);
+
+							logger.info("Executing DB migration ...");
+							liquibase.update(new Contexts());
+							logger.info("Executing DB migration [Done]");
+						}
+					}
 				}
-			}
-		}
-		catch (SQLException e)
-		{
-			logger.error("Error while accessing db: {}", e.getMessage());
-			throw new RuntimeException(e);
-		}
-		catch (LiquibaseException e)
-		{
-			logger.error("Error while running liquibase: {}", e.getMessage());
-			throw new RuntimeException(e);
+				catch (SQLException e)
+				{
+					logger.error("Error while accessing db: {}", e.getMessage());
+					throw new RuntimeException(e);
+				}
+				catch (LiquibaseException e)
+				{
+					logger.error("Error while running liquibase: {}", e.getMessage());
+					throw new RuntimeException(e);
+				}
+				catch (Exception e)
+				{
+					logger.error("Error while running liquibase: {}", e.getMessage());
+					throw new RuntimeException(e);
+				}
+			});
 		}
 		catch (Exception e)
 		{
