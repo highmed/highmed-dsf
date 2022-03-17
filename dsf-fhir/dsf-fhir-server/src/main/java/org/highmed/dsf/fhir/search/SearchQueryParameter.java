@@ -50,7 +50,7 @@ public interface SearchQueryParameter<R extends Resource> extends MatcherParamet
 
 	/**
 	 * Will not be called if {@link #isDefined()} returns <code>false</code>
-	 * 
+	 *
 	 * @param bundleUri
 	 *            never <code>null</code>
 	 */

@@ -19,7 +19,7 @@ public class SingleOrganizationMatcherImpl<P extends Person> extends AbstractMat
 {
 	/**
 	 * See {@link AbstractMatcher#AbstractMatcher(MatchedPersonFactory)}
-	 * 
+	 *
 	 * @param matchedPersonFactory
 	 *            not <code>null</code>
 	 */
@@ -30,7 +30,7 @@ public class SingleOrganizationMatcherImpl<P extends Person> extends AbstractMat
 
 	/**
 	 * See {@link AbstractMatcher#AbstractMatcher(MatchedPersonFactory, MatchCalculator)}
-	 * 
+	 *
 	 * @param matchedPersonFactory
 	 *            not <code>null</code>
 	 * @param matchCalculator
@@ -43,7 +43,7 @@ public class SingleOrganizationMatcherImpl<P extends Person> extends AbstractMat
 
 	/**
 	 * See {@link AbstractMatcher#AbstractMatcher(MatchedPersonFactory, MatchCalculator, double)}
-	 * 
+	 *
 	 * @param matchedPersonFactory
 	 *            not <code>null</code>
 	 * @param matchCalculator
@@ -59,7 +59,7 @@ public class SingleOrganizationMatcherImpl<P extends Person> extends AbstractMat
 
 	/**
 	 * Matches {@link Person}s from a single organizations - local matching.
-	 * 
+	 *
 	 * @param person
 	 *            not <code>null</code>
 	 * @param persons
@@ -87,7 +87,7 @@ public class SingleOrganizationMatcherImpl<P extends Person> extends AbstractMat
 
 	/**
 	 * Matches {@link Person}s from a single organizations - local matching.
-	 * 
+	 *
 	 * @param persons
 	 *            not <code>null</code>
 	 * @return matched persons, converted person from param {@code persons} if param {@code persons} has only one entry,

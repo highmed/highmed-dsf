@@ -12,7 +12,7 @@ public interface AuthorizationRule<R extends Resource>
 
 	/**
 	 * Override this method for non default behavior. Default: Not allowed.
-	 * 
+	 *
 	 * @param user
 	 *            not <code>null</code>
 	 * @param newResource
@@ -23,7 +23,7 @@ public interface AuthorizationRule<R extends Resource>
 
 	/**
 	 * Override this method for non default behavior. Default: Not allowed.
-	 * 
+	 *
 	 * @param connection
 	 *            not <code>null</code>
 	 * @param user
@@ -36,7 +36,7 @@ public interface AuthorizationRule<R extends Resource>
 
 	/**
 	 * Override this method for non default behavior. Default: Not allowed.
-	 * 
+	 *
 	 * @param user
 	 *            not <code>null</code>
 	 * @param existingResource
@@ -47,7 +47,7 @@ public interface AuthorizationRule<R extends Resource>
 
 	/**
 	 * Override this method for non default behavior. Default: Not allowed.
-	 * 
+	 *
 	 * @param connection
 	 *            not <code>null</code>
 	 * @param user
@@ -60,7 +60,7 @@ public interface AuthorizationRule<R extends Resource>
 
 	/**
 	 * Override this method for non default behavior. Default: Not allowed.
-	 * 
+	 *
 	 * @param user
 	 *            not <code>null</code>
 	 * @param oldResource
@@ -73,7 +73,7 @@ public interface AuthorizationRule<R extends Resource>
 
 	/**
 	 * Override this method for non default behavior. Default: Not allowed.
-	 * 
+	 *
 	 * @param connection
 	 *            not <code>null</code>
 	 * @param user
@@ -88,7 +88,7 @@ public interface AuthorizationRule<R extends Resource>
 
 	/**
 	 * Override this method for non default behavior. Default: Not allowed.
-	 * 
+	 *
 	 * @param user
 	 *            not <code>null</code>
 	 * @param oldResource
@@ -99,7 +99,7 @@ public interface AuthorizationRule<R extends Resource>
 
 	/**
 	 * Override this method for non default behavior. Default: Not allowed.
-	 * 
+	 *
 	 * @param connection
 	 *            not <code>null</code>
 	 * @param user
@@ -112,7 +112,7 @@ public interface AuthorizationRule<R extends Resource>
 
 	/**
 	 * Override this method for non default behavior. Default: Not allowed.
-	 * 
+	 *
 	 * @param user
 	 *            not <code>null</code>
 	 * @return Reason as String in {@link Optional#of(Object)} if delete allowed
@@ -121,7 +121,7 @@ public interface AuthorizationRule<R extends Resource>
 
 	/**
 	 * Override this method for non default behavior. Default: Not allowed.
-	 * 
+	 *
 	 * @param user
 	 *            not <code>null</code>
 	 * @return Reason as String in {@link Optional#of(Object)} if delete allowed
