@@ -159,7 +159,7 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 	/**
 	 * No need to check if the new resource is valid, will be checked by
 	 * {@link #newResourceOk(Connection, User, Resource)}
-	 * 
+	 *
 	 * @param connection
 	 *            not <code>null</code>
 	 * @param oldResource

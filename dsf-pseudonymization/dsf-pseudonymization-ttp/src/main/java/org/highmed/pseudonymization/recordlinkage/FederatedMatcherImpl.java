@@ -20,7 +20,7 @@ public class FederatedMatcherImpl<P extends Person> extends AbstractMatcher<P> i
 {
 	/**
 	 * See {@link AbstractMatcher#AbstractMatcher(MatchedPersonFactory)}
-	 * 
+	 *
 	 * @param matchedPersonFactory
 	 *            not <code>null</code>
 	 */
@@ -31,7 +31,7 @@ public class FederatedMatcherImpl<P extends Person> extends AbstractMatcher<P> i
 
 	/**
 	 * See {@link AbstractMatcher#AbstractMatcher(MatchedPersonFactory, MatchCalculator)}
-	 * 
+	 *
 	 * @param matchedPersonFactory
 	 *            not <code>null</code>
 	 * @param matchCalculator
@@ -44,7 +44,7 @@ public class FederatedMatcherImpl<P extends Person> extends AbstractMatcher<P> i
 
 	/**
 	 * See {@link AbstractMatcher#AbstractMatcher(MatchedPersonFactory, MatchCalculator, double)}
-	 * 
+	 *
 	 * @param matchedPersonFactory
 	 *            not <code>null</code>
 	 * @param matchCalculator
@@ -61,7 +61,7 @@ public class FederatedMatcherImpl<P extends Person> extends AbstractMatcher<P> i
 	/**
 	 * Matches {@link Person}s from multiple organizations, expects the {@link Person}s to be unique within
 	 * organizations - distributed matching.
-	 * 
+	 *
 	 * @param personLists
 	 *            not <code>null</code>
 	 * @return matched persons, converted persons from param {@code personLists} if param {@code personLists} has only

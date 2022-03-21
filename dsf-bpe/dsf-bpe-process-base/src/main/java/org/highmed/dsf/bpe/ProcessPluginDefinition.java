@@ -17,7 +17,7 @@ import ca.uhn.fhir.context.FhirContext;
  * A provider configuration file named "org.highmed.dsf.DsfProcessPluginDefinition" containing the canonical name of the
  * class implementing this interface needs to be part of the process plugin at "/META-INF/services/". For more details
  * on the content of the provider configuration file, see {@link ServiceLoader}.
- * 
+ *
  * Additional {@link TypedValueSerializer}s to be registered inside the camunda process engine need be defined as beans
  * in the process plugins spring context.
  */
@@ -47,9 +47,9 @@ public interface ProcessPluginDefinition
 	/**
 	 * Return <code>Stream.of("foo.bpmn");</code> for a foo.bpmn file located in the root folder of the process plugin
 	 * jar. The returned files will be read via {@link ClassLoader#getResourceAsStream(String)}.
-	 * 
+	 *
 	 * @return *.bpmn files inside process plugin jar
-	 * 
+	 *
 	 * @see ClassLoader#getResourceAsStream(String)
 	 */
 	Stream<String> getBpmnFiles();

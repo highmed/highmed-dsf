@@ -142,7 +142,7 @@ public abstract class AbstractDateTimeParameter<R extends DomainResource> extend
 
 	/**
 	 * Override to perform additional parameter checks
-	 * 
+	 *
 	 * @param parameters
 	 *            to be checked, not <code>null</code>
 	 * @see #addError(SearchQueryParameterError)

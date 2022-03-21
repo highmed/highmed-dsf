@@ -186,9 +186,9 @@ public interface ResourceDao<R extends Resource>
 
 	/**
 	 * Sets the version of the stored resource to latest version from DB plus 1.
-	 * 
+	 *
 	 * Does not check the latest version in DB before storing the update.
-	 * 
+	 *
 	 * Resurrects all old versions (removes deleted flag) if the latest version in DB is marked as deleted.
 	 *
 	 * @param resource
@@ -215,12 +215,12 @@ public interface ResourceDao<R extends Resource>
 
 	/**
 	 * Sets the version of the stored resource to latest version from DB plus 1.
-	 * 
+	 *
 	 * If the given expectedVersion is not <code>null</code>, checks if the given expectedVersion is the latest version
 	 * in DB before storing the update.
-	 * 
+	 *
 	 * Resurrects all old versions (removes deleted flag) if the latest version in DB is marked as deleted.
-	 * 
+	 *
 	 * @param resource
 	 *            not <code>null</code>
 	 * @param expectedVersion
@@ -239,11 +239,11 @@ public interface ResourceDao<R extends Resource>
 
 	/**
 	 * Sets the version of the stored resource to latest version from DB plus 1.
-	 * 
+	 *
 	 * Does not check the latest version in DB before storing the update.
-	 * 
+	 *
 	 * Resurrects all old versions (removes deleted flag) if the latest version in DB is marked as deleted.
-	 * 
+	 *
 	 * @param connection
 	 *            not <code>null</code>, not {@link Connection#isReadOnly()} and not {@link Connection#getAutoCommit()}
 	 *            and {@link Connection#getTransactionIsolation()} one of {@link Connection#TRANSACTION_REPEATABLE_READ}
@@ -275,10 +275,10 @@ public interface ResourceDao<R extends Resource>
 
 	/**
 	 * Sets the version of the stored resource to latest version from DB plus 1.
-	 * 
+	 *
 	 * If the given expectedVersion is not <code>null</code>, checks if the given expectedVersion is the latest version
 	 * in DB before storing the update.
-	 * 
+	 *
 	 * Resurrects all old versions (removes deleted flag) if the latest version in DB is marked as deleted.
 	 *
 	 * @param connection
@@ -306,7 +306,7 @@ public interface ResourceDao<R extends Resource>
 
 	/**
 	 * Returns <code>false</code> if a matching resource was already marked as deleted
-	 * 
+	 *
 	 * @param uuid
 	 *            may be <code>null</code>
 	 * @return <code>true</code> if a resource with the given <b>uuid</b> could be found and marked as deleted,
@@ -320,7 +320,7 @@ public interface ResourceDao<R extends Resource>
 
 	/**
 	 * Returns <code>false</code> if a matching resource was already marked as deleted
-	 * 
+	 *
 	 * @param connection
 	 *            not <code>null</code>, not {@link Connection#isReadOnly()}
 	 * @param uuid
