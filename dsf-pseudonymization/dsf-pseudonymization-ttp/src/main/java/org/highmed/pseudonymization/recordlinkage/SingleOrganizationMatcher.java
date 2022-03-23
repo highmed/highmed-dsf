@@ -13,7 +13,7 @@ public interface SingleOrganizationMatcher<P extends Person>
 {
 	/**
 	 * Matches {@link Person}s from a single organizations - local matching.
-	 * 
+	 *
 	 * @param person
 	 *            not <code>null</code>
 	 * @param persons
@@ -25,7 +25,7 @@ public interface SingleOrganizationMatcher<P extends Person>
 
 	/**
 	 * Matches {@link Person}s from a single organizations - local matching.
-	 * 
+	 *
 	 * @param persons
 	 *            not <code>null</code>
 	 * @return matched persons, converted person from param {@code persons} if param {@code persons} has only one entry,

@@ -85,7 +85,7 @@ public abstract class AbstractRevIncludeParameterFactory implements SearchQueryR
 	 * Use this method to modify the include resources. This method can be used if the resources returned by the include
 	 * SQL are not complete and additional content needs to be retrieved from a not included column. For example the
 	 * content of a {@link Binary} resource might not be stored in the json column.
-	 * 
+	 *
 	 * @param resource
 	 *            not <code>null</code>
 	 * @param connection
