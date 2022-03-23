@@ -3,6 +3,8 @@ package org.highmed.dsf.fhir.resources;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,8 +37,23 @@ class ResourceProviderImpl implements ResourceProvider
 {
 	private static final Logger logger = LoggerFactory.getLogger(ResourceProviderImpl.class);
 
-	private static final String VERSION_PATTERN_STRING = "${version}";
-	private static final Pattern VERSION_PATTERN = Pattern.compile(Pattern.quote(VERSION_PATTERN_STRING));
+	private static final String VERSION_PATTERN_STRING1 = "#{version}";
+	private static final Pattern VERSION_PATTERN1 = Pattern.compile(Pattern.quote(VERSION_PATTERN_STRING1));
+	// ${...} pattern to be backwards compatible
+	private static final String VERSION_PATTERN_STRING2 = "${version}";
+	private static final Pattern VERSION_PATTERN2 = Pattern.compile(Pattern.quote(VERSION_PATTERN_STRING2));
+
+	private static final String DATE_PATTERN_STRING1 = "#{date}";
+	private static final Pattern DATE_PATTERN1 = Pattern.compile(Pattern.quote(DATE_PATTERN_STRING1));
+	// ${...} pattern to be backwards compatible
+	private static final String DATE_PATTERN_STRING2 = "${date}";
+	private static final Pattern DATE_PATTERN2 = Pattern.compile(Pattern.quote(DATE_PATTERN_STRING2));
+	private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+	private static final String PLACEHOLDER_PREFIX_SPRING_ESCAPED = "\\${";
+	private static final String PLACEHOLDER_PREFIX = "#{";
+	private static final Pattern PLACEHOLDER_PREFIX_PATTERN = Pattern.compile(Pattern.quote(PLACEHOLDER_PREFIX));
+
 
 	private final Map<String, List<ActivityDefinition>> activityDefinitionsByProcessKeyAndVersion = new HashMap<>();
 	private final Map<String, List<CodeSystem>> codeSystemsByProcessKeyAndVersion = new HashMap<>();
@@ -225,8 +242,9 @@ class ResourceProviderImpl implements ResourceProvider
 		}
 	}
 
-	static ResourceProvider read(String processPluginVersion, Supplier<IParser> parserSupplier, ClassLoader classLoader,
-			PropertyResolver resolver, Map<String, List<AbstractResource>> resourcesByProcessKeyAndVersion)
+	static ResourceProvider read(String processPluginVersion, LocalDate processPluginDate,
+			Supplier<IParser> parserSupplier, ClassLoader classLoader, PropertyResolver resolver,
+			Map<String, List<AbstractResource>> resourcesByProcessKeyAndVersion)
 	{
 		Map<String, List<AbstractResource>> dependencyResourcesByProcessKeyAndVersion = new HashMap<>();
 		for (Entry<String, List<AbstractResource>> entry : resourcesByProcessKeyAndVersion.entrySet())
@@ -240,17 +258,17 @@ class ResourceProviderImpl implements ResourceProvider
 		for (Entry<String, List<AbstractResource>> entry : resourcesByProcessKeyAndVersion.entrySet())
 		{
 			resources.put(entry.getKey(), entry.getValue().stream()
-					.filter(Predicate.not(AbstractResource::isDependencyResource))
-					.map(r -> read(processPluginVersion, parserSupplier, classLoader, resolver, resourcesByFileName, r))
+					.filter(Predicate.not(AbstractResource::isDependencyResource)).map(r -> read(processPluginVersion,
+							processPluginDate, parserSupplier, classLoader, resolver, resourcesByFileName, r))
 					.collect(Collectors.toList()));
 		}
 
 		return of(resources, dependencyResourcesByProcessKeyAndVersion);
 	}
 
-	private static MetadataResource read(String processPluginVersion, Supplier<IParser> parserSupplier,
-			ClassLoader classLoader, PropertyResolver resolver, Map<String, MetadataResource> resourcesByFileName,
-			AbstractResource resources)
+	private static MetadataResource read(String processPluginVersion, LocalDate processPluginDate,
+			Supplier<IParser> parserSupplier, ClassLoader classLoader, PropertyResolver resolver,
+			Map<String, MetadataResource> resourcesByFileName, AbstractResource resources)
 	{
 		final String fileName = resources.getFileName();
 		final Class<? extends MetadataResource> type = resources.getType();
@@ -266,8 +284,8 @@ class ResourceProviderImpl implements ResourceProvider
 		}
 		else
 		{
-			MetadataResource m = parseResourceAndSetVersion(processPluginVersion, parserSupplier, classLoader, resolver,
-					fileName, type);
+			MetadataResource m = parseResourceAndSetVersion(processPluginVersion, processPluginDate, parserSupplier,
+					classLoader, resolver, fileName, type);
 
 			resourcesByFileName.put(fileName, m);
 
@@ -276,17 +294,35 @@ class ResourceProviderImpl implements ResourceProvider
 	}
 
 	private static <T extends MetadataResource> T parseResourceAndSetVersion(String processPluginVersion,
-			Supplier<IParser> parserSupplier, ClassLoader classLoader, PropertyResolver resolver, String fileName,
-			Class<T> type)
+			LocalDate processPluginDate, Supplier<IParser> parserSupplier, ClassLoader classLoader,
+			PropertyResolver resolver, String fileName, Class<T> type)
 	{
-		logger.debug("Reading {} from {} and replacing all occurrences of {} with {}", type.getSimpleName(), fileName,
-				VERSION_PATTERN_STRING, processPluginVersion);
+		logger.debug("Reading {} from {} and replacing all occurrences of {} and {} with {}", type.getSimpleName(),
+				fileName, VERSION_PATTERN_STRING1, VERSION_PATTERN_STRING2, processPluginVersion);
+
+		String processPluginDateValue = null;
+		if (processPluginDate != null && !LocalDate.MIN.equals(processPluginDate))
+		{
+			processPluginDateValue = processPluginDate.format(DATE_FORMAT);
+			logger.debug("Replacing all occurrences of {} and {} with {}", DATE_PATTERN_STRING1, DATE_PATTERN_STRING2,
+					processPluginDateValue);
+		}
 
 		try (InputStream in = classLoader.getResourceAsStream(fileName))
 		{
 			String read = IOUtils.toString(in, StandardCharsets.UTF_8);
-			read = VERSION_PATTERN.matcher(read).replaceAll(processPluginVersion);
 
+			read = VERSION_PATTERN1.matcher(read).replaceAll(processPluginVersion);
+			read = VERSION_PATTERN2.matcher(read).replaceAll(processPluginVersion);
+
+			if (processPluginDateValue != null)
+			{
+				read = DATE_PATTERN1.matcher(read).replaceAll(processPluginDateValue);
+				read = DATE_PATTERN2.matcher(read).replaceAll(processPluginDateValue);
+			}
+
+			// when calling replaceAll with ${ the $ needs to be escaped using \${
+			read = PLACEHOLDER_PREFIX_PATTERN.matcher(read).replaceAll(PLACEHOLDER_PREFIX_SPRING_ESCAPED);
 			read = resolver.resolveRequiredPlaceholders(read);
 
 			return parserSupplier.get().parseResource(type, read);
