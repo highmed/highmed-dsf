@@ -88,7 +88,7 @@ public interface ProcessPluginDefinition
 	/**
 	 * Override this method to implement custom logic after a process has been deployed and is active, e.g. test the
 	 * connection to an external server needed by a process.
-	 * 
+	 *
 	 * @param pluginApplicationContext
 	 *            the process plugin spring application context, never <code>null</code>
 	 * @param activeProcesses
