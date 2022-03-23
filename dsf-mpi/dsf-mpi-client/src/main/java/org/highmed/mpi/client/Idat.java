@@ -33,7 +33,7 @@ public interface Idat
 	 * O - other (http://hl7.org/fhir/administrative-gender other)<br>
 	 * U - unknown (http://hl7.org/fhir/administrative-gender unknown)<br>
 	 * X - undefined (http://fhir.de/CodeSystem/gender-amtlich-de unbestimmt)
-	 * 
+	 *
 	 * @return {D, F, M, O, U, X}
 	 */
 	String getSex();
@@ -49,7 +49,7 @@ public interface Idat
 
 	/**
 	 * https://en.wikipedia.org/wiki/ISO_3166-2
-	 * 
+	 *
 	 * @return two character code based on ISO 3166-2
 	 */
 	String getCountry();

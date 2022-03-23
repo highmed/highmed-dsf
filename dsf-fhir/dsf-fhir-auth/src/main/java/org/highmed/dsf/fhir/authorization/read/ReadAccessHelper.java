@@ -30,7 +30,7 @@ public interface ReadAccessHelper
 
 	/**
 	 * Adds LOCAL tag. Removes ALL tag if present.
-	 * 
+	 *
 	 * @param <R>
 	 *            the resource type
 	 * @param resource
@@ -42,7 +42,7 @@ public interface ReadAccessHelper
 
 	/**
 	 * Adds ORGANIZATION tag for the given organization. Adds LOCAL tag if not present, removes ALL tag if present.
-	 * 
+	 *
 	 * @param <R>
 	 *            the resource type
 	 * @param resource
@@ -57,7 +57,7 @@ public interface ReadAccessHelper
 
 	/**
 	 * Adds ORGANIZATION tag for the given organization. Adds LOCAL tag if not present, removes ALL tag if present.
-	 * 
+	 *
 	 * @param <R>
 	 *            the resource type
 	 * @param resource
@@ -76,7 +76,7 @@ public interface ReadAccessHelper
 
 	/**
 	 * Adds ROLE tag for the given affiliation. Adds LOCAL tag if not present, removes ALL tag if present.
-	 * 
+	 *
 	 * @param <R>
 	 *            the resource type
 	 * @param resource
@@ -95,7 +95,7 @@ public interface ReadAccessHelper
 
 	/**
 	 * Adds ROLE tag for the given affiliation. Adds LOCAL tag if not present, removes ALL tag if present.
-	 * 
+	 *
 	 * @param <R>
 	 *            the resource type
 	 * @param resource
@@ -115,7 +115,7 @@ public interface ReadAccessHelper
 
 	/**
 	 * Adds All tag. Removes LOCAL, ORGANIZATION and ROLE tags if present.
-	 * 
+	 *
 	 * @param <R>
 	 *            the resource type
 	 * @param resource
@@ -147,7 +147,7 @@ public interface ReadAccessHelper
 
 	/**
 	 * <b>Resource with access tags valid if:</b><br>
-	 * 
+	 *
 	 * 1 LOCAL tag and n {ORGANIZATION, ROLE} tags {@code (n >= 0)}<br>
 	 * or<br>
 	 * 1 ALL tag<br>
@@ -155,7 +155,7 @@ public interface ReadAccessHelper
 	 * All tags {LOCAL, ORGANIZATION, ROLE, ALL} valid<br>
 	 * <br>
 	 * Does not check if referenced organizations or roles exist
-	 * 
+	 *
 	 * @param resource
 	 *            may be <code>null</code>
 	 * @return <code>false</code> if given <b>resource</b> is <code>null</code> or resource not valid
@@ -164,13 +164,13 @@ public interface ReadAccessHelper
 
 	/**
 	 * <b>Resource with access tags valid if:</b><br>
-	 * 
+	 *
 	 * 1 LOCAL tag and n {ORGANIZATION, ROLE} tags {@code (n >= 0)}<br>
 	 * or<br>
 	 * 1 ALL tag<br>
 	 * <br>
 	 * All tags {LOCAL, ORGANIZATION, ROLE, ALL} valid
-	 * 
+	 *
 	 * @param resource
 	 *            may be <code>null</code>
 	 * @param organizationWithIdentifierExists

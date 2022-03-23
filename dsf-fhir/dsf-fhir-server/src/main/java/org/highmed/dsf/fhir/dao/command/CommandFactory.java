@@ -17,7 +17,7 @@ public interface CommandFactory
 	 *            not <code>null</code>
 	 * @param handlingType
 	 *            not <code>null</code>
-	 * 
+	 *
 	 * @return {@link CommandList} with individual commands from each entry contained in the bundle
 	 * @throws BadBundleException
 	 *             if the bundle could not be processed because of wrong bundle type or other errors

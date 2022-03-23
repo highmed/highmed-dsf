@@ -24,7 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
  * A provider configuration file named "org.highmed.dsf.DsfProcessPluginDefinition" containing the canonical name of the
  * class implementing this interface needs to be part of the process plugin at "/META-INF/services/". For more details
  * on the content of the provider configuration file, see {@link ServiceLoader}.
- * 
+ *
  * Additional {@link TypedValueSerializer}s to be registered inside the camunda process engine need be defined as beans
  * in the process plugins spring context.
  */
@@ -53,7 +53,7 @@ public interface ProcessPluginDefinition
 
 	/**
 	 * <i>Override this method to replace <code>#{date}</code> in FHIR and BPMN files with the returned value.</i>
-	 * 
+	 *
 	 * @return the release date of the process plugin, if not overridden {@link LocalDate#MIN}
 	 * @see ResourceProvider#read(String, LocalDate, java.util.function.Supplier, ClassLoader, PropertyResolver,
 	 *      java.util.Map)
@@ -66,9 +66,9 @@ public interface ProcessPluginDefinition
 	/**
 	 * Return <code>Stream.of("foo.bpmn");</code> for a foo.bpmn file located in the root folder of the process plugin
 	 * jar. The returned files will be read via {@link ClassLoader#getResourceAsStream(String)}.
-	 * 
+	 *
 	 * @return *.bpmn files inside process plugin jar
-	 * 
+	 *
 	 * @see ClassLoader#getResourceAsStream(String)
 	 */
 	Stream<String> getBpmnFiles();
@@ -81,7 +81,7 @@ public interface ProcessPluginDefinition
 	/**
 	 * <i>Override this method to return a {@link ResourceProvider} with fhir metadata resources (ActivityDefinition,
 	 * CodeSystem, NamingSystem, StructureDefinition, ValueSet) needed by this process plugin.</i>
-	 * 
+	 *
 	 * @param fhirContext
 	 *            applications fhir context, never <code>null</code>
 	 * @param classLoader
@@ -91,16 +91,16 @@ public interface ProcessPluginDefinition
 	 *            never <code>null</code>
 	 * @return {@link ResourceProvider} with FHIR resources needed to enable the included processes, if not overridden
 	 *         {@link ResourceProvider#empty()}
-	 * 
+	 *
 	 * @see ActivityDefinitionResource#file(String)
 	 * @see CodeSystemResource#file(String)
 	 * @see NamingSystemResource#file(String)
 	 * @see StructureDefinitionResource#file(String)
 	 * @see ValueSetResource#file(String)
-	 * 
+	 *
 	 * @see FhirContext#newJsonParser()
 	 * @see FhirContext#newXmlParser()
-	 * 
+	 *
 	 * @see ResourceProvider#read(String, java.util.function.Supplier, ClassLoader, PropertyResolver, java.util.Map)
 	 * @see ResourceProvider#read(String, LocalDate, java.util.function.Supplier, ClassLoader, PropertyResolver,
 	 *      java.util.Map)
@@ -123,7 +123,7 @@ public interface ProcessPluginDefinition
 	/**
 	 * <i>Override this method to implement custom logic after a process has been deployed and is active, e.g. test the
 	 * connection to an external server needed by a process.</i>
-	 * 
+	 *
 	 * @param pluginApplicationContext
 	 *            the process plugin spring application context, never <code>null</code>
 	 * @param activeProcesses

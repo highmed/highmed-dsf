@@ -11,7 +11,7 @@ import org.springframework.beans.factory.InitializingBean;
 
 /**
  * Adds before execution of a process a listener to every BPMN Start- and EndEvent as well as to CallActivities
- * 
+ *
  * @see StartListener
  * @see CallActivityListener
  * @see EndListener
