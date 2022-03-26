@@ -22,7 +22,26 @@ public interface BasicFhirWebserviceClient extends PreferReturnResource
 
 	Resource read(String resourceTypeName, String id);
 
+	/**
+	 * @param <R>
+	 * @param resourceType
+	 *            not <code>null</code>
+	 * @param id
+	 *            not <code>null</code>
+	 * @return
+	 */
 	<R extends Resource> R read(Class<R> resourceType, String id);
+
+	/**
+	 * Uses If-None-Match and If-Modified-Since Headers based on the version and lastUpdated values in <b>oldValue</b>
+	 * to check if the resource has been modified.
+	 *
+	 * @param <R>
+	 * @param oldValue
+	 *            not <code>null</code>
+	 * @return oldValue (same object) if server send 304 - Not Modified, else value returned from server
+	 */
+	<R extends Resource> R read(R oldValue);
 
 	<R extends Resource> boolean exists(Class<R> resourceType, String id);
 
