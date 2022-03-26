@@ -2608,6 +2608,9 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		Binary read2 = getWebserviceClient().read(createdWithoutVersion);
 		assertTrue(createdWithoutVersion == read2);
 
+		// sleeping for 1 second to make sure version two is at least 1 second newer
+		Thread.sleep(1000L);
+
 		Binary updated = getWebserviceClient().update(created);
 		assertNotEquals(created.getMeta().getVersionId(), updated.getMeta().getVersionId());
 
