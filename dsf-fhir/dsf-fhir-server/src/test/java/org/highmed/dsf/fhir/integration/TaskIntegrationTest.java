@@ -1,10 +1,6 @@
 package org.highmed.dsf.fhir.integration;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -960,5 +956,88 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertFalse(fromHistory.getRestriction().getRecipientFirstRep().hasReference());
 		assertTrue(fromHistory.getRestriction().getRecipientFirstRep().hasType());
 		assertTrue(fromHistory.getRestriction().getRecipientFirstRep().hasIdentifier());
+	}
+
+	@Test
+	public void testSearchByProfile() throws Exception
+	{
+		final String profile = "http://foo.bar/fhir/StructureDefinition/baz";
+
+		OrganizationProvider organizationProvider = getSpringWebApplicationContext()
+				.getBean(OrganizationProvider.class);
+		assertNotNull(organizationProvider);
+		Organization org = organizationProvider.getLocalOrganization().get();
+
+		Reference orgRef = new Reference("Organization/" + org.getIdElement().getIdPart());
+
+		Task task1 = new Task();
+		task1.setRequester(orgRef);
+		task1.getRestriction().addRecipient(orgRef);
+		task1.getMeta().addProfile(profile);
+
+		Task task2 = new Task();
+		task2.setRequester(orgRef);
+		task2.getRestriction().addRecipient(orgRef);
+		task2.getMeta().addProfile(profile + "|0.1.0");
+
+		TaskDao taskDao = getSpringWebApplicationContext().getBean(TaskDao.class);
+		Task createdTask1 = taskDao.create(task1);
+		assertNotNull(createdTask1);
+		Task createdTask2 = taskDao.create(task2);
+		assertNotNull(createdTask2);
+
+		Bundle result1 = getWebserviceClient().search(Task.class,
+				Map.of("_profile", Collections.singletonList(profile)));
+		assertNotNull(result1);
+		assertEquals(2, result1.getTotal());
+		assertTrue(result1.hasEntry());
+		assertEquals(2, result1.getEntry().size());
+		assertTrue(result1.getEntry().get(0).hasResource());
+		assertTrue(result1.getEntry().get(0).getResource() instanceof Task);
+
+		Bundle result2 = getWebserviceClient().search(Task.class,
+				Map.of("_profile", Collections.singletonList(profile + "|0.1.0")));
+		assertNotNull(result2);
+		assertEquals(1, result2.getTotal());
+		assertTrue(result2.hasEntry());
+		assertEquals(1, result2.getEntry().size());
+		assertTrue(result2.getEntry().get(0).hasResource());
+		assertTrue(result2.getEntry().get(0).getResource() instanceof Task);
+		assertTrue(result2.getEntry().get(0).getResource().getMeta().hasProfile());
+		assertEquals(1, result2.getEntry().get(0).getResource().getMeta().getProfile().size());
+		assertEquals(task2.getMeta().getProfile().get(0).getValue(),
+				result2.getEntry().get(0).getResource().getMeta().getProfile().get(0).getValue());
+
+		Bundle result3 = getWebserviceClient().search(Task.class,
+				Map.of("_profile", Collections.singletonList("http://foo.bar/fhir/StructureDefinition/test")));
+		assertNotNull(result3);
+		assertEquals(0, result3.getTotal());
+
+		Bundle result4 = getWebserviceClient().search(Task.class,
+				Map.of("_profile", Collections.singletonList(profile + "|0.2.0")));
+		assertNotNull(result4);
+		assertEquals(0, result4.getTotal());
+
+		Bundle result5 = getWebserviceClient().search(Task.class,
+				Map.of("_profile:below", Collections.singletonList("http://foo.bar/fhir/StructureDefinition")));
+		assertNotNull(result5);
+		assertEquals(2, result5.getTotal());
+		assertTrue(result5.hasEntry());
+		assertEquals(2, result5.getEntry().size());
+		assertTrue(result5.getEntry().get(0).hasResource());
+		assertTrue(result5.getEntry().get(0).getResource() instanceof Task);
+
+		Bundle result6 = getWebserviceClient().search(Task.class,
+				Map.of("_profile:below", Collections.singletonList("http://foo.bar/fhir/StructureDefinition|0.1.0")));
+		assertNotNull(result6);
+		assertEquals(1, result6.getTotal());
+		assertTrue(result6.hasEntry());
+		assertEquals(1, result6.getEntry().size());
+		assertTrue(result6.getEntry().get(0).hasResource());
+		assertTrue(result6.getEntry().get(0).getResource() instanceof Task);
+		assertTrue(result6.getEntry().get(0).getResource().getMeta().hasProfile());
+		assertEquals(1, result6.getEntry().get(0).getResource().getMeta().getProfile().size());
+		assertEquals(task2.getMeta().getProfile().get(0).getValue(),
+				result6.getEntry().get(0).getResource().getMeta().getProfile().get(0).getValue());
 	}
 }

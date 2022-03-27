@@ -31,9 +31,16 @@ public class ResourceProfile<R extends DomainResource> extends AbstractCanonical
 		switch (valueAndType.type)
 		{
 			case PRECISE:
-				return resourceColumn + "->'meta'->'profile' ?? ?";
+				if (valueAndType.version != null)
+					return resourceColumn + "->'meta'->'profile' ?? ?";
+				else
+					// entries without version or entries with version - ignoring the version
+					return "(" + resourceColumn + "->'meta'->'profile' ?? ?"
+							+ " OR EXISTS (SELECT 1 FROM (SELECT jsonb_array_elements_text(" + resourceColumn
+							+ "->'meta'->'profile') AS profile) AS profiles WHERE profile LIKE ?))";
 			case BELOW:
-				return resourceColumn + "->'meta'->>'profile' ~ ?";
+				return "EXISTS (SELECT 1 FROM (SELECT jsonb_array_elements_text(" + resourceColumn
+						+ "->'meta'->'profile') AS profile) AS profiles WHERE profile LIKE ?)";
 			default:
 				return "";
 		}
@@ -42,7 +49,15 @@ public class ResourceProfile<R extends DomainResource> extends AbstractCanonical
 	@Override
 	public int getSqlParameterCount()
 	{
-		return 1;
+		switch (valueAndType.type)
+		{
+			case PRECISE:
+				return valueAndType.version != null ? 1 : 2;
+			case BELOW:
+				return 1;
+			default:
+				return 0;
+		}
 	}
 
 	@Override
@@ -55,10 +70,21 @@ public class ResourceProfile<R extends DomainResource> extends AbstractCanonical
 		switch (valueAndType.type)
 		{
 			case PRECISE:
-				statement.setString(parameterIndex, valueAndType.url);
+				if (valueAndType.version != null)
+					statement.setString(parameterIndex, valueAndType.url + "|" + valueAndType.version);
+				else
+				{
+					if (subqueryParameterIndex == 1)
+						statement.setString(parameterIndex, valueAndType.url);
+					if (subqueryParameterIndex == 2)
+						statement.setString(parameterIndex, valueAndType.url + "|%");
+				}
 				return;
 			case BELOW:
-				statement.setString(parameterIndex, valueAndType.url + ".*");
+				if (valueAndType.version != null)
+					statement.setString(parameterIndex, valueAndType.url + "%|" + valueAndType.version);
+				else
+					statement.setString(parameterIndex, valueAndType.url + "%");
 				return;
 			default:
 				return;
@@ -74,10 +100,20 @@ public class ResourceProfile<R extends DomainResource> extends AbstractCanonical
 		switch (valueAndType.type)
 		{
 			case PRECISE:
-				return resource.getMeta().getProfile().stream().anyMatch(p -> p.getValue().equals(valueAndType.url));
+				if (valueAndType.version != null)
+					return resource.getMeta().getProfile().stream()
+							.anyMatch(p -> p.getValue().equals(valueAndType.url + "|" + valueAndType.version));
+				else
+					return resource.getMeta().getProfile().stream()
+							.anyMatch(p -> p.getValue().equals(valueAndType.url));
 			case BELOW:
-				return resource.getMeta().getProfile().stream()
-						.anyMatch(p -> p.getValue().startsWith(valueAndType.url));
+				if (valueAndType.version != null)
+					return resource.getMeta().getProfile().stream()
+							.anyMatch(p -> p.getValue().startsWith(valueAndType.url)
+									&& p.getValue().endsWith("|" + valueAndType.version));
+				else
+					return resource.getMeta().getProfile().stream()
+							.anyMatch(p -> p.getValue().startsWith(valueAndType.url));
 			default:
 				throw notDefined();
 		}
