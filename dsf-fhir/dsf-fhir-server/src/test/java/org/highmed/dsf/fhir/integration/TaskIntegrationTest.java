@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
@@ -960,5 +961,21 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertFalse(fromHistory.getRestriction().getRecipientFirstRep().hasReference());
 		assertTrue(fromHistory.getRestriction().getRecipientFirstRep().hasType());
 		assertTrue(fromHistory.getRestriction().getRecipientFirstRep().hasIdentifier());
+	}
+
+	@Test
+	public void testDateTimeQueryParameter() throws Exception
+	{
+		Bundle r1 = getWebserviceClient().search(Task.class,
+				Map.of("_lastUpdated", Arrays.asList("gt2021-12-02T10:00:00", "lt2021-12-02T12:00:00")));
+		assertNotNull(r1);
+		assertEquals(0, r1.getTotal());
+		assertEquals(0, r1.getEntry().size());
+
+		Bundle r2 = getWebserviceClient().search(Task.class,
+				Map.of("_lastUpdated", Arrays.asList("lt2021-12-02T12:00:00", "gt2021-12-02T10:00:00")));
+		assertNotNull(r2);
+		assertEquals(0, r2.getTotal());
+		assertEquals(0, r2.getEntry().size());
 	}
 }
