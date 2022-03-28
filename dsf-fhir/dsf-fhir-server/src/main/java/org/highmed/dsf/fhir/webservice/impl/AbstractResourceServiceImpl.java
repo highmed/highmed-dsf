@@ -3,10 +3,13 @@ package org.highmed.dsf.fhir.webservice.impl;
 import java.net.URI;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -350,10 +353,10 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		Optional<R> read = exceptionHandler.handleSqlAndResourceDeletedException(serverBase, resourceTypeName,
 				() -> dao.read(parameterConverter.toUuid(resourceTypeName, id)));
 
-		Optional<Date> ifModifiedSince = getHeaderString(headers, Constants.HEADER_IF_MODIFIED_SINCE,
-				Constants.HEADER_IF_MODIFIED_SINCE_LC).flatMap(this::toDate);
 		Optional<EntityTag> ifNoneMatch = getHeaderString(headers, Constants.HEADER_IF_NONE_MATCH,
 				Constants.HEADER_IF_NONE_MATCH_LC).flatMap(parameterConverter::toEntityTag);
+		Optional<Date> ifModifiedSince = getHeaderString(headers, Constants.HEADER_IF_MODIFIED_SINCE,
+				Constants.HEADER_IF_MODIFIED_SINCE_LC).flatMap(this::toDate);
 
 		return read.map(resource ->
 		{
@@ -362,11 +365,24 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 			EntityTag resourceTag = new EntityTag(resource.getMeta().getVersionId(), true);
 			if (ifNoneMatch.map(t -> t.equals(resourceTag)).orElse(false))
 				return Response.notModified(resourceTag).lastModified(resource.getMeta().getLastUpdated()).build();
-			else if (ifModifiedSince.map(d -> resource.getMeta().getLastUpdated().after(d)).orElse(false))
+
+			// If-Modified-Since is ignored, when used in combination with If-None-Match
+			else if (ifNoneMatch.isEmpty() && ifModifiedSince
+					.map(d -> !afterWithSecondsPrecision(resource.getMeta().getLastUpdated(), d)).orElse(false))
 				return Response.notModified(resourceTag).lastModified(resource.getMeta().getLastUpdated()).build();
 			else
 				return responseGenerator.response(Status.OK, resource, getMediaTypeForRead(uri, headers)).build();
 		}).orElseGet(() -> Response.status(Status.NOT_FOUND).build()); // TODO return OperationOutcome
+	}
+
+	private boolean afterWithSecondsPrecision(Date a, Date b)
+	{
+		LocalDateTime aLdt = a.toInstant().atZone(ZoneOffset.UTC.normalized()).toLocalDateTime()
+				.truncatedTo(ChronoUnit.SECONDS);
+		LocalDateTime bLdt = b.toInstant().atZone(ZoneOffset.UTC.normalized()).toLocalDateTime()
+				.truncatedTo(ChronoUnit.SECONDS);
+
+		return aLdt.isAfter(bLdt);
 	}
 
 	protected MediaType getMediaTypeForRead(UriInfo uri, HttpHeaders headers)
@@ -404,10 +420,10 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		Optional<R> read = exceptionHandler.handleSqlAndResourceDeletedException(serverBase, id,
 				() -> dao.readVersion(parameterConverter.toUuid(resourceTypeName, id), version));
 
-		Optional<Date> ifModifiedSince = getHeaderString(headers, Constants.HEADER_IF_MODIFIED_SINCE,
-				Constants.HEADER_IF_MODIFIED_SINCE_LC).flatMap(this::toDate);
 		Optional<EntityTag> ifNoneMatch = getHeaderString(headers, Constants.HEADER_IF_NONE_MATCH,
 				Constants.HEADER_IF_NONE_MATCH_LC).flatMap(parameterConverter::toEntityTag);
+		Optional<Date> ifModifiedSince = getHeaderString(headers, Constants.HEADER_IF_MODIFIED_SINCE,
+				Constants.HEADER_IF_MODIFIED_SINCE_LC).flatMap(this::toDate);
 
 		return read.map(resource ->
 		{
@@ -416,7 +432,10 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 			EntityTag resourceTag = new EntityTag(resource.getMeta().getVersionId(), true);
 			if (ifNoneMatch.map(t -> t.equals(resourceTag)).orElse(false))
 				return Response.notModified(resourceTag).lastModified(resource.getMeta().getLastUpdated()).build();
-			else if (ifModifiedSince.map(d -> resource.getMeta().getLastUpdated().after(d)).orElse(false))
+
+			// If-Modified-Since is ignored, when used in combination with If-None-Match
+			else if (ifNoneMatch.isEmpty() && ifModifiedSince
+					.map(d -> !afterWithSecondsPrecision(resource.getMeta().getLastUpdated(), d)).orElse(false))
 				return Response.notModified(resourceTag).lastModified(resource.getMeta().getLastUpdated()).build();
 			else
 				return responseGenerator.response(Status.OK, resource, getMediaTypeForVRead(uri, headers)).build();

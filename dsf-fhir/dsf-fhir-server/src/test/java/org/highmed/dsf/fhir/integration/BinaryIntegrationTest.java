@@ -2,6 +2,7 @@ package org.highmed.dsf.fhir.integration;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -2587,5 +2588,38 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		String binaryId = binary.getIdElement().getIdPart();
 
 		expectForbidden(() -> getExternalWebserviceClient().read(Binary.class, binaryId));
+	}
+
+	@Test
+	public void testConditionalRequest() throws Exception
+	{
+		Binary binary = new Binary();
+		binary.setContentType(MediaType.TEXT_PLAIN);
+		binary.setData("Hello World".getBytes(StandardCharsets.UTF_8));
+		getReadAccessHelper().addAll(binary);
+
+		Binary created = getWebserviceClient().create(binary);
+
+		Binary read1 = getWebserviceClient().read(created);
+		assertTrue(created == read1);
+
+		Binary createdWithoutVersion = created.copy();
+		createdWithoutVersion.getMeta().setVersionId(null);
+		Binary read2 = getWebserviceClient().read(createdWithoutVersion);
+		assertTrue(createdWithoutVersion == read2);
+
+		// sleeping for 1 second to make sure version two is at least 1 second newer
+		Thread.sleep(1000L);
+
+		Binary updated = getWebserviceClient().update(created);
+		assertNotEquals(created.getMeta().getVersionId(), updated.getMeta().getVersionId());
+
+		Binary read3 = getWebserviceClient().read(created);
+		assertFalse(created == read3);
+		assertEquals(updated.getMeta().getVersionId(), read3.getMeta().getVersionId());
+
+		Binary read4 = getWebserviceClient().read(createdWithoutVersion);
+		assertFalse(createdWithoutVersion == read4);
+		assertEquals(updated.getMeta().getVersionId(), read4.getMeta().getVersionId());
 	}
 }
