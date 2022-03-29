@@ -24,8 +24,13 @@ public class Targets
 		return Collections.unmodifiableList(entries);
 	}
 
-	public void removeTarget(Target target)
+	public boolean removeTarget(Target target)
 	{
-		entries.remove(target);
+		return entries.remove(target);
+	}
+
+	public boolean isEmpty()
+	{
+		return entries.isEmpty();
 	}
 }
