@@ -137,28 +137,37 @@ public class DocumentationGenerator
 
 		String[] valueSplit = value.value().replaceAll("\\$", "").replace("#", "").replace("{", "").replace("}", "")
 				.split(":");
-		String property = valueSplit[0];
 
-		String environment = property.replace(".", "_").toUpperCase();
+		String initialProperty = valueSplit[0];
+		String property = getDocumentationString("Property", initialProperty);
+
+		String environment = initialProperty.replace(".", "_").toUpperCase();
 		if (documentation.filePropertySupported())
 			environment = String.format("%s or %s_FILE", environment, environment);
 
-		boolean required = documentation.required();
+		String required = getDocumentationString("Required", String.valueOf(documentation.required()));
 
 		String[] documentationProcessNames = documentation.processNames();
-		String processesNamesAsString = getProcessNamesAsString(documentationProcessNames, pluginProcessNames);
+		boolean processProperty = documentation.processProperty();
+		String processes = processProperty
+				? getDocumentationString("Processes",
+						getProcessNamesAsString(documentationProcessNames, pluginProcessNames))
+				: getDocumentationString("Processes", "Default DSF property, does not belong to a specific process");
 
-		String description = documentation.description();
-		String example = documentation.example();
-		String recommendation = documentation.recommendation();
+		String description = getDocumentationString("Description", documentation.description());
+		String example = getDocumentationString("Example", documentation.example());
+		String recommendation = getDocumentationString("Recommendation", documentation.recommendation());
 
-		String defaultValue = (valueSplit.length == 2 && !"null".equals(valueSplit[1])) ? valueSplit[1]
-				: "not set by default";
+		String defaultValue = getDocumentationString("Default",
+				((valueSplit.length == 2 && !"null".equals(valueSplit[1])) ? valueSplit[1] : "not set by default"));
 
-		return String.format("### %s\n- **Property:** %s\n- **Required:** %s\n- **Processes:** %s\n"
-				+ "- **Description:** %s\n- **Example:** %s\n- **Recommendation:** %s\n" + "- **Default:** %s\n\n",
-				environment, property, required, processesNamesAsString, description, example, recommendation,
-				defaultValue);
+		return String.format("### %s\n%s%s%s%s%s%s%s\n", environment, property, required, processes, description,
+				example, recommendation, defaultValue);
+	}
+
+	private String getDocumentationString(String title, String value)
+	{
+		return String.format("- **%s:** %s\n", title, value);
 	}
 
 	private String getProcessNamesAsString(String[] documentationProcessNames, List<String> pluginProcessNames)

@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 public @interface Documentation
 {
 	/**
-	 * @return <code>true</code> if this property is required for processes that are listed in
+	 * @return <code>true</code> if this property is required for the DSF or for processes that are listed in
 	 *         {@link Documentation#processNames}
 	 */
 	boolean required() default false;
@@ -23,8 +23,14 @@ public @interface Documentation
 	boolean filePropertySupported() default false;
 
 	/**
-	 * @return an empty array if all processes use this property or an array of length >=1 containing only specific
-	 *         processes that use this property, but not all
+	 * @return <code>true</code> if this property belongs to a process, else <code>false</code>, which means that this
+	 *         is a default DSF property and {@link Documentation#processNames} should not be used
+	 */
+	boolean processProperty() default false;
+
+	/**
+	 * @return an empty array if all processes use this property or an array of length {@literal >= 1} containing only
+	 *         specific processes that use this property, but not all
 	 */
 	String[] processNames() default {};
 
