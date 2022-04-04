@@ -44,7 +44,7 @@ public class FhirDbMigratorConfig implements DbMigratorConfig
 	@Value("${org.highmed.dsf.fhir.db.user.username:fhir_server_user}")
 	private String dbUsername;
 
-	// Documented in dsf-fhir-server/src/main/java/org/highmed/dsf/fhir/spring/config/PropertiesConfig.java
+	// Documentation in dsf-fhir-server/src/main/java/org/highmed/dsf/fhir/spring/config/PropertiesConfig.java
 	@Value("${org.highmed.dsf.fhir.db.user.password}")
 	private char[] dbPassword;
 
