@@ -195,35 +195,6 @@
 
 		<plugins>
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>exec</goal>
-						</goals>
-						<phase>prepare-package</phase>
-					</execution>
-				</executions>
-				<configuration>
-					<executable>java</executable>
-					<arguments>
-						<argument>-classpath</argument>
-						<classpath/>
-						<argument>
-							org.highmed.dsf.tools.generator.DocumentationGenerator
-						</argument>
-						<argument>
-							org.highmed.dsf.fhir.spring.config
-						</argument>
-					</arguments>
-					<includeProjectDependencies>true</includeProjectDependencies>
-					<addResourcesToClasspath>true</addResourcesToClasspath>
-					<classpathScope>compile</classpathScope>
-					<workingDirectory>${project.basedir}</workingDirectory>
-				</configuration>
-			</plugin>
-			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
