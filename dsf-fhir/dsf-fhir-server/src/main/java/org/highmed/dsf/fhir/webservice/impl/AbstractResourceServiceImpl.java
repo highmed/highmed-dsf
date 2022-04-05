@@ -189,7 +189,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		if (afterCreate != null)
 			afterCreate.accept(createdResource);
 
-		URI location = toLocation(uri, createdResource);
+		URI location = toLocation(createdResource);
 
 		return responseGenerator.response(Status.CREATED, createdResource,
 				parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers),
@@ -198,9 +198,9 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 				.tag(new EntityTag(createdResource.getMeta().getVersionId(), true)).build();
 	}
 
-	private URI toLocation(UriInfo uri, R resource)
+	private URI toLocation(R resource)
 	{
-		return uri.getBaseUriBuilder().path(resource.getResourceType().name())
+		return UriBuilder.fromUri(serverBase).path(resource.getResourceType().name())
 				.path("/{id}/" + Constants.PARAM_HISTORY + "/{vid}")
 				.build(resource.getIdElement().getIdPart(), resource.getIdElement().getVersionIdPart());
 	}
@@ -512,7 +512,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 		if (afterUpdate != null)
 			afterUpdate.accept(updatedResource);
 
-		URI location = toLocation(uri, updatedResource);
+		URI location = toLocation(updatedResource);
 
 		return responseGenerator
 				.response(Status.OK, updatedResource, parameterConverter.getMediaTypeThrowIfNotSupported(uri, headers),
