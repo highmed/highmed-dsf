@@ -65,8 +65,13 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 			.compile("&lt;reference value=\"((" + RESOURCE_NAMES + ")/" + UUID + ")\"&gt;");
 	private static final Pattern JSON_REFERENCE_UUID_PATTERN = Pattern
 			.compile("\"reference\": \"((" + RESOURCE_NAMES + ")/" + UUID + ")\",");
-	private static final Pattern XML_ID_UUID_PATTERN = Pattern.compile("&lt;id value=\"(" + UUID + ")\"&gt;");
-	private static final Pattern JSON_ID_UUID_PATTERN = Pattern.compile("\"id\": \"(" + UUID + ")\",");
+	private static final Pattern XML_ID_UUID_AND_VERSION_PATTERN = Pattern.compile(
+			"&lt;id value=\"(" + UUID + ")\"/&gt;\\n([ ]*)&lt;meta&gt;\\n([ ]*)&lt;versionId value=\"([0-9]+)\"/&gt;");
+	private static final Pattern JSON_ID_UUID_AND_VERSION_PATTERN = Pattern
+			.compile("\"id\": \"(" + UUID + ")\",\\n([ ]*)\"meta\": \\{\\n([ ]*)\"versionId\": \"([0-9]+)\",");
+
+	private static final Pattern CLOSABLE_XML_TAGS = Pattern
+			.compile("(m?)[\\t ]*<[a-zA-Z0-9]+( value=\".*\"){0,1}(></[a-zA-Z0-9]+>)");
 
 	private final FhirContext fhirContext;
 	private final ServerBaseProvider serverBaseProvider;
@@ -221,7 +226,20 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		IParser parser = getParser(fhirContext::newXmlParser);
 
 		out.write("<pre id=\"xml\" class=\"prettyprint linenums lang-xml\" style=\"display:none;\">");
-		String content = parser.encodeResourceToString(t).replace("<", "&lt;").replace(">", "&gt;");
+		String content = parser.encodeResourceToString(t);
+
+		content = simplifyXml(content);
+		content = content.replace("<", "&lt;").replace(">", "&gt;");
+
+		Matcher versionMatcher = XML_ID_UUID_AND_VERSION_PATTERN.matcher(content);
+		content = versionMatcher.replaceAll(result ->
+		{
+			Optional<String> resourceName = getResourceName(t, result.group(1));
+			return resourceName.map(rN -> "&lt;id value=\"<a href=\"/fhir/" + rN + "/" + result.group(1) + "\">"
+					+ result.group(1) + "</a>\"/&gt;\n" + result.group(2) + "&lt;meta&gt;\n" + result.group(3)
+					+ "&lt;versionId value=\"" + "<a href=\"/fhir/" + rN + "/" + result.group(1) + "/_history/"
+					+ result.group(4) + "\">" + result.group(4) + "</a>" + "\"/&gt;").orElse(result.group(0));
+		});
 
 		Matcher urlMatcher = URL_PATTERN.matcher(content);
 		content = urlMatcher.replaceAll(result -> "<a href=\"" + result.group() + "\">" + result.group() + "</a>");
@@ -230,16 +248,14 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		content = referenceUuidMatcher.replaceAll(result -> "&lt;reference value=\"<a href=\"/fhir/" + result.group(1)
 				+ "\">" + result.group(1) + "</a>\"&gt");
 
-		Matcher idUuidMatcher = XML_ID_UUID_PATTERN.matcher(content);
-		content = idUuidMatcher.replaceAll(result ->
-		{
-			Optional<String> resourceName = getResourceName(t, result.group(1));
-			return resourceName.map(rN -> "&lt;id value=\"<a href=\"/fhir/" + rN + "/" + result.group(1) + "\">"
-					+ result.group(1) + "</a>\"&gt").orElse(result.group(0));
-		});
-
 		out.write(content);
 		out.write("</pre>\n");
+	}
+
+	private String simplifyXml(String xml)
+	{
+		Matcher matcher = CLOSABLE_XML_TAGS.matcher(xml);
+		return matcher.replaceAll(r -> r.group().replace(r.group(3), "/>"));
 	}
 
 	private void writeJson(T t, OutputStreamWriter out) throws IOException
@@ -256,12 +272,14 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		content = referenceUuidMatcher.replaceAll(
 				result -> "\"reference\": \"<a href=\"/fhir/" + result.group(1) + "\">" + result.group(1) + "</a>\",");
 
-		Matcher idUuidMatcher = JSON_ID_UUID_PATTERN.matcher(content);
+		Matcher idUuidMatcher = JSON_ID_UUID_AND_VERSION_PATTERN.matcher(content);
 		content = idUuidMatcher.replaceAll(result ->
 		{
 			Optional<String> resourceName = getResourceName(t, result.group(1));
 			return resourceName.map(rN -> "\"id\": \"<a href=\"/fhir/" + rN + "/" + result.group(1) + "\">"
-					+ result.group(1) + "</a>\",").orElse(result.group(0));
+					+ result.group(1) + "</a>\",\n" + result.group(2) + "\"meta\": {\n" + result.group(3)
+					+ "\"versionId\": \"" + "<a href=\"/fhir/" + rN + "/" + result.group(1) + "/_history/"
+					+ result.group(4) + "\">" + result.group(4) + "</a>" + "\",").orElse(result.group(0));
 		});
 
 		out.write(content);
