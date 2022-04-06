@@ -205,6 +205,8 @@ public class ResponseGenerator
 	public BundleEntryComponent toBundleEntryComponent(HistoryEntry historyEntry)
 	{
 		BundleEntryComponent entry = new BundleEntryComponent();
+		entry.setFullUrlElement(
+				new IdType(serverBase, historyEntry.getResourceType(), historyEntry.getId().toString(), null));
 		entry.getRequest().setMethod(HTTPVerb.fromCode(historyEntry.getMethod()))
 				.setUrl(historyEntry.getResourceType() + (historyEntry.getResource() == null
 						? "/" + historyEntry.getId().toString() + "/_history/" + historyEntry.getVersion()
