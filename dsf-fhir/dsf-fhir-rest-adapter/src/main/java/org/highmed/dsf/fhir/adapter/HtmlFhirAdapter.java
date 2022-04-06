@@ -105,6 +105,7 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 			throws IOException, WebApplicationException
 	{
 		OutputStreamWriter out = new OutputStreamWriter(entityStream);
+		out.write("<!DOCTYPE html>\n");
 		out.write("<html>\n<head>\n");
 		out.write("<link rel=\"icon\" type=\"image/svg+xml\" href=\"/fhir/static/favicon.svg\">\n");
 		out.write("<link rel=\"icon\" type=\"image/png\" href=\"/fhir/static/favicon_32x32.png\" sizes=\"32x32\">\n");
@@ -112,11 +113,36 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		out.write("<meta name=\"theme-color\" content=\"#29235c\">\n");
 		out.write("<script src=\"/fhir/static/prettify.js\"></script>\n");
 		out.write("<script src=\"/fhir/static/tabs.js\"></script>\n");
+		out.write("<script src=\"/fhir/static/bookmarks.js\"></script>\n");
 		out.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"/fhir/static/prettify.css\">\n");
 		out.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"/fhir/static/highmed.css\">\n");
 		out.write("<title>DSF" + (uriInfo.getPath() == null || uriInfo.getPath().isEmpty() ? "" : ": ")
 				+ uriInfo.getPath() + "</title>\n</head>\n");
-		out.write("<body onload=\"prettyPrint();openInitialTab();\">\n");
+		out.write("<body onload=\"prettyPrint();openInitialTab();checkBookmarked();\">\n");
+		out.write("<div id=\"icons\">\n");
+		out.write("<svg class=\"icon\" id=\"bookmark-add\" viewBox=\"0 0 24 24\" onclick=\"addCurrentBookmark();\">\n");
+		out.write(
+				"<path d=\"M17,18L12,15.82L7,18V5H17M17,3H7A2,2 0 0,0 5,5V21L12,18L19,21V5C19,3.89 18.1,3 17,3Z\" />\n");
+		out.write("</svg>\n");
+		out.write(
+				"<svg class=\"icon\" id=\"bookmark-remove\" viewBox=\"0 0 24 24\" onclick=\"removeCurrentBookmark();\" style=\"display:none;\">\n");
+		out.write("<path d=\"M17,3H7A2,2 0 0,0 5,5V21L12,18L19,21V5C19,3.89 18.1,3 17,3Z\"/>\n");
+		out.write("</svg>\n");
+		out.write("<svg class=\"icon\" id=\"bookmark-list\" viewBox=\"0 0 24 24\" onclick=\"showBookmarks();\">\n");
+		out.write(
+				"<path d=\"M9,1H19A2,2 0 0,1 21,3V19L19,18.13V3H7A2,2 0 0,1 9,1M15,20V7H5V20L10,17.82L15,20M15,5C16.11,5 17,5.9 17,7V23L10,20L3,23V7A2,2 0 0,1 5,5H15Z\"/>\n");
+		out.write("</svg>\n");
+		out.write("</div>\n");
+		out.write("<div id=\"bookmarks\" style=\"display:none;\">\n");
+		out.write("<h3 id=\"bookmarks-title\">Bookmarks</h3>\n");
+		out.write(
+				"<svg class=\"icon\" id=\"bookmark-list-close\" viewBox=\"0 0 24 24\" onclick=\"closeBookmarks();\">\n");
+		out.write(
+				"<path fill=\"currentColor\" d=\"M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z\"/>\n");
+		out.write("</svg>\n");
+		out.write("<div id=\"list\">\n");
+		out.write("</div>\n");
+		out.write("</div>\n");
 		out.write("<table id=\"header\"><tr>\n");
 		out.write("<td><image src=\"/fhir/static/highmed.svg\"></td>\n");
 		out.write("<td id=\"url\"><h1>");

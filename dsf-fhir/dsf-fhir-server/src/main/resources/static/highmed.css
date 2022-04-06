@@ -1,50 +1,41 @@
-body
-{
+body {
 	margin: 2em;
 }
 
-table#header
-{
+table#header {
 	margin-bottom: 0.4em;
 }
 
-table#header img
-{
+table#header img {
 	height: 6em;
 }
 
-td#url
-{
+td#url {
 	vertical-align: bottom;
 }
 
-td#url h1
-{
+td#url h1 {
 	font-family: monospace;
 	color: #29235c;
 	margin: 0 0 0 1em;
 	word-break: break-word;
 }
 
-td#url h1 a:link, h1 a:visited, h1 a:active
-{
+td#url h1 a:link, h1 a:visited, h1 a:active {
 	color: #29235c;
 	text-decoration: none;
 }
 
-td#url h1 a:hover
-{
+td#url h1 a:hover {
 	color: #29235c;
 	text-decoration: underline;
 }
 
-.tab
-{
+.tab {
 	text-align: right;
 }
 
-.tab button
-{
+.tab button {
 	padding: 0.2em 0.6em;
 	background-color: #f1f1f1;
 	border: none;
@@ -53,56 +44,120 @@ td#url h1 a:hover
 	transition: 0.3s;
 }
 
-.tab button:hover
-{
+.tab button:hover {
 	background-color: #ddd;
 }
-	
-.tab button.active
-{
+
+.tab button.active {
 	background-color: #ccc;
 }
 
-pre
-{
+pre {
 	white-space: pre-wrap;
 	margin-top: 0;
 }
 
-li.L0, li.L1, li.L2, li.L3, li.L5, li.L6, li.L7, li.L8
-{
+li.L0, li.L1, li.L2, li.L3, li.L5, li.L6, li.L7, li.L8 {
 	list-style-type: decimal !important;
 }
 
-@media print
-{
-	body
-	{
+#icons {
+	position: absolute;
+	top: 2em;
+	right: 2em;
+}
+
+.icon {
+	height: 1.4em;
+	cursor: pointer;
+}
+
+.icon>path {
+	fill: #ccc;
+}
+
+.icon:hover>path {
+	fill: #29235c;
+}
+
+#bookmarks {
+	position: absolute;
+	top: 1em;
+	right: 1em;
+	padding: 1em;
+	border: 1px solid #ccc;
+	background: white;
+	padding-top: 2em;
+}
+
+#bookmarks>#bookmarks-title {
+	position: relative;
+	top: -1.8em;
+	font-family: sans-serif;
+}
+
+#bookmarks a:link, a:visited, a:active {
+	color: #29235c;
+	text-decoration: none;
+	vertical-align: super;
+	font-family: monospace;
+}
+
+#bookmarks a:hover {
+	color: #29235c;
+	text-decoration: underline;
+	vertical-align: super;
+	font-family: monospace;
+}
+
+#bookmarks>#list {
+	margin-block-start: 0;
+	margin-block-end: 0;
+}
+
+#bookmarks>#list>h4 {
+	margin-block-start: 1em;
+	margin-block-end: 0.2em;
+}
+
+#bookmarks>#list>div {
+	margin-block-start: 0;
+	margin-block-end: 0.2em;
+}
+
+#bookmarks:focus {
+	outline: none;
+}
+
+#bookmark-list-close {
+	position: absolute;
+	top: 1em;
+	right: 1em;
+}
+
+@media print {
+	body {
 		margin: 0;
 	}
-	
-	table#header
-	{
+	table#header {
 		margin-bottom: 2em;
 	}
-	
-	table#header img
-	{
+	table#header img {
 		height: 3em;
 	}
-	
-	td#url h1
-	{
+	td#url h1 {
 		font-size: 1.5em;
 	}
-	
-	.tab
-	{
+	.tab {
 		display: none;
 	}
-	
-	pre.prettyprint
-	{
+	pre.prettyprint {
 		border: 0 !important;
+	}
+	#icons {
+		display: none;
+	}
+	#bookmarks {
+		display: none;
 	}
 }

@@ -16,13 +16,13 @@ function openTab(lang)
 	document.getElementById(lang).style.display = "block";
 	document.getElementById(lang + "-button").className += " active";
 	
-	if (sessionStorage != null)
-		sessionStorage.setItem('lang', lang);
+	if (localStorage != null)
+		localStorage.setItem('lang', lang);
 }
 
 function openInitialTab()
 {
-	var lang = sessionStorage != null && sessionStorage.getItem("lang") != null ? sessionStorage.getItem("lang") : "xml";
+	var lang = localStorage != null && localStorage.getItem("lang") != null ? localStorage.getItem("lang") : "xml";
 	if (lang == "xml" || lang == "json")
 		openTab(lang);
 }
