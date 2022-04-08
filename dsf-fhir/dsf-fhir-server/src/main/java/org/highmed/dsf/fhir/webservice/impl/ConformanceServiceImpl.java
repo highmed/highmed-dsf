@@ -531,7 +531,7 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 						Stream.of(ParameterConverter.XML_FORMAT), ParameterConverter.XML_FORMATS.stream())
 				.collect(Collectors.joining(", ", "[", "]"));
 		CapabilityStatementRestResourceSearchParamComponent createFormatParameter = createSearchParameter("_format", "",
-				SearchParamType.STRING,
+				SearchParamType.SPECIAL,
 				"Specify the returned format of the payload response, allowed values: " + formatValues);
 		return createFormatParameter;
 	}
