@@ -126,8 +126,7 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 				+ uriInfo.getPath() + "</title>\n</head>\n");
 		out.write("<body onload=\"prettyPrint();openInitialTab();checkBookmarked();\">\n");
 		out.write("<div id=\"icons\">\n");
-		out.write(
-				"<svg class=\"icon\" viewBox=\"0 0 24 24\" onclick=\"showHelp();\">\n");
+		out.write("<svg class=\"icon\" viewBox=\"0 0 24 24\" onclick=\"showHelp();\">\n");
 		out.write("<title>Show Help</title>\n");
 		out.write(
 				"<path d=\"M11.07,12.85c0.77-1.39,2.25-2.21,3.11-3.44c0.91-1.29,0.4-3.7-2.18-3.7c-1.69,0-2.52,1.28-2.87,2.34L6.54,6.96 C7.25,4.83,9.18,3,11.99,3c2.35,0,3.96,1.07,4.78,2.41c0.7,1.15,1.11,3.3,0.03,4.9c-1.2,1.77-2.35,2.31-2.97,3.45 c-0.25,0.46-0.35,0.76-0.35,2.24h-2.89C10.58,15.22,10.46,13.95,11.07,12.85z M14,20c0,1.1-0.9,2-2,2s-2-0.9-2-2c0-1.1,0.9-2,2-2 S14,18.9,14,20z\"/>\n");
@@ -151,8 +150,7 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		out.write("</div>\n");
 		out.write("<div id=\"help\" style=\"display:none;\">\n");
 		out.write("<h3 id=\"help-title\">Query Parameters</h3>\n");
-		out.write(
-				"<svg class=\"icon\" id=\"help-close\" viewBox=\"0 0 24 24\" onclick=\"closeHelp();\">\n");
+		out.write("<svg class=\"icon\" id=\"help-close\" viewBox=\"0 0 24 24\" onclick=\"closeHelp();\">\n");
 		out.write("<title>Close Help</title>\n");
 		out.write(
 				"<path fill=\"currentColor\" d=\"M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z\"/>\n");
