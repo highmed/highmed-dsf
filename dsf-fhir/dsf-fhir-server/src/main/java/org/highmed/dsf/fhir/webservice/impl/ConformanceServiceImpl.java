@@ -415,11 +415,15 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 			r.addInteraction().setCode(TypeRestfulInteraction.DELETE);
 			r.addInteraction().setCode(TypeRestfulInteraction.SEARCHTYPE);
 
+			var resourceSearchParameters = searchParameters.getOrDefault(resource, Collections.emptyList());
+			resourceSearchParameters.stream().map(this::createSearchParameter)
+					.sorted(Comparator.comparing(CapabilityStatementRestResourceSearchParamComponent::getName))
+					.forEach(r::addSearchParam);
+
 			r.addSearchParam(createCountParameter(defaultPageCount));
 			r.addSearchParam(createFormatParameter());
 			r.addSearchParam(createIdParameter());
 
-			var resourceSearchParameters = searchParameters.getOrDefault(resource, Collections.emptyList());
 			var includes = resourceSearchParameters.stream().map(p -> p.getAnnotation(IncludeParameterDefinition.class))
 					.filter(def -> def != null).collect(Collectors.toList());
 			if (!includes.isEmpty())
@@ -447,10 +451,6 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 
 			r.addSearchParam(createSortParameter(
 					Stream.concat(standardSortableSearchParameters.stream(), resourceSearchParameters.stream())));
-
-			resourceSearchParameters.stream().map(this::createSearchParameter)
-					.sorted(Comparator.comparing(CapabilityStatementRestResourceSearchParamComponent::getName))
-					.forEach(r::addSearchParam);
 
 			operations.getOrDefault(resource, Collections.emptyList()).forEach(r::addOperation);
 			standardOperations.forEach(r::addOperation);
