@@ -44,7 +44,7 @@ function createAndShowHelp() {
 				}
 				//Resource/id
 				else if (resourceType[0] !== undefined && resourceType[1] !== undefined && resourceType[2] === undefined && resourceType[3] === undefined) {
-					createHelp(searchParam);
+					createHelp(searchParam.filter(p => ['_format', '_pretty'].includes(p.name)));
 				}
 				//Resource/id/_history
 				else if (resourceType[0] !== undefined && resourceType[1] !== undefined && resourceType[2] !== undefined && resourceType[3] === undefined) {
@@ -52,7 +52,7 @@ function createAndShowHelp() {
 				}
 				//Resource/id/_history/version
 				else if (resourceType[0] !== undefined && resourceType[1] !== undefined && resourceType[2] !== undefined && resourceType[3] !== undefined) {
-					createHelp(searchParam);
+					createHelp(searchParam.filter(p => ['_format', '_pretty'].includes(p.name)));
 				}
 			}
 		}
