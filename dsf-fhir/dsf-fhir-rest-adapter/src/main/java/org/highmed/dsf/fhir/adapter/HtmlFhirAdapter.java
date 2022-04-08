@@ -119,33 +119,56 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		out.write("<script src=\"/fhir/static/prettify.js\"></script>\n");
 		out.write("<script src=\"/fhir/static/tabs.js\"></script>\n");
 		out.write("<script src=\"/fhir/static/bookmarks.js\"></script>\n");
+		out.write("<script src=\"/fhir/static/help.js\"></script>\n");
 		out.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"/fhir/static/prettify.css\">\n");
 		out.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"/fhir/static/highmed.css\">\n");
 		out.write("<title>DSF" + (uriInfo.getPath() == null || uriInfo.getPath().isEmpty() ? "" : ": ")
 				+ uriInfo.getPath() + "</title>\n</head>\n");
 		out.write("<body onload=\"prettyPrint();openInitialTab();checkBookmarked();\">\n");
 		out.write("<div id=\"icons\">\n");
-		out.write("<svg class=\"icon\" id=\"bookmark-add\" viewBox=\"0 0 24 24\" onclick=\"addCurrentBookmark();\">\n");
 		out.write(
-				"<path d=\"M17,18L12,15.82L7,18V5H17M17,3H7A2,2 0 0,0 5,5V21L12,18L19,21V5C19,3.89 18.1,3 17,3Z\" />\n");
+				"<svg class=\"icon\" viewBox=\"0 0 24 24\" onclick=\"showHelp();\">\n");
+		out.write("<title>Show Help</title>\n");
+		out.write(
+				"<path d=\"M11.07,12.85c0.77-1.39,2.25-2.21,3.11-3.44c0.91-1.29,0.4-3.7-2.18-3.7c-1.69,0-2.52,1.28-2.87,2.34L6.54,6.96 C7.25,4.83,9.18,3,11.99,3c2.35,0,3.96,1.07,4.78,2.41c0.7,1.15,1.11,3.3,0.03,4.9c-1.2,1.77-2.35,2.31-2.97,3.45 c-0.25,0.46-0.35,0.76-0.35,2.24h-2.89C10.58,15.22,10.46,13.95,11.07,12.85z M14,20c0,1.1-0.9,2-2,2s-2-0.9-2-2c0-1.1,0.9-2,2-2 S14,18.9,14,20z\"/>\n");
+		out.write("</svg>\n");
+		out.write("<svg class=\"icon\" id=\"bookmark-add\" viewBox=\"0 0 24 24\" onclick=\"addCurrentBookmark();\">\n");
+		out.write("<title>Add Bookmark</title>\n");
+		out.write(
+				"<path d=\"M17,11v6.97l-5-2.14l-5,2.14V5h6V3H7C5.9,3,5,3.9,5,5v16l7-3l7,3V11H17z M21,7h-2v2h-2V7h-2V5h2V3h2v2h2V7z\"/>\n");
 		out.write("</svg>\n");
 		out.write(
 				"<svg class=\"icon\" id=\"bookmark-remove\" viewBox=\"0 0 24 24\" onclick=\"removeCurrentBookmark();\" style=\"display:none;\">\n");
-		out.write("<path d=\"M17,3H7A2,2 0 0,0 5,5V21L12,18L19,21V5C19,3.89 18.1,3 17,3Z\"/>\n");
+		out.write("<title>Remove Bookmark</title>\n");
+		out.write(
+				"<path d=\"M17,11v6.97l-5-2.14l-5,2.14V5h6V3H7C5.9,3,5,3.9,5,5v16l7-3l7,3V11H17z M21,7h-6V5h6V7z\"/>\n");
 		out.write("</svg>\n");
 		out.write("<svg class=\"icon\" id=\"bookmark-list\" viewBox=\"0 0 24 24\" onclick=\"showBookmarks();\">\n");
+		out.write("<title>Show Bookmarks</title>\n");
 		out.write(
 				"<path d=\"M9,1H19A2,2 0 0,1 21,3V19L19,18.13V3H7A2,2 0 0,1 9,1M15,20V7H5V20L10,17.82L15,20M15,5C16.11,5 17,5.9 17,7V23L10,20L3,23V7A2,2 0 0,1 5,5H15Z\"/>\n");
 		out.write("</svg>\n");
+		out.write("</div>\n");
+		out.write("<div id=\"help\" style=\"display:none;\">\n");
+		out.write("<h3 id=\"help-title\">Query Parameters</h3>\n");
+		out.write(
+				"<svg class=\"icon\" id=\"help-close\" viewBox=\"0 0 24 24\" onclick=\"closeHelp();\">\n");
+		out.write("<title>Close Help</title>\n");
+		out.write(
+				"<path fill=\"currentColor\" d=\"M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z\"/>\n");
+		out.write("</svg>\n");
+		out.write("<div id=\"help-list\">\n");
+		out.write("</div>\n");
 		out.write("</div>\n");
 		out.write("<div id=\"bookmarks\" style=\"display:none;\">\n");
 		out.write("<h3 id=\"bookmarks-title\">Bookmarks</h3>\n");
 		out.write(
 				"<svg class=\"icon\" id=\"bookmark-list-close\" viewBox=\"0 0 24 24\" onclick=\"closeBookmarks();\">\n");
+		out.write("<title>Close Bookmarks</title>\n");
 		out.write(
 				"<path fill=\"currentColor\" d=\"M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z\"/>\n");
 		out.write("</svg>\n");
-		out.write("<div id=\"list\">\n");
+		out.write("<div id=\"bookmarks-list\">\n");
 		out.write("</div>\n");
 		out.write("</div>\n");
 		out.write("<table id=\"header\"><tr>\n");
@@ -172,18 +195,18 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		String[] pathSegments = uri.getPath().split("/");
 
 		String u = serverBaseProvider.getServerBase();
-		String heading = "<a href=\"" + u + "\">" + u + "</a>";
+		String heading = "<a href=\"" + u + "\" title=\"Open " + u + "\">" + u + "</a>";
 
 		for (int i = 2; i < pathSegments.length; i++)
 		{
 			u += "/" + pathSegments[i];
-			heading += "<a href=\"" + u + "\">/" + pathSegments[i] + "</a>";
+			heading += "<a href=\"" + u + "\" title=\"Open " + u + "\">/" + pathSegments[i] + "</a>";
 		}
 
 		if (uri.getQuery() != null)
 		{
 			u += "?" + uri.getQuery();
-			heading += "<a href=\"" + u + "\">?" + uri.getQuery() + "</a>";
+			heading += "<a href=\"" + u + "\" title=\"Open " + u + "\">?" + uri.getQuery() + "</a>";
 		}
 
 		return heading;

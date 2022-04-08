@@ -54,6 +54,7 @@ td#url h1 a:hover {
 
 pre {
 	white-space: pre-wrap;
+	word-break: break-all;
 	margin-top: 0;
 }
 
@@ -73,11 +74,56 @@ li.L0, li.L1, li.L2, li.L3, li.L5, li.L6, li.L7, li.L8 {
 }
 
 .icon>path {
-	fill: #ccc;
+	fill: #aaa;
 }
 
 .icon:hover>path {
 	fill: #29235c;
+}
+
+#help {
+	position: absolute;
+	top: 1em;
+	right: 1em;
+	padding: 1em;
+	border: 1px solid #ccc;
+	background: white;
+	padding-top: 2em;
+	max-width: 83%;
+	min-width: 10em;
+}
+
+#help>#help-title {
+	color: #29235c;
+	position: relative;
+	top: -1.9em;
+	font-family: sans-serif;
+}
+
+#help-close {
+	position: absolute;
+	top: 1em;
+	right: 1em;
+}
+
+.help-param {
+	font-size: small;
+	font-family: sans-serif;
+}
+
+.help-param-name {
+	font-weight: bold;
+	margin-right: 1em;
+}
+
+.help-param-type {
+	font-style: italic;
+}
+
+.help-param-documentation {
+	max-width: 50em;
+	margin-top: 0.5em;
+	margin-bottom: 1.2em;
 }
 
 #bookmarks {
@@ -88,11 +134,14 @@ li.L0, li.L1, li.L2, li.L3, li.L5, li.L6, li.L7, li.L8 {
 	border: 1px solid #ccc;
 	background: white;
 	padding-top: 2em;
+	max-width: 83%;
+	min-width: 8em;
 }
 
 #bookmarks>#bookmarks-title {
+	color: #29235c;
 	position: relative;
-	top: -1.8em;
+	top: -1.9em;
 	font-family: sans-serif;
 }
 
@@ -110,19 +159,22 @@ li.L0, li.L1, li.L2, li.L3, li.L5, li.L6, li.L7, li.L8 {
 	font-family: monospace;
 }
 
-#bookmarks>#list {
+#bookmarks>#bookmarks-list {
 	margin-block-start: 0;
 	margin-block-end: 0;
 }
 
-#bookmarks>#list>h4 {
+#bookmarks>#bookmarks-list>h4 {
 	margin-block-start: 1em;
 	margin-block-end: 0.2em;
 }
 
-#bookmarks>#list>div {
+#bookmarks>#bookmarks-list>div {
 	margin-block-start: 0;
 	margin-block-end: 0.2em;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
 }
 
 #bookmarks:focus {
