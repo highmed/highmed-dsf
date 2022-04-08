@@ -415,13 +415,11 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 			r.addInteraction().setCode(TypeRestfulInteraction.DELETE);
 			r.addInteraction().setCode(TypeRestfulInteraction.SEARCHTYPE);
 
+			r.addSearchParam(createCountParameter(defaultPageCount));
+			r.addSearchParam(createFormatParameter());
+			r.addSearchParam(createIdParameter());
+
 			var resourceSearchParameters = searchParameters.getOrDefault(resource, Collections.emptyList());
-			var resourceRevIncludeParameters = revIncludeParameters.getOrDefault(resource, Collections.emptyList());
-
-			resourceSearchParameters.stream().map(this::createSearchParameter)
-					.sorted(Comparator.comparing(CapabilityStatementRestResourceSearchParamComponent::getName))
-					.forEach(r::addSearchParam);
-
 			var includes = resourceSearchParameters.stream().map(p -> p.getAnnotation(IncludeParameterDefinition.class))
 					.filter(def -> def != null).collect(Collectors.toList());
 			if (!includes.isEmpty())
@@ -431,6 +429,12 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 						.map(StringType::new).collect(Collectors.toList()));
 			}
 
+			r.addSearchParam(createLastUpdatedParameter());
+			r.addSearchParam(createPageParameter());
+			r.addSearchParam(createPrettyParameter());
+			r.addSearchParam(createProfileParameter());
+
+			var resourceRevIncludeParameters = revIncludeParameters.getOrDefault(resource, Collections.emptyList());
 			var revIncludes = resourceRevIncludeParameters.stream()
 					.map(p -> p.getAnnotation(IncludeParameterDefinition.class)).filter(def -> def != null)
 					.collect(Collectors.toList());
@@ -441,12 +445,12 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 						.map(StringType::new).collect(Collectors.toList()));
 			}
 
-			r.addSearchParam(createFormatParameter());
-			r.addSearchParam(createPrettyParameter());
-			r.addSearchParam(createCountParameter(defaultPageCount));
-			r.addSearchParam(createPageParameter());
 			r.addSearchParam(createSortParameter(
 					Stream.concat(standardSortableSearchParameters.stream(), resourceSearchParameters.stream())));
+
+			resourceSearchParameters.stream().map(this::createSearchParameter)
+					.sorted(Comparator.comparing(CapabilityStatementRestResourceSearchParamComponent::getName))
+					.forEach(r::addSearchParam);
 
 			operations.getOrDefault(resource, Collections.emptyList()).forEach(r::addOperation);
 			standardOperations.forEach(r::addOperation);
@@ -503,6 +507,11 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 						+ " (one or multiple as comma separated string), prefix with '-' for reversed order");
 	}
 
+	private CapabilityStatementRestResourceSearchParamComponent createLastUpdatedParameter()
+	{
+		return createSearchParameter(ResourceLastUpdated.class);
+	}
+
 	private CapabilityStatementRestResourceSearchParamComponent createPageParameter()
 	{
 		return createSearchParameter("_page", "", SearchParamType.NUMBER,
@@ -527,12 +536,22 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 		return createFormatParameter;
 	}
 
+	private CapabilityStatementRestResourceSearchParamComponent createIdParameter()
+	{
+		return createSearchParameter(ResourceId.class);
+	}
+
 	private CapabilityStatementRestResourceSearchParamComponent createPrettyParameter()
 	{
 		CapabilityStatementRestResourceSearchParamComponent createFormatParameter = createSearchParameter("_pretty", "",
 				SearchParamType.SPECIAL,
 				"Ask for a pretty printed response for human convenience, allowed values: [true, false]");
 		return createFormatParameter;
+	}
+
+	private CapabilityStatementRestResourceSearchParamComponent createProfileParameter()
+	{
+		return createSearchParameter(ResourceProfile.class);
 	}
 
 	private CapabilityStatementRestResourceOperationComponent createOperation(String name, String definition,
