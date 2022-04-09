@@ -1,12 +1,11 @@
 function openTab(lang) {
-	var i, tabcontent, tablinks;
-	tabcontent = document.getElementsByClassName("prettyprint");
-	for (i = 0; i < tabcontent.length; i++) {
+	const tabcontent = document.getElementsByClassName("prettyprint");
+	for (let i = 0; i < tabcontent.length; i++) {
 		tabcontent[i].style.display = "none";
 	}
 
-	tablinks = document.getElementsByClassName("tablinks");
-	for (i = 0; i < tablinks.length; i++) {
+	const tablinks = document.getElementsByClassName("tablinks");
+	for (let i = 0; i < tablinks.length; i++) {
 		tablinks[i].className = tablinks[i].className.replace(" active", "");
 	}
 
@@ -20,25 +19,24 @@ function openTab(lang) {
 }
 
 function openInitialTab() {
-	var lang = localStorage != null && localStorage.getItem("lang") != null ? localStorage.getItem("lang") : "xml";
+	const lang = localStorage != null && localStorage.getItem("lang") != null ? localStorage.getItem("lang") : "xml";
 	if (lang == "xml" || lang == "json")
 		openTab(lang);
 }
 
 function setDownloadLink(lang) {
-	var downloadLink = document.getElementById('download-link');
-
-	var searchParams = new URLSearchParams(document.location.search);
+	const searchParams = new URLSearchParams(document.location.search);
 	searchParams.set('_format', lang);
 	searchParams.set('_pretty', 'true');
 
+	const downloadLink = document.getElementById('download-link');
 	downloadLink.href = '?' + searchParams.toString();
 	downloadLink.download = getDownloadFileName(lang);
 	downloadLink.title = 'Download as ' + lang.toUpperCase();
 }
 
 function getDownloadFileName(lang) {
-	var resourceType = getResourceTypeForCurrentUrl();
+	const resourceType = getResourceTypeForCurrentUrl();
 
 	/* /, /metadata, /_history */
 	if (resourceType == null) {
@@ -75,11 +73,11 @@ function getDownloadFileName(lang) {
 }
 
 function getResourceTypeForCurrentUrl() {
-	var url = window.location.pathname;
-	var regex = new RegExp('(([A-Za-z0-9\-\\\.\:\%\$]*\/)+)?'
+	const url = window.location.pathname;
+	const regex = new RegExp('(([A-Za-z0-9\-\\\.\:\%\$]*\/)+)?'
 		+ '(Account|ActivityDefinition|AdverseEvent|AllergyIntolerance|Appointment|AppointmentResponse|AuditEvent|Basic|Binary|BiologicallyDerivedProduct|BodyStructure|Bundle|CapabilityStatement|CarePlan|CareTeam|CatalogEntry|ChargeItem|ChargeItemDefinition|Claim|ClaimResponse|ClinicalImpression|CodeSystem|Communication|CommunicationRequest|CompartmentDefinition|Composition|ConceptMap|Condition|Consent|Contract|Coverage|CoverageEligibilityRequest|CoverageEligibilityResponse|DetectedIssue|Device|DeviceDefinition|DeviceMetric|DeviceRequest|DeviceUseStatement|DiagnosticReport|DocumentManifest|DocumentReference|EffectEvidenceSynthesis|Encounter|Endpoint|EnrollmentRequest|EnrollmentResponse|EpisodeOfCare|EventDefinition|Evidence|EvidenceVariable|ExampleScenario|ExplanationOfBenefit|FamilyMemberHistory|Flag|Goal|GraphDefinition|Group|GuidanceResponse|HealthcareService|ImagingStudy|Immunization|ImmunizationEvaluation|ImmunizationRecommendation|ImplementationGuide|InsurancePlan|Invoice|Library|Linkage|List|Location|Measure|MeasureReport|Media|Medication|MedicationAdministration|MedicationDispense|MedicationKnowledge|MedicationRequest|MedicationStatement|MedicinalProduct|MedicinalProductAuthorization|MedicinalProductContraindication|MedicinalProductIndication|MedicinalProductIngredient|MedicinalProductInteraction|MedicinalProductManufactured|MedicinalProductPackaged|MedicinalProductPharmaceutical|MedicinalProductUndesirableEffect|MessageDefinition|MessageHeader|MolecularSequence|NamingSystem|NutritionOrder|Observation|ObservationDefinition|OperationDefinition|OperationOutcome|Organization|OrganizationAffiliation|Patient|PaymentNotice|PaymentReconciliation|Person|PlanDefinition|Practitioner|PractitionerRole|Procedure|Provenance|Questionnaire|QuestionnaireResponse|RelatedPerson|RequestGroup|ResearchDefinition|ResearchElementDefinition|ResearchStudy|ResearchSubject|RiskAssessment|RiskEvidenceSynthesis|Schedule|SearchParameter|ServiceRequest|Slot|Specimen|SpecimenDefinition|StructureDefinition|StructureMap|Subscription|Substance|SubstanceNucleicAcid|SubstancePolymer|SubstanceProtein|SubstanceReferenceInformation|SubstanceSourceMaterial|SubstanceSpecification|SupplyDelivery|SupplyRequest|Task|TerminologyCapabilities|TestReport|TestScript|ValueSet|VerificationResult|VisionPrescription)'
 		+ '(\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})?(\/_history)?(\/[0-9]+)?.*');
-	var match = regex.exec(url);
+	const match = regex.exec(url);
 	if (match != null && match.length == 7)
 		return [match[3], match[4], match[5], match[6]];
 	else
