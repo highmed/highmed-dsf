@@ -3,6 +3,10 @@ package org.highmed.dsf.fhir.dao.command;
 import java.sql.Connection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
@@ -14,9 +18,12 @@ import org.highmed.dsf.fhir.service.ReferenceExtractor;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.highmed.dsf.fhir.service.ResourceReference;
 import org.highmed.dsf.fhir.service.ResourceReference.ReferenceType;
+import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.Type;
 
 public final class ReferencesHelperImpl<R extends Resource> implements ReferencesHelper<R>
 {
@@ -65,112 +72,82 @@ public final class ReferencesHelperImpl<R extends Resource> implements Reference
 		switch (type)
 		{
 			case TEMPORARY:
-				return resolveTemporaryReference(reference, idTranslationTable);
+				return resolveTemporary(reference, idTranslationTable, reference.getReference()::getReference,
+						reference.getReference()::setReferenceElement);
+
 			case RELATED_ARTEFACT_TEMPORARY_URL:
-				return resolveTemporaryRelatedArtifactUrl(reference, idTranslationTable);
+				return resolveTemporary(reference, idTranslationTable, reference.getRelatedArtifact()::getUrl,
+						newIdToAbsoluteUrl(reference.getRelatedArtifact()::setUrl));
+
 			case ATTACHMENT_TEMPORARY_URL:
-				return resolveTemporaryAttachmentUrl(reference, idTranslationTable);
+				return resolveTemporary(reference, idTranslationTable, reference.getAttachment()::getUrl,
+						newIdToAbsoluteUrl(reference.getAttachment()::setUrl));
+
 			case CONDITIONAL:
-				return resolveConditionalReference(reference, connection);
+				return resolveConditional(reference, connection, target -> reference.getReference().setReferenceElement(
+						new IdType(target.getResourceType().name(), target.getIdElement().getIdPart())));
+
 			case RELATED_ARTEFACT_CONDITIONAL_URL:
-				return resolveConditionalRelatedArtifactUrl(reference, connection);
+				return resolveConditional(reference, connection,
+						targetToAbsoluteUrl(reference.getRelatedArtifact()::setUrl));
+
 			case ATTACHMENT_CONDITIONAL_URL:
-				return resolveConditionalAttachmentUrl(reference, connection);
+				return resolveConditional(reference, connection,
+						targetToAbsoluteUrl(reference.getAttachment()::setUrl));
+
 			case RELATED_ARTEFACT_LITERAL_INTERNAL_URL:
-				return resolveLiteralInternalRelatedArtifactUrl(reference);
+				return resolveLiteralInternalUrl(reference::getRelatedArtifact, RelatedArtifact::getUrl,
+						RelatedArtifact::setUrl);
+
 			case ATTACHMENT_LITERAL_INTERNAL_URL:
-				return resolveLiteralInternalAttachmentUrl(reference);
+				return resolveLiteralInternalUrl(reference::getAttachment, Attachment::getUrl, Attachment::setUrl);
+
 			default:
 				return Optional.empty();
 		}
 	}
 
-	private Optional<OperationOutcome> resolveTemporaryReference(ResourceReference reference,
-			Map<String, IdType> idTranslationTable)
+	private Consumer<IdType> newIdToAbsoluteUrl(Consumer<String> absoluteUrlConsumer)
 	{
-		IdType newId = idTranslationTable.get(reference.getReference().getReference());
-		if (newId != null)
-		{
-			reference.getReference().setReferenceElement(newId);
-
-			return Optional.empty();
-		}
-		else
-			return Optional.of(responseGenerator.unknownReference(resource, reference, index));
-	}
-
-	private Optional<OperationOutcome> resolveTemporaryRelatedArtifactUrl(ResourceReference reference,
-			Map<String, IdType> idTranslationTable)
-	{
-		IdType newId = idTranslationTable.get(reference.getRelatedArtifact().getUrl());
-		if (newId != null)
+		return newId ->
 		{
 			String absoluteUrl = newId.withServerBase(serverBase, newId.getResourceType()).getValue();
-			reference.getRelatedArtifact().setUrl(absoluteUrl);
-
-			return Optional.empty();
-		}
-		else
-			return Optional.of(responseGenerator.unknownReference(resource, reference, index));
+			absoluteUrlConsumer.accept(absoluteUrl);
+		};
 	}
 
-	private Optional<OperationOutcome> resolveTemporaryAttachmentUrl(ResourceReference reference,
-			Map<String, IdType> idTranslationTable)
+	private Consumer<Resource> targetToAbsoluteUrl(Consumer<String> absoluteUrlConsumer)
 	{
-		IdType newId = idTranslationTable.get(reference.getAttachment().getUrl());
-		if (newId != null)
+		return target ->
 		{
-			String absoluteUrl = newId.withServerBase(serverBase, newId.getResourceType()).getValue();
-			reference.getAttachment().setUrl(absoluteUrl);
-
-			return Optional.empty();
-		}
-		else
-			return Optional.of(responseGenerator.unknownReference(resource, reference, index));
-	}
-
-	private Optional<OperationOutcome> resolveConditionalReference(ResourceReference reference, Connection connection)
-	{
-		Optional<Resource> resolvedResource = referenceResolver.resolveReference(user, reference, connection);
-		if (resolvedResource.isPresent())
-		{
-			Resource target = resolvedResource.get();
-			reference.getReference().setReferenceElement(
-					new IdType(target.getResourceType().name(), target.getIdElement().getIdPart()));
-
-			return Optional.empty();
-		}
-		else
-			return Optional.of(responseGenerator.referenceTargetNotFoundLocallyByCondition(index, resource, reference));
-	}
-
-	private Optional<OperationOutcome> resolveConditionalRelatedArtifactUrl(ResourceReference reference,
-			Connection connection)
-	{
-		Optional<Resource> resolvedResource = referenceResolver.resolveReference(user, reference, connection);
-		if (resolvedResource.isPresent())
-		{
-			Resource target = resolvedResource.get();
 			IdType newId = new IdType(target.getResourceType().name(), target.getIdElement().getIdPart());
 			String absoluteUrl = newId.withServerBase(serverBase, newId.getResourceType()).getValue();
-			reference.getRelatedArtifact().setUrl(absoluteUrl);
+			absoluteUrlConsumer.accept(absoluteUrl);
+		};
+	}
 
+	private Optional<OperationOutcome> resolveTemporary(ResourceReference reference,
+			Map<String, IdType> idTranslationTable, Supplier<String> temporaryIdSupplier,
+			Consumer<IdType> newIdConsumer)
+	{
+		IdType newId = idTranslationTable.get(temporaryIdSupplier.get());
+		if (newId != null)
+		{
+			newIdConsumer.accept(newId);
 			return Optional.empty();
 		}
 		else
-			return Optional.of(responseGenerator.referenceTargetNotFoundLocallyByCondition(index, resource, reference));
+			return Optional.of(responseGenerator.unknownReference(resource, reference, index));
 	}
 
-	private Optional<OperationOutcome> resolveConditionalAttachmentUrl(ResourceReference reference,
-			Connection connection)
+	private Optional<OperationOutcome> resolveConditional(ResourceReference reference, Connection connection,
+			Consumer<Resource> targetConsumer)
 	{
 		Optional<Resource> resolvedResource = referenceResolver.resolveReference(user, reference, connection);
 		if (resolvedResource.isPresent())
 		{
 			Resource target = resolvedResource.get();
-			IdType newId = new IdType(target.getResourceType().name(), target.getIdElement().getIdPart());
-			String absoluteUrl = newId.withServerBase(serverBase, newId.getResourceType()).getValue();
-			reference.getAttachment().setUrl(absoluteUrl);
+			targetConsumer.accept(target);
 
 			return Optional.empty();
 		}
@@ -178,27 +155,15 @@ public final class ReferencesHelperImpl<R extends Resource> implements Reference
 			return Optional.of(responseGenerator.referenceTargetNotFoundLocallyByCondition(index, resource, reference));
 	}
 
-	private Optional<OperationOutcome> resolveLiteralInternalRelatedArtifactUrl(ResourceReference reference)
+	private <T extends Type> Optional<OperationOutcome> resolveLiteralInternalUrl(Supplier<T> element,
+			Function<T, String> oldUrlValue, BiConsumer<T, String> newAbsoluteUrlConsumer)
 	{
-		if (reference.hasRelatedArtifact())
+		T type = element.get();
+		if (type != null)
 		{
-			IdType newId = new IdType(reference.getValue());
+			IdType newId = new IdType(oldUrlValue.apply(type));
 			String absoluteUrl = newId.withServerBase(serverBase, newId.getResourceType()).getValue();
-			reference.getRelatedArtifact().setUrl(absoluteUrl);
-
-			return Optional.empty();
-		}
-
-		return Optional.empty();
-	}
-
-	private Optional<OperationOutcome> resolveLiteralInternalAttachmentUrl(ResourceReference reference)
-	{
-		if (reference.hasAttachment())
-		{
-			IdType newId = new IdType(reference.getValue());
-			String absoluteUrl = newId.withServerBase(serverBase, newId.getResourceType()).getValue();
-			reference.getAttachment().setUrl(absoluteUrl);
+			newAbsoluteUrlConsumer.accept(type, absoluteUrl);
 
 			return Optional.empty();
 		}
