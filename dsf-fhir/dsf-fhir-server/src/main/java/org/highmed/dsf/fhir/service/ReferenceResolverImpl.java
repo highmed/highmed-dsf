@@ -85,6 +85,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 		{
 			case LITERAL_EXTERNAL:
 			case RELATED_ARTEFACT_LITERAL_EXTERNAL_URL:
+			case ATTACHMENT_LITERAL_EXTERNAL_URL:
 				return literalExternalReferenceCanBeCheckedAndResolved(reference);
 			case LOGICAL:
 				return logicalReferenceCanBeCheckedAndResolved(reference, connection);
@@ -110,7 +111,8 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 	{
 		ReferenceType type = reference.getType(serverBase);
 		if (!(ReferenceType.LITERAL_EXTERNAL.equals(type)
-				|| ReferenceType.RELATED_ARTEFACT_LITERAL_EXTERNAL_URL.equals(type)))
+				|| ReferenceType.RELATED_ARTEFACT_LITERAL_EXTERNAL_URL.equals(type)
+				|| ReferenceType.ATTACHMENT_LITERAL_EXTERNAL_URL.equals(type)))
 			throw new IllegalArgumentException(
 					"Not a literal external reference or related artifact literal external url");
 
@@ -133,9 +135,11 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 				return resolveLiteralInternalReference(reference, connection);
 			case LITERAL_EXTERNAL:
 			case RELATED_ARTEFACT_LITERAL_EXTERNAL_URL:
+			case ATTACHMENT_LITERAL_EXTERNAL_URL:
 				return resolveLiteralExternalReference(reference);
 			case CONDITIONAL:
 			case RELATED_ARTEFACT_CONDITIONAL_URL:
+			case ATTACHMENT_CONDITIONAL_URL:
 				return resolveConditionalReference(user, reference, connection);
 			case LOGICAL:
 				return resolveLogicalReference(user, reference, connection);
@@ -198,7 +202,8 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 
 		ReferenceType type = reference.getType(serverBase);
 		if (!(ReferenceType.LITERAL_EXTERNAL.equals(type)
-				|| ReferenceType.RELATED_ARTEFACT_LITERAL_EXTERNAL_URL.equals(type)))
+				|| ReferenceType.RELATED_ARTEFACT_LITERAL_EXTERNAL_URL.equals(type)
+				|| ReferenceType.ATTACHMENT_LITERAL_EXTERNAL_URL.equals(type)))
 			throw new IllegalArgumentException(
 					"Not a literal external reference or related artifact literal external url");
 
@@ -232,7 +237,8 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 		Objects.requireNonNull(reference, "reference");
 
 		ReferenceType type = reference.getType(serverBase);
-		if (!(ReferenceType.CONDITIONAL.equals(type) || ReferenceType.RELATED_ARTEFACT_CONDITIONAL_URL.equals(type)))
+		if (!(ReferenceType.CONDITIONAL.equals(type) || ReferenceType.RELATED_ARTEFACT_CONDITIONAL_URL.equals(type)
+				|| ReferenceType.ATTACHMENT_CONDITIONAL_URL.equals(type)))
 			throw new IllegalArgumentException("Not a conditional reference or a conditional related artifact url");
 
 		String referenceValue = reference.getValue();
@@ -397,7 +403,8 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 
 		ReferenceType type = reference.getType(serverBase);
 		if (!(ReferenceType.LITERAL_INTERNAL.equals(type)
-				|| ReferenceType.RELATED_ARTEFACT_LITERAL_INTERNAL_URL.equals(type)))
+				|| ReferenceType.RELATED_ARTEFACT_LITERAL_INTERNAL_URL.equals(type)
+				|| ReferenceType.ATTACHMENT_LITERAL_INTERNAL_URL.equals(type)))
 			throw new IllegalArgumentException(
 					"Not a literal internal reference or related artifact literal internal url");
 
@@ -439,7 +446,8 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 
 		ReferenceType type = reference.getType(serverBase);
 		if (!(ReferenceType.LITERAL_EXTERNAL.equals(type)
-				|| ReferenceType.RELATED_ARTEFACT_LITERAL_EXTERNAL_URL.equals(type)))
+				|| ReferenceType.RELATED_ARTEFACT_LITERAL_EXTERNAL_URL.equals(type)
+				|| ReferenceType.ATTACHMENT_LITERAL_EXTERNAL_URL.equals(type)))
 			throw new IllegalArgumentException(
 					"Not a literal external reference or related artifact literal external url");
 

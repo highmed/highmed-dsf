@@ -7,6 +7,7 @@ import org.highmed.dsf.fhir.webservice.impl.BinaryServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.BundleServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.CodeSystemServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.ConformanceServiceImpl;
+import org.highmed.dsf.fhir.webservice.impl.DocumentReferenceServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.EndpointServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.GroupServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.HealthcareServiceServiceImpl;
@@ -34,6 +35,7 @@ import org.highmed.dsf.fhir.webservice.jaxrs.BinaryServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.BundleServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.CodeSystemServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.ConformanceServiceJaxrs;
+import org.highmed.dsf.fhir.webservice.jaxrs.DocumentReferenceServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.EndpointServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.GroupServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.HealthcareServiceServiceJaxrs;
@@ -61,6 +63,7 @@ import org.highmed.dsf.fhir.webservice.secure.BinaryServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.BundleServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.CodeSystemServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.ConformanceServiceSecure;
+import org.highmed.dsf.fhir.webservice.secure.DocumentReferenceServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.EndpointServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.GroupServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.HealthcareServiceServiceSecure;
@@ -88,6 +91,7 @@ import org.highmed.dsf.fhir.webservice.specification.BinaryService;
 import org.highmed.dsf.fhir.webservice.specification.BundleService;
 import org.highmed.dsf.fhir.webservice.specification.CodeSystemService;
 import org.highmed.dsf.fhir.webservice.specification.ConformanceService;
+import org.highmed.dsf.fhir.webservice.specification.DocumentReferenceService;
 import org.highmed.dsf.fhir.webservice.specification.EndpointService;
 import org.highmed.dsf.fhir.webservice.specification.GroupService;
 import org.highmed.dsf.fhir.webservice.specification.HealthcareServiceService;
@@ -261,6 +265,32 @@ public class WebserviceConfig
 				propertiesConfig.getDefaultPageCount(), daoConfig.codeSystemDao(), validationConfig.resourceValidator(),
 				eventConfig.eventManager(), helperConfig.exceptionHandler(), eventConfig.eventGenerator(),
 				helperConfig.responseGenerator(), helperConfig.parameterConverter(),
+				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver(),
+				referenceConfig.referenceCleaner(), authorizationConfig.authorizationRuleProvider(),
+				historyConfig.historyService());
+	}
+
+	@Bean
+	public DocumentReferenceService documentReferenceService()
+	{
+		return new DocumentReferenceServiceJaxrs(documentReferenceServiceSecure());
+	}
+
+	private DocumentReferenceServiceSecure documentReferenceServiceSecure()
+	{
+		return new DocumentReferenceServiceSecure(documentReferenceServiceImpl(), propertiesConfig.getServerBaseUrl(),
+				helperConfig.responseGenerator(), referenceConfig.referenceResolver(),
+				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(),
+				daoConfig.documentReferenceDao(), helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
+				authorizationConfig.documentReferenceAuthorizationRule(), validationConfig.resourceValidator());
+	}
+
+	private DocumentReferenceServiceImpl documentReferenceServiceImpl()
+	{
+		return new DocumentReferenceServiceImpl(DocumentReferenceServiceJaxrs.PATH, propertiesConfig.getServerBaseUrl(),
+				propertiesConfig.getDefaultPageCount(), daoConfig.documentReferenceDao(),
+				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
+				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter(),
 				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver(),
 				referenceConfig.referenceCleaner(), authorizationConfig.authorizationRuleProvider(),
 				historyConfig.historyService());
