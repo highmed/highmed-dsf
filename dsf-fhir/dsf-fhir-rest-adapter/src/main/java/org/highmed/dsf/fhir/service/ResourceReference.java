@@ -240,7 +240,7 @@ public class ResourceReference
 		else if (hasAttachment())
 			return attachment.getUrl();
 		else
-			throw new IllegalArgumentException("reference and related artefact not set");
+			throw new IllegalArgumentException("reference, related artefact or attachment not set");
 	}
 
 	public List<Class<? extends Resource>> getReferenceTypes()
