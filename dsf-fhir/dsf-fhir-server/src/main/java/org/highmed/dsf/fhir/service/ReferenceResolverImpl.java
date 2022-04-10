@@ -3,6 +3,7 @@ package org.highmed.dsf.fhir.service;
 import java.sql.Connection;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -110,11 +111,10 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 	private boolean literalExternalReferenceCanBeCheckedAndResolved(ResourceReference reference)
 	{
 		ReferenceType type = reference.getType(serverBase);
-		if (!(ReferenceType.LITERAL_EXTERNAL.equals(type)
-				|| ReferenceType.RELATED_ARTEFACT_LITERAL_EXTERNAL_URL.equals(type)
-				|| ReferenceType.ATTACHMENT_LITERAL_EXTERNAL_URL.equals(type)))
+		if (!EnumSet.of(ReferenceType.LITERAL_EXTERNAL, ReferenceType.RELATED_ARTEFACT_LITERAL_EXTERNAL_URL,
+				ReferenceType.ATTACHMENT_LITERAL_EXTERNAL_URL).contains(type))
 			throw new IllegalArgumentException(
-					"Not a literal external reference or related artifact literal external url");
+					"Not a literal external reference, related artifact literal external url or attachment literal external url");
 
 		String remoteServerBase = reference.getServerBase(serverBase);
 
@@ -148,13 +148,23 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 		}
 	}
 
+	private void throwIfReferenceTypeUnexpected(ReferenceType type, ReferenceType expected)
+	{
+		if (!expected.equals(type))
+			throw new IllegalArgumentException("ReferenceType " + expected + " expected, but was " + type);
+	}
+
+	private void throwIfReferenceTypeUnexpected(ReferenceType type, ReferenceType... expected)
+	{
+		if (!EnumSet.copyOf(Arrays.asList(expected)).contains(type))
+			throw new IllegalArgumentException(
+					"ReferenceTypes " + Arrays.toString(expected) + " expected, but was " + type);
+	}
+
 	private Optional<Resource> resolveLiteralInternalReference(ResourceReference reference, Connection connection)
 	{
 		Objects.requireNonNull(reference, "reference");
-
-		ReferenceType type = reference.getType(serverBase);
-		if (!ReferenceType.LITERAL_INTERNAL.equals(type))
-			throw new IllegalArgumentException("Not a literal internal reference");
+		throwIfReferenceTypeUnexpected(reference.getType(serverBase), ReferenceType.LITERAL_INTERNAL);
 
 		IdType id = new IdType(reference.getReference().getReference());
 		Optional<ResourceDao<?>> referenceDao = daoProvider.getDao(id.getResourceType());
@@ -199,13 +209,8 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 	private Optional<Resource> resolveLiteralExternalReference(ResourceReference reference)
 	{
 		Objects.requireNonNull(reference, "reference");
-
-		ReferenceType type = reference.getType(serverBase);
-		if (!(ReferenceType.LITERAL_EXTERNAL.equals(type)
-				|| ReferenceType.RELATED_ARTEFACT_LITERAL_EXTERNAL_URL.equals(type)
-				|| ReferenceType.ATTACHMENT_LITERAL_EXTERNAL_URL.equals(type)))
-			throw new IllegalArgumentException(
-					"Not a literal external reference or related artifact literal external url");
+		throwIfReferenceTypeUnexpected(reference.getType(serverBase), ReferenceType.LITERAL_EXTERNAL,
+				ReferenceType.RELATED_ARTEFACT_LITERAL_EXTERNAL_URL, ReferenceType.ATTACHMENT_LITERAL_EXTERNAL_URL);
 
 		String remoteServerBase = reference.getServerBase(serverBase);
 		Optional<FhirWebserviceClient> client = clientProvider.getClient(remoteServerBase);
@@ -235,11 +240,8 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 			Connection connection)
 	{
 		Objects.requireNonNull(reference, "reference");
-
-		ReferenceType type = reference.getType(serverBase);
-		if (!(ReferenceType.CONDITIONAL.equals(type) || ReferenceType.RELATED_ARTEFACT_CONDITIONAL_URL.equals(type)
-				|| ReferenceType.ATTACHMENT_CONDITIONAL_URL.equals(type)))
-			throw new IllegalArgumentException("Not a conditional reference or a conditional related artifact url");
+		throwIfReferenceTypeUnexpected(reference.getType(serverBase), ReferenceType.CONDITIONAL,
+				ReferenceType.RELATED_ARTEFACT_CONDITIONAL_URL, ReferenceType.ATTACHMENT_CONDITIONAL_URL);
 
 		String referenceValue = reference.getValue();
 		String referenceLocation = reference.getLocation();
@@ -276,10 +278,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 	private Optional<Resource> resolveLogicalReference(User user, ResourceReference reference, Connection connection)
 	{
 		Objects.requireNonNull(reference, "reference");
-
-		ReferenceType type = reference.getType(serverBase);
-		if (!ReferenceType.LOGICAL.equals(type))
-			throw new IllegalArgumentException("Not a logical reference");
+		throwIfReferenceTypeUnexpected(reference.getType(serverBase), ReferenceType.LOGICAL);
 
 		String targetType = reference.getReference().getType();
 
@@ -400,13 +399,8 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 		Objects.requireNonNull(resource, "resource");
 		Objects.requireNonNull(reference, "reference");
 		Objects.requireNonNull(connection, "connection");
-
-		ReferenceType type = reference.getType(serverBase);
-		if (!(ReferenceType.LITERAL_INTERNAL.equals(type)
-				|| ReferenceType.RELATED_ARTEFACT_LITERAL_INTERNAL_URL.equals(type)
-				|| ReferenceType.ATTACHMENT_LITERAL_INTERNAL_URL.equals(type)))
-			throw new IllegalArgumentException(
-					"Not a literal internal reference or related artifact literal internal url");
+		throwIfReferenceTypeUnexpected(reference.getType(serverBase), ReferenceType.LITERAL_INTERNAL,
+				ReferenceType.RELATED_ARTEFACT_LITERAL_INTERNAL_URL, ReferenceType.ATTACHMENT_LITERAL_INTERNAL_URL);
 
 		IdType id = new IdType(reference.getValue());
 		Optional<ResourceDao<?>> referenceDao = daoProvider.getDao(id.getResourceType());
@@ -443,13 +437,8 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 	{
 		Objects.requireNonNull(resource, "resource");
 		Objects.requireNonNull(reference, "reference");
-
-		ReferenceType type = reference.getType(serverBase);
-		if (!(ReferenceType.LITERAL_EXTERNAL.equals(type)
-				|| ReferenceType.RELATED_ARTEFACT_LITERAL_EXTERNAL_URL.equals(type)
-				|| ReferenceType.ATTACHMENT_LITERAL_EXTERNAL_URL.equals(type)))
-			throw new IllegalArgumentException(
-					"Not a literal external reference or related artifact literal external url");
+		throwIfReferenceTypeUnexpected(reference.getType(serverBase), ReferenceType.LITERAL_EXTERNAL,
+				ReferenceType.RELATED_ARTEFACT_LITERAL_EXTERNAL_URL, ReferenceType.ATTACHMENT_LITERAL_EXTERNAL_URL);
 
 		String remoteServerBase = reference.getServerBase(serverBase);
 		String referenceValue = reference.getValue();
@@ -489,10 +478,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 		Objects.requireNonNull(resource, "resource");
 		Objects.requireNonNull(reference, "reference");
 		Objects.requireNonNull(connection, "connection");
-
-		ReferenceType type = reference.getType(serverBase);
-		if (!ReferenceType.CONDITIONAL.equals(type))
-			throw new IllegalArgumentException("Not a conditional reference");
+		throwIfReferenceTypeUnexpected(reference.getType(serverBase), ReferenceType.CONDITIONAL);
 
 		UriComponents condition = UriComponentsBuilder.fromUriString(reference.getReference().getReference()).build();
 		String path = condition.getPath();
@@ -537,10 +523,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 		Objects.requireNonNull(resource, "resource");
 		Objects.requireNonNull(reference, "reference");
 		Objects.requireNonNull(connection, "connection");
-
-		ReferenceType type = reference.getType(serverBase);
-		if (!ReferenceType.LOGICAL.equals(type))
-			throw new IllegalArgumentException("Not a logical reference");
+		throwIfReferenceTypeUnexpected(reference.getType(serverBase), ReferenceType.LOGICAL);
 
 		String targetType = reference.getReference().getType();
 
