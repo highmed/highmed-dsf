@@ -126,10 +126,8 @@ public class DocumentReferenceIntegrationTest extends AbstractIntegrationTest
 		String system = "http://test.com/fhir/sid/Foo";
 		String value1 = "Bar1";
 		String value2 = "Bar2";
-		String value3 = "Bar3";
 		DocumentReference documentReference = createValidDocumentReference();
 		documentReference.addIdentifier().setSystem(system).setValue(value1);
-		documentReference.addIdentifier().setValue(value3);
 		documentReference.getMasterIdentifier().setSystem(system).setValue(value2);
 		readAccessHelper.addLocal(documentReference);
 
@@ -173,6 +171,12 @@ public class DocumentReferenceIntegrationTest extends AbstractIntegrationTest
 		Bundle bundle7not = getWebserviceClient().search(DocumentReference.class,
 				Map.of("identifier:not", Collections.singletonList(value2)));
 		assertNotFound(bundle7not);
+		Bundle bundle8 = getWebserviceClient().search(DocumentReference.class,
+				Map.of("identifier", Collections.singletonList(system + "|")));
+		assertFound(bundle8, created);
+		Bundle bundle8not = getWebserviceClient().search(DocumentReference.class,
+				Map.of("identifier:not", Collections.singletonList(system + "|")));
+		assertNotFound(bundle8not);
 	}
 
 	@Test
@@ -190,6 +194,9 @@ public class DocumentReferenceIntegrationTest extends AbstractIntegrationTest
 		assertNotNull(created.getIdElement().getIdPart());
 		assertNotNull(created.getIdElement().getVersionIdPart());
 
+		Bundle bundle = getWebserviceClient().search(DocumentReference.class,
+				Map.of("identifier", Collections.singletonList("|Foo")));
+		assertFound(bundle, created);
 		Bundle bundleNot = getWebserviceClient().search(DocumentReference.class,
 				Map.of("identifier:not", Collections.singletonList("|Foo")));
 		assertNotFound(bundleNot);
