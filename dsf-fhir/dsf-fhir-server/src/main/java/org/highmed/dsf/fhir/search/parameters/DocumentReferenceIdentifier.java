@@ -123,7 +123,9 @@ public class DocumentReferenceIdentifier extends AbstractTokenParameter<Document
 
 		DocumentReference d = (DocumentReference) resource;
 
-		return identifierMatches(d.getIdentifier()) || identifierMatches(valueAndType, d.getMasterIdentifier());
+		return identifierMatches(d.getIdentifier())
+				|| (valueAndType.negated ? !identifierMatches(valueAndType, d.getMasterIdentifier())
+						: identifierMatches(valueAndType, d.getMasterIdentifier()));
 	}
 
 	private boolean identifierMatches(List<Identifier> identifiers)
