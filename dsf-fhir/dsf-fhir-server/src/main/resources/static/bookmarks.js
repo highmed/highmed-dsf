@@ -143,18 +143,19 @@ function createBookmarkList(bookmarks) {
 		if (e[1].length > 0) {
 			e[1].filter(b => b !== ('/fhir/' + e[0])).forEach(b => {
 				const div = document.createElement("div");
+				div.setAttribute('id', 'bookmarks-list-entry-' + counter);
 				const divAddIcon = addIcon.cloneNode(true);
 				divAddIcon.setAttribute('id', 'bookmark-add-' + counter);
 				divAddIcon.setAttribute('onclick', "addBookmark('" + b + "', " + counter + ")");
 				divAddIcon.setAttribute('viewBox', '4 0 24 24');
 				divAddIcon.style.display = 'none';
-				divAddIcon.children[0].innerHTML = 'Add ' + b + ' Bookmark';
+				divAddIcon.children[0].innerHTML = 'Add Bookmark: ' + b;
 				const divRemoveIcon = removeIcon.cloneNode(true);
 				divRemoveIcon.setAttribute('id', 'bookmark-remove-' + counter);
 				divRemoveIcon.setAttribute('onclick', "removeBookmark('" + b + "', " + counter + ")");
 				divRemoveIcon.setAttribute('viewBox', '4 0 24 24');
 				divRemoveIcon.style.display = 'inline';
-				divRemoveIcon.children[0].innerHTML = 'Remove ' + b + ' Bookmark';
+				divRemoveIcon.children[0].innerHTML = 'Remove Bookmark: ' + b;
 				const divLink = document.createElement("a");
 				divLink.href = b;
 				divLink.title = 'Open ' + b;
@@ -176,6 +177,8 @@ function removeBookmark(url, counter) {
 	addIcon.style.display = 'inline';
 	const removeIcon = document.getElementById('bookmark-remove-' + counter);
 	removeIcon.style.display = 'none';
+	const div = document.getElementById('bookmarks-list-entry-' + counter);
+	div.className = 'bookmarks-list-entry-removed';
 
 	const resourceType = getResourceType(url);
 
@@ -192,6 +195,8 @@ function addBookmark(url, counter) {
 	addIcon.style.display = 'none';
 	const removeIcon = document.getElementById('bookmark-remove-' + counter);
 	removeIcon.style.display = 'inline';
+	const div = document.getElementById('bookmarks-list-entry-' + counter);
+	div.className = null;
 
 	const resourceType = getResourceType(url);
 

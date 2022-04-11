@@ -21,13 +21,12 @@ td#url h1 {
 	word-break: break-word;
 }
 
-td#url h1 a:link, h1 a:visited, h1 a:active {
+td#url h1 a:link, td#url h1 a:visited, td#url h1 a:active {
 	color: #29235c;
 	text-decoration: none;
 }
 
 td#url h1 a:hover {
-	color: #29235c;
 	text-decoration: underline;
 }
 
@@ -145,7 +144,7 @@ li.L0, li.L1, li.L2, li.L3, li.L5, li.L6, li.L7, li.L8 {
 	font-family: sans-serif;
 }
 
-#bookmarks a:link, a:visited, a:active {
+#bookmarks a:link, #bookmarks a:visited, #bookmarks a:active {
 	color: #29235c;
 	text-decoration: none;
 	vertical-align: super;
@@ -153,10 +152,10 @@ li.L0, li.L1, li.L2, li.L3, li.L5, li.L6, li.L7, li.L8 {
 }
 
 #bookmarks a:hover {
-	color: #29235c;
+	/* color: #29235c; */
 	text-decoration: underline;
-	vertical-align: super;
-	font-family: monospace;
+	/* vertical-align: super;
+	font-family: monospace; */
 }
 
 #bookmarks>#bookmarks-list {
@@ -187,6 +186,11 @@ li.L0, li.L1, li.L2, li.L3, li.L5, li.L6, li.L7, li.L8 {
 	right: 1em;
 }
 
+.bookmarks-list-entry-removed>a:link, .bookmarks-list-entry-removed>a:visited,
+	.bookmarks-list-entry-removed>a:active {
+	color: #aaa !important;
+}
+
 @media print {
 	body {
 		margin: 0;
@@ -210,6 +214,9 @@ li.L0, li.L1, li.L2, li.L3, li.L5, li.L6, li.L7, li.L8 {
 		display: none;
 	}
 	#bookmarks {
+		display: none;
+	}
+	#help {
 		display: none;
 	}
 }
