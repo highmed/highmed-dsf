@@ -5,6 +5,7 @@ import org.highmed.dsf.fhir.dao.ActivityDefinitionDao;
 import org.highmed.dsf.fhir.dao.BinaryDao;
 import org.highmed.dsf.fhir.dao.BundleDao;
 import org.highmed.dsf.fhir.dao.CodeSystemDao;
+import org.highmed.dsf.fhir.dao.DocumentReferenceDao;
 import org.highmed.dsf.fhir.dao.EndpointDao;
 import org.highmed.dsf.fhir.dao.GroupDao;
 import org.highmed.dsf.fhir.dao.HealthcareServiceDao;
@@ -30,6 +31,7 @@ import org.highmed.dsf.fhir.dao.jdbc.ActivityDefinitionDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.BinaryDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.BundleDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.CodeSystemDaoJdbc;
+import org.highmed.dsf.fhir.dao.jdbc.DocumentReferenceDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.EndpointDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.GroupDaoJdbc;
 import org.highmed.dsf.fhir.dao.jdbc.HealthcareServiceDaoJdbc;
@@ -125,6 +127,12 @@ public class DaoConfig
 	public CodeSystemDao codeSystemDao()
 	{
 		return new CodeSystemDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext());
+	}
+
+	@Bean
+	public DocumentReferenceDao documentReferenceDao()
+	{
+		return new DocumentReferenceDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext());
 	}
 
 	@Bean
@@ -252,10 +260,11 @@ public class DaoConfig
 	public DaoProvider daoProvider()
 	{
 		return new DaoProviderImpl(dataSource(), activityDefinitionDao(), binaryDao(), bundleDao(), codeSystemDao(),
-				endpointDao(), groupDao(), healthcareServiceDao(), libraryDao(), locationDao(), measureDao(),
-				measureReportDao(), namingSystemDao(), organizationDao(), organizationAffiliationDao(), patientDao(),
-				practitionerDao(), practitionerRoleDao(), provenanceDao(), researchStudyDao(), structureDefinitionDao(),
-				structureDefinitionSnapshotDao(), subscriptionDao(), taskDao(), valueSetDao(), readAccessDao());
+				documentReferenceDao(), endpointDao(), groupDao(), healthcareServiceDao(), libraryDao(), locationDao(),
+				measureDao(), measureReportDao(), namingSystemDao(), organizationDao(), organizationAffiliationDao(),
+				patientDao(), practitionerDao(), practitionerRoleDao(), provenanceDao(), researchStudyDao(),
+				structureDefinitionDao(), structureDefinitionSnapshotDao(), subscriptionDao(), taskDao(), valueSetDao(),
+				readAccessDao());
 	}
 
 	@Bean

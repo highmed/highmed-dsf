@@ -141,7 +141,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 	{
 		logCurrentUser();
 
-		resolveLiteralInternalRelatedArtifactUrls(resource);
+		resolveLiteralInternalRelatedArtifactOrAttachmentUrls(resource);
 
 		Optional<String> reasonCreateAllowed = authorizationRule.reasonCreateAllowed(getCurrentUser(), resource);
 
@@ -172,23 +172,28 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		}
 	}
 
-	private void resolveLiteralInternalRelatedArtifactUrls(R resource)
+	private void resolveLiteralInternalRelatedArtifactOrAttachmentUrls(R resource)
 	{
 		if (resource == null)
 			return;
 
 		referenceExtractor.getReferences(resource)
-				.filter(ref -> ReferenceType.RELATED_ARTEFACT_LITERAL_INTERNAL_URL.equals(ref.getType(serverBase)))
-				.forEach(this::resolveLiteralInternalRelatedArtifactUrl);
+				.filter(ref -> ReferenceType.RELATED_ARTEFACT_LITERAL_INTERNAL_URL.equals(ref.getType(serverBase))
+						|| ReferenceType.ATTACHMENT_LITERAL_INTERNAL_URL.equals(ref.getType(serverBase)))
+				.forEach(this::resolveLiteralInternalRelatedArtifactOrAttachmentUrl);
 	}
 
-	private void resolveLiteralInternalRelatedArtifactUrl(ResourceReference reference)
+	private void resolveLiteralInternalRelatedArtifactOrAttachmentUrl(ResourceReference reference)
 	{
-		if (reference.hasRelatedArtifact())
+		if (reference.hasRelatedArtifact() || reference.hasAttachment())
 		{
 			IdType newId = new IdType(reference.getValue());
 			String absoluteUrl = newId.withServerBase(serverBase, newId.getResourceType()).getValue();
-			reference.getRelatedArtifact().setUrl(absoluteUrl);
+
+			if (reference.hasRelatedArtifact())
+				reference.getRelatedArtifact().setUrl(absoluteUrl);
+			else if (reference.hasAttachment())
+				reference.getAttachment().setUrl(absoluteUrl);
 		}
 	}
 
@@ -362,7 +367,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 
 	private Response update(String id, R newResource, UriInfo uri, HttpHeaders headers, R oldResource)
 	{
-		resolveLiteralInternalRelatedArtifactUrls(newResource);
+		resolveLiteralInternalRelatedArtifactOrAttachmentUrls(newResource);
 
 		Optional<String> reasonUpdateAllowed = authorizationRule.reasonUpdateAllowed(getCurrentUser(), oldResource,
 				newResource);

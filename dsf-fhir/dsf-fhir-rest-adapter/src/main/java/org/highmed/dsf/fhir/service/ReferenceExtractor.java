@@ -5,6 +5,7 @@ import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.HealthcareService;
@@ -36,13 +37,15 @@ public interface ReferenceExtractor
 	Stream<ResourceReference> getReferences(Binary resource);
 
 	// Not implemented yet, special rules apply for tmp ids
-	// Stream<ResourceReference> getReferences(Bundle bundle);
+	// Stream<ResourceReference> getReferences(Bundle resource);
 
 	Stream<ResourceReference> getReferences(CodeSystem resource);
 
+	Stream<ResourceReference> getReferences(DocumentReference resource);
+
 	Stream<ResourceReference> getReferences(Endpoint resource);
 
-	Stream<ResourceReference> getReferences(Group group);
+	Stream<ResourceReference> getReferences(Group resource);
 
 	Stream<ResourceReference> getReferences(HealthcareService resource);
 
