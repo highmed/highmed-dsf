@@ -291,7 +291,7 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 		}
 		else
 		{
-			referencesHelper.resolveTemporaryAndConditionalReferencesOrLiteralInternalRelatedArtifactUrls(
+			referencesHelper.resolveTemporaryAndConditionalReferencesOrLiteralInternalRelatedArtifactOrAttachmentUrls(
 					idTranslationTable, connection);
 
 			validationResult = validationHelper.checkResourceValidForUpdate(user, resource);
@@ -308,7 +308,7 @@ public class UpdateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	{
 		if (Boolean.FALSE.equals(foundByCondition))
 		{
-			referencesHelper.resolveTemporaryAndConditionalReferencesOrLiteralInternalRelatedArtifactUrls(
+			referencesHelper.resolveTemporaryAndConditionalReferencesOrLiteralInternalRelatedArtifactOrAttachmentUrls(
 					idTranslationTable, connection);
 
 			validationResult = validationHelper.checkResourceValidForCreate(user, resource);

@@ -9,6 +9,7 @@ import org.highmed.dsf.fhir.authorization.AuthorizationRuleProviderImpl;
 import org.highmed.dsf.fhir.authorization.BinaryAuthorizationRule;
 import org.highmed.dsf.fhir.authorization.BundleAuthorizationRule;
 import org.highmed.dsf.fhir.authorization.CodeSystemAuthorizationRule;
+import org.highmed.dsf.fhir.authorization.DocumentReferenceAuthorizationRule;
 import org.highmed.dsf.fhir.authorization.EndpointAuthorizationRule;
 import org.highmed.dsf.fhir.authorization.GroupAuthorizationRule;
 import org.highmed.dsf.fhir.authorization.HealthcareServiceAuthorizationRule;
@@ -39,6 +40,7 @@ import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.HealthcareService;
@@ -115,12 +117,13 @@ public class AuthorizationConfig
 
 				// Binary and Task not supported as securityContext rule
 				activityDefinitionAuthorizationRule(), bundleAuthorizationRule(), codeSystemAuthorizationRule(),
-				endpointAuthorizationRule(), groupAuthorizationRule(), healthcareServiceAuthorizationRule(),
-				libraryAuthorizationRule(), locationAuthorizationRule(), measureAuthorizationRule(),
-				measureReportAuthorizationRule(), namingSystemAuthorizationRule(), organizationAuthorizationRule(),
-				organizationAffiliationAuthorizationRule(), patientAuthorizationRule(), practitionerAuthorizationRule(),
-				practitionerRoleAuthorizationRule(), provenanceAuthorizationRule(), researchStudyAuthorizationRule(),
-				structureDefinitionAuthorizationRule(), subscriptionAuthorizationRule(), valueSetAuthorizationRule());
+				documentReferenceAuthorizationRule(), endpointAuthorizationRule(), groupAuthorizationRule(),
+				healthcareServiceAuthorizationRule(), libraryAuthorizationRule(), locationAuthorizationRule(),
+				measureAuthorizationRule(), measureReportAuthorizationRule(), namingSystemAuthorizationRule(),
+				organizationAuthorizationRule(), organizationAffiliationAuthorizationRule(), patientAuthorizationRule(),
+				practitionerAuthorizationRule(), practitionerRoleAuthorizationRule(), provenanceAuthorizationRule(),
+				researchStudyAuthorizationRule(), structureDefinitionAuthorizationRule(),
+				subscriptionAuthorizationRule(), valueSetAuthorizationRule());
 	}
 
 	@Bean
@@ -135,6 +138,14 @@ public class AuthorizationConfig
 	public AuthorizationRule<CodeSystem> codeSystemAuthorizationRule()
 	{
 		return new CodeSystemAuthorizationRule(daoConfig.daoProvider(), propertiesConfig.getServerBaseUrl(),
+				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper(),
+				helperConfig.parameterConverter());
+	}
+
+	@Bean
+	public AuthorizationRule<DocumentReference> documentReferenceAuthorizationRule()
+	{
+		return new DocumentReferenceAuthorizationRule(daoConfig.daoProvider(), propertiesConfig.getServerBaseUrl(),
 				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper(),
 				helperConfig.parameterConverter());
 	}
@@ -295,10 +306,10 @@ public class AuthorizationConfig
 	public AuthorizationRuleProvider authorizationRuleProvider()
 	{
 		return new AuthorizationRuleProviderImpl(activityDefinitionAuthorizationRule(), binaryAuthorizationRule(),
-				bundleAuthorizationRule(), codeSystemAuthorizationRule(), endpointAuthorizationRule(),
-				groupAuthorizationRule(), healthcareServiceAuthorizationRule(), libraryAuthorizationRule(),
-				locationAuthorizationRule(), measureAuthorizationRule(), measureReportAuthorizationRule(),
-				namingSystemAuthorizationRule(), organizationAuthorizationRule(),
+				bundleAuthorizationRule(), codeSystemAuthorizationRule(), documentReferenceAuthorizationRule(),
+				endpointAuthorizationRule(), groupAuthorizationRule(), healthcareServiceAuthorizationRule(),
+				libraryAuthorizationRule(), locationAuthorizationRule(), measureAuthorizationRule(),
+				measureReportAuthorizationRule(), namingSystemAuthorizationRule(), organizationAuthorizationRule(),
 				organizationAffiliationAuthorizationRule(), patientAuthorizationRule(), practitionerAuthorizationRule(),
 				practitionerRoleAuthorizationRule(), provenanceAuthorizationRule(), researchStudyAuthorizationRule(),
 				structureDefinitionAuthorizationRule(), subscriptionAuthorizationRule(), taskAuthorizationRule(),

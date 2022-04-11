@@ -10,7 +10,7 @@ import org.hl7.fhir.r4.model.Resource;
 
 public interface ReferencesHelper<R extends Resource>
 {
-	void resolveTemporaryAndConditionalReferencesOrLiteralInternalRelatedArtifactUrls(
+	void resolveTemporaryAndConditionalReferencesOrLiteralInternalRelatedArtifactOrAttachmentUrls(
 			Map<String, IdType> idTranslationTable, Connection connection) throws WebApplicationException;
 
 	void resolveLogicalReferences(Connection connection) throws WebApplicationException;

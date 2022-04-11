@@ -11,6 +11,7 @@ import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.HealthcareService;
@@ -42,6 +43,7 @@ public class HistoryUserFilterFactoryImpl implements HistoryUserFilterFactory
 		filtersByResource.put(Binary.class, BinaryHistoryUserFilter::new);
 		filtersByResource.put(Bundle.class, BundleHistoryUserFilter::new);
 		filtersByResource.put(CodeSystem.class, CodeSystemHistoryUserFilter::new);
+		filtersByResource.put(DocumentReference.class, DocumentReferenceHistoryUserFilter::new);
 		filtersByResource.put(Endpoint.class, EndpointHistoryUserFilter::new);
 		filtersByResource.put(Group.class, GroupHistoryUserFilter::new);
 		filtersByResource.put(HealthcareService.class, HealthcareServiceHistoryUserFilter::new);
