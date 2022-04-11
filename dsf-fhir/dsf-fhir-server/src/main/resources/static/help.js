@@ -86,7 +86,8 @@ function createHelp(searchParam) {
 	const helpList = document.getElementById('help-list');
 	helpList.innerHTML = null;
 
-	searchParam.forEach(param => {
+	for (let i = 0; i < searchParam.length; i++) {
+		const param = searchParam[i]
 		const div = document.createElement("div");
 		const span1 = document.createElement("span");
 		const span2 = document.createElement("span");
@@ -104,5 +105,8 @@ function createHelp(searchParam) {
 		span2.setAttribute('class', 'help-param-type');
 		p.innerText = param.documentation;
 		p.setAttribute('class', 'help-param-documentation');
-	});
+
+		if ((i + 1) == searchParam.length)
+			p.setAttribute('style', 'margin-bottom: 0px');
+	}
 }
