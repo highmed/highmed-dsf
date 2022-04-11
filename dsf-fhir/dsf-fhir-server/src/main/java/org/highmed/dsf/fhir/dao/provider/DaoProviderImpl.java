@@ -95,7 +95,7 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 
 	private final ReadAccessDao readAccessDao;
 
-	private final Map<Class<? extends Resource>, ResourceDao<?>> daosByResoureClass = new HashMap<>();
+	private final Map<Class<? extends Resource>, ResourceDao<?>> daosByResourceClass = new HashMap<>();
 	private final Map<String, ResourceDao<?>> daosByResourceTypeName = new HashMap<>();
 
 	public DaoProviderImpl(DataSource dataSource, ActivityDefinitionDao activityDefinitionDao, BinaryDao binaryDao,
@@ -138,32 +138,32 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 
 		this.readAccessDao = readAccessDao;
 
-		daosByResoureClass.put(ActivityDefinition.class, activityDefinitionDao);
-		daosByResoureClass.put(Binary.class, binaryDao);
-		daosByResoureClass.put(Bundle.class, bundleDao);
-		daosByResoureClass.put(CodeSystem.class, codeSystemDao);
-		daosByResoureClass.put(DocumentReference.class, documentReferenceDao);
-		daosByResoureClass.put(Endpoint.class, endpointDao);
-		daosByResoureClass.put(Group.class, groupDao);
-		daosByResoureClass.put(HealthcareService.class, healthcareServiceDao);
-		daosByResoureClass.put(Library.class, libraryDao);
-		daosByResoureClass.put(Location.class, locationDao);
-		daosByResoureClass.put(Measure.class, measureDao);
-		daosByResoureClass.put(MeasureReport.class, measureReportDao);
-		daosByResoureClass.put(NamingSystem.class, namingSystemDao);
-		daosByResoureClass.put(Organization.class, organizationDao);
-		daosByResoureClass.put(OrganizationAffiliation.class, organizationAffiliationDao);
-		daosByResoureClass.put(Patient.class, patientDao);
-		daosByResoureClass.put(Practitioner.class, practitionerDao);
-		daosByResoureClass.put(PractitionerRole.class, practitionerRoleDao);
-		daosByResoureClass.put(Provenance.class, provenanceDao);
-		daosByResoureClass.put(ResearchStudy.class, researchStudyDao);
-		daosByResoureClass.put(StructureDefinition.class, structureDefinitionDao);
-		daosByResoureClass.put(Subscription.class, subscriptionDao);
-		daosByResoureClass.put(Task.class, taskDao);
-		daosByResoureClass.put(ValueSet.class, valueSetDao);
+		daosByResourceClass.put(ActivityDefinition.class, activityDefinitionDao);
+		daosByResourceClass.put(Binary.class, binaryDao);
+		daosByResourceClass.put(Bundle.class, bundleDao);
+		daosByResourceClass.put(CodeSystem.class, codeSystemDao);
+		daosByResourceClass.put(DocumentReference.class, documentReferenceDao);
+		daosByResourceClass.put(Endpoint.class, endpointDao);
+		daosByResourceClass.put(Group.class, groupDao);
+		daosByResourceClass.put(HealthcareService.class, healthcareServiceDao);
+		daosByResourceClass.put(Library.class, libraryDao);
+		daosByResourceClass.put(Location.class, locationDao);
+		daosByResourceClass.put(Measure.class, measureDao);
+		daosByResourceClass.put(MeasureReport.class, measureReportDao);
+		daosByResourceClass.put(NamingSystem.class, namingSystemDao);
+		daosByResourceClass.put(Organization.class, organizationDao);
+		daosByResourceClass.put(OrganizationAffiliation.class, organizationAffiliationDao);
+		daosByResourceClass.put(Patient.class, patientDao);
+		daosByResourceClass.put(Practitioner.class, practitionerDao);
+		daosByResourceClass.put(PractitionerRole.class, practitionerRoleDao);
+		daosByResourceClass.put(Provenance.class, provenanceDao);
+		daosByResourceClass.put(ResearchStudy.class, researchStudyDao);
+		daosByResourceClass.put(StructureDefinition.class, structureDefinitionDao);
+		daosByResourceClass.put(Subscription.class, subscriptionDao);
+		daosByResourceClass.put(Task.class, taskDao);
+		daosByResourceClass.put(ValueSet.class, valueSetDao);
 
-		daosByResoureClass.forEach((k, v) -> daosByResourceTypeName.put(k.getAnnotation(ResourceDef.class).name(), v));
+		daosByResourceClass.forEach((k, v) -> daosByResourceTypeName.put(k.getAnnotation(ResourceDef.class).name(), v));
 	}
 
 	@Override
@@ -372,7 +372,7 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	public <R extends Resource> Optional<? extends ResourceDao<R>> getDao(Class<R> resourceClass)
 	{
 		@SuppressWarnings("unchecked")
-		ResourceDao<R> value = (ResourceDao<R>) daosByResoureClass.get(resourceClass);
+		ResourceDao<R> value = (ResourceDao<R>) daosByResourceClass.get(resourceClass);
 		return Optional.ofNullable(value);
 	}
 
