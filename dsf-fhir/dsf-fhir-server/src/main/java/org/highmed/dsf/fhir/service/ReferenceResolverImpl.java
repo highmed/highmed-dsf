@@ -229,7 +229,8 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 			try
 			{
 				if (!referenceId.hasVersionIdPart())
-					return Optional.ofNullable(client.get().read(referenceId.getResourceType(), referenceId.getIdPart()));
+					return Optional
+							.ofNullable(client.get().read(referenceId.getResourceType(), referenceId.getIdPart()));
 				else
 					return Optional.ofNullable(client.get().read(referenceId.getResourceType(), referenceId.getIdPart(),
 							referenceId.getVersionIdPart()));
