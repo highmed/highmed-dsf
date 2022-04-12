@@ -22,19 +22,19 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.bpe.db.url}")
 	private String dbUrl;
 
-	@Documentation(description = "The user name to access the database from the DSF BPE server", recommendation = "None", example = "See default value")
+	@Documentation(description = "The user name to access the database from the DSF BPE server")
 	@Value("${org.highmed.dsf.bpe.db.user.username:bpe_server_user}")
 	private String dbUsername;
 
-	@Documentation(required = true, filePropertySupported = true, description = "The password to access the database from the DSF BPE server", recommendation = "Use docker secret file to configure by using *ORG_HIGHMED_DSF_BPE_DB_USER_PASSWORD_FILE*. **Caution!** Editors like nano will add a `LF` (hex `0A`) character at the end of the last line. Make sure that the password file does not end with the `LF` character. For example by starting nano with `nano -L file.password`. If you want to check that the file does not end with an `LF` (hex `0A`) character, use `xxd file.password` to look at a hexdump.", example = "/run/secrets/db_user.password")
+	@Documentation(required = true, filePropertySupported = true, description = "The password to access the database from the DSF BPE server", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*. **Caution!** Editors like nano will add a `LF` (hex `0A`) character at the end of the last line. Make sure that the password file does not end with the `LF` character. For example by starting nano with `nano -L file.password`. If you want to check that the file does not end with an `LF` (hex `0A`) character, use `xxd file.password` to look at a hexdump.", example = "/run/secrets/db_user.password")
 	@Value("${org.highmed.dsf.bpe.db.user.password}")
 	private char[] dbPassword;
 
-	@Documentation(description = "The user name to access the database from the DSF BPE server for camunda processes", recommendation = "Use a different user then in *ORG_HIGHMED_DSF_BPE_DB_USER_USERNAME*", example = "See default value")
+	@Documentation(description = "The user name to access the database from the DSF BPE server for camunda processes", recommendation = "Use a different user then in *ORG_HIGHMED_DSF_BPE_DB_USER_USERNAME*")
 	@Value("${org.highmed.dsf.bpe.db.user.camunda.username:camunda_server_user}")
 	private String dbCamundaUsername;
 
-	@Documentation(required = true, filePropertySupported = true, description = "The password to access the database from the DSF BPE server for camunda processes", recommendation = "Use docker secret file to configure by using *ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_PASSWORD_FILE*. **Caution!** Editors like nano will add a `LF` (hex `0A`) character at the end of the last line. Make sure that the password file does not end with the `LF` character. For example by starting nano with `nano -L file.password`. If you want to check that the file does not end with an `LF` (hex `0A`) character, use `xxd file.password` to look at a hexdump.", example = "/run/secrets/db_user_camunda.password")
+	@Documentation(required = true, filePropertySupported = true, description = "The password to access the database from the DSF BPE server for camunda processes", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*. **Caution!** Editors like nano will add a `LF` (hex `0A`) character at the end of the last line. Make sure that the password file does not end with the `LF` character. For example by starting nano with `nano -L file.password`. If you want to check that the file does not end with an `LF` (hex `0A`) character, use `xxd file.password` to look at a hexdump.", example = "/run/secrets/db_user_camunda.password")
 	@Value("${org.highmed.dsf.bpe.db.user.camunda.password}")
 	private char[] dbCamundaPassword;
 
@@ -50,119 +50,119 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.bpe.fhir.client.certificate}")
 	private String webserviceClientCertificateFile;
 
-	@Documentation(required = true, description = "Private key corresponding to the local client certificate as PEM encoded file. Use *ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD* or *ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE* if private key is encrypted", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_certificate_private_key.pem")
+	@Documentation(required = true, description = "Private key corresponding to the local client certificate as PEM encoded file. Use ${env_variable}_PASSWORD* or *${env_variable}_PASSWORD_FILE* if private key is encrypted", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_certificate_private_key.pem")
 	@Value("${org.highmed.dsf.bpe.fhir.client.certificate.private.key}")
 	private String webserviceClientCertificatePrivateKeyFile;
 
-	@Documentation(filePropertySupported = true, description = "Password to decrypt the local client certificate encrypted private key", recommendation = "Use docker secret file to configure by using *ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE*. **Caution!** Editors like nano will add a `LF` (hex `0A`) character at the end of the last line. Make sure that the password file does not end with the `LF` character. For example by starting nano with `nano -L file.password`. If you want to check that the file does not end with an `LF` (hex `0A`) character, use `xxd file.password` to look at a hexdump.", example = "/run/secrets/app_client_certificate_private_key.pem.password")
+	@Documentation(filePropertySupported = true, description = "Password to decrypt the local client certificate encrypted private key", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*. **Caution!** Editors like nano will add a `LF` (hex `0A`) character at the end of the last line. Make sure that the password file does not end with the `LF` character. For example by starting nano with `nano -L file.password`. If you want to check that the file does not end with an `LF` (hex `0A`) character, use `xxd file.password` to look at a hexdump.", example = "/run/secrets/app_client_certificate_private_key.pem.password")
 	@Value("${org.highmed.dsf.bpe.fhir.client.certificate.private.key.password:#{null}}")
 	private char[] webserviceClientCertificatePrivateKeyFilePassword;
 
-	@Documentation(description = "The timeout in milliseconds until a reading a resource from a remote DSF FHIR server is aborted", recommendation = "Change default value only if timeout exceptions occur", example = "See default value")
+	@Documentation(description = "The timeout in milliseconds until a reading a resource from a remote DSF FHIR server is aborted", recommendation = "Change default value only if timeout exceptions occur")
 	@Value("${org.highmed.dsf.bpe.fhir.client.remote.timeout.read:60000}")
 	private int webserviceClientRemoteReadTimeout;
 
-	@Documentation(description = "The timeout in milliseconds until a connection is established with a remote DSF FHIR server", recommendation = "Change default value only if timeout exceptions occur", example = "See default value")
+	@Documentation(description = "The timeout in milliseconds until a connection is established with a remote DSF FHIR server", recommendation = "Change default value only if timeout exceptions occur")
 	@Value("${org.highmed.dsf.bpe.fhir.client.remote.timeout.connect:5000}")
 	private int webserviceClientRemoteConnectTimeout;
 
-	@Documentation(description = "Proxy location, set if the DSF BPE server can reached the internet only through a proxy", recommendation = "None", example = "http://proxy.foo:8080")
+	@Documentation(description = "Proxy location, set if the DSF BPE server can reach the internet only through a proxy", example = "http://proxy.foo:8080")
 	@Value("${org.highmed.dsf.bpe.fhir.client.remote.proxy.url:#{null}}")
 	private String webserviceClientRemoteProxySchemeHostPort;
 
-	@Documentation(description = "Proxy username, set if the the DSF BPE server can reach the internet only through a proxy which requests authentication", recommendation = "None", example = "None")
+	@Documentation(description = "Proxy username, set if the the DSF BPE server can reach the internet only through a proxy which requests authentication")
 	@Value("${org.highmed.dsf.bpe.fhir.client.remote.proxy.username:#{null}}")
 	private String webserviceClientRemoteProxyUsername;
 
-	@Documentation(filePropertySupported = true, description = "Proxy password, set if the the DSF FHIR server can reach the internet only through a proxy which requests authentication", recommendation = "Use docker secret file to configure by using *ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_REMOTE_PROXY_PASSWORD_FILE*. **Caution!** Editors like nano will add a `LF` (hex `0A`) character at the end of the last line. Make sure that the password file does not end with the `LF` character. For example by starting nano with `nano -L file.password`. If you want to check that the file does not end with an `LF` (hex `0A`) character, use `xxd file.password` to look at a hexdump.", example = "None")
+	@Documentation(filePropertySupported = true, description = "Proxy password, set if the the DSF FHIR server can reach the internet only through a proxy which requests authentication", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*. **Caution!** Editors like nano will add a `LF` (hex `0A`) character at the end of the last line. Make sure that the password file does not end with the `LF` character. For example by starting nano with `nano -L file.password`. If you want to check that the file does not end with an `LF` (hex `0A`) character, use `xxd file.password` to look at a hexdump.")
 	@Value("${org.highmed.dsf.bpe.fhir.client.remote.proxy.password:#{null}}")
 	private char[] webserviceClientRemoteProxyPassword;
 
-	@Documentation(required = true, description = "The base address of the local DSF FHIR server to read/store fhir resources", recommendation = "None", example = "http://foo.bar/fhir")
+	@Documentation(required = true, description = "The base address of the local DSF FHIR server to read/store fhir resources", example = "http://foo.bar/fhir")
 	@Value("${org.highmed.dsf.bpe.fhir.server.base.url}")
 	private String serverBaseUrl;
 
-	@Documentation(description = "The timeout in milliseconds until a reading a resource from the local DSF FHIR server is aborted", recommendation = "Change default value only if timeout exceptions occur", example = "See default value")
+	@Documentation(description = "The timeout in milliseconds until a reading a resource from the local DSF FHIR server is aborted", recommendation = "Change default value only if timeout exceptions occur")
 	@Value("${org.highmed.dsf.bpe.fhir.client.local.timeout.read:60000}")
 	private int webserviceClientLocalReadTimeout;
 
-	@Documentation(description = "The timeout in milliseconds until a connection is established with the local DSF FHIR server", recommendation = "Change default value only if timeout exceptions occur", example = "See default value")
+	@Documentation(description = "The timeout in milliseconds until a connection is established with the local DSF FHIR server", recommendation = "Change default value only if timeout exceptions occur")
 	@Value("${org.highmed.dsf.bpe.fhir.client.local.timeout.connect:2000}")
 	private int webserviceClientLocalConnectTimeout;
 
-	@Documentation(description = "Proxy location, set if the DSF BPE server can reached internal servers, like the DSF FHIR server, only through a proxy", recommendation = "None", example = "http://proxy.foo:8080")
+	@Documentation(description = "Proxy location, set if the DSF BPE server can reach internal servers, like the DSF FHIR server, only through a proxy", example = "http://proxy.foo:8080")
 	@Value("${org.highmed.dsf.bpe.fhir.client.local.proxy.url:#{null}}")
 	private String webserviceClientLocalProxySchemeHostPort;
 
-	@Documentation(description = "Proxy username, set if the DSF BPE server can reached internal servers, like the DSF FHIR server, only through a proxy which requests authentication", recommendation = "None", example = "None")
+	@Documentation(description = "Proxy username, set if the DSF BPE server can reach internal servers, like the DSF FHIR server, only through a proxy which requests authentication")
 	@Value("${org.highmed.dsf.bpe.fhir.client.local.proxy.username:#{null}}")
 	private String webserviceClientLocalProxyUsername;
 
-	@Documentation(filePropertySupported = true, description = "Proxy password, set if the DSF BPE server can reached internal servers, like the DSF FHIR server, only through a proxy which requests authentication", recommendation = "Use docker secret file to configure by using *ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_LOCAL_PROXY_PASSWORD_FILE*. **Caution!** Editors like nano will add a `LF` (hex `0A`) character at the end of the last line. Make sure that the password file does not end with the `LF` character. For example by starting nano with `nano -L file.password`. If you want to check that the file does not end with an `LF` (hex `0A`) character, use `xxd file.password` to look at a hexdump.", example = "None")
+	@Documentation(filePropertySupported = true, description = "Proxy password, set if the DSF BPE server can reach internal servers, like the DSF FHIR server, only through a proxy which requests authentication", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*. **Caution!** Editors like nano will add a `LF` (hex `0A`) character at the end of the last line. Make sure that the password file does not end with the `LF` character. For example by starting nano with `nano -L file.password`. If you want to check that the file does not end with an `LF` (hex `0A`) character, use `xxd file.password` to look at a hexdump.")
 	@Value("${org.highmed.dsf.bpe.fhir.client.local.proxy.password:#{null}}")
 	private char[] webserviceClientLocalProxyPassword;
 
-	@Documentation(description = "Proxy location, set if the DSF BPE server can reached internal servers via websocket, like the DSF FHIR server, only through a proxy", recommendation = "None", example = "http://proxy.foo:8080")
+	@Documentation(description = "Proxy location, set if the DSF BPE server can reach internal servers via websocket, like the DSF FHIR server, only through a proxy", example = "http://proxy.foo:8080")
 	@Value("${org.highmed.dsf.bpe.fhir.client.local.websocket.proxy.url:#{null}}")
 	private String websocketClientProxySchemeHostPort;
 
-	@Documentation(description = "Proxy username, set if the DSF BPE server can reached internal servers via websocket, like the DSF FHIR server, only through a proxy which requests authentication", recommendation = "None", example = "None")
+	@Documentation(description = "Proxy username, set if the DSF BPE server can reach internal servers via websocket, like the DSF FHIR server, only through a proxy which requests authentication")
 	@Value("${org.highmed.dsf.bpe.fhir.client.local.websocket.proxy.username:#{null}}")
 	private String websocketClientProxyUsername;
 
-	@Documentation(filePropertySupported = true, description = "Proxy password, set if the DSF BPE server can reached internal servers via websocket, like the getSub server, only through a proxy which requests authentication", recommendation = "Use docker secret file to configure by using *ORG_HIGHMED_DSF_BPE_FHIR_CLIENT_LOCAL_WEBSOCKET_PROXY_PASSWORD_FILE*. **Caution!** Editors like nano will add a `LF` (hex `0A`) character at the end of the last line. Make sure that the password file does not end with the `LF` character. For example by starting nano with `nano -L file.password`. If you want to check that the file does not end with an `LF` (hex `0A`) character, use `xxd file.password` to look at a hexdump.", example = "None")
+	@Documentation(filePropertySupported = true, description = "Proxy password, set if the DSF BPE server can reach internal servers via websocket, like the getSub server, only through a proxy which requests authentication", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*. **Caution!** Editors like nano will add a `LF` (hex `0A`) character at the end of the last line. Make sure that the password file does not end with the `LF` character. For example by starting nano with `nano -L file.password`. If you want to check that the file does not end with an `LF` (hex `0A`) character, use `xxd file.password` to look at a hexdump.")
 	@Value("${org.highmed.dsf.bpe.fhir.client.local.websocket.proxy.password:#{null}}")
 	private char[] websocketClientProxyPassword;
 
-	@Documentation(description = "Subscription to receive notifications about resources from the DSF FHIR server", recommendation = "Change only if you need other subscriptions then the default Task subscription of the DSF", example = "See default value")
+	@Documentation(description = "Subscription to receive notifications about resources from the DSF FHIR server", recommendation = "Change only if you need other subscriptions then the default Task subscription of the DSF")
 	@Value("${org.highmed.dsf.bpe.fhir.task.subscription.search.parameter:?criteria=Task%3Fstatus%3Drequested&status=active&type=websocket&payload=application/fhir%2Bjson}")
 	private String subscriptionSearchParameter;
 
-	@Documentation(description = "File storing the last event received and processed on the DFS BPE server from the DSF FHIR server, used to load events that occurred on the DSF FHIR server while the DSF BPE server was turned off", recommendation = "None", example = "See default value")
+	@Documentation(description = "File storing the last event received and processed on the DFS BPE server from the DSF FHIR server, used to load events that occurred on the DSF FHIR server while the DSF BPE server was turned off")
 	@Value("${org.highmed.dsf.bpe.fhir.task.subscription.last.event.time:last_event/time.file}")
 	private String lastEventTimeFile;
 
-	@Documentation(description = "Number of retries until a websocket connection can be established with the DSF FHIR server, -1 means infinite number of retries", recommendation = "None", example = "See default value")
+	@Documentation(description = "Number of retries until a websocket connection can be established with the DSF FHIR server, -1 means infinite number of retries")
 	@Value("${org.highmed.dsf.bpe.fhir.task.subscription.retry.max:-1}")
 	private int websocketMaxRetries;
 
-	@Documentation(description = "Milliseconds between two retries to establish a websocket connection with the DSF FHIR server", recommendation = "None", example = "See default value")
+	@Documentation(description = "Milliseconds between two retries to establish a websocket connection with the DSF FHIR server")
 	@Value("${org.highmed.dsf.bpe.fhir.task.subscription.retry.sleep:5000}")
 	private long websocketRetrySleepMillis;
 
-	@Documentation(description = "Factory for client implementations used to connect to a Master Patient Index (MPI) server in order to read patient demographic data", recommendation = "The default value is a factory for a stub implementation, change to a factory for client implementation that matches the API of your MPI", example = "See default value")
+	@Documentation(description = "Factory for client implementations used to connect to a Master Patient Index (MPI) server in order to read patient demographic data", recommendation = "The default value is a factory for a stub implementation, change to a factory for client implementation that matches the API of your MPI")
 	@Value("${org.highmed.dsf.bpe.mpi.webservice.factory.class:org.highmed.mpi.client.stub.MasterPatientIndexClientStubFactory}")
 	private String masterPatientIndexClientFactoryClass;
 
-	@Documentation(description = "Factory for client implementations used to connect to a consent server in order to check permissions to access patient medical data", recommendation = "The default value is a factory for a stub implementation, change to a factory for client implementation that matches the API of your Consent server", example = "See default value")
+	@Documentation(description = "Factory for client implementations used to connect to a consent server in order to check permissions to access patient medical data", recommendation = "The default value is a factory for a stub implementation, change to a factory for client implementation that matches the API of your Consent server")
 	@Value("${org.highmed.dsf.bpe.consent.webservice.factory.class:org.highmed.consent.client.stub.ConsentClientStubFactory}")
 	private String consentClientFactoryClass;
 
-	@Documentation(description = "Factory for client implementations used to connect to an openEHR repository in order to read patient medical data", recommendation = "The default value is a factory for a stub implementation, change to a factory for client implementation that matches the API of your openEHR repository", example = "See default value")
+	@Documentation(description = "Factory for client implementations used to connect to an openEHR repository in order to read patient medical data", recommendation = "The default value is a factory for a stub implementation, change to a factory for client implementation that matches the API of your openEHR repository")
 	@Value("${org.highmed.dsf.bpe.openehr.webservice.factory.class:org.highmed.openehr.client.stub.OpenEhrClientStubFactory}")
 	private String openEhrClientFactoryClass;
 
-	@Documentation(description = "Factory for client implementations used to connect to a pseudonymization service in order to pseudonymize patient demographic and medical data", recommendation = "The default value is a factory for a stub implementation, change to a factory for client implementation that matches the API of your pseudonymization service", example = "See default value")
+	@Documentation(description = "Factory for client implementations used to connect to a pseudonymization service in order to pseudonymize patient demographic and medical data", recommendation = "The default value is a factory for a stub implementation, change to a factory for client implementation that matches the API of your pseudonymization service")
 	@Value("${org.highmed.dsf.bpe.pseudonymization.webservice.factory.class:org.highmed.pseudonymization.client.stub.PseudonymizationClientStubFactory}")
 	private String pseudonymizationClientFactoryClass;
 
-	@Documentation(description = "Directory containing the DSF BPE process plugins for deployment on startup of the DSF BPE server", recommendation = "Change only if you don't use the provided directory structure from the installation guide or made changes to tit", example = "See default value")
+	@Documentation(description = "Directory containing the DSF BPE process plugins for deployment on startup of the DSF BPE server", recommendation = "Change only if you don't use the provided directory structure from the installation guide or made changes to tit")
 	@Value("${org.highmed.dsf.bpe.process.plugin.directroy:process}")
 	private String processPluginDirectory;
 
-	@Documentation(description = "List of process names that should be excluded from deployment during startup of the DSF BPE server", recommendation = "Only deploy processes that can be started depending on your organization's roles in the Allow-List", example = "None")
+	@Documentation(description = "List of process names that should be excluded from deployment during startup of the DSF BPE server", recommendation = "Only deploy processes that can be started depending on your organization's roles in the Allow-List")
 	@Value("#{'${org.highmed.dsf.bpe.process.excluded:}'.trim().split('(,[ ]?)|(\\n)')}")
 	private List<String> processExcluded;
 
-	@Documentation(description = "List of already deployed process names that should be retired during startup of the DSF BPE server", recommendation = "Retire processes that where deployed previously but are not anymore available", example = "None")
+	@Documentation(description = "List of already deployed process names that should be retired during startup of the DSF BPE server", recommendation = "Retire processes that where deployed previously but are not anymore available")
 	@Value("#{'${org.highmed.dsf.bpe.process.retired:}'.trim().split('(,[ ]?)|(\\n)')}")
 	private List<String> processRetired;
 
-	@Documentation(description = "Number of retries until a connection can be established with the local DSF FHIR server during process deployment, -1 means infinite number of retries", recommendation = "None", example = "See default value")
+	@Documentation(description = "Number of retries until a connection can be established with the local DSF FHIR server during process deployment, -1 means infinite number of retries")
 	@Value("${org.highmed.dsf.bpe.process.fhir.server.retry.max:-1}")
 	private int fhirServerRequestMaxRetries;
 
-	@Documentation(description = "Milliseconds between two retries to establish a connection with the local DSF FHIR server during process deployment", recommendation = "None", example = "See default value")
+	@Documentation(description = "Milliseconds between two retries to establish a connection with the local DSF FHIR server during process deployment")
 	@Value("${org.highmed.dsf.bpe.process.fhir.server.retry.sleep:5000}")
 	private long fhirServerRetryDelayMillis;
 

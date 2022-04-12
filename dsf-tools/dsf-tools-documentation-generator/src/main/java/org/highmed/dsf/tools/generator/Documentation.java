@@ -42,10 +42,10 @@ public @interface Documentation
 	/**
 	 * @return example value helping to configure this property
 	 */
-	String example();
+	String example() default "";
 
 	/**
 	 * @return recommendation helping to configure this property
 	 */
-	String recommendation();
+	String recommendation() default "";
 }

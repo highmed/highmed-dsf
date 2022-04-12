@@ -29,6 +29,9 @@ public class DocumentationGenerator
 {
 	private static final Logger logger = LoggerFactory.getLogger(DocumentationGenerator.class);
 
+	private static final String ENV_VARIABLE_PLACEHOLDER = "${env_variable}";
+	private static final String PROPERTY_NAME_PLACEHOLDER = " ${property_name}";
+
 	public static void main(String[] args)
 	{
 		new DocumentationGenerator().execute(args);
@@ -135,23 +138,22 @@ public class DocumentationGenerator
 		Documentation documentation = field.getAnnotation(Documentation.class);
 		Value value = field.getAnnotation(Value.class);
 
-		String[] valueSplit = value.value().replaceAll("\\$", "").replace("#", "").replace("{", "").replace("}", "")
-				.split(":");
+		String[] valueSplit = getValueDefaultArray(value.value());
 
 		String initialProperty = valueSplit[0];
 		String property = getDocumentationString("Property", initialProperty);
 
-		String environment = initialProperty.replace(".", "_").toUpperCase();
-		if (documentation.filePropertySupported())
-			environment = String.format("%s or %s_FILE", environment, environment);
+		String initialEnvironment = initialProperty.replace(".", "_").toUpperCase();
+		String environment = documentation.filePropertySupported()
+				? String.format("%s or %s_FILE", initialEnvironment, initialEnvironment)
+				: initialEnvironment;
 
 		String required = getDocumentationString("Required", String.valueOf(documentation.required()));
 
-		String[] documentationProcessNames = documentation.processNames();
+		String[] processNames = documentation.processNames();
 		boolean processProperty = documentation.processProperty();
 		String processes = processProperty
-				? getDocumentationString("Processes",
-						getProcessNamesAsString(documentationProcessNames, pluginProcessNames))
+				? getDocumentationString("Processes", getProcessNamesAsString(processNames, pluginProcessNames))
 				: getDocumentationString("Processes", "Default DSF property, does not belong to a specific process");
 
 		String description = getDocumentationString("Description", documentation.description());
@@ -161,12 +163,26 @@ public class DocumentationGenerator
 		String defaultValue = getDocumentationString("Default",
 				((valueSplit.length == 2 && !"null".equals(valueSplit[1])) ? valueSplit[1] : "not set by default"));
 
-		return String.format("### %s\n%s%s%s%s%s%s%s\n", environment, property, required, processes, description,
-				example, recommendation, defaultValue);
+		return String
+				.format("### %s\n%s%s%s%s%s%s%s\n", environment, property, required, processes, description, example,
+						recommendation, defaultValue)
+				.replace(ENV_VARIABLE_PLACEHOLDER, initialEnvironment)
+				.replace(PROPERTY_NAME_PLACEHOLDER, initialProperty);
+	}
+
+	private String[] getValueDefaultArray(String value)
+	{
+		if (value.startsWith("#{'"))
+			value = value.substring(value.indexOf("#{'") + 4, value.indexOf("}'"));
+
+		return value.replaceAll("\\$", "").replace("#", "").replace("{", "").replace("}", "").split(":");
 	}
 
 	private String getDocumentationString(String title, String value)
 	{
+		if (title == null || title.isBlank() || value == null || value.isBlank())
+			return "";
+
 		return String.format("- **%s:** %s\n", title, value);
 	}
 

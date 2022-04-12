@@ -20,35 +20,35 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.fhir.db.url}")
 	private String dbUrl;
 
-	@Documentation(description = "The user name to access the database from the DSF FHIR server", recommendation = "None", example = "See default value")
+	@Documentation(description = "The user name to access the database from the DSF FHIR server")
 	@Value("${org.highmed.dsf.fhir.db.user.username:fhir_server_user}")
 	private String dbUsername;
 
-	@Documentation(required = true, filePropertySupported = true, description = "The password to access the database from the DSF FHIR server", recommendation = "Use docker secret file to configure by using *ORG_HIGHMED_DSF_FHIR_DB_USER_PASSWORD_FILE*. **Caution!** Editors like nano will add a `LF` (hex `0A`) character at the end of the last line. Make sure that the password file does not end with the `LF` character. For example by starting nano with `nano -L file.password`. If you want to check that the file does not end with an `LF` (hex `0A`) character, use `xxd file.password` to look at a hexdump.", example = "/run/secrets/db_user.password")
+	@Documentation(required = true, filePropertySupported = true, description = "The password to access the database from the DSF FHIR server", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*. **Caution!** Editors like nano will add a `LF` (hex `0A`) character at the end of the last line. Make sure that the password file does not end with the `LF` character. For example by starting nano with `nano -L file.password`. If you want to check that the file does not end with an `LF` (hex `0A`) character, use `xxd file.password` to look at a hexdump.", example = "/run/secrets/db_user.password")
 	@Value("${org.highmed.dsf.fhir.db.user.password}")
 	private char[] dbPassword;
 
-	@Documentation(description = "The user name to access the database from the DSF FHIR server for permanent deletes", recommendation = "Use a different user then in *ORG_HIGHMED_DSF_FHIR_DB_USER_USERNAME*", example = "See default value")
+	@Documentation(description = "The user name to access the database from the DSF FHIR server for permanent deletes", recommendation = "Use a different user then in *ORG_HIGHMED_DSF_FHIR_DB_USER_USERNAME*")
 	@Value("${org.highmed.dsf.fhir.db.user.permanent.delete.username:fhir_server_permanent_delete_user}")
 	private String dbPermanentDeleteUsername;
 
-	@Documentation(required = true, filePropertySupported = true, description = "The password to access the database from the DSF FHIR server for permanent deletes", recommendation = "Use docker secret file to configure by using *ORG_HIGHMED_DSF_FHIR_DB_USER_PERMANENT_DELETE_PASSWORD_FILE*. **Caution!** Editors like nano will add a `LF` (hex `0A`) character at the end of the last line. Make sure that the password file does not end with the `LF` character. For example by starting nano with `nano -L file.password`. If you want to check that the file does not end with an `LF` (hex `0A`) character, use `xxd file.password` to look at a hexdump.", example = "/run/secrets/db_user_permanent_delete.password")
+	@Documentation(required = true, filePropertySupported = true, description = "The password to access the database from the DSF FHIR server for permanent deletes", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*. **Caution!** Editors like nano will add a `LF` (hex `0A`) character at the end of the last line. Make sure that the password file does not end with the `LF` character. For example by starting nano with `nano -L file.password`. If you want to check that the file does not end with an `LF` (hex `0A`) character, use `xxd file.password` to look at a hexdump.", example = "/run/secrets/db_user_permanent_delete.password")
 	@Value("${org.highmed.dsf.fhir.db.user.permanent.delete.password}")
 	private char[] dbPermanentDeletePassword;
 
-	@Documentation(required = true, description = "The base address of this DSF FHIR server to read/store fhir resources", recommendation = "None", example = "http://foo.bar/fhir")
+	@Documentation(required = true, description = "The base address of this DSF FHIR server to read/store fhir resources", example = "http://foo.bar/fhir")
 	@Value("${org.highmed.dsf.fhir.server.base.url}")
 	private String serverBaseUrl;
 
-	@Documentation(description = "The page size returned by the DSF FHIR server when reading/searching fhir resources", recommendation = "None", example = "See default value")
+	@Documentation(description = "The page size returned by the DSF FHIR server when reading/searching fhir resources")
 	@Value("${org.highmed.dsf.fhir.server.page.count:20}")
 	private int defaultPageCount;
 
-	@Documentation(required = true, description = "List of SHA512 thumbprints from local client certificates that can be used to access the DSF FHIR server", recommendation = "Besides the dsf bpe client certificate thumbprint, add a second thumbprint of a personal client certificate for administration purposes", example = "None")
+	@Documentation(required = true, description = "List of SHA512 thumbprints from local client certificates that can be used to access the DSF FHIR server", recommendation = "Besides the dsf bpe client certificate thumbprint, add a second thumbprint of a personal client certificate for administration purposes")
 	@Value("#{'${org.highmed.dsf.fhir.server.user.thumbprints}'.trim().split('(,[ ]?)|(\\n)')}")
 	private List<String> userThumbprints;
 
-	@Documentation(required = true, description = "List of SHA512 thumbprints from local client certificates that can be used to access the DSF FHIR server for permanent deletes", recommendation = "Besides the dsf bpe client certificate thumbprint, add a second thumbprint of a personal client certificate for administration purposes", example = "None")
+	@Documentation(required = true, description = "List of SHA512 thumbprints from local client certificates that can be used to access the DSF FHIR server for permanent deletes", recommendation = "Besides the dsf bpe client certificate thumbprint, add a second thumbprint of a personal client certificate for administration purposes")
 	@Value("#{'${org.highmed.dsf.fhir.server.user.thumbprints.permanent.delete}'.trim().split('(,[ ]?)|(\\n)')}")
 	private List<String> userPermanentDeleteThumbprints;
 
@@ -56,7 +56,7 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.fhir.server.organization.identifier.value}")
 	private String organizationIdentifierValue;
 
-	@Documentation(description = "The fhir bundle containing the initial Allow-List, loaded on startup of the DSF FHIR server", recommendation = "Change only if you don't use the provided files from the installation guide, have local changes in the Allow-List or received an Allow-List from another source", example = "See default value")
+	@Documentation(description = "The fhir bundle containing the initial Allow-List, loaded on startup of the DSF FHIR server", recommendation = "Change only if you don't use the provided files from the installation guide, have local changes in the Allow-List or received an Allow-List from another source")
 	@Value("${org.highmed.dsf.fhir.server.init.bundle:conf/bundle.xml}")
 	private String initBundleFile;
 
@@ -68,35 +68,35 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.fhir.client.certificate}")
 	private String webserviceClientCertificateFile;
 
-	@Documentation(required = true, description = "Private key corresponding to the local client certificate as PEM encoded file. Use *ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD* or *ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE* if private key is encrypted", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_certificate_private_key.pem")
+	@Documentation(required = true, description = "Private key corresponding to the local client certificate as PEM encoded file. Use *${env_variable}_PASSWORD* or *${env_variable}_PASSWORD_FILE* if private key is encrypted", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_certificate_private_key.pem")
 	@Value("${org.highmed.dsf.fhir.client.certificate.private.key}")
 	private String webserviceClientCertificatePrivateKeyFile;
 
-	@Documentation(filePropertySupported = true, description = "Password to decrypt the local client certificate encrypted private key", recommendation = "Use docker secret file to configure by using *ORG_HIGHMED_DSF_FHIR_CLIENT_CERTIFICATE_PRIVATE_KEY_PASSWORD_FILE*. **Caution!** Editors like nano will add a `LF` (hex `0A`) character at the end of the last line. Make sure that the password file does not end with the `LF` character. For example by starting nano with `nano -L file.password`. If you want to check that the file does not end with an `LF` (hex `0A`) character, use `xxd file.password` to look at a hexdump.", example = "/run/secrets/app_client_certificate_private_key.pem.password")
+	@Documentation(filePropertySupported = true, description = "Password to decrypt the local client certificate encrypted private key", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*. **Caution!** Editors like nano will add a `LF` (hex `0A`) character at the end of the last line. Make sure that the password file does not end with the `LF` character. For example by starting nano with `nano -L file.password`. If you want to check that the file does not end with an `LF` (hex `0A`) character, use `xxd file.password` to look at a hexdump.", example = "/run/secrets/app_client_certificate_private_key.pem.password")
 	@Value("${org.highmed.dsf.fhir.client.certificate.private.key.password:#{null}}")
 	private char[] webserviceClientCertificatePrivateKeyFilePassword;
 
-	@Documentation(description = "The timeout in milliseconds until a reading a resource from a remote DSF FHIR server is aborted", recommendation = "Change default value only if timeout exceptions occur", example = "See default value")
+	@Documentation(description = "The timeout in milliseconds until a reading a resource from a remote DSF FHIR server is aborted", recommendation = "Change default value only if timeout exceptions occur")
 	@Value("${org.highmed.dsf.fhir.client.timeout.read:10000}")
 	private int webserviceClientReadTimeout;
 
-	@Documentation(description = "The timeout in milliseconds until a connection is established between this DSF FHIR server and a remote DSF FHIR server", recommendation = "Change default value only if timeout exceptions occur", example = "See default value")
+	@Documentation(description = "The timeout in milliseconds until a connection is established between this DSF FHIR server and a remote DSF FHIR server", recommendation = "Change default value only if timeout exceptions occur")
 	@Value("${org.highmed.dsf.fhir.client.timeout.connect:2000}")
 	private int webserviceClientConnectTimeout;
 
-	@Documentation(description = "Proxy location, set if the DSF FHIR server can reached the internet only through a proxy", recommendation = "None", example = "http://proxy.foo:8080")
+	@Documentation(description = "Proxy location, set if the DSF FHIR server can reach the internet only through a proxy", example = "http://proxy.foo:8080")
 	@Value("${org.highmed.dsf.fhir.client.proxy.url:#{null}}")
 	private String webserviceClientProxyUrl;
 
-	@Documentation(description = "Proxy username, set if the the DSF FHIR server can reach the internet only through a proxy which requests authentication", recommendation = "None", example = "None")
+	@Documentation(description = "Proxy username, set if the the DSF FHIR server can reach the internet only through a proxy which requests authentication")
 	@Value("${org.highmed.dsf.fhir.client.proxy.username:#{null}}")
 	private String webserviceClientProxyUsername;
 
-	@Documentation(filePropertySupported = true, description = "Proxy password, set if the the DSF FHIR server can reach the internet only through a proxy which requests authentication", recommendation = "Use docker secret file to configure by using *ORG_HIGHMED_DSF_FHIR_CLIENT_PROXY_PASSWORD_FILE*. **Caution!** Editors like nano will add a `LF` (hex `0A`) character at the end of the last line. Make sure that the password file does not end with the `LF` character. For example by starting nano with `nano -L file.password`. If you want to check that the file does not end with an `LF` (hex `0A`) character, use `xxd file.password` to look at a hexdump.", example = "None")
+	@Documentation(filePropertySupported = true, description = "Proxy password, set if the the DSF FHIR server can reach the internet only through a proxy which requests authentication", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*. **Caution!** Editors like nano will add a `LF` (hex `0A`) character at the end of the last line. Make sure that the password file does not end with the `LF` character. For example by starting nano with `nano -L file.password`. If you want to check that the file does not end with an `LF` (hex `0A`) character, use `xxd file.password` to look at a hexdump.")
 	@Value("${org.highmed.dsf.fhir.client.proxy.password:#{null}}")
 	private char[] webserviceClientProxyPassword;
 
-	@Documentation(description = "List of allowed CORS origins, used to set the *Access-Control-Allow-Origin* HTTP response header, which indicates whether the response can be shared with requesting code from the given origin", recommendation = "None", example = "None")
+	@Documentation(description = "List of allowed CORS origins, used to set the *Access-Control-Allow-Origin* HTTP response header, which indicates whether the response can be shared with requesting code from the given origin")
 	@Value("#{'${org.highmed.dsf.fhir.server.cors.origins:}'.split(',')}")
 	private List<String> allowedOrigins;
 
