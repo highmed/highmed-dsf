@@ -24,19 +24,19 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.fhir.db.user.username:fhir_server_user}")
 	private String dbUsername;
 
-	@Documentation(required = true, filePropertySupported = true, description = "The password to access the database from the DSF FHIR server", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*", example = "/run/secrets/db_user.password")
+	@Documentation(required = true, description = "The password to access the database from the DSF FHIR server", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*", example = "/run/secrets/db_user.password")
 	@Value("${org.highmed.dsf.fhir.db.user.password}")
 	private char[] dbPassword;
 
-	@Documentation(description = "The user name to access the database from the DSF FHIR server for permanent deletes", recommendation = "Use a different user then in *ORG_HIGHMED_DSF_FHIR_DB_USER_USERNAME*")
+	@Documentation(description = "The user name to access the database from the DSF FHIR server for permanent deletes", recommendation = "Use a different user then *ORG_HIGHMED_DSF_FHIR_DB_USER_USERNAME*")
 	@Value("${org.highmed.dsf.fhir.db.user.permanent.delete.username:fhir_server_permanent_delete_user}")
 	private String dbPermanentDeleteUsername;
 
-	@Documentation(required = true, filePropertySupported = true, description = "The password to access the database from the DSF FHIR server for permanent deletes", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*", example = "/run/secrets/db_user_permanent_delete.password")
+	@Documentation(required = true, description = "The password to access the database from the DSF FHIR server for permanent deletes", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*", example = "/run/secrets/db_user_permanent_delete.password")
 	@Value("${org.highmed.dsf.fhir.db.user.permanent.delete.password}")
 	private char[] dbPermanentDeletePassword;
 
-	@Documentation(required = true, description = "The base address of this DSF FHIR server to read/store fhir resources", example = "http://foo.bar/fhir")
+	@Documentation(required = true, description = "The base address of this DSF FHIR server to read/store fhir resources", example = "https://foo.bar/fhir")
 	@Value("${org.highmed.dsf.fhir.server.base.url}")
 	private String serverBaseUrl;
 
@@ -44,15 +44,15 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.fhir.server.page.count:20}")
 	private int defaultPageCount;
 
-	@Documentation(required = true, description = "List of SHA512 thumbprints from local client certificates that can be used to access the DSF FHIR server", recommendation = "Besides the dsf bpe client certificate thumbprint, add a second thumbprint of a personal client certificate for administration purposes")
+	@Documentation(required = true, description = "List of SHA512 thumbprints as hex from local client certificates that can be used to access the DSF FHIR server; comma or space separated list, YAML block scalars supported", recommendation = "Besides the DSF BPE client certificate thumbprint, add a second thumbprint of a personal client certificate for administration purposes")
 	@Value("#{'${org.highmed.dsf.fhir.server.user.thumbprints}'.trim().split('(,[ ]?)|(\\n)')}")
 	private List<String> userThumbprints;
 
-	@Documentation(required = true, description = "List of SHA512 thumbprints from local client certificates that can be used to access the DSF FHIR server for permanent deletes", recommendation = "Besides the dsf bpe client certificate thumbprint, add a second thumbprint of a personal client certificate for administration purposes")
+	@Documentation(required = true, description = "List of SHA512 thumbprints as hex from local client certificates that can be used to access the DSF FHIR server for permanent deletes; comma or space separated list, YAML block scalars supported", recommendation = "Besides the DSF BPE client certificate thumbprint, add a second thumbprint of a personal client certificate for administration purposes")
 	@Value("#{'${org.highmed.dsf.fhir.server.user.thumbprints.permanent.delete}'.trim().split('(,[ ]?)|(\\n)')}")
 	private List<String> userPermanentDeleteThumbprints;
 
-	@Documentation(required = true, description = "The local identifier value used in the Allow-List", recommendation = "The convention is to use the shortest possible FQDN of the organization", example = "hospital.com")
+	@Documentation(required = true, description = "The local identifier value used in the Allow-List", recommendation = "By convention: The shortest possible FQDN that resolve the homepage of the organization", example = "hospital.com")
 	@Value("${org.highmed.dsf.fhir.server.organization.identifier.value}")
 	private String organizationIdentifierValue;
 
@@ -60,7 +60,7 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.fhir.server.init.bundle:conf/bundle.xml}")
 	private String initBundleFile;
 
-	@Documentation(required = true, description = "PEM encoded file with one or more trusted root certificates to validate DSF client certificates for https connections to remote DSF FHIR servers", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_trust_certificates.pem")
+	@Documentation(required = true, description = "PEM encoded file with one or more trusted root certificates to validate server certificates for https connections to remote DSF FHIR servers", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_trust_certificates.pem")
 	@Value("${org.highmed.dsf.fhir.client.trust.certificates}")
 	private String webserviceClientCertificateTrustCertificatesFile;
 
@@ -72,7 +72,7 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.fhir.client.certificate.private.key}")
 	private String webserviceClientCertificatePrivateKeyFile;
 
-	@Documentation(filePropertySupported = true, description = "Password to decrypt the local client certificate encrypted private key", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*", example = "/run/secrets/app_client_certificate_private_key.pem.password")
+	@Documentation(description = "Password to decrypt the local client certificate encrypted private key", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*", example = "/run/secrets/app_client_certificate_private_key.pem.password")
 	@Value("${org.highmed.dsf.fhir.client.certificate.private.key.password:#{null}}")
 	private char[] webserviceClientCertificatePrivateKeyFilePassword;
 
@@ -92,12 +92,12 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.fhir.client.proxy.username:#{null}}")
 	private String webserviceClientProxyUsername;
 
-	@Documentation(filePropertySupported = true, description = "Proxy password, set if the the DSF FHIR server can reach the internet only through a proxy which requests authentication", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*")
+	@Documentation(description = "Proxy password, set if the the DSF FHIR server can reach the internet only through a proxy which requests authentication", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*")
 	@Value("${org.highmed.dsf.fhir.client.proxy.password:#{null}}")
 	private char[] webserviceClientProxyPassword;
 
-	@Documentation(description = "List of allowed CORS origins, used to set the *Access-Control-Allow-Origin* HTTP response header, which indicates whether the response can be shared with requesting code from the given origin")
-	@Value("#{'${org.highmed.dsf.fhir.server.cors.origins:}'.split(',')}")
+	@Documentation(description = "List of allowed CORS origins, used to set the *Access-Control-Allow-Origin* HTTP response header, which indicates whether the response can be shared with requesting code from the given origin; comma or space separated list, YAML block scalars supported")
+	@Value("#{'${org.highmed.dsf.fhir.server.cors.origins:}'.trim().split('(,[ ]?)|(\\n)')}")
 	private List<String> allowedOrigins;
 
 	@Bean // static in order to initialize before @Configuration classes

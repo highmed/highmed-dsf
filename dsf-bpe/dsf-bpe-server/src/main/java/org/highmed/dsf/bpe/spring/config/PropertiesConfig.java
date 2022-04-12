@@ -26,7 +26,7 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.bpe.db.user.username:bpe_server_user}")
 	private String dbUsername;
 
-	@Documentation(required = true, filePropertySupported = true, description = "The password to access the database from the DSF BPE server", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*", example = "/run/secrets/db_user.password")
+	@Documentation(required = true, description = "The password to access the database from the DSF BPE server", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*", example = "/run/secrets/db_user.password")
 	@Value("${org.highmed.dsf.bpe.db.user.password}")
 	private char[] dbPassword;
 
@@ -34,15 +34,15 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.bpe.db.user.camunda.username:camunda_server_user}")
 	private String dbCamundaUsername;
 
-	@Documentation(required = true, filePropertySupported = true, description = "The password to access the database from the DSF BPE server for camunda processes", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*", example = "/run/secrets/db_user_camunda.password")
+	@Documentation(required = true, description = "The password to access the database from the DSF BPE server for camunda processes", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*", example = "/run/secrets/db_user_camunda.password")
 	@Value("${org.highmed.dsf.bpe.db.user.camunda.password}")
 	private char[] dbCamundaPassword;
 
-	@Documentation(required = true, description = "The local identifier value used in the Allow-List", recommendation = "The convention is to use the shortest possible FQDN of the organization", example = "hospital.com")
+	@Documentation(required = true, description = "The local identifier value used in the Allow-List", recommendation = "By convention: The shortest possible FQDN that resolve the homepage of the organization", example = "hospital.com")
 	@Value("${org.highmed.dsf.bpe.fhir.server.organization.identifier.value}")
 	private String organizationIdentifierValue;
 
-	@Documentation(required = true, description = "PEM encoded file with one or more trusted root certificates to validate DSF client certificates for https connections to local and remote DSF FHIR servers", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_trust_certificates.pem")
+	@Documentation(required = true, description = "PEM encoded file with one or more trusted root certificates to validate server certificates for https connections to local and remote DSF FHIR servers", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_trust_certificates.pem")
 	@Value("${org.highmed.dsf.bpe.fhir.client.trust.certificates}")
 	private String webserviceClientCertificateTrustStoreFile;
 
@@ -54,7 +54,7 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.bpe.fhir.client.certificate.private.key}")
 	private String webserviceClientCertificatePrivateKeyFile;
 
-	@Documentation(filePropertySupported = true, description = "Password to decrypt the local client certificate encrypted private key", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*", example = "/run/secrets/app_client_certificate_private_key.pem.password")
+	@Documentation(description = "Password to decrypt the local client certificate encrypted private key", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*", example = "/run/secrets/app_client_certificate_private_key.pem.password")
 	@Value("${org.highmed.dsf.bpe.fhir.client.certificate.private.key.password:#{null}}")
 	private char[] webserviceClientCertificatePrivateKeyFilePassword;
 
@@ -74,11 +74,11 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.bpe.fhir.client.remote.proxy.username:#{null}}")
 	private String webserviceClientRemoteProxyUsername;
 
-	@Documentation(filePropertySupported = true, description = "Proxy password, set if the the DSF FHIR server can reach the internet only through a proxy which requests authentication", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*")
+	@Documentation(description = "Proxy password, set if the the DSF FHIR server can reach the internet only through a proxy which requests authentication", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*")
 	@Value("${org.highmed.dsf.bpe.fhir.client.remote.proxy.password:#{null}}")
 	private char[] webserviceClientRemoteProxyPassword;
 
-	@Documentation(required = true, description = "The base address of the local DSF FHIR server to read/store fhir resources", example = "http://foo.bar/fhir")
+	@Documentation(required = true, description = "The base address of the local DSF FHIR server to read/store fhir resources", example = "https://foo.bar/fhir")
 	@Value("${org.highmed.dsf.bpe.fhir.server.base.url}")
 	private String serverBaseUrl;
 
@@ -98,7 +98,7 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.bpe.fhir.client.local.proxy.username:#{null}}")
 	private String webserviceClientLocalProxyUsername;
 
-	@Documentation(filePropertySupported = true, description = "Proxy password, set if the DSF BPE server can reach internal servers, like the DSF FHIR server, only through a proxy which requests authentication", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*")
+	@Documentation(description = "Proxy password, set if the DSF BPE server can reach internal servers, like the DSF FHIR server, only through a proxy which requests authentication", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*")
 	@Value("${org.highmed.dsf.bpe.fhir.client.local.proxy.password:#{null}}")
 	private char[] webserviceClientLocalProxyPassword;
 
@@ -110,7 +110,7 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.bpe.fhir.client.local.websocket.proxy.username:#{null}}")
 	private String websocketClientProxyUsername;
 
-	@Documentation(filePropertySupported = true, description = "Proxy password, set if the DSF BPE server can reach internal servers via websocket, like the getSub server, only through a proxy which requests authentication", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*")
+	@Documentation(description = "Proxy password, set if the DSF BPE server can reach internal servers via websocket, like the getSub server, only through a proxy which requests authentication", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*")
 	@Value("${org.highmed.dsf.bpe.fhir.client.local.websocket.proxy.password:#{null}}")
 	private char[] websocketClientProxyPassword;
 
@@ -122,7 +122,7 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.bpe.fhir.task.subscription.last.event.time:last_event/time.file}")
 	private String lastEventTimeFile;
 
-	@Documentation(description = "Number of retries until a websocket connection can be established with the DSF FHIR server, -1 means infinite number of retries")
+	@Documentation(description = "Number of retries until a websocket connection can be established with the DSF FHIR server, `-1` means infinite number of retries")
 	@Value("${org.highmed.dsf.bpe.fhir.task.subscription.retry.max:-1}")
 	private int websocketMaxRetries;
 
@@ -150,15 +150,15 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.bpe.process.plugin.directroy:process}")
 	private String processPluginDirectory;
 
-	@Documentation(description = "List of process names that should be excluded from deployment during startup of the DSF BPE server", recommendation = "Only deploy processes that can be started depending on your organization's roles in the Allow-List")
+	@Documentation(description = "List of process names that should be excluded from deployment during startup of the DSF BPE server; comma or space separated list, YAML block scalars supported", recommendation = "Only deploy processes that can be started depending on your organization's roles in the Allow-List")
 	@Value("#{'${org.highmed.dsf.bpe.process.excluded:}'.trim().split('(,[ ]?)|(\\n)')}")
 	private List<String> processExcluded;
 
-	@Documentation(description = "List of already deployed process names that should be retired during startup of the DSF BPE server", recommendation = "Retire processes that where deployed previously but are not anymore available")
+	@Documentation(description = "List of already deployed process names that should be retired during startup of the DSF BPE server; comma or space separated list, YAML block scalars supported", recommendation = "Retire processes that where deployed previously but are not anymore available")
 	@Value("#{'${org.highmed.dsf.bpe.process.retired:}'.trim().split('(,[ ]?)|(\\n)')}")
 	private List<String> processRetired;
 
-	@Documentation(description = "Number of retries until a connection can be established with the local DSF FHIR server during process deployment, -1 means infinite number of retries")
+	@Documentation(description = "Number of retries until a connection can be established with the local DSF FHIR server during process deployment, `-1` means infinite number of retries")
 	@Value("${org.highmed.dsf.bpe.process.fhir.server.retry.max:-1}")
 	private int fhirServerRequestMaxRetries;
 

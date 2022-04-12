@@ -16,13 +16,6 @@ public @interface Documentation
 	boolean required() default false;
 
 	/**
-	 * @return <code>true</code> if a docker secret file can be used to configure this property, else
-	 *         <code>false</code>, which means that a docker secret file <b>cannot</b> be used to configure this
-	 *         property
-	 */
-	boolean filePropertySupported() default false;
-
-	/**
 	 * @return <code>true</code> if this property belongs to a process, else <code>false</code>, which means that this
 	 *         is a default DSF property and {@link Documentation#processNames} should not be used
 	 */

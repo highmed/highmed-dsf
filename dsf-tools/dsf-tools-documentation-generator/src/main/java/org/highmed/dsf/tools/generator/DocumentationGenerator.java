@@ -2,11 +2,15 @@ package org.highmed.dsf.tools.generator;
 
 import static java.util.stream.Collectors.toList;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -44,15 +48,16 @@ public class DocumentationGenerator
 
 	private void generateDocumentation(String workingPackage)
 	{
-		String filename = "target/Documentation_" + workingPackage + ".md";
-		logger.info("Generating documentation for package {} in file {}", workingPackage, filename);
+		Path file = Paths.get("target/Documentation_" + workingPackage + ".md");
+		logger.info("Generating documentation for package {} in file {}", workingPackage, file);
 
 		Reflections reflections = createReflections(workingPackage);
 
 		List<String> pluginProcessNames = getPluginProcessNames(reflections, workingPackage);
 		List<Field> fields = getFields(reflections);
 
-		writeFields(fields, pluginProcessNames, filename, workingPackage);
+		moveExistingToBackup(file);
+		writeFields(fields, pluginProcessNames, file, workingPackage);
 	}
 
 	private Reflections createReflections(String workingPackage)
@@ -75,8 +80,9 @@ public class DocumentationGenerator
 		}
 
 		if (pluginDefinitionClasses.size() > 1)
-			logger.warn("Found {} ProcessPluginDefinitions ({}) in package {}, using only the first",
-					pluginDefinitionClasses.size(), pluginDefinitionClasses, workingPackage);
+			logger.warn("Found {} ProcessPluginDefinitions ({}) in package {}, using {}",
+					pluginDefinitionClasses.size(), pluginDefinitionClasses, workingPackage,
+					pluginDefinitionClasses.get(0).getName());
 
 		try
 		{
@@ -86,11 +92,11 @@ public class DocumentationGenerator
 			return processPluginDefinition.getBpmnFiles().map(this::getProcessName).filter(Optional::isPresent)
 					.map(Optional::get).collect(toList());
 		}
-		catch (Exception exception)
+		catch (Exception e)
 		{
-			logger.warn(
-					"Could not read process names from package {} and ProcessPluginDefinition with name {}, reason is '{}'",
-					workingPackage, pluginDefinitionClasses.get(0).getName(), exception.getMessage());
+			logger.error("Could not read process names from package {} and ProcessPluginDefinition with name {}: {} {}",
+					workingPackage, pluginDefinitionClasses.get(0).getName(), e.getClass().getSimpleName(),
+					e.getMessage());
 			return Collections.emptyList();
 		}
 	}
@@ -104,8 +110,7 @@ public class DocumentationGenerator
 		}
 		catch (Exception exception)
 		{
-			logger.warn("Could not read process name from resource file {}, reason is '{}'", bpmnFile,
-					exception.getMessage());
+			logger.warn("Could not read process name from resource file {}: {}", bpmnFile, exception.getMessage());
 			return Optional.empty();
 		}
 	}
@@ -117,18 +122,36 @@ public class DocumentationGenerator
 		return fields;
 	}
 
-	private void writeFields(List<Field> fields, List<String> pluginProcessNames, String filename,
-			String workingPackage)
+	private void moveExistingToBackup(Path file)
 	{
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename)))
+		if (Files.exists(file))
 		{
-			fields.stream().map(field -> createDocumentation(field, pluginProcessNames))
-					.forEach(d -> write(writer, filename, d));
+			Path backupFile = file.resolveSibling(file.getFileName() + ".backup");
+			try
+			{
+				logger.warn("Documentation file at {} exists, moving old file to {}", file, backupFile);
+				Files.move(file, backupFile, StandardCopyOption.REPLACE_EXISTING);
+			}
+			catch (IOException e)
+			{
+				logger.error("Could not move {} to {}: {} {}", file, backupFile, e.getClass().getSimpleName(),
+						e.getMessage());
+			}
 		}
-		catch (Exception exception)
+	}
+
+	private void writeFields(List<Field> fields, List<String> pluginProcessNames, Path file, String workingPackage)
+	{
+		Iterable<String> entries = fields.stream()
+				.map(field -> createDocumentation(field, pluginProcessNames))::iterator;
+		try
 		{
-			logger.warn("Could not generate documentation for package {}, reason is '{}'", workingPackage,
-					exception.getMessage());
+			Files.write(file, entries, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
+		}
+		catch (IOException e)
+		{
+			logger.error("Could not generate documentation for package {}: {} {}", workingPackage,
+					e.getClass().getSimpleName(), e.getMessage());
 		}
 	}
 
@@ -143,11 +166,11 @@ public class DocumentationGenerator
 		String property = getDocumentationString("Property", initialProperty);
 
 		String initialEnvironment = initialProperty.replace(".", "_").toUpperCase();
-		String environment = documentation.filePropertySupported()
+		String environment = initialProperty.endsWith(".password")
 				? String.format("%s or %s_FILE", initialEnvironment, initialEnvironment)
 				: initialEnvironment;
 
-		String required = getDocumentationString("Required", String.valueOf(documentation.required()));
+		String required = getDocumentationString("Required", documentation.required() ? "Yes" : "No");
 
 		String[] processNames = documentation.processNames();
 		boolean processProperty = documentation.processProperty();
@@ -157,10 +180,10 @@ public class DocumentationGenerator
 
 		String description = getDocumentationString("Description", documentation.description());
 		String recommendation = getDocumentationString("Recommendation", documentation.recommendation());
-		String example = getDocumentationString("Example", documentation.example());
+		String example = getDocumentationStringMonospace("Example", documentation.example());
 
 		String defaultValue = (valueSplit.length > 1 && !"null".equals(valueSplit[1]))
-				? getDocumentationString("Default", valueSplit[1])
+				? getDocumentationStringMonospace("Default", valueSplit[1])
 				: "";
 
 		return String
@@ -181,6 +204,14 @@ public class DocumentationGenerator
 			valueString = valueString.substring(valueString.indexOf("#{'") + 4, valueString.indexOf("}'"));
 
 		return valueString.replaceAll("\\$", "").replace("#", "").replace("{", "").replace("}", "").split(":");
+	}
+
+	private String getDocumentationStringMonospace(String title, String value)
+	{
+		if (title == null || title.isBlank() || value == null || value.isBlank())
+			return "";
+
+		return String.format("- **%s:** `%s`\n", title, value);
 	}
 
 	private String getDocumentationString(String title, String value)
@@ -209,18 +240,5 @@ public class DocumentationGenerator
 		}
 
 		return String.join(", ", documentationProcessNames);
-	}
-
-	private void write(BufferedWriter writer, String filename, String string)
-	{
-		try
-		{
-			writer.append(string);
-		}
-		catch (IOException e)
-		{
-			logger.warn("Writing the following string to file {} failed: \n {} reason is '{}'", filename, string,
-					e.getMessage());
-		}
 	}
 }

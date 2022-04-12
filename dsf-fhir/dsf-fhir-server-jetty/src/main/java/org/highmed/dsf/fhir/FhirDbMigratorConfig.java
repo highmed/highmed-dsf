@@ -32,7 +32,7 @@ public class FhirDbMigratorConfig implements DbMigratorConfig
 	@Value("${org.highmed.dsf.fhir.db.liquibase.username:liquibase_user}")
 	private String dbLiquibaseUsername;
 
-	@Documentation(required = true, filePropertySupported = true, description = "The password to access the database from the DSF FHIR server to execute database migrations", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*", example = "/run/secrets/db_liquibase.password")
+	@Documentation(required = true, description = "The password to access the database from the DSF FHIR server to execute database migrations", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*", example = "/run/secrets/db_liquibase.password")
 	@Value("${org.highmed.dsf.fhir.db.liquibase.password}")
 	private char[] dbLiquibasePassword;
 
