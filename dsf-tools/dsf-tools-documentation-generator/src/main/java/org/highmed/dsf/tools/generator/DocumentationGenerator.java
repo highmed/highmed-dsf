@@ -154,18 +154,19 @@ public class DocumentationGenerator
 		boolean processProperty = documentation.processProperty();
 		String processes = processProperty
 				? getDocumentationString("Processes", getProcessNamesAsString(processNames, pluginProcessNames))
-				: getDocumentationString("Processes", "Default DSF property, does not belong to a specific process");
+				: "";
 
 		String description = getDocumentationString("Description", documentation.description());
-		String example = getDocumentationString("Example", documentation.example());
 		String recommendation = getDocumentationString("Recommendation", documentation.recommendation());
+		String example = getDocumentationString("Example", documentation.example());
 
-		String defaultValue = getDocumentationString("Default",
-				((valueSplit.length == 2 && !"null".equals(valueSplit[1])) ? valueSplit[1] : "not set by default"));
+		String defaultValue = (valueSplit.length == 2 && !"null".equals(valueSplit[1]))
+				? getDocumentationString("Default", valueSplit[1])
+				: "";
 
 		return String
-				.format("### %s\n%s%s%s%s%s%s%s\n", environment, property, required, processes, description, example,
-						recommendation, defaultValue)
+				.format("### %s\n%s%s%s%s%s%s%s\n", environment, property, required, processes, description,
+						recommendation, example, defaultValue)
 				.replace(ENV_VARIABLE_PLACEHOLDER, initialEnvironment)
 				.replace(PROPERTY_NAME_PLACEHOLDER, initialProperty);
 	}
