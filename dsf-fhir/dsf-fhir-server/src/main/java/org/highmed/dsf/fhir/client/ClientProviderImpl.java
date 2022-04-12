@@ -69,10 +69,7 @@ public class ClientProviderImpl implements ClientProvider, InitializingBean
 	@Override
 	public Optional<FhirWebserviceClient> getClient(String serverBase)
 	{
-		boolean endpointExists = exceptionHandler
-				.handleSqlException(() -> endpointDao.existsActiveNotDeletedByAddress(serverBase));
-
-		if (endpointExists)
+		if (endpointExists(serverBase))
 		{
 			FhirWebserviceClient client = new FhirWebserviceClientJersey(serverBase, webserviceTrustStore,
 					webserviceKeyStore, webserviceKeyStorePassword, remoteProxySchemeHostPort, remoteProxyUsername,
@@ -81,9 +78,18 @@ public class ClientProviderImpl implements ClientProvider, InitializingBean
 			return Optional.of(client);
 		}
 		else
-		{
-			logger.warn("Endpoint with address {} (active, not deleted) not found", serverBase);
 			return Optional.empty();
-		}
+	}
+
+	@Override
+	public boolean endpointExists(String serverBase)
+	{
+		boolean endpointExists = exceptionHandler
+				.handleSqlException(() -> endpointDao.existsActiveNotDeletedByAddress(serverBase));
+
+		if (!endpointExists)
+			logger.warn("No active, not deleted Endpoint with address {} found", serverBase);
+
+		return endpointExists;
 	}
 }

@@ -501,6 +501,28 @@ public class ResponseGenerator
 						+ serverBase);
 	}
 
+	public OperationOutcome referenceTargetCouldNotBeResolvedOnRemote(Integer bundleIndex, Resource resource,
+			ResourceReference resourceReference, String serverBase)
+	{
+		if (bundleIndex == null)
+			logger.warn(
+					"Reference target {} of reference at {} in resource of type {} with id {} could not be resolved on server {} (reason hidden)",
+					resourceReference.getValue(), resourceReference.getLocation(), resource.getResourceType().name(),
+					resource.getId(), serverBase);
+		else
+			logger.warn(
+					"Reference target {} of reference at {} in resource of type {} with id {} at bundle index {} could not be resolved on server {} (reason hidden)",
+					resourceReference.getValue(), resourceReference.getLocation(), resource.getResourceType().name(),
+					resource.getId(), bundleIndex, serverBase);
+
+		return createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+				"Reference target " + resourceReference.getValue() + " of reference at "
+						+ resourceReference.getLocation() + " in resource of type " + resource.getResourceType().name()
+						+ " with id " + resource.getId()
+						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex)
+						+ " could not be resolved on server " + serverBase + " (reason hidden)");
+	}
+
 	public OperationOutcome noEndpointFoundForLiteralExternalReference(Integer bundleIndex, Resource resource,
 			ResourceReference resourceReference)
 	{
