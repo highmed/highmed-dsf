@@ -26,7 +26,7 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.bpe.db.user.username:bpe_server_user}")
 	private String dbUsername;
 
-	@Documentation(required = true, filePropertySupported = true, description = "The password to access the database from the DSF BPE server", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*. **Caution!** Editors like nano will add a `LF` (hex `0A`) character at the end of the last line. Make sure that the password file does not end with the `LF` character. For example by starting nano with `nano -L file.password`. If you want to check that the file does not end with an `LF` (hex `0A`) character, use `xxd file.password` to look at a hexdump.", example = "/run/secrets/db_user.password")
+	@Documentation(required = true, filePropertySupported = true, description = "The password to access the database from the DSF BPE server", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*", example = "/run/secrets/db_user.password")
 	@Value("${org.highmed.dsf.bpe.db.user.password}")
 	private char[] dbPassword;
 
@@ -34,7 +34,7 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.bpe.db.user.camunda.username:camunda_server_user}")
 	private String dbCamundaUsername;
 
-	@Documentation(required = true, filePropertySupported = true, description = "The password to access the database from the DSF BPE server for camunda processes", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*. **Caution!** Editors like nano will add a `LF` (hex `0A`) character at the end of the last line. Make sure that the password file does not end with the `LF` character. For example by starting nano with `nano -L file.password`. If you want to check that the file does not end with an `LF` (hex `0A`) character, use `xxd file.password` to look at a hexdump.", example = "/run/secrets/db_user_camunda.password")
+	@Documentation(required = true, filePropertySupported = true, description = "The password to access the database from the DSF BPE server for camunda processes", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*", example = "/run/secrets/db_user_camunda.password")
 	@Value("${org.highmed.dsf.bpe.db.user.camunda.password}")
 	private char[] dbCamundaPassword;
 
@@ -54,7 +54,7 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.bpe.fhir.client.certificate.private.key}")
 	private String webserviceClientCertificatePrivateKeyFile;
 
-	@Documentation(filePropertySupported = true, description = "Password to decrypt the local client certificate encrypted private key", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*. **Caution!** Editors like nano will add a `LF` (hex `0A`) character at the end of the last line. Make sure that the password file does not end with the `LF` character. For example by starting nano with `nano -L file.password`. If you want to check that the file does not end with an `LF` (hex `0A`) character, use `xxd file.password` to look at a hexdump.", example = "/run/secrets/app_client_certificate_private_key.pem.password")
+	@Documentation(filePropertySupported = true, description = "Password to decrypt the local client certificate encrypted private key", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*", example = "/run/secrets/app_client_certificate_private_key.pem.password")
 	@Value("${org.highmed.dsf.bpe.fhir.client.certificate.private.key.password:#{null}}")
 	private char[] webserviceClientCertificatePrivateKeyFilePassword;
 
@@ -74,7 +74,7 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.bpe.fhir.client.remote.proxy.username:#{null}}")
 	private String webserviceClientRemoteProxyUsername;
 
-	@Documentation(filePropertySupported = true, description = "Proxy password, set if the the DSF FHIR server can reach the internet only through a proxy which requests authentication", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*. **Caution!** Editors like nano will add a `LF` (hex `0A`) character at the end of the last line. Make sure that the password file does not end with the `LF` character. For example by starting nano with `nano -L file.password`. If you want to check that the file does not end with an `LF` (hex `0A`) character, use `xxd file.password` to look at a hexdump.")
+	@Documentation(filePropertySupported = true, description = "Proxy password, set if the the DSF FHIR server can reach the internet only through a proxy which requests authentication", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*")
 	@Value("${org.highmed.dsf.bpe.fhir.client.remote.proxy.password:#{null}}")
 	private char[] webserviceClientRemoteProxyPassword;
 
@@ -98,7 +98,7 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.bpe.fhir.client.local.proxy.username:#{null}}")
 	private String webserviceClientLocalProxyUsername;
 
-	@Documentation(filePropertySupported = true, description = "Proxy password, set if the DSF BPE server can reach internal servers, like the DSF FHIR server, only through a proxy which requests authentication", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*. **Caution!** Editors like nano will add a `LF` (hex `0A`) character at the end of the last line. Make sure that the password file does not end with the `LF` character. For example by starting nano with `nano -L file.password`. If you want to check that the file does not end with an `LF` (hex `0A`) character, use `xxd file.password` to look at a hexdump.")
+	@Documentation(filePropertySupported = true, description = "Proxy password, set if the DSF BPE server can reach internal servers, like the DSF FHIR server, only through a proxy which requests authentication", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*")
 	@Value("${org.highmed.dsf.bpe.fhir.client.local.proxy.password:#{null}}")
 	private char[] webserviceClientLocalProxyPassword;
 
@@ -110,7 +110,7 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.bpe.fhir.client.local.websocket.proxy.username:#{null}}")
 	private String websocketClientProxyUsername;
 
-	@Documentation(filePropertySupported = true, description = "Proxy password, set if the DSF BPE server can reach internal servers via websocket, like the getSub server, only through a proxy which requests authentication", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*. **Caution!** Editors like nano will add a `LF` (hex `0A`) character at the end of the last line. Make sure that the password file does not end with the `LF` character. For example by starting nano with `nano -L file.password`. If you want to check that the file does not end with an `LF` (hex `0A`) character, use `xxd file.password` to look at a hexdump.")
+	@Documentation(filePropertySupported = true, description = "Proxy password, set if the DSF BPE server can reach internal servers via websocket, like the getSub server, only through a proxy which requests authentication", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*")
 	@Value("${org.highmed.dsf.bpe.fhir.client.local.websocket.proxy.password:#{null}}")
 	private char[] websocketClientProxyPassword;
 

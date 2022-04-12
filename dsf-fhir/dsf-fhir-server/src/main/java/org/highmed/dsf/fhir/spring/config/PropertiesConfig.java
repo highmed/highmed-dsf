@@ -24,7 +24,7 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.fhir.db.user.username:fhir_server_user}")
 	private String dbUsername;
 
-	@Documentation(required = true, filePropertySupported = true, description = "The password to access the database from the DSF FHIR server", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*. **Caution!** Editors like nano will add a `LF` (hex `0A`) character at the end of the last line. Make sure that the password file does not end with the `LF` character. For example by starting nano with `nano -L file.password`. If you want to check that the file does not end with an `LF` (hex `0A`) character, use `xxd file.password` to look at a hexdump.", example = "/run/secrets/db_user.password")
+	@Documentation(required = true, filePropertySupported = true, description = "The password to access the database from the DSF FHIR server", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*", example = "/run/secrets/db_user.password")
 	@Value("${org.highmed.dsf.fhir.db.user.password}")
 	private char[] dbPassword;
 
@@ -32,7 +32,7 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.fhir.db.user.permanent.delete.username:fhir_server_permanent_delete_user}")
 	private String dbPermanentDeleteUsername;
 
-	@Documentation(required = true, filePropertySupported = true, description = "The password to access the database from the DSF FHIR server for permanent deletes", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*. **Caution!** Editors like nano will add a `LF` (hex `0A`) character at the end of the last line. Make sure that the password file does not end with the `LF` character. For example by starting nano with `nano -L file.password`. If you want to check that the file does not end with an `LF` (hex `0A`) character, use `xxd file.password` to look at a hexdump.", example = "/run/secrets/db_user_permanent_delete.password")
+	@Documentation(required = true, filePropertySupported = true, description = "The password to access the database from the DSF FHIR server for permanent deletes", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*", example = "/run/secrets/db_user_permanent_delete.password")
 	@Value("${org.highmed.dsf.fhir.db.user.permanent.delete.password}")
 	private char[] dbPermanentDeletePassword;
 
@@ -72,7 +72,7 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.fhir.client.certificate.private.key}")
 	private String webserviceClientCertificatePrivateKeyFile;
 
-	@Documentation(filePropertySupported = true, description = "Password to decrypt the local client certificate encrypted private key", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*. **Caution!** Editors like nano will add a `LF` (hex `0A`) character at the end of the last line. Make sure that the password file does not end with the `LF` character. For example by starting nano with `nano -L file.password`. If you want to check that the file does not end with an `LF` (hex `0A`) character, use `xxd file.password` to look at a hexdump.", example = "/run/secrets/app_client_certificate_private_key.pem.password")
+	@Documentation(filePropertySupported = true, description = "Password to decrypt the local client certificate encrypted private key", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*", example = "/run/secrets/app_client_certificate_private_key.pem.password")
 	@Value("${org.highmed.dsf.fhir.client.certificate.private.key.password:#{null}}")
 	private char[] webserviceClientCertificatePrivateKeyFilePassword;
 
@@ -92,7 +92,7 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.fhir.client.proxy.username:#{null}}")
 	private String webserviceClientProxyUsername;
 
-	@Documentation(filePropertySupported = true, description = "Proxy password, set if the the DSF FHIR server can reach the internet only through a proxy which requests authentication", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*. **Caution!** Editors like nano will add a `LF` (hex `0A`) character at the end of the last line. Make sure that the password file does not end with the `LF` character. For example by starting nano with `nano -L file.password`. If you want to check that the file does not end with an `LF` (hex `0A`) character, use `xxd file.password` to look at a hexdump.")
+	@Documentation(filePropertySupported = true, description = "Proxy password, set if the the DSF FHIR server can reach the internet only through a proxy which requests authentication", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*")
 	@Value("${org.highmed.dsf.fhir.client.proxy.password:#{null}}")
 	private char[] webserviceClientProxyPassword;
 
