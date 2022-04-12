@@ -97,9 +97,8 @@ public class DocumentationGenerator
 
 	private Optional<String> getProcessName(String bpmnFile)
 	{
-		try
+		try (InputStream resource = getClass().getClassLoader().getResource(bpmnFile).openStream())
 		{
-			InputStream resource = getClass().getClassLoader().getResource(bpmnFile).openStream();
 			return Bpmn.readModelFromStream(resource).getModelElementsByType(Process.class).stream()
 					.map(BaseElement::getId).findFirst();
 		}
@@ -138,9 +137,9 @@ public class DocumentationGenerator
 		Documentation documentation = field.getAnnotation(Documentation.class);
 		Value value = field.getAnnotation(Value.class);
 
-		String[] valueSplit = getValueDefaultArray(value.value());
+		String[] valueSplit = getValueDefaultArray(value);
 
-		String initialProperty = valueSplit[0];
+		String initialProperty = valueSplit.length > 0 ? valueSplit[0] : "";
 		String property = getDocumentationString("Property", initialProperty);
 
 		String initialEnvironment = initialProperty.replace(".", "_").toUpperCase();
@@ -160,7 +159,7 @@ public class DocumentationGenerator
 		String recommendation = getDocumentationString("Recommendation", documentation.recommendation());
 		String example = getDocumentationString("Example", documentation.example());
 
-		String defaultValue = (valueSplit.length == 2 && !"null".equals(valueSplit[1]))
+		String defaultValue = (valueSplit.length > 1 && !"null".equals(valueSplit[1]))
 				? getDocumentationString("Default", valueSplit[1])
 				: "";
 
@@ -171,12 +170,17 @@ public class DocumentationGenerator
 				.replace(PROPERTY_NAME_PLACEHOLDER, initialProperty);
 	}
 
-	private String[] getValueDefaultArray(String value)
+	private String[] getValueDefaultArray(Value value)
 	{
-		if (value.startsWith("#{'"))
-			value = value.substring(value.indexOf("#{'") + 4, value.indexOf("}'"));
+		if (value == null)
+			return new String[] {};
 
-		return value.replaceAll("\\$", "").replace("#", "").replace("{", "").replace("}", "").split(":");
+		String valueString = value.value();
+
+		if (valueString.startsWith("#{'"))
+			valueString = valueString.substring(valueString.indexOf("#{'") + 4, valueString.indexOf("}'"));
+
+		return valueString.replaceAll("\\$", "").replace("#", "").replace("{", "").replace("}", "").split(":");
 	}
 
 	private String getDocumentationString(String title, String value)
