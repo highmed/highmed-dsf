@@ -47,6 +47,7 @@ public class CodeSystemProfileTest
 		cs.setStatus(PublicationStatus.ACTIVE);
 		cs.setContent(CodeSystemContentMode.COMPLETE);
 		cs.addConcept().setCode("TEST").setDisplay("Test Display").setDefinition("Test Definition");
+		cs.setCaseSensitive(true);
 
 		return cs;
 	}

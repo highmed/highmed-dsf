@@ -117,8 +117,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 					"Not a literal external reference, related artifact literal external url or attachment literal external url");
 
 		String remoteServerBase = reference.getServerBase(serverBase);
-
-		return clientProvider.getClient(remoteServerBase).isPresent();
+		return clientProvider.endpointExists(remoteServerBase);
 	}
 
 	@Override
@@ -217,8 +216,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 
 		if (client.isEmpty())
 		{
-			logger.warn(
-					"Error while resolving literal external reference {}, no remote client found for server base {}",
+			logger.warn("Literal external reference {} could not be resolved, no remote client for server base {}",
 					reference.getReference().getReference(), remoteServerBase);
 			return Optional.empty();
 		}
@@ -228,11 +226,25 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 			logger.debug("Trying to resolve literal external reference {}, at remote server {}",
 					reference.getReference().getReference(), remoteServerBase);
 
-			if (!referenceId.hasVersionIdPart())
-				return Optional.ofNullable(client.get().read(referenceId.getResourceType(), referenceId.getIdPart()));
-			else
-				return Optional.ofNullable(client.get().read(referenceId.getResourceType(), referenceId.getIdPart(),
-						referenceId.getVersionIdPart()));
+			try
+			{
+				if (!referenceId.hasVersionIdPart())
+					return Optional
+							.ofNullable(client.get().read(referenceId.getResourceType(), referenceId.getIdPart()));
+				else
+					return Optional.ofNullable(client.get().read(referenceId.getResourceType(), referenceId.getIdPart(),
+							referenceId.getVersionIdPart()));
+			}
+			catch (Exception e)
+			{
+				logger.error("Literal external reference {} could not be resolved on remote server {}: {}",
+						reference.getReference().getReference(), remoteServerBase, e.getMessage());
+
+				if (logger.isDebugEnabled())
+					logger.debug("Literal external reference " + reference.getReference().getReference()
+							+ " could not be resolved on remote server " + remoteServerBase, e);
+				return Optional.empty();
+			}
 		}
 	}
 
@@ -446,8 +458,7 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 
 		if (client.isEmpty())
 		{
-			logger.error(
-					"Error while resolving literal external reference {}, no remote client found for server base {}",
+			logger.error("Literal external reference {} could not be resolved, no remote client for server base {}",
 					referenceValue, remoteServerBase);
 			return Optional
 					.of(responseGenerator.noEndpointFoundForLiteralExternalReference(bundleIndex, resource, reference));
@@ -457,17 +468,36 @@ public class ReferenceResolverImpl implements ReferenceResolver, InitializingBea
 			IdType referenceId = new IdType(referenceValue);
 			logger.debug("Trying to resolve literal external reference {}, at remote server {}", referenceValue,
 					remoteServerBase);
-			if (!client.get().exists(referenceId))
+
+			try
 			{
-				logger.error(
-						"Error while resolving literal external reference {}, resource could not be found on remote server {}",
-						referenceValue, remoteServerBase);
-				return Optional.of(responseGenerator.referenceTargetNotFoundRemote(bundleIndex, resource, reference,
-						remoteServerBase));
+				if (client.get().exists(referenceId))
+				{
+					// resource exists - no error response
+					return Optional.empty();
+				}
+				else
+				{
+					logger.warn(
+							"Literal external reference {} could not be resolved, resource not found on remote server {}",
+							referenceValue, remoteServerBase);
+					return Optional.of(responseGenerator.referenceTargetNotFoundRemote(bundleIndex, resource, reference,
+							remoteServerBase));
+				}
+			}
+			catch (Exception e)
+			{
+				logger.error("Literal external reference {} could not be resolved on remote server {}: {}",
+						referenceValue, remoteServerBase, e.getMessage());
+
+				if (logger.isDebugEnabled())
+					logger.debug("Literal external reference " + referenceValue
+							+ " could not be resolved on remote server " + remoteServerBase, e);
+
+				return Optional.of(responseGenerator.referenceTargetCouldNotBeResolvedOnRemote(bundleIndex, resource,
+						reference, remoteServerBase));
 			}
 		}
-
-		return Optional.empty();
 	}
 
 	@Override
