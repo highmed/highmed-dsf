@@ -25,6 +25,7 @@ import org.highmed.dsf.bpe.process.ProcessKeyAndVersion;
 import org.highmed.dsf.fhir.resources.ResourceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -104,10 +105,33 @@ public class ProcessPluginDefinitionAndClassLoader
 			context.setClassLoader(getClassLoader());
 			context.register(getDefinition().getSpringConfigClasses().toArray(Class<?>[]::new));
 			context.setEnvironment((ConfigurableEnvironment) mainContext.getEnvironment());
-			context.refresh();
+
+			tryContextRefresh(mainContext);
 		}
 
 		return context;
+	}
+
+	private void tryContextRefresh(ApplicationContext mainContext)
+	{
+		try
+		{
+			context.refresh();
+		}
+		catch (BeanCreationException e)
+		{
+			logger.error("Unable to create spring application context for plugin {}: {} {}",
+					getDefinition().getNameAndVersion(), e.getClass().getSimpleName(), e.getMessage());
+			logger.debug("Unable to create spring application context for plugin " + getDefinition().getNameAndVersion()
+					+ ", bean with error " + e.getBeanName(), e);
+
+			// using empty (aka no config classes registered) application context for this failed plugin
+			context = new AnnotationConfigApplicationContext();
+			context.setParent(mainContext);
+			context.setClassLoader(getClassLoader());
+			context.setEnvironment((ConfigurableEnvironment) mainContext.getEnvironment());
+			context.refresh();
+		}
 	}
 
 	public List<ProcessKeyAndVersion> getProcessKeysAndVersions()
