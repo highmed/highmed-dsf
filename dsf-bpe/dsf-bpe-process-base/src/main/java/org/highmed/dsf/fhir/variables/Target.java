@@ -35,16 +35,19 @@ public class Target
 		return new Target(targetOrganizationIdentifierValue, targetEndpointUrl, correlationKey);
 	}
 
+	@JsonProperty("targetOrganizationIdentifierValue")
 	public String getTargetOrganizationIdentifierValue()
 	{
 		return targetOrganizationIdentifierValue;
 	}
 
+	@JsonProperty("targetEndpointUrl")
 	public String getTargetEndpointUrl()
 	{
 		return targetEndpointUrl;
 	}
 
+	@JsonProperty("correlationKey")
 	public String getCorrelationKey()
 	{
 		if (correlationKey == null)
