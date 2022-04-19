@@ -1,20 +1,15 @@
 package org.highmed.dsf.bpe.spring.config;
 
-import org.highmed.dsf.fhir.variables.FhirResourceJacksonDeserializer;
-import org.highmed.dsf.fhir.variables.FhirResourceJacksonSerializer;
+import org.highmed.dsf.fhir.json.ObjectMapperFactory;
 import org.highmed.dsf.fhir.variables.FhirResourceSerializer;
 import org.highmed.dsf.fhir.variables.FhirResourcesListSerializer;
 import org.highmed.dsf.fhir.variables.TargetSerializer;
 import org.highmed.dsf.fhir.variables.TargetsSerializer;
-import org.highmed.openehr.json.OpenEhrObjectMapperFactory;
-import org.hl7.fhir.r4.model.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -27,19 +22,7 @@ public class SerializerConfig
 	@Bean
 	public ObjectMapper objectMapper()
 	{
-		ObjectMapper mapper = new ObjectMapper();
-
-		mapper.setSerializationInclusion(Include.NON_NULL);
-		mapper.setSerializationInclusion(Include.NON_EMPTY);
-
-		SimpleModule module = new SimpleModule();
-		module.addSerializer(Resource.class, new FhirResourceJacksonSerializer(fhirContext));
-		module.addDeserializer(Resource.class, new FhirResourceJacksonDeserializer(fhirContext));
-
-		mapper.registerModule(module);
-		mapper.registerModule(OpenEhrObjectMapperFactory.openEhrModule());
-
-		return mapper;
+		return ObjectMapperFactory.createObjectMapper(fhirContext);
 	}
 
 	@Bean
