@@ -15,8 +15,7 @@ import java.lang.annotation.Target;
 public @interface Documentation
 {
 	/**
-	 * @return <code>true</code> if this property is required for the DSF or for processes that are listed in
-	 *         {@link Documentation#processNames}
+	 * @return <code>true</code> if this property is required for the DSF
 	 */
 	boolean required() default false;
 
