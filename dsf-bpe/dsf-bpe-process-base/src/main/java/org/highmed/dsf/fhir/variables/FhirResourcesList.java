@@ -27,6 +27,7 @@ public class FhirResourcesList
 		this(Arrays.asList(resources));
 	}
 
+	@JsonProperty("resources")
 	public List<Resource> getResources()
 	{
 		return Collections.unmodifiableList(resources);
