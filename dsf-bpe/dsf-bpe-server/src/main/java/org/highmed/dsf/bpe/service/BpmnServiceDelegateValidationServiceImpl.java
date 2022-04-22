@@ -143,9 +143,8 @@ public class BpmnServiceDelegateValidationServiceImpl implements BpmnServiceDele
 		}
 		catch (BeansException e)
 		{
-			logger.warn("Error while getting service delegate bean of type {} defined in process {}: {}",
+			logger.error("Unable to find service delegate bean of type {} defined in process {}: {}",
 					serviceClass.getName(), processKeyAndVersion, e.getMessage());
-			throw new RuntimeException(e);
 		}
 	}
 }

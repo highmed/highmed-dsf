@@ -11,7 +11,7 @@ import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Resource;
 
-@SearchParameterDefinition(name = ResourceProfile.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Resource-profile", type = SearchParamType.URI, documentation = "Profiles this resource claims to conform to")
+@SearchParameterDefinition(name = ResourceProfile.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Resource-profile", type = SearchParamType.TOKEN, documentation = "Profiles this resource claims to conform to")
 public class ResourceProfile<R extends DomainResource> extends AbstractCanonicalUrlParameter<R>
 {
 	public static final String PARAMETER_NAME = "_profile";

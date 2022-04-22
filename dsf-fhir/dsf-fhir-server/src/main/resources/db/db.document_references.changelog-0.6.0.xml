@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<property name="json" value="JSONB" dbms="postgresql" />
+	<property name="json" value="varchar(5000)" dbms="h2" />
+
+	<changeSet author="hhund" id="db.document_references.changelog-0.6.0">
+		<createTable tableName="document_references">
+			<column name="document_reference_id" type="UUID">
+				<constraints nullable="false" />
+			</column>
+			<column name="version" type="BIGINT" defaultValueNumeric="1">
+				<constraints nullable="false" />
+			</column>
+			<column name="deleted" type="TIMESTAMP" />
+			<column name="document_reference" type="${json}">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addPrimaryKey tableName="document_references" columnNames="document_reference_id, version" />
+
+		<sql dbms="postgresql">
+			ALTER TABLE document_references OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE document_references TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE ON TABLE document_references TO ${db.server_users_group};
+			GRANT SELECT, DELETE ON TABLE document_references TO ${db.server_permanent_delete_users_group};
+			CREATE INDEX document_reference_id_index ON document_references USING btree (document_reference_id);
+			CREATE INDEX document_reference_index ON document_references USING gin (document_reference);
+			CREATE INDEX document_reference_id_version_index ON document_references USING btree (document_reference_id, version);
+		</sql>
+
+		<createView viewName="current_document_references" replaceIfExists="true">
+			SELECT document_reference_id, version, document_reference
+			FROM (
+				SELECT DISTINCT ON (document_reference_id) document_reference_id, version, deleted, document_reference
+				FROM document_references ORDER BY document_reference_id, version DESC
+			) AS current_l
+			WHERE deleted IS NULL
+		</createView>
+
+		<sql dbms="postgresql">
+			ALTER TABLE current_document_references OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_document_references TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_document_references TO ${db.server_users_group};
+		</sql>
+	</changeSet>
+</databaseChangeLog>

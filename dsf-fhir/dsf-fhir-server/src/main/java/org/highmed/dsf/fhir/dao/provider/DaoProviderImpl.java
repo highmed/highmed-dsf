@@ -13,6 +13,7 @@ import org.highmed.dsf.fhir.dao.ActivityDefinitionDao;
 import org.highmed.dsf.fhir.dao.BinaryDao;
 import org.highmed.dsf.fhir.dao.BundleDao;
 import org.highmed.dsf.fhir.dao.CodeSystemDao;
+import org.highmed.dsf.fhir.dao.DocumentReferenceDao;
 import org.highmed.dsf.fhir.dao.EndpointDao;
 import org.highmed.dsf.fhir.dao.GroupDao;
 import org.highmed.dsf.fhir.dao.HealthcareServiceDao;
@@ -38,6 +39,7 @@ import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.HealthcareService;
@@ -68,6 +70,7 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	private final ActivityDefinitionDao activityDefinitionDao;
 	private final BinaryDao binaryDao;
 	private final BundleDao bundleDao;
+	private final DocumentReferenceDao documentReferenceDao;
 	private final CodeSystemDao codeSystemDao;
 	private final EndpointDao endpointDao;
 	private final GroupDao groupDao;
@@ -92,24 +95,26 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 
 	private final ReadAccessDao readAccessDao;
 
-	private final Map<Class<? extends Resource>, ResourceDao<?>> daosByResourecClass = new HashMap<>();
+	private final Map<Class<? extends Resource>, ResourceDao<?>> daosByResourceClass = new HashMap<>();
 	private final Map<String, ResourceDao<?>> daosByResourceTypeName = new HashMap<>();
 
 	public DaoProviderImpl(DataSource dataSource, ActivityDefinitionDao activityDefinitionDao, BinaryDao binaryDao,
-			BundleDao bundleDao, CodeSystemDao codeSystemDao, EndpointDao endpointDao, GroupDao groupDao,
-			HealthcareServiceDao healthcareServiceDao, LibraryDao libraryDao, LocationDao locationDao,
-			MeasureDao measureDao, MeasureReportDao measureReportDao, NamingSystemDao namingSystemDao,
-			OrganizationDao organizationDao, OrganizationAffiliationDao organizationAffiliationDao,
-			PatientDao patientDao, PractitionerDao practitionerDao, PractitionerRoleDao practitionerRoleDao,
-			ProvenanceDao provenanceDao, ResearchStudyDao researchStudyDao,
-			StructureDefinitionDao structureDefinitionDao, StructureDefinitionDao structureDefinitionSnapshotDao,
-			SubscriptionDao subscriptionDao, TaskDao taskDao, ValueSetDao valueSetDao, ReadAccessDao readAccessDao)
+			BundleDao bundleDao, CodeSystemDao codeSystemDao, DocumentReferenceDao documentReferenceDao,
+			EndpointDao endpointDao, GroupDao groupDao, HealthcareServiceDao healthcareServiceDao,
+			LibraryDao libraryDao, LocationDao locationDao, MeasureDao measureDao, MeasureReportDao measureReportDao,
+			NamingSystemDao namingSystemDao, OrganizationDao organizationDao,
+			OrganizationAffiliationDao organizationAffiliationDao, PatientDao patientDao,
+			PractitionerDao practitionerDao, PractitionerRoleDao practitionerRoleDao, ProvenanceDao provenanceDao,
+			ResearchStudyDao researchStudyDao, StructureDefinitionDao structureDefinitionDao,
+			StructureDefinitionDao structureDefinitionSnapshotDao, SubscriptionDao subscriptionDao, TaskDao taskDao,
+			ValueSetDao valueSetDao, ReadAccessDao readAccessDao)
 	{
 		this.dataSource = dataSource;
 		this.activityDefinitionDao = activityDefinitionDao;
 		this.binaryDao = binaryDao;
 		this.bundleDao = bundleDao;
 		this.codeSystemDao = codeSystemDao;
+		this.documentReferenceDao = documentReferenceDao;
 		this.endpointDao = endpointDao;
 		this.groupDao = groupDao;
 		this.healthcareServiceDao = healthcareServiceDao;
@@ -133,31 +138,32 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 
 		this.readAccessDao = readAccessDao;
 
-		daosByResourecClass.put(ActivityDefinition.class, activityDefinitionDao);
-		daosByResourecClass.put(Binary.class, binaryDao);
-		daosByResourecClass.put(Bundle.class, bundleDao);
-		daosByResourecClass.put(CodeSystem.class, codeSystemDao);
-		daosByResourecClass.put(Endpoint.class, endpointDao);
-		daosByResourecClass.put(Group.class, groupDao);
-		daosByResourecClass.put(HealthcareService.class, healthcareServiceDao);
-		daosByResourecClass.put(Library.class, libraryDao);
-		daosByResourecClass.put(Location.class, locationDao);
-		daosByResourecClass.put(Measure.class, measureDao);
-		daosByResourecClass.put(MeasureReport.class, measureReportDao);
-		daosByResourecClass.put(NamingSystem.class, namingSystemDao);
-		daosByResourecClass.put(Organization.class, organizationDao);
-		daosByResourecClass.put(OrganizationAffiliation.class, organizationAffiliationDao);
-		daosByResourecClass.put(Patient.class, patientDao);
-		daosByResourecClass.put(Practitioner.class, practitionerDao);
-		daosByResourecClass.put(PractitionerRole.class, practitionerRoleDao);
-		daosByResourecClass.put(Provenance.class, provenanceDao);
-		daosByResourecClass.put(ResearchStudy.class, researchStudyDao);
-		daosByResourecClass.put(StructureDefinition.class, structureDefinitionDao);
-		daosByResourecClass.put(Subscription.class, subscriptionDao);
-		daosByResourecClass.put(Task.class, taskDao);
-		daosByResourecClass.put(ValueSet.class, valueSetDao);
+		daosByResourceClass.put(ActivityDefinition.class, activityDefinitionDao);
+		daosByResourceClass.put(Binary.class, binaryDao);
+		daosByResourceClass.put(Bundle.class, bundleDao);
+		daosByResourceClass.put(CodeSystem.class, codeSystemDao);
+		daosByResourceClass.put(DocumentReference.class, documentReferenceDao);
+		daosByResourceClass.put(Endpoint.class, endpointDao);
+		daosByResourceClass.put(Group.class, groupDao);
+		daosByResourceClass.put(HealthcareService.class, healthcareServiceDao);
+		daosByResourceClass.put(Library.class, libraryDao);
+		daosByResourceClass.put(Location.class, locationDao);
+		daosByResourceClass.put(Measure.class, measureDao);
+		daosByResourceClass.put(MeasureReport.class, measureReportDao);
+		daosByResourceClass.put(NamingSystem.class, namingSystemDao);
+		daosByResourceClass.put(Organization.class, organizationDao);
+		daosByResourceClass.put(OrganizationAffiliation.class, organizationAffiliationDao);
+		daosByResourceClass.put(Patient.class, patientDao);
+		daosByResourceClass.put(Practitioner.class, practitionerDao);
+		daosByResourceClass.put(PractitionerRole.class, practitionerRoleDao);
+		daosByResourceClass.put(Provenance.class, provenanceDao);
+		daosByResourceClass.put(ResearchStudy.class, researchStudyDao);
+		daosByResourceClass.put(StructureDefinition.class, structureDefinitionDao);
+		daosByResourceClass.put(Subscription.class, subscriptionDao);
+		daosByResourceClass.put(Task.class, taskDao);
+		daosByResourceClass.put(ValueSet.class, valueSetDao);
 
-		daosByResourecClass.forEach((k, v) -> daosByResourceTypeName.put(k.getAnnotation(ResourceDef.class).name(), v));
+		daosByResourceClass.forEach((k, v) -> daosByResourceTypeName.put(k.getAnnotation(ResourceDef.class).name(), v));
 	}
 
 	@Override
@@ -167,6 +173,7 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 		Objects.requireNonNull(binaryDao, "binaryDao");
 		Objects.requireNonNull(bundleDao, "bundleDao");
 		Objects.requireNonNull(codeSystemDao, "codeSystemDao");
+		Objects.requireNonNull(documentReferenceDao, "documentReferenceDao");
 		Objects.requireNonNull(endpointDao, "endpointDao");
 		Objects.requireNonNull(groupDao, "groupDao");
 		Objects.requireNonNull(healthcareServiceDao, "healthcareServiceDao");
@@ -227,6 +234,12 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	public BundleDao getBundleDao()
 	{
 		return bundleDao;
+	}
+
+	@Override
+	public DocumentReferenceDao getDocumentReferenceDao()
+	{
+		return documentReferenceDao;
 	}
 
 	@Override
@@ -359,7 +372,7 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	public <R extends Resource> Optional<? extends ResourceDao<R>> getDao(Class<R> resourceClass)
 	{
 		@SuppressWarnings("unchecked")
-		ResourceDao<R> value = (ResourceDao<R>) daosByResourecClass.get(resourceClass);
+		ResourceDao<R> value = (ResourceDao<R>) daosByResourceClass.get(resourceClass);
 		return Optional.ofNullable(value);
 	}
 

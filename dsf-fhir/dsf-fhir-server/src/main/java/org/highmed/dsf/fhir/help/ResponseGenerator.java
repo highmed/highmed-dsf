@@ -205,6 +205,8 @@ public class ResponseGenerator
 	public BundleEntryComponent toBundleEntryComponent(HistoryEntry historyEntry)
 	{
 		BundleEntryComponent entry = new BundleEntryComponent();
+		entry.setFullUrlElement(
+				new IdType(serverBase, historyEntry.getResourceType(), historyEntry.getId().toString(), null));
 		entry.getRequest().setMethod(HTTPVerb.fromCode(historyEntry.getMethod()))
 				.setUrl(historyEntry.getResourceType() + (historyEntry.getResource() == null
 						? "/" + historyEntry.getId().toString() + "/_history/" + historyEntry.getVersion()
@@ -497,6 +499,28 @@ public class ResponseGenerator
 						+ " with id " + resource.getId()
 						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex) + " not found on server "
 						+ serverBase);
+	}
+
+	public OperationOutcome referenceTargetCouldNotBeResolvedOnRemote(Integer bundleIndex, Resource resource,
+			ResourceReference resourceReference, String serverBase)
+	{
+		if (bundleIndex == null)
+			logger.warn(
+					"Reference target {} of reference at {} in resource of type {} with id {} could not be resolved on server {} (reason hidden)",
+					resourceReference.getValue(), resourceReference.getLocation(), resource.getResourceType().name(),
+					resource.getId(), serverBase);
+		else
+			logger.warn(
+					"Reference target {} of reference at {} in resource of type {} with id {} at bundle index {} could not be resolved on server {} (reason hidden)",
+					resourceReference.getValue(), resourceReference.getLocation(), resource.getResourceType().name(),
+					resource.getId(), bundleIndex, serverBase);
+
+		return createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
+				"Reference target " + resourceReference.getValue() + " of reference at "
+						+ resourceReference.getLocation() + " in resource of type " + resource.getResourceType().name()
+						+ " with id " + resource.getId()
+						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex)
+						+ " could not be resolved on server " + serverBase + " (reason hidden)");
 	}
 
 	public OperationOutcome noEndpointFoundForLiteralExternalReference(Integer bundleIndex, Resource resource,

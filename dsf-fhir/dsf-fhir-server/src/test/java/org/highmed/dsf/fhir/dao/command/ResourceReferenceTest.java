@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import org.highmed.dsf.fhir.service.ResourceReference;
 import org.highmed.dsf.fhir.service.ResourceReference.ReferenceType;
+import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedArtifact;
@@ -146,5 +147,41 @@ public class ResourceReferenceTest
 		assertEquals(ReferenceType.RELATED_ARTEFACT_UNKNOWN_URL, r7.getType(serverBase));
 		assertEquals(ReferenceType.RELATED_ARTEFACT_UNKNOWN_URL, r8.getType(serverBase));
 		assertEquals(ReferenceType.RELATED_ARTEFACT_UNKNOWN_URL, r9.getType(serverBase));
+	}
+
+	@Test
+	public void testGetTypeAttachment() throws Exception
+	{
+		var r1 = new ResourceReference("Foo.bar", new Attachment().setUrl("urn:uuid:" + UUID.randomUUID().toString()));
+
+		var r2 = new ResourceReference("Foo.bar",
+				new Attachment().setUrl("Binary?_id=" + UUID.randomUUID().toString()));
+
+		var r3 = new ResourceReference("Foo.bar", new Attachment().setUrl("Binary/" + UUID.randomUUID().toString()));
+		var r4 = new ResourceReference("Foo.bar",
+				new Attachment().setUrl(serverBase + "/Binary/" + UUID.randomUUID().toString()));
+
+		var r5 = new ResourceReference("Foo.bar",
+				new Attachment().setUrl("http://blub.com/fhir/Binary/" + UUID.randomUUID().toString()));
+		var r6 = new ResourceReference("Foo.bar",
+				new Attachment().setUrl("http://blub.com/fhir/Binary/" + UUID.randomUUID().toString() + "/_history/1"));
+
+		var r7 = new ResourceReference("Foo.bar", new Attachment().setUrl(serverBase));
+		var r8 = new ResourceReference("Foo.bar", new Attachment().setUrl("foo.bar"));
+		var r9 = new ResourceReference("Foo.bar", new Attachment().setUrl(UUID.randomUUID().toString()));
+
+		assertEquals(ReferenceType.ATTACHMENT_TEMPORARY_URL, r1.getType(serverBase));
+
+		assertEquals(ReferenceType.ATTACHMENT_CONDITIONAL_URL, r2.getType(serverBase));
+
+		assertEquals(ReferenceType.ATTACHMENT_LITERAL_INTERNAL_URL, r3.getType(serverBase));
+		assertEquals(ReferenceType.ATTACHMENT_LITERAL_INTERNAL_URL, r4.getType(serverBase));
+
+		assertEquals(ReferenceType.ATTACHMENT_LITERAL_EXTERNAL_URL, r5.getType(serverBase));
+		assertEquals(ReferenceType.ATTACHMENT_LITERAL_EXTERNAL_URL, r6.getType(serverBase));
+
+		assertEquals(ReferenceType.ATTACHMENT_UNKNOWN_URL, r7.getType(serverBase));
+		assertEquals(ReferenceType.ATTACHMENT_UNKNOWN_URL, r8.getType(serverBase));
+		assertEquals(ReferenceType.ATTACHMENT_UNKNOWN_URL, r9.getType(serverBase));
 	}
 }

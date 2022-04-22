@@ -129,7 +129,7 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 			throws SQLException, WebApplicationException
 	{
 		// always resolve temp and conditional references, necessary if conditional create and resource exists
-		referencesHelper.resolveTemporaryAndConditionalReferencesOrLiteralInternalRelatedArtifactUrls(
+		referencesHelper.resolveTemporaryAndConditionalReferencesOrLiteralInternalRelatedArtifactOrAttachmentUrls(
 				idTranslationTable, connection);
 
 		// checking again if resource exists, could be that a previous command created, or deleted it

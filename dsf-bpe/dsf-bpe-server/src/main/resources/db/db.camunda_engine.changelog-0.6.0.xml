@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<changeSet author="camunda.org" id="db.camunda_engine.changelog-0.6.0">
+		<sqlFile dbms="postgresql" encoding="utf8" path="db/camunda/postgres_engine_7.16_to_7.17.sql" />
+	</changeSet>
+
+</databaseChangeLog>

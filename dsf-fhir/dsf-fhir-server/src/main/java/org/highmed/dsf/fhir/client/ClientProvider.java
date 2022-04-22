@@ -7,4 +7,6 @@ import org.highmed.fhir.client.FhirWebserviceClient;
 public interface ClientProvider
 {
 	Optional<FhirWebserviceClient> getClient(String serverBase);
+
+	boolean endpointExists(String serverBase);
 }

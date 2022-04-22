@@ -19,13 +19,19 @@ public class Targets
 			this.entries.addAll(targets);
 	}
 
+	@JsonProperty("entries")
 	public List<Target> getEntries()
 	{
 		return Collections.unmodifiableList(entries);
 	}
 
-	public void removeTarget(Target target)
+	public boolean removeTarget(Target target)
 	{
-		entries.remove(target);
+		return entries.remove(target);
+	}
+
+	public boolean isEmpty()
+	{
+		return entries.isEmpty();
 	}
 }

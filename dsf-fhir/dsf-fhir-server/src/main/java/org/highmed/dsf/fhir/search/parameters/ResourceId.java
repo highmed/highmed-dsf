@@ -21,7 +21,7 @@ import org.postgresql.util.PGobject;
 
 import ca.uhn.fhir.parser.DataFormatException;
 
-@SearchParameterDefinition(name = ResourceId.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Resource-id", type = SearchParamType.TOKEN, documentation = "Logical id of this artifact")
+@SearchParameterDefinition(name = ResourceId.PARAMETER_NAME, definition = "http://hl7.org/fhir/SearchParameter/Resource-id", type = SearchParamType.STRING, documentation = "Logical id of this resource")
 public class ResourceId<R extends Resource> extends AbstractSearchParameter<R>
 {
 	public static final String PARAMETER_NAME = "_id";

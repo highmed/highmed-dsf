@@ -17,6 +17,9 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.camunda.bpm.model.bpmn.instance.EndEvent;
+import org.camunda.bpm.model.bpmn.instance.IntermediateThrowEvent;
+import org.camunda.bpm.model.bpmn.instance.SendTask;
 import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.bpe.delegate.AbstractServiceDelegate;
 import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
@@ -61,6 +64,7 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 	public void afterPropertiesSet() throws Exception
 	{
 		super.afterPropertiesSet();
+
 		Objects.requireNonNull(organizationProvider, "organizationProvider");
 		Objects.requireNonNull(fhirContext, "fhirContext");
 	}
@@ -94,32 +98,104 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 			logger.debug("Error while sending Task", e);
 
 			Task task = getLeadingTaskFromExecutionVariables();
-			if (task != null)
-				task.addOutput(getTaskHelper().createOutput(CODESYSTEM_HIGHMED_BPMN,
-						CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR, errorMessage));
-			else
-				logger.warn("Leading Task null, unable to add error output");
 
-			Targets targets = (Targets) execution.getVariable(BPMN_EXECUTION_VARIABLE_TARGETS);
-			if (targets != null)
+			addErrorMessageToLeadingTask(task, errorMessage);
+
+			if (execution.getBpmnModelElementInstance() instanceof IntermediateThrowEvent)
+				handleIntermediateThrowEventError(execution, target, e, task);
+			else if (execution.getBpmnModelElementInstance() instanceof EndEvent)
+				handleEndEventError(execution, target, e, task);
+			else if (execution.getBpmnModelElementInstance() instanceof SendTask)
+				handleSendTaskError(execution, target, e, task);
+			else
+				logger.warn("Error handling for {} not implemented",
+						execution.getBpmnModelElementInstance().getClass().getName());
+		}
+	}
+
+	protected void addErrorMessageToLeadingTask(Task task, String errorMessage)
+	{
+		if (task != null)
+			task.addOutput(getTaskHelper().createOutput(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR,
+					errorMessage));
+		else
+			logger.warn("Leading Task null, unable to add error output");
+	}
+
+	protected void handleIntermediateThrowEventError(DelegateExecution execution, Target target, Exception exception,
+			Task task)
+	{
+		logger.debug("Error while executing Task message send " + getClass().getName(), exception);
+		logger.error("Process {} has fatal error in step {} for task with id {}, reason: {}",
+				execution.getProcessDefinitionId(), execution.getActivityInstanceId(),
+				task == null ? "?" : task.getId(), exception.getMessage());
+
+		if (task != null)
+		{
+			task.setStatus(Task.TaskStatus.FAILED);
+			getFhirWebserviceClientProvider().getLocalWebserviceClient().withMinimalReturn().update(task);
+		}
+		else
+			logger.warn("Leading Task null, unable update Task with failed state");
+
+		execution.getProcessEngine().getRuntimeService().deleteProcessInstance(execution.getProcessInstanceId(),
+				exception.getMessage());
+	}
+
+	protected void handleEndEventError(DelegateExecution execution, Target target, Exception exception, Task task)
+	{
+		logger.debug("Error while executing Task message send " + getClass().getName(), exception);
+		logger.error("Process {} has fatal error in step {} for task with id {}, reason: {}",
+				execution.getProcessDefinitionId(), execution.getActivityInstanceId(),
+				task == null ? "?" : task.getId(), exception.getMessage());
+
+		if (task != null)
+		{
+			task.setStatus(Task.TaskStatus.FAILED);
+		}
+		else
+			logger.warn("Leading Task null, unable to set failed state");
+
+		// Task update and process end handled by EndListener
+	}
+
+	protected void handleSendTaskError(DelegateExecution execution, Target target, Exception exception, Task task)
+	{
+		Targets targets = (Targets) execution.getVariable(BPMN_EXECUTION_VARIABLE_TARGETS);
+
+		// if we are a multi instance message send task, remove target
+		if (targets != null)
+		{
+			boolean removed = targets.removeTarget(target);
+
+			if (removed)
+				logger.debug("Target organization {} with error {} removed from target list",
+						target.getTargetOrganizationIdentifierValue(), exception.getMessage());
+		}
+
+		if (targets.isEmpty())
+		{
+			logger.debug("Error while executing Task message send " + getClass().getName(), exception);
+			logger.error("Process {} has fatal error in step {} for task with id {}, last reason: {}",
+					execution.getProcessDefinitionId(), execution.getActivityInstanceId(),
+					task == null ? "?" : task.getId(), exception.getMessage());
+
+			if (task != null)
 			{
-				logger.debug("Removing target organization {} with error {} from target list",
-						target.getTargetOrganizationIdentifierValue(), e.getMessage());
-				targets.removeTarget(target);
+				task.setStatus(Task.TaskStatus.FAILED);
+				getFhirWebserviceClientProvider().getLocalWebserviceClient().withMinimalReturn().update(task);
 			}
 			else
-			{
-				logger.debug(
-						"Target list (variable {} with type {}) not defined, ignoring target organization {} with error {}",
-						BPMN_EXECUTION_VARIABLE_TARGETS, Targets.class.getCanonicalName(),
-						target.getTargetOrganizationIdentifierValue(), e.getMessage());
-			}
+				logger.warn("Leading Task null, unable update Task with failed state");
+
+			execution.getProcessEngine().getRuntimeService().deleteProcessInstance(execution.getProcessInstanceId(),
+					exception.getMessage());
 		}
 	}
 
 	/**
-	 * Override this method to set a different target then the one defined in the process variable
-	 * {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_TARGET}
+	 * <i>Override this method to set a different target then the one defined in the process variable
+	 * {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_TARGET}.</i>
 	 *
 	 * @param execution
 	 *            the delegate execution of this process instance
@@ -131,7 +207,7 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 	}
 
 	/**
-	 * Override this method to add additional input parameters to the task resource being send
+	 * <i>Override this method to add additional input parameters to the task resource being send.</i>
 	 *
 	 * @param execution
 	 *            the delegate execution of this process instance
@@ -189,6 +265,29 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 				correlationKey, client.getBaseUrl());
 		logger.trace("Task resource to send: {}", fhirContext.newJsonParser().encodeResourceToString(task));
 
+		doSend(client, task);
+	}
+
+	/**
+	 * <i>Override this method to modify the remote task create behavior, e.g. to implement retries</i>
+	 *
+	 * <pre>
+	 * <code>
+	 * &#64;Override
+	 * protected void doSend(FhirWebserviceClient client, Task task)
+	 * {
+	 *     client.withMinimalReturn().withRetry(2).create(task);
+	 * }
+	 * </code>
+	 * </pre>
+	 *
+	 * @param client
+	 *            not <code>null</code>
+	 * @param task
+	 *            not <code>null</code>
+	 */
+	protected void doSend(FhirWebserviceClient client, Task task)
+	{
 		client.withMinimalReturn().create(task);
 	}
 

@@ -37,6 +37,8 @@ import org.highmed.dsf.fhir.adapter.CapabilityStatementJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.CapabilityStatementXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.CodeSystemJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.CodeSystemXmlFhirAdapter;
+import org.highmed.dsf.fhir.adapter.DocumentReferenceJsonFhirAdapter;
+import org.highmed.dsf.fhir.adapter.DocumentReferenceXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.EndpointJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.EndpointXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.GroupJsonFhirAdapter;
@@ -136,7 +138,8 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 				new BinaryXmlFhirAdapter(fhirContext), new BundleJsonFhirAdapter(fhirContext),
 				new BundleXmlFhirAdapter(fhirContext), new CapabilityStatementJsonFhirAdapter(fhirContext),
 				new CapabilityStatementXmlFhirAdapter(fhirContext), new CodeSystemJsonFhirAdapter(fhirContext),
-				new CodeSystemXmlFhirAdapter(fhirContext), new GroupJsonFhirAdapter(fhirContext),
+				new CodeSystemXmlFhirAdapter(fhirContext), new DocumentReferenceJsonFhirAdapter(fhirContext),
+				new DocumentReferenceXmlFhirAdapter(fhirContext), new GroupJsonFhirAdapter(fhirContext),
 				new GroupXmlFhirAdapter(fhirContext), new EndpointJsonFhirAdapter(fhirContext),
 				new EndpointXmlFhirAdapter(fhirContext), new HealthcareServiceJsonFhirAdapter(fhirContext),
 				new HealthcareServiceXmlFhirAdapter(fhirContext), new LibraryJsonFhirAdapter(fhirContext),

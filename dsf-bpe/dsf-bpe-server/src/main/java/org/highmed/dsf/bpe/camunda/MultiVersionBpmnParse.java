@@ -27,9 +27,10 @@ public class MultiVersionBpmnParse extends BpmnParse
 	}
 
 	@Override
-	public ActivityImpl parseServiceTaskLike(String elementName, Element serviceTaskElement, ScopeImpl scope)
+	public void parseServiceTaskLike(ActivityImpl activity, String elementName, Element serviceTaskElement,
+			Element camundaPropertiesElement, ScopeImpl scope)
 	{
-		ActivityImpl activity = super.parseServiceTaskLike(elementName, serviceTaskElement, scope);
+		super.parseServiceTaskLike(activity, elementName, serviceTaskElement, camundaPropertiesElement, scope);
 
 		if (activity.getActivityBehavior() instanceof ClassDelegateActivityBehavior)
 		{
@@ -42,7 +43,5 @@ public class MultiVersionBpmnParse extends BpmnParse
 		}
 		else
 			logger.debug("Not modifying {}", activity.getActivityBehavior().getClass().getCanonicalName());
-
-		return activity;
 	}
 }
