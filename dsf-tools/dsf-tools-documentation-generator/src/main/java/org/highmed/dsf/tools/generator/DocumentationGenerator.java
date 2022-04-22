@@ -13,9 +13,12 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
 
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
@@ -36,6 +39,29 @@ public class DocumentationGenerator
 	private static final String ENV_VARIABLE_PLACEHOLDER = "${env_variable}";
 	private static final String PROPERTY_NAME_PLACEHOLDER = " ${property_name}";
 
+	private static final class DocumentationEntry implements Comparable<DocumentationEntry>
+	{
+		final String propertyName;
+		final String value;
+
+		DocumentationEntry(String propertyName, String value)
+		{
+			this.propertyName = propertyName;
+			this.value = value;
+		}
+
+		@Override
+		public int compareTo(DocumentationEntry o)
+		{
+			return propertyName.compareToIgnoreCase(o.propertyName);
+		}
+
+		String getValue()
+		{
+			return value;
+		}
+	}
+
 	public static void main(String[] args)
 	{
 		new DocumentationGenerator().execute(args);
@@ -51,13 +77,22 @@ public class DocumentationGenerator
 		Path file = Paths.get("target/Documentation_" + workingPackage + ".md");
 		logger.info("Generating documentation for package {} in file {}", workingPackage, file);
 
+		moveExistingToBackup(file);
+
 		Reflections reflections = createReflections(workingPackage);
 
-		List<String> pluginProcessNames = getPluginProcessNames(reflections, workingPackage);
-		List<Field> fields = getFields(reflections);
+		Set<Field> dsfFields = reflections.getFieldsAnnotatedWith(Documentation.class);
+		if (!dsfFields.isEmpty())
+		{
+			writeFields(dsfFields, dsfDocumentationGenerator(), file, workingPackage);
+		}
 
-		moveExistingToBackup(file);
-		writeFields(fields, pluginProcessNames, file, workingPackage);
+		Set<Field> processFields = reflections.getFieldsAnnotatedWith(ProcessDocumentation.class);
+		if (!processFields.isEmpty())
+		{
+			List<String> pluginProcessNames = getPluginProcessNames(reflections, workingPackage);
+			writeFields(processFields, processDocumentationGenerator(pluginProcessNames), file, workingPackage);
+		}
 	}
 
 	private Reflections createReflections(String workingPackage)
@@ -115,13 +150,6 @@ public class DocumentationGenerator
 		}
 	}
 
-	private List<Field> getFields(Reflections reflections)
-	{
-		List<Field> fields = new ArrayList<>(reflections.getFieldsAnnotatedWith(Documentation.class));
-		Collections.reverse(fields);
-		return fields;
-	}
-
 	private void moveExistingToBackup(Path file)
 	{
 		if (Files.exists(file))
@@ -140,10 +168,11 @@ public class DocumentationGenerator
 		}
 	}
 
-	private void writeFields(List<Field> fields, List<String> pluginProcessNames, Path file, String workingPackage)
+	private void writeFields(Collection<? extends Field> fields,
+			Function<Field, DocumentationEntry> documentationGenerator, Path file, String workingPackage)
 	{
-		Iterable<String> entries = fields.stream()
-				.map(field -> createDocumentation(field, pluginProcessNames))::iterator;
+		Iterable<String> entries = fields.stream().map(documentationGenerator).sorted()
+				.map(DocumentationEntry::getValue)::iterator;
 		try
 		{
 			Files.write(file, entries, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
@@ -155,42 +184,76 @@ public class DocumentationGenerator
 		}
 	}
 
-	private String createDocumentation(Field field, List<String> pluginProcessNames)
+	private Function<Field, DocumentationEntry> processDocumentationGenerator(List<String> pluginProcessNames)
 	{
-		Documentation documentation = field.getAnnotation(Documentation.class);
-		Value value = field.getAnnotation(Value.class);
+		return field ->
+		{
+			ProcessDocumentation documentation = field.getAnnotation(ProcessDocumentation.class);
+			Value value = field.getAnnotation(Value.class);
 
-		String[] valueSplit = getValueDefaultArray(value);
+			String[] valueSplit = getValueDefaultArray(value);
 
-		String initialProperty = valueSplit.length > 0 ? valueSplit[0] : "";
-		String property = getDocumentationString("Property", initialProperty);
+			String initialProperty = valueSplit.length > 0 ? valueSplit[0] : "";
+			String property = getDocumentationString("Property", initialProperty);
 
-		String initialEnvironment = initialProperty.replace(".", "_").toUpperCase();
-		String environment = initialProperty.endsWith(".password")
-				? String.format("%s or %s_FILE", initialEnvironment, initialEnvironment)
-				: initialEnvironment;
+			String initialEnvironment = initialProperty.replace(".", "_").toUpperCase();
+			String environment = initialProperty.endsWith(".password")
+					? String.format("%s or %s_FILE", initialEnvironment, initialEnvironment)
+					: initialEnvironment;
 
-		String required = getDocumentationString("Required", documentation.required() ? "Yes" : "No");
+			String required = getDocumentationString("Required", documentation.required() ? "Yes" : "No");
 
-		String[] processNames = documentation.processNames();
-		boolean processProperty = documentation.processProperty();
-		String processes = processProperty
-				? getDocumentationString("Processes", getProcessNamesAsString(processNames, pluginProcessNames))
-				: "";
+			String[] processNames = documentation.processNames();
+			String processes = getDocumentationString("Processes",
+					getProcessNamesAsString(processNames, pluginProcessNames));
 
-		String description = getDocumentationString("Description", documentation.description());
-		String recommendation = getDocumentationString("Recommendation", documentation.recommendation());
-		String example = getDocumentationStringMonospace("Example", documentation.example());
+			String description = getDocumentationString("Description", documentation.description());
+			String recommendation = getDocumentationString("Recommendation", documentation.recommendation());
+			String example = getDocumentationStringMonospace("Example", documentation.example());
 
-		String defaultValue = (valueSplit.length > 1 && !"null".equals(valueSplit[1]))
-				? getDocumentationStringMonospace("Default", valueSplit[1])
-				: "";
+			String defaultValue = (valueSplit.length > 1 && !"null".equals(valueSplit[1]))
+					? getDocumentationStringMonospace("Default", valueSplit[1])
+					: "";
 
-		return String
-				.format("### %s\n%s%s%s%s%s%s%s\n", environment, property, required, processes, description,
-						recommendation, example, defaultValue)
-				.replace(ENV_VARIABLE_PLACEHOLDER, initialEnvironment)
-				.replace(PROPERTY_NAME_PLACEHOLDER, initialProperty);
+			return new DocumentationEntry(initialProperty,
+					String.format("### %s\n%s%s%s%s%s%s%s\n", environment, property, required, processes, description,
+							recommendation, example, defaultValue).replace(ENV_VARIABLE_PLACEHOLDER, initialEnvironment)
+							.replace(PROPERTY_NAME_PLACEHOLDER, initialProperty));
+		};
+	}
+
+	private Function<Field, DocumentationEntry> dsfDocumentationGenerator()
+	{
+		return field ->
+		{
+			Documentation documentation = field.getAnnotation(Documentation.class);
+			Value value = field.getAnnotation(Value.class);
+
+			String[] valueSplit = getValueDefaultArray(value);
+
+			String initialProperty = valueSplit.length > 0 ? valueSplit[0] : "";
+			String property = getDocumentationString("Property", initialProperty);
+
+			String initialEnvironment = initialProperty.replace(".", "_").toUpperCase();
+			String environment = initialProperty.endsWith(".password")
+					? String.format("%s or %s_FILE", initialEnvironment, initialEnvironment)
+					: initialEnvironment;
+
+			String required = getDocumentationString("Required", documentation.required() ? "Yes" : "No");
+
+			String description = getDocumentationString("Description", documentation.description());
+			String recommendation = getDocumentationString("Recommendation", documentation.recommendation());
+			String example = getDocumentationStringMonospace("Example", documentation.example());
+
+			String defaultValue = (valueSplit.length > 1 && !"null".equals(valueSplit[1]))
+					? getDocumentationStringMonospace("Default", valueSplit[1])
+					: "";
+
+			return new DocumentationEntry(initialProperty,
+					String.format("### %s\n%s%s%s%s%s%s\n", environment, property, required, description,
+							recommendation, example, defaultValue).replace(ENV_VARIABLE_PLACEHOLDER, initialEnvironment)
+							.replace(PROPERTY_NAME_PLACEHOLDER, initialProperty));
+		};
 	}
 
 	private String[] getValueDefaultArray(Value value)
