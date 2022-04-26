@@ -184,7 +184,7 @@ public class ProcessPluginDefinitionAndClassLoader
 
 			// escape bpmn placeholders
 			read = PLACEHOLDER_PREFIX_PATTERN_SPRING.matcher(read).replaceAll(PLACEHOLDER_PREFIX_TMP);
-			// maker dsf placeholders look like spring placeholders
+			// make dsf placeholders look like spring placeholders
 			// when calling replaceAll with ${ the $ needs to be escaped using \${
 			read = PLACEHOLDER_PREFIX_PATTERN.matcher(read).replaceAll(PLACEHOLDER_PREFIX_SPRING_ESCAPED);
 			// resolve dsf placeholders
