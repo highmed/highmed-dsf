@@ -51,12 +51,6 @@ public class AuthenticationFilter implements Filter
 		HttpServletRequest httpServletRequest = (HttpServletRequest) request;
 		HttpServletResponse httpServletResponse = (HttpServletResponse) response;
 
-		logger.debug("{} {}", httpServletRequest.getMethod(),
-				httpServletRequest.getRequestURL()
-						+ (httpServletRequest.getQueryString() != null && !httpServletRequest.getQueryString().isEmpty()
-								? ("?" + httpServletRequest.getQueryString())
-								: ""));
-
 		if (!authenticationFilterConfig.needsAuthentication(httpServletRequest))
 		{
 			chain.doFilter(httpServletRequest, httpServletResponse);

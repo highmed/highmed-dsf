@@ -9,7 +9,7 @@
 		<artifactId>dsf-fhir-pom</artifactId>
 		<version>0.6.0-SNAPSHOT</version>
 	</parent>
-	
+
 	<properties>
 		<main.basedir>${project.basedir}/../..</main.basedir>
 	</properties>
@@ -31,6 +31,10 @@
 			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-tools-db-migration</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.highmed.dsf</groupId>
+			<artifactId>dsf-tools-documentation-generator</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>javax.servlet</groupId>
@@ -51,7 +55,7 @@
 			<groupId>javax.mail</groupId>
 			<artifactId>mail</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>jul-to-slf4j</artifactId>
@@ -75,7 +79,7 @@
 				</includes>
 			</resource>
 		</resources>
-	
+
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -139,6 +143,35 @@
 							<followSymlinks>false</followSymlinks>
 						</fileset>
 					</filesets>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+						<phase>prepare-package</phase>
+					</execution>
+				</executions>
+				<configuration>
+					<executable>java</executable>
+					<arguments>
+						<argument>-classpath</argument>
+						<classpath/>
+						<argument>
+							org.highmed.dsf.tools.generator.DocumentationGenerator
+						</argument>
+						<argument>
+							org.highmed.dsf.fhir
+						</argument>
+					</arguments>
+					<includeProjectDependencies>true</includeProjectDependencies>
+					<addResourcesToClasspath>true</addResourcesToClasspath>
+					<classpathScope>compile</classpathScope>
+					<workingDirectory>${project.basedir}</workingDirectory>
 				</configuration>
 			</plugin>
 		</plugins>

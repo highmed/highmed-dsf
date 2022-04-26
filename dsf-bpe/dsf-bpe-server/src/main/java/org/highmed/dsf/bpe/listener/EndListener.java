@@ -83,8 +83,7 @@ public class EndListener implements ExecutionListener
 				CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY).orElse(null);
 		String taskId = task.getIdElement().getIdPart();
 
-		logger.info(
-				"Process {} finished with Task status {} [message: {}, businessKey: {}, correlationKey: {}, taskId: {}]",
-				processUrl, task.getStatus().toCode(), messageName, businessKey, correlationKey, taskId);
+		logger.info("Process {} finished [message: {}, businessKey: {}, correlationKey: {}, taskId: {}]", processUrl,
+				messageName, businessKey, correlationKey, taskId);
 	}
 }

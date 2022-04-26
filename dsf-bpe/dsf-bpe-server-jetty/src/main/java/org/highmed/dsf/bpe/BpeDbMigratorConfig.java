@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.highmed.dsf.tools.db.DbMigratorConfig;
 import org.highmed.dsf.tools.docker.secrets.DockerSecretsPropertySourceFactory;
+import org.highmed.dsf.tools.generator.Documentation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,30 +24,39 @@ public class BpeDbMigratorConfig implements DbMigratorConfig
 	private static final String DB_CAMUNDA_USER = "db.camunda_user";
 	private static final String DB_CAMUNDA_USER_PASSWORD = "db.camunda_user_password";
 
+	// Documentation in dsf-bpe-server/src/main/java/org/highmed/dsf/bpe/spring/config/PropertiesConfig.java
 	@Value("${org.highmed.dsf.bpe.db.url}")
 	private String dbUrl;
 
+	@Documentation(description = "The user name to access the database from the DSF BPE server to execute database migrations")
 	@Value("${org.highmed.dsf.bpe.db.liquibase.username:liquibase_user}")
 	private String dbLiquibaseUsername;
 
+	@Documentation(required = true, description = "The password to access the database from the DSF BPE server to execute database migrations", recommendation = "Use docker secret file to configure by using *${env_variable}_FILE*", example = "/run/secrets/db_liquibase.password")
 	@Value("${org.highmed.dsf.bpe.db.liquibase.password}")
 	private char[] dbLiquibasePassword;
 
+	@Documentation(description = "The name of the user group to access the database from the DSF BPE server")
 	@Value("${org.highmed.dsf.bpe.db.user.group:bpe_users}")
 	private String dbUsersGroup;
 
+	// Documentation in dsf-bpe-server/src/main/java/org/highmed/dsf/bpe/spring/config/PropertiesConfig.java
 	@Value("${org.highmed.dsf.bpe.db.user.username:bpe_server_user}")
 	private String dbUsername;
 
+	// Documentation in dsf-bpe-server/src/main/java/org/highmed/dsf/bpe/spring/config/PropertiesConfig.java
 	@Value("${org.highmed.dsf.bpe.db.user.password}")
 	private char[] dbPassword;
 
+	@Documentation(description = "The name of the user group to access the database from the DSF BPE server for camunda processes")
 	@Value("${org.highmed.dsf.bpe.db.user.camunda.group:camunda_users}")
 	private String dbCamundaUsersGroup;
 
+	// Documentation in dsf-bpe-server/src/main/java/org/highmed/dsf/bpe/spring/config/PropertiesConfig.java
 	@Value("${org.highmed.dsf.bpe.db.user.camunda.username:camunda_server_user}")
 	private String dbCamundaUsername;
 
+	// Documentation in dsf-bpe-server/src/main/java/org/highmed/dsf/bpe/spring/config/PropertiesConfig.java
 	@Value("${org.highmed.dsf.bpe.db.user.camunda.password}")
 	private char[] dbCamundaPassword;
 

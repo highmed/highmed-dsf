@@ -1,5 +1,5 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>dsf-bpe-server-jetty</artifactId>
@@ -18,6 +18,10 @@
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-tools-db-migration</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.highmed.dsf</groupId>
+			<artifactId>dsf-tools-documentation-generator</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
@@ -145,6 +149,35 @@
 							<followSymlinks>false</followSymlinks>
 						</fileset>
 					</filesets>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+						<phase>prepare-package</phase>
+					</execution>
+				</executions>
+				<configuration>
+					<executable>java</executable>
+					<arguments>
+						<argument>-classpath</argument>
+						<classpath/>
+						<argument>
+							org.highmed.dsf.tools.generator.DocumentationGenerator
+						</argument>
+						<argument>
+							org.highmed.dsf.bpe
+						</argument>
+					</arguments>
+					<includeProjectDependencies>true</includeProjectDependencies>
+					<addResourcesToClasspath>true</addResourcesToClasspath>
+					<classpathScope>compile</classpathScope>
+					<workingDirectory>${project.basedir}</workingDirectory>
 				</configuration>
 			</plugin>
 		</plugins>
