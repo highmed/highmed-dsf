@@ -1,24 +1,26 @@
 package org.highmed.dsf.fhir.variables;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Target
 {
-	private final String targetOrganizationIdentifierValue;
-	private final String targetEndpointIdentifierValue;
-	private final String targetEndpointUrl;
+	private final String organizationIdentifierValue;
+	private final String endpointIdentifierValue;
+	private final String endpointUrl;
 	private final String correlationKey;
 
 	@JsonCreator
-	private Target(@JsonProperty("targetOrganizationIdentifierValue") String targetOrganizationIdentifierValue,
-			@JsonProperty("targetEndpointIdentifierValue") String targetEndpointIdentifierValue,
-			@JsonProperty("targetEndpointUrl") String targetEndpointUrl,
+	private Target(
+			@JsonProperty("organizationIdentifierValue") @JsonAlias("targetOrganizationIdentifierValue") String organizationIdentifierValue,
+			@JsonProperty("endpointIdentifierValue") String endpointIdentifierValue,
+			@JsonProperty("endpointUrl") @JsonAlias("targetEndpointUrl") String endpointUrl,
 			@JsonProperty("correlationKey") String correlationKey)
 	{
-		this.targetOrganizationIdentifierValue = targetOrganizationIdentifierValue;
-		this.targetEndpointIdentifierValue = targetEndpointIdentifierValue;
-		this.targetEndpointUrl = targetEndpointUrl;
+		this.organizationIdentifierValue = organizationIdentifierValue;
+		this.endpointIdentifierValue = endpointIdentifierValue;
+		this.endpointUrl = endpointUrl;
 		this.correlationKey = correlationKey;
 	}
 
@@ -48,24 +50,56 @@ public class Target
 		return createBiDirectionalTarget(targetOrganizationIdentifierValue, null, targetEndpointUrl, correlationKey);
 	}
 
-	@JsonProperty("targetOrganizationIdentifierValue")
+	/**
+	 * @return the target Organizations identifier value
+	 * @deprecated use {@link #getOrganizationIdentifierValue()}
+	 */
+	@Deprecated
 	public String getTargetOrganizationIdentifierValue()
 	{
-		return targetOrganizationIdentifierValue;
+		return getOrganizationIdentifierValue();
 	}
 
-	@JsonProperty("targetEndpointIdentifierValue")
-	public String getTargetEndpointIdentifierValue()
+	/**
+	 * @return the target Organizations identifier value
+	 */
+	@JsonProperty("organizationIdentifierValue")
+	public String getOrganizationIdentifierValue()
 	{
-		return targetEndpointIdentifierValue;
+		return organizationIdentifierValue;
 	}
 
-	@JsonProperty("targetEndpointUrl")
+	/**
+	 * @return the target Endpoints identifier value
+	 */
+	@JsonProperty("endpointIdentifierValue")
+	public String getEndpointIdentifierValue()
+	{
+		return endpointIdentifierValue;
+	}
+
+	/**
+	 * @return the target Endpoints url
+	 * @deprecated use {@link #getEndpointUrl()}
+	 */
+	@Deprecated
 	public String getTargetEndpointUrl()
 	{
-		return targetEndpointUrl;
+		return getEndpointUrl();
 	}
 
+	/**
+	 * @return the target Endpoints url
+	 */
+	@JsonProperty("endpointUrl")
+	public String getEndpointUrl()
+	{
+		return endpointUrl;
+	}
+
+	/**
+	 * @return the correlation key used in bidirectional communications
+	 */
 	@JsonProperty("correlationKey")
 	public String getCorrelationKey()
 	{

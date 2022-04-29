@@ -12,8 +12,10 @@ import java.util.Objects;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.ExecutionListener;
+import org.camunda.bpm.engine.variable.Variables;
 import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.fhir.task.TaskHelper;
+import org.highmed.dsf.fhir.variables.FhirResourceValues;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +47,7 @@ public class StartListener implements ExecutionListener
 
 			// sets initial task variable a second time in a different variable. subprocesses which start
 			// with a task resource override the initially set task variable
-			execution.setVariable(BPMN_EXECUTION_VARIABLE_LEADING_TASK, task);
+			execution.setVariable(BPMN_EXECUTION_VARIABLE_LEADING_TASK, FhirResourceValues.create(task));
 
 			log(execution, task);
 		}
@@ -54,7 +56,7 @@ public class StartListener implements ExecutionListener
 		// it is set to false, since a main process is not a called process
 		if (!execution.getVariableNames().contains(BPMN_EXECUTION_VARIABLE_IN_CALLED_PROCESS))
 		{
-			execution.setVariable(BPMN_EXECUTION_VARIABLE_IN_CALLED_PROCESS, false);
+			execution.setVariable(BPMN_EXECUTION_VARIABLE_IN_CALLED_PROCESS, Variables.booleanValue(false));
 		}
 	}
 

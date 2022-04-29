@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,24 +26,63 @@ public class Targets
 		return Collections.unmodifiableList(entries);
 	}
 
+	/**
+	 * @param target
+	 * @return true if the given target was part of the entries list
+	 * @deprecated remove based on {@link Object#equals(Object)} may not work due to
+	 * @see #removeByEndpointIdentifierValue(Target)
+	 */
 	@Deprecated
 	public boolean removeTarget(Target target)
 	{
 		return entries.remove(target);
 	}
 
-	public Targets remove(Target target)
+	/**
+	 * Removes targets base on the given {@link Target}s endpoint identifier value.
+	 *
+	 * @param target
+	 * @return new {@link Targets} object
+	 * @see Target#getEndpointIdentifierValue()
+	 */
+	public Targets removeByEndpointIdentifierValue(Target target)
 	{
-		Targets newTargets = new Targets(entries);
-		newTargets.entries.remove(target);
-		return newTargets;
+		if (target == null)
+			return new Targets(entries);
+
+		return removeByEndpointIdentifierValue(target.getEndpointIdentifierValue());
 	}
 
-	public Targets removeAll(Collection<?> c)
+	/**
+	 * Removes targets base on the given endpoint identifier value.
+	 *
+	 * @param targetEndpointIdentifierValue
+	 * @return new {@link Targets} object
+	 */
+	public Targets removeByEndpointIdentifierValue(String targetEndpointIdentifierValue)
 	{
-		Targets newTargets = new Targets(entries);
-		newTargets.entries.removeAll(c);
-		return newTargets;
+		if (targetEndpointIdentifierValue == null)
+			return new Targets(entries);
+
+		return new Targets(
+				entries.stream().filter(t -> !targetEndpointIdentifierValue.equals(t.getEndpointIdentifierValue()))
+						.collect(Collectors.toList()));
+	}
+
+	/**
+	 * Removes targets base on the given endpoint identifier values.
+	 *
+	 * @param targetEndpointIdentifierValues
+	 * @return new {@link Targets} object
+	 */
+	public Targets removeAllByEndpointIdentifierValue(Collection<String> targetEndpointIdentifierValues)
+	{
+		if (targetEndpointIdentifierValues == null || targetEndpointIdentifierValues.isEmpty())
+			return new Targets(entries);
+
+		return new Targets(
+				entries.stream().filter(t -> !targetEndpointIdentifierValues.contains(t.getEndpointIdentifierValue()))
+						.collect(Collectors.toList()));
 	}
 
 	public boolean isEmpty()

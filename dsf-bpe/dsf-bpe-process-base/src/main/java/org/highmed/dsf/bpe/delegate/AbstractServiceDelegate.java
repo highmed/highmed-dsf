@@ -14,6 +14,7 @@ import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
+import org.highmed.dsf.fhir.variables.FhirResourceValues;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -175,7 +176,7 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 			throw new IllegalStateException("execution not started");
 
 		Objects.requireNonNull(task, "task");
-		execution.setVariable(BPMN_EXECUTION_VARIABLE_TASK, task);
+		execution.setVariable(BPMN_EXECUTION_VARIABLE_TASK, FhirResourceValues.create(task));
 	}
 
 	/**
@@ -199,7 +200,7 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 		Task leadingTask = (Task) execution.getVariable(BPMN_EXECUTION_VARIABLE_LEADING_TASK);
 
 		if (leadingTask != null)
-			execution.setVariable(BPMN_EXECUTION_VARIABLE_LEADING_TASK, task);
+			execution.setVariable(BPMN_EXECUTION_VARIABLE_LEADING_TASK, FhirResourceValues.create(task));
 		else
 			updateCurrentTaskInExecutionVariables(task);
 	}

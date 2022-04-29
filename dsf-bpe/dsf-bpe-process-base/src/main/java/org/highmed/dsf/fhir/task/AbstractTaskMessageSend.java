@@ -27,6 +27,7 @@ import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.variables.Target;
 import org.highmed.dsf.fhir.variables.Targets;
+import org.highmed.dsf.fhir.variables.TargetsValues;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -93,7 +94,8 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 			String errorMessage = "Error while sending Task (process: " + instantiatesUri + ", message-name: "
 					+ messageName + ", business-key: " + businessKey + ", correlation-key: "
 					+ target.getCorrelationKey() + ") to organization with identifier "
-					+ target.getTargetOrganizationIdentifierValue() + ": " + e.getMessage();
+					+ target.getOrganizationIdentifierValue() + ", endpoint with identifier "
+					+ target.getEndpointIdentifierValue() + ": " + e.getMessage();
 			logger.warn(errorMessage);
 			logger.debug("Error while sending Task", e);
 
@@ -175,10 +177,11 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 			updateLeadingTaskInExecutionVariables(task);
 
 			Target target = getTarget();
-			targets = targets.remove(target);
+			targets = targets.removeByEndpointIdentifierValue(target);
 			updateTargets(targets);
-			logger.debug("Target organization {} with error {} removed from target list",
-					target.getTargetOrganizationIdentifierValue(), exception.getMessage());
+			logger.debug("Target organization {}, endpoint {} with error {} removed from target list",
+					target.getOrganizationIdentifierValue(), target.getEndpointIdentifierValue(),
+					exception.getMessage());
 
 			if (targets.isEmpty())
 			{
@@ -205,7 +208,6 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 			}
 		}
 	}
-
 
 	/**
 	 * <i>Override this method if the {@link Target} variable is stored in a different process engine variable other
@@ -262,7 +264,7 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 		if (execution == null)
 			throw new IllegalStateException("execution not started");
 
-		execution.setVariable(BPMN_EXECUTION_VARIABLE_TARGETS, targets);
+		execution.setVariable(BPMN_EXECUTION_VARIABLE_TARGETS, TargetsValues.create(targets));
 	}
 
 	/**
@@ -316,12 +318,11 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 
 		additionalInputParameters.forEach(task.getInput()::add);
 
-		FhirWebserviceClient client = getFhirWebserviceClientProvider()
-				.getWebserviceClient(target.getTargetEndpointUrl());
+		FhirWebserviceClient client = getFhirWebserviceClientProvider().getWebserviceClient(target.getEndpointUrl());
 
-		logger.info("Sending task {} to {} [message: {}, businessKey: {}, correlationKey: {}, endpoint: {}]",
-				task.getInstantiatesUri(), target.getTargetOrganizationIdentifierValue(), messageName, businessKey,
-				correlationKey, client.getBaseUrl());
+		logger.info("Sending task {} to {}/{} [message: {}, businessKey: {}, correlationKey: {}, endpoint: {}]",
+				task.getInstantiatesUri(), target.getOrganizationIdentifierValue(), target.getEndpointIdentifierValue(),
+				messageName, businessKey, correlationKey, client.getBaseUrl());
 		logger.trace("Task resource to send: {}", fhirContext.newJsonParser().encodeResourceToString(task));
 
 		doSend(client, task);
@@ -354,7 +355,7 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 	{
 		return new Reference().setType("Organization")
 				.setIdentifier(new Identifier().setSystem(NAMINGSYSTEM_HIGHMED_ORGANIZATION_IDENTIFIER)
-						.setValue(target.getTargetOrganizationIdentifierValue()));
+						.setValue(target.getOrganizationIdentifierValue()));
 	}
 
 	protected Reference getRequester()
