@@ -43,8 +43,8 @@ public class TargetsJsonSerializationTest
 	{
 		ObjectMapper mapper = ObjectMapperFactory.createObjectMapper(FhirContext.forR4());
 
-		Target target = Target.createBiDirectionalTarget("target.org", "https://target.org/fhir",
-				UUID.randomUUID().toString());
+		Target target = Target.createBiDirectionalTarget("target.org", "endpoint.target.org",
+				"https://endpoint.target.org/fhir", UUID.randomUUID().toString());
 		Targets targets = new Targets(Collections.singleton(target));
 
 		String targetsAsString = mapper.writeValueAsString(targets);
@@ -66,7 +66,8 @@ public class TargetsJsonSerializationTest
 	{
 		ObjectMapper mapper = ObjectMapperFactory.createObjectMapper(FhirContext.forR4());
 
-		Target target = Target.createUniDirectionalTarget("target.org", "https://target.org/fhir");
+		Target target = Target.createUniDirectionalTarget("target.org", "endpoint.target.org",
+				"https://endpoint.target.org/fhir");
 		Targets targets = new Targets(Collections.singleton(target));
 
 		String targetsAsString = mapper.writeValueAsString(targets);
