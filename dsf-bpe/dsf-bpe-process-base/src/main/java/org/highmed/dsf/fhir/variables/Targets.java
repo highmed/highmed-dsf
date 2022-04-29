@@ -25,9 +25,24 @@ public class Targets
 		return Collections.unmodifiableList(entries);
 	}
 
+	@Deprecated
 	public boolean removeTarget(Target target)
 	{
 		return entries.remove(target);
+	}
+
+	public Targets remove(Target target)
+	{
+		Targets newTargets = new Targets(entries);
+		newTargets.entries.remove(target);
+		return newTargets;
+	}
+
+	public Targets removeAll(Collection<?> c)
+	{
+		Targets newTargets = new Targets(entries);
+		newTargets.entries.removeAll(c);
+		return newTargets;
 	}
 
 	public boolean isEmpty()
