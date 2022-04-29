@@ -81,7 +81,7 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 		// String targetOrganizationId = (String) execution.getVariable(Constants.VARIABLE_TARGET_ORGANIZATION_ID);
 		// String correlationKey = (String) execution.getVariable(Constants.VARIABLE_CORRELATION_KEY);
 
-		Target target = getTarget(execution);
+		Target target = getTarget();
 
 		try
 		{
@@ -97,113 +97,172 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 			logger.warn(errorMessage);
 			logger.debug("Error while sending Task", e);
 
-			Task task = getLeadingTaskFromExecutionVariables();
-
-			addErrorMessageToLeadingTask(task, errorMessage);
-
 			if (execution.getBpmnModelElementInstance() instanceof IntermediateThrowEvent)
-				handleIntermediateThrowEventError(execution, target, e, task);
+				handleIntermediateThrowEventError(e, errorMessage);
 			else if (execution.getBpmnModelElementInstance() instanceof EndEvent)
-				handleEndEventError(execution, target, e, task);
+				handleEndEventError(e, errorMessage);
 			else if (execution.getBpmnModelElementInstance() instanceof SendTask)
-				handleSendTaskError(execution, target, e, task);
+				handleSendTaskError(e, errorMessage);
 			else
 				logger.warn("Error handling for {} not implemented",
 						execution.getBpmnModelElementInstance().getClass().getName());
 		}
 	}
 
-	protected void addErrorMessageToLeadingTask(Task task, String errorMessage)
+	private void addErrorMessage(Task task, String errorMessage)
 	{
-		if (task != null)
-			task.addOutput(getTaskHelper().createOutput(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR,
-					errorMessage));
-		else
-			logger.warn("Leading Task null, unable to add error output");
+		task.addOutput(getTaskHelper().createOutput(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR,
+				errorMessage));
 	}
 
-	protected void handleIntermediateThrowEventError(DelegateExecution execution, Target target, Exception exception,
-			Task task)
+	protected void handleIntermediateThrowEventError(Exception exception, String errorMessage)
 	{
+		Task task = getLeadingTaskFromExecutionVariables();
+
 		logger.debug("Error while executing Task message send " + getClass().getName(), exception);
 		logger.error("Process {} has fatal error in step {} for task with id {}, reason: {}",
 				execution.getProcessDefinitionId(), execution.getActivityInstanceId(),
 				task == null ? "?" : task.getId(), exception.getMessage());
 
-		if (task != null)
+		try
 		{
-			task.setStatus(Task.TaskStatus.FAILED);
-			getFhirWebserviceClientProvider().getLocalWebserviceClient().withMinimalReturn().update(task);
-		}
-		else
-			logger.warn("Leading Task null, unable update Task with failed state");
-
-		execution.getProcessEngine().getRuntimeService().deleteProcessInstance(execution.getProcessInstanceId(),
-				exception.getMessage());
-	}
-
-	protected void handleEndEventError(DelegateExecution execution, Target target, Exception exception, Task task)
-	{
-		logger.debug("Error while executing Task message send " + getClass().getName(), exception);
-		logger.error("Process {} has fatal error in step {} for task with id {}, reason: {}",
-				execution.getProcessDefinitionId(), execution.getActivityInstanceId(),
-				task == null ? "?" : task.getId(), exception.getMessage());
-
-		if (task != null)
-		{
-			task.setStatus(Task.TaskStatus.FAILED);
-		}
-		else
-			logger.warn("Leading Task null, unable to set failed state");
-
-		// Task update and process end handled by EndListener
-	}
-
-	protected void handleSendTaskError(DelegateExecution execution, Target target, Exception exception, Task task)
-	{
-		Targets targets = (Targets) execution.getVariable(BPMN_EXECUTION_VARIABLE_TARGETS);
-
-		// if we are a multi instance message send task, remove target
-		if (targets != null)
-		{
-			boolean removed = targets.removeTarget(target);
-
-			if (removed)
-				logger.debug("Target organization {} with error {} removed from target list",
-						target.getTargetOrganizationIdentifierValue(), exception.getMessage());
-		}
-
-		if (targets.isEmpty())
-		{
-			logger.debug("Error while executing Task message send " + getClass().getName(), exception);
-			logger.error("Process {} has fatal error in step {} for task with id {}, last reason: {}",
-					execution.getProcessDefinitionId(), execution.getActivityInstanceId(),
-					task == null ? "?" : task.getId(), exception.getMessage());
-
 			if (task != null)
 			{
+				addErrorMessage(task, errorMessage);
 				task.setStatus(Task.TaskStatus.FAILED);
 				getFhirWebserviceClientProvider().getLocalWebserviceClient().withMinimalReturn().update(task);
 			}
 			else
 				logger.warn("Leading Task null, unable update Task with failed state");
-
+		}
+		finally
+		{
 			execution.getProcessEngine().getRuntimeService().deleteProcessInstance(execution.getProcessInstanceId(),
 					exception.getMessage());
 		}
 	}
 
+	protected void handleEndEventError(Exception exception, String errorMessage)
+	{
+		Task task = getLeadingTaskFromExecutionVariables();
+
+		logger.debug("Error while executing Task message send " + getClass().getName(), exception);
+		logger.error("Process {} has fatal error in step {} for task with id {}, reason: {}",
+				execution.getProcessDefinitionId(), execution.getActivityInstanceId(),
+				task == null ? "?" : task.getId(), exception.getMessage());
+
+		if (task != null)
+		{
+			addErrorMessage(task, errorMessage);
+			task.setStatus(Task.TaskStatus.FAILED);
+			updateLeadingTaskInExecutionVariables(task);
+		}
+		else
+			logger.warn("Leading Task null, unable to set failed state");
+
+		// Task update and process-end handled by EndListener
+	}
+
+	protected void handleSendTaskError(Exception exception, String errorMessage)
+	{
+		Task task = getLeadingTaskFromExecutionVariables();
+		Targets targets = getTargets();
+
+		// if we are a multi instance message send task, remove target
+		if (targets != null)
+		{
+			addErrorMessage(task, errorMessage);
+			updateLeadingTaskInExecutionVariables(task);
+
+			Target target = getTarget();
+			targets = targets.remove(target);
+			updateTargets(targets);
+			logger.debug("Target organization {} with error {} removed from target list",
+					target.getTargetOrganizationIdentifierValue(), exception.getMessage());
+
+			if (targets.isEmpty())
+			{
+				logger.debug("Error while executing Task message send " + getClass().getName(), exception);
+				logger.error("Process {} has fatal error in step {} for task with id {}, last reason: {}",
+						execution.getProcessDefinitionId(), execution.getActivityInstanceId(),
+						task == null ? "?" : task.getId(), exception.getMessage());
+
+				try
+				{
+					if (task != null)
+					{
+						task.setStatus(Task.TaskStatus.FAILED);
+						getFhirWebserviceClientProvider().getLocalWebserviceClient().withMinimalReturn().update(task);
+					}
+					else
+						logger.warn("Leading Task null, unable update Task with failed state");
+				}
+				finally
+				{
+					execution.getProcessEngine().getRuntimeService()
+							.deleteProcessInstance(execution.getProcessInstanceId(), exception.getMessage());
+				}
+			}
+		}
+	}
+
+
 	/**
-	 * <i>Override this method to set a different target then the one defined in the process variable
-	 * {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_TARGET}.</i>
+	 * <i>Override this method if the {@link Target} variable is stored in a different process engine variable other
+	 * then {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_TARGET}.</i>
 	 *
 	 * @param execution
 	 *            the delegate execution of this process instance
 	 * @return {@link Target} that should receive the message
+	 * @deprecated use {@link #getTarget()}
 	 */
+	@Deprecated
 	protected Target getTarget(DelegateExecution execution)
 	{
 		return (Target) execution.getVariable(BPMN_EXECUTION_VARIABLE_TARGET);
+	}
+
+	/**
+	 * <i>Override this method if the {@link Target} variable is stored in a different process engine variable other
+	 * then {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_TARGET}.</i>
+	 *
+	 * @return {@link Target} that should receive the message
+	 */
+	protected Target getTarget()
+	{
+		if (execution == null)
+			throw new IllegalStateException("execution not started");
+
+		return (Target) execution.getVariable(BPMN_EXECUTION_VARIABLE_TARGET);
+	}
+
+	/**
+	 * <i>Override this method if the {@link Targets} variable is stored in a different process engine variable other
+	 * then {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_TARGETS}.</i>
+	 *
+	 * @return {@link Targets} that should receive the message
+	 */
+	protected Targets getTargets()
+	{
+		if (execution == null)
+			throw new IllegalStateException("execution not started");
+
+		return (Targets) execution.getVariable(BPMN_EXECUTION_VARIABLE_TARGETS);
+	}
+
+	/**
+	 * <i>Override this method if the {@link Targets} variable should stored in a different process engine variable
+	 * other then {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_TARGETS}.</i>
+	 *
+	 * @param targets
+	 *            the targets to save in process engine variable {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_TARGETS}
+	 */
+	protected void updateTargets(Targets targets)
+	{
+		if (execution == null)
+			throw new IllegalStateException("execution not started");
+
+		execution.setVariable(BPMN_EXECUTION_VARIABLE_TARGETS, targets);
 	}
 
 	/**
