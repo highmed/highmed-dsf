@@ -1,5 +1,10 @@
 package org.highmed.dsf.fhir.service;
 
+import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.ATTACHMENT_CONDITIONAL_URL;
+import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.ATTACHMENT_LITERAL_EXTERNAL_URL;
+import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.ATTACHMENT_LITERAL_INTERNAL_URL;
+import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.ATTACHMENT_TEMPORARY_URL;
+import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.ATTACHMENT_UNKNOWN_URL;
 import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.CONDITIONAL;
 import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.LITERAL_EXTERNAL;
 import static org.highmed.dsf.fhir.service.ResourceReference.ReferenceType.LITERAL_INTERNAL;
@@ -22,6 +27,7 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedArtifact;
@@ -134,35 +140,62 @@ public class ResourceReference
 		/**
 		 * unknown url in RelatedArtifact
 		 */
-		RELATED_ARTEFACT_UNKNOWN_URL
+		RELATED_ARTEFACT_UNKNOWN_URL,
+		/**
+		 * temporary url in Attachment starting with <code>urn:uuid:</code>
+		 */
+		ATTACHMENT_TEMPORARY_URL,
+		/**
+		 * conditional url in Attachment
+		 */
+		ATTACHMENT_CONDITIONAL_URL,
+		/**
+		 * literal url in Attachment to a resource on this server
+		 */
+		ATTACHMENT_LITERAL_INTERNAL_URL,
+		/**
+		 * literal url in Attachment to a resource on an external server
+		 */
+		ATTACHMENT_LITERAL_EXTERNAL_URL,
+		/**
+		 * unknown url in Attachment
+		 */
+		ATTACHMENT_UNKNOWN_URL
 	}
 
 	private final String location;
 	private final Reference reference;
 	private final RelatedArtifact relatedArtifact;
+	private final Attachment attachment;
 	private final List<Class<? extends Resource>> referenceTypes = new ArrayList<>();
 
 	@SafeVarargs
 	public ResourceReference(String location, Reference reference, Class<? extends Resource>... referenceTypes)
 	{
-		this(location, reference, null, Arrays.asList(referenceTypes));
+		this(location, reference, null, null, Arrays.asList(referenceTypes));
 	}
 
 	public ResourceReference(String location, RelatedArtifact relatedArtifact)
 	{
-		this(location, null, relatedArtifact, Collections.emptyList());
+		this(location, null, relatedArtifact, null, Collections.emptyList());
+	}
+
+	public ResourceReference(String location, Attachment attachment)
+	{
+		this(location, null, null, attachment, Collections.emptyList());
 	}
 
 	private ResourceReference(String location, Reference reference, RelatedArtifact relatedArtifact,
-			Collection<Class<? extends Resource>> referenceTypes)
+			Attachment attachment, Collection<Class<? extends Resource>> referenceTypes)
 	{
 		this.location = location;
 
-		if (reference == null && relatedArtifact == null)
-			throw new IllegalArgumentException("Either reference or relatedArtifact expected");
+		if (reference == null && relatedArtifact == null && attachment == null)
+			throw new IllegalArgumentException("Either reference, relatedArtifact or attachment expected");
 
 		this.reference = reference;
 		this.relatedArtifact = relatedArtifact;
+		this.attachment = attachment;
 
 		if (referenceTypes != null)
 			this.referenceTypes.addAll(referenceTypes);
@@ -188,14 +221,26 @@ public class ResourceReference
 		return relatedArtifact;
 	}
 
+	public boolean hasAttachment()
+	{
+		return attachment != null;
+	}
+
+	public Attachment getAttachment()
+	{
+		return attachment;
+	}
+
 	public String getValue()
 	{
 		if (hasReference())
 			return reference.getReference();
 		else if (hasRelatedArtifact())
 			return relatedArtifact.getUrl();
+		else if (hasAttachment())
+			return attachment.getUrl();
 		else
-			throw new IllegalArgumentException("reference and related artefact not set");
+			throw new IllegalArgumentException("reference, related artefact or attachment not set");
 	}
 
 	public List<Class<? extends Resource>> getReferenceTypes()
@@ -209,7 +254,7 @@ public class ResourceReference
 	}
 
 	/**
-	 * Determines the {@link ReferenceType} based on the actual FHIR reference or related artifact
+	 * Determines the {@link ReferenceType} based on the actual FHIR reference, related artifact or attachment
 	 *
 	 * @param localServerBase
 	 *            not <code>null</code>
@@ -217,7 +262,10 @@ public class ResourceReference
 	 *         {@link ReferenceType#RELATED_ARTEFACT_LITERAL_INTERNAL_URL},
 	 *         {@link ReferenceType#RELATED_ARTEFACT_LITERAL_EXTERNAL_URL},
 	 *         {@link ReferenceType#RELATED_ARTEFACT_CONDITIONAL_URL},
-	 *         {@link ReferenceType#RELATED_ARTEFACT_UNKNOWN_URL}, {@link ReferenceType#TEMPORARY},
+	 *         {@link ReferenceType#RELATED_ARTEFACT_UNKNOWN_URL}, {@link ReferenceType#ATTACHMENT_TEMPORARY_URL},
+	 *         {@link ReferenceType#ATTACHMENT_LITERAL_INTERNAL_URL},
+	 *         {@link ReferenceType#ATTACHMENT_LITERAL_EXTERNAL_URL}, {@link ReferenceType#ATTACHMENT_CONDITIONAL_URL},
+	 *         {@link ReferenceType#ATTACHMENT_UNKNOWN_URL}, {@link ReferenceType#TEMPORARY},
 	 *         {@link ReferenceType#LITERAL_INTERNAL}, {@link ReferenceType#LITERAL_EXTERNAL},
 	 *         {@link ReferenceType#CONDITIONAL}, {@link ReferenceType#LOGICAL}, {@link ReferenceType#UNKNOWN}
 	 */
@@ -249,6 +297,31 @@ public class ResourceReference
 			}
 
 			return RELATED_ARTEFACT_UNKNOWN_URL;
+		}
+		else if (attachment != null)
+		{
+			if (attachment.hasUrl())
+			{
+				Matcher tempIdRefMatcher = TEMP_ID_PATTERN.matcher(attachment.getUrl());
+				if (tempIdRefMatcher.matches())
+					return ATTACHMENT_TEMPORARY_URL;
+
+				Matcher idRefMatcher = ID_PATTERN.matcher(attachment.getUrl());
+				if (idRefMatcher.matches())
+				{
+					IdType id = new IdType(attachment.getUrl());
+					if (!id.isAbsolute() || localServerBase.equals(id.getBaseUrl()))
+						return ATTACHMENT_LITERAL_INTERNAL_URL;
+					else
+						return ATTACHMENT_LITERAL_EXTERNAL_URL;
+				}
+
+				Matcher conditionalRefMatcher = CONDITIONAL_REF_PATTERN.matcher(attachment.getUrl());
+				if (conditionalRefMatcher.matches())
+					return ATTACHMENT_CONDITIONAL_URL;
+			}
+
+			return ATTACHMENT_UNKNOWN_URL;
 		}
 		else if (reference != null)
 		{
@@ -292,14 +365,16 @@ public class ResourceReference
 	/**
 	 * @param localServerBase
 	 *            not <code>null</code>
-	 * @return empty String if the type of this {@link ResourceReference} is not {@link ReferenceType#LITERAL_EXTERNAL}
-	 *         or {@link ReferenceType#RELATED_ARTEFACT_LITERAL_EXTERNAL_URL}
+	 * @return empty String if the type of this {@link ResourceReference} is not {@link ReferenceType#LITERAL_EXTERNAL},
+	 *         {@link ReferenceType#RELATED_ARTEFACT_LITERAL_EXTERNAL_URL} or
+	 *         {@link ReferenceType#ATTACHMENT_LITERAL_EXTERNAL_URL}
 	 */
 	public String getServerBase(String localServerBase)
 	{
 		Objects.requireNonNull(localServerBase, "localServerBase");
 
-		if (EnumSet.of(LITERAL_EXTERNAL, RELATED_ARTEFACT_LITERAL_EXTERNAL_URL).contains(getType(localServerBase)))
+		if (EnumSet.of(LITERAL_EXTERNAL, RELATED_ARTEFACT_LITERAL_EXTERNAL_URL, ATTACHMENT_LITERAL_EXTERNAL_URL)
+				.contains(getType(localServerBase)))
 			return new IdType(getValue()).getBaseUrl();
 		else
 			return "";

@@ -45,11 +45,16 @@ public class EventConfig
 		put(daosByResourceName, daoConfig.binaryDao());
 		put(daosByResourceName, daoConfig.bundleDao());
 		put(daosByResourceName, daoConfig.codeSystemDao());
+		put(daosByResourceName, daoConfig.documentReferenceDao());
 		put(daosByResourceName, daoConfig.endpointDao());
 		put(daosByResourceName, daoConfig.groupDao());
 		put(daosByResourceName, daoConfig.healthcareServiceDao());
+		put(daosByResourceName, daoConfig.libraryDao());
 		put(daosByResourceName, daoConfig.locationDao());
+		put(daosByResourceName, daoConfig.measureDao());
+		put(daosByResourceName, daoConfig.measureReportDao());
 		put(daosByResourceName, daoConfig.namingSystemDao());
+		put(daosByResourceName, daoConfig.organizationAffiliationDao());
 		put(daosByResourceName, daoConfig.organizationDao());
 		put(daosByResourceName, daoConfig.patientDao());
 		put(daosByResourceName, daoConfig.practitionerDao());

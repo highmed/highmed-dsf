@@ -19,6 +19,7 @@ public class Targets
 			this.entries.addAll(targets);
 	}
 
+	@JsonProperty("entries")
 	public List<Target> getEntries()
 	{
 		return Collections.unmodifiableList(entries);

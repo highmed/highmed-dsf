@@ -8,6 +8,7 @@ import org.highmed.dsf.fhir.dao.ActivityDefinitionDao;
 import org.highmed.dsf.fhir.dao.BinaryDao;
 import org.highmed.dsf.fhir.dao.BundleDao;
 import org.highmed.dsf.fhir.dao.CodeSystemDao;
+import org.highmed.dsf.fhir.dao.DocumentReferenceDao;
 import org.highmed.dsf.fhir.dao.EndpointDao;
 import org.highmed.dsf.fhir.dao.GroupDao;
 import org.highmed.dsf.fhir.dao.HealthcareServiceDao;
@@ -42,6 +43,8 @@ public interface DaoProvider
 	BinaryDao getBinaryDao();
 
 	BundleDao getBundleDao();
+
+	DocumentReferenceDao getDocumentReferenceDao();
 
 	CodeSystemDao getCodeSystemDao();
 

@@ -10,3 +10,13 @@ RUN mkdir /usr/local/apache2/ssl/ && \
 # setting non existing default values, see host-ssl.conf IfFile tests
 ENV SSL_CERTIFICATE_CHAIN_FILE="/does/not/exist"
 ENV SSL_CA_DN_REQUEST_FILE="/does/not/exist"
+
+# timeout (seconds) for reverse proxy to app server http connection, time the proxy waits for a reply
+ENV PROXY_PASS_TIMEOUT_HTTP=60
+# timeout (seconds) for reverse proxy to app server ws connection, time the proxy waits for a reply
+ENV PROXY_PASS_TIMEOUT_WS=60
+
+# connection timeout (seconds) for reverse proxy to app server http connection, time the proxy waits for a connection to be established 
+ENV PROXY_PASS_CONNECTION_TIMEOUT_HTTP=30
+# connection timeout (seconds) for reverse proxy to app server ws connection, time the proxy waits for a connection to be established
+ENV PROXY_PASS_CONNECTION_TIMEOUT_WS=30
