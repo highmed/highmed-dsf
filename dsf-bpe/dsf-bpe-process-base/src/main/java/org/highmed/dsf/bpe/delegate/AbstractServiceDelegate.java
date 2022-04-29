@@ -27,7 +27,7 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 	private final TaskHelper taskHelper;
 	private final ReadAccessHelper readAccessHelper;
 
-	private DelegateExecution execution;
+	protected DelegateExecution execution;
 
 	public AbstractServiceDelegate(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
 			ReadAccessHelper readAccessHelper)
@@ -157,5 +157,50 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 
 		Task leadingTask = (Task) execution.getVariable(BPMN_EXECUTION_VARIABLE_LEADING_TASK);
 		return leadingTask != null ? leadingTask : getCurrentTaskFromExecutionVariables();
+	}
+
+	/**
+	 * <i>Uses this method to update the process engine variable {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_TASK},
+	 * after modifying the {@link Task}.</i>
+	 *
+	 * @param task
+	 *            not <code>null</code>
+	 * @throws IllegalStateException
+	 *             if execution of this service delegate has not been started
+	 * @see ConstantsBase#BPMN_EXECUTION_VARIABLE_TASK
+	 */
+	protected final void updateCurrentTaskInExecutionVariables(Task task)
+	{
+		if (execution == null)
+			throw new IllegalStateException("execution not started");
+
+		Objects.requireNonNull(task, "task");
+		execution.setVariable(BPMN_EXECUTION_VARIABLE_TASK, task);
+	}
+
+	/**
+	 * <i>Uses this method to update the process engine variable
+	 * {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_LEADING_TASK}, after modifying the {@link Task}.</i>
+	 *
+	 * Updates the current task if no leading task is set.
+	 *
+	 * @param task
+	 *            not <code>null</code>
+	 * @throws IllegalStateException
+	 *             if execution of this service delegate has not been started
+	 * @see ConstantsBase#BPMN_EXECUTION_VARIABLE_LEADING_TASK
+	 */
+	protected final void updateLeadingTaskInExecutionVariables(Task task)
+	{
+		if (execution == null)
+			throw new IllegalStateException("execution not started");
+
+		Objects.requireNonNull(task, "task");
+		Task leadingTask = (Task) execution.getVariable(BPMN_EXECUTION_VARIABLE_LEADING_TASK);
+
+		if (leadingTask != null)
+			execution.setVariable(BPMN_EXECUTION_VARIABLE_LEADING_TASK, task);
+		else
+			updateCurrentTaskInExecutionVariables(task);
 	}
 }
