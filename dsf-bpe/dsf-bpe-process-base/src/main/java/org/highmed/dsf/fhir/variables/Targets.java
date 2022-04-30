@@ -50,7 +50,13 @@ public class Targets
 		if (target == null)
 			return new Targets(entries);
 
-		return removeByEndpointIdentifierValue(target.getEndpointIdentifierValue());
+		Targets newTargets = removeByEndpointIdentifierValue(target.getEndpointIdentifierValue());
+
+		// if the old target factory method is used, the target object does not have an endpoint identifier set
+		if (target.getEndpointIdentifierValue() == null)
+			newTargets.removeTarget(target);
+
+		return newTargets;
 	}
 
 	/**
