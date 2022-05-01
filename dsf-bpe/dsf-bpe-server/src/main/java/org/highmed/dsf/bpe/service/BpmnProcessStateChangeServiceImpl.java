@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -72,19 +73,6 @@ public class BpmnProcessStateChangeServiceImpl implements BpmnProcessStateChange
 		}
 	}
 
-	private void updateStates(Map<ProcessKeyAndVersion, ProcessState> states)
-	{
-		try
-		{
-			processStateDao.updateStates(states);
-		}
-		catch (SQLException e)
-		{
-			logger.warn("Error while updating process states in db", e);
-			throw new RuntimeException(e);
-		}
-	}
-
 	@Override
 	public List<ProcessStateChangeOutcome> deploySuspendOrActivateProcesses(Stream<BpmnFileAndModel> models)
 	{
@@ -143,7 +131,7 @@ public class BpmnProcessStateChangeServiceImpl implements BpmnProcessStateChange
 					|| (ProcessState.EXCLUDED.equals(oldState) && ProcessState.ACTIVE.equals(newState))
 					|| (ProcessState.EXCLUDED.equals(oldState) && ProcessState.DRAFT.equals(newState)))
 			{
-				logger.info("Activating process {}", process.toString());
+				logger.debug("Activating process {}", process.toString());
 				repositoryService.activateProcessDefinitionById(definition.getId());
 			}
 			else if ((ProcessState.NEW.equals(oldState) && ProcessState.RETIRED.equals(newState))
@@ -153,17 +141,56 @@ public class BpmnProcessStateChangeServiceImpl implements BpmnProcessStateChange
 					|| (ProcessState.DRAFT.equals(oldState) && ProcessState.RETIRED.equals(newState))
 					|| (ProcessState.DRAFT.equals(oldState) && ProcessState.EXCLUDED.equals(newState)))
 			{
-				logger.info("Suspending process {}", process.toString());
+				logger.debug("Suspending process {}", process.toString());
 				repositoryService.suspendProcessDefinitionById(definition.getId());
 			}
 		}
 
 		updateStates(newProcessStates);
 
+		logProcessDeploymentStatus();
+
 		return newProcessStates.entrySet().stream()
 				.map(e -> new ProcessStateChangeOutcome(e.getKey(),
 						oldProcessStates.getOrDefault(e.getKey(), ProcessState.NEW), e.getValue()))
 				.collect(Collectors.toList());
+	}
+
+	private void updateStates(Map<ProcessKeyAndVersion, ProcessState> states)
+	{
+		try
+		{
+			processStateDao.updateStates(states);
+		}
+		catch (SQLException e)
+		{
+			logger.warn("Error while updating process states in db", e);
+			throw new RuntimeException(e);
+		}
+	}
+
+	private void logProcessDeploymentStatus()
+	{
+		Map<String, Deployment> deploymentsById = repositoryService.createDeploymentQuery().orderByDeploymentName()
+				.asc().orderByDeploymentTime().desc().list().stream()
+				.collect(Collectors.toMap(Deployment::getId, Function.identity()));
+
+		List<ProcessDefinition> definitions = repositoryService.createProcessDefinitionQuery()
+				.orderByProcessDefinitionKey().asc().orderByVersionTag().asc().orderByProcessDefinitionVersion().asc()
+				.list();
+
+		// standard for-each loop to produce cleaner log messages
+		for (ProcessDefinition def : definitions)
+		{
+			Deployment dep = deploymentsById.get(def.getDeploymentId());
+
+			if (def.isSuspended())
+				logger.debug("Suspended process {}/{} (internal version {}) from {} deployed {}", def.getKey(),
+						def.getVersionTag(), def.getVersion(), dep.getSource(), dep.getDeploymentTime());
+			else
+				logger.info("Active process {}/{} (internal version {}) from {} deployed {}", def.getKey(),
+						def.getVersionTag(), def.getVersion(), dep.getSource(), dep.getDeploymentTime());
+		}
 	}
 
 	private void deploy(BpmnFileAndModel fileAndModel)
@@ -176,8 +203,22 @@ public class BpmnProcessStateChangeServiceImpl implements BpmnProcessStateChange
 
 		Deployment deployment = builder.deploy();
 
-		logger.info("Process {} from {}://{} deployed with id {}", processKeyAndVersion.toString(),
+		logger.debug("Process {} from {}://{} deployed with id {}", processKeyAndVersion.toString(),
 				fileAndModel.getJars().stream().map(Path::toString).collect(Collectors.joining("; ")),
 				fileAndModel.getFile(), deployment.getId());
+
+		if (draft.contains(processKeyAndVersion))
+		{
+			List<ProcessDefinition> activeDraftDefinitions = repositoryService.createProcessDefinitionQuery()
+					.processDefinitionKey(processKeyAndVersion.getKey()).versionTag(processKeyAndVersion.getVersion())
+					.orderByDeploymentTime().desc().active().list();
+
+			activeDraftDefinitions.stream().skip(1).forEach(def ->
+			{
+				logger.debug("Suspending existing draft process definition {} from deployment with id {}",
+						processKeyAndVersion.toString(), def.getDeploymentId());
+				repositoryService.suspendProcessDefinitionById(def.getId());
+			});
+		}
 	}
 }
