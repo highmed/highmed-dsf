@@ -140,4 +140,15 @@ public class EndpointProviderImpl implements EndpointProvider, InitializingBean
 				.filter(r -> r instanceof Endpoint).map(r -> (Endpoint) r)
 				.filter(e -> EndpointStatus.ACTIVE.equals(e.getStatus())).findFirst();
 	}
+
+	@Override
+	public Optional<Endpoint> getEndpoint(String endpointIdentifierValue)
+	{
+		Bundle resultSet = getLocalWebserviceClient().searchWithStrictHandling(Endpoint.class,
+				Map.of("status", Collections.singletonList("active"), "identifier", Collections.singletonList(
+						ConstantsBase.NAMINGSYSTEM_HIGHMED_ENDPOINT_IDENTIFIER + "|" + endpointIdentifierValue)));
+
+		return resultSet.getEntry().stream().map(bundleEntry -> bundleEntry.getResource())
+				.filter(resource -> resource instanceof Endpoint).map(endpoint -> (Endpoint) endpoint).findFirst();
+	}
 }

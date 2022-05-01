@@ -67,4 +67,11 @@ public interface EndpointProvider
 		return getFirstConsortiumEndpoint(consortiumIdentifierValue, roleSystem, roleCode, organizationIdentifierValue)
 				.map(Endpoint::getAddress);
 	}
+
+	Optional<Endpoint> getEndpoint(String endpointIdentifierValue);
+
+	default Optional<String> getEndpointAddress(String endpointIdentifierValue)
+	{
+		return getEndpoint(endpointIdentifierValue).map(Endpoint::getAddress);
+	}
 }
