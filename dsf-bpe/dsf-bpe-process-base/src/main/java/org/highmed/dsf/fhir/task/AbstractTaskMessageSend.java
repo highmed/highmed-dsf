@@ -111,7 +111,7 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 		}
 	}
 
-	private void addErrorMessage(Task task, String errorMessage)
+	protected void addErrorMessage(Task task, String errorMessage)
 	{
 		task.addOutput(getTaskHelper().createOutput(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR,
 				errorMessage));
