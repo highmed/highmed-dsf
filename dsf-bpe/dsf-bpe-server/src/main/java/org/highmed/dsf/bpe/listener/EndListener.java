@@ -10,6 +10,7 @@ import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ME
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.ExecutionListener;
+import org.camunda.bpm.engine.variable.Variables;
 import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.fhir.client.FhirWebserviceClient;
@@ -68,7 +69,7 @@ public class EndListener implements ExecutionListener
 		{
 			// in a called process --> process does not end here, don't change the task variable
 			// reset VARIABLE_IS_CALL_ACTIVITY to false, since we leave the called process
-			execution.setVariable(BPMN_EXECUTION_VARIABLE_IN_CALLED_PROCESS, false);
+			execution.setVariable(BPMN_EXECUTION_VARIABLE_IN_CALLED_PROCESS, Variables.booleanValue(false));
 		}
 	}
 

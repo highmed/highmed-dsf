@@ -14,6 +14,7 @@ import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
+import org.highmed.dsf.fhir.variables.FhirResourceValues;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +28,7 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 	private final TaskHelper taskHelper;
 	private final ReadAccessHelper readAccessHelper;
 
-	private DelegateExecution execution;
+	protected DelegateExecution execution;
 
 	public AbstractServiceDelegate(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
 			ReadAccessHelper readAccessHelper)
@@ -157,5 +158,50 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 
 		Task leadingTask = (Task) execution.getVariable(BPMN_EXECUTION_VARIABLE_LEADING_TASK);
 		return leadingTask != null ? leadingTask : getCurrentTaskFromExecutionVariables();
+	}
+
+	/**
+	 * <i>Uses this method to update the process engine variable {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_TASK},
+	 * after modifying the {@link Task}.</i>
+	 *
+	 * @param task
+	 *            not <code>null</code>
+	 * @throws IllegalStateException
+	 *             if execution of this service delegate has not been started
+	 * @see ConstantsBase#BPMN_EXECUTION_VARIABLE_TASK
+	 */
+	protected final void updateCurrentTaskInExecutionVariables(Task task)
+	{
+		if (execution == null)
+			throw new IllegalStateException("execution not started");
+
+		Objects.requireNonNull(task, "task");
+		execution.setVariable(BPMN_EXECUTION_VARIABLE_TASK, FhirResourceValues.create(task));
+	}
+
+	/**
+	 * <i>Uses this method to update the process engine variable
+	 * {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_LEADING_TASK}, after modifying the {@link Task}.</i>
+	 *
+	 * Updates the current task if no leading task is set.
+	 *
+	 * @param task
+	 *            not <code>null</code>
+	 * @throws IllegalStateException
+	 *             if execution of this service delegate has not been started
+	 * @see ConstantsBase#BPMN_EXECUTION_VARIABLE_LEADING_TASK
+	 */
+	protected final void updateLeadingTaskInExecutionVariables(Task task)
+	{
+		if (execution == null)
+			throw new IllegalStateException("execution not started");
+
+		Objects.requireNonNull(task, "task");
+		Task leadingTask = (Task) execution.getVariable(BPMN_EXECUTION_VARIABLE_LEADING_TASK);
+
+		if (leadingTask != null)
+			execution.setVariable(BPMN_EXECUTION_VARIABLE_LEADING_TASK, FhirResourceValues.create(task));
+		else
+			updateCurrentTaskInExecutionVariables(task);
 	}
 }
