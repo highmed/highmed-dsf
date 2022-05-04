@@ -62,7 +62,7 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 	private static final Pattern URL_PATTERN = Pattern
 			.compile("(https?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_.|]");
 	private static final Pattern XML_REFERENCE_UUID_PATTERN = Pattern
-			.compile("&lt;reference value=\"((" + RESOURCE_NAMES + ")/" + UUID + ")\"&gt;");
+			.compile("&lt;reference value=\"((" + RESOURCE_NAMES + ")/" + UUID + ")\"/&gt;");
 	private static final Pattern JSON_REFERENCE_UUID_PATTERN = Pattern
 			.compile("\"reference\": \"((" + RESOURCE_NAMES + ")/" + UUID + ")\",");
 	private static final Pattern XML_ID_UUID_AND_VERSION_PATTERN = Pattern.compile(
