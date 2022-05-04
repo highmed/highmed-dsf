@@ -13,7 +13,9 @@ LABEL maintainer="hauke.hund@hs-heilbronn.de"
 
 EXPOSE 8080
 
-RUN adduser --system --no-create-home --group --uid 2101 java
+RUN adduser --system --no-create-home --group --uid 2101 java && apt update && \
+    apt dist-upgrade -y
+
 WORKDIR /opt/fhir
 COPY --from=builder /opt/fhir ./
 
