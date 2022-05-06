@@ -8,6 +8,7 @@ table#header {
 
 table#header img {
 	height: 6em;
+	display: block;
 }
 
 td#url {
