@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Targets
@@ -91,6 +92,7 @@ public class Targets
 						.collect(Collectors.toList()));
 	}
 
+	@JsonIgnore
 	public boolean isEmpty()
 	{
 		return entries.isEmpty();

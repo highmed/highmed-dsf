@@ -24,7 +24,7 @@ public class ObjectMapperFactory
 		return JsonMapper.builder().serializationInclusion(Include.NON_NULL).serializationInclusion(Include.NON_EMPTY)
 				.addModule(fhirModule(fhirContext)).addModule(OpenEhrObjectMapperFactory.openEhrModule())
 				.disable(MapperFeature.AUTO_DETECT_CREATORS).disable(MapperFeature.AUTO_DETECT_FIELDS)
-				.disable(MapperFeature.AUTO_DETECT_GETTERS).disable(MapperFeature.AUTO_DETECT_IS_GETTERS)
+				// .disable(MapperFeature.AUTO_DETECT_GETTERS).disable(MapperFeature.AUTO_DETECT_IS_GETTERS)
 				.disable(MapperFeature.AUTO_DETECT_SETTERS).build();
 	}
 
