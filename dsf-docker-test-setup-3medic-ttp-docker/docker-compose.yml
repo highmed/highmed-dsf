@@ -556,6 +556,9 @@ services:
         highmedorg_executeFeasibility/0.6.0
         highmedorg_requestDataSharing/0.6.0
         highmedorg_executeDataSharing/0.6.0
+        highmedorg_executeFeasibilityMpcMultiShare/0.6.0
+        highmedorg_executeFeasibilityMpcSingleShare/0.6.0
+        highmedorg_requestFeasibilityMpc/0.6.0
       # property org.highmed.dsf.bpe.allow.list.organization should only be set for testing, do not configure property in production, potential security risk
       ORG_HIGHMED_DSF_BPE_ALLOW_LIST_ORGANIZATION: Test_TTP
     networks:
