@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>org.highmed.dsf</groupId>
 		<artifactId>dsf-pom</artifactId>
-		<version>0.5.5</version>
+		<version>0.6.0</version>
 	</parent>
 
 	<modules>
@@ -101,6 +101,11 @@
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
 				<artifactId>dsf-tools-docker-secrets-reader</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-tools-documentation-generator</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 		</dependencies>

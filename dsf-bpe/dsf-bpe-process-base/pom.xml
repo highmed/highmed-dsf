@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.highmed.dsf</groupId>
 		<artifactId>dsf-bpe-pom</artifactId>
-		<version>0.5.5</version>
+		<version>0.6.0</version>
 	</parent>
 
 	<dependencies>
@@ -22,6 +22,10 @@
 
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
+			<artifactId>dsf-pseudonymization-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-pseudonymization-medic</artifactId>
 		</dependency>
 		<dependency>
@@ -32,6 +36,11 @@
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-mpi-client</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.highmed.dsf</groupId>
+			<artifactId>dsf-consent-client</artifactId>
 		</dependency>
 
 		<dependency>

@@ -8,6 +8,7 @@ import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ER
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -188,11 +189,12 @@ public class TaskHandler implements InitializingBean
 			String processVersion)
 	{
 		if (processVersion != null && !processVersion.isBlank())
-			return repositoryService.createProcessDefinitionQuery()
-					.processDefinitionKey(processDomain + "_" + processDefinitionKey).versionTag(processVersion)
-					.singleResult();
+			return repositoryService.createProcessDefinitionQuery().active()
+					.processDefinitionKey(processDomain + "_" + processDefinitionKey).versionTag(processVersion).list()
+					.stream().sorted(Comparator.comparing(ProcessDefinition::getVersion).reversed()).findFirst()
+					.orElse(null);
 		else
-			return repositoryService.createProcessDefinitionQuery()
+			return repositoryService.createProcessDefinitionQuery().active()
 					.processDefinitionKey(processDomain + "_" + processDefinitionKey).latestVersion().singleResult();
 	}
 

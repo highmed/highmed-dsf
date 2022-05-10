@@ -1,5 +1,5 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>dsf-bpe-server-jetty</artifactId>
@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.highmed.dsf</groupId>
 		<artifactId>dsf-bpe-pom</artifactId>
-		<version>0.5.5</version>
+		<version>0.6.0</version>
 	</parent>
 
 	<dependencies>
@@ -21,11 +21,23 @@
 		</dependency>
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
+			<artifactId>dsf-tools-documentation-generator</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.highmed.dsf</groupId>
+			<artifactId>dsf-consent-client-stub</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-openehr-client-stub</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-mpi-client-stub</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.highmed.dsf</groupId>
+			<artifactId>dsf-pseudonymization-client-stub</artifactId>
 		</dependency>
 
 		<dependency>
@@ -139,59 +151,35 @@
 					</filesets>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+						<phase>prepare-package</phase>
+					</execution>
+				</executions>
+				<configuration>
+					<executable>java</executable>
+					<arguments>
+						<argument>-classpath</argument>
+						<classpath/>
+						<argument>
+							org.highmed.dsf.tools.generator.DocumentationGenerator
+						</argument>
+						<argument>
+							org.highmed.dsf.bpe
+						</argument>
+					</arguments>
+					<includeProjectDependencies>true</includeProjectDependencies>
+					<addResourcesToClasspath>true</addResourcesToClasspath>
+					<classpathScope>compile</classpathScope>
+					<workingDirectory>${project.basedir}</workingDirectory>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
-
-	<profiles>
-		<profile>
-			<id>copy-highmed-processes</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-dependency-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>copy-process-plugins-for-testing</id>
-								<phase>package</phase>
-								<goals>
-									<goal>copy</goal>
-								</goals>
-								<configuration>
-									<artifactItems>
-										<artifactItem>
-											<groupId>org.highmed.dsf</groupId>
-											<artifactId>dsf-bpe-process-ping</artifactId>
-											<version>${project.version}</version>
-										</artifactItem>
-										<artifactItem>
-											<groupId>org.highmed.dsf</groupId>
-											<artifactId>dsf-bpe-process-update-allow-list</artifactId>
-											<version>${project.version}</version>
-										</artifactItem>
-										<artifactItem>
-											<groupId>org.highmed.dsf</groupId>
-											<artifactId>dsf-bpe-process-update-resources</artifactId>
-											<version>${project.version}</version>
-										</artifactItem>
-										<artifactItem>
-											<groupId>org.highmed.dsf</groupId>
-											<artifactId>dsf-bpe-process-feasibility</artifactId>
-											<version>${project.version}</version>
-										</artifactItem>
-										<artifactItem>
-											<groupId>org.highmed.dsf</groupId>
-											<artifactId>dsf-bpe-process-local-services</artifactId>
-											<version>${project.version}</version>
-										</artifactItem>
-									</artifactItems>
-									<outputDirectory>process</outputDirectory>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
 </project>

@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>org.highmed.dsf</groupId>
 		<artifactId>dsf-pom</artifactId>
-		<version>0.5.5</version>
+		<version>0.6.0</version>
 	</parent>
 
 	<modules>
@@ -22,7 +22,7 @@
 		<main.basedir>${project.basedir}/../..</main.basedir>
 
 		<!-- if upgrading, copy version specific camunda sql scripts to dsf-bpe-server/src/main/resource/db/camunda and create a corresponding liquibase migration script -->
-		<camunda.version>7.15.0</camunda.version>
+		<camunda.version>7.17.0</camunda.version>
 	</properties>
 
 	<repositories>
@@ -123,7 +123,22 @@
 				<artifactId>dsf-tools-docker-secrets-reader</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-tools-documentation-generator</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-pseudonymization-client</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-pseudonymization-client-stub</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
 				<artifactId>dsf-pseudonymization-medic</artifactId>
@@ -143,6 +158,17 @@
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
 				<artifactId>dsf-mpi-client-stub</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-consent-client</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-consent-client-stub</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 

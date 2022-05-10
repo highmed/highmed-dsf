@@ -29,11 +29,15 @@ public abstract class AbstractHl7v2Client
 
 		if (socketFactory != null)
 		{
+			logger.debug("HL7v2 client configured using TLS based on {}", socketFactory.getClass().getName());
+
 			this.useTLS = true;
 			context.setSocketFactory(socketFactory);
 		}
 		else
 		{
+			logger.debug("HL7v2 client configured without TLS");
+
 			this.useTLS = false;
 		}
 	}
@@ -43,6 +47,7 @@ public abstract class AbstractHl7v2Client
 		Terser terser = new Terser(request);
 		String messageType = terser.get("/MSH-9-1") + "^" + terser.get("/MSH-9-2");
 		String destination = host + ":" + port;
+
 		logger.debug("Sending message of type {} to {}", messageType, destination);
 
 		Connection connection = context.newClient(host, port, useTLS);

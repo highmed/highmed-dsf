@@ -31,6 +31,7 @@ import org.highmed.dsf.fhir.search.parameters.CodeSystemIdentifier;
 import org.highmed.dsf.fhir.search.parameters.CodeSystemStatus;
 import org.highmed.dsf.fhir.search.parameters.CodeSystemUrl;
 import org.highmed.dsf.fhir.search.parameters.CodeSystemVersion;
+import org.highmed.dsf.fhir.search.parameters.DocumentReferenceIdentifier;
 import org.highmed.dsf.fhir.search.parameters.EndpointAddress;
 import org.highmed.dsf.fhir.search.parameters.EndpointIdentifier;
 import org.highmed.dsf.fhir.search.parameters.EndpointName;
@@ -131,6 +132,7 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Enumerations.FHIRVersion;
@@ -228,11 +230,9 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 	private final ParameterConverter parameterConverter;
 	private final IValidationSupport validationSupport;
 
-	public ConformanceServiceImpl(String path, String serverBase, int defaultPageCount, BuildInfoReader buildInfoReader,
+	public ConformanceServiceImpl(String serverBase, int defaultPageCount, BuildInfoReader buildInfoReader,
 			ParameterConverter parameterConverter, IValidationSupport validationSupport)
 	{
-		super(path);
-
 		this.serverBase = serverBase;
 		this.defaultPageCount = defaultPageCount;
 		this.buildInfoReader = buildInfoReader;
@@ -243,8 +243,6 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
-		super.afterPropertiesSet();
-
 		Objects.requireNonNull(serverBase, "serverBase");
 		Objects.requireNonNull(buildInfoReader, "buildInfoReader");
 		Objects.requireNonNull(parameterConverter, "parameterConverter");
@@ -296,10 +294,11 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 		websocketExtension.setValue(new UrlType(serverBase.replace("http", "ws") + ServerEndpoint.PATH));
 
 		var resources = Arrays.asList(ActivityDefinition.class, Binary.class, Bundle.class, CodeSystem.class,
-				Endpoint.class, Group.class, HealthcareService.class, Library.class, Location.class, Measure.class,
-				MeasureReport.class, NamingSystem.class, Organization.class, OrganizationAffiliation.class,
-				Patient.class, PractitionerRole.class, Practitioner.class, Provenance.class, ResearchStudy.class,
-				StructureDefinition.class, Subscription.class, Task.class, ValueSet.class);
+				DocumentReference.class, Endpoint.class, Group.class, HealthcareService.class, Library.class,
+				Location.class, Measure.class, MeasureReport.class, NamingSystem.class, Organization.class,
+				OrganizationAffiliation.class, Patient.class, PractitionerRole.class, Practitioner.class,
+				Provenance.class, ResearchStudy.class, StructureDefinition.class, Subscription.class, Task.class,
+				ValueSet.class);
 
 		var searchParameters = new HashMap<Class<? extends Resource>, List<Class<? extends AbstractSearchParameter<?>>>>();
 		var revIncludeParameters = new HashMap<Class<? extends Resource>, List<Class<? extends AbstractRevIncludeParameterFactory>>>();
@@ -315,6 +314,8 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 
 		searchParameters.put(CodeSystem.class, Arrays.asList(CodeSystemDate.class, CodeSystemIdentifier.class,
 				CodeSystemUrl.class, CodeSystemVersion.class, CodeSystemStatus.class));
+
+		searchParameters.put(DocumentReference.class, Arrays.asList(DocumentReferenceIdentifier.class));
 
 		searchParameters.put(Endpoint.class, Arrays.asList(EndpointAddress.class, EndpointIdentifier.class,
 				EndpointName.class, EndpointOrganization.class, EndpointStatus.class));
@@ -420,11 +421,13 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 			r.addInteraction().setCode(TypeRestfulInteraction.SEARCHTYPE);
 
 			var resourceSearchParameters = searchParameters.getOrDefault(resource, Collections.emptyList());
-			var resourceRevIncludeParameters = revIncludeParameters.getOrDefault(resource, Collections.emptyList());
-
 			resourceSearchParameters.stream().map(this::createSearchParameter)
 					.sorted(Comparator.comparing(CapabilityStatementRestResourceSearchParamComponent::getName))
 					.forEach(r::addSearchParam);
+
+			r.addSearchParam(createCountParameter(defaultPageCount));
+			r.addSearchParam(createFormatParameter());
+			r.addSearchParam(createIdParameter());
 
 			var includes = resourceSearchParameters.stream().map(p -> p.getAnnotation(IncludeParameterDefinition.class))
 					.filter(def -> def != null).collect(Collectors.toList());
@@ -435,6 +438,12 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 						.map(StringType::new).collect(Collectors.toList()));
 			}
 
+			r.addSearchParam(createLastUpdatedParameter());
+			r.addSearchParam(createPageParameter());
+			r.addSearchParam(createPrettyParameter());
+			r.addSearchParam(createProfileParameter());
+
+			var resourceRevIncludeParameters = revIncludeParameters.getOrDefault(resource, Collections.emptyList());
 			var revIncludes = resourceRevIncludeParameters.stream()
 					.map(p -> p.getAnnotation(IncludeParameterDefinition.class)).filter(def -> def != null)
 					.collect(Collectors.toList());
@@ -445,10 +454,6 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 						.map(StringType::new).collect(Collectors.toList()));
 			}
 
-			r.addSearchParam(createFormatParameter());
-			r.addSearchParam(createPrettyParameter());
-			r.addSearchParam(createCountParameter(defaultPageCount));
-			r.addSearchParam(createPageParameter());
 			r.addSearchParam(createSortParameter(
 					Stream.concat(standardSortableSearchParameters.stream(), resourceSearchParameters.stream())));
 
@@ -507,6 +512,11 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 						+ " (one or multiple as comma separated string), prefix with '-' for reversed order");
 	}
 
+	private CapabilityStatementRestResourceSearchParamComponent createLastUpdatedParameter()
+	{
+		return createSearchParameter(ResourceLastUpdated.class);
+	}
+
 	private CapabilityStatementRestResourceSearchParamComponent createPageParameter()
 	{
 		return createSearchParameter("_page", "", SearchParamType.NUMBER,
@@ -526,9 +536,14 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 						Stream.of(ParameterConverter.XML_FORMAT), ParameterConverter.XML_FORMATS.stream())
 				.collect(Collectors.joining(", ", "[", "]"));
 		CapabilityStatementRestResourceSearchParamComponent createFormatParameter = createSearchParameter("_format", "",
-				SearchParamType.STRING,
+				SearchParamType.SPECIAL,
 				"Specify the returned format of the payload response, allowed values: " + formatValues);
 		return createFormatParameter;
+	}
+
+	private CapabilityStatementRestResourceSearchParamComponent createIdParameter()
+	{
+		return createSearchParameter(ResourceId.class);
 	}
 
 	private CapabilityStatementRestResourceSearchParamComponent createPrettyParameter()
@@ -537,6 +552,11 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 				SearchParamType.SPECIAL,
 				"Ask for a pretty printed response for human convenience, allowed values: [true, false]");
 		return createFormatParameter;
+	}
+
+	private CapabilityStatementRestResourceSearchParamComponent createProfileParameter()
+	{
+		return createSearchParameter(ResourceProfile.class);
 	}
 
 	private CapabilityStatementRestResourceOperationComponent createOperation(String name, String definition,

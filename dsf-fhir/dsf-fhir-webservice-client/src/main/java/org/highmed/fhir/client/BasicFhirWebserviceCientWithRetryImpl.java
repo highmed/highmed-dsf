@@ -107,6 +107,12 @@ class BasicFhirWebserviceCientWithRetryImpl extends AbstractFhirWebserviceClient
 	}
 
 	@Override
+	public <R extends Resource> R read(R oldValue)
+	{
+		return retry(nTimes, delayMillis, () -> delegate.read(oldValue));
+	}
+
+	@Override
 	public Resource read(String resourceTypeName, String id)
 	{
 		return retry(nTimes, delayMillis, () -> delegate.read(resourceTypeName, id));

@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.highmed.dsf</groupId>
 		<artifactId>dsf-pseudonymization-pom</artifactId>
-		<version>0.5.5</version>
+		<version>0.6.0</version>
 	</parent>
 	
 	<properties>
@@ -41,7 +41,6 @@
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk15on</artifactId>
-			<version>1.65</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

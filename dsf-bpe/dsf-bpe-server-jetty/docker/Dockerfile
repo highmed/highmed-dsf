@@ -13,7 +13,9 @@ LABEL maintainer="hauke.hund@hs-heilbronn.de"
 
 EXPOSE 8080
 
-RUN adduser --system --no-create-home --group --uid 2202 java
+RUN adduser --system --no-create-home --group --uid 2202 java && \
+    apt update && apt dist-upgrade -y
+
 WORKDIR /opt/bpe
 COPY --from=builder /opt/bpe ./
 

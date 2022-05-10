@@ -2,12 +2,16 @@ package org.highmed.fhir.client;
 
 import java.io.InputStream;
 import java.security.KeyStore;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.ProcessingException;
@@ -33,6 +37,8 @@ import org.highmed.dsf.fhir.adapter.CapabilityStatementJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.CapabilityStatementXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.CodeSystemJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.CodeSystemXmlFhirAdapter;
+import org.highmed.dsf.fhir.adapter.DocumentReferenceJsonFhirAdapter;
+import org.highmed.dsf.fhir.adapter.DocumentReferenceXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.EndpointJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.EndpointXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.GroupJsonFhirAdapter;
@@ -99,6 +105,8 @@ import ca.uhn.fhir.rest.api.Constants;
 
 public class FhirWebserviceClientJersey extends AbstractJerseyClient implements FhirWebserviceClient
 {
+	private static final String RFC_7231_FORMAT = "EEE, dd MMM yyyy HH:mm:ss z";
+
 	private static final Logger logger = LoggerFactory.getLogger(FhirWebserviceClientJersey.class);
 
 	private final ReferenceCleaner referenceCleaner;
@@ -130,7 +138,8 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 				new BinaryXmlFhirAdapter(fhirContext), new BundleJsonFhirAdapter(fhirContext),
 				new BundleXmlFhirAdapter(fhirContext), new CapabilityStatementJsonFhirAdapter(fhirContext),
 				new CapabilityStatementXmlFhirAdapter(fhirContext), new CodeSystemJsonFhirAdapter(fhirContext),
-				new CodeSystemXmlFhirAdapter(fhirContext), new GroupJsonFhirAdapter(fhirContext),
+				new CodeSystemXmlFhirAdapter(fhirContext), new DocumentReferenceJsonFhirAdapter(fhirContext),
+				new DocumentReferenceXmlFhirAdapter(fhirContext), new GroupJsonFhirAdapter(fhirContext),
 				new GroupXmlFhirAdapter(fhirContext), new EndpointJsonFhirAdapter(fhirContext),
 				new EndpointXmlFhirAdapter(fhirContext), new HealthcareServiceJsonFhirAdapter(fhirContext),
 				new HealthcareServiceXmlFhirAdapter(fhirContext), new LibraryJsonFhirAdapter(fhirContext),
@@ -501,19 +510,65 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 	@Override
 	public <R extends Resource> R read(Class<R> resourceType, String id)
 	{
+		return read(resourceType, id, (R) null);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <R extends Resource> R read(R oldValue)
+	{
+		return read((Class<R>) oldValue.getClass(), oldValue.getIdElement().getIdPart(), oldValue);
+	}
+
+	private <R extends Resource> R read(Class<R> resourceType, String id, R oldValue)
+	{
 		Objects.requireNonNull(resourceType, "resourceType");
 		Objects.requireNonNull(id, "id");
 
-		Response response = getResource().path(resourceType.getAnnotation(ResourceDef.class).name()).path(id).request()
-				.accept(Constants.CT_FHIR_JSON_NEW).get();
+		Builder request = getResource().path(resourceType.getAnnotation(ResourceDef.class).name()).path(id).request();
+
+		if (oldValue != null && oldValue.hasMeta())
+		{
+			if (oldValue.getMeta().hasVersionId())
+			{
+				String eTag = new EntityTag(oldValue.getMeta().getVersionIdElement().getValue(), true).toString();
+				request.header(HttpHeaders.IF_NONE_MATCH, eTag);
+				logger.trace("Sending {} Header with value '{}'", HttpHeaders.IF_NONE_MATCH, eTag.toString());
+			}
+
+			if (oldValue.getMeta().hasLastUpdated())
+			{
+				String dateValue = formatRfc7231(oldValue.getMeta().getLastUpdated());
+				request.header(HttpHeaders.IF_MODIFIED_SINCE, dateValue);
+				logger.trace("Sending {} Header with value '{}'", HttpHeaders.IF_MODIFIED_SINCE, dateValue.toString());
+			}
+		}
+
+		Response response = request.accept(Constants.CT_FHIR_JSON_NEW).get();
 
 		logger.debug("HTTP {}: {}", response.getStatusInfo().getStatusCode(),
 				response.getStatusInfo().getReasonPhrase());
 		if (Status.OK.getStatusCode() == response.getStatus())
 			// TODO remove workaround if HAPI bug fixed
 			return referenceCleaner.cleanReferenceResourcesIfBundle(response.readEntity(resourceType));
+		else if (oldValue != null && oldValue.hasMeta()
+				&& (oldValue.getMeta().hasVersionId() || oldValue.getMeta().hasLastUpdated())
+				&& Status.NOT_MODIFIED.getStatusCode() == response.getStatus())
+			return oldValue;
 		else
 			throw handleError(response);
+	}
+
+	private String formatRfc7231(Date date)
+	{
+		if (date == null)
+			return null;
+		else
+		{
+			SimpleDateFormat dateFormat = new SimpleDateFormat(RFC_7231_FORMAT, Locale.US);
+			dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+			return dateFormat.format(date);
+		}
 	}
 
 	@Override

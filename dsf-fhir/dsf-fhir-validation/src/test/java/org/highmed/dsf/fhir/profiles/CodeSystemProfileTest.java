@@ -31,8 +31,8 @@ public class CodeSystemProfileTest
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
 			Arrays.asList("highmed-code-system-0.5.0.xml", "highmed-extension-read-access-organization-0.5.0.xml",
 					"highmed-extension-read-access-consortium-role-0.5.0.xml"),
-			Arrays.asList("highmed-read-access-tag-0.5.0.xml", "highmed-organization-type-0.5.0.xml"),
-			Arrays.asList("highmed-read-access-tag-0.5.0.xml", "highmed-organization-type-0.5.0.xml"));
+			Arrays.asList("highmed-read-access-tag-0.5.0.xml", "highmed-organization-role-0.6.0.xml"),
+			Arrays.asList("highmed-read-access-tag-0.5.0.xml", "highmed-organization-role-0.6.0.xml"));
 
 	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
@@ -47,6 +47,7 @@ public class CodeSystemProfileTest
 		cs.setStatus(PublicationStatus.ACTIVE);
 		cs.setContent(CodeSystemContentMode.COMPLETE);
 		cs.addConcept().setCode("TEST").setDisplay("Test Display").setDefinition("Test Definition");
+		cs.setCaseSensitive(true);
 
 		return cs;
 	}
@@ -162,7 +163,7 @@ public class CodeSystemProfileTest
 		ex.addExtension().setUrl("consortium").setValue(new Identifier()
 				.setSystem("http://highmed.org/sid/organization-identifier").setValue("consortium.com"));
 		ex.addExtension().setUrl("role").setValue(
-				new Coding().setSystem("http://highmed.org/fhir/CodeSystem/organization-type").setCode("TTP"));
+				new Coding().setSystem("http://highmed.org/fhir/CodeSystem/organization-role").setCode("TTP"));
 
 		logResource(cs);
 
@@ -184,7 +185,7 @@ public class CodeSystemProfileTest
 		ex.addExtension().setUrl("consortium").setValue(new Identifier()
 				.setSystem("http://highmed.org/sid/organization-identifier").setValue("consortium.com"));
 		ex.addExtension().setUrl("role").setValue(
-				new Coding().setSystem("http://highmed.org/fhir/CodeSystem/organization-type").setCode("FOO"));
+				new Coding().setSystem("http://highmed.org/fhir/CodeSystem/organization-role").setCode("FOO"));
 
 		logResource(cs);
 

@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -19,11 +21,22 @@ import ca.uhn.fhir.parser.DataFormatException;
 
 public class StructureDefinitionReader
 {
-	private static final String VERSION_PATTERN_STRING = "${version}";
-	private static final Pattern VERSION_PATTERN = Pattern.compile(Pattern.quote(VERSION_PATTERN_STRING));
+	private static final String VERSION_PATTERN_STRING1 = "#{version}";
+	private static final Pattern VERSION_PATTERN1 = Pattern.compile(Pattern.quote(VERSION_PATTERN_STRING1));
+	// ${...} pattern to be backwards compatible
+	private static final String VERSION_PATTERN_STRING2 = "${version}";
+	private static final Pattern VERSION_PATTERN2 = Pattern.compile(Pattern.quote(VERSION_PATTERN_STRING2));
+
+	private static final String DATE_PATTERN_STRING1 = "#{date}";
+	private static final Pattern DATE_PATTERN1 = Pattern.compile(Pattern.quote(DATE_PATTERN_STRING1));
+	// ${...} pattern to be backwards compatible
+	private static final String DATE_PATTERN_STRING2 = "${date}";
+	private static final Pattern DATE_PATTERN2 = Pattern.compile(Pattern.quote(DATE_PATTERN_STRING2));
+	private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
 	private final FhirContext context;
 	private final String version;
+	private final LocalDate date;
 
 	public StructureDefinitionReader(FhirContext context)
 	{
@@ -32,8 +45,14 @@ public class StructureDefinitionReader
 
 	public StructureDefinitionReader(FhirContext context, String version)
 	{
+		this(context, version, LocalDate.MIN);
+	}
+
+	public StructureDefinitionReader(FhirContext context, String version, LocalDate date)
+	{
 		this.context = context;
 		this.version = version;
+		this.date = date;
 	}
 
 	public List<StructureDefinition> readXml(Path... xmlPaths)
@@ -68,7 +87,7 @@ public class StructureDefinitionReader
 
 	public StructureDefinition readXml(Path xmlPath)
 	{
-		return version == null ? doReadXml(xmlPath) : doReadXmlAndReplaceVersion(xmlPath, version);
+		return version == null ? doReadXml(xmlPath) : doReadXmlAndReplaceVersion(xmlPath, version, date);
 	}
 
 	private StructureDefinition doReadXml(Path xmlPath)
@@ -83,12 +102,12 @@ public class StructureDefinitionReader
 		}
 	}
 
-	private StructureDefinition doReadXmlAndReplaceVersion(Path xmlPath, String version)
+	private StructureDefinition doReadXmlAndReplaceVersion(Path xmlPath, String version, LocalDate date)
 	{
 		try (InputStream in = Files.newInputStream(xmlPath))
 		{
 			String read = IOUtils.toString(in, StandardCharsets.UTF_8);
-			read = VERSION_PATTERN.matcher(read).replaceAll(version);
+			read = replaceVersionAndDate(read, version, date);
 
 			return context.newXmlParser().parseResource(StructureDefinition.class, read);
 		}
@@ -98,9 +117,23 @@ public class StructureDefinitionReader
 		}
 	}
 
+	private String replaceVersionAndDate(String read, String version, LocalDate date)
+	{
+		read = VERSION_PATTERN1.matcher(read).replaceAll(version);
+		read = VERSION_PATTERN2.matcher(read).replaceAll(version);
+
+		if (date != null && !LocalDate.MIN.equals(date))
+		{
+			String dateValue = date.format(DATE_FORMAT);
+			read = DATE_PATTERN1.matcher(read).replaceAll(dateValue);
+			read = DATE_PATTERN2.matcher(read).replaceAll(dateValue);
+		}
+		return read;
+	}
+
 	public StructureDefinition readXml(String xmlOnClassPath)
 	{
-		return version == null ? doReadXml(xmlOnClassPath) : doReadXmlAndReplaceVersion(xmlOnClassPath, version);
+		return version == null ? doReadXml(xmlOnClassPath) : doReadXmlAndReplaceVersion(xmlOnClassPath, version, date);
 	}
 
 	private StructureDefinition doReadXml(String xmlOnClassPath)
@@ -115,12 +148,12 @@ public class StructureDefinitionReader
 		}
 	}
 
-	private StructureDefinition doReadXmlAndReplaceVersion(String xmlOnClassPath, String version)
+	private StructureDefinition doReadXmlAndReplaceVersion(String xmlOnClassPath, String version, LocalDate date)
 	{
 		try (InputStream in = StructureDefinitionReader.class.getResourceAsStream(xmlOnClassPath))
 		{
 			String read = IOUtils.toString(in, StandardCharsets.UTF_8);
-			read = VERSION_PATTERN.matcher(read).replaceAll(version);
+			read = replaceVersionAndDate(read, version, date);
 
 			return context.newXmlParser().parseResource(StructureDefinition.class, read);
 		}

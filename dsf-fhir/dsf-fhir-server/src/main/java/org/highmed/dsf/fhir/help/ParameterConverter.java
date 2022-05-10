@@ -115,6 +115,9 @@ public class ParameterConverter
 
 	private Optional<MediaType> getMediaType(String mediaType, boolean pretty)
 	{
+		if (mediaType == null || mediaType.isBlank())
+			mediaType = MediaType.WILDCARD;
+
 		if (mediaType.contains(MediaType.TEXT_HTML))
 			return Optional.of(mediaType("text", "html", pretty));
 		else if (mediaType.contains(Constants.CT_FHIR_JSON_NEW))
@@ -131,6 +134,8 @@ public class ParameterConverter
 			return Optional.of(mediaType("application", "xml", pretty));
 		else if (mediaType.contains(MediaType.TEXT_XML))
 			return Optional.of(mediaType("text", "xml", pretty));
+		else if (mediaType.contains(MediaType.WILDCARD))
+			return Optional.of(mediaType("application", "fhir+xml", pretty));
 		else
 			return Optional.empty();
 	}

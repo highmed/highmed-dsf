@@ -335,13 +335,13 @@
             </participatingOrganization>
             <code>
                <coding>
-                  <system value="http://highmed.org/fhir/CodeSystem/organization-type"/>
+                  <system value="http://highmed.org/fhir/CodeSystem/organization-role"/>
                   <code value="TTP"/>
                </coding>
             </code>
             <code>
                <coding>
-                  <system value="http://highmed.org/fhir/CodeSystem/organization-type"/>
+                  <system value="http://highmed.org/fhir/CodeSystem/organization-role"/>
                   <code value="DTS"/>
                </coding>
             </code>
@@ -379,13 +379,13 @@
             </participatingOrganization>
             <code>
                <coding>
-                  <system value="http://highmed.org/fhir/CodeSystem/organization-type"/>
+                  <system value="http://highmed.org/fhir/CodeSystem/organization-role"/>
                   <code value="MeDIC"/>
                </coding>
             </code>
             <code>
                <coding>
-                  <system value="http://highmed.org/fhir/CodeSystem/organization-type"/>
+                  <system value="http://highmed.org/fhir/CodeSystem/organization-role"/>
                   <code value="COS"/>
                </coding>
             </code>
@@ -423,13 +423,13 @@
             </participatingOrganization>
             <code>
                <coding>
-                  <system value="http://highmed.org/fhir/CodeSystem/organization-type"/>
+                  <system value="http://highmed.org/fhir/CodeSystem/organization-role"/>
                   <code value="MeDIC"/>
                </coding>
             </code>
             <code>
                <coding>
-                  <system value="http://highmed.org/fhir/CodeSystem/organization-type"/>
+                  <system value="http://highmed.org/fhir/CodeSystem/organization-role"/>
                   <code value="COS"/>
                </coding>
             </code>
@@ -467,13 +467,13 @@
             </participatingOrganization>
             <code>
                <coding>
-                  <system value="http://highmed.org/fhir/CodeSystem/organization-type"/>
+                  <system value="http://highmed.org/fhir/CodeSystem/organization-role"/>
                   <code value="MeDIC"/>
                </coding>
             </code>
             <code>
                <coding>
-                  <system value="http://highmed.org/fhir/CodeSystem/organization-type"/>
+                  <system value="http://highmed.org/fhir/CodeSystem/organization-role"/>
                   <code value="COS"/>
                </coding>
             </code>

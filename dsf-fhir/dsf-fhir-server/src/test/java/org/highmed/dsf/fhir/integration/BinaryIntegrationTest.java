@@ -2,6 +2,7 @@ package org.highmed.dsf.fhir.integration;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -12,6 +13,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -21,6 +23,7 @@ import java.util.stream.Collectors;
 import javax.ws.rs.core.MediaType;
 
 import org.highmed.dsf.fhir.dao.BinaryDao;
+import org.highmed.dsf.fhir.dao.DocumentReferenceDao;
 import org.highmed.dsf.fhir.dao.OrganizationDao;
 import org.highmed.dsf.fhir.dao.ResearchStudyDao;
 import org.highmed.dsf.fhir.dao.exception.ResourceDeletedException;
@@ -31,6 +34,8 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.DocumentReference;
+import org.hl7.fhir.r4.model.Enumerations.DocumentReferenceStatus;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
@@ -74,6 +79,29 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		binary.setContentType(contentType);
 		binary.setData(data);
 		binary.setSecurityContext(new Reference(createdRs.getIdElement().toVersionless()));
+
+		BinaryDao binDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
+		Binary created = binDao.create(binary);
+
+		getWebserviceClient().read(Binary.class, created.getIdElement().getIdPart());
+	}
+
+	@Test
+	public void testReadAllowedLocalUserViaSecurityContextDocumentReference() throws Exception
+	{
+		DocumentReference dr = new DocumentReference();
+		getReadAccessHelper().addLocal(dr);
+
+		DocumentReferenceDao drDao = getSpringWebApplicationContext().getBean(DocumentReferenceDao.class);
+		DocumentReference createdDr = drDao.create(dr);
+
+		final String contentType = MediaType.TEXT_PLAIN;
+		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
+
+		Binary binary = new Binary();
+		binary.setContentType(contentType);
+		binary.setData(data);
+		binary.setSecurityContext(new Reference(createdDr.getIdElement().toVersionless()));
 
 		BinaryDao binDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
 		Binary created = binDao.create(binary);
@@ -259,6 +287,43 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		binary.setContentType(contentType);
 		binary.setData(data);
 		binary.setSecurityContext(new Reference(createdRs.getIdElement().toVersionless()));
+
+		BinaryDao binDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
+		Binary created = binDao.create(binary);
+
+		getExternalWebserviceClient().read(Binary.class, created.getIdElement().getIdPart());
+	}
+
+	@Test
+	public void testReadAllowedExternalUserViaSecurityContextDocumentReference() throws Exception
+	{
+		OrganizationDao orgDao = getSpringWebApplicationContext().getBean(OrganizationDao.class);
+		PartialResult<Organization> result = orgDao.search(orgDao.createSearchQueryWithoutUserFilter(1, 1)
+				.configureParameters(Map.of("name", Arrays.asList("External Test Organization"))));
+		assertNotNull(result);
+		assertEquals(1, result.getTotal());
+		assertNotNull(result.getPartialResult());
+		assertEquals(1, result.getPartialResult().size());
+		assertNotNull(result.getPartialResult().get(0));
+
+		Organization org = result.getPartialResult().get(0);
+
+		DocumentReference dr = new DocumentReference();
+		getReadAccessHelper().addLocal(dr);
+		getReadAccessHelper().addOrganization(dr, org);
+
+		DocumentReferenceDao documentReferenceDao = getSpringWebApplicationContext()
+				.getBean(DocumentReferenceDao.class);
+		DocumentReference createdDr = documentReferenceDao.create(dr);
+		assertNotNull(createdDr);
+
+		final String contentType = MediaType.TEXT_PLAIN;
+		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
+
+		Binary binary = new Binary();
+		binary.setContentType(contentType);
+		binary.setData(data);
+		binary.setSecurityContext(new Reference(createdDr.getIdElement().toVersionless()));
 
 		BinaryDao binDao = getSpringWebApplicationContext().getBean(BinaryDao.class);
 		Binary created = binDao.create(binary);
@@ -1155,6 +1220,36 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	}
 
 	@Test
+	public void testCreateAllowedSecurityContextDocumentReference() throws Exception
+	{
+		DocumentReference dr = new DocumentReference();
+		getReadAccessHelper().addLocal(dr);
+
+		DocumentReferenceDao documentReferenceDao = getSpringWebApplicationContext()
+				.getBean(DocumentReferenceDao.class);
+		DocumentReference createdDr = documentReferenceDao.create(dr);
+
+		final String contentType = MediaType.TEXT_PLAIN;
+		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
+
+		Binary binary = new Binary();
+		binary.setContentType(contentType);
+		binary.setData(data);
+		binary.setSecurityContext(new Reference(createdDr.getIdElement().toVersionless()));
+
+		Binary created = getWebserviceClient().create(binary);
+
+		assertNotNull(created);
+		assertNotNull(created.getIdElement().toString());
+		assertEquals("1", created.getMeta().getVersionId());
+		assertNotNull(created.getMeta().getLastUpdated());
+
+		assertNotNull(created.getContentType());
+		assertEquals(contentType, created.getContentType());
+		assertTrue(Arrays.equals(data, created.getData()));
+	}
+
+	@Test
 	public void testCreateReturnMinimal() throws Exception
 	{
 		final String contentType = MediaType.TEXT_PLAIN;
@@ -1220,6 +1315,35 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 
 		assertNotNull(created.getSecurityContext());
 		assertEquals(createdRs.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
+	}
+
+	@Test
+	public void testCreateViaInputStreamDocumentReference() throws Exception
+	{
+		DocumentReferenceDao documentReferenceDao = getSpringWebApplicationContext()
+				.getBean(DocumentReferenceDao.class);
+		DocumentReference dr = new DocumentReference();
+		getReadAccessHelper().addLocal(dr);
+
+		DocumentReference createdDr = documentReferenceDao.create(dr);
+
+		final String contentType = MediaType.TEXT_PLAIN;
+		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
+
+		Binary created = getWebserviceClient().createBinary(new ByteArrayInputStream(data),
+				MediaType.valueOf(contentType), createdDr.getIdElement().toVersionless().toString());
+
+		assertNotNull(created);
+		assertNotNull(created.getIdElement().toString());
+		assertEquals("1", created.getMeta().getVersionId());
+		assertNotNull(created.getMeta().getLastUpdated());
+
+		assertNotNull(created.getContentType());
+		assertEquals(contentType, created.getContentType());
+		assertTrue(Arrays.equals(data, created.getData()));
+
+		assertNotNull(created.getSecurityContext());
+		assertEquals(createdDr.getIdElement().toVersionless(), created.getSecurityContext().getReferenceElement());
 	}
 
 	@Test
@@ -1322,6 +1446,34 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		securityContext.setType("ResearchStudy").getIdentifier()
 				.setSystem("http://highmed.org/sid/research-study-identifier")
 				.setValue(rs.getIdentifierFirstRep().getValue());
+		binary.setSecurityContext(securityContext);
+
+		Binary created = getWebserviceClient().create(binary);
+		assertNotNull(created);
+	}
+
+	@Test
+	public void testCreateSecurityContextLogicalReferenceDocumentReference() throws Exception
+	{
+		DocumentReferenceDao documentReferenceDao = getSpringWebApplicationContext()
+				.getBean(DocumentReferenceDao.class);
+		DocumentReference dr = new DocumentReference();
+		dr.addIdentifier().setSystem("http://highmed.org/sid/document-reference-test-identifier")
+				.setValue(UUID.randomUUID().toString());
+		getReadAccessHelper().addLocal(dr);
+
+		documentReferenceDao.create(dr);
+
+		final String contentType = MediaType.TEXT_PLAIN;
+		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
+
+		Binary binary = new Binary();
+		binary.setContentType(contentType);
+		binary.setData(data);
+		Reference securityContext = new Reference();
+		securityContext.setType("DocumentReference").getIdentifier()
+				.setSystem("http://highmed.org/sid/document-reference-test-identifier")
+				.setValue(dr.getIdentifierFirstRep().getValue());
 		binary.setSecurityContext(securityContext);
 
 		Binary created = getWebserviceClient().create(binary);
@@ -1488,6 +1640,71 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 
 		assertEquals(entry0.getResource().getIdElement().getIdPart(),
 				((Binary) entry1.getResource()).getSecurityContext().getReferenceElement().getIdPart());
+	}
+
+	@Test
+	public void testCreateViaTransactionBundleSecurityContextDocumentReference() throws Exception
+	{
+		String documentReferenceTempId = "urn:uuid:" + UUID.randomUUID().toString();
+		String binaryTempId = "urn:uuid:" + UUID.randomUUID().toString();
+
+		DocumentReference documentReference = new DocumentReference();
+		documentReference.setDate(new Date());
+		documentReference.setDescription("Demo DocumentReference Description");
+		documentReference.addContent().getAttachment().setContentType(MediaType.TEXT_PLAIN).setUrl(binaryTempId);
+		documentReference.setStatus(DocumentReferenceStatus.CURRENT);
+		getReadAccessHelper().addLocal(documentReference);
+
+		final String contentType = MediaType.TEXT_PLAIN;
+		final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
+
+		Binary binary = new Binary();
+		binary.setContentType(contentType);
+		binary.setData(data);
+		binary.getSecurityContext().setReference(documentReferenceTempId);
+
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		bundle.addEntry().setFullUrl(documentReferenceTempId).setResource(documentReference).getRequest()
+				.setMethod(HTTPVerb.POST).setUrl("DocumentReference");
+		bundle.addEntry().setFullUrl(binaryTempId).setResource(binary).getRequest().setMethod(HTTPVerb.POST)
+				.setUrl("Binary");
+
+		Bundle responseBundle = getWebserviceClient().postBundle(bundle);
+
+		assertNotNull(responseBundle);
+		assertEquals(BundleType.TRANSACTIONRESPONSE, responseBundle.getType());
+		assertEquals(2, responseBundle.getEntry().size());
+
+		BundleEntryComponent entry0 = responseBundle.getEntry().get(0);
+		assertNotNull(entry0);
+
+		BundleEntryComponent entry1 = responseBundle.getEntry().get(1);
+		assertNotNull(entry1);
+
+		assertNotNull(entry0.getResource());
+		assertTrue(entry0.getResource() instanceof DocumentReference);
+		assertNull(entry0.getResponse().getOutcome());
+		assertNotNull(entry0.getResponse().getStatus());
+		assertEquals("201 Created", entry0.getResponse().getStatus());
+		assertNotNull(entry0.getResponse().getLocation());
+		assertNotNull(entry0.getResponse().getEtag());
+		assertEquals("W/\"1\"", entry0.getResponse().getEtag());
+
+		assertNotNull(entry1.getResource());
+		assertTrue(entry1.getResource() instanceof Binary);
+		assertNull(entry1.getResponse().getOutcome());
+		assertNotNull(entry1.getResponse().getStatus());
+		assertEquals("201 Created", entry1.getResponse().getStatus());
+		assertNotNull(entry1.getResponse().getLocation());
+		assertNotNull(entry1.getResponse().getEtag());
+		assertEquals("W/\"1\"", entry1.getResponse().getEtag());
+
+		assertEquals(entry0.getResource().getIdElement().getIdPart(),
+				((Binary) entry1.getResource()).getSecurityContext().getReferenceElement().getIdPart());
+		assertEquals(entry1.getResource().getIdElement().getIdPart(),
+				new IdType(((DocumentReference) entry0.getResource()).getContentFirstRep().getAttachment().getUrl())
+						.getIdPart());
 	}
 
 	@Test
@@ -2091,7 +2308,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		ResearchStudy rs2 = new ResearchStudy();
 		getReadAccessHelper().addLocal(rs2);
 		getReadAccessHelper().addRole(rs2, "Parent_Organization",
-				"http://highmed.org/fhir/CodeSystem/organization-type", "MeDIC");
+				"http://highmed.org/fhir/CodeSystem/organization-role", "MeDIC");
 
 		ResearchStudy createdRs1 = researchStudyDao.create(rs1);
 		ResearchStudy createdRs2 = researchStudyDao.create(rs2);
@@ -2153,7 +2370,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		ResearchStudy rs3 = new ResearchStudy();
 		getReadAccessHelper().addLocal(rs3);
 		getReadAccessHelper().addRole(rs3, "Parent_Organization",
-				"http://highmed.org/fhir/CodeSystem/organization-type", "TTP");
+				"http://highmed.org/fhir/CodeSystem/organization-role", "TTP");
 
 		ResearchStudy createdRs1 = researchStudyDao.create(rs1);
 		ResearchStudy createdRs2 = researchStudyDao.create(rs2);
@@ -2508,7 +2725,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	{
 		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
 		ResearchStudy rs1 = new ResearchStudy();
-		readAccessHelper.addRole(rs1, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-type",
+		readAccessHelper.addRole(rs1, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-role",
 				"TTP");
 		rs1 = researchStudyDao.create(rs1);
 
@@ -2529,7 +2746,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	{
 		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
 		ResearchStudy rs1 = new ResearchStudy();
-		readAccessHelper.addRole(rs1, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-type",
+		readAccessHelper.addRole(rs1, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-role",
 				"DTS");
 		rs1 = researchStudyDao.create(rs1);
 
@@ -2550,9 +2767,9 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	{
 		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
 		ResearchStudy rs1 = new ResearchStudy();
-		readAccessHelper.addRole(rs1, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-type",
+		readAccessHelper.addRole(rs1, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-role",
 				"TTP");
-		readAccessHelper.addRole(rs1, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-type",
+		readAccessHelper.addRole(rs1, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-role",
 				"DTS");
 		rs1 = researchStudyDao.create(rs1);
 
@@ -2573,7 +2790,7 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 	{
 		ResearchStudyDao researchStudyDao = getSpringWebApplicationContext().getBean(ResearchStudyDao.class);
 		ResearchStudy rs1 = new ResearchStudy();
-		readAccessHelper.addRole(rs1, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-type",
+		readAccessHelper.addRole(rs1, "Parent_Organization", "http://highmed.org/fhir/CodeSystem/organization-role",
 				"HRP");
 		rs1 = researchStudyDao.create(rs1);
 
@@ -2587,5 +2804,38 @@ public class BinaryIntegrationTest extends AbstractIntegrationTest
 		String binaryId = binary.getIdElement().getIdPart();
 
 		expectForbidden(() -> getExternalWebserviceClient().read(Binary.class, binaryId));
+	}
+
+	@Test
+	public void testConditionalRequest() throws Exception
+	{
+		Binary binary = new Binary();
+		binary.setContentType(MediaType.TEXT_PLAIN);
+		binary.setData("Hello World".getBytes(StandardCharsets.UTF_8));
+		getReadAccessHelper().addAll(binary);
+
+		Binary created = getWebserviceClient().create(binary);
+
+		Binary read1 = getWebserviceClient().read(created);
+		assertTrue(created == read1);
+
+		Binary createdWithoutVersion = created.copy();
+		createdWithoutVersion.getMeta().setVersionId(null);
+		Binary read2 = getWebserviceClient().read(createdWithoutVersion);
+		assertTrue(createdWithoutVersion == read2);
+
+		// sleeping for 1 second to make sure version two is at least 1 second newer
+		Thread.sleep(1000L);
+
+		Binary updated = getWebserviceClient().update(created);
+		assertNotEquals(created.getMeta().getVersionId(), updated.getMeta().getVersionId());
+
+		Binary read3 = getWebserviceClient().read(created);
+		assertFalse(created == read3);
+		assertEquals(updated.getMeta().getVersionId(), read3.getMeta().getVersionId());
+
+		Binary read4 = getWebserviceClient().read(createdWithoutVersion);
+		assertFalse(createdWithoutVersion == read4);
+		assertEquals(updated.getMeta().getVersionId(), read4.getMeta().getVersionId());
 	}
 }

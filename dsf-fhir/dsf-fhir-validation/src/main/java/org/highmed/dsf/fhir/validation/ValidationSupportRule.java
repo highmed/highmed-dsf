@@ -6,6 +6,10 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
@@ -16,6 +20,7 @@ import org.highmed.dsf.fhir.validation.SnapshotGenerator.SnapshotWithValidationM
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
+import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.rules.ExternalResource;
@@ -29,8 +34,21 @@ import ca.uhn.fhir.validation.ValidationResult;
 
 public class ValidationSupportRule extends ExternalResource
 {
-	private static final String VERSION_PATTERN_STRING = "${version}";
-	private static final Pattern VERSION_PATTERN = Pattern.compile(Pattern.quote(VERSION_PATTERN_STRING));
+	private static final String VERSION_PATTERN_STRING1 = "#{version}";
+	private static final Pattern VERSION_PATTERN1 = Pattern.compile(Pattern.quote(VERSION_PATTERN_STRING1));
+	// ${...} pattern to be backwards compatible
+	private static final String VERSION_PATTERN_STRING2 = "${version}";
+	private static final Pattern VERSION_PATTERN2 = Pattern.compile(Pattern.quote(VERSION_PATTERN_STRING2));
+
+	private static final String DATE_PATTERN_STRING1 = "#{date}";
+	private static final Pattern DATE_PATTERN1 = Pattern.compile(Pattern.quote(DATE_PATTERN_STRING1));
+	// ${...} pattern to be backwards compatible
+	private static final String DATE_PATTERN_STRING2 = "${date}";
+	private static final Pattern DATE_PATTERN2 = Pattern.compile(Pattern.quote(DATE_PATTERN_STRING2));
+	private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+	private final String version;
+	private final LocalDate date;
 
 	private final FhirContext context;
 	private final IValidationSupport validationSupport;
@@ -43,6 +61,15 @@ public class ValidationSupportRule extends ExternalResource
 	public ValidationSupportRule(String version, List<String> structureDefinitions, List<String> codeSystems,
 			List<String> valueSets)
 	{
+		this(version, LocalDate.MIN, structureDefinitions, codeSystems, valueSets);
+	}
+
+	public ValidationSupportRule(String version, LocalDate date, List<String> structureDefinitions,
+			List<String> codeSystems, List<String> valueSets)
+	{
+		this.version = version;
+		this.date = date;
+
 		context = FhirContext.forR4();
 		HapiLocalizer localizer = new HapiLocalizer()
 		{
@@ -60,18 +87,18 @@ public class ValidationSupportRule extends ExternalResource
 				customValidationSupport, new DefaultProfileValidationSupport(context),
 				new CommonCodeSystemsTerminologyService(context));
 
-		readProfilesAndGenerateSnapshots(context, version, customValidationSupport,
+		readProfilesAndGenerateSnapshots(context, version, date, customValidationSupport,
 				new SnapshotGeneratorImpl(context, validationSupport), structureDefinitions.stream());
 
-		readCodeSystems(context, version, customValidationSupport, codeSystems.stream());
-		readValueSets(context, version, customValidationSupport, valueSets.stream());
+		readCodeSystems(context, version, date, customValidationSupport, codeSystems.stream());
+		readValueSets(context, version, date, customValidationSupport, valueSets.stream());
 	}
 
-	private static void readProfilesAndGenerateSnapshots(FhirContext context, String version,
+	private static void readProfilesAndGenerateSnapshots(FhirContext context, String version, LocalDate date,
 			ValidationSupportWithCustomResources vSupport, SnapshotGenerator snapshotGenerator,
 			Stream<String> structureDefinitions)
 	{
-		StructureDefinitionReader reader = new StructureDefinitionReader(context, version);
+		StructureDefinitionReader reader = new StructureDefinitionReader(context, version, date);
 		reader.readXmlFromClassPath(structureDefinitions.map(file -> "/fhir/StructureDefinition/" + file))
 				.forEach(diff ->
 				{
@@ -84,17 +111,17 @@ public class ValidationSupportRule extends ExternalResource
 				});
 	}
 
-	private static void readCodeSystems(FhirContext context, String version,
+	private static void readCodeSystems(FhirContext context, String version, LocalDate date,
 			ValidationSupportWithCustomResources vSupport, Stream<String> codeSystems)
 	{
 		codeSystems.map(file -> "/fhir/CodeSystem/" + file).forEach(file ->
 		{
-			var cS = readCodeSystem(context, version, file);
+			var cS = readCodeSystem(context, version, date, file);
 			vSupport.addOrReplace(cS);
 		});
 	}
 
-	private static CodeSystem readCodeSystem(FhirContext context, String version, String file)
+	private static CodeSystem readCodeSystem(FhirContext context, String version, LocalDate date, String file)
 	{
 		try (InputStream in = ValidationSupportRule.class.getResourceAsStream(file))
 		{
@@ -102,7 +129,7 @@ public class ValidationSupportRule extends ExternalResource
 				throw new IOException("File " + file + " not found");
 
 			String read = IOUtils.toString(in, StandardCharsets.UTF_8);
-			read = VERSION_PATTERN.matcher(read).replaceAll(version);
+			read = replaceVersionAndDate(read, version, date);
 
 			return context.newXmlParser().parseResource(CodeSystem.class, read);
 		}
@@ -112,17 +139,17 @@ public class ValidationSupportRule extends ExternalResource
 		}
 	}
 
-	private static void readValueSets(FhirContext context, String version,
+	private static void readValueSets(FhirContext context, String version, LocalDate date,
 			ValidationSupportWithCustomResources vSupport, Stream<String> valueSets)
 	{
 		valueSets.map(file -> "/fhir/ValueSet/" + file).forEach(file ->
 		{
-			var vS = readValueSet(context, version, file);
+			var vS = readValueSet(context, version, date, file);
 			vSupport.addOrReplace(vS);
 		});
 	}
 
-	private static ValueSet readValueSet(FhirContext context, String version, String file)
+	private static ValueSet readValueSet(FhirContext context, String version, LocalDate date, String file)
 	{
 		try (InputStream in = ValidationSupportRule.class.getResourceAsStream(file))
 		{
@@ -130,7 +157,7 @@ public class ValidationSupportRule extends ExternalResource
 				throw new IOException("File " + file + " not found");
 
 			String read = IOUtils.toString(in, StandardCharsets.UTF_8);
-			read = VERSION_PATTERN.matcher(read).replaceAll(version);
+			read = replaceVersionAndDate(read, version, date);
 
 			return context.newXmlParser().parseResource(ValueSet.class, read);
 		}
@@ -154,5 +181,30 @@ public class ValidationSupportRule extends ExternalResource
 	{
 		result.getMessages().stream().map(m -> m.getLocationString() + " " + m.getLocationLine() + ":"
 				+ m.getLocationCol() + " - " + m.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
+	}
+
+	private static String replaceVersionAndDate(String read, String version, LocalDate date)
+	{
+		read = VERSION_PATTERN1.matcher(read).replaceAll(version);
+		read = VERSION_PATTERN2.matcher(read).replaceAll(version);
+
+		if (date != null && !LocalDate.MIN.equals(date))
+		{
+			String dateValue = date.format(DATE_FORMAT);
+			read = DATE_PATTERN1.matcher(read).replaceAll(dateValue);
+			read = DATE_PATTERN2.matcher(read).replaceAll(dateValue);
+		}
+		return read;
+	}
+
+	public ActivityDefinition readActivityDefinition(Path file) throws IOException
+	{
+		try (InputStream in = Files.newInputStream(file))
+		{
+			String read = IOUtils.toString(in, StandardCharsets.UTF_8);
+			read = replaceVersionAndDate(read, version, date);
+
+			return context.newXmlParser().parseResource(ActivityDefinition.class, read);
+		}
 	}
 }

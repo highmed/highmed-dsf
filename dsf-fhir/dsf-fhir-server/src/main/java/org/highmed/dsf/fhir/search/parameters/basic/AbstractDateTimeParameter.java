@@ -120,8 +120,8 @@ public abstract class AbstractDateTimeParameter<R extends DomainResource> extend
 			// if two search operators, only for example lt and gt are allowed in combination
 			if (!((EnumSet.of(DateTimeSearchType.GE, DateTimeSearchType.GT).contains(first.searchType)
 					&& EnumSet.of(DateTimeSearchType.LE, DateTimeSearchType.LT).contains(second.searchType))
-					|| (EnumSet.of(DateTimeSearchType.GE, DateTimeSearchType.GT).contains(first.searchType)
-							&& EnumSet.of(DateTimeSearchType.LE, DateTimeSearchType.LT).contains(second.searchType))))
+					|| (EnumSet.of(DateTimeSearchType.GE, DateTimeSearchType.GT).contains(second.searchType)
+							&& EnumSet.of(DateTimeSearchType.LE, DateTimeSearchType.LT).contains(first.searchType))))
 				addError(new SearchQueryParameterError(SearchQueryParameterErrorType.UNSUPPORTED_NUMBER_OF_VALUES,
 						parameterName, parameters,
 						"Seach operators " + first.searchType + " and " + second.searchType + " can't be combined"));
@@ -130,8 +130,8 @@ public abstract class AbstractDateTimeParameter<R extends DomainResource> extend
 		if (valuesAndTypes.size() > 1 && (!((EnumSet.of(DateTimeSearchType.GE, DateTimeSearchType.GT)
 				.contains(first.searchType)
 				&& EnumSet.of(DateTimeSearchType.LE, DateTimeSearchType.LT).contains(second.searchType))
-				|| (EnumSet.of(DateTimeSearchType.GE, DateTimeSearchType.GT).contains(first.searchType)
-						&& EnumSet.of(DateTimeSearchType.LE, DateTimeSearchType.LT).contains(second.searchType)))))
+				|| (EnumSet.of(DateTimeSearchType.GE, DateTimeSearchType.GT).contains(second.searchType)
+						&& EnumSet.of(DateTimeSearchType.LE, DateTimeSearchType.LT).contains(first.searchType)))))
 		{
 			valuesAndTypes.clear();
 			valuesAndTypes.add(first);

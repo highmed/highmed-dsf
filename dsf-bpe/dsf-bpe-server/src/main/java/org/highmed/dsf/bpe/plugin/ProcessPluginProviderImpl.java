@@ -9,12 +9,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.ServiceLoader;
 import java.util.ServiceLoader.Provider;
+import java.util.Set;
 import java.util.function.BinaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,6 +26,8 @@ import java.util.stream.Stream;
 
 import org.highmed.dsf.bpe.ProcessPluginDefinition;
 import org.highmed.dsf.bpe.process.ProcessKeyAndVersion;
+import org.highmed.dsf.bpe.process.ProcessState;
+import org.highmed.dsf.bpe.process.ProcessStateChangeOutcome;
 import org.highmed.dsf.fhir.resources.ResourceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -333,7 +338,7 @@ public class ProcessPluginProviderImpl implements ProcessPluginProvider, Initial
 	public Map<ProcessKeyAndVersion, ApplicationContext> getApplicationContextsByProcessDefinitionKeyAndVersion()
 	{
 		return getDefinitions().stream().flatMap(def -> def.getProcessKeysAndVersions().stream().map(
-				keyAndVersion -> new Pair<>(keyAndVersion, def.createPluginApplicationContext(mainApplicationContext))))
+				keyAndVersion -> new Pair<>(keyAndVersion, def.getPluginApplicationContext(mainApplicationContext))))
 				.collect(Collectors.toMap(p -> p.k, p -> p.v, dupplicatedProcessKeyVersion()));
 	}
 
@@ -364,5 +369,33 @@ public class ProcessPluginProviderImpl implements ProcessPluginProvider, Initial
 	{
 		return getDefinitions().stream().filter(ProcessPluginDefinitionAndClassLoader::isDraft)
 				.flatMap(def -> def.getProcessKeysAndVersions().stream()).collect(Collectors.toList());
+	}
+
+	@Override
+	public void onProcessesDeployed(List<ProcessStateChangeOutcome> changes)
+	{
+		Set<ProcessKeyAndVersion> activeProcesses = changes.stream()
+				.filter(c -> EnumSet.of(ProcessState.ACTIVE, ProcessState.DRAFT).contains(c.getNewProcessState()))
+				.map(ProcessStateChangeOutcome::getProcessKeyAndVersion).collect(Collectors.toCollection(HashSet::new));
+
+		for (ProcessPluginDefinitionAndClassLoader definition : getDefinitions())
+		{
+			List<String> pluginActiveProcesses = definition.getProcessKeysAndVersions().stream()
+					.filter(activeProcesses::contains).map(ProcessKeyAndVersion::getKey).sorted()
+					.collect(Collectors.toList());
+
+			ApplicationContext pluginApplicationContext = definition
+					.getPluginApplicationContext(mainApplicationContext);
+
+			try
+			{
+				definition.getDefinition().onProcessesDeployed(pluginApplicationContext, pluginActiveProcesses);
+			}
+			catch (Exception e)
+			{
+				logger.warn("Error while executing onProcessesDeployed for plugin "
+						+ definition.getDefinition().getNameAndVersion(), e);
+			}
+		}
 	}
 }

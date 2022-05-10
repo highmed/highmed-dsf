@@ -247,7 +247,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		affiliation.setOrganization(new Reference(createdParentOrg.getIdElement().toVersionless()));
 		affiliation.setParticipatingOrganization(new Reference(createdMemberOrg.getIdElement().toVersionless()));
 		affiliation.getCodeFirstRep().getCodingFirstRep()
-				.setSystem("http://highmed.org/fhir/CodeSystem/organization-type").setCode("MeDIC");
+				.setSystem("http://highmed.org/fhir/CodeSystem/organization-role").setCode("MeDIC");
 
 		organizationAffiliationDao.create(affiliation);
 
@@ -259,7 +259,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		ex.addExtension().setUrl("consortium").setValue(new Identifier()
 				.setSystem("http://highmed.org/sid/organization-identifier").setValue("Test_Consortium"));
 		ex.addExtension().setUrl("role").setValue(
-				new Coding().setSystem("http://highmed.org/fhir/CodeSystem/organization-type").setCode("MeDIC"));
+				new Coding().setSystem("http://highmed.org/fhir/CodeSystem/organization-role").setCode("MeDIC"));
 		ResearchStudy createdRs = researchStudyDao.create(rs);
 
 		Binary b = createResource();
@@ -644,7 +644,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 
 		OrganizationAffiliation aff = new OrganizationAffiliation();
 		aff.setActive(true);
-		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-type")
+		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-role")
 				.setCode("MeDIC");
 		aff.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
 		aff.getParticipatingOrganization().setReference("Organization/" + createdMemberOrg.getIdElement().getIdPart());
@@ -653,7 +653,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 				permanentDeleteDataSource, fhirContext).create(aff);
 
 		ResearchStudy rS = new ResearchStudy();
-		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
+		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-role",
 				"MeDIC");
 		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
 				.create(rS);
@@ -703,7 +703,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 
 		OrganizationAffiliation aff1 = new OrganizationAffiliation();
 		aff1.setActive(true);
-		aff1.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-type")
+		aff1.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-role")
 				.setCode("MeDIC");
 		aff1.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
 		aff1.getParticipatingOrganization()
@@ -714,7 +714,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 
 		OrganizationAffiliation aff2 = new OrganizationAffiliation();
 		aff2.setActive(true);
-		aff2.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-type")
+		aff2.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-role")
 				.setCode("TTP");
 		aff2.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
 		aff2.getParticipatingOrganization()
@@ -724,7 +724,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 				permanentDeleteDataSource, fhirContext).create(aff2);
 
 		ResearchStudy rS = new ResearchStudy();
-		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
+		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-role",
 				"MeDIC");
 		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
 				.create(rS);
@@ -765,7 +765,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 
 		OrganizationAffiliation aff1 = new OrganizationAffiliation();
 		aff1.setActive(true);
-		aff1.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-type")
+		aff1.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-role")
 				.setCode("MeDIC");
 		aff1.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
 		aff1.getParticipatingOrganization()
@@ -776,7 +776,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 
 		OrganizationAffiliation aff2 = new OrganizationAffiliation();
 		aff2.setActive(true);
-		aff2.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-type")
+		aff2.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-role")
 				.setCode("MeDIC");
 		aff2.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
 		aff2.getParticipatingOrganization()
@@ -786,7 +786,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 				permanentDeleteDataSource, fhirContext).create(aff2);
 
 		ResearchStudy rS = new ResearchStudy();
-		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
+		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-role",
 				"MeDIC");
 		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
 				.create(rS);
@@ -972,7 +972,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 
 		OrganizationAffiliation aff = new OrganizationAffiliation();
 		aff.setActive(true);
-		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-type")
+		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-role")
 				.setCode("MeDIC");
 		aff.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
 		aff.getParticipatingOrganization().setReference("Organization/" + createdMemberOrg.getIdElement().getIdPart());
@@ -980,7 +980,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		OrganizationAffiliation createdAff = organizationAffiliationDao.create(aff);
 
 		ResearchStudy rS = new ResearchStudy();
-		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
+		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-role",
 				"MeDIC");
 		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
 				.create(rS);
@@ -1034,7 +1034,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 
 		OrganizationAffiliation aff = new OrganizationAffiliation();
 		aff.setActive(true);
-		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-type")
+		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-role")
 				.setCode("MeDIC");
 		aff.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
 		aff.getParticipatingOrganization().setReference("Organization/" + createdMemberOrg.getIdElement().getIdPart());
@@ -1042,7 +1042,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		OrganizationAffiliation createdAff = organizationAffiliationDao.create(aff);
 
 		ResearchStudy rS = new ResearchStudy();
-		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
+		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-role",
 				"MeDIC");
 		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
 				.create(rS);
@@ -1093,7 +1093,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 
 		OrganizationAffiliation aff = new OrganizationAffiliation();
 		aff.setActive(true);
-		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-type")
+		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-role")
 				.setCode("MeDIC");
 		aff.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
 		aff.getParticipatingOrganization().setReference("Organization/" + createdMemberOrg.getIdElement().getIdPart());
@@ -1101,7 +1101,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		OrganizationAffiliation createdAff = organizationAffiliationDao.create(aff);
 
 		ResearchStudy rS = new ResearchStudy();
-		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
+		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-role",
 				"MeDIC");
 		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
 				.create(rS);
@@ -1152,7 +1152,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 
 		OrganizationAffiliation aff = new OrganizationAffiliation();
 		aff.setActive(true);
-		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-type")
+		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-role")
 				.setCode("MeDIC");
 		aff.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
 		aff.getParticipatingOrganization().setReference("Organization/" + createdMemberOrg.getIdElement().getIdPart());
@@ -1160,7 +1160,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		OrganizationAffiliation createdAff = organizationAffiliationDao.create(aff);
 
 		ResearchStudy rS = new ResearchStudy();
-		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
+		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-role",
 				"MeDIC");
 		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
 				.create(rS);
@@ -1289,7 +1289,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 
 		OrganizationAffiliation aff = new OrganizationAffiliation();
 		aff.setActive(true);
-		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-type")
+		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-role")
 				.setCode("MeDIC");
 		aff.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
 		aff.getParticipatingOrganization().setReference("Organization/" + createdMemberOrg.getIdElement().getIdPart());
@@ -1300,7 +1300,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		OrganizationAffiliation createdAff = orgAffDao.create(aff);
 
 		ResearchStudy rS = new ResearchStudy();
-		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
+		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-role",
 				"MeDIC");
 		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
 				.create(rS);
@@ -1341,7 +1341,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 
 		OrganizationAffiliation aff = new OrganizationAffiliation();
 		aff.setActive(true);
-		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-type")
+		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-role")
 				.setCode("MeDIC");
 		aff.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
 		aff.getParticipatingOrganization().setReference("Organization/" + createdMemberOrg.getIdElement().getIdPart());
@@ -1352,7 +1352,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		OrganizationAffiliation createdAff = orgAffDao.create(aff);
 
 		ResearchStudy rS = new ResearchStudy();
-		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
+		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-role",
 				"MeDIC");
 		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
 				.create(rS);
@@ -1393,7 +1393,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 
 		OrganizationAffiliation aff = new OrganizationAffiliation();
 		aff.setActive(true);
-		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-type")
+		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-role")
 				.setCode("MeDIC");
 		aff.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
 		aff.getParticipatingOrganization().setReference("Organization/" + createdMemberOrg.getIdElement().getIdPart());
@@ -1404,7 +1404,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		OrganizationAffiliation createdAff = orgAffDao.create(aff);
 
 		ResearchStudy rS = new ResearchStudy();
-		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
+		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-role",
 				"MeDIC");
 		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
 				.create(rS);
@@ -1445,7 +1445,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 
 		OrganizationAffiliation aff = new OrganizationAffiliation();
 		aff.setActive(true);
-		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-type")
+		aff.getCodeFirstRep().getCodingFirstRep().setSystem("http://highmed.org/fhir/CodeSystem/organization-role")
 				.setCode("MeDIC");
 		aff.getOrganization().setReference("Organization/" + createdParentOrg.getIdElement().getIdPart());
 		aff.getParticipatingOrganization().setReference("Organization/" + createdMemberOrg.getIdElement().getIdPart());
@@ -1456,7 +1456,7 @@ public class BinaryDaoTest extends AbstractResourceDaoTest<Binary, BinaryDao> im
 		OrganizationAffiliation createdAff = orgAffDao.create(aff);
 
 		ResearchStudy rS = new ResearchStudy();
-		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-type",
+		new ReadAccessHelperImpl().addRole(rS, "parent.com", "http://highmed.org/fhir/CodeSystem/organization-role",
 				"MeDIC");
 		ResearchStudy createdRs = new ResearchStudyDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
 				.create(rS);

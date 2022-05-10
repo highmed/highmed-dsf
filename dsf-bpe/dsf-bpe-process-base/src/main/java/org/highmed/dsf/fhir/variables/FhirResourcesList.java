@@ -9,6 +9,7 @@ import java.util.List;
 import org.hl7.fhir.r4.model.Resource;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class FhirResourcesList
@@ -27,12 +28,14 @@ public class FhirResourcesList
 		this(Arrays.asList(resources));
 	}
 
+	@JsonProperty("resources")
 	public List<Resource> getResources()
 	{
 		return Collections.unmodifiableList(resources);
 	}
 
 	@SuppressWarnings("unchecked")
+	@JsonIgnore
 	public <R extends Resource> List<R> getResourcesAndCast()
 	{
 		return (List<R>) getResources();

@@ -7,6 +7,7 @@ import org.highmed.dsf.fhir.webservice.impl.BinaryServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.BundleServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.CodeSystemServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.ConformanceServiceImpl;
+import org.highmed.dsf.fhir.webservice.impl.DocumentReferenceServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.EndpointServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.GroupServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.HealthcareServiceServiceImpl;
@@ -24,6 +25,7 @@ import org.highmed.dsf.fhir.webservice.impl.ProvenanceServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.ResearchStudyServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.RootServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.StaticResourcesServiceImpl;
+import org.highmed.dsf.fhir.webservice.impl.StatusServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.StructureDefinitionServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.SubscriptionServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.TaskServiceImpl;
@@ -33,6 +35,7 @@ import org.highmed.dsf.fhir.webservice.jaxrs.BinaryServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.BundleServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.CodeSystemServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.ConformanceServiceJaxrs;
+import org.highmed.dsf.fhir.webservice.jaxrs.DocumentReferenceServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.EndpointServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.GroupServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.HealthcareServiceServiceJaxrs;
@@ -50,6 +53,7 @@ import org.highmed.dsf.fhir.webservice.jaxrs.ProvenanceServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.ResearchStudyServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.RootServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.StaticResourcesServiceJaxrs;
+import org.highmed.dsf.fhir.webservice.jaxrs.StatusServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.StructureDefinitionServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.SubscriptionServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.TaskServiceJaxrs;
@@ -59,6 +63,7 @@ import org.highmed.dsf.fhir.webservice.secure.BinaryServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.BundleServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.CodeSystemServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.ConformanceServiceSecure;
+import org.highmed.dsf.fhir.webservice.secure.DocumentReferenceServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.EndpointServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.GroupServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.HealthcareServiceServiceSecure;
@@ -76,6 +81,7 @@ import org.highmed.dsf.fhir.webservice.secure.ProvenanceServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.ResearchStudyServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.RootServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.StaticResourcesServiceSecure;
+import org.highmed.dsf.fhir.webservice.secure.StatusServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.StructureDefinitionServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.SubscriptionServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.TaskServiceSecure;
@@ -85,6 +91,7 @@ import org.highmed.dsf.fhir.webservice.specification.BinaryService;
 import org.highmed.dsf.fhir.webservice.specification.BundleService;
 import org.highmed.dsf.fhir.webservice.specification.CodeSystemService;
 import org.highmed.dsf.fhir.webservice.specification.ConformanceService;
+import org.highmed.dsf.fhir.webservice.specification.DocumentReferenceService;
 import org.highmed.dsf.fhir.webservice.specification.EndpointService;
 import org.highmed.dsf.fhir.webservice.specification.GroupService;
 import org.highmed.dsf.fhir.webservice.specification.HealthcareServiceService;
@@ -102,6 +109,7 @@ import org.highmed.dsf.fhir.webservice.specification.ProvenanceService;
 import org.highmed.dsf.fhir.webservice.specification.ResearchStudyService;
 import org.highmed.dsf.fhir.webservice.specification.RootService;
 import org.highmed.dsf.fhir.webservice.specification.StaticResourcesService;
+import org.highmed.dsf.fhir.webservice.specification.StatusService;
 import org.highmed.dsf.fhir.webservice.specification.StructureDefinitionService;
 import org.highmed.dsf.fhir.webservice.specification.SubscriptionService;
 import org.highmed.dsf.fhir.webservice.specification.TaskService;
@@ -257,6 +265,32 @@ public class WebserviceConfig
 				propertiesConfig.getDefaultPageCount(), daoConfig.codeSystemDao(), validationConfig.resourceValidator(),
 				eventConfig.eventManager(), helperConfig.exceptionHandler(), eventConfig.eventGenerator(),
 				helperConfig.responseGenerator(), helperConfig.parameterConverter(),
+				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver(),
+				referenceConfig.referenceCleaner(), authorizationConfig.authorizationRuleProvider(),
+				historyConfig.historyService());
+	}
+
+	@Bean
+	public DocumentReferenceService documentReferenceService()
+	{
+		return new DocumentReferenceServiceJaxrs(documentReferenceServiceSecure());
+	}
+
+	private DocumentReferenceServiceSecure documentReferenceServiceSecure()
+	{
+		return new DocumentReferenceServiceSecure(documentReferenceServiceImpl(), propertiesConfig.getServerBaseUrl(),
+				helperConfig.responseGenerator(), referenceConfig.referenceResolver(),
+				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(),
+				daoConfig.documentReferenceDao(), helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
+				authorizationConfig.documentReferenceAuthorizationRule(), validationConfig.resourceValidator());
+	}
+
+	private DocumentReferenceServiceImpl documentReferenceServiceImpl()
+	{
+		return new DocumentReferenceServiceImpl(DocumentReferenceServiceJaxrs.PATH, propertiesConfig.getServerBaseUrl(),
+				propertiesConfig.getDefaultPageCount(), daoConfig.documentReferenceDao(),
+				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
+				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter(),
 				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver(),
 				referenceConfig.referenceCleaner(), authorizationConfig.authorizationRuleProvider(),
 				historyConfig.historyService());
@@ -775,9 +809,9 @@ public class WebserviceConfig
 
 	private RootServiceImpl rootServiceImpl()
 	{
-		return new RootServiceImpl(RootServiceJaxrs.PATH, commandConfig.commandFactory(),
-				helperConfig.responseGenerator(), helperConfig.parameterConverter(), helperConfig.exceptionHandler(),
-				referenceConfig.referenceCleaner(), historyConfig.historyService());
+		return new RootServiceImpl(commandConfig.commandFactory(), helperConfig.responseGenerator(),
+				helperConfig.parameterConverter(), helperConfig.exceptionHandler(), referenceConfig.referenceCleaner(),
+				historyConfig.historyService());
 	}
 
 	@Bean
@@ -794,9 +828,9 @@ public class WebserviceConfig
 
 	private ConformanceServiceImpl conformanceServiceImpl()
 	{
-		return new ConformanceServiceImpl(ConformanceServiceJaxrs.PATH, propertiesConfig.getServerBaseUrl(),
-				propertiesConfig.getDefaultPageCount(), buildInfoReaderConfig.buildInfoReader(),
-				helperConfig.parameterConverter(), validationConfig.validationSupport());
+		return new ConformanceServiceImpl(propertiesConfig.getServerBaseUrl(), propertiesConfig.getDefaultPageCount(),
+				buildInfoReaderConfig.buildInfoReader(), helperConfig.parameterConverter(),
+				validationConfig.validationSupport());
 	}
 
 	@Bean
@@ -813,6 +847,22 @@ public class WebserviceConfig
 
 	private StaticResourcesServiceImpl staticResourcesServiceImpl()
 	{
-		return new StaticResourcesServiceImpl(StaticResourcesServiceJaxrs.PATH);
+		return new StaticResourcesServiceImpl();
+	}
+
+	@Bean
+	public StatusService statusService()
+	{
+		return new StatusServiceJaxrs(statusServiceSecure());
+	}
+
+	private StatusService statusServiceSecure()
+	{
+		return new StatusServiceSecure(statusServiceImpl());
+	}
+
+	private StatusService statusServiceImpl()
+	{
+		return new StatusServiceImpl(StatusServiceJaxrs.PATH, daoConfig.dataSource());
 	}
 }

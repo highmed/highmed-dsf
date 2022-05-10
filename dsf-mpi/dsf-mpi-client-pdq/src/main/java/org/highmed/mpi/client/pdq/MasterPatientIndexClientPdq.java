@@ -10,7 +10,9 @@ import org.highmed.mpi.client.message.QueryParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ca.uhn.hl7v2.HL7Exception;
 import ca.uhn.hl7v2.HapiContext;
+import ca.uhn.hl7v2.model.AbstractMessage;
 import ca.uhn.hl7v2.model.v25.message.QBP_Q21;
 import ca.uhn.hl7v2.model.v25.message.RSP_K21;
 import ca.uhn.hl7v2.util.SocketFactory;
@@ -62,7 +64,11 @@ public class MasterPatientIndexClientPdq extends AbstractHl7v2Client implements 
 			QBP_Q21 request = messageHelper.createPatientDemographicsQuery(senderApplication, senderFacility,
 					receiverApplication, receiverFacility, searchParameters);
 
+			logger.debug("Sending PDQ request: {}", encode(request));
+
 			RSP_K21 response = (RSP_K21) send(port, request);
+
+			logger.debug("Received PDQ response: {}", encode(response));
 
 			Idat idat = messageHelper.extractPatientDemographics(response, pidAssigningAuthorityNamespaceId,
 					pidAssigningAuthorityUniversalId);
@@ -75,5 +81,10 @@ public class MasterPatientIndexClientPdq extends AbstractHl7v2Client implements 
 			logger.warn("Could not get IDAT of EHR-ID='{}', reason: {}", ehrId, exception.getMessage());
 			throw new IdatNotFoundException(exception);
 		}
+	}
+
+	private String encode(AbstractMessage message) throws HL7Exception
+	{
+		return message.encode().replace("\r", "\n");
 	}
 }

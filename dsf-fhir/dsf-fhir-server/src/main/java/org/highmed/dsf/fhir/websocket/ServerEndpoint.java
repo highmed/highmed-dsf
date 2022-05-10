@@ -19,7 +19,6 @@ import javax.websocket.PongMessage;
 import javax.websocket.Session;
 
 import org.apache.commons.codec.binary.Hex;
-import org.highmed.dsf.fhir.authentication.NeedsAuthentication;
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.authentication.UserRole;
 import org.highmed.dsf.fhir.subscription.WebSocketSubscriptionManager;
@@ -28,7 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
-public class ServerEndpoint extends Endpoint implements InitializingBean, NeedsAuthentication, DisposableBean
+public class ServerEndpoint extends Endpoint implements InitializingBean, DisposableBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(ServerEndpoint.class);
 
@@ -50,12 +49,6 @@ public class ServerEndpoint extends Endpoint implements InitializingBean, NeedsA
 	public void afterPropertiesSet() throws Exception
 	{
 		Objects.requireNonNull(subscriptionManager, "subscriptionManager");
-	}
-
-	@Override
-	public String getPath()
-	{
-		return PATH;
 	}
 
 	@Override

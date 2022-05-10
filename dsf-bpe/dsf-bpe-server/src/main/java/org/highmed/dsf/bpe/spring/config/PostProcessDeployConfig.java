@@ -55,6 +55,8 @@ public class PostProcessDeployConfig
 
 		fhirResourceHandler().applyStateChangesAndStoreNewResourcesInDb(
 				processPluginProvider.getDefinitionByProcessKeyAndVersion(), changes);
+
+		processPluginProvider.onProcessesDeployed(changes);
 	}
 
 	@Bean

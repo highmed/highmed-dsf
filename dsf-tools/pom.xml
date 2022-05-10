@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>org.highmed.dsf</groupId>
 		<artifactId>dsf-pom</artifactId>
-		<version>0.5.5</version>
+		<version>0.6.0</version>
 	</parent>
 
 	<modules>
@@ -16,6 +16,7 @@
 		<module>dsf-tools-bundle-generator</module>
 		<module>dsf-tools-db-migration</module>
 		<module>dsf-tools-docker-secrets-reader</module>
+		<module>dsf-tools-documentation-generator</module>
 		<module>dsf-tools-proxy-test</module>
 		<module>dsf-tools-test-data-generator</module>
 	</modules>
@@ -48,6 +49,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-tools-documentation-generator</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
 				<artifactId>dsf-tools-proxy-test</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -57,6 +63,11 @@
 				<version>${project.version}</version>
 			</dependency>
 
+			<dependency>
+				<groupId>org.highmed.dsf</groupId>
+				<artifactId>dsf-bpe-process-base</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.highmed.dsf</groupId>
 				<artifactId>dsf-fhir-rest-adapter</artifactId>
