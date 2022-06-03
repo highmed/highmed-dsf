@@ -2,6 +2,7 @@ package org.highmed.dsf.bpe.camunda;
 
 import java.util.List;
 
+import org.camunda.bpm.engine.delegate.TaskListener;
 import org.camunda.bpm.engine.impl.bpmn.behavior.ClassDelegateActivityBehavior;
 import org.camunda.bpm.engine.impl.bpmn.parser.BpmnParse;
 import org.camunda.bpm.engine.impl.bpmn.parser.BpmnParser;
@@ -43,5 +44,26 @@ public class MultiVersionBpmnParse extends BpmnParse
 		}
 		else
 			logger.debug("Not modifying {}", activity.getActivityBehavior().getClass().getCanonicalName());
+	}
+
+	@Override
+	protected TaskListener parseTaskListener(Element taskListenerElement, String taskElementId)
+	{
+		String className = taskListenerElement.attribute(PROPERTYNAME_CLASS);
+
+		if (className != null)
+		{
+			List<FieldDeclaration> fieldDeclarations = parseFieldDeclarations(taskListenerElement);
+
+			logger.debug("Using {} for {}", MultiVersionClassDelegateTaskListener.class.getName(), className);
+			return new MultiVersionClassDelegateTaskListener(className, fieldDeclarations, delegateProvider);
+		}
+		else
+		{
+			TaskListener taskListener = super.parseTaskListener(taskListenerElement, taskElementId);
+
+			logger.debug("Using default {} for {}", taskListener.getClass().getName(), className);
+			return taskListener;
+		}
 	}
 }
