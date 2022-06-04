@@ -23,6 +23,7 @@ import org.highmed.dsf.fhir.dao.PatientDao;
 import org.highmed.dsf.fhir.dao.PractitionerDao;
 import org.highmed.dsf.fhir.dao.PractitionerRoleDao;
 import org.highmed.dsf.fhir.dao.ProvenanceDao;
+import org.highmed.dsf.fhir.dao.QuestionnaireDao;
 import org.highmed.dsf.fhir.dao.ReadAccessDao;
 import org.highmed.dsf.fhir.dao.ResearchStudyDao;
 import org.highmed.dsf.fhir.dao.ResourceDao;
@@ -75,6 +76,8 @@ public interface DaoProvider
 	PractitionerRoleDao getPractitionerRoleDao();
 
 	ProvenanceDao getProvenanceDao();
+
+	QuestionnaireDao getQuestionnaireDao();
 
 	ResearchStudyDao getResearchStudyDao();
 

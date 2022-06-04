@@ -52,6 +52,7 @@ import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Provenance.ProvenanceAgentComponent;
 import org.hl7.fhir.r4.model.Provenance.ProvenanceEntityComponent;
+import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.RelatedPerson;
@@ -365,6 +366,8 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 			return getReferences((PractitionerRole) resource);
 		else if (resource instanceof Provenance)
 			return getReferences((Provenance) resource);
+		else if (resource instanceof Questionnaire)
+			return getReferences((Questionnaire) resource);
 		else if (resource instanceof ResearchStudy)
 			return getReferences((ResearchStudy) resource);
 		else if (resource instanceof StructureDefinition)
@@ -767,6 +770,38 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 		var extensionReferences = getExtensionReferences(resource);
 
 		return concat(targets, location, agentsWho, agentsOnBehalfOf, entitiesWhat, extensionReferences);
+	}
+
+	@Override
+	public Stream<ResourceReference> getReferences(Questionnaire resource)
+	{
+		if (resource == null)
+			return Stream.empty();
+
+		var enableWhen = getBackboneElements2Reference(resource, Questionnaire::hasItem, Questionnaire::getItem,
+				Questionnaire.QuestionnaireItemComponent::hasEnableWhen,
+				Questionnaire.QuestionnaireItemComponent::getEnableWhen,
+				Questionnaire.QuestionnaireItemEnableWhenComponent::hasAnswerReference,
+				Questionnaire.QuestionnaireItemEnableWhenComponent::getAnswerReference,
+				"Questionnaire.item.enableWhen.answerReference");
+
+		var answerOption = getBackboneElements2Reference(resource, Questionnaire::hasItem, Questionnaire::getItem,
+				Questionnaire.QuestionnaireItemComponent::hasAnswerOption,
+				Questionnaire.QuestionnaireItemComponent::getAnswerOption,
+				Questionnaire.QuestionnaireItemAnswerOptionComponent::hasValueReference,
+				Questionnaire.QuestionnaireItemAnswerOptionComponent::getValueReference,
+				"Questionnaire.item.answerOption.valueReference");
+
+		var initial = getBackboneElements2Reference(resource, Questionnaire::hasItem, Questionnaire::getItem,
+				Questionnaire.QuestionnaireItemComponent::hasInitial,
+				Questionnaire.QuestionnaireItemComponent::getInitial,
+				Questionnaire.QuestionnaireItemInitialComponent::hasValueReference,
+				Questionnaire.QuestionnaireItemInitialComponent::getValueReference,
+				"Questionnaire.item.initial.valueReference");
+
+		var extensionReferences = getExtensionReferences(resource);
+
+		return concat(enableWhen, answerOption, initial, extensionReferences);
 	}
 
 	@Override

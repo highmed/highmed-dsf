@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<property name="json" value="JSONB" dbms="postgresql" />
+	<property name="json" value="varchar(5000)" dbms="h2" />
+
+	<changeSet author="wetret" id="db.questionnaires.changelog-0.5.0">
+		<createTable tableName="questionnaires">
+			<column name="questionnaire_id" type="UUID">
+				<constraints nullable="false" />
+			</column>
+			<column name="version" type="BIGINT" defaultValueNumeric="1">
+				<constraints nullable="false" />
+			</column>
+			<column name="deleted" type="TIMESTAMP" />
+			<column name="questionnaire" type="${json}">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addPrimaryKey tableName="questionnaires" columnNames="questionnaire_id, version" />
+
+		<sql dbms="postgresql">
+			ALTER TABLE questionnaires OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE questionnaires TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE ON TABLE questionnaires TO ${db.server_users_group};
+			GRANT SELECT, DELETE ON TABLE questionnaires TO ${db.server_permanent_delete_users_group};
+			CREATE INDEX questionnaire_id_index ON questionnaires USING btree (questionnaire_id);
+			CREATE INDEX questionnaire_index ON questionnaires USING gin (questionnaire);
+			CREATE INDEX questionnaire_id_version_index ON questionnaires USING btree (questionnaire_id, version);
+		</sql>
+
+		<createView viewName="current_questionnaires" replaceIfExists="true">
+			SELECT questionnaire_id, version, questionnaire
+			FROM (
+				SELECT DISTINCT ON (questionnaire_id) questionnaire_id, version, deleted, questionnaire
+				FROM questionnaires ORDER BY questionnaire_id, version DESC
+			) AS current_l
+			WHERE deleted IS NULL
+		</createView>
+
+		<sql dbms="postgresql">
+			ALTER TABLE current_questionnaires OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE current_questionnaires TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE current_questionnaires TO ${db.server_users_group};
+		</sql>
+	</changeSet>
+</databaseChangeLog>

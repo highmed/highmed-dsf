@@ -8,7 +8,7 @@
 	<property name="binary_type" value="BYTEA" dbms="postgresql" />
 	<property name="binary_type" value="binary" dbms="h2" />
 
-	<changeSet author="retwet" id="db.binaries.changelog-0.1.0">
+	<changeSet author="wetret" id="db.binaries.changelog-0.1.0">
 		<createTable tableName="binaries">
 			<column name="binary_id" type="UUID">
 				<constraints nullable="false" />

@@ -60,5 +60,6 @@
 	<include file="db/db.read_access.changelog-0.5.0.xml" />
 
 	<include file="db/db.document_references.changelog-0.6.0.xml" />
+	<include file="db/db.questionnaires.changelog-0.6.0.xml" />
 	<include file="db/db.read_access.changelog-0.6.0.xml" />
 </databaseChangeLog>
