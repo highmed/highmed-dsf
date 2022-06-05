@@ -29,6 +29,7 @@ import org.highmed.dsf.fhir.dao.PractitionerDao;
 import org.highmed.dsf.fhir.dao.PractitionerRoleDao;
 import org.highmed.dsf.fhir.dao.ProvenanceDao;
 import org.highmed.dsf.fhir.dao.QuestionnaireDao;
+import org.highmed.dsf.fhir.dao.QuestionnaireResponseDao;
 import org.highmed.dsf.fhir.dao.ReadAccessDao;
 import org.highmed.dsf.fhir.dao.ResearchStudyDao;
 import org.highmed.dsf.fhir.dao.ResourceDao;
@@ -56,6 +57,7 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StructureDefinition;
@@ -89,6 +91,7 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	private final PractitionerRoleDao practitionerRoleDao;
 	private final ProvenanceDao provenanceDao;
 	private final QuestionnaireDao questionnaireDao;
+	private final QuestionnaireResponseDao questionnaireResponseDao;
 	private final ResearchStudyDao researchStudyDao;
 	private final StructureDefinitionDao structureDefinitionDao;
 	private final StructureDefinitionDao structureDefinitionSnapshotDao;
@@ -108,9 +111,10 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 			NamingSystemDao namingSystemDao, OrganizationDao organizationDao,
 			OrganizationAffiliationDao organizationAffiliationDao, PatientDao patientDao,
 			PractitionerDao practitionerDao, PractitionerRoleDao practitionerRoleDao, ProvenanceDao provenanceDao,
-			QuestionnaireDao questionnaireDao, ResearchStudyDao researchStudyDao,
-			StructureDefinitionDao structureDefinitionDao, StructureDefinitionDao structureDefinitionSnapshotDao,
-			SubscriptionDao subscriptionDao, TaskDao taskDao, ValueSetDao valueSetDao, ReadAccessDao readAccessDao)
+			QuestionnaireDao questionnaireDao, QuestionnaireResponseDao questionnaireResponseDao,
+			ResearchStudyDao researchStudyDao, StructureDefinitionDao structureDefinitionDao,
+			StructureDefinitionDao structureDefinitionSnapshotDao, SubscriptionDao subscriptionDao, TaskDao taskDao,
+			ValueSetDao valueSetDao, ReadAccessDao readAccessDao)
 	{
 		this.dataSource = dataSource;
 		this.activityDefinitionDao = activityDefinitionDao;
@@ -133,6 +137,7 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 		this.practitionerRoleDao = practitionerRoleDao;
 		this.provenanceDao = provenanceDao;
 		this.questionnaireDao = questionnaireDao;
+		this.questionnaireResponseDao = questionnaireResponseDao;
 		this.researchStudyDao = researchStudyDao;
 		this.structureDefinitionDao = structureDefinitionDao;
 		this.structureDefinitionSnapshotDao = structureDefinitionSnapshotDao;
@@ -162,6 +167,7 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 		daosByResourceClass.put(PractitionerRole.class, practitionerRoleDao);
 		daosByResourceClass.put(Provenance.class, provenanceDao);
 		daosByResourceClass.put(Questionnaire.class, questionnaireDao);
+		daosByResourceClass.put(QuestionnaireResponse.class, questionnaireResponseDao);
 		daosByResourceClass.put(ResearchStudy.class, researchStudyDao);
 		daosByResourceClass.put(StructureDefinition.class, structureDefinitionDao);
 		daosByResourceClass.put(Subscription.class, subscriptionDao);
@@ -194,6 +200,7 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 		Objects.requireNonNull(practitionerRoleDao, "practitionerRoleDao");
 		Objects.requireNonNull(provenanceDao, "provenanceDao");
 		Objects.requireNonNull(questionnaireDao, "questionnaireDao");
+		Objects.requireNonNull(questionnaireResponseDao, "questionnaireResponseDao");
 		Objects.requireNonNull(researchStudyDao, "researchStudyDao");
 		Objects.requireNonNull(structureDefinitionDao, "structureDefinitionDao");
 		Objects.requireNonNull(structureDefinitionSnapshotDao, "structureDefinitionSnapshotDao");
@@ -342,6 +349,12 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	public QuestionnaireDao getQuestionnaireDao()
 	{
 		return questionnaireDao;
+	}
+
+	@Override
+	public QuestionnaireResponseDao getQuestionnaireResponseDao()
+	{
+		return questionnaireResponseDao;
 	}
 
 	@Override

@@ -71,6 +71,10 @@ import org.highmed.dsf.fhir.adapter.PractitionerRoleXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.PractitionerXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.ProvenanceJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.ProvenanceXmlFhirAdapter;
+import org.highmed.dsf.fhir.adapter.QuestionnaireJsonFhirAdapter;
+import org.highmed.dsf.fhir.adapter.QuestionnaireResponseJsonFhirAdapter;
+import org.highmed.dsf.fhir.adapter.QuestionnaireResponseXmlFhirAdapter;
+import org.highmed.dsf.fhir.adapter.QuestionnaireXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.ResearchStudyJsonFhirAdapter;
 import org.highmed.dsf.fhir.adapter.ResearchStudyXmlFhirAdapter;
 import org.highmed.dsf.fhir.adapter.StructureDefinitionJsonFhirAdapter;
@@ -155,12 +159,14 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 				new PatientXmlFhirAdapter(fhirContext), new PractitionerJsonFhirAdapter(fhirContext),
 				new PractitionerXmlFhirAdapter(fhirContext), new PractitionerRoleJsonFhirAdapter(fhirContext),
 				new PractitionerRoleXmlFhirAdapter(fhirContext), new ProvenanceJsonFhirAdapter(fhirContext),
-				new ProvenanceXmlFhirAdapter(fhirContext), new ResearchStudyJsonFhirAdapter(fhirContext),
-				new ResearchStudyXmlFhirAdapter(fhirContext), new StructureDefinitionJsonFhirAdapter(fhirContext),
-				new StructureDefinitionXmlFhirAdapter(fhirContext), new SubscriptionJsonFhirAdapter(fhirContext),
-				new SubscriptionXmlFhirAdapter(fhirContext), new TaskJsonFhirAdapter(fhirContext),
-				new TaskXmlFhirAdapter(fhirContext), new ValueSetJsonFhirAdapter(fhirContext),
-				new ValueSetXmlFhirAdapter(fhirContext));
+				new QuestionnaireXmlFhirAdapter(fhirContext), new QuestionnaireJsonFhirAdapter(fhirContext),
+				new QuestionnaireResponseXmlFhirAdapter(fhirContext),
+				new QuestionnaireResponseJsonFhirAdapter(fhirContext), new ProvenanceXmlFhirAdapter(fhirContext),
+				new ResearchStudyJsonFhirAdapter(fhirContext), new ResearchStudyXmlFhirAdapter(fhirContext),
+				new StructureDefinitionJsonFhirAdapter(fhirContext), new StructureDefinitionXmlFhirAdapter(fhirContext),
+				new SubscriptionJsonFhirAdapter(fhirContext), new SubscriptionXmlFhirAdapter(fhirContext),
+				new TaskJsonFhirAdapter(fhirContext), new TaskXmlFhirAdapter(fhirContext),
+				new ValueSetJsonFhirAdapter(fhirContext), new ValueSetXmlFhirAdapter(fhirContext));
 	}
 
 	private WebApplicationException handleError(Response response)
