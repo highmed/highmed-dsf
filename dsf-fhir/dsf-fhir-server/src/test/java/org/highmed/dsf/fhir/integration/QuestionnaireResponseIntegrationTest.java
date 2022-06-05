@@ -20,8 +20,8 @@ import org.junit.Test;
 
 public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTest
 {
-	private static final Date AUTHORED = Date.from(
-			LocalDateTime.parse("2022-01-01T00:00:00").toInstant(ZoneOffset.UTC));
+	private static final Date AUTHORED = Date
+			.from(LocalDateTime.parse("2022-01-01T00:00:00").toInstant(ZoneOffset.UTC));
 	private static final String IDENTIFIER_SYSTEM = "http://highmed.org/fhir/CodeSystem/user-task-id";
 	private static final String IDENTIFIER_VALUE = "foo";
 	private static final String QUESTIONNAIRE = "http://highmed.org/fhir/Questionnaire/userTask/foo";
@@ -29,8 +29,8 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 
 	private QuestionnaireResponse createQuestionnaireResponse()
 	{
-		OrganizationProvider organizationProvider = getSpringWebApplicationContext().getBean(
-				OrganizationProvider.class);
+		OrganizationProvider organizationProvider = getSpringWebApplicationContext()
+				.getBean(OrganizationProvider.class);
 		assertNotNull(organizationProvider);
 
 		QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse();
@@ -67,8 +67,8 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 	public void testSearchByDate() throws Exception
 	{
 		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
-		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext().getBean(
-				QuestionnaireResponseDao.class);
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
 		questionnaireResponseDao.create(questionnaireResponse);
 
 		Bundle searchBundle = getWebserviceClient().search(QuestionnaireResponse.class,
@@ -80,7 +80,8 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 		assertNotNull(searchBundle.getEntry().get(0).getResource());
 		assertTrue(searchBundle.getEntry().get(0).getResource() instanceof QuestionnaireResponse);
 
-		QuestionnaireResponse searchQuestionnaireResponse = (QuestionnaireResponse) searchBundle.getEntry().get(0).getResource();
+		QuestionnaireResponse searchQuestionnaireResponse = (QuestionnaireResponse) searchBundle.getEntry().get(0)
+				.getResource();
 		assertTrue(searchQuestionnaireResponse.hasAuthored());
 		assertEquals(0, AUTHORED.compareTo(searchQuestionnaireResponse.getAuthored()));
 	}
@@ -89,8 +90,8 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 	public void testSearchByIdentifier() throws Exception
 	{
 		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
-		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext().getBean(
-				QuestionnaireResponseDao.class);
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
 		questionnaireResponseDao.create(questionnaireResponse);
 
 		Bundle searchBundle = getWebserviceClient().search(QuestionnaireResponse.class,
@@ -102,7 +103,8 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 		assertNotNull(searchBundle.getEntry().get(0).getResource());
 		assertTrue(searchBundle.getEntry().get(0).getResource() instanceof QuestionnaireResponse);
 
-		QuestionnaireResponse searchQuestionnaireResponse = (QuestionnaireResponse) searchBundle.getEntry().get(0).getResource();
+		QuestionnaireResponse searchQuestionnaireResponse = (QuestionnaireResponse) searchBundle.getEntry().get(0)
+				.getResource();
 		assertTrue(searchQuestionnaireResponse.hasIdentifier());
 		assertEquals(IDENTIFIER_SYSTEM, searchQuestionnaireResponse.getIdentifier().getSystem());
 		assertEquals(IDENTIFIER_VALUE, searchQuestionnaireResponse.getIdentifier().getValue());
@@ -112,8 +114,8 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 	public void testSearchByStatus() throws Exception
 	{
 		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
-		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext().getBean(
-				QuestionnaireResponseDao.class);
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
 		questionnaireResponseDao.create(questionnaireResponse);
 
 		Bundle searchBundle = getWebserviceClient().search(QuestionnaireResponse.class,
@@ -125,7 +127,8 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 		assertNotNull(searchBundle.getEntry().get(0).getResource());
 		assertTrue(searchBundle.getEntry().get(0).getResource() instanceof QuestionnaireResponse);
 
-		QuestionnaireResponse searchQuestionnaireResponse = (QuestionnaireResponse) searchBundle.getEntry().get(0).getResource();
+		QuestionnaireResponse searchQuestionnaireResponse = (QuestionnaireResponse) searchBundle.getEntry().get(0)
+				.getResource();
 		assertTrue(searchQuestionnaireResponse.hasStatus());
 		assertEquals(STATUS, searchQuestionnaireResponse.getStatus());
 	}
