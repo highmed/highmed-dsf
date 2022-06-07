@@ -25,8 +25,8 @@ import org.junit.Test;
 
 public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTest
 {
-	private static final Date AUTHORED = Date.from(
-			LocalDateTime.parse("2022-01-01T00:00:00").toInstant(ZoneOffset.UTC));
+	private static final Date AUTHORED = Date
+			.from(LocalDateTime.parse("2022-01-01T00:00:00").toInstant(ZoneOffset.UTC));
 	private static final String IDENTIFIER_SYSTEM = "http://highmed.org/fhir/CodeSystem/user-task-id";
 	private static final String IDENTIFIER_VALUE = "foo";
 	private static final String QUESTIONNAIRE_URL = "http://highmed.org/fhir/Questionnaire/userTask/foo";
@@ -49,8 +49,8 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 	public void testSearchByDate() throws Exception
 	{
 		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
-		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext().getBean(
-				QuestionnaireResponseDao.class);
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
 		questionnaireResponseDao.create(questionnaireResponse);
 
 		Bundle searchBundle = getWebserviceClient().search(QuestionnaireResponse.class,
@@ -72,8 +72,8 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 	public void testSearchByIdentifier() throws Exception
 	{
 		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
-		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext().getBean(
-				QuestionnaireResponseDao.class);
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
 		questionnaireResponseDao.create(questionnaireResponse);
 
 		Bundle searchBundle = getWebserviceClient().search(QuestionnaireResponse.class,
@@ -111,8 +111,8 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 		questionnaireDao.create(questionnaire);
 
 		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
-		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext().getBean(
-				QuestionnaireResponseDao.class);
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
 		questionnaireResponseDao.create(questionnaireResponse);
 
 		Bundle searchBundle = getWebserviceClient().search(QuestionnaireResponse.class,
@@ -149,8 +149,8 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 		questionnaireDao.create(questionnaire);
 
 		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse().setQuestionnaire(QUESTIONNAIRE_URL);
-		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext().getBean(
-				QuestionnaireResponseDao.class);
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
 		questionnaireResponseDao.create(questionnaireResponse);
 
 		Bundle searchBundle = getWebserviceClient().search(QuestionnaireResponse.class,
@@ -196,8 +196,8 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 		questionnaireDao.create(questionnaire4);
 
 		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
-		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext().getBean(
-				QuestionnaireResponseDao.class);
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
 		questionnaireResponseDao.create(questionnaireResponse);
 
 		Bundle searchBundle = getWebserviceClient().search(QuestionnaireResponse.class,
@@ -232,8 +232,8 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 	public void testSearchByStatus() throws Exception
 	{
 		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
-		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext().getBean(
-				QuestionnaireResponseDao.class);
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
 		questionnaireResponseDao.create(questionnaireResponse);
 
 		Bundle searchBundle = getWebserviceClient().search(QuestionnaireResponse.class,
@@ -255,12 +255,12 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 	public void testSearchBySubjectReference() throws Exception
 	{
 		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
-		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext().getBean(
-				QuestionnaireResponseDao.class);
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
 		questionnaireResponseDao.create(questionnaireResponse);
 
-		OrganizationProvider organizationProvider = getSpringWebApplicationContext().getBean(
-				OrganizationProvider.class);
+		OrganizationProvider organizationProvider = getSpringWebApplicationContext()
+				.getBean(OrganizationProvider.class);
 		Organization organization = organizationProvider.getLocalOrganization().get();
 
 		String organizationReference = "Organization/" + organization.getIdElement().getIdPart();
@@ -308,8 +308,8 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 
 	private QuestionnaireResponse createQuestionnaireResponse()
 	{
-		OrganizationProvider organizationProvider = getSpringWebApplicationContext().getBean(
-				OrganizationProvider.class);
+		OrganizationProvider organizationProvider = getSpringWebApplicationContext()
+				.getBean(OrganizationProvider.class);
 		assertNotNull(organizationProvider);
 
 		QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse();
@@ -323,8 +323,8 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 		questionnaireResponse.setStatus(STATUS);
 		questionnaireResponse.setAuthored(AUTHORED);
 
-		String organizationReference =
-				"Organization/" + organizationProvider.getLocalOrganization().get().getIdElement().getIdPart();
+		String organizationReference = "Organization/"
+				+ organizationProvider.getLocalOrganization().get().getIdElement().getIdPart();
 		questionnaireResponse.setSubject(new Reference(organizationReference));
 
 		questionnaireResponse.addItem().setLinkId("foo").setText("Approve?").addAnswer()
