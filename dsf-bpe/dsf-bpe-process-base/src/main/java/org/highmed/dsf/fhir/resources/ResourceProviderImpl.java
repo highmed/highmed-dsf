@@ -25,6 +25,7 @@ import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.NamingSystem;
+import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
@@ -54,10 +55,10 @@ class ResourceProviderImpl implements ResourceProvider
 	private static final String PLACEHOLDER_PREFIX = "#{";
 	private static final Pattern PLACEHOLDER_PREFIX_PATTERN = Pattern.compile(Pattern.quote(PLACEHOLDER_PREFIX));
 
-
 	private final Map<String, List<ActivityDefinition>> activityDefinitionsByProcessKeyAndVersion = new HashMap<>();
 	private final Map<String, List<CodeSystem>> codeSystemsByProcessKeyAndVersion = new HashMap<>();
 	private final Map<String, List<NamingSystem>> namingSystemsByProcessKeyAndVersion = new HashMap<>();
+	private final Map<String, List<Questionnaire>> questionnairesByProcessKeyAndVersion = new HashMap<>();
 	private final Map<String, List<StructureDefinition>> structureDefinitionsByProcessKeyAndVersion = new HashMap<>();
 	private final Map<String, List<ValueSet>> valueSetsByProcessKeyAndVersion = new HashMap<>();
 
@@ -66,6 +67,7 @@ class ResourceProviderImpl implements ResourceProvider
 	ResourceProviderImpl(Map<String, List<ActivityDefinition>> activityDefinitionsByProcessKeyAndVersion,
 			Map<String, List<CodeSystem>> codeSystemsByProcessKeyAndVersion,
 			Map<String, List<NamingSystem>> namingSystemsByProcessKeyAndVersion,
+			Map<String, List<Questionnaire>> questionnairesByProcessKeyAndVersion,
 			Map<String, List<StructureDefinition>> structureDefinitionsByProcessKeyAndVersion,
 			Map<String, List<ValueSet>> valueSetsByProcessKeyAndVersion,
 			Map<String, List<AbstractResource>> dependencyResourcesByProcessKeyAndVersion)
@@ -76,6 +78,8 @@ class ResourceProviderImpl implements ResourceProvider
 			this.codeSystemsByProcessKeyAndVersion.putAll(codeSystemsByProcessKeyAndVersion);
 		if (namingSystemsByProcessKeyAndVersion != null)
 			this.namingSystemsByProcessKeyAndVersion.putAll(namingSystemsByProcessKeyAndVersion);
+		if (questionnairesByProcessKeyAndVersion != null)
+			this.questionnairesByProcessKeyAndVersion.putAll(questionnairesByProcessKeyAndVersion);
 		if (structureDefinitionsByProcessKeyAndVersion != null)
 			this.structureDefinitionsByProcessKeyAndVersion.putAll(structureDefinitionsByProcessKeyAndVersion);
 		if (valueSetsByProcessKeyAndVersion != null)
@@ -109,6 +113,12 @@ class ResourceProviderImpl implements ResourceProvider
 			logger.debug("{} name {} found", NamingSystem.class.getSimpleName(), name);
 
 		return opt;
+	}
+
+	@Override
+	public Optional<Questionnaire> getQuestionnaire(String url, String version)
+	{
+		return getMetadataResource(url, version, questionnairesByProcessKeyAndVersion, Questionnaire.class);
 	}
 
 	@Override
@@ -155,6 +165,8 @@ class ResourceProviderImpl implements ResourceProvider
 			return getCodeSystem(resource.getUrl(), resource.getVersion()).map(r -> (MetadataResource) r);
 		else if (NamingSystem.class.equals(resource.getType()))
 			return getNamingSystem(resource.getName()).map(r -> (MetadataResource) r);
+		else if (Questionnaire.class.equals(resource.getType()))
+			return getQuestionnaire(resource.getUrl(), resource.getVersion()).map(r -> (MetadataResource) r);
 		else if (StructureDefinition.class.equals(resource.getType()))
 			return getStructureDefinition(resource.getUrl(), resource.getVersion()).map(r -> (MetadataResource) r);
 		else if (ValueSet.class.equals(resource.getType()))
@@ -177,15 +189,14 @@ class ResourceProviderImpl implements ResourceProvider
 				.map(r -> providerByNameAndVersion.apply(r.getDependencyNameAndVersion()).getMetadataResouce(r))
 				.filter(Optional::isPresent).map(Optional::get);
 
-		Stream<MetadataResource> resources = Arrays
-				.asList(activityDefinitionsByProcessKeyAndVersion.getOrDefault(processKeyAndVersion,
-						Collections.emptyList()),
-						codeSystemsByProcessKeyAndVersion.getOrDefault(processKeyAndVersion, Collections.emptyList()),
-						namingSystemsByProcessKeyAndVersion.getOrDefault(processKeyAndVersion, Collections.emptyList()),
-						structureDefinitionsByProcessKeyAndVersion.getOrDefault(processKeyAndVersion,
-								Collections.emptyList()),
-						valueSetsByProcessKeyAndVersion.getOrDefault(processKeyAndVersion, Collections.emptyList()))
-				.stream().flatMap(List::stream);
+		Stream<MetadataResource> resources = Arrays.asList(
+				activityDefinitionsByProcessKeyAndVersion.getOrDefault(processKeyAndVersion, Collections.emptyList()),
+				codeSystemsByProcessKeyAndVersion.getOrDefault(processKeyAndVersion, Collections.emptyList()),
+				namingSystemsByProcessKeyAndVersion.getOrDefault(processKeyAndVersion, Collections.emptyList()),
+				questionnairesByProcessKeyAndVersion.getOrDefault(processKeyAndVersion, Collections.emptyList()),
+				structureDefinitionsByProcessKeyAndVersion.getOrDefault(processKeyAndVersion, Collections.emptyList()),
+				valueSetsByProcessKeyAndVersion.getOrDefault(processKeyAndVersion, Collections.emptyList())).stream()
+				.flatMap(List::stream);
 
 		return Stream.concat(resources, dependencyResources);
 	}
@@ -201,6 +212,7 @@ class ResourceProviderImpl implements ResourceProvider
 		Map<String, List<ActivityDefinition>> activityDefinitionsByProcessKeyAndVersion = new HashMap<>();
 		Map<String, List<CodeSystem>> codeSystemsByProcessKeyAndVersion = new HashMap<>();
 		Map<String, List<NamingSystem>> namingSystemsByProcessKeyAndVersion = new HashMap<>();
+		Map<String, List<Questionnaire>> questionnairesByProcessKeyAndVersion = new HashMap<>();
 		Map<String, List<StructureDefinition>> structureDefinitionsByProcessKeyAndVersion = new HashMap<>();
 		Map<String, List<ValueSet>> valueSetsByProcessKeyAndVersion = new HashMap<>();
 
@@ -214,6 +226,8 @@ class ResourceProviderImpl implements ResourceProvider
 					addOrInsert(codeSystemsByProcessKeyAndVersion, e.getKey(), (CodeSystem) r);
 				else if (r instanceof NamingSystem)
 					addOrInsert(namingSystemsByProcessKeyAndVersion, e.getKey(), (NamingSystem) r);
+				else if (r instanceof Questionnaire)
+					addOrInsert(questionnairesByProcessKeyAndVersion, e.getKey(), (Questionnaire) r);
 				else if (r instanceof StructureDefinition)
 					addOrInsert(structureDefinitionsByProcessKeyAndVersion, e.getKey(), (StructureDefinition) r);
 				else if (r instanceof ValueSet)
@@ -225,8 +239,9 @@ class ResourceProviderImpl implements ResourceProvider
 		});
 
 		return new ResourceProviderImpl(activityDefinitionsByProcessKeyAndVersion, codeSystemsByProcessKeyAndVersion,
-				namingSystemsByProcessKeyAndVersion, structureDefinitionsByProcessKeyAndVersion,
-				valueSetsByProcessKeyAndVersion, dependencyResourcesByProcessKeyAndVersion);
+				namingSystemsByProcessKeyAndVersion, questionnairesByProcessKeyAndVersion,
+				structureDefinitionsByProcessKeyAndVersion, valueSetsByProcessKeyAndVersion,
+				dependencyResourcesByProcessKeyAndVersion);
 	}
 
 	private static <T extends MetadataResource> void addOrInsert(Map<String, List<T>> map, String processKeyAndVersion,
