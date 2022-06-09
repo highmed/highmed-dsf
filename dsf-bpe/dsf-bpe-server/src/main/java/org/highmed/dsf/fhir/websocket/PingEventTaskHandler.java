@@ -6,15 +6,15 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PingEventHandler
+public class PingEventTaskHandler
 {
-	private static final Logger logger = LoggerFactory.getLogger(PingEventHandler.class);
+	private static final Logger logger = LoggerFactory.getLogger(PingEventTaskHandler.class);
 
-	private final ExistingTaskLoader taskLoader;
+	private final ExistingTaskLoader loader;
 
-	public PingEventHandler(ExistingTaskLoader taskLoader)
+	public PingEventTaskHandler(ExistingTaskLoader loader)
 	{
-		this.taskLoader = taskLoader;
+		this.loader = loader;
 	}
 
 	public void onPing(String ping, String subscriptionIdPart, Map<String, List<String>> searchCriteriaQueryParameters)
@@ -27,6 +27,6 @@ public class PingEventHandler
 			return;
 		}
 
-		taskLoader.readExistingTasks(searchCriteriaQueryParameters);
+		loader.readExistingResources(searchCriteriaQueryParameters);
 	}
 }

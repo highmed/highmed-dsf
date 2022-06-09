@@ -10,17 +10,17 @@ import java.util.Optional;
 
 import javax.ws.rs.core.UriBuilder;
 
-import org.highmed.dsf.fhir.task.TaskHandler;
+import org.highmed.dsf.fhir.questionnaire.QuestionnaireResponseHandler;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ExistingTaskLoader
+public class ExistingQuestionnaireResponseLoader
 {
-	private static final Logger logger = LoggerFactory.getLogger(ExistingTaskLoader.class);
+	private static final Logger logger = LoggerFactory.getLogger(ExistingQuestionnaireResponseLoader.class);
 
 	private static final String PARAM_LAST_UPDATED = "_lastUpdated";
 	private static final String PARAM_COUNT = "_count";
@@ -30,19 +30,19 @@ public class ExistingTaskLoader
 
 	private final LastEventTimeIo lastEventTimeIo;
 	private final FhirWebserviceClient webserviceClient;
-	private final TaskHandler taskHandler;
+	private final QuestionnaireResponseHandler handler;
 
-	public ExistingTaskLoader(LastEventTimeIo lastEventTimeIo, TaskHandler taskHandler,
+	public ExistingQuestionnaireResponseLoader(LastEventTimeIo lastEventTimeIo, QuestionnaireResponseHandler handler,
 			FhirWebserviceClient webserviceClient)
 	{
 		this.lastEventTimeIo = lastEventTimeIo;
-		this.taskHandler = taskHandler;
+		this.handler = handler;
 		this.webserviceClient = webserviceClient;
 	}
 
 	public void readExistingResources(Map<String, List<String>> searchCriteriaQueryParameters)
 	{
-		// executing search until call results in no more found tasks
+		// executing search until call results in no more found questionnaire responses
 		while (doReadExistingResources(searchCriteriaQueryParameters))
 			;
 	}
@@ -59,11 +59,11 @@ public class ExistingTaskLoader
 		queryParams.put(PARAM_PAGE, Collections.singletonList("1"));
 		queryParams.put(PARAM_SORT, Collections.singletonList(PARAM_LAST_UPDATED));
 
-		UriBuilder builder = UriBuilder.fromPath("Task");
+		UriBuilder builder = UriBuilder.fromPath("QuestionnaireResponse");
 		queryParams.forEach((k, v) -> builder.replaceQueryParam(k, v.toArray()));
 
 		logger.debug("Executing search {}", builder.toString());
-		Bundle bundle = webserviceClient.searchWithStrictHandling(Task.class, queryParams);
+		Bundle bundle = webserviceClient.searchWithStrictHandling(QuestionnaireResponse.class, queryParams);
 
 		if (bundle.getTotal() <= 0)
 		{
@@ -73,14 +73,14 @@ public class ExistingTaskLoader
 
 		for (BundleEntryComponent entry : bundle.getEntry())
 		{
-			if (entry.getResource() instanceof Task)
+			if (entry.getResource() instanceof QuestionnaireResponse)
 			{
-				Task task = (Task) entry.getResource();
-				taskHandler.onResource(task);
-				lastEventTimeIo.writeLastEventTime(task.getAuthoredOn());
+				QuestionnaireResponse questionnaireResponse = (QuestionnaireResponse) entry.getResource();
+				handler.onResource(questionnaireResponse);
+				lastEventTimeIo.writeLastEventTime(questionnaireResponse.getAuthored());
 			}
 			else
-				logger.warn("Ignoring resource of type {}", Task.class.getName());
+				logger.warn("Ignoring resource of type {}", QuestionnaireResponse.class.getName());
 		}
 
 		return true;

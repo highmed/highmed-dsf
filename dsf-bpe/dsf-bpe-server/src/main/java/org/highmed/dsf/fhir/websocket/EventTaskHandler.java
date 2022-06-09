@@ -8,14 +8,14 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 
-public class ResourceEventHandler
+public class EventTaskHandler
 {
-	private static final Logger logger = LoggerFactory.getLogger(ResourceEventHandler.class);
+	private static final Logger logger = LoggerFactory.getLogger(EventTaskHandler.class);
 
 	private final TaskHandler taskHandler;
 	private final LastEventTimeIo lastEventTimeIo;
 
-	public ResourceEventHandler(LastEventTimeIo lastEventTimeIo, TaskHandler taskHandler)
+	public EventTaskHandler(LastEventTimeIo lastEventTimeIo, TaskHandler taskHandler)
 	{
 		this.lastEventTimeIo = lastEventTimeIo;
 		this.taskHandler = taskHandler;
@@ -28,7 +28,7 @@ public class ResourceEventHandler
 		if (resource instanceof Task)
 		{
 			Task task = (Task) resource;
-			taskHandler.onTask(task);
+			taskHandler.onResource(task);
 			lastEventTimeIo.writeLastEventTime(task.getAuthoredOn());
 		}
 		else

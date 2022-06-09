@@ -59,7 +59,7 @@ public class TaskHandler implements InitializingBean
 		Objects.requireNonNull(repositoryService, "repositoryService");
 	}
 
-	public void onTask(Task task)
+	public void onResource(Task task)
 	{
 		task.setStatus(Task.TaskStatus.INPROGRESS);
 		task = webserviceClient.update(task);

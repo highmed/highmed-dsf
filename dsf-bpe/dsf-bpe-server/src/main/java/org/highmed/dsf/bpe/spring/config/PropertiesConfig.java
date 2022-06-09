@@ -114,9 +114,13 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.bpe.fhir.client.local.websocket.proxy.password:#{null}}")
 	private char[] websocketClientProxyPassword;
 
-	@Documentation(description = "Subscription to receive notifications about resources from the DSF FHIR server", recommendation = "Change only if you need other subscriptions then the default Task subscription of the DSF")
+	@Documentation(description = "Subscription to receive notifications about task resources from the DSF FHIR server")
 	@Value("${org.highmed.dsf.bpe.fhir.task.subscription.search.parameter:?criteria=Task%3Fstatus%3Drequested&status=active&type=websocket&payload=application/fhir%2Bjson}")
-	private String subscriptionSearchParameter;
+	private String taskSubscriptionSearchParameter;
+
+	@Documentation(description = "Subscription to receive notifications about questionnaire response resources from the DSF FHIR server")
+	@Value("${org.highmed.dsf.bpe.fhir.questionnaire.response.subscription.search.parameter:?criteria=QuestionnaireResponse%3Fstatus%3Dcompleted&status=active&type=websocket&payload=application/fhir%2Bjson}")
+	private String questionnaireResponseSubscriptionSearchParameter;
 
 	@Documentation(description = "File storing the last event received and processed on the DFS BPE server from the DSF FHIR server, used to load events that occurred on the DSF FHIR server while the DSF BPE server was turned off")
 	@Value("${org.highmed.dsf.bpe.fhir.task.subscription.last.event.time:last_event/time.file}")
@@ -295,9 +299,14 @@ public class PropertiesConfig
 		return websocketClientProxyPassword;
 	}
 
-	public String getSubscriptionSearchParameter()
+	public String getTaskSubscriptionSearchParameter()
 	{
-		return subscriptionSearchParameter;
+		return taskSubscriptionSearchParameter;
+	}
+
+	public String getQuestionnaireResponseSubscriptionSearchParameter()
+	{
+		return questionnaireResponseSubscriptionSearchParameter;
 	}
 
 	public Path getLastEventTimeFile()

@@ -60,6 +60,8 @@ public class EventConfig
 		put(daosByResourceName, daoConfig.practitionerDao());
 		put(daosByResourceName, daoConfig.practitionerRoleDao());
 		put(daosByResourceName, daoConfig.provenanceDao());
+		put(daosByResourceName, daoConfig.questionnaireDao());
+		put(daosByResourceName, daoConfig.questionnaireResponseDao());
 		put(daosByResourceName, daoConfig.researchStudyDao());
 		put(daosByResourceName, daoConfig.structureDefinitionDao());
 		put(daosByResourceName, daoConfig.subscriptionDao());
