@@ -70,8 +70,8 @@ public abstract class AbstractSubscriptionFhirConnector<R extends DomainResource
 		}
 		else
 		{
-			UriComponents componentes = UriComponentsBuilder.fromUriString(
-					queryParameters.startsWith("?") ? queryParameters : "?" + queryParameters).build();
+			UriComponents componentes = UriComponentsBuilder
+					.fromUriString(queryParameters.startsWith("?") ? queryParameters : "?" + queryParameters).build();
 
 			return componentes.getQueryParams();
 		}
@@ -163,20 +163,19 @@ public abstract class AbstractSubscriptionFhirConnector<R extends DomainResource
 	{
 		logger.debug("Retrieving websocket subscription");
 
-		Bundle bundle = clientProvider.getLocalWebserviceClient()
-				.searchWithStrictHandling(Subscription.class, subscriptionSearchParameter);
+		Bundle bundle = clientProvider.getLocalWebserviceClient().searchWithStrictHandling(Subscription.class,
+				subscriptionSearchParameter);
 
 		if (!Bundle.BundleType.SEARCHSET.equals(bundle.getType()))
-			throw new RuntimeException(
-					"Could not retrieve searchset for subscription search query " + subscriptionSearchParameter
-							+ ", but got " + bundle.getType());
+			throw new RuntimeException("Could not retrieve searchset for subscription search query "
+					+ subscriptionSearchParameter + ", but got " + bundle.getType());
 		if (bundle.getTotal() != 1)
 			throw new RuntimeException("Could not retrieve exactly one result for subscription search query "
 					+ subscriptionSearchParameter);
 		if (!(bundle.getEntryFirstRep().getResource() instanceof Subscription))
 			throw new RuntimeException("Could not retrieve exactly one Subscription for subscription search query "
-					+ subscriptionSearchParameter + ", but got " + bundle.getEntryFirstRep().getResource()
-					.getResourceType());
+					+ subscriptionSearchParameter + ", but got "
+					+ bundle.getEntryFirstRep().getResource().getResourceType());
 
 		Subscription subscription = (Subscription) bundle.getEntryFirstRep().getResource();
 		logger.debug("Subscription with id {} found", subscription.getIdElement().getIdPart());
