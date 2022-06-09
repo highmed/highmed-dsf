@@ -255,7 +255,7 @@ public abstract class AbstractSubscriptionFhirConnector<R extends DomainResource
 		clientProvider.disconnectAll();
 	}
 
-	protected void setPingEventHandler(WebsocketClient client, String subscriptionIdPart,
+	private void setPingEventHandler(WebsocketClient client, String subscriptionIdPart,
 			Map<String, List<String>> searchCriteriaQueryParameters)
 	{
 		FhirWebserviceClient webserviceClient = clientProvider.getLocalWebserviceClient();
@@ -265,7 +265,7 @@ public abstract class AbstractSubscriptionFhirConnector<R extends DomainResource
 		client.setPingHandler(ping -> pingHandler.onPing(ping, subscriptionIdPart, searchCriteriaQueryParameters));
 	}
 
-	protected void setResourceEventHandler(WebsocketClient client, EventType eventType)
+	private void setResourceEventHandler(WebsocketClient client, EventType eventType)
 	{
 		EventResourceHandler eventHandler = createEventResourceHandler(lastEventTimeIo, handler);
 		client.setDomainResourceHandler(eventHandler::onResource, createParserFactory(eventType, fhirContext));
