@@ -4,16 +4,19 @@ import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_USER_TAS
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_TASK_ID;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.TaskService;
+import org.highmed.dsf.fhir.websocket.ResourceHandler;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.StringType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 
-public class QuestionnaireResponseHandler
+public class QuestionnaireResponseHandler implements ResourceHandler<QuestionnaireResponse>, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(QuestionnaireResponseHandler.class);
 
@@ -22,6 +25,12 @@ public class QuestionnaireResponseHandler
 	public QuestionnaireResponseHandler(TaskService taskService)
 	{
 		this.taskService = taskService;
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception
+	{
+		Objects.requireNonNull(taskService, "taskService");
 	}
 
 	public void onResource(QuestionnaireResponse questionnaireResponse)

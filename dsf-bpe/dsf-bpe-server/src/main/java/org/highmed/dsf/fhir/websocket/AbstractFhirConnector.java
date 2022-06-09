@@ -8,10 +8,10 @@ import java.util.concurrent.Executors;
 import java.util.function.Supplier;
 
 import org.highmed.dsf.fhir.client.FhirWebsocketClientProvider;
-import org.highmed.dsf.fhir.questionnaire.QuestionnaireResponseHandler;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.highmed.fhir.client.WebsocketClient;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,12 +25,13 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 
-public class FhirConnectorQuestionnaireResponseImpl implements InitializingBean, FhirConnector
+public abstract class AbstractFhirConnector<R extends DomainResource> implements FhirConnector<R>, InitializingBean
 {
-	private static final Logger logger = LoggerFactory.getLogger(FhirConnectorQuestionnaireResponseImpl.class);
+	private static final Logger logger = LoggerFactory.getLogger(AbstractFhirConnector.class);
 
+	private final String resourcePath;
 	private final FhirWebsocketClientProvider clientProvider;
-	private final QuestionnaireResponseHandler handler;
+	private final ResourceHandler<R> handler;
 	private final LastEventTimeIo lastEventTimeIo;
 	private final FhirContext fhirContext;
 
@@ -38,10 +39,11 @@ public class FhirConnectorQuestionnaireResponseImpl implements InitializingBean,
 	private final int maxRetries;
 	private final Map<String, List<String>> subscriptionSearchParameter;
 
-	public FhirConnectorQuestionnaireResponseImpl(FhirWebsocketClientProvider clientProvider,
-			QuestionnaireResponseHandler handler, LastEventTimeIo lastEventTimeIo, FhirContext fhirContext,
+	public AbstractFhirConnector(String resourcePath, FhirWebsocketClientProvider clientProvider,
+			ResourceHandler<R> handler, LastEventTimeIo lastEventTimeIo, FhirContext fhirContext,
 			String subscriptionSearchParameter, long retrySleepMillis, int maxRetries)
 	{
+		this.resourcePath = resourcePath;
 		this.clientProvider = clientProvider;
 		this.handler = handler;
 		this.lastEventTimeIo = lastEventTimeIo;
@@ -91,9 +93,9 @@ public class FhirConnectorQuestionnaireResponseImpl implements InitializingBean,
 	private Subscription retrieveWebsocketSubscription()
 	{
 		if (maxRetries >= 0)
-			return retry(() -> doRetrieveWebsocketSubscription());
+			return retry(this::doRetrieveWebsocketSubscription);
 		else
-			return retryForever(() -> doRetrieveWebsocketSubscription());
+			return retryForever(this::doRetrieveWebsocketSubscription);
 	}
 
 	private Subscription retry(Supplier<Subscription> supplier)
@@ -178,13 +180,12 @@ public class FhirConnectorQuestionnaireResponseImpl implements InitializingBean,
 
 	private Subscription loadExistingResources(Subscription subscription)
 	{
-		logger.debug("Downloading existing QuestionnaireResponse resources");
+		logger.debug("Downloading existing resources");
 
-		FhirWebserviceClient webserviceClient = clientProvider.getLocalWebserviceClient();
-		ExistingQuestionnaireResponseLoader existingQuestionnaireResponseLoader = new ExistingQuestionnaireResponseLoader(
-				lastEventTimeIo, handler, webserviceClient);
-		Map<String, List<String>> subscriptionCriteria = parse(subscription.getCriteria(), "QuestionnaireResponse");
-		existingQuestionnaireResponseLoader.readExistingResources(subscriptionCriteria);
+		FhirWebserviceClient client = clientProvider.getLocalWebserviceClient();
+		ExistingResourceLoader existingResourceLoader = createExistingResourceLoader(lastEventTimeIo, handler, client);
+		Map<String, List<String>> subscriptionCriteria = parse(subscription.getCriteria(), resourcePath);
+		existingResourceLoader.readExistingResources(subscriptionCriteria);
 
 		return subscription;
 	}
@@ -199,7 +200,7 @@ public class FhirConnectorQuestionnaireResponseImpl implements InitializingBean,
 		EventType eventType = toEventType(subscription.getChannel().getPayload());
 		if (EventType.PING.equals(eventType))
 		{
-			Map<String, List<String>> subscriptionCriteria = parse(subscription.getCriteria(), "QuestionnaireResponse");
+			Map<String, List<String>> subscriptionCriteria = parse(subscription.getCriteria(), resourcePath);
 			setPingEventHandler(client, subscription.getIdElement().getIdPart(), subscriptionCriteria);
 		}
 		else
@@ -252,15 +253,15 @@ public class FhirConnectorQuestionnaireResponseImpl implements InitializingBean,
 			Map<String, List<String>> searchCriteriaQueryParameters)
 	{
 		FhirWebserviceClient webserviceClient = clientProvider.getLocalWebserviceClient();
-		PingEventQuestionnaireResponseHandler pingHandler = new PingEventQuestionnaireResponseHandler(
-				new ExistingQuestionnaireResponseLoader(lastEventTimeIo, handler, webserviceClient));
+		ExistingResourceLoader existingResourceLoader = createExistingResourceLoader(lastEventTimeIo, handler,
+				webserviceClient);
+		PingEventResourceHandler pingHandler = createPingEventResourceHandler(existingResourceLoader);
 		client.setPingHandler(ping -> pingHandler.onPing(ping, subscriptionIdPart, searchCriteriaQueryParameters));
 	}
 
 	protected void setResourceEventHandler(WebsocketClient client, EventType eventType)
 	{
-		EventQuestionnaireResponseHandler eventHandler = new EventQuestionnaireResponseHandler(lastEventTimeIo,
-				handler);
+		EventResourceHandler eventHandler = createEventResourceHandler(lastEventTimeIo, handler);
 		client.setDomainResourceHandler(eventHandler::onResource, createParserFactory(eventType, fhirContext));
 	}
 

@@ -6,13 +6,13 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PingEventTaskHandler
+public class PingEventResourceHandler
 {
-	private static final Logger logger = LoggerFactory.getLogger(PingEventTaskHandler.class);
+	private static final Logger logger = LoggerFactory.getLogger(PingEventResourceHandler.class);
 
-	private final ExistingTaskLoader loader;
+	private final ExistingResourceLoader loader;
 
-	public PingEventTaskHandler(ExistingTaskLoader loader)
+	public PingEventResourceHandler(ExistingResourceLoader loader)
 	{
 		this.loader = loader;
 	}

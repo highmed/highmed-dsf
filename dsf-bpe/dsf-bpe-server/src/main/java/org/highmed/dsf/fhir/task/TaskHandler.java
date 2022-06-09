@@ -25,13 +25,14 @@ import org.camunda.bpm.engine.runtime.ProcessInstance;
 import org.camunda.bpm.engine.runtime.ProcessInstanceQuery;
 import org.camunda.bpm.engine.variable.Variables;
 import org.highmed.dsf.fhir.variables.FhirResourceValues;
+import org.highmed.dsf.fhir.websocket.ResourceHandler;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-public class TaskHandler implements InitializingBean
+public class TaskHandler implements ResourceHandler<Task>, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(TaskHandler.class);
 
