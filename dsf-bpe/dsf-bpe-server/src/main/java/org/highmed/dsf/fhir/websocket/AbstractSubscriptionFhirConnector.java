@@ -8,6 +8,9 @@ import java.util.concurrent.Executors;
 import java.util.function.Supplier;
 
 import org.highmed.dsf.fhir.client.FhirWebsocketClientProvider;
+import org.highmed.dsf.fhir.subscription.EventResourceHandler;
+import org.highmed.dsf.fhir.subscription.ExistingResourceLoader;
+import org.highmed.dsf.fhir.subscription.PingEventResourceHandler;
 import org.highmed.dsf.fhir.subscription.SubscriptionHandler;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.highmed.fhir.client.WebsocketClient;

@@ -1,9 +1,6 @@
 package org.highmed.dsf.fhir.subscription;
 
-import org.highmed.dsf.fhir.websocket.EventResourceHandler;
-import org.highmed.dsf.fhir.websocket.ExistingResourceLoader;
 import org.highmed.dsf.fhir.websocket.LastEventTimeIo;
-import org.highmed.dsf.fhir.websocket.PingEventResourceHandler;
 import org.highmed.dsf.fhir.websocket.ResourceHandler;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.DomainResource;

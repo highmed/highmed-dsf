@@ -4,6 +4,9 @@ import org.highmed.dsf.fhir.client.FhirWebsocketClientProvider;
 import org.highmed.dsf.fhir.questionnaire.EventQuestionnaireResponseHandler;
 import org.highmed.dsf.fhir.questionnaire.ExistingQuestionnaireResponseLoader;
 import org.highmed.dsf.fhir.questionnaire.QuestionnaireResponseHandler;
+import org.highmed.dsf.fhir.subscription.EventResourceHandler;
+import org.highmed.dsf.fhir.subscription.ExistingResourceLoader;
+import org.highmed.dsf.fhir.subscription.PingEventResourceHandler;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 

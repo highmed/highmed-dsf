@@ -1,6 +1,6 @@
 package org.highmed.dsf.fhir.task;
 
-import org.highmed.dsf.fhir.websocket.EventResourceHandler;
+import org.highmed.dsf.fhir.subscription.EventResourceHandler;
 import org.highmed.dsf.fhir.websocket.LastEventTimeIo;
 import org.highmed.dsf.fhir.websocket.ResourceHandler;
 import org.hl7.fhir.r4.model.DomainResource;

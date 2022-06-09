@@ -10,7 +10,7 @@ import java.util.Optional;
 
 import javax.ws.rs.core.UriBuilder;
 
-import org.highmed.dsf.fhir.websocket.ExistingResourceLoader;
+import org.highmed.dsf.fhir.subscription.ExistingResourceLoader;
 import org.highmed.dsf.fhir.websocket.LastEventTimeIo;
 import org.highmed.dsf.fhir.websocket.ResourceHandler;
 import org.highmed.fhir.client.FhirWebserviceClient;

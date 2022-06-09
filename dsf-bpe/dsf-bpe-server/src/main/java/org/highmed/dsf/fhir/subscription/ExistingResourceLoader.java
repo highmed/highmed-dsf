@@ -1,4 +1,4 @@
-package org.highmed.dsf.fhir.websocket;
+package org.highmed.dsf.fhir.subscription;
 
 import java.util.List;
 import java.util.Map;

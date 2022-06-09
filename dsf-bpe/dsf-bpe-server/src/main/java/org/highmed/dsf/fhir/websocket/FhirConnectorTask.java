@@ -1,6 +1,9 @@
 package org.highmed.dsf.fhir.websocket;
 
 import org.highmed.dsf.fhir.client.FhirWebsocketClientProvider;
+import org.highmed.dsf.fhir.subscription.EventResourceHandler;
+import org.highmed.dsf.fhir.subscription.ExistingResourceLoader;
+import org.highmed.dsf.fhir.subscription.PingEventResourceHandler;
 import org.highmed.dsf.fhir.task.EventTaskHandler;
 import org.highmed.dsf.fhir.task.ExistingTaskLoader;
 import org.highmed.dsf.fhir.task.TaskHandler;
