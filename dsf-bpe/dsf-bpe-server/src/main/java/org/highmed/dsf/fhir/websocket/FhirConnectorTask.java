@@ -9,7 +9,7 @@ import org.hl7.fhir.r4.model.Task;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class FhirConnectorTask extends AbstractFhirConnector<Task>
+public class FhirConnectorTask extends AbstractSubscriptionFhirConnector<Task>
 {
 	public FhirConnectorTask(FhirWebsocketClientProvider clientProvider, TaskHandler handler,
 			LastEventTimeIo lastEventTimeIo, FhirContext fhirContext, String subscriptionSearchParameter,
@@ -27,15 +27,15 @@ public class FhirConnectorTask extends AbstractFhirConnector<Task>
 	}
 
 	@Override
-	public PingEventResourceHandler createPingEventResourceHandler(ExistingResourceLoader existingResourceLoader)
-	{
-		return new PingEventResourceHandler(existingResourceLoader);
-	}
-
-	@Override
 	public EventResourceHandler createEventResourceHandler(LastEventTimeIo lastEventTimeIo,
 			ResourceHandler<Task> resourceHandler)
 	{
 		return new EventTaskHandler(lastEventTimeIo, resourceHandler);
+	}
+
+	@Override
+	public PingEventResourceHandler createPingEventResourceHandler(ExistingResourceLoader existingResourceLoader)
+	{
+		return new PingEventResourceHandler(existingResourceLoader);
 	}
 }

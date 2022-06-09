@@ -9,7 +9,7 @@ import org.hl7.fhir.r4.model.QuestionnaireResponse;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class FhirConnectorQuestionnaireResponse extends AbstractFhirConnector<QuestionnaireResponse>
+public class FhirConnectorQuestionnaireResponse extends AbstractSubscriptionFhirConnector<QuestionnaireResponse>
 {
 
 	public FhirConnectorQuestionnaireResponse(FhirWebsocketClientProvider clientProvider,
@@ -28,15 +28,15 @@ public class FhirConnectorQuestionnaireResponse extends AbstractFhirConnector<Qu
 	}
 
 	@Override
-	public PingEventResourceHandler createPingEventResourceHandler(ExistingResourceLoader existingResourceLoader)
-	{
-		return new PingEventResourceHandler(existingResourceLoader);
-	}
-
-	@Override
 	public EventResourceHandler createEventResourceHandler(LastEventTimeIo lastEventTimeIo,
 			ResourceHandler<QuestionnaireResponse> resourceHandler)
 	{
 		return new EventQuestionnaireResponseHandler(lastEventTimeIo, resourceHandler);
+	}
+
+	@Override
+	public PingEventResourceHandler createPingEventResourceHandler(ExistingResourceLoader existingResourceLoader)
+	{
+		return new PingEventResourceHandler(existingResourceLoader);
 	}
 }

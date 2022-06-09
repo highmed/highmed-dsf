@@ -8,6 +8,7 @@ import java.util.concurrent.Executors;
 import java.util.function.Supplier;
 
 import org.highmed.dsf.fhir.client.FhirWebsocketClientProvider;
+import org.highmed.dsf.fhir.subscription.SubscriptionHandler;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.highmed.fhir.client.WebsocketClient;
 import org.hl7.fhir.r4.model.Bundle;
@@ -25,9 +26,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 
-public abstract class AbstractFhirConnector<R extends DomainResource> implements FhirConnector<R>, InitializingBean
+public abstract class AbstractSubscriptionFhirConnector<R extends DomainResource>
+		implements FhirConnector, SubscriptionHandler<R>, InitializingBean
 {
-	private static final Logger logger = LoggerFactory.getLogger(AbstractFhirConnector.class);
+	private static final Logger logger = LoggerFactory.getLogger(AbstractSubscriptionFhirConnector.class);
 
 	private final String resourcePath;
 	private final FhirWebsocketClientProvider clientProvider;
@@ -39,7 +41,7 @@ public abstract class AbstractFhirConnector<R extends DomainResource> implements
 	private final int maxRetries;
 	private final Map<String, List<String>> subscriptionSearchParameter;
 
-	public AbstractFhirConnector(String resourcePath, FhirWebsocketClientProvider clientProvider,
+	public AbstractSubscriptionFhirConnector(String resourcePath, FhirWebsocketClientProvider clientProvider,
 			ResourceHandler<R> handler, LastEventTimeIo lastEventTimeIo, FhirContext fhirContext,
 			String subscriptionSearchParameter, long retrySleepMillis, int maxRetries)
 	{
@@ -65,8 +67,8 @@ public abstract class AbstractFhirConnector<R extends DomainResource> implements
 		}
 		else
 		{
-			UriComponents componentes = UriComponentsBuilder
-					.fromUriString(queryParameters.startsWith("?") ? queryParameters : "?" + queryParameters).build();
+			UriComponents componentes = UriComponentsBuilder.fromUriString(
+					queryParameters.startsWith("?") ? queryParameters : "?" + queryParameters).build();
 
 			return componentes.getQueryParams();
 		}
@@ -158,19 +160,20 @@ public abstract class AbstractFhirConnector<R extends DomainResource> implements
 	{
 		logger.debug("Retrieving websocket subscription");
 
-		Bundle bundle = clientProvider.getLocalWebserviceClient().searchWithStrictHandling(Subscription.class,
-				subscriptionSearchParameter);
+		Bundle bundle = clientProvider.getLocalWebserviceClient()
+				.searchWithStrictHandling(Subscription.class, subscriptionSearchParameter);
 
 		if (!Bundle.BundleType.SEARCHSET.equals(bundle.getType()))
-			throw new RuntimeException("Could not retrieve searchset for subscription search query "
-					+ subscriptionSearchParameter + ", but got " + bundle.getType());
+			throw new RuntimeException(
+					"Could not retrieve searchset for subscription search query " + subscriptionSearchParameter
+							+ ", but got " + bundle.getType());
 		if (bundle.getTotal() != 1)
 			throw new RuntimeException("Could not retrieve exactly one result for subscription search query "
 					+ subscriptionSearchParameter);
 		if (!(bundle.getEntryFirstRep().getResource() instanceof Subscription))
 			throw new RuntimeException("Could not retrieve exactly one Subscription for subscription search query "
-					+ subscriptionSearchParameter + ", but got "
-					+ bundle.getEntryFirstRep().getResource().getResourceType());
+					+ subscriptionSearchParameter + ", but got " + bundle.getEntryFirstRep().getResource()
+					.getResourceType());
 
 		Subscription subscription = (Subscription) bundle.getEntryFirstRep().getResource();
 		logger.debug("Subscription with id {} found", subscription.getIdElement().getIdPart());
