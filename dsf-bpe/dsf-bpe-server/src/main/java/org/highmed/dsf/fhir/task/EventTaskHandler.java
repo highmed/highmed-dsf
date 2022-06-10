@@ -1,39 +1,26 @@
 package org.highmed.dsf.fhir.task;
 
-import org.highmed.dsf.fhir.subscription.EventResourceHandler;
+import java.util.Optional;
+
+import org.highmed.dsf.fhir.subscription.AbstractEventResourceHandler;
 import org.highmed.dsf.fhir.websocket.LastEventTimeIo;
 import org.highmed.dsf.fhir.websocket.ResourceHandler;
-import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-
-public class EventTaskHandler implements EventResourceHandler
+public class EventTaskHandler extends AbstractEventResourceHandler<Task>
 {
-	private static final Logger logger = LoggerFactory.getLogger(EventTaskHandler.class);
-
-	private final ResourceHandler<Task> handler;
-	private final LastEventTimeIo lastEventTimeIo;
-
 	public EventTaskHandler(LastEventTimeIo lastEventTimeIo, ResourceHandler<Task> handler)
 	{
-		this.lastEventTimeIo = lastEventTimeIo;
-		this.handler = handler;
+		super(lastEventTimeIo, handler);
 	}
 
-	public void onResource(DomainResource resource)
+	@Override
+	protected Optional<Task> castResource(Resource resource)
 	{
-		logger.trace("Resource of type {} received", resource.getClass().getAnnotation(ResourceDef.class).name());
-
 		if (resource instanceof Task)
-		{
-			Task task = (Task) resource;
-			handler.onResource(task);
-			lastEventTimeIo.writeLastEventTime(task.getAuthoredOn());
-		}
+			return Optional.of((Task) resource);
 		else
-			logger.warn("Ignoring resource of type {}", resource.getClass().getAnnotation(ResourceDef.class).name());
+			return Optional.empty();
 	}
 }

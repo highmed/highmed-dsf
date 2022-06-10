@@ -20,16 +20,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-public abstract class AbstractTaskListener implements TaskListener, InitializingBean
+public abstract class AbstractUserTaskListener implements TaskListener, InitializingBean
 {
-	private static final Logger logger = LoggerFactory.getLogger(AbstractTaskListener.class);
+	private static final Logger logger = LoggerFactory.getLogger(AbstractUserTaskListener.class);
 
 	private final FhirWebserviceClientProvider clientProvider;
 	private final OrganizationProvider organizationProvider;
 	private final ReadAccessHelper readAccessHelper;
 
-	public AbstractTaskListener(FhirWebserviceClientProvider clientProvider, OrganizationProvider organizationProvider,
-			ReadAccessHelper readAccessHelper)
+	public AbstractUserTaskListener(FhirWebserviceClientProvider clientProvider,
+			OrganizationProvider organizationProvider, ReadAccessHelper readAccessHelper)
 	{
 		this.clientProvider = clientProvider;
 		this.organizationProvider = organizationProvider;

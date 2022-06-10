@@ -11,11 +11,11 @@ import org.highmed.dsf.fhir.client.FhirWebsocketClientProvider;
 import org.highmed.dsf.fhir.subscription.EventResourceHandler;
 import org.highmed.dsf.fhir.subscription.ExistingResourceLoader;
 import org.highmed.dsf.fhir.subscription.PingEventResourceHandler;
-import org.highmed.dsf.fhir.subscription.SubscriptionHandler;
+import org.highmed.dsf.fhir.subscription.SubscriptionHandlerFactory;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.highmed.fhir.client.WebsocketClient;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,29 +29,25 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 
-public abstract class AbstractSubscriptionFhirConnector<R extends DomainResource>
-		implements FhirConnector, SubscriptionHandler<R>, InitializingBean
+public abstract class AbstractFhirConnector<R extends Resource> implements FhirConnector, InitializingBean
 {
-	private static final Logger logger = LoggerFactory.getLogger(AbstractSubscriptionFhirConnector.class);
+	private static final Logger logger = LoggerFactory.getLogger(AbstractFhirConnector.class);
 
 	private final String resourcePath;
 	private final FhirWebsocketClientProvider clientProvider;
-	private final ResourceHandler<R> handler;
-	private final LastEventTimeIo lastEventTimeIo;
 	private final FhirContext fhirContext;
-
+	private final SubscriptionHandlerFactory<R> subscriptionHandlerFactory;
 	private final long retrySleepMillis;
 	private final int maxRetries;
 	private final Map<String, List<String>> subscriptionSearchParameter;
 
-	public AbstractSubscriptionFhirConnector(String resourcePath, FhirWebsocketClientProvider clientProvider,
-			ResourceHandler<R> handler, LastEventTimeIo lastEventTimeIo, FhirContext fhirContext,
+	public AbstractFhirConnector(String resourcePath, FhirWebsocketClientProvider clientProvider,
+			SubscriptionHandlerFactory<R> subscriptionHandlerFactory, FhirContext fhirContext,
 			String subscriptionSearchParameter, long retrySleepMillis, int maxRetries)
 	{
 		this.resourcePath = resourcePath;
 		this.clientProvider = clientProvider;
-		this.handler = handler;
-		this.lastEventTimeIo = lastEventTimeIo;
+		this.subscriptionHandlerFactory = subscriptionHandlerFactory;
 		this.fhirContext = fhirContext;
 		this.subscriptionSearchParameter = parse(subscriptionSearchParameter, null);
 		this.retrySleepMillis = retrySleepMillis;
@@ -81,8 +77,6 @@ public abstract class AbstractSubscriptionFhirConnector<R extends DomainResource
 	public void afterPropertiesSet() throws Exception
 	{
 		Objects.requireNonNull(clientProvider, "clientProvider");
-		Objects.requireNonNull(handler, "handler");
-		Objects.requireNonNull(lastEventTimeIo, "lastEventTimeIo");
 		Objects.requireNonNull(fhirContext, "fhirContext");
 	}
 
@@ -188,7 +182,8 @@ public abstract class AbstractSubscriptionFhirConnector<R extends DomainResource
 		logger.debug("Downloading existing resources");
 
 		FhirWebserviceClient client = clientProvider.getLocalWebserviceClient();
-		ExistingResourceLoader existingResourceLoader = createExistingResourceLoader(lastEventTimeIo, handler, client);
+		ExistingResourceLoader<R> existingResourceLoader = subscriptionHandlerFactory
+				.createExistingResourceLoader(client);
 		Map<String, List<String>> subscriptionCriteria = parse(subscription.getCriteria(), resourcePath);
 		existingResourceLoader.readExistingResources(subscriptionCriteria);
 
@@ -258,15 +253,16 @@ public abstract class AbstractSubscriptionFhirConnector<R extends DomainResource
 			Map<String, List<String>> searchCriteriaQueryParameters)
 	{
 		FhirWebserviceClient webserviceClient = clientProvider.getLocalWebserviceClient();
-		ExistingResourceLoader existingResourceLoader = createExistingResourceLoader(lastEventTimeIo, handler,
-				webserviceClient);
-		PingEventResourceHandler pingHandler = createPingEventResourceHandler(existingResourceLoader);
+		ExistingResourceLoader<R> existingResourceLoader = subscriptionHandlerFactory
+				.createExistingResourceLoader(webserviceClient);
+		PingEventResourceHandler pingHandler = subscriptionHandlerFactory
+				.createPingEventResourceHandler(existingResourceLoader);
 		client.setPingHandler(ping -> pingHandler.onPing(ping, subscriptionIdPart, searchCriteriaQueryParameters));
 	}
 
 	private void setResourceEventHandler(WebsocketClient client, EventType eventType)
 	{
-		EventResourceHandler eventHandler = createEventResourceHandler(lastEventTimeIo, handler);
+		EventResourceHandler<R> eventHandler = subscriptionHandlerFactory.createEventResourceHandler();
 		client.setDomainResourceHandler(eventHandler::onResource, createParserFactory(eventType, fhirContext));
 	}
 

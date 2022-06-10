@@ -27,17 +27,23 @@ import org.highmed.dsf.fhir.organization.EndpointProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProviderImpl;
 import org.highmed.dsf.fhir.questionnaire.QuestionnaireResponseHandler;
+import org.highmed.dsf.fhir.questionnaire.QuestionnaireResponseSubscriptionHandlerFactory;
 import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.highmed.dsf.fhir.service.ReferenceCleanerImpl;
 import org.highmed.dsf.fhir.service.ReferenceExtractor;
 import org.highmed.dsf.fhir.service.ReferenceExtractorImpl;
+import org.highmed.dsf.fhir.subscription.SubscriptionHandlerFactory;
 import org.highmed.dsf.fhir.task.TaskHandler;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.task.TaskHelperImpl;
+import org.highmed.dsf.fhir.task.TaskSubscriptionHandlerFactory;
 import org.highmed.dsf.fhir.websocket.FhirConnector;
 import org.highmed.dsf.fhir.websocket.FhirConnectorQuestionnaireResponse;
 import org.highmed.dsf.fhir.websocket.FhirConnectorTask;
 import org.highmed.dsf.fhir.websocket.LastEventTimeIo;
+import org.highmed.dsf.fhir.websocket.ResourceHandler;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
+import org.hl7.fhir.r4.model.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -84,19 +90,6 @@ public class FhirConfig
 	public LastEventTimeIo lastEventTimeIo()
 	{
 		return new LastEventTimeIo(propertiesConfig.getLastEventTimeFile());
-	}
-
-	@Bean
-	public TaskHandler taskHandler()
-	{
-		return new TaskHandler(processEngine.getRuntimeService(), processEngine.getRepositoryService(),
-				clientProvider().getLocalWebserviceClient(), taskHelper());
-	}
-
-	@Bean
-	public QuestionnaireResponseHandler questionnaireResponseHandler()
-	{
-		return new QuestionnaireResponseHandler(processEngine.getTaskService());
 	}
 
 	@Bean
@@ -189,18 +182,43 @@ public class FhirConfig
 	}
 
 	@Bean
+	public ResourceHandler<Task> taskHandler()
+	{
+		return new TaskHandler(processEngine.getRuntimeService(), processEngine.getRepositoryService(),
+				clientProvider().getLocalWebserviceClient(), taskHelper());
+	}
+
+	@Bean
+	public SubscriptionHandlerFactory<Task> taskSubscriptionHandlerFactory()
+	{
+		return new TaskSubscriptionHandlerFactory(taskHandler(), lastEventTimeIo());
+	}
+
+	@Bean
 	public FhirConnector fhirConnectorTask()
 	{
-		return new FhirConnectorTask(clientProvider(), taskHandler(), lastEventTimeIo(), fhirContext(),
+		return new FhirConnectorTask(clientProvider(), taskSubscriptionHandlerFactory(), fhirContext(),
 				propertiesConfig.getTaskSubscriptionSearchParameter(), propertiesConfig.getWebsocketRetrySleepMillis(),
 				propertiesConfig.getWebsocketMaxRetries());
 	}
 
 	@Bean
+	public ResourceHandler<QuestionnaireResponse> questionnaireResponseHandler()
+	{
+		return new QuestionnaireResponseHandler(processEngine.getTaskService());
+	}
+
+	@Bean
+	public SubscriptionHandlerFactory<QuestionnaireResponse> questionnaireResponseSubscriptionHandlerFactory()
+	{
+		return new QuestionnaireResponseSubscriptionHandlerFactory(questionnaireResponseHandler(), lastEventTimeIo());
+	}
+
+	@Bean
 	public FhirConnector fhirConnectorQuestionnaireResponse()
 	{
-		return new FhirConnectorQuestionnaireResponse(clientProvider(), questionnaireResponseHandler(),
-				lastEventTimeIo(), fhirContext(),
+		return new FhirConnectorQuestionnaireResponse(clientProvider(),
+				questionnaireResponseSubscriptionHandlerFactory(), fhirContext(),
 				propertiesConfig.getQuestionnaireResponseSubscriptionSearchParameter(),
 				propertiesConfig.getWebsocketRetrySleepMillis(), propertiesConfig.getWebsocketMaxRetries());
 	}

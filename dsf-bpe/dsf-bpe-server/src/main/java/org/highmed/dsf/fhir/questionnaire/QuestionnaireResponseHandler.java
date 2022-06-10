@@ -20,17 +20,17 @@ public class QuestionnaireResponseHandler implements ResourceHandler<Questionnai
 {
 	private static final Logger logger = LoggerFactory.getLogger(QuestionnaireResponseHandler.class);
 
-	private final TaskService taskService;
+	private final TaskService userTaskService;
 
-	public QuestionnaireResponseHandler(TaskService taskService)
+	public QuestionnaireResponseHandler(TaskService userTaskService)
 	{
-		this.taskService = taskService;
+		this.userTaskService = userTaskService;
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
-		Objects.requireNonNull(taskService, "taskService");
+		Objects.requireNonNull(userTaskService, "taskService");
 	}
 
 	public void onResource(QuestionnaireResponse questionnaireResponse)
@@ -52,9 +52,9 @@ public class QuestionnaireResponseHandler implements ResourceHandler<Questionnai
 							.orElseThrow(() -> new RuntimeException(
 									"Missing linkId " + CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_TASK_ID));
 
-			logger.info("User task '{}' for Questionnaire '{}' completed [taskId: {}, businessKey: {}, user: {}]",
+			logger.info("User task '{}' for Questionnaire '{}' completed [userTaskId: {}, businessKey: {}, user: {}]",
 					questionnaireResponseId, questionnaire, taskId, businessKey, user + "|" + userType);
-			taskService.complete(taskId);
+			userTaskService.complete(taskId);
 
 			// TODO: add remaining items as process variables using linkId as key
 		}
