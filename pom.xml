@@ -4,7 +4,7 @@
 
 	<groupId>org.highmed.dsf</groupId>
 	<artifactId>dsf-pom</artifactId>
-	<version>0.6.0-SNAPSHOT</version>
+	<version>0.7.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<modules>
@@ -30,7 +30,7 @@
 		<jetty.version>9.4.46.v20220331</jetty.version>
 		<jersey.version>2.35</jersey.version>
 		<tyrus.version>1.18</tyrus.version>
-		<spring.version>5.3.19</spring.version>
+		<spring.version>5.3.20</spring.version>
 
 		<hapi.fhir.version>5.1.0</hapi.fhir.version>
 		<hapi.hl7v2.version>2.3</hapi.hl7v2.version>
@@ -131,7 +131,7 @@
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.3.4</version>
+				<version>42.3.6</version>
 			</dependency>
 
 			<!-- hhn rwh -->
@@ -206,12 +206,12 @@
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-databind</artifactId>
-				<version>2.13.2.2</version>
+				<version>2.13.3</version>
 			</dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-annotations</artifactId>
-				<version>2.13.2</version>
+				<version>2.13.3</version>
 			</dependency>
 
 			<!-- tyrus -->
