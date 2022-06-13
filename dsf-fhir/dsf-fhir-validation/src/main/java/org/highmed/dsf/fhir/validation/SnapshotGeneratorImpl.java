@@ -26,7 +26,7 @@ public class SnapshotGeneratorImpl implements SnapshotGenerator
 		worker = createWorker(fhirContext, validationSupport);
 	}
 
-	protected HapiWorkerContext createWorker(FhirContext context, IValidationSupport validationSupport)
+	protected IWorkerContext createWorker(FhirContext context, IValidationSupport validationSupport)
 	{
 		HapiWorkerContext workerContext = new HapiWorkerContext(context, validationSupport);
 		workerContext.setLocale(context.getLocalizer().getLocale());
