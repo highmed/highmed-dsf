@@ -3,6 +3,7 @@ package org.highmed.fhir.client;
 import java.security.KeyStore;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.client.Client;
@@ -15,11 +16,16 @@ import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.jackson.internal.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 import org.glassfish.jersey.jackson.internal.jackson.jaxrs.json.JacksonJsonProvider;
+import org.glassfish.jersey.logging.LoggingFeature;
+import org.glassfish.jersey.logging.LoggingFeature.Verbosity;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class AbstractJerseyClient
 {
+	private static final java.util.logging.Logger requestDebugLogger = java.util.logging.Logger
+			.getLogger(AbstractJerseyClient.class.getName());
+
 	private final Client client;
 	private final String baseUrl;
 
@@ -29,12 +35,12 @@ public class AbstractJerseyClient
 			ObjectMapper objectMapper, List<?> componentsToRegister)
 	{
 		this(baseUrl, trustStore, keyStore, keyStorePassword, null, null, null, 0, 0, objectMapper,
-				componentsToRegister);
+				componentsToRegister, false);
 	}
 
 	public AbstractJerseyClient(String baseUrl, KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword,
 			String proxySchemeHostPort, String proxyUserName, char[] proxyPassword, int connectTimeout, int readTimeout,
-			ObjectMapper objectMapper, List<?> componentsToRegister)
+			ObjectMapper objectMapper, List<?> componentsToRegister, boolean logRequests)
 	{
 		SSLContext sslContext = null;
 		if (trustStore != null && keyStore == null && keyStorePassword == null)
@@ -67,6 +73,12 @@ public class AbstractJerseyClient
 
 		if (componentsToRegister != null)
 			componentsToRegister.forEach(builder::register);
+
+		if (logRequests)
+		{
+			builder = builder.register(new LoggingFeature(requestDebugLogger, Level.FINE, Verbosity.PAYLOAD_ANY,
+					LoggingFeature.DEFAULT_MAX_ENTITY_SIZE));
+		}
 
 		client = builder.build();
 

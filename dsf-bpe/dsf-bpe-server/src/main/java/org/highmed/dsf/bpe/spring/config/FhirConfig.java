@@ -36,6 +36,9 @@ import org.highmed.dsf.fhir.task.TaskHelperImpl;
 import org.highmed.dsf.fhir.websocket.FhirConnector;
 import org.highmed.dsf.fhir.websocket.FhirConnectorImpl;
 import org.highmed.dsf.fhir.websocket.LastEventTimeIo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -49,8 +52,10 @@ import de.rwh.utils.crypto.io.CertificateReader;
 import de.rwh.utils.crypto.io.PemIo;
 
 @Configuration
-public class FhirConfig
+public class FhirConfig implements InitializingBean
 {
+	private static final Logger logger = LoggerFactory.getLogger(FhirConfig.class);
+
 	private static final BouncyCastleProvider provider = new BouncyCastleProvider();
 
 	@Autowired
@@ -98,23 +103,24 @@ public class FhirConfig
 
 		try
 		{
-			KeyStore webserviceKeyStore = createKeyStore(propertiesConfig.getWebserviceClientCertificateFile(),
-					propertiesConfig.getWebserviceClientCertificatePrivateKeyFile(),
-					propertiesConfig.getWebserviceClientCertificatePrivateKeyFilePassword(), keyStorePassword);
-			KeyStore webserviceTrustStore = createTrustStore(
-					propertiesConfig.getWebserviceClientCertificateTrustStoreFile());
+			KeyStore webserviceKeyStore = createKeyStore(propertiesConfig.getClientCertificateFile(),
+					propertiesConfig.getClientCertificatePrivateKeyFile(),
+					propertiesConfig.getClientCertificatePrivateKeyFilePassword(), keyStorePassword);
+			KeyStore webserviceTrustStore = createTrustStore(propertiesConfig.getClientCertificateTrustStoreFile());
 
 			return new FhirClientProviderImpl(fhirContext(), referenceCleaner(), propertiesConfig.getServerBaseUrl(),
 					propertiesConfig.getWebserviceClientLocalReadTimeout(),
 					propertiesConfig.getWebserviceClientLocalConnectTimeout(),
 					propertiesConfig.getWebserviceClientLocalProxySchemeHostPort(),
 					propertiesConfig.getWebserviceClientLocalProxyUsername(),
-					propertiesConfig.getWebserviceClientLocalProxyPassword(), webserviceTrustStore, webserviceKeyStore,
+					propertiesConfig.getWebserviceClientLocalProxyPassword(),
+					propertiesConfig.getWebserviceClientLocalVerbose(), webserviceTrustStore, webserviceKeyStore,
 					keyStorePassword, propertiesConfig.getWebserviceClientRemoteReadTimeout(),
 					propertiesConfig.getWebserviceClientRemoteConnectTimeout(),
 					propertiesConfig.getWebserviceClientRemoteProxySchemeHostPort(),
 					propertiesConfig.getWebserviceClientRemoteProxyUsername(),
-					propertiesConfig.getWebserviceClientRemoteProxyPassword(), getWebsocketUrl(), webserviceTrustStore,
+					propertiesConfig.getWebserviceClientRemoteProxyPassword(),
+					propertiesConfig.getWebserviceClientRemoteVerbose(), getWebsocketUrl(), webserviceTrustStore,
 					webserviceKeyStore, keyStorePassword, propertiesConfig.getWebsocketClientProxySchemeHostPort(),
 					propertiesConfig.getWebsocketClientProxyUsername(),
 					propertiesConfig.getWebsocketClientProxyPassword());
@@ -210,5 +216,38 @@ public class FhirConfig
 	public ReadAccessHelper readAccessHelper()
 	{
 		return new ReadAccessHelperImpl();
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception
+	{
+		logger.info(
+				"Local webservice client config: {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
+						+ " proxyUrl {}, proxyUsername {}, proxyPassword {}, serverBase: {}}",
+				propertiesConfig.getClientCertificateTrustStoreFile(), propertiesConfig.getClientCertificateFile(),
+				propertiesConfig.getClientCertificatePrivateKeyFile(),
+				propertiesConfig.getClientCertificatePrivateKeyFilePassword() != null ? "***" : "null",
+				propertiesConfig.getWebserviceClientLocalProxySchemeHostPort(),
+				propertiesConfig.getWebserviceClientLocalProxyUsername(),
+				propertiesConfig.getWebserviceClientLocalProxyPassword() != null ? "***" : "null",
+				propertiesConfig.getServerBaseUrl());
+		logger.info(
+				"Local websocket client config: {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
+						+ " proxyUrl {}, proxyUsername {}, proxyPassword {}, websocketUrl: {}}",
+				propertiesConfig.getClientCertificateTrustStoreFile(), propertiesConfig.getClientCertificateFile(),
+				propertiesConfig.getClientCertificatePrivateKeyFile(),
+				propertiesConfig.getClientCertificatePrivateKeyFilePassword() != null ? "***" : "null",
+				propertiesConfig.getWebsocketClientProxySchemeHostPort(),
+				propertiesConfig.getWebsocketClientProxyUsername(),
+				propertiesConfig.getWebsocketClientProxyPassword() != null ? "***" : "null", getWebsocketUrl());
+		logger.info(
+				"Remote webservice client config: {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
+						+ " proxyUrl {}, proxyUsername {}, proxyPassword {}}",
+				propertiesConfig.getClientCertificateTrustStoreFile(), propertiesConfig.getClientCertificateFile(),
+				propertiesConfig.getClientCertificatePrivateKeyFile(),
+				propertiesConfig.getClientCertificatePrivateKeyFilePassword() != null ? "***" : "null",
+				propertiesConfig.getWebserviceClientRemoteProxySchemeHostPort(),
+				propertiesConfig.getWebserviceClientRemoteProxyUsername(),
+				propertiesConfig.getWebserviceClientRemoteProxyPassword() != null ? "***" : "null");
 	}
 }

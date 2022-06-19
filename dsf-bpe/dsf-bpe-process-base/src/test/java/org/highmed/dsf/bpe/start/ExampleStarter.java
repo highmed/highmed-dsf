@@ -130,6 +130,6 @@ public class ExampleStarter
 		ReferenceCleaner referenceCleaner = new ReferenceCleanerImpl(new ReferenceExtractorImpl());
 
 		return new FhirWebserviceClientJersey(baseUrl, trustStore, keyStore, certificatePassword, null, null, null, 0,
-				0, null, context, referenceCleaner);
+				0, false, null, context, referenceCleaner);
 	}
 }
