@@ -1,5 +1,6 @@
 package org.highmed.dsf.fhir.task;
 
+import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_ALTERNATIVE_BUSINESS_KEY;
 import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_TASK;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY;
@@ -16,6 +17,7 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.RepositoryService;
 import org.camunda.bpm.engine.RuntimeService;
@@ -23,7 +25,6 @@ import org.camunda.bpm.engine.repository.ProcessDefinition;
 import org.camunda.bpm.engine.runtime.MessageCorrelationBuilder;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
 import org.camunda.bpm.engine.runtime.ProcessInstanceQuery;
-import org.camunda.bpm.engine.variable.Variables;
 import org.highmed.dsf.fhir.variables.FhirResourceValues;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Task;
@@ -159,27 +160,36 @@ public class TaskHandler implements InitializingBean
 		else
 		{
 			List<ProcessInstance> instances = getProcessInstanceQuery(processDefinition, businessKey).list();
+			List<ProcessInstance> instancesWithAlternativeBusinessKey = getAlternativeProcessInstanceQuery(
+					processDefinition, businessKey).list();
 
-			if (instances.size() > 1)
+			if (instances.size() + instancesWithAlternativeBusinessKey.size() > 1)
 				logger.warn("instance-ids {}",
-						instances.stream().map(ProcessInstance::getId).collect(Collectors.joining(", ", "[", "]")));
+						Stream.concat(instances.stream(), instancesWithAlternativeBusinessKey.stream())
+								.map(ProcessInstance::getId).collect(Collectors.joining(", ", "[", "]")));
 
-			long instanceCount = getProcessInstanceQuery(processDefinition, businessKey).count();
-
-			if (instanceCount <= 0)
+			if (instances.size() + instancesWithAlternativeBusinessKey.size() <= 0)
 			{
 				runtimeService.createMessageCorrelation(messageName).processDefinitionId(processDefinition.getId())
 						.processInstanceBusinessKey(businessKey).setVariables(variables).correlateStartMessage();
 			}
 			else
 			{
-				MessageCorrelationBuilder correlation = runtimeService.createMessageCorrelation(messageName)
-						.setVariables(variables).processInstanceBusinessKey(businessKey);
+				MessageCorrelationBuilder correlation;
+
+				if (instances.size() > 0)
+					correlation = runtimeService.createMessageCorrelation(messageName).setVariables(variables)
+							.processInstanceBusinessKey(businessKey);
+				else
+					correlation = runtimeService.createMessageCorrelation(messageName).setVariables(variables)
+							.processInstanceVariableEquals(BPMN_EXECUTION_VARIABLE_ALTERNATIVE_BUSINESS_KEY,
+									businessKey);
 
 				if (correlationKey != null)
-					correlation = correlation
-							.localVariablesEqual(Map.of("correlationKey", Variables.stringValue(correlationKey)));
+					correlation = correlation.localVariableEquals("correlationKey", correlationKey);
 
+				// throws MismatchingMessageCorrelationException - if none or more than one execution or process
+				// definition is matched by the correlation
 				correlation.correlate();
 			}
 		}
@@ -202,5 +212,12 @@ public class TaskHandler implements InitializingBean
 	{
 		return runtimeService.createProcessInstanceQuery().processDefinitionId(processDefinition.getId())
 				.processInstanceBusinessKey(businessKey);
+	}
+
+	private ProcessInstanceQuery getAlternativeProcessInstanceQuery(ProcessDefinition processDefinition,
+			String businessKey)
+	{
+		return runtimeService.createProcessInstanceQuery().processDefinitionId(processDefinition.getId())
+				.variableValueEquals(BPMN_EXECUTION_VARIABLE_ALTERNATIVE_BUSINESS_KEY, businessKey);
 	}
 }
