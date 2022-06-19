@@ -23,8 +23,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class AbstractJerseyClient
 {
-	private static final java.util.logging.Logger requestDebugLogger = java.util.logging.Logger
-			.getLogger(AbstractJerseyClient.class.getName());
+	private static final java.util.logging.Logger requestDebugLogger;
+	static
+	{
+		requestDebugLogger = java.util.logging.Logger.getLogger(AbstractJerseyClient.class.getName());
+		requestDebugLogger.setLevel(Level.INFO);
+	}
 
 	private final Client client;
 	private final String baseUrl;
@@ -76,7 +80,7 @@ public class AbstractJerseyClient
 
 		if (logRequests)
 		{
-			builder = builder.register(new LoggingFeature(requestDebugLogger, Level.FINE, Verbosity.PAYLOAD_ANY,
+			builder = builder.register(new LoggingFeature(requestDebugLogger, Level.INFO, Verbosity.PAYLOAD_ANY,
 					LoggingFeature.DEFAULT_MAX_ENTITY_SIZE));
 		}
 
