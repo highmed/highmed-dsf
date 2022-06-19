@@ -35,7 +35,7 @@ public class WebsocketClientTyrus implements WebsocketClient
 		@Override
 		public boolean onConnectFailure(Exception exception)
 		{
-			logger.warn("Websocket connection failure: {}", getMessages(exception));
+			logger.warn("Websocket connection failed: {}", getMessages(exception));
 			logger.debug("onConnectFailure", exception);
 			return true;
 		}
