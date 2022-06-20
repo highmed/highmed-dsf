@@ -846,7 +846,7 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		if (json == null)
 			return;
 
-		JsonArray array = (JsonArray) new JsonParser().parse(json);
+		JsonArray array = (JsonArray) JsonParser.parseString(json);
 
 		Iterator<JsonElement> it = array.iterator();
 		while (it.hasNext())

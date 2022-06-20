@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import javax.ws.rs.WebApplicationException;
@@ -203,10 +204,10 @@ public final class ReferencesHelperImpl<R extends Resource> implements Reference
 	}
 
 	@Override
-	public void checkReferences(Map<String, IdType> idTranslationTable, Connection connection)
-			throws WebApplicationException
+	public void checkReferences(Map<String, IdType> idTranslationTable, Connection connection,
+			Predicate<ResourceReference> checkReference) throws WebApplicationException
 	{
-		referenceExtractor.getReferences(resource)
+		referenceExtractor.getReferences(resource).filter(checkReference)
 				.filter(ref -> referenceResolver.referenceCanBeChecked(ref, connection)).forEach(ref ->
 				{
 					Optional<OperationOutcome> outcome = checkReference(idTranslationTable, connection, ref);
