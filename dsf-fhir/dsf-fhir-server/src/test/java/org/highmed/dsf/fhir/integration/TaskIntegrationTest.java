@@ -1,11 +1,16 @@
 package org.highmed.dsf.fhir.integration;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.sql.Connection;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -17,9 +22,16 @@ import java.util.UUID;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.highmed.dsf.fhir.authentication.OrganizationProvider;
+import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.dao.OrganizationDao;
 import org.highmed.dsf.fhir.dao.TaskDao;
+import org.highmed.dsf.fhir.dao.command.ReferencesHelperImpl;
+import org.highmed.dsf.fhir.help.ResponseGenerator;
+import org.highmed.dsf.fhir.service.ReferenceCleaner;
+import org.highmed.dsf.fhir.service.ReferenceExtractor;
+import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Bundle;
@@ -1056,5 +1068,97 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertEquals(1, result6.getEntry().get(0).getResource().getMeta().getProfile().size());
 		assertEquals(task2.getMeta().getProfile().get(0).getValue(),
 				result6.getEntry().get(0).getResource().getMeta().getProfile().get(0).getValue());
+	}
+
+	@Test
+	public void testUpdateTaskFromInProgressToCompletedWithNonExistingInputReferenceToExternalBinary() throws Exception
+	{
+		ActivityDefinition ad2 = readActivityDefinition("highmed-test-activity-definition2-0.5.0.xml");
+		ActivityDefinition createdAd2 = getWebserviceClient().create(ad2);
+		assertNotNull(createdAd2);
+		assertNotNull(createdAd2.getIdElement().getIdPart());
+
+		StructureDefinition testTaskProfile = readTestTaskProfile();
+		StructureDefinition createdTestTaskProfile = getWebserviceClient().create(testTaskProfile);
+		assertNotNull(createdTestTaskProfile);
+		assertNotNull(createdTestTaskProfile.getIdElement().getIdPart());
+
+		Task task = readTestTask("External_Test_Organization", "Test_Organization");
+		task.setStatus(TaskStatus.INPROGRESS);
+		task.addInput().setValue(new Reference("https://localhost:80010/fhir/Binary/" + UUID.randomUUID().toString()))
+				.getType().getCodingFirstRep().setSystem("http://test.com/fhir/CodeSystem/test").setCode("binary-ref");
+
+		TaskDao taskDao = getSpringWebApplicationContext().getBean(TaskDao.class);
+		Task created = taskDao.create(task);
+
+		ReferenceCleaner cleaner = getSpringWebApplicationContext().getBean(ReferenceCleaner.class);
+		cleaner.cleanLiteralReferences(created);
+
+		created.setStatus(TaskStatus.COMPLETED);
+
+		Task updatedTask = getWebserviceClient().update(created);
+		assertNotNull(updatedTask);
+		assertNotNull(updatedTask.getIdElement().getIdPart());
+	}
+
+	@Test
+	public void testUpdateTaskFromInProgressToCompletedWithNonExistingInputReferenceToExternalBinaryViaBundle()
+			throws Exception
+	{
+		ActivityDefinition ad2 = readActivityDefinition("highmed-test-activity-definition2-0.5.0.xml");
+		ActivityDefinition createdAd2 = getWebserviceClient().create(ad2);
+		assertNotNull(createdAd2);
+		assertNotNull(createdAd2.getIdElement().getIdPart());
+
+		StructureDefinition testTaskProfile = readTestTaskProfile();
+		StructureDefinition createdTestTaskProfile = getWebserviceClient().create(testTaskProfile);
+		assertNotNull(createdTestTaskProfile);
+		assertNotNull(createdTestTaskProfile.getIdElement().getIdPart());
+
+		Task task = readTestTask("External_Test_Organization", "Test_Organization");
+		task.setStatus(TaskStatus.INPROGRESS);
+		task.addInput().setValue(new Reference("https://localhost:80010/fhir/Binary/" + UUID.randomUUID().toString()))
+				.getType().getCodingFirstRep().setSystem("http://test.com/fhir/CodeSystem/test").setCode("binary-ref");
+
+		OrganizationProvider organizationProvider = getSpringWebApplicationContext()
+				.getBean(OrganizationProvider.class);
+		ReferenceExtractor referenceExtractor = getSpringWebApplicationContext().getBean(ReferenceExtractor.class);
+		ReferenceResolver referenceResolver = getSpringWebApplicationContext().getBean(ReferenceResolver.class);
+		ResponseGenerator responseGenerator = getSpringWebApplicationContext().getBean(ResponseGenerator.class);
+		BasicDataSource dataSource = getSpringWebApplicationContext().getBean("dataSource", BasicDataSource.class);
+
+		ReferencesHelperImpl<Task> referencesHelper = new ReferencesHelperImpl<>(0,
+				User.local(organizationProvider.getLocalOrganization().get()), task, BASE_URL, referenceExtractor,
+				referenceResolver, responseGenerator);
+		try (Connection connection = dataSource.getConnection())
+		{
+			System.out.println(fhirContext.newJsonParser().encodeResourceToString(task));
+			referencesHelper.resolveLogicalReferences(connection);
+			System.out.println(fhirContext.newJsonParser().encodeResourceToString(task));
+		}
+
+		TaskDao taskDao = getSpringWebApplicationContext().getBean(TaskDao.class);
+		Task created = taskDao.create(task);
+
+		ReferenceCleaner referenceCleaner = getSpringWebApplicationContext().getBean(ReferenceCleaner.class);
+		referenceCleaner.cleanLiteralReferences(created);
+		created.setStatus(TaskStatus.COMPLETED);
+
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		BundleEntryComponent entry = bundle.addEntry()
+				.setFullUrl(created.getIdElement().withServerBase(BASE_URL, "Task").toVersionless().getValue());
+		entry.setResource(created).getRequest().setMethod(HTTPVerb.PUT)
+				.setUrl("Task/" + created.getIdElement().getIdPart());
+
+		Bundle response = getWebserviceClient().postBundle(bundle);
+		assertNotNull(response);
+		assertEquals(BundleType.TRANSACTIONRESPONSE, response.getType());
+		assertTrue(response.hasEntry());
+		assertEquals(1, response.getEntry().size());
+		assertTrue(response.getEntryFirstRep().hasResponse());
+		assertEquals("200 OK", response.getEntryFirstRep().getResponse().getStatus());
+		assertTrue(response.getEntryFirstRep().hasResource());
+		assertTrue(response.getEntryFirstRep().getResource() instanceof Task);
 	}
 }

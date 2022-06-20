@@ -20,6 +20,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
@@ -35,6 +36,7 @@ import javax.ws.rs.core.UriInfo;
 import org.highmed.dsf.fhir.authorization.AuthorizationRule;
 import org.highmed.dsf.fhir.authorization.AuthorizationRuleProvider;
 import org.highmed.dsf.fhir.dao.ResourceDao;
+import org.highmed.dsf.fhir.dao.command.CheckReferencesCommand;
 import org.highmed.dsf.fhir.event.EventGenerator;
 import org.highmed.dsf.fhir.event.EventHandler;
 import org.highmed.dsf.fhir.help.ExceptionHandler;
@@ -168,7 +170,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 					R created = dao.createWithTransactionAndId(connection, resource, UUID.randomUUID());
 
-					checkReferences(resource, connection);
+					checkReferences(resource, connection, ref -> checkReferenceAfterCreate(resource, ref));
 
 					connection.commit();
 
@@ -196,6 +198,22 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 				parameterConverter.getPreferReturn(headers), () -> responseGenerator.created(location, createdResource))
 				.location(location).lastModified(createdResource.getMeta().getLastUpdated())
 				.tag(new EntityTag(createdResource.getMeta().getVersionId(), true)).build();
+	}
+
+	/**
+	 * <i>Override this method to exclude references from being checked after a create, add similar rule to
+	 * {@link CheckReferencesCommand}</i>
+	 *
+	 * @param created
+	 *            not <code>null</code>
+	 * @param ref
+	 *            not <code>null</code>
+	 * @return true if a reference should be checked
+	 * @see CheckReferencesCommand
+	 */
+	protected boolean checkReferenceAfterCreate(R created, ResourceReference ref)
+	{
+		return true;
 	}
 
 	private URI toLocation(R resource)
@@ -236,9 +254,10 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 			return Optional.of(responseGenerator.referenceTargetNotFoundLocallyByIdentifier(resource, reference));
 	}
 
-	private void checkReferences(Resource resource, Connection connection) throws WebApplicationException
+	private void checkReferences(Resource resource, Connection connection, Predicate<ResourceReference> checkReference)
+			throws WebApplicationException
 	{
-		referenceExtractor.getReferences(resource)
+		referenceExtractor.getReferences(resource).filter(checkReference)
 				.filter(ref -> referenceResolver.referenceCanBeChecked(ref, connection)).forEach(ref ->
 				{
 					Optional<OperationOutcome> outcome = checkReference(resource, connection, ref);
@@ -494,7 +513,7 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 
 							R updated = dao.update(resource, ifMatch.orElse(null));
 
-							checkReferences(resource, connection);
+							checkReferences(resource, connection, ref -> checkReferenceAfterUpdate(updated, ref));
 
 							connection.commit();
 
@@ -523,6 +542,22 @@ public abstract class AbstractResourceServiceImpl<D extends ResourceDao<R>, R ex
 						() -> responseGenerator.updated(location, updatedResource))
 				.location(location).lastModified(updatedResource.getMeta().getLastUpdated())
 				.tag(new EntityTag(updatedResource.getMeta().getVersionId(), true)).build();
+	}
+
+	/**
+	 * <i>Override this method to exclude references from being checked after an update, add similar rule to
+	 * {@link CheckReferencesCommand}</i>
+	 *
+	 * @param updated
+	 *            not <code>null</code>
+	 * @param ref
+	 *            not <code>null</code>
+	 * @return true if a reference should be checked
+	 * @see CheckReferencesCommand
+	 */
+	protected boolean checkReferenceAfterUpdate(R updated, ResourceReference ref)
+	{
+		return true;
 	}
 
 	/**
