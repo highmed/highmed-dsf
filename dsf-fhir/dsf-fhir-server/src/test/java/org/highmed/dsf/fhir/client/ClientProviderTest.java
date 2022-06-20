@@ -44,6 +44,7 @@ public class ClientProviderTest
 		char[] remoteProxyPassword = null;
 		String remoteProxyUsername = null;
 		String remoteProxySchemeHostPort = null;
+		boolean logRequests = false;
 		FhirContext fhirContext = mock(FhirContext.class);
 		referenceCleaner = mock(ReferenceCleaner.class);
 		endpointDao = mock(EndpointDao.class);
@@ -51,7 +52,7 @@ public class ClientProviderTest
 
 		provider = new ClientProviderImpl(webserviceTrustStore, webserviceKeyStore, webserviceKeyStorePassword,
 				remoteReadTimeout, remoteConnectTimeout, remoteProxySchemeHostPort, remoteProxyUsername,
-				remoteProxyPassword, fhirContext, referenceCleaner, endpointDao, exceptionHandler);
+				remoteProxyPassword, logRequests, fhirContext, referenceCleaner, endpointDao, exceptionHandler);
 	}
 
 	@Test

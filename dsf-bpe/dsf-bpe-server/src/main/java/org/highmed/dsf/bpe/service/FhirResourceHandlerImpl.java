@@ -355,7 +355,7 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 			List<ResourceInfo> resources = dbResourcesByProcess.get(process);
 			if (resources == null)
 			{
-				logger.warn("No resources found in BPE DB for process {}", process);
+				logger.debug("No resources found in BPE DB for process {}", process);
 				resources = Collections.emptyList();
 			}
 
