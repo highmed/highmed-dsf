@@ -26,7 +26,7 @@ public class SnapshotGeneratorImpl implements SnapshotGenerator
 		worker = createWorker(fhirContext, validationSupport);
 	}
 
-	protected HapiWorkerContext createWorker(FhirContext context, IValidationSupport validationSupport)
+	protected IWorkerContext createWorker(FhirContext context, IValidationSupport validationSupport)
 	{
 		HapiWorkerContext workerContext = new HapiWorkerContext(context, validationSupport);
 		workerContext.setLocale(context.getLocalizer().getLocale());
@@ -65,7 +65,7 @@ public class SnapshotGeneratorImpl implements SnapshotGenerator
 					differential.getIdElement().getIdPart(), differential.getUrl(), differential.getVersion());
 		else
 		{
-			logger.warn("Snapshot not generated for StructureDefinition with id {}, url {}, version {}",
+			logger.warn("Snapshot generated with issues for StructureDefinition with id {}, url {}, version {}",
 					differential.getIdElement().getIdPart(), differential.getUrl(), differential.getVersion());
 			messages.forEach(m -> logger.warn("Issue while generating snapshot: {} - {} - {}", m.getDisplay(),
 					m.getLine(), m.getMessage()));

@@ -15,7 +15,8 @@ public class TestClient extends AbstractJerseyClient
 
 	public TestClient(String baseUrl, String proxySchemeHostPort, String proxyUserName, char[] proxyPassword)
 	{
-		super(baseUrl, null, null, null, proxySchemeHostPort, proxyUserName, proxyPassword, 5_000, 5_000, null, null);
+		super(baseUrl, null, null, null, proxySchemeHostPort, proxyUserName, proxyPassword, 5_000, 5_000, null, null,
+				true);
 
 		logger.info("baseUrl: {}", baseUrl);
 		logger.info("proxySchemeHostPort: {}", proxySchemeHostPort);

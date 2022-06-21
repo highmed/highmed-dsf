@@ -155,7 +155,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 			char[] keyStorePassword, FhirContext fhirContext, ReferenceCleaner referenceCleaner)
 	{
 		return new FhirWebserviceClientJersey(BASE_URL, trustStore, keyStore, keyStorePassword, null, null, null, 0, 0,
-				null, fhirContext, referenceCleaner);
+				false, null, fhirContext, referenceCleaner);
 	}
 
 	private static WebsocketClient createWebsocketClient(KeyStore trustStore, KeyStore keyStore,

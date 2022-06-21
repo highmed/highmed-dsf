@@ -117,10 +117,10 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 
 	public FhirWebserviceClientJersey(String baseUrl, KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword,
 			String proxySchemeHostPort, String proxyUserName, char[] proxyPassword, int connectTimeout, int readTimeout,
-			ObjectMapper objectMapper, FhirContext fhirContext, ReferenceCleaner referenceCleaner)
+			boolean logRequests, ObjectMapper objectMapper, FhirContext fhirContext, ReferenceCleaner referenceCleaner)
 	{
 		super(baseUrl, trustStore, keyStore, keyStorePassword, proxySchemeHostPort, proxyUserName, proxyPassword,
-				connectTimeout, readTimeout, objectMapper, components(fhirContext));
+				connectTimeout, readTimeout, objectMapper, components(fhirContext), logRequests);
 
 		this.referenceCleaner = referenceCleaner;
 

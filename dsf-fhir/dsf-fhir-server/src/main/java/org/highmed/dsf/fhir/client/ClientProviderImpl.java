@@ -28,6 +28,7 @@ public class ClientProviderImpl implements ClientProvider, InitializingBean
 	private final String remoteProxySchemeHostPort;
 	private final String remoteProxyUsername;
 	private final char[] remoteProxyPassword;
+	private final boolean logRequests;
 	private final FhirContext fhirContext;
 	private final ReferenceCleaner referenceCleaner;
 	private final EndpointDao endpointDao;
@@ -36,7 +37,7 @@ public class ClientProviderImpl implements ClientProvider, InitializingBean
 	public ClientProviderImpl(KeyStore webserviceTrustStore, KeyStore webserviceKeyStore,
 			char[] webserviceKeyStorePassword, int remoteReadTimeout, int remoteConnectTimeout,
 			String remoteProxySchemeHostPort, String remoteProxyUsername, char[] remoteProxyPassword,
-			FhirContext fhirContext, ReferenceCleaner referenceCleaner, EndpointDao endpointDao,
+			boolean logRequests, FhirContext fhirContext, ReferenceCleaner referenceCleaner, EndpointDao endpointDao,
 			ExceptionHandler exceptionHandler)
 	{
 		this.webserviceTrustStore = webserviceTrustStore;
@@ -47,6 +48,7 @@ public class ClientProviderImpl implements ClientProvider, InitializingBean
 		this.remoteProxySchemeHostPort = remoteProxySchemeHostPort;
 		this.remoteProxyUsername = remoteProxyUsername;
 		this.remoteProxyPassword = remoteProxyPassword;
+		this.logRequests = logRequests;
 		this.fhirContext = fhirContext;
 		this.referenceCleaner = referenceCleaner;
 		this.endpointDao = endpointDao;
@@ -73,7 +75,8 @@ public class ClientProviderImpl implements ClientProvider, InitializingBean
 		{
 			FhirWebserviceClient client = new FhirWebserviceClientJersey(serverBase, webserviceTrustStore,
 					webserviceKeyStore, webserviceKeyStorePassword, remoteProxySchemeHostPort, remoteProxyUsername,
-					remoteProxyPassword, remoteConnectTimeout, remoteReadTimeout, null, fhirContext, referenceCleaner);
+					remoteProxyPassword, remoteConnectTimeout, remoteReadTimeout, logRequests, null, fhirContext,
+					referenceCleaner);
 
 			return Optional.of(client);
 		}

@@ -35,7 +35,8 @@ public class ClientEndpoint extends Endpoint
 	@Override
 	public void onOpen(Session session, EndpointConfig config)
 	{
-		logger.debug("Websocket onOpen");
+		logger.info("Websocket connected {uri: {}, session-id: {}}", session.getRequestURI().toString(),
+				session.getId());
 
 		session.addMessageHandler(new MessageHandler.Whole<String>() // don't use lambda
 		{
@@ -77,7 +78,8 @@ public class ClientEndpoint extends Endpoint
 	@Override
 	public void onClose(Session session, CloseReason closeReason)
 	{
-		logger.info("Websocket onClose {}", closeReason.getReasonPhrase());
+		logger.info("Websocket closed {uri: {}, session-id: {}}: {}", session.getRequestURI().toString(),
+				session.getId(), closeReason.getReasonPhrase());
 
 		if (CloseReason.CloseCodes.CANNOT_ACCEPT.equals(closeReason.getCloseCode()))
 		{
@@ -89,7 +91,8 @@ public class ClientEndpoint extends Endpoint
 	@Override
 	public void onError(Session session, Throwable throwable)
 	{
-		logger.warn("Websocket onError", throwable);
+		logger.warn("Websocket closed with error {uri: " + session.getRequestURI().toString() + ", session-id: "
+				+ session.getId() + "}: {}", throwable);
 	}
 
 	public void setDomainResourceHandler(Consumer<DomainResource> handler, Supplier<IParser> parser)

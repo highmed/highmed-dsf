@@ -35,15 +35,38 @@ public class WebsocketClientTyrus implements WebsocketClient
 		@Override
 		public boolean onConnectFailure(Exception exception)
 		{
-			logger.warn("onConnectFailure {}: {}", exception.getClass().getName(), exception.getMessage());
+			logger.warn("Websocket connection failed: {}", getMessages(exception));
 			logger.debug("onConnectFailure", exception);
 			return true;
+		}
+
+		private String getMessages(Exception e)
+		{
+			StringBuilder b = new StringBuilder();
+			if (e != null)
+			{
+				if (e.getMessage() != null)
+					b.append(e.getMessage());
+
+				Throwable cause = e.getCause();
+				while (cause != null)
+				{
+					if (cause.getMessage() != null)
+					{
+						b.append(' ');
+						b.append(cause.getMessage());
+					}
+
+					cause = cause.getCause();
+				}
+			}
+			return b.toString();
 		}
 
 		@Override
 		public boolean onDisconnect(CloseReason closeReason)
 		{
-			logger.warn("OnDisconnect {}", closeReason.getReasonPhrase());
+			logger.debug("onDisconnect {}", closeReason.getReasonPhrase());
 			return !closed;
 		}
 	};

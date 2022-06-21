@@ -96,6 +96,10 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.fhir.client.proxy.password:#{null}}")
 	private char[] webserviceClientProxyPassword;
 
+	@Documentation(description = "To enable verbose logging of requests to and replies from remote DSF FHIR servers, set to `true`")
+	@Value("${org.highmed.dsf.fhir.client.verbose:false}")
+	private boolean webserviceClientVerbose;
+
 	@Documentation(description = "List of allowed CORS origins, used to set the *Access-Control-Allow-Origin* HTTP response header, which indicates whether the response can be shared with requesting code from the given origin; comma or space separated list, YAML block scalars supported")
 	@Value("#{'${org.highmed.dsf.fhir.server.cors.origins:}'.trim().split('(,[ ]?)|(\\n)')}")
 	private List<String> allowedOrigins;
@@ -207,6 +211,11 @@ public class PropertiesConfig
 	public char[] getWebserviceClientProxyPassword()
 	{
 		return webserviceClientProxyPassword;
+	}
+
+	public boolean getWebserviceClientVerbose()
+	{
+		return webserviceClientVerbose;
 	}
 
 	public List<String> getAllowedOrigins()
