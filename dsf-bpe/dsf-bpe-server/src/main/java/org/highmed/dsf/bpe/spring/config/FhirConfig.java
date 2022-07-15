@@ -27,6 +27,8 @@ import org.highmed.dsf.fhir.organization.EndpointProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProviderImpl;
 import org.highmed.dsf.fhir.questionnaire.QuestionnaireResponseHandler;
+import org.highmed.dsf.fhir.questionnaire.QuestionnaireResponseHelper;
+import org.highmed.dsf.fhir.questionnaire.QuestionnaireResponseHelperImpl;
 import org.highmed.dsf.fhir.questionnaire.QuestionnaireResponseSubscriptionHandlerFactory;
 import org.highmed.dsf.fhir.service.ReferenceCleaner;
 import org.highmed.dsf.fhir.service.ReferenceCleanerImpl;
@@ -240,6 +242,12 @@ public class FhirConfig
 	public GroupHelper groupHelper()
 	{
 		return new GroupHelperImpl();
+	}
+
+	@Bean
+	public QuestionnaireResponseHelper questionnaireResponseHelper()
+	{
+		return new QuestionnaireResponseHelperImpl();
 	}
 
 	@Bean

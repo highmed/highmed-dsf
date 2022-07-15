@@ -12,6 +12,7 @@ import org.camunda.bpm.engine.delegate.TaskListener;
 import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
+import org.highmed.dsf.fhir.questionnaire.QuestionnaireResponseHelper;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResourceType;
@@ -26,13 +27,16 @@ public abstract class AbstractUserTaskListener implements TaskListener, Initiali
 
 	private final FhirWebserviceClientProvider clientProvider;
 	private final OrganizationProvider organizationProvider;
+	private final QuestionnaireResponseHelper questionnaireResponseHelper;
 	private final ReadAccessHelper readAccessHelper;
 
 	public AbstractUserTaskListener(FhirWebserviceClientProvider clientProvider,
-			OrganizationProvider organizationProvider, ReadAccessHelper readAccessHelper)
+			OrganizationProvider organizationProvider, QuestionnaireResponseHelper questionnaireResponseHelper,
+			ReadAccessHelper readAccessHelper)
 	{
 		this.clientProvider = clientProvider;
 		this.organizationProvider = organizationProvider;
+		this.questionnaireResponseHelper = questionnaireResponseHelper;
 		this.readAccessHelper = readAccessHelper;
 	}
 
@@ -41,18 +45,19 @@ public abstract class AbstractUserTaskListener implements TaskListener, Initiali
 	{
 		Objects.requireNonNull(clientProvider, "clientProvider");
 		Objects.requireNonNull(organizationProvider, "organizationProvider");
+		Objects.requireNonNull(questionnaireResponseHelper, "questionnaireResponseHelper");
 		Objects.requireNonNull(readAccessHelper, "readAccessHelper");
 	}
 
 	@Override
-	public void notify(DelegateTask task)
+	public void notify(DelegateTask userTask)
 	{
 		try
 		{
-			String questionnaireUrl = (String) task.getExecution()
+			String questionnaireUrl = (String) userTask.getExecution()
 					.getVariable(BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_URL);
-			String businessKey = task.getExecution().getBusinessKey();
-			String taskId = task.getId();
+			String businessKey = userTask.getExecution().getBusinessKey();
+			String taskId = userTask.getId();
 
 			QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse();
 			questionnaireResponse.setQuestionnaire(questionnaireUrl);
@@ -62,14 +67,14 @@ public abstract class AbstractUserTaskListener implements TaskListener, Initiali
 			questionnaireResponse.setSubject(new Reference().setType(ResourceType.Organization.name())
 					.setIdentifier(organizationProvider.getLocalIdentifier()));
 
-			questionnaireResponse.addItem().setLinkId(CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY).addAnswer()
-					.setValue(new StringType(businessKey));
-			questionnaireResponse.addItem().setLinkId(CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_TASK_ID).addAnswer()
-					.setValue(new StringType(taskId));
+			questionnaireResponseHelper.addItemLeave(questionnaireResponse,
+					CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY, new StringType(businessKey));
+			questionnaireResponseHelper.addItemLeave(questionnaireResponse,
+					CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_TASK_ID, new StringType(taskId));
 
 			readAccessHelper.addLocal(questionnaireResponse);
 
-			modifyQuestionnaireResponse(task, questionnaireResponse);
+			modifyQuestionnaireResponse(userTask, questionnaireResponse);
 
 			clientProvider.getLocalWebserviceClient().create(questionnaireResponse);
 		}
@@ -79,7 +84,7 @@ public abstract class AbstractUserTaskListener implements TaskListener, Initiali
 		}
 	}
 
-	protected void modifyQuestionnaireResponse(DelegateTask task, QuestionnaireResponse questionnaireResponse)
+	protected void modifyQuestionnaireResponse(DelegateTask userTask, QuestionnaireResponse questionnaireResponse)
 	{
 	}
 }
