@@ -43,12 +43,12 @@ public class AuthenticationFilterConfigImpl implements AuthenticationFilterConfi
 
 		if (pathsNotRequiringAuthentication.contains(path))
 		{
-			logger.debug("Request path: '{}' does not need authentication", path);
+			logger.trace("Request path: '{}' does not need authentication", path);
 			return false;
 		}
 		else
 		{
-			logger.debug("Request path: '{}' needs authentication", path);
+			logger.trace("Request path: '{}' needs authentication", path);
 			return true;
 		}
 	}

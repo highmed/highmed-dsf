@@ -15,6 +15,7 @@ public interface ConstantsBase
 	String BPMN_EXECUTION_VARIABLE_QUERY_PARAMETERS = "queryParameters";
 	String BPMN_EXECUTION_VARIABLE_TTP_IDENTIFIER = "ttpIdentifier";
 	String BPMN_EXECUTION_VARIABLE_LEADING_MEDIC_IDENTIFIER = "leadingMedicIdentifier";
+	String BPMN_EXECUTION_VARIABLE_ALTERNATIVE_BUSINESS_KEY = "alternativeBusinessKey";
 	String BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_URL = "questionnaireUrl";
 
 	/**

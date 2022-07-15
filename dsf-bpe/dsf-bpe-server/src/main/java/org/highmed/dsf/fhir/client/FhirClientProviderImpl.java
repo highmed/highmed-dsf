@@ -34,6 +34,7 @@ public class FhirClientProviderImpl
 	private final String localWebserviceProxySchemeHostPort;
 	private final String localWebserviceProxyUsername;
 	private final char[] localWebserviceProxyPassword;
+	private final boolean localWebserviceLogRequests;
 
 	private final KeyStore webserviceTrustStore;
 	private final KeyStore webserviceKeyStore;
@@ -44,6 +45,7 @@ public class FhirClientProviderImpl
 	private final String remoteWebserviceProxySchemeHostPort;
 	private final String remoteWebserviceProxyUsername;
 	private final char[] remoteWebserviceProxyPassword;
+	private final boolean remoteWebserviceLogRequests;
 
 	private final String localWebsocketUrl;
 	private final KeyStore localWebsocketTrustStore;
@@ -57,10 +59,11 @@ public class FhirClientProviderImpl
 	public FhirClientProviderImpl(FhirContext fhirContext, ReferenceCleaner referenceCleaner,
 			String localWebserviceBaseUrl, int localWebserviceReadTimeout, int localWebserviceConnectTimeout,
 			String localWebserviceProxySchemeHostPort, String localWebserviceProxyUsername,
-			char[] localWebserviceProxyPassword, KeyStore webserviceTrustStore, KeyStore webserviceKeyStore,
-			char[] webserviceKeyStorePassword, int remoteWebserviceReadTimeout, int remoteWebserviceConnectTimeout,
-			String remoteWebserviceProxySchemeHostPort, String remoteWebserviceProxyUsername,
-			char[] remoteWebserviceProxyPassword, String localWebsocketUrl, KeyStore localWebsocketTrustStore,
+			char[] localWebserviceProxyPassword, boolean localWebserviceLogRequests, KeyStore webserviceTrustStore,
+			KeyStore webserviceKeyStore, char[] webserviceKeyStorePassword, int remoteWebserviceReadTimeout,
+			int remoteWebserviceConnectTimeout, String remoteWebserviceProxySchemeHostPort,
+			String remoteWebserviceProxyUsername, char[] remoteWebserviceProxyPassword,
+			boolean remoteWebserviceLogRequests, String localWebsocketUrl, KeyStore localWebsocketTrustStore,
 			KeyStore localWebsocketKeyStore, char[] localWebsocketKeyStorePassword,
 			String localWebsocketProxySchemeHostPort, String localWebsocketProxyUsername,
 			char[] localWebsocketProxyPassword)
@@ -74,6 +77,7 @@ public class FhirClientProviderImpl
 		this.localWebserviceProxySchemeHostPort = localWebserviceProxySchemeHostPort;
 		this.localWebserviceProxyUsername = localWebserviceProxyUsername;
 		this.localWebserviceProxyPassword = localWebserviceProxyPassword;
+		this.localWebserviceLogRequests = localWebserviceLogRequests;
 
 		this.webserviceTrustStore = webserviceTrustStore;
 		this.webserviceKeyStore = webserviceKeyStore;
@@ -84,6 +88,7 @@ public class FhirClientProviderImpl
 		this.remoteWebserviceProxySchemeHostPort = remoteWebserviceProxySchemeHostPort;
 		this.remoteWebserviceProxyUsername = remoteWebserviceProxyUsername;
 		this.remoteWebserviceProxyPassword = remoteWebserviceProxyPassword;
+		this.remoteWebserviceLogRequests = remoteWebserviceLogRequests;
 
 		this.localWebsocketUrl = localWebsocketUrl;
 		this.localWebsocketTrustStore = localWebsocketTrustStore;
@@ -103,12 +108,6 @@ public class FhirClientProviderImpl
 			throw new IllegalArgumentException("localReadTimeout < 0");
 		if (localWebserviceConnectTimeout < 0)
 			throw new IllegalArgumentException("localConnectTimeout < 0");
-		if (localWebserviceProxyPassword == null)
-			logger.info("localProxyPassword is null");
-		if (localWebserviceProxyUsername == null)
-			logger.info("localProxyUsername is null");
-		if (localWebserviceProxySchemeHostPort == null)
-			logger.info("localProxySchemeHostPort is null");
 		Objects.requireNonNull(webserviceTrustStore, "webserviceTrustStore");
 		Objects.requireNonNull(webserviceKeyStore, "webserviceKeyStore");
 		Objects.requireNonNull(webserviceKeyStorePassword, "webserviceKeyStorePassword");
@@ -116,12 +115,6 @@ public class FhirClientProviderImpl
 			throw new IllegalArgumentException("remoteReadTimeout < 0");
 		if (remoteWebserviceConnectTimeout < 0)
 			throw new IllegalArgumentException("remoteConnectTimeout < 0");
-		if (remoteWebserviceProxyPassword == null)
-			logger.info("remoteProxyPassword is null");
-		if (remoteWebserviceProxyUsername == null)
-			logger.info("remoteProxyUsername is null");
-		if (remoteWebserviceProxySchemeHostPort == null)
-			logger.info("remoteProxySchemeHostPort is null");
 		Objects.requireNonNull(localWebsocketUrl, "localWebsocketUrl");
 		Objects.requireNonNull(localWebsocketTrustStore, "localWebsocketTrustStore");
 		Objects.requireNonNull(localWebsocketKeyStore, "localWebsocketKeyStore");
@@ -146,13 +139,14 @@ public class FhirClientProviderImpl
 					client = new FhirWebserviceClientJersey(webserviceUrl, webserviceTrustStore, webserviceKeyStore,
 							webserviceKeyStorePassword, localWebserviceProxySchemeHostPort,
 							localWebserviceProxyUsername, localWebserviceProxyPassword, localWebserviceConnectTimeout,
-							localWebserviceReadTimeout, null, fhirContext, referenceCleaner);
+							localWebserviceReadTimeout, localWebserviceLogRequests, null, fhirContext,
+							referenceCleaner);
 				else
 					client = new FhirWebserviceClientJersey(webserviceUrl, webserviceTrustStore, webserviceKeyStore,
 							webserviceKeyStorePassword, remoteWebserviceProxySchemeHostPort,
 							remoteWebserviceProxyUsername, remoteWebserviceProxyPassword,
-							remoteWebserviceConnectTimeout, remoteWebserviceReadTimeout, null, fhirContext,
-							referenceCleaner);
+							remoteWebserviceConnectTimeout, remoteWebserviceReadTimeout, remoteWebserviceLogRequests,
+							null, fhirContext, referenceCleaner);
 
 				webserviceClientsByUrl.put(webserviceUrl, client);
 				return client;

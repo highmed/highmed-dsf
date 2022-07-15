@@ -1,5 +1,7 @@
 package org.highmed.dsf.fhir.validation;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.hl7.fhir.r4.model.StructureDefinition;
@@ -7,15 +9,16 @@ import org.hl7.fhir.utilities.validation.ValidationMessage;
 
 public interface SnapshotGenerator
 {
-	class SnapshotWithValidationMessages
+	public class SnapshotWithValidationMessages
 	{
 		private final StructureDefinition snapshot;
-		private final List<ValidationMessage> messages;
+		private final List<ValidationMessage> messages = new ArrayList<>();
 
-		SnapshotWithValidationMessages(StructureDefinition snapshot, List<ValidationMessage> messages)
+		public SnapshotWithValidationMessages(StructureDefinition snapshot, List<ValidationMessage> messages)
 		{
 			this.snapshot = snapshot;
-			this.messages = messages;
+			if (messages != null)
+				this.messages.addAll(messages);
 		}
 
 		public StructureDefinition getSnapshot()
@@ -25,7 +28,7 @@ public interface SnapshotGenerator
 
 		public List<ValidationMessage> getMessages()
 		{
-			return messages;
+			return Collections.unmodifiableList(messages);
 		}
 	}
 

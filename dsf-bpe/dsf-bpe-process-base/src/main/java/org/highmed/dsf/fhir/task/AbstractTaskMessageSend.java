@@ -1,5 +1,6 @@
 package org.highmed.dsf.fhir.task;
 
+import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_ALTERNATIVE_BUSINESS_KEY;
 import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_INSTANTIATES_URI;
 import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_MESSAGE_NAME;
 import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_PROFILE;
@@ -14,6 +15,7 @@ import static org.highmed.dsf.bpe.ConstantsBase.NAMINGSYSTEM_HIGHMED_ORGANIZATIO
 
 import java.util.Date;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
@@ -277,6 +279,35 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 	protected Stream<ParameterComponent> getAdditionalInputParameters(DelegateExecution execution)
 	{
 		return Stream.empty();
+	}
+
+	/**
+	 * Generates an alternative business-key and stores it as a process variable with name
+	 * {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_ALTERNATIVE_BUSINESS_KEY}<br>
+	 * <br>
+	 * <i>Use this method in combination with overriding
+	 * {@link #sendTask(Target, String, String, String, String, Stream)} to use an alternative business-key with the
+	 * communication target.</i>
+	 *
+	 * <pre>
+	 * &#64;Override
+	 * protected void sendTask(Target target, String instantiatesUri, String messageName, String businessKey,
+	 * 		String profile, Stream&lt;ParameterComponent&gt; additionalInputParameters)
+	 * {
+	 * 	String alternativeBusinesKey = createAndSaveAlternativeBusinessKey();
+	 * 	super.sendTask(target, instantiatesUri, messageName, alternativeBusinesKey, profile,
+	 * 			additionalInputParameters);
+	 * }
+	 * </pre>
+	 *
+	 * @return the alternative business-key stored as variable
+	 *         {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_ALTERNATIVE_BUSINESS_KEY}
+	 */
+	protected final String createAndSaveAlternativeBusinessKey()
+	{
+		String alternativeBusinessKey = UUID.randomUUID().toString();
+		execution.setVariable(BPMN_EXECUTION_VARIABLE_ALTERNATIVE_BUSINESS_KEY, alternativeBusinessKey);
+		return alternativeBusinessKey;
 	}
 
 	protected void sendTask(Target target, String instantiatesUri, String messageName, String businessKey,

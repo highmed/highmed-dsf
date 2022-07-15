@@ -44,19 +44,19 @@ public class PropertiesConfig
 
 	@Documentation(required = true, description = "PEM encoded file with one or more trusted root certificates to validate server certificates for https connections to local and remote DSF FHIR servers", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_trust_certificates.pem")
 	@Value("${org.highmed.dsf.bpe.fhir.client.trust.certificates}")
-	private String webserviceClientCertificateTrustStoreFile;
+	private String clientCertificateTrustStoreFile;
 
 	@Documentation(required = true, description = "PEM encoded file with local client certificate for https connections to local and remote DSF FHIR servers", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_certificate.pem")
 	@Value("${org.highmed.dsf.bpe.fhir.client.certificate}")
-	private String webserviceClientCertificateFile;
+	private String clientCertificateFile;
 
 	@Documentation(required = true, description = "Private key corresponding to the local client certificate as PEM encoded file. Use ${env_variable}_PASSWORD* or *${env_variable}_PASSWORD_FILE* if private key is encrypted", recommendation = "Use docker secret file to configure", example = "/run/secrets/app_client_certificate_private_key.pem")
 	@Value("${org.highmed.dsf.bpe.fhir.client.certificate.private.key}")
-	private String webserviceClientCertificatePrivateKeyFile;
+	private String clientCertificatePrivateKeyFile;
 
 	@Documentation(description = "Password to decrypt the local client certificate encrypted private key", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*", example = "/run/secrets/app_client_certificate_private_key.pem.password")
 	@Value("${org.highmed.dsf.bpe.fhir.client.certificate.private.key.password:#{null}}")
-	private char[] webserviceClientCertificatePrivateKeyFilePassword;
+	private char[] clientCertificatePrivateKeyFilePassword;
 
 	@Documentation(description = "The timeout in milliseconds until a reading a resource from a remote DSF FHIR server is aborted", recommendation = "Change default value only if timeout exceptions occur")
 	@Value("${org.highmed.dsf.bpe.fhir.client.remote.timeout.read:60000}")
@@ -77,6 +77,10 @@ public class PropertiesConfig
 	@Documentation(description = "Proxy password, set if the the DSF FHIR server can reach the internet only through a proxy which requests authentication", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*")
 	@Value("${org.highmed.dsf.bpe.fhir.client.remote.proxy.password:#{null}}")
 	private char[] webserviceClientRemoteProxyPassword;
+
+	@Documentation(description = "To enable verbose logging of requests to and replies from remote DSF FHIR servers, set to `true`")
+	@Value("${org.highmed.dsf.bpe.fhir.client.remote.verbose:false}")
+	private boolean webserviceClientRemoteVerbose;
 
 	@Documentation(required = true, description = "The base address of the local DSF FHIR server to read/store fhir resources", example = "https://foo.bar/fhir")
 	@Value("${org.highmed.dsf.bpe.fhir.server.base.url}")
@@ -101,6 +105,10 @@ public class PropertiesConfig
 	@Documentation(description = "Proxy password, set if the DSF BPE server can reach internal servers, like the DSF FHIR server, only through a proxy which requests authentication", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*")
 	@Value("${org.highmed.dsf.bpe.fhir.client.local.proxy.password:#{null}}")
 	private char[] webserviceClientLocalProxyPassword;
+
+	@Documentation(description = "To enable verbose logging of requests to and replies from the local DSF FHIR server, set to `true`")
+	@Value("${org.highmed.dsf.bpe.fhir.client.local.verbose:false}")
+	private boolean webserviceClientLocalVerbose;
 
 	@Documentation(description = "Proxy location, set if the DSF BPE server can reach internal servers via websocket, like the DSF FHIR server, only through a proxy", example = "http://proxy.foo:8080")
 	@Value("${org.highmed.dsf.bpe.fhir.client.local.websocket.proxy.url:#{null}}")
@@ -209,24 +217,24 @@ public class PropertiesConfig
 		return organizationIdentifierValue;
 	}
 
-	public String getWebserviceClientCertificateTrustStoreFile()
+	public String getClientCertificateTrustStoreFile()
 	{
-		return webserviceClientCertificateTrustStoreFile;
+		return clientCertificateTrustStoreFile;
 	}
 
-	public String getWebserviceClientCertificateFile()
+	public String getClientCertificateFile()
 	{
-		return webserviceClientCertificateFile;
+		return clientCertificateFile;
 	}
 
-	public String getWebserviceClientCertificatePrivateKeyFile()
+	public String getClientCertificatePrivateKeyFile()
 	{
-		return webserviceClientCertificatePrivateKeyFile;
+		return clientCertificatePrivateKeyFile;
 	}
 
-	public char[] getWebserviceClientCertificatePrivateKeyFilePassword()
+	public char[] getClientCertificatePrivateKeyFilePassword()
 	{
-		return webserviceClientCertificatePrivateKeyFilePassword;
+		return clientCertificatePrivateKeyFilePassword;
 	}
 
 	public int getWebserviceClientRemoteReadTimeout()
@@ -252,6 +260,11 @@ public class PropertiesConfig
 	public char[] getWebserviceClientRemoteProxyPassword()
 	{
 		return webserviceClientRemoteProxyPassword;
+	}
+
+	public boolean getWebserviceClientRemoteVerbose()
+	{
+		return webserviceClientRemoteVerbose;
 	}
 
 	public String getServerBaseUrl()
@@ -282,6 +295,11 @@ public class PropertiesConfig
 	public char[] getWebserviceClientLocalProxyPassword()
 	{
 		return webserviceClientLocalProxyPassword;
+	}
+
+	public boolean getWebserviceClientLocalVerbose()
+	{
+		return webserviceClientLocalVerbose;
 	}
 
 	public String getWebsocketClientProxySchemeHostPort()

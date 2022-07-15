@@ -17,6 +17,9 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.pkcs.PKCSException;
 import org.highmed.dsf.fhir.client.ClientProvider;
 import org.highmed.dsf.fhir.client.ClientProviderImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,8 +29,10 @@ import de.rwh.utils.crypto.io.CertificateReader;
 import de.rwh.utils.crypto.io.PemIo;
 
 @Configuration
-public class ClientConfig
+public class ClientConfig implements InitializingBean
 {
+	private static final Logger logger = LoggerFactory.getLogger(ClientConfig.class);
+
 	private static final BouncyCastleProvider provider = new BouncyCastleProvider();
 
 	@Autowired
@@ -62,8 +67,9 @@ public class ClientConfig
 					propertiesConfig.getWebserviceClientReadTimeout(),
 					propertiesConfig.getWebserviceClientConnectTimeout(),
 					propertiesConfig.getWebserviceClientProxyUrl(), propertiesConfig.getWebserviceClientProxyUsername(),
-					propertiesConfig.getWebserviceClientProxyPassword(), fhirConfig.fhirContext(),
-					referenceConfig.referenceCleaner(), daoConfig.endpointDao(), helperConfig.exceptionHandler());
+					propertiesConfig.getWebserviceClientProxyPassword(), propertiesConfig.getWebserviceClientVerbose(),
+					fhirConfig.fhirContext(), referenceConfig.referenceCleaner(), daoConfig.endpointDao(),
+					helperConfig.exceptionHandler());
 		}
 		catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException | PKCSException e)
 		{
@@ -100,5 +106,19 @@ public class ClientConfig
 		String subjectCommonName = CertificateHelper.getSubjectCommonName(certificate);
 		return CertificateHelper.toJksKeyStore(privateKey, new Certificate[] { certificate }, subjectCommonName,
 				keyStorePassword);
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception
+	{
+		logger.info(
+				"Remote webservice client config: {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
+						+ " proxyUrl {}, proxyUsername {}, proxyPassword {}}",
+				propertiesConfig.getWebserviceClientCertificateTrustCertificatesFile(),
+				propertiesConfig.getWebserviceClientCertificateFile(),
+				propertiesConfig.getWebserviceClientCertificatePrivateKeyFile(),
+				propertiesConfig.getWebserviceClientCertificatePrivateKeyFilePassword() != null ? "***" : "null",
+				propertiesConfig.getWebserviceClientProxyUrl(), propertiesConfig.getWebserviceClientProxyUsername(),
+				propertiesConfig.getWebserviceClientProxyPassword() != null ? "***" : "null");
 	}
 }

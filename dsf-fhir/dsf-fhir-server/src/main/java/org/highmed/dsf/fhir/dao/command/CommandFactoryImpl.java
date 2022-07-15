@@ -29,6 +29,7 @@ import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.highmed.dsf.fhir.validation.SnapshotGenerator;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.springframework.beans.factory.InitializingBean;
@@ -246,11 +247,11 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 					case POST: // create
 						Command post = post(index, user, returnType, bundle, entry, (Resource) entry.getResource());
 						return resolveReferences(post, index, user, returnType, bundle, entry,
-								(Resource) entry.getResource());
+								(Resource) entry.getResource(), HTTPVerb.POST);
 					case PUT: // update
 						Command put = put(index, user, returnType, bundle, entry, (Resource) entry.getResource());
 						return resolveReferences(put, index, user, returnType, bundle, entry,
-								(Resource) entry.getResource());
+								(Resource) entry.getResource(), HTTPVerb.PUT);
 					default:
 						throw new BadBundleException("Request method " + entry.getRequest().getMethod() + " at index "
 								+ index + " not supported with resource");
@@ -262,7 +263,7 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 	}
 
 	private <R extends Resource> Stream<Command> resolveReferences(Command cmd, int index, User user,
-			PreferReturnType returnType, Bundle bundle, BundleEntryComponent entry, R resource)
+			PreferReturnType returnType, Bundle bundle, BundleEntryComponent entry, R resource, HTTPVerb verb)
 	{
 		@SuppressWarnings("unchecked")
 		Optional<? extends ResourceDao<R>> dao = (Optional<? extends ResourceDao<R>>) daoProvider
@@ -273,8 +274,8 @@ public class CommandFactoryImpl implements InitializingBean, CommandFactory
 			return dao
 					.map(d -> Stream.of(cmd,
 							new CheckReferencesCommand<R, ResourceDao<R>>(index, user, returnType, bundle, entry,
-									serverBase, authorizationHelper, resource, d, exceptionHandler, parameterConverter,
-									responseGenerator, referenceExtractor, referenceResolver)))
+									serverBase, authorizationHelper, resource, verb, d, exceptionHandler,
+									parameterConverter, responseGenerator, referenceExtractor, referenceResolver)))
 					.orElseThrow(() -> new IllegalStateException(
 							"Resource of type " + resource.getClass().getName() + " not supported"));
 		}
