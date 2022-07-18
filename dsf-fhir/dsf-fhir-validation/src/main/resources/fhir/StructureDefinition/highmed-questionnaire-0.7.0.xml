@@ -3,272 +3,95 @@
     <tag>
       <system value="http://highmed.org/fhir/CodeSystem/read-access-tag" />
       <code value="ALL" />
-    </tag>		
+    </tag>
   </meta>
-  <url value="http://highmed.org/fhir/StructureDefinition/task-base" />
-  <version value="0.5.0" />
-  <name value="TaskBase" />
+  <url value="http://highmed.org/fhir/StructureDefinition/questionnaire" />
+  <version value="0.7.0" />
+  <name value="Questionnaire" />
   <status value="active" />
   <experimental value="false" />
-  <date value="2021-08-24" />
+  <date value="2022-07-18" />
   <fhirVersion value="4.0.1" />
   <kind value="resource" />
   <abstract value="true" />
-  <type value="Task" />
-  <baseDefinition value="http://hl7.org/fhir/StructureDefinition/Task" />
+  <type value="Questionnaire" />
+  <baseDefinition value="http://hl7.org/fhir/StructureDefinition/Questionnaire" />
   <derivation value="constraint" />
   <differential>
-    <element id="Task.instantiatesUri">
-      <path value="Task.instantiatesUri" />
+    <element id="Questionnaire.url">
+      <path value="Questionnaire.url" />
       <min value="1" />
     </element>
-    <element id="Task.intent">
-      <path value="Task.intent" />
-      <fixedCode value="order" />
-    </element>
-    <element id="Task.authoredOn">
-      <path value="Task.authoredOn" />
+    <element id="Questionnaire.version">
+      <path value="Questionnaire.version" />
       <min value="1" />
     </element>
-    <element id="Task.requester">
-      <path value="Task.requester" />
-      <min value="1" />
-      <type>
-        <code value="Reference" />
-        <targetProfile value="http://highmed.org/fhir/StructureDefinition/organization" />
-      </type>
-    </element>
-    <element id="Task.requester.reference">
-      <path value="Task.requester.reference" />
-      <max value="0" />
-    </element>
-    <element id="Task.requester.identifier">
-      <path value="Task.requester.identifier" />
+    <element id="Questionnaire.date">
+      <path value="Questionnaire.date" />
       <min value="1" />
     </element>
-    <element id="Task.requester.identifier.system">
-      <path value="Task.requester.identifier.system" />
-      <min value="1" />
-      <fixedUri value="http://highmed.org/sid/organization-identifier" />
-    </element>
-    <element id="Task.requester.identifier.value">
-      <path value="Task.requester.identifier.value" />
-      <min value="1" />
-    </element>
-    <element id="Task.restriction">
-      <path value="Task.restriction" />
-      <min value="1" />
-    </element>
-    <element id="Task.restriction.recipient">
-      <path value="Task.restriction.recipient" />
-      <min value="1" />
-      <max value="1" />
-      <type>
-        <code value="Reference" />
-        <targetProfile value="http://highmed.org/fhir/StructureDefinition/organization" />
-      </type>
-    </element>
-    <element id="Task.restriction.recipient.reference">
-      <path value="Task.restriction.recipient.reference" />
-      <max value="0" />
-    </element>
-    <element id="Task.restriction.recipient.identifier">
-      <path value="Task.restriction.recipient.identifier" />
-      <min value="1" />
-    </element>
-    <element id="Task.restriction.recipient.identifier.system">
-      <path value="Task.restriction.recipient.identifier.system" />
-      <min value="1" />
-      <fixedUri value="http://highmed.org/sid/organization-identifier" />
-    </element>
-    <element id="Task.restriction.recipient.identifier.value">
-      <path value="Task.restriction.recipient.identifier.value" />
-      <min value="1" />
-    </element>
-    <element id="Task.input">
+    <!-- TODO: Questionnaire.useContext with link to process (possibly ActivityDefinition) -->
+    <element id="Questionnaire.item">
       <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
         <valueString value="Parameter" />
       </extension>
-      <path value="Task.input" />
+      <path value="Questionnaire.item" />
       <slicing>
         <discriminator>
           <type value="value" />
-          <path value="type.coding.system" />
+          <path value="linkId" />
         </discriminator>
-        <discriminator>
-          <type value="value" />
-          <path value="type.coding.code" />
-        </discriminator>
-        <rules value="openAtEnd" />
+        <rules value="closed" />
       </slicing>
-      <min value="1" />
+      <min value="3" />
     </element>
-    <element id="Task.input:message-name">
-      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
-        <valueString value="Parameter" />
-      </extension>
-      <path value="Task.input" />
-      <sliceName value="message-name" />
-      <min value="1" />
-      <max value="1" />
-    </element>
-    <element id="Task.input:message-name.type">
-      <path value="Task.input.type" />
-      <binding>
-        <extension url="http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName">
-          <valueString value="TaskInputParameterType" />
-        </extension>
-        <strength value="required" />
-        <valueSet value="http://highmed.org/fhir/ValueSet/bpmn-message" />
-      </binding>
-    </element>
-    <element id="Task.input:message-name.type.coding">
-      <path value="Task.input.type.coding" />
-      <min value="1" />
-      <max value="1" />
-    </element>
-    <element id="Task.input:message-name.type.coding.system">
-      <path value="Task.input.type.coding.system" />
-      <min value="1" />
-      <fixedUri value="http://highmed.org/fhir/CodeSystem/bpmn-message" />
-    </element>
-    <element id="Task.input:message-name.type.coding.code">
-      <path value="Task.input.type.coding.code" />
-      <min value="1" />
-      <fixedCode value="message-name" />
-    </element>
-    <element id="Task.input:message-name.value[x]">
-      <path value="Task.input.value[x]" />
-      <type>
-        <code value="string" />
-      </type>
-    </element>
-    <element id="Task.input:business-key">
-      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
-        <valueString value="Parameter" />
-      </extension>
-      <path value="Task.input" />
+    <element id="Questionnaire.item:business-key">
+      <path value="Questionnaire.item" />
       <sliceName value="business-key" />
-      <max value="1" />
-    </element>
-    <element id="Task.input:business-key.type">
-      <path value="Task.input.type" />
-      <binding>
-        <extension url="http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName">
-          <valueString value="TaskInputParameterType" />
-        </extension>
-        <strength value="required" />
-        <valueSet value="http://highmed.org/fhir/ValueSet/bpmn-message" />
-      </binding>
-    </element>
-    <element id="Task.input:business-key.type.coding">
-      <path value="Task.input.type.coding" />
       <min value="1" />
       <max value="1" />
     </element>
-    <element id="Task.input:business-key.type.coding.system">
-      <path value="Task.input.type.coding.system" />
+    <element id="Questionnaire.item:business-key.linkId">
+      <path value="Questionnaire.item.linkId" />
+      <fixedString value="business-key" />
+    </element>
+    <element id="Questionnaire.item:business-key.text">
+      <path value="Questionnaire.item.text" />
       <min value="1" />
-      <fixedUri value="http://highmed.org/fhir/CodeSystem/bpmn-message" />
+      <fixedString value="The business-key of the process execution" />
     </element>
-    <element id="Task.input:business-key.type.coding.code">
-      <path value="Task.input.type.coding.code" />
-      <min value="1" />
-      <fixedCode value="business-key" />
+    <element id="Questionnaire.item:business-key.type">
+      <path value="Questionnaire.item.type" />
+      <fixedCode value="string" />
     </element>
-    <element id="Task.input:business-key.value[x]">
-      <path value="Task.input.value[x]" />
-      <type>
-        <code value="string" />
-      </type>
-    </element>
-    <element id="Task.input:correlation-key">
-      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
-        <valueString value="Parameter" />
-      </extension>
-      <path value="Task.input" />
-      <sliceName value="correlation-key" />
-      <max value="1" />
-    </element>
-    <element id="Task.input:correlation-key.type">
-      <path value="Task.input.type" />
-      <binding>
-        <extension url="http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName">
-          <valueString value="TaskInputParameterType" />
-        </extension>
-        <strength value="required" />
-        <valueSet value="http://highmed.org/fhir/ValueSet/bpmn-message" />
-      </binding>
-    </element>
-    <element id="Task.input:correlation-key.type.coding">
-      <path value="Task.input.type.coding" />
+    <element id="Questionnaire.item:user-task-id">
+      <path value="Questionnaire.item" />
+      <sliceName value="user-task-id" />
       <min value="1" />
       <max value="1" />
     </element>
-    <element id="Task.input:correlation-key.type.coding.system">
-      <path value="Task.input.type.coding.system" />
+    <element id="Questionnaire.item:user-task-id.linkId">
+      <path value="Questionnaire.item.linkId" />
+      <fixedString value="user-task-id" />
+    </element>
+    <element id="Questionnaire.item:user-task-id.text">
+      <path value="Questionnaire.item.text" />
       <min value="1" />
-      <fixedUri value="http://highmed.org/fhir/CodeSystem/bpmn-message" />
+      <fixedString value="The user-task-id of the process execution" />
     </element>
-    <element id="Task.input:correlation-key.type.coding.code">
-      <path value="Task.input.type.coding.code" />
+    <element id="Questionnaire.item:user-task-id.type">
+      <path value="Questionnaire.item.type" />
+      <fixedCode value="string" />
+    </element>
+    <element id="Questionnaire.item:@default">
+      <path value="Questionnaire.item" />
+      <sliceName value="@default" />
       <min value="1" />
-      <fixedCode value="correlation-key" />
+      <max value="*" />
     </element>
-    <element id="Task.input:correlation-key.value[x]">
-      <path value="Task.input.value[x]" />
-      <type>
-        <code value="string" />
-      </type>
-    </element>
-    <element id="Task.output">
-      <path value="Task.output" />
-      <slicing>
-        <discriminator>
-          <type value="value" />
-          <path value="type.coding.system" />
-        </discriminator>
-        <discriminator>
-          <type value="value" />
-          <path value="type.coding.code" />
-        </discriminator>
-        <rules value="openAtEnd" />
-      </slicing>
-    </element>
-    <element id="Task.output:error">
-      <path value="Task.output" />
-      <sliceName value="error" />
-    </element>
-    <element id="Task.output:error.type">
-      <path value="Task.output.type" />
-      <binding>
-        <extension url="http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName">
-          <valueString value="TaskOutputParameterType" />
-        </extension>
-        <strength value="required" />
-        <valueSet value="http://highmed.org/fhir/ValueSet/bpmn-message" />
-      </binding>
-    </element>
-    <element id="Task.output:error.type.coding">
-      <path value="Task.output.type.coding" />
+    <element id="Questionnaire.item:@default.text">
+      <path value="Questionnaire.item.text" />
       <min value="1" />
-      <max value="1" />
-    </element>
-    <element id="Task.output:error.type.coding.system">
-      <path value="Task.output.type.coding.system" />
-      <min value="1" />
-      <fixedUri value="http://highmed.org/fhir/CodeSystem/bpmn-message" />
-    </element>
-    <element id="Task.output:error.type.coding.code">
-      <path value="Task.output.type.coding.code" />
-      <min value="1" />
-      <fixedCode value="error" />
-    </element>
-    <element id="Task.output:error.value[x]">
-      <path value="Task.output.value[x]" />
-      <type>
-        <code value="string" />
-      </type>
     </element>
   </differential>
 </StructureDefinition>

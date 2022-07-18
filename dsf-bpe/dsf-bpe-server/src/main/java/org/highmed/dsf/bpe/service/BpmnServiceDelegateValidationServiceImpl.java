@@ -63,6 +63,8 @@ public class BpmnServiceDelegateValidationServiceImpl implements BpmnServiceDele
 		process.getChildElementsByType(ServiceTask.class).stream().filter(t -> t != null).map(t -> t.getCamundaClass())
 				.forEach(c -> validateBeanAvailability(process, c));
 
+		// TODO validate bean availability for UserTask.class listener
+
 		process.getChildElementsByType(SendTask.class).stream().filter(t -> t != null).map(t -> t.getCamundaClass())
 				.forEach(c -> validateBeanAvailability(process, c));
 

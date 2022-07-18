@@ -2,9 +2,8 @@ package org.highmed.dsf.bpe.listener;
 
 import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_URL;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY;
-import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_TASK_ID;
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID;
 
-import java.util.Date;
 import java.util.Objects;
 
 import org.camunda.bpm.engine.delegate.DelegateTask;
@@ -62,7 +61,6 @@ public abstract class AbstractUserTaskListener implements TaskListener, Initiali
 			QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse();
 			questionnaireResponse.setQuestionnaire(questionnaireUrl);
 			questionnaireResponse.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS);
-			questionnaireResponse.setAuthored(new Date());
 
 			questionnaireResponse.setSubject(new Reference().setType(ResourceType.Organization.name())
 					.setIdentifier(organizationProvider.getLocalIdentifier()));
@@ -70,7 +68,9 @@ public abstract class AbstractUserTaskListener implements TaskListener, Initiali
 			questionnaireResponseHelper.addItemLeave(questionnaireResponse,
 					CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY, new StringType(businessKey));
 			questionnaireResponseHelper.addItemLeave(questionnaireResponse,
-					CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_TASK_ID, new StringType(taskId));
+					CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID, new StringType(taskId));
+
+			// TODO: read questionnaire and add items
 
 			readAccessHelper.addLocal(questionnaireResponse);
 

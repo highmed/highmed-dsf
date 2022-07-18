@@ -1,7 +1,7 @@
 package org.highmed.dsf.fhir.questionnaire;
 
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY;
-import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_TASK_ID;
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID;
 
 import java.util.List;
 import java.util.Objects;
@@ -47,10 +47,10 @@ public class QuestionnaireResponseHandler implements ResourceHandler<Questionnai
 					questionnaireResponseId)
 							.orElseThrow(() -> new RuntimeException(
 									"Missing linkId " + CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY));
-			String taskId = getStringValueFromItems(items, CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_TASK_ID,
+			String taskId = getStringValueFromItems(items, CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID,
 					questionnaireResponseId)
 							.orElseThrow(() -> new RuntimeException(
-									"Missing linkId " + CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_TASK_ID));
+									"Missing linkId " + CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID));
 
 			logger.info("User task '{}' for Questionnaire '{}' completed [userTaskId: {}, businessKey: {}, user: {}]",
 					questionnaireResponseId, questionnaire, taskId, businessKey, user + "|" + userType);

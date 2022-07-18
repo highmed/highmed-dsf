@@ -41,7 +41,7 @@ public interface ConstantsBase
 
 	String CODESYSTEM_HIGHMED_BPMN_USER_TASK = "http://highmed.org/fhir/CodeSystem/bpmn-user-task";
 	String CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY = "business-key";
-	String CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_TASK_ID = "task-id";
+	String CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID = "user-task-id";
 
 	/**
 	 * @deprecated as of release 0.6.0, use {@link #CODESYSTEM_HIGHMED_ORGANIZATION_ROLE} instead
