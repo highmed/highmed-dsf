@@ -1,0 +1,43 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+  <meta>
+    <tag>
+      <system value="http://highmed.org/fhir/CodeSystem/read-access-tag" />
+      <code value="ALL" />
+    </tag>		
+  </meta>
+  <url value="http://highmed.org/fhir/StructureDefinition/questioannire" />
+  <version value="0.7.0" />
+  <name value="QUestionnaire" />
+  <status value="active" />
+  <experimental value="false" />
+  <date value="2022-07-18" />
+  <fhirVersion value="4.0.1" />
+  <kind value="resource" />
+  <abstract value="true" />
+  <type value="Questionnaire" />
+  <baseDefinition value="http://hl7.org/fhir/StructureDefinition/Questionnaire" />
+  <derivation value="constraint" />
+  <differential>
+    <element id="Questionnaire.url">
+      <path value="Questionnaire.url" />
+      <min value="1" />
+    </element>
+    <element id="Questionnaire.version">
+      <path value="Questionnaire.version" />
+      <min value="1" />
+    </element>
+    <element id="Questionnaire.date">
+      <path value="Questionnaire.date" />
+      <min value="1" />
+    </element>
+    <!-- TODO: Questionnaire.useContext with link to process -->
+    <element id="Questionnaire.item">
+      <path value="Questionnaire.item" />
+      <min value="3" />
+    </element>
+    <element id="Questionnaire.item.text">
+      <path value="Questionnaire.item.text" />
+      <min value="1" />
+    </element>
+  </differential>
+</StructureDefinition>
