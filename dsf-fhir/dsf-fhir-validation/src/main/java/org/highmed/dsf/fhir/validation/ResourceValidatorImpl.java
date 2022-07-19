@@ -9,7 +9,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
-import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 
 public class ResourceValidatorImpl implements ResourceValidator
@@ -45,11 +44,6 @@ public class ResourceValidatorImpl implements ResourceValidator
 	private void adaptDefaultSliceValidationErrorToWarning(ValidationResult result)
 	{
 		result.getMessages().stream().filter(m -> AT_DEFAULT_SLICE_PATTERN.matcher(m.getMessage()).matches())
-				.forEach(this::adaptValidationSeverityToWarning);
-	}
-
-	private void adaptValidationSeverityToWarning(SingleValidationMessage message)
-	{
-		message.setSeverity(ResultSeverityEnum.WARNING);
+				.forEach(m -> m.setSeverity(ResultSeverityEnum.WARNING));
 	}
 }
