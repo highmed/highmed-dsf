@@ -24,19 +24,13 @@
         <key value="authored-if-completed" />
         <severity value="error" />
         <human value="Authored must be set if QuestionnaireResponse.status equals completed" />
-        <expression value="authored.exists() = (%resource.status = 'completed')" />
+        <expression value="(%resource.status = 'completed') implies authored.exists()" />
       </constraint>
       <constraint>
         <key value="author-if-completed" />
         <severity value="error" />
         <human value="Author must be set if QuestionnaireResponse.status equals completed" />
-        <expression value="author.exists() = (%resource.status = 'completed')" />
-      </constraint>
-      <constraint>
-        <key value="answer-if-completed" />
-        <severity value="error" />
-        <human value="Answer must be set if QuestionnaireResponse.status equals completed" />
-        <expression value="item.all(answer.value[x].exists() = (%resource.status = 'completed'))" />
+        <expression value="(%resource.status = 'completed') implies author.exists()" />
       </constraint>
     </element>
     <element id="QuestionnaireResponse.questionnaire">
@@ -73,6 +67,11 @@
       <min value="1" />
       <fixedString value="The business-key of the process execution" />
     </element>
+    <element id="QuestionnaireResponse.item:business-key.answer">
+      <path value="QuestionnaireResponse.item.answer" />
+      <min value="1" />
+      <max value="1" />
+    </element>
     <element id="QuestionnaireResponse.item:business-key.answer.value[x]">
       <path value="QuestionnaireResponse.item.answer.value[x]" />
       <min value="1" />
@@ -95,6 +94,11 @@
       <min value="1" />
       <fixedString value="The user-task-id of the process execution" />
     </element>
+    <element id="QuestionnaireResponse.item:user-task-id.answer">
+      <path value="QuestionnaireResponse.item.answer" />
+      <min value="1" />
+      <max value="1" />
+    </element>
     <element id="QuestionnaireResponse.item:user-task-id.answer.value[x]">
       <path value="QuestionnaireResponse.item.answer.value[x]" />
       <min value="1" />
@@ -110,6 +114,15 @@
     </element>
     <element id="QuestionnaireResponse.item:@default.text">
       <path value="QuestionnaireResponse.item.text" />
+      <min value="1" />
+    </element>
+    <element id="QuestionnaireResponse.item:@default.answer">
+      <path value="QuestionnaireResponse.item.answer" />
+      <min value="1" />
+      <max value="1" />
+    </element>
+    <element id="QuestionnaireResponse.item:@default.answer.value[x]">
+      <path value="QuestionnaireResponse.item.answer.value[x]" />
       <min value="1" />
     </element>
   </differential>
