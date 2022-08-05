@@ -16,7 +16,6 @@ import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,13 +34,17 @@ public abstract class AbstractExistingResourceLoader<R extends Resource> impleme
 	private final LastEventTimeIo lastEventTimeIo;
 	private final FhirWebserviceClient webserviceClient;
 	private final ResourceHandler<R> handler;
+	private final String resourceName;
+	private final Class<R> resourceClass;
 
 	public AbstractExistingResourceLoader(LastEventTimeIo lastEventTimeIo, ResourceHandler<R> handler,
-			FhirWebserviceClient webserviceClient)
+			FhirWebserviceClient webserviceClient, String resourceName, Class<R> resourceClass)
 	{
 		this.lastEventTimeIo = lastEventTimeIo;
 		this.handler = handler;
 		this.webserviceClient = webserviceClient;
+		this.resourceName = resourceName;
+		this.resourceClass = resourceClass;
 	}
 
 	public void readExistingResources(Map<String, List<String>> searchCriteriaQueryParameters)
@@ -63,11 +66,11 @@ public abstract class AbstractExistingResourceLoader<R extends Resource> impleme
 		queryParams.put(PARAM_PAGE, Collections.singletonList("1"));
 		queryParams.put(PARAM_SORT, Collections.singletonList(PARAM_LAST_UPDATED));
 
-		UriBuilder builder = UriBuilder.fromPath("Task");
+		UriBuilder builder = UriBuilder.fromPath(resourceName);
 		queryParams.forEach((k, v) -> builder.replaceQueryParam(k, v.toArray()));
 
 		logger.debug("Executing search {}", builder.toString());
-		Bundle bundle = webserviceClient.searchWithStrictHandling(Task.class, queryParams);
+		Bundle bundle = webserviceClient.searchWithStrictHandling(resourceClass, queryParams);
 
 		if (bundle.getTotal() <= 0)
 		{

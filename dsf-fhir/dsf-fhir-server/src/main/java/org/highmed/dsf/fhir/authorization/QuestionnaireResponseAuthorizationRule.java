@@ -14,10 +14,14 @@ import org.highmed.dsf.fhir.dao.provider.DaoProvider;
 import org.highmed.dsf.fhir.help.ParameterConverter;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class QuestionnaireResponseAuthorizationRule
 		extends AbstractMetaTagAuthorizationRule<QuestionnaireResponse, QuestionnaireResponseDao>
 {
+	private static final Logger logger = LoggerFactory.getLogger(QuestionnaireResponseAuthorizationRule.class);
+
 	public QuestionnaireResponseAuthorizationRule(DaoProvider daoProvider, String serverBase,
 			ReferenceResolver referenceResolver, OrganizationProvider organizationProvider,
 			ReadAccessHelper readAccessHelper, ParameterConverter parameterConverter)
@@ -52,7 +56,19 @@ public class QuestionnaireResponseAuthorizationRule
 	protected boolean modificationsOk(Connection connection, QuestionnaireResponse oldResource,
 			QuestionnaireResponse newResource)
 	{
-		// no unique criteria for QuestionnaireResponse
-		return true;
+		if (QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS.equals(oldResource.getStatus())
+				&& QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED.equals(newResource.getStatus()))
+		{
+			return true;
+		}
+		else
+		{
+			logger.warn(
+					"Modifications only allowed if status changes from '{}' to '{}', current status of old resource is '{}' and of new resource is '{}'",
+					QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS,
+					QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED, oldResource.getStatus(),
+					newResource.getStatus());
+			return false;
+		}
 	}
 }

@@ -94,9 +94,15 @@ public class FhirConfig implements InitializingBean
 	}
 
 	@Bean
-	public LastEventTimeIo lastEventTimeIo()
+	public LastEventTimeIo lastEventTimeIoTask()
 	{
-		return new LastEventTimeIo(propertiesConfig.getLastEventTimeFile());
+		return new LastEventTimeIo(propertiesConfig.getLastEventTimeFileTask());
+	}
+
+	@Bean
+	public LastEventTimeIo lastEventTimeIoQuestionnaireResponse()
+	{
+		return new LastEventTimeIo(propertiesConfig.getLastEventTimeFileQuestionnaireResponse());
 	}
 
 	@Bean
@@ -199,7 +205,7 @@ public class FhirConfig implements InitializingBean
 	@Bean
 	public SubscriptionHandlerFactory<Task> taskSubscriptionHandlerFactory()
 	{
-		return new TaskSubscriptionHandlerFactory(taskHandler(), lastEventTimeIo());
+		return new TaskSubscriptionHandlerFactory(taskHandler(), lastEventTimeIoTask());
 	}
 
 	@Bean
@@ -219,7 +225,8 @@ public class FhirConfig implements InitializingBean
 	@Bean
 	public SubscriptionHandlerFactory<QuestionnaireResponse> questionnaireResponseSubscriptionHandlerFactory()
 	{
-		return new QuestionnaireResponseSubscriptionHandlerFactory(questionnaireResponseHandler(), lastEventTimeIo());
+		return new QuestionnaireResponseSubscriptionHandlerFactory(questionnaireResponseHandler(),
+				lastEventTimeIoQuestionnaireResponse());
 	}
 
 	@Bean

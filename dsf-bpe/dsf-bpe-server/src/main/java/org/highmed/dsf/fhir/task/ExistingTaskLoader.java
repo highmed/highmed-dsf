@@ -14,7 +14,7 @@ public class ExistingTaskLoader extends AbstractExistingResourceLoader<Task>
 	public ExistingTaskLoader(LastEventTimeIo lastEventTimeIo, ResourceHandler<Task> handler,
 			FhirWebserviceClient webserviceClient)
 	{
-		super(lastEventTimeIo, handler, webserviceClient);
+		super(lastEventTimeIo, handler, webserviceClient, "Task", Task.class);
 	}
 
 	@Override

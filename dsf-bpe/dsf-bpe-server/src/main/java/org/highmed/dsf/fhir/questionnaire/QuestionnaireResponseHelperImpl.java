@@ -1,43 +1,30 @@
 package org.highmed.dsf.fhir.questionnaire;
 
-import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY;
-
+import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.TimeType;
 import org.hl7.fhir.r4.model.Type;
+import org.hl7.fhir.r4.model.UriType;
 
 public class QuestionnaireResponseHelperImpl implements QuestionnaireResponseHelper
 {
-	@Override
-	public Optional<QuestionnaireResponse.QuestionnaireResponseItemComponent> getFirstItemLeaveMatchingLinkId(
-			QuestionnaireResponse questionnaireResponse, String linkId)
-	{
-		return getItemLeavesMatchingLinkIdAsStream(questionnaireResponse, linkId).findFirst();
-	}
-
-	@Override
-	public List<QuestionnaireResponse.QuestionnaireResponseItemComponent> getItemLeavesMatchingLinkIdAsList(
-			QuestionnaireResponse questionnaireResponse, String linkId)
-	{
-		return getItemLeavesMatchingLinkIdAsStream(questionnaireResponse, linkId).collect(Collectors.toList());
-	}
-
 	@Override
 	public Stream<QuestionnaireResponse.QuestionnaireResponseItemComponent> getItemLeavesMatchingLinkIdAsStream(
 			QuestionnaireResponse questionnaireResponse, String linkId)
 	{
 		return getItemLeavesAsStream(questionnaireResponse).filter(i -> linkId.equals(i.getLinkId()));
-	}
-
-	@Override
-	public List<QuestionnaireResponse.QuestionnaireResponseItemComponent> getItemLeavesAsList(
-			QuestionnaireResponse questionnaireResponse)
-	{
-		return getItemLeavesAsStream(questionnaireResponse).collect(Collectors.toList());
 	}
 
 	@Override
@@ -63,9 +50,44 @@ public class QuestionnaireResponseHelperImpl implements QuestionnaireResponseHel
 	}
 
 	@Override
-	public void addItemLeave(QuestionnaireResponse questionnaireResponse, String linkId, Type answer)
+	public void addItemLeave(QuestionnaireResponse questionnaireResponse, String linkId, String text, Type answer)
 	{
-		questionnaireResponse.addItem().setLinkId(CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY).addAnswer()
-				.setValue(answer);
+		List<QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent> answerComponent = Collections
+				.singletonList(new QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent().setValue(answer));
+
+		questionnaireResponse.addItem().setLinkId(linkId).setText(text).setAnswer(answerComponent);
+	}
+
+	@Override
+	public Type transformQuestionTypeToAnswerType(Questionnaire.QuestionnaireItemComponent question)
+	{
+		switch (question.getType())
+		{
+			case STRING:
+			case TEXT:
+				return new StringType("Placeholder");
+			case BOOLEAN:
+				return new BooleanType(false);
+			case DECIMAL:
+				return new DecimalType(-1);
+			case INTEGER:
+				return new IntegerType(-1);
+			case DATE:
+				return new DateType("1900-01-01");
+			case DATETIME:
+				return new DateTimeType("1900-01-01T00:00:00.000Z");
+			case TIME:
+				return new TimeType("00:00:00.000Z");
+			case REFERENCE:
+				return new Reference("http://example.org/fhir/Placeholder/id");
+			case URL:
+				return new UriType("http://example.org/placeholder");
+			case CHOICE:
+			case OPENCHOICE:
+				return new Coding("http://example.org/fhir/CodeSystem/placeholder", "placeholder", "placeholder");
+			default:
+				throw new RuntimeException(
+						"Type '" + question.getType().getDisplay() + "' in Questionnaire.item is not supported");
+		}
 	}
 }

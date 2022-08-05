@@ -14,7 +14,7 @@ public class ExistingQuestionnaireResponseLoader extends AbstractExistingResourc
 	public ExistingQuestionnaireResponseLoader(LastEventTimeIo lastEventTimeIo,
 			ResourceHandler<QuestionnaireResponse> handler, FhirWebserviceClient webserviceClient)
 	{
-		super(lastEventTimeIo, handler, webserviceClient);
+		super(lastEventTimeIo, handler, webserviceClient, "QuestionnaireResponse", QuestionnaireResponse.class);
 	}
 
 	@Override

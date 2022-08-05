@@ -130,9 +130,13 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.bpe.fhir.questionnaire.response.subscription.search.parameter:?criteria=QuestionnaireResponse%3Fstatus%3Dcompleted&status=active&type=websocket&payload=application/fhir%2Bjson}")
 	private String questionnaireResponseSubscriptionSearchParameter;
 
-	@Documentation(description = "File storing the last event received and processed on the DFS BPE server from the DSF FHIR server, used to load events that occurred on the DSF FHIR server while the DSF BPE server was turned off")
-	@Value("${org.highmed.dsf.bpe.fhir.task.subscription.last.event.time:last_event/time.file}")
-	private String lastEventTimeFile;
+	@Documentation(description = "File storing the last task event received and processed on the DFS BPE server from the DSF FHIR server, used to load task events that occurred on the DSF FHIR server while the DSF BPE server was turned off")
+	@Value("${org.highmed.dsf.bpe.fhir.task.subscription.last.event.time:last_event/time-task.file}")
+	private String lastEventTimeFileTask;
+
+	@Documentation(description = "File storing the last questionnaire response event received and processed on the DFS BPE server from the DSF FHIR server, used to load questionnaire response events that occurred on the DSF FHIR server while the DSF BPE server was turned off")
+	@Value("${org.highmed.dsf.bpe.fhir.questionnaire.response.subscription.last.event.time:last_event/time-questionnaire-response.file}")
+	private String lastEventTimeFileQuestionnaireResponse;
 
 	@Documentation(description = "Number of retries until a websocket connection can be established with the DSF FHIR server, `-1` means infinite number of retries")
 	@Value("${org.highmed.dsf.bpe.fhir.task.subscription.retry.max:-1}")
@@ -327,9 +331,14 @@ public class PropertiesConfig
 		return questionnaireResponseSubscriptionSearchParameter;
 	}
 
-	public Path getLastEventTimeFile()
+	public Path getLastEventTimeFileTask()
 	{
-		return Paths.get(lastEventTimeFile);
+		return Paths.get(lastEventTimeFileTask);
+	}
+
+	public Path getLastEventTimeFileQuestionnaireResponse()
+	{
+		return Paths.get(lastEventTimeFileQuestionnaireResponse);
 	}
 
 	public long getWebsocketRetrySleepMillis()
