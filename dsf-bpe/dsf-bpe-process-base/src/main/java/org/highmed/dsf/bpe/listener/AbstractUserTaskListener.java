@@ -1,5 +1,6 @@
 package org.highmed.dsf.bpe.listener;
 
+import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_RESPONSE_ID;
 import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_URL;
 import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_VERSION;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY;
@@ -18,6 +19,7 @@ import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.questionnaire.QuestionnaireResponseHelper;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
@@ -78,8 +80,11 @@ public abstract class AbstractUserTaskListener implements TaskListener, Initiali
 
 			checkQuestionnaireResponse(questionnaireResponse);
 
-			QuestionnaireResponse created = clientProvider.getLocalWebserviceClient().create(questionnaireResponse);
-			logger.info("Created user task with id={}, process waiting for it's completion", created.getId());
+			IdType created = clientProvider.getLocalWebserviceClient().create(questionnaireResponse).getIdElement();
+			userTask.getExecution().setVariable(BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_RESPONSE_ID + userTask.getId(),
+					created.getIdPart());
+
+			logger.info("Created user task with id={}, process waiting for it's completion", created.getValue());
 		}
 		catch (Exception exception)
 		{
@@ -117,9 +122,11 @@ public abstract class AbstractUserTaskListener implements TaskListener, Initiali
 				.setIdentifier(organizationProvider.getLocalIdentifier()));
 
 		questionnaireResponseHelper.addItemLeave(questionnaireResponse,
-				CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY, "", new StringType(businessKey));
+				CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY, "The business-key of the process execution",
+				new StringType(businessKey));
 		questionnaireResponseHelper.addItemLeave(questionnaireResponse,
-				CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID, "", new StringType(userTaskId));
+				CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID, "The user-task-id of the process execution",
+				new StringType(userTaskId));
 
 		readAccessHelper.addLocal(questionnaireResponse);
 

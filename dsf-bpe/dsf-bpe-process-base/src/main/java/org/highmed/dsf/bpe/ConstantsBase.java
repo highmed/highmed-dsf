@@ -18,6 +18,7 @@ public interface ConstantsBase
 	String BPMN_EXECUTION_VARIABLE_ALTERNATIVE_BUSINESS_KEY = "alternativeBusinessKey";
 	String BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_URL = "questionnaireUrl";
 	String BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_VERSION = "questionnaireVersion";
+	String BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_RESPONSE_ID = "questionnaireResponseId-";
 
 	/**
 	 * Used to distinguish if I am at the moment in a process called by another process by a CallActivity or not

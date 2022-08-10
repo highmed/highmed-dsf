@@ -1,0 +1,59 @@
+form {
+    border: 1px solid #ccc;
+    background-color: #ffffff;
+    padding: 20px 20px 10px 20px;
+    font-family: Epilogue, sans-serif;
+}
+
+.row {
+    border-radius: 5px;
+    padding: 0 15px 15px 15px;
+    margin-bottom: 10px;
+    background-color: #f2f2f2;
+}
+
+.row-submit {
+    background-color: #ffffff;
+    padding: 0;
+}
+label {
+    display: block;
+    padding: 12px 12px 12px 0;
+    font-weight: 500;
+}
+
+
+label.radio {
+    padding: 5px 12px 5px 0;
+    font-weight: 100;
+}
+
+input[type=radio] {
+    margin-right: 7px;
+}
+
+input[type=text], select, textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    resize: vertical;
+    display: block;
+}
+
+button.submit {
+    background-color: #29235c;
+    color: white;
+    padding: 12px 60px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    float: left;
+}
+
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}

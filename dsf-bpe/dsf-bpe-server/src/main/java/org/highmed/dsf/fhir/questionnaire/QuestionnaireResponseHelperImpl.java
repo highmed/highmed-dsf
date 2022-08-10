@@ -65,7 +65,7 @@ public class QuestionnaireResponseHelperImpl implements QuestionnaireResponseHel
 		{
 			case STRING:
 			case TEXT:
-				return new StringType("Placeholder");
+				return new StringType("Placeholder..");
 			case BOOLEAN:
 				return new BooleanType(false);
 			case DECIMAL:

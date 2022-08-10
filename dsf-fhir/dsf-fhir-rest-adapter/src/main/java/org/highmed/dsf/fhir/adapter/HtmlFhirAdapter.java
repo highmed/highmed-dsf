@@ -87,6 +87,11 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		this.resourceType = resourceType;
 	}
 
+	protected FhirContext getFhirContext()
+	{
+		return fhirContext;
+	}
+
 	/* Parsers are not guaranteed to be thread safe */
 	private IParser getParser(Supplier<IParser> parser)
 	{
@@ -120,11 +125,13 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		out.write("<script src=\"/fhir/static/tabs.js\"></script>\n");
 		out.write("<script src=\"/fhir/static/bookmarks.js\"></script>\n");
 		out.write("<script src=\"/fhir/static/help.js\"></script>\n");
+		out.write("<script src=\"/fhir/static/form.js\"></script>\n");
 		out.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"/fhir/static/prettify.css\">\n");
 		out.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"/fhir/static/highmed.css\">\n");
+		out.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"/fhir/static/form.css\">\n");
 		out.write("<title>DSF" + (uriInfo.getPath() == null || uriInfo.getPath().isEmpty() ? "" : ": ")
 				+ uriInfo.getPath() + "</title>\n</head>\n");
-		out.write("<body onload=\"prettyPrint();openInitialTab();checkBookmarked();\">\n");
+		out.write("<body onload=\"prettyPrint();openInitialTab('" + getInitialLang() + "');checkBookmarked();\">\n");
 		out.write("<div id=\"icons\">\n");
 		out.write("<svg class=\"icon\" id=\"help-icon\" viewBox=\"0 0 24 24\" onclick=\"showHelp();\">\n");
 		out.write("<title>Show Help</title>\n");
@@ -183,10 +190,12 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		out.write("<div class=\"tab\">\n");
 		out.write("<button id=\"json-button\" class=\"tablinks\" onclick=\"openTab('json')\">json</button>\n");
 		out.write("<button id=\"xml-button\" class=\"tablinks\" onclick=\"openTab('xml')\">xml</button>\n");
+		out.write("<button id=\"html-button\" class=\"tablinks\" onclick=\"openTab('html')\">html</button>\n");
 		out.write("</div>\n");
 
 		writeXml(t, out);
 		writeJson(t, out);
+		writeHtml(t, out);
 
 		out.write("</html>");
 		out.flush();
@@ -310,6 +319,23 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 
 		out.write(content);
 		out.write("</pre>\n");
+	}
+
+	private void writeHtml(T t, OutputStreamWriter out) throws IOException
+	{
+		out.write("<div id=\"html\" class=\"prettyprint lang-html\" style=\"display:none;\">\n");
+		doWriteHtml(t, out);
+		out.write("</div>\n");
+	}
+
+	protected void doWriteHtml(T t, OutputStreamWriter out) throws IOException
+	{
+		out.write("No HTML visualization provided, change to xml or json");
+	}
+
+	protected String getInitialLang()
+	{
+		return "xml";
 	}
 
 	private Optional<String> getResourceName(T t, String uuid)

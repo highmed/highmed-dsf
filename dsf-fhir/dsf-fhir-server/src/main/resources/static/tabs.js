@@ -15,24 +15,31 @@ function openTab(lang) {
 	if (localStorage != null)
 		localStorage.setItem('lang', lang);
 
-	setDownloadLink(lang);
+	enableAndSetDownloadLink(lang);
 }
 
-function openInitialTab() {
-	const lang = localStorage != null && localStorage.getItem("lang") != null ? localStorage.getItem("lang") : "xml";
-	if (lang == "xml" || lang == "json")
+function openInitialTab(initialLang) {
+	const lang = localStorage != null && localStorage.getItem("lang") != null ? localStorage.getItem("lang") : initialLang;
+	if (lang == "xml" || lang == "json" || lang == "html")
 		openTab(lang);
 }
 
-function setDownloadLink(lang) {
-	const searchParams = new URLSearchParams(document.location.search);
-	searchParams.set('_format', lang);
-	searchParams.set('_pretty', 'true');
-
+function enableAndSetDownloadLink(lang) {
 	const downloadLink = document.getElementById('download-link');
-	downloadLink.href = '?' + searchParams.toString();
-	downloadLink.download = getDownloadFileName(lang);
-	downloadLink.title = 'Download as ' + lang.toUpperCase();
+
+	if (lang == "xml" || lang == "json") {
+		downloadLink.style.display = "inline";
+
+		const searchParams = new URLSearchParams(document.location.search);
+		searchParams.set('_format', lang);
+		searchParams.set('_pretty', 'true');
+
+		downloadLink.href = '?' + searchParams.toString();
+		downloadLink.download = getDownloadFileName(lang);
+		downloadLink.title = 'Download as ' + lang.toUpperCase();
+	} else {
+	 	downloadLink.style.display = "none";
+	}
 }
 
 function getDownloadFileName(lang) {
