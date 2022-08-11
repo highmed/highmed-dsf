@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DecimalType;
@@ -16,7 +15,6 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.TimeType;
 import org.hl7.fhir.r4.model.Type;
-import org.hl7.fhir.r4.model.UriType;
 
 public class QuestionnaireResponseHelperImpl implements QuestionnaireResponseHelper
 {
@@ -66,25 +64,20 @@ public class QuestionnaireResponseHelperImpl implements QuestionnaireResponseHel
 			case STRING:
 			case TEXT:
 				return new StringType("Placeholder..");
-			case BOOLEAN:
-				return new BooleanType(false);
-			case DECIMAL:
-				return new DecimalType(-1);
 			case INTEGER:
 				return new IntegerType(-1);
+			case DECIMAL:
+				return new DecimalType(-1);
+			case BOOLEAN:
+				return new BooleanType(false);
 			case DATE:
 				return new DateType("1900-01-01");
+			case TIME:
+				return new TimeType("00:00:00");
 			case DATETIME:
 				return new DateTimeType("1900-01-01T00:00:00.000Z");
-			case TIME:
-				return new TimeType("00:00:00.000Z");
 			case REFERENCE:
 				return new Reference("http://example.org/fhir/Placeholder/id");
-			case URL:
-				return new UriType("http://example.org/placeholder");
-			case CHOICE:
-			case OPENCHOICE:
-				return new Coding("http://example.org/fhir/CodeSystem/placeholder", "placeholder", "placeholder");
 			default:
 				throw new RuntimeException(
 						"Type '" + question.getType().getDisplay() + "' in Questionnaire.item is not supported");

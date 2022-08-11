@@ -6,7 +6,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 
 import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DecimalType;
@@ -17,7 +16,6 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.TimeType;
 import org.hl7.fhir.r4.model.Type;
-import org.hl7.fhir.r4.model.UriType;
 import org.junit.Test;
 
 public class QuestionnaireResponseTest
@@ -162,7 +160,7 @@ public class QuestionnaireResponseTest
 		assertTrue(type instanceof Reference);
 	}
 
-	@Test
+	@Test(expected = RuntimeException.class)
 	public void testQuestionTypeUrlToAnswerType()
 	{
 		QuestionnaireResponseHelper qrh = new QuestionnaireResponseHelperImpl();
@@ -170,12 +168,10 @@ public class QuestionnaireResponseTest
 		Questionnaire.QuestionnaireItemComponent question = new Questionnaire.QuestionnaireItemComponent()
 				.setType(Questionnaire.QuestionnaireItemType.URL);
 
-		Type type = qrh.transformQuestionTypeToAnswerType(question);
-
-		assertTrue(type instanceof UriType);
+		qrh.transformQuestionTypeToAnswerType(question);
 	}
 
-	@Test
+	@Test(expected = RuntimeException.class)
 	public void testQuestionTypeChoiceToAnswerType()
 	{
 		QuestionnaireResponseHelper qrh = new QuestionnaireResponseHelperImpl();
@@ -183,12 +179,10 @@ public class QuestionnaireResponseTest
 		Questionnaire.QuestionnaireItemComponent question = new Questionnaire.QuestionnaireItemComponent()
 				.setType(Questionnaire.QuestionnaireItemType.CHOICE);
 
-		Type type = qrh.transformQuestionTypeToAnswerType(question);
-
-		assertTrue(type instanceof Coding);
+		qrh.transformQuestionTypeToAnswerType(question);
 	}
 
-	@Test
+	@Test(expected = RuntimeException.class)
 	public void testQuestionTypeOpenChoiceToAnswerType()
 	{
 		QuestionnaireResponseHelper qrh = new QuestionnaireResponseHelperImpl();
@@ -196,9 +190,7 @@ public class QuestionnaireResponseTest
 		Questionnaire.QuestionnaireItemComponent question = new Questionnaire.QuestionnaireItemComponent()
 				.setType(Questionnaire.QuestionnaireItemType.OPENCHOICE);
 
-		Type type = qrh.transformQuestionTypeToAnswerType(question);
-
-		assertTrue(type instanceof Coding);
+		qrh.transformQuestionTypeToAnswerType(question);
 	}
 
 	@Test(expected = RuntimeException.class)
