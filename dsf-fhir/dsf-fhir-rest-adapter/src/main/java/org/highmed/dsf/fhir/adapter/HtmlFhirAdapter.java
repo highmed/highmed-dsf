@@ -188,14 +188,19 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		out.write("</h1></td>\n");
 		out.write("</tr></table>\n");
 		out.write("<div class=\"tab\">\n");
+
+		if (isHtmlEnabled())
+			out.write("<button id=\"html-button\" class=\"tablinks\" onclick=\"openTab('html')\">html</button>\n");
+
 		out.write("<button id=\"json-button\" class=\"tablinks\" onclick=\"openTab('json')\">json</button>\n");
 		out.write("<button id=\"xml-button\" class=\"tablinks\" onclick=\"openTab('xml')\">xml</button>\n");
-		out.write("<button id=\"html-button\" class=\"tablinks\" onclick=\"openTab('html')\">html</button>\n");
 		out.write("</div>\n");
 
 		writeXml(t, out);
 		writeJson(t, out);
-		writeHtml(t, out);
+
+		if (isHtmlEnabled())
+			writeHtml(t, out);
 
 		out.write("</html>");
 		out.flush();
@@ -328,9 +333,29 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		out.write("</div>\n");
 	}
 
+	/**
+	 * Override this method to return <code>true</code> if the HTML tab should be shown. This implies overriding
+	 * {@link #doWriteHtml(BaseResource, OutputStreamWriter)} as well.
+	 *
+	 * @return <code>true</code> if the html tab should be shown, <code>false</code> otherwise (default
+	 *         <code>false</code>)
+	 */
+	protected boolean isHtmlEnabled()
+	{
+		return false;
+	}
+
+	/**
+	 * Use this method to write output to the html tab. This implies overriding {@link #isHtmlEnabled()} as well.
+	 *
+	 * @param t
+	 *            the resource, not <code>null</code>
+	 * @param out
+	 *            the outputStreamWriter, not <code>null</code>
+	 * @throws IOException
+	 */
 	protected void doWriteHtml(T t, OutputStreamWriter out) throws IOException
 	{
-		out.write("No HTML visualization provided, change to xml or json");
 	}
 
 	protected String getInitialLang()

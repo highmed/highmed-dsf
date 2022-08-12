@@ -30,6 +30,12 @@ public class QuestionnaireResponseHtmlFhirAdapter extends HtmlFhirAdapter<Questi
 	}
 
 	@Override
+	protected boolean isHtmlEnabled()
+	{
+		return true;
+	}
+
+	@Override
 	protected void doWriteHtml(QuestionnaireResponse questionnaireResponse, OutputStreamWriter out) throws IOException
 	{
 		out.write("<form>");
