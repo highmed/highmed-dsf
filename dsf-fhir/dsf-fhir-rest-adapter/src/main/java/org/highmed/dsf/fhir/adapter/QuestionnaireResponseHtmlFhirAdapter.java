@@ -6,8 +6,14 @@ import java.io.OutputStreamWriter;
 import javax.ws.rs.ext.Provider;
 
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.TimeType;
 import org.hl7.fhir.r4.model.Type;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -81,6 +87,18 @@ public class QuestionnaireResponseHtmlFhirAdapter extends HtmlFhirAdapter<Questi
 			out.write("<input type=\"text\" id=\"" + linkId + "\" name=\"" + linkId + "\" placeholder=\"" + placeholder
 					+ "\"></input>\n");
 		}
+		else if (type instanceof IntegerType)
+		{
+			String placeholder = String.valueOf(((IntegerType) type).getValue());
+			out.write("<input type=\"number\" id=\"" + linkId + "\" name=\"" + linkId + "\" placeholder=\""
+					+ placeholder + "\" step=\"1\"></input>\n");
+		}
+		else if (type instanceof DecimalType)
+		{
+			String placeholder = String.valueOf(((DecimalType) type).getValue());
+			out.write("<input type=\"number\" id=\"" + linkId + "\" name=\"" + linkId + "\" placeholder=\""
+					+ placeholder + "\" step=\"0.01\"></input>\n");
+		}
 		else if (type instanceof BooleanType)
 		{
 			out.write("<div>\n");
@@ -89,6 +107,27 @@ public class QuestionnaireResponseHtmlFhirAdapter extends HtmlFhirAdapter<Questi
 			out.write("<label class=\"radio\"><input type=\"radio\" id=\"" + linkId + "\" name=\"" + linkId
 					+ "\" value=\"false\" checked/>No</label>\n");
 			out.write("</div>\n");
+		}
+		else if (type instanceof DateType)
+		{
+			out.write("<input type=\"date\" id=\"" + linkId + "\" name=\"" + linkId
+					+ "\" placeholder=\"dd.MM.yyyy\"></input>\n");
+		}
+		else if (type instanceof TimeType)
+		{
+			out.write("<input type=\"time\" id=\"" + linkId + "\" name=\"" + linkId
+					+ "\" placeholder=\"hh:mm:ss\"></input>\n");
+		}
+		else if (type instanceof DateTimeType)
+		{
+			out.write("<input type=\"datetime-local\" id=\"" + linkId + "\" name=\"" + linkId
+					+ "\" placeholder=\"dd.MM.yyyy hh:mm:ss\"></input>\n");
+		}
+		else if (type instanceof Reference)
+		{
+			String placeholder = ((Reference) type).getReference();
+			out.write("<input type=\"url\" id=\"" + linkId + "\" name=\"" + linkId + "\" placeholder=\"" + placeholder
+					+ "\"></input>\n");
 		}
 		else
 		{

@@ -25,10 +25,14 @@ function readAnswersFromForm(questionnaireResponse) {
 }
 
 function readValue(id, answerType) {
-    if (answerType === 'valueString') {
+    if (['valueString', 'valueInteger', 'valueDecimal', 'valueDate', 'valueReference'].includes(answerType)) {
         return document.getElementById(id).value
+    } else if (answerType === 'valueTime') {
+        return document.getElementById(id).value + ":00"
+    } else if (answerType === 'valueDateTime') {
+        return new Date(document.getElementById(id).value).toISOString()
     } else if (answerType === 'valueBoolean') {
-        return document.querySelector("input[name=" + id + "]:checked").value;
+        return document.querySelector("input[name=" + id + "]:checked").value
     } else {
         return "unknown"
     }
@@ -45,6 +49,6 @@ function updateQuestionnaireResponse(questionnaireResponse) {
         },
         body: questionnaireResponse
     }).then(response => {
-            console.log(response)
+        console.log(response)
     })
 }
