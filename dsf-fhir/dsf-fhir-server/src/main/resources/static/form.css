@@ -5,12 +5,103 @@ form {
     font-family: Epilogue, sans-serif;
 }
 
+fieldset#qr-form-fieldset {
+    display: block;
+    margin: 0;
+    padding: 0;
+    min-inline-size: min-content;
+    border: none;
+}
+
 .row {
     border-radius: 5px;
     padding: 0 15px 15px 15px;
     margin-bottom: 10px;
     background-color: #f2f2f2;
 }
+
+.error {
+    background-color: #ffa590;
+}
+
+.error-list-not-visible {
+    display: none;
+}
+
+.error-list-visible {
+    display: block;
+    font-size: small;
+    color: #470003;
+    padding-left: 20px;
+    margin-bottom: 0;
+}
+
+.row-info {
+    display: flex;
+    padding-top: 15px;
+}
+
+.info-color-completed {
+    background-color: #a3c585;
+    color: #4b6043;
+}
+
+.info-color-progress {
+    background-color: #edd273;
+    color: #864401;
+}
+
+.info-link {
+    font-family: monospace;
+    font-size: 130%;
+}
+
+.info-link-completed {
+    color: #4b6043;
+}
+
+.info-link-progress {
+    color: #864401;
+}
+
+.info-link:active {
+    font-family: monospace;
+    font-size: 130%;
+}
+
+.info-link-completed:active {
+    color: #4b6043;
+}
+
+.info-link-progress:active {
+    color: #864401;
+}
+
+.info-icon {
+    padding-top: 15px;
+    padding-right: 15px;
+    height: 35px;
+    width: 35px;
+}
+
+.info-icon > path.info-path-completed {
+    fill: #4b6043;
+}
+
+.info-icon > path.info-path-progress {
+    fill: #864401;
+}
+
+.info-list {
+    padding-left: 20px;
+}
+
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
 
 .row-submit {
     background-color: #ffffff;
@@ -22,7 +113,6 @@ label {
     padding: 12px 12px 12px 0;
     font-weight: 500;
 }
-
 
 label.radio {
     padding: 5px 12px 5px 0;
@@ -64,8 +154,54 @@ button.submit {
     float: left;
 }
 
-.row:after {
-    content: "";
-    display: table;
-    clear: both;
+button.submit:disabled,
+button.submit[disabled] {
+    background-color: #ccc;
+    color: #555;
+    cursor: not-allowed;
+}
+
+.spinner-enabled {
+    display: block;
+}
+
+.spinner-disabled {
+    display: none;
+}
+
+.spinner {
+    position: fixed;
+    width: 100%;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: rgba(255,255,255,0.7);
+    z-index: 9999;
+}
+
+@-webkit-keyframes spin {
+    from { -webkit-transform: rotate(0deg); }
+    to { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.spinner::after {
+    content: '';
+    position: absolute;
+    left: 48%;
+    top: 40%;
+    width: 40px;
+    height: 40px;
+    border-style: solid;
+    border-color: #29235c;
+    border-top-color: transparent;
+    border-width: 4px;
+    border-radius: 50%;
+    -webkit-animation: spin .8s linear infinite;
+    animation: spin .8s linear infinite;
 }
