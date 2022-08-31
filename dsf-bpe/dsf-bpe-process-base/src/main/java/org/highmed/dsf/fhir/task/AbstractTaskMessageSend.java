@@ -307,6 +307,7 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 	{
 		String alternativeBusinessKey = UUID.randomUUID().toString();
 		getExecution().setVariable(BPMN_EXECUTION_VARIABLE_ALTERNATIVE_BUSINESS_KEY, alternativeBusinessKey);
+
 		return alternativeBusinessKey;
 	}
 

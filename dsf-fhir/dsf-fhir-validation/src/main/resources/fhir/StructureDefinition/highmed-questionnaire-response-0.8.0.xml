@@ -6,7 +6,7 @@
     </tag>
   </meta>
   <url value="http://highmed.org/fhir/StructureDefinition/questionnaire-response"/>
-  <version value="0.7.0"/>
+  <version value="0.8.0"/>
   <name value="QuestionnaireResponse"/>
   <status value="active"/>
   <experimental value="false"/>

@@ -35,7 +35,7 @@ public class QuestionnaireResponseProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			Arrays.asList("highmed-questionnaire-response-0.7.0.xml"), Collections.emptyList(),
+			Arrays.asList("highmed-questionnaire-response-0.8.0.xml"), Collections.emptyList(),
 			Collections.emptyList());
 
 	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
