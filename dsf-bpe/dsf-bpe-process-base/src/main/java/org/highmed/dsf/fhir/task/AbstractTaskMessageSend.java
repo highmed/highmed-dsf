@@ -125,7 +125,7 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 
 		logger.debug("Error while executing Task message send " + getClass().getName(), exception);
 		logger.error("Process {} has fatal error in step {} for task with id {}, reason: {}",
-				execution.getProcessDefinitionId(), execution.getActivityInstanceId(),
+				getExecution().getProcessDefinitionId(), getExecution().getActivityInstanceId(),
 				task == null ? "?" : task.getId(), exception.getMessage());
 
 		try
@@ -141,8 +141,8 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 		}
 		finally
 		{
-			execution.getProcessEngine().getRuntimeService().deleteProcessInstance(execution.getProcessInstanceId(),
-					exception.getMessage());
+			getExecution().getProcessEngine().getRuntimeService()
+					.deleteProcessInstance(getExecution().getProcessInstanceId(), exception.getMessage());
 		}
 	}
 
@@ -152,7 +152,7 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 
 		logger.debug("Error while executing Task message send " + getClass().getName(), exception);
 		logger.error("Process {} has fatal error in step {} for task with id {}, reason: {}",
-				execution.getProcessDefinitionId(), execution.getActivityInstanceId(),
+				getExecution().getProcessDefinitionId(), getExecution().getActivityInstanceId(),
 				task == null ? "?" : task.getId(), exception.getMessage());
 
 		if (task != null)
@@ -189,7 +189,7 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 			{
 				logger.debug("Error while executing Task message send " + getClass().getName(), exception);
 				logger.error("Process {} has fatal error in step {} for task with id {}, last reason: {}",
-						execution.getProcessDefinitionId(), execution.getActivityInstanceId(),
+						getExecution().getProcessDefinitionId(), getExecution().getActivityInstanceId(),
 						task == null ? "?" : task.getId(), exception.getMessage());
 
 				try
@@ -204,8 +204,8 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 				}
 				finally
 				{
-					execution.getProcessEngine().getRuntimeService()
-							.deleteProcessInstance(execution.getProcessInstanceId(), exception.getMessage());
+					getExecution().getProcessEngine().getRuntimeService()
+							.deleteProcessInstance(getExecution().getProcessInstanceId(), exception.getMessage());
 				}
 			}
 		}
@@ -234,10 +234,10 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 	 */
 	protected Target getTarget()
 	{
-		if (execution == null)
+		if (getExecution() == null)
 			throw new IllegalStateException("execution not started");
 
-		return (Target) execution.getVariable(BPMN_EXECUTION_VARIABLE_TARGET);
+		return (Target) getExecution().getVariable(BPMN_EXECUTION_VARIABLE_TARGET);
 	}
 
 	/**
@@ -248,10 +248,10 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 	 */
 	protected Targets getTargets()
 	{
-		if (execution == null)
+		if (getExecution() == null)
 			throw new IllegalStateException("execution not started");
 
-		return (Targets) execution.getVariable(BPMN_EXECUTION_VARIABLE_TARGETS);
+		return (Targets) getExecution().getVariable(BPMN_EXECUTION_VARIABLE_TARGETS);
 	}
 
 	/**
@@ -263,10 +263,10 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 	 */
 	protected void updateTargets(Targets targets)
 	{
-		if (execution == null)
+		if (getExecution() == null)
 			throw new IllegalStateException("execution not started");
 
-		execution.setVariable(BPMN_EXECUTION_VARIABLE_TARGETS, TargetsValues.create(targets));
+		getExecution().setVariable(BPMN_EXECUTION_VARIABLE_TARGETS, TargetsValues.create(targets));
 	}
 
 	/**
@@ -306,7 +306,7 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 	protected final String createAndSaveAlternativeBusinessKey()
 	{
 		String alternativeBusinessKey = UUID.randomUUID().toString();
-		execution.setVariable(BPMN_EXECUTION_VARIABLE_ALTERNATIVE_BUSINESS_KEY, alternativeBusinessKey);
+		getExecution().setVariable(BPMN_EXECUTION_VARIABLE_ALTERNATIVE_BUSINESS_KEY, alternativeBusinessKey);
 		return alternativeBusinessKey;
 	}
 

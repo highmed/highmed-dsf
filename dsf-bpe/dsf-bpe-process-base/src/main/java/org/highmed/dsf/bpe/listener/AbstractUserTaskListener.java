@@ -3,8 +3,10 @@ package org.highmed.dsf.bpe.listener;
 import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_RESPONSE_ID;
 import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_URL;
 import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_VERSION;
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID;
+import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR;
 
 import java.util.Collections;
 import java.util.List;
@@ -12,12 +14,16 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.camunda.bpm.engine.delegate.BpmnError;
+import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.DelegateTask;
 import org.camunda.bpm.engine.delegate.TaskListener;
+import org.highmed.dsf.bpe.AbstractDelegateAndListener;
 import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.questionnaire.QuestionnaireResponseHelper;
+import org.highmed.dsf.fhir.task.TaskHelper;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Questionnaire;
@@ -25,42 +31,46 @@ import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-public abstract class AbstractUserTaskListener implements TaskListener, InitializingBean
+public abstract class AbstractUserTaskListener extends AbstractDelegateAndListener
+		implements TaskListener, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractUserTaskListener.class);
 
-	private final FhirWebserviceClientProvider clientProvider;
 	private final OrganizationProvider organizationProvider;
 	private final QuestionnaireResponseHelper questionnaireResponseHelper;
-	private final ReadAccessHelper readAccessHelper;
+
+	protected DelegateExecution execution;
 
 	public AbstractUserTaskListener(FhirWebserviceClientProvider clientProvider,
 			OrganizationProvider organizationProvider, QuestionnaireResponseHelper questionnaireResponseHelper,
-			ReadAccessHelper readAccessHelper)
+			TaskHelper taskHelper, ReadAccessHelper readAccessHelper)
 	{
-		this.clientProvider = clientProvider;
+		super(clientProvider, taskHelper, readAccessHelper);
+
 		this.organizationProvider = organizationProvider;
 		this.questionnaireResponseHelper = questionnaireResponseHelper;
-		this.readAccessHelper = readAccessHelper;
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
-		Objects.requireNonNull(clientProvider, "clientProvider");
+		super.afterPropertiesSet();
+
 		Objects.requireNonNull(organizationProvider, "organizationProvider");
 		Objects.requireNonNull(questionnaireResponseHelper, "questionnaireResponseHelper");
-		Objects.requireNonNull(readAccessHelper, "readAccessHelper");
 	}
 
 	@Override
 	public void notify(DelegateTask userTask)
 	{
+		setExecution(userTask.getExecution());
+
 		try
 		{
 			String questionnaireUrl = (String) userTask.getExecution()
@@ -80,21 +90,54 @@ public abstract class AbstractUserTaskListener implements TaskListener, Initiali
 
 			checkQuestionnaireResponse(questionnaireResponse);
 
-			IdType created = clientProvider.getLocalWebserviceClient().create(questionnaireResponse).getIdElement();
+			IdType created = getFhirWebserviceClientProvider().getLocalWebserviceClient().withRetryForever(60000)
+					.create(questionnaireResponse).getIdElement();
 			userTask.getExecution().setVariable(BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_RESPONSE_ID + userTask.getId(),
 					created.getIdPart());
 
 			logger.info("Created user task with id={}, process waiting for it's completion", created.getValue());
 		}
+		// Error boundary event, do not stop process execution
+		catch (BpmnError error)
+		{
+			Task task = getTask();
+
+			logger.debug("Error while executing user task listener " + getClass().getName(), error);
+			logger.error(
+					"Process {} encountered error boundary event in step {} for task with id {}, error-code: {}, message: {}",
+					execution.getProcessDefinitionId(), execution.getActivityInstanceId(), task.getId(),
+					error.getErrorCode(), error.getMessage());
+
+			throw error;
+		}
+		// Not an error boundary event, stop process execution
 		catch (Exception exception)
 		{
-			// TODO implement
+			Task task = getTask();
+
+			logger.debug("Error while executing user task listener " + getClass().getName(), exception);
+			logger.error("Process {} has fatal error in step {} for task with id {}, reason: {}",
+					execution.getProcessDefinitionId(), execution.getActivityInstanceId(), task.getId(),
+					exception.getMessage());
+
+			String errorMessage = "Process " + execution.getProcessDefinitionId() + " has fatal error in step "
+					+ execution.getActivityInstanceId() + ", reason: " + exception.getMessage();
+
+			task.addOutput(getTaskHelper().createOutput(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR,
+					errorMessage));
+			task.setStatus(Task.TaskStatus.FAILED);
+
+			getFhirWebserviceClientProvider().getLocalWebserviceClient().withMinimalReturn().update(task);
+
+			// TODO evaluate throwing exception as alternative to stopping the process instance
+			execution.getProcessEngine().getRuntimeService().deleteProcessInstance(execution.getProcessInstanceId(),
+					exception.getMessage());
 		}
 	}
 
 	private Questionnaire readQuestionnaire(String url, String version)
 	{
-		Bundle search = clientProvider.getLocalWebserviceClient().search(Questionnaire.class,
+		Bundle search = getFhirWebserviceClientProvider().getLocalWebserviceClient().search(Questionnaire.class,
 				Map.of("url", Collections.singletonList(url), "version", Collections.singletonList(version)));
 
 		List<Questionnaire> questionnaires = search.getEntry().stream().filter(Bundle.BundleEntryComponent::hasResource)
@@ -128,7 +171,7 @@ public abstract class AbstractUserTaskListener implements TaskListener, Initiali
 				CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID, "The user-task-id of the process execution",
 				new StringType(userTaskId));
 
-		readAccessHelper.addLocal(questionnaireResponse);
+		getReadAccessHelper().addLocal(questionnaireResponse);
 
 		return questionnaireResponse;
 	}
@@ -150,10 +193,6 @@ public abstract class AbstractUserTaskListener implements TaskListener, Initiali
 				answer);
 	}
 
-	protected void modifyQuestionnaireResponse(DelegateTask userTask, QuestionnaireResponse questionnaireResponse)
-	{
-	}
-
 	private void checkQuestionnaireResponse(QuestionnaireResponse questionnaireResponse)
 	{
 		questionnaireResponse.getItem().stream()
@@ -165,5 +204,22 @@ public abstract class AbstractUserTaskListener implements TaskListener, Initiali
 				.filter(i -> CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID.equals(i.getLinkId())).findFirst()
 				.orElseThrow(() -> new RuntimeException("QuestionnaireResponse does not contain an item with linkId='"
 						+ CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID + "'"));
+
+		if (!QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS.equals(questionnaireResponse.getStatus()))
+			throw new RuntimeException("QuestionnaireResponse must be in status 'in-progress'");
+	}
+
+	/**
+	 * Use this method to modify the {@link QuestionnaireResponse} before it will be created in state
+	 * {@link QuestionnaireResponse.QuestionnaireResponseStatus#INPROGRESS}
+	 *
+	 * @param userTask
+	 *            not <code>null</code>, user task on which this {@link QuestionnaireResponse} is based
+	 * @param questionnaireResponse
+	 *            not <code>null</code>, containing an answer placeholder for every item in the corresponding
+	 *            {@link Questionnaire}
+	 */
+	protected void modifyQuestionnaireResponse(DelegateTask userTask, QuestionnaireResponse questionnaireResponse)
+	{
 	}
 }
