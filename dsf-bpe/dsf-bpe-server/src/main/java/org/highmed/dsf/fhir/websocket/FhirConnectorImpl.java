@@ -29,9 +29,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 
-public abstract class AbstractFhirConnector<R extends Resource> implements FhirConnector, InitializingBean
+public class FhirConnectorImpl<R extends Resource> implements FhirConnector, InitializingBean
 {
-	private static final Logger logger = LoggerFactory.getLogger(AbstractFhirConnector.class);
+	private static final Logger logger = LoggerFactory.getLogger(FhirConnectorImpl.class);
 
 	private final String resourcePath;
 	private final FhirWebsocketClientProvider clientProvider;
@@ -41,7 +41,7 @@ public abstract class AbstractFhirConnector<R extends Resource> implements FhirC
 	private final int maxRetries;
 	private final Map<String, List<String>> subscriptionSearchParameter;
 
-	public AbstractFhirConnector(String resourcePath, FhirWebsocketClientProvider clientProvider,
+	public FhirConnectorImpl(String resourcePath, FhirWebsocketClientProvider clientProvider,
 			SubscriptionHandlerFactory<R> subscriptionHandlerFactory, FhirContext fhirContext,
 			String subscriptionSearchParameter, long retrySleepMillis, int maxRetries)
 	{

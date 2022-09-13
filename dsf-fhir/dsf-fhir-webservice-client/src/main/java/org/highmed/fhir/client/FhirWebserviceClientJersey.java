@@ -159,14 +159,14 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 				new PatientXmlFhirAdapter(fhirContext), new PractitionerJsonFhirAdapter(fhirContext),
 				new PractitionerXmlFhirAdapter(fhirContext), new PractitionerRoleJsonFhirAdapter(fhirContext),
 				new PractitionerRoleXmlFhirAdapter(fhirContext), new ProvenanceJsonFhirAdapter(fhirContext),
-				new QuestionnaireXmlFhirAdapter(fhirContext), new QuestionnaireJsonFhirAdapter(fhirContext),
-				new QuestionnaireResponseXmlFhirAdapter(fhirContext),
-				new QuestionnaireResponseJsonFhirAdapter(fhirContext), new ProvenanceXmlFhirAdapter(fhirContext),
-				new ResearchStudyJsonFhirAdapter(fhirContext), new ResearchStudyXmlFhirAdapter(fhirContext),
-				new StructureDefinitionJsonFhirAdapter(fhirContext), new StructureDefinitionXmlFhirAdapter(fhirContext),
-				new SubscriptionJsonFhirAdapter(fhirContext), new SubscriptionXmlFhirAdapter(fhirContext),
-				new TaskJsonFhirAdapter(fhirContext), new TaskXmlFhirAdapter(fhirContext),
-				new ValueSetJsonFhirAdapter(fhirContext), new ValueSetXmlFhirAdapter(fhirContext));
+				new ProvenanceXmlFhirAdapter(fhirContext), new QuestionnaireXmlFhirAdapter(fhirContext),
+				new QuestionnaireJsonFhirAdapter(fhirContext), new QuestionnaireResponseXmlFhirAdapter(fhirContext),
+				new QuestionnaireResponseJsonFhirAdapter(fhirContext), new ResearchStudyJsonFhirAdapter(fhirContext),
+				new ResearchStudyXmlFhirAdapter(fhirContext), new StructureDefinitionJsonFhirAdapter(fhirContext),
+				new StructureDefinitionXmlFhirAdapter(fhirContext), new SubscriptionJsonFhirAdapter(fhirContext),
+				new SubscriptionXmlFhirAdapter(fhirContext), new TaskJsonFhirAdapter(fhirContext),
+				new TaskXmlFhirAdapter(fhirContext), new ValueSetJsonFhirAdapter(fhirContext),
+				new ValueSetXmlFhirAdapter(fhirContext));
 	}
 
 	private WebApplicationException handleError(Response response)

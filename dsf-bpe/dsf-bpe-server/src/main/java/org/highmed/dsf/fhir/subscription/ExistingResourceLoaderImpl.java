@@ -21,9 +21,9 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 
-public abstract class AbstractExistingResourceLoader<R extends Resource> implements ExistingResourceLoader<R>
+public class ExistingResourceLoaderImpl<R extends Resource> implements ExistingResourceLoader<R>
 {
-	private static final Logger logger = LoggerFactory.getLogger(AbstractExistingResourceLoader.class);
+	private static final Logger logger = LoggerFactory.getLogger(ExistingResourceLoaderImpl.class);
 
 	private static final String PARAM_LAST_UPDATED = "_lastUpdated";
 	private static final String PARAM_COUNT = "_count";
@@ -37,7 +37,7 @@ public abstract class AbstractExistingResourceLoader<R extends Resource> impleme
 	private final String resourceName;
 	private final Class<R> resourceClass;
 
-	public AbstractExistingResourceLoader(LastEventTimeIo lastEventTimeIo, ResourceHandler<R> handler,
+	public ExistingResourceLoaderImpl(LastEventTimeIo lastEventTimeIo, ResourceHandler<R> handler,
 			FhirWebserviceClient webserviceClient, String resourceName, Class<R> resourceClass)
 	{
 		this.lastEventTimeIo = lastEventTimeIo;
@@ -82,11 +82,9 @@ public abstract class AbstractExistingResourceLoader<R extends Resource> impleme
 		{
 			if (entry.hasResource())
 			{
-				Optional<R> resourceOptional = castExistingResource(entry.getResource());
-
-				if (resourceOptional.isPresent())
+				if (resourceClass.isInstance(entry.getResource()))
 				{
-					R resource = resourceOptional.get();
+					R resource = (R) entry.getResource();
 					handler.onResource(resource);
 					lastEventTimeIo.writeLastEventTime(resource.getMeta().getLastUpdated());
 				}
@@ -105,6 +103,4 @@ public abstract class AbstractExistingResourceLoader<R extends Resource> impleme
 
 		return true;
 	}
-
-	protected abstract Optional<R> castExistingResource(Resource resource);
 }

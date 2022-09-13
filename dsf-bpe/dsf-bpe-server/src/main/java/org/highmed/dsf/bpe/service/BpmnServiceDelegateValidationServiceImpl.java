@@ -7,12 +7,15 @@ import org.camunda.bpm.engine.ProcessEngine;
 import org.camunda.bpm.engine.RepositoryService;
 import org.camunda.bpm.engine.repository.ProcessDefinition;
 import org.camunda.bpm.model.bpmn.instance.EndEvent;
+import org.camunda.bpm.model.bpmn.instance.ExtensionElements;
 import org.camunda.bpm.model.bpmn.instance.IntermediateThrowEvent;
 import org.camunda.bpm.model.bpmn.instance.MessageEventDefinition;
 import org.camunda.bpm.model.bpmn.instance.Process;
 import org.camunda.bpm.model.bpmn.instance.SendTask;
 import org.camunda.bpm.model.bpmn.instance.ServiceTask;
 import org.camunda.bpm.model.bpmn.instance.SubProcess;
+import org.camunda.bpm.model.bpmn.instance.UserTask;
+import org.camunda.bpm.model.bpmn.instance.camunda.CamundaTaskListener;
 import org.highmed.dsf.bpe.delegate.DelegateProvider;
 import org.highmed.dsf.bpe.process.ProcessKeyAndVersion;
 import org.slf4j.Logger;
@@ -63,7 +66,10 @@ public class BpmnServiceDelegateValidationServiceImpl implements BpmnServiceDele
 		process.getChildElementsByType(ServiceTask.class).stream().filter(t -> t != null).map(t -> t.getCamundaClass())
 				.forEach(c -> validateBeanAvailability(process, c));
 
-		// TODO validate bean availability for UserTask.class listener
+		process.getChildElementsByType(UserTask.class).stream().filter(t -> t != null)
+				.flatMap(u -> u.getChildElementsByType(ExtensionElements.class).stream()).filter(e -> e != null)
+				.flatMap(e -> e.getChildElementsByType(CamundaTaskListener.class).stream()).filter(t -> t != null)
+				.map(t -> t.getCamundaClass()).forEach(c -> validateBeanAvailability(process, c));
 
 		process.getChildElementsByType(SendTask.class).stream().filter(t -> t != null).map(t -> t.getCamundaClass())
 				.forEach(c -> validateBeanAvailability(process, c));

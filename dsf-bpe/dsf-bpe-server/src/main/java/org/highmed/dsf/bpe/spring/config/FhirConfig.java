@@ -40,8 +40,7 @@ import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.task.TaskHelperImpl;
 import org.highmed.dsf.fhir.task.TaskSubscriptionHandlerFactory;
 import org.highmed.dsf.fhir.websocket.FhirConnector;
-import org.highmed.dsf.fhir.websocket.FhirConnectorQuestionnaireResponse;
-import org.highmed.dsf.fhir.websocket.FhirConnectorTask;
+import org.highmed.dsf.fhir.websocket.FhirConnectorImpl;
 import org.highmed.dsf.fhir.websocket.LastEventTimeIo;
 import org.highmed.dsf.fhir.websocket.ResourceHandler;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
@@ -211,7 +210,7 @@ public class FhirConfig implements InitializingBean
 	@Bean
 	public FhirConnector fhirConnectorTask()
 	{
-		return new FhirConnectorTask(clientProvider(), taskSubscriptionHandlerFactory(), fhirContext(),
+		return new FhirConnectorImpl<>("Task", clientProvider(), taskSubscriptionHandlerFactory(), fhirContext(),
 				propertiesConfig.getTaskSubscriptionSearchParameter(), propertiesConfig.getWebsocketRetrySleepMillis(),
 				propertiesConfig.getWebsocketMaxRetries());
 	}
@@ -232,7 +231,7 @@ public class FhirConfig implements InitializingBean
 	@Bean
 	public FhirConnector fhirConnectorQuestionnaireResponse()
 	{
-		return new FhirConnectorQuestionnaireResponse(clientProvider(),
+		return new FhirConnectorImpl<>("QuestionnaireResponse", clientProvider(),
 				questionnaireResponseSubscriptionHandlerFactory(), fhirContext(),
 				propertiesConfig.getQuestionnaireResponseSubscriptionSearchParameter(),
 				propertiesConfig.getWebsocketRetrySleepMillis(), propertiesConfig.getWebsocketMaxRetries());

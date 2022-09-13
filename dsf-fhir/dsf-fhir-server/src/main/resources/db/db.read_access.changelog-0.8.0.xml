@@ -6,7 +6,7 @@
 	<property name="json" value="JSONB" dbms="postgresql" />
 	<property name="json" value="varchar(5000)" dbms="h2" />
 
-	<changeSet author="hhund" id="db.read_access.changelog-0.6.0.all_resources">
+	<changeSet author="retwet" id="db.read_access.changelog-0.8.0.all_resources">
 		<createView viewName="all_resources" replaceIfExists="true">
 			SELECT 
 				id
@@ -52,6 +52,10 @@
 				UNION
 				SELECT provenance_id AS id, version, 'Provenance'::text AS type, provenance AS resource FROM current_provenances
 				UNION
+				SELECT questionnaire_id AS id, version, 'Questionnaire'::text AS type, questionnaire AS resource FROM current_questionnaires
+				UNION
+				SELECT questionnaire_response_id AS id, version, 'QuestionnaireResponse'::text AS type, questionnaire_response AS resource FROM current_questionnaire_responses
+				UNION
 				SELECT research_study_id AS id, version, 'ResearchStudy'::text AS type, research_study AS resource FROM current_research_studies
 				UNION
 				SELECT structure_definition_id AS id, version, 'StructureDefinition'::text AS type, structure_definition AS resource FROM current_structure_definitions
@@ -69,18 +73,27 @@
 			GRANT SELECT ON TABLE all_resources TO ${db.server_users_group};
 		</sql>
 	</changeSet>
-	
-	<changeSet author="hhund" id="db.read_access.changelog-0.6.0.on_document_references_insert_function" runOnChange="true">
-		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_document_references_insert.sql" splitStatements="false" />
+
+	<changeSet author="retwet" id="db.read_access.changelog-0.8.0.on_questionnaires_insert_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_questionnaires_insert.sql" splitStatements="false" />
 	</changeSet>
-	<changeSet author="hhund" id="db.read_access.changelog-0.6.0.on_document_references_update_function" runOnChange="true">
-		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_document_references_update.sql" splitStatements="false" />
+	<changeSet author="retwet" id="db.read_access.changelog-0.8.0.on_questionnaires_update_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_questionnaires_update.sql" splitStatements="false" />
+	</changeSet>
+
+	<changeSet author="retwet" id="db.read_access.changelog-0.8.0.on_questionnaire_responses_insert_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_questionnaire_responses_insert.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="retwet" id="db.read_access.changelog-0.8.0.on_questionnaire_responses_update_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_questionnaire_responses_update.sql" splitStatements="false" />
 	</changeSet>
 	
-	<changeSet author="hhund" id="db.read_access.changelog-0.6.0.on_insert_triggers">
+	<changeSet author="retwet" id="db.read_access.changelog-0.8.0.on_insert_triggers">
 		<sql dbms="postgresql">
-			CREATE TRIGGER document_references_insert AFTER INSERT ON document_references FOR EACH ROW EXECUTE PROCEDURE on_document_references_insert();
-			CREATE TRIGGER document_references_update AFTER UPDATE ON document_references FOR EACH ROW EXECUTE PROCEDURE on_document_references_update();
+			CREATE TRIGGER questionnaires_insert AFTER INSERT ON questionnaires FOR EACH ROW EXECUTE PROCEDURE on_questionnaires_insert();
+			CREATE TRIGGER questionnaires_update AFTER UPDATE ON questionnaires FOR EACH ROW EXECUTE PROCEDURE on_questionnaires_update();
+			CREATE TRIGGER questionnaire_responses_insert AFTER INSERT ON questionnaire_responses FOR EACH ROW EXECUTE PROCEDURE on_questionnaire_responses_insert();
+			CREATE TRIGGER questionnaire_responses_update AFTER UPDATE ON questionnaire_responses FOR EACH ROW EXECUTE PROCEDURE on_questionnaire_responses_update();
 		</sql>
 	</changeSet>
 </databaseChangeLog>

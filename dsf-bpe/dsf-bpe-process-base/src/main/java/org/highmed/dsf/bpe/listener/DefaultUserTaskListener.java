@@ -74,10 +74,12 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 
 		try
 		{
+			logger.trace("Execution of user task with id='{}'", execution.getCurrentActivityId());
+
 			String questionnaireUrlWithVersion = userTask.getBpmnModelElementInstance().getCamundaFormKey();
 			Questionnaire questionnaire = readQuestionnaire(questionnaireUrlWithVersion);
 
-			String businessKey = userTask.getExecution().getBusinessKey();
+			String businessKey = execution.getBusinessKey();
 			String userTaskId = userTask.getId();
 
 			QuestionnaireResponse questionnaireResponse = createDefaultQuestionnaireResponse(
@@ -90,8 +92,7 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 
 			IdType created = clientProvider.getLocalWebserviceClient().withRetryForever(60000)
 					.create(questionnaireResponse).getIdElement();
-			userTask.getExecution().setVariable(BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_RESPONSE_ID + userTask.getId(),
-					created.getIdPart());
+			execution.setVariable(BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_RESPONSE_ID, created.getIdPart());
 
 			logger.info("Created user task with id={}, process waiting for it's completion", created.getValue());
 		}

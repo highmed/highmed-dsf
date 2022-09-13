@@ -1,14 +1,17 @@
 package org.highmed.dsf.fhir.questionnaire;
 
+import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_RESPONSE_COMPLETED;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.TaskService;
+import org.highmed.dsf.fhir.variables.FhirResourceValues;
 import org.highmed.dsf.fhir.websocket.ResourceHandler;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.StringType;
@@ -41,8 +44,8 @@ public class QuestionnaireResponseHandler implements ResourceHandler<Questionnai
 
 			String questionnaireResponseId = questionnaireResponse.getId();
 			String questionnaire = questionnaireResponse.getQuestionnaire();
-			String user = questionnaireResponse.getSubject().getIdentifier().getValue();
-			String userType = questionnaireResponse.getSubject().getType();
+			String user = questionnaireResponse.getAuthor().getIdentifier().getValue();
+			String userType = questionnaireResponse.getAuthor().getType();
 			String businessKey = getStringValueFromItems(items, CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY,
 					questionnaireResponseId)
 							.orElseThrow(() -> new RuntimeException(
@@ -54,9 +57,10 @@ public class QuestionnaireResponseHandler implements ResourceHandler<Questionnai
 
 			logger.info("User task '{}' for Questionnaire '{}' completed [userTaskId: {}, businessKey: {}, user: {}]",
 					questionnaireResponseId, questionnaire, taskId, businessKey, user + "|" + userType);
-			userTaskService.complete(taskId);
 
-			// TODO: add remaining items as process variables using linkId as key
+			Map<String, Object> variables = Map.of(BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_RESPONSE_COMPLETED,
+					FhirResourceValues.create(questionnaireResponse));
+			userTaskService.complete(taskId, variables);
 		}
 		catch (Exception exception)
 		{

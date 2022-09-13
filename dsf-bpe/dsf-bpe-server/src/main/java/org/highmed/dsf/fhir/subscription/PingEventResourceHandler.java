@@ -3,16 +3,17 @@ package org.highmed.dsf.fhir.subscription;
 import java.util.List;
 import java.util.Map;
 
+import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PingEventResourceHandler
+public class PingEventResourceHandler<R extends Resource>
 {
 	private static final Logger logger = LoggerFactory.getLogger(PingEventResourceHandler.class);
 
-	private final ExistingResourceLoader loader;
+	private final ExistingResourceLoader<R> loader;
 
-	public PingEventResourceHandler(ExistingResourceLoader loader)
+	public PingEventResourceHandler(ExistingResourceLoader<R> loader)
 	{
 		this.loader = loader;
 	}

@@ -3,7 +3,9 @@ package org.highmed.dsf.fhir.task;
 import java.util.Objects;
 
 import org.highmed.dsf.fhir.subscription.EventResourceHandler;
+import org.highmed.dsf.fhir.subscription.EventResourceHandlerImpl;
 import org.highmed.dsf.fhir.subscription.ExistingResourceLoader;
+import org.highmed.dsf.fhir.subscription.ExistingResourceLoaderImpl;
 import org.highmed.dsf.fhir.subscription.PingEventResourceHandler;
 import org.highmed.dsf.fhir.subscription.SubscriptionHandlerFactory;
 import org.highmed.dsf.fhir.websocket.LastEventTimeIo;
@@ -33,18 +35,19 @@ public class TaskSubscriptionHandlerFactory implements SubscriptionHandlerFactor
 	@Override
 	public ExistingResourceLoader<Task> createExistingResourceLoader(FhirWebserviceClient client)
 	{
-		return new ExistingTaskLoader(lastEventTimeIo, resourceHandler, client);
+		return new ExistingResourceLoaderImpl<>(lastEventTimeIo, resourceHandler, client, "Task", Task.class);
 	}
 
 	@Override
 	public EventResourceHandler<Task> createEventResourceHandler()
 	{
-		return new EventTaskHandler(lastEventTimeIo, resourceHandler);
+		return new EventResourceHandlerImpl<>(lastEventTimeIo, resourceHandler, Task.class);
 	}
 
 	@Override
-	public PingEventResourceHandler createPingEventResourceHandler(ExistingResourceLoader<Task> existingResourceLoader)
+	public PingEventResourceHandler<Task> createPingEventResourceHandler(
+			ExistingResourceLoader<Task> existingResourceLoader)
 	{
-		return new PingEventResourceHandler(existingResourceLoader);
+		return new PingEventResourceHandler<>(existingResourceLoader);
 	}
 }

@@ -16,7 +16,8 @@ public interface ConstantsBase
 	String BPMN_EXECUTION_VARIABLE_TTP_IDENTIFIER = "ttpIdentifier";
 	String BPMN_EXECUTION_VARIABLE_LEADING_MEDIC_IDENTIFIER = "leadingMedicIdentifier";
 	String BPMN_EXECUTION_VARIABLE_ALTERNATIVE_BUSINESS_KEY = "alternativeBusinessKey";
-	String BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_RESPONSE_ID = "questionnaireResponseId-";
+	String BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_RESPONSE_ID = "questionnaireResponseId";
+	String BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_RESPONSE_COMPLETED = "questionnaireResponseCompleted";
 
 	/**
 	 * Used to distinguish if I am at the moment in a process called by another process by a CallActivity or not

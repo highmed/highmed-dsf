@@ -145,7 +145,7 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 			}
 			else
 			{
-				logger.warn("Update of {} unauthorized, ", resourceTypeName, errors.get());
+				logger.warn("Update of {} unauthorized, {}", resourceTypeName, errors.get());
 				return Optional.empty();
 			}
 		}

@@ -3,7 +3,9 @@ package org.highmed.dsf.fhir.questionnaire;
 import java.util.Objects;
 
 import org.highmed.dsf.fhir.subscription.EventResourceHandler;
+import org.highmed.dsf.fhir.subscription.EventResourceHandlerImpl;
 import org.highmed.dsf.fhir.subscription.ExistingResourceLoader;
+import org.highmed.dsf.fhir.subscription.ExistingResourceLoaderImpl;
 import org.highmed.dsf.fhir.subscription.PingEventResourceHandler;
 import org.highmed.dsf.fhir.subscription.SubscriptionHandlerFactory;
 import org.highmed.dsf.fhir.websocket.LastEventTimeIo;
@@ -35,19 +37,20 @@ public class QuestionnaireResponseSubscriptionHandlerFactory
 	@Override
 	public ExistingResourceLoader<QuestionnaireResponse> createExistingResourceLoader(FhirWebserviceClient client)
 	{
-		return new ExistingQuestionnaireResponseLoader(lastEventTimeIo, resourceHandler, client);
+		return new ExistingResourceLoaderImpl<>(lastEventTimeIo, resourceHandler, client, "QuestionnaireResponse",
+				QuestionnaireResponse.class);
 	}
 
 	@Override
 	public EventResourceHandler<QuestionnaireResponse> createEventResourceHandler()
 	{
-		return new EventQuestionnaireResponseHandler(lastEventTimeIo, resourceHandler);
+		return new EventResourceHandlerImpl<>(lastEventTimeIo, resourceHandler, QuestionnaireResponse.class);
 	}
 
 	@Override
-	public PingEventResourceHandler createPingEventResourceHandler(
+	public PingEventResourceHandler<QuestionnaireResponse> createPingEventResourceHandler(
 			ExistingResourceLoader<QuestionnaireResponse> existingResourceLoader)
 	{
-		return new PingEventResourceHandler(existingResourceLoader);
+		return new PingEventResourceHandler<>(existingResourceLoader);
 	}
 }

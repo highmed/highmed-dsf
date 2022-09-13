@@ -39,6 +39,31 @@ public class QuestionnaireResponseAuthorizationRule
 			errors.add("QuestionnaireResponse is missing valid read access tag");
 		}
 
+		if (newResource.hasStatus())
+		{
+			boolean newResourceOk = QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS
+					.equals(newResource.getStatus()) && "1".equals(newResource.getMeta().getVersionId());
+
+			if (newResourceOk)
+			{
+				errors.add("QuestionnaireResponse.status not in-progress and version 1");
+			}
+
+			boolean updateResourceOk = (QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED
+					.equals(newResource.getStatus())
+					|| QuestionnaireResponse.QuestionnaireResponseStatus.STOPPED.equals(newResource.getStatus()))
+					&& "2".equals(newResource.getMeta().getVersionId());
+
+			if (updateResourceOk)
+			{
+				errors.add("QuestionnaireResponse.status not (completed or stopped) and version 2");
+			}
+		}
+		else
+		{
+			errors.add("QuestionnaireResponse.status missing");
+		}
+
 		if (errors.isEmpty())
 			return Optional.empty();
 		else
@@ -57,7 +82,8 @@ public class QuestionnaireResponseAuthorizationRule
 			QuestionnaireResponse newResource)
 	{
 		if (QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS.equals(oldResource.getStatus())
-				&& QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED.equals(newResource.getStatus()))
+				&& (QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED.equals(newResource.getStatus())
+						|| QuestionnaireResponse.QuestionnaireResponseStatus.STOPPED.equals(newResource.getStatus())))
 		{
 			return true;
 		}
@@ -66,8 +92,9 @@ public class QuestionnaireResponseAuthorizationRule
 			logger.warn(
 					"Modifications only allowed if status changes from '{}' to '{}', current status of old resource is '{}' and of new resource is '{}'",
 					QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS,
-					QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED, oldResource.getStatus(),
-					newResource.getStatus());
+					QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED + "|"
+							+ QuestionnaireResponse.QuestionnaireResponseStatus.STOPPED,
+					oldResource.getStatus(), newResource.getStatus());
 			return false;
 		}
 	}

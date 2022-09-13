@@ -6,7 +6,7 @@
 	<property name="json" value="JSONB" dbms="postgresql" />
 	<property name="json" value="varchar(5000)" dbms="h2" />
 
-	<changeSet author="wetret" id="db.questionnaires.changelog-0.5.0">
+	<changeSet author="retwet" id="db.questionnaires.changelog-0.8.0">
 		<createTable tableName="questionnaires">
 			<column name="questionnaire_id" type="UUID">
 				<constraints nullable="false" />

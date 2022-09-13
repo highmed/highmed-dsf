@@ -6,7 +6,7 @@
     <property name="json" value="JSONB" dbms="postgresql" />
     <property name="json" value="varchar(5000)" dbms="h2" />
 
-    <changeSet author="wetret" id="db.groups.changelog-0.1.0">
+    <changeSet author="retwet" id="db.groups.changelog-0.1.0">
         <createTable tableName="groups">
             <column name="group_id" type="UUID">
                 <constraints nullable="false" />
