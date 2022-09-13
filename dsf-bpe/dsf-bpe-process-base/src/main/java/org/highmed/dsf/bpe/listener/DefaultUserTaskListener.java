@@ -1,8 +1,6 @@
 package org.highmed.dsf.bpe.listener;
 
 import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_RESPONSE_ID;
-import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_URL;
-import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_VERSION;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID;
@@ -14,11 +12,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.DelegateTask;
 import org.camunda.bpm.engine.delegate.TaskListener;
-import org.highmed.dsf.bpe.AbstractDelegateAndListener;
+import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.organization.OrganizationProvider;
@@ -37,80 +34,67 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-public abstract class AbstractUserTaskListener extends AbstractDelegateAndListener
-		implements TaskListener, InitializingBean
+public class DefaultUserTaskListener implements TaskListener, InitializingBean
 {
-	private static final Logger logger = LoggerFactory.getLogger(AbstractUserTaskListener.class);
+	private static final Logger logger = LoggerFactory.getLogger(DefaultUserTaskListener.class);
 
+	private final FhirWebserviceClientProvider clientProvider;
 	private final OrganizationProvider organizationProvider;
 	private final QuestionnaireResponseHelper questionnaireResponseHelper;
+	private final TaskHelper taskHelper;
+	private final ReadAccessHelper readAccessHelper;
 
-	protected DelegateExecution execution;
+	private DelegateExecution execution;
 
-	public AbstractUserTaskListener(FhirWebserviceClientProvider clientProvider,
+	public DefaultUserTaskListener(FhirWebserviceClientProvider clientProvider,
 			OrganizationProvider organizationProvider, QuestionnaireResponseHelper questionnaireResponseHelper,
 			TaskHelper taskHelper, ReadAccessHelper readAccessHelper)
 	{
-		super(clientProvider, taskHelper, readAccessHelper);
-
+		this.clientProvider = clientProvider;
 		this.organizationProvider = organizationProvider;
 		this.questionnaireResponseHelper = questionnaireResponseHelper;
+		this.taskHelper = taskHelper;
+		this.readAccessHelper = readAccessHelper;
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
-		super.afterPropertiesSet();
-
+		Objects.requireNonNull(clientProvider, "clientProvider");
 		Objects.requireNonNull(organizationProvider, "organizationProvider");
 		Objects.requireNonNull(questionnaireResponseHelper, "questionnaireResponseHelper");
+		Objects.requireNonNull(taskHelper, "taskHelper");
+		Objects.requireNonNull(readAccessHelper, "readAccessHelper");
 	}
 
 	@Override
-	public void notify(DelegateTask userTask)
+	public final void notify(DelegateTask userTask)
 	{
-		setExecution(userTask.getExecution());
+		this.execution = userTask.getExecution();
 
 		try
 		{
-			String questionnaireUrl = (String) userTask.getExecution()
-					.getVariable(BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_URL);
-			String questionnaireVersion = (String) userTask.getExecution()
-					.getVariable(BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_VERSION);
-			Questionnaire questionnaire = readQuestionnaire(questionnaireUrl, questionnaireVersion);
+			String questionnaireUrlWithVersion = userTask.getBpmnModelElementInstance().getCamundaFormKey();
+			Questionnaire questionnaire = readQuestionnaire(questionnaireUrlWithVersion);
 
 			String businessKey = userTask.getExecution().getBusinessKey();
 			String userTaskId = userTask.getId();
 
-			QuestionnaireResponse questionnaireResponse = createDefaultQuestionnaireResponse(questionnaireUrl,
-					questionnaireVersion, businessKey, userTaskId);
+			QuestionnaireResponse questionnaireResponse = createDefaultQuestionnaireResponse(
+					questionnaireUrlWithVersion, businessKey, userTaskId);
 			addPlaceholderAnswersToQuestionnaireResponse(questionnaireResponse, questionnaire);
 
 			modifyQuestionnaireResponse(userTask, questionnaireResponse);
 
 			checkQuestionnaireResponse(questionnaireResponse);
 
-			IdType created = getFhirWebserviceClientProvider().getLocalWebserviceClient().withRetryForever(60000)
+			IdType created = clientProvider.getLocalWebserviceClient().withRetryForever(60000)
 					.create(questionnaireResponse).getIdElement();
 			userTask.getExecution().setVariable(BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_RESPONSE_ID + userTask.getId(),
 					created.getIdPart());
 
 			logger.info("Created user task with id={}, process waiting for it's completion", created.getValue());
 		}
-		// Error boundary event, do not stop process execution
-		catch (BpmnError error)
-		{
-			Task task = getTask();
-
-			logger.debug("Error while executing user task listener " + getClass().getName(), error);
-			logger.error(
-					"Process {} encountered error boundary event in step {} for task with id {}, error-code: {}, message: {}",
-					execution.getProcessDefinitionId(), execution.getActivityInstanceId(), task.getId(),
-					error.getErrorCode(), error.getMessage());
-
-			throw error;
-		}
-		// Not an error boundary event, stop process execution
 		catch (Exception exception)
 		{
 			Task task = getTask();
@@ -123,11 +107,11 @@ public abstract class AbstractUserTaskListener extends AbstractDelegateAndListen
 			String errorMessage = "Process " + execution.getProcessDefinitionId() + " has fatal error in step "
 					+ execution.getActivityInstanceId() + ", reason: " + exception.getMessage();
 
-			task.addOutput(getTaskHelper().createOutput(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR,
+			task.addOutput(taskHelper.createOutput(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR,
 					errorMessage));
 			task.setStatus(Task.TaskStatus.FAILED);
 
-			getFhirWebserviceClientProvider().getLocalWebserviceClient().withMinimalReturn().update(task);
+			clientProvider.getLocalWebserviceClient().withMinimalReturn().update(task);
 
 			// TODO evaluate throwing exception as alternative to stopping the process instance
 			execution.getProcessEngine().getRuntimeService().deleteProcessInstance(execution.getProcessInstanceId(),
@@ -135,30 +119,30 @@ public abstract class AbstractUserTaskListener extends AbstractDelegateAndListen
 		}
 	}
 
-	private Questionnaire readQuestionnaire(String url, String version)
+	private Questionnaire readQuestionnaire(String urlWithVersion)
 	{
-		Bundle search = getFhirWebserviceClientProvider().getLocalWebserviceClient().search(Questionnaire.class,
-				Map.of("url", Collections.singletonList(url), "version", Collections.singletonList(version)));
+		Bundle search = clientProvider.getLocalWebserviceClient().search(Questionnaire.class,
+				Map.of("url", Collections.singletonList(urlWithVersion)));
 
 		List<Questionnaire> questionnaires = search.getEntry().stream().filter(Bundle.BundleEntryComponent::hasResource)
 				.map(Bundle.BundleEntryComponent::getResource).filter(r -> r instanceof Questionnaire)
 				.map(r -> (Questionnaire) r).collect(Collectors.toList());
 
 		if (questionnaires.size() < 1)
-			throw new RuntimeException("Could not find Questionnaire resource with url|version=" + url + "|" + version);
+			throw new RuntimeException("Could not find Questionnaire resource with url|version=" + urlWithVersion);
 
 		if (questionnaires.size() > 1)
-			logger.info("Found {} Questionnaire resources with url|version={}|{}, using the first",
-					questionnaires.size(), version, url);
+			logger.info("Found {} Questionnaire resources with url|version={}, using the first", questionnaires.size(),
+					urlWithVersion);
 
 		return questionnaires.get(0);
 	}
 
-	private QuestionnaireResponse createDefaultQuestionnaireResponse(String questionnaireUrl,
-			String questionnaireVersion, String businessKey, String userTaskId)
+	private QuestionnaireResponse createDefaultQuestionnaireResponse(String questionnaireUrlWithVersion,
+			String businessKey, String userTaskId)
 	{
 		QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse();
-		questionnaireResponse.setQuestionnaire(questionnaireUrl + "|" + questionnaireVersion);
+		questionnaireResponse.setQuestionnaire(questionnaireUrlWithVersion);
 		questionnaireResponse.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS);
 
 		questionnaireResponse.setAuthor(new Reference().setType(ResourceType.Organization.name())
@@ -171,7 +155,7 @@ public abstract class AbstractUserTaskListener extends AbstractDelegateAndListen
 				CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID, "The user-task-id of the process execution",
 				new StringType(userTaskId));
 
-		getReadAccessHelper().addLocal(questionnaireResponse);
+		readAccessHelper.addLocal(questionnaireResponse);
 
 		return questionnaireResponse;
 	}
@@ -221,5 +205,93 @@ public abstract class AbstractUserTaskListener extends AbstractDelegateAndListen
 	 */
 	protected void modifyQuestionnaireResponse(DelegateTask userTask, QuestionnaireResponse questionnaireResponse)
 	{
+		// Nothing to do in default behaviour
+	}
+
+	protected final DelegateExecution getExecution()
+	{
+		return execution;
+	}
+
+	protected final TaskHelper getTaskHelper()
+	{
+		return taskHelper;
+	}
+
+	protected final FhirWebserviceClientProvider getFhirWebserviceClientProvider()
+	{
+		return clientProvider;
+	}
+
+	protected final ReadAccessHelper getReadAccessHelper()
+	{
+		return readAccessHelper;
+	}
+
+	/**
+	 * @return the active task from execution variables, i.e. the leading task if the main process is running or the
+	 *         current task if a subprocess is running.
+	 * @throws IllegalStateException
+	 *             if execution of this service delegate has not been started
+	 * @see ConstantsBase#BPMN_EXECUTION_VARIABLE_TASK
+	 */
+	protected final Task getTask()
+	{
+		return taskHelper.getTask(execution);
+	}
+
+	/**
+	 * @return the current task from execution variables, the task resource that started the current process or
+	 *         subprocess
+	 * @throws IllegalStateException
+	 *             if execution of this service delegate has not been started
+	 * @see ConstantsBase#BPMN_EXECUTION_VARIABLE_TASK
+	 */
+	protected final Task getCurrentTaskFromExecutionVariables()
+	{
+		return taskHelper.getCurrentTaskFromExecutionVariables(execution);
+	}
+
+	/**
+	 * @return the leading task from execution variables, same as current task if not in a subprocess
+	 * @throws IllegalStateException
+	 *             if execution of this service delegate has not been started
+	 * @see ConstantsBase#BPMN_EXECUTION_VARIABLE_LEADING_TASK
+	 */
+	protected final Task getLeadingTaskFromExecutionVariables()
+	{
+		return taskHelper.getLeadingTaskFromExecutionVariables(execution);
+	}
+
+	/**
+	 * <i>Use this method to update the process engine variable {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_TASK},
+	 * after modifying the {@link Task}.</i>
+	 *
+	 * @param task
+	 *            not <code>null</code>
+	 * @throws IllegalStateException
+	 *             if execution of this service delegate has not been started
+	 * @see ConstantsBase#BPMN_EXECUTION_VARIABLE_TASK
+	 */
+	protected final void updateCurrentTaskInExecutionVariables(Task task)
+	{
+		taskHelper.updateCurrentTaskInExecutionVariables(execution, task);
+	}
+
+	/**
+	 * <i>Use this method to update the process engine variable
+	 * {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_LEADING_TASK}, after modifying the {@link Task}.</i>
+	 * <p>
+	 * Updates the current task if no leading task is set.
+	 *
+	 * @param task
+	 *            not <code>null</code>
+	 * @throws IllegalStateException
+	 *             if execution of this service delegate has not been started
+	 * @see ConstantsBase#BPMN_EXECUTION_VARIABLE_LEADING_TASK
+	 */
+	protected final void updateLeadingTaskInExecutionVariables(Task task)
+	{
+		taskHelper.updateLeadingTaskInExecutionVariables(execution, task);
 	}
 }

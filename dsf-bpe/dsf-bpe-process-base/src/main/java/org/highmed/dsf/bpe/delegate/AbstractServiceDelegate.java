@@ -3,10 +3,12 @@ package org.highmed.dsf.bpe.delegate;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR;
 
+import java.util.Objects;
+
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
-import org.highmed.dsf.bpe.AbstractDelegateAndListener;
+import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
@@ -15,26 +17,40 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
-public abstract class AbstractServiceDelegate extends AbstractDelegateAndListener
-		implements JavaDelegate, InitializingBean
+public abstract class AbstractServiceDelegate implements JavaDelegate, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractServiceDelegate.class);
+
+	private final FhirWebserviceClientProvider clientProvider;
+	private final TaskHelper taskHelper;
+	private final ReadAccessHelper readAccessHelper;
+
+	private DelegateExecution execution;
 
 	public AbstractServiceDelegate(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
 			ReadAccessHelper readAccessHelper)
 	{
-		super(clientProvider, taskHelper, readAccessHelper);
+		this.clientProvider = clientProvider;
+		this.taskHelper = taskHelper;
+		this.readAccessHelper = readAccessHelper;
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception
+	{
+		Objects.requireNonNull(clientProvider, "clientProvider");
+		Objects.requireNonNull(taskHelper, "taskHelper");
+		Objects.requireNonNull(readAccessHelper, "readAccessHelper");
 	}
 
 	@Override
 	public final void execute(DelegateExecution execution) throws Exception
 	{
-		setExecution(execution);
+		this.execution = execution;
 
 		try
 		{
 			logger.trace("Execution of task with id='{}'", execution.getCurrentActivityId());
-
 			doExecute(execution);
 		}
 		// Error boundary event, do not stop process execution
@@ -63,11 +79,11 @@ public abstract class AbstractServiceDelegate extends AbstractDelegateAndListene
 			String errorMessage = "Process " + execution.getProcessDefinitionId() + " has fatal error in step "
 					+ execution.getActivityInstanceId() + ", reason: " + exception.getMessage();
 
-			task.addOutput(getTaskHelper().createOutput(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR,
+			task.addOutput(taskHelper.createOutput(CODESYSTEM_HIGHMED_BPMN, CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR,
 					errorMessage));
 			task.setStatus(Task.TaskStatus.FAILED);
 
-			getFhirWebserviceClientProvider().getLocalWebserviceClient().withMinimalReturn().update(task);
+			clientProvider.getLocalWebserviceClient().withMinimalReturn().update(task);
 
 			// TODO evaluate throwing exception as alternative to stopping the process instance
 			execution.getProcessEngine().getRuntimeService().deleteProcessInstance(execution.getProcessInstanceId(),
@@ -87,4 +103,91 @@ public abstract class AbstractServiceDelegate extends AbstractDelegateAndListene
 	 *             error output
 	 */
 	protected abstract void doExecute(DelegateExecution execution) throws BpmnError, Exception;
+
+	protected final DelegateExecution getExecution()
+	{
+		return execution;
+	}
+
+	protected final TaskHelper getTaskHelper()
+	{
+		return taskHelper;
+	}
+
+	protected final FhirWebserviceClientProvider getFhirWebserviceClientProvider()
+	{
+		return clientProvider;
+	}
+
+	protected final ReadAccessHelper getReadAccessHelper()
+	{
+		return readAccessHelper;
+	}
+
+	/**
+	 * @return the active task from execution variables, i.e. the leading task if the main process is running or the
+	 *         current task if a subprocess is running.
+	 * @throws IllegalStateException
+	 *             if execution of this service delegate has not been started
+	 * @see ConstantsBase#BPMN_EXECUTION_VARIABLE_TASK
+	 */
+	protected final Task getTask()
+	{
+		return taskHelper.getTask(execution);
+	}
+
+	/**
+	 * @return the current task from execution variables, the task resource that started the current process or
+	 *         subprocess
+	 * @throws IllegalStateException
+	 *             if execution of this service delegate has not been started
+	 * @see ConstantsBase#BPMN_EXECUTION_VARIABLE_TASK
+	 */
+	protected final Task getCurrentTaskFromExecutionVariables()
+	{
+		return taskHelper.getCurrentTaskFromExecutionVariables(execution);
+	}
+
+	/**
+	 * @return the leading task from execution variables, same as current task if not in a subprocess
+	 * @throws IllegalStateException
+	 *             if execution of this service delegate has not been started
+	 * @see ConstantsBase#BPMN_EXECUTION_VARIABLE_LEADING_TASK
+	 */
+	protected final Task getLeadingTaskFromExecutionVariables()
+	{
+		return taskHelper.getLeadingTaskFromExecutionVariables(execution);
+	}
+
+	/**
+	 * <i>Use this method to update the process engine variable {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_TASK},
+	 * after modifying the {@link Task}.</i>
+	 *
+	 * @param task
+	 *            not <code>null</code>
+	 * @throws IllegalStateException
+	 *             if execution of this service delegate has not been started
+	 * @see ConstantsBase#BPMN_EXECUTION_VARIABLE_TASK
+	 */
+	protected final void updateCurrentTaskInExecutionVariables(Task task)
+	{
+		taskHelper.updateCurrentTaskInExecutionVariables(execution, task);
+	}
+
+	/**
+	 * <i>Use this method to update the process engine variable
+	 * {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_LEADING_TASK}, after modifying the {@link Task}.</i>
+	 * <p>
+	 * Updates the current task if no leading task is set.
+	 *
+	 * @param task
+	 *            not <code>null</code>
+	 * @throws IllegalStateException
+	 *             if execution of this service delegate has not been started
+	 * @see ConstantsBase#BPMN_EXECUTION_VARIABLE_LEADING_TASK
+	 */
+	protected final void updateLeadingTaskInExecutionVariables(Task task)
+	{
+		taskHelper.updateLeadingTaskInExecutionVariables(execution, task);
+	}
 }
