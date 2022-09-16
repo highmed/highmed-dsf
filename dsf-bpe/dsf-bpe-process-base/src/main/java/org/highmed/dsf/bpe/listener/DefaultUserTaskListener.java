@@ -44,7 +44,11 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 	private final TaskHelper taskHelper;
 	private final ReadAccessHelper readAccessHelper;
 
-	private DelegateExecution execution;
+	/**
+	 * @deprecated as of release 0.8.0, use {@link #getExecution()} instead
+	 */
+	@Deprecated
+	protected DelegateExecution execution;
 
 	public DefaultUserTaskListener(FhirWebserviceClientProvider clientProvider,
 			OrganizationProvider organizationProvider, QuestionnaireResponseHelper questionnaireResponseHelper,
