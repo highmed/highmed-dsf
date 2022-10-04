@@ -263,6 +263,8 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		out.write("<pre id=\"xml\" class=\"prettyprint linenums lang-xml\" style=\"display:none;\">");
 		String content = parser.encodeResourceToString(t);
 
+		content = content.replace("&amp;", "&amp;amp;").replace("&apos;", "&amp;apos;").replace("&gt;", "&amp;gt;")
+				.replace("&lt;", "&amp;lt;").replace("&quot;", "&amp;quot;");
 		content = simplifyXml(content);
 		content = content.replace("<", "&lt;").replace(">", "&gt;");
 
