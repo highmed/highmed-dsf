@@ -139,6 +139,15 @@
 		</dependency>
 
 		<dependency>
+			<groupId>com.sun.mail</groupId>
+			<artifactId>jakarta.mail</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcmail-jdk15on</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>de.hs-heilbronn.mi</groupId>
 			<artifactId>db-test-utils</artifactId>
 			<scope>test</scope>
