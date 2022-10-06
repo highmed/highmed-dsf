@@ -73,13 +73,13 @@ public class SmtpMailService implements MailService, InitializingBean
 	 * @param fromAddress
 	 *            not <code>null</code>
 	 * @param toAddresses
-	 *            not <code>null</code>
+	 *            not <code>null</code>, at least one
 	 * @param mailServerHostname
 	 *            not <code>null</code>
 	 * @param mailServerPort
 	 *            not <code>null</code>
 	 */
-	public SmtpMailService(String fromAddress, String[] toAddresses, String mailServerHostname, int mailServerPort)
+	public SmtpMailService(String fromAddress, List<String> toAddresses, String mailServerHostname, int mailServerPort)
 	{
 		this(fromAddress, toAddresses, null, null, false, mailServerHostname, mailServerPort, null, null, null, null,
 				null, null, null);
@@ -89,7 +89,7 @@ public class SmtpMailService implements MailService, InitializingBean
 	 * @param fromAddress
 	 *            not <code>null</code>
 	 * @param toAddresses
-	 *            not <code>null</code>
+	 *            not <code>null</code>, at least one
 	 * @param toAddressesCc
 	 *            may be <code>null</code>
 	 * @param replyToAddresses
@@ -112,18 +112,18 @@ public class SmtpMailService implements MailService, InitializingBean
 	 *            may be <code>null</code>
 	 * @param signStorePassword
 	 */
-	public SmtpMailService(String fromAddress, String[] toAddresses, String[] toAddressesCc, String[] replyToAddresses,
-			boolean useSmtps, String mailServerHostname, int mailServerPort, String mailServerUsername,
-			String mailServerPassword, KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword,
-			KeyStore signStore, char[] signStorePassword)
+	public SmtpMailService(String fromAddress, List<String> toAddresses, List<String> toAddressesCc,
+			List<String> replyToAddresses, boolean useSmtps, String mailServerHostname, int mailServerPort,
+			String mailServerUsername, char[] mailServerPassword, KeyStore trustStore, KeyStore keyStore,
+			char[] keyStorePassword, KeyStore signStore, char[] signStorePassword)
 	{
 		this.fromAddress = toInternetAddress(fromAddress).orElse(null);
-		this.toAddresses = Arrays.stream(toAddresses != null ? toAddresses : new String[0])
-				.flatMap(s -> toInternetAddress(s).stream()).toArray(InternetAddress[]::new);
-		this.toAddressesCc = Arrays.stream(toAddressesCc != null ? toAddressesCc : new String[0])
-				.flatMap(s -> toInternetAddress(s).stream()).toArray(InternetAddress[]::new);
-		this.replyToAddresses = Arrays.stream(replyToAddresses != null ? replyToAddresses : new String[0])
-				.flatMap(s -> toInternetAddress(s).stream()).toArray(InternetAddress[]::new);
+		this.toAddresses = toAddresses == null ? new InternetAddress[0]
+				: toAddresses.stream().flatMap(s -> toInternetAddress(s).stream()).toArray(InternetAddress[]::new);
+		this.toAddressesCc = toAddressesCc == null ? new InternetAddress[0]
+				: toAddressesCc.stream().flatMap(s -> toInternetAddress(s).stream()).toArray(InternetAddress[]::new);
+		this.replyToAddresses = replyToAddresses == null ? new InternetAddress[0]
+				: replyToAddresses.stream().flatMap(s -> toInternetAddress(s).stream()).toArray(InternetAddress[]::new);
 
 		session = createSession(useSmtps, mailServerHostname, mailServerPort, mailServerUsername, mailServerPassword,
 				trustStore, keyStore, keyStorePassword);
@@ -159,7 +159,7 @@ public class SmtpMailService implements MailService, InitializingBean
 	}
 
 	private Session createSession(boolean useSmtps, String mailServerHostname, int mailServerPort,
-			String mailServerUsername, String mailServerPassword, KeyStore trustStore, KeyStore keyStore,
+			String mailServerUsername, char[] mailServerPassword, KeyStore trustStore, KeyStore keyStore,
 			char[] keyStorePassword)
 	{
 		Properties properties = new Properties();
@@ -172,29 +172,31 @@ public class SmtpMailService implements MailService, InitializingBean
 				@Override
 				protected PasswordAuthentication getPasswordAuthentication()
 				{
-					return new PasswordAuthentication(mailServerUsername, mailServerPassword);
+					return new PasswordAuthentication(mailServerUsername, String.copyValueOf(mailServerPassword));
 				}
 			};
 
-			properties.put("mail.smtps.auth", "true");
+			properties.put("mail.smtp.auth", "true");
 		}
 
 		if (useSmtps)
 		{
-			properties.put("mail.smtps.host", mailServerHostname);
-			properties.put("mail.smtps.port", mailServerPort);
+			properties.put("mail.smtp.ssl.enable", "true");
+			properties.put("mail.smtp.host", mailServerHostname);
+			properties.put("mail.smtp.port", mailServerPort);
 
 			properties.put("mail.transport.protocol", "smtps");
-			properties.put("mail.transport.protocol.rfc822", "smtps");
+			properties.put("mail.smtp.socketFactory.fallback", "false");
+
+			properties.put("mail.smtp.ssl.checkserveridentity", "true");
+			properties.put("mail.smtp.ssl.socketFactory",
+					createSslSocketFactory(trustStore, keyStore, keyStorePassword));
 		}
 		else
 		{
 			properties.put("mail.smtp.host", mailServerHostname);
 			properties.put("mail.smtp.port", mailServerPort);
 		}
-
-
-		properties.put("mail.smtp.ssl.socketFactory", createSslSocketFactory(trustStore, keyStore, keyStorePassword));
 
 		return Session.getInstance(properties, authenticator);
 	}
@@ -233,7 +235,7 @@ public class SmtpMailService implements MailService, InitializingBean
 			Optional<PrivateKey> pivateKey = getFirstPrivateKey(signStore, signStorePassword);
 			if (pivateKey.isEmpty())
 			{
-				logger.warn("Mail signing certificate store has private key, not signing mails", fromAddress);
+				logger.warn("Mail signing certificate store has no private key, not signing mails", fromAddress);
 				return null;
 			}
 
