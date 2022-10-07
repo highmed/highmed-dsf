@@ -5,10 +5,8 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.function.Consumer;
 
-import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
 import javax.mail.Session;
-import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
@@ -26,8 +24,6 @@ public class LoggingMailService implements MailService
 		try
 		{
 			MimeMessage mimeMessage = new MimeMessage(Session.getInstance(new Properties()));
-			mimeMessage.setFrom(new InternetAddress("dsf@localhost"));
-			mimeMessage.setRecipient(RecipientType.TO, new InternetAddress("dsf@localhost"));
 			mimeMessage.setSubject(subject);
 			mimeMessage.setContent(new MimeMultipart(body));
 			mimeMessage.saveChanges();
