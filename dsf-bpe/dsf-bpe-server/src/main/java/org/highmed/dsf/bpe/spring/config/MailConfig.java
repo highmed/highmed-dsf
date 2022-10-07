@@ -23,6 +23,9 @@ import org.highmed.dsf.bpe.service.LoggingMailService;
 import org.highmed.dsf.bpe.service.MailService;
 import org.highmed.dsf.bpe.service.SmtpMailService;
 import org.highmed.dsf.tools.build.BuildInfoReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,8 +37,10 @@ import de.rwh.utils.crypto.io.CertificateReader;
 import de.rwh.utils.crypto.io.PemIo;
 
 @Configuration
-public class MailConfig
+public class MailConfig implements InitializingBean
 {
+	private static final Logger logger = LoggerFactory.getLogger(MailConfig.class);
+
 	private static final BouncyCastleProvider provider = new BouncyCastleProvider();
 
 	@Autowired
@@ -64,8 +69,7 @@ public class MailConfig
 
 	private boolean isConfigured()
 	{
-		return propertiesConfig.getMailServerHostname() != null || propertiesConfig.getMailServerPort() > 0
-				|| propertiesConfig.getMailServerUsername() != null || propertiesConfig.getMailServerPassword() != null;
+		return propertiesConfig.getMailServerHostname() != null && propertiesConfig.getMailServerPort() > 0;
 	}
 
 	private MailService newSmptMailService()
@@ -150,6 +154,38 @@ public class MailConfig
 					"S/MIME mail signing certificate file '" + keyStorePath.toString() + "' not readable");
 
 		return CertificateReader.fromPkcs12(keyStorePath, mailSmimeSigingKeyStorePassword);
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception
+	{
+		if (isConfigured())
+		{
+			logger.info(
+					"Mail client config: {fromAddress: {}, toAddresses: {}, toAddressesCc: {}, replyToAddresses: {},"
+							+ " useSmtps {}, mailServerHostname {}, mailServerPort {}, mailServerUsername {},"
+							+ " mailServerPassword {}, trustStore {}, clientCertificate {}, clientCertificatePrivateKey {},"
+							+ " clientCertificatePrivateKeyPassword {}, smimeSigingKeyStore {}, smimeSigingKeyStorePassword{},"
+							+ " sendTestMailOnStartup {}}",
+					propertiesConfig.getMailFromAddress(), propertiesConfig.getMailToAddresses(),
+					propertiesConfig.getMailToAddressesCc(), propertiesConfig.getMailReplyToAddresses(),
+					propertiesConfig.getMailUseSmtps(), propertiesConfig.getMailServerHostname(),
+					propertiesConfig.getMailServerPort(), propertiesConfig.getMailServerUsername(),
+					propertiesConfig.getMailServerPassword() != null ? "***" : "null",
+					propertiesConfig.getMailServerTrustStoreFile(),
+					propertiesConfig.getMailServerClientCertificateFile(),
+					propertiesConfig.getMailServerClientCertificatePrivateKeyFile(),
+					propertiesConfig.getMailServerClientCertificatePrivateKeyFilePassword() != null ? "***" : "null",
+					propertiesConfig.getMailSmimeSigingKeyStoreFile(),
+					propertiesConfig.getMailSmimeSigingKeyStorePassword() != null ? "***" : "null",
+					propertiesConfig.getMailSendTestMailOnStartup());
+		}
+		else
+		{
+			logger.info(
+					"Mail client config: SMTP client not configured, sending mails to debug log, configure at least SMTP server host and port");
+		}
+
 	}
 
 	@EventListener({ ContextRefreshedEvent.class })
