@@ -175,11 +175,11 @@ public class PropertiesConfig
 	private long fhirServerRetryDelayMillis;
 
 	@Documentation(description = "Mail service sender address", example = "sender@localhost")
-	@Value("${org.highmed.dsf.bpe.mail.fromAddress:dsf@localhost}")
+	@Value("${org.highmed.dsf.bpe.mail.fromAddress:}")
 	private String mailFromAddress;
 
 	@Documentation(description = "Mail service recipient addresses, configure at least one; comma or space separated list, YAML block scalars supported", example = "recipient@localhost")
-	@Value("#{'${org.highmed.dsf.bpe.mail.toAddresses:dsf@localhost}'.trim().split('(,[ ]?)|(\\n)')}")
+	@Value("#{'${org.highmed.dsf.bpe.mail.toAddresses:}'.trim().split('(,[ ]?)|(\\n)')}")
 	private List<String> mailToAddresses;
 
 	@Documentation(description = "Mail service CC recipient addresses; comma or space separated list, YAML block scalars supported", example = "cc.recipient@localhost")
@@ -218,7 +218,7 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.bpe.mail.client.certificate:#{null}}")
 	private String mailServerClientCertificateFile;
 
-	@Documentation(description = "Prvate key corresponging to the SMTP server client certificate as PEM encoded file. Use ${env_variable}_PASSWORD* or *${env_variable}_PASSWORD_FILE* if private key is encrypted. Requires SMTP over TLS to be enabled via *ORG_HIGHMED_DSF_BPE_MAIL_USESMTPS*", recommendation = "Use docker secret file to configure", example = "/run/secrets/smtp_server_client_certificate_private_key.pem")
+	@Documentation(description = "Private key corresponging to the SMTP server client certificate as PEM encoded file. Use ${env_variable}_PASSWORD* or *${env_variable}_PASSWORD_FILE* if private key is encrypted. Requires SMTP over TLS to be enabled via *ORG_HIGHMED_DSF_BPE_MAIL_USESMTPS*", recommendation = "Use docker secret file to configure", example = "/run/secrets/smtp_server_client_certificate_private_key.pem")
 	@Value("${org.highmed.dsf.bpe.mail.client.certificate.private.key:#{null}}")
 	private String mailServerClientCertificatePrivateKeyFile;
 
