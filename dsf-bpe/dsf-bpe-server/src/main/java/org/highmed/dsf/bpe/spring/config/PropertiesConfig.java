@@ -235,7 +235,7 @@ public class PropertiesConfig
 	private char[] mailSmimeSigingKeyStorePassword;
 
 	@Documentation(description = "To enable a test mail being send on startup of the BPE, set to `true`")
-	@Value("${org.highmed.dsf.bpe.mail.sendTestMailOnStartup:true}")
+	@Value("${org.highmed.dsf.bpe.mail.sendTestMailOnStartup:false}")
 	private boolean mailSendTestMailOnStartup;
 
 	@Bean // static in order to initialize before @Configuration classes
