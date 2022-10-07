@@ -182,21 +182,15 @@ public class SmtpMailService implements MailService, InitializingBean
 		if (useSmtps)
 		{
 			properties.put("mail.smtp.ssl.enable", "true");
-			properties.put("mail.smtp.host", mailServerHostname);
-			properties.put("mail.smtp.port", mailServerPort);
-
 			properties.put("mail.transport.protocol", "smtps");
 			properties.put("mail.smtp.socketFactory.fallback", "false");
-
 			properties.put("mail.smtp.ssl.checkserveridentity", "true");
 			properties.put("mail.smtp.ssl.socketFactory",
 					createSslSocketFactory(trustStore, keyStore, keyStorePassword));
 		}
-		else
-		{
-			properties.put("mail.smtp.host", mailServerHostname);
-			properties.put("mail.smtp.port", mailServerPort);
-		}
+
+		properties.put("mail.smtp.host", mailServerHostname);
+		properties.put("mail.smtp.port", mailServerPort);
 
 		return Session.getInstance(properties, authenticator);
 	}
