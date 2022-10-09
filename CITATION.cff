@@ -24,8 +24,8 @@ preferred-citation:
   doi: 10.3233/SHTI210060
   type: proceedings
 title: "HiGHmed Data Sharing Framework (HiGHmed DSF)"
-version: 0.7.0
-date-released: 2022-06-21
+version: 0.8.0
+date-released: 2022-10-11
 url: https://github.com/highmed/highmed-dsf/wiki
 repository-code: https://github.com/highmed/highmed-dsf
 repository-artifact: https://github.com/highmed/highmed-dsf/releases
@@ -95,3 +95,83 @@ references:
     year: 2021
     pages: 111-118
     doi: 10.3233/SHTI210548
+  - type: proceedings
+    authors:
+      - family-names: Prokosch
+        given-names: Hans-Ulrich
+      - family-names: Bahls
+        given-names: Thomas
+      - family-names: Bialke
+        given-names: Martin
+      - family-names: Eils
+        given-names: Jürgen
+      - family-names: Fegeler
+        given-names: Christian
+      - family-names: Gruendner
+        given-names: Julian
+      - family-names: Haarbrandt
+        given-names: Birger
+      - family-names: Hampf
+        given-names: Christopher
+      - family-names: Hoffmann
+        given-names: Wolfgang
+      - family-names: Hund
+        given-names: Hauke
+      - family-names: Kampf
+        given-names: Marvin
+      - family-names: Kapsner
+        given-names: Lorenz A.
+      - family-names: Kasprzak
+        given-names: Piotr
+      - family-names: Kohlbacher
+        given-names: Oliver
+      - family-names: Krefting
+        given-names: Dagmar
+      - family-names: Mang
+        given-names: Jonathan M.
+      - family-names: Marschollek
+        given-names: Michael
+      - family-names: Mate
+        given-names: Sebastian
+      - family-names: Müller
+        given-names: Armin
+      - family-names: Prasser
+        given-names: Fabian
+      - family-names: Sass
+        given-names: Julian
+      - family-names: Semler
+        given-names: Sebastian
+      - family-names: Stenzhorn
+        given-names: Holger
+      - family-names: Thun
+        given-names: Sylvia
+      - family-names: Zenker
+        given-names: Sven
+      - family-names: Eils
+        given-names: Roland
+    title: "The COVID-19 Data Exchange Platform of the German University Medicine"
+    journal: Stud Health Technol Inform
+    volume: 294
+    year: 2022
+    pages: 674-678
+    doi: 10.3233/SHTI220554
+  - type: proceedings
+    authors:
+      - family-names: Wettstein
+        given-names: Reto
+      - family-names: Kussel
+        given-names: Tobias
+      - family-names: Hund
+        given-names: Hauke
+      - family-names: Fegeler
+        given-names: Christian
+      - family-names: Dugas
+        given-names: Martin
+      - family-names: Hamacher
+        given-names: Kay
+    title: "Secure Multi-Party Computation Based Distributed Feasibility Queries – A HiGHmed Use Case"
+    journal: Stud Health Technol Inform
+    volume: 296
+    year: 2022
+    pages: 41-49
+    doi: 10.3233/SHTI220802
