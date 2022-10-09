@@ -37,11 +37,11 @@ public class ValidationSupportWithCustomResources implements IValidationSupport
 		this.context = context;
 
 		if (structureDefinitions != null)
-			structureDefinitions.forEach(s -> structureDefinitionsByUrl.put(s.getUrl(), s));
+			structureDefinitions.forEach(this::addOrReplace);
 		if (codeSystems != null)
-			codeSystems.forEach(s -> codeSystemsByUrl.put(s.getUrl(), s));
+			codeSystems.forEach(this::addOrReplace);
 		if (valueSets != null)
-			valueSets.forEach(s -> valueSetsByUrl.put(s.getUrl(), s));
+			valueSets.forEach(this::addOrReplace);
 	}
 
 	@Override
@@ -75,6 +75,7 @@ public class ValidationSupportWithCustomResources implements IValidationSupport
 	public void addOrReplace(StructureDefinition s)
 	{
 		structureDefinitionsByUrl.put(s.getUrl(), s);
+		structureDefinitionsByUrl.put(s.getUrl() + "|" + s.getVersion(), s);
 	}
 
 	@Override
@@ -92,6 +93,7 @@ public class ValidationSupportWithCustomResources implements IValidationSupport
 	public void addOrReplace(CodeSystem s)
 	{
 		codeSystemsByUrl.put(s.getUrl(), s);
+		codeSystemsByUrl.put(s.getUrl() + "|" + s.getVersion(), s);
 	}
 
 	@Override
@@ -109,5 +111,6 @@ public class ValidationSupportWithCustomResources implements IValidationSupport
 	public void addOrReplace(ValueSet s)
 	{
 		valueSetsByUrl.put(s.getUrl(), s);
+		valueSetsByUrl.put(s.getUrl() + "|" + s.getVersion(), s);
 	}
 }
