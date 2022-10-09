@@ -255,7 +255,7 @@ public class FhirConnectorImpl<R extends Resource> implements FhirConnector, Ini
 		FhirWebserviceClient webserviceClient = clientProvider.getLocalWebserviceClient();
 		ExistingResourceLoader<R> existingResourceLoader = subscriptionHandlerFactory
 				.createExistingResourceLoader(webserviceClient);
-		PingEventResourceHandler pingHandler = subscriptionHandlerFactory
+		PingEventResourceHandler<R> pingHandler = subscriptionHandlerFactory
 				.createPingEventResourceHandler(existingResourceLoader);
 		client.setPingHandler(ping -> pingHandler.onPing(ping, subscriptionIdPart, searchCriteriaQueryParameters));
 	}
