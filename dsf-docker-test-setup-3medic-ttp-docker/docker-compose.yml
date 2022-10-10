@@ -2,7 +2,7 @@ version: '3.8'
 services:
   proxy:
     image: nginx:1.21
-    restart: on-failure
+    restart: "no"
     ports:
       - 127.0.0.1:443:443
     secrets:
@@ -38,7 +38,7 @@ services:
 
   db:
     image: postgres:13
-    restart: on-failure
+    restart: "no"
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres" ]
       interval: 10s
@@ -71,7 +71,7 @@ services:
 
   medic1-fhir:
     image: highmed/fhir
-    restart: on-failure
+    restart: "no"
     ports:
      - 127.0.0.1:5001:5001
     healthcheck:
@@ -128,7 +128,7 @@ services:
 
   medic2-fhir:
     image: highmed/fhir
-    restart: on-failure
+    restart: "no"
     ports:
      - 127.0.0.1:5002:5002
     healthcheck:
@@ -185,7 +185,7 @@ services:
 
   medic3-fhir:
     image: highmed/fhir
-    restart: on-failure
+    restart: "no"
     ports:
      - 127.0.0.1:5003:5003
     healthcheck:
@@ -242,7 +242,7 @@ services:
 
   ttp-fhir:
     image: highmed/fhir
-    restart: on-failure
+    restart: "no"
     ports:
      - 127.0.0.1:5004:5004
     healthcheck:
@@ -301,7 +301,7 @@ services:
 
   medic1-bpe:
     image: highmed/bpe
-    restart: on-failure
+    restart: "no"
     ports:
      - 127.0.0.1:5011:5011
     healthcheck:
@@ -370,7 +370,7 @@ services:
 
   medic2-bpe:
     image: highmed/bpe
-    restart: on-failure
+    restart: "no"
     ports:
      - 127.0.0.1:5012:5012
     healthcheck:
@@ -439,7 +439,7 @@ services:
 
   medic3-bpe:
     image: highmed/bpe
-    restart: on-failure
+    restart: "no"
     ports:
      - 127.0.0.1:5014:5014
     healthcheck:
@@ -513,7 +513,7 @@ services:
 
   ttp-bpe:
     image: highmed/bpe
-    restart: on-failure
+    restart: "no"
     ports:
      - 127.0.0.1:5013:5013
     healthcheck:
@@ -594,6 +594,7 @@ services:
 
   mailhog:
     image: mailhog/mailhog
+    restart: "no"
     ports:
       - 127.0.0.1:8025:8025 # web ui
     networks:

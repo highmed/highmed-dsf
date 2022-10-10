@@ -2,7 +2,7 @@ version: '3.8'
 services:
   proxy:
     image: highmed/fhir_proxy
-    restart: on-failure
+    restart: "no"
     ports:
       - 127.0.0.1:80:80
       - 127.0.0.1:443:443
@@ -29,7 +29,7 @@ services:
 
   app:
     image: highmed/fhir
-    restart: on-failure
+    restart: "no"
 #    ports:
 #      - 127.0.0.1:5001:5001
     healthcheck:
@@ -81,7 +81,7 @@ services:
 
   db:
     image: postgres:13
-    restart: on-failure
+    restart: "no"
 #    ports:
 #      - 127.0.0.1:5432:5432
     healthcheck:
