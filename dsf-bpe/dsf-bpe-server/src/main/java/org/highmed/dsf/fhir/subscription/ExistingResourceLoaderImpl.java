@@ -84,6 +84,7 @@ public class ExistingResourceLoaderImpl<R extends Resource> implements ExistingR
 			{
 				if (resourceClass.isInstance(entry.getResource()))
 				{
+					@SuppressWarnings("unchecked")
 					R resource = (R) entry.getResource();
 					handler.onResource(resource);
 					lastEventTimeIo.writeLastEventTime(resource.getMeta().getLastUpdated());
@@ -93,7 +94,6 @@ public class ExistingResourceLoaderImpl<R extends Resource> implements ExistingR
 					logger.warn("Ignoring resource of type {}",
 							entry.getResource().getClass().getAnnotation(ResourceDef.class).name());
 				}
-
 			}
 			else
 			{

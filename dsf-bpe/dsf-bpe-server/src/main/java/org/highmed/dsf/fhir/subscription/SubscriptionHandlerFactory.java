@@ -9,5 +9,5 @@ public interface SubscriptionHandlerFactory<R extends Resource>
 
 	EventResourceHandler<R> createEventResourceHandler();
 
-	PingEventResourceHandler createPingEventResourceHandler(ExistingResourceLoader<R> existingResourceLoader);
+	PingEventResourceHandler<R> createPingEventResourceHandler(ExistingResourceLoader<R> existingResourceLoader);
 }
