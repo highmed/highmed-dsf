@@ -1,6 +1,9 @@
 package org.highmed.dsf.fhir.subscription;
 
-import org.highmed.dsf.fhir.websocket.LastEventTimeIo;
+import java.sql.SQLException;
+import java.util.Date;
+
+import org.highmed.dsf.bpe.dao.LastEventTimeDao;
 import org.highmed.dsf.fhir.websocket.ResourceHandler;
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
@@ -12,13 +15,14 @@ public class EventResourceHandlerImpl<R extends Resource> implements EventResour
 {
 	private static final Logger logger = LoggerFactory.getLogger(EventResourceHandlerImpl.class);
 
-	private final LastEventTimeIo lastEventTimeIo;
+	private final LastEventTimeDao lastEventTimeDao;
 	private final ResourceHandler<R> handler;
 	private final Class<R> resourceClass;
 
-	public EventResourceHandlerImpl(LastEventTimeIo lastEventTimeIo, ResourceHandler<R> handler, Class<R> resourceClass)
+	public EventResourceHandlerImpl(LastEventTimeDao lastEventTimeDao, ResourceHandler<R> handler,
+			Class<R> resourceClass)
 	{
-		this.lastEventTimeIo = lastEventTimeIo;
+		this.lastEventTimeDao = lastEventTimeDao;
 		this.handler = handler;
 		this.resourceClass = resourceClass;
 	}
@@ -32,11 +36,24 @@ public class EventResourceHandlerImpl<R extends Resource> implements EventResour
 			@SuppressWarnings("unchecked")
 			R cast = (R) resource;
 			handler.onResource(cast);
-			lastEventTimeIo.writeLastEventTime(cast.getMeta().getLastUpdated());
+			writeLastEventTime(cast.getMeta().getLastUpdated());
 		}
 		else
 		{
 			logger.warn("Ignoring resource of type {}", resource.getClass().getAnnotation(ResourceDef.class).name());
+		}
+	}
+
+	private void writeLastEventTime(Date lastUpdated)
+	{
+		try
+		{
+			lastEventTimeDao.writeLastEventTime(lastUpdated);
+		}
+		catch (SQLException e)
+		{
+			logger.warn("Unable to write last event time to db: {} - {}", e.getClass().getName(), e.getMessage());
+			throw new RuntimeException(e);
 		}
 	}
 }

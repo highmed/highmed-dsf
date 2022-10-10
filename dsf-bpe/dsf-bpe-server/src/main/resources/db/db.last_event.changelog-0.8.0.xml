@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+	<changeSet author="hhund" id="db.last_event.changelog-0.8.0">
+		<createTable tableName="last_events">
+			<column name="type" type="TEXT">
+				<constraints nullable="false"/>
+			</column>
+			<column name="last_event" type="TIMESTAMP">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+		
+		<addPrimaryKey tableName="last_events" columnNames="type"/>
+		
+		<addUniqueConstraint tableName="last_events" columnNames="type"/>
+		
+		<sql dbms="postgresql">
+			ALTER TABLE last_events OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE process_states TO ${db.liquibase_user};
+			GRANT SELECT, INSERT, UPDATE ON TABLE last_events TO ${db.server_users_group};
+		</sql>
+	</changeSet>
+
+</databaseChangeLog>

@@ -41,7 +41,6 @@ import org.highmed.dsf.fhir.task.TaskHelperImpl;
 import org.highmed.dsf.fhir.task.TaskSubscriptionHandlerFactory;
 import org.highmed.dsf.fhir.websocket.FhirConnector;
 import org.highmed.dsf.fhir.websocket.FhirConnectorImpl;
-import org.highmed.dsf.fhir.websocket.LastEventTimeIo;
 import org.highmed.dsf.fhir.websocket.ResourceHandler;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Task;
@@ -71,6 +70,9 @@ public class FhirConfig implements InitializingBean
 	private PropertiesConfig propertiesConfig;
 
 	@Autowired
+	private DaoConfig daoConfig;
+
+	@Autowired
 	@Lazy
 	private ProcessEngine processEngine;
 
@@ -90,18 +92,6 @@ public class FhirConfig implements InitializingBean
 	public ReferenceExtractor referenceExtractor()
 	{
 		return new ReferenceExtractorImpl();
-	}
-
-	@Bean
-	public LastEventTimeIo lastEventTimeIoTask()
-	{
-		return new LastEventTimeIo(propertiesConfig.getLastEventTimeFileTask());
-	}
-
-	@Bean
-	public LastEventTimeIo lastEventTimeIoQuestionnaireResponse()
-	{
-		return new LastEventTimeIo(propertiesConfig.getLastEventTimeFileQuestionnaireResponse());
 	}
 
 	@Bean
@@ -204,7 +194,7 @@ public class FhirConfig implements InitializingBean
 	@Bean
 	public SubscriptionHandlerFactory<Task> taskSubscriptionHandlerFactory()
 	{
-		return new TaskSubscriptionHandlerFactory(taskHandler(), lastEventTimeIoTask());
+		return new TaskSubscriptionHandlerFactory(taskHandler(), daoConfig.lastEventTimeDaoTask());
 	}
 
 	@Bean
@@ -225,7 +215,7 @@ public class FhirConfig implements InitializingBean
 	public SubscriptionHandlerFactory<QuestionnaireResponse> questionnaireResponseSubscriptionHandlerFactory()
 	{
 		return new QuestionnaireResponseSubscriptionHandlerFactory(questionnaireResponseHandler(),
-				lastEventTimeIoQuestionnaireResponse());
+				daoConfig.lastEventTimeDaoQuestionnaireResponse());
 	}
 
 	@Bean

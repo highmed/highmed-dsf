@@ -1,8 +1,10 @@
 package org.highmed.dsf.fhir.subscription;
 
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,7 +12,7 @@ import java.util.Optional;
 
 import javax.ws.rs.core.UriBuilder;
 
-import org.highmed.dsf.fhir.websocket.LastEventTimeIo;
+import org.highmed.dsf.bpe.dao.LastEventTimeDao;
 import org.highmed.dsf.fhir.websocket.ResourceHandler;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Bundle;
@@ -31,16 +33,16 @@ public class ExistingResourceLoaderImpl<R extends Resource> implements ExistingR
 	private static final String PARAM_SORT = "_sort";
 	private static final int RESULT_PAGE_COUNT = 20;
 
-	private final LastEventTimeIo lastEventTimeIo;
+	private final LastEventTimeDao lastEventTimeDao;
 	private final FhirWebserviceClient webserviceClient;
 	private final ResourceHandler<R> handler;
 	private final String resourceName;
 	private final Class<R> resourceClass;
 
-	public ExistingResourceLoaderImpl(LastEventTimeIo lastEventTimeIo, ResourceHandler<R> handler,
+	public ExistingResourceLoaderImpl(LastEventTimeDao lastEventTimeDao, ResourceHandler<R> handler,
 			FhirWebserviceClient webserviceClient, String resourceName, Class<R> resourceClass)
 	{
-		this.lastEventTimeIo = lastEventTimeIo;
+		this.lastEventTimeDao = lastEventTimeDao;
 		this.handler = handler;
 		this.webserviceClient = webserviceClient;
 		this.resourceName = resourceName;
@@ -57,7 +59,7 @@ public class ExistingResourceLoaderImpl<R extends Resource> implements ExistingR
 	private boolean doReadExistingResources(Map<String, List<String>> searchCriteriaQueryParameters)
 	{
 		Map<String, List<String>> queryParams = new HashMap<>(searchCriteriaQueryParameters);
-		Optional<LocalDateTime> readLastEventTime = lastEventTimeIo.readLastEventTime();
+		Optional<LocalDateTime> readLastEventTime = readLastEventTime();
 
 		readLastEventTime.ifPresent(lastEventTime -> queryParams.put(PARAM_LAST_UPDATED,
 				Collections.singletonList("gt" + lastEventTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))));
@@ -87,7 +89,7 @@ public class ExistingResourceLoaderImpl<R extends Resource> implements ExistingR
 					@SuppressWarnings("unchecked")
 					R resource = (R) entry.getResource();
 					handler.onResource(resource);
-					lastEventTimeIo.writeLastEventTime(resource.getMeta().getLastUpdated());
+					writeLastEventTime(resource.getMeta().getLastUpdated());
 				}
 				else
 				{
@@ -102,5 +104,31 @@ public class ExistingResourceLoaderImpl<R extends Resource> implements ExistingR
 		}
 
 		return true;
+	}
+
+	private Optional<LocalDateTime> readLastEventTime()
+	{
+		try
+		{
+			return lastEventTimeDao.readLastEventTime();
+		}
+		catch (SQLException e)
+		{
+			logger.warn("Unable to read last event time from db: {} - {}", e.getClass().getName(), e.getMessage());
+			throw new RuntimeException(e);
+		}
+	}
+
+	private void writeLastEventTime(Date lastUpdated)
+	{
+		try
+		{
+			lastEventTimeDao.writeLastEventTime(lastUpdated);
+		}
+		catch (SQLException e)
+		{
+			logger.warn("Unable to write last event time to db: {} - {}", e.getClass().getName(), e.getMessage());
+			throw new RuntimeException(e);
+		}
 	}
 }
