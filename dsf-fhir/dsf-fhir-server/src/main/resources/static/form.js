@@ -149,9 +149,9 @@ function validateUrl(rowElement, errorListElement, value, errors, id) {
     try {
         new URL(value);
         removeError(rowElement, errorListElement)
-        return {reference: value}
+        return value
     } catch (_) {
-        addError(rowElement, errorListElement, errors, id, "Value is not a reference")
+        addError(rowElement, errorListElement, errors, id, "Value is not a url")
         return null
     }
 }
