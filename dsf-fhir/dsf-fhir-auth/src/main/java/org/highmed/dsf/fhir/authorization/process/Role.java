@@ -118,7 +118,7 @@ public class Role implements Recipient, Requester
 				.setSystem(ProcessAuthorizationHelper.ORGANIZATION_IDENTIFIER_SYSTEM).setValue(consortiumIdentifier);
 		Extension consortiumExt = new Extension(
 				ProcessAuthorizationHelper.EXTENSION_PROCESS_AUTHORIZATION_CONSORTIUM_ROLE_CONSORTIUM)
-						.setValue(consortium);
+				.setValue(consortium);
 
 		Coding role = new Coding(roleSystem, roleCode, null);
 		Extension roleExt = new Extension(
