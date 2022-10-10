@@ -29,7 +29,6 @@ dsf-fhir/dsf-fhir-validation/src/main/resources/fhir/bundle.xml
 ###
 # dsf-docker-test-setup ignores
 ###
-dsf-docker-test-setup/bpe/last_event/time.file
 dsf-docker-test-setup/bpe/log/*.log
 dsf-docker-test-setup/bpe/log/*.log.gz
 dsf-docker-test-setup/bpe/plugin/*.jar
@@ -56,7 +55,6 @@ dsf-docker-test-setup-3medic-ttp/**/fhir/.env
 ###
 # dsf-docker-test-setup-3medic-ttp-docker ignores
 ###
-dsf-docker-test-setup-3medic-ttp-docker/**/bpe/last_event/*.file
 dsf-docker-test-setup-3medic-ttp-docker/**/bpe/log/*.log
 dsf-docker-test-setup-3medic-ttp-docker/**/bpe/log/*.log.gz
 dsf-docker-test-setup-3medic-ttp-docker/**/bpe/plugin/*.jar
