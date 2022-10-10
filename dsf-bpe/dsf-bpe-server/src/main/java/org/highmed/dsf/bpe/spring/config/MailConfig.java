@@ -17,6 +17,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.Filter.Result;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.filter.ThresholdFilter;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.pkcs.PKCSException;
 import org.highmed.dsf.bpe.service.LoggingMailService;
@@ -99,7 +105,8 @@ public class MailConfig implements InitializingBean
 
 		return new SmtpMailService(fromAddress, toAddresses, toAddressesCc, replyToAddresses, useSmtps,
 				mailServerHostname, mailServerPort, mailServerUsername, mailServerPassword, trustStore, keyStore,
-				keyStorePassword, signStore, propertiesConfig.getMailSmimeSigingKeyStorePassword());
+				keyStorePassword, signStore, propertiesConfig.getMailSmimeSigingKeyStorePassword(),
+				propertiesConfig.getSendMailOnErrorLogEvent(), propertiesConfig.getMailOnErrorLogEventBufferSize());
 	}
 
 	private KeyStore toTrustStore(String trustStoreFile)
@@ -163,10 +170,10 @@ public class MailConfig implements InitializingBean
 		{
 			logger.info(
 					"Mail client config: {fromAddress: {}, toAddresses: {}, toAddressesCc: {}, replyToAddresses: {},"
-							+ " useSmtps {}, mailServerHostname {}, mailServerPort {}, mailServerUsername {},"
-							+ " mailServerPassword {}, trustStore {}, clientCertificate {}, clientCertificatePrivateKey {},"
-							+ " clientCertificatePrivateKeyPassword {}, smimeSigingKeyStore {}, smimeSigingKeyStorePassword{},"
-							+ " sendTestMailOnStartup {}}",
+							+ " useSmtps: {}, mailServerHostname: {}, mailServerPort: {}, mailServerUsername: {},"
+							+ " mailServerPassword: {}, trustStore: {}, clientCertificate: {}, clientCertificatePrivateKey: {},"
+							+ " clientCertificatePrivateKeyPassword: {}, smimeSigingKeyStore: {}, smimeSigingKeyStorePassword: {},"
+							+ " sendTestMailOnStartup: {}, sendMailOnErrorLogEvent: {}, mailOnErrorLogEventBufferSize: {}}",
 					propertiesConfig.getMailFromAddress(), propertiesConfig.getMailToAddresses(),
 					propertiesConfig.getMailToAddressesCc(), propertiesConfig.getMailReplyToAddresses(),
 					propertiesConfig.getMailUseSmtps(), propertiesConfig.getMailServerHostname(),
@@ -178,7 +185,8 @@ public class MailConfig implements InitializingBean
 					propertiesConfig.getMailServerClientCertificatePrivateKeyFilePassword() != null ? "***" : "null",
 					propertiesConfig.getMailSmimeSigingKeyStoreFile(),
 					propertiesConfig.getMailSmimeSigingKeyStorePassword() != null ? "***" : "null",
-					propertiesConfig.getMailSendTestMailOnStartup());
+					propertiesConfig.getSendTestMailOnStartup(), propertiesConfig.getSendMailOnErrorLogEvent(),
+					propertiesConfig.getMailOnErrorLogEventBufferSize());
 		}
 		else
 		{
@@ -186,24 +194,36 @@ public class MailConfig implements InitializingBean
 					"Mail client config: SMTP client not configured, sending mails to debug log, configure at least SMTP server host and port");
 		}
 
+		if (isConfigured())
+		{
+			Appender appender = ((SmtpMailService) mailService()).getLog4jAppender();
+			if (appender != null)
+			{
+				appender.start();
+
+				LoggerContext context = (LoggerContext) LogManager.getContext(false);
+				context.getConfiguration().getRootLogger().addAppender(appender, Level.INFO,
+						ThresholdFilter.createFilter(Level.INFO, Result.ACCEPT, Result.DENY));
+			}
+		}
 	}
 
 	@EventListener({ ContextRefreshedEvent.class })
 	public void onContextRefreshedEvent(ContextRefreshedEvent event) throws IOException
 	{
-		if (propertiesConfig.getMailSendTestMailOnStartup())
+		if (propertiesConfig.getSendTestMailOnStartup())
 		{
+			DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+
 			BuildInfoReader buildInfoReader = buildInfoReaderConfig.buildInfoReader();
-			mailService().send("DSF Test Mail",
-					"DSF startup test mail from BPE {" + "artifact: " + buildInfoReader.getProjectArtifact()
-							+ ", version: " + buildInfoReader.getProjectVersion() + ", build: "
+			mailService().send("DSF BPE Test Mail",
+					"BPE startup test mail\n\nArtifact: " + buildInfoReader.getProjectArtifact() + "\nVersion: "
+							+ buildInfoReader.getProjectVersion() + "\nBuild: "
 							+ buildInfoReader.getBuildDate().withZoneSameInstant(ZoneId.systemDefault())
-									.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-							+ ", branch: " + buildInfoReader.getBuildBranch() + ", commit: "
-							+ buildInfoReader.getBuildNumber() + "} send on "
-							+ ZonedDateTime.now().withZoneSameInstant(ZoneId.systemDefault())
-									.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-							+ ".");
+									.format(formatter)
+							+ "\nBranch: " + buildInfoReader.getBuildBranch() + "\nCommit: "
+							+ buildInfoReader.getBuildNumber() + "\n\nSend on "
+							+ ZonedDateTime.now().withZoneSameInstant(ZoneId.systemDefault()).format(formatter));
 		}
 	}
 }

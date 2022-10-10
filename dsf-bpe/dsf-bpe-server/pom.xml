@@ -146,15 +146,14 @@
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcmail-jdk15on</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>de.hs-heilbronn.mi</groupId>
+			<artifactId>log4j2-utils</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>de.hs-heilbronn.mi</groupId>
 			<artifactId>db-test-utils</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>de.hs-heilbronn.mi</groupId>
-			<artifactId>log4j2-utils</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

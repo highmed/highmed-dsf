@@ -1,6 +1,7 @@
 package org.highmed.dsf.bpe.service;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.security.Key;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
@@ -15,6 +16,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
@@ -36,6 +38,18 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.net.ssl.SSLSocketFactory;
 
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.StringLayout;
+import org.apache.logging.log4j.core.appender.AbstractAppender;
+import org.apache.logging.log4j.core.appender.AbstractManager;
+import org.apache.logging.log4j.core.filter.ThresholdFilter;
+import org.apache.logging.log4j.core.layout.ByteBufferDestination;
+import org.apache.logging.log4j.core.layout.HtmlLayout;
+import org.apache.logging.log4j.core.net.MailManager;
+import org.apache.logging.log4j.core.net.MailManager.FactoryData;
+import org.apache.logging.log4j.core.net.MailManagerFactory;
+import org.apache.logging.log4j.core.net.SmtpManager;
+import org.apache.logging.log4j.util.Strings;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.smime.SMIMECapabilitiesAttribute;
@@ -59,6 +73,104 @@ public class SmtpMailService implements MailService, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(SmtpMailService.class);
 
+	private static final class Layout implements StringLayout
+	{
+		HtmlLayout delegate = HtmlLayout.newBuilder().setDatePattern("yyyy-MM-dd HH:mm:ss.nnnn").build();
+
+		@Override
+		public byte[] getFooter()
+		{
+			StringBuilder sbuf = new StringBuilder();
+			sbuf.append("</table>").append(Strings.LINE_SEPARATOR);
+			sbuf.append("<br>").append(Strings.LINE_SEPARATOR);
+			sbuf.append("For more details see debug log at <i>/opt/bpe/log/bpe.log</i>").append(Strings.LINE_SEPARATOR);
+			sbuf.append("<br>").append(Strings.LINE_SEPARATOR);
+			sbuf.append("</body></html>").append(Strings.LINE_SEPARATOR);
+
+			return sbuf.toString().getBytes(getCharset());
+		}
+
+		@Override
+		public byte[] getHeader()
+		{
+			return delegate.getHeader();
+		}
+
+		@Override
+		public byte[] toByteArray(LogEvent event)
+		{
+			return delegate.toByteArray(event);
+		}
+
+		@Override
+		public String getContentType()
+		{
+			return delegate.getContentType();
+		}
+
+		@Override
+		public Map<String, String> getContentFormat()
+		{
+			return delegate.getContentFormat();
+		}
+
+		@Override
+		public void encode(LogEvent source, ByteBufferDestination destination)
+		{
+			delegate.encode(source, destination);
+		}
+
+		@Override
+		public Charset getCharset()
+		{
+			return delegate.getCharset();
+		}
+
+		@Override
+		public String toSerializable(LogEvent event)
+		{
+			return delegate.toSerializable(event);
+		}
+	}
+
+	private static final class Log4jAppender extends AbstractAppender
+	{
+		private final MailManager manager;
+
+		private Log4jAppender(Session session, MimeMessage message, String subject, int messageBufferSize)
+		{
+			super("SmtpMailService.Log4jAppender", ThresholdFilter.createFilter(null, null, null), new Layout(), false,
+					null);
+
+			MailManagerFactory factory = (name, data) ->
+			{
+				return new SmtpManager(name, session, message, data)
+				{
+				};
+			};
+			FactoryData data = new FactoryData(null, null, null, null, null, null, event -> subject, null, null, 0,
+					null, null, false, messageBufferSize, null, null);
+			manager = AbstractManager.getManager("SmtpMailService.Log4jAppender.Manager", factory, data);
+		}
+
+		@Override
+		public boolean isFiltered(LogEvent event)
+		{
+			boolean filtered = super.isFiltered(event);
+
+			if (filtered)
+				manager.add(event);
+
+			return filtered;
+		}
+
+		@Override
+		public void append(LogEvent event)
+		{
+			manager.sendEvents(getLayout(), event);
+		}
+	}
+
 	private final InternetAddress fromAddress;
 	private final InternetAddress[] toAddresses;
 	private final InternetAddress[] toAddressesCc;
@@ -67,8 +179,10 @@ public class SmtpMailService implements MailService, InitializingBean
 	private final Session session;
 	private final SMIMESignedGenerator smimeSignedGenerator;
 
+	private final Log4jAppender log4jAppender;
+
 	/**
-	 * SMTP, non authentication, mails not signed
+	 * SMTP, non authentication, mails not signed, no mails on error log events
 	 *
 	 * @param fromAddress
 	 *            not <code>null</code>
@@ -82,7 +196,7 @@ public class SmtpMailService implements MailService, InitializingBean
 	public SmtpMailService(String fromAddress, List<String> toAddresses, String mailServerHostname, int mailServerPort)
 	{
 		this(fromAddress, toAddresses, null, null, false, mailServerHostname, mailServerPort, null, null, null, null,
-				null, null, null);
+				null, null, null, false, 0);
 	}
 
 	/**
@@ -98,7 +212,7 @@ public class SmtpMailService implements MailService, InitializingBean
 	 * @param mailServerHostname
 	 *            not <code>null</code>
 	 * @param mailServerPort
-	 *            <code>&gt;0</code>
+	 *            <code>&gt; 0</code>
 	 * @param mailServerUsername
 	 *            may be <code>null</code>
 	 * @param mailServerPassword
@@ -111,11 +225,16 @@ public class SmtpMailService implements MailService, InitializingBean
 	 * @param signStore
 	 *            may be <code>null</code>
 	 * @param signStorePassword
+	 * @param mailOnErrorLogEvent
+	 *            <code>true</code> if mail should be send for error log events
+	 * @param mailOnErrorLogEventBufferSize
+	 *            <code>&gt;= 0</code>
 	 */
 	public SmtpMailService(String fromAddress, List<String> toAddresses, List<String> toAddressesCc,
 			List<String> replyToAddresses, boolean useSmtps, String mailServerHostname, int mailServerPort,
 			String mailServerUsername, char[] mailServerPassword, KeyStore trustStore, KeyStore keyStore,
-			char[] keyStorePassword, KeyStore signStore, char[] signStorePassword)
+			char[] keyStorePassword, KeyStore signStore, char[] signStorePassword, boolean mailOnErrorLogEvent,
+			int mailOnErrorLogEventBufferSize)
 	{
 		this.fromAddress = toInternetAddress(fromAddress).orElse(null);
 		this.toAddresses = toAddresses == null ? new InternetAddress[0]
@@ -129,6 +248,10 @@ public class SmtpMailService implements MailService, InitializingBean
 				trustStore, keyStore, keyStorePassword);
 
 		smimeSignedGenerator = createSmimeSignedGenerator(fromAddress, signStore, signStorePassword);
+
+		log4jAppender = !mailOnErrorLogEvent ? null
+				: new Log4jAppender(session, createMimeMessage("DSF BPE Error", null), "DSF BPE Error",
+						mailOnErrorLogEventBufferSize);
 	}
 
 	private Optional<InternetAddress> toInternetAddress(String fromAddress)
@@ -337,7 +460,8 @@ public class SmtpMailService implements MailService, InitializingBean
 			mimeMessage.setRecipients(RecipientType.CC, toAddressesCc);
 			mimeMessage.setReplyTo(replyToAddresses);
 			mimeMessage.setSubject(subject);
-			mimeMessage.setContent(mimeMultipart);
+			if (mimeMultipart != null)
+				mimeMessage.setContent(mimeMultipart);
 			mimeMessage.saveChanges();
 
 			return mimeMessage;
@@ -379,7 +503,8 @@ public class SmtpMailService implements MailService, InitializingBean
 	{
 		MimeMessage message = createMimeMessage(subject, signMessage(body));
 
-		messageModifier.accept(message);
+		if (messageModifier != null)
+			messageModifier.accept(message);
 
 		try
 		{
@@ -390,5 +515,10 @@ public class SmtpMailService implements MailService, InitializingBean
 			logger.warn("Unable to send message: {} - {}", e.getClass().getName(), e.getMessage());
 			throw new RuntimeException(e);
 		}
+	}
+
+	public Log4jAppender getLog4jAppender()
+	{
+		return log4jAppender;
 	}
 }

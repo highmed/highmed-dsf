@@ -234,9 +234,17 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.bpe.mail.smime.p12Keystore.password:#{null}}")
 	private char[] mailSmimeSigingKeyStorePassword;
 
-	@Documentation(description = "To enable a test mail being send on startup of the BPE, set to `true`")
+	@Documentation(description = "To enable a test mail being send on startup of the BPE, set to `true`. Requires SMTP server to be configured.")
 	@Value("${org.highmed.dsf.bpe.mail.sendTestMailOnStartup:false}")
-	private boolean mailSendTestMailOnStartup;
+	private boolean sendTestMailOnStartup;
+
+	@Documentation(description = "To enable mails being send for every ERROR logged, set to `true`. Requires SMTP server to be configured.")
+	@Value("${org.highmed.dsf.bpe.mail.sendMailOnErrorLogEvent:false}")
+	private boolean sendMailOnErrorLogEvent;
+
+	@Documentation(description = "Number of previous INFO, WARN log messages to include in ERROR log event mails (>=0). Requires send mail on ERROR log event option to be enabled.")
+	@Value("${org.highmed.dsf.bpe.mail.mailOnErrorLogEventBufferSize:4}")
+	private int mailOnErrorLogEventBufferSize;
 
 	@Bean // static in order to initialize before @Configuration classes
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer(
@@ -517,8 +525,18 @@ public class PropertiesConfig
 		return mailSmimeSigingKeyStorePassword;
 	}
 
-	public boolean getMailSendTestMailOnStartup()
+	public boolean getSendTestMailOnStartup()
 	{
-		return mailSendTestMailOnStartup;
+		return sendTestMailOnStartup;
+	}
+
+	public boolean getSendMailOnErrorLogEvent()
+	{
+		return sendMailOnErrorLogEvent;
+	}
+
+	public int getMailOnErrorLogEventBufferSize()
+	{
+		return mailOnErrorLogEventBufferSize;
 	}
 }
