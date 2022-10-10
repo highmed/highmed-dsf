@@ -17,6 +17,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.TimeType;
 import org.hl7.fhir.r4.model.Type;
+import org.hl7.fhir.r4.model.UriType;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -192,6 +193,12 @@ public class QuestionnaireResponseHtmlFhirAdapter extends HtmlFhirAdapter<Questi
 			out.write("<input type=\"datetime-local\" id=\"" + linkId + "\" name=\"" + linkId + "\" "
 					+ (isCompleted ? "value=\"" + dateTime + "\"" : "placeholder=\"yyyy.MM.dd hh:mm:ss\"")
 					+ "></input>\n");
+		}
+		else if (type instanceof UriType)
+		{
+			String value = ((UriType) type).getValue();
+			out.write("<input type=\"url\" id=\"" + linkId + "\" name=\"" + linkId + "\" "
+					+ (isCompleted ? "value=\"" + value + "\"" : "placeholder=\"" + value + "\"") + "></input>\n");
 		}
 		else if (type instanceof Reference)
 		{

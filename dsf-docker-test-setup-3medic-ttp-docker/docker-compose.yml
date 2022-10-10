@@ -349,6 +349,11 @@ services:
       ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_USERNAME: medic1_camunda_server_user
       ORG_HIGHMED_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_MeDIC_1
       ORG_HIGHMED_DSF_BPE_FHIR_SERVER_BASE_URL: https://medic1-docker/fhir
+      ORG_HIGHMED_DSF_BPE_MAIL_HOST: mailhog
+      ORG_HIGHMED_DSF_BPE_MAIL_PORT: 1025
+      ORG_HIGHMED_DSF_BPE_MAIL_FROMADDRESS: bpe@medic1-docker
+      ORG_HIGHMED_DSF_BPE_MAIL_TOADDRESSES: bpe@medic1-docker
+      #ORG_HIGHMED_DSF_BPE_MAIL_SENDTESTMAILONSTARTUP: 'false' # default no test mail on startup
       ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: highmedorg_computeFeasibility/0.6.0,highmedorg_computeDataSharing/0.6.0,highmedorg_requestUpdateResources/0.6.0,highmedorg_updateAllowList/0.6.0
       # property org.highmed.dsf.bpe.allow.list.organization should only be set for testing, do not configure property in production, potential security risk
       ORG_HIGHMED_DSF_BPE_ALLOW_LIST_ORGANIZATION: Test_TTP
@@ -410,6 +415,11 @@ services:
       ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_USERNAME: medic2_camunda_server_user
       ORG_HIGHMED_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_MeDIC_2
       ORG_HIGHMED_DSF_BPE_FHIR_SERVER_BASE_URL: https://medic2-docker/fhir
+      ORG_HIGHMED_DSF_BPE_MAIL_HOST: mailhog
+      ORG_HIGHMED_DSF_BPE_MAIL_PORT: 1025
+      ORG_HIGHMED_DSF_BPE_MAIL_FROMADDRESS: bpe@medic2-docker
+      ORG_HIGHMED_DSF_BPE_MAIL_TOADDRESSES: bpe@medic2-docker
+      #ORG_HIGHMED_DSF_BPE_MAIL_SENDTESTMAILONSTARTUP: 'false' # default no test mail on startup
       ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: highmedorg_computeFeasibility/0.6.0, highmedorg_computeDataSharing/0.6.0, highmedorg_requestUpdateResources/0.6.0, highmedorg_updateAllowList/0.6.0
       # property org.highmed.dsf.bpe.allow.list.organization should only be set for testing, do not configure property in production, potential security risk
       ORG_HIGHMED_DSF_BPE_ALLOW_LIST_ORGANIZATION: Test_TTP
@@ -471,6 +481,11 @@ services:
       ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_USERNAME: medic3_camunda_server_user
       ORG_HIGHMED_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_MeDIC_3
       ORG_HIGHMED_DSF_BPE_FHIR_SERVER_BASE_URL: https://medic3-docker/fhir
+      ORG_HIGHMED_DSF_BPE_MAIL_HOST: mailhog
+      ORG_HIGHMED_DSF_BPE_MAIL_PORT: 1025
+      ORG_HIGHMED_DSF_BPE_MAIL_FROMADDRESS: bpe@medic3-docker
+      ORG_HIGHMED_DSF_BPE_MAIL_TOADDRESSES: bpe@medic3-docker
+      #ORG_HIGHMED_DSF_BPE_MAIL_SENDTESTMAILONSTARTUP: 'false' # default no test mail on startup
       ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: >
         highmedorg_computeFeasibility/0.6.0,
         highmedorg_computeDataSharing/0.6.0,
@@ -485,6 +500,7 @@ services:
     depends_on:
       - db
       - medic3-fhir
+      - mailhog
 
   ttp-bpe:
     image: highmed/bpe
@@ -536,6 +552,12 @@ services:
       ORG_HIGHMED_DSF_BPE_DB_USER_CAMUNDA_USERNAME: ttp_camunda_server_user
       ORG_HIGHMED_DSF_BPE_FHIR_SERVER_ORGANIZATION_IDENTIFIER_VALUE: Test_TTP
       ORG_HIGHMED_DSF_BPE_FHIR_SERVER_BASE_URL: https://ttp-docker/fhir
+      ORG_HIGHMED_DSF_BPE_MAIL_HOST: mailhog
+      ORG_HIGHMED_DSF_BPE_MAIL_PORT: 1025
+      ORG_HIGHMED_DSF_BPE_MAIL_FROMADDRESS: bpe@ttp-docker
+      ORG_HIGHMED_DSF_BPE_MAIL_TOADDRESSES: bpe@ttp-docker
+      ORG_HIGHMED_DSF_BPE_MAIL_SENDTESTMAILONSTARTUP: 'true'
+      ORG_HIGHMED_DSF_BPE_MAIL_SENDMAILONERRORLOGEVENT: 'true'
       ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: |
         highmedorg_executeUpdateResources/0.6.0
         highmedorg_downloadAllowList/0.6.0
@@ -556,6 +578,14 @@ services:
     depends_on:
       - db
       - ttp-fhir
+      - mailhog
+
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - 127.0.0.1:8025:8025 # web ui
+    networks:
+      internet:
 
 secrets:
   proxy_certificate_and_int_cas.pem:

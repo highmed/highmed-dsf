@@ -79,6 +79,12 @@ public class QuestionnaireProfileTest
 	}
 
 	@Test
+	public void testQuestionnaireValidTypeUrl()
+	{
+		testQuestionnaireValidType(Questionnaire.QuestionnaireItemType.URL);
+	}
+
+	@Test
 	public void testQuestionnaireValidTypeReference()
 	{
 		testQuestionnaireValidType(Questionnaire.QuestionnaireItemType.REFERENCE);
@@ -112,12 +118,6 @@ public class QuestionnaireProfileTest
 	public void testQuestionnaireInvalidTypeQuestion()
 	{
 		testQuestionnaireInvalidType(Questionnaire.QuestionnaireItemType.QUESTION);
-	}
-
-	@Test
-	public void testQuestionnaireInvalidTypeUrl()
-	{
-		testQuestionnaireInvalidType(Questionnaire.QuestionnaireItemType.URL);
 	}
 
 	@Test

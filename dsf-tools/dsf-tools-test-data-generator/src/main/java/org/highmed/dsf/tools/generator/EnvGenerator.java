@@ -71,7 +71,7 @@ public class EnvGenerator
 				"medic1-client", "Webbrowser Test User").collect(Collectors.toList());
 		List<String> confMedic1UserThumbprintsPermanentDelete = filterAndMapToThumbprint(
 				clientCertificateFilesByCommonName, "medic1-client", "Webbrowser Test User")
-						.collect(Collectors.toList());
+				.collect(Collectors.toList());
 
 		String bundleMedic2UserThumbprint = filterAndMapToThumbprint(clientCertificateFilesByCommonName,
 				"medic2-client").findFirst().get();
@@ -79,7 +79,7 @@ public class EnvGenerator
 				"medic2-client", "Webbrowser Test User").collect(Collectors.toList());
 		List<String> confMedic2UserThumbprintsPermanentDelete = filterAndMapToThumbprint(
 				clientCertificateFilesByCommonName, "medic2-client", "Webbrowser Test User")
-						.collect(Collectors.toList());
+				.collect(Collectors.toList());
 
 		String bundleMedic3UserThumbprint = filterAndMapToThumbprint(clientCertificateFilesByCommonName,
 				"medic3-client").findFirst().get();
@@ -87,7 +87,7 @@ public class EnvGenerator
 				"medic3-client", "Webbrowser Test User").collect(Collectors.toList());
 		List<String> confMedic3UserThumbprintsPermanentDelete = filterAndMapToThumbprint(
 				clientCertificateFilesByCommonName, "medic3-client", "Webbrowser Test User")
-						.collect(Collectors.toList());
+				.collect(Collectors.toList());
 
 		String bundleTtpUserThumbprint = filterAndMapToThumbprint(clientCertificateFilesByCommonName, "ttp-client")
 				.findFirst().get();
@@ -152,7 +152,7 @@ public class EnvGenerator
 				"medic1-client", "Webbrowser Test User").collect(Collectors.toList());
 		List<String> confMedic1UserThumbprintsPermanentDelete = filterAndMapToThumbprint(
 				clientCertificateFilesByCommonName, "medic1-client", "Webbrowser Test User")
-						.collect(Collectors.toList());
+				.collect(Collectors.toList());
 
 		String bundleMedic2UserThumbprint = filterAndMapToThumbprint(clientCertificateFilesByCommonName,
 				"medic2-client").findFirst().get();
@@ -160,7 +160,7 @@ public class EnvGenerator
 				"medic2-client", "Webbrowser Test User").collect(Collectors.toList());
 		List<String> confMedic2UserThumbprintsPermanentDelete = filterAndMapToThumbprint(
 				clientCertificateFilesByCommonName, "medic2-client", "Webbrowser Test User")
-						.collect(Collectors.toList());
+				.collect(Collectors.toList());
 
 		String bundleMedic3UserThumbprint = filterAndMapToThumbprint(clientCertificateFilesByCommonName,
 				"medic3-client").findFirst().get();
@@ -168,7 +168,7 @@ public class EnvGenerator
 				"medic3-client", "Webbrowser Test User").collect(Collectors.toList());
 		List<String> confMedic3UserThumbprintsPermanentDelete = filterAndMapToThumbprint(
 				clientCertificateFilesByCommonName, "medic3-client", "Webbrowser Test User")
-						.collect(Collectors.toList());
+				.collect(Collectors.toList());
 
 		String bundleTtpUserThumbprint = filterAndMapToThumbprint(clientCertificateFilesByCommonName, "ttp-client")
 				.findFirst().get();

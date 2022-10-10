@@ -15,6 +15,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.TimeType;
 import org.hl7.fhir.r4.model.Type;
+import org.hl7.fhir.r4.model.UriType;
 
 public class QuestionnaireResponseHelperImpl implements QuestionnaireResponseHelper
 {
@@ -76,6 +77,8 @@ public class QuestionnaireResponseHelperImpl implements QuestionnaireResponseHel
 				return new TimeType("00:00:00");
 			case DATETIME:
 				return new DateTimeType("1900-01-01T00:00:00.000Z");
+			case URL:
+				return new UriType("http://example.org/foo");
 			case REFERENCE:
 				return new Reference("http://example.org/fhir/Placeholder/id");
 			default:

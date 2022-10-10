@@ -48,12 +48,12 @@ public class QuestionnaireResponseHandler implements ResourceHandler<Questionnai
 			String userType = questionnaireResponse.getAuthor().getType();
 			String businessKey = getStringValueFromItems(items, CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY,
 					questionnaireResponseId)
-							.orElseThrow(() -> new RuntimeException(
-									"Missing linkId " + CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY));
+					.orElseThrow(() -> new RuntimeException(
+							"Missing linkId " + CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY));
 			String taskId = getStringValueFromItems(items, CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID,
 					questionnaireResponseId)
-							.orElseThrow(() -> new RuntimeException(
-									"Missing linkId " + CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID));
+					.orElseThrow(() -> new RuntimeException(
+							"Missing linkId " + CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID));
 
 			logger.info("User task '{}' for Questionnaire '{}' completed [userTaskId: {}, businessKey: {}, user: {}]",
 					questionnaireResponseId, questionnaire, taskId, businessKey, user + "|" + userType);
