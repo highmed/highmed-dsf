@@ -21,6 +21,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.TimeType;
 import org.hl7.fhir.r4.model.Type;
+import org.hl7.fhir.r4.model.UriType;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -81,6 +82,12 @@ public class QuestionnaireResponseProfileTest
 	public void testQuestionnaireResponseValidTypeDateTime()
 	{
 		testQuestionnaireResponseValidType(new DateTimeType("1900-01-01T00:00:00.000Z"));
+	}
+
+	@Test
+	public void testQuestionnaireResponseValidTypeUri()
+	{
+		testQuestionnaireResponseValidType(new UriType("http://example.de/foo"));
 	}
 
 	@Test

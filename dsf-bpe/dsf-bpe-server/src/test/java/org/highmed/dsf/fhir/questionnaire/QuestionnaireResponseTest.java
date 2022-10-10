@@ -16,6 +16,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.TimeType;
 import org.hl7.fhir.r4.model.Type;
+import org.hl7.fhir.r4.model.UriType;
 import org.junit.Test;
 
 public class QuestionnaireResponseTest
@@ -148,6 +149,19 @@ public class QuestionnaireResponseTest
 	}
 
 	@Test
+	public void testQuestionTypeUrlToAnswerType()
+	{
+		QuestionnaireResponseHelper qrh = new QuestionnaireResponseHelperImpl();
+
+		Questionnaire.QuestionnaireItemComponent question = new Questionnaire.QuestionnaireItemComponent()
+				.setType(Questionnaire.QuestionnaireItemType.URL);
+
+		Type type = qrh.transformQuestionTypeToAnswerType(question);
+
+		assertTrue(type instanceof UriType);
+	}
+
+	@Test
 	public void testQuestionTypeReferenceToAnswerType()
 	{
 		QuestionnaireResponseHelper qrh = new QuestionnaireResponseHelperImpl();
@@ -158,17 +172,6 @@ public class QuestionnaireResponseTest
 		Type type = qrh.transformQuestionTypeToAnswerType(question);
 
 		assertTrue(type instanceof Reference);
-	}
-
-	@Test(expected = RuntimeException.class)
-	public void testQuestionTypeUrlToAnswerType()
-	{
-		QuestionnaireResponseHelper qrh = new QuestionnaireResponseHelperImpl();
-
-		Questionnaire.QuestionnaireItemComponent question = new Questionnaire.QuestionnaireItemComponent()
-				.setType(Questionnaire.QuestionnaireItemType.URL);
-
-		qrh.transformQuestionTypeToAnswerType(question);
 	}
 
 	@Test(expected = RuntimeException.class)

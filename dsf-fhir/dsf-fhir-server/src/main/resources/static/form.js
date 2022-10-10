@@ -47,6 +47,8 @@ function readAndValidateValue(id, answerType, errors) {
         return validateTime(rowElement, errorListElement, value, errors, id)
     } else if (answerType === 'valueDateTime') {
         return validateDateTime(rowElement, errorListElement, value, errors, id)
+    } else if (answerType === 'valueUri') {
+        return validateUrl(rowElement, errorListElement, value, errors, id)
     } else if (answerType === 'valueReference') {
         return validateReference(rowElement, errorListElement, value, errors, id)
     } else if (answerType === 'valueBoolean') {
@@ -129,6 +131,19 @@ function validateDateTime(rowElement, errorListElement, value, errors, id) {
 }
 
 function validateReference(rowElement, errorListElement, value, errors, id) {
+    validateString(rowElement, errorListElement, value, errors, id)
+
+    try {
+        new URL(value);
+        removeError(rowElement, errorListElement)
+        return {reference: value}
+    } catch (_) {
+        addError(rowElement, errorListElement, errors, id, "Value is not a reference")
+        return null
+    }
+}
+
+function validateUrl(rowElement, errorListElement, value, errors, id) {
     validateString(rowElement, errorListElement, value, errors, id)
 
     try {

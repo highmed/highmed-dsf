@@ -49,7 +49,7 @@
 				<severity value="error"/>
 				<human value="Constraines available types from ValueSet 'http://hl7.org/fhir/item-type'"/>
 				<expression
-						value="(type = 'string') or (type = 'text') or (type = 'integer') or (type = 'decimal') or (type = 'boolean') or (type = 'date') or (type = 'time') or (type = 'dateTime') or (type = 'reference')"/>
+						value="(type = 'string') or (type = 'text') or (type = 'integer') or (type = 'decimal') or (type = 'boolean') or (type = 'date') or (type = 'time') or (type = 'dateTime') or (type = 'reference') or (type = 'url')"/>
 			</constraint>
 		</element>
 		<element id="Questionnaire.item:business-key">
