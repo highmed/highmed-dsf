@@ -22,4 +22,6 @@
 
 	<include file="db/db.camunda_engine.changelog-0.6.0.xml" />
 
+	<include file="db/db.camunda_engine.changelog-0.8.0.xml" />
+
 </databaseChangeLog>

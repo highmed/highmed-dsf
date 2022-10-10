@@ -3,6 +3,8 @@ package org.highmed.dsf.fhir.adapter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
@@ -20,11 +22,20 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.MessageBodyWriter;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
 
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
+
+import com.google.common.base.Objects;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
@@ -70,8 +81,7 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 	private static final Pattern JSON_ID_UUID_AND_VERSION_PATTERN = Pattern
 			.compile("\"id\": \"(" + UUID + ")\",\\n([ ]*)\"meta\": \\{\\n([ ]*)\"versionId\": \"([0-9]+)\",");
 
-	private static final Pattern CLOSABLE_XML_TAGS = Pattern
-			.compile("(m?)[\\t ]*<[a-zA-Z0-9]+( value=\".*\"){0,1}(></[a-zA-Z0-9]+>)");
+	private final TransformerFactory transformerFactory = TransformerFactory.newInstance();
 
 	private final FhirContext fhirContext;
 	private final ServerBaseProvider serverBaseProvider;
@@ -243,11 +253,7 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 
 	private Optional<String> getResourceUrl(T t) throws MalformedURLException
 	{
-		if (t instanceof Bundle)
-			return ((Bundle) t).getLink().stream().filter(c -> "self".equals(c.getRelation())).findFirst()
-					.map(c -> c.getUrl());
-		else if (t instanceof Resource && t.getIdElement().getResourceType() != null
-				&& t.getIdElement().getIdPart() != null)
+		if (t instanceof Resource && t.getIdElement().hasIdPart())
 		{
 			if (!uriInfo.getPath().contains("_history"))
 				return Optional.of(String.format("%s/%s/%s", serverBaseProvider.getServerBase(),
@@ -257,6 +263,9 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 						t.getIdElement().getResourceType(), t.getIdElement().getIdPart(),
 						t.getIdElement().getVersionIdPart()));
 		}
+		else if (t instanceof Bundle && !t.getIdElement().hasIdPart())
+			return ((Bundle) t).getLink().stream().filter(c -> "self".equals(c.getRelation())).findFirst()
+					.map(c -> c.getUrl());
 		else
 			return Optional.empty();
 	}
@@ -268,6 +277,8 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		out.write("<pre id=\"xml\" class=\"prettyprint linenums lang-xml\" style=\"display:none;\">");
 		String content = parser.encodeResourceToString(t);
 
+		content = content.replace("&amp;", "&amp;amp;").replace("&apos;", "&amp;apos;").replace("&gt;", "&amp;gt;")
+				.replace("&lt;", "&amp;lt;").replace("&quot;", "&amp;quot;");
 		content = simplifyXml(content);
 		content = content.replace("<", "&lt;").replace(">", "&gt;");
 
@@ -292,10 +303,29 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		out.write("</pre>\n");
 	}
 
+	private Transformer newTransformer() throws TransformerConfigurationException
+	{
+		Transformer transformer = transformerFactory.newTransformer();
+		transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+		transformer.setOutputProperty("{http://xml.apache.org/xalan}indent-amount", "3");
+		return transformer;
+	}
+
 	private String simplifyXml(String xml)
 	{
-		Matcher matcher = CLOSABLE_XML_TAGS.matcher(xml);
-		return matcher.replaceAll(r -> r.group().replace(r.group(3), "/>"));
+		try
+		{
+			Transformer transformer = newTransformer();
+			StringWriter writer = new StringWriter();
+			transformer.transform(new StreamSource(new StringReader(xml)), new StreamResult(writer));
+			return writer.toString();
+		}
+		catch (TransformerException e)
+		{
+			throw new RuntimeException(e);
+		}
 	}
 
 	private void writeJson(T t, OutputStreamWriter out) throws IOException
@@ -366,19 +396,25 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 	private Optional<String> getResourceName(T t, String uuid)
 	{
 		if (t instanceof Bundle)
-			return ((Bundle) t).getEntry().stream().filter(c ->
-			{
-				if (c.hasResource())
-					return uuid.equals(c.getResource().getIdElement().getIdPart());
-				else
-					return uuid.equals(new IdType(c.getResponse().getLocation()).getIdPart());
-			}).map(c ->
-			{
-				if (c.hasResource())
-					return c.getResource().getClass().getAnnotation(ResourceDef.class).name();
-				else
-					return new IdType(c.getResponse().getLocation()).getResourceType();
-			}).findFirst();
+		{
+			// if persistent Bundle resource
+			if (Objects.equal(uuid, t.getIdElement().getIdPart()))
+				return Optional.of(t.getClass().getAnnotation(ResourceDef.class).name());
+			else
+				return ((Bundle) t).getEntry().stream().filter(c ->
+				{
+					if (c.hasResource())
+						return uuid.equals(c.getResource().getIdElement().getIdPart());
+					else
+						return uuid.equals(new IdType(c.getResponse().getLocation()).getIdPart());
+				}).map(c ->
+				{
+					if (c.hasResource())
+						return c.getResource().getClass().getAnnotation(ResourceDef.class).name();
+					else
+						return new IdType(c.getResponse().getLocation()).getResourceType();
+				}).findFirst();
+		}
 		else if (t instanceof Resource)
 			return Optional.of(t.getClass().getAnnotation(ResourceDef.class).name());
 		else

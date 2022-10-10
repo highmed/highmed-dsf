@@ -134,6 +134,11 @@
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 		</dependency>
+		
+		<dependency>
+			<groupId>com.sun.mail</groupId>
+			<artifactId>jakarta.mail</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
@@ -231,7 +236,6 @@
 			<plugin>
 				<groupId>io.fabric8</groupId>
 				<artifactId>docker-maven-plugin</artifactId>
-				<version>0.34.1</version>
 				<extensions>true</extensions>
 				<executions>
 					<execution>
