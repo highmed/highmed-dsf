@@ -48,7 +48,19 @@ public class ActivityDefinitionAuthorizationRule
 		Objects.requireNonNull(processAuthorizationHelper, "processAuthorizationHelper");
 	}
 
-	protected Optional<String> newResourceOk(Connection connection, User user, ActivityDefinition newResource)
+	@Override
+	protected Optional<String> newResourceOkForCreate(Connection connection, User user, ActivityDefinition newResource)
+	{
+		return newResourceOk(connection, user, newResource);
+	}
+
+	@Override
+	protected Optional<String> newResourceOkForUpdate(Connection connection, User user, ActivityDefinition newResource)
+	{
+		return newResourceOk(connection, user, newResource);
+	}
+
+	private Optional<String> newResourceOk(Connection connection, User user, ActivityDefinition newResource)
 	{
 		List<String> errors = new ArrayList<String>();
 
@@ -93,6 +105,7 @@ public class ActivityDefinitionAuthorizationRule
 			return Optional.of(errors.stream().collect(Collectors.joining(", ")));
 	}
 
+	@Override
 	protected boolean resourceExists(Connection connection, ActivityDefinition newResource)
 	{
 		try
@@ -108,6 +121,7 @@ public class ActivityDefinitionAuthorizationRule
 		}
 	}
 
+	@Override
 	protected boolean modificationsOk(Connection connection, ActivityDefinition oldResource,
 			ActivityDefinition newResource)
 	{

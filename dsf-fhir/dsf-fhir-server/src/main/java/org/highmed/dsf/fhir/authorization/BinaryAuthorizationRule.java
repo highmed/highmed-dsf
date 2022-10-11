@@ -35,7 +35,19 @@ public class BinaryAuthorizationRule extends AbstractMetaTagAuthorizationRule<Bi
 				.collect(Collectors.toMap(AuthorizationRule::getResourceType, Function.identity()));
 	}
 
-	protected Optional<String> newResourceOk(Connection connection, User user, Binary newResource)
+	@Override
+	protected Optional<String> newResourceOkForCreate(Connection connection, User user, Binary newResource)
+	{
+		return newResourceOk(connection, user, newResource);
+	}
+
+	@Override
+	protected Optional<String> newResourceOkForUpdate(Connection connection, User user, Binary newResource)
+	{
+		return newResourceOk(connection, user, newResource);
+	}
+
+	private Optional<String> newResourceOk(Connection connection, User user, Binary newResource)
 	{
 		List<String> errors = new ArrayList<String>();
 

@@ -39,7 +39,19 @@ public class EndpointAuthorizationRule extends AbstractMetaTagAuthorizationRule<
 				parameterConverter);
 	}
 
-	protected Optional<String> newResourceOk(Connection connection, User user, Endpoint newResource)
+	@Override
+	protected Optional<String> newResourceOkForCreate(Connection connection, User user, Endpoint newResource)
+	{
+		return newResourceOk(connection, user, newResource);
+	}
+
+	@Override
+	protected Optional<String> newResourceOkForUpdate(Connection connection, User user, Endpoint newResource)
+	{
+		return newResourceOk(connection, user, newResource);
+	}
+
+	private Optional<String> newResourceOk(Connection connection, User user, Endpoint newResource)
 	{
 		List<String> errors = new ArrayList<String>();
 
@@ -81,6 +93,7 @@ public class EndpointAuthorizationRule extends AbstractMetaTagAuthorizationRule<
 			return Optional.of(errors.stream().collect(Collectors.joining(", ")));
 	}
 
+	@Override
 	protected boolean resourceExists(Connection connection, Endpoint newResource)
 	{
 		String identifierValue = newResource.getIdentifier().stream()

@@ -66,7 +66,8 @@ public class MultiVersionBpmnParse extends BpmnParse
 
 		if (taskDefinition.getTaskListeners().getOrDefault(TaskListener.EVENTNAME_CREATE, new ArrayList<>()).stream()
 				.filter(l -> l instanceof MultiVersionClassDelegateTaskListener)
-				.map(l -> (MultiVersionClassDelegateTaskListener) l).noneMatch(this::containsDefaultUserTaskListener))
+				.map(l -> (MultiVersionClassDelegateTaskListener) l)
+				.noneMatch(this::containsDefaultUserTaskListenerOrSuperClassOf))
 		{
 			logger.debug("Adding new {} for event '{}' to BPMN element with id '{}'",
 					DefaultUserTaskListener.class.getName(), TaskListener.EVENTNAME_CREATE,
@@ -85,7 +86,7 @@ public class MultiVersionBpmnParse extends BpmnParse
 		}
 	}
 
-	private boolean containsDefaultUserTaskListener(
+	private boolean containsDefaultUserTaskListenerOrSuperClassOf(
 			MultiVersionClassDelegateTaskListener multiVersionClassDelegateTaskListener)
 	{
 		try

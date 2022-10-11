@@ -37,12 +37,6 @@ public class QuestionnaireResponseHtmlFhirAdapter extends HtmlFhirAdapter<Questi
 	}
 
 	@Override
-	protected String getInitialLang()
-	{
-		return "html";
-	}
-
-	@Override
 	protected boolean isHtmlEnabled()
 	{
 		return true;

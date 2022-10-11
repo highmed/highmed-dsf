@@ -35,7 +35,21 @@ public class OrganizationAffiliationAuthorizationRule
 				readAccessHelper, parameterConverter);
 	}
 
-	protected Optional<String> newResourceOk(Connection connection, User user, OrganizationAffiliation newResource)
+	@Override
+	protected Optional<String> newResourceOkForCreate(Connection connection, User user,
+			OrganizationAffiliation newResource)
+	{
+		return newResourceOk(connection, user, newResource);
+	}
+
+	@Override
+	protected Optional<String> newResourceOkForUpdate(Connection connection, User user,
+			OrganizationAffiliation newResource)
+	{
+		return newResourceOk(connection, user, newResource);
+	}
+
+	private Optional<String> newResourceOk(Connection connection, User user, OrganizationAffiliation newResource)
 	{
 		List<String> errors = new ArrayList<String>();
 

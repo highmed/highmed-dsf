@@ -141,7 +141,8 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		out.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"/fhir/static/form.css\">\n");
 		out.write("<title>DSF" + (uriInfo.getPath() == null || uriInfo.getPath().isEmpty() ? "" : ": ")
 				+ uriInfo.getPath() + "</title>\n</head>\n");
-		out.write("<body onload=\"prettyPrint();openInitialTab('" + getInitialLang() + "');checkBookmarked();\">\n");
+		out.write("<body onload=\"prettyPrint();openInitialTab(" + String.valueOf(isHtmlEnabled())
+				+ ");checkBookmarked();\">\n");
 		out.write("<div id=\"icons\">\n");
 		out.write("<svg class=\"icon\" id=\"help-icon\" viewBox=\"0 0 24 24\" onclick=\"showHelp();\">\n");
 		out.write("<title>Show Help</title>\n");
@@ -293,7 +294,10 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		});
 
 		Matcher urlMatcher = URL_PATTERN.matcher(content);
-		content = urlMatcher.replaceAll(result -> "<a href=\"" + result.group() + "\">" + result.group() + "</a>");
+		content = urlMatcher.replaceAll(result -> "<a href=\""
+				+ result.group().replace("&amp;amp;", "&amp;").replace("&amp;apos;", "&apos;")
+						.replace("&amp;gt;", "&gt;").replace("&amp;lt;", "&lt;").replace("&amp;quot;", "&quot;")
+				+ "\">" + result.group() + "</a>");
 
 		Matcher referenceUuidMatcher = XML_REFERENCE_UUID_PATTERN.matcher(content);
 		content = referenceUuidMatcher.replaceAll(result -> "&lt;reference value=\"<a href=\"/fhir/" + result.group(1)
@@ -386,11 +390,6 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 	 */
 	protected void doWriteHtml(T t, OutputStreamWriter out) throws IOException
 	{
-	}
-
-	protected String getInitialLang()
-	{
-		return "xml";
 	}
 
 	private Optional<String> getResourceName(T t, String uuid)

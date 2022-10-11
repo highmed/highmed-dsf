@@ -75,7 +75,7 @@ public class SmtpMailService implements MailService, InitializingBean
 
 	private static final class Layout implements StringLayout
 	{
-		HtmlLayout delegate = HtmlLayout.newBuilder().setDatePattern("yyyy-MM-dd HH:mm:ss.nnnn").build();
+		final HtmlLayout delegate = HtmlLayout.newBuilder().setDatePattern("yyyy-MM-dd HH:mm:ss.nnnn").build();
 
 		@Override
 		public byte[] getFooter()
