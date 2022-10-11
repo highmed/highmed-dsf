@@ -22,6 +22,8 @@ import org.highmed.dsf.fhir.webservice.impl.PatientServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.PractitionerRoleServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.PractitionerServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.ProvenanceServiceImpl;
+import org.highmed.dsf.fhir.webservice.impl.QuestionnaireResponseServiceImpl;
+import org.highmed.dsf.fhir.webservice.impl.QuestionnaireServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.ResearchStudyServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.RootServiceImpl;
 import org.highmed.dsf.fhir.webservice.impl.StaticResourcesServiceImpl;
@@ -50,6 +52,8 @@ import org.highmed.dsf.fhir.webservice.jaxrs.PatientServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.PractitionerRoleServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.PractitionerServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.ProvenanceServiceJaxrs;
+import org.highmed.dsf.fhir.webservice.jaxrs.QuestionnaireResponseServiceJaxrs;
+import org.highmed.dsf.fhir.webservice.jaxrs.QuestionnaireServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.ResearchStudyServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.RootServiceJaxrs;
 import org.highmed.dsf.fhir.webservice.jaxrs.StaticResourcesServiceJaxrs;
@@ -78,6 +82,8 @@ import org.highmed.dsf.fhir.webservice.secure.PatientServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.PractitionerRoleServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.PractitionerServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.ProvenanceServiceSecure;
+import org.highmed.dsf.fhir.webservice.secure.QuestionnaireResponseServiceSecure;
+import org.highmed.dsf.fhir.webservice.secure.QuestionnaireServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.ResearchStudyServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.RootServiceSecure;
 import org.highmed.dsf.fhir.webservice.secure.StaticResourcesServiceSecure;
@@ -106,6 +112,8 @@ import org.highmed.dsf.fhir.webservice.specification.PatientService;
 import org.highmed.dsf.fhir.webservice.specification.PractitionerRoleService;
 import org.highmed.dsf.fhir.webservice.specification.PractitionerService;
 import org.highmed.dsf.fhir.webservice.specification.ProvenanceService;
+import org.highmed.dsf.fhir.webservice.specification.QuestionnaireResponseService;
+import org.highmed.dsf.fhir.webservice.specification.QuestionnaireService;
 import org.highmed.dsf.fhir.webservice.specification.ResearchStudyService;
 import org.highmed.dsf.fhir.webservice.specification.RootService;
 import org.highmed.dsf.fhir.webservice.specification.StaticResourcesService;
@@ -660,6 +668,59 @@ public class WebserviceConfig
 				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver(),
 				referenceConfig.referenceCleaner(), authorizationConfig.authorizationRuleProvider(),
 				historyConfig.historyService());
+	}
+
+	@Bean
+	public QuestionnaireService questionnaireService()
+	{
+		return new QuestionnaireServiceJaxrs(questionnaireServiceSecure());
+	}
+
+	private QuestionnaireServiceSecure questionnaireServiceSecure()
+	{
+		return new QuestionnaireServiceSecure(questionnaireServiceImpl(), propertiesConfig.getServerBaseUrl(),
+				helperConfig.responseGenerator(), referenceConfig.referenceResolver(),
+				referenceConfig.referenceCleaner(), referenceConfig.referenceExtractor(), daoConfig.questionnaireDao(),
+				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
+				authorizationConfig.questionnaireAuthorizationRule(), validationConfig.resourceValidator());
+	}
+
+	private QuestionnaireServiceImpl questionnaireServiceImpl()
+	{
+		return new QuestionnaireServiceImpl(QuestionnaireServiceJaxrs.PATH, propertiesConfig.getServerBaseUrl(),
+				propertiesConfig.getDefaultPageCount(), daoConfig.questionnaireDao(),
+				validationConfig.resourceValidator(), eventConfig.eventManager(), helperConfig.exceptionHandler(),
+				eventConfig.eventGenerator(), helperConfig.responseGenerator(), helperConfig.parameterConverter(),
+				referenceConfig.referenceExtractor(), referenceConfig.referenceResolver(),
+				referenceConfig.referenceCleaner(), authorizationConfig.authorizationRuleProvider(),
+				historyConfig.historyService());
+	}
+
+	@Bean
+	public QuestionnaireResponseService questionnaireResponseService()
+	{
+		return new QuestionnaireResponseServiceJaxrs(questionnaireResponseServiceSecure());
+	}
+
+	private QuestionnaireResponseServiceSecure questionnaireResponseServiceSecure()
+	{
+		return new QuestionnaireResponseServiceSecure(questionnaireResponseServiceImpl(),
+				propertiesConfig.getServerBaseUrl(), helperConfig.responseGenerator(),
+				referenceConfig.referenceResolver(), referenceConfig.referenceCleaner(),
+				referenceConfig.referenceExtractor(), daoConfig.questionnaireResponseDao(),
+				helperConfig.exceptionHandler(), helperConfig.parameterConverter(),
+				authorizationConfig.questionnaireResponseAuthorizationRule(), validationConfig.resourceValidator());
+	}
+
+	private QuestionnaireResponseServiceImpl questionnaireResponseServiceImpl()
+	{
+		return new QuestionnaireResponseServiceImpl(QuestionnaireResponseServiceJaxrs.PATH,
+				propertiesConfig.getServerBaseUrl(), propertiesConfig.getDefaultPageCount(),
+				daoConfig.questionnaireResponseDao(), validationConfig.resourceValidator(), eventConfig.eventManager(),
+				helperConfig.exceptionHandler(), eventConfig.eventGenerator(), helperConfig.responseGenerator(),
+				helperConfig.parameterConverter(), referenceConfig.referenceExtractor(),
+				referenceConfig.referenceResolver(), referenceConfig.referenceCleaner(),
+				authorizationConfig.authorizationRuleProvider(), historyConfig.historyService());
 	}
 
 	@Bean

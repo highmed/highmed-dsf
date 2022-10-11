@@ -24,6 +24,8 @@ import org.highmed.dsf.fhir.authorization.PatientAuthorizationRule;
 import org.highmed.dsf.fhir.authorization.PractitionerAuthorizationRule;
 import org.highmed.dsf.fhir.authorization.PractitionerRoleAuthorizationRule;
 import org.highmed.dsf.fhir.authorization.ProvenanceAuthorizationRule;
+import org.highmed.dsf.fhir.authorization.QuestionnaireAuthorizationRule;
+import org.highmed.dsf.fhir.authorization.QuestionnaireResponseAuthorizationRule;
 import org.highmed.dsf.fhir.authorization.ResearchStudyAuthorizationRule;
 import org.highmed.dsf.fhir.authorization.RootAuthorizationRule;
 import org.highmed.dsf.fhir.authorization.StructureDefinitionAuthorizationRule;
@@ -55,6 +57,8 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Provenance;
+import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StructureDefinition;
@@ -122,6 +126,7 @@ public class AuthorizationConfig
 				measureAuthorizationRule(), measureReportAuthorizationRule(), namingSystemAuthorizationRule(),
 				organizationAuthorizationRule(), organizationAffiliationAuthorizationRule(), patientAuthorizationRule(),
 				practitionerAuthorizationRule(), practitionerRoleAuthorizationRule(), provenanceAuthorizationRule(),
+				questionnaireAuthorizationRule(), questionnaireResponseAuthorizationRule(),
 				researchStudyAuthorizationRule(), structureDefinitionAuthorizationRule(),
 				subscriptionAuthorizationRule(), valueSetAuthorizationRule());
 	}
@@ -263,6 +268,22 @@ public class AuthorizationConfig
 	}
 
 	@Bean
+	public AuthorizationRule<Questionnaire> questionnaireAuthorizationRule()
+	{
+		return new QuestionnaireAuthorizationRule(daoConfig.daoProvider(), propertiesConfig.getServerBaseUrl(),
+				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper(),
+				helperConfig.parameterConverter());
+	}
+
+	@Bean
+	public AuthorizationRule<QuestionnaireResponse> questionnaireResponseAuthorizationRule()
+	{
+		return new QuestionnaireResponseAuthorizationRule(daoConfig.daoProvider(), propertiesConfig.getServerBaseUrl(),
+				referenceConfig.referenceResolver(), organizationProvider(), readAccessHelper(),
+				helperConfig.parameterConverter());
+	}
+
+	@Bean
 	public AuthorizationRule<ResearchStudy> researchStudyAuthorizationRule()
 	{
 		return new ResearchStudyAuthorizationRule(daoConfig.daoProvider(), propertiesConfig.getServerBaseUrl(),
@@ -311,7 +332,8 @@ public class AuthorizationConfig
 				libraryAuthorizationRule(), locationAuthorizationRule(), measureAuthorizationRule(),
 				measureReportAuthorizationRule(), namingSystemAuthorizationRule(), organizationAuthorizationRule(),
 				organizationAffiliationAuthorizationRule(), patientAuthorizationRule(), practitionerAuthorizationRule(),
-				practitionerRoleAuthorizationRule(), provenanceAuthorizationRule(), researchStudyAuthorizationRule(),
+				practitionerRoleAuthorizationRule(), provenanceAuthorizationRule(), questionnaireAuthorizationRule(),
+				questionnaireResponseAuthorizationRule(), researchStudyAuthorizationRule(),
 				structureDefinitionAuthorizationRule(), subscriptionAuthorizationRule(), taskAuthorizationRule(),
 				valueSetAuthorizationRule());
 	}

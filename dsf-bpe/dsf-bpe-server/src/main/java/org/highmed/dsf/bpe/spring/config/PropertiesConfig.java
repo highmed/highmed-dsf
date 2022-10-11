@@ -122,13 +122,13 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.bpe.fhir.client.local.websocket.proxy.password:#{null}}")
 	private char[] websocketClientProxyPassword;
 
-	@Documentation(description = "Subscription to receive notifications about resources from the DSF FHIR server", recommendation = "Change only if you need other subscriptions then the default Task subscription of the DSF")
+	@Documentation(description = "Subscription to receive notifications about task resources from the DSF FHIR server")
 	@Value("${org.highmed.dsf.bpe.fhir.task.subscription.search.parameter:?criteria=Task%3Fstatus%3Drequested&status=active&type=websocket&payload=application/fhir%2Bjson}")
-	private String subscriptionSearchParameter;
+	private String taskSubscriptionSearchParameter;
 
-	@Documentation(description = "File storing the last event received and processed on the DFS BPE server from the DSF FHIR server, used to load events that occurred on the DSF FHIR server while the DSF BPE server was turned off")
-	@Value("${org.highmed.dsf.bpe.fhir.task.subscription.last.event.time:last_event/time.file}")
-	private String lastEventTimeFile;
+	@Documentation(description = "Subscription to receive notifications about questionnaire response resources from the DSF FHIR server")
+	@Value("${org.highmed.dsf.bpe.fhir.questionnaire.response.subscription.search.parameter:?criteria=QuestionnaireResponse%3Fstatus%3Dcompleted&status=active&type=websocket&payload=application/fhir%2Bjson}")
+	private String questionnaireResponseSubscriptionSearchParameter;
 
 	@Documentation(description = "Number of retries until a websocket connection can be established with the DSF FHIR server, `-1` means infinite number of retries")
 	@Value("${org.highmed.dsf.bpe.fhir.task.subscription.retry.max:-1}")
@@ -173,6 +173,82 @@ public class PropertiesConfig
 	@Documentation(description = "Milliseconds between two retries to establish a connection with the local DSF FHIR server during process deployment")
 	@Value("${org.highmed.dsf.bpe.process.fhir.server.retry.sleep:5000}")
 	private long fhirServerRetryDelayMillis;
+
+	@Documentation(description = "Mail service sender address", example = "sender@localhost")
+	@Value("${org.highmed.dsf.bpe.mail.fromAddress:}")
+	private String mailFromAddress;
+
+	@Documentation(description = "Mail service recipient addresses, configure at least one; comma or space separated list, YAML block scalars supported", example = "recipient@localhost")
+	@Value("#{'${org.highmed.dsf.bpe.mail.toAddresses:}'.trim().split('(,[ ]?)|(\\n)')}")
+	private List<String> mailToAddresses;
+
+	@Documentation(description = "Mail service CC recipient addresses; comma or space separated list, YAML block scalars supported", example = "cc.recipient@localhost")
+	@Value("#{'${org.highmed.dsf.bpe.mail.toAddressesCc:}'.trim().split('(,[ ]?)|(\\n)')}")
+	private List<String> mailToAddressesCc;
+
+	@Documentation(description = "Mail service reply to addresses; comma or space separated list, YAML block scalars supported", example = "reply.to@localhost")
+	@Value("#{'${org.highmed.dsf.bpe.mail.replyToAddresses:}'.trim().split('(,[ ]?)|(\\n)')}")
+	private List<String> mailReplyToAddresses;
+
+	@Documentation(description = "To enable SMTP over TLS (smtps), set to `true`")
+	@Value("${org.highmed.dsf.bpe.mail.useSmtps:false}")
+	private boolean mailUseSmtps;
+
+	@Documentation(description = "SMTP server hostname", example = "smtp.server.de")
+	@Value("${org.highmed.dsf.bpe.mail.host:#{null}}")
+	private String mailServerHostname;
+
+	@Documentation(description = "SMTP server port", example = "465")
+	@Value("${org.highmed.dsf.bpe.mail.port:0}")
+	private int mailServerPort;
+
+	@Documentation(description = "SMTP server authentication username", recommendation = "Configure if the SMTP server reqiures username/password authentication; enable SMTP over TLS via *ORG_HIGHMED_DSF_BPE_MAIL_USESMTPS*")
+	@Value("${org.highmed.dsf.bpe.mail.username:#{null}}")
+	private String mailServerUsername;
+
+	@Documentation(description = "SMTP server authentication password", recommendation = "Configure if the SMTP server reqiures username/password authentication; use docker secret file to configure using *${env_variable}_FILE*; enable SMTP over TLS via *ORG_HIGHMED_DSF_BPE_MAIL_USESMTPS*")
+	@Value("${org.highmed.dsf.bpe.mail.password:#{null}}")
+	private char[] mailServerPassword;
+
+	@Documentation(description = "PEM encoded file with one or more trusted root certificates to validate the server certificate of the SMTP server. Requires SMTP over TLS to be enabled via *ORG_HIGHMED_DSF_BPE_MAIL_USESMTPS*", recommendation = "Use docker secret file to configure", example = "/run/secrets/smtp_server_trust_certificates.pem")
+	@Value("${org.highmed.dsf.bpe.mail.trust.certificates:#{null}}")
+	private String mailServerTrustStoreFile;
+
+	@Documentation(description = "PEM encoded file with client certificate used to authenticate against the SMTP server. Requires SMTP over TLS to be enabled via *ORG_HIGHMED_DSF_BPE_MAIL_USESMTPS*", recommendation = "Use docker secret file to configure", example = "/run/secrets/smtp_server_client_certificate.pem")
+	@Value("${org.highmed.dsf.bpe.mail.client.certificate:#{null}}")
+	private String mailServerClientCertificateFile;
+
+	@Documentation(description = "Private key corresponging to the SMTP server client certificate as PEM encoded file. Use ${env_variable}_PASSWORD* or *${env_variable}_PASSWORD_FILE* if private key is encrypted. Requires SMTP over TLS to be enabled via *ORG_HIGHMED_DSF_BPE_MAIL_USESMTPS*", recommendation = "Use docker secret file to configure", example = "/run/secrets/smtp_server_client_certificate_private_key.pem")
+	@Value("${org.highmed.dsf.bpe.mail.client.certificate.private.key:#{null}}")
+	private String mailServerClientCertificatePrivateKeyFile;
+
+	@Documentation(description = "Password to decrypt the local client certificate encrypted private key", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*", example = "/run/secrets/smtp_server_client_certificate_private_key.pem.password")
+	@Value("${org.highmed.dsf.bpe.mail.client.certificate.private.key.password:#{null}}")
+	private char[] mailServerClientCertificatePrivateKeyFilePassword;
+
+	@Documentation(description = "PKCS12 encoded file with S/MIME certificate, private key and certificate chain to enable send mails to be S/MIME signed", recommendation = "Use docker secret file to configure", example = "/run/secrets/smime_certificate.p12")
+	@Value("${org.highmed.dsf.bpe.mail.smime.p12Keystore:#{null}}")
+	private String mailSmimeSigingKeyStoreFile;
+
+	@Documentation(description = "Password to decrypt the PKCS12 encoded S/MIMIE certificate file", recommendation = "Use docker secret file to configure using *${env_variable}_FILE*", example = "/run/secrets/smime_certificate.p12.password")
+	@Value("${org.highmed.dsf.bpe.mail.smime.p12Keystore.password:#{null}}")
+	private char[] mailSmimeSigingKeyStorePassword;
+
+	@Documentation(description = "To enable a test mail being send on startup of the BPE, set to `true`. Requires SMTP server to be configured.")
+	@Value("${org.highmed.dsf.bpe.mail.sendTestMailOnStartup:false}")
+	private boolean sendTestMailOnStartup;
+
+	@Documentation(description = "To enable mails being send for every ERROR logged, set to `true`. Requires SMTP server to be configured.")
+	@Value("${org.highmed.dsf.bpe.mail.sendMailOnErrorLogEvent:false}")
+	private boolean sendMailOnErrorLogEvent;
+
+	@Documentation(description = "Number of previous INFO, WARN log messages to include in ERROR log event mails (>=0). Requires send mail on ERROR log event option to be enabled to have an effect.")
+	@Value("${org.highmed.dsf.bpe.mail.mailOnErrorLogEventBufferSize:4}")
+	private int mailOnErrorLogEventBufferSize;
+
+	@Documentation(description = "Location of the BPE debug log as displayed in the footer of ERROR log event mails, does not modify the actual location of the debug log file. Requires send mail on ERROR log event option to be enabled to have an effect.")
+	@Value("${org.highmed.dsf.bpe.mail.mailOnErrorLogEventDebugLogLocation:/opt/bpe/log/bpe.log}")
+	private String mailOnErrorLogEventDebugLogLocation;
 
 	@Bean // static in order to initialize before @Configuration classes
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer(
@@ -313,14 +389,14 @@ public class PropertiesConfig
 		return websocketClientProxyPassword;
 	}
 
-	public String getSubscriptionSearchParameter()
+	public String getTaskSubscriptionSearchParameter()
 	{
-		return subscriptionSearchParameter;
+		return taskSubscriptionSearchParameter;
 	}
 
-	public Path getLastEventTimeFile()
+	public String getQuestionnaireResponseSubscriptionSearchParameter()
 	{
-		return Paths.get(lastEventTimeFile);
+		return questionnaireResponseSubscriptionSearchParameter;
 	}
 
 	public long getWebsocketRetrySleepMillis()
@@ -376,5 +452,100 @@ public class PropertiesConfig
 	public long getFhirServerRetryDelayMillis()
 	{
 		return fhirServerRetryDelayMillis;
+	}
+
+	public String getMailFromAddress()
+	{
+		return mailFromAddress;
+	}
+
+	public List<String> getMailToAddresses()
+	{
+		return mailToAddresses;
+	}
+
+	public List<String> getMailToAddressesCc()
+	{
+		return mailToAddressesCc;
+	}
+
+	public List<String> getMailReplyToAddresses()
+	{
+		return mailReplyToAddresses;
+	}
+
+	public boolean getMailUseSmtps()
+	{
+		return mailUseSmtps;
+	}
+
+	public String getMailServerHostname()
+	{
+		return mailServerHostname;
+	}
+
+	public int getMailServerPort()
+	{
+		return mailServerPort;
+	}
+
+	public String getMailServerUsername()
+	{
+		return mailServerUsername;
+	}
+
+	public char[] getMailServerPassword()
+	{
+		return mailServerPassword;
+	}
+
+	public String getMailServerTrustStoreFile()
+	{
+		return mailServerTrustStoreFile;
+	}
+
+	public String getMailServerClientCertificateFile()
+	{
+		return mailServerClientCertificateFile;
+	}
+
+	public String getMailServerClientCertificatePrivateKeyFile()
+	{
+		return mailServerClientCertificatePrivateKeyFile;
+	}
+
+	public char[] getMailServerClientCertificatePrivateKeyFilePassword()
+	{
+		return mailServerClientCertificatePrivateKeyFilePassword;
+	}
+
+	public String getMailSmimeSigingKeyStoreFile()
+	{
+		return mailSmimeSigingKeyStoreFile;
+	}
+
+	public char[] getMailSmimeSigingKeyStorePassword()
+	{
+		return mailSmimeSigingKeyStorePassword;
+	}
+
+	public boolean getSendTestMailOnStartup()
+	{
+		return sendTestMailOnStartup;
+	}
+
+	public boolean getSendMailOnErrorLogEvent()
+	{
+		return sendMailOnErrorLogEvent;
+	}
+
+	public int getMailOnErrorLogEventBufferSize()
+	{
+		return mailOnErrorLogEventBufferSize;
+	}
+
+	public String getMailOnErrorLogEventDebugLogLocation()
+	{
+		return mailOnErrorLogEventDebugLogLocation;
 	}
 }

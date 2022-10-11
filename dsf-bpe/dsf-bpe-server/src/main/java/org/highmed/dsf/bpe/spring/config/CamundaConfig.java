@@ -16,6 +16,7 @@ import org.highmed.dsf.bpe.delegate.DelegateProvider;
 import org.highmed.dsf.bpe.delegate.DelegateProviderImpl;
 import org.highmed.dsf.bpe.listener.CallActivityListener;
 import org.highmed.dsf.bpe.listener.DefaultBpmnParseListener;
+import org.highmed.dsf.bpe.listener.DefaultUserTaskListener;
 import org.highmed.dsf.bpe.listener.EndListener;
 import org.highmed.dsf.bpe.listener.StartListener;
 import org.highmed.dsf.bpe.plugin.ProcessPluginProvider;
@@ -112,7 +113,7 @@ public class CamundaConfig
 	public SpringProcessEngineConfiguration processEngineConfiguration() throws IOException
 	{
 		var c = new MultiVersionSpringProcessEngineConfiguration(delegateProvider());
-		c.setProcessEngineName("highmed");
+		c.setProcessEngineName("dsf");
 		c.setDataSource(transactionAwareDataSource());
 		c.setTransactionManager(transactionManager());
 		c.setDatabaseSchemaUpdate("false");
@@ -161,5 +162,12 @@ public class CamundaConfig
 
 		return new ProcessPluginProviderImpl(fhirConfig.fhirContext(), processPluginDirectoryPath, applicationContext,
 				environment);
+	}
+
+	@Bean
+	public DefaultUserTaskListener defaultUserTaskListener()
+	{
+		return new DefaultUserTaskListener(fhirConfig.clientProvider(), fhirConfig.organizationProvider(),
+				fhirConfig.questionnaireResponseHelper(), fhirConfig.taskHelper(), fhirConfig.readAccessHelper());
 	}
 }

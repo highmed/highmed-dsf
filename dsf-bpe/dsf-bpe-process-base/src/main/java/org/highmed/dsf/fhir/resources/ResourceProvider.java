@@ -12,6 +12,7 @@ import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.NamingSystem;
+import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.springframework.core.env.PropertyResolver;
@@ -25,6 +26,8 @@ public interface ResourceProvider
 	Optional<CodeSystem> getCodeSystem(String url, String version);
 
 	Optional<NamingSystem> getNamingSystem(String name);
+
+	Optional<Questionnaire> getQuestionnaire(String url, String version);
 
 	Optional<StructureDefinition> getStructureDefinition(String url, String version);
 
@@ -53,6 +56,12 @@ public interface ResourceProvider
 
 			@Override
 			public Optional<NamingSystem> getNamingSystem(String name)
+			{
+				return Optional.empty();
+			}
+
+			@Override
+			public Optional<Questionnaire> getQuestionnaire(String url, String version)
 			{
 				return Optional.empty();
 			}

@@ -10,6 +10,7 @@ import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.BackboneElement;
 import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.CarePlan;
 import org.hl7.fhir.r4.model.CareTeam;
 import org.hl7.fhir.r4.model.ClaimResponse;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -38,6 +39,7 @@ import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.NamingSystem;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.ObservationDefinition;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
@@ -49,14 +51,18 @@ import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Practitioner.PractitionerQualificationComponent;
 import org.hl7.fhir.r4.model.PractitionerRole;
+import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Provenance.ProvenanceAgentComponent;
 import org.hl7.fhir.r4.model.Provenance.ProvenanceEntityComponent;
+import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.RelatedPerson;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.SpecimenDefinition;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Subscription;
@@ -365,6 +371,10 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 			return getReferences((PractitionerRole) resource);
 		else if (resource instanceof Provenance)
 			return getReferences((Provenance) resource);
+		else if (resource instanceof Questionnaire)
+			return getReferences((Questionnaire) resource);
+		else if (resource instanceof QuestionnaireResponse)
+			return getReferences((QuestionnaireResponse) resource);
 		else if (resource instanceof ResearchStudy)
 			return getReferences((ResearchStudy) resource);
 		else if (resource instanceof StructureDefinition)
@@ -767,6 +777,69 @@ public class ReferenceExtractorImpl implements ReferenceExtractor
 		var extensionReferences = getExtensionReferences(resource);
 
 		return concat(targets, location, agentsWho, agentsOnBehalfOf, entitiesWhat, extensionReferences);
+	}
+
+	@Override
+	public Stream<ResourceReference> getReferences(Questionnaire resource)
+	{
+		if (resource == null)
+			return Stream.empty();
+
+		var enableWhen = getBackboneElements2Reference(resource, Questionnaire::hasItem, Questionnaire::getItem,
+				Questionnaire.QuestionnaireItemComponent::hasEnableWhen,
+				Questionnaire.QuestionnaireItemComponent::getEnableWhen,
+				Questionnaire.QuestionnaireItemEnableWhenComponent::hasAnswerReference,
+				Questionnaire.QuestionnaireItemEnableWhenComponent::getAnswerReference,
+				"Questionnaire.item.enableWhen.answerReference");
+
+		var answerOption = getBackboneElements2Reference(resource, Questionnaire::hasItem, Questionnaire::getItem,
+				Questionnaire.QuestionnaireItemComponent::hasAnswerOption,
+				Questionnaire.QuestionnaireItemComponent::getAnswerOption,
+				Questionnaire.QuestionnaireItemAnswerOptionComponent::hasValueReference,
+				Questionnaire.QuestionnaireItemAnswerOptionComponent::getValueReference,
+				"Questionnaire.item.answerOption.valueReference");
+
+		var initial = getBackboneElements2Reference(resource, Questionnaire::hasItem, Questionnaire::getItem,
+				Questionnaire.QuestionnaireItemComponent::hasInitial,
+				Questionnaire.QuestionnaireItemComponent::getInitial,
+				Questionnaire.QuestionnaireItemInitialComponent::hasValueReference,
+				Questionnaire.QuestionnaireItemInitialComponent::getValueReference,
+				"Questionnaire.item.initial.valueReference");
+
+		var extensionReferences = getExtensionReferences(resource);
+
+		return concat(enableWhen, answerOption, initial, extensionReferences);
+	}
+
+	@Override
+	public Stream<ResourceReference> getReferences(QuestionnaireResponse resource)
+	{
+		if (resource == null)
+			return Stream.empty();
+
+		var author = getReference(resource, QuestionnaireResponse::hasAuthor, QuestionnaireResponse::getAuthor,
+				"QuestionnaireResponse.author", Device.class, Organization.class, Patient.class, Practitioner.class,
+				PractitionerRole.class, RelatedPerson.class);
+
+		var basedOn = getReferences(resource, QuestionnaireResponse::hasBasedOn, QuestionnaireResponse::getBasedOn,
+				"QuestionnaireResponse.basedOn", CarePlan.class, ServiceRequest.class);
+
+		var encounter = getReference(resource, QuestionnaireResponse::hasEncounter, QuestionnaireResponse::getEncounter,
+				"QuestionnaireResponse.encounter", Encounter.class);
+
+		var partOf = getReferences(resource, QuestionnaireResponse::hasPartOf, QuestionnaireResponse::getPartOf,
+				"QuestionnaireResponse.partOf", Observation.class, Procedure.class);
+
+		var source = getReference(resource, QuestionnaireResponse::hasSource, QuestionnaireResponse::getSource,
+				"QuestionnaireResponse.source", Patient.class, Practitioner.class, PractitionerRole.class,
+				RelatedPerson.class);
+
+		var subject = getReference(resource, QuestionnaireResponse::hasSubject, QuestionnaireResponse::getSubject,
+				"QuestionnaireResponse.subject");
+
+		var extensionReferences = getExtensionReferences(resource);
+
+		return concat(author, basedOn, encounter, partOf, source, subject, extensionReferences);
 	}
 
 	@Override

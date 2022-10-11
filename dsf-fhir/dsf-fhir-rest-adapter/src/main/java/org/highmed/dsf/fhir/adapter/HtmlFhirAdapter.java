@@ -3,6 +3,8 @@ package org.highmed.dsf.fhir.adapter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
@@ -20,11 +22,20 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.MessageBodyWriter;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
 
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
+
+import com.google.common.base.Objects;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
@@ -70,8 +81,7 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 	private static final Pattern JSON_ID_UUID_AND_VERSION_PATTERN = Pattern
 			.compile("\"id\": \"(" + UUID + ")\",\\n([ ]*)\"meta\": \\{\\n([ ]*)\"versionId\": \"([0-9]+)\",");
 
-	private static final Pattern CLOSABLE_XML_TAGS = Pattern
-			.compile("(m?)[\\t ]*<[a-zA-Z0-9]+( value=\".*\"){0,1}(></[a-zA-Z0-9]+>)");
+	private final TransformerFactory transformerFactory = TransformerFactory.newInstance();
 
 	private final FhirContext fhirContext;
 	private final ServerBaseProvider serverBaseProvider;
@@ -85,6 +95,11 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		this.fhirContext = fhirContext;
 		this.serverBaseProvider = serverBaseProvider;
 		this.resourceType = resourceType;
+	}
+
+	protected FhirContext getFhirContext()
+	{
+		return fhirContext;
 	}
 
 	/* Parsers are not guaranteed to be thread safe */
@@ -120,11 +135,14 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		out.write("<script src=\"/fhir/static/tabs.js\"></script>\n");
 		out.write("<script src=\"/fhir/static/bookmarks.js\"></script>\n");
 		out.write("<script src=\"/fhir/static/help.js\"></script>\n");
+		out.write("<script src=\"/fhir/static/form.js\"></script>\n");
 		out.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"/fhir/static/prettify.css\">\n");
 		out.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"/fhir/static/highmed.css\">\n");
+		out.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"/fhir/static/form.css\">\n");
 		out.write("<title>DSF" + (uriInfo.getPath() == null || uriInfo.getPath().isEmpty() ? "" : ": ")
 				+ uriInfo.getPath() + "</title>\n</head>\n");
-		out.write("<body onload=\"prettyPrint();openInitialTab();checkBookmarked();\">\n");
+		out.write("<body onload=\"prettyPrint();openInitialTab(" + String.valueOf(isHtmlEnabled())
+				+ ");checkBookmarked();\">\n");
 		out.write("<div id=\"icons\">\n");
 		out.write("<svg class=\"icon\" id=\"help-icon\" viewBox=\"0 0 24 24\" onclick=\"showHelp();\">\n");
 		out.write("<title>Show Help</title>\n");
@@ -181,12 +199,19 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		out.write("</h1></td>\n");
 		out.write("</tr></table>\n");
 		out.write("<div class=\"tab\">\n");
+
+		if (isHtmlEnabled())
+			out.write("<button id=\"html-button\" class=\"tablinks\" onclick=\"openTab('html')\">html</button>\n");
+
 		out.write("<button id=\"json-button\" class=\"tablinks\" onclick=\"openTab('json')\">json</button>\n");
 		out.write("<button id=\"xml-button\" class=\"tablinks\" onclick=\"openTab('xml')\">xml</button>\n");
 		out.write("</div>\n");
 
 		writeXml(t, out);
 		writeJson(t, out);
+
+		if (isHtmlEnabled())
+			writeHtml(t, out);
 
 		out.write("</html>");
 		out.flush();
@@ -229,11 +254,7 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 
 	private Optional<String> getResourceUrl(T t) throws MalformedURLException
 	{
-		if (t instanceof Bundle)
-			return ((Bundle) t).getLink().stream().filter(c -> "self".equals(c.getRelation())).findFirst()
-					.map(c -> c.getUrl());
-		else if (t instanceof Resource && t.getIdElement().getResourceType() != null
-				&& t.getIdElement().getIdPart() != null)
+		if (t instanceof Resource && t.getIdElement().hasIdPart())
 		{
 			if (!uriInfo.getPath().contains("_history"))
 				return Optional.of(String.format("%s/%s/%s", serverBaseProvider.getServerBase(),
@@ -243,6 +264,9 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 						t.getIdElement().getResourceType(), t.getIdElement().getIdPart(),
 						t.getIdElement().getVersionIdPart()));
 		}
+		else if (t instanceof Bundle && !t.getIdElement().hasIdPart())
+			return ((Bundle) t).getLink().stream().filter(c -> "self".equals(c.getRelation())).findFirst()
+					.map(c -> c.getUrl());
 		else
 			return Optional.empty();
 	}
@@ -254,6 +278,8 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		out.write("<pre id=\"xml\" class=\"prettyprint linenums lang-xml\" style=\"display:none;\">");
 		String content = parser.encodeResourceToString(t);
 
+		content = content.replace("&amp;", "&amp;amp;").replace("&apos;", "&amp;apos;").replace("&gt;", "&amp;gt;")
+				.replace("&lt;", "&amp;lt;").replace("&quot;", "&amp;quot;");
 		content = simplifyXml(content);
 		content = content.replace("<", "&lt;").replace(">", "&gt;");
 
@@ -268,7 +294,10 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		});
 
 		Matcher urlMatcher = URL_PATTERN.matcher(content);
-		content = urlMatcher.replaceAll(result -> "<a href=\"" + result.group() + "\">" + result.group() + "</a>");
+		content = urlMatcher.replaceAll(result -> "<a href=\""
+				+ result.group().replace("&amp;amp;", "&amp;").replace("&amp;apos;", "&apos;")
+						.replace("&amp;gt;", "&gt;").replace("&amp;lt;", "&lt;").replace("&amp;quot;", "&quot;")
+				+ "\">" + result.group() + "</a>");
 
 		Matcher referenceUuidMatcher = XML_REFERENCE_UUID_PATTERN.matcher(content);
 		content = referenceUuidMatcher.replaceAll(result -> "&lt;reference value=\"<a href=\"/fhir/" + result.group(1)
@@ -278,10 +307,29 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		out.write("</pre>\n");
 	}
 
+	private Transformer newTransformer() throws TransformerConfigurationException
+	{
+		Transformer transformer = transformerFactory.newTransformer();
+		transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+		transformer.setOutputProperty("{http://xml.apache.org/xalan}indent-amount", "3");
+		return transformer;
+	}
+
 	private String simplifyXml(String xml)
 	{
-		Matcher matcher = CLOSABLE_XML_TAGS.matcher(xml);
-		return matcher.replaceAll(r -> r.group().replace(r.group(3), "/>"));
+		try
+		{
+			Transformer transformer = newTransformer();
+			StringWriter writer = new StringWriter();
+			transformer.transform(new StreamSource(new StringReader(xml)), new StreamResult(writer));
+			return writer.toString();
+		}
+		catch (TransformerException e)
+		{
+			throw new RuntimeException(e);
+		}
 	}
 
 	private void writeJson(T t, OutputStreamWriter out) throws IOException
@@ -312,22 +360,60 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		out.write("</pre>\n");
 	}
 
+	private void writeHtml(T t, OutputStreamWriter out) throws IOException
+	{
+		out.write("<div id=\"html\" class=\"prettyprint lang-html\" style=\"display:none;\">\n");
+		doWriteHtml(t, out);
+		out.write("</div>\n");
+	}
+
+	/**
+	 * Override this method to return <code>true</code> if the HTML tab should be shown. This implies overriding
+	 * {@link #doWriteHtml(BaseResource, OutputStreamWriter)} as well.
+	 *
+	 * @return <code>true</code> if the html tab should be shown, <code>false</code> otherwise (default
+	 *         <code>false</code>)
+	 */
+	protected boolean isHtmlEnabled()
+	{
+		return false;
+	}
+
+	/**
+	 * Use this method to write output to the html tab. This implies overriding {@link #isHtmlEnabled()} as well.
+	 *
+	 * @param t
+	 *            the resource, not <code>null</code>
+	 * @param out
+	 *            the outputStreamWriter, not <code>null</code>
+	 * @throws IOException
+	 */
+	protected void doWriteHtml(T t, OutputStreamWriter out) throws IOException
+	{
+	}
+
 	private Optional<String> getResourceName(T t, String uuid)
 	{
 		if (t instanceof Bundle)
-			return ((Bundle) t).getEntry().stream().filter(c ->
-			{
-				if (c.hasResource())
-					return uuid.equals(c.getResource().getIdElement().getIdPart());
-				else
-					return uuid.equals(new IdType(c.getResponse().getLocation()).getIdPart());
-			}).map(c ->
-			{
-				if (c.hasResource())
-					return c.getResource().getClass().getAnnotation(ResourceDef.class).name();
-				else
-					return new IdType(c.getResponse().getLocation()).getResourceType();
-			}).findFirst();
+		{
+			// if persistent Bundle resource
+			if (Objects.equal(uuid, t.getIdElement().getIdPart()))
+				return Optional.of(t.getClass().getAnnotation(ResourceDef.class).name());
+			else
+				return ((Bundle) t).getEntry().stream().filter(c ->
+				{
+					if (c.hasResource())
+						return uuid.equals(c.getResource().getIdElement().getIdPart());
+					else
+						return uuid.equals(new IdType(c.getResponse().getLocation()).getIdPart());
+				}).map(c ->
+				{
+					if (c.hasResource())
+						return c.getResource().getClass().getAnnotation(ResourceDef.class).name();
+					else
+						return new IdType(c.getResponse().getLocation()).getResourceType();
+				}).findFirst();
+		}
 		else if (t instanceof Resource)
 			return Optional.of(t.getClass().getAnnotation(ResourceDef.class).name());
 		else

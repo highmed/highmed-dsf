@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.highmed.dsf</groupId>
 		<artifactId>dsf-bpe-pom</artifactId>
-		<version>0.7.0</version>
+		<version>0.8.0</version>
 	</parent>
 
 	<dependencies>
@@ -85,6 +85,11 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>jul-to-slf4j</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.sun.mail</groupId>
+			<artifactId>jakarta.mail</artifactId>
 		</dependency>
 	</dependencies>
 

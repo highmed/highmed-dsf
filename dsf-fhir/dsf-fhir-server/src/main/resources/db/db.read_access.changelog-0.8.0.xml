@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+	<property name="json" value="JSONB" dbms="postgresql" />
+	<property name="json" value="varchar(5000)" dbms="h2" />
+
+	<changeSet author="retwet" id="db.read_access.changelog-0.8.0.all_resources">
+		<createView viewName="all_resources" replaceIfExists="true">
+			SELECT 
+				id
+				, version
+				, type
+				, resource
+			FROM (
+				SELECT activity_definition_id AS id, version, 'ActivityDefinition'::text AS type, activity_definition AS resource FROM current_activity_definitions
+				UNION
+				SELECT binary_id AS id, version, 'Binary'::text AS type, binary_json AS resource FROM current_binaries
+				UNION
+				SELECT bundle_id AS id, version, 'Bundle'::text AS type, bundle AS resource FROM current_bundles
+				UNION
+				SELECT code_system_id AS id, version, 'CodeSystem'::text AS type, code_system AS resource FROM current_code_systems
+				UNION
+				SELECT document_reference_id AS id, version, 'DocumentReference'::text AS type, document_reference AS resource FROM current_document_references
+				UNION
+				SELECT endpoint_id AS id, version, 'Endpoint'::text AS type, endpoint AS resource FROM current_endpoints
+				UNION
+				SELECT group_id AS id, version, 'Group'::text AS type, group_json AS resource FROM current_groups
+				UNION
+				SELECT healthcare_service_id AS id, version, 'HealthcareService'::text AS type, healthcare_service AS resource FROM current_healthcare_services
+				UNION
+				SELECT library_id AS id, version, 'Library'::text AS type, library AS resource FROM current_libraries
+				UNION
+				SELECT location_id AS id, version, 'Location'::text AS type, location AS resource FROM current_locations
+				UNION
+				SELECT measure_report_id AS id, version, 'MeasureReport'::text AS type, measure_report AS resource FROM current_measure_reports
+				UNION
+				SELECT measure_id AS id, version, 'Measure'::text AS type, measure AS resource FROM current_measures
+				UNION
+				SELECT naming_system_id AS id, version, 'NamingSystem'::text AS type, naming_system AS resource FROM current_naming_systems
+				UNION
+				SELECT organization_id AS id, version, 'Organization'::text AS type, organization AS resource FROM current_organizations
+				UNION
+				SELECT organization_affiliation_id AS id, version, 'OrganizationAffiliation'::text AS type, organization_affiliation AS resource FROM current_organization_affiliations
+				UNION
+				SELECT patient_id AS id, version, 'Patient'::text AS type, patient AS resource FROM current_patients
+				UNION
+				SELECT practitioner_role_id AS id, version, 'PractitionerRole'::text AS type, practitioner_role AS resource FROM current_practitioner_roles
+				UNION
+				SELECT practitioner_id AS id, version, 'Practitioner'::text AS type, practitioner AS resource FROM current_practitioners
+				UNION
+				SELECT provenance_id AS id, version, 'Provenance'::text AS type, provenance AS resource FROM current_provenances
+				UNION
+				SELECT questionnaire_id AS id, version, 'Questionnaire'::text AS type, questionnaire AS resource FROM current_questionnaires
+				UNION
+				SELECT questionnaire_response_id AS id, version, 'QuestionnaireResponse'::text AS type, questionnaire_response AS resource FROM current_questionnaire_responses
+				UNION
+				SELECT research_study_id AS id, version, 'ResearchStudy'::text AS type, research_study AS resource FROM current_research_studies
+				UNION
+				SELECT structure_definition_id AS id, version, 'StructureDefinition'::text AS type, structure_definition AS resource FROM current_structure_definitions
+				UNION
+				SELECT subscription_id AS id, version, 'Subscription'::text AS type, subscription AS resource FROM current_subscriptions
+				UNION
+				SELECT task_id AS id, version, 'Task'::text AS type, task AS resource FROM current_tasks
+				UNION
+				SELECT value_set_id AS id, version, 'ValueSet'::text AS type, value_set AS resource FROM current_value_sets
+			) AS current_all
+		</createView>
+		<sql dbms="postgresql">
+			ALTER TABLE all_resources OWNER TO ${db.liquibase_user};
+			GRANT ALL ON TABLE all_resources TO ${db.liquibase_user};
+			GRANT SELECT ON TABLE all_resources TO ${db.server_users_group};
+		</sql>
+	</changeSet>
+
+	<changeSet author="retwet" id="db.read_access.changelog-0.8.0.on_questionnaires_insert_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_questionnaires_insert.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="retwet" id="db.read_access.changelog-0.8.0.on_questionnaires_update_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_questionnaires_update.sql" splitStatements="false" />
+	</changeSet>
+
+	<changeSet author="retwet" id="db.read_access.changelog-0.8.0.on_questionnaire_responses_insert_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_questionnaire_responses_insert.sql" splitStatements="false" />
+	</changeSet>
+	<changeSet author="retwet" id="db.read_access.changelog-0.8.0.on_questionnaire_responses_update_function" runOnChange="true">
+		<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="trigger_functions/on_questionnaire_responses_update.sql" splitStatements="false" />
+	</changeSet>
+	
+	<changeSet author="retwet" id="db.read_access.changelog-0.8.0.on_insert_triggers">
+		<sql dbms="postgresql">
+			CREATE TRIGGER questionnaires_insert AFTER INSERT ON questionnaires FOR EACH ROW EXECUTE PROCEDURE on_questionnaires_insert();
+			CREATE TRIGGER questionnaires_update AFTER UPDATE ON questionnaires FOR EACH ROW EXECUTE PROCEDURE on_questionnaires_update();
+			CREATE TRIGGER questionnaire_responses_insert AFTER INSERT ON questionnaire_responses FOR EACH ROW EXECUTE PROCEDURE on_questionnaire_responses_insert();
+			CREATE TRIGGER questionnaire_responses_update AFTER UPDATE ON questionnaire_responses FOR EACH ROW EXECUTE PROCEDURE on_questionnaire_responses_update();
+		</sql>
+	</changeSet>
+</databaseChangeLog>
