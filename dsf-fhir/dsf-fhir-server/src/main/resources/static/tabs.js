@@ -16,17 +16,17 @@ function openTab(lang) {
         localStorage.setItem('lang', lang);
     
     if (lang == "html")
-	    lang = localStorage != null && localStorage.getItem("lang") != null ? localStorage.getItem("lang") : "xml";
-	
-	setDownloadLink(lang);
+        lang = localStorage != null && localStorage.getItem("lang") != null ? localStorage.getItem("lang") : "xml";
+
+    setDownloadLink(lang);
 }
 
 function openInitialTab(htmlEnabled) {
     if (htmlEnabled)
-	    openTab("html");
-	else {
-	    const lang = localStorage != null && localStorage.getItem("lang") != null ? localStorage.getItem("lang") : "xml";
-	    if (lang == "xml" || lang == "json")
+        openTab("html");
+    else {
+        const lang = localStorage != null && localStorage.getItem("lang") != null ? localStorage.getItem("lang") : "xml";
+        if (lang == "xml" || lang == "json")
         openTab(lang);
     }
 }
