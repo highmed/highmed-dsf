@@ -33,7 +33,19 @@ public class StructureDefinitionAuthorizationRule
 				readAccessHelper, parameterConverter);
 	}
 
-	protected Optional<String> newResourceOk(Connection connection, User user, StructureDefinition newResource)
+	@Override
+	protected Optional<String> newResourceOkForCreate(Connection connection, User user, StructureDefinition newResource)
+	{
+		return newResourceOk(connection, user, newResource);
+	}
+
+	@Override
+	protected Optional<String> newResourceOkForUpdate(Connection connection, User user, StructureDefinition newResource)
+	{
+		return newResourceOk(connection, user, newResource);
+	}
+
+	private Optional<String> newResourceOk(Connection connection, User user, StructureDefinition newResource)
 	{
 		List<String> errors = new ArrayList<String>();
 
@@ -70,6 +82,7 @@ public class StructureDefinitionAuthorizationRule
 			return Optional.of(errors.stream().collect(Collectors.joining(", ")));
 	}
 
+	@Override
 	protected boolean resourceExists(Connection connection, StructureDefinition newResource)
 	{
 		try

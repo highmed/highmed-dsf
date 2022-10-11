@@ -11,6 +11,9 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response.Status;
+
 import org.highmed.dsf.fhir.authentication.OrganizationProvider;
 import org.highmed.dsf.fhir.dao.QuestionnaireDao;
 import org.highmed.dsf.fhir.dao.QuestionnaireResponseDao;
@@ -20,6 +23,7 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
+import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.Test;
 
@@ -43,6 +47,81 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 		assertNotNull(created);
 		assertNotNull(created.getIdElement().getIdPart());
 		assertNotNull(created.getIdElement().getVersionIdPart());
+	}
+
+	@Test(expected = WebApplicationException.class)
+	public void testCreateNotAllowedByLocalUser() throws Exception
+	{
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
+		questionnaireResponse.setStatus(QuestionnaireResponseStatus.COMPLETED);
+
+		try
+		{
+			getWebserviceClient().create(questionnaireResponse);
+		}
+		catch (WebApplicationException e)
+		{
+			assertEquals(Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
+			throw e;
+		}
+	}
+
+	@Test
+	public void testUpdateAllowedByLocalUser() throws Exception
+	{
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
+		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
+
+		created.setStatus(QuestionnaireResponseStatus.COMPLETED);
+		QuestionnaireResponse updated = getWebserviceClient().update(created);
+
+		assertNotNull(updated);
+		assertNotNull(updated.getIdElement().getIdPart());
+		assertEquals(created.getIdElement().getIdPart(), updated.getIdElement().getIdPart());
+		assertNotNull(updated.getIdElement().getVersionIdPart());
+		assertEquals("2", updated.getIdElement().getVersionIdPart());
+	}
+
+	@Test(expected = WebApplicationException.class)
+	public void testUpdateNotAllowedByLocalUser() throws Exception
+	{
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
+		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
+
+		try
+		{
+			getWebserviceClient().update(created);
+		}
+		catch (WebApplicationException e)
+		{
+			assertEquals(Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
+			throw e;
+		}
+	}
+
+	@Test(expected = WebApplicationException.class)
+	public void testSecondUpdateNotAllowedByLocalUser() throws Exception
+	{
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
+		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
+		created.setStatus(QuestionnaireResponseStatus.COMPLETED);
+		QuestionnaireResponse updated = questionnaireResponseDao.update(created);
+
+		try
+		{
+			getWebserviceClient().update(updated);
+		}
+		catch (WebApplicationException e)
+		{
+			assertEquals(Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
+			throw e;
+		}
 	}
 
 	@Test

@@ -35,7 +35,19 @@ public class NamingSystemAuthorizationRule extends AbstractMetaTagAuthorizationR
 				parameterConverter);
 	}
 
-	protected Optional<String> newResourceOk(Connection connection, User user, NamingSystem newResource)
+	@Override
+	protected Optional<String> newResourceOkForCreate(Connection connection, User user, NamingSystem newResource)
+	{
+		return newResourceOk(connection, user, newResource);
+	}
+
+	@Override
+	protected Optional<String> newResourceOkForUpdate(Connection connection, User user, NamingSystem newResource)
+	{
+		return newResourceOk(connection, user, newResource);
+	}
+
+	private Optional<String> newResourceOk(Connection connection, User user, NamingSystem newResource)
 	{
 		List<String> errors = new ArrayList<String>();
 
@@ -84,6 +96,7 @@ public class NamingSystemAuthorizationRule extends AbstractMetaTagAuthorizationR
 		return uriCount == distinctUriCount;
 	}
 
+	@Override
 	protected boolean resourceExists(Connection connection, NamingSystem newResource)
 	{
 		try

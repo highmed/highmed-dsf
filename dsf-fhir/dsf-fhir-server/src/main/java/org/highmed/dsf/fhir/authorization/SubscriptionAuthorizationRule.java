@@ -41,7 +41,19 @@ public class SubscriptionAuthorizationRule extends AbstractMetaTagAuthorizationR
 				parameterConverter);
 	}
 
-	protected Optional<String> newResourceOk(Connection connection, User user, Subscription newResource)
+	@Override
+	protected Optional<String> newResourceOkForCreate(Connection connection, User user, Subscription newResource)
+	{
+		return newResourceOk(connection, user, newResource);
+	}
+
+	@Override
+	protected Optional<String> newResourceOkForUpdate(Connection connection, User user, Subscription newResource)
+	{
+		return newResourceOk(connection, user, newResource);
+	}
+
+	private Optional<String> newResourceOk(Connection connection, User user, Subscription newResource)
 	{
 		List<String> errors = new ArrayList<String>();
 
@@ -111,6 +123,7 @@ public class SubscriptionAuthorizationRule extends AbstractMetaTagAuthorizationR
 			return Optional.of(errors.stream().collect(Collectors.joining(", ")));
 	}
 
+	@Override
 	protected boolean resourceExists(Connection connection, Subscription newResource)
 	{
 		Map<String, List<String>> queryParameters = Map.of("criteria",

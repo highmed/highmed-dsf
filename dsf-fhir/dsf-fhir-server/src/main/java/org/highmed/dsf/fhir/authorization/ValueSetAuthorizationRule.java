@@ -32,7 +32,19 @@ public class ValueSetAuthorizationRule extends AbstractMetaTagAuthorizationRule<
 				parameterConverter);
 	}
 
-	protected Optional<String> newResourceOk(Connection connection, User user, ValueSet newResource)
+	@Override
+	protected Optional<String> newResourceOkForCreate(Connection connection, User user, ValueSet newResource)
+	{
+		return newResourceOk(connection, user, newResource);
+	}
+
+	@Override
+	protected Optional<String> newResourceOkForUpdate(Connection connection, User user, ValueSet newResource)
+	{
+		return newResourceOk(connection, user, newResource);
+	}
+
+	private Optional<String> newResourceOk(Connection connection, User user, ValueSet newResource)
 	{
 		List<String> errors = new ArrayList<String>();
 
@@ -69,6 +81,7 @@ public class ValueSetAuthorizationRule extends AbstractMetaTagAuthorizationRule<
 			return Optional.of(errors.stream().collect(Collectors.joining(", ")));
 	}
 
+	@Override
 	protected boolean resourceExists(Connection connection, ValueSet newResource)
 	{
 		try

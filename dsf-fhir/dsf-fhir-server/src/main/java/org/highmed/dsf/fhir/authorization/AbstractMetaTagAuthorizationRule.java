@@ -56,7 +56,7 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 	{
 		if (isLocalUser(user))
 		{
-			Optional<String> errors = newResourceOk(connection, user, newResource);
+			Optional<String> errors = newResourceOkForCreate(connection, user, newResource);
 			if (errors.isEmpty())
 			{
 				if (!resourceExists(connection, newResource))
@@ -86,7 +86,7 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 
 	protected abstract boolean resourceExists(Connection connection, R newResource);
 
-	protected abstract Optional<String> newResourceOk(Connection connection, User user, R newResource);
+	protected abstract Optional<String> newResourceOkForCreate(Connection connection, User user, R newResource);
 
 	@Override
 	public final Optional<String> reasonReadAllowed(Connection connection, User user, R existingResource)
@@ -123,12 +123,14 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 		}
 	}
 
+	protected abstract Optional<String> newResourceOkForUpdate(Connection connection, User user, R newResource);
+
 	@Override
 	public final Optional<String> reasonUpdateAllowed(Connection connection, User user, R oldResource, R newResource)
 	{
 		if (isLocalUser(user))
 		{
-			Optional<String> errors = newResourceOk(connection, user, newResource);
+			Optional<String> errors = newResourceOkForUpdate(connection, user, newResource);
 			if (errors.isEmpty())
 			{
 				if (modificationsOk(connection, oldResource, newResource))
@@ -158,7 +160,7 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 
 	/**
 	 * No need to check if the new resource is valid, will be checked by
-	 * {@link #newResourceOk(Connection, User, Resource)}
+	 * {@link #newResourceOkForUpdate(Connection, User, Resource)}
 	 *
 	 * @param connection
 	 *            not <code>null</code>
