@@ -330,9 +330,6 @@ services:
       source: ./medic1/bpe/log
       target: /opt/bpe/log
     - type: bind
-      source: ./medic1/bpe/last_event
-      target: /opt/bpe/last_event
-    - type: bind
       source: ./medic1/bpe/psn
       target: /opt/bpe/psn
     environment:
@@ -399,9 +396,6 @@ services:
       source: ./medic2/bpe/log
       target: /opt/bpe/log
     - type: bind
-      source: ./medic2/bpe/last_event
-      target: /opt/bpe/last_event
-    - type: bind
       source: ./medic2/bpe/psn
       target: /opt/bpe/psn
     environment:
@@ -467,9 +461,6 @@ services:
     - type: bind
       source: ./medic3/bpe/log
       target: /opt/bpe/log
-    - type: bind
-      source: ./medic3/bpe/last_event
-      target: /opt/bpe/last_event
     - type: bind
       source: ./medic3/bpe/psn
       target: /opt/bpe/psn
@@ -541,9 +532,6 @@ services:
     - type: bind
       source: ./ttp/bpe/log
       target: /opt/bpe/log
-    - type: bind
-      source: ./ttp/bpe/last_event
-      target: /opt/bpe/last_event
     - type: bind
       source: ./ttp/bpe/psn
       target: /opt/bpe/psn

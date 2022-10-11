@@ -31,9 +31,6 @@ services:
         source: ./log
         target: /opt/bpe/log
       - type: bind
-        source: ./last_event
-        target: /opt/bpe/last_event
-      - type: bind
         source: ./psn
         target: /opt/bpe/psn
     environment:

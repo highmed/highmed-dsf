@@ -1,6 +1,8 @@
 package org.highmed.dsf.bpe.spring.config;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.highmed.dsf.bpe.dao.LastEventTimeDao;
+import org.highmed.dsf.bpe.dao.LastEventTimeDaoJdbc;
 import org.highmed.dsf.bpe.dao.ProcessPluginResourcesDao;
 import org.highmed.dsf.bpe.dao.ProcessPluginResourcesDaoJdbc;
 import org.highmed.dsf.bpe.dao.ProcessStateDao;
@@ -46,5 +48,17 @@ public class DaoConfig
 	public ProcessStateDao processStateDao()
 	{
 		return new ProcessStateDaoJdbc(dataSource());
+	}
+
+	@Bean
+	public LastEventTimeDao lastEventTimeDaoTask()
+	{
+		return new LastEventTimeDaoJdbc(dataSource(), "Task");
+	}
+
+	@Bean
+	public LastEventTimeDao lastEventTimeDaoQuestionnaireResponse()
+	{
+		return new LastEventTimeDaoJdbc(dataSource(), "QuestionnaireResponse");
 	}
 }
