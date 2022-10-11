@@ -1,8 +1,14 @@
 package org.highmed.dsf.fhir.task;
 
+import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_LEADING_TASK;
+import static org.highmed.dsf.bpe.ConstantsBase.BPMN_EXECUTION_VARIABLE_TASK;
+
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.highmed.dsf.fhir.variables.FhirResourceValues;
 import org.hl7.fhir.r4.model.Base64BinaryType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -143,5 +149,60 @@ public class TaskHelperImpl implements TaskHelper
 	public TaskOutputComponent createOutput(String system, String code, Reference reference)
 	{
 		return new TaskOutputComponent(new CodeableConcept(new Coding(system, code, null)), reference);
+	}
+
+	@Override
+	public Task getTask(DelegateExecution execution)
+	{
+		if (execution == null)
+			throw new IllegalStateException("execution not started");
+
+		return execution.getParentId() == null || execution.getParentId().equals(execution.getProcessInstanceId())
+				? getLeadingTaskFromExecutionVariables(execution)
+				: getCurrentTaskFromExecutionVariables(execution);
+	}
+
+	@Override
+	public Task getCurrentTaskFromExecutionVariables(DelegateExecution execution)
+	{
+		if (execution == null)
+			throw new IllegalStateException("execution not started");
+
+		return (Task) execution.getVariable(BPMN_EXECUTION_VARIABLE_TASK);
+	}
+
+	@Override
+	public Task getLeadingTaskFromExecutionVariables(DelegateExecution execution)
+	{
+		if (execution == null)
+			throw new IllegalStateException("execution not started");
+
+		Task leadingTask = (Task) execution.getVariable(BPMN_EXECUTION_VARIABLE_LEADING_TASK);
+		return leadingTask != null ? leadingTask : getCurrentTaskFromExecutionVariables(execution);
+	}
+
+	@Override
+	public void updateCurrentTaskInExecutionVariables(DelegateExecution execution, Task task)
+	{
+		if (execution == null)
+			throw new IllegalStateException("execution not started");
+
+		Objects.requireNonNull(task, "task");
+		execution.setVariable(BPMN_EXECUTION_VARIABLE_TASK, FhirResourceValues.create(task));
+	}
+
+	@Override
+	public void updateLeadingTaskInExecutionVariables(DelegateExecution execution, Task task)
+	{
+		if (execution == null)
+			throw new IllegalStateException("execution not started");
+
+		Objects.requireNonNull(task, "task");
+		Task leadingTask = (Task) execution.getVariable(BPMN_EXECUTION_VARIABLE_LEADING_TASK);
+
+		if (leadingTask != null)
+			execution.setVariable(BPMN_EXECUTION_VARIABLE_LEADING_TASK, FhirResourceValues.create(task));
+		else
+			updateCurrentTaskInExecutionVariables(execution, task);
 	}
 }

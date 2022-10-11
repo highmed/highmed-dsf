@@ -1,0 +1,192 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+  <meta>
+    <tag>
+      <system value="http://highmed.org/fhir/CodeSystem/read-access-tag"/>
+      <code value="ALL"/>
+    </tag>
+  </meta>
+  <url value="http://highmed.org/fhir/StructureDefinition/questionnaire-response"/>
+  <version value="0.8.0"/>
+  <name value="QuestionnaireResponse"/>
+  <status value="active"/>
+  <experimental value="false"/>
+  <date value="2022-10-11"/>
+  <fhirVersion value="4.0.1"/>
+  <kind value="resource"/>
+  <abstract value="true"/>
+  <type value="QuestionnaireResponse"/>
+  <baseDefinition value="http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse"/>
+  <derivation value="constraint"/>
+  <differential>
+    <element id="QuestionnaireResponse">
+      <path value="QuestionnaireResponse"/>
+      <constraint>
+        <key value="authored-if-completed"/>
+        <severity value="error"/>
+        <human value="Authored must be set if QuestionnaireResponse.status equals completed"/>
+        <expression value="(%resource.status = 'completed') implies authored.exists()"/>
+      </constraint>
+      <constraint>
+        <key value="author-if-completed"/>
+        <severity value="error"/>
+        <human value="Author must be set if QuestionnaireResponse.status equals completed"/>
+        <expression value="((%resource.status = 'completed') implies author.exists()) and ((%resource.status = 'completed') implies author.identifier.exists())"/>
+      </constraint>
+    </element>
+    <element id="QuestionnaireResponse.questionnaire">
+      <path value="QuestionnaireResponse.questionnaire"/>
+      <min value="1"/>
+    </element>
+    <!-- TODO: QuestionnaireResponse.author must be of highmed-organization profile -->
+    <element id="QuestionnaireResponse.item">
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="Parameter"/>
+      </extension>
+      <path value="QuestionnaireResponse.item"/>
+      <slicing>
+        <discriminator>
+          <type value="value"/>
+          <path value="linkId"/>
+        </discriminator>
+        <rules value="closed"/>
+      </slicing>
+      <min value="3"/>
+    </element>
+    <element id="QuestionnaireResponse.item:business-key">
+      <path value="QuestionnaireResponse.item"/>
+      <sliceName value="business-key"/>
+      <min value="1"/>
+      <max value="1"/>
+    </element>
+    <element id="QuestionnaireResponse.item:business-key.linkId">
+      <path value="QuestionnaireResponse.item.linkId"/>
+      <fixedString value="business-key"/>
+    </element>
+    <element id="QuestionnaireResponse.item:business-key.definition">
+      <path value="QuestionnaireResponse.item.definition"/>
+      <max value="0"/>
+    </element>
+    <element id="QuestionnaireResponse.item:business-key.text">
+      <path value="QuestionnaireResponse.item.text"/>
+      <min value="1"/>
+      <fixedString value="The business-key of the process execution"/>
+    </element>
+    <element id="QuestionnaireResponse.item:business-key.answer">
+      <path value="QuestionnaireResponse.item.answer"/>
+      <min value="1"/>
+      <max value="1"/>
+    </element>
+    <element id="QuestionnaireResponse.item:business-key.answer.value[x]">
+      <path value="QuestionnaireResponse.item.answer.value[x]"/>
+      <min value="1"/>
+      <type>
+        <code value="string"/>
+      </type>
+    </element>
+    <element id="QuestionnaireResponse.item:business-key.answer.item">
+      <path value="QuestionnaireResponse.item.answer.item"/>
+      <max value="0"/>
+    </element>
+    <element id="QuestionnaireResponse.item:business-key.item">
+      <path value="QuestionnaireResponse.item.item"/>
+      <max value="0"/>
+    </element>
+    <element id="QuestionnaireResponse.item:user-task-id">
+      <path value="QuestionnaireResponse.item"/>
+      <sliceName value="user-task-id"/>
+      <min value="1"/>
+      <max value="1"/>
+    </element>
+    <element id="QuestionnaireResponse.item:user-task-id.linkId">
+      <path value="QuestionnaireResponse.item.linkId"/>
+      <fixedString value="user-task-id"/>
+    </element>
+    <element id="QuestionnaireResponse.item:user-task-id.definition">
+      <path value="QuestionnaireResponse.item.definition"/>
+      <max value="0"/>
+    </element>
+    <element id="QuestionnaireResponse.item:user-task-id.text">
+      <path value="QuestionnaireResponse.item.text"/>
+      <min value="1"/>
+      <fixedString value="The user-task-id of the process execution"/>
+    </element>
+    <element id="QuestionnaireResponse.item:user-task-id.answer">
+      <path value="QuestionnaireResponse.item.answer"/>
+      <min value="1"/>
+      <max value="1"/>
+    </element>
+    <element id="QuestionnaireResponse.item:user-task-id.answer.value[x]">
+      <path value="QuestionnaireResponse.item.answer.value[x]"/>
+      <min value="1"/>
+      <type>
+        <code value="string"/>
+      </type>
+    </element>
+    <element id="QuestionnaireResponse.item:user-task-id.answer.item">
+      <path value="QuestionnaireResponse.item.answer.item"/>
+      <max value="0"/>
+    </element>
+    <element id="QuestionnaireResponse.item:user-task-id.item">
+      <path value="QuestionnaireResponse.item.item"/>
+      <max value="0"/>
+    </element>
+    <element id="QuestionnaireResponse.item:@default">
+      <path value="QuestionnaireResponse.item"/>
+      <sliceName value="@default"/>
+      <min value="1"/>
+      <max value="*"/>
+    </element>
+    <element id="QuestionnaireResponse.item:@default.definition">
+      <path value="QuestionnaireResponse.item.definition"/>
+      <max value="0"/>
+    </element>
+    <element id="QuestionnaireResponse.item:@default.text">
+      <path value="QuestionnaireResponse.item.text"/>
+      <min value="1"/>
+    </element>
+    <element id="QuestionnaireResponse.item:@default.answer">
+      <path value="QuestionnaireResponse.item.answer"/>
+      <min value="1"/>
+      <max value="1"/>
+    </element>
+    <element id="QuestionnaireResponse.item:@default.answer.value[x]">
+      <path value="QuestionnaireResponse.item.answer.value[x]"/>
+      <min value="1"/>
+      <type>
+        <code value="string"/>
+      </type>
+      <type>
+        <code value="integer"/>
+      </type>
+      <type>
+        <code value="decimal"/>
+      </type>
+      <type>
+        <code value="boolean"/>
+      </type>
+      <type>
+        <code value="date"/>
+      </type>
+      <type>
+        <code value="time"/>
+      </type>
+      <type>
+        <code value="dateTime"/>
+      </type>
+      <type>
+        <code value="uri"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+      </type>
+    </element>
+    <element id="QuestionnaireResponse.item:@default.answer.item">
+      <path value="QuestionnaireResponse.item.answer.item"/>
+      <max value="0"/>
+    </element>
+    <element id="QuestionnaireResponse.item:@default.item">
+      <path value="QuestionnaireResponse.item.item"/>
+      <max value="0"/>
+    </element>
+  </differential>
+</StructureDefinition>

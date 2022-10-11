@@ -25,7 +25,19 @@ public class MeasureAuthorizationRule extends AbstractMetaTagAuthorizationRule<M
 				parameterConverter);
 	}
 
-	protected Optional<String> newResourceOk(Connection connection, User user, Measure newResource)
+	@Override
+	protected Optional<String> newResourceOkForCreate(Connection connection, User user, Measure newResource)
+	{
+		return newResourceOk(connection, user, newResource);
+	}
+
+	@Override
+	protected Optional<String> newResourceOkForUpdate(Connection connection, User user, Measure newResource)
+	{
+		return newResourceOk(connection, user, newResource);
+	}
+
+	private Optional<String> newResourceOk(Connection connection, User user, Measure newResource)
 	{
 		List<String> errors = new ArrayList<String>();
 

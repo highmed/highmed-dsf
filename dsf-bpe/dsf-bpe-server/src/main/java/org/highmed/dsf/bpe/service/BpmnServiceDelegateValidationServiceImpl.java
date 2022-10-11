@@ -7,12 +7,18 @@ import org.camunda.bpm.engine.ProcessEngine;
 import org.camunda.bpm.engine.RepositoryService;
 import org.camunda.bpm.engine.repository.ProcessDefinition;
 import org.camunda.bpm.model.bpmn.instance.EndEvent;
+import org.camunda.bpm.model.bpmn.instance.ExtensionElements;
+import org.camunda.bpm.model.bpmn.instance.FlowNode;
 import org.camunda.bpm.model.bpmn.instance.IntermediateThrowEvent;
 import org.camunda.bpm.model.bpmn.instance.MessageEventDefinition;
 import org.camunda.bpm.model.bpmn.instance.Process;
 import org.camunda.bpm.model.bpmn.instance.SendTask;
 import org.camunda.bpm.model.bpmn.instance.ServiceTask;
 import org.camunda.bpm.model.bpmn.instance.SubProcess;
+import org.camunda.bpm.model.bpmn.instance.UserTask;
+import org.camunda.bpm.model.bpmn.instance.camunda.CamundaExecutionListener;
+import org.camunda.bpm.model.bpmn.instance.camunda.CamundaTaskListener;
+import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 import org.highmed.dsf.bpe.delegate.DelegateProvider;
 import org.highmed.dsf.bpe.process.ProcessKeyAndVersion;
 import org.slf4j.Logger;
@@ -60,50 +66,48 @@ public class BpmnServiceDelegateValidationServiceImpl implements BpmnServiceDele
 	{
 		logger.debug("Checking bean availability for process {}/{}", process.getId(), process.getCamundaVersionTag());
 
-		process.getChildElementsByType(ServiceTask.class).stream().filter(t -> t != null).map(t -> t.getCamundaClass())
-				.forEach(c -> validateBeanAvailability(process, c));
-
-		process.getChildElementsByType(SendTask.class).stream().filter(t -> t != null).map(t -> t.getCamundaClass())
-				.forEach(c -> validateBeanAvailability(process, c));
-
-		process.getChildElementsByType(IntermediateThrowEvent.class).stream().filter(e -> e != null)
-				.flatMap(e -> e.getEventDefinitions().stream()
-						.filter(def -> def != null && def instanceof MessageEventDefinition))
-				.map(def -> (MessageEventDefinition) def).map(def -> def.getCamundaClass())
-				.forEach(c -> validateBeanAvailability(process, c));
-
-		process.getChildElementsByType(EndEvent.class).stream().filter(e -> e != null)
-				.flatMap(e -> e.getEventDefinitions().stream()
-						.filter(def -> def != null && def instanceof MessageEventDefinition))
-				.map(def -> (MessageEventDefinition) def).map(def -> def.getCamundaClass())
-				.forEach(c -> validateBeanAvailability(process, c));
-
-		process.getChildElementsByType(SubProcess.class).stream().filter(s -> s != null)
-				.forEach(sp -> validateBeanAvailabilityForSubProcess(process, sp));
+		validateBeanAvailabilityForProcess(process, process);
 	}
 
-	private void validateBeanAvailabilityForSubProcess(Process process, SubProcess sProcess)
+	private void validateBeanAvailabilityForProcess(ModelElementInstance parent, Process process)
 	{
-		sProcess.getChildElementsByType(ServiceTask.class).stream().filter(t -> t != null).map(t -> t.getCamundaClass())
+		// service tasks
+		parent.getChildElementsByType(ServiceTask.class).stream().filter(t -> t != null)
+				.map(ServiceTask::getCamundaClass).forEach(c -> validateBeanAvailability(process, c));
+
+		// send tasks
+		parent.getChildElementsByType(SendTask.class).stream().filter(t -> t != null).map(SendTask::getCamundaClass)
 				.forEach(c -> validateBeanAvailability(process, c));
 
-		sProcess.getChildElementsByType(SendTask.class).stream().filter(t -> t != null).map(t -> t.getCamundaClass())
-				.forEach(c -> validateBeanAvailability(process, c));
+		// user tasks: task listeners
+		parent.getChildElementsByType(UserTask.class).stream().filter(t -> t != null)
+				.flatMap(u -> u.getChildElementsByType(ExtensionElements.class).stream()).filter(e -> e != null)
+				.flatMap(e -> e.getChildElementsByType(CamundaTaskListener.class).stream()).filter(t -> t != null)
+				.map(CamundaTaskListener::getCamundaClass).forEach(c -> validateBeanAvailability(process, c));
 
-		sProcess.getChildElementsByType(IntermediateThrowEvent.class).stream().filter(e -> e != null)
+		// all elements: execution listeners
+		parent.getChildElementsByType(FlowNode.class).stream().filter(t -> t != null)
+				.flatMap(u -> u.getChildElementsByType(ExtensionElements.class).stream()).filter(e -> e != null)
+				.flatMap(e -> e.getChildElementsByType(CamundaExecutionListener.class).stream()).filter(t -> t != null)
+				.map(CamundaExecutionListener::getCamundaClass).forEach(c -> validateBeanAvailability(process, c));
+
+		// intermediate message throw events
+		parent.getChildElementsByType(IntermediateThrowEvent.class).stream().filter(e -> e != null)
 				.flatMap(e -> e.getEventDefinitions().stream()
 						.filter(def -> def != null && def instanceof MessageEventDefinition))
-				.map(def -> (MessageEventDefinition) def).map(def -> def.getCamundaClass())
+				.map(def -> (MessageEventDefinition) def).map(MessageEventDefinition::getCamundaClass)
 				.forEach(c -> validateBeanAvailability(process, c));
 
-		sProcess.getChildElementsByType(EndEvent.class).stream().filter(e -> e != null)
+		// end events
+		parent.getChildElementsByType(EndEvent.class).stream().filter(e -> e != null)
 				.flatMap(e -> e.getEventDefinitions().stream()
 						.filter(def -> def != null && def instanceof MessageEventDefinition))
-				.map(def -> (MessageEventDefinition) def).map(def -> def.getCamundaClass())
+				.map(def -> (MessageEventDefinition) def).map(MessageEventDefinition::getCamundaClass)
 				.forEach(c -> validateBeanAvailability(process, c));
 
-		sProcess.getChildElementsByType(SubProcess.class).stream().filter(s -> s != null)
-				.forEach(sp -> validateBeanAvailabilityForSubProcess(process, sp));
+		// sub processes
+		parent.getChildElementsByType(SubProcess.class).stream().filter(s -> s != null)
+				.forEach(subProcess -> validateBeanAvailabilityForProcess(subProcess, process));
 	}
 
 	private void validateBeanAvailability(Process process, String className)

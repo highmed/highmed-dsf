@@ -2,7 +2,7 @@ version: '3.8'
 services:
   app:
     image: highmed/bpe
-    restart: on-failure
+    restart: "no"
 #    ports:
 #      - 127.0.0.1:5002:5002
     healthcheck:
@@ -59,7 +59,7 @@ services:
 
   db:
     image: postgres:13
-    restart: on-failure
+    restart: "no"
 #    ports:
 #      - 127.0.0.1:5432:5432
     healthcheck:

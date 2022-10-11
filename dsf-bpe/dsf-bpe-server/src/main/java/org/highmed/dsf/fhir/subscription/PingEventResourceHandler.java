@@ -1,20 +1,21 @@
-package org.highmed.dsf.fhir.websocket;
+package org.highmed.dsf.fhir.subscription;
 
 import java.util.List;
 import java.util.Map;
 
+import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PingEventHandler
+public class PingEventResourceHandler<R extends Resource>
 {
-	private static final Logger logger = LoggerFactory.getLogger(PingEventHandler.class);
+	private static final Logger logger = LoggerFactory.getLogger(PingEventResourceHandler.class);
 
-	private final ExistingTaskLoader taskLoader;
+	private final ExistingResourceLoader<R> loader;
 
-	public PingEventHandler(ExistingTaskLoader taskLoader)
+	public PingEventResourceHandler(ExistingResourceLoader<R> loader)
 	{
-		this.taskLoader = taskLoader;
+		this.loader = loader;
 	}
 
 	public void onPing(String ping, String subscriptionIdPart, Map<String, List<String>> searchCriteriaQueryParameters)
@@ -27,6 +28,6 @@ public class PingEventHandler
 			return;
 		}
 
-		taskLoader.readExistingTasks(searchCriteriaQueryParameters);
+		loader.readExistingResources(searchCriteriaQueryParameters);
 	}
 }

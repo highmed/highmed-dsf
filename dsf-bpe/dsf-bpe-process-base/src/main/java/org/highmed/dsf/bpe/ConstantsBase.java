@@ -16,6 +16,8 @@ public interface ConstantsBase
 	String BPMN_EXECUTION_VARIABLE_TTP_IDENTIFIER = "ttpIdentifier";
 	String BPMN_EXECUTION_VARIABLE_LEADING_MEDIC_IDENTIFIER = "leadingMedicIdentifier";
 	String BPMN_EXECUTION_VARIABLE_ALTERNATIVE_BUSINESS_KEY = "alternativeBusinessKey";
+	String BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_RESPONSE_ID = "questionnaireResponseId";
+	String BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_RESPONSE_COMPLETED = "questionnaireResponseCompleted";
 
 	/**
 	 * Used to distinguish if I am at the moment in a process called by another process by a CallActivity or not
@@ -37,6 +39,10 @@ public interface ConstantsBase
 	String CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY = "business-key";
 	String CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY = "correlation-key";
 	String CODESYSTEM_HIGHMED_BPMN_VALUE_ERROR = "error";
+
+	String CODESYSTEM_HIGHMED_BPMN_USER_TASK = "http://highmed.org/fhir/CodeSystem/bpmn-user-task";
+	String CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY = "business-key";
+	String CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID = "user-task-id";
 
 	/**
 	 * @deprecated as of release 0.6.0, use {@link #CODESYSTEM_HIGHMED_ORGANIZATION_ROLE} instead

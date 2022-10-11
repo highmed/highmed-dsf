@@ -56,7 +56,7 @@ dsf-docker-test-setup-3medic-ttp/**/fhir/.env
 ###
 # dsf-docker-test-setup-3medic-ttp-docker ignores
 ###
-dsf-docker-test-setup-3medic-ttp-docker/**/bpe/last_event/time.file
+dsf-docker-test-setup-3medic-ttp-docker/**/bpe/last_event/*.file
 dsf-docker-test-setup-3medic-ttp-docker/**/bpe/log/*.log
 dsf-docker-test-setup-3medic-ttp-docker/**/bpe/log/*.log.gz
 dsf-docker-test-setup-3medic-ttp-docker/**/bpe/plugin/*.jar

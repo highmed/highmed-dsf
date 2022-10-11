@@ -74,6 +74,14 @@ import org.highmed.dsf.fhir.search.parameters.PractitionerRoleActive;
 import org.highmed.dsf.fhir.search.parameters.PractitionerRoleIdentifier;
 import org.highmed.dsf.fhir.search.parameters.PractitionerRoleOrganization;
 import org.highmed.dsf.fhir.search.parameters.PractitionerRolePractitioner;
+import org.highmed.dsf.fhir.search.parameters.QuestionnaireDate;
+import org.highmed.dsf.fhir.search.parameters.QuestionnaireIdentifier;
+import org.highmed.dsf.fhir.search.parameters.QuestionnaireResponseAuthored;
+import org.highmed.dsf.fhir.search.parameters.QuestionnaireResponseIdentifier;
+import org.highmed.dsf.fhir.search.parameters.QuestionnaireResponseStatus;
+import org.highmed.dsf.fhir.search.parameters.QuestionnaireStatus;
+import org.highmed.dsf.fhir.search.parameters.QuestionnaireUrl;
+import org.highmed.dsf.fhir.search.parameters.QuestionnaireVersion;
 import org.highmed.dsf.fhir.search.parameters.ResearchStudyEnrollment;
 import org.highmed.dsf.fhir.search.parameters.ResearchStudyIdentifier;
 import org.highmed.dsf.fhir.search.parameters.ResearchStudyPrincipalInvestigator;
@@ -152,6 +160,8 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Provenance;
+import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
@@ -297,8 +307,8 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 				DocumentReference.class, Endpoint.class, Group.class, HealthcareService.class, Library.class,
 				Location.class, Measure.class, MeasureReport.class, NamingSystem.class, Organization.class,
 				OrganizationAffiliation.class, Patient.class, PractitionerRole.class, Practitioner.class,
-				Provenance.class, ResearchStudy.class, StructureDefinition.class, Subscription.class, Task.class,
-				ValueSet.class);
+				Provenance.class, Questionnaire.class, QuestionnaireResponse.class, ResearchStudy.class,
+				StructureDefinition.class, Subscription.class, Task.class, ValueSet.class);
 
 		var searchParameters = new HashMap<Class<? extends Resource>, List<Class<? extends AbstractSearchParameter<?>>>>();
 		var revIncludeParameters = new HashMap<Class<? extends Resource>, List<Class<? extends AbstractRevIncludeParameterFactory>>>();
@@ -359,6 +369,12 @@ public class ConformanceServiceImpl extends AbstractBasicService implements Conf
 		searchParameters.put(PractitionerRole.class,
 				Arrays.asList(PractitionerRoleActive.class, PractitionerRoleIdentifier.class,
 						PractitionerRoleOrganization.class, PractitionerRolePractitioner.class));
+
+		searchParameters.put(Questionnaire.class, Arrays.asList(QuestionnaireDate.class, QuestionnaireIdentifier.class,
+				QuestionnaireStatus.class, QuestionnaireUrl.class, QuestionnaireVersion.class));
+
+		searchParameters.put(QuestionnaireResponse.class, Arrays.asList(QuestionnaireResponseAuthored.class,
+				QuestionnaireResponseIdentifier.class, QuestionnaireResponseStatus.class));
 
 		searchParameters.put(ResearchStudy.class, Arrays.asList(ResearchStudyIdentifier.class,
 				ResearchStudyEnrollment.class, ResearchStudyPrincipalInvestigator.class));

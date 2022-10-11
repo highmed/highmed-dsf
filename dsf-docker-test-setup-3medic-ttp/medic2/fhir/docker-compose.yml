@@ -2,7 +2,7 @@ version: '3.8'
 services:
   proxy:
     image: registry:5000/highmed/fhir_proxy
-    restart: on-failure
+    restart: "no"
     ports:
       - 80:80
       - 443:443
@@ -29,7 +29,7 @@ services:
 
   app:
     image: registry:5000/highmed/fhir
-    restart: on-failure
+    restart: "no"
     healthcheck:
       test: ["CMD", "java", "-cp", "dsf_fhir.jar", "org.highmed.dsf.fhir.StatusClient"]
       interval: 10s
@@ -84,7 +84,7 @@ services:
 
   db:
     image: postgres:13
-    restart: on-failure
+    restart: "no"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U liquibase_user -d fhir"]
       interval: 10s
