@@ -12,36 +12,34 @@ function openTab(lang) {
     document.getElementById(lang).style.display = "block";
     document.getElementById(lang + "-button").className += " active";
 
-    if (localStorage != null)
-        localStorage.setItem('lang-' + getResourceTypeForCurrentUrl(), lang);
-
-    enableAndSetDownloadLink(lang);
+    if (lang != "html" && localStorage != null)
+        localStorage.setItem('lang', lang);
+    
+    if (lang == "html")
+	    lang = localStorage != null && localStorage.getItem("lang") != null ? localStorage.getItem("lang") : "xml";
+	
+	setDownloadLink(lang);
 }
 
-function openInitialTab(initialLang) {
-    let resourceType = getResourceTypeForCurrentUrl();
-
-    const lang = localStorage != null && localStorage.getItem("lang-" + resourceType) != null ? localStorage.getItem("lang-" + resourceType) : initialLang;
-    if (lang === "xml" || lang === "json" || lang === "html")
+function openInitialTab(htmlEnabled) {
+    if (htmlEnabled)
+	    openTab("html");
+	else {
+	    const lang = localStorage != null && localStorage.getItem("lang") != null ? localStorage.getItem("lang") : "xml";
+	    if (lang == "xml" || lang == "json")
         openTab(lang);
+    }
 }
 
-function enableAndSetDownloadLink(lang) {
+function setDownloadLink(lang) {
+    const searchParams = new URLSearchParams(document.location.search);
+    searchParams.set('_format', lang);
+    searchParams.set('_pretty', 'true');
+
     const downloadLink = document.getElementById('download-link');
-
-    if (lang === "xml" || lang === "json") {
-        downloadLink.style.display = "inline";
-
-        const searchParams = new URLSearchParams(document.location.search);
-        searchParams.set('_format', lang);
-        searchParams.set('_pretty', 'true');
-
-        downloadLink.href = '?' + searchParams.toString();
-        downloadLink.download = getDownloadFileName(lang);
-        downloadLink.title = 'Download as ' + lang.toUpperCase();
-    } else {
-        downloadLink.style.display = "none";
-    }
+    downloadLink.href = '?' + searchParams.toString();
+    downloadLink.download = getDownloadFileName(lang);
+    downloadLink.title = 'Download as ' + lang.toUpperCase();
 }
 
 function getDownloadFileName(lang) {
