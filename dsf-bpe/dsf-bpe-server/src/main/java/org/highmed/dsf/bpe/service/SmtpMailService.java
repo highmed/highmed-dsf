@@ -300,6 +300,10 @@ public class SmtpMailService implements MailService, InitializingBean
 			};
 
 			properties.put("mail.smtp.auth", "true");
+
+			if (!useSmtps)
+				logger.warn(
+						"Username/Password configured, SMTPS not enabled. Password will be send without encryption! Consider activating/using SMTP over TLS (aka SMTPS)");
 		}
 
 		if (useSmtps)
