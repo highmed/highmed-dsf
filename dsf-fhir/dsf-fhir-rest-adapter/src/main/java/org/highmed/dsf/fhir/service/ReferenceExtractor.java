@@ -21,6 +21,8 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Provenance;
+import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StructureDefinition;
@@ -72,6 +74,10 @@ public interface ReferenceExtractor
 	Stream<ResourceReference> getReferences(PractitionerRole resource);
 
 	Stream<ResourceReference> getReferences(Provenance resource);
+
+	Stream<ResourceReference> getReferences(Questionnaire resource);
+
+	Stream<ResourceReference> getReferences(QuestionnaireResponse resource);
 
 	Stream<ResourceReference> getReferences(ResearchStudy resource);
 

@@ -25,7 +25,19 @@ public class ProvenanceAuthorizationRule extends AbstractMetaTagAuthorizationRul
 				parameterConverter);
 	}
 
-	protected Optional<String> newResourceOk(Connection connection, User user, Provenance newResource)
+	@Override
+	protected Optional<String> newResourceOkForCreate(Connection connection, User user, Provenance newResource)
+	{
+		return newResourceOk(connection, user, newResource);
+	}
+
+	@Override
+	protected Optional<String> newResourceOkForUpdate(Connection connection, User user, Provenance newResource)
+	{
+		return newResourceOk(connection, user, newResource);
+	}
+
+	private Optional<String> newResourceOk(Connection connection, User user, Provenance newResource)
 	{
 		List<String> errors = new ArrayList<String>();
 

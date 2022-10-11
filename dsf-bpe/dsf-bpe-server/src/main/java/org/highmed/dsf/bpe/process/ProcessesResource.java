@@ -15,6 +15,7 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.NamingSystem;
+import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 
@@ -30,13 +31,15 @@ public final class ProcessesResource
 			return from((CodeSystem) resource);
 		else if (resource instanceof NamingSystem)
 			return from((NamingSystem) resource);
+		else if (resource instanceof Questionnaire)
+			return from((Questionnaire) resource);
 		else if (resource instanceof StructureDefinition)
 			return from((StructureDefinition) resource);
 		else if (resource instanceof ValueSet)
 			return from((ValueSet) resource);
 		else
 			throw new IllegalArgumentException(
-					"MetadataResource of type" + resource.getClass().getName() + " not supported");
+					"MetadataResource of type " + resource.getClass().getName() + " not supported");
 	}
 
 	public static ProcessesResource from(ActivityDefinition resource)
@@ -57,6 +60,13 @@ public final class ProcessesResource
 	{
 		return new ProcessesResource(
 				new ResourceInfo(resource.getResourceType().name(), null, null, resource.getName()), resource);
+	}
+
+	public static ProcessesResource from(Questionnaire resource)
+	{
+		return new ProcessesResource(
+				new ResourceInfo(resource.getResourceType().name(), resource.getUrl(), resource.getVersion(), null),
+				resource);
 	}
 
 	public static ProcessesResource from(StructureDefinition resource)

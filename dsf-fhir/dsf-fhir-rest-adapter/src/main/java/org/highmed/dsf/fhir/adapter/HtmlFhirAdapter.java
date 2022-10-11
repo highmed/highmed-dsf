@@ -97,6 +97,11 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		this.resourceType = resourceType;
 	}
 
+	protected FhirContext getFhirContext()
+	{
+		return fhirContext;
+	}
+
 	/* Parsers are not guaranteed to be thread safe */
 	private IParser getParser(Supplier<IParser> parser)
 	{
@@ -130,11 +135,14 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		out.write("<script src=\"/fhir/static/tabs.js\"></script>\n");
 		out.write("<script src=\"/fhir/static/bookmarks.js\"></script>\n");
 		out.write("<script src=\"/fhir/static/help.js\"></script>\n");
+		out.write("<script src=\"/fhir/static/form.js\"></script>\n");
 		out.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"/fhir/static/prettify.css\">\n");
 		out.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"/fhir/static/highmed.css\">\n");
+		out.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"/fhir/static/form.css\">\n");
 		out.write("<title>DSF" + (uriInfo.getPath() == null || uriInfo.getPath().isEmpty() ? "" : ": ")
 				+ uriInfo.getPath() + "</title>\n</head>\n");
-		out.write("<body onload=\"prettyPrint();openInitialTab();checkBookmarked();\">\n");
+		out.write("<body onload=\"prettyPrint();openInitialTab(" + String.valueOf(isHtmlEnabled())
+				+ ");checkBookmarked();\">\n");
 		out.write("<div id=\"icons\">\n");
 		out.write("<svg class=\"icon\" id=\"help-icon\" viewBox=\"0 0 24 24\" onclick=\"showHelp();\">\n");
 		out.write("<title>Show Help</title>\n");
@@ -191,12 +199,19 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		out.write("</h1></td>\n");
 		out.write("</tr></table>\n");
 		out.write("<div class=\"tab\">\n");
+
+		if (isHtmlEnabled())
+			out.write("<button id=\"html-button\" class=\"tablinks\" onclick=\"openTab('html')\">html</button>\n");
+
 		out.write("<button id=\"json-button\" class=\"tablinks\" onclick=\"openTab('json')\">json</button>\n");
 		out.write("<button id=\"xml-button\" class=\"tablinks\" onclick=\"openTab('xml')\">xml</button>\n");
 		out.write("</div>\n");
 
 		writeXml(t, out);
 		writeJson(t, out);
+
+		if (isHtmlEnabled())
+			writeHtml(t, out);
 
 		out.write("</html>");
 		out.flush();
@@ -279,7 +294,10 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		});
 
 		Matcher urlMatcher = URL_PATTERN.matcher(content);
-		content = urlMatcher.replaceAll(result -> "<a href=\"" + result.group() + "\">" + result.group() + "</a>");
+		content = urlMatcher.replaceAll(result -> "<a href=\""
+				+ result.group().replace("&amp;amp;", "&amp;").replace("&amp;apos;", "&apos;")
+						.replace("&amp;gt;", "&gt;").replace("&amp;lt;", "&lt;").replace("&amp;quot;", "&quot;")
+				+ "\">" + result.group() + "</a>");
 
 		Matcher referenceUuidMatcher = XML_REFERENCE_UUID_PATTERN.matcher(content);
 		content = referenceUuidMatcher.replaceAll(result -> "&lt;reference value=\"<a href=\"/fhir/" + result.group(1)
@@ -340,6 +358,38 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 
 		out.write(content);
 		out.write("</pre>\n");
+	}
+
+	private void writeHtml(T t, OutputStreamWriter out) throws IOException
+	{
+		out.write("<div id=\"html\" class=\"prettyprint lang-html\" style=\"display:none;\">\n");
+		doWriteHtml(t, out);
+		out.write("</div>\n");
+	}
+
+	/**
+	 * Override this method to return <code>true</code> if the HTML tab should be shown. This implies overriding
+	 * {@link #doWriteHtml(BaseResource, OutputStreamWriter)} as well.
+	 *
+	 * @return <code>true</code> if the html tab should be shown, <code>false</code> otherwise (default
+	 *         <code>false</code>)
+	 */
+	protected boolean isHtmlEnabled()
+	{
+		return false;
+	}
+
+	/**
+	 * Use this method to write output to the html tab. This implies overriding {@link #isHtmlEnabled()} as well.
+	 *
+	 * @param t
+	 *            the resource, not <code>null</code>
+	 * @param out
+	 *            the outputStreamWriter, not <code>null</code>
+	 * @throws IOException
+	 */
+	protected void doWriteHtml(T t, OutputStreamWriter out) throws IOException
+	{
 	}
 
 	private Optional<String> getResourceName(T t, String uuid)

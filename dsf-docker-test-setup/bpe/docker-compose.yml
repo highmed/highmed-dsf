@@ -2,7 +2,7 @@ version: '3.8'
 services:
   app:
     image: highmed/bpe
-    restart: on-failure
+    restart: "no"
 #    ports:
 #      - 127.0.0.1:5002:5002
     healthcheck:
@@ -31,9 +31,6 @@ services:
         source: ./log
         target: /opt/bpe/log
       - type: bind
-        source: ./last_event
-        target: /opt/bpe/last_event
-      - type: bind
         source: ./psn
         target: /opt/bpe/psn
     environment:
@@ -59,7 +56,7 @@ services:
 
   db:
     image: postgres:13
-    restart: on-failure
+    restart: "no"
 #    ports:
 #      - 127.0.0.1:5432:5432
     healthcheck:

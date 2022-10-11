@@ -3,6 +3,7 @@ package org.highmed.dsf.fhir.task;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.ParameterComponent;
@@ -48,4 +49,14 @@ public interface TaskHelper
 	TaskOutputComponent createOutputUnsignedInt(String system, String code, int value);
 
 	TaskOutputComponent createOutput(String system, String code, Reference reference);
+
+	Task getTask(DelegateExecution execution);
+
+	Task getCurrentTaskFromExecutionVariables(DelegateExecution execution);
+
+	Task getLeadingTaskFromExecutionVariables(DelegateExecution execution);
+
+	void updateCurrentTaskInExecutionVariables(DelegateExecution execution, Task task);
+
+	void updateLeadingTaskInExecutionVariables(DelegateExecution execution, Task task);
 }
