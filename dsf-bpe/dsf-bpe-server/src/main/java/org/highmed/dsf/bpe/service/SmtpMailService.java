@@ -77,13 +77,22 @@ public class SmtpMailService implements MailService, InitializingBean
 	{
 		final HtmlLayout delegate = HtmlLayout.newBuilder().setDatePattern("yyyy-MM-dd HH:mm:ss.nnnn").build();
 
+		final String debugLogLocation;
+
+		Layout(String debugLogLocation)
+		{
+			this.debugLogLocation = debugLogLocation;
+		}
+
 		@Override
 		public byte[] getFooter()
 		{
 			StringBuilder sbuf = new StringBuilder();
 			sbuf.append("</table>").append(Strings.LINE_SEPARATOR);
 			sbuf.append("<br>").append(Strings.LINE_SEPARATOR);
-			sbuf.append("For more details see debug log at <i>/opt/bpe/log/bpe.log</i>").append(Strings.LINE_SEPARATOR);
+			sbuf.append("For more details see debug log at <i>").append(Strings.LINE_SEPARATOR);
+			sbuf.append(debugLogLocation).append(Strings.LINE_SEPARATOR);
+			sbuf.append("</i>").append(Strings.LINE_SEPARATOR);
 			sbuf.append("<br>").append(Strings.LINE_SEPARATOR);
 			sbuf.append("</body></html>").append(Strings.LINE_SEPARATOR);
 
@@ -137,10 +146,11 @@ public class SmtpMailService implements MailService, InitializingBean
 	{
 		private final MailManager manager;
 
-		private Log4jAppender(Session session, MimeMessage message, String subject, int messageBufferSize)
+		private Log4jAppender(Session session, MimeMessage message, String subject, int messageBufferSize,
+				String debugLogLocation)
 		{
-			super("SmtpMailService.Log4jAppender", ThresholdFilter.createFilter(null, null, null), new Layout(), false,
-					null);
+			super("SmtpMailService.Log4jAppender", ThresholdFilter.createFilter(null, null, null),
+					new Layout(debugLogLocation), false, null);
 
 			MailManagerFactory factory = (name, data) ->
 			{
@@ -171,6 +181,8 @@ public class SmtpMailService implements MailService, InitializingBean
 		}
 	}
 
+	public static final String DEFAULT_DEBUG_LOG_LOCATION = "/opt/bpe/log/bpe.log";
+
 	private final InternetAddress fromAddress;
 	private final InternetAddress[] toAddresses;
 	private final InternetAddress[] toAddressesCc;
@@ -182,7 +194,8 @@ public class SmtpMailService implements MailService, InitializingBean
 	private final Log4jAppender log4jAppender;
 
 	/**
-	 * SMTP, non authentication, mails not signed, no mails on error log events
+	 * SMTP, non authentication, mails not signed, no mails on error log events, value of
+	 * {@link #DEFAULT_DEBUG_LOG_LOCATION} as debug log location
 	 *
 	 * @param fromAddress
 	 *            not <code>null</code>
@@ -196,7 +209,7 @@ public class SmtpMailService implements MailService, InitializingBean
 	public SmtpMailService(String fromAddress, List<String> toAddresses, String mailServerHostname, int mailServerPort)
 	{
 		this(fromAddress, toAddresses, null, null, false, mailServerHostname, mailServerPort, null, null, null, null,
-				null, null, null, false, 0);
+				null, null, null, false, 0, DEFAULT_DEBUG_LOG_LOCATION);
 	}
 
 	/**
@@ -229,12 +242,14 @@ public class SmtpMailService implements MailService, InitializingBean
 	 *            <code>true</code> if mail should be send for error log events
 	 * @param mailOnErrorLogEventBufferSize
 	 *            <code>&gt;= 0</code>
+	 * @param debugLogLocation
+	 *            not <code>null</code>
 	 */
 	public SmtpMailService(String fromAddress, List<String> toAddresses, List<String> toAddressesCc,
 			List<String> replyToAddresses, boolean useSmtps, String mailServerHostname, int mailServerPort,
 			String mailServerUsername, char[] mailServerPassword, KeyStore trustStore, KeyStore keyStore,
 			char[] keyStorePassword, KeyStore signStore, char[] signStorePassword, boolean mailOnErrorLogEvent,
-			int mailOnErrorLogEventBufferSize)
+			int mailOnErrorLogEventBufferSize, String debugLogLocation)
 	{
 		this.fromAddress = toInternetAddress(fromAddress).orElse(null);
 		this.toAddresses = toAddresses == null ? new InternetAddress[0]
@@ -251,7 +266,7 @@ public class SmtpMailService implements MailService, InitializingBean
 
 		log4jAppender = !mailOnErrorLogEvent ? null
 				: new Log4jAppender(session, createMimeMessage("DSF BPE Error", null), "DSF BPE Error",
-						mailOnErrorLogEventBufferSize);
+						mailOnErrorLogEventBufferSize, debugLogLocation);
 	}
 
 	private Optional<InternetAddress> toInternetAddress(String fromAddress)
