@@ -242,9 +242,13 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.bpe.mail.sendMailOnErrorLogEvent:false}")
 	private boolean sendMailOnErrorLogEvent;
 
-	@Documentation(description = "Number of previous INFO, WARN log messages to include in ERROR log event mails (>=0). Requires send mail on ERROR log event option to be enabled.")
+	@Documentation(description = "Number of previous INFO, WARN log messages to include in ERROR log event mails (>=0). Requires send mail on ERROR log event option to be enabled to have an effect.")
 	@Value("${org.highmed.dsf.bpe.mail.mailOnErrorLogEventBufferSize:4}")
 	private int mailOnErrorLogEventBufferSize;
+
+	@Documentation(description = "Location of the BPE debug log as displayed in the footer of ERROR log event mails, does not modify the actual location of the debug log file. Requires send mail on ERROR log event option to be enabled to have an effect.")
+	@Value("${org.highmed.dsf.bpe.mail.mailOnErrorLogEventDebugLogLocation:/opt/bpe/log/bpe.log}")
+	private String mailOnErrorLogEventDebugLogLocation;
 
 	@Bean // static in order to initialize before @Configuration classes
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer(
@@ -538,5 +542,10 @@ public class PropertiesConfig
 	public int getMailOnErrorLogEventBufferSize()
 	{
 		return mailOnErrorLogEventBufferSize;
+	}
+
+	public String getMailOnErrorLogEventDebugLogLocation()
+	{
+		return mailOnErrorLogEventDebugLogLocation;
 	}
 }

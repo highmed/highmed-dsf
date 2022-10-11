@@ -106,7 +106,8 @@ public class MailConfig implements InitializingBean
 		return new SmtpMailService(fromAddress, toAddresses, toAddressesCc, replyToAddresses, useSmtps,
 				mailServerHostname, mailServerPort, mailServerUsername, mailServerPassword, trustStore, keyStore,
 				keyStorePassword, signStore, propertiesConfig.getMailSmimeSigingKeyStorePassword(),
-				propertiesConfig.getSendMailOnErrorLogEvent(), propertiesConfig.getMailOnErrorLogEventBufferSize());
+				propertiesConfig.getSendMailOnErrorLogEvent(), propertiesConfig.getMailOnErrorLogEventBufferSize(),
+				propertiesConfig.getMailOnErrorLogEventDebugLogLocation());
 	}
 
 	private KeyStore toTrustStore(String trustStoreFile)
@@ -173,7 +174,8 @@ public class MailConfig implements InitializingBean
 							+ " useSmtps: {}, mailServerHostname: {}, mailServerPort: {}, mailServerUsername: {},"
 							+ " mailServerPassword: {}, trustStore: {}, clientCertificate: {}, clientCertificatePrivateKey: {},"
 							+ " clientCertificatePrivateKeyPassword: {}, smimeSigingKeyStore: {}, smimeSigingKeyStorePassword: {},"
-							+ " sendTestMailOnStartup: {}, sendMailOnErrorLogEvent: {}, mailOnErrorLogEventBufferSize: {}}",
+							+ " sendTestMailOnStartup: {}, sendMailOnErrorLogEvent: {}, mailOnErrorLogEventBufferSize: {},"
+							+ " mailOnErrorLogEventDebugLogLocation: {}}",
 					propertiesConfig.getMailFromAddress(), propertiesConfig.getMailToAddresses(),
 					propertiesConfig.getMailToAddressesCc(), propertiesConfig.getMailReplyToAddresses(),
 					propertiesConfig.getMailUseSmtps(), propertiesConfig.getMailServerHostname(),
@@ -186,7 +188,8 @@ public class MailConfig implements InitializingBean
 					propertiesConfig.getMailSmimeSigingKeyStoreFile(),
 					propertiesConfig.getMailSmimeSigingKeyStorePassword() != null ? "***" : "null",
 					propertiesConfig.getSendTestMailOnStartup(), propertiesConfig.getSendMailOnErrorLogEvent(),
-					propertiesConfig.getMailOnErrorLogEventBufferSize());
+					propertiesConfig.getMailOnErrorLogEventBufferSize(),
+					propertiesConfig.getMailOnErrorLogEventDebugLogLocation());
 		}
 		else
 		{
