@@ -84,11 +84,11 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 		// String targetOrganizationId = (String) execution.getVariable(Constants.VARIABLE_TARGET_ORGANIZATION_ID);
 		// String correlationKey = (String) execution.getVariable(Constants.VARIABLE_CORRELATION_KEY);
 
-		Target target = getTarget();
+		Target target = getTarget(execution);
 
 		try
 		{
-			sendTask(target, instantiatesUri, messageName, businessKey, profile,
+			sendTask(execution, target, instantiatesUri, messageName, businessKey, profile,
 					getAdditionalInputParameters(execution));
 		}
 		catch (Exception e)
@@ -102,11 +102,11 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 			logger.debug("Error while sending Task", e);
 
 			if (execution.getBpmnModelElementInstance() instanceof IntermediateThrowEvent)
-				handleIntermediateThrowEventError(e, errorMessage);
+				handleIntermediateThrowEventError(execution, e, errorMessage);
 			else if (execution.getBpmnModelElementInstance() instanceof EndEvent)
-				handleEndEventError(e, errorMessage);
+				handleEndEventError(execution, e, errorMessage);
 			else if (execution.getBpmnModelElementInstance() instanceof SendTask)
-				handleSendTaskError(e, errorMessage);
+				handleSendTaskError(execution, e, errorMessage);
 			else
 				logger.warn("Error handling for {} not implemented",
 						execution.getBpmnModelElementInstance().getClass().getName());
@@ -119,13 +119,14 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 				errorMessage));
 	}
 
-	protected void handleIntermediateThrowEventError(Exception exception, String errorMessage)
+	protected void handleIntermediateThrowEventError(DelegateExecution execution, Exception exception,
+			String errorMessage)
 	{
-		Task task = getLeadingTaskFromExecutionVariables();
+		Task task = getLeadingTaskFromExecutionVariables(execution);
 
 		logger.debug("Error while executing Task message send " + getClass().getName(), exception);
 		logger.error("Process {} has fatal error in step {} for task with id {}, reason: {}",
-				getExecution().getProcessDefinitionId(), getExecution().getActivityInstanceId(),
+				execution.getProcessDefinitionId(), execution.getActivityInstanceId(),
 				task == null ? "?" : task.getId(), exception.getMessage());
 
 		try
@@ -141,25 +142,25 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 		}
 		finally
 		{
-			getExecution().getProcessEngine().getRuntimeService()
-					.deleteProcessInstance(getExecution().getProcessInstanceId(), exception.getMessage());
+			execution.getProcessEngine().getRuntimeService().deleteProcessInstance(execution.getProcessInstanceId(),
+					exception.getMessage());
 		}
 	}
 
-	protected void handleEndEventError(Exception exception, String errorMessage)
+	protected void handleEndEventError(DelegateExecution execution, Exception exception, String errorMessage)
 	{
-		Task task = getLeadingTaskFromExecutionVariables();
+		Task task = getLeadingTaskFromExecutionVariables(execution);
 
 		logger.debug("Error while executing Task message send " + getClass().getName(), exception);
 		logger.error("Process {} has fatal error in step {} for task with id {}, reason: {}",
-				getExecution().getProcessDefinitionId(), getExecution().getActivityInstanceId(),
+				execution.getProcessDefinitionId(), execution.getActivityInstanceId(),
 				task == null ? "?" : task.getId(), exception.getMessage());
 
 		if (task != null)
 		{
 			addErrorMessage(task, errorMessage);
 			task.setStatus(Task.TaskStatus.FAILED);
-			updateLeadingTaskInExecutionVariables(task);
+			updateLeadingTaskInExecutionVariables(execution, task);
 		}
 		else
 			logger.warn("Leading Task null, unable to set failed state");
@@ -167,20 +168,20 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 		// Task update and process-end handled by EndListener
 	}
 
-	protected void handleSendTaskError(Exception exception, String errorMessage)
+	protected void handleSendTaskError(DelegateExecution execution, Exception exception, String errorMessage)
 	{
-		Task task = getLeadingTaskFromExecutionVariables();
-		Targets targets = getTargets();
+		Task task = getLeadingTaskFromExecutionVariables(execution);
+		Targets targets = getTargets(execution);
 
 		// if we are a multi instance message send task, remove target
 		if (targets != null)
 		{
 			addErrorMessage(task, errorMessage);
-			updateLeadingTaskInExecutionVariables(task);
+			updateLeadingTaskInExecutionVariables(execution, task);
 
-			Target target = getTarget();
+			Target target = getTarget(execution);
 			targets = targets.removeByEndpointIdentifierValue(target);
-			updateTargets(targets);
+			updateTargets(execution, targets);
 			logger.debug("Target organization {}, endpoint {} with error {} removed from target list",
 					target.getOrganizationIdentifierValue(), target.getEndpointIdentifierValue(),
 					exception.getMessage());
@@ -189,7 +190,7 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 			{
 				logger.debug("Error while executing Task message send " + getClass().getName(), exception);
 				logger.error("Process {} has fatal error in step {} for task with id {}, last reason: {}",
-						getExecution().getProcessDefinitionId(), getExecution().getActivityInstanceId(),
+						execution.getProcessDefinitionId(), execution.getActivityInstanceId(),
 						task == null ? "?" : task.getId(), exception.getMessage());
 
 				try
@@ -204,8 +205,8 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 				}
 				finally
 				{
-					getExecution().getProcessEngine().getRuntimeService()
-							.deleteProcessInstance(getExecution().getProcessInstanceId(), exception.getMessage());
+					execution.getProcessEngine().getRuntimeService()
+							.deleteProcessInstance(execution.getProcessInstanceId(), exception.getMessage());
 				}
 			}
 		}
@@ -216,57 +217,39 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 	 * then {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_TARGET}.</i>
 	 *
 	 * @param execution
-	 *            the delegate execution of this process instance
+	 *            not <code>null</code>
 	 * @return {@link Target} that should receive the message
-	 * @deprecated use {@link #getTarget()}
 	 */
-	@Deprecated
 	protected Target getTarget(DelegateExecution execution)
 	{
 		return (Target) execution.getVariable(BPMN_EXECUTION_VARIABLE_TARGET);
 	}
 
 	/**
-	 * <i>Override this method if the {@link Target} variable is stored in a different process engine variable other
-	 * then {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_TARGET}.</i>
-	 *
-	 * @return {@link Target} that should receive the message
-	 */
-	protected Target getTarget()
-	{
-		if (getExecution() == null)
-			throw new IllegalStateException("execution not started");
-
-		return (Target) getExecution().getVariable(BPMN_EXECUTION_VARIABLE_TARGET);
-	}
-
-	/**
 	 * <i>Override this method if the {@link Targets} variable is stored in a different process engine variable other
 	 * then {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_TARGETS}.</i>
 	 *
+	 * @param execution
+	 *            not <code>null</code>
 	 * @return {@link Targets} that should receive the message
 	 */
-	protected Targets getTargets()
+	protected Targets getTargets(DelegateExecution execution)
 	{
-		if (getExecution() == null)
-			throw new IllegalStateException("execution not started");
-
-		return (Targets) getExecution().getVariable(BPMN_EXECUTION_VARIABLE_TARGETS);
+		return (Targets) execution.getVariable(BPMN_EXECUTION_VARIABLE_TARGETS);
 	}
 
 	/**
 	 * <i>Override this method if the {@link Targets} variable should stored in a different process engine variable
 	 * other then {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_TARGETS}.</i>
 	 *
+	 * @param execution
+	 *            not <code>null</code>
 	 * @param targets
 	 *            the targets to save in process engine variable {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_TARGETS}
 	 */
-	protected void updateTargets(Targets targets)
+	protected void updateTargets(DelegateExecution execution, Targets targets)
 	{
-		if (getExecution() == null)
-			throw new IllegalStateException("execution not started");
-
-		getExecution().setVariable(BPMN_EXECUTION_VARIABLE_TARGETS, TargetsValues.create(targets));
+		execution.setVariable(BPMN_EXECUTION_VARIABLE_TARGETS, TargetsValues.create(targets));
 	}
 
 	/**
@@ -291,28 +274,30 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 	 *
 	 * <pre>
 	 * &#64;Override
-	 * protected void sendTask(Target target, String instantiatesUri, String messageName, String businessKey,
-	 * 		String profile, Stream&lt;ParameterComponent&gt; additionalInputParameters)
+	 * protected void sendTask(DelegateExecution execution, Target target, String instantiatesUri, String messageName,
+	 * 		String businessKey, String profile, Stream&lt;ParameterComponent&gt; additionalInputParameters)
 	 * {
 	 * 	String alternativeBusinesKey = createAndSaveAlternativeBusinessKey();
-	 * 	super.sendTask(target, instantiatesUri, messageName, alternativeBusinesKey, profile,
+	 * 	super.sendTask(execution, target, instantiatesUri, messageName, alternativeBusinesKey, profile,
 	 * 			additionalInputParameters);
 	 * }
 	 * </pre>
 	 *
+	 * @param execution
+	 *            not <code>null</code>
 	 * @return the alternative business-key stored as variable
 	 *         {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_ALTERNATIVE_BUSINESS_KEY}
 	 */
-	protected final String createAndSaveAlternativeBusinessKey()
+	protected final String createAndSaveAlternativeBusinessKey(DelegateExecution execution)
 	{
 		String alternativeBusinessKey = UUID.randomUUID().toString();
-		getExecution().setVariable(BPMN_EXECUTION_VARIABLE_ALTERNATIVE_BUSINESS_KEY, alternativeBusinessKey);
+		execution.setVariable(BPMN_EXECUTION_VARIABLE_ALTERNATIVE_BUSINESS_KEY, alternativeBusinessKey);
 
 		return alternativeBusinessKey;
 	}
 
-	protected void sendTask(Target target, String instantiatesUri, String messageName, String businessKey,
-			String profile, Stream<ParameterComponent> additionalInputParameters)
+	protected void sendTask(DelegateExecution execution, Target target, String instantiatesUri, String messageName,
+			String businessKey, String profile, Stream<ParameterComponent> additionalInputParameters)
 	{
 		if (messageName.isEmpty() || instantiatesUri.isEmpty())
 			throw new IllegalStateException("Next process-id or message-name not definied");

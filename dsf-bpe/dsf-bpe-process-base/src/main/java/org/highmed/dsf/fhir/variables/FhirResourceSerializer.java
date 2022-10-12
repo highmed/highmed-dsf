@@ -9,6 +9,8 @@ import org.camunda.bpm.engine.impl.variable.serializer.ValueFields;
 import org.camunda.bpm.engine.variable.impl.value.UntypedValueImpl;
 import org.highmed.dsf.fhir.variables.FhirResourceValues.FhirResourceValue;
 import org.hl7.fhir.r4.model.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -17,6 +19,8 @@ import ca.uhn.fhir.parser.IParser;
 
 public class FhirResourceSerializer extends PrimitiveValueSerializer<FhirResourceValue> implements InitializingBean
 {
+	private static final Logger logger = LoggerFactory.getLogger(FhirResourceSerializer.class);
+
 	private final FhirContext fhirContext;
 
 	public FhirResourceSerializer(FhirContext fhirContext)
@@ -73,9 +77,18 @@ public class FhirResourceSerializer extends PrimitiveValueSerializer<FhirResourc
 
 		try
 		{
-			@SuppressWarnings("unchecked")
-			Class<Resource> clazz = (Class<Resource>) Class.forName(className);
-			Resource resource = newJsonParser().parseResource(clazz, new ByteArrayInputStream(bytes));
+			Resource resource;
+			if (className != null)
+			{
+				@SuppressWarnings("unchecked")
+				Class<Resource> clazz = (Class<Resource>) Class.forName(className);
+				resource = newJsonParser().parseResource(clazz, new ByteArrayInputStream(bytes));
+			}
+			else
+			{
+				logger.warn("ClassName from DB null, trying to parse FHIR resource without type information");
+				resource = (Resource) newJsonParser().parseResource(new ByteArrayInputStream(bytes));
+			}
 
 			return FhirResourceValues.create(resource);
 		}
