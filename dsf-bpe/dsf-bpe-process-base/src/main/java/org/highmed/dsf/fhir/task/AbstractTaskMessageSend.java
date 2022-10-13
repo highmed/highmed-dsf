@@ -269,8 +269,8 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 	 * {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_ALTERNATIVE_BUSINESS_KEY}<br>
 	 * <br>
 	 * <i>Use this method in combination with overriding
-	 * {@link #sendTask(Target, String, String, String, String, Stream)} to use an alternative business-key with the
-	 * communication target.</i>
+	 * {@link #sendTask(DelegateExecution, Target, String, String, String, String, Stream)} to use an alternative
+	 * business-key with the communication target.</i>
 	 *
 	 * <pre>
 	 * &#64;Override
