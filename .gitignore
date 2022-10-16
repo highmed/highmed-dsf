@@ -67,6 +67,7 @@ dsf-docker-test-setup-3medic-ttp-docker/**/fhir/log/*.log.gz
 
 dsf-docker-test-setup-3medic-ttp-docker/secrets/*.pem
 dsf-docker-test-setup-3medic-ttp-docker/.env
+dsf-docker-test-setup-3medic-ttp-docker/docker-compose.override.yml
 
 ###
 # dsf-tools ignores
