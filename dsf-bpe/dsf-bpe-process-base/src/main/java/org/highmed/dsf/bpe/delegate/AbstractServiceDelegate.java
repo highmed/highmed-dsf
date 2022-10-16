@@ -12,6 +12,7 @@ import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,8 +92,8 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 	protected final String getTaskAbsoluteUrl(Task task)
 	{
 		return task == null ? "?"
-				: task.getIdElement().toVersionless().withServerBase(clientProvider.getLocalBaseUrl(), "Task")
-						.getValue();
+				: task.getIdElement().toVersionless()
+						.withServerBase(clientProvider.getLocalBaseUrl(), ResourceType.Task.name()).getValue();
 	}
 
 	/**

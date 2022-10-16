@@ -16,6 +16,7 @@ import org.camunda.bpm.engine.variable.Variables;
 import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.fhir.client.FhirWebserviceClient;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,8 +93,8 @@ public class EndListener implements ExecutionListener, InitializingBean
 				CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY).orElse(null);
 		String correlationKey = taskHelper.getFirstInputParameterStringValue(task, CODESYSTEM_HIGHMED_BPMN,
 				CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY).orElse(null);
-		String taskUrl = task.getIdElement().toVersionless().withServerBase(webserviceClient.getBaseUrl(), "Task")
-				.getValue();
+		String taskUrl = task.getIdElement().toVersionless()
+				.withServerBase(webserviceClient.getBaseUrl(), ResourceType.Task.name()).getValue();
 
 		logger.info("Process {} finished [message: {}, businessKey: {}, correlationKey: {}, task: {}]", processUrl,
 				messageName, businessKey, correlationKey, taskUrl);
