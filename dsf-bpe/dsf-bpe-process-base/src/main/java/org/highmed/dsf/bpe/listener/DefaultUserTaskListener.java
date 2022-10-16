@@ -83,7 +83,7 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 					questionnaireUrlWithVersion, businessKey, userTaskId);
 			addPlaceholderAnswersToQuestionnaireResponse(questionnaireResponse, questionnaire);
 
-			modifyQuestionnaireResponse(userTask, questionnaireResponse);
+			beforeQuestionnaireResponseCreate(userTask, questionnaireResponse);
 
 			checkQuestionnaireResponse(questionnaireResponse);
 
@@ -96,7 +96,7 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 					created.getIdElement().toVersionless().withServerBase(clientProvider.getLocalBaseUrl(),
 							ResourceType.QuestionnaireResponse.name()));
 
-			afterQuestionnaireResponseCreated(userTask, created);
+			afterQuestionnaireResponseCreate(userTask, created);
 		}
 		catch (Exception exception)
 		{
@@ -200,7 +200,7 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 
 	/**
 	 * <i>Override this method to modify the {@link QuestionnaireResponse} before it will be created in state
-	 * {@link QuestionnaireResponse.QuestionnaireResponseStatus#INPROGRESS}</i>
+	 * {@link QuestionnaireResponse.QuestionnaireResponseStatus#INPROGRESS} on the DSF FHIR server</i>
 	 *
 	 * @param userTask
 	 *            not <code>null</code>, user task on which this {@link QuestionnaireResponse} is based
@@ -208,7 +208,7 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 	 *            not <code>null</code>, containing an answer placeholder for every item in the corresponding
 	 *            {@link Questionnaire}
 	 */
-	protected void modifyQuestionnaireResponse(DelegateTask userTask, QuestionnaireResponse questionnaireResponse)
+	protected void beforeQuestionnaireResponseCreate(DelegateTask userTask, QuestionnaireResponse questionnaireResponse)
 	{
 		// Nothing to do in default behavior
 	}
@@ -222,7 +222,7 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 	 * @param questionnaireResponse
 	 *            not <code>null</code>, created on the DSF FHIR server
 	 */
-	protected void afterQuestionnaireResponseCreated(DelegateTask userTask, QuestionnaireResponse questionnaireResponse)
+	protected void afterQuestionnaireResponseCreate(DelegateTask userTask, QuestionnaireResponse questionnaireResponse)
 	{
 		// Nothing to do in default behavior
 	}
