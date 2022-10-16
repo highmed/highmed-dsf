@@ -130,14 +130,6 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.bpe.fhir.questionnaire.response.subscription.search.parameter:?criteria=QuestionnaireResponse%3Fstatus%3Dcompleted&status=active&type=websocket&payload=application/fhir%2Bjson}")
 	private String questionnaireResponseSubscriptionSearchParameter;
 
-	@Documentation(description = "File storing the last task event received and processed on the DFS BPE server from the DSF FHIR server, used to load task events that occurred on the DSF FHIR server while the DSF BPE server was turned off")
-	@Value("${org.highmed.dsf.bpe.fhir.task.subscription.last.event.time:last_event/time-task.file}")
-	private String lastEventTimeFileTask;
-
-	@Documentation(description = "File storing the last questionnaire response event received and processed on the DFS BPE server from the DSF FHIR server, used to load questionnaire response events that occurred on the DSF FHIR server while the DSF BPE server was turned off")
-	@Value("${org.highmed.dsf.bpe.fhir.questionnaire.response.subscription.last.event.time:last_event/time-questionnaire-response.file}")
-	private String lastEventTimeFileQuestionnaireResponse;
-
 	@Documentation(description = "Number of retries until a websocket connection can be established with the DSF FHIR server, `-1` means infinite number of retries")
 	@Value("${org.highmed.dsf.bpe.fhir.task.subscription.retry.max:-1}")
 	private int websocketMaxRetries;
@@ -250,9 +242,13 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.bpe.mail.sendMailOnErrorLogEvent:false}")
 	private boolean sendMailOnErrorLogEvent;
 
-	@Documentation(description = "Number of previous INFO, WARN log messages to include in ERROR log event mails (>=0). Requires send mail on ERROR log event option to be enabled.")
+	@Documentation(description = "Number of previous INFO, WARN log messages to include in ERROR log event mails (>=0). Requires send mail on ERROR log event option to be enabled to have an effect.")
 	@Value("${org.highmed.dsf.bpe.mail.mailOnErrorLogEventBufferSize:4}")
 	private int mailOnErrorLogEventBufferSize;
+
+	@Documentation(description = "Location of the BPE debug log as displayed in the footer of ERROR log event mails, does not modify the actual location of the debug log file. Requires send mail on ERROR log event option to be enabled to have an effect.")
+	@Value("${org.highmed.dsf.bpe.mail.mailOnErrorLogEventDebugLogLocation:/opt/bpe/log/bpe.log}")
+	private String mailOnErrorLogEventDebugLogLocation;
 
 	@Bean // static in order to initialize before @Configuration classes
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer(
@@ -403,16 +399,6 @@ public class PropertiesConfig
 		return questionnaireResponseSubscriptionSearchParameter;
 	}
 
-	public Path getLastEventTimeFileTask()
-	{
-		return Paths.get(lastEventTimeFileTask);
-	}
-
-	public Path getLastEventTimeFileQuestionnaireResponse()
-	{
-		return Paths.get(lastEventTimeFileQuestionnaireResponse);
-	}
-
 	public long getWebsocketRetrySleepMillis()
 	{
 		return websocketRetrySleepMillis;
@@ -556,5 +542,10 @@ public class PropertiesConfig
 	public int getMailOnErrorLogEventBufferSize()
 	{
 		return mailOnErrorLogEventBufferSize;
+	}
+
+	public String getMailOnErrorLogEventDebugLogLocation()
+	{
+		return mailOnErrorLogEventDebugLogLocation;
 	}
 }

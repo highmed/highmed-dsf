@@ -1,5 +1,4 @@
 - .rsync-filter
-- last_event/README.md
 - log/README.md
 - plugin/README.md
 - process/README.md

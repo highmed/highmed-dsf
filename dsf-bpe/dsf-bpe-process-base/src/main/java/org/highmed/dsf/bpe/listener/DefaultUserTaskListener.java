@@ -44,12 +44,6 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 	private final TaskHelper taskHelper;
 	private final ReadAccessHelper readAccessHelper;
 
-	/**
-	 * @deprecated as of release 0.8.0, use {@link #getExecution()} instead
-	 */
-	@Deprecated
-	protected DelegateExecution execution;
-
 	public DefaultUserTaskListener(FhirWebserviceClientProvider clientProvider,
 			OrganizationProvider organizationProvider, QuestionnaireResponseHelper questionnaireResponseHelper,
 			TaskHelper taskHelper, ReadAccessHelper readAccessHelper)
@@ -74,7 +68,7 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 	@Override
 	public final void notify(DelegateTask userTask)
 	{
-		this.execution = userTask.getExecution();
+		DelegateExecution execution = userTask.getExecution();
 
 		try
 		{
@@ -102,7 +96,7 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 		}
 		catch (Exception exception)
 		{
-			Task task = getTask();
+			Task task = getTask(execution);
 
 			logger.debug("Error while executing user task listener " + getClass().getName(), exception);
 			logger.error("Process {} has fatal error in step {} for task with id {}, reason: {}",
@@ -213,11 +207,6 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 		// Nothing to do in default behaviour
 	}
 
-	protected final DelegateExecution getExecution()
-	{
-		return execution;
-	}
-
 	protected final TaskHelper getTaskHelper()
 	{
 		return taskHelper;
@@ -234,36 +223,42 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 	}
 
 	/**
+	 * @param execution
+	 *            not <code>null</code>
 	 * @return the active task from execution variables, i.e. the leading task if the main process is running or the
 	 *         current task if a subprocess is running.
 	 * @throws IllegalStateException
 	 *             if execution of this service delegate has not been started
 	 * @see ConstantsBase#BPMN_EXECUTION_VARIABLE_TASK
 	 */
-	protected final Task getTask()
+	protected final Task getTask(DelegateExecution execution)
 	{
 		return taskHelper.getTask(execution);
 	}
 
 	/**
+	 * @param execution
+	 *            not <code>null</code>
 	 * @return the current task from execution variables, the task resource that started the current process or
 	 *         subprocess
 	 * @throws IllegalStateException
 	 *             if execution of this service delegate has not been started
 	 * @see ConstantsBase#BPMN_EXECUTION_VARIABLE_TASK
 	 */
-	protected final Task getCurrentTaskFromExecutionVariables()
+	protected final Task getCurrentTaskFromExecutionVariables(DelegateExecution execution)
 	{
 		return taskHelper.getCurrentTaskFromExecutionVariables(execution);
 	}
 
 	/**
+	 * @param execution
+	 *            not <code>null</code>
 	 * @return the leading task from execution variables, same as current task if not in a subprocess
 	 * @throws IllegalStateException
 	 *             if execution of this service delegate has not been started
 	 * @see ConstantsBase#BPMN_EXECUTION_VARIABLE_LEADING_TASK
 	 */
-	protected final Task getLeadingTaskFromExecutionVariables()
+	protected final Task getLeadingTaskFromExecutionVariables(DelegateExecution execution)
 	{
 		return taskHelper.getLeadingTaskFromExecutionVariables(execution);
 	}
@@ -272,13 +267,15 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 	 * <i>Use this method to update the process engine variable {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_TASK},
 	 * after modifying the {@link Task}.</i>
 	 *
+	 * @param execution
+	 *            not <code>null</code>
 	 * @param task
 	 *            not <code>null</code>
 	 * @throws IllegalStateException
 	 *             if execution of this service delegate has not been started
 	 * @see ConstantsBase#BPMN_EXECUTION_VARIABLE_TASK
 	 */
-	protected final void updateCurrentTaskInExecutionVariables(Task task)
+	protected final void updateCurrentTaskInExecutionVariables(DelegateExecution execution, Task task)
 	{
 		taskHelper.updateCurrentTaskInExecutionVariables(execution, task);
 	}
@@ -289,13 +286,15 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 	 * <p>
 	 * Updates the current task if no leading task is set.
 	 *
+	 * @param execution
+	 *            not <code>null</code>
 	 * @param task
 	 *            not <code>null</code>
 	 * @throws IllegalStateException
 	 *             if execution of this service delegate has not been started
 	 * @see ConstantsBase#BPMN_EXECUTION_VARIABLE_LEADING_TASK
 	 */
-	protected final void updateLeadingTaskInExecutionVariables(Task task)
+	protected final void updateLeadingTaskInExecutionVariables(DelegateExecution execution, Task task)
 	{
 		taskHelper.updateLeadingTaskInExecutionVariables(execution, task);
 	}

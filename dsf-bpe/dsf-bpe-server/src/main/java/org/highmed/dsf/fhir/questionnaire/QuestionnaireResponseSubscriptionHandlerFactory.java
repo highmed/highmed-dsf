@@ -2,13 +2,13 @@ package org.highmed.dsf.fhir.questionnaire;
 
 import java.util.Objects;
 
+import org.highmed.dsf.bpe.dao.LastEventTimeDao;
 import org.highmed.dsf.fhir.subscription.EventResourceHandler;
 import org.highmed.dsf.fhir.subscription.EventResourceHandlerImpl;
 import org.highmed.dsf.fhir.subscription.ExistingResourceLoader;
 import org.highmed.dsf.fhir.subscription.ExistingResourceLoaderImpl;
 import org.highmed.dsf.fhir.subscription.PingEventResourceHandler;
 import org.highmed.dsf.fhir.subscription.SubscriptionHandlerFactory;
-import org.highmed.dsf.fhir.websocket.LastEventTimeIo;
 import org.highmed.dsf.fhir.websocket.ResourceHandler;
 import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
@@ -18,33 +18,33 @@ public class QuestionnaireResponseSubscriptionHandlerFactory
 		implements SubscriptionHandlerFactory<QuestionnaireResponse>, InitializingBean
 {
 	private final ResourceHandler<QuestionnaireResponse> resourceHandler;
-	private final LastEventTimeIo lastEventTimeIo;
+	private final LastEventTimeDao lastEventTimeDao;
 
 	public QuestionnaireResponseSubscriptionHandlerFactory(ResourceHandler<QuestionnaireResponse> resourceHandler,
-			LastEventTimeIo lastEventTimeIo)
+			LastEventTimeDao lastEventTimeDao)
 	{
 		this.resourceHandler = resourceHandler;
-		this.lastEventTimeIo = lastEventTimeIo;
+		this.lastEventTimeDao = lastEventTimeDao;
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
 		Objects.requireNonNull(resourceHandler, "resourceHandler");
-		Objects.requireNonNull(lastEventTimeIo, "lastEventTimeIo");
+		Objects.requireNonNull(lastEventTimeDao, "lastEventTimeDao");
 	}
 
 	@Override
 	public ExistingResourceLoader<QuestionnaireResponse> createExistingResourceLoader(FhirWebserviceClient client)
 	{
-		return new ExistingResourceLoaderImpl<>(lastEventTimeIo, resourceHandler, client, "QuestionnaireResponse",
+		return new ExistingResourceLoaderImpl<>(lastEventTimeDao, resourceHandler, client, "QuestionnaireResponse",
 				QuestionnaireResponse.class);
 	}
 
 	@Override
 	public EventResourceHandler<QuestionnaireResponse> createEventResourceHandler()
 	{
-		return new EventResourceHandlerImpl<>(lastEventTimeIo, resourceHandler, QuestionnaireResponse.class);
+		return new EventResourceHandlerImpl<>(lastEventTimeDao, resourceHandler, QuestionnaireResponse.class);
 	}
 
 	@Override

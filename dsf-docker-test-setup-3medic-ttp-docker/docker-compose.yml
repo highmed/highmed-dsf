@@ -330,9 +330,6 @@ services:
       source: ./medic1/bpe/log
       target: /opt/bpe/log
     - type: bind
-      source: ./medic1/bpe/last_event
-      target: /opt/bpe/last_event
-    - type: bind
       source: ./medic1/bpe/psn
       target: /opt/bpe/psn
     environment:
@@ -357,7 +354,7 @@ services:
       ORG_HIGHMED_DSF_BPE_MAIL_FROMADDRESS: bpe@medic1-docker
       ORG_HIGHMED_DSF_BPE_MAIL_TOADDRESSES: bpe@medic1-docker
       #ORG_HIGHMED_DSF_BPE_MAIL_SENDTESTMAILONSTARTUP: 'false' # default no test mail on startup
-      ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: highmedorg_computeFeasibility/0.6.0,highmedorg_computeDataSharing/0.6.0,highmedorg_requestUpdateResources/0.6.0,highmedorg_updateAllowList/0.6.0
+      ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: highmedorg_computeFeasibility/0.7.0,highmedorg_computeDataSharing/0.7.0,highmedorg_requestUpdateResources/0.7.0,highmedorg_updateAllowList/0.7.0
       # property org.highmed.dsf.bpe.allow.list.organization should only be set for testing, do not configure property in production, potential security risk
       ORG_HIGHMED_DSF_BPE_ALLOW_LIST_ORGANIZATION: Test_TTP
     networks:
@@ -399,9 +396,6 @@ services:
       source: ./medic2/bpe/log
       target: /opt/bpe/log
     - type: bind
-      source: ./medic2/bpe/last_event
-      target: /opt/bpe/last_event
-    - type: bind
       source: ./medic2/bpe/psn
       target: /opt/bpe/psn
     environment:
@@ -426,7 +420,7 @@ services:
       ORG_HIGHMED_DSF_BPE_MAIL_FROMADDRESS: bpe@medic2-docker
       ORG_HIGHMED_DSF_BPE_MAIL_TOADDRESSES: bpe@medic2-docker
       #ORG_HIGHMED_DSF_BPE_MAIL_SENDTESTMAILONSTARTUP: 'false' # default no test mail on startup
-      ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: highmedorg_computeFeasibility/0.6.0, highmedorg_computeDataSharing/0.6.0, highmedorg_requestUpdateResources/0.6.0, highmedorg_updateAllowList/0.6.0
+      ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: highmedorg_computeFeasibility/0.7.0, highmedorg_computeDataSharing/0.7.0, highmedorg_requestUpdateResources/0.7.0, highmedorg_updateAllowList/0.7.0
       # property org.highmed.dsf.bpe.allow.list.organization should only be set for testing, do not configure property in production, potential security risk
       ORG_HIGHMED_DSF_BPE_ALLOW_LIST_ORGANIZATION: Test_TTP
     networks:
@@ -468,9 +462,6 @@ services:
       source: ./medic3/bpe/log
       target: /opt/bpe/log
     - type: bind
-      source: ./medic3/bpe/last_event
-      target: /opt/bpe/last_event
-    - type: bind
       source: ./medic3/bpe/psn
       target: /opt/bpe/psn
     environment:
@@ -496,10 +487,10 @@ services:
       ORG_HIGHMED_DSF_BPE_MAIL_TOADDRESSES: bpe@medic3-docker
       #ORG_HIGHMED_DSF_BPE_MAIL_SENDTESTMAILONSTARTUP: 'false' # default no test mail on startup
       ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: >
-        highmedorg_computeFeasibility/0.6.0,
-        highmedorg_computeDataSharing/0.6.0,
-        highmedorg_requestUpdateResources/0.6.0,
-        highmedorg_updateAllowList/0.6.0
+        highmedorg_computeFeasibility/0.7.0,
+        highmedorg_computeDataSharing/0.7.0,
+        highmedorg_requestUpdateResources/0.7.0,
+        highmedorg_updateAllowList/0.7.0
       # property org.highmed.dsf.bpe.allow.list.organization should only be set for testing, do not configure property in production, potential security risk
       ORG_HIGHMED_DSF_BPE_ALLOW_LIST_ORGANIZATION: Test_TTP
     networks:
@@ -542,9 +533,6 @@ services:
       source: ./ttp/bpe/log
       target: /opt/bpe/log
     - type: bind
-      source: ./ttp/bpe/last_event
-      target: /opt/bpe/last_event
-    - type: bind
       source: ./ttp/bpe/psn
       target: /opt/bpe/psn
     environment:
@@ -571,16 +559,16 @@ services:
       ORG_HIGHMED_DSF_BPE_MAIL_SENDTESTMAILONSTARTUP: 'true'
       ORG_HIGHMED_DSF_BPE_MAIL_SENDMAILONERRORLOGEVENT: 'true'
       ORG_HIGHMED_DSF_BPE_PROCESS_EXCLUDED: |
-        highmedorg_executeUpdateResources/0.6.0
-        highmedorg_downloadAllowList/0.6.0
-        highmedorg_localServicesIntegration/0.6.0
-        highmedorg_requestFeasibility/0.6.0
-        highmedorg_executeFeasibility/0.6.0
-        highmedorg_requestDataSharing/0.6.0
-        highmedorg_executeDataSharing/0.6.0
-        highmedorg_executeFeasibilityMpcMultiShare/0.6.0
-        highmedorg_executeFeasibilityMpcSingleShare/0.6.0
-        highmedorg_requestFeasibilityMpc/0.6.0
+        highmedorg_executeUpdateResources/0.7.0
+        highmedorg_downloadAllowList/0.7.0
+        highmedorg_localServicesIntegration/0.7.0
+        highmedorg_requestFeasibility/0.7.0
+        highmedorg_executeFeasibility/0.7.0
+        highmedorg_requestDataSharing/0.7.0
+        highmedorg_executeDataSharing/0.7.0
+        highmedorg_executeFeasibilityMpcMultiShare/0.7.0
+        highmedorg_executeFeasibilityMpcSingleShare/0.7.0
+        highmedorg_requestFeasibilityMpc/0.7.0
       # property org.highmed.dsf.bpe.allow.list.organization should only be set for testing, do not configure property in production, potential security risk
       ORG_HIGHMED_DSF_BPE_ALLOW_LIST_ORGANIZATION: Test_TTP
     networks:
