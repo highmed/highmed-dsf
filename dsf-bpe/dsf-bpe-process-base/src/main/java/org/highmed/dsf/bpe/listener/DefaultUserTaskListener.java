@@ -22,7 +22,6 @@ import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.questionnaire.QuestionnaireResponseHelper;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
@@ -84,23 +83,30 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 					questionnaireUrlWithVersion, businessKey, userTaskId);
 			addPlaceholderAnswersToQuestionnaireResponse(questionnaireResponse, questionnaire);
 
-			modifyQuestionnaireResponse(userTask, questionnaireResponse);
+			beforeQuestionnaireResponseCreate(userTask, questionnaireResponse);
 
 			checkQuestionnaireResponse(questionnaireResponse);
 
-			IdType created = clientProvider.getLocalWebserviceClient().withRetryForever(60000)
-					.create(questionnaireResponse).getIdElement();
-			execution.setVariable(BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_RESPONSE_ID, created.getIdPart());
+			QuestionnaireResponse created = clientProvider.getLocalWebserviceClient().withRetryForever(60000)
+					.create(questionnaireResponse);
+			execution.setVariable(BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_RESPONSE_ID,
+					created.getIdElement().getIdPart());
 
-			logger.info("Created user task with id={}, process waiting for it's completion", created.getValue());
+			logger.info("Created QuestionnaireResponse for user task at {}, process waiting for it's completion",
+					created.getIdElement().toVersionless().withServerBase(clientProvider.getLocalBaseUrl(),
+							ResourceType.QuestionnaireResponse.name()));
+
+			afterQuestionnaireResponseCreate(userTask, created);
 		}
 		catch (Exception exception)
 		{
 			Task task = getTask(execution);
 
 			logger.debug("Error while executing user task listener " + getClass().getName(), exception);
-			logger.error("Process {} has fatal error in step {} for task with id {}, reason: {}",
-					execution.getProcessDefinitionId(), execution.getActivityInstanceId(), task.getId(),
+			logger.error("Process {} has fatal error in step {} for task {}, reason: {}",
+					execution.getProcessDefinitionId(), execution.getActivityInstanceId(),
+					task.getIdElement().toVersionless()
+							.withServerBase(clientProvider.getLocalBaseUrl(), ResourceType.Task.name()).getValue(),
 					exception.getMessage());
 
 			String errorMessage = "Process " + execution.getProcessDefinitionId() + " has fatal error in step "
@@ -193,18 +199,32 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 	}
 
 	/**
-	 * Use this method to modify the {@link QuestionnaireResponse} before it will be created in state
-	 * {@link QuestionnaireResponse.QuestionnaireResponseStatus#INPROGRESS}
+	 * <i>Override this method to modify the {@link QuestionnaireResponse} before it will be created in state
+	 * {@link QuestionnaireResponse.QuestionnaireResponseStatus#INPROGRESS} on the DSF FHIR server</i>
 	 *
 	 * @param userTask
 	 *            not <code>null</code>, user task on which this {@link QuestionnaireResponse} is based
-	 * @param questionnaireResponse
+	 * @param beforeCreate
 	 *            not <code>null</code>, containing an answer placeholder for every item in the corresponding
 	 *            {@link Questionnaire}
 	 */
-	protected void modifyQuestionnaireResponse(DelegateTask userTask, QuestionnaireResponse questionnaireResponse)
+	protected void beforeQuestionnaireResponseCreate(DelegateTask userTask, QuestionnaireResponse beforeCreate)
 	{
-		// Nothing to do in default behaviour
+		// Nothing to do in default behavior
+	}
+
+	/**
+	 * <i>Override this method to execute code after the {@link QuestionnaireResponse} resource has been created on the
+	 * DSF FHIR server</i>
+	 *
+	 * @param userTask
+	 *            not <code>null</code>, user task on which this {@link QuestionnaireResponse} is based
+	 * @param afterCreate
+	 *            not <code>null</code>, created on the DSF FHIR server
+	 */
+	protected void afterQuestionnaireResponseCreate(DelegateTask userTask, QuestionnaireResponse afterCreate)
+	{
+		// Nothing to do in default behavior
 	}
 
 	protected final TaskHelper getTaskHelper()
