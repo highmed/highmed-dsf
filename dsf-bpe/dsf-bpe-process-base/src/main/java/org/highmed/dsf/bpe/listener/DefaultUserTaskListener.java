@@ -92,7 +92,7 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 			execution.setVariable(BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_RESPONSE_ID,
 					created.getIdElement().getIdPart());
 
-			logger.info("Created user task at {}, process waiting for it's completion",
+			logger.info("Created QuestionnaireResponse for user task at {}, process waiting for it's completion",
 					created.getIdElement().toVersionless().withServerBase(clientProvider.getLocalBaseUrl(),
 							ResourceType.QuestionnaireResponse.name()));
 
