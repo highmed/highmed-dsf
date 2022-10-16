@@ -5,7 +5,6 @@ import java.util.List;
 import org.camunda.bpm.engine.ProcessEngineException;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.ExecutionListener;
-import org.camunda.bpm.engine.delegate.TaskListener;
 import org.camunda.bpm.engine.impl.ProcessEngineLogger;
 import org.camunda.bpm.engine.impl.bpmn.delegate.ExecutionListenerInvocation;
 import org.camunda.bpm.engine.impl.bpmn.listener.ClassDelegateExecutionListener;
@@ -55,7 +54,7 @@ public class MultiVersionClassDelegateExecutionListener extends ClassDelegateExe
 	{
 		Object delegateInstance = instantiateDelegate(processKeyAndVersion, className, fieldDeclarations);
 
-		if (delegateInstance instanceof TaskListener)
+		if (delegateInstance instanceof ExecutionListener)
 		{
 			return (ExecutionListener) delegateInstance;
 		}
