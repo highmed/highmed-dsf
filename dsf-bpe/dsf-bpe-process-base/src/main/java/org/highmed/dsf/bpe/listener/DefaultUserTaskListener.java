@@ -204,11 +204,11 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 	 *
 	 * @param userTask
 	 *            not <code>null</code>, user task on which this {@link QuestionnaireResponse} is based
-	 * @param questionnaireResponse
+	 * @param beforeCreate
 	 *            not <code>null</code>, containing an answer placeholder for every item in the corresponding
 	 *            {@link Questionnaire}
 	 */
-	protected void beforeQuestionnaireResponseCreate(DelegateTask userTask, QuestionnaireResponse questionnaireResponse)
+	protected void beforeQuestionnaireResponseCreate(DelegateTask userTask, QuestionnaireResponse beforeCreate)
 	{
 		// Nothing to do in default behavior
 	}
@@ -219,10 +219,10 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 	 *
 	 * @param userTask
 	 *            not <code>null</code>, user task on which this {@link QuestionnaireResponse} is based
-	 * @param questionnaireResponse
+	 * @param afterCreate
 	 *            not <code>null</code>, created on the DSF FHIR server
 	 */
-	protected void afterQuestionnaireResponseCreate(DelegateTask userTask, QuestionnaireResponse questionnaireResponse)
+	protected void afterQuestionnaireResponseCreate(DelegateTask userTask, QuestionnaireResponse afterCreate)
 	{
 		// Nothing to do in default behavior
 	}
