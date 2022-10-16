@@ -88,7 +88,7 @@ public class CamundaConfig
 	@Bean
 	public StartListener startListener()
 	{
-		return new StartListener(fhirConfig.taskHelper());
+		return new StartListener(fhirConfig.taskHelper(), clientProvider.getLocalBaseUrl());
 	}
 
 	@Bean

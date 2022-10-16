@@ -8,6 +8,8 @@ import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_BU
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY;
 import static org.highmed.dsf.bpe.ConstantsBase.CODESYSTEM_HIGHMED_BPMN_VALUE_MESSAGE_NAME;
 
+import java.util.Objects;
+
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.ExecutionListener;
 import org.camunda.bpm.engine.variable.Variables;
@@ -17,6 +19,7 @@ import org.highmed.fhir.client.FhirWebserviceClient;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 
 /**
  * Added to each BPMN EndEvent by the {@link DefaultBpmnParseListener}. Is used to set the FHIR {@link Task} status as
@@ -24,17 +27,24 @@ import org.slf4j.LoggerFactory;
  * {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_IN_CALLED_PROCESS} back to <code>false</code> if a called sub process
  * ends.
  */
-public class EndListener implements ExecutionListener
+public class EndListener implements ExecutionListener, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(EndListener.class);
 
-	private final TaskHelper taskHelper;
 	private final FhirWebserviceClient webserviceClient;
+	private final TaskHelper taskHelper;
 
 	public EndListener(FhirWebserviceClient webserviceClient, TaskHelper taskHelper)
 	{
-		this.taskHelper = taskHelper;
 		this.webserviceClient = webserviceClient;
+		this.taskHelper = taskHelper;
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception
+	{
+		Objects.requireNonNull(webserviceClient, "webserviceClient");
+		Objects.requireNonNull(taskHelper, "taskHelper");
 	}
 
 	@Override
@@ -82,9 +92,10 @@ public class EndListener implements ExecutionListener
 				CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY).orElse(null);
 		String correlationKey = taskHelper.getFirstInputParameterStringValue(task, CODESYSTEM_HIGHMED_BPMN,
 				CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY).orElse(null);
-		String taskId = task.getIdElement().getIdPart();
+		String taskUrl = task.getIdElement().toVersionless().withServerBase(webserviceClient.getBaseUrl(), "Task")
+				.getValue();
 
-		logger.info("Process {} finished [message: {}, businessKey: {}, correlationKey: {}, taskId: {}]", processUrl,
-				messageName, businessKey, correlationKey, taskId);
+		logger.info("Process {} finished [message: {}, businessKey: {}, correlationKey: {}, task: {}]", processUrl,
+				messageName, businessKey, correlationKey, taskUrl);
 	}
 }
