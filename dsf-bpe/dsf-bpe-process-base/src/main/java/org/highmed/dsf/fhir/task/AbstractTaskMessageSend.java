@@ -125,9 +125,9 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 		Task task = getLeadingTaskFromExecutionVariables(execution);
 
 		logger.debug("Error while executing Task message send " + getClass().getName(), exception);
-		logger.error("Process {} has fatal error in step {} for task with id {}, reason: {}",
-				execution.getProcessDefinitionId(), execution.getActivityInstanceId(),
-				task == null ? "?" : task.getId(), exception.getMessage());
+		logger.error("Process {} has fatal error in step {} for task {}, reason: {}",
+				execution.getProcessDefinitionId(), execution.getActivityInstanceId(), getTaskAbsoluteUrl(task),
+				exception.getMessage());
 
 		try
 		{
@@ -152,9 +152,9 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 		Task task = getLeadingTaskFromExecutionVariables(execution);
 
 		logger.debug("Error while executing Task message send " + getClass().getName(), exception);
-		logger.error("Process {} has fatal error in step {} for task with id {}, reason: {}",
-				execution.getProcessDefinitionId(), execution.getActivityInstanceId(),
-				task == null ? "?" : task.getId(), exception.getMessage());
+		logger.error("Process {} has fatal error in step {} for task {}, reason: {}",
+				execution.getProcessDefinitionId(), execution.getActivityInstanceId(), getTaskAbsoluteUrl(task),
+				exception.getMessage());
 
 		if (task != null)
 		{
@@ -189,9 +189,9 @@ public class AbstractTaskMessageSend extends AbstractServiceDelegate implements 
 			if (targets.isEmpty())
 			{
 				logger.debug("Error while executing Task message send " + getClass().getName(), exception);
-				logger.error("Process {} has fatal error in step {} for task with id {}, last reason: {}",
-						execution.getProcessDefinitionId(), execution.getActivityInstanceId(),
-						task == null ? "?" : task.getId(), exception.getMessage());
+				logger.error("Process {} has fatal error in step {} for task {}, last reason: {}",
+						execution.getProcessDefinitionId(), execution.getActivityInstanceId(), getTaskAbsoluteUrl(task),
+						exception.getMessage());
 
 				try
 				{

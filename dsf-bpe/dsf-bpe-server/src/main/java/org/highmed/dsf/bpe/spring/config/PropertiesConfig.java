@@ -250,6 +250,18 @@ public class PropertiesConfig
 	@Value("${org.highmed.dsf.bpe.mail.mailOnErrorLogEventDebugLogLocation:/opt/bpe/log/bpe.log}")
 	private String mailOnErrorLogEventDebugLogLocation;
 
+	@Documentation(description = "To enable debug log messages for every bpmn activity start, set to `true`.", recommendation = "This debug function should only be activated during process plugin development.")
+	@Value("${org.highmed.dsf.bpe.debug.log.message.onActivityStart:false}")
+	private boolean debugLogMessageOnActivityStart;
+
+	@Documentation(description = "To enable debug log messages for every bpmn activity end, set to `true`.", recommendation = "This debug function should only be activated during process plugin development.")
+	@Value("${org.highmed.dsf.bpe.debug.log.message.onActivityEnd:false}")
+	private boolean debugLogMessageOnActivityEnd;
+
+	@Documentation(description = "To enable loging bpmn variables for every bpmn activity start or end, when logging of these events is enabled, set to `true`.", recommendation = "This debug function should only be activated during process plugin development. WARNNING: Confidential information may be leaked via the debug log!")
+	@Value("${org.highmed.dsf.bpe.debug.log.message.variables:false}")
+	private boolean debugLogMessageVariables;
+
 	@Bean // static in order to initialize before @Configuration classes
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer(
 			ConfigurableEnvironment environment)
@@ -547,5 +559,20 @@ public class PropertiesConfig
 	public String getMailOnErrorLogEventDebugLogLocation()
 	{
 		return mailOnErrorLogEventDebugLogLocation;
+	}
+
+	public boolean getDebugLogMessageOnActivityStart()
+	{
+		return debugLogMessageOnActivityStart;
+	}
+
+	public boolean getDebugLogMessageOnActivityEnd()
+	{
+		return debugLogMessageOnActivityEnd;
+	}
+
+	public boolean getDebugLogMessageVariables()
+	{
+		return debugLogMessageVariables;
 	}
 }

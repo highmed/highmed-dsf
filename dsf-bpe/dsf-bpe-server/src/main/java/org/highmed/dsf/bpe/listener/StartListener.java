@@ -16,24 +16,35 @@ import org.camunda.bpm.engine.variable.Variables;
 import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.highmed.dsf.fhir.variables.FhirResourceValues;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 
 /**
  * Added to each BPMN StartEvent by the {@link DefaultBpmnParseListener}. Initializes the
  * {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_IN_CALLED_PROCESS} variable with <code>false</code> for processes
  * started via a {@link Task} resource.
  */
-public class StartListener implements ExecutionListener
+public class StartListener implements ExecutionListener, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(StartListener.class);
 
-	private TaskHelper taskHelper;
+	private final TaskHelper taskHelper;
+	private final String baseUrl;
 
-	public StartListener(TaskHelper taskHelper)
+	public StartListener(TaskHelper taskHelper, String baseUrl)
 	{
-		this.taskHelper = Objects.requireNonNull(taskHelper, "taskHelper");
+		this.taskHelper = taskHelper;
+		this.baseUrl = baseUrl;
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception
+	{
+		Objects.requireNonNull(taskHelper, "taskHelper");
+		Objects.requireNonNull(baseUrl, "baseUrl");
 	}
 
 	@Override
@@ -69,9 +80,10 @@ public class StartListener implements ExecutionListener
 				CODESYSTEM_HIGHMED_BPMN_VALUE_BUSINESS_KEY).orElse(null);
 		String correlationKey = taskHelper.getFirstInputParameterStringValue(task, CODESYSTEM_HIGHMED_BPMN,
 				CODESYSTEM_HIGHMED_BPMN_VALUE_CORRELATION_KEY).orElse(null);
-		String taskId = task.getIdElement().getIdPart();
+		String taskUrl = task.getIdElement().toVersionless().withServerBase(baseUrl, ResourceType.Task.name())
+				.getValue();
 
-		logger.info("Starting process {} [message: {}, businessKey: {}, correlationKey: {}, taskId: {}]", processUrl,
-				messageName, businessKey, correlationKey, taskId);
+		logger.info("Starting process {} [message: {}, businessKey: {}, correlationKey: {}, task: {}]", processUrl,
+				messageName, businessKey, correlationKey, taskUrl);
 	}
 }
