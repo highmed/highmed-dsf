@@ -6,7 +6,7 @@
     </tag>
   </meta>
   <url value="http://highmed.org/fhir/StructureDefinition/questionnaire-response"/>
-  <version value="0.8.0"/>
+  <version value="0.9.0"/>
   <name value="QuestionnaireResponse"/>
   <status value="active"/>
   <experimental value="false"/>
@@ -50,46 +50,7 @@
         </discriminator>
         <rules value="closed"/>
       </slicing>
-      <min value="3"/>
-    </element>
-    <element id="QuestionnaireResponse.item:business-key">
-      <path value="QuestionnaireResponse.item"/>
-      <sliceName value="business-key"/>
       <min value="1"/>
-      <max value="1"/>
-    </element>
-    <element id="QuestionnaireResponse.item:business-key.linkId">
-      <path value="QuestionnaireResponse.item.linkId"/>
-      <fixedString value="business-key"/>
-    </element>
-    <element id="QuestionnaireResponse.item:business-key.definition">
-      <path value="QuestionnaireResponse.item.definition"/>
-      <max value="0"/>
-    </element>
-    <element id="QuestionnaireResponse.item:business-key.text">
-      <path value="QuestionnaireResponse.item.text"/>
-      <min value="1"/>
-      <fixedString value="The business-key of the process execution"/>
-    </element>
-    <element id="QuestionnaireResponse.item:business-key.answer">
-      <path value="QuestionnaireResponse.item.answer"/>
-      <min value="1"/>
-      <max value="1"/>
-    </element>
-    <element id="QuestionnaireResponse.item:business-key.answer.value[x]">
-      <path value="QuestionnaireResponse.item.answer.value[x]"/>
-      <min value="1"/>
-      <type>
-        <code value="string"/>
-      </type>
-    </element>
-    <element id="QuestionnaireResponse.item:business-key.answer.item">
-      <path value="QuestionnaireResponse.item.answer.item"/>
-      <max value="0"/>
-    </element>
-    <element id="QuestionnaireResponse.item:business-key.item">
-      <path value="QuestionnaireResponse.item.item"/>
-      <max value="0"/>
     </element>
     <element id="QuestionnaireResponse.item:user-task-id">
       <path value="QuestionnaireResponse.item"/>
@@ -130,10 +91,49 @@
       <path value="QuestionnaireResponse.item.item"/>
       <max value="0"/>
     </element>
+    <element id="QuestionnaireResponse.item:business-key">
+      <path value="QuestionnaireResponse.item"/>
+      <sliceName value="business-key"/>
+      <min value="0"/>
+      <max value="1"/>
+    </element>
+    <element id="QuestionnaireResponse.item:business-key.linkId">
+      <path value="QuestionnaireResponse.item.linkId"/>
+      <fixedString value="business-key"/>
+    </element>
+    <element id="QuestionnaireResponse.item:business-key.definition">
+      <path value="QuestionnaireResponse.item.definition"/>
+      <max value="0"/>
+    </element>
+    <element id="QuestionnaireResponse.item:business-key.text">
+      <path value="QuestionnaireResponse.item.text"/>
+      <min value="1"/>
+      <fixedString value="The business-key of the process execution"/>
+    </element>
+    <element id="QuestionnaireResponse.item:business-key.answer">
+      <path value="QuestionnaireResponse.item.answer"/>
+      <min value="1"/>
+      <max value="1"/>
+    </element>
+    <element id="QuestionnaireResponse.item:business-key.answer.value[x]">
+      <path value="QuestionnaireResponse.item.answer.value[x]"/>
+      <min value="1"/>
+      <type>
+        <code value="string"/>
+      </type>
+    </element>
+    <element id="QuestionnaireResponse.item:business-key.answer.item">
+      <path value="QuestionnaireResponse.item.answer.item"/>
+      <max value="0"/>
+    </element>
+    <element id="QuestionnaireResponse.item:business-key.item">
+      <path value="QuestionnaireResponse.item.item"/>
+      <max value="0"/>
+    </element>
     <element id="QuestionnaireResponse.item:@default">
       <path value="QuestionnaireResponse.item"/>
       <sliceName value="@default"/>
-      <min value="1"/>
+      <min value="0"/>
       <max value="*"/>
     </element>
     <element id="QuestionnaireResponse.item:@default.definition">
@@ -146,12 +146,13 @@
     </element>
     <element id="QuestionnaireResponse.item:@default.answer">
       <path value="QuestionnaireResponse.item.answer"/>
-      <min value="1"/>
+      <min value="0"/>
       <max value="1"/>
     </element>
     <element id="QuestionnaireResponse.item:@default.answer.value[x]">
       <path value="QuestionnaireResponse.item.answer.value[x]"/>
       <min value="1"/>
+      <max value="1"/>
       <type>
         <code value="string"/>
       </type>

@@ -82,7 +82,7 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 
 			QuestionnaireResponse questionnaireResponse = createDefaultQuestionnaireResponse(
 					questionnaireUrlWithVersion, businessKey, userTaskId);
-			addPlaceholderAnswersToQuestionnaireResponse(questionnaireResponse, questionnaire);
+			transformQuestionnaireItemsToQuestionnaireResponseItems(questionnaireResponse, questionnaire);
 
 			beforeQuestionnaireResponseCreate(userTask, questionnaireResponse);
 			checkQuestionnaireResponse(questionnaireResponse);
@@ -155,33 +155,41 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 
 		if (addBusinessKeyToQuestionnaireResponse())
 		{
-			questionnaireResponseHelper.addItemLeave(questionnaireResponse,
+			questionnaireResponseHelper.addItemLeafWithAnswer(questionnaireResponse,
 					CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY, "The business-key of the process execution",
 					new StringType(businessKey));
 		}
 
-		questionnaireResponseHelper.addItemLeave(questionnaireResponse,
+		questionnaireResponseHelper.addItemLeafWithAnswer(questionnaireResponse,
 				CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID, "The user-task-id of the process execution",
 				new StringType(userTaskId));
 
 		return questionnaireResponse;
 	}
 
-	private void addPlaceholderAnswersToQuestionnaireResponse(QuestionnaireResponse questionnaireResponse,
+	private void transformQuestionnaireItemsToQuestionnaireResponseItems(QuestionnaireResponse questionnaireResponse,
 			Questionnaire questionnaire)
 	{
 		questionnaire.getItem().stream()
 				.filter(i -> !CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY.equals(i.getLinkId()))
 				.filter(i -> !CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID.equals(i.getLinkId()))
-				.forEach(i -> createAndAddAnswerPlaceholder(questionnaireResponse, i));
+				.forEach(i -> transformItem(questionnaireResponse, i));
 	}
 
-	private void createAndAddAnswerPlaceholder(QuestionnaireResponse questionnaireResponse,
+	private void transformItem(QuestionnaireResponse questionnaireResponse,
 			Questionnaire.QuestionnaireItemComponent question)
 	{
-		Type answer = questionnaireResponseHelper.transformQuestionTypeToAnswerType(question);
-		questionnaireResponseHelper.addItemLeave(questionnaireResponse, question.getLinkId(), question.getText(),
-				answer);
+		if (Questionnaire.QuestionnaireItemType.DISPLAY.equals(question.getType()))
+		{
+			questionnaireResponseHelper.addItemLeafWithoutAnswer(questionnaireResponse, question.getLinkId(),
+					question.getText());
+		}
+		else
+		{
+			Type answer = questionnaireResponseHelper.transformQuestionTypeToAnswerType(question);
+			questionnaireResponseHelper.addItemLeafWithAnswer(questionnaireResponse, question.getLinkId(),
+					question.getText(), answer);
+		}
 	}
 
 	private void checkQuestionnaireResponse(QuestionnaireResponse questionnaireResponse)

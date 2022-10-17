@@ -2,3 +2,5 @@ ValueSet?url=http://hl7.org/fhir/ValueSet/mimetypes&version=4.0.1&date=eq2019-11
 ValueSet?url=http://hl7.org/fhir/ValueSet/mimetypes&version=4.0.1&date=eq2021-02-12
 CodeSystem?url=urn:ietf:bcp:13&version=4.0.1&date=eq2020-05-29
 CodeSystem?url=urn:ietf:bcp:13&version=4.0.1&date=eq2021-02-12
+StructureDefinition?url=http://highmed.org/fhir/StructureDefinition/questionnaire&version=0.8.0&date=eq2022-10-11
+StructureDefinition?url=http://highmed.org/fhir/StructureDefinition/questionnaire-response&version=0.8.0&date=eq2022-10-11
