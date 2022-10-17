@@ -15,6 +15,7 @@ import org.highmed.dsf.bpe.camunda.MultiVersionSpringProcessEngineConfiguration;
 import org.highmed.dsf.bpe.delegate.DelegateProvider;
 import org.highmed.dsf.bpe.delegate.DelegateProviderImpl;
 import org.highmed.dsf.bpe.listener.CallActivityListener;
+import org.highmed.dsf.bpe.listener.DebugLoggingBpmnParseListener;
 import org.highmed.dsf.bpe.listener.DefaultBpmnParseListener;
 import org.highmed.dsf.bpe.listener.DefaultUserTaskListener;
 import org.highmed.dsf.bpe.listener.EndListener;
@@ -88,7 +89,7 @@ public class CamundaConfig
 	@Bean
 	public StartListener startListener()
 	{
-		return new StartListener(fhirConfig.taskHelper());
+		return new StartListener(fhirConfig.taskHelper(), clientProvider.getLocalBaseUrl());
 	}
 
 	@Bean
@@ -110,6 +111,13 @@ public class CamundaConfig
 	}
 
 	@Bean
+	public DebugLoggingBpmnParseListener debugLoggingBpmnParseListener()
+	{
+		return new DebugLoggingBpmnParseListener(propertiesConfig.getDebugLogMessageOnActivityStart(),
+				propertiesConfig.getDebugLogMessageOnActivityEnd(), propertiesConfig.getDebugLogMessageVariables());
+	}
+
+	@Bean
 	public SpringProcessEngineConfiguration processEngineConfiguration() throws IOException
 	{
 		var c = new MultiVersionSpringProcessEngineConfiguration(delegateProvider());
@@ -118,7 +126,7 @@ public class CamundaConfig
 		c.setTransactionManager(transactionManager());
 		c.setDatabaseSchemaUpdate("false");
 		c.setJobExecutorActivate(true);
-		c.setCustomPreBPMNParseListeners(List.of(defaultBpmnParseListener()));
+		c.setCustomPreBPMNParseListeners(List.of(defaultBpmnParseListener(), debugLoggingBpmnParseListener()));
 		c.setCustomPreVariableSerializers(baseSerializers);
 		c.setFallbackSerializerFactory(getFallbackSerializerFactory());
 

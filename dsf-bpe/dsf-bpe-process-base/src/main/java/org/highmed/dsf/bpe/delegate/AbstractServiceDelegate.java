@@ -12,6 +12,7 @@ import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,8 +58,8 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 
 			logger.debug("Error while executing service delegate " + getClass().getName(), error);
 			logger.error(
-					"Process {} encountered error boundary event in step {} for task with id {}, error-code: {}, message: {}",
-					execution.getProcessDefinitionId(), execution.getActivityInstanceId(), task.getId(),
+					"Process {} encountered error boundary event in step {} for task {}, error-code: {}, message: {}",
+					execution.getProcessDefinitionId(), execution.getActivityInstanceId(), getTaskAbsoluteUrl(task),
 					error.getErrorCode(), error.getMessage());
 
 			throw error;
@@ -69,8 +70,8 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 			Task task = getTask(execution);
 
 			logger.debug("Error while executing service delegate " + getClass().getName(), exception);
-			logger.error("Process {} has fatal error in step {} for task with id {}, reason: {} - {}",
-					execution.getProcessDefinitionId(), execution.getActivityInstanceId(), task.getId(),
+			logger.error("Process {} has fatal error in step {} for task {}, reason: {} - {}",
+					execution.getProcessDefinitionId(), execution.getActivityInstanceId(), getTaskAbsoluteUrl(task),
 					exception.getClass().getName(), exception.getMessage());
 
 			String errorMessage = "Process " + execution.getProcessDefinitionId() + " has fatal error in step "
@@ -86,6 +87,13 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 			execution.getProcessEngine().getRuntimeService().deleteProcessInstance(execution.getProcessInstanceId(),
 					exception.getMessage());
 		}
+	}
+
+	protected final String getTaskAbsoluteUrl(Task task)
+	{
+		return task == null ? "?"
+				: task.getIdElement().toVersionless()
+						.withServerBase(clientProvider.getLocalBaseUrl(), ResourceType.Task.name()).getValue();
 	}
 
 	/**

@@ -47,7 +47,10 @@ public class DefaultBpmnParseListener extends AbstractBpmnParseListener implemen
 	@Override
 	public void parseEndEvent(Element endEventElement, ScopeImpl scope, ActivityImpl endEventActivity)
 	{
-		endEventActivity.addListener(ExecutionListener.EVENTNAME_END, endListener);
+		// Adding at index 0 to the end phase of the EndEvent, so processes can execute listeners after the Task
+		// resource has been updated.
+		// Listeners added to the end phase of the EndEvent via bpmn are execute after this listener
+		endEventActivity.addListener(ExecutionListener.EVENTNAME_END, endListener, 0);
 	}
 
 	@Override

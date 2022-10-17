@@ -508,9 +508,12 @@ public class SmtpMailService implements MailService, InitializingBean
 		{
 			try
 			{
-				return new MimeMultipart(body);
+				if (body.getContent() != null && body.getContent() instanceof MimeMultipart)
+					return (MimeMultipart) body.getContent();
+				else
+					return new MimeMultipart(body);
 			}
-			catch (MessagingException e)
+			catch (MessagingException | IOException e)
 			{
 				throw new RuntimeException(e);
 			}
