@@ -199,7 +199,13 @@ function updateQuestionnaireResponse(questionnaireResponse) {
             disableSpinner()
             window.scrollTo(0, 0);
             location.reload();
-        } else {
+        } else if (response.status >= 400 && response.status < 600) {
+	        response.text().then((responseText) => {
+	            document.open();
+        	    document.write(responseText);
+        	    document.close();
+        	});
+	    } else {
             const status = response.status
             const statusText = response.statusText === null ? " - " + response.statusText : ""
 
