@@ -81,7 +81,7 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 
 			QuestionnaireResponse questionnaireResponse = createDefaultQuestionnaireResponse(
 					questionnaireUrlWithVersion, businessKey, userTaskId);
-			addPlaceholderAnswersToQuestionnaireResponse(questionnaireResponse, questionnaire);
+			transformQuestionnaireItemsToQuestionnaireResponseItems(questionnaireResponse, questionnaire);
 
 			beforeQuestionnaireResponseCreate(userTask, questionnaireResponse);
 
@@ -153,10 +153,10 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 		questionnaireResponse.setAuthor(new Reference().setType(ResourceType.Organization.name())
 				.setIdentifier(organizationProvider.getLocalIdentifier()));
 
-		questionnaireResponseHelper.addItemLeave(questionnaireResponse,
+		questionnaireResponseHelper.addItemLeafWithAnswer(questionnaireResponse,
 				CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY, "The business-key of the process execution",
 				new StringType(businessKey));
-		questionnaireResponseHelper.addItemLeave(questionnaireResponse,
+		questionnaireResponseHelper.addItemLeafWithAnswer(questionnaireResponse,
 				CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID, "The user-task-id of the process execution",
 				new StringType(userTaskId));
 
@@ -165,30 +165,33 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 		return questionnaireResponse;
 	}
 
-	private void addPlaceholderAnswersToQuestionnaireResponse(QuestionnaireResponse questionnaireResponse,
+	private void transformQuestionnaireItemsToQuestionnaireResponseItems(QuestionnaireResponse questionnaireResponse,
 			Questionnaire questionnaire)
 	{
 		questionnaire.getItem().stream()
 				.filter(i -> !CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY.equals(i.getLinkId()))
 				.filter(i -> !CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID.equals(i.getLinkId()))
-				.forEach(i -> createAndAddAnswerPlaceholder(questionnaireResponse, i));
+				.forEach(i -> transformItem(questionnaireResponse, i));
 	}
 
-	private void createAndAddAnswerPlaceholder(QuestionnaireResponse questionnaireResponse,
+	private void transformItem(QuestionnaireResponse questionnaireResponse,
 			Questionnaire.QuestionnaireItemComponent question)
 	{
-		Type answer = questionnaireResponseHelper.transformQuestionTypeToAnswerType(question);
-		questionnaireResponseHelper.addItemLeave(questionnaireResponse, question.getLinkId(), question.getText(),
-				answer);
+		if (Questionnaire.QuestionnaireItemType.DISPLAY.equals(question.getType()))
+		{
+			questionnaireResponseHelper.addItemLeafWithoutAnswer(questionnaireResponse, question.getLinkId(),
+					question.getText());
+		}
+		else
+		{
+			Type answer = questionnaireResponseHelper.transformQuestionTypeToAnswerType(question);
+			questionnaireResponseHelper.addItemLeafWithAnswer(questionnaireResponse, question.getLinkId(),
+					question.getText(), answer);
+		}
 	}
 
 	private void checkQuestionnaireResponse(QuestionnaireResponse questionnaireResponse)
 	{
-		questionnaireResponse.getItem().stream()
-				.filter(i -> CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY.equals(i.getLinkId())).findFirst()
-				.orElseThrow(() -> new RuntimeException("QuestionnaireResponse does not contain an item with linkId='"
-						+ CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY + "'"));
-
 		questionnaireResponse.getItem().stream()
 				.filter(i -> CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID.equals(i.getLinkId())).findFirst()
 				.orElseThrow(() -> new RuntimeException("QuestionnaireResponse does not contain an item with linkId='"

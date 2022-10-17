@@ -20,6 +20,14 @@ fieldset#qr-form-fieldset {
     background-color: #f2f2f2;
 }
 
+.row-display {
+    padding-top: 15px;
+}
+
+.p-display {
+    margin: 0;
+}
+
 .error {
     background-color: #ffa590;
 }

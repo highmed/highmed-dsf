@@ -25,7 +25,7 @@ public class QuestionnaireProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			Arrays.asList("highmed-questionnaire-0.8.0.xml"), Collections.emptyList(), Collections.emptyList());
+			Arrays.asList("highmed-questionnaire-0.9.0.xml"), Collections.emptyList(), Collections.emptyList());
 
 	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
 			validationRule.getValidationSupport());
@@ -90,6 +90,12 @@ public class QuestionnaireProfileTest
 		testQuestionnaireValidType(Questionnaire.QuestionnaireItemType.REFERENCE);
 	}
 
+	@Test
+	public void testQuestionnaireValidTypeDisplay()
+	{
+		testQuestionnaireValidType(Questionnaire.QuestionnaireItemType.DISPLAY);
+	}
+
 	private void testQuestionnaireValidType(Questionnaire.QuestionnaireItemType type)
 	{
 		Questionnaire res = createQuestionnaire(type);
@@ -106,12 +112,6 @@ public class QuestionnaireProfileTest
 	public void testQuestionnaireInvalidTypeGroup()
 	{
 		testQuestionnaireInvalidType(Questionnaire.QuestionnaireItemType.GROUP);
-	}
-
-	@Test
-	public void testQuestionnaireInvalidTypeDisplay()
-	{
-		testQuestionnaireInvalidType(Questionnaire.QuestionnaireItemType.DISPLAY);
 	}
 
 	@Test
