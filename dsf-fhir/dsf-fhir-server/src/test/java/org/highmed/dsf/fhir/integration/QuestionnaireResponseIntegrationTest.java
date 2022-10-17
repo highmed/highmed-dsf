@@ -3,17 +3,22 @@ package org.highmed.dsf.fhir.integration;
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
+import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.fhir.authentication.OrganizationProvider;
 import org.highmed.dsf.fhir.dao.QuestionnaireDao;
 import org.highmed.dsf.fhir.dao.QuestionnaireResponseDao;
@@ -25,14 +30,14 @@ import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Type;
 import org.junit.Test;
 
 public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTest
 {
 	private static final Date AUTHORED = Date
 			.from(LocalDateTime.parse("2022-01-01T00:00:00").toInstant(ZoneOffset.UTC));
-	private static final String IDENTIFIER_SYSTEM = "http://highmed.org/fhir/CodeSystem/user-task-id";
-	private static final String IDENTIFIER_VALUE = "foo";
 	private static final String QUESTIONNAIRE_URL = "http://highmed.org/fhir/Questionnaire/userTask/foo";
 	private static final String QUESTIONNAIRE_VERSION = "1.0.0";
 	private static final String QUESTIONNAIRE = QUESTIONNAIRE_URL + "|" + QUESTIONNAIRE_VERSION;
@@ -58,6 +63,22 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 		try
 		{
 			getWebserviceClient().create(questionnaireResponse);
+		}
+		catch (WebApplicationException e)
+		{
+			assertEquals(Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
+			throw e;
+		}
+	}
+
+	@Test(expected = WebApplicationException.class)
+	public void testCreateNotAllowedByRemoteUser() throws Exception
+	{
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
+
+		try
+		{
+			getExternalWebserviceClient().create(questionnaireResponse);
 		}
 		catch (WebApplicationException e)
 		{
@@ -104,6 +125,52 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 	}
 
 	@Test(expected = WebApplicationException.class)
+	public void testUpdateNotAllowedByLocalUserNowUserTaskId() throws Exception
+	{
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
+		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
+
+		created.setStatus(QuestionnaireResponseStatus.STOPPED);
+		created.getItem().clear();
+
+		try
+		{
+			getWebserviceClient().update(created);
+		}
+		catch (WebApplicationException e)
+		{
+			assertEquals(Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
+			throw e;
+		}
+	}
+
+	@Test(expected = WebApplicationException.class)
+	public void testUpdateNotAllowedByLocalUserChangedUserTaskId() throws Exception
+	{
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
+		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
+
+		created.setStatus(QuestionnaireResponseStatus.STOPPED);
+		created.getItem().clear();
+		addItem(created, ConstantsBase.CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID, "UserTask ID",
+				new StringType(UUID.randomUUID().toString()));
+
+		try
+		{
+			getWebserviceClient().update(created);
+		}
+		catch (WebApplicationException e)
+		{
+			assertEquals(Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
+			throw e;
+		}
+	}
+
+	@Test(expected = WebApplicationException.class)
 	public void testSecondUpdateNotAllowedByLocalUser() throws Exception
 	{
 		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
@@ -116,6 +183,26 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 		try
 		{
 			getWebserviceClient().update(updated);
+		}
+		catch (WebApplicationException e)
+		{
+			assertEquals(Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
+			throw e;
+		}
+	}
+
+	@Test(expected = WebApplicationException.class)
+	public void testUpdateNotAllowedByRemoteUser() throws Exception
+	{
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
+		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
+
+		created.setStatus(QuestionnaireResponseStatus.COMPLETED);
+		try
+		{
+			getExternalWebserviceClient().update(created);
 		}
 		catch (WebApplicationException e)
 		{
@@ -150,13 +237,17 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 	@Test
 	public void testSearchByIdentifier() throws Exception
 	{
+		final String value = UUID.randomUUID().toString();
+		final String system = "http://foo/fhir/sid/Test";
+
 		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
+		questionnaireResponse.getIdentifier().setSystem(system).setValue(value);
 		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
 				.getBean(QuestionnaireResponseDao.class);
 		questionnaireResponseDao.create(questionnaireResponse);
 
 		Bundle searchBundle = getWebserviceClient().search(QuestionnaireResponse.class,
-				Map.of("identifier", Collections.singletonList(IDENTIFIER_SYSTEM + "|" + IDENTIFIER_VALUE)));
+				Map.of("identifier", Collections.singletonList(system + "|" + value)));
 
 		assertNotNull(searchBundle.getEntry());
 		assertEquals(1, searchBundle.getEntry().size());
@@ -164,11 +255,28 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 		assertNotNull(searchBundle.getEntry().get(0).getResource());
 		assertTrue(searchBundle.getEntry().get(0).getResource() instanceof QuestionnaireResponse);
 
-		QuestionnaireResponse searchQuestionnaireResponse = (QuestionnaireResponse) searchBundle.getEntry().get(0)
+		QuestionnaireResponse foundQuestionnaireResponse = (QuestionnaireResponse) searchBundle.getEntry().get(0)
 				.getResource();
-		assertTrue(searchQuestionnaireResponse.hasIdentifier());
-		assertEquals(IDENTIFIER_SYSTEM, searchQuestionnaireResponse.getIdentifier().getSystem());
-		assertEquals(IDENTIFIER_VALUE, searchQuestionnaireResponse.getIdentifier().getValue());
+		assertTrue(foundQuestionnaireResponse.hasIdentifier());
+	}
+
+	@Test
+	public void testSearchByIdentifierRemoteUser() throws Exception
+	{
+		final String value = UUID.randomUUID().toString();
+		final String system = "http://foo/fhir/sid/Test";
+
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
+		questionnaireResponse.getIdentifier().setSystem(system).setValue(value);
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
+		questionnaireResponseDao.create(questionnaireResponse);
+
+		Bundle searchBundle = getExternalWebserviceClient().search(QuestionnaireResponse.class,
+				Map.of("identifier", Collections.singletonList(system + "|" + value)));
+
+		assertNotNull(searchBundle.getEntry());
+		assertEquals(0, searchBundle.getEntry().size());
 	}
 
 	@Test
@@ -392,10 +500,6 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 		assertNotNull(organizationProvider);
 
 		QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse();
-		questionnaireResponse.getMeta().addTag().setSystem("http://highmed.org/fhir/CodeSystem/read-access-tag")
-				.setCode("ALL");
-
-		questionnaireResponse.getIdentifier().setSystem(IDENTIFIER_SYSTEM).setValue(IDENTIFIER_VALUE);
 
 		questionnaireResponse.setQuestionnaire(QUESTIONNAIRE);
 
@@ -406,9 +510,273 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 				+ organizationProvider.getLocalOrganization().get().getIdElement().getIdPart();
 		questionnaireResponse.setSubject(new Reference(organizationReference));
 
-		questionnaireResponse.addItem().setLinkId("foo").setText("Approve?").addAnswer()
-				.setValue(new BooleanType(true));
+		addItem(questionnaireResponse, ConstantsBase.CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID,
+				"UserTask ID", new StringType(UUID.randomUUID().toString()));
 
 		return questionnaireResponse;
+	}
+
+	private void addItem(QuestionnaireResponse questionnaireResponse, String linkId, String text, Type answer)
+	{
+		List<QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent> answerComponent = Collections
+				.singletonList(new QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent().setValue(answer));
+
+		questionnaireResponse.addItem().setLinkId(linkId).setText(text).setAnswer(answerComponent);
+	}
+
+	@Test
+	public void testDeleteAllowedByLocalUser() throws Exception
+	{
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
+		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
+
+		getWebserviceClient().delete(QuestionnaireResponse.class, created.getIdElement().getIdPart());
+	}
+
+	@Test(expected = WebApplicationException.class)
+	public void testDeleteNotAllowedByRemoteUser() throws Exception
+	{
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
+		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
+
+		try
+		{
+			getExternalWebserviceClient().delete(QuestionnaireResponse.class, created.getIdElement().getIdPart());
+		}
+		catch (WebApplicationException e)
+		{
+			assertEquals(Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
+			throw e;
+		}
+	}
+
+	@Test
+	public void testReadAllowedByLocalUser() throws Exception
+	{
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
+		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
+
+		QuestionnaireResponse read = getWebserviceClient().read(QuestionnaireResponse.class,
+				created.getIdElement().getIdPart());
+
+		assertNotNull(read);
+		assertNotNull(read.getIdElement().getIdPart());
+		assertEquals(created.getIdElement().getIdPart(), read.getIdElement().getIdPart());
+		assertNotNull(read.getIdElement().getVersionIdPart());
+		assertEquals("1", read.getIdElement().getVersionIdPart());
+	}
+
+	@Test(expected = WebApplicationException.class)
+	public void testReadNotAllowedByRemoteUser() throws Exception
+	{
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
+		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
+
+		try
+		{
+			getExternalWebserviceClient().read(QuestionnaireResponse.class, created.getIdElement().getIdPart());
+		}
+		catch (WebApplicationException e)
+		{
+			assertEquals(Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
+			throw e;
+		}
+	}
+
+	@Test(expected = WebApplicationException.class)
+	public void testReadNotAllowedByRemoteUserWithVersion() throws Exception
+	{
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
+		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
+
+		try
+		{
+			getExternalWebserviceClient().read(QuestionnaireResponse.class, created.getIdElement().getIdPart(),
+					created.getIdElement().getVersionIdPart());
+		}
+		catch (WebApplicationException e)
+		{
+			assertEquals(Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
+			throw e;
+		}
+	}
+
+	@Test
+	public void testNotModifiedCheckAllowedByLocalUser() throws Exception
+	{
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
+		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
+
+		QuestionnaireResponse read = getWebserviceClient().read(created);
+		assertNotNull(read);
+		assertTrue(created == read);
+	}
+
+	@Test(expected = WebApplicationException.class)
+	public void testNotModifiedCheckNotAllowedByRemoteUser() throws Exception
+	{
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
+		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
+
+		try
+		{
+			getExternalWebserviceClient().read(created);
+		}
+		catch (WebApplicationException e)
+		{
+			assertEquals(Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
+			throw e;
+		}
+	}
+
+	@Test
+	public void testNotModifiedCheckAllowedByLocalUserWithModification() throws Exception
+	{
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
+		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
+		QuestionnaireResponse updated = questionnaireResponseDao.update(created);
+		assertEquals("2", updated.getIdElement().getVersionIdPart());
+
+		QuestionnaireResponse read = getWebserviceClient().read(created);
+		assertNotNull(read);
+		assertTrue(created != read);
+
+		assertEquals("2", read.getIdElement().getVersionIdPart());
+	}
+
+	@Test(expected = WebApplicationException.class)
+	public void testNotModifiedCheckNotAllowedByRemoteUserWithModification() throws Exception
+	{
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
+		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
+		QuestionnaireResponse updated = questionnaireResponseDao.update(created);
+		assertEquals("2", updated.getIdElement().getVersionIdPart());
+
+		try
+		{
+			getExternalWebserviceClient().read(created);
+		}
+		catch (WebApplicationException e)
+		{
+			assertEquals(Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
+			throw e;
+		}
+	}
+
+	@Test
+	public void testHistory() throws Exception
+	{
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
+		QuestionnaireResponse created = questionnaireResponseDao.create(createQuestionnaireResponse());
+
+		Bundle historyBundle = getWebserviceClient().history(QuestionnaireResponse.class,
+				created.getIdElement().getIdPart());
+
+		assertNotNull(historyBundle.getEntry());
+		assertEquals(1, historyBundle.getEntry().size());
+		assertNotNull(historyBundle.getEntry().get(0));
+		assertNotNull(historyBundle.getEntry().get(0).getResource());
+		assertTrue(historyBundle.getEntry().get(0).getResource() instanceof QuestionnaireResponse);
+
+		Bundle historyBundle2 = getWebserviceClient().history(QuestionnaireResponse.class);
+
+		assertNotNull(historyBundle2.getEntry());
+		assertEquals(1, historyBundle2.getEntry().size());
+		assertNotNull(historyBundle2.getEntry().get(0));
+		assertNotNull(historyBundle2.getEntry().get(0).getResource());
+		assertTrue(historyBundle2.getEntry().get(0).getResource() instanceof QuestionnaireResponse);
+
+		Bundle historyBundle3 = getWebserviceClient().history(1, Integer.MAX_VALUE);
+
+		assertNotNull(historyBundle3.getEntry());
+
+		List<QuestionnaireResponse> qrFromBundle = historyBundle3.getEntry().stream()
+				.filter(e -> e.hasResource() && e.getResource() instanceof QuestionnaireResponse)
+				.map(e -> (QuestionnaireResponse) e.getResource()).collect(Collectors.toList());
+
+		assertEquals(1, qrFromBundle.size());
+		assertNotNull(qrFromBundle.get(0));
+	}
+
+	@Test
+	public void testHistoryRemoteUser() throws Exception
+	{
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
+		QuestionnaireResponse created = questionnaireResponseDao.create(createQuestionnaireResponse());
+
+		Bundle historyBundle = getExternalWebserviceClient().history(QuestionnaireResponse.class,
+				created.getIdElement().getIdPart());
+
+		assertNotNull(historyBundle.getEntry());
+		assertEquals(0, historyBundle.getEntry().size());
+
+		Bundle historyBundle2 = getExternalWebserviceClient().history(QuestionnaireResponse.class);
+
+		assertNotNull(historyBundle2.getEntry());
+		assertEquals(0, historyBundle2.getEntry().size());
+
+		Bundle historyBundle3 = getExternalWebserviceClient().history(1, Integer.MAX_VALUE);
+
+		assertNotNull(historyBundle3.getEntry());
+		assertNotSame(0, historyBundle3.getEntry().size());
+
+		List<QuestionnaireResponse> qrFromBundle = historyBundle3.getEntry().stream()
+				.filter(e -> e.hasResource() && e.getResource() instanceof QuestionnaireResponse)
+				.map(e -> (QuestionnaireResponse) e.getResource()).collect(Collectors.toList());
+
+		assertEquals(0, qrFromBundle.size());
+	}
+
+	@Test
+	public void testDeletePermanentlyAllowedByLocalUser() throws Exception
+	{
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
+		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
+		questionnaireResponseDao.delete(UUID.fromString(created.getIdElement().getIdPart()));
+
+		getWebserviceClient().deletePermanently(QuestionnaireResponse.class, created.getIdElement().getIdPart());
+	}
+
+	@Test(expected = WebApplicationException.class)
+	public void testDeletePermanentlyNotAllowedByRemoteUser() throws Exception
+	{
+		QuestionnaireResponse questionnaireResponse = createQuestionnaireResponse();
+		QuestionnaireResponseDao questionnaireResponseDao = getSpringWebApplicationContext()
+				.getBean(QuestionnaireResponseDao.class);
+		QuestionnaireResponse created = questionnaireResponseDao.create(questionnaireResponse);
+		questionnaireResponseDao.delete(UUID.fromString(created.getIdElement().getIdPart()));
+
+		try
+		{
+			getExternalWebserviceClient().deletePermanently(QuestionnaireResponse.class,
+					created.getIdElement().getIdPart());
+		}
+		catch (WebApplicationException e)
+		{
+			assertEquals(Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
+			throw e;
+		}
 	}
 }

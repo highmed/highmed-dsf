@@ -3,6 +3,7 @@ package org.highmed.dsf.fhir.authorization;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -42,6 +43,14 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 
 		readAccessDao = daoProvider.getReadAccessDao();
 		resourceTypeName = resourceType.getAnnotation(ResourceDef.class).name();
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception
+	{
+		super.afterPropertiesSet();
+
+		Objects.requireNonNull(parameterConverter, "parameterConverter");
 	}
 
 	protected final boolean hasValidReadAccessTag(Connection connection, Resource resource)

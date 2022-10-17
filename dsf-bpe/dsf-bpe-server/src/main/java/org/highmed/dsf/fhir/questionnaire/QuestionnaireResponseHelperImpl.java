@@ -49,12 +49,19 @@ public class QuestionnaireResponseHelperImpl implements QuestionnaireResponseHel
 	}
 
 	@Override
-	public void addItemLeave(QuestionnaireResponse questionnaireResponse, String linkId, String text, Type answer)
+	public void addItemLeafWithAnswer(QuestionnaireResponse questionnaireResponse, String linkId, String text,
+			Type answer)
 	{
 		List<QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent> answerComponent = Collections
 				.singletonList(new QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent().setValue(answer));
 
 		questionnaireResponse.addItem().setLinkId(linkId).setText(text).setAnswer(answerComponent);
+	}
+
+	@Override
+	public void addItemLeafWithoutAnswer(QuestionnaireResponse questionnaireResponse, String linkId, String text)
+	{
+		questionnaireResponse.addItem().setLinkId(linkId).setText(text);
 	}
 
 	@Override
@@ -82,8 +89,8 @@ public class QuestionnaireResponseHelperImpl implements QuestionnaireResponseHel
 			case REFERENCE:
 				return new Reference("http://example.org/fhir/Placeholder/id");
 			default:
-				throw new RuntimeException(
-						"Type '" + question.getType().getDisplay() + "' in Questionnaire.item is not supported");
+				throw new RuntimeException("Type '" + question.getType().getDisplay()
+						+ "' in Questionnaire.item is not supported as answer type");
 		}
 	}
 }

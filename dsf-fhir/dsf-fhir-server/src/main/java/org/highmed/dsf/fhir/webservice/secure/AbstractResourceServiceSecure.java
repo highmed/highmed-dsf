@@ -235,9 +235,28 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 		{
 			audit.info("Read of resource {} denied for user '{}' ({}), not a {}", resourceTypeName + "/" + id,
 					getCurrentUser().getName(), getCurrentUser().getSubjectDn(), resourceTypeName);
-
-			logger.warn("Not allowing access to entity of type {}", read.getEntity().getClass().getName());
 			return forbidden("read");
+		}
+		else if (!read.hasEntity() && Status.NOT_MODIFIED.getStatusCode() == read.getStatus())
+		{
+			Optional<R> dbResource = exceptionHandler.handleSqlAndResourceDeletedException(serverBase, resourceTypeName,
+					() -> dao.read(parameterConverter.toUuid(resourceTypeName, id)));
+			Optional<String> reasonReadAllowed = authorizationRule.reasonReadAllowed(getCurrentUser(),
+					dbResource.get());
+
+			if (reasonReadAllowed.isEmpty())
+			{
+				audit.info("Read of resource {} denied for user '{}' ({})", dbResource.get().getIdElement().getValue(),
+						getCurrentUser().getName(), getCurrentUser().getSubjectDn());
+				return forbidden("read");
+			}
+			else
+			{
+				audit.info("Read of resource {} allowed for user '{}' ({}): {}",
+						dbResource.get().getIdElement().getValue(), getCurrentUser().getName(),
+						getCurrentUser().getSubjectDn(), reasonReadAllowed.get());
+				return read;
+			}
 		}
 		else
 		{
@@ -245,7 +264,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 					resourceTypeName + "/" + id, getCurrentUser().getName(), getCurrentUser().getSubjectDn(),
 					read.getStatus());
 
-			logger.warn("Returning with status {}, but no entity", read.getStatus());
+			logger.info("Returning with status {}, but no entity", read.getStatus());
 			return read;
 		}
 	}
@@ -289,9 +308,28 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 			audit.info("Read of resource {} denied for user '{}' ({}), not a {}",
 					resourceTypeName + "/" + id + "/_history/" + version, getCurrentUser().getName(),
 					getCurrentUser().getSubjectDn(), resourceTypeName);
-
-			logger.warn("Not allowing access to entity of type {}", read.getEntity().getClass().getName());
 			return forbidden("read");
+		}
+		else if (!read.hasEntity() && Status.NOT_MODIFIED.getStatusCode() == read.getStatus())
+		{
+			Optional<R> dbResource = exceptionHandler.handleSqlAndResourceDeletedException(serverBase, resourceTypeName,
+					() -> dao.readVersion(parameterConverter.toUuid(resourceTypeName, id), version));
+			Optional<String> reasonReadAllowed = authorizationRule.reasonReadAllowed(getCurrentUser(),
+					dbResource.get());
+
+			if (reasonReadAllowed.isEmpty())
+			{
+				audit.info("Read of resource {} denied for user '{}' ({})", dbResource.get().getIdElement().getValue(),
+						getCurrentUser().getName(), getCurrentUser().getSubjectDn());
+				return forbidden("read");
+			}
+			else
+			{
+				audit.info("Read of resource {} allowed for user '{}' ({}): {}",
+						dbResource.get().getIdElement().getValue(), getCurrentUser().getName(),
+						getCurrentUser().getSubjectDn(), reasonReadAllowed.get());
+				return read;
+			}
 		}
 		else
 		{
@@ -299,7 +337,7 @@ public abstract class AbstractResourceServiceSecure<D extends ResourceDao<R>, R 
 					resourceTypeName + "/" + id + "/_history/" + version, getCurrentUser().getName(),
 					getCurrentUser().getSubjectDn(), read.getStatus());
 
-			logger.warn("Returning with status {}, but no entity", read.getStatus());
+			logger.info("Returning with status {}, but no entity", read.getStatus());
 			return read;
 		}
 	}

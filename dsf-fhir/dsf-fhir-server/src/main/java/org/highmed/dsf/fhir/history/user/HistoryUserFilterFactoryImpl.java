@@ -26,6 +26,8 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Provenance;
+import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StructureDefinition;
@@ -58,6 +60,8 @@ public class HistoryUserFilterFactoryImpl implements HistoryUserFilterFactory
 		filtersByResource.put(Practitioner.class, PractitionerHistoryUserFilter::new);
 		filtersByResource.put(PractitionerRole.class, PractitionerRoleHistoryUserFilter::new);
 		filtersByResource.put(Provenance.class, ProvenanceHistoryUserFilter::new);
+		filtersByResource.put(Questionnaire.class, QuestionnaireHistoryUserFilter::new);
+		filtersByResource.put(QuestionnaireResponse.class, QuestionnaireResponseHistoryUserFilter::new);
 		filtersByResource.put(ResearchStudy.class, ResearchStudyHistoryUserFilter::new);
 		filtersByResource.put(StructureDefinition.class, StructureDefinitionHistoryUserFilter::new);
 		filtersByResource.put(Subscription.class, SubscriptionHistoryUserFilter::new);

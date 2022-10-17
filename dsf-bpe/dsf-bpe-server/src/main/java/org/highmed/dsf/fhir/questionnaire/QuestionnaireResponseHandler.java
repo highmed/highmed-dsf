@@ -47,25 +47,32 @@ public class QuestionnaireResponseHandler implements ResourceHandler<Questionnai
 			String user = questionnaireResponse.getAuthor().getIdentifier().getValue();
 			String userType = questionnaireResponse.getAuthor().getType();
 			String businessKey = getStringValueFromItems(items, CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY,
-					questionnaireResponseId)
-					.orElseThrow(() -> new RuntimeException(
-							"Missing linkId " + CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY));
-			String taskId = getStringValueFromItems(items, CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID,
-					questionnaireResponseId)
-					.orElseThrow(() -> new RuntimeException(
-							"Missing linkId " + CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID));
+					questionnaireResponseId).orElse("?");
 
-			logger.info("User task '{}' for Questionnaire '{}' completed [userTaskId: {}, businessKey: {}, user: {}]",
-					questionnaireResponseId, questionnaire, taskId, businessKey, user + "|" + userType);
+			Optional<String> userTaskIdOpt = getStringValueFromItems(items,
+					CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID, questionnaireResponseId);
 
-			Map<String, Object> variables = Map.of(BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_RESPONSE_COMPLETED,
-					FhirResourceValues.create(questionnaireResponse));
-			userTaskService.complete(taskId, variables);
+			userTaskIdOpt.ifPresentOrElse(userTaskId ->
+			{
+				logger.info(
+						"QuestionnaireResponse '{}' for Questionnaire '{}' completed [userTaskId: {}, businessKey: {}, user: {}]",
+						questionnaireResponseId, questionnaire, userTaskId, businessKey, user + "|" + userType);
+
+				Map<String, Object> variables = Map.of(BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_RESPONSE_COMPLETED,
+						FhirResourceValues.create(questionnaireResponse));
+				userTaskService.complete(userTaskId, variables);
+			}, () ->
+			{
+				logger.warn(
+						"QuestionnaireResponse '{}' for Questionnaire '{}' has no answer with item.linkId '{}' [businessKey: {}, user: {}], ignoring QuestionnaireResponse",
+						questionnaireResponseId, questionnaire, CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID,
+						businessKey, user + "|" + userType);
+			});
 		}
-		catch (Exception exception)
+		catch (Exception e)
 		{
-			// TODO handle exception
-			throw new RuntimeException(exception);
+			logger.warn("Unable to complete UserTask", e);
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -79,7 +86,7 @@ public class QuestionnaireResponseHandler implements ResourceHandler<Questionnai
 
 		if (answers.size() == 0)
 		{
-			logger.warn("QuestionnaireResponse with id '{}' did not contain any linkId '{}'", questionnaireResponseId,
+			logger.info("QuestionnaireResponse with id '{}' did not contain any linkId '{}'", questionnaireResponseId,
 					linkId);
 			return Optional.empty();
 		}

@@ -36,7 +36,7 @@ public class QuestionnaireResponseProfileTest
 
 	@ClassRule
 	public static final ValidationSupportRule validationRule = new ValidationSupportRule(
-			Arrays.asList("highmed-questionnaire-response-0.8.0.xml"), Collections.emptyList(),
+			Arrays.asList("highmed-questionnaire-response-0.9.0.xml"), Collections.emptyList(),
 			Collections.emptyList());
 
 	private ResourceValidator resourceValidator = new ResourceValidatorImpl(validationRule.getFhirContext(),
@@ -96,10 +96,26 @@ public class QuestionnaireResponseProfileTest
 		testQuestionnaireResponseValidType(new Reference("Observation/foo"));
 	}
 
+	@Test
+	public void testQuestionnaireResponseValidTypeReferenceWithBusinessKey()
+	{
+		testQuestionnaireResponseValidTypeWithBusinessKey(new Reference("Observation/foo"));
+	}
+
+	private void testQuestionnaireResponseValidTypeWithBusinessKey(Type type)
+	{
+		QuestionnaireResponse res = createQuestionnaireResponseWithBusinessKey(type);
+		testQuestionnaireResponse(res);
+	}
+
 	private void testQuestionnaireResponseValidType(Type type)
 	{
 		QuestionnaireResponse res = createQuestionnaireResponse(type);
+		testQuestionnaireResponse(res);
+	}
 
+	private void testQuestionnaireResponse(QuestionnaireResponse res)
+	{
 		ValidationResult result = resourceValidator.validate(res);
 		result.getMessages().stream().map(m -> m.getLocationString() + " " + m.getLocationLine() + ":"
 				+ m.getLocationCol() + " - " + m.getSeverity() + ": " + m.getMessage()).forEach(logger::info);
@@ -183,17 +199,24 @@ public class QuestionnaireResponseProfileTest
 						.filter(m -> m.getMessage().startsWith("author-if-completed")).count());
 	}
 
+	private QuestionnaireResponse createQuestionnaireResponseWithBusinessKey(Type type)
+	{
+		QuestionnaireResponse res = createQuestionnaireResponse(type);
+		res.addItem().setLinkId("business-key").setText("The business-key of the process execution").addAnswer()
+				.setValue(new StringType(UUID.randomUUID().toString()));
+
+		return res;
+	}
+
 	private QuestionnaireResponse createQuestionnaireResponse(Type type)
 	{
 		QuestionnaireResponse res = new QuestionnaireResponse();
 		res.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/questionnaire-response");
 		res.setQuestionnaire("http://highmed.org/fhir/Questionnaire/hello-world|0.1.0");
 		res.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS);
-		res.addItem().setLinkId("business-key").setText("The business-key of the process execution").addAnswer()
-				.setValue(new StringType(UUID.randomUUID().toString()));
 		res.addItem().setLinkId("user-task-id").setText("The user-task-id of the process execution").addAnswer()
 				.setValue(new StringType("1"));
-		;
+		res.addItem().setLinkId("valid-display").setText("valid-display");
 		res.addItem().setLinkId("valid-answer").setText("valid answer").addAnswer().setValue(type);
 
 		return res;
