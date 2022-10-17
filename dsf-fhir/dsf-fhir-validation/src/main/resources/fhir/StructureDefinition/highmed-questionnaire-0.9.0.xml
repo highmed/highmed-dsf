@@ -6,11 +6,11 @@
 		</tag>
 	</meta>
 	<url value="http://highmed.org/fhir/StructureDefinition/questionnaire"/>
-	<version value="0.8.0"/>
+	<version value="0.9.0"/>
 	<name value="Questionnaire"/>
 	<status value="active"/>
 	<experimental value="false"/>
-	<date value="2022-10-11"/>
+	<date value="2022-10-17"/>
 	<fhirVersion value="4.0.1"/>
 	<kind value="resource"/>
 	<abstract value="true"/>
@@ -43,61 +43,14 @@
 				</discriminator>
 				<rules value="closed"/>
 			</slicing>
-			<min value="3"/>
+			<min value="1"/>
 			<constraint>
 				<key value="type-code"/>
 				<severity value="error"/>
-				<human value="Constraines available types from ValueSet 'http://hl7.org/fhir/item-type'"/>
+				<human value="Constrains available types from ValueSet 'http://hl7.org/fhir/item-type'"/>
 				<expression
-						value="(type = 'string') or (type = 'text') or (type = 'integer') or (type = 'decimal') or (type = 'boolean') or (type = 'date') or (type = 'time') or (type = 'dateTime') or (type = 'reference') or (type = 'url')"/>
+						value="(type = 'display') or (type = 'string') or (type = 'text') or (type = 'integer') or (type = 'decimal') or (type = 'boolean') or (type = 'date') or (type = 'time') or (type = 'dateTime') or (type = 'reference') or (type = 'url')"/>
 			</constraint>
-		</element>
-		<element id="Questionnaire.item:business-key">
-			<path value="Questionnaire.item"/>
-			<sliceName value="business-key"/>
-			<min value="1"/>
-			<max value="1"/>
-		</element>
-		<element id="Questionnaire.item:business-key.linkId">
-			<path value="Questionnaire.item.linkId"/>
-			<fixedString value="business-key"/>
-		</element>
-		<element id="Questionnaire.item:business-key.definition">
-			<path value="Questionnaire.item.definition"/>
-			<max value="0"/>
-		</element>
-		<element id="Questionnaire.item:business-key.code">
-			<path value="Questionnaire.item.code"/>
-			<max value="0"/>
-		</element>
-		<element id="Questionnaire.item:business-key.prefix">
-			<path value="Questionnaire.item.prefix"/>
-			<max value="0"/>
-		</element>
-		<element id="Questionnaire.item:business-key.text">
-			<path value="Questionnaire.item.text"/>
-			<min value="1"/>
-			<fixedString value="The business-key of the process execution"/>
-		</element>
-		<element id="Questionnaire.item:business-key.type">
-			<path value="Questionnaire.item.type"/>
-			<fixedCode value="string"/>
-		</element>
-		<element id="Questionnaire.item:business-key.enableWhen">
-			<path value="Questionnaire.item.enableWhen"/>
-			<max value="0"/>
-		</element>
-		<element id="Questionnaire.item:business-key.answerOption">
-			<path value="Questionnaire.item.answerOption"/>
-			<max value="0"/>
-		</element>
-		<element id="Questionnaire.item:business-key.initial">
-			<path value="Questionnaire.item.initial"/>
-			<max value="0"/>
-		</element>
-		<element id="Questionnaire.item:business-key.item">
-			<path value="Questionnaire.item.item"/>
-			<max value="0"/>
 		</element>
 		<element id="Questionnaire.item:user-task-id">
 			<path value="Questionnaire.item"/>
@@ -146,10 +99,57 @@
 			<path value="Questionnaire.item.item"/>
 			<max value="0"/>
 		</element>
+		<element id="Questionnaire.item:business-key">
+			<path value="Questionnaire.item"/>
+			<sliceName value="business-key"/>
+			<min value="0"/>
+			<max value="1"/>
+		</element>
+		<element id="Questionnaire.item:business-key.linkId">
+			<path value="Questionnaire.item.linkId"/>
+			<fixedString value="business-key"/>
+		</element>
+		<element id="Questionnaire.item:business-key.definition">
+			<path value="Questionnaire.item.definition"/>
+			<max value="0"/>
+		</element>
+		<element id="Questionnaire.item:business-key.code">
+			<path value="Questionnaire.item.code"/>
+			<max value="0"/>
+		</element>
+		<element id="Questionnaire.item:business-key.prefix">
+			<path value="Questionnaire.item.prefix"/>
+			<max value="0"/>
+		</element>
+		<element id="Questionnaire.item:business-key.text">
+			<path value="Questionnaire.item.text"/>
+			<min value="1"/>
+			<fixedString value="The business-key of the process execution"/>
+		</element>
+		<element id="Questionnaire.item:business-key.type">
+			<path value="Questionnaire.item.type"/>
+			<fixedCode value="string"/>
+		</element>
+		<element id="Questionnaire.item:business-key.enableWhen">
+			<path value="Questionnaire.item.enableWhen"/>
+			<max value="0"/>
+		</element>
+		<element id="Questionnaire.item:business-key.answerOption">
+			<path value="Questionnaire.item.answerOption"/>
+			<max value="0"/>
+		</element>
+		<element id="Questionnaire.item:business-key.initial">
+			<path value="Questionnaire.item.initial"/>
+			<max value="0"/>
+		</element>
+		<element id="Questionnaire.item:business-key.item">
+			<path value="Questionnaire.item.item"/>
+			<max value="0"/>
+		</element>
 		<element id="Questionnaire.item:@default">
 			<path value="Questionnaire.item"/>
 			<sliceName value="@default"/>
-			<min value="1"/>
+			<min value="0"/>
 			<max value="*"/>
 		</element>
 		<element id="Questionnaire.item:@default.definition">
@@ -170,6 +170,7 @@
 		</element>
 		<element id="Questionnaire.item:@default.type">
 			<path value="Questionnaire.item.type"/>
+			<min value="1"/>
 		</element>
 		<element id="Questionnaire.item:@default.enableWhen">
 			<path value="Questionnaire.item.enableWhen"/>

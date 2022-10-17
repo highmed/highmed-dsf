@@ -37,5 +37,7 @@ public interface QuestionnaireResponseHelper
 
 	Type transformQuestionTypeToAnswerType(Questionnaire.QuestionnaireItemComponent question);
 
-	void addItemLeave(QuestionnaireResponse questionnaireResponse, String linkId, String text, Type answer);
+	void addItemLeafWithoutAnswer(QuestionnaireResponse questionnaireResponse, String linkId, String text);
+
+	void addItemLeafWithAnswer(QuestionnaireResponse questionnaireResponse, String linkId, String text, Type answer);
 }

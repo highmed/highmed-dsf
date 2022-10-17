@@ -22,9 +22,9 @@ import org.highmed.dsf.fhir.organization.OrganizationProvider;
 import org.highmed.dsf.fhir.questionnaire.QuestionnaireResponseHelper;
 import org.highmed.dsf.fhir.task.TaskHelper;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
+import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
@@ -43,12 +43,6 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 	private final QuestionnaireResponseHelper questionnaireResponseHelper;
 	private final TaskHelper taskHelper;
 	private final ReadAccessHelper readAccessHelper;
-
-	/**
-	 * @deprecated as of release 0.8.0, use {@link #getExecution()} instead
-	 */
-	@Deprecated
-	protected DelegateExecution execution;
 
 	public DefaultUserTaskListener(FhirWebserviceClientProvider clientProvider,
 			OrganizationProvider organizationProvider, QuestionnaireResponseHelper questionnaireResponseHelper,
@@ -74,7 +68,7 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 	@Override
 	public final void notify(DelegateTask userTask)
 	{
-		this.execution = userTask.getExecution();
+		DelegateExecution execution = userTask.getExecution();
 
 		try
 		{
@@ -88,25 +82,31 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 
 			QuestionnaireResponse questionnaireResponse = createDefaultQuestionnaireResponse(
 					questionnaireUrlWithVersion, businessKey, userTaskId);
-			addPlaceholderAnswersToQuestionnaireResponse(questionnaireResponse, questionnaire);
+			transformQuestionnaireItemsToQuestionnaireResponseItems(questionnaireResponse, questionnaire);
 
-			modifyQuestionnaireResponse(userTask, questionnaireResponse);
-
+			beforeQuestionnaireResponseCreate(userTask, questionnaireResponse);
 			checkQuestionnaireResponse(questionnaireResponse);
 
-			IdType created = clientProvider.getLocalWebserviceClient().withRetryForever(60000)
-					.create(questionnaireResponse).getIdElement();
-			execution.setVariable(BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_RESPONSE_ID, created.getIdPart());
+			QuestionnaireResponse created = clientProvider.getLocalWebserviceClient().withRetryForever(60000)
+					.create(questionnaireResponse);
+			execution.setVariable(BPMN_EXECUTION_VARIABLE_QUESTIONNAIRE_RESPONSE_ID,
+					created.getIdElement().getIdPart());
 
-			logger.info("Created user task with id={}, process waiting for it's completion", created.getValue());
+			logger.info("Created QuestionnaireResponse for user task at {}, process waiting for it's completion",
+					created.getIdElement().toVersionless().withServerBase(clientProvider.getLocalBaseUrl(),
+							ResourceType.QuestionnaireResponse.name()));
+
+			afterQuestionnaireResponseCreate(userTask, created);
 		}
 		catch (Exception exception)
 		{
-			Task task = getTask();
+			Task task = getTask(execution);
 
 			logger.debug("Error while executing user task listener " + getClass().getName(), exception);
-			logger.error("Process {} has fatal error in step {} for task with id {}, reason: {}",
-					execution.getProcessDefinitionId(), execution.getActivityInstanceId(), task.getId(),
+			logger.error("Process {} has fatal error in step {} for task {}, reason: {}",
+					execution.getProcessDefinitionId(), execution.getActivityInstanceId(),
+					task.getIdElement().toVersionless()
+							.withServerBase(clientProvider.getLocalBaseUrl(), ResourceType.Task.name()).getValue(),
 					exception.getMessage());
 
 			String errorMessage = "Process " + execution.getProcessDefinitionId() + " has fatal error in step "
@@ -153,41 +153,55 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 		questionnaireResponse.setAuthor(new Reference().setType(ResourceType.Organization.name())
 				.setIdentifier(organizationProvider.getLocalIdentifier()));
 
-		questionnaireResponseHelper.addItemLeave(questionnaireResponse,
-				CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY, "The business-key of the process execution",
-				new StringType(businessKey));
-		questionnaireResponseHelper.addItemLeave(questionnaireResponse,
+		if (addBusinessKeyToQuestionnaireResponse())
+		{
+			questionnaireResponseHelper.addItemLeafWithAnswer(questionnaireResponse,
+					CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY, "The business-key of the process execution",
+					new StringType(businessKey));
+		}
+
+		questionnaireResponseHelper.addItemLeafWithAnswer(questionnaireResponse,
 				CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID, "The user-task-id of the process execution",
 				new StringType(userTaskId));
-
-		readAccessHelper.addLocal(questionnaireResponse);
 
 		return questionnaireResponse;
 	}
 
-	private void addPlaceholderAnswersToQuestionnaireResponse(QuestionnaireResponse questionnaireResponse,
+	private void transformQuestionnaireItemsToQuestionnaireResponseItems(QuestionnaireResponse questionnaireResponse,
 			Questionnaire questionnaire)
 	{
 		questionnaire.getItem().stream()
 				.filter(i -> !CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY.equals(i.getLinkId()))
 				.filter(i -> !CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID.equals(i.getLinkId()))
-				.forEach(i -> createAndAddAnswerPlaceholder(questionnaireResponse, i));
+				.forEach(i -> transformItem(questionnaireResponse, i));
 	}
 
-	private void createAndAddAnswerPlaceholder(QuestionnaireResponse questionnaireResponse,
+	private void transformItem(QuestionnaireResponse questionnaireResponse,
 			Questionnaire.QuestionnaireItemComponent question)
 	{
-		Type answer = questionnaireResponseHelper.transformQuestionTypeToAnswerType(question);
-		questionnaireResponseHelper.addItemLeave(questionnaireResponse, question.getLinkId(), question.getText(),
-				answer);
+		if (Questionnaire.QuestionnaireItemType.DISPLAY.equals(question.getType()))
+		{
+			questionnaireResponseHelper.addItemLeafWithoutAnswer(questionnaireResponse, question.getLinkId(),
+					question.getText());
+		}
+		else
+		{
+			Type answer = questionnaireResponseHelper.transformQuestionTypeToAnswerType(question);
+			questionnaireResponseHelper.addItemLeafWithAnswer(questionnaireResponse, question.getLinkId(),
+					question.getText(), answer);
+		}
 	}
 
 	private void checkQuestionnaireResponse(QuestionnaireResponse questionnaireResponse)
 	{
-		questionnaireResponse.getItem().stream()
-				.filter(i -> CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY.equals(i.getLinkId())).findFirst()
-				.orElseThrow(() -> new RuntimeException("QuestionnaireResponse does not contain an item with linkId='"
-						+ CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY + "'"));
+		if (addBusinessKeyToQuestionnaireResponse())
+		{
+			questionnaireResponse.getItem().stream()
+					.filter(i -> CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY.equals(i.getLinkId())).findFirst()
+					.orElseThrow(
+							() -> new RuntimeException("QuestionnaireResponse does not contain an item with linkId='"
+									+ CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY + "'"));
+		}
 
 		questionnaireResponse.getItem().stream()
 				.filter(i -> CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID.equals(i.getLinkId())).findFirst()
@@ -199,23 +213,44 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 	}
 
 	/**
-	 * Use this method to modify the {@link QuestionnaireResponse} before it will be created in state
-	 * {@link QuestionnaireResponse.QuestionnaireResponseStatus#INPROGRESS}
+	 * <i>Override this method to decided if you want to add the Business-Key to the {@link QuestionnaireResponse}
+	 * resource as an item with {@link QuestionnaireResponseItemComponent#getLinkId()} equal to
+	 * {@link ConstantsBase#CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY}</i>
+	 *
+	 * @return <code>false</code>
+	 */
+	protected boolean addBusinessKeyToQuestionnaireResponse()
+	{
+		return false;
+	}
+
+	/**
+	 * <i>Override this method to modify the {@link QuestionnaireResponse} before it will be created in state
+	 * {@link QuestionnaireResponse.QuestionnaireResponseStatus#INPROGRESS} on the DSF FHIR server</i>
 	 *
 	 * @param userTask
 	 *            not <code>null</code>, user task on which this {@link QuestionnaireResponse} is based
-	 * @param questionnaireResponse
+	 * @param beforeCreate
 	 *            not <code>null</code>, containing an answer placeholder for every item in the corresponding
 	 *            {@link Questionnaire}
 	 */
-	protected void modifyQuestionnaireResponse(DelegateTask userTask, QuestionnaireResponse questionnaireResponse)
+	protected void beforeQuestionnaireResponseCreate(DelegateTask userTask, QuestionnaireResponse beforeCreate)
 	{
-		// Nothing to do in default behaviour
+		// Nothing to do in default behavior
 	}
 
-	protected final DelegateExecution getExecution()
+	/**
+	 * <i>Override this method to execute code after the {@link QuestionnaireResponse} resource has been created on the
+	 * DSF FHIR server</i>
+	 *
+	 * @param userTask
+	 *            not <code>null</code>, user task on which this {@link QuestionnaireResponse} is based
+	 * @param afterCreate
+	 *            not <code>null</code>, created on the DSF FHIR server
+	 */
+	protected void afterQuestionnaireResponseCreate(DelegateTask userTask, QuestionnaireResponse afterCreate)
 	{
-		return execution;
+		// Nothing to do in default behavior
 	}
 
 	protected final TaskHelper getTaskHelper()
@@ -234,36 +269,42 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 	}
 
 	/**
+	 * @param execution
+	 *            not <code>null</code>
 	 * @return the active task from execution variables, i.e. the leading task if the main process is running or the
 	 *         current task if a subprocess is running.
 	 * @throws IllegalStateException
 	 *             if execution of this service delegate has not been started
 	 * @see ConstantsBase#BPMN_EXECUTION_VARIABLE_TASK
 	 */
-	protected final Task getTask()
+	protected final Task getTask(DelegateExecution execution)
 	{
 		return taskHelper.getTask(execution);
 	}
 
 	/**
+	 * @param execution
+	 *            not <code>null</code>
 	 * @return the current task from execution variables, the task resource that started the current process or
 	 *         subprocess
 	 * @throws IllegalStateException
 	 *             if execution of this service delegate has not been started
 	 * @see ConstantsBase#BPMN_EXECUTION_VARIABLE_TASK
 	 */
-	protected final Task getCurrentTaskFromExecutionVariables()
+	protected final Task getCurrentTaskFromExecutionVariables(DelegateExecution execution)
 	{
 		return taskHelper.getCurrentTaskFromExecutionVariables(execution);
 	}
 
 	/**
+	 * @param execution
+	 *            not <code>null</code>
 	 * @return the leading task from execution variables, same as current task if not in a subprocess
 	 * @throws IllegalStateException
 	 *             if execution of this service delegate has not been started
 	 * @see ConstantsBase#BPMN_EXECUTION_VARIABLE_LEADING_TASK
 	 */
-	protected final Task getLeadingTaskFromExecutionVariables()
+	protected final Task getLeadingTaskFromExecutionVariables(DelegateExecution execution)
 	{
 		return taskHelper.getLeadingTaskFromExecutionVariables(execution);
 	}
@@ -272,13 +313,15 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 	 * <i>Use this method to update the process engine variable {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_TASK},
 	 * after modifying the {@link Task}.</i>
 	 *
+	 * @param execution
+	 *            not <code>null</code>
 	 * @param task
 	 *            not <code>null</code>
 	 * @throws IllegalStateException
 	 *             if execution of this service delegate has not been started
 	 * @see ConstantsBase#BPMN_EXECUTION_VARIABLE_TASK
 	 */
-	protected final void updateCurrentTaskInExecutionVariables(Task task)
+	protected final void updateCurrentTaskInExecutionVariables(DelegateExecution execution, Task task)
 	{
 		taskHelper.updateCurrentTaskInExecutionVariables(execution, task);
 	}
@@ -289,13 +332,15 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 	 * <p>
 	 * Updates the current task if no leading task is set.
 	 *
+	 * @param execution
+	 *            not <code>null</code>
 	 * @param task
 	 *            not <code>null</code>
 	 * @throws IllegalStateException
 	 *             if execution of this service delegate has not been started
 	 * @see ConstantsBase#BPMN_EXECUTION_VARIABLE_LEADING_TASK
 	 */
-	protected final void updateLeadingTaskInExecutionVariables(Task task)
+	protected final void updateLeadingTaskInExecutionVariables(DelegateExecution execution, Task task)
 	{
 		taskHelper.updateLeadingTaskInExecutionVariables(execution, task);
 	}

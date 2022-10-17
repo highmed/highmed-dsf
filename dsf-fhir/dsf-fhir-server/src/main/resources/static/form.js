@@ -18,12 +18,15 @@ function readAnswersFromForm(questionnaireResponse, errors) {
     questionnaireResponse.status = "completed";
 
     questionnaireResponse.item.forEach((item) => {
-        const id = item.linkId
-        const answer = item.answer[0]
-        const answerType = Object.keys(answer)[0]
+        if (item.hasOwnProperty('answer')) {
+            const id = item.linkId
 
-        if (id !== "business-key" && id !== "user-task-id") {
-            answer[answerType] = readAndValidateValue(id, answerType, errors)
+            if (id !== "business-key" && id !== "user-task-id") {
+                const answer = item.answer[0]
+                const answerType = Object.keys(answer)[0]
+
+                answer[answerType] = readAndValidateValue(id, answerType, errors)
+            }
         }
     })
 }
@@ -31,7 +34,7 @@ function readAnswersFromForm(questionnaireResponse, errors) {
 function readAndValidateValue(id, answerType, errors) {
     const value = document.getElementById(id).value
 
-    const rowElement = document.getElementById(id + "-row");
+    const rowElement = document.getElementById(id + "-answer-row");
     const errorListElement = document.getElementById(id + "-error");
     errorListElement.replaceChildren()
 
@@ -196,7 +199,13 @@ function updateQuestionnaireResponse(questionnaireResponse) {
             disableSpinner()
             window.scrollTo(0, 0);
             location.reload();
-        } else {
+        } else if (response.status >= 400 && response.status < 600) {
+	        response.text().then((responseText) => {
+	            document.open();
+        	    document.write(responseText);
+        	    document.close();
+        	});
+	    } else {
             const status = response.status
             const statusText = response.statusText === null ? " - " + response.statusText : ""
 

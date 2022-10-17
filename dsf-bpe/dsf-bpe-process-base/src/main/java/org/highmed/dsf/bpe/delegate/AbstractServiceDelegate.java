@@ -12,6 +12,7 @@ import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.fhir.authorization.read.ReadAccessHelper;
 import org.highmed.dsf.fhir.client.FhirWebserviceClientProvider;
 import org.highmed.dsf.fhir.task.TaskHelper;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,12 +25,6 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 	private final FhirWebserviceClientProvider clientProvider;
 	private final TaskHelper taskHelper;
 	private final ReadAccessHelper readAccessHelper;
-
-	/**
-	 * @deprecated as of release 0.8.0, use {@link #getExecution()} instead
-	 */
-	@Deprecated
-	protected DelegateExecution execution;
 
 	public AbstractServiceDelegate(FhirWebserviceClientProvider clientProvider, TaskHelper taskHelper,
 			ReadAccessHelper readAccessHelper)
@@ -50,8 +45,6 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 	@Override
 	public final void execute(DelegateExecution execution) throws Exception
 	{
-		this.execution = execution;
-
 		try
 		{
 			logger.trace("Execution of task with id='{}'", execution.getCurrentActivityId());
@@ -61,12 +54,12 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 		// Error boundary event, do not stop process execution
 		catch (BpmnError error)
 		{
-			Task task = getTask();
+			Task task = getTask(execution);
 
 			logger.debug("Error while executing service delegate " + getClass().getName(), error);
 			logger.error(
-					"Process {} encountered error boundary event in step {} for task with id {}, error-code: {}, message: {}",
-					execution.getProcessDefinitionId(), execution.getActivityInstanceId(), task.getId(),
+					"Process {} encountered error boundary event in step {} for task {}, error-code: {}, message: {}",
+					execution.getProcessDefinitionId(), execution.getActivityInstanceId(), getTaskAbsoluteUrl(task),
 					error.getErrorCode(), error.getMessage());
 
 			throw error;
@@ -74,12 +67,12 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 		// Not an error boundary event, stop process execution
 		catch (Exception exception)
 		{
-			Task task = getTask();
+			Task task = getTask(execution);
 
 			logger.debug("Error while executing service delegate " + getClass().getName(), exception);
-			logger.error("Process {} has fatal error in step {} for task with id {}, reason: {}",
-					execution.getProcessDefinitionId(), execution.getActivityInstanceId(), task.getId(),
-					exception.getMessage());
+			logger.error("Process {} has fatal error in step {} for task {}, reason: {} - {}",
+					execution.getProcessDefinitionId(), execution.getActivityInstanceId(), getTaskAbsoluteUrl(task),
+					exception.getClass().getName(), exception.getMessage());
 
 			String errorMessage = "Process " + execution.getProcessDefinitionId() + " has fatal error in step "
 					+ execution.getActivityInstanceId() + ", reason: " + exception.getMessage();
@@ -96,6 +89,13 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 		}
 	}
 
+	protected final String getTaskAbsoluteUrl(Task task)
+	{
+		return task == null ? "?"
+				: task.getIdElement().toVersionless()
+						.withServerBase(clientProvider.getLocalBaseUrl(), ResourceType.Task.name()).getValue();
+	}
+
 	/**
 	 * Method called by a BPMN service task
 	 *
@@ -108,11 +108,6 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 	 *             error output
 	 */
 	protected abstract void doExecute(DelegateExecution execution) throws BpmnError, Exception;
-
-	protected final DelegateExecution getExecution()
-	{
-		return execution;
-	}
 
 	protected final TaskHelper getTaskHelper()
 	{
@@ -130,36 +125,42 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 	}
 
 	/**
+	 * @param execution
+	 *            not <code>null</code>
 	 * @return the active task from execution variables, i.e. the leading task if the main process is running or the
 	 *         current task if a subprocess is running.
 	 * @throws IllegalStateException
 	 *             if execution of this service delegate has not been started
 	 * @see ConstantsBase#BPMN_EXECUTION_VARIABLE_TASK
 	 */
-	protected final Task getTask()
+	protected final Task getTask(DelegateExecution execution)
 	{
 		return taskHelper.getTask(execution);
 	}
 
 	/**
+	 * @param execution
+	 *            not <code>null</code>
 	 * @return the current task from execution variables, the task resource that started the current process or
 	 *         subprocess
 	 * @throws IllegalStateException
 	 *             if execution of this service delegate has not been started
 	 * @see ConstantsBase#BPMN_EXECUTION_VARIABLE_TASK
 	 */
-	protected final Task getCurrentTaskFromExecutionVariables()
+	protected final Task getCurrentTaskFromExecutionVariables(DelegateExecution execution)
 	{
 		return taskHelper.getCurrentTaskFromExecutionVariables(execution);
 	}
 
 	/**
+	 * @param execution
+	 *            not <code>null</code>
 	 * @return the leading task from execution variables, same as current task if not in a subprocess
 	 * @throws IllegalStateException
 	 *             if execution of this service delegate has not been started
 	 * @see ConstantsBase#BPMN_EXECUTION_VARIABLE_LEADING_TASK
 	 */
-	protected final Task getLeadingTaskFromExecutionVariables()
+	protected final Task getLeadingTaskFromExecutionVariables(DelegateExecution execution)
 	{
 		return taskHelper.getLeadingTaskFromExecutionVariables(execution);
 	}
@@ -168,13 +169,15 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 	 * <i>Use this method to update the process engine variable {@link ConstantsBase#BPMN_EXECUTION_VARIABLE_TASK},
 	 * after modifying the {@link Task}.</i>
 	 *
+	 * @param execution
+	 *            not <code>null</code>
 	 * @param task
 	 *            not <code>null</code>
 	 * @throws IllegalStateException
 	 *             if execution of this service delegate has not been started
 	 * @see ConstantsBase#BPMN_EXECUTION_VARIABLE_TASK
 	 */
-	protected final void updateCurrentTaskInExecutionVariables(Task task)
+	protected final void updateCurrentTaskInExecutionVariables(DelegateExecution execution, Task task)
 	{
 		taskHelper.updateCurrentTaskInExecutionVariables(execution, task);
 	}
@@ -185,13 +188,15 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 	 * <p>
 	 * Updates the current task if no leading task is set.
 	 *
+	 * @param execution
+	 *            not <code>null</code>
 	 * @param task
 	 *            not <code>null</code>
 	 * @throws IllegalStateException
 	 *             if execution of this service delegate has not been started
 	 * @see ConstantsBase#BPMN_EXECUTION_VARIABLE_LEADING_TASK
 	 */
-	protected final void updateLeadingTaskInExecutionVariables(Task task)
+	protected final void updateLeadingTaskInExecutionVariables(DelegateExecution execution, Task task)
 	{
 		taskHelper.updateLeadingTaskInExecutionVariables(execution, task);
 	}

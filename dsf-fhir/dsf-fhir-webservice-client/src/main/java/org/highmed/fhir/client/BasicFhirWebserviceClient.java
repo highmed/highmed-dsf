@@ -97,12 +97,12 @@ public interface BasicFhirWebserviceClient extends PreferReturnResource
 
 	default Bundle history(Class<? extends Resource> resourceType)
 	{
-		return history(null, null);
+		return history(resourceType, null);
 	}
 
 	default Bundle history(Class<? extends Resource> resourceType, int page, int count)
 	{
-		return history(null, null, page, count);
+		return history(resourceType, null, page, count);
 	}
 
 	default Bundle history(Class<? extends Resource> resourceType, String id)
