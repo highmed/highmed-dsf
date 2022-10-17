@@ -24,6 +24,7 @@ import org.highmed.dsf.fhir.task.TaskHelper;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
+import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
@@ -84,7 +85,6 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 			addPlaceholderAnswersToQuestionnaireResponse(questionnaireResponse, questionnaire);
 
 			beforeQuestionnaireResponseCreate(userTask, questionnaireResponse);
-
 			checkQuestionnaireResponse(questionnaireResponse);
 
 			QuestionnaireResponse created = clientProvider.getLocalWebserviceClient().withRetryForever(60000)
@@ -153,14 +153,16 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 		questionnaireResponse.setAuthor(new Reference().setType(ResourceType.Organization.name())
 				.setIdentifier(organizationProvider.getLocalIdentifier()));
 
-		questionnaireResponseHelper.addItemLeave(questionnaireResponse,
-				CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY, "The business-key of the process execution",
-				new StringType(businessKey));
+		if (addBusinessKeyToQuestionnaireResponse())
+		{
+			questionnaireResponseHelper.addItemLeave(questionnaireResponse,
+					CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY, "The business-key of the process execution",
+					new StringType(businessKey));
+		}
+
 		questionnaireResponseHelper.addItemLeave(questionnaireResponse,
 				CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID, "The user-task-id of the process execution",
 				new StringType(userTaskId));
-
-		readAccessHelper.addLocal(questionnaireResponse);
 
 		return questionnaireResponse;
 	}
@@ -184,10 +186,14 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 
 	private void checkQuestionnaireResponse(QuestionnaireResponse questionnaireResponse)
 	{
-		questionnaireResponse.getItem().stream()
-				.filter(i -> CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY.equals(i.getLinkId())).findFirst()
-				.orElseThrow(() -> new RuntimeException("QuestionnaireResponse does not contain an item with linkId='"
-						+ CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY + "'"));
+		if (addBusinessKeyToQuestionnaireResponse())
+		{
+			questionnaireResponse.getItem().stream()
+					.filter(i -> CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY.equals(i.getLinkId())).findFirst()
+					.orElseThrow(
+							() -> new RuntimeException("QuestionnaireResponse does not contain an item with linkId='"
+									+ CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY + "'"));
+		}
 
 		questionnaireResponse.getItem().stream()
 				.filter(i -> CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_USER_TASK_ID.equals(i.getLinkId())).findFirst()
@@ -196,6 +202,18 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 
 		if (!QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS.equals(questionnaireResponse.getStatus()))
 			throw new RuntimeException("QuestionnaireResponse must be in status 'in-progress'");
+	}
+
+	/**
+	 * <i>Override this method to decided if you want to add the Business-Key to the {@link QuestionnaireResponse}
+	 * resource as an item with {@link QuestionnaireResponseItemComponent#getLinkId()} equal to
+	 * {@link ConstantsBase#CODESYSTEM_HIGHMED_BPMN_USER_TASK_VALUE_BUSINESS_KEY}</i>
+	 *
+	 * @return <code>false</code>
+	 */
+	protected boolean addBusinessKeyToQuestionnaireResponse()
+	{
+		return false;
 	}
 
 	/**
