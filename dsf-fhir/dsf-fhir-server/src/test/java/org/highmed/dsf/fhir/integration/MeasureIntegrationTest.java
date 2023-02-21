@@ -8,7 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
 
-import javax.ws.rs.WebApplicationException;
+import jakarta.ws.rs.WebApplicationException;
 
 import org.highmed.dsf.fhir.dao.LibraryDao;
 import org.highmed.dsf.fhir.dao.MeasureDao;

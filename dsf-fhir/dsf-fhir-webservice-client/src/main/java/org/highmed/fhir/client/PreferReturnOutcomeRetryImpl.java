@@ -4,12 +4,12 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
-import javax.ws.rs.core.MediaType;
-
 import org.highmed.dsf.fhir.prefer.PreferReturnType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Resource;
+
+import jakarta.ws.rs.core.MediaType;
 
 class PreferReturnOutcomeRetryImpl extends AbstractFhirWebserviceClientJerseyWithRetry implements PreferReturnOutcome
 {

@@ -2,10 +2,10 @@ package org.highmed.dsf.fhir.exception;
 
 import java.util.Objects;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.ext.ExceptionMapper;
+import jakarta.ws.rs.ext.Provider;
 
 import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.hl7.fhir.r4.model.OperationOutcome;

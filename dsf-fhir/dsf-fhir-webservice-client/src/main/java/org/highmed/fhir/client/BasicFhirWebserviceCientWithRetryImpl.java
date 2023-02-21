@@ -5,14 +5,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import javax.ws.rs.core.MediaType;
-
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StructureDefinition;
+
+import jakarta.ws.rs.core.MediaType;
 
 class BasicFhirWebserviceCientWithRetryImpl extends AbstractFhirWebserviceClientJerseyWithRetry
 		implements BasicFhirWebserviceClient

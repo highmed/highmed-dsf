@@ -2,7 +2,7 @@ package org.highmed.dsf.fhir.webservice.secure;
 
 import java.util.Objects;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 import org.highmed.dsf.fhir.help.ResponseGenerator;
 import org.highmed.dsf.fhir.service.ReferenceResolver;
