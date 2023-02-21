@@ -1,6 +1,6 @@
 package org.highmed.dsf.fhir.webservice.jaxrs;
 
-import javax.ws.rs.Path;
+import jakarta.ws.rs.Path;
 
 import org.highmed.dsf.fhir.webservice.specification.LocationService;
 import org.hl7.fhir.r4.model.Location;

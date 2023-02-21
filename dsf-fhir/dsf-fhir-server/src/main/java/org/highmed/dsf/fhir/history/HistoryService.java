@@ -1,7 +1,7 @@
 package org.highmed.dsf.fhir.history;
 
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.UriInfo;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.UriInfo;
 
 import org.highmed.dsf.fhir.authentication.User;
 import org.hl7.fhir.r4.model.Bundle;

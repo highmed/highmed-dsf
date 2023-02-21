@@ -15,8 +15,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response.Status;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response.Status;
 
 import org.highmed.dsf.bpe.ConstantsBase;
 import org.highmed.dsf.fhir.authentication.OrganizationProvider;

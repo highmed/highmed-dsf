@@ -1,6 +1,6 @@
 package org.highmed.dsf.fhir.adapter;
 
-import javax.ws.rs.ext.Provider;
+import jakarta.ws.rs.ext.Provider;
 
 import org.hl7.fhir.r4.model.StructureDefinition;
 

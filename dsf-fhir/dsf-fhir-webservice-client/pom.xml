@@ -3,13 +3,14 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>dsf-fhir-webservice-client</artifactId>
+	<version>0.9.1-SNAPSHOT</version>
 
 	<parent>
 		<groupId>org.highmed.dsf</groupId>
 		<artifactId>dsf-fhir-pom</artifactId>
 		<version>0.9.0</version>
 	</parent>
-	
+
 	<properties>
 		<main.basedir>${project.basedir}/../..</main.basedir>
 	</properties>
@@ -18,6 +19,7 @@
 		<dependency>
 			<groupId>org.highmed.dsf</groupId>
 			<artifactId>dsf-fhir-rest-adapter</artifactId>
+			<version>0.9.0</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
@@ -73,6 +75,16 @@
 			<groupId>de.hs-heilbronn.mi</groupId>
 			<artifactId>log4j2-utils</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.jakarta.rs</groupId>
+			<artifactId>jackson-jakarta-rs-json-provider</artifactId>
+			<version>2.14.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.module</groupId>
+			<artifactId>jackson-module-jakarta-xmlbind-annotations</artifactId>
+			<version>2.14.2</version>
 		</dependency>
 	</dependencies>
 </project>

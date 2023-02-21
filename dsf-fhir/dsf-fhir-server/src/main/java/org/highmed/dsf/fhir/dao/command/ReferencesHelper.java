@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import javax.ws.rs.WebApplicationException;
+import jakarta.ws.rs.WebApplicationException;
 
 import org.highmed.dsf.fhir.service.ResourceReference;
 import org.hl7.fhir.r4.model.IdType;

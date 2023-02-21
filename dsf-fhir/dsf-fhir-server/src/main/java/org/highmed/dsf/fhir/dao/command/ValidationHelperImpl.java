@@ -2,7 +2,7 @@ package org.highmed.dsf.fhir.dao.command;
 
 import java.util.stream.Collectors;
 
-import javax.ws.rs.WebApplicationException;
+import jakarta.ws.rs.WebApplicationException;
 
 import org.highmed.dsf.fhir.authentication.User;
 import org.highmed.dsf.fhir.help.ResponseGenerator;

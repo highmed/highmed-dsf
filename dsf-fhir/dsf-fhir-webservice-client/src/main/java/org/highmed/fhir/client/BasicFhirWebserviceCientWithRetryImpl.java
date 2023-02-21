@@ -1,12 +1,10 @@
 package org.highmed.fhir.client;
 
+import jakarta.ws.rs.core.MediaType;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
-
-import javax.ws.rs.core.MediaType;
-
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;

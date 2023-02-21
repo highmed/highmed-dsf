@@ -1,5 +1,19 @@
 package org.highmed.fhir.client;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.rest.api.Constants;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.ws.rs.ProcessingException;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.EntityTag;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.text.SimpleDateFormat;
@@ -13,18 +27,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
-
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.EntityTag;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
 import org.apache.commons.lang3.StringUtils;
 import org.highmed.dsf.fhir.adapter.AbstractFhirAdapter;
 import org.highmed.dsf.fhir.adapter.ActivityDefinitionJsonFhirAdapter;
@@ -100,12 +102,6 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.UriType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.rest.api.Constants;
 
 public class FhirWebserviceClientJersey extends AbstractJerseyClient implements FhirWebserviceClient
 {

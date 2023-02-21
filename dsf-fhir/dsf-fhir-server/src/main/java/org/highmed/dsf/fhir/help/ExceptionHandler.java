@@ -7,10 +7,10 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.function.Supplier;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.EntityTag;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.EntityTag;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
 import org.highmed.dsf.fhir.dao.command.CommandList;
 import org.highmed.dsf.fhir.dao.exception.BadBundleException;

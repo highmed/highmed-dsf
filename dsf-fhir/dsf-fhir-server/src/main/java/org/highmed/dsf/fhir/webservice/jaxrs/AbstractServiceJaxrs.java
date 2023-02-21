@@ -1,7 +1,7 @@
 package org.highmed.dsf.fhir.webservice.jaxrs;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.Context;
+import jakarta.ws.rs.core.Context;
 
 import org.highmed.dsf.fhir.authentication.UserProvider;
 import org.highmed.dsf.fhir.webservice.base.AbstractDelegatingBasicService;
