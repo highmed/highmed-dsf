@@ -24,7 +24,7 @@ preferred-citation:
   doi: 10.3233/SHTI210060
   type: proceedings
 title: "HiGHmed Data Sharing Framework (HiGHmed DSF)"
-version: 0.9.0
+version: 0.9.1
 date-released: 2022-10-17
 url: https://github.com/highmed/highmed-dsf/wiki
 repository-code: https://github.com/highmed/highmed-dsf
