@@ -25,6 +25,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.sql.Connection;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -148,7 +149,10 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		fhirServer = startFhirServer();
 
 		logger.info("Creating template database ...");
-		liquibaseRule.createTemplateDatabase();
+		try (Connection connection = adminDataSource.getConnection())
+		{
+			liquibaseRule.createTemplateDatabase(connection);
+		}
 	}
 
 	private static FhirWebserviceClient createWebserviceClient(KeyStore trustStore, KeyStore keyStore,
