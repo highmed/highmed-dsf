@@ -143,22 +143,22 @@
 			<dependency>
 				<groupId>de.hs-heilbronn.mi</groupId>
 				<artifactId>jetty-utils</artifactId>
-				<version>0.18.0</version>
+				<version>0.19.0</version>
 			</dependency>
 			<dependency>
 				<groupId>de.hs-heilbronn.mi</groupId>
 				<artifactId>crypto-utils</artifactId>
-				<version>3.4.0</version>
+				<version>3.5.0</version>
 			</dependency>
 			<dependency>
 				<groupId>de.hs-heilbronn.mi</groupId>
 				<artifactId>log4j2-utils</artifactId>
-				<version>0.14.0</version>
+				<version>0.15.0</version>
 			</dependency>
 			<dependency>
 				<groupId>de.hs-heilbronn.mi</groupId>
 				<artifactId>db-test-utils</artifactId>
-				<version>0.19.0</version>
+				<version>0.20.0</version>
 			</dependency>
 
 			<dependency>
