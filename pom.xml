@@ -4,7 +4,7 @@
 
 	<groupId>org.highmed.dsf</groupId>
 	<artifactId>dsf-pom</artifactId>
-	<version>0.9.0</version>
+	<version>0.9.1</version>
 	<packaging>pom</packaging>
 
 	<modules>
@@ -25,12 +25,12 @@
 		<main.basedir>${project.basedir}</main.basedir>
 
 		<slf4j.version>1.8.0-beta4</slf4j.version>
-		<log4j.version>2.19.0</log4j.version>
+		<log4j.version>2.20.0</log4j.version>
 
-		<jetty.version>9.4.49.v20220914</jetty.version>
-		<jersey.version>2.37</jersey.version>
+		<jetty.version>9.4.51.v20230217</jetty.version>
+		<jersey.version>2.39.1</jersey.version>
 		<tyrus.version>1.20</tyrus.version>
-		<spring.version>5.3.23</spring.version>
+		<spring.version>5.3.27</spring.version>
 
 		<hapi.fhir.version>5.1.0</hapi.fhir.version>
 		<hapi.hl7v2.version>2.3</hapi.hl7v2.version>
@@ -114,7 +114,7 @@
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-core</artifactId>
-				<version>4.8.0</version>
+				<version>4.11.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
@@ -131,40 +131,34 @@
 			<dependency>
 				<groupId>org.liquibase</groupId>
 				<artifactId>liquibase-core</artifactId>
-				<version>4.16.1</version>
-			</dependency>
-			<!-- managing out-dated liquibase dependency, liquibase 4.17.0 broken -->
-			<dependency>
-				<groupId>org.yaml</groupId>
-				<artifactId>snakeyaml</artifactId>
-				<version>1.32</version>
+				<version>4.21.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.5.0</version>
+				<version>42.6.0</version>
 			</dependency>
 
 			<!-- hhn rwh -->
 			<dependency>
 				<groupId>de.hs-heilbronn.mi</groupId>
 				<artifactId>jetty-utils</artifactId>
-				<version>0.18.0</version>
+				<version>0.19.0</version>
 			</dependency>
 			<dependency>
 				<groupId>de.hs-heilbronn.mi</groupId>
 				<artifactId>crypto-utils</artifactId>
-				<version>3.4.0</version>
+				<version>3.5.0</version>
 			</dependency>
 			<dependency>
 				<groupId>de.hs-heilbronn.mi</groupId>
 				<artifactId>log4j2-utils</artifactId>
-				<version>0.14.0</version>
+				<version>0.15.0</version>
 			</dependency>
 			<dependency>
 				<groupId>de.hs-heilbronn.mi</groupId>
 				<artifactId>db-test-utils</artifactId>
-				<version>0.18.0</version>
+				<version>0.20.0</version>
 			</dependency>
 
 			<dependency>
@@ -217,12 +211,7 @@
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-databind</artifactId>
-				<version>2.14.0-rc1</version>
-			</dependency>
-			<dependency>
-				<groupId>com.fasterxml.jackson.core</groupId>
-				<artifactId>jackson-annotations</artifactId>
-				<version>2.13.4</version>
+				<version>2.14.2</version>
 			</dependency>
 
 			<!-- tyrus -->
@@ -241,7 +230,7 @@
 			<dependency>
 				<groupId>org.glassfish.jaxb</groupId>
 				<artifactId>jaxb-runtime</artifactId>
-				<version>2.3.6</version>
+				<version>2.3.8</version>
 			</dependency>
 
 			<!-- spring -->
@@ -341,7 +330,7 @@
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-compress</artifactId>
-  				<version>1.21</version>
+  				<version>1.23.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
@@ -351,7 +340,7 @@
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpclient</artifactId>
-				<version>4.5.13</version>
+				<version>4.5.14</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.guava</groupId>
@@ -361,7 +350,7 @@
 			<dependency>
 				<groupId>com.google.code.gson</groupId>
 				<artifactId>gson</artifactId>
-				<version>2.9.1</version>
+				<version>2.10.1</version>
 			</dependency>
 
 
@@ -380,7 +369,7 @@
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-csv</artifactId>
-				<version>1.9.0</version>
+				<version>1.10.0</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-io</groupId>
@@ -396,7 +385,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.10.1</version>
+					<version>3.11.0</version>
 					<configuration>
 						<source>${compileSource}</source>
 						<target>${compileTarget}</target>
@@ -444,33 +433,32 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>3.4.1</version>
+					<version>3.5.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>3.0.0-M7</version>
+					<version>3.0.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-failsafe-plugin</artifactId>
-					<!-- latest version 3.0.0-M5 not working, with jetty integraiton tests -->
-					<version>3.0.0-M7</version>
+					<version>3.0.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-shade-plugin</artifactId>
-					<version>3.4.0</version>
+					<version>3.4.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-assembly-plugin</artifactId>
-					<version>3.4.2</version>
+					<version>3.5.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-resources-plugin</artifactId>
-					<version>3.3.0</version>
+					<version>3.3.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -480,6 +468,7 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>exec-maven-plugin</artifactId>
+					<!-- use 3.0.0 instead of 3.1.0 to ensure compatibility with HAPI FHIR -->
 					<version>3.0.0</version>
 				</plugin>
 				<plugin>
@@ -490,17 +479,17 @@
 				<plugin>
 					<groupId>net.revelc.code.formatter</groupId>
 					<artifactId>formatter-maven-plugin</artifactId>
-					<version>2.20.0</version>
+					<version>2.22.0</version>
 				</plugin>
 				<plugin>
 					<groupId>net.revelc.code</groupId>
 					<artifactId>impsort-maven-plugin</artifactId>
-					<version>1.7.0</version>
+					<version>1.8.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
-					<version>3.3.0</version>
+					<version>3.5.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
@@ -510,7 +499,7 @@
 				<plugin>
 					<groupId>io.fabric8</groupId>
 					<artifactId>docker-maven-plugin</artifactId>
-					<version>0.40.2</version>
+					<version>0.42.1</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>

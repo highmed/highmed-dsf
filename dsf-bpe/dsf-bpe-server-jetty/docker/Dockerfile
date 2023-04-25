@@ -8,7 +8,7 @@ RUN chown root:java ./ && \
 	chmod 1775 ./log ./last_event
 
 
-FROM openjdk:11-jre-slim
+FROM azul/zulu-openjdk:11-jre
 LABEL maintainer="hauke.hund@hs-heilbronn.de"
 
 EXPOSE 8080

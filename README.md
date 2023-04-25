@@ -1,6 +1,6 @@
 # HiGHmed Data Sharing Framework (HiGHmed DSF)
 
-[![Java CI with Maven status](https://github.com/highmed/highmed-dsf/workflows/Java%20CI%20with%20Maven/badge.svg)](https://github.com/highmed/highmed-dsf/actions?query=workflow%3A"Java+CI+with+Maven")
+[![Java CI with Maven status](https://github.com/highmed/highmed-dsf/workflows/Java%20CI%20Build%20with%20Maven/badge.svg)](https://github.com/highmed/highmed-dsf/actions?query=workflow%3A"Java+CI+Build+with+Maven")
 
 The HiGHmed Data Sharing Framework (HiGHmed DSF) implements a distributed process engine based on the BPMN 2.0 and FHIR R4 standards.  Within the HiGHmed medical informatics consortium, the DSF is used to support biomedical research with routine data. Every participating site runs a FHIR endpoint (dsf-fhir) accessible by other sites and a business process engine (dsf-bpe) in the local secured network. Authentication between sites is handled using X.509 client/server certificates. The process engines execute BPMN processes in order to coordinate local and remote steps necessary to enable cross-site data sharing and feasibility analyses. This includes access to local data repositories, use-and-access-committee decision support, consent filtering, and privacy preserving record-linkage and pseudonymization.
 
@@ -39,4 +39,3 @@ Prerequisite: Java 11, Maven >= 3.6, Docker >= 18
     docker-compose up
     ```
 * To access the FHIR endpoint (https://fhir/fhir/...) add a `127.0.0.1 fhir` entry to your local `hosts` file and install *.../highmed-dsf/dsf-tools/dsf-tools-test-data-generator/cert/Webbrowser_Test_User/Webbrowser_Test_User_certificate.p12* (Password: *password*) in your web browsers certifiate store. The p12 file includes a client certificate for "Webbrowser Test User" and the "Test CA" certificate. All private-keys and certificates including the Test CA are generated during the maven build and are private to your machine. Make sure to protect the CA private-key at *.../highmed-dsf/dsf-tools/dsf-tools-test-data-generator/cert/ca/testca_private-key.pem* from third-party access if you have installed the Test CA certificate in your certificate store.
-* The BPE rest interface (https://localhost:8443/bpe/...) can be accessed via a web browser as well, but is currently not needed for testing.

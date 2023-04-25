@@ -71,8 +71,7 @@ public class QuestionnaireResponseHandler implements ResourceHandler<Questionnai
 		}
 		catch (Exception e)
 		{
-			logger.warn("Unable to complete UserTask", e);
-			throw new RuntimeException(e);
+			logger.warn("Error while handling completed UserTask: " + e.getMessage(), e);
 		}
 	}
 
