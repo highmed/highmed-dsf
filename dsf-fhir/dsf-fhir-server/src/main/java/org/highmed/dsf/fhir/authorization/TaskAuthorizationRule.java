@@ -318,13 +318,23 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 				Optional<String> errors = newResourceOk(connection, user, newResource);
 				if (errors.isEmpty())
 				{
-					logger.info("Update of Task authorized for local or remote user '{}'", user.getName());
-					return Optional.of(
-							"local or remote user, task.status draft or requested, task.requester current users organization, task.restriction.recipient local organization");
+					if (taskAllowed(connection, user, newResource))
+					{
+						logger.info("Update of Task authorized for {} user '{}'", user.getRole(), user.getName());
+						return Optional.of(
+								"local or remote user, task.status draft or requested, task.requester current users organization, task.restriction.recipient local organization, process with instantiatesUri and message-name allowed for current user, task matches profile");
+					}
+					else
+					{
+						logger.warn(
+								"Update of Task unauthorized, process with instantiatesUri, message-name, requester or recipient not allowed for current user",
+								user.getName());
+						return Optional.empty();
+					}
 				}
 				else
 				{
-					logger.warn("Create of Task unauthorized, " + errors.get());
+					logger.warn("Update of Task unauthorized, " + errors.get());
 					return Optional.empty();
 				}
 			}
@@ -380,7 +390,7 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 			else
 			{
 				logger.warn(
-						"Update of Task unauthorized, expected taks.status draft and current user part of task.requester or task.status requester or inprogress and current local user part of task.restriction.recipient");
+						"Update of Task unauthorized, expected taks.status draft and current user part of task.requester or task.status requested or inprogress and current local user part of task.restriction.recipient");
 				return Optional.empty();
 			}
 		}
