@@ -42,6 +42,7 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Task;
@@ -50,9 +51,13 @@ import org.hl7.fhir.r4.model.Task.TaskIntent;
 import org.hl7.fhir.r4.model.Task.TaskRestrictionComponent;
 import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TaskIntegrationTest extends AbstractIntegrationTest
 {
+	private static final Logger logger = LoggerFactory.getLogger(TaskIntegrationTest.class);
+
 	@Test(expected = WebApplicationException.class)
 	public void testCreateTaskStartPingProcessNotAllowedForRemoteUser() throws Exception
 	{
@@ -161,6 +166,19 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		try
 		{
 			client.create(task);
+			fail("WebApplicationException expected");
+		}
+		catch (WebApplicationException e)
+		{
+			assertEquals(403, e.getResponse().getStatus());
+		}
+	}
+
+	private void testUpdateExpectForbidden(FhirWebserviceClient client, Task task) throws Exception
+	{
+		try
+		{
+			client.update(task);
 			fail("WebApplicationException expected");
 		}
 		catch (WebApplicationException e)
@@ -629,8 +647,12 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 
 	private StructureDefinition readTestTaskProfile() throws IOException
 	{
-		try (InputStream in = Files
-				.newInputStream(Paths.get("src/test/resources/integration/task/highmed-test-task-profile-0.5.0.xml")))
+		return readTestTaskProfile("highmed-test-task-profile-0.5.0.xml");
+	}
+
+	private StructureDefinition readTestTaskProfile(String fileName) throws IOException
+	{
+		try (InputStream in = Files.newInputStream(Paths.get("src/test/resources/integration/task", fileName)))
 		{
 			return fhirContext.newXmlParser().parseResource(StructureDefinition.class, in);
 		}
@@ -1160,5 +1182,70 @@ public class TaskIntegrationTest extends AbstractIntegrationTest
 		assertEquals("200 OK", response.getEntryFirstRep().getResponse().getStatus());
 		assertTrue(response.getEntryFirstRep().hasResource());
 		assertTrue(response.getEntryFirstRep().getResource() instanceof Task);
+	}
+
+	@Test
+	public void testCreateNotAllowViaDraft() throws Exception
+	{
+		ActivityDefinition aLocal = readActivityDefinition("highmed-test-activity-definition-local-0.9.2.xml");
+		ActivityDefinition aLocalCreated = getWebserviceClient().create(aLocal);
+		assertNotNull(aLocalCreated);
+		assertNotNull(aLocalCreated.getIdElement().getIdPart());
+
+		ActivityDefinition aRemote = readActivityDefinition("highmed-test-activity-definition-remote-0.9.2.xml");
+		ActivityDefinition aRemoteCreated = getWebserviceClient().create(aRemote);
+		assertNotNull(aRemoteCreated);
+		assertNotNull(aRemoteCreated.getIdElement().getIdPart());
+
+		StructureDefinition pLocal = readTestTaskProfile("highmed-test-task-local-profile-0.9.2.xml");
+		StructureDefinition pLocalCreated = getWebserviceClient().create(pLocal);
+		assertNotNull(pLocalCreated);
+		assertNotNull(pLocalCreated.getIdElement().getIdPart());
+
+		StructureDefinition pRemote = readTestTaskProfile("highmed-test-task-remote-profile-0.9.2.xml");
+		StructureDefinition pRemoteCreated = getWebserviceClient().create(pRemote);
+		assertNotNull(pRemoteCreated);
+		assertNotNull(pRemoteCreated.getIdElement().getIdPart());
+
+		Task draftTask = createNotAllowViaDraftTask();
+		testCreateExpectForbidden(getWebserviceClient(), draftTask);
+
+		Task draftTaskCreated = getExternalWebserviceClient().create(draftTask);
+		logger.debug("draftTaskCreated: {}",
+				fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(draftTaskCreated));
+		assertNotNull(draftTaskCreated);
+		assertNotNull(draftTaskCreated.getIdElement().getIdPart());
+
+		Task requestedTask = modifyNotAllowViaDrafTask(draftTaskCreated);
+		logger.debug("requestedTask: {}",
+				fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(requestedTask));
+		testUpdateExpectForbidden(getExternalWebserviceClient(), requestedTask);
+	}
+
+	private Task createNotAllowViaDraftTask()
+	{
+		Task t = new Task();
+		t.getMeta().addProfile("http://highmed.org/fhir/StructureDefinition/test-task-remote|0.9.2");
+		t.setInstantiatesUri("http://highmed.org/bpe/Process/test-remote/0.9.2");
+		t.setStatus(TaskStatus.DRAFT);
+		t.setIntent(TaskIntent.ORDER);
+		t.setAuthoredOn(new Date());
+		t.getRequester().setType(ResourceType.Organization.name()).getIdentifier()
+				.setSystem("http://highmed.org/sid/organization-identifier").setValue("External_Test_Organization");
+		t.getRestriction().addRecipient().setType(ResourceType.Organization.name()).getIdentifier()
+				.setSystem("http://highmed.org/sid/organization-identifier").setValue("Test_Organization");
+		t.addInput().setValue(new StringType("test-message-remote")).getType().addCoding()
+				.setSystem("http://highmed.org/fhir/CodeSystem/bpmn-message").setCode("message-name");
+		return t;
+	}
+
+	private Task modifyNotAllowViaDrafTask(Task t)
+	{
+		t.getMeta().getProfile().get(0).setValue("http://highmed.org/fhir/StructureDefinition/test-task-local|0.9.2");
+		t.setInstantiatesUri("http://highmed.org/bpe/Process/test-local/0.9.2");
+		t.setStatus(TaskStatus.REQUESTED);
+		t.getInputFirstRep().setValue(new StringType("test-message-local"));
+
+		return t;
 	}
 }
