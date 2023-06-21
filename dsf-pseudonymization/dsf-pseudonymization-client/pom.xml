@@ -9,7 +9,7 @@
 	<parent>
 		<artifactId>dsf-pseudonymization-pom</artifactId>
 		<groupId>org.highmed.dsf</groupId>
-		<version>0.9.1</version>
+		<version>0.9.2</version>
 	</parent>
 
 	<properties>
