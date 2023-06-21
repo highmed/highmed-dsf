@@ -175,3 +175,49 @@ references:
     year: 2022
     pages: 41-49
     doi: 10.3233/SHTI220802
+  - type: proceedings
+    authors:
+      - family-names: Hund
+        given-names: Hauke
+      - family-names: Wettstein
+        given-names: Reto
+      - family-names: Hampf
+        given-names: Christopher
+      - family-names: Bialke
+        given-names: Martin
+      - family-names: Kurscheidt
+        given-names: Maximilian
+      - family-names: Schweizer
+        given-names: Simon Tobias
+      - family-names: Zilske
+        given-names: Christoph
+      - family-names: Mödinger
+        given-names: Simon
+      - family-names: Fegeler
+        given-names: Christian
+    title: "No Transfer Without Validation: A Data Sharing Framework Use Case"
+    journal: Stud Health Technol Inform
+    volume: 302
+    year: 2023
+    pages: 68-72
+    doi: 10.3233/SHTI230066
+  - type: proceedings
+    authors:
+      - family-names: Zilske
+        given-names: Christoph
+      - family-names: Kurscheidt
+        given-names: Maximilian
+      - family-names: Schweizer
+        given-names: Simon Tobias
+      - family-names: Hund
+        given-names: Hauke
+      - family-names: Mödinger
+        given-names: Simon
+      - family-names: Fegeler
+        given-names: Christian
+    title: "Monitoring Distributed Business Processes in Biomedical Research"
+    journal: Stud Health Technol Inform
+    volume: 302
+    year: 2023
+    pages: 252-256
+    doi: 10.3233/SHTI230113
