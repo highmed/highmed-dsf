@@ -34,6 +34,7 @@ import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
+import org.springframework.web.util.HtmlUtils;
 
 import com.google.common.base.Objects;
 
@@ -140,7 +141,7 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		out.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"/fhir/static/highmed.css\">\n");
 		out.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"/fhir/static/form.css\">\n");
 		out.write("<title>DSF" + (uriInfo.getPath() == null || uriInfo.getPath().isEmpty() ? "" : ": ")
-				+ uriInfo.getPath() + "</title>\n</head>\n");
+				+ HtmlUtils.htmlEscape(uriInfo.getPath()) + "</title>\n</head>\n");
 		out.write("<body onload=\"prettyPrint();openInitialTab(" + String.valueOf(isHtmlEnabled())
 				+ ");checkBookmarked();\">\n");
 		out.write("<div id=\"icons\">\n");
@@ -222,19 +223,21 @@ public class HtmlFhirAdapter<T extends BaseResource> implements MessageBodyWrite
 		URI uri = getResourceUrl(t).map(this::toURI).orElse(uriInfo.getRequestUri());
 		String[] pathSegments = uri.getPath().split("/");
 
-		String u = serverBaseProvider.getServerBase();
+		String u = HtmlUtils.htmlEscape(serverBaseProvider.getServerBase());
 		String heading = "<a href=\"" + u + "\" title=\"Open " + u + "\">" + u + "</a>";
 
 		for (int i = 2; i < pathSegments.length; i++)
 		{
-			u += "/" + pathSegments[i];
-			heading += "<a href=\"" + u + "\" title=\"Open " + u + "\">/" + pathSegments[i] + "</a>";
+			String pathSegment = HtmlUtils.htmlEscape(pathSegments[i]);
+			u += "/" + pathSegment;
+			heading += "<a href=\"" + u + "\" title=\"Open " + u + "\">/" + pathSegment + "</a>";
 		}
 
 		if (uri.getQuery() != null)
 		{
-			u += "?" + uri.getQuery();
-			heading += "<a href=\"" + u + "\" title=\"Open " + u + "\">?" + uri.getQuery() + "</a>";
+			String queryValue = HtmlUtils.htmlEscape(uri.getQuery());
+			u += "?" + queryValue;
+			heading += "<a href=\"" + u + "\" title=\"Open " + u + "\">?" + queryValue + "</a>";
 		}
 
 		return heading;

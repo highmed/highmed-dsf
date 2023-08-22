@@ -9,7 +9,7 @@
 	<parent>
 		<artifactId>dsf-mpi-pom</artifactId>
 		<groupId>org.highmed.dsf</groupId>
-		<version>0.9.2</version>
+		<version>0.9.3</version>
 	</parent>
 	
 	<properties>
