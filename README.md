@@ -1,3 +1,13 @@
+## Deprecation Notice
+
+This repository is no longer maintained. Development of the Data Sharing Framework (DSF) has been moved to [datasharingframework/dsf](https://github.com/datasharingframework/dsf)
+
+Further information, including instructions on how to update to the latest version, can be found on the new project website: https://dsf.dev
+
+We would like to thank everyone who has contributed to this archived version with code contributions, issues or comments.
+
+---
+
 # HiGHmed Data Sharing Framework (HiGHmed DSF)
 
 [![Java CI with Maven status](https://github.com/highmed/highmed-dsf/workflows/Java%20CI%20Build%20with%20Maven/badge.svg)](https://github.com/highmed/highmed-dsf/actions?query=workflow%3A"Java+CI+Build+with+Maven")
